@@ -1040,12 +1040,15 @@ abstract class WidgetController {
     int buttons = kPrimaryButton,
     bool warnIfMissed = true,
     PointerDeviceKind kind = PointerDeviceKind.touch,
+    int? viewId,
   }) {
+    final FlutterView view = _viewOf(finder);
     return tapAt(
       getCenter(finder, warnIfMissed: warnIfMissed, callee: 'tap'),
       pointer: pointer,
       buttons: buttons,
       kind: kind,
+      viewId: view.viewId,
     );
   }
 
@@ -1097,7 +1100,12 @@ abstract class WidgetController {
         ),
       ]);
     }
-    return tapAt(tapLocation, pointer: pointer, buttons: buttons);
+    return tapAt(
+      tapLocation,
+      pointer: pointer,
+      buttons: buttons,
+      viewId: ranges.single.view.view.viewId,
+    );
   }
 
   /// Dispatch a pointer down / pointer up sequence at the given location.
@@ -1106,6 +1114,7 @@ abstract class WidgetController {
     int? pointer,
     int buttons = kPrimaryButton,
     PointerDeviceKind kind = PointerDeviceKind.touch,
+    int? viewId,
   }) {
     return TestAsyncUtils.guard<void>(() async {
       final TestGesture gesture = await startGesture(
@@ -1113,6 +1122,7 @@ abstract class WidgetController {
         pointer: pointer,
         buttons: buttons,
         kind: kind,
+        viewId: viewId,
       );
       await gesture.up();
     });
@@ -1138,12 +1148,14 @@ abstract class WidgetController {
     bool warnIfMissed = true,
     PointerDeviceKind kind = PointerDeviceKind.touch,
   }) {
+    final FlutterView view = _viewOf(finder);
     return TestAsyncUtils.guard<TestGesture>(() {
       return startGesture(
         getCenter(finder, warnIfMissed: warnIfMissed, callee: 'press'),
         pointer: pointer,
         buttons: buttons,
         kind: kind,
+        viewId: view.viewId,
       );
     });
   }
@@ -1167,11 +1179,13 @@ abstract class WidgetController {
     bool warnIfMissed = true,
     PointerDeviceKind kind = PointerDeviceKind.touch,
   }) {
+    final FlutterView view = _viewOf(finder);
     return longPressAt(
       getCenter(finder, warnIfMissed: warnIfMissed, callee: 'longPress'),
       pointer: pointer,
       buttons: buttons,
       kind: kind,
+      viewId: view.viewId,
     );
   }
 
@@ -1182,6 +1196,7 @@ abstract class WidgetController {
     int? pointer,
     int buttons = kPrimaryButton,
     PointerDeviceKind kind = PointerDeviceKind.touch,
+    int? viewId,
   }) {
     return TestAsyncUtils.guard<void>(() async {
       final TestGesture gesture = await startGesture(
@@ -1189,6 +1204,7 @@ abstract class WidgetController {
         pointer: pointer,
         buttons: buttons,
         kind: kind,
+        viewId: viewId,
       );
       await pump(kLongPressTimeout + kPressTimeout);
       await gesture.up();
@@ -1253,6 +1269,7 @@ abstract class WidgetController {
     bool warnIfMissed = true,
     PointerDeviceKind deviceKind = PointerDeviceKind.touch,
   }) {
+    final FlutterView view = _viewOf(finder);
     return flingFrom(
       getCenter(finder, warnIfMissed: warnIfMissed, callee: 'fling'),
       offset,
@@ -1263,6 +1280,7 @@ abstract class WidgetController {
       initialOffset: initialOffset,
       initialOffsetDelay: initialOffsetDelay,
       deviceKind: deviceKind,
+      viewId: view.viewId,
     );
   }
 
@@ -1283,6 +1301,7 @@ abstract class WidgetController {
     Offset initialOffset = Offset.zero,
     Duration initialOffsetDelay = const Duration(seconds: 1),
     PointerDeviceKind deviceKind = PointerDeviceKind.touch,
+    int? viewId,
   }) {
     assert(offset.distance > 0.0);
     assert(speed > 0.0); // speed is pixels/second
@@ -1299,7 +1318,11 @@ abstract class WidgetController {
       double timeStamp = 0.0;
       double lastTimeStamp = timeStamp;
       await sendEventToBinding(
-        testPointer.down(startLocation, timeStamp: Duration(microseconds: timeStamp.round())),
+        testPointer.down(
+          startLocation,
+          timeStamp: Duration(microseconds: timeStamp.round()),
+          viewId: viewId,
+        ),
       );
       if (initialOffset.distance > 0.0) {
         await sendEventToBinding(
@@ -1315,7 +1338,11 @@ abstract class WidgetController {
         final Offset location =
             startLocation + initialOffset + Offset.lerp(Offset.zero, offset, i / kMoveCount)!;
         await sendEventToBinding(
-          testPointer.move(location, timeStamp: Duration(microseconds: timeStamp.round())),
+          testPointer.move(
+            location,
+            timeStamp: Duration(microseconds: timeStamp.round()),
+            viewId: viewId,
+          ),
         );
         timeStamp += timeStampDelta;
         if (timeStamp - lastTimeStamp > frameInterval.inMicroseconds) {
@@ -1324,7 +1351,10 @@ abstract class WidgetController {
         }
       }
       await sendEventToBinding(
-        testPointer.up(timeStamp: Duration(microseconds: timeStamp.round())),
+        testPointer.up(
+          timeStamp: Duration(microseconds: timeStamp.round()),
+          viewId: viewId,
+        ),
       );
     });
   }
@@ -1350,6 +1380,7 @@ abstract class WidgetController {
     Duration initialOffsetDelay = const Duration(seconds: 1),
     bool warnIfMissed = true,
   }) {
+    final FlutterView view = _viewOf(finder);
     return trackpadFlingFrom(
       getCenter(finder, warnIfMissed: warnIfMissed, callee: 'fling'),
       offset,
@@ -1359,6 +1390,7 @@ abstract class WidgetController {
       frameInterval: frameInterval,
       initialOffset: initialOffset,
       initialOffsetDelay: initialOffsetDelay,
+      viewId: view.viewId,
     );
   }
 
@@ -1379,6 +1411,7 @@ abstract class WidgetController {
     Duration frameInterval = const Duration(milliseconds: 16),
     Offset initialOffset = Offset.zero,
     Duration initialOffsetDelay = const Duration(seconds: 1),
+    int? viewId,
   }) {
     assert(offset.distance > 0.0);
     assert(speed > 0.0); // speed is pixels/second
@@ -1398,6 +1431,7 @@ abstract class WidgetController {
         testPointer.panZoomStart(
           startLocation,
           timeStamp: Duration(microseconds: timeStamp.round()),
+          viewId: viewId,
         ),
       );
       if (initialOffset.distance > 0.0) {
@@ -1406,6 +1440,7 @@ abstract class WidgetController {
             startLocation,
             pan: initialOffset,
             timeStamp: Duration(microseconds: timeStamp.round()),
+            viewId: viewId,
           ),
         );
         timeStamp += initialOffsetDelay.inMicroseconds;
@@ -1418,6 +1453,7 @@ abstract class WidgetController {
             startLocation,
             pan: pan,
             timeStamp: Duration(microseconds: timeStamp.round()),
+            viewId: viewId,
           ),
         );
         timeStamp += timeStampDelta;
@@ -1427,7 +1463,10 @@ abstract class WidgetController {
         }
       }
       await sendEventToBinding(
-        testPointer.panZoomEnd(timeStamp: Duration(microseconds: timeStamp.round())),
+        testPointer.panZoomEnd(
+          timeStamp: Duration(microseconds: timeStamp.round()),
+          viewId: viewId,
+        ),
       );
     });
   }
@@ -1537,6 +1576,7 @@ abstract class WidgetController {
     bool warnIfMissed = true,
     PointerDeviceKind kind = PointerDeviceKind.touch,
   }) {
+    final FlutterView view = _viewOf(finder);
     return dragFrom(
       getCenter(finder, warnIfMissed: warnIfMissed, callee: 'drag'),
       offset,
@@ -1545,6 +1585,7 @@ abstract class WidgetController {
       touchSlopX: touchSlopX,
       touchSlopY: touchSlopY,
       kind: kind,
+      viewId: view.viewId,
     );
   }
 
@@ -1567,6 +1608,7 @@ abstract class WidgetController {
     double touchSlopX = kDragSlopDefault,
     double touchSlopY = kDragSlopDefault,
     PointerDeviceKind kind = PointerDeviceKind.touch,
+    int? viewId,
   }) {
     assert(kDragSlopDefault > kTouchSlop);
     return TestAsyncUtils.guard<void>(() async {
@@ -1575,6 +1617,7 @@ abstract class WidgetController {
         pointer: pointer,
         buttons: buttons,
         kind: kind,
+        viewId: viewId,
       );
 
       final double xSign = offset.dx.sign;
@@ -1602,17 +1645,20 @@ abstract class WidgetController {
             final double diffY = offsetSlope.abs() * touchSlopX * ySign;
 
             // The vector from the origin to the vertical edge.
-            await gesture.moveBy(Offset(signedSlopX, diffY));
+            await gesture.moveBy(Offset(signedSlopX, diffY), viewId: viewId);
             if (offsetY.abs() <= touchSlopY) {
               // The drag ends on or before getting to the horizontal extension of the horizontal edge.
-              await gesture.moveBy(Offset(offsetX - signedSlopX, offsetY - diffY));
+              await gesture.moveBy(Offset(offsetX - signedSlopX, offsetY - diffY), viewId: viewId);
             } else {
               final double diffY2 = signedSlopY - diffY;
               final double diffX2 = inverseOffsetSlope * diffY2;
 
               // The vector from the edge of the box to the horizontal extension of the horizontal edge.
-              await gesture.moveBy(Offset(diffX2, diffY2));
-              await gesture.moveBy(Offset(offsetX - diffX2 - signedSlopX, offsetY - signedSlopY));
+              await gesture.moveBy(Offset(diffX2, diffY2), viewId: viewId);
+              await gesture.moveBy(
+                Offset(offsetX - diffX2 - signedSlopX, offsetY - signedSlopY),
+                viewId: viewId,
+              );
             }
           } else {
             assert(offsetY.abs() > touchSlopY);
@@ -1621,29 +1667,35 @@ abstract class WidgetController {
             final double diffX = inverseOffsetSlope.abs() * touchSlopY * xSign;
 
             // The vector from the origin to the vertical edge.
-            await gesture.moveBy(Offset(diffX, signedSlopY));
+            await gesture.moveBy(Offset(diffX, signedSlopY), viewId: viewId);
             if (offsetX.abs() <= touchSlopX) {
               // The drag ends on or before getting to the vertical extension of the vertical edge.
-              await gesture.moveBy(Offset(offsetX - diffX, offsetY - signedSlopY));
+              await gesture.moveBy(Offset(offsetX - diffX, offsetY - signedSlopY), viewId: viewId);
             } else {
               final double diffX2 = signedSlopX - diffX;
               final double diffY2 = offsetSlope * diffX2;
 
               // The vector from the edge of the box to the vertical extension of the vertical edge.
-              await gesture.moveBy(Offset(diffX2, diffY2));
-              await gesture.moveBy(Offset(offsetX - signedSlopX, offsetY - diffY2 - signedSlopY));
+              await gesture.moveBy(Offset(diffX2, diffY2), viewId: viewId);
+              await gesture.moveBy(
+                Offset(offsetX - signedSlopX, offsetY - diffY2 - signedSlopY),
+                viewId: viewId,
+              );
             }
           }
         } else {
           // The drag goes through the corner of the box.
-          await gesture.moveBy(Offset(signedSlopX, signedSlopY));
-          await gesture.moveBy(Offset(offsetX - signedSlopX, offsetY - signedSlopY));
+          await gesture.moveBy(Offset(signedSlopX, signedSlopY), viewId: viewId);
+          await gesture.moveBy(
+            Offset(offsetX - signedSlopX, offsetY - signedSlopY),
+            viewId: viewId,
+          );
         }
       } else {
         // The drag ends inside the box.
-        await gesture.moveBy(offset);
+        await gesture.moveBy(offset, viewId: viewId);
       }
-      await gesture.up();
+      await gesture.up(viewId: viewId);
     });
   }
 
@@ -1675,6 +1727,7 @@ abstract class WidgetController {
     int buttons = kPrimaryButton,
     double frequency = 60.0,
     bool warnIfMissed = true,
+    int? viewId,
   }) {
     return timedDragFrom(
       getCenter(finder, warnIfMissed: warnIfMissed, callee: 'timedDrag'),
@@ -1683,6 +1736,7 @@ abstract class WidgetController {
       pointer: pointer,
       buttons: buttons,
       frequency: frequency,
+      viewId: viewId ?? 0,
     );
   }
 
@@ -1701,6 +1755,7 @@ abstract class WidgetController {
     int? pointer,
     int buttons = kPrimaryButton,
     double frequency = 60.0,
+    int viewId = 0,
   }) {
     assert(frequency > 0);
     final int intervals = duration.inMicroseconds * frequency ~/ 1E6;
@@ -1715,13 +1770,14 @@ abstract class WidgetController {
     ];
     final List<PointerEventRecord> records = <PointerEventRecord>[
       PointerEventRecord(Duration.zero, <PointerEvent>[
-        PointerAddedEvent(position: startLocation),
+        PointerAddedEvent(position: startLocation, viewId: viewId),
         PointerDownEvent(position: startLocation, pointer: pointer, buttons: buttons),
       ]),
       ...<PointerEventRecord>[
         for (int t = 0; t <= intervals; t += 1)
           PointerEventRecord(timeStamps[t], <PointerEvent>[
             PointerMoveEvent(
+              viewId: viewId,
               timeStamp: timeStamps[t],
               position: offsets[t + 1],
               delta: offsets[t + 1] - offsets[t],
@@ -1732,6 +1788,7 @@ abstract class WidgetController {
       ],
       PointerEventRecord(duration, <PointerEvent>[
         PointerUpEvent(
+          viewId: viewId,
           timeStamp: duration,
           position: offsets.last,
           pointer: pointer,
@@ -1807,12 +1864,13 @@ abstract class WidgetController {
     int? pointer,
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int buttons = kPrimaryButton,
+    int? viewId,
   }) async {
     final TestGesture result = _createGesture(pointer: pointer, kind: kind, buttons: buttons);
     if (kind == PointerDeviceKind.trackpad) {
-      await result.panZoomStart(downLocation);
+      await result.panZoomStart(downLocation, viewId: viewId);
     } else {
-      await result.down(downLocation);
+      await result.down(downLocation, viewId: viewId);
     }
     return result;
   }
