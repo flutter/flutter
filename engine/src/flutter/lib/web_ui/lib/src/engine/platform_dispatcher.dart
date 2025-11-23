@@ -609,6 +609,10 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         PlatformViewMessageHandler.instance.handlePlatformViewCall(method, arguments, callback!);
         return;
 
+      case BrowserScrollChannel.channelName:
+        BrowserScrollChannel.handleMessage(data, callback);
+        return;
+
       case 'flutter/accessibility':
         // In widget tests we want to bypass processing of platform messages.
         const StandardMessageCodec codec = StandardMessageCodec();

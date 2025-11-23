@@ -64,6 +64,9 @@ class PlatformViewManager {
     return _contents.containsKey(viewId);
   }
 
+  /// Track if we've shown the browser scroll hint
+  bool _hasShownBrowserScrollHint = false;
+
   /// Returns the cached contents of [viewId], to be injected into the DOM.
   ///
   /// This is only used by the active `Renderer` object when a platform view needs
@@ -166,8 +169,53 @@ class PlatformViewManager {
 
       wrapper.setAttribute(_ariaHiddenAttribute, 'true');
 
+      // Auto-detection: Suggest browser scrolling when first platform view is created
+      _maybeSuggestBrowserScrolling();
+
       return wrapper;
     });
+  }
+
+  /// Suggest enabling browser scrolling when platform views are detected.
+  ///
+  /// This helps users discover the solution to nested scrolling problems
+  /// with iframes and HTML content.
+  void _maybeSuggestBrowserScrolling() {
+    if (_hasShownBrowserScrollHint || _contents.length != 1) {
+      return;
+    }
+
+    _hasShownBrowserScrollHint = true;
+
+    assert(() {
+      print(
+        '\n'
+        '╔═══════════════════════════════════════════════════════════════════════════╗\n'
+        '║  Platform View Detected - Browser Scrolling Available                    ║\n'
+        '╠═══════════════════════════════════════════════════════════════════════════╣\n'
+        '║                                                                           ║\n'
+        '║  If you experience scrolling issues with iframes or HTML content,        ║\n'
+        '║  consider enabling browser-driven scrolling mode:                        ║\n'
+        '║                                                                           ║\n'
+        '║  // In your Flutter app (requires framework support):                    ║\n'
+        '║  BrowserScrollView(                                                      ║\n'
+        '║    child: YourContent(),                                                 ║\n'
+        '║  )                                                                        ║\n'
+        '║                                                                           ║\n'
+        '║  // Or enable via JavaScript console for testing:                        ║\n'
+        '║  const channel = new MessageChannel();                                   ║\n'
+        '║  window.flutter.postMessage({                                            ║\n'
+        '║    method: "enable",                                                     ║\n'
+        '║    viewId: 0                                                             ║\n'
+        '║  }, "flutter/browserscroll", [channel.port2]);                           ║\n'
+        '║                                                                           ║\n'
+        '║  This solves the nested scrolling problem where scrolling stops          ║\n'
+        '║  working when the pointer is over platform views (iframes, HTML).        ║\n'
+        '║                                                                           ║\n'
+        '╚═══════════════════════════════════════════════════════════════════════════╝\n',
+      );
+      return true;
+    }());
   }
 
   /// Removes a PlatformView by its `viewId` from the manager, and from the DOM.

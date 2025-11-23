@@ -123,6 +123,7 @@ abstract class ScrollView extends StatelessWidget {
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
     this.hitTestBehavior = HitTestBehavior.opaque,
+    this.browserScrolling,
   }) : assert(
          !(controller != null && (primary ?? false)),
          'Primary ScrollViews obtain their ScrollController via inheritance '
@@ -402,6 +403,9 @@ abstract class ScrollView extends StatelessWidget {
   /// Defaults to [HitTestBehavior.opaque].
   final HitTestBehavior hitTestBehavior;
 
+  /// {@macro flutter.widgets.scrollable.browserScrolling}
+  final bool? browserScrolling;
+
   /// Returns the [AxisDirection] in which the scroll view scrolls.
   ///
   /// Combines the [scrollDirection] with the [reverse] boolean to obtain the
@@ -506,6 +510,7 @@ abstract class ScrollView extends StatelessWidget {
       semanticChildCount: semanticChildCount,
       restorationId: restorationId,
       hitTestBehavior: hitTestBehavior,
+      browserScrolling: browserScrolling,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return buildViewport(context, offset, axisDirection, slivers);
       },
@@ -857,6 +862,7 @@ abstract class BoxScrollView extends ScrollView {
     super.restorationId,
     super.clipBehavior,
     super.hitTestBehavior,
+    super.browserScrolling,
   });
 
   /// The amount of space by which to inset the children.
@@ -1298,6 +1304,7 @@ class ListView extends BoxScrollView {
     super.restorationId,
     super.clipBehavior,
     super.hitTestBehavior,
+    super.browserScrolling,
   }) : assert(
          (itemExtent == null && prototypeItem == null) ||
              (itemExtent == null && itemExtentBuilder == null) ||
@@ -1375,6 +1382,7 @@ class ListView extends BoxScrollView {
     super.restorationId,
     super.clipBehavior,
     super.hitTestBehavior,
+    super.browserScrolling,
   }) : assert(itemCount == null || itemCount >= 0),
        assert(semanticChildCount == null || semanticChildCount <= itemCount!),
        assert(
@@ -1489,6 +1497,7 @@ class ListView extends BoxScrollView {
     super.restorationId,
     super.clipBehavior,
     super.hitTestBehavior,
+    super.browserScrolling,
   }) : assert(itemCount >= 0),
        assert(
          findItemIndexCallback == null || findChildIndexCallback == null,
@@ -1553,6 +1562,7 @@ class ListView extends BoxScrollView {
     super.restorationId,
     super.clipBehavior,
     super.hitTestBehavior,
+    super.browserScrolling,
   }) : assert(
          (itemExtent == null && prototypeItem == null) ||
              (itemExtent == null && itemExtentBuilder == null) ||
