@@ -346,6 +346,8 @@ class ExternalViewEmbedder {
 
   virtual ~ExternalViewEmbedder() = default;
 
+  // virtual void SetCurrentProcessingView(int64_t flutter_view_id) {}
+
   // Deallocate the resources for displaying a view.
   //
   // This method must be called when a view is removed from the engine.
@@ -390,8 +392,9 @@ class ExternalViewEmbedder {
   virtual DlCanvas* CompositeEmbeddedView(int64_t platform_view_id) = 0;
 
   // Prepare for a view to be drawn.
-  virtual void PrepareFlutterView(DlISize frame_size,
-                                  double device_pixel_ratio) = 0;
+  virtual void PrepareFlutterView(int64_t flutter_view_id,
+                          DlISize frame_size,
+                          double device_pixel_ratio) = 0;
 
   // Submits the content stored since |PrepareFlutterView| to the specified
   // Flutter view.
@@ -458,6 +461,10 @@ class ExternalViewEmbedder {
   virtual void PushFilterToVisitedPlatformViews(
       const std::shared_ptr<DlImageFilter>& filter,
       const DlRect& filter_rect) {}
+
+  virtual std::unique_ptr<SurfaceFrame> AcquireRootFrame(int64_t flutter_view_id) {
+    return nullptr;
+  }
 
  private:
   bool used_this_frame_ = false;
