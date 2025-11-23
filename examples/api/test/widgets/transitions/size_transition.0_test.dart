@@ -21,7 +21,11 @@ void main() {
       tester.widget(find.byType(SizeTransition)),
       isA<SizeTransition>()
           .having((SizeTransition transition) => transition.axis, 'axis', Axis.horizontal)
-          .having((SizeTransition transition) => transition.axisAlignment, 'axis alignment', -1)
+          .having(
+            (SizeTransition transition) => transition.alignment,
+            'alignment',
+            Alignment.topLeft,
+          )
           .having(
             (SizeTransition transition) => transition.sizeFactor,
             'factor',
