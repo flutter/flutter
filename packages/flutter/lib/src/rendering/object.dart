@@ -5869,19 +5869,8 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   }
 
   void _updateGeometry({required _SemanticsGeometry newGeometry}) {
-    final _SemanticsGeometry? currentGeometry = geometry;
     geometry = newGeometry;
     markNeedsBuild();
-    if (currentGeometry != null) {
-      final bool isSemanticsHidden =
-          configProvider.original.isHidden ||
-          (!(parentData?.mergeIntoParent ?? false) && newGeometry.hidden);
-      final bool sizeChanged = currentGeometry.rect.size != newGeometry.rect.size;
-      final bool visibilityChanged = configProvider.effective.isHidden != isSemanticsHidden;
-      if (!sizeChanged && !visibilityChanged) {
-        return;
-      }
-    }
     _updateChildGeometry();
   }
 
