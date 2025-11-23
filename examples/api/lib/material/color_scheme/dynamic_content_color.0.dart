@@ -107,7 +107,7 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
             actions: <Widget>[
               const Icon(Icons.light_mode),
               Switch(
-                activeColor: colorScheme.primary,
+                activeThumbColor: colorScheme.primary,
                 activeTrackColor: colorScheme.surface,
                 inactiveTrackColor: colorScheme.onSecondary,
                 value: isLight,
