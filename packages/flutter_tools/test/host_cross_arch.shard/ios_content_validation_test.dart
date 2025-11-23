@@ -188,14 +188,12 @@ void main() {
                 .deploymentTarget()
                 .toString();
 
-            final ProcessResult result = processManager.runSync(<String>[
-              'plutil',
-              '-p',
-              appFrameworkInfoPlist.path,
-            ]);
+            final String appFrameworkInfoPlistContents = appFrameworkInfoPlist.readAsStringSync();
 
-            expect(result.exitCode, 0);
-            expect(result.stdout, contains('"MinimumOSVersion" => "$expectedMinimumOSVersion"'));
+            expect(
+              appFrameworkInfoPlistContents,
+              contains('<key>MinimumOSVersion</key>\n\t<string>$expectedMinimumOSVersion</string>'),
+            );
           });
 
           testWithoutContext('Info.plist dart VM Service Bonjour service', () {
