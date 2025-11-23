@@ -8,6 +8,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <map>
 
 #include <android/hardware_buffer_jni.h>
 #include "flutter/fml/platform/android/scoped_java_ref.h"
@@ -23,6 +24,47 @@
 #include "shell/platform/android/image_external_texture.h"
 
 namespace flutter {
+
+class AndroidSurfacesManager {
+   public:
+  AndroidSurfacesManager(const std::shared_ptr<AndroidContext>& context, bool is_impeller_auto_select);
+
+   ~AndroidSurfacesManager() = default;
+
+  void AddSurface(int64_t view_id, std::unique_ptr<AndroidSurface> surface);
+
+  void RemoveSurface(int64_t view_id);
+
+  AndroidSurface* GetSurface(int64_t view_id) const;
+
+  std::unique_ptr<Surface> CreateGPUSurface(
+      GrDirectContext* gr_context);
+
+  int SurfaceCount() const;
+
+  void CreateSurfaceFrameLayer(int64_t view_id);
+
+  void DestroySurfaceFrameLayer(int64_t view_id);
+
+  SurfaceFrameLayer *GetSurfaceFrameLayer(int64_t view_id);
+
+  private:
+    AndroidSurface* GetFirstActiveSurface() const;
+
+    bool isRenderingAPIOpenGL() const;
+
+    const std::shared_ptr<AndroidContext>& android_context_;
+
+    std::shared_ptr<impeller::AiksContext> aiks_context_;
+
+    std::unordered_map<int64_t, std::unique_ptr<AndroidSurface>> android_surfaces_;
+
+    std::unordered_map<int64_t, std::unique_ptr<SurfaceFrameLayer>> frame_layers_;
+
+    bool is_impeller_auto_select_;
+
+    FML_DISALLOW_COPY_AND_ASSIGN(AndroidSurfacesManager);
+};
 
 class AndroidSurfaceFactoryImpl : public AndroidSurfaceFactory {
  public:
@@ -58,19 +100,31 @@ class PlatformViewAndroid final : public PlatformView {
       PlatformView::Delegate& delegate,
       const flutter::TaskRunners& task_runners,
       const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-      const std::shared_ptr<flutter::AndroidContext>& android_context);
+      const std::shared_ptr<flutter::AndroidContext>& android_context,
+      AndroidRenderingAPI rendering_api);
 
   ~PlatformViewAndroid() override;
 
   void NotifyCreated(fml::RefPtr<AndroidNativeWindow> native_window);
 
+  void NotifyCreated(int64_t view_id, fml::RefPtr<AndroidNativeWindow> native_window);
+
   void NotifySurfaceWindowChanged(
       fml::RefPtr<AndroidNativeWindow> native_window);
 
+        void NotifySurfaceWindowChanged(
+            int64_t view_id,
+      fml::RefPtr<AndroidNativeWindow> native_window);
+
+
   void NotifyChanged(const DlISize& size);
+
+  void NotifyChanged(int64_t view_id,const DlISize& size);
 
   // |PlatformView|
   void NotifyDestroyed() override;
+
+  void NotifyDestroyed(int64_t view_id);
 
   void DispatchPlatformMessage(JNIEnv* env,
                                std::string name,
@@ -135,6 +189,10 @@ class PlatformViewAndroid final : public PlatformView {
   PlatformViewAndroidDelegate platform_view_android_delegate_;
 
   std::unique_ptr<AndroidSurface> android_surface_;
+//   std::unique_ptr<AndroidMultipleSurfacesImpeller> android_multiple_surfaces_;
+//   std::unordered_map<int64_t, std::unique_ptr<AndroidSurface>> android_surfaces_;
+  std::unique_ptr<AndroidSurfacesManager> android_surfaces_manager_;
+  int active_surface_frame_layers_ = 0;
   std::shared_ptr<PlatformMessageHandlerAndroid> platform_message_handler_;
   bool android_meets_hcpp_criteria_ = false;
 

@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include "flutter/flow/layers/layer_tree.h"
 
+#include "flutter/common/constants.h"
 #include "flutter/flow/compositor_context.h"
 #include "flutter/flow/layers/container_layer.h"
 #include "flutter/flow/raster_cache.h"
@@ -22,14 +23,16 @@ class LayerTreeTest : public CanvasTest {
   LayerTreeTest()
       : root_transform_(DlMatrix::MakeTranslation({1.0f, 1.0f})),
         builder_(DisplayListBuilder::kMaxCullRect),
-        scoped_frame_(compositor_context_.AcquireFrame(nullptr,
-                                                       &builder_,
-                                                       nullptr,
-                                                       root_transform_,
-                                                       false,
-                                                       true,
-                                                       nullptr,
-                                                       nullptr)) {}
+        scoped_frame_(
+            compositor_context_.AcquireFrame(nullptr,
+                                             &builder_,
+                                             nullptr,
+                                             root_transform_,
+                                             false,
+                                             true,
+                                             nullptr,
+                                             nullptr,
+                                             kFlutterImplicitViewId)) {}
 
   CompositorContext::ScopedFrame& frame() { return *scoped_frame_.get(); }
   const DlMatrix& root_transform() { return root_transform_; }

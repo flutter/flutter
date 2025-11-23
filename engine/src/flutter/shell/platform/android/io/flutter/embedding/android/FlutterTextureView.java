@@ -39,6 +39,8 @@ public class FlutterTextureView extends TextureView implements RenderSurface {
   @Nullable private FlutterRenderer flutterRenderer;
   @Nullable private Surface renderSurface;
 
+  private long viewId = -1;
+
   private boolean shouldNotify() {
     return flutterRenderer != null && !isPaused;
   }
@@ -149,7 +151,7 @@ public class FlutterTextureView extends TextureView implements RenderSurface {
           TAG,
           "Already connected to a FlutterRenderer. Detaching from old one and attaching to new"
               + " one.");
-      this.flutterRenderer.stopRenderingToSurface();
+      this.flutterRenderer.stopRenderingToSurface(getViewId());
     }
 
     this.flutterRenderer = flutterRenderer;
@@ -235,7 +237,7 @@ public class FlutterTextureView extends TextureView implements RenderSurface {
     }
 
     renderSurface = new Surface(getSurfaceTexture());
-    flutterRenderer.startRenderingToSurface(renderSurface, isPaused);
+    flutterRenderer.startRenderingToSurface(getViewId(), renderSurface, isPaused);
   }
 
   // FlutterRenderer must be non-null.
@@ -262,10 +264,23 @@ public class FlutterTextureView extends TextureView implements RenderSurface {
               + " non-null.");
     }
 
-    flutterRenderer.stopRenderingToSurface();
+    flutterRenderer.stopRenderingToSurface(getViewId());
     if (renderSurface != null) {
       renderSurface.release();
       renderSurface = null;
     }
+  }
+
+  public void setViewId(long viewId) {
+    this.viewId = viewId;
+  }
+
+  private long getViewId() {
+    if (viewId == -1) {
+      throw new IllegalStateException(
+              "setViewId must be called first.");
+    }
+
+    return viewId;
   }
 }

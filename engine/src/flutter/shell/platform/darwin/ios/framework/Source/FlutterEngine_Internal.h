@@ -17,7 +17,7 @@
 
 #include "flutter/shell/platform/embedder/embedder.h"
 
-#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
+#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterIndirectScribbleDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
@@ -35,7 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
 // Indicates whether this engine has **ever** been manually registered to a scene.
 @property(nonatomic, assign) BOOL manuallyRegisteredToScene;
 
-- (void)updateViewportMetrics:(flutter::ViewportMetrics)viewportMetrics;
+- (void)updateViewportMetrics:(flutter::ViewportMetrics)viewportMetrics viewIdentifier:(FlutterViewIdentifier)viewIdentifier;
 - (void)dispatchPointerDataPacket:(std::unique_ptr<flutter::PointerDataPacket>)packet;
 
 - (fml::RefPtr<fml::TaskRunner>)platformTaskRunner;
@@ -44,8 +44,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)installFirstFrameCallback:(void (^)(void))block;
 - (void)enableSemantics:(BOOL)enabled withFlags:(int64_t)flags;
-- (void)notifyViewCreated;
-- (void)notifyViewDestroyed;
+- (void)notifyViewCreated:(FlutterViewIdentifier)viewIdentifier;
+- (void)notifyViewDestroyed:(FlutterViewIdentifier)viewIdentifier;
 
 - (flutter::Rasterizer::Screenshot)screenshot:(flutter::Rasterizer::ScreenshotType)type
                                  base64Encode:(bool)base64Encode;
@@ -60,7 +60,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)createShell:(nullable NSString*)entrypoint
          libraryURI:(nullable NSString*)libraryOrNil
        initialRoute:(nullable NSString*)initialRoute;
-- (void)attachView;
+- (void)attachView:(FlutterViewIdentifier)viewIdentifier;
 - (void)notifyLowMemory;
 
 /// Blocks until the first frame is presented or the timeout is exceeded, then invokes callback.
@@ -123,6 +123,37 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSObject<FlutterApplicationRegistrar>*)registrarForApplication:(NSString*)key;
 
 - (void)sendDeepLinkToFramework:(NSURL*)url completionHandler:(void (^)(BOOL success))completion;
+
+/**
+ * Attach a view controller to the engine as its default controller.
+ *
+ * Since FlutterEngine can only handle the implicit view for now, the given
+ * controller will always be assigned to the implicit view, if there isn't an
+ * implicit view yet. If the engine already has an implicit view, this call
+ * throws an assertion.
+ *
+ * The engine holds a weak reference to the attached view controller.
+ *
+ * If the given view controller is already attached to an engine, this call
+ * throws an assertion.
+ */
+- (FlutterViewIdentifier)addViewController:(FlutterViewController*)viewController;
+
+/**
+ * Notify the engine that a view for the given view controller has been loaded.
+ */
+// - (void)viewControllerViewDidLoad:(FlutterViewController*)viewController;
+
+/**
+ * Dissociate the given view controller from this engine.
+ *
+ * If the view controller is not associated with this engine, this call throws an
+ * assertion.
+ */
+- (void)removeViewController:(FlutterViewIdentifier)viewIdentifier;
+
+- (nullable FlutterViewController*)viewControllerForIdentifier:
+    (FlutterViewIdentifier)viewIdentifier;
 
 @end
 

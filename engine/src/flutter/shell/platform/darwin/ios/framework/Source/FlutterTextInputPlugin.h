@@ -9,6 +9,7 @@
 
 #import "flutter/shell/platform/common/text_editing_delta.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
+#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterIndirectScribbleDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeySecondaryResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
@@ -30,10 +31,23 @@ typedef NS_ENUM(NSInteger, FlutterScribbleInteractionStatus) {
   // NOLINTEND(readability-identifier-naming)
 };
 
+/**
+ * Delegate for FlutterTextInputPlugin. Implemented by FlutterEngine.
+ */
+@protocol FlutterTextInputPluginDelegate
+
+/**
+ * Returns the FlutterViewController for the given view identifier.
+ */
+- (FlutterViewController*)viewControllerForIdentifier:(FlutterViewIdentifier)viewIdentifier;
+
+@end
+
 @interface FlutterTextInputPlugin
     : NSObject <FlutterKeySecondaryResponder, UIIndirectScribbleInteractionDelegate>
 
-@property(nonatomic, weak) UIViewController* viewController;
+//@property(nonatomic, weak) UIViewController* viewController;
+@property(nonatomic, readonly, weak) FlutterViewController* currentViewController;
 @property(nonatomic, weak) id<FlutterIndirectScribbleDelegate> indirectScribbleDelegate;
 @property(nonatomic, strong)
     NSMutableDictionary<UIScribbleElementIdentifier, NSValue*>* scribbleElements;
@@ -41,7 +55,8 @@ typedef NS_ENUM(NSInteger, FlutterScribbleInteractionStatus) {
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 
-- (instancetype)initWithDelegate:(id<FlutterTextInputDelegate>)textInputDelegate
+- (instancetype)initWithDelegate:(id<FlutterTextInputPluginDelegate>) delegate
+               textInputDelegate:(id<FlutterTextInputDelegate>)textInputDelegate
     NS_DESIGNATED_INITIALIZER;
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result;

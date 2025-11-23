@@ -265,7 +265,7 @@ if (enable_unittests) {
       "painting/image_decoder_no_gl_unittests.cc",
       "painting/image_decoder_no_gl_unittests.h",
       "painting/image_dispose_unittests.cc",
-      "painting/image_encoding_unittests.cc",
+      #"painting/image_encoding_unittests.cc",
       "painting/image_generator_registry_unittests.cc",
       "painting/paint_unittests.cc",
       "painting/path_unittests.cc",

@@ -148,6 +148,9 @@
 
 // Sets flutterAccessibilityContainer as this view's accessibilityContainer.
 @property(nonatomic, retain) id flutterAccessibilityContainer;
+
+/// @brief The flutter view controller.
+@property(nonatomic, weak) UIViewController<FlutterViewResponder>* flutterViewController;
 @end
 
 @interface UIView (FirstResponder)

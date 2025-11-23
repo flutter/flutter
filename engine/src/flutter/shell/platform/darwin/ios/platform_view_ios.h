@@ -25,6 +25,45 @@
 
 namespace flutter {
 
+class IOSSurfacesManager {
+public:
+  IOSSurfacesManager(const std::shared_ptr<IOSContext>& context);
+
+  ~IOSSurfacesManager() = default;
+
+  void AddSurface(int64_t view_id, std::unique_ptr<IOSSurface> surface);
+
+  void RemoveSurface(int64_t view_id);
+
+  IOSSurface* GetSurface(int64_t view_id) const;
+
+  std::unique_ptr<Surface> CreateGPUSurface();
+
+  int SurfaceCount() const;
+
+  void CreateSurfaceFrameLayer(int64_t view_id);
+
+  void DestroySurfaceFrameLayer(int64_t view_id);
+
+  SurfaceFrameLayer *GetSurfaceFrameLayer(int64_t view_id);
+
+  private:
+
+    const std::shared_ptr<impeller::Context> impeller_context_;
+    std::shared_ptr<impeller::AiksContext> aiks_context_;
+    // bool is_valid_ = false;
+
+    std::unordered_map<int64_t, std::unique_ptr<IOSSurface>> ios_surfaces_;
+
+    std::unordered_map<int64_t, std::unique_ptr<SurfaceFrameLayer>> frame_layers_;
+
+    // Since the `ios_surface_` is created on the platform thread but
+    // used on the raster thread we need to protect it with a mutex.
+    mutable std::shared_mutex ios_surface_mutex_;
+
+    FML_DISALLOW_COPY_AND_ASSIGN(IOSSurfacesManager);
+};
+
 /**
  * A bridge connecting the platform agnostic shell and the iOS embedding.
  *
@@ -54,6 +93,12 @@ class PlatformViewIOS final : public PlatformView {
 
   ~PlatformViewIOS() override;
 
+  void NotifyCreated(int64_t view_id);
+
+  void NotifyDestroyed() override;
+
+  void NotifyDestroyed(int64_t view_id);
+
   /**
    * Returns the `FlutterViewController` currently attached to the `FlutterEngine` owning
    * this PlatformViewIOS.
@@ -67,6 +112,10 @@ class PlatformViewIOS final : public PlatformView {
    */
   void SetOwnerViewController(__weak FlutterViewController* owner_controller);
 
+  void AddOwnerViewController(__weak FlutterViewController* owner_controller);
+
+  void RemoveOwnerViewController(FlutterViewIdentifier viewIdentifier);
+
   /**
    * Called one time per `FlutterViewController` when the `FlutterViewController`'s
    * UIView is first loaded.
@@ -74,7 +123,7 @@ class PlatformViewIOS final : public PlatformView {
    * Can be used to perform late initialization after `FlutterViewController`'s
    * init.
    */
-  void attachView();
+  void attachView(FlutterViewIdentifier viewIdentifier);
 
   /**
    * Called through when an external texture such as video or camera is
@@ -168,6 +217,10 @@ class PlatformViewIOS final : public PlatformView {
   ScopedObserver dealloc_view_controller_observer_;
   std::vector<std::string> platform_resolved_locale_;
   std::shared_ptr<PlatformMessageHandlerIos> platform_message_handler_;
+  std::shared_ptr<IOSSurfacesManager> ios_surfaces_manager_;
+  int active_surface_layers_ = 0;
+  // It can't use NSDictionary, because the values need to be weak references.
+  NSMapTable* viewControllers_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewIOS);
 };

@@ -14,15 +14,58 @@
 #include "flutter/impeller/renderer/backend/metal/swapchain_transients_mtl.h"
 #include "flutter/shell/gpu/gpu_surface_metal_delegate.h"
 #include "third_party/skia/include/gpu/ganesh/mtl/GrMtlTypes.h"
+#include "flutter/common/constants.h"
 
 namespace flutter {
+
+class GPUSurfaceMetalSurfaceFrameLayer : public SurfaceFrameLayer {
+public:
+    GPUSurfaceMetalSurfaceFrameLayer(
+        // const DlISize& frame_size,
+                    GPUSurfaceMetalDelegate* delegate,
+                    const std::shared_ptr<impeller::AiksContext>& context
+                );
+
+    ~GPUSurfaceMetalSurfaceFrameLayer();
+
+    std::unique_ptr<SurfaceFrame> MakeSurfaceFrame(const DlISize& frame_size) override;
+private:
+    bool IsValid();
+
+    std::unique_ptr<SurfaceFrame> AcquireFrameFromCAMetalLayer(
+      const GPUSurfaceMetalDelegate* delegate,
+      const DlISize& frame_size);
+
+    std::unique_ptr<SurfaceFrame> AcquireFrameFromMTLTexture(
+      const GPUSurfaceMetalDelegate* delegate,
+      const DlISize& frame_size);
+
+    const DlISize render_surface_size_;
+    const GPUSurfaceMetalDelegate* delegate_;
+    std::shared_ptr<impeller::AiksContext> aiks_context_;
+    id<MTLTexture> last_texture_;
+    // TODO(38466): Refactor GPU surface APIs take into account the fact that an
+    // external view embedder may want to render to the root surface. This is a
+    // hack to make avoid allocating resources for the root surface when an
+    // external view embedder is present.
+    // bool render_to_surface_ = true;
+    bool disable_partial_repaint_ = false;
+    // Accumulated damage for each framebuffer; Key is address of underlying
+    // MTLTexture for each drawable
+    std::shared_ptr<std::map<void*, DlIRect>> damage_ =
+        std::make_shared<std::map<void*, DlIRect>>();
+    std::shared_ptr<impeller::SwapchainTransientsMTL> swapchain_transients_;
+};
 
 class IMPELLER_CA_METAL_LAYER_AVAILABLE GPUSurfaceMetalImpeller
     : public Surface {
  public:
+  using GetGPUSurfaceMetalDelegateCallback = std::function<GPUSurfaceMetalDelegate*(int64_t view_id)>;
   GPUSurfaceMetalImpeller(GPUSurfaceMetalDelegate* delegate,
                           const std::shared_ptr<impeller::AiksContext>& context,
-                          bool render_to_surface = true);
+                          bool render_to_surface = true
+                          // const GetGPUSurfaceMetalDelegateCallback& get_gpu_surface_metal_delegate = {}
+                        );
 
   // |Surface|
   ~GPUSurfaceMetalImpeller();
@@ -34,8 +77,10 @@ class IMPELLER_CA_METAL_LAYER_AVAILABLE GPUSurfaceMetalImpeller
 
  private:
   const GPUSurfaceMetalDelegate* delegate_;
-  const MTLRenderTargetType render_target_type_;
+  const GetGPUSurfaceMetalDelegateCallback get_gpu_surface_metal_delegate_;
+//   const MTLRenderTargetType render_target_type_;
   std::shared_ptr<impeller::AiksContext> aiks_context_;
+  std::unique_ptr<GPUSurfaceMetalSurfaceFrameLayer> surface_frame_layer_;
   id<MTLTexture> last_texture_;
   // TODO(38466): Refactor GPU surface APIs take into account the fact that an
   // external view embedder may want to render to the root surface. This is a
@@ -50,17 +95,20 @@ class IMPELLER_CA_METAL_LAYER_AVAILABLE GPUSurfaceMetalImpeller
   std::shared_ptr<impeller::SwapchainTransientsMTL> swapchain_transients_;
 
   // |Surface|
-  std::unique_ptr<SurfaceFrame> AcquireFrame(
-      const DlISize& frame_size) override;
+//   std::unique_ptr<SurfaceFrame> AcquireFrame(const DlISize& size, int64_t view_id = kFlutterImplicitViewId) override;
+std::unique_ptr<SurfaceFrame> AcquireFrame(const DlISize& size) override;
 
   std::unique_ptr<SurfaceFrame> AcquireFrameFromCAMetalLayer(
+      const GPUSurfaceMetalDelegate* delegate,
       const DlISize& frame_size);
 
   std::unique_ptr<SurfaceFrame> AcquireFrameFromMTLTexture(
+      const GPUSurfaceMetalDelegate* delegate,
       const DlISize& frame_size);
 
   // |Surface|
-  DlMatrix GetRootTransformation() const override;
+//   DlMatrix GetRootTransformation(int64_t view_id = kFlutterImplicitViewId) const override;
+DlMatrix GetRootTransformation() const override;
 
   // |Surface|
   GrDirectContext* GetContext() override;

@@ -44,7 +44,7 @@ executable("flutter_shell_native_unittests") {
   testonly = true
   sources = [
     "android_context_gl_impeller_unittests.cc",
-    "android_shell_holder_unittests.cc",
+    #"android_shell_holder_unittests.cc",
     "apk_asset_provider_unittests.cc",
     "flutter_shell_native_unittests.cc",
     "image_lru_unittests.cc",

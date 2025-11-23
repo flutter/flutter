@@ -64,7 +64,8 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
 
   void HardwareBufferClose(JavaLocalRef hardware_buffer) override;
 
-  void FlutterViewOnDisplayPlatformView(int view_id,
+  void FlutterViewOnDisplayPlatformView(int64_t flutter_view_id,
+                                        int view_id,
                                         int x,
                                         int y,
                                         int width,
@@ -73,7 +74,8 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
                                         int viewHeight,
                                         MutatorsStack mutators_stack) override;
 
-  void FlutterViewDisplayOverlaySurface(int surface_id,
+  void FlutterViewDisplayOverlaySurface(int64_t flutter_view_id,
+                                        int surface_id,
                                         int x,
                                         int y,
                                         int width,
@@ -84,9 +86,9 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
   void FlutterViewEndFrame() override;
 
   std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata>
-  FlutterViewCreateOverlaySurface() override;
+  FlutterViewCreateOverlaySurface(int64_t flutter_view_id) override;
 
-  void FlutterViewDestroyOverlaySurfaces() override;
+  void FlutterViewDestroyOverlaySurfaces(int64_t flutter_view_id) override;
 
   std::unique_ptr<std::vector<std::string>>
   FlutterViewComputePlatformResolvedLocale(

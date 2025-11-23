@@ -198,6 +198,7 @@ import java.util.List;
     }
 
     if (host.shouldAttachEngineToActivity()) {
+      Log.e(TAG, "Attaching FlutterEngine to the Activity that owns this delegate.1111111111");
       // Notify any plugins that are currently attached to our FlutterEngine that they
       // are now attached to an Activity.
       //

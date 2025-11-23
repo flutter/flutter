@@ -16,10 +16,34 @@
 
 namespace flutter {
 
+class GPUSurfaceVulkanSurfaceFrameLayer : public SurfaceFrameLayer {
+public:
+  GPUSurfaceVulkanSurfaceFrameLayer(
+                  GPUSurfaceVulkanDelegate* delegate,
+                  const std::shared_ptr<impeller::Context>& context,
+                  const std::shared_ptr<impeller::AiksContext>& aiks_context
+              );
+
+  ~GPUSurfaceVulkanSurfaceFrameLayer();
+
+  std::unique_ptr<SurfaceFrame> MakeSurfaceFrame(const DlISize& frame_size) override;
+private:
+  bool IsValid();
+
+  GPUSurfaceVulkanDelegate* delegate_;
+  std::shared_ptr<impeller::Context> impeller_context_;
+  std::shared_ptr<impeller::AiksContext> aiks_context_;
+  std::shared_ptr<impeller::SwapchainTransientsVK> transients_;
+  bool is_valid_ = false;
+};
+
 class GPUSurfaceVulkanImpeller final : public Surface {
  public:
+  using GetSurfaceContextVKCallback = std::function<std::shared_ptr<impeller::Context>(int64_t view_id)>;
+
   explicit GPUSurfaceVulkanImpeller(GPUSurfaceVulkanDelegate* delegate,
-                                    std::shared_ptr<impeller::Context> context);
+                                    std::shared_ptr<impeller::Context> context,
+                                    const GetSurfaceContextVKCallback& get_surface_context_vk_callback = {});
 
   // |Surface|
   ~GPUSurfaceVulkanImpeller() override;
@@ -33,8 +57,17 @@ class GPUSurfaceVulkanImpeller final : public Surface {
   std::shared_ptr<impeller::AiksContext> aiks_context_;
   std::shared_ptr<impeller::SwapchainTransientsVK> transients_;
   bool is_valid_ = false;
+  const GetSurfaceContextVKCallback get_surface_context_vk_callback_;
 
-  // |Surface|
+  std::unique_ptr<GPUSurfaceVulkanSurfaceFrameLayer> surface_frame_layer_;
+
+  // // |Surface|
+  // std::unique_ptr<SurfaceFrame> AcquireFrame(const DlISize& size, int64_t view_id = kFlutterImplicitViewId) override;
+
+  // // |Surface|
+  // DlMatrix GetRootTransformation(int64_t view_id = kFlutterImplicitViewId) const override;
+
+    // |Surface|
   std::unique_ptr<SurfaceFrame> AcquireFrame(const DlISize& size) override;
 
   // |Surface|

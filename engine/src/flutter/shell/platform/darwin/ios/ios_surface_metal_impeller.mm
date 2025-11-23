@@ -64,6 +64,10 @@ GPUCAMetalLayerHandle IOSSurfaceMetalImpeller::GetCAMetalLayer(const DlISize& fr
   return (__bridge GPUCAMetalLayerHandle)layer_;
 }
 
+MTLPixelFormat IOSSurfaceMetalImpeller::GetPixelFormat() const {
+  return layer_.pixelFormat;
+}
+
 // |GPUSurfaceMetalDelegate|
 bool IOSSurfaceMetalImpeller::PresentDrawable(GrMTLHandle drawable) const {
   FML_DCHECK(false);

@@ -9,6 +9,7 @@
 #include <memory>
 #include <utility>
 
+#include "common/constants.h"
 #include "common/settings.h"
 #include "flutter/common/graphics/texture.h"
 #include "flutter/fml/synchronization/waitable_event.h"
@@ -46,6 +47,10 @@
 #include "flutter/shell/platform/android/surface/snapshot_surface_producer.h"
 #include "flutter/shell/platform/android/vsync_waiter_android.h"
 
+#include "flutter/shell/gpu/gpu_surface_gl_impeller.h"
+#include "flutter/shell/gpu/gpu_surface_multi_view.h"
+#include "flutter/shell/gpu/gpu_surface_vulkan_impeller.h"
+
 namespace flutter {
 
 namespace {
@@ -66,6 +71,342 @@ AndroidContext::ContextSettings CreateContextSettings(
   return settings;
 }
 }  // namespace
+
+AndroidSurfacesManager::AndroidSurfacesManager(
+  const std::shared_ptr<AndroidContext>& context,
+  bool is_impeller_auto_select):
+    android_context_(context),
+    is_impeller_auto_select_(is_impeller_auto_select) {}
+
+  void AndroidSurfacesManager::AddSurface(int64_t view_id, std::unique_ptr<AndroidSurface> surface) {
+    // FML_LOG(ERROR) << "AndroidSurfacesManager::AddSurface view_id: " << view_id;
+android_surfaces_.emplace(view_id, std::move(surface));
+  }
+
+  void AndroidSurfacesManager::RemoveSurface(int64_t view_id) {
+    // FML_LOG(ERROR) << "AndroidSurfacesManager::RemoveSurface view_id: " << view_id;
+android_surfaces_.erase(view_id);
+  }
+
+  AndroidSurface* AndroidSurfacesManager::GetSurface(int64_t view_id) const {
+    // FML_LOG(ERROR) << "AndroidSurfacesManager::GetSurface view_id: " << view_id;
+    auto iter = android_surfaces_.find(view_id);
+    if (iter != android_surfaces_.end()) {
+        return iter->second.get();
+    }
+
+    return nullptr;
+
+  }
+
+  // std::unique_ptr<Surface> AndroidSurfacesManager::CreateGPUSurface(
+  //     GrDirectContext* gr_context) {
+  //   auto android_rendering_api = android_context_->RenderingApi();
+  //   AndroidSurfacesManager* surfaces_manager_ptr = this;
+  //   if (is_impeller_auto_select_ || android_context_->IsDynamicSelection()) {
+  //     switch (android_rendering_api) {
+  //       case AndroidRenderingAPI::kImpellerVulkan: {
+  //         auto gpu_surface = std::make_unique<GPUSurfaceVulkanImpeller>(
+  //               nullptr,
+  //               android_context_->GetImpellerContext(),
+  //               [surfaces_manager_ptr](int64_t view_id) {               // get_gpu_surface_delegate
+  //                   auto *surface = surfaces_manager_ptr->GetSurface(view_id);
+  //                   auto *backed_surface = static_cast<AndroidSurfaceDynamicImpeller*>(surface);
+  //                   // GPUSurfaceGLDelegate
+  //                   auto * surface_vk = static_cast<AndroidSurfaceVKImpeller *>(backed_surface->GetBackedSurface());
+  //                   return surface_vk->GetImpellerContext();
+  //               });
+
+  //         FML_LOG(ERROR) << "AndroidSurfaceVKImpeller::CreateGPUSurface" << (gpu_surface->IsValid());
+  //         if (!gpu_surface->IsValid()) {
+  //           return nullptr;
+  //         }
+
+  //         return gpu_surface;
+  //         // return std::make_unique<AndroidContextVKImpeller>(settings);
+  //       }
+  //       case AndroidRenderingAPI::kImpellerOpenGLES: {
+  //           FML_LOG(ERROR) << "AndroidSurfaceGLImpeller::CreateGPUSurface";
+  //           auto surface = std::make_unique<GPUSurfaceGLImpeller>(
+  //           nullptr,                                    // delegate
+  //           android_context_->GetImpellerContext(),  // context
+  //           true,                                     // render to surface
+  //           [surfaces_manager_ptr](int64_t view_id) {               // get_gpu_surface_delegate
+  //               auto *surface = surfaces_manager_ptr->GetSurface(view_id);
+  //               auto *backed_surface = static_cast<AndroidSurfaceDynamicImpeller*>(surface);
+  //               // GPUSurfaceGLDelegate
+  //               return static_cast<AndroidSurfaceGLImpeller*>(backed_surface->GetBackedSurface());
+  //           });
+  //           if (!surface->IsValid()) {
+  //             // FML_LOG(ERROR) << "AndroidSurfaceGLImpeller::CreateGPUSurface surface->IsValid()" << (surface->IsValid());
+  //             return nullptr;
+  //           }
+  //           FML_LOG(ERROR) << "AndroidSurfaceGLImpeller::CreateGPUSurface surface success";
+  //           return surface;
+  //       }
+  //       case AndroidRenderingAPI::kSoftware:
+  //       case AndroidRenderingAPI::kSkiaOpenGLES:
+  //       case AndroidRenderingAPI::kImpellerAutoselect:
+  //           FML_UNREACHABLE();
+  //     }
+  //     FML_UNREACHABLE();
+  //   }
+  //   switch (android_rendering_api) {
+  //     case AndroidRenderingAPI::kSkiaOpenGLES:
+  //         return nullptr;
+  //     case AndroidRenderingAPI::kImpellerVulkan: {
+  //         auto gpu_surface = std::make_unique<GPUSurfaceVulkanImpeller>(
+  //               nullptr,
+  //               android_context_->GetImpellerContext(),
+  //               [surfaces_manager_ptr](int64_t view_id) {               // get_gpu_surface_delegate
+  //                   auto *surface = surfaces_manager_ptr->GetSurface(view_id);
+  //                   auto *surface_vk = static_cast<AndroidSurfaceVKImpeller*>(surface);
+  //                   // GPUSurfaceGLDelegate
+  //                   // auto * surface_vk = static_cast<AndroidSurfaceVKImpeller *>(backed_surface->GetBackedSurface());
+  //                   return surface_vk->GetImpellerContext();
+  //               });
+
+  //         FML_LOG(ERROR) << "AndroidSurfaceVKImpeller::CreateGPUSurface" << (gpu_surface->IsValid());
+  //         if (!gpu_surface->IsValid()) {
+  //           return nullptr;
+  //         }
+
+  //         return gpu_surface;
+  //     }
+  //     case AndroidRenderingAPI::kImpellerOpenGLES:
+  //         {
+  //           FML_LOG(ERROR) << "AndroidSurfaceGLImpeller::CreateGPUSurface";
+  //           auto surface = std::make_unique<GPUSurfaceGLImpeller>(
+  //           nullptr,                                    // delegate
+  //           android_context_->GetImpellerContext(),  // context
+  //           true,                                     // render to surface
+  //           [surfaces_manager_ptr](int64_t view_id) {               // get_gpu_surface_delegate
+  //               auto *surface = surfaces_manager_ptr->GetSurface(view_id);
+  //               return static_cast<AndroidSurfaceGLImpeller*>(surface);
+  //           });
+  //           if (!surface->IsValid()) {
+  //             // FML_LOG(ERROR) << "AndroidSurfaceGLImpeller::CreateGPUSurface surface->IsValid()" << (surface->IsValid());
+  //             return nullptr;
+  //           }
+  //           FML_LOG(ERROR) << "AndroidSurfaceGLImpeller::CreateGPUSurface surface success";
+  //           return surface;
+  //         }
+  //     case AndroidRenderingAPI::kSoftware:
+  //     case AndroidRenderingAPI::kImpellerAutoselect:
+  //         FML_UNREACHABLE();
+  //     //   // Determine if we're using GL or Vulkan.
+  //     //   return std::make_unique<AndroidContextDynamicImpeller>(settings);
+  //   }
+  //   FML_UNREACHABLE();
+  // }
+
+  std::unique_ptr<Surface> AndroidSurfacesManager::CreateGPUSurface(
+      GrDirectContext* gr_context) {
+    aiks_context_ = std::make_shared<impeller::AiksContext>(
+      android_context_->GetImpellerContext(), impeller::TypographerContextSkia::Make());
+    AndroidSurfacesManager* surfaces_manager_ptr = this;
+
+    return std::make_unique<GPUSurfaceMultiView>(
+      android_context_->GetImpellerContext(),
+      aiks_context_,
+      [surfaces_manager_ptr, android_context = android_context_]()
+          -> std::unique_ptr<GLContextResult> {
+        auto *surface = surfaces_manager_ptr->GetFirstActiveSurface();
+        auto android_rendering_api = android_context->RenderingApi();
+        bool is_impeller_auto_select = android_rendering_api == AndroidRenderingAPI::kImpellerAutoselect;
+        if (surface) {
+          if (is_impeller_auto_select || android_context->IsDynamicSelection()) {
+            switch (android_rendering_api) {
+              case AndroidRenderingAPI::kImpellerOpenGLES: {
+                auto *backed_surface = static_cast<AndroidSurfaceDynamicImpeller*>(surface);
+                // GPUSurfaceGLDelegate
+                auto *delegate =  static_cast<AndroidSurfaceGLImpeller*>(backed_surface->GetBackedSurface());
+                return delegate->GLContextMakeCurrent();
+              }
+              case AndroidRenderingAPI::kImpellerVulkan:
+              case AndroidRenderingAPI::kSoftware:
+              case AndroidRenderingAPI::kSkiaOpenGLES:
+              case AndroidRenderingAPI::kImpellerAutoselect:
+                  break;
+            }
+          } else {
+            switch (android_rendering_api) {
+              case AndroidRenderingAPI::kSkiaOpenGLES:
+                break;
+              case AndroidRenderingAPI::kImpellerOpenGLES: {
+                auto *delegate = static_cast<AndroidSurfaceGLImpeller *>(surface);
+                return delegate->GLContextMakeCurrent();
+              }
+              case AndroidRenderingAPI::kImpellerVulkan:
+              case AndroidRenderingAPI::kSoftware:
+              case AndroidRenderingAPI::kImpellerAutoselect:
+                  break;
+            }
+          }
+        }
+
+        return std::make_unique<GLContextDefaultResult>(false);
+      }, // make_render_context_current_callback
+      [surfaces_manager_ptr, android_context = android_context_]() {
+        auto *surface = surfaces_manager_ptr->GetFirstActiveSurface();
+        auto android_rendering_api = android_context->RenderingApi();
+        bool is_impeller_auto_select = android_rendering_api == AndroidRenderingAPI::kImpellerAutoselect;
+        if (surface) {
+          if (is_impeller_auto_select || android_context->IsDynamicSelection()) {
+            switch (android_rendering_api) {
+              case AndroidRenderingAPI::kImpellerOpenGLES: {
+                auto *backed_surface = static_cast<AndroidSurfaceDynamicImpeller*>(surface);
+                // GPUSurfaceGLDelegate
+                auto *delegate =  static_cast<AndroidSurfaceGLImpeller*>(backed_surface->GetBackedSurface());
+                return delegate->GLContextClearCurrent();
+              }
+              case AndroidRenderingAPI::kImpellerVulkan:
+              case AndroidRenderingAPI::kSoftware:
+              case AndroidRenderingAPI::kSkiaOpenGLES:
+              case AndroidRenderingAPI::kImpellerAutoselect:
+                  break;
+            }
+          } else {
+            switch (android_rendering_api) {
+              case AndroidRenderingAPI::kSkiaOpenGLES:
+                break;
+              case AndroidRenderingAPI::kImpellerOpenGLES: {
+                auto *delegate = static_cast<AndroidSurfaceGLImpeller *>(surface);
+                return delegate->GLContextClearCurrent();
+              }
+              case AndroidRenderingAPI::kImpellerVulkan:
+              case AndroidRenderingAPI::kSoftware:
+              case AndroidRenderingAPI::kImpellerAutoselect:
+                  break;
+            }
+          }
+        }
+
+        return false;
+      },// clear_render_context_callback
+      [android_context = android_context_]() {
+        // This only return true for `AndroidRenderingAPI::kSkiaOpenGLES`
+        return android_context->RenderingApi() == AndroidRenderingAPI::kSkiaOpenGLES;
+      }, // enable_raster_cache_callback
+      []() {
+        // TODO: Implement this later
+        return nullptr;
+      }// get_gr_context_callback
+    );
+  }
+
+  int AndroidSurfacesManager::SurfaceCount() const {
+    return android_surfaces_.size();
+  }
+
+void AndroidSurfacesManager::CreateSurfaceFrameLayer(int64_t view_id) {
+  std::unique_ptr<SurfaceFrameLayer> surface_frame_layer;
+      auto android_rendering_api = android_context_->RenderingApi();
+    bool is_impeller_auto_select = android_rendering_api == AndroidRenderingAPI::kImpellerAutoselect;
+  //   AndroidSurfacesManager* surfaces_manager_ptr = this;
+    if (is_impeller_auto_select || android_context_->IsDynamicSelection()) {
+      switch (android_rendering_api) {
+        case AndroidRenderingAPI::kImpellerVulkan: {
+                auto *surface = GetSurface(view_id);
+                auto *backed_surface = static_cast<AndroidSurfaceDynamicImpeller*>(surface);
+                auto * surface_vk = static_cast<AndroidSurfaceVKImpeller *>(backed_surface->GetBackedSurface());
+
+                surface_frame_layer = std::make_unique<GPUSurfaceVulkanSurfaceFrameLayer>(
+                          nullptr,
+                          surface_vk->GetImpellerContext(),
+                          aiks_context_);
+                break;
+        }
+        case AndroidRenderingAPI::kImpellerOpenGLES: {
+                auto *surface = GetSurface(view_id);
+                auto *backed_surface = static_cast<AndroidSurfaceDynamicImpeller*>(surface);
+                // GPUSurfaceGLDelegate
+                auto *delegate =  static_cast<AndroidSurfaceGLImpeller*>(backed_surface->GetBackedSurface());
+            // auto *delegate = static_cast<AndroidSurfaceGLImpeller *>(
+            //         GetSurface(view_id));
+
+                surface_frame_layer = std::make_unique<GPUSurfaceGLSurfaceFrameLayer>(
+                          delegate,
+                          android_context_->GetImpellerContext(),
+                          aiks_context_);
+                break;
+        }
+        case AndroidRenderingAPI::kSoftware:
+        case AndroidRenderingAPI::kSkiaOpenGLES:
+        case AndroidRenderingAPI::kImpellerAutoselect:
+            FML_UNREACHABLE();
+      }
+    } else {
+      switch (android_rendering_api) {
+        case AndroidRenderingAPI::kSkiaOpenGLES:
+            break;
+        case AndroidRenderingAPI::kImpellerVulkan: {
+              auto *surface_vk = static_cast<AndroidSurfaceVKImpeller *>(
+                      GetSurface(view_id));
+
+              surface_frame_layer = std::make_unique<GPUSurfaceVulkanSurfaceFrameLayer>(
+                        nullptr,
+                        surface_vk->GetImpellerContext(),
+                        aiks_context_);
+              break;
+        }
+        case AndroidRenderingAPI::kImpellerOpenGLES:
+            {
+
+              auto *delegate = static_cast<AndroidSurfaceGLImpeller *>(
+                      GetSurface(view_id));
+
+                  surface_frame_layer = std::make_unique<GPUSurfaceGLSurfaceFrameLayer>(
+                            delegate,
+                            android_context_->GetImpellerContext(),
+                            aiks_context_);
+                  break;
+            }
+        case AndroidRenderingAPI::kSoftware:
+        case AndroidRenderingAPI::kImpellerAutoselect:
+            FML_UNREACHABLE();
+        //   // Determine if we're using GL or Vulkan.
+        //   return std::make_unique<AndroidContextDynamicImpeller>(settings);
+      }
+    }
+
+  frame_layers_[view_id] = std::move(surface_frame_layer);
+}
+
+void AndroidSurfacesManager::DestroySurfaceFrameLayer(int64_t view_id) {
+  frame_layers_.erase(view_id);
+}
+
+SurfaceFrameLayer *AndroidSurfacesManager::GetSurfaceFrameLayer(int64_t view_id) {
+  auto iter = frame_layers_.find(view_id);
+  if (iter != frame_layers_.end()) {
+    return iter->second.get();
+  }
+  return nullptr;
+}
+
+AndroidSurface* AndroidSurfacesManager::GetFirstActiveSurface() const {
+  if (frame_layers_.empty()) {
+    return nullptr;
+  }
+  auto view_id = frame_layers_.begin()->first;
+  return GetSurface(view_id);
+}
+
+bool AndroidSurfacesManager::isRenderingAPIOpenGL() const {
+  bool is_android_rendering_api_opengl = false;
+  auto android_rendering_api = android_context_->RenderingApi();
+  switch (android_rendering_api) {
+    case AndroidRenderingAPI::kSkiaOpenGLES:
+    case AndroidRenderingAPI::kImpellerOpenGLES:
+      is_android_rendering_api_opengl = true;
+    case AndroidRenderingAPI::kImpellerVulkan:
+    case AndroidRenderingAPI::kSoftware:
+    case AndroidRenderingAPI::kImpellerAutoselect:
+        break;
+  }
+  return is_android_rendering_api_opengl;
+}
 
 AndroidSurfaceFactoryImpl::AndroidSurfaceFactoryImpl(
     const std::shared_ptr<AndroidContext>& context,
@@ -147,13 +488,15 @@ PlatformViewAndroid::PlatformViewAndroid(
               task_runners,
               rendering_api,
               delegate.OnPlatformViewGetSettings().enable_opengl_gpu_tracing,
-              CreateContextSettings(delegate.OnPlatformViewGetSettings()))) {}
+              CreateContextSettings(delegate.OnPlatformViewGetSettings())),
+          rendering_api) {}
 
 PlatformViewAndroid::PlatformViewAndroid(
     PlatformView::Delegate& delegate,
     const flutter::TaskRunners& task_runners,
     const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-    const std::shared_ptr<flutter::AndroidContext>& android_context)
+    const std::shared_ptr<flutter::AndroidContext>& android_context,
+    AndroidRenderingAPI rendering_api)
     : PlatformView(delegate, task_runners),
       jni_facade_(jni_facade),
       android_context_(android_context),
@@ -168,15 +511,25 @@ PlatformViewAndroid::PlatformViewAndroid(
         delegate.OnPlatformViewGetSettings()
             .impeller_enable_lazy_shader_mode  //
     );
-    android_surface_ = surface_factory_->CreateSurface();
+    auto android_surface = surface_factory_->CreateSurface();
     android_meets_hcpp_criteria_ =
         delegate.OnPlatformViewGetSettings().enable_surface_control &&
         android_get_device_api_level() >= kMinAPILevelHCPP &&
         delegate.OnPlatformViewGetSettings().enable_impeller;
-    FML_CHECK(android_surface_ && android_surface_->IsValid())
+    FML_CHECK(android_surface && android_surface->IsValid())
         << "Could not create an OpenGL, Vulkan or Software surface to set "
            "up "
            "rendering.";
+
+
+
+    // android_multiple_surfaces_ = std::make_unique<AndroidMultipleSurfacesImpeller>(surface_factory_);
+
+    bool is_impeller_auto_select = rendering_api == AndroidRenderingAPI::kImpellerAutoselect;
+    android_surfaces_manager_ = std::make_unique<AndroidSurfacesManager>(android_context_,
+                                                                         is_impeller_auto_select);
+    android_surfaces_manager_->AddSurface(kFlutterImplicitViewId, std::move(android_surface));
+
   }
 }
 
@@ -201,6 +554,78 @@ void PlatformViewAndroid::NotifyCreated(
   PlatformView::NotifyCreated();
 }
 
+void PlatformViewAndroid::NotifyCreated(
+    int64_t view_id,
+    fml::RefPtr<AndroidNativeWindow> native_window) {
+  // if (view_id != kFlutterImplicitViewId)
+   {
+      auto android_surface = surface_factory_->CreateSurface();
+      android_surfaces_manager_->AddSurface(view_id, std::move(android_surface));
+  }
+
+  auto android_surface = android_surfaces_manager_->GetSurface(view_id);
+  if (android_surface){
+    InstallFirstFrameCallback();
+    AndroidSurfacesManager* surfaces_manager_ptr = android_surfaces_manager_.get();
+    fml::AutoResetWaitableEvent latch;
+    fml::TaskRunner::RunNowOrPostTask(
+        task_runners_.GetRasterTaskRunner(),
+        [&latch,
+         surface = android_surface,
+         native_window = std::move(native_window),
+         jni_facade = jni_facade_]() {
+          // if (view_id != kFlutterImplicitViewId) {
+            surface->SetupImpellerSurface();
+          // }
+          surface->SetNativeWindow(native_window, jni_facade);
+
+          // surfaces_manager_ptr->CreateSurfaceFrameLayer(view_id);
+
+
+          latch.Signal();
+        });
+    latch.Wait();
+
+  }
+
+  {
+    if (active_surface_frame_layers_ == 0) {
+      PlatformView::NotifyCreated();
+      {
+        AndroidSurfacesManager* surfaces_manager_ptr = android_surfaces_manager_.get();
+        fml::AutoResetWaitableEvent latch;
+        fml::TaskRunner::RunNowOrPostTask(
+            task_runners_.GetRasterTaskRunner(),
+            [&latch,
+            surfaces_manager_ptr,
+            view_id]() {
+              surfaces_manager_ptr->CreateSurfaceFrameLayer(view_id);
+              latch.Signal();
+            });
+        latch.Wait();
+      }
+    } else {
+      {
+        AndroidSurfacesManager* surfaces_manager_ptr = android_surfaces_manager_.get();
+        fml::AutoResetWaitableEvent latch;
+        fml::TaskRunner::RunNowOrPostTask(
+            task_runners_.GetRasterTaskRunner(),
+            [&latch,
+            surfaces_manager_ptr,
+            view_id]() {
+              surfaces_manager_ptr->CreateSurfaceFrameLayer(view_id);
+              latch.Signal();
+            });
+        latch.Wait();
+      }
+      PlatformView::ScheduleFrame();
+      FML_LOG(ERROR) << "PlatformView::ScheduleFrame();, view_id: " << view_id;
+    }
+  }
+
+  active_surface_frame_layers_++;
+}
+
 void PlatformViewAndroid::NotifySurfaceWindowChanged(
     fml::RefPtr<AndroidNativeWindow> native_window) {
   if (android_surface_) {
@@ -219,15 +644,63 @@ void PlatformViewAndroid::NotifySurfaceWindowChanged(
   PlatformView::ScheduleFrame();
 }
 
-void PlatformViewAndroid::NotifyDestroyed() {
-  PlatformView::NotifyDestroyed();
+void PlatformViewAndroid::NotifySurfaceWindowChanged(
+      int64_t view_id,
+      fml::RefPtr<AndroidNativeWindow> native_window) {
+auto *android_surface = android_surfaces_manager_->GetSurface(view_id);
+  if (android_surface) {
 
-  if (android_surface_) {
     fml::AutoResetWaitableEvent latch;
     fml::TaskRunner::RunNowOrPostTask(
         task_runners_.GetRasterTaskRunner(),
-        [&latch, surface = android_surface_.get()]() {
+        [&latch, surface = android_surface,
+         native_window = std::move(native_window), jni_facade = jni_facade_]() {
           surface->TeardownOnScreenContext();
+          surface->SetNativeWindow(native_window, jni_facade);
+          latch.Signal();
+        });
+    latch.Wait();
+  }
+
+  PlatformView::ScheduleFrame();
+  }
+
+void PlatformViewAndroid::NotifyDestroyed() {
+  // PlatformView::NotifyDestroyed();
+
+  // if (android_surface_) {
+  //   fml::AutoResetWaitableEvent latch;
+  //   fml::TaskRunner::RunNowOrPostTask(
+  //       task_runners_.GetRasterTaskRunner(),
+  //       [&latch, surface = android_surface_.get()]() {
+  //         surface->TeardownOnScreenContext();
+  //         latch.Signal();
+  //       });
+  //   latch.Wait();
+  // }
+}
+
+void PlatformViewAndroid::NotifyDestroyed(long view_id) {
+  if (active_surface_frame_layers_ == 0) {
+    return;
+  }
+  active_surface_frame_layers_--;
+  {
+    if (active_surface_frame_layers_ == 0) {
+      FML_LOG(ERROR) << "PlatformViewAndroid::NotifyDestroyed, kFlutterImplicitViewId view_id: " << view_id;
+      PlatformView::NotifyDestroyed();
+    }
+  }
+
+  auto *android_surface = android_surfaces_manager_->GetSurface(view_id);
+  if (android_surface){
+    AndroidSurfacesManager* surfaces_manager_ptr = android_surfaces_manager_.get();
+    fml::AutoResetWaitableEvent latch;
+    fml::TaskRunner::RunNowOrPostTask(
+        task_runners_.GetRasterTaskRunner(),
+        [&latch, surface = android_surface, surfaces_manager_ptr, view_id]() {
+          surface->TeardownOnScreenContext();
+          surfaces_manager_ptr->DestroySurfaceFrameLayer(view_id);
           latch.Signal();
         });
     latch.Wait();
@@ -242,6 +715,21 @@ void PlatformViewAndroid::NotifyChanged(const DlISize& size) {
   fml::TaskRunner::RunNowOrPostTask(
       task_runners_.GetRasterTaskRunner(),  //
       [&latch, surface = android_surface_.get(), size]() {
+        surface->OnScreenSurfaceResize(size);
+        latch.Signal();
+      });
+  latch.Wait();
+}
+
+void PlatformViewAndroid::NotifyChanged(int64_t view_id,const DlISize& size) {
+    auto *android_surface = android_surfaces_manager_->GetSurface(view_id);
+    if (!android_surface) {
+    return;
+  }
+  fml::AutoResetWaitableEvent latch;
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners_.GetRasterTaskRunner(),  //
+      [&latch, surface = android_surface, size]() {
         surface->OnScreenSurfaceResize(size);
         latch.Signal();
       });
@@ -420,38 +908,47 @@ std::unique_ptr<VsyncWaiter> PlatformViewAndroid::CreateVSyncWaiter() {
 
 // |PlatformView|
 std::unique_ptr<Surface> PlatformViewAndroid::CreateRenderingSurface() {
-  if (!android_surface_) {
+  if (!android_surfaces_manager_) {
     return nullptr;
   }
-  return android_surface_->CreateGPUSurface(
+  return android_surfaces_manager_->CreateGPUSurface(
       android_context_->GetMainSkiaContext().get());
 }
 
 // |PlatformView|
 std::shared_ptr<ExternalViewEmbedder>
 PlatformViewAndroid::CreateExternalViewEmbedder() {
+  AndroidSurfacesManager* surfaces_manager_ptr = android_surfaces_manager_.get();
   return std::make_shared<AndroidExternalViewEmbedderWrapper>(
       android_meets_hcpp_criteria_, *android_context_, jni_facade_,
-      surface_factory_, task_runners_);
+      surface_factory_, task_runners_,
+      [surfaces_manager_ptr](int64_t view_id)  {
+        return surfaces_manager_ptr->GetSurfaceFrameLayer(view_id);
+      });
 }
 
 // |PlatformView|
 std::unique_ptr<SnapshotSurfaceProducer>
 PlatformViewAndroid::CreateSnapshotSurfaceProducer() {
-  if (!android_surface_) {
-    return nullptr;
-  }
-  return std::make_unique<AndroidSnapshotSurfaceProducer>(*android_surface_);
+  return std::make_unique<AndroidSnapshotSurfaceProducer>([android_surfaces_manager = android_surfaces_manager_.get()]() -> AndroidSurface& {
+     auto *android_surface = android_surfaces_manager->GetSurface(kFlutterImplicitViewId);
+     if (!android_surface) {
+       // This should not happen in normal operation
+       FML_LOG(FATAL) << "Failed to get android surface for implicit view";
+     }
+     return *android_surface;  // Dereference pointer to get reference
+  });
 }
 
 // |PlatformView|
 sk_sp<GrDirectContext> PlatformViewAndroid::CreateResourceContext() const {
-  if (!android_surface_) {
+  auto *android_surface =  android_surfaces_manager_->GetSurface(kFlutterImplicitViewId);
+  if (!android_surface) {
     return nullptr;
   }
 #if !SLIMPELLER
   sk_sp<GrDirectContext> resource_context;
-  if (android_surface_->ResourceContextMakeCurrent()) {
+  if (android_surface->ResourceContextMakeCurrent()) {
     // TODO(chinmaygarde): Currently, this code depends on the fact that only
     // the OpenGL surface will be able to make a resource context current. If
     // this changes, this assumption breaks. Handle the same.
@@ -463,23 +960,25 @@ sk_sp<GrDirectContext> PlatformViewAndroid::CreateResourceContext() const {
   }
   return resource_context;
 #else
-  android_surface_->ResourceContextMakeCurrent();
+  android_surface->ResourceContextMakeCurrent();
   return nullptr;
 #endif  //  !SLIMPELLER
 }
 
 // |PlatformView|
 void PlatformViewAndroid::ReleaseResourceContext() const {
-  if (android_surface_) {
-    android_surface_->ResourceContextClearCurrent();
+  auto *android_surface =  android_surfaces_manager_->GetSurface(kFlutterImplicitViewId);
+  if (android_surface) {
+    android_surface->ResourceContextClearCurrent();
   }
 }
 
 // |PlatformView|
 std::shared_ptr<impeller::Context> PlatformViewAndroid::GetImpellerContext()
     const {
-  if (android_surface_) {
-    return android_surface_->GetImpellerContext();
+      auto *android_surface =  android_surfaces_manager_->GetSurface(kFlutterImplicitViewId);
+  if (android_surface) {
+    return android_surface->GetImpellerContext();
   }
   return android_context_->GetImpellerContext();
 }
@@ -562,7 +1061,8 @@ bool PlatformViewAndroid::IsSurfaceControlEnabled() const {
 
 void PlatformViewAndroid::SetupImpellerContext() {
   android_context_->SetupImpellerContext();
-  android_surface_->SetupImpellerSurface();
+  // auto *android_surface = android_surfaces_manager_->GetSurface(kFlutterImplicitViewId);
+  // android_surface->SetupImpellerSurface();
 }
 
 }  // namespace flutter

@@ -65,6 +65,8 @@ public class FlutterImageView extends View implements RenderSurface {
   /** Whether the view is attached to the Flutter render. */
   private boolean isAttachedToFlutterRenderer = false;
 
+  private long viewId = -1;
+
   /**
    * Constructs a {@code FlutterImageView} with an {@link android.media.ImageReader} that provides
    * the Flutter UI.
@@ -140,7 +142,7 @@ public class FlutterImageView extends View implements RenderSurface {
   public void attachToRenderer(@NonNull FlutterRenderer flutterRenderer) {
     switch (kind) {
       case background:
-        flutterRenderer.swapSurface(imageReader.getSurface());
+        flutterRenderer.swapSurface(getViewId(), imageReader.getSurface());
         break;
       case overlay:
         // Do nothing since the attachment is done by the handler of
@@ -291,7 +293,20 @@ public class FlutterImageView extends View implements RenderSurface {
       resizeIfNeeded(width, height);
       // Bind native window to the new surface, and create a new onscreen surface
       // with the new size in the native side.
-      flutterRenderer.swapSurface(imageReader.getSurface());
+      flutterRenderer.swapSurface(getViewId(), imageReader.getSurface());
     }
+  }
+
+  public void setViewId(long viewId) {
+    this.viewId = viewId;
+  }
+
+  private long getViewId() {
+    if (viewId == -1) {
+      throw new IllegalStateException(
+              "setViewId must be called first.");
+    }
+
+    return viewId;
   }
 }
