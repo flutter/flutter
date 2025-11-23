@@ -29,6 +29,10 @@ void main() {
     expect(FlutterVersion.engineRevision, const String.fromEnvironment('FLUTTER_ENGINE_REVISION'));
   });
 
+  test('FlutterVersion.contentHash contains the current content hash', () {
+    expect(FlutterVersion.contentHash, const String.fromEnvironment('FLUTTER_CONTENT_HASH'));
+  });
+
   test('FlutterVersion.dartVersion contains the current Dart version', () {
     expect(FlutterVersion.dartVersion, const String.fromEnvironment('FLUTTER_DART_VERSION'));
   });
