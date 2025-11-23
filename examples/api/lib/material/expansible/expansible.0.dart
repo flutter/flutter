@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 
 void main() => runApp(const ExpansibleExampleApp());
 
+/// An application that shows an example of how to use [Expansible].
 class ExpansibleExampleApp extends StatelessWidget {
   const ExpansibleExampleApp({super.key});
 
@@ -22,6 +23,7 @@ class ExpansibleExampleApp extends StatelessWidget {
   }
 }
 
+/// A StatefulWidget that displays a list of expandable FAQ items.
 class ExpansibleExample extends StatefulWidget {
   const ExpansibleExample({super.key});
 
@@ -30,6 +32,9 @@ class ExpansibleExample extends StatefulWidget {
 }
 
 class _ExpansibleExampleState extends State<ExpansibleExample> {
+  static final Animatable<double> _halfTween =
+      Tween<double>(begin: 0.0, end: 0.5);
+
   late final List<_FaqItem> _items;
 
   @override
@@ -98,7 +103,12 @@ class _ExpansibleExampleState extends State<ExpansibleExample> {
             padding: const EdgeInsets.all(16.0),
             decoration: BoxDecoration(
               color: Colors.blue.shade50,
-              borderRadius: BorderRadius.circular(8.0),
+              borderRadius: controller.isExpanded
+                  ? const BorderRadius.only(
+                      topLeft: Radius.circular(8.0),
+                      topRight: Radius.circular(8.0),
+                    )
+                  : BorderRadius.circular(8.0),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -110,7 +120,7 @@ class _ExpansibleExampleState extends State<ExpansibleExample> {
                   ),
                 ),
                 RotationTransition(
-                  turns: Tween<double>(begin: 0.0, end: 0.5).animate(animation),
+                  turns: _halfTween.animate(animation),
                   child: const Icon(Icons.expand_more),
                 ),
               ],
