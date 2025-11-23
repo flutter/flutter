@@ -51,4 +51,65 @@ class MyHomePage extends StatelessWidget {
       ),
     );
   }
+}import 'package:flutter/material.dart';
+@override
+Widget build(BuildContext context) {
+return MaterialApp(
+debugShowCheckedModeBanner: false,
+title: 'Flutter Demo',
+theme: ThemeData(
+colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+useMaterial3: true,
+),
+home: const HomePage(),
+);
+}
+}
+
+class HomePage extends StatelessWidget {
+const HomePage({super.key});
+
+@override
+Widget build(BuildContext context) {
+return Scaffold(
+appBar: AppBar(
+title: const Text('Menu Principal'),
+backgroundColor: Colors.deepPurple.shade200,
+),
+drawer: Drawer(
+child: ListView(
+children: [
+const DrawerHeader(
+child: Text('Navegação', style: TextStyle(fontSize: 22)),
+),
+ListTile(
+leading: const Icon(Icons.pages),
+title: const Text('Componentes'),
+onTap: () {
+Navigator.pop(context);
+Navigator.push(
+context,
+MaterialPageRoute(builder: (_) => const ComponentsPage()),
+);
+},
+),
+ListTile(
+leading: const Icon(Icons.person),
+title: const Text('Alunos'),
+onTap: () {
+Navigator.pop(context);
+Navigator.push(
+context,
+MaterialPageRoute(builder: (_) => const StudentsPage()),
+);
+},
+),
+],
+),
+),
+body: const Center(
+child: Text("Selecione uma opção no menu"),
+),
+);
+}
 }
