@@ -8,7 +8,6 @@
 /// @docImport 'widget_tester.dart';
 library;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
