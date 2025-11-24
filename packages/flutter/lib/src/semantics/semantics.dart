@@ -2719,7 +2719,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   }
 
   // null means this node is not a traversal child and the transform is
-  // the same as [transform].
+  // the same as [transform] (or kIsWeb is true).
   Matrix4? _traversalChildTransform;
   // null represents the identity transform.
   Matrix4? get _traversalTransform {
