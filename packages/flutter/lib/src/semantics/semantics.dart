@@ -3929,11 +3929,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
       }
     }
 
-    if (_isTraversalChild) {
-      traversalParent = owner!._traversalParentNodes[traversalChildIdentifier];
-      transform = _computeTraversalTransform(parent: traversalParent!, child: this);
-    }
-
     int traversalParentId = -1;
     if (data.traversalChildIdentifier case final Object identifier?) {
       if (owner!._traversalParentNodes[identifier] case final SemanticsNode parentNode?) {
