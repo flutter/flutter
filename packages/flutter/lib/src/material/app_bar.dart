@@ -448,7 +448,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// The elevation that will be used if this app bar has something
   /// scrolled underneath it.
   ///
-  /// If non-null then the ambient [AppBarThemeData.scrolledUnderElevation]
+  /// If this property is null, then the ambient [AppBarThemeData.scrolledUnderElevation]
   /// is used. If that is also null then [elevation] is used.
   ///
   /// The value must be non-negative.
