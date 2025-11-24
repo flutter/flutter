@@ -14,16 +14,16 @@ import 'package:flutter/widget_previews.dart';
 
 import 'package:stack_trace/stack_trace.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'dtd/editor_service.dart';
-import 'theme/ide_theme.dart';
-import 'theme/theme.dart';
+import 'package:widget_preview_scaffold/src/dtd/editor_service.dart';
+import 'package:widget_preview_scaffold/src/theme/ide_theme.dart';
+import 'package:widget_preview_scaffold/src/theme/theme.dart';
 
-import 'controls.dart';
-import 'generated_preview.dart';
-import 'utils.dart';
-import 'widget_preview.dart';
-import 'widget_preview_inspector_service.dart';
-import 'widget_preview_scaffold_controller.dart';
+import 'package:widget_preview_scaffold/src/controls.dart';
+import 'package:widget_preview_scaffold/src/generated_preview.dart';
+import 'package:widget_preview_scaffold/src/utils.dart';
+import 'package:widget_preview_scaffold/src/widget_preview.dart';
+import 'package:widget_preview_scaffold/src/widget_preview_inspector_service.dart';
+import 'package:widget_preview_scaffold/src/widget_preview_scaffold_controller.dart';
 
 /// Displayed when an unhandled exception is thrown when initializing the widget
 /// tree for a preview (i.e., before the build phase).

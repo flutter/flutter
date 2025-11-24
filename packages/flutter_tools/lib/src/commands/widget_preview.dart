@@ -263,6 +263,14 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   /// The currently running instance of the widget preview scaffold.
   ResidentRunner? _widgetPreviewApp;
 
+  /// The location of the widget_preview_scaffold for the current execution of the command.
+  ///
+  /// This is only meant for testing as there's no simple mapping from the target project to the
+  /// scaffold project.
+  // TODO(bkonyi): remove once https://github.com/flutter/flutter/issues/179036 is resolved.
+  @visibleForTesting
+  static late Directory widgetPreviewScaffold;
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     assert(_logger is WidgetPreviewMachineAwareLogger);
@@ -272,7 +280,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     logger.sendInitializingEvent();
 
     final String? customPreviewScaffoldOutput = stringArg(kWidgetPreviewScaffoldOutputDir);
-    final Directory widgetPreviewScaffold = customPreviewScaffoldOutput != null
+    widgetPreviewScaffold = customPreviewScaffoldOutput != null
         ? fs.directory(customPreviewScaffoldOutput)
         : rootProject.widgetPreviewScaffold;
 
@@ -498,6 +506,15 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           platform: platform,
           outputPreferences: globals.outputPreferences,
           systemClock: globals.systemClock,
+          // Explicitly provide the project root path rather than relying on the current directory
+          // as the current directory exists within $TMP. At least on MacOS, when setting the
+          // current directory to the widget_preview_scaffold project created under
+          // `/var/folders/...`, the underlying chdir call actually changes the directory to
+          // `/private/var/folders/...`. These directories are identical, but confuse the package
+          // config resolution logic.
+          // TODO(bkonyi): consider removing if we stop placing the scaffold in $TMP.
+          // See https://github.com/flutter/flutter/issues/179036
+          projectRootPath: widgetPreviewScaffoldProject.directory.absolute.path,
         );
         unawaited(_widgetPreviewApp!.run(appStartedCompleter: appStarted));
         await appStarted.future;

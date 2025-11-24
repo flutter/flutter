@@ -1123,7 +1123,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     processManager: globals.processManager,
     platform: globals.platform,
     analytics: globals.analytics,
-    projectDir: globals.fs.currentDirectory,
+    projectDir: globals.fs.directory(projectRootPath),
     packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
     generateDartPluginRegistry: generateDartPluginRegistry,
     defines: <String, String>{
