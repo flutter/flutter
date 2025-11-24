@@ -2720,7 +2720,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
   // null means this node is not a traversal child and the transform is
   // the same as [transform].
-  Matrix4? _traversalTransform;
+  Matrix4? _traversalChildTransform;
+  // null represents the identity transform.
+  Matrix4? get _traversalTransform {
+    return kIsWeb ? transform : (_traversalChildTransform ?? transform);
+  }
 
   /// The bounding box for this node in its coordinate system.
   Rect get rect => _rect;
@@ -3938,15 +3942,12 @@ class SemanticsNode with DiagnosticableTreeMixin {
     final Object? childIdentifier = traversalChildIdentifier;
     if (childIdentifier != null) {
       traversalParent = owner!._traversalParentNodes[childIdentifier];
-    }
-    final Matrix4 traversalTransform;
-    if (!kIsWeb && childIdentifier != null) {
-      traversalTransform = _traversalTransform = _computeTraversalTransform(
-        parent: traversalParent!,
-        child: this,
-      );
-    } else {
-      traversalTransform = data.transform ?? _kIdentityTransform;
+      if (!kIsWeb) {
+        _traversalChildTransform = _computeTraversalTransform(
+          parent: traversalParent!,
+          child: this,
+        );
+      }
     }
 
     builder.updateNode(
@@ -3977,7 +3978,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       scrollPosition: data.scrollPosition ?? double.nan,
       scrollExtentMax: data.scrollExtentMax ?? double.nan,
       scrollExtentMin: data.scrollExtentMin ?? double.nan,
-      transform: traversalTransform.storage,
+      transform: (_traversalTransform ?? _kIdentityTransform).storage,
       traversalParent: traversalParentId,
       hitTestTransform: (data.transform ?? _kIdentityTransform).storage,
       childrenInTraversalOrder: childrenInTraversalOrder,
@@ -4535,12 +4536,7 @@ class _SemanticsSortGroup implements Comparable<_SemanticsSortGroup> {
 
 /// Converts `point` to the `node`'s parent's coordinate system.
 Offset _pointInParentCoordinates(SemanticsNode node, Offset point) {
-  final Matrix4? traversalTransform;
-  if (kIsWeb) {
-    traversalTransform = node.transform;
-  } else {
-    traversalTransform = node._traversalTransform ?? node.transform;
-  }
+  final Matrix4? traversalTransform = node._traversalTransform;
   if (traversalTransform == null) {
     return point;
   }
