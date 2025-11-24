@@ -3477,6 +3477,43 @@ void main() {
   );
 
   testUsingContext(
+    'can create a darwin plugin project',
+    () async {
+      await _createAndAnalyzeProject(
+        projectDir,
+        <String>['--template=plugin', '--platforms=darwin'],
+        <String>[
+          'pubspec.yaml',
+          'darwin/flutter_project.podspec',
+          'darwin/Classes/FlutterProjectPlugin.swift',
+          'example/ios/Runner.xcworkspace',
+          'example/macos/Runner.xcworkspace',
+        ],
+        unexpectedPaths: <String>['ios/flutter_project.podspec', 'macos/flutter_project.podspec'],
+      );
+      final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
+      final pubspec = Pubspec.parse(rawPubspec);
+      final platforms = (pubspec.flutter!['plugin'] as YamlMap)['platforms'] as YamlMap;
+
+      expect(platforms, contains('ios'));
+      expect(platforms, contains('macos'));
+      expect((platforms['ios'] as YamlMap)['sharedDarwinSource'], true);
+      expect((platforms['macos'] as YamlMap)['sharedDarwinSource'], true);
+    },
+    overrides: {
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: mockStdio,
+      ),
+    },
+  );
+
+  testUsingContext(
     'creates a plugin with shared darwin implementation using Swift Package Manager',
     () async {
       final command = CreateCommand();

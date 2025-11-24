@@ -98,9 +98,6 @@ flutter:
 {{#ios}}
       ios:
         pluginClass: {{pluginClass}}
-{{#sharedDarwinSource}}
-        sharedDarwinSource: true
-{{/sharedDarwinSource}}
 {{/ios}}
 {{#linux}}
       linux:
@@ -109,10 +106,15 @@ flutter:
 {{#macos}}
       macos:
         pluginClass: {{pluginClass}}
-{{#sharedDarwinSource}}
-        sharedDarwinSource: true
-{{/sharedDarwinSource}}
 {{/macos}}
+{{#darwin}}
+      ios:
+        pluginClass: {{pluginClass}}
+        sharedDarwinSource: true
+      macos:
+        pluginClass: {{pluginClass}}
+        sharedDarwinSource: true
+{{/darwin}}
 {{#windows}}
       windows:
         pluginClass: {{pluginClass}}CApi

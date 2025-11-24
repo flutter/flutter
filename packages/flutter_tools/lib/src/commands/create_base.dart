@@ -499,8 +499,12 @@ mixin CreateBase on FlutterCommand {
       platformsForMigrateConfig.add(SupportedPlatform.macos);
     }
     if (darwinPlatform) {
-      platformsForMigrateConfig.add(SupportedPlatform.ios);
-      platformsForMigrateConfig.add(SupportedPlatform.macos);
+      if (!platformsForMigrateConfig.contains(SupportedPlatform.ios)) {
+        platformsForMigrateConfig.add(SupportedPlatform.ios);
+      }
+      if (!platformsForMigrateConfig.contains(SupportedPlatform.macos)) {
+        platformsForMigrateConfig.add(SupportedPlatform.macos);
+      }
     }
     if (webPlatform) {
       platformsForMigrateConfig.add(SupportedPlatform.web);

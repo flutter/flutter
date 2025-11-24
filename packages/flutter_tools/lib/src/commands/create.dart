@@ -727,6 +727,15 @@ Your $application code is in $relativeAppMain.
 
     final projectName = templateContext['projectName'] as String?;
     final bool includeDarwin = templateContext['darwin'] as bool? ?? false;
+    final bool originalIos = templateContext['ios'] as bool? ?? false;
+    final bool originalMacos = templateContext['macos'] as bool? ?? false;
+    if (includeDarwin) {
+      // Temporarily disable ios/macos for the plugin generation
+      // so we don't get ios/ and macos/ directories in the plugin root.
+      templateContext['ios'] = false;
+      templateContext['macos'] = false;
+    }
+
     final templates = <String>['plugin', 'plugin_shared'];
 
     final bool useSwiftPackageManager =
@@ -734,9 +743,10 @@ Your $application code is in $relativeAppMain.
         featureFlags.isSwiftPackageManagerEnabled;
 
     if (useSwiftPackageManager) {
-      templates.add('plugin_swift_package_manager');
       if (includeDarwin) {
         templates.add('plugin_darwin_spm');
+      } else {
+        templates.add('plugin_swift_package_manager');
       }
       templateContext['swiftLibraryName'] = projectName?.replaceAll('_', '-');
       templateContext['swiftToolsVersion'] = minimumSwiftToolchainVersion;
@@ -747,9 +757,10 @@ Your $application code is in $relativeAppMain.
           .supportedPackagePlatform
           .format();
     } else {
-      templates.add('plugin_cocoapods');
       if (includeDarwin) {
         templates.add('plugin_darwin_cocoapods');
+      } else {
+        templates.add('plugin_cocoapods');
       }
     }
     generatedCount += await renderMerged(
@@ -759,6 +770,9 @@ Your $application code is in $relativeAppMain.
       overwrite: overwrite,
       printStatusWhenWriting: printStatusWhenWriting,
     );
+
+    templateContext['ios'] = originalIos;
+    templateContext['macos'] = originalMacos;
 
     final FlutterProject project = FlutterProject.fromDirectory(directory);
     final generateAndroid = templateContext['android'] == true;
