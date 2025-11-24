@@ -500,9 +500,20 @@ end
     }
     final String versionString = target == 'ios'
         ? "s.platform = :ios, '13.0'"
-        : "s.platform = :osx, '10.15'";
+        : "s.platform = :osx, '10.11'";
+    final String alternateVersionString = target == 'ios'
+        ? "s.ios.deployment_target = '13.0'"
+        : "s.osx.deployment_target = '10.15'";
+
     String podspecContent = podspec.readAsStringSync();
-    if (!podspecContent.contains(versionString)) {
+    String? foundVersionString;
+    if (podspecContent.contains(versionString)) {
+      foundVersionString = versionString;
+    } else if (podspecContent.contains(alternateVersionString)) {
+      foundVersionString = alternateVersionString;
+    }
+
+    if (foundVersionString == null) {
       throw TaskResult.failure(
         'Update this test to match plugin minimum $target deployment version',
       );
@@ -520,7 +531,7 @@ s.dependency 'AppAuth', '1.6.0'
 ''';
 
     podspecContent = podspecContent.replaceFirst(
-      versionString,
+      foundVersionString,
       target == 'ios' ? iosContent : macosContent,
     );
     podspec.writeAsStringSync(podspecContent, flush: true);
