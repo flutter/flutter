@@ -3823,50 +3823,43 @@ class SemanticsNode with DiagnosticableTreeMixin {
   static final Int32List _kEmptyCustomSemanticsActionsList = Int32List(0);
   static final Matrix4 _kIdentityTransform = Matrix4.identity();
 
-  static Matrix4 _computeChildTransform({
-    required Matrix4? parentTransform,
-    required Rect? parentPaintClipRect,
-    required Rect? parentSemanticsClipRect,
+  static Matrix4 _computeTraversalTransform({
     required SemanticsNode parent,
     required SemanticsNode child,
   }) {
-    final Matrix4 transform = parentTransform?.clone() ?? Matrix4.identity();
+    final Matrix4 traversalTransform = Matrix4.identity();
     Matrix4? parentToCommonAncestorTransform;
-    Matrix4? childToCommonAncestorTransform;
-    SemanticsNode childSemanticsNode = child;
-    SemanticsNode parentSemanticsNode = parent;
+    SemanticsNode fromNode = child;
+    SemanticsNode toNode = parent;
 
     // Find the common ancestor.
-    while (!identical(childSemanticsNode, parentSemanticsNode)) {
-      final int fromDepth = childSemanticsNode.depth;
-      final int toDepth = parentSemanticsNode.depth;
+    while (!identical(fromNode, toNode)) {
+      final int fromDepth = fromNode.depth;
+      final int toDepth = toNode.depth;
 
       if (fromDepth >= toDepth) {
-        childToCommonAncestorTransform ??= Matrix4.identity();
-        childToCommonAncestorTransform.multiply(childSemanticsNode.transform ?? Matrix4.identity());
-        childSemanticsNode = childSemanticsNode.traversalParent!;
+        if (fromNode.transform case final Matrix4 transform?) {
+          traversalTransform.multiply(transform);
+        }
+        fromNode = fromNode.parent!;
       }
       if (fromDepth <= toDepth) {
         parentToCommonAncestorTransform ??= Matrix4.identity();
-        parentToCommonAncestorTransform.multiply(
-          parentSemanticsNode.transform ?? Matrix4.identity(),
-        );
-        if (parentSemanticsNode.traversalParent == null) {
-          break;
+        if (toNode.transform case final Matrix4 transform?) {
+          parentToCommonAncestorTransform.multiply(transform);
         }
-        parentSemanticsNode = parentSemanticsNode.traversalParent!;
+        toNode = toNode.parent!;
       }
     }
 
     if (parentToCommonAncestorTransform != null) {
       if (parentToCommonAncestorTransform.invert() != 0) {
-        transform.multiply(parentToCommonAncestorTransform);
+        traversalTransform.multiply(parentToCommonAncestorTransform);
       } else {
-        transform.setZero();
+        traversalTransform.setZero();
       }
     }
-
-    return transform;
+    return traversalTransform;
   }
 
   Int32List _childrenIdInTraversalOrder() {
@@ -3944,11 +3937,13 @@ class SemanticsNode with DiagnosticableTreeMixin {
       }
     }
     final Matrix4 traversalTransform;
-    if (kIsWeb) {
-      traversalTransform = data.transform ?? _kIdentityTransform;
+    if (traversalChildIdentifier case final Object childIdentifier? when !kIsWeb) {
+      _traversalTransform = traversalTransform = _computeTraversalTransform(
+        parent: (traversalParent = owner!._traversalParentNodes[childIdentifier])!,
+        child: this,
+      );
     } else {
-      traversalParent = owner!._traversalParentNodes[traversalChildIdentifier];
-      traversalTransform = _traversalTransform ?? data.transform ?? _kIdentityTransform;
+      traversalTransform = data.transform ?? _kIdentityTransform;
     }
 
     builder.updateNode(
@@ -4063,16 +4058,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
         for (final SemanticsNode node in traversalChildren) {
           if (node.attached) {
             updatedChildren.add(node);
-
-            if (!kIsWeb) {
-              node._traversalTransform = _computeChildTransform(
-                parentPaintClipRect: parentPaintClipRect,
-                parentSemanticsClipRect: parentSemanticsClipRect,
-                parentTransform: null,
-                parent: this,
-                child: node,
-              );
-            }
           }
         }
       }
