@@ -14,10 +14,10 @@ class RawScrollbarExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      // Overridden scroll behavior for sample clarity - does not build 
-      // a default Scrollbar (as it does on some platforms) because 
+      // Overridden scroll behavior for sample clarity - does not build
+      // a default Scrollbar (as it does on some platforms) because
       // this sample demonstrates two RawScrollbars interacting.
-      scrollBehavior: const NoScrollbarBehavior(),
+      scrollBehavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
       home: Scaffold(
         appBar: AppBar(title: const Text('RawScrollbar Sample')),
         body: const Center(child: RawScrollbarExample()),
