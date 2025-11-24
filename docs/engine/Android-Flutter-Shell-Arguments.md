@@ -25,6 +25,15 @@ Use the manifest when:
     `src/release/AndroidManifest.xml` (or per-flavor manifests) to tailor flags
     per variant.
 
+Use the command line when:
+
+- You want to quickly experiment with a flag for a single run of your app.
+- You need to override a flag that is already set in the manifest temporarily for debugging
+  or testing purposes.
+
+**Note: If a flag is specified both on the command line and in the manifest,
+the command-line value takes precedence at runtime.**
+
 See below for details on using each method.
 
 ## How to set engine flags from the command line
@@ -45,9 +54,6 @@ Notes:
     tool forwards them in that form to the Android embedding.
 - If you wish to statically set flags for your application, setting them via
     the manifest is recommended.
-
-**Note: If a flag is specified both on the command line and in the manifest,
-the command-line value takes precedence at runtime.**
 
 ## How to set engine flags in the manifest
 
@@ -86,7 +92,7 @@ Set the `--enable-flutter-gpu` flag:
 />
 ```
 
-### Release-mode restrictions
+## Release-mode restrictions
 
 - Some flags are not allowed in release mode. The Android embedding enforces
     this policy (see `src/flutter/shell/platform/android/io/flutter/
