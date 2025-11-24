@@ -42,8 +42,8 @@ public class FlutterLoader {
   private static final String TAG = "FlutterLoader";
 
   // Flags to only be set internally by default. Match values in flutter::switches.
-  static final String SNAPSHOT_ASSET_PATH_KEY = "snapshot-asset-path";
-  static final String AOT_VMSERVICE_SHARED_LIBRARY_NAME = "aot-vmservice-shared-library-name";
+  private static final String SNAPSHOT_ASSET_PATH_KEY = "snapshot-asset-path";
+  private static final String AOT_VMSERVICE_SHARED_LIBRARY_NAME = "aot-vmservice-shared-library-name";
 
   // Flag set for generating GeneratedPluginRegistrant.java.
   private static final String FLUTTER_EMBEDDING_KEY = "flutterEmbedding";

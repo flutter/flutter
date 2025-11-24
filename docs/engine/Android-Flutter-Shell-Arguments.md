@@ -62,9 +62,6 @@ command line flag corresponds to the metadata key
 For flags that take values, set the numeric, string, or boolean value (without
 the leading `--flag=` prefix).
 
-**Note: Manifest-provided values are overridden by command-line flags if both
-are present.**
-
 ### Examples
 
 Set the `--old-gen-heap-size=` flag to 322 MB:
@@ -92,7 +89,8 @@ Set the `--enable-flutter-gpu` flag:
 ### Release-mode restrictions
 
 - Some flags are not allowed in release mode. The Android embedding enforces
-    this policy (see `FlutterShellArgs`, which marks allowed flags
+    this policy (see `src/flutter/shell/platform/android/io/flutter/
+    embedding/engine/FlutterShellArgs`, which marks allowed flags
     with `allowedInRelease`). If a disallowed flag is set in release, it will
     be ignored.
 - If you need different behavior in release vs debug/profile mode, configure it
