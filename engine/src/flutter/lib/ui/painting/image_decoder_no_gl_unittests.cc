@@ -221,9 +221,12 @@ TEST(ImageDecoderNoGLTest, ImpellerRGBA32FDecode) {
       fml::MakeRefCounted<ImmutableBuffer>(std::move(sk_data));
 
   // 2. Create an ImageDescriptor using the private constructor.
-  SkImageInfo image_info =
-      SkImageInfo::Make(1, 1, kRGBA_F32_SkColorType, kPremul_SkAlphaType,
-                        SkColorSpace::MakeSRGB());
+  ImageDescriptor::ImageInfo image_info = {
+      .width = 1,
+      .height = 1,
+      .format = ImageDescriptor::PixelFormat::kRGBAFloat32,
+      .alpha_type = kUnpremul_SkAlphaType,
+  };
   auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
       immutable_buffer->data(), image_info, sizeof(pixel_data));
 
@@ -261,6 +264,63 @@ TEST(ImageDecoderNoGLTest, ImpellerRGBA32FDecode) {
   EXPECT_EQ(decompressed_pixel_ptr[1], 0.5f);   // G
   EXPECT_EQ(decompressed_pixel_ptr[2], 0.25f);  // B
   EXPECT_EQ(decompressed_pixel_ptr[3], 1.0f);   // A
+
+#endif  // IMPELLER_SUPPORTS_RENDERING
+}
+
+TEST(ImageDecoderNoGLTest, ImpellerR32FDecode) {
+#if defined(OS_FUCHSIA)
+  GTEST_SKIP() << "Fuchsia can't load the test fixtures.";
+#endif
+
+#if !IMPELLER_SUPPORTS_RENDERING
+  GTEST_SKIP() << "test only supported on impeller";
+#else
+  // 1. Create a 1x1 pixel with float RGBA values.
+  float pixel_data[] = {1.0f};
+  sk_sp<SkData> sk_data = SkData::MakeWithCopy(pixel_data, sizeof(pixel_data));
+  auto immutable_buffer =
+      fml::MakeRefCounted<ImmutableBuffer>(std::move(sk_data));
+
+  // 2. Create an ImageDescriptor using the private constructor.
+  ImageDescriptor::ImageInfo image_info = {
+      .width = 1,
+      .height = 1,
+      .format = ImageDescriptor::PixelFormat::kR32Float,
+      .alpha_type = kUnpremul_SkAlphaType,
+  };
+  auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
+      immutable_buffer->data(), image_info, sizeof(pixel_data));
+
+  // Set up Impeller capabilities and allocator.
+  std::shared_ptr<impeller::Capabilities> capabilities =
+      impeller::CapabilitiesBuilder()
+          .SetSupportsTextureToTextureBlits(true)
+          .Build();
+  std::shared_ptr<impeller::Allocator> allocator =
+      std::make_shared<impeller::TestImpellerAllocator>();
+
+  // 3. Call ImageDecoderImpeller::DecompressTexture with this ImageDescriptor.
+  absl::StatusOr<ImageDecoderImpeller::DecompressResult> result =
+      ImageDecoderImpeller::DecompressTexture(
+          descriptor.get(),
+          /*options=*/
+          {.target_width = 1,
+           .target_height = 1,
+           .target_format = ImageDecoder::TargetPixelFormat::kR32Float},
+          /*max_texture_size=*/{1, 1},
+          /*supports_wide_gamut=*/true, capabilities, allocator);
+
+  // 4. Assert that wide_result->image_info.format is
+  // impeller::PixelFormat::kR32G32B32A32Float.
+  ASSERT_TRUE(result.ok());
+  ASSERT_EQ(result->image_info.format, impeller::PixelFormat::kR32Float);
+
+  // Optionally, verify the pixel data if needed.
+  const float* decompressed_pixel_ptr =
+      reinterpret_cast<const float*>(result->device_buffer->OnGetContents());
+  ASSERT_NE(decompressed_pixel_ptr, nullptr);
+  EXPECT_EQ(decompressed_pixel_ptr[0], 1.0f);
 
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
