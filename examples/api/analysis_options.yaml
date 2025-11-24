@@ -1,8 +1,6 @@
 # This file is also used by dev/bots/analyze_snippet_code.dart to analyze code snippets (`{@tool snippet}` sections).
 
-# The following line activates a set of recommended lints for Flutter apps,
-# packages, and plugins designed to encourage good coding practices.
-include: package:flutter_lints/flutter.yaml
+include: ../../analysis_options.yaml #TODO(Piinks): Replace with flutter_lints after pub roll.
 
 linter:
   rules:
