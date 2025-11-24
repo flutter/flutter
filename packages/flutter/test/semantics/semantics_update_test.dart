@@ -5,6 +5,7 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -263,7 +264,7 @@ void main() {
     );
     SemanticsUpdateBuilderSpy.observations.clear();
     handle.dispose();
-  });
+  }, skip: kIsWeb); // intended: the web engine handles the transform calculation itself.
 }
 
 class SemanticsUpdateTestBinding extends AutomatedTestWidgetsFlutterBinding {
