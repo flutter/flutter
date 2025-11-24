@@ -4,8 +4,10 @@
 
 #include "impeller/entity/contents/content_context.h"
 
+#include <algorithm>
 #include <format>
 #include <memory>
+#include <typeinfo>
 #include <utility>
 
 #include "fml/trace_event.h"
@@ -125,6 +127,7 @@ class Variants : public GenericVariants {
       VALIDATION_LOG << "Failed to create default pipeline.";
       return;
     }
+    context.GetPipelineLibrary()->LogPipelineCreation(*desc);
     options.ApplyToPipelineDescriptor(*desc);
     desc_ = desc;
     if (context.GetFlags().lazy_shader_mode) {
@@ -190,6 +193,8 @@ RenderPipelineHandleT* CreateIfNeeded(
   auto variant_future = pipeline->CreateVariant(
       /*async=*/false, [&opts, variants_count = container.GetPipelineCount()](
                            PipelineDescriptor& desc) {
+        auto desc_copy = desc;
+        desc.SetBasePipeline(std::make_shared<PipelineDescriptor>(desc_copy));
         opts.ApplyToPipelineDescriptor(desc);
         desc.SetLabel(std::format("{} V#{}", desc.GetLabel(), variants_count));
       });

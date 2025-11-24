@@ -129,6 +129,10 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
 
   const std::vector<Scalar>& GetSpecializationConstants() const;
 
+  void SetBasePipeline(std::shared_ptr<PipelineDescriptor> desc);
+
+  const std::shared_ptr<PipelineDescriptor> GetBasePipeline() const;
+
  private:
   std::string label_;
   SampleCount sample_count_ = SampleCount::kCount1;
@@ -148,6 +152,7 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
   PrimitiveType primitive_type_ = PrimitiveType::kTriangle;
   PolygonMode polygon_mode_ = PolygonMode::kFill;
   std::vector<Scalar> specialization_constants_;
+  std::shared_ptr<PipelineDescriptor> base_pipeline_;
 };
 
 }  // namespace impeller

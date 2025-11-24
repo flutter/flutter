@@ -39,6 +39,8 @@ const std::string_view
         "_flutter.estimateRasterCacheMemory";
 const std::string_view ServiceProtocol::kReloadAssetFonts =
     "_flutter.reloadAssetFonts";
+const std::string_view ServiceProtocol::kGetPiplineUseageExtensionName =
+    "_flutter.getPipelineUsage";
 
 static constexpr std::string_view kViewIdPrefx = "_flutterView/";
 static constexpr std::string_view kListViewsExtensionName =
@@ -59,6 +61,7 @@ ServiceProtocol::ServiceProtocol()
           kGetSkSLsExtensionName,
           kEstimateRasterCacheMemoryExtensionName,
           kReloadAssetFonts,
+          kGetPiplineUseageExtensionName,
       }) {}
 
 ServiceProtocol::~ServiceProtocol() {

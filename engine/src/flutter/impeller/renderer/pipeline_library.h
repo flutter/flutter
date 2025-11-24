@@ -74,6 +74,16 @@ class PipelineLibrary : public std::enable_shared_from_this<PipelineLibrary> {
   virtual void RemovePipelinesWithEntryPoint(
       std::shared_ptr<const ShaderFunction> function) = 0;
 
+  void LogPipelineUsage(const PipelineDescriptor& p);
+
+  void LogPipelineCreation(const PipelineDescriptor& p);
+
+  std::unordered_map<PipelineDescriptor,
+                     int,
+                     ComparableHash<PipelineDescriptor>,
+                     ComparableEqual<PipelineDescriptor>>
+  GetPipelineUseCounts();
+
  protected:
   PipelineLibrary();
 
@@ -81,6 +91,12 @@ class PipelineLibrary : public std::enable_shared_from_this<PipelineLibrary> {
   PipelineLibrary(const PipelineLibrary&) = delete;
 
   PipelineLibrary& operator=(const PipelineLibrary&) = delete;
+
+  std::unordered_map<PipelineDescriptor,
+                     int,
+                     ComparableHash<PipelineDescriptor>,
+                     ComparableEqual<PipelineDescriptor>>
+      pipeline_use_counts_;
 };
 
 }  // namespace impeller
