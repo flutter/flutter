@@ -57,7 +57,7 @@ Widget _buildBoilerplate({
     textDirection: textDirection,
     child: MediaQuery(
       data: MediaQueryData(padding: padding),
-      child: ScrollConfiguration(behavior: const NoScrollbarBehavior(), child: child),
+      child: ScrollConfiguration(behavior: const NoScrollbarMaterialBehavior(), child: child),
     ),
   );
 }
@@ -799,7 +799,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
         // Manually insert Scrollbar into widget tree versus MaterialApp's default.
-        scrollBehavior: const NoScrollbarBehavior(),
+        scrollBehavior: const NoScrollbarMaterialBehavior(),
         home: PrimaryScrollController(
           controller: scrollController,
           child: Scrollbar(
@@ -1286,7 +1286,7 @@ void main() {
           child: MediaQuery(
             data: const MediaQueryData(),
             child: ScrollConfiguration(
-              behavior: const NoScrollbarBehavior(),
+              behavior: const NoScrollbarMaterialBehavior(),
               child: Scrollbar(
                 key: key2,
                 child: SingleChildScrollView(
@@ -1417,7 +1417,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         // Manually insert Scrollbar into widget tree versus MaterialApp's default.
-        scrollBehavior: const NoScrollbarBehavior(),
+        scrollBehavior: const NoScrollbarMaterialBehavior(),
         home: PrimaryScrollController(
           controller: scrollController,
           child: Scrollbar(
@@ -1505,7 +1505,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         // Manually insert Scrollbar into widget tree versus MaterialApp's default.
-        scrollBehavior: const NoScrollbarBehavior(),
+        scrollBehavior: const NoScrollbarMaterialBehavior(),
         theme: ThemeData(useMaterial3: false),
         home: PrimaryScrollController(
           controller: scrollController,
@@ -1763,7 +1763,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
       const MaterialApp(
         // Manually insert Scrollbar into widget tree versus MaterialApp's default
         // for clarity.
-        scrollBehavior: NoScrollbarBehavior(),
+        scrollBehavior: NoScrollbarMaterialBehavior(),
         home: Center(
           child: SizedBox.shrink(child: Scrollbar(child: SingleChildScrollView())),
         ),

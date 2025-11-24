@@ -26,7 +26,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         // Do not build MaterialApp's default Scrollbar.
-        scrollBehavior: const NoScrollbarBehavior(),
+        scrollBehavior: const NoScrollbarMaterialBehavior(),
         home: ListView(controller: controller, children: children(30)),
       ),
     );

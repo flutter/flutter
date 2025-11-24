@@ -104,7 +104,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         // Do not build MaterialApp's default Scrollbar.
-        scrollBehavior: const NoScrollbarBehavior(),
+        scrollBehavior: const NoScrollbarMaterialBehavior(),
         home: ListView.builder(
           itemBuilder: (BuildContext context, int index) => index == 0
               ? const ExpandingBox(collapsedSize: 400, expandedSize: 1200)

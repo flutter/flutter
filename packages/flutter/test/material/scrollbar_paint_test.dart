@@ -74,7 +74,7 @@ void main() {
       MaterialApp(
         // Manually insert Scrollbar into widget tree versus using MaterialApp's default
         // for clarity.
-        scrollBehavior: const NoScrollbarBehavior(),
+        scrollBehavior: const NoScrollbarMaterialBehavior(),
         home: MediaQuery(
           data: const MediaQueryData(padding: EdgeInsets.fromLTRB(0, 20, 0, 34)),
           child: Scaffold(
