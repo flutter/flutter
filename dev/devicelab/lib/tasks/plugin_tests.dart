@@ -500,7 +500,7 @@ end
     }
     final String versionString = target == 'ios'
         ? "s.platform = :ios, '13.0'"
-        : "s.platform = :osx, '10.11'";
+        : "s.platform = :osx, '10.15'";
     String podspecContent = podspec.readAsStringSync();
     if (!podspecContent.contains(versionString)) {
       throw TaskResult.failure(
