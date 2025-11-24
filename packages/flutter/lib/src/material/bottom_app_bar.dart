@@ -100,9 +100,9 @@ class BottomAppBar extends StatefulWidget {
 
   /// The bottom app bar's background color.
   ///
-  /// If this property is null then [BottomAppBarThemeData.color] of
-  /// [ThemeData.bottomAppBarTheme] is used. If that's null and [ThemeData.useMaterial3]
-  /// is true, the default value is [ColorScheme.surface]; if [ThemeData.useMaterial3]
+  /// If this property is null then the ambient [BottomAppBarThemeData.color]
+  /// is used. If that's null and [ThemeData.useMaterial3] is true,
+  /// the default value is [ColorScheme.surface]; if [ThemeData.useMaterial3]
   /// is false, then the default value is `Color(0xFF424242)` in dark theme and
   /// [Colors.white] in light theme.
   final Color? color;
@@ -113,16 +113,15 @@ class BottomAppBar extends StatefulWidget {
   /// This controls the size of the shadow below the bottom app bar. The
   /// value is non-negative.
   ///
-  /// If this property is null then [BottomAppBarThemeData.elevation] of
-  /// [ThemeData.bottomAppBarTheme] is used. If that's null and
-  /// [ThemeData.useMaterial3] is true, than the default value is 3 else is 8.
+  /// If this property is null then the ambient [BottomAppBarThemeData.elevation]
+  /// is used. If that's null and [ThemeData.useMaterial3] is true,
+  /// then the default value is 3 else is 8.
   final double? elevation;
 
   /// The notch that is made for the floating action button.
   ///
-  /// If this property is null then [BottomAppBarThemeData.shape] of
-  /// [ThemeData.bottomAppBarTheme] is used. If that's null then the shape will
-  /// be rectangular with no notch.
+  /// If this property is null then the ambient [BottomAppBarThemeData.shape]
+  /// is used. If that's null then the shape will be rectangular with no notch.
   final NotchedShape? shape;
 
   /// {@macro flutter.material.Material.clipBehavior}
@@ -143,9 +142,8 @@ class BottomAppBar extends StatefulWidget {
   /// which provide more flexibility. The intention is to eventually remove surface tint color from
   /// the framework.
   ///
-  /// If this property is null, then [BottomAppBarThemeData.surfaceTintColor]
-  /// of [ThemeData.bottomAppBarTheme] is used. If that is also null, the default
-  /// value is [Colors.transparent].
+  /// If this property is null, then the ambient [BottomAppBarThemeData.surfaceTintColor]
+  /// is used. If that is also null, the default value is [Colors.transparent].
   ///
   /// Ignored if [ThemeData.useMaterial3] is false.
   ///
@@ -154,9 +152,9 @@ class BottomAppBar extends StatefulWidget {
 
   /// The color of the shadow below the app bar.
   ///
-  /// If this property is null, then [BottomAppBarThemeData.shadowColor] of
-  /// [ThemeData.bottomAppBarTheme] is used. If that is also null, the default value
-  /// is fully opaque black for Material 2, and transparent for Material 3.
+  /// If this property is null, then the ambient [BottomAppBarThemeData.shadowColor]
+  /// is used. If that is also null, the default value is fully opaque black for
+  /// Material 2, and transparent for Material 3.
   ///
   /// See also:
   ///
