@@ -14,11 +14,11 @@ class ScrollbarExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      // Overridden scroll behavior for sample clarity - does not build
+      // a default Scrollbar (as it does on some platforms) because
+      // this sample demonstrates manual Scrollbar use.
+      scrollBehavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
       home: Scaffold(
-        // Overridden scroll behavior for sample clarity - does not build
-        // a default Scrollbar (as it does on some platforms) because
-        // this sample demonstrates manual Scrollbar use.
-        scrollBehavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
         appBar: AppBar(title: const Text('Scrollbar Sample')),
         body: const ScrollbarExample(),
       ),
