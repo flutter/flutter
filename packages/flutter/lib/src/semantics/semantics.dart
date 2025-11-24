@@ -3929,17 +3929,25 @@ class SemanticsNode with DiagnosticableTreeMixin {
       }
     }
 
+    if (_isTraversalChild) {
+      traversalParent = owner!._traversalParentNodes[traversalChildIdentifier];
+      transform = _computeTraversalTransform(parent: traversalParent!, child: this);
+    }
+
     int traversalParentId = -1;
-    if (data.traversalChildIdentifier != null) {
-      final Object identifier = data.traversalChildIdentifier!;
-      if (owner!._traversalParentNodes.containsKey(identifier)) {
-        traversalParentId = owner!._traversalParentNodes[identifier]!.id;
+    if (data.traversalChildIdentifier case final Object identifier?) {
+      if (owner!._traversalParentNodes[identifier] case final SemanticsNode parentNode?) {
+        traversalParentId = parentNode.id;
       }
     }
+    final Object? childIdentifier = traversalChildIdentifier;
+    if (childIdentifier != null) {
+      traversalParent = owner!._traversalParentNodes[childIdentifier];
+    }
     final Matrix4 traversalTransform;
-    if (traversalChildIdentifier case final Object childIdentifier? when !kIsWeb) {
-      _traversalTransform = traversalTransform = _computeTraversalTransform(
-        parent: (traversalParent = owner!._traversalParentNodes[childIdentifier])!,
+    if (!kIsWeb && childIdentifier != null) {
+      traversalTransform = _traversalTransform = _computeTraversalTransform(
+        parent: traversalParent!,
         child: this,
       );
     } else {
