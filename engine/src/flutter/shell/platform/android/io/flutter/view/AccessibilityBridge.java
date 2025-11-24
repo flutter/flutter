@@ -310,8 +310,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   private boolean isReleased = false;
 
   // Handler for all messages received from Flutter via the {@code accessibilityChannel}
-  @VisibleForTesting
-  public final AccessibilityChannel.AccessibilityMessageHandler accessibilityMessageHandler =
+  private final AccessibilityChannel.AccessibilityMessageHandler accessibilityMessageHandler =
       new AccessibilityChannel.AccessibilityMessageHandler() {
         /** The Dart application would like the given {@code message} to be announced. */
         @Override
@@ -390,10 +389,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         }
 
         @Override
-        public void setSemanticsTreeEnabled(boolean enabled) {
-          if (!enabled) {
-            AccessibilityBridge.this.reset();
-          }
+        public void resetSemantics() {
+          AccessibilityBridge.this.reset();
         }
       };
 

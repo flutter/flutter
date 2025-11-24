@@ -211,7 +211,7 @@ public class AccessibilityBridgeTest {
     assertFalse(bridge.flutterSemanticsTree.isEmpty());
 
     // Disable semantics and check that the tree is cleared.
-    bridge.accessibilityMessageHandler.setSemanticsTreeEnabled(false);
+    bridge.accessibilityMessageHandler.resetSemantics();
     assertTrue(bridge.flutterSemanticsTree.isEmpty());
   }
 

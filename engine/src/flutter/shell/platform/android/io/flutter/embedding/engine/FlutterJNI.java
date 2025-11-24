@@ -806,7 +806,9 @@ public class FlutterJNI {
   public void setSemanticsTreeEnabled(boolean enabled) {
     ensureRunningOnMainThread();
     if (accessibilityDelegate != null) {
-      accessibilityDelegate.setSemanticsTreeEnabled(enabled);
+      if (!enabled) {
+        accessibilityDelegate.resetSemantics();
+      }
     }
   }
 
@@ -1661,12 +1663,9 @@ public class FlutterJNI {
     /**
      * Invoked by native to notify framework started or stopped compiling accessibility tree.
      *
-     * <p>The embedding needs to be prepare to receive accessibility tree updates when true, and
-     * clean up when false.
-     *
-     * @param enabled True if the framework is compiling the accessibility tree.
+     * <p>The embedding needs to be prepare to clean up previously stored caches.
      */
-    void setSemanticsTreeEnabled(boolean enabled);
+    void resetSemantics();
   }
 
   public interface AsyncWaitForVsyncDelegate {
