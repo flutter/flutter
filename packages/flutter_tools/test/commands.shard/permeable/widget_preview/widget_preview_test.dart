@@ -290,7 +290,7 @@ void main() {
           ),
         },
       );
-    }, skip: true);
+    });
 
     testUsingContext(
       'start succeeds when no .dart_tool/ directory exists',
