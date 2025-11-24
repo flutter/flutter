@@ -1871,9 +1871,8 @@ abstract class WidgetController {
   }
 
   /// Forwards the given location to the binding's hitTest logic.
-  HitTestResult hitTestOnBinding(Offset location, {FlutterView? view}) {
-    final int viewId =
-        view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView!.viewId;
+  HitTestResult hitTestOnBinding(Offset location, {int? viewId}) {
+    viewId ??= view.viewId;
     final HitTestResult result = HitTestResult();
     binding.hitTestInView(result, location, viewId);
     return result;
