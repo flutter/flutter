@@ -490,7 +490,11 @@ end
   // Make the platform version artificially low to test that the "deployment
   // version too low" warning is never emitted.
   void _reduceDarwinPluginMinimumVersion(String plugin, String target) {
-    final File podspec = File(path.join(rootPath, target, '$plugin.podspec'));
+    File podspec = File(path.join(rootPath, target, '$plugin.podspec'));
+    if (!podspec.existsSync()) {
+      // Fallback to darwin directory for shared darwin plugins
+      podspec = File(path.join(rootPath, 'darwin', '$plugin.podspec'));
+    }
     if (!podspec.existsSync()) {
       throw TaskResult.failure('podspec file missing at ${podspec.path}');
     }
