@@ -150,7 +150,6 @@ class _LiveWidgetController extends LiveWidgetController {
     int buttons = kPrimaryButton,
     bool warnIfMissed = true,
     PointerDeviceKind kind = PointerDeviceKind.touch,
-    int? viewId,
   }) async {
     await super.tap(
       await _waitForElement(finder),
@@ -158,7 +157,6 @@ class _LiveWidgetController extends LiveWidgetController {
       buttons: buttons,
       warnIfMissed: warnIfMissed,
       kind: kind,
-      viewId: viewId,
     );
   }
 }
