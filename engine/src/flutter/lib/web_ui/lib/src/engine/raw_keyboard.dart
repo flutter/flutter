@@ -88,7 +88,7 @@ class RawKeyboard {
       return;
     }
 
-    final FlutterHtmlKeyboardEvent event = FlutterHtmlKeyboardEvent(domEvent as DomKeyboardEvent);
+    final event = FlutterHtmlKeyboardEvent(domEvent as DomKeyboardEvent);
     final String timerKey = event.code!;
 
     if (_shouldIgnore(event)) {
@@ -131,7 +131,7 @@ class RawKeyboard {
         _lastMetaState |= _modifierMeta;
       }
     }
-    final Map<String, dynamic> eventData = <String, dynamic>{
+    final eventData = <String, dynamic>{
       'type': event.type,
       'keymap': 'web',
       'code': event.code,
@@ -148,7 +148,7 @@ class RawKeyboard {
         if (data == null) {
           return;
         }
-        final Map<String, dynamic> jsonResponse =
+        final jsonResponse =
             _messageCodec.decodeMessage(data) as Map<String, dynamic>;
         if (jsonResponse['handled'] as bool) {
           // If the framework handled it, then don't propagate it any further.
@@ -160,7 +160,7 @@ class RawKeyboard {
   }
 
   void _synthesizeKeyup(FlutterHtmlKeyboardEvent event) {
-    final Map<String, dynamic> eventData = <String, dynamic>{
+    final eventData = <String, dynamic>{
       'type': 'keyup',
       'keymap': 'web',
       'code': event.code,

@@ -15,7 +15,7 @@ void main() {
 void testMain() {
   group('initializeEngineServices', () {
     test('stores user configuration', () async {
-      final JsFlutterConfiguration config = JsFlutterConfiguration(
+      final config = JsFlutterConfiguration(
         canvasKitBaseUrl: '/canvaskit/',
         nonce: 'some_nonce',
       );

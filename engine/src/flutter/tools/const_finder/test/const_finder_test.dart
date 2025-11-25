@@ -12,13 +12,13 @@ import 'package:test/test.dart';
 
 void main() {
   final engine = Engine.findWithin();
-  var buildDir = io.Platform.environment['FLUTTER_BUILD_DIRECTORY'];
+  String? buildDir = io.Platform.environment['FLUTTER_BUILD_DIRECTORY'];
   buildDir ??= engine.latestOutput()?.path.path;
   if (buildDir == null) {
     fail('No build directory found. Set FLUTTER_BUILD_DIRECTORY');
   }
 
-  final fixturesPath = path.join(
+  final String fixturesPath = path.join(
     engine.flutterDir.path,
     'tools',
     'const_finder',
@@ -29,16 +29,16 @@ void main() {
       ? '/$fixturesPath'.replaceAll(io.Platform.pathSeparator, '/')
       : fixturesPath;
 
-  final frontendServerSnapshot = path.join(buildDir, 'gen', 'frontend_server_aot.dart.snapshot');
-  final flutterPatchedSdk = path.join(buildDir, 'flutter_patched_sdk');
-  final librariesDotJson = path.join(flutterPatchedSdk, 'lib', 'libraries.json');
+  final String frontendServerSnapshot = path.join(buildDir, 'gen', 'frontend_server_aot.dart.snapshot');
+  final String flutterPatchedSdk = path.join(buildDir, 'flutter_patched_sdk');
+  final String librariesDotJson = path.join(flutterPatchedSdk, 'lib', 'libraries.json');
   final String packageConfig = path.join(fixturesPath, '.dart_tool', 'package_config.json');
 
-  final dart = io.Platform.resolvedExecutable;
-  final dartaotruntime = path.join(path.dirname(io.Platform.resolvedExecutable), 'dartaotruntime');
+  final String dart = io.Platform.resolvedExecutable;
+  final String dartaotruntime = path.join(path.dirname(io.Platform.resolvedExecutable), 'dartaotruntime');
 
   void compileAOTDill({required String sourcePath, required String dillPath}) {
-    final result = io.Process.runSync(dartaotruntime, [
+    final io.ProcessResult result = io.Process.runSync(dartaotruntime, [
       frontendServerSnapshot,
       '--sdk-root=$flutterPatchedSdk',
       '--target=flutter',
@@ -57,7 +57,7 @@ void main() {
   }
 
   void compileDart2JSDill({required String sourcePath, required String dillPath}) {
-    final result = io.Process.runSync(dart, [
+    final io.ProcessResult result = io.Process.runSync(dart, [
       'compile',
       'js',
       '--libraries-spec=$librariesDotJson',
@@ -77,8 +77,8 @@ void main() {
   }
 
   test('box_frontend (aot)', () {
-    final sourcePath = path.join(fixturesPath, 'lib', 'box.dart');
-    final dillPath = path.join(fixturesPath, 'box_frontend.dill');
+    final String sourcePath = path.join(fixturesPath, 'lib', 'box.dart');
+    final String dillPath = path.join(fixturesPath, 'box_frontend.dill');
     compileAOTDill(sourcePath: sourcePath, dillPath: dillPath);
     final finder = ConstFinder(
       kernelFilePath: dillPath,
@@ -91,8 +91,8 @@ void main() {
   });
 
   test('box_web (dart2js)', () {
-    final sourcePath = path.join(fixturesPath, 'lib', 'box.dart');
-    final dillPath = path.join(fixturesPath, 'box_web.dill');
+    final String sourcePath = path.join(fixturesPath, 'lib', 'box.dart');
+    final String dillPath = path.join(fixturesPath, 'box_web.dill');
     compileDart2JSDill(sourcePath: sourcePath, dillPath: dillPath);
     final finder = ConstFinder(
       kernelFilePath: dillPath,
@@ -105,8 +105,8 @@ void main() {
   });
 
   test('consts_frontend (aot)', () {
-    final sourcePath = path.join(fixturesPath, 'lib', 'consts.dart');
-    final dillPath = path.join(fixturesPath, 'consts_frontend.dill');
+    final String sourcePath = path.join(fixturesPath, 'lib', 'consts.dart');
+    final String dillPath = path.join(fixturesPath, 'consts_frontend.dill');
     compileAOTDill(sourcePath: sourcePath, dillPath: dillPath);
 
     final {
@@ -147,8 +147,8 @@ void main() {
   });
 
   test('consts_web (dart2js)', () {
-    final sourcePath = path.join(fixturesPath, 'lib', 'consts.dart');
-    final dillPath = path.join(fixturesPath, 'consts_web.dill');
+    final String sourcePath = path.join(fixturesPath, 'lib', 'consts.dart');
+    final String dillPath = path.join(fixturesPath, 'consts_web.dill');
     compileDart2JSDill(sourcePath: sourcePath, dillPath: dillPath);
 
     final {
@@ -192,8 +192,8 @@ void main() {
   });
 
   test('consts_and_non_frontend (aot)', () {
-    final sourcePath = path.join(fixturesPath, 'lib', 'consts_and_non.dart');
-    final dillPath = path.join(fixturesPath, 'consts_and_non_frontend.dill');
+    final String sourcePath = path.join(fixturesPath, 'lib', 'consts_and_non.dart');
+    final String dillPath = path.join(fixturesPath, 'consts_and_non_frontend.dill');
     compileAOTDill(sourcePath: sourcePath, dillPath: dillPath);
 
     final {
@@ -227,8 +227,8 @@ void main() {
   });
 
   test('consts_and_non_web (dart2js)', () {
-    final sourcePath = path.join(fixturesPath, 'lib', 'consts_and_non.dart');
-    final dillPath = path.join(fixturesPath, 'consts_and_non_web.dill');
+    final String sourcePath = path.join(fixturesPath, 'lib', 'consts_and_non.dart');
+    final String dillPath = path.join(fixturesPath, 'consts_and_non_web.dill');
     compileDart2JSDill(sourcePath: sourcePath, dillPath: dillPath);
 
     final {
@@ -264,8 +264,8 @@ void main() {
   });
 
   test('static_icon_provider_frontend (aot)', () {
-    final sourcePath = path.join(fixturesPath, 'lib', 'static_icon_provider.dart');
-    final dillPath = path.join(fixturesPath, 'static_icon_provider_frontend.dill');
+    final String sourcePath = path.join(fixturesPath, 'lib', 'static_icon_provider.dart');
+    final String dillPath = path.join(fixturesPath, 'static_icon_provider_frontend.dill');
     compileAOTDill(sourcePath: sourcePath, dillPath: dillPath);
     final finder = ConstFinder(
       kernelFilePath: dillPath,
@@ -294,8 +294,8 @@ void main() {
   });
 
   test('static_icon_provider_web (dart2js)', () {
-    final sourcePath = path.join(fixturesPath, 'lib', 'static_icon_provider.dart');
-    final dillPath = path.join(fixturesPath, 'static_icon_provider_web.dill');
+    final String sourcePath = path.join(fixturesPath, 'lib', 'static_icon_provider.dart');
+    final String dillPath = path.join(fixturesPath, 'static_icon_provider_web.dill');
     compileDart2JSDill(sourcePath: sourcePath, dillPath: dillPath);
     final finder = ConstFinder(
       kernelFilePath: dillPath,

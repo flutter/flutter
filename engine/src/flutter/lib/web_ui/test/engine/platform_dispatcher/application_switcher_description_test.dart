@@ -13,7 +13,7 @@ void main() {
 
 Future<void> testMain() async {
   String? getCssThemeColor() {
-    final DomHTMLMetaElement? theme =
+    final theme =
         domDocument.querySelector('#flutterweb-theme') as DomHTMLMetaElement?;
     return theme?.content;
   }
@@ -36,7 +36,7 @@ Future<void> testMain() async {
         null,
       );
 
-      const ui.Color expectedPrimaryColor = ui.Color(0xFF00FF00);
+      const expectedPrimaryColor = ui.Color(0xFF00FF00);
 
       expect(domDocument.title, 'Title Test');
       expect(getCssThemeColor(), expectedPrimaryColor.toCssString());
@@ -52,14 +52,14 @@ Future<void> testMain() async {
         null,
       );
 
-      const ui.Color expectedNewPrimaryColor = ui.Color(0xFFFABADA);
+      const expectedNewPrimaryColor = ui.Color(0xFFFABADA);
 
       expect(domDocument.title, 'Different title');
       expect(getCssThemeColor(), expectedNewPrimaryColor.toCssString());
     });
 
     test('supports null title and primaryColor', () {
-      const ui.Color expectedNullColor = ui.Color(0xFF000000);
+      const expectedNullColor = ui.Color(0xFF000000);
       // TODO(yjbanov): https://github.com/flutter/flutter/issues/39159
       domDocument.title = 'Something Else';
       expect(domDocument.title, 'Something Else');

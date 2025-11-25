@@ -40,7 +40,7 @@ class AssetManager {
   //
   // This warns the user and points them to the new initializeEngine style.
   String? get _deprecatedAssetBase {
-    final DomHTMLMetaElement? meta =
+    final meta =
         domWindow.document.querySelector('meta[name=assetBase]') as DomHTMLMetaElement?;
 
     final String? fallbackBaseUrl = meta?.content;

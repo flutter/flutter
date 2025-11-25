@@ -20,8 +20,8 @@ typedef PlatformViewFactoryCall = ({int viewId, Object? params});
 void testMain() {
   group('PlatformViewMessageHandler', () {
     group('handlePlatformViewCall', () {
-      const String platformViewType = 'forTest';
-      const int platformViewId = 6;
+      const platformViewType = 'forTest';
+      const platformViewId = 6;
       late PlatformViewManager contentManager;
       late Completer<ByteData?> completer;
 
@@ -32,7 +32,7 @@ void testMain() {
 
       group('"create" message', () {
         test('unregistered viewType, fails with descriptive exception', () async {
-          final PlatformViewMessageHandler messageHandler = PlatformViewMessageHandler(
+          final messageHandler = PlatformViewMessageHandler(
             contentManager: contentManager,
           );
           final Map<dynamic, dynamic> arguments = _getCreateArguments(
@@ -55,7 +55,7 @@ void testMain() {
         test('duplicate viewId, fails with descriptive exception', () async {
           contentManager.registerFactory(platformViewType, (int id) => createDomHTMLDivElement());
           contentManager.renderContent(platformViewType, platformViewId, null);
-          final PlatformViewMessageHandler messageHandler = PlatformViewMessageHandler(
+          final messageHandler = PlatformViewMessageHandler(
             contentManager: contentManager,
           );
           final Map<dynamic, dynamic> arguments = _getCreateArguments(
@@ -79,7 +79,7 @@ void testMain() {
             platformViewType,
             (int id) => createDomHTMLDivElement()..id = 'success',
           );
-          final PlatformViewMessageHandler messageHandler = PlatformViewMessageHandler(
+          final messageHandler = PlatformViewMessageHandler(
             contentManager: contentManager,
           );
           final Map<dynamic, dynamic> arguments = _getCreateArguments(
@@ -103,7 +103,7 @@ void testMain() {
             platformViewType,
             (int id) => createDomHTMLDivElement()..id = 'success',
           );
-          final PlatformViewMessageHandler messageHandler = PlatformViewMessageHandler(
+          final messageHandler = PlatformViewMessageHandler(
             contentManager: contentManager,
           );
           final Map<dynamic, dynamic> arguments = _getCreateArguments(
@@ -138,16 +138,16 @@ void testMain() {
         });
 
         test('passes creation params to the factory', () async {
-          final List<PlatformViewFactoryCall> factoryCalls = <PlatformViewFactoryCall>[];
+          final factoryCalls = <PlatformViewFactoryCall>[];
           contentManager.registerFactory(platformViewType, (int viewId, {Object? params}) {
             factoryCalls.add((viewId: viewId, params: params));
             return createDomHTMLDivElement();
           });
-          final PlatformViewMessageHandler messageHandler = PlatformViewMessageHandler(
+          final messageHandler = PlatformViewMessageHandler(
             contentManager: contentManager,
           );
 
-          final List<Completer<ByteData?>> completers = <Completer<ByteData?>>[];
+          final completers = <Completer<ByteData?>>[];
 
           completers.add(Completer<ByteData?>());
           messageHandler.handlePlatformViewCall(
@@ -181,7 +181,7 @@ void testMain() {
             completers.map((Completer<ByteData?> c) => c.future),
           );
 
-          for (final ByteData? response in responses) {
+          for (final response in responses) {
             expect(
               codec.decodeEnvelope(response!),
               isNull,
@@ -206,7 +206,7 @@ void testMain() {
             return Object();
           });
 
-          final PlatformViewMessageHandler messageHandler = PlatformViewMessageHandler(
+          final messageHandler = PlatformViewMessageHandler(
             contentManager: contentManager,
           );
           final Map<dynamic, dynamic> arguments = _getCreateArguments(
@@ -228,7 +228,7 @@ void testMain() {
         });
 
         test('never fails, even for unknown viewIds', () async {
-          final PlatformViewMessageHandler messageHandler = PlatformViewMessageHandler(
+          final messageHandler = PlatformViewMessageHandler(
             contentManager: contentManager,
           );
 
@@ -243,7 +243,7 @@ void testMain() {
         });
 
         test('never fails, even for unknown viewIds', () async {
-          final PlatformViewMessageHandler messageHandler = PlatformViewMessageHandler(
+          final messageHandler = PlatformViewMessageHandler(
             contentManager: _FakePlatformViewManager(viewIdCompleter.complete),
           );
 

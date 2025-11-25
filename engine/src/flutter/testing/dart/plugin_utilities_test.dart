@@ -27,7 +27,7 @@ void main() {
     final CallbackHandle hTop = PluginUtilities.getCallbackHandle(top)!;
     expect(hTop, isNot(0));
     expect(PluginUtilities.getCallbackHandle(top), hTop);
-    final StringFunction topClosure =
+    final topClosure =
         PluginUtilities.getCallbackFromHandle(hTop)! as StringFunction;
     expect(topClosure(), 'top');
 
@@ -35,12 +35,12 @@ void main() {
     final CallbackHandle hGetInt = PluginUtilities.getCallbackHandle(Foo.getInt)!;
     expect(hGetInt, isNot(0));
     expect(PluginUtilities.getCallbackHandle(Foo.getInt), hGetInt);
-    final IntFunction getIntClosure =
+    final getIntClosure =
         PluginUtilities.getCallbackFromHandle(hGetInt)! as IntFunction;
     expect(getIntClosure(), 1);
 
     // Instance method callbacks cannot be looked up.
-    const Foo foo = Foo();
+    const foo = Foo();
     expect(PluginUtilities.getCallbackHandle(foo.getDouble), isNull);
 
     // Anonymous closures cannot be looked up.

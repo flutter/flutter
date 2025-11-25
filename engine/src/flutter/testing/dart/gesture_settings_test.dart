@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 
 void main() {
   test('GestureSettings has a reasonable toString', () {
-    const GestureSettings gestureSettings = GestureSettings(
+    const gestureSettings = GestureSettings(
       physicalDoubleTapSlop: 2.0,
       physicalTouchSlop: 1.0,
     );
@@ -22,15 +22,15 @@ void main() {
   test('GestureSettings has a correct equality', () {
     // don't refactor these to be const, that defeats the point!
     final double value = nonconst(2.0);
-    final GestureSettings settingsA = GestureSettings(
+    final settingsA = GestureSettings(
       physicalDoubleTapSlop: value,
       physicalTouchSlop: 1.0,
     );
-    final GestureSettings settingsB = GestureSettings(
+    final settingsB = GestureSettings(
       physicalDoubleTapSlop: value,
       physicalTouchSlop: 3.0,
     );
-    final GestureSettings settingsC = GestureSettings(
+    final settingsC = GestureSettings(
       physicalDoubleTapSlop: value,
       physicalTouchSlop: 1.0,
     );
@@ -46,7 +46,7 @@ void main() {
   });
 
   test('GestureSettings copyWith preserves already set values', () {
-    const GestureSettings initial = GestureSettings(
+    const initial = GestureSettings(
       physicalDoubleTapSlop: 1.0,
       physicalTouchSlop: 1.0,
     );
@@ -66,7 +66,7 @@ void main() {
   });
 
   test('GestureSettings constructor defaults to null', () {
-    const GestureSettings settings = GestureSettings();
+    const settings = GestureSettings();
 
     expect(settings.physicalDoubleTapSlop, null);
     expect(settings.physicalTouchSlop, null);
