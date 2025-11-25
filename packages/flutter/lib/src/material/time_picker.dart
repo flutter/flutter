@@ -3809,10 +3809,10 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
         if (states.contains(WidgetState.pressed)) {
           overlayColor = _colors.onPrimaryContainer;
         } else if (states.contains(WidgetState.hovered)) {
-          const double hoverOpacity = 0.08;
+          const hoverOpacity = 0.08;
           overlayColor = _colors.onPrimaryContainer.withOpacity(hoverOpacity);
         } else if (states.contains(WidgetState.focused)) {
-          const double focusOpacity = 0.1;
+          const focusOpacity = 0.1;
           overlayColor = _colors.onPrimaryContainer.withOpacity(focusOpacity);
         }
         return Color.alphaBlend(overlayColor, _colors.primaryContainer);
@@ -3821,10 +3821,10 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
         if (states.contains(WidgetState.pressed)) {
           overlayColor = _colors.onSurface;
         } else if (states.contains(WidgetState.hovered)) {
-          const double hoverOpacity = 0.08;
+          const hoverOpacity = 0.08;
           overlayColor = _colors.onSurface.withOpacity(hoverOpacity);
         } else if (states.contains(WidgetState.focused)) {
-          const double focusOpacity = 0.1;
+          const focusOpacity = 0.1;
           overlayColor = _colors.onSurface.withOpacity(focusOpacity);
         }
         return Color.alphaBlend(overlayColor, _colors.surfaceContainerHighest);
