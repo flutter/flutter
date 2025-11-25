@@ -136,10 +136,7 @@ class TestPointer {
       _buttons = buttons;
     }
     return PointerDownEvent(
-      viewId:
-          view?.viewId ??
-          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView?.viewId ??
-          0,
+      viewId: view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView?.viewId ?? 0,
       timeStamp: timeStamp,
       kind: kind,
       device: _device,
@@ -179,10 +176,7 @@ class TestPointer {
     }
     return PointerMoveEvent(
       timeStamp: timeStamp,
-      viewId:
-          view?.viewId ??
-          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView?.viewId ??
-          0,
+      viewId: view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView?.viewId ?? 0,
       kind: kind,
       device: _device,
       pointer: pointer,
@@ -203,10 +197,7 @@ class TestPointer {
     assert(isDown);
     _isDown = false;
     return PointerUpEvent(
-      viewId:
-          view?.viewId ??
-          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView?.viewId ??
-          0,
+      viewId: view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView?.viewId ?? 0,
       timeStamp: timeStamp,
       kind: kind,
       device: _device,
@@ -226,10 +217,7 @@ class TestPointer {
     _isDown = false;
     return PointerCancelEvent(
       timeStamp: timeStamp,
-      viewId:
-          view?.viewId ??
-          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView?.viewId ??
-          0,
+      viewId: view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView?.viewId ?? 0,
       kind: kind,
       device: _device,
       pointer: pointer,
@@ -249,10 +237,7 @@ class TestPointer {
   }) {
     _location = location ?? _location;
     return PointerAddedEvent(
-      viewId:
-          view?.viewId ??
-          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView?.viewId ??
-          0,
+      viewId: view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView?.viewId ?? 0,
       timeStamp: timeStamp,
       kind: kind,
       device: _device,
@@ -272,10 +257,7 @@ class TestPointer {
   }) {
     _location = location ?? _location;
     return PointerRemovedEvent(
-      viewId:
-          view?.viewId ??
-          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView?.viewId ??
-          0,
+      viewId: view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView?.viewId ?? 0,
       timeStamp: timeStamp,
       kind: kind,
       device: _device,
@@ -304,10 +286,7 @@ class TestPointer {
     final Offset delta = location != null ? newLocation - location! : Offset.zero;
     _location = newLocation;
     return PointerHoverEvent(
-      viewId:
-          view?.viewId ??
-          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView?.viewId ??
-          0,
+      viewId: view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView?.viewId ?? 0,
       timeStamp: timeStamp,
       kind: kind,
       device: _device,
@@ -331,10 +310,7 @@ class TestPointer {
     assert(kind != PointerDeviceKind.touch, "Touch pointers can't generate pointer signal events");
     assert(location != null);
     return PointerScrollEvent(
-      viewId:
-          view?.viewId ??
-          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView?.viewId ??
-          0,
+      viewId: view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView?.viewId ?? 0,
       timeStamp: timeStamp,
       kind: kind,
       device: _device,
@@ -355,10 +331,7 @@ class TestPointer {
     assert(kind != PointerDeviceKind.touch, "Touch pointers can't generate pointer signal events");
     assert(location != null);
     return PointerScrollInertiaCancelEvent(
-      viewId:
-          view?.viewId ??
-          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView?.viewId ??
-          0,
+      viewId: view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView?.viewId ?? 0,
       timeStamp: timeStamp,
       kind: kind,
       device: _device,
@@ -374,10 +347,7 @@ class TestPointer {
     assert(kind != PointerDeviceKind.touch, "Touch pointers can't generate pointer signal events");
     assert(location != null);
     return PointerScaleEvent(
-      viewId:
-          view?.viewId ??
-          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView?.viewId ??
-          0,
+      viewId: view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView?.viewId ?? 0,
       timeStamp: timeStamp,
       kind: kind,
       device: _device,
@@ -402,10 +372,7 @@ class TestPointer {
     _pan = Offset.zero;
     _isPanZoomActive = true;
     return PointerPanZoomStartEvent(
-      viewId:
-          view?.viewId ??
-          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView?.viewId ??
-          0,
+      viewId: view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView?.viewId ?? 0,
       timeStamp: timeStamp,
       device: _device,
       pointer: pointer,
@@ -434,10 +401,7 @@ class TestPointer {
     final Offset panDelta = pan - _pan!;
     _pan = pan;
     return PointerPanZoomUpdateEvent(
-      viewId:
-          view?.viewId ??
-          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView?.viewId ??
-          0,
+      viewId: view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView?.viewId ?? 0,
       timeStamp: timeStamp,
       device: _device,
       pointer: pointer,
@@ -460,10 +424,7 @@ class TestPointer {
     _isPanZoomActive = false;
     _pan = null;
     return PointerPanZoomEndEvent(
-      viewId:
-          view?.viewId ??
-          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView?.viewId ??
-          0,
+      viewId: view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView?.viewId ?? 0,
       timeStamp: timeStamp,
       device: _device,
       pointer: pointer,
