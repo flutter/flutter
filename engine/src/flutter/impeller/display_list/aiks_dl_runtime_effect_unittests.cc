@@ -393,7 +393,6 @@ TEST_P(AiksTest, ComposeBackdropRuntimeOuterBlurInnerSmallSigma) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
-
 TEST_P(AiksTest, ClippedBackdropFilterWithShader) {
   struct FragUniforms {
     Vector2 uSize;
