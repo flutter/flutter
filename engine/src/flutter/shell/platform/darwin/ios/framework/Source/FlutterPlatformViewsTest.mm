@@ -527,7 +527,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
   stack.PushTransform(screenScaleMatrix);
   // Push a backdrop filter
-  auto filter = flutter::DlBlurImageFilter::Make(5, 2, flutter::DlTileMode::kClamp);
+  auto filter = flutter::DlBlurImageFilter::Make(5, 2, std::nullopt, flutter::DlTileMode::kClamp);
   stack.PushBackdropFilter(filter,
                            flutter::DlRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
 
@@ -609,7 +609,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
   stack.PushTransform(screenScaleMatrix);
   // Push a backdrop filter
-  auto filter = flutter::DlBlurImageFilter::Make(5, 2, flutter::DlTileMode::kClamp);
+  auto filter = flutter::DlBlurImageFilter::Make(5, 2, std::nullopt, flutter::DlTileMode::kClamp);
   stack.PushBackdropFilter(filter,
                            flutter::DlRect::MakeXYWH(0, 0, screenScale * 8, screenScale * 8));
 
@@ -692,7 +692,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   stack.PushTransform(screenScaleMatrix);
   // Push backdrop filters
   for (int i = 0; i < 50; i++) {
-    auto filter = flutter::DlBlurImageFilter::Make(i, 2, flutter::DlTileMode::kClamp);
+    auto filter = flutter::DlBlurImageFilter::Make(i, 2, std::nullopt, flutter::DlTileMode::kClamp);
     stack.PushBackdropFilter(filter,
                              flutter::DlRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   }
@@ -774,7 +774,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
   stack.PushTransform(screenScaleMatrix);
   // Push a backdrop filter
-  auto filter = flutter::DlBlurImageFilter::Make(5, 2, flutter::DlTileMode::kClamp);
+  auto filter = flutter::DlBlurImageFilter::Make(5, 2, std::nullopt, flutter::DlTileMode::kClamp);
   stack.PushBackdropFilter(filter,
                            flutter::DlRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
 
@@ -903,7 +903,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
   stack.PushTransform(screenScaleMatrix);
   // Push backdrop filters
-  auto filter = flutter::DlBlurImageFilter::Make(5, 2, flutter::DlTileMode::kClamp);
+  auto filter = flutter::DlBlurImageFilter::Make(5, 2, std::nullopt, flutter::DlTileMode::kClamp);
   for (int i = 0; i < 5; i++) {
     stack.PushBackdropFilter(filter,
                              flutter::DlRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
@@ -1059,7 +1059,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
   stack.PushTransform(screenScaleMatrix);
   // Push backdrop filters
-  auto filter = flutter::DlBlurImageFilter::Make(5, 2, flutter::DlTileMode::kClamp);
+  auto filter = flutter::DlBlurImageFilter::Make(5, 2, std::nullopt, flutter::DlTileMode::kClamp);
   for (int i = 0; i < 5; i++) {
     stack.PushBackdropFilter(filter,
                              flutter::DlRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
@@ -1102,7 +1102,8 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   // Push backdrop filters
   for (int i = 0; i < 5; i++) {
     if (i == 3) {
-      auto filter2 = flutter::DlBlurImageFilter::Make(2, 5, flutter::DlTileMode::kClamp);
+      auto filter2 =
+          flutter::DlBlurImageFilter::Make(2, 5, std::nullopt, flutter::DlTileMode::kClamp);
 
       stack2.PushBackdropFilter(
           filter2, flutter::DlRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
@@ -1161,7 +1162,8 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   // Push backdrop filters
   for (int i = 0; i < 5; i++) {
     if (i == 0) {
-      auto filter2 = flutter::DlBlurImageFilter::Make(2, 5, flutter::DlTileMode::kClamp);
+      auto filter2 =
+          flutter::DlBlurImageFilter::Make(2, 5, std::nullopt, flutter::DlTileMode::kClamp);
       stack2.PushBackdropFilter(
           filter2, flutter::DlRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
       continue;
@@ -1217,7 +1219,8 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   // Push backdrop filters
   for (int i = 0; i < 5; i++) {
     if (i == 4) {
-      auto filter2 = flutter::DlBlurImageFilter::Make(2, 5, flutter::DlTileMode::kClamp);
+      auto filter2 =
+          flutter::DlBlurImageFilter::Make(2, 5, std::nullopt, flutter::DlTileMode::kClamp);
       stack2.PushBackdropFilter(
           filter2, flutter::DlRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
       continue;
@@ -1274,7 +1277,8 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   }
   // Push backdrop filters
   for (int i = 0; i < 5; i++) {
-    auto filter2 = flutter::DlBlurImageFilter::Make(i, 2, flutter::DlTileMode::kClamp);
+    auto filter2 =
+        flutter::DlBlurImageFilter::Make(i, 2, std::nullopt, flutter::DlTileMode::kClamp);
 
     stack2.PushBackdropFilter(filter2,
                               flutter::DlRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
@@ -1397,7 +1401,8 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   // Layer tree always pushes a screen scale factor to the stack
   stack2.PushTransform(screenScaleMatrix);
   // Push backdrop filters and dilate filter
-  auto blurFilter = flutter::DlBlurImageFilter::Make(5, 2, flutter::DlTileMode::kClamp);
+  auto blurFilter =
+      flutter::DlBlurImageFilter::Make(5, 2, std::nullopt, flutter::DlTileMode::kClamp);
 
   for (int i = 0; i < 5; i++) {
     if (i == 2) {
@@ -1851,7 +1856,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
   [flutterPlatformViewsController pushVisitedPlatformViewId:2];
-  auto filter = flutter::DlBlurImageFilter::Make(5, 2, flutter::DlTileMode::kClamp);
+  auto filter = flutter::DlBlurImageFilter::Make(5, 2, std::nullopt, flutter::DlTileMode::kClamp);
   [flutterPlatformViewsController
       pushFilterToVisitedPlatformViews:filter
                               withRect:flutter::DlRect::MakeXYWH(0, 0, screenScale * 10,

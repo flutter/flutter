@@ -126,15 +126,19 @@ static const auto kTestMatrixColorFilter2 =
 
 static const DlBlurImageFilter kTestBlurImageFilter1(5.0,
                                                      5.0,
+                                                     std::nullopt,
                                                      DlTileMode::kClamp);
 static const DlBlurImageFilter kTestBlurImageFilter2(6.0,
                                                      5.0,
+                                                     std::nullopt,
                                                      DlTileMode::kClamp);
 static const DlBlurImageFilter kTestBlurImageFilter3(5.0,
                                                      6.0,
+                                                     std::nullopt,
                                                      DlTileMode::kClamp);
 static const DlBlurImageFilter kTestBlurImageFilter4(5.0,
                                                      5.0,
+                                                     std::nullopt,
                                                      DlTileMode::kDecal);
 static const DlDilateImageFilter kTestDilateImageFilter1(5.0, 5.0);
 static const DlDilateImageFilter kTestDilateImageFilter2(6.0, 5.0);

@@ -67,6 +67,7 @@ impeller_shaders("entity_shaders") {
     "shaders/gradients/fast_gradient.vert",
     "shaders/gradients/fast_gradient.frag",
     "shaders/texture_downsample.frag",
+    "shaders/texture_downsample_bounded.frag",
     "shaders/texture_downsample_gles.frag",
   ]
 }

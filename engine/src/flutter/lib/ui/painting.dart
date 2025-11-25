@@ -4262,8 +4262,18 @@ abstract class ImageFilter {
   ImageFilter._(); // ignore: unused_element
 
   /// Creates an image filter that applies a Gaussian blur.
-  factory ImageFilter.blur({double sigmaX = 0.0, double sigmaY = 0.0, TileMode? tileMode}) {
-    return _GaussianBlurImageFilter(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
+  factory ImageFilter.blur({
+    double sigmaX = 0.0,
+    double sigmaY = 0.0,
+    TileMode? tileMode,
+    Rect? bounds,
+  }) {
+    return _GaussianBlurImageFilter(
+      sigmaX: sigmaX,
+      sigmaY: sigmaY,
+      tileMode: tileMode,
+      bounds: bounds,
+    );
   }
 
   /// Creates an image filter that dilates each input pixel's channel values
@@ -4407,11 +4417,17 @@ class _MatrixImageFilter implements ImageFilter {
 }
 
 class _GaussianBlurImageFilter implements ImageFilter {
-  _GaussianBlurImageFilter({required this.sigmaX, required this.sigmaY, required this.tileMode});
+  _GaussianBlurImageFilter({
+    required this.sigmaX,
+    required this.sigmaY,
+    this.bounds,
+    required this.tileMode,
+  });
 
   final double sigmaX;
   final double sigmaY;
   final TileMode? tileMode;
+  final Rect? bounds;
 
   // MakeBlurFilter
   late final _ImageFilter nativeFilter = _ImageFilter.blur(this);
@@ -4434,10 +4450,12 @@ class _GaussianBlurImageFilter implements ImageFilter {
   }
 
   @override
-  String get _shortDescription => 'blur($sigmaX, $sigmaY, $_modeString)';
+  String get _shortDescription => 'blur($sigmaX, $sigmaY, $_modeString${_boundsString()})';
+
+  String _boundsString() => bounds == null ? '' : ', bounds: $bounds';
 
   @override
-  String toString() => 'ImageFilter.blur($sigmaX, $sigmaY, $_modeString)';
+  String toString() => 'ImageFilter.blur($sigmaX, $sigmaY, $_modeString${_boundsString()})';
 
   @override
   bool operator ==(Object other) {
@@ -4447,11 +4465,12 @@ class _GaussianBlurImageFilter implements ImageFilter {
     return other is _GaussianBlurImageFilter &&
         other.sigmaX == sigmaX &&
         other.sigmaY == sigmaY &&
+        other.bounds == bounds &&
         other.tileMode == tileMode;
   }
 
   @override
-  int get hashCode => Object.hash(sigmaX, sigmaY);
+  int get hashCode => Object.hash(sigmaX, sigmaY, bounds, tileMode);
 }
 
 class _DilateImageFilter implements ImageFilter {
@@ -4584,7 +4603,17 @@ base class _ImageFilter extends NativeFieldWrapperClass1 {
   /// Creates an image filter that applies a Gaussian blur.
   _ImageFilter.blur(_GaussianBlurImageFilter filter) : creator = filter {
     _constructor();
-    _initBlur(filter.sigmaX, filter.sigmaY, filter.tileMode?.index ?? -1);
+    final Rect bounds = filter.bounds ?? Rect.zero;
+    _initBlur(
+      filter.sigmaX,
+      filter.sigmaY,
+      filter.tileMode?.index ?? -1,
+      filter.bounds != null,
+      bounds.left,
+      bounds.top,
+      bounds.right,
+      bounds.bottom,
+    );
   }
 
   /// Creates an image filter that dilates each input pixel's channel values
@@ -4636,11 +4665,19 @@ base class _ImageFilter extends NativeFieldWrapperClass1 {
   @Native<Void Function(Handle)>(symbol: 'ImageFilter::Create')
   external void _constructor();
 
-  @Native<Void Function(Pointer<Void>, Double, Double, Int32)>(
-    symbol: 'ImageFilter::initBlur',
-    isLeaf: true,
-  )
-  external void _initBlur(double sigmaX, double sigmaY, int tileMode);
+  @Native<
+    Void Function(Pointer<Void>, Double, Double, Int32, Bool, Double, Double, Double, Double)
+  >(symbol: 'ImageFilter::initBlur', isLeaf: true)
+  external void _initBlur(
+    double sigmaX,
+    double sigmaY,
+    int tileMode,
+    bool bounded,
+    double boundsLeft,
+    double boundsTop,
+    double boundsRight,
+    double boundsBottom,
+  );
 
   @Native<Void Function(Pointer<Void>, Double, Double)>(
     symbol: 'ImageFilter::initDilate',
