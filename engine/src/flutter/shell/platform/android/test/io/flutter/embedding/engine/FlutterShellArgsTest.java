@@ -45,6 +45,24 @@ public class FlutterShellArgsTest {
   }
 
   @Test
+  public void getFlagFromIntentKey_returnsExpectedFlagWhenValidKeySpecified() {
+    // Test flag without value.
+    FlutterShellArgs.Flag flag = FlutterShellArgs.getFlagFromIntentKey("enable-software-rendering");
+    assertNotNull(flag);
+    assertEquals("--enable-software-rendering", flag.commandLineArgument);
+
+    // Test with flag.
+    flag = FlutterShellArgs.getFlagFromIntentKey("vm-service-port");
+    assertNotNull(flag);
+    assertEquals("--vm-service-port=", flag.commandLineArgument);
+  }
+
+  @Test
+  public void getFlagFromIntentKey_returnsNullWhenInvalidKeySpecified() {
+    assertNull(FlutterShellArgs.getFlagFromIntentKey("non-existent-flag"));
+  }
+
+  @Test
   public void getFlagByMetadataKey_returnsNullWhenInvalidKeySpecified() {
     FlutterShellArgs.Flag flag =
         FlutterShellArgs.getFlagByMetadataKey("io.flutter.embedding.android.InvalidMetaDataKey");

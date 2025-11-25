@@ -31,12 +31,14 @@ import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterEngineCache;
 import io.flutter.embedding.engine.FlutterEngineGroup;
 import io.flutter.embedding.engine.FlutterEngineGroupCache;
+import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.plugin.view.SensitiveContentPlugin;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Delegate that implements all Flutter logic that is the same between a {@link FlutterActivity} and
@@ -330,6 +332,7 @@ import java.util.List;
         "No preferred FlutterEngine was provided. Creating a new FlutterEngine for"
             + " this FlutterFragment.");
 
+    warnIfEngineFlagsSetViaIntent(host.getActivity().getIntent());
     FlutterEngineGroup group =
         engineGroup == null ? new FlutterEngineGroup(host.getContext()) : engineGroup;
     flutterEngine =
@@ -339,6 +342,27 @@ import java.util.List;
                     .setAutomaticallyRegisterPlugins(false)
                     .setWaitForRestorationData(host.shouldRestoreAndSaveState())));
     isFlutterEngineFromHost = false;
+  }
+
+  private void warnIfEngineFlagsSetViaIntent(Intent intent) {
+    if (intent.getExtras() == null) {
+      return;
+    }
+
+    Bundle extras = intent.getExtras();
+    Set<String> extrasKeys = extras.keySet();
+
+    for (String extrasKey : extrasKeys) {
+      FlutterShellArgs.Flag flag = FlutterShellArgs.getFlagFromIntentKey(extrasKey);
+      if (flag != null) {
+        Log.w(
+            TAG,
+            "Engine flags can no longer be set via Intent on Android. If you wish to set "
+                + flag.commandLineArgument
+                + "either set the flag in the application manifest or via the command line. See flutter/docs/engine/Android-Flutter-Shell-Arguments.md for details.");
+        break;
+      }
+    }
   }
 
   /**
