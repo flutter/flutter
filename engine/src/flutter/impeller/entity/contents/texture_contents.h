@@ -125,8 +125,6 @@ class TextureContents final : public Contents {
   ///        apply it during rendering.
   void SetDeferApplyingOpacity(bool defer_applying_opacity);
 
-  /// The value on the `Snapshot` that will be returned from `RenderToSnapshot`
-  /// when rasterization does not happen.
   /// @see Snapshot::needs_rasterization_for_runtime_effects
   void SetNeedsRasterizationForRuntimeEffects(bool value);
 
@@ -143,7 +141,7 @@ class TextureContents final : public Contents {
   Scalar opacity_ = 1.0f;
   Scalar inherited_opacity_ = 1.0f;
   bool defer_applying_opacity_ = false;
-  bool needs_rasterization_for_runtime_effects_ = false;
+  bool snapshots_need_rasterization_for_runtime_effects_ = false;
 
   TextureContents(const TextureContents&) = delete;
 

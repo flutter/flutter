@@ -89,7 +89,7 @@ std::optional<Snapshot> TextureContents::RenderToSnapshot(
                         sampler_descriptor_),
                     .opacity = opacity,
                     .needs_rasterization_for_runtime_effects =
-                        needs_rasterization_for_runtime_effects_};
+                        snapshots_need_rasterization_for_runtime_effects_};
   }
   return Contents::RenderToSnapshot(
       renderer, entity,
@@ -256,7 +256,7 @@ void TextureContents::SetDeferApplyingOpacity(bool defer_applying_opacity) {
 }
 
 void TextureContents::SetNeedsRasterizationForRuntimeEffects(bool value) {
-  needs_rasterization_for_runtime_effects_ = value;
+  snapshots_need_rasterization_for_runtime_effects_ = value;
 }
 
 }  // namespace impeller
