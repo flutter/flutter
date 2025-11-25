@@ -43,14 +43,11 @@ public class FlutterLoader {
 
   // Flags to only be set internally by default. Match values in flutter::switches.
   private static final String SNAPSHOT_ASSET_PATH_KEY = "snapshot-asset-path";
-  private static final String AOT_VMSERVICE_SHARED_LIBRARY_NAME = "aot-vmservice-shared-library-name";
+  private static final String AOT_VMSERVICE_SHARED_LIBRARY_NAME =
+      "aot-vmservice-shared-library-name";
 
   // Flag set for generating GeneratedPluginRegistrant.java.
   private static final String FLUTTER_EMBEDDING_KEY = "flutterEmbedding";
-
-  // Deprecated flag. An exception will be thrown if this is specified in an app manifest.
-  private static final String DISABLE_MERGED_PLATFORM_UI_THREAD_METADATA_KEY =
-      "io.flutter.embedding.android.DisableMergedPlatformUIThread";
 
   // Resource names used for components of the precompiled snapshot.
   private static final String DEFAULT_LIBRARY = "libflutter.so";
@@ -303,7 +300,6 @@ public class FlutterLoader {
       // so we must add it here before adding flags from the manifest.
       if (args != null) {
         for (String arg : args) {
-          System.out.println("arg: " + arg);
           if (arg.startsWith(FlutterShellArgs.AOT_SHARED_LIBRARY_NAME.commandLineArgument)) {
             // Perform security check for path containing application's compiled Dart
             // code and potentially user-provided compiled native code.
@@ -335,14 +331,6 @@ public class FlutterLoader {
                 metadataKey -> {
                   FlutterShellArgs.Flag flag = FlutterShellArgs.getFlagByMetadataKey(metadataKey);
                   if (flag == null) {
-                    if (metadataKey.startsWith(DISABLE_MERGED_PLATFORM_UI_THREAD_METADATA_KEY)) {
-                      // The --disable-merged-platform-ui-thread flag has been disabled on
-                      // Android.
-                      throw new IllegalArgumentException(
-                          DISABLE_MERGED_PLATFORM_UI_THREAD_METADATA_KEY
-                              + " is no longer allowed.");
-                    }
-
                     // Manifest flag was not recognized.
                     Log.w(
                         TAG,
@@ -350,10 +338,12 @@ public class FlutterLoader {
                             + metadataKey
                             + " is not recognized. Please ensure that the flag is defined in the FlutterShellArgs.");
                     return;
-                  }
-
-                  // Only add flags that are allowed in the current build mode.
-                  if (!flag.allowedInRelease && BuildConfig.RELEASE) {
+                  } else if (FlutterShellArgs.isDeprecated(flag)) {
+                    // Do not allow deprecated flags.
+                    throw new IllegalArgumentException(
+                        metadataKey
+                            + " is deprecated and no longer allowed. Please remove this flag from your application manifest.");
+                  } else if (!flag.allowedInRelease && BuildConfig.RELEASE) {
                     // Manifest flag is not allowed in release builds.
                     Log.w(
                         TAG,
@@ -405,12 +395,26 @@ public class FlutterLoader {
       // metadata and any defaults set below.
       if (args != null) {
         for (String arg : args) {
-          // Only allow known flags to be passed to the engine.
-          if (!FlutterShellArgs.containsCommandLineArgument(getArgBase(arg))) {
+          FlutterShellArgs.Flag flag = FlutterShellArgs.getFlagByCommandLineArgument(arg);
+          if (flag == null) {
+            // Command line flag was not recognized.
+            Log.w(
+                TAG,
+                "Command line argument "
+                    + arg
+                    + "is not recognized. Please ensure that the flag is defined in the FlutterShellArgs.");
             continue;
-          } else if (arg.startsWith(FlutterShellArgs.AOT_SHARED_LIBRARY_NAME.commandLineArgument)) {
+          } else if (flag.equals(FlutterShellArgs.AOT_SHARED_LIBRARY_NAME)) {
             // This flag has already been handled.
             continue;
+          } else if (!flag.allowedInRelease && BuildConfig.RELEASE) {
+            // Flag is not allowed in release builds.
+            Log.w(
+                TAG,
+                "Command line argument "
+                    + arg
+                    + " is not allowed in release builds and will be ignored. Please remove this flag from your command line engine flags if running in release mode.");
+            return;
           }
 
           shellArgs.add(arg);

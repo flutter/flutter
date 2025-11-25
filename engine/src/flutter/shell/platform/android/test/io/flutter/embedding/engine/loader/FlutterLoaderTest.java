@@ -913,7 +913,7 @@ public class FlutterLoaderTest {
         cause
             .getMessage()
             .contains(
-                "io.flutter.embedding.android.DisableMergedPlatformUIThread is no longer allowed."));
+                "io.flutter.embedding.android.DisableMergedPlatformUIThread is deprecated and no longer allowed."));
   }
 
   @Test
