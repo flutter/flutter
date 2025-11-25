@@ -21,10 +21,9 @@ class FortnightlyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final StatelessWidget home =
-        isDisplayDesktop(context)
-            ? const _FortnightlyHomeDesktop()
-            : const _FortnightlyHomeMobile();
+    final StatelessWidget home = isDisplayDesktop(context)
+        ? const _FortnightlyHomeDesktop()
+        : const _FortnightlyHomeMobile();
     return MaterialApp(
       restorationScopeId: 'fortnightly_app',
       title: _fortnightlyTitle,

@@ -170,10 +170,7 @@ void main() {
       'computeDryBaseline results are cached and shared with computeDistanceToActualBaseline',
       () {
         const viewHeight = 200.0;
-        const constraints = BoxConstraints.tightFor(
-          width: 200.0,
-          height: viewHeight,
-        );
+        const constraints = BoxConstraints.tightFor(width: 200.0, height: viewHeight);
         final test = RenderDryBaselineTestBox();
         final RenderBox baseline = RenderBaseline(
           baseline: 0.0,
@@ -181,10 +178,7 @@ void main() {
           child: test,
         );
 
-        final root = RenderConstrainedBox(
-          additionalConstraints: constraints,
-          child: baseline,
-        );
+        final root = RenderConstrainedBox(additionalConstraints: constraints, child: baseline);
 
         layout(RenderPositionedBox(child: root));
         expect(test.calls, 1);

@@ -463,10 +463,7 @@ Future<void> main() async {
     const borderTopTangent = Offset(radius, 0.0);
     const borderLeftTangent = Offset(0.0, radius);
     const double borderDiagonalOffset = radius - radius * math.sqrt1_2;
-    const fartherBorderRadiusPoint = Offset(
-      borderDiagonalOffset + 1,
-      borderDiagonalOffset + 1,
-    );
+    const fartherBorderRadiusPoint = Offset(borderDiagonalOffset + 1, borderDiagonalOffset + 1);
 
     await tester.tapAt(borderTopTangent);
     expect(itemsTapped, <int>[1], reason: 'border Top not tapped');

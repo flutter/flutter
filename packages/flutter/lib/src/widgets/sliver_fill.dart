@@ -305,10 +305,7 @@ class SliverFillRemaining extends StatelessWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Widget>('child', child));
-    final flags = <String>[
-      if (hasScrollBody) 'scrollable',
-      if (fillOverscroll) 'fillOverscroll',
-    ];
+    final flags = <String>[if (hasScrollBody) 'scrollable', if (fillOverscroll) 'fillOverscroll'];
     if (flags.isEmpty) {
       flags.add('nonscrollable');
     }

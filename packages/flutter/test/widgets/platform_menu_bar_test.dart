@@ -122,10 +122,7 @@ void main() {
         label: 'label2',
         shortcut: SingleActivator(LogicalKeyboardKey.keyA),
       );
-      const menuBar = PlatformMenuBar(
-        menus: <PlatformMenuItem>[item],
-        child: SizedBox(),
-      );
+      const menuBar = PlatformMenuBar(menus: <PlatformMenuItem>[item], child: SizedBox());
 
       await tester.pumpWidget(const MaterialApp(home: Material(child: menuBar)));
       await tester.pump();
@@ -179,9 +176,7 @@ void main() {
     });
 
     testWidgets('modifier constructor', (WidgetTester tester) async {
-      final serialization = ShortcutSerialization.modifier(
-        LogicalKeyboardKey.home,
-      );
+      final serialization = ShortcutSerialization.modifier(LogicalKeyboardKey.home);
       expect(
         serialization.toChannelRepresentation(),
         equals(<String, Object?>{

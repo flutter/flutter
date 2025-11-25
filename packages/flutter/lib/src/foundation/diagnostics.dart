@@ -1383,8 +1383,7 @@ class TextTreeRenderer {
         final DiagnosticsNode child = children[i];
         final TextTreeConfiguration childConfig = _childTextConfiguration(child, config)!;
         if (i == children.length - 1) {
-          final lastChildPrefixLineOne =
-              '$prefixChildrenRaw${childConfig.prefixLastChildLineOne}';
+          final lastChildPrefixLineOne = '$prefixChildrenRaw${childConfig.prefixLastChildLineOne}';
           final childPrefixOtherLines =
               '$prefixChildrenRaw${childConfig.childLinkSpace}${childConfig.prefixOtherLines}';
           builder.writeRawLines(
@@ -1683,8 +1682,7 @@ abstract class DiagnosticsNode {
   /// See https://github.com/flutter/devtools/issues/8553 for details about this
   /// iterative approach.
   Map<String, Object?> toJsonMapIterative(DiagnosticsSerializationDelegate delegate) {
-    final childrenToJsonify =
-        ListQueue<(DiagnosticsNode, void Function(_JsonDiagnosticsNode))>();
+    final childrenToJsonify = ListQueue<(DiagnosticsNode, void Function(_JsonDiagnosticsNode))>();
     var result = <String, Object?>{};
     assert(() {
       result = _toJson(delegate, childrenToJsonify: childrenToJsonify);

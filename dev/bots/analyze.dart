@@ -313,9 +313,7 @@ Future<void> verifyReleaseBranchState(String workringDirerctory) async {
 }
 
 Future<void> verifyTargetPlatform(String workingDirectory) async {
-  final framework = File(
-    '$workingDirectory/packages/flutter/lib/src/foundation/platform.dart',
-  );
+  final framework = File('$workingDirectory/packages/flutter/lib/src/foundation/platform.dart');
   final frameworkPlatforms = <String>{};
   List<String> lines = framework.readAsLinesSync();
   var index = 0;
@@ -1021,9 +1019,7 @@ Iterable<_Line> _getTestSkips(File file) {
     featureSet: _parsingFeatureSet(),
     path: file.absolute.path,
   );
-  final visitor = _TestSkipLinesVisitor<CompilationUnit>(
-    parseResult,
-  );
+  final visitor = _TestSkipLinesVisitor<CompilationUnit>(parseResult);
   visitor.visitCompilationUnit(parseResult.unit);
   return visitor.skips;
 }
@@ -1542,8 +1538,7 @@ Future<void> verifyIssueLinks(String workingDirectory) async {
           )
           .map<String>((File file) => path.basename(file.path))
           .toSet();
-  final kTemplates =
-      'The available templates are:\n${templateNames.map(_bullets).join("\n")}';
+  final kTemplates = 'The available templates are:\n${templateNames.map(_bullets).join("\n")}';
   final problems = <String>[];
   final suggestions = <String>{};
   final List<File> files = await _gitFiles(workingDirectory);
@@ -2315,8 +2310,7 @@ Future<void> _checkConsumerDependencies() async {
       foundError(<String>[result.stdout.toString(), result.stderr.toString()]);
       return;
     }
-    final rawJson =
-        json.decode(result.stdout as String) as Map<String, Object?>;
+    final rawJson = json.decode(result.stdout as String) as Map<String, Object?>;
     final dependencyTree = <String, Map<String, Object?>>{
       for (final Map<String, Object?> package
           in (rawJson['packages']! as List<Object?>).cast<Map<String, Object?>>())

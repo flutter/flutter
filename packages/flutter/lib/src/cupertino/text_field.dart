@@ -115,8 +115,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder
     // this handler. If the clear button widget recognizes the up event,
     // then do not handle it.
     if (_state._clearGlobalKey.currentContext != null) {
-      final renderBox =
-          _state._clearGlobalKey.currentContext!.findRenderObject()! as RenderBox;
+      final renderBox = _state._clearGlobalKey.currentContext!.findRenderObject()! as RenderBox;
       final Offset localOffset = renderBox.globalToLocal(details.globalPosition);
       if (renderBox.hitTest(BoxHitTestResult(), position: localOffset)) {
         return;
@@ -1835,10 +1834,8 @@ class _RenderBaselineAlignedStack extends RenderBox
     final RenderBox? placeholder = _placeholderChild;
     final RenderBox editableText = _editableTextChild;
 
-    final editableTextParentData =
-        editableText.parentData! as _BaselineAlignedStackParentData;
-    final placeholderParentData =
-        placeholder?.parentData as _BaselineAlignedStackParentData?;
+    final editableTextParentData = editableText.parentData! as _BaselineAlignedStackParentData;
+    final placeholderParentData = placeholder?.parentData as _BaselineAlignedStackParentData?;
 
     size = _computeSize(
       constraints: constraints,
@@ -1872,13 +1869,11 @@ class _RenderBaselineAlignedStack extends RenderBox
     final RenderBox editableText = _editableTextChild;
 
     if (placeholder != null) {
-      final placeholderParentData =
-          placeholder.parentData! as _BaselineAlignedStackParentData;
+      final placeholderParentData = placeholder.parentData! as _BaselineAlignedStackParentData;
       context.paintChild(placeholder, offset + placeholderParentData.offset);
     }
 
-    final editableTextParentData =
-        editableText.parentData! as _BaselineAlignedStackParentData;
+    final editableTextParentData = editableText.parentData! as _BaselineAlignedStackParentData;
     context.paintChild(editableText, offset + editableTextParentData.offset);
   }
 
@@ -1934,8 +1929,7 @@ class _RenderBaselineAlignedStack extends RenderBox
   @override
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     final RenderBox editableText = _editableTextChild;
-    final editableTextParentData =
-        editableText.parentData! as _BaselineAlignedStackParentData;
+    final editableTextParentData = editableText.parentData! as _BaselineAlignedStackParentData;
 
     return result.addWithPaintOffset(
       offset: editableTextParentData.offset,

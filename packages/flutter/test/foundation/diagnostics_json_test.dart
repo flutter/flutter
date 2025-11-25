@@ -163,8 +163,7 @@ void main() {
         ),
       );
       expect(result['foo'], isTrue);
-      final properties =
-          result['properties']! as List<Map<String, Object?>>;
+      final properties = result['properties']! as List<Map<String, Object?>>;
       expect(properties, hasLength(7));
       expect(properties.every((Map<String, Object?> property) => property['foo'] == true), isTrue);
 
@@ -182,8 +181,7 @@ void main() {
           },
         ),
       );
-      final properties =
-          result['properties']! as List<Map<String, Object?>>;
+      final properties = result['properties']! as List<Map<String, Object?>>;
       expect(properties, hasLength(3));
       expect(
         properties.every((Map<String, Object?> property) => property['type'] == 'StringProperty'),
@@ -205,8 +203,7 @@ void main() {
           },
         ),
       );
-      final properties =
-          result['properties']! as List<Map<String, Object?>>;
+      final properties = result['properties']! as List<Map<String, Object?>>;
       expect(properties, hasLength(1));
       expect(properties.single['name'], 'foo');
     });
@@ -252,8 +249,7 @@ void main() {
       expect(children, hasLength(3));
       expect(children.last['truncated'], isTrue);
 
-      final properties =
-          result['properties']! as List<Map<String, Object?>>;
+      final properties = result['properties']! as List<Map<String, Object?>>;
       expect(properties, hasLength(3));
       expect(properties.last['truncated'], isTrue);
     });
@@ -268,8 +264,7 @@ void main() {
           },
         ),
       );
-      final properties =
-          result['properties']! as List<Map<String, Object?>>;
+      final properties = result['properties']! as List<Map<String, Object?>>;
       expect(properties, hasLength(7));
       expect(
         properties.every((Map<String, Object?> property) => !property.containsKey('properties')),

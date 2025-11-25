@@ -1568,10 +1568,7 @@ void main() {
   });
 
   testWidgets('MediaQuery can be partially depended-on', (WidgetTester tester) async {
-    var data = const MediaQueryData(
-      size: Size(800, 600),
-      textScaler: TextScaler.linear(1.1),
-    );
+    var data = const MediaQueryData(size: Size(800, 600), textScaler: TextScaler.linear(1.1));
 
     var sizeBuildCount = 0;
     var textScalerBuildCount = 0;

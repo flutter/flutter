@@ -610,8 +610,7 @@ void main() {
   });
 
   testWidgets('Ensure CurvedAnimations are disposed on widget change', (WidgetTester tester) async {
-    final key =
-        GlobalKey<ImplicitlyAnimatedWidgetState<AnimatedOpacity>>();
+    final key = GlobalKey<ImplicitlyAnimatedWidgetState<AnimatedOpacity>>();
     final curve = ValueNotifier<Curve>(const Interval(0.0, 0.5));
     addTearDown(curve.dispose);
     await tester.pumpWidget(
@@ -673,11 +672,7 @@ void main() {
         shadowColor: color,
         child: child,
       );
-      const physicalModel = PhysicalModel(
-        color: color,
-        shadowColor: color,
-        child: child,
-      );
+      const physicalModel = PhysicalModel(color: color, shadowColor: color, child: child);
       expect(identical(animatedPhysicalModel.shape, physicalModel.shape), isTrue);
       expect(identical(animatedPhysicalModel.clipBehavior, physicalModel.clipBehavior), isTrue);
       expect(identical(animatedPhysicalModel.borderRadius, physicalModel.borderRadius), isTrue);

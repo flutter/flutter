@@ -33,10 +33,7 @@ class TestRoute extends Route<String?> with LocalHistoryRoute<String?> {
   @override
   void install() {
     log('install');
-    final entry = OverlayEntry(
-      builder: (BuildContext context) => Container(),
-      opaque: true,
-    );
+    final entry = OverlayEntry(builder: (BuildContext context) => Container(), opaque: true);
     _entries.add(entry);
     routes.add(this);
     super.install();
@@ -669,8 +666,7 @@ void main() {
       );
       await tester.pump();
       await tester.pumpAndSettle();
-      final secondaryAnimationPageOne =
-          secondaryAnimationProxyPageOne.parent! as ProxyAnimation;
+      final secondaryAnimationPageOne = secondaryAnimationProxyPageOne.parent! as ProxyAnimation;
       expect(animationPageOne.value, 1.0);
       expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
 
@@ -689,8 +685,7 @@ void main() {
       );
       await tester.pump();
       await tester.pumpAndSettle();
-      final secondaryAnimationPageTwo =
-          secondaryAnimationProxyPageTwo.parent! as ProxyAnimation;
+      final secondaryAnimationPageTwo = secondaryAnimationProxyPageTwo.parent! as ProxyAnimation;
       expect(animationPageTwo.value, 1.0);
       expect(secondaryAnimationPageTwo.parent, kAlwaysDismissedAnimation);
       expect(secondaryAnimationPageOne.parent, animationPageTwo.parent);
@@ -726,8 +721,7 @@ void main() {
       );
       await tester.pump();
       await tester.pumpAndSettle();
-      final secondaryAnimationPageOne =
-          secondaryAnimationProxyPageOne.parent! as ProxyAnimation;
+      final secondaryAnimationPageOne = secondaryAnimationProxyPageOne.parent! as ProxyAnimation;
       expect(animationPageOne.value, 1.0);
       expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
 
@@ -747,8 +741,7 @@ void main() {
       );
       await tester.pump();
       await tester.pumpAndSettle();
-      final secondaryAnimationPageTwo =
-          secondaryAnimationProxyPageTwo.parent! as ProxyAnimation;
+      final secondaryAnimationPageTwo = secondaryAnimationProxyPageTwo.parent! as ProxyAnimation;
       expect(animationPageTwo.value, 1.0);
       expect(secondaryAnimationPageTwo.parent, kAlwaysDismissedAnimation);
       expect(secondaryAnimationPageOne.parent, animationPageTwo.parent);
@@ -829,8 +822,7 @@ void main() {
       );
       await tester.pump();
       await tester.pumpAndSettle();
-      final secondaryAnimationPageOne =
-          secondaryAnimationProxyPageOne.parent! as ProxyAnimation;
+      final secondaryAnimationPageOne = secondaryAnimationProxyPageOne.parent! as ProxyAnimation;
       expect(animationPageOne.value, 1.0);
       expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
 
@@ -863,8 +855,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 1));
       expect(secondaryAnimationPageOne.parent, isA<TrainHoppingAnimation>());
-      final trainHopper =
-          secondaryAnimationPageOne.parent! as TrainHoppingAnimation;
+      final trainHopper = secondaryAnimationPageOne.parent! as TrainHoppingAnimation;
       expect(trainHopper.currentTrain, animationPageTwo.parent);
       await tester.pump(const Duration(milliseconds: 100));
       expect(secondaryAnimationPageOne.parent, isNot(isA<TrainHoppingAnimation>()));
@@ -900,8 +891,7 @@ void main() {
       );
       await tester.pump();
       await tester.pumpAndSettle();
-      final secondaryAnimationPageOne =
-          secondaryAnimationProxyPageOne.parent! as ProxyAnimation;
+      final secondaryAnimationPageOne = secondaryAnimationProxyPageOne.parent! as ProxyAnimation;
       expect(animationPageOne.value, 1.0);
       expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
 
@@ -932,16 +922,14 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 10));
       expect(secondaryAnimationPageOne.parent, isA<TrainHoppingAnimation>());
-      final trainHopper =
-          secondaryAnimationPageOne.parent! as TrainHoppingAnimation;
+      final trainHopper = secondaryAnimationPageOne.parent! as TrainHoppingAnimation;
       expect(trainHopper.currentTrain, animationPageTwo.parent);
 
       // Pop page three while replacement push is ongoing.
       navigator.currentState!.pop();
       await tester.pump();
       expect(secondaryAnimationPageOne.parent, isA<TrainHoppingAnimation>());
-      final trainHopper2 =
-          secondaryAnimationPageOne.parent! as TrainHoppingAnimation;
+      final trainHopper2 = secondaryAnimationPageOne.parent! as TrainHoppingAnimation;
       expect(trainHopper2.currentTrain, animationPageTwo.parent);
       expect(trainHopper.currentTrain, isNull); // Has been disposed.
       await tester.pumpAndSettle();
@@ -1057,8 +1045,7 @@ void main() {
       expect(barrier.dismissible, isFalse);
 
       // Close the dialog.
-      final navigatorElement =
-          find.byType(Navigator).evaluate().last as StatefulElement;
+      final navigatorElement = find.byType(Navigator).evaluate().last as StatefulElement;
       final navigatorState = navigatorElement.state as NavigatorState;
       navigatorState.pop();
       await tester.pumpAndSettle();
@@ -1097,8 +1084,7 @@ void main() {
       expect(barrier.semanticsLabel, same(null));
 
       // Close the dialog.
-      final navigatorElement =
-          find.byType(Navigator).evaluate().last as StatefulElement;
+      final navigatorElement = find.byType(Navigator).evaluate().last as StatefulElement;
       final navigatorState = navigatorElement.state as NavigatorState;
       navigatorState.pop();
       await tester.pumpAndSettle();

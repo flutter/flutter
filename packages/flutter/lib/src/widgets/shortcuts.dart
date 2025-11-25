@@ -866,8 +866,7 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
   static Map<LogicalKeyboardKey?, List<_ActivatorIntentPair>> _indexShortcuts(
     Map<ShortcutActivator, Intent> source,
   ) {
-    final result =
-        <LogicalKeyboardKey?, List<_ActivatorIntentPair>>{};
+    final result = <LogicalKeyboardKey?, List<_ActivatorIntentPair>>{};
     source.forEach((ShortcutActivator activator, Intent intent) {
       // This intermediate variable is necessary to comply with Dart analyzer.
       final Iterable<LogicalKeyboardKey?>? nullableTriggers = activator.triggers;
@@ -1467,8 +1466,7 @@ class ShortcutRegistry with ChangeNotifier {
   }
 
   bool _debugCheckForDuplicates() {
-    final previous =
-        <ShortcutActivator, ShortcutRegistryEntry?>{};
+    final previous = <ShortcutActivator, ShortcutRegistryEntry?>{};
     for (final MapEntry<ShortcutRegistryEntry, Map<ShortcutActivator, Intent>> tokenEntry
         in _registeredShortcuts.entries) {
       for (final ShortcutActivator shortcut in tokenEntry.value.keys) {

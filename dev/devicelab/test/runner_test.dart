@@ -8,10 +8,7 @@ import 'package:vm_service/vm_service.dart';
 import 'common.dart';
 
 void main() {
-  final isolateParams = <String, String>{
-    'runFlutterConfig': 'false',
-    'timeoutInMinutes': '1',
-  };
+  final isolateParams = <String, String>{'runFlutterConfig': 'false', 'timeoutInMinutes': '1'};
   late List<String> printLog;
   void print(String s) => printLog.add(s);
 

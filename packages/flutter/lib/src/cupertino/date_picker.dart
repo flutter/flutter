@@ -1960,11 +1960,7 @@ class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
   bool get _isCurrentDateValid {
     // The current date selection represents a range [minSelectedData, maxSelectDate].
     final minSelectedDate = DateTime(selectedYear, selectedMonth);
-    final maxSelectedDate = DateTime(
-      selectedYear,
-      selectedMonth,
-      widget.initialDateTime.day + 1,
-    );
+    final maxSelectedDate = DateTime(selectedYear, selectedMonth, widget.initialDateTime.day + 1);
 
     final bool minCheck = widget.minimumDate?.isBefore(maxSelectedDate) ?? true;
     final bool maxCheck = widget.maximumDate?.isBefore(minSelectedDate) ?? false;
@@ -1985,11 +1981,7 @@ class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
     // Whenever scrolling lands on an invalid entry, the picker
     // automatically scrolls to a valid one.
     final minSelectDate = DateTime(selectedYear, selectedMonth);
-    final maxSelectDate = DateTime(
-      selectedYear,
-      selectedMonth,
-      widget.initialDateTime.day + 1,
-    );
+    final maxSelectDate = DateTime(selectedYear, selectedMonth, widget.initialDateTime.day + 1);
 
     final bool minCheck = widget.minimumDate?.isBefore(maxSelectDate) ?? true;
     final bool maxCheck = widget.maximumDate?.isBefore(minSelectDate) ?? false;

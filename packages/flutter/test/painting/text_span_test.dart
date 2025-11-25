@@ -36,16 +36,8 @@ void main() {
     final d1 = TextSpan(text: 'a', onEnter: callback1);
     final d2 = TextSpan(text: 'a', onEnter: callback1);
     final d3 = TextSpan(text: 'a', onEnter: callback2);
-    final e1 = TextSpan(
-      text: 'a',
-      onEnter: callback2,
-      mouseCursor: SystemMouseCursors.forbidden,
-    );
-    final e2 = TextSpan(
-      text: 'a',
-      onEnter: callback2,
-      mouseCursor: SystemMouseCursors.forbidden,
-    );
+    final e1 = TextSpan(text: 'a', onEnter: callback2, mouseCursor: SystemMouseCursors.forbidden);
+    final e2 = TextSpan(text: 'a', onEnter: callback2, mouseCursor: SystemMouseCursors.forbidden);
 
     expect(a1 == d1, isFalse);
     expect(d1 == d2, isTrue);
@@ -465,8 +457,7 @@ void main() {
     expect(collector[1].stringAttributes[0].range, const TextRange(start: 0, end: 5));
     expect(collector[1].stringAttributes[1], isA<LocaleStringAttribute>());
     expect(collector[1].stringAttributes[1].range, const TextRange(start: 0, end: 5));
-    final localeStringAttribute =
-        collector[1].stringAttributes[1] as LocaleStringAttribute;
+    final localeStringAttribute = collector[1].stringAttributes[1] as LocaleStringAttribute;
     expect(localeStringAttribute.locale, const Locale('es', 'MX'));
     expect(collector[2].stringAttributes.length, 0);
     expect(collector[3].stringAttributes.length, 0);
@@ -483,8 +474,7 @@ void main() {
     expect(combined[0].stringAttributes[1].range, const TextRange(start: 5, end: 10));
     expect(combined[0].stringAttributes[2], isA<LocaleStringAttribute>());
     expect(combined[0].stringAttributes[2].range, const TextRange(start: 5, end: 10));
-    final combinedLocaleStringAttribute =
-        combined[0].stringAttributes[2] as LocaleStringAttribute;
+    final combinedLocaleStringAttribute = combined[0].stringAttributes[2] as LocaleStringAttribute;
     expect(combinedLocaleStringAttribute.locale, const Locale('es', 'MX'));
     expect(combined[0].stringAttributes[3], isA<SpellOutStringAttribute>());
     expect(combined[0].stringAttributes[3].range, const TextRange(start: 20, end: 25));

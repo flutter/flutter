@@ -1060,12 +1060,8 @@ void main() {
     test('swapping painters', () {
       layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
 
-      final painter1 = _TestRenderEditablePainter(
-        color: const Color(0x01234567),
-      );
-      final painter2 = _TestRenderEditablePainter(
-        color: const Color(0x76543210),
-      );
+      final painter1 = _TestRenderEditablePainter(color: const Color(0x01234567));
+      final painter2 = _TestRenderEditablePainter(color: const Color(0x76543210));
 
       editable.painter = painter1;
       editable.foregroundPainter = painter2;

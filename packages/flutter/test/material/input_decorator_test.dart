@@ -2052,9 +2052,7 @@ void main() {
       WidgetTester tester,
     ) async {
       const canvasRect = Rect.fromLTWH(0, 0, 100, 100);
-      const border = UnderlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(12.0)),
-      );
+      const border = UnderlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0)));
       expect(
         (Canvas canvas) => border.paint(canvas, canvasRect),
         paints..drrect(
@@ -2077,9 +2075,7 @@ void main() {
         ),
       );
 
-      const border2 = UnderlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(60.0)),
-      );
+      const border2 = UnderlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(60.0)));
       expect(
         (Canvas canvas) => border2.paint(canvas, canvasRect),
         paints..drrect(
@@ -2109,9 +2105,7 @@ void main() {
     ) async {
       const canvasRect = Rect.fromLTWH(0, 0, 100, 100);
       const borderWidth = 2.0;
-      const border = UnderlineInputBorder(
-        borderSide: BorderSide(width: borderWidth),
-      );
+      const border = UnderlineInputBorder(borderSide: BorderSide(width: borderWidth));
       expect(
         (Canvas canvas) => border.paint(canvas, canvasRect),
         paints..line(
@@ -8404,15 +8398,11 @@ void main() {
   testWidgets('InputDecorationThemeData.inputDecoration with WidgetState', (
     WidgetTester tester,
   ) async {
-    final themeStyle = WidgetStateTextStyle.resolveWith((
-      Set<WidgetState> states,
-    ) {
+    final themeStyle = WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
       return const TextStyle(color: Colors.green);
     });
 
-    final decorationStyle = WidgetStateTextStyle.resolveWith((
-      Set<WidgetState> states,
-    ) {
+    final decorationStyle = WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
       return const TextStyle(color: Colors.blue);
     });
 
@@ -8456,9 +8446,7 @@ void main() {
     );
 
     // InputDecoration (baseDecoration) defines InputDecoration properties
-    final border = WidgetStateInputBorder.resolveWith((
-      Set<WidgetState> states,
-    ) {
+    final border = WidgetStateInputBorder.resolveWith((Set<WidgetState> states) {
       return const OutlineInputBorder();
     });
     decoration =
@@ -8531,16 +8519,15 @@ void main() {
   });
 
   testWidgets('InputDecoration with WidgetStateInputBorder', (WidgetTester tester) async {
-    const outlineInputBorder =
-        WidgetStateInputBorder.fromMap(<WidgetStatesConstraint, InputBorder>{
-          WidgetState.focused: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.blue, width: 4.0),
-          ),
-          WidgetState.hovered: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.cyan, width: 8.0),
-          ),
-          WidgetState.any: OutlineInputBorder(),
-        });
+    const outlineInputBorder = WidgetStateInputBorder.fromMap(<WidgetStatesConstraint, InputBorder>{
+      WidgetState.focused: OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.blue, width: 4.0),
+      ),
+      WidgetState.hovered: OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.cyan, width: 8.0),
+      ),
+      WidgetState.any: OutlineInputBorder(),
+    });
 
     RenderObject getBorder() {
       return tester.renderObject(
@@ -8647,12 +8634,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final builder = DiagnosticPropertiesBuilder();
-    const constraints = BoxConstraints(
-      minWidth: 10,
-      maxWidth: 10,
-      minHeight: 30,
-      maxHeight: 30,
-    );
+    const constraints = BoxConstraints(minWidth: 10, maxWidth: 10, minHeight: 30, maxHeight: 30);
     const InputDecorationThemeData(
       labelStyle: TextStyle(),
       floatingLabelStyle: TextStyle(),
@@ -9353,10 +9335,7 @@ void main() {
     testWidgets('depends on hint width and content width when decorator is empty', (
       WidgetTester tester,
     ) async {
-      const decorationWithHint = InputDecoration(
-        contentPadding: EdgeInsets.zero,
-        hintText: 'Hint',
-      );
+      const decorationWithHint = InputDecoration(contentPadding: EdgeInsets.zero, hintText: 'Hint');
       const hintTextWidth = 66.0;
       const smallContentWidth = 20.0;
       const largeContentWidth = 80.0;
@@ -9414,10 +9393,7 @@ void main() {
     testWidgets('depends on hint width when decorator is not empty and maintainHintSize is true', (
       WidgetTester tester,
     ) async {
-      const decorationWithHint = InputDecoration(
-        contentPadding: EdgeInsets.zero,
-        hintText: 'Hint',
-      );
+      const decorationWithHint = InputDecoration(contentPadding: EdgeInsets.zero, hintText: 'Hint');
       const contentWidth = 20.0;
 
       await tester.pumpWidget(
@@ -9550,9 +9526,7 @@ void main() {
   });
 
   test('InputDecorationThemeData.copyWith keeps original iconColor', () async {
-    const original = InputDecorationThemeData(
-      iconColor: Color(0xDEADBEEF),
-    );
+    const original = InputDecorationThemeData(iconColor: Color(0xDEADBEEF));
     expect(original.iconColor, const Color(0xDEADBEEF));
     expect(original.fillColor, isNot(const Color(0xDEADCAFE)));
     final InputDecorationThemeData copy1 = original.copyWith(fillColor: const Color(0xDEADCAFE));
@@ -9572,10 +9546,7 @@ void main() {
   });
 
   test('InputDecorationThemeData copyWith correctly copies and replaces values', () {
-    const original = InputDecorationThemeData(
-      focusColor: Colors.orange,
-      fillColor: Colors.green,
-    );
+    const original = InputDecorationThemeData(focusColor: Colors.orange, fillColor: Colors.green);
     final InputDecorationThemeData copy = original.copyWith(
       focusColor: Colors.yellow,
       fillColor: Colors.blue,
@@ -10255,9 +10226,7 @@ void main() {
     const overlayColor = Color(0xff0000ff);
     const shadowColor = Color(0xff0ff0ff);
     const elevation = 4.0;
-    final shape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(10.0),
-    );
+    final shape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0));
     final iconButtonStyle = ButtonStyle(
       backgroundColor: const MaterialStatePropertyAll<Color>(backgroundColor),
       foregroundColor: const MaterialStatePropertyAll<Color>(foregroundColor),
@@ -10305,9 +10274,7 @@ void main() {
     const overlayColor = Color(0xff0000ff);
     const shadowColor = Color(0xff0ff0ff);
     const elevation = 4.0;
-    final shape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(10.0),
-    );
+    final shape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0));
     final iconButtonStyle = ButtonStyle(
       backgroundColor: const MaterialStatePropertyAll<Color>(backgroundColor),
       foregroundColor: const MaterialStatePropertyAll<Color>(foregroundColor),
@@ -15843,8 +15810,7 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/175993.
   testWidgets('helper/error text default padding is correct', (WidgetTester tester) async {
     const defaultPadding = 16.0; // From M3 spec.
-    const longText =
-        'This is a very long text that should wrap and fill the available width';
+    const longText = 'This is a very long text that should wrap and fill the available width';
     const double inputWidth = 300;
 
     Future<void> buildDecorator({

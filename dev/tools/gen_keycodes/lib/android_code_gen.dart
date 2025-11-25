@@ -88,11 +88,7 @@ class AndroidCodeGenerator extends PlatformCodeGenerator {
   /// This generates the mask values for the part of a key code that defines its plane.
   String get _maskConstants {
     final buffer = StringBuffer();
-    const maskConstants = <MaskConstant>[
-      kValueMask,
-      kUnicodePlane,
-      kAndroidPlane,
-    ];
+    const maskConstants = <MaskConstant>[kValueMask, kUnicodePlane, kAndroidPlane];
     for (final constant in maskConstants) {
       buffer.writeln(
         '  public static final long k${constant.upperCamelName} = ${toHex(constant.value, digits: 11)}L;',

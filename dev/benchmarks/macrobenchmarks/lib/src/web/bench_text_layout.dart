@@ -136,13 +136,12 @@ class BenchTextCachedLayout extends RawRecorder {
 
   @override
   void body(Profile profile) {
-    final builder =
-        ui.ParagraphBuilder(ui.ParagraphStyle(fontFamily: 'sans-serif'))
-          ..pushStyle(ui.TextStyle(fontSize: 12.0))
-          ..addText(
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, '
-            'sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-          );
+    final builder = ui.ParagraphBuilder(ui.ParagraphStyle(fontFamily: 'sans-serif'))
+      ..pushStyle(ui.TextStyle(fontSize: 12.0))
+      ..addText(
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, '
+        'sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+      );
     final ui.Paragraph paragraph = builder.build();
     profile.record('layout', () {
       paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));

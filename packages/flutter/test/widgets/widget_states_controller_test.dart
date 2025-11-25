@@ -86,9 +86,7 @@ void main() {
       count += 1;
     }
 
-    final controller = WidgetStatesController(const <WidgetState>{
-      WidgetState.selected,
-    });
+    final controller = WidgetStatesController(const <WidgetState>{WidgetState.selected});
     controller.addListener(valueChanged);
 
     controller.update(WidgetState.selected, true);

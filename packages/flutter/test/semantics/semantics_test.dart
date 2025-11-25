@@ -175,10 +175,8 @@ void main() {
     test('provides the correct isMergedIntoParent value', () {
       final root = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
       final node1 = SemanticsNode()..rect = const Rect.fromLTRB(1.0, 0.0, 10.0, 10.0);
-      final node11 = SemanticsNode()
-        ..rect = const Rect.fromLTRB(2.0, 0.0, 10.0, 10.0);
-      final node12 = SemanticsNode()
-        ..rect = const Rect.fromLTRB(3.0, 0.0, 10.0, 10.0);
+      final node11 = SemanticsNode()..rect = const Rect.fromLTRB(2.0, 0.0, 10.0, 10.0);
+      final node12 = SemanticsNode()..rect = const Rect.fromLTRB(3.0, 0.0, 10.0, 10.0);
 
       final noMergeConfig = SemanticsConfiguration()
         ..isSemanticBoundary = true
@@ -607,8 +605,7 @@ void main() {
       ],
     );
 
-    final rootComplex = SemanticsNode()
-      ..rect = const Rect.fromLTRB(0.0, 0.0, 25.0, 5.0);
+    final rootComplex = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 25.0, 5.0);
     rootComplex.updateWith(
       config: null,
       childrenInInversePaintOrder: <SemanticsNode>[child1, child2, child3],
@@ -923,8 +920,7 @@ void main() {
   test('performActionAt can hit test on merged semantics node', () {
     var tapped = false;
     final owner = SemanticsOwner(onSemanticsUpdate: (SemanticsUpdate update) {});
-    final root = SemanticsNode.root(owner: owner)
-      ..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
+    final root = SemanticsNode.root(owner: owner)..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
     final merged = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
     final mergeConfig = SemanticsConfiguration()
       ..isSemanticBoundary = true
@@ -940,8 +936,7 @@ void main() {
   });
 
   test('Tags show up in debug properties', () {
-    final actionNode = SemanticsNode()
-      ..tags = <SemanticsTag>{RenderViewport.useTwoPaneSemantics};
+    final actionNode = SemanticsNode()..tags = <SemanticsTag>{RenderViewport.useTwoPaneSemantics};
 
     expect(actionNode.toStringDeep(), contains('\n   tags: RenderViewport.twoPane\n'));
   });
@@ -1229,10 +1224,7 @@ void main() {
     });
 
     test('complex multilingual example', () {
-      final builder = SemanticsLabelBuilder(
-        textDirection: TextDirection.ltr,
-        separator: ', ',
-      );
+      final builder = SemanticsLabelBuilder(textDirection: TextDirection.ltr, separator: ', ');
       builder
         ..addPart('Welcome', textDirection: TextDirection.ltr)
         ..addPart('مرحبا', textDirection: TextDirection.rtl) // Arabic

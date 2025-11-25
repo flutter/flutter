@@ -1011,11 +1011,7 @@ void main() {
     expect(falseProperty.isFiltered(DiagnosticLevel.info), isFalse);
     validatePropertyJsonSerialization(trueProperty);
     validatePropertyJsonSerialization(falseProperty);
-    final truthyProperty = DiagnosticsProperty<bool>(
-      'name',
-      true,
-      description: 'truthy',
-    );
+    final truthyProperty = DiagnosticsProperty<bool>('name', true, description: 'truthy');
     expect(truthyProperty.toString(), equals('name: truthy'));
     validatePropertyJsonSerialization(truthyProperty);
     expect(DiagnosticsProperty<bool>('name', true, showName: false).toString(), equals('true'));
@@ -1033,11 +1029,7 @@ void main() {
       DiagnosticsProperty<bool>('name', null, defaultValue: null).isFiltered(DiagnosticLevel.info),
       isTrue,
     );
-    final missingBool = DiagnosticsProperty<bool>(
-      'name',
-      null,
-      ifNull: 'missing',
-    );
+    final missingBool = DiagnosticsProperty<bool>('name', null, ifNull: 'missing');
     expect(missingBool.toString(), equals('name: missing'));
     validatePropertyJsonSerialization(missingBool);
   });
@@ -1057,11 +1049,7 @@ void main() {
   });
 
   test('property with tooltip test', () {
-    final withTooltip = DiagnosticsProperty<String>(
-      'name',
-      'value',
-      tooltip: 'tooltip',
-    );
+    final withTooltip = DiagnosticsProperty<String>('name', 'value', tooltip: 'tooltip');
     expect(withTooltip.toString(), equals('name: value (tooltip)'));
     expect(withTooltip.value, equals('value'));
     expect(withTooltip.isFiltered(DiagnosticLevel.fine), isFalse);
@@ -1154,16 +1142,8 @@ void main() {
 
   test('callback property test', () {
     void onClick() {}
-    final present = ObjectFlagProperty<Function>(
-      'onClick',
-      onClick,
-      ifPresent: 'clickable',
-    );
-    final missing = ObjectFlagProperty<Function>(
-      'onClick',
-      null,
-      ifPresent: 'clickable',
-    );
+    final present = ObjectFlagProperty<Function>('onClick', onClick, ifPresent: 'clickable');
+    final missing = ObjectFlagProperty<Function>('onClick', null, ifPresent: 'clickable');
 
     expect(present.toString(), equals('clickable'));
     expect(present.isFiltered(DiagnosticLevel.info), isFalse);
@@ -1177,16 +1157,8 @@ void main() {
   test('missing callback property test', () {
     void onClick() {}
 
-    final present = ObjectFlagProperty<Function>(
-      'onClick',
-      onClick,
-      ifNull: 'disabled',
-    );
-    final missing = ObjectFlagProperty<Function>(
-      'onClick',
-      null,
-      ifNull: 'disabled',
-    );
+    final present = ObjectFlagProperty<Function>('onClick', onClick, ifNull: 'disabled');
+    final missing = ObjectFlagProperty<Function>('onClick', null, ifNull: 'disabled');
 
     expect(present.toString(), equals('onClick: Closure: () => void'));
     expect(present.isFiltered(DiagnosticLevel.fine), isTrue);
@@ -1198,20 +1170,8 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54221
 
   test('describe bool property', () {
-    final yes = FlagProperty(
-      'name',
-      value: true,
-      ifTrue: 'YES',
-      ifFalse: 'NO',
-      showName: true,
-    );
-    final no = FlagProperty(
-      'name',
-      value: false,
-      ifTrue: 'YES',
-      ifFalse: 'NO',
-      showName: true,
-    );
+    final yes = FlagProperty('name', value: true, ifTrue: 'YES', ifFalse: 'NO', showName: true);
+    final no = FlagProperty('name', value: false, ifTrue: 'YES', ifFalse: 'NO', showName: true);
     expect(yes.toString(), equals('name: YES'));
     expect(yes.level, equals(DiagnosticLevel.info));
     expect(yes.value, isTrue);
@@ -1247,10 +1207,7 @@ void main() {
   test('enum property test', () {
     final hello = EnumProperty<ExampleEnum>('name', ExampleEnum.hello);
     final world = EnumProperty<ExampleEnum>('name', ExampleEnum.world);
-    final deferToChild = EnumProperty<ExampleEnum>(
-      'name',
-      ExampleEnum.deferToChild,
-    );
+    final deferToChild = EnumProperty<ExampleEnum>('name', ExampleEnum.deferToChild);
     final nullEnum = EnumProperty<ExampleEnum>('name', null);
     expect(hello.level, equals(DiagnosticLevel.info));
     expect(hello.value, equals(ExampleEnum.hello));
@@ -1343,11 +1300,7 @@ void main() {
     expect(simple.toString(), equals('name: Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)'));
     validatePropertyJsonSerialization(simple);
 
-    final withDescription = DiagnosticsProperty<Rect>(
-      'name',
-      rect,
-      description: 'small rect',
-    );
+    final withDescription = DiagnosticsProperty<Rect>('name', rect, description: 'small rect');
     expect(withDescription.value, equals(rect));
     expect(withDescription.level, equals(DiagnosticLevel.info));
     expect(withDescription.toString(), equals('name: small rect'));
@@ -1359,21 +1312,13 @@ void main() {
     expect(nullProperty.toString(), equals('name: null'));
     validatePropertyJsonSerialization(nullProperty);
 
-    final hideNullProperty = DiagnosticsProperty<Object>(
-      'name',
-      null,
-      defaultValue: null,
-    );
+    final hideNullProperty = DiagnosticsProperty<Object>('name', null, defaultValue: null);
     expect(hideNullProperty.value, isNull);
     expect(hideNullProperty.isFiltered(DiagnosticLevel.info), isTrue);
     expect(hideNullProperty.toString(), equals('name: null'));
     validatePropertyJsonSerialization(hideNullProperty);
 
-    final nullDescription = DiagnosticsProperty<Object>(
-      'name',
-      null,
-      ifNull: 'missing',
-    );
+    final nullDescription = DiagnosticsProperty<Object>('name', null, ifNull: 'missing');
     expect(nullDescription.value, isNull);
     expect(nullDescription.level, equals(DiagnosticLevel.info));
     expect(nullDescription.toString(), equals('name: missing'));
@@ -1390,11 +1335,7 @@ void main() {
     expect(hideName.toString(), equals('Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)'));
     validatePropertyJsonSerialization(hideName);
 
-    final hideSeparator = DiagnosticsProperty<Rect>(
-      'Creator',
-      rect,
-      showSeparator: false,
-    );
+    final hideSeparator = DiagnosticsProperty<Rect>('Creator', rect, showSeparator: false);
     expect(hideSeparator.value, equals(rect));
     expect(hideSeparator.level, equals(DiagnosticLevel.info));
     expect(hideSeparator.toString(), equals('Creator Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)'));
@@ -1403,11 +1344,7 @@ void main() {
 
   test('lazy object property test', () {
     const rect = Rect.fromLTRB(0.0, 0.0, 20.0, 20.0);
-    final simple = DiagnosticsProperty<Rect>.lazy(
-      'name',
-      () => rect,
-      description: 'small rect',
-    );
+    final simple = DiagnosticsProperty<Rect>.lazy('name', () => rect, description: 'small rect');
     expect(simple.value, equals(rect));
     expect(simple.level, equals(DiagnosticLevel.info));
     expect(simple.toString(), equals('name: small rect'));
@@ -1497,11 +1434,7 @@ void main() {
     expect(hide.toString(), equals('wasLayout: false'));
     validateFlagPropertyJsonSerialization(hide);
 
-    final hideTrue = FlagProperty(
-      'wasLayout',
-      value: true,
-      ifFalse: 'no layout computed',
-    );
+    final hideTrue = FlagProperty('wasLayout', value: true, ifFalse: 'no layout computed');
     expect(hideTrue.name, equals('wasLayout'));
     expect(hideTrue.value, isTrue);
     expect(hideTrue.level, equals(DiagnosticLevel.hidden));
@@ -1572,11 +1505,7 @@ void main() {
     // Empty property (without ifEmpty)
     {
       final value = <String, Function?>{'enter': null};
-      final flags = FlagsSummary<Function>(
-        'listeners',
-        value,
-        ifEmpty: '<none>',
-      );
+      final flags = FlagsSummary<Function>('listeners', value, ifEmpty: '<none>');
       expect(flags.toString(), equals('listeners: <none>'));
       expect(flags.isFiltered(DiagnosticLevel.info), isFalse);
       validateIterableFlagsPropertyJsonSerialization(flags);
@@ -1608,11 +1537,7 @@ void main() {
     expect(nullProperty.toString(), equals('list: null'));
     validateIterablePropertyJsonSerialization(nullProperty);
 
-    final hideNullProperty = IterableProperty<Object>(
-      'list',
-      null,
-      defaultValue: null,
-    );
+    final hideNullProperty = IterableProperty<Object>('list', null, defaultValue: null);
     expect(hideNullProperty.value, isNull);
     expect(hideNullProperty.isFiltered(DiagnosticLevel.info), isTrue);
     expect(hideNullProperty.level, equals(DiagnosticLevel.fine));

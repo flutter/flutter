@@ -504,9 +504,7 @@ void main() {
   ) async {
     await binding.setSurfaceSize(const Size(800, 800));
     const headerText = 'HEADER';
-    final actions = <Widget>[
-      IconButton(onPressed: () {}, icon: const Icon(Icons.add)),
-    ];
+    final actions = <Widget>[IconButton(onPressed: () {}, icon: const Icon(Icons.add))];
     final source = TestDataSource(allowSelection: true);
     addTearDown(source.dispose);
 

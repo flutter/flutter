@@ -286,8 +286,7 @@ void main() {
       expect(find.text('Sheet'), isOnstage);
 
       // Show the bottom sheet.
-      final sheet =
-          containerKey2.currentState! as PersistentBottomSheetTestState;
+      final sheet = containerKey2.currentState! as PersistentBottomSheetTestState;
       sheet.showBottomSheet();
 
       await tester.pump(const Duration(seconds: 1));

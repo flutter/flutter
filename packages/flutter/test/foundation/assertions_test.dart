@@ -353,10 +353,7 @@ void main() {
 #11     Element.updateChild (package:flutter/src/widgets/framework.dart:3070:12)
 #12     SingleChildRenderObjectElement.mount (package:flutter/blah.dart:999:9)''');
 
-    final details = FlutterErrorDetails(
-      exception: AssertionError('Test assertion'),
-      stack: stack,
-    );
+    final details = FlutterErrorDetails(exception: AssertionError('Test assertion'), stack: stack);
 
     final builder = DiagnosticPropertiesBuilder();
     details.debugFillProperties(builder);
@@ -389,10 +386,7 @@ void main() {
 #12     Element.updateChild (package:flutter/src/widgets/framework.dart:3070:12)
 #13     SingleChildRenderObjectElement.mount (package:flutter/blah.dart:999:9)''');
 
-    final details = FlutterErrorDetails(
-      exception: AssertionError('Test assertion'),
-      stack: stack,
-    );
+    final details = FlutterErrorDetails(exception: AssertionError('Test assertion'), stack: stack);
 
     final builder = DiagnosticPropertiesBuilder();
     details.debugFillProperties(builder);

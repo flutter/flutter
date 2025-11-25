@@ -22,13 +22,12 @@ void main() {
   test('WidgetStateProperty.map()', () {
     final WidgetStatesConstraint active =
         WidgetState.hovered | WidgetState.focused | WidgetState.pressed;
-    final value =
-        WidgetStateProperty<String?>.fromMap(<WidgetStatesConstraint, String?>{
-          active & WidgetState.error: 'active error',
-          WidgetState.disabled | WidgetState.error: 'kinda sus',
-          ~(WidgetState.dragged | WidgetState.selected) & ~active: 'this is boring',
-          active: 'active',
-        });
+    final value = WidgetStateProperty<String?>.fromMap(<WidgetStatesConstraint, String?>{
+      active & WidgetState.error: 'active error',
+      WidgetState.disabled | WidgetState.error: 'kinda sus',
+      ~(WidgetState.dragged | WidgetState.selected) & ~active: 'this is boring',
+      active: 'active',
+    });
     expect(value.resolve(<WidgetState>{WidgetState.focused, WidgetState.error}), 'active error');
     expect(value.resolve(<WidgetState>{WidgetState.scrolledUnder}), 'this is boring');
     expect(value.resolve(<WidgetState>{WidgetState.disabled}), 'kinda sus');
@@ -153,88 +152,67 @@ void main() {
 
     const whiteBorder = BorderSide(color: white);
     const blackBorder = BorderSide();
-    final side1 = WidgetStateBorderSide.fromMap(
-      <WidgetStatesConstraint, BorderSide>{
-        WidgetState.focused | WidgetState.hovered: whiteBorder,
-        WidgetState.any: blackBorder,
-      },
-    );
-    final side2 = WidgetStateBorderSide.fromMap(
-      <WidgetStatesConstraint, BorderSide>{
-        WidgetState.focused | WidgetState.hovered: whiteBorder,
-        WidgetState.any: blackBorder,
-      },
-    );
-    final side3 = WidgetStateBorderSide.fromMap(
-      <WidgetStatesConstraint, BorderSide>{
-        WidgetState.focused | WidgetState.hovered: blackBorder,
-        WidgetState.any: whiteBorder,
-      },
-    );
+    final side1 = WidgetStateBorderSide.fromMap(<WidgetStatesConstraint, BorderSide>{
+      WidgetState.focused | WidgetState.hovered: whiteBorder,
+      WidgetState.any: blackBorder,
+    });
+    final side2 = WidgetStateBorderSide.fromMap(<WidgetStatesConstraint, BorderSide>{
+      WidgetState.focused | WidgetState.hovered: whiteBorder,
+      WidgetState.any: blackBorder,
+    });
+    final side3 = WidgetStateBorderSide.fromMap(<WidgetStatesConstraint, BorderSide>{
+      WidgetState.focused | WidgetState.hovered: blackBorder,
+      WidgetState.any: whiteBorder,
+    });
     expect(side1 == side2, isTrue);
     expect(side1 == side3, isFalse);
 
     const OutlinedBorder whiteRRect = RoundedRectangleBorder(side: whiteBorder);
     const OutlinedBorder blackRRect = RoundedRectangleBorder(side: blackBorder);
-    final border1 = WidgetStateOutlinedBorder.fromMap(
-      <WidgetStatesConstraint, OutlinedBorder>{
-        WidgetState.focused | WidgetState.hovered: whiteRRect,
-        WidgetState.any: blackRRect,
-      },
-    );
-    final border2 = WidgetStateOutlinedBorder.fromMap(
-      <WidgetStatesConstraint, OutlinedBorder>{
-        WidgetState.focused | WidgetState.hovered: whiteRRect,
-        WidgetState.any: blackRRect,
-      },
-    );
-    final border3 = WidgetStateOutlinedBorder.fromMap(
-      <WidgetStatesConstraint, OutlinedBorder>{
-        WidgetState.focused | WidgetState.hovered: blackRRect,
-        WidgetState.any: whiteRRect,
-      },
-    );
+    final border1 = WidgetStateOutlinedBorder.fromMap(<WidgetStatesConstraint, OutlinedBorder>{
+      WidgetState.focused | WidgetState.hovered: whiteRRect,
+      WidgetState.any: blackRRect,
+    });
+    final border2 = WidgetStateOutlinedBorder.fromMap(<WidgetStatesConstraint, OutlinedBorder>{
+      WidgetState.focused | WidgetState.hovered: whiteRRect,
+      WidgetState.any: blackRRect,
+    });
+    final border3 = WidgetStateOutlinedBorder.fromMap(<WidgetStatesConstraint, OutlinedBorder>{
+      WidgetState.focused | WidgetState.hovered: blackRRect,
+      WidgetState.any: whiteRRect,
+    });
     expect(border1 == border2, isTrue);
     expect(border1 == border3, isFalse);
 
-    final cursor1 =
-        WidgetStateMouseCursor.fromMap(<WidgetStatesConstraint, MouseCursor>{
-          WidgetState.focused | WidgetState.hovered: MouseCursor.defer,
-          WidgetState.any: MouseCursor.uncontrolled,
-        });
-    final cursor2 =
-        WidgetStateMouseCursor.fromMap(<WidgetStatesConstraint, MouseCursor>{
-          WidgetState.focused | WidgetState.hovered: MouseCursor.defer,
-          WidgetState.any: MouseCursor.uncontrolled,
-        });
-    final cursor3 =
-        WidgetStateMouseCursor.fromMap(<WidgetStatesConstraint, MouseCursor>{
-          WidgetState.focused | WidgetState.hovered: MouseCursor.uncontrolled,
-          WidgetState.any: MouseCursor.defer,
-        });
+    final cursor1 = WidgetStateMouseCursor.fromMap(<WidgetStatesConstraint, MouseCursor>{
+      WidgetState.focused | WidgetState.hovered: MouseCursor.defer,
+      WidgetState.any: MouseCursor.uncontrolled,
+    });
+    final cursor2 = WidgetStateMouseCursor.fromMap(<WidgetStatesConstraint, MouseCursor>{
+      WidgetState.focused | WidgetState.hovered: MouseCursor.defer,
+      WidgetState.any: MouseCursor.uncontrolled,
+    });
+    final cursor3 = WidgetStateMouseCursor.fromMap(<WidgetStatesConstraint, MouseCursor>{
+      WidgetState.focused | WidgetState.hovered: MouseCursor.uncontrolled,
+      WidgetState.any: MouseCursor.defer,
+    });
     expect(cursor1 == cursor2, isTrue);
     expect(cursor1 == cursor3, isFalse);
 
     const whiteText = TextStyle(color: white);
     const blackText = TextStyle(color: black);
-    final style1 = WidgetStateTextStyle.fromMap(
-      <WidgetStatesConstraint, TextStyle>{
-        WidgetState.focused | WidgetState.hovered: whiteText,
-        WidgetState.any: blackText,
-      },
-    );
-    final style2 = WidgetStateTextStyle.fromMap(
-      <WidgetStatesConstraint, TextStyle>{
-        WidgetState.focused | WidgetState.hovered: whiteText,
-        WidgetState.any: blackText,
-      },
-    );
-    final style3 = WidgetStateTextStyle.fromMap(
-      <WidgetStatesConstraint, TextStyle>{
-        WidgetState.focused | WidgetState.hovered: blackText,
-        WidgetState.any: whiteText,
-      },
-    );
+    final style1 = WidgetStateTextStyle.fromMap(<WidgetStatesConstraint, TextStyle>{
+      WidgetState.focused | WidgetState.hovered: whiteText,
+      WidgetState.any: blackText,
+    });
+    final style2 = WidgetStateTextStyle.fromMap(<WidgetStatesConstraint, TextStyle>{
+      WidgetState.focused | WidgetState.hovered: whiteText,
+      WidgetState.any: blackText,
+    });
+    final style3 = WidgetStateTextStyle.fromMap(<WidgetStatesConstraint, TextStyle>{
+      WidgetState.focused | WidgetState.hovered: blackText,
+      WidgetState.any: whiteText,
+    });
     expect(style1 == style2, isTrue);
     expect(style1 == style3, isFalse);
   });

@@ -867,9 +867,7 @@ class RawKeyboard {
       '${event.data}',
     );
     // Send the event to passive listeners.
-    for (final listener in List<ValueChanged<RawKeyEvent>>.of(
-      _listeners,
-    )) {
+    for (final listener in List<ValueChanged<RawKeyEvent>>.of(_listeners)) {
       try {
         if (_listeners.contains(listener)) {
           listener(event);
@@ -1002,8 +1000,7 @@ class RawKeyboard {
     // a state change.
 
     final Map<ModifierKey, KeyboardSide?> modifiersPressed = event.data.modifiersPressed;
-    final modifierKeys =
-        <PhysicalKeyboardKey, LogicalKeyboardKey>{};
+    final modifierKeys = <PhysicalKeyboardKey, LogicalKeyboardKey>{};
     // Physical keys that whose modifiers are pressed at any side.
     final anySideKeys = <PhysicalKeyboardKey>{};
     final keysPressedAfterEvent = <PhysicalKeyboardKey>{

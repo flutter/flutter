@@ -151,8 +151,7 @@ void loadMatchingArbsIntoBundleMaps({
       void populateResources(LocaleInfo locale, File file) {
         final Map<String, String> resources = localeToResources[locale]!;
         final Map<String, dynamic> attributes = localeToResourceAttributes[locale]!;
-        final bundle =
-            json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+        final bundle = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
         for (final String key in bundle.keys) {
           // The ARB file resource "attributes" for foo are called @foo.
           if (key.startsWith('@')) {
@@ -183,9 +182,7 @@ void loadMatchingArbsIntoBundleMaps({
       // Add an assumed locale to default to when there is no info on scriptOnly locales.
       locale = LocaleInfo.fromString(localeString, deriveScriptCode: true);
       if (locale.scriptCode != null) {
-        final scriptLocale = LocaleInfo.fromString(
-          '${locale.languageCode}_${locale.scriptCode}',
-        );
+        final scriptLocale = LocaleInfo.fromString('${locale.languageCode}_${locale.scriptCode}');
         if (!localeToResources.containsKey(scriptLocale)) {
           assumedLocales.add(scriptLocale);
           localeToResources[scriptLocale] ??= <String, String>{};

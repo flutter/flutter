@@ -709,10 +709,7 @@ class _PopupMenuState<T> extends State<_PopupMenu<T>> {
     for (var i = 0; i < widget.route.items.length; i += 1) {
       final double start = (i + 1) * unit;
       final double end = clampDouble(start + 1.5 * unit, 0.0, 1.0);
-      final opacity = CurvedAnimation(
-        parent: widget.route.animation!,
-        curve: Interval(start, end),
-      );
+      final opacity = CurvedAnimation(parent: widget.route.animation!, curve: Interval(start, end));
       newOpacities.add(opacity);
     }
     _opacities = newOpacities;
@@ -1203,10 +1200,7 @@ Future<T?> showMenu<T>({
       semanticLabel ??= MaterialLocalizations.of(context).popupMenuLabel;
   }
 
-  final menuItemKeys = List<GlobalKey>.generate(
-    items.length,
-    (int index) => GlobalKey(),
-  );
+  final menuItemKeys = List<GlobalKey>.generate(items.length, (int index) => GlobalKey());
   final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator);
   return navigator.push(
     _PopupMenuRoute<T>(

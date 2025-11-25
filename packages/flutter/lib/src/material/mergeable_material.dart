@@ -185,23 +185,11 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   }
 
   void _initGap(MaterialGap gap) {
-    final controller = AnimationController(
-      duration: kThemeAnimationDuration,
-      vsync: this,
-    );
+    final controller = AnimationController(duration: kThemeAnimationDuration, vsync: this);
 
-    final startAnimation = CurvedAnimation(
-      parent: controller,
-      curve: Curves.fastOutSlowIn,
-    );
-    final endAnimation = CurvedAnimation(
-      parent: controller,
-      curve: Curves.fastOutSlowIn,
-    );
-    final gapAnimation = CurvedAnimation(
-      parent: controller,
-      curve: Curves.fastOutSlowIn,
-    );
+    final startAnimation = CurvedAnimation(parent: controller, curve: Curves.fastOutSlowIn);
+    final endAnimation = CurvedAnimation(parent: controller, curve: Curves.fastOutSlowIn);
+    final gapAnimation = CurvedAnimation(parent: controller, curve: Curves.fastOutSlowIn);
 
     controller.addListener(_handleTick);
 
@@ -666,8 +654,7 @@ class _MergeableMaterialListBody extends ListBody {
 
   @override
   void updateRenderObject(BuildContext context, RenderListBody renderObject) {
-    final materialRenderListBody =
-        renderObject as _RenderMergeableMaterialListBody;
+    final materialRenderListBody = renderObject as _RenderMergeableMaterialListBody;
     materialRenderListBody
       ..axisDirection = _getDirection(context)
       ..elevation = elevation;

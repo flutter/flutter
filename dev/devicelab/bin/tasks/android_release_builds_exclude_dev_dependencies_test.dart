@@ -44,9 +44,7 @@ Future<void> main() async {
         for (final buildMode in buildModesToTest) {
           final gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
           final gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
-          final regExpToMatchDevDependencyPlugin = RegExp(
-            r'--- project :dev_dependency_plugin',
-          );
+          final regExpToMatchDevDependencyPlugin = RegExp(r'--- project :dev_dependency_plugin');
           final regExpToMatchDevDependencyPluginWithTransitiveDependencies = RegExp(
             r'--- project :dev_dependency_plugin\n(\s)*\+--- org.jetbrains.kotlin.*\s\(\*\)\n(\s)*\\---\sio.flutter:flutter_embedding_' +
                 buildMode,

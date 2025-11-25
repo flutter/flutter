@@ -38,9 +38,7 @@ class ViewConfiguration {
 
   /// Creates a view configuration for the provided [ui.FlutterView].
   factory ViewConfiguration.fromView(ui.FlutterView view) {
-    final physicalConstraints = BoxConstraints.fromViewConstraints(
-      view.physicalConstraints,
-    );
+    final physicalConstraints = BoxConstraints.fromViewConstraints(view.physicalConstraints);
     final double devicePixelRatio = view.devicePixelRatio;
     return ViewConfiguration(
       physicalConstraints: physicalConstraints,

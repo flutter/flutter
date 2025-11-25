@@ -67,8 +67,7 @@ Future<void> testWithNewIOSSimulator(
   // Next, get the preferred runtime build for the selected Xcode version. Preferred
   // means the runtime was either bundled with Xcode, exactly matched your SDK
   // version, or it's indicated a better match for your SDK.
-  final decodeResult =
-      json.decode(runtimesForSelectedXcode) as Map<String, Object?>;
+  final decodeResult = json.decode(runtimesForSelectedXcode) as Map<String, Object?>;
   final String? iosKey = decodeResult.keys
       .where((String key) => key.contains('iphoneos'))
       .firstOrNull;

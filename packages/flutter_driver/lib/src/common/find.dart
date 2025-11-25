@@ -342,9 +342,7 @@ class Descendant extends SerializableFinder {
     if (matching == null) {
       throw ArgumentError.notNull(path == null ? 'matching' : '$path.matching');
     }
-    final jsonOfMatcher = Map<String, String>.from(
-      jsonDecode(of) as Map<String, dynamic>,
-    );
+    final jsonOfMatcher = Map<String, String>.from(jsonDecode(of) as Map<String, dynamic>);
     final jsonMatchingMatcher = Map<String, String>.from(
       jsonDecode(matching) as Map<String, dynamic>,
     );
@@ -413,9 +411,7 @@ class Ancestor extends SerializableFinder {
     if (matching == null) {
       throw ArgumentError.notNull(path == null ? 'matching' : '$path.matching');
     }
-    final jsonOfMatcher = Map<String, String>.from(
-      jsonDecode(of) as Map<String, dynamic>,
-    );
+    final jsonOfMatcher = Map<String, String>.from(jsonDecode(of) as Map<String, dynamic>);
     final jsonMatchingMatcher = Map<String, String>.from(
       jsonDecode(matching) as Map<String, dynamic>,
     );

@@ -1157,10 +1157,7 @@ void main() {
       expect(size.height, 600.0);
     }
 
-    for (final platform in <TargetPlatform>[
-      TargetPlatform.linux,
-      TargetPlatform.windows,
-    ]) {
+    for (final platform in <TargetPlatform>[TargetPlatform.linux, TargetPlatform.windows]) {
       await tester.pumpWidget(Container());
       await tester.pumpWidget(buildSearchAnchor(platform));
       await tester.tap(find.byIcon(Icons.search));
@@ -1198,10 +1195,7 @@ void main() {
       );
     }
 
-    for (final platform in <TargetPlatform>[
-      TargetPlatform.linux,
-      TargetPlatform.windows,
-    ]) {
+    for (final platform in <TargetPlatform>[TargetPlatform.linux, TargetPlatform.windows]) {
       await tester.pumpWidget(Container());
       await tester.pumpWidget(buildSearchAnchor(platform));
       await tester.tap(find.byIcon(Icons.search));

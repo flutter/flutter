@@ -13,7 +13,9 @@ class SettingsIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(painter: _SettingsIconPainter(time: time, context: context));
+    return CustomPaint(
+      painter: _SettingsIconPainter(time: time, context: context),
+    );
   }
 }
 
@@ -59,8 +61,9 @@ class _SettingsIconPainter extends CustomPainter {
 
   /// Black or white paint, depending on brightness.
   Paint get _monoPaint {
-    final Color monoColor =
-        Theme.of(context).colorScheme.brightness == Brightness.light ? Colors.black : Colors.white;
+    final Color monoColor = Theme.of(context).colorScheme.brightness == Brightness.light
+        ? Colors.black
+        : Colors.white;
     return Paint()..color = monoColor;
   }
 

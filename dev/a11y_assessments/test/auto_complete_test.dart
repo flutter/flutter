@@ -38,8 +38,7 @@ void main() {
 
     const kOptions = <String>['apple', 'banana', 'lemon'];
     const label = 'Fruit';
-    final message =
-        'Type below to autocomplete the following possible results: $kOptions.\n$label';
+    final message = 'Type below to autocomplete the following possible results: $kOptions.\n$label';
 
     final SemanticsNode node = tester.semantics.find(find.bySemanticsLabel(message));
     expect(node.flagsCollection.isTextField, isTrue);

@@ -283,9 +283,7 @@ Future<Process> startProcess(
 }) async {
   final command = '$executable ${arguments?.join(" ") ?? ""}';
   final String finalWorkingDirectory = workingDirectory ?? cwd;
-  final newEnvironment = Map<String, String>.from(
-    environment ?? <String, String>{},
-  );
+  final newEnvironment = Map<String, String>.from(environment ?? <String, String>{});
   newEnvironment['BOT'] = isBot ? 'true' : 'false';
   newEnvironment['LANG'] = 'en_US.UTF-8';
   print('Executing "$command" in "$finalWorkingDirectory" with environment $newEnvironment');

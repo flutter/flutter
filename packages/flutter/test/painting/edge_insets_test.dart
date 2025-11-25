@@ -67,20 +67,12 @@ void main() {
     expect(all.resolve(TextDirection.rtl), equals(const EdgeInsets.fromLTRB(10, 10, 10, 10)));
 
     // only
-    const directional = EdgeInsetsDirectional.only(
-      start: 10,
-      top: 20,
-      end: 30,
-      bottom: 40,
-    );
+    const directional = EdgeInsetsDirectional.only(start: 10, top: 20, end: 30, bottom: 40);
     expect(directional.resolve(TextDirection.ltr), const EdgeInsets.fromLTRB(10, 20, 30, 40));
     expect(directional.resolve(TextDirection.rtl), const EdgeInsets.fromLTRB(30, 20, 10, 40));
 
     // symmetric
-    const symmetric = EdgeInsetsDirectional.symmetric(
-      horizontal: 10,
-      vertical: 20,
-    );
+    const symmetric = EdgeInsetsDirectional.symmetric(horizontal: 10, vertical: 20);
     expect(symmetric.resolve(TextDirection.ltr), equals(const EdgeInsets.fromLTRB(10, 20, 10, 20)));
     expect(symmetric.resolve(TextDirection.rtl), equals(const EdgeInsets.fromLTRB(10, 20, 10, 20)));
   });
@@ -234,12 +226,7 @@ void main() {
   });
 
   test('EdgeInsets copyWith', () {
-    const sourceEdgeInsets = EdgeInsets.only(
-      left: 1.0,
-      top: 2.0,
-      bottom: 3.0,
-      right: 4.0,
-    );
+    const sourceEdgeInsets = EdgeInsets.only(left: 1.0, top: 2.0, bottom: 3.0, right: 4.0);
     final EdgeInsets copy = sourceEdgeInsets.copyWith(left: 5.0, top: 6.0);
     expect(copy, const EdgeInsets.only(left: 5.0, top: 6.0, bottom: 3.0, right: 4.0));
   });

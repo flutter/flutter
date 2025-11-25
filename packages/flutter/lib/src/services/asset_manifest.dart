@@ -35,9 +35,7 @@ abstract class AssetManifest {
       // json+base64-decoded to get to the binary data.
       return bundle.loadStructuredData(_kAssetManifestWebFilename, (String jsonData) async {
         // Decode the manifest JSON file to the underlying BIN, and convert to ByteData.
-        final message = ByteData.sublistView(
-          base64.decode(json.decode(jsonData) as String),
-        );
+        final message = ByteData.sublistView(base64.decode(json.decode(jsonData) as String));
         // Now we can keep operating as usual.
         return _AssetManifestBin.fromStandardMessageCodecMessage(message);
       });

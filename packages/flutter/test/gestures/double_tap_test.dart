@@ -700,11 +700,10 @@ void main() {
 
   testGesture('Buttons filter should cancel invalid taps', (GestureTester tester) {
     final recognized = <String>[];
-    final doubleTap =
-        DoubleTapGestureRecognizer(allowedButtonsFilter: (int buttons) => false)
-          ..onDoubleTap = () {
-            recognized.add('primary');
-          };
+    final doubleTap = DoubleTapGestureRecognizer(allowedButtonsFilter: (int buttons) => false)
+      ..onDoubleTap = () {
+        recognized.add('primary');
+      };
     addTearDown(doubleTap.dispose);
 
     // Down/up pair 7: normal tap sequence close to pair 6

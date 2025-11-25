@@ -104,9 +104,7 @@ void main() {
   test(
     'Config can be set and changed after instantiation without calling prepareInitialFrame first',
     () {
-      final view = RenderView(
-        view: RendererBinding.instance.platformDispatcher.views.single,
-      );
+      final view = RenderView(view: RendererBinding.instance.platformDispatcher.views.single);
       view.configuration = ViewConfiguration(
         logicalConstraints: BoxConstraints.tight(const Size(100, 200)),
         devicePixelRatio: 3.0,
@@ -121,12 +119,7 @@ void main() {
   );
 
   test('Constraints are derived from configuration', () {
-    const constraints = BoxConstraints(
-      minWidth: 1,
-      maxWidth: 2,
-      minHeight: 3,
-      maxHeight: 4,
-    );
+    const constraints = BoxConstraints(minWidth: 1, maxWidth: 2, minHeight: 3, maxHeight: 4);
     const devicePixelRatio = 3.0;
     final config = ViewConfiguration(
       logicalConstraints: constraints,
@@ -135,9 +128,7 @@ void main() {
     );
 
     // Configuration set via setter.
-    final view = RenderView(
-      view: RendererBinding.instance.platformDispatcher.views.single,
-    );
+    final view = RenderView(view: RendererBinding.instance.platformDispatcher.views.single);
     expect(
       () => view.constraints,
       throwsA(

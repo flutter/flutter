@@ -10,10 +10,7 @@ import 'package:flutter_devicelab/framework/task_result.dart';
 import '../common.dart';
 
 void main() {
-  final isolateParams = <String, String>{
-    'runFlutterConfig': 'false',
-    'timeoutInMinutes': '1',
-  };
+  final isolateParams = <String, String>{'runFlutterConfig': 'false', 'timeoutInMinutes': '1'};
 
   test('runs build and test when no args are passed', () async {
     final TaskResult result = await runTask(

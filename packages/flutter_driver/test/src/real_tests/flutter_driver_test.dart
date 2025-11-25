@@ -1167,8 +1167,7 @@ class FakeFlutterWebConnection extends Fake implements FlutterWebConnection {
   @override
   Future<dynamic> sendCommand(String script, Duration? duration) async {
     commandLog.add('$script $duration');
-    final decoded =
-        jsonDecode(_checkAndEncode(script)) as Map<String, dynamic>;
+    final decoded = jsonDecode(_checkAndEncode(script)) as Map<String, dynamic>;
     final dynamic response = responses[decoded['command']];
     assert(response != null, 'Missing ${decoded['command']} in responses.');
     return response;

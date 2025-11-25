@@ -406,9 +406,7 @@ void main() {
       );
     }
 
-    const border1 = RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(5)),
-    );
+    const border1 = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5)));
     const side1 = BorderSide(color: Color(0xfff44336));
     await tester.pumpWidget(buildApp(side1, border1));
     expect(tester.widget<CheckboxListTile>(find.byType(CheckboxListTile)).side, side1);
@@ -423,9 +421,7 @@ void main() {
         inner: RRect.fromLTRBR(12.0, 12.0, 28.0, 28.0, const Radius.circular(4)),
       ),
     );
-    const border2 = RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(5)),
-    );
+    const border2 = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5)));
     const side2 = BorderSide(width: 4.0, color: Color(0xff424242));
     await tester.pumpWidget(buildApp(side2, border2));
     expect(tester.widget<Checkbox>(find.byType(Checkbox)).side, side2);
@@ -1146,10 +1142,7 @@ void main() {
       );
     }
 
-    for (final platform in <TargetPlatform>[
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    ]) {
+    for (final platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
       await tester.pumpWidget(buildApp(platform));
       await tester.pumpAndSettle();
 

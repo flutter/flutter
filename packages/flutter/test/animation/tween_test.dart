@@ -35,10 +35,7 @@ void main() {
   test(
     'throws flutter error when tweening types that do not fully satisfy tween requirements - Color',
     () {
-      final colorTween = Tween<Color>(
-        begin: const Color(0xFF000000),
-        end: const Color(0xFFFFFFFF),
-      );
+      final colorTween = Tween<Color>(begin: const Color(0xFF000000), end: const Color(0xFFFFFFFF));
 
       expect(
         () => colorTween.transform(0.1),
@@ -206,10 +203,7 @@ void main() {
   });
 
   test('ColorTween', () {
-    final tween = ColorTween(
-      begin: const Color(0xff000000),
-      end: const Color(0xffffffff),
-    );
+    final tween = ColorTween(begin: const Color(0xff000000), end: const Color(0xffffffff));
     expect(tween.lerp(0.0), isSameColorAs(const Color(0xff000000)));
     expect(tween.lerp(0.5), isSameColorAs(const Color(0xff7f7f7f)));
     expect(tween.lerp(0.7), isSameColorAs(const Color(0xffb2b2b2)));

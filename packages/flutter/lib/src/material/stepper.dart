@@ -443,9 +443,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 
   Color _connectorColor(bool isActive) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final states = <WidgetState>{
-      if (isActive) WidgetState.selected else WidgetState.disabled,
-    };
+    final states = <WidgetState>{if (isActive) WidgetState.selected else WidgetState.disabled};
     final Color? resolvedConnectorColor = widget.connectorColor?.resolve(states);
 
     return resolvedConnectorColor ?? (isActive ? colorScheme.primary : Colors.grey.shade400);
@@ -479,9 +477,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   Color _circleColor(int index) {
     final bool isActive = widget.steps[index].isActive;
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final states = <WidgetState>{
-      if (isActive) WidgetState.selected else WidgetState.disabled,
-    };
+    final states = <WidgetState>{if (isActive) WidgetState.selected else WidgetState.disabled};
     final Color? resolvedConnectorColor = widget.connectorColor?.resolve(states);
     if (resolvedConnectorColor != null) {
       return resolvedConnectorColor;
@@ -987,11 +983,7 @@ class _TrianglePainter extends CustomPainter {
     final double base = size.width;
     final double halfBase = size.width / 2.0;
     final double height = size.height;
-    final points = <Offset>[
-      Offset(0.0, height),
-      Offset(base, height),
-      Offset(halfBase, 0.0),
-    ];
+    final points = <Offset>[Offset(0.0, height), Offset(base, height), Offset(halfBase, 0.0)];
 
     canvas.drawPath(Path()..addPolygon(points, true), Paint()..color = color);
   }

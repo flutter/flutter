@@ -255,9 +255,7 @@ void _tests() {
 
     const containerHeight = 200.0;
 
-    final scrollController = ScrollController(
-      initialScrollOffset: containerHeight * 1.5,
-    );
+    final scrollController = ScrollController(initialScrollOffset: containerHeight * 1.5);
     addTearDown(scrollController.dispose);
     final slivers = List<Widget>.generate(30, (int i) {
       return SliverToBoxAdapter(

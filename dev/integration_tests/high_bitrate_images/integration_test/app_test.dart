@@ -22,9 +22,7 @@ double _decodeBGR10(int x) {
 
 Uint8List _convertBGRA10XRToBGRA8888(Uint8List bgra10xr) {
   final inputByteData = ByteData.sublistView(bgra10xr);
-  final bgra8888 = Uint8List(
-    bgra10xr.lengthInBytes ~/ 2,
-  ); // 8 bytes per pixel -> 4 bytes per pixel
+  final bgra8888 = Uint8List(bgra10xr.lengthInBytes ~/ 2); // 8 bytes per pixel -> 4 bytes per pixel
   final outputByteData = ByteData.view(bgra8888.buffer);
 
   for (var i = 0, j = 0; i < bgra10xr.lengthInBytes; i += 8, j += 4) {

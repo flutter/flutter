@@ -1895,10 +1895,7 @@ mixin WidgetInspectorService {
 
   List<Object> _getChildren(String? diagnosticsNodeId, String groupName) {
     final node = toObject(diagnosticsNodeId) as DiagnosticsNode?;
-    final delegate = InspectorSerializationDelegate(
-      groupName: groupName,
-      service: this,
-    );
+    final delegate = InspectorSerializationDelegate(groupName: groupName, service: this);
     return _nodesToJson(
       node == null ? const <DiagnosticsNode>[] : _getChildrenFiltered(node, delegate),
       delegate,
@@ -2787,8 +2784,7 @@ class _ElementLocationStatsTracker {
 
     // Encode the new locations using the newer encoding (as of v2.4.0).
     if (newLocations.isNotEmpty) {
-      final fileLocationsMap =
-          <String, Map<String, List<Object?>>>{};
+      final fileLocationsMap = <String, Map<String, List<Object?>>>{};
       for (final _LocationCount entry in newLocations) {
         final _Location location = entry.location;
         final Map<String, List<Object?>> locations = fileLocationsMap.putIfAbsent(
@@ -4339,8 +4335,7 @@ Map<String, dynamic> _locationIdMapToJson() {
   const columnsKey = 'columns';
   const namesKey = 'names';
 
-  final fileLocationsMap =
-      <String, Map<String, List<Object?>>>{};
+  final fileLocationsMap = <String, Map<String, List<Object?>>>{};
   for (final MapEntry<_Location, int> entry in _locationToId.entries) {
     final _Location location = entry.key;
     final Map<String, List<Object?>> locations = fileLocationsMap.putIfAbsent(

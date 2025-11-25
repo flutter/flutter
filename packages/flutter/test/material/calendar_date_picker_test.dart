@@ -1560,10 +1560,7 @@ void main() {
       );
       expect(inkFeatures, paintsExactlyCountTimes(#clipPath, 1));
 
-      final expectedClipRect = Rect.fromCircle(
-        center: const Offset(400.0, 241.0),
-        radius: 35.0,
-      );
+      final expectedClipRect = Rect.fromCircle(center: const Offset(400.0, 241.0), radius: 35.0);
       final expectedClipPath = Path()..addRect(expectedClipRect);
       expect(
         inkFeatures,

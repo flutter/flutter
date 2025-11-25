@@ -167,10 +167,7 @@ void runTests() {
     };
 
     final String url = _uniqueUrl(tester.testDescription);
-    final networkImage = NetworkImage(
-      url,
-      webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
-    );
+    final networkImage = NetworkImage(url, webHtmlElementStrategy: WebHtmlElementStrategy.fallback);
     ImageInfo? imageInfo;
     Object? recordedError;
     Completer<void>? imageCompleter;
@@ -268,10 +265,7 @@ void runTests() {
     };
 
     final String url = _uniqueUrl(tester.testDescription);
-    final networkImage = NetworkImage(
-      url,
-      webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
-    );
+    final networkImage = NetworkImage(url, webHtmlElementStrategy: WebHtmlElementStrategy.prefer);
     ImageInfo? imageInfo;
     Object? recordedError;
     Completer<void>? imageCompleter;
@@ -464,8 +458,7 @@ void runTests() {
     await tester.pumpAndSettle();
     final FakePlatformView imgElementPlatformView = fakePlatformViewRegistry.views.single;
     expect(imgElementPlatformView.htmlElement, isA<web.HTMLImageElement>());
-    final imgElement =
-        imgElementPlatformView.htmlElement as web.HTMLImageElement;
+    final imgElement = imgElementPlatformView.htmlElement as web.HTMLImageElement;
     expect(imgElement.src, testImg.src);
     expect(imgElement.style.width, '100%');
     expect(imgElement.style.height, '100%');
@@ -485,8 +478,7 @@ void runTests() {
     await tester.pumpAndSettle();
     final FakePlatformView imgElementPlatformView = fakePlatformViewRegistry.views.single;
     expect(imgElementPlatformView.htmlElement, isA<web.HTMLImageElement>());
-    final imgElement =
-        imgElementPlatformView.htmlElement as web.HTMLImageElement;
+    final imgElement = imgElementPlatformView.htmlElement as web.HTMLImageElement;
     expect(imgElement.style.pointerEvents, 'none');
   });
 

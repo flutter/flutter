@@ -475,10 +475,7 @@ void main() {
 
       test('do not resize when null cache dimensions', () async {
         final testBytes = Uint8List.fromList(kTransparentImage);
-        final image = FadeInImage.memoryNetwork(
-          placeholder: testBytes,
-          image: 'test.com',
-        );
+        final image = FadeInImage.memoryNetwork(placeholder: testBytes, image: 'test.com');
 
         var called = false;
         Future<ui.Codec> decode(

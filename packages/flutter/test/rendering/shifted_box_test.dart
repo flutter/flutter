@@ -70,10 +70,7 @@ void main() {
 
     test('computeDryBaseline works with top-left alignment', () {
       final child = MockRenderBox();
-      final positioner = RenderPositionedBox(
-        alignment: Alignment.topLeft,
-        child: child,
-      );
+      final positioner = RenderPositionedBox(alignment: Alignment.topLeft, child: child);
 
       final double? baseline = positioner.computeDryBaseline(
         const BoxConstraints(maxWidth: 200.0, maxHeight: 200.0),
@@ -86,10 +83,7 @@ void main() {
 
     test('computeDryBaseline works with bottom-right alignment', () {
       final child = MockRenderBox();
-      final positioner = RenderPositionedBox(
-        alignment: Alignment.bottomRight,
-        child: child,
-      );
+      final positioner = RenderPositionedBox(alignment: Alignment.bottomRight, child: child);
 
       final double? baseline = positioner.computeDryBaseline(
         const BoxConstraints(maxWidth: 200.0, maxHeight: 200.0),
@@ -103,10 +97,7 @@ void main() {
 
     test('computeDryBaseline with different TextBaseline types', () {
       final child = MockRenderBox();
-      final positioner = RenderPositionedBox(
-        alignment: Alignment.topLeft,
-        child: child,
-      );
+      final positioner = RenderPositionedBox(alignment: Alignment.topLeft, child: child);
 
       // Test alphabetic baseline
       final double? alphabeticBaseline = positioner.computeDryBaseline(
@@ -146,10 +137,7 @@ void main() {
 
     test('computeDryBaseline works with infinite constraints', () {
       final child = MockRenderBox();
-      final positioner = RenderPositionedBox(
-        alignment: Alignment.topLeft,
-        child: child,
-      );
+      final positioner = RenderPositionedBox(alignment: Alignment.topLeft, child: child);
 
       final double? baseline = positioner.computeDryBaseline(
         const BoxConstraints(),
@@ -211,10 +199,7 @@ void main() {
 
     test('RenderPadding computeDryBaseline', () {
       final child = MockRenderBox();
-      final padding = RenderPadding(
-        padding: const EdgeInsets.all(10.0),
-        child: child,
-      );
+      final padding = RenderPadding(padding: const EdgeInsets.all(10.0), child: child);
 
       final double? baseline = padding.computeDryBaseline(
         const BoxConstraints(maxWidth: 100.0, maxHeight: 100.0),

@@ -383,11 +383,7 @@ void main() {
 
   group('Enforce consistent-button restriction:', () {
     // In sequence between `down` and `up` but with buttons changed
-    const moveR = PointerMoveEvent(
-      pointer: 5,
-      buttons: kSecondaryButton,
-      position: Offset(10, 10),
-    );
+    const moveR = PointerMoveEvent(pointer: 5, buttons: kSecondaryButton, position: Offset(10, 10));
 
     late LongPressGestureRecognizer gesture;
     final recognized = <String>[];
@@ -722,11 +718,7 @@ void main() {
       buttons: kPrimaryButton | kSecondaryButton,
     );
 
-    const up4 = PointerUpEvent(
-      pointer: 8,
-      position: Offset(100, 200),
-      buttons: kSecondaryButton,
-    );
+    const up4 = PointerUpEvent(pointer: 8, position: Offset(100, 200), buttons: kSecondaryButton);
 
     longPress.addPointer(down4);
     tester.closeArena(4);

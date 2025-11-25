@@ -22,9 +22,7 @@ void main() {
     );
     const side = BorderSide(width: 10.0, color: Color(0xff123456));
     const radius = BorderRadius.all(Radius.circular(16.0));
-    const directionalRadius = BorderRadiusDirectional.all(
-      Radius.circular(16.0),
-    );
+    const directionalRadius = BorderRadiusDirectional.all(Radius.circular(16.0));
 
     expect(
       const RoundedRectangleBorder().copyWith(side: side, borderRadius: radius),
@@ -84,9 +82,7 @@ void main() {
   });
 
   test('RoundedRectangleBorder and CircleBorder', () {
-    const r = RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-    );
+    const r = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0)));
     const c = CircleBorder();
     const rect = Rect.fromLTWH(0.0, 0.0, 100.0, 20.0); // center is x=40..60 y=10
     final Matcher looksLikeR = isPathThat(
@@ -167,9 +163,7 @@ void main() {
   });
 
   test('RoundedRectangleBorder.dimensions and CircleBorder.dimensions', () {
-    const insideRoundedRectangleBorder = RoundedRectangleBorder(
-      side: BorderSide(width: 10),
-    );
+    const insideRoundedRectangleBorder = RoundedRectangleBorder(side: BorderSide(width: 10));
     expect(insideRoundedRectangleBorder.dimensions, const EdgeInsets.all(10));
 
     const centerRoundedRectangleBorder = RoundedRectangleBorder(

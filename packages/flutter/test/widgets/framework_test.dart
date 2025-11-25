@@ -1261,8 +1261,7 @@ void main() {
         ],
       ),
     );
-    final element =
-        key0.currentContext! as MultiChildRenderObjectElement;
+    final element = key0.currentContext! as MultiChildRenderObjectElement;
     expect(element.children.map((Element element) => element.widget.key), <Key?>[
       null,
       key1,
@@ -1329,8 +1328,7 @@ void main() {
         ],
       ),
     );
-    final element =
-        key0.currentContext! as MultiChildRenderObjectElement;
+    final element = key0.currentContext! as MultiChildRenderObjectElement;
 
     expect(element, hasAGoodToStringDeep);
     expect(

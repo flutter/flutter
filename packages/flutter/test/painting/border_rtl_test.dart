@@ -595,11 +595,7 @@ void main() {
     const magenta3 = BorderSide(color: Color(0xFFFF00FF), width: 3.0);
     const magenta6 = BorderSide(color: Color(0xFFFF00FF), width: 6.0);
     const yellow2 = BorderSide(color: Color(0xFFFFFF00), width: 2.0);
-    const yellowNone0 = BorderSide(
-      color: Color(0xFFFFFF00),
-      width: 0.0,
-      style: BorderStyle.none,
-    );
+    const yellowNone0 = BorderSide(color: Color(0xFFFFFF00), width: 0.0, style: BorderStyle.none);
     expect(
       BorderDirectional.merge(
         const BorderDirectional(top: yellow2),
@@ -708,11 +704,7 @@ void main() {
     const magenta3 = BorderSide(color: Color(0xFFFF00FF), width: 3.0);
     const magenta6 = BorderSide(color: Color(0xFFFF00FF), width: 6.0);
     const yellow2 = BorderSide(color: Color(0xFFFFFF00), width: 2.0);
-    const yellowNone0 = BorderSide(
-      color: Color(0xFFFFFF00),
-      width: 0.0,
-      style: BorderStyle.none,
-    );
+    const yellowNone0 = BorderSide(color: Color(0xFFFFFF00), width: 0.0, style: BorderStyle.none);
     expect(
       const BorderDirectional(top: yellow2) + const BorderDirectional(end: magenta3),
       const BorderDirectional(top: yellow2, end: magenta3),
@@ -805,20 +797,9 @@ void main() {
     const borderWithLeft = Border(left: side1, top: side2, bottom: side2);
     const borderWithRight = Border(right: side1, top: side2, bottom: side2);
     const borderWithoutSides = Border(top: side2, bottom: side2);
-    const borderDirectionalWithStart = BorderDirectional(
-      start: side1,
-      top: side2,
-      bottom: side2,
-    );
-    const borderDirectionalWithEnd = BorderDirectional(
-      end: side1,
-      top: side2,
-      bottom: side2,
-    );
-    const borderDirectionalWithoutSides = BorderDirectional(
-      top: side2,
-      bottom: side2,
-    );
+    const borderDirectionalWithStart = BorderDirectional(start: side1, top: side2, bottom: side2);
+    const borderDirectionalWithEnd = BorderDirectional(end: side1, top: side2, bottom: side2);
+    const borderDirectionalWithoutSides = BorderDirectional(top: side2, bottom: side2);
 
     expect(
       (borderWithLeft + borderDirectionalWithStart).toString(),
@@ -899,11 +880,7 @@ void main() {
     const magenta3 = BorderSide(color: Color(0xFFFF00FF), width: 3.0);
     const magenta6 = BorderSide(color: Color(0xFFFF00FF), width: 6.0);
     const yellow2 = BorderSide(color: Color(0xFFFFFF00), width: 2.0);
-    const yellowNone0 = BorderSide(
-      color: Color(0xFFFFFF00),
-      width: 0.0,
-      style: BorderStyle.none,
-    );
+    const yellowNone0 = BorderSide(color: Color(0xFFFFFF00), width: 0.0, style: BorderStyle.none);
     const b3 = BorderDirectional(start: magenta3);
     const b6 = BorderDirectional(start: magenta6);
     expect(b3.scale(2.0), b6);
@@ -919,26 +896,11 @@ void main() {
       start: BorderSide(width: 0.0),
       end: BorderSide(width: 300.0),
     );
-    const at0 = BorderDirectional(
-      start: BorderSide(width: 100.0),
-      end: BorderSide(width: 200.0),
-    );
-    const at25 = BorderDirectional(
-      start: BorderSide(width: 125.0),
-      end: BorderSide(width: 175.0),
-    );
-    const at75 = BorderDirectional(
-      start: BorderSide(width: 175.0),
-      end: BorderSide(width: 125.0),
-    );
-    const at100 = BorderDirectional(
-      start: BorderSide(width: 200.0),
-      end: BorderSide(width: 100.0),
-    );
-    const at200 = BorderDirectional(
-      start: BorderSide(width: 300.0),
-      end: BorderSide(width: 0.0),
-    );
+    const at0 = BorderDirectional(start: BorderSide(width: 100.0), end: BorderSide(width: 200.0));
+    const at25 = BorderDirectional(start: BorderSide(width: 125.0), end: BorderSide(width: 175.0));
+    const at75 = BorderDirectional(start: BorderSide(width: 175.0), end: BorderSide(width: 125.0));
+    const at100 = BorderDirectional(start: BorderSide(width: 200.0), end: BorderSide(width: 100.0));
+    const at200 = BorderDirectional(start: BorderSide(width: 300.0), end: BorderSide(width: 0.0));
 
     expect(BorderDirectional.lerp(null, null, -1.0), null);
     expect(
@@ -1041,15 +1003,9 @@ void main() {
   });
 
   test('BoxDecoration.border takes a BorderDirectional', () {
-    const decoration2 = BoxDecoration(
-      border: BorderDirectional(start: BorderSide(width: 2.0)),
-    );
-    const decoration4 = BoxDecoration(
-      border: BorderDirectional(start: BorderSide(width: 4.0)),
-    );
-    const decoration6 = BoxDecoration(
-      border: BorderDirectional(start: BorderSide(width: 6.0)),
-    );
+    const decoration2 = BoxDecoration(border: BorderDirectional(start: BorderSide(width: 2.0)));
+    const decoration4 = BoxDecoration(border: BorderDirectional(start: BorderSide(width: 4.0)));
+    const decoration6 = BoxDecoration(border: BorderDirectional(start: BorderSide(width: 6.0)));
     final BoxPainter painter = decoration2.createBoxPainter();
     expect(
       (Canvas canvas) {

@@ -373,8 +373,7 @@ void main() {
       expect(attributedValue.string, 'value');
       expect(attributedValue.attributes.length, 1);
       expect(attributedValue.attributes[0] is LocaleStringAttribute, isTrue);
-      final valueLocale =
-          attributedValue.attributes[0] as LocaleStringAttribute;
+      final valueLocale = attributedValue.attributes[0] as LocaleStringAttribute;
       expect(valueLocale.range, const TextRange(start: 0, end: 5));
       expect(valueLocale.locale, const Locale('en', 'MX'));
 

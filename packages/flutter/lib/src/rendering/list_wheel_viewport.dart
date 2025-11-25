@@ -885,10 +885,7 @@ class RenderListWheelViewport extends RenderBox
     );
 
     // Offset that helps painting everything in the center (e.g. angle = 0).
-    final offsetToCenter = Offset(
-      untransformedPaintingCoordinates.dx,
-      -_topScrollMarginExtent,
-    );
+    final offsetToCenter = Offset(untransformedPaintingCoordinates.dx, -_topScrollMarginExtent);
 
     final bool shouldApplyOffCenterDim = overAndUnderCenterOpacity < 1;
     if (useMagnifier || shouldApplyOffCenterDim) {

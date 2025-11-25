@@ -99,9 +99,7 @@ class SnippetGenerator {
     final description = <SourceLine>[];
     final components = <SkeletonInjection>[];
     String? language;
-    final codeStartEnd = RegExp(
-      r'^\s*```(?<language>[-\w]+|[-\w]+ (?<section>[-\w]+))?\s*$',
-    );
+    final codeStartEnd = RegExp(r'^\s*```(?<language>[-\w]+|[-\w]+ (?<section>[-\w]+))?\s*$');
     for (final SourceLine line in sample.input) {
       final RegExpMatch? match = codeStartEnd.firstMatch(line.text);
       if (match != null) {

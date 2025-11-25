@@ -45,8 +45,7 @@ void macroPerfTestMultiPageE2E(
 }) {
   final WidgetsBinding widgetsBinding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   assert(widgetsBinding is IntegrationTestWidgetsFlutterBinding);
-  final binding =
-      widgetsBinding as IntegrationTestWidgetsFlutterBinding;
+  final binding = widgetsBinding as IntegrationTestWidgetsFlutterBinding;
   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive;
 
   testWidgets(

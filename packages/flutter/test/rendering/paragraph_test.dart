@@ -917,9 +917,7 @@ void main() {
 
   test('TextSpan Hit testing with text justification', () {
     const textSpanA = TextSpan(text: 'A '); // The space is a word break.
-    const textSpanB = TextSpan(
-      text: 'B\u200B',
-    ); // The zero-width space is used as a line break.
+    const textSpanB = TextSpan(text: 'B\u200B'); // The zero-width space is used as a line break.
     final textSpanC = TextSpan(
       text: 'C' * 10,
     ); // The third span starts a new line since it's too long for the first line.
@@ -1490,8 +1488,7 @@ void main() {
     expect(data.hasAction(SemanticsAction.longPress), false);
     expect(data.hasAction(SemanticsAction.tap), true);
 
-    final recognizerAfter = LongPressGestureRecognizer()
-      ..onLongPress = () {};
+    final recognizerAfter = LongPressGestureRecognizer()..onLongPress = () {};
     paragraph.text = TextSpan(text: 'How are you \n', recognizer: recognizerAfter);
 
     pumpFrame(phase: EnginePhase.flushSemantics);

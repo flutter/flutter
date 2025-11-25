@@ -1982,10 +1982,7 @@ void main() {
     await tester.pump();
 
     final Offset droppedLocation = tester.getTopLeft(find.text('Target'));
-    final expectedDropOffset = Offset(
-      droppedLocation.dx,
-      secondLocation.dy - firstLocation.dy,
-    );
+    final expectedDropOffset = Offset(droppedLocation.dx, secondLocation.dy - firstLocation.dy);
 
     expect(accepted, equals(<int>[1]));
     expect(acceptedDetails, hasLength(1));
@@ -2272,11 +2269,9 @@ void main() {
     WidgetTester tester,
   ) async {
     final acceptedDragTargetDatas = <DragTargetData>[];
-    final acceptedDragTargetDataDetails =
-        <DragTargetDetails<DragTargetData>>[];
+    final acceptedDragTargetDataDetails = <DragTargetDetails<DragTargetData>>[];
     final acceptedExtendedDragTargetDatas = <ExtendedDragTargetData>[];
-    final acceptedExtendedDragTargetDataDetails =
-        <DragTargetDetails<ExtendedDragTargetData>>[];
+    final acceptedExtendedDragTargetDataDetails = <DragTargetDetails<ExtendedDragTargetData>>[];
     final dragTargetData = DragTargetData();
     await tester.pumpWidget(
       MaterialApp(
@@ -2862,10 +2857,7 @@ void main() {
     await tester.pump();
 
     final Offset droppedLocation = tester.getTopLeft(find.text('Target'));
-    final expectedDropOffset = Offset(
-      droppedLocation.dx,
-      secondLocation.dy - firstLocation.dy,
-    );
+    final expectedDropOffset = Offset(droppedLocation.dx, secondLocation.dy - firstLocation.dy);
 
     expect(accepted, equals(<int>[1]));
     expect(acceptedDetails, hasLength(1));

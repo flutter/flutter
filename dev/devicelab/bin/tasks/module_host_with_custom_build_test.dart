@@ -48,9 +48,7 @@ Future<void> main() async {
 
       section('Add to existing Android app');
 
-      final hostAppDir = Directory(
-        path.join(tempDir.path, 'hello_host_app_with_custom_build'),
-      );
+      final hostAppDir = Directory(path.join(tempDir.path, 'hello_host_app_with_custom_build'));
       mkdir(hostAppDir);
       recursiveCopy(
         Directory(

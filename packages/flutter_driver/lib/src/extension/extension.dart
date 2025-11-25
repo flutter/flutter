@@ -427,8 +427,7 @@ class FlutterDriverExtension
       _log(message);
       return _makeResponse(message, isError: true);
     } catch (error, stackTrace) {
-      final message =
-          'Uncaught extension error while executing $commandKind: $error\n$stackTrace';
+      final message = 'Uncaught extension error while executing $commandKind: $error\n$stackTrace';
       if (!_silenceErrors) {
         _log(message);
       }

@@ -161,11 +161,7 @@ void main() {
   });
 
   testWidgets('PageSelector responds correctly to TabBarView drags', (WidgetTester tester) async {
-    final tabController = TabController(
-      vsync: const TestVSync(),
-      initialIndex: 1,
-      length: 3,
-    );
+    final tabController = TabController(vsync: const TestVSync(), initialIndex: 1, length: 3);
     addTearDown(tabController.dispose);
     await tester.pumpWidget(buildFrame(tabController));
 
@@ -247,11 +243,7 @@ void main() {
     const kRed = Color(0xFFFF0000);
     const kBlue = Color(0xFF0000FF);
 
-    final tabController = TabController(
-      vsync: const TestVSync(),
-      initialIndex: 1,
-      length: 3,
-    );
+    final tabController = TabController(vsync: const TestVSync(), initialIndex: 1, length: 3);
     addTearDown(tabController.dispose);
     await tester.pumpWidget(buildFrame(tabController, color: kRed, selectedColor: kBlue));
 
@@ -264,11 +256,7 @@ void main() {
   });
 
   testWidgets('PageSelector indicatorSize', (WidgetTester tester) async {
-    final tabController = TabController(
-      vsync: const TestVSync(),
-      initialIndex: 1,
-      length: 3,
-    );
+    final tabController = TabController(vsync: const TestVSync(), initialIndex: 1, length: 3);
     addTearDown(tabController.dispose);
     await tester.pumpWidget(buildFrame(tabController, indicatorSize: 16.0));
 
@@ -288,11 +276,7 @@ void main() {
   });
 
   testWidgets('PageSelector circle border', (WidgetTester tester) async {
-    final tabController = TabController(
-      vsync: const TestVSync(),
-      initialIndex: 1,
-      length: 3,
-    );
+    final tabController = TabController(vsync: const TestVSync(), initialIndex: 1, length: 3);
     addTearDown(tabController.dispose);
 
     Iterable<TabPageSelectorIndicator> indicators;

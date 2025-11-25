@@ -1879,10 +1879,7 @@ void main() {
   ) async {
     debugDisableShadows = false;
     try {
-      final theme = ThemeData(
-        platform: TargetPlatform.android,
-        primarySwatch: Colors.blue,
-      );
+      final theme = ThemeData(platform: TargetPlatform.android, primarySwatch: Colors.blue);
       final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(
         thumbColor: Colors.red.shade500,
         showValueIndicator: ShowValueIndicator.always,
@@ -1940,10 +1937,7 @@ void main() {
     'Default paddle range slider value indicator shape draws correctly with debugDisableShadows',
     (WidgetTester tester) async {
       debugDisableShadows = true;
-      final theme = ThemeData(
-        platform: TargetPlatform.android,
-        primarySwatch: Colors.blue,
-      );
+      final theme = ThemeData(platform: TargetPlatform.android, primarySwatch: Colors.blue);
       final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(
         thumbColor: Colors.red.shade500,
         showValueIndicator: ShowValueIndicator.always,
@@ -2631,9 +2625,7 @@ void main() {
     testWidgets(
       'Only draw active track if thumb center is higher than trackRect.left and track radius',
       (WidgetTester tester) async {
-        const sliderTheme = SliderThemeData(
-          trackShape: RoundedRectSliderTrackShape(),
-        );
+        const sliderTheme = SliderThemeData(trackShape: RoundedRectSliderTrackShape());
         await tester.pumpWidget(_buildApp(sliderTheme));
 
         MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
@@ -2661,9 +2653,7 @@ void main() {
     testWidgets(
       'Only draw inactive track if thumb center is lower than trackRect.right and track radius',
       (WidgetTester tester) async {
-        const sliderTheme = SliderThemeData(
-          trackShape: RoundedRectSliderTrackShape(),
-        );
+        const sliderTheme = SliderThemeData(trackShape: RoundedRectSliderTrackShape());
         await tester.pumpWidget(_buildApp(sliderTheme, value: 1.0));
 
         MaterialInkController material = Material.of(tester.element(find.byType(Slider)));

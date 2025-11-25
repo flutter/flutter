@@ -11,13 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Positioned constructors', (WidgetTester tester) async {
     final Widget child = Container();
-    final a = Positioned(
-      left: 101.0,
-      right: 201.0,
-      top: 301.0,
-      bottom: 401.0,
-      child: child,
-    );
+    final a = Positioned(left: 101.0, right: 201.0, top: 301.0, bottom: 401.0, child: child);
     expect(a.left, 101.0);
     expect(a.right, 201.0);
     expect(a.top, 301.0);
@@ -57,10 +51,7 @@ void main() {
         const Rect.fromLTRB(0.0, 10.0, 100.0, 110.0),
       ),
     );
-    final controller = AnimationController(
-      duration: const Duration(seconds: 10),
-      vsync: tester,
-    );
+    final controller = AnimationController(duration: const Duration(seconds: 10), vsync: tester);
     addTearDown(controller.dispose);
     final sizes = <Size>[];
     final positions = <Offset>[];

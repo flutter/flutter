@@ -96,9 +96,7 @@ void main() {
       double initialOffset,
       double expectedOffset,
     ) async {
-      final scrollController = ScrollController(
-        initialScrollOffset: initialOffset,
-      );
+      final scrollController = ScrollController(initialScrollOffset: initialOffset);
       addTearDown(scrollController.dispose);
       await tester.pumpWidget(buildFrame(physics, scrollController: scrollController));
       final ScrollableState scrollable = tester.state(find.byType(Scrollable));

@@ -166,11 +166,7 @@ void main() {
     });
 
     test('with device host and arch tags', () async {
-      final tags = <String, dynamic>{
-        'device_type': 'ab-c',
-        'host_type': 'de-f',
-        'arch': 'm1',
-      };
+      final tags = <String, dynamic>{'device_type': 'ab-c', 'host_type': 'de-f', 'arch': 'm1'};
       final String fileName = metricFileName('test', tags);
       expect(fileName, 'test_m1_def_abc');
     });

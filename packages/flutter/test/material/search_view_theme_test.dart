@@ -113,11 +113,7 @@ void main() {
     const headerHeight = 45.0;
     const headerTextStyle = TextStyle(color: Color(0xff000004), fontSize: 20.0);
     const headerHintStyle = TextStyle(color: Color(0xff000005), fontSize: 18.0);
-    const constraints = BoxConstraints(
-      minWidth: 250.0,
-      maxWidth: 300.0,
-      minHeight: 450.0,
-    );
+    const constraints = BoxConstraints(minWidth: 250.0, maxWidth: 300.0, minHeight: 450.0);
 
     const searchViewTheme = SearchViewThemeData(
       backgroundColor: backgroundColor,

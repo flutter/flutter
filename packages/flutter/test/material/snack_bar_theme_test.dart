@@ -287,9 +287,7 @@ void main() {
   });
 
   testWidgets('SnackBarAction uses actionBackgroundColor', (WidgetTester tester) async {
-    final actionBackgroundColor = WidgetStateColor.resolveWith((
-      Set<WidgetState> states,
-    ) {
+    final actionBackgroundColor = WidgetStateColor.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.disabled)) {
         return Colors.blue;
       }
@@ -347,18 +345,14 @@ void main() {
   testWidgets('SnackBarAction backgroundColor overrides SnackBarThemeData actionBackgroundColor', (
     WidgetTester tester,
   ) async {
-    final snackBarActionBackgroundColor = WidgetStateColor.resolveWith((
-      Set<WidgetState> states,
-    ) {
+    final snackBarActionBackgroundColor = WidgetStateColor.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.disabled)) {
         return Colors.amber;
       }
       return Colors.cyan;
     });
 
-    final actionBackgroundColor = WidgetStateColor.resolveWith((
-      Set<WidgetState> states,
-    ) {
+    final actionBackgroundColor = WidgetStateColor.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.disabled)) {
         return Colors.blue;
       }
@@ -420,9 +414,7 @@ void main() {
   testWidgets(
     'SnackBarThemeData asserts when actionBackgroundColor is a WidgetStateColor and disabledActionBackgroundColor is also provided',
     (WidgetTester tester) async {
-      final actionBackgroundColor = WidgetStateColor.resolveWith((
-        Set<WidgetState> states,
-      ) {
+      final actionBackgroundColor = WidgetStateColor.resolveWith((Set<WidgetState> states) {
         if (states.contains(WidgetState.disabled)) {
           return Colors.blue;
         }

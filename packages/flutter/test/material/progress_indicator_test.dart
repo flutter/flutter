@@ -792,9 +792,7 @@ void main() {
   testWidgets('Material2 - RefreshProgressIndicator uses expected animation', (
     WidgetTester tester,
   ) async {
-    final animationSheet = AnimationSheetBuilder(
-      frameSize: const Size(50, 50),
-    );
+    final animationSheet = AnimationSheetBuilder(frameSize: const Size(50, 50));
     addTearDown(animationSheet.dispose);
 
     await tester.pumpFrames(
@@ -813,9 +811,7 @@ void main() {
   testWidgets('Material3 - RefreshProgressIndicator uses expected animation', (
     WidgetTester tester,
   ) async {
-    final animationSheet = AnimationSheetBuilder(
-      frameSize: const Size(50, 50),
-    );
+    final animationSheet = AnimationSheetBuilder(frameSize: const Size(50, 50));
     addTearDown(animationSheet.dispose);
 
     await tester.pumpFrames(
@@ -1087,9 +1083,7 @@ void main() {
   testWidgets('Material2 - Indeterminate CircularProgressIndicator uses expected animation', (
     WidgetTester tester,
   ) async {
-    final animationSheet = AnimationSheetBuilder(
-      frameSize: const Size(40, 40),
-    );
+    final animationSheet = AnimationSheetBuilder(frameSize: const Size(40, 40));
     addTearDown(animationSheet.dispose);
 
     await tester.pumpFrames(
@@ -1114,9 +1108,7 @@ void main() {
   testWidgets('Material3 - Indeterminate CircularProgressIndicator uses expected animation', (
     WidgetTester tester,
   ) async {
-    final animationSheet = AnimationSheetBuilder(
-      frameSize: const Size(40, 40),
-    );
+    final animationSheet = AnimationSheetBuilder(frameSize: const Size(40, 40));
     addTearDown(animationSheet.dispose);
 
     await tester.pumpFrames(
@@ -1388,9 +1380,7 @@ void main() {
         final value = ValueNotifier<double>(0);
         addTearDown(value.dispose);
 
-        final animationSheet = AnimationSheetBuilder(
-          frameSize: const Size(250, 30),
-        );
+        final animationSheet = AnimationSheetBuilder(frameSize: const Size(250, 30));
         addTearDown(animationSheet.dispose);
 
         final Widget target = Material(
@@ -1452,9 +1442,7 @@ void main() {
         required TextDirection textDirection,
         double? trackGap,
       }) async {
-        final animationSheet = AnimationSheetBuilder(
-          frameSize: const Size(250, 30),
-        );
+        final animationSheet = AnimationSheetBuilder(frameSize: const Size(250, 30));
         addTearDown(animationSheet.dispose);
 
         final Widget target = Material(

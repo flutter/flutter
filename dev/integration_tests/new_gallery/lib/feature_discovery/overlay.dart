@@ -306,8 +306,9 @@ class TapTarget extends StatelessWidget {
               height: radius * 2,
               width: radius * 2,
               decoration: BoxDecoration(
-                color:
-                    theme.brightness == Brightness.dark ? theme.colorScheme.primary : Colors.white,
+                color: theme.brightness == Brightness.dark
+                    ? theme.colorScheme.primary
+                    : Colors.white,
                 shape: BoxShape.circle,
               ),
               child: child,

@@ -338,10 +338,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
 
   /// This generates the map of Web KeyboardEvent codes to physical keys.
   String get _webPhysicalKeyMap {
-    final lines = OutputLines<String>(
-      'Web physical key map',
-      behavior: DeduplicateBehavior.kKeep,
-    );
+    final lines = OutputLines<String>('Web physical key map', behavior: DeduplicateBehavior.kKeep);
     for (final PhysicalKeyEntry entry in keyData.entries) {
       for (final String webCodes in entry.webCodes()) {
         lines.add(entry.name, "  '$webCodes': PhysicalKeyboardKey.${entry.constantName},");

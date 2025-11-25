@@ -1169,10 +1169,7 @@ void main() {
     const iconKey = ValueKey<String>('icon');
 
     const textScaleFactorOptions = <double>[0.5, 1.0, 1.25, 1.5, 2.0, 2.5, 3.0, 4.0];
-    const textDirectionOptions = <TextDirection>[
-      TextDirection.ltr,
-      TextDirection.rtl,
-    ];
+    const textDirectionOptions = <TextDirection>[TextDirection.ltr, TextDirection.rtl];
     const iconOptions = <Widget?>[null, Icon(Icons.add, size: 18, key: iconKey)];
 
     // Expected values for each textScaleFactor.
@@ -2285,10 +2282,7 @@ void main() {
       expect(foregroundStates.isEmpty, isTrue);
 
       const focusedStates = <WidgetState>{WidgetState.focused};
-      const focusedHoveredStates = <WidgetState>{
-        WidgetState.focused,
-        WidgetState.hovered,
-      };
+      const focusedHoveredStates = <WidgetState>{WidgetState.focused, WidgetState.hovered};
       const focusedHoveredPressedStates = <WidgetState>{
         WidgetState.focused,
         WidgetState.hovered,

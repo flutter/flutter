@@ -66,10 +66,7 @@ void main() {
   testWidgets(
     'use allLayers to record out-of-subtree contents',
     (WidgetTester tester) async {
-      final builder = AnimationSheetBuilder(
-        frameSize: const Size(8, 2),
-        allLayers: true,
-      );
+      final builder = AnimationSheetBuilder(frameSize: const Size(8, 2), allLayers: true);
       addTearDown(builder.dispose);
 
       // The `record` (sized 8, 2) is placed on top of `_DecuplePixels`

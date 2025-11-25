@@ -11,9 +11,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   testGesture('Should recognize pan', (GestureTester tester) {
-    final tap = MultiTapGestureRecognizer(
-      longTapDelay: kLongPressTimeout,
-    );
+    final tap = MultiTapGestureRecognizer(longTapDelay: kLongPressTimeout);
 
     final log = <String>[];
 

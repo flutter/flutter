@@ -329,9 +329,7 @@ void main() {
 
   test('StadiumBorder and RoundedRectBorder with circular BorderRadius', () {
     const stadium = StadiumBorder();
-    const rrect = RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(10)),
-    );
+    const rrect = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10)));
     const rect = Rect.fromLTWH(0.0, 0.0, 100.0, 50.0);
     final Matcher looksLikeS = isPathThat(
       includes: const <Offset>[Offset(25.0, 25.0), Offset(50.0, 25.0), Offset(7.33, 7.33)],

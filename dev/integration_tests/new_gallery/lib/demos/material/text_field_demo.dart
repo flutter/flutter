@@ -102,10 +102,9 @@ class _PasswordFieldState extends State<PasswordField> with RestorationMixin {
           hoverColor: Colors.transparent,
           icon: Icon(
             _obscureText.value ? Icons.visibility : Icons.visibility_off,
-            semanticLabel:
-                _obscureText.value
-                    ? GalleryLocalizations.of(context)!.demoTextFieldShowPasswordLabel
-                    : GalleryLocalizations.of(context)!.demoTextFieldHidePasswordLabel,
+            semanticLabel: _obscureText.value
+                ? GalleryLocalizations.of(context)!.demoTextFieldShowPasswordLabel
+                : GalleryLocalizations.of(context)!.demoTextFieldHidePasswordLabel,
           ),
         ),
       ),

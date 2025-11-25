@@ -278,10 +278,7 @@ mixin class ChangeNotifier implements Listenable {
       if (_count == 0) {
         _listeners = List<VoidCallback?>.filled(1, null);
       } else {
-        final newListeners = List<VoidCallback?>.filled(
-          _listeners.length * 2,
-          null,
-        );
+        final newListeners = List<VoidCallback?>.filled(_listeners.length * 2, null);
         for (var i = 0; i < _count; i++) {
           newListeners[i] = _listeners[i];
         }

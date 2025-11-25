@@ -62,10 +62,7 @@ void main() {
         stdio: stdio,
       );
 
-      final repo = FrameworkRepository(
-        checkouts,
-        mirrorRemote: const Remote.mirror('mirror'),
-      );
+      final repo = FrameworkRepository(checkouts, mirrorRemote: const Remote.mirror('mirror'));
       expect(
         () async => repo.commit(message, addFirst: true),
         throwsExceptionWith('Tried to commit with message $message but no changes were present'),
@@ -103,10 +100,7 @@ void main() {
         stdio: stdio,
       );
 
-      final repo = FrameworkRepository(
-        checkouts,
-        mirrorRemote: const Remote.mirror('mirror'),
-      );
+      final repo = FrameworkRepository(checkouts, mirrorRemote: const Remote.mirror('mirror'));
       await repo.commit(message);
       expect(processManager.hasRemainingExpectations, false);
     });

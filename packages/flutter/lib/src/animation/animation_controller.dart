@@ -790,12 +790,8 @@ class AnimationController extends Animation<double>
       AnimationBehavior.normal when SemanticsBinding.instance.disableAnimations => 200.0,
       AnimationBehavior.normal || AnimationBehavior.preserve => 1.0,
     };
-    final simulation = SpringSimulation(
-      springDescription,
-      value,
-      target,
-      velocity * scale,
-    )..tolerance = _kFlingTolerance;
+    final simulation = SpringSimulation(springDescription, value, target, velocity * scale)
+      ..tolerance = _kFlingTolerance;
     assert(
       simulation.type != SpringType.underDamped,
       'The specified spring simulation is of type SpringType.underDamped.\n'

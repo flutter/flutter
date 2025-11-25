@@ -270,8 +270,8 @@ void main([List<String> args = const <String>[]]) {
         await runDemos(
           <String>['crane@study'],
           driver,
-          additionalActions:
-              () async => driver.scroll(craneFlyList, 0, -1000, const Duration(seconds: 1)),
+          additionalActions: () async =>
+              driver.scroll(craneFlyList, 0, -1000, const Duration(seconds: 1)),
           scrollToTopWhenDone: false,
         );
       }, streams: const <TimelineStream>[TimelineStream.dart, TimelineStream.embedder]);

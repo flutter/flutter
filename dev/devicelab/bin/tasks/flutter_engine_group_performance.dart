@@ -42,9 +42,7 @@ void _copyGradleFromModule(String source, String destination) {
   final String windowsWrapperDestinationPath = path.join(destination, 'gradlew.bat');
   File(wrapperPath).copySync(wrapperDestinationPath);
   File(windowsWrapperPath).copySync(windowsWrapperDestinationPath);
-  final gradleDestinationDirectory = Directory(
-    path.join(destination, 'gradle', 'wrapper'),
-  );
+  final gradleDestinationDirectory = Directory(path.join(destination, 'gradle', 'wrapper'));
   if (!gradleDestinationDirectory.existsSync()) {
     gradleDestinationDirectory.createSync(recursive: true);
   }
@@ -111,9 +109,7 @@ Future<TaskResult> _doTest() async {
       }
       final totalMemoryStatistics = ListStatistics(totalMemorySamples);
 
-      final results = <String, dynamic>{
-        ...totalMemoryStatistics.asMap('totalMemory'),
-      };
+      final results = <String, dynamic>{...totalMemoryStatistics.asMap('totalMemory')};
       result = TaskResult.success(results, benchmarkScoreKeys: results.keys.toList());
     });
 

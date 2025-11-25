@@ -237,13 +237,7 @@ void main() {
         ),
       );
 
-      final elementEntry = <dynamic>[
-        TextInput.scribbleClients.keys.first,
-        0.0,
-        0.0,
-        800.0,
-        600.0,
-      ];
+      final elementEntry = <dynamic>[TextInput.scribbleClients.keys.first, 0.0, 0.0, 800.0, 600.0];
 
       List<List<dynamic>> elements = await tester.testTextInput.scribbleRequestElementsInRect(
         const Rect.fromLTWH(0, 0, 1, 1),

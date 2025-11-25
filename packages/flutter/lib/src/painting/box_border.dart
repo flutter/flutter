@@ -469,12 +469,7 @@ class Border extends BoxBorder {
     BorderStyle style = BorderStyle.solid,
     double strokeAlign = BorderSide.strokeAlignInside,
   }) {
-    final side = BorderSide(
-      color: color,
-      width: width,
-      style: style,
-      strokeAlign: strokeAlign,
-    );
+    final side = BorderSide(color: color, width: width, style: style, strokeAlign: strokeAlign);
     return Border.fromBorderSide(side);
   }
 

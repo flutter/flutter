@@ -1721,10 +1721,7 @@ void main() {
   testWidgets('Background color of disabled segment should be different than enabled segment', (
     WidgetTester tester,
   ) async {
-    final children = <int, Widget>{
-      0: const Text('Child 1'),
-      1: const Text('Child 2'),
-    };
+    final children = <int, Widget>{0: const Text('Child 1'), 1: const Text('Child 2')};
     var sharedValue = 0;
 
     await tester.pumpWidget(

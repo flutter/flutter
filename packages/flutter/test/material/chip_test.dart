@@ -2506,9 +2506,7 @@ void main() {
   });
 
   testWidgets('Chip uses ThemeData chip theme if present', (WidgetTester tester) async {
-    final theme = ThemeData(
-      chipTheme: const ChipThemeData(backgroundColor: Color(0xffff0000)),
-    );
+    final theme = ThemeData(chipTheme: const ChipThemeData(backgroundColor: Color(0xffff0000)));
 
     Widget buildChip() {
       return wrapForChip(
@@ -2672,10 +2670,7 @@ void main() {
   testWidgets('Chip uses the right theme colors for the right components', (
     WidgetTester tester,
   ) async {
-    final themeData = ThemeData(
-      platform: TargetPlatform.android,
-      primarySwatch: Colors.blue,
-    );
+    final themeData = ThemeData(platform: TargetPlatform.android, primarySwatch: Colors.blue);
     final defaultChipTheme = ChipThemeData.fromDefaults(
       brightness: themeData.brightness,
       secondaryColor: Colors.blue,

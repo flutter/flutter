@@ -1316,8 +1316,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       _nodesNeedingPaint = <RenderObject>[];
 
       // Sort the dirty nodes in reverse order (deepest first).
-      for (final node
-          in dirtyNodes..sort((RenderObject a, RenderObject b) => b.depth - a.depth)) {
+      for (final node in dirtyNodes..sort((RenderObject a, RenderObject b) => b.depth - a.depth)) {
         assert(node._layerHandle.layer != null);
         if ((node._needsPaint || node._needsCompositedLayerUpdate) && node.owner == this) {
           if (node._layerHandle.layer!.attached) {
@@ -2256,9 +2255,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         ]);
       }
 
-      final summary = ErrorSummary(
-        'A $runtimeType was mutated in $culpritFullMethodName.',
-      );
+      final summary = ErrorSummary('A $runtimeType was mutated in $culpritFullMethodName.');
       final isMutatedByAncestor = activeLayoutRoot == debugActiveLayout;
       final description = isMutatedByAncestor
           ? 'A RenderObject must not mutate its descendants in its $culpritMethodName method.'
@@ -4401,8 +4398,7 @@ mixin ContainerRenderObjectMixin<
       assert(_lastChild == child);
       _lastChild = childParentData.previousSibling;
     } else {
-      final childNextSiblingParentData =
-          childParentData.nextSibling!.parentData! as ParentDataType;
+      final childNextSiblingParentData = childParentData.nextSibling!.parentData! as ParentDataType;
       childNextSiblingParentData.previousSibling = childParentData.previousSibling;
     }
     childParentData.previousSibling = null;
@@ -5694,8 +5690,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     final ChildSemanticsConfigurationsDelegate? childConfigurationsDelegate =
         configProvider.effective.childConfigurationsDelegate;
     final hasChildConfigurationsDelegate = childConfigurationsDelegate != null;
-    final configToFragment =
-        <SemanticsConfiguration, _SemanticsFragment>{};
+    final configToFragment = <SemanticsConfiguration, _SemanticsFragment>{};
 
     // It is possible the childConfigurationsDelegate may produce incomplete
     // fragments. In this case, this render object semantics need to absorb all

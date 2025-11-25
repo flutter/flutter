@@ -381,10 +381,7 @@ void main() {
   test('reparenting should clear position', () {
     final coloredBox = RenderDecoratedBox(decoration: const BoxDecoration());
 
-    final paddedBox = RenderPadding(
-      child: coloredBox,
-      padding: const EdgeInsets.all(10.0),
-    );
+    final paddedBox = RenderPadding(child: coloredBox, padding: const EdgeInsets.all(10.0));
     layout(paddedBox);
     final parentData = coloredBox.parentData! as BoxParentData;
     expect(parentData.offset.dx, isNot(equals(0.0)));
@@ -555,10 +552,7 @@ void main() {
     });
 
     test('handles flow layout', () {
-      final child = RenderParagraph(
-        TextSpan(text: 'a' * 100),
-        textDirection: TextDirection.ltr,
-      );
+      final child = RenderParagraph(TextSpan(text: 'a' * 100), textDirection: TextDirection.ltr);
       final box = RenderConstraintsTransformBox(
         alignment: Alignment.center,
         textDirection: TextDirection.ltr,
@@ -580,10 +574,7 @@ void main() {
 
     test('paints even when its size is empty', () {
       // Regression test for https://github.com/flutter/flutter/issues/146840.
-      final child = RenderParagraph(
-        const TextSpan(text: ''),
-        textDirection: TextDirection.ltr,
-      );
+      final child = RenderParagraph(const TextSpan(text: ''), textDirection: TextDirection.ltr);
       final box = RenderConstraintsTransformBox(
         alignment: Alignment.center,
         textDirection: TextDirection.ltr,

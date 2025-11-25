@@ -63,8 +63,7 @@ void main() {
       final BuildContext context = tester.element(find.byType(Placeholder));
 
       // Magnifier should be positioned directly over the red square.
-      final tapPointRenderBox =
-          tester.firstRenderObject(find.byKey(fakeTextFieldKey)) as RenderBox;
+      final tapPointRenderBox = tester.firstRenderObject(find.byKey(fakeTextFieldKey)) as RenderBox;
       final Rect fakeTextFieldRect =
           tapPointRenderBox.localToGlobal(Offset.zero) & tapPointRenderBox.size;
 

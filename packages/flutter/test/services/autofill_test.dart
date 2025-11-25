@@ -43,12 +43,8 @@ void main() {
     test(
       'AutofillClients send the correct configuration to the platform and responds to updateEditingStateWithTag method correctly',
       () async {
-        final client1 = FakeAutofillClient(
-          const TextEditingValue(text: 'test1'),
-        );
-        final client2 = FakeAutofillClient(
-          const TextEditingValue(text: 'test2'),
-        );
+        final client1 = FakeAutofillClient(const TextEditingValue(text: 'test1'));
+        final client2 = FakeAutofillClient(const TextEditingValue(text: 'test2'));
 
         client1.textInputConfiguration = TextInputConfiguration(
           autofillConfiguration: AutofillConfiguration(

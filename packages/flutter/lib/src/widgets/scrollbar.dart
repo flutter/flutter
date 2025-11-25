@@ -1474,9 +1474,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }
     final ScrollController? scrollController = _effectiveScrollController;
     final tryPrimary = widget.controller == null;
-    final controllerForError = tryPrimary
-        ? 'PrimaryScrollController'
-        : 'provided ScrollController';
+    final controllerForError = tryPrimary ? 'PrimaryScrollController' : 'provided ScrollController';
 
     var when = '';
     if (widget.thumbVisibility ?? false) {
@@ -1733,8 +1731,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
     assert(_thumbDrag == null);
     final ScrollPosition position = _cachedController!.position;
-    final renderBox =
-        _scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
+    final renderBox = _scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
     final details = DragStartDetails(
       localPosition: localPosition,
       globalPosition: renderBox.localToGlobal(localPosition),
@@ -1781,8 +1778,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       Axis.horizontal => Offset(primaryDelta, 0),
       Axis.vertical => Offset(0, primaryDelta),
     };
-    final renderBox =
-        _scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
+    final renderBox = _scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
     final scrollDetails = DragUpdateDetails(
       delta: delta,
       primaryDelta: primaryDelta,
@@ -1823,8 +1819,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       TargetPlatform.iOS || TargetPlatform.android => -velocity,
       _ => Velocity.zero,
     };
-    final renderBox =
-        _scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
+    final renderBox = _scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
     final details = DragEndDetails(
       localPosition: localPosition,
       globalPosition: renderBox.localToGlobal(localPosition),
@@ -1877,10 +1872,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }
 
     final ScrollableState? state = Scrollable.maybeOf(position.context.notificationContext!);
-    final intent = ScrollIntent(
-      direction: scrollDirection,
-      type: ScrollIncrementType.page,
-    );
+    final intent = ScrollIntent(direction: scrollDirection, type: ScrollIncrementType.page);
     assert(state != null);
     final double scrollIncrement = ScrollAction.getDirectionalIncrement(state!, intent);
 
@@ -1988,8 +1980,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   // to the scrollbar. Ensure that the localPosition is reported consistently,
   // even if the source of the event is a trackpad or a stylus.
   Offset _globalToScrollbar(Offset offset) {
-    final renderBox =
-        _scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
+    final renderBox = _scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
     return renderBox.globalToLocal(offset);
   }
 

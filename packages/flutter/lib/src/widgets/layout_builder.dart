@@ -176,8 +176,7 @@ class _LayoutBuilderElement<LayoutInfoType> extends RenderObjectElement {
   @override
   void update(AbstractLayoutBuilder<LayoutInfoType> newWidget) {
     assert(widget != newWidget);
-    final oldWidget =
-        widget as AbstractLayoutBuilder<LayoutInfoType>;
+    final oldWidget = widget as AbstractLayoutBuilder<LayoutInfoType>;
     super.update(newWidget);
     assert(widget == newWidget);
 

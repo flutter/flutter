@@ -32,9 +32,7 @@ void main() {
     });
 
     test('sets the DPR to match the window', () {
-      final configuration = TestViewConfiguration(
-        size: const Size(1280.0, 800.0),
-      );
+      final configuration = TestViewConfiguration(size: const Size(1280.0, 800.0));
       expect(configuration.devicePixelRatio, binding.window.devicePixelRatio);
     });
   });

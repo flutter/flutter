@@ -2107,8 +2107,7 @@ class _RestorableDateRangePickerDialogTestWidgetState
     // Example: "25/7/1994"
     final startDateTimeString =
         '${startDateTime?.day}/${startDateTime?.month}/${startDateTime?.year}';
-    final endDateTimeString =
-        '${endDateTime?.day}/${endDateTime?.month}/${endDateTime?.year}';
+    final endDateTimeString = '${endDateTime?.day}/${endDateTime?.month}/${endDateTime?.year}';
     return Scaffold(
       body: Center(
         child: Column(

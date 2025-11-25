@@ -23,11 +23,7 @@ Future<void> execute() async {
   void runAddListenerBenchmark(int iteration, {bool addResult = true}) {
     const name = 'add';
     for (var listenerCount = 1; listenerCount <= 5; listenerCount += 1) {
-      final notifiers = List<_Notifier>.generate(
-        iteration,
-        (_) => _Notifier(),
-        growable: false,
-      );
+      final notifiers = List<_Notifier>.generate(iteration, (_) => _Notifier(), growable: false);
 
       final watch = Stopwatch();
       watch.start();

@@ -346,11 +346,10 @@ void main() {
   testWidgets('SliverGridRegularTileLayout - can handle close to zero mainAxisStride', (
     WidgetTester tester,
   ) async {
-    const delegate =
-        SliverGridDelegateWithMaxCrossAxisExtent(
-          childAspectRatio: 1e300,
-          maxCrossAxisExtent: 500.0,
-        );
+    const delegate = SliverGridDelegateWithMaxCrossAxisExtent(
+      childAspectRatio: 1e300,
+      maxCrossAxisExtent: 500.0,
+    );
     final SliverGridLayout layout = delegate.getLayout(
       const SliverConstraints(
         axisDirection: AxisDirection.down,

@@ -345,9 +345,7 @@ void main() {
   testWidgets('Dialog background color', (WidgetTester tester) async {
     const Color customColor = Colors.pink;
     const dialog = AlertDialog(title: Text('Title'), actions: <Widget>[]);
-    final theme = ThemeData(
-      dialogTheme: const DialogThemeData(backgroundColor: customColor),
-    );
+    final theme = ThemeData(dialogTheme: const DialogThemeData(backgroundColor: customColor));
 
     await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));
@@ -397,9 +395,7 @@ void main() {
 
   testWidgets('Custom dialog alignment', (WidgetTester tester) async {
     const dialog = AlertDialog(title: Text('Title'), actions: <Widget>[]);
-    final theme = ThemeData(
-      dialogTheme: const DialogThemeData(alignment: Alignment.bottomLeft),
-    );
+    final theme = ThemeData(dialogTheme: const DialogThemeData(alignment: Alignment.bottomLeft));
 
     await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));
@@ -420,9 +416,7 @@ void main() {
       actions: <Widget>[],
       alignment: Alignment.topRight,
     );
-    final theme = ThemeData(
-      dialogTheme: const DialogThemeData(alignment: Alignment.bottomLeft),
-    );
+    final theme = ThemeData(dialogTheme: const DialogThemeData(alignment: Alignment.bottomLeft));
 
     await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));
@@ -595,9 +589,7 @@ void main() {
     const titleText = 'Title';
     const titleTextStyle = TextStyle(color: Colors.pink);
     const dialog = AlertDialog(title: Text(titleText), actions: <Widget>[]);
-    final theme = ThemeData(
-      dialogTheme: const DialogThemeData(titleTextStyle: titleTextStyle),
-    );
+    final theme = ThemeData(dialogTheme: const DialogThemeData(titleTextStyle: titleTextStyle));
 
     await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));
@@ -643,10 +635,7 @@ void main() {
   ) async {
     const titleText = 'Title';
     const titleTextStyle = TextStyle(color: Colors.pink);
-    const dialog = SimpleDialog(
-      title: Text(titleText),
-      titleTextStyle: titleTextStyle,
-    );
+    const dialog = SimpleDialog(title: Text(titleText), titleTextStyle: titleTextStyle);
 
     await tester.pumpWidget(_appWithDialog(tester, dialog));
     await tester.tap(find.text('X'));
@@ -662,9 +651,7 @@ void main() {
     const titleText = 'Title';
     const titleTextStyle = TextStyle(color: Colors.pink);
     const dialog = SimpleDialog(title: Text(titleText));
-    final theme = ThemeData(
-      dialogTheme: const DialogThemeData(titleTextStyle: titleTextStyle),
-    );
+    final theme = ThemeData(dialogTheme: const DialogThemeData(titleTextStyle: titleTextStyle));
 
     await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));
@@ -709,9 +696,7 @@ void main() {
     const contentText = 'Content';
     const contentTextStyle = TextStyle(color: Colors.pink);
     const dialog = AlertDialog(content: Text(contentText), actions: <Widget>[]);
-    final theme = ThemeData(
-      dialogTheme: const DialogThemeData(contentTextStyle: contentTextStyle),
-    );
+    final theme = ThemeData(dialogTheme: const DialogThemeData(contentTextStyle: contentTextStyle));
 
     await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));
@@ -755,9 +740,7 @@ void main() {
   testWidgets('Custom barrierColor - Theme', (WidgetTester tester) async {
     const Color barrierColor = Colors.blue;
     const dialog = SimpleDialog();
-    final theme = ThemeData(
-      dialogTheme: const DialogThemeData(barrierColor: barrierColor),
-    );
+    final theme = ThemeData(dialogTheme: const DialogThemeData(barrierColor: barrierColor));
 
     await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));
@@ -770,9 +753,7 @@ void main() {
   testWidgets('DialogTheme.insetPadding updates Dialog insetPadding', (WidgetTester tester) async {
     // The default testing screen (800, 600)
     const screenRect = Rect.fromLTRB(0.0, 0.0, 800.0, 600.0);
-    const dialogTheme = DialogThemeData(
-      insetPadding: EdgeInsets.fromLTRB(10, 15, 20, 25),
-    );
+    const dialogTheme = DialogThemeData(insetPadding: EdgeInsets.fromLTRB(10, 15, 20, 25));
     const dialog = Dialog(child: Placeholder());
 
     await tester.pumpWidget(
@@ -810,9 +791,7 @@ void main() {
 
   testWidgets('Dialog.clipBehavior takes priority over theme', (WidgetTester tester) async {
     const dialog = Dialog(clipBehavior: Clip.antiAlias, child: Placeholder());
-    final theme = ThemeData(
-      dialogTheme: const DialogThemeData(clipBehavior: Clip.hardEdge),
-    );
+    final theme = ThemeData(dialogTheme: const DialogThemeData(clipBehavior: Clip.hardEdge));
 
     await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));
@@ -843,10 +822,7 @@ void main() {
     WidgetTester tester,
   ) async {
     const themeConstraints = BoxConstraints(maxWidth: 500, maxHeight: 500);
-    const dialogTheme = DialogThemeData(
-      alignment: Alignment.center,
-      constraints: themeConstraints,
-    );
+    const dialogTheme = DialogThemeData(alignment: Alignment.center, constraints: themeConstraints);
 
     final dialog = Dialog(
       child: SizedBox.expand(child: Container(color: Colors.amber)),

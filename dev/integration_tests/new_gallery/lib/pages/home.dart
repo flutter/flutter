@@ -190,16 +190,15 @@ class HomePage extends StatelessWidget {
                       },
                       excludeFromSemantics: true,
                       child: FadeInImage(
-                        image:
-                            Theme.of(context).colorScheme.brightness == Brightness.dark
-                                ? const AssetImage(
-                                  'assets/logo/flutter_logo.png',
-                                  package: 'flutter_gallery_assets',
-                                )
-                                : const AssetImage(
-                                  'assets/logo/flutter_logo_color.png',
-                                  package: 'flutter_gallery_assets',
-                                ),
+                        image: Theme.of(context).colorScheme.brightness == Brightness.dark
+                            ? const AssetImage(
+                                'assets/logo/flutter_logo.png',
+                                package: 'flutter_gallery_assets',
+                              )
+                            : const AssetImage(
+                                'assets/logo/flutter_logo_color.png',
+                                package: 'flutter_gallery_assets',
+                              ),
                         placeholder: MemoryImage(kTransparentImage),
                         fadeInDuration: entranceAnimationDuration,
                       ),
@@ -496,8 +495,8 @@ class _DesktopCategoryItem extends StatelessWidget {
                   // Makes integration tests possible.
                   key: ValueKey<String>('${category.name}DemoList'),
                   primary: false,
-                  itemBuilder:
-                      (BuildContext context, int index) => CategoryDemoItem(demo: demos[index]),
+                  itemBuilder: (BuildContext context, int index) =>
+                      CategoryDemoItem(demo: demos[index]),
                   itemCount: demos.length,
                 ),
               ),
@@ -583,7 +582,10 @@ class _AnimatedCategoryItem extends StatelessWidget {
     return AnimatedBuilder(
       animation: controller,
       builder: (BuildContext context, Widget? child) {
-        return Padding(padding: EdgeInsets.only(top: topPaddingAnimation.value), child: child);
+        return Padding(
+          padding: EdgeInsets.only(top: topPaddingAnimation.value),
+          child: child,
+        );
       },
       child: child,
     );
@@ -813,10 +815,9 @@ class _DesktopCarouselState extends State<_DesktopCarousel> {
           children: <Widget>[
             ListView.builder(
               padding: EdgeInsets.symmetric(
-                horizontal:
-                    isDesktop
-                        ? _horizontalDesktopPadding - _carouselItemDesktopMargin
-                        : _horizontalPadding - _carouselItemMobileMargin,
+                horizontal: isDesktop
+                    ? _horizontalDesktopPadding - _carouselItemDesktopMargin
+                    : _horizontalPadding - _carouselItemMobileMargin,
               ),
               scrollDirection: Axis.horizontal,
               primary: false,
@@ -824,11 +825,10 @@ class _DesktopCarouselState extends State<_DesktopCarousel> {
               controller: _controller,
               itemExtent: _carouselItemWidth,
               itemCount: widget.children.length,
-              itemBuilder:
-                  (BuildContext context, int index) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: widget.children[index],
-                  ),
+              itemBuilder: (BuildContext context, int index) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: widget.children[index],
+              ),
             ),
             if (showPreviousButton)
               _DesktopPageButton(
@@ -920,10 +920,9 @@ class _DesktopPageButton extends StatelessWidget {
           height: buttonSize,
           margin: EdgeInsetsDirectional.only(start: isEnd ? 0 : padding, end: isEnd ? padding : 0),
           child: Tooltip(
-            message:
-                isEnd
-                    ? MaterialLocalizations.of(context).nextPageTooltip
-                    : MaterialLocalizations.of(context).previousPageTooltip,
+            message: isEnd
+                ? MaterialLocalizations.of(context).nextPageTooltip
+                : MaterialLocalizations.of(context).previousPageTooltip,
             child: Material(
               color: Colors.black.withOpacity(0.5),
               shape: const CircleBorder(),

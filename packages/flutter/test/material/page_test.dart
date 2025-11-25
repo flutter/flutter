@@ -1190,9 +1190,7 @@ void main() {
   testWidgets('MaterialPage works', (WidgetTester tester) async {
     final LocalKey pageKey = UniqueKey();
     final detector = TransitionDetector();
-    var myPages = <Page<void>>[
-      MaterialPage<void>(key: pageKey, child: const Text('first')),
-    ];
+    var myPages = <Page<void>>[MaterialPage<void>(key: pageKey, child: const Text('first'))];
     await tester.pumpWidget(
       buildNavigator(
         view: tester.view,

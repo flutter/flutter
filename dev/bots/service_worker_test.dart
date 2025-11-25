@@ -65,9 +65,7 @@ self.addEventListener('fetch', (event) => {
 });
   ''';
 
-  final serviceWorkerBuildFile = File(
-    path.join(_appBuildDirectory, 'flutter_service_worker.js'),
-  );
+  final serviceWorkerBuildFile = File(path.join(_appBuildDirectory, 'flutter_service_worker.js'));
 
   try {
     await runCommand(_flutter, <String>['clean'], workingDirectory: _testAppDirectory);

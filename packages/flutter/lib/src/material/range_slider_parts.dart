@@ -759,8 +759,7 @@ class RoundRangeSliderTickMarkShape extends RangeSliderTickMarkShape {
     final Color? end = isBetweenThumbs
         ? sliderTheme.activeTickMarkColor
         : sliderTheme.inactiveTickMarkColor;
-    final paint = Paint()
-      ..color = ColorTween(begin: begin, end: end).evaluate(enableAnimation)!;
+    final paint = Paint()..color = ColorTween(begin: begin, end: end).evaluate(enableAnimation)!;
 
     // The tick marks are tiny circles that are the same height as the track.
     final double tickMarkRadius =
@@ -835,10 +834,7 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
     assert(sliderTheme.showValueIndicator != null);
     assert(sliderTheme.overlappingShapeStrokeColor != null);
     final Canvas canvas = context.canvas;
-    final radiusTween = Tween<double>(
-      begin: _disabledThumbRadius,
-      end: enabledThumbRadius,
-    );
+    final radiusTween = Tween<double>(begin: _disabledThumbRadius, end: enabledThumbRadius);
     final colorTween = ColorTween(
       begin: sliderTheme.disabledThumbColor,
       end: sliderTheme.thumbColor,

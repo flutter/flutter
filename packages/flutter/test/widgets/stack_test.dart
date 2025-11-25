@@ -130,13 +130,11 @@ void main() {
     );
 
     final Element child0 = tester.element(find.byKey(child0Key));
-    final child0RenderObjectParentData =
-        child0.renderObject!.parentData! as StackParentData;
+    final child0RenderObjectParentData = child0.renderObject!.parentData! as StackParentData;
     expect(child0RenderObjectParentData.offset, equals(Offset.zero));
 
     final Element child1 = tester.element(find.byKey(child1Key));
-    final child1RenderObjectParentData =
-        child1.renderObject!.parentData! as StackParentData;
+    final child1RenderObjectParentData = child1.renderObject!.parentData! as StackParentData;
     expect(child1RenderObjectParentData.offset, equals(const Offset(5.0, 5.0)));
 
     await tester.pumpWidget(
@@ -178,13 +176,11 @@ void main() {
     );
 
     final Element child0 = tester.element(find.byKey(child0Key));
-    final child0RenderObjectParentData =
-        child0.renderObject!.parentData! as StackParentData;
+    final child0RenderObjectParentData = child0.renderObject!.parentData! as StackParentData;
     expect(child0RenderObjectParentData.offset, equals(Offset.zero));
 
     final Element child1 = tester.element(find.byKey(child1Key));
-    final child1RenderObjectParentData =
-        child1.renderObject!.parentData! as StackParentData;
+    final child1RenderObjectParentData = child1.renderObject!.parentData! as StackParentData;
     expect(child1RenderObjectParentData.offset, equals(const Offset(5.0, 5.0)));
 
     await tester.pumpWidget(
@@ -496,10 +492,7 @@ void main() {
   });
 
   testWidgets('IndexedStack excludes focus for hidden children', (WidgetTester tester) async {
-    const children = <Widget>[
-      Focus(child: Text('child 0')),
-      Focus(child: Text('child 1')),
-    ];
+    const children = <Widget>[Focus(child: Text('child 0')), Focus(child: Text('child 1'))];
 
     Future<void> pumpIndexedStack(int? activeIndex) async {
       await tester.pumpWidget(

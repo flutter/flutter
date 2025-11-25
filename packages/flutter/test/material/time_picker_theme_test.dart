@@ -133,9 +133,7 @@ void main() {
     'TimePickerThemeData.inputDecorationTheme accepts only InputDecorationTheme or InputDecorationThemeData instances',
     () {
       const decorationTheme = InputDecorationTheme();
-      var timePickerTheme = const TimePickerThemeData(
-        inputDecorationTheme: decorationTheme,
-      );
+      var timePickerTheme = const TimePickerThemeData(inputDecorationTheme: decorationTheme);
       expect(timePickerTheme.inputDecorationTheme, decorationTheme.data);
 
       timePickerTheme = TimePickerThemeData(inputDecorationTheme: decorationTheme.data);
@@ -705,8 +703,7 @@ void main() {
     final Material pmMaterial = _textMaterial(tester, 'PM');
     expect(pmMaterial.color, _unselectedColor);
 
-    final dayPeriodShape =
-        timePickerTheme.dayPeriodShape! as RoundedRectangleBorder;
+    final dayPeriodShape = timePickerTheme.dayPeriodShape! as RoundedRectangleBorder;
     final borderRadius = dayPeriodShape.borderRadius as BorderRadius;
 
     final RoundedRectangleBorder expectedAmShape = dayPeriodShape.copyWith(
@@ -855,8 +852,7 @@ void main() {
     final Material pmMaterial = _textMaterial(tester, 'PM');
     expect(pmMaterial.color, _unselectedColor);
 
-    final dayPeriodShape =
-        timePickerTheme.dayPeriodShape! as RoundedRectangleBorder;
+    final dayPeriodShape = timePickerTheme.dayPeriodShape! as RoundedRectangleBorder;
     final borderRadius = dayPeriodShape.borderRadius as BorderRadius;
 
     final RoundedRectangleBorder expectedAmShape = dayPeriodShape.copyWith(

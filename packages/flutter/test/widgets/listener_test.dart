@@ -174,8 +174,7 @@ void main() {
       final move = events[1] as PointerMoveEvent;
       final up = events[2] as PointerUpEvent;
 
-      final expectedTransform = Matrix4.identity()
-        ..scale(1 / scaleFactor, 1 / scaleFactor, 1.0);
+      final expectedTransform = Matrix4.identity()..scale(1 / scaleFactor, 1 / scaleFactor, 1.0);
 
       expect(center, isNot(const Offset(50, 50)));
 

@@ -138,11 +138,7 @@ void main() {
   });
 
   testWidgets('Material2 - Dialog Defaults', (WidgetTester tester) async {
-    const dialog = AlertDialog(
-      title: Text('Title'),
-      content: Text('Y'),
-      actions: <Widget>[],
-    );
+    const dialog = AlertDialog(title: Text('Title'), content: Text('Y'), actions: <Widget>[]);
     await tester.pumpWidget(_buildAppWithDialog(dialog, theme: material2Theme));
 
     await tester.tap(find.text('X'));
@@ -160,11 +156,7 @@ void main() {
   });
 
   testWidgets('Material3 - Dialog Defaults', (WidgetTester tester) async {
-    const dialog = AlertDialog(
-      title: Text('Title'),
-      content: Text('Y'),
-      actions: <Widget>[],
-    );
+    const dialog = AlertDialog(title: Text('Title'), content: Text('Y'), actions: <Widget>[]);
     await tester.pumpWidget(_buildAppWithDialog(dialog, theme: material3Theme));
 
     await tester.tap(find.text('X'));
@@ -904,9 +896,7 @@ void main() {
     final Widget icon = Icon(Icons.ac_unit, key: iconKey);
     final Widget title = Text('title', key: titleKey);
     final Widget content = Text('content', key: contentKey);
-    final actions = <Widget>[
-      ElevatedButton(onPressed: () {}, child: const Text('button')),
-    ];
+    final actions = <Widget>[ElevatedButton(onPressed: () {}, child: const Text('button'))];
     final children = <Widget>[
       SimpleDialogOption(key: childrenKey, child: const Text('child'), onPressed: () {}),
     ];
@@ -2664,8 +2654,7 @@ void main() {
     }
 
     Future<bool> previousFocus() async {
-      final result =
-          Actions.invoke(primaryFocus!.context!, const PreviousFocusIntent())! as bool;
+      final result = Actions.invoke(primaryFocus!.context!, const PreviousFocusIntent())! as bool;
       await tester.pump();
       return result;
     }
@@ -2719,10 +2708,7 @@ void main() {
       actions: <Widget>[TextButton(onPressed: () {}, child: const Text('OK'))],
     );
 
-    for (final platform in <TargetPlatform>[
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    ]) {
+    for (final platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
       await tester.pumpWidget(_buildAppWithDialog(dialog, theme: ThemeData(platform: platform)));
       await tester.pumpAndSettle();
 
@@ -2812,10 +2798,7 @@ void main() {
   });
 
   testWidgets('Applies AnimationStyle to showAdaptiveDialog', (WidgetTester tester) async {
-    const animationStyle = AnimationStyle(
-      duration: Duration(seconds: 1),
-      curve: Curves.easeInOut,
-    );
+    const animationStyle = AnimationStyle(duration: Duration(seconds: 1), curve: Curves.easeInOut);
 
     await tester.pumpWidget(
       const MaterialApp(

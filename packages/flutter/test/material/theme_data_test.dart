@@ -1176,14 +1176,8 @@ void main() {
     });
 
     testWidgets('can lerp', (WidgetTester tester) async {
-      const extensionA1 = MyThemeExtensionA(
-        color1: Colors.black,
-        color2: Colors.amber,
-      );
-      const extensionA2 = MyThemeExtensionA(
-        color1: Colors.white,
-        color2: Colors.blue,
-      );
+      const extensionA1 = MyThemeExtensionA(color1: Colors.black, color2: Colors.amber);
+      const extensionA2 = MyThemeExtensionA(color1: Colors.white, color2: Colors.blue);
       const extensionB1 = MyThemeExtensionB(textStyle: TextStyle(fontSize: 50));
       const extensionB2 = MyThemeExtensionB(textStyle: TextStyle(fontSize: 100));
 
@@ -1891,9 +1885,7 @@ void main() {
     });
 
     testWidgets('should return null on extension not found', (WidgetTester tester) async {
-      final theme = ThemeData(
-        adaptations: const <Adaptation<Object>>[StringAdaptation()],
-      );
+      final theme = ThemeData(adaptations: const <Adaptation<Object>>[StringAdaptation()]);
 
       expect(theme.extension<SwitchThemeAdaptation>(), isNull);
     });

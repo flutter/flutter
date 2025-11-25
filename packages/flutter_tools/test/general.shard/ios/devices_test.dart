@@ -1097,7 +1097,8 @@ class FakeXcdevice extends Fake implements XCDevice {
   int getAvailableIOSDevicesForWirelessDiscoveryCount = 0;
   final devices = <List<IOSDevice>>[];
   final diagnostics = <String>[];
-  StreamController<XCDeviceEventNotification> deviceEventController = StreamController<XCDeviceEventNotification>();
+  StreamController<XCDeviceEventNotification> deviceEventController =
+      StreamController<XCDeviceEventNotification>();
 
   XCDeviceEventNotification? waitForDeviceEvent;
 

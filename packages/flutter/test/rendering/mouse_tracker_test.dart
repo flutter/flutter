@@ -607,12 +607,8 @@ void main() {
   test('should not flip out if not all mouse events are listened to', () {
     var isInHitRegionOne = true;
     var isInHitRegionTwo = false;
-    final annotation1 = TestAnnotationTarget(
-      onEnter: (PointerEnterEvent event) {},
-    );
-    final annotation2 = TestAnnotationTarget(
-      onExit: (PointerExitEvent event) {},
-    );
+    final annotation1 = TestAnnotationTarget(onEnter: (PointerEnterEvent event) {});
+    final annotation2 = TestAnnotationTarget(onExit: (PointerExitEvent event) {});
     setUpMouseAnnotationFinder((Offset position) sync* {
       if (isInHitRegionOne) {
         yield TestAnnotationEntry(annotation1);

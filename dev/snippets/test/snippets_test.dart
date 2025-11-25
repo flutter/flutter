@@ -274,8 +274,7 @@ void main() {
       element.samples.first.metadata.addAll(<String, Object>{'channel': 'stable'});
       generator.generateCode(element.samples.first, output: outputFile);
       expect(expectedMetadataFile.existsSync(), isTrue);
-      final json =
-          jsonDecode(expectedMetadataFile.readAsStringSync()) as Map<String, dynamic>;
+      final json = jsonDecode(expectedMetadataFile.readAsStringSync()) as Map<String, dynamic>;
       expect(json['id'], equals('MyElement.0'));
       expect(json['channel'], equals('stable'));
       expect(json['file'], equals('snippet_out.dart'));

@@ -59,9 +59,7 @@ class TestFileReporterResults {
         final suiteID = group['suiteID']! as int;
         addMetricDone(suiteID, entry['time']! as int, testSpecs);
       } else if (entry.containsKey('error')) {
-        final stackTrace = entry.containsKey('stackTrace')
-            ? entry['stackTrace']! as String
-            : '';
+        final stackTrace = entry.containsKey('stackTrace') ? entry['stackTrace']! as String : '';
         errors.add('${entry['error']}\n $stackTrace');
       } else if (entry.containsKey('success') && entry['success'] == true) {
         hasFailedTests = false;

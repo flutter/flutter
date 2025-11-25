@@ -784,10 +784,7 @@ class RenderCustomPaint extends RenderProxyBox {
     int newChildrenBottom = newChildSemantics.length - 1;
     int oldChildrenBottom = oldSemantics.length - 1;
 
-    final newChildren = List<SemanticsNode?>.filled(
-      newChildSemantics.length,
-      null,
-    );
+    final newChildren = List<SemanticsNode?>.filled(newChildSemantics.length, null);
 
     // Update the top of the list.
     while ((oldChildrenTop <= oldChildrenBottom) && (newChildrenTop <= newChildrenBottom)) {

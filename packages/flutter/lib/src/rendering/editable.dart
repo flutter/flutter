@@ -183,10 +183,7 @@ class VerticalCaretMovementRun implements Iterator<TextPosition> {
 
     final newOffset = Offset(_currentOffset.dx, _lineMetrics[lineNumber].baseline);
     final TextPosition closestPosition = _editable._textPainter.getPositionForOffset(newOffset);
-    final position = MapEntry<Offset, TextPosition>(
-      newOffset,
-      closestPosition,
-    );
+    final position = MapEntry<Offset, TextPosition>(newOffset, closestPosition);
     _positionCache[lineNumber] = position;
     return position;
   }
@@ -440,9 +437,7 @@ class RenderEditable extends RenderBox
           );
 
     if (_foregroundRenderObject == null) {
-      final foregroundRenderObject = _RenderEditableCustomPaint(
-        painter: effectivePainter,
-      );
+      final foregroundRenderObject = _RenderEditableCustomPaint(painter: effectivePainter);
       adoptChild(foregroundRenderObject);
       _foregroundRenderObject = foregroundRenderObject;
     } else {
@@ -474,9 +469,7 @@ class RenderEditable extends RenderBox
           );
 
     if (_backgroundRenderObject == null) {
-      final backgroundRenderObject = _RenderEditableCustomPaint(
-        painter: effectivePainter,
-      );
+      final backgroundRenderObject = _RenderEditableCustomPaint(painter: effectivePainter);
       adoptChild(backgroundRenderObject);
       _backgroundRenderObject = backgroundRenderObject;
     } else {
@@ -1441,10 +1434,7 @@ class RenderEditable extends RenderBox
     final newChildCache = <Key, SemanticsNode>{};
     _cachedCombinedSemanticsInfos ??= combineSemanticsInfo(_semanticsInfo!);
     for (final InlineSpanSemanticsInformation info in _cachedCombinedSemanticsInfos!) {
-      final selection = TextSelection(
-        baseOffset: start,
-        extentOffset: start + info.text.length,
-      );
+      final selection = TextSelection(baseOffset: start, extentOffset: start + info.text.length);
       start += info.text.length;
 
       if (info.isPlaceholder) {

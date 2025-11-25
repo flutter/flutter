@@ -98,12 +98,7 @@ void main() {
     const SerializableFinder of = ByType('Text');
     final SerializableFinder matching = ByValueKey('hello');
 
-    final a = Descendant(
-      of: of,
-      matching: matching,
-      matchRoot: true,
-      firstMatchOnly: true,
-    );
+    final a = Descendant(of: of, matching: matching, matchRoot: true, firstMatchOnly: true);
     expect(a.serialize(), <String, String>{
       'finderType': 'Descendant',
       'of': '{"finderType":"ByType","type":"Text"}',
@@ -246,10 +241,7 @@ void main() {
     });
 
     test('deserialize with missing keyValueString', () {
-      final serialized = <String, String>{
-        'finderType': 'ByValueKey',
-        'keyValueType': 'String',
-      };
+      final serialized = <String, String>{'finderType': 'ByValueKey', 'keyValueType': 'String'};
       expect(
         () => ByValueKey.deserialize(serialized),
         throwsA(
@@ -261,10 +253,7 @@ void main() {
     });
 
     test('deserialize with missing keyValueType', () {
-      final serialized = <String, String>{
-        'finderType': 'ByValueKey',
-        'keyValueString': 'hello',
-      };
+      final serialized = <String, String>{'finderType': 'ByValueKey', 'keyValueString': 'hello'};
       expect(
         () => ByValueKey.deserialize(serialized),
         throwsA(

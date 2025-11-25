@@ -47,18 +47,19 @@ class _SharedXAxisTransitionDemoState extends State<SharedXAxisTransitionDemo> {
             Expanded(
               child: PageTransitionSwitcher(
                 reverse: !_isLoggedIn,
-                transitionBuilder: (
-                  Widget child,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) {
-                  return SharedAxisTransition(
-                    animation: animation,
-                    secondaryAnimation: secondaryAnimation,
-                    transitionType: SharedAxisTransitionType.horizontal,
-                    child: child,
-                  );
-                },
+                transitionBuilder:
+                    (
+                      Widget child,
+                      Animation<double> animation,
+                      Animation<double> secondaryAnimation,
+                    ) {
+                      return SharedAxisTransition(
+                        animation: animation,
+                        secondaryAnimation: secondaryAnimation,
+                        transitionType: SharedAxisTransitionType.horizontal,
+                        child: child,
+                      );
+                    },
                 child: _isLoggedIn ? const _CoursePage() : const _SignInPage(),
               ),
             ),
@@ -134,10 +135,9 @@ class _CourseSwitchState extends State<_CourseSwitch> {
   @override
   Widget build(BuildContext context) {
     final GalleryLocalizations? localizations = GalleryLocalizations.of(context);
-    final String subtitle =
-        _isCourseBundled
-            ? localizations!.demoSharedXAxisBundledCourseSubtitle
-            : localizations!.demoSharedXAxisIndividualCourseSubtitle;
+    final String subtitle = _isCourseBundled
+        ? localizations!.demoSharedXAxisBundledCourseSubtitle
+        : localizations!.demoSharedXAxisIndividualCourseSubtitle;
 
     return SwitchListTile(
       title: Text(widget.course!),

@@ -1596,9 +1596,7 @@ class SelectableRegionState extends State<SelectableRegion>
   ///    for the default context menu buttons.
   TextSelectionToolbarAnchors get contextMenuAnchors {
     if (_lastSecondaryTapDownPosition != null) {
-      final anchors = TextSelectionToolbarAnchors(
-        primaryAnchor: _lastSecondaryTapDownPosition!,
-      );
+      final anchors = TextSelectionToolbarAnchors(primaryAnchor: _lastSecondaryTapDownPosition!);
       // Clear the state of _lastSecondaryTapDownPosition after use since a user may
       // access contextMenuAnchors and receive invalid anchors for their context menu.
       _lastSecondaryTapDownPosition = null;

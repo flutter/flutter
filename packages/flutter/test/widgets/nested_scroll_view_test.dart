@@ -91,14 +91,8 @@ void main() {
   testWidgets('ScrollDirection test', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/107101
     final receivedResult = <ScrollDirection>[];
-    const expectedReverseResult = <ScrollDirection>[
-      ScrollDirection.reverse,
-      ScrollDirection.idle,
-    ];
-    const expectedForwardResult = <ScrollDirection>[
-      ScrollDirection.forward,
-      ScrollDirection.idle,
-    ];
+    const expectedReverseResult = <ScrollDirection>[ScrollDirection.reverse, ScrollDirection.idle];
+    const expectedForwardResult = <ScrollDirection>[ScrollDirection.forward, ScrollDirection.idle];
 
     await tester.pumpWidget(
       MaterialApp(

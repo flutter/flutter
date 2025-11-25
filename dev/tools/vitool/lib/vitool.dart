@@ -85,10 +85,7 @@ class PathAnimation {
       commandIdx += 1
     ) {
       final int numPointsInCommand = frames[0].paths[pathIdx].commands[commandIdx].points.length;
-      final points = List<List<Point<double>>>.filled(
-        numPointsInCommand,
-        <Point<double>>[],
-      );
+      final points = List<List<Point<double>>>.filled(numPointsInCommand, <Point<double>>[]);
       final String commandType = frames[0].paths[pathIdx].commands[commandIdx].type;
       for (var i = 0; i < frames.length; i += 1) {
         final FrameData frame = frames[i];
@@ -228,10 +225,7 @@ List<SvgPath> _interpretSvgGroup(List<XmlNode> children, _Transform transform) {
         );
       }
 
-      final subtreeTransform = _Transform(
-        transformMatrix: transformMatrix,
-        opacity: opacity,
-      );
+      final subtreeTransform = _Transform(transformMatrix: transformMatrix, opacity: opacity);
       paths.addAll(_interpretSvgGroup(element.children, subtreeTransform));
     }
   }

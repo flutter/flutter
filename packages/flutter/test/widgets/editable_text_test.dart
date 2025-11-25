@@ -3318,9 +3318,7 @@ void main() {
   }, skip: kIsWeb); // [intended]
 
   // The variants to test in the focus handling test.
-  final focusVariants = ValueVariant<TextInputAction>(
-    TextInputAction.values.toSet(),
-  );
+  final focusVariants = ValueVariant<TextInputAction>(TextInputAction.values.toSet());
 
   testWidgets('Handles focus correctly when action is invoked', (WidgetTester tester) async {
     // The expectations for each of the types of TextInputAction.
@@ -10774,9 +10772,7 @@ void main() {
   });
 
   testWidgets('EditableText inherits DefaultTextHeightBehavior', (WidgetTester tester) async {
-    const customTextHeightBehavior = TextHeightBehavior(
-      applyHeightToFirstAscent: false,
-    );
+    const customTextHeightBehavior = TextHeightBehavior(applyHeightToFirstAscent: false);
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(),
@@ -10806,9 +10802,7 @@ void main() {
   testWidgets('EditableText defaultTextHeightBehavior is used over inherited widget', (
     WidgetTester tester,
   ) async {
-    const inheritedTextHeightBehavior = TextHeightBehavior(
-      applyHeightToFirstAscent: false,
-    );
+    const inheritedTextHeightBehavior = TextHeightBehavior(applyHeightToFirstAscent: false);
     const customTextHeightBehavior = TextHeightBehavior(
       applyHeightToLastDescent: false,
       applyHeightToFirstAscent: false,
@@ -12297,13 +12291,12 @@ void main() {
       affinity: TextAffinity.upstream,
     );
     var myIntentWasCalled = false;
-    final overrideAction =
-        CallbackAction<ExtendSelectionByCharacterIntent>(
-          onInvoke: (ExtendSelectionByCharacterIntent intent) {
-            myIntentWasCalled = true;
-            return null;
-          },
-        );
+    final overrideAction = CallbackAction<ExtendSelectionByCharacterIntent>(
+      onInvoke: (ExtendSelectionByCharacterIntent intent) {
+        myIntentWasCalled = true;
+        return null;
+      },
+    );
     await tester.pumpWidget(
       MaterialApp(
         home: Align(
@@ -12343,13 +12336,12 @@ void main() {
 
   testWidgets('can change tap outside behavior by overriding actions', (WidgetTester tester) async {
     var myIntentWasCalled = false;
-    final overrideAction =
-        CallbackAction<EditableTextTapOutsideIntent>(
-          onInvoke: (EditableTextTapOutsideIntent intent) {
-            myIntentWasCalled = true;
-            return null;
-          },
-        );
+    final overrideAction = CallbackAction<EditableTextTapOutsideIntent>(
+      onInvoke: (EditableTextTapOutsideIntent intent) {
+        myIntentWasCalled = true;
+        return null;
+      },
+    );
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -12382,13 +12374,12 @@ void main() {
     WidgetTester tester,
   ) async {
     var myIntentWasCalled = false;
-    final overrideAction =
-        CallbackAction<EditableTextTapUpOutsideIntent>(
-          onInvoke: (EditableTextTapUpOutsideIntent intent) {
-            myIntentWasCalled = true;
-            return null;
-          },
-        );
+    final overrideAction = CallbackAction<EditableTextTapUpOutsideIntent>(
+      onInvoke: (EditableTextTapUpOutsideIntent intent) {
+        myIntentWasCalled = true;
+        return null;
+      },
+    );
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -13162,9 +13153,7 @@ void main() {
     }
 
     // Empty text editing value with a collapsed selection.
-    const emptyTextCollapsed = TextEditingValue(
-      selection: TextSelection.collapsed(offset: 0),
-    );
+    const emptyTextCollapsed = TextEditingValue(selection: TextSelection.collapsed(offset: 0));
 
     // Texts and text editing values used repeatedly in undo/redo tests.
     const textA = 'A';
@@ -15257,9 +15246,7 @@ void main() {
       void checkMagnifierKey(Key testKey) {
         final EditableText editableText = tester.widget(find.byType(EditableText));
         final BuildContext context = tester.firstElement(find.byType(EditableText));
-        final magnifierInfo = ValueNotifier<MagnifierInfo>(
-          MagnifierInfo.empty,
-        );
+        final magnifierInfo = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
         addTearDown(magnifierInfo.dispose);
         expect(
           editableText.magnifierConfiguration.magnifierBuilder(
@@ -15474,10 +15461,7 @@ void main() {
         final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
 
         const cursorIndex = 21;
-        const expectedSpan = SuggestionSpan(TextRange(start: 20, end: 23), <String>[
-          'Hey',
-          'He',
-        ]);
+        const expectedSpan = SuggestionSpan(TextRange(start: 20, end: 23), <String>['Hey', 'He']);
         const suggestionSpans = <SuggestionSpan>[
           SuggestionSpan(TextRange(start: 13, end: 18), <String>['world', 'word', 'old']),
           expectedSpan,
@@ -15517,10 +15501,7 @@ void main() {
         final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
 
         const cursorIndex = 23;
-        const expectedSpan = SuggestionSpan(TextRange(start: 20, end: 23), <String>[
-          'Hey',
-          'He',
-        ]);
+        const expectedSpan = SuggestionSpan(TextRange(start: 20, end: 23), <String>['Hey', 'He']);
         const suggestionSpans = <SuggestionSpan>[
           SuggestionSpan(TextRange(start: 13, end: 18), <String>['world', 'word', 'old']),
           expectedSpan,
@@ -15559,10 +15540,7 @@ void main() {
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
 
       const cursorIndex = 33;
-      const expectedSpan = SuggestionSpan(TextRange(start: 20, end: 23), <String>[
-        'Hey',
-        'He',
-      ]);
+      const expectedSpan = SuggestionSpan(TextRange(start: 20, end: 23), <String>['Hey', 'He']);
       const suggestionSpans = <SuggestionSpan>[
         SuggestionSpan(TextRange(start: 13, end: 18), <String>['world', 'word', 'old']),
         expectedSpan,
@@ -15600,10 +15578,7 @@ void main() {
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
 
       const cursorIndex = 5;
-      const expectedSpan = SuggestionSpan(TextRange(start: 20, end: 23), <String>[
-        'Hey',
-        'He',
-      ]);
+      const expectedSpan = SuggestionSpan(TextRange(start: 20, end: 23), <String>['Hey', 'He']);
       const suggestionSpans = <SuggestionSpan>[
         SuggestionSpan(TextRange(start: 13, end: 18), <String>['world', 'word', 'old']),
         expectedSpan,
@@ -16058,9 +16033,7 @@ void main() {
       await tester.pumpWidget(MaterialApp(home: editableText));
 
       final BuildContext context = tester.firstElement(find.byType(EditableText));
-      final notifier = ValueNotifier<MagnifierInfo>(
-        MagnifierInfo.empty,
-      );
+      final notifier = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
       addTearDown(notifier.dispose);
 
       expect(
@@ -16633,13 +16606,9 @@ void main() {
     testWidgets(
       'moving focus after the app resumed should select all the content on desktop',
       (WidgetTester tester) async {
-        final controller1 = TextEditingController.fromValue(
-          collapsedAtEnd('Flutter!'),
-        );
+        final controller1 = TextEditingController.fromValue(collapsedAtEnd('Flutter!'));
         addTearDown(controller1.dispose);
-        final controller2 = TextEditingController.fromValue(
-          collapsedAtEnd('Dart!'),
-        );
+        final controller2 = TextEditingController.fromValue(collapsedAtEnd('Dart!'));
         addTearDown(controller2.dispose);
         final focusNode1 = FocusNode();
         addTearDown(focusNode1.dispose);

@@ -460,8 +460,7 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(OneAncestorWidget(child: Container()));
-    var parentData =
-        tester.renderObject(find.byType(Container)).parentData! as DummyParentData;
+    var parentData = tester.renderObject(find.byType(Container)).parentData! as DummyParentData;
     expect(parentData.string, isNull);
 
     await tester.pumpWidget(

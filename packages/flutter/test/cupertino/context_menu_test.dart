@@ -404,8 +404,7 @@ void main() {
         );
       }
 
-      final decoyContainer =
-          tester.firstElement(findBuilderDecoyChild()).widget as Container;
+      final decoyContainer = tester.firstElement(findBuilderDecoyChild()).widget as Container;
       final decoyDecoration = decoyContainer.decoration as BoxDecoration?;
       expect(decoyDecoration?.borderRadius, equals(BorderRadius.circular(0)));
 
@@ -413,8 +412,7 @@ void main() {
 
       // After a small delay, the _DecoyChild has begun to animate with a different border radius.
       await tester.pump(const Duration(milliseconds: 500));
-      final decoyLaterContainer =
-          tester.firstElement(findBuilderDecoyChild()).widget as Container;
+      final decoyLaterContainer = tester.firstElement(findBuilderDecoyChild()).widget as Container;
       final decoyLaterDecoration = decoyLaterContainer.decoration as BoxDecoration?;
       expect(decoyLaterDecoration?.borderRadius, isNot(equals(BorderRadius.circular(0))));
 
@@ -709,8 +707,7 @@ void main() {
 
       // Check border radius.
       expect(findStaticDefaultPreview(), findsOneWidget);
-      final previewWidget =
-          tester.firstWidget(findStaticDefaultPreview()) as ClipRSuperellipse;
+      final previewWidget = tester.firstWidget(findStaticDefaultPreview()) as ClipRSuperellipse;
       expect(previewWidget.borderRadius, equals(BorderRadius.circular(12.0)));
     });
 

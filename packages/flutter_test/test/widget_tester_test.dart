@@ -87,10 +87,7 @@ void main() {
       await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
       int count;
 
-      final test = AnimationController(
-        duration: const Duration(milliseconds: 5100),
-        vsync: tester,
-      );
+      final test = AnimationController(duration: const Duration(milliseconds: 5100), vsync: tester);
       count = await tester.pumpAndSettle(const Duration(seconds: 1));
       expect(count, 1); // it always pumps at least one frame
 
@@ -622,10 +619,7 @@ void main() {
         }
       }, variant: TargetPlatformVariant.all());
 
-      const excludePlatforms = <TargetPlatform>{
-        TargetPlatform.android,
-        TargetPlatform.linux,
-      };
+      const excludePlatforms = <TargetPlatform>{TargetPlatform.android, TargetPlatform.linux};
       testWidgets(
         'TargetPlatformVariant.all, excluding runs an all variants except those provided in excluding',
         (WidgetTester tester) async {

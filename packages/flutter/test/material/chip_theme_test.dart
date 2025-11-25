@@ -355,9 +355,7 @@ void main() {
     const padding = EdgeInsets.all(10);
     const labelPadding = EdgeInsets.all(5);
     const labelStyle = TextStyle(fontSize: 20);
-    const shape = RoundedRectangleBorder(
-      side: BorderSide(color: Color(0xff0000ff)),
-    );
+    const shape = RoundedRectangleBorder(side: BorderSide(color: Color(0xff0000ff)));
     const iconTheme = IconThemeData(color: Color(0xff00ff00));
 
     await tester.pumpWidget(

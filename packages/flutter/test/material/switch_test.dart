@@ -1182,10 +1182,7 @@ void main() {
       );
     }
 
-    for (final platform in <TargetPlatform>[
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    ]) {
+    for (final platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
       value = false;
       await tester.pumpWidget(buildFrame(platform));
       expect(find.byType(Switch), findsOneWidget, reason: 'on ${platform.name}');
@@ -1223,10 +1220,7 @@ void main() {
   });
 
   testWidgets('Switch.adaptive default mouse cursor(Cupertino)', (WidgetTester tester) async {
-    for (final platform in <TargetPlatform>[
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    ]) {
+    for (final platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
       await tester.pumpWidget(buildAdaptiveSwitch(platform: platform, value: false));
       final Size switchSize = tester.getSize(find.byType(Switch));
       expect(switchSize, const Size(60.0, 48.0));
@@ -1266,17 +1260,9 @@ void main() {
     WidgetTester tester,
   ) async {
     const Color thumbColor = Colors.white;
-    const inactiveTrackColor = Color.fromARGB(
-      40,
-      120,
-      120,
-      128,
-    ); // Default inactive track color.
+    const inactiveTrackColor = Color.fromARGB(40, 120, 120, 128); // Default inactive track color.
     const activeTrackColor = Color.fromARGB(255, 52, 199, 89); // Default active track color.
-    for (final platform in <TargetPlatform>[
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    ]) {
+    for (final platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
       // Switches have same sizes on both platform but they are more compact on macOS.
       final trackRRect = platform == TargetPlatform.iOS
           ? RRect.fromLTRBR(4.5, 8.5, 55.5, 39.5, const Radius.circular(15.5))
@@ -1382,10 +1368,7 @@ void main() {
       thumbColor: MaterialStatePropertyAll<Color>(updatedThumbColor),
       trackColor: MaterialStatePropertyAll<Color>(updatedTrackColor),
     );
-    for (final platform in <TargetPlatform>[
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    ]) {
+    for (final platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
       await tester.pumpWidget(Container());
       await tester.pumpWidget(
         buildAdaptiveSwitch(platform: platform, overallSwitchThemeData: overallSwitchTheme),
@@ -1472,10 +1455,7 @@ void main() {
       thumbColor: MaterialStatePropertyAll<Color>(updatedThumbColor),
       trackColor: MaterialStatePropertyAll<Color>(updatedTrackColor),
     );
-    for (final platform in <TargetPlatform>[
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    ]) {
+    for (final platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
       await tester.pumpWidget(Container());
       await tester.pumpWidget(
         buildAdaptiveSwitch(platform: platform, switchThemeData: switchTheme),
@@ -1547,10 +1527,7 @@ void main() {
   testWidgets('Override default adaptive SwitchThemeData on iOS/macOS', (
     WidgetTester tester,
   ) async {
-    for (final platform in <TargetPlatform>[
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    ]) {
+    for (final platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
       await tester.pumpWidget(Container());
       await tester.pumpWidget(
         buildAdaptiveSwitch(
@@ -4307,10 +4284,7 @@ void main() {
       );
     }
 
-    for (final platform in <TargetPlatform>[
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    ]) {
+    for (final platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
       final trackRRect = platform == TargetPlatform.iOS
           ? RRect.fromLTRBR(4.0, 8.5, 55.0, 39.5, const Radius.circular(15.5))
           : RRect.fromLTRBR(4.0, 4.5, 55.0, 35.5, const Radius.circular(15.5));
@@ -4333,8 +4307,7 @@ void main() {
       TargetPlatform.linux,
       TargetPlatform.windows,
     ]) {
-      final trackRRect =
-          platform == TargetPlatform.fuchsia || platform == TargetPlatform.android
+      final trackRRect = platform == TargetPlatform.fuchsia || platform == TargetPlatform.android
           ? RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0))
           : RRect.fromLTRBR(13.0, 13.0, 46.0, 27.0, const Radius.circular(7.0));
       await tester.pumpWidget(buildFrame(platform));
@@ -4383,10 +4356,7 @@ void main() {
       );
     }
 
-    for (final platform in <TargetPlatform>[
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    ]) {
+    for (final platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
       final trackRRect = platform == TargetPlatform.iOS
           ? RRect.fromLTRBR(4.5, 8.5, 55.5, 39.5, const Radius.circular(15.5))
           : RRect.fromLTRBR(4.5, 4.5, 55.5, 35.5, const Radius.circular(15.5));
@@ -4409,8 +4379,7 @@ void main() {
       TargetPlatform.linux,
       TargetPlatform.windows,
     ]) {
-      final trackRRect =
-          platform == TargetPlatform.fuchsia || platform == TargetPlatform.android
+      final trackRRect = platform == TargetPlatform.fuchsia || platform == TargetPlatform.android
           ? RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0))
           : RRect.fromLTRBR(4.0, 4.0, 56.0, 36.0, const Radius.circular(16.0));
 

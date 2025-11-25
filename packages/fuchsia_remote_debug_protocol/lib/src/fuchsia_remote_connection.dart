@@ -510,25 +510,19 @@ class FuchsiaRemoteConnection {
   /// Helper for getDeviceServicePorts() to extract the vm_service_port from
   /// json response.
   List<int> getVmServicePortFromInspectSnapshot(dynamic inspectSnapshot) {
-    final snapshot = List<Map<String, dynamic>>.from(
-      inspectSnapshot as List<dynamic>,
-    );
+    final snapshot = List<Map<String, dynamic>>.from(inspectSnapshot as List<dynamic>);
     final ports = <int>[];
 
     for (final item in snapshot) {
       if (!item.containsKey('payload') || item['payload'] == null) {
         continue;
       }
-      final payload = Map<String, dynamic>.from(
-        item['payload'] as Map<String, dynamic>,
-      );
+      final payload = Map<String, dynamic>.from(item['payload'] as Map<String, dynamic>);
 
       if (!payload.containsKey('root') || payload['root'] == null) {
         continue;
       }
-      final root = Map<String, dynamic>.from(
-        payload['root'] as Map<String, dynamic>,
-      );
+      final root = Map<String, dynamic>.from(payload['root'] as Map<String, dynamic>);
 
       if (!root.containsKey('vm_service_port') || root['vm_service_port'] == null) {
         continue;

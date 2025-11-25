@@ -115,8 +115,7 @@ void main() {
       final Event navigationEvent = await navigationFuture;
       // validate the fields
       expect(navigationEvent.extensionData!.data['route'] is Map<dynamic, dynamic>);
-      final route =
-          navigationEvent.extensionData!.data['route'] as Map<dynamic, dynamic>;
+      final route = navigationEvent.extensionData!.data['route'] as Map<dynamic, dynamic>;
       expect(route['description'] is String);
       expect(route['settings'] is Map<dynamic, dynamic>);
       final settings = route['settings'] as Map<dynamic, dynamic>;

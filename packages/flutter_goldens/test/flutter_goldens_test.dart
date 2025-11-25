@@ -238,11 +238,7 @@ void main() {
         log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
 
-      const gitInvocation = RunInvocation(<String>[
-        'git',
-        'rev-parse',
-        'HEAD',
-      ], '/flutter');
+      const gitInvocation = RunInvocation(<String>['git', 'rev-parse', 'HEAD'], '/flutter');
       const goldctlInvocation = RunInvocation(<String>[
         'goldctl',
         'imgtest',
@@ -290,11 +286,7 @@ void main() {
         log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
 
-      const gitInvocation = RunInvocation(<String>[
-        'git',
-        'rev-parse',
-        'HEAD',
-      ], '/flutter');
+      const gitInvocation = RunInvocation(<String>['git', 'rev-parse', 'HEAD'], '/flutter');
       const goldctlInvocation = RunInvocation(<String>[
         'goldctl',
         'imgtest',
@@ -351,11 +343,7 @@ void main() {
         log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
 
-      const gitInvocation = RunInvocation(<String>[
-        'git',
-        'rev-parse',
-        'HEAD',
-      ], '/flutter');
+      const gitInvocation = RunInvocation(<String>['git', 'rev-parse', 'HEAD'], '/flutter');
       const goldctlInvocation = RunInvocation(<String>[
         'goldctl',
         'imgtest',
@@ -683,9 +671,7 @@ void main() {
         );
         final Uri imageUrl = Uri.parse('https://flutter-gold.skia.org/img/images/$expectation.png');
         final fakeImageRequest = FakeHttpClientRequest();
-        final fakeImageResponse = FakeHttpImageResponse(
-          imageResponseTemplate(),
-        );
+        final fakeImageResponse = FakeHttpImageResponse(imageResponseTemplate());
 
         fakeHttpClient.request = fakeImageRequest;
         fakeImageRequest.response = fakeImageResponse;

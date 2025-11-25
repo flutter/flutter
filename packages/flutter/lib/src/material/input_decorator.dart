@@ -1706,11 +1706,9 @@ class _RenderDecoration extends RenderBox
   ChildSemanticsConfigurationsResult _childSemanticsConfigurationDelegate(
     List<SemanticsConfiguration> childConfigs,
   ) {
-    final builder =
-        ChildSemanticsConfigurationsResultBuilder();
+    final builder = ChildSemanticsConfigurationsResultBuilder();
 
-    final mergeGroups =
-        <SemanticsTag, List<SemanticsConfiguration>>{};
+    final mergeGroups = <SemanticsTag, List<SemanticsConfiguration>>{};
     final tags = <SemanticsTag>{
       _InputDecoratorState._kPrefixSemanticsTag,
       _InputDecoratorState._kPrefixIconSemanticsTag,

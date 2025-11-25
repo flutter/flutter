@@ -799,8 +799,7 @@ void main() {
         await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
 
         // We're expecting the traversal to start where the slider is.
-        final expectedMatchers = <Matcher>[...fullTraversalMatchers]
-          ..removeRange(0, 9);
+        final expectedMatchers = <Matcher>[...fullTraversalMatchers]..removeRange(0, 9);
 
         expect(
           tester.semantics.simulatedAccessibilityTraversal(start: find.byType(Slider)),

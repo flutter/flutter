@@ -1622,9 +1622,7 @@ void main() {
       });
 
       test('returns true if results are available', () {
-        final finder = _FakeFinder(
-          findInCandidatesCallback: (_) => <String>['Results'],
-        );
+        final finder = _FakeFinder(findInCandidatesCallback: (_) => <String>['Results']);
 
         expect(finder.tryEvaluate(), true);
       });

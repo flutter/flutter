@@ -1287,12 +1287,7 @@ abstract class WidgetController {
     assert(offset.distance > 0.0);
     assert(speed > 0.0); // speed is pixels/second
     return TestAsyncUtils.guard<void>(() async {
-      final testPointer = TestPointer(
-        pointer ?? _getNextPointer(),
-        deviceKind,
-        null,
-        buttons,
-      );
+      final testPointer = TestPointer(pointer ?? _getNextPointer(), deviceKind, null, buttons);
       const kMoveCount =
           50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
       final double timeStampDelta = 1000000.0 * offset.distance / (kMoveCount * speed);

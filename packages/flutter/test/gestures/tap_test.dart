@@ -600,8 +600,7 @@ void main() {
     const cancel = PointerCancelEvent(pointer: 5, position: Offset(10.0, 10.0));
 
     final tap = TapGestureRecognizer();
-    final drag = HorizontalDragGestureRecognizer()
-      ..onStart = (_) {}; // Need a callback to compete
+    final drag = HorizontalDragGestureRecognizer()..onStart = (_) {}; // Need a callback to compete
     addTearDown(drag.dispose);
 
     final recognized = <String>[];
@@ -1077,8 +1076,7 @@ void main() {
     addTearDown(tap.dispose);
 
     // Add drag recognizer for competition
-    final drag = HorizontalDragGestureRecognizer()
-      ..onStart = (_) {};
+    final drag = HorizontalDragGestureRecognizer()..onStart = (_) {};
     addTearDown(drag.dispose);
 
     final pointer1 = TestPointer();

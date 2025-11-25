@@ -303,10 +303,7 @@ void main() {
 
     testWidgets('Material3 - BAB theme overrides shadowColor', (WidgetTester tester) async {
       const Color babThemeShadowColor = Colors.yellow;
-      const theme = BottomAppBarThemeData(
-        shadowColor: babThemeShadowColor,
-        elevation: 0,
-      );
+      const theme = BottomAppBarThemeData(shadowColor: babThemeShadowColor, elevation: 0);
       await tester.pumpWidget(_withTheme(babTheme: theme));
 
       final PhysicalShape widget = _getBabRenderObject(tester);
@@ -317,9 +314,7 @@ void main() {
       const Color color = Colors.white10; // base color that the surface tint will be applied to
       const Color babThemeSurfaceTintColor = Colors.black87;
       const Color babSurfaceTintColor = Colors.pink;
-      const theme = BottomAppBarThemeData(
-        surfaceTintColor: babThemeSurfaceTintColor,
-      );
+      const theme = BottomAppBarThemeData(surfaceTintColor: babThemeSurfaceTintColor);
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(bottomAppBarTheme: theme),

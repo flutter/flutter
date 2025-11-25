@@ -7,10 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('When snapToEnd is set, value is exactly `end` after completion', () {
-    final description = SpringDescription.withDampingRatio(
-      mass: 1.0,
-      stiffness: 400,
-    );
+    final description = SpringDescription.withDampingRatio(mass: 1.0, stiffness: 400);
     const time = 0.4;
 
     final regularSimulation = SpringSimulation(
@@ -95,11 +92,7 @@ void main() {
     });
 
     test('get duration and bounce based on mass and stiffness', () {
-      const spring = SpringDescription(
-        mass: 1.0,
-        stiffness: 157.91,
-        damping: 17.59,
-      );
+      const spring = SpringDescription(mass: 1.0, stiffness: 157.91, damping: 17.59);
 
       expect(spring.bounce, moreOrLessEquals(0.3, epsilon: 0.001));
       expect(spring.duration.inMilliseconds, equals(500));

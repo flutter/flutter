@@ -85,20 +85,8 @@ class PathBoundsMatcher extends Matcher {
   bool matches(covariant Path item, Map<dynamic, dynamic> matchState) {
     final Rect bounds = item.getBounds();
 
-    final matchers = <Matcher?>[
-      rectMatcher,
-      topMatcher,
-      leftMatcher,
-      rightMatcher,
-      bottomMatcher,
-    ];
-    final values = <dynamic>[
-      bounds,
-      bounds.top,
-      bounds.left,
-      bounds.right,
-      bounds.bottom,
-    ];
+    final matchers = <Matcher?>[rectMatcher, topMatcher, leftMatcher, rightMatcher, bottomMatcher];
+    final values = <dynamic>[bounds, bounds.top, bounds.left, bounds.right, bounds.bottom];
     final failedMatcher = <Matcher, dynamic>{};
 
     for (var idx = 0; idx < matchers.length; idx++) {
@@ -1758,9 +1746,7 @@ void main() {
   testWidgets(
     'text field toolbar options correctly changes options on Apple Platforms',
     (WidgetTester tester) async {
-      final controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
+      final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
@@ -1809,9 +1795,7 @@ void main() {
   testWidgets(
     'text field toolbar options correctly changes options on non-Apple platforms',
     (WidgetTester tester) async {
-      final controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
+      final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
@@ -1956,9 +1940,7 @@ void main() {
   testWidgets(
     'tap moves cursor to the edge of the word it tapped on',
     (WidgetTester tester) async {
-      final controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
+      final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
@@ -1986,9 +1968,7 @@ void main() {
   testWidgets(
     'slow double tap does not trigger double tap',
     (WidgetTester tester) async {
-      final controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
+      final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
       addTearDown(controller.dispose);
       // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
       // On macOS, we select the precise position of the tap.
@@ -2114,9 +2094,7 @@ void main() {
   testWidgets(
     'Tapping on a non-collapsed selection toggles the toolbar and retains the selection',
     (WidgetTester tester) async {
-      final controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
+      final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
       addTearDown(controller.dispose);
       // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
       await tester.pumpWidget(
@@ -2179,9 +2157,7 @@ void main() {
   testWidgets(
     'double tap selects word for non-Apple platforms',
     (WidgetTester tester) async {
-      final controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
+      final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
@@ -2227,9 +2203,7 @@ void main() {
   testWidgets(
     'double tap selects word for Apple platforms',
     (WidgetTester tester) async {
-      final controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
+      final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
@@ -2266,9 +2240,7 @@ void main() {
   testWidgets('double tap does not select word on read-only obscured field', (
     WidgetTester tester,
   ) async {
-    final controller = TextEditingController(
-      text: 'Atwater Peel Sherbrooke Bonaventure',
-    );
+    final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       CupertinoApp(
@@ -2421,9 +2393,7 @@ void main() {
   testWidgets(
     'double tap selects word and first tap of double tap moves cursor',
     (WidgetTester tester) async {
-      final controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
+      final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
       addTearDown(controller.dispose);
       // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
       // On macOS, we select the precise position of the tap.
@@ -2461,9 +2431,7 @@ void main() {
   );
 
   testWidgets('double tap hold selects word', (WidgetTester tester) async {
-    final controller = TextEditingController(
-      text: 'Atwater Peel Sherbrooke Bonaventure',
-    );
+    final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       CupertinoApp(
@@ -2496,9 +2464,7 @@ void main() {
   testWidgets(
     'tap after a double tap select is not affected',
     (WidgetTester tester) async {
-      final controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
+      final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
       addTearDown(controller.dispose);
       // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
       // On macOS, we select the precise position of the tap.
@@ -2729,9 +2695,7 @@ void main() {
   testWidgets('An obscured CupertinoTextField is not selectable when disabled', (
     WidgetTester tester,
   ) async {
-    final controller = TextEditingController(
-      text: 'Atwater Peel Sherbrooke Bonaventure',
-    );
+    final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       CupertinoApp(
@@ -2772,9 +2736,7 @@ void main() {
   testWidgets('A read-only obscured CupertinoTextField is not selectable', (
     WidgetTester tester,
   ) async {
-    final controller = TextEditingController(
-      text: 'Atwater Peel Sherbrooke Bonaventure',
-    );
+    final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       CupertinoApp(
@@ -2811,9 +2773,7 @@ void main() {
   testWidgets('An obscured CupertinoTextField is selectable by default', (
     WidgetTester tester,
   ) async {
-    final controller = TextEditingController(
-      text: 'Atwater Peel Sherbrooke Bonaventure',
-    );
+    final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       CupertinoApp(
@@ -2855,9 +2815,7 @@ void main() {
   testWidgets(
     'An obscured TextField has correct default context menu',
     (WidgetTester tester) async {
-      final controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
+      final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -2900,9 +2858,7 @@ void main() {
   testWidgets(
     'long press selects the word at the long press position and shows toolbar on non-Apple platforms',
     (WidgetTester tester) async {
-      final controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
+      final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
@@ -2931,9 +2887,7 @@ void main() {
   testWidgets(
     'long press moves cursor to the exact long press position and shows toolbar on Apple platforms',
     (WidgetTester tester) async {
-      final controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
+      final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
@@ -2966,9 +2920,7 @@ void main() {
   testWidgets(
     'long press tap cannot initiate a double tap',
     (WidgetTester tester) async {
-      final controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
+      final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
@@ -3012,9 +2964,7 @@ void main() {
   testWidgets(
     'long press drag selects word by word and shows toolbar on lift on non-Apple platforms',
     (WidgetTester tester) async {
-      final controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
+      final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
@@ -3077,9 +3027,7 @@ void main() {
   testWidgets(
     'long press drag on a focused TextField moves the cursor under the drag and shows toolbar on lift on Apple platforms',
     (WidgetTester tester) async {
-      final controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
+      final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
@@ -3322,9 +3270,7 @@ void main() {
   testWidgets(
     'long tap after a double tap select is not affected',
     (WidgetTester tester) async {
-      final controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
+      final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
       addTearDown(controller.dispose);
       // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
       // On macOS, we select the precise position of the tap.
@@ -3364,9 +3310,7 @@ void main() {
   testWidgets(
     'double tap after a long tap is not affected',
     (WidgetTester tester) async {
-      final controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
+      final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
       addTearDown(controller.dispose);
       // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
       // On macOS, we select the precise position of the tap.
@@ -3417,9 +3361,7 @@ void main() {
   testWidgets(
     'double tap chains work',
     (WidgetTester tester) async {
-      final controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
+      final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
@@ -3729,9 +3671,7 @@ void main() {
     testWidgets(
       'triple tap chains work on Non-Apple mobile platforms',
       (WidgetTester tester) async {
-        final controller = TextEditingController(
-          text: 'Atwater Peel Sherbrooke Bonaventure',
-        );
+        final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           CupertinoApp(
@@ -4715,9 +4655,7 @@ void main() {
   });
 
   testWidgets('force press selects word', (WidgetTester tester) async {
-    final controller = TextEditingController(
-      text: 'Atwater Peel Sherbrooke Bonaventure',
-    );
+    final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       CupertinoApp(
@@ -4751,9 +4689,7 @@ void main() {
   testWidgets(
     'force press on unsupported devices falls back to tap',
     (WidgetTester tester) async {
-      final controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
+      final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
       addTearDown(controller.dispose);
       // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
       // On macOS, we select the precise position of the tap.
@@ -8413,9 +8349,7 @@ void main() {
   testWidgets(
     'can shift + tap to select with a keyboard (Apple platforms)',
     (WidgetTester tester) async {
-      final controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
+      final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
@@ -8460,9 +8394,7 @@ void main() {
   testWidgets(
     'can shift + tap to select with a keyboard (non-Apple platforms)',
     (WidgetTester tester) async {
-      final controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
+      final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
@@ -8507,9 +8439,7 @@ void main() {
   );
 
   testWidgets('shift tapping an unfocused field', (WidgetTester tester) async {
-    final controller = TextEditingController(
-      text: 'Atwater Peel Sherbrooke Bonaventure',
-    );
+    final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
     addTearDown(controller.dispose);
     final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
@@ -8562,9 +8492,7 @@ void main() {
   testWidgets(
     'can shift + tap + drag to select with a keyboard (Apple platforms)',
     (WidgetTester tester) async {
-      final controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
+      final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
       addTearDown(controller.dispose);
       final isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
       await tester.pumpWidget(
@@ -8671,9 +8599,7 @@ void main() {
   testWidgets(
     'can shift + tap + drag to select with a keyboard (non-Apple platforms)',
     (WidgetTester tester) async {
-      final controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
+      final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
       addTearDown(controller.dispose);
       final bool isTargetPlatformMobile =
           defaultTargetPlatform == TargetPlatform.android ||
@@ -8784,9 +8710,7 @@ void main() {
   testWidgets(
     'can shift + tap + drag to select with a keyboard, reversed (Apple platforms)',
     (WidgetTester tester) async {
-      final controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
+      final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
       addTearDown(controller.dispose);
       final isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
       await tester.pumpWidget(
@@ -8894,9 +8818,7 @@ void main() {
   testWidgets(
     'can shift + tap + drag to select with a keyboard, reversed (non-Apple platforms)',
     (WidgetTester tester) async {
-      final controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
+      final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
       addTearDown(controller.dispose);
       final bool isTargetPlatformMobile =
           defaultTargetPlatform == TargetPlatform.android ||
@@ -9499,9 +9421,7 @@ void main() {
 
         final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
-        final magnifierInfo = ValueNotifier<MagnifierInfo>(
-          MagnifierInfo.empty,
-        );
+        final magnifierInfo = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
         addTearDown(magnifierInfo.dispose);
         expect(
           defaultCupertinoTextField.magnifierConfiguration!.magnifierBuilder(
@@ -9522,9 +9442,7 @@ void main() {
             final BuildContext context = tester.firstElement(find.byType(CupertinoTextField));
             final EditableText editableText = tester.widget(find.byType(EditableText));
 
-            final magnifierInfo = ValueNotifier<MagnifierInfo>(
-              MagnifierInfo.empty,
-            );
+            final magnifierInfo = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
             addTearDown(magnifierInfo.dispose);
             expect(
               editableText.magnifierConfiguration.magnifierBuilder(
@@ -9550,9 +9468,7 @@ void main() {
           final BuildContext context = tester.firstElement(find.byType(CupertinoTextField));
           final EditableText editableText = tester.widget(find.byType(EditableText));
 
-          final magnifierInfo = ValueNotifier<MagnifierInfo>(
-            MagnifierInfo.empty,
-          );
+          final magnifierInfo = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
           addTearDown(magnifierInfo.dispose);
           expect(
             editableText.magnifierConfiguration.magnifierBuilder(
@@ -10282,10 +10198,7 @@ void main() {
     );
     expect(endpoints.length, 2);
 
-    final offsetFromEndPointToMiddlePoint = Offset(
-      0.0,
-      -renderEditable.preferredLineHeight / 2,
-    );
+    final offsetFromEndPointToMiddlePoint = Offset(0.0, -renderEditable.preferredLineHeight / 2);
 
     // Drag the left handle to just after 'Second', still on the second line.
     Offset handlePos = endpoints[0].point + offsetFromEndPointToMiddlePoint;
@@ -10547,8 +10460,7 @@ void main() {
 
       // The placeholder and text are baseline aligned, so some portion of them
       // extends both above and below the baseline.
-      const ahemBaselineRatio =
-          0.8; // https://web-platform-tests.org/writing-tests/ahem.html
+      const ahemBaselineRatio = 0.8; // https://web-platform-tests.org/writing-tests/ahem.html
       final double placeholderHeightAboveBaseline = placeholderSize * ahemBaselineRatio;
       final double textHeightAboveBaseline = textSize * ahemBaselineRatio;
       final double placeholderTopDy = tester.getTopLeft(find.text(placeholderTextContent)).dy;

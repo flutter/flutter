@@ -232,11 +232,7 @@ void main() {
   });
 
   testWidgets('Tap changes toggle state', (WidgetTester tester) async {
-    const children = <int, Widget>{
-      0: Text('Child 1'),
-      1: Text('Child 2'),
-      2: Text('Child 3'),
-    };
+    const children = <int, Widget>{0: Text('Child 1'), 1: Text('Child 2'), 2: Text('Child 3')};
 
     await tester.pumpWidget(
       boilerplate(
@@ -412,11 +408,7 @@ void main() {
   });
 
   testWidgets('Disabled segment can be selected programmatically', (WidgetTester tester) async {
-    const children = <int, Widget>{
-      0: Text('Child 1'),
-      1: Text('Child 2'),
-      2: Text('Child 3'),
-    };
+    const children = <int, Widget>{0: Text('Child 1'), 1: Text('Child 2'), 2: Text('Child 3')};
 
     groupValue = 0;
     await tester.pumpWidget(
@@ -1331,10 +1323,7 @@ void main() {
     });
     await tester.pump(const Duration(milliseconds: 10));
 
-    const newChildren = <int, Widget>{
-      0: Text('C1', maxLines: 1),
-      1: Text('C2', maxLines: 1),
-    };
+    const newChildren = <int, Widget>{0: Text('C1', maxLines: 1), 1: Text('C2', maxLines: 1)};
 
     // Now let the segments shrink.
     await tester.pumpWidget(

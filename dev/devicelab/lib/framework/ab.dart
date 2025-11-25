@@ -150,14 +150,7 @@ class ABTest {
         ],
     ];
 
-    final titles = <String>[
-      'Score',
-      'Average A',
-      '(noise)',
-      'Average B',
-      '(noise)',
-      'Speed-up',
-    ];
+    final titles = <String>['Score', 'Average A', '(noise)', 'Average B', '(noise)', 'Speed-up'];
     final alignments = <FieldJustification>[
       FieldJustification.LEFT,
       FieldJustification.RIGHT,
@@ -223,9 +216,7 @@ class ABTest {
     final Map<String, _ScoreSummary> summariesA = _summarize(_aResults);
     final Map<String, _ScoreSummary> summariesB = _summarize(_bResults);
 
-    final buffer = StringBuffer(
-      'Score\tAverage A (noise)\tAverage B (noise)\tSpeed-up\n',
-    );
+    final buffer = StringBuffer('Score\tAverage A (noise)\tAverage B (noise)\tSpeed-up\n');
 
     for (final String scoreKey in _allScoreKeys) {
       final _ScoreSummary? summaryA = summariesA[scoreKey];

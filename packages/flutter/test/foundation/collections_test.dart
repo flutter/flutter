@@ -123,10 +123,7 @@ void main() {
   test('MergeSortSpecialCases', () {
     for (final size in <int>[511, 512, 513]) {
       // All equal.
-      final list = List<OrderedComparable>.generate(
-        size,
-        (int i) => OrderedComparable(0, i),
-      );
+      final list = List<OrderedComparable>.generate(size, (int i) => OrderedComparable(0, i));
       mergeSort(list);
       for (var i = 0; i < size; i++) {
         expect(list[i].order, equals(i));

@@ -569,8 +569,7 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox
     if (isRtl) {
       // In RTL, we want the nav button on the left and items right-aligned.
       if (showNavButton) {
-        final navParentData =
-            navButton.parentData! as ToolbarItemsParentData;
+        final navParentData = navButton.parentData! as ToolbarItemsParentData;
         navParentData.offset = Offset.zero;
         currentX += navButton.size.width;
       }
@@ -593,8 +592,7 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox
 
       // Then place the nav button at the end.
       if (showNavButton) {
-        final navParentData =
-            navButton.parentData! as ToolbarItemsParentData;
+        final navParentData = navButton.parentData! as ToolbarItemsParentData;
         navParentData.offset = Offset(currentX, 0.0);
       }
     }
@@ -609,8 +607,7 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox
     var currentY = 0.0;
     var maxWidth = 0.0;
 
-    final navButtonParentData =
-        navButton.parentData! as ToolbarItemsParentData;
+    final navButtonParentData = navButton.parentData! as ToolbarItemsParentData;
 
     if (_shouldPaintChild(navButton, 0)) {
       navButtonParentData.shouldPaint = true;

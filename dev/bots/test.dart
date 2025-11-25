@@ -625,8 +625,7 @@ bool _allTargetsCached(File performanceFile) {
   if (dryRun) {
     return true;
   }
-  final data =
-      json.decode(performanceFile.readAsStringSync()) as Map<String, Object?>;
+  final data = json.decode(performanceFile.readAsStringSync()) as Map<String, Object?>;
   final List<Map<String, Object?>> targets = (data['targets']! as List<Object?>)
       .cast<Map<String, Object?>>();
   return targets.every((Map<String, Object?> element) => element['skipped'] == true);

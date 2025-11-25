@@ -3731,9 +3731,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     } else {
       routeBlocksPop = false;
     }
-    final notification = NavigationNotification(
-      canHandlePop: navigatorCanPop || routeBlocksPop,
-    );
+    final notification = NavigationNotification(canHandlePop: navigatorCanPop || routeBlocksPop);
     // Avoid dispatching a notification in the middle of a build.
     switch (SchedulerBinding.instance.schedulerPhase) {
       case SchedulerPhase.postFrameCallbacks:
@@ -4164,8 +4162,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     int oldEntriesTop = _history.length - 1;
 
     final newHistory = <_RouteEntry>[];
-    final pageRouteToPagelessRoutes =
-        <_RouteEntry?, List<_RouteEntry>>{};
+    final pageRouteToPagelessRoutes = <_RouteEntry?, List<_RouteEntry>>{};
 
     // Updates the bottom of the list.
     _RouteEntry? previousOldPageRouteEntry;
@@ -4290,8 +4287,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }
 
     // Any remaining old routes that do not have a match will need to be removed.
-    final locationToExitingPageRoute =
-        <RouteTransitionRecord?, RouteTransitionRecord>{};
+    final locationToExitingPageRoute = <RouteTransitionRecord?, RouteTransitionRecord>{};
     while (oldEntriesBottom <= oldEntriesTop) {
       final _RouteEntry potentialEntryToRemove = _history[oldEntriesBottom];
       oldEntriesBottom += 1;
@@ -4310,8 +4306,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         continue;
       }
 
-      final potentialPageToRemove =
-          potentialEntryToRemove.route.settings as Page<dynamic>;
+      final potentialPageToRemove = potentialEntryToRemove.route.settings as Page<dynamic>;
       // Marks for transition delegate to remove if this old page does not have
       // a key, was not taken during updating the middle of new page, or is
       // already transitioning out.
@@ -5911,9 +5906,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
           }
           // Otherwise, dispatch a new Notification with the correct canPop and
           // stop the propagation of the old Notification.
-          const nextNotification = NavigationNotification(
-            canHandlePop: true,
-          );
+          const nextNotification = NavigationNotification(canHandlePop: true);
           nextNotification.dispatch(context);
           return true;
         },

@@ -1008,9 +1008,7 @@ class _SnippetChecker {
       path.join(_contentDirectory.path, _pubspecName),
       path.join(_flutterRoot, 'examples', 'api', _pubspecName),
     );
-    final targetAnalysisOptions = File(
-      path.join(_contentDirectory.path, 'analysis_options.yaml'),
-    );
+    final targetAnalysisOptions = File(path.join(_contentDirectory.path, 'analysis_options.yaml'));
     if (!targetAnalysisOptions.existsSync()) {
       // Use the same analysis_options.yaml configuration that's used for examples/api.
       final sourceAnalysisOptions = File(

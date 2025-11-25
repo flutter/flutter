@@ -74,13 +74,7 @@ void main() {
   });
 
   test('BoundedFrictionSimulation control test', () {
-    final friction = BoundedFrictionSimulation(
-      0.3,
-      100.0,
-      400.0,
-      50.0,
-      150.0,
-    );
+    final friction = BoundedFrictionSimulation(0.3, 100.0, 400.0, 50.0, 150.0);
 
     friction.tolerance = const Tolerance(velocity: 1.0);
 
@@ -246,11 +240,7 @@ void main() {
   });
 
   test('test_kinetic_scroll', () {
-    final spring = SpringDescription.withDampingRatio(
-      mass: 1.0,
-      stiffness: 50.0,
-      ratio: 0.5,
-    );
+    final spring = SpringDescription.withDampingRatio(mass: 1.0, stiffness: 50.0, ratio: 0.5);
 
     final scroll = BouncingScrollSimulation(
       position: 100.0,
@@ -278,11 +268,7 @@ void main() {
   });
 
   test('scroll_with_inf_edge_ends', () {
-    final spring = SpringDescription.withDampingRatio(
-      mass: 1.0,
-      stiffness: 50.0,
-      ratio: 0.5,
-    );
+    final spring = SpringDescription.withDampingRatio(mass: 1.0, stiffness: 50.0, ratio: 0.5);
 
     final scroll = BouncingScrollSimulation(
       position: 100.0,
@@ -308,11 +294,7 @@ void main() {
   });
 
   test('over/under scroll spring', () {
-    final spring = SpringDescription.withDampingRatio(
-      mass: 1.0,
-      stiffness: 170.0,
-      ratio: 1.1,
-    );
+    final spring = SpringDescription.withDampingRatio(mass: 1.0, stiffness: 170.0, ratio: 1.1);
     final scroll = BouncingScrollSimulation(
       position: 500.0,
       velocity: -7500.0,

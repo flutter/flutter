@@ -483,9 +483,7 @@ void main() {
       ),
     ];
 
-    final expansionListRadio = ExpansionPanelList.radio(
-      children: demoItemsRadio,
-    );
+    final expansionListRadio = ExpansionPanelList.radio(children: demoItemsRadio);
 
     await tester.pumpWidget(MaterialApp(home: SingleChildScrollView(child: expansionListRadio)));
 
@@ -1313,9 +1311,7 @@ void main() {
       ),
     ];
 
-    final expansionListRadio = ExpansionPanelList.radio(
-      children: demoItemsRadio,
-    );
+    final expansionListRadio = ExpansionPanelList.radio(children: demoItemsRadio);
 
     await tester.pumpWidget(MaterialApp(home: SingleChildScrollView(child: expansionListRadio)));
 
@@ -1470,9 +1466,7 @@ void main() {
       ),
     ];
 
-    final expansionListRadio = ExpansionPanelList.radio(
-      children: demoItemsRadio,
-    );
+    final expansionListRadio = ExpansionPanelList.radio(children: demoItemsRadio);
 
     await tester.pumpWidget(MaterialApp(home: SingleChildScrollView(child: expansionListRadio)));
 

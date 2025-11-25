@@ -699,17 +699,9 @@ void main() {
     await tester.pumpAndSettle();
 
     final ScrollableState scrollableState = tester.state(find.byType(Scrollable));
-    final scroller = EdgeDraggingAutoScroller(
-      scrollableState,
-      velocityScalar: 1.0,
-    );
+    final scroller = EdgeDraggingAutoScroller(scrollableState, velocityScalar: 1.0);
     final scrollRenderBox = scrollableState.context.findRenderObject()! as RenderBox;
-    final dragTarget = Rect.fromLTWH(
-      0,
-      0,
-      scrollRenderBox.size.width,
-      scrollRenderBox.size.height,
-    );
+    final dragTarget = Rect.fromLTWH(0, 0, scrollRenderBox.size.width, scrollRenderBox.size.height);
 
     scroller.startAutoScrollIfNecessary(dragTarget);
     await tester.pump();

@@ -302,8 +302,7 @@ Future<Uri> _getRemoteDebuggerUrl(Uri base) async {
   final client = io.HttpClient();
   final io.HttpClientRequest request = await client.getUrl(base.resolve('/json/list'));
   final io.HttpClientResponse response = await request.close();
-  final jsonObject =
-      await json.fuse(utf8).decoder.bind(response).single as List<dynamic>?;
+  final jsonObject = await json.fuse(utf8).decoder.bind(response).single as List<dynamic>?;
   if (jsonObject == null || jsonObject.isEmpty) {
     return base;
   }

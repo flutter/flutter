@@ -57,14 +57,8 @@ void main() {
     });
 
     test('getters, toString', () {
-      final children = <TreeSliverNode<String>>[
-        TreeSliverNode<String>('child'),
-      ];
-      final node = TreeSliverNode<String>(
-        'parent',
-        children: children,
-        expanded: true,
-      );
+      final children = <TreeSliverNode<String>>[TreeSliverNode<String>('child')];
+      final node = TreeSliverNode<String>('parent', children: children, expanded: true);
       expect(node.content, 'parent');
       expect(node.children, children);
       expect(node.isExpanded, isTrue);
@@ -82,14 +76,8 @@ void main() {
     });
 
     testWidgets('TreeSliverNode sets ups parent and depth properties', (WidgetTester tester) async {
-      final children = <TreeSliverNode<String>>[
-        TreeSliverNode<String>('child'),
-      ];
-      final node = TreeSliverNode<String>(
-        'parent',
-        children: children,
-        expanded: true,
-      );
+      final children = <TreeSliverNode<String>>[TreeSliverNode<String>('child')];
+      final node = TreeSliverNode<String>('parent', children: children, expanded: true);
       await tester.pumpWidget(
         MaterialApp(
           home: CustomScrollView(

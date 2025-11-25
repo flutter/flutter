@@ -563,9 +563,7 @@ void main() {
 
   test('BorderRadiusGeometry add and subtract', () {
     const a = BorderRadius.only(topLeft: Radius.elliptical(300.0, 500.0));
-    const b = BorderRadiusDirectional.only(
-      topEnd: Radius.elliptical(30.0, 50.0),
-    );
+    const b = BorderRadiusDirectional.only(topEnd: Radius.elliptical(30.0, 50.0));
     const c = BorderRadius.only(bottomLeft: Radius.elliptical(3.0, 5.0));
 
     const ltr = BorderRadius.only(

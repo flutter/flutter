@@ -28,8 +28,9 @@ class RallyLineChart extends StatelessWidget {
         labelStyle: Theme.of(context).textTheme.bodyMedium!,
         textDirection: GalleryOptions.of(context).resolvedTextDirection(),
         textScaleFactor: reducedTextScale(context),
-        padding:
-            isDisplayDesktop(context) ? const EdgeInsets.symmetric(vertical: 22) : EdgeInsets.zero,
+        padding: isDisplayDesktop(context)
+            ? const EdgeInsets.symmetric(vertical: 22)
+            : EdgeInsets.zero,
       ),
     );
   }
@@ -157,11 +158,10 @@ class RallyLineChartPainter extends CustomPainter {
     final amounts = <double>[];
     for (var i = 0; i < numDays; i++) {
       final int endMillis = startMillis + millisInDay * 1;
-      final List<DetailedEventData> filteredEvents =
-          events.where((DetailedEventData e) {
-            return startMillis <= e.date.millisecondsSinceEpoch &&
-                e.date.millisecondsSinceEpoch < endMillis;
-          }).toList();
+      final List<DetailedEventData> filteredEvents = events.where((DetailedEventData e) {
+        return startMillis <= e.date.millisecondsSinceEpoch &&
+            e.date.millisecondsSinceEpoch < endMillis;
+      }).toList();
       lastAmount += sumOf<DetailedEventData>(filteredEvents, (DetailedEventData e) => e.amount);
       amounts.add(lastAmount);
       startMillis = endMillis;
@@ -170,11 +170,10 @@ class RallyLineChartPainter extends CustomPainter {
   }
 
   void _drawLine(Canvas canvas, Rect rect) {
-    final linePaint =
-        Paint()
-          ..color = RallyColors.accountColor(2)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2;
+    final linePaint = Paint()
+      ..color = RallyColors.accountColor(2)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
 
     // Try changing this value between 1, 7, 15, etc.
     const smoothing = 1;

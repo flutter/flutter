@@ -872,10 +872,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/50505.
-    final controller = PageController(
-      initialPage: kStates.length - 1,
-      viewportFraction: 0.5,
-    );
+    final controller = PageController(initialPage: kStates.length - 1, viewportFraction: 0.5);
     addTearDown(controller.dispose);
 
     Widget build(Size size) {

@@ -78,9 +78,7 @@ class LogicalKeyData {
     final data = <String, LogicalKeyEntry>{};
     data.addEntries(
       contentMap.values.map((dynamic value) {
-        final entry = LogicalKeyEntry.fromJsonMapEntry(
-          value as Map<String, dynamic>,
-        );
+        final entry = LogicalKeyEntry.fromJsonMapEntry(value as Map<String, dynamic>);
         return MapEntry<String, LogicalKeyEntry>(entry.name, entry);
       }),
     );

@@ -613,10 +613,9 @@ class _MobileNavState extends State<_MobileNav> with TickerProviderStateMixin {
             );
           },
         ),
-        floatingActionButton:
-            _bottomDrawerVisible
-                ? null
-                : const Padding(padding: EdgeInsetsDirectional.only(bottom: 8), child: _ReplyFab()),
+        floatingActionButton: _bottomDrawerVisible
+            ? null
+            : const Padding(padding: EdgeInsetsDirectional.only(bottom: 8), child: _ReplyFab()),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       ),
     );
@@ -686,22 +685,19 @@ class _AnimatedBottomAppBar extends StatelessWidget {
                           const SizedBox(width: 10),
                           _FadeThroughTransitionSwitcher(
                             fillColor: Colors.transparent,
-                            child:
-                                onMailView
-                                    ? const SizedBox(width: 48)
-                                    : FadeTransition(
-                                      opacity: fadeOut,
-                                      child: Text(
-                                        navigationDestinations.firstWhere((
-                                          _Destination destination,
-                                        ) {
-                                          return destination.type == selectedMailbox;
-                                        }).textLabel,
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.bodyLarge!.copyWith(color: ReplyColors.white50),
-                                      ),
+                            child: onMailView
+                                ? const SizedBox(width: 48)
+                                : FadeTransition(
+                                    opacity: fadeOut,
+                                    child: Text(
+                                      navigationDestinations.firstWhere((_Destination destination) {
+                                        return destination.type == selectedMailbox;
+                                      }).textLabel,
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodyLarge!.copyWith(color: ReplyColors.white50),
                                     ),
+                                  ),
                           ),
                         ],
                       ),
@@ -736,85 +732,83 @@ class _BottomAppBarActionItems extends StatelessWidget {
         Color? starIconColor;
 
         if (onMailView) {
-          starIconColor =
-              model.isCurrentEmailStarred
-                  ? Theme.of(context).colorScheme.secondary
-                  : ReplyColors.white50;
+          starIconColor = model.isCurrentEmailStarred
+              ? Theme.of(context).colorScheme.secondary
+              : ReplyColors.white50;
         }
 
         return _FadeThroughTransitionSwitcher(
           fillColor: Colors.transparent,
-          child:
-              drawerVisible
-                  ? Align(
-                    key: UniqueKey(),
-                    alignment: Alignment.centerRight,
-                    child: IconButton(
-                      icon: const Icon(Icons.settings),
-                      color: ReplyColors.white50,
-                      onPressed: () {},
-                    ),
-                  )
-                  : onMailView
-                  ? Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: <Widget>[
-                      IconButton(
-                        key: const ValueKey<String>('star_email_button'),
-                        icon: ImageIcon(
-                          const AssetImage(
-                            '$_iconAssetLocation/twotone_star.png',
-                            package: _assetsPackage,
-                          ),
-                          color: starIconColor,
+          child: drawerVisible
+              ? Align(
+                  key: UniqueKey(),
+                  alignment: Alignment.centerRight,
+                  child: IconButton(
+                    icon: const Icon(Icons.settings),
+                    color: ReplyColors.white50,
+                    onPressed: () {},
+                  ),
+                )
+              : onMailView
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    IconButton(
+                      key: const ValueKey<String>('star_email_button'),
+                      icon: ImageIcon(
+                        const AssetImage(
+                          '$_iconAssetLocation/twotone_star.png',
+                          package: _assetsPackage,
                         ),
-                        onPressed: () {
-                          final Email currentEmail = model.currentEmail;
-                          if (model.isCurrentEmailStarred) {
-                            model.unstarEmail(currentEmail.id);
-                          } else {
-                            model.starEmail(currentEmail.id);
-                          }
-                          if (model.selectedMailboxPage == MailboxPageType.starred) {
-                            mobileMailNavKey.currentState!.pop();
-                            model.selectedEmailId = -1;
-                          }
-                        },
-                        color: ReplyColors.white50,
+                        color: starIconColor,
                       ),
-                      IconButton(
-                        icon: const ImageIcon(
-                          AssetImage(
-                            '$_iconAssetLocation/twotone_delete.png',
-                            package: _assetsPackage,
-                          ),
-                        ),
-                        onPressed: () {
-                          model.deleteEmail(model.selectedEmailId);
-
+                      onPressed: () {
+                        final Email currentEmail = model.currentEmail;
+                        if (model.isCurrentEmailStarred) {
+                          model.unstarEmail(currentEmail.id);
+                        } else {
+                          model.starEmail(currentEmail.id);
+                        }
+                        if (model.selectedMailboxPage == MailboxPageType.starred) {
                           mobileMailNavKey.currentState!.pop();
                           model.selectedEmailId = -1;
-                        },
-                        color: ReplyColors.white50,
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.more_vert),
-                        onPressed: () {},
-                        color: ReplyColors.white50,
-                      ),
-                    ],
-                  )
-                  : Align(
-                    alignment: Alignment.centerRight,
-                    child: IconButton(
-                      key: const ValueKey<String>('ReplySearch'),
-                      icon: const Icon(Icons.search),
-                      color: ReplyColors.white50,
-                      onPressed: () {
-                        Provider.of<EmailStore>(context, listen: false).onSearchPage = true;
+                        }
                       },
+                      color: ReplyColors.white50,
                     ),
+                    IconButton(
+                      icon: const ImageIcon(
+                        AssetImage(
+                          '$_iconAssetLocation/twotone_delete.png',
+                          package: _assetsPackage,
+                        ),
+                      ),
+                      onPressed: () {
+                        model.deleteEmail(model.selectedEmailId);
+
+                        mobileMailNavKey.currentState!.pop();
+                        model.selectedEmailId = -1;
+                      },
+                      color: ReplyColors.white50,
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.more_vert),
+                      onPressed: () {},
+                      color: ReplyColors.white50,
+                    ),
+                  ],
+                )
+              : Align(
+                  alignment: Alignment.centerRight,
+                  child: IconButton(
+                    key: const ValueKey<String>('ReplySearch'),
+                    icon: const Icon(Icons.search),
+                    color: ReplyColors.white50,
+                    onPressed: () {
+                      Provider.of<EmailStore>(context, listen: false).onSearchPage = true;
+                    },
                   ),
+                ),
         );
       },
     );
@@ -866,18 +860,16 @@ class _BottomDrawerDestinations extends StatelessWidget {
             mouseCursor: SystemMouseCursors.click,
             leading: ImageIcon(
               AssetImage(destination.icon, package: _assetsPackage),
-              color:
-                  destination.type == selectedMailbox
-                      ? theme.colorScheme.secondary
-                      : theme.navigationRailTheme.unselectedLabelTextStyle!.color,
+              color: destination.type == selectedMailbox
+                  ? theme.colorScheme.secondary
+                  : theme.navigationRailTheme.unselectedLabelTextStyle!.color,
             ),
             title: Text(
               destination.textLabel,
               style: theme.textTheme.bodyMedium!.copyWith(
-                color:
-                    destination.type == selectedMailbox
-                        ? theme.colorScheme.secondary
-                        : theme.navigationRailTheme.unselectedLabelTextStyle!.color,
+                color: destination.type == selectedMailbox
+                    ? theme.colorScheme.secondary
+                    : theme.navigationRailTheme.unselectedLabelTextStyle!.color,
               ),
             ),
           ),
@@ -1032,10 +1024,9 @@ class _ReplyFabState extends State<_ReplyFab> with SingleTickerProviderStateMixi
       builder: (BuildContext context, bool onMailView, Widget? child) {
         final fabSwitcher = _FadeThroughTransitionSwitcher(
           fillColor: Colors.transparent,
-          child:
-              onMailView
-                  ? Icon(Icons.reply_all, key: fabKey, color: Colors.black)
-                  : const Icon(Icons.create, color: Colors.black),
+          child: onMailView
+              ? Icon(Icons.reply_all, key: fabKey, color: Colors.black)
+              : const Icon(Icons.create, color: Colors.black),
         );
         final tooltip = onMailView ? 'Reply' : 'Compose';
 
@@ -1044,38 +1035,37 @@ class _ReplyFabState extends State<_ReplyFab> with SingleTickerProviderStateMixi
           return Container(
             height: 56,
             padding: EdgeInsets.symmetric(vertical: ui.lerpDouble(0, 6, animation.value)!),
-            child:
-                animation.value == 0
-                    ? FloatingActionButton(
-                      tooltip: tooltip,
+            child: animation.value == 0
+                ? FloatingActionButton(
+                    tooltip: tooltip,
+                    key: const ValueKey<String>('ReplyFab'),
+                    onPressed: onPressed,
+                    child: fabSwitcher,
+                  )
+                : Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: FloatingActionButton.extended(
                       key: const ValueKey<String>('ReplyFab'),
-                      onPressed: onPressed,
-                      child: fabSwitcher,
-                    )
-                    : Align(
-                      alignment: AlignmentDirectional.centerStart,
-                      child: FloatingActionButton.extended(
-                        key: const ValueKey<String>('ReplyFab'),
-                        label: Row(
-                          children: <Widget>[
-                            fabSwitcher,
-                            SizedBox(width: 16 * animation.value),
-                            Align(
-                              alignment: AlignmentDirectional.centerStart,
-                              widthFactor: animation.value,
-                              child: Text(
-                                tooltip.toUpperCase(),
-                                style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                                  fontSize: 16,
-                                  color: theme.colorScheme.onSecondary,
-                                ),
+                      label: Row(
+                        children: <Widget>[
+                          fabSwitcher,
+                          SizedBox(width: 16 * animation.value),
+                          Align(
+                            alignment: AlignmentDirectional.centerStart,
+                            widthFactor: animation.value,
+                            child: Text(
+                              tooltip.toUpperCase(),
+                              style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                                fontSize: 16,
+                                color: theme.colorScheme.onSecondary,
                               ),
                             ),
-                          ],
-                        ),
-                        onPressed: onPressed,
+                          ),
+                        ],
                       ),
+                      onPressed: onPressed,
                     ),
+                  ),
           );
         } else {
           // TODO(x): State restoration of compose page on mobile is blocked because OpenContainer does not support restorablePush, https://github.com/flutter/gallery/issues/570.
@@ -1118,18 +1108,15 @@ class _FadeThroughTransitionSwitcher extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PageTransitionSwitcher(
-      transitionBuilder: (
-        Widget child,
-        Animation<double> animation,
-        Animation<double> secondaryAnimation,
-      ) {
-        return FadeThroughTransition(
-          fillColor: fillColor,
-          animation: animation,
-          secondaryAnimation: secondaryAnimation,
-          child: child,
-        );
-      },
+      transitionBuilder:
+          (Widget child, Animation<double> animation, Animation<double> secondaryAnimation) {
+            return FadeThroughTransition(
+              fillColor: fillColor,
+              animation: animation,
+              secondaryAnimation: secondaryAnimation,
+              child: child,
+            );
+          },
       child: child,
     );
   }
@@ -1147,19 +1134,16 @@ class _SharedAxisTransitionSwitcher extends StatelessWidget {
       builder: (BuildContext context, bool onSearchPage, Widget? child) {
         return PageTransitionSwitcher(
           reverse: !onSearchPage,
-          transitionBuilder: (
-            Widget child,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-          ) {
-            return SharedAxisTransition(
-              fillColor: Theme.of(context).colorScheme.background,
-              animation: animation,
-              secondaryAnimation: secondaryAnimation,
-              transitionType: SharedAxisTransitionType.scaled,
-              child: child,
-            );
-          },
+          transitionBuilder:
+              (Widget child, Animation<double> animation, Animation<double> secondaryAnimation) {
+                return SharedAxisTransition(
+                  fillColor: Theme.of(context).colorScheme.background,
+                  animation: animation,
+                  secondaryAnimation: secondaryAnimation,
+                  transitionType: SharedAxisTransitionType.scaled,
+                  child: child,
+                );
+              },
           child: onSearchPage ? const SearchPage() : defaultChild,
         );
       },

@@ -1226,8 +1226,7 @@ void main() {
   ) async {
     final formKey = GlobalKey<FormState>();
     const forceErrorText = 'Forcing error.';
-    const validatorErrorText =
-        'this error should not appear as we override it with forceErrorText';
+    const validatorErrorText = 'this error should not appear as we override it with forceErrorText';
     var didCallValidator = false;
 
     Widget builder(AutovalidateMode autovalidateMode) {

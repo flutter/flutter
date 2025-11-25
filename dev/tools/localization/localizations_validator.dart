@@ -124,9 +124,7 @@ void removeUndefinedLocalizations(Map<LocaleInfo, Map<String, String>> localeToR
       return resources.containsKey('${prefix}Other');
     }
 
-    final keys = Set<String>.from(
-      resources.keys.where((String key) => !isPluralVariation(key)),
-    );
+    final keys = Set<String>.from(resources.keys.where((String key) => !isPluralVariation(key)));
 
     final Set<String> invalidKeys = keys.difference(canonicalKeys);
     resources.removeWhere((String key, String value) => invalidKeys.contains(key));
@@ -169,9 +167,7 @@ void validateLocalizations(
       return resources.containsKey('${prefix}Other');
     }
 
-    final keys = Set<String>.from(
-      resources.keys.where((String key) => !isPluralVariation(key)),
-    );
+    final keys = Set<String>.from(resources.keys.where((String key) => !isPluralVariation(key)));
 
     // Make sure keys are valid (i.e. they also exist in the canonical
     // localizations)

@@ -4373,8 +4373,7 @@ class EditableTextState extends State<EditableText>
       _showCaretOnScreenScheduled = false;
       // Since we are in a post frame callback, check currentContext in case
       // RenderEditable has been disposed (in which case it will be null).
-      final renderEditable =
-          _editableKey.currentContext?.findRenderObject() as RenderEditable?;
+      final renderEditable = _editableKey.currentContext?.findRenderObject() as RenderEditable?;
       if (renderEditable == null ||
           !(renderEditable.selection?.isValid ?? false) ||
           !_scrollController.hasClients) {
@@ -4951,9 +4950,7 @@ class EditableTextState extends State<EditableText>
   void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause? cause) {
     // Compare the current TextEditingValue with the pre-format new
     // TextEditingValue value, in case the formatter would reject the change.
-    final shouldShowCaret = widget.readOnly
-        ? _value.selection != value.selection
-        : _value != value;
+    final shouldShowCaret = widget.readOnly ? _value.selection != value.selection : _value != value;
     if (shouldShowCaret) {
       _scheduleShowCaretOnScreen(withAnimation: true);
     }
@@ -6483,9 +6480,7 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent>
   // Returns true if the given position at a wordwrap boundary in the
   // downstream position.
   bool _isAtWordwrapDownstream(TextPosition position) {
-    final start = TextPosition(
-      offset: state.renderEditable.getLineAtOffset(position).start,
-    );
+    final start = TextPosition(offset: state.renderEditable.getLineAtOffset(position).start);
     return start == position &&
         start.offset != 0 &&
         state.textEditingValue.text.codeUnitAt(position.offset - 1) != NEWLINE_CODE_UNIT;

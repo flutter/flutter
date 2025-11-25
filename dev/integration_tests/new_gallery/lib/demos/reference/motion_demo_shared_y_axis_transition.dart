@@ -112,18 +112,19 @@ class _SharedYAxisTransitionDemoState extends State<SharedYAxisTransitionDemo>
           Expanded(
             child: PageTransitionSwitcher(
               reverse: _isAlphabetical,
-              transitionBuilder: (
-                Widget child,
-                Animation<double> animation,
-                Animation<double> secondaryAnimation,
-              ) {
-                return SharedAxisTransition(
-                  animation: animation,
-                  secondaryAnimation: secondaryAnimation,
-                  transitionType: SharedAxisTransitionType.vertical,
-                  child: child,
-                );
-              },
+              transitionBuilder:
+                  (
+                    Widget child,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) {
+                    return SharedAxisTransition(
+                      animation: animation,
+                      secondaryAnimation: secondaryAnimation,
+                      transitionType: SharedAxisTransitionType.vertical,
+                      child: child,
+                    );
+                  },
               child: _isAlphabetical ? _alphabeticalList : _recentList,
             ),
           ),

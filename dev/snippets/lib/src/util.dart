@@ -112,8 +112,7 @@ class FlutterInformation {
       );
     }
 
-    final flutterVersion =
-        json.decode(flutterVersionJson) as Map<String, dynamic>;
+    final flutterVersion = json.decode(flutterVersionJson) as Map<String, dynamic>;
     if (flutterVersion['flutterRoot'] == null ||
         flutterVersion['frameworkVersion'] == null ||
         flutterVersion['dartSdkVersion'] == null) {

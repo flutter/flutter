@@ -143,8 +143,7 @@ String generateArbBasedLocalizationSubclasses({
 
     final Map<String, String> languageResources = localeToResources[languageLocale]!;
     for (final key in allKeys) {
-      final attributes =
-          localeToResourceAttributes[canonicalLocale]![key] as Map<String, dynamic>?;
+      final attributes = localeToResourceAttributes[canonicalLocale]![key] as Map<String, dynamic>?;
       output.writeln(generateGetter(key, languageResources[key], attributes, languageLocale));
     }
     output.writeln('}');
@@ -547,9 +546,7 @@ void main(List<String> rawArgs) {
   // is the 2nd command line argument, lc is a language code and cc is the country
   // code. In most cases both codes are just two characters.
 
-  final directory = Directory(
-    path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n'),
-  );
+  final directory = Directory(path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n'));
   final widgetsFilenameRE = RegExp(r'widgets_(\w+)\.arb$');
   final materialFilenameRE = RegExp(r'material_(\w+)\.arb$');
   final cupertinoFilenameRE = RegExp(r'cupertino_(\w+)\.arb$');
@@ -575,28 +572,22 @@ void main(List<String> rawArgs) {
   precacheLanguageAndRegionTags();
 
   // Maps of locales to resource key/value pairs for Widgets ARBs.
-  final widgetsLocaleToResources =
-      <LocaleInfo, Map<String, String>>{};
+  final widgetsLocaleToResources = <LocaleInfo, Map<String, String>>{};
   // Maps of locales to resource key/attributes pairs for Widgets ARBs.
   // https://github.com/googlei18n/app-resource-bundle/wiki/ApplicationResourceBundleSpecification#resource-attributes
-  final widgetsLocaleToResourceAttributes =
-      <LocaleInfo, Map<String, dynamic>>{};
+  final widgetsLocaleToResourceAttributes = <LocaleInfo, Map<String, dynamic>>{};
 
   // Maps of locales to resource key/value pairs for Material ARBs.
-  final materialLocaleToResources =
-      <LocaleInfo, Map<String, String>>{};
+  final materialLocaleToResources = <LocaleInfo, Map<String, String>>{};
   // Maps of locales to resource key/attributes pairs for Material ARBs.
   // https://github.com/googlei18n/app-resource-bundle/wiki/ApplicationResourceBundleSpecification#resource-attributes
-  final materialLocaleToResourceAttributes =
-      <LocaleInfo, Map<String, dynamic>>{};
+  final materialLocaleToResourceAttributes = <LocaleInfo, Map<String, dynamic>>{};
 
   // Maps of locales to resource key/value pairs for Cupertino ARBs.
-  final cupertinoLocaleToResources =
-      <LocaleInfo, Map<String, String>>{};
+  final cupertinoLocaleToResources = <LocaleInfo, Map<String, String>>{};
   // Maps of locales to resource key/attributes pairs for Cupertino ARBs.
   // https://github.com/googlei18n/app-resource-bundle/wiki/ApplicationResourceBundleSpecification#resource-attributes
-  final cupertinoLocaleToResourceAttributes =
-      <LocaleInfo, Map<String, dynamic>>{};
+  final cupertinoLocaleToResourceAttributes = <LocaleInfo, Map<String, dynamic>>{};
 
   loadMatchingArbsIntoBundleMaps(
     directory: directory,

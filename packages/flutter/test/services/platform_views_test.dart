@@ -592,10 +592,7 @@ void main() {
   });
 
   test('toString works as intended', () async {
-    const androidPointerProperties = AndroidPointerProperties(
-      id: 0,
-      toolType: 0,
-    );
+    const androidPointerProperties = AndroidPointerProperties(id: 0, toolType: 0);
     expect(androidPointerProperties.toString(), 'AndroidPointerProperties(id: 0, toolType: 0)');
 
     const zero = 0.0;

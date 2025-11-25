@@ -609,18 +609,12 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     expectProgressAt(left: 16.028758883476257, right: 141.07513427734375);
 
-    final globalThemeController = AnimationController(
-      vsync: tester,
-      value: 0.1,
-    );
+    final globalThemeController = AnimationController(vsync: tester, value: 0.1);
     addTearDown(globalThemeController.dispose);
     await tester.pumpWidget(buildApp(globalThemeController: globalThemeController));
     expectProgressAt(left: 0.0, right: 37.14974820613861);
 
-    final indicatorThemeController = AnimationController(
-      vsync: tester,
-      value: 0.5,
-    );
+    final indicatorThemeController = AnimationController(vsync: tester, value: 0.5);
     addTearDown(indicatorThemeController.dispose);
     await tester.pumpWidget(
       buildApp(
@@ -685,18 +679,12 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     expectProgressAt(start: 0.43225767465697107, sweep: 4.52182126629162);
 
-    final globalThemeController = AnimationController(
-      vsync: tester,
-      value: 0.1,
-    );
+    final globalThemeController = AnimationController(vsync: tester, value: 0.1);
     addTearDown(globalThemeController.dispose);
     await tester.pumpWidget(buildApp(globalThemeController: globalThemeController));
     expectProgressAt(start: 0.628318530718057, sweep: 2.8904563625380906);
 
-    final indicatorThemeController = AnimationController(
-      vsync: tester,
-      value: 0.5,
-    );
+    final indicatorThemeController = AnimationController(vsync: tester, value: 0.5);
     addTearDown(indicatorThemeController.dispose);
     await tester.pumpWidget(
       buildApp(

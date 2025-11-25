@@ -305,9 +305,7 @@ class _TabStyle extends AnimatedWidget {
     final TabBarThemeData tabBarTheme = TabBarTheme.of(context);
     final animation = listenable as Animation<double>;
 
-    final states = isSelected
-        ? const <WidgetState>{WidgetState.selected}
-        : const <WidgetState>{};
+    final states = isSelected ? const <WidgetState>{WidgetState.selected} : const <WidgetState>{};
 
     // To enable TextStyle.lerp(style1, style2, value), both styles must have
     // the same value of inherit. Force that to be inherit=true here.
@@ -1923,9 +1921,7 @@ class _TabBarState extends State<TabBar> {
     // the same share of the tab bar's overall width.
     final int tabCount = widget.tabs.length;
     for (var index = 0; index < tabCount; index += 1) {
-      final selectedState = <WidgetState>{
-        if (index == _currentIndex) WidgetState.selected,
-      };
+      final selectedState = <WidgetState>{if (index == _currentIndex) WidgetState.selected};
 
       final MouseCursor effectiveMouseCursor =
           WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, selectedState) ??

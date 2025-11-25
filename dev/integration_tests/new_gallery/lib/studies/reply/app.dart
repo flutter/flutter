@@ -34,19 +34,20 @@ class ReplyApp extends StatefulWidget {
             Animation<double> animation,
             Animation<double> secondaryAnimation,
           ) => const ComposePage(),
-      transitionsBuilder: (
-        BuildContext context,
-        Animation<double> animation,
-        Animation<double> secondaryAnimation,
-        Widget child,
-      ) {
-        return FadeThroughTransition(
-          fillColor: Theme.of(context).cardColor,
-          animation: animation,
-          secondaryAnimation: secondaryAnimation,
-          child: child,
-        );
-      },
+      transitionsBuilder:
+          (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+            Widget child,
+          ) {
+            return FadeThroughTransition(
+              fillColor: Theme.of(context).cardColor,
+              animation: animation,
+              secondaryAnimation: secondaryAnimation,
+              child: child,
+            );
+          },
       settings: settings,
     );
   }
@@ -75,13 +76,13 @@ class _ReplyAppState extends State<ReplyApp> with RestorationMixin {
   @override
   Widget build(BuildContext context) {
     final ThemeMode galleryThemeMode = GalleryOptions.of(context).themeMode;
-    final isDark =
-        galleryThemeMode == ThemeMode.system
-            ? Theme.brightnessOf(context) == Brightness.dark
-            : galleryThemeMode == ThemeMode.dark;
+    final isDark = galleryThemeMode == ThemeMode.system
+        ? Theme.brightnessOf(context) == Brightness.dark
+        : galleryThemeMode == ThemeMode.dark;
 
-    final ThemeData replyTheme =
-        isDark ? _buildReplyDarkTheme(context) : _buildReplyLightTheme(context);
+    final ThemeData replyTheme = isDark
+        ? _buildReplyDarkTheme(context)
+        : _buildReplyLightTheme(context);
 
     return MultiProvider(
       providers: <SingleChildWidget>[
@@ -97,15 +98,14 @@ class _ReplyAppState extends State<ReplyApp> with RestorationMixin {
         supportedLocales: GalleryLocalizations.supportedLocales,
         locale: GalleryOptions.of(context).locale,
         initialRoute: ReplyApp.homeRoute,
-        onGenerateRoute:
-            (RouteSettings settings) => switch (settings.name) {
-              ReplyApp.homeRoute => MaterialPageRoute<void>(
-                builder: (BuildContext context) => const AdaptiveNav(),
-                settings: settings,
-              ),
-              ReplyApp.composeRoute => ReplyApp.createComposeRoute(settings),
-              _ => null,
-            },
+        onGenerateRoute: (RouteSettings settings) => switch (settings.name) {
+          ReplyApp.homeRoute => MaterialPageRoute<void>(
+            builder: (BuildContext context) => const AdaptiveNav(),
+            settings: settings,
+          ),
+          ReplyApp.composeRoute => ReplyApp.createComposeRoute(settings),
+          _ => null,
+        },
       ),
     );
   }

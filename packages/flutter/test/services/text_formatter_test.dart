@@ -447,9 +447,7 @@ void main() {
       test('Passes through when under limit', () async {
         const oldValue = TextEditingValue(text: 'aaa');
         const newValue = TextEditingValue(text: 'aaab');
-        final formatter = LengthLimitingTextInputFormatter(
-          maxLength,
-        );
+        final formatter = LengthLimitingTextInputFormatter(maxLength);
         final TextEditingValue formatted = formatter.formatEditUpdate(oldValue, newValue);
         expect(formatted.text, newValue.text);
       });
@@ -457,9 +455,7 @@ void main() {
       test('Uses old value when at the limit', () async {
         const oldValue = TextEditingValue(text: 'aaaaaaaaaa');
         const newValue = TextEditingValue(text: 'aaaaabbbbbaaaaa');
-        final formatter = LengthLimitingTextInputFormatter(
-          maxLength,
-        );
+        final formatter = LengthLimitingTextInputFormatter(maxLength);
         final TextEditingValue formatted = formatter.formatEditUpdate(oldValue, newValue);
         expect(formatted.text, oldValue.text);
       });
@@ -467,9 +463,7 @@ void main() {
       test('Truncates newValue when oldValue already over limit', () async {
         const oldValue = TextEditingValue(text: 'aaaaaaaaaaaaaaaaaaaa');
         const newValue = TextEditingValue(text: 'bbbbbbbbbbbbbbbbbbbb');
-        final formatter = LengthLimitingTextInputFormatter(
-          maxLength,
-        );
+        final formatter = LengthLimitingTextInputFormatter(maxLength);
         final TextEditingValue formatted = formatter.formatEditUpdate(oldValue, newValue);
         expect(formatted.text, 'bbbbbbbbbb');
       });

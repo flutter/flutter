@@ -98,8 +98,7 @@ void main() {
     expect(chipMaterial.shadowColor, Colors.black);
     expect(chipMaterial.shape, const StadiumBorder());
 
-    var decoration =
-        tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    var decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
     expect(decoration.color, Colors.black.withAlpha(0x1f));
 
     // Test disabled ChoiceChip defaults.
@@ -203,8 +202,7 @@ void main() {
       ),
     );
 
-    var decoration =
-        tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    var decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
     expect(decoration.color, null);
 
     // Test disabled ChoiceChip defaults.
@@ -329,8 +327,7 @@ void main() {
       ),
     );
 
-    var decoration =
-        tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    var decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
     expect(decoration.color, theme.colorScheme.surfaceContainerLow);
 
     // Test disabled ChoiceChip.elevated defaults.

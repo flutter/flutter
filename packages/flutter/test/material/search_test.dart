@@ -1079,9 +1079,7 @@ void main() {
     const searchFieldDecorationTheme = InputDecorationTheme(
       hintStyle: TextStyle(color: _TestSearchDelegate.hintTextColor),
     );
-    final delegate = _TestSearchDelegate(
-      searchFieldDecorationTheme: searchFieldDecorationTheme,
-    );
+    final delegate = _TestSearchDelegate(searchFieldDecorationTheme: searchFieldDecorationTheme);
     addTearDown(() => delegate.dispose());
 
     await tester.pumpWidget(TestHomePage(delegate: delegate));

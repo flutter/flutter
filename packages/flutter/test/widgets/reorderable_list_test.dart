@@ -1099,13 +1099,7 @@ void main() {
       ),
     );
 
-    const expectedExtents = <int, double>{
-      0: 10.0,
-      1: 20.0,
-      2: 30.0,
-      3: 40.0,
-      4: 50.0,
-    };
+    const expectedExtents = <int, double>{0: 10.0, 1: 20.0, 2: 30.0, 3: 40.0, 4: 50.0};
 
     final itemExtents = <int, double>{
       for (int i = 0; i < itemCount; i++) i: tester.getSize(find.text('Item $i')).height,
@@ -1592,10 +1586,7 @@ void main() {
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/132077
       const itemCount = 5;
-      final items = List<String>.generate(
-        itemCount,
-        (int index) => 'Item ${index + 1}',
-      );
+      final items = List<String>.generate(itemCount, (int index) => 'Item ${index + 1}');
 
       await tester.pumpWidget(
         MaterialApp(
@@ -1839,9 +1830,7 @@ void main() {
         ),
       ),
     );
-    final preDragLayoutConstraints = Map<int, BoxConstraints>.of(
-      itemLayoutConstraints,
-    );
+    final preDragLayoutConstraints = Map<int, BoxConstraints>.of(itemLayoutConstraints);
     itemLayoutConstraints.clear();
     final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('0')));
     await tester.pump(kLongPressTimeout);

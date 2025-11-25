@@ -7,15 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('MaterialPointArcTween control test', () {
-    final a = MaterialPointArcTween(
-      begin: Offset.zero,
-      end: const Offset(0.0, 10.0),
-    );
+    final a = MaterialPointArcTween(begin: Offset.zero, end: const Offset(0.0, 10.0));
 
-    final b = MaterialPointArcTween(
-      begin: Offset.zero,
-      end: const Offset(0.0, 10.0),
-    );
+    final b = MaterialPointArcTween(begin: Offset.zero, end: const Offset(0.0, 10.0));
 
     expect(a, hasOneLineDescription);
     expect(a.toString(), equals(b.toString()));
@@ -36,10 +30,7 @@ void main() {
   });
 
   test('on-axis MaterialPointArcTween', () {
-    var tween = MaterialPointArcTween(
-      begin: Offset.zero,
-      end: const Offset(0.0, 10.0),
-    );
+    var tween = MaterialPointArcTween(begin: Offset.zero, end: const Offset(0.0, 10.0));
     expect(tween.lerp(0.5), equals(const Offset(0.0, 5.0)));
     expect(tween, hasOneLineDescription);
 

@@ -115,8 +115,7 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
         ],
       );
     }
-    final profileData =
-        Completer<List<Map<String, dynamic>>>();
+    final profileData = Completer<List<Map<String, dynamic>>>();
     final collectedProfiles = <Map<String, dynamic>>[];
     List<String>? benchmarks;
     late Iterator<String> benchmarkIterator;
@@ -183,8 +182,7 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
           latestPerformanceTrace = await chrome!.endRecordingPerformance();
           return Response.ok('Stopped performance tracing', headers: requestHeaders);
         } else if (request.requestedUri.path.endsWith('/on-error')) {
-          final errorDetails =
-              json.decode(requestContents) as Map<String, dynamic>;
+          final errorDetails = json.decode(requestContents) as Map<String, dynamic>;
           unawaited(server.close());
           // Keep the stack trace as a string. It's thrown in the browser, not this Dart VM.
           profileData.completeError('${errorDetails['error']}\n${errorDetails['stackTrace']}');

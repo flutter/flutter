@@ -43,10 +43,7 @@ class KeyCodesJavaGenerator extends BaseCodeGenerator {
 
   /// Gets the generated definitions of PhysicalKeyboardKeys.
   String get _logicalDefinitions {
-    final lines = OutputLines<int>(
-      'Logical Key list',
-      behavior: DeduplicateBehavior.kSkip,
-    );
+    final lines = OutputLines<int>('Logical Key list', behavior: DeduplicateBehavior.kSkip);
     for (final LogicalKeyEntry entry in logicalData.entries) {
       lines.add(
         entry.value,

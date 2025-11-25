@@ -1173,10 +1173,7 @@ class DataTable extends StatelessWidget {
         paddingEnd = effectiveColumnSpacing / 2.0;
       }
 
-      final padding = EdgeInsetsDirectional.only(
-        start: paddingStart,
-        end: paddingEnd,
-      );
+      final padding = EdgeInsetsDirectional.only(start: paddingStart, end: paddingEnd);
       if (column.columnWidth != null) {
         tableColumns[displayColumnIndex] = column.columnWidth!;
       } else if (dataColumnIndex == _onlyTextColumn) {
@@ -1185,9 +1182,7 @@ class DataTable extends StatelessWidget {
         tableColumns[displayColumnIndex] = const IntrinsicColumnWidth();
       }
 
-      final headerStates = <WidgetState>{
-        if (column.onSort == null) WidgetState.disabled,
-      };
+      final headerStates = <WidgetState>{if (column.onSort == null) WidgetState.disabled};
       tableRows[0].children[displayColumnIndex] = _buildHeadingCell(
         context: context,
         padding: padding,

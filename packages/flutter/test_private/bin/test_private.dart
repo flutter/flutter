@@ -167,9 +167,7 @@ class TestCase {
     }
     for (final File file in testDependencies) {
       try {
-        final destDir = Directory(
-          path.join(tmpdir.absolute.path, 'lib', file.parent.path),
-        );
+        final destDir = Directory(path.join(tmpdir.absolute.path, 'lib', file.parent.path));
         destDir.createSync(recursive: true);
         final File absFile = makeAbsolute(file, workingDirectory: flutterPackageDir);
         final String destination = path.join(tmpdir.absolute.path, 'lib', file.path);

@@ -180,14 +180,8 @@ class _RangeSlidersState extends State<_RangeSliders> with RestorationMixin {
 
   @override
   Widget build(BuildContext context) {
-    final continuousValues = RangeValues(
-      _continuousStartValue.value,
-      _continuousEndValue.value,
-    );
-    final discreteValues = RangeValues(
-      _discreteStartValue.value,
-      _discreteEndValue.value,
-    );
+    final continuousValues = RangeValues(_continuousStartValue.value, _continuousEndValue.value);
+    final discreteValues = RangeValues(_discreteStartValue.value, _discreteEndValue.value);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 40),

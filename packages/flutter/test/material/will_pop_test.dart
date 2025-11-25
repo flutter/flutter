@@ -440,15 +440,13 @@ void main() {
 
     await tester.pumpWidget(buildFrame());
     await tester.pump();
-    final route1 =
-        ModalRoute.of(tester.element(find.text('anchor')))! as _TestPageRoute<dynamic>;
+    final route1 = ModalRoute.of(tester.element(find.text('anchor')))! as _TestPageRoute<dynamic>;
     expect(route1.hasCallback, isTrue);
     moveToAnotherNavigator = true;
     contentsSetState(() {});
 
     await tester.pump();
-    final route2 =
-        ModalRoute.of(tester.element(find.text('anchor')))! as _TestPageRoute<dynamic>;
+    final route2 = ModalRoute.of(tester.element(find.text('anchor')))! as _TestPageRoute<dynamic>;
 
     expect(route1.hasCallback, isFalse);
     expect(route2.hasCallback, isTrue);

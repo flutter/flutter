@@ -184,9 +184,7 @@ void main() {
 
     // Regression test for https://github.com/flutter/flutter/issues/162972
     test('FixedExtentScrollController debugLabel', () {
-      final controller = FixedExtentScrollController(
-        debugLabel: 'MyCustomWidget',
-      );
+      final controller = FixedExtentScrollController(debugLabel: 'MyCustomWidget');
       expect(controller.debugLabel, 'MyCustomWidget');
       expect(controller.toString(), contains('MyCustomWidget'));
     });

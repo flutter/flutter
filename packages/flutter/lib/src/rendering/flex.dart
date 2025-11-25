@@ -1257,11 +1257,7 @@ class RenderFlex extends RenderBox
     // The second pass distributes free space to flexible children.
     final double flexSpace = math.max(0.0, maxMainSize - accumulatedSize.mainAxisExtent);
     final double spacePerFlex = flexSpace / totalFlex;
-    for (
-      var child = firstFlexChild;
-      child != null && totalFlex > 0;
-      child = childAfter(child)
-    ) {
+    for (var child = firstFlexChild; child != null && totalFlex > 0; child = childAfter(child)) {
       final int flex = _getFlex(child);
       if (flex == 0) {
         continue;

@@ -223,9 +223,7 @@ void main() {
     });
 
     test('no easing resistance for ScrollDecelerationRate.fast', () {
-      const desktop = BouncingScrollPhysics(
-        decelerationRate: ScrollDecelerationRate.fast,
-      );
+      const desktop = BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast);
       final ScrollMetrics overscrolledPosition = FixedScrollMetrics(
         minScrollExtent: 0.0,
         maxScrollExtent: 1000.0,
@@ -279,9 +277,7 @@ void main() {
 
     test('frictionFactor', () {
       const mobile = BouncingScrollPhysics();
-      const desktop = BouncingScrollPhysics(
-        decelerationRate: ScrollDecelerationRate.fast,
-      );
+      const desktop = BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast);
 
       expect(desktop.frictionFactor(0), 0.26);
       expect(mobile.frictionFactor(0), 0.52);

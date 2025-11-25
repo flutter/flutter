@@ -207,10 +207,7 @@ void main() {
     expect(find.text('Select all'), findsNothing);
   }, skip: kIsWeb); // [intended] We don't show the toolbar on the web.
 
-  for (final colorScheme in <ColorScheme>[
-    ThemeData().colorScheme,
-    ThemeData.dark().colorScheme,
-  ]) {
+  for (final colorScheme in <ColorScheme>[ThemeData().colorScheme, ThemeData.dark().colorScheme]) {
     testWidgets('default background color', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -381,10 +378,7 @@ void main() {
     expect(find.byType(TestBox), findsNWidgets(itemCount));
 
     // Find all text widgets by their content and get their positions.
-    final textRects = List<Rect>.generate(
-      itemCount,
-      (int i) => tester.getRect(find.text('$i')),
-    );
+    final textRects = List<Rect>.generate(itemCount, (int i) => tester.getRect(find.text('$i')));
 
     // In RTL, items should be in reverse order (2, 1, 0).
     // So item 2 should be leftmost, then 1, then 0.

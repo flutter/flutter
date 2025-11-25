@@ -508,9 +508,7 @@ String? validateSnapshotDependency(FlutterProject project, String expectedTarget
 }
 
 File getAndroidBuildFile(String androidAppPath, {bool settings = false}) {
-  final groovyFile = File(
-    path.join(androidAppPath, settings ? 'settings.gradle' : 'build.gradle'),
-  );
+  final groovyFile = File(path.join(androidAppPath, settings ? 'settings.gradle' : 'build.gradle'));
   final kotlinFile = File(
     path.join(androidAppPath, settings ? 'settings.gradle.kts' : 'build.gradle.kts'),
   );

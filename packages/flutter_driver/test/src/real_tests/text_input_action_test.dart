@@ -9,12 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('SendTextInputAction', () {
     test('serializes and deserializes', () {
-      const action = command.SendTextInputAction(
-        flutter_driver.TextInputAction.done,
-      );
-      final roundTrip = command.SendTextInputAction.deserialize(
-        action.serialize(),
-      );
+      const action = command.SendTextInputAction(flutter_driver.TextInputAction.done);
+      final roundTrip = command.SendTextInputAction.deserialize(action.serialize());
       expect(roundTrip.textInputAction, flutter_driver.TextInputAction.done);
     });
 

@@ -114,11 +114,7 @@ void main() {
       });
 
       final title = Title(title: 'title', color: const Color(0xFF00FF00), child: Container());
-      final title2 = Title(
-        title: 'title2',
-        color: const Color(0xFF00FF02),
-        child: Container(),
-      );
+      final title2 = Title(title: 'title2', color: const Color(0xFF00FF02), child: Container());
 
       await tester.pumpWidget(title);
       await tester.pumpWidget(title);

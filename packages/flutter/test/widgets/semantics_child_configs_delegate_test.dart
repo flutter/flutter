@@ -16,8 +16,7 @@ void main() {
     const third = SemanticsTag('3');
     ChildSemanticsConfigurationsResult delegate(List<SemanticsConfiguration> configs) {
       expect(configs.length, 3);
-      final builder =
-          ChildSemanticsConfigurationsResultBuilder();
+      final builder = ChildSemanticsConfigurationsResultBuilder();
       final sibling = <SemanticsConfiguration>[];
       // Merge first and third
       for (final config in configs) {
@@ -86,8 +85,7 @@ void main() {
     const second = SemanticsTag('2');
     const third = SemanticsTag('3');
     ChildSemanticsConfigurationsResult delegate(List<SemanticsConfiguration> configs) {
-      final builder =
-          ChildSemanticsConfigurationsResultBuilder();
+      final builder = ChildSemanticsConfigurationsResultBuilder();
       // Merge first and third
       for (final config in configs) {
         if (config.tagsChildrenWith(first) || config.tagsChildrenWith(third)) {
@@ -149,8 +147,7 @@ void main() {
     const second = SemanticsTag('2');
     const third = SemanticsTag('3');
     ChildSemanticsConfigurationsResult delegate(List<SemanticsConfiguration> configs) {
-      final builder =
-          ChildSemanticsConfigurationsResultBuilder();
+      final builder = ChildSemanticsConfigurationsResultBuilder();
       // Marks the same one twice.
       builder.markAsMergeUp(configs.first);
       builder.markAsMergeUp(configs.first);
@@ -199,8 +196,7 @@ void main() {
     const second = SemanticsTag('2');
     const third = SemanticsTag('3');
     ChildSemanticsConfigurationsResult delegate(List<SemanticsConfiguration> configs) {
-      final builder =
-          ChildSemanticsConfigurationsResultBuilder();
+      final builder = ChildSemanticsConfigurationsResultBuilder();
       // Marks the same one twice.
       builder.markAsMergeUp(configs.first);
       builder.markAsSiblingMergeGroup(<SemanticsConfiguration>[configs.first]);
@@ -249,8 +245,7 @@ void main() {
     final boundaryParent = UniqueKey();
     final grandBoundaryParent = UniqueKey();
     ChildSemanticsConfigurationsResult delegate(List<SemanticsConfiguration> configs) {
-      final builder =
-          ChildSemanticsConfigurationsResultBuilder();
+      final builder = ChildSemanticsConfigurationsResultBuilder();
       configs.forEach(builder.markAsMergeUp);
       return builder.build();
     }

@@ -444,8 +444,7 @@ void main() {
     final ui.Image testImage2 = await createTestImage(width: 10, height: 10);
 
     final completer1 = TestImageStreamCompleter()..testSetImage(testImage);
-    final completer2 = TestImageStreamCompleter()
-      ..testSetImage(testImage2);
+    final completer2 = TestImageStreamCompleter()..testSetImage(testImage2);
 
     completer1.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {}));
 
@@ -517,8 +516,7 @@ void main() {
     final ui.Image testImage2 = await createTestImage(width: 10, height: 10);
 
     final completer1 = TestImageStreamCompleter();
-    final completer2 = TestImageStreamCompleter()
-      ..testSetImage(testImage2);
+    final completer2 = TestImageStreamCompleter()..testSetImage(testImage2);
 
     imageCache.putIfAbsent(testImage1, () => completer1);
     expect(imageCache.statusForKey(testImage1).pending, true);

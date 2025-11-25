@@ -81,9 +81,7 @@ void main() {
   testWidgets('FreeScrollStartVelocityTracker.getVelocity throws when no points', (
     WidgetTester tester,
   ) async {
-    final tracker = IOSScrollViewFlingVelocityTracker(
-      PointerDeviceKind.touch,
-    );
+    final tracker = IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
     AssertionError? exception;
     try {
       tracker.getVelocity();
@@ -97,9 +95,7 @@ void main() {
   testWidgets(
     'FreeScrollStartVelocityTracker.getVelocity throws when the new point precedes the previous point',
     (WidgetTester tester) async {
-      final tracker = IOSScrollViewFlingVelocityTracker(
-        PointerDeviceKind.touch,
-      );
+      final tracker = IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
       AssertionError? exception;
 
       tracker.addPosition(const Duration(hours: 1), Offset.zero);
@@ -117,9 +113,7 @@ void main() {
   testWidgets('Estimate does not throw when there are more than 1 point', (
     WidgetTester tester,
   ) async {
-    final tracker = IOSScrollViewFlingVelocityTracker(
-      PointerDeviceKind.touch,
-    );
+    final tracker = IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
     Offset position = Offset.zero;
     Duration time = Duration.zero;
     const positionDelta = Offset(0, -1);
@@ -143,9 +137,7 @@ void main() {
   testWidgets('Makes consistent velocity estimates with consistent velocity', (
     WidgetTester tester,
   ) async {
-    final tracker = IOSScrollViewFlingVelocityTracker(
-      PointerDeviceKind.touch,
-    );
+    final tracker = IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
     Offset position = Offset.zero;
     Duration time = Duration.zero;
     const positionDelta = Offset(0, -1);
@@ -184,9 +176,7 @@ void main() {
   testWidgets('Assume zero velocity when there are no recent samples - IOS', (
     WidgetTester tester,
   ) async {
-    final tracker = IOSScrollViewFlingVelocityTracker(
-      PointerDeviceKind.touch,
-    );
+    final tracker = IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
     Offset position = Offset.zero;
     Duration time = Duration.zero;
     const positionDelta = Offset(0, -1);
@@ -205,9 +195,7 @@ void main() {
   testWidgets('Assume zero velocity when there are no recent samples - MacOS', (
     WidgetTester tester,
   ) async {
-    final tracker = MacOSScrollViewFlingVelocityTracker(
-      PointerDeviceKind.touch,
-    );
+    final tracker = MacOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
     Offset position = Offset.zero;
     Duration time = Duration.zero;
     const positionDelta = Offset(0, -1);

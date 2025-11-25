@@ -451,10 +451,7 @@ void main() {
 
     const tabBarTheme = TabBarThemeData(labelPadding: themeLabelPadding);
 
-    final controller = TabController(
-      length: _sizedTabs.length,
-      vsync: const TestVSync(),
-    );
+    final controller = TabController(length: _sizedTabs.length, vsync: const TestVSync());
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -514,10 +511,7 @@ void main() {
 
     const tabBarTheme = TabBarThemeData(labelPadding: themeLabelPadding);
 
-    final controller = TabController(
-      length: _sizedTabs.length,
-      vsync: const TestVSync(),
-    );
+    final controller = TabController(length: _sizedTabs.length, vsync: const TestVSync());
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -619,9 +613,7 @@ void main() {
   });
 
   testWidgets('Tab bar theme overrides tab mouse cursor', (WidgetTester tester) async {
-    const tabBarTheme = TabBarThemeData(
-      mouseCursor: WidgetStateMouseCursor.textable,
-    );
+    const tabBarTheme = TabBarThemeData(mouseCursor: WidgetStateMouseCursor.textable);
 
     await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme));
 
@@ -639,9 +631,7 @@ void main() {
   });
 
   testWidgets('Tab bar theme - custom tab indicator', (WidgetTester tester) async {
-    final tabBarTheme = TabBarThemeData(
-      indicator: BoxDecoration(border: Border.all()),
-    );
+    final tabBarTheme = TabBarThemeData(indicator: BoxDecoration(border: Border.all()));
 
     await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme));
 
@@ -1015,10 +1005,7 @@ void main() {
     'TabBar labels use colors from TabBarTheme.labelStyle & TabBarTheme.unselectedLabelStyle',
     (WidgetTester tester) async {
       const labelStyle = TextStyle(color: Color(0xff0000ff), fontStyle: FontStyle.italic);
-      const unselectedLabelStyle = TextStyle(
-        color: Color(0x950000ff),
-        fontStyle: FontStyle.italic,
-      );
+      const unselectedLabelStyle = TextStyle(color: Color(0x950000ff), fontStyle: FontStyle.italic);
       const tabBarTheme = TabBarThemeData(
         labelStyle: labelStyle,
         unselectedLabelStyle: unselectedLabelStyle,
@@ -1055,10 +1042,7 @@ void main() {
       const labelColor = Color(0xfff00000);
       const unselectedLabelColor = Color(0x95ff0000);
       const labelStyle = TextStyle(color: Color(0xff0000ff), fontStyle: FontStyle.italic);
-      const unselectedLabelStyle = TextStyle(
-        color: Color(0x950000ff),
-        fontStyle: FontStyle.italic,
-      );
+      const unselectedLabelStyle = TextStyle(color: Color(0x950000ff), fontStyle: FontStyle.italic);
       var tabBarTheme = const TabBarThemeData(
         labelStyle: labelStyle,
         unselectedLabelStyle: unselectedLabelStyle,
@@ -1121,10 +1105,7 @@ void main() {
       const labelColor = Color(0xfff00000);
       const unselectedLabelColor = Color(0x95ff0000);
       const labelStyle = TextStyle(color: Color(0xff0000ff), fontStyle: FontStyle.italic);
-      const unselectedLabelStyle = TextStyle(
-        color: Color(0x950000ff),
-        fontStyle: FontStyle.italic,
-      );
+      const unselectedLabelStyle = TextStyle(color: Color(0x950000ff), fontStyle: FontStyle.italic);
 
       Widget buildTabBar({TabBarThemeData? tabBarTheme}) {
         return MaterialApp(

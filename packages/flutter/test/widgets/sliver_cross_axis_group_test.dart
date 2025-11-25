@@ -1057,8 +1057,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/174262.
   testWidgets('SliverCrossAxisGroup pointer event positions', (WidgetTester tester) async {
-    final tapDownLog =
-        <({int index, TapDownDetails details})>[];
+    final tapDownLog = <({int index, TapDownDetails details})>[];
 
     Widget buildItem(int index) {
       return SliverToBoxAdapter(

@@ -208,8 +208,7 @@ void main() {
     'Chunk events of base ImageStreamCompleter are not buffered before listener registration',
     (WidgetTester tester) async {
       final chunkEvents = <ImageChunkEvent>[];
-      final streamController =
-          StreamController<ImageChunkEvent>();
+      final streamController = StreamController<ImageChunkEvent>();
       final ImageStreamCompleter imageStream = FakeEventReportingImageStreamCompleter(
         chunkEvents: streamController.stream,
       );
@@ -269,8 +268,7 @@ void main() {
     (WidgetTester tester) async {
       final chunkEvents = <ImageChunkEvent>[];
       final completer = Completer<Codec>();
-      final streamController =
-          StreamController<ImageChunkEvent>();
+      final streamController = StreamController<ImageChunkEvent>();
       final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
         codec: completer.future,
         chunkEvents: streamController.stream,
@@ -365,10 +363,7 @@ void main() {
 
     final emittedImages = <ImageInfo>[];
 
-    final listener = ImageStreamListener((
-      ImageInfo image,
-      bool synchronousCall,
-    ) {
+    final listener = ImageStreamListener((ImageInfo image, bool synchronousCall) {
       emittedImages.add(image);
       addTearDown(image.dispose);
     });
@@ -401,10 +396,7 @@ void main() {
     );
 
     final emittedImages = <ImageInfo>[];
-    final listener = ImageStreamListener((
-      ImageInfo image,
-      bool synchronousCall,
-    ) {
+    final listener = ImageStreamListener((ImageInfo image, bool synchronousCall) {
       emittedImages.add(image);
       addTearDown(image.dispose);
     });
@@ -457,10 +449,7 @@ void main() {
     );
 
     final emittedImages = <ImageInfo>[];
-    final listener = ImageStreamListener((
-      ImageInfo image,
-      bool synchronousCall,
-    ) {
+    final listener = ImageStreamListener((ImageInfo image, bool synchronousCall) {
       emittedImages.add(image);
       addTearDown(image.dispose);
     });
@@ -508,10 +497,7 @@ void main() {
     );
 
     final emittedImages = <ImageInfo>[];
-    final listener = ImageStreamListener((
-      ImageInfo image,
-      bool synchronousCall,
-    ) {
+    final listener = ImageStreamListener((ImageInfo image, bool synchronousCall) {
       emittedImages.add(image);
       addTearDown(image.dispose);
     });
@@ -555,10 +541,7 @@ void main() {
       scale: 1.0,
     );
 
-    final listener = ImageStreamListener((
-      ImageInfo image,
-      bool synchronousCall,
-    ) {
+    final listener = ImageStreamListener((ImageInfo image, bool synchronousCall) {
       addTearDown(image.dispose);
     });
     imageStream.addListener(listener);
@@ -605,18 +588,12 @@ void main() {
     );
 
     final emittedImages1 = <ImageInfo>[];
-    final listener1 = ImageStreamListener((
-      ImageInfo image,
-      bool synchronousCall,
-    ) {
+    final listener1 = ImageStreamListener((ImageInfo image, bool synchronousCall) {
       emittedImages1.add(image);
       addTearDown(image.dispose);
     });
     final emittedImages2 = <ImageInfo>[];
-    final listener2 = ImageStreamListener((
-      ImageInfo image,
-      bool synchronousCall,
-    ) {
+    final listener2 = ImageStreamListener((ImageInfo image, bool synchronousCall) {
       emittedImages2.add(image);
       addTearDown(image.dispose);
     });
@@ -700,10 +677,7 @@ void main() {
       scale: 1.0,
     );
 
-    final listener = ImageStreamListener((
-      ImageInfo image,
-      bool synchronousCall,
-    ) {
+    final listener = ImageStreamListener((ImageInfo image, bool synchronousCall) {
       addTearDown(image.dispose);
     });
     imageStream.addListener(listener);
@@ -824,16 +798,8 @@ void main() {
       ImageErrorListener? onError2,
       bool areEqual = true,
     }) {
-      final l1 = ImageStreamListener(
-        onImage1,
-        onChunk: onChunk1,
-        onError: onError1,
-      );
-      final l2 = ImageStreamListener(
-        onImage2,
-        onChunk: onChunk2,
-        onError: onError2,
-      );
+      final l1 = ImageStreamListener(onImage1, onChunk: onChunk1, onError: onError1);
+      final l2 = ImageStreamListener(onImage2, onChunk: onChunk2, onError: onError2);
       Matcher comparison(dynamic expected) => areEqual ? equals(expected) : isNot(equals(expected));
       expect(l1, comparison(l2));
       expect(l1.hashCode, comparison(l2.hashCode));
@@ -1053,8 +1019,7 @@ void main() {
   test('ImageStreamCompleterHandle dispatches memory events', () async {
     await expectLater(
       await memoryEvents(() {
-        final streamController =
-            StreamController<ImageChunkEvent>();
+        final streamController = StreamController<ImageChunkEvent>();
         addTearDown(streamController.close);
         final ImageStreamCompleterHandle imageStreamCompleterHandle =
             FakeEventReportingImageStreamCompleter(

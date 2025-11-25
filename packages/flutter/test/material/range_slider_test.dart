@@ -3004,10 +3004,7 @@ void main() {
   }, semanticsEnabled: false);
 
   testWidgets('Value indicator appears when it should', (WidgetTester tester) async {
-    final baseTheme = ThemeData(
-      platform: TargetPlatform.android,
-      primarySwatch: Colors.blue,
-    );
+    final baseTheme = ThemeData(platform: TargetPlatform.android, primarySwatch: Colors.blue);
     SliderThemeData theme = baseTheme.sliderTheme.copyWith(valueIndicatorColor: Colors.red);
     var value = const RangeValues(1, 5);
     Widget buildApp({required SliderThemeData sliderTheme, int? divisions, bool enabled = true}) {
@@ -3674,8 +3671,7 @@ void main() {
   ) async {
     const values = RangeValues(25.0, 75.0);
     final log = <InlineSpan>[];
-    final loggingValueIndicatorShape =
-        LoggingRangeSliderValueIndicatorShape(log);
+    final loggingValueIndicatorShape = LoggingRangeSliderValueIndicatorShape(log);
     final theme = ThemeData(
       sliderTheme: SliderThemeData(rangeValueIndicatorShape: loggingValueIndicatorShape),
     );

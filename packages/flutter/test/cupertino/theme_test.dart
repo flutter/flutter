@@ -113,10 +113,7 @@ void main() {
   });
 
   testWidgets('copyWith works', (WidgetTester tester) async {
-    const originalTheme = CupertinoThemeData(
-      brightness: Brightness.dark,
-      applyThemeToAll: true,
-    );
+    const originalTheme = CupertinoThemeData(brightness: Brightness.dark, applyThemeToAll: true);
 
     final CupertinoThemeData theme = await testTheme(
       tester,
@@ -261,10 +258,7 @@ void main() {
 
     testWidgets('CupertinoTheme.of resolves default values', (WidgetTester tester) async {
       const CupertinoDynamicColor primaryColor = CupertinoColors.systemRed;
-      final data = CupertinoThemeData(
-        brightness: currentBrightness,
-        primaryColor: primaryColor,
-      );
+      final data = CupertinoThemeData(brightness: currentBrightness, primaryColor: primaryColor);
 
       const barBackgroundColor = CupertinoDynamicColor.withBrightness(
         color: Color(0xF0F9F9F9),

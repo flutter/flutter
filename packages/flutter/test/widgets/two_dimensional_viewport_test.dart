@@ -234,21 +234,20 @@ void main() {
         final verticalController = ScrollController();
         addTearDown(verticalController.dispose);
         final checkBoxKey = UniqueKey();
-        final builderDelegate =
-            TwoDimensionalChildBuilderDelegate(
-              maxXIndex: 5,
-              maxYIndex: 5,
-              builder: (BuildContext context, ChildVicinity vicinity) {
-                return SizedBox.square(
-                  dimension: 200,
-                  child: Center(
-                    child: vicinity == firstCell
-                        ? KeepAliveCheckBox(key: checkBoxKey)
-                        : Text('R${vicinity.xIndex}:C${vicinity.yIndex}'),
-                  ),
-                );
-              },
+        final builderDelegate = TwoDimensionalChildBuilderDelegate(
+          maxXIndex: 5,
+          maxYIndex: 5,
+          builder: (BuildContext context, ChildVicinity vicinity) {
+            return SizedBox.square(
+              dimension: 200,
+              child: Center(
+                child: vicinity == firstCell
+                    ? KeepAliveCheckBox(key: checkBoxKey)
+                    : Text('R${vicinity.xIndex}:C${vicinity.yIndex}'),
+              ),
             );
+          },
+        );
         addTearDown(builderDelegate.dispose);
 
         await tester.pumpWidget(
@@ -307,27 +306,26 @@ void main() {
         final verticalController = ScrollController();
         addTearDown(verticalController.dispose);
         final checkBoxKey = UniqueKey();
-        final builderDelegate =
-            TwoDimensionalChildBuilderDelegate(
-              maxXIndex: 5,
-              maxYIndex: 5,
-              addRepaintBoundaries: false,
-              builder: (BuildContext context, ChildVicinity vicinity) {
-                // The delegate will add a KeepAlive ParentDataWidget, this add an
-                // additional ParentDataWidget.
-                return TestParentDataWidget(
-                  testValue: 20,
-                  child: SizedBox.square(
-                    dimension: 200,
-                    child: Center(
-                      child: vicinity == firstCell
-                          ? KeepAliveCheckBox(key: checkBoxKey)
-                          : Text('R${vicinity.xIndex}:C${vicinity.yIndex}'),
-                    ),
-                  ),
-                );
-              },
+        final builderDelegate = TwoDimensionalChildBuilderDelegate(
+          maxXIndex: 5,
+          maxYIndex: 5,
+          addRepaintBoundaries: false,
+          builder: (BuildContext context, ChildVicinity vicinity) {
+            // The delegate will add a KeepAlive ParentDataWidget, this add an
+            // additional ParentDataWidget.
+            return TestParentDataWidget(
+              testValue: 20,
+              child: SizedBox.square(
+                dimension: 200,
+                child: Center(
+                  child: vicinity == firstCell
+                      ? KeepAliveCheckBox(key: checkBoxKey)
+                      : Text('R${vicinity.xIndex}:C${vicinity.yIndex}'),
+                ),
+              ),
             );
+          },
+        );
         addTearDown(builderDelegate.dispose);
 
         await tester.pumpWidget(
@@ -346,8 +344,7 @@ void main() {
           tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).wantKeepAlive,
           isFalse,
         );
-        var viewport =
-            getViewport(tester, checkBoxKey) as RenderSimpleBuilderTableViewport;
+        var viewport = getViewport(tester, checkBoxKey) as RenderSimpleBuilderTableViewport;
         TestExtendedParentData parentData = viewport.parentDataOf(
           viewport.testGetChildFor(firstCell)!,
         );
@@ -411,22 +408,21 @@ void main() {
         final verticalController = ScrollController();
         addTearDown(verticalController.dispose);
         final checkBoxKey = UniqueKey();
-        final builderDelegate =
-            TwoDimensionalChildBuilderDelegate(
-              maxXIndex: 5,
-              maxYIndex: 5,
-              addAutomaticKeepAlives: false, // No keeping alive this time
-              builder: (BuildContext context, ChildVicinity vicinity) {
-                return SizedBox.square(
-                  dimension: 200,
-                  child: Center(
-                    child: vicinity == firstCell
-                        ? KeepAliveCheckBox(key: checkBoxKey)
-                        : Text('R${vicinity.xIndex}:C${vicinity.yIndex}'),
-                  ),
-                );
-              },
+        final builderDelegate = TwoDimensionalChildBuilderDelegate(
+          maxXIndex: 5,
+          maxYIndex: 5,
+          addAutomaticKeepAlives: false, // No keeping alive this time
+          builder: (BuildContext context, ChildVicinity vicinity) {
+            return SizedBox.square(
+              dimension: 200,
+              child: Center(
+                child: vicinity == firstCell
+                    ? KeepAliveCheckBox(key: checkBoxKey)
+                    : Text('R${vicinity.xIndex}:C${vicinity.yIndex}'),
+              ),
             );
+          },
+        );
         addTearDown(builderDelegate.dispose);
 
         await tester.pumpWidget(
@@ -605,9 +601,7 @@ void main() {
         expect(delegate.shouldRebuild(delegate), isFalse);
 
         final newChildren = <List<Widget>>[];
-        final oldDelegate = TwoDimensionalChildListDelegate(
-          children: newChildren,
-        );
+        final oldDelegate = TwoDimensionalChildListDelegate(children: newChildren);
         addTearDown(oldDelegate.dispose);
 
         expect(delegate.shouldRebuild(oldDelegate), isTrue);

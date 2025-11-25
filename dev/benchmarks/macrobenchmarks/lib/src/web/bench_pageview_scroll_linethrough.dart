@@ -95,11 +95,7 @@ class _CustomPainter extends CustomPainter {
     _textPainter.textDirection = TextDirection.ltr;
     _textPainter.textWidthBasis = TextWidthBasis.longestLine;
     _textPainter.textScaler = TextScaler.noScaling;
-    const textStyle = TextStyle(
-      color: Colors.black87,
-      fontSize: 13,
-      fontFamily: 'Roboto',
-    );
+    const textStyle = TextStyle(color: Colors.black87, fontSize: 13, fontFamily: 'Roboto');
 
     _linePainter.isAntiAlias = true;
     for (var i = 0; i < 42; i++) {

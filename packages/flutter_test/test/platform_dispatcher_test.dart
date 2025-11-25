@@ -240,9 +240,7 @@ void main() {
         displays: <Display>[],
         views: <FlutterView>[_FakeFlutterView()],
       );
-      final testDispatcher = TestPlatformDispatcher(
-        platformDispatcher: backingDispatcher,
-      );
+      final testDispatcher = TestPlatformDispatcher(platformDispatcher: backingDispatcher);
 
       expect(testDispatcher.views.length, backingDispatcher.views.length);
     });

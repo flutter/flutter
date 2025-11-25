@@ -161,17 +161,16 @@ class __SenderAddressRowState extends State<_SenderAddressRow> {
           senderEmail = email;
         });
       },
-      itemBuilder:
-          (BuildContext context) => <PopupMenuItem<String>>[
-            PopupMenuItem<String>(
-              value: accounts[0],
-              child: Text(accounts[0], style: textTheme.bodyMedium),
-            ),
-            PopupMenuItem<String>(
-              value: accounts[1],
-              child: Text(accounts[1], style: textTheme.bodyMedium),
-            ),
-          ],
+      itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
+        PopupMenuItem<String>(
+          value: accounts[0],
+          child: Text(accounts[0], style: textTheme.bodyMedium),
+        ),
+        PopupMenuItem<String>(
+          value: accounts[1],
+          child: Text(accounts[1], style: textTheme.bodyMedium),
+        ),
+      ],
       child: Padding(
         padding: const EdgeInsets.only(left: 12, top: 16, right: 10, bottom: 10),
         child: Row(

@@ -54,9 +54,7 @@ void main(List<String> args) {
     return;
   }
 
-  final frames = <FrameData>[
-    for (final String filePath in argResults.rest) interpretSvg(filePath),
-  ];
+  final frames = <FrameData>[for (final String filePath in argResults.rest) interpretSvg(filePath)];
 
   final generatedSb = StringBuffer();
 

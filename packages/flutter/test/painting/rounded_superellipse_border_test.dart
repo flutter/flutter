@@ -25,9 +25,7 @@ void main() {
     );
     const side = BorderSide(width: 10.0, color: Color(0xff123456));
     const radius = BorderRadius.all(Radius.circular(16.0));
-    const directionalRadius = BorderRadiusDirectional.all(
-      Radius.circular(16.0),
-    );
+    const directionalRadius = BorderRadiusDirectional.all(Radius.circular(16.0));
 
     expect(
       const RoundedSuperellipseBorder().copyWith(side: side, borderRadius: radius),
@@ -89,9 +87,7 @@ void main() {
   });
 
   test('RoundedSuperellipseBorder and CircleBorder', () {
-    const r = RoundedSuperellipseBorder(
-      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-    );
+    const r = RoundedSuperellipseBorder(borderRadius: BorderRadius.all(Radius.circular(10.0)));
     const c = CircleBorder();
     const rect = Rect.fromLTWH(0.0, 0.0, 100.0, 20.0); // center is x=40..60 y=10
     final Matcher looksLikeR = isPathThat(
@@ -172,9 +168,7 @@ void main() {
   });
 
   test('RoundedSuperellipseBorder.dimensions and CircleBorder.dimensions', () {
-    const insideRoundedSuperellipseBorder = RoundedSuperellipseBorder(
-      side: BorderSide(width: 10),
-    );
+    const insideRoundedSuperellipseBorder = RoundedSuperellipseBorder(side: BorderSide(width: 10));
     expect(insideRoundedSuperellipseBorder.dimensions, const EdgeInsets.all(10));
 
     const centerRoundedSuperellipseBorder = RoundedSuperellipseBorder(
@@ -202,9 +196,7 @@ void main() {
   });
 
   test('RoundedSuperellipseBorder.lerp with different StrokeAlign', () {
-    const rInside = RoundedSuperellipseBorder(
-      side: BorderSide(width: 10.0),
-    );
+    const rInside = RoundedSuperellipseBorder(side: BorderSide(width: 10.0));
     const rOutside = RoundedSuperellipseBorder(
       side: BorderSide(width: 20.0, strokeAlign: BorderSide.strokeAlignOutside),
     );

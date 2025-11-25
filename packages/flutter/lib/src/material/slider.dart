@@ -740,8 +740,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       _SliderAdjustmentType.right => directionality == TextDirection.ltr,
     };
 
-    final slider =
-        _renderObjectKey.currentContext!.findRenderObject()! as _RenderSlider;
+    final slider = _renderObjectKey.currentContext!.findRenderObject()! as _RenderSlider;
     return shouldIncrease ? slider.increaseAction() : slider.decreaseAction();
   }
 

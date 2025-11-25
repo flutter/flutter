@@ -253,8 +253,7 @@ void main() {
   test('LeaderLayer.applyTransform can be called after retained rendering', () {
     void expectTransform(RenderObject leader) {
       final leaderLayer = leader.debugLayer! as LeaderLayer;
-      final expected = Matrix4.identity()
-        ..translate(leaderLayer.offset.dx, leaderLayer.offset.dy);
+      final expected = Matrix4.identity()..translate(leaderLayer.offset.dx, leaderLayer.offset.dy);
       final transformed = Matrix4.identity();
       leaderLayer.applyTransform(null, transformed);
       expect(transformed, expected);
@@ -373,15 +372,8 @@ void main() {
   });
 
   test('BackdropFilterLayer prints filter and blendMode in debug info', () {
-    final filter = ImageFilter.blur(
-      sigmaX: 1.0,
-      sigmaY: 1.0,
-      tileMode: TileMode.repeated,
-    );
-    final layer = BackdropFilterLayer(
-      filter: filter,
-      blendMode: BlendMode.clear,
-    );
+    final filter = ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0, tileMode: TileMode.repeated);
+    final layer = BackdropFilterLayer(filter: filter, blendMode: BlendMode.clear);
     final List<String> info = getDebugInfo(layer);
 
     expect(info, contains('filter: ImageFilter.blur(${1.0}, ${1.0}, repeated)'));
@@ -435,10 +427,7 @@ void main() {
   const unitRect = Rect.fromLTRB(0, 0, 1, 1);
 
   test('mutating PerformanceOverlayLayer fields triggers needsAddToScene', () {
-    final layer = PerformanceOverlayLayer(
-      overlayRect: Rect.zero,
-      optionsMask: 0,
-    );
+    final layer = PerformanceOverlayLayer(overlayRect: Rect.zero, optionsMask: 0);
     checkNeedsAddToScene(layer, () {
       layer.overlayRect = unitRect;
     });
@@ -472,9 +461,7 @@ void main() {
   });
 
   test('mutating ClipRSuperellipseLayer fields triggers needsAddToScene', () {
-    final layer = ClipRSuperellipseLayer(
-      clipRSuperellipse: RSuperellipse.zero,
-    );
+    final layer = ClipRSuperellipseLayer(clipRSuperellipse: RSuperellipse.zero);
     checkNeedsAddToScene(layer, () {
       layer.clipRSuperellipse = RSuperellipse.fromRectAndRadius(unitRect, Radius.zero);
     });
@@ -517,11 +504,7 @@ void main() {
   test('mutating ShaderMaskLayer fields triggers needsAddToScene', () {
     const Gradient gradient = RadialGradient(colors: <Color>[Color(0x00000000), Color(0x00000001)]);
     final Shader shader = gradient.createShader(Rect.zero);
-    final layer = ShaderMaskLayer(
-      shader: shader,
-      maskRect: Rect.zero,
-      blendMode: BlendMode.clear,
-    );
+    final layer = ShaderMaskLayer(shader: shader, maskRect: Rect.zero, blendMode: BlendMode.clear);
     checkNeedsAddToScene(layer, () {
       layer.maskRect = unitRect;
     });

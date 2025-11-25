@@ -149,11 +149,7 @@ void main() {
     const WidgetStateProperty<TextStyle?> hintStyle = MaterialStatePropertyAll<TextStyle>(
       hintStyleValue,
     );
-    const constraints = BoxConstraints(
-      minWidth: 250.0,
-      maxWidth: 300.0,
-      minHeight: 80.0,
-    );
+    const constraints = BoxConstraints(minWidth: 250.0, maxWidth: 300.0, minHeight: 80.0);
     const TextCapitalization textCapitalization = TextCapitalization.words;
 
     const searchBarTheme = SearchBarThemeData(

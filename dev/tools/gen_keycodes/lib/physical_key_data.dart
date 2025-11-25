@@ -41,9 +41,7 @@ class PhysicalKeyData {
   factory PhysicalKeyData.fromJson(Map<String, dynamic> contentMap) {
     final data = <String, PhysicalKeyEntry>{};
     for (final MapEntry<String, dynamic> jsonEntry in contentMap.entries) {
-      final entry = PhysicalKeyEntry.fromJsonMapEntry(
-        jsonEntry.value as Map<String, dynamic>,
-      );
+      final entry = PhysicalKeyEntry.fromJsonMapEntry(jsonEntry.value as Map<String, dynamic>);
       data[entry.name] = entry;
     }
     return PhysicalKeyData._(data);

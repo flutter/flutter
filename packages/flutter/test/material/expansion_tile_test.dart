@@ -110,8 +110,7 @@ void main() {
       expect(getHeight(topKey), getHeight(collapsedKey) - 2.0);
       expect(getHeight(topKey), getHeight(defaultKey) - 2.0);
 
-      var expandedContainerDecoration =
-          getDecoratedBox(expandedKey).decoration as ShapeDecoration;
+      var expandedContainerDecoration = getDecoratedBox(expandedKey).decoration as ShapeDecoration;
       expect(expandedContainerDecoration.color, Colors.red);
       expect((expandedContainerDecoration.shape as Border).top.color, dividerColor);
       expect((expandedContainerDecoration.shape as Border).bottom.color, dividerColor);

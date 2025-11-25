@@ -68,8 +68,7 @@ class _ProfiledBinaryMessenger implements BinaryMessenger {
 
   Future<ByteData?>? sendWithPostfix(String channel, String postfix, ByteData? message) async {
     _debugRecordUpStream(channelTypeName, '$channel$postfix', codecTypeName, message);
-    final timelineTask = TimelineTask()
-      ..start('Platform Channel send $channel$postfix');
+    final timelineTask = TimelineTask()..start('Platform Channel send $channel$postfix');
     final ByteData? result;
     try {
       result = await proxy.send(channel, message);

@@ -177,9 +177,7 @@ void main(List<String> args) {
 
   final ArgResults argResults = _handleArguments(args);
 
-  final iconsFile = File(
-    path.normalize(path.absolute(argResults[_iconsPathOption] as String)),
-  );
+  final iconsFile = File(path.normalize(path.absolute(argResults[_iconsPathOption] as String)));
   if (!iconsFile.existsSync()) {
     stderr.writeln('Error: Icons file not found: ${iconsFile.path}');
     exit(1);
@@ -232,9 +230,7 @@ void main(List<String> args) {
   } else {
     iconsFile.writeAsStringSync(newIconsContents);
 
-    final sortedNewTokenPairMap = SplayTreeMap<String, String>.of(
-      newTokenPairMap,
-    );
+    final sortedNewTokenPairMap = SplayTreeMap<String, String>.of(newTokenPairMap);
     _regenerateCodepointsFile(oldCodepointsFile, sortedNewTokenPairMap);
 
     sortedNewTokenPairMap.removeWhere(

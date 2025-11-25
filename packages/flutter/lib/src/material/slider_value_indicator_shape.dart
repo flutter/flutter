@@ -464,10 +464,7 @@ class _RectangularSliderValueIndicatorPathPainter {
       ..lineTo(_triangleHeight, -_triangleHeight)
       ..close();
     final fillPaint = Paint()..color = backgroundPaintColor;
-    final upperRRect = RRect.fromRectAndRadius(
-      upperRect,
-      const Radius.circular(_upperRectRadius),
-    );
+    final upperRRect = RRect.fromRectAndRadius(upperRect, const Radius.circular(_upperRectRadius));
     trianglePath.addRRect(upperRRect);
 
     canvas.save();

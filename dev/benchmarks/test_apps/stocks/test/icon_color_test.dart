@@ -67,10 +67,7 @@ void main() {
       0.0,
       (tester.view.physicalSize / tester.view.devicePixelRatio).height / 2.0,
     );
-    final right = Offset(
-      (tester.view.physicalSize / tester.view.devicePixelRatio).width,
-      left.dy,
-    );
+    final right = Offset((tester.view.physicalSize / tester.view.devicePixelRatio).width, left.dy);
     final TestGesture gesture = await tester.startGesture(left);
     await tester.pump();
     await gesture.moveTo(right);

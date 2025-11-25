@@ -2141,8 +2141,7 @@ class _HighlightModeManager {
     if (_listeners.isEmpty) {
       return;
     }
-    final localListeners =
-        List<ValueChanged<FocusHighlightMode>>.of(_listeners);
+    final localListeners = List<ValueChanged<FocusHighlightMode>>.of(_listeners);
     for (final listener in localListeners) {
       try {
         if (_listeners.contains(listener)) {

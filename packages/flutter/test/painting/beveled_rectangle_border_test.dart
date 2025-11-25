@@ -20,9 +20,7 @@ void main() {
     );
     const side = BorderSide(width: 10.0, color: Color(0xff123456));
     const radius = BorderRadius.all(Radius.circular(16.0));
-    const directionalRadius = BorderRadiusDirectional.all(
-      Radius.circular(16.0),
-    );
+    const directionalRadius = BorderRadiusDirectional.all(Radius.circular(16.0));
     expect(
       const BeveledRectangleBorder().copyWith(side: side, borderRadius: radius),
       const BeveledRectangleBorder(side: side, borderRadius: radius),
@@ -84,9 +82,7 @@ void main() {
       includes: const <Offset>[Offset(15.0, 25.0), Offset(20.0, 30.0)],
       excludes: const <Offset>[Offset(10.0, 20.0), Offset(30.0, 40.0)],
     );
-    const border = BeveledRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(5.0)),
-    );
+    const border = BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5.0)));
     expect(border.getOuterPath(rect), looksLikeRect);
     expect(border.getInnerPath(rect), looksLikeRect);
   });

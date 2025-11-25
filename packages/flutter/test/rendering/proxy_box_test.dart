@@ -598,8 +598,9 @@ void main() {
   });
 
   test('RenderFractionalTranslation updates its semantics after its translation value is set', () {
-    final box =
-        _TestSemanticsUpdateRenderFractionalTranslation(translation: const Offset(0.5, 0.5));
+    final box = _TestSemanticsUpdateRenderFractionalTranslation(
+      translation: const Offset(0.5, 0.5),
+    );
     layout(box, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
     expect(box.markNeedsSemanticsUpdateCallCount, 1);
     box.translation = const Offset(0.4, 0.4);
@@ -635,10 +636,7 @@ void main() {
     final leader = LeaderLayer(link: link);
     leader.attach(Object());
 
-    final follower = RenderFollowerLayer(
-      link: link,
-      child: RenderSizedBox(const Size(1.0, 1.0)),
-    );
+    final follower = RenderFollowerLayer(link: link, child: RenderSizedBox(const Size(1.0, 1.0)));
     layout(follower, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
     final hitTestResult = BoxHitTestResult();
     expect(follower.hitTest(hitTestResult, position: Offset.zero), isTrue);
@@ -718,9 +716,7 @@ void main() {
   test(
     'RenderObject with repaint boundary asserts when a composited layer is replaced during layer property update',
     () {
-      final childBox = ConditionalRepaintBoundary(
-        isRepaintBoundary: true,
-      );
+      final childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
       final renderBox = ConditionalRepaintBoundary(child: childBox);
 
       // Ignore old layer.
@@ -743,9 +739,7 @@ void main() {
   test(
     'RenderObject with repaint boundary asserts when a composited layer is replaced during painting',
     () {
-      final childBox = ConditionalRepaintBoundary(
-        isRepaintBoundary: true,
-      );
+      final childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
       final renderBox = ConditionalRepaintBoundary(child: childBox);
 
       // Ignore old layer.
@@ -767,9 +761,7 @@ void main() {
   test(
     'RenderObject with repaint boundary asserts when a composited layer tries to update its own offset',
     () {
-      final childBox = ConditionalRepaintBoundary(
-        isRepaintBoundary: true,
-      );
+      final childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
       final renderBox = ConditionalRepaintBoundary(child: childBox);
 
       // Ignore old layer.
@@ -792,9 +784,7 @@ void main() {
     'RenderObject markNeedsPaint while repaint boundary, and then updated to no longer be a repaint boundary with '
     'calling markNeedsCompositingBitsUpdate 1',
     () {
-      final childBox = ConditionalRepaintBoundary(
-        isRepaintBoundary: true,
-      );
+      final childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
       final renderBox = ConditionalRepaintBoundary(child: childBox);
       // Ignore old layer.
       childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
@@ -818,9 +808,7 @@ void main() {
     'RenderObject markNeedsPaint while repaint boundary, and then updated to no longer be a repaint boundary with '
     'calling markNeedsCompositingBitsUpdate 2',
     () {
-      final childBox = ConditionalRepaintBoundary(
-        isRepaintBoundary: true,
-      );
+      final childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
       final renderBox = ConditionalRepaintBoundary(child: childBox);
       // Ignore old layer.
       childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
@@ -844,9 +832,7 @@ void main() {
     'RenderObject markNeedsPaint while repaint boundary, and then updated to no longer be a repaint boundary with '
     'calling markNeedsCompositingBitsUpdate 3',
     () {
-      final childBox = ConditionalRepaintBoundary(
-        isRepaintBoundary: true,
-      );
+      final childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
       final renderBox = ConditionalRepaintBoundary(child: childBox);
       // Ignore old layer.
       childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
@@ -900,14 +886,8 @@ void main() {
     final RenderBox box = RenderConstrainedBox(
       additionalConstraints: const BoxConstraints.tightFor(width: 20),
     );
-    final opacityAnimation = AnimationController(
-      value: 1,
-      vsync: FakeTickerProvider(),
-    );
-    final opacity = RenderAnimatedOpacity(
-      opacity: opacityAnimation,
-      child: box,
-    );
+    final opacityAnimation = AnimationController(value: 1, vsync: FakeTickerProvider());
+    final opacity = RenderAnimatedOpacity(opacity: opacityAnimation, child: box);
 
     // Make it listen to the animation.
     opacity.attach(PipelineOwner());
@@ -923,14 +903,8 @@ void main() {
     final RenderSliver sliver = RenderSliverToBoxAdapter(
       child: RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20)),
     );
-    final opacityAnimation = AnimationController(
-      value: 1,
-      vsync: FakeTickerProvider(),
-    );
-    final opacity = RenderSliverAnimatedOpacity(
-      opacity: opacityAnimation,
-      sliver: sliver,
-    );
+    final opacityAnimation = AnimationController(value: 1, vsync: FakeTickerProvider());
+    final opacity = RenderSliverAnimatedOpacity(opacity: opacityAnimation, sliver: sliver);
 
     // Make it listen to the animation.
     opacity.attach(PipelineOwner());

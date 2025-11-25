@@ -658,9 +658,7 @@ void main() {
     testWidgets(
       'When selecting multiple lines over max lines',
       (WidgetTester tester) async {
-        final controller = TextEditingController(
-          text: 'abc\ndef\nghi\njkl\nmno\npqr',
-        );
+        final controller = TextEditingController(text: 'abc\ndef\nghi\njkl\nmno\npqr');
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           CupertinoApp(

@@ -2102,9 +2102,7 @@ class TextInput {
         (_currentConnection!._client as DeltaTextInputClient).updateEditingValueWithDeltas(deltas);
       case 'TextInputClient.performAction':
         if (args[1] as String == 'TextInputAction.commitContent') {
-          final content = KeyboardInsertedContent.fromJson(
-            args[2] as Map<String, dynamic>,
-          );
+          final content = KeyboardInsertedContent.fromJson(args[2] as Map<String, dynamic>);
           _currentConnection!._client.insertContent(content);
         } else {
           _currentConnection!._client.performAction(_toTextInputAction(args[1] as String));

@@ -361,8 +361,7 @@ void main() {
     expect(toolbarY, equals(anchorBelowY + _kToolbarContentDistance));
     expect(find.byType(CustomSingleChildLayout), findsOneWidget);
     final CustomSingleChildLayout layout = tester.widget(find.byType(CustomSingleChildLayout));
-    final delegate =
-        layout.delegate as TextSelectionToolbarLayoutDelegate;
+    final delegate = layout.delegate as TextSelectionToolbarLayoutDelegate;
     expect(delegate.anchorBelow.dy, anchorBelowY - paddingAbove);
 
     // Even when it barely doesn't fit.

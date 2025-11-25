@@ -236,8 +236,7 @@ class RenderSimpleBuilderTableViewport extends RenderTwoDimensionalViewport {
 
     final double viewportWidth = viewportDimension.width;
     final double viewportHeight = viewportDimension.height;
-    final builderDelegate =
-        delegate as TwoDimensionalChildBuilderDelegate;
+    final builderDelegate = delegate as TwoDimensionalChildBuilderDelegate;
 
     final int maxRowIndex;
     final int maxColumnIndex;
@@ -433,8 +432,7 @@ class RenderSimpleListTableViewport extends RenderTwoDimensionalViewport {
     // Every child is 200x200 square
     final double horizontalPixels = horizontalOffset.pixels;
     final double verticalPixels = verticalOffset.pixels;
-    final listDelegate =
-        delegate as TwoDimensionalChildListDelegate;
+    final listDelegate = delegate as TwoDimensionalChildListDelegate;
     final int rowCount;
     final int columnCount;
     rowCount = listDelegate.children.length;

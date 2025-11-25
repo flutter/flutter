@@ -187,8 +187,7 @@ void main() {
     );
 
     final SemanticsNode node = tester.getSemantics(find.byType(Directionality));
-    final localeStringAttribute =
-        node.attributedLabel.attributes[0] as LocaleStringAttribute;
+    final localeStringAttribute = node.attributedLabel.attributes[0] as LocaleStringAttribute;
 
     expect(node.label, 'Flutter 2050');
     expect(localeStringAttribute.locale.toLanguageTag(), 'de-DE');

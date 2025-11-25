@@ -23,26 +23,17 @@ Future<TestStepResult> methodCallJsonNotImplementedHandshake() async {
 }
 
 Future<TestStepResult> methodCallStandardSuccessHandshake(dynamic payload) async {
-  const channel = MethodChannel(
-    'std-method',
-    StandardMethodCodec(ExtendedStandardMessageCodec()),
-  );
+  const channel = MethodChannel('std-method', StandardMethodCodec(ExtendedStandardMessageCodec()));
   return _methodCallSuccessHandshake('Standard success($payload)', channel, payload);
 }
 
 Future<TestStepResult> methodCallStandardErrorHandshake(dynamic payload) async {
-  const channel = MethodChannel(
-    'std-method',
-    StandardMethodCodec(ExtendedStandardMessageCodec()),
-  );
+  const channel = MethodChannel('std-method', StandardMethodCodec(ExtendedStandardMessageCodec()));
   return _methodCallErrorHandshake('Standard error($payload)', channel, payload);
 }
 
 Future<TestStepResult> methodCallStandardNotImplementedHandshake() async {
-  const channel = MethodChannel(
-    'std-method',
-    StandardMethodCodec(ExtendedStandardMessageCodec()),
-  );
+  const channel = MethodChannel('std-method', StandardMethodCodec(ExtendedStandardMessageCodec()));
   return _methodCallNotImplementedHandshake('Standard notImplemented()', channel);
 }
 

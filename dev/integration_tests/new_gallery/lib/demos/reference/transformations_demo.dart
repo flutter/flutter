@@ -113,11 +113,11 @@ class _TransformationsDemoState extends State<TransformationsDemo> with TickerPr
 
             // Start the first render, start the scene centered in the viewport.
             if (_homeMatrix == null) {
-              _homeMatrix =
-                  Matrix4.identity()..translate(
-                    viewportSize.width / 2 - _board.size.width / 2,
-                    viewportSize.height / 2 - _board.size.height / 2,
-                  );
+              _homeMatrix = Matrix4.identity()
+                ..translate(
+                  viewportSize.width / 2 - _board.size.width / 2,
+                  viewportSize.height / 2 - _board.size.height / 2,
+                );
               _transformationController.value = _homeMatrix!;
             }
 
@@ -137,7 +137,10 @@ class _TransformationsDemoState extends State<TransformationsDemo> with TickerPr
                     minScale: 0.01,
                     onInteractionStart: _onScaleStart,
                     child: SizedBox.expand(
-                      child: CustomPaint(size: _board.size, painter: _BoardPainter(board: _board)),
+                      child: CustomPaint(
+                        size: _board.size,
+                        painter: _BoardPainter(board: _board),
+                      ),
                     ),
                   ),
                 ),

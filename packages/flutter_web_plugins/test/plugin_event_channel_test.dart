@@ -92,9 +92,7 @@ void main() {
       const listeningChannel = EventChannel('test3');
       const sendingChannel = PluginEventChannel<String>('test3');
 
-      final controller = StreamController<String>(
-        onListen: expectAsync0<void>(() {}),
-      );
+      final controller = StreamController<String>(onListen: expectAsync0<void>(() {}));
       sendingChannel.setController(controller);
 
       expect(listeningChannel.receiveBroadcastStream(), emitsInOrder(<String>['hello']));
@@ -107,9 +105,7 @@ void main() {
       const listeningChannel = EventChannel('test3');
       const sendingChannel = PluginEventChannel<String>('test3');
 
-      final controller = StreamController<String>(
-        onListen: expectAsync0<void>(() {}),
-      );
+      final controller = StreamController<String>(onListen: expectAsync0<void>(() {}));
       sendingChannel.setController(controller);
 
       expect(listeningChannel.receiveBroadcastStream(), emitsInOrder(<String>['hello']));
@@ -122,9 +118,7 @@ void main() {
       const listeningChannel = EventChannel('test4');
       const sendingChannel = PluginEventChannel<String>('test4');
 
-      final controller = StreamController<String>(
-        onCancel: expectAsync0<void>(() {}),
-      );
+      final controller = StreamController<String>(onCancel: expectAsync0<void>(() {}));
       sendingChannel.setController(controller);
 
       final Stream<dynamic> eventStream = listeningChannel.receiveBroadcastStream();
@@ -143,9 +137,7 @@ void main() {
       const listeningChannel = EventChannel('test4');
       const sendingChannel = PluginEventChannel<String>('test4');
 
-      final controller = StreamController<String>(
-        onCancel: expectAsync0<void>(() {}),
-      );
+      final controller = StreamController<String>(onCancel: expectAsync0<void>(() {}));
       sendingChannel.setController(controller);
 
       final Stream<dynamic> eventStream = listeningChannel.receiveBroadcastStream();

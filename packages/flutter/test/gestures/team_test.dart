@@ -12,8 +12,7 @@ void main() {
 
   testGesture('GestureArenaTeam rejection test', (GestureTester tester) {
     final team = GestureArenaTeam();
-    final horizontalDrag = HorizontalDragGestureRecognizer()
-      ..team = team;
+    final horizontalDrag = HorizontalDragGestureRecognizer()..team = team;
     final verticalDrag = VerticalDragGestureRecognizer()..team = team;
     final tap = TapGestureRecognizer();
 
@@ -65,8 +64,7 @@ void main() {
   testGesture('GestureArenaTeam captain', (GestureTester tester) {
     final team = GestureArenaTeam();
     final captain = PassiveGestureRecognizer()..team = team;
-    final horizontalDrag = HorizontalDragGestureRecognizer()
-      ..team = team;
+    final horizontalDrag = HorizontalDragGestureRecognizer()..team = team;
     final verticalDrag = VerticalDragGestureRecognizer()..team = team;
     final tap = TapGestureRecognizer();
 

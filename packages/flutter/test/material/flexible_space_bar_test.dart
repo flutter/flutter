@@ -28,10 +28,7 @@ void main() {
     Size size = tester.getSize(title);
     expect(center.dx, lessThan(400.0 - size.width / 2.0));
 
-    for (final platform in <TargetPlatform>[
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    ]) {
+    for (final platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
       // Clear the widget tree to avoid animating between platforms.
       await tester.pumpWidget(Container(key: UniqueKey()));
 

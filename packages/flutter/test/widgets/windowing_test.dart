@@ -246,9 +246,7 @@ void main() {
       });
 
       testWidgets('Can access WindowScope.of for tooltip windows', (WidgetTester tester) async {
-        final controller = _StubTooltipWindowController(
-          tester: tester,
-        );
+        final controller = _StubTooltipWindowController(tester: tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -306,9 +304,7 @@ void main() {
       testWidgets('Can access WindowScope.maybeOf for tooltip windows', (
         WidgetTester tester,
       ) async {
-        final controller = _StubTooltipWindowController(
-          tester: tester,
-        );
+        final controller = _StubTooltipWindowController(tester: tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -368,9 +364,7 @@ void main() {
       testWidgets('Can access WindowScope.contentSizeOf for tooltip windows', (
         WidgetTester tester,
       ) async {
-        final controller = _StubTooltipWindowController(
-          tester: tester,
-        );
+        final controller = _StubTooltipWindowController(tester: tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -430,9 +424,7 @@ void main() {
       testWidgets('Can access WindowScope.maybeContentSizeOf for tooltip windows', (
         WidgetTester tester,
       ) async {
-        final controller = _StubTooltipWindowController(
-          tester: tester,
-        );
+        final controller = _StubTooltipWindowController(tester: tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -490,9 +482,7 @@ void main() {
       testWidgets('Can access WindowScope.titleOf for tooltip windows', (
         WidgetTester tester,
       ) async {
-        final controller = _StubTooltipWindowController(
-          tester: tester,
-        );
+        final controller = _StubTooltipWindowController(tester: tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -552,9 +542,7 @@ void main() {
       testWidgets('Can access WindowScope.maybeTitleOf for tooltip windows', (
         WidgetTester tester,
       ) async {
-        final controller = _StubTooltipWindowController(
-          tester: tester,
-        );
+        final controller = _StubTooltipWindowController(tester: tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -614,9 +602,7 @@ void main() {
       testWidgets('Can access WindowScope.isActivatedOf for tooltip windows', (
         WidgetTester tester,
       ) async {
-        final controller = _StubTooltipWindowController(
-          tester: tester,
-        );
+        final controller = _StubTooltipWindowController(tester: tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -676,9 +662,7 @@ void main() {
       testWidgets('Can access WindowScope.maybeIsActivatedOf for tooltip windows', (
         WidgetTester tester,
       ) async {
-        final controller = _StubTooltipWindowController(
-          tester: tester,
-        );
+        final controller = _StubTooltipWindowController(tester: tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -738,9 +722,7 @@ void main() {
       testWidgets('Can access WindowScope.isMinimizedOf for tooltip windows', (
         WidgetTester tester,
       ) async {
-        final controller = _StubTooltipWindowController(
-          tester: tester,
-        );
+        final controller = _StubTooltipWindowController(tester: tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -800,9 +782,7 @@ void main() {
       testWidgets('Can access WindowScope.maybeIsMinimizedOf for tooltip windows', (
         WidgetTester tester,
       ) async {
-        final controller = _StubTooltipWindowController(
-          tester: tester,
-        );
+        final controller = _StubTooltipWindowController(tester: tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -862,9 +842,7 @@ void main() {
       testWidgets('Can access WindowScope.isMaximizedOf for tooltip windows', (
         WidgetTester tester,
       ) async {
-        final controller = _StubTooltipWindowController(
-          tester: tester,
-        );
+        final controller = _StubTooltipWindowController(tester: tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -924,9 +902,7 @@ void main() {
       testWidgets('Can access WindowScope.maybeIsMaximizedOf for tooltip windows', (
         WidgetTester tester,
       ) async {
-        final controller = _StubTooltipWindowController(
-          tester: tester,
-        );
+        final controller = _StubTooltipWindowController(tester: tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -986,9 +962,7 @@ void main() {
       testWidgets('Can access WindowScope.isFullscreenOf for tooltip windows', (
         WidgetTester tester,
       ) async {
-        final controller = _StubTooltipWindowController(
-          tester: tester,
-        );
+        final controller = _StubTooltipWindowController(tester: tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -1048,9 +1022,7 @@ void main() {
       testWidgets('Can access WindowScope.maybeIsFullscreenOf for tooltip windows', (
         WidgetTester tester,
       ) async {
-        final controller = _StubTooltipWindowController(
-          tester: tester,
-        );
+        final controller = _StubTooltipWindowController(tester: tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,

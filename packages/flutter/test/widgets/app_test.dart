@@ -396,9 +396,7 @@ void main() {
       );
       addTearDown(delegate.dispose);
       delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
-      final routerConfig = RouterConfig<RouteInformation>(
-        routerDelegate: delegate,
-      );
+      final routerConfig = RouterConfig<RouteInformation>(routerDelegate: delegate);
       await expectLater(() async {
         await tester.pumpWidget(
           WidgetsApp.router(

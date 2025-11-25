@@ -1664,9 +1664,7 @@ void main() {
   testWidgets('SliverAppBar positioning of leading and trailing widgets with bottom padding', (
     WidgetTester tester,
   ) async {
-    const topPadding100 = MediaQueryData(
-      padding: EdgeInsets.only(top: 100.0, bottom: 50.0),
-    );
+    const topPadding100 = MediaQueryData(padding: EdgeInsets.only(top: 100.0, bottom: 50.0));
     final Key leadingKey = UniqueKey();
     final Key titleKey = UniqueKey();
     final Key trailingKey = UniqueKey();

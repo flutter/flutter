@@ -144,8 +144,7 @@ void main() {
   testWidgets(
     'can customize the menu items',
     (WidgetTester tester) async {
-      final itemsReceived =
-          <List<IOSSystemContextMenuItemData>>[];
+      final itemsReceived = <List<IOSSystemContextMenuItemData>>[];
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.platform,
         (MethodCall methodCall) async {
@@ -234,8 +233,7 @@ void main() {
   testWidgets(
     "passing empty items builds the widget but doesn't show the system context menu",
     (WidgetTester tester) async {
-      final itemsReceived =
-          <List<IOSSystemContextMenuItemData>>[];
+      final itemsReceived = <List<IOSSystemContextMenuItemData>>[];
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.platform,
         (MethodCall methodCall) async {
@@ -313,8 +311,7 @@ void main() {
   testWidgets(
     'items receive a default title',
     (WidgetTester tester) async {
-      final itemsReceived =
-          <List<IOSSystemContextMenuItemData>>[];
+      final itemsReceived = <List<IOSSystemContextMenuItemData>>[];
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.platform,
         (MethodCall methodCall) async {
@@ -410,8 +407,7 @@ void main() {
         (MethodCall methodCall) async {
           if (methodCall.method == 'ContextMenu.showSystemContextMenu') {
             final arguments = methodCall.arguments as Map<String, dynamic>;
-            final untypedTargetRect =
-                arguments['targetRect'] as Map<String, dynamic>;
+            final untypedTargetRect = arguments['targetRect'] as Map<String, dynamic>;
             final Map<String, double> lastTargetRect = untypedTargetRect.map((
               String key,
               dynamic value,
@@ -901,8 +897,7 @@ void main() {
     (WidgetTester tester) async {
       var customAction1Called = false;
       var customAction2Called = false;
-      final itemsReceived =
-          <List<IOSSystemContextMenuItemData>>[];
+      final itemsReceived = <List<IOSSystemContextMenuItemData>>[];
 
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.platform,

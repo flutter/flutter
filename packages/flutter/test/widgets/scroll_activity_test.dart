@@ -87,8 +87,7 @@ void main() {
         ),
       ),
     );
-    final position =
-        controller.position as ScrollPositionWithSingleContext;
+    final position = controller.position as ScrollPositionWithSingleContext;
     final double end = position.maxScrollExtent;
 
     position.beginActivity(
@@ -319,8 +318,7 @@ void main() {
         child: ListView(controller: controller, children: children(10)),
       ),
     );
-    final position =
-        controller.position as ScrollPositionWithSingleContext;
+    final position = controller.position as ScrollPositionWithSingleContext;
 
     const g = 9.8;
     position.beginActivity(

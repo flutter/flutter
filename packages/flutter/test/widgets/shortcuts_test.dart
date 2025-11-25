@@ -492,10 +492,7 @@ void main() {
         ),
       );
 
-      const singleActivator = SingleActivator(
-        LogicalKeyboardKey.keyA,
-        control: true,
-      );
+      const singleActivator = SingleActivator(LogicalKeyboardKey.keyA, control: true);
 
       await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
@@ -713,10 +710,7 @@ void main() {
 
   group(Shortcuts, () {
     testWidgets('Default constructed Shortcuts has empty shortcuts', (WidgetTester tester) async {
-      const shortcuts = Shortcuts(
-        shortcuts: <LogicalKeySet, Intent>{},
-        child: SizedBox(),
-      );
+      const shortcuts = Shortcuts(shortcuts: <LogicalKeySet, Intent>{}, child: SizedBox());
       await tester.pumpWidget(shortcuts);
       expect(shortcuts.shortcuts, isNotNull);
       expect(shortcuts.shortcuts, isEmpty);
@@ -1521,10 +1515,7 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
       expect(ShortcutActivator.isActivatedBy(characterActivator, events.last), isFalse);
 
-      const noRepeatCharacterActivator = CharacterActivator(
-        'a',
-        includeRepeats: false,
-      );
+      const noRepeatCharacterActivator = CharacterActivator('a', includeRepeats: false);
 
       await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
       expect(ShortcutActivator.isActivatedBy(noRepeatCharacterActivator, events.last), isTrue);
@@ -2026,8 +2017,7 @@ void main() {
     });
 
     testWidgets('Updating shortcuts triggers dependency rebuild', (WidgetTester tester) async {
-      final shortcutsChanged =
-          <Map<ShortcutActivator, Intent>>[];
+      final shortcutsChanged = <Map<ShortcutActivator, Intent>>[];
       void dependenciesUpdated(Map<ShortcutActivator, Intent> shortcuts) {
         shortcutsChanged.add(shortcuts);
       }

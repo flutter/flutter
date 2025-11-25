@@ -19,10 +19,7 @@ void main() {
   const leadingIconToInputPadding = 4.0;
 
   for (final TestMenu value in TestMenu.values) {
-    final entry = DropdownMenuEntry<TestMenu>(
-      value: value,
-      label: value.label,
-    );
+    final entry = DropdownMenuEntry<TestMenu>(value: value, label: value.label);
     menuChildren.add(entry);
   }
 
@@ -447,8 +444,7 @@ void main() {
         foregroundColor: WidgetStateProperty.all(luckyColor),
       );
 
-      final partiallyStyledMenuEntries =
-          <DropdownMenuEntry<TestMenu>>[];
+      final partiallyStyledMenuEntries = <DropdownMenuEntry<TestMenu>>[];
       for (final entryWithIcons in menuChildrenWithIcons) {
         partiallyStyledMenuEntries.add(
           DropdownMenuEntry<TestMenu>(
@@ -659,10 +655,7 @@ void main() {
     final shortMenuItems = <DropdownMenuEntry<ShortMenu>>[];
 
     for (final ShortMenu value in ShortMenu.values) {
-      final entry = DropdownMenuEntry<ShortMenu>(
-        value: value,
-        label: value.label,
-      );
+      final entry = DropdownMenuEntry<ShortMenu>(value: value, label: value.label);
       shortMenuItems.add(entry);
     }
 
@@ -697,10 +690,7 @@ void main() {
     final shortMenuItems = <DropdownMenuEntry<ShortMenu>>[];
 
     for (final ShortMenu value in ShortMenu.values) {
-      final entry = DropdownMenuEntry<ShortMenu>(
-        value: value,
-        label: value.label,
-      );
+      final entry = DropdownMenuEntry<ShortMenu>(value: value, label: value.label);
       shortMenuItems.add(entry);
     }
 
@@ -784,10 +774,7 @@ void main() {
     const parentWidth = 500.0;
     final shortMenuItems = <DropdownMenuEntry<ShortMenu>>[];
     for (final ShortMenu value in ShortMenu.values) {
-      final entry = DropdownMenuEntry<ShortMenu>(
-        value: value,
-        label: value.label,
-      );
+      final entry = DropdownMenuEntry<ShortMenu>(value: value, label: value.label);
       shortMenuItems.add(entry);
     }
     Widget buildMenuAnchor({EdgeInsets? expandedInsets}) {
@@ -855,10 +842,7 @@ void main() {
     const parentWidth = 500.0;
     final shortMenuItems = <DropdownMenuEntry<ShortMenu>>[];
     for (final ShortMenu value in ShortMenu.values) {
-      final entry = DropdownMenuEntry<ShortMenu>(
-        value: value,
-        label: value.label,
-      );
+      final entry = DropdownMenuEntry<ShortMenu>(value: value, label: value.label);
       shortMenuItems.add(entry);
     }
     Widget buildMenuAnchor({EdgeInsetsGeometry? expandedInsets}) {
@@ -5004,9 +4988,7 @@ void main() {
   });
 
   // The variants to test in the focus handling test.
-  final focusVariants = ValueVariant<TextInputAction>(
-    TextInputAction.values.toSet(),
-  );
+  final focusVariants = ValueVariant<TextInputAction>(TextInputAction.values.toSet());
 
   // Regression test for https://github.com/flutter/flutter/issues/177009.
   testWidgets('Handles focus correctly when TextInputAction is invoked', (

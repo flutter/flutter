@@ -1558,8 +1558,7 @@ void main() {
           const SingleActivator(LogicalKeyboardKey.keyC, meta: true),
         );
 
-        final clipboardData =
-            mockClipboard.clipboardData as Map<String, dynamic>;
+        final clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
         expect(clipboardData['text'], 'em 0It');
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{
@@ -1627,8 +1626,7 @@ void main() {
           const SingleActivator(LogicalKeyboardKey.keyC, control: true),
         );
 
-        final clipboardData =
-            mockClipboard.clipboardData as Map<String, dynamic>;
+        final clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
         expect(clipboardData['text'], 'em 0It');
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{

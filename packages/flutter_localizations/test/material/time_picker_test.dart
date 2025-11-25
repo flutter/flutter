@@ -623,20 +623,7 @@ void main() {
     ); // 24 hour, outer ring
   });
 
-  const labels12To11 = <String>[
-    '12',
-    '1',
-    '2',
-    '3',
-    '4',
-    '5',
-    '6',
-    '7',
-    '8',
-    '9',
-    '10',
-    '11',
-  ];
+  const labels12To11 = <String>['12', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
   const labels00To22TwoDigit = <String>[
     '00',
     '02',

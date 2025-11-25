@@ -67,8 +67,7 @@ void main() {
         painter: TestCustomPainter(log: log),
       ),
     );
-    final renderCustom =
-        target.currentContext!.findRenderObject()! as RenderCustomPaint;
+    final renderCustom = target.currentContext!.findRenderObject()! as RenderCustomPaint;
     final paintingContext = MockPaintingContext();
     final MockCanvas canvas = paintingContext.canvas;
 
@@ -175,8 +174,7 @@ void main() {
         painter: TestCustomPainter(log: log),
       ),
     );
-    var renderCustom =
-        target.currentContext!.findRenderObject()! as RenderCustomPaint;
+    var renderCustom = target.currentContext!.findRenderObject()! as RenderCustomPaint;
     expect(renderCustom.isComplex, true);
     expect(renderCustom.willChange, false);
 

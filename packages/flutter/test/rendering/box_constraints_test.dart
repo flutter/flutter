@@ -112,34 +112,15 @@ void main() {
   });
 
   test('BoxConstraints lerp with unbounded height', () {
-    const constraints1 = BoxConstraints(
-      minWidth: 10.0,
-      maxWidth: 20.0,
-      minHeight: double.infinity,
-    );
-    const constraints2 = BoxConstraints(
-      minWidth: 20.0,
-      maxWidth: 30.0,
-      minHeight: double.infinity,
-    );
-    const constraints3 = BoxConstraints(
-      minWidth: 15.0,
-      maxWidth: 25.0,
-      minHeight: double.infinity,
-    );
+    const constraints1 = BoxConstraints(minWidth: 10.0, maxWidth: 20.0, minHeight: double.infinity);
+    const constraints2 = BoxConstraints(minWidth: 20.0, maxWidth: 30.0, minHeight: double.infinity);
+    const constraints3 = BoxConstraints(minWidth: 15.0, maxWidth: 25.0, minHeight: double.infinity);
     expect(BoxConstraints.lerp(constraints1, constraints2, 0.5), constraints3);
   });
 
   test('BoxConstraints lerp from bounded to unbounded', () {
-    const constraints1 = BoxConstraints(
-      minWidth: double.infinity,
-      minHeight: double.infinity,
-    );
-    const constraints2 = BoxConstraints(
-      minWidth: 20.0,
-      maxWidth: 30.0,
-      minHeight: double.infinity,
-    );
+    const constraints1 = BoxConstraints(minWidth: double.infinity, minHeight: double.infinity);
+    const constraints2 = BoxConstraints(minWidth: 20.0, maxWidth: 30.0, minHeight: double.infinity);
     const constraints3 = BoxConstraints(
       minWidth: double.infinity,
       minHeight: 20.0,
@@ -165,9 +146,7 @@ void main() {
   });
 
   test('BoxConstraints.fromViewConstraints', () {
-    final unconstrained = BoxConstraints.fromViewConstraints(
-      const ViewConstraints(),
-    );
+    final unconstrained = BoxConstraints.fromViewConstraints(const ViewConstraints());
     expect(unconstrained, const BoxConstraints());
 
     final constraints = BoxConstraints.fromViewConstraints(

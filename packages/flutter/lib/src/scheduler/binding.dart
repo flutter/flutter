@@ -661,9 +661,7 @@ mixin SchedulerBinding on BindingBase {
         // even if the information collector is called after
         // the problem has been resolved.
         final int count = transientCallbackCount;
-        final callbacks = Map<int, _FrameCallbackEntry>.of(
-          _transientCallbacks,
-        );
+        final callbacks = Map<int, _FrameCallbackEntry>.of(_transientCallbacks);
         FlutterError.reportError(
           FlutterErrorDetails(
             exception: reason,
@@ -1349,9 +1347,7 @@ mixin SchedulerBinding on BindingBase {
 
       // POST-FRAME CALLBACKS
       _schedulerPhase = SchedulerPhase.postFrameCallbacks;
-      final localPostFrameCallbacks = List<FrameCallback>.of(
-        _postFrameCallbacks,
-      );
+      final localPostFrameCallbacks = List<FrameCallback>.of(_postFrameCallbacks);
       _postFrameCallbacks.clear();
       if (!kReleaseMode) {
         FlutterTimeline.startSync('POST_FRAME');

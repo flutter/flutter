@@ -542,12 +542,8 @@ class WebTestsSuite {
   Future<void> _runWebUnitTests({required bool useWasm, required int webShardCount}) async {
     final subshards = <String, ShardRunner>{};
 
-    final flutterPackageDirectory = Directory(
-      path.join(flutterRoot, 'packages', 'flutter'),
-    );
-    final flutterPackageTestDirectory = Directory(
-      path.join(flutterPackageDirectory.path, 'test'),
-    );
+    final flutterPackageDirectory = Directory(path.join(flutterRoot, 'packages', 'flutter'));
+    final flutterPackageTestDirectory = Directory(path.join(flutterPackageDirectory.path, 'test'));
 
     final List<String> allTests =
         flutterPackageTestDirectory
@@ -683,8 +679,7 @@ class WebTestsSuite {
     final HttpClientRequest request = await client.getUrl(chromeDriverUrl);
     final HttpClientResponse response = await request.close();
     final String responseString = await response.transform(utf8.decoder).join();
-    final webDriverStatus =
-        json.decode(responseString) as Map<String, dynamic>;
+    final webDriverStatus = json.decode(responseString) as Map<String, dynamic>;
     client.close();
     final webDriverReady = (webDriverStatus['value'] as Map<String, dynamic>)['ready'] as bool;
     if (!webDriverReady) {

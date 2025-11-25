@@ -130,8 +130,7 @@ Future<void> uploadToSkiaPerf(
     commitTimeSinceEpoch = DateTime.now().millisecondsSinceEpoch;
   }
   taskName = taskName ?? 'default';
-  final benchmarkTagsMap =
-      jsonDecode(benchmarkTags ?? '{}') as Map<String, dynamic>;
+  final benchmarkTagsMap = jsonDecode(benchmarkTags ?? '{}') as Map<String, dynamic>;
   final resultFile = File(resultsPath);
   var resultsJson = <String, dynamic>{};
   resultsJson = json.decode(await resultFile.readAsString()) as Map<String, dynamic>;

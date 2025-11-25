@@ -82,10 +82,7 @@ $otherComments  static const PhysicalKeyboardKey ${entry.constantName} = Physica
 
   /// Gets the generated definitions of LogicalKeyboardKeys.
   String get _logicalDefinitions {
-    final lines = OutputLines<int>(
-      'Logical debug names',
-      behavior: DeduplicateBehavior.kSkip,
-    );
+    final lines = OutputLines<int>('Logical debug names', behavior: DeduplicateBehavior.kSkip);
     void printKey(int flutterId, String constantName, String commentName, {String? otherComments}) {
       final String firstComment = _wrapString(
         'Represents the logical "$commentName" key on the keyboard.',
@@ -148,10 +145,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   }
 
   String get _logicalKeyLabels {
-    final lines = OutputLines<int>(
-      'Logical key labels',
-      behavior: DeduplicateBehavior.kSkip,
-    );
+    final lines = OutputLines<int>('Logical key labels', behavior: DeduplicateBehavior.kSkip);
     for (final LogicalKeyEntry entry in logicalData.entries) {
       lines.add(entry.value, '''
     ${toHex(entry.value, digits: 11)}: '${entry.commentName}',''');
@@ -170,10 +164,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
 
   /// This generates the map of Flutter key codes to logical keys.
   String get _predefinedKeyCodeMap {
-    final lines = OutputLines<int>(
-      'Logical key map',
-      behavior: DeduplicateBehavior.kSkip,
-    );
+    final lines = OutputLines<int>('Logical key map', behavior: DeduplicateBehavior.kSkip);
     for (final LogicalKeyEntry entry in logicalData.entries) {
       lines.add(entry.value, '    ${toHex(entry.value, digits: 11)}: ${entry.constantName},');
     }
@@ -181,10 +172,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   }
 
   String get _maskConstantVariables {
-    final lines = OutputLines<int>(
-      'Mask constants',
-      behavior: DeduplicateBehavior.kKeep,
-    );
+    final lines = OutputLines<int>('Mask constants', behavior: DeduplicateBehavior.kKeep);
     for (final MaskConstant constant in _maskConstants) {
       lines.add(constant.value, '''
 ${_wrapString(constant.description)}  ///
