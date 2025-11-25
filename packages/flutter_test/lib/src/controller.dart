@@ -781,6 +781,14 @@ abstract class WidgetController {
     ).view;
   }
 
+  FlutterView? _maybeViewOf(finders.FinderBase<Element> finder) {
+    try {
+      return _viewOf(finder);
+    } on StateError {
+      return null;
+    }
+  }
+
   /// Checks if `finder` exists in the tree.
   bool any(finders.FinderBase<Element> finder) {
     TestAsyncUtils.guardSync();
@@ -1041,7 +1049,7 @@ abstract class WidgetController {
     bool warnIfMissed = true,
     PointerDeviceKind kind = PointerDeviceKind.touch,
   }) {
-    final FlutterView view = _viewOf(finder);
+    final FlutterView? view = _maybeViewOf(finder);
     return tapAt(
       getCenter(finder, warnIfMissed: warnIfMissed, callee: 'tap'),
       pointer: pointer,
@@ -1142,7 +1150,7 @@ abstract class WidgetController {
     bool warnIfMissed = true,
     PointerDeviceKind kind = PointerDeviceKind.touch,
   }) {
-    final FlutterView view = _viewOf(finder);
+    final FlutterView? view = _maybeViewOf(finder);
     return TestAsyncUtils.guard<TestGesture>(() {
       return startGesture(
         getCenter(finder, warnIfMissed: warnIfMissed, callee: 'press'),
@@ -1173,7 +1181,7 @@ abstract class WidgetController {
     bool warnIfMissed = true,
     PointerDeviceKind kind = PointerDeviceKind.touch,
   }) {
-    final FlutterView view = _viewOf(finder);
+    final FlutterView? view = _maybeViewOf(finder);
     return longPressAt(
       getCenter(finder, warnIfMissed: warnIfMissed, callee: 'longPress'),
       pointer: pointer,
@@ -1263,7 +1271,7 @@ abstract class WidgetController {
     bool warnIfMissed = true,
     PointerDeviceKind deviceKind = PointerDeviceKind.touch,
   }) {
-    final FlutterView view = _viewOf(finder);
+    final FlutterView? view = _maybeViewOf(finder);
     return flingFrom(
       getCenter(finder, warnIfMissed: warnIfMissed, callee: 'fling'),
       offset,
@@ -1374,7 +1382,7 @@ abstract class WidgetController {
     Duration initialOffsetDelay = const Duration(seconds: 1),
     bool warnIfMissed = true,
   }) {
-    final FlutterView view = _viewOf(finder);
+    final FlutterView? view = _maybeViewOf(finder);
     return trackpadFlingFrom(
       getCenter(finder, warnIfMissed: warnIfMissed, callee: 'fling'),
       offset,
@@ -1570,7 +1578,7 @@ abstract class WidgetController {
     bool warnIfMissed = true,
     PointerDeviceKind kind = PointerDeviceKind.touch,
   }) {
-    final FlutterView view = _viewOf(finder);
+    final FlutterView? view = _maybeViewOf(finder);
     return dragFrom(
       getCenter(finder, warnIfMissed: warnIfMissed, callee: 'drag'),
       offset,
