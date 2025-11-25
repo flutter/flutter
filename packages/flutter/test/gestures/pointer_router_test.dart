@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  
+
   test('Should route pointers', () {
     bool callbackRan = false;
     void callback(PointerEvent event) {
