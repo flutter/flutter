@@ -172,9 +172,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       for (int i = 0; i < images; i++)
         AnimationController(duration: const Duration(milliseconds: 3600), vsync: this)..repeat(),
     ];
-    final completers = <Completer<bool>>[
-      for (int i = 0; i < images; i++) Completer<bool>(),
-    ];
+    final completers = <Completer<bool>>[for (int i = 0; i < images; i++) Completer<bool>()];
     final List<Future<bool>> futures = completers
         .map((Completer<bool> completer) => completer.future)
         .toList();
