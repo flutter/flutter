@@ -162,7 +162,7 @@ void testWidgets(
   );
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final tester = WidgetTester._(binding);
-  for (final dynamic value in variant.values) {
+  for (final Object? value in variant.values) {
     final String variationDescription = variant.describeValue(value);
     // IDEs may make assumptions about the format of this suffix in order to
     // support running tests directly from the editor (where they may have

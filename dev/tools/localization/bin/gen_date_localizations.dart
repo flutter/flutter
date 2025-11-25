@@ -187,7 +187,7 @@ String _jsonToObject(dynamic json) {
     case Iterable<Object?>():
       final Type type = json.first.runtimeType;
       final buffer = StringBuffer('const <$type>[');
-      for (final dynamic value in json) {
+      for (final Object? value in json) {
         buffer.writeln('${_jsonToMap(value)},');
       }
       buffer.write(']');
@@ -212,7 +212,7 @@ String _jsonToMap(dynamic json) {
       return generateEncodedString(currentLocale, json);
     case Iterable<dynamic>():
       final buffer = StringBuffer('<String>[');
-      for (final dynamic value in json) {
+      for (final Object? value in json) {
         buffer.writeln('${_jsonToMap(value)},');
       }
       buffer.write(']');
