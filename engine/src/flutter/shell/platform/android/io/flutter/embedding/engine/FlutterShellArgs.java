@@ -46,11 +46,24 @@ public final class FlutterShellArgs {
     /** Whether this flag is allowed to be set in release mode. */
     public final boolean allowedInRelease;
 
-    private String packageName = "io.flutter.embedding.android.";
+    private String flagPrefix = "io.flutter.embedding.android.";
 
-    public Flag(String commandLineArgument, String metaDataName, boolean allowedInRelease) {
+    /** Creates a new Flutter shell flag that is not allowed in release mode. */
+    private Flag(String commandLineArgument, String metaDataName) {
+      this(commandLineArgument, metaDataName, false);
+    }
+
+    /**
+     * Creates a new Flutter shell flag.
+     *
+     * <p>{@param allowedInRelease} determines whether or not this flag is allowed in release mode.
+     * Whenever possible, it is recommended to NOT allow this flag in release mode. Many flags
+     * are designed for debugging purposes and if enabled in production, could expose sensitive
+     * application data or make the app vulnerable to malicious actors.
+     */
+    private Flag(String commandLineArgument, String metaDataName, boolean allowedInRelease) {
       this.commandLineArgument = commandLineArgument;
-      this.metadataKey = packageName + metaDataName;
+      this.metadataKey = flagPrefix + metaDataName;
       this.allowedInRelease = allowedInRelease;
     }
 
@@ -122,22 +135,22 @@ public final class FlutterShellArgs {
   // Manifest flags NOT allowed in release mode:
 
   /** Use the Ahem test font for font resolution. */
-  public static final Flag USE_TEST_FONTS = new Flag("--use-test-fonts", "UseTestFonts", false);
+  public static final Flag USE_TEST_FONTS = new Flag("--use-test-fonts", "UseTestFonts");
 
   /** Sets the port for the Dart VM Service. */
-  public static final Flag VM_SERVICE_PORT = new Flag("--vm-service-port=", "VMServicePort", false);
+  public static final Flag VM_SERVICE_PORT = new Flag("--vm-service-port=", "VMServicePort");
 
   /** Enables Vulkan validation layers if available. */
   public static final Flag ENABLE_VULKAN_VALIDATION =
-      new Flag("--enable-vulkan-validation", "EnableVulkanValidation", false);
+      new Flag("--enable-vulkan-validation", "EnableVulkanValidation");
 
   /** Enables GPU tracing for OpenGL. */
   public static final Flag ENABLE_OPENGL_GPU_TRACING =
-      new Flag("--enable-opengl-gpu-tracing", "EnableOpenGLGPUTracing", false);
+      new Flag("--enable-opengl-gpu-tracing", "EnableOpenGLGPUTracing");
 
   /** Enables GPU tracing for Vulkan. */
   public static final Flag ENABLE_VULKAN_GPU_TRACING =
-      new Flag("--enable-vulkan-gpu-tracing", "EnableVulkanGPUTracing", false);
+      new Flag("--enable-vulkan-gpu-tracing", "EnableVulkanGPUTracing");
 
   /**
    * Set whether leave or clean up the VM after the last shell shuts down. It can be set from app's
@@ -150,56 +163,56 @@ public final class FlutterShellArgs {
    * <p>TODO(eggfly): Should it be set to false by default?
    * https://github.com/flutter/flutter/issues/96843
    */
-  public static final Flag LEAK_VM = new Flag("--leak-vm=", "LeakVM", false);
+  public static final Flag LEAK_VM = new Flag("--leak-vm=", "LeakVM");
 
   /** Measures startup time and switches to an endless trace buffer. */
-  public static final Flag TRACE_STARTUP = new Flag("--trace-startup", "TraceStartup", false);
+  public static final Flag TRACE_STARTUP = new Flag("--trace-startup", "TraceStartup");
 
   /** Pauses Dart code execution at launch until a debugger is attached. */
-  public static final Flag START_PAUSED = new Flag("--start-paused", "StartPaused", false);
+  public static final Flag START_PAUSED = new Flag("--start-paused", "StartPaused");
 
   /** Disables authentication codes for VM service communication. */
   public static final Flag DISABLE_SERVICE_AUTH_CODES =
-      new Flag("--disable-service-auth-codes", "DisableServiceAuthCodes", false);
+      new Flag("--disable-service-auth-codes", "DisableServiceAuthCodes");
 
   /** Enables an endless trace buffer for timeline events. */
   public static final Flag ENDLESS_TRACE_BUFFER =
-      new Flag("--endless-trace-buffer", "EndlessTraceBuffer", false);
+      new Flag("--endless-trace-buffer", "EndlessTraceBuffer");
 
   /** Enables Dart profiling for use with DevTools. */
   public static final Flag ENABLE_DART_PROFILING =
-      new Flag("--enable-dart-profiling", "EnableDartProfiling", false);
+      new Flag("--enable-dart-profiling", "EnableDartProfiling");
 
   /** Discards new profiler samples once the buffer is full. */
-  public static final Flag PROFILE_STARTUP = new Flag("--profile-startup", "ProfileStartup", false);
+  public static final Flag PROFILE_STARTUP = new Flag("--profile-startup", "ProfileStartup");
 
   /** Enables tracing of Skia GPU calls. */
-  public static final Flag TRACE_SKIA = new Flag("--trace-skia", "TraceSkia", false);
+  public static final Flag TRACE_SKIA = new Flag("--trace-skia", "TraceSkia");
 
   /** Only traces specified Skia event categories. */
   public static final Flag TRACE_SKIA_ALLOWLIST =
-      new Flag("--trace-skia-allowlist=", "TraceSkiaAllowList", false);
+      new Flag("--trace-skia-allowlist=", "TraceSkiaAllowList");
 
   /** Traces to the system tracer on supported platforms. */
-  public static final Flag TRACE_SYSTRACE = new Flag("--trace-systrace", "TraceSystrace", false);
+  public static final Flag TRACE_SYSTRACE = new Flag("--trace-systrace", "TraceSystrace");
 
   /** Writes timeline trace to a file in Perfetto format. */
-  public static final Flag TRACE_TO_FILE = new Flag("--trace-to-file=", "TraceToFile", false);
+  public static final Flag TRACE_TO_FILE = new Flag("--trace-to-file=", "TraceToFile");
 
   /** Collects and logs information about microtasks. */
   public static final Flag PROFILE_MICROTASKS =
-      new Flag("--profile-microtasks", "ProfileMicrotasks", false);
+      new Flag("--profile-microtasks", "ProfileMicrotasks");
 
   /** Dumps SKP files that trigger shader compilations. */
   public static final Flag DUMP_SKP_ON_SHADER_COMPILATION =
-      new Flag("--dump-skp-on-shader-compilation", "DumpSkpOnShaderCompilation", false);
+      new Flag("--dump-skp-on-shader-compilation", "DumpSkpOnShaderCompilation");
 
   /** Removes all persistent cache files for debugging. */
   public static final Flag PURGE_PERSISTENT_CACHE =
-      new Flag("--purge-persistent-cache", "PurgePersistentCache", false);
+      new Flag("--purge-persistent-cache", "PurgePersistentCache");
 
   /** Enables logging at all severity levels. */
-  public static final Flag VERBOSE_LOGGING = new Flag("--verbose-logging", "VerboseLogging", false);
+  public static final Flag VERBOSE_LOGGING = new Flag("--verbose-logging", "VerboseLogging");
 
   /**
    * Passes additional flags to the Dart VM.
@@ -207,8 +220,10 @@ public final class FlutterShellArgs {
    * <p>All flags provided with this argument are subject to filtering based on a list of allowed
    * flags in shell/common/switches.cc. If any flag provided is not allowed, the process will
    * immediately terminate.
+   * 
+   * <p>Flags should be separated by comma, e.g. "--dart-flags=--flag-1,--flag-2=2".
    */
-  public static final Flag DART_FLAGS = new Flag("--dart-flags=", "DartFlags", false);
+  public static final Flag DART_FLAGS = new Flag("--dart-flags=", "DartFlags");
 
   // Deprecated flags.
 
