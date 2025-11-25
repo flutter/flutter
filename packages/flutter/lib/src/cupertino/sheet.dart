@@ -1393,14 +1393,35 @@ class _CupertinoDraggableScrollableSheetState<T>
   }
 }
 
+/// A widget for manually adding a drag area to trigger an ancester [CupertinoSheetRoute]'s
+/// drag to dismiss transition.
+///
+/// To be used when the [CupertinoSheetRoute] does not have drag to dismiss enabled
+/// for the whole sheet body, either through [CupertinoSheetRoute.enableDrag] being
+/// set to false, or when [CupertinoSheetRoute.scrollable] is used.
 class CupertinoSheetDragArea<T> extends StatelessWidget {
-  CupertinoSheetDragArea({this.enableDrag = true, required this.route, required this.child});
+  /// Wraps its children with a [VerticalDragGestureRecognizer] which will trigger
+  /// a parent [CupertinoSheetRoute]'s drag to dismiss transition.
+  const CupertinoSheetDragArea({
+    super.key,
+    this.enableDrag = true,
+    required this.route,
+    required this.child,
+  });
 
+  /// Determines whether the content can be dragged.
+  ///
+  /// If `true`, dragging is enabled; otherwise, it remains fixed.
   final bool enableDrag;
 
+  /// The child widget to be wrapped.
   final Widget child;
 
-  final ModalRoute<T> route;
+  /// The parent [CupertinoSheetRoute].
+  ///
+  /// This is the route that will have its transition respond to the drag gesture
+  /// on this widget.
+  final CupertinoSheetRoute<T> route;
 
   @override
   Widget build(BuildContext context) {
