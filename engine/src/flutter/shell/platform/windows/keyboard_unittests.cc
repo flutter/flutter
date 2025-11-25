@@ -1027,6 +1027,40 @@ TEST_F(KeyboardTest, RestartClearsKeyboardState) {
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 0);
 }
 
+// Press Enter, lose focus before the up event arrives, and press Enter again
+// once focus returns. The second down event should not be dropped.
+TEST_F(KeyboardTest, FreshKeyDownAfterMissedUpIsDelivered) {
+  KeyboardTester tester{GetContext()};
+  tester.Responding(true);
+
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyDownInfo{VK_RETURN, kScanCodeEnter, kNotExtended, kWasUp}.Build(
+          kWmResultZero)});
+
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyDownInfo{VK_RETURN, kScanCodeEnter, kNotExtended, kWasUp}.Build(
+          kWmResultZero)});
+
+  ASSERT_EQ(tester.key_calls.size(), 3u);
+  EXPECT_CALL_IS_EVENT(tester.key_calls[0], kFlutterKeyEventTypeDown,
+                       kPhysicalEnter, kLogicalEnter, "", kNotSynthesized);
+  EXPECT_CALL_IS_EVENT(tester.key_calls[1], kFlutterKeyEventTypeUp,
+                       kPhysicalEnter, kLogicalEnter, "", kSynthesized);
+  EXPECT_CALL_IS_EVENT(tester.key_calls[2], kFlutterKeyEventTypeDown,
+                       kPhysicalEnter, kLogicalEnter, "", kNotSynthesized);
+  tester.clear_key_calls();
+
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyUpInfo{VK_RETURN, kScanCodeEnter, kNotExtended}.Build(
+          kWmResultZero)});
+
+  ASSERT_EQ(tester.key_calls.size(), 1u);
+  EXPECT_CALL_IS_EVENT(tester.key_calls[0], kFlutterKeyEventTypeUp,
+                       kPhysicalEnter, kLogicalEnter, "", kNotSynthesized);
+  tester.clear_key_calls();
+  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 0u);
+}
+
 // Press Shift-A. This is special because Win32 gives 'A' as character for the
 // KeyA press.
 TEST_F(KeyboardTest, ShiftLeftKeyA) {
