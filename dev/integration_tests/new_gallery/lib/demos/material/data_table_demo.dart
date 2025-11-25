@@ -38,7 +38,7 @@ class _RestorableDessertSelections extends RestorableProperty<Set<int>> {
 
   @override
   Set<int> fromPrimitives(Object? data) {
-    final List<dynamic> selectedItemIndices = data! as List<dynamic>;
+    final selectedItemIndices = data! as List<dynamic>;
     _dessertSelections = <int>{...selectedItemIndices.map<int>((dynamic id) => id as int)};
     return _dessertSelections;
   }
@@ -475,7 +475,7 @@ class _DessertDataSource extends DataTableSource {
 
   void updateSelectedDesserts(_RestorableDessertSelections selectedRows) {
     _selectedCount = 0;
-    for (int i = 0; i < _desserts.length; i += 1) {
+    for (var i = 0; i < _desserts.length; i += 1) {
       final _Dessert dessert = _desserts[i];
       if (selectedRows.isSelected(i)) {
         dessert.selected = true;
@@ -489,7 +489,7 @@ class _DessertDataSource extends DataTableSource {
 
   @override
   DataRow? getRow(int index) {
-    final NumberFormat format = NumberFormat.decimalPercentPattern(
+    final format = NumberFormat.decimalPercentPattern(
       locale: GalleryOptions.of(context).locale.toString(),
       decimalDigits: 0,
     );

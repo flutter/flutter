@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('attachRootWidget will schedule a frame', () async {
-    final WidgetsFlutterBindingWithTestBinaryMessenger binding =
+    final binding =
         WidgetsFlutterBindingWithTestBinaryMessenger();
     expect(SchedulerBinding.instance.hasScheduledFrame, isFalse);
     // Framework starts with detached statue. Sends resumed signal to enable frame.

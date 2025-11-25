@@ -187,8 +187,8 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> {
   }
 
   Animation<double> _getDesktopGapAnimation(double gapHeight) {
-    final double collapsedGapHeight = gapHeight;
-    const double expandedGapHeight = 0.0;
+    final collapsedGapHeight = gapHeight;
+    const expandedGapHeight = 0.0;
 
     if (_controller.status == AnimationStatus.forward) {
       // Opening animation
@@ -286,7 +286,7 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> {
   // Returns the correct width of the ExpandingBottomSheet based on the number of
   // products and the text scaling options in the cart in the mobile layout.
   double _mobileWidthFor(int numProducts, BuildContext context) {
-    final int cartThumbnailGap = numProducts > 0 ? 16 : 0;
+    final cartThumbnailGap = numProducts > 0 ? 16 : 0;
     final double thumbnailsWidth =
         min(numProducts, _maxThumbnailCount) * _paddedThumbnailHeight(context);
     final num overflowNumberWidth =
@@ -309,7 +309,7 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> {
   // Returns the correct height of the ExpandingBottomSheet based on the number of
   // products and the text scaling options in the cart in the desktop layout.
   double _desktopHeightFor(int numProducts, BuildContext context) {
-    final int cartThumbnailGap = numProducts > 0 ? 8 : 0;
+    final cartThumbnailGap = numProducts > 0 ? 8 : 0;
     final double thumbnailsHeight =
         min(numProducts, _maxThumbnailCount) * _paddedThumbnailHeight(context);
     final num overflowNumberHeight =
@@ -487,7 +487,7 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> {
     if (isDesktop) {
       return child;
     } else {
-      final int textDirectionScalar = Directionality.of(context) == TextDirection.ltr ? 1 : -1;
+      final textDirectionScalar = Directionality.of(context) == TextDirection.ltr ? 1 : -1;
 
       _slideAnimation = _getEmphasizedEasingAnimation(
         begin: Offset(1.0 * textDirectionScalar, 0.0),
@@ -582,15 +582,15 @@ class _ProductThumbnailRowState extends State<ProductThumbnailRow> {
   void _updateLists() {
     // Update _internalList based on the model
     _internalList = ScopedModel.of<AppStateModel>(context).productsInCart.keys.toList();
-    final Set<int> internalSet = Set<int>.from(_internalList);
-    final Set<int> listSet = Set<int>.from(_list.list);
+    final internalSet = Set<int>.from(_internalList);
+    final listSet = Set<int>.from(_list.list);
 
     final Set<int> difference = internalSet.difference(listSet);
     if (difference.isEmpty) {
       return;
     }
 
-    for (final int product in difference) {
+    for (final product in difference) {
       if (_internalList.length < _list.length) {
         _list.remove(product);
       } else if (_internalList.length > _list.length) {
@@ -599,7 +599,7 @@ class _ProductThumbnailRowState extends State<ProductThumbnailRow> {
     }
 
     while (_internalList.length != _list.length) {
-      int index = 0;
+      var index = 0;
       // Check bounds and that the list elements are the same
       while (_internalList.isNotEmpty &&
           _list.length > 0 &&
@@ -647,7 +647,7 @@ class ExtraProductsNumber extends StatelessWidget {
     // List created to be able to access products by index instead of ID.
     // Order is guaranteed because productsInCart returns a LinkedHashMap.
     final List<int> products = productMap.keys.toList();
-    int overflow = 0;
+    var overflow = 0;
     final int numProducts = products.length;
     for (int i = _maxThumbnailCount; i < numProducts; i++) {
       overflow += productMap[products[i]]!;
@@ -662,7 +662,7 @@ class ExtraProductsNumber extends StatelessWidget {
 
     final int numOverflowProducts = _calculateOverflow(model);
     // Maximum of 99 so padding doesn't get messy.
-    final int displayedOverflowProducts = numOverflowProducts <= 99 ? numOverflowProducts : 99;
+    final displayedOverflowProducts = numOverflowProducts <= 99 ? numOverflowProducts : 99;
     return Text(
       '+$displayedOverflowProducts',
       style: Theme.of(context).primaryTextTheme.labelLarge,

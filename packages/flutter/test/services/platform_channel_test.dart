@@ -10,7 +10,7 @@ void main() {
 
   group('BasicMessageChannel', () {
     const MessageCodec<String?> string = StringCodec();
-    const BasicMessageChannel<String?> channel = BasicMessageChannel<String?>('ch', string);
+    const channel = BasicMessageChannel<String?>('ch', string);
     test('can send string message and get reply', () async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch',
@@ -39,8 +39,8 @@ void main() {
     const MessageCodec<dynamic> jsonMessage = JSONMessageCodec();
     const MethodCodec jsonMethod = JSONMethodCodec();
 
-    const MethodChannel channel = MethodChannel('ch7', jsonMethod);
-    const OptionalMethodChannel optionalMethodChannel = OptionalMethodChannel('ch8', jsonMethod);
+    const channel = MethodChannel('ch7', jsonMethod);
+    const optionalMethodChannel = OptionalMethodChannel('ch8', jsonMethod);
     tearDown(() {
       channel.setMethodCallHandler(null);
       optionalMethodChannel.setMethodCallHandler(null);
@@ -50,7 +50,7 @@ void main() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch7',
         (ByteData? message) async {
-          final Map<dynamic, dynamic> methodCall =
+          final methodCall =
               jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
           if (methodCall['method'] == 'sayHello') {
             return jsonMessage.encodeMessage(<dynamic>['${methodCall['args']} world']);
@@ -67,7 +67,7 @@ void main() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch7',
         (ByteData? message) async {
-          final Map<dynamic, dynamic> methodCall =
+          final methodCall =
               jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
           if (methodCall['method'] == 'sayHello') {
             return jsonMessage.encodeMessage(<dynamic>[
@@ -89,7 +89,7 @@ void main() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch7',
         (ByteData? message) async {
-          final Map<dynamic, dynamic> methodCall =
+          final methodCall =
               jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
           if (methodCall['method'] == 'sayHello') {
             return jsonMessage.encodeMessage(<dynamic>[null]);
@@ -105,7 +105,7 @@ void main() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch7',
         (ByteData? message) async {
-          final Map<dynamic, dynamic> methodCall =
+          final methodCall =
               jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
           if (methodCall['method'] == 'sayHello') {
             return jsonMessage.encodeMessage(<dynamic>[
@@ -129,7 +129,7 @@ void main() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch7',
         (ByteData? message) async {
-          final Map<dynamic, dynamic> methodCall =
+          final methodCall =
               jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
           if (methodCall['method'] == 'sayHello') {
             return jsonMessage.encodeMessage(<dynamic>[null]);
@@ -306,7 +306,7 @@ void main() {
     test('can check the mock handler', () async {
       Future<dynamic> handler(MethodCall call) => Future<dynamic>.value();
 
-      const MethodChannel channel = MethodChannel('test_handler');
+      const channel = MethodChannel('test_handler');
       expect(
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.checkMockMessageHandler(
           channel.name,
@@ -337,10 +337,10 @@ void main() {
 
   group('EventChannel', () {
     const MethodCodec jsonMethod = JSONMethodCodec();
-    const EventChannel channel = EventChannel('ch', jsonMethod);
+    const channel = EventChannel('ch', jsonMethod);
 
     test('can receive event stream', () async {
-      bool canceled = false;
+      var canceled = false;
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockStreamHandler(
         channel,
         MockStreamHandler.inline(
@@ -369,14 +369,14 @@ void main() {
           },
         ),
       );
-      final List<Object?> events = <Object?>[];
-      final List<Object?> errors = <Object?>[];
+      final events = <Object?>[];
+      final errors = <Object?>[];
       channel.receiveBroadcastStream('hello').listen(events.add, onError: errors.add);
       await Future<void>.delayed(Duration.zero);
       expect(events, isEmpty);
       expect(errors, hasLength(1));
       expect(errors[0], isA<PlatformException>());
-      final PlatformException? error = errors[0] as PlatformException?;
+      final error = errors[0] as PlatformException?;
       expect(error?.code, '404');
       expect(error?.message, 'Not Found.');
       expect(error?.details, 'hello');

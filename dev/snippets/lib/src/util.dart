@@ -25,8 +25,8 @@ class SnippetException implements Exception {
   @override
   String toString() {
     if (file != null || line != null) {
-      final String fileStr = file == null ? '' : '$file:';
-      final String lineStr = line == null ? '' : '$line:';
+      final fileStr = file == null ? '' : '$file:';
+      final lineStr = line == null ? '' : '$line:';
       return '$runtimeType: $fileStr$lineStr: $message';
     } else {
       return '$runtimeType: $message';
@@ -112,7 +112,7 @@ class FlutterInformation {
       );
     }
 
-    final Map<String, dynamic> flutterVersion =
+    final flutterVersion =
         json.decode(flutterVersionJson) as Map<String, dynamic>;
     if (flutterVersion['flutterRoot'] == null ||
         flutterVersion['frameworkVersion'] == null ||
@@ -122,7 +122,7 @@ class FlutterInformation {
       );
     }
 
-    final Map<String, dynamic> info = <String, dynamic>{};
+    final info = <String, dynamic>{};
     info['flutterRoot'] = filesystem.directory(flutterVersion['flutterRoot']! as String);
     info['frameworkVersion'] = Version.parse(flutterVersion['frameworkVersion'] as String);
 
@@ -158,7 +158,7 @@ String interpolateTemplate(
     }
     // We don't wrap some sections, because otherwise they generate invalid files.
     final String result = <String>[...contents].join('\n');
-    final RegExp wrappingNewlines = RegExp(r'^\n*(.*)\n*$', dotAll: true);
+    final wrappingNewlines = RegExp(r'^\n*(.*)\n*$', dotAll: true);
     return result.replaceAllMapped(wrappingNewlines, (Match match) => match.group(1)!);
   }
 

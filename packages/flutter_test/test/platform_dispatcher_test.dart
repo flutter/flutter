@@ -179,9 +179,9 @@ void main() {
     'TestPlatformDispatcher sends fake locales when WidgetsBindingObserver notifiers are called',
     (WidgetTester tester) async {
       final List<Locale> defaultLocales = WidgetsBinding.instance.platformDispatcher.locales;
-      final TestObserver observer = TestObserver();
+      final observer = TestObserver();
       retrieveTestBinding(tester).addObserver(observer);
-      final List<Locale> expectedValue = <Locale>[const Locale('fake_language_code')];
+      final expectedValue = <Locale>[const Locale('fake_language_code')];
       retrieveTestBinding(tester).platformDispatcher.localesTestValue = expectedValue;
       expect(observer.locales, equals(expectedValue));
       retrieveTestBinding(tester).platformDispatcher.localesTestValue = defaultLocales;
@@ -240,7 +240,7 @@ void main() {
         displays: <Display>[],
         views: <FlutterView>[_FakeFlutterView()],
       );
-      final TestPlatformDispatcher testDispatcher = TestPlatformDispatcher(
+      final testDispatcher = TestPlatformDispatcher(
         platformDispatcher: backingDispatcher,
       );
 
@@ -249,8 +249,8 @@ void main() {
 
     group('creates TestFlutterViews', () {
       testWidgets('that defaults to the correct devicePixelRatio', (WidgetTester tester) async {
-        const double expectedDpr = 2.5;
-        final TestPlatformDispatcher testDispatcher = TestPlatformDispatcher(
+        const expectedDpr = 2.5;
+        final testDispatcher = TestPlatformDispatcher(
           platformDispatcher: _FakePlatformDispatcher(
             displays: <Display>[],
             views: <FlutterView>[_FakeFlutterView(devicePixelRatio: expectedDpr)],
@@ -261,9 +261,9 @@ void main() {
       });
 
       testWidgets('with working devicePixelRatio setter', (WidgetTester tester) async {
-        const double expectedDpr = 2.5;
+        const expectedDpr = 2.5;
         const double defaultDpr = 4;
-        final TestPlatformDispatcher testDispatcher = TestPlatformDispatcher(
+        final testDispatcher = TestPlatformDispatcher(
           platformDispatcher: _FakePlatformDispatcher(
             displays: <Display>[],
             views: <FlutterView>[_FakeFlutterView(devicePixelRatio: defaultDpr)],
@@ -276,9 +276,9 @@ void main() {
       });
 
       testWidgets('with working resetDevicePixelRatio', (WidgetTester tester) async {
-        const double changedDpr = 2.5;
+        const changedDpr = 2.5;
         const double defaultDpr = 4;
-        final TestPlatformDispatcher testDispatcher = TestPlatformDispatcher(
+        final testDispatcher = TestPlatformDispatcher(
           platformDispatcher: _FakePlatformDispatcher(
             displays: <Display>[],
             views: <FlutterView>[_FakeFlutterView(devicePixelRatio: defaultDpr)],

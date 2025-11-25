@@ -72,7 +72,7 @@ class _SettingsPageState extends State<SettingsPage> {
   /// native name can't be determined, it is omitted. If the locale can't be
   /// determined, the locale code is used.
   DisplayOption _getLocaleDisplayOption(BuildContext context, Locale? locale) {
-    final String localeCode = locale.toString();
+    final localeCode = locale.toString();
     final String? localeName = LocaleNames.of(context)!.nameOf(localeCode);
     if (localeName != null) {
       final String? localeNativeName =
@@ -99,7 +99,7 @@ class _SettingsPageState extends State<SettingsPage> {
   /// Create a sorted — by native name – map of supported locales to their
   /// intended display string, with a system option as the first element.
   Map<Locale, DisplayOption> _getLocaleOptions() {
-    final Map<Locale, DisplayOption> localeOptions =
+    final localeOptions =
         Map<Locale, DisplayOption>.of(<Locale, DisplayOption>{
           systemLocaleOption: DisplayOption(
             GalleryLocalizations.of(context)!.settingsSystemDefault +
@@ -108,7 +108,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     : ''),
           ),
         });
-    final List<Locale> supportedLocales = List<Locale>.from(GalleryLocalizations.supportedLocales);
+    final supportedLocales = List<Locale>.from(GalleryLocalizations.supportedLocales);
     supportedLocales.removeWhere((Locale locale) => locale == deviceLocale);
 
     final List<MapEntry<Locale, DisplayOption>> displayLocales =
@@ -132,7 +132,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final bool isDesktop = isDisplayDesktop(context);
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
-    final List<Widget> settingsListItems = <Widget>[
+    final settingsListItems = <Widget>[
       SettingsListItem<double?>(
         title: localizations.settingsTextScaling,
         selectedOption: options.textScaleFactor(context, useSentinel: true),
@@ -303,7 +303,7 @@ class SettingsAttribution extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isDesktop = isDisplayDesktop(context);
-    final double verticalPadding = isDesktop ? 0.0 : 28.0;
+    final verticalPadding = isDesktop ? 0.0 : 28.0;
     return MergeSemantics(
       child: Padding(
         padding: EdgeInsetsDirectional.only(
@@ -371,8 +371,8 @@ class _AnimateSettingsListItems extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const double dividingPadding = 4.0;
-    final Tween<double> dividerTween = Tween<double>(begin: 0, end: dividingPadding);
+    const dividingPadding = 4.0;
+    final dividerTween = Tween<double>(begin: 0, end: dividingPadding);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16.0),

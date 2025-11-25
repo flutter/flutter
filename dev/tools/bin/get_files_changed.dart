@@ -26,7 +26,7 @@ void main(List<String> args) async {
   // Get a list of files changed between this commit and the base SHA.
   final List<String> filesChanged;
   {
-    final List<String> args = <String>[
+    final args = <String>[
       'diff',
       '--name-only',
       '--full-index',
@@ -41,7 +41,7 @@ void main(List<String> args) async {
       return;
     }
 
-    final String stdout = git.stdout as String;
+    final stdout = git.stdout as String;
     filesChanged = const LineSplitter().convert(stdout);
   }
 

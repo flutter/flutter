@@ -422,7 +422,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
   }
 
   DataRow _getProgressIndicatorRowFor(int index) {
-    bool haveProgressIndicator = false;
+    var haveProgressIndicator = false;
     final List<DataCell> cells = widget.columns.map<DataCell>((DataColumn column) {
       if (!column.numeric) {
         haveProgressIndicator = true;
@@ -438,10 +438,10 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
   }
 
   List<DataRow> _getRows(int firstRowIndex, int rowsPerPage) {
-    final List<DataRow> result = <DataRow>[];
+    final result = <DataRow>[];
     final int nextPageFirstRowIndex = firstRowIndex + rowsPerPage;
-    bool haveProgressIndicator = false;
-    for (int index = firstRowIndex; index < nextPageFirstRowIndex; index += 1) {
+    var haveProgressIndicator = false;
+    for (var index = firstRowIndex; index < nextPageFirstRowIndex; index += 1) {
       DataRow? row;
       if (index < _rowCount || _rowCountApproximate) {
         row = _rows.putIfAbsent(index, () => widget.source.getRow(index));
@@ -491,7 +491,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     final ThemeData themeData = Theme.of(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     // HEADER
-    final List<Widget> headerWidgets = <Widget>[];
+    final headerWidgets = <Widget>[];
     if (_selectedRowCount == 0 && widget.header != null) {
       headerWidgets.add(Expanded(child: widget.header!));
     } else if (widget.header != null) {
@@ -513,7 +513,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
 
     // FOOTER
     final TextStyle? footerTextStyle = themeData.textTheme.bodySmall;
-    final List<Widget> footerWidgets = <Widget>[];
+    final footerWidgets = <Widget>[];
     if (widget.onRowsPerPageChanged != null) {
       final List<Widget> availableRowsPerPage = widget.availableRowsPerPage
           .where((int value) => value <= _rowCount || value == widget.rowsPerPage)

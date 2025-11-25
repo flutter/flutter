@@ -8,10 +8,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('gets local coordinates', (WidgetTester tester) async {
-    int tapCount = 0;
-    int tapCancelCount = 0;
-    final List<TapDownDetails> downDetails = <TapDownDetails>[];
-    final List<TapUpDetails> upDetails = <TapUpDetails>[];
+    var tapCount = 0;
+    var tapCancelCount = 0;
+    final downDetails = <TapDownDetails>[];
+    final upDetails = <TapUpDetails>[];
 
     final Key redContainer = UniqueKey();
     await tester.pumpWidget(
@@ -46,10 +46,10 @@ void main() {
   testWidgets('kTouchSlop is evaluated in the global coordinate space when scaled up', (
     WidgetTester tester,
   ) async {
-    int tapCount = 0;
-    int tapCancelCount = 0;
-    final List<TapDownDetails> downDetails = <TapDownDetails>[];
-    final List<TapUpDetails> upDetails = <TapUpDetails>[];
+    var tapCount = 0;
+    var tapCancelCount = 0;
+    final downDetails = <TapDownDetails>[];
+    final upDetails = <TapUpDetails>[];
 
     final Key redContainer = UniqueKey();
     await tester.pumpWidget(
@@ -106,10 +106,10 @@ void main() {
   testWidgets('kTouchSlop is evaluated in the global coordinate space when scaled down', (
     WidgetTester tester,
   ) async {
-    int tapCount = 0;
-    int tapCancelCount = 0;
-    final List<TapDownDetails> downDetails = <TapDownDetails>[];
-    final List<TapUpDetails> upDetails = <TapUpDetails>[];
+    var tapCount = 0;
+    var tapCancelCount = 0;
+    final downDetails = <TapDownDetails>[];
+    final upDetails = <TapUpDetails>[];
 
     final Key redContainer = UniqueKey();
     await tester.pumpWidget(

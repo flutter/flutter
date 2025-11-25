@@ -24,7 +24,7 @@ void main() {
       equals(<String>['Hello,\nworld']),
     );
 
-    for (int i = 0; i < 14; ++i) {
+    for (var i = 0; i < 14; ++i) {
       expect(
         captureOutput(() {
           debugPrintSynchronously('Hello,   world', wrapWidth: i);

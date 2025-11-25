@@ -58,7 +58,7 @@ class CupertinoThumbPainter {
   void paint(Canvas canvas, Rect rect) {
     // Paint RRects instead of RSuperellipses here, because practically
     // [CupertinoSlider] only draws circular thumbs.
-    final RRect thumbShape = RRect.fromRectAndRadius(
+    final thumbShape = RRect.fromRectAndRadius(
       rect,
       Radius.circular(rect.shortestSide / 2.0),
     );

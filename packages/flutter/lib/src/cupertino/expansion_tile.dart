@@ -226,9 +226,9 @@ class _CupertinoExpansionTileState extends State<CupertinoExpansionTile> {
           controller: _fadeController,
           overlayChildBuilder: (BuildContext context) {
             final BuildContext headerContext = _headerKey.currentContext!;
-            final RenderBox overlay =
+            final overlay =
                 Overlay.of(headerContext).context.findRenderObject()! as RenderBox;
-            final RenderBox headerBox = headerContext.findRenderObject()! as RenderBox;
+            final headerBox = headerContext.findRenderObject()! as RenderBox;
             final Offset headerOffset = headerBox.localToGlobal(Offset.zero, ancestor: overlay);
             return Positioned(
               top: headerOffset.dy + _kHeaderHeight,

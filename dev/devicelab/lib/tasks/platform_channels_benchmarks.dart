@@ -22,7 +22,7 @@ TaskFunction runTask(adb.DeviceOperatingSystem operatingSystem) {
       path.join(utils.flutterDirectory.path, 'dev/benchmarks/platform_channels_benchmarks'),
     );
     final Process flutterProcess = await utils.inDirectory(appDir, () async {
-      final List<String> createArgs = <String>[
+      final createArgs = <String>[
         '--platforms',
         'ios,android',
         '--no-overwrite',
@@ -32,7 +32,7 @@ TaskFunction runTask(adb.DeviceOperatingSystem operatingSystem) {
       print('\nExecuting: flutter create $createArgs $appDir');
       await utils.flutter('create', options: createArgs);
 
-      final List<String> options = <String>[
+      final options = <String>[
         '-v',
         // --release doesn't work on iOS due to code signing issues
         '--profile',

@@ -50,7 +50,7 @@ class _AdaptiveNavState extends State<AdaptiveNav> {
     final bool isDesktop = isDisplayDesktop(context);
     final bool isTablet = isDisplaySmallDesktop(context);
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
-    final List<_Destination> navigationDestinations = <_Destination>[
+    final navigationDestinations = <_Destination>[
       _Destination(
         type: MailboxPageType.inbox,
         textLabel: localizations.replyInboxLabel,
@@ -83,7 +83,7 @@ class _AdaptiveNavState extends State<AdaptiveNav> {
       ),
     ];
 
-    final Map<String, String> folders = <String, String>{
+    final folders = <String, String>{
       'Receipts': _folderIconAssetLocation,
       'Pine Elementary': _folderIconAssetLocation,
       'Taxes': _folderIconAssetLocation,
@@ -484,7 +484,7 @@ class _MobileNavState extends State<_MobileNav> with TickerProviderStateMixin {
   }
 
   double get _bottomDrawerHeight {
-    final RenderBox renderBox = _bottomDrawerKey.currentContext!.findRenderObject()! as RenderBox;
+    final renderBox = _bottomDrawerKey.currentContext!.findRenderObject()! as RenderBox;
     return renderBox.size.height;
   }
 
@@ -839,9 +839,9 @@ class _BottomDrawerDestinations extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final List<Widget> destinationButtons = <Widget>[];
+    final destinationButtons = <Widget>[];
 
-    for (int index = 0; index < destinations.length; index += 1) {
+    for (var index = 0; index < destinations.length; index += 1) {
       final _Destination destination = destinations[index];
       destinationButtons.add(
         InkWell(
@@ -1025,19 +1025,19 @@ class _ReplyFabState extends State<_ReplyFab> with SingleTickerProviderStateMixi
   Widget build(BuildContext context) {
     final bool isDesktop = isDisplayDesktop(context);
     final ThemeData theme = Theme.of(context);
-    const CircleBorder circleFabBorder = CircleBorder();
+    const circleFabBorder = CircleBorder();
 
     return Selector<EmailStore, bool>(
       selector: (BuildContext context, EmailStore emailStore) => emailStore.onMailView,
       builder: (BuildContext context, bool onMailView, Widget? child) {
-        final _FadeThroughTransitionSwitcher fabSwitcher = _FadeThroughTransitionSwitcher(
+        final fabSwitcher = _FadeThroughTransitionSwitcher(
           fillColor: Colors.transparent,
           child:
               onMailView
                   ? Icon(Icons.reply_all, key: fabKey, color: Colors.black)
                   : const Icon(Icons.create, color: Colors.black),
         );
-        final String tooltip = onMailView ? 'Reply' : 'Compose';
+        final tooltip = onMailView ? 'Reply' : 'Compose';
 
         if (isDesktop) {
           final Animation<double> animation = NavigationRail.extendedAnimation(context);

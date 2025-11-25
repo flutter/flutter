@@ -45,7 +45,7 @@ void macroPerfTestMultiPageE2E(
 }) {
   final WidgetsBinding widgetsBinding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   assert(widgetsBinding is IntegrationTestWidgetsFlutterBinding);
-  final IntegrationTestWidgetsFlutterBinding binding =
+  final binding =
       widgetsBinding as IntegrationTestWidgetsFlutterBinding;
   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive;
 
@@ -62,7 +62,7 @@ void macroPerfTestMultiPageE2E(
       // See: https://github.com/flutter/flutter/issues/19434
       await tester.binding.delayed(const Duration(microseconds: 250));
 
-      for (final ScrollableButtonRoute route in routes) {
+      for (final route in routes) {
         expect(route.listViewKey, startsWith('/'));
         expect(route.buttonKey, startsWith('/'));
 

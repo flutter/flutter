@@ -57,10 +57,10 @@ void main() {
     });
 
     test('getters, toString', () {
-      final List<TreeSliverNode<String>> children = <TreeSliverNode<String>>[
+      final children = <TreeSliverNode<String>>[
         TreeSliverNode<String>('child'),
       ];
-      final TreeSliverNode<String> node = TreeSliverNode<String>(
+      final node = TreeSliverNode<String>(
         'parent',
         children: children,
         expanded: true,
@@ -82,10 +82,10 @@ void main() {
     });
 
     testWidgets('TreeSliverNode sets ups parent and depth properties', (WidgetTester tester) async {
-      final List<TreeSliverNode<String>> children = <TreeSliverNode<String>>[
+      final children = <TreeSliverNode<String>>[
         TreeSliverNode<String>('child'),
       ];
-      final TreeSliverNode<String> node = TreeSliverNode<String>(
+      final node = TreeSliverNode<String>(
         'parent',
         children: children,
         expanded: true,
@@ -141,7 +141,7 @@ void main() {
     });
 
     testWidgets('Can set controller on TreeSliver', (WidgetTester tester) async {
-      final TreeSliverController controller = TreeSliverController();
+      final controller = TreeSliverController();
       TreeSliverController? returnedController;
       await tester.pumpWidget(
         MaterialApp(
@@ -193,7 +193,7 @@ void main() {
     });
 
     testWidgets('Can get node for TreeSliverNode.content', (WidgetTester tester) async {
-      final TreeSliverController controller = TreeSliverController();
+      final controller = TreeSliverController();
       await tester.pumpWidget(
         MaterialApp(
           home: CustomScrollView(
@@ -206,7 +206,7 @@ void main() {
     });
 
     testWidgets('Can get isExpanded for a node', (WidgetTester tester) async {
-      final TreeSliverController controller = TreeSliverController();
+      final controller = TreeSliverController();
       await tester.pumpWidget(
         MaterialApp(
           home: CustomScrollView(
@@ -219,7 +219,7 @@ void main() {
     });
 
     testWidgets('Can get isActive for a node', (WidgetTester tester) async {
-      final TreeSliverController controller = TreeSliverController();
+      final controller = TreeSliverController();
       await tester.pumpWidget(
         MaterialApp(
           home: CustomScrollView(
@@ -235,7 +235,7 @@ void main() {
     });
 
     testWidgets('Can toggleNode, to collapse or expand', (WidgetTester tester) async {
-      final TreeSliverController controller = TreeSliverController();
+      final controller = TreeSliverController();
       await tester.pumpWidget(
         MaterialApp(
           home: CustomScrollView(
@@ -267,7 +267,7 @@ void main() {
     });
 
     testWidgets('Can expandNode, then collapseAll', (WidgetTester tester) async {
-      final TreeSliverController controller = TreeSliverController();
+      final controller = TreeSliverController();
       await tester.pumpWidget(
         MaterialApp(
           home: CustomScrollView(
@@ -300,7 +300,7 @@ void main() {
     });
 
     testWidgets('Can collapseNode, then expandAll', (WidgetTester tester) async {
-      final TreeSliverController controller = TreeSliverController();
+      final controller = TreeSliverController();
       await tester.pumpWidget(
         MaterialApp(
           home: CustomScrollView(
@@ -368,9 +368,9 @@ void main() {
       TreeSliverNode<String>('Root 3'),
     ];
 
-    final TreeSliverController controller = TreeSliverController();
+    final controller = TreeSliverController();
     // The default node builder wraps the leading icon with toggleNodeWith.
-    bool toggled = false;
+    var toggled = false;
     TreeSliverNode<String>? toggledNode;
     await tester.pumpWidget(
       MaterialApp(
@@ -585,7 +585,7 @@ void main() {
       ),
       TreeSliverNode<String>('Root 3'),
     ];
-    final TreeSliverController controller = TreeSliverController();
+    final controller = TreeSliverController();
     await tester.pumpWidget(
       MaterialApp(
         home: StatefulBuilder(
@@ -655,7 +655,7 @@ void main() {
       ),
       TreeSliverNode<String>('Root 3'),
     ];
-    final TreeSliverController controller = TreeSliverController();
+    final controller = TreeSliverController();
     await tester.pumpWidget(
       MaterialApp(
         home: StatefulBuilder(
@@ -704,8 +704,8 @@ void main() {
     'TreeSliverNode should close all children when collapsed when animation is disabled',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/153889
-      final TreeSliverController controller = TreeSliverController();
-      final List<TreeSliverNode<String>> tree = <TreeSliverNode<String>>[
+      final controller = TreeSliverController();
+      final tree = <TreeSliverNode<String>>[
         TreeSliverNode<String>('First'),
         TreeSliverNode<String>(
           'Second',
@@ -800,8 +800,8 @@ void main() {
   testWidgets(
     'TreeSliverNode should close all children when collapsed when animation is completed',
     (WidgetTester tester) async {
-      final TreeSliverController controller = TreeSliverController();
-      final List<TreeSliverNode<String>> tree = <TreeSliverNode<String>>[
+      final controller = TreeSliverController();
+      final tree = <TreeSliverNode<String>>[
         TreeSliverNode<String>(
           'First',
           expanded: true,
@@ -877,7 +877,7 @@ void main() {
   testWidgets('TreeSliver and PinnedHeaderSliver can render correctly when used together.', (
     WidgetTester tester,
   ) async {
-    const ValueKey<String> key = ValueKey<String>('sliver_tree_pined_header');
+    const key = ValueKey<String>('sliver_tree_pined_header');
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -947,8 +947,8 @@ void main() {
   });
 
   testWidgets('TreeSliver renders correctly after scrolling.', (WidgetTester tester) async {
-    const ValueKey<String> key = ValueKey<String>('sliver_scrolling');
-    final ScrollController scrollController = ScrollController();
+    const key = ValueKey<String>('sliver_scrolling');
+    final scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(

@@ -29,11 +29,11 @@ class TestScrollPhysics extends ScrollPhysics {
 
 void main() {
   test('ScrollPhysics applyTo()', () {
-    const TestScrollPhysics a = TestScrollPhysics(name: 'a');
-    const TestScrollPhysics b = TestScrollPhysics(name: 'b');
-    const TestScrollPhysics c = TestScrollPhysics(name: 'c');
-    const TestScrollPhysics d = TestScrollPhysics(name: 'd');
-    const TestScrollPhysics e = TestScrollPhysics(name: 'e');
+    const a = TestScrollPhysics(name: 'a');
+    const b = TestScrollPhysics(name: 'b');
+    const c = TestScrollPhysics(name: 'c');
+    const d = TestScrollPhysics(name: 'd');
+    const e = TestScrollPhysics(name: 'e');
 
     expect(a.parent, null);
     expect(b.parent, null);
@@ -109,9 +109,9 @@ void main() {
         devicePixelRatio: 3.0,
       );
 
-      const BouncingScrollPhysics bounce = BouncingScrollPhysics();
-      const ClampingScrollPhysics clamp = ClampingScrollPhysics();
-      const PageScrollPhysics page = PageScrollPhysics();
+      const bounce = BouncingScrollPhysics();
+      const clamp = ClampingScrollPhysics();
+      const page = PageScrollPhysics();
 
       // Calls to createBallisticSimulation may happen on every frame (i.e. when the maxScrollExtent changes)
       // Changing velocity for time 0 may cause a sudden, unwanted damping/speedup effect
@@ -223,7 +223,7 @@ void main() {
     });
 
     test('no easing resistance for ScrollDecelerationRate.fast', () {
-      const BouncingScrollPhysics desktop = BouncingScrollPhysics(
+      const desktop = BouncingScrollPhysics(
         decelerationRate: ScrollDecelerationRate.fast,
       );
       final ScrollMetrics overscrolledPosition = FixedScrollMetrics(
@@ -278,8 +278,8 @@ void main() {
     });
 
     test('frictionFactor', () {
-      const BouncingScrollPhysics mobile = BouncingScrollPhysics();
-      const BouncingScrollPhysics desktop = BouncingScrollPhysics(
+      const mobile = BouncingScrollPhysics();
+      const desktop = BouncingScrollPhysics(
         decelerationRate: ScrollDecelerationRate.fast,
       );
 
@@ -295,7 +295,7 @@ void main() {
   });
 
   test('ClampingScrollPhysics assertion test', () {
-    const ClampingScrollPhysics physics = ClampingScrollPhysics();
+    const physics = ClampingScrollPhysics();
     const double pixels = 500;
     final ScrollMetrics position = FixedScrollMetrics(
       pixels: pixels,

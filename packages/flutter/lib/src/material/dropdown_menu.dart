@@ -786,7 +786,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
   double? getWidth(GlobalKey key) {
     final BuildContext? context = key.currentContext;
     if (context != null) {
-      final RenderBox box = context.findRenderObject()! as RenderBox;
+      final box = context.findRenderObject()! as RenderBox;
       return box.hasSize ? box.size.width : null;
     }
     return null;
@@ -842,8 +842,8 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
     bool? useMaterial3,
   }) {
     final double effectiveInputStartGap = useMaterial3 ?? false ? _kInputStartGap : 0.0;
-    final List<Widget> result = <Widget>[];
-    for (int i = 0; i < filteredEntries.length; i++) {
+    final result = <Widget>[];
+    for (var i = 0; i < filteredEntries.length; i++) {
       final DropdownMenuEntry<T> entry = filteredEntries[i];
 
       // By default, when the text field has a leading icon but a menu entry doesn't
@@ -1459,13 +1459,13 @@ class _RenderDropdownMenuBody extends RenderBox
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
-    double maxWidth = 0.0;
+    var maxWidth = 0.0;
     double? maxHeight;
     RenderBox? child = firstChild;
 
     final double intrinsicWidth = width ?? getMaxIntrinsicWidth(constraints.maxHeight);
     final double widthConstraint = math.min(intrinsicWidth, constraints.maxWidth);
-    final BoxConstraints innerConstraints = BoxConstraints(
+    final innerConstraints = BoxConstraints(
       maxWidth: widthConstraint,
       maxHeight: getMaxIntrinsicHeight(widthConstraint),
     );
@@ -1473,14 +1473,14 @@ class _RenderDropdownMenuBody extends RenderBox
       if (child == firstChild) {
         child.layout(innerConstraints, parentUsesSize: true);
         maxHeight ??= child.size.height;
-        final _DropdownMenuBodyParentData childParentData =
+        final childParentData =
             child.parentData! as _DropdownMenuBodyParentData;
         assert(child.parentData == childParentData);
         child = childParentData.nextSibling;
         continue;
       }
       child.layout(innerConstraints, parentUsesSize: true);
-      final _DropdownMenuBodyParentData childParentData =
+      final childParentData =
           child.parentData! as _DropdownMenuBodyParentData;
       childParentData.offset = Offset.zero;
       maxWidth = math.max(maxWidth, child.size.width);
@@ -1498,7 +1498,7 @@ class _RenderDropdownMenuBody extends RenderBox
   void paint(PaintingContext context, Offset offset) {
     final RenderBox? child = firstChild;
     if (child != null) {
-      final _DropdownMenuBodyParentData childParentData =
+      final childParentData =
           child.parentData! as _DropdownMenuBodyParentData;
       context.paintChild(child, offset + childParentData.offset);
     }
@@ -1506,12 +1506,12 @@ class _RenderDropdownMenuBody extends RenderBox
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    double maxWidth = 0.0;
+    var maxWidth = 0.0;
     double? maxHeight;
     RenderBox? child = firstChild;
     final double intrinsicWidth = width ?? getMaxIntrinsicWidth(constraints.maxHeight);
     final double widthConstraint = math.min(intrinsicWidth, constraints.maxWidth);
-    final BoxConstraints innerConstraints = BoxConstraints(
+    final innerConstraints = BoxConstraints(
       maxWidth: widthConstraint,
       maxHeight: getMaxIntrinsicHeight(widthConstraint),
     );
@@ -1525,7 +1525,7 @@ class _RenderDropdownMenuBody extends RenderBox
         maxWidth = math.max(maxWidth, childSize.width);
       }
 
-      final _DropdownMenuBodyParentData childParentData =
+      final childParentData =
           child.parentData! as _DropdownMenuBodyParentData;
       maxHeight ??= childSize.height;
       child = childParentData.nextSibling;
@@ -1542,7 +1542,7 @@ class _RenderDropdownMenuBody extends RenderBox
     double width = 0;
     while (child != null) {
       if (child == firstChild) {
-        final _DropdownMenuBodyParentData childParentData =
+        final childParentData =
             child.parentData! as _DropdownMenuBodyParentData;
         child = childParentData.nextSibling;
         continue;
@@ -1557,7 +1557,7 @@ class _RenderDropdownMenuBody extends RenderBox
         width += minIntrinsicWidth;
       }
       width = math.max(width, minIntrinsicWidth);
-      final _DropdownMenuBodyParentData childParentData =
+      final childParentData =
           child.parentData! as _DropdownMenuBodyParentData;
       child = childParentData.nextSibling;
     }
@@ -1571,7 +1571,7 @@ class _RenderDropdownMenuBody extends RenderBox
     double width = 0;
     while (child != null) {
       if (child == firstChild) {
-        final _DropdownMenuBodyParentData childParentData =
+        final childParentData =
             child.parentData! as _DropdownMenuBodyParentData;
         child = childParentData.nextSibling;
         continue;
@@ -1586,7 +1586,7 @@ class _RenderDropdownMenuBody extends RenderBox
         width += maxIntrinsicWidth;
       }
       width = math.max(width, maxIntrinsicWidth);
-      final _DropdownMenuBodyParentData childParentData =
+      final childParentData =
           child.parentData! as _DropdownMenuBodyParentData;
       child = childParentData.nextSibling;
     }
@@ -1618,7 +1618,7 @@ class _RenderDropdownMenuBody extends RenderBox
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     final RenderBox? child = firstChild;
     if (child != null) {
-      final _DropdownMenuBodyParentData childParentData =
+      final childParentData =
           child.parentData! as _DropdownMenuBodyParentData;
       final bool isHit = result.addWithPaintOffset(
         offset: childParentData.offset,
@@ -1639,7 +1639,7 @@ class _RenderDropdownMenuBody extends RenderBox
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
     visitChildren((RenderObject renderObjectChild) {
-      final RenderBox child = renderObjectChild as RenderBox;
+      final child = renderObjectChild as RenderBox;
       if (child == firstChild) {
         visitor(renderObjectChild);
       }

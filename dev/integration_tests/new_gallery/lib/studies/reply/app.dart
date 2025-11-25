@@ -75,7 +75,7 @@ class _ReplyAppState extends State<ReplyApp> with RestorationMixin {
   @override
   Widget build(BuildContext context) {
     final ThemeMode galleryThemeMode = GalleryOptions.of(context).themeMode;
-    final bool isDark =
+    final isDark =
         galleryThemeMode == ThemeMode.system
             ? Theme.brightnessOf(context) == Brightness.dark
             : galleryThemeMode == ThemeMode.dark;
@@ -119,18 +119,18 @@ class _RestorableEmailState extends RestorableListenable<EmailStore> {
 
   @override
   EmailStore fromPrimitives(Object? data) {
-    final EmailStore appState = EmailStore();
-    final Map<String, dynamic> appData = Map<String, dynamic>.from(data! as Map<dynamic, dynamic>);
+    final appState = EmailStore();
+    final appData = Map<String, dynamic>.from(data! as Map<dynamic, dynamic>);
     appState.selectedEmailId = appData['selectedEmailId'] as int;
     appState.onSearchPage = appData['onSearchPage'] as bool;
 
     // The index of the MailboxPageType enum is restored.
-    final int mailboxPageIndex = appData['selectedMailboxPage'] as int;
+    final mailboxPageIndex = appData['selectedMailboxPage'] as int;
     appState.selectedMailboxPage = MailboxPageType.values[mailboxPageIndex];
 
-    final List<dynamic> starredEmailIdsList = appData['starredEmailIds'] as List<dynamic>;
+    final starredEmailIdsList = appData['starredEmailIds'] as List<dynamic>;
     appState.starredEmailIds = <int>{...starredEmailIdsList.map<int>((dynamic id) => id as int)};
-    final List<dynamic> trashEmailIdsList = appData['trashEmailIds'] as List<dynamic>;
+    final trashEmailIdsList = appData['trashEmailIds'] as List<dynamic>;
     appState.trashEmailIds = <int>{...trashEmailIdsList.map<int>((dynamic id) => id as int)};
     return appState;
   }
@@ -150,7 +150,7 @@ class _RestorableEmailState extends RestorableListenable<EmailStore> {
 }
 
 ThemeData _buildReplyLightTheme(BuildContext context) {
-  final ThemeData base = ThemeData();
+  final base = ThemeData();
   return base.copyWith(
     bottomAppBarTheme: const BottomAppBarThemeData(color: ReplyColors.blue700),
     bottomSheetTheme: BottomSheetThemeData(
@@ -190,7 +190,7 @@ ThemeData _buildReplyLightTheme(BuildContext context) {
 }
 
 ThemeData _buildReplyDarkTheme(BuildContext context) {
-  final ThemeData base = ThemeData.dark();
+  final base = ThemeData.dark();
   return base.copyWith(
     bottomAppBarTheme: const BottomAppBarThemeData(color: ReplyColors.darkBottomAppBarBackground),
     bottomSheetTheme: BottomSheetThemeData(

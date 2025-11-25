@@ -44,7 +44,7 @@ class HomePage extends StatelessWidget {
     final bool isDesktop = isDisplayDesktop(context);
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     final Map<String, GalleryDemo> studyDemos = Demos.studies(localizations);
-    final List<Widget> carouselCards = <Widget>[
+    final carouselCards = <Widget>[
       _CarouselCard(
         demo: studyDemos['reply'],
         asset: const AssetImage('assets/studies/reply_card.png', package: 'flutter_gallery_assets'),
@@ -129,7 +129,7 @@ class HomePage extends StatelessWidget {
 
     if (isDesktop) {
       // Desktop layout
-      final List<_DesktopCategoryItem> desktopCategoryItems = <_DesktopCategoryItem>[
+      final desktopCategoryItems = <_DesktopCategoryItem>[
         _DesktopCategoryItem(
           category: GalleryDemoCategory.material,
           asset: const AssetImage(
@@ -711,7 +711,7 @@ class _MobileCarouselState extends State<_MobileCarousel>
   }
 
   Widget builder(int index) {
-    final AnimatedBuilder carouselCard = AnimatedBuilder(
+    final carouselCard = AnimatedBuilder(
       animation: _controller,
       builder: (BuildContext context, Widget? child) {
         double value;
@@ -795,8 +795,8 @@ class _DesktopCarouselState extends State<_DesktopCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    bool showPreviousButton = false;
-    bool showNextButton = true;
+    var showPreviousButton = false;
+    var showNextButton = true;
     // Only check this after the _controller has been attached to the ListView.
     if (_controller.hasClients) {
       showPreviousButton = _controller.offset > 0;
@@ -910,7 +910,7 @@ class _DesktopPageButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const double buttonSize = 58.0;
+    const buttonSize = 58.0;
     const double padding = _horizontalDesktopPadding - buttonSize / 2;
     return ExcludeSemantics(
       child: Align(
@@ -965,7 +965,7 @@ class _CarouselCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
-    final bool isDark = Theme.of(context).colorScheme.brightness == Brightness.dark;
+    final isDark = Theme.of(context).colorScheme.brightness == Brightness.dark;
     final ImageProvider<Object>? asset = isDark ? assetDark : this.asset;
     final Color? assetColor = isDark ? assetDarkColor : this.assetColor;
     final Color? textColor = isDark ? Colors.white.withOpacity(0.87) : this.textColor;

@@ -528,11 +528,11 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
         );
 
     final Color iconColor = CupertinoDynamicColor.resolve(widget.itemColor, context);
-    final IconThemeData suffixIconThemeData = IconThemeData(
+    final suffixIconThemeData = IconThemeData(
       color: iconColor,
       size: _scaledIconSize,
     );
-    final IconThemeData prefixIconThemeData = IconThemeData(
+    final prefixIconThemeData = IconThemeData(
       color: iconColor,
       size: _scaledIconSize >= _kMaxPrefixIconSize && _effectiveFocusNode.hasFocus
           ? 0.0

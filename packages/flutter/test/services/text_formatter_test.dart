@@ -20,8 +20,8 @@ void main() {
   TextEditingValue testNewValue = TextEditingValue.empty;
 
   test('test const constructor', () {
-    const TestTextInputFormatter testValue1 = TestTextInputFormatter();
-    const TestTextInputFormatter testValue2 = TestTextInputFormatter();
+    const testValue1 = TestTextInputFormatter();
+    const testValue2 = TestTextInputFormatter();
 
     expect(testValue1, same(testValue2));
   });
@@ -33,7 +33,7 @@ void main() {
     late TextEditingValue calledOldValue;
     late TextEditingValue calledNewValue;
 
-    final TextInputFormatter formatterUnderTest = TextInputFormatter.withFunction((
+    final formatterUnderTest = TextInputFormatter.withFunction((
       TextEditingValue oldValue,
       TextEditingValue newValue,
     ) {
@@ -60,7 +60,7 @@ void main() {
     });
 
     test('test filtering formatter example', () {
-      const TextEditingValue intoTheWoods = TextEditingValue(text: 'Into the Woods');
+      const intoTheWoods = TextEditingValue(text: 'Into the Woods');
       expect(
         FilteringTextInputFormatter(
           'o',
@@ -95,7 +95,7 @@ void main() {
       );
 
       // "Into the Wo|ods|"
-      const TextEditingValue selectedIntoTheWoods = TextEditingValue(
+      const selectedIntoTheWoods = TextEditingValue(
         text: 'Into the Woods',
         selection: TextSelection(baseOffset: 11, extentOffset: 14),
       );
@@ -405,36 +405,36 @@ void main() {
   group('LengthLimitingTextInputFormatter', () {
     group('truncate', () {
       test('Removes characters from the end', () async {
-        const TextEditingValue value = TextEditingValue(text: '01234567890');
+        const value = TextEditingValue(text: '01234567890');
         final TextEditingValue truncated = LengthLimitingTextInputFormatter.truncate(value, 10);
         expect(truncated.text, '0123456789');
       });
 
       test('Counts surrogate pairs as single characters', () async {
-        const String stringOverflowing = '😆01234567890';
-        const TextEditingValue value = TextEditingValue(
+        const stringOverflowing = '😆01234567890';
+        const value = TextEditingValue(
           text: stringOverflowing,
           // Put the cursor at the end of the overflowing string to test if it
           // ends up at the end of the new string after truncation.
           selection: TextSelection.collapsed(offset: stringOverflowing.length),
         );
         final TextEditingValue truncated = LengthLimitingTextInputFormatter.truncate(value, 10);
-        const String stringTruncated = '😆012345678';
+        const stringTruncated = '😆012345678';
         expect(truncated.text, stringTruncated);
         expect(truncated.selection.baseOffset, stringTruncated.length);
         expect(truncated.selection.extentOffset, stringTruncated.length);
       });
 
       test('Counts grapheme clusters as single characters', () async {
-        const String stringOverflowing = '👨‍👩‍👦01234567890';
-        const TextEditingValue value = TextEditingValue(
+        const stringOverflowing = '👨‍👩‍👦01234567890';
+        const value = TextEditingValue(
           text: stringOverflowing,
           // Put the cursor at the end of the overflowing string to test if it
           // ends up at the end of the new string after truncation.
           selection: TextSelection.collapsed(offset: stringOverflowing.length),
         );
         final TextEditingValue truncated = LengthLimitingTextInputFormatter.truncate(value, 10);
-        const String stringTruncated = '👨‍👩‍👦012345678';
+        const stringTruncated = '👨‍👩‍👦012345678';
         expect(truncated.text, stringTruncated);
         expect(truncated.selection.baseOffset, stringTruncated.length);
         expect(truncated.selection.extentOffset, stringTruncated.length);
@@ -442,12 +442,12 @@ void main() {
     });
 
     group('formatEditUpdate', () {
-      const int maxLength = 10;
+      const maxLength = 10;
 
       test('Passes through when under limit', () async {
-        const TextEditingValue oldValue = TextEditingValue(text: 'aaa');
-        const TextEditingValue newValue = TextEditingValue(text: 'aaab');
-        final LengthLimitingTextInputFormatter formatter = LengthLimitingTextInputFormatter(
+        const oldValue = TextEditingValue(text: 'aaa');
+        const newValue = TextEditingValue(text: 'aaab');
+        final formatter = LengthLimitingTextInputFormatter(
           maxLength,
         );
         final TextEditingValue formatted = formatter.formatEditUpdate(oldValue, newValue);
@@ -455,9 +455,9 @@ void main() {
       });
 
       test('Uses old value when at the limit', () async {
-        const TextEditingValue oldValue = TextEditingValue(text: 'aaaaaaaaaa');
-        const TextEditingValue newValue = TextEditingValue(text: 'aaaaabbbbbaaaaa');
-        final LengthLimitingTextInputFormatter formatter = LengthLimitingTextInputFormatter(
+        const oldValue = TextEditingValue(text: 'aaaaaaaaaa');
+        const newValue = TextEditingValue(text: 'aaaaabbbbbaaaaa');
+        final formatter = LengthLimitingTextInputFormatter(
           maxLength,
         );
         final TextEditingValue formatted = formatter.formatEditUpdate(oldValue, newValue);
@@ -465,9 +465,9 @@ void main() {
       });
 
       test('Truncates newValue when oldValue already over limit', () async {
-        const TextEditingValue oldValue = TextEditingValue(text: 'aaaaaaaaaaaaaaaaaaaa');
-        const TextEditingValue newValue = TextEditingValue(text: 'bbbbbbbbbbbbbbbbbbbb');
-        final LengthLimitingTextInputFormatter formatter = LengthLimitingTextInputFormatter(
+        const oldValue = TextEditingValue(text: 'aaaaaaaaaaaaaaaaaaaa');
+        const newValue = TextEditingValue(text: 'bbbbbbbbbbbbbbbbbbbb');
+        final formatter = LengthLimitingTextInputFormatter(
           maxLength,
         );
         final TextEditingValue formatted = formatter.formatEditUpdate(oldValue, newValue);
@@ -499,8 +499,8 @@ void main() {
   test(
     'FilteringTextInputFormatter should return the old value if new value contains non-white-listed character',
     () {
-      const TextEditingValue oldValue = TextEditingValue(text: '12345');
-      const TextEditingValue newValue = TextEditingValue(text: '12345@');
+      const oldValue = TextEditingValue(text: '12345');
+      const newValue = TextEditingValue(text: '12345@');
 
       final TextInputFormatter formatter = FilteringTextInputFormatter.digitsOnly;
       final TextEditingValue formatted = formatter.formatEditUpdate(oldValue, newValue);
@@ -545,8 +545,8 @@ void main() {
   });
 
   test('FilteringTextInputFormatter should remove non-allowed characters', () {
-    const TextEditingValue oldValue = TextEditingValue(text: '12345');
-    const TextEditingValue newValue = TextEditingValue(text: '12345@');
+    const oldValue = TextEditingValue(text: '12345');
+    const newValue = TextEditingValue(text: '12345@');
 
     final TextInputFormatter formatter = FilteringTextInputFormatter.digitsOnly;
     final TextEditingValue formatted = formatter.formatEditUpdate(oldValue, newValue);
@@ -563,8 +563,8 @@ void main() {
   test(
     'WhitelistingTextInputFormatter should return the old value if new value contains non-allowed character',
     () {
-      const TextEditingValue oldValue = TextEditingValue(text: '12345');
-      const TextEditingValue newValue = TextEditingValue(text: '12345@');
+      const oldValue = TextEditingValue(text: '12345');
+      const newValue = TextEditingValue(text: '12345@');
 
       final TextInputFormatter formatter = FilteringTextInputFormatter.digitsOnly;
       final TextEditingValue formatted = formatter.formatEditUpdate(oldValue, newValue);
@@ -646,11 +646,11 @@ void main() {
     );
 
     const TextEditingValue oldValue = TextEditingValue.empty;
-    const TextEditingValue newValue = TextEditingValue(text: 'abcabcabc');
+    const newValue = TextEditingValue(text: 'abcabcabc');
 
     final String filteredText = formatter.formatEditUpdate(oldValue, newValue).text;
 
-    for (int i = 0; i < newValue.text.length; i += 1) {
+    for (var i = 0; i < newValue.text.length; i += 1) {
       final String text = formatter
           .formatEditUpdate(
             oldValue,
@@ -668,11 +668,11 @@ void main() {
     );
 
     const TextEditingValue oldValue = TextEditingValue.empty;
-    const TextEditingValue newValue = TextEditingValue(text: 'abcabcabc');
+    const newValue = TextEditingValue(text: 'abcabcabc');
 
     final String filteredText = formatter.formatEditUpdate(oldValue, newValue).text;
 
-    for (int i = 0; i < newValue.text.length; i += 1) {
+    for (var i = 0; i < newValue.text.length; i += 1) {
       final String text = formatter
           .formatEditUpdate(oldValue, newValue.copyWith(composing: TextRange.collapsed(i)))
           .text;
@@ -681,11 +681,11 @@ void main() {
   });
 
   test('FilteringTextInputFormatter basic filtering test', () {
-    final RegExp filter = RegExp('[A-Za-z0-9.@-]*');
+    final filter = RegExp('[A-Za-z0-9.@-]*');
     final TextInputFormatter formatter = FilteringTextInputFormatter.allow(filter);
 
     const TextEditingValue oldValue = TextEditingValue.empty;
-    const TextEditingValue newValue = TextEditingValue(text: 'ab&&ca@bcabc');
+    const newValue = TextEditingValue(text: 'ab&&ca@bcabc');
 
     expect(formatter.formatEditUpdate(oldValue, newValue).text, 'abca@bcabc');
   });
@@ -694,7 +694,7 @@ void main() {
     const TextEditingValue oldValue = TextEditingValue.empty;
 
     test('Preserves selection region', () {
-      const TextEditingValue newValue = TextEditingValue(text: 'AAABBBCCC');
+      const newValue = TextEditingValue(text: 'AAABBBCCC');
 
       // AAA | BBB | CCC => AAA | **** | CCC
       expect(
@@ -777,7 +777,7 @@ void main() {
     });
 
     test('Preserves selection region, allow', () {
-      const TextEditingValue newValue = TextEditingValue(text: 'AAABBBCCC');
+      const newValue = TextEditingValue(text: 'AAABBBCCC');
 
       // AAA | BBB | CCC => **** | BBB | ****
       expect(
@@ -828,7 +828,7 @@ void main() {
     });
 
     test('Preserves composing region', () {
-      const TextEditingValue newValue = TextEditingValue(text: 'AAABBBCCC');
+      const newValue = TextEditingValue(text: 'AAABBBCCC');
 
       // AAA | BBB | CCC => AAA | **** | CCC
       expect(

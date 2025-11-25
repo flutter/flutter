@@ -192,7 +192,7 @@ void main() {
       });
 
       testWidgets('RegularWindow does not throw', (WidgetTester tester) async {
-        final _StubRegularWindowController controller = _StubRegularWindowController(tester);
+        final controller = _StubRegularWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -201,7 +201,7 @@ void main() {
       });
 
       testWidgets('Dialog does not throw', (WidgetTester tester) async {
-        final _StubDialogWindowController controller = _StubDialogWindowController(tester);
+        final controller = _StubDialogWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -210,7 +210,7 @@ void main() {
       });
 
       testWidgets('Can access WindowScope.of for regular windows', (WidgetTester tester) async {
-        final _StubRegularWindowController controller = _StubRegularWindowController(tester);
+        final controller = _StubRegularWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -228,7 +228,7 @@ void main() {
       });
 
       testWidgets('Can access WindowScope.of for dialog windows', (WidgetTester tester) async {
-        final _StubDialogWindowController controller = _StubDialogWindowController(tester);
+        final controller = _StubDialogWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -246,7 +246,7 @@ void main() {
       });
 
       testWidgets('Can access WindowScope.of for tooltip windows', (WidgetTester tester) async {
-        final _StubTooltipWindowController controller = _StubTooltipWindowController(
+        final controller = _StubTooltipWindowController(
           tester: tester,
         );
         addTearDown(controller.dispose);
@@ -268,7 +268,7 @@ void main() {
       testWidgets('Can access WindowScope.maybeOf for regular windows', (
         WidgetTester tester,
       ) async {
-        final _StubRegularWindowController controller = _StubRegularWindowController(tester);
+        final controller = _StubRegularWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -286,7 +286,7 @@ void main() {
       });
 
       testWidgets('Can access WindowScope.maybeOf for dialog windows', (WidgetTester tester) async {
-        final _StubDialogWindowController controller = _StubDialogWindowController(tester);
+        final controller = _StubDialogWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -306,7 +306,7 @@ void main() {
       testWidgets('Can access WindowScope.maybeOf for tooltip windows', (
         WidgetTester tester,
       ) async {
-        final _StubTooltipWindowController controller = _StubTooltipWindowController(
+        final controller = _StubTooltipWindowController(
           tester: tester,
         );
         addTearDown(controller.dispose);
@@ -328,7 +328,7 @@ void main() {
       testWidgets('Can access WindowScope.contentSizeOf for regular windows', (
         WidgetTester tester,
       ) async {
-        final _StubRegularWindowController controller = _StubRegularWindowController(tester);
+        final controller = _StubRegularWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -348,7 +348,7 @@ void main() {
       testWidgets('Can access WindowScope.contentSizeOf for dialog windows', (
         WidgetTester tester,
       ) async {
-        final _StubDialogWindowController controller = _StubDialogWindowController(tester);
+        final controller = _StubDialogWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -368,7 +368,7 @@ void main() {
       testWidgets('Can access WindowScope.contentSizeOf for tooltip windows', (
         WidgetTester tester,
       ) async {
-        final _StubTooltipWindowController controller = _StubTooltipWindowController(
+        final controller = _StubTooltipWindowController(
           tester: tester,
         );
         addTearDown(controller.dispose);
@@ -390,7 +390,7 @@ void main() {
       testWidgets('Can access WindowScope.maybeContentSizeOf for regular windows', (
         WidgetTester tester,
       ) async {
-        final _StubRegularWindowController controller = _StubRegularWindowController(tester);
+        final controller = _StubRegularWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -410,7 +410,7 @@ void main() {
       testWidgets('Can access WindowScope.maybeContentSizeOf for dialog windows', (
         WidgetTester tester,
       ) async {
-        final _StubDialogWindowController controller = _StubDialogWindowController(tester);
+        final controller = _StubDialogWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -430,7 +430,7 @@ void main() {
       testWidgets('Can access WindowScope.maybeContentSizeOf for tooltip windows', (
         WidgetTester tester,
       ) async {
-        final _StubTooltipWindowController controller = _StubTooltipWindowController(
+        final controller = _StubTooltipWindowController(
           tester: tester,
         );
         addTearDown(controller.dispose);
@@ -452,7 +452,7 @@ void main() {
       testWidgets('Can access WindowScope.titleOf for regular windows', (
         WidgetTester tester,
       ) async {
-        final _StubRegularWindowController controller = _StubRegularWindowController(tester);
+        final controller = _StubRegularWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -470,7 +470,7 @@ void main() {
       });
 
       testWidgets('Can access WindowScope.titleOf for dialog windows', (WidgetTester tester) async {
-        final _StubDialogWindowController controller = _StubDialogWindowController(tester);
+        final controller = _StubDialogWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -490,7 +490,7 @@ void main() {
       testWidgets('Can access WindowScope.titleOf for tooltip windows', (
         WidgetTester tester,
       ) async {
-        final _StubTooltipWindowController controller = _StubTooltipWindowController(
+        final controller = _StubTooltipWindowController(
           tester: tester,
         );
         addTearDown(controller.dispose);
@@ -512,7 +512,7 @@ void main() {
       testWidgets('Can access WindowScope.maybeTitleOf for regular windows', (
         WidgetTester tester,
       ) async {
-        final _StubRegularWindowController controller = _StubRegularWindowController(tester);
+        final controller = _StubRegularWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -532,7 +532,7 @@ void main() {
       testWidgets('Can access WindowScope.maybeTitleOf for dialog windows', (
         WidgetTester tester,
       ) async {
-        final _StubDialogWindowController controller = _StubDialogWindowController(tester);
+        final controller = _StubDialogWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -552,7 +552,7 @@ void main() {
       testWidgets('Can access WindowScope.maybeTitleOf for tooltip windows', (
         WidgetTester tester,
       ) async {
-        final _StubTooltipWindowController controller = _StubTooltipWindowController(
+        final controller = _StubTooltipWindowController(
           tester: tester,
         );
         addTearDown(controller.dispose);
@@ -574,7 +574,7 @@ void main() {
       testWidgets('Can access WindowScope.isActivatedOf for regular windows', (
         WidgetTester tester,
       ) async {
-        final _StubRegularWindowController controller = _StubRegularWindowController(tester);
+        final controller = _StubRegularWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -594,7 +594,7 @@ void main() {
       testWidgets('Can access WindowScope.isActivatedOf for dialog windows', (
         WidgetTester tester,
       ) async {
-        final _StubDialogWindowController controller = _StubDialogWindowController(tester);
+        final controller = _StubDialogWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -614,7 +614,7 @@ void main() {
       testWidgets('Can access WindowScope.isActivatedOf for tooltip windows', (
         WidgetTester tester,
       ) async {
-        final _StubTooltipWindowController controller = _StubTooltipWindowController(
+        final controller = _StubTooltipWindowController(
           tester: tester,
         );
         addTearDown(controller.dispose);
@@ -636,7 +636,7 @@ void main() {
       testWidgets('Can access WindowScope.maybeIsActivatedOf for regular windows', (
         WidgetTester tester,
       ) async {
-        final _StubRegularWindowController controller = _StubRegularWindowController(tester);
+        final controller = _StubRegularWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -656,7 +656,7 @@ void main() {
       testWidgets('Can access WindowScope.maybeIsActivatedOf for dialog windows', (
         WidgetTester tester,
       ) async {
-        final _StubDialogWindowController controller = _StubDialogWindowController(tester);
+        final controller = _StubDialogWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -676,7 +676,7 @@ void main() {
       testWidgets('Can access WindowScope.maybeIsActivatedOf for tooltip windows', (
         WidgetTester tester,
       ) async {
-        final _StubTooltipWindowController controller = _StubTooltipWindowController(
+        final controller = _StubTooltipWindowController(
           tester: tester,
         );
         addTearDown(controller.dispose);
@@ -698,7 +698,7 @@ void main() {
       testWidgets('Can access WindowScope.isMinimizedOf for regular windows', (
         WidgetTester tester,
       ) async {
-        final _StubRegularWindowController controller = _StubRegularWindowController(tester);
+        final controller = _StubRegularWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -718,7 +718,7 @@ void main() {
       testWidgets('Can access WindowScope.isMinimizedOf for dialog windows', (
         WidgetTester tester,
       ) async {
-        final _StubDialogWindowController controller = _StubDialogWindowController(tester);
+        final controller = _StubDialogWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -738,7 +738,7 @@ void main() {
       testWidgets('Can access WindowScope.isMinimizedOf for tooltip windows', (
         WidgetTester tester,
       ) async {
-        final _StubTooltipWindowController controller = _StubTooltipWindowController(
+        final controller = _StubTooltipWindowController(
           tester: tester,
         );
         addTearDown(controller.dispose);
@@ -760,7 +760,7 @@ void main() {
       testWidgets('Can access WindowScope.maybeIsMinimizedOf for regular windows', (
         WidgetTester tester,
       ) async {
-        final _StubRegularWindowController controller = _StubRegularWindowController(tester);
+        final controller = _StubRegularWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -780,7 +780,7 @@ void main() {
       testWidgets('Can access WindowScope.maybeIsMinimizedOf for dialog windows', (
         WidgetTester tester,
       ) async {
-        final _StubDialogWindowController controller = _StubDialogWindowController(tester);
+        final controller = _StubDialogWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -800,7 +800,7 @@ void main() {
       testWidgets('Can access WindowScope.maybeIsMinimizedOf for tooltip windows', (
         WidgetTester tester,
       ) async {
-        final _StubTooltipWindowController controller = _StubTooltipWindowController(
+        final controller = _StubTooltipWindowController(
           tester: tester,
         );
         addTearDown(controller.dispose);
@@ -822,7 +822,7 @@ void main() {
       testWidgets('Can access WindowScope.isMaximizedOf for regular windows', (
         WidgetTester tester,
       ) async {
-        final _StubRegularWindowController controller = _StubRegularWindowController(tester);
+        final controller = _StubRegularWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -842,7 +842,7 @@ void main() {
       testWidgets('Can access WindowScope.isMaximizedOf for dialog windows', (
         WidgetTester tester,
       ) async {
-        final _StubDialogWindowController controller = _StubDialogWindowController(tester);
+        final controller = _StubDialogWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -862,7 +862,7 @@ void main() {
       testWidgets('Can access WindowScope.isMaximizedOf for tooltip windows', (
         WidgetTester tester,
       ) async {
-        final _StubTooltipWindowController controller = _StubTooltipWindowController(
+        final controller = _StubTooltipWindowController(
           tester: tester,
         );
         addTearDown(controller.dispose);
@@ -884,7 +884,7 @@ void main() {
       testWidgets('Can access WindowScope.maybeIsMaximizedOf for regular windows', (
         WidgetTester tester,
       ) async {
-        final _StubRegularWindowController controller = _StubRegularWindowController(tester);
+        final controller = _StubRegularWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -904,7 +904,7 @@ void main() {
       testWidgets('Can access WindowScope.maybeIsMaximizedOf for dialog windows', (
         WidgetTester tester,
       ) async {
-        final _StubDialogWindowController controller = _StubDialogWindowController(tester);
+        final controller = _StubDialogWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -924,7 +924,7 @@ void main() {
       testWidgets('Can access WindowScope.maybeIsMaximizedOf for tooltip windows', (
         WidgetTester tester,
       ) async {
-        final _StubTooltipWindowController controller = _StubTooltipWindowController(
+        final controller = _StubTooltipWindowController(
           tester: tester,
         );
         addTearDown(controller.dispose);
@@ -946,7 +946,7 @@ void main() {
       testWidgets('Can access WindowScope.isFullscreenOf for regular windows', (
         WidgetTester tester,
       ) async {
-        final _StubRegularWindowController controller = _StubRegularWindowController(tester);
+        final controller = _StubRegularWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -966,7 +966,7 @@ void main() {
       testWidgets('Can access WindowScope.isFullscreenOf for dialog windows', (
         WidgetTester tester,
       ) async {
-        final _StubDialogWindowController controller = _StubDialogWindowController(tester);
+        final controller = _StubDialogWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -986,7 +986,7 @@ void main() {
       testWidgets('Can access WindowScope.isFullscreenOf for tooltip windows', (
         WidgetTester tester,
       ) async {
-        final _StubTooltipWindowController controller = _StubTooltipWindowController(
+        final controller = _StubTooltipWindowController(
           tester: tester,
         );
         addTearDown(controller.dispose);
@@ -1008,7 +1008,7 @@ void main() {
       testWidgets('Can access WindowScope.maybeIsFullscreenOf for regular windows', (
         WidgetTester tester,
       ) async {
-        final _StubRegularWindowController controller = _StubRegularWindowController(tester);
+        final controller = _StubRegularWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -1028,7 +1028,7 @@ void main() {
       testWidgets('Can access WindowScope.maybeIsFullscreenOf for dialog windows', (
         WidgetTester tester,
       ) async {
-        final _StubDialogWindowController controller = _StubDialogWindowController(tester);
+        final controller = _StubDialogWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
@@ -1048,7 +1048,7 @@ void main() {
       testWidgets('Can access WindowScope.maybeIsFullscreenOf for tooltip windows', (
         WidgetTester tester,
       ) async {
-        final _StubTooltipWindowController controller = _StubTooltipWindowController(
+        final controller = _StubTooltipWindowController(
           tester: tester,
         );
         addTearDown(controller.dispose);

@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Positioned constructors', (WidgetTester tester) async {
     final Widget child = Container();
-    final Positioned a = Positioned(
+    final a = Positioned(
       left: 101.0,
       right: 201.0,
       top: 301.0,
@@ -24,7 +24,7 @@ void main() {
     expect(a.bottom, 401.0);
     expect(a.width, null);
     expect(a.height, null);
-    final Positioned b = Positioned.fromRect(
+    final b = Positioned.fromRect(
       rect: const Rect.fromLTRB(102.0, 302.0, 202.0, 502.0),
       child: child,
     );
@@ -34,7 +34,7 @@ void main() {
     expect(b.bottom, null);
     expect(b.width, 100.0);
     expect(b.height, 200.0);
-    final Positioned c = Positioned.fromRelativeRect(
+    final c = Positioned.fromRelativeRect(
       rect: const RelativeRect.fromLTRB(103.0, 303.0, 203.0, 403.0),
       child: child,
     );
@@ -47,7 +47,7 @@ void main() {
   });
 
   testWidgets('Can animate position data', (WidgetTester tester) async {
-    final RelativeRectTween rect = RelativeRectTween(
+    final rect = RelativeRectTween(
       begin: RelativeRect.fromRect(
         const Rect.fromLTRB(10.0, 20.0, 20.0, 30.0),
         const Rect.fromLTRB(0.0, 10.0, 100.0, 110.0),
@@ -57,18 +57,18 @@ void main() {
         const Rect.fromLTRB(0.0, 10.0, 100.0, 110.0),
       ),
     );
-    final AnimationController controller = AnimationController(
+    final controller = AnimationController(
       duration: const Duration(seconds: 10),
       vsync: tester,
     );
     addTearDown(controller.dispose);
-    final List<Size> sizes = <Size>[];
-    final List<Offset> positions = <Offset>[];
+    final sizes = <Size>[];
+    final positions = <Offset>[];
     final GlobalKey key = GlobalKey();
 
     void recordMetrics() {
-      final RenderBox box = key.currentContext!.findRenderObject()! as RenderBox;
-      final BoxParentData boxParentData = box.parentData! as BoxParentData;
+      final box = key.currentContext!.findRenderObject()! as RenderBox;
+      final boxParentData = box.parentData! as BoxParentData;
       sizes.add(box.size);
       positions.add(boxParentData.offset);
     }
@@ -93,7 +93,7 @@ void main() {
       ),
     ); // t=0
     recordMetrics();
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     controller.forward().whenComplete(completer.complete);
     expect(completer.isCompleted, isFalse);
     await tester.pump(); // t=0 again

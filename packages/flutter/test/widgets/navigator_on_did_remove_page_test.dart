@@ -24,33 +24,33 @@ void main() {
   }
 
   testWidgets('Page API will not call onDidRemovePage', (WidgetTester tester) async {
-    final List<Page<void>> removedPages = <Page<void>>[];
+    final removedPages = <Page<void>>[];
 
-    const MaterialPage<void> page = MaterialPage<void>(
+    const page = MaterialPage<void>(
       key: ValueKey<String>('page'),
       child: Text('page'),
     );
-    const MaterialPage<void> page1 = MaterialPage<void>(
+    const page1 = MaterialPage<void>(
       key: ValueKey<String>('page1'),
       child: Text('page1'),
     );
-    const MaterialPage<void> page2 = MaterialPage<void>(
+    const page2 = MaterialPage<void>(
       key: ValueKey<String>('page2'),
       child: Text('page2'),
     );
-    const MaterialPage<void> page3 = MaterialPage<void>(
+    const page3 = MaterialPage<void>(
       key: ValueKey<String>('page3'),
       child: Text('page3'),
     );
-    const MaterialPage<void> page4 = MaterialPage<void>(
+    const page4 = MaterialPage<void>(
       key: ValueKey<String>('page4'),
       child: Text('page4'),
     );
-    const MaterialPage<void> page5 = MaterialPage<void>(
+    const page5 = MaterialPage<void>(
       key: ValueKey<String>('page5'),
       child: Text('page5'),
     );
-    const MaterialPage<void> page6 = MaterialPage<void>(
+    const page6 = MaterialPage<void>(
       key: ValueKey<String>('page6'),
       child: Text('page6'),
     );
@@ -76,14 +76,14 @@ void main() {
   });
 
   testWidgets('pop calls onDidRemovePage', (WidgetTester tester) async {
-    final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
-    final List<Page<void>> removedPage = <Page<void>>[];
+    final key = GlobalKey<NavigatorState>();
+    final removedPage = <Page<void>>[];
 
-    const MaterialPage<void> page = MaterialPage<void>(
+    const page = MaterialPage<void>(
       key: ValueKey<String>('page'),
       child: Text('page'),
     );
-    const MaterialPage<void> page1 = MaterialPage<void>(
+    const page1 = MaterialPage<void>(
       key: ValueKey<String>('page1'),
       child: Text('page1'),
     );
@@ -98,14 +98,14 @@ void main() {
   });
 
   testWidgets('pushReplacement calls onDidRemovePage', (WidgetTester tester) async {
-    final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
-    final List<Page<void>> removedPage = <Page<void>>[];
+    final key = GlobalKey<NavigatorState>();
+    final removedPage = <Page<void>>[];
 
-    const MaterialPage<void> page = MaterialPage<void>(
+    const page = MaterialPage<void>(
       key: ValueKey<String>('page'),
       child: Text('page'),
     );
-    const MaterialPage<void> page1 = MaterialPage<void>(
+    const page1 = MaterialPage<void>(
       key: ValueKey<String>('page1'),
       child: Text('page1'),
     );

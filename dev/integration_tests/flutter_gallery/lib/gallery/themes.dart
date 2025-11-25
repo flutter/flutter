@@ -12,8 +12,8 @@ TextTheme _buildTextTheme(TextTheme base) {
 }
 
 ThemeData _buildDarkTheme() {
-  const Color primaryColor = Color(0xFF0175c2);
-  const Color secondaryColor = Color(0xFF13B9FD);
+  const primaryColor = Color(0xFF0175c2);
+  const secondaryColor = Color(0xFF13B9FD);
   final ColorScheme colorScheme = const ColorScheme.dark().copyWith(
     primary: primaryColor,
     secondary: secondaryColor,
@@ -21,7 +21,7 @@ ThemeData _buildDarkTheme() {
     error: const Color(0xFFB00020),
     surface: const Color(0xFF202124),
   );
-  final ThemeData base = ThemeData(
+  final base = ThemeData(
     useMaterial3: false,
     brightness: Brightness.dark,
     colorScheme: colorScheme,
@@ -39,14 +39,14 @@ ThemeData _buildDarkTheme() {
 }
 
 ThemeData _buildLightTheme() {
-  const Color primaryColor = Color(0xFF0175c2);
-  const Color secondaryColor = Color(0xFF13B9FD);
+  const primaryColor = Color(0xFF0175c2);
+  const secondaryColor = Color(0xFF13B9FD);
   final ColorScheme colorScheme = const ColorScheme.light().copyWith(
     primary: primaryColor,
     secondary: secondaryColor,
     error: const Color(0xFFB00020),
   );
-  final ThemeData base = ThemeData(
+  final base = ThemeData(
     useMaterial3: false,
     brightness: Brightness.light,
     colorScheme: colorScheme,
