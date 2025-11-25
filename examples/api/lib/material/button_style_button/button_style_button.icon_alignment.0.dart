@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+// ignore: deprecated_member_use
 /// Flutter code sample for using [ButtonStyleButton.iconAlignment] parameter.
 
 void main() {
