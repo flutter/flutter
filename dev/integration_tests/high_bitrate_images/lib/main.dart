@@ -21,11 +21,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'SDF Demo',
-      theme: ThemeData.dark(),
-      home: const MyHomePage(),
-    );
+    return MaterialApp(title: 'SDF Demo', theme: ThemeData.dark(), home: const MyHomePage());
   }
 }
 
@@ -45,17 +41,13 @@ class _MyHomePageState extends State<MyHomePage> {
         child = const CpuSdfCanvas(targetFormat: ui.TargetPixelFormat.rFloat32);
         break;
       case TestType.cpuRgba32fSdf:
-        child = const CpuSdfCanvas(
-          targetFormat: ui.TargetPixelFormat.rgbaFloat32,
-        );
+        child = const CpuSdfCanvas(targetFormat: ui.TargetPixelFormat.rgbaFloat32);
         break;
       case TestType.gpuR32fSdf:
         child = const GpuSdfCanvas(targetFormat: ui.TargetPixelFormat.rFloat32);
         break;
       case TestType.gpuRgba32fSdf:
-        child = const GpuSdfCanvas(
-          targetFormat: ui.TargetPixelFormat.rgbaFloat32,
-        );
+        child = const GpuSdfCanvas(targetFormat: ui.TargetPixelFormat.rgbaFloat32);
         break;
     }
     return Scaffold(body: child);

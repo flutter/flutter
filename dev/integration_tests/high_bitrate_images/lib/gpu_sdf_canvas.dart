@@ -35,9 +35,7 @@ class _GpuSdfCanvasState extends State<GpuSdfCanvas> {
   }
 
   Future<ui.FragmentShader> _loadCircleShader() async {
-    final program = await ui.FragmentProgram.fromAsset(
-      'shaders/circle_sdf.frag',
-    );
+    final program = await ui.FragmentProgram.fromAsset('shaders/circle_sdf.frag');
     return program.fragmentShader();
   }
 
@@ -68,9 +66,7 @@ class _GpuSdfCanvasState extends State<GpuSdfCanvas> {
       return const Center(child: CircularProgressIndicator());
     }
     _image ??= _loadImage(_circle!);
-    return SizedBox.expand(
-      child: CustomPaint(painter: GpuSdfPainter(_image!, _sdfShader!)),
-    );
+    return SizedBox.expand(child: CustomPaint(painter: GpuSdfPainter(_image!, _sdfShader!)));
   }
 }
 

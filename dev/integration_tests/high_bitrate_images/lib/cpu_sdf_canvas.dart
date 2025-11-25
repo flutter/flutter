@@ -37,9 +37,7 @@ class _CpuSdfCanvasState extends State<CpuSdfCanvas> {
   }
 
   Future<ui.FragmentShader> _loadShader() async {
-    final ui.FragmentProgram program = await ui.FragmentProgram.fromAsset(
-      'shaders/sdf.frag',
-    );
+    final ui.FragmentProgram program = await ui.FragmentProgram.fromAsset('shaders/sdf.frag');
     return program.fragmentShader();
   }
 
