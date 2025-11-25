@@ -851,17 +851,14 @@ class _ValueIndicatorTextProcessor {
   }
 
   final TextPainter _originalPainter;
-  late final TextPainter _textPainter;
-  bool _createdNewPainter = false;
 
   /// Gets the TextPainter to use for rendering.
   /// This will be either the original painter or a new one with multiline processing applied.
-  TextPainter get textPainter => _textPainter;
+  TextPainter get textPainter => _originalPainter;
 
   void _processText(ValueIndicatorMultilineConfig multilineConfig, double textScaleFactor) {
     if (!multilineConfig.enabled || multilineConfig.maxLines == null) {
-      _textPainter = _originalPainter;
-      _createdNewPainter = false;
+      // No multiline processing is needed if multiline is disabled or maxLines is null.
       return;
     }
 
@@ -871,29 +868,14 @@ class _ValueIndicatorTextProcessor {
 
     if (actualLines <= maxLines) {
       // Text fits within maxLines, just return the original painter.
-      _textPainter = _originalPainter;
-      _createdNewPainter = false;
       return;
     }
 
-    // If text exceeds maxLines, create painter with ellipsis
+    // If text exceeds maxLines, update old painter with maxLines and ellipsis
     // using TextPainter's built-in API.
-    _textPainter = TextPainter(
-      text: _originalPainter.text,
-      textDirection: _originalPainter.textDirection,
-      textScaleFactor: textScaleFactor,
-      maxLines: maxLines,
-      ellipsis: _kEllipsis,
-    )..layout();
-    _createdNewPainter = true;
-  }
-
-  /// Disposes resources if a new TextPainter was created.
-  /// Safe to call multiple times.
-  void dispose() {
-    if (_createdNewPainter && _textPainter != _originalPainter) {
-      _textPainter.dispose();
-    }
+    _originalPainter.ellipsis = _kEllipsis;
+    _originalPainter.maxLines = maxLines;
+    _originalPainter.layout();
   }
 }
 
@@ -1153,9 +1135,6 @@ class _DropSliderValueIndicatorPathPainter {
       finalLabelPainter.paint(canvas, labelOffset);
     }
     canvas.restore();
-
-    // Dispose the processor, which handles TextPainter lifecycle automatically.
-    processor.dispose();
   }
 }
 
@@ -1667,9 +1646,6 @@ class _RoundedRectSliderValueIndicatorPathPainter {
     );
     finalLabelPainter.paint(canvas, labelOffset);
     canvas.restore();
-
-    // Dispose the processor, which handles TextPainter lifecycle automatically.
-    processor.dispose();
   }
 }
 
