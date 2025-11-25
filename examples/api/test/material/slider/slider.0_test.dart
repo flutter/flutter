@@ -37,16 +37,20 @@ void main() {
     await tester.pumpWidget(const example.SliderExampleApp());
 
     Slider slider = tester.widget<Slider>(find.byType(Slider).first);
+    // ignore: deprecated_member_use
     expect(slider.year2023, true);
     Slider discreteSlider = tester.widget<Slider>(find.byType(Slider).last);
+    // ignore: deprecated_member_use
     expect(discreteSlider.year2023, true);
 
     await tester.tap(find.byType(SwitchListTile));
     await tester.pumpAndSettle();
 
     slider = tester.widget<Slider>(find.byType(Slider).first);
+    // ignore: deprecated_member_use
     expect(slider.year2023, false);
     discreteSlider = tester.widget<Slider>(find.byType(Slider).last);
+    // ignore: deprecated_member_use
     expect(discreteSlider.year2023, false);
   });
 }

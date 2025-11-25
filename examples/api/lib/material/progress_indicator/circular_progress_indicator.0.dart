@@ -56,11 +56,16 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
             const Text('Determinate CircularProgressIndicator'),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: CircularProgressIndicator(year2023: year2023, value: controller.value),
+              child: CircularProgressIndicator(
+                // ignore: deprecated_member_use
+                year2023: year2023,
+                value: controller.value,
+              ),
             ),
             const Text('Indeterminate CircularProgressIndicator'),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
+              // ignore: deprecated_member_use
               child: CircularProgressIndicator(year2023: year2023),
             ),
             SwitchListTile(

@@ -36,10 +36,12 @@ void main() {
     LinearProgressIndicator determinateIndicator = tester.widget<LinearProgressIndicator>(
       find.byType(LinearProgressIndicator).first,
     );
+    // ignore: deprecated_member_use
     expect(determinateIndicator.year2023, true);
     LinearProgressIndicator indeterminateIndicator = tester.widget<LinearProgressIndicator>(
       find.byType(LinearProgressIndicator).last,
     );
+    // ignore: deprecated_member_use
     expect(indeterminateIndicator.year2023, true);
 
     await tester.tap(find.byType(SwitchListTile));
@@ -48,10 +50,12 @@ void main() {
     determinateIndicator = tester.widget<LinearProgressIndicator>(
       find.byType(LinearProgressIndicator).first,
     );
+    // ignore: deprecated_member_use
     expect(determinateIndicator.year2023, false);
     indeterminateIndicator = tester.widget<LinearProgressIndicator>(
       find.byType(LinearProgressIndicator).last,
     );
+    // ignore: deprecated_member_use
     expect(indeterminateIndicator.year2023, false);
   });
 }
