@@ -213,7 +213,7 @@ public class AccessibilityChannel {
     /**
      * The framework has stopped compiling the accessibility tree.
      *
-     * The subclass needs to clean up any cached accessibility data from previous update.
+     * <p>The subclass needs to clean up any cached accessibility data from previous update.
      */
     void resetSemantics();
   }
