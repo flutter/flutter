@@ -2382,6 +2382,42 @@ void main() {
     },
     skip: kIsWeb, // [intended] the web traversal order by using ARIA-OWNS.
   );
+
+  // Regression test for https://github.com/flutter/flutter/issues/173097.
+  testWidgets('Semantics geometry can scroll to reveal hidden children in a scrollable container', (
+    WidgetTester tester,
+  ) async {
+    final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SingleChildScrollView(
+          controller: scrollController,
+          child: Semantics(
+            container: true,
+            explicitChildNodes: true,
+            child: Column(
+              children: <Widget>[
+                for (int i = 0; i < 20; i++) ...<Widget>[
+                  Text('Label text $i'),
+                  const SizedBox(height: 50),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    final SemanticsNode label10 = tester.getSemantics(
+      find.text('Label text 10', skipOffstage: false),
+    );
+    expect(label10, matchesSemantics(isHidden: true));
+
+    scrollController.jumpTo(500);
+    await tester.pumpAndSettle();
+    expect(label10, matchesSemantics(isHidden: false)); // ignore: avoid_redundant_argument_values
+  });
 }
 
 class CustomSortKey extends OrdinalSortKey {
