@@ -2,7 +2,7 @@ name: tracing_tests
 description: Various tests for tracing in flutter/flutter
 
 environment:
-  sdk: ^3.8.0-0
+  sdk: ^3.9.0-0
 
 resolution: workspace
 
