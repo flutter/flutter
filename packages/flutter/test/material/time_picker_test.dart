@@ -2644,6 +2644,19 @@ void main() {
     },
     variant: TargetPlatformVariant.all(),
   );
+
+  testWidgets('TimePickerDialog does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: TimePickerDialog(initialTime: TimeOfDay(hour: 10, minute: 12)),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(TimePickerDialog)), Size.zero);
+  });
 }
 
 final Finder findDialPaint = find.descendant(

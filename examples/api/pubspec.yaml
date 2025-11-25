@@ -34,9 +34,10 @@ dev_dependencies:
     sdk: flutter
   flutter_web_plugins:
     sdk: flutter
+  flutter_lints: ^6.0.0
 
 
 flutter:
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: p9pqmd
+# PUBSPEC CHECKSUM: 1vgq65

@@ -176,4 +176,19 @@ void main() {
       expect(textButton.style!.backgroundColor!.resolve(<WidgetState>{}), Colors.transparent);
     });
   }
+
+  testWidgets('TextSelectionToolbarTextButton does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: TextSelectionToolbarTextButton(padding: EdgeInsets.all(5), child: Text('X')),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(TextSelectionToolbarTextButton)), Size.zero);
+  });
 }

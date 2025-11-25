@@ -455,6 +455,28 @@ class Environment {
     required this.generateDartPluginRegistry,
   });
 
+  Environment copyWith({Directory? outputDir}) {
+    return Environment._(
+      outputDir: outputDir ?? this.outputDir,
+      projectDir: projectDir,
+      packageConfigPath: packageConfigPath,
+      buildDir: buildDir,
+      rootBuildDir: rootBuildDir,
+      cacheDir: cacheDir,
+      defines: defines,
+      flutterRootDir: flutterRootDir,
+      fileSystem: fileSystem,
+      logger: logger,
+      artifacts: artifacts,
+      processManager: processManager,
+      platform: platform,
+      analytics: analytics,
+      engineVersion: engineVersion,
+      inputs: inputs,
+      generateDartPluginRegistry: generateDartPluginRegistry,
+    );
+  }
+
   /// The [Source] value which is substituted with the path to [projectDir].
   static const kProjectDirectory = '{PROJECT_DIR}';
 

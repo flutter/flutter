@@ -150,10 +150,6 @@ void main() {
     return fs.directory(await createProject(tempDir, arguments: <String>['--pub']));
   }
 
-  Directory widgetPreviewScaffoldFromRootProject({required Directory rootProject}) {
-    return rootProject.childDirectory('.dart_tool').childDirectory('widget_preview_scaffold');
-  }
-
   Future<void> runWidgetPreviewCommand(List<String> arguments) async {
     final CommandRunner<void> runner = createTestCommandRunner(
       WidgetPreviewCommand(
@@ -211,15 +207,12 @@ void main() {
       '--verbose',
       ?rootProject?.path,
     ]);
-    final Directory widgetPreviewScaffoldDir = widgetPreviewScaffoldFromRootProject(
-      rootProject: rootProject ?? current,
-    );
     // Don't perform analysis on Windows since `dart pub add` will use '\' for
     // path dependencies and cause analysis to fail.
     // TODO(bkonyi): enable analysis on Windows once https://github.com/dart-lang/pub/issues/4520
     // is resolved.
     if (!platform.isWindows) {
-      await analyzeProject(widgetPreviewScaffoldDir.path);
+      await analyzeProject(WidgetPreviewStartCommand.widgetPreviewScaffold.path);
     }
     fs.currentDirectory = current;
   }
@@ -404,19 +397,17 @@ List<_i1.WidgetPreview> previews() => [
       'start finds existing previews and injects them into ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
       () async {
         final Directory rootProject = await createRootProject();
-        final Directory widgetPreviewScaffoldDir = widgetPreviewScaffoldFromRootProject(
-          rootProject: rootProject,
-        );
         rootProject
             .childDirectory('lib')
             .childFile('foo.dart')
             .writeAsStringSync(samplePreviewFile);
 
-        final File generatedFile = widgetPreviewScaffoldDir.childFile(
+        await startWidgetPreview(rootProject: rootProject);
+
+        final File generatedFile = WidgetPreviewStartCommand.widgetPreviewScaffold.childFile(
           PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
         );
 
-        await startWidgetPreview(rootProject: rootProject);
         expect(generatedFile.readAsStringSync().stripScriptUris, expectedGeneratedFileContents);
         expectSinglePreviewLaunchTimingEvent();
       },
@@ -438,22 +429,18 @@ List<_i1.WidgetPreview> previews() => [
       'start finds existing previews in the CWD and injects them into ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
       () async {
         final Directory rootProject = await createRootProject();
-        final Directory widgetPreviewScaffoldDir = widgetPreviewScaffoldFromRootProject(
-          rootProject: rootProject,
-        );
         rootProject
             .childDirectory('lib')
             .childFile('foo.dart')
             .writeAsStringSync(samplePreviewFile);
 
-        final File generatedFile = widgetPreviewScaffoldDir.childFile(
-          PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
-        );
-
         // Try to execute using the CWD.
-
         fs.currentDirectory = rootProject;
         await startWidgetPreview(rootProject: null);
+
+        final File generatedFile = WidgetPreviewStartCommand.widgetPreviewScaffold.childFile(
+          PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
+        );
 
         expect(generatedFile.readAsStringSync().stripScriptUris, expectedGeneratedFileContents);
         expectSinglePreviewLaunchTimingEvent();
