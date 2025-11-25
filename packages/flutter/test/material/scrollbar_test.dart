@@ -731,9 +731,9 @@ void main() {
 
   testWidgets('Scrollbar never goes away until finger lift', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Directionality(
-        textDirection: TextDirection.ltr,
-        child: Scrollbar(
+      const MaterialApp(
+        scrollBehavior: NoScrollbarMaterialBehavior(),
+        home: Scrollbar(
           child: SingleChildScrollView(child: SizedBox(width: 4000.0, height: 4000.0)),
         ),
       ),
