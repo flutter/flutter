@@ -98,6 +98,12 @@ run-configs:
     browser: chrome
     canvaskit-variant: full
 
+  - name: chrome-wimp
+    browser: chrome
+    canvaskit-variant: chromium
+    cross-origin-isolated: true
+    enable-wimp: true
+
   - name: edge
     browser: edge
     canvaskit-variant: chromium
@@ -133,6 +139,11 @@ test-suites:
     run-config: chrome-experimental-webparagraph
     artifact-deps: [ canvaskit_experimental_webparagraph ]
     enable-ci: false
+
+  - name: chrome-dart2wasm-wimp-ui
+    test-bundle: dart2wasm-skwasm-ui
+    run-config: chrome-wimp
+    artifact-deps: [ skwasm ]
 
   - name: chrome-dart2js-canvaskit-engine
     test-bundle: dart2js-canvaskit-engine

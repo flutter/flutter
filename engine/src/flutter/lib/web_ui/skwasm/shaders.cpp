@@ -9,7 +9,7 @@
 
 #include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/display_list/effects/dl_runtime_effect_skia.h"
-#include "third_party/skia/include/core/SkImage.h"
+#include "flutter/display_list/image/dl_image.h"
 #include "third_party/skia/include/effects/SkRuntimeEffect.h"
 
 using namespace Skwasm;
@@ -19,6 +19,8 @@ namespace Skwasm {
 struct UniformData {
   std::shared_ptr<std::vector<uint8_t>> data;
 };
+
+extern sk_sp<DlRuntimeEffect> createRuntimeEffect(SkString* string);
 }  // namespace Skwasm
 
 SKWASM_EXPORT sp_wrapper<DlColorSource>* shader_createLinearGradient(
@@ -133,29 +135,22 @@ SKWASM_EXPORT void shader_dispose(sp_wrapper<DlColorSource>* shader) {
   delete shader;
 }
 
-SKWASM_EXPORT SkRuntimeEffect* runtimeEffect_create(SkString* source) {
+SKWASM_EXPORT DlRuntimeEffect* runtimeEffect_create(SkString* source) {
   liveRuntimeEffectCount++;
-  auto result = SkRuntimeEffect::MakeForShader(*source);
-  if (result.effect == nullptr) {
-    printf("Failed to compile shader. Error text:\n%s",
-           result.errorText.data());
-    return nullptr;
-  } else {
-    return result.effect.release();
-  }
+  return createRuntimeEffect(source).release();
 }
 
-SKWASM_EXPORT void runtimeEffect_dispose(SkRuntimeEffect* effect) {
+SKWASM_EXPORT void runtimeEffect_dispose(DlRuntimeEffect* effect) {
   liveRuntimeEffectCount--;
   effect->unref();
 }
 
-SKWASM_EXPORT size_t runtimeEffect_getUniformSize(SkRuntimeEffect* effect) {
-  return effect->uniformSize();
+SKWASM_EXPORT size_t runtimeEffect_getUniformSize(DlRuntimeEffect* effect) {
+  return effect->uniform_size();
 }
 
 SKWASM_EXPORT sp_wrapper<DlColorSource>* shader_createRuntimeEffectShader(
-    SkRuntimeEffect* runtimeEffect,
+    DlRuntimeEffect* runtimeEffect,
     UniformData* uniforms,
     sp_wrapper<DlColorSource>** children,
     size_t childCount) {
@@ -167,12 +162,11 @@ SKWASM_EXPORT sp_wrapper<DlColorSource>* shader_createRuntimeEffectShader(
   }
 
   return new sp_wrapper<DlColorSource>(DlColorSource::MakeRuntimeEffect(
-      DlRuntimeEffectSkia::Make(sk_ref_sp(runtimeEffect)),
-      std::move(childPointers), uniforms->data));
+      sk_ref_sp(runtimeEffect), std::move(childPointers), uniforms->data));
 }
 
 SKWASM_EXPORT sp_wrapper<DlColorSource>* shader_createFromImage(
-    SkImage* image,
+    DlImage* image,
     DlTileMode tileModeX,
     DlTileMode tileModeY,
     FilterQuality quality,
@@ -181,11 +175,11 @@ SKWASM_EXPORT sp_wrapper<DlColorSource>* shader_createFromImage(
   if (matrix33) {
     auto localMatrix = createDlMatrixFrom3x3(matrix33);
     return new sp_wrapper<DlColorSource>(DlColorSource::MakeImage(
-        DlImage::Make(image), tileModeX, tileModeY,
+        sk_ref_sp(image), tileModeX, tileModeY,
         samplingOptionsForQuality(quality), &localMatrix));
   } else {
     return new sp_wrapper<DlColorSource>(
-        DlColorSource::MakeImage(DlImage::Make(image), tileModeX, tileModeY,
+        DlColorSource::MakeImage(sk_ref_sp(image), tileModeX, tileModeY,
                                  samplingOptionsForQuality(quality)));
   }
 }

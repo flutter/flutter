@@ -8,177 +8,51 @@
 #include "surface.h"
 #include "wrappers.h"
 
-#include "flutter/display_list/geometry/dl_geometry_conversions.h"
-#include "flutter/display_list/skia/dl_sk_dispatcher.h"
+#include "images.h"
 
-#include "third_party/skia/include/core/SkColorSpace.h"
-#include "third_party/skia/include/core/SkData.h"
-#include "third_party/skia/include/core/SkImage.h"
-#include "third_party/skia/include/core/SkImageInfo.h"
-#include "third_party/skia/include/core/SkPicture.h"
-#include "third_party/skia/include/core/SkPictureRecorder.h"
-#include "third_party/skia/include/gpu/GpuTypes.h"
-#include "third_party/skia/include/gpu/ganesh/GrBackendSurface.h"
-#include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
-#include "third_party/skia/include/gpu/ganesh/GrExternalTextureGenerator.h"
-#include "third_party/skia/include/gpu/ganesh/SkImageGanesh.h"
-#include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
-#include "third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h"
-#include "third_party/skia/include/gpu/ganesh/gl/GrGLInterface.h"
-#include "third_party/skia/include/gpu/ganesh/gl/GrGLTypes.h"
-
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
-#include <emscripten/html5_webgl.h>
-
-using namespace SkImages;
 using namespace flutter;
 
-namespace {
-
-enum class PixelFormat {
-  rgba8888,
-  bgra8888,
-  rgbaFloat32,
-};
-
-SkColorType colorTypeForPixelFormat(PixelFormat format) {
-  switch (format) {
-    case PixelFormat::rgba8888:
-      return SkColorType::kRGBA_8888_SkColorType;
-    case PixelFormat::bgra8888:
-      return SkColorType::kBGRA_8888_SkColorType;
-    case PixelFormat::rgbaFloat32:
-      return SkColorType::kRGBA_F32_SkColorType;
-  }
-}
-
-SkAlphaType alphaTypeForPixelFormat(PixelFormat format) {
-  switch (format) {
-    case PixelFormat::rgba8888:
-    case PixelFormat::bgra8888:
-      return SkAlphaType::kPremul_SkAlphaType;
-    case PixelFormat::rgbaFloat32:
-      return SkAlphaType::kUnpremul_SkAlphaType;
-  }
-}
-
-class ExternalWebGLTexture : public GrExternalTexture {
- public:
-  ExternalWebGLTexture(GrBackendTexture backendTexture,
-                       GLuint textureId,
-                       EMSCRIPTEN_WEBGL_CONTEXT_HANDLE context)
-      : _backendTexture(backendTexture),
-        _textureId(textureId),
-        _webGLContext(context) {}
-
-  GrBackendTexture getBackendTexture() override { return _backendTexture; }
-
-  void dispose() override {
-    Skwasm::makeCurrent(_webGLContext);
-    glDeleteTextures(1, &_textureId);
-  }
-
- private:
-  GrBackendTexture _backendTexture;
-  GLuint _textureId;
-  EMSCRIPTEN_WEBGL_CONTEXT_HANDLE _webGLContext;
-};
-}  // namespace
-
-class TextureSourceImageGenerator : public GrExternalTextureGenerator {
- public:
-  TextureSourceImageGenerator(SkImageInfo ii,
-                              SkwasmObject textureSource,
-                              Skwasm::Surface* surface)
-      : GrExternalTextureGenerator(ii),
-        _textureSourceWrapper(
-            surface->createTextureSourceWrapper(textureSource)) {}
-
-  std::unique_ptr<GrExternalTexture> generateExternalTexture(
-      GrRecordingContext* context,
-      skgpu::Mipmapped mipmapped) override {
-    GrGLTextureInfo glInfo;
-    glInfo.fID = skwasm_createGlTextureFromTextureSource(
-        _textureSourceWrapper->getTextureSource(), fInfo.width(),
-        fInfo.height());
-    glInfo.fFormat = GL_RGBA8_OES;
-    glInfo.fTarget = GL_TEXTURE_2D;
-
-    auto backendTexture = GrBackendTextures::MakeGL(
-        fInfo.width(), fInfo.height(), skgpu::Mipmapped::kNo, glInfo);
-
-    // In order to bind the image source to the texture, makeTexture has changed
-    // which texture is "in focus" for the WebGL context.
-    GrAsDirectContext(context)->resetContext(kTextureBinding_GrGLBackendState);
-    return std::make_unique<ExternalWebGLTexture>(
-        backendTexture, glInfo.fID, emscripten_webgl_get_current_context());
-  }
-
- private:
-  std::unique_ptr<Skwasm::TextureSourceWrapper> _textureSourceWrapper;
-};
-
-SKWASM_EXPORT SkImage* image_createFromPicture(DisplayList* displayList,
+SKWASM_EXPORT DlImage* image_createFromPicture(DisplayList* displayList,
                                                int32_t width,
                                                int32_t height) {
   liveImageCount++;
-  SkPictureRecorder recorder;
-  SkCanvas* canvas =
-      recorder.beginRecording(ToSkRect(displayList->GetBounds()));
-  DlSkCanvasDispatcher dispatcher(canvas);
-  dispatcher.drawDisplayList(sk_ref_sp(displayList), 1.0f);
-
-  return DeferredFromPicture(recorder.finishRecordingAsPicture(),
-                             {width, height}, nullptr, nullptr, BitDepth::kU8,
-                             SkColorSpace::MakeSRGB())
-      .release();
+  return Skwasm::MakeImageFromPicture(displayList, width, height).release();
 }
 
-SKWASM_EXPORT SkImage* image_createFromPixels(SkData* data,
+SKWASM_EXPORT DlImage* image_createFromPixels(SkData* data,
                                               int width,
                                               int height,
-                                              PixelFormat pixelFormat,
+                                              Skwasm::PixelFormat pixelFormat,
                                               size_t rowByteCount) {
   liveImageCount++;
-  return SkImages::RasterFromData(
-             SkImageInfo::Make(width, height,
-                               colorTypeForPixelFormat(pixelFormat),
-                               alphaTypeForPixelFormat(pixelFormat),
-                               SkColorSpace::MakeSRGB()),
-             sk_ref_sp(data), rowByteCount)
+  return Skwasm::MakeImageFromPixels(data, width, height, pixelFormat,
+                                     rowByteCount)
       .release();
 }
 
-SKWASM_EXPORT SkImage* image_createFromTextureSource(SkwasmObject textureSource,
+SKWASM_EXPORT DlImage* image_createFromTextureSource(SkwasmObject textureSource,
                                                      int width,
                                                      int height,
                                                      Skwasm::Surface* surface) {
   liveImageCount++;
-  return SkImages::DeferredFromTextureGenerator(
-             std::unique_ptr<TextureSourceImageGenerator>(
-                 new TextureSourceImageGenerator(
-                     SkImageInfo::Make(width, height,
-                                       SkColorType::kRGBA_8888_SkColorType,
-                                       SkAlphaType::kPremul_SkAlphaType),
-                     textureSource, surface)))
+  return Skwasm::MakeImageFromTexture(textureSource, width, height, surface)
       .release();
 }
 
-SKWASM_EXPORT void image_ref(SkImage* image) {
+SKWASM_EXPORT void image_ref(DlImage* image) {
   liveImageCount++;
   image->ref();
 }
 
-SKWASM_EXPORT void image_dispose(SkImage* image) {
+SKWASM_EXPORT void image_dispose(DlImage* image) {
   liveImageCount--;
   image->unref();
 }
 
-SKWASM_EXPORT int image_getWidth(SkImage* image) {
+SKWASM_EXPORT int image_getWidth(DlImage* image) {
   return image->width();
 }
 
-SKWASM_EXPORT int image_getHeight(SkImage* image) {
+SKWASM_EXPORT int image_getHeight(DlImage* image) {
   return image->height();
 }
