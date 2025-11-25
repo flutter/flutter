@@ -48,45 +48,37 @@ class _UnfocusExampleState extends State<UnfocusExample> {
                 );
               }),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                ...List<Widget>.generate(UnfocusDisposition.values.length, (
-                  int index,
-                ) {
-                  return Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Radio<UnfocusDisposition>(
-                        // TODO(loic-sharma): Migrate to RadioGroup.
-                        // https://github.com/flutter/flutter/issues/179088
-                        // ignore: deprecated_member_use
-                        groupValue: disposition,
-                        // TODO(loic-sharma): Migrate to RadioGroup.
-                        // https://github.com/flutter/flutter/issues/179088
-                        // ignore: deprecated_member_use
-                        onChanged: (UnfocusDisposition? value) {
-                          setState(() {
-                            if (value != null) {
-                              disposition = value;
-                            }
-                          });
-                        },
-                        value: UnfocusDisposition.values[index],
-                      ),
-                      Text(UnfocusDisposition.values[index].name),
-                    ],
-                  );
-                }),
-                OutlinedButton(
-                  child: const Text('UNFOCUS'),
-                  onPressed: () {
-                    setState(() {
-                      primaryFocus!.unfocus(disposition: disposition);
-                    });
-                  },
-                ),
-              ],
+            RadioGroup<UnfocusDisposition>(
+              groupValue: disposition,
+              onChanged: (UnfocusDisposition? value) {
+                setState(() {
+                  if (value != null) {
+                    disposition = value;
+                  }
+                });
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
+                  for (final UnfocusDisposition unfocusDisposition
+                      in UnfocusDisposition.values)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Radio<UnfocusDisposition>(value: unfocusDisposition),
+                        Text(unfocusDisposition.name),
+                      ],
+                    ),
+                  OutlinedButton(
+                    child: const Text('UNFOCUS'),
+                    onPressed: () {
+                      setState(() {
+                        primaryFocus!.unfocus(disposition: disposition);
+                      });
+                    },
+                  ),
+                ],
+              ),
             ),
           ],
         ),
