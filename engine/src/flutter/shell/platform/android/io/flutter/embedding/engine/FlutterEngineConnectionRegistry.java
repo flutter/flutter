@@ -327,6 +327,15 @@ import java.util.Set;
   private void attachToActivityInternal(@NonNull Activity activity, @NonNull Lifecycle lifecycle) {
     this.activityPluginBinding = new FlutterEngineActivityPluginBinding(activity, lifecycle);
 
+    final Intent intent = activity.getIntent();
+    if (intent != null) {
+      if (intent.hasExtra("enable-software-rendering")) {
+        Log.w(
+            TAG,
+            "Setting engine flags on Android via Intent is no longer supported. See flutter/docs/engine/Android-Flutter-Shell-Arguments.md for ways to configure software rendering instead.");
+      }
+    }
+
     // Activate the PlatformViewsController. This must happen before any plugins attempt
     // to use it, otherwise an error stack trace will appear that says there is no
     // flutter/platform_views channel.

@@ -359,7 +359,7 @@ import java.util.Set;
             TAG,
             "Engine flags can no longer be set via Intent on Android. If you wish to set "
                 + flag.commandLineArgument
-                + "either set the flag in the application manifest or via the command line. See flutter/docs/engine/Android-Flutter-Shell-Arguments.md for details.");
+                + ", see flutter/docs/engine/Android-Flutter-Shell-Arguments.md for alternative methods.");
         break;
       }
     }
