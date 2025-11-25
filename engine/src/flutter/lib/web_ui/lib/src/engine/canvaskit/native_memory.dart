@@ -82,7 +82,7 @@ class UniqueRef<T extends JSObject> {
     if (Instrumentation.enabled) {
       Instrumentation.instance.incrementCounter('$_debugOwnerLabel Deleted');
     }
-    final object = nativeObject as SkDeletable;
+    final SkDeletable object = nativeObject as SkDeletable;
     if (!object.isDeleted()) {
       object.delete();
     }

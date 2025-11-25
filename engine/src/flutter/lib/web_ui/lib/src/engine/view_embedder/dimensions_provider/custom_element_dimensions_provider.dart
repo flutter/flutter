@@ -38,7 +38,7 @@ class CustomElementDimensionsProvider extends DimensionsProvider {
       List<DomResizeObserverEntry> entries,
       DomResizeObserver _,
     ) {
-      for (final _ in entries) {
+      for (final DomResizeObserverEntry _ in entries) {
         _broadcastSize(null);
       }
     });

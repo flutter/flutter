@@ -95,7 +95,7 @@ Future<void> doTests() async {
           ),
         );
 
-        final element = views.getInitialData(viewId) as InitialData?;
+        final InitialData? element = views.getInitialData(viewId) as InitialData?;
 
         expect(element, isNotNull);
         expect(element!.someInt, 42);

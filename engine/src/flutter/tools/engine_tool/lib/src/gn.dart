@@ -5,7 +5,6 @@
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
-import 'package:process_runner/src/process_runner.dart';
 
 import 'environment.dart';
 import 'label.dart';
@@ -45,8 +44,8 @@ interface class Gn {
   ///
   /// See also: <https://gn.googlesource.com/gn/+/main/docs/reference.md#cmd_desc>.
   Future<List<BuildTarget>> desc(String outDir, TargetPattern pattern) async {
-    final List<String> command = [_gnPath, 'desc', '--format=json', outDir, pattern.toGnPattern()];
-    final ProcessRunnerResult process = await _environment.processRunner.runProcess(
+    final command = [_gnPath, 'desc', '--format=json', outDir, pattern.toGnPattern()];
+    final process = await _environment.processRunner.runProcess(
       command,
       workingDirectory: _environment.engine.srcDir,
       failOk: true,
@@ -56,9 +55,9 @@ interface class Gn {
       // "The input testing/foo:foo matches no targets, configs or files."
       //
       // Then report a nicer error, versus a fatal error.
-      final String stdout = process.stdout;
+      final stdout = process.stdout;
       if (stdout.contains('matches no targets, configs or files')) {
-        final String gnPattern = pattern.toGnPattern();
+        final gnPattern = pattern.toGnPattern();
         if (!gnPattern.startsWith('//flutter')) {
           _environment.logger.warning(
             'No targets matched the pattern `$gnPattern`.'
@@ -91,12 +90,12 @@ interface class Gn {
         .asMap()
         .entries
         .map((entry) {
-          final String label = entry.key;
-          final Object? properties = entry.value;
+          final label = entry.key;
+          final properties = entry.value;
           if (properties is! Map<String, Object?>) {
             return null;
           }
-          final BuildTarget? target = BuildTarget._fromJson(label, JsonObject(properties));
+          final target = BuildTarget._fromJson(label, JsonObject(properties));
           if (target == null) {
             _environment.logger.warning(
               'Unknown target type for $label: type=${properties['type']}',
@@ -120,12 +119,12 @@ sealed class BuildTarget {
     required bool testOnly,
     required JsonObject json,
   }) {
-    final JsonObject? metadata = json.objectOrNull('metadata');
+    final metadata = json.objectOrNull('metadata');
     if (metadata != null) {
-      final List<String>? actionTypes = metadata.stringListOrNull('action_type');
+      final actionTypes = metadata.stringListOrNull('action_type');
       if (actionTypes != null && actionTypes.contains('dart_test')) {
         final String executable;
-        final List<String>? outputs = json.stringListOrNull('outputs');
+        final outputs = json.stringListOrNull('outputs');
         if (outputs == null || outputs.isEmpty) {
           throw StateError('Expected at least one output for $label');
         }

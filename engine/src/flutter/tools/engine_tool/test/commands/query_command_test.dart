@@ -62,7 +62,7 @@ void main() {
         'mac_test_config': macOSBuilders.buildConfig(path: 'ci/builders/mac_test_config.json'),
       },
     );
-    final int result = await runner.run(<String>['query', 'builders']);
+    final result = await runner.run(<String>['query', 'builders']);
 
     printOnFailure(testEnvironment.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));
@@ -123,7 +123,7 @@ void main() {
         ),
       },
     );
-    final int result = await runner.run(<String>[
+    final result = await runner.run(<String>[
       'query',
       'builders',
       '--builder',
@@ -187,7 +187,7 @@ void main() {
         'mac_test_config': macOSBuilders.buildConfig(path: 'ci/builders/mac_test_config.json'),
       },
     );
-    final int result = await runner.run(<String>['query', 'builders', '--all']);
+    final result = await runner.run(<String>['query', 'builders', '--all']);
 
     printOnFailure(testEnvironment.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));
@@ -270,7 +270,7 @@ void main() {
         'linux_test_config': linuxBuilders1.buildConfig(path: 'ci/builders/linux_test_config.json'),
       },
     );
-    final int result = await runner.run(<String>['query', 'targets']);
+    final result = await runner.run(<String>['query', 'targets']);
 
     printOnFailure(testEnvironment.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));
@@ -281,7 +281,7 @@ void main() {
       '//flutter/fml:fml_unittests',
     ];
 
-    final List<String> testLogs = stringsFromLogs(testEnvironment.testLogs);
+    final testLogs = stringsFromLogs(testEnvironment.testLogs);
     for (final testLog in testLogs) {
       // Expect one of the expected targets to be in the output.
       // Then remove it from the list of expected targets.

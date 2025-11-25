@@ -14,9 +14,9 @@ void main() {
 }
 
 void testMain() {
-  var callOrder = 1;
-  var initCalled = 0;
-  var runCalled = 0;
+  int callOrder = 1;
+  int initCalled = 0;
+  int runCalled = 0;
 
   setUp(() {
     callOrder = 1;

@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 
 void main() {
   test('PlatformView layers do not emit errors from tester', () async {
-    final builder = SceneBuilder();
+    final SceneBuilder builder = SceneBuilder();
     builder.addPlatformView(1);
     PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
       final Scene scene = builder.build();

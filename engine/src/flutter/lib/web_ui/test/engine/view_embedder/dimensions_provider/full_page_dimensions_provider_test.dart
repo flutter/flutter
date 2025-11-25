@@ -22,7 +22,7 @@ void doTests() {
     });
 
     test('returns visualViewport physical size (width * dpr)', () {
-      const dpr = 2.5;
+      const double dpr = 2.5;
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(dpr);
       final ui.Size expected = ui.Size(
         domWindow.visualViewport!.width! * dpr,
@@ -44,7 +44,7 @@ void doTests() {
 
     test('from viewport physical size (simulated keyboard)', () {
       // Simulate a 100px tall keyboard showing...
-      const dpr = 2.5;
+      const double dpr = 2.5;
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(dpr);
       const double keyboardGap = 100;
       final double physicalHeight = (domWindow.visualViewport!.height! + keyboardGap) * dpr;
@@ -85,7 +85,7 @@ void doTests() {
 
     test('closed by onHotRestart', () {
       // Register an onDone listener for the stream
-      final completer = Completer<bool>();
+      final Completer<bool> completer = Completer<bool>();
       provider.onResize.listen(
         null,
         onDone: () {

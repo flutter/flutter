@@ -33,7 +33,7 @@ class SafariMacOsEnvironment extends BrowserEnvironment {
 
   @override
   Future<void> prepare() async {
-    var retryCount = 0;
+    int retryCount = 0;
 
     while (true) {
       try {
@@ -143,7 +143,7 @@ $stackTrace
   /// See also: https://github.com/flutter/flutter/issues/163790
   Future<WebDriver> _createDriverSessionWithRetry() async {
     const kSessionRetryCount = 10;
-    var retryCount = 0;
+    int retryCount = 0;
     while (true) {
       // Give Safari a chance to launch.
       //
@@ -190,14 +190,14 @@ $stackTrace
     // 100ms seems enough in most cases, but feel free to revisit this.
     await Future<void>.delayed(const Duration(milliseconds: 100));
 
-    var retryCount = 0;
+    int retryCount = 0;
     while (true) {
       retryCount += 1;
       final httpClient = HttpClient();
       try {
-        final HttpClientRequest request = await httpClient.get('localhost', _portNumber, '/status');
-        final HttpClientResponse response = await request.close();
-        final String stringData = await response.transform(utf8.decoder).join();
+        final request = await httpClient.get('localhost', _portNumber, '/status');
+        final response = await request.close();
+        final stringData = await response.transform(utf8.decoder).join();
         final jsonResponse = json.decode(stringData) as Map<String, Object?>;
         final value = jsonResponse['value']! as Map<String, Object?>;
         final ready = value['ready']! as bool;
@@ -220,7 +220,7 @@ $stackTrace
 
   @override
   Future<Browser> launchBrowserInstance(Uri url, {bool debug = false}) async {
-    return WebDriverBrowser(webDriver, url);
+    return WebDriverBrowser(webDriver!, url);
   }
 
   @override

@@ -93,7 +93,7 @@ class ZoneSpy {
   final List<String> printLog = <String>[];
 
   dynamic run(dynamic Function() function) {
-    final printInterceptor = ZoneSpecification(
+    final ZoneSpecification printInterceptor = ZoneSpecification(
       print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
         printLog.add(line);
       },

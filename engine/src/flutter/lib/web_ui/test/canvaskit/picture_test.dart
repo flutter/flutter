@@ -25,7 +25,7 @@ void testMain() {
         final ui.PictureRecorder recorder = ui.PictureRecorder();
         final ui.Canvas canvas = ui.Canvas(recorder);
         canvas.drawPaint(ui.Paint());
-        final picture = recorder.endRecording() as CkPicture;
+        final CkPicture picture = recorder.endRecording() as CkPicture;
         expect(picture.skiaObject, isNotNull);
         expect(picture.debugDisposed, isFalse);
         picture.debugCheckNotDisposed('Test.'); // must not throw
@@ -85,7 +85,7 @@ void testMain() {
       canvas.drawCircle(const ui.Offset(200, 200), 100, ui.Paint()..color = green);
       canvas.drawOval(const ui.Rect.fromLTRB(210, 40, 268, 199), ui.Paint()..color = blue);
 
-      final picture = recorder.endRecording() as CkPicture;
+      final CkPicture picture = recorder.endRecording() as CkPicture;
       final ui.Rect bounds = picture.cullRect;
       // Top left bounded by the red rrect, right bounded by right edge
       // of red rrect, bottom bounded by bottom of green circle.
@@ -99,7 +99,7 @@ void testMain() {
       final ui.Canvas canvas = ui.Canvas(recorder);
       canvas.drawColor(red, ui.BlendMode.src);
 
-      final picture = recorder.endRecording() as CkPicture;
+      final CkPicture picture = recorder.endRecording() as CkPicture;
       final ui.Rect bounds = picture.cullRect;
       // Since the drawColor command fills the entire canvas, the computed
       // bounds default to the cullRect that is passed in when the
@@ -121,7 +121,7 @@ void testMain() {
       canvas.drawCircle(const ui.Offset(200, 200), 100, ui.Paint()..color = green);
       canvas.drawOval(const ui.Rect.fromLTRB(210, 40, 268, 199), ui.Paint()..color = blue);
 
-      final picture = recorder.endRecording() as CkPicture;
+      final CkPicture picture = recorder.endRecording() as CkPicture;
       final int bytesUsed = picture.approximateBytesUsed;
       // Sanity check: the picture should use more than 20 bytes of memory.
       expect(bytesUsed, greaterThan(20));

@@ -20,7 +20,7 @@ class WebFontCollection implements FlutterFontCollection {
   /// fonts declared within.
   @override
   Future<AssetFontsResult> loadAssetFonts(FontManifest manifest) async {
-    final pendingFonts =
+    final List<Future<(String, FontLoadError?)>> pendingFonts =
         <Future<(String, FontLoadError?)>>[];
     for (final FontFamily family in manifest.families) {
       for (final FontAsset fontAsset in family.fontAssets) {
@@ -33,8 +33,8 @@ class WebFontCollection implements FlutterFontCollection {
       }
     }
 
-    final loadedFonts = <String>[];
-    final fontFailures = <String, FontLoadError>{};
+    final List<String> loadedFonts = <String>[];
+    final Map<String, FontLoadError> fontFailures = <String, FontLoadError>{};
     for (final (String asset, FontLoadError? error) in await Future.wait(pendingFonts)) {
       if (error == null) {
         loadedFonts.add(asset);
@@ -108,8 +108,8 @@ class WebFontCollection implements FlutterFontCollection {
     String asset,
     Map<String, String> descriptors,
   ) async {
-    final fontFaces = <DomFontFace>[];
-    final errors = <FontLoadError>[];
+    final List<DomFontFace> fontFaces = <DomFontFace>[];
+    final List<FontLoadError> errors = <FontLoadError>[];
     try {
       if (startWithDigit.hasMatch(family) || notPunctuation.stringMatch(family) != family) {
         // Load a font family name with special characters once here wrapped in
@@ -134,7 +134,7 @@ class WebFontCollection implements FlutterFontCollection {
       // Since we can't use tear-offs for interop members, this code is faster
       // and easier to read with a for loop instead of forEach.
       // ignore: prefer_foreach
-      for (final font in fontFaces) {
+      for (final DomFontFace font in fontFaces) {
         domDocument.fonts!.add(font);
       }
     } catch (e) {

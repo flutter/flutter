@@ -46,10 +46,10 @@ void main() {
   }
 
   test('--fix is passed to ci/bin/format.dart by default', () async {
-    final logger = Logger.test((_) {});
+    final Logger logger = Logger.test((_) {});
     final FakeProcessManager manager = _formatProcessManager(expectedFlags: <String>['--fix']);
     final Environment env = linuxEnv(logger, manager);
-    final runner = ToolCommandRunner(
+    final ToolCommandRunner runner = ToolCommandRunner(
       environment: env,
       configs: <String, BuilderConfig>{},
     );
@@ -58,10 +58,10 @@ void main() {
   });
 
   test('--fix is not passed to ci/bin/format.dart with --dry-run', () async {
-    final logger = Logger.test((_) {});
+    final Logger logger = Logger.test((_) {});
     final FakeProcessManager manager = _formatProcessManager(expectedFlags: <String>[]);
     final Environment env = linuxEnv(logger, manager);
-    final runner = ToolCommandRunner(
+    final ToolCommandRunner runner = ToolCommandRunner(
       environment: env,
       configs: <String, BuilderConfig>{},
     );
@@ -70,13 +70,13 @@ void main() {
   });
 
   test('exit code is non-zero when ci/bin/format.dart exit code was non zero', () async {
-    final logger = Logger.test((_) {});
+    final Logger logger = Logger.test((_) {});
     final FakeProcessManager manager = _formatProcessManager(
       expectedFlags: <String>['--fix'],
       exitCode: 1,
     );
     final Environment env = linuxEnv(logger, manager);
-    final runner = ToolCommandRunner(
+    final ToolCommandRunner runner = ToolCommandRunner(
       environment: env,
       configs: <String, BuilderConfig>{},
     );
@@ -85,12 +85,12 @@ void main() {
   });
 
   test('--all-files is passed to ci/bin/format.dart correctly', () async {
-    final logger = Logger.test((_) {});
+    final Logger logger = Logger.test((_) {});
     final FakeProcessManager manager = _formatProcessManager(
       expectedFlags: <String>['--fix', '--all-files'],
     );
     final Environment env = linuxEnv(logger, manager);
-    final runner = ToolCommandRunner(
+    final ToolCommandRunner runner = ToolCommandRunner(
       environment: env,
       configs: <String, BuilderConfig>{},
     );
@@ -99,12 +99,12 @@ void main() {
   });
 
   test('--verbose is passed to ci/bin/format.dart correctly', () async {
-    final logger = Logger.test((_) {});
+    final Logger logger = Logger.test((_) {});
     final FakeProcessManager manager = _formatProcessManager(
       expectedFlags: <String>['--fix', '--verbose'],
     );
     final Environment env = linuxEnv(logger, manager);
-    final runner = ToolCommandRunner(
+    final ToolCommandRunner runner = ToolCommandRunner(
       environment: env,
       configs: <String, BuilderConfig>{},
     );
@@ -113,15 +113,15 @@ void main() {
   });
 
   test('--quiet suppresses non-error output', () async {
-    final testLogs = <LogRecord>[];
-    final logger = Logger.test(testLogs.add);
+    final List<LogRecord> testLogs = <LogRecord>[];
+    final Logger logger = Logger.test(testLogs.add);
     final FakeProcessManager manager = _formatProcessManager(
       expectedFlags: <String>['--fix'],
       stdout: <String>['many', 'lines', 'of', 'output'].join('\n'),
       stderr: 'error\n',
     );
     final Environment env = linuxEnv(logger, manager);
-    final runner = ToolCommandRunner(
+    final ToolCommandRunner runner = ToolCommandRunner(
       environment: env,
       configs: <String, BuilderConfig>{},
     );
@@ -131,8 +131,8 @@ void main() {
   });
 
   test('Diffs are suppressed by default', () async {
-    final testLogs = <LogRecord>[];
-    final logger = Logger.test(testLogs.add);
+    final List<LogRecord> testLogs = <LogRecord>[];
+    final Logger logger = Logger.test(testLogs.add);
     final FakeProcessManager manager = _formatProcessManager(
       expectedFlags: <String>['--fix'],
       stdout: <String>[
@@ -145,7 +145,7 @@ void main() {
       ].join('\n'),
     );
     final Environment env = linuxEnv(logger, manager);
-    final runner = ToolCommandRunner(
+    final ToolCommandRunner runner = ToolCommandRunner(
       environment: env,
       configs: <String, BuilderConfig>{},
     );
@@ -155,8 +155,8 @@ void main() {
   });
 
   test('--dry-run disables --fix and prints diffs', () async {
-    final testLogs = <LogRecord>[];
-    final logger = Logger.test(testLogs.add);
+    final List<LogRecord> testLogs = <LogRecord>[];
+    final Logger logger = Logger.test(testLogs.add);
     final FakeProcessManager manager = _formatProcessManager(
       expectedFlags: <String>[],
       stdout: <String>[
@@ -169,7 +169,7 @@ void main() {
       ].join('\n'),
     );
     final Environment env = linuxEnv(logger, manager);
-    final runner = ToolCommandRunner(
+    final ToolCommandRunner runner = ToolCommandRunner(
       environment: env,
       configs: <String, BuilderConfig>{},
     );
@@ -189,9 +189,9 @@ void main() {
   });
 
   test('progress lines are followed by a carriage return', () async {
-    final testLogs = <LogRecord>[];
-    final logger = Logger.test(testLogs.add);
-    const progressLine =
+    final List<LogRecord> testLogs = <LogRecord>[];
+    final Logger logger = Logger.test(testLogs.add);
+    const String progressLine =
         'diff Jobs:  46% done, 1528/3301 completed,  '
         '7 in progress, 1753 pending,  13 failed.';
     final FakeProcessManager manager = _formatProcessManager(
@@ -199,7 +199,7 @@ void main() {
       stdout: progressLine,
     );
     final Environment env = linuxEnv(logger, manager);
-    final runner = ToolCommandRunner(
+    final ToolCommandRunner runner = ToolCommandRunner(
       environment: env,
       configs: <String, BuilderConfig>{},
     );
@@ -217,8 +217,8 @@ FakeProcessManager _formatProcessManager({
   bool Function(Object?, {String? workingDirectory})? canRun,
   bool failUnknown = true,
 }) {
-  final success = io.ProcessResult(1, 0, '', '');
-  final formatProcess = FakeProcess(exitCode: exitCode, stdout: stdout, stderr: stderr);
+  final io.ProcessResult success = io.ProcessResult(1, 0, '', '');
+  final FakeProcess formatProcess = FakeProcess(exitCode: exitCode, stdout: stdout, stderr: stderr);
   return FakeProcessManager(
     canRun: canRun ?? (Object? exe, {String? workingDirectory}) => true,
     onRun: (FakeCommandLogEntry entry) => switch (entry.command) {

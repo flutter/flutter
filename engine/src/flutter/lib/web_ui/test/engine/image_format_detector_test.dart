@@ -52,7 +52,7 @@ Future<void> testMain() async {
       final Uint8List responseBytes = await response.asUint8List();
 
       // WebP files which are known to be animated.
-      const animatedWebpFiles = <String>[
+      const List<String> animatedWebpFiles = <String>[
         '/test_images/blendBG.webp',
         '/test_images/required.webp',
         '/test_images/stoplight_h.webp',
@@ -60,7 +60,7 @@ Future<void> testMain() async {
       ];
 
       // GIF files which are known to be animated.
-      const animatedGifFiles = <String>[
+      const List<String> animatedGifFiles = <String>[
         '/test_images/alphabetAnim.gif',
         '/test_images/colorTables.gif',
         '/test_images/flightAnim.gif',
@@ -100,7 +100,7 @@ Uint8List _createTestGif({
   int numFrames = 2,
   bool includeManyCommentBlocks = true,
 }) {
-  final bytes = <int>[];
+  final List<int> bytes = <int>[];
   // Generate header.
   bytes.addAll('GIF'.codeUnits);
   bytes.addAll('89a'.codeUnits);
@@ -123,17 +123,17 @@ Uint8List _createTestGif({
 
   // Generate data.
   List<int> generateCommentBlock() {
-    final comment = <int>[];
+    final List<int> comment = <int>[];
     comment.add(0x21);
     comment.add(0xfe);
-    const commentString = 'This is a comment';
+    const String commentString = 'This is a comment';
     comment.add(commentString.codeUnits.length);
     comment.addAll(commentString.codeUnits);
     comment.add(0);
     return comment;
   }
 
-  for (var i = 0; i < numFrames; i++) {
+  for (int i = 0; i < numFrames; i++) {
     if (includeManyCommentBlocks) {
       bytes.addAll(generateCommentBlock());
     }
@@ -163,7 +163,7 @@ Uint8List _createTestGif({
     bytes.add(0);
 
     bytes.add(0);
-    const fakeImageData = 'This is an image';
+    const String fakeImageData = 'This is an image';
     bytes.add(fakeImageData.codeUnits.length);
     bytes.addAll(fakeImageData.codeUnits);
     bytes.add(0);

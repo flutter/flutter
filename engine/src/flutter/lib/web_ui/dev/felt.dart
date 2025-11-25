@@ -36,7 +36,7 @@ Future<void> main(List<String> rawArgs) async {
 
   _listenToShutdownSignals();
 
-  var exitCode = -1;
+  int exitCode = -1;
   try {
     final bool? result = await runner.run(args);
     if (result != true) {

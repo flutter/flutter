@@ -28,7 +28,7 @@ void main() async {
       workingDirectory: testEnvironment.environment.engine.srcDir,
       failOk: true,
     );
-    final List<ExecutedProcess> history = testEnvironment.processHistory;
+    final history = testEnvironment.processHistory;
     expect(
       history,
       containsCommand((command) {
@@ -57,7 +57,7 @@ void main() async {
       workingDirectory: testEnvironment.environment.engine.srcDir,
       failOk: true,
     );
-    final List<ExecutedProcess> history = testEnvironment.processHistory;
+    final history = testEnvironment.processHistory;
     expect(
       history,
       doesNotContainCommand((command) {

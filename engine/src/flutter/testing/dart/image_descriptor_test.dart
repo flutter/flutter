@@ -55,9 +55,9 @@ void main() {
   });
 
   test('basic image descriptor - raw', () async {
-    final bytes = Uint8List.fromList(List<int>.filled(16, 0xFFABCDEF));
+    final Uint8List bytes = Uint8List.fromList(List<int>.filled(16, 0xFFABCDEF));
     final ImmutableBuffer buffer = await ImmutableBuffer.fromUint8List(bytes);
-    final descriptor = ImageDescriptor.raw(
+    final ImageDescriptor descriptor = ImageDescriptor.raw(
       buffer,
       width: 4,
       height: 4,
@@ -90,7 +90,7 @@ void main() {
 }
 
 Future<Uint8List> readFile(String fileName) async {
-  final file = File(path.join('flutter', 'testing', 'resources', fileName));
+  final File file = File(path.join('flutter', 'testing', 'resources', fileName));
   return file.readAsBytes();
 }
 

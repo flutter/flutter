@@ -40,12 +40,12 @@ class CkPaint implements ui.Paint {
     skPaint.setColorInt(_colorValue);
     skPaint.setStrokeMiter(strokeMiterLimit);
 
-    final ManagedSkColorFilter? effectiveColorFilter = _effectiveColorFilter;
+    final effectiveColorFilter = _effectiveColorFilter;
     if (effectiveColorFilter != null) {
       skPaint.setColorFilter(effectiveColorFilter.skiaObject);
     }
 
-    final CkShader? shader = _shader;
+    final shader = _shader;
     if (shader != null) {
       skPaint.setShader(shader.getSkShader(filterQuality));
       if (shader.isGradient) {
@@ -63,7 +63,7 @@ class CkPaint implements ui.Paint {
       }
     }
 
-    final CkManagedSkImageFilterConvertible? localImageFilter = _imageFilter;
+    final localImageFilter = _imageFilter;
     if (localImageFilter != null) {
       localImageFilter.withSkImageFilter((skImageFilter) {
         skPaint.setImageFilter(skImageFilter);
@@ -216,11 +216,11 @@ class CkPaint implements ui.Paint {
 
   @override
   String toString() {
-    var resultString = 'Paint()';
+    String resultString = 'Paint()';
 
     assert(() {
-      final result = StringBuffer();
-      var semicolon = '';
+      final StringBuffer result = StringBuffer();
+      String semicolon = '';
       result.write('Paint(');
       if (style == ui.PaintingStyle.stroke) {
         result.write('$style');
@@ -300,7 +300,7 @@ class CkFragmentProgram implements ui.FragmentProgram {
   CkFragmentProgram(this.name, this.effect, this.uniforms, this.floatCount, this.textureCount);
 
   factory CkFragmentProgram.fromBytes(String name, Uint8List data) {
-    final shaderData = ShaderData.fromBytes(data);
+    final ShaderData shaderData = ShaderData.fromBytes(data);
     final SkRuntimeEffect? effect = MakeRuntimeEffect(shaderData.source);
     if (effect == null) {
       throw const FormatException('Invalid Shader Source');
@@ -327,8 +327,8 @@ class CkFragmentProgram implements ui.FragmentProgram {
   }
 
   int _getShaderIndex(String name, int index) {
-    var result = 0;
-    for (final UniformData uniform in uniforms) {
+    int result = 0;
+    for (final uniform in uniforms) {
       if (uniform.name == name) {
         if (index < 0 || index >= uniform.floatCount) {
           throw IndexError.withLength(index, uniform.floatCount);

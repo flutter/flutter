@@ -32,8 +32,8 @@ Future<void> main(List<String> args) async {
 }
 
 Future<int> runLint(ArgParser argParser, ArgResults argResults) async {
-  final inArgument = argResults['in'] as String;
-  final androidDir = Directory(
+  final String inArgument = argResults['in'] as String;
+  final Directory androidDir = Directory(
     path.join(inArgument, 'flutter', 'shell', 'platform', 'android'),
   );
   if (!androidDir.existsSync()) {
@@ -45,7 +45,7 @@ Future<int> runLint(ArgParser argParser, ArgResults argResults) async {
     return -1;
   }
 
-  final androidSdkDir = Directory(
+  final Directory androidSdkDir = Directory(
     path.join(inArgument, 'flutter', 'third_party', 'android_tools', 'sdk'),
   );
 
@@ -59,10 +59,10 @@ Future<int> runLint(ArgParser argParser, ArgResults argResults) async {
     return -1;
   }
 
-  final rebaseline = argResults['rebaseline'] as bool;
+  final bool rebaseline = argResults['rebaseline'] as bool;
   if (rebaseline) {
     print('Removing previous baseline.xml...');
-    final baselineXml = File(baselineXmlPath);
+    final File baselineXml = File(baselineXmlPath);
     if (baselineXml.existsSync()) {
       await baselineXml.delete();
     }
@@ -93,7 +93,7 @@ Future<int> runLint(ArgParser argParser, ArgResults argResults) async {
 ''');
   await projectXml.close();
   print('Wrote project.xml, starting lint...');
-  final lintArgs = <String>[
+  final List<String> lintArgs = <String>[
     path.join(androidSdkDir.path, 'cmdline-tools', 'latest', 'bin', 'lint'),
     '--project', projectXmlPath,
     '--compile-sdk-version', '34',
@@ -104,7 +104,7 @@ Future<int> runLint(ArgParser argParser, ArgResults argResults) async {
     '--baseline',
     baselineXmlPath,
   ];
-  final html = argResults['html'] as bool;
+  final bool html = argResults['html'] as bool;
   if (html) {
     lintArgs.addAll(<String>['--html', argResults['out'] as String]);
   }
@@ -121,7 +121,7 @@ Future<int> runLint(ArgParser argParser, ArgResults argResults) async {
 
 /// Prepares an [ArgParser] for this script.
 ArgParser setupOptions() {
-  final argParser = ArgParser();
+  final ArgParser argParser = ArgParser();
   argParser
     ..addOption(
       'in',

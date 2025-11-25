@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 
 void main() {
   test('Picture construction invokes onCreate once', () async {
-    var onCreateInvokedCount = 0;
+    int onCreateInvokedCount = 0;
     Picture? createdPicture;
     Picture.onCreate = (Picture picture) {
       onCreateInvokedCount++;
@@ -28,7 +28,7 @@ void main() {
   });
 
   test('approximateBytesUsed is available for onCreate', () async {
-    var pictureSize = -1;
+    int pictureSize = -1;
 
     Picture.onCreate = (Picture picture) => pictureSize = picture.approximateBytesUsed;
 
@@ -39,7 +39,7 @@ void main() {
   });
 
   test('dispose() invokes onDispose once', () async {
-    var onDisposeInvokedCount = 0;
+    int onDisposeInvokedCount = 0;
     Picture? disposedPicture;
     Picture.onDispose = (Picture picture) {
       onDisposeInvokedCount++;
@@ -61,9 +61,9 @@ void main() {
 }
 
 Picture _createPicture() {
-  final recorder = PictureRecorder();
-  final canvas = Canvas(recorder);
-  const rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+  final PictureRecorder recorder = PictureRecorder();
+  final Canvas canvas = Canvas(recorder);
+  const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
   canvas.clipRect(rect);
   return recorder.endRecording();
 }

@@ -20,7 +20,7 @@ void doTests() {
   late EngineFlutterView view;
   late DomElement rootElement;
   late DomElement eventSource;
-  final events = StreamController<DomEvent>.broadcast();
+  final StreamController<DomEvent> events = StreamController<DomEvent>.broadcast();
 
   /// Dispatches an event `e` on `target`, and returns it after it's gone through the browser.
   Future<DomPointerEvent> dispatchAndCatch(DomElement target, DomPointerEvent e) async {

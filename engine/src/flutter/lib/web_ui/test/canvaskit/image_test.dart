@@ -32,8 +32,8 @@ void testMain() {
   });
 
   test('fetchImage fetches image in chunks', () async {
-    final cumulativeBytesLoadedInvocations = <int>[];
-    final expectedTotalBytesInvocations = <int>[];
+    final List<int> cumulativeBytesLoadedInvocations = <int>[];
+    final List<int> expectedTotalBytesInvocations = <int>[];
     final Uint8List result = await fetchImage('/long_test_payload?length=100000&chunk=1000', (
       int cumulativeBytesLoaded,
       int expectedTotalBytes,
@@ -46,7 +46,7 @@ void testMain() {
     expect(cumulativeBytesLoadedInvocations, hasLength(greaterThan(1)));
 
     // Check that reported total byte count is the same across all invocations.
-    for (final expectedTotalBytes in expectedTotalBytesInvocations) {
+    for (final int expectedTotalBytes in expectedTotalBytesInvocations) {
       expect(expectedTotalBytes, 100000);
     }
 

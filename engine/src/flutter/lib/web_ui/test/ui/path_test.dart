@@ -104,7 +104,7 @@ Future<void> testMain() async {
   test('transformation tests', () {
     const Rect bounds = Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
     final Path p = Path()..addRect(bounds);
-    final scaleMatrix = Float64List.fromList(<double>[
+    final Float64List scaleMatrix = Float64List.fromList(<double>[
       2.5, 0.0, 0.0, 0.0, // first col
       0.0, 0.5, 0.0, 0.0, // second col
       0.0, 0.0, 1.0, 0.0, // third col
@@ -143,7 +143,7 @@ Future<void> testMain() async {
     expect(simpleHorizontalMetrics.iterator.current.isClosed, isFalse);
     final Path simpleExtract = simpleHorizontalMetrics.iterator.current.extractPath(1.0, 9.0);
     expect(simpleExtract.getBounds(), equals(const Rect.fromLTRB(1.0, 0.0, 9.0, 0.0)));
-    final Tangent posTan = simpleHorizontalMetrics.iterator.current.getTangentForOffset(1.0);
+    final Tangent posTan = simpleHorizontalMetrics.iterator.current.getTangentForOffset(1.0)!;
     expect(posTan.position, equals(const Offset(1.0, 0.0)));
     expect(posTan.angle, equals(0.0));
 
@@ -165,7 +165,7 @@ Future<void> testMain() async {
     final Path simpleVerticalLine = Path()..lineTo(0.0, 10.0);
     final PathMetrics simpleMetricsVertical = simpleVerticalLine.computeMetrics()
       ..iterator.moveNext();
-    final Tangent posTanVertical = simpleMetricsVertical.iterator.current.getTangentForOffset(5.0);
+    final Tangent posTanVertical = simpleMetricsVertical.iterator.current.getTangentForOffset(5.0)!;
     expect(posTanVertical.position, equals(const Offset(0.0, 5.0)));
     expect(posTanVertical.angle, closeTo(-1.5708, .0001)); // 90 degrees
 
@@ -176,7 +176,7 @@ Future<void> testMain() async {
     final double midPoint = simpleMetricsDiagonal.iterator.current.length / 2;
     final Tangent posTanDiagonal = simpleMetricsDiagonal.iterator.current.getTangentForOffset(
       midPoint,
-    );
+    )!;
     expect(posTanDiagonal.position, equals(const Offset(5.0, 5.0)));
     expect(posTanDiagonal.angle, closeTo(-0.7853981633974483, .00001)); // ~45 degrees
 

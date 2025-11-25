@@ -60,7 +60,7 @@ void testMain() {
     });
 
     test('rounds physical size to nearest integer size', () async {
-      final EngineFlutterWindow implicitView = EnginePlatformDispatcher.instance.implicitView;
+      final EngineFlutterWindow implicitView = EnginePlatformDispatcher.instance.implicitView!;
       implicitView.debugPhysicalSizeOverride = const ui.Size(199.999999, 200.000001);
 
       final ui.SceneBuilder sceneBuilder = ui.SceneBuilder();

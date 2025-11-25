@@ -18,7 +18,7 @@ void main(List<String> args) async {
     return;
   }
 
-  final Engine? engine = Engine.tryFindWithin();
+  final engine = Engine.tryFindWithin();
   if (engine == null) {
     io.stderr.writeln('Must be run from within the engine repository.');
     io.exitCode = 1;
@@ -36,7 +36,7 @@ void main(List<String> args) async {
   final cleanup = <FutureOr<void> Function()>{};
 
   // Parse the command-line arguments.
-  final ArgResults results = _args.parse(args);
+  final results = _args.parse(args);
   final String iosEngineVariant;
   if (results.rest case [final variant]) {
     iosEngineVariant = variant;
@@ -123,14 +123,14 @@ Future<void> _run(
   _deleteAnyExistingDevices(deviceName: deviceName);
   _createDevice(deviceName: deviceName, deviceIdentifier: deviceIdentifier, osRuntime: osRuntime);
 
-  final (String scenarioPath, io.Directory resultBundle) = _buildResultBundlePath(
+  final (scenarioPath, resultBundle) = _buildResultBundlePath(
     engine: engine,
     iosEngineVariant: iosEngineVariant,
   );
 
   cleanup.add(() => _deleteIfPresent(resultBundle));
 
-  final io.Process process = await _runTests(
+  final process = await _runTests(
     outScenariosPath: scenarioPath,
     resultBundlePath: resultBundle.path,
     osVersion: osVersion,
@@ -142,7 +142,7 @@ Future<void> _run(
   // Create a temporary directory, if needed.
   var storePath = dumpXcresultOnFailure;
   if (storePath == null) {
-    final io.Directory dumpDir = io.Directory.systemTemp.createTempSync();
+    final dumpDir = io.Directory.systemTemp.createTempSync();
     storePath = dumpDir.path;
     cleanup.add(() => dumpDir.delete(recursive: true));
   }
@@ -204,7 +204,7 @@ final _args = ArgParser()
 
 void _ensureSimulatorsRotateAutomaticallyForPlatformViewRotationTest() {
   // Can also be set via Simulator Device > Rotate Device Automatically.
-  final io.ProcessResult result = io.Process.runSync('defaults', const [
+  final result = io.Process.runSync('defaults', const [
     'write',
     'com.apple.iphonesimulator',
     'RotateWindowWhenSignaledByGuest',
@@ -219,7 +219,7 @@ void _deleteAnyExistingDevices({required String deviceName}) {
   io.stderr.writeln('Deleting any existing simulator devices named $deviceName...');
 
   bool deleteSimulator() {
-    final io.ProcessResult result = io.Process.runSync('xcrun', ['simctl', 'delete', deviceName]);
+    final result = io.Process.runSync('xcrun', ['simctl', 'delete', deviceName]);
     if (result.exitCode == 0) {
       io.stderr.writeln('Deleted $deviceName');
       return true;
@@ -237,7 +237,7 @@ void _createDevice({
   required String osRuntime,
 }) {
   io.stderr.writeln('Creating $deviceName $deviceIdentifier $osRuntime...');
-  final io.ProcessResult result = io.Process.runSync('xcrun', [
+  final result = io.Process.runSync('xcrun', [
     'simctl',
     'create',
     deviceName,
@@ -254,12 +254,12 @@ void _createDevice({
   required Engine engine,
   required String iosEngineVariant,
 }) {
-  final String scenarioPath = path.normalize(
+  final scenarioPath = path.normalize(
     path.join(engine.outDir.path, iosEngineVariant, 'ios_scenario_app', 'Scenarios'),
   );
 
   // Create a temporary directory to store the test results.
-  final io.Directory result = io.Directory(scenarioPath).createTempSync('ios_scenario_xcresult');
+  final result = io.Directory(scenarioPath).createTempSync('ios_scenario_xcresult');
   return (scenarioPath, result);
 }
 
@@ -296,8 +296,8 @@ String _zipAndStoreFailedTestResults({
   required io.Directory resultBundle,
   required String storePath,
 }) {
-  final String outputPath = path.join(storePath, '${iosEngineVariant.replaceAll('/', '_')}.zip');
-  final io.ProcessResult result = io.Process.runSync('zip', ['-q', '-r', outputPath, resultBundle.path]);
+  final outputPath = path.join(storePath, '${iosEngineVariant.replaceAll('/', '_')}.zip');
+  final result = io.Process.runSync('zip', ['-q', '-r', outputPath, resultBundle.path]);
   if (result.exitCode != 0) {
     throw Exception(
       'Failed to zip the test results (exit code = ${result.exitCode}).\n\n'

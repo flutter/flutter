@@ -10,32 +10,32 @@ import 'package:const_finder_fixtures_package/package.dart';
 import 'target.dart';
 
 void main() {
-  const target1 = Target('1', 1, null);
-  const target2 = Target('2', 2, Target('4', 4, null));
-  const target3 = Target('3', 3, Target('5', 5, null)); // should be tree shaken out.
+  const Target target1 = Target('1', 1, null);
+  const Target target2 = Target('2', 2, Target('4', 4, null));
+  const Target target3 = Target('3', 3, Target('5', 5, null)); // should be tree shaken out.
   target1.hit();
   target2.hit();
 
   blah(const Target('6', 6, null));
 
-  const ignoreMe = IgnoreMe(Target('7', 7, null)); // IgnoreMe is ignored but 7 is not.
-  final ignoreMe2 = IgnoreMe(const Target('8', 8, null));
-  final ignoreMe3 = IgnoreMe(const Target('9', 9, Target('10', 10, null)));
+  const IgnoreMe ignoreMe = IgnoreMe(Target('7', 7, null)); // IgnoreMe is ignored but 7 is not.
+  final IgnoreMe ignoreMe2 = IgnoreMe(const Target('8', 8, null));
+  final IgnoreMe ignoreMe3 = IgnoreMe(const Target('9', 9, Target('10', 10, null)));
   print(ignoreMe);
   print(ignoreMe2);
   print(ignoreMe3);
 
   createTargetInPackage();
 
-  final staticConstMap = StaticConstInitializer();
+  final StaticConstInitializer staticConstMap = StaticConstInitializer();
   staticConstMap.useOne(1);
 
-  const extendsTarget = ExtendsTarget('11', 11, null);
+  const ExtendsTarget extendsTarget = ExtendsTarget('11', 11, null);
   extendsTarget.hit();
-  const implementsTarget = ImplementsTarget('12', 12, null);
+  const ImplementsTarget implementsTarget = ImplementsTarget('12', 12, null);
   implementsTarget.hit();
 
-  const mixedInTraget = MixedInTarget('13');
+  const MixedInTarget mixedInTraget = MixedInTarget('13');
   mixedInTraget.hit();
 }
 

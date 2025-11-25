@@ -243,7 +243,7 @@ class _ExpectMismatch extends Matcher {
       return false;
     }
 
-    final description = _TestDescription();
+    final _TestDescription description = _TestDescription();
     _matcher.describeMismatch(item, description, matchState, false);
     final String mismatchDescription = description.items.join();
 

@@ -406,7 +406,7 @@ class ClickDebouncer {
     // It's only interesting to debounce clicks when both `pointerdown` and
     // `pointerup` land on the same element.
     if (event.type == 'pointerup') {
-      final targetChanged = event.target != state.target;
+      final bool targetChanged = event.target != state.target;
       if (targetChanged) {
         _flush();
       }
@@ -442,7 +442,7 @@ class ClickDebouncer {
     final DebounceState state = _state!;
     state.timer.cancel();
 
-    final aggregateData = <ui.PointerData>[];
+    final List<ui.PointerData> aggregateData = <ui.PointerData>[];
     for (final QueuedEvent queuedEvent in state.queue) {
       if (queuedEvent.event.type == 'pointerup') {
         _lastSentPointerUpTimeStamp = queuedEvent.timeStamp;
@@ -458,7 +458,7 @@ class ClickDebouncer {
   void _sendToFramework(DomEvent? event, List<ui.PointerData> data) {
     final ui.PointerDataPacket packet = ui.PointerDataPacket(data: data.toList());
     if (_debugLogFlutterEvents) {
-      for (final datum in data) {
+      for (final ui.PointerData datum in data) {
         print('fw:${datum.change}    ${datum.physicalX},${datum.physicalY}');
       }
     }
@@ -511,11 +511,11 @@ class Listener {
     if (passive == null) {
       target.addEventListener(event, jsHandler);
     } else {
-      final eventOptions = <String, Object>{'passive': passive};
+      final Map<String, Object> eventOptions = <String, Object>{'passive': passive};
       target.addEventListener(event, jsHandler, eventOptions.toJSAnyDeep);
     }
 
-    final listener = Listener._(event: event, target: target, handler: jsHandler);
+    final Listener listener = Listener._(event: event, target: target, handler: jsHandler);
 
     return listener;
   }
@@ -572,7 +572,7 @@ abstract class _BaseAdapter {
     void loggedHandler(DomEvent event) {
       if (_debugLogPointerEvents) {
         if (event.isA<DomPointerEvent>()) {
-          final pointerEvent = event as DomPointerEvent;
+          final DomPointerEvent pointerEvent = event as DomPointerEvent;
           final ui.Offset offset = computeEventOffsetToTarget(event, _view);
           print(
             '${pointerEvent.type}    '
@@ -672,9 +672,9 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
   }
 
   List<ui.PointerData> _convertWheelEventToPointerData(DomWheelEvent event) {
-    const domDeltaPixel = 0x00;
-    const domDeltaLine = 0x01;
-    const domDeltaPage = 0x02;
+    const int domDeltaPixel = 0x00;
+    const int domDeltaLine = 0x01;
+    const int domDeltaPage = 0x02;
 
     ui.PointerDeviceKind kind = ui.PointerDeviceKind.mouse;
     int deviceId = _mouseDeviceId;
@@ -706,9 +706,9 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
         break;
     }
 
-    final data = <ui.PointerData>[];
+    final List<ui.PointerData> data = <ui.PointerData>[];
     final ui.Offset offset = computeEventOffsetToTarget(event, _view);
-    var ignoreCtrlKey = false;
+    bool ignoreCtrlKey = false;
     if (ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs) {
       ignoreCtrlKey =
           (_keyboardConverter?.keyIsPressed(kPhysicalControlLeft) ?? false) ||
@@ -792,7 +792,7 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
   ///
   /// Use Firefox to test this code path.
   double _computeDefaultScrollLineHeight() {
-    const kFallbackFontHeight = 16.0;
+    const double kFallbackFontHeight = 16.0;
     final DomHTMLDivElement probe = createDomHTMLDivElement();
     probe.style
       ..fontSize = 'initial'
@@ -960,7 +960,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     bool checkModifiers = true,
   }) {
     addEventListener(target, eventName, (DomEvent event) {
-      final pointerEvent = event as DomPointerEvent;
+      final DomPointerEvent pointerEvent = event as DomPointerEvent;
       if (checkModifiers) {
         _checkModifiersState(event);
       }
@@ -982,7 +982,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
   void setup() {
     _addPointerEventListener(_viewTarget, 'pointerdown', (DomPointerEvent event) {
       final int device = _getPointerId(event);
-      final pointerData = <ui.PointerData>[];
+      final List<ui.PointerData> pointerData = <ui.PointerData>[];
       final _ButtonSanitizer sanitizer = _ensureSanitizer(device);
       final _SanitizedDetails? up = sanitizer.sanitizeMissingRightClickUp(
         buttons: event.buttons!.toInt(),
@@ -1030,9 +1030,9 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     _addPointerEventListener(_globalTarget, 'pointermove', (DomPointerEvent moveEvent) {
       final int device = _getPointerId(moveEvent);
       final _ButtonSanitizer sanitizer = _ensureSanitizer(device);
-      final pointerData = <ui.PointerData>[];
+      final List<ui.PointerData> pointerData = <ui.PointerData>[];
       final List<DomPointerEvent> expandedEvents = _expandEvents(moveEvent);
-      for (final event in expandedEvents) {
+      for (final DomPointerEvent event in expandedEvents) {
         final _SanitizedDetails? up = sanitizer.sanitizeMissingRightClickUp(
           buttons: event.buttons!.toInt(),
         );
@@ -1060,7 +1060,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     _addPointerEventListener(_viewTarget, 'pointerleave', (DomPointerEvent event) {
       final int device = _getPointerId(event);
       final _ButtonSanitizer sanitizer = _ensureSanitizer(device);
-      final pointerData = <ui.PointerData>[];
+      final List<ui.PointerData> pointerData = <ui.PointerData>[];
       final _SanitizedDetails? details = sanitizer.sanitizeLeaveEvent(
         buttons: event.buttons!.toInt(),
       );
@@ -1074,7 +1074,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     _addPointerEventListener(_globalTarget, 'pointerup', (DomPointerEvent event) {
       final int device = _getPointerId(event);
       if (_hasSanitizer(device)) {
-        final pointerData = <ui.PointerData>[];
+        final List<ui.PointerData> pointerData = <ui.PointerData>[];
         final _SanitizedDetails? details = _getSanitizer(
           device,
         ).sanitizeUpEvent(buttons: event.buttons?.toInt());
@@ -1093,7 +1093,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     _addPointerEventListener(_viewTarget, 'pointercancel', (DomPointerEvent event) {
       final int device = _getPointerId(event);
       if (_hasSanitizer(device)) {
-        final pointerData = <ui.PointerData>[];
+        final List<ui.PointerData> pointerData = <ui.PointerData>[];
         final _SanitizedDetails details = _getSanitizer(device).sanitizeCancelEvent();
         _removePointerIfUnhoverable(event);
         _convertEventsToPointerData(data: pointerData, event: event, details: details);

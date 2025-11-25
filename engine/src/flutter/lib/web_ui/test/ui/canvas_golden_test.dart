@@ -52,7 +52,7 @@ void testMain() {
         builder.pushStyle(
           ui.TextStyle(fontSize: 16, color: color, foreground: foreground, background: background),
         );
-        final text = StringBuffer();
+        final StringBuffer text = StringBuffer();
         if (color == null && foreground == null && background == null) {
           text.write('Default');
         } else {
@@ -78,7 +78,7 @@ void testMain() {
         return paragraph;
       }
 
-      final variations = <ParagraphFactory>[
+      final List<ParagraphFactory> variations = <ParagraphFactory>[
         () => createTestParagraph(),
         () => createTestParagraph(color: const ui.Color(0xFF009900)),
         () => createTestParagraph(foreground: ui.Paint()..color = const ui.Color(0xFF990000)),
@@ -97,8 +97,8 @@ void testMain() {
       final ui.Canvas canvas = ui.Canvas(recorder, ui.Rect.largest);
       canvas.translate(10, 10);
 
-      for (final from in variations) {
-        for (final to in variations) {
+      for (final ParagraphFactory from in variations) {
+        for (final ParagraphFactory to in variations) {
           canvas.save();
           final ui.Paragraph fromParagraph = from();
           canvas.drawParagraph(fromParagraph, ui.Offset.zero);
@@ -377,7 +377,7 @@ Future<void> drawTestPicture(LayerCanvas canvas) async {
 
   canvas.translate(60, 0);
   final int restorePoint = canvas.getSaveCount();
-  for (var i = 0; i < 5; i++) {
+  for (int i = 0; i < 5; i++) {
     canvas.save();
     canvas.translate(10, 10);
     canvas.drawCircle(ui.Offset.zero, 5, ui.Paint());
@@ -484,7 +484,7 @@ Future<ui.Image> generateTestImage() {
   ctx.fillStyle = '#FF00FF';
   ctx.fillRect(10, 10, 10, 10);
   final Uint8List imageData = ctx.getImageData(0, 0, 20, 20).data.buffer.asUint8List();
-  final completer = Completer<ui.Image>();
+  final Completer<ui.Image> completer = Completer<ui.Image>();
   renderer.decodeImageFromPixels(imageData, 20, 20, ui.PixelFormat.rgba8888, (ui.Image result) {
     completer.complete(result);
   });

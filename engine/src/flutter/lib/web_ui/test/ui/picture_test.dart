@@ -17,7 +17,7 @@ Future<void> testMain() async {
   setUpUnitTests();
 
   test('recorder and picture dispose underlying objects properly', () {
-    final recorder = ui.PictureRecorder() as LayerPictureRecorder;
+    final LayerPictureRecorder recorder = ui.PictureRecorder() as LayerPictureRecorder;
     final ui.Canvas canvas = ui.Canvas(recorder);
     const ui.Rect rect = ui.Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
     canvas.clipRect(rect);
@@ -35,7 +35,7 @@ Future<void> testMain() async {
   });
 
   test('Picture construction invokes onCreate once', () async {
-    var onCreateInvokedCount = 0;
+    int onCreateInvokedCount = 0;
     ui.Picture? createdPicture;
     ui.Picture.onCreate = (ui.Picture picture) {
       onCreateInvokedCount++;
@@ -55,7 +55,7 @@ Future<void> testMain() async {
   });
 
   test('approximateBytesUsed is available for onCreate', () async {
-    var pictureSize = -1;
+    int pictureSize = -1;
 
     ui.Picture.onCreate = (ui.Picture picture) => pictureSize = picture.approximateBytesUsed;
 
@@ -66,7 +66,7 @@ Future<void> testMain() async {
   });
 
   test('dispose() invokes onDispose once', () async {
-    var onDisposeInvokedCount = 0;
+    int onDisposeInvokedCount = 0;
     ui.Picture? disposedPicture;
     ui.Picture.onDispose = (ui.Picture picture) {
       onDisposeInvokedCount++;

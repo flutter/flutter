@@ -426,7 +426,7 @@ class LazyPath implements LayerPath, Collectable {
     }
     final DisposablePath path = initializer();
     path.fillType = _fillType;
-    for (final PathCommand command in _commands) {
+    for (final command in _commands) {
       command.apply(path);
     }
 
@@ -679,7 +679,7 @@ class LazyPathMetricIterator implements Iterator<ui.PathMetric>, Collectable {
     _cachedIterator?.dispose();
     _cachedIterator = null;
 
-    for (final DisposablePathMetric metric in _metrics) {
+    for (final metric in _metrics) {
       metric.dispose();
     }
     _metrics.clear();
@@ -690,7 +690,7 @@ class LazyPathMetricIterator implements Iterator<ui.PathMetric>, Collectable {
       return;
     }
     _cachedIterator = path.builtPath.computeMetrics(forceClosed: forceClosed).iterator;
-    for (var i = 0; i < _nextIndex; i++) {
+    for (int i = 0; i < _nextIndex; i++) {
       if (_cachedIterator!.moveNext()) {
         _metrics.add(_cachedIterator!.current);
       } else {

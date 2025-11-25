@@ -19,7 +19,7 @@ const int kPhysicalKeyA = 0x00070004;
 const int kLogicalKeyA = 0x00000000061;
 
 EnginePlatformDispatcher get dispatcher => EnginePlatformDispatcher.instance;
-EngineFlutterWindow get myWindow => dispatcher.implicitView;
+EngineFlutterWindow get myWindow => dispatcher.implicitView!;
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -270,7 +270,7 @@ Future<void> testMain() async {
     expect(eventLog, [ui.SemanticsAction.focus]);
     eventLog.clear();
 
-    var tapCalled = false;
+    bool tapCalled = false;
     EnginePlatformDispatcher.instance.onBeginFrame = (_) {
       // Inside onBeginFrame: should be delayed
       EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
@@ -282,7 +282,7 @@ Future<void> testMain() async {
       tapCalled = true;
     };
 
-    var increaseCalled = false;
+    bool increaseCalled = false;
     EnginePlatformDispatcher.instance.onDrawFrame = () {
       // Inside onDrawFrame: should be delayed
       EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
@@ -335,7 +335,7 @@ Future<void> testMain() async {
   });
 
   test('onAccessibilityFeaturesChanged is called when semantics is enabled', () {
-    var a11yChangeInvoked = false;
+    bool a11yChangeInvoked = false;
     myWindow.onAccessibilityFeaturesChanged = () {
       a11yChangeInvoked = true;
     };
@@ -367,11 +367,11 @@ Future<void> testMain() async {
   });
 
   test('sendPlatformMessage preserves the zone', () async {
-    final completer = Completer<void>();
+    final Completer<void> completer = Completer<void>();
     final Zone innerZone = Zone.current.fork();
 
     innerZone.runGuarded(() {
-      final inputData = ByteData(4);
+      final ByteData inputData = ByteData(4);
       inputData.setUint32(0, 42);
       myWindow.sendPlatformMessage('flutter/debug-echo', inputData, (ByteData? outputData) {
         expect(Zone.current, innerZone);
@@ -383,9 +383,9 @@ Future<void> testMain() async {
   });
 
   test('sendPlatformMessage responds even when channel is unknown', () async {
-    var responded = false;
+    bool responded = false;
 
-    final inputData = ByteData(4);
+    final ByteData inputData = ByteData(4);
     inputData.setUint32(0, 42);
     myWindow.sendPlatformMessage('flutter/__unknown__channel__', null, (ByteData? outputData) {
       responded = true;
@@ -415,7 +415,7 @@ Future<void> testMain() async {
 
   // Emulates the framework sending a request for screen orientation lock.
   Future<bool> sendSetPreferredOrientations(List<dynamic> orientations) {
-    final completer = Completer<bool>();
+    final Completer<bool> completer = Completer<bool>();
     final ByteData? inputData = const JSONMethodCodec().encodeMethodCall(
       MethodCall('SystemChrome.setPreferredOrientations', orientations),
     );
@@ -432,9 +432,9 @@ Future<void> testMain() async {
   test('sets preferred screen orientation', () async {
     final DomScreen? original = domWindow.screen;
 
-    final lockCalls = <String>[];
-    var unlockCount = 0;
-    var simulateError = false;
+    final List<String> lockCalls = <String>[];
+    int unlockCount = 0;
+    bool simulateError = false;
 
     // The `orientation` property cannot be overridden, so this test overrides the entire `screen`.
     domWindow['screen'] = <String, Object?>{
@@ -524,7 +524,7 @@ Future<void> testMain() async {
     'SingletonFlutterWindow implements locale, locales, and locale change notifications',
     () async {
       // This will count how many times we notified about locale changes.
-      var localeChangedCount = 0;
+      int localeChangedCount = 0;
       myWindow.onLocaleChanged = () {
         localeChangedCount += 1;
       };
@@ -549,7 +549,7 @@ Future<void> testMain() async {
   );
 
   test('dispatches browser event on flutter/service_worker channel', () async {
-    final completer = Completer<void>();
+    final Completer<void> completer = Completer<void>();
     domWindow.addEventListener(
       'flutter-first-frame',
       createDomEventListener((DomEvent e) => completer.complete()),
@@ -588,7 +588,7 @@ Future<void> testMain() async {
     // The existing viewport meta tag should've been removed.
     expect(existingMeta.isConnected, isFalse);
     // And a new one should've been added.
-    final newMeta =
+    final DomHTMLMetaElement? newMeta =
         domDocument.head!.querySelector('meta[name="viewport"]') as DomHTMLMetaElement?;
     expect(newMeta, isNotNull);
     newMeta!;
@@ -759,7 +759,7 @@ Future<void> testMain() async {
   });
 
   group('physicalConstraints', () {
-    const dpr = 2.5;
+    const double dpr = 2.5;
     late DomHTMLDivElement host;
     late EngineFlutterView view;
 

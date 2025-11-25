@@ -75,7 +75,7 @@ Future<void> testMain() async {
 
   test('kTextHeightNone unsets the height multiplier', () {
     const double fontSize = 10;
-    const text = 'A';
+    const String text = 'A';
     final ParagraphBuilder builder = ParagraphBuilder(
       ParagraphStyle(fontSize: fontSize, height: 10),
     );

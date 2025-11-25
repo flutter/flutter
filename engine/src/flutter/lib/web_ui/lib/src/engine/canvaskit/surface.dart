@@ -35,7 +35,7 @@ class Surface extends DisplayCanvas {
 
   /// Returns the underlying CanvasKit Surface. Should only be used in tests.
   CkSurface? debugGetCkSurface() {
-    var assertsEnabled = false;
+    bool assertsEnabled = false;
     assert(() {
       assertsEnabled = true;
       return true;
@@ -89,7 +89,7 @@ class Surface extends DisplayCanvas {
 
   /// Returns the underlying OffscreenCanvas. Should only be used in tests.
   DomOffscreenCanvas? debugGetOffscreenCanvas() {
-    var assertsEnabled = false;
+    bool assertsEnabled = false;
     assert(() {
       assertsEnabled = true;
       return true;
@@ -392,17 +392,17 @@ class Surface extends DisplayCanvas {
     _contextLost = false;
 
     if (webGLVersion != -1 && !configuration.canvasKitForceCpuOnly) {
-      var glContext = 0;
-      final options = SkWebGLContextOptions(
+      int glContext = 0;
+      final SkWebGLContextOptions options = SkWebGLContextOptions(
         // Default to no anti-aliasing. Paint commands can be explicitly
         // anti-aliased by setting their `Paint` object's `antialias` property.
         antialias: _kUsingMSAA ? 1 : 0,
         majorVersion: webGLVersion.toDouble(),
       );
       if (useOffscreenCanvas) {
-        glContext = canvasKit.GetOffscreenWebGLContext(_offscreenCanvas, options).toInt();
+        glContext = canvasKit.GetOffscreenWebGLContext(_offscreenCanvas!, options).toInt();
       } else {
-        glContext = canvasKit.GetWebGLContext(_canvasElement, options).toInt();
+        glContext = canvasKit.GetWebGLContext(_canvasElement!, options).toInt();
       }
 
       _glContext = glContext;
@@ -477,9 +477,9 @@ class Surface extends DisplayCanvas {
 
       SkSurface surface;
       if (useOffscreenCanvas) {
-        surface = canvasKit.MakeOffscreenSWCanvasSurface(_offscreenCanvas);
+        surface = canvasKit.MakeOffscreenSWCanvasSurface(_offscreenCanvas!);
       } else {
-        surface = canvasKit.MakeSWCanvasSurface(_canvasElement);
+        surface = canvasKit.MakeSWCanvasSurface(_canvasElement!);
       }
       return CkSurface(surface, null, size);
     } catch (error) {

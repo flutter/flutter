@@ -50,7 +50,7 @@ class CanvasKitRenderer extends Renderer {
   Future<void> initialize() async {
     _initialized ??= () async {
       if (windowFlutterCanvasKit != null) {
-        canvasKit = windowFlutterCanvasKit;
+        canvasKit = windowFlutterCanvasKit!;
       } else if (windowFlutterCanvasKitLoaded != null) {
         // CanvasKit is being preloaded by flutter.js. Wait for it to complete.
         canvasKit = await windowFlutterCanvasKitLoaded!.toDart;
@@ -178,11 +178,11 @@ class CanvasKitRenderer extends Renderer {
     required ui.ImageFilter inner,
   }) {
     if (outer is EngineColorFilter) {
-      final CkColorFilter colorFilter = createCkColorFilter(outer);
+      final CkColorFilter colorFilter = createCkColorFilter(outer)!;
       outer = CkColorFilterImageFilter(colorFilter: colorFilter);
     }
     if (inner is EngineColorFilter) {
-      final CkColorFilter colorFilter = createCkColorFilter(inner);
+      final CkColorFilter colorFilter = createCkColorFilter(inner)!;
       inner = CkColorFilterImageFilter(colorFilter: colorFilter);
     }
     return CkImageFilter.compose(outer: outer as CkImageFilter, inner: inner as CkImageFilter);
@@ -485,7 +485,7 @@ class CanvasKitRenderer extends Renderer {
 
   @override
   void dumpDebugInfo() {
-    var i = 0;
+    int i = 0;
     for (final viewRasterizer in rasterizers.values) {
       final Map<String, dynamic>? debugJson = viewRasterizer.dumpDebugInfo();
       if (debugJson != null) {

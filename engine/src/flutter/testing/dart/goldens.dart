@@ -25,15 +25,15 @@ class ImageComparer {
 
   /// Creates an image comparer and authorizes.
   static Future<ImageComparer> create({bool verbose = false}) async {
-    const workDirectoryPath = String.fromEnvironment(_kSkiaGoldWorkDirectoryKey);
+    const String workDirectoryPath = String.fromEnvironment(_kSkiaGoldWorkDirectoryKey);
     if (workDirectoryPath.isEmpty) {
       throw UnsupportedError('Using ImageComparer requries defining kSkiaGoldWorkDirectoryKey.');
     }
 
-    final workDirectory = Directory(
+    final Directory workDirectory = Directory(
       impellerEnabled ? '${workDirectoryPath}_iplr' : workDirectoryPath,
     )..createSync();
-    final dimensions = <String, String>{
+    final Map<String, String> dimensions = <String, String>{
       'impeller_enabled': impellerEnabled.toString(),
     };
     final SkiaGoldClient client = SkiaGoldClient.isAvailable() && _useSkiaGold
@@ -52,7 +52,7 @@ class ImageComparer {
   Future<void> addGoldenImage(Image image, String fileName) async {
     final ByteData data = (await image.toByteData(format: ImageByteFormat.png))!;
 
-    final file = File(path.join(_client.workDirectory.path, fileName))
+    final File file = File(path.join(_client.workDirectory.path, fileName))
       ..writeAsBytesSync(data.buffer.asUint8List());
     await _client.addImg(fileName, file, screenshotSize: image.width * image.height).catchError((
       dynamic error,
@@ -69,8 +69,8 @@ class ImageComparer {
     int getPixel(ByteData data, int x, int y) => data.getUint32((x + y * golden.width) * 4);
     final ByteData goldenData = (await golden.toByteData())!;
     final ByteData testImageData = (await testImage.toByteData())!;
-    for (var y = 0; y < golden.height; y++) {
-      for (var x = 0; x < golden.width; x++) {
+    for (int y = 0; y < golden.height; y++) {
+      for (int x = 0; x < golden.width; x++) {
         if (getPixel(goldenData, x, y) != getPixel(testImageData, x, y)) {
           return false;
         }

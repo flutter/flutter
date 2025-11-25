@@ -51,7 +51,7 @@ void testMain() {
       expect(read.getFloat64(), equals(3.14));
     });
     test('of 32-bit int list when unaligned', () {
-      final integers = Int32List.fromList(<int>[-99, 2, 99]);
+      final Int32List integers = Int32List.fromList(<int>[-99, 2, 99]);
       final WriteBuffer write = WriteBuffer();
       write.putUint8(9);
       write.putInt32List(integers);
@@ -62,7 +62,7 @@ void testMain() {
       expect(read.getInt32List(3), equals(integers));
     });
     test('of 64-bit int list when unaligned', () {
-      final integers = Int64List.fromList(<int>[-99, 2, 99]);
+      final Int64List integers = Int64List.fromList(<int>[-99, 2, 99]);
       final WriteBuffer write = WriteBuffer();
       write.putUint8(9);
       write.putInt64List(integers);
@@ -73,7 +73,7 @@ void testMain() {
       expect(read.getInt64List(3), equals(integers));
     }, skip: !_kSupportsDartNumerics);
     test('of double list when unaligned', () {
-      final doubles = Float64List.fromList(<double>[3.14, double.nan]);
+      final Float64List doubles = Float64List.fromList(<double>[3.14, double.nan]);
       final WriteBuffer write = WriteBuffer();
       write.putUint8(9);
       write.putFloat64List(doubles);

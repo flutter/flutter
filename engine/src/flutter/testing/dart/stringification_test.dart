@@ -36,9 +36,9 @@ void main() {
     expect(ParagraphBuilder(ParagraphStyle()).build().toString(), 'Paragraph(dirty)');
     expect((await instantiateImageCodec(imageData)).toString(), 'Codec()');
     expect(Path().toString(), 'Path');
-    final recorder = PictureRecorder();
+    final PictureRecorder recorder = PictureRecorder();
     expect(recorder.toString(), 'PictureRecorder(recording: false)');
-    final canvas = Canvas(recorder);
+    final Canvas canvas = Canvas(recorder);
     expect(recorder.toString(), 'PictureRecorder(recording: true)');
     expect(canvas.toString(), 'Canvas(recording: true)');
     final Picture picture = recorder.endRecording();

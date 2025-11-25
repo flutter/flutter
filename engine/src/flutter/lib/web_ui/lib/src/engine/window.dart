@@ -611,10 +611,10 @@ final class EngineFlutterWindow extends EngineFlutterView implements ui.Singleto
 
   Future<bool> _waitInTheLine(_HandleMessageCallBack callback) async {
     final Future<void> currentPosition = _endOfTheLine;
-    final completer = Completer<void>();
+    final Completer<void> completer = Completer<void>();
     _endOfTheLine = completer.future;
     await currentPosition;
-    var result = false;
+    bool result = false;
     try {
       result = await callback();
     } finally {
@@ -626,7 +626,7 @@ final class EngineFlutterWindow extends EngineFlutterView implements ui.Singleto
   Future<bool> handleNavigationMessage(ByteData? data) async {
     return _waitInTheLine(() async {
       final MethodCall decoded = const JSONMethodCodec().decodeMethodCall(data);
-      final arguments = decoded.arguments as Map<String, dynamic>?;
+      final Map<String, dynamic>? arguments = decoded.arguments as Map<String, dynamic>?;
       switch (decoded.method) {
         case 'selectMultiEntryHistory':
           await _useMultiEntryBrowserHistory();
@@ -685,7 +685,7 @@ EngineFlutterWindow? _window;
 EngineFlutterWindow ensureImplicitViewInitialized({DomElement? hostElement}) {
   if (_window == null) {
     _window = EngineFlutterView.implicit(EnginePlatformDispatcher.instance, hostElement);
-    EnginePlatformDispatcher.instance.viewManager.registerView(_window);
+    EnginePlatformDispatcher.instance.viewManager.registerView(_window!);
   }
   return _window!;
 }

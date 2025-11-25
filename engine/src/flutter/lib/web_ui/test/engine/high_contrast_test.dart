@@ -115,7 +115,7 @@ void testMain() {
     );
 
     // Ensure that at least some colors are different between light and dark mode.
-    var differentCount = 0;
+    int differentCount = 0;
     for (final colorName in systemColorNames) {
       final lightColor = detectorLight.systemColors[colorName];
       final darkColor = detectorDark.systemColors[colorName];

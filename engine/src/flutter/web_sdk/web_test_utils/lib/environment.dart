@@ -16,9 +16,9 @@ Environment? _environment;
 class Environment {
   /// Creates an environment deduced from the path of the main Dart script.
   factory Environment() {
-    final script = io.File.fromUri(io.Platform.script);
+    final io.File script = io.File.fromUri(io.Platform.script);
     io.Directory directory = script.parent;
-    var foundEngineRepoRoot = false;
+    bool foundEngineRepoRoot = false;
     while (!foundEngineRepoRoot) {
       foundEngineRepoRoot = directory
           .listSync()
@@ -44,14 +44,14 @@ class Environment {
   });
 
   static Environment _prepareEnvironmentFromEngineDir(io.File self, io.Directory engineSrcDir) {
-    final engineToolsDir = io.Directory(
+    final io.Directory engineToolsDir = io.Directory(
       pathlib.join(engineSrcDir.path, 'flutter', 'tools'),
     );
-    final webUiRootDir = io.Directory(
+    final io.Directory webUiRootDir = io.Directory(
       pathlib.join(engineSrcDir.path, 'flutter', 'lib', 'web_ui'),
     );
 
-    for (final expectedDirectory in <io.Directory>[engineSrcDir, webUiRootDir]) {
+    for (final io.Directory expectedDirectory in <io.Directory>[engineSrcDir, webUiRootDir]) {
       if (!expectedDirectory.existsSync()) {
         throw Exception('$expectedDirectory does not exist.');
       }

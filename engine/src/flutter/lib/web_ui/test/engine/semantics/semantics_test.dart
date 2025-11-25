@@ -168,7 +168,7 @@ void _testSemanticRole() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final tester = SemanticsTester(owner());
+    final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
       children: <SemanticsNodeUpdate>[tester.updateNode(id: 372), tester.updateNode(id: 599)],
@@ -221,7 +221,7 @@ void _testSemanticRole() {
         ..debugOverrideTimestampFunction(() => _testTime)
         ..semanticsEnabled = true;
 
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         children: <SemanticsNodeUpdate>[
@@ -293,7 +293,7 @@ void _testRoleLifecycle() {
 
     // Check that roles are initialized immediately
     {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         flags: const ui.SemanticsFlags(isButton: true),
@@ -303,7 +303,7 @@ void _testRoleLifecycle() {
 
       tester.expectSemantics('<sem role="button"></sem>');
 
-      final SemanticsObject node = owner().debugSemanticsTree![0];
+      final SemanticsObject node = owner().debugSemanticsTree![0]!;
       expect(node.semanticRole?.kind, EngineSemanticsRole.button);
       expect(
         node.semanticRole?.debugSemanticBehaviorTypes,
@@ -314,7 +314,7 @@ void _testRoleLifecycle() {
 
     // Check that roles apply their functionality upon update.
     {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         label: 'a label',
@@ -325,7 +325,7 @@ void _testRoleLifecycle() {
 
       tester.expectSemantics('<sem role="button">a label</sem>');
 
-      final SemanticsObject node = owner().debugSemanticsTree![0];
+      final SemanticsObject node = owner().debugSemanticsTree![0]!;
       expect(node.semanticRole?.kind, EngineSemanticsRole.button);
       expect(
         node.semanticRole?.debugSemanticBehaviorTypes,
@@ -407,7 +407,7 @@ void _testAlerts() {
       ..semanticsEnabled = true;
 
     SemanticsObject pumpSemantics() {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         role: ui.SemanticsRole.alert,
@@ -428,7 +428,7 @@ void _testAlerts() {
       ..semanticsEnabled = true;
 
     SemanticsObject pumpSemantics() {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         role: ui.SemanticsRole.status,
@@ -474,7 +474,7 @@ void _testEngineSemanticsOwner() {
     final DomElement assertiveElement = accessibilityAnnouncements.ariaLiveElementFor(
       Assertiveness.assertive,
     );
-    final DomElement announcementHost = politeElement.parent;
+    final DomElement announcementHost = politeElement.parent!;
 
     // Polite and assertive elements share the same host.
     expect(assertiveElement.parent, announcementHost);
@@ -572,7 +572,7 @@ void _testEngineSemanticsOwner() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final tester = SemanticsTester(owner());
+    final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(id: 0, label: 'I am root', rect: const ui.Rect.fromLTRB(0, 0, 100, 50));
     tester.apply();
 
@@ -657,7 +657,7 @@ void _testEngineSemanticsOwner() {
     expect(tree[1]!.element.tagName.toLowerCase(), 'flt-semantics');
     expect(tree[1]!.id, 1);
     expect(tree[1]!.label, 'Hello');
-    final DomElement existingParent = tree[1]!.element.parent;
+    final DomElement existingParent = tree[1]!.element.parent!;
 
     expectSemanticsTree(owner(), '''
 <sem>
@@ -749,7 +749,7 @@ void _testEngineSemanticsOwner() {
     });
   });
   test('checks shouldEnableSemantics for every global event', () {
-    final mockSemanticsEnabler = MockSemanticsEnabler();
+    final MockSemanticsEnabler mockSemanticsEnabler = MockSemanticsEnabler();
     semantics().semanticsHelper.semanticsEnabler = mockSemanticsEnabler;
     final DomEvent pointerEvent = createDomEvent('Event', 'pointermove');
 
@@ -760,7 +760,7 @@ void _testEngineSemanticsOwner() {
   });
 
   test('forwards events to framework if shouldEnableSemantics returns true', () {
-    final mockSemanticsEnabler = MockSemanticsEnabler();
+    final MockSemanticsEnabler mockSemanticsEnabler = MockSemanticsEnabler();
     semantics().semanticsHelper.semanticsEnabler = mockSemanticsEnabler;
     final DomEvent pointerEvent = createDomEvent('Event', 'pointermove');
     mockSemanticsEnabler.shouldEnableSemanticsReturnValue = true;
@@ -775,7 +775,7 @@ void _testEngineSemanticsOwner() {
     expect(reason: 'Should start in idle phase', owner().phase, SemanticsUpdatePhase.idle);
 
     void pumpSemantics({required String label}) {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         children: <SemanticsNodeUpdate>[tester.updateNode(id: 1, label: label)],
@@ -790,7 +790,7 @@ void _testEngineSemanticsOwner() {
 
     pumpSemantics(label: 'Hello');
 
-    final SemanticsObject semanticsObject = owner().debugSemanticsTree![1];
+    final SemanticsObject semanticsObject = owner().debugSemanticsTree![1]!;
 
     expect(
       reason: 'Should be in postUpdate phase while calling post-update callbacks',
@@ -804,7 +804,7 @@ void _testEngineSemanticsOwner() {
     );
 
     // Rudely replace the role with a mock, and trigger an update.
-    final mockRole = MockRole(EngineSemanticsRole.generic, semanticsObject);
+    final MockRole mockRole = MockRole(EngineSemanticsRole.generic, semanticsObject);
     semanticsObject.semanticRole = mockRole;
 
     pumpSemantics(label: 'World');
@@ -996,7 +996,7 @@ void _testLongestIncreasingSubsequence() {
   });
 
   test('fully sorted up', () {
-    for (var count = 0; count < 100; count += 1) {
+    for (int count = 0; count < 100; count += 1) {
       expectLis(
         List<int>.generate(count, (int i) => 10 * i),
         List<int>.generate(count, (int i) => i),
@@ -1005,7 +1005,7 @@ void _testLongestIncreasingSubsequence() {
   });
 
   test('fully sorted down', () {
-    for (var count = 1; count < 100; count += 1) {
+    for (int count = 1; count < 100; count += 1) {
       expectLis(List<int>.generate(count, (int i) => 10 * (count - i)), <int>[count - 1]);
     }
   });
@@ -1046,7 +1046,7 @@ label''');
     final originalSupportsAriaDescription = LabelAndValue.supportsAriaDescription;
 
     for (final representation in LabelRepresentation.values) {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       // For container nodes, children force ariaLabel, so test as a leaf node (no children)
       tester.updateNode(
         id: 0,
@@ -1055,7 +1055,7 @@ label''');
         rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
       );
       tester.apply();
-      final SemanticsObject node = owner().debugSemanticsTree![0];
+      final SemanticsObject node = owner().debugSemanticsTree![0]!;
       final element = node.element;
 
       // Set the preferred representation directly (simulate what a custom role would do)
@@ -1102,7 +1102,7 @@ label''');
 
       LabelAndValue.supportsAriaDescriptionForTest = false;
 
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         label: 'Label',
@@ -1111,7 +1111,7 @@ label''');
       );
       tester.apply();
 
-      final SemanticsObject node = owner().debugSemanticsTree![0];
+      final SemanticsObject node = owner().debugSemanticsTree![0]!;
       final element = node.element;
 
       final ariaDescribedBy = element.getAttribute('aria-describedby');
@@ -1174,10 +1174,10 @@ void _testContainer() {
     owner().updateSemantics(builder.build());
     expectSemanticsTree(owner(), '''<sem><sem></sem></sem>''');
 
-    final DomElement parentElement = owner().semanticsHost.querySelector('flt-semantics');
+    final DomElement parentElement = owner().semanticsHost.querySelector('flt-semantics')!;
     final DomElement childElement = owner().semanticsHost.querySelector(
       '#${kFlutterSemanticNodePrefix}1',
-    );
+    )!;
 
     if (isMacOrIOS) {
       expect(parentElement.style.top, '0px');
@@ -1220,10 +1220,10 @@ void _testContainer() {
     owner().updateSemantics(builder.build());
     expectSemanticsTree(owner(), '''<sem><sem></sem></sem>''');
 
-    final DomElement parentElement = owner().semanticsHost.querySelector('flt-semantics');
+    final DomElement parentElement = owner().semanticsHost.querySelector('flt-semantics')!;
     final DomElement childElement = owner().semanticsHost.querySelector(
       '#${kFlutterSemanticNodePrefix}1',
-    );
+    )!;
 
     expect(parentElement.style.transform, 'matrix(1, 0, 0, 1, 10, 10)');
     if (isSafari) {
@@ -1272,10 +1272,10 @@ void _testContainer() {
       owner().updateSemantics(builder.build());
       expectSemanticsTree(owner(), '''<sem><sem></sem></sem>''');
 
-      final DomElement parentElement = owner().semanticsHost.querySelector('flt-semantics');
+      final DomElement parentElement = owner().semanticsHost.querySelector('flt-semantics')!;
       final DomElement childElement = owner().semanticsHost.querySelector(
         '#${kFlutterSemanticNodePrefix}1',
-      );
+      )!;
 
       expect(parentElement.style.transform, 'matrix(1, 0, 0, 1, 10, 10)');
       if (isSafari) {
@@ -1346,7 +1346,7 @@ void _testContainer() {
         childrenInHitTestOrder: Int32List.fromList(<int>[1, 3, 2, 4]),
       );
 
-      for (var id = 1; id <= 4; id++) {
+      for (int id = 1; id <= 4; id++) {
         updateNode(builder, id: id);
       }
 
@@ -1438,17 +1438,17 @@ void _testContainer() {
     <sem style="z-index: 1"></sem>
 </sem>''');
 
-    final DomElement root = owner().semanticsHost.querySelector('#${kFlutterSemanticNodePrefix}0');
+    final DomElement root = owner().semanticsHost.querySelector('#${kFlutterSemanticNodePrefix}0')!;
     expect(root.style.pointerEvents, 'none');
 
     final DomElement child1 = owner().semanticsHost.querySelector(
       '#${kFlutterSemanticNodePrefix}1',
-    );
+    )!;
     expect(child1.style.pointerEvents, 'all');
 
     final DomElement child2 = owner().semanticsHost.querySelector(
       '#${kFlutterSemanticNodePrefix}2',
-    );
+    )!;
     expect(child2.style.pointerEvents, 'all');
 
     semantics().semanticsEnabled = false;
@@ -1476,7 +1476,7 @@ void _testContainer() {
     <sem style="z-index: 1"></sem>
 </sem>''');
 
-    final DomElement root = owner().semanticsHost.querySelector('#${kFlutterSemanticNodePrefix}0');
+    final DomElement root = owner().semanticsHost.querySelector('#${kFlutterSemanticNodePrefix}0')!;
     expect(root.style.pointerEvents, 'all');
 
     semantics().semanticsEnabled = false;
@@ -1504,7 +1504,7 @@ void _testContainer() {
     <sem style="z-index: 1"></sem>
 </sem>''');
 
-    final DomElement root = owner().semanticsHost.querySelector('#${kFlutterSemanticNodePrefix}0');
+    final DomElement root = owner().semanticsHost.querySelector('#${kFlutterSemanticNodePrefix}0')!;
     expect(root.style.pointerEvents, 'all');
 
     semantics().semanticsEnabled = false;
@@ -1530,7 +1530,7 @@ void _testContainer() {
 
       final DomElement element = owner().semanticsHost.querySelector(
         '#${kFlutterSemanticNodePrefix}0',
-      );
+      )!;
       expect(
         element.style.pointerEvents,
         'none',
@@ -1546,7 +1546,7 @@ void _testContainer() {
 
       final DomElement element = owner().semanticsHost.querySelector(
         '#${kFlutterSemanticNodePrefix}0',
-      );
+      )!;
       expect(
         element.style.pointerEvents,
         'all',
@@ -1566,7 +1566,7 @@ void _testContainer() {
 
       final DomElement element = owner().semanticsHost.querySelector(
         '#${kFlutterSemanticNodePrefix}0',
-      );
+      )!;
       expect(
         element.style.pointerEvents,
         'all',
@@ -1582,7 +1582,7 @@ void _testContainer() {
 
       final DomElement element = owner().semanticsHost.querySelector(
         '#${kFlutterSemanticNodePrefix}0',
-      );
+      )!;
       expect(
         element.style.pointerEvents,
         'all',
@@ -1598,7 +1598,7 @@ void _testContainer() {
 
       final DomElement element = owner().semanticsHost.querySelector(
         '#${kFlutterSemanticNodePrefix}0',
-      );
+      )!;
       expect(
         element.style.pointerEvents,
         'all',
@@ -1614,7 +1614,7 @@ void _testContainer() {
 
       final DomElement element = owner().semanticsHost.querySelector(
         '#${kFlutterSemanticNodePrefix}0',
-      );
+      )!;
       expect(element.style.pointerEvents, 'all', reason: 'Link nodes should accept pointer events');
     });
 
@@ -1626,7 +1626,7 @@ void _testContainer() {
 
       final DomElement element = owner().semanticsHost.querySelector(
         '#${kFlutterSemanticNodePrefix}0',
-      );
+      )!;
       expect(
         element.style.pointerEvents,
         'all',
@@ -1648,7 +1648,7 @@ void _testContainer() {
 
       final DomElement container = owner().semanticsHost.querySelector(
         '#${kFlutterSemanticNodePrefix}0',
-      );
+      )!;
       expect(
         container.style.pointerEvents,
         'none',
@@ -1665,7 +1665,7 @@ void _testContainer() {
 
       final DomElement element = owner().semanticsHost.querySelector(
         '#${kFlutterSemanticNodePrefix}0',
-      );
+      )!;
       expect(
         element.style.pointerEvents,
         'all',
@@ -1681,7 +1681,7 @@ void _testContainer() {
 
       final DomElement element = owner().semanticsHost.querySelector(
         '#${kFlutterSemanticNodePrefix}0',
-      );
+      )!;
       expect(
         element.style.pointerEvents,
         'none',
@@ -1702,7 +1702,7 @@ void _testContainer() {
 
       final DomElement element = owner().semanticsHost.querySelector(
         '#${kFlutterSemanticNodePrefix}0',
-      );
+      )!;
       expect(
         element.style.pointerEvents,
         'none',
@@ -2005,7 +2005,7 @@ void _testContainer() {
 
       final DomElement childElement = owner().semanticsHost.querySelector(
         '#${kFlutterSemanticNodePrefix}3',
-      );
+      )!;
 
       expectSemanticsTree(owner(), '''
   <sem>
@@ -2042,7 +2042,7 @@ void _testContainer() {
 
       final DomElement childElement = owner().semanticsHost.querySelector(
         '#${kFlutterSemanticNodePrefix}3',
-      );
+      )!;
       expectSemanticsTree(owner(), '''
     <sem>
         <sem style="z-index: 2">
@@ -2106,7 +2106,7 @@ void _testVerticalScrolling() {
 
     final scrollable = owner().debugSemanticsTree![0]!.semanticRole! as SemanticScrollable;
     final scrollEvent = createDomEvent('Event', 'scroll') as JSAny;
-    final listener = scrollable.scrollListener;
+    final listener = scrollable.scrollListener!;
     expect(() => listener.callAsFunction(null, scrollEvent), returnsNormally);
 
     semantics().semanticsEnabled = false;
@@ -2178,7 +2178,7 @@ void _testVerticalScrolling() {
 
   test('scrollable node dispatches scroll events', () async {
     Future<ui.SemanticsActionEvent> captureSemanticsEvent() {
-      final completer = Completer<ui.SemanticsActionEvent>();
+      final Completer<ui.SemanticsActionEvent> completer = Completer<ui.SemanticsActionEvent>();
       ui.PlatformDispatcher.instance.onSemanticsActionEvent = (ui.SemanticsActionEvent event) {
         completer.complete(event);
       };
@@ -2204,7 +2204,7 @@ void _testVerticalScrolling() {
       childrenInTraversalOrder: Int32List.fromList(<int>[1, 2, 3]),
     );
 
-    for (var id = 1; id <= 3; id++) {
+    for (int id = 1; id <= 3; id++) {
       updateNode(
         builder,
         id: id,
@@ -2234,10 +2234,10 @@ void _testVerticalScrolling() {
     expect(capturedEvent.nodeId, 0);
     expect(capturedEvent.type, ui.SemanticsAction.scrollToOffset);
     expect(capturedEvent.arguments, isNotNull);
-    final expectedOffset = Float64List(2);
+    final Float64List expectedOffset = Float64List(2);
     expectedOffset[0] = 0.0;
     expectedOffset[1] = 20.0;
-    var message =
+    Float64List message =
         const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
             as Float64List;
     expect(message, expectedOffset);
@@ -2295,7 +2295,7 @@ void _testVerticalScrolling() {
       childrenInTraversalOrder: Int32List.fromList(<int>[1, 2, 3]),
     );
 
-    for (var id = 1; id <= 3; id++) {
+    for (int id = 1; id <= 3; id++) {
       updateNode(
         builder,
         id: id,
@@ -2406,7 +2406,7 @@ void _testHorizontalScrolling() {
 
   test('scrollable node dispatches scroll events', () async {
     Future<ui.SemanticsActionEvent> captureSemanticsEvent() {
-      final completer = Completer<ui.SemanticsActionEvent>();
+      final Completer<ui.SemanticsActionEvent> completer = Completer<ui.SemanticsActionEvent>();
       ui.PlatformDispatcher.instance.onSemanticsActionEvent = (ui.SemanticsActionEvent event) {
         completer.complete(event);
       };
@@ -2432,7 +2432,7 @@ void _testHorizontalScrolling() {
       childrenInTraversalOrder: Int32List.fromList(<int>[1, 2, 3]),
     );
 
-    for (var id = 1; id <= 3; id++) {
+    for (int id = 1; id <= 3; id++) {
       updateNode(
         builder,
         id: id,
@@ -2462,10 +2462,10 @@ void _testHorizontalScrolling() {
     expect(capturedEvent.nodeId, 0);
     expect(capturedEvent.type, ui.SemanticsAction.scrollToOffset);
     expect(capturedEvent.arguments, isNotNull);
-    final expectedOffset = Float64List(2);
+    final Float64List expectedOffset = Float64List(2);
     expectedOffset[0] = 20.0;
     expectedOffset[1] = 0.0;
-    var message =
+    Float64List message =
         const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
             as Float64List;
     expect(message, expectedOffset);
@@ -2522,7 +2522,7 @@ void _testIncrementables() {
   <input role="slider" aria-valuenow="1" aria-valuetext="d" aria-valuemax="1" aria-valuemin="1">
 </sem>''');
 
-    final SemanticsObject node = owner().debugSemanticsTree![0];
+    final SemanticsObject node = owner().debugSemanticsTree![0]!;
     expect(node.semanticRole?.kind, EngineSemanticsRole.incrementable);
     expect(
       reason: 'Incrementables use custom focus management',
@@ -2534,7 +2534,7 @@ void _testIncrementables() {
   });
 
   test('increments', () async {
-    final logger = SemanticsActionLogger();
+    final SemanticsActionLogger logger = SemanticsActionLogger();
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -2555,7 +2555,7 @@ void _testIncrementables() {
   <input role="slider" aria-valuenow="1" aria-valuetext="d" aria-valuemax="2" aria-valuemin="1">
 </sem>''');
 
-    final input =
+    final DomHTMLInputElement input =
         owner().semanticsHost.querySelector('input')! as DomHTMLInputElement;
     input.value = '2';
     input.dispatchEvent(createDomEvent('Event', 'change'));
@@ -2567,7 +2567,7 @@ void _testIncrementables() {
   });
 
   test('decrements', () async {
-    final logger = SemanticsActionLogger();
+    final SemanticsActionLogger logger = SemanticsActionLogger();
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -2588,7 +2588,7 @@ void _testIncrementables() {
   <input role="slider" aria-valuenow="1" aria-valuetext="d" aria-valuemax="1" aria-valuemin="0">
 </sem>''');
 
-    final input =
+    final DomHTMLInputElement input =
         owner().semanticsHost.querySelector('input')! as DomHTMLInputElement;
     input.value = '0';
     input.dispatchEvent(createDomEvent('Event', 'change'));
@@ -2630,7 +2630,7 @@ void _testIncrementables() {
       ..semanticsEnabled = true;
 
     void pumpSemantics({required ui.Tristate isFocused}) {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         hasIncrease: true,
@@ -2642,13 +2642,13 @@ void _testIncrementables() {
       tester.apply();
     }
 
-    final capturedActions = <CapturedAction>[];
+    final List<CapturedAction> capturedActions = <CapturedAction>[];
     EnginePlatformDispatcher.instance.onSemanticsActionEvent = (ui.SemanticsActionEvent event) {
       capturedActions.add((event.nodeId, event.type, event.arguments));
     };
 
     pumpSemantics(isFocused: ui.Tristate.isFalse);
-    final DomElement element = owner().debugSemanticsTree![0]!.element.querySelector('input');
+    final DomElement element = owner().debugSemanticsTree![0]!.element.querySelector('input')!;
     expect(capturedActions, isEmpty);
 
     pumpSemantics(isFocused: ui.Tristate.isTrue);
@@ -2706,9 +2706,9 @@ void _testTextField() {
   <input />
 </sem>''');
 
-    final SemanticsObject node = owner().debugSemanticsTree![0];
-    final textFieldRole = node.semanticRole! as SemanticTextField;
-    final inputElement = textFieldRole.editableElement as DomHTMLInputElement;
+    final SemanticsObject node = owner().debugSemanticsTree![0]!;
+    final SemanticTextField textFieldRole = node.semanticRole! as SemanticTextField;
+    final DomHTMLInputElement inputElement = textFieldRole.editableElement as DomHTMLInputElement;
 
     // TODO(yjbanov): this used to attempt to test that value="hello" but the
     //                test was a false positive. We should revise this test and
@@ -2752,7 +2752,7 @@ void _testCheckables() {
 <sem aria-label="test label" flt-tappable role="switch" aria-checked="true"></sem>
 ''');
 
-    final SemanticsObject node = owner().debugSemanticsTree![0];
+    final SemanticsObject node = owner().debugSemanticsTree![0]!;
     expect(node.semanticRole?.kind, EngineSemanticsRole.checkable);
     expect(
       reason: 'Checkables use generic semantic behaviors',
@@ -3015,7 +3015,7 @@ void _testCheckables() {
       ..semanticsEnabled = true;
 
     void pumpSemantics({required ui.Tristate isFocused}) {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
 
@@ -3034,7 +3034,7 @@ void _testCheckables() {
       tester.apply();
     }
 
-    final capturedActions = <CapturedAction>[];
+    final List<CapturedAction> capturedActions = <CapturedAction>[];
     EnginePlatformDispatcher.instance.onSemanticsActionEvent = (ui.SemanticsActionEvent event) {
       capturedActions.add((event.nodeId, event.type, event.arguments));
     };
@@ -3186,7 +3186,7 @@ void _testSelectables() {
 
     expectSemanticsTree(owner(), '<sem flt-tappable role="checkbox" aria-checked="true"></sem>');
 
-    final node = owner().debugSemanticsTree![0];
+    final node = owner().debugSemanticsTree![0]!;
     expect(node.semanticRole!.kind, EngineSemanticsRole.checkable);
     expect(node.semanticRole!.debugSemanticBehaviorTypes, isNot(contains(Selectable)));
     expect(node.element.getAttribute('aria-selected'), isNull);
@@ -3269,7 +3269,7 @@ void _testTappable() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final tester = SemanticsTester(owner());
+    final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
       flags: const ui.SemanticsFlags(
@@ -3286,7 +3286,7 @@ void _testTappable() {
 <sem role="button" flt-tappable></sem>
 ''');
 
-    final SemanticsObject node = owner().debugSemanticsTree![0];
+    final SemanticsObject node = owner().debugSemanticsTree![0]!;
     expect(node.semanticRole?.kind, EngineSemanticsRole.button);
     expect(node.semanticRole?.debugSemanticBehaviorTypes, containsAll(<Type>[Focusable, Tappable]));
     expect(tester.getSemanticsObject(0).element.tabIndex, 0);
@@ -3299,7 +3299,7 @@ void _testTappable() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final tester = SemanticsTester(owner());
+    final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
       flags: const ui.SemanticsFlags(
@@ -3324,7 +3324,7 @@ void _testTappable() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final tester = SemanticsTester(owner());
+    final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
       // Not a button
@@ -3340,7 +3340,7 @@ void _testTappable() {
 <sem role="button" flt-tappable></sem>
 ''');
 
-    final SemanticsObject node = owner().debugSemanticsTree![0];
+    final SemanticsObject node = owner().debugSemanticsTree![0]!;
     expect(node.semanticRole?.kind, EngineSemanticsRole.button);
     expect(node.semanticRole?.debugSemanticBehaviorTypes, containsAll(<Type>[Focusable, Tappable]));
     expect(tester.getSemanticsObject(0).element.tabIndex, 0);
@@ -3354,7 +3354,7 @@ void _testTappable() {
       ..semanticsEnabled = true;
 
     void updateTappable({required bool enabled}) {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         flags: ui.SemanticsFlags(
@@ -3387,7 +3387,7 @@ void _testTappable() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final tester = SemanticsTester(owner());
+    final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
       flags: const ui.SemanticsFlags(
@@ -3410,7 +3410,7 @@ void _testTappable() {
       ..semanticsEnabled = true;
 
     void pumpSemantics({required ui.Tristate isFocused}) {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         flags: ui.SemanticsFlags(
@@ -3427,7 +3427,7 @@ void _testTappable() {
       tester.apply();
     }
 
-    final capturedActions = <CapturedAction>[];
+    final List<CapturedAction> capturedActions = <CapturedAction>[];
     EnginePlatformDispatcher.instance.onSemanticsActionEvent = (ui.SemanticsActionEvent event) {
       capturedActions.add((event.nodeId, event.type, event.arguments));
     };
@@ -3476,12 +3476,12 @@ void _testTappable() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final capturedActions = <CapturedAction>[];
+    final List<CapturedAction> capturedActions = <CapturedAction>[];
     EnginePlatformDispatcher.instance.onSemanticsActionEvent = (ui.SemanticsActionEvent event) {
       capturedActions.add((event.nodeId, event.type, event.arguments));
     };
 
-    final tester = SemanticsTester(owner());
+    final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
       flags: const ui.SemanticsFlags(
@@ -3691,7 +3691,7 @@ void _testLiveRegion() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final mockAccessibilityAnnouncements =
+    final MockAccessibilityAnnouncements mockAccessibilityAnnouncements =
         MockAccessibilityAnnouncements();
     LiveRegion.debugOverrideAccessibilityAnnouncements(mockAccessibilityAnnouncements);
 
@@ -3715,7 +3715,7 @@ void _testLiveRegion() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final mockAccessibilityAnnouncements =
+    final MockAccessibilityAnnouncements mockAccessibilityAnnouncements =
         MockAccessibilityAnnouncements();
     LiveRegion.debugOverrideAccessibilityAnnouncements(mockAccessibilityAnnouncements);
 
@@ -3737,7 +3737,7 @@ void _testLiveRegion() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final mockAccessibilityAnnouncements =
+    final MockAccessibilityAnnouncements mockAccessibilityAnnouncements =
         MockAccessibilityAnnouncements();
     LiveRegion.debugOverrideAccessibilityAnnouncements(mockAccessibilityAnnouncements);
 
@@ -3802,7 +3802,7 @@ void _testPlatformView() {
     owner().updateSemantics(builder.build());
 
     expectSemanticsTree(owner(), '<sem aria-owns="flt-pv-5"></sem>');
-    final DomElement element = owner().semanticsHost.querySelector('flt-semantics');
+    final DomElement element = owner().semanticsHost.querySelector('flt-semantics')!;
     expect(element.style.pointerEvents, 'none');
 
     semantics().semanticsEnabled = false;
@@ -3887,12 +3887,12 @@ void _testPlatformView() {
     <sem style="z-index: 1"></sem>
 </sem>''');
 
-    final DomElement root = owner().semanticsHost.querySelector('#${kFlutterSemanticNodePrefix}0');
+    final DomElement root = owner().semanticsHost.querySelector('#${kFlutterSemanticNodePrefix}0')!;
     expect(root.style.pointerEvents, 'none');
 
     final DomElement child1 = owner().semanticsHost.querySelector(
       '#${kFlutterSemanticNodePrefix}1',
-    );
+    )!;
     expect(
       child1.style.pointerEvents,
       'all',
@@ -3906,7 +3906,7 @@ void _testPlatformView() {
 
     final DomElement child2 = owner().semanticsHost.querySelector(
       '#${kFlutterSemanticNodePrefix}2',
-    );
+    )!;
     expect(child2.style.pointerEvents, 'none');
     final DomRect child2Rect = child2.getBoundingClientRect();
     expect(child2Rect.left, 0);
@@ -3916,7 +3916,7 @@ void _testPlatformView() {
 
     final DomElement child3 = owner().semanticsHost.querySelector(
       '#${kFlutterSemanticNodePrefix}3',
-    );
+    )!;
     expect(
       child3.style.pointerEvents,
       'all',
@@ -3928,7 +3928,7 @@ void _testPlatformView() {
     expect(child3Rect.right, 20);
     expect(child3Rect.bottom, 60);
 
-    final DomElement platformViewElement = platformViewsHost.querySelector('#view-0');
+    final DomElement platformViewElement = platformViewsHost.querySelector('#view-0')!;
     final DomRect platformViewRect = platformViewElement.getBoundingClientRect();
     expect(platformViewRect.left, 0);
     expect(platformViewRect.top, 15);
@@ -4071,7 +4071,7 @@ void _testRoute() {
   });
 
   test('warns about missing label', () {
-    final warnings = <String>[];
+    final List<String> warnings = <String>[];
     printWarning = warnings.add;
 
     semantics()
@@ -4114,7 +4114,7 @@ void _testRoute() {
       ..semanticsEnabled = true;
 
     void pumpSemantics({required String label}) {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         flags: const ui.SemanticsFlags(scopesRoute: true),
@@ -4162,7 +4162,7 @@ void _testRoute() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final tester = SemanticsTester(owner());
+    final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
       flags: const ui.SemanticsFlags(scopesRoute: true),
@@ -4185,7 +4185,7 @@ void _testRoute() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final tester = SemanticsTester(owner());
+    final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
       transform: Matrix4.identity().toFloat64(),
@@ -4229,12 +4229,12 @@ void _testRoute() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final capturedActions = <CapturedAction>[];
+    final List<CapturedAction> capturedActions = <CapturedAction>[];
     EnginePlatformDispatcher.instance.onSemanticsActionEvent = (ui.SemanticsActionEvent event) {
       capturedActions.add((event.nodeId, event.type, event.arguments));
     };
 
-    final tester = SemanticsTester(owner());
+    final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
       flags: const ui.SemanticsFlags(scopesRoute: true),
@@ -4288,12 +4288,12 @@ void _testRoute() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final capturedActions = <CapturedAction>[];
+    final List<CapturedAction> capturedActions = <CapturedAction>[];
     EnginePlatformDispatcher.instance.onSemanticsActionEvent = (ui.SemanticsActionEvent event) {
       capturedActions.add((event.nodeId, event.type, event.arguments));
     };
 
-    final tester = SemanticsTester(owner());
+    final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
       flags: const ui.SemanticsFlags(scopesRoute: true),
@@ -4345,12 +4345,12 @@ void _testRoute() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final capturedActions = <CapturedAction>[];
+    final List<CapturedAction> capturedActions = <CapturedAction>[];
     EnginePlatformDispatcher.instance.onSemanticsActionEvent = (ui.SemanticsActionEvent event) {
       capturedActions.add((event.nodeId, event.type, event.arguments));
     };
 
-    final tester = SemanticsTester(owner());
+    final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
       flags: const ui.SemanticsFlags(scopesRoute: true),
@@ -4407,12 +4407,12 @@ void _testRoute() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final capturedActions = <CapturedAction>[];
+    final List<CapturedAction> capturedActions = <CapturedAction>[];
     EnginePlatformDispatcher.instance.onSemanticsActionEvent = (ui.SemanticsActionEvent event) {
       capturedActions.add((event.nodeId, event.type, event.arguments));
     };
 
-    final tester = SemanticsTester(owner());
+    final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
       flags: const ui.SemanticsFlags(scopesRoute: true),
@@ -4434,7 +4434,7 @@ void _testDialogs() {
       ..semanticsEnabled = true;
 
     SemanticsObject pumpSemantics() {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         role: ui.SemanticsRole.dialog,
@@ -4455,7 +4455,7 @@ void _testDialogs() {
       ..semanticsEnabled = true;
 
     SemanticsObject pumpSemantics() {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         role: ui.SemanticsRole.alertDialog,
@@ -4476,7 +4476,7 @@ void _testDialogs() {
       ..semanticsEnabled = true;
 
     void pumpSemantics({required String label}) {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         role: ui.SemanticsRole.dialog,
@@ -4541,7 +4541,7 @@ void _testFocusable() {
       owner().updateSemantics(builder.build());
     }
 
-    final capturedActions = <CapturedAction>[];
+    final List<CapturedAction> capturedActions = <CapturedAction>[];
     EnginePlatformDispatcher.instance.onSemanticsActionEvent = (ui.SemanticsActionEvent event) {
       capturedActions.add((event.nodeId, event.type, event.arguments));
     };
@@ -4641,7 +4641,7 @@ void _testFocusable() {
       ..semanticsEnabled = true;
 
     {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         transform: Matrix4.identity().toFloat64(),
@@ -4663,7 +4663,7 @@ void _testFocusable() {
 </sem>
 ''');
 
-    final SemanticsObject node = owner().debugSemanticsTree![1];
+    final SemanticsObject node = owner().debugSemanticsTree![1]!;
     expect(node.isFocusable, isTrue);
     expect(node.semanticRole?.kind, EngineSemanticsRole.generic);
     expect(node.semanticRole?.debugSemanticBehaviorTypes, contains(Focusable));
@@ -4672,7 +4672,7 @@ void _testFocusable() {
     expect(domDocument.activeElement, isNot(element));
 
     {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 1,
         label: 'test focusable',
@@ -4695,7 +4695,7 @@ void _testLink() {
       ..semanticsEnabled = true;
 
     SemanticsObject pumpSemantics() {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         flags: const ui.SemanticsFlags(isLink: true),
@@ -4716,7 +4716,7 @@ void _testLink() {
       ..semanticsEnabled = true;
 
     SemanticsObject pumpSemantics() {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         flags: const ui.SemanticsFlags(isLink: true),
@@ -4737,8 +4737,8 @@ void _testLink() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    const url = 'https://flutter.dev';
-    final tester = SemanticsTester(owner());
+    const String url = 'https://flutter.dev';
+    final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
       linkUrl: url,
@@ -4749,7 +4749,7 @@ void _testLink() {
     tester.apply();
 
     tester.expectSemantics('<a style="display: block;">link button label</a>');
-    final SemanticsObject node = owner().debugSemanticsTree![0];
+    final SemanticsObject node = owner().debugSemanticsTree![0]!;
     expect(node.semanticRole?.kind, EngineSemanticsRole.link);
     expect(node.linkUrl, url);
     expect(
@@ -4768,7 +4768,7 @@ void _testTabs() {
       ..semanticsEnabled = true;
 
     SemanticsObject pumpSemantics() {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         role: ui.SemanticsRole.tab,
@@ -4788,7 +4788,7 @@ void _testTabs() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final tester = SemanticsTester(owner());
+    final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
       role: ui.SemanticsRole.tab,
@@ -4809,7 +4809,7 @@ void _testTabs() {
       ..semanticsEnabled = true;
 
     SemanticsObject pumpSemantics() {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         role: ui.SemanticsRole.tabPanel,
@@ -4830,7 +4830,7 @@ void _testTabs() {
       ..semanticsEnabled = true;
 
     SemanticsObject pumpSemantics() {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         role: ui.SemanticsRole.tabBar,
@@ -4853,7 +4853,7 @@ void _testTables() {
       ..semanticsEnabled = true;
 
     SemanticsObject pumpSemantics() {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         role: ui.SemanticsRole.table,
@@ -4874,7 +4874,7 @@ void _testTables() {
       ..semanticsEnabled = true;
 
     SemanticsObject pumpSemantics() {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         role: ui.SemanticsRole.cell,
@@ -4895,7 +4895,7 @@ void _testTables() {
       ..semanticsEnabled = true;
 
     SemanticsObject pumpSemantics() {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         role: ui.SemanticsRole.row,
@@ -4916,7 +4916,7 @@ void _testTables() {
       ..semanticsEnabled = true;
 
     SemanticsObject pumpSemantics() {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         role: ui.SemanticsRole.columnHeader,
@@ -4936,7 +4936,7 @@ void _testTables() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final tester = SemanticsTester(owner());
+    final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
       flags: const ui.SemanticsFlags(scopesRoute: true),
@@ -5007,7 +5007,7 @@ void _testMenus() {
       ..semanticsEnabled = true;
 
     SemanticsObject pumpSemantics() {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         role: ui.SemanticsRole.menu,
@@ -5027,7 +5027,7 @@ void _testMenus() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final tester = SemanticsTester(owner());
+    final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
       role: ui.SemanticsRole.menu,
@@ -5058,7 +5058,7 @@ void _testMenus() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final tester = SemanticsTester(owner());
+    final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
       role: ui.SemanticsRole.menu,
@@ -5110,7 +5110,7 @@ void _testMenus() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final tester = SemanticsTester(owner());
+    final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
       role: ui.SemanticsRole.menuBar,
@@ -5141,7 +5141,7 @@ void _testMenus() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final tester = SemanticsTester(owner());
+    final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
       role: ui.SemanticsRole.menuBar,
@@ -5194,7 +5194,7 @@ void _testMenus() {
       ..semanticsEnabled = true;
 
     SemanticsObject pumpSemantics() {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         role: ui.SemanticsRole.menuItem,
@@ -5215,7 +5215,7 @@ void _testMenus() {
       ..semanticsEnabled = true;
 
     SemanticsObject pumpSemantics(ui.Tristate isExpanded) {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         role: ui.SemanticsRole.menuItem,
@@ -5242,7 +5242,7 @@ void _testMenus() {
       ..semanticsEnabled = true;
 
     SemanticsObject pumpSemantics() {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         role: ui.SemanticsRole.menuBar,
@@ -5263,7 +5263,7 @@ void _testMenus() {
       ..semanticsEnabled = true;
 
     SemanticsObject pumpSemantics() {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         role: ui.SemanticsRole.menuItemCheckbox,
@@ -5284,7 +5284,7 @@ void _testMenus() {
       ..semanticsEnabled = true;
 
     SemanticsObject pumpSemantics() {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         role: ui.SemanticsRole.menuItemRadio,
@@ -5309,7 +5309,7 @@ void _testLists() {
       ..semanticsEnabled = true;
 
     SemanticsObject pumpSemantics() {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         role: ui.SemanticsRole.list,
@@ -5330,7 +5330,7 @@ void _testLists() {
       ..semanticsEnabled = true;
 
     SemanticsObject pumpSemantics() {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         role: ui.SemanticsRole.listItem,
@@ -5354,7 +5354,7 @@ void _testControlsNodes() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final tester = SemanticsTester(owner());
+    final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
       controlsNodes: <String>['a'],
@@ -5686,7 +5686,7 @@ void _testSemanticsValidationResult() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final tester = SemanticsTester(owner());
+    final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
       children: <SemanticsNodeUpdate>[
@@ -5739,7 +5739,7 @@ void _testLandmarks() {
       ..semanticsEnabled = true;
 
     SemanticsObject pumpSemantics() {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         role: ui.SemanticsRole.complementary,
@@ -5759,7 +5759,7 @@ void _testLandmarks() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final tester = SemanticsTester(owner());
+    final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -5813,7 +5813,7 @@ void _testLandmarks() {
       ..semanticsEnabled = true;
 
     SemanticsObject pumpSemantics() {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         role: ui.SemanticsRole.contentInfo,
@@ -5833,7 +5833,7 @@ void _testLandmarks() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final tester = SemanticsTester(owner());
+    final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -5870,7 +5870,7 @@ void _testLandmarks() {
       ..semanticsEnabled = true;
 
     SemanticsObject pumpSemantics() {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         role: ui.SemanticsRole.main,
@@ -5890,7 +5890,7 @@ void _testLandmarks() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final tester = SemanticsTester(owner());
+    final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -5927,7 +5927,7 @@ void _testLandmarks() {
       ..semanticsEnabled = true;
 
     SemanticsObject pumpSemantics() {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         role: ui.SemanticsRole.navigation,
@@ -5947,7 +5947,7 @@ void _testLandmarks() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final tester = SemanticsTester(owner());
+    final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -5984,7 +5984,7 @@ void _testLandmarks() {
       ..semanticsEnabled = true;
 
     SemanticsObject pumpSemantics() {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         label: 'Header 1',
@@ -6011,7 +6011,7 @@ void _testLocale() {
       ..semanticsEnabled = true;
 
     SemanticsObject pumpSemantics() {
-      final tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         locale: const ui.Locale('es-MX'),
@@ -6030,7 +6030,7 @@ void _testLocale() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final tester = SemanticsTester(owner());
+    final SemanticsTester tester = SemanticsTester(owner());
     SemanticsObject pumpSemantics() {
       tester.updateNode(
         id: 0,
@@ -6059,7 +6059,7 @@ void _testLocale() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final tester = SemanticsTester(owner());
+    final SemanticsTester tester = SemanticsTester(owner());
     SemanticsObject pumpSemantics() {
       tester.updateNode(
         id: 0,
@@ -6101,7 +6101,7 @@ void _testForms() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final tester = SemanticsTester(owner());
+    final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
       role: ui.SemanticsRole.form,
@@ -6119,7 +6119,7 @@ void _testForms() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final tester = SemanticsTester(owner());
+    final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
       flags: const ui.SemanticsFlags(scopesRoute: true),
@@ -6254,7 +6254,7 @@ const MethodCodec codec = StandardMethodCodec();
 
 /// Sends a platform message to create a Platform View with the given id and viewType.
 Future<void> createPlatformView(int id, String viewType) {
-  final completer = Completer<void>();
+  final Completer<void> completer = Completer<void>();
   ui.PlatformDispatcher.instance.sendPlatformMessage(
     'flutter/platform_views',
     codec.encodeMethodCall(MethodCall('create', <String, dynamic>{'id': id, 'viewType': viewType})),

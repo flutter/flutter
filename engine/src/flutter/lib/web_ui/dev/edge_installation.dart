@@ -41,7 +41,7 @@ Future<BrowserInstallation> getEdgeInstallation(
     // Since Edge is included in Windows, always assume there will be one on the
     // system.
     infoLog.writeln('Using the system version that is already installed.');
-    final edgeLauncher = EdgeLauncher();
+    final EdgeLauncher edgeLauncher = EdgeLauncher();
     if (edgeLauncher.isInstalled) {
       infoLog.writeln('Launcher installation was skipped, already installed.');
     } else {
@@ -104,7 +104,7 @@ class EdgeLauncher {
       launcherInstallationDir.createSync(recursive: true);
     }
 
-    final client = Client();
+    final Client client = Client();
 
     try {
       // Download executable from Github.

@@ -33,7 +33,7 @@ class ServiceClient {
   }
 
   String _createKey() {
-    final key = '$_id';
+    final String key = '$_id';
     _id++;
     return key;
   }
@@ -43,9 +43,9 @@ class ServiceClient {
     final dynamic key = response['id'];
     if (key != null) {
       print('<- $key');
-      final Completer<dynamic> completer = _outstandingRequests.remove(key)!;
-      final Object? result = response['result'];
-      final Object? error = response['error'];
+      final completer = _outstandingRequests.remove(key)!;
+      final result = response['result'];
+      final error = response['error'];
       if (error != null) {
         completer.completeError(error);
       } else {

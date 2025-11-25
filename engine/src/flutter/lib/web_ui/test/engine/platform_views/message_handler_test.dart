@@ -20,8 +20,8 @@ typedef PlatformViewFactoryCall = ({int viewId, Object? params});
 void testMain() {
   group('PlatformViewMessageHandler', () {
     group('handlePlatformViewCall', () {
-      const platformViewType = 'forTest';
-      const platformViewId = 6;
+      const String platformViewType = 'forTest';
+      const int platformViewId = 6;
       late PlatformViewManager contentManager;
       late Completer<ByteData?> completer;
 
@@ -138,7 +138,7 @@ void testMain() {
         });
 
         test('passes creation params to the factory', () async {
-          final factoryCalls = <PlatformViewFactoryCall>[];
+          final List<PlatformViewFactoryCall> factoryCalls = <PlatformViewFactoryCall>[];
           contentManager.registerFactory(platformViewType, (int viewId, {Object? params}) {
             factoryCalls.add((viewId: viewId, params: params));
             return createDomHTMLDivElement();
@@ -147,7 +147,7 @@ void testMain() {
             contentManager: contentManager,
           );
 
-          final completers = <Completer<ByteData?>>[];
+          final List<Completer<ByteData?>> completers = <Completer<ByteData?>>[];
 
           completers.add(Completer<ByteData?>());
           messageHandler.handlePlatformViewCall(
@@ -181,7 +181,7 @@ void testMain() {
             completers.map((Completer<ByteData?> c) => c.future),
           );
 
-          for (final response in responses) {
+          for (final ByteData? response in responses) {
             expect(
               codec.decodeEnvelope(response!),
               isNull,

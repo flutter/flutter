@@ -268,7 +268,7 @@ void _vertexModeTests() {
 
 void _imageTests() {
   test('MakeAnimatedImageFromEncoded makes a non-animated image', () {
-    final SkAnimatedImage nonAnimated = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
+    final SkAnimatedImage nonAnimated = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!;
     expect(nonAnimated.getFrameCount(), 1);
     expect(nonAnimated.getRepetitionCount(), 0);
     expect(nonAnimated.width(), 1);
@@ -292,12 +292,12 @@ void _imageTests() {
   });
 
   test('MakeAnimatedImageFromEncoded makes an animated image', () {
-    final SkAnimatedImage animated = canvasKit.MakeAnimatedImageFromEncoded(kAnimatedGif);
+    final SkAnimatedImage animated = canvasKit.MakeAnimatedImageFromEncoded(kAnimatedGif)!;
     expect(animated.getFrameCount(), 3);
     expect(animated.getRepetitionCount(), -1); // animates forever
     expect(animated.width(), 1);
     expect(animated.height(), 1);
-    for (var i = 0; i < 100; i++) {
+    for (int i = 0; i < 100; i++) {
       final SkImage frame = animated.makeImageAtCurrentFrame();
       expect(frame.width(), 1);
       expect(frame.height(), 1);
@@ -344,7 +344,7 @@ void _shaderTests() {
   });
 
   test('RuntimeEffect', () {
-    const kSkSlProgram = r'''
+    const String kSkSlProgram = r'''
 half4 main(vec2 fragCoord) {
   return vec4(1.0, 0.0, 0.0, 1.0);
 }
@@ -353,7 +353,7 @@ half4 main(vec2 fragCoord) {
     final SkRuntimeEffect? effect = MakeRuntimeEffect(kSkSlProgram);
     expect(effect, isNotNull);
 
-    const kInvalidSkSlProgram = '';
+    const String kInvalidSkSlProgram = '';
 
     // Invalid SkSL returns null.
     final SkRuntimeEffect? invalidEffect = MakeRuntimeEffect(kInvalidSkSlProgram);
@@ -369,7 +369,7 @@ half4 main(vec2 fragCoord) {
 
     expect(invalidShader, isNull);
 
-    const kSkSlProgramWithUniforms = r'''
+    const String kSkSlProgramWithUniforms = r'''
 uniform vec4 u_color;
 
 half4 main(vec2 fragCoord) {
@@ -508,16 +508,16 @@ void _imageFilterTests() {
 
 void _mallocTests() {
   test('$SkFloat32List', () {
-    final lists = <SkFloat32List>[];
+    final List<SkFloat32List> lists = <SkFloat32List>[];
 
-    for (var size = 0; size < 1000; size++) {
+    for (int size = 0; size < 1000; size++) {
       final SkFloat32List skList = mallocFloat32List(4);
       expect(skList, isNotNull);
       expect(skList.toTypedArray(), hasLength(4));
       lists.add(skList);
     }
 
-    for (final skList in lists) {
+    for (final SkFloat32List skList in lists) {
       // toTypedArray() still works.
       expect(() => skList.toTypedArray(), returnsNormally);
       free(skList);
@@ -526,16 +526,16 @@ void _mallocTests() {
     }
   });
   test('$SkUint32List', () {
-    final lists = <SkUint32List>[];
+    final List<SkUint32List> lists = <SkUint32List>[];
 
-    for (var size = 0; size < 1000; size++) {
+    for (int size = 0; size < 1000; size++) {
       final SkUint32List skList = mallocUint32List(4);
       expect(skList, isNotNull);
       expect(skList.toTypedArray(), hasLength(4));
       lists.add(skList);
     }
 
-    for (final skList in lists) {
+    for (final SkUint32List skList in lists) {
       // toTypedArray() still works.
       expect(() => skList.toTypedArray(), returnsNormally);
       free(skList);
@@ -684,8 +684,8 @@ Future<bool> fuzzyCompareImages(ui.Image golden, ui.Image img) async {
   int getPixel(ByteData data, int x, int y) => data.getUint32((x + y * golden.width) * 4);
   final ByteData goldenData = (await golden.toByteData())!;
   final ByteData imgData = (await img.toByteData())!;
-  for (var y = 0; y < golden.height; y++) {
-    for (var x = 0; x < golden.width; x++) {
+  for (int y = 0; y < golden.height; y++) {
+    for (int x = 0; x < golden.width; x++) {
       if (getPixel(goldenData, x, y) != getPixel(imgData, x, y)) {
         return false;
       }
@@ -698,8 +698,8 @@ void _matrix4x4CompositionTests() {
   test('compose4x4MatrixInCanvas', () async {
     const double rotateAroundX = pi / 6; // 30 degrees
     const double rotateAroundY = pi / 9; // 20 degrees
-    const width = 150;
-    const height = 150;
+    const int width = 150;
+    const int height = 150;
     const ui.Color black = ui.Color.fromARGB(255, 0, 0, 0);
     const ui.Color green = ui.Color.fromARGB(255, 0, 255, 0);
     void paint(ui.Canvas canvas, CanvasCallback rotate) {
@@ -961,7 +961,7 @@ void _pathTests() {
       false,
       1.0,
     );
-    final SkContourMeasure measure1 = iter.next();
+    final SkContourMeasure measure1 = iter.next()!;
     expect(measure1.length(), 40);
     expect(measure1.getPosTan(5), Float32List.fromList(<double>[15, 10, 1, 0]));
     expect(measure1.getPosTan(15), Float32List.fromList(<double>[20, 15, 0, 1]));
@@ -1140,7 +1140,7 @@ void _canvasTests() {
   });
 
   test('drawAtlas', () {
-    final SkAnimatedImage image = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
+    final SkAnimatedImage image = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!;
     canvas.drawAtlas(
       image.makeImageAtCurrentFrame(),
       Float32List.fromList(<double>[0, 0, 1, 1]),
@@ -1168,7 +1168,7 @@ void _canvasTests() {
   });
 
   test('drawImageOptions', () {
-    final SkAnimatedImage image = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
+    final SkAnimatedImage image = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!;
     canvas.drawImageOptions(
       image.makeImageAtCurrentFrame(),
       10,
@@ -1180,12 +1180,12 @@ void _canvasTests() {
   });
 
   test('drawImageCubic', () {
-    final SkAnimatedImage image = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
+    final SkAnimatedImage image = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!;
     canvas.drawImageCubic(image.makeImageAtCurrentFrame(), 10, 20, 0.3, 0.3, SkPaint());
   });
 
   test('drawImageRectOptions', () {
-    final SkAnimatedImage image = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
+    final SkAnimatedImage image = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!;
     canvas.drawImageRectOptions(
       image.makeImageAtCurrentFrame(),
       Float32List.fromList(<double>[0, 0, 1, 1]),
@@ -1197,7 +1197,7 @@ void _canvasTests() {
   });
 
   test('drawImageRectCubic', () {
-    final SkAnimatedImage image = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
+    final SkAnimatedImage image = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!;
     canvas.drawImageRectCubic(
       image.makeImageAtCurrentFrame(),
       Float32List.fromList(<double>[0, 0, 1, 1]),
@@ -1209,7 +1209,7 @@ void _canvasTests() {
   });
 
   test('drawImageNine', () {
-    final SkAnimatedImage image = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
+    final SkAnimatedImage image = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!;
     canvas.drawImageNine(
       image.makeImageAtCurrentFrame(),
       Float32List.fromList(<double>[0, 0, 1, 1]),
@@ -1255,11 +1255,11 @@ void _canvasTests() {
   });
 
   test('drawShadow', () {
-    for (final flags in const <int>[0x01, 0x00]) {
-      const devicePixelRatio = 2.0;
-      const elevation = 4.0;
-      const ambientAlpha = 0.039;
-      const spotAlpha = 0.25;
+    for (final int flags in const <int>[0x01, 0x00]) {
+      const double devicePixelRatio = 2.0;
+      const double elevation = 4.0;
+      const double ambientAlpha = 0.039;
+      const double spotAlpha = 0.25;
 
       final SkPath path = _testClosedSkPath().snapshot();
       final ui.Rect bounds = fromSkRect(path.getBounds());
@@ -1429,7 +1429,7 @@ void _canvasTests() {
       SkPaint()..setColorInt(0xAAFFFFFF),
     );
     final CkPicture picture = CkPicture(otherRecorder.finishRecordingAsPicture());
-    final image = await picture.toImage(1, 1) as CkImage;
+    final CkImage image = await picture.toImage(1, 1) as CkImage;
     final ByteData rawData = await image.toByteData();
     expect(rawData.lengthInBytes, greaterThan(0));
     expect(rawData.buffer.asUint32List(), <int>[0xAAAAAAAA]);
@@ -1647,7 +1647,7 @@ void _paragraphTests() {
     expect(paragraph.getGlyphPositionAtCoordinate(5, 5).affinity, canvasKit.Affinity.Upstream);
 
     // "Hello"
-    for (var i = 0; i < 5; i++) {
+    for (int i = 0; i < 5; i++) {
       expect(paragraph.getWordBoundary(i.toDouble()).start, 0);
       expect(paragraph.getWordBoundary(i.toDouble()).end, 5);
     }
@@ -1655,7 +1655,7 @@ void _paragraphTests() {
     expect(paragraph.getWordBoundary(5).start, 5);
     expect(paragraph.getWordBoundary(5).end, 6);
     // "World"
-    for (var i = 6; i < 11; i++) {
+    for (int i = 6; i < 11; i++) {
       expect(paragraph.getWordBoundary(i.toDouble()).start, 6);
       expect(paragraph.getWordBoundary(i.toDouble()).end, 11);
     }

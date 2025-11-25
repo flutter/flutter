@@ -224,42 +224,42 @@ void mainForPlatformIsolatesThrowError() {
 
 @pragma('vm:entry-point')
 void sendSemanticsUpdate() {
-  final builder = SemanticsUpdateBuilder();
-  const identifier = 'identifier';
-  const label = 'label';
-  final labelAttributes = <StringAttribute>[
+  final SemanticsUpdateBuilder builder = SemanticsUpdateBuilder();
+  const String identifier = 'identifier';
+  const String label = 'label';
+  final List<StringAttribute> labelAttributes = <StringAttribute>[
     SpellOutStringAttribute(range: const TextRange(start: 1, end: 2)),
   ];
 
-  const value = 'value';
-  final valueAttributes = <StringAttribute>[
+  const String value = 'value';
+  final List<StringAttribute> valueAttributes = <StringAttribute>[
     SpellOutStringAttribute(range: const TextRange(start: 2, end: 3)),
   ];
 
-  const increasedValue = 'increasedValue';
-  final increasedValueAttributes = <StringAttribute>[
+  const String increasedValue = 'increasedValue';
+  final List<StringAttribute> increasedValueAttributes = <StringAttribute>[
     SpellOutStringAttribute(range: const TextRange(start: 4, end: 5)),
   ];
 
-  const decreasedValue = 'decreasedValue';
-  final decreasedValueAttributes = <StringAttribute>[
+  const String decreasedValue = 'decreasedValue';
+  final List<StringAttribute> decreasedValueAttributes = <StringAttribute>[
     SpellOutStringAttribute(range: const TextRange(start: 5, end: 6)),
   ];
 
-  const hint = 'hint';
-  final hintAttributes = <StringAttribute>[
+  const String hint = 'hint';
+  final List<StringAttribute> hintAttributes = <StringAttribute>[
     LocaleStringAttribute(
       locale: const Locale('en', 'MX'),
       range: const TextRange(start: 0, end: 1),
     ),
   ];
 
-  const tooltip = 'tooltip';
+  const String tooltip = 'tooltip';
 
-  final transform = Float64List(16);
-  final childrenInTraversalOrder = Int32List(0);
-  final childrenInHitTestOrder = Int32List(0);
-  final additionalActions = Int32List(0);
+  final Float64List transform = Float64List(16);
+  final Int32List childrenInTraversalOrder = Int32List(0);
+  final Int32List childrenInHitTestOrder = Int32List(0);
+  final Int32List additionalActions = Int32List(0);
   transform[0] = 1;
   transform[1] = 0;
   transform[2] = 0;

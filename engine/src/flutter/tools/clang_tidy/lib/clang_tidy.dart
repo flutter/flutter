@@ -158,7 +158,7 @@ class ClangTidy {
       }
     }
 
-    final buildCommandsData =
+    final List<Object?> buildCommandsData =
         jsonDecode(options.buildCommandsPath.readAsStringSync()) as List<Object?>;
     final List<List<Object?>> shardBuildCommandsData = options.shardCommandsPaths
         .map((io.File file) => jsonDecode(file.readAsStringSync()) as List<Object?>)
@@ -189,7 +189,7 @@ class ClangTidy {
       changedFileBuildCommands,
       options,
     );
-    final computeResult = computeJobsResult.sawMalformed ? 1 : 0;
+    final int computeResult = computeJobsResult.sawMalformed ? 1 : 0;
     final List<WorkerJob> jobs = computeJobsResult.jobs;
 
     final int runResult = await _runJobs(jobs);
@@ -212,21 +212,21 @@ class ClangTidy {
       case LintAll():
         return options.repoPath.listSync(recursive: true).whereType<io.File>().toList();
       case LintRegex(:final String regex):
-        final pattern = RegExp(regex);
+        final RegExp pattern = RegExp(regex);
         return options.repoPath
             .listSync(recursive: true)
             .whereType<io.File>()
             .where((io.File file) => pattern.hasMatch(file.path))
             .toList();
       case LintChanged():
-        final repo = GitRepo.fromRoot(
+        final GitRepo repo = GitRepo.fromRoot(
           options.repoPath,
           processManager: _processManager,
           verbose: options.verbose,
         );
         return repo.changedFiles;
       case LintHead():
-        final repo = GitRepo.fromRoot(
+        final GitRepo repo = GitRepo.fromRoot(
           options.repoPath,
           processManager: _processManager,
           verbose: options.verbose,
@@ -237,8 +237,8 @@ class ClangTidy {
 
   /// Returns f(n) = value(n * [shardCount] + [id]).
   Iterable<T> _takeShard<T>(Iterable<T> values, int id, int shardCount) sync* {
-    var count = 0;
-    for (final val in values) {
+    int count = 0;
+    for (final T val in values) {
       if (count % shardCount == id) {
         yield val;
       }
@@ -254,7 +254,7 @@ class ClangTidy {
     Iterable<Set<String>> filePathSets,
   ) sync* {
     bool allSetsContain(Command command) {
-      for (final filePathSet in filePathSets) {
+      for (final Set<String> filePathSet in filePathSets) {
         if (!filePathSet.contains(command.filePath)) {
           return false;
         }
@@ -262,7 +262,7 @@ class ClangTidy {
       return true;
     }
 
-    for (final command in items) {
+    for (final Command command in items) {
       if (allSetsContain(command)) {
         yield _SetStatusCommand(_SetStatus.Intersection, command);
       } else {
@@ -283,13 +283,13 @@ class ClangTidy {
     List<List<Object?>> sharedBuildCommandsData,
     int? shardId,
   ) {
-    final totalCommands = <Command>[];
+    final List<Command> totalCommands = <Command>[];
     if (sharedBuildCommandsData.isNotEmpty) {
-      final buildCommands = <Command>[
+      final List<Command> buildCommands = <Command>[
         for (final Object? data in buildCommandsData)
           Command.fromMap((data as Map<String, Object?>?)!),
       ];
-      final shardFilePaths = <Set<String>>[
+      final List<Set<String>> shardFilePaths = <Set<String>>[
         for (final List<Object?> list in sharedBuildCommandsData)
           <String>{
             for (final Object? data in list)
@@ -300,12 +300,12 @@ class ClangTidy {
         buildCommands,
         shardFilePaths,
       );
-      for (final result in intersectionResults) {
+      for (final _SetStatusCommand result in intersectionResults) {
         if (result.setStatus == _SetStatus.Difference) {
           totalCommands.add(result.command);
         }
       }
-      final intersection = <Command>[
+      final List<Command> intersection = <Command>[
         for (final _SetStatusCommand result in intersectionResults)
           if (result.setStatus == _SetStatus.Intersection) result.command,
       ];
@@ -320,8 +320,8 @@ class ClangTidy {
       ]);
     }
     return () async {
-      final result = <Command>[];
-      for (final command in totalCommands) {
+      final List<Command> result = <Command>[];
+      for (final Command command in totalCommands) {
         final LintAction lintAction = await command.lintAction;
         // Short-circuit the expensive containsAny call for the many third_party files.
         if (lintAction != LintAction.skipThirdParty && command.containsAny(files)) {
@@ -333,9 +333,9 @@ class ClangTidy {
   }
 
   Future<_ComputeJobsResult> _computeJobs(List<Command> commands, Options options) async {
-    var sawMalformed = false;
-    final jobs = <WorkerJob>[];
-    for (final command in commands) {
+    bool sawMalformed = false;
+    final List<WorkerJob> jobs = <WorkerJob>[];
+    for (final Command command in commands) {
       final String relativePath = path.relative(
         command.filePath,
         from: options.repoPath.parent.path,
@@ -361,10 +361,10 @@ class ClangTidy {
   }
 
   static Iterable<String> _trimGenerator(String output) sync* {
-    const splitter = LineSplitter();
+    const LineSplitter splitter = LineSplitter();
     final List<String> lines = splitter.convert(output);
-    var isPrintingError = false;
-    for (final line in lines) {
+    bool isPrintingError = false;
+    for (final String line in lines) {
       if (line.contains(': error:') || line.contains(': warning:')) {
         isPrintingError = true;
         yield line;
@@ -382,9 +382,9 @@ class ClangTidy {
   static String trimOutput(String output) => _trimGenerator(output).join('\n');
 
   Future<int> _runJobs(List<WorkerJob> jobs) async {
-    var result = 0;
-    var ignoredFailures = 0;
-    final pendingJobs = <String>{for (final WorkerJob job in jobs) job.name};
+    int result = 0;
+    int ignoredFailures = 0;
+    final Set<String> pendingJobs = <String>{for (final WorkerJob job in jobs) job.name};
 
     void reporter(int totalJobs, int completed, int inProgress, int pending, int failed) {
       return _logWithTimestamp(
@@ -398,7 +398,7 @@ class ClangTidy {
       );
     }
 
-    final pool = ProcessPool(
+    final ProcessPool pool = ProcessPool(
       printReport: reporter,
       processRunner: ProcessRunner(processManager: _processManager),
     );

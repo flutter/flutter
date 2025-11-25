@@ -26,11 +26,11 @@ Future<void> testMain() async {
     for (final String property in _populatorsA.keys) {
       final _StrutStylePropertyPopulator populator = _populatorsA[property]!;
 
-      final aBuilder = _TestStrutStyleBuilder();
+      final _TestStrutStyleBuilder aBuilder = _TestStrutStyleBuilder();
       populator(aBuilder);
       final ui.StrutStyle a = aBuilder.build();
 
-      final bBuilder = _TestStrutStyleBuilder();
+      final _TestStrutStyleBuilder bBuilder = _TestStrutStyleBuilder();
       populator(bBuilder);
       final ui.StrutStyle b = bBuilder.build();
 
@@ -43,12 +43,12 @@ Future<void> testMain() async {
     for (final String property in _populatorsA.keys) {
       final _StrutStylePropertyPopulator populatorA = _populatorsA[property]!;
 
-      final aBuilder = _TestStrutStyleBuilder();
+      final _TestStrutStyleBuilder aBuilder = _TestStrutStyleBuilder();
       populatorA(aBuilder);
       final ui.StrutStyle a = aBuilder.build();
 
       final _StrutStylePropertyPopulator populatorB = _populatorsB[property]!;
-      final bBuilder = _TestStrutStyleBuilder();
+      final _TestStrutStyleBuilder bBuilder = _TestStrutStyleBuilder();
       populatorB(bBuilder);
       final ui.StrutStyle b = bBuilder.build();
 
@@ -58,8 +58,8 @@ Future<void> testMain() async {
   });
 
   test('all properties altogether equal', () {
-    final aBuilder = _TestStrutStyleBuilder();
-    final bBuilder = _TestStrutStyleBuilder();
+    final _TestStrutStyleBuilder aBuilder = _TestStrutStyleBuilder();
+    final _TestStrutStyleBuilder bBuilder = _TestStrutStyleBuilder();
 
     for (final String property in _populatorsA.keys) {
       final _StrutStylePropertyPopulator populator = _populatorsA[property]!;
@@ -75,8 +75,8 @@ Future<void> testMain() async {
   });
 
   test('all properties altogether not equal', () {
-    final aBuilder = _TestStrutStyleBuilder();
-    final bBuilder = _TestStrutStyleBuilder();
+    final _TestStrutStyleBuilder aBuilder = _TestStrutStyleBuilder();
+    final _TestStrutStyleBuilder bBuilder = _TestStrutStyleBuilder();
 
     for (final String property in _populatorsA.keys) {
       final _StrutStylePropertyPopulator populatorA = _populatorsA[property]!;

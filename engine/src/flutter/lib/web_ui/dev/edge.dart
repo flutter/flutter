@@ -57,7 +57,7 @@ class Edge extends Browser {
         );
 
         // Debug is not a valid option for Edge. Remove it.
-        var pathToOpen = url.toString();
+        String pathToOpen = url.toString();
         if (pathToOpen.contains('debug')) {
           final int index = pathToOpen.indexOf('debug');
           pathToOpen = pathToOpen.substring(0, index - 1);

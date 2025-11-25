@@ -13,7 +13,7 @@ typedef FutureFunction = Future<Object?> Function();
 
 /// Asserts that `callback` throws an exception of type `T`.
 Future<void> asyncExpectThrows<T>(FutureFunction callback) async {
-  var threw = false;
+  bool threw = false;
   try {
     await callback();
   } catch (e) {
@@ -34,9 +34,9 @@ Future<void> bindServerAndTest(
   String serverHost,
   Future<void> Function(HttpClient client, Uri uri) testCode,
 ) async {
-  final httpClient = HttpClient();
+  final HttpClient httpClient = HttpClient();
   final HttpServer server = await HttpServer.bind(serverHost, 0);
-  final uri = Uri(scheme: 'http', host: serverHost, port: server.port);
+  final Uri uri = Uri(scheme: 'http', host: serverHost, port: server.port);
   try {
     await testCode(httpClient, uri);
   } finally {
@@ -83,7 +83,7 @@ void main() {
     await bindServerAndTest(Platform.localHostname, (HttpClient httpClient, Uri httpUri) async {
       asyncExpectThrows<UnsupportedError>(() async => httpClient.getUrl(httpUri));
 
-      final mockFoo = _MockZoneValue('foo');
+      final _MockZoneValue mockFoo = _MockZoneValue('foo');
       asyncExpectThrows<UnsupportedError>(
         () async => runZoned(
           () => httpClient.getUrl(httpUri),
@@ -92,7 +92,7 @@ void main() {
       );
       expect(mockFoo.checked, isTrue);
 
-      final mockFalse = _MockZoneValue(false);
+      final _MockZoneValue mockFalse = _MockZoneValue(false);
       asyncExpectThrows<UnsupportedError>(
         () async => runZoned(
           () => httpClient.getUrl(httpUri),
@@ -101,7 +101,7 @@ void main() {
       );
       expect(mockFalse.checked, isTrue);
 
-      final mockTrue = _MockZoneValue(true);
+      final _MockZoneValue mockTrue = _MockZoneValue(true);
       await runZoned(
         () => httpClient.getUrl(httpUri),
         zoneValues: <dynamic, dynamic>{#flutter.io.allow_http: mockTrue},

@@ -17,7 +17,7 @@ Future<int> fetchDependencies(Environment environment) async {
     return 1;
   }
 
-  final String? dotGclientPath = findDotGclient(environment);
+  final dotGclientPath = findDotGclient(environment);
 
   if (dotGclientPath == null) {
     environment.logger.error(

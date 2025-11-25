@@ -17,16 +17,16 @@ class DarwinSystemFont extends Scenario {
 
   @override
   void onBeginFrame(Duration duration) {
-    final builder = SceneBuilder();
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder);
+    final SceneBuilder builder = SceneBuilder();
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
 
-    final paragraphBuilderDisplay =
+    final ParagraphBuilder paragraphBuilderDisplay =
         ParagraphBuilder(ParagraphStyle(fontFamily: 'CupertinoSystemDisplay'))
           ..pushStyle(TextStyle(fontSize: 50))
           ..addText('Cupertino System Display\n')
           ..pop();
-    final paragraphBuilderText =
+    final ParagraphBuilder paragraphBuilderText =
         ParagraphBuilder(ParagraphStyle(fontFamily: 'CupertinoSystemText'))
           ..pushStyle(TextStyle(fontSize: 50))
           ..addText('Cupertino System Text\n')

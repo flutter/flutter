@@ -40,7 +40,7 @@ et build //flutter/fml:fml_benchmarks  # Build a specific target in `//flutter/f
   Future<int> run() async {
     final plan = BuildPlan.fromArgResults(argResults!, environment, builds: builds);
 
-    final List<String> commandLineTargets = argResults!.rest;
+    final commandLineTargets = argResults!.rest;
     if (commandLineTargets.isNotEmpty &&
         !await ensureBuildDir(environment, plan.build, enableRbe: plan.useRbe)) {
       return 1;
@@ -51,8 +51,8 @@ et build //flutter/fml:fml_benchmarks  # Build a specific target in `//flutter/f
     final gn = Gn.fromEnvironment(environment);
     final allTargets = <Label>{};
     for (final pattern in commandLineTargets) {
-      final TargetPattern target = TargetPattern.parse(pattern);
-      final List<BuildTarget> targets = await gn.desc('out/${plan.build.ninja.config}', target);
+      final target = TargetPattern.parse(pattern);
+      final targets = await gn.desc('out/${plan.build.ninja.config}', target);
       allTargets.addAll(targets.map((target) => target.label));
     }
 
@@ -61,7 +61,7 @@ et build //flutter/fml:fml_benchmarks  # Build a specific target in `//flutter/f
     // unneccesarily noisy, we can remove it or limit it to verbose mode.
     if (allTargets.length < commandLineTargets.length) {
       // Report which targets were not found.
-      final Iterable<String> notFound = commandLineTargets.where(
+      final notFound = commandLineTargets.where(
         (target) => !allTargets.contains(Label.parse(target)),
       );
       environment.logger.warning(

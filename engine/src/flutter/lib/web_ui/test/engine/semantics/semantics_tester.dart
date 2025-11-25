@@ -178,9 +178,9 @@ class SemanticsTester {
       }
     }
 
-    final childIds = Int32List(children?.length ?? 0);
+    final Int32List childIds = Int32List(children?.length ?? 0);
     if (children != null) {
-      for (var i = 0; i < children.length; i++) {
+      for (int i = 0; i < children.length; i++) {
         childIds[i] = children[i].id;
       }
     }

@@ -161,7 +161,7 @@ Scenario? _currentScenarioInstance;
 /// Loads an scenario.
 /// The map must contain a `name` entry, which equals to the name of the scenario.
 void loadScenario(Map<String, dynamic> scenario, FlutterView view) {
-  final scenarioName = scenario['name'] as String;
+  final String scenarioName = scenario['name'] as String;
   assert(_scenarios[scenarioName] != null);
   _currentScenarioParams = scenario;
 

@@ -35,7 +35,7 @@ R timeAction<R>(String name, Action<R> action) {
   if (!Profiler.isBenchmarkMode) {
     return action();
   } else {
-    final stopwatch = Stopwatch()..start();
+    final Stopwatch stopwatch = Stopwatch()..start();
     final R result = action();
     stopwatch.stop();
     Profiler.instance.benchmark(name, stopwatch.elapsedMicroseconds.toDouble());
@@ -166,13 +166,13 @@ class Instrumentation {
       if (_printTimer == null || !_enabled) {
         return;
       }
-      final message = StringBuffer('Engine counters:\n');
+      final StringBuffer message = StringBuffer('Engine counters:\n');
       // Entries are sorted for readability and testability.
       final List<MapEntry<String, int>> entries = _counters.entries.toList()
         ..sort((MapEntry<String, int> a, MapEntry<String, int> b) {
           return a.key.compareTo(b.key);
         });
-      for (final entry in entries) {
+      for (final MapEntry<String, int> entry in entries) {
         message.writeln('  ${entry.key}: ${entry.value}');
       }
       print(message);

@@ -41,7 +41,7 @@ class FakeAssetManager implements ui_web.AssetManager {
   }
 
   FakeAssetScope pushAssetScope() {
-    final scope = FakeAssetScope._(_currentScope);
+    final FakeAssetScope scope = FakeAssetScope._(_currentScope);
     _currentScope = scope;
     return scope;
   }

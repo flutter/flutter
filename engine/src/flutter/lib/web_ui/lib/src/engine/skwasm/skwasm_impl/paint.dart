@@ -129,11 +129,11 @@ class SkwasmPaint implements ui.Paint {
 
   @override
   String toString() {
-    var resultString = 'Paint()';
+    String resultString = 'Paint()';
 
     assert(() {
-      final result = StringBuffer();
-      var semicolon = '';
+      final StringBuffer result = StringBuffer();
+      String semicolon = '';
       result.write('Paint(');
       if (style == ui.PaintingStyle.stroke) {
         result.write('$style');

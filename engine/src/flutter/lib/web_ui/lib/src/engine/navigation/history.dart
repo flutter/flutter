@@ -142,7 +142,7 @@ class MultiEntriesBrowserHistory extends BrowserHistory {
   late int _lastSeenSerialCount;
   int get _currentSerialCount {
     if (_hasSerialCount(currentState)) {
-      final stateMap = currentState! as Map<dynamic, dynamic>;
+      final Map<dynamic, dynamic> stateMap = currentState! as Map<dynamic, dynamic>;
       return (stateMap['serialCount'] as double).toInt();
     }
     return 0;
@@ -226,7 +226,7 @@ class MultiEntriesBrowserHistory extends BrowserHistory {
     }
     // Unwrap state.
     assert(_hasSerialCount(currentState) && _currentSerialCount == 0);
-    final stateMap = currentState! as Map<dynamic, dynamic>;
+    final Map<dynamic, dynamic> stateMap = currentState! as Map<dynamic, dynamic>;
     urlStrategy!.replaceState(stateMap['state'], 'flutter', currentPath);
   }
 }
@@ -290,7 +290,7 @@ class SingleEntryBrowserHistory extends BrowserHistory {
 
   Object? _unwrapOriginState(Object? state) {
     assert(_isOriginEntry(state));
-    final originState = state! as Map<dynamic, dynamic>;
+    final Map<dynamic, dynamic> originState = state! as Map<dynamic, dynamic>;
     return originState['state'];
   }
 
@@ -313,14 +313,14 @@ class SingleEntryBrowserHistory extends BrowserHistory {
   void setRouteName(String? routeName, {Object? state, bool replace = false}) {
     if (urlStrategy != null) {
       _currentRouteName = routeName ?? currentPath;
-      _setupFlutterEntry(urlStrategy, replace: true);
+      _setupFlutterEntry(urlStrategy!, replace: true);
     }
   }
 
   @override
   void onPopState(Object? state) {
     if (_isOriginEntry(state)) {
-      _setupFlutterEntry(urlStrategy);
+      _setupFlutterEntry(urlStrategy!);
 
       // 2. Send a 'popRoute' platform message so the app can handle it accordingly.
       EnginePlatformDispatcher.instance.invokeOnPlatformMessage(

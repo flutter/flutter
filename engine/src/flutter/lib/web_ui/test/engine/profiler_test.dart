@@ -24,7 +24,7 @@ void testMain() {
 }
 
 void _profilerTests() {
-  final warnings = <String>[];
+  final List<String> warnings = <String>[];
   late void Function(String) oldPrintWarning;
 
   setUpAll(() {
@@ -54,7 +54,7 @@ void _profilerTests() {
   });
 
   test('can listen to benchmarks', () {
-    final data = <BenchmarkDatapoint>[];
+    final List<BenchmarkDatapoint> data = <BenchmarkDatapoint>[];
     ui_web.benchmarkValueCallback = (String name, double value) {
       data.add((name, value));
     };
@@ -96,7 +96,7 @@ void _instrumentationTests() {
   });
 
   test('when enabled increments counter', () {
-    final spy = ZoneSpy();
+    final ZoneSpy spy = ZoneSpy();
     spy.run(() {
       Instrumentation.enabled = true;
       final Instrumentation instrumentation = Instrumentation.instance;

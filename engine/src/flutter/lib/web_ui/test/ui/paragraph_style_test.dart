@@ -26,11 +26,11 @@ Future<void> testMain() async {
     for (final String property in _populatorsA.keys) {
       final _ParagraphStylePropertyPopulator populator = _populatorsA[property]!;
 
-      final aBuilder = _TestParagraphStyleBuilder();
+      final _TestParagraphStyleBuilder aBuilder = _TestParagraphStyleBuilder();
       populator(aBuilder);
       final ui.ParagraphStyle a = aBuilder.build();
 
-      final bBuilder = _TestParagraphStyleBuilder();
+      final _TestParagraphStyleBuilder bBuilder = _TestParagraphStyleBuilder();
       populator(bBuilder);
       final ui.ParagraphStyle b = bBuilder.build();
 
@@ -43,12 +43,12 @@ Future<void> testMain() async {
     for (final String property in _populatorsA.keys) {
       final _ParagraphStylePropertyPopulator populatorA = _populatorsA[property]!;
 
-      final aBuilder = _TestParagraphStyleBuilder();
+      final _TestParagraphStyleBuilder aBuilder = _TestParagraphStyleBuilder();
       populatorA(aBuilder);
       final ui.ParagraphStyle a = aBuilder.build();
 
       final _ParagraphStylePropertyPopulator populatorB = _populatorsB[property]!;
-      final bBuilder = _TestParagraphStyleBuilder();
+      final _TestParagraphStyleBuilder bBuilder = _TestParagraphStyleBuilder();
       populatorB(bBuilder);
       final ui.ParagraphStyle b = bBuilder.build();
 
@@ -58,8 +58,8 @@ Future<void> testMain() async {
   });
 
   test('all properties altogether equal', () {
-    final aBuilder = _TestParagraphStyleBuilder();
-    final bBuilder = _TestParagraphStyleBuilder();
+    final _TestParagraphStyleBuilder aBuilder = _TestParagraphStyleBuilder();
+    final _TestParagraphStyleBuilder bBuilder = _TestParagraphStyleBuilder();
 
     for (final String property in _populatorsA.keys) {
       final _ParagraphStylePropertyPopulator populator = _populatorsA[property]!;
@@ -75,8 +75,8 @@ Future<void> testMain() async {
   });
 
   test('all properties altogether not equal', () {
-    final aBuilder = _TestParagraphStyleBuilder();
-    final bBuilder = _TestParagraphStyleBuilder();
+    final _TestParagraphStyleBuilder aBuilder = _TestParagraphStyleBuilder();
+    final _TestParagraphStyleBuilder bBuilder = _TestParagraphStyleBuilder();
 
     for (final String property in _populatorsA.keys) {
       final _ParagraphStylePropertyPopulator populatorA = _populatorsA[property]!;

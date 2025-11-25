@@ -188,7 +188,7 @@ class MultilineInputType extends EngineInputType {
 }
 
 DomHTMLTextAreaElement createMultilineTextArea() {
-  final DomHTMLTextAreaElement element = createDomHTMLTextAreaElement();
+  final element = createDomHTMLTextAreaElement();
   // Scrollbar width affects text layout. This zeroes out the scrollbar width.
   element.style.scrollbarWidth = 'none';
   return element;

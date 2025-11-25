@@ -26,7 +26,7 @@ void main() {
   }
 
   (Environment, List<List<String>>) macEnv(Logger logger) {
-    final runHistory = <List<String>>[];
+    final List<List<String>> runHistory = <List<String>>[];
     return (
       Environment(
         abi: ffi.Abi.macosArm64,
@@ -63,26 +63,26 @@ void main() {
   }
 
   test('process queue success', () async {
-    final logger = Logger.test((_) {});
+    final Logger logger = Logger.test((_) {});
     final (Environment env, _) = macEnv(logger);
-    final wp = WorkerPool(env, NoopWorkerPoolProgressReporter());
-    final task = ProcessTask('S', env, io.Directory.current, <String>['success']);
+    final WorkerPool wp = WorkerPool(env, NoopWorkerPoolProgressReporter());
+    final ProcessTask task = ProcessTask('S', env, io.Directory.current, <String>['success']);
     final bool r = await wp.run(<WorkerTask>{task});
     expect(r, equals(true));
     expect(task.processArtifacts.exitCode, equals(0));
-    final loaded = ProcessArtifacts.fromFile(io.File(task.processArtifactsPath));
+    final ProcessArtifacts loaded = ProcessArtifacts.fromFile(io.File(task.processArtifactsPath));
     expect(loaded.stdout, equals('stdout success'));
   });
 
   test('process queue failure', () async {
-    final logger = Logger.test((_) {});
+    final Logger logger = Logger.test((_) {});
     final (Environment env, _) = macEnv(logger);
-    final wp = WorkerPool(env, NoopWorkerPoolProgressReporter());
-    final task = ProcessTask('F', env, io.Directory.current, <String>['failure']);
+    final WorkerPool wp = WorkerPool(env, NoopWorkerPoolProgressReporter());
+    final ProcessTask task = ProcessTask('F', env, io.Directory.current, <String>['failure']);
     final bool r = await wp.run(<WorkerTask>{task});
     expect(r, equals(false));
     expect(task.processArtifacts.exitCode, isNot(0));
-    final loaded = ProcessArtifacts.fromFile(io.File(task.processArtifactsPath));
+    final ProcessArtifacts loaded = ProcessArtifacts.fromFile(io.File(task.processArtifactsPath));
     expect(loaded.stdout, equals('stdout failure'));
   });
 }

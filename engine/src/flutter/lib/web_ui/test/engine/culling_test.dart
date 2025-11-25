@@ -172,7 +172,7 @@ void testMain() {
 PlatformViewEmbedder createPlatformViewEmbedder() {
   return PlatformViewEmbedder(
     createDomHTMLDivElement(),
-    FakeRasterizer(EnginePlatformDispatcher.instance.implicitView),
+    FakeRasterizer(EnginePlatformDispatcher.instance.implicitView!),
   )..frameSize = const BitmapSize(100, 100);
 }
 

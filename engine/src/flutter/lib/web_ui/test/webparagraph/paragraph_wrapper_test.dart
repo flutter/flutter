@@ -30,7 +30,7 @@ Future<void> testMain() async {
       paragraph.layout(const ParagraphConstraints(width: 250));
       final List<TextLine> lines = paragraph.lines;
       expect(lines.length, 10);
-      for (var i = 0; i < 10; i++) {
+      for (int i = 0; i < 10; i++) {
         if (i == 8) {
           expect(lines[i].whitespacesRange.isEmpty, true);
         } else {
@@ -48,7 +48,7 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: 500));
     final List<TextLine> lines = paragraph.lines;
     expect(lines.length, 4);
-    for (var i = 0; i < 4; i++) {
+    for (int i = 0; i < 4; i++) {
       expect(lines[i].whitespacesRange.size, 3);
     }
   });
@@ -69,8 +69,8 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: 250));
     final List<TextLine> lines = paragraph.lines;
     expect(lines.length, 3);
-    var length = 0;
-    for (var i = 0; i < 3; i++) {
+    int length = 0;
+    for (int i = 0; i < 3; i++) {
       expect(lines[i].whitespacesRange.size, 0);
       length += lines[i].textRange.size;
     }
@@ -99,8 +99,8 @@ Future<void> testMain() async {
 
     final List<TextLine> lines = paragraph.lines;
     expect(lines.length, 3);
-    var length = 0;
-    for (var i = 0; i < 3; i++) {
+    int length = 0;
+    for (int i = 0; i < 3; i++) {
       expect(lines[i].whitespacesRange.size, 0);
       length += lines[i].textRange.size;
     }
@@ -117,8 +117,8 @@ Future<void> testMain() async {
 
     final List<TextLine> lines = paragraph.lines;
     expect(lines.length, 15);
-    var length = 0;
-    for (var i = 0; i < 15; i++) {
+    int length = 0;
+    for (int i = 0; i < 15; i++) {
       expect(lines[i].whitespacesRange.size, i != 14 ? 1 : 0);
       expect(lines[i].hardLineBreak, i != 14);
       length += lines[i].textRange.size;
@@ -151,7 +151,7 @@ Future<void> testMain() async {
 
     final List<TextLine> lines = paragraph.lines;
     expect(lines.length, 3);
-    for (var i = 0; i < 3; i++) {
+    for (int i = 0; i < 3; i++) {
       expect(lines[i].whitespacesRange.size, 1);
       expect(lines[i].textRange.size, 0);
       expect(lines[i].hardLineBreak, i != 3);

@@ -173,7 +173,7 @@ void testMain() {
       debugEmulateHotRestart();
 
       // Wait for 1 second for the frame to be rendered.
-      var timedOut = false;
+      bool timedOut = false;
       await frameCompleter.future.timeout(
         const Duration(seconds: 1),
         onTimeout: () {

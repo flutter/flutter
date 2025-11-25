@@ -104,12 +104,12 @@ ValueGetter<T> _cached<T>(ValueGetter<T> body) {
 class KeyboardBinding {
   KeyboardBinding._() {
     _addEventListener('keydown', (DomEvent domEvent) {
-      final event = FlutterHtmlKeyboardEvent(domEvent as DomKeyboardEvent);
+      final FlutterHtmlKeyboardEvent event = FlutterHtmlKeyboardEvent(domEvent as DomKeyboardEvent);
       _converter.handleEvent(event);
       RawKeyboard.instance?.handleHtmlEvent(domEvent);
     });
     _addEventListener('keyup', (DomEvent domEvent) {
-      final event = FlutterHtmlKeyboardEvent(domEvent as DomKeyboardEvent);
+      final FlutterHtmlKeyboardEvent event = FlutterHtmlKeyboardEvent(domEvent as DomKeyboardEvent);
       _converter.handleEvent(event);
       RawKeyboard.instance?.handleHtmlEvent(domEvent);
     });
@@ -340,7 +340,7 @@ class KeyboardConverter {
     ValueGetter<ui.KeyData> getData,
     _VoidCallback callback,
   ) {
-    var canceled = false;
+    bool canceled = false;
     Future<void>.delayed(duration).then<void>((_) {
       if (!canceled && !_disposed) {
         callback();
@@ -607,7 +607,7 @@ class KeyboardConverter {
     }
 
     assert(_dispatchKeyData == null);
-    var sentAnyEvents = false;
+    bool sentAnyEvents = false;
     _dispatchKeyData = (ui.KeyData data) {
       sentAnyEvents = true;
       return performDispatchKeyData(data);

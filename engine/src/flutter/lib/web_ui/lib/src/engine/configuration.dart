@@ -146,14 +146,14 @@ class FlutterConfiguration {
   }
 
   FlutterConfiguration withOverrides(JsFlutterConfiguration? overrides) {
-    final newJsConfig =
+    final JsFlutterConfiguration newJsConfig =
         objectConstructor.assign(
               <String, Object>{}.jsify(),
               _configuration.jsify(),
               overrides.jsify(),
             )
             as JsFlutterConfiguration;
-    final newConfig = FlutterConfiguration();
+    final FlutterConfiguration newConfig = FlutterConfiguration();
     newConfig._configuration = newJsConfig;
     return newConfig;
   }

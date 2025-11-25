@@ -27,7 +27,7 @@ String? findDotGclient(Environment env) {
       return p.basename(file.path) == '.gclient';
     });
 
-    final io.Directory parent = directory.parent;
+    final parent = directory.parent;
     if (parent.path == directory.path) {
       break;
     }

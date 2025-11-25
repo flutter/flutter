@@ -30,7 +30,7 @@ void testMain() {
         fontFamily: 'Roboto',
       );
 
-      for (var i = 0; i < 10; i++) {
+      for (int i = 0; i < 10; i++) {
         final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle(fontSize: 16));
         builder.pushStyle(textStyleWithShadows);
         builder.addText('test');

@@ -74,18 +74,18 @@ final class LintCommand extends CommandBase {
     if (environment.platform.isWindows) {
       environment.logger.fatal('lint command is not supported on Windows (for now).');
     }
-    final wp = WorkerPool(environment, ProcessTaskProgressReporter(environment));
+    final WorkerPool wp = WorkerPool(environment, ProcessTaskProgressReporter(environment));
 
-    final tasks = <ProcessTask>{};
+    final Set<ProcessTask> tasks = <ProcessTask>{};
     for (final MapEntry<Linter, _LinterDescription> entry in _linters.entries) {
       tasks.add(ProcessTask(entry.key.name, environment, entry.value.cwd, entry.value.command));
     }
     final bool r = await wp.run(tasks);
 
-    final quiet = argResults![quietFlag] as bool;
+    final bool quiet = argResults![quietFlag] as bool;
     if (!quiet) {
       environment.logger.status('\nDumping failure logs\n');
-      for (final pt in tasks) {
+      for (final ProcessTask pt in tasks) {
         final ProcessArtifacts pa = pt.processArtifacts;
         if (pa.exitCode == 0) {
           continue;

@@ -143,13 +143,13 @@ typedef DoubleFunction = double? Function();
 /// when running using a release-mode VM with default settings, this acts as a
 /// no-op.
 void expectAssertion(DoubleFunction callback) {
-  var assertsEnabled = false;
+  bool assertsEnabled = false;
   assert(() {
     assertsEnabled = true;
     return true;
   }());
   if (assertsEnabled) {
-    var threw = false;
+    bool threw = false;
     try {
       callback();
     } catch (e) {

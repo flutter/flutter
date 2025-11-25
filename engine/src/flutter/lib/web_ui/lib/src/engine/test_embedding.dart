@@ -147,7 +147,7 @@ class TestUrlStrategy implements ui_web.UrlStrategy {
   /// like a real browser.
   void _firePopStateEvent() {
     assert(withinAppHistory);
-    for (var i = 0; i < listeners.length; i++) {
+    for (int i = 0; i < listeners.length; i++) {
       listeners[i](currentEntry.state);
     }
 
@@ -161,8 +161,8 @@ class TestUrlStrategy implements ui_web.UrlStrategy {
 
   @override
   String toString() {
-    final lines = <String>[];
-    for (var i = 0; i < history.length; i++) {
+    final List<String> lines = <String>[];
+    for (int i = 0; i < history.length; i++) {
       final TestHistoryEntry entry = history[i];
       lines.add(_currentEntryIndex == i ? '* $entry' : '  $entry');
     }

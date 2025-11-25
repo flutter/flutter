@@ -23,7 +23,7 @@ class EngineColorFilter implements LayerImageFilter, ui.ColorFilter {
   /// The output of this filter is then composited into the background according
   /// to the [Paint.blendMode], using the output of this filter as the source
   /// and the background as the destination.
-  const EngineColorFilter.mode(this.color, this.blendMode)
+  const EngineColorFilter.mode(ui.Color this.color, ui.BlendMode this.blendMode)
     : matrix = null,
       type = ColorFilterType.mode;
 
@@ -111,9 +111,9 @@ class EngineColorFilter implements LayerImageFilter, ui.ColorFilter {
   /// Creates a color filter that applies the given saturation to the RGB
   /// channels.
   factory EngineColorFilter.saturation(double saturation) {
-    const rLuminance = 0.2126;
-    const gLuminance = 0.7152;
-    const bLuminance = 0.0722;
+    const double rLuminance = 0.2126;
+    const double gLuminance = 0.7152;
+    const double bLuminance = 0.0722;
     final double invSat = 1 - saturation;
 
     return EngineColorFilter.matrix(<double>[

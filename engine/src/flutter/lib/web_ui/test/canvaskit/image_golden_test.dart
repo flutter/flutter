@@ -34,12 +34,12 @@ Future<void> testMain() async {
 
     test('CkAnimatedImage toByteData(RGBA)', () async {
       final CkAnimatedImage image = CkAnimatedImage.decodeFromBytes(kAnimatedGif, 'test');
-      const expectedColors = <List<int>>[
+      const List<List<int>> expectedColors = <List<int>>[
         <int>[255, 0, 0, 255],
         <int>[0, 255, 0, 255],
         <int>[0, 0, 255, 255],
       ];
-      for (var i = 0; i < image.frameCount; i++) {
+      for (int i = 0; i < image.frameCount; i++) {
         final ui.FrameInfo frame = await image.getNextFrame();
         final ByteData? rgba = await frame.image.toByteData();
         expect(rgba, isNotNull);

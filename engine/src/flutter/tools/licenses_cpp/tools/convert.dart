@@ -42,14 +42,14 @@ Future<List<License>> parseLicenses(String filePath) async {
     throw FileSystemException('File not found', filePath);
   }
 
-  final List<String> lines = await file.readAsLines();
+  final lines = await file.readAsLines();
   final licenses = <License>[];
   final buffer = StringBuffer();
   String? currentLibrary;
   List<String> currentOrigins = [];
   String? currentType;
   List<String> currentFiles = [];
-  var seenDivider = false;
+  bool seenDivider = false;
 
   for (final line in lines) {
     if (line.startsWith(
@@ -117,16 +117,16 @@ void main(List<String> arguments) async {
     exit(1);
   }
 
-  final String filePath = arguments.first;
+  final filePath = arguments.first;
 
   try {
-    final List<License> licenses = await parseLicenses(filePath);
+    final licenses = await parseLicenses(filePath);
     if (licenses.isEmpty) {
       print('No licenses found in the file.');
       return;
     }
 
-    var first = true;
+    bool first = true;
     for (final license in licenses) {
       if (!first) {
         print('--------------------------------------------------------------------------------');

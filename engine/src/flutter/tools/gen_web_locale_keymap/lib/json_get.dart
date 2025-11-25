@@ -78,7 +78,7 @@ List<dynamic> _jsonPathSplit(String path) {
 ///
 /// If the final result is not of type `T`, throws an `ArgumentError`.
 JsonContext<T> jsonGetPath<T>(JsonContext<dynamic> context, String path) {
-  var current = context;
+  JsonContext<dynamic> current = context;
   void jsonGetKeyOrIndex<M>(dynamic key, int depth) {
     assert(key is String || key is int, 'Key at $depth is a ${key.runtimeType}.');
     if (key is String) {
@@ -102,7 +102,7 @@ JsonContext<T> jsonGetPath<T>(JsonContext<dynamic> context, String path) {
   }
 
   final List<dynamic> pathSegments = _jsonPathSplit(path);
-  for (var depth = 0; depth < pathSegments.length; depth += 1) {
+  for (int depth = 0; depth < pathSegments.length; depth += 1) {
     if (depth != pathSegments.length - 1) {
       jsonGetKeyOrIndexForNext(pathSegments[depth], pathSegments[depth + 1], depth);
     } else {

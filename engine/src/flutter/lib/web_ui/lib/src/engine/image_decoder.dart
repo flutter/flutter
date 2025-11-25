@@ -151,7 +151,7 @@ abstract class BrowserImageDecoder implements ui.Codec {
     // Duration can be null if the image is not animated. However, Flutter
     // requires a non-null value. 0 indicates that the frame is meant to be
     // displayed indefinitely, which is fine for a static image.
-    final duration = Duration(microseconds: frame.duration?.toInt() ?? 0);
+    final Duration duration = Duration(microseconds: frame.duration?.toInt() ?? 0);
     final ui.Image image = generateImageFromVideoFrame(frame);
     return AnimatedImageFrameInfo(duration, image);
   }

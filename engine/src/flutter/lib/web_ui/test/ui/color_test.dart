@@ -166,14 +166,14 @@ Future<void> testMain() async {
   // Regression test for https://github.com/flutter/flutter/issues/41257
   // CupertinoDynamicColor was overriding base class and calling super(0).
   test('subclass of Color can override value', () {
-    const color = DynamicColorClass(0xF0E0D0C0);
+    const DynamicColorClass color = DynamicColorClass(0xF0E0D0C0);
     expect(color.value, 0xF0E0D0C0);
     // Call base class member, make sure it uses overridden value.
     expect(color.red, 0xE0);
   });
 
   test('Paint converts Color subclasses to plain Color', () {
-    const color = DynamicColorClass(0xF0E0D0C0);
+    const DynamicColorClass color = DynamicColorClass(0xF0E0D0C0);
     final Paint paint = Paint()..color = color;
     expect(paint.color.runtimeType, Color);
   });

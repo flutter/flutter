@@ -10,15 +10,15 @@ bool _hasCommandOnPath(String name) {
 }
 
 List<String> _findPairs(Set<String> as, Set<String> bs) {
-  final result = <String>[];
-  for (final a in as) {
+  final List<String> result = <String>[];
+  for (final String a in as) {
     if (bs.contains(a)) {
       result.add(a);
     } else {
       print('Mix match file $a.');
     }
   }
-  for (final b in bs) {
+  for (final String b in bs) {
     if (!as.contains(b)) {
       print('Mix match file $b.');
     }
@@ -41,7 +41,7 @@ Set<String> _grabPngFilenames(Directory dir) {
 /// The main entry point to the tool, execute it like `main`. Returns the
 /// `exitCode`.
 int run(List<String> args) {
-  var returnCode = 0;
+  int returnCode = 0;
   if (!_hasCommandOnPath('compare')) {
     throw Exception(r'Could not find `compare` from ImageMagick on $PATH.');
   }
@@ -49,11 +49,11 @@ int run(List<String> args) {
     throw Exception('Usage: compare_goldens.dart <dir path> <dir path>');
   }
 
-  final dirA = Directory(args[0]);
+  final Directory dirA = Directory(args[0]);
   if (!dirA.existsSync()) {
     throw Exception('Unable to find $dirA');
   }
-  final dirB = Directory(args[1]);
+  final Directory dirB = Directory(args[1]);
   if (!dirB.existsSync()) {
     throw Exception('Unable to find $dirB');
   }
@@ -66,12 +66,12 @@ int run(List<String> args) {
     returnCode = 1;
   }
 
-  var count = 0;
-  for (final name in pairs) {
+  int count = 0;
+  for (final String name in pairs) {
     count += 1;
     final String pathA = <String>[dirA.path, name].join(Platform.pathSeparator);
     final String pathB = <String>[dirB.path, name].join(Platform.pathSeparator);
-    final output = 'diff_$name';
+    final String output = 'diff_$name';
     print('compare ($count / ${pairs.length}) $name');
     final ProcessResult result = Process.runSync('compare', <String>[
       '-metric',

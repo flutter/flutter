@@ -10,13 +10,13 @@ import 'package:test/test.dart';
 
 void main() {
   final engine = Engine.findWithin();
-  final String? manualBuildDir = io.Platform.environment['FLUTTER_BUILD_DIRECTORY'];
-  final String? buildDir = manualBuildDir ?? engine.latestOutput()?.path.path;
+  final manualBuildDir = io.Platform.environment['FLUTTER_BUILD_DIRECTORY'];
+  final buildDir = manualBuildDir ?? engine.latestOutput()?.path.path;
   if (buildDir == null) {
     fail('No build directory found. Set FLUTTER_BUILD_DIRECTORY');
   }
-  final String frontendServer = path.join(buildDir, 'gen', 'frontend_server_aot.dart.snapshot');
-  final String sdkRoot = path.join(buildDir, 'flutter_patched_sdk');
+  final frontendServer = path.join(buildDir, 'gen', 'frontend_server_aot.dart.snapshot');
+  final sdkRoot = path.join(buildDir, 'flutter_patched_sdk');
 
   final String dart = io.Platform.resolvedExecutable;
   final String dartaotruntime = path.join(
@@ -24,13 +24,13 @@ void main() {
     'dartaotruntime',
   );
 
-  final String engineDir = engine.flutterDir.path;
-  final String basePath = path.join(engineDir, 'flutter_frontend_server');
-  final String fixtures = path.join(basePath, 'test', 'fixtures');
-  final String mainDart = path.join(fixtures, 'lib', 'main.dart');
-  final String packageConfig = path.join(fixtures, '.dart_tool', 'package_config.json');
-  final String regularDill = path.join(fixtures, 'toString.dill');
-  final String transformedDill = path.join(fixtures, 'toStringTransformed.dill');
+  final engineDir = engine.flutterDir.path;
+  final basePath = path.join(engineDir, 'flutter_frontend_server');
+  final fixtures = path.join(basePath, 'test', 'fixtures');
+  final mainDart = path.join(fixtures, 'lib', 'main.dart');
+  final packageConfig = path.join(fixtures, '.dart_tool', 'package_config.json');
+  final regularDill = path.join(fixtures, 'toString.dill');
+  final transformedDill = path.join(fixtures, 'toStringTransformed.dill');
 
   void checkProcessResult(io.ProcessResult result) {
     printOnFailure(result.stdout.toString());
@@ -49,7 +49,7 @@ void main() {
         mainDart,
       ]),
     );
-    final io.ProcessResult runResult = io.Process.runSync(dart, <String>[regularDill]);
+    final runResult = io.Process.runSync(dart, <String>[regularDill]);
     checkProcessResult(runResult);
     var paintString =
         '"Paint.toString":"Paint(Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB))"';
@@ -57,7 +57,7 @@ void main() {
       paintString = '"Paint.toString":"Instance of \'Paint\'"';
     }
 
-    final expectedStdout =
+    final String expectedStdout =
         '{$paintString,'
         '"Brightness.toString":"Brightness.dark",'
         '"Foo.toString":"I am a Foo",'
@@ -81,7 +81,7 @@ void main() {
         mainDart,
       ]),
     );
-    final io.ProcessResult runResult = io.Process.runSync(dart, <String>[transformedDill]);
+    final runResult = io.Process.runSync(dart, <String>[transformedDill]);
     checkProcessResult(runResult);
 
     const expectedStdout =
@@ -89,7 +89,7 @@ void main() {
         '"Brightness.toString":"Brightness.dark",'
         '"Foo.toString":"Instance of \'Foo\'",'
         '"Keep.toString":"I am a Keep"}';
-    final String actualStdout = (runResult.stdout as String).trim();
+    final actualStdout = (runResult.stdout as String).trim();
     expect(actualStdout, equals(expectedStdout));
   });
 }

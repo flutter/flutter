@@ -13,7 +13,7 @@ void main() {
 
 void testMain() {
   group('LayerSceneBuilder.addPerformanceOverlay', () {
-    final warnings = <String>[];
+    final List<String> warnings = <String>[];
     late void Function(String) oldPrintWarning;
 
     setUpAll(() {

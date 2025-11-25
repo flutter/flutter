@@ -12,7 +12,7 @@ void main() {
 
 void testMain() {
   group('PlatformViewManager', () {
-    const viewId = 6;
+    const int viewId = 6;
 
     group('createPlatformViewSlot', () {
       test('can render slot, even for views that might have never been rendered before', () async {
@@ -28,7 +28,7 @@ void testMain() {
           'auto',
           reason: 'Should re-enable pointer events for the contents of the view.',
         );
-        final DomElement innerSlot = slot.querySelector('slot');
+        final DomElement innerSlot = slot.querySelector('slot')!;
         expect(
           innerSlot.getAttribute('name'),
           contains('$viewId'),

@@ -17,7 +17,7 @@ import '../common/test_data.dart';
 import '../common/test_initialization.dart';
 import 'utils.dart';
 
-EngineFlutterWindow get implicitView => EnginePlatformDispatcher.instance.implicitView;
+EngineFlutterWindow get implicitView => EnginePlatformDispatcher.instance.implicitView!;
 
 DomElement get platformViewsHost => implicitView.dom.platformViewsHost;
 DomElement get sceneHost => implicitView.dom.sceneHost;
@@ -30,8 +30,8 @@ Future<void> testMain() async {
   setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
 
   const ui.Rect region = ui.Rect.fromLTWH(0, 0, 300, 300);
-  const platformViewType = 'test-platform-view';
-  const invisiblePlatformViewType = 'invisible-test-platform-view';
+  const String platformViewType = 'test-platform-view';
+  const String invisiblePlatformViewType = 'invisible-test-platform-view';
 
   setUp(() {
     ui_web.platformViewRegistry.registerViewFactory(platformViewType, (int viewId) {
@@ -341,10 +341,10 @@ Future<void> testMain() async {
     // The platform view is now split in two parts. The contents live
     // as a child of the glassPane, and the slot lives in the glassPane
     // shadow root. The slot is the one that has pointer events auto.
-    final DomElement contents = platformViewsHost.querySelector('#view-1');
-    final DomElement slot = sceneHost.querySelector('slot');
-    final DomElement contentsHost = contents.parent;
-    final DomElement slotHost = slot.parent;
+    final DomElement contents = platformViewsHost.querySelector('#view-1')!;
+    final DomElement slot = sceneHost.querySelector('slot')!;
+    final DomElement contentsHost = contents.parent!;
+    final DomElement slotHost = slot.parent!;
 
     expect(contents, isNotNull, reason: 'The view from the factory is injected in the DOM.');
 
@@ -415,7 +415,7 @@ Future<void> testMain() async {
     await renderScene(sb.build());
 
     // Transformations happen on the slot element.
-    final DomElement slotHost = sceneHost.querySelector('flt-platform-view-slot');
+    final DomElement slotHost = sceneHost.querySelector('flt-platform-view-slot')!;
 
     expect(
       slotHost.style.transform,
@@ -433,7 +433,7 @@ Future<void> testMain() async {
     sb.addPlatformView(1, offset: const ui.Offset(3, 4), width: 5, height: 6);
     await renderScene(sb.build());
 
-    final DomElement slotHost = sceneHost.querySelector('flt-platform-view-slot');
+    final DomElement slotHost = sceneHost.querySelector('flt-platform-view-slot')!;
     final DomCSSStyleDeclaration style = slotHost.style;
 
     expect(style.transform, 'matrix(1, 0, 0, 1, 3, 4)');
@@ -459,7 +459,7 @@ Future<void> testMain() async {
     await renderScene(sb.build());
 
     // Transformations happen on the slot element.
-    DomElement slotHost = sceneHost.querySelector('flt-platform-view-slot');
+    DomElement slotHost = sceneHost.querySelector('flt-platform-view-slot')!;
 
     expect(getTransformChain(slotHost), <String>[
       'matrix(1, 0, 0, 1, 6, 6)',
@@ -476,7 +476,7 @@ Future<void> testMain() async {
     await renderScene(sb.build());
 
     // Transformations happen on the slot element.
-    slotHost = sceneHost.querySelector('flt-platform-view-slot');
+    slotHost = sceneHost.querySelector('flt-platform-view-slot')!;
 
     expect(getTransformChain(slotHost), <String>[
       'matrix(1, 0, 0, 1, 9, 9)',
@@ -497,7 +497,7 @@ Future<void> testMain() async {
     await renderScene(sb.build());
 
     // Transformations happen on the slot element.
-    final DomElement slotHost = sceneHost.querySelector('flt-platform-view-slot');
+    final DomElement slotHost = sceneHost.querySelector('flt-platform-view-slot')!;
 
     expect(getTransformChain(slotHost), <String>['matrix(0.25, 0, 0, 0.25, 1.5, 1.5)']);
     EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(null);
@@ -517,7 +517,7 @@ Future<void> testMain() async {
     await renderScene(sb.build());
 
     // Transformations happen on the slot element.
-    final DomElement slotHost = sceneHost.querySelector('flt-platform-view-slot');
+    final DomElement slotHost = sceneHost.querySelector('flt-platform-view-slot')!;
 
     expect(getTransformChain(slotHost), <String>[
       'matrix(1, 0, 0, 1, 9, 9)',
@@ -537,8 +537,8 @@ Future<void> testMain() async {
     final ui.Picture testPicture = testRecorder.endRecording();
 
     // Initialize all platform views to be used in the test.
-    final platformViewIds = <int>[];
-    for (var i = 0; i < 16; i++) {
+    final List<int> platformViewIds = <int>[];
+    for (int i = 0; i < 16; i++) {
       await createPlatformView(i, platformViewType);
       platformViewIds.add(i);
     }
@@ -546,7 +546,7 @@ Future<void> testMain() async {
     Future<void> renderTestScene({required int viewCount}) async {
       final ui.SceneBuilder sb = ui.SceneBuilder();
       sb.pushOffset(0, 0);
-      for (var i = 0; i < viewCount; i++) {
+      for (int i = 0; i < viewCount; i++) {
         sb.addPicture(ui.Offset.zero, testPicture);
         sb.addPlatformView(i, width: 10, height: 10);
       }
@@ -641,9 +641,9 @@ Future<void> testMain() async {
     // Frame 6:
     //   Render: deleted platform views.
     //   Expect: error.
-    for (final id in platformViewIds) {
+    for (final int id in platformViewIds) {
       const StandardMethodCodec codec = StandardMethodCodec();
-      final completer = Completer<void>();
+      final Completer<void> completer = Completer<void>();
       ui.PlatformDispatcher.instance.sendPlatformMessage(
         'flutter/platform_views',
         codec.encodeMethodCall(MethodCall('dispose', id)),
@@ -680,8 +680,8 @@ Future<void> testMain() async {
     final ui.Picture testPicture = testRecorder.endRecording();
 
     // Initialize all platform views to be used in the test.
-    final platformViewIds = <int>[];
-    for (var i = 0; i < 20; i++) {
+    final List<int> platformViewIds = <int>[];
+    for (int i = 0; i < 20; i++) {
       await createPlatformView(i, platformViewType);
       platformViewIds.add(i);
     }
@@ -689,7 +689,7 @@ Future<void> testMain() async {
     Future<void> renderTestScene(List<int> views) async {
       final ui.SceneBuilder sb = ui.SceneBuilder();
       sb.pushOffset(0, 0);
-      for (final view in views) {
+      for (final int view in views) {
         sb.addPicture(ui.Offset.zero, testPicture);
         sb.addPlatformView(view, width: 10, height: 10);
       }
@@ -1412,8 +1412,8 @@ Future<void> testMain() async {
     final ui.Picture testPicture = testRecorder.endRecording();
 
     // Initialize all platform views to be used in the test.
-    final platformViewIds = <int>[];
-    for (var i = 0; i < 16; i++) {
+    final List<int> platformViewIds = <int>[];
+    for (int i = 0; i < 16; i++) {
       ui_web.platformViewRegistry.registerViewFactory(
         'test-platform-view',
         (int viewId) => createDomHTMLDivElement()..id = 'view-$i',
@@ -1425,7 +1425,7 @@ Future<void> testMain() async {
     Future<void> renderTestScene({required int viewCount}) async {
       final LayerSceneBuilder sb = LayerSceneBuilder();
       sb.pushOffset(0, 0);
-      for (var i = 0; i < viewCount; i++) {
+      for (int i = 0; i < viewCount; i++) {
         sb.addPicture(ui.Offset.zero, testPicture);
         sb.addPlatformView(i, width: 10, height: 10);
       }
@@ -1482,8 +1482,8 @@ Future<void> testMain() async {
     final ui.Picture testPicture = testRecorder.endRecording();
 
     // Initialize all platform views to be used in the test.
-    final platformViewIds = <int>[];
-    for (var i = 0; i < 20; i++) {
+    final List<int> platformViewIds = <int>[];
+    for (int i = 0; i < 20; i++) {
       ui_web.platformViewRegistry.registerViewFactory(
         'test-platform-view',
         (int viewId) => createDomHTMLDivElement()..id = 'view-$i',
@@ -1495,7 +1495,7 @@ Future<void> testMain() async {
     Future<void> renderTestScene(List<int> views) async {
       final ui.SceneBuilder sb = ui.SceneBuilder();
       sb.pushOffset(0, 0);
-      for (final view in views) {
+      for (final int view in views) {
         sb.addPicture(ui.Offset.zero, testPicture);
         sb.addPlatformView(view, width: 10, height: 10);
       }
@@ -1618,8 +1618,8 @@ Future<void> testMain() async {
 // Returns the list of CSS transforms applied to the ancestor chain of
 // elements starting from `viewHost`, up until and excluding <flt-scene>.
 List<String> getTransformChain(DomElement viewHost) {
-  final chain = <String>[];
-  var element = viewHost;
+  final List<String> chain = <String>[];
+  DomElement? element = viewHost;
   while (element != null && element.tagName.toLowerCase() != 'flt-scene') {
     chain.add(element.style.transform);
     element = element.parent;
@@ -1641,7 +1641,7 @@ const Map<String, _EmbeddedViewMarker> _tagToViewMarker = <String, _EmbeddedView
 };
 
 void _expectSceneMatches(List<_EmbeddedViewMarker> expectedMarkers, {String? reason}) {
-  final DomElement fltScene = sceneHost.querySelector('flt-scene');
+  final DomElement fltScene = sceneHost.querySelector('flt-scene')!;
   // Convert the scene elements to its corresponding array of _EmbeddedViewMarker
   final List<_EmbeddedViewMarker> sceneElements = fltScene.children
       .where((DomElement element) => element.tagName != 'svg')

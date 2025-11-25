@@ -21,7 +21,7 @@ void main() {
       Future<void>(() => Isolate.exit());
     });
 
-    var throws = false;
+    bool throws = false;
     try {
       await slowTask;
     } catch (error) {

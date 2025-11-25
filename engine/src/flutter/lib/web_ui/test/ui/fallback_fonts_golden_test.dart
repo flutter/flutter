@@ -30,7 +30,7 @@ void testMain() {
     /// Used to save and restore [ui.PlatformDispatcher.onPlatformMessage] after each test.
     ui.PlatformMessageCallback? savedCallback;
 
-    final downloadedFontFamilies = <String>[];
+    final List<String> downloadedFontFamilies = <String>[];
 
     setUp(() {
       renderer.fontCollection.debugResetFallbackFonts();
@@ -236,7 +236,7 @@ void testMain() {
       // downloadedFontFamilies.clear();
       // renderer.fontCollection.debugResetFallbackFonts();
 
-      final fallbackManager = renderer.fontCollection.fontFallbackManager;
+      final fallbackManager = renderer.fontCollection.fontFallbackManager!;
       final oldLanguage = fallbackManager.debugUserPreferredLanguage;
       if (userPreferredLanguage != null) {
         fallbackManager.debugUserPreferredLanguage = userPreferredLanguage;
@@ -386,8 +386,8 @@ void testMain() {
     test('findMinimumFontsForCodePoints for all supported code points', () async {
       // Collect all supported code points from all fallback fonts in the Noto
       // font tree.
-      final testedFonts = <String>{};
-      final supportedUniqueCodePoints = <int>{};
+      final Set<String> testedFonts = <String>{};
+      final Set<int> supportedUniqueCodePoints = <int>{};
       renderer.fontCollection.fontFallbackManager!.codePointToComponents.forEachRange((
         int start,
         int end,
@@ -395,7 +395,7 @@ void testMain() {
       ) {
         if (component.fonts.isNotEmpty) {
           testedFonts.addAll(component.fonts.map((font) => font.name));
-          for (var codePoint = start; codePoint <= end; codePoint++) {
+          for (int codePoint = start; codePoint <= end; codePoint++) {
             supportedUniqueCodePoints.add(codePoint);
           }
         }
@@ -558,19 +558,19 @@ void testMain() {
       );
 
       // Construct random paragraphs out of supported code points.
-      final random = math.Random(0);
+      final math.Random random = math.Random(0);
       final List<int> supportedCodePoints = supportedUniqueCodePoints.toList()..shuffle(random);
-      const paragraphLength = 3;
-      const totalTestSize = 1000;
+      const int paragraphLength = 3;
+      const int totalTestSize = 1000;
 
-      for (var batchStart = 0; batchStart < totalTestSize; batchStart += paragraphLength) {
+      for (int batchStart = 0; batchStart < totalTestSize; batchStart += paragraphLength) {
         final int batchEnd = math.min(batchStart + paragraphLength, supportedCodePoints.length);
-        final codePoints = <int>{};
-        for (var i = batchStart; i < batchEnd; i += 1) {
+        final Set<int> codePoints = <int>{};
+        for (int i = batchStart; i < batchEnd; i += 1) {
           codePoints.add(supportedCodePoints[i]);
         }
-        final fonts = <NotoFont>{};
-        for (final codePoint in codePoints) {
+        final Set<NotoFont> fonts = <NotoFont>{};
+        for (final int codePoint in codePoints) {
           final List<NotoFont> fontsForPoint = renderer
               .fontCollection
               .fontFallbackManager!

@@ -30,7 +30,7 @@ Future<String> compareImage(
   }
 
   final String screenshotPath = p.join(suiteGoldenDirectory.path, filename);
-  final screenshotFile = File(screenshotPath);
+  final File screenshotFile = File(screenshotPath);
   await screenshotFile.create(recursive: true);
   await screenshotFile.writeAsBytes(encodePng(screenshot), flush: true);
 

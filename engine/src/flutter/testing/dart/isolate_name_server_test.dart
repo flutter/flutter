@@ -53,7 +53,7 @@ void isolateSpawnEntrypoint(IsolateSpawnInfo info) {
 
 void main() {
   test('simple isolate name server', () {
-    const portName = 'foobar1';
+    const String portName = 'foobar1';
     try {
       // Mapping for 'foobar' isn't set. Check these cases to ensure correct
       // negative response.
@@ -61,13 +61,13 @@ void main() {
       expect(IsolateNameServer.removePortNameMapping(portName), isFalse);
 
       // Register a SendPort.
-      final receivePort = ReceivePort();
+      final ReceivePort receivePort = ReceivePort();
       final SendPort sendPort = receivePort.sendPort;
       expect(IsolateNameServer.registerPortWithName(sendPort, portName), isTrue);
       expect(IsolateNameServer.lookupPortByName(portName), sendPort);
 
       // Check we can't register the same name twice.
-      final receivePort2 = ReceivePort();
+      final ReceivePort receivePort2 = ReceivePort();
       final SendPort sendPort2 = receivePort2.sendPort;
       expect(IsolateNameServer.registerPortWithName(sendPort2, portName), isFalse);
       expect(IsolateNameServer.lookupPortByName(portName), sendPort);
@@ -89,21 +89,21 @@ void main() {
   });
 
   test('isolate name server multi-isolate', () async {
-    const portName = 'foobar2';
+    const String portName = 'foobar2';
     try {
       // Register our send port with the name server.
-      final receivePort = ReceivePort();
+      final ReceivePort receivePort = ReceivePort();
       final SendPort sendPort = receivePort.sendPort;
       expect(IsolateNameServer.registerPortWithName(sendPort, portName), isTrue);
 
       // Test driver.
-      final testReceivePort = ReceivePort();
-      final testPortCompleter = Completer<void>();
+      final ReceivePort testReceivePort = ReceivePort();
+      final Completer<void> testPortCompleter = Completer<void>();
       testReceivePort.listen(
         expectAsync1<void, dynamic>((dynamic response) {
-          final typedResponse = response as List<dynamic>;
-          final code = typedResponse[0] as int;
-          final message = typedResponse[1] as String;
+          final List<dynamic> typedResponse = response as List<dynamic>;
+          final int code = typedResponse[0] as int;
+          final String message = typedResponse[1] as String;
           switch (code) {
             case kStartCode:
               break;
@@ -122,7 +122,7 @@ void main() {
         onDone: testPortCompleter.complete,
       );
 
-      final portCompleter = Completer<void>();
+      final Completer<void> portCompleter = Completer<void>();
       receivePort.listen(
         expectAsync1<void, dynamic>((dynamic message) {
           // If we don't get this message, we timeout and fail.

@@ -9,6 +9,7 @@ import 'package:ui/ui.dart' as ui;
 import '../canvaskit/canvaskit_api.dart';
 import '../canvaskit/image.dart';
 import '../dom.dart';
+import '../util.dart';
 import 'debug.dart';
 import 'layout.dart';
 import 'paragraph.dart';
@@ -85,7 +86,7 @@ class CanvasKitPainter extends Painter {
 
     final double thickness = calculateThickness(block.style);
 
-    const DoubleDecorationSpacing = 3.0;
+    const double DoubleDecorationSpacing = 3.0;
 
     for (final ui.TextDecoration decoration in [
       ui.TextDecoration.lineThrough,
@@ -126,7 +127,7 @@ class CanvasKitPainter extends Painter {
 
         case ui.TextDecorationStyle.dashed:
         case ui.TextDecorationStyle.dotted:
-          final dashes = Float32List(2)
+          final Float32List dashes = Float32List(2)
             ..[0] =
                 thickness * (block.style.decorationStyle! == ui.TextDecorationStyle.dotted ? 1 : 4)
             ..[1] = thickness;
@@ -159,7 +160,7 @@ class CanvasKitPainter extends Painter {
       throw Exception('Failed to convert text image bitmap to an SkImage.');
     }
 
-    final ckImage = CkImage(skImage, imageSource: ImageBitmapImageSource(bitmap));
+    final CkImage ckImage = CkImage(skImage, imageSource: ImageBitmapImageSource(bitmap));
     canvas.drawImageRect(
       ckImage,
       sourceRect,
@@ -208,7 +209,7 @@ class CanvasKitPainter extends Painter {
     if (skImage == null) {
       throw Exception('Failed to convert text image bitmap to an SkImage.');
     }
-    final ckImage = CkImage(skImage, imageSource: ImageBitmapImageSource(bitmap));
+    final CkImage ckImage = CkImage(skImage, imageSource: ImageBitmapImageSource(bitmap));
     canvas.drawImageRect(
       ckImage,
       shadowSourceRect,
@@ -241,7 +242,7 @@ class CanvasKitPainter extends Painter {
       throw Exception('Failed to convert text image bitmap to an SkImage.');
     }
 
-    final ckImage = CkImage(skImage, imageSource: ImageBitmapImageSource(bitmap));
+    final CkImage ckImage = CkImage(skImage, imageSource: ImageBitmapImageSource(bitmap));
     canvas.drawImageRect(
       ckImage,
       sourceRect,
@@ -283,9 +284,9 @@ class CanvasKitPainter extends Painter {
     ui.Rect textBounds,
     double thickness,
   ) {
-    final quarterWave = thickness;
+    final double quarterWave = thickness;
 
-    var waveCount = 0;
+    int waveCount = 0;
     double xStart = 0;
     final double yStart = y + quarterWave;
 
@@ -297,10 +298,10 @@ class CanvasKitPainter extends Painter {
     paintContext.beginPath();
     //paintContext.moveTo(x, y + quarterWave);
     while (xStart + quarterWave * 2 < textBounds.width) {
-      final x1 = xStart;
+      final double x1 = xStart;
       final double y1 = yStart + quarterWave * (waveCount.isEven ? 1 : -1);
       final double x2 = xStart + quarterWave * 2;
-      final y2 = yStart;
+      final double y2 = yStart;
       WebParagraphDebug.log('wave: $x1, $y1, $x2, $y2');
       paintContext.quadraticCurveTo(x1, y1, x2, y2);
       xStart += quarterWave * 2;
@@ -310,11 +311,11 @@ class CanvasKitPainter extends Painter {
     // The rest of the wave
     final double remaining = textBounds.width - xStart;
     if (remaining > 0) {
-      final x1 = xStart;
+      final double x1 = xStart;
       final double y1 = yStart + quarterWave * (waveCount.isEven ? 1 : -1);
       //final double y1 = yStart + remaining / 2 * (waveCount.isEven ? 1 : -1);
       final double x2 = xStart + remaining;
-      final y2 = yStart;
+      final double y2 = yStart;
       //final double y2 = yStart + remaining + remaining / quarterWave * y1;
       WebParagraphDebug.log(
         'remaining: ${textBounds.width} - $xStart = $remaining '

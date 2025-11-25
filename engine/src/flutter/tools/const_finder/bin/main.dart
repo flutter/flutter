@@ -9,7 +9,7 @@ import 'package:args/args.dart';
 import 'package:kernel/const_finder.dart';
 
 void main(List<String> args) {
-  final parser = ArgParser();
+  final ArgParser parser = ArgParser();
   parser
     ..addSeparator(
       'Finds constant instances of a specified class from the\n'
@@ -87,8 +87,8 @@ void main(List<String> args) {
   final String? annotationClassName = getArg<String?>('annotation-class-name');
   final String? annotationClassLibraryUri = getArg<String?>('annotation-class-library-uri');
 
-  final annotationClassNameProvided = annotationClassName != null;
-  final annotationClassLibraryUriProvided = annotationClassLibraryUri != null;
+  final bool annotationClassNameProvided = annotationClassName != null;
+  final bool annotationClassLibraryUriProvided = annotationClassLibraryUri != null;
   if (annotationClassNameProvided != annotationClassLibraryUriProvided) {
     throw StateError(
       'If either "--annotation-class-name" or "--annotation-class-library-uri" are provided they both must be',
@@ -100,7 +100,7 @@ void main(List<String> args) {
     exit(0);
   }
 
-  final finder = ConstFinder(
+  final ConstFinder finder = ConstFinder(
     kernelFilePath: getArg<String>('kernel-file'),
     classLibraryUri: getArg<String>('class-library-uri'),
     className: getArg<String>('class-name'),
@@ -108,7 +108,7 @@ void main(List<String> args) {
     annotationClassLibraryUri: annotationClassLibraryUri,
   );
 
-  final encoder = getArg<bool>('pretty')
+  final JsonEncoder encoder = getArg<bool>('pretty')
       ? const JsonEncoder.withIndent('  ')
       : const JsonEncoder();
 

@@ -18,7 +18,7 @@ void testMain() {
 
       // TODO(mdebbar): This should be `rootViewElement`.
       //                https://github.com/flutter/flutter/issues/140226
-      final DomElement cursorTarget = domDocument.body;
+      final DomElement cursorTarget = domDocument.body!;
 
       mouseCursor.activateSystemCursor('alias');
       expect(cursorTarget.style.cursor, 'alias');
@@ -42,7 +42,7 @@ void testMain() {
 
       // TODO(mdebbar): This should be `rootViewElement`.
       //                https://github.com/flutter/flutter/issues/140226
-      final DomElement cursorTarget = domDocument.body;
+      final DomElement cursorTarget = domDocument.body!;
 
       mouseCursor.activateSystemCursor('unknown');
       expect(cursorTarget.style.cursor, isEmpty);

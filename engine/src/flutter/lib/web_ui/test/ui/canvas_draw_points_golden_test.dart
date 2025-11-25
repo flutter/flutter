@@ -37,21 +37,21 @@ Future<void> testMain() async {
     final ui.Paint paint = ui.Paint();
     paint.strokeWidth = 2.0;
     paint.color = const ui.Color(0xFF00FF00);
-    const points = <ui.Offset>[
+    const List<ui.Offset> points = <ui.Offset>[
       ui.Offset(10, 10),
       ui.Offset(50, 10),
       ui.Offset(70, 70),
       ui.Offset(170, 70),
     ];
     canvas.drawPoints(ui.PointMode.points, points, paint);
-    const points2 = <ui.Offset>[
+    const List<ui.Offset> points2 = <ui.Offset>[
       ui.Offset(10, 110),
       ui.Offset(50, 110),
       ui.Offset(70, 170),
       ui.Offset(170, 170),
     ];
     canvas.drawPoints(ui.PointMode.lines, points2, paint);
-    const points3 = <ui.Offset>[
+    const List<ui.Offset> points3 = <ui.Offset>[
       ui.Offset(10, 210),
       ui.Offset(50, 210),
       ui.Offset(70, 270),

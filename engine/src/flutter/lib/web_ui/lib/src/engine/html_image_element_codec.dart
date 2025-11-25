@@ -32,7 +32,7 @@ abstract class HtmlImageElementCodec implements ui.Codec {
     if (decodeFuture != null) {
       return decodeFuture;
     }
-    final completer = Completer<void>();
+    final Completer<void> completer = Completer<void>();
     decodeFuture = completer.future;
     // Currently there is no way to watch decode progress, so
     // we add 0/100 , 100/100 progress callbacks to enable loading progress
@@ -69,12 +69,12 @@ abstract class HtmlImageElementCodec implements ui.Codec {
     if (naturalWidth == 0 &&
         naturalHeight == 0 &&
         ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox) {
-      const kDefaultImageSizeFallback = 300;
+      const int kDefaultImageSizeFallback = 300;
       naturalWidth = kDefaultImageSizeFallback;
       naturalHeight = kDefaultImageSizeFallback;
     }
     final ui.Image image = await createImageFromHTMLImageElement(
-      imgElement,
+      imgElement!,
       naturalWidth,
       naturalHeight,
     );

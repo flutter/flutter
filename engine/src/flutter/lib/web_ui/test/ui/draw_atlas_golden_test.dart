@@ -54,11 +54,11 @@ ui.Image generateAtlas() {
   // Draw the star
   canvas.save();
   canvas.clipRect(kMagentaStarRegion);
-  const ui.Offset starCenter = kMagentaStarRegion.center;
+  final ui.Offset starCenter = kMagentaStarRegion.center;
 
   // Make the star one pixel smaller than the bounds so that it doesn't bleed
   // into the other shapes.
-  const double radius = (kMagentaStarRegion.height / 2.0) - 1.0;
+  final double radius = (kMagentaStarRegion.height / 2.0) - 1.0;
 
   // Start at the top (rotated 90 degrees)
   double theta = -math.pi / 2.0;
@@ -70,7 +70,7 @@ ui.Image generateAtlas() {
     starCenter.dx + radius * math.cos(theta),
     starCenter.dy + radius * math.sin(theta),
   );
-  for (var i = 0; i < 5; i++) {
+  for (int i = 0; i < 5; i++) {
     theta += rotation;
     starPath.lineTo(
       starCenter.dx + radius * math.cos(theta),
@@ -129,7 +129,7 @@ Future<void> testMain() async {
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     final ui.Canvas canvas = ui.Canvas(recorder, region);
     final ui.Image atlas = generateAtlas();
-    final transforms = List<ui.RSTransform>.generate(12, (int index) {
+    final List<ui.RSTransform> transforms = List<ui.RSTransform>.generate(12, (int index) {
       const double radius = 100;
       const double rotation = math.pi / 6.0;
       final double angle = rotation * index;
@@ -142,7 +142,7 @@ Future<void> testMain() async {
         region.center.dy + radius * ssin,
       );
     });
-    final rects = <ui.Rect>[
+    final List<ui.Rect> rects = <ui.Rect>[
       kBlueSquareRegion,
       kRedCircleRegion,
       kMagentaStarRegion,
@@ -166,8 +166,8 @@ Future<void> testMain() async {
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     final ui.Canvas canvas = ui.Canvas(recorder, region);
     final ui.Image atlas = generateAtlas();
-    final transforms = Float32List(12 * 4);
-    for (var i = 0; i < 12; i++) {
+    final Float32List transforms = Float32List(12 * 4);
+    for (int i = 0; i < 12; i++) {
       const double radius = 100;
       const double rotation = math.pi / 6.0;
       final double angle = rotation * i;
@@ -178,7 +178,7 @@ Future<void> testMain() async {
       transforms[i * 4 + 2] = region.center.dx + radius * scos;
       transforms[i * 4 + 3] = region.center.dy + radius * ssin;
     }
-    final rects = <ui.Rect>[
+    final List<ui.Rect> rects = <ui.Rect>[
       kBlueSquareRegion,
       kRedCircleRegion,
       kMagentaStarRegion,
@@ -192,16 +192,16 @@ Future<void> testMain() async {
       kMagentaStarRegion,
       kGreenSquiggleRegion,
     ];
-    final rawRects = Float32List(rects.length * 4);
-    for (var i = 0; i < rects.length; i++) {
+    final Float32List rawRects = Float32List(rects.length * 4);
+    for (int i = 0; i < rects.length; i++) {
       rawRects[i * 4] = rects[i].left;
       rawRects[i * 4 + 1] = rects[i].top;
       rawRects[i * 4 + 2] = rects[i].right;
       rawRects[i * 4 + 3] = rects[i].bottom;
     }
 
-    final colors = Int32List(12);
-    for (var i = 0; i < 12; i++) {
+    final Int32List colors = Int32List(12);
+    for (int i = 0; i < 12; i++) {
       final int rgb = 0xFF << (8 * (i % 3));
       colors[i] = 0xFF000000 | rgb;
     }

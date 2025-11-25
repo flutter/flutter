@@ -18,7 +18,7 @@ import 'impeller_enabled.dart';
 typedef CanvasCallback = void Function(Canvas canvas);
 
 Future<Image> createImage(int width, int height) {
-  final completer = Completer<Image>();
+  final Completer<Image> completer = Completer<Image>();
   decodeImageFromPixels(
     Uint8List.fromList(List<int>.generate(width * height * 4, (int pixel) => pixel % 255)),
     width,
@@ -39,8 +39,8 @@ void testCanvas(CanvasCallback callback) {
 }
 
 Future<Image> toImage(CanvasCallback callback, int width, int height) {
-  final recorder = PictureRecorder();
-  final canvas = Canvas(recorder, Rect.fromLTRB(0, 0, width.toDouble(), height.toDouble()));
+  final PictureRecorder recorder = PictureRecorder();
+  final Canvas canvas = Canvas(recorder, Rect.fromLTRB(0, 0, width.toDouble(), height.toDouble()));
   callback(canvas);
   final Picture picture = recorder.endRecording();
   return picture.toImage(width, height);
@@ -48,16 +48,16 @@ Future<Image> toImage(CanvasCallback callback, int width, int height) {
 
 void testNoCrashes() {
   test('canvas APIs should not crash', () async {
-    final paint = Paint();
-    const rect = Rect.fromLTRB(double.nan, double.nan, double.nan, double.nan);
-    final rrect = RRect.fromRectAndCorners(rect);
-    const offset = Offset(double.nan, double.nan);
-    final path = Path();
-    const color = Color(0x00000000);
+    final Paint paint = Paint();
+    const Rect rect = Rect.fromLTRB(double.nan, double.nan, double.nan, double.nan);
+    final RRect rrect = RRect.fromRectAndCorners(rect);
+    const Offset offset = Offset(double.nan, double.nan);
+    final Path path = Path();
+    const Color color = Color(0x00000000);
     final Paragraph paragraph = ParagraphBuilder(ParagraphStyle()).build();
 
-    final recorder = PictureRecorder();
-    final recorderCanvas = Canvas(recorder);
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas recorderCanvas = Canvas(recorder);
     recorderCanvas.scale(1.0, 1.0);
     final Picture picture = recorder.endRecording();
     final Image image = await picture.toImage(1, 1);
@@ -165,7 +165,7 @@ void testNoCrashes() {
 const String kFlutterBuildDirectory = 'kFlutterBuildDirectory';
 
 String get _flutterBuildPath {
-  const buildPath = String.fromEnvironment(kFlutterBuildDirectory);
+  const String buildPath = String.fromEnvironment(kFlutterBuildDirectory);
   if (buildPath.isEmpty) {
     throw StateError('kFlutterBuildDirectory -D variable is not set.');
   }
@@ -180,9 +180,9 @@ void main() async {
   test('Simple .toImage', () async {
     final Image image = await toImage(
       (Canvas canvas) {
-        final circlePath = Path()
+        final Path circlePath = Path()
           ..addOval(Rect.fromCircle(center: const Offset(40.0, 40.0), radius: 20.0));
-        final paint = Paint()
+        final Paint paint = Paint()
           ..isAntiAlias = false
           ..style = PaintingStyle.fill;
         canvas.drawPath(circlePath, paint);
@@ -205,7 +205,7 @@ void main() async {
   test('Simple gradient, which is implicitly dithered', () async {
     final Image image = await toImage(
       (Canvas canvas) {
-        final paint = Paint()..shader = makeGradient();
+        final Paint paint = Paint()..shader = makeGradient();
         canvas.drawPaint(paint);
       },
       100,
@@ -219,12 +219,12 @@ void main() async {
 
   test('Null values allowed for drawAtlas methods', () async {
     final Image image = await createImage(100, 100);
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder);
-    const rect = Rect.fromLTWH(0, 0, 100, 100);
-    final transform = RSTransform(1, 0, 0, 0);
-    const color = Color(0x00000000);
-    final paint = Paint();
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    const Rect rect = Rect.fromLTWH(0, 0, 100, 100);
+    final RSTransform transform = RSTransform(1, 0, 0, 0);
+    const Color color = Color(0x00000000);
+    final Paint paint = Paint();
     canvas.drawAtlas(
       image,
       <RSTransform>[transform],
@@ -281,12 +281,12 @@ void main() async {
 
   test('Data lengths must match for drawAtlas methods', () async {
     final Image image = await createImage(100, 100);
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder);
-    const rect = Rect.fromLTWH(0, 0, 100, 100);
-    final transform = RSTransform(1, 0, 0, 0);
-    const color = Color(0x00000000);
-    final paint = Paint();
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    const Rect rect = Rect.fromLTWH(0, 0, 100, 100);
+    final RSTransform transform = RSTransform(1, 0, 0, 0);
+    const Color color = Color(0x00000000);
+    final Paint paint = Paint();
     canvas.drawAtlas(
       image,
       <RSTransform>[transform],
@@ -416,10 +416,10 @@ void main() async {
   test('Canvas preserves perspective data in Matrix4', () async {
     const double rotateAroundX = pi / 6; // 30 degrees
     const double rotateAroundY = pi / 9; // 20 degrees
-    const width = 150;
-    const height = 150;
-    const black = Color.fromARGB(255, 0, 0, 0);
-    const green = Color.fromARGB(255, 0, 255, 0);
+    const int width = 150;
+    const int height = 150;
+    const Color black = Color.fromARGB(255, 0, 0, 0);
+    const Color green = Color.fromARGB(255, 0, 255, 0);
     void paint(Canvas canvas, CanvasCallback rotate) {
       canvas.translate(width * 0.5, height * 0.5);
       rotate(canvas);
@@ -443,7 +443,7 @@ void main() async {
     final Image incrementalMatrixImage = await toImage(
       (Canvas canvas) {
         paint(canvas, (Canvas canvas) {
-          final matrix = Matrix4.identity();
+          final Matrix4 matrix = Matrix4.identity();
           matrix.setEntry(3, 2, 0.001);
           canvas.transform(matrix.storage);
           matrix.setRotationX(rotateAroundX);
@@ -458,7 +458,7 @@ void main() async {
     final Image combinedMatrixImage = await toImage(
       (Canvas canvas) {
         paint(canvas, (Canvas canvas) {
-          final matrix = Matrix4.identity();
+          final Matrix4 matrix = Matrix4.identity();
           matrix.setEntry(3, 2, 0.001);
           matrix.rotateX(rotateAroundX);
           matrix.rotateY(rotateAroundY);
@@ -484,7 +484,7 @@ void main() async {
       Offset offset, {
       TextDecorationStyle style = TextDecorationStyle.solid,
     }) {
-      final builder = ParagraphBuilder(ParagraphStyle());
+      final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle());
       builder.pushStyle(
         TextStyle(
           decoration: TextDecoration.underline,
@@ -504,7 +504,7 @@ void main() async {
     final Image image = await toImage(
       (Canvas canvas) {
         canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.srcOver);
-        final paint = Paint()
+        final Paint paint = Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 5;
         drawText(canvas, 'Hello World', const Offset(20, 10));
@@ -530,8 +530,8 @@ void main() async {
   test('Gradients with matrices in Paragraphs render correctly', () async {
     final Image image = await toImage(
       (Canvas canvas) {
-        final p = Paint();
-        final transform = Float64List.fromList(<double>[
+        final Paint p = Paint();
+        final Float64List transform = Float64List.fromList(<double>[
           86.80000129342079,
           0.0,
           0.0,
@@ -563,7 +563,7 @@ void main() async {
           transform,
           const Offset(2.55, 0.4),
         );
-        final builder = ParagraphBuilder(ParagraphStyle());
+        final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle());
         builder.pushStyle(TextStyle(foreground: p, fontSize: 200));
         builder.addText('Woodstock!');
         final Paragraph paragraph = builder.build();
@@ -580,8 +580,8 @@ void main() async {
   });
 
   test('toImageSync - too big', () async {
-    var recorder = PictureRecorder();
-    var canvas = Canvas(recorder);
+    PictureRecorder recorder = PictureRecorder();
+    Canvas canvas = Canvas(recorder);
     canvas.drawPaint(Paint()..color = const Color(0xFF123456));
     final Picture picture = recorder.endRecording();
     final Image image = picture.toImageSync(300000, 4000000);
@@ -602,8 +602,8 @@ void main() async {
     // On a slower CI machine, the raster thread may get behind the UI thread
     // here. However, once the image is in an error state it will immediately
     // throw on subsequent attempts.
-    var caughtException = false;
-    for (var iterations = 0; iterations < 1000; iterations += 1) {
+    bool caughtException = false;
+    for (int iterations = 0; iterations < 1000; iterations += 1) {
       try {
         canvas.drawImage(image, Offset.zero, Paint());
       } on PictureRasterizationException catch (e) {
@@ -629,8 +629,8 @@ void main() async {
   });
 
   test('toImageSync - succeeds', () async {
-    var recorder = PictureRecorder();
-    var canvas = Canvas(recorder);
+    PictureRecorder recorder = PictureRecorder();
+    Canvas canvas = Canvas(recorder);
     canvas.drawPaint(Paint()..color = const Color(0xFF123456));
     final Picture picture = recorder.endRecording();
     final Image image = picture.toImageSync(30, 40);
@@ -651,9 +651,9 @@ void main() async {
   });
 
   test('toImageSync - toByteData', () async {
-    const color = Color(0xFF123456);
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder);
+    const Color color = Color(0xFF123456);
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
     canvas.drawPaint(Paint()..color = color);
     final Picture picture = recorder.endRecording();
     final Image image = picture.toImageSync(6, 8);
@@ -679,8 +679,8 @@ void main() async {
       return;
     }
 
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder);
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
     canvas.drawRect(
       const Rect.fromLTWH(20, 20, 100, 100),
       Paint()..color = const Color(0xA0FF6D00),
@@ -692,8 +692,8 @@ void main() async {
     // To trigger observable difference in alpha, draw image
     // on a second canvas.
     Future<ByteData> drawOnCanvas(Image image) async {
-      final recorder = PictureRecorder();
-      final canvas = Canvas(recorder);
+      final PictureRecorder recorder = PictureRecorder();
+      final Canvas canvas = Canvas(recorder);
       canvas.drawPaint(Paint()..color = const Color(0x4FFFFFFF));
       canvas.drawImage(image, Offset.zero, Paint());
       final Image resultImage = await recorder.endRecording().toImage(200, 200);
@@ -710,7 +710,7 @@ void main() async {
     expect(() {
       toImage(
         (Canvas canvas) {
-          final builder = ParagraphBuilder(ParagraphStyle());
+          final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle());
           builder.addText('Woodstock!');
           final Paragraph woodstock = builder.build();
           canvas.drawParagraph(woodstock, const Offset(0, 50));
@@ -724,7 +724,7 @@ void main() async {
   Future<Image> drawText(String text) {
     return toImage(
       (Canvas canvas) {
-        final builder = ParagraphBuilder(
+        final ParagraphBuilder builder = ParagraphBuilder(
           ParagraphStyle(
             fontFamily: 'RobotoSerif',
             fontStyle: FontStyle.normal,
@@ -749,7 +749,7 @@ void main() async {
     // Skia renders a tofu if the font does not have a glyph for a character.
     // However, Flutter opts-in to a Skia feature to render tabs as a single space.
     // See: https://github.com/flutter/flutter/issues/79153
-    final file = File(
+    final File file = File(
       path.join(_flutterBuildPath, 'flutter', 'txt', 'assets', 'Roboto-Regular.ttf'),
     );
     final Uint8List fontData = await file.readAsBytes();
@@ -769,23 +769,23 @@ void main() async {
   });
 
   test('drawRect, drawOval, and clipRect render with unsorted rectangles', () async {
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder);
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
 
     canvas.drawColor(const Color(0xFFE0E0E0), BlendMode.src);
 
     void draw(Rect rect, double x, double y, Color color) {
-      final paint = Paint()
+      final Paint paint = Paint()
         ..color = color
         ..strokeWidth = 5.0;
 
-      final tallThin = Rect.fromLTRB(
+      final Rect tallThin = Rect.fromLTRB(
         min(rect.left, rect.right) - 10,
         rect.top,
         min(rect.left, rect.right) - 10,
         rect.bottom,
       );
-      final wideThin = Rect.fromLTRB(
+      final Rect wideThin = Rect.fromLTRB(
         rect.left,
         min(rect.top, rect.bottom) - 10,
         rect.right,
@@ -858,8 +858,8 @@ void main() async {
   });
 
   test('Canvas.translate affects canvas.getTransform', () async {
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder);
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
     canvas.translate(12, 14.5);
     final Float64List matrix = Matrix4.translationValues(12, 14.5, 0).storage;
     final Float64List curMatrix = canvas.getTransform();
@@ -871,8 +871,8 @@ void main() async {
   });
 
   test('Canvas.scale affects canvas.getTransform', () async {
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder);
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
     canvas.scale(12, 14.5);
     final Float64List matrix = Matrix4.diagonal3Values(12, 14.5, 1).storage;
     final Float64List curMatrix = canvas.getTransform();
@@ -884,8 +884,8 @@ void main() async {
   });
 
   test('Canvas.rotate affects canvas.getTransform', () async {
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder);
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
     canvas.rotate(pi);
     final Float64List matrix = Matrix4.rotationZ(pi).storage;
     final Float64List curMatrix = canvas.getTransform();
@@ -897,8 +897,8 @@ void main() async {
   });
 
   test('Canvas.skew affects canvas.getTransform', () async {
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder);
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
     canvas.skew(12, 14.5);
     final Float64List matrix =
         (Matrix4.identity()
@@ -914,8 +914,8 @@ void main() async {
   });
 
   test('Canvas.transform affects canvas.getTransform', () async {
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder);
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
     final Float64List matrix =
         (Matrix4.identity()
               ..translate(12.0, 14.5)
@@ -932,11 +932,11 @@ void main() async {
 
   test('Canvas.clipRect affects canvas.getClipBounds', () async {
     void testRect(Rect clipRect, bool doAA) {
-      final recorder = PictureRecorder();
-      final canvas = Canvas(recorder);
+      final PictureRecorder recorder = PictureRecorder();
+      final Canvas canvas = Canvas(recorder);
       canvas.clipRect(clipRect, doAntiAlias: doAA);
 
-      final clipSortedBounds = Rect.fromLTRB(
+      final Rect clipSortedBounds = Rect.fromLTRB(
         min(clipRect.left, clipRect.right),
         min(clipRect.top, clipRect.bottom),
         max(clipRect.left, clipRect.right),
@@ -976,7 +976,7 @@ void main() async {
 
       canvas.save();
       canvas.scale(2, 2);
-      final scaledExpandedBounds = Rect.fromLTRB(
+      final Rect scaledExpandedBounds = Rect.fromLTRB(
         clipExpandedBounds.left / 2.0,
         clipExpandedBounds.top / 2.0,
         clipExpandedBounds.right / 2.0,
@@ -1009,10 +1009,10 @@ void main() async {
   });
 
   test('Canvas.clipRect with matrix affects canvas.getClipBounds', () async {
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder);
-    const clipBounds1 = Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
-    const clipBounds2 = Rect.fromLTRB(10.0, 10.0, 20.0, 20.0);
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    const Rect clipBounds1 = Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
+    const Rect clipBounds2 = Rect.fromLTRB(10.0, 10.0, 20.0, 20.0);
 
     canvas.save();
     canvas.clipRect(clipBounds1, doAntiAlias: false);
@@ -1030,11 +1030,11 @@ void main() async {
   });
 
   test('Canvas.clipRRect(doAA=true) affects canvas.getClipBounds', () async {
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder);
-    const clipBounds = Rect.fromLTRB(10.2, 11.3, 20.4, 25.7);
-    const clipExpandedBounds = Rect.fromLTRB(10, 11, 21, 26);
-    final clip = RRect.fromRectAndRadius(clipBounds, const Radius.circular(3));
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    const Rect clipBounds = Rect.fromLTRB(10.2, 11.3, 20.4, 25.7);
+    const Rect clipExpandedBounds = Rect.fromLTRB(10, 11, 21, 26);
+    final RRect clip = RRect.fromRectAndRadius(clipBounds, const Radius.circular(3));
     canvas.clipRRect(clip);
 
     // Save initial return values for testing restored values
@@ -1059,7 +1059,7 @@ void main() async {
 
     canvas.save();
     canvas.scale(2, 2);
-    const scaledExpandedBounds = Rect.fromLTRB(5, 5.5, 10.5, 13);
+    const Rect scaledExpandedBounds = Rect.fromLTRB(5, 5.5, 10.5, 13);
     expect(canvas.getLocalClipBounds(), closeToRect(scaledExpandedBounds));
     // Destination bounds are unaffected by transform
     expect(canvas.getDestinationClipBounds(), closeToRect(clipExpandedBounds));
@@ -1071,10 +1071,10 @@ void main() async {
   });
 
   test('Canvas.clipRRect(doAA=false) affects canvas.getClipBounds', () async {
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder);
-    const clipBounds = Rect.fromLTRB(10.2, 11.3, 20.4, 25.7);
-    final clip = RRect.fromRectAndRadius(clipBounds, const Radius.circular(3));
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    const Rect clipBounds = Rect.fromLTRB(10.2, 11.3, 20.4, 25.7);
+    final RRect clip = RRect.fromRectAndRadius(clipBounds, const Radius.circular(3));
     canvas.clipRRect(clip, doAntiAlias: false);
 
     // Save initial return values for testing restored values
@@ -1099,7 +1099,7 @@ void main() async {
 
     canvas.save();
     canvas.scale(2, 2);
-    const scaledClipBounds = Rect.fromLTRB(5.1, 5.65, 10.2, 12.85);
+    const Rect scaledClipBounds = Rect.fromLTRB(5.1, 5.65, 10.2, 12.85);
     expect(canvas.getLocalClipBounds(), closeToRect(scaledClipBounds));
     // Destination bounds are unaffected by transform
     expect(canvas.getDestinationClipBounds(), closeToRect(clipBounds));
@@ -1111,12 +1111,12 @@ void main() async {
   });
 
   test('Canvas.clipRRect with matrix affects canvas.getClipBounds', () async {
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder);
-    const clipBounds1 = Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
-    const clipBounds2 = Rect.fromLTRB(10.0, 10.0, 20.0, 20.0);
-    final clip1 = RRect.fromRectAndRadius(clipBounds1, const Radius.circular(3));
-    final clip2 = RRect.fromRectAndRadius(clipBounds2, const Radius.circular(3));
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    const Rect clipBounds1 = Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
+    const Rect clipBounds2 = Rect.fromLTRB(10.0, 10.0, 20.0, 20.0);
+    final RRect clip1 = RRect.fromRectAndRadius(clipBounds1, const Radius.circular(3));
+    final RRect clip2 = RRect.fromRectAndRadius(clipBounds2, const Radius.circular(3));
 
     canvas.save();
     canvas.clipRRect(clip1, doAntiAlias: false);
@@ -1134,11 +1134,11 @@ void main() async {
   });
 
   test('Canvas.clipPath(doAA=true) affects canvas.getClipBounds', () async {
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder);
-    const clipBounds = Rect.fromLTRB(10.2, 11.3, 20.4, 25.7);
-    const clipExpandedBounds = Rect.fromLTRB(10, 11, 21, 26);
-    final clip = Path()
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    const Rect clipBounds = Rect.fromLTRB(10.2, 11.3, 20.4, 25.7);
+    const Rect clipExpandedBounds = Rect.fromLTRB(10, 11, 21, 26);
+    final Path clip = Path()
       ..addRect(clipBounds)
       ..addOval(clipBounds);
     canvas.clipPath(clip);
@@ -1165,7 +1165,7 @@ void main() async {
 
     canvas.save();
     canvas.scale(2, 2);
-    const scaledExpandedBounds = Rect.fromLTRB(5, 5.5, 10.5, 13);
+    const Rect scaledExpandedBounds = Rect.fromLTRB(5, 5.5, 10.5, 13);
     expect(canvas.getLocalClipBounds(), closeToRect(scaledExpandedBounds));
     // Destination bounds are unaffected by transform
     expect(canvas.getDestinationClipBounds(), closeToRect(clipExpandedBounds));
@@ -1177,10 +1177,10 @@ void main() async {
   });
 
   test('Canvas.clipPath(doAA=false) affects canvas.getClipBounds', () async {
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder);
-    const clipBounds = Rect.fromLTRB(10.2, 11.3, 20.4, 25.7);
-    final clip = Path()
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    const Rect clipBounds = Rect.fromLTRB(10.2, 11.3, 20.4, 25.7);
+    final Path clip = Path()
       ..addRect(clipBounds)
       ..addOval(clipBounds);
     canvas.clipPath(clip, doAntiAlias: false);
@@ -1207,7 +1207,7 @@ void main() async {
 
     canvas.save();
     canvas.scale(2, 2);
-    const scaledClipBounds = Rect.fromLTRB(5.1, 5.65, 10.2, 12.85);
+    const Rect scaledClipBounds = Rect.fromLTRB(5.1, 5.65, 10.2, 12.85);
     expect(canvas.getLocalClipBounds(), closeToRect(scaledClipBounds));
     // Destination bounds are unaffected by transform
     expect(canvas.getDestinationClipBounds(), closeToRect(clipBounds));
@@ -1219,14 +1219,14 @@ void main() async {
   });
 
   test('Canvas.clipPath with matrix affects canvas.getClipBounds', () async {
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder);
-    const clipBounds1 = Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
-    const clipBounds2 = Rect.fromLTRB(10.0, 10.0, 20.0, 20.0);
-    final clip1 = Path()
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    const Rect clipBounds1 = Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
+    const Rect clipBounds2 = Rect.fromLTRB(10.0, 10.0, 20.0, 20.0);
+    final Path clip1 = Path()
       ..addRect(clipBounds1)
       ..addOval(clipBounds1);
-    final clip2 = Path()
+    final Path clip2 = Path()
       ..addRect(clipBounds2)
       ..addOval(clipBounds2);
 
@@ -1246,9 +1246,9 @@ void main() async {
   });
 
   test('Canvas.clipRect(diff) does not affect canvas.getClipBounds', () async {
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder);
-    const clipBounds = Rect.fromLTRB(10.2, 11.3, 20.4, 25.7);
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    const Rect clipBounds = Rect.fromLTRB(10.2, 11.3, 20.4, 25.7);
     canvas.clipRect(clipBounds, doAntiAlias: false);
 
     // Save initial return values for testing restored values
@@ -1267,8 +1267,8 @@ void main() async {
   });
 
   test('RestoreToCount can work', () async {
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder);
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
     canvas.save();
     canvas.save();
     canvas.save();
@@ -1282,8 +1282,8 @@ void main() async {
   });
 
   test('RestoreToCount count less than 1, the stack should be reset', () async {
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder);
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
     canvas.save();
     canvas.save();
     canvas.save();
@@ -1295,8 +1295,8 @@ void main() async {
   });
 
   test('RestoreToCount count greater than current [getSaveCount], nothing would happend', () async {
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder);
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
     canvas.save();
     canvas.save();
     canvas.save();
@@ -1308,17 +1308,17 @@ void main() async {
   });
 
   test('TextDecoration renders non-solid lines', () async {
-    final file = File(
+    final File file = File(
       path.join(_flutterBuildPath, 'flutter', 'txt', 'assets', 'Roboto-Regular.ttf'),
     );
     final Uint8List fontData = await file.readAsBytes();
     await loadFontFromList(fontData, fontFamily: 'RobotoSlab');
 
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder);
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
 
     for (final (int index, TextDecorationStyle style) in TextDecorationStyle.values.indexed) {
-      final builder = ParagraphBuilder(ParagraphStyle());
+      final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle());
       builder.pushStyle(
         TextStyle(
           decoration: TextDecoration.underline,
@@ -1345,7 +1345,7 @@ void main() async {
   });
 
   test('Paint, when copied, has equivalent fields', () {
-    final paint = Paint()
+    final Paint paint = Paint()
       ..color = const Color(0xFF0000FF)
       ..strokeWidth = 10.0
       ..strokeCap = StrokeCap.round
@@ -1357,7 +1357,7 @@ void main() async {
       ..colorFilter = const ColorFilter.mode(Color(0xFF00FF00), BlendMode.color)
       ..imageFilter = ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0);
 
-    final paintCopy = Paint.from(paint);
+    final Paint paintCopy = Paint.from(paint);
     expect(paintCopy.color, equals(const Color(0xFF0000FF)));
     expect(paintCopy.strokeWidth, equals(10.0));
     expect(paintCopy.strokeCap, equals(StrokeCap.round));
@@ -1374,7 +1374,7 @@ void main() async {
   });
 
   test('Paint, when copied, does not mutate the original instance', () {
-    final paint = Paint()
+    final Paint paint = Paint()
       ..color = const Color(0xFF0000FF)
       ..strokeWidth = 10.0
       ..strokeCap = StrokeCap.round
@@ -1413,7 +1413,7 @@ void main() async {
   });
 
   test('Paint, when copied, the original changing does not mutate the copy', () {
-    final paint = Paint()
+    final Paint paint = Paint()
       ..color = const Color(0xFF0000FF)
       ..strokeWidth = 10.0
       ..strokeCap = StrokeCap.round
@@ -1426,7 +1426,7 @@ void main() async {
       ..imageFilter = ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0);
 
     // Make a copy, and change every field of the original.
-    final paintCopy = Paint.from(paint);
+    final Paint paintCopy = Paint.from(paint);
     paint
       ..color = const Color(0xFF00FF00)
       ..strokeWidth = 20.0
@@ -1457,8 +1457,8 @@ void main() async {
 
   test('DrawAtlas correctly copies color values into display list format', () async {
     final Image testImage = await createTestImage();
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder);
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
     // Make a drawAtlas call that should be solid red.
     canvas.drawAtlas(
       testImage,
@@ -1490,8 +1490,8 @@ void main() async {
 
   test('DrawAtlas with no colors does not crash', () async {
     final Image testImage = await createTestImage();
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder);
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
     // Make a drawAtlas call that should be solid red.
     canvas.drawAtlas(
       testImage,
@@ -1546,7 +1546,7 @@ void main() async {
       Paint()..color = const Color.fromARGB(255, 255, 0, 0),
     );
 
-    final Picture picture = recorder.endRecording();
+    final picture = recorder.endRecording();
     return picture.toImageSync(width, height);
   }
 
@@ -1555,9 +1555,9 @@ void main() async {
     final canvas = Canvas(recorder);
     canvas.drawColor(const Color.fromARGB(255, 224, 224, 224), BlendMode.src);
 
-    const zone = Rect.fromLTWH(15, 15, 20, 20);
+    const Rect zone = Rect.fromLTWH(15, 15, 20, 20);
     final Rect arena = zone.inflate(15);
-    const ovalZone = Rect.fromLTWH(20, 15, 10, 20);
+    const Rect ovalZone = Rect.fromLTWH(20, 15, 10, 20);
 
     final gradient = Gradient.linear(
       zone.topLeft,
@@ -1566,19 +1566,19 @@ void main() async {
       <double>[0, 1],
     );
     final filter = ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0, tileMode: tileMode);
-    final white = Paint()..color = const Color.fromARGB(255, 255, 255, 255);
-    final grey = Paint()..color = const Color.fromARGB(255, 127, 127, 127);
-    final unblurredFill = Paint()..shader = gradient;
-    final blurredFill = Paint.from(unblurredFill)..imageFilter = filter;
-    final unblurredStroke = Paint.from(unblurredFill)
+    final Paint white = Paint()..color = const Color.fromARGB(255, 255, 255, 255);
+    final Paint grey = Paint()..color = const Color.fromARGB(255, 127, 127, 127);
+    final Paint unblurredFill = Paint()..shader = gradient;
+    final Paint blurredFill = Paint.from(unblurredFill)..imageFilter = filter;
+    final Paint unblurredStroke = Paint.from(unblurredFill)
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round
       ..strokeWidth = 10;
-    final blurredStroke = Paint.from(unblurredStroke)..imageFilter = filter;
+    final Paint blurredStroke = Paint.from(unblurredStroke)..imageFilter = filter;
     final Image image = makeCheckerBoard(20, 20);
-    const imageBounds = Rect.fromLTRB(0, 0, 20, 20);
-    const imageCenter = Rect.fromLTRB(5, 5, 9, 9);
+    const Rect imageBounds = Rect.fromLTRB(0, 0, 20, 20);
+    const Rect imageCenter = Rect.fromLTRB(5, 5, 9, 9);
     final points = <Offset>[
       zone.topLeft,
       zone.topCenter,
@@ -1661,8 +1661,8 @@ void main() async {
 
     const double pad = 10;
     final double offset = arena.width + pad;
-    const columns = 5;
-    final pairArena = Rect.fromLTRB(
+    const int columns = 5;
+    final Rect pairArena = Rect.fromLTRB(
       arena.left - 3,
       arena.top - 3,
       arena.right + 3,
@@ -1706,13 +1706,13 @@ void main() async {
 
     canvas.save();
     canvas.translate(pad, pad);
-    var renderIndex = 0;
-    var rows = 0;
+    int renderIndex = 0;
+    int rows = 0;
     while (renderIndex < renderers.length) {
       rows += 2;
       canvas.save();
-      for (var col = 0; col < columns && renderIndex < renderers.length; col++) {
-        final void Function(Canvas canvas, Paint fill, Paint stroke) renderer = renderers[renderIndex++];
+      for (int col = 0; col < columns && renderIndex < renderers.length; col++) {
+        final renderer = renderers[renderIndex++];
         canvas.drawRect(pairArena, grey);
         canvas.drawRect(arena, white);
         renderer(canvas, unblurredFill, unblurredStroke);
@@ -1728,12 +1728,12 @@ void main() async {
     }
     canvas.restore();
 
-    final Picture picture = recorder.endRecording();
+    final picture = recorder.endRecording();
     return picture.toImageSync((offset * columns + pad).round(), (offset * rows + pad).round());
   }
 
   test('Rendering ops with ImageFilter blur with default tile mode', () async {
-    final Image image = renderingOpsWithTileMode(null);
+    final image = renderingOpsWithTileMode(null);
     await comparer.addGoldenImage(
       image,
       'canvas_test_blurred_rendering_with_default_tile_mode.png',
@@ -1741,17 +1741,17 @@ void main() async {
   });
 
   test('Rendering ops with ImageFilter blur with clamp tile mode', () async {
-    final Image image = renderingOpsWithTileMode(TileMode.clamp);
+    final image = renderingOpsWithTileMode(TileMode.clamp);
     await comparer.addGoldenImage(image, 'canvas_test_blurred_rendering_with_clamp_tile_mode.png');
   });
 
   test('Rendering ops with ImageFilter blur with mirror tile mode', () async {
-    final Image image = renderingOpsWithTileMode(TileMode.mirror);
+    final image = renderingOpsWithTileMode(TileMode.mirror);
     await comparer.addGoldenImage(image, 'canvas_test_blurred_rendering_with_mirror_tile_mode.png');
   });
 
   test('Rendering ops with ImageFilter blur with repeated tile mode', () async {
-    final Image image = renderingOpsWithTileMode(TileMode.repeated);
+    final image = renderingOpsWithTileMode(TileMode.repeated);
     await comparer.addGoldenImage(
       image,
       'canvas_test_blurred_rendering_with_repeated_tile_mode.png',
@@ -1759,14 +1759,14 @@ void main() async {
   });
 
   test('Rendering ops with ImageFilter blur with decal tile mode', () async {
-    final Image image = renderingOpsWithTileMode(TileMode.decal);
+    final image = renderingOpsWithTileMode(TileMode.decal);
     await comparer.addGoldenImage(image, 'canvas_test_blurred_rendering_with_decal_tile_mode.png');
   });
 }
 
 Future<Image> createTestImage() async {
-  final recorder = PictureRecorder();
-  final recorderCanvas = Canvas(recorder);
+  final PictureRecorder recorder = PictureRecorder();
+  final Canvas recorderCanvas = Canvas(recorder);
   recorderCanvas.scale(1.0, 1.0);
   final Picture picture = recorder.endRecording();
   return picture.toImage(1, 1);
@@ -1809,7 +1809,7 @@ final class _CloseToTransformMatcher extends Matcher {
     if (item.length != 16 || _expected.length != 16) {
       return false;
     }
-    for (var i = 0; i < 16; i++) {
+    for (int i = 0; i < 16; i++) {
       if ((item[i] - _expected[i]).abs() > 1e-10) {
         return false;
       }

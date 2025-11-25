@@ -49,7 +49,7 @@ void main() {
           commandsRun.add(entry.command);
           for (final intercept in interceptCommands) {
             if (entry.command.first.endsWith(intercept.$1)) {
-              final FakeProcess? result = intercept.$2(entry.command);
+              final result = intercept.$2(entry.command);
               if (result != null) {
                 return result;
               }
@@ -115,7 +115,7 @@ void main() {
           containsAllInOrder([endsWith('content_aware_hash.sh')]),
         ]),
       );
-      final List<String> logStrings = [for (final log in testLogs) log.message.trim()];
+      final logStrings = [for (final log in testLogs) log.message.trim()];
 
       expect(
         logStrings,

@@ -101,9 +101,9 @@ class TextPaint {
       final int end = block.isLtr
           ? block.clusterRangeWithoutWhitespaces.end
           : block.clusterRangeWithoutWhitespaces.start - 1;
-      final step = block.isLtr ? 1 : -1;
-      for (var i = start; i != end; i += step) {
-        final WebCluster clusterText = layout.allClusters[i];
+      final int step = block.isLtr ? 1 : -1;
+      for (int i = start; i != end; i += step) {
+        final clusterText = layout.allClusters[i];
         // We need to adjust the canvas size to fit the block in case there is scaling or zoom involved
         final (ui.Rect sourceRect, ui.Rect targetRect) = calculateCluster(
           layout,

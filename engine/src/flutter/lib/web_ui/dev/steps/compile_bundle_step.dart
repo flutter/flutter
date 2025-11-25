@@ -87,7 +87,7 @@ class CompileBundleStep implements PipelineStep {
     final List<TestCompiler> compilers = bundle.compileConfigs
         .map((CompileConfiguration config) => _createCompiler(config))
         .toList();
-    final stopwatch = Stopwatch()..start();
+    final Stopwatch stopwatch = Stopwatch()..start();
     final String testSetDirectoryPath = testSetDirectory.path;
 
     // Clear out old bundle compilations, if they exist
@@ -95,17 +95,17 @@ class CompileBundleStep implements PipelineStep {
       outputBundleDirectory.deleteSync(recursive: true);
     }
 
-    final pendingResults =
+    final List<Future<MapEntry<String, CompileResult>>> pendingResults =
         <Future<MapEntry<String, CompileResult>>>[];
-    for (final compiler in compilers) {
-      for (final testFile in allTests) {
+    for (final TestCompiler compiler in compilers) {
+      for (final FilePath testFile in allTests) {
         final String relativePath = pathlib.relative(testFile.absolute, from: testSetDirectoryPath);
         final Future<MapEntry<String, CompileResult>> result = compilePool.withResource(() async {
           if (testFiles != null && !testFiles!.contains(testFile)) {
             return MapEntry<String, CompileResult>(relativePath, CompileResult.filtered);
           }
           final bool success = await compiler.compileTest(testFile);
-          const maxTestNameLength = 80;
+          const int maxTestNameLength = 80;
           final String truncatedPath = relativePath.length > maxTestNameLength
               ? relativePath.replaceRange(maxTestNameLength - 3, relativePath.length, '...')
               : relativePath;
@@ -118,7 +118,7 @@ class CompileBundleStep implements PipelineStep {
         pendingResults.add(result);
       }
     }
-    final results = Map<String, CompileResult>.fromEntries(
+    final Map<String, CompileResult> results = Map<String, CompileResult>.fromEntries(
       await Future.wait(pendingResults),
     );
     stopwatch.stop();
@@ -137,11 +137,11 @@ class CompileBundleStep implements PipelineStep {
       'compileTimeInMs': stopwatch.elapsedMilliseconds,
       'results': results.map((String k, CompileResult v) => MapEntry<String, String>(k, v.name)),
     });
-    final outputResultsFile = io.File(
+    final io.File outputResultsFile = io.File(
       pathlib.join(outputBundleDirectory.path, 'results.json'),
     );
     outputResultsFile.writeAsStringSync(resultsJson);
-    final failedFiles = <String>[];
+    final List<String> failedFiles = <String>[];
     results.forEach((String fileName, CompileResult result) {
       if (result == CompileResult.compilationFailure) {
         failedFiles.add(fileName);
@@ -157,7 +157,7 @@ class CompileBundleStep implements PipelineStep {
         '\rThe bundle ${bundle.name.ansiMagenta} compiled with some failures in ${stopwatch.elapsedMilliseconds}ms.',
       );
       print('Compilation failures:');
-      for (final fileName in failedFiles) {
+      for (final String fileName in failedFiles) {
         print('  $fileName');
       }
       throw ToolExit('Failed to compile ${bundle.name.ansiMagenta}.');
@@ -205,7 +205,7 @@ class Dart2JSCompiler extends TestCompiler {
       outputDirectory.createSync(recursive: true);
     }
 
-    final arguments = <String>[
+    final List<String> arguments = <String>[
       'compile',
       'js',
       '--no-minify',
@@ -263,7 +263,7 @@ class Dart2WasmCompiler extends TestCompiler {
       outputDirectory.createSync(recursive: true);
     }
 
-    final arguments = <String>[
+    final List<String> arguments = <String>[
       environment.dart2wasmSnapshotPath,
 
       '--libraries-spec=${environment.dartSdkDir.path}/lib/libraries.json',

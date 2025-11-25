@@ -130,7 +130,7 @@ void doTests() {
     test('setScene', () {
       final DomManager domManager = DomManager(devicePixelRatio: 3.0);
 
-      final DomElement sceneHost = domManager.renderingHost.querySelector('flt-scene-host');
+      final DomElement sceneHost = domManager.renderingHost.querySelector('flt-scene-host')!;
 
       final DomElement scene1 = createDomElement('flt-scene');
       domManager.setScene(scene1);

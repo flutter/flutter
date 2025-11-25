@@ -43,7 +43,7 @@ class PrerollVisitor extends LayerVisitor<void> {
       ui.Rect clipRect;
       switch (m.type) {
         case MutatorType.clipRect:
-          clipRect = m.rect;
+          clipRect = m.rect!;
         case MutatorType.clipRRect:
           clipRect = m.rrect!.outerRect;
         case MutatorType.clipPath:
@@ -413,7 +413,7 @@ class MeasureVisitor extends LayerVisitor<void> {
     measuringCanvas.translate(picture.offset.dx, picture.offset.dy);
 
     // Get the picture bounds using the measuring canvas.
-    final localTransform = Float32List.fromList(measuringCanvas.getTransform());
+    final Float32List localTransform = Float32List.fromList(measuringCanvas.getTransform());
     ui.Rect transformedBounds = Matrix4.fromFloat32List(
       localTransform,
     ).transformRect(picture.picture.cullRect);
@@ -465,7 +465,7 @@ class MeasureVisitor extends LayerVisitor<void> {
 /// The canvases are the optimized canvases that were created when the view
 /// embedder optimized the canvases after the measure step.
 class PaintVisitor extends LayerVisitor<void> {
-  PaintVisitor(this.nWayCanvas, this.viewEmbedder) : toImageCanvas = null;
+  PaintVisitor(this.nWayCanvas, PlatformViewEmbedder this.viewEmbedder) : toImageCanvas = null;
 
   PaintVisitor.forToImage(this.nWayCanvas, this.toImageCanvas) : viewEmbedder = null;
 
@@ -642,7 +642,7 @@ class PaintVisitor extends LayerVisitor<void> {
 
     late List<ui.Canvas> canvasesToApplyShaderMask;
     if (viewEmbedder != null) {
-      final canvases = <ui.Canvas>{};
+      final Set<ui.Canvas> canvases = <ui.Canvas>{};
       final List<PictureLayer>? pictureChildren = picturesUnderShaderMask[shaderMask];
       if (pictureChildren != null) {
         for (final PictureLayer picture in pictureChildren) {
@@ -651,10 +651,10 @@ class PaintVisitor extends LayerVisitor<void> {
       }
       canvasesToApplyShaderMask = canvases.toList();
     } else {
-      canvasesToApplyShaderMask = <ui.Canvas>[toImageCanvas];
+      canvasesToApplyShaderMask = <ui.Canvas>[toImageCanvas!];
     }
 
-    for (final canvas in canvasesToApplyShaderMask) {
+    for (final ui.Canvas canvas in canvasesToApplyShaderMask) {
       canvas.save();
       canvas.translate(shaderMask.maskRect.left, shaderMask.maskRect.top);
 
@@ -683,7 +683,7 @@ class PaintVisitor extends LayerVisitor<void> {
     if (viewEmbedder != null) {
       pictureRecorderCanvas = viewEmbedder!.getOptimizedCanvasFor(picture);
     } else {
-      pictureRecorderCanvas = toImageCanvas;
+      pictureRecorderCanvas = toImageCanvas!;
     }
 
     pictureRecorderCanvas.save();
@@ -724,7 +724,7 @@ class PaintVisitor extends LayerVisitor<void> {
 
 class DebugInfoVisitor extends LayerVisitor<Map<String, dynamic>> {
   List<Map<String, dynamic>> debugChildren(ContainerLayer container) {
-    final children = <Map<String, dynamic>>[];
+    final List<Map<String, dynamic>> children = <Map<String, dynamic>>[];
 
     for (final Layer layer in container.children) {
       children.add(layer.accept(this));

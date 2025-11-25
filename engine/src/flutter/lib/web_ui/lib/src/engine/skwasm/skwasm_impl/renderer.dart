@@ -478,7 +478,7 @@ class SkwasmRenderer extends Renderer {
       withStackScope((StackScope scope) {
         final Pointer<Uint32> counts = scope.allocUint32Array(28);
         skwasmGetLiveObjectCounts(counts);
-        final countsJson = <String, dynamic>{
+        final Map<String, dynamic> countsJson = <String, dynamic>{
           'lineBreakBufferCount': counts[0],
           'unicodePositionBufferCount': counts[1],
           'lineMetricsCount': counts[2],
@@ -511,7 +511,7 @@ class SkwasmRenderer extends Renderer {
         downloadDebugInfo('live_object_counts', countsJson);
       });
 
-      var i = 0;
+      int i = 0;
       for (final viewRasterizer in rasterizers.values) {
         final Map<String, dynamic>? debugJson = viewRasterizer.dumpDebugInfo();
         if (debugJson != null) {

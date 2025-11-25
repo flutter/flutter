@@ -24,7 +24,7 @@ void doTests() {
         warnings.add(message);
       };
 
-      final DomElement target = domDocument.body;
+      final DomElement target = domDocument.body!;
       final DomHTMLMetaElement meta = createDomHTMLMetaElement();
       meta
         ..id = 'my_viewport_meta_for_testing'

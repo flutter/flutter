@@ -13,52 +13,52 @@ import 'src/matchers.dart';
 void main() {
   group('detectAndSelect', () {
     test('returns null on an empty list', () {
-      final RunTarget? target = RunTarget.detectAndSelect([]);
+      final target = RunTarget.detectAndSelect([]);
       expect(target, isNull);
     });
 
     test('returns the only target', () {
-      final Device device = _device(TargetPlatform.androidArm64);
+      final device = _device(TargetPlatform.androidArm64);
 
-      final RunTarget? target = RunTarget.detectAndSelect([device]);
+      final target = RunTarget.detectAndSelect([device]);
       expect(target, isA<RunTarget>().having((t) => t.device, 'device', device));
     });
 
     test('returns the first target if multiple are available', () {
-      final Device device1 = _device(TargetPlatform.androidArm64);
-      final Device device2 = _device(TargetPlatform.androidX64);
+      final device1 = _device(TargetPlatform.androidArm64);
+      final device2 = _device(TargetPlatform.androidX64);
 
-      final RunTarget? target = RunTarget.detectAndSelect([device1, device2]);
+      final target = RunTarget.detectAndSelect([device1, device2]);
       expect(target, isA<RunTarget>().having((t) => t.device, 'device', device1));
     });
 
     test('returns the android target', () {
-      final Device device1 = _device(TargetPlatform.darwinArm64);
-      final Device device2 = _device(TargetPlatform.androidArm64);
+      final device1 = _device(TargetPlatform.darwinArm64);
+      final device2 = _device(TargetPlatform.androidArm64);
 
-      final RunTarget? target = RunTarget.detectAndSelect([device1, device2], idPrefix: 'android');
+      final target = RunTarget.detectAndSelect([device1, device2], idPrefix: 'android');
       expect(target, isA<RunTarget>().having((t) => t.device, 'device', device2));
     });
 
     test('returns the first android target', () {
-      final Device device1 = _device(TargetPlatform.androidArm64);
-      final Device device2 = _device(TargetPlatform.androidX64);
+      final device1 = _device(TargetPlatform.androidArm64);
+      final device2 = _device(TargetPlatform.androidX64);
 
-      final RunTarget? target = RunTarget.detectAndSelect([device1, device2], idPrefix: 'android');
+      final target = RunTarget.detectAndSelect([device1, device2], idPrefix: 'android');
       expect(target, isA<RunTarget>().having((t) => t.device, 'device', device1));
     });
 
     test('returns null if no android targets are available', () {
-      final Device device1 = _device(TargetPlatform.darwinArm64);
-      final Device device2 = _device(TargetPlatform.darwinX64);
+      final device1 = _device(TargetPlatform.darwinArm64);
+      final device2 = _device(TargetPlatform.darwinX64);
 
-      final RunTarget? target = RunTarget.detectAndSelect([device1, device2], idPrefix: 'android');
+      final target = RunTarget.detectAndSelect([device1, device2], idPrefix: 'android');
       expect(target, isNull);
     });
   });
 
   group('buildConfigFor', () {
-    final Map<TargetPlatform, String> expectedDebugTargets = {
+    final expectedDebugTargets = {
       TargetPlatform.androidUnspecified: 'android_debug',
       TargetPlatform.androidX86: 'android_debug_x86',
       TargetPlatform.androidX64: 'android_debug_x64',
@@ -74,17 +74,17 @@ void main() {
       TargetPlatform.webJavascript: 'chrome_debug',
     };
 
-    for (final TargetPlatform platform in TargetPlatform.knownPlatforms) {
+    for (final platform in TargetPlatform.knownPlatforms) {
       if (expectedDebugTargets.containsKey(platform)) {
         test('${platform.identifier} => ${expectedDebugTargets[platform]}', () {
-          final Device device = _device(platform);
+          final device = _device(platform);
           final target = RunTarget.fromDevice(device);
 
           expect(target.buildConfigFor('debug'), expectedDebugTargets[platform]);
         });
       } else {
         test('${platform.identifier} => FatalError', () {
-          final Device device = _device(platform);
+          final device = _device(platform);
           final target = RunTarget.fromDevice(device);
 
           expect(() => target.buildConfigFor('debug'), throwsFatalError);
@@ -94,7 +94,7 @@ void main() {
   });
 
   group('buildTargetsForShell', () {
-    final Map<TargetPlatform, List<Label>> expectedShellTargets = {
+    final expectedShellTargets = {
       TargetPlatform.androidUnspecified: [
         Label.parseGn('//flutter/shell/platform/android:android_jar'),
       ],
@@ -131,17 +131,17 @@ void main() {
       TargetPlatform.webJavascript: [Label.parseGn('//flutter/web_sdk:flutter_web_sdk_archive')],
     };
 
-    for (final TargetPlatform platform in TargetPlatform.knownPlatforms) {
+    for (final platform in TargetPlatform.knownPlatforms) {
       if (expectedShellTargets.containsKey(platform)) {
         test('${platform.identifier} => ${expectedShellTargets[platform]}', () {
-          final Device device = _device(platform);
+          final device = _device(platform);
           final target = RunTarget.fromDevice(device);
 
           expect(target.buildTargetsForShell, expectedShellTargets[platform]);
         });
       } else {
         test('${platform.identifier} => FatalError', () {
-          final Device device = _device(platform);
+          final device = _device(platform);
           final target = RunTarget.fromDevice(device);
 
           expect(() => target.buildTargetsForShell, throwsFatalError);
