@@ -41,7 +41,11 @@ class _ReorderableExampleState extends State<ReorderableExample> {
     final Color evenItemColor = colorScheme.secondary.withValues(alpha: 0.15);
     final Color draggableItemColor = colorScheme.secondary;
 
-    Widget proxyDecorator(Widget child, int index, Animation<double> animation) {
+    Widget proxyDecorator(
+      Widget child,
+      int index,
+      Animation<double> animation,
+    ) {
       return AnimatedBuilder(
         animation: animation,
         builder: (BuildContext context, Widget? child) {

@@ -33,7 +33,9 @@ void main() {
     expect(slider.value, equals(0));
   });
 
-  testWidgets('Sliders year2023 flag can be toggled', (WidgetTester tester) async {
+  testWidgets('Sliders year2023 flag can be toggled', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.SliderExampleApp());
 
     Slider slider = tester.widget<Slider>(find.byType(Slider).first);

@@ -42,7 +42,10 @@ class MoodyGradient extends StatelessWidget {
           ),
         ),
         child: const Center(
-          child: Text('From Night to Day', style: TextStyle(fontSize: 24, color: Colors.white)),
+          child: Text(
+            'From Night to Day',
+            style: TextStyle(fontSize: 24, color: Colors.white),
+          ),
         ),
       ),
     );

@@ -57,15 +57,22 @@ class FallbackDemoState extends State<FallbackDemo> {
               'This area handles key presses that are unhandled by any shortcuts, by '
               'displaying them below. Try text shortcuts such as Ctrl-A!',
             ),
-            Text(_capture == null ? '' : '$_capture is not handled by shortcuts.'),
-            const TextField(decoration: InputDecoration(label: Text('Text field 1'))),
+            Text(
+              _capture == null ? '' : '$_capture is not handled by shortcuts.',
+            ),
+            const TextField(
+              decoration: InputDecoration(label: Text('Text field 1')),
+            ),
             Shortcuts(
               shortcuts: <ShortcutActivator, Intent>{
-                const SingleActivator(LogicalKeyboardKey.keyQ): VoidCallbackIntent(() {}),
+                const SingleActivator(LogicalKeyboardKey.keyQ):
+                    VoidCallbackIntent(() {}),
               },
               child: const TextField(
                 decoration: InputDecoration(
-                  label: Text('This field also considers key Q as a shortcut (that does nothing).'),
+                  label: Text(
+                    'This field also considers key Q as a shortcut (that does nothing).',
+                  ),
                 ),
               ),
             ),
@@ -113,16 +120,16 @@ class FallbackKeyEventRegistrar {
       // have been called somewhere.
       assert(existing != null);
       // Assign the global handler with a patched handler.
-      ServicesBinding.instance.keyEventManager.keyMessageHandler = _instance._buildHandler(
-        existing!,
-      );
+      ServicesBinding.instance.keyEventManager.keyMessageHandler = _instance
+          ._buildHandler(existing!);
       _initialized = true;
     }
     return _instance;
   }
 
   static bool _initialized = false;
-  static final FallbackKeyEventRegistrar _instance = FallbackKeyEventRegistrar._();
+  static final FallbackKeyEventRegistrar _instance =
+      FallbackKeyEventRegistrar._();
 
   final List<FallbackFocusNode> _fallbackNodes = <FallbackFocusNode>[];
 

@@ -17,7 +17,8 @@ class WidgetStateOutlinedBorderExampleApp extends StatelessWidget {
   }
 }
 
-class SelectedBorder extends RoundedRectangleBorder implements WidgetStateOutlinedBorder {
+class SelectedBorder extends RoundedRectangleBorder
+    implements WidgetStateOutlinedBorder {
   const SelectedBorder();
 
   @override
@@ -33,10 +34,12 @@ class WidgetStateOutlinedBorderExample extends StatefulWidget {
   const WidgetStateOutlinedBorderExample({super.key});
 
   @override
-  State<WidgetStateOutlinedBorderExample> createState() => _WidgetStateOutlinedBorderExampleState();
+  State<WidgetStateOutlinedBorderExample> createState() =>
+      _WidgetStateOutlinedBorderExampleState();
 }
 
-class _WidgetStateOutlinedBorderExampleState extends State<WidgetStateOutlinedBorderExample> {
+class _WidgetStateOutlinedBorderExampleState
+    extends State<WidgetStateOutlinedBorderExample> {
   bool isSelected = true;
 
   @override

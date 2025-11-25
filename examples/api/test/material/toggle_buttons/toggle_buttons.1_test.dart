@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/toggle_buttons/toggle_buttons.1.dart' as example;
+import 'package:flutter_api_samples/material/toggle_buttons/toggle_buttons.1.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('ToggleButtons allows multiple or no selection', (WidgetTester tester) async {
+  testWidgets('ToggleButtons allows multiple or no selection', (
+    WidgetTester tester,
+  ) async {
     final ThemeData theme = ThemeData();
     Finder findButton(String text) {
       return find.descendant(
@@ -70,7 +73,9 @@ void main() {
     );
   });
 
-  testWidgets('SegmentedButton allows multiple or no selection', (WidgetTester tester) async {
+  testWidgets('SegmentedButton allows multiple or no selection', (
+    WidgetTester tester,
+  ) async {
     final ThemeData theme = ThemeData();
     Finder findButton(String text) {
       return find.descendant(

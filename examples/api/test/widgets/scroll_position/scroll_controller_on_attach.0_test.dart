@@ -8,7 +8,9 @@ import 'package:flutter_api_samples/widgets/scroll_position/scroll_controller_on
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can toggle between scroll notification types', (WidgetTester tester) async {
+  testWidgets('Can toggle between scroll notification types', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.ScrollControllerDemo());
 
     expect(find.byType(CustomScrollView), findsOneWidget);

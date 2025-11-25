@@ -21,7 +21,8 @@ class ProgressIndicatorExample extends StatefulWidget {
   const ProgressIndicatorExample({super.key});
 
   @override
-  State<ProgressIndicatorExample> createState() => _ProgressIndicatorExampleState();
+  State<ProgressIndicatorExample> createState() =>
+      _ProgressIndicatorExampleState();
 }
 
 class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
@@ -32,11 +33,12 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
   @override
   void initState() {
     super.initState();
-    controller = AnimationController(vsync: this, duration: const Duration(seconds: 5))
-      ..addListener(() {
-        setState(() {});
-      })
-      ..repeat(reverse: true);
+    controller =
+        AnimationController(vsync: this, duration: const Duration(seconds: 5))
+          ..addListener(() {
+            setState(() {});
+          })
+          ..repeat(reverse: true);
   }
 
   @override

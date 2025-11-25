@@ -22,7 +22,8 @@ class EditableTextToolbarBuilderExampleApp extends StatefulWidget {
 class _EditableTextToolbarBuilderExampleAppState
     extends State<EditableTextToolbarBuilderExampleApp> {
   final TextEditingController _controller = TextEditingController(
-    text: 'Right click (desktop) or long press (mobile) to see the menu with a custom toolbar.',
+    text:
+        'Right click (desktop) or long press (mobile) to see the menu with a custom toolbar.',
   );
 
   @override
@@ -47,46 +48,59 @@ class _EditableTextToolbarBuilderExampleAppState
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('Custom toolbar, default-looking buttons')),
+        appBar: AppBar(
+          title: const Text('Custom toolbar, default-looking buttons'),
+        ),
         body: Center(
           child: Column(
             children: <Widget>[
               const SizedBox(height: 20.0),
               TextField(
                 controller: _controller,
-                contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
-                  return _MyTextSelectionToolbar(
-                    anchor: editableTextState.contextMenuAnchors.primaryAnchor,
-                    // getAdaptiveButtons creates the default button widgets for
-                    // the current platform.
-                    children: AdaptiveTextSelectionToolbar.getAdaptiveButtons(
-                      context,
-                      // These buttons just close the menu when clicked.
-                      <ContextMenuButtonItem>[
-                        ContextMenuButtonItem(
-                          label: 'One',
-                          onPressed: () => ContextMenuController.removeAny(),
-                        ),
-                        ContextMenuButtonItem(
-                          label: 'Two',
-                          onPressed: () => ContextMenuController.removeAny(),
-                        ),
-                        ContextMenuButtonItem(
-                          label: 'Three',
-                          onPressed: () => ContextMenuController.removeAny(),
-                        ),
-                        ContextMenuButtonItem(
-                          label: 'Four',
-                          onPressed: () => ContextMenuController.removeAny(),
-                        ),
-                        ContextMenuButtonItem(
-                          label: 'Five',
-                          onPressed: () => ContextMenuController.removeAny(),
-                        ),
-                      ],
-                    ).toList(),
-                  );
-                },
+                contextMenuBuilder:
+                    (
+                      BuildContext context,
+                      EditableTextState editableTextState,
+                    ) {
+                      return _MyTextSelectionToolbar(
+                        anchor:
+                            editableTextState.contextMenuAnchors.primaryAnchor,
+                        // getAdaptiveButtons creates the default button widgets for
+                        // the current platform.
+                        children:
+                            AdaptiveTextSelectionToolbar.getAdaptiveButtons(
+                              context,
+                              // These buttons just close the menu when clicked.
+                              <ContextMenuButtonItem>[
+                                ContextMenuButtonItem(
+                                  label: 'One',
+                                  onPressed: () =>
+                                      ContextMenuController.removeAny(),
+                                ),
+                                ContextMenuButtonItem(
+                                  label: 'Two',
+                                  onPressed: () =>
+                                      ContextMenuController.removeAny(),
+                                ),
+                                ContextMenuButtonItem(
+                                  label: 'Three',
+                                  onPressed: () =>
+                                      ContextMenuController.removeAny(),
+                                ),
+                                ContextMenuButtonItem(
+                                  label: 'Four',
+                                  onPressed: () =>
+                                      ContextMenuController.removeAny(),
+                                ),
+                                ContextMenuButtonItem(
+                                  label: 'Five',
+                                  onPressed: () =>
+                                      ContextMenuController.removeAny(),
+                                ),
+                              ],
+                            ).toList(),
+                      );
+                    },
               ),
             ],
           ),

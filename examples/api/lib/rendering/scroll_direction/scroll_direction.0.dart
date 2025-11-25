@@ -106,7 +106,9 @@ class _MyWidgetState extends State<MyWidget> {
     return DefaultTextStyle(
       style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
       child: RadioTheme(
-        data: RadioThemeData(fillColor: WidgetStateProperty.all<Color>(Colors.white)),
+        data: RadioThemeData(
+          fillColor: WidgetStateProperty.all<Color>(Colors.white),
+        ),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(
@@ -187,7 +189,10 @@ class _MyWidgetState extends State<MyWidget> {
         title: const Text('ScrollDirections'),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(50),
-          child: Padding(padding: const EdgeInsets.all(8.0), child: _getRadioRow()),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: _getRadioRow(),
+          ),
         ),
       ),
       body: NotificationListener<UserScrollNotification>(
@@ -210,12 +215,17 @@ class _MyWidgetState extends State<MyWidget> {
                   child = _getLeading();
                 } else {
                   child = Container(
-                    color: index.isEven ? Colors.amber[100] : Colors.amberAccent,
+                    color: index.isEven
+                        ? Colors.amber[100]
+                        : Colors.amberAccent,
                     padding: const EdgeInsets.all(8.0),
                     child: Center(child: Text(alphabet[index - 1])),
                   );
                 }
-                return Padding(padding: const EdgeInsets.all(8.0), child: child);
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: child,
+                );
               },
             ),
           ],

@@ -17,7 +17,10 @@ class RepeatingAnimationBuilderExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData.from(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.purple, brightness: Brightness.dark),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.purple,
+          brightness: Brightness.dark,
+        ),
         useMaterial3: true,
       ),
       home: const RepeatingAnimationBuilderExample(),
@@ -29,10 +32,12 @@ class RepeatingAnimationBuilderExample extends StatefulWidget {
   const RepeatingAnimationBuilderExample({super.key});
 
   @override
-  State<RepeatingAnimationBuilderExample> createState() => _RepeatingAnimationBuilderExampleState();
+  State<RepeatingAnimationBuilderExample> createState() =>
+      _RepeatingAnimationBuilderExampleState();
 }
 
-class _RepeatingAnimationBuilderExampleState extends State<RepeatingAnimationBuilderExample> {
+class _RepeatingAnimationBuilderExampleState
+    extends State<RepeatingAnimationBuilderExample> {
   bool _isPaused = false;
   bool _isReversing = false;
 
@@ -56,7 +61,10 @@ class _RepeatingAnimationBuilderExampleState extends State<RepeatingAnimationBui
           return Stack(
             children: <Widget>[
               Center(
-                child: Transform.rotate(angle: value * 0.5 * math.pi, child: child),
+                child: Transform.rotate(
+                  angle: value * 0.5 * math.pi,
+                  child: child,
+                ),
               ),
               _buildControls(colors, value),
             ],
@@ -176,10 +184,17 @@ class _RepeatingAnimationBuilderExampleState extends State<RepeatingAnimationBui
             // The solid button core is the middle layer.
             Container(
               margin: const EdgeInsets.all(8), // Inset from the progress ring
-              decoration: BoxDecoration(shape: BoxShape.circle, color: colors.primary),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: colors.primary,
+              ),
             ),
             // The icon is the top layer.
-            Icon(_isPaused ? Icons.play_arrow : Icons.pause, size: 40, color: colors.onPrimary),
+            Icon(
+              _isPaused ? Icons.play_arrow : Icons.pause,
+              size: 40,
+              color: colors.onPrimary,
+            ),
           ],
         ),
       ),
@@ -208,7 +223,10 @@ class _RepeatingAnimationBuilderExampleState extends State<RepeatingAnimationBui
             const SizedBox(width: 8),
             Text(
               _isReversing ? 'Back & Forth' : 'Forward Only',
-              style: TextStyle(color: colors.onSurface, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                color: colors.onSurface,
+                fontWeight: FontWeight.w500,
+              ),
             ),
             const SizedBox(width: 8),
             Switch(

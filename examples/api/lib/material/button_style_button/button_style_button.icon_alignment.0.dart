@@ -16,7 +16,9 @@ class ButtonStyleButtonIconAlignmentApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: Scaffold(body: ButtonStyleButtonIconAlignmentExample()));
+    return const MaterialApp(
+      home: Scaffold(body: ButtonStyleButtonIconAlignmentExample()),
+    );
   }
 }
 
@@ -101,7 +103,9 @@ class _ButtonStyleButtonIconAlignmentExampleState
                           });
                         },
                         selected: <IconAlignment>{_iconAlignment},
-                        segments: IconAlignment.values.map((IconAlignment iconAlignment) {
+                        segments: IconAlignment.values.map((
+                          IconAlignment iconAlignment,
+                        ) {
                           return ButtonSegment<IconAlignment>(
                             value: iconAlignment,
                             label: Text(iconAlignment.name),

@@ -40,7 +40,9 @@ class MaterialStatePropertyExample extends StatelessWidget {
     }
 
     return TextButton(
-      style: ButtonStyle(foregroundColor: WidgetStateProperty.resolveWith(getColor)),
+      style: ButtonStyle(
+        foregroundColor: WidgetStateProperty.resolveWith(getColor),
+      ),
       onPressed: () {},
       child: const Text('TextButton'),
     );

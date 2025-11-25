@@ -102,7 +102,9 @@ class _MyWidgetState extends State<MyWidget> {
     return DefaultTextStyle(
       style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
       child: RadioTheme(
-        data: RadioThemeData(fillColor: WidgetStateProperty.all<Color>(Colors.white)),
+        data: RadioThemeData(
+          fillColor: WidgetStateProperty.all<Color>(Colors.white),
+        ),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(
@@ -174,7 +176,10 @@ class _MyWidgetState extends State<MyWidget> {
         title: const Text('AxisDirections'),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(50),
-          child: Padding(padding: const EdgeInsets.all(8.0), child: _getRadioRow()),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: _getRadioRow(),
+          ),
         ),
       ),
       // Also works for ListView.builder, which creates a SliverList for itself.
