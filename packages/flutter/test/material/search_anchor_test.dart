@@ -4281,6 +4281,29 @@ void main() {
     expect(viewTextField.smartQuotesType, SmartQuotesType.disabled);
   });
 
+  testWidgets('SearchAnchor does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final SearchController controller = SearchController();
+    addTearDown(controller.dispose);
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SearchAnchor(
+            searchController: controller,
+            builder: (_, _) => const Text('X'),
+            suggestionsBuilder: (_, _) => <Widget>[const Text('Y')],
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SearchAnchor)), Size.zero);
+    controller.selection = const TextSelection.collapsed(offset: 0);
+    await tester.pump();
+    expect(find.byType(Text), findsWidgets);
+  });
+
   testWidgets('SearchBar does not crash at zero area', (WidgetTester tester) async {
     tester.view.physicalSize = Size.zero;
     final TextEditingController controller = TextEditingController(text: 'X');
