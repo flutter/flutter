@@ -138,7 +138,8 @@ class TestPointer {
     return PointerDownEvent(
       viewId:
           view?.viewId ??
-          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView!.viewId,
+          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView?.viewId ??
+          0,
       timeStamp: timeStamp,
       kind: kind,
       device: _device,
@@ -180,7 +181,8 @@ class TestPointer {
       timeStamp: timeStamp,
       viewId:
           view?.viewId ??
-          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView!.viewId,
+          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView?.viewId ??
+          0,
       kind: kind,
       device: _device,
       pointer: pointer,
@@ -203,7 +205,8 @@ class TestPointer {
     return PointerUpEvent(
       viewId:
           view?.viewId ??
-          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView!.viewId,
+          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView?.viewId ??
+          0,
       timeStamp: timeStamp,
       kind: kind,
       device: _device,
@@ -225,7 +228,8 @@ class TestPointer {
       timeStamp: timeStamp,
       viewId:
           view?.viewId ??
-          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView!.viewId,
+          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView?.viewId ??
+          0,
       kind: kind,
       device: _device,
       pointer: pointer,
@@ -247,7 +251,8 @@ class TestPointer {
     return PointerAddedEvent(
       viewId:
           view?.viewId ??
-          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView!.viewId,
+          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView?.viewId ??
+          0,
       timeStamp: timeStamp,
       kind: kind,
       device: _device,
@@ -269,7 +274,8 @@ class TestPointer {
     return PointerRemovedEvent(
       viewId:
           view?.viewId ??
-          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView!.viewId,
+          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView?.viewId ??
+          0,
       timeStamp: timeStamp,
       kind: kind,
       device: _device,
@@ -300,7 +306,8 @@ class TestPointer {
     return PointerHoverEvent(
       viewId:
           view?.viewId ??
-          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView!.viewId,
+          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView?.viewId ??
+          0,
       timeStamp: timeStamp,
       kind: kind,
       device: _device,
@@ -326,7 +333,8 @@ class TestPointer {
     return PointerScrollEvent(
       viewId:
           view?.viewId ??
-          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView!.viewId,
+          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView?.viewId ??
+          0,
       timeStamp: timeStamp,
       kind: kind,
       device: _device,
@@ -349,7 +357,8 @@ class TestPointer {
     return PointerScrollInertiaCancelEvent(
       viewId:
           view?.viewId ??
-          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView!.viewId,
+          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView?.viewId ??
+          0,
       timeStamp: timeStamp,
       kind: kind,
       device: _device,
@@ -367,7 +376,8 @@ class TestPointer {
     return PointerScaleEvent(
       viewId:
           view?.viewId ??
-          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView!.viewId,
+          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView?.viewId ??
+          0,
       timeStamp: timeStamp,
       kind: kind,
       device: _device,
@@ -394,7 +404,8 @@ class TestPointer {
     return PointerPanZoomStartEvent(
       viewId:
           view?.viewId ??
-          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView!.viewId,
+          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView?.viewId ??
+          0,
       timeStamp: timeStamp,
       device: _device,
       pointer: pointer,
@@ -425,7 +436,8 @@ class TestPointer {
     return PointerPanZoomUpdateEvent(
       viewId:
           view?.viewId ??
-          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView!.viewId,
+          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView?.viewId ??
+          0,
       timeStamp: timeStamp,
       device: _device,
       pointer: pointer,
@@ -450,7 +462,8 @@ class TestPointer {
     return PointerPanZoomEndEvent(
       viewId:
           view?.viewId ??
-          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView!.viewId,
+          TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView?.viewId ??
+          0,
       timeStamp: timeStamp,
       device: _device,
       pointer: pointer,
