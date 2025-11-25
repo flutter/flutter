@@ -99,7 +99,7 @@ void main() {
               '--$mode',
               if (device == 'chrome') ...[
                 '--no-web-resources-cdn',
-                '--web-browser-flags=--no-sandbox',
+                '--web-browser-flag=--no-sandbox',
               ],
             ],
             root.path,
