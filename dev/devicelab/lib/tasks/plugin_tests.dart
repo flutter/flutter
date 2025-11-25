@@ -502,14 +502,12 @@ end
     final bool isMultiPlatform = podspecContent.contains('s.osx.deployment_target');
     final String versionString;
     if (isMultiPlatform){
-      print('Multi platform podspec');
       versionString = target == 'ios'
         ? "s.ios.deployment_target = '13.0'"
         : "s.osx.deployment_target = '10.15'";
     } else {
-      print('Single platform podspec');
       versionString = target == 'ios'
-        ? "s.platform = :ios, '11.0'"
+        ? "s.platform = :ios, '13.0'"
         : "s.platform = :osx, '10.11'";
     }
 
