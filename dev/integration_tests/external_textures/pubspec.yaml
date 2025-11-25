@@ -2,7 +2,7 @@ name: external_textures
 description: A test of Flutter integrating external textures.
 
 environment:
-  sdk: ^3.8.0-0
+  sdk: ^3.9.0-0
 
 resolution: workspace
 

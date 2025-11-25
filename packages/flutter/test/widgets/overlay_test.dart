@@ -1574,6 +1574,29 @@ void main() {
 
       expect(() => entry.addListener(() {}), throwsAssertionError);
     });
+
+    testWidgets('asserts when remove is called twice', (WidgetTester tester) async {
+      await tester.pumpWidget(emptyOverlay);
+      final OverlayState overlay = overlayKey.currentState! as OverlayState;
+      final OverlayEntry entry = OverlayEntry(builder: (BuildContext context) => Container());
+      addTearDown(entry.dispose);
+
+      overlay.insert(entry);
+
+      expect(
+        () {
+          entry.remove();
+          entry.remove();
+        },
+        throwsA(
+          isA<AssertionError>().having(
+            (AssertionError e) => e.message,
+            'message',
+            'An OverlayEntry should be removed only once.',
+          ),
+        ),
+      );
+    });
   });
 
   group('LookupBoundary', () {
