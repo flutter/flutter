@@ -501,14 +501,12 @@ end
     String podspecContent = podspec.readAsStringSync();
     final bool isMultiPlatform = podspecContent.contains('s.osx.deployment_target');
     final String versionString;
-    if (isMultiPlatform){
+    if (isMultiPlatform) {
       versionString = target == 'ios'
-        ? "s.ios.deployment_target = '13.0'"
-        : "s.osx.deployment_target = '10.15'";
+          ? "s.ios.deployment_target = '13.0'"
+          : "s.osx.deployment_target = '10.15'";
     } else {
-      versionString = target == 'ios'
-        ? "s.platform = :ios, '13.0'"
-        : "s.platform = :osx, '10.11'";
+      versionString = target == 'ios' ? "s.platform = :ios, '13.0'" : "s.platform = :osx, '10.11'";
     }
 
     if (!podspecContent.contains(versionString)) {
@@ -529,10 +527,7 @@ end
           : "s.platform = :osx, '10.8'\ns.dependency 'AppAuth', '1.6.0'";
     }
 
-    podspecContent = podspecContent.replaceFirst(
-      versionString,
-      replacementContent,
-    );
+    podspecContent = podspecContent.replaceFirst(versionString, replacementContent);
     podspec.writeAsStringSync(podspecContent, flush: true);
   }
 
