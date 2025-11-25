@@ -35,7 +35,7 @@ class Composition {
     if (other.entities.length != entities.length) {
       return false;
     }
-    for (int i = 0; i < entities.length; i++) {
+    for (var i = 0; i < entities.length; i++) {
       if (!entities[i].equalsForCompositing(other.entities[i])) {
         return false;
       }
@@ -78,7 +78,7 @@ class CompositionCanvas extends CompositionEntity {
   /// Adds the [picture] to the pictures that should be rendered in this canvas.
   void add(PictureLayer picture) {
     pictures.add(picture);
-    _occlusionMap.addRect(picture.sceneBounds!);
+    _occlusionMap.addRect(picture.sceneBounds);
   }
 
   bool overlaps(ui.Rect rect) {
@@ -123,7 +123,7 @@ class CompositionPlatformView extends CompositionEntity {
 ui.Rect computePlatformViewBounds(EmbeddedViewParams params) {
   ui.Rect currentClipBounds = ui.Rect.largest;
 
-  Matrix4 currentTransform = Matrix4.identity();
+  var currentTransform = Matrix4.identity();
   for (final Mutator mutator in params.mutators.reversed) {
     switch (mutator.type) {
       case MutatorType.clipRect:
@@ -172,17 +172,17 @@ Composition createOptimizedComposition(
   Iterable<SceneElement> sceneElements,
   Map<int, EmbeddedViewParams> paramsForViews,
 ) {
-  final Map<int, ui.Rect> cachedComputedRects = <int, ui.Rect>{};
+  final cachedComputedRects = <int, ui.Rect>{};
 
-  final Composition result = Composition();
+  final result = Composition();
 
   // The first picture is added to the composition in a new canvas.
-  CompositionCanvas tentativeCanvas = CompositionCanvas();
+  var tentativeCanvas = CompositionCanvas();
 
-  for (final SceneElement sceneElement in sceneElements) {
+  for (final sceneElement in sceneElements) {
     if (sceneElement is PlatformViewSceneElement) {
       final int viewId = sceneElement.viewId;
-      final CompositionPlatformView platformView = CompositionPlatformView(viewId);
+      final platformView = CompositionPlatformView(viewId);
       if (PlatformViewManager.instance.isVisible(viewId)) {
         final ui.Rect platformViewBounds = cachedComputedRects[viewId] = computePlatformViewBounds(
           paramsForViews[viewId]!,
@@ -213,17 +213,17 @@ Composition createOptimizedComposition(
       // First check if the picture intersects with any pictures in the
       // tentative canvas, as this will be the last canvas in the composition
       // when it is eventually added.
-      if (tentativeCanvas.overlaps(picture.sceneBounds!)) {
+      if (tentativeCanvas.overlaps(picture.sceneBounds)) {
         tentativeCanvas.add(picture);
         continue;
       }
 
       CompositionCanvas? lastCanvasSeen;
-      bool addedPictureToComposition = false;
+      var addedPictureToComposition = false;
       for (final CompositionEntity entity in result.entities.reversed) {
         if (entity is CompositionPlatformView) {
           if (PlatformViewManager.instance.isVisible(entity.viewId)) {
-            final ui.Rect platformViewBounds = cachedComputedRects[entity.viewId]!;
+            final ui.Rect platformViewBounds = cachedComputedRects[entity.viewId];
             if (!platformViewBounds.intersect(picture.sceneBounds!).isEmpty) {
               // The next picture intersects with a platform view already in the
               // result. Add this picture to the first canvas which comes
@@ -240,7 +240,7 @@ Composition createOptimizedComposition(
         } else if (entity is CompositionCanvas) {
           lastCanvasSeen = entity;
           // Check if we intersect with any pictures in this canvas.
-          if (entity.overlaps(picture.sceneBounds!)) {
+          if (entity.overlaps(picture.sceneBounds)) {
             entity.add(picture);
             addedPictureToComposition = true;
           }

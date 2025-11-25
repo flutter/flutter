@@ -32,8 +32,8 @@ void testMain() {
   group(UniqueRef, () {
     test('create-dispose-collect cycle', () {
       expect(mockFinalizationRegistry.registeredPairs, hasLength(0));
-      final Object owner = Object();
-      final TestSkDeletable nativeObject = TestSkDeletable();
+      final owner = Object();
+      final nativeObject = TestSkDeletable();
       final UniqueRef<TestSkDeletable> ref = UniqueRef<TestSkDeletable>(
         owner,
         nativeObject,
@@ -72,8 +72,8 @@ void testMain() {
 
     test('create-collect cycle', () {
       expect(mockFinalizationRegistry.registeredPairs, hasLength(0));
-      final Object owner = Object();
-      final TestSkDeletable nativeObject = TestSkDeletable();
+      final owner = Object();
+      final nativeObject = TestSkDeletable();
       final UniqueRef<TestSkDeletable> ref = UniqueRef<TestSkDeletable>(
         owner,
         nativeObject,
@@ -96,8 +96,8 @@ void testMain() {
       Instrumentation.enabled = true;
       Instrumentation.instance.debugCounters.clear();
 
-      final Object owner = Object();
-      final TestSkDeletable nativeObject = TestSkDeletable();
+      final owner = Object();
+      final nativeObject = TestSkDeletable();
 
       expect(Instrumentation.instance.debugCounters, <String, int>{});
       final UniqueRef<TestSkDeletable> ref = UniqueRef<TestSkDeletable>(
@@ -117,8 +117,8 @@ void testMain() {
       Instrumentation.enabled = true;
       Instrumentation.instance.debugCounters.clear();
 
-      final Object owner = Object();
-      final TestSkDeletable nativeObject = TestSkDeletable();
+      final owner = Object();
+      final nativeObject = TestSkDeletable();
 
       expect(Instrumentation.instance.debugCounters, <String, int>{});
       final UniqueRef<TestSkDeletable> ref = UniqueRef<TestSkDeletable>(
@@ -139,8 +139,8 @@ void testMain() {
   group(CountedRef, () {
     test('single owner', () {
       expect(mockFinalizationRegistry.registeredPairs, hasLength(0));
-      final TestSkDeletable nativeObject = TestSkDeletable();
-      final TestCountedRefOwner owner = TestCountedRefOwner(nativeObject);
+      final nativeObject = TestSkDeletable();
+      final owner = TestCountedRefOwner(nativeObject);
       expect(owner.ref.debugReferrers, hasLength(1));
       expect(owner.ref.debugReferrers.single, owner);
       expect(owner.ref.refCount, 1);
@@ -167,8 +167,8 @@ void testMain() {
 
     test('multiple owners', () {
       expect(mockFinalizationRegistry.registeredPairs, hasLength(0));
-      final TestSkDeletable nativeObject = TestSkDeletable();
-      final TestCountedRefOwner owner1 = TestCountedRefOwner(nativeObject);
+      final nativeObject = TestSkDeletable();
+      final owner1 = TestCountedRefOwner(nativeObject);
       expect(owner1.ref.debugReferrers, hasLength(1));
       expect(owner1.ref.debugReferrers.single, owner1);
       expect(owner1.ref.refCount, 1);
@@ -253,7 +253,7 @@ class TestSkDeletableMock {
 
 extension type TestSkDeletable._primary(JSObject _) implements SkDeletable {
   factory TestSkDeletable() {
-    final TestSkDeletableMock mock = TestSkDeletableMock();
+    final mock = TestSkDeletableMock();
     return TestSkDeletable._(
       isDeleted: () {
         return mock.isDeleted();

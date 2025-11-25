@@ -14,7 +14,7 @@ import '../common/matchers.dart';
 import '../common/spy.dart';
 import '../common/test_initialization.dart';
 
-EngineFlutterWindow get implicitView => EnginePlatformDispatcher.instance.implicitView!;
+EngineFlutterWindow get implicitView => EnginePlatformDispatcher.instance.implicitView;
 
 Map<String, dynamic> _wrapOriginState(dynamic state) {
   return <String, dynamic>{'origin': true, 'state': state};
@@ -53,7 +53,7 @@ void testMain() {
     expect(history.urlStrategy, strategy);
 
     // Multi-entry history state.
-    final Map<dynamic, dynamic> state = <dynamic, dynamic>{
+    final state = <dynamic, dynamic>{
       'serialCount': 1.0,
       'state': <dynamic, dynamic>{'foo': 123.0},
     };
@@ -80,7 +80,7 @@ void testMain() {
   });
 
   group('$SingleEntryBrowserHistory', () {
-    final PlatformMessagesSpy spy = PlatformMessagesSpy();
+    final spy = PlatformMessagesSpy();
 
     setUp(() async {
       spy.setUp();
@@ -116,7 +116,7 @@ void testMain() {
     });
 
     test('disposes of its listener without touching history', () async {
-      const String unwrappedOriginState = 'initial state';
+      const unwrappedOriginState = 'initial state';
       final Map<String, dynamic> wrappedOriginState = _wrapOriginState(unwrappedOriginState);
 
       final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
@@ -263,7 +263,7 @@ void testMain() {
       // The next browser back will exit the app. We store the strategy locally
       // because it will be remove from the browser history class once it exits
       // the app.
-      final TestUrlStrategy originalStrategy = strategy;
+      final originalStrategy = strategy;
       await originalStrategy.go(-1);
       // 1. The engine sends a `popRoute` platform message.
       expect(spy.messages, hasLength(1));
@@ -375,7 +375,7 @@ void testMain() {
   });
 
   group('$MultiEntriesBrowserHistory', () {
-    final PlatformMessagesSpy spy = PlatformMessagesSpy();
+    final spy = PlatformMessagesSpy();
 
     setUp(() async {
       spy.setUp();
@@ -402,7 +402,7 @@ void testMain() {
     });
 
     test('disposes of its listener without touching history', () async {
-      const String untaggedState = 'initial state';
+      const untaggedState = 'initial state';
       final Map<String, dynamic> taggedState = _tagStateWithSerialCount(untaggedState, 0);
 
       final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
@@ -673,7 +673,7 @@ void testMain() {
     });
 
     test('prepareExternalUrl', () {
-      const String internalUrl = '/menu?foo=bar';
+      const internalUrl = '/menu?foo=bar';
       final HashUrlStrategy strategy = HashUrlStrategy(location);
 
       location.pathname = '/';
@@ -687,7 +687,7 @@ void testMain() {
     });
 
     test('removes /#/ from the home page', () {
-      const String internalUrl = '/';
+      const internalUrl = '/';
       final HashUrlStrategy strategy = HashUrlStrategy(location);
 
       location.pathname = '/';
@@ -702,8 +702,8 @@ void testMain() {
 
     test('addPopStateListener fn unwraps DomPopStateEvent state', () {
       final HashUrlStrategy strategy = HashUrlStrategy(location);
-      const String expected = 'expected value';
-      final List<Object?> states = <Object?>[];
+      const expected = 'expected value';
+      final states = <Object?>[];
 
       // Put the popStates received from the `location` in a list
       strategy.addPopStateListener(states.add);
@@ -762,7 +762,7 @@ void testMain() {
 }
 
 Future<void> routeInformationUpdated(String location, dynamic state) {
-  final Completer<void> completer = Completer<void>();
+  final completer = Completer<void>();
   EnginePlatformDispatcher.instance.sendPlatformMessage(
     'flutter/navigation',
     codec.encodeMethodCall(
@@ -777,7 +777,7 @@ Future<void> routeInformationUpdated(String location, dynamic state) {
 }
 
 Future<void> systemNavigatorPop() {
-  final Completer<void> completer = Completer<void>();
+  final completer = Completer<void>();
   EnginePlatformDispatcher.instance.sendPlatformMessage(
     'flutter/platform',
     codec.encodeMethodCall(const MethodCall('SystemNavigator.pop')),

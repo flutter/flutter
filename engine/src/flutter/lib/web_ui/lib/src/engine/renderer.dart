@@ -76,7 +76,7 @@ abstract class Renderer {
   }
 
   void _onViewCreated(int viewId) {
-    final EngineFlutterView view = EnginePlatformDispatcher.instance.viewManager[viewId]!;
+    final EngineFlutterView view = EnginePlatformDispatcher.instance.viewManager[viewId];
     rasterizers[view.viewId] = rasterizer.createViewRasterizer(view);
   }
 
@@ -85,7 +85,7 @@ abstract class Renderer {
     if (!rasterizers.containsKey(viewId)) {
       return;
     }
-    final ViewRasterizer rasterizer = rasterizers.remove(viewId)!;
+    final ViewRasterizer rasterizer = rasterizers.remove(viewId);
     rasterizer.dispose();
   }
 
@@ -283,7 +283,7 @@ abstract class Renderer {
       rasterizers.containsKey(view.viewId),
       "Unable to render to a view which hasn't been registered",
     );
-    final ViewRasterizer rasterizer = rasterizers[view.viewId]!;
+    final ViewRasterizer rasterizer = rasterizers[view.viewId];
     final RenderQueue renderQueue = rasterizer.queue;
     final FrameTimingRecorder? recorder = FrameTimingRecorder.frameTimingsEnabled
         ? FrameTimingRecorder()
@@ -292,11 +292,11 @@ abstract class Renderer {
       // If a scene is already queued up, drop it and queue this one up instead
       // so that the scene view always displays the most recently requested scene.
       renderQueue.next?.completer.complete();
-      final Completer<void> completer = Completer<void>();
+      final completer = Completer<void>();
       renderQueue.next = (scene: scene, completer: completer, recorder: recorder);
       return completer.future;
     }
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     renderQueue.current = (scene: scene, completer: completer, recorder: recorder);
     unawaited(_kickRenderLoop(rasterizer));
     return completer.future;
@@ -304,7 +304,7 @@ abstract class Renderer {
 
   Future<void> _kickRenderLoop(ViewRasterizer rasterizer) async {
     final RenderQueue renderQueue = rasterizer.queue;
-    final RenderRequest current = renderQueue.current!;
+    final RenderRequest current = renderQueue.current;
     try {
       await _renderScene(current.scene, rasterizer, current.recorder);
       current.completer.complete();

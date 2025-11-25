@@ -104,7 +104,7 @@ class WebParagraphStyle implements ui.ParagraphStyle {
 
   @override
   String toString() {
-    String result = super.toString();
+    var result = super.toString();
     assert(() {
       result =
           'WebParagraphStyle('
@@ -350,7 +350,7 @@ class WebTextStyle implements ui.TextStyle {
 
   @override
   String toString() {
-    String result = super.toString();
+    var result = super.toString();
     assert(() {
       final double? fontSize = this.fontSize;
       result =
@@ -424,7 +424,7 @@ class WebTextStyle implements ui.TextStyle {
     }
 
     final fontFeatureSettings = <ui.FontFeature>[];
-    bool optimizeLegibility = false;
+    var optimizeLegibility = false;
 
     for (final ui.FontFeature feature in fontFeatures!) {
       switch (feature.feature) {
@@ -954,7 +954,7 @@ class WebParagraph implements ui.Paragraph {
 
   void paint(ui.Canvas canvas, ui.Offset offset) {
     _paint.painter.resizePaintCanvas(ui.window.devicePixelRatio);
-    for (final line in _layout.lines) {
+    for (final TextLine line in _layout.lines) {
       _paint.paintLine(canvas, _layout, line, offset.dx, offset.dy);
     }
   }
@@ -973,8 +973,8 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   List<ui.LineMetrics> computeLineMetrics() {
-    final List<ui.LineMetrics> metrics = <ui.LineMetrics>[];
-    for (final line in _layout.lines) {
+    final metrics = <ui.LineMetrics>[];
+    for (final TextLine line in _layout.lines) {
       metrics.add(line.getMetrics());
     }
     WebParagraphDebug.apiTrace('computeLineMetrics("$text": $metrics');
@@ -1009,7 +1009,7 @@ class WebParagraph implements ui.Paragraph {
       return null;
     }
 
-    for (final line in _layout.lines) {
+    for (final TextLine line in _layout.lines) {
       if (line.allLineTextRange.isBefore(codeUnitOffset)) {
         continue;
       }
@@ -1137,7 +1137,7 @@ class WebLineMetrics implements ui.LineMetrics {
 
   @override
   String toString() {
-    String result = super.toString();
+    var result = super.toString();
     assert(() {
       result =
           'LineMetrics(hardBreak: $hardBreak, '
@@ -1196,9 +1196,9 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
 
     _closeTextSpan();
 
-    final start = _fullTextBuffer.length;
+    final int start = _fullTextBuffer.length;
     addText(kPlaceholderChar);
-    final end = _fullTextBuffer.length;
+    final int end = _fullTextBuffer.length;
 
     _spans.add(
       PlaceholderSpan(
@@ -1274,7 +1274,7 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
   @override
   WebParagraph build() {
     _closeTextSpan();
-    final String text = _fullTextBuffer.toString();
+    final text = _fullTextBuffer.toString();
 
     final paragraph = WebParagraph(_paragraphStyle, _spans, text);
     WebParagraphDebug.apiTrace('WebParagraphBuilder.build(): "$text" ${_spans.length}');
@@ -1302,7 +1302,7 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
 
   @override
   void pushStyle(ui.TextStyle textStyle) {
-    final newNode = _styleStack.last.createChild(textStyle as WebTextStyle);
+    final ChildStyleNode newNode = _styleStack.last.createChild(textStyle as WebTextStyle);
     _styleStack.add(newNode);
   }
 }

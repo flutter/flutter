@@ -34,11 +34,11 @@ Future<void> testMain() async {
       final ui.PictureRecorder recorder = ui.PictureRecorder();
       final ui.Canvas canvas = ui.Canvas(recorder, region);
       canvas.drawColor(const ui.Color(0xffffffff), ui.BlendMode.srcOver);
-      final double sideLength = region.width / 20;
+      const double sideLength = region.width / 20;
       final int rows = (region.height / sideLength).ceil();
 
-      for (int row = 0; row < rows; row++) {
-        for (int column = 0; column < 10; column++) {
+      for (var row = 0; row < rows; row++) {
+        for (var column = 0; column < 10; column++) {
           final ui.Rect rect = ui.Rect.fromLTWH(
             row.isEven ? (column * 2) * sideLength : (column * 2 + 1) * sideLength,
             row * sideLength,
@@ -97,11 +97,11 @@ Future<void> testMain() async {
       final ui.PictureRecorder recorder = ui.PictureRecorder();
       final ui.Canvas canvas = ui.Canvas(recorder, region);
       canvas.drawColor(const ui.Color(0xffffffff), ui.BlendMode.srcOver);
-      final double sideLength = region.width / 20;
+      const double sideLength = region.width / 20;
       final int rows = (region.height / sideLength).ceil();
 
-      for (int row = 0; row < rows; row++) {
-        for (int column = 0; column < 10; column++) {
+      for (var row = 0; row < rows; row++) {
+        for (var column = 0; column < 10; column++) {
           final ui.Rect rect = ui.Rect.fromLTWH(
             row.isEven ? (column * 2) * sideLength : (column * 2 + 1) * sideLength,
             row * sideLength,

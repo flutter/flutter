@@ -87,7 +87,7 @@ void testMain() {
         expect(canvas.isConnected, isFalse);
       }
 
-      final EngineFlutterView implicitView = EnginePlatformDispatcher.instance.implicitView!;
+      final EngineFlutterView implicitView = EnginePlatformDispatcher.instance.implicitView;
 
       final DisplayCanvasFactory<DisplayCanvas> originalFactory =
           renderer.rasterizers[implicitView.viewId]!.displayFactory;
@@ -97,8 +97,8 @@ void testMain() {
       expect(originalFactory.baseCanvas.isConnected, isTrue);
 
       // Create a few overlay canvases
-      final List<DisplayCanvas> overlays = <DisplayCanvas>[];
-      for (int i = 0; i < 3; i++) {
+      final overlays = <DisplayCanvas>[];
+      for (var i = 0; i < 3; i++) {
         final DisplayCanvas canvas = originalFactory.getCanvas();
         implicitView.dom.sceneHost.prepend(canvas.hostElement);
         overlays.add(canvas);

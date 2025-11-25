@@ -43,11 +43,11 @@ void testMain() {
       final LayerScene scene = sb.build();
       final LayerTree layerTree = scene.layerTree;
       await renderScene(scene);
-      final ClipRectEngineLayer clipRect =
+      final clipRect =
           layerTree.rootLayer.debugLayers.single as ClipRectEngineLayer;
       expect(clipRect.paintBounds, const ui.Rect.fromLTRB(15, 15, 30, 30));
 
-      final TransformEngineLayer transform = clipRect.debugLayers.single as TransformEngineLayer;
+      final transform = clipRect.debugLayers.single as TransformEngineLayer;
       expect(transform.paintBounds, const ui.Rect.fromLTRB(0, 0, 30, 30));
     });
 
@@ -101,7 +101,7 @@ void testMain() {
       final LayerTree layerTree = scene.layerTree;
       await renderScene(scene);
 
-      final ImageFilterEngineLayer imageFilterLayer =
+      final imageFilterLayer =
           layerTree.rootLayer.debugLayers.single as ImageFilterEngineLayer;
       expect(imageFilterLayer.paintBounds, const ui.Rect.fromLTRB(10, 0, 60, 50));
     });

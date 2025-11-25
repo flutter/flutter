@@ -28,9 +28,9 @@ Future<void> testMain() async {
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
 
     final SegmentationResult result = segmentText(paragraph.text);
-    int start = 0;
+    var start = 0;
     for (final end in result.words.skip(1)) {
-      for (int i = start; i < end; i++) {
+      for (var i = start; i < end; i++) {
         expect(
           paragraph.getWordBoundary(
             ui.TextPosition(offset: i /*affinity: ui.TextAffinity.downstream*/),
@@ -193,7 +193,7 @@ Future<void> testMain() async {
   });
 
   test('Paragraph getGlyphInfoAt', () {
-    const double epsilon = 0.001;
+    const epsilon = 0.001;
     final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 
     final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
@@ -234,7 +234,7 @@ Future<void> testMain() async {
   });
 
   test('Paragraph getClosestGlyphInfoForOffset', () {
-    const double epsilon = 0.001;
+    const epsilon = 0.001;
     final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
     final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
     builder.addText('Line1\nLine2\nLine3');

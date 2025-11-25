@@ -21,7 +21,7 @@ Future<void> testMain() async {
   );
 
   test('empty paragraph', () {
-    const double fontSize = 10.0;
+    const fontSize = 10.0;
     final ui.Paragraph paragraph = ui.ParagraphBuilder(
       ui.ParagraphStyle(fontSize: fontSize),
     ).build();
@@ -103,7 +103,7 @@ Future<void> testMain() async {
   });
 
   test('Basic glyph metrics - hit test', () {
-    const double fontSize = 10.0;
+    const fontSize = 10.0;
     final ui.ParagraphBuilder builder = ui.ParagraphBuilder(
       ui.ParagraphStyle(fontSize: fontSize, fontFamily: 'FlutterTest'),
     )..addText('Test\nTest');
@@ -123,8 +123,8 @@ Future<void> testMain() async {
   });
 
   test('rounding hack is always disabled', () {
-    const double fontSize = 1.25;
-    const String text = '12345';
+    const fontSize = 1.25;
+    const text = '12345';
     assert((fontSize * text.length).truncate() != fontSize * text.length);
     final ui.ParagraphBuilder builder = ui.ParagraphBuilder(
       ui.ParagraphStyle(fontSize: fontSize, fontFamily: 'FlutterTest'),

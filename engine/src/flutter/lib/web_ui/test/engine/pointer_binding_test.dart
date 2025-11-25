@@ -75,7 +75,7 @@ void testMain() {
       debugEmulateIosSafari = false;
     });
 
-    final MockSafariPointerEventWorkaround mockSafariWorkaround =
+    final mockSafariWorkaround =
         MockSafariPointerEventWorkaround();
     final PointerBinding instance = PointerBinding(view, safariWorkaround: mockSafariWorkaround);
     expect(mockSafariWorkaround.workAroundInvoked, isIosSafari);
@@ -92,7 +92,7 @@ void testMain() {
       return events.map(expectCorrectType).toList();
     }
 
-    final _PointerEventContext context = _PointerEventContext();
+    final context = _PointerEventContext();
     DomPointerEvent event;
     List<DomPointerEvent> events;
 
@@ -278,7 +278,7 @@ void testMain() {
   // its propagation to prevent Flutter from receiving and handling it.
   test('event listeners are attached to the bubble phase', () {
     final _BasicEventContext context = _PointerEventContext();
-    final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+    final packets = <ui.PointerDataPacket>[];
     ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
       packets.add(packet);
     };
@@ -332,7 +332,7 @@ void testMain() {
 
   test('does create an add event if got a pointerdown', () {
     final _BasicEventContext context = _PointerEventContext();
-    final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+    final packets = <ui.PointerDataPacket>[];
     ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
       packets.add(packet);
     };
@@ -575,7 +575,7 @@ void testMain() {
     'correctly detects events on the semantics placeholder',
     () {
       final _ButtonedEventMixin context = _PointerEventContext();
-      final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+      final packets = <ui.PointerDataPacket>[];
       ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
         packets.add(packet);
       };
@@ -631,7 +631,7 @@ void testMain() {
 
   test('creates an add event if the first pointer activity is a hover', () {
     final _ButtonedEventMixin context = _PointerEventContext();
-    final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+    final packets = <ui.PointerDataPacket>[];
     ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
       packets.add(packet);
     };
@@ -648,7 +648,7 @@ void testMain() {
 
   test('sends a pointermove event instead of the second pointerdown in a row', () {
     final _ButtonedEventMixin context = _PointerEventContext();
-    final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+    final packets = <ui.PointerDataPacket>[];
     ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
       packets.add(packet);
     };
@@ -751,7 +751,7 @@ void testMain() {
 
   test('does synthesize add or hover or move for scroll', () {
     final _ButtonedEventMixin context = _PointerEventContext();
-    final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+    final packets = <ui.PointerDataPacket>[];
     ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
       packets.add(packet);
     };
@@ -846,11 +846,11 @@ void testMain() {
   test('converts scroll delta to physical pixels (macOs)', () {
     final _ButtonedEventMixin context = _PointerEventContext();
 
-    const double dpi = 2.5;
+    const dpi = 2.5;
     ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.macOs;
     EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(dpi);
 
-    final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+    final packets = <ui.PointerDataPacket>[];
     ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
       packets.add(packet);
     };
@@ -885,7 +885,7 @@ void testMain() {
       return;
     }
     final _ButtonedEventMixin context = _PointerEventContext();
-    final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+    final packets = <ui.PointerDataPacket>[];
     ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
       packets.add(packet);
     };
@@ -1117,7 +1117,7 @@ void testMain() {
 
   test('does choose scroll vs scale based on ctrlKey', () {
     final _ButtonedEventMixin context = _PointerEventContext();
-    final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+    final packets = <ui.PointerDataPacket>[];
     ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
       packets.add(packet);
     };
@@ -1196,7 +1196,7 @@ void testMain() {
 
   test('does calculate delta and pointer identifier correctly', () {
     final _ButtonedEventMixin context = _PointerEventContext();
-    final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+    final packets = <ui.PointerDataPacket>[];
     ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
       packets.add(packet);
     };
@@ -1296,7 +1296,7 @@ void testMain() {
 
   test('correctly converts buttons of down, move, leave, and up events', () {
     final _ButtonedEventMixin context = _PointerEventContext();
-    final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+    final packets = <ui.PointerDataPacket>[];
     ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
       packets.add(packet);
     };
@@ -1442,7 +1442,7 @@ void testMain() {
 
   test('correctly handles button changes during a down sequence', () {
     final _ButtonedEventMixin context = _PointerEventContext();
-    final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+    final packets = <ui.PointerDataPacket>[];
     ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
       packets.add(packet);
     };
@@ -1492,7 +1492,7 @@ void testMain() {
     // This can happen when the user pops up the context menu by right
     // clicking, then dismisses it with a left click.
 
-    final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+    final packets = <ui.PointerDataPacket>[];
     ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
       packets.add(packet);
     };
@@ -1556,7 +1556,7 @@ void testMain() {
     //  - Clicks LMB;
     //  - Releases RMB.
 
-    final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+    final packets = <ui.PointerDataPacket>[];
     ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
       packets.add(packet);
     };
@@ -1611,7 +1611,7 @@ void testMain() {
     //  - Clicks LMB to close context menu.
     //  - Moves mouse.
 
-    final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+    final packets = <ui.PointerDataPacket>[];
     ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
       packets.add(packet);
     };
@@ -1648,7 +1648,7 @@ void testMain() {
     // context menu shows up), the browser sends a move event before down.
     // The move event will have "button:-1, buttons:2".
 
-    final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+    final packets = <ui.PointerDataPacket>[];
     ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
       packets.add(packet);
     };
@@ -1675,7 +1675,7 @@ void testMain() {
     //  - Pops up the context menu by right clicking, but holds RMB;
     //  - Move the pointer to hover.
 
-    final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+    final packets = <ui.PointerDataPacket>[];
     ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
       packets.add(packet);
     };
@@ -1725,7 +1725,7 @@ void testMain() {
     // `pointermove`/`mousemove` events. Then when the LMB click comes in, it
     // could be in a different location without any `*move` events in between.
 
-    final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+    final packets = <ui.PointerDataPacket>[];
     ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
       packets.add(packet);
     };
@@ -1772,7 +1772,7 @@ void testMain() {
     //  - Pops up the context menu by right clicking, but holds RMB;
     //  - Clicks RMB again in a different location;
 
-    final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+    final packets = <ui.PointerDataPacket>[];
     ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
       packets.add(packet);
     };
@@ -1830,7 +1830,7 @@ void testMain() {
     //
     // This seems to be happening sometimes when using RMB on the Mac trackpad.
 
-    final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+    final packets = <ui.PointerDataPacket>[];
     ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
       packets.add(packet);
     };
@@ -1895,7 +1895,7 @@ void testMain() {
     // cases, the browser actually sends an `up` event for the RMB click even
     // when the context menu is shown.
 
-    final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+    final packets = <ui.PointerDataPacket>[];
     ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
       packets.add(packet);
     };
@@ -1944,7 +1944,7 @@ void testMain() {
     //     RMB:              down------------------up
     // Flutter:   down-------move-------move-------up
 
-    final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+    final packets = <ui.PointerDataPacket>[];
     ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
       packets.add(packet);
     };
@@ -2006,7 +2006,7 @@ void testMain() {
     // This can happen when the up event occurs while the mouse is outside the
     // browser window.
 
-    final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+    final packets = <ui.PointerDataPacket>[];
     ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
       packets.add(packet);
     };
@@ -2045,9 +2045,9 @@ void testMain() {
   test('handles stylus touches', () {
     // Repeated stylus touches use different pointerIds.
 
-    final _PointerEventContext context = _PointerEventContext();
+    final context = _PointerEventContext();
 
-    final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+    final packets = <ui.PointerDataPacket>[];
     ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
       packets.add(packet);
     };
@@ -2112,7 +2112,7 @@ void testMain() {
 
   test('treats each pointer separately', () {
     final _MultiPointerEventMixin context = _PointerEventContext();
-    final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+    final packets = <ui.PointerDataPacket>[];
     List<ui.PointerData> data;
     ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
       packets.add(packet);
@@ -2281,7 +2281,7 @@ void testMain() {
 
   test('ignores pointerId on coalesced events', () {
     final _MultiPointerEventMixin context = _PointerEventContext();
-    final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+    final packets = <ui.PointerDataPacket>[];
     List<ui.PointerData> data;
     ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
       packets.add(packet);
@@ -2370,7 +2370,7 @@ void testMain() {
 
   test('correctly parses cancel event', () {
     final _MultiPointerEventMixin context = _PointerEventContext();
-    final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+    final packets = <ui.PointerDataPacket>[];
     ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
       packets.add(packet);
     };
@@ -2411,8 +2411,8 @@ void testMain() {
   });
 
   test('does not synthesize pointer up if from different device', () {
-    final _PointerEventContext context = _PointerEventContext();
-    final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+    final context = _PointerEventContext();
+    final packets = <ui.PointerDataPacket>[];
     ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
       packets.add(packet);
     };
@@ -2449,8 +2449,8 @@ void testMain() {
   });
 
   test('ignores pointer up or pointer cancel events for unknown device', () {
-    final _PointerEventContext context = _PointerEventContext();
-    final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+    final context = _PointerEventContext();
+    final packets = <ui.PointerDataPacket>[];
     ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
       packets.add(packet);
     };
@@ -2469,14 +2469,14 @@ void testMain() {
   });
 
   test('handles random pointer id on up events', () {
-    final _PointerEventContext context = _PointerEventContext();
+    final context = _PointerEventContext();
     // This happens with pens that are simulated with mouse events
     // (e.g. Wacom). It sends events with the pointer type "mouse", and
     // assigns a random pointer ID to each event.
     //
     // For more info, see: https://github.com/flutter/flutter/issues/75559
 
-    final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+    final packets = <ui.PointerDataPacket>[];
     ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
       packets.add(packet);
     };
@@ -2553,7 +2553,7 @@ void testMain() {
     });
 
     test('listeners are registered only once', () {
-      int timesHandled = 0;
+      var timesHandled = 0;
       Listener.register(
         event: 'custom-event',
         target: eventTarget,
@@ -2574,7 +2574,7 @@ void testMain() {
 typedef CapturedSemanticsEvent = ({ui.SemanticsAction type, int nodeId});
 
 void _testClickDebouncer({required PointerBinding Function() getBinding}) {
-  final DateTime testTime = DateTime(2018, 12, 17);
+  final testTime = DateTime(2018, 12, 17);
   late List<ui.PointerChange> pointerPackets;
   late List<CapturedSemanticsEvent> semanticsActions;
   late _PointerEventContext context;

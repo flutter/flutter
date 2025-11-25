@@ -116,8 +116,8 @@ Future<void> testMain() async {
       const double ry = 100;
       const double cx = 150;
       const double cy = 100;
-      const double startAngle = 0.0;
-      const double endAngle = 90.0;
+      const startAngle = 0.0;
+      const endAngle = 90.0;
       const double startRad = startAngle * math.pi / 180.0;
       const double endRad = endAngle * math.pi / 180.0;
 
@@ -144,8 +144,8 @@ Future<void> testMain() async {
       const double ry = 100;
       const double cx = 150;
       const double cy = 100;
-      const double startAngle = 0.0;
-      const double endAngle = 180.0;
+      const startAngle = 0.0;
+      const endAngle = 180.0;
       const double startRad = startAngle * math.pi / 180.0;
       const double endRad = endAngle * math.pi / 180.0;
 
@@ -172,8 +172,8 @@ Future<void> testMain() async {
       const double ry = 100;
       const double cx = 150;
       const double cy = 100;
-      const double startAngle = 0.0;
-      const double endAngle = 270.0;
+      const startAngle = 0.0;
+      const endAngle = 270.0;
       const double startRad = startAngle * math.pi / 180.0;
       const double endRad = endAngle * math.pi / 180.0;
 
@@ -200,8 +200,8 @@ Future<void> testMain() async {
       const double ry = 50;
       const double cx = 150;
       const double cy = 100;
-      const double startAngle = 0.0;
-      const double endAngle = 270.0;
+      const startAngle = 0.0;
+      const endAngle = 270.0;
       const double startRad = startAngle * math.pi / 180.0;
       const double endRad = endAngle * math.pi / 180.0;
 
@@ -226,7 +226,7 @@ Future<void> testMain() async {
 }
 
 List<double> computeLengths(PathMetrics pathMetrics) {
-  final List<double> lengths = <double>[];
+  final lengths = <double>[];
   for (final PathMetric metric in pathMetrics) {
     lengths.add(metric.length);
   }

@@ -20,7 +20,7 @@ void testMain() {
 }
 
 void _alarmClockTests() {
-  int callCount = 0;
+  var callCount = 0;
 
   void testCallback() {
     callCount += 1;

@@ -50,7 +50,7 @@ Future<void> testMain() async {
       ..strokeCap = StrokeCap.round;
 
     // test vertical, horizontal, and diagonal lines
-    final List<Offset> points = <Offset>[
+    final points = <Offset>[
       const Offset(-25, 50),
       const Offset(45, 50),
       const Offset(100, -25),
@@ -92,7 +92,7 @@ Future<void> testMain() async {
       ..strokeCap = StrokeCap.butt;
 
     // test vertical, horizontal, and diagonal lines
-    final List<Offset> points = <Offset>[
+    final points = <Offset>[
       const Offset(5, 50),
       const Offset(45, 50),
       const Offset(100, 5),
@@ -156,7 +156,7 @@ void paintLines(Canvas canvas) {
 
 void paintLinesFromPoints(Canvas canvas, Paint paint, List<Offset> points) {
   // points list contains pairs of Offset points, so for loop step is 2
-  for (int i = 0; i < points.length - 1; i += 2) {
+  for (var i = 0; i < points.length - 1; i += 2) {
     canvas.drawLine(points[i], points[i + 1], paint);
   }
 }

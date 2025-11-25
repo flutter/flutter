@@ -141,8 +141,8 @@ class PlatformViewEmbedder {
   }
 
   int _countClips(MutatorsStack mutators) {
-    int clipCount = 0;
-    for (final Mutator mutator in mutators) {
+    var clipCount = 0;
+    for (final mutator in mutators) {
       if (mutator.isClipType) {
         clipCount++;
       }
@@ -156,17 +156,17 @@ class PlatformViewEmbedder {
     DomElement headClipView,
   ) {
     DomNode? headClipViewNextSibling;
-    bool headClipViewWasAttached = false;
+    var headClipViewWasAttached = false;
     if (headClipView.parentNode != null) {
       headClipViewWasAttached = true;
       headClipViewNextSibling = headClipView.nextSibling;
       headClipView.remove();
     }
-    DomElement head = platformView;
-    int clipIndex = 0;
+    var head = platformView;
+    var clipIndex = 0;
     // Re-use as much existing clip views as needed.
     while (head != headClipView && clipIndex < numClips) {
-      head = head.parent!;
+      head = head.parent;
       clipIndex++;
     }
     // If there weren't enough existing clip views, add more.
@@ -187,14 +187,14 @@ class PlatformViewEmbedder {
 
   void _applyMutators(EmbeddedViewParams params, DomElement embeddedView, int viewId) {
     final MutatorsStack mutators = params.mutators;
-    DomElement head = embeddedView;
+    var head = embeddedView;
     Matrix4 headTransform = params.offset == ui.Offset.zero
         ? Matrix4.identity()
         : Matrix4.translationValues(params.offset.dx, params.offset.dy, 0);
-    double embeddedOpacity = 1.0;
+    var embeddedOpacity = 1.0;
     _resetAnchor(head);
 
-    for (final Mutator mutator in mutators) {
+    for (final mutator in mutators) {
       switch (mutator.type) {
         case MutatorType.transform:
           headTransform = mutator.matrix!.multiplied(headTransform);
@@ -202,7 +202,7 @@ class PlatformViewEmbedder {
         case MutatorType.clipRect:
         case MutatorType.clipRRect:
         case MutatorType.clipPath:
-          final DomElement clipView = head.parent!;
+          final DomElement clipView = head.parent;
           clipView.style.clip = '';
           clipView.style.clipPath = '';
           headTransform = Matrix4.identity();
@@ -213,12 +213,12 @@ class PlatformViewEmbedder {
           clipView.style.width = '100%';
           clipView.style.height = '100%';
           if (mutator.rect != null) {
-            final ui.Rect rect = mutator.rect!;
+            final ui.Rect rect = mutator.rect;
             clipView.style.clipPath =
                 'rect(${rect.top}px ${rect.right}px '
                 '${rect.bottom}px ${rect.left}px)';
           } else if (mutator.rrect != null) {
-            final ui.RRect rrect = mutator.rrect!;
+            final ui.RRect rrect = mutator.rrect;
             if (rrect.blRadius == rrect.brRadius &&
                 rrect.blRadius == rrect.tlRadius &&
                 rrect.blRadius == rrect.trRadius &&
@@ -228,12 +228,12 @@ class PlatformViewEmbedder {
                   '${rrect.bottom}px ${rrect.left}px '
                   'round ${rrect.blRadiusX}px)';
             } else {
-              final LayerPath path = ui.Path() as LayerPath;
+              final path = ui.Path() as LayerPath;
               path.addRRect(mutator.rrect!);
               clipView.style.clipPath = 'path("${path.toSvgString()}")';
             }
           } else if (mutator.path != null) {
-            final LayerPath path = (mutator.path! as LazyPath).builtPath as LayerPath;
+            final path = (mutator.path! as LazyPath).builtPath as LayerPath;
             clipView.style.clipPath = 'path("${path.toSvgString()}")';
           }
           _resetAnchor(clipView);
@@ -276,14 +276,14 @@ class PlatformViewEmbedder {
     _context.optimizedComposition = composition;
     // Create new picture recorders for the optimized canvases and record
     // which pictures go in which canvas.
-    final List<LayerPictureRecorder> optimizedCanvasRecorders = <LayerPictureRecorder>[];
-    final List<LayerCanvas> optimizedCanvases = <LayerCanvas>[];
-    final Map<PictureLayer, LayerCanvas> pictureToOptimizedCanvasMap =
+    final optimizedCanvasRecorders = <LayerPictureRecorder>[];
+    final optimizedCanvases = <LayerCanvas>[];
+    final pictureToOptimizedCanvasMap =
         <PictureLayer, LayerCanvas>{};
     for (final CompositionCanvas canvas in composition.canvases) {
-      final LayerPictureRecorder pictureRecorder = ui.PictureRecorder() as LayerPictureRecorder;
+      final pictureRecorder = ui.PictureRecorder() as LayerPictureRecorder;
       optimizedCanvasRecorders.add(pictureRecorder);
-      final LayerCanvas layerCanvas =
+      final layerCanvas =
           ui.Canvas(pictureRecorder, ui.Offset.zero & _frameSize.toSize()) as LayerCanvas;
       optimizedCanvases.add(layerCanvas);
       for (final PictureLayer picture in canvas.pictures) {
@@ -303,11 +303,11 @@ class PlatformViewEmbedder {
   }
 
   Future<void> submitFrame(FrameTimingRecorder? recorder) async {
-    final Composition composition = _context.optimizedComposition!;
+    final Composition composition = _context.optimizedComposition;
     _updateDomForNewComposition(composition);
     if (composition.equalsForCompositing(_activeComposition)) {
       // Copy the display canvases to the new composition.
-      for (int i = 0; i < composition.canvases.length; i++) {
+      for (var i = 0; i < composition.canvases.length; i++) {
         composition.canvases[i].displayCanvas = _activeComposition.canvases[i].displayCanvas;
         _activeComposition.canvases[i].displayCanvas = null;
       }
@@ -315,7 +315,7 @@ class PlatformViewEmbedder {
     _activeComposition = composition;
 
     final List<DisplayCanvas> displayCanvases = composition.canvases
-        .map((CompositionCanvas canvas) => canvas.displayCanvas!)
+        .map((CompositionCanvas canvas) => canvas.displayCanvas)
         .toList();
     final List<ui.Picture> picturesToRasterize = _context.optimizedCanvasRecorders!
         .map((ui.PictureRecorder recorder) => recorder.endRecording())
@@ -356,7 +356,7 @@ class PlatformViewEmbedder {
         }
       }
       await rasterizer.rasterize(
-        <DisplayCanvas>[debugBoundsCanvas!],
+        <DisplayCanvas>[debugBoundsCanvas],
         <ui.Picture>[boundsRecorder.endRecording()],
         null,
       );
@@ -370,15 +370,15 @@ class PlatformViewEmbedder {
       return;
     }
 
-    final Set<int> unusedViews = Set<int>.from(_activeCompositionOrder);
+    final unusedViews = Set<int>.from(_activeCompositionOrder);
     _activeCompositionOrder.clear();
 
     List<int>? debugInvalidViewIds;
 
-    for (int i = 0; i < _compositionOrder.length; i++) {
+    for (var i = 0; i < _compositionOrder.length; i++) {
       final int viewId = _compositionOrder[i];
 
-      bool isViewInvalid = false;
+      var isViewInvalid = false;
       assert(() {
         isViewInvalid = !PlatformViewManager.instance.knowsViewId(viewId);
         if (isViewInvalid) {
@@ -423,11 +423,11 @@ class PlatformViewEmbedder {
       return composition;
     }
     int numCanvasesToDelete = numCanvases - maximumCanvases;
-    final List<PictureLayer> picturesForLastCanvas = <PictureLayer>[];
-    final List<CompositionEntity> modifiedEntities = List<CompositionEntity>.from(
+    final picturesForLastCanvas = <PictureLayer>[];
+    final modifiedEntities = List<CompositionEntity>.from(
       composition.entities,
     );
-    bool sawLastCanvas = false;
+    var sawLastCanvas = false;
     for (int i = composition.entities.length - 1; i >= 0; i--) {
       final CompositionEntity entity = modifiedEntities[i];
       if (entity is CompositionCanvas) {
@@ -473,13 +473,13 @@ class PlatformViewEmbedder {
     final List<int> staticElements = longestIncreasingSubsequence(existingIndexMap);
     // Convert longest increasing subsequence from subsequence of indices of
     // `existingIndexMap` to a subsequence of indices in previous composition.
-    for (int i = 0; i < staticElements.length; i++) {
+    for (var i = 0; i < staticElements.length; i++) {
       staticElements[i] = existingIndexMap[staticElements[i]];
     }
 
     // Remove elements which are in the active composition, but not in the new
     // composition.
-    for (int i = 0; i < _activeComposition.entities.length; i++) {
+    for (var i = 0; i < _activeComposition.entities.length; i++) {
       if (indexMap.contains(i)) {
         continue;
       }
@@ -519,8 +519,8 @@ class PlatformViewEmbedder {
     // At this point, the DOM contains the static elements and the elements from
     // the previous composition which need to move. We iterate over the static
     // elements and insert the elements which come before them into the DOM.
-    int staticElementIndex = 0;
-    int nextCompositionIndex = 0;
+    var staticElementIndex = 0;
+    var nextCompositionIndex = 0;
     while (staticElementIndex < staticElements.length) {
       final int staticElementIndexInActiveComposition = staticElements[staticElementIndex];
       final DomElement staticDomElement = _getElement(
@@ -573,15 +573,15 @@ class PlatformViewEmbedder {
       !previous.equalsForCompositing(next),
       'Should not be in this method if the Compositions are equal',
     );
-    final List<int> result = <int>[];
-    int index = 0;
+    final result = <int>[];
+    var index = 0;
 
     final int maxUnchangedLength = math.min(previous.entities.length, next.entities.length);
 
     // A canvas in the previous composition can only be used once in the next
     // composition. So if it is matched with one in the next composition, mark
     // it here so it is only matched once.
-    final Set<int> alreadyClaimedCanvases = <int>{};
+    final alreadyClaimedCanvases = <int>{};
 
     // Add the unchanged elements from the beginning of the list.
     while (index < maxUnchangedLength &&
@@ -594,8 +594,8 @@ class PlatformViewEmbedder {
     }
 
     while (index < next.entities.length) {
-      bool foundForIndex = false;
-      for (int oldIndex = 0; oldIndex < previous.entities.length; oldIndex += 1) {
+      var foundForIndex = false;
+      for (var oldIndex = 0; oldIndex < previous.entities.length; oldIndex += 1) {
         if (previous.entities[oldIndex].equalsForCompositing(next.entities[index]) &&
             !alreadyClaimedCanvases.contains(oldIndex)) {
           result.add(oldIndex);

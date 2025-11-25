@@ -20,13 +20,13 @@ void testMain() {
     return <CkColorFilter>[
       createCkColorFilter(
         const EngineColorFilter.mode(ui.Color(0x12345678), ui.BlendMode.srcOver),
-      )!,
+      ),
       createCkColorFilter(
         const EngineColorFilter.mode(ui.Color(0x12345678), ui.BlendMode.dstOver),
-      )!,
+      ),
       createCkColorFilter(
         const EngineColorFilter.mode(ui.Color(0x87654321), ui.BlendMode.dstOver),
-      )!,
+      ),
       createCkColorFilter(
         const EngineColorFilter.matrix(<double>[
           1,
@@ -50,7 +50,7 @@ void testMain() {
           1,
           0,
         ]),
-      )!,
+      ),
       createCkColorFilter(
         EngineColorFilter.matrix(
           Float32List.fromList(<double>[
@@ -76,15 +76,15 @@ void testMain() {
             0,
           ]),
         ),
-      )!,
-      createCkColorFilter(const EngineColorFilter.linearToSrgbGamma())!,
-      createCkColorFilter(const EngineColorFilter.srgbToLinearGamma())!,
-      createCkColorFilter(EngineColorFilter.saturation(0.5))!,
+      ),
+      createCkColorFilter(const EngineColorFilter.linearToSrgbGamma()),
+      createCkColorFilter(const EngineColorFilter.srgbToLinearGamma()),
+      createCkColorFilter(EngineColorFilter.saturation(0.5)),
     ];
   }
 
   List<CkImageFilter> createImageFilters() {
-    final List<CkImageFilter> filters = <CkImageFilter>[
+    final filters = <CkImageFilter>[
       CkImageFilter.blur(sigmaX: 5, sigmaY: 6, tileMode: ui.TileMode.clamp),
       CkImageFilter.blur(sigmaX: 6, sigmaY: 5, tileMode: ui.TileMode.clamp),
       CkImageFilter.blur(sigmaX: 6, sigmaY: 5, tileMode: ui.TileMode.decal),
@@ -125,11 +125,11 @@ void testMain() {
       final CkPaint paint = CkPaint();
       paint.imageFilter = CkImageFilter.blur(sigmaX: 5, sigmaY: 10, tileMode: ui.TileMode.clamp);
 
-      final CkManagedSkImageFilterConvertible managedFilter1 =
+      final managedFilter1 =
           paint.imageFilter! as CkManagedSkImageFilterConvertible;
 
       paint.imageFilter = CkImageFilter.blur(sigmaX: 5, sigmaY: 10, tileMode: ui.TileMode.clamp);
-      final CkManagedSkImageFilterConvertible managedFilter2 =
+      final managedFilter2 =
           paint.imageFilter! as CkManagedSkImageFilterConvertible;
 
       expect(managedFilter1, same(managedFilter2));

@@ -20,7 +20,7 @@ void testMain() {
   group('$SkiaFontCollection', () {
     setUpUnitTests(testEnvironment: const ui_web.TestEnvironment(forceTestFonts: true));
 
-    final List<String> warnings = <String>[];
+    final warnings = <String>[];
     late void Function(String) oldPrintWarning;
     late FakeAssetScope testAssetScope;
 
@@ -160,7 +160,7 @@ void testMain() {
     });
 
     test('falls back to default Ahem URL', () async {
-      final SkiaFontCollection fontCollection = renderer.fontCollection as SkiaFontCollection;
+      final fontCollection = renderer.fontCollection as SkiaFontCollection;
 
       final ByteBuffer ahemData = await httpFetchByteBuffer('/assets/fonts/ahem.ttf');
 
@@ -175,7 +175,7 @@ void testMain() {
     });
 
     test('FlutterTest is the default test font', () async {
-      final SkiaFontCollection fontCollection = renderer.fontCollection as SkiaFontCollection;
+      final fontCollection = renderer.fontCollection as SkiaFontCollection;
 
       expect(fontCollection.debugRegisteredFonts, isNotEmpty);
       expect(fontCollection.debugRegisteredFonts!.first.family, 'FlutterTest');

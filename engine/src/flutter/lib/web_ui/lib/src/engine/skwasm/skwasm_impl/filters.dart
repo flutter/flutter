@@ -312,7 +312,7 @@ abstract class SkwasmColorFilter {
 
   factory SkwasmColorFilter.fromEngineColorFilter(EngineColorFilter colorFilter) =>
       switch (colorFilter.type) {
-        ColorFilterType.mode => SkwasmModeColorFilter(colorFilter.color!, colorFilter.blendMode!),
+        ColorFilterType.mode => SkwasmModeColorFilter(colorFilter.color, colorFilter.blendMode),
         ColorFilterType.linearToSrgbGamma => const SkwasmLinearToSrgbGammaColorFilter(),
         ColorFilterType.srgbToLinearGamma => const SkwasmSrgbToLinearGammaColorFilter(),
         ColorFilterType.matrix => SkwasmMatrixColorFilter(colorFilter.matrix!),

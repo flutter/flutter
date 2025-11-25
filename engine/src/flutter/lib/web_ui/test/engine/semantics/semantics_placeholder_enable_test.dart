@@ -26,7 +26,7 @@ Future<void> testMain() async {
     expect(semantics().semanticsEnabled, isFalse);
 
     // Synthesize a click on the placeholder.
-    final DomElement placeholder = domDocument.querySelector('flt-semantics-placeholder')!;
+    final DomElement placeholder = domDocument.querySelector('flt-semantics-placeholder');
 
     expect(placeholder.isConnected, isTrue);
 

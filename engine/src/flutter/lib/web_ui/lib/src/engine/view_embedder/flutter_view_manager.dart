@@ -101,7 +101,7 @@ class FlutterViewManager {
   }
 
   EngineFlutterView? findViewForElement(DomElement? element) {
-    const String viewRootSelector =
+    const viewRootSelector =
         '${DomManager.flutterViewTagName}[${GlobalHtmlAttributes.flutterViewIdAttributeName}]';
     final DomElement? viewRoot = element?.closest(viewRootSelector);
     if (viewRoot == null) {

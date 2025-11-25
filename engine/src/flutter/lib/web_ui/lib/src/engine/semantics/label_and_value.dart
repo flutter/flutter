@@ -266,8 +266,8 @@ final class SizedSpanRepresentation extends LabelRepresentationBehavior {
   @override
   void update(String label) {
     final ui.Size? size = semanticsObject.rect?.size;
-    final bool labelChanged = label != _previousLabel;
-    final bool sizeChanged = size != _previousSize;
+    final labelChanged = label != _previousLabel;
+    final sizeChanged = size != _previousSize;
 
     // Label must be updated before sizing because the size depends on text
     // content.
@@ -353,7 +353,7 @@ final class SizedSpanRepresentation extends LabelRepresentationBehavior {
       return;
     }
 
-    final List<_Measurement> measurements = <_Measurement>[];
+    final measurements = <_Measurement>[];
 
     // Step 1: set `display` to `inline` so that the measurement measures the
     //         true size of the text. Update all spans in a batch so that the
@@ -388,7 +388,7 @@ final class SizedSpanRepresentation extends LabelRepresentationBehavior {
 
     // Step 3: update all spans at a batch without taking any further DOM
     //         measurements, which avoids additional reflows.
-    for (final _Measurement measurement in measurements) {
+    for (final measurement in measurements) {
       final SizedSpanRepresentation representation = measurement.representation;
       final double domWidth = measurement.domSize.width;
       final double domHeight = measurement.domSize.height;
@@ -612,7 +612,7 @@ String? computeDomSemanticsLabel({String? tooltip, String? label, String? value}
     return null;
   }
 
-  final StringBuffer combinedValue = StringBuffer();
+  final combinedValue = StringBuffer();
   if (tooltip != null) {
     combinedValue.write(tooltip);
 

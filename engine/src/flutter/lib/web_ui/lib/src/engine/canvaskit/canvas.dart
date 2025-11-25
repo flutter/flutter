@@ -22,7 +22,7 @@ class CkCanvas implements LayerCanvas {
       throw ArgumentError('"recorder" must not already be associated with another Canvas.');
     }
     cullRect ??= ui.Rect.largest;
-    final CkPictureRecorder ckRecorder = recorder as CkPictureRecorder;
+    final ckRecorder = recorder as CkPictureRecorder;
     return ckRecorder.beginRecording(cullRect);
   }
 
@@ -299,7 +299,7 @@ class CkCanvas implements LayerCanvas {
 
   @override
   void drawVertices(ui.Vertices vertices, ui.BlendMode blendMode, ui.Paint paint) {
-    final CkVertices ckVertices = vertices as CkVertices;
+    final ckVertices = vertices as CkVertices;
     if (ckVertices.hasNoPoints) {
       return;
     }
@@ -354,7 +354,7 @@ class CkCanvas implements LayerCanvas {
   void saveLayerWithFilter(ui.Rect? bounds, ui.Paint? paint, ui.ImageFilter filter) {
     final CkManagedSkImageFilterConvertible convertible;
     if (filter is ui.ColorFilter) {
-      convertible = createCkColorFilter(filter as EngineColorFilter)!;
+      convertible = createCkColorFilter(filter as EngineColorFilter);
     } else {
       convertible = filter as CkManagedSkImageFilterConvertible;
     }
@@ -410,9 +410,9 @@ class CkCanvas implements LayerCanvas {
 
   Float32List getLocalToDevice() {
     final List<dynamic> list = skCanvas.getLocalToDevice();
-    final Float32List matrix4 = Float32List(16);
-    for (int r = 0; r < 4; r++) {
-      for (int c = 0; c < 4; c++) {
+    final matrix4 = Float32List(16);
+    for (var r = 0; r < 4; r++) {
+      for (var c = 0; c < 4; c++) {
         matrix4[c * 4 + r] = (list[r * 4 + c] as num).toDouble();
       }
     }
@@ -441,10 +441,10 @@ class CkCanvas implements LayerCanvas {
       );
     }
 
-    final Float32List rstTransformBuffer = Float32List(rectCount * 4);
-    final Float32List rectBuffer = Float32List(rectCount * 4);
+    final rstTransformBuffer = Float32List(rectCount * 4);
+    final rectBuffer = Float32List(rectCount * 4);
 
-    for (int i = 0; i < rectCount; ++i) {
+    for (var i = 0; i < rectCount; ++i) {
       final int index0 = i * 4;
       final int index1 = index0 + 1;
       final int index2 = index0 + 2;

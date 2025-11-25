@@ -15,7 +15,7 @@ Future<int> main() async {
   void withTestFile(String path, String contents, void Function(io.File) fn) {
     // Create a temporary file and delete it when we're done.
     final io.Directory tempDir = io.Directory.systemTemp.createTempSync('header_guard_check_test');
-    final io.File file = io.File(p.join(tempDir.path, path));
+    final file = io.File(p.join(tempDir.path, path));
     file.writeAsStringSync(contents);
     try {
       fn(file);
@@ -26,8 +26,8 @@ Future<int> main() async {
 
   group('HeaderGuardSpans', () {
     test('parses #ifndef', () {
-      const String input = '#ifndef FOO_H_';
-      final HeaderGuardSpans guard = HeaderGuardSpans(
+      const input = '#ifndef FOO_H_';
+      final guard = HeaderGuardSpans(
         ifndefSpan: SourceSpanWithContext(
           SourceLocation(0),
           SourceLocation(input.length),
@@ -41,7 +41,7 @@ Future<int> main() async {
     });
 
     test('ignores #ifndef if omitted', () {
-      const HeaderGuardSpans guard = HeaderGuardSpans(
+      const guard = HeaderGuardSpans(
         ifndefSpan: null,
         defineSpan: null,
         endifSpan: null,
@@ -50,8 +50,8 @@ Future<int> main() async {
     });
 
     test('ignores #ifndef if invalid', () {
-      const String input = '#oops FOO_H_';
-      final HeaderGuardSpans guard = HeaderGuardSpans(
+      const input = '#oops FOO_H_';
+      final guard = HeaderGuardSpans(
         ifndefSpan: SourceSpanWithContext(
           SourceLocation(0),
           SourceLocation(input.length),
@@ -65,8 +65,8 @@ Future<int> main() async {
     });
 
     test('parses #define', () {
-      const String input = '#define FOO_H_';
-      final HeaderGuardSpans guard = HeaderGuardSpans(
+      const input = '#define FOO_H_';
+      final guard = HeaderGuardSpans(
         ifndefSpan: null,
         defineSpan: SourceSpanWithContext(
           SourceLocation(0),
@@ -80,7 +80,7 @@ Future<int> main() async {
     });
 
     test('ignores #define if omitted', () {
-      const HeaderGuardSpans guard = HeaderGuardSpans(
+      const guard = HeaderGuardSpans(
         ifndefSpan: null,
         defineSpan: null,
         endifSpan: null,
@@ -89,8 +89,8 @@ Future<int> main() async {
     });
 
     test('ignores #define if invalid', () {
-      const String input = '#oops FOO_H_';
-      final HeaderGuardSpans guard = HeaderGuardSpans(
+      const input = '#oops FOO_H_';
+      final guard = HeaderGuardSpans(
         ifndefSpan: null,
         defineSpan: SourceSpanWithContext(
           SourceLocation(0),
@@ -104,8 +104,8 @@ Future<int> main() async {
     });
 
     test('parses #endif', () {
-      const String input = '#endif  // FOO_H_';
-      final HeaderGuardSpans guard = HeaderGuardSpans(
+      const input = '#endif  // FOO_H_';
+      final guard = HeaderGuardSpans(
         ifndefSpan: null,
         defineSpan: null,
         endifSpan: SourceSpanWithContext(
@@ -119,7 +119,7 @@ Future<int> main() async {
     });
 
     test('ignores #endif if omitted', () {
-      const HeaderGuardSpans guard = HeaderGuardSpans(
+      const guard = HeaderGuardSpans(
         ifndefSpan: null,
         defineSpan: null,
         endifSpan: null,
@@ -128,8 +128,8 @@ Future<int> main() async {
     });
 
     test('ignores #endif if invalid', () {
-      const String input = '#oops  // FOO_H_';
-      final HeaderGuardSpans guard = HeaderGuardSpans(
+      const input = '#oops  // FOO_H_';
+      final guard = HeaderGuardSpans(
         ifndefSpan: null,
         defineSpan: null,
         endifSpan: SourceSpanWithContext(
@@ -146,15 +146,15 @@ Future<int> main() async {
   group('HeaderFile', () {
     test('produces a valid header guard name from various file names', () {
       // All of these should produce the name `FOO_BAR_BAZ_H_`.
-      const List<String> inputs = <String>[
+      const inputs = <String>[
         'foo_bar_baz.h',
         'foo-bar-baz.h',
         'foo_bar-baz.h',
         'foo-bar_baz.h',
         'foo+bar+baz.h',
       ];
-      for (final String input in inputs) {
-        final HeaderFile headerFile = HeaderFile.from(input, guard: null, pragmaOnce: null);
+      for (final input in inputs) {
+        final headerFile = HeaderFile.from(input, guard: null, pragmaOnce: null);
         expect(headerFile.computeExpectedName(engineRoot: ''), endsWith('FOO_BAR_BAZ_H_'));
       }
     });
@@ -167,7 +167,7 @@ Future<int> main() async {
         '#endif  // FOO_H_',
       ].join('\n');
       withTestFile('foo.h', input, (io.File file) {
-        final HeaderFile headerFile = HeaderFile.parse(file.path);
+        final headerFile = HeaderFile.parse(file.path);
         expect(headerFile.guard!.ifndefValue, 'FOO_H_');
         expect(headerFile.guard!.defineValue, 'FOO_H_');
         expect(headerFile.guard!.endifValue, 'FOO_H_');
@@ -183,7 +183,7 @@ Future<int> main() async {
         '#endif',
       ].join('\n');
       withTestFile('foo.h', input, (io.File file) {
-        final HeaderFile headerFile = HeaderFile.parse(file.path);
+        final headerFile = HeaderFile.parse(file.path);
         expect(headerFile.guard!.ifndefValue, 'FOO_H_');
         expect(headerFile.guard!.defineValue, 'FOO_H_');
         expect(headerFile.guard!.endifValue, isNull);
@@ -198,7 +198,7 @@ Future<int> main() async {
         '#endif  // FOO_H_',
       ].join('\n');
       withTestFile('foo.h', input, (io.File file) {
-        final HeaderFile headerFile = HeaderFile.parse(file.path);
+        final headerFile = HeaderFile.parse(file.path);
         expect(headerFile.guard!.ifndefValue, 'FOO_H_');
         expect(headerFile.guard!.defineValue, isNull);
         expect(headerFile.guard!.endifValue, 'FOO_H_');
@@ -213,7 +213,7 @@ Future<int> main() async {
         '#endif  // FOO_H_',
       ].join('\n');
       withTestFile('foo.h', input, (io.File file) {
-        final HeaderFile headerFile = HeaderFile.parse(file.path);
+        final headerFile = HeaderFile.parse(file.path);
         expect(headerFile.guard, isNull);
       });
     });
@@ -221,7 +221,7 @@ Future<int> main() async {
     test('parses a header file with a #pragma once', () {
       final String input = <String>['#pragma once', ''].join('\n');
       withTestFile('foo.h', input, (io.File file) {
-        final HeaderFile headerFile = HeaderFile.parse(file.path);
+        final headerFile = HeaderFile.parse(file.path);
         expect(headerFile.pragmaOnce, isNotNull);
       });
     });
@@ -229,7 +229,7 @@ Future<int> main() async {
     test('fixes a file that uses #pragma once', () {
       final String input = <String>['#pragma once', '', '// ...'].join('\n');
       withTestFile('foo.h', input, (io.File file) {
-        final HeaderFile headerFile = HeaderFile.parse(file.path);
+        final headerFile = HeaderFile.parse(file.path);
         expect(headerFile.fix(engineRoot: p.dirname(file.path)), isTrue);
         expect(
           file.readAsStringSync(),
@@ -253,7 +253,7 @@ Future<int> main() async {
         '#endif  // FOO_H_',
       ].join('\n');
       withTestFile('foo.h', input, (io.File file) {
-        final HeaderFile headerFile = HeaderFile.parse(file.path);
+        final headerFile = HeaderFile.parse(file.path);
         expect(headerFile.fix(engineRoot: p.dirname(file.path)), isTrue);
         expect(
           file.readAsStringSync(),
@@ -282,7 +282,7 @@ Future<int> main() async {
         '',
       ].join('\n');
       withTestFile('foo.h', input, (io.File file) {
-        final HeaderFile headerFile = HeaderFile.parse(file.path);
+        final headerFile = HeaderFile.parse(file.path);
         expect(headerFile.fix(engineRoot: p.dirname(file.path)), isTrue);
         expect(
           file.readAsStringSync(),
@@ -322,7 +322,7 @@ Future<int> main() async {
         '',
       ].join('\n');
       withTestFile('foo.h', input, (io.File file) {
-        final HeaderFile headerFile = HeaderFile.parse(file.path);
+        final headerFile = HeaderFile.parse(file.path);
         expect(headerFile.fix(engineRoot: p.dirname(file.path)), isFalse);
       });
     });
@@ -337,7 +337,7 @@ Future<int> main() async {
         '#endif  // FLUTTER_FOO_H_',
       ].join('\r\n');
       withTestFile('foo.h', input, (io.File file) {
-        final HeaderFile headerFile = HeaderFile.parse(file.path);
+        final headerFile = HeaderFile.parse(file.path);
         expect(headerFile.pragmaOnce, isNull);
         expect(headerFile.guard!.ifndefValue, 'FLUTTER_FOO_H_');
         expect(headerFile.guard!.defineValue, 'FLUTTER_FOO_H_');

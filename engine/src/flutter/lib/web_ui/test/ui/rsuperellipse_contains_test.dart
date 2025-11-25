@@ -100,7 +100,7 @@ void testMain() {
       // The bounds is not centered at the origin and has unequal height and width.
       const RSuperellipse rse = RSuperellipse.fromLTRBXY(0, 0, 50, 100, 23.0, 30.0);
 
-      final Offset center = rse.outerRect.center;
+      const Offset center = rse.outerRect.center;
       void checkPointAndMirrors(Offset globalPoint) {
         final Offset p = globalPoint - center;
         checkPointWithOffset(rse, Offset(p.dx, p.dy) + center, const Offset(0.02, 0.02));

@@ -218,7 +218,7 @@ Future<void> testMain() async {
           final ui.Paint bluePaint = ui.Paint()..color = const ui.Color(0xFF0000FF);
           for (double y = 0; y < 300; y += 10) {
             for (double x = 0; x < 300; x += 10) {
-              final ui.Paint paint = ((x + y) % 20 == 0) ? redPaint : bluePaint;
+              final paint = ((x + y) % 20 == 0) ? redPaint : bluePaint;
               canvas.drawRect(ui.Rect.fromLTWH(x, y, 10, 10), paint);
             }
           }
@@ -253,7 +253,7 @@ Future<void> testMain() async {
           final ui.Paint bluePaint = ui.Paint()..color = const ui.Color(0xFF0000FF);
           for (double y = 0; y < 300; y += 10) {
             for (double x = 0; x < 300; x += 10) {
-              final ui.Paint paint = ((x + y) % 20 == 0) ? redPaint : bluePaint;
+              final paint = ((x + y) % 20 == 0) ? redPaint : bluePaint;
               canvas.drawRect(ui.Rect.fromLTWH(x, y, 10, 10), paint);
             }
           }
@@ -529,7 +529,7 @@ Future<void> testMain() async {
       sceneBuilder.pushOffset(0, 0);
       sceneBuilder.pushOpacity(128);
       // Push some complex transforms
-      final Float64List transform1 = Float64List.fromList([
+      final transform1 = Float64List.fromList([
         1.00,
         0.00,
         0.00,
@@ -547,7 +547,7 @@ Future<void> testMain() async {
         63.11,
         0.81,
       ]);
-      final Float64List transform2 = Float64List.fromList([
+      final transform2 = Float64List.fromList([
         1.00,
         0.00,
         0.00,
@@ -675,10 +675,10 @@ ui.Scene backdropBlurWithTileMode(ui.TileMode? tileMode, final double rectSize, 
 
   final ui.Picture blueGreenGridPicture = drawPicture((ui.Canvas canvas) {
     canvas.drawColor(white, ui.BlendMode.src);
-    for (int i = 0; i < count; i++) {
-      for (int j = 0; j < count; j++) {
-        final bool rectOdd = (i + j) & 1 == 0;
-        final ui.Color fg = (i < count / 2)
+    for (var i = 0; i < count; i++) {
+      for (var j = 0; j < count; j++) {
+        final rectOdd = (i + j) & 1 == 0;
+        final fg = (i < count / 2)
             ? ((j < count / 2) ? green : blue)
             : ((j < count / 2) ? yellow : red);
         canvas.drawRect(

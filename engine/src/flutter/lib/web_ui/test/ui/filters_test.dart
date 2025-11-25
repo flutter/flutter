@@ -349,7 +349,7 @@ Future<void> testMain() async {
 
     const double pad = 10;
     final double offset = arena.width + pad;
-    const int columns = 5;
+    const columns = 5;
     final ui.Rect pairArena = ui.Rect.fromLTRB(
       arena.left - 3,
       arena.top - 3,
@@ -394,12 +394,12 @@ Future<void> testMain() async {
 
     canvas.save();
     canvas.translate(pad, pad);
-    int renderIndex = 0;
-    int rows = 0;
+    var renderIndex = 0;
+    var rows = 0;
     while (renderIndex < renderers.length) {
       rows += 2;
       canvas.save();
-      for (int col = 0; col < columns && renderIndex < renderers.length; col++) {
+      for (var col = 0; col < columns && renderIndex < renderers.length; col++) {
         final renderer = renderers[renderIndex++];
         canvas.drawRect(pairArena, grey);
         canvas.drawRect(arena, white);
@@ -539,19 +539,19 @@ Future<void> testMain() async {
   });
 
   test('== operator', () {
-    final List<ui.ImageFilter> filters1 = <ui.ImageFilter>[
+    final filters1 = <ui.ImageFilter>[
       ...createImageFilters(),
       ...createColorFilters(),
     ];
-    final List<ui.ImageFilter> filters2 = <ui.ImageFilter>[
+    final filters2 = <ui.ImageFilter>[
       ...createImageFilters(),
       ...createColorFilters(),
     ];
 
-    for (int index1 = 0; index1 < filters1.length; index1 += 1) {
+    for (var index1 = 0; index1 < filters1.length; index1 += 1) {
       final ui.ImageFilter imageFilter1 = filters1[index1];
       expect(imageFilter1 == imageFilter1, isTrue);
-      for (int index2 = 0; index2 < filters2.length; index2 += 1) {
+      for (var index2 = 0; index2 < filters2.length; index2 += 1) {
         final ui.ImageFilter imageFilter2 = filters2[index2];
         expect(imageFilter1 == imageFilter2, imageFilter2 == imageFilter1);
         expect(
@@ -599,7 +599,7 @@ List<ui.ColorFilter> createColorFilters() {
 }
 
 List<ui.ImageFilter> createImageFilters() {
-  final List<ui.ImageFilter> filters = <ui.ImageFilter>[
+  final filters = <ui.ImageFilter>[
     ui.ImageFilter.blur(sigmaX: 5, sigmaY: 6, tileMode: ui.TileMode.clamp),
     ui.ImageFilter.blur(sigmaX: 6, sigmaY: 5, tileMode: ui.TileMode.clamp),
     ui.ImageFilter.blur(sigmaX: 6, sigmaY: 5, tileMode: ui.TileMode.decal),

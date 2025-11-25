@@ -265,7 +265,7 @@ void testMain() {
     path.getBounds();
 
     expect(constructors.createdPaths.length, 1);
-    final disposablePath = constructors.createdPaths.first;
+    final FakePath disposablePath = constructors.createdPaths.first;
 
     expect(disposablePath.isDisposed, false);
     expect(disposablePath.apiCallCount, 20);
@@ -273,7 +273,7 @@ void testMain() {
     final metrics = path.computeMetrics();
     expect(metrics.iterator.moveNext(), false);
     expect(disposablePath.computedMetrics.length, 1);
-    final disposableMetrics = disposablePath.computedMetrics.first;
+    final FakePathMetrics disposableMetrics = disposablePath.computedMetrics.first;
     expect(disposableMetrics.iterator.isDisposed, false);
 
     EnginePlatformDispatcher.instance.frameArena.collect();
@@ -286,7 +286,7 @@ void testMain() {
     path.getBounds();
 
     expect(constructors.createdPaths.length, 2);
-    final resurrectedPath = constructors.createdPaths.last;
+    final FakePath resurrectedPath = constructors.createdPaths.last;
 
     expect(resurrectedPath.isDisposed, false);
     expect(resurrectedPath.apiCallCount, 20);

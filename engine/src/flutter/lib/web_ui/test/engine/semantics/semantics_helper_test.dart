@@ -95,11 +95,11 @@ void testMain() {
     );
 
     test('Can update placeholder label', () {
-      const String testLabel = 'Test label for placeholder';
+      const testLabel = 'Test label for placeholder';
       desktopSemanticsEnabler.updatePlaceholderLabel(testLabel);
       expect(placeholder!.getAttribute('aria-label'), testLabel);
 
-      const String anotherLabel = 'Another label for placeholder';
+      const anotherLabel = 'Another label for placeholder';
       desktopSemanticsEnabler.dispose();
       expect(() => desktopSemanticsEnabler.updatePlaceholderLabel(anotherLabel), returnsNormally);
     });
@@ -151,11 +151,11 @@ void testMain() {
       });
 
       test('Can update placeholder label', () {
-        const String testLabel = 'Test label for placeholder';
+        const testLabel = 'Test label for placeholder';
         mobileSemanticsEnabler.updatePlaceholderLabel(testLabel);
         expect(placeholder!.getAttribute('aria-label'), testLabel);
 
-        const String anotherLabel = 'Another label for placeholder';
+        const anotherLabel = 'Another label for placeholder';
         mobileSemanticsEnabler.dispose();
         expect(() => mobileSemanticsEnabler.updatePlaceholderLabel(anotherLabel), returnsNormally);
       });

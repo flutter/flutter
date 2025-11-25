@@ -63,7 +63,7 @@ class CkResizingCodec extends ResizingCodec {
     int? targetHeight,
     bool allowUpscaling = true,
   }) {
-    final CkImage ckImage = image as CkImage;
+    final ckImage = image as CkImage;
     if (ckImage.imageSource == null) {
       return scaleImageIfNeeded(
         image,
@@ -102,7 +102,7 @@ class CkResizingCodec extends ResizingCodec {
     final int scaledHeight = scaledSize.height;
 
     final DomOffscreenCanvas offscreenCanvas = createDomOffscreenCanvas(scaledWidth, scaledHeight);
-    final DomCanvasRenderingContext2D ctx =
+    final ctx =
         offscreenCanvas.getContext('2d')! as DomCanvasRenderingContext2D;
     ctx.drawImage(
       image.imageSource!.canvasImageSource,
@@ -179,13 +179,13 @@ class CkImageBlobCodec extends HtmlBlobCodec {
 
 /// Creates and decodes an image using HtmlImageElement.
 Future<CkImageBlobCodec> decodeBlobToCkImage(DomBlob blob) async {
-  final CkImageBlobCodec codec = CkImageBlobCodec(blob);
+  final codec = CkImageBlobCodec(blob);
   await codec.decode();
   return codec;
 }
 
 Future<CkImageElementCodec> decodeUrlToCkImage(String src) async {
-  final CkImageElementCodec codec = CkImageElementCodec(src);
+  final codec = CkImageElementCodec(src);
   await codec.decode();
   return codec;
 }
@@ -308,7 +308,7 @@ CkImage scaleImage(SkImage image, int? targetWidth, int? targetHeight) {
   final CkPicture picture = recorder.endRecording();
   final ui.Image finalImage = picture.toImageSync(targetWidth, targetHeight);
 
-  final CkImage ckImage = finalImage as CkImage;
+  final ckImage = finalImage as CkImage;
   return ckImage;
 }
 
@@ -320,7 +320,7 @@ Future<ui.Codec> skiaInstantiateWebImageCodec(
   String url,
   ui_web.ImageCodecChunkCallback? chunkCallback,
 ) async {
-  final CkImageElementCodec imageElementCodec = CkImageElementCodec(
+  final imageElementCodec = CkImageElementCodec(
     url,
     chunkCallback: chunkCallback,
   );
@@ -339,7 +339,7 @@ Future<ui.Codec> skiaInstantiateWebImageCodec(
       );
     } else {
       final DomBlob blob = createDomBlob(<ByteBuffer>[list.buffer]);
-      final CkImageBlobCodec codec = CkImageBlobCodec(blob, chunkCallback: chunkCallback);
+      final codec = CkImageBlobCodec(blob, chunkCallback: chunkCallback);
 
       try {
         await codec.decode();
@@ -389,9 +389,9 @@ Future<Uint8List> readChunked(
   int contentLength,
   ui_web.ImageCodecChunkCallback chunkCallback,
 ) async {
-  final JSUint8Array result = JSUint8Array.withLength(contentLength);
-  int position = 0;
-  int cumulativeBytesLoaded = 0;
+  final result = JSUint8Array.withLength(contentLength);
+  var position = 0;
+  var cumulativeBytesLoaded = 0;
   await payload.read((JSUint8Array chunk) {
     cumulativeBytesLoaded += chunk.length;
     chunkCallback(cumulativeBytesLoaded, contentLength);

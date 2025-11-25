@@ -17,8 +17,8 @@ void testMain() {
   setUpImplicitView();
 
   group('PlatformViewManager', () {
-    const String viewType = 'forTest';
-    const int viewId = 6;
+    const viewType = 'forTest';
+    const viewId = 6;
 
     late PlatformViewManager contentManager;
 
@@ -86,8 +86,8 @@ void testMain() {
     });
 
     group('renderContent', () {
-      const String unregisteredViewType = 'unregisteredForTest';
-      const String anotherViewType = 'anotherViewType';
+      const unregisteredViewType = 'unregisteredForTest';
+      const anotherViewType = 'anotherViewType';
 
       setUp(() {
         contentManager.registerFactory(viewType, (int id) {
@@ -120,7 +120,7 @@ void testMain() {
         expect(content.getAttribute('slot'), getPlatformViewSlotName(viewId));
         expect(content.getAttribute('id'), getPlatformViewDomId(viewId));
 
-        final DomElement userContent = content.querySelector('div')!;
+        final DomElement userContent = content.querySelector('div');
         expect(userContent.style.height, '100%');
         expect(userContent.style.width, '100%');
       });
@@ -128,7 +128,7 @@ void testMain() {
       test('slot property has the same value as createPlatformViewSlot', () async {
         final DomElement content = contentManager.renderContent(viewType, viewId, null);
         final DomElement slot = createPlatformViewSlot(viewId);
-        final DomElement innerSlot = slot.querySelector('slot')!;
+        final DomElement innerSlot = slot.querySelector('slot');
 
         expect(
           content.getAttribute('slot'),
@@ -142,7 +142,7 @@ void testMain() {
         'do not modify style.height / style.width if passed by the user (anotherViewType)',
         () async {
           final DomElement content = contentManager.renderContent(anotherViewType, viewId, null);
-          final DomElement userContent = content.querySelector('div')!;
+          final DomElement userContent = content.querySelector('div');
           expect(userContent.style.height, 'auto');
           expect(userContent.style.width, '55%');
         },
@@ -158,18 +158,18 @@ void testMain() {
 
     group('getViewById', () {
       test('finds created views', () async {
-        final Map<int, DomElement> views1 = <int, DomElement>{
+        final views1 = <int, DomElement>{
           1: createDomHTMLDivElement(),
           2: createDomHTMLDivElement(),
           5: createDomHTMLDivElement(),
         };
-        final Map<int, DomElement> views2 = <int, DomElement>{
+        final views2 = <int, DomElement>{
           3: createDomHTMLDivElement(),
           4: createDomHTMLDivElement(),
         };
 
-        contentManager.registerFactory('forTest1', (int id) => views1[id]!);
-        contentManager.registerFactory('forTest2', (int id) => views2[id]!);
+        contentManager.registerFactory('forTest1', (int id) => views1[id]);
+        contentManager.registerFactory('forTest2', (int id) => views2[id]);
 
         // Render all 5 views.
         for (final int id in views1.keys) {

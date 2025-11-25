@@ -138,7 +138,7 @@ Future<void> testMain() async {
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: 500));
 
-    const double EPSILON = 0.001;
+    const EPSILON = 0.001;
 
     final rectsTop = paragraph.getBoxesForRange(
       0,

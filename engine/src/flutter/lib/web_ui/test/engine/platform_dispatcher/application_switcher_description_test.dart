@@ -13,7 +13,7 @@ void main() {
 
 Future<void> testMain() async {
   String? getCssThemeColor() {
-    final DomHTMLMetaElement? theme =
+    final theme =
         domDocument.querySelector('#flutterweb-theme') as DomHTMLMetaElement?;
     return theme?.content;
   }

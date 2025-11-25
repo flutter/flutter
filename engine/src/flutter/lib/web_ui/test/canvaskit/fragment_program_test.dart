@@ -286,13 +286,13 @@ void testMain() {
     expect(program.name, 'test');
 
     {
-      final CkFragmentShader shader = program.fragmentShader() as CkFragmentShader;
+      final shader = program.fragmentShader() as CkFragmentShader;
 
       shader.setFloat(0, 4);
       expect(reason: 'SkShaders are created lazily', shader.ref, isNull);
 
       final SkShader skShader = shader.getSkShader(ui.FilterQuality.none);
-      final UniqueRef<SkShader> ref = shader.ref!;
+      final UniqueRef<SkShader> ref = shader.ref;
       expect(skShader, same(ref.nativeObject));
       expect(ref.isDisposed, false);
 
@@ -303,14 +303,14 @@ void testMain() {
     }
 
     {
-      final CkFragmentShader shader = program.fragmentShader() as CkFragmentShader;
+      final shader = program.fragmentShader() as CkFragmentShader;
       shader.setFloat(0, 5);
 
       final SkShader skShader1 = shader.getSkShader(ui.FilterQuality.none);
-      final UniqueRef<SkShader> ref1 = shader.ref!;
+      final UniqueRef<SkShader> ref1 = shader.ref;
 
       final SkShader skShader2 = shader.getSkShader(ui.FilterQuality.none);
-      final UniqueRef<SkShader> ref2 = shader.ref!;
+      final UniqueRef<SkShader> ref2 = shader.ref;
       expect(ref1, isNot(same(ref2)));
       expect(
         reason:

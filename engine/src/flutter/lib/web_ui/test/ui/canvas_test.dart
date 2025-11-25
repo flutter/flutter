@@ -28,8 +28,8 @@ Future<void> testMain() async {
     void transformsClose(Float64List value, Float64List expected) {
       expect(expected.length, equals(16));
       expect(value.length, equals(16));
-      for (int r = 0; r < 4; r++) {
-        for (int c = 0; c < 4; c++) {
+      for (var r = 0; r < 4; r++) {
+        for (var c = 0; c < 4; c++) {
           expect(value[r * 4 + c], within(from: expected[r * 4 + c]));
         }
       }

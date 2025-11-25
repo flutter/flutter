@@ -21,7 +21,7 @@ class FullPageEmbeddingStrategy implements EmbeddingStrategy {
   }
 
   @override
-  final DomElement hostElement = domDocument.body!;
+  final DomElement hostElement = domDocument.body;
 
   @override
   DomEventTarget get globalEventTarget => domWindow;

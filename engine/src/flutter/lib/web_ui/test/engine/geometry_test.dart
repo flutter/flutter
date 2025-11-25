@@ -207,7 +207,7 @@ void testMain() {
     expect(rrectMix2.blRadius, equals(const Radius.elliptical(10, 6)));
   });
   test('RRect asserts when corner radii are negative', () {
-    bool assertsEnabled = false;
+    var assertsEnabled = false;
     assert(() {
       assertsEnabled = true;
       return true;

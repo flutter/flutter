@@ -26,8 +26,8 @@ void testMain() {
     test('Surface allocates canvases efficiently', () {
       final Surface surface = Surface();
       surface.createOrUpdateSurface(const BitmapSize(9, 19));
-      final CkSurface originalSurface = surface.debugGetCkSurface()!;
-      final DomOffscreenCanvas original = surface.debugGetOffscreenCanvas()!;
+      final CkSurface originalSurface = surface.debugGetCkSurface();
+      final DomOffscreenCanvas original = surface.debugGetOffscreenCanvas();
 
       // Expect exact requested dimensions.
       expect(original.width, 9);
@@ -38,8 +38,8 @@ void testMain() {
       // Shrinking causes the surface to create a new canvas with the exact
       // size requested.
       surface.createOrUpdateSurface(const BitmapSize(5, 15));
-      final CkSurface shrunkSurface = surface.debugGetCkSurface()!;
-      final DomOffscreenCanvas shrunk = surface.debugGetOffscreenCanvas()!;
+      final CkSurface shrunkSurface = surface.debugGetCkSurface();
+      final DomOffscreenCanvas shrunk = surface.debugGetOffscreenCanvas();
       expect(shrunk, same(original));
       expect(shrunkSurface, isNot(same(originalSurface)));
       expect(shrunkSurface.width(), 5);
@@ -48,8 +48,8 @@ void testMain() {
       // The first increase will allocate a new surface to exactly the
       // requested size.
       surface.createOrUpdateSurface(const BitmapSize(10, 20));
-      final CkSurface firstIncreaseSurface = surface.debugGetCkSurface()!;
-      final DomOffscreenCanvas firstIncrease = surface.debugGetOffscreenCanvas()!;
+      final CkSurface firstIncreaseSurface = surface.debugGetCkSurface();
+      final DomOffscreenCanvas firstIncrease = surface.debugGetOffscreenCanvas();
       expect(firstIncrease, same(original));
       expect(firstIncreaseSurface, isNot(same(shrunkSurface)));
 
@@ -61,8 +61,8 @@ void testMain() {
 
       // Subsequent increases within 40% will still allocate a new canvas.
       surface.createOrUpdateSurface(const BitmapSize(11, 22));
-      final CkSurface secondIncreaseSurface = surface.debugGetCkSurface()!;
-      final DomOffscreenCanvas secondIncrease = surface.debugGetOffscreenCanvas()!;
+      final CkSurface secondIncreaseSurface = surface.debugGetCkSurface();
+      final DomOffscreenCanvas secondIncrease = surface.debugGetOffscreenCanvas();
       expect(secondIncrease, same(firstIncrease));
       expect(secondIncreaseSurface, isNot(same(firstIncreaseSurface)));
       expect(secondIncreaseSurface.width(), 11);
@@ -70,8 +70,8 @@ void testMain() {
 
       // Increases beyond the 40% limit will cause a new allocation.
       surface.createOrUpdateSurface(const BitmapSize(20, 40));
-      final CkSurface hugeSurface = surface.debugGetCkSurface()!;
-      final DomOffscreenCanvas huge = surface.debugGetOffscreenCanvas()!;
+      final CkSurface hugeSurface = surface.debugGetCkSurface();
+      final DomOffscreenCanvas huge = surface.debugGetOffscreenCanvas();
       expect(huge, same(secondIncrease));
       expect(hugeSurface, isNot(same(secondIncreaseSurface)));
 
@@ -83,8 +83,8 @@ void testMain() {
 
       // Shrink again. Create a new surface.
       surface.createOrUpdateSurface(const BitmapSize(5, 15));
-      final CkSurface shrunkSurface2 = surface.debugGetCkSurface()!;
-      final DomOffscreenCanvas shrunk2 = surface.debugGetOffscreenCanvas()!;
+      final CkSurface shrunkSurface2 = surface.debugGetCkSurface();
+      final DomOffscreenCanvas shrunk2 = surface.debugGetOffscreenCanvas();
       expect(shrunk2, same(huge));
       expect(shrunkSurface2, isNot(same(hugeSurface)));
       expect(shrunkSurface2.width(), 5);
@@ -94,8 +94,8 @@ void testMain() {
       // This tests https://github.com/flutter/flutter/issues/77084
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(2.0);
       surface.createOrUpdateSurface(const BitmapSize(5, 15));
-      final CkSurface dpr2Surface = surface.debugGetCkSurface()!;
-      final DomOffscreenCanvas dpr2Canvas = surface.debugGetOffscreenCanvas()!;
+      final CkSurface dpr2Surface = surface.debugGetCkSurface();
+      final DomOffscreenCanvas dpr2Canvas = surface.debugGetOffscreenCanvas();
       expect(dpr2Canvas, same(huge));
       expect(dpr2Surface, isNot(same(hugeSurface)));
       expect(dpr2Surface.width(), 5);
@@ -201,18 +201,18 @@ void testMain() {
         final Surface surface = Surface();
         expect(surface.debugForceNewContext, isTrue);
         surface.createOrUpdateSurface(const BitmapSize(9, 19));
-        final CkSurface before = surface.debugGetCkSurface()!;
+        final CkSurface before = surface.debugGetCkSurface();
         expect(surface.debugForceNewContext, isFalse);
 
         // Pump a timer to flush any microtasks.
         await Future<void>.delayed(Duration.zero);
         surface.createOrUpdateSurface(const BitmapSize(9, 19));
-        final CkSurface afterAcquireFrame = surface.debugGetCkSurface()!;
+        final CkSurface afterAcquireFrame = surface.debugGetCkSurface();
         // Existing context is reused.
         expect(afterAcquireFrame, same(before));
 
         // Emulate WebGL context loss.
-        final DomOffscreenCanvas canvas = surface.debugGetOffscreenCanvas()!;
+        final DomOffscreenCanvas canvas = surface.debugGetOffscreenCanvas();
         final WebGLContext ctx = canvas.getGlContext(2);
         final WebGLLoseContextExtension loseContextExtension = ctx.loseContextExtension;
         loseContextExtension.loseContext();
@@ -232,7 +232,7 @@ void testMain() {
         expect(surface.debugForceNewContext, isTrue);
 
         surface.createOrUpdateSurface(const BitmapSize(9, 19));
-        final CkSurface afterContextLost = surface.debugGetCkSurface()!;
+        final CkSurface afterContextLost = surface.debugGetCkSurface();
         // A new context is created.
         expect(afterContextLost, isNot(same(before)));
       },
@@ -246,7 +246,7 @@ void testMain() {
       () {
         final Surface surface = Surface();
         surface.createOrUpdateSurface(const BitmapSize(10, 16));
-        final CkSurface original = surface.debugGetCkSurface()!;
+        final CkSurface original = surface.debugGetCkSurface();
 
         expect(original.width(), 10);
         expect(original.height(), 16);
@@ -257,7 +257,7 @@ void testMain() {
         // fewer of them to cover the browser window.
         EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(2.0);
         surface.createOrUpdateSurface(const BitmapSize(10, 16));
-        final CkSurface highDpr = surface.debugGetCkSurface()!;
+        final CkSurface highDpr = surface.debugGetCkSurface();
         expect(highDpr.width(), 10);
         expect(highDpr.height(), 16);
         expect(surface.debugGetOffscreenCanvas()!.width, 10);
@@ -267,7 +267,7 @@ void testMain() {
         // more of them to cover the browser window.
         EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(0.5);
         surface.createOrUpdateSurface(const BitmapSize(10, 16));
-        final CkSurface lowDpr = surface.debugGetCkSurface()!;
+        final CkSurface lowDpr = surface.debugGetCkSurface();
         expect(lowDpr.width(), 10);
         expect(lowDpr.height(), 16);
         expect(surface.debugGetOffscreenCanvas()!.width, 10);
@@ -276,7 +276,7 @@ void testMain() {
         // See https://github.com/flutter/flutter/issues/77084#issuecomment-1120151172
         EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(2.0);
         surface.createOrUpdateSurface(BitmapSize.fromSize(const ui.Size(9.9, 15.9)));
-        final CkSurface changeRatioAndSize = surface.debugGetCkSurface()!;
+        final CkSurface changeRatioAndSize = surface.debugGetCkSurface();
         expect(changeRatioAndSize.width(), 10);
         expect(changeRatioAndSize.height(), 16);
         expect(surface.debugGetOffscreenCanvas()!.width, 10);
@@ -288,10 +288,10 @@ void testMain() {
     test('uses transferToImageBitmap for bitmap creation', () async {
       final Surface surface = Surface();
       surface.ensureSurface(const BitmapSize(10, 10));
-      final DomOffscreenCanvas offscreenCanvas = surface.debugGetOffscreenCanvas()!;
-      final JSFunction transferToImageBitmap =
+      final DomOffscreenCanvas offscreenCanvas = surface.debugGetOffscreenCanvas();
+      final transferToImageBitmap =
           offscreenCanvas['transferToImageBitmap']! as JSFunction;
-      int transferToImageBitmapCalls = 0;
+      var transferToImageBitmapCalls = 0;
       offscreenCanvas['transferToImageBitmap'] = () {
         transferToImageBitmapCalls++;
         return transferToImageBitmap.callAsFunction(offscreenCanvas);

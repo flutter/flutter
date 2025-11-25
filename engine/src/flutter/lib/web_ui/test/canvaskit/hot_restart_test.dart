@@ -17,7 +17,7 @@ void testMain() {
     expect(windowFlutterCanvasKit, isNotNull);
 
     // Remember the initial instance.
-    final CanvasKit firstCanvasKitInstance = windowFlutterCanvasKit!;
+    final CanvasKit firstCanvasKitInstance = windowFlutterCanvasKit;
 
     // Try to load CanvasKit again.
     await renderer.initialize();

@@ -79,7 +79,7 @@ void testMain() {
     });
 
     test('always renders most recent picture and skips intermediate pictures', () async {
-      final TestRasterizer testRasterizer = TestRasterizer();
+      final testRasterizer = TestRasterizer();
       CanvasKitRenderer.instance.debugOverrideRasterizer(testRasterizer);
 
       // Create another view to render into to force the renderer to make
@@ -90,9 +90,9 @@ void testMain() {
       );
       EnginePlatformDispatcher.instance.viewManager.registerView(testView);
 
-      final List<LayerTree> treesToRender = <LayerTree>[];
-      final List<Future<void>> renderFutures = <Future<void>>[];
-      for (int i = 1; i < 20; i++) {
+      final treesToRender = <LayerTree>[];
+      final renderFutures = <Future<void>>[];
+      for (var i = 1; i < 20; i++) {
         final ui.PictureRecorder recorder = ui.PictureRecorder();
         final ui.Canvas canvas = ui.Canvas(recorder);
         canvas.drawRect(
@@ -116,7 +116,7 @@ void testMain() {
     });
 
     test('can render multiple frames at once into multiple views', () async {
-      final TestRasterizer testRasterizer = TestRasterizer();
+      final testRasterizer = TestRasterizer();
       CanvasKitRenderer.instance.debugOverrideRasterizer(testRasterizer);
 
       // Create another view to render into to force the renderer to make
@@ -137,15 +137,15 @@ void testMain() {
       );
       EnginePlatformDispatcher.instance.viewManager.registerView(testView3);
 
-      final Map<EngineFlutterView, List<LayerTree>> treesToRender =
+      final treesToRender =
           <EngineFlutterView, List<LayerTree>>{};
       treesToRender[testView1] = <LayerTree>[];
       treesToRender[testView2] = <LayerTree>[];
       treesToRender[testView3] = <LayerTree>[];
-      final List<Future<void>> renderFutures = <Future<void>>[];
+      final renderFutures = <Future<void>>[];
 
-      for (int i = 1; i < 20; i++) {
-        for (final EngineFlutterView testView in <EngineFlutterView>[
+      for (var i = 1; i < 20; i++) {
+        for (final testView in <EngineFlutterView>[
           testView1,
           testView2,
           testView3,
