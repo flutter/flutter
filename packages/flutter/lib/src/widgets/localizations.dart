@@ -809,8 +809,10 @@ class LocalizationsResolver extends ChangeNotifier with WidgetsBindingObserver {
     _localeListResolutionCallback = localeListResolutionCallback;
     _localeResolutionCallback = localeResolutionCallback;
     _localizationsDelegates = localizationsDelegates;
-    _supportedLocales = supportedLocales;
-    _updateResolvedLocale(WidgetsBinding.instance.platformDispatcher.locales);
+    if (_supportedLocales != supportedLocales) {
+      _supportedLocales = supportedLocales;
+      _updateResolvedLocale(WidgetsBinding.instance.platformDispatcher.locales);
+    }
   }
 
   /// The currently resolved [Locale] based on the current platform locale and
