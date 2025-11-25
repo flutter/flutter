@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "બધા પસંદ કરો",
   "searchResultsFound": "શોધ પરિણામો મળ્યાં",
   "noResultsFound": "કોઈ પરિણામ મળ્યું નથી",
-  "radioButtonUnselectedLabel": "પસંદગી કરી નથી"
+  "radioButtonUnselectedLabel": "પસંદગી કરી નથી",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

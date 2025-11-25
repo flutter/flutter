@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "Selectați tot",
   "searchResultsFound": "Am găsit rezultate ale căutării",
   "noResultsFound": "Niciun rezultat",
-  "radioButtonUnselectedLabel": "Neselectat"
+  "radioButtonUnselectedLabel": "Neselectat",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

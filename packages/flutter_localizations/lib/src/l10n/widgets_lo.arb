@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "ເລືອກທັງໝົດ",
   "searchResultsFound": "ພົບຜົນການຊອກຫາ",
   "noResultsFound": "ບໍ່ພົບຜົນການຊອກຫາ",
-  "radioButtonUnselectedLabel": "ບໍ່ໄດ້ເລືອກ"
+  "radioButtonUnselectedLabel": "ບໍ່ໄດ້ເລືອກ",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

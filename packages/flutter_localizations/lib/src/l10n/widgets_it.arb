@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "Seleziona tutto",
   "searchResultsFound": "Risultati di ricerca trovati",
   "noResultsFound": "Nessun risultato trovato",
-  "radioButtonUnselectedLabel": "Non selezionato"
+  "radioButtonUnselectedLabel": "Non selezionato",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

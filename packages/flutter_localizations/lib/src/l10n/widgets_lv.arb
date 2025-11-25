@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "Atlasīt visu",
   "searchResultsFound": "Tika atrasti meklēšanas rezultāti",
   "noResultsFound": "Netika atrasts neviens rezultāts",
-  "radioButtonUnselectedLabel": "Nav atlasīts"
+  "radioButtonUnselectedLabel": "Nav atlasīts",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

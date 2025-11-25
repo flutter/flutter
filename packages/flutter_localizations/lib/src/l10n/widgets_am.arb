@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "ሁሉንም ምረጥ",
   "searchResultsFound": "የፍለጋ ውጤቶች ተገኝተዋል",
   "noResultsFound": "ምንም ውጤቶች አልተገኙም",
-  "radioButtonUnselectedLabel": "አልተመረጠም"
+  "radioButtonUnselectedLabel": "አልተመረጠም",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }
