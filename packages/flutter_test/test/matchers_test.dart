@@ -753,7 +753,6 @@ void main() {
         role: ui.SemanticsRole.none,
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
-        hitTestBehavior: ui.SemanticsHitTestBehavior.defer,
         inputType: ui.SemanticsInputType.none,
         locale: null,
       );
@@ -1056,7 +1055,6 @@ void main() {
         role: ui.SemanticsRole.none,
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
-        hitTestBehavior: ui.SemanticsHitTestBehavior.defer,
         inputType: ui.SemanticsInputType.none,
         locale: null,
       );
@@ -1159,7 +1157,6 @@ void main() {
         role: ui.SemanticsRole.none,
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
-        hitTestBehavior: ui.SemanticsHitTestBehavior.defer,
         inputType: ui.SemanticsInputType.none,
         locale: null,
       );
@@ -1267,7 +1264,6 @@ void main() {
         role: ui.SemanticsRole.none,
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
-        hitTestBehavior: ui.SemanticsHitTestBehavior.defer,
         inputType: ui.SemanticsInputType.none,
         locale: null,
       );
@@ -1303,7 +1299,6 @@ void main() {
         role: ui.SemanticsRole.none,
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
-        hitTestBehavior: ui.SemanticsHitTestBehavior.defer,
         inputType: ui.SemanticsInputType.none,
         locale: null,
       );
@@ -1438,7 +1433,6 @@ void main() {
         role: ui.SemanticsRole.none,
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
-        hitTestBehavior: ui.SemanticsHitTestBehavior.defer,
         inputType: ui.SemanticsInputType.none,
         locale: null,
       );
