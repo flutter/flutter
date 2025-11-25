@@ -10,6 +10,7 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import 'utils.dart';
@@ -79,8 +80,8 @@ class TestsCrossImportChecker {
   final Directory flutterRoot;
   final FileSystem filesystem;
 
-  static final Set<String> _knownCrossImports = _knownWidgetsCrossImports.union(
-    _knownCupertinoCrossImports,
+  static final Set<String> _knownCrossImports = knownWidgetsCrossImports.union(
+    knownCupertinoCrossImports,
   );
 
   /// Returns the Set of paths in `knownPaths` that are not in `files`.
@@ -163,8 +164,8 @@ class TestsCrossImportChecker {
       buffer.writeln('  $path');
     }
     final String knownListName = switch (library) {
-      _Library.widgets => '_knownWidgetsCrossImports',
-      _Library.cupertino => '_knownCupertinoCrossImports',
+      _Library.widgets => 'knownWidgetsCrossImports',
+      _Library.cupertino => 'knownCupertinoCrossImports',
       _Library.material => throw UnimplementedError(
         'Material is responsible for testing its interactions with Cupertino, so it is allowed to cross-import.',
       ),
@@ -198,18 +199,23 @@ class TestsCrossImportChecker {
     );
 
     // Find any cross imports that are not in the known list.
+    // TODO(justinmc): This error logic is backwards??
     bool error = true;
     final Set<File> unknownWidgetsTestsImportingMaterial = _getUnknowns(
       widgetsTestsImportingMaterial,
       _knownCrossImports,
     );
     if (unknownWidgetsTestsImportingMaterial.isNotEmpty) {
+      // TODO(justinmc): Not sure why this is getting detected wrong.
+      print(
+        'justin there is an unknown widgets test importing material: $unknownWidgetsTestsImportingMaterial.',
+      );
       error = false;
       foundError(
         _getImportError(
-          unknownWidgetsTestsImportingMaterial,
-          _Library.widgets.name,
-          _Library.material.name,
+          files: unknownWidgetsTestsImportingMaterial,
+          testLibraryName: _Library.widgets.name,
+          importedLibraryName: _Library.material.name,
         ).split('\n'),
       );
     }
@@ -218,12 +224,15 @@ class TestsCrossImportChecker {
       _knownCrossImports,
     );
     if (unknownWidgetsTestsImportingCupertino.isNotEmpty) {
+      print(
+        'justin there is an unknown widgets test importing cupertino: $unknownWidgetsTestsImportingCupertino.',
+      );
       error = false;
       foundError(
         _getImportError(
-          unknownWidgetsTestsImportingCupertino,
-          _Library.widgets.name,
-          _Library.cupertino.name,
+          files: unknownWidgetsTestsImportingCupertino,
+          testLibraryName: _Library.widgets.name,
+          importedLibraryName: _Library.cupertino.name,
         ).split('\n'),
       );
     }
@@ -232,19 +241,22 @@ class TestsCrossImportChecker {
       _knownCrossImports,
     );
     if (unknownCupertinoTestsImportingMaterial.isNotEmpty) {
+      print(
+        'justin there is an unknown cupertino test importing material: $unknownCupertinoTestsImportingMaterial.',
+      );
       error = false;
       foundError(
         _getImportError(
-          unknownCupertinoTestsImportingMaterial,
-          _Library.cupertino.name,
-          _Library.material.name,
+          files: unknownCupertinoTestsImportingMaterial,
+          testLibraryName: _Library.cupertino.name,
+          importedLibraryName: _Library.material.name,
         ).split('\n'),
       );
     }
 
     // Find any known cross imports that weren't found, and are therefore fixed.
     final Set<String> fixedWidgetsCrossImports = _differencePaths(
-      _knownWidgetsCrossImports,
+      knownWidgetsCrossImports,
       widgetsTestsImportingMaterial.union(widgetsTestsImportingCupertino),
     );
     if (fixedWidgetsCrossImports.isNotEmpty) {
@@ -252,7 +264,7 @@ class TestsCrossImportChecker {
       foundError(_getFixedImportError(fixedWidgetsCrossImports, _Library.widgets).split('\n'));
     }
     final Set<String> fixedCupertinoCrossImports = _differencePaths(
-      _knownCupertinoCrossImports,
+      knownCupertinoCrossImports,
       cupertinoTestsImportingMaterial,
     );
     if (fixedCupertinoCrossImports.isNotEmpty) {
@@ -271,7 +283,11 @@ class TestsCrossImportChecker {
 
   /// Returns the import error for the `files` in testLibraryName which import
   /// importedLibraryName.
-  String _getImportError(Set<File> files, String testLibraryName, String importedLibraryName) {
+  String _getImportError({
+    required Set<File> files,
+    required String testLibraryName,
+    required String importedLibraryName,
+  }) {
     final StringBuffer buffer = StringBuffer(
       files.length < 2
           ? 'The following test in $testLibraryName has a disallowed import of $importedLibraryName. Refactor it or move it to $importedLibraryName.\n'
@@ -290,7 +306,8 @@ class TestsCrossImportChecker {
 //
 // TODO(justinmc): Fix all of these tests so there are no cross imports.
 // See https://github.com/flutter/flutter/issues/177028.
-final Set<String> _knownWidgetsCrossImports = <String>{
+@visibleForTesting
+final Set<String> knownWidgetsCrossImports = <String>{
   'packages/flutter/test/widgets/basic_test.dart',
   'packages/flutter/test/widgets/text_test.dart',
   'packages/flutter/test/widgets/reorderable_list_test.dart',
@@ -501,7 +518,8 @@ final Set<String> _knownWidgetsCrossImports = <String>{
   'packages/flutter/test/widgets/implicit_semantics_test.dart',
   'packages/flutter/test/widgets/shrink_wrapping_viewport_test.dart',
 };
-final Set<String> _knownCupertinoCrossImports = <String>{
+@visibleForTesting
+final Set<String> knownCupertinoCrossImports = <String>{
   'packages/flutter/test/cupertino/material/tab_scaffold_test.dart',
   'packages/flutter/test/cupertino/route_test.dart',
   'packages/flutter/test/cupertino/text_selection_test.dart',

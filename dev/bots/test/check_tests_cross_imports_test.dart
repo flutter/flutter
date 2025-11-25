@@ -25,80 +25,59 @@ void main() {
   late Directory _testWidgetsDirectory;
   late Directory _testMaterialDirectory;
   late Directory _testCupertinoDirectory;
-  late Set<Directory> _testDirectories = <Directory>{};
+  late final Set<Directory> _testDirectories = <Directory>{};
 
   String getRelativePath(File file, [Directory? from]) {
     from ??= flutterRoot;
     return path.relative(file.absolute.path, from: flutterRoot.absolute.path);
   }
 
-  void writeImport(File source) {
-    source
+  // Writes a Material import into the given file.
+  void writeImport(File file, [String importString = "import 'package:flutter/material.dart';"]) {
+    file
       ..createSync(recursive: true)
-      // TODO(justinmc): Other imports.
-      ..writeAsStringSync("import 'package:flutter/material.dart;");
+      ..writeAsStringSync("import 'package:flutter/material.dart';");
   }
 
-  void buildTestFiles({bool missingLinks = false, bool missingTests = false}) {
-    for (final Directory directory in _testDirectories) {
-      for (final String knownString in <String>['known', 'unknown']) {
-        final File file = directory.childFile('$knownString.dart')..createSync(recursive: true);
-        writeImport(file);
+  File getFile(String filepath, Directory directory) {
+    final String path = directory.path.substring('/flutter/sdk'.length);
+    final String filename = filepath.substring(path.length);
+    return directory.childFile(filename);
+  }
+
+  void buildTestFiles({
+    Set<String> excludes = const <String>{},
+    Set<String> extraCupertinos = const <String>{},
+    Set<String> extraWidgetsImportingMaterial = const <String>{},
+    Set<String> extraWidgetsImportingCupertino = const <String>{},
+  }) {
+    final Map<Directory, Set<String>> knownFiles = <Directory, Set<String>>{
+      _testWidgetsDirectory: knownWidgetsCrossImports,
+      _testCupertinoDirectory: knownCupertinoCrossImports,
+    };
+
+    for (final MapEntry<Directory, Set<String>>(key: Directory directory, value: Set<String> files)
+        in knownFiles.entries) {
+      for (final String filepath in files) {
+        if (excludes.contains(filepath)) {
+          continue;
+        }
+        writeImport(getFile(filepath, directory));
       }
     }
-    /*
-    final Directory examplesLib = examples.childDirectory('lib').childDirectory('layer')
-      ..createSync(recursive: true);
-    final File fooExample = examplesLib.childFile('foo_example.0.dart')
-      ..createSync(recursive: true)
-      ..writeAsStringSync('// Example for foo');
-    final File barExample = examplesLib.childFile('bar_example.0.dart')
-      ..createSync(recursive: true)
-      ..writeAsStringSync('// Example for bar');
-    final File curvesExample =
-        examples
-            .childDirectory('lib')
-            .childDirectory('animation')
-            .childDirectory('curves')
-            .childFile('curve2_d.0.dart')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('// Missing a test, but OK');
-    if (missingLinks) {
-      examplesLib.childFile('missing_example.0.dart')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('// Example that is not linked');
+
+    for (final String filepath in extraWidgetsImportingMaterial) {
+      writeImport(getFile(filepath, _testWidgetsDirectory));
     }
-    final Directory examplesTests = examples.childDirectory('test').childDirectory('layer')
-      ..createSync(recursive: true);
-    examplesTests.childFile('foo_example.0_test.dart')
-      ..createSync(recursive: true)
-      ..writeAsStringSync('// test for foo example');
-    if (!missingTests) {
-      examplesTests.childFile('bar_example.0_test.dart')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('// test for bar example');
+    for (final String filepath in extraWidgetsImportingCupertino) {
+      writeImport(
+        getFile(filepath, _testWidgetsDirectory),
+        "import 'package:flutter/cupertino.dart';",
+      );
     }
-    if (missingLinks) {
-      examplesTests.childFile('missing_example.0_test.dart')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('// test for foo example');
+    for (final String filepath in extraCupertinos) {
+      writeImport(getFile(filepath, _testCupertinoDirectory));
     }
-    final Directory flutterPackage =
-        packages.childDirectory('flutter').childDirectory('lib').childDirectory('src')
-          ..createSync(recursive: true);
-    writeLink(
-      source: flutterPackage.childDirectory('layer').childFile('foo.dart'),
-      example: fooExample,
-    );
-    writeLink(
-      source: flutterPackage.childDirectory('layer').childFile('bar.dart'),
-      example: barExample,
-    );
-    writeLink(
-      source: flutterPackage.childDirectory('animation').childFile('curves.dart'),
-      example: curvesExample,
-    );
-    */
   }
 
   setUp(() {
@@ -108,7 +87,7 @@ void main() {
     // Get the root prefix of the current directory so that on Windows we get a
     // correct root prefix.
     flutterRoot = fs.directory(
-      path.join(path.rootPrefix(fs.currentDirectory.absolute.path), 'flutter sdk'),
+      path.join(path.rootPrefix(fs.currentDirectory.absolute.path), 'flutter/sdk'),
     )..createSync(recursive: true);
     fs.currentDirectory = flutterRoot;
     examples = flutterRoot.childDirectory('examples').childDirectory('api')
@@ -144,18 +123,30 @@ void main() {
     );
   });
 
-  test('check_code_samples.dart - checkCodeSamples catches missing links', () async {
-    buildTestFiles(missingLinks: true);
+  /*
+  test('only all knowns have cross imports', () async {
+    buildTestFiles();
+    bool? success;
+    final String result = await capture(() async {
+      success = checker.check();
+    });
+    expect(result, equals(''));
+    expect(success, isTrue);
+  });
+
+  test('not all widgets knowns have cross imports', () async {
+    buildTestFiles(excludes: <String>{knownWidgetsCrossImports.first});
     bool? success;
     final String result = await capture(() async {
       success = checker.check();
     }, shouldHaveErrors: true);
     final String lines =
         <String>[
-              '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════',
-              '║ The following examples are not linked from any source file API doc comments:',
-              '║   examples/api/lib/layer/missing_example.0.dart',
-              '║ Either link them to a source file API doc comment, or remove them.',
+              '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+              '║ Huzzah! The following tests in Widgets no longer contain cross imports!',
+              '║   packages/flutter/test/widgets/basic_test.dart',
+              '║ However, they now need to be removed from the',
+              '║ knownWidgetsCrossImports list in the script /usr/local/google/home/jmccandless/Projects/flutter/main.dart.',
               '╚═══════════════════════════════════════════════════════════════════════════════',
             ]
             .map((String line) {
@@ -163,8 +154,101 @@ void main() {
             })
             .join('\n');
     expect(result, equals('$lines\n'));
-    expect(success, equals(false));
+    expect(success, isFalse);
   });
+
+  test('not all cupertino knowns have cross imports', () async {
+    final String excluded = knownCupertinoCrossImports.first;
+    buildTestFiles(excludes: <String>{excluded});
+    bool? success;
+    final String result = await capture(() async {
+      success = checker.check();
+    }, shouldHaveErrors: true);
+    final String lines =
+        <String>[
+              '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+              '║ Huzzah! The following tests in Cupertino no longer contain cross imports!',
+              '║   $excluded',
+              '║ However, they now need to be removed from the',
+              '║ knownCupertinoCrossImports list in the script /usr/local/google/home/jmccandless/Projects/flutter/main.dart.',
+              '╚═══════════════════════════════════════════════════════════════════════════════',
+            ]
+            .map((String line) {
+              return line.replaceAll('/', Platform.isWindows ? r'\' : '/');
+            })
+            .join('\n');
+    expect(result, equals('$lines\n'));
+    expect(success, isFalse);
+  });
+
+  test('unknown Widgets cross import of Material', () async {
+    const String extra = 'packages/flutter/test/widgets/foo_test.dart';
+    buildTestFiles(extraWidgetsImportingMaterial: <String>{extra});
+    bool? success;
+    final String result = await capture(() async {
+      success = checker.check();
+    }, shouldHaveErrors: true);
+    final String lines =
+        <String>[
+              '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+              '║ The following test in Widgets has a disallowed import of Material. Refactor it or move it to Material.',
+              '║   $extra',
+              '╚═══════════════════════════════════════════════════════════════════════════════',
+            ]
+            .map((String line) {
+              return line.replaceAll('/', Platform.isWindows ? r'\' : '/');
+            })
+            .join('\n');
+    expect(result, equals('$lines\n'));
+    expect(success, isFalse);
+  });
+  */
+
+  test('unknown Widgets cross import of Cupertino', () async {
+    const String extra = 'packages/flutter/test/widgets/foo_test.dart';
+    buildTestFiles(extraWidgetsImportingCupertino: <String>{extra});
+    bool? success;
+    final String result = await capture(() async {
+      success = checker.check();
+    }, shouldHaveErrors: true);
+    final String lines =
+        <String>[
+              '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+              '║ The following test in Widgets has a disallowed import of Cupertino. Refactor it or move it to Cupertino.',
+              '║   $extra',
+              '╚═══════════════════════════════════════════════════════════════════════════════',
+            ]
+            .map((String line) {
+              return line.replaceAll('/', Platform.isWindows ? r'\' : '/');
+            })
+            .join('\n');
+    expect(result, equals('$lines\n'));
+    expect(success, isFalse);
+  });
+
+  /*
+  test('unknown Cupertino cross importing Material', () async {
+    const String extra = 'packages/flutter/test/cupertino/foo_test.dart';
+    buildTestFiles(extraCupertinos: <String>{extra});
+    bool? success;
+    final String result = await capture(() async {
+      success = checker.check();
+    }, shouldHaveErrors: true);
+    final String lines =
+        <String>[
+              '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+              '║ The following test in Cupertino has a disallowed import of Material. Refactor it or move it to Material.',
+              '║   $extra',
+              '╚═══════════════════════════════════════════════════════════════════════════════',
+            ]
+            .map((String line) {
+              return line.replaceAll('/', Platform.isWindows ? r'\' : '/');
+            })
+            .join('\n');
+    expect(result, equals('$lines\n'));
+    expect(success, isFalse);
+  });
+  */
 
   /*
   test('check_code_samples.dart - checkCodeSamples catches missing tests', () async {
