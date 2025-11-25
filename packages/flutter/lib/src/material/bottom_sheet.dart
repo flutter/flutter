@@ -6,7 +6,6 @@
 library;
 
 import 'dart:math' as math;
-import 'dart:ui' show SemanticsHitTestBehavior;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -1118,12 +1117,9 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
       ),
     );
 
-    Widget bottomSheet = useSafeArea
+    final Widget bottomSheet = useSafeArea
         ? SafeArea(bottom: false, child: content)
         : MediaQuery.removePadding(context: context, removeTop: true, child: content);
-
-    // Prevent clicks inside the bottom sheet from passing through to the barrier
-    bottomSheet = Semantics(hitTestBehavior: SemanticsHitTestBehavior.opaque, child: bottomSheet);
 
     return capturedThemes?.wrap(bottomSheet) ?? bottomSheet;
   }

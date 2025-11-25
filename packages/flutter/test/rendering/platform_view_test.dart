@@ -558,22 +558,6 @@ void main() {
       });
     });
   });
-
-  test('PlatformViewRenderBox has transparent hitTestBehavior in semantics', () {
-    final FakePlatformViewController controller = FakePlatformViewController(0);
-    final PlatformViewRenderBox renderBox = PlatformViewRenderBox(
-      controller: controller,
-      hitTestBehavior: PlatformViewHitTestBehavior.opaque,
-      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
-    );
-
-    final SemanticsConfiguration config = SemanticsConfiguration();
-    renderBox.describeSemanticsConfiguration(config);
-
-    expect(config.hitTestBehavior, ui.SemanticsHitTestBehavior.transparent);
-    expect(config.isSemanticBoundary, true);
-    expect(config.platformViewId, 0);
-  });
 }
 
 ui.PointerData _pointerData(
