@@ -448,6 +448,16 @@ void main() {
             tester.getTopLeft(find.byKey(optionsKey)),
             Offset(padding, bottomOfField - optionsSize.height),
           );
+        case OptionsViewOpenDirection.mostSpace:
+          // Behaves like OptionsViewOpenDirection.up.
+          expect(find.byType(InkWell), findsNWidgets(3));
+          final double optionHeight = tester.getSize(find.byType(InkWell).first).height;
+          final double topOfField = tester.getTopLeft(find.byKey(fieldKey)).dy;
+          expect(
+            tester.getTopLeft(find.byType(InkWell).first),
+            Offset(padding, topOfField - 3 * optionHeight),
+          );
+          expect(tester.getBottomLeft(find.byType(InkWell).at(2)), Offset(padding, topOfField));
       }
 
       setState(() {
@@ -470,6 +480,16 @@ void main() {
           expect(tester.getBottomLeft(find.byKey(optionsKey)), Offset(padding, optionsSize.height));
         case OptionsViewOpenDirection.down:
           // Options are positioned and sized like normal.
+          expect(find.byType(InkWell), findsNWidgets(3));
+          final double optionHeight = tester.getSize(find.byType(InkWell).first).height;
+          final double bottomOfField = tester.getBottomLeft(find.byKey(fieldKey)).dy;
+          expect(tester.getTopLeft(find.byType(InkWell).first), Offset(padding, bottomOfField));
+          expect(
+            tester.getBottomLeft(find.byType(InkWell).at(2)),
+            Offset(padding, bottomOfField + 3 * optionHeight),
+          );
+        case OptionsViewOpenDirection.mostSpace:
+          // Behaves like OptionsViewOpenDirection.down.
           expect(find.byType(InkWell), findsNWidgets(3));
           final double optionHeight = tester.getSize(find.byType(InkWell).first).height;
           final double bottomOfField = tester.getBottomLeft(find.byKey(fieldKey)).dy;
@@ -610,6 +630,8 @@ void main() {
           tester.getTopLeft(find.byKey(fieldKey)).dy + fieldBox.size.height,
         OptionsViewOpenDirection.up =>
           tester.getTopLeft(find.byKey(fieldKey)).dy - optionsBox.size.height,
+        OptionsViewOpenDirection.mostSpace =>
+          tester.getTopLeft(find.byKey(fieldKey)).dy + fieldBox.size.height,
       });
     });
   }
@@ -913,8 +935,8 @@ void main() {
           home: Scaffold(
             body: Center(
               child: RawAutocomplete<String>(
-                optionsViewOpenDirection:
-                    OptionsViewOpenDirection.down, // ignore: avoid_redundant_argument_values
+                // ignore: avoid_redundant_argument_values
+                optionsViewOpenDirection: OptionsViewOpenDirection.down,
                 optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
                 fieldViewBuilder:
                     (
@@ -984,6 +1006,76 @@ void main() {
       );
     });
 
+    testWidgets('auto: open in the direction with more space', (WidgetTester tester) async {
+      final GlobalKey fieldKey = GlobalKey();
+      final GlobalKey optionsKey = GlobalKey();
+      late StateSetter setState;
+      Alignment alignment = Alignment.topCenter;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setter) {
+                setState = setter;
+                return Align(
+                  alignment: alignment,
+                  child: RawAutocomplete<String>(
+                    key: fieldKey,
+                    optionsViewOpenDirection: OptionsViewOpenDirection.mostSpace,
+                    optionsBuilder: (TextEditingValue textEditingValue) => <String>['a', 'b', 'c'],
+                    fieldViewBuilder:
+                        (
+                          BuildContext context,
+                          TextEditingController controller,
+                          FocusNode focusNode,
+                          VoidCallback onFieldSubmitted,
+                        ) {
+                          return TextField(controller: controller, focusNode: focusNode);
+                        },
+                    optionsViewBuilder:
+                        (
+                          BuildContext context,
+                          AutocompleteOnSelected<String> onSelected,
+                          Iterable<String> options,
+                        ) {
+                          return Material(
+                            child: ListView(
+                              key: optionsKey,
+                              children: options.map((String option) => Text(option)).toList(),
+                            ),
+                          );
+                        },
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Show the options. It should open downwards since there is more space.
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+
+      expect(
+        tester.getBottomLeft(find.byKey(fieldKey)),
+        offsetMoreOrLessEquals(tester.getTopLeft(find.byKey(optionsKey))),
+      );
+
+      // Move the field to the bottom.
+      setState(() {
+        alignment = Alignment.bottomCenter;
+      });
+      await tester.pump();
+
+      // The options should now open upwards, since there is more space above.
+      expect(
+        tester.getTopLeft(find.byKey(fieldKey)),
+        offsetMoreOrLessEquals(tester.getBottomLeft(find.byKey(optionsKey))),
+      );
+    });
+
     group('fieldViewBuilder not passed', () {
       testWidgets('down', (WidgetTester tester) async {
         final GlobalKey autocompleteKey = GlobalKey();
@@ -1002,8 +1094,8 @@ void main() {
                     key: autocompleteKey,
                     textEditingController: controller,
                     focusNode: focusNode,
-                    optionsViewOpenDirection:
-                        OptionsViewOpenDirection.down, // ignore: avoid_redundant_argument_values
+                    // ignore: avoid_redundant_argument_values
+                    optionsViewOpenDirection: OptionsViewOpenDirection.down,
                     optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
                     optionsViewBuilder:
                         (
@@ -2125,8 +2217,6 @@ void main() {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();
     late AutocompleteOnSelected<String> lastOnSelected;
-    late FocusNode focusNode;
-    late TextEditingController textEditingController;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2144,12 +2234,10 @@ void main() {
                   FocusNode fieldFocusNode,
                   VoidCallback onFieldSubmitted,
                 ) {
-                  focusNode = fieldFocusNode;
-                  textEditingController = fieldTextEditingController;
                   return TextField(
                     key: fieldKey,
-                    focusNode: focusNode,
-                    controller: textEditingController,
+                    focusNode: fieldFocusNode,
+                    controller: fieldTextEditingController,
                   );
                 },
             optionsViewBuilder:
@@ -3374,4 +3462,71 @@ void main() {
     final Finder xText = find.text('X');
     expect(tester.getSize(xText).isEmpty, isTrue);
   });
+
+  testWidgets(
+    'floating menu is displayed when the field is focused and already has a selected value',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/177429.
+      const Key fieldKey = Key('field');
+      const Key optionsKey = Key('options');
+      late AutocompleteOnSelected<String> lastOnSelected;
+      late FocusNode focusNode;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: RawAutocomplete<String>(
+              optionsBuilder: (TextEditingValue textEditingValue) {
+                return kOptions.where((String option) {
+                  return option.contains(textEditingValue.text.toLowerCase());
+                });
+              },
+              fieldViewBuilder:
+                  (
+                    BuildContext context,
+                    TextEditingController fieldTextEditingController,
+                    FocusNode fieldFocusNode,
+                    VoidCallback onFieldSubmitted,
+                  ) {
+                    focusNode = fieldFocusNode;
+                    return TextField(
+                      key: fieldKey,
+                      focusNode: fieldFocusNode,
+                      controller: fieldTextEditingController,
+                    );
+                  },
+              optionsViewBuilder:
+                  (
+                    BuildContext context,
+                    AutocompleteOnSelected<String> onSelected,
+                    Iterable<String> options,
+                  ) {
+                    lastOnSelected = onSelected;
+                    return Container(key: optionsKey);
+                  },
+            ),
+          ),
+        ),
+      );
+
+      // The field is always rendered, but the options are not unless needed.
+      expect(find.byKey(fieldKey), findsOne);
+      expect(find.byKey(optionsKey), findsNothing);
+
+      await tester.enterText(find.byKey(fieldKey), kOptions[0]);
+      await tester.pumpAndSettle();
+      expect(find.byKey(optionsKey), findsOne);
+
+      lastOnSelected(kOptions[0]);
+      await tester.pump();
+      expect(find.byKey(optionsKey), findsNothing);
+
+      focusNode.unfocus();
+      await tester.pump();
+      focusNode.requestFocus();
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(optionsKey), findsOne);
+    },
+  );
 }

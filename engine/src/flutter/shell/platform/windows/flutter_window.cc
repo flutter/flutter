@@ -12,7 +12,7 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/shell/platform/embedder/embedder.h"
-#include "flutter/shell/platform/windows/display_monitor.h"
+#include "flutter/shell/platform/windows/display_manager.h"
 #include "flutter/shell/platform/windows/dpi_utils.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
@@ -77,11 +77,11 @@ static uint64_t ConvertWinButtonToFlutterButton(UINT button) {
 FlutterWindow::FlutterWindow(
     int width,
     int height,
-    std::shared_ptr<DisplayMonitor> const& display_monitor,
+    std::shared_ptr<DisplayManagerWin32> const& display_manager,
     std::shared_ptr<WindowsProcTable> windows_proc_table,
     std::unique_ptr<TextInputManager> text_input_manager)
     : touch_id_generator_(kMinTouchDeviceId, kMaxTouchDeviceId),
-      display_monitor_(display_monitor),
+      display_manager_(display_manager),
       windows_proc_table_(std::move(windows_proc_table)),
       text_input_manager_(std::move(text_input_manager)),
       ax_fragment_root_(nullptr) {
@@ -312,7 +312,7 @@ FlutterEngineDisplayId FlutterWindow::GetDisplayId() {
   FlutterEngineDisplayId const display_id =
       reinterpret_cast<FlutterEngineDisplayId>(
           MonitorFromWindow(GetWindowHandle(), MONITOR_DEFAULTTONEAREST));
-  if (!display_monitor_->FindById(display_id)) {
+  if (!display_manager_->FindById(display_id)) {
     FML_LOG(ERROR) << "Current monitor not found in display list.";
   }
   return display_id;

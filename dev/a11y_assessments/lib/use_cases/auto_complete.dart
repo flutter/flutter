@@ -55,22 +55,25 @@ class _MainWidgetState extends State<_MainWidget> {
         title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text('Type below to autocomplete the following possible results: $_kOptions.'),
-            Autocomplete<String>(
-              optionsBuilder: (TextEditingValue textEditingValue) {
-                if (textEditingValue.text == '') {
-                  return const Iterable<String>.empty();
-                }
-                return _kOptions.where((String option) {
-                  return option.contains(textEditingValue.text.toLowerCase());
-                });
-              },
-              fieldViewBuilder: _fieldViewBuilder,
-            ),
-          ],
+        child: Semantics(
+          container: true,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text('Type below to autocomplete the following possible results: $_kOptions.'),
+              Autocomplete<String>(
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  if (textEditingValue.text == '') {
+                    return const Iterable<String>.empty();
+                  }
+                  return _kOptions.where((String option) {
+                    return option.contains(textEditingValue.text.toLowerCase());
+                  });
+                },
+                fieldViewBuilder: _fieldViewBuilder,
+              ),
+            ],
+          ),
         ),
       ),
     );

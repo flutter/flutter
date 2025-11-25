@@ -1734,7 +1734,8 @@ TEST_P(EntityTest, YUVToRGBFilter) {
           textures[0], textures[1], yuv_color_space);
       Entity filter_entity;
       filter_entity.SetContents(filter_contents);
-      auto snapshot = filter_contents->RenderToSnapshot(context, filter_entity);
+      auto snapshot =
+          filter_contents->RenderToSnapshot(context, filter_entity, {});
 
       Entity entity;
       auto contents = TextureContents::MakeRect(Rect::MakeLTRB(0, 0, 256, 256));
@@ -2494,6 +2495,82 @@ TEST_P(EntityTest, DrawRoundSuperEllipse) {
   };
 
   ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+TEST_P(EntityTest, CanDrawRoundSuperEllipseWithTinyRadius) {
+  // Regression test for https://github.com/flutter/flutter/issues/176894
+  // Verify that a radius marginally below the minimum threshold can be
+  // processed safely. The expectation is that the rounded corners degenerate
+  // into sharp corners (four corner points) and that no NaNs or crashes occur.
+  auto geom = Geometry::MakeRoundSuperellipse(
+      Rect::MakeLTRB(200, 200, 300, 300), 0.5 * kEhCloseEnough);
+
+  ContentContext content_context(GetContext(), /*typographer_context=*/nullptr);
+  Entity entity;
+
+  auto cmd_buffer = content_context.GetContext()->CreateCommandBuffer();
+
+  RenderTargetAllocator allocator(
+      content_context.GetContext()->GetResourceAllocator());
+
+  auto render_target = allocator.CreateOffscreen(
+      *content_context.GetContext(), /*size=*/{500, 500}, /*mip_count=*/1);
+  auto pass = cmd_buffer->CreateRenderPass(render_target);
+
+  GeometryResult result =
+      geom->GetPositionBuffer(content_context, entity, *pass);
+
+  EXPECT_EQ(result.vertex_buffer.vertex_count, 4u);
+  Point* written_data = reinterpret_cast<Point*>(
+      (result.vertex_buffer.vertex_buffer.GetBuffer()->OnGetContents() +
+       result.vertex_buffer.vertex_buffer.GetRange().offset));
+
+  std::vector<Point> expected = {Point(300.0, 200.0), Point(300.0, 300.0),
+                                 Point(200.0, 200.0), Point(200.0, 300.0)};
+
+  for (size_t i = 0; i < expected.size(); i++) {
+    const Point& point = written_data[i];
+    EXPECT_NEAR(point.x, expected[i].x, 0.1);
+    EXPECT_NEAR(point.y, expected[i].y, 0.1);
+  }
+}
+
+TEST_P(EntityTest, CanDrawRoundSuperEllipseWithJustEnoughRadius) {
+  // Regression test for https://github.com/flutter/flutter/issues/176894
+  // Verify that a radius marginally above the minimum threshold can be
+  // processed safely. The expectation is that the rounded corners are
+  // drawn as rounded and that no NaNs or crashes occur.
+  auto geom = Geometry::MakeRoundSuperellipse(
+      Rect::MakeLTRB(200, 200, 300, 300), 1.1 * kEhCloseEnough);
+
+  ContentContext content_context(GetContext(), /*typographer_context=*/nullptr);
+  Entity entity;
+
+  auto cmd_buffer = content_context.GetContext()->CreateCommandBuffer();
+
+  RenderTargetAllocator allocator(
+      content_context.GetContext()->GetResourceAllocator());
+
+  auto render_target = allocator.CreateOffscreen(
+      *content_context.GetContext(), /*size=*/{500, 500}, /*mip_count=*/1);
+  auto pass = cmd_buffer->CreateRenderPass(render_target);
+
+  GeometryResult result =
+      geom->GetPositionBuffer(content_context, entity, *pass);
+
+  EXPECT_EQ(result.vertex_buffer.vertex_count, 200u);
+  Point* written_data = reinterpret_cast<Point*>(
+      (result.vertex_buffer.vertex_buffer.GetBuffer()->OnGetContents() +
+       result.vertex_buffer.vertex_buffer.GetRange().offset));
+
+  std::vector<Point> expected_head = {Point(250.0, 200.0), Point(299.9, 200.0),
+                                      Point(200.1, 200.0), Point(299.9, 200.0)};
+
+  for (size_t i = 0; i < expected_head.size(); i++) {
+    const Point& point = written_data[i];
+    EXPECT_NEAR(point.x, expected_head[i].x, 0.1);
+    EXPECT_NEAR(point.y, expected_head[i].y, 0.1);
+  }
 }
 
 TEST_P(EntityTest, SolidColorApplyColorFilter) {

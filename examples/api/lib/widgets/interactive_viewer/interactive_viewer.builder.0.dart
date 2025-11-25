@@ -74,7 +74,9 @@ class _IVBuilderExampleState extends State<_IVBuilderExample> {
                   return Container(
                     height: _cellHeight,
                     width: _cellWidth,
-                    color: row % 2 + column % 2 == 1 ? Colors.white : Colors.grey.withOpacity(0.1),
+                    color: row % 2 + column % 2 == 1
+                        ? Colors.white
+                        : Colors.grey.withValues(alpha: 0.1),
                     child: Align(child: Text('$row x $column')),
                   );
                 },

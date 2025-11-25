@@ -25,7 +25,7 @@ void main() {
     expect(imageProvider.url, equals('https://example.does.not.exist/image.jpg'));
   });
 
-  testWidgets('errorBuilder returns text with emoji', (WidgetTester tester) async {
+  testWidgets('errorBuilder returns text', (WidgetTester tester) async {
     await tester.pumpWidget(const example.ErrorBuilderExampleApp());
     await tester.pumpAndSettle();
 
@@ -35,7 +35,7 @@ void main() {
 
     expect(
       errorBuilder(context, const HttpException('oops'), StackTrace.empty),
-      isA<Text>().having((Text text) => text.data, 'data', equals('😢')),
+      isA<Text>().having((Text text) => text.data, 'data', equals('Image failed to load')),
     );
   });
 }

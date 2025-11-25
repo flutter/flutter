@@ -163,6 +163,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV3Callbacks) {
           ASSERT_EQ(9.0, node->transform.pers2);
           ASSERT_EQ(std::strncmp(kTooltip, node->tooltip, sizeof(kTooltip) - 1),
                     0);
+          ASSERT_EQ(node->heading_level, 0);
 
           if (node->id == 128) {
             ASSERT_EQ(0x3f3, node->platform_view_id);
@@ -300,6 +301,11 @@ TEST_F(EmbedderA11yTest, A11yStringAttributes) {
         ASSERT_EQ(update->custom_action_count, size_t(0));
 
         auto node = update->nodes[0];
+
+        // Verify identifier
+        {
+          ASSERT_EQ(std::string(node->identifier), "identifier");
+        }
 
         // Verify label
         {
@@ -458,6 +464,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV2Callbacks) {
       ASSERT_EQ(8.0, node->transform.pers1);
       ASSERT_EQ(9.0, node->transform.pers2);
       ASSERT_EQ(std::strncmp(kTooltip, node->tooltip, sizeof(kTooltip) - 1), 0);
+      ASSERT_EQ(node->heading_level, 0);
 
       if (node->id == 128) {
         ASSERT_EQ(0x3f3, node->platform_view_id);

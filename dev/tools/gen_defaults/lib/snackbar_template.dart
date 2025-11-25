@@ -29,7 +29,7 @@ class _${blockName}DefaultsM3 extends SnackBarThemeData {
   Color get backgroundColor => ${componentColor("$tokenGroup.container")};
 
   @override
-  Color get actionTextColor =>  MaterialStateColor.resolveWith((Set<WidgetState> states) {
+  Color get actionTextColor =>  WidgetStateColor.resolveWith((Set<WidgetState> states) {
     if (states.contains(WidgetState.disabled)) {
       return ${componentColor("$tokenGroup.action.pressed.label-text")};
     }

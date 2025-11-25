@@ -748,7 +748,7 @@ void main() {
       return inactiveEnabledThumbColor;
     }
 
-    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = WidgetStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitchListTile({required bool enabled, required bool selected}) {
       return MaterialApp(
@@ -843,7 +843,7 @@ void main() {
       return inactiveEnabledThumbColor;
     }
 
-    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = WidgetStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitchListTile({required bool enabled, required bool selected}) {
       return MaterialApp(
@@ -921,7 +921,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = WidgetStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitchListTile() {
       return MaterialApp(
@@ -988,7 +988,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = WidgetStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitchListTile() {
       return MaterialApp(
@@ -1052,7 +1052,7 @@ void main() {
       return inactiveEnabledTrackColor;
     }
 
-    final WidgetStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
+    final WidgetStateProperty<Color> trackColor = WidgetStateColor.resolveWith(getTrackColor);
 
     Widget buildSwitchListTile({required bool enabled, required bool selected}) {
       return wrap(
@@ -1110,7 +1110,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final WidgetStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
+    final WidgetStateProperty<Color> trackColor = WidgetStateColor.resolveWith(getTrackColor);
 
     Widget buildSwitchListTile() {
       return wrap(
@@ -1717,7 +1717,7 @@ void main() {
       return inactiveEnabledTrackOutlineColor;
     }
 
-    final WidgetStateProperty<Color> trackOutlineColor = MaterialStateColor.resolveWith(
+    final WidgetStateProperty<Color> trackOutlineColor = WidgetStateColor.resolveWith(
       getOutlineColor,
     );
 
@@ -1787,7 +1787,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final WidgetStateProperty<Color> outlineColor = MaterialStateColor.resolveWith(
+    final WidgetStateProperty<Color> outlineColor = WidgetStateColor.resolveWith(
       getTrackOutlineColor,
     );
 
@@ -2193,5 +2193,18 @@ void main() {
       find.descendant(of: find.byType(ListTile), matching: find.text('title')),
     );
     expect(title.text.style!.color, Colors.yellow[500]);
+  });
+
+  testWidgets('SwitchListTile does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(child: SwitchListTile(value: true, onChanged: (_) {})),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SwitchListTile)), Size.zero);
   });
 }

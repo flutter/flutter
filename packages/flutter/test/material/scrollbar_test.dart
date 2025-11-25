@@ -934,12 +934,9 @@ void main() {
             useMaterial3: false,
             scrollbarTheme: ScrollbarThemeData(
               thumbVisibility: WidgetStateProperty.all(true),
-              trackVisibility: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-                if (states.contains(WidgetState.hovered)) {
-                  return true;
-                }
-                return false;
-              }),
+              trackVisibility: WidgetStateProperty.resolveWith(
+                (Set<WidgetState> states) => states.contains(WidgetState.hovered),
+              ),
             ),
           ),
           home: const SingleChildScrollView(child: SizedBox(width: 4000.0, height: 4000.0)),
@@ -1086,12 +1083,9 @@ void main() {
             useMaterial3: false,
             scrollbarTheme: ScrollbarThemeData(
               thumbVisibility: WidgetStateProperty.all(true),
-              trackVisibility: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-                if (states.contains(WidgetState.hovered)) {
-                  return true;
-                }
-                return false;
-              }),
+              trackVisibility: WidgetStateProperty.resolveWith(
+                (Set<WidgetState> states) => states.contains(WidgetState.hovered),
+              ),
             ),
           ),
           home: const SingleChildScrollView(child: SizedBox(width: 4000.0, height: 4000.0)),
@@ -1154,12 +1148,9 @@ void main() {
             useMaterial3: false,
             scrollbarTheme: ScrollbarThemeData(
               thumbVisibility: WidgetStateProperty.all(true),
-              trackVisibility: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-                if (states.contains(WidgetState.hovered)) {
-                  return true;
-                }
-                return false;
-              }),
+              trackVisibility: WidgetStateProperty.resolveWith(
+                (Set<WidgetState> states) => states.contains(WidgetState.hovered),
+              ),
             ),
           ),
           home: const SingleChildScrollView(child: SizedBox(width: 4000.0, height: 4000.0)),
@@ -1763,5 +1754,16 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     );
 
     scrollController.dispose();
+  });
+
+  testWidgets('Scrollbar does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: Scrollbar(child: SingleChildScrollView())),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Scrollbar)), Size.zero);
   });
 }

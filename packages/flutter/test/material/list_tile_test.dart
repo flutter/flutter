@@ -1635,10 +1635,10 @@ void main() {
         MaterialApp(
           home: Material(
             child: ListTileTheme(
-              data: const ListTileThemeData(mouseCursor: MaterialStateMouseCursor.clickable),
+              data: const ListTileThemeData(mouseCursor: WidgetStateMouseCursor.clickable),
               child: ListTile(
                 key: tileKey,
-                mouseCursor: MaterialStateMouseCursor.textable,
+                mouseCursor: WidgetStateMouseCursor.textable,
                 title: const Text('Title'),
                 onTap: () {},
               ),
@@ -2176,7 +2176,7 @@ void main() {
     );
   });
 
-  testWidgets('ListTile.textColor respects MaterialStateColor', (WidgetTester tester) async {
+  testWidgets('ListTile.textColor respects WidgetStateColor', (WidgetTester tester) async {
     bool enabled = false;
     bool selected = false;
     const Color defaultColor = Colors.blue;
@@ -2192,7 +2192,7 @@ void main() {
                 return ListTile(
                   enabled: enabled,
                   selected: selected,
-                  textColor: MaterialStateColor.resolveWith((Set<WidgetState> states) {
+                  textColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
                     if (states.contains(WidgetState.disabled)) {
                       return disabledColor;
                     }
@@ -2231,7 +2231,7 @@ void main() {
     expect(title.text.style!.color, selectedColor);
   });
 
-  testWidgets('ListTile.iconColor respects MaterialStateColor', (WidgetTester tester) async {
+  testWidgets('ListTile.iconColor respects WidgetStateColor', (WidgetTester tester) async {
     bool enabled = false;
     bool selected = false;
     const Color defaultColor = Colors.blue;
@@ -2248,7 +2248,7 @@ void main() {
                 return ListTile(
                   enabled: enabled,
                   selected: selected,
-                  iconColor: MaterialStateColor.resolveWith((Set<WidgetState> states) {
+                  iconColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
                     if (states.contains(WidgetState.disabled)) {
                       return disabledColor;
                     }
@@ -4711,6 +4711,26 @@ void main() {
     expect(controller.value, <WidgetState>{WidgetState.disabled});
     expect(count, 11);
     await gesture.removePointer();
+  });
+
+  testWidgets('ListTile does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(
+              child: ListTile(
+                title: Text('title'),
+                leading: Icon(Icons.add),
+                trailing: Icon(Icons.remove),
+                subtitle: Text('subTitle'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(ListTile)), Size.zero);
   });
 }
 

@@ -30,10 +30,10 @@
   "clearButtonLabel": "Rensa",
   "cancelButtonLabel": "Avbryt",
   "backButtonLabel": "Tillbaka",
-  "expansionTileExpandedHint": "double tap to collapse",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "dubbeltryck för att komprimera",
+  "expansionTileCollapsedHint": "dubbeltryck för att utöka",
+  "expansionTileExpandedTapHint": "Komprimera",
+  "expansionTileCollapsedTapHint": "Utöka för mer information",
+  "expandedHint": "Komprimerades",
+  "collapsedHint": "Utökades"
 }

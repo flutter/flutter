@@ -513,6 +513,82 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
   State<CupertinoSlidingSegmentedControl<T>> createState() => _SegmentedControlState<T>();
 }
 
+/// A wrapper widget that implements RadioClient for each segment button in sliding segmented control.
+class _SlidingSegmentButton<T> extends StatefulWidget {
+  const _SlidingSegmentButton({
+    super.key,
+    required this.value,
+    required this.child,
+    required this.enabled,
+  });
+
+  final T value;
+  final Widget child;
+  final bool enabled;
+
+  @override
+  State<_SlidingSegmentButton<T>> createState() => _SlidingSegmentButtonState<T>();
+}
+
+class _SlidingSegmentButtonState<T> extends State<_SlidingSegmentButton<T>> with RadioClient<T> {
+  late final FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode(debugLabel: 'CupertinoSlidingSegmentedControl<$T>[${widget.value}]');
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    registry = widget.enabled ? RadioGroup.maybeOf<T>(context) : null;
+  }
+
+  @override
+  void didUpdateWidget(_SlidingSegmentButton<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.enabled != widget.enabled) {
+      registry = widget.enabled ? RadioGroup.maybeOf<T>(context) : null;
+    }
+  }
+
+  @override
+  void dispose() {
+    registry = null;
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  bool get enabled => widget.enabled;
+
+  @override
+  T get radioValue => widget.value;
+
+  @override
+  FocusNode get focusNode => _focusNode;
+
+  @override
+  bool get tristate => false;
+
+  void requestFocus() {
+    if (widget.enabled) {
+      _focusNode.requestFocus();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Focus(
+      focusNode: _focusNode,
+      canRequestFocus: widget.enabled,
+      onKeyEvent: (FocusNode node, KeyEvent event) => KeyEventResult.ignored,
+      child: widget.child,
+    );
+  }
+}
+
 class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSegmentedControl<T>>
     with TickerProviderStateMixin<CupertinoSlidingSegmentedControl<T>> {
   late final AnimationController thumbController = AnimationController(
@@ -535,6 +611,8 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
   final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
   final LongPressGestureRecognizer longPress = LongPressGestureRecognizer();
   final GlobalKey segmentedControlRenderWidgetKey = GlobalKey();
+  final Map<T, GlobalKey<_SlidingSegmentButtonState<T>>> _segmentKeys =
+      <T, GlobalKey<_SlidingSegmentButtonState<T>>>{};
 
   @override
   void initState() {
@@ -682,8 +760,13 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
 
     final T segment = segmentForXPosition(details.localPosition.dx);
     onPressedChangedByGesture(null);
-    if (segment != widget.groupValue && !widget.disabledChildren.contains(segment)) {
-      widget.onValueChanged(segment);
+
+    if (!widget.disabledChildren.contains(segment)) {
+      _segmentKeys[segment]?.currentState?.requestFocus();
+
+      if (segment != widget.groupValue) {
+        widget.onValueChanged(segment);
+      }
     }
   }
 
@@ -729,12 +812,14 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
     if (isThumbDragging) {
       _playThumbScaleAnimation(isExpanding: true);
       if (highlighted != widget.groupValue) {
+        _segmentKeys[highlighted]?.currentState?.requestFocus();
         widget.onValueChanged(highlighted);
       }
     } else if (pressed != null) {
       onHighlightChangedByGesture(pressed);
       assert(pressed == highlighted);
       if (highlighted != widget.groupValue) {
+        _segmentKeys[highlighted]?.currentState?.requestFocus();
         widget.onValueChanged(highlighted);
       }
     }
@@ -795,28 +880,39 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
         TextDirection.rtl when index == 0 => _SegmentLocation.rightmost,
         TextDirection.ltr || TextDirection.rtl => _SegmentLocation.inbetween,
       };
+      final GlobalKey<_SlidingSegmentButtonState<T>> segmentKey = _segmentKeys.putIfAbsent(
+        entry.key,
+        () => GlobalKey<_SlidingSegmentButtonState<T>>(),
+      );
+
       children.add(
-        Semantics(
-          button: true,
-          onTap: () {
-            if (widget.disabledChildren.contains(entry.key)) {
-              return;
-            }
-            widget.onValueChanged(entry.key);
-          },
-          inMutuallyExclusiveGroup: true,
-          selected: widget.groupValue == entry.key,
-          child: MouseRegion(
-            cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
-            child: _Segment<T>(
-              key: ValueKey<T>(entry.key),
-              highlighted: isHighlighted,
-              pressed: pressed == entry.key,
-              isDragging: isThumbDragging,
-              enabled: !widget.disabledChildren.contains(entry.key),
-              segmentLocation: segmentLocation,
-              isMomentary: widget.isMomentary,
-              child: entry.value,
+        _SlidingSegmentButton<T>(
+          key: segmentKey,
+          value: entry.key,
+          enabled: !widget.disabledChildren.contains(entry.key),
+          child: Semantics(
+            button: true,
+            onTap: () {
+              if (widget.disabledChildren.contains(entry.key)) {
+                return;
+              }
+              _segmentKeys[entry.key]?.currentState?.requestFocus();
+              widget.onValueChanged(entry.key);
+            },
+            inMutuallyExclusiveGroup: true,
+            selected: widget.groupValue == entry.key,
+            child: MouseRegion(
+              cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+              child: _Segment<T>(
+                key: ValueKey<T>(entry.key),
+                highlighted: isHighlighted,
+                pressed: pressed == entry.key,
+                isDragging: isThumbDragging,
+                enabled: !widget.disabledChildren.contains(entry.key),
+                segmentLocation: segmentLocation,
+                isMomentary: widget.isMomentary,
+                child: entry.value,
+              ),
             ),
           ),
         ),
@@ -838,30 +934,43 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
         }
     }
 
-    return UnconstrainedBox(
-      constrainedAxis: Axis.horizontal,
-      child: Container(
-        // Clip the thumb shadow if it is outside of the segmented control. This
-        // behavior is eyeballed by the iOS 17.5 simulator.
-        clipBehavior: Clip.antiAlias,
-        padding: widget.padding.resolve(Directionality.of(context)),
-        decoration: ShapeDecoration(
-          shape: const RoundedSuperellipseBorder(borderRadius: BorderRadius.all(_kCornerRadius)),
-          color: CupertinoDynamicColor.resolve(widget.backgroundColor, context),
-        ),
-        child: AnimatedBuilder(
-          animation: thumbScaleAnimation,
-          builder: (BuildContext context, Widget? child) {
-            return _SegmentedControlRenderWidget<T>(
-              key: segmentedControlRenderWidgetKey,
-              highlightedIndex: widget.isMomentary ? null : highlightedIndex,
-              thumbColor: CupertinoDynamicColor.resolve(widget.thumbColor, context),
-              thumbScale: thumbScaleAnimation.value,
-              proportionalWidth: widget.proportionalWidth,
-              state: this,
-              children: children,
-            );
-          },
+    return Actions(
+      actions: <Type, Action<Intent>>{VoidCallbackIntent: VoidCallbackAction()},
+      child: RadioGroup<T>(
+        groupValue: widget.groupValue,
+        onChanged: (T? value) {
+          if (value != null && !widget.disabledChildren.contains(value)) {
+            widget.onValueChanged(value);
+          }
+        },
+        child: UnconstrainedBox(
+          constrainedAxis: Axis.horizontal,
+          child: Container(
+            // Clip the thumb shadow if it is outside of the segmented control. This
+            // behavior is eyeballed by the iOS 17.5 simulator.
+            clipBehavior: Clip.antiAlias,
+            padding: widget.padding.resolve(Directionality.of(context)),
+            decoration: ShapeDecoration(
+              shape: const RoundedSuperellipseBorder(
+                borderRadius: BorderRadius.all(_kCornerRadius),
+              ),
+              color: CupertinoDynamicColor.resolve(widget.backgroundColor, context),
+            ),
+            child: AnimatedBuilder(
+              animation: thumbScaleAnimation,
+              builder: (BuildContext context, Widget? child) {
+                return _SegmentedControlRenderWidget<T>(
+                  key: segmentedControlRenderWidgetKey,
+                  highlightedIndex: widget.isMomentary ? null : highlightedIndex,
+                  thumbColor: CupertinoDynamicColor.resolve(widget.thumbColor, context),
+                  thumbScale: thumbScaleAnimation.value,
+                  proportionalWidth: widget.proportionalWidth,
+                  state: this,
+                  children: children,
+                );
+              },
+            ),
+          ),
         ),
       ),
     );

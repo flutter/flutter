@@ -893,11 +893,18 @@ void main() {
                 TestSemantics(
                   children: <TestSemantics>[
                     TestSemantics(
-                      label: 'Dialog',
-                      textDirection: TextDirection.ltr,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
                       children: <TestSemantics>[
-                        TestSemantics(label: 'BottomSheet', textDirection: TextDirection.ltr),
+                        TestSemantics(
+                          label: 'Dialog',
+                          textDirection: TextDirection.ltr,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.scopesRoute,
+                            SemanticsFlag.namesRoute,
+                          ],
+                          children: <TestSemantics>[
+                            TestSemantics(label: 'BottomSheet', textDirection: TextDirection.ltr),
+                          ],
+                        ),
                       ],
                     ),
                   ],
@@ -1069,14 +1076,24 @@ void main() {
                 TestSemantics(
                   children: <TestSemantics>[
                     TestSemantics(
-                      label: 'Dialog',
-                      textDirection: TextDirection.ltr,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
-                          flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                          label: 'Dialog',
+                          textDirection: TextDirection.ltr,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.scopesRoute,
+                            SemanticsFlag.namesRoute,
+                          ],
                           children: <TestSemantics>[
-                            TestSemantics(label: 'BottomSheet', textDirection: TextDirection.ltr),
+                            TestSemantics(
+                              flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                              children: <TestSemantics>[
+                                TestSemantics(
+                                  label: 'BottomSheet',
+                                  textDirection: TextDirection.ltr,
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ],
@@ -1145,14 +1162,24 @@ void main() {
                 TestSemantics(
                   children: <TestSemantics>[
                     TestSemantics(
-                      label: 'Dialog',
-                      textDirection: TextDirection.ltr,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
-                          flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                          label: 'Dialog',
+                          textDirection: TextDirection.ltr,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.scopesRoute,
+                            SemanticsFlag.namesRoute,
+                          ],
                           children: <TestSemantics>[
-                            TestSemantics(label: 'BottomSheet', textDirection: TextDirection.ltr),
+                            TestSemantics(
+                              flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                              children: <TestSemantics>[
+                                TestSemantics(
+                                  label: 'BottomSheet',
+                                  textDirection: TextDirection.ltr,
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ],
@@ -1217,17 +1244,24 @@ void main() {
                 TestSemantics(
                   children: <TestSemantics>[
                     TestSemantics(
-                      label: 'Dialog',
-                      textDirection: TextDirection.ltr,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
-                          flags: <SemanticsFlag>[SemanticsFlag.isButton],
-                          actions: <SemanticsAction>[SemanticsAction.tap],
-                          label: 'Dismiss',
+                          label: 'Dialog',
                           textDirection: TextDirection.ltr,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.scopesRoute,
+                            SemanticsFlag.namesRoute,
+                          ],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              flags: <SemanticsFlag>[SemanticsFlag.isButton],
+                              actions: <SemanticsAction>[SemanticsAction.tap],
+                              label: 'Dismiss',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(label: 'BottomSheet', textDirection: TextDirection.ltr),
+                          ],
                         ),
-                        TestSemantics(label: 'BottomSheet', textDirection: TextDirection.ltr),
                       ],
                     ),
                   ],
@@ -1312,7 +1346,7 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           bottomSheetTheme: BottomSheetThemeData(
-            dragHandleColor: MaterialStateColor.resolveWith((Set<WidgetState> states) {
+            dragHandleColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
               if (states.contains(WidgetState.hovered)) {
                 return hoveringColor;
               }
@@ -2888,6 +2922,133 @@ void main() {
     await tester.pumpAndSettle();
     expect(FocusScope.of(tester.element(find.text('BottomSheet'))).hasFocus, false);
     expect(focusNode.hasFocus, true);
+  });
+
+  testWidgets('BottomSheet does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(
+              child: BottomSheet(
+                onClosing: () {},
+                builder: (BuildContext context) => const Text('X'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(BottomSheet)), Size.zero);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/177004
+  testWidgets('ModalBottomSheet semantics for mismatched platforms', (WidgetTester tester) async {
+    const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+
+    Future<void> pumpModalBottomSheetWithTheme(TargetPlatform themePlatform) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: themePlatform),
+          home: Scaffold(
+            body: Builder(
+              builder: (BuildContext context) {
+                return OutlinedButton(
+                  onPressed: () {
+                    showModalBottomSheet<void>(
+                      context: context,
+                      showDragHandle: true,
+                      builder: (BuildContext context) {
+                        return const Text('BottomSheet');
+                      },
+                    );
+                  },
+                  child: const Text('open'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      final Finder popupFinder = find.bySemanticsLabel(localizations.dialogLabel);
+
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          expect(popupFinder, findsNothing); // Apple platforms don't show label.
+        case _:
+          expect(popupFinder, findsOneWidget); // Non-Apple platforms show label.
+      }
+    }
+
+    // Test with theme.platform = Android on different real platforms.
+    await pumpModalBottomSheetWithTheme(TargetPlatform.android);
+
+    // Dismiss the first bottom sheet.
+    Navigator.of(tester.element(find.text('BottomSheet'))).pop();
+    await tester.pumpAndSettle();
+
+    // Test with theme.platform = iOS on different real platforms.
+    await pumpModalBottomSheetWithTheme(TargetPlatform.iOS);
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Modal bottom sheet has hitTestBehavior.opaque to prevent dismissal on empty areas', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    late BuildContext savedContext;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            savedContext = context;
+            return Container();
+          },
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    showModalBottomSheet<void>(
+      context: savedContext,
+      builder: (BuildContext context) => Container(
+        height: 200,
+        color: Colors.blue,
+        child: const Center(child: Text('Modal Bottom Sheet')),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Modal Bottom Sheet'), findsOneWidget);
+
+    // Verify the route-level Semantics has opaque hitTestBehavior
+    // This prevents clicks inside the bottom sheet from passing through to the barrier
+    final List<Semantics> allSemantics = tester
+        .widgetList<Semantics>(
+          find.ancestor(of: find.text('Modal Bottom Sheet'), matching: find.byType(Semantics)),
+        )
+        .toList();
+
+    final Semantics routeSemantics = allSemantics.firstWhere(
+      (Semantics s) => s.properties.hitTestBehavior == SemanticsHitTestBehavior.opaque,
+    );
+
+    expect(routeSemantics.properties.hitTestBehavior, SemanticsHitTestBehavior.opaque);
+
+    final Semantics widgetSemantics = allSemantics.firstWhere(
+      (Semantics s) => s.properties.scopesRoute ?? false,
+    );
+
+    expect(widgetSemantics.properties.scopesRoute, true);
+
+    semantics.dispose();
   });
 }
 

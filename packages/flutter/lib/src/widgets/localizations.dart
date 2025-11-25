@@ -223,6 +223,9 @@ abstract class WidgetsLocalizations {
   /// Label for "share" edit buttons and menu items.
   String get shareButtonLabel;
 
+  /// The accessibility hint for an unselected radio button.
+  String get radioButtonUnselectedLabel;
+
   /// The `WidgetsLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
   ///
@@ -320,6 +323,8 @@ class DefaultWidgetsLocalizations implements WidgetsLocalizations {
   String get shareButtonLabel => 'Share';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+  @override
   TextDirection get textDirection => TextDirection.ltr;
 
   /// Creates an object that provides US English resource values for the
@@ -368,7 +373,7 @@ class _LocalizationsScope extends InheritedWidget {
 /// {@tool snippet}
 ///
 /// This following class is defined in terms of the
-/// [Dart `intl` package](https://github.com/dart-lang/intl). Using the `intl`
+/// [Dart `intl` package](https://github.com/dart-lang/i18n/tree/main/pkgs/intl). Using the `intl`
 /// package isn't required.
 ///
 /// ```dart
@@ -634,6 +639,14 @@ class _LocalizationsState extends State<Localizations> {
 
   Locale? get locale => _locale;
   Locale? _locale;
+  set locale(Locale? locale) {
+    assert(locale != null);
+    if (_locale == locale) {
+      return;
+    }
+    WidgetsBinding.instance.platformDispatcher.setApplicationLocale(locale!);
+    _locale = locale;
+  }
 
   @override
   void initState() {
@@ -668,7 +681,7 @@ class _LocalizationsState extends State<Localizations> {
   void load(Locale locale) {
     final Iterable<LocalizationsDelegate<dynamic>> delegates = widget.delegates;
     if (delegates.isEmpty) {
-      _locale = locale;
+      this.locale = locale;
       return;
     }
 
@@ -681,7 +694,7 @@ class _LocalizationsState extends State<Localizations> {
     if (typeToResources != null) {
       // All of the delegates' resources loaded synchronously.
       _typeToResources = typeToResources!;
-      _locale = locale;
+      this.locale = locale;
     } else {
       // - Don't rebuild the dependent widgets until the resources for the new locale
       // have finished loading. Until then the old locale will continue to be used.
@@ -692,7 +705,7 @@ class _LocalizationsState extends State<Localizations> {
         if (mounted) {
           setState(() {
             _typeToResources = value;
-            _locale = locale;
+            this.locale = locale;
           });
         }
         RendererBinding.instance.allowFirstFrame();

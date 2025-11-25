@@ -6,7 +6,9 @@
 library;
 
 import 'dart:math' as math;
+import 'dart:ui' show SemanticsHitTestBehavior;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -682,7 +684,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   ParametricCurve<double> animationCurve = _modalBottomSheetCurve;
 
   String _getRouteLabel(MaterialLocalizations localizations) {
-    switch (Theme.of(context).platform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         return '';
@@ -1116,9 +1118,12 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
       ),
     );
 
-    final Widget bottomSheet = useSafeArea
+    Widget bottomSheet = useSafeArea
         ? SafeArea(bottom: false, child: content)
         : MediaQuery.removePadding(context: context, removeTop: true, child: content);
+
+    // Prevent clicks inside the bottom sheet from passing through to the barrier
+    bottomSheet = Semantics(hitTestBehavior: SemanticsHitTestBehavior.opaque, child: bottomSheet);
 
     return capturedThemes?.wrap(bottomSheet) ?? bottomSheet;
   }

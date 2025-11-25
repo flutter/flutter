@@ -1829,7 +1829,6 @@ Checking for wireless devices...
         setUp(() {
           deviceManager.specifiedDeviceId = 'target-device';
         });
-
         testUsingContext('when multiple matches but first is unsupported by flutter', () async {
           deviceManager.iosDiscoverer.deviceList = <Device>[
             exactMatchAttachedUnsupportedIOSDevice,
@@ -2995,7 +2994,10 @@ class TestPollingDeviceDiscovery extends PollingDeviceDiscovery {
   List<String> get wellKnownIds => const <String>[];
 
   @override
-  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
+  Future<List<Device>> pollingGetDevices({
+    Duration? timeout,
+    bool forWirelessDiscovery = false,
+  }) async {
     numberOfTimesPolled++;
     return deviceList;
   }
@@ -3007,7 +3009,11 @@ class TestPollingDeviceDiscovery extends PollingDeviceDiscovery {
   }
 
   @override
-  Future<List<Device>> discoverDevices({Duration? timeout, DeviceDiscoveryFilter? filter}) {
+  Future<List<Device>> discoverDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+    bool forWirelessDiscovery = false,
+  }) {
     discoverDevicesCalled++;
     if (refreshDeviceList.isNotEmpty) {
       deviceList = refreshDeviceList;
@@ -3042,7 +3048,10 @@ class TestIOSDeviceDiscovery extends IOSDevices {
   FakeXcdevice get xcdevice => _xcdevice;
 
   @override
-  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
+  Future<List<Device>> pollingGetDevices({
+    Duration? timeout,
+    bool forWirelessDiscovery = false,
+  }) async {
     numberOfTimesPolled++;
     if (!_platform.isMacOS) {
       throw UnsupportedError('Control of iOS devices or simulators only supported on macOS.');
@@ -3057,7 +3066,11 @@ class TestIOSDeviceDiscovery extends IOSDevices {
   }
 
   @override
-  Future<List<Device>> discoverDevices({Duration? timeout, DeviceDiscoveryFilter? filter}) {
+  Future<List<Device>> discoverDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+    bool forWirelessDiscovery = false,
+  }) {
     discoverDevicesCalled++;
     if (refreshDeviceList.isNotEmpty) {
       deviceList = refreshDeviceList;
@@ -3091,6 +3104,9 @@ class FakeXcdevice extends Fake implements XCDevice {
 
   @override
   void cancelWaitForDeviceToConnect() {}
+
+  @override
+  void cancelWirelessDiscovery() {}
 }
 
 class FakeIOSWorkflow extends Fake implements IOSWorkflow {}

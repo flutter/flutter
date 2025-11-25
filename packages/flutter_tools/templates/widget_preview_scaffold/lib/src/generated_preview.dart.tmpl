@@ -4,4 +4,4 @@
 
 import 'widget_preview.dart';
 
-List<WidgetPreviewGroup> previews() => <WidgetPreviewGroup>[];
+List<WidgetPreview> previews() => <WidgetPreview>[];

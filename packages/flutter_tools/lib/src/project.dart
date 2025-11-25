@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
 import 'package:meta/meta.dart';
 import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
@@ -33,18 +35,14 @@ export 'xcode_project.dart';
 
 /// Enum for each officially supported platform.
 enum SupportedPlatform {
-  android(name: 'android'),
-  ios(name: 'ios'),
-  linux(name: 'linux'),
-  macos(name: 'macos'),
-  web(name: 'web'),
-  windows(name: 'windows'),
-  fuchsia(name: 'fuchsia'),
-  root(name: 'root'); // Special platform to represent the root project directory
-
-  const SupportedPlatform({required this.name});
-
-  final String name;
+  android,
+  ios,
+  linux,
+  macos,
+  web,
+  windows,
+  fuchsia,
+  root, // Special platform to represent the root project directory
 }
 
 class FlutterProjectFactory {
@@ -233,7 +231,10 @@ class FlutterProject {
 
   /// The location of the generated scaffolding project for hosting widget
   /// previews from this project.
-  Directory get widgetPreviewScaffold => dartTool.childDirectory('widget_preview_scaffold');
+  // TODO(bkonyi): don't create this project in $TMP.
+  // See https://github.com/flutter/flutter/issues/179036
+  late final Directory widgetPreviewScaffold = directory.fileSystem.systemTempDirectory
+      .createTempSync('widget_preview_scaffold');
 
   /// The directory containing the generated code for this project.
   Directory get generated => directory.absolute
@@ -241,6 +242,20 @@ class FlutterProject {
       .childDirectory('build')
       .childDirectory('generated')
       .childDirectory(manifest.appName);
+
+  /// The set of directories created by the tool containing ephemeral state.
+  // TODO(bkonyi): provide getters for each project type that returns the set
+  // of known ephemeral files / directories.
+  Set<Directory> get ephemeralDirectories => UnmodifiableSetView(_ephemeralDirectories);
+  late final _ephemeralDirectories = <Directory>{
+    buildDirectory,
+    android.ephemeralDirectory,
+    ios.ephemeralDirectory,
+    ios.ephemeralModuleDirectory,
+    linux.ephemeralDirectory,
+    macos.ephemeralDirectory,
+    windows.ephemeralDirectory,
+  };
 
   /// The generated Dart plugin registrant for non-web platforms.
   File get dartPluginRegistrant =>
@@ -643,6 +658,18 @@ class AndroidProject extends FlutterProjectPlatform {
     }
 
     return hostAppGradleRoot.childFile('AndroidManifest.xml');
+  }
+
+  /// Gets the Gradle wrapper properties file.
+  ///
+  /// This file is located under `gradle/wrapper/gradle-wrapper.properties`
+  /// in the host app's Gradle root directory. It defines the distribution
+  /// settings for the Gradle wrapper.
+  File get gradleWrapperPropertiesFile {
+    return hostAppGradleRoot
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.properties');
   }
 
   File get generatedPluginRegistrantFile {

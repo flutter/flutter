@@ -107,7 +107,7 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete> {
         ),
         Switch(
           value: _networkEnabled,
-          onChanged: (bool? value) {
+          onChanged: (bool value) {
             setState(() {
               _networkEnabled = !_networkEnabled;
             });

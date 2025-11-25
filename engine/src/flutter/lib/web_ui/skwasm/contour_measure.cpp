@@ -8,13 +8,16 @@
 
 #include "third_party/skia/include/core/SkContourMeasure.h"
 #include "third_party/skia/include/core/SkPath.h"
+#include "third_party/skia/include/core/SkPathBuilder.h"
 
 using namespace Skwasm;
 
-SKWASM_EXPORT SkContourMeasureIter*
-contourMeasureIter_create(SkPath* path, bool forceClosed, SkScalar resScale) {
+SKWASM_EXPORT SkContourMeasureIter* contourMeasureIter_create(
+    SkPathBuilder* path,
+    bool forceClosed,
+    SkScalar resScale) {
   liveCountourMeasureIterCount++;
-  return new SkContourMeasureIter(*path, forceClosed, resScale);
+  return new SkContourMeasureIter(path->snapshot(), forceClosed, resScale);
 }
 
 SKWASM_EXPORT SkContourMeasure* contourMeasureIter_next(
@@ -52,11 +55,12 @@ SKWASM_EXPORT bool contourMeasure_getPosTan(SkContourMeasure* measure,
   return measure->getPosTan(distance, outPosition, outTangent);
 }
 
-SKWASM_EXPORT SkPath* contourMeasure_getSegment(SkContourMeasure* measure,
-                                                SkScalar startD,
-                                                SkScalar stopD,
-                                                bool startWithMoveTo) {
-  SkPath* outPath = new SkPath();
+SKWASM_EXPORT SkPathBuilder* contourMeasure_getSegment(
+    SkContourMeasure* measure,
+    SkScalar startD,
+    SkScalar stopD,
+    bool startWithMoveTo) {
+  SkPathBuilder* outPath = new SkPathBuilder();
   if (!measure->getSegment(startD, stopD, outPath, startWithMoveTo)) {
     delete outPath;
     return nullptr;

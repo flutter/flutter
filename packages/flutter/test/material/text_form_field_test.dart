@@ -1848,4 +1848,48 @@ void main() {
     variant: TargetPlatformVariant.all(),
     skip: kIsWeb, // [intended] on web the browser handles the context menu.
   );
+
+  // Regression test for https://github.com/flutter/flutter/issues/176391.
+  testWidgets('TextFormField can inherit decoration from local InputDecorationThemeData', (
+    WidgetTester tester,
+  ) async {
+    const InputDecoration decoration = InputDecoration(labelText: 'Label');
+    const InputDecorationThemeData decorationTheme = InputDecorationThemeData(
+      labelStyle: TextStyle(color: Colors.green),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: InputDecorationTheme(
+            data: decorationTheme,
+            child: TextFormField(decoration: decoration),
+          ),
+        ),
+      ),
+    );
+
+    final InputDecorator decorator = tester.widget(find.byType(InputDecorator));
+    final InputDecoration expectedDecoration = decoration
+        .applyDefaults(decorationTheme)
+        .copyWith(enabled: true, hintMaxLines: 1);
+    expect(decorator.decoration, expectedDecoration);
+  });
+
+  testWidgets('TextFormField does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final TextEditingController controller = TextEditingController(text: 'X');
+    addTearDown(tester.view.reset);
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(child: TextFormField(controller: controller)),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(TextFormField)), Size.zero);
+    controller.selection = const TextSelection.collapsed(offset: 0);
+    tester.pump();
+  });
 }

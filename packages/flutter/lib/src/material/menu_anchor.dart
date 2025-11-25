@@ -364,7 +364,11 @@ class _MenuAnchorState extends State<MenuAnchor> {
   void didUpdateWidget(MenuAnchor oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
-      _internalMenuController = widget.controller != null ? MenuController() : null;
+      if (widget.controller == null) {
+        _internalMenuController = MenuController();
+      } else {
+        _internalMenuController = null;
+      }
     }
   }
 
@@ -935,7 +939,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
       autofocus: widget.enabled && widget.autofocus,
       statesController: widget.statesController,
       clipBehavior: widget.clipBehavior,
-      isSemanticButton: null,
+      isSemanticButton: kIsWeb ? true : null,
       child: _MenuItemLabel(
         leadingIcon: widget.leadingIcon,
         shortcut: widget.shortcut,
@@ -1846,7 +1850,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
                 focusNode: _buttonFocusNode,
                 onFocusChange: _enabled ? widget.onFocusChange : null,
                 onPressed: _enabled ? toggleShowMenu : null,
-                isSemanticButton: null,
+                isSemanticButton: kIsWeb ? true : null,
                 child: _MenuItemLabel(
                   leadingIcon: widget.leadingIcon,
                   trailingIcon: widget.trailingIcon,
@@ -3085,6 +3089,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
         menuPadding != oldDelegate.menuPadding ||
         orientation != oldDelegate.orientation ||
         parentOrientation != oldDelegate.parentOrientation ||
+        reservedPadding != oldDelegate.reservedPadding ||
         !setEquals(avoidBounds, oldDelegate.avoidBounds);
   }
 
@@ -3331,7 +3336,7 @@ class _Submenu extends StatelessWidget {
       });
     }
 
-    final MaterialStateMouseCursor mouseCursor = _MouseCursor(
+    final WidgetStateMouseCursor mouseCursor = _MouseCursor(
       (Set<WidgetState> states) =>
           effectiveValue((MenuStyle? style) => style?.mouseCursor?.resolve(states)),
     );
@@ -3433,7 +3438,7 @@ class _Submenu extends StatelessWidget {
 
 /// Wraps the [WidgetStateMouseCursor] so that it can default to
 /// [MouseCursor.uncontrolled] if none is set.
-class _MouseCursor extends MaterialStateMouseCursor {
+class _MouseCursor extends WidgetStateMouseCursor {
   const _MouseCursor(this.resolveCallback);
 
   final WidgetPropertyResolver<MouseCursor?> resolveCallback;
@@ -3636,16 +3641,7 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   }
 
   @override
-  WidgetStateProperty<MouseCursor?>? get mouseCursor {
-    return WidgetStateProperty.resolveWith(
-      (Set<WidgetState> states) {
-        if (states.contains(WidgetState.disabled)) {
-          return SystemMouseCursors.basic;
-        }
-        return SystemMouseCursors.click;
-      },
-    );
-  }
+  WidgetStateProperty<MouseCursor?>? get mouseCursor => WidgetStateMouseCursor.adaptiveClickable;
 
   @override
   WidgetStateProperty<Color?>? get overlayColor {

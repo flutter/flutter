@@ -9,7 +9,7 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-final bool _ckRequiresClientICU = canvasKit.ParagraphBuilder.RequiresClientICU();
+const String _kWeightAxisTag = 'wght';
 
 final List<String> _testFonts = <String>['FlutterTest', 'Ahem'];
 String? _computeEffectiveFontFamily(String? fontFamily) {
@@ -88,6 +88,12 @@ class CkParagraphStyle implements ui.ParagraphStyle {
     if (fontWeight != null || fontStyle != null) {
       skTextStyle.fontStyle = toSkFontStyle(fontWeight, fontStyle);
     }
+
+    final int weightValue = fontWeight?.value ?? ui.FontWeight.normal.value;
+    final SkFontVariation skFontVariation = SkFontVariation();
+    skFontVariation.axis = _kWeightAxisTag;
+    skFontVariation.value = weightValue.toDouble();
+    skTextStyle.fontVariations = <SkFontVariation>[skFontVariation];
 
     if (fontSize != null) {
       skTextStyle.fontSize = fontSize;
@@ -581,16 +587,27 @@ class CkTextStyle implements ui.TextStyle {
       properties.fontFeatures = skFontFeatures;
     }
 
+    final List<SkFontVariation> skFontVariations = <SkFontVariation>[];
+    bool weightAxisSet = false;
     if (fontVariations != null) {
-      final List<SkFontVariation> skFontVariations = <SkFontVariation>[];
       for (final ui.FontVariation fontVariation in fontVariations) {
         final SkFontVariation skFontVariation = SkFontVariation();
         skFontVariation.axis = fontVariation.axis;
         skFontVariation.value = fontVariation.value;
         skFontVariations.add(skFontVariation);
+        if (fontVariation.axis == _kWeightAxisTag) {
+          weightAxisSet = true;
+        }
       }
-      properties.fontVariations = skFontVariations;
     }
+    if (!weightAxisSet) {
+      final int weightValue = fontWeight?.value ?? ui.FontWeight.normal.value;
+      final SkFontVariation skFontVariation = SkFontVariation();
+      skFontVariation.axis = _kWeightAxisTag;
+      skFontVariation.value = weightValue.toDouble();
+      skFontVariations.add(skFontVariation);
+    }
+    properties.fontVariations = skFontVariations;
 
     return canvasKit.TextStyle(properties);
   }();
@@ -1140,27 +1157,9 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
     return CkParagraph(builtParagraph, _style);
   }
 
-  /// Injects required ICU data into the [builder].
-  ///
-  /// This should only be used with the CanvasKit Chromium variant that's compiled
-  /// without ICU data.
-  static void injectClientICU(SkParagraphBuilder builder) {
-    assert(
-      canvasKit.ParagraphBuilder.RequiresClientICU(),
-      'This method should only be used with the CanvasKit Chromium variant.',
-    );
-
-    final SegmentationResult result = segmentText(builder.getText());
-    builder.setWordsUtf16(result.words);
-    builder.setGraphemeBreaksUtf16(result.graphemes);
-    builder.setLineBreaksUtf16(result.breaks);
-  }
-
   /// Builds the CkParagraph with the builder and deletes the builder.
   SkParagraph _buildSkParagraph() {
-    if (_ckRequiresClientICU) {
-      injectClientICU(_paragraphBuilder);
-    }
+    _paragraphBuilder.injectClientICUIfNeeded();
     final SkParagraph result = _paragraphBuilder.build();
     _paragraphBuilder.delete();
     return result;

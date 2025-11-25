@@ -1495,6 +1495,140 @@ void main() {
     semantics.dispose();
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/176566
+  testWidgets(
+    'AppBar title Semantics.namesRoute flag should be null on iOS/macOS platforms regardless of theme platform',
+    (WidgetTester tester) async {
+      // Regression test for VoiceOver accessibility when theme platform differs from device platform.
+      // When someone sets theme.platform to TargetPlatform.android on an iOS/macOS device,
+      // VoiceOver should still work correctly by not having a namesRoute flag in the title's semantics.
+      final SemanticsTester semantics = SemanticsTester(tester);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.android),
+          home: AppBar(title: const Text('Title')),
+        ),
+      );
+
+      final List<SemanticsFlag> expectedFlags = <SemanticsFlag>[SemanticsFlag.isHeader];
+
+      expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 1,
+                textDirection: TextDirection.ltr,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 2,
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 3,
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            id: 4,
+                            children: <TestSemantics>[
+                              TestSemantics(
+                                id: 5,
+                                flags: expectedFlags,
+                                label: 'Title',
+                                textDirection: TextDirection.ltr,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          ignoreRect: true,
+          ignoreTransform: true,
+        ),
+      );
+
+      semantics.dispose();
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    }),
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/176566
+  testWidgets(
+    'AppBar title Semantics.namesRoute flag should be non-null on Android/Fuchsia/Linux/Windows platforms regardless of theme platform',
+    (WidgetTester tester) async {
+      // When someone sets theme.platform to TargetPlatform.iOS on an Android device,
+      // TalkBack should still work correctly by having a namesRoute flag in the title's semantics.
+      final SemanticsTester semantics = SemanticsTester(tester);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.iOS),
+          home: AppBar(title: const Text('Title')),
+        ),
+      );
+
+      final List<SemanticsFlag> expectedFlags = <SemanticsFlag>[
+        SemanticsFlag.isHeader,
+        SemanticsFlag.namesRoute,
+      ];
+
+      expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 1,
+                textDirection: TextDirection.ltr,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 2,
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 3,
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            id: 4,
+                            children: <TestSemantics>[
+                              TestSemantics(
+                                id: 5,
+                                flags: expectedFlags,
+                                label: 'Title',
+                                textDirection: TextDirection.ltr,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          ignoreRect: true,
+          ignoreTransform: true,
+        ),
+      );
+
+      semantics.dispose();
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+      TargetPlatform.linux,
+      TargetPlatform.windows,
+    }),
+  );
+
   testWidgets('Material3 - AppBar draws a light system bar for a dark background', (
     WidgetTester tester,
   ) async {
@@ -2326,7 +2460,7 @@ void main() {
     });
   });
 
-  group('MaterialStateColor scrolledUnder', () {
+  group('WidgetStateColor scrolledUnder', () {
     const Color scrolledColor = Color(0xff00ff00);
     const Color defaultColor = Color(0xff0000ff);
 
@@ -2342,7 +2476,7 @@ void main() {
           appBar: AppBar(
             elevation: 0,
             scrolledUnderElevation: scrolledUnderElevation,
-            backgroundColor: MaterialStateColor.resolveWith((Set<WidgetState> states) {
+            backgroundColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
               return states.contains(WidgetState.scrolledUnder) ? scrolledColor : defaultColor;
             }),
             title: const Text('AppBar'),
@@ -2365,7 +2499,7 @@ void main() {
           home: Scaffold(
             appBar: AppBar(
               elevation: 0,
-              backgroundColor: MaterialStateColor.resolveWith((Set<WidgetState> states) {
+              backgroundColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
                 return states.contains(WidgetState.scrolledUnder) ? scrolledColor : defaultColor;
               }),
               title: const Text('AppBar'),
@@ -2574,7 +2708,7 @@ void main() {
           home: Scaffold(
             appBar: AppBar(
               elevation: 0,
-              backgroundColor: MaterialStateColor.resolveWith((Set<WidgetState> states) {
+              backgroundColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
                 return states.contains(WidgetState.scrolledUnder) ? scrolledColor : defaultColor;
               }),
               title: const Text('AppBar'),
@@ -2656,7 +2790,7 @@ void main() {
           home: Scaffold(
             appBar: AppBar(
               elevation: 0,
-              backgroundColor: MaterialStateColor.resolveWith((Set<WidgetState> states) {
+              backgroundColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
                 return states.contains(WidgetState.scrolledUnder) ? scrolledColor : defaultColor;
               }),
               title: const Text('AppBar'),
@@ -2731,7 +2865,7 @@ void main() {
           home: Scaffold(
             appBar: AppBar(
               elevation: 0,
-              backgroundColor: MaterialStateColor.resolveWith((Set<WidgetState> states) {
+              backgroundColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
                 return states.contains(WidgetState.scrolledUnder) ? scrolledColor : defaultColor;
               }),
               title: const Text('AppBar'),

@@ -223,6 +223,9 @@ class FakeDeviceManager implements DeviceManager {
   }
 
   @override
+  void stopExtendedWirelessDeviceDiscoverers() {}
+
+  @override
   set specifiedDeviceId(String? id) {
     _specifiedDeviceId = id;
   }

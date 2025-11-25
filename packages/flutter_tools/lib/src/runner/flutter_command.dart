@@ -1603,7 +1603,10 @@ abstract class FlutterCommand extends Command<void> {
     });
 
     if (argParser.options.containsKey(FlutterOptions.kDartDefinesOption)) {
-      dartDefines.addAll(stringsArg(FlutterOptions.kDartDefinesOption));
+      final Iterable<String> defines = stringsArg(
+        FlutterOptions.kDartDefinesOption,
+      ).where((string) => string.isNotEmpty);
+      dartDefines.addAll(defines);
     }
 
     return dartDefines;
@@ -1946,7 +1949,7 @@ abstract class FlutterCommand extends Command<void> {
   /// If [includeDevicesUnsupportedByProject] is true, the tool does not filter
   /// the list by the current project support list.
   Future<Device?> findTargetDevice({bool includeDevicesUnsupportedByProject = false}) async {
-    List<Device>? deviceList = await findAllTargetDevices(
+    final List<Device>? deviceList = await findAllTargetDevices(
       includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
     );
     if (deviceList == null) {
@@ -1954,9 +1957,9 @@ abstract class FlutterCommand extends Command<void> {
     }
     if (deviceList.length > 1) {
       globals.printStatus(globals.userMessages.flutterSpecifyDevice);
-      deviceList = await globals.deviceManager!.getAllDevices();
+      final List<Device> allDevices = await globals.deviceManager!.getAllDevices();
       globals.printStatus('');
-      await Device.printDevices(deviceList, globals.logger);
+      await Device.printDevices(allDevices, globals.logger);
       return null;
     }
     return deviceList.single;

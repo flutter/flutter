@@ -250,7 +250,7 @@ void main() {
 
     await pumpsUseCase(tester, ActionChipUseCase());
     expect(
-      log[4],
+      log[3],
       isMethodCall(
         'SystemChrome.setApplicationSwitcherDescription',
         arguments: <String, dynamic>{'label': 'ActionChip', 'primaryColor': 4284960932},
@@ -259,7 +259,7 @@ void main() {
 
     await pumpsUseCase(tester, BadgeUseCase());
     expect(
-      log[6],
+      log[4],
       isMethodCall(
         'SystemChrome.setApplicationSwitcherDescription',
         arguments: <String, dynamic>{'label': 'Badge', 'primaryColor': 4284960932},
@@ -268,7 +268,7 @@ void main() {
 
     await pumpsUseCase(tester, CardUseCase());
     expect(
-      log[8],
+      log[5],
       isMethodCall(
         'SystemChrome.setApplicationSwitcherDescription',
         arguments: <String, dynamic>{'label': 'Card', 'primaryColor': 4284960932},
@@ -277,7 +277,7 @@ void main() {
 
     await pumpsUseCase(tester, CheckBoxListTile());
     expect(
-      log[10],
+      log[6],
       isMethodCall(
         'SystemChrome.setApplicationSwitcherDescription',
         arguments: <String, dynamic>{'label': 'CheckBoxListTile', 'primaryColor': 4284960932},
@@ -286,7 +286,7 @@ void main() {
 
     await pumpsUseCase(tester, DatePickerUseCase());
     expect(
-      log[12],
+      log[7],
       isMethodCall(
         'SystemChrome.setApplicationSwitcherDescription',
         arguments: <String, dynamic>{'label': 'DatePicker', 'primaryColor': 4284960932},
@@ -295,7 +295,7 @@ void main() {
 
     await pumpsUseCase(tester, DialogUseCase());
     expect(
-      log[14],
+      log[8],
       isMethodCall(
         'SystemChrome.setApplicationSwitcherDescription',
         arguments: <String, dynamic>{'label': 'Dialog', 'primaryColor': 4284960932},
@@ -304,7 +304,7 @@ void main() {
 
     await pumpsUseCase(tester, ExpansionTileUseCase());
     expect(
-      log[16],
+      log[9],
       isMethodCall(
         'SystemChrome.setApplicationSwitcherDescription',
         arguments: <String, dynamic>{'label': 'ExpansionTile', 'primaryColor': 4284960932},
@@ -313,7 +313,7 @@ void main() {
 
     await pumpsUseCase(tester, MaterialBannerUseCase());
     expect(
-      log[18],
+      log[10],
       isMethodCall(
         'SystemChrome.setApplicationSwitcherDescription',
         arguments: <String, dynamic>{'label': 'MaterialBanner', 'primaryColor': 4284960932},
@@ -322,7 +322,7 @@ void main() {
 
     await pumpsUseCase(tester, NavigationBarUseCase());
     expect(
-      log[20],
+      log[11],
       isMethodCall(
         'SystemChrome.setApplicationSwitcherDescription',
         arguments: <String, dynamic>{'label': 'NavigationBar', 'primaryColor': 4284960932},
@@ -331,7 +331,7 @@ void main() {
 
     await pumpsUseCase(tester, RadioListTileUseCase());
     expect(
-      log[22],
+      log[12],
       isMethodCall(
         'SystemChrome.setApplicationSwitcherDescription',
         arguments: <String, dynamic>{'label': 'RadioListTile', 'primaryColor': 4284960932},
@@ -340,7 +340,7 @@ void main() {
 
     await pumpsUseCase(tester, SliderUseCase());
     expect(
-      log[24],
+      log[13],
       isMethodCall(
         'SystemChrome.setApplicationSwitcherDescription',
         arguments: <String, dynamic>{'label': 'Slider', 'primaryColor': 4284960932},
@@ -349,7 +349,7 @@ void main() {
 
     await pumpsUseCase(tester, SnackBarUseCase());
     expect(
-      log[26],
+      log[14],
       isMethodCall(
         'SystemChrome.setApplicationSwitcherDescription',
         arguments: <String, dynamic>{'label': 'SnackBar', 'primaryColor': 4284960932},
@@ -358,7 +358,7 @@ void main() {
 
     await pumpsUseCase(tester, SwitchListTileUseCase());
     expect(
-      log[28],
+      log[15],
       isMethodCall(
         'SystemChrome.setApplicationSwitcherDescription',
         arguments: <String, dynamic>{'label': 'SwitchListTile', 'primaryColor': 4284960932},
@@ -367,7 +367,7 @@ void main() {
 
     await pumpsUseCase(tester, TextButtonUseCase());
     expect(
-      log[30],
+      log[16],
       isMethodCall(
         'SystemChrome.setApplicationSwitcherDescription',
         arguments: <String, dynamic>{'label': 'TextButton', 'primaryColor': 4284960932},
@@ -376,7 +376,7 @@ void main() {
 
     await pumpsUseCase(tester, TextFieldUseCase());
     expect(
-      log[32],
+      log[17],
       isMethodCall(
         'SystemChrome.setApplicationSwitcherDescription',
         arguments: <String, dynamic>{'label': 'TextField', 'primaryColor': 4284960932},
@@ -385,7 +385,7 @@ void main() {
 
     await pumpsUseCase(tester, TextFieldPasswordUseCase());
     expect(
-      log[34],
+      log[18],
       isMethodCall(
         'SystemChrome.setApplicationSwitcherDescription',
         arguments: <String, dynamic>{'label': 'TextField password', 'primaryColor': 4284960932},
@@ -394,7 +394,7 @@ void main() {
 
     await pumpsUseCase(tester, NavigationDrawerUseCase());
     expect(
-      log[36],
+      log[19],
       isMethodCall(
         'SystemChrome.setApplicationSwitcherDescription',
         arguments: <String, dynamic>{'label': 'NavigationDrawer', 'primaryColor': 4284960932},
@@ -403,7 +403,7 @@ void main() {
 
     await pumpsUseCase(tester, NavigationRailUseCase());
     expect(
-      log[38],
+      log[20],
       isMethodCall(
         'SystemChrome.setApplicationSwitcherDescription',
         arguments: <String, dynamic>{'label': 'NavigationRail', 'primaryColor': 4284960932},
@@ -412,7 +412,7 @@ void main() {
 
     await pumpsUseCase(tester, DrawerUseCase());
     expect(
-      log[40],
+      log[21],
       isMethodCall(
         'SystemChrome.setApplicationSwitcherDescription',
         arguments: <String, dynamic>{'label': 'drawer', 'primaryColor': 4284960932},

@@ -1734,6 +1734,42 @@ void main() {
         ),
       );
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/155198.
+    testWidgets('Ink features are painted on inner Material', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        yearPicker(
+          firstDate: DateTime(2020),
+          lastDate: DateTime(2030),
+          selectedDate: DateTime(2025),
+        ),
+      );
+
+      expect(find.byType(Material), findsNWidgets(2));
+
+      // Material outside the GridView.
+      final MaterialInkController outerMaterial = Material.of(
+        tester.element(find.byType(YearPicker)),
+      );
+      // Material directly wrapping the GridView.
+      final MaterialInkController innerMaterial = Material.of(
+        tester.element(find.byType(GridView)),
+      );
+
+      expect(outerMaterial, isNot(same(innerMaterial)));
+      expect((outerMaterial as dynamic).debugInkFeatures, isNull);
+      expect((innerMaterial as dynamic).debugInkFeatures, isNull);
+
+      // Hover over the 2022 year item to trigger the ink highlight.
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: tester.getCenter(find.text('2022')));
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+
+      // Only the inner Material should have ink features.
+      expect((outerMaterial as dynamic).debugInkFeatures, isNull);
+      expect((innerMaterial as dynamic).debugInkFeatures, hasLength(1));
+    });
   });
 
   group('Calendar Delegate', () {

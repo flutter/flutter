@@ -1103,10 +1103,9 @@ void main() {
         ),
       ),
     );
-
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
 
     // Test default cursor when disabled
@@ -1154,7 +1153,7 @@ void main() {
       return inactiveEnabledFillColor;
     }
 
-    final WidgetStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
+    final WidgetStateProperty<Color> fillColor = WidgetStateColor.resolveWith(getFillColor);
 
     int? groupValue = 0;
     const Key radioKey = Key('radio');
@@ -1271,7 +1270,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final WidgetStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
+    final WidgetStateProperty<Color> fillColor = WidgetStateColor.resolveWith(getFillColor);
 
     int? groupValue = 0;
     const Key radioKey = Key('radio');
@@ -1363,7 +1362,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final WidgetStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
+    final WidgetStateProperty<Color> fillColor = WidgetStateColor.resolveWith(getFillColor);
 
     int? groupValue = 0;
     const Key radioKey = Key('radio');
@@ -2168,7 +2167,7 @@ void main() {
       return inactiveEnabledBackgroundColor;
     }
 
-    final WidgetStateProperty<Color> backgroundColor = MaterialStateColor.resolveWith(
+    final WidgetStateProperty<Color> backgroundColor = WidgetStateColor.resolveWith(
       getBackgroundColor,
     );
 
@@ -2282,7 +2281,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final WidgetStateProperty<Color> backgroundColor = MaterialStateColor.resolveWith(
+    final WidgetStateProperty<Color> backgroundColor = WidgetStateColor.resolveWith(
       getBackgroundColor,
     );
 
@@ -2722,5 +2721,65 @@ void main() {
     );
 
     focusNode.dispose();
+  });
+
+  // Regression tests for https://github.com/flutter/flutter/issues/170422
+  group('Radio accessibility announcements on various platforms', () {
+    testWidgets('Unselected radio should be vocalized via hint on iOS/macOS platform', (
+      WidgetTester tester,
+    ) async {
+      const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: Material(
+            child: RadioGroup<int>(
+              groupValue: 2,
+              onChanged: (int? value) {},
+              child: const Radio<int>(value: 1),
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode semanticNode = tester.getSemantics(find.byType(Focus).last);
+      if (defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.macOS) {
+        expect(semanticNode.hint, localizations.radioButtonUnselectedLabel);
+      } else {
+        expect(semanticNode.hint, anyOf(isNull, isEmpty));
+      }
+    });
+
+    testWidgets('Selected radio should be vocalized via the selected flag on all platforms', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: Material(
+            child: RadioGroup<int>(
+              groupValue: 1,
+              onChanged: (int? value) {},
+              child: const Radio<int>(value: 1),
+            ),
+          ),
+        ),
+      );
+
+      final SemanticsNode semanticNode = tester.getSemantics(find.byType(Focus).last);
+      // Radio semantics should not have hint.
+      expect(semanticNode.hint, anyOf(isNull, isEmpty));
+    });
+  });
+
+  testWidgets('Radio does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(child: SizedBox.shrink(child: Radio<bool>(value: true))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Radio<bool>)), Size.zero);
   });
 }

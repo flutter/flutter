@@ -49,12 +49,10 @@ BufferView RuntimeEffectContents::EmplaceVulkanUniform(
           input_data->data())[uniform_byte_index++]);
     }
   }
-  size_t alignment = std::max(sizeof(float) * uniform_buffer.size(),
-                              minimum_uniform_alignment);
 
   return data_host_buffer.Emplace(
       reinterpret_cast<const void*>(uniform_buffer.data()),
-      sizeof(float) * uniform_buffer.size(), alignment);
+      sizeof(float) * uniform_buffer.size(), minimum_uniform_alignment);
 }
 
 void RuntimeEffectContents::SetRuntimeStage(

@@ -236,7 +236,8 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
       _announcedInitialDate = true;
       final bool isToday = widget.calendarDelegate.isSameDay(widget.currentDate, _selectedDate);
       final String semanticLabelSuffix = isToday ? ', ${_localizations.currentDateLabel}' : '';
-      SemanticsService.announce(
+      SemanticsService.sendAnnouncement(
+        View.of(context),
         '${_localizations.formatFullDate(_selectedDate!)}$semanticLabelSuffix',
         _textDirection,
       );
@@ -265,7 +266,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
           DatePickerMode.day => widget.calendarDelegate.formatMonthYear(selected, _localizations),
           DatePickerMode.year => widget.calendarDelegate.formatYear(selected.year, _localizations),
         };
-        SemanticsService.announce(message, _textDirection);
+        SemanticsService.sendAnnouncement(View.of(context), message, _textDirection);
       }
     });
   }
@@ -315,7 +316,8 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
         case TargetPlatform.windows:
           final bool isToday = widget.calendarDelegate.isSameDay(widget.currentDate, _selectedDate);
           final String semanticLabelSuffix = isToday ? ', ${_localizations.currentDateLabel}' : '';
-          SemanticsService.announce(
+          SemanticsService.sendAnnouncement(
+            View.of(context),
             '${_localizations.selectedDateLabel} ${widget.calendarDelegate.formatFullDate(_selectedDate!, _localizations)}$semanticLabelSuffix',
             _textDirection,
           );
@@ -665,7 +667,8 @@ class _MonthPickerState extends State<_MonthPicker> {
           // the same day of the month.
           _focusedDay = _focusableDayForMonth(_currentMonth, _focusedDay!.day);
         }
-        SemanticsService.announce(
+        SemanticsService.sendAnnouncement(
+          View.of(context),
           widget.calendarDelegate.formatMonthYear(_currentMonth, _localizations),
           _textDirection,
         );
@@ -1539,18 +1542,20 @@ class _YearPickerState extends State<YearPicker> {
 
   @override
   Widget build(BuildContext context) {
-    assert(debugCheckHasMaterial(context));
     return Column(
       children: <Widget>[
         const Divider(),
         Expanded(
-          child: GridView.builder(
-            controller: _scrollController,
-            dragStartBehavior: widget.dragStartBehavior,
-            gridDelegate: _YearPickerGridDelegate(context),
-            itemBuilder: _buildYearItem,
-            itemCount: math.max(_itemCount, minYears),
-            padding: const EdgeInsets.symmetric(horizontal: _yearPickerPadding),
+          child: Material(
+            type: MaterialType.transparency,
+            child: GridView.builder(
+              controller: _scrollController,
+              dragStartBehavior: widget.dragStartBehavior,
+              gridDelegate: _YearPickerGridDelegate(context),
+              itemBuilder: _buildYearItem,
+              itemCount: math.max(_itemCount, minYears),
+              padding: const EdgeInsets.symmetric(horizontal: _yearPickerPadding),
+            ),
           ),
         ),
         const Divider(),

@@ -52,6 +52,8 @@ abstract final class FlutterTestDriver {
   final _errorBuffer = StringBuffer();
   String? _lastResponse;
   Uri? _vmServiceWsUri;
+  Uri? _devToolsUri;
+  Uri? _dtdUri;
   int? _attachPort;
   var _hasExited = false;
 
@@ -62,6 +64,8 @@ abstract final class FlutterTestDriver {
   int? get vmServicePort => _vmServiceWsUri?.port;
   bool get hasExited => _hasExited;
   Uri? get vmServiceWsUri => _vmServiceWsUri;
+  Uri? get devToolsUri => _devToolsUri;
+  Uri? get dtdUri => _dtdUri;
 
   /// Completes with the full method name for the 'reloadSources' service once
   /// it's registered (e.g., `s0.reloadSources`).
@@ -602,8 +606,14 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
         ...?additionalCommandArgs,
       ],
       withDebugger: withDebugger,
+      withDevtools: !noDevtools,
       startPaused: startPaused,
       waitForDebugPort: device != WebServerDevice.kWebServerDeviceId && !wasm,
+      waitForDtdAndDevTools:
+          device != WebServerDevice.kWebServerDeviceId &&
+          device != GoogleChromeDevice.kChromeDeviceId &&
+          !noDevtools &&
+          spawnDdsInstance,
       pauseOnExceptions: pauseOnExceptions,
       script: script,
       verbose: verbose,
@@ -642,9 +652,11 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
     List<String> args, {
     String? script,
     bool withDebugger = false,
+    bool withDevtools = false,
     bool startPaused = false,
     bool pauseOnExceptions = false,
     bool waitForDebugPort = false,
+    bool waitForDtdAndDevTools = true,
     bool verbose = false,
     int? attachPort,
   }) async {
@@ -685,10 +697,29 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
           event: 'app.started',
           timeout: appStartTimeout,
         );
+        final Future<void> devTools =
+            _waitFor(
+              event: 'app.devTools',
+              timeout: appStartTimeout,
+              ignoreAppStopEvent: true,
+            ).then((event) async {
+              _devToolsUri = Uri.parse(
+                (event['params']! as Map<String, Object?>)['uri']! as String,
+              );
+            });
+        final Future<void> dtd =
+            _waitFor(event: 'app.dtd', timeout: appStartTimeout, ignoreAppStopEvent: true).then((
+              event,
+            ) {
+              _dtdUri = Uri.parse((event['params']! as Map<String, Object?>)['uri']! as String);
+            });
 
         late final Map<String, Object?> debugPort;
         if (waitForDebugPort || withDebugger || attachPort != null) {
           debugPort = await _waitFor(event: 'app.debugPort', timeout: appStartTimeout);
+        }
+        if (withDebugger && waitForDtdAndDevTools) {
+          await Future.wait([devTools, dtd]);
         }
         if (withDebugger || attachPort != null) {
           final wsUriString = (debugPort['params']! as Map<String, Object?>)['wsUri']! as String;

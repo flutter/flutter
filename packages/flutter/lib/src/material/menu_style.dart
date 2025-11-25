@@ -13,7 +13,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
-import 'material_state.dart';
 import 'menu_anchor.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -336,7 +335,7 @@ class MenuStyle with Diagnosticable {
       minimumSize: WidgetStateProperty.lerp<Size?>(a?.minimumSize, b?.minimumSize, t, Size.lerp),
       fixedSize: WidgetStateProperty.lerp<Size?>(a?.fixedSize, b?.fixedSize, t, Size.lerp),
       maximumSize: WidgetStateProperty.lerp<Size?>(a?.maximumSize, b?.maximumSize, t, Size.lerp),
-      side: MaterialStateBorderSide.lerp(a?.side, b?.side, t),
+      side: WidgetStateBorderSide.lerp(a?.side, b?.side, t),
       shape: WidgetStateProperty.lerp<OutlinedBorder?>(a?.shape, b?.shape, t, OutlinedBorder.lerp),
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
       visualDensity: t < 0.5 ? a?.visualDensity : b?.visualDensity,

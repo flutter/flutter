@@ -23,6 +23,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterRestorationPlugin.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifeCycle_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
@@ -30,6 +31,9 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface FlutterEngine () <FlutterViewEngineDelegate>
+
+// Indicates whether this engine has **ever** been manually registered to a scene.
+@property(nonatomic, assign) BOOL manuallyRegisteredToScene;
 
 - (void)updateViewportMetrics:(flutter::ViewportMetrics)viewportMetrics;
 - (void)dispatchPointerDataPacket:(std::unique_ptr<flutter::PointerDataPacket>)packet;
@@ -49,6 +53,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (FlutterPlatformPlugin*)platformPlugin;
 - (FlutterTextInputPlugin*)textInputPlugin;
 - (FlutterRestorationPlugin*)restorationPlugin;
+- (FlutterEnginePluginSceneLifeCycleDelegate*)sceneLifeCycleDelegate;
 - (void)launchEngine:(nullable NSString*)entrypoint
           libraryURI:(nullable NSString*)libraryOrNil
       entrypointArgs:(nullable NSArray<NSString*>*)entrypointArgs;
@@ -102,6 +107,26 @@ NS_ASSUME_NONNULL_BEGIN
  * This function must be called on the main thread.
  */
 + (nullable FlutterEngine*)engineForIdentifier:(int64_t)identifier;
+
+- (void)addSceneLifeCycleDelegate:(NSObject<FlutterSceneLifeCycleDelegate>*)delegate;
+
+/*
+ * Performs AppDelegate callback provided through the `FlutterImplicitEngineDelegate` protocol to
+ * inform apps that the implicit `FlutterEngine` has initialized.
+ */
+- (BOOL)performImplicitEngineCallback;
+
+/*
+ * Creates a `FlutterEngineApplicationRegistrar` that can be used to access application-level
+ * services, such as the engine's `FlutterBinaryMessenger` or `FlutterTextureRegistry`.
+ */
+- (NSObject<FlutterApplicationRegistrar>*)registrarForApplication:(NSString*)key;
+
+- (void)sendDeepLinkToFramework:(NSURL*)url completionHandler:(void (^)(BOOL success))completion;
+
+@end
+
+@interface FlutterImplicitEngineBridgeImpl : NSObject <FlutterImplicitEngineBridge>
 
 @end
 

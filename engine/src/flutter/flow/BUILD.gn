@@ -82,8 +82,6 @@ source_set("flow") {
     "stopwatch.h",
     "stopwatch_dl.cc",
     "stopwatch_dl.h",
-    "stopwatch_sk.cc",
-    "stopwatch_sk.h",
     "surface.cc",
     "surface.h",
     "surface_frame.cc",

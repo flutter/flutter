@@ -1185,6 +1185,10 @@ class _SnappingSimulation extends Simulation {
       return pixelSnapSizes.first;
     }
     final double nextSize = pixelSnapSizes[indexOfNextSize];
+    // If already snapped - keep this as target size
+    if (nextSize == position) {
+      return nextSize;
+    }
     final double previousSize = pixelSnapSizes[indexOfNextSize - 1];
     if (initialVelocity.abs() <= tolerance.velocity) {
       // If velocity is zero, snap to the nearest snap size with the minimum velocity.

@@ -44,11 +44,9 @@ class CkCanvas implements LayerCanvas {
 
   @override
   void clipPath(ui.Path path, {bool doAntiAlias = true}) {
-    skCanvas.clipPath(
-      ((path as LazyPath).builtPath as CkPath).skiaObject,
-      _clipOpIntersect,
-      doAntiAlias,
-    );
+    final SkPath skPath = ((path as LazyPath).builtPath as CkPath).snapshotSkPath();
+    skCanvas.clipPath(skPath, _clipOpIntersect, doAntiAlias);
+    skPath.delete();
   }
 
   @override
@@ -61,11 +59,11 @@ class CkCanvas implements LayerCanvas {
   void clipRSuperellipse(ui.RSuperellipse rsuperellipse, {bool doAntiAlias = true}) {
     final (ui.Path path, ui.Offset offset) = rsuperellipse.toPathOffset();
     translate(offset.dx, offset.dy);
-    skCanvas.clipPath(
-      ((path as LazyPath).builtPath as CkPath).skiaObject,
-      _clipOpIntersect,
-      doAntiAlias,
-    );
+
+    final SkPath skPath = ((path as LazyPath).builtPath as CkPath).snapshotSkPath();
+    skCanvas.clipPath(skPath, _clipOpIntersect, doAntiAlias);
+    skPath.delete();
+
     translate(-offset.dx, -offset.dy);
   }
 
@@ -226,7 +224,9 @@ class CkCanvas implements LayerCanvas {
   @override
   void drawPath(ui.Path path, ui.Paint paint) {
     final skPaint = (paint as CkPaint).toSkPaint();
-    skCanvas.drawPath(((path as LazyPath).builtPath as CkPath).skiaObject, skPaint);
+    final SkPath skPath = ((path as LazyPath).builtPath as CkPath).snapshotSkPath();
+    skCanvas.drawPath(skPath, skPaint);
+    skPath.delete();
     skPaint.delete();
   }
 
@@ -268,7 +268,11 @@ class CkCanvas implements LayerCanvas {
     final skPaint = (paint as CkPaint).toSkPaint();
     final (ui.Path path, ui.Offset offset) = rsuperellipse.toPathOffset();
     translate(offset.dx, offset.dy);
-    skCanvas.drawPath(((path as LazyPath).builtPath as CkPath).skiaObject, skPaint);
+
+    final SkPath skPath = ((path as LazyPath).builtPath as CkPath).snapshotSkPath();
+    skCanvas.drawPath(skPath, skPaint);
+    skPath.delete();
+
     translate(-offset.dx, -offset.dy);
     skPaint.delete();
   }

@@ -254,9 +254,7 @@ abstract class UnpackIOS extends UnpackDarwin {
   ];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.pattern('{OUTPUT_DIR}/Flutter.framework/Flutter'),
-  ];
+  List<Source> get outputs => const <Source>[kFlutterIOSFrameworkBinarySource];
 
   @override
   List<Target> get dependencies => <Target>[];
@@ -459,10 +457,10 @@ class _IssueLaunchRootViewControllerAccess extends Target {
         flutterProject.ios.appDelegateSwift,
       );
     }
-    if (flutterProject.ios.appDelegateObjc.existsSync()) {
+    if (flutterProject.ios.appDelegateObjcImplementation.existsSync()) {
       await checkForLaunchRootViewControllerAccessDeprecationObjc(
         environment.logger,
-        flutterProject.ios.appDelegateObjc,
+        flutterProject.ios.appDelegateObjcImplementation,
       );
     }
   }
@@ -476,7 +474,10 @@ class _IssueLaunchRootViewControllerAccess extends Target {
       const Source.pattern(
         '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart',
       ),
-      Source.fromProject((FlutterProject project) => project.ios.appDelegateObjc, optional: true),
+      Source.fromProject(
+        (FlutterProject project) => project.ios.appDelegateObjcImplementation,
+        optional: true,
+      ),
       Source.fromProject((FlutterProject project) => project.ios.appDelegateSwift, optional: true),
     ];
   }
@@ -722,9 +723,12 @@ abstract class IosAssetBundle extends Target {
     );
 
     // Copy the plist from either the project or module.
-    flutterProject.ios.appFrameworkInfoPlist.copySync(
-      environment.outputDir.childDirectory('App.framework').childFile('Info.plist').path,
-    );
+    final File appFrameworkInfoPlist = environment.outputDir
+        .childDirectory('App.framework')
+        .childFile('Info.plist');
+    flutterProject.ios.appFrameworkInfoPlist.copySync(appFrameworkInfoPlist.path);
+
+    await _updateMinimumOSVersion(appFrameworkInfoPlist, environment);
 
     await _signFramework(environment, frameworkBinary, buildMode);
   }
@@ -822,6 +826,25 @@ class ReleaseIosApplicationBundle extends _IosAssetBundleWithDSYM {
         );
       }
     }
+  }
+}
+
+/// Update the MinimumOSVersion key in the given Info.plist file.
+Future<void> _updateMinimumOSVersion(File infoPlist, Environment environment) async {
+  final minimumOSVersion = FlutterDarwinPlatform.ios.deploymentTarget().toString();
+  final plutilArgs = <String>[
+    'plutil',
+    '-replace',
+    'MinimumOSVersion',
+    '-string',
+    minimumOSVersion,
+    infoPlist.path,
+  ];
+  final ProcessResult result = await environment.processManager.run(plutilArgs);
+  if (result.exitCode != 0) {
+    printXcodeWarning(
+      'Failed to update MinimumOSVersion in ${infoPlist.path}. This may cause AppStore validation failures. Please file an issue at https://github.com/flutter/flutter/issues/new/choose',
+    );
   }
 }
 
