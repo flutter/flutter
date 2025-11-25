@@ -211,10 +211,10 @@ public class AccessibilityChannel {
     void onTooltip(@NonNull String message);
 
     /**
-     * The framework has started or stopped compiling the accessibility tree.
+     * The framework has stopped compiling the accessibility tree.
      *
-     * @param enabled True to start compiling the accessibility tree, false to stop it.
+     * The subclass needs to clean up any cached accessibility data from previous update.
      */
-    void setSemanticsTreeEnabled(boolean enabled);
+    void resetSemantics();
   }
 }
