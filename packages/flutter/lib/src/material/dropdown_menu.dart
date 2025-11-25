@@ -481,7 +481,7 @@ class DropdownMenu<T extends Object> extends StatefulWidget {
   /// by the [FocusNode.canRequestFocus] property.
   final FocusNode? focusNode;
 
-  /// Determine if the dropdown button requests focus and the on-screen virtual
+  /// Determine if the dropdown menu requests focus and the on-screen virtual
   /// keyboard is shown in response to a touch event.
   ///
   /// Ignored if a [focusNode] is explicitly provided (in which case,
