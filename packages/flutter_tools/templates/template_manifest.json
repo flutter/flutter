@@ -337,6 +337,7 @@
     "templates/plugin_darwin_spm/darwin.tmpl/projectName.tmpl/Package.swift.tmpl",
     "templates/plugin_darwin_spm/darwin.tmpl/projectName.tmpl/Sources/projectName.tmpl/PrivacyInfo.xcprivacy",
     "templates/plugin_darwin_spm/darwin.tmpl/projectName.tmpl/Sources/projectName.tmpl/Resources/.gitkeep",
+    "templates/plugin_darwin_spm/darwin.tmpl/projectName.podspec.tmpl",
 
     "templates/plugin_cocoapods/ios.tmpl/Classes/pluginClass.swift.tmpl",
     "templates/plugin_cocoapods/ios.tmpl/Assets/.gitkeep",

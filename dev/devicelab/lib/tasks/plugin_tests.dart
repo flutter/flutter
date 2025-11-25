@@ -419,6 +419,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
     required String template,
     Map<String, String>? environment,
   }) async {
+    print('This are options: $options');
     final bool isDarwin = target == 'ios' || target == 'macos';
     await inDirectory(directory, () async {
       await flutter(
@@ -427,7 +428,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
           '--template=$template',
           '--org',
           'io.flutter.devicelab',
-          ...options,
+          if (template == 'app' && isDarwin) '--platforms=$target' else ...options,
           name,
         ],
         environment: environment,
@@ -498,41 +499,42 @@ end
     if (!podspec.existsSync()) {
       throw TaskResult.failure('podspec file missing at ${podspec.path}');
     }
-    final String versionString = target == 'ios'
-        ? "s.platform = :ios, '13.0'"
-        : "s.platform = :osx, '10.11'";
-    final String alternateVersionString = target == 'ios'
+    String podspecContent = podspec.readAsStringSync();
+    final bool isMultiPlatform = podspecContent.contains('s.osx.deployment_target');
+    final String versionString;
+    if (isMultiPlatform){
+      print('Multi platform podspec');
+      versionString = target == 'ios'
         ? "s.ios.deployment_target = '13.0'"
         : "s.osx.deployment_target = '10.15'";
-
-    String podspecContent = podspec.readAsStringSync();
-    String? foundVersionString;
-    if (podspecContent.contains(versionString)) {
-      foundVersionString = versionString;
-    } else if (podspecContent.contains(alternateVersionString)) {
-      foundVersionString = alternateVersionString;
+    } else {
+      print('Single platform podspec');
+      versionString = target == 'ios'
+        ? "s.platform = :ios, '11.0'"
+        : "s.platform = :osx, '10.11'";
     }
 
-    if (foundVersionString == null) {
+    if (!podspecContent.contains(versionString)) {
       throw TaskResult.failure(
         'Update this test to match plugin minimum $target deployment version',
       );
     }
     // Add transitive dependency on AppAuth 1.6 targeting iOS 8 and macOS 10.9, which no longer builds in Xcode
     // to test the version is forced higher and builds.
-    const String iosContent = '''
-s.platform = :ios, '10.0'
-s.dependency 'AppAuth', '1.6.0'
-''';
-
-    const String macosContent = '''
-s.platform = :osx, '10.8'
-s.dependency 'AppAuth', '1.6.0'
-''';
+    final String replacementContent;
+    if (isMultiPlatform) {
+      replacementContent = target == 'ios'
+          ? "s.ios.deployment_target = '10.0'\n  s.dependency 'AppAuth', '1.6.0'"
+          : "s.osx.deployment_target = '10.8'\n  s.dependency 'AppAuth', '1.6.0'";
+    } else {
+      replacementContent = target == 'ios'
+          ? "s.platform = :ios, '10.0'\ns.dependency 'AppAuth', '1.6.0'"
+          : "s.platform = :osx, '10.8'\ns.dependency 'AppAuth', '1.6.0'";
+    }
 
     podspecContent = podspecContent.replaceFirst(
-      foundVersionString,
-      target == 'ios' ? iosContent : macosContent,
+      versionString,
+      replacementContent,
     );
     podspec.writeAsStringSync(podspecContent, flush: true);
   }
