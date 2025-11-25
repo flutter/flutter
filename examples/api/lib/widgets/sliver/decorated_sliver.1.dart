@@ -44,7 +44,7 @@ class _DecoratedSliverClipExampleState extends State<DecoratedSliverClipExample>
             children: <Widget>[
               Switch(
                 inactiveTrackColor: Colors.cyan,
-                activeColor: Colors.pink,
+                activeThumbColor: Colors.pink,
                 onChanged: (bool value) {
                   setState(() {
                     _isClipped = value;

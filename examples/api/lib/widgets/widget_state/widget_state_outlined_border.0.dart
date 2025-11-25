@@ -21,8 +21,8 @@ class SelectedBorder extends RoundedRectangleBorder implements WidgetStateOutlin
   const SelectedBorder();
 
   @override
-  OutlinedBorder? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.selected)) {
+  OutlinedBorder? resolve(Set<WidgetState> states) {
+    if (states.contains(WidgetState.selected)) {
       return const RoundedRectangleBorder();
     }
     return null; // Defer to default value on the theme or widget.

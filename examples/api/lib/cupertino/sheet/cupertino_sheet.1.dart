@@ -37,8 +37,7 @@ class HomePage extends StatelessWidget {
               onPressed: () {
                 showCupertinoSheet<void>(
                   context: context,
-                  useNestedNavigation: true,
-                  pageBuilder: (BuildContext context) => const _SheetScaffold(),
+                  useNestedNavigation: true, builder: (BuildContext context) => const _SheetScaffold(),
                 );
               },
               child: const Text('Open Bottom Sheet'),
@@ -95,8 +94,7 @@ class _SheetBody extends StatelessWidget {
             onPressed: () {
               showCupertinoSheet<void>(
                 context: context,
-                useNestedNavigation: true,
-                pageBuilder: (BuildContext context) => const _SheetScaffold(),
+                useNestedNavigation: true, builder: (BuildContext context) => const _SheetScaffold(),
               );
             },
             child: const Text('Push Another Sheet'),

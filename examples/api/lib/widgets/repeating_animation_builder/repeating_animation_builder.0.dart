@@ -164,7 +164,7 @@ class _RepeatingAnimationBuilderExampleState extends State<RepeatingAnimationBui
               child: CircularProgressIndicator(
                 value: animationValue,
                 strokeWidth: 6,
-                backgroundColor: colors.surfaceVariant.withOpacity(0.3),
+                backgroundColor: colors.surfaceContainerHighest.withOpacity(0.3),
                 color: colors.primary,
               ),
             ),
@@ -189,7 +189,7 @@ class _RepeatingAnimationBuilderExampleState extends State<RepeatingAnimationBui
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         decoration: BoxDecoration(
-          color: colors.surfaceVariant.withOpacity(0.3),
+          color: colors.surfaceContainerHighest.withOpacity(0.3),
           borderRadius: BorderRadius.circular(24.0),
         ),
         child: Row(
