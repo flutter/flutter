@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "ជ្រើសរើស​ទាំងអស់",
   "searchResultsFound": "បាន​រក​ឃើញ​លទ្ធផល​ស្វែងរក",
   "noResultsFound": "រក​មិន​ឃើញ​លទ្ធផលទេ",
-  "radioButtonUnselectedLabel": "មិនបាន​ជ្រើសរើសទេ"
+  "radioButtonUnselectedLabel": "មិនបាន​ជ្រើសរើសទេ",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

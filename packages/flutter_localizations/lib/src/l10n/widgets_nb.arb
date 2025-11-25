@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "Velg alle",
   "searchResultsFound": "Søkeresultater ble funnet",
   "noResultsFound": "Fant ingen resultater",
-  "radioButtonUnselectedLabel": "Ikke valgt"
+  "radioButtonUnselectedLabel": "Ikke valgt",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

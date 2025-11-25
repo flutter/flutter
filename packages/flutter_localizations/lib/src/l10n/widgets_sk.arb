@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "Vybrať všetko",
   "searchResultsFound": "Našli sa výsledky vyhľadávania",
   "noResultsFound": "Nenašli sa žiadne výsledky",
-  "radioButtonUnselectedLabel": "Nevybrané"
+  "radioButtonUnselectedLabel": "Nevybrané",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "සියල්ල තෝරන්න",
   "searchResultsFound": "සෙවීම් ප්‍රතිඵල හමු විය",
   "noResultsFound": "ප්‍රතිඵල හමු නොවුණි",
-  "radioButtonUnselectedLabel": "තෝරා නොමැත"
+  "radioButtonUnselectedLabel": "තෝරා නොමැත",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

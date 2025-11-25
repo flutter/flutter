@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "Velja allt",
   "searchResultsFound": "Leitarniðurstöður fundust",
   "noResultsFound": "Engar niðurstöður fundust",
-  "radioButtonUnselectedLabel": "Ekki valið"
+  "radioButtonUnselectedLabel": "Ekki valið",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

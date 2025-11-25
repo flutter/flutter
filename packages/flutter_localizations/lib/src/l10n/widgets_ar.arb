@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "اختيار الكل",
   "searchResultsFound": "تم العثور على نتائج بحث",
   "noResultsFound": "لم يتم العثور على نتائج",
-  "radioButtonUnselectedLabel": "غير محدّد"
+  "radioButtonUnselectedLabel": "غير محدّد",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }
