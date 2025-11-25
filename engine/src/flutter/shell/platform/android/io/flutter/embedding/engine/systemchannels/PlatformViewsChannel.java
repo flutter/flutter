@@ -92,20 +92,18 @@ public class PlatformViewsChannel {
                   : null;
 
           try {
-            // TODO(gmackall): Enable hcpp path in a follow up PR to
-            //                 https://github.com/flutter/flutter/pull/170553/.
-            //                 with a new more externally friendly flag name.
-            //            if (handler.isHcppEnabled()) {
-            //              final PlatformViewCreationRequest request =
-            //                  PlatformViewCreationRequest.createHCPPRequest(
-            //                      (int) createArgs.get("id"),
-            //                      (String) createArgs.get("viewType"),
-            //                      (int) createArgs.get("direction"),
-            //                      additionalParams);
-            //              handler.createPlatformViewHcpp(request);
-            //              result.success(null);
-            //              return;
-            //            }
+            Log.e("HI GRAY", "creating HCPP view");
+            if (handler.isHcppEnabled()) {
+              final PlatformViewCreationRequest request =
+                  PlatformViewCreationRequest.createHCPPRequest(
+                      (int) createArgs.get("id"),
+                      (String) createArgs.get("viewType"),
+                      (int) createArgs.get("direction"),
+                      additionalParams);
+              handler.createPlatformViewHcpp(request);
+              result.success(null);
+              return;
+            }
             if (usesPlatformViewLayer) {
               final PlatformViewCreationRequest request =
                   PlatformViewCreationRequest.createHybridCompositionRequest(
