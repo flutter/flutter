@@ -58,16 +58,18 @@ class IOSDeploymentTargetMigration extends ProjectMigrator {
   <key>MinimumOSVersion</key>
   <string>12.0</string>
 ''';
-    const minimumOSVersionReplacement = '''
+    const minimumOSVersionOriginal13 = '''
   <key>MinimumOSVersion</key>
   <string>13.0</string>
 ''';
+    const minimumOSVersionReplacement = '';
 
     return fileContents
         .replaceAll(minimumOSVersionOriginal8, minimumOSVersionReplacement)
         .replaceAll(minimumOSVersionOriginal9, minimumOSVersionReplacement)
         .replaceAll(minimumOSVersionOriginal11, minimumOSVersionReplacement)
-        .replaceAll(minimumOSVersionOriginal12, minimumOSVersionReplacement);
+        .replaceAll(minimumOSVersionOriginal12, minimumOSVersionReplacement)
+        .replaceAll(minimumOSVersionOriginal13, minimumOSVersionReplacement);
   }
 
   @override
