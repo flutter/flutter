@@ -326,7 +326,10 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
             })
         .addOnFailureListener(
             exception -> {
-              switch (((SplitInstallException) exception).getErrorCode()) {
+              SplitInstallException splitInstallException = (SplitInstallException) exception;
+              int errorCode = splitInstallException.getErrorCode();
+
+              switch (errorCode) {
                 case SplitInstallErrorCode.NETWORK_ERROR:
                   flutterJNI.deferredComponentInstallFailure(
                       loadingUnitId,
@@ -335,6 +338,7 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
                           + "\" failed with a network error",
                       true);
                   break;
+
                 case SplitInstallErrorCode.MODULE_UNAVAILABLE:
                   flutterJNI.deferredComponentInstallFailure(
                       loadingUnitId,
@@ -343,14 +347,13 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
                           + "\" failed as it is unavailable",
                       false);
                   break;
+
                 default:
                   flutterJNI.deferredComponentInstallFailure(
                       loadingUnitId,
                       String.format(
                           "Install of deferred component module \"%s\" failed with error %d: %s",
-                          componentName,
-                          ((SplitInstallException) exception).getErrorCode(),
-                          exception.getMessage()),
+                          componentName, errorCode, splitInstallException.getMessage()),
                       false);
                   break;
               }
