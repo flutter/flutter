@@ -613,7 +613,11 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
         borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
         child: CupertinoUserInterfaceLevel(
           data: CupertinoUserInterfaceLevelData.elevated,
-          child: _CupertinoSheetScope(child: _effectiveBuilder(context)),
+          child: Builder(
+            builder: (BuildContext context) {
+              return _CupertinoSheetScope(sheetContext: context, child: _effectiveBuilder(context));
+            },
+          ),
         ),
       ),
     );
@@ -653,7 +657,9 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
 
 // Internally used to see if another sheet is in the tree already.
 class _CupertinoSheetScope extends InheritedWidget {
-  const _CupertinoSheetScope({required super.child});
+  const _CupertinoSheetScope({required super.child, required this.sheetContext});
+
+  final BuildContext sheetContext;
 
   static _CupertinoSheetScope? maybeOf(BuildContext context) {
     return context.getInheritedWidgetOfExactType<_CupertinoSheetScope>();
@@ -762,6 +768,7 @@ class _CupertinoDragGestureDetector<T> extends StatefulWidget {
     required this.enabledCallback,
     required this.onStartPopGesture,
     required this.child,
+    this.sheetContext,
   });
 
   final Widget child;
@@ -769,6 +776,8 @@ class _CupertinoDragGestureDetector<T> extends StatefulWidget {
   final ValueGetter<bool> enabledCallback;
 
   final ValueGetter<_CupertinoDragGestureController<T>> onStartPopGesture;
+
+  final BuildContext? sheetContext;
 
   @override
   _CupertinoDragGestureDetectorState<T> createState() => _CupertinoDragGestureDetectorState<T>();
@@ -782,6 +791,8 @@ class _CupertinoDragGestureDetectorState<T> extends State<_CupertinoDragGestureD
 
   static VelocityTracker _cupertinoVelicityBuilder(PointerEvent event) =>
       IOSScrollViewFlingVelocityTracker(event.kind);
+
+  BuildContext get sheetContext => widget.sheetContext ?? context;
 
   @override
   void initState() {
@@ -832,7 +843,8 @@ class _CupertinoDragGestureDetectorState<T> extends State<_CupertinoDragGestureD
     }
     _dragGestureController!.dragUpdate(
       // Divide by size of the sheet.
-      details.primaryDelta! / (context.size!.height - (context.size!.height * _kTopGapRatio)),
+      details.primaryDelta! /
+          (sheetContext.size!.height - (sheetContext.size!.height * _kTopGapRatio)),
       _stretchDragController!.controller,
     );
   }
@@ -845,7 +857,7 @@ class _CupertinoDragGestureDetectorState<T> extends State<_CupertinoDragGestureD
       return;
     }
     _dragGestureController!.dragEnd(
-      details.velocity.pixelsPerSecond.dy / context.size!.height,
+      details.velocity.pixelsPerSecond.dy / sheetContext.size!.height,
       _stretchDragController!.controller,
     );
     _dragGestureController = null;
@@ -1203,5 +1215,26 @@ class _CupertinoDraggableScrollableSheetState<T>
   @override
   Widget build(BuildContext context) {
     return widget.builder(context, _scrollController);
+  }
+}
+
+class CupertinoSheetDragArea<T> extends StatelessWidget {
+  CupertinoSheetDragArea({this.enableDrag = true, required this.route, required this.child});
+
+  final bool enableDrag;
+
+  final Widget child;
+
+  final ModalRoute<T> route;
+
+  @override
+  Widget build(BuildContext context) {
+    final BuildContext sheetContext = _CupertinoSheetScope.maybeOf(context)!.sheetContext;
+    return _CupertinoDragGestureDetector<T>(
+      enabledCallback: () => enableDrag,
+      onStartPopGesture: () => _CupertinoSheetRouteTransitionMixin._startPopGesture<T>(route),
+      sheetContext: sheetContext,
+      child: child,
+    );
   }
 }
