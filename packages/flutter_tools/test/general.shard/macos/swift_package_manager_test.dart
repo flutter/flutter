@@ -5,6 +5,8 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/macos/swift_package_manager.dart';
@@ -34,6 +36,7 @@ void main() {
             final spm = SwiftPackageManager(
               fileSystem: fs,
               templateRenderer: const MustacheTemplateRenderer(),
+              artifacts: FakeArtifacts(),
             );
             await spm.generatePluginsSwiftPackage(<Plugin>[], platform, project);
 
@@ -51,6 +54,7 @@ void main() {
             final spm = SwiftPackageManager(
               fileSystem: fs,
               templateRenderer: const MustacheTemplateRenderer(),
+              artifacts: FakeArtifacts(),
             );
             await spm.generatePluginsSwiftPackage(<Plugin>[], platform, project);
 
@@ -59,6 +63,64 @@ void main() {
                 : '.macOS("10.15")';
             expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
             expect(project.flutterPluginSwiftPackageManifest.readAsStringSync(), '''
+// swift-tools-version: 5.9
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+//
+//  Generated file. Do not edit.
+//
+
+import PackageDescription
+
+let package = Package(
+    name: "FlutterGeneratedPluginSwiftPackage",
+    platforms: [
+        $supportedPlatform
+    ],
+    products: [
+        .library(name: "FlutterGeneratedPluginSwiftPackage", type: .static, targets: ["FlutterGeneratedPluginSwiftPackage"])
+    ],
+    dependencies: [
+        .package(name: "FlutterFramework", path: "../.packages/FlutterFramework")
+    ],
+    targets: [
+        .target(
+            name: "FlutterGeneratedPluginSwiftPackage",
+            dependencies: [
+                .product(name: "FlutterFramework", package: "FlutterFramework")
+            ]
+        )
+    ]
+)
+''');
+          });
+
+          testWithoutContext(
+            'generate if no dependencies, no Flutter dependency, and already migrated',
+            () async {
+              final fs = MemoryFileSystem();
+              final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
+              project.xcodeProjectInfoFile.createSync(recursive: true);
+              project.xcodeProjectInfoFile.writeAsStringSync('''
+'		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };';
+''');
+
+              final spm = SwiftPackageManager(
+                fileSystem: fs,
+                templateRenderer: const MustacheTemplateRenderer(),
+                artifacts: FakeArtifacts(),
+              );
+              await spm.generatePluginsSwiftPackage(
+                <Plugin>[],
+                platform,
+                project,
+                flutterAsADependency: false,
+              );
+
+              final supportedPlatform = platform == FlutterDarwinPlatform.ios
+                  ? '.iOS("13.0")'
+                  : '.macOS("10.15")';
+              expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
+              expect(project.flutterPluginSwiftPackageManifest.readAsStringSync(), '''
 // swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 //
@@ -85,7 +147,8 @@ $_doubleIndent
     ]
 )
 ''');
-          });
+            },
+          );
 
           testWithoutContext('generate with single dependency', () async {
             final fs = MemoryFileSystem();
@@ -104,6 +167,7 @@ $_doubleIndent
             final spm = SwiftPackageManager(
               fileSystem: fs,
               templateRenderer: const MustacheTemplateRenderer(),
+              artifacts: FakeArtifacts(),
             );
             await spm.generatePluginsSwiftPackage(<Plugin>[validPlugin1], platform, project);
 
@@ -134,13 +198,15 @@ let package = Package(
         .library(name: "FlutterGeneratedPluginSwiftPackage", type: .static, targets: ["FlutterGeneratedPluginSwiftPackage"])
     ],
     dependencies: [
-        .package(name: "valid_plugin_1", path: "../.packages/valid_plugin_1")
+        .package(name: "valid_plugin_1", path: "../.packages/valid_plugin_1"),
+        .package(name: "FlutterFramework", path: "../.packages/FlutterFramework")
     ],
     targets: [
         .target(
             name: "FlutterGeneratedPluginSwiftPackage",
             dependencies: [
-                .product(name: "valid-plugin-1", package: "valid_plugin_1")
+                .product(name: "valid-plugin-1", package: "valid_plugin_1"),
+                .product(name: "FlutterFramework", package: "FlutterFramework")
             ]
         )
     ]
@@ -191,6 +257,7 @@ let package = Package(
             final spm = SwiftPackageManager(
               fileSystem: fs,
               templateRenderer: const MustacheTemplateRenderer(),
+              artifacts: FakeArtifacts(),
             );
             await spm.generatePluginsSwiftPackage(
               <Plugin>[
@@ -237,19 +304,97 @@ let package = Package(
     ],
     dependencies: [
         .package(name: "valid_plugin_1", path: "../.packages/valid_plugin_1"),
-        .package(name: "valid_plugin_2", path: "../.packages/valid_plugin_2")
+        .package(name: "valid_plugin_2", path: "../.packages/valid_plugin_2"),
+        .package(name: "FlutterFramework", path: "../.packages/FlutterFramework")
     ],
     targets: [
         .target(
             name: "FlutterGeneratedPluginSwiftPackage",
             dependencies: [
                 .product(name: "valid-plugin-1", package: "valid_plugin_1"),
-                .product(name: "valid-plugin-2", package: "valid_plugin_2")
+                .product(name: "valid-plugin-2", package: "valid_plugin_2"),
+                .product(name: "FlutterFramework", package: "FlutterFramework")
             ]
         )
     ]
 )
 ''');
+          });
+
+          testWithoutContext('symlinks the framework for each build mode', () async {
+            final fs = MemoryFileSystem();
+            final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
+            project.xcodeProjectInfoFile.createSync(recursive: true);
+            project.xcodeProjectInfoFile.writeAsStringSync('''
+'		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };';
+''');
+
+            final spm = SwiftPackageManager(
+              fileSystem: fs,
+              templateRenderer: const MustacheTemplateRenderer(),
+              artifacts: FakeArtifacts(),
+            );
+            await spm.generatePluginsSwiftPackage(<Plugin>[], platform, project);
+            expect(project.flutterFrameworkSwiftPackageDirectory.existsSync(), isTrue);
+
+            if (platform == FlutterDarwinPlatform.ios) {
+              expect(
+                project.flutterFrameworkSwiftPackageDirectory
+                    .childDirectory('Debug')
+                    .childLink('Flutter.xcframework')
+                    .targetSync(),
+                'flutter/bin/cache/artifacts/engine/ios/Flutter.xcframework',
+              );
+              expect(
+                project.flutterFrameworkSwiftPackageDirectory
+                    .childDirectory('Profile')
+                    .childLink('Flutter.xcframework')
+                    .targetSync(),
+                'flutter/bin/cache/artifacts/engine/ios-profile/Flutter.xcframework',
+              );
+              expect(
+                project.flutterFrameworkSwiftPackageDirectory
+                    .childDirectory('Release')
+                    .childLink('Flutter.xcframework')
+                    .targetSync(),
+                'flutter/bin/cache/artifacts/engine/ios-release/Flutter.xcframework',
+              );
+              expect(
+                project.flutterFrameworkSwiftPackageDirectory
+                    .childLink('Flutter.xcframework')
+                    .targetSync(),
+                './Debug/Flutter.xcframework',
+              );
+            }
+            if (platform == FlutterDarwinPlatform.macos) {
+              expect(
+                project.flutterFrameworkSwiftPackageDirectory
+                    .childDirectory('Debug')
+                    .childLink('FlutterMacOS.xcframework')
+                    .targetSync(),
+                'flutter/bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.xcframework',
+              );
+              expect(
+                project.flutterFrameworkSwiftPackageDirectory
+                    .childDirectory('Profile')
+                    .childLink('FlutterMacOS.xcframework')
+                    .targetSync(),
+                'flutter/bin/cache/artifacts/engine/darwin-x64-profile/FlutterMacOS.xcframework',
+              );
+              expect(
+                project.flutterFrameworkSwiftPackageDirectory
+                    .childDirectory('Release')
+                    .childLink('FlutterMacOS.xcframework')
+                    .targetSync(),
+                'flutter/bin/cache/artifacts/engine/darwin-x64-release/FlutterMacOS.xcframework',
+              );
+              expect(
+                project.flutterFrameworkSwiftPackageDirectory
+                    .childLink('FlutterMacOS.xcframework')
+                    .targetSync(),
+                './Debug/FlutterMacOS.xcframework',
+              );
+            }
           });
         });
 
@@ -336,6 +481,44 @@ let package = Package(
             );
           });
         });
+
+        group('updateFlutterFrameworkSymlink', () {
+          testWithoutContext('create link if does not exists', () {
+            final fs = MemoryFileSystem();
+            final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
+            final Link frameworkSymlink = project.flutterFrameworkSwiftPackageDirectory.childLink(
+              '${platform.binaryName}.xcframework',
+            );
+            expect(frameworkSymlink.existsSync(), isFalse);
+            SwiftPackageManager.updateFlutterFrameworkSymlink(
+              buildMode: BuildMode.profile,
+              fileSystem: fs,
+              platform: platform,
+              project: project,
+            );
+            expect(frameworkSymlink.targetSync(), './Profile/${platform.binaryName}.xcframework');
+          });
+
+          testWithoutContext('replace link if already exists', () {
+            final fs = MemoryFileSystem();
+            final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
+            final Link frameworkSymlink = project.flutterFrameworkSwiftPackageDirectory.childLink(
+              '${platform.binaryName}.xcframework',
+            );
+            frameworkSymlink.createSync(
+              './Release/${platform.binaryName}.xcframework',
+              recursive: true,
+            );
+            expect(frameworkSymlink.targetSync(), './Release/${platform.binaryName}.xcframework');
+            SwiftPackageManager.updateFlutterFrameworkSymlink(
+              buildMode: BuildMode.debug,
+              fileSystem: fs,
+              platform: platform,
+              project: project,
+            );
+            expect(frameworkSymlink.targetSync(), './Debug/${platform.binaryName}.xcframework');
+          });
+        });
       });
     }
   });
@@ -364,6 +547,10 @@ class FakeXcodeProject extends Fake implements IosProject {
   @override
   Directory get relativeSwiftPackagesDirectory =>
       flutterSwiftPackagesDirectory.childDirectory('.packages');
+
+  @override
+  Directory get flutterFrameworkSwiftPackageDirectory =>
+      relativeSwiftPackagesDirectory.childDirectory('FlutterFramework');
 
   @override
   Directory get flutterPluginSwiftPackageDirectory =>
@@ -407,3 +594,32 @@ class FakePlugin extends Fake implements Plugin {
 }
 
 class FakePluginPlatform extends Fake implements PluginPlatform {}
+
+class FakeArtifacts extends Fake implements Artifacts {
+  @override
+  String getArtifactPath(
+    Artifact artifact, {
+    TargetPlatform? platform,
+    BuildMode? mode,
+    EnvironmentType? environmentType,
+  }) {
+    final String platformName;
+    final String frameworkName;
+    if (platform == TargetPlatform.darwin) {
+      platformName = 'darwin-x64';
+      frameworkName = 'FlutterMacOS';
+    } else {
+      platformName = 'ios';
+      frameworkName = 'Flutter';
+    }
+    final String plaformBuildMode;
+    if (mode == BuildMode.release) {
+      plaformBuildMode = '$platformName-release';
+    } else if (mode == BuildMode.profile) {
+      plaformBuildMode = '$platformName-profile';
+    } else {
+      plaformBuildMode = platformName;
+    }
+    return 'flutter/bin/cache/artifacts/engine/$plaformBuildMode/$frameworkName.xcframework';
+  }
+}

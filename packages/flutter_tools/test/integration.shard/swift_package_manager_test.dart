@@ -41,7 +41,6 @@ void main() {
           flutterBin,
           workingDirectoryPath,
           platform: platformName,
-          usesSwiftPackageManager: true,
           options: <String>['--platforms=$platformName'],
         );
         SwiftPackageManagerUtils.addDependency(
@@ -67,16 +66,15 @@ void main() {
           fileSystem.directory(appDirectoryPath).childDirectory(platformName).childFile('Podfile'),
           exists,
         );
-        expect(
-          fileSystem
-              .directory(appDirectoryPath)
-              .childDirectory(platformName)
-              .childDirectory('Flutter')
-              .childDirectory('ephemeral')
-              .childDirectory('Packages')
-              .childDirectory('FlutterGeneratedPluginSwiftPackage'),
-          isNot(exists),
-        );
+        final File generatedSwiftPackage = fileSystem
+            .directory(appDirectoryPath)
+            .childDirectory(platformName)
+            .childDirectory('Flutter')
+            .childDirectory('ephemeral')
+            .childDirectory('Packages')
+            .childDirectory('FlutterGeneratedPluginSwiftPackage')
+            .childFile('Package.swift');
+        expect(generatedSwiftPackage, isNot(exists));
 
         final SwiftPackageManagerPlugin createdCocoaPodsPlugin =
             await SwiftPackageManagerUtils.createPlugin(
@@ -170,16 +168,32 @@ void main() {
           fileSystem.directory(appDirectoryPath).childDirectory(platformName).childFile('Podfile'),
           exists,
         );
-        expect(
-          fileSystem
-              .directory(appDirectoryPath)
-              .childDirectory(platformName)
-              .childDirectory('Flutter')
-              .childDirectory('ephemeral')
-              .childDirectory('Packages')
-              .childDirectory('FlutterGeneratedPluginSwiftPackage'),
-          exists,
+        expect(generatedSwiftPackage, exists);
+
+        // Validate targeted configuration matches the embedded Flutter Framework configuration
+        final Directory buildDir = fileSystem
+            .directory(appDirectoryPath)
+            .childDirectory('build')
+            .childDirectory(platformName);
+        validateFrameworkConfiguration(buildDir, 'Debug', platformName);
+
+        // Validate targeted configuration matches the embedded Flutter Framework configuration
+        // when switching configuration directly with Xcode
+        await SwiftPackageManagerUtils.xcodebuildApp(
+          '$appDirectoryPath/$platformName',
+          platformName: platformName,
+          configuration: 'Release',
+          buildDir: buildDir.path,
         );
+        validateFrameworkConfiguration(buildDir, 'Release', platformName);
+
+        await SwiftPackageManagerUtils.xcodebuildApp(
+          '$appDirectoryPath/$platformName',
+          platformName: platformName,
+          configuration: 'Debug',
+          buildDir: buildDir.path,
+        );
+        validateFrameworkConfiguration(buildDir, 'Debug', platformName);
 
         // Build an app using both a CocoaPods and Swift Package Manager plugin.
         SwiftPackageManagerUtils.addDependency(
@@ -210,16 +224,7 @@ void main() {
           fileSystem.directory(appDirectoryPath).childDirectory(platformName).childFile('Podfile'),
           exists,
         );
-        expect(
-          fileSystem
-              .directory(appDirectoryPath)
-              .childDirectory(platformName)
-              .childDirectory('Flutter')
-              .childDirectory('ephemeral')
-              .childDirectory('Packages')
-              .childDirectory('FlutterGeneratedPluginSwiftPackage'),
-          exists,
-        );
+        expect(generatedSwiftPackage, exists);
 
         // Build app again but with Swift Package Manager disabled by config.
         // App will now use CocoaPods version of integration_test plugin.
@@ -294,27 +299,6 @@ void main() {
         plugin: integrationTestPlugin,
       );
 
-      await SwiftPackageManagerUtils.buildApp(
-        flutterBin,
-        appDirectoryPath,
-        options: <String>[platformName, '--config-only', '-v'],
-      );
-
-      expect(
-        fileSystem.directory(appDirectoryPath).childDirectory(platformName).childFile('Podfile'),
-        isNot(exists),
-      );
-      expect(
-        fileSystem
-            .directory(appDirectoryPath)
-            .childDirectory(platformName)
-            .childDirectory('Flutter')
-            .childDirectory('ephemeral')
-            .childDirectory('Packages')
-            .childDirectory('FlutterGeneratedPluginSwiftPackage'),
-        exists,
-      );
-
       // Create and build framework using the CocoaPods version of
       // integration_test even though Swift Package Manager is enabled.
       await SwiftPackageManagerUtils.buildApp(
@@ -325,6 +309,22 @@ void main() {
           'Swift Package Manager does not yet support this command. CocoaPods will be used instead.',
         ],
       );
+
+      // Verify the generated Swift Package Manager manifest file has no dependencies.
+      final File generatedManifestFile = fileSystem
+          .directory(appDirectoryPath)
+          .childDirectory(platformName)
+          .childDirectory('Flutter')
+          .childDirectory('ephemeral')
+          .childDirectory('Packages')
+          .childDirectory('FlutterGeneratedPluginSwiftPackage')
+          .childFile('Package.swift');
+
+      expect(generatedManifestFile, exists);
+
+      final String generatedManifest = generatedManifestFile.readAsStringSync();
+      const expected = 'dependencies: [\n        \n    ],\n';
+      expect(generatedManifest, contains(expected));
 
       expect(
         fileSystem
@@ -379,8 +379,10 @@ void main() {
           options: <String>[platformName, '--debug', '-v', if (noCodesign) '--no-codesign'],
           expectedLines: <Pattern>[
             r'SchemeAction Run\ Prepare\ Flutter\ Framework\ Script',
+            '-dXcodeBuildScript=prepare',
             '$unpackTarget: Starting due to',
-            '-dPreBuildAction=PrepareFramework $unpackTarget',
+            '-dXcodeBuildScript=build',
+            'Skipping target: $unpackTarget',
           ],
           unexpectedLines: <String>[],
         );
@@ -757,7 +759,8 @@ void main() {
     String generatedManifest = generatedManifestFile.readAsStringSync();
     const generatedSwiftDependency = '''
     dependencies: [
-        .package(name: "integration_test", path: "../.packages/integration_test")
+        .package(name: "integration_test", path: "../.packages/integration_test"),
+        .package(name: "FlutterFramework", path: "../.packages/FlutterFramework")
     ],
 ''';
 
@@ -779,8 +782,11 @@ void main() {
     expect(generatedManifestFile, exists);
 
     generatedManifest = generatedManifestFile.readAsStringSync();
-    const emptyDependencies = 'dependencies: [\n        \n    ],\n';
-
+    const emptyDependencies = '''
+    dependencies: [
+        .package(name: "FlutterFramework", path: "../.packages/FlutterFramework")
+    ],
+''';
     expect(generatedManifest, isNot(contains(generatedSwiftDependency)));
     expect(generatedManifest, contains(emptyDependencies));
   }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
@@ -853,7 +859,8 @@ void main() {
     String generatedManifest = generatedManifestFile.readAsStringSync();
     const generatedSwiftDependency = '''
     dependencies: [
-        .package(name: "integration_test", path: "../.packages/integration_test")
+        .package(name: "integration_test", path: "../.packages/integration_test"),
+        .package(name: "FlutterFramework", path: "../.packages/FlutterFramework")
     ],
 ''';
 
@@ -886,4 +893,48 @@ void main() {
     expect(generatedManifest, contains(emptyDependencies));
     expect(cocoaPodsPluginFramework, exists);
   }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
+}
+
+void validateFrameworkConfiguration(Directory buildDir, String configuration, String platformName) {
+  final File frameworkInfoPlist;
+  final Directory dsym;
+  if (platformName == 'macos') {
+    frameworkInfoPlist = buildDir
+        .childDirectory('Build')
+        .childDirectory('Products')
+        .childDirectory(configuration)
+        .childDirectory('macos_default_app.app')
+        .childDirectory('Contents')
+        .childDirectory('Frameworks')
+        .childDirectory('FlutterMacOS.framework')
+        .childDirectory('Resources')
+        .childFile('Info.plist');
+
+    dsym = buildDir
+        .childDirectory('Build')
+        .childDirectory('Products')
+        .childDirectory(configuration)
+        .childDirectory('FlutterMacOS.framework.dSYM');
+  } else {
+    frameworkInfoPlist = buildDir
+        .childDirectory('$configuration-iphoneos')
+        .childDirectory('Runner.app')
+        .childDirectory('Frameworks')
+        .childDirectory('Flutter.framework')
+        .childFile('Info.plist');
+    dsym = buildDir
+        .childDirectory('$configuration-iphoneos')
+        .childDirectory('Flutter.framework.dSYM');
+  }
+  expect(frameworkInfoPlist, exists);
+  expect(
+    frameworkInfoPlist.readAsStringSync().replaceAll(' ', '').replaceAll('\t', ''),
+    contains('''
+<key>BuildMode</key>
+<string>${configuration.toLowerCase()}</string>
+'''),
+  );
+  if (configuration == 'Release') {
+    expect(dsym, exists);
+  }
 }

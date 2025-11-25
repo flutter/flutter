@@ -50,7 +50,7 @@ class Context {
       case 'build':
         buildApp(platform);
       case 'prepare':
-        prepare(platform);
+        unpackFor(platform, 'prepare');
       case 'thin':
         // No-op, thinning is handled during the bundle asset assemble build target.
         break;
@@ -293,25 +293,49 @@ class Context {
         expandedCodeSignIdentity.isNotEmpty &&
         environment['CODE_SIGNING_REQUIRED'] != 'NO';
 
-    // Embed the actual Flutter.framework that the Flutter app expects to run against,
-    // which could be a local build or an arch/type specific build.
-    switch (platform) {
-      case TargetPlatform.ios:
-        runRsync('${environment['BUILT_PRODUCTS_DIR']}/Flutter.framework', '$xcodeFrameworksDir/');
-      case TargetPlatform.macos:
-        runRsync(
-          extraArgs: <String>['--filter', '- Headers', '--filter', '- Modules'],
-          '${environment['BUILT_PRODUCTS_DIR']}/FlutterMacOS.framework',
-          '$xcodeFrameworksDir/',
-        );
+    var shouldEmbedFlutterFramework = true;
+    if (_usingFlutterFrameworkSwiftPackage()) {
+      final bool isFrameworkCorrect = _validateFlutterFramework(
+        buildMode: parseFlutterBuildMode(),
+        platform: platform,
+        builtProductsDir: environment['BUILT_PRODUCTS_DIR'],
+        targetBuildDir: xcodeFrameworksDir,
+      );
+      if (isFrameworkCorrect) {
+        // If the engine is correct, skip embedding.
+        shouldEmbedFlutterFramework = false;
+      } else {
+        // If the engine is wrong in either BUILT_PRODUCTS_DIR or TARGET_BUILD_DIR, call unpack
+        // again so the correct framework is copied into BUILT_PRODUCTS_DIR to then be embedded
+        // into TARGET_BUILD_DIR below.
+        unpackFor(platform, 'embed');
+      }
+    }
 
-        if (codesign) {
-          _codesignFramework(expandedCodeSignIdentity, '$xcodeFrameworksDir/App.framework/App');
-          _codesignFramework(
-            expandedCodeSignIdentity,
-            '$xcodeFrameworksDir/FlutterMacOS.framework/FlutterMacOS',
+    if (shouldEmbedFlutterFramework) {
+      // Embed the actual Flutter.framework that the Flutter app expects to run against,
+      // which could be a local build or an arch/type specific build.
+      switch (platform) {
+        case TargetPlatform.ios:
+          runRsync(
+            '${environment['BUILT_PRODUCTS_DIR']}/Flutter.framework',
+            '$xcodeFrameworksDir/',
           );
-        }
+        case TargetPlatform.macos:
+          runRsync(
+            extraArgs: <String>['--filter', '- Headers', '--filter', '- Modules'],
+            '${environment['BUILT_PRODUCTS_DIR']}/FlutterMacOS.framework',
+            '$xcodeFrameworksDir/',
+          );
+
+          if (codesign) {
+            _codesignFramework(expandedCodeSignIdentity, '$xcodeFrameworksDir/App.framework/App');
+            _codesignFramework(
+              expandedCodeSignIdentity,
+              '$xcodeFrameworksDir/FlutterMacOS.framework/FlutterMacOS',
+            );
+          }
+      }
     }
 
     _embedNativeAssets(
@@ -324,6 +348,94 @@ class Context {
     if (platform == TargetPlatform.ios) {
       addVmServiceBonjourService();
     }
+  }
+
+  bool _usingFlutterFrameworkSwiftPackage() {
+    final String? swiftPackagePath = environment['FLUTTER_FRAMEWORK_SWIFT_PACKAGE_PATH'];
+    if (swiftPackagePath == null) {
+      return false;
+    }
+    final swiftPackage = Directory(swiftPackagePath);
+    return swiftPackage.existsSync();
+  }
+
+  /// Returns `true` if the Flutter/FlutterMacOS framework Info.plist in [builtProductsDir] and
+  /// [targetBuildDir] matches the framework Info.plist from the engine cache for the
+  /// corresponding [platform] and [buildMode].
+  bool _validateFlutterFramework({
+    required String buildMode,
+    required TargetPlatform platform,
+    required String? builtProductsDir,
+    required String? targetBuildDir,
+  }) {
+    if (builtProductsDir == null || targetBuildDir == null) {
+      return false;
+    }
+    try {
+      final infoPlistFromBuild = File('$builtProductsDir/${platform.infoPlistPath}');
+      if (!infoPlistFromBuild.existsSync()) {
+        return false;
+      }
+      final infoPlistFromEmbedded = File('$targetBuildDir/${platform.infoPlistPath}');
+      if (!infoPlistFromEmbedded.existsSync()) {
+        return false;
+      }
+
+      final File? infoPlistFromEngineCache = _infoPlistFromEngineCache(buildMode, platform);
+      if (infoPlistFromEngineCache == null || !infoPlistFromEngineCache.existsSync()) {
+        return false;
+      }
+      final String expectedInfoPlist = infoPlistFromEngineCache.readAsStringSync();
+      return infoPlistFromBuild.readAsStringSync() == expectedInfoPlist &&
+          infoPlistFromEmbedded.readAsStringSync() == expectedInfoPlist;
+    } on Exception catch (e) {
+      // Use `echo` instead of `echoError` so it does not cause the build to fail.
+      echo('An error occured while validating the Flutter framework: $e');
+    }
+    return false;
+  }
+
+  /// Find the Info.plist of the Flutter/FlutterMacOS framework for the corresponding [buildMode]
+  /// and [platform].
+  File? _infoPlistFromEngineCache(String buildMode, TargetPlatform platform) {
+    final String artifactMode = buildMode == 'debug'
+        ? platform.artifactName
+        : '${platform.artifactName}-$buildMode';
+    final xcframework = Directory(
+      '${environment['FLUTTER_ROOT'] ?? ''}/bin/cache/artifacts/engine/$artifactMode/${platform.frameworkName}.xcframework',
+    );
+    switch (platform) {
+      case TargetPlatform.ios:
+        String? sdkRoot = environment['SDKROOT'];
+        if (sdkRoot == null) {
+          return null;
+        }
+        sdkRoot = sdkRoot.toLowerCase();
+        var simulatorSDK = false;
+        if (!sdkRoot.contains('iphone')) {
+          return null;
+        }
+        if (sdkRoot.contains('simulator')) {
+          simulatorSDK = true;
+        }
+        for (final FileSystemEntity entity in xcframework.listSync()) {
+          if (entity is Directory && entity.path.contains('ios-')) {
+            if (simulatorSDK && entity.path.endsWith('-simulator')) {
+              return File('${entity.path}/${platform.infoPlistPath}');
+            }
+            if (!simulatorSDK && !entity.path.endsWith('-simulator')) {
+              return File('${entity.path}/${platform.infoPlistPath}');
+            }
+          }
+        }
+      case TargetPlatform.macos:
+        for (final FileSystemEntity entity in xcframework.listSync()) {
+          if (entity is Directory && entity.path.contains('macos-')) {
+            return File('${entity.path}/${platform.infoPlistPath}');
+          }
+        }
+    }
+    return null;
   }
 
   void _embedNativeAssets(
@@ -493,7 +605,7 @@ class Context {
   }
 
   /// Calls `flutter assemble [buildMode]_unpack_[platform]` (e.g. `debug_unpack_ios`, `debug_unpack_macos`)
-  void prepare(TargetPlatform platform) {
+  void unpackFor(TargetPlatform platform, String command) {
     // The "prepare" command runs in a pre-action script, which also runs when
     // using the Xcode/xcodebuild clean command. Skip if cleaning.
     if (environment['ACTION'] == 'clean') {
@@ -504,9 +616,11 @@ class Context {
     final String projectPath = environment['FLUTTER_APPLICATION_PATH'] ?? '$sourceRoot/..';
 
     final String buildMode = parseFlutterBuildMode();
-
+    if (command == 'prepare') {
+      _updateBuildConfigurationForSwiftPackages(buildMode, platform);
+    }
     final List<String> flutterArgs = _generateFlutterArgsForAssemble(
-      command: 'prepare',
+      command: command,
       buildMode: buildMode,
       sourceRoot: sourceRoot,
       platform: platform,
@@ -529,6 +643,34 @@ class Context {
       echoError('Failed to copy Flutter framework.');
       exitApp(-1);
     }
+  }
+
+  /// Replace the build mode in the relative symlink for the Flutter framework in
+  /// `FLUTTER_PLUGINS_SWIFT_PACKAGE_PATH`.
+  ///
+  /// Example: ./Debug/Flutter.xcframework -> ./Release/Flutter.xcframework
+  void _updateBuildConfigurationForSwiftPackages(String buildMode, TargetPlatform platform) {
+    final String? swiftPackagePath = environment['FLUTTER_FRAMEWORK_SWIFT_PACKAGE_PATH'];
+    if (swiftPackagePath == null) {
+      return;
+    }
+    final String frameworkName;
+    switch (platform) {
+      case TargetPlatform.ios:
+        frameworkName = 'Flutter';
+      case TargetPlatform.macos:
+        frameworkName = 'FlutterMacOS';
+    }
+    final swiftPackage = Link('$swiftPackagePath/$frameworkName.xcframework');
+    if (!swiftPackage.existsSync()) {
+      return;
+    }
+    final String relativeLink = swiftPackage.targetSync();
+    final String newRelativeLink = relativeLink.replaceFirst(
+      RegExp('\\.\\/.*\\/$frameworkName\\.xcframework'),
+      './${buildMode[0].toUpperCase()}${buildMode.substring(1)}/$frameworkName.xcframework',
+    );
+    swiftPackage.updateSync(newRelativeLink);
   }
 
   /// Calls `flutter assemble [buildMode]_[platform]_bundle_flutter_assets`
@@ -660,6 +802,7 @@ class Context {
       '--DartDefines=${environment['DART_DEFINES'] ?? ''}',
       '--ExtraFrontEndOptions=${environment['EXTRA_FRONT_END_OPTIONS'] ?? ''}',
       '-dSrcRoot=${environment['SRCROOT'] ?? ''}',
+      '-dXcodeBuildScript=$command',
     ]);
 
     if (platform == TargetPlatform.ios) {
@@ -681,14 +824,6 @@ class Context {
       ]);
     }
 
-    if (command == 'prepare') {
-      // Use the PreBuildAction define flag to force the tool to use a different
-      // filecache file for the "prepare" command. This will make the environment
-      // buildPrefix for the "prepare" command unique from the "build" command.
-      // This will improve caching since the "build" command has more target dependencies.
-      flutterArgs.add('-dPreBuildAction=PrepareFramework');
-    }
-
     if (environment['PERFORMANCE_MEASUREMENT_FILE'] != null &&
         environment['PERFORMANCE_MEASUREMENT_FILE']!.isNotEmpty) {
       flutterArgs.add(
@@ -705,4 +840,21 @@ class Context {
   }
 }
 
-enum TargetPlatform { ios, macos }
+enum TargetPlatform {
+  ios(artifactName: 'ios', frameworkName: 'Flutter', infoPlistPath: 'Flutter.framework/Info.plist'),
+  macos(
+    artifactName: 'darwin-x64',
+    frameworkName: 'FlutterMacOS',
+    infoPlistPath: 'FlutterMacOS.framework/Resources/Info.plist',
+  );
+
+  const TargetPlatform({
+    required this.artifactName,
+    required this.frameworkName,
+    required this.infoPlistPath,
+  });
+
+  final String artifactName;
+  final String frameworkName;
+  final String infoPlistPath;
+}
