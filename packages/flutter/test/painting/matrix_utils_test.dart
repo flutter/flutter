@@ -21,6 +21,17 @@ void main() {
     expect(transformedRect.isFinite, true);
   });
 
+  test('MatrixUtils.multiplyInPlace stores result in the second argument', () {
+    final Matrix4 originalA = Matrix4.identity()..translate(10.0);
+    final Matrix4 a = originalA.clone();
+    final Matrix4 b = Matrix4.identity()..translate(20.0);
+    final Matrix4 result = a.multiplied(b);
+    MatrixUtils.multiplyInPlace(a, b);
+    expect(a.storage, originalA.storage);
+    expect(b.storage, result.storage);
+    expect(b.getTranslation().x, isNot(20.0));
+  });
+
   test('MatrixUtils.getAsTranslation()', () {
     Matrix4 test;
     test = Matrix4.identity();
