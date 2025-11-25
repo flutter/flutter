@@ -318,8 +318,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     // after we generate the scaffold project as invoking the getter triggers
     // lazy initialization of the preview scaffold's FlutterManifest before
     // the scaffold project's pubspec has been generated.
+    final FlutterProject widgetPreviewScaffoldProject = rootProject.widgetPreviewScaffoldProject;
     _previewCodeGenerator = PreviewCodeGenerator(
-      widgetPreviewScaffoldProject: rootProject.widgetPreviewScaffoldProject,
+      widgetPreviewScaffoldProject: widgetPreviewScaffoldProject,
       fs: fs,
     );
 
@@ -333,6 +334,12 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       await _previewPubspecBuilder.populatePreviewPubspec(rootProject: rootProject);
     }
 
+    if (!widgetPreviewScaffoldProject.dartTool.existsSync()) {
+      await _previewPubspecBuilder.generatePackageConfig(
+        widgetPreviewScaffoldProject: widgetPreviewScaffoldProject,
+      );
+    }
+
     shutdownHooks.addShutdownHook(() async {
       await _widgetPreviewApp?.exitApp();
       await _previewDetector.dispose();
@@ -343,7 +350,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
     await configureDtd();
     final int result = await runPreviewEnvironment(
-      widgetPreviewScaffoldProject: rootProject.widgetPreviewScaffoldProject,
+      widgetPreviewScaffoldProject: widgetPreviewScaffoldProject,
     );
     if (result != 0) {
       throwToolExit('Failed to launch the widget previewer.', exitCode: result);
