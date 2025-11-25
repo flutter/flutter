@@ -2622,13 +2622,6 @@ void main() {
       Artifacts: () => Artifacts.test(),
     },
   );
-
-  // Unit tests for ExportOptions.plist generation have been moved to
-  // build_ipa_export_plist_test.dart to avoid integration test complexity.
-  // See that file for focused unit tests of the plist generation logic.
-  //
-  // TODO(flutter-team): Integration test for full `flutter build ipa` flow with manual signing.
-  // See https://github.com/flutter/flutter/issues/177853 for the feature issue.
 }
 
 const _xcBundleFilePath = '/.tmp_rand0/flutter_ios_build_temp_dirrand0/temporary_xcresult_bundle';

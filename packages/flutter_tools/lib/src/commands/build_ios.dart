@@ -536,12 +536,24 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
         final Map<String, String>? buildSettings = await app.project.buildSettingsForBuildInfo(
           buildInfo,
         );
+        // Create XcodeCodeSigningSettings for dependency injection into createExportPlist
+        final codeSigningSettings = XcodeCodeSigningSettings(
+          config: globals.config,
+          logger: logger,
+          platform: globals.platform,
+          processUtils: globals.processUtils,
+          fileSystem: globals.fs,
+          fileSystemUtils: globals.fsUtils,
+          terminal: globals.terminal,
+          plistParser: globals.plistParser,
+        );
         generatedExportPlist = await createExportPlist(
           exportMethod: exportMethod,
           app: app,
           buildInfo: buildInfo,
           buildSettings: buildSettings,
           fileSystem: globals.fs,
+          codeSigningSettings: codeSigningSettings,
         );
         exportOptions = generatedExportPlist.path;
       }
@@ -657,6 +669,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     required BuildInfo buildInfo,
     required Map<String, String>? buildSettings,
     required FileSystem fileSystem,
+    XcodeCodeSigningSettings? codeSigningSettings,
   }) async {
     final String? codeSignStyle = buildSettings?['CODE_SIGN_STYLE'];
     final isManualSigning = codeSignStyle == 'Manual';
@@ -671,7 +684,10 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
       if (profileSpecifier != null && teamId != null) {
         // Try to find and parse the provisioning profile
-        final String? profileUuid = await _findProvisioningProfileUuid(profileSpecifier);
+        final String? profileUuid = await _findProvisioningProfileUuid(
+          profileSpecifier,
+          codeSigningSettings: codeSigningSettings,
+        );
 
         if (profileUuid != null) {
           // Generate enhanced ExportOptions.plist for manual signing
@@ -786,7 +802,10 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   /// - Profile not found - logs trace with helpful context and returns null
   ///
   /// Returns the UUID of the matching profile, or null if not found or parsing fails.
-  Future<String?> _findProvisioningProfileUuid(String profileSpecifier) async {
+  Future<String?> _findProvisioningProfileUuid(
+    String profileSpecifier, {
+    XcodeCodeSigningSettings? codeSigningSettings,
+  }) async {
     final Directory? profileDirectory = getProvisioningProfileDirectory(
       fileSystemUtils: globals.fsUtils,
       fileSystem: globals.fs,
@@ -808,17 +827,19 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       return null;
     }
 
-    // Use XcodeCodeSigningSettings to parse provisioning profiles
-    final codeSigningSettings = XcodeCodeSigningSettings(
-      config: globals.config,
-      logger: logger,
-      platform: globals.platform,
-      processUtils: globals.processUtils,
-      fileSystem: globals.fs,
-      fileSystemUtils: globals.fsUtils,
-      terminal: globals.terminal,
-      plistParser: globals.plistParser,
-    );
+    // Use provided or create new XcodeCodeSigningSettings instance
+    final XcodeCodeSigningSettings settings =
+        codeSigningSettings ??
+        XcodeCodeSigningSettings(
+          config: globals.config,
+          logger: logger,
+          platform: globals.platform,
+          processUtils: globals.processUtils,
+          fileSystem: globals.fs,
+          fileSystemUtils: globals.fsUtils,
+          terminal: globals.terminal,
+          plistParser: globals.plistParser,
+        );
 
     // Search for profiles matching the specifier (could be name or UUID)
     await for (final FileSystemEntity entity in profileDirectory.list()) {
@@ -827,9 +848,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       }
 
       // Decode profile once and extract both UUID and name
-      final ProvisioningProfile? profile = await codeSigningSettings.parseProvisioningProfile(
-        entity,
-      );
+      final ProvisioningProfile? profile = await settings.parseProvisioningProfile(entity);
       if (profile != null) {
         // Check if this profile matches the specifier (by UUID or name)
         if (profile.uuid == profileSpecifier || profile.name == profileSpecifier) {
