@@ -438,16 +438,18 @@ std::unique_ptr<Rasterizer::GpuImageResult> Rasterizer::MakeSkiaGpuImage(
 void Rasterizer::MakeRasterSnapshot(
     sk_sp<DisplayList> display_list,
     DlISize picture_size,
-    std::function<void(sk_sp<DlImage>)> callback) {
+    std::function<void(sk_sp<DlImage>)> callback,
+    SnapshotPixelFormat pixel_format) {
   return snapshot_controller_->MakeRasterSnapshot(display_list, picture_size,
-                                                  callback);
+                                                  callback, pixel_format);
 }
 
 sk_sp<DlImage> Rasterizer::MakeRasterSnapshotSync(
     sk_sp<DisplayList> display_list,
-    DlISize picture_size) {
-  return snapshot_controller_->MakeRasterSnapshotSync(display_list,
-                                                      picture_size);
+    DlISize picture_size,
+    SnapshotPixelFormat pixel_format) {
+  return snapshot_controller_->MakeRasterSnapshotSync(
+      display_list, picture_size, pixel_format);
 }
 
 sk_sp<SkImage> Rasterizer::ConvertToRasterImage(sk_sp<SkImage> image) {
