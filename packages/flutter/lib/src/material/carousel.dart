@@ -466,7 +466,7 @@ class CarouselView extends StatefulWidget {
   ///   visible item that occupies the primary position, determined by
   ///   the largest effective `weight` in the current layout pass.
   ///   If multiple items share the same largest weight, the **one closest to the
-  ///   start of the viewport** is considered the leading item.
+  ///   leading edge of the viewport** is considered the leading item.
   /// {@endtemplate}
   ///
   /// This callback is invoked only when the leading item index actually
@@ -523,7 +523,7 @@ class _CarouselViewState extends State<CarouselView> {
     if (widget.controller == null) {
       _internalController = CarouselController();
     }
-    _lastReportedLeadingIndex = _controller.leadingItem;
+    _lastReportedLeadingIndex = _controller.initialItem;
     _controller._attach(this);
   }
 
@@ -686,7 +686,6 @@ class _CarouselViewState extends State<CarouselView> {
                 widget.onIndexChanged != null &&
                 notification is ScrollUpdateNotification) {
               final ScrollPosition position = _controller.position;
-
               final int currentLeadingIndex = (position as _CarouselPosition).leadingItem;
               if (currentLeadingIndex != _lastReportedLeadingIndex) {
                 _lastReportedLeadingIndex = currentLeadingIndex;
@@ -1633,7 +1632,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
   // getItemFromPixels may return a fractional value (e.g., 0.6 when mid-scroll).
   // We use toInt() to truncate the fractional part, ensuring the leading item
   // only advances after fully crossing the next item's boundary.
-  int get leadingItem => getItemFromPixels(pixels, viewportDimension).toInt();
+  int get leadingItem => getItemFromPixels(pixels, viewportDimension).round();
 
   double updateLeadingItem(List<int>? newFlexWeights, bool newConsumeMaxWeight) {
     final double maxItem;
@@ -1772,17 +1771,20 @@ class CarouselController extends ScrollController {
   /// The item that expands to the maximum size when first creating the [CarouselView].
   final int initialItem;
 
-  /// The index of the leading item in the controlled carousel.
-  ///
-  /// Returns [initialItem] if the carousel is not attached yet.
-  /// Otherwise, returns the index of the leading item as resolved by
-  /// the first attached carousel.
+  /// The current leading item index in the [CarouselView].
   ///
   /// {@macro flutter.material.CarouselView.onIndexChanged}
   int get leadingItem {
-    if (_carouselState == null) {
-      return initialItem;
-    }
+    assert(
+      positions.isNotEmpty,
+      'CarouselController.leadingItem cannot be accessed before a CarouselView is built with it.',
+    );
+    assert(
+      positions.length == 1,
+      'CarouselController.leadingItem cannot be read when multiple CarouselViews '
+      'are attached to the same controller.',
+    );
+
     return (position as _CarouselPosition).leadingItem;
   }
 
