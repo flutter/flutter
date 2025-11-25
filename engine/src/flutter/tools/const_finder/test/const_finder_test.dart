@@ -194,7 +194,7 @@ void main() {
     );
 
     expect(nonConstantLocations, [
-      {'file': 'file://$fixturesUrl/pkg/package.dart', 'line': 14, 'column': 25},
+      {'file': 'file://$fixturesUrl/pkg/package.dart', 'line': 14, 'column': 18},
     ]);
   });
 
@@ -225,11 +225,11 @@ void main() {
       ]),
     );
     expect(nonConstantLocations, [
-      {'file': 'file://$fixturesUrl/lib/consts_and_non.dart', 'line': 14, 'column': 26},
-      {'file': 'file://$fixturesUrl/lib/consts_and_non.dart', 'line': 16, 'column': 26},
-      {'file': 'file://$fixturesUrl/lib/consts_and_non.dart', 'line': 16, 'column': 41},
-      {'file': 'file://$fixturesUrl/lib/consts_and_non.dart', 'line': 17, 'column': 26},
-      {'file': 'file://$fixturesUrl/pkg/package.dart', 'line': 14, 'column': 25},
+      {'file': 'file://$fixturesUrl/lib/consts_and_non.dart', 'line': 14, 'column': 19},
+      {'file': 'file://$fixturesUrl/lib/consts_and_non.dart', 'line': 16, 'column': 19},
+      {'file': 'file://$fixturesUrl/lib/consts_and_non.dart', 'line': 16, 'column': 34},
+      {'file': 'file://$fixturesUrl/lib/consts_and_non.dart', 'line': 17, 'column': 19},
+      {'file': 'file://$fixturesUrl/pkg/package.dart', 'line': 14, 'column': 18},
     ]);
   });
 
@@ -262,11 +262,11 @@ void main() {
     );
 
     expect(nonConstantLocations, [
-      {'file': 'file://$fixturesUrl/lib/consts_and_non.dart', 'line': 14, 'column': 26},
-      {'file': 'file://$fixturesUrl/lib/consts_and_non.dart', 'line': 16, 'column': 26},
-      {'file': 'file://$fixturesUrl/lib/consts_and_non.dart', 'line': 16, 'column': 41},
-      {'file': 'file://$fixturesUrl/lib/consts_and_non.dart', 'line': 17, 'column': 26},
-      {'file': 'file://$fixturesUrl/pkg/package.dart', 'line': 14, 'column': 25},
+      {'file': 'file://$fixturesUrl/lib/consts_and_non.dart', 'line': 14, 'column': 19},
+      {'file': 'file://$fixturesUrl/lib/consts_and_non.dart', 'line': 16, 'column': 19},
+      {'file': 'file://$fixturesUrl/lib/consts_and_non.dart', 'line': 16, 'column': 34},
+      {'file': 'file://$fixturesUrl/lib/consts_and_non.dart', 'line': 17, 'column': 19},
+      {'file': 'file://$fixturesUrl/pkg/package.dart', 'line': 14, 'column': 18},
     ]);
   });
 
