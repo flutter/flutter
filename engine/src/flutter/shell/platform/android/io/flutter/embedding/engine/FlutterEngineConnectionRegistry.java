@@ -327,12 +327,14 @@ import java.util.Set;
   private void attachToActivityInternal(@NonNull Activity activity, @NonNull Lifecycle lifecycle) {
     this.activityPluginBinding = new FlutterEngineActivityPluginBinding(activity, lifecycle);
 
+    // Previously, --enable-software-rendering could be set here via Intent. Warn developers
+    // about the new method for doing so if this was attempted.
     final Intent intent = activity.getIntent();
     if (intent != null) {
       if (intent.hasExtra("enable-software-rendering")) {
         Log.w(
             TAG,
-            "Setting engine flags on Android via Intent is no longer supported. See flutter/docs/engine/Android-Flutter-Shell-Arguments.md for ways to configure software rendering instead.");
+            "Setting engine flags on Android via Intent is no longer supported. See flutter/docs/engine/Android-Flutter-Shell-Arguments.md for alternative ways to configure software rendering.");
       }
     }
 

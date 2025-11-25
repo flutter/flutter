@@ -52,8 +52,6 @@ Notes:
 
 - Flags that take values use the `--flag=value` form (with `=`). The Flutter
     tool forwards them in that form to the Android embedding.
-- If you wish to statically set flags for your application, setting them via
-    the manifest is recommended.
 
 ## How to set engine flags in the manifest
 
