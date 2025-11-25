@@ -91,6 +91,7 @@ class _AnimateSampleState extends State<AnimateSample> with SingleTickerProvider
 
 void main() {
   TestBinding.ensureInitialized();
+  TestWidgetsFlutterBinding.ensureInitialized();
 
   test('Test pump on LiveWidgetController', () async {
     runApp(const MaterialApp(home: Center(child: CountButton())));
