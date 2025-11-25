@@ -43,6 +43,7 @@ void main() {
             fs: MemoryFileSystem.test(),
           ),
         ),
+        project: project,
         logger: logger,
         fs: fs,
         onChangeDetected: (_) {},
