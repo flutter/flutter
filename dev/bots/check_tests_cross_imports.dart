@@ -113,19 +113,6 @@ class TestsCrossImportChecker {
             return true;
           }
           return file.absolute.path.contains(filenamePattern);
-          /*
-          if (!file.absolute.path.contains(filenamePattern)) {
-            return false;
-          }
-
-          final int index = file.absolute.path.indexOf('packages/flutter/test');
-          if (index == -1) {
-            return true;
-          }
-
-          final String comparablePath = file.absolute.path.substring(index);
-          return !_knownCrossImports.contains(comparablePath);
-          */
         })
         .map<File>((File? s) => s!)
         .toList();
