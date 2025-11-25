@@ -3640,6 +3640,208 @@ void main() {
       }
     });
   });
+
+  group('ValueIndicatorMultilineConfig', () {
+    test('ValueIndicatorMultilineConfig defaults', () {
+      const ValueIndicatorMultilineConfig config = ValueIndicatorMultilineConfig();
+      expect(config.enabled, true);
+      expect(config.maxLines, null);
+      expect(config.cornerPadding, null);
+    });
+
+    test('ValueIndicatorMultilineConfig with custom values', () {
+      const ValueIndicatorMultilineConfig config = ValueIndicatorMultilineConfig(
+        enabled: false,
+        maxLines: 3,
+        cornerPadding: EdgeInsets.all(12.0),
+      );
+      expect(config.enabled, false);
+      expect(config.maxLines, 3);
+      expect(config.cornerPadding, const EdgeInsets.all(12.0));
+    });
+
+    test('ValueIndicatorMultilineConfig copyWith', () {
+      const ValueIndicatorMultilineConfig original = ValueIndicatorMultilineConfig(
+        maxLines: 2,
+        cornerPadding: EdgeInsets.all(8.0),
+      );
+
+      // Test copying with no changes.
+      final ValueIndicatorMultilineConfig copy1 = original.copyWith();
+      expect(copy1.enabled, true);
+      expect(copy1.maxLines, 2);
+      expect(copy1.cornerPadding, const EdgeInsets.all(8.0));
+
+      // Test copying with changes.
+      final ValueIndicatorMultilineConfig copy2 = original.copyWith(
+        enabled: false,
+        maxLines: 5,
+        cornerPadding: const EdgeInsets.all(16.0),
+      );
+      expect(copy2.enabled, false);
+      expect(copy2.maxLines, 5);
+      expect(copy2.cornerPadding, const EdgeInsets.all(16.0));
+
+      // Test copying with partial changes.
+      final ValueIndicatorMultilineConfig copy3 = original.copyWith(maxLines: 4);
+      expect(copy3.enabled, true);
+      expect(copy3.maxLines, 4);
+      expect(copy3.cornerPadding, const EdgeInsets.all(8.0));
+    });
+
+    test('ValueIndicatorMultilineConfig equality', () {
+      const ValueIndicatorMultilineConfig config1 = ValueIndicatorMultilineConfig(
+        maxLines: 2,
+        cornerPadding: EdgeInsets.all(8.0),
+      );
+      const ValueIndicatorMultilineConfig config2 = ValueIndicatorMultilineConfig(
+        maxLines: 2,
+        cornerPadding: EdgeInsets.all(8.0),
+      );
+      const ValueIndicatorMultilineConfig config3 = ValueIndicatorMultilineConfig(
+        enabled: false,
+        maxLines: 2,
+        cornerPadding: EdgeInsets.all(8.0),
+      );
+
+      // Test equality with same values.
+      expect(config1, config2);
+      expect(config1 == config3, false);
+      expect(config1.hashCode, config2.hashCode);
+      expect(config1.hashCode == config3.hashCode, false);
+    });
+
+    test('ValueIndicatorMultilineConfig lerp', () {
+      const ValueIndicatorMultilineConfig a = ValueIndicatorMultilineConfig(
+        maxLines: 2,
+        cornerPadding: EdgeInsets.all(8.0),
+      );
+      const ValueIndicatorMultilineConfig b = ValueIndicatorMultilineConfig(
+        enabled: false,
+        maxLines: 4,
+        cornerPadding: EdgeInsets.all(16.0),
+      );
+
+      final ValueIndicatorMultilineConfig? lerp0 = ValueIndicatorMultilineConfig.lerp(a, b, 0.0);
+      expect(lerp0, a);
+
+      final ValueIndicatorMultilineConfig? lerp1 = ValueIndicatorMultilineConfig.lerp(a, b, 1.0);
+      expect(lerp1, b);
+
+      final ValueIndicatorMultilineConfig? lerp05 = ValueIndicatorMultilineConfig.lerp(a, b, 0.5);
+      expect(lerp05!.enabled, false);
+      expect(lerp05.maxLines, 4);
+      expect(lerp05.cornerPadding, const EdgeInsets.all(12.0)); // = (8.0 + (16.0 - 8.0) * 0.5)
+
+      final ValueIndicatorMultilineConfig? lerp03 = ValueIndicatorMultilineConfig.lerp(a, b, 0.3);
+      expect(lerp03!.enabled, true);
+      expect(lerp03.maxLines, 2);
+
+      // = (8.0 + (16.0 - 8.0) * 0.3) = 10.4
+      // It's expected to equal EdgeInsets.all(10.4) directly but will encounter floating-point issue.
+      // So, do check the values for all sides are close to 10.4, not strict EdgeInsets object equality.
+      final EdgeInsets e = lerp03.cornerPadding! as EdgeInsets;
+      expect(e.left, moreOrLessEquals(10.4));
+      expect(e.top, moreOrLessEquals(10.4));
+      expect(e.right, moreOrLessEquals(10.4));
+      expect(e.bottom, moreOrLessEquals(10.4));
+
+      expect(ValueIndicatorMultilineConfig.lerp(null, null, 0.5), null);
+      expect(ValueIndicatorMultilineConfig.lerp(a, null, 0.5), a);
+      expect(ValueIndicatorMultilineConfig.lerp(null, b, 0.5), b);
+    });
+
+    testWidgets('ValueIndicatorMultilineConfig debugFillProperties', (WidgetTester tester) async {
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      const ValueIndicatorMultilineConfig(
+        enabled: false,
+        maxLines: 3,
+        cornerPadding: EdgeInsets.all(12.0),
+      ).debugFillProperties(builder);
+
+      final List<String> description = builder.properties
+          .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
+
+      expect(description, <String>[
+        'enabled: false',
+        'maxLines: 3',
+        'cornerPadding: EdgeInsets.all(12.0)',
+      ]);
+    });
+
+    testWidgets('ValueIndicatorMultilineConfig in SliderThemeData', (WidgetTester tester) async {
+      const ValueIndicatorMultilineConfig config = ValueIndicatorMultilineConfig(
+        enabled: false,
+        maxLines: 2,
+        cornerPadding: EdgeInsets.all(10.0),
+      );
+
+      const SliderThemeData theme = SliderThemeData(valueIndicatorMultilineConfig: config);
+
+      expect(theme.valueIndicatorMultilineConfig, config);
+
+      final SliderThemeData copiedTheme = theme.copyWith(
+        valueIndicatorMultilineConfig: const ValueIndicatorMultilineConfig(maxLines: 5),
+      );
+
+      expect(copiedTheme.valueIndicatorMultilineConfig!.enabled, true);
+      expect(copiedTheme.valueIndicatorMultilineConfig!.maxLines, 5);
+      expect(copiedTheme.valueIndicatorMultilineConfig!.cornerPadding, null);
+    });
+
+    testWidgets('SliderThemeData lerp with ValueIndicatorMultilineConfig', (
+      WidgetTester tester,
+    ) async {
+      const ValueIndicatorMultilineConfig configA = ValueIndicatorMultilineConfig(
+        maxLines: 1,
+        cornerPadding: EdgeInsets.all(4.0),
+      );
+      const ValueIndicatorMultilineConfig configB = ValueIndicatorMultilineConfig(
+        enabled: false,
+        maxLines: 3,
+        cornerPadding: EdgeInsets.all(12.0),
+      );
+
+      const SliderThemeData themeA = SliderThemeData(valueIndicatorMultilineConfig: configA);
+      const SliderThemeData themeB = SliderThemeData(valueIndicatorMultilineConfig: configB);
+
+      final SliderThemeData lerpedTheme = SliderThemeData.lerp(themeA, themeB, 0.5);
+      expect(lerpedTheme.valueIndicatorMultilineConfig!.enabled, false);
+      expect(lerpedTheme.valueIndicatorMultilineConfig!.maxLines, 3);
+      expect(lerpedTheme.valueIndicatorMultilineConfig!.cornerPadding, const EdgeInsets.all(8.0));
+    });
+
+    testWidgets('SliderThemeData debugFillProperties includes ValueIndicatorMultilineConfig', (
+      WidgetTester tester,
+    ) async {
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      const SliderThemeData(
+        trackHeight: 5.0,
+        valueIndicatorMultilineConfig: ValueIndicatorMultilineConfig(
+          enabled: false,
+          maxLines: 2,
+          cornerPadding: EdgeInsets.all(8.0),
+        ),
+      ).debugFillProperties(builder);
+
+      final List<String> description = builder.properties
+          .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
+
+      expect(description, contains('trackHeight: 5.0'));
+      expect(
+        description.any(
+          (String desc) =>
+              desc.startsWith('valueIndicatorMultilineConfig: ValueIndicatorMultilineConfig#') &&
+              desc.contains('enabled: false, maxLines: 2, cornerPadding: EdgeInsets.all(8.0)'),
+        ),
+        true,
+      );
+    });
+  });
 }
 
 class RoundedRectSliderTrackShapeWithCustomAdditionalActiveTrackHeight
