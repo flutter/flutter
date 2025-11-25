@@ -35,12 +35,14 @@ class _GpuSdfCanvasState extends State<GpuSdfCanvas> {
   }
 
   Future<ui.FragmentShader> _loadCircleShader() async {
-    final program = await ui.FragmentProgram.fromAsset('shaders/circle_sdf.frag');
+    final ui.FragmentProgram program = await ui.FragmentProgram.fromAsset(
+      'shaders/circle_sdf.frag',
+    );
     return program.fragmentShader();
   }
 
   Future<ui.FragmentShader> _loadSdfShader() async {
-    final program = await ui.FragmentProgram.fromAsset('shaders/sdf.frag');
+    final ui.FragmentProgram program = await ui.FragmentProgram.fromAsset('shaders/sdf.frag');
     return program.fragmentShader();
   }
 

@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
+
+import 'package:flutter/material.dart';
 
 import 'cpu_sdf_canvas.dart';
 import 'gpu_sdf_canvas.dart';
@@ -39,16 +40,12 @@ class _MyHomePageState extends State<MyHomePage> {
     switch (testToRun) {
       case TestType.cpuR32fSdf:
         child = const CpuSdfCanvas(targetFormat: ui.TargetPixelFormat.rFloat32);
-        break;
       case TestType.cpuRgba32fSdf:
         child = const CpuSdfCanvas(targetFormat: ui.TargetPixelFormat.rgbaFloat32);
-        break;
       case TestType.gpuR32fSdf:
         child = const GpuSdfCanvas(targetFormat: ui.TargetPixelFormat.rFloat32);
-        break;
       case TestType.gpuRgba32fSdf:
         child = const GpuSdfCanvas(targetFormat: ui.TargetPixelFormat.rgbaFloat32);
-        break;
     }
     return Scaffold(body: child);
   }
