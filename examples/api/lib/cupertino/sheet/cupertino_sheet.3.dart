@@ -102,6 +102,9 @@ class CupertinoSheetNavbar<T> extends StatelessWidget implements ObstructingPref
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoSheetDragArea<T>(route: ModalRoute.of(context)! as ModalRoute<T>, child: child);
+    return CupertinoSheetDragArea<T>(
+      route: ModalRoute.of(context)! as CupertinoSheetRoute<T>,
+      child: child,
+    );
   }
 }
