@@ -57,6 +57,9 @@ void main() {
               matching: find.byType(Radio<Color>),
             ),
           )
+          // TODO(loic-sharma): Migrate to RadioGroup.
+          // https://github.com/flutter/flutter/issues/179088
+          // ignore: deprecated_member_use
           .groupValue,
       equals(Colors.green),
     );
@@ -76,6 +79,9 @@ void main() {
               matching: find.byType(Radio<Color>),
             ),
           )
+          // TODO(loic-sharma): Migrate to RadioGroup.
+          // https://github.com/flutter/flutter/issues/179088
+          // ignore: deprecated_member_use
           .groupValue,
       equals(Colors.red),
     );
@@ -95,6 +101,9 @@ void main() {
               matching: find.byType(Radio<Color>),
             ),
           )
+          // TODO(loic-sharma): Migrate to RadioGroup.
+          // https://github.com/flutter/flutter/issues/179088
+          // ignore: deprecated_member_use
           .groupValue,
       equals(Colors.blue),
     );

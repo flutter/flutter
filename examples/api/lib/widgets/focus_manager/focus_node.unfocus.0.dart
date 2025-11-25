@@ -54,7 +54,13 @@ class _UnfocusExampleState extends State<UnfocusExample> {
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       Radio<UnfocusDisposition>(
+                        // TODO(loic-sharma): Migrate to RadioGroup.
+                        // https://github.com/flutter/flutter/issues/179088
+                        // ignore: deprecated_member_use
                         groupValue: disposition,
+                        // TODO(loic-sharma): Migrate to RadioGroup.
+                        // https://github.com/flutter/flutter/issues/179088
+                        // ignore: deprecated_member_use
                         onChanged: (UnfocusDisposition? value) {
                           setState(() {
                             if (value != null) {

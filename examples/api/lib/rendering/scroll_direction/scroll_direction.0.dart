@@ -114,28 +114,52 @@ class _MyWidgetState extends State<MyWidget> {
             children: <Widget>[
               Radio<AxisDirection>(
                 value: AxisDirection.up,
+                // TODO(loic-sharma): Migrate to RadioGroup.
+                // https://github.com/flutter/flutter/issues/179088
+                // ignore: deprecated_member_use
                 groupValue: _axisDirection,
+                // TODO(loic-sharma): Migrate to RadioGroup.
+                // https://github.com/flutter/flutter/issues/179088
+                // ignore: deprecated_member_use
                 onChanged: _onAxisDirectionChanged,
               ),
               const Text('up'),
               spacer,
               Radio<AxisDirection>(
                 value: AxisDirection.down,
+                // TODO(loic-sharma): Migrate to RadioGroup.
+                // https://github.com/flutter/flutter/issues/179088
+                // ignore: deprecated_member_use
                 groupValue: _axisDirection,
+                // TODO(loic-sharma): Migrate to RadioGroup.
+                // https://github.com/flutter/flutter/issues/179088
+                // ignore: deprecated_member_use
                 onChanged: _onAxisDirectionChanged,
               ),
               const Text('down'),
               spacer,
               Radio<AxisDirection>(
                 value: AxisDirection.left,
+                // TODO(loic-sharma): Migrate to RadioGroup.
+                // https://github.com/flutter/flutter/issues/179088
+                // ignore: deprecated_member_use
                 groupValue: _axisDirection,
+                // TODO(loic-sharma): Migrate to RadioGroup.
+                // https://github.com/flutter/flutter/issues/179088
+                // ignore: deprecated_member_use
                 onChanged: _onAxisDirectionChanged,
               ),
               const Text('left'),
               spacer,
               Radio<AxisDirection>(
                 value: AxisDirection.right,
+                // TODO(loic-sharma): Migrate to RadioGroup.
+                // https://github.com/flutter/flutter/issues/179088
+                // ignore: deprecated_member_use
                 groupValue: _axisDirection,
+                // TODO(loic-sharma): Migrate to RadioGroup.
+                // https://github.com/flutter/flutter/issues/179088
+                // ignore: deprecated_member_use
                 onChanged: _onAxisDirectionChanged,
               ),
               const Text('right'),

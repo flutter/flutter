@@ -331,8 +331,14 @@ class _RadioSelectionState<T extends Object?> extends State<RadioSelection<T>> {
         Padding(
           padding: const EdgeInsetsDirectional.only(end: 8),
           child: Radio<T>(
+            // TODO(loic-sharma): Migrate to RadioGroup.
+            // https://github.com/flutter/flutter/issues/179088
+            // ignore: deprecated_member_use
             groupValue: widget.groupValue,
             value: widget.value,
+            // TODO(loic-sharma): Migrate to RadioGroup.
+            // https://github.com/flutter/flutter/issues/179088
+            // ignore: deprecated_member_use
             onChanged: widget.onChanged,
           ),
         ),

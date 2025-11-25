@@ -106,13 +106,25 @@ class _ScrollNotificationDemoState extends State<ScrollNotificationDemo> {
                     const Text('with:'),
                     Radio<bool>(
                       value: true,
+                      // TODO(loic-sharma): Migrate to RadioGroup.
+                      // https://github.com/flutter/flutter/issues/179088
+                      // ignore: deprecated_member_use
                       groupValue: _useController,
+                      // TODO(loic-sharma): Migrate to RadioGroup.
+                      // https://github.com/flutter/flutter/issues/179088
+                      // ignore: deprecated_member_use
                       onChanged: _handleRadioChange,
                     ),
                     const Text('ScrollController'),
                     Radio<bool>(
                       value: false,
+                      // TODO(loic-sharma): Migrate to RadioGroup.
+                      // https://github.com/flutter/flutter/issues/179088
+                      // ignore: deprecated_member_use
                       groupValue: _useController,
+                      // TODO(loic-sharma): Migrate to RadioGroup.
+                      // https://github.com/flutter/flutter/issues/179088
+                      // ignore: deprecated_member_use
                       onChanged: _handleRadioChange,
                     ),
                     const Text('NotificationListener'),
