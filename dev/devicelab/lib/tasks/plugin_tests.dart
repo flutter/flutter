@@ -419,7 +419,6 @@ public class $pluginClass: NSObject, FlutterPlugin {
     required String template,
     Map<String, String>? environment,
   }) async {
-    print('This are options: $options');
     final bool isDarwin = target == 'ios' || target == 'macos';
     await inDirectory(directory, () async {
       await flutter(
