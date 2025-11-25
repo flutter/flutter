@@ -45,6 +45,9 @@ struct Snapshot {
   /// capture the padding.
   bool needs_rasterization_for_runtime_effects = false;
 
+  /// Any snapshot that is scaled should rerasterize because we should be
+  /// performing the RuntimeEffect at the resolution of the screen, not the
+  /// scaled up or scaled down version of the snapshot.
   bool ShouldRasterizeForRuntimeEffects() const {
     return !transform.IsTranslationOnly() ||
            needs_rasterization_for_runtime_effects;
