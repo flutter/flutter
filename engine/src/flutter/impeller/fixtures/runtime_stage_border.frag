@@ -13,11 +13,11 @@ void main() {
   vec2 fragCoord = FlutterFragCoord().xy;
 
   vec2 screenUV = vec2(fragCoord.x / uSize.x, fragCoord.y / uSize.y);
-  vec4 texColor = texture(uTexture, screenUV);
-
+  vec2 correctedScreenUV = screenUV;
 #ifdef IMPELLER_TARGET_OPENGLES
-  screenUV.y = 1.0 - screenUV.y;
+  correctedScreenUV.y = 1.0 - screenUV.y;
 #endif
+  vec4 texColor = texture(uTexture, correctedScreenUV);
 
   // Check if we're within 20px of any edge
   float borderWidth = 20.0;
