@@ -28,7 +28,6 @@ import 'dart:ui'
         StringAttribute,
         TextDirection,
         Tristate;
-import 'dart:ui' as ui show SemanticsHitTestBehavior;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -1021,7 +1020,6 @@ class SemanticsData with Diagnosticable {
     required this.role,
     required this.controlsNodes,
     required this.validationResult,
-    required this.hitTestBehavior,
     required this.inputType,
     required this.locale,
     this.tags,
@@ -1290,9 +1288,6 @@ class SemanticsData with Diagnosticable {
   /// {@macro flutter.semantics.SemanticsProperties.validationResult}
   final SemanticsValidationResult validationResult;
 
-  /// {@macro flutter.semantics.SemanticsProperties.hitTestBehavior}
-  final ui.SemanticsHitTestBehavior hitTestBehavior;
-
   /// {@macro flutter.semantics.SemanticsNode.inputType}
   final SemanticsInputType inputType;
 
@@ -1420,7 +1415,6 @@ class SemanticsData with Diagnosticable {
         other.role == role &&
         other.validationResult == validationResult &&
         other.inputType == inputType &&
-        other.hitTestBehavior == hitTestBehavior &&
         _sortedListsEqual(other.customSemanticsActionIds, customSemanticsActionIds) &&
         setEquals<String>(controlsNodes, other.controlsNodes);
   }
@@ -1457,7 +1451,8 @@ class SemanticsData with Diagnosticable {
       validationResult,
       controlsNodes == null ? null : Object.hashAll(controlsNodes!),
       inputType,
-      hitTestBehavior,
+      traversalParentIdentifier,
+      traversalChildIdentifier,
     ),
   );
 
@@ -1616,7 +1611,6 @@ class SemanticsProperties extends DiagnosticableTree {
     this.controlsNodes,
     this.inputType,
     this.validationResult = SemanticsValidationResult.none,
-    this.hitTestBehavior,
     this.onTap,
     this.onLongPress,
     this.onScrollLeft,
@@ -2561,13 +2555,6 @@ class SemanticsProperties extends DiagnosticableTree {
   /// {@endtemplate}
   final SemanticsValidationResult validationResult;
 
-  /// {@template flutter.semantics.SemanticsProperties.hitTestBehavior}
-  /// Describes how the semantic node should behave during hit testing.
-  ///
-  /// See [ui.SemanticsHitTestBehavior] for more details.
-  /// {@endtemplate}
-  final ui.SemanticsHitTestBehavior? hitTestBehavior;
-
   /// {@template flutter.semantics.SemanticsProperties.inputType}
   /// The input type for of a editable widget.
   ///
@@ -2729,6 +2716,14 @@ class SemanticsNode with DiagnosticableTreeMixin {
       _transform = value == null || MatrixUtils.isIdentity(value) ? null : value;
       _markDirty();
     }
+  }
+
+  // null means this node is not a traversal child and the transform is
+  // the same as [transform] (or kIsWeb is true).
+  Matrix4? _traversalChildTransform;
+  // null represents the identity transform.
+  Matrix4? get _traversalTransform {
+    return kIsWeb ? transform : (_traversalChildTransform ?? transform);
   }
 
   /// The bounding box for this node in its coordinate system.
@@ -3240,8 +3235,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
         _headingLevel != config._headingLevel ||
         _linkUrl != config._linkUrl ||
         _role != config.role ||
-        _validationResult != config.validationResult ||
-        _hitTestBehavior != config.hitTestBehavior;
+        _validationResult != config.validationResult;
   }
 
   // TAGS, LABELS, ACTIONS
@@ -3535,10 +3529,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
   SemanticsValidationResult get validationResult => _validationResult;
   SemanticsValidationResult _validationResult = _kEmptyConfig.validationResult;
 
-  /// {@macro flutter.semantics.SemanticsProperties.hitTestBehavior}
-  ui.SemanticsHitTestBehavior get hitTestBehavior => _hitTestBehavior;
-  ui.SemanticsHitTestBehavior _hitTestBehavior = ui.SemanticsHitTestBehavior.defer;
-
   /// {@template flutter.semantics.SemanticsNode.inputType}
   /// The input type for of a editable node.
   ///
@@ -3619,7 +3609,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
     _role = config._role;
     _controlsNodes = config._controlsNodes;
     _validationResult = config._validationResult;
-    _hitTestBehavior = config._hitTestBehavior;
     _inputType = config._inputType;
     _locale = config.locale;
 
@@ -3674,7 +3663,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
     SemanticsRole role = _role;
     Set<String>? controlsNodes = _controlsNodes;
     SemanticsValidationResult validationResult = _validationResult;
-    ui.SemanticsHitTestBehavior hitTestBehavior = _hitTestBehavior;
     SemanticsInputType inputType = _inputType;
     final Locale? locale = _locale;
     final Set<int> customSemanticsActionIds = <int>{};
@@ -3738,10 +3726,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
         }
         if (inputType == SemanticsInputType.none) {
           inputType = node._inputType;
-        }
-        if (hitTestBehavior == ui.SemanticsHitTestBehavior.defer &&
-            node._hitTestBehavior != ui.SemanticsHitTestBehavior.defer) {
-          hitTestBehavior = node._hitTestBehavior;
         }
         if (tooltip == '') {
           tooltip = node._tooltip;
@@ -3834,64 +3818,52 @@ class SemanticsNode with DiagnosticableTreeMixin {
       role: role,
       controlsNodes: controlsNodes,
       validationResult: validationResult,
-      hitTestBehavior: hitTestBehavior,
       inputType: inputType,
       locale: locale,
     );
   }
 
-  static Float64List _initIdentityTransform() {
-    return Matrix4.identity().storage;
-  }
-
   static final Int32List _kEmptyChildList = Int32List(0);
   static final Int32List _kEmptyCustomSemanticsActionsList = Int32List(0);
-  static final Float64List _kIdentityTransform = _initIdentityTransform();
+  static final Matrix4 _kIdentityTransform = Matrix4.identity();
 
-  static Matrix4 _computeChildTransform({
-    required Matrix4? parentTransform,
-    required Rect? parentPaintClipRect,
-    required Rect? parentSemanticsClipRect,
+  static Matrix4 _computeTraversalTransform({
     required SemanticsNode parent,
     required SemanticsNode child,
   }) {
-    final Matrix4 transform = parentTransform?.clone() ?? Matrix4.identity();
+    final Matrix4 traversalTransform = Matrix4.identity();
     Matrix4? parentToCommonAncestorTransform;
-    Matrix4? childToCommonAncestorTransform;
-    SemanticsNode childSemanticsNode = child;
-    SemanticsNode parentSemanticsNode = parent;
+    SemanticsNode fromNode = child;
+    SemanticsNode toNode = parent;
 
     // Find the common ancestor.
-    while (!identical(childSemanticsNode, parentSemanticsNode)) {
-      final int fromDepth = childSemanticsNode.depth;
-      final int toDepth = parentSemanticsNode.depth;
+    while (!identical(fromNode, toNode)) {
+      final int fromDepth = fromNode.depth;
+      final int toDepth = toNode.depth;
 
       if (fromDepth >= toDepth) {
-        childToCommonAncestorTransform ??= Matrix4.identity();
-        childToCommonAncestorTransform.multiply(childSemanticsNode.transform ?? Matrix4.identity());
-        childSemanticsNode = childSemanticsNode.traversalParent!;
+        if (fromNode.transform case final Matrix4 transform?) {
+          traversalTransform.multiply(transform);
+        }
+        fromNode = fromNode.parent!;
       }
       if (fromDepth <= toDepth) {
         parentToCommonAncestorTransform ??= Matrix4.identity();
-        parentToCommonAncestorTransform.multiply(
-          parentSemanticsNode.transform ?? Matrix4.identity(),
-        );
-        if (parentSemanticsNode.traversalParent == null) {
-          break;
+        if (toNode.transform case final Matrix4 transform?) {
+          parentToCommonAncestorTransform.multiply(transform);
         }
-        parentSemanticsNode = parentSemanticsNode.traversalParent!;
+        toNode = toNode.parent!;
       }
     }
 
     if (parentToCommonAncestorTransform != null) {
       if (parentToCommonAncestorTransform.invert() != 0) {
-        transform.multiply(parentToCommonAncestorTransform);
+        traversalTransform.multiply(parentToCommonAncestorTransform);
       } else {
-        transform.setZero();
+        traversalTransform.setZero();
       }
     }
-
-    return transform;
+    return traversalTransform;
   }
 
   Int32List _childrenIdInTraversalOrder() {
@@ -3961,30 +3933,21 @@ class SemanticsNode with DiagnosticableTreeMixin {
       }
     }
 
-    if (_isTraversalChild) {
-      traversalParent = owner!._traversalParentNodes[traversalChildIdentifier];
-      transform = _computeChildTransform(
-        parentPaintClipRect: traversalParent!.parentPaintClipRect,
-        parentSemanticsClipRect: traversalParent!.parentSemanticsClipRect,
-        parentTransform: null,
-        parent: traversalParent!,
-        child: this,
-      );
-    }
-
     int traversalParentId = -1;
-    if (data.traversalChildIdentifier != null) {
-      final Object identifier = data.traversalChildIdentifier!;
-      if (owner!._traversalParentNodes.containsKey(identifier)) {
-        traversalParentId = owner!._traversalParentNodes[identifier]!.id;
+    if (data.traversalChildIdentifier case final Object identifier?) {
+      if (owner!._traversalParentNodes[identifier] case final SemanticsNode parentNode?) {
+        traversalParentId = parentNode.id;
       }
     }
-
-    final Float64List updatedTransform;
-    if (kIsWeb) {
-      updatedTransform = data.transform?.storage ?? _kIdentityTransform;
-    } else {
-      updatedTransform = transform?.storage ?? data.transform?.storage ?? _kIdentityTransform;
+    final Object? childIdentifier = traversalChildIdentifier;
+    if (childIdentifier != null) {
+      traversalParent = owner!._traversalParentNodes[childIdentifier];
+      if (!kIsWeb) {
+        _traversalChildTransform = _computeTraversalTransform(
+          parent: traversalParent!,
+          child: this,
+        );
+      }
     }
 
     builder.updateNode(
@@ -4015,9 +3978,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
       scrollPosition: data.scrollPosition ?? double.nan,
       scrollExtentMax: data.scrollExtentMax ?? double.nan,
       scrollExtentMin: data.scrollExtentMin ?? double.nan,
-      transform: updatedTransform,
+      transform: (_traversalTransform ?? _kIdentityTransform).storage,
       traversalParent: traversalParentId,
-      hitTestTransform: data.transform?.storage ?? _kIdentityTransform,
+      hitTestTransform: (data.transform ?? _kIdentityTransform).storage,
       childrenInTraversalOrder: childrenInTraversalOrder,
       childrenInHitTestOrder: childrenInHitTestOrder,
       additionalActions: customSemanticsActionIds ?? _kEmptyCustomSemanticsActionsList,
@@ -4026,7 +3989,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
       role: data.role,
       controlsNodes: data.controlsNodes?.toList(),
       validationResult: data.validationResult,
-      hitTestBehavior: data.hitTestBehavior,
       inputType: data.inputType,
       locale: data.locale,
     );
@@ -4082,10 +4044,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
     // children from _traversalChildNodes and add them to the children list
     // of this current node.
     if (_isTraversalParent) {
-      if (owner != null && owner!._traversalChildNodes.containsKey(traversalParentIdentifier)) {
-        final Set<SemanticsNode> traversalChildren =
-            owner!._traversalChildNodes[traversalParentIdentifier]!;
-
+      final Set<SemanticsNode>? traversalChildren =
+          owner?._traversalChildNodes[traversalParentIdentifier!];
+      if (traversalChildren != null) {
         // When traversal children are grafted from other branches, make sure
         // these children are not ancestors of the traversal parent. Otherwise,
         // it will cause infinite loop.
@@ -4575,11 +4536,13 @@ class _SemanticsSortGroup implements Comparable<_SemanticsSortGroup> {
 
 /// Converts `point` to the `node`'s parent's coordinate system.
 Offset _pointInParentCoordinates(SemanticsNode node, Offset point) {
-  if (node.transform == null) {
+  final Matrix4? traversalTransform = node._traversalTransform;
+  if (traversalTransform == null) {
     return point;
   }
   final Vector3 vector = Vector3(point.dx, point.dy, 0.0);
-  node.transform!.transform3(vector);
+
+  traversalTransform.transform3(vector);
   return Offset(vector.x, vector.y);
 }
 
@@ -6452,14 +6415,6 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
-  /// {@macro flutter.semantics.SemanticsProperties.hitTestBehavior}
-  ui.SemanticsHitTestBehavior get hitTestBehavior => _hitTestBehavior;
-  ui.SemanticsHitTestBehavior _hitTestBehavior = ui.SemanticsHitTestBehavior.defer;
-  set hitTestBehavior(ui.SemanticsHitTestBehavior value) {
-    _hitTestBehavior = value;
-    _hasBeenAnnotated = true;
-  }
-
   /// {@macro flutter.semantics.SemanticsProperties.inputType}
   SemanticsInputType get inputType => _inputType;
   SemanticsInputType _inputType = SemanticsInputType.none;
@@ -6566,10 +6521,6 @@ class SemanticsConfiguration {
       return false;
     }
     if (_hasExplicitRole && other._hasExplicitRole) {
-      return false;
-    }
-    if (_hitTestBehavior != ui.SemanticsHitTestBehavior.defer ||
-        other._hitTestBehavior != ui.SemanticsHitTestBehavior.defer) {
       return false;
     }
     return true;
@@ -6682,10 +6633,6 @@ class SemanticsConfiguration {
       child._accessiblityFocusBlockType,
     );
 
-    if (_hitTestBehavior == ui.SemanticsHitTestBehavior.defer) {
-      _hitTestBehavior = child._hitTestBehavior;
-    }
-
     _hasBeenAnnotated = hasBeenAnnotated || child.hasBeenAnnotated;
   }
 
@@ -6731,8 +6678,7 @@ class SemanticsConfiguration {
       .._role = _role
       .._controlsNodes = _controlsNodes
       .._validationResult = _validationResult
-      .._inputType = _inputType
-      .._hitTestBehavior = _hitTestBehavior;
+      .._inputType = _inputType;
   }
 }
 

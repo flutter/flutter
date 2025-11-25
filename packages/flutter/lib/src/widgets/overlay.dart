@@ -223,7 +223,7 @@ class OverlayEntry implements Listenable {
   /// that if you do call this after the overlay rebuild, the UI will not update
   /// until the next frame (i.e. many milliseconds later).
   void remove() {
-    assert(_overlay != null);
+    assert(_overlay != null, 'An OverlayEntry should be removed only once.');
     assert(!_disposedByOwner);
     final OverlayState overlay = _overlay!;
     _overlay = null;
@@ -261,8 +261,8 @@ class OverlayEntry implements Listenable {
 
   /// Discards any resources used by this [OverlayEntry].
   ///
-  /// This method must be called after [remove] if the [OverlayEntry] is
-  /// inserted into an [Overlay].
+  /// The [remove] method must be called before this method if the
+  /// [OverlayEntry] is inserted into an [Overlay].
   ///
   /// After this is called, the object is not in a usable state and should be
   /// discarded (calls to [addListener] will throw after the object is disposed).

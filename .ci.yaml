@@ -166,7 +166,7 @@ platform_properties:
         [
           {"dependency": "apple_signing", "version": "version:to_2026"}
         ]
-      os: Mac-15.5
+      os: Mac-15.5|Mac-15.7
       device_type: none
       $flutter/osx_sdk : >-
         {
@@ -183,7 +183,7 @@ platform_properties:
         [
           {"dependency": "apple_signing", "version": "version:to_2026"}
         ]
-      os: Mac-15.5
+      os: Mac-15.5|Mac-15.7
       device_type: none
       cpu: arm64
       $flutter/osx_sdk : >-
@@ -203,7 +203,7 @@ platform_properties:
         ]
       device_type: none
       mac_model: "Macmini8,1"
-      os: Mac-15.5
+      os: Mac-15.5|Mac-15.7
       tags: >
         ["devicelab", "hostonly", "mac"]
       $flutter/osx_sdk : >-
@@ -221,7 +221,7 @@ platform_properties:
         [
           {"dependency": "apple_signing", "version": "version:to_2026"}
         ]
-      os: Mac-15.5
+      os: Mac-15.5|Mac-15.7
       device_type: none
       cpu: x86
       $flutter/osx_sdk : >-
@@ -240,7 +240,7 @@ platform_properties:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "version:to_2026"}
         ]
-      os: Mac-15.5
+      os: Mac-15.5|Mac-15.7
       device_type: none
       cpu: x86
       $flutter/osx_sdk : >-
@@ -267,7 +267,7 @@ platform_properties:
           {"dependency": "android_sdk", "version": "version:36v4"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
-      os: Mac-15.1|Mac-15.5|Mac-15.6
+      os: Mac-15.1|Mac-15.5|Mac-15.6|Mac-15.7
       cpu: arm64
       device_type: "mokey"
 
@@ -282,7 +282,7 @@ platform_properties:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "version:to_2026"}
         ]
-      os: Mac-15.1|Mac-15.5|Mac-15.6
+      os: Mac-15.1|Mac-15.5|Mac-15.6|Mac-15.7
       device_os: iOS-18
       $flutter/osx_sdk : >-
         {
@@ -300,7 +300,7 @@ platform_properties:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "version:to_2026"}
         ]
-      os: Mac-15.1|Mac-15.5|Mac-15.6
+      os: Mac-15.1|Mac-15.5|Mac-15.6|Mac-15.7
       cpu: x86
       device_os: iOS-18
       $flutter/osx_sdk : >-
@@ -319,7 +319,7 @@ platform_properties:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "none"}
         ]
-      os: Mac-15.1|Mac-15.5|Mac-15.6
+      os: Mac-15.1|Mac-15.5|Mac-15.6|Mac-15.7
       cpu: arm64
       device_os: iOS-18
       $flutter/osx_sdk : >-
@@ -1068,7 +1068,6 @@ targets:
       - DEPS
 
   - name: Linux build_android_host_app_with_module_aar
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/172630
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -2566,7 +2565,6 @@ targets:
 
   # linux mokey benchmark
   - name: Linux_mokey complex_layout__start_up
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/173691
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3552,6 +3550,46 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: rrect_blur_perf_ios__timeline_summary
+
+  - name: Linux_pixel_7pro draw_arcs_all_fill_styles_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: draw_arcs_all_fill_styles_perf__timeline_summary
+
+  - name: Mac_ios draw_arcs_all_fill_styles_perf_ios__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: draw_arcs_all_fill_styles_perf_ios__timeline_summary
+
+  - name: Linux_pixel_7pro draw_arcs_all_stroke_styles_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: draw_arcs_all_stroke_styles_perf__timeline_summary
+
+  - name: Mac_ios draw_arcs_all_stroke_styles_perf_ios__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: draw_arcs_all_stroke_styles_perf_ios__timeline_summary
 
   # Uses Impeller.
   - name: Linux_pixel_7pro animated_blur_backdrop_filter_perf_opengles__timeline_summary
@@ -5415,7 +5453,7 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: ios_debug_workflow
-      os: Mac-15.5
+      os: Mac-15.5|Mac-15.7
       $flutter/osx_sdk : >-
         {
           "sdk_version": "17a5295f"
@@ -5457,7 +5495,7 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery__transition_perf_e2e_ios
       drone_dimensions: >
-        ["device_os=iOS-18","os=Mac-15.1|Mac-15.5|Mac-15.6", "cpu=x86"]
+        ["device_os=iOS-18","os=Mac-15.1|Mac-15.5|Mac-15.6|Mac-15.7", "cpu=x86"]
 
   - name: Mac_ios animated_blur_backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone

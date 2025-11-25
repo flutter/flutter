@@ -3,7 +3,7 @@ description: A framework for writing Flutter applications
 homepage: https://flutter.dev
 
 environment:
-  sdk: ^3.8.0-0
+  sdk: ^3.9.0-0
 
 resolution: workspace
 
@@ -14,7 +14,7 @@ dependencies:
   # https://github.com/flutter/flutter/blob/main/docs/infra/Updating-dependencies-in-Flutter.md
   characters: 1.4.0
   collection: 1.19.1
-  material_color_utilities: 0.11.1
+  material_color_utilities: 0.13.0
   meta: 1.17.0
   vector_math: 2.2.0
   sky_engine:
@@ -40,4 +40,4 @@ dev_dependencies:
   path: any
   platform: any
 
-# PUBSPEC CHECKSUM: spkhmh
+# PUBSPEC CHECKSUM: mth90e
