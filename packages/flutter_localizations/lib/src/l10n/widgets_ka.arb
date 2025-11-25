@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "ყველას არჩევა",
   "searchResultsFound": "ძიების შედეგები ნაპოვნია",
   "noResultsFound": "შედეგები ვერ მოიძებნა",
-  "radioButtonUnselectedLabel": "არ არის არჩეული"
+  "radioButtonUnselectedLabel": "არ არის არჩეული",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

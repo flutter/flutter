@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "Piliin lahat",
   "searchResultsFound": "Nakakita ng mga resulta ng paghahanap",
   "noResultsFound": "Walang nakitang resulta",
-  "radioButtonUnselectedLabel": "Hindi napili"
+  "radioButtonUnselectedLabel": "Hindi napili",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

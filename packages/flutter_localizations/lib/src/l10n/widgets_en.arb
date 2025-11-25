@@ -33,5 +33,29 @@
   "@radioButtonUnselectedLabel": {
     "description": "The accessibility hint for an unselected radio button.",
     "type": "text"
+  },
+  "expansibleExpandedHint": "double tap to collapse",
+  "@expansibleExpandedHint": {
+    "description": "The semantics hint to describe the tap action on an expanded Expansible on iOS and macOS."
+  },
+  "expansibleCollapsedHint": "double tap to expand",
+  "@expansibleCollapsedHint": {
+    "description": "The semantics hint to describe the tap action on a collapsed Expansible on iOS and macOS."
+  },
+  "expansibleExpandedTapHint": "Collapse",
+  "@expansibleExpandedTapHint": {
+    "description": "The semantics hint to describe the tap action on an expanded Expansible."
+  },
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "@expansibleCollapsedTapHint": {
+    "description": "The semantics hint to describe the tap action on a collapsed Expansible."
+  },
+  "expandedHint": "Collapsed",
+  "@expandedHint": {
+    "description": "The semantics hint to describe the Expansible expanded state."
+  },
+  "collapsedHint": "Expanded",
+  "@collapsedHint": {
+    "description": "The semantics hint to describe the Expansible collapsed state."
   }
 }

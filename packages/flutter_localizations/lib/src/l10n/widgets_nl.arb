@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "Alles selecteren",
   "searchResultsFound": "Zoekresultaten gevonden",
   "noResultsFound": "Geen resultaten gevonden",
-  "radioButtonUnselectedLabel": "Niet geselecteerd"
+  "radioButtonUnselectedLabel": "Niet geselecteerd",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

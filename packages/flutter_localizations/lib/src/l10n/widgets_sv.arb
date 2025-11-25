@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "Markera allt",
   "searchResultsFound": "Sökresultat hittades",
   "noResultsFound": "Inga resultat hittades",
-  "radioButtonUnselectedLabel": "Inte markerad"
+  "radioButtonUnselectedLabel": "Inte markerad",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }
