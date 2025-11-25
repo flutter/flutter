@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Setup Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: ${{ github.repository }}
           ref: master

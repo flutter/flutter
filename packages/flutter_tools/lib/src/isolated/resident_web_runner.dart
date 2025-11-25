@@ -98,6 +98,7 @@ class ResidentWebRunner extends ResidentRunner {
     String? target,
     bool stayResident = true,
     bool machine = false,
+    String? projectRootPath,
     required this.flutterProject,
     required DebuggingOptions debuggingOptions,
     required FileSystem fileSystem,
@@ -129,6 +130,7 @@ class ResidentWebRunner extends ResidentRunner {
            outputPreferences: outputPreferences,
          ),
          dartBuilder: hookRunner,
+         projectRootPath: projectRootPath,
        );
 
   final FileSystem _fileSystem;

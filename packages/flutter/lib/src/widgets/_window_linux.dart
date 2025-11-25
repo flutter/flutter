@@ -23,6 +23,7 @@ import 'package:flutter/rendering.dart';
 
 import '../foundation/_features.dart';
 import '_window.dart';
+import '_window_positioner.dart';
 import 'binding.dart';
 
 // Maximum width and height a window can be.
@@ -407,7 +408,9 @@ class _FlView extends _GtkWidget {
   _FlView()
     : super(
         _flViewNewForEngine(
-          ffi.Pointer<ffi.NativeType>.fromAddress(PlatformDispatcher.instance.engineId!),
+          ffi.Pointer<ffi.NativeType>.fromAddress(
+            WidgetsBinding.instance.platformDispatcher.engineId!,
+          ),
         ),
       );
 
@@ -542,7 +545,7 @@ class WindowingOwnerLinux extends WindowingOwner {
     }
 
     assert(
-      PlatformDispatcher.instance.engineId != null,
+      WidgetsBinding.instance.platformDispatcher.engineId != null,
       'WindowingOwnerLinux must be created after the engine has been initialized.',
     );
   }
@@ -588,6 +591,18 @@ class WindowingOwnerLinux extends WindowingOwner {
     );
     _windows[controller.rootView.viewId] = controller._window;
     return controller;
+  }
+
+  @internal
+  @override
+  TooltipWindowController createTooltipWindowController({
+    required TooltipWindowControllerDelegate delegate,
+    required BoxConstraints preferredConstraints,
+    required Rect anchorRect,
+    required WindowPositioner positioner,
+    required BaseWindowController parent,
+  }) {
+    throw UnimplementedError('Tooltip windows are not yet implemented on Linux.');
   }
 }
 

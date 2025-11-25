@@ -3,7 +3,7 @@ description: Tools for building Flutter applications
 homepage: https://flutter.dev
 
 environment:
-  sdk: ^3.8.0-0
+  sdk: ^3.9.0-0
 
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
@@ -19,16 +19,16 @@ dependencies:
   collection: 1.19.1
   completion: 1.0.2
   coverage: 1.15.0
-  crypto: 3.0.6
+  crypto: 3.0.7
   ffi: 2.1.4
   file: 7.0.1
   flutter_template_images: 5.0.0
   html: 0.15.6
-  http: 1.5.0
+  http: 1.6.0
   intl: 0.20.2
   meta: 1.17.0
   multicast_dns: 0.3.3
-  mustache_template: 2.0.1
+  mustache_template: 2.0.2
   package_config: 2.2.0
   process: 5.0.5
   fake_async: 1.3.3
@@ -41,7 +41,7 @@ dependencies:
   native_stack_traces: 0.6.1
   shelf: 1.4.2
   vm_snapshot_analysis: 0.7.6
-  uuid: 4.5.1
+  uuid: 4.5.2
   web_socket_channel: 3.0.3
   stream_channel: 2.1.4
   shelf_web_socket: 2.0.1
@@ -66,21 +66,21 @@ dependencies:
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so when upgrading
   # this, make sure the tests are still running correctly.
-  test_api: 0.7.7
-  test_core: 0.6.12
+  test_api: 0.7.8
+  test_core: 0.6.14
 
   vm_service: 15.0.2
 
   standard_message_codec: 0.0.1+4
 
-  dart_style: 3.1.2
+  dart_style: 3.1.3
 
   # The below dependencies are transitive and are here to pin them to a specific version.
   _fe_analyzer_shared: 89.0.0
   boolean_selector: 2.1.2
   browser_launcher: 1.1.3
   built_collection: 5.1.1
-  built_value: 8.12.0
+  built_value: 8.12.1
   cli_config: 0.2.0
   clock: 1.1.2
   csslib: 1.0.2
@@ -95,7 +95,7 @@ dependencies:
   http_parser: 4.1.2
   io: 1.0.5
   json_rpc_2: 3.0.3
-  matcher: 0.12.17
+  matcher: 0.12.18
   petitparser: 6.1.0
   platform: 3.1.6
   shelf_packages_handler: 3.0.2
@@ -122,9 +122,9 @@ dev_dependencies:
   js: 0.7.2
   json_annotation: 4.9.0
   node_preamble: 2.0.2
-  test: 1.26.3
+  test: 1.28.0
 
 dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
-# PUBSPEC CHECKSUM: 1aoins
+# PUBSPEC CHECKSUM: vqtudk
