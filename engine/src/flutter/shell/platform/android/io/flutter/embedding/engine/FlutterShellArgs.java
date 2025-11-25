@@ -290,6 +290,25 @@ public final class FlutterShellArgs {
     return FLAG_BY_COMMAND_LINE_ARG.get(arg.substring(0, equalsIndex + 1));
   }
 
+  /**
+   * Looks up a {@link Flag} by its intent key.
+   *
+   * <p>Intent keys were set by the deprecated version of FlutterShellArgs which match the command
+   * line argument without the "--" prefix and "=" suffix if the argument takes a value.
+   */
+  public static Flag getFlagFromIntentKey(String intentKey) {
+    for (Flag flag : ALL_FLAGS) {
+      String commandLineArg = flag.commandLineArgument;
+      String key = commandLineArg.startsWith("--") ? commandLineArg.substring(2) : commandLineArg;
+      if (key.endsWith("=")) {
+        key = key.substring(0, key.length() - 1);
+      }
+      if (key.equals(intentKey)) {
+        return flag;
+      }
+    }
+    return null;
+  }
   /** Returns whether or not a flag is deprecated and should raise an exception if used. */
   public static boolean isDeprecated(Flag flag) {
     return DEPRECATED_FLAGS.contains(flag);
