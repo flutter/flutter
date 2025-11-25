@@ -261,8 +261,8 @@ class OverlayEntry implements Listenable {
 
   /// Discards any resources used by this [OverlayEntry].
   ///
-  /// [remove] must be called before this method if the [OverlayEntry] is
-  /// inserted into an [Overlay].
+  /// The [remove] method must be called before this method if the
+  /// [OverlayEntry] is inserted into an [Overlay].
   ///
   /// After this is called, the object is not in a usable state and should be
   /// discarded (calls to [addListener] will throw after the object is disposed).
