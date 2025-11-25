@@ -103,7 +103,7 @@ void main() {
   testWidgets('shrink listview while dragging', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        // Do not build MaterialApp's default Scrollbar.
+        // Do not build MaterialScrollBehaviors's default Scrollbar.
         scrollBehavior: const NoScrollbarMaterialBehavior(),
         home: ListView.builder(
           itemBuilder: (BuildContext context, int index) => index == 0
