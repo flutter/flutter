@@ -76,6 +76,6 @@ public class FlutterShellArgsTest {
 
   @Test
   public void isDeprecated_returnsFalseWhenFlagIsNotDeprecated() {
-    assertFalse(FlutterShellArgs.isDeprecated(FlutterShellArgs.VM_SERVICE_PORT));
+    assertFalse(FlutterShellArgs.isDeprecated(FlutterShellArgs.VM_SNAPSHOT_DATA));
   }
 }
