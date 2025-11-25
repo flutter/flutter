@@ -770,7 +770,9 @@ Your $application code is in $relativeAppMain.
       overwrite: overwrite,
       printStatusWhenWriting: printStatusWhenWriting,
     );
-
+    // Restore the original ios and macos values.
+    // This is necessary in case the user requested the darwin platform,
+    // and we need to restore them for the example app generation.
     templateContext['ios'] = originalIos;
     templateContext['macos'] = originalMacos;
 
