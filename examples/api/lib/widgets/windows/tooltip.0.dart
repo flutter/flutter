@@ -24,10 +24,14 @@ void main() {
         child: const MaterialApp(home: MyApp()),
       ),
     );
-  } on UnsupportedError {
+  } on UnsupportedError catch (e) {
     // TODO(mattkae): Remove this catch block when Windows tooltips are supported in tests.
     // For now, we need to catch the error so that the API smoke tests pass.
-    return;
+    runApp(
+      MaterialApp(
+        home: Scaffold(body: Center(child: Text(e.message ?? 'Unsupported'))),
+      ),
+    );
   }
 }
 
