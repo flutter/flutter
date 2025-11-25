@@ -16,9 +16,7 @@ final PackageLock packageLock = PackageLock();
 /// Provides access to the contents of the `package_lock.yaml` file.
 class PackageLock {
   factory PackageLock() {
-    final lockFile = io.File(
-      path.join(environment.webUiRootDir.path, 'dev', 'package_lock.yaml'),
-    );
+    final lockFile = io.File(path.join(environment.webUiRootDir.path, 'dev', 'package_lock.yaml'));
     final yaml = loadYaml(lockFile.readAsStringSync()) as YamlMap;
     return PackageLock._fromYaml(yaml);
   }

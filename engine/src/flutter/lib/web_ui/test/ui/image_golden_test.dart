@@ -240,12 +240,7 @@ Future<void> testMain() async {
         final ui.Image image = await generateImage();
 
         final Float64List matrix = Matrix4.rotationZ(pi / 6).toFloat64();
-        final shader = ui.ImageShader(
-          image,
-          ui.TileMode.decal,
-          ui.TileMode.decal,
-          matrix,
-        );
+        final shader = ui.ImageShader(image, ui.TileMode.decal, ui.TileMode.decal, matrix);
 
         // Draw an octagon
         const vertexValues = <ui.Offset>[

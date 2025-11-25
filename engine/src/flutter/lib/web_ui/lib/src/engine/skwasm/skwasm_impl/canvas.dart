@@ -227,7 +227,9 @@ class SkwasmCanvas implements LayerCanvas {
 
   @override
   void drawImage(ui.Image image, ui.Offset offset, ui.Paint paint) {
-    final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(defaultBlurTileMode: ui.TileMode.clamp);
+    final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(
+      defaultBlurTileMode: ui.TileMode.clamp,
+    );
     canvasDrawImage(
       _handle,
       (image as SkwasmImage).handle,
@@ -244,7 +246,9 @@ class SkwasmCanvas implements LayerCanvas {
     withStackScope((StackScope scope) {
       final Pointer<Float> sourceRect = scope.convertRectToNative(src);
       final Pointer<Float> destRect = scope.convertRectToNative(dst);
-      final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(defaultBlurTileMode: ui.TileMode.clamp);
+      final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(
+        defaultBlurTileMode: ui.TileMode.clamp,
+      );
       canvasDrawImageRect(
         _handle,
         (image as SkwasmImage).handle,
@@ -262,7 +266,9 @@ class SkwasmCanvas implements LayerCanvas {
     withStackScope((StackScope scope) {
       final Pointer<Int32> centerRect = scope.convertIRectToNative(center);
       final Pointer<Float> destRect = scope.convertRectToNative(dst);
-      final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(defaultBlurTileMode: ui.TileMode.clamp);
+      final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(
+        defaultBlurTileMode: ui.TileMode.clamp,
+      );
       canvasDrawImageNine(
         _handle,
         (image as SkwasmImage).handle,
@@ -326,7 +332,9 @@ class SkwasmCanvas implements LayerCanvas {
         ? scope.convertColorArrayToNative(colors)
         : nullptr;
     final RawRect rawCullRect = cullRect != null ? scope.convertRectToNative(cullRect) : nullptr;
-    final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(defaultBlurTileMode: ui.TileMode.clamp);
+    final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(
+      defaultBlurTileMode: ui.TileMode.clamp,
+    );
     canvasDrawAtlas(
       _handle,
       (atlas as SkwasmImage).handle,
@@ -357,7 +365,9 @@ class SkwasmCanvas implements LayerCanvas {
         ? scope.convertIntsToUint32Native(colors)
         : nullptr;
     final RawRect rawCullRect = cullRect != null ? scope.convertRectToNative(cullRect) : nullptr;
-    final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(defaultBlurTileMode: ui.TileMode.clamp);
+    final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(
+      defaultBlurTileMode: ui.TileMode.clamp,
+    );
     canvasDrawAtlas(
       _handle,
       (atlas as SkwasmImage).handle,

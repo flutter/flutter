@@ -289,8 +289,7 @@ void testMain() {
       final surface = Surface();
       surface.ensureSurface(const BitmapSize(10, 10));
       final DomOffscreenCanvas offscreenCanvas = surface.debugGetOffscreenCanvas()!;
-      final transferToImageBitmap =
-          offscreenCanvas['transferToImageBitmap']! as JSFunction;
+      final transferToImageBitmap = offscreenCanvas['transferToImageBitmap']! as JSFunction;
       var transferToImageBitmapCalls = 0;
       offscreenCanvas['transferToImageBitmap'] = () {
         transferToImageBitmapCalls++;

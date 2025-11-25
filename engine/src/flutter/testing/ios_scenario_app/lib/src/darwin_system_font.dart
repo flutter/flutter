@@ -26,11 +26,10 @@ class DarwinSystemFont extends Scenario {
           ..pushStyle(TextStyle(fontSize: 50))
           ..addText('Cupertino System Display\n')
           ..pop();
-    final paragraphBuilderText =
-        ParagraphBuilder(ParagraphStyle(fontFamily: 'CupertinoSystemText'))
-          ..pushStyle(TextStyle(fontSize: 50))
-          ..addText('Cupertino System Text\n')
-          ..pop();
+    final paragraphBuilderText = ParagraphBuilder(ParagraphStyle(fontFamily: 'CupertinoSystemText'))
+      ..pushStyle(TextStyle(fontSize: 50))
+      ..addText('Cupertino System Text\n')
+      ..pop();
 
     final Paragraph paragraphPro = paragraphBuilderDisplay.build();
     paragraphPro.layout(ParagraphConstraints(width: _screenWidth));

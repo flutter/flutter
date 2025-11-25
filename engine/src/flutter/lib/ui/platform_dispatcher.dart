@@ -1289,8 +1289,7 @@ class PlatformDispatcher {
       _nativeSpellCheckServiceDefined = false;
     }
 
-    final supportsShowingSystemContextMenu =
-        data['supportsShowingSystemContextMenu'] as bool?;
+    final supportsShowingSystemContextMenu = data['supportsShowingSystemContextMenu'] as bool?;
     if (supportsShowingSystemContextMenu != null) {
       _supportsShowingSystemContextMenu = supportsShowingSystemContextMenu;
     } else {

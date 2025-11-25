@@ -60,9 +60,8 @@ Future<void> testMain() async {
   });
 
   test('respects paragraph height', () {
-    final builder = ui.ParagraphBuilder(
-      ui.ParagraphStyle(fontSize: 10, height: 1.5),
-    )..addText('A' * 10);
+    final builder = ui.ParagraphBuilder(ui.ParagraphStyle(fontSize: 10, height: 1.5))
+      ..addText('A' * 10);
     final ui.Paragraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
 

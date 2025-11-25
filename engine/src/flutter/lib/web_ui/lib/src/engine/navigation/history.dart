@@ -366,7 +366,9 @@ class SingleEntryBrowserHistory extends BrowserHistory {
   /// This method is used manipulate the Flutter Entry which is always the
   /// active entry while the Flutter app is running.
   void _setupFlutterEntry(ui_web.UrlStrategy strategy, {bool replace = false}) {
-    final void Function(Object? state, String title, String url) updateState = replace ? strategy.replaceState : strategy.pushState;
+    final void Function(Object? state, String title, String url) updateState = replace
+        ? strategy.replaceState
+        : strategy.pushState;
     updateState(_flutterState, 'flutter', _currentRouteName);
   }
 

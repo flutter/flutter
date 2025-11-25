@@ -315,7 +315,10 @@ void testMain() {
       expect(owner().semanticsHost.ownerDocument?.activeElement, domDocument.body);
 
       strategy.enable(singlelineConfig, onChange: (_, _) {}, onAction: (_) {});
-      final SemanticsObject textFieldSemantics = createTextFieldSemantics(value: 'hello', isFocused: true);
+      final SemanticsObject textFieldSemantics = createTextFieldSemantics(
+        value: 'hello',
+        isFocused: true,
+      );
 
       final textField = textFieldSemantics.semanticRole! as SemanticTextField;
       expect(textField.editableElement, strategy.domElement);
@@ -334,7 +337,10 @@ void testMain() {
       expect(strategy.domElement, isNull);
 
       // During the semantics update the DOM element is created and is focused on.
-      final SemanticsObject textFieldSemantics = createTextFieldSemantics(value: 'hello', isFocused: true);
+      final SemanticsObject textFieldSemantics = createTextFieldSemantics(
+        value: 'hello',
+        isFocused: true,
+      );
       expect(strategy.domElement, isNotNull);
       expect(owner().semanticsHost.ownerDocument?.activeElement, strategy.domElement);
 

@@ -138,9 +138,8 @@ void main() {
           io.Directory(p.join(srcDir.path, 'flutter')).createSync();
           io.Directory(p.join(srcDir.path, 'out')).createSync();
 
-          final nestedSrcDir = io.Directory(
-            p.join(srcDir.path, 'flutter', 'bar', 'src', 'baz'),
-          )..createSync(recursive: true);
+          final nestedSrcDir = io.Directory(p.join(srcDir.path, 'flutter', 'bar', 'src', 'baz'))
+            ..createSync(recursive: true);
 
           final engine = Engine.findWithin(nestedSrcDir.path);
 
@@ -198,19 +197,15 @@ void main() {
 
     try {
       // Create a valid engine.
-      final srcDir = io.Directory(p.join(emptyDir.path, 'src'))
-        ..createSync(recursive: true);
-      final flutterDir = io.Directory(p.join(srcDir.path, 'flutter'))
-        ..createSync(recursive: true);
-      final outDir = io.Directory(p.join(srcDir.path, 'out'))
-        ..createSync(recursive: true);
+      final srcDir = io.Directory(p.join(emptyDir.path, 'src'))..createSync(recursive: true);
+      final flutterDir = io.Directory(p.join(srcDir.path, 'flutter'))..createSync(recursive: true);
+      final outDir = io.Directory(p.join(srcDir.path, 'out'))..createSync(recursive: true);
 
       // Create two targets in out: host_debug and host_debug_unopt_arm64.
       final hostDebug = io.Directory(p.join(outDir.path, 'host_debug'))
         ..createSync(recursive: true);
-      final hostDebugUnoptArm64 = io.Directory(
-        p.join(outDir.path, 'host_debug_unopt_arm64'),
-      )..createSync(recursive: true);
+      final hostDebugUnoptArm64 = io.Directory(p.join(outDir.path, 'host_debug_unopt_arm64'))
+        ..createSync(recursive: true);
 
       final Engine engine = TestEngine.withPaths(
         srcDir: srcDir,

@@ -125,12 +125,10 @@ void testMain() {
       final paint = CkPaint();
       paint.imageFilter = CkImageFilter.blur(sigmaX: 5, sigmaY: 10, tileMode: ui.TileMode.clamp);
 
-      final managedFilter1 =
-          paint.imageFilter! as CkManagedSkImageFilterConvertible;
+      final managedFilter1 = paint.imageFilter! as CkManagedSkImageFilterConvertible;
 
       paint.imageFilter = CkImageFilter.blur(sigmaX: 5, sigmaY: 10, tileMode: ui.TileMode.clamp);
-      final managedFilter2 =
-          paint.imageFilter! as CkManagedSkImageFilterConvertible;
+      final managedFilter2 = paint.imageFilter! as CkManagedSkImageFilterConvertible;
 
       expect(managedFilter1, same(managedFilter2));
     });

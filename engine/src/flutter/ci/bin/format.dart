@@ -228,10 +228,7 @@ abstract class FormatChecker {
 
   @protected
   Future<bool> applyPatch(List<String> patches) async {
-    final patchPool = ProcessPool(
-      processRunner: _processRunner,
-      printReport: namedReport('patch'),
-    );
+    final patchPool = ProcessPool(processRunner: _processRunner, printReport: namedReport('patch'));
     final List<WorkerJob> jobs = patches.map<WorkerJob>((String patch) {
       return WorkerJob(<String>[
         'git',
@@ -440,10 +437,7 @@ class ClangFormatChecker extends FormatChecker {
         );
       }
     }
-    final diffPool = ProcessPool(
-      processRunner: _processRunner,
-      printReport: namedReport('diff'),
-    );
+    final diffPool = ProcessPool(processRunner: _processRunner, printReport: namedReport('diff'));
     final List<WorkerJob> completedDiffs = await diffPool.runToCompletion(diffJobs);
     final Iterable<WorkerJob> failed = completedDiffs.where((WorkerJob job) {
       return job.result.exitCode != 0;
@@ -517,13 +511,7 @@ class JavaFormatChecker extends FormatChecker {
 
   /// Returns the path to the java executable in the flutter repository.
   static File hermeticJava(Directory srcDir) {
-    final javaPath = <String>[
-      srcDir.absolute.path,
-      'flutter',
-      'third_party',
-      'java',
-      'openjdk',
-    ];
+    final javaPath = <String>[srcDir.absolute.path, 'flutter', 'third_party', 'java', 'openjdk'];
     if (Platform.isMacOS) {
       javaPath.add('Contents');
       javaPath.add('Home');
@@ -647,10 +635,7 @@ class JavaFormatChecker extends FormatChecker {
         );
       }
     }
-    final diffPool = ProcessPool(
-      processRunner: _processRunner,
-      printReport: namedReport('diff'),
-    );
+    final diffPool = ProcessPool(processRunner: _processRunner, printReport: namedReport('diff'));
     final List<WorkerJob> completedDiffs = await diffPool.runToCompletion(diffJobs);
     final Iterable<WorkerJob> failed = completedDiffs.where((WorkerJob job) {
       return job.result.exitCode != 0;
@@ -770,10 +755,7 @@ class GnFormatChecker extends FormatChecker {
         );
       }
     }
-    final diffPool = ProcessPool(
-      processRunner: _processRunner,
-      printReport: namedReport('diff'),
-    );
+    final diffPool = ProcessPool(processRunner: _processRunner, printReport: namedReport('diff'));
     final List<WorkerJob> completedDiffs = await diffPool.runToCompletion(diffJobs);
     final Iterable<WorkerJob> failed = completedDiffs.where((WorkerJob job) {
       return job.result.exitCode != 0;
@@ -895,10 +877,7 @@ class DartFormatChecker extends FormatChecker {
           );
         }
       }
-      final diffPool = ProcessPool(
-        processRunner: _processRunner,
-        printReport: namedReport('diff'),
-      );
+      final diffPool = ProcessPool(processRunner: _processRunner, printReport: namedReport('diff'));
       final List<WorkerJob> completedDiffs = await diffPool.runToCompletion(diffJobs);
       incorrect = completedDiffs.where((WorkerJob job) {
         return job.result.exitCode != 0;

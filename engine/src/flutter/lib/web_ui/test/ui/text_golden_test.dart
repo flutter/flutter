@@ -781,9 +781,7 @@ Future<void> testSampleText(
   ui.Picture renderPicture() {
     final recorder = ui.PictureRecorder();
     final canvas = ui.Canvas(recorder);
-    final paragraphBuilder = ui.ParagraphBuilder(
-      ui.ParagraphStyle(textDirection: textDirection),
-    );
+    final paragraphBuilder = ui.ParagraphBuilder(ui.ParagraphStyle(textDirection: textDirection));
     paragraphBuilder.addText(text);
     final ui.Paragraph paragraph = paragraphBuilder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: testWidth - 20));

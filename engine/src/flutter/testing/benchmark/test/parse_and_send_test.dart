@@ -29,10 +29,7 @@ void main() {
 
     // Check that gitLog[1] is a sensible Unix Epoch
     final int millisecondsSinceEpoch = secondsSinceEpoch * 1000;
-    final commitDate = DateTime.fromMillisecondsSinceEpoch(
-      millisecondsSinceEpoch,
-      isUtc: true,
-    );
+    final commitDate = DateTime.fromMillisecondsSinceEpoch(millisecondsSinceEpoch, isUtc: true);
     expect(commitDate.year > 2000, true);
     expect(commitDate.year < 3000, true);
   });

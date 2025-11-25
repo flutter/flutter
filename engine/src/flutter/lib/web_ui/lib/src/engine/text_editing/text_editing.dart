@@ -461,9 +461,7 @@ class AutofillInfo {
     final String? firstHint = (hintsList == null || hintsList.isEmpty)
         ? null
         : hintsList.first as String;
-    final editingState = EditingState.fromFrameworkMessage(
-      autofill.readJson('editingValue'),
-    );
+    final editingState = EditingState.fromFrameworkMessage(autofill.readJson('editingValue'));
     return AutofillInfo(
       uniqueIdentifier: uniqueIdentifier,
       autofillHint: (firstHint != null)
@@ -2244,8 +2242,7 @@ class TextInputFinishAutofillContext extends TextInputCommand {
 /// See: https://github.com/flutter/flutter/blob/bf9f3a3dcfea3022f9cf2dfc3ab10b120b48b19d/packages/flutter/lib/src/services/text_input.dart#L1277
 void saveForms() {
   formsOnTheDom.forEach((String identifier, DomHTMLFormElement form) {
-    final submitBtn =
-        form.getElementsByClassName('submitBtn').first as DomHTMLInputElement;
+    final submitBtn = form.getElementsByClassName('submitBtn').first as DomHTMLInputElement;
     submitBtn.click();
   });
 }

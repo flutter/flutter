@@ -26,13 +26,19 @@ void main() {
     TestEnvironment? environment,
     void Function(TestBuilderConfig)? builds,
   }) {
-    final (List<Build> builders, ArgParser parser, Environment env) = _createTestFixture(environment: environment, builds: builds);
+    final (List<Build> builders, ArgParser parser, Environment env) = _createTestFixture(
+      environment: environment,
+      builds: builds,
+    );
 
     return BuildPlan.fromArgResults(parser.parse(args), env, builds: builders);
   }
 
   test('rbe defaults to true if detected', () {
-    final BuildPlan plan = configureAndParse([], environment: TestEnvironment.withTestEngine(withRbe: true));
+    final BuildPlan plan = configureAndParse(
+      [],
+      environment: TestEnvironment.withTestEngine(withRbe: true),
+    );
 
     expect(plan.useRbe, isTrue);
     expect(plan.toGnArgs(), isNot(contains('--no-rbe')));
@@ -388,7 +394,9 @@ void main() {
     });
 
     test('shows LTO instructions if verbose', () {
-      final ArgParser parser = createArgParser(environment: TestEnvironment.withTestEngine(verbose: true));
+      final ArgParser parser = createArgParser(
+        environment: TestEnvironment.withTestEngine(verbose: true),
+      );
 
       expect(parser.usage, contains('Whether LTO should be enabled for a build'));
     });
@@ -412,7 +420,9 @@ void main() {
     });
 
     test('shows RBE instructions if verbose', () {
-      final ArgParser parser = createArgParser(environment: TestEnvironment.withTestEngine(verbose: true));
+      final ArgParser parser = createArgParser(
+        environment: TestEnvironment.withTestEngine(verbose: true),
+      );
 
       expect(
         parser.usage,
@@ -424,7 +434,9 @@ void main() {
     });
 
     test('hides RBE instructions if enabled', () {
-      final ArgParser parser = createArgParser(environment: TestEnvironment.withTestEngine(withRbe: true));
+      final ArgParser parser = createArgParser(
+        environment: TestEnvironment.withTestEngine(withRbe: true),
+      );
 
       expect(parser.usage, contains('Enable pre-configured remote build execution'));
       expect(parser.usage, isNot(contains('https://flutter.dev/to/engine-rbe')));
@@ -443,13 +455,17 @@ void main() {
     });
 
     test('shows --build-strategy if RBE enabled', () {
-      final ArgParser parser = createArgParser(environment: TestEnvironment.withTestEngine(withRbe: true));
+      final ArgParser parser = createArgParser(
+        environment: TestEnvironment.withTestEngine(withRbe: true),
+      );
 
       expect(parser.usage, contains('How to prefer remote or local builds'));
     });
 
     test('shows --build-strategy if verbose', () {
-      final ArgParser parser = createArgParser(environment: TestEnvironment.withTestEngine(verbose: true));
+      final ArgParser parser = createArgParser(
+        environment: TestEnvironment.withTestEngine(verbose: true),
+      );
 
       expect(parser.usage, contains('How to prefer remote or local builds'));
     });
@@ -461,7 +477,9 @@ void main() {
     });
 
     test('shows --gn-args if verbose', () {
-      final ArgParser parser = createArgParser(environment: TestEnvironment.withTestEngine(verbose: true));
+      final ArgParser parser = createArgParser(
+        environment: TestEnvironment.withTestEngine(verbose: true),
+      );
 
       expect(parser.usage, contains('Additional arguments to provide to "gn"'));
     });

@@ -253,9 +253,7 @@ class _PackageRoller {
     final String version = _lock.chromeLock.version;
     final String url = platform.binding.getChromeDriverDownloadUrl(version);
     final cipdPackageName = 'flutter_internal/browser-drivers/chrome/${platform.name}';
-    final platformDir = io.Directory(
-      path.join(_rollDir.path, '${platform.name}_driver'),
-    );
+    final platformDir = io.Directory(path.join(_rollDir.path, '${platform.name}_driver'));
     print('\nRolling Chromedriver for ${platform.os}-${platform.arch} (version:$version)');
     // Bail out if CIPD already has version:$majorVersion for this package!
     if (!dryRun &&

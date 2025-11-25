@@ -219,21 +219,9 @@ Future<void> testMain() async {
     final redPaint = Paint()..color = const Color(0xFFFF0000);
     final bluePaint = Paint()..color = const Color(0xFF0000FF);
 
-    final blackStyle = WebTextStyle(
-      foreground: blackPaint,
-      fontSize: 20,
-      fontFamily: 'Roboto',
-    );
-    final blueStyle = WebTextStyle(
-      foreground: bluePaint,
-      fontSize: 20,
-      fontFamily: 'Roboto',
-    );
-    final redStyle = WebTextStyle(
-      foreground: redPaint,
-      fontSize: 20,
-      fontFamily: 'Roboto',
-    );
+    final blackStyle = WebTextStyle(foreground: blackPaint, fontSize: 20, fontFamily: 'Roboto');
+    final blueStyle = WebTextStyle(foreground: bluePaint, fontSize: 20, fontFamily: 'Roboto');
+    final redStyle = WebTextStyle(foreground: redPaint, fontSize: 20, fontFamily: 'Roboto');
     final builder = WebParagraphBuilder(WebParagraphStyle());
     builder.pushStyle(blackStyle);
 
@@ -333,41 +321,19 @@ Future<void> testMain() async {
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
     final blackPaint = Paint()..color = const Color(0xFF000000);
 
-    final defaultStyle = WebTextStyle(
-      fontFamily: 'Roboto',
-      fontSize: 20,
-      foreground: blackPaint,
-    );
+    final defaultStyle = WebTextStyle(fontFamily: 'Roboto', fontSize: 20, foreground: blackPaint);
 
-    final normalNormal = WebTextStyle(
-      fontStyle: FontStyle.normal,
-      fontWeight: FontWeight.normal,
-    );
+    final normalNormal = WebTextStyle(fontStyle: FontStyle.normal, fontWeight: FontWeight.normal);
 
-    final normalBold = WebTextStyle(
-      fontStyle: FontStyle.normal,
-      fontWeight: FontWeight.bold,
-    );
+    final normalBold = WebTextStyle(fontStyle: FontStyle.normal, fontWeight: FontWeight.bold);
 
-    final normalThin = WebTextStyle(
-      fontStyle: FontStyle.normal,
-      fontWeight: FontWeight.w100,
-    );
+    final normalThin = WebTextStyle(fontStyle: FontStyle.normal, fontWeight: FontWeight.w100);
 
-    final italicNormal = WebTextStyle(
-      fontStyle: FontStyle.italic,
-      fontWeight: FontWeight.normal,
-    );
+    final italicNormal = WebTextStyle(fontStyle: FontStyle.italic, fontWeight: FontWeight.normal);
 
-    final italicBold = WebTextStyle(
-      fontStyle: FontStyle.italic,
-      fontWeight: FontWeight.bold,
-    );
+    final italicBold = WebTextStyle(fontStyle: FontStyle.italic, fontWeight: FontWeight.bold);
 
-    final italicThin = WebTextStyle(
-      fontStyle: FontStyle.italic,
-      fontWeight: FontWeight.w100,
-    );
+    final italicThin = WebTextStyle(fontStyle: FontStyle.italic, fontWeight: FontWeight.w100);
 
     final builder = WebParagraphBuilder(WebParagraphStyle());
     builder.pushStyle(defaultStyle);
@@ -563,41 +529,17 @@ Future<void> testMain() async {
 
     final defaultStyle = WebTextStyle(foreground: blackPaint);
 
-    final roboto10 = WebTextStyle(
-      fontFamily: 'Roboto',
-      fontSize: 10,
-      foreground: redPaint,
-    );
+    final roboto10 = WebTextStyle(fontFamily: 'Roboto', fontSize: 10, foreground: redPaint);
 
-    final arial10 = WebTextStyle(
-      fontFamily: 'Arial',
-      fontSize: 10,
-      foreground: bluePaint,
-    );
+    final arial10 = WebTextStyle(fontFamily: 'Arial', fontSize: 10, foreground: bluePaint);
 
-    final roboto20 = WebTextStyle(
-      fontFamily: 'Roboto',
-      fontSize: 20,
-      foreground: greenPaint,
-    );
+    final roboto20 = WebTextStyle(fontFamily: 'Roboto', fontSize: 20, foreground: greenPaint);
 
-    final arial20 = WebTextStyle(
-      fontFamily: 'Arial',
-      fontSize: 20,
-      foreground: bluePaint,
-    );
+    final arial20 = WebTextStyle(fontFamily: 'Arial', fontSize: 20, foreground: bluePaint);
 
-    final roboto40 = WebTextStyle(
-      fontFamily: 'Roboto',
-      fontSize: 40,
-      foreground: redPaint,
-    );
+    final roboto40 = WebTextStyle(fontFamily: 'Roboto', fontSize: 40, foreground: redPaint);
 
-    final arial40 = WebTextStyle(
-      fontFamily: 'Arial',
-      fontSize: 40,
-      foreground: bluePaint,
-    );
+    final arial40 = WebTextStyle(fontFamily: 'Arial', fontSize: 40, foreground: bluePaint);
 
     final builder = WebParagraphBuilder(paragraphStyle);
     builder.pushStyle(defaultStyle);
@@ -954,11 +896,7 @@ Future<void> testMain() async {
       fontSize: 50,
       color: const Color(0xFF000000),
     );
-    final blackStyle = WebTextStyle(
-      fontFamily: 'Roboto',
-      fontSize: 20,
-      foreground: blackPaint,
-    );
+    final blackStyle = WebTextStyle(fontFamily: 'Roboto', fontSize: 20, foreground: blackPaint);
     final whiteStyle = WebTextStyle(
       foreground: blackPaint,
       background: whitePaint,

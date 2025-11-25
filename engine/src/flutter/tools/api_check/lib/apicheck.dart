@@ -19,9 +19,7 @@ import 'package:analyzer/dart/ast/ast.dart';
 /// `k` and terminated in `Index`.
 List<String> getDartClassFields({required String sourcePath, required String className}) {
   final includedPaths = <String>[sourcePath];
-  final collection = AnalysisContextCollection(
-    includedPaths: includedPaths,
-  );
+  final collection = AnalysisContextCollection(includedPaths: includedPaths);
   final AnalysisContext context = collection.contextFor(sourcePath);
   final AnalysisSession session = context.currentSession;
 

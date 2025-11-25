@@ -33,9 +33,7 @@ void testMain() {
     setUpUnitTests(withImplicitView: true);
 
     test('getCanvas', () {
-      final factory = DisplayCanvasFactory<DisplayCanvas>(
-        createCanvas: () => DummyDisplayCanvas(),
-      );
+      final factory = DisplayCanvasFactory<DisplayCanvas>(createCanvas: () => DummyDisplayCanvas());
       expect(factory.baseCanvas, isNotNull);
 
       expect(factory.debugSurfaceCount, equals(1));
@@ -54,9 +52,7 @@ void testMain() {
     });
 
     test('releaseCanvas', () {
-      final factory = DisplayCanvasFactory<DisplayCanvas>(
-        createCanvas: () => DummyDisplayCanvas(),
-      );
+      final factory = DisplayCanvasFactory<DisplayCanvas>(createCanvas: () => DummyDisplayCanvas());
 
       // Create a new canvas and immediately release it.
       final DisplayCanvas canvas = factory.getCanvas();
@@ -69,9 +65,7 @@ void testMain() {
     });
 
     test('isLive', () {
-      final factory = DisplayCanvasFactory<DisplayCanvas>(
-        createCanvas: () => DummyDisplayCanvas(),
-      );
+      final factory = DisplayCanvasFactory<DisplayCanvas>(createCanvas: () => DummyDisplayCanvas());
 
       expect(factory.isLive(factory.baseCanvas), isTrue);
 

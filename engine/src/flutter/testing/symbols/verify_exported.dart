@@ -151,9 +151,7 @@ int _checkAndroid(String outPath, String nmPath, Iterable<String> builds) {
       continue;
     }
     final Iterable<NmEntry> entries = NmEntry.parse(nmResult.stdout as String);
-    final entryMap = <String, String>{
-      for (final NmEntry entry in entries) entry.name: entry.type,
-    };
+    final entryMap = <String, String>{for (final NmEntry entry in entries) entry.name: entry.type};
     final expectedSymbols = <String, String>{
       'JNI_OnLoad': 'T',
       '_binary_icudtl_dat_size': 'R',

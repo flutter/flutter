@@ -325,8 +325,7 @@ void readPlatformExecutable() {
 @pragma('vm:entry-point')
 void drawHelloWorld() {
   ui.PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
-    final paragraphBuilder = ui.ParagraphBuilder(ui.ParagraphStyle())
-      ..addText('Hello world');
+    final paragraphBuilder = ui.ParagraphBuilder(ui.ParagraphStyle())..addText('Hello world');
     final ui.Paragraph paragraph = paragraphBuilder.build();
 
     paragraph.layout(const ui.ParagraphConstraints(width: 800.0));

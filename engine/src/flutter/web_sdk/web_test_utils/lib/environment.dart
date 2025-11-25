@@ -44,12 +44,8 @@ class Environment {
   });
 
   static Environment _prepareEnvironmentFromEngineDir(io.File self, io.Directory engineSrcDir) {
-    final engineToolsDir = io.Directory(
-      pathlib.join(engineSrcDir.path, 'flutter', 'tools'),
-    );
-    final webUiRootDir = io.Directory(
-      pathlib.join(engineSrcDir.path, 'flutter', 'lib', 'web_ui'),
-    );
+    final engineToolsDir = io.Directory(pathlib.join(engineSrcDir.path, 'flutter', 'tools'));
+    final webUiRootDir = io.Directory(pathlib.join(engineSrcDir.path, 'flutter', 'lib', 'web_ui'));
 
     for (final expectedDirectory in <io.Directory>[engineSrcDir, webUiRootDir]) {
       if (!expectedDirectory.existsSync()) {

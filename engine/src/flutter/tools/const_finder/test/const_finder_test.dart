@@ -29,13 +29,20 @@ void main() {
       ? '/$fixturesPath'.replaceAll(io.Platform.pathSeparator, '/')
       : fixturesPath;
 
-  final String frontendServerSnapshot = path.join(buildDir, 'gen', 'frontend_server_aot.dart.snapshot');
+  final String frontendServerSnapshot = path.join(
+    buildDir,
+    'gen',
+    'frontend_server_aot.dart.snapshot',
+  );
   final String flutterPatchedSdk = path.join(buildDir, 'flutter_patched_sdk');
   final String librariesDotJson = path.join(flutterPatchedSdk, 'lib', 'libraries.json');
   final String packageConfig = path.join(fixturesPath, '.dart_tool', 'package_config.json');
 
   final String dart = io.Platform.resolvedExecutable;
-  final String dartaotruntime = path.join(path.dirname(io.Platform.resolvedExecutable), 'dartaotruntime');
+  final String dartaotruntime = path.join(
+    path.dirname(io.Platform.resolvedExecutable),
+    'dartaotruntime',
+  );
 
   void compileAOTDill({required String sourcePath, required String dillPath}) {
     final io.ProcessResult result = io.Process.runSync(dartaotruntime, [

@@ -1577,9 +1577,8 @@ void render_impeller_text_test() {
     final baseRecorder = PictureRecorder();
     final canvas = Canvas(baseRecorder);
 
-    final paragraphBuilder = ParagraphBuilder(
-      ParagraphStyle(fontFamily: 'sans-serif'),
-    )..addText('Flutter is the best!');
+    final paragraphBuilder = ParagraphBuilder(ParagraphStyle(fontFamily: 'sans-serif'))
+      ..addText('Flutter is the best!');
     final Paragraph paragraph = paragraphBuilder.build()
       ..layout(const ParagraphConstraints(width: 400));
     canvas.drawParagraph(paragraph, const Offset(20, 20));

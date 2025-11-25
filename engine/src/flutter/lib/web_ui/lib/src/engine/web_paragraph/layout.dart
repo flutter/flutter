@@ -185,10 +185,7 @@ class TextLayout {
     // Arrange line vertically, calculate metrics and bounds
     final ui.TextRange contentTextRange = _mapping.toTextRange(contentRange);
     final ui.TextRange whitespaceTextRange = _mapping.toTextRange(whitespaceRange);
-    final allTextRange = ui.TextRange(
-      start: contentTextRange.start,
-      end: whitespaceTextRange.end,
-    );
+    final allTextRange = ui.TextRange(start: contentTextRange.start, end: whitespaceTextRange.end);
     assert(contentTextRange.end == whitespaceTextRange.start);
 
     // TODO(mdebbar): Move this line creation to the end of the method when all info is available.
@@ -322,7 +319,9 @@ class TextLayout {
             ),
           );
 
-          final ui.TextRange blockLineWhitespaces = bidiLineSpanTextRange.intersect(bidiWhitespacesTextRange);
+          final ui.TextRange blockLineWhitespaces = bidiLineSpanTextRange.intersect(
+            bidiWhitespacesTextRange,
+          );
           final ui.TextRange blockLineNoWhitespaces = bidiLineSpanTextRange.intersect(
             _mapping.toTextRange(textIntersection),
           );

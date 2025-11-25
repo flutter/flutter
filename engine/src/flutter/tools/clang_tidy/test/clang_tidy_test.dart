@@ -151,9 +151,8 @@ void main() {
     '--help gives help, and uses the latest build by default outside in an engine root',
     () async {
       final io.Directory rootDir = io.Directory.systemTemp.createTempSync('clang_tidy_test');
-      final buildDir = io.Directory(
-        path.join(rootDir.path, 'out', 'host_debug_unopt_arm64'),
-      )..createSync(recursive: true);
+      final buildDir = io.Directory(path.join(rootDir.path, 'out', 'host_debug_unopt_arm64'))
+        ..createSync(recursive: true);
       try {
         final fixture = Fixture.fromCommandLine(
           <String>['--help'],
@@ -258,10 +257,7 @@ void main() {
   });
 
   test('Error when --compile-commands path does not exist', () async {
-    final fixture = Fixture.fromCommandLine(<String>[
-      '--compile-commands',
-      '/does/not/exist',
-    ]);
+    final fixture = Fixture.fromCommandLine(<String>['--compile-commands', '/does/not/exist']);
     final int result = await fixture.tool.run();
 
     expect(result, equals(1));
@@ -395,9 +391,7 @@ void main() {
       };
     }
 
-    final filePaths = <String>[
-      for (int i = 0; i < 10; ++i) '/path/to/a/source_file_$i.cc',
-    ];
+    final filePaths = <String>[for (int i = 0; i < 10; ++i) '/path/to/a/source_file_$i.cc'];
     final List<Map<String, String>> buildCommandsData = filePaths
         .map((String e) => makeBuildCommandEntry(e))
         .toList();
@@ -641,9 +635,7 @@ void main() {
       },
     ];
 
-    final commands = io.File(
-      path.join(io.Directory.systemTemp.path, 'test_compile_commands.json'),
-    );
+    final commands = io.File(path.join(io.Directory.systemTemp.path, 'test_compile_commands.json'));
     int result;
     try {
       commands.writeAsStringSync(jsonEncode(commandsData));

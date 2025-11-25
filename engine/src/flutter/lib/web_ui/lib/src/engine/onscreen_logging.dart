@@ -105,9 +105,7 @@ void debugPrintStack({String? label, int? maxFrames}) {
 /// and the final line may be prose rather than a stack frame.
 Iterable<String> defaultStackFilter(Iterable<String> frames) {
   const filteredPackages = <String>['dart:async-patch', 'dart:async', 'dart:_runtime'];
-  final stackParser = RegExp(
-    r'^#[0-9]+ +([^.]+).* \(([^/\\]*)[/\\].+:[0-9]+(?::[0-9]+)?\)$',
-  );
+  final stackParser = RegExp(r'^#[0-9]+ +([^.]+).* \(([^/\\]*)[/\\].+:[0-9]+(?::[0-9]+)?\)$');
   final packageParser = RegExp(r'^([^:]+):(.+)$');
   final result = <String>[];
   final skipped = <String>[];

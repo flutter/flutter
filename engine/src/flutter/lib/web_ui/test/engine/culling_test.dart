@@ -23,12 +23,7 @@ void testMain() {
     canvas.drawRect(const ui.Rect.fromLTWH(200, 200, 10, 10), ui.Paint());
     final ui.Picture picture = recorder.endRecording();
 
-    final pictureLayer = PictureLayer(
-      picture as LayerPicture,
-      ui.Offset.zero,
-      false,
-      false,
-    );
+    final pictureLayer = PictureLayer(picture as LayerPicture, ui.Offset.zero, false, false);
 
     final rootLayer = RootLayer();
     rootLayer.children.add(pictureLayer);

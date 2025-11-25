@@ -59,16 +59,8 @@ void testParagraphStyle() {
     fontSize: 10.0,
     height: 100.0,
   );
-  final ps3 = ParagraphStyle(
-    fontWeight: FontWeight.w700,
-    fontSize: 12.0,
-    height: 123.0,
-  );
-  final ps4 = ParagraphStyle(
-    fontWeight: FontWeight.w700,
-    fontSize: 12.0,
-    height: kTextHeightNone,
-  );
+  final ps3 = ParagraphStyle(fontWeight: FontWeight.w700, fontSize: 12.0, height: 123.0);
+  final ps4 = ParagraphStyle(fontWeight: FontWeight.w700, fontSize: 12.0, height: kTextHeightNone);
 
   test('ParagraphStyle toString works', () {
     expect(
@@ -113,10 +105,7 @@ void testTextStyle() {
     height: 100.0,
   );
   final ts2 = TextStyle(fontFamily: 'test');
-  final ts3 = TextStyle(
-    fontFamily: 'foo',
-    fontFamilyFallback: <String>['Roboto', 'test'],
-  );
+  final ts3 = TextStyle(fontFamily: 'foo', fontFamilyFallback: <String>['Roboto', 'test']);
   final ts4 = TextStyle(leadingDistribution: TextLeadingDistribution.even);
   final ts5 = TextStyle(height: kTextHeightNone);
 
@@ -359,17 +348,13 @@ void testFontVariation() {
     final Uint8List fontData = await readFile('RobotoSlab-VariableFont_wght.ttf');
     await loadFontFromList(fontData, fontFamily: 'RobotoSerif');
 
-    final baseBuilder = ParagraphBuilder(
-      ParagraphStyle(fontFamily: 'RobotoSerif', fontSize: 40.0),
-    );
+    final baseBuilder = ParagraphBuilder(ParagraphStyle(fontFamily: 'RobotoSerif', fontSize: 40.0));
     baseBuilder.addText('Hello');
     final Paragraph baseParagraph = baseBuilder.build();
     baseParagraph.layout(const ParagraphConstraints(width: double.infinity));
     final double baseWidth = baseParagraph.minIntrinsicWidth;
 
-    final wideBuilder = ParagraphBuilder(
-      ParagraphStyle(fontFamily: 'RobotoSerif', fontSize: 40.0),
-    );
+    final wideBuilder = ParagraphBuilder(ParagraphStyle(fontFamily: 'RobotoSerif', fontSize: 40.0));
     wideBuilder.pushStyle(
       TextStyle(
         fontFamily: 'RobotoSerif',
@@ -457,9 +442,7 @@ void testGetWordBoundary() {
     final Uint8List fontData = await readFile('RobotoSlab-VariableFont_wght.ttf');
     await loadFontFromList(fontData, fontFamily: 'RobotoSerif');
 
-    final builder = ParagraphBuilder(
-      ParagraphStyle(fontFamily: 'RobotoSerif', fontSize: 40.0),
-    );
+    final builder = ParagraphBuilder(ParagraphStyle(fontFamily: 'RobotoSerif', fontSize: 40.0));
     builder.addText('Hello team');
     final Paragraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: double.infinity));

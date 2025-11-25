@@ -326,7 +326,9 @@ class HtmlPatternMatcher extends Matcher {
     html.Element pattern,
   ) {
     for (final MapEntry<Object, String> attribute in pattern.attributes.entries) {
-      final (String expectedName, bool expectMissing) = _parseExpectedAttributeName(attribute.key as String);
+      final (String expectedName, bool expectMissing) = _parseExpectedAttributeName(
+        attribute.key as String,
+      );
       final String expectedValue = attribute.value;
       final _Breadcrumbs breadcrumb = parent.attribute(expectedName);
 

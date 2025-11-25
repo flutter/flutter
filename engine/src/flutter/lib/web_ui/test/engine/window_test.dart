@@ -588,8 +588,7 @@ Future<void> testMain() async {
     // The existing viewport meta tag should've been removed.
     expect(existingMeta.isConnected, isFalse);
     // And a new one should've been added.
-    final newMeta =
-        domDocument.head!.querySelector('meta[name="viewport"]') as DomHTMLMetaElement?;
+    final newMeta = domDocument.head!.querySelector('meta[name="viewport"]') as DomHTMLMetaElement?;
     expect(newMeta, isNotNull);
     newMeta!;
     expect(newMeta.getAttribute('flt-viewport'), isNotNull);

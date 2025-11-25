@@ -2573,8 +2573,7 @@ class SemanticsObject {
   String toString() {
     var result = super.toString();
     assert(() {
-      final children =
-          _childrenInTraversalOrder != null && _childrenInTraversalOrder!.isNotEmpty
+      final children = _childrenInTraversalOrder != null && _childrenInTraversalOrder!.isNotEmpty
           ? '[${_childrenInTraversalOrder!.join(', ')}]'
           : '<empty>';
       result = '$runtimeType(#$id, children: $children)';
@@ -3117,8 +3116,7 @@ class EngineSemanticsOwner {
     }
 
     final bool isConsistent = _semanticsTree.keys.every(liveIds.keys.contains);
-    final heading =
-        'The semantics node map is ${isConsistent ? 'consistent' : 'inconsistent'}';
+    final heading = 'The semantics node map is ${isConsistent ? 'consistent' : 'inconsistent'}';
     final message = StringBuffer('$heading:\n');
     message.writeln('  Nodes in tree:');
     for (final MapEntry<int, List<int>> entry in liveIds.entries) {

@@ -2555,8 +2555,7 @@ void _testIncrementables() {
   <input role="slider" aria-valuenow="1" aria-valuetext="d" aria-valuemax="2" aria-valuemin="1">
 </sem>''');
 
-    final input =
-        owner().semanticsHost.querySelector('input')! as DomHTMLInputElement;
+    final input = owner().semanticsHost.querySelector('input')! as DomHTMLInputElement;
     input.value = '2';
     input.dispatchEvent(createDomEvent('Event', 'change'));
 
@@ -2588,8 +2587,7 @@ void _testIncrementables() {
   <input role="slider" aria-valuenow="1" aria-valuetext="d" aria-valuemax="1" aria-valuemin="0">
 </sem>''');
 
-    final input =
-        owner().semanticsHost.querySelector('input')! as DomHTMLInputElement;
+    final input = owner().semanticsHost.querySelector('input')! as DomHTMLInputElement;
     input.value = '0';
     input.dispatchEvent(createDomEvent('Event', 'change'));
 
@@ -3691,8 +3689,7 @@ void _testLiveRegion() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final mockAccessibilityAnnouncements =
-        MockAccessibilityAnnouncements();
+    final mockAccessibilityAnnouncements = MockAccessibilityAnnouncements();
     LiveRegion.debugOverrideAccessibilityAnnouncements(mockAccessibilityAnnouncements);
 
     final builder = ui.SemanticsUpdateBuilder();
@@ -3715,8 +3712,7 @@ void _testLiveRegion() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final mockAccessibilityAnnouncements =
-        MockAccessibilityAnnouncements();
+    final mockAccessibilityAnnouncements = MockAccessibilityAnnouncements();
     LiveRegion.debugOverrideAccessibilityAnnouncements(mockAccessibilityAnnouncements);
 
     final builder = ui.SemanticsUpdateBuilder();
@@ -3737,8 +3733,7 @@ void _testLiveRegion() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final mockAccessibilityAnnouncements =
-        MockAccessibilityAnnouncements();
+    final mockAccessibilityAnnouncements = MockAccessibilityAnnouncements();
     LiveRegion.debugOverrideAccessibilityAnnouncements(mockAccessibilityAnnouncements);
 
     var builder = ui.SemanticsUpdateBuilder();

@@ -49,10 +49,7 @@ Future<void> main() async {
       .split('%%')
       .map<Map<String, List<String>>>(parseSection)
       .toList();
-  final outputs = <String, List<String>>{
-    'language': <String>[],
-    'region': <String>[],
-  };
+  final outputs = <String, List<String>>{'language': <String>[], 'region': <String>[]};
   String? fileDate;
   for (final section in sections) {
     if (fileDate == null) {

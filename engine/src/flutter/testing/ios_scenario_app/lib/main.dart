@@ -36,8 +36,7 @@ void main() {
 FlutterView get _view => PlatformDispatcher.instance.implicitView!;
 
 void _handleDriverMessage(ByteData? data, PlatformMessageResponseCallback? callback) {
-  final call =
-      json.decode(utf8.decode(data!.buffer.asUint8List())) as Map<String, dynamic>;
+  final call = json.decode(utf8.decode(data!.buffer.asUint8List())) as Map<String, dynamic>;
   final methodName = call['method'] as String?;
   switch (methodName) {
     case 'set_scenario':

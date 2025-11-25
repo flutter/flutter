@@ -34,11 +34,7 @@ void testMain() {
       expect(mockFinalizationRegistry.registeredPairs, hasLength(0));
       final owner = Object();
       final nativeObject = TestSkDeletable();
-      final ref = UniqueRef<TestSkDeletable>(
-        owner,
-        nativeObject,
-        'TestSkDeletable',
-      );
+      final ref = UniqueRef<TestSkDeletable>(owner, nativeObject, 'TestSkDeletable');
       expect(ref.isDisposed, isFalse);
       expect(ref.nativeObject, same(nativeObject));
       expect(TestSkDeletableMock.deleteCount, 0);
@@ -74,11 +70,7 @@ void testMain() {
       expect(mockFinalizationRegistry.registeredPairs, hasLength(0));
       final owner = Object();
       final nativeObject = TestSkDeletable();
-      final ref = UniqueRef<TestSkDeletable>(
-        owner,
-        nativeObject,
-        'TestSkDeletable',
-      );
+      final ref = UniqueRef<TestSkDeletable>(owner, nativeObject, 'TestSkDeletable');
       expect(ref.isDisposed, isFalse);
       expect(ref.nativeObject, same(nativeObject));
       expect(TestSkDeletableMock.deleteCount, 0);
@@ -100,11 +92,7 @@ void testMain() {
       final nativeObject = TestSkDeletable();
 
       expect(Instrumentation.instance.debugCounters, <String, int>{});
-      final ref = UniqueRef<TestSkDeletable>(
-        owner,
-        nativeObject,
-        'TestSkDeletable',
-      );
+      final ref = UniqueRef<TestSkDeletable>(owner, nativeObject, 'TestSkDeletable');
       expect(Instrumentation.instance.debugCounters, <String, int>{'TestSkDeletable Created': 1});
       ref.dispose();
       expect(Instrumentation.instance.debugCounters, <String, int>{
@@ -121,11 +109,7 @@ void testMain() {
       final nativeObject = TestSkDeletable();
 
       expect(Instrumentation.instance.debugCounters, <String, int>{});
-      final ref = UniqueRef<TestSkDeletable>(
-        owner,
-        nativeObject,
-        'TestSkDeletable',
-      );
+      final ref = UniqueRef<TestSkDeletable>(owner, nativeObject, 'TestSkDeletable');
       expect(Instrumentation.instance.debugCounters, <String, int>{'TestSkDeletable Created': 1});
       ref.collect();
       expect(Instrumentation.instance.debugCounters, <String, int>{

@@ -20,8 +20,7 @@ class WebFontCollection implements FlutterFontCollection {
   /// fonts declared within.
   @override
   Future<AssetFontsResult> loadAssetFonts(FontManifest manifest) async {
-    final pendingFonts =
-        <Future<(String, FontLoadError?)>>[];
+    final pendingFonts = <Future<(String, FontLoadError?)>>[];
     for (final FontFamily family in manifest.families) {
       for (final FontAsset fontAsset in family.fontAssets) {
         pendingFonts.add(() async {

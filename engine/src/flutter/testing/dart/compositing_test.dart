@@ -79,24 +79,7 @@ void main() {
 
   test('pushTransform validates the matrix', () {
     final builder = SceneBuilder();
-    final matrix4 = Float64List.fromList(<double>[
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-    ]);
+    final matrix4 = Float64List.fromList(<double>[1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
     expect(builder.pushTransform(matrix4), isNotNull);
 
     final matrix4WrongLength = Float64List.fromList(<double>[

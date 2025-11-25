@@ -31,8 +31,7 @@ class FontManifest {
 }
 
 Future<FontManifest> fetchFontManifest(ui_web.AssetManager assetManager) async {
-  final response =
-      await assetManager.loadAsset('FontManifest.json') as HttpFetchResponse;
+  final response = await assetManager.loadAsset('FontManifest.json') as HttpFetchResponse;
   if (!response.hasPayload) {
     printWarning('Font manifest does not exist at `${response.url}` - ignoring.');
     return FontManifest(<FontFamily>[]);

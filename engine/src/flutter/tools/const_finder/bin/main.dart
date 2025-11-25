@@ -108,9 +108,7 @@ void main(List<String> args) {
     annotationClassLibraryUri: annotationClassLibraryUri,
   );
 
-  final encoder = getArg<bool>('pretty')
-      ? const JsonEncoder.withIndent('  ')
-      : const JsonEncoder();
+  final encoder = getArg<bool>('pretty') ? const JsonEncoder.withIndent('  ') : const JsonEncoder();
 
   stdout.writeln(encoder.convert(finder.findInstances()));
 }

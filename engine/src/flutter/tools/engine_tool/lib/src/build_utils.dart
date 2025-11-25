@@ -147,9 +147,7 @@ Future<bool> ensureBuildDir(
   required bool enableRbe,
 }) async {
   // TODO(matanlurey): https://github.com/flutter/flutter/issues/148442.
-  final buildDir = io.Directory(
-    p.join(environment.engine.outDir.path, build.ninja.config),
-  );
+  final buildDir = io.Directory(p.join(environment.engine.outDir.path, build.ninja.config));
   if (buildDir.existsSync()) {
     return true;
   }

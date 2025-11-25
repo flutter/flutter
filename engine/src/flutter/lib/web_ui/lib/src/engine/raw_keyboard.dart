@@ -148,8 +148,7 @@ class RawKeyboard {
         if (data == null) {
           return;
         }
-        final jsonResponse =
-            _messageCodec.decodeMessage(data) as Map<String, dynamic>;
+        final jsonResponse = _messageCodec.decodeMessage(data) as Map<String, dynamic>;
         if (jsonResponse['handled'] as bool) {
           // If the framework handled it, then don't propagate it any further.
           event.preventDefault();

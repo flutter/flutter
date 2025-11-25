@@ -139,19 +139,14 @@ void testMain() {
       );
       EnginePlatformDispatcher.instance.viewManager.registerView(testView3);
 
-      final treesToRender =
-          <EngineFlutterView, List<LayerTree>>{};
+      final treesToRender = <EngineFlutterView, List<LayerTree>>{};
       treesToRender[testView1] = <LayerTree>[];
       treesToRender[testView2] = <LayerTree>[];
       treesToRender[testView3] = <LayerTree>[];
       final renderFutures = <Future<void>>[];
 
       for (var i = 1; i < 20; i++) {
-        for (final testView in <EngineFlutterView>[
-          testView1,
-          testView2,
-          testView3,
-        ]) {
+        for (final testView in <EngineFlutterView>[testView1, testView2, testView3]) {
           final recorder = ui.PictureRecorder();
           final canvas = ui.Canvas(recorder);
           canvas.drawRect(

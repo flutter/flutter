@@ -116,8 +116,7 @@ Future<void> testMain() async {
   group('ImageCodecUrl', () {
     test('loads sample image from web', () async {
       final Uri uri = Uri.base.resolve('sample_image1.png');
-      final codec =
-          await ui_web.createImageCodecFromUrl(uri) as HtmlImageElementCodec;
+      final codec = await ui_web.createImageCodecFromUrl(uri) as HtmlImageElementCodec;
       final ui.FrameInfo frameInfo = await codec.getNextFrame();
 
       expect(codec.imgElement, isNotNull);

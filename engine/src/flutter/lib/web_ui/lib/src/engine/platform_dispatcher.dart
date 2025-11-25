@@ -661,8 +661,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     ui.PlatformMessageResponseCallback? callback,
   ) async {
     try {
-      final response =
-          await ui_web.assetManager.loadAsset(url) as HttpFetchResponse;
+      final response = await ui_web.assetManager.loadAsset(url) as HttpFetchResponse;
       final ByteBuffer assetData = await response.asByteBuffer();
       replyToPlatformMessage(callback, assetData.asByteData());
     } catch (error) {
@@ -1257,8 +1256,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// callback if [_highContrast] changed.
   void _updateHighContrast(bool value) {
     if (configuration.accessibilityFeatures.highContrast != value) {
-      final original =
-          configuration.accessibilityFeatures as EngineAccessibilityFeatures;
+      final original = configuration.accessibilityFeatures as EngineAccessibilityFeatures;
       configuration = configuration.copyWith(
         accessibilityFeatures: original.copyWith(highContrast: value),
       );

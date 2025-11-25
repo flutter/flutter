@@ -33,9 +33,7 @@ Future<void> main(List<String> args) async {
 
 Future<int> runLint(ArgParser argParser, ArgResults argResults) async {
   final inArgument = argResults['in'] as String;
-  final androidDir = Directory(
-    path.join(inArgument, 'flutter', 'shell', 'platform', 'android'),
-  );
+  final androidDir = Directory(path.join(inArgument, 'flutter', 'shell', 'platform', 'android'));
   if (!androidDir.existsSync()) {
     print(
       'This command must be run from the engine/src directory, '

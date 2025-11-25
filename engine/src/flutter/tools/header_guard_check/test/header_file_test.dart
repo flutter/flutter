@@ -41,11 +41,7 @@ Future<int> main() async {
     });
 
     test('ignores #ifndef if omitted', () {
-      const guard = HeaderGuardSpans(
-        ifndefSpan: null,
-        defineSpan: null,
-        endifSpan: null,
-      );
+      const guard = HeaderGuardSpans(ifndefSpan: null, defineSpan: null, endifSpan: null);
       expect(guard.ifndefValue, isNull);
     });
 
@@ -80,11 +76,7 @@ Future<int> main() async {
     });
 
     test('ignores #define if omitted', () {
-      const guard = HeaderGuardSpans(
-        ifndefSpan: null,
-        defineSpan: null,
-        endifSpan: null,
-      );
+      const guard = HeaderGuardSpans(ifndefSpan: null, defineSpan: null, endifSpan: null);
       expect(guard.defineValue, isNull);
     });
 
@@ -119,11 +111,7 @@ Future<int> main() async {
     });
 
     test('ignores #endif if omitted', () {
-      const guard = HeaderGuardSpans(
-        ifndefSpan: null,
-        defineSpan: null,
-        endifSpan: null,
-      );
+      const guard = HeaderGuardSpans(ifndefSpan: null, defineSpan: null, endifSpan: null);
       expect(guard.endifValue, isNull);
     });
 

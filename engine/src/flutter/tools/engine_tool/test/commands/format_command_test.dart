@@ -49,10 +49,7 @@ void main() {
     final logger = Logger.test((_) {});
     final FakeProcessManager manager = _formatProcessManager(expectedFlags: <String>['--fix']);
     final Environment env = linuxEnv(logger, manager);
-    final runner = ToolCommandRunner(
-      environment: env,
-      configs: <String, BuilderConfig>{},
-    );
+    final runner = ToolCommandRunner(environment: env, configs: <String, BuilderConfig>{});
     final int result = await runner.run(<String>['format']);
     expect(result, equals(0));
   });
@@ -61,10 +58,7 @@ void main() {
     final logger = Logger.test((_) {});
     final FakeProcessManager manager = _formatProcessManager(expectedFlags: <String>[]);
     final Environment env = linuxEnv(logger, manager);
-    final runner = ToolCommandRunner(
-      environment: env,
-      configs: <String, BuilderConfig>{},
-    );
+    final runner = ToolCommandRunner(environment: env, configs: <String, BuilderConfig>{});
     final int result = await runner.run(<String>['format', '--$dryRunFlag']);
     expect(result, equals(0));
   });
@@ -76,10 +70,7 @@ void main() {
       exitCode: 1,
     );
     final Environment env = linuxEnv(logger, manager);
-    final runner = ToolCommandRunner(
-      environment: env,
-      configs: <String, BuilderConfig>{},
-    );
+    final runner = ToolCommandRunner(environment: env, configs: <String, BuilderConfig>{});
     final int result = await runner.run(<String>['format']);
     expect(result, equals(1));
   });
@@ -90,10 +81,7 @@ void main() {
       expectedFlags: <String>['--fix', '--all-files'],
     );
     final Environment env = linuxEnv(logger, manager);
-    final runner = ToolCommandRunner(
-      environment: env,
-      configs: <String, BuilderConfig>{},
-    );
+    final runner = ToolCommandRunner(environment: env, configs: <String, BuilderConfig>{});
     final int result = await runner.run(<String>['format', '--$allFlag']);
     expect(result, equals(0));
   });
@@ -104,10 +92,7 @@ void main() {
       expectedFlags: <String>['--fix', '--verbose'],
     );
     final Environment env = linuxEnv(logger, manager);
-    final runner = ToolCommandRunner(
-      environment: env,
-      configs: <String, BuilderConfig>{},
-    );
+    final runner = ToolCommandRunner(environment: env, configs: <String, BuilderConfig>{});
     final int result = await runner.run(<String>['format', '--$verboseFlag']);
     expect(result, equals(0));
   });
@@ -121,10 +106,7 @@ void main() {
       stderr: 'error\n',
     );
     final Environment env = linuxEnv(logger, manager);
-    final runner = ToolCommandRunner(
-      environment: env,
-      configs: <String, BuilderConfig>{},
-    );
+    final runner = ToolCommandRunner(environment: env, configs: <String, BuilderConfig>{});
     final int result = await runner.run(<String>['format', '--$quietFlag']);
     expect(result, equals(0));
     expect(stringsFromLogs(testLogs), equals(<String>['error\n']));
@@ -145,10 +127,7 @@ void main() {
       ].join('\n'),
     );
     final Environment env = linuxEnv(logger, manager);
-    final runner = ToolCommandRunner(
-      environment: env,
-      configs: <String, BuilderConfig>{},
-    );
+    final runner = ToolCommandRunner(environment: env, configs: <String, BuilderConfig>{});
     final int result = await runner.run(<String>['format']);
     expect(result, equals(0));
     expect(stringsFromLogs(testLogs), isEmpty);
@@ -169,10 +148,7 @@ void main() {
       ].join('\n'),
     );
     final Environment env = linuxEnv(logger, manager);
-    final runner = ToolCommandRunner(
-      environment: env,
-      configs: <String, BuilderConfig>{},
-    );
+    final runner = ToolCommandRunner(environment: env, configs: <String, BuilderConfig>{});
     final int result = await runner.run(<String>['format', '--$dryRunFlag']);
     expect(result, equals(0));
     expect(
@@ -199,10 +175,7 @@ void main() {
       stdout: progressLine,
     );
     final Environment env = linuxEnv(logger, manager);
-    final runner = ToolCommandRunner(
-      environment: env,
-      configs: <String, BuilderConfig>{},
-    );
+    final runner = ToolCommandRunner(environment: env, configs: <String, BuilderConfig>{});
     final int result = await runner.run(<String>['format']);
     expect(result, equals(0));
     expect(stringsFromLogs(testLogs), equals(<String>['$progressLine\r']));

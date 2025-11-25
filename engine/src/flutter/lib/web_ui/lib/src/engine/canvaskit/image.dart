@@ -102,8 +102,7 @@ class CkResizingCodec extends ResizingCodec {
     final int scaledHeight = scaledSize.height;
 
     final DomOffscreenCanvas offscreenCanvas = createDomOffscreenCanvas(scaledWidth, scaledHeight);
-    final ctx =
-        offscreenCanvas.getContext('2d')! as DomCanvasRenderingContext2D;
+    final ctx = offscreenCanvas.getContext('2d')! as DomCanvasRenderingContext2D;
     ctx.drawImage(
       image.imageSource!.canvasImageSource,
       0,
@@ -320,10 +319,7 @@ Future<ui.Codec> skiaInstantiateWebImageCodec(
   String url,
   ui_web.ImageCodecChunkCallback? chunkCallback,
 ) async {
-  final imageElementCodec = CkImageElementCodec(
-    url,
-    chunkCallback: chunkCallback,
-  );
+  final imageElementCodec = CkImageElementCodec(url, chunkCallback: chunkCallback);
   try {
     await imageElementCodec.decode();
     return imageElementCodec;

@@ -104,7 +104,9 @@ void main() {
       ),
     );
 
-    final List<LibraryBuildTarget> libraryTargets = targets.whereType<LibraryBuildTarget>().toList();
+    final List<LibraryBuildTarget> libraryTargets = targets
+        .whereType<LibraryBuildTarget>()
+        .toList();
     expect(libraryTargets, hasLength(2));
     expect(
       libraryTargets.contains(

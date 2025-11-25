@@ -41,8 +41,7 @@ void main(List<String> args) {
     return;
   }
 
-  final compileCommands =
-      json.decode(compileCommandsFile.readAsStringSync()) as List<Object?>;
+  final compileCommands = json.decode(compileCommandsFile.readAsStringSync()) as List<Object?>;
   if (compileCommands.isEmpty) {
     io.stderr.writeln('Unexpected: compile_commands.json is empty');
     io.exitCode = 1;

@@ -215,9 +215,7 @@ class FontFallbackManager {
       // All the code points in the selected font are now covered. Zero out each
       // component that is used by the font and adjust the counts of other fonts
       // that use the same components.
-      for (final component in <FallbackFontComponent>[
-        ...selectedFont.coverComponents,
-      ]) {
+      for (final component in <FallbackFontComponent>[...selectedFont.coverComponents]) {
         for (final NotoFont font in component.fonts) {
           font.coverCount -= component.coverCount;
           font.coverComponents.remove(component);

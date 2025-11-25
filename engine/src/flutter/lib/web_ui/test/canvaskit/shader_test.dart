@@ -22,8 +22,7 @@ void testMain() {
     setUpCanvasKitTest();
 
     test('Sweep gradient', () {
-      final gradient =
-          ui.Gradient.sweep(ui.Offset.zero, testColors) as CkGradientSweep;
+      final gradient = ui.Gradient.sweep(ui.Offset.zero, testColors) as CkGradientSweep;
       expect(gradient.getSkShader(ui.FilterQuality.none), isNotNull);
     });
 
@@ -34,8 +33,7 @@ void testMain() {
     });
 
     test('Radial gradient', () {
-      final gradient =
-          ui.Gradient.radial(ui.Offset.zero, 10, testColors) as CkGradientRadial;
+      final gradient = ui.Gradient.radial(ui.Offset.zero, 10, testColors) as CkGradientRadial;
       expect(gradient.getSkShader(ui.FilterQuality.none), isNotNull);
     });
 
@@ -136,8 +134,7 @@ void testMain() {
     });
 
     test('isGradient', () {
-      final sweepGradient =
-          ui.Gradient.sweep(ui.Offset.zero, testColors) as CkGradientSweep;
+      final sweepGradient = ui.Gradient.sweep(ui.Offset.zero, testColors) as CkGradientSweep;
       expect(sweepGradient.isGradient, isTrue);
       sweepGradient.dispose();
 
@@ -146,8 +143,7 @@ void testMain() {
       expect(linearGradient.isGradient, isTrue);
       linearGradient.dispose();
 
-      final radialGradient =
-          ui.Gradient.radial(ui.Offset.zero, 10, testColors) as CkGradientRadial;
+      final radialGradient = ui.Gradient.radial(ui.Offset.zero, 10, testColors) as CkGradientRadial;
       expect(radialGradient.isGradient, isTrue);
       radialGradient.dispose();
 

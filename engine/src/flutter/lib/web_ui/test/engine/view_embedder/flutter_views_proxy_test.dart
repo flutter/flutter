@@ -66,7 +66,10 @@ Future<void> doTests() async {
       });
 
       test('can retrieve hostElement for an implicit view with custom host element', () {
-        final EngineFlutterWindow view = EngineFlutterView.implicit(platformDispatcher, hostElement);
+        final EngineFlutterWindow view = EngineFlutterView.implicit(
+          platformDispatcher,
+          hostElement,
+        );
         final int viewId = view.viewId;
         viewManager.registerView(view);
         addTearDown(() => viewManager.unregisterView(viewId));

@@ -297,7 +297,12 @@ String _zipAndStoreFailedTestResults({
   required String storePath,
 }) {
   final String outputPath = path.join(storePath, '${iosEngineVariant.replaceAll('/', '_')}.zip');
-  final io.ProcessResult result = io.Process.runSync('zip', ['-q', '-r', outputPath, resultBundle.path]);
+  final io.ProcessResult result = io.Process.runSync('zip', [
+    '-q',
+    '-r',
+    outputPath,
+    resultBundle.path,
+  ]);
   if (result.exitCode != 0) {
     throw Exception(
       'Failed to zip the test results (exit code = ${result.exitCode}).\n\n'

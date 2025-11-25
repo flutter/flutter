@@ -344,10 +344,7 @@ class BrowserPlatform extends PlatformPlugin {
       var byteCounter = 0;
       while (remainingByteCount > 0) {
         final int currentChunkLength = min(chunkLength, remainingByteCount);
-        final chunk = List<int>.generate(
-          currentChunkLength,
-          (int i) => (byteCounter + i) & 0xFF,
-        );
+        final chunk = List<int>.generate(currentChunkLength, (int i) => (byteCounter + i) & 0xFF);
         byteCounter = (byteCounter + currentChunkLength) & 0xFF;
         remainingByteCount -= currentChunkLength;
         controller.add(chunk);

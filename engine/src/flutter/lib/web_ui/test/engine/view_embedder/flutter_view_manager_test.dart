@@ -21,10 +21,7 @@ Future<void> doTests() async {
 
     group('registerView', () {
       test('can register view', () {
-        final view = EngineFlutterView(
-          platformDispatcher,
-          createDomElement('div'),
-        );
+        final view = EngineFlutterView(platformDispatcher, createDomElement('div'));
         final int viewId = view.viewId;
 
         viewManager.registerView(view);
@@ -33,10 +30,7 @@ Future<void> doTests() async {
       });
 
       test('fails if the same viewId is already registered', () {
-        final view = EngineFlutterView(
-          platformDispatcher,
-          createDomElement('div'),
-        );
+        final view = EngineFlutterView(platformDispatcher, createDomElement('div'));
 
         viewManager.registerView(view);
 
@@ -46,14 +40,9 @@ Future<void> doTests() async {
       });
 
       test('stores JSOptions that getOptions can retrieve', () {
-        final view = EngineFlutterView(
-          platformDispatcher,
-          createDomElement('div'),
-        );
+        final view = EngineFlutterView(platformDispatcher, createDomElement('div'));
         final int viewId = view.viewId;
-        final expectedOptions = JsFlutterViewOptions(
-          hostElement: createDomElement('div'),
-        );
+        final expectedOptions = JsFlutterViewOptions(hostElement: createDomElement('div'));
 
         viewManager.registerView(view, jsViewOptions: expectedOptions);
 
@@ -64,10 +53,7 @@ Future<void> doTests() async {
 
     group('unregisterView', () {
       test('unregisters a view', () {
-        final view = EngineFlutterView(
-          platformDispatcher,
-          createDomElement('div'),
-        );
+        final view = EngineFlutterView(platformDispatcher, createDomElement('div'));
         final int viewId = view.viewId;
 
         viewManager.registerView(view);
@@ -97,10 +83,7 @@ Future<void> doTests() async {
       );
 
       test('on view registered/unregistered - fires event', () async {
-        final view = EngineFlutterView(
-          platformDispatcher,
-          createDomElement('div'),
-        );
+        final view = EngineFlutterView(platformDispatcher, createDomElement('div'));
         final int viewId = view.viewId;
 
         final Future<List<void>> viewCreatedEvents = onViewCreated.toList();

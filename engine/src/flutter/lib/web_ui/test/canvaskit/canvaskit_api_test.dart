@@ -666,10 +666,7 @@ typedef CanvasCallback = void Function(ui.Canvas canvas);
 
 Future<ui.Image> toImage(CanvasCallback callback, int width, int height) {
   final recorder = ui.PictureRecorder();
-  final canvas = ui.Canvas(
-    recorder,
-    ui.Rect.fromLTRB(0, 0, width.toDouble(), height.toDouble()),
-  );
+  final canvas = ui.Canvas(recorder, ui.Rect.fromLTRB(0, 0, width.toDouble(), height.toDouble()));
   callback(canvas);
   final ui.Picture picture = recorder.endRecording();
   return picture.toImage(width, height);
@@ -956,11 +953,7 @@ void _pathTests() {
   });
 
   test('SkContourMeasureIter/SkContourMeasure', () {
-    final iter = SkContourMeasureIter(
-      _testClosedSkPath().snapshot(),
-      false,
-      1.0,
-    );
+    final iter = SkContourMeasureIter(_testClosedSkPath().snapshot(), false, 1.0);
     final SkContourMeasure measure1 = iter.next()!;
     expect(measure1.length(), 40);
     expect(measure1.getPosTan(5), Float32List.fromList(<double>[15, 10, 1, 0]));

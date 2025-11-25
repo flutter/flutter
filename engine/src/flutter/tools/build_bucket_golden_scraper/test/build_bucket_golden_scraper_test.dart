@@ -46,8 +46,7 @@ void main() {
     io.Directory(p.join(srcDir.path, 'flutter', 'docs')).createSync(recursive: true);
 
     // Create an empty logo in docs/flutter_logo.png.
-    final logo = io.File(p.join(srcDir.path, 'flutter', 'docs', 'flutter_logo.png'))
-      ..createSync();
+    final logo = io.File(p.join(srcDir.path, 'flutter', 'docs', 'flutter_logo.png'))..createSync();
 
     // Create a fake log file.
     try {

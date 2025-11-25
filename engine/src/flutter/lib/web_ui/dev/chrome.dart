@@ -372,8 +372,7 @@ Future<Uri> getRemoteDebuggerUrl(Uri base) async {
     final client = HttpClient();
     final HttpClientRequest request = await client.getUrl(base.resolve('/json/list'));
     final HttpClientResponse response = await request.close();
-    final jsonObject =
-        await json.fuse(utf8).decoder.bind(response).single as List<dynamic>?;
+    final jsonObject = await json.fuse(utf8).decoder.bind(response).single as List<dynamic>?;
     return base.resolve(
       (jsonObject!.first as Map<dynamic, dynamic>)['devtoolsFrontendUrl'] as String,
     );

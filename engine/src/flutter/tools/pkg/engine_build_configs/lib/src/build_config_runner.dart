@@ -377,12 +377,7 @@ final class BuildRunner extends Runner {
         failOk: true,
       );
     }
-    final result = RunnerResult(
-      '${build.name}: GN',
-      command,
-      DateTime.now(),
-      processResult,
-    );
+    final result = RunnerResult('${build.name}: GN', command, DateTime.now(), processResult);
     eventHandler(result);
     return result.ok;
   }
@@ -757,11 +752,7 @@ final class BuildTaskRunner extends Runner {
   Future<bool> run(RunnerEventHandler eventHandler) async {
     final String interpreter = _interpreter(task.language);
     for (final String script in task.scripts) {
-      final command = <String>[
-        if (interpreter.isNotEmpty) interpreter,
-        script,
-        ...task.parameters,
-      ];
+      final command = <String>[if (interpreter.isNotEmpty) interpreter, script, ...task.parameters];
       eventHandler(RunnerStart(task.name, command, DateTime.now()));
       final ProcessRunnerResult processResult;
       if (dryRun) {

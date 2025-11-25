@@ -35,9 +35,7 @@ void main(List<String> args) async {
   }
 
   // Find and parse the engine build configs.
-  final buildConfigsDir = io.Directory(
-    p.join(engine.flutterDir.path, 'ci', 'builders'),
-  );
+  final buildConfigsDir = io.Directory(p.join(engine.flutterDir.path, 'ci', 'builders'));
   final loader = BuildConfigLoader(buildConfigsDir: buildConfigsDir);
 
   // Treat it as an error if no build configs were found. The caller likely
@@ -69,11 +67,7 @@ void main(List<String> args) async {
   );
 
   // Use the Engine and BuildConfig collection to build the CommandRunner.
-  final runner = ToolCommandRunner(
-    environment: environment,
-    configs: configs,
-    help: help,
-  );
+  final runner = ToolCommandRunner(environment: environment, configs: configs, help: help);
 
   try {
     io.exitCode = await runner.run(args);

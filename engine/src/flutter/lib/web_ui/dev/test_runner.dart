@@ -291,9 +291,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
   }
 
   List<TestBundle> _filterBundlesForSuites(List<TestSuite> suites) {
-    final seenBundles = Set<TestBundle>.from(
-      suites.map((TestSuite suite) => suite.testBundle),
-    );
+    final seenBundles = Set<TestBundle>.from(suites.map((TestSuite suite) => suite.testBundle));
     return config.testBundles.where((TestBundle bundle) => seenBundles.contains(bundle)).toList();
   }
 

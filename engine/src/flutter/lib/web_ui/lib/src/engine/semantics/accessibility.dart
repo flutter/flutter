@@ -98,11 +98,8 @@ class AccessibilityAnnouncements {
   }
 
   static DomHTMLElement _createElement(Assertiveness assertiveness) {
-    final ariaLiveValue = (assertiveness == Assertiveness.assertive)
-        ? 'assertive'
-        : 'polite';
-    final liveRegion =
-        createDomElement('flt-announcement-$ariaLiveValue') as DomHTMLElement;
+    final ariaLiveValue = (assertiveness == Assertiveness.assertive) ? 'assertive' : 'polite';
+    final liveRegion = createDomElement('flt-announcement-$ariaLiveValue') as DomHTMLElement;
     liveRegion.style
       ..position = 'fixed'
       ..overflow = 'hidden'

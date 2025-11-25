@@ -27,8 +27,7 @@ void testMain() {
   }
 
   String? getCssThemeColor() {
-    final theme =
-        domDocument.querySelector('#flutterweb-theme') as DomHTMLMetaElement?;
+    final theme = domDocument.querySelector('#flutterweb-theme') as DomHTMLMetaElement?;
     return theme?.content;
   }
 

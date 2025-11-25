@@ -21,8 +21,7 @@ void testMain() {
   });
 
   test('collects frame timings', () async {
-    final dispatcher =
-        ui.PlatformDispatcher.instance as EnginePlatformDispatcher;
+    final dispatcher = ui.PlatformDispatcher.instance as EnginePlatformDispatcher;
     List<ui.FrameTiming>? timings;
     dispatcher.onReportTimings = (List<ui.FrameTiming> data) {
       timings = data;

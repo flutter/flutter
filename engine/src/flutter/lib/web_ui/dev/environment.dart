@@ -25,22 +25,14 @@ class Environment {
 
     final io.Directory engineSrcDir = self.parent.parent.parent.parent.parent;
     final io.Directory flutterRootDir = engineSrcDir.parent.parent;
-    final engineToolsDir = io.Directory(
-      pathlib.join(engineSrcDir.path, 'flutter', 'tools'),
-    );
+    final engineToolsDir = io.Directory(pathlib.join(engineSrcDir.path, 'flutter', 'tools'));
     final outDir = io.Directory(pathlib.join(engineSrcDir.path, 'out'));
     final wasmReleaseOutDir = io.Directory(pathlib.join(outDir.path, 'wasm_release'));
     final wasmProfileOutDir = io.Directory(pathlib.join(outDir.path, 'wasm_profile'));
-    final wasmDebugUnoptOutDir = io.Directory(
-      pathlib.join(outDir.path, 'wasm_debug_unopt'),
-    );
-    final hostDebugUnoptDir = io.Directory(
-      pathlib.join(outDir.path, 'host_debug_unopt'),
-    );
+    final wasmDebugUnoptOutDir = io.Directory(pathlib.join(outDir.path, 'wasm_debug_unopt'));
+    final hostDebugUnoptDir = io.Directory(pathlib.join(outDir.path, 'host_debug_unopt'));
     final io.Directory dartSdkDir = dartExecutable.parent.parent;
-    final webUiRootDir = io.Directory(
-      pathlib.join(engineSrcDir.path, 'flutter', 'lib', 'web_ui'),
-    );
+    final webUiRootDir = io.Directory(pathlib.join(engineSrcDir.path, 'flutter', 'lib', 'web_ui'));
 
     for (final expectedDirectory in <io.Directory>[engineSrcDir, webUiRootDir]) {
       if (!expectedDirectory.existsSync()) {

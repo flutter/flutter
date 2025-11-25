@@ -30,10 +30,7 @@ class ShaderData {
       throw const FormatException('Invalid Shader Data');
     }
 
-    final uniforms = List<UniformData>.filled(
-      rawUniforms.length,
-      UniformData.empty,
-    );
+    final uniforms = List<UniformData>.filled(rawUniforms.length, UniformData.empty);
 
     var textureCount = 0;
     var floatCount = 0;

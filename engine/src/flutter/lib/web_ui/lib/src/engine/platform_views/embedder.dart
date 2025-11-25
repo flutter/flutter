@@ -278,8 +278,7 @@ class PlatformViewEmbedder {
     // which pictures go in which canvas.
     final optimizedCanvasRecorders = <LayerPictureRecorder>[];
     final optimizedCanvases = <LayerCanvas>[];
-    final pictureToOptimizedCanvasMap =
-        <PictureLayer, LayerCanvas>{};
+    final pictureToOptimizedCanvasMap = <PictureLayer, LayerCanvas>{};
     for (final CompositionCanvas canvas in composition.canvases) {
       final pictureRecorder = ui.PictureRecorder() as LayerPictureRecorder;
       optimizedCanvasRecorders.add(pictureRecorder);
@@ -336,14 +335,9 @@ class PlatformViewEmbedder {
     if (debugOverlayOptimizationBounds) {
       debugBoundsCanvas ??= rasterizer.displayFactory.getCanvas();
       final boundsRecorder = ui.PictureRecorder();
-      final boundsCanvas = ui.Canvas(
-        boundsRecorder,
-        ui.Offset.zero & _frameSize.toSize(),
-      );
-      final platformViewBoundsPaint = ui.Paint()
-        ..color = const ui.Color.fromARGB(100, 0, 255, 0);
-      final pictureBoundsPaint = ui.Paint()
-        ..color = const ui.Color.fromARGB(100, 0, 0, 255);
+      final boundsCanvas = ui.Canvas(boundsRecorder, ui.Offset.zero & _frameSize.toSize());
+      final platformViewBoundsPaint = ui.Paint()..color = const ui.Color.fromARGB(100, 0, 255, 0);
+      final pictureBoundsPaint = ui.Paint()..color = const ui.Color.fromARGB(100, 0, 0, 255);
       for (final CompositionEntity entity in _activeComposition.entities) {
         if (entity is CompositionPlatformView) {
           if (entity.debugComputedBounds != null) {
@@ -424,9 +418,7 @@ class PlatformViewEmbedder {
     }
     int numCanvasesToDelete = numCanvases - maximumCanvases;
     final picturesForLastCanvas = <PictureLayer>[];
-    final modifiedEntities = List<CompositionEntity>.from(
-      composition.entities,
-    );
+    final modifiedEntities = List<CompositionEntity>.from(composition.entities);
     var sawLastCanvas = false;
     for (int i = composition.entities.length - 1; i >= 0; i--) {
       final CompositionEntity entity = modifiedEntities[i];

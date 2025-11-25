@@ -52,18 +52,13 @@ void testMain() {
     });
 
     test('assetBase can be absolute', () {
-      final assets = ui_web.AssetManager(
-        assetBase: 'https://www.gstatic.com/my-app/',
-      );
+      final assets = ui_web.AssetManager(assetBase: 'https://www.gstatic.com/my-app/');
 
       expect(assets.getAssetUrl('asset.txt'), 'https://www.gstatic.com/my-app/assets/asset.txt');
     });
 
     test('assetBase in conjunction with assetsDir, fully custom paths', () {
-      final assets = ui_web.AssetManager(
-        assetBase: '/asset/base/',
-        assetsDir: 'static',
-      );
+      final assets = ui_web.AssetManager(assetBase: '/asset/base/', assetsDir: 'static');
 
       expect(assets.getAssetUrl('asset.txt'), '/asset/base/static/asset.txt');
     });
@@ -78,9 +73,7 @@ void testMain() {
     });
 
     test('Fully-qualified asset URLs are untouched (even with assetBase)', () {
-      final assets = ui_web.AssetManager(
-        assetBase: 'https://static.my-app.com/',
-      );
+      final assets = ui_web.AssetManager(assetBase: 'https://static.my-app.com/');
 
       expect(
         assets.getAssetUrl('https://static.my-app.com/favicon.ico'),

@@ -2174,10 +2174,7 @@ extension type SkGlyphClusterInfo(JSObject _) implements JSObject {
       list[2].toDartDouble,
       list[3].toDartDouble,
     );
-    final textRange = ui.TextRange(
-      start: _textRange.start.toInt(),
-      end: _textRange.end.toInt(),
-    );
+    final textRange = ui.TextRange(start: _textRange.start.toInt(), end: _textRange.end.toInt());
     return ui.GlyphInfo(bounds, textRange, ui.TextDirection.values[_direction.value.toInt()]);
   }
 }

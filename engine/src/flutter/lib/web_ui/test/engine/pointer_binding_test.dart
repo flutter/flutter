@@ -75,8 +75,7 @@ void testMain() {
       debugEmulateIosSafari = false;
     });
 
-    final mockSafariWorkaround =
-        MockSafariPointerEventWorkaround();
+    final mockSafariWorkaround = MockSafariPointerEventWorkaround();
     final instance = PointerBinding(view, safariWorkaround: mockSafariWorkaround);
     expect(mockSafariWorkaround.workAroundInvoked, isIosSafari);
     instance.dispose();

@@ -467,8 +467,7 @@ void main() {
 
   test('fixes gcc paths', () {
     final String outDir = path.join(io.Directory.current.path, 'foo', 'bar');
-    const error =
-        'flutter/impeller/renderer/backend/metal/allocator_mtl.h:69:33: error: foobar';
+    const error = 'flutter/impeller/renderer/backend/metal/allocator_mtl.h:69:33: error: foobar';
     final String fixed = BuildRunner.fixGccPaths('../../$error', outDir);
     expect(fixed, './$error');
   });

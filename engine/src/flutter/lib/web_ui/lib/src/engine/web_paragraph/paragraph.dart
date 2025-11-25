@@ -868,7 +868,12 @@ class WebParagraph implements ui.Paragraph {
     ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
     ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
   }) {
-    final List<ui.TextBox> result = _layout.getBoxesForRange(start, end, boxHeightStyle, boxWidthStyle);
+    final List<ui.TextBox> result = _layout.getBoxesForRange(
+      start,
+      end,
+      boxHeightStyle,
+      boxWidthStyle,
+    );
     WebParagraphDebug.apiTrace(
       'getBoxesForRange("$text", $start, $end, $boxHeightStyle, $boxWidthStyle): $result ($longestLine, $maxLineWidthWithTrailingSpaces)',
     );

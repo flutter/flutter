@@ -914,7 +914,8 @@ class SkwasmParagraphStyle implements ui.ParagraphStyle {
 class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
     implements ui.ParagraphBuilder {
   factory SkwasmParagraphBuilder(SkwasmParagraphStyle style, SkwasmFontCollection collection) {
-    final (ParagraphStyleHandle paragraphStyleHandle, SkwasmNativeTextStyle nativeTextStyle) = style.createNative();
+    final (ParagraphStyleHandle paragraphStyleHandle, SkwasmNativeTextStyle nativeTextStyle) = style
+        .createNative();
     final builder = SkwasmParagraphBuilder._(
       paragraphBuilderCreate(paragraphStyleHandle, collection.handle),
       style,
@@ -990,10 +991,7 @@ class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
       text = '';
       jsText = ''.toJS;
     } else {
-      final codeUnitList = List<int>.generate(
-        outSize.value,
-        (int index) => utf8Data[index],
-      );
+      final codeUnitList = List<int>.generate(outSize.value, (int index) => utf8Data[index]);
       text = utf8.decode(codeUnitList);
       jsText = _utf8Decoder.decode(
         // In an ideal world we would just use a subview of wasm memory rather

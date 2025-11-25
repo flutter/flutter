@@ -38,7 +38,9 @@ final class BuildPlan {
   }) {
     final Build build = () {
       final String? name = args.option(_flagConfig) ?? defaultBuild();
-      final Build? config = builds.firstWhereOrNull((b) => mangleConfigName(environment, b.name) == name);
+      final Build? config = builds.firstWhereOrNull(
+        (b) => mangleConfigName(environment, b.name) == name,
+      );
       if (config == null) {
         if (name == null) {
           throw FatalError('No build configuration specified.');

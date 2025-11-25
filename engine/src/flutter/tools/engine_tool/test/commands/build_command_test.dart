@@ -143,7 +143,13 @@ void main() {
       environment: testEnv.environment,
       configs: {'mac_test_config': builder.buildConfig(path: 'ci/builders/mac_test_config.json')},
     );
-    final int result = await runner.run(['build', '--config', 'ci/android_debug_arm64', '-j', '500']);
+    final int result = await runner.run([
+      'build',
+      '--config',
+      'ci/android_debug_arm64',
+      '-j',
+      '500',
+    ]);
 
     printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));
@@ -333,7 +339,9 @@ void main() {
     printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));
 
-    final ExecutedProcess ninjaCmd = testEnv.processHistory.firstWhere((p) => p.command.first.endsWith('ninja'));
+    final ExecutedProcess ninjaCmd = testEnv.processHistory.firstWhere(
+      (p) => p.command.first.endsWith('ninja'),
+    );
     expect(ninjaCmd.command, containsAllInOrder([endsWith('ninja'), '-C', endsWith('host_debug')]));
     expect(ninjaCmd.command, contains(contains('flutter/fml:fml_unittests')));
   });
@@ -380,7 +388,9 @@ void main() {
     printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));
 
-    final ExecutedProcess ninjaCmd = testEnv.processHistory.firstWhere((p) => p.command.first.endsWith('ninja'));
+    final ExecutedProcess ninjaCmd = testEnv.processHistory.firstWhere(
+      (p) => p.command.first.endsWith('ninja'),
+    );
     expect(ninjaCmd.command, containsAllInOrder([endsWith('ninja'), '-C', endsWith('host_debug')]));
 
     expect(

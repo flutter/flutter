@@ -197,9 +197,7 @@ class CopyArtifactsStep implements PipelineStep {
     );
     for (final io.File file in fallbackFontsSource.listSync(recursive: true).whereType<io.File>()) {
       final String relativePath = pathlib.relative(file.path, from: fallbackFontsSource.path);
-      final destinationFile = io.File(
-        pathlib.join(fallbackFontsDestinationPath, relativePath),
-      );
+      final destinationFile = io.File(pathlib.join(fallbackFontsDestinationPath, relativePath));
       if (!destinationFile.parent.existsSync()) {
         destinationFile.parent.createSync(recursive: true);
       }

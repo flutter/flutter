@@ -32,9 +32,7 @@ void testMain() {
 
       group('"create" message', () {
         test('unregistered viewType, fails with descriptive exception', () async {
-          final messageHandler = PlatformViewMessageHandler(
-            contentManager: contentManager,
-          );
+          final messageHandler = PlatformViewMessageHandler(contentManager: contentManager);
           final Map<dynamic, dynamic> arguments = _getCreateArguments(
             platformViewType,
             platformViewId,
@@ -55,9 +53,7 @@ void testMain() {
         test('duplicate viewId, fails with descriptive exception', () async {
           contentManager.registerFactory(platformViewType, (int id) => createDomHTMLDivElement());
           contentManager.renderContent(platformViewType, platformViewId, null);
-          final messageHandler = PlatformViewMessageHandler(
-            contentManager: contentManager,
-          );
+          final messageHandler = PlatformViewMessageHandler(contentManager: contentManager);
           final Map<dynamic, dynamic> arguments = _getCreateArguments(
             platformViewType,
             platformViewId,
@@ -79,9 +75,7 @@ void testMain() {
             platformViewType,
             (int id) => createDomHTMLDivElement()..id = 'success',
           );
-          final messageHandler = PlatformViewMessageHandler(
-            contentManager: contentManager,
-          );
+          final messageHandler = PlatformViewMessageHandler(contentManager: contentManager);
           final Map<dynamic, dynamic> arguments = _getCreateArguments(
             platformViewType,
             platformViewId,
@@ -103,9 +97,7 @@ void testMain() {
             platformViewType,
             (int id) => createDomHTMLDivElement()..id = 'success',
           );
-          final messageHandler = PlatformViewMessageHandler(
-            contentManager: contentManager,
-          );
+          final messageHandler = PlatformViewMessageHandler(contentManager: contentManager);
           final Map<dynamic, dynamic> arguments = _getCreateArguments(
             platformViewType,
             platformViewId,
@@ -143,9 +135,7 @@ void testMain() {
             factoryCalls.add((viewId: viewId, params: params));
             return createDomHTMLDivElement();
           });
-          final messageHandler = PlatformViewMessageHandler(
-            contentManager: contentManager,
-          );
+          final messageHandler = PlatformViewMessageHandler(contentManager: contentManager);
 
           final completers = <Completer<ByteData?>>[];
 
@@ -206,9 +196,7 @@ void testMain() {
             return Object();
           });
 
-          final messageHandler = PlatformViewMessageHandler(
-            contentManager: contentManager,
-          );
+          final messageHandler = PlatformViewMessageHandler(contentManager: contentManager);
           final Map<dynamic, dynamic> arguments = _getCreateArguments(
             platformViewType,
             platformViewId,
@@ -228,9 +216,7 @@ void testMain() {
         });
 
         test('never fails, even for unknown viewIds', () async {
-          final messageHandler = PlatformViewMessageHandler(
-            contentManager: contentManager,
-          );
+          final messageHandler = PlatformViewMessageHandler(contentManager: contentManager);
 
           messageHandler.handlePlatformViewCall('dispose', platformViewId, completer.complete);
 

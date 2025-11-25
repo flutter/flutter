@@ -1712,7 +1712,8 @@ void main() async {
       rows += 2;
       canvas.save();
       for (var col = 0; col < columns && renderIndex < renderers.length; col++) {
-        final void Function(Canvas canvas, Paint fill, Paint stroke) renderer = renderers[renderIndex++];
+        final void Function(Canvas canvas, Paint fill, Paint stroke) renderer =
+            renderers[renderIndex++];
         canvas.drawRect(pairArena, grey);
         canvas.drawRect(arena, white);
         renderer(canvas, unblurredFill, unblurredStroke);

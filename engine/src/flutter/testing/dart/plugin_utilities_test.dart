@@ -27,16 +27,14 @@ void main() {
     final CallbackHandle hTop = PluginUtilities.getCallbackHandle(top)!;
     expect(hTop, isNot(0));
     expect(PluginUtilities.getCallbackHandle(top), hTop);
-    final topClosure =
-        PluginUtilities.getCallbackFromHandle(hTop)! as StringFunction;
+    final topClosure = PluginUtilities.getCallbackFromHandle(hTop)! as StringFunction;
     expect(topClosure(), 'top');
 
     // Static method callback.
     final CallbackHandle hGetInt = PluginUtilities.getCallbackHandle(Foo.getInt)!;
     expect(hGetInt, isNot(0));
     expect(PluginUtilities.getCallbackHandle(Foo.getInt), hGetInt);
-    final getIntClosure =
-        PluginUtilities.getCallbackFromHandle(hGetInt)! as IntFunction;
+    final getIntClosure = PluginUtilities.getCallbackFromHandle(hGetInt)! as IntFunction;
     expect(getIntClosure(), 1);
 
     // Instance method callbacks cannot be looked up.

@@ -845,8 +845,7 @@ void debugResetCanvasCount() {
 
 DomHTMLCanvasElement createDomCanvasElement({int? width, int? height}) {
   debugCanvasCount++;
-  final canvas =
-      domWindow.document.createElement('canvas') as DomHTMLCanvasElement;
+  final canvas = domWindow.document.createElement('canvas') as DomHTMLCanvasElement;
   if (width != null) {
     canvas.width = width.toDouble();
   }

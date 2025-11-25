@@ -85,9 +85,7 @@ void run(
   debugPrint('Initializing from ${p.relative(engine.srcDir.path)}');
 
   // Find and parse the engine build configs.
-  final buildConfigsDir = io.Directory(
-    p.join(engine.flutterDir.path, 'ci', 'builders'),
-  );
+  final buildConfigsDir = io.Directory(p.join(engine.flutterDir.path, 'ci', 'builders'));
   final loader = BuildConfigLoader(buildConfigsDir: buildConfigsDir);
 
   // Treat it as an error if no build configs were found. The caller likely

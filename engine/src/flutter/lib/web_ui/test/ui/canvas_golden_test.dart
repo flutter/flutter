@@ -103,10 +103,7 @@ void testMain() {
           final ui.Paragraph fromParagraph = from();
           canvas.drawParagraph(fromParagraph, ui.Offset.zero);
 
-          final leftEnd = ui.Offset(
-            fromParagraph.maxIntrinsicWidth + 10,
-            fromParagraph.height / 2,
-          );
+          final leftEnd = ui.Offset(fromParagraph.maxIntrinsicWidth + 10, fromParagraph.height / 2);
           final rightEnd = ui.Offset(middle - 10, leftEnd.dy);
           const tipOffset = ui.Offset(-5, -5);
           canvas.drawLine(leftEnd, rightEnd, ui.Paint());

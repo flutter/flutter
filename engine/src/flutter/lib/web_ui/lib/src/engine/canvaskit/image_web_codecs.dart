@@ -191,8 +191,7 @@ ByteBuffer readDomImageSourcePixelsUnmodified(
   int height,
 ) {
   final DomHTMLCanvasElement htmlCanvas = createDomCanvasElement(width: width, height: height);
-  final ctx =
-      htmlCanvas.getContext('2d')! as DomCanvasRenderingContext2D;
+  final ctx = htmlCanvas.getContext('2d')! as DomCanvasRenderingContext2D;
   ctx.drawImage(imageSource, 0, 0);
   final DomImageData imageData = ctx.getImageData(0, 0, width, height);
   // Resize the canvas to 0x0 to cause the browser to reclaim its memory

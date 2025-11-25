@@ -95,8 +95,7 @@ class CompileBundleStep implements PipelineStep {
       outputBundleDirectory.deleteSync(recursive: true);
     }
 
-    final pendingResults =
-        <Future<MapEntry<String, CompileResult>>>[];
+    final pendingResults = <Future<MapEntry<String, CompileResult>>>[];
     for (final compiler in compilers) {
       for (final testFile in allTests) {
         final String relativePath = pathlib.relative(testFile.absolute, from: testSetDirectoryPath);
@@ -118,9 +117,7 @@ class CompileBundleStep implements PipelineStep {
         pendingResults.add(result);
       }
     }
-    final results = Map<String, CompileResult>.fromEntries(
-      await Future.wait(pendingResults),
-    );
+    final results = Map<String, CompileResult>.fromEntries(await Future.wait(pendingResults));
     stopwatch.stop();
 
     final String resultsJson = const JsonEncoder.withIndent('  ').convert(<String, dynamic>{
@@ -137,9 +134,7 @@ class CompileBundleStep implements PipelineStep {
       'compileTimeInMs': stopwatch.elapsedMilliseconds,
       'results': results.map((String k, CompileResult v) => MapEntry<String, String>(k, v.name)),
     });
-    final outputResultsFile = io.File(
-      pathlib.join(outputBundleDirectory.path, 'results.json'),
-    );
+    final outputResultsFile = io.File(pathlib.join(outputBundleDirectory.path, 'results.json'));
     outputResultsFile.writeAsStringSync(resultsJson);
     final failedFiles = <String>[];
     results.forEach((String fileName, CompileResult result) {

@@ -38,8 +38,7 @@ GloballyPositionedTextEditingStrategy _enableEditingStrategy({
 
   owner.configuration = InputConfiguration(viewId: kImplicitViewId, enableDeltaModel: deltaModel);
 
-  final editingStrategy =
-      GloballyPositionedTextEditingStrategy(owner);
+  final editingStrategy = GloballyPositionedTextEditingStrategy(owner);
 
   owner.debugTextEditingStrategyOverride = editingStrategy;
 
@@ -65,8 +64,7 @@ Future<void> testMain() async {
 
     group('composition end', () {
       test('should reset composing text on handle composition end', () {
-        final mockWithCompositionAwareMixin =
-            _MockWithCompositionAwareMixin();
+        final mockWithCompositionAwareMixin = _MockWithCompositionAwareMixin();
         mockWithCompositionAwareMixin.composingText = fakeComposingText;
         mockWithCompositionAwareMixin.addCompositionEventHandlers(_inputElement);
 
@@ -80,8 +78,7 @@ Future<void> testMain() async {
 
     group('composition start', () {
       test('should reset composing text on handle composition start', () {
-        final mockWithCompositionAwareMixin =
-            _MockWithCompositionAwareMixin();
+        final mockWithCompositionAwareMixin = _MockWithCompositionAwareMixin();
         mockWithCompositionAwareMixin.composingText = fakeComposingText;
         mockWithCompositionAwareMixin.addCompositionEventHandlers(_inputElement);
 
@@ -96,8 +93,7 @@ Future<void> testMain() async {
     group('composition update', () {
       test('should set composing text to event composing text', () {
         const fakeEventText = 'IAmComposingThis';
-        final mockWithCompositionAwareMixin =
-            _MockWithCompositionAwareMixin();
+        final mockWithCompositionAwareMixin = _MockWithCompositionAwareMixin();
         mockWithCompositionAwareMixin.composingText = fakeComposingText;
         mockWithCompositionAwareMixin.addCompositionEventHandlers(_inputElement);
 
@@ -114,28 +110,18 @@ Future<void> testMain() async {
 
     group('determine composition state', () {
       test('should return editing state if extentOffset is null', () {
-        final editingState = EditingState(
-          text: 'Test',
-          baseOffset: 0,
-          extentOffset: 0,
-        );
+        final editingState = EditingState(text: 'Test', baseOffset: 0, extentOffset: 0);
 
-        final mockWithCompositionAwareMixin =
-            _MockWithCompositionAwareMixin();
+        final mockWithCompositionAwareMixin = _MockWithCompositionAwareMixin();
         mockWithCompositionAwareMixin.composingText = 'Test';
 
         expect(mockWithCompositionAwareMixin.determineCompositionState(editingState), editingState);
       });
 
       test('should return editing state if composingText is null', () {
-        final editingState = EditingState(
-          text: 'Test',
-          baseOffset: 0,
-          extentOffset: 4,
-        );
+        final editingState = EditingState(text: 'Test', baseOffset: 0, extentOffset: 4);
 
-        final mockWithCompositionAwareMixin =
-            _MockWithCompositionAwareMixin();
+        final mockWithCompositionAwareMixin = _MockWithCompositionAwareMixin();
 
         expect(mockWithCompositionAwareMixin.determineCompositionState(editingState), editingState);
       });
@@ -143,8 +129,7 @@ Future<void> testMain() async {
       test('should return editing state if text is null', () {
         final editingState = EditingState(text: '', baseOffset: 0, extentOffset: 0);
 
-        final mockWithCompositionAwareMixin =
-            _MockWithCompositionAwareMixin();
+        final mockWithCompositionAwareMixin = _MockWithCompositionAwareMixin();
         mockWithCompositionAwareMixin.composingText = 'Test';
 
         expect(mockWithCompositionAwareMixin.determineCompositionState(editingState), editingState);
@@ -153,14 +138,9 @@ Future<void> testMain() async {
       test('should return editing state if extentOffset is smaller than composingText length', () {
         const composingText = 'composeMe';
 
-        final editingState = EditingState(
-          text: 'Test',
-          baseOffset: 0,
-          extentOffset: 4,
-        );
+        final editingState = EditingState(text: 'Test', baseOffset: 0, extentOffset: 4);
 
-        final mockWithCompositionAwareMixin =
-            _MockWithCompositionAwareMixin();
+        final mockWithCompositionAwareMixin = _MockWithCompositionAwareMixin();
         mockWithCompositionAwareMixin.composingText = composingText;
 
         expect(mockWithCompositionAwareMixin.determineCompositionState(editingState), editingState);
@@ -176,8 +156,7 @@ Future<void> testMain() async {
           extentOffset: baseOffset,
         );
 
-        final mockWithCompositionAwareMixin =
-            _MockWithCompositionAwareMixin();
+        final mockWithCompositionAwareMixin = _MockWithCompositionAwareMixin();
         mockWithCompositionAwareMixin.composingText = composingText;
 
         const int expectedComposingBase = baseOffset - composingText.length;
@@ -196,8 +175,7 @@ Future<void> testMain() async {
 
         final editingState = EditingState(text: '今日は', baseOffset: 0, extentOffset: 3);
 
-        final mockWithCompositionAwareMixin =
-            _MockWithCompositionAwareMixin();
+        final mockWithCompositionAwareMixin = _MockWithCompositionAwareMixin();
         mockWithCompositionAwareMixin.composingText = composingText;
 
         const expectedComposingBase = 0;
@@ -216,8 +194,7 @@ Future<void> testMain() async {
 
         var editingState = EditingState(text: '今日は寒い日です', baseOffset: 0, extentOffset: 8);
 
-        final mockWithCompositionAwareMixin =
-            _MockWithCompositionAwareMixin();
+        final mockWithCompositionAwareMixin = _MockWithCompositionAwareMixin();
         mockWithCompositionAwareMixin.composingText = composingText;
 
         expect(
@@ -325,8 +302,7 @@ Future<void> testMain() async {
   group('Text Editing Delta Model', () {
     late GloballyPositionedTextEditingStrategy editingStrategy;
 
-    final deltaStream =
-        StreamController<TextEditingDeltaState?>.broadcast();
+    final deltaStream = StreamController<TextEditingDeltaState?>.broadcast();
 
     setUp(() {
       editingStrategy = _enableEditingStrategy(

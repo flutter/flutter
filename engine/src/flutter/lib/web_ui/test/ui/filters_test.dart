@@ -400,7 +400,8 @@ Future<void> testMain() async {
       rows += 2;
       canvas.save();
       for (var col = 0; col < columns && renderIndex < renderers.length; col++) {
-        final void Function(ui.Canvas canvas, ui.Paint fill, ui.Paint stroke) renderer = renderers[renderIndex++];
+        final void Function(ui.Canvas canvas, ui.Paint fill, ui.Paint stroke) renderer =
+            renderers[renderIndex++];
         canvas.drawRect(pairArena, grey);
         canvas.drawRect(arena, white);
         renderer(canvas, unblurredFill, unblurredStroke);
@@ -539,14 +540,8 @@ Future<void> testMain() async {
   });
 
   test('== operator', () {
-    final filters1 = <ui.ImageFilter>[
-      ...createImageFilters(),
-      ...createColorFilters(),
-    ];
-    final filters2 = <ui.ImageFilter>[
-      ...createImageFilters(),
-      ...createColorFilters(),
-    ];
+    final filters1 = <ui.ImageFilter>[...createImageFilters(), ...createColorFilters()];
+    final filters2 = <ui.ImageFilter>[...createImageFilters(), ...createColorFilters()];
 
     for (var index1 = 0; index1 < filters1.length; index1 += 1) {
       final ui.ImageFilter imageFilter1 = filters1[index1];

@@ -188,10 +188,7 @@ void main() {
     expect(line.end, 5);
 
     // Since these are hard newlines, TextAffinity has no effect here.
-    const emptyLinePositionUpstream = TextPosition(
-      offset: 5,
-      affinity: TextAffinity.upstream,
-    );
+    const emptyLinePositionUpstream = TextPosition(offset: 5, affinity: TextAffinity.upstream);
     line = paragraph.getLineBoundary(emptyLinePositionUpstream);
     expect(line.start, 5);
     expect(line.end, 5);
@@ -338,9 +335,7 @@ void main() {
 
   test('kTextHeightNone unsets the height multiplier', () {
     const double fontSize = 10;
-    final builder = ParagraphBuilder(
-      ParagraphStyle(fontSize: fontSize, height: 10),
-    );
+    final builder = ParagraphBuilder(ParagraphStyle(fontSize: fontSize, height: 10));
     builder.pushStyle(TextStyle(height: kTextHeightNone));
     builder.addText('A');
     final Paragraph paragraph = builder.build()..layout(const ParagraphConstraints(width: 1000));
@@ -349,9 +344,7 @@ void main() {
 
   test('kTextHeightNone ParagraphStyle', () {
     const double fontSize = 10;
-    final builder = ParagraphBuilder(
-      ParagraphStyle(fontSize: fontSize, height: kTextHeightNone),
-    );
+    final builder = ParagraphBuilder(ParagraphStyle(fontSize: fontSize, height: kTextHeightNone));
     builder.addText('A');
     final Paragraph paragraph = builder.build()..layout(const ParagraphConstraints(width: 1000));
     expect(paragraph.height, fontSize);

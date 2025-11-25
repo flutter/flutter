@@ -638,10 +638,7 @@ interface class SkiaGoldClient {
   /// Currently, the only key value pairs being tracked are the platform and
   /// browser the image was rendered on.
   Map<String, dynamic> _getKeys() {
-    final initialKeys = <String, dynamic>{
-      'CI': 'luci',
-      'Platform': io.Platform.operatingSystem,
-    };
+    final initialKeys = <String, dynamic>{'CI': 'luci', 'Platform': io.Platform.operatingSystem};
     if (dimensions != null) {
       initialKeys.addAll(dimensions!);
     }
@@ -668,11 +665,7 @@ interface class SkiaGoldClient {
   /// the image keys.
   @visibleForTesting
   String getTraceID(String testName) {
-    final keys = <String, dynamic>{
-      ..._getKeys(),
-      'name': testName,
-      'source_type': _instance,
-    };
+    final keys = <String, dynamic>{..._getKeys(), 'name': testName, 'source_type': _instance};
     final String jsonTrace = json.encode(keys);
     final md5Sum = md5.convert(utf8.encode(jsonTrace)).toString();
     return md5Sum;

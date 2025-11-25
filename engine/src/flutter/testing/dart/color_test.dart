@@ -231,13 +231,7 @@ void main() {
   });
 
   test('p3 to extended srgb', () {
-    const p3 = Color.from(
-      alpha: 1,
-      red: 1,
-      green: 0,
-      blue: 0,
-      colorSpace: ColorSpace.displayP3,
-    );
+    const p3 = Color.from(alpha: 1, red: 1, green: 0, blue: 0, colorSpace: ColorSpace.displayP3);
     final Color srgb = p3.withValues(colorSpace: ColorSpace.extendedSRGB);
     expect(srgb.a, equals(1.0));
     expect(srgb.r, closeTo(1.0931, 1e-4));
@@ -247,13 +241,7 @@ void main() {
   });
 
   test('p3 to srgb', () {
-    const p3 = Color.from(
-      alpha: 1,
-      red: 1,
-      green: 0,
-      blue: 0,
-      colorSpace: ColorSpace.displayP3,
-    );
+    const p3 = Color.from(alpha: 1, red: 1, green: 0, blue: 0, colorSpace: ColorSpace.displayP3);
     final Color srgb = p3.withValues(colorSpace: ColorSpace.sRGB);
     expect(srgb.a, equals(1.0));
     expect(srgb.r, closeTo(1, 1e-4));
@@ -298,25 +286,13 @@ void main() {
 
   test('hash considers colorspace', () {
     const srgb = Color.from(alpha: 1, red: 1, green: 0, blue: 0);
-    const p3 = Color.from(
-      alpha: 1,
-      red: 1,
-      green: 0,
-      blue: 0,
-      colorSpace: ColorSpace.displayP3,
-    );
+    const p3 = Color.from(alpha: 1, red: 1, green: 0, blue: 0, colorSpace: ColorSpace.displayP3);
     expect(srgb.hashCode, isNot(p3.hashCode));
   });
 
   test('equality considers colorspace', () {
     const srgb = Color.from(alpha: 1, red: 1, green: 0, blue: 0);
-    const p3 = Color.from(
-      alpha: 1,
-      red: 1,
-      green: 0,
-      blue: 0,
-      colorSpace: ColorSpace.displayP3,
-    );
+    const p3 = Color.from(alpha: 1, red: 1, green: 0, blue: 0, colorSpace: ColorSpace.displayP3);
     expect(srgb, isNot(p3));
   });
 

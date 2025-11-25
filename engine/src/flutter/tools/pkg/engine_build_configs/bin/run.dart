@@ -55,9 +55,7 @@ The build names are the "name" fields of the maps in the list of "builds".
   }
 
   // Find and parse the engine build configs.
-  final buildConfigsDir = io.Directory(
-    p.join(engine.flutterDir.path, 'ci', 'builders'),
-  );
+  final buildConfigsDir = io.Directory(p.join(engine.flutterDir.path, 'ci', 'builders'));
   final loader = BuildConfigLoader(buildConfigsDir: buildConfigsDir);
 
   // Treat it as an error if no build configs were found. The caller likely
@@ -105,9 +103,7 @@ The build names are the "name" fields of the maps in the list of "builds".
 
   // If RBE config files aren't in the tree, then disable RBE.
   final String rbeConfigPath = p.join(engine.srcDir.path, 'flutter', 'build', 'rbe');
-  final extraGnArgs = <String>[
-    if (!io.Directory(rbeConfigPath).existsSync()) '--no-rbe',
-  ];
+  final extraGnArgs = <String>[if (!io.Directory(rbeConfigPath).existsSync()) '--no-rbe'];
 
   final buildRunner = BuildRunner(
     platform: const LocalPlatform(),

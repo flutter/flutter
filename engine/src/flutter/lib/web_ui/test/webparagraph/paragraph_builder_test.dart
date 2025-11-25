@@ -20,10 +20,7 @@ final WebTextStyle defaultBackground = WebTextStyle(
 
 Future<void> testMain() async {
   test('Build paragraph for Flutter Gallery', () {
-    final paragraphStyle = WebParagraphStyle(
-      fontFamily: 'GoogleSans',
-      fontSize: 20.0,
-    );
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'GoogleSans', fontSize: 20.0);
     final builder = WebParagraphBuilder(paragraphStyle);
     final textStyle = WebTextStyle(fontFamily: 'GoogleSans', fontSize: 20.0);
     builder.pushStyle(textStyle);
@@ -275,15 +272,9 @@ Future<void> testMain() async {
 
   test('Build paragraph with inherited styles (foreground, background) [1[2[3]]]', () {
     final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 24.0);
-    final textStyle1 = WebTextStyle(
-      foreground: Paint()..color = const Color(0xFF00FF00),
-    );
-    final textStyle2 = WebTextStyle(
-      background: Paint()..color = const Color(0xFFFF0000),
-    );
-    final textStyle3 = WebTextStyle(
-      foreground: Paint()..color = const Color(0xFF0000FF),
-    );
+    final textStyle1 = WebTextStyle(foreground: Paint()..color = const Color(0xFF00FF00));
+    final textStyle2 = WebTextStyle(background: Paint()..color = const Color(0xFFFF0000));
+    final textStyle3 = WebTextStyle(foreground: Paint()..color = const Color(0xFF0000FF));
 
     final builder = WebParagraphBuilder(paragraphStyle);
     builder.pushStyle(textStyle1);

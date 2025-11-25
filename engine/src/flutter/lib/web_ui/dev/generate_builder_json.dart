@@ -116,7 +116,9 @@ class GenerateBuilderJsonCommand extends Command<bool> {
     String? specificOS,
     String? cpu,
   }) {
-    final Iterable<TestSuite> filteredSuites = suites.where((suite) => suite.runConfig.browser == browser);
+    final Iterable<TestSuite> filteredSuites = suites.where(
+      (suite) => suite.runConfig.browser == browser,
+    );
     final Set<TestBundle> bundles = filteredSuites.map((suite) => suite.testBundle).toSet();
     return <String, dynamic>{
       'name': '$platform run ${browser.name} suites',

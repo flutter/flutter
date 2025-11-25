@@ -297,8 +297,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     if (response.statusCode != 200) {
       throw ToolExit('Failed to download Google Fonts list.');
     }
-    final googleFontsResult =
-        jsonDecode(response.body) as Map<String, dynamic>;
+    final googleFontsResult = jsonDecode(response.body) as Map<String, dynamic>;
     final List<Map<String, dynamic>> fontDatas = (googleFontsResult['items'] as List<dynamic>)
         .cast<Map<String, dynamic>>();
     for (final Map<String, Object?> fontData in fontDatas) {

@@ -177,9 +177,7 @@ void testMain() {
     });
 
     test('browser back button pops routes correctly', () async {
-      final strategy = TestUrlStrategy.fromEntry(
-        const TestHistoryEntry(null, null, '/home'),
-      );
+      final strategy = TestUrlStrategy.fromEntry(const TestHistoryEntry(null, null, '/home'));
       await implicitView.debugInitializeHistory(strategy, useSingle: true);
 
       // Initially, we should be on the flutter entry.
@@ -214,9 +212,7 @@ void testMain() {
     });
 
     test('multiple browser back clicks', () async {
-      final strategy = TestUrlStrategy.fromEntry(
-        const TestHistoryEntry(null, null, '/home'),
-      );
+      final strategy = TestUrlStrategy.fromEntry(const TestHistoryEntry(null, null, '/home'));
       await implicitView.debugInitializeHistory(strategy, useSingle: true);
 
       await routeInformationUpdated('/page1', null);
@@ -280,9 +276,7 @@ void testMain() {
     });
 
     test('handle user-provided url', () async {
-      final strategy = TestUrlStrategy.fromEntry(
-        const TestHistoryEntry(null, null, '/home'),
-      );
+      final strategy = TestUrlStrategy.fromEntry(const TestHistoryEntry(null, null, '/home'));
       await implicitView.debugInitializeHistory(strategy, useSingle: true);
 
       await strategy.simulateUserTypingUrl('/page3');
@@ -321,9 +315,7 @@ void testMain() {
     });
 
     test('user types unknown url', () async {
-      final strategy = TestUrlStrategy.fromEntry(
-        const TestHistoryEntry(null, null, '/home'),
-      );
+      final strategy = TestUrlStrategy.fromEntry(const TestHistoryEntry(null, null, '/home'));
       await implicitView.debugInitializeHistory(strategy, useSingle: true);
 
       await strategy.simulateUserTypingUrl('/unknown');
@@ -345,9 +337,7 @@ void testMain() {
     });
 
     test('popping a nameless route does not change url', () async {
-      final strategy = TestUrlStrategy.fromEntry(
-        const TestHistoryEntry(null, null, '/home'),
-      );
+      final strategy = TestUrlStrategy.fromEntry(const TestHistoryEntry(null, null, '/home'));
       await implicitView.debugInitializeHistory(strategy, useSingle: true);
 
       // Go to a named route.

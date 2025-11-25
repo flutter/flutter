@@ -99,8 +99,7 @@ void main() {
       // Needs https://github.com/flutter/flutter/issues/129659
       return;
     }
-    final testAssetName =
-        'test_insert_uniforms_${DateTime.now().millisecondsSinceEpoch}.frag.iplr';
+    final testAssetName = 'test_insert_uniforms_${DateTime.now().millisecondsSinceEpoch}.frag.iplr';
     final String buildDir = Platform.environment['FLUTTER_BUILD_DIRECTORY']!;
     final String assetsDir = path.join(buildDir, 'gen/flutter/lib/ui/assets');
     final String shaderSrcA = path.join(assetsDir, 'uniforms.frag.iplr');
