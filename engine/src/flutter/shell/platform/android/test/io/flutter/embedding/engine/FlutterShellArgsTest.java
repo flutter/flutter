@@ -36,18 +36,6 @@ public class FlutterShellArgsTest {
   }
 
   @Test
-  public void containsCommandLineArgument_returnsTrueWhenValidArgSpecified() {
-    assertTrue(FlutterShellArgs.containsCommandLineArgument("--enable-software-rendering"));
-  }
-
-  @Test
-  public void containsCommandLineArgument_returnsFalseWhenInvalidArgSpecified() {
-    assertFalse(
-        "Should return false for an invalid command line argument",
-        FlutterShellArgs.containsCommandLineArgument("--invalid-argument"));
-  }
-
-  @Test
   public void getFlagByMetadataKey_returnsExpectedFlagWhenValidKeySpecified() {
     FlutterShellArgs.Flag flag =
         FlutterShellArgs.getFlagByMetadataKey(
@@ -61,5 +49,15 @@ public class FlutterShellArgsTest {
     FlutterShellArgs.Flag flag =
         FlutterShellArgs.getFlagByMetadataKey("io.flutter.embedding.android.InvalidMetaDataKey");
     assertNull("Should return null for an invalid meta-data key", flag);
+  }
+
+  @Test
+  public void isDeprecated_returnsTrueWhenFlagIsDeprecated() {
+    assertTrue(FlutterShellArgs.isDeprecated(FlutterShellArgs.DISABLE_MERGED_PLATFORM_UI_THREAD));
+  }
+
+  @Test
+  public void isDeprecated_returnsFalseWhenFlagIsNotDeprecated() {
+    assertFalse(FlutterShellArgs.isDeprecated(FlutterShellArgs.VM_SERVICE_PORT));
   }
 }

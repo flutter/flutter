@@ -210,6 +210,12 @@ public final class FlutterShellArgs {
    */
   public static final Flag DART_FLAGS = new Flag("--dart-flags=", "DartFlags", false);
 
+  // Deprecated flags.
+
+  /** Disables the merging of the UI and platform threads. */
+  public static final Flag DISABLE_MERGED_PLATFORM_UI_THREAD =
+      new Flag("no-enable-merged-platform-ui-thread", "DisableMergedPlatformUIThread", true);
+
   public static final List<Flag> ALL_FLAGS =
       Collections.unmodifiableList(
           Arrays.asList(
@@ -246,7 +252,11 @@ public final class FlutterShellArgs {
               DUMP_SKP_ON_SHADER_COMPILATION,
               PURGE_PERSISTENT_CACHE,
               VERBOSE_LOGGING,
-              DART_FLAGS));
+              DART_FLAGS,
+              DISABLE_MERGED_PLATFORM_UI_THREAD));
+
+  private static final List<Flag> DEPRECATED_FLAGS =
+      Collections.unmodifiableList(Arrays.asList(DISABLE_MERGED_PLATFORM_UI_THREAD));
 
   // Lookup map for retrieving the Flag corresponding to a specific command line argument.
   private static final Map<String, Flag> FLAG_BY_COMMAND_LINE_ARG;
@@ -265,13 +275,23 @@ public final class FlutterShellArgs {
     FLAG_BY_META_DATA_KEY = Collections.unmodifiableMap(metaMap);
   }
 
-  /** Returns true if a manifest flag with the given command line argument exists. */
-  public static boolean containsCommandLineArgument(String arg) {
-    return FLAG_BY_COMMAND_LINE_ARG.containsKey(arg);
-  }
-
   /** Looks up a {@link Flag} by its metadataKey. */
   public static Flag getFlagByMetadataKey(String key) {
     return FLAG_BY_META_DATA_KEY.get(key);
+  }
+
+  /** Looks up a {@link Flag} by its commandLineArgument. */
+  public static Flag getFlagByCommandLineArgument(String arg) {
+    int equalsIndex = arg.indexOf('=');
+    if (equalsIndex == -1) {
+      return FLAG_BY_COMMAND_LINE_ARG.get(arg);
+    }
+    // Return the part of the string including the '='
+    return FLAG_BY_COMMAND_LINE_ARG.get(arg.substring(0, equalsIndex + 1));
+  }
+
+  /** Returns whether or not a flag is deprecated and should raise an exception if used. */
+  public static boolean isDeprecated(Flag flag) {
+    return DEPRECATED_FLAGS.contains(flag);
   }
 }
