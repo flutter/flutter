@@ -47,7 +47,7 @@ class MockPath extends Mock implements Path {}
 void main() {
   group('Interpolate points', () {
     test('- single point', () {
-      const List<Offset> points = <Offset>[
+      const points = <Offset>[
         Offset(25.0, 1.0),
       ];
       expect(_interpolate(points, 0.0, Offset.lerp), const Offset(25.0, 1.0));
@@ -56,7 +56,7 @@ void main() {
     });
 
     test('- two points', () {
-      const List<Offset> points = <Offset>[
+      const points = <Offset>[
         Offset(25.0, 1.0),
         Offset(12.0, 12.0),
       ];
@@ -66,7 +66,7 @@ void main() {
     });
 
     test('- three points', () {
-      const List<Offset> points = <Offset>[
+      const points = <Offset>[
         Offset(25.0, 1.0),
         Offset(12.0, 12.0),
         Offset(23.0, 9.0),
@@ -80,7 +80,7 @@ void main() {
   });
 
   group('_AnimatedIconPainter', () {
-    const Size size = Size(48.0, 48.0);
+    const size = Size(48.0, 48.0);
     late MockPath mockPath;
     late MockCanvas mockCanvas;
     late List<MockPath> generatedPaths;
@@ -97,7 +97,7 @@ void main() {
     });
 
     test('progress 0', () {
-      final _AnimatedIconPainter painter = _AnimatedIconPainter(
+      final painter = _AnimatedIconPainter(
         paths: _movingBar.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF00FF00),
@@ -119,7 +119,7 @@ void main() {
     });
 
     test('progress 1', () {
-      final _AnimatedIconPainter painter = _AnimatedIconPainter(
+      final painter = _AnimatedIconPainter(
         paths: _movingBar.paths,
         progress: const AlwaysStoppedAnimation<double>(1.0),
         color: const Color(0xFF00FF00),
@@ -141,7 +141,7 @@ void main() {
     });
 
     test('clamped progress', () {
-      final _AnimatedIconPainter painter = _AnimatedIconPainter(
+      final painter = _AnimatedIconPainter(
         paths: _movingBar.paths,
         progress: const AlwaysStoppedAnimation<double>(1.5),
         color: const Color(0xFF00FF00),
@@ -163,7 +163,7 @@ void main() {
     });
 
     test('scale', () {
-      final _AnimatedIconPainter painter = _AnimatedIconPainter(
+      final painter = _AnimatedIconPainter(
         paths: _movingBar.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF00FF00),
@@ -179,7 +179,7 @@ void main() {
     });
 
     test('mirror', () {
-      final _AnimatedIconPainter painter = _AnimatedIconPainter(
+      final painter = _AnimatedIconPainter(
         paths: _movingBar.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF00FF00),
@@ -197,7 +197,7 @@ void main() {
     });
 
     test('interpolated frame', () {
-      final _AnimatedIconPainter painter = _AnimatedIconPainter(
+      final painter = _AnimatedIconPainter(
         paths: _movingBar.paths,
         progress: const AlwaysStoppedAnimation<double>(0.5),
         color: const Color(0xFF00FF00),
@@ -219,7 +219,7 @@ void main() {
     });
 
     test('curved frame', () {
-      final _AnimatedIconPainter painter = _AnimatedIconPainter(
+      final painter = _AnimatedIconPainter(
         paths: _bow.paths,
         progress: const AlwaysStoppedAnimation<double>(1.0),
         color: const Color(0xFF00FF00),
@@ -239,7 +239,7 @@ void main() {
     });
 
     test('interpolated curved frame', () {
-      final _AnimatedIconPainter painter = _AnimatedIconPainter(
+      final painter = _AnimatedIconPainter(
         paths: _bow.paths,
         progress: const AlwaysStoppedAnimation<double>(0.25),
         color: const Color(0xFF00FF00),
@@ -259,7 +259,7 @@ void main() {
     });
 
     test('should not repaint same values', () {
-      final _AnimatedIconPainter painter1 = _AnimatedIconPainter(
+      final painter1 = _AnimatedIconPainter(
         paths: _bow.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF00FF00),
@@ -268,7 +268,7 @@ void main() {
         uiPathFactory: pathFactory,
       );
 
-      final _AnimatedIconPainter painter2 = _AnimatedIconPainter(
+      final painter2 = _AnimatedIconPainter(
         paths: _bow.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF00FF00),
@@ -281,7 +281,7 @@ void main() {
     });
 
     test('should repaint on progress change', () {
-      final _AnimatedIconPainter painter1 = _AnimatedIconPainter(
+      final painter1 = _AnimatedIconPainter(
         paths: _bow.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF00FF00),
@@ -290,7 +290,7 @@ void main() {
         uiPathFactory: pathFactory,
       );
 
-      final _AnimatedIconPainter painter2 = _AnimatedIconPainter(
+      final painter2 = _AnimatedIconPainter(
         paths: _bow.paths,
         progress: const AlwaysStoppedAnimation<double>(0.1),
         color: const Color(0xFF00FF00),
@@ -303,7 +303,7 @@ void main() {
     });
 
     test('should repaint on color change', () {
-      final _AnimatedIconPainter painter1 = _AnimatedIconPainter(
+      final painter1 = _AnimatedIconPainter(
         paths: _bow.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF00FF00),
@@ -312,7 +312,7 @@ void main() {
         uiPathFactory: pathFactory,
       );
 
-      final _AnimatedIconPainter painter2 = _AnimatedIconPainter(
+      final painter2 = _AnimatedIconPainter(
         paths: _bow.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFFFF0000),
@@ -325,7 +325,7 @@ void main() {
     });
 
     test('should repaint on paths change', () {
-      final _AnimatedIconPainter painter1 = _AnimatedIconPainter(
+      final painter1 = _AnimatedIconPainter(
         paths: _bow.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF0000FF),
@@ -334,7 +334,7 @@ void main() {
         uiPathFactory: pathFactory,
       );
 
-      final _AnimatedIconPainter painter2 = _AnimatedIconPainter(
+      final painter2 = _AnimatedIconPainter(
         paths: const <_PathFrames>[],
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF0000FF),
@@ -363,7 +363,7 @@ class MockCall {
 
   final Symbol memberSymbol;
   String get memberName {
-    final RegExp symbolMatch = RegExp(r'Symbol\("(?<name>.*)"\)');
+    final symbolMatch = RegExp(r'Symbol\("(?<name>.*)"\)');
     final RegExpMatch? match = symbolMatch.firstMatch(memberSymbol.toString());
     assert(match != null);
     return match!.namedGroup('name')!;
@@ -386,7 +386,7 @@ class Mock {
 
   // Verify that the given calls happened in the order given.
   void verifyCallsInOrder(List<MockCall> expected) {
-    int count = 0;
+    var count = 0;
     expect(expected.length, equals(_calls.length),
         reason: 'Incorrect number of calls received. '
             'Expected ${expected.length} and received ${_calls.length}.\n'
@@ -397,8 +397,8 @@ class Mock {
           reason: 'Unexpected call to ${call.memberName}, expected a call to '
               '${expected[count].memberName} instead.');
       if (call.positionalArguments != null && !expected[count].acceptAny) {
-        int countArg = 0;
-        for (final dynamic arg in call.positionalArguments!) {
+        var countArg = 0;
+        for (final Object? arg in call.positionalArguments!) {
           expect(arg, equals(expected[count].positionalArguments![countArg]),
               reason: 'Failed at call $count. Positional argument $countArg to ${call.memberName} '
                   'not as expected. Expected ${expected[count].positionalArguments![countArg]} '
