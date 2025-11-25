@@ -76,11 +76,11 @@ public final class FlutterShellArgs {
   // Manifest flags allowed in release mode:
 
   /** Use Skia software backend for rendering. */
-  public static final Flag ENABLE_SOFTWARE_RENDERING =
+  private static final Flag ENABLE_SOFTWARE_RENDERING =
       new Flag("--enable-software-rendering", "EnableSoftwareRendering", true);
 
   /** Ensures deterministic Skia rendering by skipping CPU feature swaps. */
-  public static final Flag SKIA_DETERMINISTIC_RENDERING =
+  private static final Flag SKIA_DETERMINISTIC_RENDERING =
       new Flag("--skia-deterministic-rendering", "SkiaDeterministicRendering", true);
 
   /**
@@ -102,26 +102,26 @@ public final class FlutterShellArgs {
       new Flag("--old-gen-heap-size=", "OldGenHeapSize", true);
 
   /** Enables or disables the Impeller renderer. */
-  public static final Flag ENABLE_IMPELLER = new Flag("--enable-impeller=", "EnableImpeller", true);
+  private static final Flag ENABLE_IMPELLER = new Flag("--enable-impeller=", "EnableImpeller", true);
 
   /** Specifies the backend to use for Impeller rendering. */
-  public static final Flag IMPELLER_BACKEND =
+  private static final Flag IMPELLER_BACKEND =
       new Flag("--impeller-backend=", "ImpellerBackend", true);
 
   /** Enables Android SurfaceControl for rendering. */
-  public static final Flag ENABLE_SURFACE_CONTROL =
+  private static final Flag ENABLE_SURFACE_CONTROL =
       new Flag("--enable-surface-control", "EnableSurfaceControl", true);
 
   /** Enables the Flutter GPU backend. */
-  public static final Flag ENABLE_FLUTTER_GPU =
+  private static final Flag ENABLE_FLUTTER_GPU =
       new Flag("--enable-flutter-gpu", "EnableFlutterGPU", true);
 
   /** Enables lazy initialization of Impeller shaders. */
-  public static final Flag IMPELLER_LAZY_SHADER_MODE =
+  private static final Flag IMPELLER_LAZY_SHADER_MODE =
       new Flag("--impeller-lazy-shader-mode=", "ImpellerLazyShaderInitialization", true);
 
   /** Enables antialiasing for lines in Impeller. */
-  public static final Flag IMPELLER_ANTIALIAS_LINES =
+  private static final Flag IMPELLER_ANTIALIAS_LINES =
       new Flag("--impeller-antialias-lines", "ImpellerAntialiasLines", true);
 
   /** Specifies the path to the VM snapshot data file. */
@@ -135,21 +135,21 @@ public final class FlutterShellArgs {
   // Manifest flags NOT allowed in release mode:
 
   /** Use the Ahem test font for font resolution. */
-  public static final Flag USE_TEST_FONTS = new Flag("--use-test-fonts", "UseTestFonts");
+  private static final Flag USE_TEST_FONTS = new Flag("--use-test-fonts", "UseTestFonts");
 
   /** Sets the port for the Dart VM Service. */
-  public static final Flag VM_SERVICE_PORT = new Flag("--vm-service-port=", "VMServicePort");
+  private static final Flag VM_SERVICE_PORT = new Flag("--vm-service-port=", "VMServicePort");
 
   /** Enables Vulkan validation layers if available. */
-  public static final Flag ENABLE_VULKAN_VALIDATION =
+  private static final Flag ENABLE_VULKAN_VALIDATION =
       new Flag("--enable-vulkan-validation", "EnableVulkanValidation");
 
   /** Enables GPU tracing for OpenGL. */
-  public static final Flag ENABLE_OPENGL_GPU_TRACING =
+  private static final Flag ENABLE_OPENGL_GPU_TRACING =
       new Flag("--enable-opengl-gpu-tracing", "EnableOpenGLGPUTracing");
 
   /** Enables GPU tracing for Vulkan. */
-  public static final Flag ENABLE_VULKAN_GPU_TRACING =
+  private static final Flag ENABLE_VULKAN_GPU_TRACING =
       new Flag("--enable-vulkan-gpu-tracing", "EnableVulkanGPUTracing");
 
   /**
@@ -166,53 +166,53 @@ public final class FlutterShellArgs {
   public static final Flag LEAK_VM = new Flag("--leak-vm=", "LeakVM");
 
   /** Measures startup time and switches to an endless trace buffer. */
-  public static final Flag TRACE_STARTUP = new Flag("--trace-startup", "TraceStartup");
+  private static final Flag TRACE_STARTUP = new Flag("--trace-startup", "TraceStartup");
 
   /** Pauses Dart code execution at launch until a debugger is attached. */
-  public static final Flag START_PAUSED = new Flag("--start-paused", "StartPaused");
+  private static final Flag START_PAUSED = new Flag("--start-paused", "StartPaused");
 
   /** Disables authentication codes for VM service communication. */
-  public static final Flag DISABLE_SERVICE_AUTH_CODES =
+  private static final Flag DISABLE_SERVICE_AUTH_CODES =
       new Flag("--disable-service-auth-codes", "DisableServiceAuthCodes");
 
   /** Enables an endless trace buffer for timeline events. */
-  public static final Flag ENDLESS_TRACE_BUFFER =
+  private static final Flag ENDLESS_TRACE_BUFFER =
       new Flag("--endless-trace-buffer", "EndlessTraceBuffer");
 
   /** Enables Dart profiling for use with DevTools. */
-  public static final Flag ENABLE_DART_PROFILING =
+  private static final Flag ENABLE_DART_PROFILING =
       new Flag("--enable-dart-profiling", "EnableDartProfiling");
 
   /** Discards new profiler samples once the buffer is full. */
-  public static final Flag PROFILE_STARTUP = new Flag("--profile-startup", "ProfileStartup");
+  private static final Flag PROFILE_STARTUP = new Flag("--profile-startup", "ProfileStartup");
 
   /** Enables tracing of Skia GPU calls. */
-  public static final Flag TRACE_SKIA = new Flag("--trace-skia", "TraceSkia");
+  private static final Flag TRACE_SKIA = new Flag("--trace-skia", "TraceSkia");
 
   /** Only traces specified Skia event categories. */
-  public static final Flag TRACE_SKIA_ALLOWLIST =
+  private static final Flag TRACE_SKIA_ALLOWLIST =
       new Flag("--trace-skia-allowlist=", "TraceSkiaAllowList");
 
   /** Traces to the system tracer on supported platforms. */
-  public static final Flag TRACE_SYSTRACE = new Flag("--trace-systrace", "TraceSystrace");
+  private static final Flag TRACE_SYSTRACE = new Flag("--trace-systrace", "TraceSystrace");
 
   /** Writes timeline trace to a file in Perfetto format. */
-  public static final Flag TRACE_TO_FILE = new Flag("--trace-to-file=", "TraceToFile");
+  private static final Flag TRACE_TO_FILE = new Flag("--trace-to-file=", "TraceToFile");
 
   /** Collects and logs information about microtasks. */
-  public static final Flag PROFILE_MICROTASKS =
+  private static final Flag PROFILE_MICROTASKS =
       new Flag("--profile-microtasks", "ProfileMicrotasks");
 
   /** Dumps SKP files that trigger shader compilations. */
-  public static final Flag DUMP_SKP_ON_SHADER_COMPILATION =
+  private static final Flag DUMP_SKP_ON_SHADER_COMPILATION =
       new Flag("--dump-skp-on-shader-compilation", "DumpSkpOnShaderCompilation");
 
   /** Removes all persistent cache files for debugging. */
-  public static final Flag PURGE_PERSISTENT_CACHE =
+  private static final Flag PURGE_PERSISTENT_CACHE =
       new Flag("--purge-persistent-cache", "PurgePersistentCache");
 
   /** Enables logging at all severity levels. */
-  public static final Flag VERBOSE_LOGGING = new Flag("--verbose-logging", "VerboseLogging");
+  private static final Flag VERBOSE_LOGGING = new Flag("--verbose-logging", "VerboseLogging");
 
   /**
    * Passes additional flags to the Dart VM.
@@ -221,16 +221,18 @@ public final class FlutterShellArgs {
    * flags in shell/common/switches.cc. If any flag provided is not allowed, the process will
    * immediately terminate.
    * 
-   * <p>Flags should be separated by comma, e.g. "--dart-flags=--flag-1,--flag-2=2".
+   * <p>Flags should be separated by a space, e.g. "--dart-flags=--flag-1 --flag-2=2".
    */
-  public static final Flag DART_FLAGS = new Flag("--dart-flags=", "DartFlags");
+  private static final Flag DART_FLAGS = new Flag("--dart-flags=", "DartFlags");
 
   // Deprecated flags.
 
   /** Disables the merging of the UI and platform threads. */
+  @VisibleForTesting
   public static final Flag DISABLE_MERGED_PLATFORM_UI_THREAD =
       new Flag("no-enable-merged-platform-ui-thread", "DisableMergedPlatformUIThread", true);
 
+  @VisibleForTesting
   public static final List<Flag> ALL_FLAGS =
       Collections.unmodifiableList(
           Arrays.asList(
