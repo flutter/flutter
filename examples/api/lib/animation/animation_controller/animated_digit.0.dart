@@ -55,10 +55,8 @@ class _AnimatedDigitState extends State<AnimatedDigit>
   late final AnimationController controller;
   late int incomingValue;
   late int outgoingValue;
-  List<int> pendingValues =
-      <
-        int
-      >[]; // widget.value updates that occurred while the animation is underway
+  // widget.value updates that occurred while the animation is underway.
+  List<int> pendingValues = <int>[];
   Duration duration = defaultDuration;
 
   @override
