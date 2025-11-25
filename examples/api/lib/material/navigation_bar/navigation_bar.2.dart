@@ -244,7 +244,7 @@ class ListPage extends StatelessWidget {
     final ButtonStyle buttonStyle = OutlinedButton.styleFrom(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
-        side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12)),
+        side: BorderSide(color: colorScheme.onSurface.withValues(alpha: 0.12)),
       ),
       foregroundColor: destination.color,
       fixedSize: const Size.fromHeight(64),

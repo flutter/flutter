@@ -77,7 +77,7 @@ class _RepeatingAnimationBuilderExampleState extends State<RepeatingAnimationBui
         children: <Widget>[
           Container(
             decoration: ShapeDecoration(
-              color: colors.primaryContainer.withOpacity(0.5),
+              color: colors.primaryContainer.withValues(alpha: 0.5),
               shape: StarBorder(
                 points: 8,
                 innerRadiusRatio: 0.7,
@@ -98,7 +98,10 @@ class _RepeatingAnimationBuilderExampleState extends State<RepeatingAnimationBui
                 child: Container(
                   decoration: BoxDecoration(
                     boxShadow: <BoxShadow>[
-                      BoxShadow(color: colors.primary.withOpacity(value * 0.7), blurRadius: 25),
+                      BoxShadow(
+                        color: colors.primary.withValues(alpha: value * 0.7),
+                        blurRadius: 25,
+                      ),
                     ],
                   ),
                   child: child,
@@ -164,7 +167,9 @@ class _RepeatingAnimationBuilderExampleState extends State<RepeatingAnimationBui
               child: CircularProgressIndicator(
                 value: animationValue,
                 strokeWidth: 6,
-                backgroundColor: colors.surfaceContainerHighest.withOpacity(0.3),
+                backgroundColor: colors.surfaceContainerHighest.withValues(
+                  alpha: 0.3,
+                ),
                 color: colors.primary,
               ),
             ),
@@ -189,7 +194,7 @@ class _RepeatingAnimationBuilderExampleState extends State<RepeatingAnimationBui
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         decoration: BoxDecoration(
-          color: colors.surfaceContainerHighest.withOpacity(0.3),
+          color: colors.surfaceContainerHighest.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(24.0),
         ),
         child: Row(
