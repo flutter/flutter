@@ -33,9 +33,7 @@ void testMain() {
     setUpUnitTests(withImplicitView: true);
 
     test('getCanvas', () {
-      final DisplayCanvasFactory<DisplayCanvas> factory = DisplayCanvasFactory<DisplayCanvas>(
-        createCanvas: () => DummyDisplayCanvas(),
-      );
+      final factory = DisplayCanvasFactory<DisplayCanvas>(createCanvas: () => DummyDisplayCanvas());
       expect(factory.baseCanvas, isNotNull);
 
       expect(factory.debugSurfaceCount, equals(1));
@@ -54,9 +52,7 @@ void testMain() {
     });
 
     test('releaseCanvas', () {
-      final DisplayCanvasFactory<DisplayCanvas> factory = DisplayCanvasFactory<DisplayCanvas>(
-        createCanvas: () => DummyDisplayCanvas(),
-      );
+      final factory = DisplayCanvasFactory<DisplayCanvas>(createCanvas: () => DummyDisplayCanvas());
 
       // Create a new canvas and immediately release it.
       final DisplayCanvas canvas = factory.getCanvas();
@@ -69,9 +65,7 @@ void testMain() {
     });
 
     test('isLive', () {
-      final DisplayCanvasFactory<DisplayCanvas> factory = DisplayCanvasFactory<DisplayCanvas>(
-        createCanvas: () => DummyDisplayCanvas(),
-      );
+      final factory = DisplayCanvasFactory<DisplayCanvas>(createCanvas: () => DummyDisplayCanvas());
 
       expect(factory.isLive(factory.baseCanvas), isTrue);
 
@@ -97,8 +91,8 @@ void testMain() {
       expect(originalFactory.baseCanvas.isConnected, isTrue);
 
       // Create a few overlay canvases
-      final List<DisplayCanvas> overlays = <DisplayCanvas>[];
-      for (int i = 0; i < 3; i++) {
+      final overlays = <DisplayCanvas>[];
+      for (var i = 0; i < 3; i++) {
         final DisplayCanvas canvas = originalFactory.getCanvas();
         implicitView.dom.sceneHost.prepend(canvas.hostElement);
         overlays.add(canvas);
