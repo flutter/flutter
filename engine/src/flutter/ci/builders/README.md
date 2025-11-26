@@ -29,20 +29,20 @@ operations.
 ## USAGE EXAMPLES
 
 Engine build definition files using the Build Definition Language can be found in the
-[ci/builders](https://github.com/flutter/flutter/tree/master/engine/src/flutter/ci/builders) directory.
+[ci/builders](https://github.com/flutter/flutter/tree/main/engine/src/flutter/ci/builders) directory.
 
 The [engine orchestrator recipe](https://flutter.googlesource.com/recipes/+/refs/heads/main/recipes/engine_v2/)
 reads each file in that directory, shards their builds, collects artifacts and
 uploads them to the Google Cloud Storage bucket.
 
-The [.ci.yaml file](https://github.com/flutter/flutter/blob/master/engine/src/flutter/.ci.yaml) at the
+The [.ci.yaml file](https://github.com/flutter/flutter/blob/main/engine/src/flutter/.ci.yaml) at the
 `engine/src/flutter` dir of the `flutter/flutter` repository puts all the components together.
 Builds are specified in that file using a property pointing to the build definition
 file to be used by engine\_v2 recipes. Full documentation of the `.ci.yaml` file format
 can be found [in the Cocoon repository here](https://github.com/flutter/cocoon/blob/main/CI_YAML.md).
 
 The following is a sample build configuration referencing
-[android\_aot\_engine.json](https://github.com/flutter/flutter/blob/master/engine/src/flutter/ci/builders/mac_android_aot_engine.json)
+[android\_aot\_engine.json](https://github.com/flutter/flutter/blob/main/engine/src/flutter/ci/builders/mac_android_aot_engine.json)
 in the `config_name` under `properties`:
 
 ```yaml
@@ -90,16 +90,16 @@ file:
 Note: tests, generators and archives can be omited if empty.
 
 Build configuration files have to be checked into the
-[engine_checkout/ci/builders](https://github.com/flutter/flutter/tree/master/engine/src/flutter/ci/builders)
+[engine_checkout/ci/builders](https://github.com/flutter/flutter/tree/main/engine/src/flutter/ci/builders)
 directory where engine v2 recipes will be reading them from.
 
 Configurations with a single build are supported. Single build configurations
 are located have to be checked into the
-[engine_checkout/ci/builder/standalone](https://github.com/flutter/flutter/tree/master/engine/src/flutter/ci/builders/standalone)
+[engine_checkout/ci/builder/standalone](https://github.com/flutter/flutter/tree/main/engine/src/flutter/ci/builders/standalone)
 
 A configuration file defines a top-level builder that will show up as a column
 in the
-[Flutter Dashboard](https://flutter-dashboard.appspot.com/#/build?repo=engine&branch=master).
+[Flutter Dashboard](https://flutter-dashboard.appspot.com/#/build?branch=master).
 
 
 ### Magic variables
@@ -237,13 +237,13 @@ They are usually used to add or remove gclient dependencies.
 ```
 
 The example above is used to avoid downloading the
-[android sdk dependencies](https://cs.opensource.google/flutter/flutter/+/master:DEPS;l=92)
+[android sdk dependencies](https://cs.opensource.google/flutter/flutter/+/main:DEPS;l=92)
 in builders that do not need it.
 
 #### GN
 
 A list of strings representing flags passed to the
-[tools/gn](https://github.com/flutter/flutter/tree/master/engine/src/flutter/tools/gn) script. The strings can be in the form of “--flag=value” or
+[tools/gn](https://github.com/flutter/flutter/tree/main/engine/src/flutter/tools/gn) script. The strings can be in the form of “--flag=value” or
 “--flag” followed by “value”.
 
 ```json
@@ -276,7 +276,7 @@ and “target” which is a list of strings with the Ninja targets to build.
 In the example above the ninja command will use the configuration for
 host\_debug and will build artifacts and embedder targets as described
 by the
-[flutter/build/archives/BUILD.gn](https://github.com/flutter/flutter/tree/master/engine/src/flutter/build/archives/BUILD.gn)
+[flutter/build/archives/BUILD.gn](https://github.com/flutter/flutter/tree/main/engine/src/flutter/build/archives/BUILD.gn)
 file.
 
 #### Tests
@@ -481,7 +481,7 @@ The property's description is as follows:
 
 * **name** the name that will be assigned to the sub-build.
 * **shard** the flutter/flutter shard test to run. The supported shard names can be found
-on the flutter framework [test.dart](https://github.com/flutter/flutter/blob/master/dev/bots/test.dart#L244).
+on the flutter framework [test.dart](https://github.com/flutter/flutter/blob/main/dev/bots/test.dart#L244).
 * **subshard** one of the accepted subshard values for shard. Sub-shards are defined as part
 of the shard implementation, please look at the corresponding shard implementation to find the
 accepted values.

@@ -128,7 +128,7 @@ class LocaleInfo implements Comparable<LocaleInfo> {
   }
 }
 
-// See also //master/tools/gen_locale.dart in the engine repo.
+// See also engine/src/flutter/tools/gen_locale.dart.
 Map<String, List<String>> _parseSection(String section) {
   final result = <String, List<String>>{};
   late List<String> lastHeading;

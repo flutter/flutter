@@ -7,7 +7,8 @@ name: coverage
 on:
   push:
     branches:
-      - master
+      - master # TODO(https://github.com/flutter/flutter/issues/121564): consider removing once sufficient data is collected on main at https://app.codecov.io/gh/flutter/flutter
+      - main
     paths:
       - 'packages/flutter/**'
 

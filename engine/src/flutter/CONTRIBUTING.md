@@ -183,8 +183,8 @@ Automatically formatted with `gn format`.
 [linux embedding]: shell/platform/linux
 [google_cpp_style]: https://google.github.io/styleguide/cppguide.html
 [pr_49801]: https://github.com/flutter/engine/pull/49801
-[code_of_conduct]: https://github.com/flutter/flutter/blob/master/CODE_OF_CONDUCT.md
-[contrib_guide]: https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md
+[code_of_conduct]: https://github.com/flutter/flutter/blob/main/CODE_OF_CONDUCT.md
+[contrib_guide]: https://github.com/flutter/flutter/blob/main/CONTRIBUTING.md
 [engine_dev_setup]: docs/contributing/Setting-up-the-Engine-development-environment.md
 [flutter_style]: https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md
 [objc_style]: https://google.github.io/styleguide/objcguide.html

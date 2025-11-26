@@ -777,7 +777,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
   double get minFlingVelocity => kMinFlingVelocity * 2.0;
 
   // Methodology:
-  // 1- Use https://github.com/flutter/platform_tests/tree/master/scroll_overlay to test with
+  // 1- Use https://github.com/flutter/platform_tests/tree/main/scroll_overlay to test with
   //    Flutter and platform scroll views superimposed.
   // 3- If the scrollables stopped overlapping at any moment, adjust the desired
   //    output value of this function at that input speed.

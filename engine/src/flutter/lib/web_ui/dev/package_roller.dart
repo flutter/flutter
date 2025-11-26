@@ -36,10 +36,6 @@ final Client _client = Client();
 ///
 /// Chrome rolls are consumed by the "chrome_and_driver" and "chrome" LUCI recipes, here:
 /// * https://cs.opensource.google/flutter/recipes/+/main:recipe_modules/flutter_deps/api.py;l=146
-/// * https://cs.opensource.google/flutter/recipes/+/master:recipe_modules/web_util/api.py;l=22
-///
-/// Chromedriver is consumed by the same "chrome_and_driver" LUCI recipe, but also "chrome_driver":
-/// * https://cs.opensource.google/flutter/recipes/+/master:recipe_modules/web_util/api.py;l=48
 ///
 /// There's a small difference in the layout of the zip file coming from CIPD for the
 /// Mac platform. In `Linux` and `Windows`, the chrome(.exe) executable is expected

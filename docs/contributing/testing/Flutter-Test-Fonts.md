@@ -1,7 +1,7 @@
 Flutter tests run via the `flutter test` command have access to several readily available test fonts, including [FlutterTest](#the-fluttertest-test-font) and [Ahem](https://www.w3.org/Style/CSS/Test/Fonts/Ahem/).
 
-In tests, if [`fontFamily`](https://master-api.flutter.dev/flutter/painting/TextStyle/fontFamily.html) isn't specified or the specified font families are not available, the default test font `FlutterTest` will be used.
-If you wish to use a custom font in tests, check out the [`FontLoader`](https://master-api.flutter.dev/flutter/services/FontLoader-class.html) class, and [this example](https://github.com/flutter/flutter/blob/6ec444506375cfa94535a45c2320e01094c295e0/packages/flutter/test/material/icons_test.dart#L149-L172).
+In tests, if [`fontFamily`](https://main-api.flutter.dev/flutter/painting/TextStyle/fontFamily.html) isn't specified or the specified font families are not available, the default test font `FlutterTest` will be used.
+If you wish to use a custom font in tests, check out the [`FontLoader`](https://main-api.flutter.dev/flutter/services/FontLoader-class.html) class, and [this example](https://github.com/flutter/flutter/blob/6ec444506375cfa94535a45c2320e01094c295e0/packages/flutter/test/material/icons_test.dart#L149-L172).
 
 ## The `FlutterTest` test font
 

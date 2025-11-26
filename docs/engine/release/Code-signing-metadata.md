@@ -189,8 +189,8 @@ You can reference the generator script
 
 ## Code signing artifacts other than flutter engine binaries
 
-The code signing functionality is implemented as [a recipe module in flutter recipes](https://cs.opensource.google/flutter/recipes/+/master:recipe_modules/signing/api.py). Therefore it can also be used to
+The code signing functionality is implemented as [a recipe module in flutter recipes](https://cs.opensource.google/flutter/recipes/+/main:recipe_modules/signing/api.py). Therefore it can also be used to
 code sign arbitrary flutter artifacts built through recipe, for example, flutter iOS usb dependencies.
 
 To code sign, after the artifacts are built, pass the file paths into
-the code signing recipe module and invoke the function. An example is [how engine V2 invokes the code signing recipe module](https://cs.opensource.google/flutter/recipes/+/master:recipes/engine_v2/engine_v2.py;l=197-212).
+the code signing recipe module and invoke the function. An example is [how engine V2 invokes the code signing recipe module](https://cs.opensource.google/flutter/recipes/+/main:recipes/engine_v2/engine_v2.py;l=197-212).
