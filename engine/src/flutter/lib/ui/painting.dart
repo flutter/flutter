@@ -3,6 +3,11 @@
 // found in the LICENSE file.
 part of dart.ui;
 
+// TODO(loic-sharma): Migrate fragment shader samples off deprecated
+// Color APIs.
+// See: https://github.com/flutter/flutter/issues/179146
+// ignore_for_file: deprecated_member_use
+
 // Examples can assume:
 // // (for the example in Color)
 // // ignore_for_file: use_full_hex_values_for_flutter_colors
