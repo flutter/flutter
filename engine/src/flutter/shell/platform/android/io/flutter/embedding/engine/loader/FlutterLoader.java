@@ -349,7 +349,7 @@ public class FlutterLoader {
                         TAG,
                         "Flag with metadata key "
                             + metadataKey
-                            + " is not allowed in release builds and will be ignored. Please remove this flag from your release build manifest.");
+                            + " is not allowed in release builds and will be ignored if specified in the application manifest or via the command line.");
                     return;
                   }
 
@@ -413,7 +413,7 @@ public class FlutterLoader {
                 TAG,
                 "Command line argument "
                     + arg
-                    + " is not allowed in release builds and will be ignored. Please remove this flag from your command line engine flags if running in release mode.");
+                    + " is not allowed in release builds and will be ignored if specified in the application manifest or via the command line.");
             return;
           }
 
