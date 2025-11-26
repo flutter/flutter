@@ -172,12 +172,11 @@ class Mutator {
       case MutatorType::kClipPath:
       case MutatorType::kClipRRect:
       case MutatorType::kClipRSE:
-      // TODO: Figure out if this matters
+        return true;
       case MutatorType::kBackdropClipRect:
       case MutatorType::kBackdropClipRRect:
       case MutatorType::kBackdropClipRSuperellipse:
       case MutatorType::kBackdropClipPath:
-        return true;
       case MutatorType::kOpacity:
       case MutatorType::kTransform:
       case MutatorType::kBackdropFilter:
