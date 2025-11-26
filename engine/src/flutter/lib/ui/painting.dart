@@ -1372,7 +1372,7 @@ final class Paint {
   set isAntiAlias(bool value) {
     // We encode true as zero and false as one because the default value, which
     // we always encode as zero, is true.
-    final int encoded = value ? 0 : 1;
+    final encoded = value ? 0 : 1;
     _data.setInt32(_kIsAntiAliasOffset, encoded, _kFakeHostEndian);
   }
 
@@ -1463,7 +1463,7 @@ final class Paint {
   }
 
   set strokeWidth(double value) {
-    final double encoded = value;
+    final encoded = value;
     _data.setFloat32(_kStrokeWidthOffset, encoded, _kFakeHostEndian);
   }
 
@@ -1635,7 +1635,7 @@ final class Paint {
   ///
   /// When a shape is being drawn, [colorFilter] overrides [color] and [shader].
   ColorFilter? get colorFilter {
-    final _ColorFilter? nativeFilter = _objects?[_kColorFilterIndex] as _ColorFilter?;
+    final nativeFilter = _objects?[_kColorFilterIndex] as _ColorFilter?;
     return nativeFilter?.creator;
   }
 
@@ -1669,7 +1669,7 @@ final class Paint {
   ///
   ///  * [MaskFilter], which is used for drawing geometry.
   ImageFilter? get imageFilter {
-    final _ImageFilter? nativeFilter = _objects?[_kImageFilterIndex] as _ImageFilter?;
+    final nativeFilter = _objects?[_kImageFilterIndex] as _ImageFilter?;
     return nativeFilter?.creator;
   }
 
@@ -1680,7 +1680,7 @@ final class Paint {
       }
     } else {
       final List<Object?> objects = _ensureObjectsInitialized();
-      final _ImageFilter? imageFilter = objects[_kImageFilterIndex] as _ImageFilter?;
+      final imageFilter = objects[_kImageFilterIndex] as _ImageFilter?;
       if (imageFilter?.creator != value) {
         objects[_kImageFilterIndex] = value._toNativeImageFilter();
       }
@@ -1705,8 +1705,8 @@ final class Paint {
     if (const bool.fromEnvironment('dart.vm.product')) {
       return super.toString();
     }
-    final StringBuffer result = StringBuffer();
-    String semicolon = '';
+    final result = StringBuffer();
+    var semicolon = '';
     result.write('Paint(');
     if (style == PaintingStyle.stroke) {
       result.write('$style');
@@ -2382,7 +2382,7 @@ base class _NativeCodec extends NativeFieldWrapperClass1 implements Codec {
 
   @override
   Future<FrameInfo> getNextFrame() async {
-    final Completer<FrameInfo> completer = Completer<FrameInfo>.sync();
+    final completer = Completer<FrameInfo>.sync();
     final String? error = _getNextFrame((
       _Image? image,
       int durationMilliseconds,
@@ -2704,7 +2704,7 @@ void decodeImageFromPixels(
   }
 
   ImmutableBuffer.fromUint8List(pixels).then((ImmutableBuffer buffer) {
-    final ImageDescriptor descriptor = ImageDescriptor.raw(
+    final descriptor = ImageDescriptor.raw(
       buffer,
       width: width,
       height: height,
@@ -2882,7 +2882,7 @@ abstract class Path {
   /// This copy is fast and does not require additional memory unless either
   /// the `source` path or the path returned by this constructor are modified.
   factory Path.from(Path source) {
-    final _NativePath clonedPath = _NativePath._();
+    final clonedPath = _NativePath._();
     (source as _NativePath)._clone(clonedPath);
     return clonedPath;
   }
@@ -3124,7 +3124,7 @@ abstract class Path {
   /// curve order is reduced where possible so that cubics may be turned into
   /// quadratics, and quadratics maybe turned into lines.
   static Path combine(PathOperation operation, Path path1, Path path2) {
-    final _NativePath path = _NativePath();
+    final path = _NativePath();
     if (path._op(path1 as _NativePath, path2 as _NativePath, operation.index)) {
       return path;
     }
@@ -3474,7 +3474,7 @@ base class _NativePath extends NativeFieldWrapperClass1 implements Path {
   @override
   Path shift(Offset offset) {
     assert(_offsetIsValid(offset));
-    final _NativePath path = _NativePath._();
+    final path = _NativePath._();
     _shift(path, offset.dx, offset.dy);
     return path;
   }
@@ -3485,7 +3485,7 @@ base class _NativePath extends NativeFieldWrapperClass1 implements Path {
   @override
   Path transform(Float64List matrix4) {
     assert(_matrix4IsValid(matrix4));
-    final _NativePath path = _NativePath._();
+    final path = _NativePath._();
     _transform(path, matrix4);
     return path;
   }
@@ -3735,7 +3735,7 @@ base class _PathMeasure extends NativeFieldWrapperClass1 {
       contourIndex <= currentContourIndex,
       'Iterator must be advanced before index $contourIndex can be used.',
     );
-    final _NativePath path = _NativePath._();
+    final path = _NativePath._();
     _extractPath(path, contourIndex, start, end, startWithMoveTo);
     return path;
   }
@@ -3916,7 +3916,7 @@ _ColorTransform _getColorTransform(ColorSpace source, ColorSpace destination) {
   // format long
   // p3ToSrgb = srgbColors * inv(p3Colors)
   // srgbToP3 = inv(p3ToSrgb)
-  const _MatrixColorTransform srgbToP3 = _MatrixColorTransform(<double>[
+  const srgbToP3 = _MatrixColorTransform(<double>[
     0.808052267214446, 0.220292047628890, -0.139648846160100,
     0.145738111193222, //
     0.096480880462996, 0.916386732581291, -0.086093928394828,
@@ -4067,9 +4067,9 @@ class ColorFilter implements ImageFilter {
   /// Creates a color filter that applies the given saturation to the RGB
   /// channels.
   factory ColorFilter.saturation(double saturation) {
-    const double rLuminance = 0.2126;
-    const double gLuminance = 0.7152;
-    const double bLuminance = 0.0722;
+    const rLuminance = 0.2126;
+    const gLuminance = 0.7152;
+    const bLuminance = 0.0722;
     final double invSat = 1 - saturation;
 
     return ColorFilter.matrix(<double>[
@@ -4323,7 +4323,7 @@ abstract class ImageFilter {
     final bool invalidFloats = shader._floats.length < 2;
     final bool invalidSampler = !shader._validateImageFilter();
     if (invalidFloats || invalidSampler) {
-      final StringBuffer buffer = StringBuffer(
+      final buffer = StringBuffer(
         'ImageFilter.shader requires that the first uniform is a vec2 and at '
         'least one sampler uniform is present.\n',
       );
@@ -4801,8 +4801,8 @@ enum TileMode {
 
 Float32List _encodeWideColorList(List<Color> colors) {
   final int colorCount = colors.length;
-  final Float32List result = Float32List(colorCount * 4);
-  for (int i = 0; i < colorCount; i++) {
+  final result = Float32List(colorCount * 4);
+  for (var i = 0; i < colorCount; i++) {
     final Color colorXr = colors[i].withValues(colorSpace: ColorSpace.extendedSRGB);
     result[i * 4 + 0] = colorXr.a;
     result[i * 4 + 1] = colorXr.r;
@@ -4814,8 +4814,8 @@ Float32List _encodeWideColorList(List<Color> colors) {
 
 Int32List _encodeColorList(List<Color> colors) {
   final int colorCount = colors.length;
-  final Int32List result = Int32List(colorCount);
-  for (int i = 0; i < colorCount; i++) {
+  final result = Int32List(colorCount);
+  for (var i = 0; i < colorCount; i++) {
     result[i] = colors[i].value;
   }
   return result;
@@ -4823,8 +4823,8 @@ Int32List _encodeColorList(List<Color> colors) {
 
 Float32List _encodePointList(List<Offset> points) {
   final int pointCount = points.length;
-  final Float32List result = Float32List(pointCount * 2);
-  for (int i = 0; i < pointCount; i++) {
+  final result = Float32List(pointCount * 2);
+  for (var i = 0; i < pointCount; i++) {
     final int xIndex = i * 2;
     final int yIndex = xIndex + 1;
     final Offset point = points[i];
@@ -4838,7 +4838,7 @@ Float32List _encodePointList(List<Offset> points) {
 Float32List _encodeTwoPoints(Offset pointA, Offset pointB) {
   assert(_offsetIsValid(pointA));
   assert(_offsetIsValid(pointB));
-  final Float32List result = Float32List(4);
+  final result = Float32List(4);
   result[0] = pointA.dx;
   result[1] = pointA.dy;
   result[2] = pointB.dx;
@@ -5264,7 +5264,7 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
       return Future<FragmentProgram>.value(program);
     }
     return Future<FragmentProgram>.microtask(() {
-      final FragmentProgram program = FragmentProgram._fromAsset(encodedKey);
+      final program = FragmentProgram._fromAsset(encodedKey);
       _shaderRegistry[encodedKey] = program;
       return program;
     });
@@ -5326,10 +5326,10 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
   }
 
   int _getImageSamplerIndex(String name) {
-    int index = 0;
-    bool found = false;
-    for (final dynamic entryDynamic in _uniformInfo) {
-      final Map<String, Object> entry = entryDynamic as Map<String, Object>;
+    var index = 0;
+    var found = false;
+    for (final Object? entryDynamic in _uniformInfo) {
+      final entry = entryDynamic! as Map<String, Object>;
       if (entry['name'] == name) {
         if (entry['type'] != 'SampledImage') {
           throw ArgumentError('Uniform "$name" is not an image sampler.');
@@ -5352,11 +5352,11 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
       throw ArgumentError('Index `$index` out of bounds for `$name`.');
     }
 
-    int offset = 0;
-    bool found = false;
-    const int sizeOfFloat = 4;
-    for (final dynamic entryDynamic in _uniformInfo) {
-      final Map<String, Object> entry = entryDynamic as Map<String, Object>;
+    var offset = 0;
+    var found = false;
+    const sizeOfFloat = 4;
+    for (final Object? entryDynamic in _uniformInfo) {
+      final entry = entryDynamic! as Map<String, Object>;
       final int sizeInFloats = (entry['size'] as int? ?? 0) ~/ sizeOfFloat;
       if (entry['name'] == name) {
         if (index + 1 > sizeInFloats) {
@@ -5392,7 +5392,7 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
 
   /// Returns a fresh instance of [FragmentShader].
   FragmentShader fragmentShader() {
-    final FragmentShader result = FragmentShader._(this, debugName: _debugName);
+    final result = FragmentShader._(this, debugName: _debugName);
     _shaders.removeWhere((WeakReference<FragmentShader> ref) => ref.target == null);
     _shaders.add(WeakReference<FragmentShader>(result));
     return result;
@@ -5565,7 +5565,7 @@ base class FragmentShader extends Shader {
   UniformFloatSlot getUniformFloat(String name, [int? index]) {
     index ??= 0;
     final int shaderIndex = _program._getUniformFloatIndex(name, index);
-    final UniformFloatSlot result = UniformFloatSlot._(this, name, index, shaderIndex);
+    final result = UniformFloatSlot._(this, name, index, shaderIndex);
     _slots.removeWhere((WeakReference<UniformFloatSlot> ref) => ref.target == null);
     _slots.add(WeakReference<UniformFloatSlot>(result));
     return result;
@@ -5578,7 +5578,7 @@ base class FragmentShader extends Shader {
   /// defined in the fragment program, excluding all non-sampler uniforms.
   ImageSamplerSlot getImageSampler(String name) {
     final int index = _program._getImageSamplerIndex(name);
-    final ImageSamplerSlot slot = ImageSamplerSlot._(this, name, index);
+    final slot = ImageSamplerSlot._(this, name, index);
     _samplers.removeWhere((WeakReference<ImageSamplerSlot> ref) => ref.target == null);
     _samplers.add(WeakReference<ImageSamplerSlot>(slot));
     return slot;
@@ -5745,7 +5745,7 @@ base class Vertices extends NativeFieldWrapperClass1 {
     }
     assert(() {
       if (indices != null) {
-        for (int index = 0; index < indices.length; index += 1) {
+        for (var index = 0; index < indices.length; index += 1) {
           if (indices[index] >= positions.length) {
             throw ArgumentError(
               '"indices" values must be valid indices in the positions list '
@@ -5840,7 +5840,7 @@ base class Vertices extends NativeFieldWrapperClass1 {
     }
     assert(() {
       if (indices != null) {
-        for (int index = 0; index < indices.length; index += 1) {
+        for (var index = 0; index < indices.length; index += 1) {
           if (indices[index] * 2 >= positions.length) {
             throw ArgumentError(
               '"indices" values must be valid indices in the positions list '
@@ -6911,7 +6911,7 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
 
   @override
   Float64List getTransform() {
-    final Float64List matrix4 = Float64List(16);
+    final matrix4 = Float64List(16);
     _getTransform(matrix4);
     return matrix4;
   }
@@ -6970,7 +6970,7 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
 
   @override
   Rect getLocalClipBounds() {
-    final Float64List bounds = Float64List(4);
+    final bounds = Float64List(4);
     _getLocalClipBounds(bounds);
     return Rect.fromLTRB(bounds[0], bounds[1], bounds[2], bounds[3]);
   }
@@ -6980,7 +6980,7 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
 
   @override
   Rect getDestinationClipBounds() {
-    final Float64List bounds = Float64List(4);
+    final bounds = Float64List(4);
     _getDestinationClipBounds(bounds);
     return Rect.fromLTRB(bounds[0], bounds[1], bounds[2], bounds[3]);
   }
@@ -7325,7 +7325,7 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
 
   @override
   void drawParagraph(Paragraph paragraph, Offset offset) {
-    final _NativeParagraph nativeParagraph = paragraph as _NativeParagraph;
+    final nativeParagraph = paragraph as _NativeParagraph;
     assert(!nativeParagraph.debugDisposed);
     assert(_offsetIsValid(offset));
     assert(!nativeParagraph._needsLayout);
@@ -7392,10 +7392,10 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
       );
     }
 
-    final Float32List rstTransformBuffer = Float32List(rectCount * 4);
-    final Float32List rectBuffer = Float32List(rectCount * 4);
+    final rstTransformBuffer = Float32List(rectCount * 4);
+    final rectBuffer = Float32List(rectCount * 4);
 
-    for (int i = 0; i < rectCount; i++) {
+    for (var i = 0; i < rectCount; i++) {
       final int index0 = i * 4;
       final int index1 = index0 + 1;
       final int index2 = index0 + 2;
@@ -7626,7 +7626,7 @@ base class _NativePicture extends NativeFieldWrapperClass1 implements Picture {
       throw Exception('Invalid image dimensions.');
     }
 
-    final _Image image = _Image._();
+    final image = _Image._();
     _toImageSync(width, height, image);
     return Image._(image, image.width, image.height);
   }
@@ -7727,7 +7727,7 @@ base class _NativePictureRecorder extends NativeFieldWrapperClass1 implements Pi
     if (_canvas == null) {
       throw StateError('PictureRecorder did not start recording.');
     }
-    final _NativePicture picture = _NativePicture._();
+    final picture = _NativePicture._();
     _endRecording(picture);
     _canvas!._recorder = null;
     _canvas = null;
@@ -7877,15 +7877,15 @@ class Shadow {
     }
     a ??= <Shadow>[];
     b ??= <Shadow>[];
-    final List<Shadow> result = <Shadow>[];
+    final result = <Shadow>[];
     final int commonLength = math.min(a.length, b.length);
-    for (int i = 0; i < commonLength; i += 1) {
+    for (var i = 0; i < commonLength; i += 1) {
       result.add(Shadow.lerp(a[i], b[i], t)!);
     }
-    for (int i = commonLength; i < a.length; i += 1) {
+    for (var i = commonLength; i < a.length; i += 1) {
       result.add(a[i].scale(1.0 - t));
     }
-    for (int i = commonLength; i < b.length; i += 1) {
+    for (var i = commonLength; i < b.length; i += 1) {
       result.add(b[i].scale(t));
     }
     return result;
@@ -7914,10 +7914,10 @@ class Shadow {
     }
 
     final int byteCount = shadows.length * _kBytesPerShadow;
-    final ByteData shadowsData = ByteData(byteCount);
+    final shadowsData = ByteData(byteCount);
 
-    int shadowOffset = 0;
-    for (int shadowIndex = 0; shadowIndex < shadows.length; ++shadowIndex) {
+    var shadowOffset = 0;
+    for (var shadowIndex = 0; shadowIndex < shadows.length; ++shadowIndex) {
       final Shadow shadow = shadows[shadowIndex];
       shadowOffset = shadowIndex * _kBytesPerShadow;
 
@@ -7952,7 +7952,7 @@ base class ImmutableBuffer extends NativeFieldWrapperClass1 {
   /// Creates a copy of the data from a [Uint8List] suitable for internal use
   /// in the engine.
   static Future<ImmutableBuffer> fromUint8List(Uint8List list) {
-    final ImmutableBuffer instance = ImmutableBuffer._(list.length);
+    final instance = ImmutableBuffer._(list.length);
     return _futurize((_Callback<void> callback) {
       return instance._init(list, callback);
     }).then((_) => instance);
@@ -7967,7 +7967,7 @@ base class ImmutableBuffer extends NativeFieldWrapperClass1 {
     // the same encoding here so that users can load assets with the same
     // key they have written in the pubspec.
     final String encodedKey = Uri(path: Uri.encodeFull(assetKey)).path;
-    final ImmutableBuffer instance = ImmutableBuffer._(0);
+    final instance = ImmutableBuffer._(0);
     return _futurize((_Callback<int> callback) {
       return instance._initFromAsset(encodedKey, callback);
     }).then((int length) {
@@ -7982,7 +7982,7 @@ base class ImmutableBuffer extends NativeFieldWrapperClass1 {
   ///
   /// Throws an [Exception] if the asset does not exist.
   static Future<ImmutableBuffer> fromFilePath(String path) {
-    final ImmutableBuffer instance = ImmutableBuffer._(0);
+    final instance = ImmutableBuffer._(0);
     return _futurize((_Callback<int> callback) {
       return instance._initFromFile(path, callback);
     }).then((int length) {
@@ -8069,7 +8069,7 @@ abstract class ImageDescriptor {
 
   /// Creates an image descriptor from encoded data in a supported format.
   static Future<ImageDescriptor> encoded(ImmutableBuffer buffer) {
-    final _NativeImageDescriptor descriptor = _NativeImageDescriptor._();
+    final descriptor = _NativeImageDescriptor._();
     return _futurize((_Callback<void> callback) {
       return descriptor._initEncoded(buffer, callback);
     }).then((_) => descriptor);
@@ -8271,11 +8271,11 @@ typedef _CallbackerWithError<T> = String? Function(_CallbackWithError<T?> callba
 //
 // TODO(ianh): We should either automate the code duplication or just make it public.
 Future<T> _futurize<T>(_Callbacker<T> callbacker) {
-  final Completer<T> completer = Completer<T>.sync();
+  final completer = Completer<T>.sync();
   // If the callback synchronously throws an error, then synchronously
   // rethrow that error instead of adding it to the completer. This
   // prevents the Zone from receiving an uncaught exception.
-  bool isSync = true;
+  var isSync = true;
   final String? error = callbacker((T? t) {
     if (t == null) {
       if (isSync) {
@@ -8296,11 +8296,11 @@ Future<T> _futurize<T>(_Callbacker<T> callbacker) {
 
 /// A variant of `_futurize` that can communicate specific errors.
 Future<T> _futurizeWithError<T>(_CallbackerWithError<T> callbacker) {
-  final Completer<T> completer = Completer<T>.sync();
+  final completer = Completer<T>.sync();
   // If the callback synchronously throws an error, then synchronously
   // rethrow that error instead of adding it to the completer. This
   // prevents the Zone from receiving an uncaught exception.
-  bool isSync = true;
+  var isSync = true;
   final String? error = callbacker((T? t, String? error) {
     if (t != null) {
       completer.complete(t);
@@ -8336,7 +8336,7 @@ class PictureRasterizationException implements Exception {
 
   @override
   String toString() {
-    final StringBuffer buffer = StringBuffer('Failed to rasterize a picture: $message.');
+    final buffer = StringBuffer('Failed to rasterize a picture: $message.');
     if (stack != null) {
       buffer.writeln();
       buffer.writeln('The callstack when the image was created was:');

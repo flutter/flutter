@@ -24,7 +24,7 @@ void testMain() {
     });
 
     test('Surface allocates canvases efficiently', () {
-      final Surface surface = Surface();
+      final surface = Surface();
       surface.createOrUpdateSurface(const BitmapSize(9, 19));
       final CkSurface originalSurface = surface.debugGetCkSurface()!;
       final DomOffscreenCanvas original = surface.debugGetOffscreenCanvas()!;
@@ -109,7 +109,7 @@ void testMain() {
     }, skip: isFirefox || !Surface.offscreenCanvasSupported);
 
     test('Surface used as DisplayCanvas resizes correctly', () {
-      final Surface surface = Surface(isDisplayCanvas: true);
+      final surface = Surface(isDisplayCanvas: true);
 
       surface.createOrUpdateSurface(const BitmapSize(9, 19));
       final DomHTMLCanvasElement original = getDisplayCanvas(surface);
@@ -198,7 +198,7 @@ void testMain() {
     test(
       'Surface creates new context when WebGL context is restored',
       () async {
-        final Surface surface = Surface();
+        final surface = Surface();
         expect(surface.debugForceNewContext, isTrue);
         surface.createOrUpdateSurface(const BitmapSize(9, 19));
         final CkSurface before = surface.debugGetCkSurface()!;
@@ -244,7 +244,7 @@ void testMain() {
     test(
       'updates canvas logical size when device-pixel ratio changes',
       () {
-        final Surface surface = Surface();
+        final surface = Surface();
         surface.createOrUpdateSurface(const BitmapSize(10, 16));
         final CkSurface original = surface.debugGetCkSurface()!;
 
@@ -286,18 +286,17 @@ void testMain() {
     );
 
     test('uses transferToImageBitmap for bitmap creation', () async {
-      final Surface surface = Surface();
+      final surface = Surface();
       surface.ensureSurface(const BitmapSize(10, 10));
       final DomOffscreenCanvas offscreenCanvas = surface.debugGetOffscreenCanvas()!;
-      final JSFunction transferToImageBitmap =
-          offscreenCanvas['transferToImageBitmap']! as JSFunction;
-      int transferToImageBitmapCalls = 0;
+      final transferToImageBitmap = offscreenCanvas['transferToImageBitmap']! as JSFunction;
+      var transferToImageBitmapCalls = 0;
       offscreenCanvas['transferToImageBitmap'] = () {
         transferToImageBitmapCalls++;
         return transferToImageBitmap.callAsFunction(offscreenCanvas);
       }.toJS;
-      final RenderCanvas renderCanvas = RenderCanvas();
-      final CkPictureRecorder recorder = CkPictureRecorder();
+      final renderCanvas = RenderCanvas();
+      final recorder = CkPictureRecorder();
       final CkCanvas canvas = recorder.beginRecording(const ui.Rect.fromLTRB(0, 0, 10, 10));
       canvas.drawCircle(
         const ui.Offset(5, 5),
@@ -311,7 +310,7 @@ void testMain() {
 
     test('throws error if CanvasKit.MakeGrContext returns null', () async {
       canvasKit['MakeGrContext'] = ((int glContext) => null).toJS;
-      final Surface surface = Surface();
+      final surface = Surface();
       expect(() => surface.ensureSurface(const BitmapSize(10, 10)), throwsA(isA<CanvasKitError>()));
       // Skipping on Firefox for now since Firefox headless doesn't support WebGL
     }, skip: isFirefox);
@@ -322,7 +321,7 @@ void testMain() {
       );
       addTearDown(() => debugOverrideJsConfiguration(null));
 
-      final Surface surface = Surface();
+      final surface = Surface();
       surface.debugThrowOnSoftwareSurfaceCreation = true;
       expect(
         () => surface.createOrUpdateSurface(const BitmapSize(12, 34)),
@@ -333,7 +332,7 @@ void testMain() {
       expect(surface.debugForceNewContext, isFalse);
 
       surface.debugThrowOnSoftwareSurfaceCreation = false;
-      final ckSurface = surface.createOrUpdateSurface(const BitmapSize(12, 34));
+      final CkSurface ckSurface = surface.createOrUpdateSurface(const BitmapSize(12, 34));
 
       expect(ckSurface.surface.width(), 12);
       expect(ckSurface.surface.height(), 34);

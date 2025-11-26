@@ -81,7 +81,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
     BoxConstraints? preferredConstraints,
     String? title,
   }) {
-    final RegularWindowControllerMacOS res = RegularWindowControllerMacOS(
+    final res = RegularWindowControllerMacOS(
       owner: this,
       delegate: delegate,
       preferredSize: preferredSize,
@@ -99,7 +99,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
     BaseWindowController? parent,
     String? title,
   }) {
-    final DialogWindowControllerMacOS res = DialogWindowControllerMacOS(
+    final res = DialogWindowControllerMacOS(
       owner: this,
       delegate: delegate,
       preferredSize: preferredSize,
@@ -757,7 +757,7 @@ extension _Utf8Pointer on Pointer<_Utf8> {
   }
 
   static int _length(Pointer<Uint8> codeUnits) {
-    int length = 0;
+    var length = 0;
     while (codeUnits[length] != 0) {
       length++;
     }

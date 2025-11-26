@@ -18,7 +18,7 @@ final String rootDirectoryPath = Directory.current.path;
 void main() {
   for (final String language in kCupertinoSupportedLanguages) {
     testWidgets('translations exist for $language', (WidgetTester tester) async {
-      final Locale locale = Locale(language);
+      final locale = Locale(language);
 
       expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
 
@@ -123,7 +123,7 @@ void main() {
   }
 
   testWidgets('Spot check French', (WidgetTester tester) async {
-    const Locale locale = Locale('fr');
+    const locale = Locale('fr');
     expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
     final CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(
       locale,
@@ -140,7 +140,7 @@ void main() {
   });
 
   testWidgets('Spot check Chinese', (WidgetTester tester) async {
-    const Locale locale = Locale('zh');
+    const locale = Locale('zh');
     expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
     final CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(
       locale,
@@ -160,15 +160,15 @@ void main() {
   testWidgets('`nb` uses `no` as its synonym when `nb` arb file is not present', (
     WidgetTester tester,
   ) async {
-    final File nbCupertinoArbFile = File(
+    final nbCupertinoArbFile = File(
       path.join(rootDirectoryPath, 'lib', 'src', 'l10n', 'cupertino_nb.arb'),
     );
-    final File noCupertinoArbFile = File(
+    final noCupertinoArbFile = File(
       path.join(rootDirectoryPath, 'lib', 'src', 'l10n', 'cupertino_no.arb'),
     );
 
     if (noCupertinoArbFile.existsSync() && !nbCupertinoArbFile.existsSync()) {
-      Locale locale = const Locale.fromSubtags(languageCode: 'no');
+      var locale = const Locale.fromSubtags(languageCode: 'no');
       expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
       CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(
         locale,
@@ -191,10 +191,9 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/36704.
   testWidgets('kn arb file should be properly Unicode escaped', (WidgetTester tester) async {
-    final File file = File(path.join(rootDirectoryPath, 'lib', 'src', 'l10n', 'cupertino_kn.arb'));
+    final file = File(path.join(rootDirectoryPath, 'lib', 'src', 'l10n', 'cupertino_kn.arb'));
 
-    final Map<String, dynamic> bundle =
-        json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+    final bundle = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
 
     // Encodes the arb resource values if they have not already been
     // encoded.
@@ -217,7 +216,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/110451.
   testWidgets('Finnish translation for tab label', (WidgetTester tester) async {
-    const Locale locale = Locale('fi');
+    const locale = Locale('fi');
     expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
     final CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(
       locale,
@@ -251,7 +250,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/141764
   testWidgets('zh-CN translation for look up label', (WidgetTester tester) async {
-    const Locale locale = Locale('zh');
+    const locale = Locale('zh');
     expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
     final CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(
       locale,
@@ -264,7 +263,7 @@ void main() {
   testWidgets('ko-KR translation for cut, copy, paste label in ButtonLabel', (
     WidgetTester tester,
   ) async {
-    const Locale locale = Locale('ko');
+    const locale = Locale('ko');
     expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
     final CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(
       locale,
@@ -278,7 +277,7 @@ void main() {
   testWidgets('localizations.datePickerDayOfMonth uses the current locale for weekdays', (
     WidgetTester tester,
   ) async {
-    const Locale locale = Locale('zh');
+    const locale = Locale('zh');
     expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
     final CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(
       locale,
@@ -291,7 +290,7 @@ void main() {
   testWidgets('Test correct time order for CupertinoDatePicker in Korean locale', (
     WidgetTester tester,
   ) async {
-    const Locale locale = Locale('ko');
+    const locale = Locale('ko');
     expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
 
     final CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(

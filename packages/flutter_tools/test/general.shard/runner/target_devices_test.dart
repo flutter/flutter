@@ -2921,7 +2921,7 @@ class TestTargetDevicesWithExtendedWirelessDeviceDiscovery
 class TestTargetDeviceSelection extends TargetDeviceSelection {
   TestTargetDeviceSelection(super.logger);
 
-  var input = <String>[];
+  List<String> input = <String>[];
 
   @override
   Future<String> readUserInput() async {
@@ -2949,7 +2949,7 @@ class TestDeviceManager extends DeviceManager {
   String? specifiedDeviceId;
 
   @override
-  var hasSpecifiedAllDevices = false;
+  bool hasSpecifiedAllDevices = false;
 
   final androidDiscoverer = TestPollingDeviceDiscovery('android');
   final otherDiscoverer = TestPollingDeviceDiscovery('other');
@@ -2981,11 +2981,11 @@ class TestDeviceManager extends DeviceManager {
 class TestPollingDeviceDiscovery extends PollingDeviceDiscovery {
   TestPollingDeviceDiscovery(super.name);
 
-  var deviceList = <Device>[];
-  var refreshDeviceList = <Device>[];
-  var devicesCalled = 0;
-  var discoverDevicesCalled = 0;
-  var numberOfTimesPolled = 0;
+  List<Device> deviceList = <Device>[];
+  List<Device> refreshDeviceList = <Device>[];
+  int devicesCalled = 0;
+  int discoverDevicesCalled = 0;
+  int numberOfTimesPolled = 0;
 
   @override
   bool get supportsPlatform => true;
@@ -3036,11 +3036,11 @@ class TestIOSDeviceDiscovery extends IOSDevices {
        super(xcdevice: xcdevice);
 
   final Platform _platform;
-  var deviceList = <Device>[];
-  var refreshDeviceList = <Device>[];
-  var devicesCalled = 0;
-  var discoverDevicesCalled = 0;
-  var numberOfTimesPolled = 0;
+  List<Device> deviceList = <Device>[];
+  List<Device> refreshDeviceList = <Device>[];
+  int devicesCalled = 0;
+  int discoverDevicesCalled = 0;
+  int numberOfTimesPolled = 0;
 
   final FakeXcdevice _xcdevice;
 
@@ -3085,7 +3085,7 @@ class TestIOSDeviceDiscovery extends IOSDevices {
 class FakeXcdevice extends Fake implements XCDevice {
   XCDeviceEventNotification? waitForDeviceEvent;
 
-  var waitedForDeviceToConnect = false;
+  bool waitedForDeviceToConnect = false;
 
   @override
   Future<XCDeviceEventNotification?> waitForDeviceToConnect(String deviceId) async {
@@ -3342,10 +3342,10 @@ class FakeTerminal extends Fake implements AnsiTerminal {
   bool get isCliAnimationEnabled => supportsColor;
 
   @override
-  var usesTerminalUi = true;
+  bool usesTerminalUi = true;
 
   @override
-  var singleCharMode = false;
+  bool singleCharMode = false;
 
   void setPrompt(List<String> characters, String result) {
     _nextPrompt = characters;
@@ -3376,7 +3376,7 @@ class FakeTerminal extends Fake implements AnsiTerminal {
 class TestBufferLogger extends BufferLogger {
   TestBufferLogger.test({super.terminal, super.outputPreferences, super.verbose}) : super.test();
 
-  var originalStatusText = '';
+  String originalStatusText = '';
 
   @override
   void printStatus(
