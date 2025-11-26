@@ -34,8 +34,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String PING = "ping";
     private BasicMessageChannel<String> messageChannel;
 
-    // Previously, this example checked for certain flags set via Intent. As engine
-    // flags can no longer be set via Intent, warn developers that Intent extras
+    // Previously, this example checked for certain flags set via Intent. Engine
+    // flags can no longer be set via Intent, so warn developers that Intent extras
     // will be ignored and point to alternative methods for setting engine flags.
     private void warnIfEngineFlagsSetViaIntent(Intent intent) {
         List<String> previouslySupportedFlagsViaIntent = Arrays.asList(
