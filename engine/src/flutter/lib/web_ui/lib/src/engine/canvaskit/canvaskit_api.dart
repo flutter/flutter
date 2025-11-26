@@ -480,6 +480,16 @@ SkFillType toSkFillType(ui.PathFillType fillType) {
   return _skFillTypes[fillType.index];
 }
 
+ui.PathFillType fromSkFillType(SkFillType fillType) {
+  if (fillType == canvasKit.FillType.Winding) {
+    return ui.PathFillType.nonZero;
+  }
+  if (fillType == canvasKit.FillType.EvenOdd) {
+    return ui.PathFillType.evenOdd;
+  }
+  throw UnimplementedError('Unsupported SkFillType: $fillType');
+}
+
 extension type SkPathOpEnum(JSObject _) implements JSObject {
   external SkPathOp get Difference;
   external SkPathOp get Intersect;
@@ -1289,6 +1299,7 @@ final SkFloat32List _sharedSkColor3 = mallocFloat32List(4);
 
 @JS('window.flutterCanvasKit.Path')
 extension type SkPath._(JSObject _) implements JSObject {
+  external SkFillType getFillType();
   external void setFillType(SkFillType fillType);
 
   @JS('getBounds')
