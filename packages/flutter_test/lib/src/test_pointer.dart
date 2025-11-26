@@ -11,7 +11,6 @@ library;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
-import 'binding.dart';
 import 'test_async_utils.dart';
 
 export 'dart:ui' show Offset;
