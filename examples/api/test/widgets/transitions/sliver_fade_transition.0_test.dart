@@ -4,7 +4,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_api_samples/widgets/transitions/sliver_fade_transition.0.dart' as example;
+import 'package:flutter_api_samples/widgets/transitions/sliver_fade_transition.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -15,13 +16,15 @@ void main() {
     expect(find.byType(CustomScrollView), findsOneWidget);
     expect(
       find.byWidgetPredicate(
-        (Widget widget) => widget is Container && widget.color == Colors.indigo[200],
+        (Widget widget) =>
+            widget is Container && widget.color == Colors.indigo[200],
       ),
       findsNWidgets(3),
     );
     expect(
       find.byWidgetPredicate(
-        (Widget widget) => widget is Container && widget.color == Colors.orange[200],
+        (Widget widget) =>
+            widget is Container && widget.color == Colors.orange[200],
       ),
       findsNWidgets(2),
     );
