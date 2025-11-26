@@ -17,7 +17,8 @@ void ClipRectLayer::ApplyClip(LayerStateStack::MutatorContext& mutator) const {
   mutator.clipRect(clip_shape(), clip_behavior() != Clip::kHardEdge);
 }
 
-void ClipRectLayer::PushClipToEmbedderStack(PrerollContext* context) const {
+void ClipRectLayer::PushClipToEmbeddedNativeViewMutatorStack(
+    PrerollContext* context) const {
   context->view_embedder->PushClipRectToVisitedPlatformViews(clip_shape());
 }
 

@@ -155,7 +155,7 @@ class Mutator {
   const BackdropClipRRect& GetBackdropClipRRect() const {
     return std::get<BackdropClipRRect>(data_);
   }
-  const BackdropClipRSuperellipse& GetBackdropClipRSE() const {
+  const BackdropClipRSuperellipse& GetBackdropClipRSuperellipse() const {
     return std::get<BackdropClipRSuperellipse>(data_);
   }
   const BackdropClipPath& GetBackdropClipPath() const {
