@@ -310,10 +310,11 @@ public final class FlutterShellArgs {
   }
 
   /**
-   * Looks up a {@link Flag} by its intent key.
+   * Looks up a {@link Flag} by its Intent key.
    *
-   * <p>Intent keys were set by the deprecated version of FlutterShellArgs which match the command
-   * line argument without the "--" prefix and "=" suffix if the argument takes a value.
+   * <p>Previously, the Intent keys were used to set Flutter shell arguments via Intent. The Intent
+   * keys match the command line argument without the "--" prefix and "=" suffix if the argument
+   * takes a value.
    */
   public static Flag getFlagFromIntentKey(String intentKey) {
     for (Flag flag : ALL_FLAGS) {

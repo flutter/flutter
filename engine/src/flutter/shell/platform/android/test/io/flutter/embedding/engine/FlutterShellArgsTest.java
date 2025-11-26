@@ -42,6 +42,25 @@ public class FlutterShellArgsTest {
   }
 
   @Test
+  public void getFlagByMetadataKey_returnsNullWhenInvalidKeySpecified() {
+    FlutterShellArgs.Flag flag =
+        FlutterShellArgs.getFlagByMetadataKey("io.flutter.embedding.android.InvalidMetaDataKey");
+    assertNull("Should return null for an invalid meta-data key", flag);
+  }
+
+  @Test
+  public void getFlagByCommandLineArgument_returnsExpectedFlagWhenValidArgumentSpecified() {
+    FlutterShellArgs.Flag flag =
+        FlutterShellArgs.getFlagByCommandLineArgument("--flutter-assets-dir=");
+    assertEquals(FlutterShellArgs.FLUTTER_ASSETS_DIR, flag);
+  }
+
+  @Test
+  public void getFlagByCommandLineArgument_returnsNullWhenInvalidArgumentSpecified() {
+    assertNull(FlutterShellArgs.getFlagFromIntentKey("--non-existent-flag"));
+  }
+
+  @Test
   public void getFlagFromIntentKey_returnsExpectedFlagWhenValidKeySpecified() {
     // Test flag without value.
     FlutterShellArgs.Flag flag = FlutterShellArgs.getFlagFromIntentKey("old-gen-heap-size");
@@ -55,13 +74,6 @@ public class FlutterShellArgsTest {
   @Test
   public void getFlagFromIntentKey_returnsNullWhenInvalidKeySpecified() {
     assertNull(FlutterShellArgs.getFlagFromIntentKey("non-existent-flag"));
-  }
-
-  @Test
-  public void getFlagByMetadataKey_returnsNullWhenInvalidKeySpecified() {
-    FlutterShellArgs.Flag flag =
-        FlutterShellArgs.getFlagByMetadataKey("io.flutter.embedding.android.InvalidMetaDataKey");
-    assertNull("Should return null for an invalid meta-data key", flag);
   }
 
   @Test
