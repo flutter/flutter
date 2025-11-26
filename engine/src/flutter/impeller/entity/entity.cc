@@ -23,6 +23,8 @@ Entity Entity::FromSnapshot(const Snapshot& snapshot, BlendMode blend_mode) {
   contents->SetSamplerDescriptor(snapshot.sampler_descriptor);
   contents->SetSourceRect(texture_rect);
   contents->SetOpacity(snapshot.opacity);
+  contents->SetNeedsRasterizationForRuntimeEffects(
+      snapshot.needs_rasterization_for_runtime_effects);
 
   Entity entity;
   entity.SetBlendMode(blend_mode);

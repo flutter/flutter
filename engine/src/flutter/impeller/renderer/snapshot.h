@@ -34,6 +34,25 @@ struct Snapshot {
 
   Scalar opacity = 1.0f;
 
+  /// @brief Whether this snapshot needs to be re-rasterized when used as an
+  /// input to a runtime effect.
+  /// @details This is required because there is no good heuristic to determine
+  /// if a `Snapshot` needs to be rerasterized before applying a RuntimeFilter.
+  /// In particular the GaussianBlurContents will return a Snapshot that
+  /// includes padding for the blur halo which is not possible for the
+  /// RuntimeEffectContents to know about. This value will tell
+  /// RuntimeEffectContents that the Snapshot will have to be rerasterized to
+  /// capture the padding.
+  bool needs_rasterization_for_runtime_effects = false;
+
+  /// Any snapshot that is scaled should rerasterize because we should be
+  /// performing the RuntimeEffect at the resolution of the screen, not the
+  /// scaled up or scaled down version of the snapshot.
+  bool ShouldRasterizeForRuntimeEffects() const {
+    return !transform.IsTranslationOnly() ||
+           needs_rasterization_for_runtime_effects;
+  }
+
   std::optional<Rect> GetCoverage() const;
 
   /// @brief  Get the transform that converts screen space coordinates to the UV
