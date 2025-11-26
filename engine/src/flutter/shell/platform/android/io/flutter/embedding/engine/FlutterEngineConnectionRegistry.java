@@ -351,10 +351,12 @@ import java.util.Set;
               .getPackageManager()
               .getApplicationInfo(appContext.getPackageName(), PackageManager.GET_META_DATA);
       Bundle applicationMetaData = applicationInfo.metaData;
-      final boolean useSoftwareRendering =
-          applicationMetaData.getBoolean(
-              FlutterShellArgs.ENABLE_SOFTWARE_RENDERING.metadataKey, false);
-      flutterEngine.getPlatformViewsController().setSoftwareRendering(useSoftwareRendering);
+      if (applicationMetaData != null) {
+        final boolean useSoftwareRendering =
+            applicationMetaData.getBoolean(
+                FlutterShellArgs.ENABLE_SOFTWARE_RENDERING.metadataKey, false);
+        flutterEngine.getPlatformViewsController().setSoftwareRendering(useSoftwareRendering);
+      }
     } catch (PackageManager.NameNotFoundException e) {
       Log.w(
           TAG,
