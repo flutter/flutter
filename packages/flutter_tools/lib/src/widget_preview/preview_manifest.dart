@@ -92,9 +92,9 @@ class PreviewManifest {
     // modified since the last time we calculated hashes, recalculate all the hashes for
     // simplicity.
     if (_isPubspecPathForProject(project: rootProject, path: updatedPubspecPath)) {
-      final workspaceProjectUpdates =
-          previousWorkspaceProjects.map((p) => p.directory).toSet() !=
-          (rootProject.workspaceProjects.map((p) => p.directory).toSet());
+      final workspaceProjectUpdates = !const SetEquality().equals(
+          previousWorkspaceProjects.map((p) => p.directory).toSet(),
+          rootProject.workspaceProjects.map((p) => p.directory).toSet());
       if (workspaceProjectUpdates) {
         return _buildPubspecHashesMap();
       }
