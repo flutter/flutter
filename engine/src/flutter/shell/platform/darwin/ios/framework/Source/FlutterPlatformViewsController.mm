@@ -581,9 +581,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
         UIVisualEffectView* visualEffectView = [[UIVisualEffectView alloc]
             initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleLight]];
 
-        // TODO: Technically we should be using the largest corner radius, but currently
-        // we're not handling overlapping clips. We are also ignoring variable radius for each
-        // corner
+        // TODO(https://github.com/flutter/flutter/issues/179126)
         CGFloat cornerRadius = 0.0;
         if ([pendingClipRRects count] > 0) {
           cornerRadius = pendingClipRRects[0].topLeftRadius;
@@ -621,11 +619,11 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
         [pendingClipRRects addObject:clip];
       }
       case flutter::MutatorType::kBackdropClipRSuperellipse: {
-        // TODO: Pending Implementation
+        // TODO(https://github.com/flutter/flutter/issues/179125)
         break;
       }
       case flutter::MutatorType::kBackdropClipPath: {
-        // TODO: Pending Implementation
+        // TODO(https://github.com/flutter/flutter/issues/179127)
         break;
       }
     }
