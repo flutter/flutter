@@ -55,7 +55,7 @@ class CopyArtifactsStep implements PipelineStep {
         'Could not generate artifact bucket url for unknown realm.',
       ),
     };
-    final Uri url = Uri.https(
+    final url = Uri.https(
       'storage.googleapis.com',
       '${realmComponent}flutter_infra_release/flutter/${realm == LuciRealm.Try ? gitRevision : contentHash}/flutter-web-sdk.zip',
     );
@@ -80,8 +80,8 @@ class CopyArtifactsStep implements PipelineStep {
     final String skwasmSourceDirectory;
     final String skwasmHeavySourceDirectory;
     switch (source) {
-      case LocalArtifactSource(:final mode):
-        final buildDirectory = getBuildDirectoryForRuntimeMode(mode).path;
+      case LocalArtifactSource(:final RuntimeMode mode):
+        final String buildDirectory = getBuildDirectoryForRuntimeMode(mode).path;
         flutterJsSourceDirectory = pathlib.join(buildDirectory, 'flutter_web_sdk', 'flutter_js');
         canvaskitExperimentalWebParagraphSourceDirectory = pathlib.join(
           buildDirectory,
@@ -92,8 +92,8 @@ class CopyArtifactsStep implements PipelineStep {
         skwasmSourceDirectory = pathlib.join(buildDirectory, 'skwasm');
         skwasmHeavySourceDirectory = pathlib.join(buildDirectory, 'skwasm_heavy');
 
-      case GcsArtifactSource(:final realm):
-        final artifactsDirectory = (await _downloadArtifacts(realm)).path;
+      case GcsArtifactSource(:final LuciRealm realm):
+        final String artifactsDirectory = (await _downloadArtifacts(realm)).path;
         flutterJsSourceDirectory = pathlib.join(artifactsDirectory, 'flutter_js');
         canvaskitExperimentalWebParagraphSourceDirectory = pathlib.join(
           artifactsDirectory,
@@ -141,7 +141,7 @@ class CopyArtifactsStep implements PipelineStep {
   }
 
   Future<void> copyTestFonts() async {
-    const Map<String, String> testFonts = <String, String>{
+    const testFonts = <String, String>{
       'Ahem': 'ahem.ttf',
       'Roboto': 'Roboto-Regular.ttf',
       'RobotoVariable': 'RobotoSlab-VariableFont_wght.ttf',
@@ -156,7 +156,7 @@ class CopyArtifactsStep implements PipelineStep {
       'fonts',
     );
 
-    final List<dynamic> fontManifest = <dynamic>[];
+    final fontManifest = <dynamic>[];
     for (final MapEntry<String, String> fontEntry in testFonts.entries) {
       final String family = fontEntry.key;
       final String fontFile = fontEntry.value;
@@ -168,21 +168,21 @@ class CopyArtifactsStep implements PipelineStep {
         ],
       });
 
-      final io.File sourceTtf = io.File(pathlib.join(fontsPath, fontFile));
-      final io.File destinationTtf = io.File(
+      final sourceTtf = io.File(pathlib.join(fontsPath, fontFile));
+      final destinationTtf = io.File(
         pathlib.join(environment.webTestsArtifactsDir.path, 'assets', 'fonts', fontFile),
       );
       await destinationTtf.create(recursive: true);
       await sourceTtf.copy(destinationTtf.path);
     }
 
-    final io.File fontManifestFile = io.File(
+    final fontManifestFile = io.File(
       pathlib.join(environment.webTestsArtifactsDir.path, 'assets', 'FontManifest.json'),
     );
     await fontManifestFile.create(recursive: true);
     await fontManifestFile.writeAsString(const JsonEncoder.withIndent('  ').convert(fontManifest));
 
-    final io.Directory fallbackFontsSource = io.Directory(
+    final fallbackFontsSource = io.Directory(
       pathlib.join(
         environment.engineSrcDir.path,
         'flutter',
@@ -197,9 +197,7 @@ class CopyArtifactsStep implements PipelineStep {
     );
     for (final io.File file in fallbackFontsSource.listSync(recursive: true).whereType<io.File>()) {
       final String relativePath = pathlib.relative(file.path, from: fallbackFontsSource.path);
-      final io.File destinationFile = io.File(
-        pathlib.join(fallbackFontsDestinationPath, relativePath),
-      );
+      final destinationFile = io.File(pathlib.join(fallbackFontsDestinationPath, relativePath));
       if (!destinationFile.parent.existsSync()) {
         destinationFile.parent.createSync(recursive: true);
       }
@@ -208,7 +206,7 @@ class CopyArtifactsStep implements PipelineStep {
   }
 
   Future<void> copySkiaTestImages() async {
-    final io.Directory testImagesDir = io.Directory(
+    final testImagesDir = io.Directory(
       pathlib.join(
         environment.engineSrcDir.path,
         'flutter',
@@ -225,7 +223,7 @@ class CopyArtifactsStep implements PipelineStep {
       if (imageBaseName.contains('invalid') || imageBaseName.contains('missing_eof')) {
         continue;
       }
-      final io.File destination = io.File(
+      final destination = io.File(
         pathlib.join(
           environment.webTestsArtifactsDir.path,
           'test_images',
@@ -238,7 +236,7 @@ class CopyArtifactsStep implements PipelineStep {
   }
 
   Future<void> copyFlutterJsFiles(String sourcePath) async {
-    final io.Directory flutterJsInputDirectory = io.Directory(sourcePath);
+    final flutterJsInputDirectory = io.Directory(sourcePath);
     final String targetDirectoryPath = pathlib.join(
       environment.webTestsArtifactsDir.path,
       'flutter_js',
@@ -251,7 +249,7 @@ class CopyArtifactsStep implements PipelineStep {
         from: flutterJsInputDirectory.path,
       );
       final String targetPath = pathlib.join(targetDirectoryPath, relativePath);
-      final io.File targetFile = io.File(targetPath);
+      final targetFile = io.File(targetPath);
       if (!targetFile.parent.existsSync()) {
         targetFile.parent.createSync(recursive: true);
       }
@@ -269,13 +267,13 @@ class CopyArtifactsStep implements PipelineStep {
       destinationPath,
     );
 
-    for (final String filename in <String>[
+    for (final filename in <String>[
       '$libraryName.js',
       '$libraryName.wasm',
       '$libraryName.wasm.map',
     ]) {
-      final io.File sourceFile = io.File(pathlib.join(sourcePath, filename));
-      final io.File targetFile = io.File(pathlib.join(targetDirectoryPath, filename));
+      final sourceFile = io.File(pathlib.join(sourcePath, filename));
+      final targetFile = io.File(pathlib.join(targetDirectoryPath, filename));
       if (!sourceFile.existsSync()) {
         if (filename.endsWith('.map')) {
           // Sourcemaps are only generated under certain build conditions, so
@@ -293,27 +291,27 @@ class CopyArtifactsStep implements PipelineStep {
 
   Future<void> buildHostPage() async {
     final String hostDartPath = pathlib.join('lib', 'static', 'host.dart');
-    final io.File hostDartFile = io.File(
+    final hostDartFile = io.File(
       pathlib.join(environment.webEngineTesterRootDir.path, hostDartPath),
     );
     final String targetDirectoryPath = pathlib.join(environment.webTestsArtifactsDir.path, 'host');
     io.Directory(targetDirectoryPath).createSync(recursive: true);
     final String targetFilePath = pathlib.join(targetDirectoryPath, 'host.dart');
 
-    const List<String> staticFiles = <String>['favicon.ico', 'host.css', 'index.html'];
-    for (final String staticFilePath in staticFiles) {
-      final io.File source = io.File(
+    const staticFiles = <String>['favicon.ico', 'host.css', 'index.html'];
+    for (final staticFilePath in staticFiles) {
+      final source = io.File(
         pathlib.join(environment.webEngineTesterRootDir.path, 'lib', 'static', staticFilePath),
       );
-      final io.File destination = io.File(pathlib.join(targetDirectoryPath, staticFilePath));
+      final destination = io.File(pathlib.join(targetDirectoryPath, staticFilePath));
       await source.copy(destination.path);
     }
 
-    final io.File timestampFile = io.File(
+    final timestampFile = io.File(
       pathlib.join(environment.webEngineTesterRootDir.path, '$targetFilePath.js.timestamp'),
     );
 
-    final String timestamp = hostDartFile.statSync().modified.millisecondsSinceEpoch.toString();
+    final timestamp = hostDartFile.statSync().modified.millisecondsSinceEpoch.toString();
     if (timestampFile.existsSync()) {
       final String lastBuildTimestamp = timestampFile.readAsStringSync();
       if (lastBuildTimestamp == timestamp) {
