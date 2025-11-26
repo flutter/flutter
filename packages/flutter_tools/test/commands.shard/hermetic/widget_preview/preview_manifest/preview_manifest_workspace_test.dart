@@ -58,8 +58,6 @@ void main() {
     testPreviewDetector(
       'can handle the addition of new workspace projects before the workspace pubspec is updated',
       (PreviewDetector previewDetector) async {
-        previewDetector = createTestPreviewDetector();
-
         final workspace = WidgetPreviewWorkspace(workspaceRoot: previewDetector.projectRoot);
 
         await workspace.createWorkspaceProject(name: 'foo');
@@ -98,8 +96,6 @@ void main() {
     testPreviewDetector('can handle the removal of workspace projects', (
       PreviewDetector previewDetector,
     ) async {
-      previewDetector = createTestPreviewDetector();
-
       final workspace = WidgetPreviewWorkspace(workspaceRoot: previewDetector.projectRoot);
 
       await workspace.createWorkspaceProject(name: 'foo');
@@ -122,7 +118,6 @@ void main() {
       // Update the manifest and verify we haven't added any new pubspec hashes, since the new
       // workspace project technically isn't part of the workspace yet.
       manifest.updatePubspecHash(updatedPubspecPath: pubspecPath);
-      print(workspace.workspacePubspecPaths);
       expect(manifest.pubspecHashes.keys, workspace.workspacePubspecPaths);
 
       // Update the workspace to include the newly added project.

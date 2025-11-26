@@ -30,7 +30,6 @@ void Function(PreviewDependencyGraph)? _onChangeDetectedImpl;
 void Function(String path)? _onPubspecChangeDetected;
 Directory? _projectRoot;
 
-FileSystem get previewDetectorFs => _fs;
 late FileSystem _fs;
 
 /// Registers setup and tear down logic for [PreviewDetector] tests.
@@ -70,7 +69,7 @@ void testPreviewDetector(
     },
     overrides: {
       FlutterProjectFactory: () =>
-          FlutterProjectFactory(fileSystem: previewDetectorFs, logger: BufferLogger.test()),
+          FlutterProjectFactory(fileSystem: _fs, logger: BufferLogger.test()),
     },
   );
 }
