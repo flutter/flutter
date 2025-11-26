@@ -10,18 +10,18 @@ void encodeBundleTranslations(Map<String, dynamic> bundle) {
     if (key.startsWith('@')) {
       continue;
     }
-    final String translation = bundle[key] as String;
+    final translation = bundle[key] as String;
     // Rewrite the string as a series of unicode characters in JSON format.
     // Like "\u0012\u0123\u1234".
     bundle[key] = translation.runes.map((int code) {
-      final String codeString = '00${code.toRadixString(16)}';
+      final codeString = '00${code.toRadixString(16)}';
       return '\\u${codeString.substring(codeString.length - 4)}';
     }).join();
   }
 }
 
 String generateArbString(Map<String, dynamic> bundle) {
-  final StringBuffer contents = StringBuffer();
+  final contents = StringBuffer();
   contents.writeln('{');
   for (final String key in bundle.keys) {
     contents.writeln('  "$key": "${bundle[key]}"${key == bundle.keys.last ? '' : ','}');

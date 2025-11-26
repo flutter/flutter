@@ -45,10 +45,10 @@ class TextWrapper {
     // LTR: "words":[startLine:whitespaces.start) "whitespaces":[whitespaces.start:whitespaces.end) "letters":[whitespaces.end:...)
     // RTL: "letters":(...:whitespaces.end] "whitespaces":(whitespaces.end:whitespaces.start] "words":(whitespaces.start:startLine]
 
-    final _LineBuilder line = _LineBuilder(_layout, maxWidth);
+    final line = _LineBuilder(_layout, maxWidth);
 
-    bool hardLineBreak = false;
-    for (int index = 0; index < _layout.allClusters.length - 1; index += 1) {
+    var hardLineBreak = false;
+    for (var index = 0; index < _layout.allClusters.length - 1; index += 1) {
       final WebCluster cluster = _layout.allClusters[index];
       final double widthCluster = cluster.advance.width;
       hardLineBreak = _isHardLineBreak(cluster);
@@ -81,7 +81,7 @@ class TextWrapper {
 
       // Check if we exceeded the line width
       if (!line.canFit(widthCluster)) {
-        bool clusterAdded = false;
+        var clusterAdded = false;
 
         if (line.hasSoftLineBreak) {
           // There was at least one possible line break so we can use it to break the text
@@ -206,7 +206,7 @@ class _LineBuilder {
   bool get isEmpty {
     // When `start` and `pendingTextEnd` are equal, we know there was no text, whitespaces
     // or pending text added to the line.
-    final bool empty = start == _pendingTextEnd;
+    final empty = start == _pendingTextEnd;
 
     if (empty) {
       assert(
@@ -241,7 +241,7 @@ class _LineBuilder {
   }
 
   bool get hasWhitespaces {
-    final bool result = _whitespaceStart != _whitespaceEnd;
+    final result = _whitespaceStart != _whitespaceEnd;
 
     if (!result) {
       // When there's no whitespaces, the width of whitespaces is also 0.

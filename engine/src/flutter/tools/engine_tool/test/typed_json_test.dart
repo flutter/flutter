@@ -8,12 +8,12 @@ import 'package:test/test.dart';
 void main() {
   group('JsonObject.string', () {
     test('returns string value', () {
-      const JsonObject jsonObject = JsonObject(<String, Object?>{'key': 'value'});
+      const jsonObject = JsonObject(<String, Object?>{'key': 'value'});
       expect(jsonObject.string('key'), 'value');
     });
 
     test('throws due to missing key', () {
-      const JsonObject jsonObject = JsonObject(<String, Object?>{'key': 'value'});
+      const jsonObject = JsonObject(<String, Object?>{'key': 'value'});
       expect(
         () => jsonObject.string('missing'),
         throwsA(const isInstanceOf<MissingKeyJsonReadException>()),
@@ -21,7 +21,7 @@ void main() {
     });
 
     test('throws due to wrong type', () {
-      const JsonObject jsonObject = JsonObject(<String, Object?>{'key': 42});
+      const jsonObject = JsonObject(<String, Object?>{'key': 42});
       expect(
         () => jsonObject.string('key'),
         throwsA(const isInstanceOf<InvalidTypeJsonReadException>()),
@@ -31,12 +31,12 @@ void main() {
 
   group('JsonObject.integer', () {
     test('returns integer value', () {
-      const JsonObject jsonObject = JsonObject(<String, Object?>{'key': 42});
+      const jsonObject = JsonObject(<String, Object?>{'key': 42});
       expect(jsonObject.integer('key'), 42);
     });
 
     test('throws due to missing key', () {
-      const JsonObject jsonObject = JsonObject(<String, Object?>{'key': 42});
+      const jsonObject = JsonObject(<String, Object?>{'key': 42});
       expect(
         () => jsonObject.integer('missing'),
         throwsA(const isInstanceOf<MissingKeyJsonReadException>()),
@@ -44,7 +44,7 @@ void main() {
     });
 
     test('throws due to wrong type', () {
-      const JsonObject jsonObject = JsonObject(<String, Object?>{'key': 'value'});
+      const jsonObject = JsonObject(<String, Object?>{'key': 'value'});
       expect(
         () => jsonObject.integer('key'),
         throwsA(const isInstanceOf<InvalidTypeJsonReadException>()),
@@ -54,12 +54,12 @@ void main() {
 
   group('JsonObject.boolean', () {
     test('returns boolean value', () {
-      const JsonObject jsonObject = JsonObject(<String, Object?>{'key': true});
+      const jsonObject = JsonObject(<String, Object?>{'key': true});
       expect(jsonObject.boolean('key'), true);
     });
 
     test('throws due to missing key', () {
-      const JsonObject jsonObject = JsonObject(<String, Object?>{'key': true});
+      const jsonObject = JsonObject(<String, Object?>{'key': true});
       expect(
         () => jsonObject.boolean('missing'),
         throwsA(const isInstanceOf<MissingKeyJsonReadException>()),
@@ -67,7 +67,7 @@ void main() {
     });
 
     test('throws due to wrong type', () {
-      const JsonObject jsonObject = JsonObject(<String, Object?>{'key': 'value'});
+      const jsonObject = JsonObject(<String, Object?>{'key': 'value'});
       expect(
         () => jsonObject.boolean('key'),
         throwsA(const isInstanceOf<InvalidTypeJsonReadException>()),
@@ -77,14 +77,14 @@ void main() {
 
   group('JsonObject.stringList', () {
     test('returns string list value', () {
-      const JsonObject jsonObject = JsonObject(<String, Object?>{
+      const jsonObject = JsonObject(<String, Object?>{
         'key': <Object?>['value1', 'value2'],
       });
       expect(jsonObject.stringList('key'), <String>['value1', 'value2']);
     });
 
     test('throws due to missing key', () {
-      const JsonObject jsonObject = JsonObject(<String, Object?>{
+      const jsonObject = JsonObject(<String, Object?>{
         'key': <Object?>['value1', 'value2'],
       });
       expect(
@@ -94,7 +94,7 @@ void main() {
     });
 
     test('throws due to wrong type', () {
-      const JsonObject jsonObject = JsonObject(<String, Object?>{'key': 'value'});
+      const jsonObject = JsonObject(<String, Object?>{'key': 'value'});
       expect(
         () => jsonObject.stringList('key'),
         throwsA(const isInstanceOf<InvalidTypeJsonReadException>()),
@@ -102,7 +102,7 @@ void main() {
     });
 
     test('throws due to wrong element type', () {
-      const JsonObject jsonObject = JsonObject(<String, Object?>{
+      const jsonObject = JsonObject(<String, Object?>{
         'key': <Object?>['value1', 42],
       });
       expect(
@@ -114,17 +114,17 @@ void main() {
 
   group('JsonObject.stringOrNull', () {
     test('returns string value', () {
-      const JsonObject jsonObject = JsonObject(<String, Object?>{'key': 'value'});
+      const jsonObject = JsonObject(<String, Object?>{'key': 'value'});
       expect(jsonObject.stringOrNull('key'), 'value');
     });
 
     test('returns null due to missing key', () {
-      const JsonObject jsonObject = JsonObject(<String, Object?>{'key': 'value'});
+      const jsonObject = JsonObject(<String, Object?>{'key': 'value'});
       expect(jsonObject.stringOrNull('missing'), isNull);
     });
 
     test('throws due to wrong type', () {
-      const JsonObject jsonObject = JsonObject(<String, Object?>{'key': 42});
+      const jsonObject = JsonObject(<String, Object?>{'key': 42});
       expect(
         () => jsonObject.stringOrNull('key'),
         throwsA(const isInstanceOf<InvalidTypeJsonReadException>()),
@@ -134,17 +134,17 @@ void main() {
 
   group('JsonObject.integerOrNull', () {
     test('returns integer value', () {
-      const JsonObject jsonObject = JsonObject(<String, Object?>{'key': 42});
+      const jsonObject = JsonObject(<String, Object?>{'key': 42});
       expect(jsonObject.integerOrNull('key'), 42);
     });
 
     test('returns null due to missing key', () {
-      const JsonObject jsonObject = JsonObject(<String, Object?>{'key': 42});
+      const jsonObject = JsonObject(<String, Object?>{'key': 42});
       expect(jsonObject.integerOrNull('missing'), isNull);
     });
 
     test('throws due to wrong type', () {
-      const JsonObject jsonObject = JsonObject(<String, Object?>{'key': 'value'});
+      const jsonObject = JsonObject(<String, Object?>{'key': 'value'});
       expect(
         () => jsonObject.integerOrNull('key'),
         throwsA(const isInstanceOf<InvalidTypeJsonReadException>()),
@@ -154,17 +154,17 @@ void main() {
 
   group('JsonObject.booleanOrNull', () {
     test('returns boolean value', () {
-      const JsonObject jsonObject = JsonObject(<String, Object?>{'key': true});
+      const jsonObject = JsonObject(<String, Object?>{'key': true});
       expect(jsonObject.booleanOrNull('key'), true);
     });
 
     test('returns null due to missing key', () {
-      const JsonObject jsonObject = JsonObject(<String, Object?>{'key': true});
+      const jsonObject = JsonObject(<String, Object?>{'key': true});
       expect(jsonObject.booleanOrNull('missing'), isNull);
     });
 
     test('throws due to wrong type', () {
-      const JsonObject jsonObject = JsonObject(<String, Object?>{'key': 'value'});
+      const jsonObject = JsonObject(<String, Object?>{'key': 'value'});
       expect(
         () => jsonObject.booleanOrNull('key'),
         throwsA(const isInstanceOf<InvalidTypeJsonReadException>()),
@@ -174,21 +174,21 @@ void main() {
 
   group('JsonObject.stringListOrNull', () {
     test('returns string list value', () {
-      const JsonObject jsonObject = JsonObject(<String, Object?>{
+      const jsonObject = JsonObject(<String, Object?>{
         'key': <Object?>['value1', 'value2'],
       });
       expect(jsonObject.stringListOrNull('key'), <String>['value1', 'value2']);
     });
 
     test('returns null due to missing key', () {
-      const JsonObject jsonObject = JsonObject(<String, Object?>{
+      const jsonObject = JsonObject(<String, Object?>{
         'key': <Object?>['value1', 'value2'],
       });
       expect(jsonObject.stringListOrNull('missing'), isNull);
     });
 
     test('throws due to wrong type', () {
-      const JsonObject jsonObject = JsonObject(<String, Object?>{'key': 'value'});
+      const jsonObject = JsonObject(<String, Object?>{'key': 'value'});
       expect(
         () => jsonObject.stringListOrNull('key'),
         throwsA(const isInstanceOf<InvalidTypeJsonReadException>()),
@@ -196,7 +196,7 @@ void main() {
     });
 
     test('throws due to wrong element type', () {
-      const JsonObject jsonObject = JsonObject(<String, Object?>{
+      const jsonObject = JsonObject(<String, Object?>{
         'key': <Object?>['value1', 42],
       });
       expect(

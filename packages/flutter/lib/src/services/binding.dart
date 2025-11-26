@@ -171,8 +171,8 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   @protected
   @mustCallSuper
   Future<void> handleSystemMessage(Object systemMessage) async {
-    final Map<String, dynamic> message = systemMessage as Map<String, dynamic>;
-    final String type = message['type'] as String;
+    final message = systemMessage as Map<String, dynamic>;
+    final type = message['type'] as String;
     switch (type) {
       case 'memoryPressure':
         handleMemoryPressure();
@@ -229,7 +229,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
 
   // This is run in another isolate created by _addLicenses above.
   static List<LicenseEntry> _parseLicenses(String rawLicenses) {
-    final String licenseSeparator = '\n${'-' * 80}\n';
+    final licenseSeparator = '\n${'-' * 80}\n';
     return <LicenseEntry>[
       for (final String license in rawLicenses.split(licenseSeparator))
         if (license.indexOf('\n\n') case final int split when split >= 0)
@@ -302,7 +302,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   Future<String?> _handleLifecycleMessage(String? message) async {
     final AppLifecycleState? state = _parseAppLifecycleMessage(message!);
     final List<AppLifecycleState> generated = _generateStateTransitions(lifecycleState, state!);
-    for (final AppLifecycleState stateChange in generated) {
+    for (final stateChange in generated) {
       handleAppLifecycleStateChanged(stateChange);
       SystemChrome.handleAppLifecycleStateChanged(stateChange);
     }
@@ -316,7 +316,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     if (previousState == state) {
       return const <AppLifecycleState>[];
     }
-    final List<AppLifecycleState> stateChanges = <AppLifecycleState>[];
+    final stateChanges = <AppLifecycleState>[];
     if (previousState == null) {
       // If there was no previous state, just jump directly to the new state.
       stateChanges.add(state);
@@ -331,7 +331,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
         }
         stateChanges.add(AppLifecycleState.detached);
       } else if (previousStateIndex > stateIndex) {
-        for (int i = stateIndex; i < previousStateIndex; ++i) {
+        for (var i = stateIndex; i < previousStateIndex; ++i) {
           stateChanges.insert(0, AppLifecycleState.values[i]);
         }
       } else {
@@ -342,8 +342,8 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     }
     assert(
       () {
-        AppLifecycleState? starting = previousState;
-        for (final AppLifecycleState ending in stateChanges) {
+        var starting = previousState;
+        for (final ending in stateChanges) {
           if (!_debugVerifyLifecycleChange(starting, ending)) {
             return false;
           }
@@ -385,7 +385,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   Future<void> _handleAccessibilityMessage(Object accessibilityMessage) async {
     final Map<String, dynamic> message = (accessibilityMessage as Map<Object?, Object?>)
         .cast<String, dynamic>();
-    final String type = message['type'] as String;
+    final type = message['type'] as String;
     switch (type) {
       case 'didGainFocus':
         accessibilityFocus.value = message['nodeId'] as int;
@@ -431,11 +431,11 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
           );
           return;
         }
-        final List<dynamic> args = methodCall.arguments as List<dynamic>;
-        final String callbackId = args[1] as String;
+        final args = methodCall.arguments as List<dynamic>;
+        final callbackId = args[1] as String;
         _systemContextMenuClient!.handleCustomContextMenuAction(callbackId);
       case 'SystemChrome.systemUIChange':
-        final List<dynamic> args = methodCall.arguments as List<dynamic>;
+        final args = methodCall.arguments as List<dynamic>;
         if (_systemUiChangeCallback != null) {
           await _systemUiChangeCallback!(args[0] as bool);
         }
@@ -624,7 +624,7 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
 
   @override
   Future<ByteData?> send(String channel, ByteData? message) {
-    final Completer<ByteData?> completer = Completer<ByteData?>();
+    final completer = Completer<ByteData?>();
     // ui.PlatformDispatcher.instance is accessed directly instead of using
     // ServicesBinding.instance.platformDispatcher because this method might be
     // invoked before any binding is initialized. This issue was reported in

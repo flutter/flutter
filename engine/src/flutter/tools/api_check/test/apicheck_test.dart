@@ -207,7 +207,7 @@ void checkApiConsistency(String flutterRoot) {
 
 /// Returns the PascalCase equivalent of an UPPER_SNAKE_CASE identifier.
 String upperSnakeCaseToPascalCase(String identifier) {
-  final StringBuffer buffer = StringBuffer();
+  final buffer = StringBuffer();
   for (final String word in identifier.split('_')) {
     if (word.isNotEmpty) {
       buffer.write(word[0]);
@@ -280,7 +280,7 @@ class NativeFunctionVisitor extends RecursiveAstVisitor<void> {
 
 void checkNativeApi(String flutterRoot) {
   test('Native API does not pass nullable parameters of simple types', () {
-    final NativeFunctionVisitor visitor = NativeFunctionVisitor();
+    final visitor = NativeFunctionVisitor();
     visitUIUnits(flutterRoot, visitor);
     expect(visitor.errors, isEmpty);
   });
