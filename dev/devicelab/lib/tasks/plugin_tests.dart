@@ -427,7 +427,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
           '--template=$template',
           '--org',
           'io.flutter.devicelab',
-          ...options,
+          if (template == 'app' && isDarwin) '--platforms=$target' else ...options,
           name,
         ],
         environment: environment,
@@ -490,14 +490,25 @@ end
   // Make the platform version artificially low to test that the "deployment
   // version too low" warning is never emitted.
   void _reduceDarwinPluginMinimumVersion(String plugin, String target) {
-    final podspec = File(path.join(rootPath, target, '$plugin.podspec'));
+    var podspec = File(path.join(rootPath, target, '$plugin.podspec'));
+    if (!podspec.existsSync()) {
+      // Fallback to darwin directory for shared darwin plugins
+      podspec = File(path.join(rootPath, 'darwin', '$plugin.podspec'));
+    }
     if (!podspec.existsSync()) {
       throw TaskResult.failure('podspec file missing at ${podspec.path}');
     }
-    final versionString = target == 'ios'
-        ? "s.platform = :ios, '13.0'"
-        : "s.platform = :osx, '10.11'";
     String podspecContent = podspec.readAsStringSync();
+    final bool isMultiPlatform = podspecContent.contains('s.osx.deployment_target');
+    final String versionString;
+    if (isMultiPlatform) {
+      versionString = target == 'ios'
+          ? "s.ios.deployment_target = '13.0'"
+          : "s.osx.deployment_target = '10.15'";
+    } else {
+      versionString = target == 'ios' ? "s.platform = :ios, '13.0'" : "s.platform = :osx, '10.11'";
+    }
+
     if (!podspecContent.contains(versionString)) {
       throw TaskResult.failure(
         'Update this test to match plugin minimum $target deployment version',
@@ -505,20 +516,18 @@ end
     }
     // Add transitive dependency on AppAuth 1.6 targeting iOS 8 and macOS 10.9, which no longer builds in Xcode
     // to test the version is forced higher and builds.
-    const iosContent = '''
-s.platform = :ios, '10.0'
-s.dependency 'AppAuth', '1.6.0'
-''';
+    final String replacementContent;
+    if (isMultiPlatform) {
+      replacementContent = target == 'ios'
+          ? "s.ios.deployment_target = '10.0'\n  s.dependency 'AppAuth', '1.6.0'"
+          : "s.osx.deployment_target = '10.8'\n  s.dependency 'AppAuth', '1.6.0'";
+    } else {
+      replacementContent = target == 'ios'
+          ? "s.platform = :ios, '10.0'\ns.dependency 'AppAuth', '1.6.0'"
+          : "s.platform = :osx, '10.8'\ns.dependency 'AppAuth', '1.6.0'";
+    }
 
-    const macosContent = '''
-s.platform = :osx, '10.8'
-s.dependency 'AppAuth', '1.6.0'
-''';
-
-    podspecContent = podspecContent.replaceFirst(
-      versionString,
-      target == 'ios' ? iosContent : macosContent,
-    );
+    podspecContent = podspecContent.replaceFirst(versionString, replacementContent);
     podspec.writeAsStringSync(podspecContent, flush: true);
   }
 

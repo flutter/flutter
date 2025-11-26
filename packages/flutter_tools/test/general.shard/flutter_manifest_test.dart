@@ -585,6 +585,64 @@ flutter:
     expect(flutterManifest.androidPackage, isNull);
   });
 
+  testWithoutContext('sharedDarwinSource is parsed correctly from plugin config', () {
+    const manifest = '''
+name: test
+flutter:
+  plugin:
+    implements: test
+    platforms:
+      ios:
+        pluginClass: HelloPlugin
+        sharedDarwinSource: true
+      macos:
+        pluginClass: HelloPlugin
+        sharedDarwinSource: true
+''';
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    )!;
+
+    expect(flutterManifest.isPlugin, isTrue);
+    final Map<String, dynamic>? validSupportedPlatforms = flutterManifest.validSupportedPlatforms;
+    expect(validSupportedPlatforms, isNotNull);
+
+    expect(validSupportedPlatforms!['ios'], <String, dynamic>{
+      'pluginClass': 'HelloPlugin',
+      'sharedDarwinSource': true,
+    });
+
+    expect(validSupportedPlatforms['macos'], <String, dynamic>{
+      'pluginClass': 'HelloPlugin',
+      'sharedDarwinSource': true,
+    });
+  });
+
+  testWithoutContext('sharedDarwinSource is false when not present in plugin config', () {
+    const manifest = '''
+name: test
+flutter:
+  plugin:
+    implements: test
+    platforms:
+      ios:
+        pluginClass: MyPlugin
+''';
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    )!;
+
+    expect(flutterManifest.isPlugin, isTrue);
+    final Map<String, dynamic>? validSupportedPlatforms = flutterManifest.validSupportedPlatforms;
+    expect(validSupportedPlatforms, isNotNull);
+
+    expect(validSupportedPlatforms!['ios'], <String, dynamic>{'pluginClass': 'MyPlugin'});
+
+    expect(validSupportedPlatforms['macos'], isNull);
+  });
+
   testWithoutContext('FlutterManifest handles an invalid plugin declaration', () {
     const manifest = '''
 name: test
