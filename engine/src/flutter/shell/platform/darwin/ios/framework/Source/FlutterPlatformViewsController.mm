@@ -672,9 +672,11 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
       if (self.platformTaskRunner->RunsTasksOnCurrentThread()) {
         [self performResize:self.frameSize];
       } else {
-        PostTaskSync(self.platformTaskRunner, [self, frameSize = self.frameSize]() mutable {
-          [self performResize:frameSize];
-        });
+        fml::TaskRunner::RunNowOrPostTask(
+            self.platformTaskRunner, fml::MakeCopyable([self, frameSize = self.frameSize]() {
+              FML_DCHECK(self);
+              [self performResize:frameSize];
+            }));
       }
     }
 
@@ -1018,19 +1020,5 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 - (std::vector<int64_t>&)previousCompositionOrder {
   return _previousCompositionOrder;
 }
-
-namespace {
-void PostTaskSync(const fml::RefPtr<fml::TaskRunner>& task_runner, fml::closure task) {
-  FML_DCHECK(!task_runner->RunsTasksOnCurrentThread());
-  fml::AutoResetWaitableEvent latch;
-  task_runner->PostTask([&latch, task = std::move(task)]() {
-    if (task) {
-      task();
-    }
-    latch.Signal();
-  });
-  latch.Wait();
-}
-}  // namespace
 
 @end
