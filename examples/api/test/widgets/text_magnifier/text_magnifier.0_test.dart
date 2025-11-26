@@ -102,8 +102,8 @@ void main() {
       TargetPlatform.iOS,
       TargetPlatform.android,
     }),
-    skip:
-        true, // This image is flaky. https://github.com/flutter/flutter/issues/144350
+    // This image is flaky. https://github.com/flutter/flutter/issues/144350
+    skip: true,
   );
 
   testWidgets('should show custom magnifier in RTL', (
