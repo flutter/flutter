@@ -93,7 +93,7 @@ Widget builds: $_widgetBuilds''';
     await Future<void>.delayed(const Duration(milliseconds: 3000));
     debugPrint('Calibrating...');
     late DateTime startTime;
-    int tickCount = 0;
+    var tickCount = 0;
     Ticker? ticker;
     ticker = createTicker((Duration time) {
       tickCount += 1;

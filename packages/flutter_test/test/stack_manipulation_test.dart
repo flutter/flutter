@@ -11,9 +11,9 @@ void main() {
       expect(false, isTrue);
       fail('unexpectedly did not throw');
     } catch (e, stack) {
-      final List<DiagnosticsNode> information = <DiagnosticsNode>[];
+      final information = <DiagnosticsNode>[];
       expect(reportExpectCall(stack, information), 4);
-      final TextTreeRenderer renderer = TextTreeRenderer();
+      final renderer = TextTreeRenderer();
       final List<String> lines = information
           .map((DiagnosticsNode node) => renderer.render(node).trimRight())
           .join('\n')
@@ -22,7 +22,7 @@ void main() {
       expect(lines[1], matches(r'^  .*stack_manipulation_test.dart line [0-9]+$'));
     }
 
-    final List<DiagnosticsNode> information = <DiagnosticsNode>[];
+    final information = <DiagnosticsNode>[];
     expect(reportExpectCall(StackTrace.current, information), 0);
     expect(information, isEmpty);
   });

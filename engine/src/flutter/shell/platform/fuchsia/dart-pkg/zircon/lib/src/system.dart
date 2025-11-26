@@ -239,6 +239,10 @@ base class System extends NativeFieldWrapperClass1 {
   @pragma('vm:external-name', 'System_VmoMap')
   external static MapResult vmoMap(Handle vmo);
 
+  // Iob operations.
+  @pragma('vm:external-name', 'System_IobWrite')
+  external static int iobWrite(Handle iob, int regionIndex, ByteData data);
+
   // Time operations.
   static int clockGetMonotonic() {
     if (zirconFFIBindings == null) {

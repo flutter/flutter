@@ -259,7 +259,7 @@ https://docs.flutter.dev/testing/integration-tests
     if (_vmService == null) {
       final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
       assert(info.serverUri != null);
-      final String address = 'ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws';
+      final address = 'ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws';
       try {
         _vmService = await _vmServiceConnectUri(address, httpClient: httpClient);
       } on SocketException catch (e, s) {
@@ -402,9 +402,9 @@ https://docs.flutter.dev/testing/integration-tests
     // TODO(CareF): remove this when flush FrameTiming is readily in engine.
     //              See https://github.com/flutter/flutter/issues/64808
     //              and https://github.com/flutter/flutter/issues/67593
-    final List<FrameTiming> frameTimings = <FrameTiming>[];
+    final frameTimings = <FrameTiming>[];
     Future<void> delayForFrameTimings() async {
-      int count = 0;
+      var count = 0;
       while (frameTimings.isEmpty) {
         count++;
         await Future<void>.delayed(const Duration(seconds: 2));
@@ -422,7 +422,7 @@ https://docs.flutter.dev/testing/integration-tests
     await delayForFrameTimings(); // make sure all FrameTimings are reported
     removeTimingsCallback(watcher);
 
-    final FrameTimingSummarizer frameTimes = FrameTimingSummarizer(
+    final frameTimes = FrameTimingSummarizer(
       frameTimings,
       newGenGCCount: gcInfo.newCount,
       oldGenGCCount: gcInfo.oldCount,
@@ -465,8 +465,8 @@ class _GarbageCollectionInfo {
 // is created before the test can change the HttpOverrides.
 Future<vm.VmService> _vmServiceConnectUri(String wsUri, {HttpClient? httpClient}) async {
   final WebSocket socket = await WebSocket.connect(wsUri, customClient: httpClient);
-  final StreamController<dynamic> controller = StreamController<dynamic>();
-  final Completer<void> streamClosedCompleter = Completer<void>();
+  final controller = StreamController<dynamic>();
+  final streamClosedCompleter = Completer<void>();
 
   socket.listen(
     (dynamic data) => controller.add(data),
