@@ -76,10 +76,6 @@ public final class FlutterShellArgs {
 
   // Manifest flags allowed in release mode:
 
-  /** Use Skia software backend for rendering. */
-  private static final Flag ENABLE_SOFTWARE_RENDERING =
-      new Flag("--enable-software-rendering", "EnableSoftwareRendering", true);
-
   /** Ensures deterministic Skia rendering by skipping CPU feature swaps. */
   private static final Flag SKIA_DETERMINISTIC_RENDERING =
       new Flag("--skia-deterministic-rendering", "SkiaDeterministicRendering", true);
@@ -135,6 +131,10 @@ public final class FlutterShellArgs {
       new Flag("--isolate-snapshot-data=", "IsolateSnapshotData", true);
 
   // Manifest flags NOT allowed in release mode:
+
+  /** Use Skia software backend for rendering. */
+  public static final Flag ENABLE_SOFTWARE_RENDERING =
+      new Flag("--enable-software-rendering", "EnableSoftwareRendering");
 
   /** Use the Ahem test font for font resolution. */
   private static final Flag USE_TEST_FONTS = new Flag("--use-test-fonts", "UseTestFonts");
