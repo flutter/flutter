@@ -1518,6 +1518,55 @@ void main() {
     expect(semantics.nodesWith(label: 'b'), hasLength(1));
     semantics.dispose();
   });
+
+  testWidgets(
+    'nested SliverMainAxisGroup with multiple PinnedHeaderSlivers positions correctly on scroll',
+    (WidgetTester tester) async {
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      final List<Key> keys = [GlobalKey(), GlobalKey(), GlobalKey(), GlobalKey()];
+      await tester.pumpWidget(
+        _buildSliverMainAxisGroup(
+          controller: controller,
+          viewportHeight: 300,
+          precedingSlivers: <Widget>[PinnedHeaderSliver(child: SizedBox(height: 30, key: keys[0]))],
+          otherSlivers: <Widget>[const SliverToBoxAdapter(child: SizedBox(height: 300))],
+          slivers: <Widget>[
+            PinnedHeaderSliver(child: SizedBox(height: 30, key: keys[1])),
+            SliverMainAxisGroup(
+              slivers: [
+                PinnedHeaderSliver(child: SizedBox(height: 30, key: keys[2])),
+                const SliverToBoxAdapter(child: SizedBox(height: 30)),
+                PinnedHeaderSliver(child: SizedBox(height: 30, key: keys[3])),
+                const SliverToBoxAdapter(child: SizedBox(height: 30)),
+              ],
+            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 30)),
+          ],
+        ),
+      );
+
+      void expectPosition(List<double> positions) {
+        for (var i = 0; i < keys.length; i++) {
+          expect(tester.getTopLeft(find.byKey(keys[i])).dy, positions[i]);
+        }
+      }
+
+      await tester.pumpAndSettle();
+      controller.jumpTo(10);
+      await tester.pumpAndSettle();
+      expectPosition([0.0, 30.0, 60.0, 110.0]);
+      controller.jumpTo(40);
+      await tester.pumpAndSettle();
+      expectPosition([0.0, 30.0, 60.0, 90.0]);
+      controller.jumpTo(70);
+      await tester.pumpAndSettle();
+      expectPosition([0.0, 30.0, 50.0, 80.0]);
+      controller.jumpTo(100);
+      await tester.pumpAndSettle();
+      expectPosition([0.0, 30.0, 20.0, 50.0]);
+    },
+  );
 }
 
 Widget _buildSliverList({
@@ -1559,6 +1608,7 @@ Widget _buildSliverMainAxisGroup({
   Axis scrollDirection = Axis.vertical,
   bool reverse = false,
   List<Widget> otherSlivers = const <Widget>[],
+  List<Widget> precedingSlivers = const <Widget>[],
 }) {
   return MaterialApp(
     home: Directionality(
@@ -1573,6 +1623,7 @@ Widget _buildSliverMainAxisGroup({
             reverse: reverse,
             controller: controller,
             slivers: <Widget>[
+              ...precedingSlivers,
               SliverMainAxisGroup(slivers: slivers),
               ...otherSlivers,
             ],
