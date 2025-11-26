@@ -332,6 +332,15 @@ class FlutterProject {
     return manifest;
   }
 
+  void reloadManifest({required Logger logger, required FileSystem fs}) {
+    _manifest = _readManifest(pubspecFile.path, logger: logger, fileSystem: fs);
+  }
+
+  String computeManifestMD5Hash({required Logger logger, required FileSystem fs}) {
+    reloadManifest(logger: logger, fs: fs);
+    return _manifest.computeMD5Hash();
+  }
+
   /// Replaces the content of [pubspecFile] with the contents of [updated] and
   /// sets [manifest] to the [updated] manifest.
   void replacePubspec(FlutterManifest updated) {
