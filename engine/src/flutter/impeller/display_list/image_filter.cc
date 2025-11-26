@@ -142,6 +142,9 @@ std::shared_ptr<FilterContents> WrapInput(const flutter::DlImageFilter* filter,
                                                runtime_filter->uniform_data(),
                                                std::move(texture_inputs));
     }
+    case flutter::DlImageFilterType::kCombine: {
+      return nullptr;
+    }
   }
   FML_UNREACHABLE();
 }

@@ -50,6 +50,13 @@ std::shared_ptr<DlImageFilter> DlImageFilter::MakeCompose(
   return DlComposeImageFilter::Make(outer, inner);
 }
 
+std::shared_ptr<DlImageFilter> DlImageFilter::MakeCombine(
+    const std::shared_ptr<DlImageFilter>& first,
+    const std::shared_ptr<DlImageFilter>& second,
+    const std::shared_ptr<DlImageFilter>& combiner) {
+  return DlCombineImageFilter::Make(first, second, combiner);
+}
+
 DlVector2 DlImageFilter::map_vectors_affine(const DlMatrix& ctm,
                                             DlScalar x,
                                             DlScalar y) {

@@ -320,6 +320,7 @@ class DisplayListGeneralReceiver : public DlOpReceiver {
         case DlImageFilterType::kLocalMatrix:
         case DlImageFilterType::kColorFilter:
         case DlImageFilterType::kRuntimeEffect:
+        case DlImageFilterType::kCombine:
           RecordByType(DisplayListOpType::kSetSharedImageFilter);
           break;
       }
