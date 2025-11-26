@@ -313,7 +313,7 @@ class RegularWindowControllerWin32 extends RegularWindowController {
   Size get contentSize {
     _ensureNotDestroyed();
     final _ActualContentSize size = _Win32PlatformInterface.getWindowContentSize(getWindowHandle());
-    final Size result = Size(size.width, size.height);
+    final result = Size(size.width, size.height);
     return result;
   }
 
@@ -553,7 +553,7 @@ class DialogWindowControllerWin32 extends DialogWindowController {
   Size get contentSize {
     _ensureNotDestroyed();
     final _ActualContentSize size = _Win32PlatformInterface.getWindowContentSize(getWindowHandle());
-    final Size result = Size(size.width, size.height);
+    final result = Size(size.width, size.height);
     return result;
   }
 
@@ -1043,8 +1043,8 @@ extension _Utf16Pointer on ffi.Pointer<_Utf16> {
       String.fromCharCodes(codeUnits.asTypedList(length));
 
   static String _toUnknownLengthString(ffi.Pointer<ffi.Uint16> codeUnits) {
-    final StringBuffer buffer = StringBuffer();
-    int i = 0;
+    final buffer = StringBuffer();
+    var i = 0;
     while (true) {
       final int char = (codeUnits + i).value;
       if (char == 0) {
@@ -1105,7 +1105,7 @@ final class _CallocAllocator implements ffi.Allocator {
   // ignore: always_specify_types
   void _fillMemory(ffi.Pointer destination, int length, int fill) {
     final ffi.Pointer<ffi.Uint8> ptr = destination.cast<ffi.Uint8>();
-    for (int i = 0; i < length; i++) {
+    for (var i = 0; i < length; i++) {
       ptr[i] = fill;
     }
   }

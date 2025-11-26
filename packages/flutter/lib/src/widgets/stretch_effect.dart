@@ -92,8 +92,8 @@ class StretchEffect extends StatelessWidget {
     }
 
     final TextDirection textDirection = Directionality.of(context);
-    double x = 1.0;
-    double y = 1.0;
+    var x = 1.0;
+    var y = 1.0;
 
     switch (axis) {
       case Axis.horizontal:
@@ -219,7 +219,7 @@ class _StretchOverscrollEffectState extends State<_StretchOverscrollEffect> {
 class _StretchEffectPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()
+    final paint = Paint()
       ..color = const Color.fromARGB(1, 0, 0, 0)
       ..style = PaintingStyle.fill;
 

@@ -24,7 +24,7 @@ void main() {
 
   testWidgets('OverflowEntries context contains Overlay', (WidgetTester tester) async {
     final GlobalKey overlayKey = GlobalKey();
-    bool didBuild = false;
+    var didBuild = false;
     late final OverlayEntry overlayEntry1;
     addTearDown(
       () => overlayEntry1
@@ -207,7 +207,7 @@ void main() {
   });
 
   test('of method calls getElementForInheritedWidgetOfExactType', () async {
-    final FakeBuildContext context = FakeBuildContext();
+    final context = FakeBuildContext();
     expect(context.called, isFalse);
     expect(Overlay.maybeOf(context), isNull);
     expect(context.called, isTrue);
@@ -215,7 +215,7 @@ void main() {
 
   testWidgets('insert top', (WidgetTester tester) async {
     final GlobalKey overlayKey = GlobalKey();
-    final List<String> buildOrder = <String>[];
+    final buildOrder = <String>[];
     late final OverlayEntry baseEntry;
     addTearDown(
       () => baseEntry
@@ -243,7 +243,7 @@ void main() {
     expect(buildOrder, <String>['Base']);
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState! as OverlayState;
+    final overlay = overlayKey.currentState! as OverlayState;
     late final OverlayEntry newEntry;
     addTearDown(
       () => newEntry
@@ -271,7 +271,7 @@ void main() {
         ..remove()
         ..dispose(),
     );
-    final List<String> buildOrder = <String>[];
+    final buildOrder = <String>[];
 
     await tester.pumpWidget(
       Directionality(
@@ -293,7 +293,7 @@ void main() {
     expect(buildOrder, <String>['Base']);
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState! as OverlayState;
+    final overlay = overlayKey.currentState! as OverlayState;
     late final OverlayEntry newEntry;
     addTearDown(
       () => newEntry
@@ -328,7 +328,7 @@ void main() {
         ..remove()
         ..dispose(),
     );
-    final List<String> buildOrder = <String>[];
+    final buildOrder = <String>[];
 
     await tester.pumpWidget(
       Directionality(
@@ -356,7 +356,7 @@ void main() {
     expect(buildOrder, <String>['Base', 'Top']);
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState! as OverlayState;
+    final overlay = overlayKey.currentState! as OverlayState;
     late final OverlayEntry newEntry;
     addTearDown(
       () => newEntry
@@ -379,7 +379,7 @@ void main() {
 
   testWidgets('insertAll top', (WidgetTester tester) async {
     final GlobalKey overlayKey = GlobalKey();
-    final List<String> buildOrder = <String>[];
+    final buildOrder = <String>[];
     late final OverlayEntry baseEntry;
     addTearDown(
       () => baseEntry
@@ -406,7 +406,7 @@ void main() {
 
     expect(buildOrder, <String>['Base']);
 
-    final List<OverlayEntry> entries = <OverlayEntry>[
+    final entries = <OverlayEntry>[
       OverlayEntry(
         builder: (BuildContext context) {
           buildOrder.add('New1');
@@ -421,7 +421,7 @@ void main() {
       ),
     ];
     addTearDown(() {
-      for (final OverlayEntry entry in entries) {
+      for (final entry in entries) {
         entry
           ..remove()
           ..dispose();
@@ -429,7 +429,7 @@ void main() {
     });
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState! as OverlayState;
+    final overlay = overlayKey.currentState! as OverlayState;
     overlay.insertAll(entries);
     await tester.pump();
 
@@ -444,7 +444,7 @@ void main() {
         ..remove()
         ..dispose(),
     );
-    final List<String> buildOrder = <String>[];
+    final buildOrder = <String>[];
 
     await tester.pumpWidget(
       Directionality(
@@ -465,7 +465,7 @@ void main() {
 
     expect(buildOrder, <String>['Base']);
 
-    final List<OverlayEntry> entries = <OverlayEntry>[
+    final entries = <OverlayEntry>[
       OverlayEntry(
         builder: (BuildContext context) {
           buildOrder.add('New1');
@@ -480,7 +480,7 @@ void main() {
       ),
     ];
     addTearDown(() {
-      for (final OverlayEntry entry in entries) {
+      for (final entry in entries) {
         entry
           ..remove()
           ..dispose();
@@ -488,7 +488,7 @@ void main() {
     });
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState! as OverlayState;
+    final overlay = overlayKey.currentState! as OverlayState;
     overlay.insertAll(entries, below: baseEntry);
     await tester.pump();
 
@@ -497,7 +497,7 @@ void main() {
 
   testWidgets('insertAll above', (WidgetTester tester) async {
     final GlobalKey overlayKey = GlobalKey();
-    final List<String> buildOrder = <String>[];
+    final buildOrder = <String>[];
     late final OverlayEntry baseEntry;
     addTearDown(
       () => baseEntry
@@ -536,7 +536,7 @@ void main() {
 
     expect(buildOrder, <String>['Base', 'Top']);
 
-    final List<OverlayEntry> entries = <OverlayEntry>[
+    final entries = <OverlayEntry>[
       OverlayEntry(
         builder: (BuildContext context) {
           buildOrder.add('New1');
@@ -551,7 +551,7 @@ void main() {
       ),
     ];
     addTearDown(() {
-      for (final OverlayEntry entry in entries) {
+      for (final entry in entries) {
         entry
           ..remove()
           ..dispose();
@@ -559,7 +559,7 @@ void main() {
     });
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState! as OverlayState;
+    final overlay = overlayKey.currentState! as OverlayState;
     overlay.insertAll(entries, above: baseEntry);
     await tester.pump();
 
@@ -568,8 +568,8 @@ void main() {
 
   testWidgets('rearrange', (WidgetTester tester) async {
     final GlobalKey overlayKey = GlobalKey();
-    final List<int> buildOrder = <int>[];
-    final List<OverlayEntry> initialEntries = <OverlayEntry>[
+    final buildOrder = <int>[];
+    final initialEntries = <OverlayEntry>[
       OverlayEntry(
         builder: (BuildContext context) {
           buildOrder.add(0);
@@ -596,7 +596,7 @@ void main() {
       ),
     ];
     addTearDown(() {
-      for (final OverlayEntry entry in initialEntries) {
+      for (final entry in initialEntries) {
         entry
           ..remove()
           ..dispose();
@@ -618,7 +618,7 @@ void main() {
         ..remove()
         ..dispose(),
     );
-    final List<OverlayEntry> rearranged = <OverlayEntry>[
+    final rearranged = <OverlayEntry>[
       initialEntries[3],
       newEntry = OverlayEntry(
         builder: (BuildContext context) {
@@ -632,7 +632,7 @@ void main() {
     ];
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState! as OverlayState;
+    final overlay = overlayKey.currentState! as OverlayState;
     overlay.rearrange(rearranged);
     await tester.pump();
 
@@ -641,9 +641,9 @@ void main() {
 
   testWidgets('rearrange above', (WidgetTester tester) async {
     final GlobalKey overlayKey = GlobalKey();
-    final List<int> buildOrder = <int>[];
+    final buildOrder = <int>[];
 
-    final List<OverlayEntry> initialEntries = <OverlayEntry>[
+    final initialEntries = <OverlayEntry>[
       OverlayEntry(
         builder: (BuildContext context) {
           buildOrder.add(0);
@@ -670,7 +670,7 @@ void main() {
       ),
     ];
     addTearDown(() {
-      for (final OverlayEntry entry in initialEntries) {
+      for (final entry in initialEntries) {
         entry
           ..remove()
           ..dispose();
@@ -692,7 +692,7 @@ void main() {
         ..remove()
         ..dispose(),
     );
-    final List<OverlayEntry> rearranged = <OverlayEntry>[
+    final rearranged = <OverlayEntry>[
       initialEntries[3],
       newEntry = OverlayEntry(
         builder: (BuildContext context) {
@@ -706,7 +706,7 @@ void main() {
     ];
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState! as OverlayState;
+    final overlay = overlayKey.currentState! as OverlayState;
     overlay.rearrange(rearranged, above: initialEntries[2]);
     await tester.pump();
 
@@ -715,8 +715,8 @@ void main() {
 
   testWidgets('rearrange below', (WidgetTester tester) async {
     final GlobalKey overlayKey = GlobalKey();
-    final List<int> buildOrder = <int>[];
-    final List<OverlayEntry> initialEntries = <OverlayEntry>[
+    final buildOrder = <int>[];
+    final initialEntries = <OverlayEntry>[
       OverlayEntry(
         builder: (BuildContext context) {
           buildOrder.add(0);
@@ -743,7 +743,7 @@ void main() {
       ),
     ];
     addTearDown(() {
-      for (final OverlayEntry entry in initialEntries) {
+      for (final entry in initialEntries) {
         entry
           ..remove()
           ..dispose();
@@ -765,7 +765,7 @@ void main() {
         ..remove()
         ..dispose(),
     );
-    final List<OverlayEntry> rearranged = <OverlayEntry>[
+    final rearranged = <OverlayEntry>[
       initialEntries[3],
       newEntry = OverlayEntry(
         builder: (BuildContext context) {
@@ -779,7 +779,7 @@ void main() {
     ];
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState! as OverlayState;
+    final overlay = overlayKey.currentState! as OverlayState;
     overlay.rearrange(rearranged, below: initialEntries[2]);
     await tester.pump();
 
@@ -804,7 +804,7 @@ void main() {
       ),
     );
 
-    final OverlayState overlay = overlayKey.currentState! as OverlayState;
+    final overlay = overlayKey.currentState! as OverlayState;
 
     try {
       overlay.insert(
@@ -968,10 +968,10 @@ void main() {
   testWidgets(
     'OverlayEntry.opaque can be changed when OverlayEntry is not part of an Overlay (yet)',
     (WidgetTester tester) async {
-      final GlobalKey<OverlayState> overlayKey = GlobalKey<OverlayState>();
+      final overlayKey = GlobalKey<OverlayState>();
       final Key root = UniqueKey();
       final Key top = UniqueKey();
-      final OverlayEntry rootEntry = OverlayEntry(
+      final rootEntry = OverlayEntry(
         builder: (BuildContext context) {
           return Container(key: root);
         },
@@ -991,7 +991,7 @@ void main() {
 
       expect(find.byKey(root), findsOneWidget);
 
-      final OverlayEntry newEntry = OverlayEntry(
+      final newEntry = OverlayEntry(
         builder: (BuildContext context) {
           return Container(key: top);
         },
@@ -1017,7 +1017,7 @@ void main() {
   testWidgets('OverlayEntries do not rebuild when opaqueness changes', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/45797.
 
-    final GlobalKey<OverlayState> overlayKey = GlobalKey<OverlayState>();
+    final overlayKey = GlobalKey<OverlayState>();
     final Key bottom = UniqueKey();
     final Key middle = UniqueKey();
     final Key top = UniqueKey();
@@ -1025,7 +1025,7 @@ void main() {
     final Widget middleWidget = StatefulTestWidget(key: middle);
     final Widget topWidget = StatefulTestWidget(key: top);
 
-    final OverlayEntry bottomEntry = OverlayEntry(
+    final bottomEntry = OverlayEntry(
       maintainState: true,
       builder: (BuildContext context) {
         return bottomWidget;
@@ -1036,7 +1036,7 @@ void main() {
         ..remove()
         ..dispose(),
     );
-    final OverlayEntry middleEntry = OverlayEntry(
+    final middleEntry = OverlayEntry(
       maintainState: true,
       builder: (BuildContext context) {
         return middleWidget;
@@ -1047,7 +1047,7 @@ void main() {
         ..remove()
         ..dispose(),
     );
-    final OverlayEntry topEntry = OverlayEntry(
+    final topEntry = OverlayEntry(
       maintainState: true,
       builder: (BuildContext context) {
         return topWidget;
@@ -1092,7 +1092,7 @@ void main() {
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/45797.
 
-    final GlobalKey<OverlayState> overlayKey = GlobalKey<OverlayState>();
+    final overlayKey = GlobalKey<OverlayState>();
     final Key bottom = UniqueKey();
     final Key middle = UniqueKey();
     final Key top = UniqueKey();
@@ -1100,7 +1100,7 @@ void main() {
     final Widget middleWidget = StatefulTestWidget(key: middle);
     final Widget topWidget = StatefulTestWidget(key: top);
 
-    final OverlayEntry bottomEntry = OverlayEntry(
+    final bottomEntry = OverlayEntry(
       maintainState: true,
       builder: (BuildContext context) {
         return bottomWidget;
@@ -1111,7 +1111,7 @@ void main() {
         ..remove()
         ..dispose(),
     );
-    final OverlayEntry middleEntry = OverlayEntry(
+    final middleEntry = OverlayEntry(
       opaque: true,
       maintainState: true,
       builder: (BuildContext context) {
@@ -1123,7 +1123,7 @@ void main() {
         ..remove()
         ..dispose(),
     );
-    final OverlayEntry topEntry = OverlayEntry(
+    final topEntry = OverlayEntry(
       maintainState: true,
       builder: (BuildContext context) {
         return topWidget;
@@ -1162,8 +1162,8 @@ void main() {
   testWidgets('entries below opaque entries are ignored for hit testing', (
     WidgetTester tester,
   ) async {
-    final GlobalKey<OverlayState> overlayKey = GlobalKey<OverlayState>();
-    int bottomTapCount = 0;
+    final overlayKey = GlobalKey<OverlayState>();
+    var bottomTapCount = 0;
     late final OverlayEntry baseEntry;
     addTearDown(
       () => baseEntry
@@ -1225,7 +1225,7 @@ void main() {
     ); // gesture detector is translucent; no hit is registered between it and the render view
     expect(bottomTapCount, 1);
 
-    int topTapCount = 0;
+    var topTapCount = 0;
     late final OverlayEntry newEntry2;
     addTearDown(
       () => newEntry2
@@ -1257,8 +1257,8 @@ void main() {
   });
 
   testWidgets('Semantics of entries below opaque entries are ignored', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    final GlobalKey<OverlayState> overlayKey = GlobalKey<OverlayState>();
+    final semantics = SemanticsTester(tester);
+    final overlayKey = GlobalKey<OverlayState>();
     late final OverlayEntry bottomEntry;
     addTearDown(
       () => bottomEntry
@@ -1362,7 +1362,7 @@ void main() {
       );
 
       expect((renderObject as dynamic).clipBehavior, clip);
-      bool visited = false;
+      var visited = false;
       renderObject.visitChildren((RenderObject child) {
         visited = true;
         switch (clip) {
@@ -1417,7 +1417,7 @@ void main() {
       const Directionality(textDirection: TextDirection.ltr, child: Overlay()),
     );
     final OverlayState overlay = tester.state(find.byType(Overlay));
-    final OverlayEntry entry = OverlayEntry(builder: (BuildContext context) => const SizedBox());
+    final entry = OverlayEntry(builder: (BuildContext context) => const SizedBox());
     addTearDown(
       () => entry
         ..remove()
@@ -1492,9 +1492,9 @@ void main() {
 
     testWidgets('mounted state can be listened', (WidgetTester tester) async {
       await tester.pumpWidget(emptyOverlay);
-      final OverlayState overlay = overlayKey.currentState! as OverlayState;
-      final List<bool> mountedLog = <bool>[];
-      final OverlayEntry entry = OverlayEntry(builder: (BuildContext context) => Container());
+      final overlay = overlayKey.currentState! as OverlayState;
+      final mountedLog = <bool>[];
+      final entry = OverlayEntry(builder: (BuildContext context) => Container());
       addTearDown(entry.dispose);
 
       entry.addListener(() {
@@ -1524,8 +1524,8 @@ void main() {
 
     testWidgets('throw if disposed before removal', (WidgetTester tester) async {
       await tester.pumpWidget(emptyOverlay);
-      final OverlayState overlay = overlayKey.currentState! as OverlayState;
-      final OverlayEntry entry = OverlayEntry(builder: (BuildContext context) => Container());
+      final overlay = overlayKey.currentState! as OverlayState;
+      final entry = OverlayEntry(builder: (BuildContext context) => Container());
       addTearDown(
         () => entry
           ..remove()
@@ -1544,7 +1544,7 @@ void main() {
     });
 
     test('dispose works', () {
-      final OverlayEntry entry = OverlayEntry(builder: (BuildContext context) => Container());
+      final entry = OverlayEntry(builder: (BuildContext context) => Container());
 
       entry.dispose();
       expect(() => entry.addListener(() {}), throwsAssertionError);
@@ -1552,9 +1552,9 @@ void main() {
 
     testWidgets('delayed dispose', (WidgetTester tester) async {
       await tester.pumpWidget(emptyOverlay);
-      final OverlayState overlay = overlayKey.currentState! as OverlayState;
-      final List<bool> mountedLog = <bool>[];
-      final OverlayEntry entry = OverlayEntry(builder: (BuildContext context) => Container());
+      final overlay = overlayKey.currentState! as OverlayState;
+      final mountedLog = <bool>[];
+      final entry = OverlayEntry(builder: (BuildContext context) => Container());
       entry.addListener(() {
         mountedLog.add(entry.mounted);
       });
@@ -1577,8 +1577,8 @@ void main() {
 
     testWidgets('asserts when remove is called twice', (WidgetTester tester) async {
       await tester.pumpWidget(emptyOverlay);
-      final OverlayState overlay = overlayKey.currentState! as OverlayState;
-      final OverlayEntry entry = OverlayEntry(builder: (BuildContext context) => Container());
+      final overlay = overlayKey.currentState! as OverlayState;
+      final entry = OverlayEntry(builder: (BuildContext context) => Container());
       addTearDown(entry.dispose);
 
       overlay.insert(entry);
@@ -1665,7 +1665,7 @@ void main() {
       );
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
-      final FlutterError error = exception! as FlutterError;
+      final error = exception! as FlutterError;
 
       expect(
         error.toStringDeep(),
@@ -1715,7 +1715,7 @@ void main() {
       );
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
-      final FlutterError error = exception! as FlutterError;
+      final error = exception! as FlutterError;
 
       expect(
         error.toStringDeep(),
@@ -1781,7 +1781,7 @@ void main() {
   testWidgets('Overlay is sized by child in an unconstrained environment', (
     WidgetTester tester,
   ) async {
-    final OverlayEntry initialEntry = OverlayEntry(
+    final initialEntry = OverlayEntry(
       opaque: true,
       canSizeOverlay: true,
       builder: (BuildContext context) {
@@ -1805,7 +1805,7 @@ void main() {
 
     final OverlayState overlay = tester.state<OverlayState>(find.byType(Overlay));
 
-    final OverlayEntry nonSizingEntry = OverlayEntry(
+    final nonSizingEntry = OverlayEntry(
       builder: (BuildContext context) {
         return const SizedBox(width: 600, height: 600, child: Center(child: Text('Hello')));
       },
@@ -1817,7 +1817,7 @@ void main() {
     expect(tester.getSize(find.byType(Overlay)), const Size(123, 456));
     expect(find.text('Hello'), findsOneWidget);
 
-    final OverlayEntry sizingEntry = OverlayEntry(
+    final sizingEntry = OverlayEntry(
       canSizeOverlay: true,
       builder: (BuildContext context) {
         return const SizedBox(width: 222, height: 111, child: Center(child: Text('World')));
@@ -1845,7 +1845,7 @@ void main() {
   });
 
   testWidgets('Overlay throws if unconstrained and has no child', (WidgetTester tester) async {
-    final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
+    final errors = <FlutterErrorDetails>[];
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     FlutterError.onError = errors.add;
 
@@ -1866,11 +1866,11 @@ void main() {
   testWidgets('Overlay throws if unconstrained and only positioned child', (
     WidgetTester tester,
   ) async {
-    final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
+    final errors = <FlutterErrorDetails>[];
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     FlutterError.onError = errors.add;
 
-    final OverlayEntry entry = OverlayEntry(
+    final entry = OverlayEntry(
       canSizeOverlay: true,
       builder: (BuildContext context) {
         return const Positioned(top: 100, child: SizedBox(width: 600, height: 600));
@@ -1899,11 +1899,11 @@ void main() {
   testWidgets('Overlay throws if unconstrained and no canSizeOverlay child', (
     WidgetTester tester,
   ) async {
-    final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
+    final errors = <FlutterErrorDetails>[];
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     FlutterError.onError = errors.add;
 
-    final OverlayEntry entry = OverlayEntry(
+    final entry = OverlayEntry(
       builder: (BuildContext context) {
         return const SizedBox(width: 600, height: 600);
       },

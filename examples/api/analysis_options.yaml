@@ -1,6 +1,11 @@
 # This file is also used by dev/bots/analyze_snippet_code.dart to analyze code snippets (`{@tool snippet}` sections).
 
-include: ../../analysis_options.yaml #TODO(Piinks): Replace with flutter_lints after pub roll.
+# include: ../../analysis_options.yaml #TODO(Piinks): Replace with flutter_lints - separate change.
+
+analyzer:
+  errors:
+    # We have some clean up to do here. Landing examples/api update separately.
+    deprecated_member_use: ignore
 
 linter:
   rules:

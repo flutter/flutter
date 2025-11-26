@@ -51,7 +51,7 @@ void main() {
   }
 
   testWidgets('SearchBar defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
     final ColorScheme colorScheme = theme.colorScheme;
 
     await tester.pumpWidget(
@@ -71,8 +71,8 @@ void main() {
   });
 
   testWidgets('SearchBar respects controller property', (WidgetTester tester) async {
-    const String defaultText = 'default text';
-    final TextEditingController controller = TextEditingController(text: defaultText);
+    const defaultText = 'default text';
+    final controller = TextEditingController(text: defaultText);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -84,7 +84,7 @@ void main() {
     expect(controller.value.text, defaultText);
     expect(find.text(defaultText), findsOneWidget);
 
-    const String updatedText = 'updated text';
+    const updatedText = 'updated text';
     await tester.enterText(find.byType(SearchBar), updatedText);
     expect(controller.value.text, updatedText);
     expect(find.text(defaultText), findsNothing);
@@ -92,7 +92,7 @@ void main() {
   });
 
   testWidgets('SearchBar respects focusNode property', (WidgetTester tester) async {
-    final FocusNode node = FocusNode();
+    final node = FocusNode();
     addTearDown(node.dispose);
 
     await tester.pumpWidget(
@@ -113,7 +113,7 @@ void main() {
   });
 
   testWidgets('SearchBar focusNode is hot swappable', (WidgetTester tester) async {
-    final FocusNode node1 = FocusNode();
+    final node1 = FocusNode();
     addTearDown(node1.dispose);
 
     await tester.pumpWidget(
@@ -132,7 +132,7 @@ void main() {
     await tester.pump();
     expect(node1.hasFocus, isFalse);
 
-    final FocusNode node2 = FocusNode();
+    final node2 = FocusNode();
     addTearDown(node2.dispose);
 
     await tester.pumpWidget(
@@ -229,7 +229,7 @@ void main() {
   });
 
   testWidgets('SearchBar respects hintText property', (WidgetTester tester) async {
-    const String hintText = 'hint text';
+    const hintText = 'hint text';
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(child: SearchBar(hintText: hintText)),
@@ -240,7 +240,7 @@ void main() {
   });
 
   testWidgets('SearchBar respects leading property', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
     final ColorScheme colorScheme = theme.colorScheme;
     await tester.pumpWidget(
       MaterialApp(
@@ -258,7 +258,7 @@ void main() {
   });
 
   testWidgets('SearchBar respects trailing property', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
     final ColorScheme colorScheme = theme.colorScheme;
     await tester.pumpWidget(
       MaterialApp(
@@ -276,7 +276,7 @@ void main() {
   });
 
   testWidgets('SearchBar respects onTap property', (WidgetTester tester) async {
-    int tapCount = 0;
+    var tapCount = 0;
     await tester.pumpWidget(
       MaterialApp(
         home: StatefulBuilder(
@@ -302,7 +302,7 @@ void main() {
   });
 
   testWidgets('SearchBar respects onChanged property', (WidgetTester tester) async {
-    int changeCount = 0;
+    var changeCount = 0;
     await tester.pumpWidget(
       MaterialApp(
         home: StatefulBuilder(
@@ -329,7 +329,7 @@ void main() {
   });
 
   testWidgets('SearchBar respects onSubmitted property', (WidgetTester tester) async {
-    String submittedQuery = '';
+    var submittedQuery = '';
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -349,7 +349,7 @@ void main() {
   });
 
   testWidgets('SearchBar respects constraints property', (WidgetTester tester) async {
-    const BoxConstraints constraints = BoxConstraints(maxWidth: 350.0, minHeight: 80);
+    const constraints = BoxConstraints(maxWidth: 350.0, minHeight: 80);
     await tester.pumpWidget(
       const MaterialApp(
         home: Center(
@@ -363,10 +363,10 @@ void main() {
   });
 
   testWidgets('SearchBar respects elevation property', (WidgetTester tester) async {
-    const double pressedElevation = 0.0;
-    const double hoveredElevation = 1.0;
-    const double focusedElevation = 2.0;
-    const double defaultElevation = 3.0;
+    const pressedElevation = 0.0;
+    const hoveredElevation = 1.0;
+    const focusedElevation = 2.0;
+    const defaultElevation = 3.0;
     double getElevation(Set<WidgetState> states) {
       if (states.contains(WidgetState.pressed)) {
         return pressedElevation;
@@ -540,7 +540,7 @@ void main() {
   });
 
   testWidgets('SearchBar respects overlayColor property', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
@@ -598,10 +598,10 @@ void main() {
   });
 
   testWidgets('SearchBar respects side and shape properties', (WidgetTester tester) async {
-    const BorderSide pressedSide = BorderSide(width: 2.0);
-    const BorderSide hoveredSide = BorderSide(width: 3.0);
-    const BorderSide focusedSide = BorderSide(width: 4.0);
-    const BorderSide defaultSide = BorderSide(width: 5.0);
+    const pressedSide = BorderSide(width: 2.0);
+    const hoveredSide = BorderSide(width: 3.0);
+    const focusedSide = BorderSide(width: 4.0);
+    const defaultSide = BorderSide(width: 5.0);
 
     const OutlinedBorder pressedShape = RoundedRectangleBorder();
     const OutlinedBorder hoveredShape = ContinuousRectangleBorder();
@@ -738,7 +738,7 @@ void main() {
   });
 
   testWidgets('SearchBar respects textStyle property', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(text: 'input text');
+    final controller = TextEditingController(text: 'input text');
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -850,10 +850,10 @@ void main() {
   testWidgets('SearchAnchor respects viewOnChanged and viewOnSubmitted properties', (
     WidgetTester tester,
   ) async {
-    final SearchController controller = SearchController();
+    final controller = SearchController();
     addTearDown(controller.dispose);
-    int onChangedCalled = 0;
-    int onSubmittedCalled = 0;
+    var onChangedCalled = 0;
+    var onSubmittedCalled = 0;
     await tester.pumpWidget(
       MaterialApp(
         home: StatefulBuilder(
@@ -946,10 +946,10 @@ void main() {
   testWidgets('SearchAnchor.bar respects onChanged and onSubmitted properties', (
     WidgetTester tester,
   ) async {
-    final SearchController controller = SearchController();
+    final controller = SearchController();
     addTearDown(controller.dispose);
-    int onChangedCalled = 0;
-    int onSubmittedCalled = 0;
+    var onChangedCalled = 0;
+    var onSubmittedCalled = 0;
     await tester.pumpWidget(
       MaterialApp(
         home: StatefulBuilder(
@@ -1058,7 +1058,7 @@ void main() {
   });
 
   testWidgets('The search view defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
     final ColorScheme colorScheme = theme.colorScheme;
     await tester.pumpWidget(
       MaterialApp(
@@ -1094,7 +1094,7 @@ void main() {
     final Container dividerContainer = tester.widget<Container>(
       find.descendant(of: findDivider, matching: find.byType(Container)).first,
     );
-    final BoxDecoration decoration = dividerContainer.decoration! as BoxDecoration;
+    final decoration = dividerContainer.decoration! as BoxDecoration;
     expect(decoration.border!.bottom.color, colorScheme.outline);
 
     // Default search view has a leading back button on the start of the header.
@@ -1106,7 +1106,7 @@ void main() {
     expect(helperText.style?.fontFamily, 'Roboto');
     expect(helperText.style?.fontWeight, FontWeight.w400);
 
-    const String input = 'entered text';
+    const input = 'entered text';
     await tester.enterText(find.byType(SearchBar), input);
     final EditableText inputText = tester.widget(find.text(input));
     expect(inputText.style.color, colorScheme.onSurface);
@@ -1141,7 +1141,7 @@ void main() {
       );
     }
 
-    for (final TargetPlatform platform in <TargetPlatform>[
+    for (final platform in <TargetPlatform>[
       TargetPlatform.iOS,
       TargetPlatform.android,
       TargetPlatform.fuchsia,
@@ -1157,10 +1157,7 @@ void main() {
       expect(size.height, 600.0);
     }
 
-    for (final TargetPlatform platform in <TargetPlatform>[
-      TargetPlatform.linux,
-      TargetPlatform.windows,
-    ]) {
+    for (final platform in <TargetPlatform>[TargetPlatform.linux, TargetPlatform.windows]) {
       await tester.pumpWidget(Container());
       await tester.pumpWidget(buildSearchAnchor(platform));
       await tester.tap(find.byIcon(Icons.search));
@@ -1198,10 +1195,7 @@ void main() {
       );
     }
 
-    for (final TargetPlatform platform in <TargetPlatform>[
-      TargetPlatform.linux,
-      TargetPlatform.windows,
-    ]) {
+    for (final platform in <TargetPlatform>[TargetPlatform.linux, TargetPlatform.windows]) {
       await tester.pumpWidget(Container());
       await tester.pumpWidget(buildSearchAnchor(platform));
       await tester.tap(find.byIcon(Icons.search));
@@ -1215,8 +1209,8 @@ void main() {
   });
 
   testWidgets('SearchAnchor respects controller property', (WidgetTester tester) async {
-    const String defaultText = 'initial text';
-    final SearchController controller = SearchController();
+    const defaultText = 'initial text';
+    final controller = SearchController();
     addTearDown(controller.dispose);
     controller.text = defaultText;
 
@@ -1246,7 +1240,7 @@ void main() {
     expect(controller.value.text, defaultText);
     expect(find.text(defaultText), findsOneWidget);
 
-    const String updatedText = 'updated text';
+    const updatedText = 'updated text';
     await tester.enterText(find.byType(SearchBar), updatedText);
     expect(controller.value.text, updatedText);
     expect(find.text(defaultText), findsNothing);
@@ -1264,7 +1258,7 @@ void main() {
       return const <Widget>[];
     }
 
-    final SearchController controller1 = SearchController();
+    final controller1 = SearchController();
     addTearDown(controller1.dispose);
 
     expect(controller1.isAttached, isFalse);
@@ -1293,7 +1287,7 @@ void main() {
 
     expect(controller1.isAttached, isFalse);
 
-    final SearchController controller2 = SearchController();
+    final controller2 = SearchController();
     addTearDown(controller2.dispose);
 
     expect(controller2.isAttached, isFalse);
@@ -1581,7 +1575,7 @@ void main() {
   });
 
   testWidgets('SearchAnchor respects viewSide property', (WidgetTester tester) async {
-    const BorderSide side = BorderSide(color: Colors.purple, width: 5.0);
+    const side = BorderSide(color: Colors.purple, width: 5.0);
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -1613,7 +1607,7 @@ void main() {
   });
 
   testWidgets('SearchAnchor respects viewShape property', (WidgetTester tester) async {
-    const BorderSide side = BorderSide(color: Colors.purple, width: 5.0);
+    const side = BorderSide(color: Colors.purple, width: 5.0);
     const OutlinedBorder shape = StadiumBorder(side: side);
 
     await tester.pumpWidget(
@@ -1852,7 +1846,7 @@ void main() {
     final Container dividerContainer = tester.widget<Container>(
       find.descendant(of: findDivider, matching: find.byType(Container)).first,
     );
-    final BoxDecoration decoration = dividerContainer.decoration! as BoxDecoration;
+    final decoration = dividerContainer.decoration! as BoxDecoration;
     expect(decoration.border!.bottom.color, Colors.red);
   });
 
@@ -2009,9 +2003,9 @@ void main() {
   });
 
   testWidgets('SearchAnchor respects suggestionsBuilder property', (WidgetTester tester) async {
-    final SearchController controller = SearchController();
+    final controller = SearchController();
     addTearDown(controller.dispose);
-    const String suggestion = 'suggestion text';
+    const suggestion = 'suggestion text';
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2059,8 +2053,8 @@ void main() {
   testWidgets('SearchAnchor should update suggestions on changes to search controller', (
     WidgetTester tester,
   ) async {
-    final SearchController controller = SearchController();
-    const List<String> suggestions = <String>['foo', 'far', 'bim'];
+    final controller = SearchController();
+    const suggestions = <String>['foo', 'far', 'bim'];
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -2151,9 +2145,9 @@ void main() {
   testWidgets('SearchAnchor suggestionsBuilder property could be async', (
     WidgetTester tester,
   ) async {
-    final SearchController controller = SearchController();
+    final controller = SearchController();
     addTearDown(controller.dispose);
-    const String suggestion = 'suggestion text';
+    const suggestion = 'suggestion text';
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2235,7 +2229,7 @@ void main() {
   });
 
   testWidgets('SearchController can open/close view', (WidgetTester tester) async {
-    final SearchController controller = SearchController();
+    final controller = SearchController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -2528,7 +2522,7 @@ void main() {
               },
               suggestionsBuilder: (BuildContext context, SearchController controller) {
                 return List<Widget>.generate(5, (int index) {
-                  final String item = 'item $index';
+                  final item = 'item $index';
                   return ListTile(
                     leading: const Icon(Icons.history),
                     title: Text(item),
@@ -2557,7 +2551,7 @@ void main() {
   testWidgets('Docked search should position itself correctly based on closest navigator', (
     WidgetTester tester,
   ) async {
-    const double rootSpacing = 100.0;
+    const rootSpacing = 100.0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2601,7 +2595,7 @@ void main() {
     tester.view.physicalSize = const Size(400.0, 400.0);
     tester.view.devicePixelRatio = 1.0;
 
-    const double rootSpacing = 100.0;
+    const rootSpacing = 100.0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2644,8 +2638,8 @@ void main() {
   // Regression tests for https://github.com/flutter/flutter/issues/128332
   group('SearchAnchor text selection', () {
     testWidgets('can right-click to select word', (WidgetTester tester) async {
-      const String defaultText = 'initial text';
-      final SearchController controller = SearchController();
+      const defaultText = 'initial text';
+      final controller = SearchController();
       addTearDown(controller.dispose);
       controller.text = defaultText;
 
@@ -2678,8 +2672,8 @@ void main() {
     }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
 
     testWidgets('can click to set position', (WidgetTester tester) async {
-      const String defaultText = 'initial text';
-      final SearchController controller = SearchController();
+      const defaultText = 'initial text';
+      final controller = SearchController();
       addTearDown(controller.dispose);
       controller.text = defaultText;
 
@@ -2715,8 +2709,8 @@ void main() {
     }, variant: TargetPlatformVariant.desktop());
 
     testWidgets('can double-click to select word', (WidgetTester tester) async {
-      const String defaultText = 'initial text';
-      final SearchController controller = SearchController();
+      const defaultText = 'initial text';
+      final controller = SearchController();
       addTearDown(controller.dispose);
       controller.text = defaultText;
 
@@ -2759,8 +2753,8 @@ void main() {
     }, variant: TargetPlatformVariant.desktop());
 
     testWidgets('can triple-click to select field', (WidgetTester tester) async {
-      const String defaultText = 'initial text';
-      final SearchController controller = SearchController();
+      const defaultText = 'initial text';
+      final controller = SearchController();
       addTearDown(controller.dispose);
       controller.text = defaultText;
 
@@ -2810,7 +2804,7 @@ void main() {
 
   // Regression tests for https://github.com/flutter/flutter/issues/126623
   group('Overall InputDecorationThemeData does not impact SearchBar and SearchView', () {
-    const InputDecorationThemeData inputDecorationTheme = InputDecorationThemeData(
+    const inputDecorationTheme = InputDecorationThemeData(
       focusColor: Colors.green,
       hoverColor: Colors.blue,
       outlineBorder: BorderSide(color: Colors.pink, width: 10),
@@ -2828,7 +2822,7 @@ void main() {
       disabledBorder: UnderlineInputBorder(),
       constraints: BoxConstraints(maxWidth: 300),
     );
-    final ThemeData theme = ThemeData(inputDecorationTheme: inputDecorationTheme);
+    final theme = ThemeData(inputDecorationTheme: inputDecorationTheme);
 
     void checkDecorationInSearchBar(WidgetTester tester) {
       final Finder textField = findTextField();
@@ -2918,7 +2912,7 @@ void main() {
       final Text hintText = tester.widget(find.text('hint text'));
       expect(hintText.style?.color, theme.colorScheme.onSurfaceVariant);
 
-      const String input = 'entered text';
+      const input = 'entered text';
       await tester.enterText(find.byType(SearchBar), input);
       final EditableText inputText = tester.widget(find.text(input));
       expect(inputText.style.color, theme.colorScheme.onSurface);
@@ -2949,7 +2943,7 @@ void main() {
       );
     }
 
-    ThemeData theme = ThemeData(brightness: Brightness.light);
+    var theme = ThemeData(brightness: Brightness.light);
     await tester.pumpWidget(buildSearchAnchor(theme));
 
     // Open the search view.
@@ -2971,8 +2965,8 @@ void main() {
   });
 
   testWidgets('Search view widgets can inherit local themes', (WidgetTester tester) async {
-    final ThemeData globalTheme = ThemeData(colorSchemeSeed: Colors.red);
-    final ThemeData localTheme = ThemeData(
+    final globalTheme = ThemeData(colorSchemeSeed: Colors.red);
+    final localTheme = ThemeData(
       colorSchemeSeed: Colors.green,
       iconButtonTheme: IconButtonThemeData(
         style: IconButton.styleFrom(backgroundColor: const Color(0xffffff00)),
@@ -3221,8 +3215,8 @@ void main() {
   });
 
   testWidgets('Block entering text on disabled widget', (WidgetTester tester) async {
-    const String initValue = 'init';
-    final TextEditingController controller = TextEditingController(text: initValue);
+    const initValue = 'init';
+    final controller = TextEditingController(text: initValue);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -3233,7 +3227,7 @@ void main() {
       ),
     );
 
-    const String testValue = 'abcdefghi';
+    const testValue = 'abcdefghi';
     await tester.enterText(find.byType(SearchBar), testValue);
     expect(controller.value.text, initValue);
   });
@@ -3241,8 +3235,8 @@ void main() {
   testWidgets('Block entering text on disabled widget with SearchAnchor.bar', (
     WidgetTester tester,
   ) async {
-    const String initValue = 'init';
-    final TextEditingController controller = TextEditingController(text: initValue);
+    const initValue = 'init';
+    final controller = TextEditingController(text: initValue);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -3260,7 +3254,7 @@ void main() {
       ),
     );
 
-    const String testValue = 'abcdefghi';
+    const testValue = 'abcdefghi';
     await tester.enterText(find.byType(SearchBar), testValue);
     expect(controller.value.text, initValue);
   });
@@ -3268,8 +3262,8 @@ void main() {
   testWidgets('Disabled SearchBar semantics node still contains value and inputType', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    final TextEditingController controller = TextEditingController(text: 'text');
+    final semantics = SemanticsTester(tester);
+    final controller = TextEditingController(text: 'text');
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -3292,7 +3286,7 @@ void main() {
   });
 
   testWidgets('SearchBar semantics node has search input type', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -3435,7 +3429,7 @@ void main() {
   testWidgets(
     'Tapping outside searchbar should unfocus the searchbar on mobile',
     (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+      final focusNode = FocusNode(debugLabel: 'Test Node');
       addTearDown(focusNode.dispose);
       await tester.pumpWidget(
         MaterialApp(
@@ -3459,7 +3453,7 @@ void main() {
               },
               suggestionsBuilder: (BuildContext context, SearchController controller) {
                 return List<ListTile>.generate(5, (int index) {
-                  final String item = 'item $index';
+                  final item = 'item $index';
                   return ListTile(title: Text(item));
                 });
               },
@@ -3513,7 +3507,7 @@ void main() {
   testWidgets('suggestionsBuilder with Future is not called twice on layout resize', (
     WidgetTester tester,
   ) async {
-    int suggestionsLoadingCount = 0;
+    var suggestionsLoadingCount = 0;
 
     Future<List<String>> createListData() async {
       return List<String>.generate(1000, (int index) {
@@ -3574,7 +3568,7 @@ void main() {
   testWidgets('suggestionsBuilder is not called when the search value does not change', (
     WidgetTester tester,
   ) async {
-    int suggestionsBuilderCalledCount = 0;
+    var suggestionsBuilderCalledCount = 0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -3617,7 +3611,7 @@ void main() {
 
   testWidgets('Suggestions gets refreshed after long API call', (WidgetTester tester) async {
     Timer? debounceTimer;
-    const Duration apiCallDuration = Duration(seconds: 1);
+    const apiCallDuration = Duration(seconds: 1);
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -3627,14 +3621,14 @@ void main() {
                 return const Icon(Icons.search);
               },
               suggestionsBuilder: (BuildContext context, SearchController controller) async {
-                final Completer<List<String>> completer = Completer<List<String>>();
+                final completer = Completer<List<String>>();
                 debounceTimer?.cancel();
                 debounceTimer = Timer(apiCallDuration, () {
                   completer.complete(List<String>.generate(10, (int index) => 'Item - $index'));
                 });
                 final List<String> options = await completer.future;
 
-                final List<Widget> suggestions = List<Widget>.generate(options.length, (int index) {
+                final suggestions = List<Widget>.generate(options.length, (int index) {
                   final String item = options[index];
                   return ListTile(title: Text(item));
                 });
@@ -3764,7 +3758,7 @@ void main() {
           tester.view.reset();
         });
 
-        final TextEditingController controller = TextEditingController(text: 'one two three');
+        final controller = TextEditingController(text: 'one two three');
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           // Don't wrap with the global View so that the change to
@@ -3799,7 +3793,7 @@ void main() {
   testWidgets('SearchAnchor does not dispose external SearchController', (
     WidgetTester tester,
   ) async {
-    final SearchController controller = SearchController();
+    final controller = SearchController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(
@@ -3832,7 +3826,7 @@ void main() {
   testWidgets('SearchAnchor gracefully closes its search view when disposed', (
     WidgetTester tester,
   ) async {
-    bool disposed = false;
+    var disposed = false;
     late StateSetter setState;
     await tester.pumpWidget(
       MaterialApp(
@@ -3900,7 +3894,7 @@ void main() {
   testWidgets('disposing SearchAnchor during search view exit animation does not crash', (
     WidgetTester tester,
   ) async {
-    final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
+    final key = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       MaterialApp(
         navigatorKey: key,
@@ -3937,7 +3931,7 @@ void main() {
   });
 
   testWidgets('SearchAnchor viewOnClose function test', (WidgetTester tester) async {
-    String name = 'silva';
+    var name = 'silva';
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -3956,7 +3950,7 @@ void main() {
               },
               suggestionsBuilder: (BuildContext context, SearchController controller) {
                 return List<Widget>.generate(5, (int index) {
-                  final String item = 'item $index';
+                  final item = 'item $index';
                   return ListTile(
                     leading: const Icon(Icons.history),
                     title: Text(item),
@@ -3985,7 +3979,7 @@ void main() {
   });
 
   testWidgets('SearchAnchor.bar viewOnClose function test', (WidgetTester tester) async {
-    String name = 'silva';
+    var name = 'silva';
 
     await tester.pumpWidget(
       MaterialApp(
@@ -4025,7 +4019,7 @@ void main() {
   testWidgets('SearchAnchor viewOnOpen is called when the search view is opened', (
     WidgetTester tester,
   ) async {
-    String searchViewState = 'Idle';
+    var searchViewState = 'Idle';
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -4047,7 +4041,7 @@ void main() {
               },
               suggestionsBuilder: (BuildContext context, SearchController controller) {
                 return List<Widget>.generate(5, (int index) {
-                  final String item = 'item $index';
+                  final item = 'item $index';
                   return ListTile(
                     leading: const Icon(Icons.history),
                     title: Text(item),
@@ -4077,7 +4071,7 @@ void main() {
   testWidgets('SearchAnchor.bar onOpen is called when the search view is opened', (
     WidgetTester tester,
   ) async {
-    String searchViewState = 'Idle';
+    var searchViewState = 'Idle';
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -4091,7 +4085,7 @@ void main() {
               },
               suggestionsBuilder: (BuildContext context, SearchController controller) {
                 return List<Widget>.generate(5, (int index) {
-                  final String item = 'item $index';
+                  final item = 'item $index';
                   return ListTile(
                     leading: const Icon(Icons.history),
                     title: Text(item),
@@ -4139,7 +4133,7 @@ void main() {
       // Open search view.
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
-      const double fakeKeyboardHeight = 500.0;
+      const fakeKeyboardHeight = 500.0;
       final double physicalBottomPadding = fakeKeyboardHeight * tester.view.devicePixelRatio;
 
       // Simulate the keyboard opening resizing the view.
@@ -4164,14 +4158,14 @@ void main() {
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/170521.
       tester.platformDispatcher.supportsShowingSystemContextMenu = true;
-      final TextEditingController controller = TextEditingController(text: 'abcdefghijklmnopqr');
+      final controller = TextEditingController(text: 'abcdefghijklmnopqr');
       addTearDown(() {
         tester.platformDispatcher.resetSupportsShowingSystemContextMenu();
         tester.view.reset();
         controller.dispose();
       });
 
-      bool readOnly = true;
+      var readOnly = true;
       late StateSetter setState;
 
       await tester.pumpWidget(
@@ -4283,7 +4277,7 @@ void main() {
 
   testWidgets('SearchAnchor does not crash at zero area', (WidgetTester tester) async {
     tester.view.physicalSize = Size.zero;
-    final SearchController controller = SearchController();
+    final controller = SearchController();
     addTearDown(controller.dispose);
     addTearDown(tester.view.reset);
 
@@ -4306,7 +4300,7 @@ void main() {
 
   testWidgets('SearchBar does not crash at zero area', (WidgetTester tester) async {
     tester.view.physicalSize = Size.zero;
-    final TextEditingController controller = TextEditingController(text: 'X');
+    final controller = TextEditingController(text: 'X');
     addTearDown(controller.dispose);
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
@@ -4342,7 +4336,7 @@ Future<void> checkSearchBarDefaults(
   expect(helperText.style?.fontFamily, 'Roboto');
   expect(helperText.style?.fontWeight, FontWeight.w400);
 
-  const String input = 'entered text';
+  const input = 'entered text';
   await tester.enterText(find.byType(SearchBar), input);
   final EditableText inputText = tester.widget(find.text(input));
   expect(inputText.style.color, colorScheme.onSurface);

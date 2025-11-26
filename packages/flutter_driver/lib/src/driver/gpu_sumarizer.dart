@@ -9,7 +9,7 @@ import 'timeline.dart';
 class GpuSumarizer {
   /// Creates a RasterCacheSummarizer given the timeline events.
   GpuSumarizer(List<TimelineEvent> gpuEvents) {
-    for (final TimelineEvent event in gpuEvents) {
+    for (final event in gpuEvents) {
       final Object? value = event.arguments!['FrameTimeMS'];
       if (value is String) {
         final double? parsedValue = double.tryParse(value);
@@ -45,7 +45,7 @@ class GpuSumarizer {
     }
 
     double total = 0;
-    for (final double data in values) {
+    for (final data in values) {
       total += data;
     }
     return total / values.length;

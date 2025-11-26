@@ -57,8 +57,8 @@ void main() {
     WidgetTester tester,
   ) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/121511
-    const String title = 'AppBar Title';
-    const double titleSpacing = 16.0;
+    const title = 'AppBar Title';
+    const titleSpacing = 16.0;
 
     Widget buildWidget() {
       return MaterialApp(
@@ -181,7 +181,7 @@ void main() {
     const double collapsedAppBarHeight = 64;
     const double expandedAppBarHeight = 112;
     const double bottomHeight = 48;
-    const String title = 'Medium App Bar';
+    const title = 'Medium App Bar';
 
     Widget buildWidget() {
       return MaterialApp(
@@ -233,7 +233,7 @@ void main() {
     const double collapsedAppBarHeight = 64;
     const double expandedAppBarHeight = 152;
     const double bottomHeight = 48;
-    const String title = 'Large App Bar';
+    const title = 'Large App Bar';
 
     Widget buildWidget() {
       return MaterialApp(
@@ -283,7 +283,7 @@ void main() {
   testWidgets('SliverAppBar.medium expanded title has upper limit on text scaling', (
     WidgetTester tester,
   ) async {
-    const String title = 'Medium AppBar';
+    const title = 'Medium AppBar';
     Widget buildAppBar({double textScaleFactor = 1.0}) {
       return MaterialApp(
         home: MediaQuery.withClampedTextScaling(
@@ -319,7 +319,7 @@ void main() {
   testWidgets('SliverAppBar.large expanded title has upper limit on text scaling', (
     WidgetTester tester,
   ) async {
-    const String title = 'Large AppBar';
+    const title = 'Large AppBar';
     Widget buildAppBar({double textScaleFactor = 1.0}) {
       return MaterialApp(
         home: MediaQuery.withClampedTextScaling(
@@ -352,7 +352,7 @@ void main() {
   testWidgets('SliverAppBar.medium expanded title position is adjusted with textScaleFactor', (
     WidgetTester tester,
   ) async {
-    const String title = 'Medium AppBar';
+    const title = 'Medium AppBar';
     Widget buildAppBar({double textScaleFactor = 1.0}) {
       return MaterialApp(
         home: MediaQuery.withClampedTextScaling(
@@ -388,7 +388,7 @@ void main() {
   testWidgets('SliverAppBar.large expanded title position is adjusted with textScaleFactor', (
     WidgetTester tester,
   ) async {
-    const String title = 'Large AppBar';
+    const title = 'Large AppBar';
     Widget buildAppBar({double textScaleFactor = 1.0}) {
       return MaterialApp(
         home: MediaQuery.withClampedTextScaling(
@@ -434,7 +434,7 @@ void main() {
   testWidgets('SliverAppBar.medium collapsed title does not overlap with leading/actions widgets', (
     WidgetTester tester,
   ) async {
-    const String title = 'Medium SliverAppBar Very Long Title';
+    const title = 'Medium SliverAppBar Very Long Title';
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -480,7 +480,7 @@ void main() {
   testWidgets('SliverAppBar.large collapsed title does not overlap with leading/actions widgets', (
     WidgetTester tester,
   ) async {
-    const String title = 'Large SliverAppBar Very Long Title';
+    const title = 'Large SliverAppBar Very Long Title';
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -524,8 +524,8 @@ void main() {
   });
 
   testWidgets('SliverAppBar.medium respects title spacing', (WidgetTester tester) async {
-    const String title = 'Medium SliverAppBar Very Long Title';
-    const double titleSpacing = 16.0;
+    const title = 'Medium SliverAppBar Very Long Title';
+    const titleSpacing = 16.0;
 
     Widget buildWidget({double? titleSpacing, bool? centerTitle}) {
       return MaterialApp(
@@ -619,8 +619,8 @@ void main() {
   });
 
   testWidgets('SliverAppBar.large respects title spacing', (WidgetTester tester) async {
-    const String title = 'Large SliverAppBar Very Long Title';
-    const double titleSpacing = 16.0;
+    const title = 'Large SliverAppBar Very Long Title';
+    const titleSpacing = 16.0;
 
     Widget buildWidget({double? titleSpacing, bool? centerTitle}) {
       return MaterialApp(
@@ -715,9 +715,9 @@ void main() {
   testWidgets('SliverAppBar.medium without the leading widget updates collapsed title padding', (
     WidgetTester tester,
   ) async {
-    const String title = 'Medium SliverAppBar Title';
-    const double leadingPadding = 56.0;
-    const double titleSpacing = 16.0;
+    const title = 'Medium SliverAppBar Title';
+    const leadingPadding = 56.0;
+    const titleSpacing = 16.0;
 
     Widget buildWidget({bool showLeading = true}) {
       return MaterialApp(
@@ -769,9 +769,9 @@ void main() {
   testWidgets('SliverAppBar.large without the leading widget updates collapsed title padding', (
     WidgetTester tester,
   ) async {
-    const String title = 'Large SliverAppBar Title';
-    const double leadingPadding = 56.0;
-    const double titleSpacing = 16.0;
+    const title = 'Large SliverAppBar Title';
+    const leadingPadding = 56.0;
+    const titleSpacing = 16.0;
 
     Widget buildWidget({bool showLeading = true}) {
       return MaterialApp(
@@ -822,9 +822,9 @@ void main() {
 
   group('WidgetStateColor scrolledUnder', () {
     const double collapsedHeight = kToolbarHeight;
-    const double expandedHeight = 200.0;
-    const Color scrolledColor = Color(0xff00ff00);
-    const Color defaultColor = Color(0xff0000ff);
+    const expandedHeight = 200.0;
+    const scrolledColor = Color(0xff00ff00);
+    const defaultColor = Color(0xff0000ff);
 
     Widget buildSliverApp({
       required double contentHeight,
@@ -1031,7 +1031,7 @@ void main() {
     expect(find.byType(SliverAppBar), findsOneWidget);
     expect(appBarHeight(tester), 128.0);
 
-    const double initialAppBarHeight = 128.0;
+    const initialAppBarHeight = 128.0;
     final double initialTabBarHeight = tabBarHeight(tester);
 
     // Scroll the not-pinned appbar, collapsing the expanded height. At this
@@ -1061,7 +1061,7 @@ void main() {
     expect(find.byType(SliverAppBar), findsOneWidget);
     expect(appBarHeight(tester), 128.0);
 
-    const double initialAppBarHeight = 128.0;
+    const initialAppBarHeight = 128.0;
     final double initialTabBarHeight = tabBarHeight(tester);
 
     // Scroll the floating-pinned appbar, collapsing the expanded height. At this
@@ -1245,8 +1245,8 @@ void main() {
   });
 
   testWidgets('SliverAppBar expandedHeight, collapsedHeight', (WidgetTester tester) async {
-    const double expandedAppBarHeight = 400.0;
-    const double collapsedAppBarHeight = 200.0;
+    const expandedAppBarHeight = 400.0;
+    const collapsedAppBarHeight = 200.0;
 
     await tester.pumpWidget(
       buildSliverAppBarApp(
@@ -1285,7 +1285,7 @@ void main() {
   });
 
   testWidgets('Material3 - SliverAppBar.medium defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
     const double collapsedAppBarHeight = 64;
     const double expandedAppBarHeight = 112;
 
@@ -1369,7 +1369,7 @@ void main() {
   });
 
   testWidgets('Material3 - SliverAppBar.large defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
     const double collapsedAppBarHeight = 64;
     const double expandedAppBarHeight = 152;
 
@@ -1532,7 +1532,7 @@ void main() {
       required VoidCallback onPressed,
     }) {
       const double appBarHeight = 120;
-      final ScrollController controller = ScrollController(initialScrollOffset: appBarHeight);
+      final controller = ScrollController(initialScrollOffset: appBarHeight);
 
       return (
         controller,
@@ -1574,7 +1574,7 @@ void main() {
     testWidgets('forceMaterialTransparency == true allows gestures beneath the app bar', (
       WidgetTester tester,
     ) async {
-      bool buttonWasPressed = false;
+      var buttonWasPressed = false;
       final (ScrollController controller, Widget widget) = buildWidget(
         forceMaterialTransparency: true,
         onPressed: () {
@@ -1601,7 +1601,7 @@ void main() {
       // errors/warning that the button is not hittable (which is expected).
       WidgetController.hitTestWarningShouldBeFatal = false;
 
-      bool buttonWasPressed = false;
+      var buttonWasPressed = false;
       final (ScrollController controller, Widget widget) = buildWidget(
         forceMaterialTransparency: false,
         onPressed: () {
@@ -1625,7 +1625,7 @@ void main() {
   testWidgets('SliverAppBar positioning of leading and trailing widgets with top padding', (
     WidgetTester tester,
   ) async {
-    const MediaQueryData topPadding100 = MediaQueryData(padding: EdgeInsets.only(top: 100.0));
+    const topPadding100 = MediaQueryData(padding: EdgeInsets.only(top: 100.0));
     final Key leadingKey = UniqueKey();
     final Key titleKey = UniqueKey();
     final Key trailingKey = UniqueKey();
@@ -1664,9 +1664,7 @@ void main() {
   testWidgets('SliverAppBar positioning of leading and trailing widgets with bottom padding', (
     WidgetTester tester,
   ) async {
-    const MediaQueryData topPadding100 = MediaQueryData(
-      padding: EdgeInsets.only(top: 100.0, bottom: 50.0),
-    );
+    const topPadding100 = MediaQueryData(padding: EdgeInsets.only(top: 100.0, bottom: 50.0));
     final Key leadingKey = UniqueKey();
     final Key titleKey = UniqueKey();
     final Key trailingKey = UniqueKey();
@@ -1711,7 +1709,7 @@ void main() {
   });
 
   testWidgets('SliverAppBar provides correct semantics in LTR', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1776,7 +1774,7 @@ void main() {
   });
 
   testWidgets('SliverAppBar provides correct semantics in RTL', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1852,7 +1850,7 @@ void main() {
   });
 
   testWidgets('SliverAppBar excludes header semantics correctly', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -1927,7 +1925,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/64922.
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -2007,8 +2005,8 @@ void main() {
 
   testWidgets('Changing SliverAppBar snap from true to false', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/17598
-    const double appBarHeight = 256.0;
-    bool snap = true;
+    const appBarHeight = 256.0;
+    var snap = true;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2084,7 +2082,7 @@ void main() {
   });
 
   testWidgets('SliverAppBar with shape', (WidgetTester tester) async {
-    const RoundedRectangleBorder roundedRectangleBorder = RoundedRectangleBorder(
+    const roundedRectangleBorder = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(15.0)),
     );
     await tester.pumpWidget(
@@ -2155,7 +2153,7 @@ void main() {
   testWidgets('SliverAppBar default collapsedHeight with respect to toolbarHeight', (
     WidgetTester tester,
   ) async {
-    const double toolbarHeight = 100.0;
+    const toolbarHeight = 100.0;
 
     await tester.pumpWidget(buildSliverAppBarApp(toolbarHeight: toolbarHeight));
 
@@ -2172,8 +2170,8 @@ void main() {
   });
 
   testWidgets('SliverAppBar collapsedHeight with toolbarHeight', (WidgetTester tester) async {
-    const double toolbarHeight = 100.0;
-    const double collapsedHeight = 150.0;
+    const toolbarHeight = 100.0;
+    const collapsedHeight = 150.0;
 
     await tester.pumpWidget(
       buildSliverAppBarApp(toolbarHeight: toolbarHeight, collapsedHeight: collapsedHeight),
@@ -2190,7 +2188,7 @@ void main() {
   });
 
   testWidgets('SliverAppBar collapsedHeight', (WidgetTester tester) async {
-    const double collapsedHeight = 56.0;
+    const collapsedHeight = 56.0;
 
     await tester.pumpWidget(buildSliverAppBarApp(collapsedHeight: collapsedHeight));
 
@@ -2205,7 +2203,7 @@ void main() {
   });
 
   testWidgets('SliverAppBar respects leadingWidth', (WidgetTester tester) async {
-    const Key key = Key('leading');
+    const key = Key('leading');
     await tester.pumpWidget(
       const MaterialApp(
         home: CustomScrollView(
@@ -2235,7 +2233,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/158158.
   testWidgets('SliverAppBar should update TabBar before TabBar build', (WidgetTester tester) async {
-    final List<Tab> tabs = <Tab>[const Tab(text: 'initial tab')];
+    final tabs = <Tab>[const Tab(text: 'initial tab')];
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2287,7 +2285,7 @@ void main() {
     // can be deleted.
 
     testWidgets('Material2 - SliverAppBar.medium defaults', (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(useMaterial3: false);
+      final theme = ThemeData(useMaterial3: false);
       const double collapsedAppBarHeight = 64;
       const double expandedAppBarHeight = 112;
 
@@ -2375,7 +2373,7 @@ void main() {
     });
 
     testWidgets('Material2 - SliverAppBar.large defaults', (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(useMaterial3: false);
+      final theme = ThemeData(useMaterial3: false);
       const double collapsedAppBarHeight = 64;
       const double expandedAppBarHeight = 152;
 
