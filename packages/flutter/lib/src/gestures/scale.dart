@@ -485,7 +485,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   double _computeRotationFactor() {
-    double factor = 0.0;
+    var factor = 0.0;
     if (_initialLine != null && _currentLine != null) {
       final double fx = _initialLine!.pointerStartLocation.dx;
       final double fy = _initialLine!.pointerStartLocation.dy;
@@ -544,8 +544,8 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void handleEvent(PointerEvent event) {
     assert(_state != _ScaleState.ready);
-    bool didChangeConfiguration = false;
-    bool shouldStartIfAccepted = false;
+    var didChangeConfiguration = false;
+    var shouldStartIfAccepted = false;
     if (event is PointerMoveEvent) {
       final VelocityTracker tracker = _velocityTrackers[event.pointer]!;
       if (!event.synthesized) {
@@ -630,9 +630,9 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     // Span is the average deviation from focal point. Horizontal and vertical
     // spans are the average deviations from the focal point's horizontal and
     // vertical coordinates, respectively.
-    double totalDeviation = 0.0;
-    double totalHorizontalDeviation = 0.0;
-    double totalVerticalDeviation = 0.0;
+    var totalDeviation = 0.0;
+    var totalHorizontalDeviation = 0.0;
+    var totalVerticalDeviation = 0.0;
     for (final int pointer in _pointerLocations.keys) {
       totalDeviation += (pointerFocalPoint - _pointerLocations[pointer]!).distance;
       totalHorizontalDeviation += (pointerFocalPoint.dx - _pointerLocations[pointer]!.dx).abs();

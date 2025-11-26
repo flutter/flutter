@@ -68,7 +68,7 @@ void _removeView(int viewId) {
 
 @pragma('vm:entry-point')
 void _sendViewFocusEvent(int viewId, int viewFocusState, int viewFocusDirection) {
-  final ViewFocusEvent viewFocusEvent = ViewFocusEvent(
+  final viewFocusEvent = ViewFocusEvent(
     viewId: viewId,
     state: ViewFocusState.values[viewFocusState],
     direction: ViewFocusDirection.values[viewFocusDirection],
@@ -93,8 +93,8 @@ void _updateDisplays(
   assert(ids.length == heights.length);
   assert(ids.length == devicePixelRatios.length);
   assert(ids.length == refreshRates.length);
-  final List<Display> displays = <Display>[];
-  for (int index = 0; index < ids.length; index += 1) {
+  final displays = <Display>[];
+  for (var index = 0; index < ids.length; index += 1) {
     final int displayId = ids[index];
     displays.add(
       Display._(
@@ -117,8 +117,8 @@ List<DisplayFeature> _decodeDisplayFeatures({
 }) {
   assert(bounds.length / 4 == type.length, 'Bounds are rectangles, requiring 4 measurements each');
   assert(type.length == state.length);
-  final List<DisplayFeature> result = <DisplayFeature>[];
-  for (int i = 0; i < type.length; i++) {
+  final result = <DisplayFeature>[];
+  for (var i = 0; i < type.length; i++) {
     final int rectOffset = i * 4;
     result.add(
       DisplayFeature(
