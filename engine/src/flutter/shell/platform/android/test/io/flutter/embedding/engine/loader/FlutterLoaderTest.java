@@ -31,7 +31,6 @@ import android.util.DisplayMetrics;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.FlutterJNI;
-import io.flutter.embedding.engine.FlutterShellArgs;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -642,9 +641,7 @@ public class FlutterLoaderTest {
   @Test
   public void itSetsEnableImpellerFromMetaData() {
     testFlagFromMetaData(
-        "io.flutter.embedding.android.EnableImpeller",
-        true,
-        "--enable-impeller=true");
+        "io.flutter.embedding.android.EnableImpeller", true, "--enable-impeller=true");
   }
 
   @Test
@@ -659,17 +656,13 @@ public class FlutterLoaderTest {
   @Test
   public void itSetsEnableSurfaceControlFromMetaData() {
     testFlagFromMetaData(
-        "io.flutter.embedding.android.EnableSurfaceControl",
-        true,
-        "--enable-surface-control");
+        "io.flutter.embedding.android.EnableSurfaceControl", true, "--enable-surface-control");
   }
 
   @Test
   public void itSetsEnableFlutterGPUFromMetaData() {
     testFlagFromMetaData(
-        "io.flutter.embedding.android.EnableFlutterGPU",
-        true,
-        "--enable-flutter-gpu");
+        "io.flutter.embedding.android.EnableFlutterGPU", true, "--enable-flutter-gpu");
   }
 
   @Test
@@ -683,9 +676,7 @@ public class FlutterLoaderTest {
   @Test
   public void itSetsImpellerAntiAliasLinesFromMetadata() {
     testFlagFromMetaData(
-        "io.flutter.embedding.android.ImpellerAntialiasLines",
-        true,
-        "--impeller-antialias-lines");
+        "io.flutter.embedding.android.ImpellerAntialiasLines", true, "--impeller-antialias-lines");
   }
 
   @Test
@@ -708,10 +699,7 @@ public class FlutterLoaderTest {
 
   @Test
   public void itSetsUseTestFontsFromMetaData() {
-    testFlagFromMetaData(
-        "io.flutter.embedding.android.UseTestFonts",
-        true,
-        "--use-test-fonts");
+    testFlagFromMetaData("io.flutter.embedding.android.UseTestFonts", true, "--use-test-fonts");
   }
 
   @Test
@@ -720,63 +708,44 @@ public class FlutterLoaderTest {
     testFlagFromMetaData(
         "io.flutter.embedding.android.VMServicePort",
         expectedVmServicePort,
-       "--vm-service-port=" + expectedVmServicePort);
+        "--vm-service-port=" + expectedVmServicePort);
   }
 
   @Test
   public void itSetsEnableVulkanValidationFromMetaData() {
     testFlagFromMetaData(
-        "io.flutter.embedding.android.EnableVulkanValidation",
-        true,
-        "--enable-vulkan-validation");
+        "io.flutter.embedding.android.EnableVulkanValidation", true, "--enable-vulkan-validation");
   }
 
   @Test
   public void itSetsEnableOpenGLGPUTracingFromMetaData() {
     testFlagFromMetaData(
-        "io.flutter.embedding.android.EnableOpenGLGPUTracing",
-        true,
-        "--enable-opengl-gpu-tracing");
+        "io.flutter.embedding.android.EnableOpenGLGPUTracing", true, "--enable-opengl-gpu-tracing");
   }
 
   @Test
   public void itSetsEnableVulkanGPUTracingFromMetaData() {
     testFlagFromMetaData(
-        "io.flutter.embedding.android.EnableVulkanGPUTracing",
-        true,
-        "--enable-vulkan-gpu-tracing");
+        "io.flutter.embedding.android.EnableVulkanGPUTracing", true, "--enable-vulkan-gpu-tracing");
   }
 
   @Test
   public void itSetsLeakVMFromMetaData() {
     // Test that LeakVM can be set via manifest.
-    testFlagFromMetaData(
-        "io.flutter.embedding.android.LeakVM",
-        false,
-        "--leak-vm=false");
+    testFlagFromMetaData("io.flutter.embedding.android.LeakVM", false, "--leak-vm=false");
 
     // Test that default LeakVM will not be included if it is configured via the manifest.
-    testFlagFromMetaData(
-        "io.flutter.embedding.android.LeakVM",
-        false,
-        "--leak-vm=true",
-        false);
+    testFlagFromMetaData("io.flutter.embedding.android.LeakVM", false, "--leak-vm=true", false);
   }
 
   @Test
   public void itSetsTraceStartupFromMetaData() {
-    testFlagFromMetaData(
-        "io.flutter.embedding.android.TraceStartup",
-        true,
-        "--trace-startup");
+    testFlagFromMetaData("io.flutter.embedding.android.TraceStartup", true, "--trace-startup");
   }
 
   @Test
   public void itSetsStartPausedFromMetaData() {
-    testFlagFromMetaData(
-        "io.flutter.embedding.android.StartPaused",
-        true,
-        "--start-paused");
+    testFlagFromMetaData("io.flutter.embedding.android.StartPaused", true, "--start-paused");
   }
 
   @Test
@@ -790,33 +759,23 @@ public class FlutterLoaderTest {
   @Test
   public void itSetsEndlessTraceBufferFromMetaData() {
     testFlagFromMetaData(
-        "io.flutter.embedding.android.EndlessTraceBuffer",
-        true,
-        "--endless-trace-buffer");
+        "io.flutter.embedding.android.EndlessTraceBuffer", true, "--endless-trace-buffer");
   }
 
   @Test
   public void itSetsEnableDartProfilingFromMetaData() {
     testFlagFromMetaData(
-        "io.flutter.embedding.android.EnableDartProfiling",
-        true,
-        "--enable-dart-profiling";
+        "io.flutter.embedding.android.EnableDartProfiling", true, "--enable-dart-profiling");
   }
 
   @Test
   public void itSetsProfileStartupFromMetaData() {
-    testFlagFromMetaData(
-        "io.flutter.embedding.android.ProfileStartup",
-        true,
-        "--profile-startup");
+    testFlagFromMetaData("io.flutter.embedding.android.ProfileStartup", true, "--profile-startup");
   }
 
   @Test
   public void itSetsTraceSkiaFromMetaData() {
-    testFlagFromMetaData(
-        "io.flutter.embedding.android.TraceSkia",
-        true,
-        "--trace-skia");
+    testFlagFromMetaData("io.flutter.embedding.android.TraceSkia", true, "--trace-skia");
   }
 
   @Test
@@ -825,15 +784,12 @@ public class FlutterLoaderTest {
     testFlagFromMetaData(
         "io.flutter.embedding.android.TraceSkiaAllowList",
         expectedTraceSkiaAllowList,
-        FlutterShellArgs.TRACE_SKIA_ALLOWLIST.commandLineArgument + expectedTraceSkiaAllowList);
+        "--trace-skia-allowlist=" + expectedTraceSkiaAllowList);
   }
 
   @Test
   public void itSetsTraceSystraceFromMetaData() {
-    testFlagFromMetaData(
-        "io.flutter.embedding.android.TraceSystrace",
-        true,
-        "--trace-skia-allowlist=");
+    testFlagFromMetaData("io.flutter.embedding.android.TraceSystrace", true, "--trace-systrace");
   }
 
   @Test
@@ -848,9 +804,7 @@ public class FlutterLoaderTest {
   @Test
   public void itSetsProfileMicrotasksFromMetaData() {
     testFlagFromMetaData(
-        "io.flutter.embedding.android.ProfileMicrotasks",
-        true,
-        "--profile-microtasks");
+        "io.flutter.embedding.android.ProfileMicrotasks", true, "--profile-microtasks");
   }
 
   @Test
@@ -864,17 +818,12 @@ public class FlutterLoaderTest {
   @Test
   public void itSetsPurgePersistentCacheFromMetaData() {
     testFlagFromMetaData(
-        "io.flutter.embedding.android.PurgePersistentCache",
-        true,
-        "--purge-persistent-cache");
+        "io.flutter.embedding.android.PurgePersistentCache", true, "--purge-persistent-cache");
   }
 
   @Test
   public void itSetsVerboseLoggingFromMetaData() {
-    testFlagFromMetaData(
-        "io.flutter.embedding.android.VerboseLogging",
-        true,
-        "--verbose-logging");
+    testFlagFromMetaData("io.flutter.embedding.android.VerboseLogging", true, "--verbose-logging");
   }
 
   @Test
@@ -984,10 +933,8 @@ public class FlutterLoaderTest {
 
   @Test
   public void ifFlagSetViaManifestAndCommandLineThenCommandLineTakesPrecedence() {
-    String expectedImpellerArgFromMetadata =
-       "--enable-impeller=true";
-    String expectedImpellerArgFromCommandLine =
-        "--enable-impeller=false";
+    String expectedImpellerArgFromMetadata = "--enable-impeller=true";
+    String expectedImpellerArgFromCommandLine = "--enable-impeller=false";
 
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
@@ -1059,10 +1006,7 @@ public class FlutterLoaderTest {
     flutterLoader.startInitialization(ctx, settings);
     flutterLoader.ensureInitializationComplete(
         ctx,
-        new String[] {
-          expectedAotSharedLibraryNameFromCommandLine,
-          "--enable-opengl-gpu-tracing"
-        });
+        new String[] {expectedAotSharedLibraryNameFromCommandLine, "--enable-opengl-gpu-tracing"});
     shadowOf(getMainLooper()).idle();
 
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);

@@ -4,6 +4,7 @@
 
 package io.flutter.embedding.engine;
 
+import androidx.annotation.VisibleForTesting;
 import java.util.*;
 
 /**
@@ -57,8 +58,8 @@ public final class FlutterShellArgs {
      * Creates a new Flutter shell flag.
      *
      * <p>{@param allowedInRelease} determines whether or not this flag is allowed in release mode.
-     * Whenever possible, it is recommended to NOT allow this flag in release mode. Many flags
-     * are designed for debugging purposes and if enabled in production, could expose sensitive
+     * Whenever possible, it is recommended to NOT allow this flag in release mode. Many flags are
+     * designed for debugging purposes and if enabled in production, could expose sensitive
      * application data or make the app vulnerable to malicious actors.
      */
     private Flag(String commandLineArgument, String metaDataName, boolean allowedInRelease) {
@@ -102,7 +103,8 @@ public final class FlutterShellArgs {
       new Flag("--old-gen-heap-size=", "OldGenHeapSize", true);
 
   /** Enables or disables the Impeller renderer. */
-  private static final Flag ENABLE_IMPELLER = new Flag("--enable-impeller=", "EnableImpeller", true);
+  private static final Flag ENABLE_IMPELLER =
+      new Flag("--enable-impeller=", "EnableImpeller", true);
 
   /** Specifies the backend to use for Impeller rendering. */
   private static final Flag IMPELLER_BACKEND =
@@ -220,7 +222,7 @@ public final class FlutterShellArgs {
    * <p>All flags provided with this argument are subject to filtering based on a list of allowed
    * flags in shell/common/switches.cc. If any flag provided is not allowed, the process will
    * immediately terminate.
-   * 
+   *
    * <p>Flags should be separated by a space, e.g. "--dart-flags=--flag-1 --flag-2=2".
    */
   private static final Flag DART_FLAGS = new Flag("--dart-flags=", "DartFlags");
