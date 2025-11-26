@@ -3,11 +3,6 @@
 // found in the LICENSE file.
 part of dart.ui;
 
-// TODO(loic-sharma): Migrate fragment shader samples off deprecated
-// Color APIs.
-// See: https://github.com/flutter/flutter/issues/179146
-// ignore_for_file: deprecated_member_use
-
 // Examples can assume:
 // // (for the example in Color)
 // // ignore_for_file: use_full_hex_values_for_flutter_colors
@@ -5524,10 +5519,10 @@ base class FragmentShader extends Shader {
   ///   shader.setFloat(2, 83);  // uMagnitude y
   ///
   ///   // Convert color to premultiplied opacity.
-  ///   shader.setFloat(3, color.red / 255 * color.opacity);   // uColor r
-  ///   shader.setFloat(4, color.green / 255 * color.opacity); // uColor g
-  ///   shader.setFloat(5, color.blue / 255 * color.opacity);  // uColor b
-  ///   shader.setFloat(6, color.opacity);                     // uColor a
+  ///   shader.setFloat(3, color.r * color.a); // uColor r
+  ///   shader.setFloat(4, color.g * color.a); // uColor g
+  ///   shader.setFloat(5, color.b * color.a); // uColor b
+  ///   shader.setFloat(6, color.a);           // uColor a
   ///
   ///   // initialize sampler uniform.
   ///   shader.setImageSampler(0, image);
