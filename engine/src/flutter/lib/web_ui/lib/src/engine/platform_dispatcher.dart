@@ -1094,10 +1094,10 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         'line-height',
       )?.toDouble();
       final double? fontSize = parseFontSize(_typographyMeasurementElement!)?.toDouble();
-      final double computedLineHeightScaleFactor =
+      final double? computedLineHeightScaleFactor =
           fontSize != null && lineHeight != null && lineHeight != spacingDefault
           ? lineHeight / fontSize
-          : defaultLineHeightFactor;
+          : null;
       final double? computedWordSpacing = parseNumericStyleProperty(
         _typographyMeasurementElement!,
         'word-spacing',
@@ -1143,16 +1143,18 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
           computedWordSpacingChanged ||
           computedParagraphSpacingChanged;
 
-      if (computedTextScaleFactorChanged || metricsChanged) {
-        invokeOnPlatformConfigurationChanged();
+      if (!computedTextScaleFactorChanged && !metricsChanged) {
+        return;
+      }
 
-        if (computedTextScaleFactorChanged) {
-          invokeOnTextScaleFactorChanged();
-        }
+      invokeOnPlatformConfigurationChanged();
 
-        if (metricsChanged) {
-          invokeOnMetricsChanged();
-        }
+      if (computedTextScaleFactorChanged) {
+        invokeOnTextScaleFactorChanged();
+      }
+
+      if (metricsChanged) {
+        invokeOnMetricsChanged();
       }
     });
 
