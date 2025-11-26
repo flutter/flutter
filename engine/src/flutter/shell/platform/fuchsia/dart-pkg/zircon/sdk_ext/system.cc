@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <zircon/process.h>
 #include <zircon/processargs.h>
+#include <zircon/syscalls/iob.h>
 
 #include "flutter/fml/unique_fd.h"
 #include "third_party/tonic/dart_binding_macros.h"
@@ -565,6 +566,23 @@ Dart_Handle System::VmoMap(fml::RefPtr<Handle> vmo) {
   return ConstructDartObject(kMapResult, ToDart(ZX_OK), object);
 }
 
+zx_status_t System::IobWrite(fml::RefPtr<Handle> iob,
+                             uint32_t region_index,
+                             const tonic::DartByteData& data) {
+  if (!iob || !iob->is_valid()) {
+    data.Release();
+    return ZX_ERR_BAD_HANDLE;
+  }
+
+  zx_iovec_t vector = {.buffer = const_cast<void*>(data.data()),
+                       .capacity = data.length_in_bytes()};
+  zx_status_t status =
+      zx_iob_writev(iob->handle(), /*options=*/0, region_index, &vector, 1);
+
+  data.Release();
+  return status;
+}
+
 uint64_t System::ClockGetMonotonic() {
   return zx_clock_get_monotonic();
 }
@@ -574,23 +592,24 @@ uint64_t System::ClockGetMonotonic() {
 #define FOR_EACH_STATIC_BINDING(V)  \
   V(System, ChannelCreate)          \
   V(System, ChannelFromFile)        \
-  V(System, ChannelWrite)           \
-  V(System, ChannelWriteEtc)        \
   V(System, ChannelQueryAndRead)    \
   V(System, ChannelQueryAndReadEtc) \
-  V(System, EventpairCreate)        \
+  V(System, ChannelWrite)           \
+  V(System, ChannelWriteEtc)        \
+  V(System, ClockGetMonotonic)      \
   V(System, ConnectToService)       \
+  V(System, EventpairCreate)        \
+  V(System, IobWrite)               \
   V(System, SocketCreate)           \
-  V(System, SocketWrite)            \
   V(System, SocketRead)             \
+  V(System, SocketWrite)            \
   V(System, VmoCreate)              \
   V(System, VmoFromFile)            \
   V(System, VmoGetSize)             \
-  V(System, VmoSetSize)             \
-  V(System, VmoRead)                \
-  V(System, VmoWrite)               \
   V(System, VmoMap)                 \
-  V(System, ClockGetMonotonic)
+  V(System, VmoRead)                \
+  V(System, VmoSetSize)             \
+  V(System, VmoWrite)
 
 // clang-format: on
 

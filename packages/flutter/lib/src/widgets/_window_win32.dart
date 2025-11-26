@@ -23,6 +23,8 @@ import 'package:flutter/rendering.dart';
 
 import '../foundation/_features.dart';
 import '_window.dart';
+import '_window_positioner.dart';
+import 'binding.dart';
 
 /// A Win32 window handle.
 ///
@@ -111,13 +113,13 @@ class WindowingOwnerWin32 extends WindowingOwner {
     }
 
     assert(
-      PlatformDispatcher.instance.engineId != null,
+      WidgetsBinding.instance.platformDispatcher.engineId != null,
       'WindowingOwnerWin32 must be created after the engine has been initialized.',
     );
 
     _Win32PlatformInterface.initializeWindowing(
       allocator,
-      PlatformDispatcher.instance.engineId!,
+      WidgetsBinding.instance.platformDispatcher.engineId!,
       _onMessage,
     );
   }
@@ -168,6 +170,18 @@ class WindowingOwnerWin32 extends WindowingOwner {
     );
   }
 
+  @internal
+  @override
+  TooltipWindowController createTooltipWindowController({
+    required TooltipWindowControllerDelegate delegate,
+    required BoxConstraints preferredConstraints,
+    required Rect anchorRect,
+    required WindowPositioner positioner,
+    required BaseWindowController parent,
+  }) {
+    throw UnimplementedError('Tooltip windows are not yet implemented on Windows.');
+  }
+
   /// Register a new [WindowsMessageHandler].
   ///
   /// The handler will be triggered for unhandled messages for all top level
@@ -195,7 +209,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
   }
 
   void _onMessage(ffi.Pointer<_WindowsMessage> message) {
-    final FlutterView flutterView = PlatformDispatcher.instance.views.firstWhere(
+    final FlutterView flutterView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
       (FlutterView view) => view.viewId == message.ref.viewId,
     );
 
@@ -274,7 +288,7 @@ class RegularWindowControllerWin32 extends RegularWindowController {
     owner._addMessageHandler(_handler);
     final int viewId = _Win32PlatformInterface.createRegularWindow(
       _owner.allocator,
-      PlatformDispatcher.instance.engineId!,
+      WidgetsBinding.instance.platformDispatcher.engineId!,
       preferredSize,
       preferredConstraints,
       title,
@@ -283,7 +297,7 @@ class RegularWindowControllerWin32 extends RegularWindowController {
       throw Exception('Windows failed to create a regular window with a valid view id.');
     }
 
-    final FlutterView flutterView = PlatformDispatcher.instance.views.firstWhere(
+    final FlutterView flutterView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
       (FlutterView view) => view.viewId == viewId,
     );
     rootView = flutterView;
@@ -406,7 +420,7 @@ class RegularWindowControllerWin32 extends RegularWindowController {
   HWND getWindowHandle() {
     _ensureNotDestroyed();
     return _Win32PlatformInterface.getWindowHandle(
-      PlatformDispatcher.instance.engineId!,
+      WidgetsBinding.instance.platformDispatcher.engineId!,
       rootView.viewId,
     );
   }
@@ -507,13 +521,13 @@ class DialogWindowControllerWin32 extends DialogWindowController {
     owner._addMessageHandler(_handler);
     final int viewId = _Win32PlatformInterface.createDialogWindow(
       _owner.allocator,
-      PlatformDispatcher.instance.engineId!,
+      WidgetsBinding.instance.platformDispatcher.engineId!,
       preferredSize,
       preferredConstraints,
       title,
       parent != null
           ? _Win32PlatformInterface.getWindowHandle(
-              PlatformDispatcher.instance.engineId!,
+              WidgetsBinding.instance.platformDispatcher.engineId!,
               parent.rootView.viewId,
             )
           : null,
@@ -522,7 +536,7 @@ class DialogWindowControllerWin32 extends DialogWindowController {
       throw Exception('Windows failed to create a dialog window with a valid view id.');
     }
 
-    final FlutterView flutterView = PlatformDispatcher.instance.views.firstWhere(
+    final FlutterView flutterView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
       (FlutterView view) => view.viewId == viewId,
     );
     rootView = flutterView;
@@ -621,7 +635,7 @@ class DialogWindowControllerWin32 extends DialogWindowController {
   HWND getWindowHandle() {
     _ensureNotDestroyed();
     return _Win32PlatformInterface.getWindowHandle(
-      PlatformDispatcher.instance.engineId!,
+      WidgetsBinding.instance.platformDispatcher.engineId!,
       rootView.viewId,
     );
   }

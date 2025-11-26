@@ -182,14 +182,14 @@ sealed class _DebugSemanticsRoleChecks {
       SemanticsRole.navigation => _semanticsNavigation,
       SemanticsRole.region => _semanticsRegion,
       SemanticsRole.form => _noCheckRequired,
-      SemanticsRole.loadingSpinner => _noCheckRequired,
-      SemanticsRole.progressBar => _semanticsProgressBar,
       // TODO(chunhtai): add checks when the roles are used in framework.
       // https://github.com/flutter/flutter/issues/159741.
       SemanticsRole.dragHandle => _unimplemented,
       SemanticsRole.spinButton => _unimplemented,
       SemanticsRole.comboBox => _unimplemented,
       SemanticsRole.tooltip => _unimplemented,
+      SemanticsRole.loadingSpinner => _unimplemented,
+      SemanticsRole.progressBar => _unimplemented,
       SemanticsRole.hotKey => _unimplemented,
     }(node);
 
@@ -204,48 +204,6 @@ sealed class _DebugSemanticsRoleChecks {
       FlutterError('Missing checks for role ${node.getSemanticsData().role}');
 
   static FlutterError? _noCheckRequired(SemanticsNode node) => null;
-
-  static FlutterError? _semanticsProgressBar(SemanticsNode node) {
-    final SemanticsData data = node.getSemanticsData();
-
-    // Check if value is present
-    if (data.value.isEmpty) {
-      return FlutterError('A progress bar must have a value');
-    }
-
-    // Check if minValue and maxValue are present
-    if (data.minValue == null) {
-      return FlutterError('A progress bar must have a minValue');
-    }
-
-    if (data.maxValue == null) {
-      return FlutterError('A progress bar must have a maxValue');
-    }
-
-    // Validate that value is within min and max range
-    try {
-      final double currentValue = double.parse(data.value);
-      final double minVal = double.parse(data.minValue!);
-      final double maxVal = double.parse(data.maxValue!);
-
-      if (currentValue < minVal || currentValue > maxVal) {
-        return FlutterError(
-          'Progress bar value ($currentValue) must be between minValue ($minVal) and maxValue ($maxVal)',
-        );
-      }
-
-      if (minVal >= maxVal) {
-        return FlutterError('Progress bar minValue ($minVal) must be less than maxValue ($maxVal)');
-      }
-    } catch (e) {
-      return FlutterError(
-        'Progress bar value, minValue, and maxValue must be valid numbers. '
-        'value: "${data.value}", minValue: "${data.minValue}", maxValue: "${data.maxValue}"',
-      );
-    }
-
-    return null;
-  }
 
   static FlutterError? _semanticsTab(SemanticsNode node) {
     final SemanticsData data = node.getSemanticsData();
@@ -1064,8 +1022,6 @@ class SemanticsData with Diagnosticable {
     required this.validationResult,
     required this.inputType,
     required this.locale,
-    required this.minValue,
-    required this.maxValue,
     this.tags,
     this.transform,
     this.customSemanticsActionIds,
@@ -1341,12 +1297,6 @@ class SemanticsData with Diagnosticable {
   /// content of this semantics node.
   final Locale? locale;
 
-  /// {@macro flutter.semantics.SemanticsProperties.maxValue}
-  final String? maxValue;
-
-  /// {@macro flutter.semantics.SemanticsProperties.minValue}
-  final String? minValue;
-
   /// Whether [flags] contains the given flag.
   @Deprecated(
     'Use flagsCollection instead. '
@@ -1431,8 +1381,6 @@ class SemanticsData with Diagnosticable {
         ),
       );
     }
-    properties.add(StringProperty('minValue', minValue, defaultValue: null));
-    properties.add(StringProperty('maxValue', maxValue, defaultValue: null));
   }
 
   @override
@@ -1468,9 +1416,7 @@ class SemanticsData with Diagnosticable {
         other.validationResult == validationResult &&
         other.inputType == inputType &&
         _sortedListsEqual(other.customSemanticsActionIds, customSemanticsActionIds) &&
-        setEquals<String>(controlsNodes, other.controlsNodes) &&
-        minValue == other.minValue &&
-        maxValue == other.maxValue;
+        setEquals<String>(controlsNodes, other.controlsNodes);
   }
 
   @override
@@ -1507,8 +1453,6 @@ class SemanticsData with Diagnosticable {
       inputType,
       traversalParentIdentifier,
       traversalChildIdentifier,
-      minValue,
-      maxValue,
     ),
   );
 
@@ -1691,8 +1635,6 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onExpand,
     this.onCollapse,
     this.customSemanticsActions,
-    this.minValue,
-    this.maxValue,
   }) : assert(
          label == null || attributedLabel == null,
          'Only one of label or attributedLabel should be provided',
@@ -2624,28 +2566,6 @@ class SemanticsProperties extends DiagnosticableTree {
   /// {@endtemplate}
   final SemanticsInputType? inputType;
 
-  /// {@template flutter.semantics.SemanticsProperties.maxValue}
-  /// The maximum value of the node.
-  ///
-  /// Used in conjunction with [value] to define the current value and range
-  /// of a node. A typical usage is for progress indicators, where [value]
-  /// represents the current progress and [maxValue] defines the maximum
-  /// possible value.
-  ///
-  /// {@endtemplate}
-  final String? maxValue;
-
-  /// {@template flutter.semantics.SemanticsProperties.minValue}
-  /// The minimum value of the node.
-  ///
-  /// Used in conjunction with [value] to define the current value and range
-  /// of a node. A typical usage is for progress indicators, where [value]
-  /// represents the current progress and [minValue] defines the minimum
-  /// possible value.
-  ///
-  /// {@endtemplate}
-  final String? minValue;
-
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -2796,6 +2716,14 @@ class SemanticsNode with DiagnosticableTreeMixin {
       _transform = value == null || MatrixUtils.isIdentity(value) ? null : value;
       _markDirty();
     }
+  }
+
+  // null means this node is not a traversal child and the transform is
+  // the same as [transform] (or kIsWeb is true).
+  Matrix4? _traversalChildTransform;
+  // null represents the identity transform.
+  Matrix4? get _traversalTransform {
+    return kIsWeb ? transform : (_traversalChildTransform ?? transform);
   }
 
   /// The bounding box for this node in its coordinate system.
@@ -3307,9 +3235,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
         _headingLevel != config._headingLevel ||
         _linkUrl != config._linkUrl ||
         _role != config.role ||
-        _validationResult != config.validationResult ||
-        _minValue != config._minValue ||
-        _maxValue != config._maxValue;
+        _validationResult != config.validationResult;
   }
 
   // TAGS, LABELS, ACTIONS
@@ -3599,14 +3525,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
   Set<String>? get controlsNodes => _controlsNodes;
   Set<String>? _controlsNodes = _kEmptyConfig.controlsNodes;
 
-  /// {@macro flutter.semantics.SemanticsProperties.minValue}
-  String? get minValue => _minValue;
-  String? _minValue;
-
-  /// {@macro flutter.semantics.SemanticsProperties.maxValue}
-  String? get maxValue => _maxValue;
-  String? _maxValue;
-
   /// {@macro flutter.semantics.SemanticsProperties.validationResult}
   SemanticsValidationResult get validationResult => _validationResult;
   SemanticsValidationResult _validationResult = _kEmptyConfig.validationResult;
@@ -3694,8 +3612,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
     _inputType = config._inputType;
     _locale = config.locale;
 
-    _minValue = config.minValue;
-    _maxValue = config.maxValue;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
 
     if (mergeAllDescendantsIntoThisNodeValueChanged) {
@@ -3749,8 +3665,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
     SemanticsValidationResult validationResult = _validationResult;
     SemanticsInputType inputType = _inputType;
     final Locale? locale = _locale;
-    String? minValue = _minValue;
-    String? maxValue = _maxValue;
     final Set<int> customSemanticsActionIds = <int>{};
     for (final CustomSemanticsAction action in _customSemanticsActions.keys) {
       customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
@@ -3858,9 +3772,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
           controlsNodes = <String>{...controlsNodes!, ...node._controlsNodes!};
         }
 
-        minValue ??= node._minValue;
-        maxValue ??= node._maxValue;
-
         if (validationResult == SemanticsValidationResult.none) {
           validationResult = node._validationResult;
         } else if (validationResult == SemanticsValidationResult.valid) {
@@ -3909,63 +3820,50 @@ class SemanticsNode with DiagnosticableTreeMixin {
       validationResult: validationResult,
       inputType: inputType,
       locale: locale,
-      minValue: minValue,
-      maxValue: maxValue,
     );
-  }
-
-  static Float64List _initIdentityTransform() {
-    return Matrix4.identity().storage;
   }
 
   static final Int32List _kEmptyChildList = Int32List(0);
   static final Int32List _kEmptyCustomSemanticsActionsList = Int32List(0);
-  static final Float64List _kIdentityTransform = _initIdentityTransform();
+  static final Matrix4 _kIdentityTransform = Matrix4.identity();
 
-  static Matrix4 _computeChildTransform({
-    required Matrix4? parentTransform,
-    required Rect? parentPaintClipRect,
-    required Rect? parentSemanticsClipRect,
+  static Matrix4 _computeTraversalTransform({
     required SemanticsNode parent,
     required SemanticsNode child,
   }) {
-    final Matrix4 transform = parentTransform?.clone() ?? Matrix4.identity();
+    final Matrix4 traversalTransform = Matrix4.identity();
     Matrix4? parentToCommonAncestorTransform;
-    Matrix4? childToCommonAncestorTransform;
-    SemanticsNode childSemanticsNode = child;
-    SemanticsNode parentSemanticsNode = parent;
+    SemanticsNode fromNode = child;
+    SemanticsNode toNode = parent;
 
     // Find the common ancestor.
-    while (!identical(childSemanticsNode, parentSemanticsNode)) {
-      final int fromDepth = childSemanticsNode.depth;
-      final int toDepth = parentSemanticsNode.depth;
+    while (!identical(fromNode, toNode)) {
+      final int fromDepth = fromNode.depth;
+      final int toDepth = toNode.depth;
 
       if (fromDepth >= toDepth) {
-        childToCommonAncestorTransform ??= Matrix4.identity();
-        childToCommonAncestorTransform.multiply(childSemanticsNode.transform ?? Matrix4.identity());
-        childSemanticsNode = childSemanticsNode.traversalParent!;
+        if (fromNode.transform case final Matrix4 transform?) {
+          traversalTransform.multiply(transform);
+        }
+        fromNode = fromNode.parent!;
       }
       if (fromDepth <= toDepth) {
         parentToCommonAncestorTransform ??= Matrix4.identity();
-        parentToCommonAncestorTransform.multiply(
-          parentSemanticsNode.transform ?? Matrix4.identity(),
-        );
-        if (parentSemanticsNode.traversalParent == null) {
-          break;
+        if (toNode.transform case final Matrix4 transform?) {
+          parentToCommonAncestorTransform.multiply(transform);
         }
-        parentSemanticsNode = parentSemanticsNode.traversalParent!;
+        toNode = toNode.parent!;
       }
     }
 
     if (parentToCommonAncestorTransform != null) {
       if (parentToCommonAncestorTransform.invert() != 0) {
-        transform.multiply(parentToCommonAncestorTransform);
+        traversalTransform.multiply(parentToCommonAncestorTransform);
       } else {
-        transform.setZero();
+        traversalTransform.setZero();
       }
     }
-
-    return transform;
+    return traversalTransform;
   }
 
   Int32List _childrenIdInTraversalOrder() {
@@ -4035,30 +3933,21 @@ class SemanticsNode with DiagnosticableTreeMixin {
       }
     }
 
-    if (_isTraversalChild) {
-      traversalParent = owner!._traversalParentNodes[traversalChildIdentifier];
-      transform = _computeChildTransform(
-        parentPaintClipRect: traversalParent!.parentPaintClipRect,
-        parentSemanticsClipRect: traversalParent!.parentSemanticsClipRect,
-        parentTransform: null,
-        parent: traversalParent!,
-        child: this,
-      );
-    }
-
     int traversalParentId = -1;
-    if (data.traversalChildIdentifier != null) {
-      final Object identifier = data.traversalChildIdentifier!;
-      if (owner!._traversalParentNodes.containsKey(identifier)) {
-        traversalParentId = owner!._traversalParentNodes[identifier]!.id;
+    if (data.traversalChildIdentifier case final Object identifier?) {
+      if (owner!._traversalParentNodes[identifier] case final SemanticsNode parentNode?) {
+        traversalParentId = parentNode.id;
       }
     }
-
-    final Float64List updatedTransform;
-    if (kIsWeb) {
-      updatedTransform = data.transform?.storage ?? _kIdentityTransform;
-    } else {
-      updatedTransform = transform?.storage ?? data.transform?.storage ?? _kIdentityTransform;
+    final Object? childIdentifier = traversalChildIdentifier;
+    if (childIdentifier != null) {
+      traversalParent = owner!._traversalParentNodes[childIdentifier];
+      if (!kIsWeb) {
+        _traversalChildTransform = _computeTraversalTransform(
+          parent: traversalParent!,
+          child: this,
+        );
+      }
     }
 
     builder.updateNode(
@@ -4089,9 +3978,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
       scrollPosition: data.scrollPosition ?? double.nan,
       scrollExtentMax: data.scrollExtentMax ?? double.nan,
       scrollExtentMin: data.scrollExtentMin ?? double.nan,
-      transform: updatedTransform,
+      transform: (_traversalTransform ?? _kIdentityTransform).storage,
       traversalParent: traversalParentId,
-      hitTestTransform: data.transform?.storage ?? _kIdentityTransform,
+      hitTestTransform: (data.transform ?? _kIdentityTransform).storage,
       childrenInTraversalOrder: childrenInTraversalOrder,
       childrenInHitTestOrder: childrenInHitTestOrder,
       additionalActions: customSemanticsActionIds ?? _kEmptyCustomSemanticsActionsList,
@@ -4102,8 +3991,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
       validationResult: data.validationResult,
       inputType: data.inputType,
       locale: data.locale,
-      minValue: data.minValue ?? '0',
-      maxValue: data.maxValue ?? '0',
     );
     _dirty = false;
   }
@@ -4157,10 +4044,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
     // children from _traversalChildNodes and add them to the children list
     // of this current node.
     if (_isTraversalParent) {
-      if (owner != null && owner!._traversalChildNodes.containsKey(traversalParentIdentifier)) {
-        final Set<SemanticsNode> traversalChildren =
-            owner!._traversalChildNodes[traversalParentIdentifier]!;
-
+      final Set<SemanticsNode>? traversalChildren =
+          owner?._traversalChildNodes[traversalParentIdentifier!];
+      if (traversalChildren != null) {
         // When traversal children are grafted from other branches, make sure
         // these children are not ancestors of the traversal parent. Otherwise,
         // it will cause infinite loop.
@@ -4397,8 +4283,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
         ),
       );
     }
-    properties.add(StringProperty('minValue', _minValue, defaultValue: null));
-    properties.add(StringProperty('maxValue', _maxValue, defaultValue: null));
   }
 
   /// Returns a string representation of this node and its descendants.
@@ -4652,11 +4536,13 @@ class _SemanticsSortGroup implements Comparable<_SemanticsSortGroup> {
 
 /// Converts `point` to the `node`'s parent's coordinate system.
 Offset _pointInParentCoordinates(SemanticsNode node, Offset point) {
-  if (node.transform == null) {
+  final Matrix4? traversalTransform = node._traversalTransform;
+  if (traversalTransform == null) {
     return point;
   }
   final Vector3 vector = Vector3(point.dx, point.dy, 0.0);
-  node.transform!.transform3(vector);
+
+  traversalTransform.transform3(vector);
   return Offset(vector.x, vector.y);
 }
 
@@ -6537,22 +6423,6 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
-  /// {@macro flutter.semantics.SemanticsProperties.maxValue}
-  String? get maxValue => _maxValue;
-  String? _maxValue;
-  set maxValue(String? value) {
-    _maxValue = value;
-    _hasBeenAnnotated = true;
-  }
-
-  /// {@macro flutter.semantics.SemanticsProperties.minValue}
-  String? get minValue => _minValue;
-  String? _minValue;
-  set minValue(String? value) {
-    _minValue = value;
-    _hasBeenAnnotated = true;
-  }
-
   // TAGS
 
   /// The set of tags that this configuration wants to add to all child
@@ -6651,12 +6521,6 @@ class SemanticsConfiguration {
       return false;
     }
     if (_hasExplicitRole && other._hasExplicitRole) {
-      return false;
-    }
-    if (_minValue != null && other._minValue != null) {
-      return false;
-    }
-    if (_maxValue != null && other._maxValue != null) {
       return false;
     }
     return true;
@@ -6768,8 +6632,6 @@ class SemanticsConfiguration {
     _accessiblityFocusBlockType = _accessiblityFocusBlockType._merge(
       child._accessiblityFocusBlockType,
     );
-    _minValue ??= child._minValue;
-    _maxValue ??= child._maxValue;
 
     _hasBeenAnnotated = hasBeenAnnotated || child.hasBeenAnnotated;
   }
@@ -6816,9 +6678,7 @@ class SemanticsConfiguration {
       .._role = _role
       .._controlsNodes = _controlsNodes
       .._validationResult = _validationResult
-      .._inputType = _inputType
-      .._minValue = _minValue
-      .._maxValue = _maxValue;
+      .._inputType = _inputType;
   }
 }
 

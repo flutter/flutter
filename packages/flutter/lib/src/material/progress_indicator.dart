@@ -8,7 +8,6 @@
 library;
 
 import 'dart:math' as math;
-import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -142,20 +141,11 @@ abstract class ProgressIndicator extends StatefulWidget {
   }
 
   Widget _buildSemanticsWrapper({required BuildContext context, required Widget child}) {
-    bool isProgressBar = false;
     String? expandedSemanticsValue = semanticsValue;
     if (value != null) {
-      expandedSemanticsValue ??= '${(value! * 100).round()}';
-      isProgressBar = true;
+      expandedSemanticsValue ??= '${(value! * 100).round()}%';
     }
-    return Semantics(
-      label: semanticsLabel,
-      role: isProgressBar ? SemanticsRole.progressBar : SemanticsRole.loadingSpinner,
-      minValue: isProgressBar ? '0' : null,
-      maxValue: isProgressBar ? '100' : null,
-      value: expandedSemanticsValue,
-      child: child,
-    );
+    return Semantics(label: semanticsLabel, value: expandedSemanticsValue, child: child);
   }
 }
 
@@ -1195,32 +1185,28 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
 
   @override
   Widget build(BuildContext context) {
-    return Builder(
-      builder: (BuildContext context) {
-        switch (widget._indicatorType) {
-          case _ActivityIndicatorType.material:
+    switch (widget._indicatorType) {
+      case _ActivityIndicatorType.material:
+        if (widget.value != null) {
+          return _buildMaterialIndicator(context, 0.0, 0.0, 0, 0.0);
+        }
+        return _buildAnimation();
+      case _ActivityIndicatorType.adaptive:
+        final ThemeData theme = Theme.of(context);
+        switch (theme.platform) {
+          case TargetPlatform.iOS:
+          case TargetPlatform.macOS:
+            return _buildCupertinoIndicator(context);
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
             if (widget.value != null) {
               return _buildMaterialIndicator(context, 0.0, 0.0, 0, 0.0);
             }
             return _buildAnimation();
-          case _ActivityIndicatorType.adaptive:
-            final ThemeData theme = Theme.of(context);
-            switch (theme.platform) {
-              case TargetPlatform.iOS:
-              case TargetPlatform.macOS:
-                return _buildCupertinoIndicator(context);
-              case TargetPlatform.android:
-              case TargetPlatform.fuchsia:
-              case TargetPlatform.linux:
-              case TargetPlatform.windows:
-                if (widget.value != null) {
-                  return _buildMaterialIndicator(context, 0.0, 0.0, 0, 0.0);
-                }
-                return _buildAnimation();
-            }
         }
-      },
-    );
+    }
   }
 }
 
@@ -1398,10 +1384,10 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
         return _buildMaterialIndicator(
           context,
           // Lengthen the arc a little
-          1.05 * _CircularProgressIndicatorState._strokeHeadTween.evaluate(_controller),
-          _CircularProgressIndicatorState._strokeTailTween.evaluate(_controller),
-          _CircularProgressIndicatorState._offsetTween.evaluate(_controller),
-          _CircularProgressIndicatorState._rotationTween.evaluate(_controller),
+          1.05 * _CircularProgressIndicatorState._strokeHeadTween.transform(_controller.value),
+          _CircularProgressIndicatorState._strokeTailTween.transform(_controller.value),
+          _CircularProgressIndicatorState._offsetTween.transform(_controller.value),
+          _CircularProgressIndicatorState._rotationTween.transform(_controller.value),
         );
       },
     );
