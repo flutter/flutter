@@ -557,6 +557,7 @@ PrimitiveType ArcVertexGenerator::GetTriangleType() const {
 size_t ArcVertexGenerator::GetVertexCount() const {
   size_t count = iteration_.GetPointCount();
   if (half_width_ > 0) {
+    // Stroked arc
     FML_DCHECK(!use_center_);
     FML_DCHECK(cap_ != Cap::kRound);
     count *= 2;
@@ -564,12 +565,16 @@ size_t ArcVertexGenerator::GetVertexCount() const {
       count += 4;
     }
   } else if (supports_triangle_fans_) {
+    // Filled arc using a triangle fan
     if (use_center_) {
       count++;
     }
   } else {
-    // corrugated triangle fan
-    count += (count + 1) / 2;
+    // Filled arc using a triangle strip
+    count = 2 * (count - 2) + 1;
+    if (use_center_) {
+      count += 2;
+    }
   }
   return count;
 }
@@ -806,27 +811,23 @@ void Tessellator::GenerateFilledArcStrip(const Trigs& trigs,
   if (use_center) {
     origin = center;
   } else {
-    Point midpoint = (iteration.start + iteration.end) * 0.5f;
-    origin = center + midpoint * radii;
+    origin = center + iteration.end * radii;
   }
 
-  proc(origin);
   proc(center + iteration.start * radii);
-  bool insert_origin = false;
   for (size_t i = 0; i < iteration.quadrant_count; i++) {
     auto quadrant = iteration.quadrants[i];
     for (size_t j = quadrant.start_index; j < quadrant.end_index; j++) {
-      if (insert_origin) {
-        proc(origin);
-      }
-      insert_origin = !insert_origin;
+      proc(origin);
       proc(center + trigs[j] * quadrant.axis * radii);
     }
   }
-  if (insert_origin) {
+  if (use_center) {
+    // Vertices for iteration.end. This is only needed when use_center is true.
+    // Otherwise iteration.end is used for the origin so it is already handled.
     proc(origin);
+    proc(center + iteration.end * radii);
   }
-  proc(center + iteration.end * radii);
 }
 
 void Tessellator::GenerateStrokedArc(const Trigs& trigs,
