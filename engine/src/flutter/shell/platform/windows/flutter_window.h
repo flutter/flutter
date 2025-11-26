@@ -42,7 +42,8 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
                 int height,
                 std::shared_ptr<DisplayManagerWin32> const& display_manager,
                 std::shared_ptr<WindowsProcTable> windows_proc_table = nullptr,
-                std::unique_ptr<TextInputManager> text_input_manager = nullptr);
+                std::unique_ptr<TextInputManager> text_input_manager = nullptr,
+                std::unique_ptr<KeyboardManager> keyboard_manager = nullptr);
 
   virtual ~FlutterWindow();
 
