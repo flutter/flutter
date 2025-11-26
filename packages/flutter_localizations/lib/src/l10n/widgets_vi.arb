@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "Chọn tất cả",
   "searchResultsFound": "Search results found",
   "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "radioButtonUnselectedLabel": "Not selected",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -488,5 +489,126 @@ void main() {
     expect(find.text('Body'), findsNothing);
 
     controller.dispose();
+  });
+
+  testWidgets(
+    'Expansible includes correct Semantics hint for expanded and collapsed states iOS/MacOS devices',
+    (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      const DefaultWidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+      final ExpansibleController controller = ExpansibleController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Expansible(
+              controller: controller,
+              headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
+                onTap: controller.isExpanded ? controller.collapse : controller.expand,
+                child: const Text('Header'),
+              ),
+              bodyBuilder: (BuildContext context, Animation<double> animation) =>
+                  const Text('Body'),
+            ),
+          ),
+        ),
+      );
+
+      // The header should have tap action and isExpanded is false initially.
+      final SemanticsNode semantics = tester.getSemantics(find.text('Header'));
+      expect(semantics, isNotNull);
+      expect(
+        semantics.hint,
+        '${localizations.expandedHint}\n ${localizations.expansibleCollapsedHint}',
+      );
+
+      controller.expand();
+      await tester.pumpAndSettle();
+
+      expect(semantics, isNotNull);
+      expect(
+        semantics.hint,
+        '${localizations.collapsedHint}\n ${localizations.expansibleExpandedHint}',
+      );
+
+      handle.dispose();
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    }),
+  );
+
+  testWidgets(
+    'Expansible includes correct Semantics hint for expanded and collapsed states non iOS/MacOS devices',
+    (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      final ExpansibleController controller = ExpansibleController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Expansible(
+              controller: controller,
+              headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
+                onTap: controller.isExpanded ? controller.collapse : controller.expand,
+                child: const Text('Header'),
+              ),
+              bodyBuilder: (BuildContext context, Animation<double> animation) =>
+                  const Text('Body'),
+            ),
+          ),
+        ),
+      );
+
+      // The header should have tap action and isExpanded is false initially.
+      final SemanticsNode semantics = tester.getSemantics(find.text('Header'));
+      expect(semantics, isNotNull);
+      expect(semantics.hint, isEmpty);
+
+      controller.expand();
+      await tester.pumpAndSettle();
+
+      expect(semantics, isNotNull);
+      expect(semantics.hint, isEmpty);
+
+      handle.dispose();
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.android,
+      TargetPlatform.windows,
+      TargetPlatform.fuchsia,
+      TargetPlatform.linux,
+    }),
+  );
+
+  testWidgets('Expansible includes correct Semantics onTapHint', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final DefaultWidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+    final ExpansibleController controller = ExpansibleController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Expansible(
+            controller: controller,
+            headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
+              onTap: controller.isExpanded ? controller.collapse : controller.expand,
+              child: const Text('Header'),
+            ),
+            bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),
+          ),
+        ),
+      ),
+    );
+
+    // The header should have tap action and isExpanded is false initially.
+    final SemanticsNode semantics = tester.getSemantics(find.text('Header'));
+    expect(semantics.hintOverrides, isNotNull);
+    expect(semantics.hintOverrides!.onTapHint, localizations.expansibleCollapsedTapHint);
+
+    controller.expand();
+    await tester.pumpAndSettle();
+
+    expect(semantics.hintOverrides!.onTapHint, localizations.expansibleExpandedTapHint);
+
+    handle.dispose();
   });
 }

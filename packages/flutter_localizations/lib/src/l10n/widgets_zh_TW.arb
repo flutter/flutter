@@ -12,5 +12,11 @@
   "shareButtonLabel": "分享",
   "pasteButtonLabel": "貼上",
   "selectAllButtonLabel": "全選",
-  "radioButtonUnselectedLabel": "Not selected"
+  "radioButtonUnselectedLabel": "Not selected",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }
