@@ -428,6 +428,29 @@ void main() {
     },
   );
 
+  testWidgets('SizeTransition alignment parameter', (WidgetTester tester) async {
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
+    addTearDown(controller.dispose);
+    final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
+
+    final Widget widget = SizeTransition(
+      sizeFactor: animation,
+      alignment: Alignment.topLeft,
+      child: const SizedBox.shrink(),
+    );
+
+    await tester.pumpWidget(widget);
+
+    expect(
+      tester.widget(find.byType(SizeTransition)),
+      isA<SizeTransition>().having(
+        (SizeTransition transition) => transition.alignment,
+        'alignment',
+        Alignment.topLeft,
+      ),
+    );
+  });
+
   testWidgets('MatrixTransition animates', (WidgetTester tester) async {
     final controller = AnimationController(vsync: const TestVSync());
     addTearDown(controller.dispose);

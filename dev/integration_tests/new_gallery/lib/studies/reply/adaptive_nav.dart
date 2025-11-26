@@ -657,7 +657,7 @@ class _AnimatedBottomAppBar extends StatelessWidget {
 
         return SizeTransition(
           sizeFactor: bottomAppBarCurve,
-          axisAlignment: -1,
+          alignment: Alignment.topLeft,
           child: Padding(
             padding: const EdgeInsetsDirectional.only(top: 2),
             child: BottomAppBar(
