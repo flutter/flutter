@@ -127,7 +127,8 @@ class Mutator {
       : data_(backdrop_rect) {}
   explicit Mutator(const BackdropClipRRect& backdrop_rrect)
       : data_(backdrop_rrect) {}
-  explicit Mutator(const BackdropClipRSuperellipse& backdrop_rse) : data_(backdrop_rse) {}
+  explicit Mutator(const BackdropClipRSuperellipse& backdrop_rse)
+      : data_(backdrop_rse) {}
   explicit Mutator(const BackdropClipPath& backdrop_path)
       : data_(backdrop_path) {}
 

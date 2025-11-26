@@ -122,7 +122,8 @@ TEST(MutatorsStack, PushPlatformViewClipRSuperellipse) {
   auto rse = DlRoundSuperellipse();
   stack.PushPlatformViewClipRSuperellipse(rse);
   auto iter = stack.Bottom();
-  ASSERT_TRUE(iter->get()->GetType() == MutatorType::kBackdropClipRSuperellipse);
+  ASSERT_TRUE(iter->get()->GetType() ==
+              MutatorType::kBackdropClipRSuperellipse);
   ASSERT_TRUE(iter->get()->GetBackdropClipRSuperellipse().rse == rse);
 }
 
