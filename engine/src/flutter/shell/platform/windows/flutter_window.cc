@@ -79,11 +79,13 @@ FlutterWindow::FlutterWindow(
     int height,
     std::shared_ptr<DisplayManagerWin32> const& display_manager,
     std::shared_ptr<WindowsProcTable> windows_proc_table,
-    std::unique_ptr<TextInputManager> text_input_manager)
+    std::unique_ptr<TextInputManager> text_input_manager,
+    std::unique_ptr<KeyboardManager> keyboard_manager)
     : touch_id_generator_(kMinTouchDeviceId, kMaxTouchDeviceId),
       display_manager_(display_manager),
       windows_proc_table_(std::move(windows_proc_table)),
       text_input_manager_(std::move(text_input_manager)),
+      keyboard_manager_(std::move(keyboard_manager)),
       ax_fragment_root_(nullptr) {
   // Get the DPI of the primary monitor as the initial DPI. If Per-Monitor V2 is
   // supported, |current_dpi_| should be updated in the
@@ -101,7 +103,9 @@ FlutterWindow::FlutterWindow(
   if (text_input_manager_ == nullptr) {
     text_input_manager_ = std::make_unique<TextInputManager>();
   }
-  keyboard_manager_ = std::make_unique<KeyboardManager>(this);
+  if (keyboard_manager_ == nullptr) {
+    keyboard_manager_ = std::make_unique<KeyboardManager>(this);
+  }
 
   InitializeChild("FLUTTERVIEW", width, height);
 }
@@ -754,6 +758,17 @@ FlutterWindow::HandleMessage(UINT const message,
     case WM_KEYUP:
     case WM_SYSKEYUP:
       if (keyboard_manager_->HandleMessage(message, wparam, lparam)) {
+        return 0;
+      }
+
+      // Fix for https://github.com/flutter/flutter/issues/177822
+      // When a user clicks the alt key, Win32 will attempt to open up the
+      // system menu by default. This causes the next key down to be consumed
+      // by the event system and therefore never delivered to the app.
+      // The workaround is to eat VK_MENU events. If the Flutter app wishes
+      // to open a menu in response to alt down, they will now receive the
+      // alt and can choose to do what they like in response.
+      if (message == WM_SYSKEYDOWN && wparam == VK_MENU) {
         return 0;
       }
       break;
