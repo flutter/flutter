@@ -93,7 +93,6 @@ class KeyboardManager {
   using KeyEventCallback = WindowDelegate::KeyEventCallback;
 
   explicit KeyboardManager(WindowDelegate* delegate);
-  virtual ~KeyboardManager() = default;
 
   // Processes Win32 messages related to keyboard and text.
   //
@@ -107,9 +106,9 @@ class KeyboardManager {
   // message here usually means that this message is a redispatched message,
   // but there are other rare cases too. |Window| should forward unhandled
   // messages to |DefWindowProc|.
-  virtual bool HandleMessage(UINT const message,
-                             WPARAM const wparam,
-                             LPARAM const lparam);
+  bool HandleMessage(UINT const message,
+                     WPARAM const wparam,
+                     LPARAM const lparam);
 
  protected:
   struct Win32Message {
