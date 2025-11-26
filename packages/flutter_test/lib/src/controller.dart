@@ -776,17 +776,24 @@ abstract class WidgetController {
   }
 
   FlutterView _viewOf(finders.FinderBase<Element> finder) {
-    return firstWidget<View>(
-      finders.find.ancestor(of: finder, matching: finders.find.byType(View)),
-    ).view;
+    final FlutterView? view = _maybeViewOf(finder);
+    if (view == null) {
+      throw StateError(
+        'No FlutterView ancestor found for finder: '
+        '${finder.toString(describeSelf: true)}',
+      );
+    }
+    return view;
   }
 
   FlutterView? _maybeViewOf(finders.FinderBase<Element> finder) {
-    try {
-      return _viewOf(finder);
-    } on StateError {
+    final Iterable<View> views = widgetList<View>(
+      finders.find.ancestor(of: finder, matching: finders.find.byType(View)),
+    );
+    if (views.isEmpty) {
       return null;
     }
+    return views.first.view;
   }
 
   /// Checks if `finder` exists in the tree.
