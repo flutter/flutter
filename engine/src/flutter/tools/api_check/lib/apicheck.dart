@@ -104,7 +104,7 @@ List<String> getSwiftOptionSetProperties({
     source: File(sourcePath).readAsStringSync(),
     startExp: RegExp('struct $optionSetName: OptionSet {'),
   );
-  final RegExp valueExp = RegExp('^\\s*static let (\\w*) = $optionSetName\\(');
+  final valueExp = RegExp('^\\s*static let (\\w*) = $optionSetName\\(');
   return _extractMatchingExpression(lines: lines, regexp: valueExp);
 }
 
