@@ -11,14 +11,19 @@ import static org.mockito.Mockito.*;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.android.ExclusiveAppComponent;
+import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
+import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.plugin.platform.PlatformViewsController2;
@@ -85,6 +90,19 @@ public class FlutterEngineConnectionRegistryTest {
     when(flutterEngine.getPlatformViewsControllerDelegator())
         .thenReturn(platformViewsControllerDelegator);
 
+    PackageManager packageManager = mock(PackageManager.class);
+    String packageName = "io.flutter.test";
+    ApplicationInfo applicationInfo = new ApplicationInfo();
+    applicationInfo.metaData = new Bundle();
+    when(context.getPackageName()).thenReturn(packageName);
+    when(context.getPackageManager()).thenReturn(packageManager);
+    try {
+      when(packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA))
+          .thenReturn(applicationInfo);
+    } catch (PackageManager.NameNotFoundException e) {
+      fail("Mocking application info threw an exception");
+    }
+
     FlutterLoader flutterLoader = mock(FlutterLoader.class);
 
     ExclusiveAppComponent appComponent = mock(ExclusiveAppComponent.class);
@@ -124,6 +142,50 @@ public class FlutterEngineConnectionRegistryTest {
 
     // The order of the listeners in the HashSet is random: So just check the sum of calls
     assertEquals(3, listener1.callCount + listener2.callCount);
+  }
+
+  @Test
+  public void attachToActivityConfiguresSoftwareRendering() {
+    Context context = mock(Context.class);
+    PackageManager packageManager = mock(PackageManager.class);
+    ApplicationInfo applicationInfo = new ApplicationInfo();
+    Bundle metaData = new Bundle();
+    String packageName = "io.flutter.test";
+    metaData.putBoolean("io.flutter.embedding.android.EnableSoftwareRendering", true);
+    applicationInfo.metaData = metaData;
+
+    when(context.getPackageName()).thenReturn(packageName);
+    when(context.getPackageManager()).thenReturn(packageManager);
+    try {
+      when(packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA))
+          .thenReturn(applicationInfo);
+    } catch (PackageManager.NameNotFoundException e) {
+      fail("Mocking application info threw an exception");
+    }
+
+    FlutterEngine flutterEngine = mock(FlutterEngine.class);
+    PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
+    when(flutterEngine.getPlatformViewsController()).thenReturn(platformViewsController);
+    PlatformViewsControllerDelegator platformViewsControllerDelegator =
+        mock(PlatformViewsControllerDelegator.class);
+    when(flutterEngine.getPlatformViewsControllerDelegator())
+        .thenReturn(platformViewsControllerDelegator);
+    when(flutterEngine.getDartExecutor()).thenReturn(mock(DartExecutor.class));
+    when(flutterEngine.getRenderer()).thenReturn(mock(FlutterRenderer.class));
+
+    FlutterLoader flutterLoader = mock(FlutterLoader.class);
+    FlutterEngineConnectionRegistry registry =
+        new FlutterEngineConnectionRegistry(context, flutterEngine, flutterLoader, null);
+
+    ExclusiveAppComponent<Activity> appComponent = mock(ExclusiveAppComponent.class);
+    Activity activity = mock(Activity.class);
+    when(appComponent.getAppComponent()).thenReturn(activity);
+    when(activity.getIntent()).thenReturn(mock(Intent.class));
+    Lifecycle lifecycle = mock(Lifecycle.class);
+
+    registry.attachToActivity(appComponent, lifecycle);
+
+    verify(platformViewsController).setSoftwareRendering(true);
   }
 
   private static class FakeFlutterPlugin implements FlutterPlugin {
