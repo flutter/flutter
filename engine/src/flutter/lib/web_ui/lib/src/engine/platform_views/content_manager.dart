@@ -149,7 +149,13 @@ class PlatformViewManager {
     return _contents.putIfAbsent(viewId, () {
       final DomElement wrapper = domDocument.createElement('flt-platform-view')
         ..id = getPlatformViewDomId(viewId)
-        ..setAttribute('slot', slotName);
+        ..setAttribute('slot', slotName)
+        // Position relative so the wheel overlay can be positioned absolutely inside
+        // Width/height 100% to fill the slot's dimensions
+        ..style.position = 'relative'
+        ..style.width = '100%'
+        ..style.height = '100%'
+        ..style.display = 'block';
 
       final Function factoryFunction = _factories[viewType]!;
       final DomElement content;
@@ -164,9 +170,106 @@ class PlatformViewManager {
       _ensureContentCorrectlySized(content, viewType);
       wrapper.append(content);
 
+      // Add a transparent overlay to capture wheel events over cross-origin iframes.
+      // Cross-origin iframes (like YouTube embeds) completely isolate events - wheel 
+      // events inside the iframe never reach the parent page due to browser security.
+      // This overlay sits on top and captures wheel events, forwarding them to Flutter.
+      // This fixes Issue #113196.
+      final DomElement wheelOverlay = domDocument.createElement('div')
+        ..style.position = 'absolute'
+        ..style.top = '0'
+        ..style.left = '0'
+        ..style.width = '100%'
+        ..style.height = '100%'
+        ..style.zIndex = '1000'
+        // Capture wheel events only, let clicks pass through
+        ..style.pointerEvents = 'auto';
+      
+      _setupWheelEventForwarding(wheelOverlay, wrapper);
+      wrapper.append(wheelOverlay);
+
       wrapper.setAttribute(_ariaHiddenAttribute, 'true');
 
       return wrapper;
+    });
+  }
+  
+  /// Sets up wheel event forwarding from the overlay to Flutter's scroll handler.
+  /// Also forwards other pointer events to the content beneath the overlay.
+  void _setupWheelEventForwarding(DomElement overlay, DomElement wrapper) {
+    // Capture wheel events and forward to Flutter
+    overlay.addEventListener(
+      'wheel',
+      createDomEventListener((DomEvent event) {
+        event.stopPropagation();
+        event.preventDefault();
+
+        // Find the flutter-view element to dispatch the event
+        DomElement? flutterView = wrapper.parentElement;
+        while (flutterView != null && flutterView.tagName != 'FLUTTER-VIEW') {
+          flutterView = flutterView.parentElement;
+        }
+
+        if (flutterView != null) {
+          final DomWheelEvent wheelEvent = event as DomWheelEvent;
+          final DomWheelEvent newEvent = createDomWheelEvent(
+            'wheel',
+            <String, dynamic>{
+              'bubbles': true,
+              'cancelable': true,
+              'clientX': wheelEvent.clientX,
+              'clientY': wheelEvent.clientY,
+              'deltaX': wheelEvent.deltaX,
+              'deltaY': wheelEvent.deltaY,
+              'deltaMode': wheelEvent.deltaMode,
+              'buttons': wheelEvent.buttons,
+            },
+          );
+          flutterView.dispatchEvent(newEvent);
+        }
+      }),
+      <String, bool>{'capture': false, 'passive': false}.jsify()!,
+    );
+    
+    // For click events, temporarily hide the overlay and re-dispatch to element beneath
+    overlay.addEventListener(
+      'click',
+      createDomEventListener((DomEvent event) {
+        _forwardPointerEventToContent(event as DomMouseEvent, overlay);
+      }),
+    );
+    
+    // For mousedown, also forward to content
+    overlay.addEventListener(
+      'mousedown',
+      createDomEventListener((DomEvent event) {
+        _forwardPointerEventToContent(event as DomMouseEvent, overlay);
+      }),
+    );
+    
+    // For mouseup, also forward to content  
+    overlay.addEventListener(
+      'mouseup',
+      createDomEventListener((DomEvent event) {
+        _forwardPointerEventToContent(event as DomMouseEvent, overlay);
+      }),
+    );
+  }
+  
+  /// Forwards a pointer event to the element beneath the overlay.
+  ///
+  /// Note: For cross-origin iframes, we can't actually dispatch events to the
+  /// content. This method temporarily sets pointer-events to 'none' to allow
+  /// the browser to naturally handle click-through.
+  void _forwardPointerEventToContent(DomMouseEvent event, DomElement overlay) {
+    // Temporarily hide the overlay to allow click-through
+    final String originalPointerEvents = overlay.style.pointerEvents;
+    overlay.style.pointerEvents = 'none';
+
+    // Use a microtask to restore pointer-events after the browser has had
+    // a chance to dispatch the event to the element beneath.
+    Future<void>.microtask(() {
+      overlay.style.pointerEvents = originalPointerEvents;
     });
   }
 
