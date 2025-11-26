@@ -421,7 +421,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
   }
 
   _MenuAnchorState get _root {
-    _MenuAnchorState anchor = this;
+    var anchor = this;
     while (anchor._parent != null) {
       anchor = anchor._parent!;
     }
@@ -1767,7 +1767,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
       (Axis.vertical, TextDirection.rtl) => Offset(0, -menuPadding.top),
       (Axis.vertical, TextDirection.ltr) => Offset(0, -menuPadding.top),
     };
-    final Set<WidgetState> states = <WidgetState>{
+    final states = <WidgetState>{
       if (!_enabled) WidgetState.disabled,
       if (_isHovered) WidgetState.hovered,
       if (_buttonFocusNode.hasFocus) WidgetState.focused,
@@ -2122,7 +2122,7 @@ class _LocalizedShortcutLabeler {
     }
     if (serialized.trigger != null) {
       final LogicalKeyboardKey trigger = serialized.trigger!;
-      final List<String> modifiers = <String>[
+      final modifiers = <String>[
         if (_usesSymbolicModifiers) ...<String>[
           // macOS/iOS platform convention uses this ordering, with ⌘ always last.
           if (serialized.control!) _getModifierLabel(LogicalKeyboardKey.control, localizations),
@@ -2160,7 +2160,7 @@ class _LocalizedShortcutLabeler {
         if (shortcutTrigger != null && shortcutTrigger.isNotEmpty) shortcutTrigger,
       ].join(keySeparator);
     } else if (serialized.character != null) {
-      final List<String> modifiers = <String>[
+      final modifiers = <String>[
         // Character based shortcuts cannot check shifted keys.
         if (_usesSymbolicModifiers) ...<String>[
           // macOS/iOS platform convention uses this ordering, with ⌘ always last.
@@ -2328,7 +2328,7 @@ class _MenuBarAnchorState extends _MenuAnchorState {
 
   @override
   Widget build(BuildContext context) {
-    final Actions child = Actions(
+    final child = Actions(
       actions: actions,
       child: Shortcuts(
         shortcuts: _kMenuTraversalShortcuts,
@@ -2598,15 +2598,15 @@ class MenuAcceleratorLabel extends StatefulWidget {
   ///
   /// {@macro flutter.material.menu_anchor.menu_accelerator_label.label}
   static String stripAcceleratorMarkers(String label, {void Function(int index)? setIndex}) {
-    int quotedAmpersands = 0;
-    final StringBuffer displayLabel = StringBuffer();
-    int acceleratorIndex = -1;
+    var quotedAmpersands = 0;
+    final displayLabel = StringBuffer();
+    var acceleratorIndex = -1;
     // Use characters so that we don't split up surrogate pairs and interpret
     // them incorrectly.
     final Characters labelChars = label.characters;
     final Characters ampersand = '&'.characters;
-    bool lastWasAmpersand = false;
-    for (int i = 0; i < labelChars.length; i += 1) {
+    var lastWasAmpersand = false;
+    for (var i = 0; i < labelChars.length; i += 1) {
       // Stop looking one before the end, since a single ampersand at the end is
       // just treated as a quoted ampersand.
       final Characters character = labelChars.characterAt(i);
@@ -3095,7 +3095,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
 
   Rect _closestScreen(Iterable<Rect> screens, Offset point) {
     Rect closest = screens.first;
-    for (final Rect screen in screens) {
+    for (final screen in screens) {
       if ((screen.center - point).distance < (closest.center - point).distance) {
         closest = screen;
       }

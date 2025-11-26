@@ -7,34 +7,31 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('StrutStyle diagnostics test', () {
-    const StrutStyle s0 = StrutStyle(fontFamily: 'Serif', fontSize: 14);
+    const s0 = StrutStyle(fontFamily: 'Serif', fontSize: 14);
     expect(s0.toString(), equals('StrutStyle(family: Serif, size: 14.0)'));
 
-    const StrutStyle s1 = StrutStyle(fontFamily: 'Serif', fontSize: 14, forceStrutHeight: true);
+    const s1 = StrutStyle(fontFamily: 'Serif', fontSize: 14, forceStrutHeight: true);
     expect(s1.fontFamily, 'Serif');
     expect(s1.fontSize, 14.0);
     expect(s1, equals(s1));
     expect(s1.toString(), equals('StrutStyle(family: Serif, size: 14.0, <strut height forced>)'));
 
-    const StrutStyle s2 = StrutStyle(fontFamily: 'Serif', fontSize: 14, forceStrutHeight: false);
+    const s2 = StrutStyle(fontFamily: 'Serif', fontSize: 14, forceStrutHeight: false);
     expect(s2.toString(), equals('StrutStyle(family: Serif, size: 14.0, <strut height normal>)'));
 
-    const StrutStyle s3 = StrutStyle();
+    const s3 = StrutStyle();
     expect(s3.toString(), equals('StrutStyle'));
 
-    const StrutStyle s4 = StrutStyle(forceStrutHeight: false);
+    const s4 = StrutStyle(forceStrutHeight: false);
     expect(s4.toString(), equals('StrutStyle(<strut height normal>)'));
 
-    const StrutStyle s5 = StrutStyle(forceStrutHeight: true);
+    const s5 = StrutStyle(forceStrutHeight: true);
     expect(s5.toString(), equals('StrutStyle(<strut height forced>)'));
 
-    const StrutStyle s6 = StrutStyle(height: 14, leadingDistribution: TextLeadingDistribution.even);
+    const s6 = StrutStyle(height: 14, leadingDistribution: TextLeadingDistribution.even);
     expect(s6.toString(), equals('StrutStyle(height: 14.0x, leadingDistribution: even)'));
 
-    const StrutStyle s7 = StrutStyle(
-      height: 14,
-      leadingDistribution: TextLeadingDistribution.proportional,
-    );
+    const s7 = StrutStyle(height: 14, leadingDistribution: TextLeadingDistribution.proportional);
     expect(s7.toString(), equals('StrutStyle(height: 14.0x, leadingDistribution: proportional)'));
 
     expect(s6, isNot(equals(s7)));

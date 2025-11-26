@@ -123,8 +123,8 @@ Finder findTooltipContainer(String tooltipText) {
 
 void main() {
   testWidgets('Material2 - FilterChip defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: false);
-    const String label = 'filter chip';
+    final theme = ThemeData(useMaterial3: false);
+    const label = 'filter chip';
 
     // Test enabled FilterChip defaults.
     await tester.pumpWidget(
@@ -152,8 +152,7 @@ void main() {
     expect(chipMaterial.shadowColor, Colors.black);
     expect(chipMaterial.shape, const StadiumBorder());
 
-    ShapeDecoration decoration =
-        tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    var decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
     expect(decoration.color, Colors.black.withAlpha(0x1f));
 
     // Test disabled FilterChip defaults.
@@ -217,8 +216,8 @@ void main() {
   });
 
   testWidgets('Material3 - FilterChip defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
-    const String label = 'filter chip';
+    final theme = ThemeData();
+    const label = 'filter chip';
 
     // Test enabled FilterChip defaults.
     await tester.pumpWidget(
@@ -255,8 +254,7 @@ void main() {
       ),
     );
 
-    ShapeDecoration decoration =
-        tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    var decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
     expect(decoration.color, null);
 
     // Test disabled FilterChip defaults.
@@ -341,8 +339,8 @@ void main() {
   });
 
   testWidgets('Material3 - FilterChip.elevated defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
-    const String label = 'filter chip';
+    final theme = ThemeData();
+    const label = 'filter chip';
 
     // Test enabled FilterChip.elevated defaults.
     await tester.pumpWidget(
@@ -382,8 +380,7 @@ void main() {
       ),
     );
 
-    ShapeDecoration decoration =
-        tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    var decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
     expect(decoration.color, theme.colorScheme.surfaceContainerLow);
 
     // Test disabled FilterChip.elevated defaults.
@@ -468,10 +465,10 @@ void main() {
   });
 
   testWidgets('FilterChip.color resolves material states', (WidgetTester tester) async {
-    const Color disabledSelectedColor = Color(0xffffff00);
-    const Color disabledColor = Color(0xff00ff00);
-    const Color backgroundColor = Color(0xff0000ff);
-    const Color selectedColor = Color(0xffff0000);
+    const disabledSelectedColor = Color(0xffffff00);
+    const disabledColor = Color(0xff00ff00);
+    const backgroundColor = Color(0xff0000ff);
+    const selectedColor = Color(0xffff0000);
     final WidgetStateProperty<Color?> color = WidgetStateProperty.resolveWith((
       Set<WidgetState> states,
     ) {
@@ -557,9 +554,9 @@ void main() {
   });
 
   testWidgets('FilterChip uses provided state color properties', (WidgetTester tester) async {
-    const Color disabledColor = Color(0xff00ff00);
-    const Color backgroundColor = Color(0xff0000ff);
-    const Color selectedColor = Color(0xffff0000);
+    const disabledColor = Color(0xff00ff00);
+    const backgroundColor = Color(0xff0000ff);
+    const selectedColor = Color(0xffff0000);
     Widget buildApp({required bool enabled, required bool selected}) {
       return wrapForChip(
         child: Column(
@@ -647,7 +644,7 @@ void main() {
   testWidgets(
     'Material3 - Filter chip check mark color is determined by platform brightness when light',
     (WidgetTester tester) async {
-      final ThemeData theme = ThemeData();
+      final theme = ThemeData();
       await pumpCheckmarkChip(tester, chip: selectedFilterChip(), theme: theme);
 
       expectCheckmarkColor(find.byType(FilterChip), theme.colorScheme.onSecondaryContainer);
@@ -670,7 +667,7 @@ void main() {
   testWidgets(
     'Material3 - Filter chip check mark color is determined by platform brightness when dark',
     (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(brightness: Brightness.dark);
+      final theme = ThemeData(brightness: Brightness.dark);
       await pumpCheckmarkChip(tester, chip: selectedFilterChip(), theme: theme);
 
       expectCheckmarkColor(find.byType(FilterChip), theme.colorScheme.onSecondaryContainer);
@@ -716,7 +713,7 @@ void main() {
   testWidgets('FilterChip clipBehavior properly passes through to the Material', (
     WidgetTester tester,
   ) async {
-    const Text label = Text('label');
+    const label = Text('label');
     await tester.pumpWidget(
       wrapForChip(
         child: FilterChip(label: label, onSelected: (bool b) {}),
@@ -736,7 +733,7 @@ void main() {
     // Regression tests for: https://github.com/flutter/flutter/issues/110645
 
     // For the text "FilterChip" the chip should default to 175 regardless of selection.
-    const int expectedWidth = 175;
+    const expectedWidth = 175;
 
     // Unselected
     await tester.pumpWidget(
@@ -774,7 +771,7 @@ void main() {
   });
 
   testWidgets('FilterChip uses provided iconTheme', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
 
     Widget buildChip({IconThemeData? iconTheme}) {
       return MaterialApp(
@@ -802,7 +799,7 @@ void main() {
   });
 
   testWidgets('Material3 - FilterChip supports delete button', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -854,7 +851,7 @@ void main() {
   });
 
   testWidgets('Material2 - FilterChip supports delete button', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: false);
+    final theme = ThemeData(useMaterial3: false);
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -958,8 +955,8 @@ void main() {
   });
 
   testWidgets('FilterChip delete button control test', (WidgetTester tester) async {
-    final FeedbackTester feedback = FeedbackTester();
-    final List<String> deletedButtonStrings = <String>[];
+    final feedback = FeedbackTester();
+    final deletedButtonStrings = <String>[];
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -1045,7 +1042,7 @@ void main() {
     const IconData flatDeleteIcon = Icons.delete;
     const IconData elevatedAvatar = Icons.house;
     const IconData elevatedDeleteIcon = Icons.clear_all;
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
 
     Widget buildChips({required bool selected}) {
       return MaterialApp(
@@ -1106,11 +1103,11 @@ void main() {
   testWidgets('FilterChip avatar layout constraints can be customized', (
     WidgetTester tester,
   ) async {
-    const double border = 1.0;
-    const double iconSize = 18.0;
-    const double labelPadding = 8.0;
-    const double padding = 8.0;
-    const Size labelSize = Size(100, 100);
+    const border = 1.0;
+    const iconSize = 18.0;
+    const labelPadding = 8.0;
+    const padding = 8.0;
+    const labelSize = Size(100, 100);
 
     Widget buildChip({BoxConstraints? avatarBoxConstraints}) {
       return wrapForChip(
@@ -1165,11 +1162,11 @@ void main() {
   testWidgets('FilterChip delete icon layout constraints can be customized', (
     WidgetTester tester,
   ) async {
-    const double border = 1.0;
-    const double iconSize = 18.0;
-    const double labelPadding = 8.0;
-    const double padding = 8.0;
-    const Size labelSize = Size(100, 100);
+    const border = 1.0;
+    const iconSize = 18.0;
+    const labelPadding = 8.0;
+    const padding = 8.0;
+    const labelSize = Size(100, 100);
 
     Widget buildChip({BoxConstraints? deleteIconBoxConstraints}) {
       return wrapForChip(
@@ -1224,7 +1221,7 @@ void main() {
   });
 
   testWidgets('FilterChip.chipAnimationStyle is passed to RawChip', (WidgetTester tester) async {
-    final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
+    final chipAnimationStyle = ChipAnimationStyle(
       enableAnimation: AnimationStyle.noAnimation,
       selectAnimation: const AnimationStyle(duration: Durations.extralong4),
     );
@@ -1247,7 +1244,7 @@ void main() {
   testWidgets('Elevated FilterChip.chipAnimationStyle is passed to RawChip', (
     WidgetTester tester,
   ) async {
-    final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
+    final chipAnimationStyle = ChipAnimationStyle(
       enableAnimation: AnimationStyle.noAnimation,
       selectAnimation: const AnimationStyle(duration: Durations.extralong4),
     );
@@ -1331,7 +1328,7 @@ void main() {
     WidgetTester tester,
   ) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    final FocusNode focusNode = FocusNode(debugLabel: 'Chip');
+    final focusNode = FocusNode(debugLabel: 'Chip');
     addTearDown(focusNode.dispose);
 
     Widget buildChip({required bool enabled}) {

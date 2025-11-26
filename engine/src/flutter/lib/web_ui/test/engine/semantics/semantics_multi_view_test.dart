@@ -24,15 +24,15 @@ Future<void> testMain() async {
 
     final DomElement host1 = createDomElement('view-host');
     domDocument.body!.append(host1);
-    final EngineFlutterView view1 = EngineFlutterView(EnginePlatformDispatcher.instance, host1);
+    final view1 = EngineFlutterView(EnginePlatformDispatcher.instance, host1);
     EnginePlatformDispatcher.instance.viewManager.registerView(view1);
-    final SemanticsTester tester1 = SemanticsTester(view1.semantics);
+    final tester1 = SemanticsTester(view1.semantics);
 
     final DomElement host2 = createDomElement('view-host');
     domDocument.body!.append(host2);
-    final EngineFlutterView view2 = EngineFlutterView(EnginePlatformDispatcher.instance, host2);
+    final view2 = EngineFlutterView(EnginePlatformDispatcher.instance, host2);
     EnginePlatformDispatcher.instance.viewManager.registerView(view2);
-    final SemanticsTester tester2 = SemanticsTester(view2.semantics);
+    final tester2 = SemanticsTester(view2.semantics);
 
     tester1.updateNode(id: 0);
     tester1.apply();

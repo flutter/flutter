@@ -53,7 +53,7 @@ final class BuildBucketGoldenScraper {
   }
 
   static Never _usage(List<String> args) {
-    final StringBuffer output = StringBuffer();
+    final output = StringBuffer();
     output.writeln('Usage: build_bucket_golden_scraper [options] <path or URL>');
     output.writeln();
     output.writeln(_argParser.usage);
@@ -97,7 +97,7 @@ final class BuildBucketGoldenScraper {
     if (maybeUri.hasScheme) {
       contents = await _downloadFile(maybeUri);
     } else {
-      final io.File readFile = io.File(pathOrUrl);
+      final readFile = io.File(pathOrUrl);
       if (!readFile.existsSync()) {
         throw FormatException('File does not exist: $pathOrUrl');
       }
@@ -118,9 +118,9 @@ final class BuildBucketGoldenScraper {
     // We want to extract the file name (relative to the engine root) and then
     // decode the base64 encoded string (and write it to disk if we are not in
     // dry-run mode).
-    final List<_Golden> goldens = <_Golden>[];
+    final goldens = <_Golden>[];
     final List<String> lines = contents.split('\n');
-    for (int i = 0; i < lines.length; i++) {
+    for (var i = 0; i < lines.length; i++) {
       final String line = lines[i];
       if (line.startsWith(_base64MagicString)) {
         final String relativePath = line.split(_buildBucketMagicString).last.split(':').first;
@@ -130,7 +130,7 @@ final class BuildBucketGoldenScraper {
 
         final String base64EncodedString = lines[i + 1];
         final List<int> bytes = base64Decode(base64EncodedString);
-        final io.File outFile = io.File(p.join(engine.srcDir.path, pathWithouNew));
+        final outFile = io.File(p.join(engine.srcDir.path, pathWithouNew));
         goldens.add(_Golden(outFile, bytes));
       }
     }
@@ -146,7 +146,7 @@ final class BuildBucketGoldenScraper {
 
     // Write the goldens to disk (or pretend to in dry-run mode).
     _outSink.writeln('${dryRun ? 'Found' : 'Wrote'} ${uniqueGoldens.length} golden file changes:');
-    for (final _Golden golden in uniqueGoldens) {
+    for (final golden in uniqueGoldens) {
       final String truncatedPathAfterFlutterDir = golden.outFile.path
           .split('flutter${p.separator}')
           .last;
@@ -166,10 +166,10 @@ final class BuildBucketGoldenScraper {
   static const String _base64MagicString = 'See also the base64 encoded $_buildBucketMagicString';
 
   static Future<String> _downloadFile(Uri uri) async {
-    final io.HttpClient client = io.HttpClient();
+    final client = io.HttpClient();
     final io.HttpClientRequest request = await client.getUrl(uri);
     final io.HttpClientResponse response = await request.close();
-    final StringBuffer contents = StringBuffer();
+    final contents = StringBuffer();
     await response.transform(utf8.decoder).forEach(contents.write);
     client.close();
     return contents.toString();

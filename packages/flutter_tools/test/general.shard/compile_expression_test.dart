@@ -199,13 +199,13 @@ void main() {
 
 class FakeProcess extends Fake implements Process {
   @override
-  var stdout = const Stream<List<int>>.empty();
+  Stream<List<int>> stdout = const Stream<List<int>>.empty();
 
   @override
-  var stderr = const Stream<List<int>>.empty();
+  Stream<List<int>> stderr = const Stream<List<int>>.empty();
 
   @override
-  var stdin = IOSink(StreamController<List<int>>().sink);
+  IOSink stdin = IOSink(StreamController<List<int>>().sink);
 
   @override
   Future<int> get exitCode => Completer<int>().future;

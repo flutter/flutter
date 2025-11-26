@@ -10,13 +10,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('Theme data control test', () {
-    final ThemeData dark = ThemeData.dark();
+    final dark = ThemeData.dark();
 
     expect(dark, hasOneLineDescription);
     expect(dark, equals(dark.copyWith()));
     expect(dark.hashCode, equals(dark.copyWith().hashCode));
 
-    final ThemeData light = ThemeData();
+    final light = ThemeData();
     final ThemeData dawn = ThemeData.lerp(dark, light, 0.25);
 
     expect(dawn.brightness, Brightness.dark);
@@ -63,8 +63,8 @@ void main() {
 
   test('Defaults to the default typography for the platform', () {
     for (final TargetPlatform platform in TargetPlatform.values) {
-      final ThemeData theme = ThemeData(platform: platform, useMaterial3: false);
-      final Typography typography = Typography.material2018(platform: platform);
+      final theme = ThemeData(platform: platform, useMaterial3: false);
+      final typography = Typography.material2018(platform: platform);
       expect(
         theme.textTheme,
         typography.black.apply(decoration: TextDecoration.none),
@@ -74,51 +74,51 @@ void main() {
   });
 
   test('Default text theme contrasts with brightness', () {
-    final ThemeData lightTheme = ThemeData(brightness: Brightness.light, useMaterial3: false);
-    final ThemeData darkTheme = ThemeData(brightness: Brightness.dark, useMaterial3: false);
-    final Typography typography = Typography.material2018(platform: lightTheme.platform);
+    final lightTheme = ThemeData(brightness: Brightness.light, useMaterial3: false);
+    final darkTheme = ThemeData(brightness: Brightness.dark, useMaterial3: false);
+    final typography = Typography.material2018(platform: lightTheme.platform);
 
     expect(lightTheme.textTheme.titleLarge!.color, typography.black.titleLarge!.color);
     expect(darkTheme.textTheme.titleLarge!.color, typography.white.titleLarge!.color);
   });
 
   test('Default primary text theme contrasts with primary brightness', () {
-    final ThemeData lightTheme = ThemeData(primaryColor: Colors.white, useMaterial3: false);
-    final ThemeData darkTheme = ThemeData(primaryColor: Colors.black, useMaterial3: false);
-    final Typography typography = Typography.material2018(platform: lightTheme.platform);
+    final lightTheme = ThemeData(primaryColor: Colors.white, useMaterial3: false);
+    final darkTheme = ThemeData(primaryColor: Colors.black, useMaterial3: false);
+    final typography = Typography.material2018(platform: lightTheme.platform);
 
     expect(lightTheme.primaryTextTheme.titleLarge!.color, typography.black.titleLarge!.color);
     expect(darkTheme.primaryTextTheme.titleLarge!.color, typography.white.titleLarge!.color);
   });
 
   test('Default icon theme contrasts with brightness', () {
-    final ThemeData lightTheme = ThemeData(brightness: Brightness.light, useMaterial3: false);
-    final ThemeData darkTheme = ThemeData(brightness: Brightness.dark, useMaterial3: false);
-    final Typography typography = Typography.material2018(platform: lightTheme.platform);
+    final lightTheme = ThemeData(brightness: Brightness.light, useMaterial3: false);
+    final darkTheme = ThemeData(brightness: Brightness.dark, useMaterial3: false);
+    final typography = Typography.material2018(platform: lightTheme.platform);
 
     expect(lightTheme.textTheme.titleLarge!.color, typography.black.titleLarge!.color);
     expect(darkTheme.textTheme.titleLarge!.color, typography.white.titleLarge!.color);
   });
 
   test('Default primary icon theme contrasts with primary brightness', () {
-    final ThemeData lightTheme = ThemeData(primaryColor: Colors.white, useMaterial3: false);
-    final ThemeData darkTheme = ThemeData(primaryColor: Colors.black, useMaterial3: false);
-    final Typography typography = Typography.material2018(platform: lightTheme.platform);
+    final lightTheme = ThemeData(primaryColor: Colors.white, useMaterial3: false);
+    final darkTheme = ThemeData(primaryColor: Colors.black, useMaterial3: false);
+    final typography = Typography.material2018(platform: lightTheme.platform);
 
     expect(lightTheme.primaryTextTheme.titleLarge!.color, typography.black.titleLarge!.color);
     expect(darkTheme.primaryTextTheme.titleLarge!.color, typography.white.titleLarge!.color);
   });
 
   test('light, dark and fallback constructors support useMaterial3', () {
-    final ThemeData lightTheme = ThemeData();
+    final lightTheme = ThemeData();
     expect(lightTheme.useMaterial3, true);
     expect(lightTheme.typography, Typography.material2021(colorScheme: lightTheme.colorScheme));
 
-    final ThemeData darkTheme = ThemeData.dark();
+    final darkTheme = ThemeData.dark();
     expect(darkTheme.useMaterial3, true);
     expect(darkTheme.typography, Typography.material2021(colorScheme: darkTheme.colorScheme));
 
-    final ThemeData fallbackTheme = ThemeData();
+    final fallbackTheme = ThemeData();
     expect(fallbackTheme.useMaterial3, true);
     expect(
       fallbackTheme.typography,
@@ -129,7 +129,7 @@ void main() {
   testWidgets(
     'Defaults to MaterialTapTargetBehavior.padded on mobile platforms and MaterialTapTargetBehavior.shrinkWrap on desktop',
     (WidgetTester tester) async {
-      final ThemeData themeData = ThemeData(platform: defaultTargetPlatform);
+      final themeData = ThemeData(platform: defaultTargetPlatform);
       switch (defaultTargetPlatform) {
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
@@ -145,7 +145,7 @@ void main() {
   );
 
   test('Can control fontFamily default', () {
-    final ThemeData themeData = ThemeData(
+    final themeData = ThemeData(
       fontFamily: 'FlutterTest',
       textTheme: const TextTheme(titleLarge: TextStyle(fontFamily: 'Roboto')),
     );
@@ -190,7 +190,7 @@ void main() {
   });
 
   test('ThemeData can generate a light colorScheme from colorSchemeSeed', () {
-    final ThemeData theme = ThemeData(colorSchemeSeed: Colors.blue);
+    final theme = ThemeData(colorSchemeSeed: Colors.blue);
 
     expect(theme.colorScheme.primary, const Color(0xff36618e));
     expect(theme.colorScheme.onPrimary, const Color(0xffffffff));
@@ -254,7 +254,7 @@ void main() {
   });
 
   test('ThemeData can generate a dark colorScheme from colorSchemeSeed', () {
-    final ThemeData theme = ThemeData(colorSchemeSeed: Colors.blue, brightness: Brightness.dark);
+    final theme = ThemeData(colorSchemeSeed: Colors.blue, brightness: Brightness.dark);
 
     expect(theme.colorScheme.primary, const Color(0xffa0cafd));
     expect(theme.colorScheme.onPrimary, const Color(0xff003258));
@@ -318,7 +318,7 @@ void main() {
   });
 
   test('ThemeData can generate a default M3 light colorScheme when useMaterial3 is true', () {
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
 
     expect(theme.colorScheme.primary, const Color(0xff6750a4));
     expect(theme.colorScheme.onPrimary, const Color(0xffffffff));
@@ -382,7 +382,7 @@ void main() {
   test(
     'ThemeData applies light system colors when useSystemColors is true',
     () {
-      final ThemeData theme = ThemeData(
+      final theme = ThemeData(
         colorSchemeSeed: Colors.orange,
         brightness: Brightness.light,
         useSystemColors: true,
@@ -588,7 +588,7 @@ void main() {
   test(
     'ThemeData applies dark system colors when useSystemColors is true',
     () {
-      final ThemeData theme = ThemeData(
+      final theme = ThemeData(
         colorSchemeSeed: Colors.orange,
         brightness: Brightness.dark,
         useSystemColors: true,
@@ -794,7 +794,7 @@ void main() {
   test(
     'ThemeData.light() can generate a default M3 light colorScheme when useMaterial3 is true',
     () {
-      final ThemeData theme = ThemeData.light();
+      final theme = ThemeData.light();
 
       expect(theme.colorScheme.primary, const Color(0xff6750a4));
       expect(theme.colorScheme.onPrimary, const Color(0xffffffff));
@@ -857,7 +857,7 @@ void main() {
   );
 
   test('ThemeData.dark() can generate a default M3 dark colorScheme when useMaterial3 is true', () {
-    final ThemeData theme = ThemeData.dark();
+    final theme = ThemeData.dark();
     expect(theme.colorScheme.primary, const Color(0xffd0bcff));
     expect(theme.colorScheme.onPrimary, const Color(0xff381e72));
     expect(theme.colorScheme.primaryContainer, const Color(0xff4f378b));
@@ -920,8 +920,8 @@ void main() {
   testWidgets('ThemeData.from a light color scheme sets appropriate values', (
     WidgetTester tester,
   ) async {
-    const ColorScheme lightColors = ColorScheme.light();
-    final ThemeData theme = ThemeData.from(colorScheme: lightColors);
+    const lightColors = ColorScheme.light();
+    final theme = ThemeData.from(colorScheme: lightColors);
 
     expect(theme.brightness, equals(Brightness.light));
     expect(theme.primaryColor, equals(lightColors.primary));
@@ -935,8 +935,8 @@ void main() {
   testWidgets('ThemeData.from a dark color scheme sets appropriate values', (
     WidgetTester tester,
   ) async {
-    const ColorScheme darkColors = ColorScheme.dark();
-    final ThemeData theme = ThemeData.from(colorScheme: darkColors);
+    const darkColors = ColorScheme.dark();
+    final theme = ThemeData.from(colorScheme: darkColors);
 
     expect(theme.brightness, equals(Brightness.dark));
     // in dark theme's the color used for main components is surface instead of primary
@@ -951,7 +951,7 @@ void main() {
   testWidgets(
     'splashFactory is InkSparkle only for Android non-web when useMaterial3 is true',
     (WidgetTester tester) async {
-      final ThemeData theme = ThemeData();
+      final theme = ThemeData();
 
       // Basic check that this theme is in fact using material 3.
       expect(theme.useMaterial3, true);
@@ -977,7 +977,7 @@ void main() {
   testWidgets(
     'splashFactory is InkSplash for every platform scenario, including Android non-web, when useMaterial3 is false',
     (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(useMaterial3: false);
+      final theme = ThemeData(useMaterial3: false);
 
       switch (debugDefaultTargetPlatformOverride!) {
         case TargetPlatform.android:
@@ -1035,7 +1035,7 @@ void main() {
   testWidgets(
     'VisualDensity in ThemeData defaults to "compact" on desktop and "standard" on mobile',
     (WidgetTester tester) async {
-      final ThemeData themeData = ThemeData();
+      final themeData = ThemeData();
       switch (debugDefaultTargetPlatformOverride!) {
         case TargetPlatform.android:
         case TargetPlatform.iOS:
@@ -1053,7 +1053,7 @@ void main() {
   testWidgets(
     'VisualDensity in ThemeData defaults to the right thing when a platform is supplied to it',
     (WidgetTester tester) async {
-      final ThemeData themeData = ThemeData(
+      final themeData = ThemeData(
         platform: debugDefaultTargetPlatformOverride! == TargetPlatform.android
             ? TargetPlatform.linux
             : TargetPlatform.android,
@@ -1075,7 +1075,7 @@ void main() {
   testWidgets('Ensure Visual Density effective constraints are clamped', (
     WidgetTester tester,
   ) async {
-    const BoxConstraints square = BoxConstraints.tightFor(width: 35, height: 35);
+    const square = BoxConstraints.tightFor(width: 35, height: 35);
     BoxConstraints expanded = const VisualDensity(
       horizontal: 4.0,
       vertical: 4.0,
@@ -1094,7 +1094,7 @@ void main() {
     expect(expanded.maxWidth, equals(35));
     expect(expanded.maxHeight, equals(35));
 
-    const BoxConstraints small = BoxConstraints.tightFor(width: 4, height: 4);
+    const small = BoxConstraints.tightFor(width: 4, height: 4);
     expanded = const VisualDensity(horizontal: 4.0, vertical: 4.0).effectiveConstraints(small);
     expect(expanded.minWidth, equals(4));
     expect(expanded.minHeight, equals(4));
@@ -1111,7 +1111,7 @@ void main() {
   testWidgets('Ensure Visual Density effective constraints expand and contract', (
     WidgetTester tester,
   ) async {
-    const BoxConstraints square = BoxConstraints();
+    const square = BoxConstraints();
     final BoxConstraints expanded = const VisualDensity(
       horizontal: 4.0,
       vertical: 4.0,
@@ -1132,7 +1132,7 @@ void main() {
   });
 
   group('Theme extensions', () {
-    const Key containerKey = Key('container');
+    const containerKey = Key('container');
 
     testWidgets('can be obtained', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1176,16 +1176,10 @@ void main() {
     });
 
     testWidgets('can lerp', (WidgetTester tester) async {
-      const MyThemeExtensionA extensionA1 = MyThemeExtensionA(
-        color1: Colors.black,
-        color2: Colors.amber,
-      );
-      const MyThemeExtensionA extensionA2 = MyThemeExtensionA(
-        color1: Colors.white,
-        color2: Colors.blue,
-      );
-      const MyThemeExtensionB extensionB1 = MyThemeExtensionB(textStyle: TextStyle(fontSize: 50));
-      const MyThemeExtensionB extensionB2 = MyThemeExtensionB(textStyle: TextStyle(fontSize: 100));
+      const extensionA1 = MyThemeExtensionA(color1: Colors.black, color2: Colors.amber);
+      const extensionA2 = MyThemeExtensionA(color1: Colors.white, color2: Colors.blue);
+      const extensionB1 = MyThemeExtensionB(textStyle: TextStyle(fontSize: 50));
+      const extensionB2 = MyThemeExtensionB(textStyle: TextStyle(fontSize: 100));
 
       // Both ThemeData arguments include both extensions.
       ThemeData lerped = ThemeData.lerp(
@@ -1229,7 +1223,7 @@ void main() {
     });
 
     testWidgets('should return null on extension not found', (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(extensions: const <ThemeExtension<dynamic>>{});
+      final theme = ThemeData(extensions: const <ThemeExtension<dynamic>>{});
 
       expect(theme.extension<MyThemeExtensionA>(), isNull);
     });
@@ -1245,15 +1239,15 @@ void main() {
 
     // Focus color and hover color are used in the default button theme, so
     // use an empty one to ensure that just focus and hover colors are tested.
-    const ButtonThemeData buttonTheme = ButtonThemeData();
+    const buttonTheme = ButtonThemeData();
 
-    final ThemeData focusColorBlack = ThemeData(focusColor: Colors.black, buttonTheme: buttonTheme);
-    final ThemeData focusColorWhite = ThemeData(focusColor: Colors.white, buttonTheme: buttonTheme);
+    final focusColorBlack = ThemeData(focusColor: Colors.black, buttonTheme: buttonTheme);
+    final focusColorWhite = ThemeData(focusColor: Colors.white, buttonTheme: buttonTheme);
     expect(focusColorBlack != focusColorWhite, true);
     expect(focusColorBlack.hashCode != focusColorWhite.hashCode, true);
 
-    final ThemeData hoverColorBlack = ThemeData(hoverColor: Colors.black, buttonTheme: buttonTheme);
-    final ThemeData hoverColorWhite = ThemeData(hoverColor: Colors.white, buttonTheme: buttonTheme);
+    final hoverColorBlack = ThemeData(hoverColor: Colors.black, buttonTheme: buttonTheme);
+    final hoverColorWhite = ThemeData(hoverColor: Colors.white, buttonTheme: buttonTheme);
     expect(hoverColorBlack != hoverColorWhite, true);
     expect(hoverColorBlack.hashCode != hoverColorWhite.hashCode, true);
   });
@@ -1261,27 +1255,27 @@ void main() {
   testWidgets('ThemeData.copyWith correctly creates new ThemeData with all copied arguments', (
     WidgetTester tester,
   ) async {
-    final SliderThemeData sliderTheme = SliderThemeData.fromPrimaryColors(
+    final sliderTheme = SliderThemeData.fromPrimaryColors(
       primaryColor: Colors.black,
       primaryColorDark: Colors.black,
       primaryColorLight: Colors.black,
       valueIndicatorTextStyle: const TextStyle(color: Colors.black),
     );
 
-    final ChipThemeData chipTheme = ChipThemeData.fromDefaults(
+    final chipTheme = ChipThemeData.fromDefaults(
       primaryColor: Colors.black,
       secondaryColor: Colors.white,
       labelStyle: const TextStyle(color: Colors.black),
     );
 
-    const PageTransitionsTheme pageTransitionTheme = PageTransitionsTheme(
+    const pageTransitionTheme = PageTransitionsTheme(
       builders: <TargetPlatform, PageTransitionsBuilder>{
         TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
         TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
       },
     );
 
-    final ThemeData theme = ThemeData.raw(
+    final theme = ThemeData.raw(
       // For the sanity of the reader, make sure these properties are in the same
       // order everywhere that they are separated by section comments (e.g.
       // GENERAL CONFIGURATION). Each section except for deprecations should be
@@ -1397,20 +1391,20 @@ void main() {
       indicatorColor: Colors.black,
     );
 
-    final SliderThemeData otherSliderTheme = SliderThemeData.fromPrimaryColors(
+    final otherSliderTheme = SliderThemeData.fromPrimaryColors(
       primaryColor: Colors.white,
       primaryColorDark: Colors.white,
       primaryColorLight: Colors.white,
       valueIndicatorTextStyle: const TextStyle(color: Colors.white),
     );
 
-    final ChipThemeData otherChipTheme = ChipThemeData.fromDefaults(
+    final otherChipTheme = ChipThemeData.fromDefaults(
       primaryColor: Colors.white,
       secondaryColor: Colors.black,
       labelStyle: const TextStyle(color: Colors.white),
     );
 
-    final ThemeData otherTheme = ThemeData.raw(
+    final otherTheme = ThemeData.raw(
       // For the sanity of the reader, make sure these properties are in the same
       // order everywhere that they are separated by section comments (e.g.
       // GENERAL CONFIGURATION). Each section except for deprecations should be
@@ -1718,13 +1712,13 @@ void main() {
     // This test makes sure that the ThemeData debug output doesn't get too
     // verbose, which has been a problem in the past.
 
-    const ColorScheme darkColors = ColorScheme.dark();
-    final ThemeData darkTheme = ThemeData.from(colorScheme: darkColors);
+    const darkColors = ColorScheme.dark();
+    final darkTheme = ThemeData.from(colorScheme: darkColors);
 
     expect(darkTheme.toString().length, lessThan(200));
 
-    const ColorScheme lightColors = ColorScheme.light();
-    final ThemeData lightTheme = ThemeData.from(colorScheme: lightColors);
+    const lightColors = ColorScheme.light();
+    final lightTheme = ThemeData.from(colorScheme: lightColors);
 
     expect(lightTheme.toString().length, lessThan(200));
   });
@@ -1732,7 +1726,7 @@ void main() {
   testWidgets('ThemeData brightness parameter overrides ColorScheme brightness', (
     WidgetTester tester,
   ) async {
-    const ColorScheme lightColors = ColorScheme.light();
+    const lightColors = ColorScheme.light();
     expect(
       () => ThemeData(colorScheme: lightColors, brightness: Brightness.dark),
       throwsAssertionError,
@@ -1742,7 +1736,7 @@ void main() {
   testWidgets('ThemeData.copyWith brightness parameter overrides ColorScheme brightness', (
     WidgetTester tester,
   ) async {
-    const ColorScheme lightColors = ColorScheme.light();
+    const lightColors = ColorScheme.light();
     final ThemeData theme = ThemeData.from(
       colorScheme: lightColors,
     ).copyWith(brightness: Brightness.dark);
@@ -1760,7 +1754,7 @@ void main() {
 
   test('ThemeData diagnostics include all properties', () {
     // List of properties must match the properties in ThemeData.hashCode()
-    final Set<String> expectedPropertyNames = <String>{
+    final expectedPropertyNames = <String>{
       // GENERAL CONFIGURATION
       'adaptations',
       'applyElevationOverlayColor',
@@ -1851,7 +1845,7 @@ void main() {
       'indicatorColor',
     };
 
-    final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
+    final properties = DiagnosticPropertiesBuilder();
     ThemeData().debugFillProperties(properties);
     final List<String> propertyNameList = properties.properties
         .map((final DiagnosticsNode node) => node.name)
@@ -1867,7 +1861,7 @@ void main() {
   });
 
   group('Theme adaptationMap', () {
-    const Key containerKey = Key('container');
+    const containerKey = Key('container');
 
     testWidgets('can be obtained', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1891,9 +1885,7 @@ void main() {
     });
 
     testWidgets('should return null on extension not found', (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(
-        adaptations: const <Adaptation<Object>>[StringAdaptation()],
-      );
+      final theme = ThemeData(adaptations: const <Adaptation<Object>>[StringAdaptation()]);
 
       expect(theme.extension<SwitchThemeAdaptation>(), isNull);
     });

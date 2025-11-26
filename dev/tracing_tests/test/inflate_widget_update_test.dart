@@ -23,10 +23,10 @@ void main() {
       TestRoot.state.updateKey();
     });
 
-    int buildCount = 0;
+    var buildCount = 0;
     for (final TimelineEvent event in await fetchTimelineEvents()) {
       if (event.json!['name'] == 'BUILD') {
-        final String ph = event.json!['ph'] as String;
+        final ph = event.json!['ph'] as String;
         if (ph == 'B') {
           buildCount++;
         } else if (ph == 'E') {

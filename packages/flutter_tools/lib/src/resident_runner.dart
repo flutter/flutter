@@ -1123,7 +1123,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     processManager: globals.processManager,
     platform: globals.platform,
     analytics: globals.analytics,
-    projectDir: globals.fs.currentDirectory,
+    projectDir: globals.fs.directory(projectRootPath),
     packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
     generateDartPluginRegistry: generateDartPluginRegistry,
     defines: <String, String>{
@@ -1165,7 +1165,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   /// - [attach] is used to explicitly connect to an already running app.
   @protected
   @visibleForTesting
-  var stopAppDuringCleanup = true;
+  bool stopAppDuringCleanup = true;
 
   bool get debuggingEnabled => debuggingOptions.debuggingEnabled;
 
