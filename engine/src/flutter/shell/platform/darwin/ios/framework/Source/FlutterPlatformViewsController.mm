@@ -668,16 +668,17 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   // No platform views to render.
   if (self.flutterView == nil || (self.compositionOrder.empty() && !self.hadPlatformViews)) {
     // No platform views to render but the FlutterView may need to be resized.
+    __weak FlutterPlatformViewsController* weakSelf = self;
     if (self.flutterView != nil) {
-      if (self.platformTaskRunner->RunsTasksOnCurrentThread()) {
-        [self performResize:self.frameSize];
-      } else {
-        fml::TaskRunner::RunNowOrPostTask(self.platformTaskRunner,
-                                          fml::MakeCopyable([self, frameSize = self.frameSize]() {
-                                            FML_DCHECK(self);
-                                            [self performResize:frameSize];
-                                          }));
-      }
+      fml::TaskRunner::RunNowOrPostTask(
+          weakSelf.platformTaskRunner,
+          fml::MakeCopyable([weakSelf, frameSize = weakSelf.frameSize]() {
+            FlutterPlatformViewsController* strongSelf = weakSelf;
+            if (!strongSelf) {
+              return;
+            }
+            [strongSelf performResize:frameSize];
+          }));
     }
 
     self.hadPlatformViews = NO;
