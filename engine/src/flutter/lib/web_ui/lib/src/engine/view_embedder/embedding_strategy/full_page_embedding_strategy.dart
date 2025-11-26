@@ -60,10 +60,11 @@ class FullPageEmbeddingStrategy implements EmbeddingStrategy {
     setElementStyle(hostElement, 'user-select', 'none');
     setElementStyle(hostElement, '-webkit-user-select', 'none');
 
-    // This is required to prevent the browser from doing any native touch
-    // handling. If this is not done, the browser doesn't report 'pointermove'
-    // events properly.
-    setElementStyle(hostElement, 'touch-action', 'none');
+    // Allow touch scrolling (pan gestures) while preventing other touch actions
+    // like double-tap zoom. This enables browser-driven scrolling for better
+    // mobile UX while still allowing Flutter to handle other gestures.
+    // Changed from 'none' to 'pan-x pan-y' to fix Issue #157435.
+    setElementStyle(hostElement, 'touch-action', 'pan-x pan-y');
   }
 
   // Sets a meta viewport tag appropriate for Flutter Web in full screen.

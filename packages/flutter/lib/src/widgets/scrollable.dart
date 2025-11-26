@@ -16,6 +16,7 @@ library;
 
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -32,6 +33,8 @@ import 'restoration.dart';
 import 'restoration_properties.dart';
 import 'scroll_activity.dart';
 import 'scroll_configuration.dart';
+import 'scroll_configuration_web_stub.dart'
+  if (dart.library.js_interop) 'scroll_configuration_web.dart';
 import 'scroll_context.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
@@ -134,6 +137,7 @@ class Scrollable extends StatefulWidget {
     this.scrollBehavior,
     this.clipBehavior = Clip.hardEdge,
     this.hitTestBehavior = HitTestBehavior.opaque,
+    this.browserScrolling,
   }) : assert(semanticChildCount == null || semanticChildCount >= 0);
 
   /// {@template flutter.widgets.Scrollable.axisDirection}
@@ -332,6 +336,36 @@ class Scrollable extends StatefulWidget {
   /// clipping of the [Scrollable]. This reflects the same [Clip] that is provided
   /// to [ScrollView.clipBehavior] and is supplied to the [Viewport].
   final Clip clipBehavior;
+
+  /// Whether to use native browser scrolling on web.
+  ///
+  /// When `true`, Flutter uses the browser's native scrolling mechanism, which provides:
+  /// - Native touch and wheel scrolling behavior
+  /// - Proper nested scrolling disambiguation
+  /// - No iframe scroll blocking
+  /// - Better accessibility and integration with browser features
+  ///
+  /// When `false`, Flutter uses canvas-based scrolling (the traditional behavior).
+  ///
+  /// When `null` (default), uses canvas-based scrolling for backward compatibility.
+  /// The default may change to `true` on web in a future release.
+  ///
+  /// This parameter only affects web platforms. On other platforms, it is ignored.
+  ///
+  /// Example of enabling browser scrolling for nested scrolling scenarios:
+  /// ```dart
+  /// ListView.builder(
+  ///   browserScrolling: true, // Opt-in to browser scrolling
+  ///   itemBuilder: (context, index) => ListTile(...),
+  /// )
+  /// ```
+  ///
+  /// See also:
+  ///
+  ///  * https://github.com/flutter/flutter/issues/156985 (nested scrolling)
+  ///  * https://github.com/flutter/flutter/issues/157435 (touch scrolling)
+  ///  * https://github.com/flutter/flutter/issues/113196 (iframe blocking)
+  final bool? browserScrolling;
 
   /// The axis along which the scroll view scrolls.
   ///
@@ -612,6 +646,7 @@ class ScrollableState extends State<Scrollable>
   late ScrollBehavior _configuration;
   ScrollController? _fallbackScrollController;
   DeviceGestureSettings? _mediaQueryGestureSettings;
+  ExternalScroller? _browserScrollStrategy;
 
   // Only call this from places that will definitely trigger a rebuild.
   void _updatePosition() {
@@ -655,6 +690,92 @@ class ScrollableState extends State<Scrollable>
     ServicesBinding.instance.restorationManager.flushData();
   }
 
+  bool get _shouldUseBrowserScrolling {
+    // Only on web platform
+    if (!kIsWeb) {
+      return false;
+    }
+    // Check widget parameter
+    if (widget.browserScrolling != null) {
+      return widget.browserScrolling!;
+    }
+    // Fall back to global default (currently false for opt-in)
+    return kDefaultBrowserScrollingEnabled;
+  }
+
+  void _initBrowserScrolling() {
+    if (!_shouldUseBrowserScrolling) {
+      return;
+    }
+
+    // Get the view ID from the current context
+    final int viewId = View.of(context).viewId;
+    _browserScrollStrategy = createBrowserScrollStrategy(viewId);
+    _browserScrollStrategy?.setup();
+
+    // Sync scroll position from browser to Flutter
+    _browserScrollStrategy?.addScrollListener(_syncScrollFromBrowser);
+
+    // Sync content height from Flutter to browser (in next frame after position is available)
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (_position != null) {
+        _position!.addListener(_syncHeightToBrowser);
+        _syncHeightToBrowser();
+        
+        // Enable boundary detection for nested scrolling
+        // This allows touch events to pass through when scrollable is at boundaries
+        _browserScrollStrategy?.enableBoundaryDetection(_effectiveScrollController);
+      }
+    });
+  }
+
+  void _syncScrollFromBrowser() {
+    if (_browserScrollStrategy == null || _position == null) {
+      return;
+    }
+    
+    // Get the scroll position from browser (only on web)
+    final ui.Rect visibleRect = _browserScrollStrategy!.computeVisibleRect() as ui.Rect;
+    final double browserScrollTop = visibleRect.top;
+    
+    // Update Flutter's scroll position to match browser
+    if ((_position!.pixels - browserScrollTop).abs() > 1.0) {
+      _position!.jumpTo(
+        clampDouble(
+          browserScrollTop,
+          _position!.minScrollExtent,
+          _position!.maxScrollExtent,
+        ),
+      );
+    }
+  }
+
+  void _syncHeightToBrowser() {
+    if (_browserScrollStrategy == null || _position == null) {
+      return;
+    }
+    
+    // Calculate total content height
+    final double maxScrollExtent = _position!.maxScrollExtent;
+    final double viewportHeight = _position!.viewportDimension;
+    final double totalHeight = maxScrollExtent + viewportHeight;
+    
+    // Update browser placeholder height
+    _browserScrollStrategy!.updateHeight(totalHeight);
+  }
+
+  void _disposeBrowserScrolling() {
+    if (_browserScrollStrategy != null) {
+      _browserScrollStrategy!.removeScrollListener(_syncScrollFromBrowser);
+      if (_position != null) {
+        _position!.removeListener(_syncHeightToBrowser);
+      }
+      _browserScrollStrategy!.disableBoundaryDetection();
+      _browserScrollStrategy!.dispose();
+      _browserScrollStrategy = null;
+    }
+  }
+
   @protected
   @override
   void initState() {
@@ -671,6 +792,8 @@ class ScrollableState extends State<Scrollable>
     _devicePixelRatio =
         MediaQuery.maybeDevicePixelRatioOf(context) ?? View.of(context).devicePixelRatio;
     _updatePosition();
+    // Initialize browser scrolling after position is created
+    _initBrowserScrolling();
     super.didChangeDependencies();
   }
 
@@ -727,6 +850,12 @@ class ScrollableState extends State<Scrollable>
     if (_shouldUpdatePosition(oldWidget)) {
       _updatePosition();
     }
+
+    // Handle changes to browserScrolling parameter
+    if (widget.browserScrolling != oldWidget.browserScrolling) {
+      _disposeBrowserScrolling();
+      _initBrowserScrolling();
+    }
   }
 
   @protected
@@ -741,6 +870,7 @@ class ScrollableState extends State<Scrollable>
 
     position.dispose();
     _persistedScrollOffset.dispose();
+    _disposeBrowserScrolling();
     super.dispose();
   }
 
