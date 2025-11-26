@@ -419,7 +419,7 @@ void expectDylibIsBundledIos(Directory appDirectory, String buildMode) {
 	<key>CFBundleVersion</key>
 	<string>1.0</string>
 	<key>MinimumOSVersion</key>
-	<string>12.0</string>
+	<string>13.0</string>
 </dict>
 </plist>''');
 }
