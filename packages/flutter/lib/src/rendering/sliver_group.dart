@@ -375,7 +375,7 @@ class RenderSliverMainAxisGroup extends RenderSliver
     // they need to be corrected.
     if (paintOffset > remainingExtent) {
       // Whether the current remaining space can accommodate all pinned children.
-      late final bool pinnedChildrenOverflow =
+      final bool pinnedChildrenOverflow =
           maxScrollObstructionExtent > remainingExtent - constraints.overlap;
       final double paintCorrection = paintOffset - remainingExtent;
       paintOffset = remainingExtent;
@@ -388,7 +388,7 @@ class RenderSliverMainAxisGroup extends RenderSliver
           Axis.horizontal => childParentData.paintOffset.dx,
         };
         final double childPaintEnd = childMainAxisPaintOffset + childLayoutGeometry.paintExtent;
-        late final bool childIsPinned = childLayoutGeometry.maxScrollObstructionExtent > 0;
+        final bool childIsPinned = childLayoutGeometry.maxScrollObstructionExtent > 0;
         if (childPaintEnd > remainingExtent || (pinnedChildrenOverflow && childIsPinned)) {
           childParentData.paintOffset = switch (constraints.axis) {
             Axis.vertical => Offset(0.0, childParentData.paintOffset.dy - paintCorrection),
