@@ -6,7 +6,6 @@ package io.flutter.embedding.engine;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -38,23 +37,19 @@ public class FlutterShellArgsTest {
   @Test
   public void getFlagByMetadataKey_returnsExpectedFlagWhenValidKeySpecified() {
     FlutterShellArgs.Flag flag =
-        FlutterShellArgs.getFlagByMetadataKey(
-            "io.flutter.embedding.android.EnableSoftwareRendering");
-    assertNotNull(flag);
-    assertEquals("--enable-software-rendering", flag.commandLineArgument);
+        FlutterShellArgs.getFlagByMetadataKey("io.flutter.embedding.android.AOTSharedLibraryName");
+    assertEquals(FlutterShellArgs.AOT_SHARED_LIBRARY_NAME, flag);
   }
 
   @Test
   public void getFlagFromIntentKey_returnsExpectedFlagWhenValidKeySpecified() {
     // Test flag without value.
-    FlutterShellArgs.Flag flag = FlutterShellArgs.getFlagFromIntentKey("enable-software-rendering");
-    assertNotNull(flag);
-    assertEquals("--enable-software-rendering", flag.commandLineArgument);
+    FlutterShellArgs.Flag flag = FlutterShellArgs.getFlagFromIntentKey("old-gen-heap-size");
+    assertEquals(FlutterShellArgs.OLD_GEN_HEAP_SIZE, flag);
 
     // Test with flag.
-    flag = FlutterShellArgs.getFlagFromIntentKey("vm-service-port");
-    assertNotNull(flag);
-    assertEquals("--vm-service-port=", flag.commandLineArgument);
+    flag = FlutterShellArgs.getFlagFromIntentKey("vm-snapshot-data");
+    assertEquals(FlutterShellArgs.VM_SNAPSHOT_DATA, flag);
   }
 
   @Test
