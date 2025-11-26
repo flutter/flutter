@@ -283,7 +283,7 @@ void testMain() {
 
       // Wait for next frame.
       Future<void> waitForResizeObserver() {
-        final Completer<void> completer = Completer<void>();
+        final completer = Completer<void>();
         domWindow.requestAnimationFrame((_) {
           Timer.run(completer.complete);
         });
@@ -388,7 +388,7 @@ void testMain() {
 
       // Wait for next frame.
       Future<void> waitForResizeObserver() {
-        final Completer<void> completer = Completer<void>();
+        final completer = Completer<void>();
         domWindow.requestAnimationFrame((_) {
           Timer.run(completer.complete);
         });
