@@ -107,6 +107,14 @@ flutter:
       macos:
         pluginClass: {{pluginClass}}
 {{/macos}}
+{{#darwin}}
+      ios:
+        pluginClass: {{pluginClass}}
+        sharedDarwinSource: true
+      macos:
+        pluginClass: {{pluginClass}}
+        sharedDarwinSource: true
+{{/darwin}}
 {{#windows}}
       windows:
         pluginClass: {{pluginClass}}CApi
