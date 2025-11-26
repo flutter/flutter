@@ -344,10 +344,8 @@ import java.util.Set;
     isFlutterEngineFromHost = false;
   }
 
-  // Previously engine flags could be configured via Intent. As engine
-  // flags can no longer be set via Intent, warn developers about Flutter
-  // shell args set via Intent extras being ignored and point to alternative
-  // methods for setting flags.
+  // Engine flags can no longer be set via Intent, so warn developers that
+  // engine shell arguments set that way will be ignored.
   private void warnIfEngineFlagsSetViaIntent(Intent intent) {
     if (intent.getExtras() == null) {
       return;

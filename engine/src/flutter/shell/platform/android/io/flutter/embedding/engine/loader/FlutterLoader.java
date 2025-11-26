@@ -249,16 +249,6 @@ public class FlutterLoader {
     }
   }
 
-  // Returns the base part of a command line argument, i.e. the part before any '=' character.
-  private String getArgBase(String arg) {
-    int equalsIndex = arg.indexOf('=');
-    if (equalsIndex == -1) {
-      return arg;
-    }
-    // Return the part of the string including the '='
-    return arg.substring(0, equalsIndex + 1);
-  }
-
   /**
    * Blocks until initialization of the native system has completed.
    *
@@ -414,7 +404,7 @@ public class FlutterLoader {
                 "Command line argument "
                     + arg
                     + " is not allowed in release builds and will be ignored if specified in the application manifest or via the command line.");
-            return;
+            continue;
           }
 
           shellArgs.add(arg);

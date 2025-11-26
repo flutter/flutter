@@ -227,12 +227,12 @@ public final class FlutterShellArgs {
    */
   private static final Flag DART_FLAGS = new Flag("--dart-flags=", "DartFlags");
 
-  // Deprecated flags.
+  // Deprecated flags:
 
   /** Disables the merging of the UI and platform threads. */
   @VisibleForTesting
   public static final Flag DISABLE_MERGED_PLATFORM_UI_THREAD =
-      new Flag("no-enable-merged-platform-ui-thread", "DisableMergedPlatformUIThread", true);
+      new Flag("--no-enable-merged-platform-ui-thread", "DisableMergedPlatformUIThread", true);
 
   @VisibleForTesting
   public static final List<Flag> ALL_FLAGS =
@@ -328,6 +328,7 @@ public final class FlutterShellArgs {
     }
     return null;
   }
+
   /** Returns whether or not a flag is deprecated and should raise an exception if used. */
   public static boolean isDeprecated(Flag flag) {
     return DEPRECATED_FLAGS.contains(flag);

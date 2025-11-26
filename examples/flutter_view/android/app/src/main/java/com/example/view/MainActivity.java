@@ -32,8 +32,8 @@ public class MainActivity extends AppCompatActivity {
     private BasicMessageChannel<String> messageChannel;
 
     // Previously, this example checked for certain flags set via Intent. As engine
-    // flags can no longer be set via Intent, warn developers about Intent extras
-    // being ignored and point to alternative methods for setting flags.
+    // flags can no longer be set via Intent, warn developers that Intent extras
+    // will be ignored and point to alternative methods for setting engine flags.
     private void warnIfEngineFlagsSetViaIntent(Intent intent) {
         List<String> previouslySupportedFlagsViaIntent = Arrays.asList(
             "trace-startup", "start-paused", "enable-dart-profiling");
