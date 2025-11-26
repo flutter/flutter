@@ -584,5 +584,5 @@ class FakeStdio extends Fake implements Stdio {
   }
 
   @override
-  var stdinHasTerminal = false;
+  bool stdinHasTerminal = false;
 }

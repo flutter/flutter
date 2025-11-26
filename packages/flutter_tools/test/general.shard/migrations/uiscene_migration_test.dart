@@ -421,7 +421,7 @@ class FakePlistParser extends Fake implements PlistParser {
 
   final String? storyboardName;
   final bool insertKeySucceeds;
-  var insertKeyCalled = false;
+  bool insertKeyCalled = false;
 
   @override
   T? getValueFromFile<T>(String plistFilePath, String key) {

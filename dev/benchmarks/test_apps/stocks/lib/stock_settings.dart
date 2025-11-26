@@ -106,7 +106,7 @@ class StockSettingsState extends State<StockSettings> {
   }
 
   Widget buildSettingsPane(BuildContext context) {
-    final List<Widget> rows = <Widget>[
+    final rows = <Widget>[
       ListTile(
         leading: const Icon(Icons.thumb_up),
         title: const Text('Everything is awesome'),

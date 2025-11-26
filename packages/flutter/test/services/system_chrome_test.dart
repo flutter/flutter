@@ -12,7 +12,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('SystemChrome overlay style test', (WidgetTester tester) async {
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
@@ -81,7 +81,7 @@ void main() {
   });
 
   test('setPreferredOrientations control test', () async {
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
@@ -104,7 +104,7 @@ void main() {
   });
 
   test('setApplicationSwitcherDescription control test', () async {
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
@@ -147,7 +147,7 @@ void main() {
   });
 
   test('setEnabledSystemUIMode control test', () async {
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
@@ -182,7 +182,7 @@ void main() {
   });
 
   test('setEnabledSystemUIMode passes correct overlays for manual configuration', () async {
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
@@ -208,7 +208,7 @@ void main() {
   });
 
   test('setSystemUIChangeCallback control test', () async {
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
@@ -228,9 +228,9 @@ void main() {
 
   group('SystemUiOverlayStyle', () {
     test('toString default values should be null', () async {
-      const SystemUiOverlayStyle systemUiOverlayStyle = SystemUiOverlayStyle();
+      const systemUiOverlayStyle = SystemUiOverlayStyle();
 
-      final String result = systemUiOverlayStyle.toString();
+      final result = systemUiOverlayStyle.toString();
       expect(result, startsWith('SystemUiOverlayStyle#'));
       expect(result, contains('systemNavigationBarColor: null'));
       expect(result, contains('systemNavigationBarDividerColor: null'));
@@ -243,7 +243,7 @@ void main() {
     });
 
     test('toString works as intended with actual values', () {
-      const SystemUiOverlayStyle style = SystemUiOverlayStyle(
+      const style = SystemUiOverlayStyle(
         systemNavigationBarColor: Color(0xFF123456),
         systemNavigationBarDividerColor: Color(0xFF654321),
         systemStatusBarContrastEnforced: true,
@@ -254,7 +254,7 @@ void main() {
         systemNavigationBarContrastEnforced: false,
       );
 
-      final String result = style.toString();
+      final result = style.toString();
       expect(result, startsWith('SystemUiOverlayStyle#'));
       expect(
         result,
@@ -282,15 +282,15 @@ void main() {
     });
 
     test('==, hashCode basics', () {
-      const SystemUiOverlayStyle style1 = SystemUiOverlayStyle(
+      const style1 = SystemUiOverlayStyle(
         systemNavigationBarColor: Color(0xFF123456),
         statusBarBrightness: Brightness.dark,
       );
-      const SystemUiOverlayStyle style2 = SystemUiOverlayStyle(
+      const style2 = SystemUiOverlayStyle(
         systemNavigationBarColor: Color(0xFF123456),
         statusBarBrightness: Brightness.dark,
       );
-      const SystemUiOverlayStyle style3 = SystemUiOverlayStyle(
+      const style3 = SystemUiOverlayStyle(
         systemNavigationBarColor: Color(0xFF654321),
         statusBarBrightness: Brightness.dark,
       );
@@ -305,7 +305,7 @@ void main() {
     });
 
     test('copyWith can override properties', () {
-      const SystemUiOverlayStyle style1 = SystemUiOverlayStyle(
+      const style1 = SystemUiOverlayStyle(
         systemNavigationBarColor: Color(0xFF123456),
         statusBarBrightness: Brightness.dark,
         systemStatusBarContrastEnforced: true,
@@ -324,7 +324,7 @@ void main() {
     });
 
     test('SystemUiOverlayStyle implements debugFillProperties', () {
-      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      final builder = DiagnosticPropertiesBuilder();
 
       const SystemUiOverlayStyle(
         systemNavigationBarColor: Color(0xFF123456),
@@ -356,7 +356,7 @@ void main() {
   });
 
   testWidgets('SystemChrome handles detached lifecycle state', (WidgetTester tester) async {
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
@@ -366,7 +366,7 @@ void main() {
       },
     );
 
-    const SystemUiOverlayStyle systemUiOverlayStyle = SystemUiOverlayStyle();
+    const systemUiOverlayStyle = SystemUiOverlayStyle();
     SystemChrome.setSystemUIOverlayStyle(systemUiOverlayStyle);
     await tester.idle();
     expect(log.length, equals(1));

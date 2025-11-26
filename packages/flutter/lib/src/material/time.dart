@@ -192,7 +192,7 @@ class RestorableTimeOfDay extends RestorableValue<TimeOfDay> {
 
   @override
   TimeOfDay fromPrimitives(Object? data) {
-    final List<Object?> timeData = data! as List<Object?>;
+    final timeData = data! as List<Object?>;
     return TimeOfDay(minute: timeData[0]! as int, hour: timeData[1]! as int);
   }
 

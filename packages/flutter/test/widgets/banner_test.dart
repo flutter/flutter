@@ -23,14 +23,14 @@ void main() {
   // affect the layout.
 
   test('A Banner with a location of topStart paints in the top left (LTR)', () {
-    final BannerPainter bannerPainter = BannerPainter(
+    final bannerPainter = BannerPainter(
       message: 'foo',
       textDirection: TextDirection.rtl,
       location: BannerLocation.topStart,
       layoutDirection: TextDirection.ltr,
     );
 
-    final TestCanvas canvas = TestCanvas();
+    final canvas = TestCanvas();
 
     bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
@@ -51,14 +51,14 @@ void main() {
   });
 
   test('A Banner with a location of topStart paints in the top right (RTL)', () {
-    final BannerPainter bannerPainter = BannerPainter(
+    final bannerPainter = BannerPainter(
       message: 'foo',
       textDirection: TextDirection.ltr,
       location: BannerLocation.topStart,
       layoutDirection: TextDirection.rtl,
     );
 
-    final TestCanvas canvas = TestCanvas();
+    final canvas = TestCanvas();
 
     bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
@@ -79,14 +79,14 @@ void main() {
   });
 
   test('A Banner with a location of topEnd paints in the top right (LTR)', () {
-    final BannerPainter bannerPainter = BannerPainter(
+    final bannerPainter = BannerPainter(
       message: 'foo',
       textDirection: TextDirection.ltr,
       location: BannerLocation.topEnd,
       layoutDirection: TextDirection.ltr,
     );
 
-    final TestCanvas canvas = TestCanvas();
+    final canvas = TestCanvas();
 
     bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
@@ -107,14 +107,14 @@ void main() {
   });
 
   test('A Banner with a location of topEnd paints in the top left (RTL)', () {
-    final BannerPainter bannerPainter = BannerPainter(
+    final bannerPainter = BannerPainter(
       message: 'foo',
       textDirection: TextDirection.rtl,
       location: BannerLocation.topEnd,
       layoutDirection: TextDirection.rtl,
     );
 
-    final TestCanvas canvas = TestCanvas();
+    final canvas = TestCanvas();
 
     bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
@@ -135,14 +135,14 @@ void main() {
   });
 
   test('A Banner with a location of bottomStart paints in the bottom left (LTR)', () {
-    final BannerPainter bannerPainter = BannerPainter(
+    final bannerPainter = BannerPainter(
       message: 'foo',
       textDirection: TextDirection.ltr,
       location: BannerLocation.bottomStart,
       layoutDirection: TextDirection.ltr,
     );
 
-    final TestCanvas canvas = TestCanvas();
+    final canvas = TestCanvas();
 
     bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
@@ -163,14 +163,14 @@ void main() {
   });
 
   test('A Banner with a location of bottomStart paints in the bottom right (RTL)', () {
-    final BannerPainter bannerPainter = BannerPainter(
+    final bannerPainter = BannerPainter(
       message: 'foo',
       textDirection: TextDirection.rtl,
       location: BannerLocation.bottomStart,
       layoutDirection: TextDirection.rtl,
     );
 
-    final TestCanvas canvas = TestCanvas();
+    final canvas = TestCanvas();
 
     bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
@@ -191,14 +191,14 @@ void main() {
   });
 
   test('A Banner with a location of bottomEnd paints in the bottom right (LTR)', () {
-    final BannerPainter bannerPainter = BannerPainter(
+    final bannerPainter = BannerPainter(
       message: 'foo',
       textDirection: TextDirection.rtl,
       location: BannerLocation.bottomEnd,
       layoutDirection: TextDirection.ltr,
     );
 
-    final TestCanvas canvas = TestCanvas();
+    final canvas = TestCanvas();
 
     bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
@@ -219,14 +219,14 @@ void main() {
   });
 
   test('A Banner with a location of bottomEnd paints in the bottom left (RTL)', () {
-    final BannerPainter bannerPainter = BannerPainter(
+    final bannerPainter = BannerPainter(
       message: 'foo',
       textDirection: TextDirection.ltr,
       location: BannerLocation.bottomEnd,
       layoutDirection: TextDirection.rtl,
     );
 
-    final TestCanvas canvas = TestCanvas();
+    final canvas = TestCanvas();
 
     bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
@@ -333,7 +333,7 @@ void main() {
     expect(customPaint, findsOneWidget);
 
     final CustomPaint paintWidget = tester.widget(customPaint);
-    final BannerPainter painter = paintWidget.foregroundPainter! as BannerPainter;
+    final painter = paintWidget.foregroundPainter! as BannerPainter;
 
     expect(painter.shadow.color, const Color(0xFF008000));
     expect(painter.shadow.blurRadius, 8.0);

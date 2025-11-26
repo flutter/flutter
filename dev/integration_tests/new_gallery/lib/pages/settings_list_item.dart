@@ -173,7 +173,9 @@ class _SettingsListItemState<T> extends State<SettingsListItem<T?>>
         ),
         Padding(
           padding: _childrenPadding.value,
-          child: ClipRect(child: Align(heightFactor: _childrenHeightFactor.value, child: child)),
+          child: ClipRect(
+            child: Align(heightFactor: _childrenHeightFactor.value, child: child),
+          ),
         ),
       ],
     );

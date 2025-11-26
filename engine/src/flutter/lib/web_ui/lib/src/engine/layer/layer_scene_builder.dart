@@ -204,7 +204,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
 
   @override
   TransformEngineLayer pushTransform(Float64List matrix4, {ui.EngineLayer? oldLayer}) {
-    final Matrix4 matrix = Matrix4.fromFloat32List(toMatrix32(matrix4));
+    final matrix = Matrix4.fromFloat32List(toMatrix32(matrix4));
     return pushLayer<TransformEngineLayer>(TransformEngineLayer(matrix));
   }
 

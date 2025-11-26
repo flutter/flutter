@@ -94,11 +94,11 @@ class WidgetSpan extends PlaceholderSpan {
   /// This function is used by [EditableText] and [RichText] so calling it
   /// directly is rarely necessary.
   static List<Widget> extractFromInlineSpan(InlineSpan span, TextScaler textScaler) {
-    final List<Widget> widgets = <Widget>[];
+    final widgets = <Widget>[];
     // _kEngineDefaultFontSize is the default font size to use when none of the
     // ancestor spans specifies one.
-    final List<double> fontSizeStack = <double>[kDefaultFontSize];
-    int index = 0;
+    final fontSizeStack = <double>[kDefaultFontSize];
+    var index = 0;
     // This assumes an InlineSpan tree's logical order is equivalent to preorder.
     bool visitSubtree(InlineSpan span) {
       final double? fontSizeToPush = switch (span.style?.fontSize) {
@@ -161,7 +161,7 @@ class WidgetSpan extends PlaceholderSpan {
   }) {
     assert(debugAssertIsValid());
     assert(dimensions != null);
-    final bool hasStyle = style != null;
+    final hasStyle = style != null;
     if (hasStyle) {
       builder.pushStyle(style!.getTextStyle(textScaler: textScaler));
     }
@@ -214,7 +214,7 @@ class WidgetSpan extends PlaceholderSpan {
     if ((style == null) != (other.style == null)) {
       return RenderComparison.layout;
     }
-    final WidgetSpan typedOther = other as WidgetSpan;
+    final typedOther = other as WidgetSpan;
     if (child != typedOther.child || alignment != typedOther.alignment) {
       return RenderComparison.layout;
     }
@@ -288,7 +288,7 @@ class _WidgetSpanParentData extends ParentDataWidget<TextParentData> {
 
   @override
   void applyParentData(RenderObject renderObject) {
-    final TextParentData parentData = renderObject.parentData! as TextParentData;
+    final parentData = renderObject.parentData! as TextParentData;
     parentData.span = span;
   }
 

@@ -92,7 +92,7 @@ class DaemonInputStreamConverter {
   late StreamController<List<int>> currentBinaryStream;
 
   /// Remaining length in bytes that have to be sent to the binary stream.
-  var remainingBinaryLength = 0;
+  int remainingBinaryLength = 0;
 
   /// Buffer to hold the current line of input data.
   final bytesBuilder = BytesBuilder(copy: false);

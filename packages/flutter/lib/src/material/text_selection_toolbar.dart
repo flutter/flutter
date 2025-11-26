@@ -110,7 +110,7 @@ class TextSelectionToolbar extends StatelessWidget {
     final double availableHeight = anchorAbovePadded.dy - _kToolbarContentDistance - paddingAbove;
     final bool fitsAbove = _kToolbarHeight <= availableHeight;
     // Makes up for the Padding above the Stack.
-    final Offset localAdjustment = Offset(screenPadding, paddingAbove);
+    final localAdjustment = Offset(screenPadding, paddingAbove);
 
     return Padding(
       padding: EdgeInsets.fromLTRB(screenPadding, paddingAbove, screenPadding, screenPadding),
@@ -331,7 +331,7 @@ class _TextSelectionToolbarTrailingEdgeAlignRenderBox extends RenderProxyBox {
 
     // Set the offset in the parent data such that the child will be aligned to
     // the trailing edge, depending on the text direction.
-    final ToolbarItemsParentData childParentData = child!.parentData! as ToolbarItemsParentData;
+    final childParentData = child!.parentData! as ToolbarItemsParentData;
     childParentData.offset = Offset(
       textDirection == TextDirection.rtl ? 0.0 : size.width - child!.size.width,
       0.0,
@@ -341,7 +341,7 @@ class _TextSelectionToolbarTrailingEdgeAlignRenderBox extends RenderProxyBox {
   // Paint at the offset set in the parent data.
   @override
   void paint(PaintingContext context, Offset offset) {
-    final ToolbarItemsParentData childParentData = child!.parentData! as ToolbarItemsParentData;
+    final childParentData = child!.parentData! as ToolbarItemsParentData;
     context.paintChild(child!, childParentData.offset + offset);
   }
 
@@ -349,7 +349,7 @@ class _TextSelectionToolbarTrailingEdgeAlignRenderBox extends RenderProxyBox {
   @override
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     // The x, y parameters have the top left of the node's box as the origin.
-    final ToolbarItemsParentData childParentData = child!.parentData! as ToolbarItemsParentData;
+    final childParentData = child!.parentData! as ToolbarItemsParentData;
     return result.addWithPaintOffset(
       offset: childParentData.offset,
       position: position,
@@ -369,7 +369,7 @@ class _TextSelectionToolbarTrailingEdgeAlignRenderBox extends RenderProxyBox {
 
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
-    final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
+    final childParentData = child.parentData! as ToolbarItemsParentData;
     transform.translateByDouble(childParentData.offset.dx, childParentData.offset.dy, 0, 1);
     super.applyPaintTransform(child, transform);
   }
@@ -479,8 +479,8 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox
         ? constraints
         : BoxConstraints.loose(Size(constraints.maxWidth, _kToolbarHeight));
 
-    int i = -1;
-    double width = 0.0;
+    var i = -1;
+    var width = 0.0;
     visitChildren((RenderObject renderObjectChild) {
       i++;
 
@@ -492,7 +492,7 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox
         return;
       }
 
-      final RenderBox child = renderObjectChild as RenderBox;
+      final child = renderObjectChild as RenderBox;
       child.layout(sizedConstraints.loosen(), parentUsesSize: true);
       width += child.size.width;
 
@@ -533,18 +533,18 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox
   /// Horizontal layout.
   Size _placeChildrenHorizontally() {
     final RenderBox navButton = firstChild!;
-    final bool isRtl = textDirection == TextDirection.rtl;
+    final isRtl = textDirection == TextDirection.rtl;
 
-    final List<RenderBox> contentItems = <RenderBox>[];
+    final contentItems = <RenderBox>[];
 
-    double totalWidth = 0.0;
-    double maxHeight = 0.0;
+    var totalWidth = 0.0;
+    var maxHeight = 0.0;
 
     // First pass: calculate dimensions and collect items.
-    int i = -1;
+    var i = -1;
     visitChildren((RenderObject renderObjectChild) {
-      final RenderBox child = renderObjectChild as RenderBox;
-      final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
+      final child = renderObjectChild as RenderBox;
+      final childParentData = child.parentData! as ToolbarItemsParentData;
       i++;
 
       if (!_shouldPaintChild(child, i)) {
@@ -563,38 +563,36 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox
     });
 
     // Position items based on text direction.
-    double currentX = 0.0;
+    var currentX = 0.0;
     final bool showNavButton = _lastIndexThatFits >= 0;
 
     if (isRtl) {
       // In RTL, we want the nav button on the left and items right-aligned.
       if (showNavButton) {
-        final ToolbarItemsParentData navParentData =
-            navButton.parentData! as ToolbarItemsParentData;
+        final navParentData = navButton.parentData! as ToolbarItemsParentData;
         navParentData.offset = Offset.zero;
         currentX += navButton.size.width;
       }
 
       // Position content items from right to left.
-      double rightEdge = totalWidth;
-      for (final RenderBox item in contentItems) {
+      var rightEdge = totalWidth;
+      for (final item in contentItems) {
         rightEdge -= item.size.width;
-        final ToolbarItemsParentData itemParentData = item.parentData! as ToolbarItemsParentData;
+        final itemParentData = item.parentData! as ToolbarItemsParentData;
         itemParentData.offset = Offset(rightEdge, 0.0);
       }
     } else {
       // LTR: Place content items first, then nav button.
       // First position all content items from left to right.
-      for (final RenderBox item in contentItems) {
-        final ToolbarItemsParentData itemParentData = item.parentData! as ToolbarItemsParentData;
+      for (final item in contentItems) {
+        final itemParentData = item.parentData! as ToolbarItemsParentData;
         itemParentData.offset = Offset(currentX, 0.0);
         currentX += item.size.width;
       }
 
       // Then place the nav button at the end.
       if (showNavButton) {
-        final ToolbarItemsParentData navParentData =
-            navButton.parentData! as ToolbarItemsParentData;
+        final navParentData = navButton.parentData! as ToolbarItemsParentData;
         navParentData.offset = Offset(currentX, 0.0);
       }
     }
@@ -606,11 +604,10 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox
   Size _placeChildrenVertically() {
     final RenderBox navButton = firstChild!;
 
-    double currentY = 0.0;
-    double maxWidth = 0.0;
+    var currentY = 0.0;
+    var maxWidth = 0.0;
 
-    final ToolbarItemsParentData navButtonParentData =
-        navButton.parentData! as ToolbarItemsParentData;
+    final navButtonParentData = navButton.parentData! as ToolbarItemsParentData;
 
     if (_shouldPaintChild(navButton, 0)) {
       navButtonParentData.shouldPaint = true;
@@ -623,10 +620,10 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox
       navButtonParentData.shouldPaint = false;
     }
 
-    int i = -1;
+    var i = -1;
     visitChildren((RenderObject renderObjectChild) {
-      final RenderBox child = renderObjectChild as RenderBox;
-      final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
+      final child = renderObjectChild as RenderBox;
+      final childParentData = child.parentData! as ToolbarItemsParentData;
 
       i++;
 
@@ -670,11 +667,11 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox
     }
 
     final RenderBox navButton = firstChild!;
-    int i = -1;
+    var i = -1;
 
     visitChildren((RenderObject renderObjectChild) {
-      final RenderBox child = renderObjectChild as RenderBox;
-      final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
+      final child = renderObjectChild as RenderBox;
+      final childParentData = child.parentData! as ToolbarItemsParentData;
 
       i++;
 
@@ -709,8 +706,8 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox
   @override
   void paint(PaintingContext context, Offset offset) {
     visitChildren((RenderObject renderObjectChild) {
-      final RenderBox child = renderObjectChild as RenderBox;
-      final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
+      final child = renderObjectChild as RenderBox;
+      final childParentData = child.parentData! as ToolbarItemsParentData;
       if (!childParentData.shouldPaint) {
         return;
       }
@@ -731,7 +728,7 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox
     RenderBox? child = lastChild;
     while (child != null) {
       // The x, y parameters have the top left of the node's box as the origin.
-      final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
+      final childParentData = child.parentData! as ToolbarItemsParentData;
 
       // Don't hit test children aren't shown.
       if (!childParentData.shouldPaint) {
@@ -759,8 +756,8 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
     visitChildren((RenderObject renderObjectChild) {
-      final RenderBox child = renderObjectChild as RenderBox;
-      final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
+      final child = renderObjectChild as RenderBox;
+      final childParentData = child.parentData! as ToolbarItemsParentData;
       if (childParentData.shouldPaint) {
         visitor(renderObjectChild);
       }

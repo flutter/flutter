@@ -10,9 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final MagnifierController magnifierController = MagnifierController();
-  const Rect reasonableTextField = Rect.fromLTRB(50, 100, 200, 100);
-  final Offset basicOffset = Offset(
+  final magnifierController = MagnifierController();
+  const reasonableTextField = Rect.fromLTRB(50, 100, 200, 100);
+  final basicOffset = Offset(
     Magnifier.kDefaultMagnifierSize.width / 2,
     Magnifier.kStandardVerticalFocalPointShift + Magnifier.kDefaultMagnifierSize.height,
   );
@@ -59,9 +59,7 @@ void main() {
 
         final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
-        final ValueNotifier<MagnifierInfo> magnifierPositioner = ValueNotifier<MagnifierInfo>(
-          MagnifierInfo.empty,
-        );
+        final magnifierPositioner = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
         addTearDown(magnifierPositioner.dispose);
 
         final Widget? builtWidget = TextMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
@@ -82,9 +80,7 @@ void main() {
 
         final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
-        final ValueNotifier<MagnifierInfo> magnifierPositioner = ValueNotifier<MagnifierInfo>(
-          MagnifierInfo.empty,
-        );
+        final magnifierPositioner = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
         addTearDown(magnifierPositioner.dispose);
 
         final Widget? builtWidget = TextMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
@@ -105,9 +101,7 @@ void main() {
 
         final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
-        final ValueNotifier<MagnifierInfo> magnifierPositioner = ValueNotifier<MagnifierInfo>(
-          MagnifierInfo.empty,
-        );
+        final magnifierPositioner = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
         addTearDown(magnifierPositioner.dispose);
 
         final Widget? builtWidget = TextMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
@@ -153,12 +147,11 @@ void main() {
         final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
         // Magnifier should be positioned directly over the red square.
-        final RenderBox tapPointRenderBox =
-            tester.firstRenderObject(find.byKey(textField)) as RenderBox;
+        final tapPointRenderBox = tester.firstRenderObject(find.byKey(textField)) as RenderBox;
         final Rect fakeTextFieldRect =
             tapPointRenderBox.localToGlobal(Offset.zero) & tapPointRenderBox.size;
 
-        final ValueNotifier<MagnifierInfo> magnifierInfo = ValueNotifier<MagnifierInfo>(
+        final magnifierInfo = ValueNotifier<MagnifierInfo>(
           MagnifierInfo(
             currentLineBoundaries: fakeTextFieldRect,
             fieldBounds: fakeTextFieldRect,
@@ -275,7 +268,7 @@ void main() {
       testWidgets('should reposition vertically if mashed against the ceiling', (
         WidgetTester tester,
       ) async {
-        final Rect topOfScreenTextFieldRect = Rect.fromPoints(Offset.zero, const Offset(200, 0));
+        final topOfScreenTextFieldRect = Rect.fromPoints(Offset.zero, const Offset(200, 0));
 
         await tester.pumpWidget(const MaterialApp(home: Placeholder()));
 
@@ -337,7 +330,7 @@ void main() {
       testWidgets('focal point should shift if mashed against the top to always point to text', (
         WidgetTester tester,
       ) async {
-        final Rect topOfScreenTextFieldRect = Rect.fromPoints(Offset.zero, const Offset(200, 0));
+        final topOfScreenTextFieldRect = Rect.fromPoints(Offset.zero, const Offset(200, 0));
 
         await tester.pumpWidget(const MaterialApp(home: Placeholder()));
 
@@ -400,7 +393,7 @@ void main() {
 
         final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
-        final ValueNotifier<MagnifierInfo> magnifierPositioner = ValueNotifier<MagnifierInfo>(
+        final magnifierPositioner = ValueNotifier<MagnifierInfo>(
           MagnifierInfo(
             currentLineBoundaries: reasonableTextField,
             fieldBounds: reasonableTextField,
@@ -425,13 +418,13 @@ void main() {
       });
 
       testWidgets('should be animated on vertical shifts', (WidgetTester tester) async {
-        const Offset verticalShift = Offset(0, 200);
+        const verticalShift = Offset(0, 200);
 
         await tester.pumpWidget(const MaterialApp(home: Placeholder()));
 
         final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
-        final ValueNotifier<MagnifierInfo> magnifierPositioner = ValueNotifier<MagnifierInfo>(
+        final magnifierPositioner = ValueNotifier<MagnifierInfo>(
           MagnifierInfo(
             currentLineBoundaries: reasonableTextField,
             fieldBounds: reasonableTextField,
@@ -459,13 +452,13 @@ void main() {
       });
 
       testWidgets('should stop being animated when timer is up', (WidgetTester tester) async {
-        const Offset verticalShift = Offset(0, 200);
+        const verticalShift = Offset(0, 200);
 
         await tester.pumpWidget(const MaterialApp(home: Placeholder()));
 
         final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
-        final ValueNotifier<MagnifierInfo> magnifierPositioner = ValueNotifier<MagnifierInfo>(
+        final magnifierPositioner = ValueNotifier<MagnifierInfo>(
           MagnifierInfo(
             currentLineBoundaries: reasonableTextField,
             fieldBounds: reasonableTextField,

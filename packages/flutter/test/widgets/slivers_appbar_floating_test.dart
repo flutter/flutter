@@ -9,9 +9,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void verifyPaintPosition(GlobalKey key, Offset ideal, bool visible) {
-  final RenderSliver target = key.currentContext!.findRenderObject()! as RenderSliver;
+  final target = key.currentContext!.findRenderObject()! as RenderSliver;
   expect(target.parent, isA<RenderViewport>());
-  final SliverPhysicalParentData parentData = target.parentData! as SliverPhysicalParentData;
+  final parentData = target.parentData! as SliverPhysicalParentData;
   final Offset actual = parentData.paintOffset;
   expect(actual, ideal);
   final SliverGeometry geometry = target.geometry!;
@@ -20,7 +20,7 @@ void verifyPaintPosition(GlobalKey key, Offset ideal, bool visible) {
 
 void verifyActualBoxPosition(WidgetTester tester, Finder finder, int index, Rect ideal) {
   final RenderBox box = tester.renderObjectList<RenderBox>(finder).elementAt(index);
-  final Rect rect = Rect.fromPoints(
+  final rect = Rect.fromPoints(
     box.localToGlobal(Offset.zero),
     box.localToGlobal(box.size.bottomRight(Offset.zero)),
   );
@@ -31,7 +31,7 @@ void main() {
   testWidgets("Sliver appbars - floating - scroll offset doesn't change", (
     WidgetTester tester,
   ) async {
-    const double bigHeight = 1000.0;
+    const bigHeight = 1000.0;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -62,8 +62,8 @@ void main() {
   });
 
   testWidgets('Sliver appbars - floating - normal behavior works', (WidgetTester tester) async {
-    final TestDelegate delegate = TestDelegate();
-    const double bigHeight = 1000.0;
+    final delegate = TestDelegate();
+    const bigHeight = 1000.0;
     GlobalKey key1, key2, key3;
     await tester.pumpWidget(
       Directionality(
@@ -190,8 +190,8 @@ void main() {
   testWidgets('Sliver appbars - floating - no floating behavior when animating', (
     WidgetTester tester,
   ) async {
-    final TestDelegate delegate = TestDelegate();
-    const double bigHeight = 1000.0;
+    final delegate = TestDelegate();
+    const bigHeight = 1000.0;
     GlobalKey key1, key2, key3;
     await tester.pumpWidget(
       Directionality(
@@ -235,8 +235,8 @@ void main() {
   testWidgets('Sliver appbars - floating - floating behavior when dragging down', (
     WidgetTester tester,
   ) async {
-    final TestDelegate delegate = TestDelegate();
-    const double bigHeight = 1000.0;
+    final delegate = TestDelegate();
+    const bigHeight = 1000.0;
     GlobalKey key1, key2, key3;
     await tester.pumpWidget(
       Directionality(
@@ -250,7 +250,7 @@ void main() {
         ),
       ),
     );
-    final ScrollPositionWithSingleContext position =
+    final position =
         tester.state<ScrollableState>(find.byType(Scrollable)).position
             as ScrollPositionWithSingleContext;
 
@@ -336,7 +336,7 @@ void main() {
       required bool visible,
       required double paintExtent,
     }) {
-      final RenderSliver target = key.currentContext!.findRenderObject()! as RenderSliver;
+      final target = key.currentContext!.findRenderObject()! as RenderSliver;
       final SliverGeometry geometry = target.geometry!;
       expect(geometry.visible, visible);
       expect(geometry.paintExtent, paintExtent);
@@ -357,7 +357,7 @@ void main() {
       // Pointer scroll the app bar away, we will scroll back less to validate the
       // app bar floats back in.
       final Offset point1 = tester.getCenter(find.text('Item 5'));
-      final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+      final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
       testPointer.hover(point1);
       await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 300.0)));
       await tester.pump();
@@ -401,7 +401,7 @@ void main() {
       // Pointer scroll the app bar away, we will scroll back less to validate the
       // app bar floats back in.
       final Offset point1 = tester.getCenter(find.text('Item 5'));
-      final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+      final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
       testPointer.hover(point1);
       await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 300.0)));
       await tester.pump();
@@ -444,7 +444,7 @@ void main() {
       // Pointer scroll the app bar away, we will scroll back less to validate the
       // app bar floats back in and then snaps to full size.
       final Offset point1 = tester.getCenter(find.text('Item 5'));
-      final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+      final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
       testPointer.hover(point1);
       await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 300.0)));
       await tester.pump();

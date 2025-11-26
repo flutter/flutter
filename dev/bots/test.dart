@@ -86,8 +86,8 @@ final Map<String, String> localEngineEnv = <String, String>{};
 Future<void> main(List<String> args) async {
   try {
     printProgress('STARTING ANALYSIS');
-    bool dryRunArgSet = false;
-    for (final String arg in args) {
+    var dryRunArgSet = false;
+    for (final arg in args) {
       if (arg.startsWith('--local-engine=')) {
         localEngineEnv['FLUTTER_LOCAL_ENGINE'] = arg.substring('--local-engine='.length);
         flutterTestArgs.add(arg);
@@ -119,7 +119,7 @@ Future<void> main(List<String> args) async {
     if (dryRunArgSet) {
       enableDryRun();
     }
-    final WebTestsSuite webTestsSuite = WebTestsSuite(flutterTestArgs);
+    final webTestsSuite = WebTestsSuite(flutterTestArgs);
     await selectShard(<String, ShardRunner>{
       'add_to_app_life_cycle_tests': addToAppLifeCycleRunner,
       'build_tests': _runBuildTests,
@@ -196,8 +196,8 @@ Future<void> _runWebToolTests() async {
   final List<File> allFiles = Directory(
     path.join(_toolsPath, 'test', 'web.shard'),
   ).listSync(recursive: true).whereType<File>().toList();
-  final List<String> allTests = <String>[];
-  for (final File file in allFiles) {
+  final allTests = <String>[];
+  for (final file in allFiles) {
     if (file.path.endsWith('_test.dart')) {
       allTests.add(file.path);
     }
@@ -269,7 +269,7 @@ Future<void> _runSnippetsTests() async {
 Future<void> runForbiddenFromReleaseTests() async {
   // Build a release APK to get the snapshot json.
   final Directory tempDirectory = Directory.systemTemp.createTempSync('flutter_forbidden_imports.');
-  final List<String> command = <String>[
+  final command = <String>[
     'build',
     'apk',
     '--target-platform',
@@ -288,7 +288,7 @@ Future<void> runForbiddenFromReleaseTests() async {
   );
 
   // First, a smoke test.
-  final List<String> smokeTestArgs = <String>[
+  final smokeTestArgs = <String>[
     path.join(flutterRoot, 'dev', 'forbidden_from_release_tests', 'bin', 'main.dart'),
     '--snapshot',
     path.join(tempDirectory.path, 'snapshot.arm64-v8a.json'),
@@ -300,7 +300,7 @@ Future<void> runForbiddenFromReleaseTests() async {
   await runCommand(dart, smokeTestArgs, workingDirectory: flutterRoot, expectNonZeroExit: true);
 
   // Actual test.
-  final List<String> args = <String>[
+  final args = <String>[
     path.join(flutterRoot, 'dev', 'forbidden_from_release_tests', 'bin', 'main.dart'),
     '--snapshot',
     path.join(tempDirectory.path, 'snapshot.arm64-v8a.json'),
@@ -355,7 +355,7 @@ Future<void> _runBuildTests() async {
 
   // The tests are randomly distributed into subshards so as to get a uniform
   // distribution of costs, but the seed is fixed so that issues are reproducible.
-  final List<ShardRunner> tests = <ShardRunner>[
+  final tests = <ShardRunner>[
     for (final Directory exampleDirectory in exampleDirectories)
       () => _runExampleProjectBuildTests(exampleDirectory),
     ...<ShardRunner>[
@@ -386,7 +386,7 @@ Future<void> _runExampleProjectBuildTests(Directory exampleDirectory, [File? mai
   // Only verify caching with flutter gallery.
   final bool verifyCaching = exampleDirectory.path.contains('flutter_gallery');
   final String examplePath = path.relative(exampleDirectory.path, from: Directory.current.path);
-  final List<String> additionalArgs = <String>[
+  final additionalArgs = <String>[
     if (mainFile != null) path.relative(mainFile.path, from: exampleDirectory.absolute.path),
   ];
   if (Directory(path.join(examplePath, 'android')).existsSync()) {
@@ -611,7 +611,7 @@ Future<void> _flutterBuild(
       if (release) '--release' else '--debug',
       '-v',
     ], workingDirectory: path.join(flutterRoot, relativePathToApplication));
-    final File file = File(path.join(flutterRoot, relativePathToApplication, 'perf.json'));
+    final file = File(path.join(flutterRoot, relativePathToApplication, 'perf.json'));
     if (!_allTargetsCached(file)) {
       foundError(<String>[
         '${red}Not all build targets cached after second run.$reset',
@@ -625,8 +625,7 @@ bool _allTargetsCached(File performanceFile) {
   if (dryRun) {
     return true;
   }
-  final Map<String, Object?> data =
-      json.decode(performanceFile.readAsStringSync()) as Map<String, Object?>;
+  final data = json.decode(performanceFile.readAsStringSync()) as Map<String, Object?>;
   final List<Map<String, Object?>> targets = (data['targets']! as List<Object?>)
       .cast<Map<String, Object?>>();
   return targets.every((Map<String, Object?> element) => element['skipped'] == true);

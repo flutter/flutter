@@ -104,7 +104,7 @@ class WebParagraphStyle implements ui.ParagraphStyle {
 
   @override
   String toString() {
-    String result = super.toString();
+    var result = super.toString();
     assert(() {
       result =
           'WebParagraphStyle('
@@ -350,7 +350,7 @@ class WebTextStyle implements ui.TextStyle {
 
   @override
   String toString() {
-    String result = super.toString();
+    var result = super.toString();
     assert(() {
       final double? fontSize = this.fontSize;
       result =
@@ -424,7 +424,7 @@ class WebTextStyle implements ui.TextStyle {
     }
 
     final fontFeatureSettings = <ui.FontFeature>[];
-    bool optimizeLegibility = false;
+    var optimizeLegibility = false;
 
     for (final ui.FontFeature feature in fontFeatures!) {
       switch (feature.feature) {
@@ -652,16 +652,16 @@ class TextSpan extends ParagraphSpan {
 
   ui.Rect getTextRangeSelectionInBlock(LineBlock block, ui.TextRange textRange) {
     // Let's normalize the ranges
-    final intersect = block.textRange.intersect(textRange);
+    final ui.TextRange intersect = block.textRange.intersect(textRange);
     if (intersect.isEmpty) {
       return ui.Rect.zero;
     }
     // This `selection` is relative to the span, but blocks should be positioned relative to the line.
-    final beforeSelection = _metrics.getSelection(
+    final ui.Rect beforeSelection = _metrics.getSelection(
       block.textRange.start - start,
       intersect.start - start,
     );
-    final intersectSelection = _metrics.getSelection(
+    final ui.Rect intersectSelection = _metrics.getSelection(
       intersect.start - start,
       intersect.end - start,
     );
@@ -677,7 +677,7 @@ class TextSpan extends ParagraphSpan {
 
   ui.Rect getBlockSelection(LineBlock block) {
     // This `selection` is relative to the span, but blocks should be positioned relative to the line.
-    final selection = _metrics.getSelection(
+    final ui.Rect selection = _metrics.getSelection(
       block.textRange.start - start,
       block.textRange.end - start,
     );
@@ -868,7 +868,12 @@ class WebParagraph implements ui.Paragraph {
     ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
     ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
   }) {
-    final result = _layout.getBoxesForRange(start, end, boxHeightStyle, boxWidthStyle);
+    final List<ui.TextBox> result = _layout.getBoxesForRange(
+      start,
+      end,
+      boxHeightStyle,
+      boxWidthStyle,
+    );
     WebParagraphDebug.apiTrace(
       'getBoxesForRange("$text", $start, $end, $boxHeightStyle, $boxWidthStyle): $result ($longestLine, $maxLineWidthWithTrailingSpaces)',
     );
@@ -886,9 +891,9 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   ui.GlyphInfo? getClosestGlyphInfoForOffset(ui.Offset offset) {
-    final position = getPositionForOffset(offset);
+    final ui.TextPosition position = getPositionForOffset(offset);
     assert(position.offset < text.length || text.isEmpty);
-    final result = getGlyphInfoAt(position.offset);
+    final ui.GlyphInfo? result = getGlyphInfoAt(position.offset);
     if (result == null) {
       WebParagraphDebug.apiTrace(
         'getClosestGlyphInfoForOffset("$text", ${offset.dx}, ${offset.dy}): '
@@ -913,7 +918,7 @@ class WebParagraph implements ui.Paragraph {
     if (codeUnitOffset < 0 || codeUnitOffset >= text.length) {
       return null;
     }
-    final result = _layout.getGlyphInfoAt(codeUnitOffset);
+    final ui.GlyphInfo? result = _layout.getGlyphInfoAt(codeUnitOffset);
     WebParagraphDebug.apiTrace('getGlyphInfoAt("$text", $codeUnitOffset): $result');
     return result;
   }
@@ -930,7 +935,7 @@ class WebParagraph implements ui.Paragraph {
     if (codepointPosition >= text.length) {
       return ui.TextRange(start: text.length, end: text.length);
     }
-    final result = _layout.getWordBoundary(codepointPosition);
+    final ui.TextRange result = _layout.getWordBoundary(codepointPosition);
     WebParagraphDebug.apiTrace('getWordBoundary("$text", $position): $result');
     return result;
   }
@@ -954,7 +959,7 @@ class WebParagraph implements ui.Paragraph {
 
   void paint(ui.Canvas canvas, ui.Offset offset) {
     _paint.painter.resizePaintCanvas(ui.window.devicePixelRatio);
-    for (final line in _layout.lines) {
+    for (final TextLine line in _layout.lines) {
       _paint.paintLine(canvas, _layout, line, offset.dx, offset.dy);
     }
   }
@@ -966,15 +971,15 @@ class WebParagraph implements ui.Paragraph {
       ui.TextAffinity.downstream => position.offset,
     };
 
-    final result = _layout.getLineBoundary(codepointPosition);
+    final ui.TextRange result = _layout.getLineBoundary(codepointPosition);
     WebParagraphDebug.apiTrace('getLineBoundary("$text", $position): $result');
     return result;
   }
 
   @override
   List<ui.LineMetrics> computeLineMetrics() {
-    final List<ui.LineMetrics> metrics = <ui.LineMetrics>[];
-    for (final line in _layout.lines) {
+    final metrics = <ui.LineMetrics>[];
+    for (final TextLine line in _layout.lines) {
       metrics.add(line.getMetrics());
     }
     WebParagraphDebug.apiTrace('computeLineMetrics("$text": $metrics');
@@ -1009,7 +1014,7 @@ class WebParagraph implements ui.Paragraph {
       return null;
     }
 
-    for (final line in _layout.lines) {
+    for (final TextLine line in _layout.lines) {
       if (line.allLineTextRange.isBefore(codeUnitOffset)) {
         continue;
       }
@@ -1137,7 +1142,7 @@ class WebLineMetrics implements ui.LineMetrics {
 
   @override
   String toString() {
-    String result = super.toString();
+    var result = super.toString();
     assert(() {
       result =
           'LineMetrics(hardBreak: $hardBreak, '
@@ -1196,9 +1201,9 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
 
     _closeTextSpan();
 
-    final start = _fullTextBuffer.length;
+    final int start = _fullTextBuffer.length;
     addText(kPlaceholderChar);
-    final end = _fullTextBuffer.length;
+    final int end = _fullTextBuffer.length;
 
     _spans.add(
       PlaceholderSpan(
@@ -1274,7 +1279,7 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
   @override
   WebParagraph build() {
     _closeTextSpan();
-    final String text = _fullTextBuffer.toString();
+    final text = _fullTextBuffer.toString();
 
     final paragraph = WebParagraph(_paragraphStyle, _spans, text);
     WebParagraphDebug.apiTrace('WebParagraphBuilder.build(): "$text" ${_spans.length}');
@@ -1302,7 +1307,7 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
 
   @override
   void pushStyle(ui.TextStyle textStyle) {
-    final newNode = _styleStack.last.createChild(textStyle as WebTextStyle);
+    final ChildStyleNode newNode = _styleStack.last.createChild(textStyle as WebTextStyle);
     _styleStack.add(newNode);
   }
 }

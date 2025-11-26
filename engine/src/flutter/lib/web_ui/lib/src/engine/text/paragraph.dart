@@ -79,7 +79,7 @@ class EngineLineMetrics implements ui.LineMetrics {
 
   @override
   String toString() {
-    String result = super.toString();
+    var result = super.toString();
     assert(() {
       result =
           'LineMetrics(hardBreak: $hardBreak, '
@@ -178,9 +178,9 @@ String fontFeatureListToCss(List<ui.FontFeature> fontFeatures) {
 
   // For more details, see:
   // * https://developer.mozilla.org/en-US/docs/Web/CSS/font-feature-settings
-  final StringBuffer sb = StringBuffer();
+  final sb = StringBuffer();
   final int len = fontFeatures.length;
-  for (int i = 0; i < len; i++) {
+  for (var i = 0; i < len; i++) {
     if (i != 0) {
       sb.write(',');
     }
@@ -193,9 +193,9 @@ String fontFeatureListToCss(List<ui.FontFeature> fontFeatures) {
 String fontVariationListToCss(List<ui.FontVariation> fontVariations) {
   assert(fontVariations.isNotEmpty);
 
-  final StringBuffer sb = StringBuffer();
+  final sb = StringBuffer();
   final int len = fontVariations.length;
-  for (int i = 0; i < len; i++) {
+  for (var i = 0; i < len; i++) {
     if (i != 0) {
       sb.write(',');
     }

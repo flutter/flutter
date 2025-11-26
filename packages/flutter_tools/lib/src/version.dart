@@ -1234,7 +1234,7 @@ class VersionFreshnessValidator {
   ///
   /// This can be customized in tests to speed them up.
   @visibleForTesting
-  static var timeToPauseToLetUserReadTheMessage = const Duration(seconds: 2);
+  static Duration timeToPauseToLetUserReadTheMessage = const Duration(seconds: 2);
 
   // We show a warning if either we know there is a new remote version, or we
   // couldn't tell but the local version is outdated.

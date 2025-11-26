@@ -987,7 +987,7 @@ class AccessibilityFeatures {
 
   @override
   String toString() {
-    final List<String> features = <String>[];
+    final features = <String>[];
     if (accessibleNavigation) {
       features.add('accessibleNavigation');
     }

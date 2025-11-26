@@ -87,7 +87,7 @@ void testMain() {
   test(
     'Attaches styles to hide the autofill overlay for browsers that support it',
     () {
-      final String vendorPrefix = (isSafari || isFirefox) ? '' : '-webkit-';
+      final vendorPrefix = (isSafari || isFirefox) ? '' : '-webkit-';
       final bool autofillOverlay = hasCssRule(
         styleElement,
         selector: '.transparentTextEditing:${vendorPrefix}autofill',
@@ -128,9 +128,9 @@ bool hasCssRule(
   assert(styleElement.sheet != null);
 
   // regexr.com/740ff
-  final RegExp ruleLike = RegExp('[^{]*(?:$selector)[^{]*{[^}]*(?:$declaration)[^}]*}');
+  final ruleLike = RegExp('[^{]*(?:$selector)[^{]*{[^}]*(?:$declaration)[^}]*}');
 
-  final DomCSSStyleSheet sheet = styleElement.sheet! as DomCSSStyleSheet;
+  final sheet = styleElement.sheet! as DomCSSStyleSheet;
 
   // Check that the cssText of any rule matches the ruleLike RegExp.
   final bool result = sheet.cssRules

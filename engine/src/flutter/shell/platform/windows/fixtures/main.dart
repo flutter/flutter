@@ -46,7 +46,7 @@ void hiPlatformChannels() {
 /// Returns a future that completes when
 /// `PlatformDispatcher.instance.onSemanticsEnabledChanged` fires.
 Future<void> get semanticsChanged {
-  final Completer<void> semanticsChanged = Completer<void>();
+  final semanticsChanged = Completer<void>();
   ui.PlatformDispatcher.instance.onSemanticsEnabledChanged = semanticsChanged.complete;
   return semanticsChanged.future;
 }
@@ -60,11 +60,11 @@ Future<void> sendAccessibilityAnnouncement() async {
 
   // Standard message codec magic number identifiers.
   // See: https://github.com/flutter/flutter/blob/ee94fe262b63b0761e8e1f889ae52322fef068d2/packages/flutter/lib/src/services/message_codecs.dart#L262
-  const int valueMap = 13, valueString = 7, valueInt64 = 4;
+  const valueMap = 13, valueString = 7, valueInt64 = 4;
 
   // Corresponds to: {"type": "announce", "data": {"viewId": 0, "message": "hello"}}
   // See: https://github.com/flutter/flutter/blob/b781da9b5822de1461a769c3b245075359f5464d/packages/flutter/lib/src/semantics/semantics_event.dart#L86
-  final Uint8List data = Uint8List.fromList([
+  final data = Uint8List.fromList([
     // Map with 2 entries
     valueMap, 2,
     // Map key: "type"
@@ -102,11 +102,11 @@ Future<void> sendAccessibilityTooltipEvent() async {
 
   // Standard message codec magic number identifiers.
   // See: https://github.com/flutter/flutter/blob/ee94fe262b63b0761e8e1f889ae52322fef068d2/packages/flutter/lib/src/services/message_codecs.dart#L262
-  const int valueMap = 13, valueString = 7;
+  const valueMap = 13, valueString = 7;
 
   // Corresponds to: {"type": "tooltip", "data": {"message": "hello"}}
   // See: https://github.com/flutter/flutter/blob/b781da9b5822de1461a769c3b245075359f5464d/packages/flutter/lib/src/semantics/semantics_event.dart#L120
-  final Uint8List data = Uint8List.fromList([
+  final data = Uint8List.fromList([
     // Map with 2 entries
     valueMap, 2,
     // Map key: "type"
@@ -133,7 +133,7 @@ Future<void> sendAccessibilityTooltipEvent() async {
 
 @pragma('vm:entry-point')
 Future<void> exitTestExit() async {
-  final Completer<ByteData?> closed = Completer<ByteData?>();
+  final closed = Completer<ByteData?>();
   ui.channelBuffers.setListener('flutter/platform', (
     ByteData? data,
     ui.PlatformMessageResponseCallback callback,
@@ -141,7 +141,7 @@ Future<void> exitTestExit() async {
     final String jsonString = json.encode(<Map<String, String>>[
       {'response': 'exit'},
     ]);
-    final ByteData responseData = ByteData.sublistView(utf8.encode(jsonString));
+    final responseData = ByteData.sublistView(utf8.encode(jsonString));
     callback(responseData);
     closed.complete(data);
   });
@@ -150,7 +150,7 @@ Future<void> exitTestExit() async {
 
 @pragma('vm:entry-point')
 Future<void> exitTestCancel() async {
-  final Completer<ByteData?> closed = Completer<ByteData?>();
+  final closed = Completer<ByteData?>();
   ui.channelBuffers.setListener('flutter/platform', (
     ByteData? data,
     ui.PlatformMessageResponseCallback callback,
@@ -158,14 +158,14 @@ Future<void> exitTestCancel() async {
     final String jsonString = json.encode(<Map<String, String>>[
       {'response': 'cancel'},
     ]);
-    final ByteData responseData = ByteData.sublistView(utf8.encode(jsonString));
+    final responseData = ByteData.sublistView(utf8.encode(jsonString));
     callback(responseData);
     closed.complete(data);
   });
   await closed.future;
 
   // Because the request was canceled, the below shall execute.
-  final Completer<ByteData?> exited = Completer<ByteData?>();
+  final exited = Completer<ByteData?>();
   final String jsonString = json.encode(<String, dynamic>{
     'method': 'System.exitApplication',
     'args': <String, dynamic>{'type': 'required', 'exitCode': 0},
@@ -182,7 +182,7 @@ Future<void> exitTestCancel() async {
 
 @pragma('vm:entry-point')
 Future<void> enableLifecycleTest() async {
-  final Completer<ByteData?> finished = Completer<ByteData?>();
+  final finished = Completer<ByteData?>();
   ui.channelBuffers.setListener('flutter/lifecycle', (
     ByteData? data,
     ui.PlatformMessageResponseCallback callback,
@@ -212,7 +212,7 @@ Future<void> enableLifecycleToFrom() async {
       );
     }
   });
-  final Completer<ByteData?> enabledLifecycle = Completer<ByteData?>();
+  final enabledLifecycle = Completer<ByteData?>();
   ui.PlatformDispatcher.instance.sendPlatformMessage(
     'flutter/platform',
     ByteData.sublistView(utf8.encode('{"method":"System.initializationComplete"}')),
@@ -227,14 +227,14 @@ Future<void> sendCreatePlatformViewMethod() async {
   // The platform view method channel uses the standard method codec.
   // See https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/services/message_codecs.dart#L262
   // for the implementation of the encoding and magic number identifiers.
-  const int valueString = 7;
-  const int valueMap = 13;
-  const int valueInt32 = 3;
-  const String method = 'create';
-  const String typeKey = 'viewType';
-  const String typeValue = 'type';
-  const String idKey = 'id';
-  final List<int> data = <int>[
+  const valueString = 7;
+  const valueMap = 13;
+  const valueInt32 = 3;
+  const method = 'create';
+  const typeKey = 'viewType';
+  const typeValue = 'type';
+  const idKey = 'id';
+  final data = <int>[
     // Method name
     valueString, method.length, ...utf8.encode(method),
     // Method arguments: {'type': 'type':, 'id': 0}
@@ -245,8 +245,8 @@ Future<void> sendCreatePlatformViewMethod() async {
     valueInt32, 0, 0, 0, 0,
   ];
 
-  final Completer<ByteData?> completed = Completer<ByteData?>();
-  final ByteData bytes = ByteData.sublistView(Uint8List.fromList(data));
+  final completed = Completer<ByteData?>();
+  final bytes = ByteData.sublistView(Uint8List.fromList(data));
   ui.PlatformDispatcher.instance.sendPlatformMessage('flutter/platform_views', bytes, (
     ByteData? response,
   ) {
@@ -260,26 +260,26 @@ Future<void> sendGetKeyboardState() async {
   // The keyboard method channel uses the standard method codec.
   // See https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/services/message_codecs.dart#L262
   // for the implementation of the encoding and magic number identifiers.
-  const int valueNull = 0;
-  const int valueString = 7;
-  const int valueMap = 13;
+  const valueNull = 0;
+  const valueString = 7;
+  const valueMap = 13;
 
-  const String method = 'getKeyboardState';
-  final List<int> data = <int>[
+  const method = 'getKeyboardState';
+  final data = <int>[
     // Method name
     valueString, method.length, ...utf8.encode(method),
     // Method arguments: null
     valueNull, 2,
   ];
 
-  final Completer<void> completer = Completer<void>();
-  final ByteData bytes = ByteData.sublistView(Uint8List.fromList(data));
+  final completer = Completer<void>();
+  final bytes = ByteData.sublistView(Uint8List.fromList(data));
   ui.PlatformDispatcher.instance.sendPlatformMessage('flutter/keyboard', bytes, (
     ByteData? response,
   ) {
     // For magic numbers for decoding a reply envelope, see:
     // https://github.com/flutter/flutter/blob/67271f69f7f88a4edba6d8023099e3bd27a072d2/packages/flutter/lib/src/services/message_codecs.dart#L577-L587
-    const int replyEnvelopeSuccess = 0;
+    const replyEnvelopeSuccess = 0;
 
     // Ensure the response is a success containing a map of keyboard states.
     if (response == null) {
@@ -313,7 +313,7 @@ void verifyNativeFunctionWithParameters() {
 
 @pragma('vm:entry-point')
 void verifyNativeFunctionWithReturn() {
-  final value = signalBoolReturn();
+  final bool value = signalBoolReturn();
   signalBoolValue(value);
 }
 
@@ -325,19 +325,18 @@ void readPlatformExecutable() {
 @pragma('vm:entry-point')
 void drawHelloWorld() {
   ui.PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
-    final ui.ParagraphBuilder paragraphBuilder = ui.ParagraphBuilder(ui.ParagraphStyle())
-      ..addText('Hello world');
+    final paragraphBuilder = ui.ParagraphBuilder(ui.ParagraphStyle())..addText('Hello world');
     final ui.Paragraph paragraph = paragraphBuilder.build();
 
     paragraph.layout(const ui.ParagraphConstraints(width: 800.0));
 
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = ui.Canvas(recorder);
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder);
 
     canvas.drawParagraph(paragraph, ui.Offset.zero);
 
     final ui.Picture picture = recorder.endRecording();
-    final ui.SceneBuilder sceneBuilder = ui.SceneBuilder()
+    final sceneBuilder = ui.SceneBuilder()
       ..addPicture(ui.Offset.zero, picture)
       ..pop();
 
@@ -349,10 +348,10 @@ void drawHelloWorld() {
 }
 
 ui.Picture _createColoredBox(ui.Color color, ui.Size size) {
-  final ui.Paint paint = ui.Paint();
+  final paint = ui.Paint();
   paint.color = color;
-  final ui.PictureRecorder baseRecorder = ui.PictureRecorder();
-  final ui.Canvas canvas = ui.Canvas(baseRecorder);
+  final baseRecorder = ui.PictureRecorder();
+  final canvas = ui.Canvas(baseRecorder);
   canvas.drawRect(ui.Rect.fromLTRB(0.0, 0.0, size.width, size.height), paint);
   return baseRecorder.endRecording();
 }
@@ -360,10 +359,10 @@ ui.Picture _createColoredBox(ui.Color color, ui.Size size) {
 @pragma('vm:entry-point')
 void renderImplicitView() {
   ui.PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
-    const ui.Size size = ui.Size(800.0, 600.0);
-    const ui.Color red = ui.Color.fromARGB(127, 255, 0, 0);
+    const size = ui.Size(800.0, 600.0);
+    const red = ui.Color.fromARGB(127, 255, 0, 0);
 
-    final ui.SceneBuilder builder = ui.SceneBuilder();
+    final builder = ui.SceneBuilder();
 
     builder.pushOffset(0.0, 0.0);
 
@@ -430,12 +429,12 @@ Future<void> sendSemanticsTreeInfo() async {
   );
 
   ui.SemanticsUpdate createSemanticsUpdate(int nodeId) {
-    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
-    final Float64List transform = Float64List(16);
-    final Float64List hitTestTransform = Float64List(16);
-    final Int32List childrenInTraversalOrder = Int32List(0);
-    final Int32List childrenInHitTestOrder = Int32List(0);
-    final Int32List additionalActions = Int32List(0);
+    final builder = ui.SemanticsUpdateBuilder();
+    final transform = Float64List(16);
+    final hitTestTransform = Float64List(16);
+    final childrenInTraversalOrder = Int32List(0);
+    final childrenInHitTestOrder = Int32List(0);
+    final additionalActions = Int32List(0);
     // Identity matrix 4x4.
     transform[0] = 1;
     transform[5] = 1;

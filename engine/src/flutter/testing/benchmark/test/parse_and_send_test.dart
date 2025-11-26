@@ -21,7 +21,7 @@ void main() {
     final List<String> gitLog = await pas.getGitLog();
 
     // Check that gitLog[0] is a hash
-    final RegExp sha1re = RegExp(r'[a-f0-9]{40}');
+    final sha1re = RegExp(r'[a-f0-9]{40}');
     expect(sha1re.hasMatch(gitLog[0]), true);
 
     // Check that gitLog[1] is an int
@@ -29,10 +29,7 @@ void main() {
 
     // Check that gitLog[1] is a sensible Unix Epoch
     final int millisecondsSinceEpoch = secondsSinceEpoch * 1000;
-    final DateTime commitDate = DateTime.fromMillisecondsSinceEpoch(
-      millisecondsSinceEpoch,
-      isUtc: true,
-    );
+    final commitDate = DateTime.fromMillisecondsSinceEpoch(millisecondsSinceEpoch, isUtc: true);
     expect(commitDate.year > 2000, true);
     expect(commitDate.year < 3000, true);
   });

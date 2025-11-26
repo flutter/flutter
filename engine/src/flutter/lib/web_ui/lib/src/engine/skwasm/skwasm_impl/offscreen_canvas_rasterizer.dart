@@ -74,8 +74,8 @@ class SkwasmOffscreenCanvasViewRasterizer extends ViewRasterizer {
     );
     recorder?.recordRasterStart(renderResult.rasterStartMicros);
     recorder?.recordRasterFinish(renderResult.rasterEndMicros);
-    for (int i = 0; i < displayCanvases.length; i++) {
-      final RenderCanvas renderCanvas = displayCanvases[i] as RenderCanvas;
+    for (var i = 0; i < displayCanvases.length; i++) {
+      final renderCanvas = displayCanvases[i] as RenderCanvas;
       final DomImageBitmap bitmap = renderResult.imageBitmaps[i];
       renderCanvas.render(bitmap);
     }

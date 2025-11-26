@@ -87,12 +87,12 @@ const List<int> _kFailPngBytes = <int>[
 ];
 
 void main() {
-  final List<String> log = <String>[];
-  final MemoryFileSystem fs = MemoryFileSystem();
+  final log = <String>[];
+  final fs = MemoryFileSystem();
   final Directory basedir = fs.directory('flutter/test/library/')..createSync(recursive: true);
-  final FakeSkiaGoldClient fakeSkiaClient = FakeSkiaGoldClient()
+  final fakeSkiaClient = FakeSkiaGoldClient()
     ..expectationForTestValues['flutter.new_golden_test.1'] = '';
-  final FlutterLocalFileComparator comparator = FlutterLocalFileComparator(
+  final comparator = FlutterLocalFileComparator(
     basedir.uri,
     fakeSkiaClient,
     fs: fs,
@@ -112,7 +112,7 @@ void main() {
       ),
       isTrue,
     );
-    const String expectation =
+    const expectation =
         'No expectations provided by Skia Gold for test: library.flutter.new_golden_test.1.png. '
         'This may be a new test. If this is an unexpected result, check https://flutter-gold.skia.org.\n'
         'Validate image output found at flutter/test/library/';
@@ -128,7 +128,7 @@ void main() {
       ),
       isTrue,
     );
-    const String expectation =
+    const expectation =
         'No expectations provided by Skia Gold for test: library.flutter.new_golden_test.2.png. '
         'This may be a new test. If this is an unexpected result, check https://flutter-gold.skia.org.\n'
         'Validate image output found at flutter/test/library/';

@@ -71,7 +71,7 @@ void main() {
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/101874
 
   testWidgets('Image filter - matrix', (WidgetTester tester) async {
-    final ImageFilter matrix = ImageFilter.matrix(
+    final matrix = ImageFilter.matrix(
       Float64List.fromList(<double>[
         0.5, 0.0, 0.0, 0.0, //
         0.0, 0.5, 0.0, 0.0, //
@@ -104,8 +104,8 @@ void main() {
   });
 
   testWidgets('Image filter - matrix with offset', (WidgetTester tester) async {
-    final Matrix4 matrix = Matrix4.rotationZ(pi / 18);
-    final ImageFilter matrixFilter = ImageFilter.matrix(matrix.storage);
+    final matrix = Matrix4.rotationZ(pi / 18);
+    final matrixFilter = ImageFilter.matrix(matrix.storage);
     final Key key = GlobalKey();
     await tester.pumpWidget(
       RepaintBoundary(
@@ -149,7 +149,7 @@ void main() {
 
     await pumpWithSigma(5.0);
     final RenderObject renderObject = tester.firstRenderObject(find.byType(ImageFiltered));
-    final ImageFilterLayer originalLayer = renderObject.debugLayer! as ImageFilterLayer;
+    final originalLayer = renderObject.debugLayer! as ImageFilterLayer;
 
     // Change blur sigma to force a repaint.
     await pumpWithSigma(10.0);

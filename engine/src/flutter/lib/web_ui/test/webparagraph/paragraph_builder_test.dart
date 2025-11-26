@@ -20,11 +20,8 @@ final WebTextStyle defaultBackground = WebTextStyle(
 
 Future<void> testMain() async {
   test('Build paragraph for Flutter Gallery', () {
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(
-      fontFamily: 'GoogleSans',
-      fontSize: 20.0,
-    );
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'GoogleSans', fontSize: 20.0);
+    final builder = WebParagraphBuilder(paragraphStyle);
     final textStyle = WebTextStyle(fontFamily: 'GoogleSans', fontSize: 20.0);
     builder.pushStyle(textStyle);
     builder.addText('Options');
@@ -43,8 +40,8 @@ Future<void> testMain() async {
   });
 
   test('Build paragraph without text or style', () {
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
+    final builder = WebParagraphBuilder(paragraphStyle);
     final WebParagraph paragraph = builder.build();
     expect(paragraph.text, '');
     expect(paragraph.paragraphStyle, paragraphStyle);
@@ -52,8 +49,8 @@ Future<void> testMain() async {
   });
 
   test('Build paragraph with some text but without a style', () {
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.addText('some ');
     builder.addText('text');
     final WebParagraph paragraph = builder.build();
@@ -70,9 +67,9 @@ Future<void> testMain() async {
   });
 
   test('Build paragraph without any text but with a style', () {
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
-    final WebTextStyle textStyle = WebTextStyle(fontFamily: 'Roboto', fontSize: 30);
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
+    final textStyle = WebTextStyle(fontFamily: 'Roboto', fontSize: 30);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.pushStyle(textStyle);
     final WebParagraph paragraph = builder.build();
     expect(paragraph.text, '');
@@ -81,13 +78,13 @@ Future<void> testMain() async {
   });
 
   test('Build paragraph with a few styles at the end without any text', () {
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
-    final WebTextStyle textStyle1 = WebTextStyle(fontFamily: 'Roboto', fontSize: 30);
-    final WebTextStyle textStyle2 = WebTextStyle(fontFamily: 'Roboto', fontSize: 35);
-    final WebTextStyle textStyle3 = WebTextStyle(fontFamily: 'Roboto', fontSize: 40);
-    final WebTextStyle textStyle4 = WebTextStyle(fontFamily: 'Roboto', fontSize: 45);
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
+    final textStyle1 = WebTextStyle(fontFamily: 'Roboto', fontSize: 30);
+    final textStyle2 = WebTextStyle(fontFamily: 'Roboto', fontSize: 35);
+    final textStyle3 = WebTextStyle(fontFamily: 'Roboto', fontSize: 40);
+    final textStyle4 = WebTextStyle(fontFamily: 'Roboto', fontSize: 45);
 
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.pushStyle(textStyle1);
     builder.addText('some ');
     builder.pushStyle(textStyle2);
@@ -108,12 +105,12 @@ Future<void> testMain() async {
   });
 
   test('Build paragraph with a few styles at the beginning and without some text', () {
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
-    final WebTextStyle textStyle1 = WebTextStyle(fontFamily: 'Roboto', fontSize: 30);
-    final WebTextStyle textStyle2 = WebTextStyle(fontFamily: 'Roboto', fontSize: 35);
-    final WebTextStyle textStyle3 = WebTextStyle(fontFamily: 'Roboto', fontSize: 40);
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
+    final textStyle1 = WebTextStyle(fontFamily: 'Roboto', fontSize: 30);
+    final textStyle2 = WebTextStyle(fontFamily: 'Roboto', fontSize: 35);
+    final textStyle3 = WebTextStyle(fontFamily: 'Roboto', fontSize: 40);
 
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.pushStyle(textStyle1);
     builder.addText('');
     builder.pushStyle(textStyle2);
@@ -132,12 +129,12 @@ Future<void> testMain() async {
   });
 
   test('Build paragraph with a nested styles [1] [2] [3]', () {
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
-    final WebTextStyle textStyle1 = WebTextStyle(fontFamily: 'Roboto', fontSize: 30);
-    final WebTextStyle textStyle2 = WebTextStyle(fontFamily: 'Roboto', fontSize: 35);
-    final WebTextStyle textStyle3 = WebTextStyle(fontFamily: 'Roboto', fontSize: 40);
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
+    final textStyle1 = WebTextStyle(fontFamily: 'Roboto', fontSize: 30);
+    final textStyle2 = WebTextStyle(fontFamily: 'Roboto', fontSize: 35);
+    final textStyle3 = WebTextStyle(fontFamily: 'Roboto', fontSize: 40);
 
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.pushStyle(textStyle1);
     builder.addText('[1]');
     builder.pop();
@@ -152,7 +149,7 @@ Future<void> testMain() async {
     expect(paragraph.paragraphStyle, paragraphStyle);
     expect(paragraph.spans, hasLength(3));
 
-    final spans = paragraph.spans.cast<TextSpan>();
+    final List<TextSpan> spans = paragraph.spans.cast<TextSpan>();
     expect(spans[0].text, '[1]');
     expect(spans[1].text, '[2]');
     expect(spans[2].text, '[3]');
@@ -178,12 +175,12 @@ Future<void> testMain() async {
   });
 
   test('Build paragraph with nested styles [1[2[3]]]', () {
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
-    final WebTextStyle textStyle1 = WebTextStyle(fontFamily: 'Roboto', fontSize: 30);
-    final WebTextStyle textStyle2 = WebTextStyle(fontFamily: 'Roboto', fontSize: 35);
-    final WebTextStyle textStyle3 = WebTextStyle(fontFamily: 'Roboto', fontSize: 40);
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
+    final textStyle1 = WebTextStyle(fontFamily: 'Roboto', fontSize: 30);
+    final textStyle2 = WebTextStyle(fontFamily: 'Roboto', fontSize: 35);
+    final textStyle3 = WebTextStyle(fontFamily: 'Roboto', fontSize: 40);
 
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.pushStyle(textStyle1);
     builder.addText('[1');
     builder.pushStyle(textStyle2);
@@ -195,7 +192,7 @@ Future<void> testMain() async {
     expect(paragraph.paragraphStyle, paragraphStyle);
     expect(paragraph.spans, hasLength(3));
 
-    final spans = paragraph.spans.cast<TextSpan>();
+    final List<TextSpan> spans = paragraph.spans.cast<TextSpan>();
     expect(spans[0].text, '[1');
     expect(spans[1].text, '[2');
     expect(spans[2].text, '[3]]]');
@@ -223,16 +220,16 @@ Future<void> testMain() async {
   test(
     'Build paragraph with inherited styles (font name, font size, font weight, font style) [1[2[3]]]',
     () {
-      final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontSize: 32);
-      final WebTextStyle textStyle1 = WebTextStyle(fontFamily: 'Roboto');
-      final WebTextStyle textStyle2 = WebTextStyle(fontSize: 42, fontWeight: FontWeight.bold);
-      final WebTextStyle textStyle3 = WebTextStyle(
+      final paragraphStyle = WebParagraphStyle(fontSize: 32);
+      final textStyle1 = WebTextStyle(fontFamily: 'Roboto');
+      final textStyle2 = WebTextStyle(fontSize: 42, fontWeight: FontWeight.bold);
+      final textStyle3 = WebTextStyle(
         fontSize: 52,
         fontStyle: FontStyle.italic,
         fontFamily: 'Arial',
       );
 
-      final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+      final builder = WebParagraphBuilder(paragraphStyle);
       builder.pushStyle(textStyle1);
       builder.addText('[1');
       builder.pushStyle(textStyle2);
@@ -252,7 +249,7 @@ Future<void> testMain() async {
       expect(paragraph.paragraphStyle, paragraphStyle);
       expect(paragraph.spans, hasLength(4));
 
-      final spans = paragraph.spans.cast<TextSpan>();
+      final List<TextSpan> spans = paragraph.spans.cast<TextSpan>();
       expect(spans[0].text, '[1');
       expect(spans[1].text, '[2');
       expect(spans[2].text, '[3');
@@ -274,18 +271,12 @@ Future<void> testMain() async {
   );
 
   test('Build paragraph with inherited styles (foreground, background) [1[2[3]]]', () {
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 24.0);
-    final WebTextStyle textStyle1 = WebTextStyle(
-      foreground: Paint()..color = const Color(0xFF00FF00),
-    );
-    final WebTextStyle textStyle2 = WebTextStyle(
-      background: Paint()..color = const Color(0xFFFF0000),
-    );
-    final WebTextStyle textStyle3 = WebTextStyle(
-      foreground: Paint()..color = const Color(0xFF0000FF),
-    );
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 24.0);
+    final textStyle1 = WebTextStyle(foreground: Paint()..color = const Color(0xFF00FF00));
+    final textStyle2 = WebTextStyle(background: Paint()..color = const Color(0xFFFF0000));
+    final textStyle3 = WebTextStyle(foreground: Paint()..color = const Color(0xFF0000FF));
 
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.pushStyle(textStyle1);
     builder.addText('[1');
     builder.pushStyle(textStyle2);
@@ -303,7 +294,7 @@ Future<void> testMain() async {
     expect(paragraph.paragraphStyle, paragraphStyle);
     expect(paragraph.spans, hasLength(3));
 
-    final spans = paragraph.spans.cast<TextSpan>();
+    final List<TextSpan> spans = paragraph.spans.cast<TextSpan>();
     expect(spans[0].text, '[1');
     expect(spans[1].text, '[2');
     expect(spans[2].text, '[3]]]');
@@ -320,12 +311,12 @@ Future<void> testMain() async {
   });
 
   test('Build paragraph with complex nested styles [1[11[111][112]]][2[21[211][212]]]', () {
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
-    final WebTextStyle textStyle1 = WebTextStyle(fontFamily: 'Roboto', fontSize: 30);
-    final WebTextStyle textStyle2 = WebTextStyle(fontFamily: 'Roboto', fontSize: 35);
-    final WebTextStyle textStyle3 = WebTextStyle(fontFamily: 'Roboto', fontSize: 40);
-    final WebTextStyle textStyle4 = WebTextStyle(fontFamily: 'Roboto', fontSize: 45);
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
+    final textStyle1 = WebTextStyle(fontFamily: 'Roboto', fontSize: 30);
+    final textStyle2 = WebTextStyle(fontFamily: 'Roboto', fontSize: 35);
+    final textStyle3 = WebTextStyle(fontFamily: 'Roboto', fontSize: 40);
+    final textStyle4 = WebTextStyle(fontFamily: 'Roboto', fontSize: 45);
+    final builder = WebParagraphBuilder(paragraphStyle);
 
     builder.pushStyle(textStyle1);
     builder.addText('[1');
@@ -356,11 +347,11 @@ Future<void> testMain() async {
   });
 
   test('Build paragraph with a placeholder', () {
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
-    final WebTextStyle textStyle1 = WebTextStyle(fontFamily: 'Roboto', fontSize: 10);
-    final WebTextStyle textStyle2 = WebTextStyle(fontFamily: 'Roboto', fontSize: 20);
-    final WebTextStyle textStyle3 = WebTextStyle(fontFamily: 'Roboto', fontSize: 30);
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
+    final textStyle1 = WebTextStyle(fontFamily: 'Roboto', fontSize: 10);
+    final textStyle2 = WebTextStyle(fontFamily: 'Roboto', fontSize: 20);
+    final textStyle3 = WebTextStyle(fontFamily: 'Roboto', fontSize: 30);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.pushStyle(textStyle1);
     builder.addText('textStyle1.');
     builder.addText(' ');

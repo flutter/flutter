@@ -455,7 +455,7 @@ class ElevatedButton extends ButtonStyleButton {
 
 EdgeInsetsGeometry _scaledPadding(BuildContext context) {
   final ThemeData theme = Theme.of(context);
-  final double padding1x = theme.useMaterial3 ? 24.0 : 16.0;
+  final padding1x = theme.useMaterial3 ? 24.0 : 16.0;
   final double defaultFontSize = theme.textTheme.labelLarge?.fontSize ?? 14.0;
   final double effectiveTextScale = MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
 

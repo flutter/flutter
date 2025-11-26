@@ -17,7 +17,7 @@ class AndroidCodeGenerator extends PlatformCodeGenerator {
 
   /// This generates the map of Android key codes to logical keys.
   String get _androidKeyCodeMap {
-    final StringBuffer androidKeyCodeMap = StringBuffer();
+    final androidKeyCodeMap = StringBuffer();
     for (final LogicalKeyEntry entry in logicalData.entries) {
       for (final int code in entry.androidValues) {
         androidKeyCodeMap.writeln(
@@ -30,7 +30,7 @@ class AndroidCodeGenerator extends PlatformCodeGenerator {
 
   /// This generates the map of Android scan codes to physical keys.
   String get _androidScanCodeMap {
-    final StringBuffer androidScanCodeMap = StringBuffer();
+    final androidScanCodeMap = StringBuffer();
     for (final PhysicalKeyEntry entry in keyData.entries) {
       for (final int code in entry.androidScanCodes.cast<int>()) {
         androidScanCodeMap.writeln(
@@ -42,8 +42,8 @@ class AndroidCodeGenerator extends PlatformCodeGenerator {
   }
 
   String get _pressingGoals {
-    final OutputLines<int> lines = OutputLines<int>('Android pressing goals');
-    const Map<String, List<String>> goalsSource = <String, List<String>>{
+    final lines = OutputLines<int>('Android pressing goals');
+    const goalsSource = <String, List<String>>{
       'SHIFT': <String>['ShiftLeft', 'ShiftRight'],
       'CTRL': <String>['ControlLeft', 'ControlRight'],
       'ALT': <String>['AltLeft', 'AltRight'],
@@ -70,8 +70,8 @@ class AndroidCodeGenerator extends PlatformCodeGenerator {
   }
 
   String get _togglingGoals {
-    final OutputLines<int> lines = OutputLines<int>('Android toggling goals');
-    const Map<String, String> goalsSource = <String, String>{'CAPS_LOCK': 'CapsLock'};
+    final lines = OutputLines<int>('Android toggling goals');
+    const goalsSource = <String, String>{'CAPS_LOCK': 'CapsLock'};
     goalsSource.forEach((String flagName, String keyName) {
       final PhysicalKeyEntry physicalKey = keyData.entryByName(keyName);
       final LogicalKeyEntry logicalKey = logicalData.entryByName(keyName);
@@ -87,13 +87,9 @@ class AndroidCodeGenerator extends PlatformCodeGenerator {
 
   /// This generates the mask values for the part of a key code that defines its plane.
   String get _maskConstants {
-    final StringBuffer buffer = StringBuffer();
-    const List<MaskConstant> maskConstants = <MaskConstant>[
-      kValueMask,
-      kUnicodePlane,
-      kAndroidPlane,
-    ];
-    for (final MaskConstant constant in maskConstants) {
+    final buffer = StringBuffer();
+    const maskConstants = <MaskConstant>[kValueMask, kUnicodePlane, kAndroidPlane];
+    for (final constant in maskConstants) {
       buffer.writeln(
         '  public static final long k${constant.upperCamelName} = ${toHex(constant.value, digits: 11)}L;',
       );

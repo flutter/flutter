@@ -189,8 +189,8 @@ mixin SlottedContainerRenderObjectMixin<SlotType, ChildType extends RenderObject
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    final List<DiagnosticsNode> value = <DiagnosticsNode>[];
-    final Map<ChildType, SlotType> childToSlot = Map<ChildType, SlotType>.fromIterables(
+    final value = <DiagnosticsNode>[];
+    final childToSlot = Map<ChildType, SlotType>.fromIterables(
       _slotToChild.values,
       _slotToChild.keys,
     );
@@ -273,8 +273,7 @@ class SlottedRenderObjectElement<SlotType, ChildType extends RenderObject>
   List<SlotType>? _debugPreviousSlots;
 
   void _updateChildren() {
-    final SlottedMultiChildRenderObjectWidgetMixin<SlotType, ChildType>
-    slottedMultiChildRenderObjectWidgetMixin =
+    final slottedMultiChildRenderObjectWidgetMixin =
         widget as SlottedMultiChildRenderObjectWidgetMixin<SlotType, ChildType>;
     assert(() {
       _debugPreviousSlots ??= slottedMultiChildRenderObjectWidgetMixin.slots.toList();

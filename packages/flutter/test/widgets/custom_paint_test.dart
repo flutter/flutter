@@ -41,7 +41,7 @@ class MockPaintingContext extends Fake implements PaintingContext {
 
 void main() {
   testWidgets('Control test for custom painting', (WidgetTester tester) async {
-    final List<String?> log = <String?>[];
+    final log = <String?>[];
     await tester.pumpWidget(
       CustomPaint(
         painter: TestCustomPainter(log: log, name: 'background'),
@@ -59,7 +59,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final GlobalKey target = GlobalKey();
-    final List<String?> log = <String?>[];
+    final log = <String?>[];
     await tester.pumpWidget(
       CustomPaint(
         key: target,
@@ -67,9 +67,8 @@ void main() {
         painter: TestCustomPainter(log: log),
       ),
     );
-    final RenderCustomPaint renderCustom =
-        target.currentContext!.findRenderObject()! as RenderCustomPaint;
-    final MockPaintingContext paintingContext = MockPaintingContext();
+    final renderCustom = target.currentContext!.findRenderObject()! as RenderCustomPaint;
+    final paintingContext = MockPaintingContext();
     final MockCanvas canvas = paintingContext.canvas;
 
     FlutterError getError() {
@@ -167,7 +166,7 @@ void main() {
   testWidgets('Raster cache hints', (WidgetTester tester) async {
     final GlobalKey target = GlobalKey();
 
-    final List<String?> log = <String?>[];
+    final log = <String?>[];
     await tester.pumpWidget(
       CustomPaint(
         key: target,
@@ -175,8 +174,7 @@ void main() {
         painter: TestCustomPainter(log: log),
       ),
     );
-    RenderCustomPaint renderCustom =
-        target.currentContext!.findRenderObject()! as RenderCustomPaint;
+    var renderCustom = target.currentContext!.findRenderObject()! as RenderCustomPaint;
     expect(renderCustom.isComplex, true);
     expect(renderCustom.willChange, false);
 
@@ -198,7 +196,7 @@ void main() {
   });
 
   test('RenderCustomPaint consults preferred size for intrinsics when it has no child', () {
-    final RenderCustomPaint inner = RenderCustomPaint(preferredSize: const Size(20, 30));
+    final inner = RenderCustomPaint(preferredSize: const Size(20, 30));
     expect(inner.getMinIntrinsicWidth(double.infinity), 20);
     expect(inner.getMaxIntrinsicWidth(double.infinity), 20);
     expect(inner.getMinIntrinsicHeight(double.infinity), 30);
@@ -206,7 +204,7 @@ void main() {
   });
 
   test('RenderCustomPaint does not return infinity for its intrinsics', () {
-    final RenderCustomPaint inner = RenderCustomPaint(preferredSize: Size.infinite);
+    final inner = RenderCustomPaint(preferredSize: Size.infinite);
     expect(inner.getMinIntrinsicWidth(double.infinity), 0);
     expect(inner.getMaxIntrinsicWidth(double.infinity), 0);
     expect(inner.getMinIntrinsicHeight(double.infinity), 0);

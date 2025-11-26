@@ -126,10 +126,10 @@ class WebDevFS implements DevFS {
 
   // A flag to indicate whether we have called `setAssetDirectory` on the target device.
   @override
-  var hasSetAssetDirectory = false;
+  bool hasSetAssetDirectory = false;
 
   @override
-  var didUpdateFontManifest = false;
+  bool didUpdateFontManifest = false;
 
   Future<DebugConnection>? _cachedExtensionFuture;
   StreamSubscription<void>? _connectedApps;
@@ -181,7 +181,7 @@ class WebDevFS implements DevFS {
   }
 
   @override
-  var sources = <Uri>[];
+  List<Uri> sources = <Uri>[];
 
   @override
   DateTime? lastCompiled;

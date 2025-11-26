@@ -150,51 +150,51 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
   );
 
   BrowserSuiteFilter? makeBrowserFilter() {
-    final List<String>? browserArgs = argResults!['browser'] as List<String>?;
+    final browserArgs = argResults!['browser'] as List<String>?;
     if (browserArgs == null || browserArgs.isEmpty) {
       return null;
     }
-    final Set<BrowserName> browserNames = Set<BrowserName>.from(
+    final browserNames = Set<BrowserName>.from(
       browserArgs.map((String arg) => BrowserName.values.byName(arg)),
     );
     return BrowserSuiteFilter(allowList: browserNames);
   }
 
   CompilerFilter? makeCompilerFilter() {
-    final List<String>? compilerArgs = argResults!['compiler'] as List<String>?;
+    final compilerArgs = argResults!['compiler'] as List<String>?;
     if (compilerArgs == null || compilerArgs.isEmpty) {
       return null;
     }
-    final Set<Compiler> compilers = Set<Compiler>.from(
+    final compilers = Set<Compiler>.from(
       compilerArgs.map((String arg) => Compiler.values.byName(arg)),
     );
     return CompilerFilter(allowList: compilers);
   }
 
   RendererFilter? makeRendererFilter() {
-    final List<String>? rendererArgs = argResults!['renderer'] as List<String>?;
+    final rendererArgs = argResults!['renderer'] as List<String>?;
     if (rendererArgs == null || rendererArgs.isEmpty) {
       return null;
     }
-    final Set<Renderer> renderers = Set<Renderer>.from(
+    final renderers = Set<Renderer>.from(
       rendererArgs.map((String arg) => Renderer.values.byName(arg)),
     );
     return RendererFilter(allowList: renderers);
   }
 
   CanvasKitVariantFilter? makeCanvasKitVariantFilter() {
-    final List<String>? variantArgs = argResults!['canvaskit-variant'] as List<String>?;
+    final variantArgs = argResults!['canvaskit-variant'] as List<String>?;
     if (variantArgs == null || variantArgs.isEmpty) {
       return null;
     }
-    final Set<CanvasKitVariant> variants = Set<CanvasKitVariant>.from(
+    final variants = Set<CanvasKitVariant>.from(
       variantArgs.map((String arg) => CanvasKitVariant.values.byName(arg)),
     );
     return CanvasKitVariantFilter(allowList: variants);
   }
 
   SuiteNameFilter? makeSuiteNameFilter() {
-    final List<String>? suiteNameArgs = argResults!['suite'] as List<String>?;
+    final suiteNameArgs = argResults!['suite'] as List<String>?;
     if (suiteNameArgs == null || suiteNameArgs.isEmpty) {
       return null;
     }
@@ -209,7 +209,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
   }
 
   BundleNameFilter? makeBundleNameFilter() {
-    final List<String>? bundleNameArgs = argResults!['bundle'] as List<String>?;
+    final bundleNameArgs = argResults!['bundle'] as List<String>?;
     if (bundleNameArgs == null || bundleNameArgs.isEmpty) {
       return null;
     }
@@ -230,12 +230,12 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
     if (tests.isEmpty) {
       return null;
     }
-    final Set<String> bundleNames = <String>{};
-    for (final FilePath testPath in tests) {
+    final bundleNames = <String>{};
+    for (final testPath in tests) {
       if (!io.File(testPath.absolute).existsSync()) {
         throw ToolExit('Test path not found: $testPath');
       }
-      bool bundleFound = false;
+      var bundleFound = false;
       for (final TestBundle bundle in config.testBundles) {
         final String testSetPath = getTestSetDirectory(bundle.testSet).path;
         if (path.isWithin(testSetPath, testPath.absolute)) {
@@ -276,7 +276,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
     }
     final List<SuiteFilter> filters = suiteFilters;
     final List<TestSuite> filteredSuites = config.testSuites.where((TestSuite suite) {
-      for (final SuiteFilter filter in filters) {
+      for (final filter in filters) {
         final SuiteFilterResult result = filter.filterSuite(suite);
         if (!result.isAccepted) {
           if (isVerbose) {
@@ -291,9 +291,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
   }
 
   List<TestBundle> _filterBundlesForSuites(List<TestSuite> suites) {
-    final Set<TestBundle> seenBundles = Set<TestBundle>.from(
-      suites.map((TestSuite suite) => suite.testBundle),
-    );
+    final seenBundles = Set<TestBundle>.from(suites.map((TestSuite suite) => suite.testBundle));
     return config.testBundles.where((TestBundle bundle) => seenBundles.contains(bundle)).toList();
   }
 
@@ -305,7 +303,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
   }
 
   ArtifactSource get artifactSource {
-    final List<ArtifactSource> sources = <ArtifactSource>[];
+    final sources = <ArtifactSource>[];
     if (boolArg('debug')) {
       sources.add(LocalArtifactSource(mode: RuntimeMode.debug));
     }
@@ -330,7 +328,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
     if (sources.length == 1) {
       return sources.first;
     }
-    final realm = luciConfig?.realm;
+    final LuciRealm? realm = luciConfig?.realm;
     if (realm != null) {
       return GcsArtifactSource(realm: realm);
     } else {
@@ -345,11 +343,11 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
     final ArtifactDependencies artifacts = _artifactsForSuites(filteredSuites);
     if (isList || isVerbose) {
       print('Suites:');
-      for (final TestSuite suite in filteredSuites) {
+      for (final suite in filteredSuites) {
         print('  ${suite.name.ansiCyan}');
       }
       print('Bundles:');
-      for (final TestBundle bundle in bundles) {
+      for (final bundle in bundles) {
         print('  ${bundle.name.ansiMagenta}');
       }
       print('Artifacts:');
@@ -381,7 +379,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
     }
 
     final Set<FilePath>? testFiles = targetFiles.isEmpty ? null : Set<FilePath>.from(targetFiles);
-    final Pipeline testPipeline = Pipeline(
+    final testPipeline = Pipeline(
       steps: <PipelineStep>[
         if (isWatchMode) ClearTerminalScreenStep(),
         if (shouldCopyArtifacts) CopyArtifactsStep(artifacts, source: artifactSource),
@@ -424,7 +422,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
     }
 
     if (isWatchMode) {
-      final FilePath dir = FilePath.fromWebUi('');
+      final dir = FilePath.fromWebUi('');
       print('');
       print('Watching ${dir.relativeToCwd}/lib and ${dir.relativeToCwd}/test to re-run tests');
       print('');

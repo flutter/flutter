@@ -12,7 +12,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final Key container = UniqueKey();
-    const String errorText = 'Oh no, there was a crash!!1';
+    const errorText = 'Oh no, there was a crash!!1';
 
     await tester.pumpWidget(
       Container(

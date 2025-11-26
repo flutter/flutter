@@ -188,7 +188,7 @@ const double _kMaxRegularTextScaleFactor = 1.4;
 // Accessibility mode on iOS is determined by the text scale factor that the
 // user has selected.
 bool _isInAccessibilityMode(BuildContext context) {
-  const double defaultFontSize = 14.0;
+  const defaultFontSize = 14.0;
   final double? scaledFontSize = MediaQuery.maybeTextScalerOf(context)?.scale(defaultFontSize);
   return scaledFontSize != null && scaledFontSize > defaultFontSize * _kMaxRegularTextScaleFactor;
 }
@@ -315,7 +315,7 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
       return null;
     }
 
-    const double defaultFontSize = 14.0;
+    const defaultFontSize = 14.0;
     final double effectiveTextScaleFactor =
         MediaQuery.textScalerOf(context).scale(defaultFontSize) / defaultFontSize;
 
@@ -680,7 +680,7 @@ class CupertinoPopupSurface extends StatelessWidget {
   static bool debugIsVibrancePainted = true;
 
   ImageFilter? _buildFilter(Brightness? brightness) {
-    bool isVibrancePainted = true;
+    var isVibrancePainted = true;
     assert(() {
       isVibrancePainted = debugIsVibrancePainted;
       return true;
@@ -935,7 +935,7 @@ class _TargetSelectionGestureRecognizer extends GestureRecognizer {
 
     // A slide target might nest other targets, therefore multiple targets might
     // be found.
-    final List<_SlideTarget> foundTargets = <_SlideTarget>[];
+    final foundTargets = <_SlideTarget>[];
     for (final HitTestEntry entry in result.path) {
       if (entry.target case final RenderMetaData target) {
         if (target.metaData is _SlideTarget) {
@@ -955,7 +955,7 @@ class _TargetSelectionGestureRecognizer extends GestureRecognizer {
       _currentTargets
         ..clear()
         ..addAll(foundTargets);
-      bool enabled = true;
+      var enabled = true;
       for (final _SlideTarget target in _currentTargets) {
         enabled = target.didEnter(fromPointerDown: fromPointerDown, innerEnabled: enabled);
       }
@@ -1004,14 +1004,14 @@ class _ActionSheetGestureDetector extends StatelessWidget {
 
   HitTestResult _hitTest(BuildContext context, Offset globalPosition) {
     final int viewId = View.of(context).viewId;
-    final HitTestResult result = HitTestResult();
+    final result = HitTestResult();
     WidgetsBinding.instance.hitTestInView(result, globalPosition, viewId);
     return result;
   }
 
   @override
   Widget build(BuildContext context) {
-    final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
+    final gestures = <Type, GestureRecognizerFactory>{};
     gestures[_TargetSelectionGestureRecognizer] =
         GestureRecognizerFactoryWithHandlers<_TargetSelectionGestureRecognizer>(
           () => _TargetSelectionGestureRecognizer(
@@ -1266,9 +1266,9 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
 
     // The x for lerp is the top view padding, while the y is ratio of
     // action sheet padding versus top view padding.
-    const double viewPaddingData1 = 47.0;
-    const double paddingRatioData1 = 1.0;
-    const double viewPaddingData2 = 59.0;
+    const viewPaddingData1 = 47.0;
+    const paddingRatioData1 = 1.0;
+    const viewPaddingData2 = 59.0;
     const double paddingRatioData2 = 54.0 / 59.0;
 
     final double currentViewPadding = MediaQuery.viewPaddingOf(context).top;
@@ -1304,7 +1304,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
      *  ╰─────────────────╯
      */
 
-    final List<Widget> children = <Widget>[
+    final children = <Widget>[
       Flexible(
         child: ClipRSuperellipse(
           borderRadius: const BorderRadius.all(Radius.circular(12.0)),
@@ -1561,7 +1561,7 @@ class _ActionSheetActionContent extends StatelessWidget {
   Widget build(BuildContext context) {
     // The context scale factor is derived from the current body size and the
     // standard body size in "large".
-    const double higLargeBodySize = 17.0;
+    const higLargeBodySize = 17.0;
     final double contextBodySize = MediaQuery.textScalerOf(context).scale(higLargeBodySize);
     final double contextScaleFactor = contextBodySize / higLargeBodySize;
     final double fontSize = _buttonFontSize(contextBodySize);
@@ -1683,7 +1683,7 @@ class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackgrou
         child: widget.child,
       );
     } else {
-      const BorderRadius borderRadius = BorderRadius.all(Radius.circular(_kCornerRadius));
+      const borderRadius = BorderRadius.all(Radius.circular(_kCornerRadius));
 
       child = ClipRSuperellipse(
         borderRadius: borderRadius,
@@ -1844,8 +1844,8 @@ class _ActionSheetActionSection extends StatelessWidget {
     if (actions == null || actions!.isEmpty) {
       return const LimitedBox(maxWidth: 0, child: SizedBox(width: double.infinity, height: 0));
     }
-    final List<Widget> column = <Widget>[];
-    for (int actionIndex = 0; actionIndex < actions!.length; actionIndex += 1) {
+    final column = <Widget>[];
+    for (var actionIndex = 0; actionIndex < actions!.length; actionIndex += 1) {
       if (actionIndex != 0) {
         column.add(
           _Divider(
@@ -2009,7 +2009,7 @@ class _CupertinoAlertContentSection extends StatelessWidget {
       return SingleChildScrollView(controller: scrollController, child: const SizedBox.shrink());
     }
 
-    final List<Widget> titleContentGroup = <Widget>[
+    final titleContentGroup = <Widget>[
       if (title != null)
         Padding(
           padding: titlePadding!,
@@ -2075,8 +2075,8 @@ class _CupertinoAlertActionSection extends StatelessWidget {
     final Color dialogPressedColor = CupertinoDynamicColor.resolve(_kDialogPressedColor, context);
     final Color dividerColor = CupertinoDynamicColor.resolve(CupertinoColors.separator, context);
 
-    final List<Widget> column = <Widget>[];
-    for (int actionIndex = 0; actionIndex < actions.length; actionIndex += 1) {
+    final column = <Widget>[];
+    for (var actionIndex = 0; actionIndex < actions.length; actionIndex += 1) {
       if (actionIndex != 0) {
         column.add(
           _Divider(
@@ -2515,7 +2515,7 @@ class _RenderAlertDialogActionsLayout extends RenderFlex {
     final double height = getMinIntrinsicHeight(overallWidth);
     size = Size(overallWidth, height);
 
-    final bool ltr = textDirection == TextDirection.ltr;
+    final ltr = textDirection == TextDirection.ltr;
     RenderBox slot = firstChild!;
     double x = ltr ? 0 : (overallWidth - slotWidth);
     while (true) {

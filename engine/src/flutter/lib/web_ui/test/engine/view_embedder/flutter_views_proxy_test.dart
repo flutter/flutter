@@ -18,8 +18,8 @@ void main() {
 Future<void> doTests() async {
   group('FlutterViewManagerProxy', () {
     final EnginePlatformDispatcher platformDispatcher = EnginePlatformDispatcher.instance;
-    final FlutterViewManager viewManager = FlutterViewManager(platformDispatcher);
-    final FlutterViewManagerProxy views = FlutterViewManagerProxy(viewManager: viewManager);
+    final viewManager = FlutterViewManager(platformDispatcher);
+    final views = FlutterViewManagerProxy(viewManager: viewManager);
 
     late EngineFlutterView view;
     late int viewId;
@@ -55,8 +55,8 @@ Future<void> doTests() async {
       });
 
       test('can retrieve hostElement for an implicit view with default host element', () {
-        final view = EngineFlutterView.implicit(platformDispatcher, null);
-        final viewId = view.viewId;
+        final EngineFlutterWindow view = EngineFlutterView.implicit(platformDispatcher, null);
+        final int viewId = view.viewId;
         viewManager.registerView(view);
         addTearDown(() => viewManager.unregisterView(viewId));
 
@@ -66,8 +66,11 @@ Future<void> doTests() async {
       });
 
       test('can retrieve hostElement for an implicit view with custom host element', () {
-        final view = EngineFlutterView.implicit(platformDispatcher, hostElement);
-        final viewId = view.viewId;
+        final EngineFlutterWindow view = EngineFlutterView.implicit(
+          platformDispatcher,
+          hostElement,
+        );
+        final int viewId = view.viewId;
         viewManager.registerView(view);
         addTearDown(() => viewManager.unregisterView(viewId));
 
@@ -95,7 +98,7 @@ Future<void> doTests() async {
           ),
         );
 
-        final InitialData? element = views.getInitialData(viewId) as InitialData?;
+        final element = views.getInitialData(viewId) as InitialData?;
 
         expect(element, isNotNull);
         expect(element!.someInt, 42);

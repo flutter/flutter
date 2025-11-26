@@ -9,8 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Radio group control test', (WidgetTester tester) async {
-    final UniqueKey key0 = UniqueKey();
-    final UniqueKey key1 = UniqueKey();
+    final key0 = UniqueKey();
+    final key1 = UniqueKey();
 
     await tester.pumpWidget(
       Material(
@@ -57,8 +57,8 @@ void main() {
   });
 
   testWidgets('Radio group can have disabled radio', (WidgetTester tester) async {
-    final UniqueKey key0 = UniqueKey();
-    final UniqueKey key1 = UniqueKey();
+    final key0 = UniqueKey();
+    final key1 = UniqueKey();
 
     await tester.pumpWidget(
       Material(
@@ -116,10 +116,10 @@ void main() {
   });
 
   testWidgets('Radio group can use arrow key', (WidgetTester tester) async {
-    final UniqueKey key0 = UniqueKey();
-    final UniqueKey key1 = UniqueKey();
-    final UniqueKey key2 = UniqueKey();
-    final FocusNode focusNode = FocusNode();
+    final key0 = UniqueKey();
+    final key1 = UniqueKey();
+    final key2 = UniqueKey();
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     await tester.pumpWidget(
       MaterialApp(
@@ -172,10 +172,10 @@ void main() {
   });
 
   testWidgets('Radio group arrow key skips disabled radio', (WidgetTester tester) async {
-    final UniqueKey key0 = UniqueKey();
-    final UniqueKey key1 = UniqueKey();
-    final UniqueKey key2 = UniqueKey();
-    final FocusNode focusNode = FocusNode();
+    final key0 = UniqueKey();
+    final key1 = UniqueKey();
+    final key2 = UniqueKey();
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     await tester.pumpWidget(
       MaterialApp(
@@ -227,16 +227,16 @@ void main() {
   });
 
   testWidgets('Radio group can tab in and out', (WidgetTester tester) async {
-    final UniqueKey key0 = UniqueKey();
-    final UniqueKey key1 = UniqueKey();
-    final UniqueKey key2 = UniqueKey();
-    final FocusNode radio0 = FocusNode();
+    final key0 = UniqueKey();
+    final key1 = UniqueKey();
+    final key2 = UniqueKey();
+    final radio0 = FocusNode();
     addTearDown(radio0.dispose);
-    final FocusNode radio1 = FocusNode();
+    final radio1 = FocusNode();
     addTearDown(radio1.dispose);
-    final FocusNode textFieldBefore = FocusNode();
+    final textFieldBefore = FocusNode();
     addTearDown(textFieldBefore.dispose);
-    final FocusNode textFieldAfter = FocusNode();
+    final textFieldAfter = FocusNode();
     addTearDown(textFieldAfter.dispose);
     await tester.pumpWidget(
       MaterialApp(
@@ -302,7 +302,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/175258.
   testWidgets('Radio group throws on multiple selection', (WidgetTester tester) async {
-    final UniqueKey key1 = UniqueKey();
+    final key1 = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -387,8 +387,8 @@ void main() {
   testWidgets('Radio group does not intercept key events when no radio is focused', (
     WidgetTester tester,
   ) async {
-    final List<String> log = <String>[];
-    late final Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{
+    final log = <String>[];
+    late final shortcuts = <ShortcutActivator, Intent>{
       const SingleActivator(LogicalKeyboardKey.arrowLeft): VoidCallbackIntent(() => log.add('←')),
       const SingleActivator(LogicalKeyboardKey.arrowRight): VoidCallbackIntent(() => log.add('→')),
       const SingleActivator(LogicalKeyboardKey.arrowDown): VoidCallbackIntent(() => log.add('↓')),
@@ -396,9 +396,9 @@ void main() {
       const SingleActivator(LogicalKeyboardKey.space): VoidCallbackIntent(() => log.add('_')),
     };
 
-    final FocusNode firstRadioFocusNode = FocusNode();
+    final firstRadioFocusNode = FocusNode();
     addTearDown(firstRadioFocusNode.dispose);
-    final FocusNode textFieldFocusNode = FocusNode();
+    final textFieldFocusNode = FocusNode();
     addTearDown(textFieldFocusNode.dispose);
 
     await tester.pumpWidget(

@@ -77,7 +77,7 @@ class AndroidRunOutputTest extends RunOutputTask {
   @override
   Future<void> prepare(String deviceId) async {
     // Uninstall if the app is already installed on the device to get to a clean state.
-    final List<String> stderr = <String>[];
+    final stderr = <String>[];
     print('uninstalling...');
     final Process uninstall = await startFlutter(
       'install',
@@ -107,8 +107,8 @@ class AndroidRunOutputTest extends RunOutputTask {
 
   @override
   TaskResult verify(List<String> stdout, List<String> stderr) {
-    final String gradleTask = release ? 'assembleRelease' : 'assembleDebug';
-    final String apk = release ? 'app-release.apk' : 'app-debug.apk';
+    final gradleTask = release ? 'assembleRelease' : 'assembleDebug';
+    final apk = release ? 'app-release.apk' : 'app-debug.apk';
 
     _findNextMatcherInList(
       stdout,
@@ -177,7 +177,7 @@ class WindowsRunOutputTest extends DesktopRunOutputTest {
   void verifyBuildOutput(List<String> stdout) {
     _findNextMatcherInList(stdout, _buildOutput.hasMatch, 'Building Windows application...');
 
-    final String buildMode = release ? 'Release' : 'Debug';
+    final buildMode = release ? 'Release' : 'Debug';
     _findNextMatcherInList(stdout, (String line) {
       if (!_builtOutput.hasMatch(line) || !line.contains(buildMode)) {
         return false;
@@ -254,13 +254,13 @@ abstract class RunOutputTask {
       await device.unlock();
       final String deviceId = device.deviceId;
 
-      final Completer<void> ready = Completer<void>();
-      final List<String> stdout = <String>[];
-      final List<String> stderr = <String>[];
+      final ready = Completer<void>();
+      final stdout = <String>[];
+      final stderr = <String>[];
 
       await prepare(deviceId);
 
-      final List<String> options = <String>[testTarget, '-d', deviceId, if (release) '--release'];
+      final options = <String>[testTarget, '-d', deviceId, if (release) '--release'];
 
       final Process run = await startFlutter('run', options: options, isBot: false);
 
@@ -297,7 +297,7 @@ abstract class RunOutputTask {
         throw 'flutter run ${release ? '--release' : ''} had unexpected output on standard error.';
       }
 
-      final List<String> engineLogs = List<String>.from(stdout.where(_engineLogRegex.hasMatch));
+      final engineLogs = List<String>.from(stdout.where(_engineLogRegex.hasMatch));
       if (engineLogs.isNotEmpty) {
         throw 'flutter run had unexpected Flutter engine logs $engineLogs';
       }
@@ -323,7 +323,7 @@ abstract class RunOutputTask {
     bool Function(String testLine) matcher,
     String errorMessageExpectedLine,
   ) {
-    final List<String> copyOfListForErrorMessage = List<String>.from(list);
+    final copyOfListForErrorMessage = List<String>.from(list);
 
     while (list.isNotEmpty) {
       final String nextLine = list.first;

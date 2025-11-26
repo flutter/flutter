@@ -494,9 +494,9 @@ void main() {
 }
 
 class FakeCache extends Fake implements Cache {
-  var isUpToDateValue = false;
-  var clearedStampFiles = false;
-  var locked = false;
+  bool isUpToDateValue = false;
+  bool clearedStampFiles = false;
+  bool locked = false;
   Set<DevelopmentArtifact>? artifacts;
 
   @override
@@ -526,5 +526,5 @@ class FakeCache extends Fake implements Cache {
   Set<String>? platformOverrideArtifacts;
 
   @override
-  var includeAllPlatforms = false;
+  bool includeAllPlatforms = false;
 }

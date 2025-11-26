@@ -2218,7 +2218,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
 
   @override
   SemanticsUpdate build() {
-    final _NativeSemanticsUpdate semanticsUpdate = _NativeSemanticsUpdate._();
+    final semanticsUpdate = _NativeSemanticsUpdate._();
     _build(semanticsUpdate);
     return semanticsUpdate;
   }

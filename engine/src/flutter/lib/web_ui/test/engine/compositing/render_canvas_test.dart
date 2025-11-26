@@ -32,7 +32,7 @@ void testMain() {
 
     // Regression test for https://github.com/flutter/flutter/issues/75286
     test('updates canvas logical size when device-pixel ratio changes', () async {
-      final RenderCanvas canvas = RenderCanvas();
+      final canvas = RenderCanvas();
       canvas.render(await newBitmap(10, 16));
 
       expect(canvas.canvasElement.width, 10);
@@ -63,9 +63,9 @@ void testMain() {
       final EngineFlutterWindow implicitView = EnginePlatformDispatcher.instance.implicitView!;
       implicitView.debugPhysicalSizeOverride = const ui.Size(199.999999, 200.000001);
 
-      final ui.SceneBuilder sceneBuilder = ui.SceneBuilder();
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
-      final ui.Canvas canvas = ui.Canvas(recorder, ui.Rect.largest);
+      final sceneBuilder = ui.SceneBuilder();
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, ui.Rect.largest);
       canvas.drawPaint(ui.Paint()..color = const ui.Color(0xff00ff00));
       final ui.Picture picture = recorder.endRecording();
       sceneBuilder.addPicture(ui.Offset.zero, picture);

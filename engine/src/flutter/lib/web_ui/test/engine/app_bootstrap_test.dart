@@ -14,9 +14,9 @@ void main() {
 }
 
 void testMain() {
-  int callOrder = 1;
-  int initCalled = 0;
-  int runCalled = 0;
+  var callOrder = 1;
+  var initCalled = 0;
+  var runCalled = 0;
 
   setUp(() {
     callOrder = 1;
@@ -36,7 +36,7 @@ void testMain() {
   }
 
   test('autoStart() immediately calls init and run', () async {
-    final AppBootstrap bootstrap = AppBootstrap(initializeEngine: mockInit, runApp: mockRunApp);
+    final bootstrap = AppBootstrap(initializeEngine: mockInit, runApp: mockRunApp);
 
     await bootstrap.autoStart();
 
@@ -45,7 +45,7 @@ void testMain() {
   });
 
   test('engineInitializer autoStart() does the same as Dart autoStart()', () async {
-    final AppBootstrap bootstrap = AppBootstrap(initializeEngine: mockInit, runApp: mockRunApp);
+    final bootstrap = AppBootstrap(initializeEngine: mockInit, runApp: mockRunApp);
 
     final FlutterEngineInitializer engineInitializer = bootstrap.prepareEngineInitializer();
 
@@ -58,7 +58,7 @@ void testMain() {
   });
 
   test('engineInitializer initEngine() calls init and returns an appRunner', () async {
-    final AppBootstrap bootstrap = AppBootstrap(initializeEngine: mockInit, runApp: mockRunApp);
+    final bootstrap = AppBootstrap(initializeEngine: mockInit, runApp: mockRunApp);
 
     final FlutterEngineInitializer engineInitializer = bootstrap.prepareEngineInitializer();
 
@@ -69,7 +69,7 @@ void testMain() {
   });
 
   test('appRunner runApp() calls run and returns a FlutterApp', () async {
-    final AppBootstrap bootstrap = AppBootstrap(initializeEngine: mockInit, runApp: mockRunApp);
+    final bootstrap = AppBootstrap(initializeEngine: mockInit, runApp: mockRunApp);
 
     final FlutterEngineInitializer engineInitializer = bootstrap.prepareEngineInitializer();
 
@@ -82,7 +82,7 @@ void testMain() {
 
   group('FlutterApp', () {
     test('addView/removeView respectively adds/removes view', () async {
-      final AppBootstrap bootstrap = AppBootstrap(initializeEngine: mockInit, runApp: mockRunApp);
+      final bootstrap = AppBootstrap(initializeEngine: mockInit, runApp: mockRunApp);
 
       final FlutterEngineInitializer engineInitializer = bootstrap.prepareEngineInitializer();
 

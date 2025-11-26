@@ -9,8 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Nested TickerMode cannot turn tickers back on', (WidgetTester tester) async {
-    int outerTickCount = 0;
-    int innerTickCount = 0;
+    var outerTickCount = 0;
+    var innerTickCount = 0;
 
     Widget nestedTickerModes({required bool innerEnabled, required bool outerEnabled}) {
       return Directionality(
@@ -422,7 +422,7 @@ void main() {
 
   testWidgets('TickerMode.getValuesNotifier notifies listeners', (WidgetTester tester) async {
     late ValueListenable<TickerModeData> notifier;
-    final List<TickerModeData> notifiedValues = <TickerModeData>[];
+    final notifiedValues = <TickerModeData>[];
 
     await tester.pumpWidget(
       TickerMode(
@@ -464,8 +464,8 @@ void main() {
   test('TickerModeData equality works correctly', () {
     const TickerModeData data1 = TickerModeData.fallback;
     const TickerModeData data2 = TickerModeData.fallback;
-    const TickerModeData data3 = TickerModeData(enabled: false, forceFrames: false);
-    const TickerModeData data4 = TickerModeData(enabled: true, forceFrames: true);
+    const data3 = TickerModeData(enabled: false, forceFrames: false);
+    const data4 = TickerModeData(enabled: true, forceFrames: true);
 
     expect(data1, equals(data2));
     expect(data1, isNot(equals(data3)));

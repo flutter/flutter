@@ -340,7 +340,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 
 class FakeDeviceLogReader implements DeviceLogReader {
   final logLinesController = StreamController<String>();
-  var disposeCalled = false;
+  bool disposeCalled = false;
 
   @override
   Future<void> provideVmService(FlutterVmService? connectedVmService) async {}

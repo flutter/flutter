@@ -246,7 +246,7 @@ String generateNumberFormattingLogic(Message message, LocaleInfo locale) {
 }
 
 /// List of possible cases for plurals defined the ICU messageFormat syntax.
-var pluralCases = <String, String>{
+Map<String, String> pluralCases = <String, String>{
   '0': 'zero',
   '1': 'one',
   '2': 'two',
@@ -666,14 +666,14 @@ class LocalizationsGenerator {
   final List<LocaleInfo> preferredSupportedLocales;
 
   // Whether we want to use escaping for ICU messages.
-  var useEscaping = false;
+  bool useEscaping = false;
 
   /// Whether any errors were caught. This is set after encountering any errors
   /// from calling [_generateMethod].
-  var hadErrors = false;
+  bool hadErrors = false;
 
   /// Whether to use relaxed syntax.
-  var useRelaxedSyntax = false;
+  bool useRelaxedSyntax = false;
 
   /// The list of all arb path strings in [inputDirectory].
   List<String> get arbPathStrings {

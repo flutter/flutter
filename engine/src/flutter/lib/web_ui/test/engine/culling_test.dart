@@ -18,27 +18,22 @@ void testMain() {
 
   test('Picture is culled when outside of the viewport', () {
     // Create a picture that is outside the viewport.
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = ui.Canvas(recorder);
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder);
     canvas.drawRect(const ui.Rect.fromLTWH(200, 200, 10, 10), ui.Paint());
     final ui.Picture picture = recorder.endRecording();
 
-    final PictureLayer pictureLayer = PictureLayer(
-      picture as LayerPicture,
-      ui.Offset.zero,
-      false,
-      false,
-    );
+    final pictureLayer = PictureLayer(picture as LayerPicture, ui.Offset.zero, false, false);
 
-    final RootLayer rootLayer = RootLayer();
+    final rootLayer = RootLayer();
     rootLayer.children.add(pictureLayer);
     final PlatformViewEmbedder embedder = createPlatformViewEmbedder();
 
     // Preroll and measure the scene. The viewport is 100x100.
-    final PrerollVisitor prerollVisitor = PrerollVisitor(embedder);
+    final prerollVisitor = PrerollVisitor(embedder);
     rootLayer.accept(prerollVisitor);
 
-    final MeasureVisitor measureVisitor = MeasureVisitor(const BitmapSize(100, 100), embedder);
+    final measureVisitor = MeasureVisitor(const BitmapSize(100, 100), embedder);
     rootLayer.accept(measureVisitor);
 
     embedder.optimizeComposition();
@@ -49,33 +44,33 @@ void testMain() {
 
   test('Picture is culled when clipped out', () {
     // Create a picture.
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = ui.Canvas(recorder);
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder);
     canvas.drawRect(const ui.Rect.fromLTWH(0, 0, 10, 10), ui.Paint());
     final ui.Picture picture = recorder.endRecording();
 
-    final PictureLayer pictureLayer = PictureLayer(
+    final pictureLayer = PictureLayer(
       picture as LayerPicture,
       const ui.Offset(50, 50), // Position the picture inside the clip.
       false,
       false,
     );
 
-    final ClipRectEngineLayer clipRectLayer = ClipRectEngineLayer(
+    final clipRectLayer = ClipRectEngineLayer(
       const ui.Rect.fromLTWH(0, 0, 20, 20), // Clip rect is at the top-left.
       ui.Clip.hardEdge,
     );
     clipRectLayer.children.add(pictureLayer);
 
-    final RootLayer rootLayer = RootLayer();
+    final rootLayer = RootLayer();
     rootLayer.children.add(clipRectLayer);
     final PlatformViewEmbedder embedder = createPlatformViewEmbedder();
 
     // Preroll and measure the scene. The viewport is 100x100.
-    final PrerollVisitor prerollVisitor = PrerollVisitor(embedder);
+    final prerollVisitor = PrerollVisitor(embedder);
     rootLayer.accept(prerollVisitor);
 
-    final MeasureVisitor measureVisitor = MeasureVisitor(const BitmapSize(100, 100), embedder);
+    final measureVisitor = MeasureVisitor(const BitmapSize(100, 100), embedder);
     rootLayer.accept(measureVisitor);
 
     embedder.optimizeComposition();
@@ -86,33 +81,33 @@ void testMain() {
 
   test('Picture is not culled when inside a clip', () {
     // Create a picture.
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = ui.Canvas(recorder);
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder);
     canvas.drawRect(const ui.Rect.fromLTWH(0, 0, 10, 10), ui.Paint());
     final ui.Picture picture = recorder.endRecording();
 
-    final PictureLayer pictureLayer = PictureLayer(
+    final pictureLayer = PictureLayer(
       picture as LayerPicture,
       const ui.Offset(5, 5), // Position the picture inside the clip.
       false,
       false,
     );
 
-    final ClipRectEngineLayer clipRectLayer = ClipRectEngineLayer(
+    final clipRectLayer = ClipRectEngineLayer(
       const ui.Rect.fromLTWH(0, 0, 20, 20), // Clip rect is at the top-left.
       ui.Clip.hardEdge,
     );
     clipRectLayer.children.add(pictureLayer);
 
-    final RootLayer rootLayer = RootLayer();
+    final rootLayer = RootLayer();
     rootLayer.children.add(clipRectLayer);
     final PlatformViewEmbedder embedder = createPlatformViewEmbedder();
 
     // Preroll and measure the scene. The viewport is 100x100.
-    final PrerollVisitor prerollVisitor = PrerollVisitor(embedder);
+    final prerollVisitor = PrerollVisitor(embedder);
     rootLayer.accept(prerollVisitor);
 
-    final MeasureVisitor measureVisitor = MeasureVisitor(const BitmapSize(100, 100), embedder);
+    final measureVisitor = MeasureVisitor(const BitmapSize(100, 100), embedder);
     rootLayer.accept(measureVisitor);
 
     embedder.optimizeComposition();
@@ -123,12 +118,12 @@ void testMain() {
 
   test('Picture is not culled when it becomes visible again', () {
     // Create a picture.
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = ui.Canvas(recorder);
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder);
     canvas.drawRect(const ui.Rect.fromLTWH(0, 0, 10, 10), ui.Paint());
     final ui.Picture picture = recorder.endRecording();
 
-    final PictureLayer pictureLayer = PictureLayer(
+    final pictureLayer = PictureLayer(
       picture as LayerPicture,
       const ui.Offset(25, 25), // Position the picture.
       false,
@@ -136,16 +131,16 @@ void testMain() {
     );
 
     void renderAndCheck(ui.Rect clipRect, {required bool isComposited}) {
-      final ClipRectEngineLayer clipRectLayer = ClipRectEngineLayer(clipRect, ui.Clip.hardEdge);
+      final clipRectLayer = ClipRectEngineLayer(clipRect, ui.Clip.hardEdge);
       // IMPORTANT: we are reusing the same pictureLayer instance.
       clipRectLayer.children.add(pictureLayer);
-      final RootLayer rootLayer = RootLayer();
+      final rootLayer = RootLayer();
       rootLayer.children.add(clipRectLayer);
       final PlatformViewEmbedder embedder = createPlatformViewEmbedder();
 
-      final PrerollVisitor prerollVisitor = PrerollVisitor(embedder);
+      final prerollVisitor = PrerollVisitor(embedder);
       rootLayer.accept(prerollVisitor);
-      final MeasureVisitor measureVisitor = MeasureVisitor(const BitmapSize(100, 100), embedder);
+      final measureVisitor = MeasureVisitor(const BitmapSize(100, 100), embedder);
       rootLayer.accept(measureVisitor);
 
       embedder.optimizeComposition();

@@ -258,7 +258,7 @@ abstract class Repository {
     bool force = false,
     bool dryRun = false,
   }) async {
-    final List<String> args = <String>['push', if (force) '--force', remote, '$fromRef:$toRef'];
+    final args = <String>['push', if (force) '--force', remote, '$fromRef:$toRef'];
     final String command = <String>['git', ...args].join(' ');
     if (dryRun) {
       stdio.printStatus('About to execute command: `$command`');
@@ -299,18 +299,18 @@ abstract class Repository {
       }
       authorArg = '--author="$author"';
     }
-    final List<String> commitCmd = <String>['commit', '--message', message, ?authorArg];
+    final commitCmd = <String>['commit', '--message', message, ?authorArg];
     stdio.printTrace('Executing git $commitCmd...');
     final io.ProcessResult commitResult = await git.run(
       commitCmd,
       'commit changes',
       workingDirectory: (await checkoutDirectory).path,
     );
-    final String stdout = commitResult.stdout as String;
+    final stdout = commitResult.stdout as String;
     if (stdout.isNotEmpty) {
       stdio.printTrace(stdout);
     }
-    final String stderr = commitResult.stderr as String;
+    final stderr = commitResult.stderr as String;
     if (stderr.isNotEmpty) {
       stdio.printTrace(stderr);
     }

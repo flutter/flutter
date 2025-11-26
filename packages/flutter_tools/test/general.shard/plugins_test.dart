@@ -2651,7 +2651,7 @@ flutter:
 
 class FakeFlutterManifest extends Fake implements FlutterManifest {
   @override
-  late var dependencies = <String>{};
+  late Set<String> dependencies = <String>{};
   @override
   late String appName;
   @override
@@ -2665,7 +2665,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 
 class FakeFlutterProject extends Fake implements FlutterProject {
   @override
-  var isModule = false;
+  bool isModule = false;
 
   @override
   late FlutterManifest manifest;
@@ -2700,9 +2700,9 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 
 class FakeMacOSProject extends Fake implements MacOSProject {
   @override
-  var pluginConfigKey = 'macos';
+  String pluginConfigKey = 'macos';
 
-  var exists = false;
+  bool exists = false;
 
   @override
   late File podfile;
@@ -2711,7 +2711,7 @@ class FakeMacOSProject extends Fake implements MacOSProject {
   late File podManifestLock;
 
   @override
-  var usesSwiftPackageManager = false;
+  bool usesSwiftPackageManager = false;
 
   @override
   late Directory managedDirectory;
@@ -2722,9 +2722,9 @@ class FakeMacOSProject extends Fake implements MacOSProject {
 
 class FakeIosProject extends Fake implements IosProject {
   @override
-  var pluginConfigKey = 'ios';
+  String pluginConfigKey = 'ios';
 
-  var testExists = false;
+  bool testExists = false;
 
   @override
   bool existsSync() => testExists;
@@ -2749,14 +2749,14 @@ class FakeIosProject extends Fake implements IosProject {
   late File podManifestLock;
 
   @override
-  var usesSwiftPackageManager = false;
+  bool usesSwiftPackageManager = false;
 }
 
 class FakeAndroidProject extends Fake implements AndroidProject {
   @override
-  var pluginConfigKey = 'android';
+  String pluginConfigKey = 'android';
 
-  var exists = false;
+  bool exists = false;
 
   @override
   late Directory pluginRegistrantHost;
@@ -2796,12 +2796,12 @@ class FakeAndroidProject extends Fake implements AndroidProject {
 
 class FakeWebProject extends Fake implements WebProject {
   @override
-  var pluginConfigKey = 'web';
+  String pluginConfigKey = 'web';
 
   @override
   late Directory libDirectory;
 
-  var exists = false;
+  bool exists = false;
 
   @override
   bool existsSync() => exists;
@@ -2809,7 +2809,7 @@ class FakeWebProject extends Fake implements WebProject {
 
 class FakeWindowsProject extends Fake implements WindowsProject {
   @override
-  var pluginConfigKey = 'windows';
+  String pluginConfigKey = 'windows';
 
   @override
   late Directory managedDirectory;
@@ -2825,7 +2825,7 @@ class FakeWindowsProject extends Fake implements WindowsProject {
 
   @override
   late File generatedPluginCmakeFile;
-  var exists = false;
+  bool exists = false;
 
   @override
   bool existsSync() => exists;
@@ -2833,7 +2833,7 @@ class FakeWindowsProject extends Fake implements WindowsProject {
 
 class FakeLinuxProject extends Fake implements LinuxProject {
   @override
-  var pluginConfigKey = 'linux';
+  String pluginConfigKey = 'linux';
 
   @override
   late Directory managedDirectory;
@@ -2849,7 +2849,7 @@ class FakeLinuxProject extends Fake implements LinuxProject {
 
   @override
   late File generatedPluginCmakeFile;
-  var exists = false;
+  bool exists = false;
 
   @override
   bool existsSync() => exists;
@@ -2872,7 +2872,7 @@ class FakeSystemClock extends Fake implements SystemClock {
 }
 
 class FakeDarwinDependencyManagement extends Fake implements DarwinDependencyManagement {
-  var setupPlatforms = <FlutterDarwinPlatform>[];
+  List<FlutterDarwinPlatform> setupPlatforms = <FlutterDarwinPlatform>[];
 
   @override
   Future<void> setUp({required FlutterDarwinPlatform platform}) async {

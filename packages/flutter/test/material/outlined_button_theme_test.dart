@@ -15,14 +15,14 @@ void main() {
 
   test('OutlinedButtonThemeData lerp special cases', () {
     expect(OutlinedButtonThemeData.lerp(null, null, 0), null);
-    const OutlinedButtonThemeData data = OutlinedButtonThemeData();
+    const data = OutlinedButtonThemeData();
     expect(identical(OutlinedButtonThemeData.lerp(data, data, 0.5), data), true);
   });
 
   testWidgets('Material3: Passing no OutlinedButtonTheme returns defaults', (
     WidgetTester tester,
   ) async {
-    const ColorScheme colorScheme = ColorScheme.light();
+    const colorScheme = ColorScheme.light();
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.from(colorScheme: colorScheme),
@@ -47,7 +47,7 @@ void main() {
     expect(material.shadowColor, Colors.transparent);
 
     expect(material.shape, isInstanceOf<StadiumBorder>());
-    final StadiumBorder materialShape = material.shape! as StadiumBorder;
+    final materialShape = material.shape! as StadiumBorder;
     expect(materialShape.side, BorderSide(color: colorScheme.outline));
 
     expect(material.textStyle!.color, colorScheme.primary);
@@ -64,7 +64,7 @@ void main() {
   testWidgets('Material2: Passing no OutlinedButtonTheme returns defaults', (
     WidgetTester tester,
   ) async {
-    const ColorScheme colorScheme = ColorScheme.light();
+    const colorScheme = ColorScheme.light();
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.from(useMaterial3: false, colorScheme: colorScheme),
@@ -89,7 +89,7 @@ void main() {
     expect(material.shadowColor, Colors.black);
 
     expect(material.shape, isInstanceOf<RoundedRectangleBorder>());
-    final RoundedRectangleBorder materialShape = material.shape! as RoundedRectangleBorder;
+    final materialShape = material.shape! as RoundedRectangleBorder;
     expect(materialShape.side, BorderSide(color: colorScheme.onSurface.withOpacity(0.12)));
     expect(materialShape.borderRadius, const BorderRadius.all(Radius.circular(4.0)));
 
@@ -105,15 +105,15 @@ void main() {
   });
 
   group('[Theme, TextTheme, OutlinedButton style overrides]', () {
-    const Color foregroundColor = Color(0xff000001);
-    const Color backgroundColor = Color(0xff000002);
-    const Color disabledColor = Color(0xff000003);
-    const Color shadowColor = Color(0xff000004);
+    const foregroundColor = Color(0xff000001);
+    const backgroundColor = Color(0xff000002);
+    const disabledColor = Color(0xff000003);
+    const shadowColor = Color(0xff000004);
     const double elevation = 3;
-    const TextStyle textStyle = TextStyle(fontSize: 12.0);
-    const EdgeInsets padding = EdgeInsets.all(3);
-    const Size minimumSize = Size(200, 200);
-    const BorderSide side = BorderSide(color: Colors.green, width: 2);
+    const textStyle = TextStyle(fontSize: 12.0);
+    const padding = EdgeInsets.all(3);
+    const minimumSize = Size(200, 200);
+    const side = BorderSide(color: Colors.green, width: 2);
     const OutlinedBorder shape = RoundedRectangleBorder(
       side: side,
       borderRadius: BorderRadius.all(Radius.circular(2)),
@@ -121,8 +121,8 @@ void main() {
     const MouseCursor enabledMouseCursor = SystemMouseCursors.text;
     const MouseCursor disabledMouseCursor = SystemMouseCursors.grab;
     const MaterialTapTargetSize tapTargetSize = MaterialTapTargetSize.shrinkWrap;
-    const Duration animationDuration = Duration(milliseconds: 25);
-    const bool enableFeedback = false;
+    const animationDuration = Duration(milliseconds: 25);
+    const enableFeedback = false;
     const AlignmentGeometry alignment = Alignment.centerLeft;
 
     final ButtonStyle style = OutlinedButton.styleFrom(
@@ -184,10 +184,10 @@ void main() {
       matching: find.byType(InkWell),
     );
 
-    const Set<WidgetState> enabled = <WidgetState>{};
-    const Set<WidgetState> disabled = <WidgetState>{WidgetState.disabled};
-    const Set<WidgetState> hovered = <WidgetState>{WidgetState.hovered};
-    const Set<WidgetState> focused = <WidgetState>{WidgetState.focused};
+    const enabled = <WidgetState>{};
+    const disabled = <WidgetState>{WidgetState.disabled};
+    const hovered = <WidgetState>{WidgetState.hovered};
+    const focused = <WidgetState>{WidgetState.focused};
 
     void checkButton(WidgetTester tester) {
       final Material material = tester.widget<Material>(findMaterial);
@@ -277,9 +277,9 @@ void main() {
   });
 
   testWidgets('Material3 - OutlinedButton repsects Theme shadowColor', (WidgetTester tester) async {
-    const ColorScheme colorScheme = ColorScheme.light();
-    const Color shadowColor = Color(0xff000001);
-    const Color overriddenColor = Color(0xff000002);
+    const colorScheme = ColorScheme.light();
+    const shadowColor = Color(0xff000001);
+    const overriddenColor = Color(0xff000002);
 
     Widget buildFrame({Color? overallShadowColor, Color? themeShadowColor, Color? shadowColor}) {
       return MaterialApp(
@@ -345,9 +345,9 @@ void main() {
   });
 
   testWidgets('Material2 - OutlinedButton repsects Theme shadowColor', (WidgetTester tester) async {
-    const ColorScheme colorScheme = ColorScheme.light();
-    const Color shadowColor = Color(0xff000001);
-    const Color overriddenColor = Color(0xff000002);
+    const colorScheme = ColorScheme.light();
+    const shadowColor = Color(0xff000001);
+    const overriddenColor = Color(0xff000002);
 
     Widget buildFrame({Color? overallShadowColor, Color? themeShadowColor, Color? shadowColor}) {
       return MaterialApp(
@@ -458,7 +458,7 @@ void main() {
   testWidgets(
     'OutlinedButton icon uses provided OutlinedButtonTheme foregroundColor over default icon color',
     (WidgetTester tester) async {
-      const Color foregroundColor = Color(0xFFFFA500);
+      const foregroundColor = Color(0xFFFFA500);
 
       await tester.pumpWidget(
         MaterialApp(

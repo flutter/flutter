@@ -20,8 +20,7 @@ void main() {
       expect(PlatformDispatcher.instance.onDrawFrame, isNull);
 
       // Instantiation does nothing with regards to frame scheduling.
-      final WidgetsFlutterBindingWithTestBinaryMessenger binding =
-          WidgetsFlutterBindingWithTestBinaryMessenger();
+      final binding = WidgetsFlutterBindingWithTestBinaryMessenger();
       expect(binding, isA<WidgetsFlutterBinding>());
       expect(SchedulerBinding.instance.hasScheduledFrame, isFalse);
       expect(PlatformDispatcher.instance.onBeginFrame, isNull);

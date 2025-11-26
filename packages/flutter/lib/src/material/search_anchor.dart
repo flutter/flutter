@@ -482,7 +482,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
   void dispose() {
     widget.searchController?._detach(this);
     _internalSearchController?._detach(this);
-    final bool usingExternalController = widget.searchController != null;
+    final usingExternalController = widget.searchController != null;
     if (_route?.navigator != null) {
       _route?._dismiss(disposeController: !usingExternalController);
       if (usingExternalController) {
@@ -667,7 +667,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   Rect? getRect() {
     final BuildContext? context = anchorKey.currentContext;
     if (context != null) {
-      final RenderBox searchBarBox = context.findRenderObject()! as RenderBox;
+      final searchBarBox = context.findRenderObject()! as RenderBox;
       final Size boxSize = searchBarBox.size;
       final NavigatorState navigator = Navigator.of(context);
       final Offset boxLocation = searchBarBox.localToGlobal(
@@ -721,7 +721,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   }
 
   void updateTweens(BuildContext context) {
-    final RenderBox navigator = Navigator.of(context).context.findRenderObject()! as RenderBox;
+    final navigator = Navigator.of(context).context.findRenderObject()! as RenderBox;
     final Size screenSize = navigator.size;
     final Rect anchorRect = getRect() ?? Rect.zero;
 
@@ -755,7 +755,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
         if (viewTopToScreenBottom < viewHeight) {
           topLeft = Offset(topLeft.dx, screenSize.height - math.min(viewHeight, screenSize.height));
         }
-        final Size endSize = Size(viewWidth, viewHeight);
+        final endSize = Size(viewWidth, viewHeight);
         _rectTween.end = showFullScreenView ? Offset.zero & screenSize : (topLeft & endSize);
         return;
       case TextDirection.rtl:
@@ -763,14 +763,14 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
         final double viewTopToScreenBottom = screenSize.height - anchorRect.top;
 
         // Make sure the search view doesn't go off the screen.
-        Offset topLeft = Offset(math.max(anchorRect.right - viewWidth, 0.0), anchorRect.top);
+        var topLeft = Offset(math.max(anchorRect.right - viewWidth, 0.0), anchorRect.top);
         if (viewRightToScreenLeft < viewWidth) {
           topLeft = Offset(0.0, topLeft.dy);
         }
         if (viewTopToScreenBottom < viewHeight) {
           topLeft = Offset(topLeft.dx, screenSize.height - math.min(viewHeight, screenSize.height));
         }
-        final Size endSize = Size(viewWidth, viewHeight);
+        final endSize = Size(viewWidth, viewHeight);
         _rectTween.end = showFullScreenView ? Offset.zero & screenSize : (topLeft & endSize);
     }
   }
@@ -1033,7 +1033,7 @@ class _ViewContentState extends State<_ViewContent> {
       },
     );
 
-    final List<Widget> defaultTrailing = <Widget>[
+    final defaultTrailing = <Widget>[
       if (_controller.text.isNotEmpty)
         IconButton(
           icon: const Icon(Icons.close),

@@ -11,8 +11,8 @@ import 'common.dart';
 void main() {
   group('repository', () {
     late FakePlatform platform;
-    const String rootDir = '/';
-    const String revision = 'deadbeef';
+    const rootDir = '/';
+    const revision = 'deadbeef';
     late MemoryFileSystem fileSystem;
     late FakeProcessManager processManager;
     late TestStdio stdio;
@@ -31,9 +31,9 @@ void main() {
     });
 
     test('commit() throws if there are no local changes to commit and addFirst = true', () {
-      const String commit1 = 'abc123';
-      const String commit2 = 'def456';
-      const String message = 'This is a commit message.';
+      const commit1 = 'abc123';
+      const commit2 = 'def456';
+      const message = 'This is a commit message.';
       processManager.addCommands(<FakeCommand>[
         FakeCommand(
           command: <String>[
@@ -55,17 +55,14 @@ void main() {
         const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: commit2),
       ]);
 
-      final Checkouts checkouts = Checkouts(
+      final checkouts = Checkouts(
         parentDirectory: fileSystem.directory(rootDir),
         platform: platform,
         processManager: processManager,
         stdio: stdio,
       );
 
-      final FrameworkRepository repo = FrameworkRepository(
-        checkouts,
-        mirrorRemote: const Remote.mirror('mirror'),
-      );
+      final repo = FrameworkRepository(checkouts, mirrorRemote: const Remote.mirror('mirror'));
       expect(
         () async => repo.commit(message, addFirst: true),
         throwsExceptionWith('Tried to commit with message $message but no changes were present'),
@@ -73,9 +70,9 @@ void main() {
     });
 
     test('commit() passes correct commit message', () async {
-      const String commit1 = 'abc123';
-      const String commit2 = 'def456';
-      const String message = 'This is a commit message.';
+      const commit1 = 'abc123';
+      const commit2 = 'def456';
+      const message = 'This is a commit message.';
       processManager.addCommands(<FakeCommand>[
         FakeCommand(
           command: <String>[
@@ -96,24 +93,21 @@ void main() {
         const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: commit2),
       ]);
 
-      final Checkouts checkouts = Checkouts(
+      final checkouts = Checkouts(
         parentDirectory: fileSystem.directory(rootDir),
         platform: platform,
         processManager: processManager,
         stdio: stdio,
       );
 
-      final FrameworkRepository repo = FrameworkRepository(
-        checkouts,
-        mirrorRemote: const Remote.mirror('mirror'),
-      );
+      final repo = FrameworkRepository(checkouts, mirrorRemote: const Remote.mirror('mirror'));
       await repo.commit(message);
       expect(processManager.hasRemainingExpectations, false);
     });
 
     test('.listRemoteBranches() parses git output', () async {
-      const String remoteName = 'mirror';
-      const String lsRemoteOutput = '''
+      const remoteName = 'mirror';
+      const lsRemoteOutput = '''
 Extraneous debug information that should be ignored.
 
 4d44dca340603e25d4918c6ef070821181202e69        refs/heads/experiment
@@ -145,7 +139,7 @@ Extraneous debug information that should be ignored.
           stdout: lsRemoteOutput,
         ),
       ]);
-      final Checkouts checkouts = Checkouts(
+      final checkouts = Checkouts(
         parentDirectory: fileSystem.directory(rootDir),
         platform: platform,
         processManager: processManager,

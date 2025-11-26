@@ -12,7 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 // fit the container, we should see a significant drop in
 // the amount of memory consumed by this benchmark.
 Future<void> main() async {
-  const int numItems = 10;
+  const numItems = 10;
 
   runApp(
     Directionality(

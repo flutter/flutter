@@ -15,7 +15,7 @@ void main() {
   });
 
   testWidgets('overflow indicator is shown when overflowing', (WidgetTester tester) async {
-    const UnconstrainedBox box = UnconstrainedBox(child: SizedBox(width: 200.0, height: 200.0));
+    const box = UnconstrainedBox(child: SizedBox(width: 200.0, height: 200.0));
     await tester.pumpWidget(const Center(child: SizedBox(height: 100.0, child: box)));
 
     final dynamic exception = tester.takeException();

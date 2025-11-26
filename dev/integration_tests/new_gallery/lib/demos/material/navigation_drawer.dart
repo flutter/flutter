@@ -15,12 +15,12 @@ class NavDrawerDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final GalleryLocalizations localization = GalleryLocalizations.of(context)!;
-    final UserAccountsDrawerHeader drawerHeader = UserAccountsDrawerHeader(
+    final drawerHeader = UserAccountsDrawerHeader(
       accountName: Text(localization.demoNavigationDrawerUserName),
       accountEmail: Text(localization.demoNavigationDrawerUserEmail),
       currentAccountPicture: const CircleAvatar(child: FlutterLogo(size: 42.0)),
     );
-    final ListView drawerItems = ListView(
+    final drawerItems = ListView(
       children: <Widget>[
         drawerHeader,
         ListTile(

@@ -629,7 +629,7 @@ class _SnackBarState extends State<SnackBar> {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
     final SnackBarThemeData snackBarTheme = theme.snackBarTheme;
-    final bool isThemeDark = theme.brightness == Brightness.dark;
+    final isThemeDark = theme.brightness == Brightness.dark;
     final Color buttonColor = isThemeDark ? colorScheme.primary : colorScheme.secondary;
     final SnackBarThemeData defaults = theme.useMaterial3
         ? _SnackbarDefaultsM3(context)
@@ -667,7 +667,7 @@ class _SnackBarState extends State<SnackBar> {
       // assert that other properties are configured properly.
       if (snackBarBehavior != SnackBarBehavior.floating) {
         String message(String parameter) {
-          final String prefix = '$parameter can only be used with floating behavior.';
+          final prefix = '$parameter can only be used with floating behavior.';
           if (widget.behavior != null) {
             return '$prefix SnackBarBehavior.fixed was set in the SnackBar constructor.';
           } else if (snackBarTheme.behavior != null) {
@@ -686,8 +686,8 @@ class _SnackBarState extends State<SnackBar> {
     final bool showCloseIcon =
         widget.showCloseIcon ?? snackBarTheme.showCloseIcon ?? defaults.showCloseIcon!;
 
-    final bool isFloatingSnackBar = snackBarBehavior == SnackBarBehavior.floating;
-    final double horizontalPadding = isFloatingSnackBar ? 16.0 : 24.0;
+    final isFloatingSnackBar = snackBarBehavior == SnackBarBehavior.floating;
+    final horizontalPadding = isFloatingSnackBar ? 16.0 : 24.0;
     final EdgeInsetsGeometry padding =
         widget.padding ??
         EdgeInsetsDirectional.only(
@@ -714,7 +714,7 @@ class _SnackBarState extends State<SnackBar> {
         : null;
 
     // Calculate combined width of Action, Icon, and their padding, if they are present.
-    final TextPainter actionTextPainter = TextPainter(
+    final actionTextPainter = TextPainter(
       text: TextSpan(
         text: widget.action?.label ?? '',
         style: Theme.of(context).textTheme.labelLarge,
@@ -742,7 +742,7 @@ class _SnackBarState extends State<SnackBar> {
 
     final bool willOverflowAction = actionAndIconWidth / snackBarWidth > actionOverflowThreshold;
 
-    final List<Widget> maybeActionAndIcon = <Widget>[
+    final maybeActionAndIcon = <Widget>[
       if (widget.action != null)
         Padding(
           padding: EdgeInsets.symmetric(horizontal: actionHorizontalMargin),

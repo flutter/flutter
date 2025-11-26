@@ -19,7 +19,7 @@ void main() {
   testWidgets(
     'recording disposes images',
     (WidgetTester tester) async {
-      final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
+      final builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
       addTearDown(builder.dispose);
 
       await tester.pumpFrames(
@@ -34,7 +34,7 @@ void main() {
   testWidgets(
     'correctly records frames using collate',
     (WidgetTester tester) async {
-      final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
+      final builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
       addTearDown(builder.dispose);
 
       await tester.pumpFrames(
@@ -66,10 +66,7 @@ void main() {
   testWidgets(
     'use allLayers to record out-of-subtree contents',
     (WidgetTester tester) async {
-      final AnimationSheetBuilder builder = AnimationSheetBuilder(
-        frameSize: const Size(8, 2),
-        allLayers: true,
-      );
+      final builder = AnimationSheetBuilder(frameSize: const Size(8, 2), allLayers: true);
       addTearDown(builder.dispose);
 
       // The `record` (sized 8, 2) is placed on top of `_DecuplePixels`
@@ -156,7 +153,7 @@ class _PaintDecuplePixels extends CustomPainter {
       end: const Rect.fromLTWH(11, 1, 1, 1),
     ).transform(value)!;
     canvas.drawRect(rect, Paint()..color = Colors.yellow);
-    final Paint black = Paint()..color = Colors.black;
+    final black = Paint()..color = Colors.black;
     canvas
       // Top border
       ..drawRect(const Rect.fromLTRB(0, 0, 12, 1), black)

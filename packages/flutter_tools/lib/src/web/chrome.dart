@@ -131,7 +131,7 @@ class ChromiumLauncher {
   bool get hasChromeInstance => currentCompleter.isCompleted;
 
   @visibleForTesting
-  var currentCompleter = Completer<Chromium>();
+  Completer<Chromium> currentCompleter = Completer<Chromium>();
 
   /// Whether we can locate the chrome executable.
   bool canFindExecutable() {

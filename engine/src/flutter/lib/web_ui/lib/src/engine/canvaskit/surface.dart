@@ -35,7 +35,7 @@ class Surface extends DisplayCanvas {
 
   /// Returns the underlying CanvasKit Surface. Should only be used in tests.
   CkSurface? debugGetCkSurface() {
-    bool assertsEnabled = false;
+    var assertsEnabled = false;
     assert(() {
       assertsEnabled = true;
       return true;
@@ -89,7 +89,7 @@ class Surface extends DisplayCanvas {
 
   /// Returns the underlying OffscreenCanvas. Should only be used in tests.
   DomOffscreenCanvas? debugGetOffscreenCanvas() {
-    bool assertsEnabled = false;
+    var assertsEnabled = false;
     assert(() {
       assertsEnabled = true;
       return true;
@@ -392,8 +392,8 @@ class Surface extends DisplayCanvas {
     _contextLost = false;
 
     if (webGLVersion != -1 && !configuration.canvasKitForceCpuOnly) {
-      int glContext = 0;
-      final SkWebGLContextOptions options = SkWebGLContextOptions(
+      var glContext = 0;
+      final options = SkWebGLContextOptions(
         // Default to no anti-aliasing. Paint commands can be explicitly
         // anti-aliased by setting their `Paint` object's `antialias` property.
         antialias: _kUsingMSAA ? 1 : 0,

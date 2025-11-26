@@ -84,7 +84,7 @@ void testMain() {
   }
 
   List<CkImageFilter> createImageFilters() {
-    final List<CkImageFilter> filters = <CkImageFilter>[
+    final filters = <CkImageFilter>[
       CkImageFilter.blur(sigmaX: 5, sigmaY: 6, tileMode: ui.TileMode.clamp),
       CkImageFilter.blur(sigmaX: 6, sigmaY: 5, tileMode: ui.TileMode.clamp),
       CkImageFilter.blur(sigmaX: 6, sigmaY: 5, tileMode: ui.TileMode.decal),
@@ -102,7 +102,7 @@ void testMain() {
 
   group('ImageFilters', () {
     {
-      final testFilters = createImageFilters();
+      final List<CkImageFilter> testFilters = createImageFilters();
       for (final imageFilter in testFilters) {
         test('${imageFilter.runtimeType}.withSkImageFilter creates temp SkImageFilter', () {
           expect(imageFilter, isA<CkImageFilter>());
@@ -122,15 +122,13 @@ void testMain() {
     }
 
     test('reuses the Skia filter', () {
-      final CkPaint paint = CkPaint();
+      final paint = CkPaint();
       paint.imageFilter = CkImageFilter.blur(sigmaX: 5, sigmaY: 10, tileMode: ui.TileMode.clamp);
 
-      final CkManagedSkImageFilterConvertible managedFilter1 =
-          paint.imageFilter! as CkManagedSkImageFilterConvertible;
+      final managedFilter1 = paint.imageFilter! as CkManagedSkImageFilterConvertible;
 
       paint.imageFilter = CkImageFilter.blur(sigmaX: 5, sigmaY: 10, tileMode: ui.TileMode.clamp);
-      final CkManagedSkImageFilterConvertible managedFilter2 =
-          paint.imageFilter! as CkManagedSkImageFilterConvertible;
+      final managedFilter2 = paint.imageFilter! as CkManagedSkImageFilterConvertible;
 
       expect(managedFilter1, same(managedFilter2));
     });

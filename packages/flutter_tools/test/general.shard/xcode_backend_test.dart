@@ -1049,8 +1049,8 @@ class TestContext extends Context {
   final FileSystem fileSystem;
   final FakeProcessManager processManager;
 
-  var stdout = '';
-  var stderr = '';
+  String stdout = '';
+  String stderr = '';
 
   @override
   bool existsFile(String path) {

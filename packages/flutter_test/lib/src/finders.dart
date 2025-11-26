@@ -835,7 +835,7 @@ final class CommonTextRangeFinders {
     bool skipOffstage = true,
     FinderBase<Element>? descendentOf,
   }) {
-    final _TextContainingWidgetFinder textWidgetFinder = _TextContainingWidgetFinder(
+    final textWidgetFinder = _TextContainingWidgetFinder(
       substring,
       skipOffstage: skipOffstage,
       findRichText: true,
@@ -1216,7 +1216,7 @@ abstract class SemanticsFinder extends FinderBase<SemanticsNode> {
   }
 
   static Iterable<SemanticsNode> get _allRoots {
-    final List<SemanticsNode> roots = <SemanticsNode>[];
+    final roots = <SemanticsNode>[];
     void collectSemanticsRoots(PipelineOwner owner) {
       final SemanticsNode? root = owner.semanticsOwner?.rootSemanticsNode;
       if (root != null) {
@@ -1248,7 +1248,7 @@ class _StaticTextRangeFinder extends FinderBase<TextRangeContext> {
     }
 
     final View view = from.findAncestorWidgetOfExactType<View>()!;
-    final List<RenderParagraph> paragraphs = <RenderParagraph>[];
+    final paragraphs = <RenderParagraph>[];
 
     void visitor(RenderObject child) {
       switch (child) {
@@ -1425,14 +1425,14 @@ class _HitTestableWidgetFinder extends ChainedFinder {
 
   @override
   Iterable<Element> filter(Iterable<Element> parentCandidates) sync* {
-    for (final Element candidate in parentCandidates) {
+    for (final candidate in parentCandidates) {
       final int viewId = candidate.findAncestorWidgetOfExactType<View>()!.view.viewId;
       final RenderObject? object = candidate.renderObject;
       if (object is! RenderBox) {
         continue;
       }
       final Offset absoluteOffset = object.localToGlobal(alignment.alongSize(object.size));
-      final HitTestResult hitResult = HitTestResult();
+      final hitResult = HitTestResult();
       WidgetsBinding.instance.hitTestInView(hitResult, absoluteOffset, viewId);
       for (final HitTestEntry entry in hitResult.path) {
         if (entry.target == candidate.renderObject) {
@@ -1802,7 +1802,7 @@ mixin _AncestorFinderMixin<CandidateType> on FinderBase<CandidateType> {
 
   @override
   Iterable<CandidateType> get allCandidates {
-    final List<CandidateType> candidates = <CandidateType>[];
+    final candidates = <CandidateType>[];
     for (final CandidateType leaf in descendant.evaluate()) {
       if (matchLeaves) {
         candidates.add(leaf);
@@ -1831,7 +1831,7 @@ class _AncestorWidgetFinder extends Finder with _AncestorFinderMixin<Element> {
 
   @override
   Iterable<Element> _collectAncestors(Element child) {
-    final List<Element> ancestors = <Element>[];
+    final ancestors = <Element>[];
     child.visitAncestorElements((Element element) {
       ancestors.add(element);
       return true;
@@ -1855,7 +1855,7 @@ class _AncestorSemanticsFinder extends FinderBase<SemanticsNode>
 
   @override
   Iterable<SemanticsNode> _collectAncestors(SemanticsNode child) {
-    final List<SemanticsNode> ancestors = <SemanticsNode>[];
+    final ancestors = <SemanticsNode>[];
     while (child.parent != null) {
       ancestors.add(child.parent!);
       child = child.parent!;

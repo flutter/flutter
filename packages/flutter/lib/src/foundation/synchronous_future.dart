@@ -29,7 +29,7 @@ class SynchronousFuture<T> implements Future<T> {
 
   @override
   Stream<T> asStream() {
-    final StreamController<T> controller = StreamController<T>();
+    final controller = StreamController<T>();
     controller.add(_value);
     controller.close();
     return controller.stream;

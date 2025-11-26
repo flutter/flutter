@@ -921,7 +921,7 @@ class _AppBarState extends State<AppBar> {
 
     final FlexibleSpaceBarSettings? settings = context
         .dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>();
-    final Set<WidgetState> states = <WidgetState>{
+    final states = <WidgetState>{
       if (settings?.isScrolledUnder ?? _scrolledUnder) WidgetState.scrolledUnder,
     };
 
@@ -946,7 +946,7 @@ class _AppBarState extends State<AppBar> {
       Theme.of(context).colorScheme.surfaceContainer,
     );
 
-    final Color effectiveBackgroundColor = states.contains(WidgetState.scrolledUnder)
+    final effectiveBackgroundColor = states.contains(WidgetState.scrolledUnder)
         ? scrolledUnderBackground
         : backgroundColor;
 
@@ -2471,7 +2471,7 @@ class _RenderExpandedTitleBox extends RenderShiftedBox {
     }
     size = constraints.biggest;
     child.layout(constraints.widthConstraints().deflate(padding), parentUsesSize: true);
-    final BoxParentData childParentData = child.parentData! as BoxParentData;
+    final childParentData = child.parentData! as BoxParentData;
     childParentData.offset = _childOffsetFromSize(child.size, size);
   }
 }

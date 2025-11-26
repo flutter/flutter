@@ -60,10 +60,10 @@ void testMain() {
     });
 
     test('high contrast in accessibilityFeatures has the correct value', () {
-      final MockHighContrastSupport mockHighContrast = MockHighContrastSupport();
+      final mockHighContrast = MockHighContrastSupport();
       HighContrastSupport.instance = mockHighContrast;
 
-      final EnginePlatformDispatcher dispatcher = EnginePlatformDispatcher();
+      final dispatcher = EnginePlatformDispatcher();
 
       expect(dispatcher.accessibilityFeatures.highContrast, isTrue);
       mockHighContrast.isEnabled = false;
@@ -74,12 +74,12 @@ void testMain() {
     });
 
     test('AppLifecycleState transitions through all states', () {
-      final List<ui.AppLifecycleState> states = <ui.AppLifecycleState>[];
+      final states = <ui.AppLifecycleState>[];
       void listener(ui.AppLifecycleState state) {
         states.add(state);
       }
 
-      final MockAppLifecycleState mockAppLifecycleState = MockAppLifecycleState();
+      final mockAppLifecycleState = MockAppLifecycleState();
 
       expect(mockAppLifecycleState.appLifecycleState, ui.AppLifecycleState.resumed);
 
@@ -157,7 +157,7 @@ void testMain() {
 
     test('responds to flutter/skia Skia.setResourceCacheMaxBytes', () async {
       const MethodCodec codec = JSONMethodCodec();
-      final Completer<ByteData?> completer = Completer<ByteData?>();
+      final completer = Completer<ByteData?>();
       ui.PlatformDispatcher.instance.sendPlatformMessage(
         'flutter/skia',
         codec.encodeMethodCall(
@@ -173,7 +173,7 @@ void testMain() {
 
     test('responds to flutter/platform HapticFeedback.vibrate', () async {
       const MethodCodec codec = JSONMethodCodec();
-      final Completer<ByteData?> completer = Completer<ByteData?>();
+      final completer = Completer<ByteData?>();
       ui.PlatformDispatcher.instance.sendPlatformMessage(
         'flutter/platform',
         codec.encodeMethodCall(const MethodCall('HapticFeedback.vibrate')),
@@ -187,7 +187,7 @@ void testMain() {
 
     test('responds to flutter/platform SystemChrome.setSystemUIOverlayStyle', () async {
       const MethodCodec codec = JSONMethodCodec();
-      final Completer<ByteData?> completer = Completer<ByteData?>();
+      final completer = Completer<ByteData?>();
       ui.PlatformDispatcher.instance.sendPlatformMessage(
         'flutter/platform',
         codec.encodeMethodCall(
@@ -203,7 +203,7 @@ void testMain() {
 
     test('responds to flutter/contextmenu enable', () async {
       const MethodCodec codec = JSONMethodCodec();
-      final Completer<ByteData?> completer = Completer<ByteData?>();
+      final completer = Completer<ByteData?>();
       ui.PlatformDispatcher.instance.sendPlatformMessage(
         'flutter/contextmenu',
         codec.encodeMethodCall(const MethodCall('enableContextMenu')),
@@ -217,7 +217,7 @@ void testMain() {
 
     test('responds to flutter/contextmenu disable', () async {
       const MethodCodec codec = JSONMethodCodec();
-      final Completer<ByteData?> completer = Completer<ByteData?>();
+      final completer = Completer<ByteData?>();
       ui.PlatformDispatcher.instance.sendPlatformMessage(
         'flutter/contextmenu',
         codec.encodeMethodCall(const MethodCall('disableContextMenu')),
@@ -231,7 +231,7 @@ void testMain() {
 
     test('can set application locale', () async {
       final DomElement host1 = createDomHTMLDivElement();
-      final EngineFlutterView view1 = EngineFlutterView(dispatcher, host1);
+      final view1 = EngineFlutterView(dispatcher, host1);
       final EngineFlutterView view2 = EngineFlutterView.implicit(dispatcher, null);
       dispatcher.viewManager
         ..registerView(view1)
@@ -243,7 +243,7 @@ void testMain() {
     });
 
     test('can find text scale factor', () async {
-      const double deltaTolerance = 1e-5;
+      const deltaTolerance = 1e-5;
 
       final DomElement root = domDocument.documentElement!;
       final String oldFontSize = root.style.fontSize;
@@ -283,7 +283,7 @@ void testMain() {
 
       root.style.fontSize = '16px';
 
-      bool isCalled = false;
+      var isCalled = false;
       ui.PlatformDispatcher.instance.onTextScaleFactorChanged = () {
         isCalled = true;
       };
@@ -310,7 +310,7 @@ void testMain() {
 
       // Wait for next frame.
       Future<void> waitForResizeObserver() {
-        final Completer<void> completer = Completer<void>();
+        final completer = Completer<void>();
         domWindow.requestAnimationFrame((_) {
           Timer.run(completer.complete);
         });
@@ -323,15 +323,15 @@ void testMain() {
         ui.PlatformDispatcher.instance.onMetricsChanged = oldCallback;
       });
 
-      bool isCalled = false;
+      var isCalled = false;
       ui.PlatformDispatcher.instance.onMetricsChanged = () {
         isCalled = true;
       };
 
-      const double expectedLineHeightScaleFactor = 2.0;
-      const double expectedLetterSpacing = 1.0;
-      const double expectedWordSpacing = 4.0;
-      const double expectedParagraphSpacing = 10.0;
+      const expectedLineHeightScaleFactor = 2.0;
+      const expectedLetterSpacing = 1.0;
+      const expectedWordSpacing = 4.0;
+      const expectedParagraphSpacing = 10.0;
 
       style.text =
           'html *{ line-height: 2 !important; word-spacing: 4px !important; letter-spacing: 1px !important; margin-bottom: 10px !important; }';
@@ -374,9 +374,9 @@ void testMain() {
     });
 
     test('disposes all its views', () {
-      final EngineFlutterView view1 = EngineFlutterView(dispatcher, createDomHTMLDivElement());
-      final EngineFlutterView view2 = EngineFlutterView(dispatcher, createDomHTMLDivElement());
-      final EngineFlutterView view3 = EngineFlutterView(dispatcher, createDomHTMLDivElement());
+      final view1 = EngineFlutterView(dispatcher, createDomHTMLDivElement());
+      final view2 = EngineFlutterView(dispatcher, createDomHTMLDivElement());
+      final view3 = EngineFlutterView(dispatcher, createDomHTMLDivElement());
 
       dispatcher.viewManager
         ..registerView(view1)
@@ -394,8 +394,8 @@ void testMain() {
     });
 
     test('connects view disposal to metrics changed event', () {
-      final EngineFlutterView view1 = EngineFlutterView(dispatcher, createDomHTMLDivElement());
-      final EngineFlutterView view2 = EngineFlutterView(dispatcher, createDomHTMLDivElement());
+      final view1 = EngineFlutterView(dispatcher, createDomHTMLDivElement());
+      final view2 = EngineFlutterView(dispatcher, createDomHTMLDivElement());
 
       dispatcher.viewManager
         ..registerView(view1)
@@ -404,7 +404,7 @@ void testMain() {
       expect(view1.isDisposed, isFalse);
       expect(view2.isDisposed, isFalse);
 
-      bool onMetricsChangedCalled = false;
+      var onMetricsChangedCalled = false;
       dispatcher.onMetricsChanged = () {
         onMetricsChangedCalled = true;
       };
@@ -419,13 +419,13 @@ void testMain() {
     });
 
     test('disconnects view disposal event on dispose', () {
-      final EngineFlutterView view1 = EngineFlutterView(dispatcher, createDomHTMLDivElement());
+      final view1 = EngineFlutterView(dispatcher, createDomHTMLDivElement());
 
       dispatcher.viewManager.registerView(view1);
 
       expect(view1.isDisposed, isFalse);
 
-      bool onMetricsChangedCalled = false;
+      var onMetricsChangedCalled = false;
       dispatcher.onMetricsChanged = () {
         onMetricsChangedCalled = true;
       };
@@ -437,8 +437,8 @@ void testMain() {
     });
 
     test('invokeOnViewFocusChange calls onViewFocusChange', () {
-      final List<ui.ViewFocusEvent> dispatchedViewFocusEvents = <ui.ViewFocusEvent>[];
-      const ui.ViewFocusEvent viewFocusEvent = ui.ViewFocusEvent(
+      final dispatchedViewFocusEvents = <ui.ViewFocusEvent>[];
+      const viewFocusEvent = ui.ViewFocusEvent(
         viewId: 0,
         state: ui.ViewFocusState.focused,
         direction: ui.ViewFocusDirection.undefined,
@@ -454,7 +454,7 @@ void testMain() {
     test('invokeOnViewFocusChange preserves the zone', () {
       final Zone zone1 = Zone.current.fork();
       final Zone zone2 = Zone.current.fork();
-      const ui.ViewFocusEvent viewFocusEvent = ui.ViewFocusEvent(
+      const viewFocusEvent = ui.ViewFocusEvent(
         viewId: 0,
         state: ui.ViewFocusState.focused,
         direction: ui.ViewFocusDirection.undefined,
@@ -482,9 +482,9 @@ void testMain() {
     });
 
     test('accessibility placeholder label can be updated', () {
-      final placeholder = domDocument.querySelector('flt-semantics-placeholder')!;
+      final DomElement placeholder = domDocument.querySelector('flt-semantics-placeholder')!;
 
-      const String testLabel = 'Test accessibility label';
+      const testLabel = 'Test accessibility label';
       ui_web.accessibilityPlaceholderMessage = testLabel;
       expect(placeholder.getAttribute('aria-label'), testLabel);
 
@@ -493,8 +493,8 @@ void testMain() {
     });
 
     test('scheduleWarmupFrame should call both callbacks', () async {
-      bool beginFrameCalled = false;
-      final Completer<void> drawFrameCalled = Completer<void>();
+      var beginFrameCalled = false;
+      final drawFrameCalled = Completer<void>();
       dispatcher.scheduleWarmUpFrame(
         beginFrame: () {
           expect(drawFrameCalled.isCompleted, false);
@@ -515,9 +515,9 @@ void testMain() {
     group('NavigationTarget', () {
       test('creates with element and nodeId', () {
         final DomElement element = createDomHTMLDivElement();
-        const int nodeId = 123;
+        const nodeId = 123;
 
-        final NavigationTarget target = NavigationTarget(element, nodeId);
+        final target = NavigationTarget(element, nodeId);
 
         expect(target.element, equals(element));
         expect(target.nodeId, equals(nodeId));
@@ -598,13 +598,13 @@ void testMain() {
       });
 
       test('handles events from multiple navigation element types', () {
-        final List<DomElement> navElements = <DomElement>[
+        final navElements = <DomElement>[
           createDomHTMLButtonElement()..setAttribute('role', 'button'),
           createDomElement('a')..setAttribute('role', 'link'),
           createDomHTMLDivElement()..setAttribute('role', 'tab'),
         ];
 
-        for (int i = 0; i < navElements.length; i++) {
+        for (var i = 0; i < navElements.length; i++) {
           final DomElement element = navElements[i];
           element.setAttribute('id', '$kFlutterSemanticNodePrefix${100 + i}');
           element.tabIndex = 0;
@@ -612,12 +612,12 @@ void testMain() {
         }
 
         addTearDown(() {
-          for (final DomElement element in navElements) {
+          for (final element in navElements) {
             element.remove();
           }
         });
 
-        for (final DomElement element in navElements) {
+        for (final element in navElements) {
           final DomMouseEvent atEvent = createTestClickEvent();
 
           expect(() => element.dispatchEvent(atEvent), returnsNormally);
@@ -644,7 +644,7 @@ void testMain() {
       test('handles elements with semantics focus action but no tabindex', () {
         semantics().semanticsEnabled = true;
 
-        final SemanticsTester tester = SemanticsTester(owner());
+        final tester = SemanticsTester(owner());
         tester.updateNode(
           id: 0,
           children: <SemanticsNodeUpdate>[
@@ -674,7 +674,7 @@ void testMain() {
       test('prioritizes tabindex over semantics focus action for focus finding', () {
         semantics().semanticsEnabled = true;
 
-        final SemanticsTester tester = SemanticsTester(owner());
+        final tester = SemanticsTester(owner());
         tester.updateNode(
           id: 0,
           children: <SemanticsNodeUpdate>[
@@ -703,7 +703,7 @@ void testMain() {
       test('finds child elements with semantics focus action', () {
         semantics().semanticsEnabled = true;
 
-        final SemanticsTester tester = SemanticsTester(owner());
+        final tester = SemanticsTester(owner());
         tester.updateNode(
           id: 0,
           children: <SemanticsNodeUpdate>[

@@ -87,7 +87,7 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final Matrix4 transformMatrix = Matrix4.identity()
+    final transformMatrix = Matrix4.identity()
       ..translate(translation.dx, translation.dy)
       ..scale(scale)
       ..rotateZ(angle * math.pi);

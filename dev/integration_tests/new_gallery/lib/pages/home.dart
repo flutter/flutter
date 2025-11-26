@@ -44,7 +44,7 @@ class HomePage extends StatelessWidget {
     final bool isDesktop = isDisplayDesktop(context);
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     final Map<String, GalleryDemo> studyDemos = Demos.studies(localizations);
-    final List<Widget> carouselCards = <Widget>[
+    final carouselCards = <Widget>[
       _CarouselCard(
         demo: studyDemos['reply'],
         asset: const AssetImage('assets/studies/reply_card.png', package: 'flutter_gallery_assets'),
@@ -129,7 +129,7 @@ class HomePage extends StatelessWidget {
 
     if (isDesktop) {
       // Desktop layout
-      final List<_DesktopCategoryItem> desktopCategoryItems = <_DesktopCategoryItem>[
+      final desktopCategoryItems = <_DesktopCategoryItem>[
         _DesktopCategoryItem(
           category: GalleryDemoCategory.material,
           asset: const AssetImage(
@@ -190,16 +190,15 @@ class HomePage extends StatelessWidget {
                       },
                       excludeFromSemantics: true,
                       child: FadeInImage(
-                        image:
-                            Theme.of(context).colorScheme.brightness == Brightness.dark
-                                ? const AssetImage(
-                                  'assets/logo/flutter_logo.png',
-                                  package: 'flutter_gallery_assets',
-                                )
-                                : const AssetImage(
-                                  'assets/logo/flutter_logo_color.png',
-                                  package: 'flutter_gallery_assets',
-                                ),
+                        image: Theme.of(context).colorScheme.brightness == Brightness.dark
+                            ? const AssetImage(
+                                'assets/logo/flutter_logo.png',
+                                package: 'flutter_gallery_assets',
+                              )
+                            : const AssetImage(
+                                'assets/logo/flutter_logo_color.png',
+                                package: 'flutter_gallery_assets',
+                              ),
                         placeholder: MemoryImage(kTransparentImage),
                         fadeInDuration: entranceAnimationDuration,
                       ),
@@ -496,8 +495,8 @@ class _DesktopCategoryItem extends StatelessWidget {
                   // Makes integration tests possible.
                   key: ValueKey<String>('${category.name}DemoList'),
                   primary: false,
-                  itemBuilder:
-                      (BuildContext context, int index) => CategoryDemoItem(demo: demos[index]),
+                  itemBuilder: (BuildContext context, int index) =>
+                      CategoryDemoItem(demo: demos[index]),
                   itemCount: demos.length,
                 ),
               ),
@@ -583,7 +582,10 @@ class _AnimatedCategoryItem extends StatelessWidget {
     return AnimatedBuilder(
       animation: controller,
       builder: (BuildContext context, Widget? child) {
-        return Padding(padding: EdgeInsets.only(top: topPaddingAnimation.value), child: child);
+        return Padding(
+          padding: EdgeInsets.only(top: topPaddingAnimation.value),
+          child: child,
+        );
       },
       child: child,
     );
@@ -711,7 +713,7 @@ class _MobileCarouselState extends State<_MobileCarousel>
   }
 
   Widget builder(int index) {
-    final AnimatedBuilder carouselCard = AnimatedBuilder(
+    final carouselCard = AnimatedBuilder(
       animation: _controller,
       builder: (BuildContext context, Widget? child) {
         double value;
@@ -795,8 +797,8 @@ class _DesktopCarouselState extends State<_DesktopCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    bool showPreviousButton = false;
-    bool showNextButton = true;
+    var showPreviousButton = false;
+    var showNextButton = true;
     // Only check this after the _controller has been attached to the ListView.
     if (_controller.hasClients) {
       showPreviousButton = _controller.offset > 0;
@@ -813,10 +815,9 @@ class _DesktopCarouselState extends State<_DesktopCarousel> {
           children: <Widget>[
             ListView.builder(
               padding: EdgeInsets.symmetric(
-                horizontal:
-                    isDesktop
-                        ? _horizontalDesktopPadding - _carouselItemDesktopMargin
-                        : _horizontalPadding - _carouselItemMobileMargin,
+                horizontal: isDesktop
+                    ? _horizontalDesktopPadding - _carouselItemDesktopMargin
+                    : _horizontalPadding - _carouselItemMobileMargin,
               ),
               scrollDirection: Axis.horizontal,
               primary: false,
@@ -824,11 +825,10 @@ class _DesktopCarouselState extends State<_DesktopCarousel> {
               controller: _controller,
               itemExtent: _carouselItemWidth,
               itemCount: widget.children.length,
-              itemBuilder:
-                  (BuildContext context, int index) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: widget.children[index],
-                  ),
+              itemBuilder: (BuildContext context, int index) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: widget.children[index],
+              ),
             ),
             if (showPreviousButton)
               _DesktopPageButton(
@@ -910,7 +910,7 @@ class _DesktopPageButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const double buttonSize = 58.0;
+    const buttonSize = 58.0;
     const double padding = _horizontalDesktopPadding - buttonSize / 2;
     return ExcludeSemantics(
       child: Align(
@@ -920,10 +920,9 @@ class _DesktopPageButton extends StatelessWidget {
           height: buttonSize,
           margin: EdgeInsetsDirectional.only(start: isEnd ? 0 : padding, end: isEnd ? padding : 0),
           child: Tooltip(
-            message:
-                isEnd
-                    ? MaterialLocalizations.of(context).nextPageTooltip
-                    : MaterialLocalizations.of(context).previousPageTooltip,
+            message: isEnd
+                ? MaterialLocalizations.of(context).nextPageTooltip
+                : MaterialLocalizations.of(context).previousPageTooltip,
             child: Material(
               color: Colors.black.withOpacity(0.5),
               shape: const CircleBorder(),
@@ -965,7 +964,7 @@ class _CarouselCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
-    final bool isDark = Theme.of(context).colorScheme.brightness == Brightness.dark;
+    final isDark = Theme.of(context).colorScheme.brightness == Brightness.dark;
     final ImageProvider<Object>? asset = isDark ? assetDark : this.asset;
     final Color? assetColor = isDark ? assetDarkColor : this.assetColor;
     final Color? textColor = isDark ? Colors.white.withOpacity(0.87) : this.textColor;

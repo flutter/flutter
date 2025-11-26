@@ -45,7 +45,7 @@ class _CategoryItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final bool isDark = theme.brightness == Brightness.dark;
+    final isDark = theme.brightness == Brightness.dark;
 
     // This repaint boundary prevents the entire _CategoriesPage from being
     // repainted when the button's ink splash animates.
@@ -92,7 +92,7 @@ class _CategoriesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     const double aspectRatio = 160.0 / 180.0;
     final List<GalleryDemoCategory> categoriesList = categories!.toList();
-    final int columnCount = (MediaQuery.of(context).orientation == Orientation.portrait) ? 2 : 3;
+    final columnCount = (MediaQuery.of(context).orientation == Orientation.portrait) ? 2 : 3;
 
     return Semantics(
       scopesRoute: true,
@@ -164,9 +164,9 @@ class _DemoItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final bool isDark = theme.brightness == Brightness.dark;
+    final isDark = theme.brightness == Brightness.dark;
     // The fontSize to use for computing the heuristic UI scaling factor.
-    const double defaultFontSize = 14.0;
+    const defaultFontSize = 14.0;
     final double containerScalingFactor =
         MediaQuery.textScalerOf(context).scale(defaultFontSize) / defaultFontSize;
     return RawMaterialButton(
@@ -292,7 +292,7 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final bool isDark = theme.brightness == Brightness.dark;
+    final isDark = theme.brightness == Brightness.dark;
     final MediaQueryData media = MediaQuery.of(context);
     final bool centerHome = media.orientation == Orientation.portrait && media.size.height < 800.0;
 

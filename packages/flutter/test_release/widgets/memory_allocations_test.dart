@@ -94,7 +94,7 @@ class _MyStatefulWidgetState extends State<_MyStatefulWidget> {
 
 /// Create and dispose Flutter objects to fire memory allocation events.
 Future<void> _activateFlutterObjects(WidgetTester tester) async {
-  final _TestElement element = _TestElement();
+  final element = _TestElement();
   element.makeInactive();
   // ignore: invalid_use_of_visible_for_overriding_member
   element.unmount();

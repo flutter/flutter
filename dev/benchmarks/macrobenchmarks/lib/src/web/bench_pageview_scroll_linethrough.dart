@@ -95,22 +95,18 @@ class _CustomPainter extends CustomPainter {
     _textPainter.textDirection = TextDirection.ltr;
     _textPainter.textWidthBasis = TextWidthBasis.longestLine;
     _textPainter.textScaler = TextScaler.noScaling;
-    const TextStyle textStyle = TextStyle(
-      color: Colors.black87,
-      fontSize: 13,
-      fontFamily: 'Roboto',
-    );
+    const textStyle = TextStyle(color: Colors.black87, fontSize: 13, fontFamily: 'Roboto');
 
     _linePainter.isAntiAlias = true;
-    for (int i = 0; i < 42; i++) {
+    for (var i = 0; i < 42; i++) {
       _linePainter.color = Colors.white;
 
-      TextStyle temp = textStyle;
+      var temp = textStyle;
       if (i % 7 == 0) {
         temp = textStyle.copyWith(decoration: TextDecoration.lineThrough);
       }
 
-      final TextSpan span = TextSpan(text: text, style: temp);
+      final span = TextSpan(text: text, style: temp);
 
       _textPainter.text = span;
 
@@ -147,7 +143,7 @@ class _CustomPainter extends CustomPainter {
     _linePainter.strokeWidth = lineWidth;
     _linePainter.color = Colors.grey;
     canvas.drawLine(const Offset(0, lineWidth), Offset(size.width, lineWidth), _linePainter);
-    for (int i = 0; i < 6; i++) {
+    for (var i = 0; i < 6; i++) {
       canvas.drawLine(Offset(0, yPosition), Offset(size.width, yPosition), _linePainter);
       yPosition += height;
     }
@@ -159,7 +155,7 @@ class _CustomPainter extends CustomPainter {
     );
     xPosition = width;
     canvas.drawLine(const Offset(lineWidth, 0), Offset(lineWidth, size.height), _linePainter);
-    for (int i = 0; i < 6; i++) {
+    for (var i = 0; i < 6; i++) {
       canvas.drawLine(Offset(xPosition, 0), Offset(xPosition, size.height), _linePainter);
       xPosition += width;
     }

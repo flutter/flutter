@@ -43,7 +43,7 @@ class LocaleInfo implements Comparable<LocaleInfo> {
     String? scriptCode;
     String? countryCode;
     int length = codes.length;
-    String originalString = locale;
+    var originalString = locale;
     if (codes.length == 2) {
       scriptCode = codes[1].length >= 4 ? codes[1] : null;
       countryCode = codes[1].length < 4 ? codes[1] : null;
@@ -139,20 +139,19 @@ void loadMatchingArbsIntoBundleMaps({
   /// the first Hant Chinese locale as a default by repeating the data. If an
   /// explicit match is later found, we can reference this set to see if we should
   /// overwrite the existing assumed data.
-  final Set<LocaleInfo> assumedLocales = <LocaleInfo>{};
+  final assumedLocales = <LocaleInfo>{};
 
   for (final FileSystemEntity entity in directory.listSync().toList()..sort(sortFilesByPath)) {
     final String entityPath = entity.path;
     if (FileSystemEntity.isFileSync(entityPath) && filenamePattern.hasMatch(entityPath)) {
       final String localeString = filenamePattern.firstMatch(entityPath)![1]!;
-      final File arbFile = File(entityPath);
+      final arbFile = File(entityPath);
 
       // Helper method to fill the maps with the correct data from file.
       void populateResources(LocaleInfo locale, File file) {
         final Map<String, String> resources = localeToResources[locale]!;
         final Map<String, dynamic> attributes = localeToResourceAttributes[locale]!;
-        final Map<String, dynamic> bundle =
-            json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+        final bundle = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
         for (final String key in bundle.keys) {
           // The ARB file resource "attributes" for foo are called @foo.
           if (key.startsWith('@')) {
@@ -166,7 +165,7 @@ void loadMatchingArbsIntoBundleMaps({
       // Only pre-assume scriptCode if there is a country or script code to assume off of.
       // When we assume scriptCode based on languageCode-only, we want this initial pass
       // to use the un-assumed version as a base class.
-      LocaleInfo locale = LocaleInfo.fromString(
+      var locale = LocaleInfo.fromString(
         localeString,
         deriveScriptCode: localeString.split('_').length > 1,
       );
@@ -183,9 +182,7 @@ void loadMatchingArbsIntoBundleMaps({
       // Add an assumed locale to default to when there is no info on scriptOnly locales.
       locale = LocaleInfo.fromString(localeString, deriveScriptCode: true);
       if (locale.scriptCode != null) {
-        final LocaleInfo scriptLocale = LocaleInfo.fromString(
-          '${locale.languageCode}_${locale.scriptCode}',
-        );
+        final scriptLocale = LocaleInfo.fromString('${locale.languageCode}_${locale.scriptCode}');
         if (!localeToResources.containsKey(scriptLocale)) {
           assumedLocales.add(scriptLocale);
           localeToResources[scriptLocale] ??= <String, String>{};
@@ -214,7 +211,7 @@ void checkCwdIsRepoRoot(String commandName) {
 }
 
 GeneratorOptions parseArgs(List<String> rawArgs) {
-  final argslib.ArgParser argParser = argslib.ArgParser()
+  final argParser = argslib.ArgParser()
     ..addFlag('help', abbr: 'h', help: 'Print the usage message for this command')
     ..addFlag('overwrite', abbr: 'w', help: 'Overwrite existing localizations')
     ..addFlag(
@@ -241,11 +238,11 @@ GeneratorOptions parseArgs(List<String> rawArgs) {
     stderr.writeln(argParser.usage);
     exit(0);
   }
-  final bool writeToFile = args['overwrite'] as bool;
-  final bool removeUndefined = args['remove-undefined'] as bool;
-  final bool widgetsOnly = args['widgets'] as bool;
-  final bool materialOnly = args['material'] as bool;
-  final bool cupertinoOnly = args['cupertino'] as bool;
+  final writeToFile = args['overwrite'] as bool;
+  final removeUndefined = args['remove-undefined'] as bool;
+  final widgetsOnly = args['widgets'] as bool;
+  final materialOnly = args['material'] as bool;
+  final cupertinoOnly = args['cupertino'] as bool;
 
   return GeneratorOptions(
     writeToFile: writeToFile,
@@ -274,7 +271,7 @@ class GeneratorOptions {
 
 // See also //master/tools/gen_locale.dart in the engine repo.
 Map<String, List<String>> _parseSection(String section) {
-  final Map<String, List<String>> result = <String, List<String>>{};
+  final result = <String, List<String>>{};
   late List<String> lastHeading;
   for (final String line in section.split('\n')) {
     if (line == '') {
@@ -311,7 +308,7 @@ void precacheLanguageAndRegionTags() {
       .skip(1)
       .map<Map<String, List<String>>>(_parseSection)
       .toList();
-  for (final Map<String, List<String>> section in sections) {
+  for (final section in sections) {
     assert(section.containsKey('Type'), section.toString());
     final String type = section['Type']!.single;
     if (type == 'language' || type == 'region' || type == 'script') {
@@ -350,7 +347,7 @@ String describeLocale(String tag) {
   assert(subtags.isNotEmpty);
   assert(_languages.containsKey(subtags[0]));
   final String language = _languages[subtags[0]]!;
-  String output = language;
+  var output = language;
   String? region;
   String? script;
   if (subtags.length == 2) {
@@ -416,7 +413,7 @@ String generateString(String value) {
     }
   }
 
-  const String backslash = '__BACKSLASH__';
+  const backslash = '__BACKSLASH__';
   assert(
     !value.contains(backslash),
     'Input string cannot contain the sequence: '

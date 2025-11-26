@@ -57,7 +57,7 @@ FakeProcessLister powershellUnavailable() {
 
 /// The expected validation result object for
 /// a passing windows version test
-var validWindows11ValidationResult = ValidationResult(
+ValidationResult validWindows11ValidationResult = ValidationResult(
   ValidationType.success,
   const <ValidationMessage>[],
   statusInfo: '11 Pro 64-bit, 23H2, 2009',
@@ -65,29 +65,32 @@ var validWindows11ValidationResult = ValidationResult(
 
 /// The expected validation result object for
 /// a passing windows version test
-var invalidWindowsValidationResult = ValidationResult(
+ValidationResult invalidWindowsValidationResult = ValidationResult(
   ValidationType.missing,
   const <ValidationMessage>[],
   statusInfo: 'Unable to confirm if installed Windows version is 10 or greater',
 );
 
-var ofdFoundRunning = ValidationResult(ValidationType.partial, const <ValidationMessage>[
-  ValidationMessage.hint(
-    'The Topaz OFD Security Module was detected on your machine. '
-    'You may need to disable it to build Flutter applications.',
-  ),
-], statusInfo: 'Problem detected with Windows installation');
+ValidationResult ofdFoundRunning =
+    ValidationResult(ValidationType.partial, const <ValidationMessage>[
+      ValidationMessage.hint(
+        'The Topaz OFD Security Module was detected on your machine. '
+        'You may need to disable it to build Flutter applications.',
+      ),
+    ], statusInfo: 'Problem detected with Windows installation');
 
-var powershellUnavailableResult =
+ValidationResult powershellUnavailableResult =
     ValidationResult(ValidationType.partial, const <ValidationMessage>[
       ValidationMessage.hint(
         'Failed to find ${ProcessLister.powershell} or ${ProcessLister.pwsh} on PATH',
       ),
     ], statusInfo: 'Problem detected with Windows installation');
 
-var getProcessFailed = ValidationResult(ValidationType.partial, const <ValidationMessage>[
-  ValidationMessage.hint('Get-Process failed to complete'),
-], statusInfo: 'Problem detected with Windows installation');
+ValidationResult getProcessFailed = ValidationResult(
+  ValidationType.partial,
+  const <ValidationMessage>[ValidationMessage.hint('Get-Process failed to complete')],
+  statusInfo: 'Problem detected with Windows installation',
+);
 
 class FakeVersionExtractor extends Fake implements WindowsVersionExtractor {
   FakeVersionExtractor({required this.mockData});

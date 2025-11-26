@@ -140,7 +140,7 @@ void main() {
     });
 
     testWidgets('faking physicalSize fakes physicalConstraints', (WidgetTester tester) async {
-      const Size fakeSize = Size(50, 50);
+      const fakeSize = Size(50, 50);
       verifyPropertyFaked<ViewConstraints>(
         tester: tester,
         realValue: trueImplicitView().physicalConstraints,
@@ -167,7 +167,7 @@ void main() {
     });
 
     testWidgets('resetting physicalSize resets physicalConstraints', (WidgetTester tester) async {
-      const Size fakeSize = Size(50, 50);
+      const fakeSize = Size(50, 50);
       verifyPropertyReset<ViewConstraints>(
         tester: tester,
         fakeValue: ViewConstraints.tight(fakeSize),
@@ -292,7 +292,7 @@ void main() {
     });
 
     testWidgets('can clear out fake properties all at once', (WidgetTester tester) async {
-      final FlutterViewSnapshot initial = FlutterViewSnapshot(tester.view);
+      final initial = FlutterViewSnapshot(tester.view);
 
       tester.view.devicePixelRatio = 7;
       tester.view.displayFeatures = <DisplayFeature>[
@@ -311,11 +311,11 @@ void main() {
         physicalDoubleTapSlop: 5,
       );
 
-      final FlutterViewSnapshot faked = FlutterViewSnapshot(tester.view);
+      final faked = FlutterViewSnapshot(tester.view);
 
       tester.view.reset();
 
-      final FlutterViewSnapshot reset = FlutterViewSnapshot(tester.view);
+      final reset = FlutterViewSnapshot(tester.view);
 
       expect(initial, isNot(matchesSnapshot(faked)));
       expect(initial, matchesSnapshot(reset));
@@ -323,8 +323,8 @@ void main() {
 
     testWidgets('render is passed through to backing FlutterView', (WidgetTester tester) async {
       final Scene expectedScene = SceneBuilder().build();
-      final _FakeFlutterView backingView = _FakeFlutterView();
-      final TestFlutterView view = TestFlutterView(
+      final backingView = _FakeFlutterView();
+      final view = TestFlutterView(
         view: backingView,
         platformDispatcher: tester.binding.platformDispatcher,
         display: _FakeDisplay(),
@@ -340,8 +340,8 @@ void main() {
       WidgetTester tester,
     ) async {
       final SemanticsUpdate expectedUpdate = SemanticsUpdateBuilder().build();
-      final _FakeFlutterView backingView = _FakeFlutterView();
-      final TestFlutterView view = TestFlutterView(
+      final backingView = _FakeFlutterView();
+      final view = TestFlutterView(
         view: backingView,
         platformDispatcher: tester.binding.platformDispatcher,
         display: _FakeDisplay(),
@@ -376,7 +376,7 @@ class _FlutterViewSnapshotMatcher extends Matcher {
     bool verbose,
   ) {
     assert(item is FlutterViewSnapshot, 'Can only match against snapshots of FlutterView.');
-    final FlutterViewSnapshot actual = item as FlutterViewSnapshot;
+    final actual = item as FlutterViewSnapshot;
 
     if (actual.devicePixelRatio != expected.devicePixelRatio) {
       mismatchDescription.add(
@@ -459,7 +459,7 @@ class _FlutterViewSnapshotMatcher extends Matcher {
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
     assert(item is FlutterViewSnapshot, 'Can only match against snapshots of FlutterView.');
-    final FlutterViewSnapshot actual = item as FlutterViewSnapshot;
+    final actual = item as FlutterViewSnapshot;
 
     return actual.devicePixelRatio == expected.devicePixelRatio &&
         actual.displayFeatures.equals(expected.displayFeatures) &&

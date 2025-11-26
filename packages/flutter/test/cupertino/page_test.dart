@@ -13,7 +13,7 @@ void main() {
           return CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
-              final String pageNumber = settings.name == '/' ? '1' : '2';
+              final pageNumber = settings.name == '/' ? '1' : '2';
               return Center(child: Text('Page $pageNumber'));
             },
           );
@@ -89,7 +89,7 @@ void main() {
           return CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
-              final String pageNumber = settings.name == '/' ? '1' : '2';
+              final pageNumber = settings.name == '/' ? '1' : '2';
               return Center(child: Text('Page $pageNumber'));
             },
           );
@@ -217,7 +217,7 @@ void main() {
           return CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
-              final String pageNumber = settings.name == '/' ? '1' : '2';
+              final pageNumber = settings.name == '/' ? '1' : '2';
               return Center(child: Text('Page $pageNumber'));
             },
           );
@@ -381,7 +381,7 @@ void main() {
           return CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
-              final String pageNumber = settings.name == '/' ? '1' : '2';
+              final pageNumber = settings.name == '/' ? '1' : '2';
               return Center(child: Text('Page $pageNumber'));
             },
           );
@@ -445,7 +445,7 @@ void main() {
           return CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
-              final String pageNumber = settings.name == '/' ? '1' : '2';
+              final pageNumber = settings.name == '/' ? '1' : '2';
               return Center(child: Text('Page $pageNumber'));
             },
           );
@@ -476,7 +476,7 @@ void main() {
   testWidgets('CupertinoPage does not lose its state when transitioning out', (
     WidgetTester tester,
   ) async {
-    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    final navigator = GlobalKey<NavigatorState>();
     await tester.pumpWidget(KeepsStateTestWidget(navigatorKey: navigator));
     expect(find.text('subpage'), findsOneWidget);
     expect(find.text('home'), findsNothing);

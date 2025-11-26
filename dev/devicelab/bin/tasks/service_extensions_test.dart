@@ -22,7 +22,7 @@ void main() {
     await device.unlock();
     final Directory appDir = dir(path.join(flutterDirectory.path, 'dev/integration_tests/ui'));
     await inDirectory(appDir, () async {
-      final Completer<void> ready = Completer<void>();
+      final ready = Completer<void>();
       late bool ok;
       print('run: starting...');
       final Process run = await startFlutter(
@@ -68,8 +68,8 @@ void main() {
       final VM vm = await client.getVM();
       final IsolateRef isolate = vm.isolates!.first;
 
-      final StreamController<Event> frameEventsController = StreamController<Event>();
-      final StreamController<Event> navigationEventsController = StreamController<Event>();
+      final frameEventsController = StreamController<Event>();
+      final navigationEventsController = StreamController<Event>();
       try {
         await client.streamListen(EventKind.kExtension);
       } catch (err) {
@@ -115,11 +115,10 @@ void main() {
       final Event navigationEvent = await navigationFuture;
       // validate the fields
       expect(navigationEvent.extensionData!.data['route'] is Map<dynamic, dynamic>);
-      final Map<dynamic, dynamic> route =
-          navigationEvent.extensionData!.data['route'] as Map<dynamic, dynamic>;
+      final route = navigationEvent.extensionData!.data['route'] as Map<dynamic, dynamic>;
       expect(route['description'] is String);
       expect(route['settings'] is Map<dynamic, dynamic>);
-      final Map<dynamic, dynamic> settings = route['settings'] as Map<dynamic, dynamic>;
+      final settings = route['settings'] as Map<dynamic, dynamic>;
       expect(settings.containsKey('name'));
 
       run.stdin.write('q');

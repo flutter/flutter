@@ -8,7 +8,7 @@ import 'package:flutter_tools/src/base/terminal.dart';
 class LoggingLogger extends BufferLogger {
   LoggingLogger() : super.test();
 
-  var messages = <String>[];
+  List<String> messages = <String>[];
 
   @override
   void printError(

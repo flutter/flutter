@@ -141,7 +141,7 @@ abstract class MultiDragPointerState {
     assert(_client == null);
     assert(pendingDelta != null);
     _client = client;
-    final DragUpdateDetails details = DragUpdateDetails(
+    final details = DragUpdateDetails(
       sourceTimeStamp: _lastPendingEventTimestamp,
       delta: pendingDelta!,
       globalPosition: initialPosition,
@@ -156,7 +156,7 @@ abstract class MultiDragPointerState {
     assert(_arenaEntry != null);
     if (_client != null) {
       assert(pendingDelta == null);
-      final DragEndDetails details = DragEndDetails(velocity: _velocityTracker.getVelocity());
+      final details = DragEndDetails(velocity: _velocityTracker.getVelocity());
       final Drag client = _client!;
       _client = null;
       // Call client last to avoid reentrancy.

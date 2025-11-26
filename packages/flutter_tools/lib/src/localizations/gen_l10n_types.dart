@@ -245,10 +245,10 @@ class Placeholder {
   final bool? isCustomDateFormat;
   // The following will be initialized after all messages are parsed in the Message constructor.
   String? type;
-  var isPlural = false;
-  var isSelect = false;
-  var isDateTime = false;
-  var requiresDateFormatting = false;
+  bool isPlural = false;
+  bool isSelect = false;
+  bool isDateTime = false;
+  bool requiresDateFormatting = false;
 
   bool get requiresFormatting => requiresDateFormatting || requiresNumFormatting;
   bool get requiresNumFormatting =>
@@ -412,7 +412,7 @@ class Message {
   final bool useEscaping;
   final bool useRelaxedSyntax;
   final Logger? logger;
-  var hadErrors = false;
+  bool hadErrors = false;
 
   Iterable<Placeholder> getPlaceholders(LocaleInfo locale) {
     final Map<String, Placeholder>? placeholders = localePlaceholders[locale];

@@ -15,7 +15,7 @@ Future<int> main() async {
   void withTestRepository(String path, void Function(io.Directory) fn) {
     // Create a temporary directory and delete it when we're done.
     final io.Directory tempDir = io.Directory.systemTemp.createTempSync('header_guard_check_test');
-    final io.Directory repoDir = io.Directory(p.join(tempDir.path, path));
+    final repoDir = io.Directory(p.join(tempDir.path, path));
     repoDir.createSync(recursive: true);
     try {
       fn(repoDir);
@@ -27,18 +27,18 @@ Future<int> main() async {
   group('HeaderGuardCheck', () {
     test('by default checks all files', () {
       withTestRepository('engine/src', (io.Directory repoDir) {
-        final io.Directory flutterDir = io.Directory(p.join(repoDir.path, 'flutter'));
+        final flutterDir = io.Directory(p.join(repoDir.path, 'flutter'));
         flutterDir.createSync(recursive: true);
-        final io.File file1 = io.File(p.join(flutterDir.path, 'foo.h'));
+        final file1 = io.File(p.join(flutterDir.path, 'foo.h'));
         file1.createSync(recursive: true);
-        final io.File file2 = io.File(p.join(flutterDir.path, 'bar.h'));
+        final file2 = io.File(p.join(flutterDir.path, 'bar.h'));
         file2.createSync(recursive: true);
-        final io.File file3 = io.File(p.join(flutterDir.path, 'baz.h'));
+        final file3 = io.File(p.join(flutterDir.path, 'baz.h'));
         file3.createSync(recursive: true);
 
-        final StringBuffer stdOut = StringBuffer();
-        final StringBuffer stdErr = StringBuffer();
-        final HeaderGuardCheck check = HeaderGuardCheck(
+        final stdOut = StringBuffer();
+        final stdErr = StringBuffer();
+        final check = HeaderGuardCheck(
           source: Engine.fromSrcPath(repoDir.path),
           exclude: const <String>[],
           stdOut: stdOut,
@@ -54,18 +54,18 @@ Future<int> main() async {
 
     test('if --include is provided, checks specific files', () {
       withTestRepository('engine/src', (io.Directory repoDir) {
-        final io.Directory flutterDir = io.Directory(p.join(repoDir.path, 'flutter'));
+        final flutterDir = io.Directory(p.join(repoDir.path, 'flutter'));
         flutterDir.createSync(recursive: true);
-        final io.File file1 = io.File(p.join(flutterDir.path, 'foo.h'));
+        final file1 = io.File(p.join(flutterDir.path, 'foo.h'));
         file1.createSync(recursive: true);
-        final io.File file2 = io.File(p.join(flutterDir.path, 'bar.h'));
+        final file2 = io.File(p.join(flutterDir.path, 'bar.h'));
         file2.createSync(recursive: true);
-        final io.File file3 = io.File(p.join(flutterDir.path, 'baz.h'));
+        final file3 = io.File(p.join(flutterDir.path, 'baz.h'));
         file3.createSync(recursive: true);
 
-        final StringBuffer stdOut = StringBuffer();
-        final StringBuffer stdErr = StringBuffer();
-        final HeaderGuardCheck check = HeaderGuardCheck(
+        final stdOut = StringBuffer();
+        final stdErr = StringBuffer();
+        final check = HeaderGuardCheck(
           source: Engine.fromSrcPath(repoDir.path),
           include: <String>[file1.path, file3.path],
           exclude: const <String>[],
@@ -87,22 +87,22 @@ Future<int> main() async {
 
     test('if --include is provided, checks specific directories', () {
       withTestRepository('engine/src', (io.Directory repoDir) {
-        final io.Directory flutterDir = io.Directory(p.join(repoDir.path, 'flutter'));
+        final flutterDir = io.Directory(p.join(repoDir.path, 'flutter'));
         flutterDir.createSync(recursive: true);
 
         // Create a sub-directory called "impeller".
-        final io.Directory impellerDir = io.Directory(p.join(flutterDir.path, 'impeller'));
+        final impellerDir = io.Directory(p.join(flutterDir.path, 'impeller'));
         impellerDir.createSync(recursive: true);
 
         // Create one file in both the root and in impeller.
-        final io.File file1 = io.File(p.join(flutterDir.path, 'foo.h'));
+        final file1 = io.File(p.join(flutterDir.path, 'foo.h'));
         file1.createSync(recursive: true);
-        final io.File file2 = io.File(p.join(impellerDir.path, 'bar.h'));
+        final file2 = io.File(p.join(impellerDir.path, 'bar.h'));
         file2.createSync(recursive: true);
 
-        final StringBuffer stdOut = StringBuffer();
-        final StringBuffer stdErr = StringBuffer();
-        final HeaderGuardCheck check = HeaderGuardCheck(
+        final stdOut = StringBuffer();
+        final stdErr = StringBuffer();
+        final check = HeaderGuardCheck(
           source: Engine.fromSrcPath(repoDir.path),
           include: <String>[impellerDir.path],
           exclude: const <String>[],

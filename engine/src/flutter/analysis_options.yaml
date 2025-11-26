@@ -20,9 +20,7 @@ analyzer:
 
 linter:
   rules:
-    always_specify_types: false # see https://github.com/flutter/flutter/blob/main/engine/src/flutter/CONTRIBUTING.md#dart
     avoid_equals_and_hash_code_on_mutable_classes: false # cannot import the meta package here
     missing_whitespace_between_adjacent_strings: false # too many false positives
     public_member_api_docs: true # dart:ui is public API
-    type_annotate_public_apis: true # to compensate for disabling always_specify_types, see https://github.com/flutter/flutter/blob/main/engine/src/flutter/CONTRIBUTING.md#dart
     use_string_in_part_of_directives: false # needs to be evaluated, dart:ui frequently uses non-strings

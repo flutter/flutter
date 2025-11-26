@@ -654,7 +654,7 @@ class FakeVMService extends Fake implements vm_service.VmService {
   final serviceCallBacks = <String, vm_service.ServiceCallback>{};
   final calledMethods = <String, List<({Map<String, Object?>? args, String? isolateId})>>{};
   final listenedStreams = <String>{};
-  var errorOnRegisterService = false;
+  bool errorOnRegisterService = false;
 
   @override
   Future<vm_service.Response> callMethod(

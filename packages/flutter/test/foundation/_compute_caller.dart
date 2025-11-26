@@ -11,7 +11,7 @@ int getLength(String s) {
 }
 
 Future<void> main() async {
-  const String s = 'hello world';
+  const s = 'hello world';
   final int result = await compute(getLength, s);
   if (result != s.length) {
     throw Exception('compute returned bad result');

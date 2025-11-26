@@ -31,7 +31,7 @@ class LicensesCommand extends Command<bool> {
 
     final List<String> allDartPaths = allSourceFiles.map((io.File f) => f.path).toList();
 
-    for (final String expectedDirectory in const <String>['lib', 'test', 'dev']) {
+    for (final expectedDirectory in const <String>['lib', 'test', 'dev']) {
       final String expectedAbsoluteDirectory = path.join(
         environment.webUiRootDir.path,
         expectedDirectory,

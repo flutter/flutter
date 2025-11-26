@@ -359,12 +359,12 @@ class FilteringTextInputFormatter extends TextInputFormatter {
     TextEditingValue oldValue, // unused.
     TextEditingValue newValue,
   ) {
-    final _TextEditingValueAccumulator formatState = _TextEditingValueAccumulator(newValue);
+    final formatState = _TextEditingValueAccumulator(newValue);
     assert(!formatState.debugFinalized);
 
     final Iterable<Match> matches = filterPattern.allMatches(newValue.text);
     Match? previousMatch;
-    for (final Match match in matches) {
+    for (final match in matches) {
       assert(match.end >= match.start);
       // Compute the non-match region between this `Match` and the previous
       // `Match`. Depending on the value of `allow`, either the match region or
@@ -539,7 +539,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   ///  * [Dart's documentation on runes and grapheme clusters](https://dart.dev/guides/language/language-tour#runes-and-grapheme-clusters).
   @visibleForTesting
   static TextEditingValue truncate(TextEditingValue value, int maxLength) {
-    final CharacterRange iterator = CharacterRange(value.text);
+    final iterator = CharacterRange(value.text);
     if (value.text.characters.length > maxLength) {
       iterator.expandNext(maxLength);
     }

@@ -257,7 +257,7 @@ class _BottomSheetState extends State<BottomSheet> {
   final GlobalKey _childKey = GlobalKey(debugLabel: 'BottomSheet child');
 
   double get _childHeight {
-    final RenderBox renderBox = _childKey.currentContext!.findRenderObject()! as RenderBox;
+    final renderBox = _childKey.currentContext!.findRenderObject()! as RenderBox;
     return renderBox.size.height;
   }
 
@@ -296,7 +296,7 @@ class _BottomSheetState extends State<BottomSheet> {
     setState(() {
       dragHandleStates.remove(WidgetState.dragged);
     });
-    bool isClosing = false;
+    var isClosing = false;
     if (details.velocity.pixelsPerSecond.dy > _minFlingVelocity) {
       final double flingVelocity = -details.velocity.pixelsPerSecond.dy / _childHeight;
       if (widget.animationController!.value > 0.0) {
@@ -638,7 +638,7 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
     final BoxConstraints childConstraints = _getConstraintsForChild(constraints);
     assert(childConstraints.debugAssertIsValid(isAppliedConstraint: true));
     child.layout(childConstraints, parentUsesSize: !childConstraints.isTight);
-    final BoxParentData childParentData = child.parentData! as BoxParentData;
+    final childParentData = child.parentData! as BoxParentData;
     final Size childSize = childConstraints.isTight ? childConstraints.smallest : child.size;
     childParentData.offset = _getPositionForChild(size, childSize);
 

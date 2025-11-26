@@ -158,7 +158,7 @@ class BySemanticsLabel extends SerializableFinder {
   @override
   Map<String, String> serialize() {
     if (label is RegExp) {
-      final RegExp regExp = label as RegExp;
+      final regExp = label as RegExp;
       return super.serialize()
         ..addAll(<String, String>{'label': regExp.pattern, 'isRegExp': 'true'});
     } else {
@@ -172,7 +172,7 @@ class BySemanticsLabel extends SerializableFinder {
     if (label == null) {
       throw ArgumentError.notNull(path == null ? 'label' : '$path.label');
     }
-    final bool isRegExp = json['isRegExp'] == 'true';
+    final isRegExp = json['isRegExp'] == 'true';
     return BySemanticsLabel(isRegExp ? RegExp(label) : label);
   }
 }
@@ -342,10 +342,8 @@ class Descendant extends SerializableFinder {
     if (matching == null) {
       throw ArgumentError.notNull(path == null ? 'matching' : '$path.matching');
     }
-    final Map<String, String> jsonOfMatcher = Map<String, String>.from(
-      jsonDecode(of) as Map<String, dynamic>,
-    );
-    final Map<String, String> jsonMatchingMatcher = Map<String, String>.from(
+    final jsonOfMatcher = Map<String, String>.from(jsonDecode(of) as Map<String, dynamic>);
+    final jsonMatchingMatcher = Map<String, String>.from(
       jsonDecode(matching) as Map<String, dynamic>,
     );
     return Descendant(
@@ -413,10 +411,8 @@ class Ancestor extends SerializableFinder {
     if (matching == null) {
       throw ArgumentError.notNull(path == null ? 'matching' : '$path.matching');
     }
-    final Map<String, String> jsonOfMatcher = Map<String, String>.from(
-      jsonDecode(of) as Map<String, dynamic>,
-    );
-    final Map<String, String> jsonMatchingMatcher = Map<String, String>.from(
+    final jsonOfMatcher = Map<String, String>.from(jsonDecode(of) as Map<String, dynamic>);
+    final jsonMatchingMatcher = Map<String, String>.from(
       jsonDecode(matching) as Map<String, dynamic>,
     );
     return Ancestor(

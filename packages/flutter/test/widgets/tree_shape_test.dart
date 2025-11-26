@@ -351,7 +351,7 @@ void main() {
     final Widget globalKeyChild = SizedBox(key: GlobalKey());
 
     Map<int, RenderObject> collectLeafRenderObjects() {
-      final Map<int, RenderObject> result = <int, RenderObject>{};
+      final result = <int, RenderObject>{};
       for (final RenderView renderView in RendererBinding.instance.renderViews) {
         void visit(RenderObject object) {
           result[renderView.flutterView.viewId] = object;
@@ -432,7 +432,7 @@ void main() {
     final Widget globalKeyChild = SizedBox(key: GlobalKey());
 
     Map<int, RenderObject> collectLeafRenderObjects() {
-      final Map<int, RenderObject> result = <int, RenderObject>{};
+      final result = <int, RenderObject>{};
       for (final RenderView renderView in RendererBinding.instance.renderViews) {
         void visit(RenderObject object) {
           result[renderView.flutterView.viewId] = object;

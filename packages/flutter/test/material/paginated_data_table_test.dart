@@ -69,7 +69,7 @@ void main() {
   tearDown(() => source.dispose());
 
   testWidgets('PaginatedDataTable paging', (WidgetTester tester) async {
-    final List<String> log = <String>[];
+    final log = <String>[];
 
     await tester.pumpWidget(
       MaterialApp(
@@ -171,7 +171,7 @@ void main() {
   });
 
   testWidgets('PaginatedDataTable footer page number', (WidgetTester tester) async {
-    int rowsPerPage = 2;
+    var rowsPerPage = 2;
 
     Widget buildTable(TestDataSource source, int rowsPerPage) {
       return PaginatedDataTable(
@@ -287,8 +287,8 @@ void main() {
   });
 
   testWidgets('PaginatedDataTable Last Page Empty Space', (WidgetTester tester) async {
-    final TestDataSource source = TestDataSource();
-    int rowsPerPage = 3;
+    final source = TestDataSource();
+    var rowsPerPage = 3;
     final int rowCount = source.rowCount;
     addTearDown(source.dispose);
 
@@ -392,10 +392,10 @@ void main() {
   });
 
   testWidgets('PaginatedDataTable control test', (WidgetTester tester) async {
-    TestDataSource source = TestDataSource()..generation = 42;
+    var source = TestDataSource()..generation = 42;
     addTearDown(source.dispose);
 
-    final List<String> log = <String>[];
+    final log = <String>[];
 
     Widget buildTable(TestDataSource source) {
       return PaginatedDataTable(
@@ -503,11 +503,9 @@ void main() {
     WidgetTester tester,
   ) async {
     await binding.setSurfaceSize(const Size(800, 800));
-    const String headerText = 'HEADER';
-    final List<Widget> actions = <Widget>[
-      IconButton(onPressed: () {}, icon: const Icon(Icons.add)),
-    ];
-    final TestDataSource source = TestDataSource(allowSelection: true);
+    const headerText = 'HEADER';
+    final actions = <Widget>[IconButton(onPressed: () {}, icon: const Icon(Icons.add))];
+    final source = TestDataSource(allowSelection: true);
     addTearDown(source.dispose);
 
     Widget buildTable({String? header, List<Widget>? actions}) => MaterialApp(
@@ -732,10 +730,10 @@ void main() {
   testWidgets('PaginatedDataTable custom horizontal padding - checkbox', (
     WidgetTester tester,
   ) async {
-    const double defaultHorizontalMargin = 24.0;
-    const double defaultColumnSpacing = 56.0;
-    const double customHorizontalMargin = 10.0;
-    const double customColumnSpacing = 15.0;
+    const defaultHorizontalMargin = 24.0;
+    const defaultColumnSpacing = 56.0;
+    const customHorizontalMargin = 10.0;
+    const customColumnSpacing = 15.0;
 
     const double width = 400;
     const double height = 400;
@@ -746,7 +744,7 @@ void main() {
     // much, resulting in our custom margin being ignored.
     await binding.setSurfaceSize(const Size(width, height));
 
-    final TestDataSource source = TestDataSource(allowSelection: true);
+    final source = TestDataSource(allowSelection: true);
     addTearDown(source.dispose);
     Finder cellContent;
     Finder checkbox;
@@ -898,10 +896,10 @@ void main() {
   testWidgets('PaginatedDataTable custom horizontal padding - no checkbox', (
     WidgetTester tester,
   ) async {
-    const double defaultHorizontalMargin = 24.0;
-    const double defaultColumnSpacing = 56.0;
-    const double customHorizontalMargin = 10.0;
-    const double customColumnSpacing = 15.0;
+    const defaultHorizontalMargin = 24.0;
+    const defaultColumnSpacing = 56.0;
+    const customHorizontalMargin = 10.0;
+    const customColumnSpacing = 15.0;
     Finder cellContent;
     Finder padding;
 
@@ -1082,7 +1080,7 @@ void main() {
   testWidgets('PaginatedDataTable with optional column checkbox', (WidgetTester tester) async {
     await binding.setSurfaceSize(const Size(800, 800));
     addTearDown(() => binding.setSurfaceSize(null));
-    final TestDataSource source = TestDataSource(allowSelection: true);
+    final source = TestDataSource(allowSelection: true);
     addTearDown(source.dispose);
 
     Widget buildTable(bool checkbox) => MaterialApp(
@@ -1110,7 +1108,7 @@ void main() {
     await binding.setSurfaceSize(const Size(800, 800));
 
     Widget buildTable() {
-      final TestDataSource source = TestDataSource(allowSelection: true);
+      final source = TestDataSource(allowSelection: true);
       addTearDown(source.dispose);
 
       return MaterialApp(
@@ -1145,9 +1143,9 @@ void main() {
     addTearDown(() => binding.setSurfaceSize(null));
     await binding.setSurfaceSize(const Size(800, 800));
 
-    const double minMaxDataRowHeight = 30.0;
+    const minMaxDataRowHeight = 30.0;
 
-    final TestDataSource source = TestDataSource(allowSelection: true);
+    final source = TestDataSource(allowSelection: true);
     addTearDown(source.dispose);
 
     await tester.pumpWidget(
@@ -1180,8 +1178,8 @@ void main() {
   testWidgets('PaginatedDataTable custom checkboxHorizontalMargin properly applied', (
     WidgetTester tester,
   ) async {
-    const double customCheckboxHorizontalMargin = 15.0;
-    const double customHorizontalMargin = 10.0;
+    const customCheckboxHorizontalMargin = 15.0;
+    const customHorizontalMargin = 10.0;
 
     const double width = 400;
     const double height = 400;
@@ -1192,7 +1190,7 @@ void main() {
     // much, resulting in our custom margin being ignored.
     await binding.setSurfaceSize(const Size(width, height));
 
-    final TestDataSource source = TestDataSource(allowSelection: true);
+    final source = TestDataSource(allowSelection: true);
     addTearDown(source.dispose);
 
     Finder cellContent;
@@ -1248,11 +1246,11 @@ void main() {
   });
 
   testWidgets('Items selected text uses secondary color', (WidgetTester tester) async {
-    const Color selectedTextColor = Color(0xff00ddff);
+    const selectedTextColor = Color(0xff00ddff);
     final ColorScheme colors = const ColorScheme.light().copyWith(secondary: selectedTextColor);
-    final ThemeData theme = ThemeData.from(colorScheme: colors);
+    final theme = ThemeData.from(colorScheme: colors);
 
-    final TestDataSource source = TestDataSource(allowSelection: true);
+    final source = TestDataSource(allowSelection: true);
     addTearDown(source.dispose);
 
     Widget buildTable() {
@@ -1295,7 +1293,7 @@ void main() {
   testWidgets('PaginatedDataTable arrowHeadColor set properly', (WidgetTester tester) async {
     await binding.setSurfaceSize(const Size(800, 800));
     addTearDown(() => binding.setSurfaceSize(null));
-    const Color arrowHeadColor = Color(0xFFE53935);
+    const arrowHeadColor = Color(0xFFE53935);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1352,7 +1350,7 @@ void main() {
   testWidgets('PaginatedDataTable can be scrolled using ScrollController', (
     WidgetTester tester,
   ) async {
-    final ScrollController scrollController = ScrollController();
+    final scrollController = ScrollController();
     addTearDown(scrollController.dispose);
 
     Widget buildTable(TestDataSource source) {
@@ -1391,7 +1389,7 @@ void main() {
   testWidgets('PaginatedDataTable uses PrimaryScrollController when primary ', (
     WidgetTester tester,
   ) async {
-    final ScrollController primaryScrollController = ScrollController();
+    final primaryScrollController = ScrollController();
     addTearDown(primaryScrollController.dispose);
 
     await tester.pumpWidget(
@@ -1448,12 +1446,12 @@ void main() {
 
     final Table table = tester.widget(find.byType(Table));
     final TableRow tableRow = table.children[0];
-    final BoxDecoration tableRowBoxDecoration = tableRow.decoration! as BoxDecoration;
+    final tableRowBoxDecoration = tableRow.decoration! as BoxDecoration;
     expect(tableRowBoxDecoration.color, headingRowColor.resolve(<WidgetState>{}));
   });
 
   testWidgets('PaginatedDataTable respects custom dividerThickness', (WidgetTester tester) async {
-    const double dividerThickness = 2.0;
+    const dividerThickness = 2.0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1477,16 +1475,16 @@ void main() {
     expect(find.byType(Table), findsOneWidget);
     final Table table = tester.widget(find.byType(Table));
     final TableRow tableRow = table.children[0];
-    final BoxDecoration? tableRowBoxDecoration = tableRow.decoration as BoxDecoration?;
+    final tableRowBoxDecoration = tableRow.decoration as BoxDecoration?;
     expect(tableRowBoxDecoration, isNotNull);
     expect(tableRowBoxDecoration?.border, isA<Border>());
 
-    final Border? border = tableRowBoxDecoration?.border as Border?;
+    final border = tableRowBoxDecoration?.border as Border?;
     expect(border?.bottom.width, dividerThickness);
   });
 
   testWidgets('PaginatedDataTable respects default dividerThickness', (WidgetTester tester) async {
-    const double defaultDividerThickness = 1.0;
+    const defaultDividerThickness = 1.0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1509,11 +1507,11 @@ void main() {
     expect(find.byType(Table), findsOneWidget);
     final Table table = tester.widget(find.byType(Table));
     final TableRow tableRow = table.children[0];
-    final BoxDecoration? tableRowBoxDecoration = tableRow.decoration as BoxDecoration?;
+    final tableRowBoxDecoration = tableRow.decoration as BoxDecoration?;
     expect(tableRowBoxDecoration, isNotNull);
     expect(tableRowBoxDecoration?.border, isA<Border>());
 
-    final Border? border = tableRowBoxDecoration?.border as Border?;
+    final border = tableRowBoxDecoration?.border as Border?;
     expect(border?.bottom.width, defaultDividerThickness);
   });
 

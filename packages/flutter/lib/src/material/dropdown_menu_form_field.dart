@@ -75,7 +75,7 @@ class DropdownMenuFormField<T extends Object> extends FormField<T> {
          initialValue: initialSelection,
          autovalidateMode: autovalidateMode,
          builder: (FormFieldState<T> field) {
-           final _DropdownMenuFormFieldState<T> state = field as _DropdownMenuFormFieldState<T>;
+           final state = field as _DropdownMenuFormFieldState<T>;
            return UnmanagedRestorationScope(
              bucket: field.bucket,
              child: DropdownMenu<T>(

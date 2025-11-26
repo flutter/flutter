@@ -351,7 +351,7 @@ class FormState extends State<Form> {
   ///  * [validate], which also validates descendant [FormField]s,
   /// and return true if there are no errors.
   Set<FormFieldState<Object?>> validateGranularly() {
-    final Set<FormFieldState<Object?>> invalidFields = <FormFieldState<Object?>>{};
+    final invalidFields = <FormFieldState<Object?>>{};
     _hasInteractedByUser = true;
     _forceRebuild();
     _validate(View.of(context), invalidFields);
@@ -359,9 +359,9 @@ class FormState extends State<Form> {
   }
 
   bool _validate(FlutterView view, [Set<FormFieldState<Object?>>? invalidFields]) {
-    bool hasError = false;
-    String errorMessage = '';
-    final bool validateOnFocusChange = widget.autovalidateMode == AutovalidateMode.onUnfocus;
+    var hasError = false;
+    var errorMessage = '';
+    final validateOnFocusChange = widget.autovalidateMode == AutovalidateMode.onUnfocus;
 
     for (final FormFieldState<dynamic> field in _fields) {
       final bool hasFocus = field._focusNode.hasFocus;

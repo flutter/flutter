@@ -13,8 +13,8 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  const Duration expansionDuration = Duration(milliseconds: 250);
-  const Duration infinitesimalDuration = Duration(microseconds: 1);
+  const expansionDuration = Duration(milliseconds: 250);
+  const infinitesimalDuration = Duration(microseconds: 1);
   testWidgets('Toggles expansion on tap', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
@@ -37,7 +37,7 @@ void main() {
   });
 
   testWidgets('Can be controlled by ExpansibleController', (WidgetTester tester) async {
-    final ExpansibleController controller = ExpansibleController();
+    final controller = ExpansibleController();
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoPageScaffold(
@@ -67,7 +67,7 @@ void main() {
   });
 
   testWidgets('Controller can set the tile to be initially expanded', (WidgetTester tester) async {
-    final ExpansibleController controller = ExpansibleController();
+    final controller = ExpansibleController();
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoPageScaffold(
@@ -214,7 +214,7 @@ void main() {
   });
 
   testWidgets('Nested CupertinoListTile Semantics', (WidgetTester tester) async {
-    final ExpansibleController controller = ExpansibleController();
+    final controller = ExpansibleController();
     addTearDown(controller.dispose);
     final SemanticsHandle handle = tester.ensureSemantics();
 
@@ -262,10 +262,10 @@ void main() {
   testWidgets('Semantics with the onTapHint is an ancestor of CupertinoListTile', (
     WidgetTester tester,
   ) async {
-    final ExpansibleController controller = ExpansibleController();
+    final controller = ExpansibleController();
     addTearDown(controller.dispose);
     final SemanticsHandle handle = tester.ensureSemantics();
-    const DefaultCupertinoLocalizations localizations = DefaultCupertinoLocalizations();
+    const localizations = DefaultCupertinoLocalizations();
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -320,10 +320,10 @@ void main() {
   testWidgets(
     'Semantics hint for iOS and macOS',
     (WidgetTester tester) async {
-      final ExpansibleController controller = ExpansibleController();
+      final controller = ExpansibleController();
       addTearDown(controller.dispose);
       final SemanticsHandle handle = tester.ensureSemantics();
-      const DefaultCupertinoLocalizations localizations = DefaultCupertinoLocalizations();
+      const localizations = DefaultCupertinoLocalizations();
 
       await tester.pumpWidget(
         CupertinoApp(

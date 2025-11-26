@@ -104,7 +104,7 @@ class RenderDots extends RenderBox {
 
 void main() {
   // Create some styled text to tell the user to interact with the app.
-  final RenderParagraph paragraph = RenderParagraph(
+  final paragraph = RenderParagraph(
     const TextSpan(
       style: TextStyle(color: Colors.black87),
       text: 'Touch me!',
@@ -114,7 +114,7 @@ void main() {
   // A stack is a render object that layers its children on top of each other.
   // The bottom later is our RenderDots object, and on top of that we show the
   // text.
-  final RenderStack stack = RenderStack(
+  final stack = RenderStack(
     textDirection: TextDirection.ltr,
     children: <RenderBox>[RenderDots(), paragraph],
   );
@@ -126,7 +126,7 @@ void main() {
   //
   // We use the StackParentData of the paragraph to position the text in the top
   // left corner of the screen.
-  final StackParentData paragraphParentData = paragraph.parentData! as StackParentData;
+  final paragraphParentData = paragraph.parentData! as StackParentData;
   paragraphParentData
     ..top = 40.0
     ..left = 20.0;

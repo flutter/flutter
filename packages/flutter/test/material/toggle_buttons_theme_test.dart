@@ -32,12 +32,12 @@ void main() {
 
   test('ToggleButtonsThemeData lerp special cases', () {
     expect(ToggleButtonsThemeData.lerp(null, null, 0), null);
-    const ToggleButtonsThemeData data = ToggleButtonsThemeData();
+    const data = ToggleButtonsThemeData();
     expect(identical(ToggleButtonsThemeData.lerp(data, data, 0.5), data), true);
   });
 
   test('ToggleButtonsThemeData defaults', () {
-    const ToggleButtonsThemeData themeData = ToggleButtonsThemeData();
+    const themeData = ToggleButtonsThemeData();
     expect(themeData.textStyle, null);
     expect(themeData.constraints, null);
     expect(themeData.color, null);
@@ -54,10 +54,7 @@ void main() {
     expect(themeData.borderRadius, null);
     expect(themeData.borderWidth, null);
 
-    const ToggleButtonsTheme theme = ToggleButtonsTheme(
-      data: ToggleButtonsThemeData(),
-      child: SizedBox(),
-    );
+    const theme = ToggleButtonsTheme(data: ToggleButtonsThemeData(), child: SizedBox());
     expect(theme.data.textStyle, null);
     expect(theme.data.constraints, null);
     expect(theme.data.color, null);
@@ -76,7 +73,7 @@ void main() {
   });
 
   testWidgets('Default ToggleButtonsThemeData debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const ToggleButtonsThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -88,7 +85,7 @@ void main() {
   });
 
   testWidgets('ToggleButtonsThemeData implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const ToggleButtonsThemeData(
       textStyle: TextStyle(fontSize: 10),
       constraints: BoxConstraints(minHeight: 10.0, maxHeight: 20.0),
@@ -262,7 +259,7 @@ void main() {
           .style;
     }
 
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
     const Color enabledColor = Colors.lime;
     const Color selectedColor = Colors.green;
     const Color disabledColor = Colors.yellow;
@@ -422,11 +419,11 @@ void main() {
   });
 
   testWidgets('Theme InkWell colors', (WidgetTester tester) async {
-    const Color splashColor = Color(0xff4caf50);
-    const Color highlightColor = Color(0xffcddc39);
-    const Color hoverColor = Color(0xffffeb3b);
-    const Color focusColor = Color(0xffffff00);
-    final FocusNode focusNode = FocusNode();
+    const splashColor = Color(0xff4caf50);
+    const highlightColor = Color(0xffcddc39);
+    const hoverColor = Color(0xffffeb3b);
+    const focusColor = Color(0xffffff00);
+    final focusNode = FocusNode();
 
     await tester.pumpWidget(
       Material(
@@ -495,10 +492,10 @@ void main() {
   testWidgets('Theme border width and border colors for enabled, selected and disabled states', (
     WidgetTester tester,
   ) async {
-    const Color borderColor = Color(0xff4caf50);
-    const Color selectedBorderColor = Color(0xffcddc39);
-    const Color disabledBorderColor = Color(0xffffeb3b);
-    const double customWidth = 2.0;
+    const borderColor = Color(0xff4caf50);
+    const selectedBorderColor = Color(0xffcddc39);
+    const disabledBorderColor = Color(0xffffeb3b);
+    const customWidth = 2.0;
 
     await tester.pumpWidget(
       Material(

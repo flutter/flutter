@@ -510,8 +510,8 @@ class SliverConstraints extends Constraints {
     InformationCollector? informationCollector,
   }) {
     assert(() {
-      bool hasErrors = false;
-      final StringBuffer errorMessage = StringBuffer('\n');
+      var hasErrors = false;
+      final errorMessage = StringBuffer('\n');
       void verify(bool check, String message) {
         if (check) {
           return;
@@ -527,7 +527,7 @@ class SliverConstraints extends Constraints {
         bool mustBeNegative = false,
       }) {
         if (property.isNaN) {
-          String additional = '.';
+          var additional = '.';
           if (mustBePositive) {
             additional = ', expected greater than or equal to zero.';
           } else if (mustBeNegative) {
@@ -615,7 +615,7 @@ class SliverConstraints extends Constraints {
 
   @override
   String toString() {
-    final List<String> properties = <String>[
+    final properties = <String>[
       '$axisDirection',
       '$growthDirection',
       '$userScrollDirection',
@@ -1380,7 +1380,7 @@ abstract class RenderSliver extends RenderObject {
         );
       }
 
-      final List<DiagnosticsNode> information = <DiagnosticsNode>[
+      final information = <DiagnosticsNode>[
         ErrorSummary('RenderSliver geometry setter called incorrectly.'),
         violation,
         ?hint,
@@ -1782,7 +1782,7 @@ abstract class RenderSliver extends RenderObject {
     assert(() {
       if (debugPaintSizeEnabled) {
         final double strokeWidth = math.min(4.0, geometry!.paintExtent / 30.0);
-        final Paint paint = Paint()
+        final paint = Paint()
           ..color = const Color(0xFF33CC33)
           ..strokeWidth = strokeWidth
           ..style = PaintingStyle.stroke
@@ -1962,7 +1962,7 @@ abstract class RenderSliverSingleBoxAdapter extends RenderSliver
     SliverConstraints constraints,
     SliverGeometry geometry,
   ) {
-    final SliverPhysicalParentData childParentData = child.parentData! as SliverPhysicalParentData;
+    final childParentData = child.parentData! as SliverPhysicalParentData;
     childParentData.paintOffset = switch (applyGrowthDirectionToAxisDirection(
       constraints.axisDirection,
       constraints.growthDirection,
@@ -2006,15 +2006,14 @@ abstract class RenderSliverSingleBoxAdapter extends RenderSliver
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
     assert(child == this.child);
-    final SliverPhysicalParentData childParentData = child.parentData! as SliverPhysicalParentData;
+    final childParentData = child.parentData! as SliverPhysicalParentData;
     childParentData.applyPaintTransform(transform);
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null && geometry!.visible) {
-      final SliverPhysicalParentData childParentData =
-          child!.parentData! as SliverPhysicalParentData;
+      final childParentData = child!.parentData! as SliverPhysicalParentData;
       context.paintChild(child!, offset + childParentData.paintOffset);
     }
   }

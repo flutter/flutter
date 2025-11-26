@@ -15,7 +15,7 @@ void main() {
 Future<void> testMain() async {
   setUpUnitTests();
   test('rect accessors', () {
-    const Rect r = Rect.fromLTRB(1.0, 3.0, 5.0, 7.0);
+    const r = Rect.fromLTRB(1.0, 3.0, 5.0, 7.0);
     expect(r.left, equals(1.0));
     expect(r.top, equals(3.0));
     expect(r.right, equals(5.0));
@@ -23,7 +23,7 @@ Future<void> testMain() async {
   });
 
   test('rect created by width and height', () {
-    const Rect r = Rect.fromLTWH(1.0, 3.0, 5.0, 7.0);
+    const r = Rect.fromLTWH(1.0, 3.0, 5.0, 7.0);
     expect(r.left, equals(1.0));
     expect(r.top, equals(3.0));
     expect(r.right, equals(6.0));
@@ -33,8 +33,8 @@ Future<void> testMain() async {
   });
 
   test('rect intersection', () {
-    const Rect r1 = Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
-    const Rect r2 = Rect.fromLTRB(50.0, 50.0, 200.0, 200.0);
+    const r1 = Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
+    const r2 = Rect.fromLTRB(50.0, 50.0, 200.0, 200.0);
     final Rect r3 = r1.intersect(r2);
     expect(r3.left, equals(50.0));
     expect(r3.top, equals(50.0));
@@ -45,8 +45,8 @@ Future<void> testMain() async {
   });
 
   test('rect expandToInclude overlapping rects', () {
-    const Rect r1 = Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
-    const Rect r2 = Rect.fromLTRB(50.0, 50.0, 200.0, 200.0);
+    const r1 = Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
+    const r2 = Rect.fromLTRB(50.0, 50.0, 200.0, 200.0);
     final Rect r3 = r1.expandToInclude(r2);
     expect(r3.left, equals(0.0));
     expect(r3.top, equals(0.0));
@@ -57,8 +57,8 @@ Future<void> testMain() async {
   });
 
   test('rect expandToInclude crossing rects', () {
-    const Rect r1 = Rect.fromLTRB(50.0, 0.0, 50.0, 200.0);
-    const Rect r2 = Rect.fromLTRB(0.0, 50.0, 200.0, 50.0);
+    const r1 = Rect.fromLTRB(50.0, 0.0, 50.0, 200.0);
+    const r2 = Rect.fromLTRB(0.0, 50.0, 200.0, 50.0);
     final Rect r3 = r1.expandToInclude(r2);
     expect(r3.left, equals(0.0));
     expect(r3.top, equals(0.0));
@@ -69,7 +69,7 @@ Future<void> testMain() async {
   });
 
   test('size created from doubles', () {
-    const Size size = Size(5.0, 7.0);
+    const size = Size(5.0, 7.0);
     expect(size.width, equals(5.0));
     expect(size.height, equals(7.0));
     expect(size.shortestSide, equals(5.0));
@@ -77,8 +77,8 @@ Future<void> testMain() async {
   });
 
   test('rounded rect created from rect and radii', () {
-    const Rect baseRect = Rect.fromLTWH(1.0, 3.0, 5.0, 7.0);
-    final RRect r = RRect.fromRectXY(baseRect, 1.0, 1.0);
+    const baseRect = Rect.fromLTWH(1.0, 3.0, 5.0, 7.0);
+    final r = RRect.fromRectXY(baseRect, 1.0, 1.0);
     expect(r.left, equals(1.0));
     expect(r.top, equals(3.0));
     expect(r.right, equals(6.0));

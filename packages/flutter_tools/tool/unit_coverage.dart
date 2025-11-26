@@ -55,6 +55,6 @@ void main(List<String> args) {
 
 class Coverage {
   String? library;
-  var totalLines = 0;
-  var testedLines = 0;
+  int totalLines = 0;
+  int testedLines = 0;
 }

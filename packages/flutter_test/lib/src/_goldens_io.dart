@@ -144,7 +144,7 @@ mixin LocalComparisonOutput {
     Uri basedir, {
     String key = '',
   }) async => TestAsyncUtils.guard<String>(() async {
-    String additionalFeedback = '';
+    var additionalFeedback = '';
     if (result.diffs != null) {
       additionalFeedback =
           '\nFailure feedback can be found at ${path.join(basedir.path, 'failures')}';
@@ -166,7 +166,7 @@ mixin LocalComparisonOutput {
   /// Returns the appropriate file for a given diff from a [ComparisonResult].
   File getFailureFile(String failure, Uri golden, Uri basedir) {
     final String fileName = golden.pathSegments.last;
-    final String testName = '${fileName.split(path.extension(fileName))[0]}_$failure.png';
+    final testName = '${fileName.split(path.extension(fileName))[0]}_$failure.png';
     return File(path.join(path.fromUri(basedir), path.fromUri(Uri.parse('failures/$testName'))));
   }
 }
@@ -200,7 +200,7 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
   final int height = testImage.height;
 
   if (width != masterImage.width || height != masterImage.height) {
-    final ComparisonResult result = ComparisonResult(
+    final result = ComparisonResult(
       passed: false,
       diffPercent: 1.0,
       error:
@@ -212,18 +212,18 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
     return result;
   }
 
-  int pixelDiffCount = 0;
+  var pixelDiffCount = 0;
   final int totalPixels = width * height;
   final ByteData invertedMasterRgba = _invert(masterImageRgba!);
   final ByteData invertedTestRgba = _invert(testImageRgba!);
 
   final Uint8List testImageBytes = (await testImage.toByteData())!.buffer.asUint8List();
-  final ByteData maskedDiffRgba = ByteData(testImageBytes.length);
+  final maskedDiffRgba = ByteData(testImageBytes.length);
   maskedDiffRgba.buffer.asUint8List().setRange(0, testImageBytes.length, testImageBytes);
-  final ByteData isolatedDiffRgba = ByteData(width * height * 4);
+  final isolatedDiffRgba = ByteData(width * height * 4);
 
-  for (int x = 0; x < width; x++) {
-    for (int y = 0; y < height; y++) {
+  for (var x = 0; x < width; x++) {
+    for (var y = 0; y < height; y++) {
       final int byteOffset = (width * y + x) * 4;
       final int testPixel = testImageRgba.getUint32(byteOffset);
       final int masterPixel = masterImageRgba.getUint32(byteOffset);
@@ -274,9 +274,9 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
 
 /// Inverts [imageBytes], returning a new [ByteData] object.
 ByteData _invert(ByteData imageBytes) {
-  final ByteData bytes = ByteData(imageBytes.lengthInBytes);
+  final bytes = ByteData(imageBytes.lengthInBytes);
   // Invert the RGB data (but not A).
-  for (int i = 0; i < imageBytes.lengthInBytes; i += 4) {
+  for (var i = 0; i < imageBytes.lengthInBytes; i += 4) {
     bytes.setUint8(i, 255 - imageBytes.getUint8(i));
     bytes.setUint8(i + 1, 255 - imageBytes.getUint8(i + 1));
     bytes.setUint8(i + 2, 255 - imageBytes.getUint8(i + 2));
@@ -299,7 +299,7 @@ int _readAlpha(int pixel) => pixel & 0xff;
 
 /// Convenience wrapper around [decodeImageFromPixels].
 Future<Image> _createImage(ByteData bytes, int width, int height) {
-  final Completer<Image> completer = Completer<Image>();
+  final completer = Completer<Image>();
   decodeImageFromPixels(
     bytes.buffer.asUint8List(),
     width,

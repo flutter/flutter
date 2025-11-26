@@ -64,7 +64,7 @@ void main() {
       // Needs https://github.com/flutter/flutter/issues/129659
       return;
     }
-    final String testAssetName =
+    final testAssetName =
         'test_reorder_uniforms_${DateTime.now().millisecondsSinceEpoch}.frag.iplr';
     final String buildDir = Platform.environment['FLUTTER_BUILD_DIRECTORY']!;
     final String assetsDir = path.join(buildDir, 'gen/flutter/lib/ui/assets');
@@ -72,7 +72,7 @@ void main() {
     final String shaderSrcB = path.join(assetsDir, 'uniforms_reordered.frag.iplr');
     final String shaderSrcC = path.join(assetsDir, testAssetName);
 
-    final File fileC = File(shaderSrcC);
+    final fileC = File(shaderSrcC);
     final Uint8List sourceA = File(shaderSrcA).readAsBytesSync();
     final Uint8List sourceB = File(shaderSrcB).readAsBytesSync();
 
@@ -99,15 +99,14 @@ void main() {
       // Needs https://github.com/flutter/flutter/issues/129659
       return;
     }
-    final String testAssetName =
-        'test_insert_uniforms_${DateTime.now().millisecondsSinceEpoch}.frag.iplr';
+    final testAssetName = 'test_insert_uniforms_${DateTime.now().millisecondsSinceEpoch}.frag.iplr';
     final String buildDir = Platform.environment['FLUTTER_BUILD_DIRECTORY']!;
     final String assetsDir = path.join(buildDir, 'gen/flutter/lib/ui/assets');
     final String shaderSrcA = path.join(assetsDir, 'uniforms.frag.iplr');
     final String shaderSrcB = path.join(assetsDir, 'uniforms_inserted.frag.iplr');
     final String shaderSrcC = path.join(assetsDir, testAssetName);
 
-    final File fileC = File(shaderSrcC);
+    final fileC = File(shaderSrcC);
     final Uint8List sourceA = File(shaderSrcA).readAsBytesSync();
     final Uint8List sourceB = File(shaderSrcB).readAsBytesSync();
 
@@ -136,7 +135,7 @@ void main() {
       // Needs https://github.com/flutter/flutter/issues/129659
       return;
     }
-    final String testAssetName =
+    final testAssetName =
         'test_reorder_samplers_${DateTime.now().millisecondsSinceEpoch}.frag.iplr';
     final String buildDir = Platform.environment['FLUTTER_BUILD_DIRECTORY']!;
     final String assetsDir = path.join(buildDir, 'gen/flutter/lib/ui/assets');
@@ -144,7 +143,7 @@ void main() {
     final String shaderSrcB = path.join(assetsDir, 'double_sampler_swapped.frag.iplr');
     final String shaderSrcC = path.join(assetsDir, testAssetName);
 
-    final File fileC = File(shaderSrcC);
+    final fileC = File(shaderSrcC);
     final Uint8List sourceA = File(shaderSrcA).readAsBytesSync();
     final Uint8List sourceB = File(shaderSrcB).readAsBytesSync();
 

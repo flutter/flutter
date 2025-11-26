@@ -1012,7 +1012,7 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
 /// Maps the selector from NSStandardKeyBindingResponding to the Intent if the
 /// selector is recognized.
 Intent? intentForMacOSSelector(String selectorName) {
-  const Map<String, Intent> selectorToIntent = <String, Intent>{
+  const selectorToIntent = <String, Intent>{
     'deleteBackward:': DeleteCharacterIntent(forward: false),
     'deleteWordBackward:': DeleteToNextWordBoundaryIntent(forward: false),
     'deleteToBeginningOfLine:': DeleteToLineBreakIntent(forward: false),

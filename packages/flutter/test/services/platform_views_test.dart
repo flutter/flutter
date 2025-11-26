@@ -274,7 +274,7 @@ void main() {
     });
 
     test('dispose clears focusCallbacks', () async {
-      bool didFocus = false;
+      var didFocus = false;
       viewsController.registerViewType('webview');
       final AndroidViewController viewController = PlatformViewsService.initAndroidView(
         id: 0,
@@ -334,7 +334,7 @@ void main() {
 
     test('OnPlatformViewCreated callback', () async {
       viewsController.registerViewType('webview');
-      final List<int> createdViews = <int>[];
+      final createdViews = <int>[];
       void callback(int id) {
         createdViews.add(id);
       }
@@ -444,7 +444,7 @@ void main() {
     testWidgets('motion event converter does not duplicate move events', (
       WidgetTester tester,
     ) async {
-      final List<MethodCall> log = <MethodCall>[];
+      final log = <MethodCall>[];
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.platform_views,
         (MethodCall methodCall) async {
@@ -460,8 +460,8 @@ void main() {
       );
       viewController.pointTransformer = (Offset offset) => offset;
 
-      const int pointerCount = 10;
-      for (int i = 0; i < pointerCount; i++) {
+      const pointerCount = 10;
+      for (var i = 0; i < pointerCount; i++) {
         final PointerEvent event = PointerDownEvent(
           timeStamp: const Duration(milliseconds: 1),
           pointer: i,
@@ -470,9 +470,9 @@ void main() {
       }
 
       // Pointer event platform data constant from _AndroidMotionEventConverter
-      const int kPointerDataFlagMultiple = 2;
+      const kPointerDataFlagMultiple = 2;
 
-      for (int i = 0; i < pointerCount; i++) {
+      for (var i = 0; i < pointerCount; i++) {
         final PointerEvent event = PointerMoveEvent(
           timeStamp: const Duration(milliseconds: 2),
           pointer: i,
@@ -482,18 +482,18 @@ void main() {
       }
 
       // Indexes in the list returned by AndroidMotionEvent._asList
-      const int kAndroidMotionEventListIndexAction = 3;
-      const int kAndroidMotionEventListIndexPointerCount = 4;
+      const kAndroidMotionEventListIndexAction = 3;
+      const kAndroidMotionEventListIndexPointerCount = 4;
 
       final List<MethodCall> moveCalls = log.where((MethodCall call) {
-        final List<dynamic> args = call.arguments as List<dynamic>;
+        final args = call.arguments as List<dynamic>;
         return call.method == 'touch' &&
             args[kAndroidMotionEventListIndexAction] == AndroidViewController.kActionMove;
       }).toList();
 
       // The _AndroidMotionEventConverter should yield one touch event containing all of the pointers.
       expect(moveCalls.length, equals(1));
-      final List<dynamic> moveArgs = moveCalls.single.arguments as List<dynamic>;
+      final moveArgs = moveCalls.single.arguments as List<dynamic>;
       expect(moveArgs[kAndroidMotionEventListIndexPointerCount], equals(pointerCount));
     });
   });
@@ -592,14 +592,11 @@ void main() {
   });
 
   test('toString works as intended', () async {
-    const AndroidPointerProperties androidPointerProperties = AndroidPointerProperties(
-      id: 0,
-      toolType: 0,
-    );
+    const androidPointerProperties = AndroidPointerProperties(id: 0, toolType: 0);
     expect(androidPointerProperties.toString(), 'AndroidPointerProperties(id: 0, toolType: 0)');
 
-    const double zero = 0.0;
-    const AndroidPointerCoords androidPointerCoords = AndroidPointerCoords(
+    const zero = 0.0;
+    const androidPointerCoords = AndroidPointerCoords(
       orientation: zero,
       pressure: zero,
       size: zero,
@@ -623,7 +620,7 @@ void main() {
       'y: $zero)',
     );
 
-    final AndroidMotionEvent androidMotionEvent = AndroidMotionEvent(
+    final androidMotionEvent = AndroidMotionEvent(
       downTime: 0,
       eventTime: 0,
       action: 0,

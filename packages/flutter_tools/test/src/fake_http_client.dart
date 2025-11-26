@@ -95,7 +95,7 @@ class FakeHttpClient implements HttpClient {
   final List<FakeRequest> _requests;
 
   @override
-  var autoUncompress = true;
+  bool autoUncompress = true;
 
   @override
   Duration? connectionTimeout;
@@ -276,22 +276,22 @@ class _FakeHttpClientRequest implements HttpClientRequest {
   final StackTrace _stackTrace;
 
   @override
-  var bufferOutput = true;
+  bool bufferOutput = true;
 
   @override
-  var contentLength = 0;
+  int contentLength = 0;
 
   @override
   late Encoding encoding;
 
   @override
-  var followRedirects = true;
+  bool followRedirects = true;
 
   @override
-  var maxRedirects = 5;
+  int maxRedirects = 5;
 
   @override
-  var persistentConnection = true;
+  bool persistentConnection = true;
 
   @override
   void abort([Object? exception, StackTrace? stackTrace]) {
@@ -461,7 +461,7 @@ class _FakeHttpHeaders implements HttpHeaders {
   }
 
   @override
-  var contentLength = -1;
+  int contentLength = -1;
 
   @override
   ContentType? contentType;

@@ -59,7 +59,7 @@ ffi.Pointer<ffi.Uint8> _stringToNative(String value) {
 }
 
 String _nativeToString(ffi.Pointer<ffi.Uint8> value) {
-  int length = 0;
+  var length = 0;
   while (value[length] != 0) {
     length++;
   }
@@ -239,7 +239,7 @@ class _GtkWindow extends _GtkContainer {
       ffi.sizeOf<_GdkGeometry>(),
     ).cast<_GdkGeometry>();
     final _GdkGeometry g = geometry.ref;
-    int geometryMask = 0;
+    var geometryMask = 0;
     if (minWidth != null || minHeight != null) {
       g.minWidth = minWidth ?? 0;
       g.minHeight = minHeight ?? 0;
@@ -294,7 +294,7 @@ class _GtkWindow extends _GtkContainer {
     final ffi.Pointer<ffi.Int> width = _gMalloc0(ffi.sizeOf<ffi.Int>()).cast<ffi.Int>();
     final ffi.Pointer<ffi.Int> height = _gMalloc0(ffi.sizeOf<ffi.Int>()).cast<ffi.Int>();
     _gtkWindowGetSize(instance, width, height);
-    final Size result = Size(width.value.toDouble(), height.value.toDouble());
+    final result = Size(width.value.toDouble(), height.value.toDouble());
     _gFree(width);
     _gFree(height);
     return result;
@@ -561,7 +561,7 @@ class WindowingOwnerLinux extends WindowingOwner {
     String? title,
     required RegularWindowControllerDelegate delegate,
   }) {
-    final RegularWindowControllerLinux controller = RegularWindowControllerLinux(
+    final controller = RegularWindowControllerLinux(
       owner: this,
       delegate: delegate,
       preferredSize: preferredSize,
@@ -581,7 +581,7 @@ class WindowingOwnerLinux extends WindowingOwner {
     BaseWindowController? parent,
     String? title,
   }) {
-    final DialogWindowControllerLinux controller = DialogWindowControllerLinux(
+    final controller = DialogWindowControllerLinux(
       owner: this,
       delegate: delegate,
       preferredSize: preferredSize,
@@ -665,7 +665,7 @@ class RegularWindowControllerLinux extends RegularWindowController {
     if (title != null) {
       setTitle(title);
     }
-    final _FlView view = _FlView();
+    final view = _FlView();
     final int viewId = view.getId();
     rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
       (FlutterView view) => view.viewId == viewId,
@@ -849,7 +849,7 @@ class DialogWindowControllerLinux extends DialogWindowController {
     if (title != null) {
       setTitle(title);
     }
-    final _FlView view = _FlView();
+    final view = _FlView();
     final int viewId = view.getId();
     rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
       (FlutterView view) => view.viewId == viewId,

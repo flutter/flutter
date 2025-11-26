@@ -29,13 +29,13 @@ void main() {
 
   group('Serialization', () {
     // These are always included.
-    const List<String> defaultDiagnosticKeys = <String>['description'];
+    const defaultDiagnosticKeys = <String>['description'];
     // These are only included when fullDetails = false.
-    const List<String> essentialDiagnosticKeys = <String>['shouldIndent'];
+    const essentialDiagnosticKeys = <String>['shouldIndent'];
     // These are only included with fullDetails = true.
-    const List<String> detailedDiagnosticKeys = <String>['type', 'hasChildren', 'allowWrap'];
+    const detailedDiagnosticKeys = <String>['type', 'hasChildren', 'allowWrap'];
 
-    final TestTree testTree = TestTree(
+    final testTree = TestTree(
       properties: <DiagnosticsNode>[
         StringProperty('stringProperty1', 'value1', quoted: false),
         DoubleProperty('doubleProperty1', 42.5),
@@ -84,10 +84,10 @@ void main() {
       expect(result.containsKey('properties'), isFalse);
       expect(result.containsKey('children'), isFalse);
 
-      for (final String keyName in defaultDiagnosticKeys) {
+      for (final keyName in defaultDiagnosticKeys) {
         expect(result.containsKey(keyName), isTrue, reason: '$keyName is included.');
       }
-      for (final String keyName in detailedDiagnosticKeys) {
+      for (final keyName in detailedDiagnosticKeys) {
         expect(result.containsKey(keyName), isTrue, reason: '$keyName is included.');
       }
     });
@@ -98,13 +98,13 @@ void main() {
       );
       expect(result.containsKey('properties'), isFalse);
       expect(result.containsKey('children'), isFalse);
-      for (final String keyName in defaultDiagnosticKeys) {
+      for (final keyName in defaultDiagnosticKeys) {
         expect(result.containsKey(keyName), isTrue, reason: '$keyName is included.');
       }
-      for (final String keyName in essentialDiagnosticKeys) {
+      for (final keyName in essentialDiagnosticKeys) {
         expect(result.containsKey(keyName), isTrue, reason: '$keyName is included.');
       }
-      for (final String keyName in detailedDiagnosticKeys) {
+      for (final keyName in detailedDiagnosticKeys) {
         expect(result.containsKey(keyName), isFalse, reason: '$keyName is  not included.');
       }
 
@@ -117,7 +117,7 @@ void main() {
         const DiagnosticsSerializationDelegate(subtreeDepth: 1),
       );
       expect(result.containsKey('properties'), isFalse);
-      final List<Map<String, Object?>> children = result['children']! as List<Map<String, Object?>>;
+      final children = result['children']! as List<Map<String, Object?>>;
       expect(children[0].containsKey('children'), isFalse);
       expect(children[1].containsKey('children'), isFalse);
       expect(children[2].containsKey('children'), isFalse);
@@ -128,7 +128,7 @@ void main() {
         const DiagnosticsSerializationDelegate(subtreeDepth: 5),
       );
       expect(result.containsKey('properties'), isFalse);
-      final List<Map<String, Object?>> children = result['children']! as List<Map<String, Object?>>;
+      final children = result['children']! as List<Map<String, Object?>>;
       expect(children[0]['children'], hasLength(0));
       expect(children[1]['children'], hasLength(3));
       expect(children[2]['children'], hasLength(0));
@@ -147,7 +147,7 @@ void main() {
         const DiagnosticsSerializationDelegate(includeProperties: true, subtreeDepth: 1),
       );
       expect(result['properties'], hasLength(7));
-      final List<Map<String, Object?>> children = result['children']! as List<Map<String, Object?>>;
+      final children = result['children']! as List<Map<String, Object?>>;
       expect(children, hasLength(3));
       expect(children[0]['properties'], hasLength(0));
       expect(children[1]['properties'], hasLength(2));
@@ -163,12 +163,11 @@ void main() {
         ),
       );
       expect(result['foo'], isTrue);
-      final List<Map<String, Object?>> properties =
-          result['properties']! as List<Map<String, Object?>>;
+      final properties = result['properties']! as List<Map<String, Object?>>;
       expect(properties, hasLength(7));
       expect(properties.every((Map<String, Object?> property) => property['foo'] == true), isTrue);
 
-      final List<Map<String, Object?>> children = result['children']! as List<Map<String, Object?>>;
+      final children = result['children']! as List<Map<String, Object?>>;
       expect(children, hasLength(3));
       expect(children.every((Map<String, Object?> child) => child['foo'] == true), isTrue);
     });
@@ -182,8 +181,7 @@ void main() {
           },
         ),
       );
-      final List<Map<String, Object?>> properties =
-          result['properties']! as List<Map<String, Object?>>;
+      final properties = result['properties']! as List<Map<String, Object?>>;
       expect(properties, hasLength(3));
       expect(
         properties.every((Map<String, Object?> property) => property['type'] == 'StringProperty'),
@@ -192,7 +190,7 @@ void main() {
     });
 
     test('filterProperties - replace', () {
-      bool replaced = false;
+      var replaced = false;
       final Map<String, Object?> result = testTree.toDiagnosticsNode().toJsonMap(
         TestDiagnosticsSerializationDelegate(
           includeProperties: true,
@@ -205,8 +203,7 @@ void main() {
           },
         ),
       );
-      final List<Map<String, Object?>> properties =
-          result['properties']! as List<Map<String, Object?>>;
+      final properties = result['properties']! as List<Map<String, Object?>>;
       expect(properties, hasLength(1));
       expect(properties.single['name'], 'foo');
     });
@@ -220,7 +217,7 @@ void main() {
           },
         ),
       );
-      final List<Map<String, Object?>> children = result['children']! as List<Map<String, Object?>>;
+      final children = result['children']! as List<Map<String, Object?>>;
       expect(children, hasLength(1));
     });
 
@@ -233,7 +230,7 @@ void main() {
           },
         ),
       );
-      final List<Map<String, Object?>> children = result['children']! as List<Map<String, Object?>>;
+      final children = result['children']! as List<Map<String, Object?>>;
       expect(children, hasLength(3));
       expect(children.first['name'], 'child node B1');
     });
@@ -248,12 +245,11 @@ void main() {
           },
         ),
       );
-      final List<Map<String, Object?>> children = result['children']! as List<Map<String, Object?>>;
+      final children = result['children']! as List<Map<String, Object?>>;
       expect(children, hasLength(3));
       expect(children.last['truncated'], isTrue);
 
-      final List<Map<String, Object?>> properties =
-          result['properties']! as List<Map<String, Object?>>;
+      final properties = result['properties']! as List<Map<String, Object?>>;
       expect(properties, hasLength(3));
       expect(properties.last['truncated'], isTrue);
     });
@@ -268,15 +264,14 @@ void main() {
           },
         ),
       );
-      final List<Map<String, Object?>> properties =
-          result['properties']! as List<Map<String, Object?>>;
+      final properties = result['properties']! as List<Map<String, Object?>>;
       expect(properties, hasLength(7));
       expect(
         properties.every((Map<String, Object?> property) => !property.containsKey('properties')),
         isTrue,
       );
 
-      final List<Map<String, Object?>> children = result['children']! as List<Map<String, Object?>>;
+      final children = result['children']! as List<Map<String, Object?>>;
       expect(children, hasLength(3));
       expect(
         children.every((Map<String, Object?> child) => !child.containsKey('properties')),

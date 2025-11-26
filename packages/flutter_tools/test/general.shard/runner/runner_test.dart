@@ -892,7 +892,7 @@ class MultipleExceptionCrashingFlutterCommand extends FlutterCommand {
 
   Future<void> get doneThrowing => _completer.future;
 
-  var exceptionCount = 0;
+  int exceptionCount = 0;
 
   @override
   Future<FlutterCommandResult> runCommand() async {

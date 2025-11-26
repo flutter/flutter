@@ -41,8 +41,8 @@ void main() {
   testWidgets('Specified color is made opaque for Title', (WidgetTester tester) async {
     // The Title widget can only handle fully opaque colors, the WidgetApp should
     // ensure it only uses a fully opaque version of its color for the title.
-    const Color transparentBlue = Color(0xDD0000ff);
-    const Color opaqueBlue = Color(0xFF0000ff);
+    const transparentBlue = Color(0xDD0000ff);
+    const opaqueBlue = Color(0xFF0000ff);
     await pumpApp(tester, color: transparentBlue);
     expect(tester.widget<Title>(find.byType(Title)).color, opaqueBlue);
   });

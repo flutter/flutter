@@ -74,7 +74,7 @@ void main() {
         fail('This test must not be run with --disable-vm-service.');
       }
 
-      final Completer<String> completer = Completer<String>();
+      final completer = Completer<String>();
       ui.channelBuffers.setListener('flutter/system', (
         ByteData? data,
         ui.PlatformMessageResponseCallback callback,
@@ -105,7 +105,7 @@ void main() {
 
 Future<String> getViewId(vms.VmService vmService) async {
   final vms.Response response = await vmService.callMethod('_flutter.listViews');
-  final List<Object?>? rawViews = response.json!['views'] as List<Object?>?;
+  final rawViews = response.json!['views'] as List<Object?>?;
   return (rawViews![0]! as Map<String, Object?>?)!['id']! as String;
 }
 

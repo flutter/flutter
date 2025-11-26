@@ -105,7 +105,7 @@ class Command {
       return LintAction.skipThirdParty;
     }
 
-    final io.File file = io.File(filePath);
+    final file = io.File(filePath);
     if (!file.existsSync()) {
       return LintAction.skipMissing;
     }
@@ -135,7 +135,7 @@ class Command {
 
   /// The job for the process runner for the lint needed for this command.
   WorkerJob createLintJob(Options options) {
-    final List<String> args = <String>[
+    final args = <String>[
       filePath,
       '--warnings-as-errors=${options.warningsAsErrors ?? '*'}',
       if (options.checks != null) options.checks!,

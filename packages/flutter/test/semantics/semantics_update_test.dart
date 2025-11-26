@@ -157,7 +157,7 @@ void main() {
       SemanticsUpdateBuilderSpy.observations[1]!.valueAttributes![0] is LocaleStringAttribute,
       isTrue,
     );
-    final LocaleStringAttribute localeAttribute =
+    final localeAttribute =
         SemanticsUpdateBuilderSpy.observations[1]!.valueAttributes![0] as LocaleStringAttribute;
     expect(localeAttribute.range, const TextRange(start: 0, end: 5));
     expect(localeAttribute.locale, const Locale('en', 'MX'));
@@ -201,10 +201,10 @@ void main() {
     // The warm up frame will send update for an empty semantics tree. We
     // ignore this one time update.
     SemanticsUpdateBuilderSpy.observations.clear();
-    final OverlayPortalController controller1 = OverlayPortalController()..show();
-    final OverlayPortalController controller2 = OverlayPortalController()..show();
+    final controller1 = OverlayPortalController()..show();
+    final controller2 = OverlayPortalController()..show();
 
-    final OverlayEntry entry = OverlayEntry(
+    final entry = OverlayEntry(
       builder: (BuildContext context) {
         return OverlayPortal(
           controller: controller1,

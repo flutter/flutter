@@ -133,9 +133,9 @@ Color color(double factor) {
   if (v < 0) {
     v += 255 * 3;
   }
-  int r = 0;
-  int g = 0;
-  int b = 0;
+  var r = 0;
+  var g = 0;
+  var b = 0;
   if (v < 255) {
     r = 255 - v;
     g = v;
@@ -156,10 +156,10 @@ Color color(double factor) {
 Shader rotatingGradient(double factor, double x, double y, double h) {
   final double s = sin(factor * 2 * pi) * h / 8;
   final double c = cos(factor * 2 * pi) * h / 8;
-  final double cx = x;
+  final cx = x;
   final double cy = y + h / 2;
-  final Offset p0 = Offset(cx + s, cy + c);
-  final Offset p1 = Offset(cx - s, cy - c);
+  final p0 = Offset(cx + s, cy + c);
+  final p1 = Offset(cx - s, cy - c);
   return ui.Gradient.linear(p0, p1, <Color>[color(factor), color(factor + 0.5)]);
 }
 
@@ -193,11 +193,11 @@ class RecreatedDynamicGradients extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint p = Paint();
+    final p = Paint();
     p.color = color(baseFactor);
     canvas.drawRect(Offset.zero & size, p);
-    for (int j = 0; j < nDown; j++) {
-      for (int i = 0; i < nAcross; i++) {
+    for (var j = 0; j < nDown; j++) {
+      for (var i = 0; i < nAcross; i++) {
         p.shader = gradient(baseFactor, i, j);
         canvas.drawRect(Rect.fromLTWH(x(i, j), y(i, j), cellW, cellH), p);
       }
@@ -215,11 +215,11 @@ class RecreatedConsistentGradients extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint p = Paint();
+    final p = Paint();
     p.color = color(baseFactor);
     canvas.drawRect(Offset.zero & size, p);
-    for (int j = 0; j < nDown; j++) {
-      for (int i = 0; i < nAcross; i++) {
+    for (var j = 0; j < nDown; j++) {
+      for (var i = 0; i < nAcross; i++) {
         p.shader = gradient(0, i, j);
         canvas.drawRect(Rect.fromLTWH(x(i, j), y(i, j), cellW, cellH), p);
       }
@@ -241,11 +241,11 @@ class StaticConsistentGradients extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint p = Paint();
+    final p = Paint();
     p.color = color(baseFactor);
     canvas.drawRect(Offset.zero & size, p);
-    for (int j = 0; j < nDown; j++) {
-      for (int i = 0; i < nAcross; i++) {
+    for (var j = 0; j < nDown; j++) {
+      for (var i = 0; i < nAcross; i++) {
         p.shader = gradients[j][i];
         canvas.drawRect(Rect.fromLTWH(x(i, j), y(i, j), cellW, cellH), p);
       }

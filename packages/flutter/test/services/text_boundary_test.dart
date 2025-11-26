@@ -26,8 +26,8 @@ class _ConsistentTextRangeImplementationMatcher extends Matcher {
     Map<dynamic, dynamic> matchState,
     bool verbose,
   ) {
-    final TextBoundary boundary = matchState['textBoundary'] as TextBoundary;
-    final int position = matchState['position'] as int;
+    final boundary = matchState['textBoundary'] as TextBoundary;
+    final position = matchState['position'] as int;
     final int leading = boundary.getLeadingTextBoundaryAt(position) ?? -1;
     final int trailing = boundary.getTrailingTextBoundaryAt(position) ?? -1;
 
@@ -58,7 +58,7 @@ Matcher _hasConsistentTextRangeImplementationWithinRange(int length) =>
 
 void main() {
   test('Character boundary works', () {
-    const CharacterBoundary boundary = CharacterBoundary('abc');
+    const boundary = CharacterBoundary('abc');
     expect(boundary, _hasConsistentTextRangeImplementationWithinRange(3));
 
     expect(boundary.getLeadingTextBoundaryAt(-1), null);
@@ -81,8 +81,8 @@ void main() {
   });
 
   test('Character boundary works with grapheme', () {
-    const String text = 'a❄︎c';
-    const CharacterBoundary boundary = CharacterBoundary(text);
+    const text = 'a❄︎c';
+    const boundary = CharacterBoundary(text);
     expect(boundary, _hasConsistentTextRangeImplementationWithinRange(text.length));
 
     expect(boundary.getLeadingTextBoundaryAt(-1), null);
@@ -106,7 +106,7 @@ void main() {
   });
 
   test('wordBoundary.moveByWordBoundary', () {
-    const String text =
+    const text =
         'ABC   ABC\n' // [0, 10)
         'AÁ    Á\n' // [10, 20)
         '         \n' // [20, 30)
@@ -114,7 +114,7 @@ void main() {
         '  !ABC !!\n' // [40, 50)
         'A  𑗋𑗋 A\n'; // [50, 60)
 
-    final TextPainter textPainter = TextPainter()
+    final textPainter = TextPainter()
       ..textDirection = TextDirection.ltr
       ..text = const TextSpan(text: text)
       ..layout();
@@ -148,7 +148,7 @@ void main() {
   });
 
   test('line boundary works', () {
-    final LineBoundary boundary = LineBoundary(TestTextLayoutMetrics());
+    final boundary = LineBoundary(TestTextLayoutMetrics());
     expect(boundary.getLeadingTextBoundaryAt(3), TestTextLayoutMetrics.lineAt3.start);
     expect(boundary.getTrailingTextBoundaryAt(3), TestTextLayoutMetrics.lineAt3.end);
     expect(boundary.getTextBoundaryAt(3), TestTextLayoutMetrics.lineAt3);
@@ -156,43 +156,43 @@ void main() {
 
   group('paragraph boundary', () {
     test('works for simple cases', () {
-      const String textA = 'abcd efg hi\njklmno\npqrstuv';
-      const ParagraphBoundary boundaryA = ParagraphBoundary(textA);
+      const textA = 'abcd efg hi\njklmno\npqrstuv';
+      const boundaryA = ParagraphBoundary(textA);
 
       // Position enclosed inside of paragraph, 'abcd efg h|i\n'.
-      const int position = 10;
+      const position = 10;
 
       // The range includes the line terminator.
       expect(boundaryA.getLeadingTextBoundaryAt(position), 0);
       expect(boundaryA.getTrailingTextBoundaryAt(position), 12);
 
       // This text includes a carriage return followed by a line feed.
-      const String textB = 'abcd efg hi\r\njklmno\npqrstuv';
-      const ParagraphBoundary boundaryB = ParagraphBoundary(textB);
+      const textB = 'abcd efg hi\r\njklmno\npqrstuv';
+      const boundaryB = ParagraphBoundary(textB);
       expect(boundaryB.getLeadingTextBoundaryAt(position), 0);
       expect(boundaryB.getTrailingTextBoundaryAt(position), 13);
 
-      const String textF =
+      const textF =
           'Now is the time for\n' // 20
           'all good people\n' // 20 + 16 => 36
           'to come to the aid\n' // 36 + 19 => 55
           'of their country.'; // 55 + 17 => 72
-      const ParagraphBoundary boundaryF = ParagraphBoundary(textF);
-      const int positionF = 11;
+      const boundaryF = ParagraphBoundary(textF);
+      const positionF = 11;
       expect(boundaryF.getLeadingTextBoundaryAt(positionF), 0);
       expect(boundaryF.getTrailingTextBoundaryAt(positionF), 20);
     });
 
     test('works for consecutive line terminators involving CRLF', () {
-      const String textI =
+      const textI =
           'Now is the time for\n' // 20
           'all good people\n\r\n' // 20 + 16 => 38
           'to come to the aid\n' // 38 + 19 => 57
           'of their country.'; // 57 + 17 => 74
-      const ParagraphBoundary boundaryI = ParagraphBoundary(textI);
-      const int positionI = 56; // \n at the end of the third line.
-      const int positionJ = 38; // t at beginning of third line.
-      const int positionK = 37; // \n at end of second line.
+      const boundaryI = ParagraphBoundary(textI);
+      const positionI = 56; // \n at the end of the third line.
+      const positionJ = 38; // t at beginning of third line.
+      const positionK = 37; // \n at end of second line.
       expect(boundaryI.getLeadingTextBoundaryAt(positionI), 38);
       expect(boundaryI.getTrailingTextBoundaryAt(positionI), 57);
       expect(boundaryI.getLeadingTextBoundaryAt(positionJ), 38);
@@ -202,15 +202,15 @@ void main() {
     });
 
     test('works for consecutive line terminators', () {
-      const String textI =
+      const textI =
           'Now is the time for\n' // 20
           'all good people\n\n' // 20 + 16 => 37
           'to come to the aid\n' // 37 + 19 => 56
           'of their country.'; // 56 + 17 => 73
-      const ParagraphBoundary boundaryI = ParagraphBoundary(textI);
-      const int positionI = 55; // \n at the end of the third line.
-      const int positionJ = 37; // t at beginning of third line.
-      const int positionK = 36; // \n at end of second line.
+      const boundaryI = ParagraphBoundary(textI);
+      const positionI = 55; // \n at the end of the third line.
+      const positionJ = 37; // t at beginning of third line.
+      const positionK = 36; // \n at end of second line.
       expect(boundaryI.getLeadingTextBoundaryAt(positionI), 37);
       expect(boundaryI.getTrailingTextBoundaryAt(positionI), 56);
       expect(boundaryI.getLeadingTextBoundaryAt(positionJ), 37);
@@ -221,52 +221,52 @@ void main() {
 
     test('leading boundary works for consecutive CRLF', () {
       // This text includes multiple consecutive carriage returns followed by line feeds (CRLF).
-      const String textH = 'abcd efg hi\r\n\r\n\r\n\r\n\r\n\r\n\r\n\n\n\n\n\njklmno\npqrstuv';
-      const ParagraphBoundary boundaryH = ParagraphBoundary(textH);
-      const int positionH = 18;
+      const textH = 'abcd efg hi\r\n\r\n\r\n\r\n\r\n\r\n\r\n\n\n\n\n\njklmno\npqrstuv';
+      const boundaryH = ParagraphBoundary(textH);
+      const positionH = 18;
       expect(boundaryH.getLeadingTextBoundaryAt(positionH), 17);
       expect(boundaryH.getTrailingTextBoundaryAt(positionH), 19);
     });
 
     test('trailing boundary works for consecutive CRLF', () {
       // This text includes multiple consecutive carriage returns followed by line feeds (CRLF).
-      const String textG = 'abcd efg hi\r\n\n\n\n\n\n\r\n\r\n\r\n\r\n\n\n\n\n\njklmno\npqrstuv';
-      const ParagraphBoundary boundaryG = ParagraphBoundary(textG);
-      const int positionG = 18;
+      const textG = 'abcd efg hi\r\n\n\n\n\n\n\r\n\r\n\r\n\r\n\n\n\n\n\njklmno\npqrstuv';
+      const boundaryG = ParagraphBoundary(textG);
+      const positionG = 18;
       expect(boundaryG.getLeadingTextBoundaryAt(positionG), 18);
       expect(boundaryG.getTrailingTextBoundaryAt(positionG), 20);
     });
 
     test('works when position is between two CRLF', () {
-      const String textE = 'abcd efg hi\r\nhello\r\n\n';
-      const ParagraphBoundary boundaryE = ParagraphBoundary(textE);
+      const textE = 'abcd efg hi\r\nhello\r\n\n';
+      const boundaryE = ParagraphBoundary(textE);
       // Position enclosed inside of paragraph, 'abcd efg hi\r\nhello\r\n\n'.
-      const int positionE = 16;
+      const positionE = 16;
       expect(boundaryE.getLeadingTextBoundaryAt(positionE), 13);
       expect(boundaryE.getTrailingTextBoundaryAt(positionE), 20);
     });
 
     test('works for multiple consecutive line terminators', () {
       // This text includes multiple consecutive line terminators.
-      const String textC = 'abcd efg hi\r\n\n\n\n\n\n\n\n\n\n\n\njklmno\npqrstuv';
-      const ParagraphBoundary boundaryC = ParagraphBoundary(textC);
+      const textC = 'abcd efg hi\r\n\n\n\n\n\n\n\n\n\n\n\njklmno\npqrstuv';
+      const boundaryC = ParagraphBoundary(textC);
       // Position enclosed inside of paragraph, 'abcd efg hi\r\n\n\n\n\n\n|\n\n\n\n\n\njklmno\npqrstuv'.
-      const int positionC = 18;
+      const positionC = 18;
       expect(boundaryC.getLeadingTextBoundaryAt(positionC), 18);
       expect(boundaryC.getTrailingTextBoundaryAt(positionC), 19);
 
-      const String textD = 'abcd efg hi\r\n\n\n\n';
-      const ParagraphBoundary boundaryD = ParagraphBoundary(textD);
+      const textD = 'abcd efg hi\r\n\n\n\n';
+      const boundaryD = ParagraphBoundary(textD);
       // Position enclosed inside of paragraph, 'abcd efg hi\r\n\n|\n\n'.
-      const int positionD = 14;
+      const positionD = 14;
       expect(boundaryD.getLeadingTextBoundaryAt(positionD), 14);
       expect(boundaryD.getTrailingTextBoundaryAt(positionD), 15);
     });
   });
 
   test('document boundary works', () {
-    const String text = 'abcd efg hi\njklmno\npqrstuv';
-    const DocumentBoundary boundary = DocumentBoundary(text);
+    const text = 'abcd efg hi\njklmno\npqrstuv';
+    const boundary = DocumentBoundary(text);
     expect(boundary, _hasConsistentTextRangeImplementationWithinRange(text.length));
 
     expect(boundary.getLeadingTextBoundaryAt(-1), null);

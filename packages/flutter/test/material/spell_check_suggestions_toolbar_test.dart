@@ -101,7 +101,7 @@ void main() {
   );
 
   test('buildSuggestionButtons only considers the first three suggestions', () {
-    final _FakeEditableTextState editableTextState = _FakeEditableTextState(
+    final editableTextState = _FakeEditableTextState(
       suggestions: <String>['hello', 'yellow', 'yell', 'yeller'],
     );
     final List<ContextMenuButtonItem>? buttonItems = SpellCheckSuggestionsToolbar.buildButtonItems(
@@ -120,7 +120,7 @@ void main() {
   });
 
   test('buildButtonItems builds only a delete button when no suggestions', () {
-    final _FakeEditableTextState editableTextState = _FakeEditableTextState();
+    final editableTextState = _FakeEditableTextState();
     final List<ContextMenuButtonItem>? buttonItems = SpellCheckSuggestionsToolbar.buildButtonItems(
       editableTextState,
     );

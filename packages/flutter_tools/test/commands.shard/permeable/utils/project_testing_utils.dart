@@ -16,7 +16,7 @@ import '../../../src/test_flutter_command_runner.dart';
 /// A ProcessManager that invokes a real process manager, but keeps
 /// track of all commands sent to it.
 class LoggingProcessManager extends LocalProcessManager {
-  var commands = <List<String>>[];
+  List<List<String>> commands = <List<String>>[];
 
   @override
   Future<Process> start(

@@ -88,17 +88,17 @@ class LogicalKeyboardKey extends KeyboardKey {
   static int _nonValueBits(int n) {
     // `n >> valueMaskWidth` is equivalent to `n / divisorForValueMask`.
     const int divisorForValueMask = valueMask + 1;
-    const int valueMaskWidth = 32;
+    const valueMaskWidth = 32;
 
     // Equivalent to assert(divisorForValueMask == (1 << valueMaskWidth)).
-    const int firstDivisorWidth = 28;
+    const firstDivisorWidth = 28;
     assert(
       divisorForValueMask == (1 << firstDivisorWidth) * (1 << (valueMaskWidth - firstDivisorWidth)),
     );
 
     // JS only supports up to 2^53 - 1, therefore non-value bits can only
     // contain (maxSafeIntegerWidth - valueMaskWidth) bits.
-    const int maxSafeIntegerWidth = 52;
+    const maxSafeIntegerWidth = 52;
     const int nonValueMask = (1 << (maxSafeIntegerWidth - valueMaskWidth)) - 1;
 
     if (kIsWeb) {

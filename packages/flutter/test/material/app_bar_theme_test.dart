@@ -9,7 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  const AppBarThemeData appBarTheme = AppBarThemeData(
+  const appBarTheme = AppBarThemeData(
     backgroundColor: Color(0xff00ff00),
     foregroundColor: Color(0xff00ffff),
     elevation: 4.0,
@@ -51,12 +51,12 @@ void main() {
   });
 
   test('AppBarTheme lerp special cases', () {
-    const AppBarTheme data = AppBarTheme();
+    const data = AppBarTheme();
     expect(identical(AppBarTheme.lerp(data, data, 0.5), data), true);
   });
 
   testWidgets('Material2 - Passing no AppBarTheme returns defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: false);
+    final theme = ThemeData(useMaterial3: false);
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -97,7 +97,7 @@ void main() {
   });
 
   testWidgets('Material3 - Passing no AppBarTheme returns defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -179,14 +179,14 @@ void main() {
     const Brightness brightness = Brightness.dark;
     const SystemUiOverlayStyle systemOverlayStyle = SystemUiOverlayStyle.light;
     const Color color = Colors.orange;
-    const double elevation = 3.0;
+    const elevation = 3.0;
     const Color shadowColor = Colors.purple;
     const Color surfaceTintColor = Colors.brown;
     const ShapeBorder shape = RoundedRectangleBorder();
-    const IconThemeData iconThemeData = IconThemeData(color: Colors.green);
-    const IconThemeData actionsIconThemeData = IconThemeData(color: Colors.lightBlue);
-    const TextStyle toolbarTextStyle = TextStyle(color: Colors.pink);
-    const TextStyle titleTextStyle = TextStyle(color: Colors.orange);
+    const iconThemeData = IconThemeData(color: Colors.green);
+    const actionsIconThemeData = IconThemeData(color: Colors.lightBlue);
+    const toolbarTextStyle = TextStyle(color: Colors.pink);
+    const titleTextStyle = TextStyle(color: Colors.orange);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -231,8 +231,8 @@ void main() {
 
   testWidgets('AppBar icon color takes priority over everything', (WidgetTester tester) async {
     const Color color = Colors.lime;
-    const IconThemeData iconThemeData = IconThemeData(color: Colors.green);
-    const IconThemeData actionsIconThemeData = IconThemeData(color: Colors.lightBlue);
+    const iconThemeData = IconThemeData(color: Colors.green);
+    const actionsIconThemeData = IconThemeData(color: Colors.lightBlue);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -291,14 +291,8 @@ void main() {
   testWidgets('Material2 - ThemeData colorScheme is used when no AppBarTheme is set', (
     WidgetTester tester,
   ) async {
-    final ThemeData lightTheme = ThemeData.from(
-      colorScheme: const ColorScheme.light(),
-      useMaterial3: false,
-    );
-    final ThemeData darkTheme = ThemeData.from(
-      colorScheme: const ColorScheme.dark(),
-      useMaterial3: false,
-    );
+    final lightTheme = ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: false);
+    final darkTheme = ThemeData.from(colorScheme: const ColorScheme.dark(), useMaterial3: false);
     Widget buildFrame(ThemeData appTheme) {
       return MaterialApp(
         theme: appTheme,
@@ -387,8 +381,8 @@ void main() {
   testWidgets('Material3 - ThemeData colorScheme is used when no AppBarTheme is set', (
     WidgetTester tester,
   ) async {
-    final ThemeData lightTheme = ThemeData.from(colorScheme: const ColorScheme.light());
-    final ThemeData darkTheme = ThemeData.from(colorScheme: const ColorScheme.dark());
+    final lightTheme = ThemeData.from(colorScheme: const ColorScheme.light());
+    final darkTheme = ThemeData.from(colorScheme: const ColorScheme.dark());
     Widget buildFrame(ThemeData appTheme) {
       return MaterialApp(
         theme: appTheme,
@@ -593,7 +587,7 @@ void main() {
   testWidgets(
     'Material3 - AppBarThemeData.iconTheme.color takes priority over IconButtonTheme.foregroundColor',
     (WidgetTester tester) async {
-      const IconThemeData overallIconTheme = IconThemeData(color: Colors.yellow);
+      const overallIconTheme = IconThemeData(color: Colors.yellow);
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
@@ -623,7 +617,7 @@ void main() {
   testWidgets(
     'Material3 - AppBarThemeData.iconTheme.size takes priority over IconButtonTheme.iconSize',
     (WidgetTester tester) async {
-      const IconThemeData overallIconTheme = IconThemeData(size: 30.0);
+      const overallIconTheme = IconThemeData(size: 30.0);
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
@@ -651,8 +645,8 @@ void main() {
   testWidgets(
     'Material3 - AppBarThemeData.actionsIconTheme.color takes priority over IconButtonTheme.foregroundColor',
     (WidgetTester tester) async {
-      const IconThemeData actionsIconTheme = IconThemeData(color: Colors.yellow);
-      final IconButtonThemeData iconButtonTheme = IconButtonThemeData(
+      const actionsIconTheme = IconThemeData(color: Colors.yellow);
+      final iconButtonTheme = IconButtonThemeData(
         style: IconButton.styleFrom(foregroundColor: Colors.red),
       );
 
@@ -683,10 +677,8 @@ void main() {
   testWidgets(
     'Material3 - AppBarThemeData.actionsIconTheme.size takes priority over IconButtonTheme.iconSize',
     (WidgetTester tester) async {
-      const IconThemeData actionsIconTheme = IconThemeData(size: 30.0);
-      final IconButtonThemeData iconButtonTheme = IconButtonThemeData(
-        style: IconButton.styleFrom(iconSize: 32.0),
-      );
+      const actionsIconTheme = IconThemeData(size: 30.0);
+      final iconButtonTheme = IconButtonThemeData(style: IconButton.styleFrom(iconSize: 32.0));
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
@@ -717,14 +709,11 @@ void main() {
   testWidgets(
     'Material3 - AppBarThemeData.foregroundColor takes priority over IconButtonTheme.foregroundColor',
     (WidgetTester tester) async {
-      final IconButtonThemeData iconButtonTheme = IconButtonThemeData(
+      final iconButtonTheme = IconButtonThemeData(
         style: IconButton.styleFrom(foregroundColor: Colors.red),
       );
-      const AppBarThemeData appBarTheme = AppBarThemeData(foregroundColor: Colors.green);
-      final ThemeData themeData = ThemeData(
-        iconButtonTheme: iconButtonTheme,
-        appBarTheme: appBarTheme,
-      );
+      const appBarTheme = AppBarThemeData(foregroundColor: Colors.green);
+      final themeData = ThemeData(iconButtonTheme: iconButtonTheme, appBarTheme: appBarTheme);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -874,7 +863,7 @@ void main() {
   });
 
   testWidgets('SliverAppBar.medium uses AppBarThemeData properties', (WidgetTester tester) async {
-    const String title = 'Medium App Bar';
+    const title = 'Medium App Bar';
 
     await tester.pumpWidget(
       MaterialApp(
@@ -928,17 +917,17 @@ void main() {
   testWidgets('SliverAppBar.medium properties take priority over AppBarThemeData properties', (
     WidgetTester tester,
   ) async {
-    const String title = 'Medium App Bar';
-    const Color backgroundColor = Color(0xff000099);
-    const Color foregroundColor = Color(0xff00ff98);
-    const Color shadowColor = Color(0xff00ff97);
+    const title = 'Medium App Bar';
+    const backgroundColor = Color(0xff000099);
+    const foregroundColor = Color(0xff00ff98);
+    const shadowColor = Color(0xff00ff97);
     const ShapeBorder shape = RoundedRectangleBorder(
       borderRadius: BorderRadiusDirectional.only(bottomStart: Radius.circular(12.0)),
     );
-    const IconThemeData iconTheme = IconThemeData(color: Color(0xff00ff96));
-    const IconThemeData actionsIconTheme = IconThemeData(color: Color(0xff00ff95));
-    const double titleSpacing = 18.0;
-    const TextStyle titleTextStyle = TextStyle(fontSize: 22.9, fontStyle: FontStyle.italic);
+    const iconTheme = IconThemeData(color: Color(0xff00ff96));
+    const actionsIconTheme = IconThemeData(color: Color(0xff00ff95));
+    const titleSpacing = 18.0;
+    const titleTextStyle = TextStyle(fontSize: 22.9, fontStyle: FontStyle.italic);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -998,7 +987,7 @@ void main() {
   });
 
   testWidgets('SliverAppBar.large uses AppBarThemeData properties', (WidgetTester tester) async {
-    const String title = 'Large App Bar';
+    const title = 'Large App Bar';
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1052,17 +1041,17 @@ void main() {
   testWidgets('SliverAppBar.large properties take priority over AppBarThemeData properties', (
     WidgetTester tester,
   ) async {
-    const String title = 'Large App Bar';
-    const Color backgroundColor = Color(0xff000099);
-    const Color foregroundColor = Color(0xff00ff98);
-    const Color shadowColor = Color(0xff00ff97);
+    const title = 'Large App Bar';
+    const backgroundColor = Color(0xff000099);
+    const foregroundColor = Color(0xff00ff98);
+    const shadowColor = Color(0xff00ff97);
     const ShapeBorder shape = RoundedRectangleBorder(
       borderRadius: BorderRadiusDirectional.only(bottomStart: Radius.circular(12.0)),
     );
-    const IconThemeData iconTheme = IconThemeData(color: Color(0xff00ff96));
-    const IconThemeData actionsIconTheme = IconThemeData(color: Color(0xff00ff95));
-    const double titleSpacing = 18.0;
-    const TextStyle titleTextStyle = TextStyle(fontSize: 22.9, fontStyle: FontStyle.italic);
+    const iconTheme = IconThemeData(color: Color(0xff00ff96));
+    const actionsIconTheme = IconThemeData(color: Color(0xff00ff95));
+    const titleSpacing = 18.0;
+    const titleTextStyle = TextStyle(fontSize: 22.9, fontStyle: FontStyle.italic);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1122,9 +1111,9 @@ void main() {
   });
 
   testWidgets('SliverAppBar medium & large supports foregroundColor', (WidgetTester tester) async {
-    const String title = 'AppBar title';
-    const AppBarThemeData appBarTheme = AppBarThemeData(foregroundColor: Color(0xff00ff20));
-    const Color foregroundColor = Color(0xff001298);
+    const title = 'AppBar title';
+    const appBarTheme = AppBarThemeData(foregroundColor: Color(0xff00ff20));
+    const foregroundColor = Color(0xff001298);
 
     Widget buildWidget({Color? color, AppBarThemeData? appBarTheme}) {
       return MaterialApp(
@@ -1157,7 +1146,7 @@ void main() {
   });
 
   testWidgets('Default AppBarThemeData debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const AppBarThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -1169,7 +1158,7 @@ void main() {
   });
 
   testWidgets('AppBarThemeData implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const AppBarThemeData(
       backgroundColor: Color(0xff000000),
       foregroundColor: Color(0xff000001),
@@ -1228,23 +1217,23 @@ void main() {
   testWidgets('Local AppBarTheme overrides defaults', (WidgetTester tester) async {
     const Color backgroundColor = Colors.blueAccent;
     const Color foregroundColor = Colors.white;
-    const double elevation = 1.0;
-    const double scrolledUnderElevation = 2.0;
+    const elevation = 1.0;
+    const scrolledUnderElevation = 2.0;
     const Color shadowColor = Colors.black87;
     const Color surfaceTintColor = Colors.transparent;
     const ShapeBorder shape = RoundedRectangleBorder();
-    const IconThemeData iconTheme = IconThemeData(color: Colors.red);
-    const IconThemeData actionsIconTheme = IconThemeData(color: Color(0xFF6750A4));
-    const bool centerTitle = true;
-    const double titleSpacing = 20.0;
-    const double leadingWidth = 80.0;
-    const double toolbarHeight = 100.0;
-    const TextStyle toolbarTextStyle = TextStyle(color: Colors.yellow);
-    const TextStyle titleTextStyle = TextStyle(color: Colors.orange);
+    const iconTheme = IconThemeData(color: Colors.red);
+    const actionsIconTheme = IconThemeData(color: Color(0xFF6750A4));
+    const centerTitle = true;
+    const titleSpacing = 20.0;
+    const leadingWidth = 80.0;
+    const toolbarHeight = 100.0;
+    const toolbarTextStyle = TextStyle(color: Colors.yellow);
+    const titleTextStyle = TextStyle(color: Colors.orange);
     const SystemUiOverlayStyle systemOverlayStyle = SystemUiOverlayStyle.dark;
     const EdgeInsetsGeometry actionsPadding = EdgeInsets.all(8);
 
-    const AppBarThemeData appbarThemeData = AppBarThemeData(
+    const appbarThemeData = AppBarThemeData(
       backgroundColor: backgroundColor,
       foregroundColor: foregroundColor,
       elevation: elevation,
@@ -1325,23 +1314,23 @@ void main() {
   testWidgets('Local AppBarTheme can override global AppBarTheme', (WidgetTester tester) async {
     const Color backgroundColor = Colors.blueAccent;
     const Color foregroundColor = Colors.white;
-    const double elevation = 1.0;
-    const double scrolledUnderElevation = 2.0;
+    const elevation = 1.0;
+    const scrolledUnderElevation = 2.0;
     const Color shadowColor = Colors.black87;
     const Color surfaceTintColor = Colors.transparent;
     const ShapeBorder shape = RoundedRectangleBorder();
-    const IconThemeData iconTheme = IconThemeData(color: Colors.red);
-    const IconThemeData actionsIconTheme = IconThemeData(color: Color(0xFF6750A4));
-    const bool centerTitle = true;
-    const double titleSpacing = 20.0;
-    const double leadingWidth = 80.0;
-    const double toolbarHeight = 100.0;
-    const TextStyle toolbarTextStyle = TextStyle(color: Colors.yellow);
-    const TextStyle titleTextStyle = TextStyle(color: Colors.orange);
+    const iconTheme = IconThemeData(color: Colors.red);
+    const actionsIconTheme = IconThemeData(color: Color(0xFF6750A4));
+    const centerTitle = true;
+    const titleSpacing = 20.0;
+    const leadingWidth = 80.0;
+    const toolbarHeight = 100.0;
+    const toolbarTextStyle = TextStyle(color: Colors.yellow);
+    const titleTextStyle = TextStyle(color: Colors.orange);
     const SystemUiOverlayStyle systemOverlayStyle = SystemUiOverlayStyle.dark;
     const EdgeInsetsGeometry actionsPadding = EdgeInsets.all(8);
 
-    const AppBarThemeData appbarThemeData = AppBarThemeData(
+    const appbarThemeData = AppBarThemeData(
       backgroundColor: backgroundColor,
       foregroundColor: foregroundColor,
       elevation: elevation,
@@ -1360,7 +1349,7 @@ void main() {
       systemOverlayStyle: systemOverlayStyle,
       actionsPadding: actionsPadding,
     );
-    const AppBarThemeData globalAppbarThemeData = AppBarThemeData(
+    const globalAppbarThemeData = AppBarThemeData(
       backgroundColor: Colors.red,
       foregroundColor: Colors.green,
       elevation: 0.0,
@@ -1443,7 +1432,7 @@ void main() {
   testWidgets(
     'Material3 - AppBarThemeData.iconTheme correctly applies custom white color in dark mode',
     (WidgetTester tester) async {
-      final ThemeData themeData = ThemeData(
+      final themeData = ThemeData(
         brightness: Brightness.dark,
         appBarTheme: const AppBarThemeData(iconTheme: IconThemeData(color: Colors.white)),
       );
@@ -1471,11 +1460,11 @@ void main() {
 AppBarThemeData _appBarTheme() {
   const SystemUiOverlayStyle systemOverlayStyle = SystemUiOverlayStyle.dark;
   const Color backgroundColor = Colors.lightBlue;
-  const double elevation = 6.0;
+  const elevation = 6.0;
   const Color shadowColor = Colors.red;
   const Color surfaceTintColor = Colors.green;
-  const IconThemeData iconThemeData = IconThemeData(color: Colors.black);
-  const IconThemeData actionsIconThemeData = IconThemeData(color: Colors.pink);
+  const iconThemeData = IconThemeData(color: Colors.black);
+  const actionsIconThemeData = IconThemeData(color: Colors.pink);
   return const AppBarThemeData(
     actionsIconTheme: actionsIconThemeData,
     systemOverlayStyle: systemOverlayStyle,

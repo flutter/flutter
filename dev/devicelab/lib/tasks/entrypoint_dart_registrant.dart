@@ -45,15 +45,15 @@ class MainActivity: FlutterActivity() {
 ''';
 
 Future<TaskResult> _runWithTempDir(Directory tempDir) async {
-  const String testDirName = 'entrypoint_dart_registrant';
-  final String testPath = '${tempDir.path}/$testDirName';
+  const testDirName = 'entrypoint_dart_registrant';
+  final testPath = '${tempDir.path}/$testDirName';
   await inDirectory(tempDir, () async {
     await flutter('create', options: <String>['--platforms', 'android', testDirName]);
   });
-  final String mainPath = '${tempDir.path}/$testDirName/lib/main.dart';
+  final mainPath = '${tempDir.path}/$testDirName/lib/main.dart';
   print(mainPath);
   File(mainPath).writeAsStringSync(_dartCode);
-  final String activityPath =
+  final activityPath =
       '${tempDir.path}/$testDirName/android/app/src/main/kotlin/com/example/entrypoint_dart_registrant/MainActivity.kt';
   File(activityPath).writeAsStringSync(_kotlinCode);
   final Device device = await devices.workingDevice;
@@ -64,7 +64,7 @@ Future<TaskResult> _runWithTempDir(Directory tempDir) async {
     await flutter('pub', options: <String>['add', 'path_provider:2.0.9']);
     // The problem only manifested on release builds, so we test release.
     final Process process = await startFlutter('run', options: <String>['--release']);
-    final Completer<String> completer = Completer<String>();
+    final completer = Completer<String>();
     final StreamSubscription<String> stdoutSub = process.stdout
         .transform<String>(const Utf8Decoder())
         .transform<String>(const LineSplitter())
@@ -84,7 +84,7 @@ Future<TaskResult> _runWithTempDir(Directory tempDir) async {
     if (result is int) {
       throw Exception('flutter run failed, exitCode=$result');
     }
-    final String entrypoint = result as String;
+    final entrypoint = result as String;
     await stdoutSub.cancel();
     await stderrSub.cancel();
     process.stdin.write('q');

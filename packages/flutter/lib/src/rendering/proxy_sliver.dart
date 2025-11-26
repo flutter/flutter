@@ -94,7 +94,7 @@ abstract class RenderProxySliver extends RenderSliver
 
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
-    final SliverPhysicalParentData childParentData = child.parentData! as SliverPhysicalParentData;
+    final childParentData = child.parentData! as SliverPhysicalParentData;
     childParentData.applyPaintTransform(transform);
   }
 }
@@ -144,7 +144,7 @@ class RenderSliverOpacity extends RenderProxySliver {
       return;
     }
     final bool didNeedCompositing = alwaysNeedsCompositing;
-    final bool wasVisible = _alpha != 0;
+    final wasVisible = _alpha != 0;
     _opacity = value;
     _alpha = ui.Color.getAlphaFromOpacity(_opacity);
     if (didNeedCompositing != alwaysNeedsCompositing) {

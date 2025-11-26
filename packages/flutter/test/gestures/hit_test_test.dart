@@ -10,14 +10,14 @@ void main() {
     final HitTestEntry entry1 = HitTestEntry(_DummyHitTestTarget());
     final HitTestEntry entry2 = HitTestEntry(_DummyHitTestTarget());
     final HitTestEntry entry3 = HitTestEntry(_DummyHitTestTarget());
-    final Matrix4 transform = Matrix4.translationValues(40.0, 150.0, 0.0);
+    final transform = Matrix4.translationValues(40.0, 150.0, 0.0);
 
     final HitTestResult wrapped = MyHitTestResult()..publicPushTransform(transform);
     wrapped.add(entry1);
     expect(wrapped.path, equals(<HitTestEntry>[entry1]));
     expect(entry1.transform, transform);
 
-    final HitTestResult wrapping = HitTestResult.wrap(wrapped);
+    final wrapping = HitTestResult.wrap(wrapped);
     expect(wrapping.path, equals(<HitTestEntry>[entry1]));
     expect(wrapping.path, same(wrapped.path));
 
@@ -39,11 +39,11 @@ void main() {
       return entry.transform;
     }
 
-    final MyHitTestResult result = MyHitTestResult();
+    final result = MyHitTestResult();
 
-    final Matrix4 m1 = Matrix4.translationValues(10, 20, 0);
-    final Matrix4 m2 = Matrix4.rotationZ(1);
-    final Matrix4 m3 = Matrix4.diagonal3Values(1.1, 1.2, 1.0);
+    final m1 = Matrix4.translationValues(10, 20, 0);
+    final m2 = Matrix4.rotationZ(1);
+    final m3 = Matrix4.diagonal3Values(1.1, 1.2, 1.0);
 
     result.publicPushTransform(m1);
     expect(currentTransform(result), equals(m1));
@@ -53,7 +53,7 @@ void main() {
     expect(currentTransform(result), equals(m2 * m1)); // Test repeated add
 
     // The `wrapped` is wrapped at [m1, m2]
-    final MyHitTestResult wrapped = MyHitTestResult.wrap(result);
+    final wrapped = MyHitTestResult.wrap(result);
     expect(currentTransform(wrapped), equals(m2 * m1));
 
     result.publicPushTransform(m3);
@@ -81,12 +81,12 @@ void main() {
       return entry.transform;
     }
 
-    final MyHitTestResult result = MyHitTestResult();
+    final result = MyHitTestResult();
 
-    final Matrix4 m1 = Matrix4.rotationZ(1);
-    final Matrix4 m2 = Matrix4.diagonal3Values(1.1, 1.2, 1.0);
-    const Offset o3 = Offset(10, 20);
-    final Matrix4 m3 = Matrix4.translationValues(o3.dx, o3.dy, 0.0);
+    final m1 = Matrix4.rotationZ(1);
+    final m2 = Matrix4.diagonal3Values(1.1, 1.2, 1.0);
+    const o3 = Offset(10, 20);
+    final m3 = Matrix4.translationValues(o3.dx, o3.dy, 0.0);
 
     // Test pushing offset as the first element
     result.publicPushOffset(o3);
@@ -99,7 +99,7 @@ void main() {
     expect(currentTransform(result), equals(m1 * m3)); // Test repeated add
 
     // The `wrapped` is wrapped at [m1, m2]
-    final MyHitTestResult wrapped = MyHitTestResult.wrap(result);
+    final wrapped = MyHitTestResult.wrap(result);
     expect(currentTransform(wrapped), equals(m1 * m3));
 
     result.publicPushTransform(m2);

@@ -104,7 +104,7 @@ class _UnderlinePainter extends BoxPainter {
     if (borderRadius != null) {
       paint = Paint()..color = decoration.borderSide.color;
       final Rect indicator = decoration._indicatorRectFor(rect, textDirection);
-      final RRect rrect = RRect.fromRectAndCorners(
+      final rrect = RRect.fromRectAndCorners(
         indicator,
         topLeft: borderRadius!.topLeft,
         topRight: borderRadius!.topRight,

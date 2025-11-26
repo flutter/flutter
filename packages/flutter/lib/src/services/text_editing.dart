@@ -155,7 +155,7 @@ class TextSelection extends TextRange {
       return Object.hash(-1.hashCode, -1.hashCode, TextAffinity.downstream.hashCode);
     }
 
-    final int affinityHash = isCollapsed ? affinity.hashCode : TextAffinity.downstream.hashCode;
+    final affinityHash = isCollapsed ? affinity.hashCode : TextAffinity.downstream.hashCode;
     return Object.hash(
       baseOffset.hashCode,
       extentOffset.hashCode,

@@ -14,8 +14,8 @@ void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
   test('ShapeDecoration constructor', () {
-    const Color colorR = Color(0xffff0000);
-    const Color colorG = Color(0xff00ff00);
+    const colorR = Color(0xffff0000);
+    const colorG = Color(0xff00ff00);
     const Gradient gradient = LinearGradient(colors: <Color>[colorR, colorG]);
     expect(const ShapeDecoration(shape: Border()), const ShapeDecoration(shape: Border()));
     expect(
@@ -59,7 +59,7 @@ void main() {
 
   test('ShapeDecoration.lerp identical a,b', () {
     expect(ShapeDecoration.lerp(null, null, 0), null);
-    const ShapeDecoration shape = ShapeDecoration(shape: CircleBorder());
+    const shape = ShapeDecoration(shape: CircleBorder());
     expect(identical(ShapeDecoration.lerp(shape, shape, 0.5), shape), true);
   });
 
@@ -81,7 +81,7 @@ void main() {
     expect(Decoration.lerp(a, c, 1.0), c);
     expect(Decoration.lerp(b, c, 0.0), b);
     expect(Decoration.lerp(b, c, 1.0), c);
-    const Size size = Size(200.0, 100.0); // at t=0.5, width will be 150 (x=25 to x=175).
+    const size = Size(200.0, 100.0); // at t=0.5, width will be 150 (x=25 to x=175).
     expect(a.hitTest(size, const Offset(20.0, 50.0)), isFalse);
     expect(c.hitTest(size, const Offset(50, 5.0)), isFalse);
     expect(c.hitTest(size, const Offset(5, 30.0)), isFalse);
@@ -99,8 +99,8 @@ void main() {
 
   test('ShapeDecoration.image RTL test', () async {
     final ui.Image image = await createTestImage(width: 100, height: 200);
-    final List<int> log = <int>[];
-    final ShapeDecoration decoration = ShapeDecoration(
+    final log = <int>[];
+    final decoration = ShapeDecoration(
       shape: const CircleBorder(),
       image: DecorationImage(
         image: TestImageProvider(image),
@@ -142,8 +142,8 @@ void main() {
   });
 
   test('ShapeDecoration.getClipPath', () {
-    const ShapeDecoration decoration = ShapeDecoration(shape: CircleBorder());
-    const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 20.0);
+    const decoration = ShapeDecoration(shape: CircleBorder());
+    const rect = Rect.fromLTWH(0.0, 0.0, 100.0, 20.0);
     final Path clipPath = decoration.getClipPath(rect, TextDirection.ltr);
     final Matcher isLookLikeExpectedPath = isPathThat(
       includes: const <Offset>[Offset(50.0, 10.0)],
@@ -152,8 +152,8 @@ void main() {
     expect(clipPath, isLookLikeExpectedPath);
   });
   test('ShapeDecoration.getClipPath for oval', () {
-    const ShapeDecoration decoration = ShapeDecoration(shape: OvalBorder());
-    const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 50.0);
+    const decoration = ShapeDecoration(shape: OvalBorder());
+    const rect = Rect.fromLTWH(0.0, 0.0, 100.0, 50.0);
     final Path clipPath = decoration.getClipPath(rect, TextDirection.ltr);
     final Matcher isLookLikeExpectedPath = isPathThat(
       includes: const <Offset>[Offset(50.0, 10.0)],

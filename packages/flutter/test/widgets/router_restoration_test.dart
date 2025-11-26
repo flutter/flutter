@@ -10,7 +10,7 @@ void main() {
   testWidgets('Router state restoration without RouteInformationProvider', (
     WidgetTester tester,
   ) async {
-    final UniqueKey router = UniqueKey();
+    final router = UniqueKey();
     _TestRouterDelegate delegate() =>
         tester.widget<Router<Object?>>(find.byKey(router)).routerDelegate as _TestRouterDelegate;
 
@@ -47,7 +47,7 @@ void main() {
   testWidgets('Router state restoration with RouteInformationProvider', (
     WidgetTester tester,
   ) async {
-    final UniqueKey router = UniqueKey();
+    final router = UniqueKey();
     _TestRouterDelegate delegate() =>
         tester.widget<Router<Object?>>(find.byKey(router)).routerDelegate as _TestRouterDelegate;
     _TestRouteInformationProvider provider() =>

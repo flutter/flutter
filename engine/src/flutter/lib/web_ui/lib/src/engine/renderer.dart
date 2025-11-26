@@ -292,11 +292,11 @@ abstract class Renderer {
       // If a scene is already queued up, drop it and queue this one up instead
       // so that the scene view always displays the most recently requested scene.
       renderQueue.next?.completer.complete();
-      final Completer<void> completer = Completer<void>();
+      final completer = Completer<void>();
       renderQueue.next = (scene: scene, completer: completer, recorder: recorder);
       return completer.future;
     }
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     renderQueue.current = (scene: scene, completer: completer, recorder: recorder);
     unawaited(_kickRenderLoop(rasterizer));
     return completer.future;

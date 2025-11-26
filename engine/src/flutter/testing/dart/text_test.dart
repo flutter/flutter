@@ -16,7 +16,7 @@ import 'package:test/test.dart';
 import 'goldens.dart';
 
 Future<Uint8List> readFile(String fileName) async {
-  final File file = File(path.join('flutter', 'testing', 'resources', fileName));
+  final file = File(path.join('flutter', 'testing', 'resources', fileName));
   return file.readAsBytes();
 }
 
@@ -51,24 +51,16 @@ void testFontWeight() {
 }
 
 void testParagraphStyle() {
-  final ParagraphStyle ps0 = ParagraphStyle(textDirection: TextDirection.ltr, fontSize: 14.0);
-  final ParagraphStyle ps1 = ParagraphStyle(textDirection: TextDirection.rtl, fontSize: 14.0);
-  final ParagraphStyle ps2 = ParagraphStyle(
+  final ps0 = ParagraphStyle(textDirection: TextDirection.ltr, fontSize: 14.0);
+  final ps1 = ParagraphStyle(textDirection: TextDirection.rtl, fontSize: 14.0);
+  final ps2 = ParagraphStyle(
     textAlign: TextAlign.center,
     fontWeight: FontWeight.w800,
     fontSize: 10.0,
     height: 100.0,
   );
-  final ParagraphStyle ps3 = ParagraphStyle(
-    fontWeight: FontWeight.w700,
-    fontSize: 12.0,
-    height: 123.0,
-  );
-  final ParagraphStyle ps4 = ParagraphStyle(
-    fontWeight: FontWeight.w700,
-    fontSize: 12.0,
-    height: kTextHeightNone,
-  );
+  final ps3 = ParagraphStyle(fontWeight: FontWeight.w700, fontSize: 12.0, height: 123.0);
+  final ps4 = ParagraphStyle(fontWeight: FontWeight.w700, fontSize: 12.0, height: kTextHeightNone);
 
   test('ParagraphStyle toString works', () {
     expect(
@@ -105,20 +97,17 @@ void testParagraphStyle() {
 }
 
 void testTextStyle() {
-  final TextStyle ts0 = TextStyle(fontWeight: FontWeight.w700, fontSize: 12.0, height: 123.0);
-  final TextStyle ts1 = TextStyle(
+  final ts0 = TextStyle(fontWeight: FontWeight.w700, fontSize: 12.0, height: 123.0);
+  final ts1 = TextStyle(
     color: const Color(0xFF00FF00),
     fontWeight: FontWeight.w800,
     fontSize: 10.0,
     height: 100.0,
   );
-  final TextStyle ts2 = TextStyle(fontFamily: 'test');
-  final TextStyle ts3 = TextStyle(
-    fontFamily: 'foo',
-    fontFamilyFallback: <String>['Roboto', 'test'],
-  );
-  final TextStyle ts4 = TextStyle(leadingDistribution: TextLeadingDistribution.even);
-  final TextStyle ts5 = TextStyle(height: kTextHeightNone);
+  final ts2 = TextStyle(fontFamily: 'test');
+  final ts3 = TextStyle(fontFamily: 'foo', fontFamilyFallback: <String>['Roboto', 'test']);
+  final ts4 = TextStyle(leadingDistribution: TextLeadingDistribution.even);
+  final ts5 = TextStyle(height: kTextHeightNone);
 
   test('TextStyle toString works', () {
     expect(
@@ -161,14 +150,14 @@ void testTextStyle() {
 }
 
 void testTextHeightBehavior() {
-  const TextHeightBehavior behavior0 = TextHeightBehavior();
-  const TextHeightBehavior behavior1 = TextHeightBehavior(
+  const behavior0 = TextHeightBehavior();
+  const behavior1 = TextHeightBehavior(
     applyHeightToFirstAscent: false,
     applyHeightToLastDescent: false,
   );
-  const TextHeightBehavior behavior2 = TextHeightBehavior(applyHeightToFirstAscent: false);
-  const TextHeightBehavior behavior3 = TextHeightBehavior(applyHeightToLastDescent: false);
-  const TextHeightBehavior behavior4 = TextHeightBehavior(
+  const behavior2 = TextHeightBehavior(applyHeightToFirstAscent: false);
+  const behavior3 = TextHeightBehavior(applyHeightToLastDescent: false);
+  const behavior4 = TextHeightBehavior(
     applyHeightToLastDescent: false,
     leadingDistribution: TextLeadingDistribution.even,
   );
@@ -226,7 +215,7 @@ void testTextHeightBehavior() {
 
 void testTextRange() {
   test('TextRange empty ranges are correct', () {
-    const TextRange range = TextRange(start: -1, end: -1);
+    const range = TextRange(start: -1, end: -1);
     expect(range, equals(const TextRange.collapsed(-1)));
     expect(range, equals(TextRange.empty));
   });
@@ -282,10 +271,10 @@ void testTextRange() {
 
 void testGlyphInfo() {
   test('constructor', () {
-    const Rect testRect = Rect.fromLTWH(1, 2, 3, 4);
-    const TextRange testRange = TextRange(start: 5, end: 6);
+    const testRect = Rect.fromLTWH(1, 2, 3, 4);
+    const testRange = TextRange(start: 5, end: 6);
     const TextDirection testDirection = TextDirection.ltr;
-    final GlyphInfo info = GlyphInfo(testRect, testRange, testDirection);
+    final info = GlyphInfo(testRect, testRange, testDirection);
     expect(info.graphemeClusterLayoutBounds, testRect);
     expect(info.graphemeClusterCodeUnitRange, testRange);
     expect(info.writingDirection, testDirection);
@@ -303,7 +292,7 @@ void testLoadFontFromList() {
       final Uint8List list = data!.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
       message = utf8.decode(list);
     });
-    final Uint8List fontData = Uint8List(0);
+    final fontData = Uint8List(0);
     await loadFontFromList(fontData, fontFamily: 'fake');
     expect(message, '{"type":"fontsChange"}');
     channelBuffers.clearListener('flutter/system');
@@ -359,17 +348,13 @@ void testFontVariation() {
     final Uint8List fontData = await readFile('RobotoSlab-VariableFont_wght.ttf');
     await loadFontFromList(fontData, fontFamily: 'RobotoSerif');
 
-    final ParagraphBuilder baseBuilder = ParagraphBuilder(
-      ParagraphStyle(fontFamily: 'RobotoSerif', fontSize: 40.0),
-    );
+    final baseBuilder = ParagraphBuilder(ParagraphStyle(fontFamily: 'RobotoSerif', fontSize: 40.0));
     baseBuilder.addText('Hello');
     final Paragraph baseParagraph = baseBuilder.build();
     baseParagraph.layout(const ParagraphConstraints(width: double.infinity));
     final double baseWidth = baseParagraph.minIntrinsicWidth;
 
-    final ParagraphBuilder wideBuilder = ParagraphBuilder(
-      ParagraphStyle(fontFamily: 'RobotoSerif', fontSize: 40.0),
-    );
+    final wideBuilder = ParagraphBuilder(ParagraphStyle(fontFamily: 'RobotoSerif', fontSize: 40.0));
     wideBuilder.pushStyle(
       TextStyle(
         fontFamily: 'RobotoSerif',
@@ -421,7 +406,7 @@ void testFontVariation() {
     final Uint8List fontData = await readFile('RobotoSlab-VariableFont_wght.ttf');
     await loadFontFromList(fontData, fontFamily: 'RobotoSerif');
 
-    final ParagraphBuilder pb = ParagraphBuilder(
+    final pb = ParagraphBuilder(
       ParagraphStyle(fontFamily: 'RobotoSerif', fontSize: 40.0, fontWeight: FontWeight.w100),
     );
     pb.pushStyle(TextStyle(color: const Color(0xFF000000)));
@@ -435,12 +420,12 @@ void testFontVariation() {
     pb.pushStyle(TextStyle(fontWeight: FontWeight.w900));
     pb.addText('Black - 900\n');
 
-    const ParagraphConstraints paragraphConstraints = ParagraphConstraints(width: 300);
+    const paragraphConstraints = ParagraphConstraints(width: 300);
     final Paragraph paragraph = pb.build()..layout(paragraphConstraints);
 
-    final PictureRecorder recorder = PictureRecorder();
-    const int imageSize = 300;
-    final Canvas canvas = Canvas(
+    final recorder = PictureRecorder();
+    const imageSize = 300;
+    final canvas = Canvas(
       recorder,
       Rect.fromLTWH(0.0, 0.0, imageSize.toDouble(), imageSize.toDouble()),
     );
@@ -457,9 +442,7 @@ void testGetWordBoundary() {
     final Uint8List fontData = await readFile('RobotoSlab-VariableFont_wght.ttf');
     await loadFontFromList(fontData, fontFamily: 'RobotoSerif');
 
-    final ParagraphBuilder builder = ParagraphBuilder(
-      ParagraphStyle(fontFamily: 'RobotoSerif', fontSize: 40.0),
-    );
+    final builder = ParagraphBuilder(ParagraphStyle(fontFamily: 'RobotoSerif', fontSize: 40.0));
     builder.addText('Hello team');
     final Paragraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: double.infinity));

@@ -14,7 +14,7 @@ void main() {
       return Directionality(textDirection: TextDirection.ltr, child: child);
     }
 
-    final ViewportOffset offset1 = ViewportOffset.zero();
+    final offset1 = ViewportOffset.zero();
     addTearDown(offset1.dispose);
 
     await tester.pumpWidget(
@@ -33,11 +33,11 @@ void main() {
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
     // 2nd, check that the painting context has received the default clip behavior.
-    final TestClipPaintingContext context = TestClipPaintingContext();
+    final context = TestClipPaintingContext();
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.hardEdge));
 
-    final ViewportOffset offset2 = ViewportOffset.zero();
+    final offset2 = ViewportOffset.zero();
     addTearDown(offset2.dispose);
 
     // 3rd, pump a new widget to check that the render object can update its clip behavior.

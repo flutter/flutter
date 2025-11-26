@@ -23,22 +23,22 @@ void main() {
   group('dump directory', () {
     test('set by environment', () async {
       final Directory environmentDir = fs.directory(fs.path.join('home', 'logs'));
-      final FakePlatform fakePlatform = FakePlatform(
+      final fakePlatform = FakePlatform(
         environment: <String, String>{'FLUTTER_LOGS_DIR': environmentDir.path},
         operatingSystem: 'windows',
       );
-      final HostAgent agent = HostAgent(platform: fakePlatform, fileSystem: fs);
+      final agent = HostAgent(platform: fakePlatform, fileSystem: fs);
 
       expect(agent.dumpDirectory!.existsSync(), isTrue);
       expect(agent.dumpDirectory!.path, environmentDir.path);
     });
 
     test('not set by environment', () async {
-      final FakePlatform fakePlatform = FakePlatform(
+      final fakePlatform = FakePlatform(
         environment: <String, String>{},
         operatingSystem: 'windows',
       );
-      final HostAgent agent = HostAgent(platform: fakePlatform, fileSystem: fs);
+      final agent = HostAgent(platform: fakePlatform, fileSystem: fs);
 
       expect(agent.dumpDirectory, null);
     });

@@ -80,7 +80,7 @@ void main() {
 
     final ShapeListenerState shapeListenerState = tester.state(find.byType(ShapeListener));
     final RenderBox renderBox = tester.renderObject(find.byType(BottomAppBar));
-    final Path expectedPath = Path()..addRect(Offset.zero & renderBox.size);
+    final expectedPath = Path()..addRect(Offset.zero & renderBox.size);
 
     final Path actualPath = shapeListenerState.cache.value;
     expect(
@@ -168,7 +168,7 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44572
 
   testWidgets('Custom Padding', (WidgetTester tester) async {
-    const EdgeInsets customPadding = EdgeInsets.all(10);
+    const customPadding = EdgeInsets.all(10);
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.from(colorScheme: const ColorScheme.light()),
@@ -312,7 +312,7 @@ void main() {
   testWidgets('Material3 - Dark theme applies an elevation overlay color', (
     WidgetTester tester,
   ) async {
-    const ColorScheme colorScheme = ColorScheme.dark();
+    const colorScheme = ColorScheme.dark();
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.from(colorScheme: colorScheme),
@@ -322,7 +322,7 @@ void main() {
 
     final PhysicalShape physicalShape = tester.widget(find.byType(PhysicalShape).at(0));
 
-    const double elevation = 3.0; // Default for M3.
+    const elevation = 3.0; // Default for M3.
     final Color overlayColor = ElevationOverlay.applySurfaceTint(
       colorScheme.surfaceContainer,
       colorScheme.surfaceTint,
@@ -364,7 +364,7 @@ void main() {
 
     final ShapeListenerState shapeListenerState = tester.state(find.byType(ShapeListener));
     final RenderBox renderBox = tester.renderObject(find.byType(BottomAppBar));
-    final Path expectedPath = Path()..addRect(Offset.zero & renderBox.size);
+    final expectedPath = Path()..addRect(Offset.zero & renderBox.size);
 
     final Path actualPath = shapeListenerState.cache.value;
 
@@ -401,7 +401,7 @@ void main() {
     final double fabRight = fabLeft + fabSize.width;
     final double fabBottom = fabSize.height / 2.0;
 
-    final Path expectedPath = Path()
+    final expectedPath = Path()
       ..moveTo(0.0, 0.0)
       ..lineTo(fabLeft, 0.0)
       ..lineTo(fabLeft, fabBottom)
@@ -447,7 +447,7 @@ void main() {
     final double fabRight = fabLeft + fabSize.width + 6.0;
     final double fabBottom = 6.0 + fabSize.height / 2.0;
 
-    final Path expectedPath = Path()
+    final expectedPath = Path()
       ..moveTo(0.0, 0.0)
       ..lineTo(fabLeft, 0.0)
       ..lineTo(fabLeft, fabBottom)
@@ -483,7 +483,7 @@ void main() {
   });
 
   testWidgets('Material3 - Observes safe area', (WidgetTester tester) async {
-    const double safeAreaPadding = 50.0;
+    const safeAreaPadding = 50.0;
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(),
@@ -496,8 +496,8 @@ void main() {
       ),
     );
 
-    const double appBarVerticalPadding = 12.0;
-    const double appBarHorizontalPadding = 16.0;
+    const appBarVerticalPadding = 12.0;
+    const appBarHorizontalPadding = 16.0;
     expect(
       tester.getBottomLeft(find.widgetWithText(Center, 'safe')),
       const Offset(
@@ -544,7 +544,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/80878
-    final ThemeData theme = ThemeData(useMaterial3: false);
+    final theme = ThemeData(useMaterial3: false);
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -583,7 +583,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/80878
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -652,7 +652,7 @@ void main() {
     final double fabRight = fabLeft + fabSize.width + 6.0;
     final double fabBottom = 6.0 + fabSize.height / 2.0;
 
-    final Path expectedPath = Path()
+    final expectedPath = Path()
       ..moveTo(0.0, 0.0)
       ..lineTo(fabLeft, 0.0)
       ..lineTo(fabLeft, fabBottom)
@@ -702,7 +702,7 @@ void main() {
   testWidgets('Material3 - BottomAppBar adds bottom padding to height', (
     WidgetTester tester,
   ) async {
-    const double bottomPadding = 35.0;
+    const bottomPadding = 35.0;
 
     await tester.pumpWidget(
       MediaQuery(

@@ -72,7 +72,7 @@ void main() {
   });
 
   testWidgets('Can use dynamic color', (WidgetTester tester) async {
-    const CupertinoDynamicColor dynamicColor = CupertinoDynamicColor.withBrightness(
+    const dynamicColor = CupertinoDynamicColor.withBrightness(
       color: Color(0xFF000000),
       darkColor: Color(0xFF000001),
     );
@@ -100,7 +100,7 @@ void main() {
   });
 
   testWidgets('Can customize initial routes', (WidgetTester tester) async {
-    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+    final navigatorKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       CupertinoApp(
         navigatorKey: navigatorKey,
@@ -149,21 +149,21 @@ void main() {
   });
 
   testWidgets('CupertinoApp.navigatorKey can be updated', (WidgetTester tester) async {
-    final GlobalKey<NavigatorState> key1 = GlobalKey<NavigatorState>();
+    final key1 = GlobalKey<NavigatorState>();
     await tester.pumpWidget(CupertinoApp(navigatorKey: key1, home: const Placeholder()));
     expect(key1.currentState, isA<NavigatorState>());
-    final GlobalKey<NavigatorState> key2 = GlobalKey<NavigatorState>();
+    final key2 = GlobalKey<NavigatorState>();
     await tester.pumpWidget(CupertinoApp(navigatorKey: key2, home: const Placeholder()));
     expect(key2.currentState, isA<NavigatorState>());
     expect(key1.currentState, isNull);
   });
 
   testWidgets('CupertinoApp.router works', (WidgetTester tester) async {
-    final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
+    final provider = PlatformRouteInformationProvider(
       initialRouteInformation: RouteInformation(uri: Uri.parse('initial')),
     );
     addTearDown(provider.dispose);
-    final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
+    final delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
       },
@@ -197,11 +197,11 @@ void main() {
     WidgetTester tester,
   ) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/139903.
-    final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
+    final provider = PlatformRouteInformationProvider(
       initialRouteInformation: RouteInformation(uri: Uri.parse('initial')),
     );
     addTearDown(provider.dispose);
-    final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
+    final delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
       },
@@ -212,7 +212,7 @@ void main() {
     );
     addTearDown(delegate.dispose);
 
-    int navigationCount = 0;
+    var navigationCount = 0;
 
     await tester.pumpWidget(
       CupertinoApp.router(
@@ -228,7 +228,7 @@ void main() {
     expect(find.text('initial'), findsOneWidget);
 
     expect(navigationCount, greaterThan(0));
-    final int navigationCountAfterBuild = navigationCount;
+    final navigationCountAfterBuild = navigationCount;
 
     // Simulate android back button intent.
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
@@ -246,7 +246,7 @@ void main() {
   testWidgets('CupertinoApp.router route information parser is optional', (
     WidgetTester tester,
   ) async {
-    final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
+    final delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
       },
@@ -274,7 +274,7 @@ void main() {
   testWidgets(
     'CupertinoApp.router throw if route information provider is provided but no route information parser',
     (WidgetTester tester) async {
-      final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
+      final delegate = SimpleNavigatorRouterDelegate(
         builder: (BuildContext context, RouteInformation information) {
           return Text(information.uri.toString());
         },
@@ -285,7 +285,7 @@ void main() {
       );
       addTearDown(delegate.dispose);
       delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
-      final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
+      final provider = PlatformRouteInformationProvider(
         initialRouteInformation: RouteInformation(uri: Uri.parse('initial')),
       );
       addTearDown(provider.dispose);
@@ -299,7 +299,7 @@ void main() {
   testWidgets(
     'CupertinoApp.router throw if route configuration is provided along with other delegate',
     (WidgetTester tester) async {
-      final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
+      final delegate = SimpleNavigatorRouterDelegate(
         builder: (BuildContext context, RouteInformation information) {
           return Text(information.uri.toString());
         },
@@ -310,9 +310,7 @@ void main() {
       );
       addTearDown(delegate.dispose);
       delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
-      final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(
-        routerDelegate: delegate,
-      );
+      final routerConfig = RouterConfig<RouteInformation>(routerDelegate: delegate);
       await tester.pumpWidget(
         CupertinoApp.router(routerDelegate: delegate, routerConfig: routerConfig),
       );
@@ -323,11 +321,11 @@ void main() {
   testWidgets('CupertinoApp.router router config works', (WidgetTester tester) async {
     late SimpleNavigatorRouterDelegate delegate;
     addTearDown(() => delegate.dispose());
-    final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
+    final provider = PlatformRouteInformationProvider(
       initialRouteInformation: RouteInformation(uri: Uri.parse('initial')),
     );
     addTearDown(provider.dispose);
-    final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(
+    final routerConfig = RouterConfig<RouteInformation>(
       routeInformationProvider: provider,
       routeInformationParser: SimpleRouteInformationParser(),
       routerDelegate: delegate = SimpleNavigatorRouterDelegate(
@@ -463,7 +461,7 @@ void main() {
     'When `useInheritedMediaQuery` is true an existing MediaQuery is used if one is available',
     (WidgetTester tester) async {
       late BuildContext capturedContext;
-      final UniqueKey uniqueKey = UniqueKey();
+      final uniqueKey = UniqueKey();
       await tester.pumpWidget(
         MediaQuery(
           key: uniqueKey,
@@ -556,7 +554,7 @@ void main() {
     await tester.pumpWidget(const CupertinoApp(home: CupertinoPageScaffold(child: Text('Hello'))));
 
     final RenderParagraph paragraph = tester.renderObject(find.text('Hello'));
-    final CupertinoDynamicColor textColor = paragraph.text.style!.color! as CupertinoDynamicColor;
+    final textColor = paragraph.text.style!.color! as CupertinoDynamicColor;
 
     // App with non-null brightness, so resolving color
     // doesn't depend on the MediaQuery.platformBrightness.
@@ -623,9 +621,9 @@ void main() {
       return renderEditable!;
     }
 
-    final FocusNode focusNode = FocusNode();
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
-    final TextEditingController controller = TextEditingController();
+    final controller = TextEditingController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -678,7 +676,7 @@ void main() {
         ),
       );
 
-      const ScrollableDetails details = ScrollableDetails(direction: AxisDirection.down);
+      const details = ScrollableDetails(direction: AxisDirection.down);
       final Widget child = Container();
 
       switch (defaultTargetPlatform) {

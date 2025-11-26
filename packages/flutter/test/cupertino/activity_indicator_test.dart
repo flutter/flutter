@@ -132,7 +132,7 @@ void main() {
 
   testWidgets('Can specify color', (WidgetTester tester) async {
     final Key key = UniqueKey();
-    const Color color = Color(0xFF5D3FD3);
+    const color = Color(0xFF5D3FD3);
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(

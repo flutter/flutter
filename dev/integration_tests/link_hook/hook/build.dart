@@ -26,13 +26,13 @@ void main(List<String> args) async {
       assetName = '${input.packageName}_bindings_generated.dart';
     }
     final String packageName = input.packageName;
-    final CBuilder cbuilder = CBuilder.library(
+    final cbuilder = CBuilder.library(
       name: packageName,
       assetName: assetName,
       sources: <String>['src/$packageName.c'],
       dartBuildFiles: <String>['hook/build.dart'],
     );
-    final BuildOutputBuilder outputCatcher = BuildOutputBuilder();
+    final outputCatcher = BuildOutputBuilder();
     await cbuilder.run(
       input: input,
       output: outputCatcher,
@@ -40,7 +40,7 @@ void main(List<String> args) async {
         ..level = Level.ALL
         ..onRecord.listen((LogRecord record) => print(record.message)),
     );
-    final BuildOutput caughtOutput = BuildOutput(outputCatcher.json);
+    final caughtOutput = BuildOutput(outputCatcher.json);
     output.addDependencies(caughtOutput.dependencies);
     // Send the asset to hook/link.dart or immediately for bundling.
     output.assets.code.add(

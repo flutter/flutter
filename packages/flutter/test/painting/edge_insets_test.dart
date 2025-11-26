@@ -23,17 +23,17 @@ void main() {
     expect(ltrbRtl.bottom, 40);
 
     // all
-    const EdgeInsets all = EdgeInsets.all(10);
+    const all = EdgeInsets.all(10);
     expect(all.resolve(TextDirection.ltr), equals(const EdgeInsets.fromLTRB(10, 10, 10, 10)));
     expect(all.resolve(TextDirection.rtl), equals(const EdgeInsets.fromLTRB(10, 10, 10, 10)));
 
     // only
-    const EdgeInsets only = EdgeInsets.only(left: 10, top: 20, right: 30, bottom: 40);
+    const only = EdgeInsets.only(left: 10, top: 20, right: 30, bottom: 40);
     expect(only.resolve(TextDirection.ltr), equals(const EdgeInsets.fromLTRB(10, 20, 30, 40)));
     expect(only.resolve(TextDirection.rtl), equals(const EdgeInsets.fromLTRB(10, 20, 30, 40)));
 
     // symmetric
-    const EdgeInsets symmetric = EdgeInsets.symmetric(horizontal: 10, vertical: 20);
+    const symmetric = EdgeInsets.symmetric(horizontal: 10, vertical: 20);
     expect(symmetric.resolve(TextDirection.ltr), equals(const EdgeInsets.fromLTRB(10, 20, 10, 20)));
     expect(symmetric.resolve(TextDirection.rtl), equals(const EdgeInsets.fromLTRB(10, 20, 10, 20)));
   });
@@ -62,31 +62,23 @@ void main() {
     expect(stebRtl.bottom, 40);
 
     // all
-    const EdgeInsetsDirectional all = EdgeInsetsDirectional.all(10);
+    const all = EdgeInsetsDirectional.all(10);
     expect(all.resolve(TextDirection.ltr), equals(const EdgeInsets.fromLTRB(10, 10, 10, 10)));
     expect(all.resolve(TextDirection.rtl), equals(const EdgeInsets.fromLTRB(10, 10, 10, 10)));
 
     // only
-    const EdgeInsetsDirectional directional = EdgeInsetsDirectional.only(
-      start: 10,
-      top: 20,
-      end: 30,
-      bottom: 40,
-    );
+    const directional = EdgeInsetsDirectional.only(start: 10, top: 20, end: 30, bottom: 40);
     expect(directional.resolve(TextDirection.ltr), const EdgeInsets.fromLTRB(10, 20, 30, 40));
     expect(directional.resolve(TextDirection.rtl), const EdgeInsets.fromLTRB(30, 20, 10, 40));
 
     // symmetric
-    const EdgeInsetsDirectional symmetric = EdgeInsetsDirectional.symmetric(
-      horizontal: 10,
-      vertical: 20,
-    );
+    const symmetric = EdgeInsetsDirectional.symmetric(horizontal: 10, vertical: 20);
     expect(symmetric.resolve(TextDirection.ltr), equals(const EdgeInsets.fromLTRB(10, 20, 10, 20)));
     expect(symmetric.resolve(TextDirection.rtl), equals(const EdgeInsets.fromLTRB(10, 20, 10, 20)));
   });
 
   test('EdgeInsets control test', () {
-    const EdgeInsets insets = EdgeInsets.fromLTRB(5.0, 7.0, 11.0, 13.0);
+    const insets = EdgeInsets.fromLTRB(5.0, 7.0, 11.0, 13.0);
 
     expect(insets, hasOneLineDescription);
     expect(insets.hashCode, equals(const EdgeInsets.fromLTRB(5.0, 7.0, 11.0, 13.0).hashCode));
@@ -121,8 +113,8 @@ void main() {
   });
 
   test('EdgeInsets.lerp()', () {
-    const EdgeInsets a = EdgeInsets.all(10.0);
-    const EdgeInsets b = EdgeInsets.all(20.0);
+    const a = EdgeInsets.all(10.0);
+    const b = EdgeInsets.all(20.0);
     expect(EdgeInsets.lerp(a, b, 0.25), equals(a * 1.25));
     expect(EdgeInsets.lerp(a, b, 0.25), equals(b * 0.625));
     expect(EdgeInsets.lerp(a, b, 0.25), equals(a + const EdgeInsets.all(2.5)));
@@ -234,12 +226,7 @@ void main() {
   });
 
   test('EdgeInsets copyWith', () {
-    const EdgeInsets sourceEdgeInsets = EdgeInsets.only(
-      left: 1.0,
-      top: 2.0,
-      bottom: 3.0,
-      right: 4.0,
-    );
+    const sourceEdgeInsets = EdgeInsets.only(left: 1.0, top: 2.0, bottom: 3.0, right: 4.0);
     final EdgeInsets copy = sourceEdgeInsets.copyWith(left: 5.0, top: 6.0);
     expect(copy, const EdgeInsets.only(left: 5.0, top: 6.0, bottom: 3.0, right: 4.0));
   });
@@ -322,8 +309,8 @@ void main() {
   });
 
   test('EdgeInsetsGeometry.lerp(normal, ...)', () {
-    const EdgeInsets a = EdgeInsets.all(10.0);
-    const EdgeInsets b = EdgeInsets.all(20.0);
+    const a = EdgeInsets.all(10.0);
+    const b = EdgeInsets.all(20.0);
     expect(EdgeInsetsGeometry.lerp(a, b, 0.25), equals(a * 1.25));
     expect(EdgeInsetsGeometry.lerp(a, b, 0.25), equals(b * 0.625));
     expect(EdgeInsetsGeometry.lerp(a, b, 0.25), equals(a + const EdgeInsets.all(2.5)));
@@ -335,8 +322,8 @@ void main() {
   });
 
   test('EdgeInsetsGeometry.lerp(directional, ...)', () {
-    const EdgeInsetsDirectional a = EdgeInsetsDirectional.only(start: 10.0, end: 10.0);
-    const EdgeInsetsDirectional b = EdgeInsetsDirectional.only(start: 20.0, end: 20.0);
+    const a = EdgeInsetsDirectional.only(start: 10.0, end: 10.0);
+    const b = EdgeInsetsDirectional.only(start: 20.0, end: 20.0);
     expect(EdgeInsetsGeometry.lerp(a, b, 0.25), equals(a * 1.25));
     expect(EdgeInsetsGeometry.lerp(a, b, 0.25), equals(b * 0.625));
     expect(
@@ -371,7 +358,7 @@ void main() {
   });
 
   test('EdgeInsets operators', () {
-    const EdgeInsets a = EdgeInsets.fromLTRB(1.0, 2.0, 3.0, 5.0);
+    const a = EdgeInsets.fromLTRB(1.0, 2.0, 3.0, 5.0);
     expect(a * 2.0, const EdgeInsets.fromLTRB(2.0, 4.0, 6.0, 10.0));
     expect(a / 2.0, const EdgeInsets.fromLTRB(0.5, 1.0, 1.5, 2.5));
     expect(a % 2.0, const EdgeInsets.fromLTRB(1.0, 0.0, 1.0, 1.0));
@@ -383,7 +370,7 @@ void main() {
   });
 
   test('EdgeInsetsDirectional operators', () {
-    const EdgeInsetsDirectional a = EdgeInsetsDirectional.fromSTEB(1.0, 2.0, 3.0, 5.0);
+    const a = EdgeInsetsDirectional.fromSTEB(1.0, 2.0, 3.0, 5.0);
     expect(a * 2.0, const EdgeInsetsDirectional.fromSTEB(2.0, 4.0, 6.0, 10.0));
     expect(a / 2.0, const EdgeInsetsDirectional.fromSTEB(0.5, 1.0, 1.5, 2.5));
     expect(a % 2.0, const EdgeInsetsDirectional.fromSTEB(1.0, 0.0, 1.0, 1.0));
@@ -436,7 +423,7 @@ void main() {
   });
 
   test('EdgeInsetsDirectional copyWith', () {
-    const EdgeInsetsDirectional sourceEdgeInsets = EdgeInsetsDirectional.only(
+    const sourceEdgeInsets = EdgeInsetsDirectional.only(
       start: 1.0,
       top: 2.0,
       bottom: 3.0,
@@ -476,7 +463,7 @@ void main() {
   });
 
   test('EdgeInsetsDirectional.resolve with null TextDirection asserts', () {
-    const EdgeInsetsDirectional edgeInsets = EdgeInsetsDirectional.all(10);
+    const edgeInsets = EdgeInsetsDirectional.all(10);
 
     expect(
       () => edgeInsets.resolve(null),
@@ -491,8 +478,8 @@ void main() {
   });
 
   test('resolve method of _MixedEdgeInsets throws detailed error when TextDirection is null', () {
-    const EdgeInsets a = EdgeInsets.only(top: 5.0, left: 5.0);
-    const EdgeInsetsDirectional b = EdgeInsetsDirectional.only(top: 15.0, start: 15.0);
+    const a = EdgeInsets.only(top: 5.0, left: 5.0);
+    const b = EdgeInsetsDirectional.only(top: 15.0, start: 15.0);
 
     expect(
       () => a.add(b).resolve(null),
@@ -519,7 +506,7 @@ void main() {
 
   group('EdgeInsets RRect methods', () {
     test('inflateRRect increases the size while preserving radius proportions', () {
-      final RRect original = RRect.fromLTRBAndCorners(
+      final original = RRect.fromLTRBAndCorners(
         10.0,
         20.0,
         30.0,
@@ -530,7 +517,7 @@ void main() {
         bottomLeft: const Radius.circular(8.0),
       );
 
-      const EdgeInsets insets = EdgeInsets.fromLTRB(2.0, 3.0, 4.0, 5.0);
+      const insets = EdgeInsets.fromLTRB(2.0, 3.0, 4.0, 5.0);
       final RRect inflated = insets.inflateRRect(original);
 
       expect(inflated.left, equals(original.left - insets.left));
@@ -552,7 +539,7 @@ void main() {
     });
 
     test('deflateRRect decreases the size while preserving radius proportions', () {
-      final RRect original = RRect.fromLTRBAndCorners(
+      final original = RRect.fromLTRBAndCorners(
         10.0,
         20.0,
         30.0,
@@ -563,7 +550,7 @@ void main() {
         bottomLeft: const Radius.circular(11.0),
       );
 
-      const EdgeInsets insets = EdgeInsets.fromLTRB(2.0, 3.0, 4.0, 5.0);
+      const insets = EdgeInsets.fromLTRB(2.0, 3.0, 4.0, 5.0);
       final RRect deflated = insets.deflateRRect(original);
 
       expect(deflated.left, equals(original.left + insets.left));
@@ -585,7 +572,7 @@ void main() {
     });
 
     test('inflateRRect with zero insets returns the same RRect', () {
-      final RRect original = RRect.fromLTRBAndCorners(
+      final original = RRect.fromLTRBAndCorners(
         10.0,
         20.0,
         30.0,
@@ -599,7 +586,7 @@ void main() {
     });
 
     test('deflateRRect with zero insets returns the same RRect', () {
-      final RRect original = RRect.fromLTRBAndCorners(
+      final original = RRect.fromLTRBAndCorners(
         10.0,
         20.0,
         30.0,
@@ -613,7 +600,7 @@ void main() {
     });
 
     test('deflateRRect clamps radius to zero when insets are larger than radius', () {
-      final RRect original = RRect.fromLTRBAndCorners(
+      final original = RRect.fromLTRBAndCorners(
         10.0,
         20.0,
         30.0,
@@ -624,7 +611,7 @@ void main() {
         bottomLeft: const Radius.circular(3.0),
       );
 
-      const EdgeInsets largeInsets = EdgeInsets.all(5.0);
+      const largeInsets = EdgeInsets.all(5.0);
       final RRect deflated = largeInsets.deflateRRect(original);
 
       expect(deflated.tlRadius.x, equals(0.0));
@@ -638,7 +625,7 @@ void main() {
     });
 
     test('inflateRRect and deflateRRect are inverse operations', () {
-      final RRect original = RRect.fromLTRBAndCorners(
+      final original = RRect.fromLTRBAndCorners(
         10.0,
         20.0,
         30.0,
@@ -649,7 +636,7 @@ void main() {
         bottomLeft: const Radius.circular(8.0),
       );
 
-      const EdgeInsets insets = EdgeInsets.fromLTRB(2.0, 3.0, 4.0, 5.0);
+      const insets = EdgeInsets.fromLTRB(2.0, 3.0, 4.0, 5.0);
 
       final RRect inflatedThenDeflated = insets.deflateRRect(insets.inflateRRect(original));
 

@@ -24,7 +24,7 @@ void registerWebServiceExtension(Future<Map<String, dynamic>> Function(Map<Strin
   _window.setProperty(
     r'$flutterDriver'.toJS,
     (JSAny message) {
-      final Map<String, String> params = Map<String, String>.from(
+      final params = Map<String, String>.from(
         jsonDecode((message as JSString).toDart) as Map<String, dynamic>,
       );
       call(params).then((Map<String, dynamic> result) {

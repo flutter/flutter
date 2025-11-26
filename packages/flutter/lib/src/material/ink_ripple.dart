@@ -235,7 +235,7 @@ class InkRipple extends InteractiveInkFeature {
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
     final int alpha = _fadeInController.isAnimating ? _fadeIn.value : _fadeOut.value;
-    final Paint paint = Paint()..color = color.withAlpha(alpha);
+    final paint = Paint()..color = color.withAlpha(alpha);
     final Rect? rect = _clipCallback?.call();
     // Splash moves to the center of the reference box.
     final Offset center = Offset.lerp(
