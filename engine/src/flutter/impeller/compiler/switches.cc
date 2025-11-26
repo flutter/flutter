@@ -327,9 +327,8 @@ SourceOptions Switches::CreateSourceOptions(
   options.defines = defines;
   options.entry_point_name =
       entry_point_prefix +
-      EntryPointFunctionNameFromSourceName(source_file_name, options.type,
-                                           options.source_language,
-                                           entry_point);
+      EntryPointFunctionNameFromSourceName(
+          source_file_name, options.type, options.source_language, entry_point);
   options.json_format = json_format;
   options.gles_language_version = gles_language_version;
   options.metal_version = metal_version;
