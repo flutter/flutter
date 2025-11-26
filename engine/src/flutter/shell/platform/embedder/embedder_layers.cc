@@ -188,7 +188,7 @@ void EmbedderLayers::PushPlatformViewLayer(
         case MutatorType::kBackdropFilter:
         case MutatorType::kBackdropClipRect:
         case MutatorType::kBackdropClipRRect:
-        case MutatorType::kBackdropClipRse:
+        case MutatorType::kBackdropClipRSuperellipse:
         case MutatorType::kBackdropClipPath:
           break;
       }

@@ -79,7 +79,7 @@ class IOSExternalViewEmbedder : public ExternalViewEmbedder {
       const DlRoundRect& clip_rrect) override;
 
   // |ExternalViewEmbedder|
-  void PushClipRSEToVisitedPlatformViews(
+  void PushClipRSuperellipseToVisitedPlatformViews(
       const DlRoundSuperellipse& clip_rse) override;
 
   // |ExternalViewEmbedder|

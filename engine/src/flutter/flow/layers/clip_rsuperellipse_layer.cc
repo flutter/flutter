@@ -22,7 +22,7 @@ void ClipRSuperellipseLayer::ApplyClip(
 
 void ClipRSuperellipseLayer::PushClipToEmbedderStack(
     PrerollContext* context) const {
-  context->view_embedder->PushClipRSEToVisitedPlatformViews(clip_shape());
+  context->view_embedder->PushClipRSuperellipseToVisitedPlatformViews(clip_shape());
 }
 
 }  // namespace flutter

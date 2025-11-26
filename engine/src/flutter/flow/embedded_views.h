@@ -42,7 +42,7 @@ enum class MutatorType {
   kBackdropFilter,
   kBackdropClipRect,
   kBackdropClipRRect,
-  kBackdropClipRse,
+  kBackdropClipRSuperellipse,
   kBackdropClipPath,
 };
 
@@ -85,11 +85,11 @@ struct BackdropClipRRect {
   }
 };
 
-struct BackdropClipRSE {
+struct BackdropClipRSuperellipse {
   DlRoundSuperellipse rse;
-  explicit BackdropClipRSE(const DlRoundSuperellipse& r) : rse(r) {}
+  explicit BackdropClipRSuperellipse(const DlRoundSuperellipse& r) : rse(r) {}
 
-  bool operator==(const BackdropClipRSE& other) const {
+  bool operator==(const BackdropClipRSuperellipse& other) const {
     return rse == other.rse;
   }
 };
@@ -127,7 +127,7 @@ class Mutator {
       : data_(backdrop_rect) {}
   explicit Mutator(const BackdropClipRRect& backdrop_rrect)
       : data_(backdrop_rrect) {}
-  explicit Mutator(const BackdropClipRSE& backdrop_rse) : data_(backdrop_rse) {}
+  explicit Mutator(const BackdropClipRSuperellipse& backdrop_rse) : data_(backdrop_rse) {}
   explicit Mutator(const BackdropClipPath& backdrop_path)
       : data_(backdrop_path) {}
 
@@ -154,8 +154,8 @@ class Mutator {
   const BackdropClipRRect& GetBackdropClipRRect() const {
     return std::get<BackdropClipRRect>(data_);
   }
-  const BackdropClipRSE& GetBackdropClipRSE() const {
-    return std::get<BackdropClipRSE>(data_);
+  const BackdropClipRSuperellipse& GetBackdropClipRSE() const {
+    return std::get<BackdropClipRSuperellipse>(data_);
   }
   const BackdropClipPath& GetBackdropClipPath() const {
     return std::get<BackdropClipPath>(data_);
@@ -174,7 +174,7 @@ class Mutator {
       // TODO: Figure out if this matters
       case MutatorType::kBackdropClipRect:
       case MutatorType::kBackdropClipRRect:
-      case MutatorType::kBackdropClipRse:
+      case MutatorType::kBackdropClipRSuperellipse:
       case MutatorType::kBackdropClipPath:
         return true;
       case MutatorType::kOpacity:
@@ -194,7 +194,7 @@ class Mutator {
                ImageFilterMutation,
                BackdropClipRect,
                BackdropClipRRect,
-               BackdropClipRSE,
+               BackdropClipRSuperellipse,
                BackdropClipPath>
       data_;
 };  // Mutator
@@ -223,7 +223,7 @@ class MutatorsStack {
                           const DlRect& filter_rect);
   void PushPlatformViewClipRect(const DlRect& rect);
   void PushPlatformViewClipRRect(const DlRoundRect& rrect);
-  void PushPlatformViewClipRSE(const DlRoundSuperellipse& rse);
+  void PushPlatformViewClipRSuperellipse(const DlRoundSuperellipse& rse);
   void PushPlatformViewClipPath(const DlPath& path);
 
   // Removes the `Mutator` on the top of the stack
@@ -332,8 +332,8 @@ class EmbeddedViewParams {
     mutators_stack_.PushPlatformViewClipRRect(clip_rrect);
   }
 
-  void PushPlatformViewClipRSE(const DlRoundSuperellipse& clip_rse) {
-    mutators_stack_.PushPlatformViewClipRSE(clip_rse);
+  void PushPlatformViewClipRSuperellipse(const DlRoundSuperellipse& clip_rse) {
+    mutators_stack_.PushPlatformViewClipRSuperellipse(clip_rse);
   }
 
   void PushPlatformViewClipPath(const DlPath& clip_path) {
@@ -553,7 +553,7 @@ class ExternalViewEmbedder {
   virtual void PushClipRectToVisitedPlatformViews(const DlRect& clip_rect) {}
   virtual void PushClipRRectToVisitedPlatformViews(
       const DlRoundRect& clip_rrect) {}
-  virtual void PushClipRSEToVisitedPlatformViews(
+  virtual void PushClipRSuperellipseToVisitedPlatformViews(
       const DlRoundSuperellipse& clip_rse) {}
   virtual void PushClipPathToVisitedPlatformViews(const DlPath& clip_path) {}
 

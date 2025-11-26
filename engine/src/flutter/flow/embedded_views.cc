@@ -106,9 +106,9 @@ void MutatorsStack::PushPlatformViewClipRRect(const DlRoundRect& rrect) {
       std::make_shared<Mutator>(BackdropClipRRect(rrect));
   vector_.push_back(element);
 }
-void MutatorsStack::PushPlatformViewClipRSE(const DlRoundSuperellipse& rse) {
+void MutatorsStack::PushPlatformViewClipRSuperellipse(const DlRoundSuperellipse& rse) {
   std::shared_ptr<Mutator> element =
-      std::make_shared<Mutator>(BackdropClipRSE(rse));
+      std::make_shared<Mutator>(BackdropClipRSuperellipse(rse));
   vector_.push_back(element);
 }
 void MutatorsStack::PushPlatformViewClipPath(const DlPath& path) {

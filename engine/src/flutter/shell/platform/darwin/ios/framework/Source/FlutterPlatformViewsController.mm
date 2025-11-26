@@ -498,10 +498,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 
   DlMatrix transformMatrix;
   NSMutableArray* blurFilters = [[NSMutableArray alloc] init];
-  // NSMutableArray* pendingClipRects = [[NSMutableArray alloc] init];
   NSMutableArray<PendingRRectClip*>* pendingClipRRects = [[NSMutableArray alloc] init];
-  // NSMutableArray* pendingClipRSE = [[NSMutableArray alloc] init];
-  // NSMutableArray* pendingClipPaths = [[NSMutableArray alloc] init];
 
   FML_DCHECK(!clipView.maskView ||
              [clipView.maskView isKindOfClass:[FlutterClippingMaskView class]]);
@@ -623,7 +620,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
         clip.bottomRightRadius = radii.bottom_right.width;
         [pendingClipRRects addObject:clip];
       }
-      case flutter::MutatorType::kBackdropClipRse: {
+      case flutter::MutatorType::kBackdropClipRSuperellipse: {
         // TODO: Pending Implementation
         break;
       }
@@ -1012,10 +1009,10 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   }
 }
 
-- (void)pushClipRSEToVisitedPlatformViews:(const flutter::DlRoundSuperellipse&)clipRse {
+- (void)pushClipRSuperellipseToVisitedPlatformViews:(const flutter::DlRoundSuperellipse&)clipRse {
   for (int64_t id : self.visitedPlatformViews) {
     flutter::EmbeddedViewParams params = self.currentCompositionParams[id];
-    params.PushPlatformViewClipRSE(clipRse);
+    params.PushPlatformViewClipRSuperellipse(clipRse);
     self.currentCompositionParams[id] = params;
   }
 }

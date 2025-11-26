@@ -117,13 +117,13 @@ TEST(MutatorsStack, PushPlatformViewClipRRect) {
   ASSERT_TRUE(iter->get()->GetBackdropClipRRect().rrect == rrect);
 }
 
-TEST(MutatorsStack, PushPlatformViewClipRSE) {
+TEST(MutatorsStack, PushPlatformViewClipRSuperellipse) {
   MutatorsStack stack;
   auto rse = DlRoundSuperellipse();
-  stack.PushPlatformViewClipRSE(rse);
+  stack.PushPlatformViewClipRSuperellipse(rse);
   auto iter = stack.Bottom();
-  ASSERT_TRUE(iter->get()->GetType() == MutatorType::kBackdropClipRse);
-  ASSERT_TRUE(iter->get()->GetBackdropClipRSE().rse == rse);
+  ASSERT_TRUE(iter->get()->GetType() == MutatorType::kBackdropClipRSuperellipse);
+  ASSERT_TRUE(iter->get()->GetBackdropClipRSuperellipse().rse == rse);
 }
 
 TEST(MutatorsStack, PushPlatformViewClipPath) {
