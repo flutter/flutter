@@ -56,7 +56,9 @@ class HomePage extends StatelessWidget {
                 elevation: 0,
                 color: Theme.of(context).colorScheme.surfaceContainerLowest,
                 child: ListView(
-                  children: List<Widget>.generate(Colors.primaries.length, (int index) {
+                  children: List<Widget>.generate(Colors.primaries.length, (
+                    int index,
+                  ) {
                     final Text kittenName = Text('Kitten $index');
                     final CircleAvatar avatar = CircleAvatar(
                       backgroundColor: Colors.primaries[index],

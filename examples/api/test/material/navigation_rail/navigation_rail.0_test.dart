@@ -3,13 +3,18 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/navigation_rail/navigation_rail.0.dart' as example;
+import 'package:flutter_api_samples/material/navigation_rail/navigation_rail.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('NavigationRail updates destination on tap', (WidgetTester tester) async {
+  testWidgets('NavigationRail updates destination on tap', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.NavigationRailExampleApp());
-    final NavigationRail navigationRailWidget = tester.firstWidget(find.byType(NavigationRail));
+    final NavigationRail navigationRailWidget = tester.firstWidget(
+      find.byType(NavigationRail),
+    );
 
     /// NavigationRailDestinations must be rendered
     expect(find.text('First'), findsOneWidget);
@@ -47,7 +52,9 @@ void main() {
     expect(find.text('Label type: none'), findsOneWidget);
   });
 
-  testWidgets('Navigation rail updates group alignment', (WidgetTester tester) async {
+  testWidgets('Navigation rail updates group alignment', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.NavigationRailExampleApp());
 
     // initial group alignment set top top.
@@ -64,7 +71,9 @@ void main() {
     expect(find.text('Group alignment: 1.0'), findsOneWidget);
   });
 
-  testWidgets('NavigationRail shows leading/trailing widgets', (WidgetTester tester) async {
+  testWidgets('NavigationRail shows leading/trailing widgets', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.NavigationRailExampleApp());
 
     // Initially leading/trailing widgets are hidden.
@@ -89,13 +98,19 @@ void main() {
 
     // Test badge without label.
     final Badge notificationBadge = tester.firstWidget(
-      find.ancestor(of: find.byIcon(Icons.bookmark_border), matching: find.byType(Badge)),
+      find.ancestor(
+        of: find.byIcon(Icons.bookmark_border),
+        matching: find.byType(Badge),
+      ),
     );
     expect(notificationBadge.label, null);
 
     // Test badge with label.
     final Badge messagesBadge = tester.firstWidget(
-      find.ancestor(of: find.byIcon(Icons.star_border), matching: find.byType(Badge)),
+      find.ancestor(
+        of: find.byIcon(Icons.star_border),
+        matching: find.byType(Badge),
+      ),
     );
     expect(messagesBadge.label, isNotNull);
   });

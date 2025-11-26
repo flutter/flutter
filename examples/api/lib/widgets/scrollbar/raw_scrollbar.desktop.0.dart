@@ -78,7 +78,9 @@ class _DesktopExampleState extends State<DesktopExample> {
                 thickness: 20.0,
                 thumbVisibility: true,
                 child: ScrollConfiguration(
-                  behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                  behavior: ScrollConfiguration.of(
+                    context,
+                  ).copyWith(scrollbars: false),
                   child: ListView.builder(
                     primary: true,
                     itemCount: 100,

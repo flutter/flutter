@@ -8,7 +8,9 @@ import 'package:flutter_api_samples/widgets/slotted_render_object_widget/slotted
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('shows two widgets arranged diagonally', (WidgetTester tester) async {
+  testWidgets('shows two widgets arranged diagonally', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.ExampleWidget());
 
     expect(find.text('topLeft'), findsOneWidget);
@@ -19,10 +21,19 @@ void main() {
       tester.getTopLeft(findContainerWithText('bottomRight')),
     );
 
-    expect(tester.getSize(findContainerWithText('topLeft')), const Size(200, 100));
-    expect(tester.getSize(findContainerWithText('bottomRight')), const Size(30, 60));
+    expect(
+      tester.getSize(findContainerWithText('topLeft')),
+      const Size(200, 100),
+    );
+    expect(
+      tester.getSize(findContainerWithText('bottomRight')),
+      const Size(30, 60),
+    );
 
-    expect(tester.getSize(find.byType(example.Diagonal)), const Size(200 + 30, 100 + 60));
+    expect(
+      tester.getSize(find.byType(example.Diagonal)),
+      const Size(200 + 30, 100 + 60),
+    );
   });
 }
 

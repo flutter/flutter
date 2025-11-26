@@ -20,7 +20,12 @@ class InheritedModelApp extends StatelessWidget {
 }
 
 class LogoModel extends InheritedModel<LogoAspect> {
-  const LogoModel({super.key, this.backgroundColor, this.large, required super.child});
+  const LogoModel({
+    super.key,
+    this.backgroundColor,
+    this.large,
+    required super.child,
+  });
 
   final Color? backgroundColor;
   final bool? large;
@@ -33,16 +38,24 @@ class LogoModel extends InheritedModel<LogoAspect> {
   }
 
   static bool sizeOf(BuildContext context) {
-    return InheritedModel.inheritFrom<LogoModel>(context, aspect: LogoAspect.large)?.large ?? false;
+    return InheritedModel.inheritFrom<LogoModel>(
+          context,
+          aspect: LogoAspect.large,
+        )?.large ??
+        false;
   }
 
   @override
   bool updateShouldNotify(LogoModel oldWidget) {
-    return backgroundColor != oldWidget.backgroundColor || large != oldWidget.large;
+    return backgroundColor != oldWidget.backgroundColor ||
+        large != oldWidget.large;
   }
 
   @override
-  bool updateShouldNotifyDependent(LogoModel oldWidget, Set<LogoAspect> dependencies) {
+  bool updateShouldNotifyDependent(
+    LogoModel oldWidget,
+    Set<LogoAspect> dependencies,
+  ) {
     if (backgroundColor != oldWidget.backgroundColor &&
         dependencies.contains(LogoAspect.backgroundColor)) {
       return true;

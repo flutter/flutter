@@ -8,7 +8,9 @@ import 'package:flutter_api_samples/cupertino/refresh/cupertino_sliver_refresh_c
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can pull down to reveal CupertinoSliverRefreshControl', (WidgetTester tester) async {
+  testWidgets('Can pull down to reveal CupertinoSliverRefreshControl', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.RefreshControlApp());
 
     expect(find.byType(CupertinoSliverRefreshControl), findsNothing);

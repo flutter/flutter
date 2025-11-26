@@ -85,12 +85,21 @@ class ListTileSelectExampleState extends State<ListTileSelectExample> {
           if (isSelectionMode)
             TextButton(
               child: !_selectAll
-                  ? const Text('select all', style: TextStyle(color: Colors.white))
-                  : const Text('unselect all', style: TextStyle(color: Colors.white)),
+                  ? const Text(
+                      'select all',
+                      style: TextStyle(color: Colors.white),
+                    )
+                  : const Text(
+                      'unselect all',
+                      style: TextStyle(color: Colors.white),
+                    ),
               onPressed: () {
                 _selectAll = !_selectAll;
                 setState(() {
-                  _selected = List<bool>.generate(listLength, (_) => _selectAll);
+                  _selected = List<bool>.generate(
+                    listLength,
+                    (_) => _selectAll,
+                  );
                 });
               },
             ),
@@ -148,7 +157,9 @@ class GridBuilderState extends State<GridBuilder> {
   Widget build(BuildContext context) {
     return GridView.builder(
       itemCount: widget.selectedList.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+      ),
       itemBuilder: (_, int index) {
         return InkWell(
           onTap: () => _toggle(index),
@@ -217,7 +228,10 @@ class _ListBuilderState extends State<ListBuilder> {
             }
           },
           trailing: widget.isSelectionMode
-              ? Checkbox(value: widget.selectedList[index], onChanged: (bool? x) => _toggle(index))
+              ? Checkbox(
+                  value: widget.selectedList[index],
+                  onChanged: (bool? x) => _toggle(index),
+                )
               : const SizedBox.shrink(),
           title: Text('item $index'),
         );

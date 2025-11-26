@@ -308,7 +308,7 @@ class CupertinoSwitch extends StatefulWidget {
   ///   onChanged: (bool value) { },
   ///   trackOutlineColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.disabled)) {
-  ///       return CupertinoColors.activeOrange.withOpacity(.48);
+  ///       return CupertinoColors.activeOrange.withValues(alpha: .48);
   ///     }
   ///     return null; // Use the default color.
   ///   }),

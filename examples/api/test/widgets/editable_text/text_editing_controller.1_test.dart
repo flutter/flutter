@@ -8,7 +8,9 @@ import 'package:flutter_api_samples/widgets/editable_text/text_editing_controlle
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Initial selection is collapsed at offset 0', (WidgetTester tester) async {
+  testWidgets('Initial selection is collapsed at offset 0', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.TextEditingControllerExampleApp());
 
     final EditableText editableText = tester.widget(find.byType(EditableText));

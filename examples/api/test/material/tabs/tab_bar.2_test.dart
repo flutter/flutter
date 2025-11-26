@@ -16,10 +16,14 @@ void main() {
 
     await tester.pumpWidget(const example.TabBarApp());
 
-    final TabBar primaryTabBar = tester.widget<TabBar>(find.byType(TabBar).last);
+    final TabBar primaryTabBar = tester.widget<TabBar>(
+      find.byType(TabBar).last,
+    );
     expect(primaryTabBar.tabs.length, 3);
 
-    final TabBar secondaryTabBar = tester.widget<TabBar>(find.byType(TabBar).first);
+    final TabBar secondaryTabBar = tester.widget<TabBar>(
+      find.byType(TabBar).first,
+    );
     expect(secondaryTabBar.tabs.length, 2);
 
     String tabBarViewText = '$primaryTabLabel2: $secondaryTabLabel1 tab';

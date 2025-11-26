@@ -13,7 +13,9 @@ class ScaffoldFloatingActionButtonAnimatorApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: ScaffoldFloatingActionButtonAnimatorExample());
+    return const MaterialApp(
+      home: ScaffoldFloatingActionButtonAnimatorExample(),
+    );
   }
 }
 
@@ -42,7 +44,9 @@ class ScaffoldFloatingActionButtonAnimatorExample extends StatefulWidget {
 
 class _ScaffoldFloatingActionButtonAnimatorExampleState
     extends State<ScaffoldFloatingActionButtonAnimatorExample> {
-  Set<FabAnimator> _selectedFabAnimator = <FabAnimator>{FabAnimator.defaultStyle};
+  Set<FabAnimator> _selectedFabAnimator = <FabAnimator>{
+    FabAnimator.defaultStyle,
+  };
   Set<FabLocation> _selectedFabLocation = <FabLocation>{FabLocation.endFloat};
   FloatingActionButtonAnimator? _floatingActionButtonAnimator;
   FloatingActionButtonLocation? _floatingActionButtonLocation;
@@ -64,7 +68,8 @@ class _ScaffoldFloatingActionButtonAnimatorExampleState
                 setState(() {
                   _floatingActionButtonAnimator = switch (styles.first) {
                     FabAnimator.defaultStyle => null,
-                    FabAnimator.none => FloatingActionButtonAnimator.noAnimation,
+                    FabAnimator.none =>
+                      FloatingActionButtonAnimator.noAnimation,
                   };
                   _selectedFabAnimator = styles;
                 });
@@ -74,7 +79,10 @@ class _ScaffoldFloatingActionButtonAnimatorExampleState
               ) {
                 final FabAnimator animator = fabAnimator.$1;
                 final String label = fabAnimator.$2;
-                return ButtonSegment<FabAnimator>(value: animator, label: Text(label));
+                return ButtonSegment<FabAnimator>(
+                  value: animator,
+                  label: Text(label),
+                );
               }).toList(),
             ),
             const SizedBox(height: 10),
@@ -83,8 +91,10 @@ class _ScaffoldFloatingActionButtonAnimatorExampleState
               onSelectionChanged: (Set<FabLocation> styles) {
                 setState(() {
                   _floatingActionButtonLocation = switch (styles.first) {
-                    FabLocation.centerFloat => FloatingActionButtonLocation.centerFloat,
-                    FabLocation.endFloat => FloatingActionButtonLocation.endFloat,
+                    FabLocation.centerFloat =>
+                      FloatingActionButtonLocation.centerFloat,
+                    FabLocation.endFloat =>
+                      FloatingActionButtonLocation.endFloat,
                     FabLocation.endTop => FloatingActionButtonLocation.endTop,
                   };
                   _selectedFabLocation = styles;
@@ -95,7 +105,10 @@ class _ScaffoldFloatingActionButtonAnimatorExampleState
               ) {
                 final FabLocation location = fabLocation.$1;
                 final String label = fabLocation.$2;
-                return ButtonSegment<FabLocation>(value: location, label: Text(label));
+                return ButtonSegment<FabLocation>(
+                  value: location,
+                  label: Text(label),
+                );
               }).toList(),
             ),
             const SizedBox(height: 10),
@@ -113,7 +126,10 @@ class _ScaffoldFloatingActionButtonAnimatorExampleState
       ),
       floatingActionButton: !_showFab
           ? null
-          : FloatingActionButton(onPressed: () {}, child: const Icon(Icons.add)),
+          : FloatingActionButton(
+              onPressed: () {},
+              child: const Icon(Icons.add),
+            ),
     );
   }
 }

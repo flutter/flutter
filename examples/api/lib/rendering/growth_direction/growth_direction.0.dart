@@ -110,7 +110,9 @@ class _MyWidgetState extends State<MyWidget> {
     return DefaultTextStyle(
       style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
       child: RadioTheme(
-        data: RadioThemeData(fillColor: WidgetStateProperty.all<Color>(Colors.white)),
+        data: RadioThemeData(
+          fillColor: WidgetStateProperty.all<Color>(Colors.white),
+        ),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(
@@ -118,28 +120,52 @@ class _MyWidgetState extends State<MyWidget> {
             children: <Widget>[
               Radio<AxisDirection>(
                 value: AxisDirection.up,
+                // TODO(loic-sharma): Migrate to RadioGroup.
+                // https://github.com/flutter/flutter/issues/179088
+                // ignore: deprecated_member_use
                 groupValue: _axisDirection,
+                // TODO(loic-sharma): Migrate to RadioGroup.
+                // https://github.com/flutter/flutter/issues/179088
+                // ignore: deprecated_member_use
                 onChanged: _onAxisDirectionChanged,
               ),
               const Text('up'),
               _spacer,
               Radio<AxisDirection>(
                 value: AxisDirection.down,
+                // TODO(loic-sharma): Migrate to RadioGroup.
+                // https://github.com/flutter/flutter/issues/179088
+                // ignore: deprecated_member_use
                 groupValue: _axisDirection,
+                // TODO(loic-sharma): Migrate to RadioGroup.
+                // https://github.com/flutter/flutter/issues/179088
+                // ignore: deprecated_member_use
                 onChanged: _onAxisDirectionChanged,
               ),
               const Text('down'),
               _spacer,
               Radio<AxisDirection>(
                 value: AxisDirection.left,
+                // TODO(loic-sharma): Migrate to RadioGroup.
+                // https://github.com/flutter/flutter/issues/179088
+                // ignore: deprecated_member_use
                 groupValue: _axisDirection,
+                // TODO(loic-sharma): Migrate to RadioGroup.
+                // https://github.com/flutter/flutter/issues/179088
+                // ignore: deprecated_member_use
                 onChanged: _onAxisDirectionChanged,
               ),
               const Text('left'),
               _spacer,
               Radio<AxisDirection>(
                 value: AxisDirection.right,
+                // TODO(loic-sharma): Migrate to RadioGroup.
+                // https://github.com/flutter/flutter/issues/179088
+                // ignore: deprecated_member_use
                 groupValue: _axisDirection,
+                // TODO(loic-shaQrma): Migrate to RadioGroup.
+                // https://github.com/flutter/flutter/issues/179088
+                // ignore: deprecated_member_use
                 onChanged: _onAxisDirectionChanged,
               ),
               const Text('right'),
@@ -186,7 +212,10 @@ class _MyWidgetState extends State<MyWidget> {
         title: const Text('GrowthDirections'),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(50),
-          child: Padding(padding: const EdgeInsets.all(8.0), child: _getRadioRow()),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: _getRadioRow(),
+          ),
         ),
       ),
       body: CustomScrollView(

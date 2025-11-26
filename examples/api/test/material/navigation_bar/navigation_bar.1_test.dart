@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/navigation_bar/navigation_bar.1.dart' as example;
+import 'package:flutter_api_samples/material/navigation_bar/navigation_bar.1.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -11,7 +12,9 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const example.NavigationBarApp());
-    NavigationBar navigationBarWidget = tester.firstWidget(find.byType(NavigationBar));
+    NavigationBar navigationBarWidget = tester.firstWidget(
+      find.byType(NavigationBar),
+    );
 
     expect(find.text('Label behavior: alwaysShow'), findsOneWidget);
 
@@ -20,7 +23,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Label behavior: alwaysShow'), findsOneWidget);
-    expect(navigationBarWidget.labelBehavior, NavigationDestinationLabelBehavior.alwaysShow);
+    expect(
+      navigationBarWidget.labelBehavior,
+      NavigationDestinationLabelBehavior.alwaysShow,
+    );
 
     /// Test onlyShowSelected label behavior button.
     await tester.tap(find.widgetWithText(ElevatedButton, 'onlyShowSelected'));
@@ -28,7 +34,10 @@ void main() {
 
     expect(find.text('Label behavior: onlyShowSelected'), findsOneWidget);
     navigationBarWidget = tester.firstWidget(find.byType(NavigationBar));
-    expect(navigationBarWidget.labelBehavior, NavigationDestinationLabelBehavior.onlyShowSelected);
+    expect(
+      navigationBarWidget.labelBehavior,
+      NavigationDestinationLabelBehavior.onlyShowSelected,
+    );
 
     /// Test alwaysHide label behavior button.
     await tester.tap(find.widgetWithText(ElevatedButton, 'alwaysHide'));
@@ -36,13 +45,20 @@ void main() {
 
     expect(find.text('Label behavior: alwaysHide'), findsOneWidget);
     navigationBarWidget = tester.firstWidget(find.byType(NavigationBar));
-    expect(navigationBarWidget.labelBehavior, NavigationDestinationLabelBehavior.alwaysHide);
+    expect(
+      navigationBarWidget.labelBehavior,
+      NavigationDestinationLabelBehavior.alwaysHide,
+    );
   });
 
-  testWidgets('Overflow buttons are aligned in the center', (WidgetTester tester) async {
+  testWidgets('Overflow buttons are aligned in the center', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.NavigationBarApp());
 
-    final OverflowBar overflowBar = tester.widget<OverflowBar>(find.byType(OverflowBar));
+    final OverflowBar overflowBar = tester.widget<OverflowBar>(
+      find.byType(OverflowBar),
+    );
     expect(overflowBar.overflowAlignment, OverflowBarAlignment.center);
     expect(overflowBar.overflowSpacing, 10.0);
   });

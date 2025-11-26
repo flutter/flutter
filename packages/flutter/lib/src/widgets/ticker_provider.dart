@@ -68,6 +68,7 @@ class TickerMode extends StatefulWidget {
   /// Typical usage is as follows:
   ///
   /// ```dart
+  /// // ignore: deprecated_member_use
   /// bool tickingEnabled = TickerMode.of(context);
   /// ```
   @Deprecated(

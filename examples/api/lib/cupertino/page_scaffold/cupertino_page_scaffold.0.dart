@@ -35,7 +35,9 @@ class _PageScaffoldExampleState extends State<PageScaffoldExample> {
     return CupertinoPageScaffold(
       // Uncomment to change the background color
       // backgroundColor: CupertinoColors.systemPink,
-      navigationBar: const CupertinoNavigationBar(middle: Text('CupertinoPageScaffold Sample')),
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('CupertinoPageScaffold Sample'),
+      ),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

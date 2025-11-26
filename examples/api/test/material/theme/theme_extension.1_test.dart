@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/theme/theme_extension.1.dart' as example;
+import 'package:flutter_api_samples/material/theme/theme_extension.1.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -37,12 +38,17 @@ void main() {
     expect(colors.danger, equals(const Color(0xFFEF9A9A)));
   });
 
-  testWidgets('Home uses MyColors extension correctly', (WidgetTester tester) async {
+  testWidgets('Home uses MyColors extension correctly', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
           extensions: const <ThemeExtension<dynamic>>[
-            example.MyColors(brandColor: Color(0xFF0000FF), danger: Color(0xFFFF0000)),
+            example.MyColors(
+              brandColor: Color(0xFF0000FF),
+              danger: Color(0xFFFF0000),
+            ),
           ],
         ),
         home: example.Home(isLightTheme: true, toggleTheme: () {}),
@@ -81,6 +87,9 @@ void main() {
 
     expect(theme.brightness, equals(Brightness.dark));
     expect(home.isLightTheme, isFalse);
-    expect(iconButton.icon, isA<Icon>().having((Icon i) => i.icon, 'icon', equals(Icons.wb_sunny)));
+    expect(
+      iconButton.icon,
+      isA<Icon>().having((Icon i) => i.icon, 'icon', equals(Icons.wb_sunny)),
+    );
   });
 }

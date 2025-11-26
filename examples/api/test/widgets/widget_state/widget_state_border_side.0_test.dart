@@ -27,7 +27,9 @@ void main() {
     await tester.pumpWidget(const example.WidgetStateBorderSideExampleApp());
 
     // Hover over the FilterChip.
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
     await gesture.moveTo(tester.getCenter(find.byType(FilterChip)));
 
     await tester.pumpAndSettle();
@@ -57,17 +59,21 @@ void main() {
     expect(findByBorderColor(Colors.red), findsOneWidget);
   });
 
-  testWidgets('FilterChip displays the correct border color when not selected', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(const example.WidgetStateBorderSideExampleApp());
+  testWidgets(
+    'FilterChip displays the correct border color when not selected',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(const example.WidgetStateBorderSideExampleApp());
 
-    await tester.tap(find.byType(FilterChip));
-    await tester.pumpAndSettle();
+      await tester.tap(find.byType(FilterChip));
+      await tester.pumpAndSettle();
 
-    final ThemeData theme = Theme.of(tester.element(find.byType(FilterChip)));
+      final ThemeData theme = Theme.of(tester.element(find.byType(FilterChip)));
 
-    // FilterChip's border color defaults to ColorScheme.outlineVariant.
-    expect(findByBorderColor(theme.colorScheme.outlineVariant), findsOneWidget);
-  });
+      // FilterChip's border color defaults to ColorScheme.outlineVariant.
+      expect(
+        findByBorderColor(theme.colorScheme.outlineVariant),
+        findsOneWidget,
+      );
+    },
+  );
 }

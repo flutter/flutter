@@ -4,7 +4,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_api_samples/widgets/hardware_keyboard/key_event_manager.0.dart' as example;
+import 'package:flutter_api_samples/widgets/hardware_keyboard/key_event_manager.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

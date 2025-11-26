@@ -32,7 +32,8 @@ class RestorableCounter extends StatefulWidget {
 
 // The [State] object uses the [RestorationMixin] to make the current value
 // of the counter restorable.
-class _RestorableCounterState extends State<RestorableCounter> with RestorationMixin {
+class _RestorableCounterState extends State<RestorableCounter>
+    with RestorationMixin {
   // The current value of the counter is stored in a [RestorableProperty].
   // During state restoration it is automatically restored to its old value.
   // If no restoration data is available to restore the counter from, it is
@@ -75,7 +76,10 @@ class _RestorableCounterState extends State<RestorableCounter> with RestorationM
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text('You have pushed the button this many times:'),
-            Text('${_counter.value}', style: Theme.of(context).textTheme.headlineMedium),
+            Text(
+              '${_counter.value}',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
           ],
         ),
       ),

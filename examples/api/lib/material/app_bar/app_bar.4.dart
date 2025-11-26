@@ -35,15 +35,23 @@ class AppBarExample extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: TextField(
               decoration: InputDecoration(
-                border: OutlineInputBorder(borderSide: BorderSide(color: colorScheme.primary)),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: colorScheme.primary),
+                ),
                 enabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: colorScheme.onPrimaryContainer),
                 ),
                 filled: true,
                 hintText: 'Enter a search term',
                 fillColor: colorScheme.surface,
-                prefixIcon: Icon(Icons.search_rounded, color: colorScheme.primary),
-                suffixIcon: Icon(Icons.tune_rounded, color: colorScheme.primary),
+                prefixIcon: Icon(
+                  Icons.search_rounded,
+                  color: colorScheme.primary,
+                ),
+                suffixIcon: Icon(
+                  Icons.tune_rounded,
+                  color: colorScheme.primary,
+                ),
               ),
             ),
           ),
@@ -74,7 +82,12 @@ class CustomAppBarShape extends OutlinedBorder {
 
     final Offset controlPoint = Offset(size.width * 0.4, size.height);
     final Offset endPoint = Offset(size.width, size.height / 2);
-    path.quadraticBezierTo(controlPoint.dx, controlPoint.dy, endPoint.dx, endPoint.dy);
+    path.quadraticBezierTo(
+      controlPoint.dx,
+      controlPoint.dy,
+      endPoint.dx,
+      endPoint.dy,
+    );
 
     path.lineTo(size.width, 0.0);
     path.close();
@@ -97,7 +110,10 @@ class CustomAppBarShape extends OutlinedBorder {
     if (rect.isEmpty) {
       return;
     }
-    canvas.drawPath(getOuterPath(rect, textDirection: textDirection), side.toPaint());
+    canvas.drawPath(
+      getOuterPath(rect, textDirection: textDirection),
+      side.toPaint(),
+    );
   }
 
   @override

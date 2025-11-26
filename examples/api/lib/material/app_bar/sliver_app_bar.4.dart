@@ -14,7 +14,8 @@ class StretchableSliverAppBar extends StatefulWidget {
   const StretchableSliverAppBar({super.key});
 
   @override
-  State<StretchableSliverAppBar> createState() => _StretchableSliverAppBarState();
+  State<StretchableSliverAppBar> createState() =>
+      _StretchableSliverAppBarState();
 }
 
 class _StretchableSliverAppBarState extends State<StretchableSliverAppBar> {
@@ -49,7 +50,12 @@ class _StretchableSliverAppBarState extends State<StretchableSliverAppBar> {
                 return Container(
                   color: index.isOdd ? Colors.white : Colors.black12,
                   height: 100.0,
-                  child: Center(child: Text('$index', textScaler: const TextScaler.linear(5.0))),
+                  child: Center(
+                    child: Text(
+                      '$index',
+                      textScaler: const TextScaler.linear(5.0),
+                    ),
+                  ),
                 );
               },
             ),

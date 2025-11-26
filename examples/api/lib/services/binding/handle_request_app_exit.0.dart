@@ -46,7 +46,9 @@ class _BodyState extends State<Body> with WidgetsBindingObserver {
   }
 
   Future<void> _quit() async {
-    final AppExitType exitType = _shouldExit ? AppExitType.required : AppExitType.cancelable;
+    final AppExitType exitType = _shouldExit
+        ? AppExitType.required
+        : AppExitType.cancelable;
     setState(() {
       lastResponse = 'App requesting ${exitType.name} exit';
     });
@@ -55,7 +57,9 @@ class _BodyState extends State<Body> with WidgetsBindingObserver {
 
   @override
   Future<AppExitResponse> didRequestAppExit() async {
-    final AppExitResponse response = _shouldExit ? AppExitResponse.exit : AppExitResponse.cancel;
+    final AppExitResponse response = _shouldExit
+        ? AppExitResponse.exit
+        : AppExitResponse.cancel;
     setState(() {
       lastResponse = 'App responded ${response.name} to exit request';
     });
@@ -83,7 +87,10 @@ class _BodyState extends State<Body> with WidgetsBindingObserver {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              const RadioListTile<bool>(title: Text('Do Not Allow Exit'), value: false),
+              const RadioListTile<bool>(
+                title: Text('Do Not Allow Exit'),
+                value: false,
+              ),
               const RadioListTile<bool>(title: Text('Allow Exit'), value: true),
               const SizedBox(height: 30),
               ElevatedButton(onPressed: _quit, child: const Text('Quit')),

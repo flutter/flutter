@@ -796,6 +796,7 @@ enum KeyDataTransitMode {
 /// using [combineKeyEventResults].
 ///
 /// ```dart
+/// // ignore: deprecated_member_use
 /// void handleMessage(FocusNode node, KeyMessage message) {
 ///   final List<KeyEventResult> results = <KeyEventResult>[];
 ///   if (node.onKeyEvent != null) {
@@ -803,7 +804,9 @@ enum KeyDataTransitMode {
 ///       results.add(node.onKeyEvent!(node, event));
 ///     }
 ///   }
+///   // ignore: deprecated_member_use
 ///   if (node.onKey != null && message.rawEvent != null) {
+///     // ignore: deprecated_member_use
 ///     results.add(node.onKey!(node, message.rawEvent!));
 ///   }
 ///   final KeyEventResult result = combineKeyEventResults(results);

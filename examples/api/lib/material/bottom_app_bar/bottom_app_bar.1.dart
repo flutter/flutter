@@ -20,7 +20,8 @@ class BottomAppBarDemo extends StatefulWidget {
 class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   bool _showFab = true;
   bool _showNotch = true;
-  FloatingActionButtonLocation _fabLocation = FloatingActionButtonLocation.endDocked;
+  FloatingActionButtonLocation _fabLocation =
+      FloatingActionButtonLocation.endDocked;
 
   void _onShowNotchChanged(bool value) {
     setState(() {
@@ -44,10 +45,14 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(automaticallyImplyLeading: false, title: const Text('Bottom App Bar Demo')),
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          title: const Text('Bottom App Bar Demo'),
+        ),
         body: RadioGroup<FloatingActionButtonLocation>(
           groupValue: _fabLocation,
-          onChanged: (FloatingActionButtonLocation? value) => _onFabLocationChanged(value),
+          onChanged: (FloatingActionButtonLocation? value) =>
+              _onFabLocationChanged(value),
           child: ListView(
             padding: const EdgeInsets.only(bottom: 88),
             children: <Widget>[
@@ -110,10 +115,11 @@ class _DemoBottomAppBar extends StatelessWidget {
   final FloatingActionButtonLocation fabLocation;
   final NotchedShape? shape;
 
-  static final List<FloatingActionButtonLocation> centerLocations = <FloatingActionButtonLocation>[
-    FloatingActionButtonLocation.centerDocked,
-    FloatingActionButtonLocation.centerFloat,
-  ];
+  static final List<FloatingActionButtonLocation> centerLocations =
+      <FloatingActionButtonLocation>[
+        FloatingActionButtonLocation.centerDocked,
+        FloatingActionButtonLocation.centerFloat,
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -130,8 +136,16 @@ class _DemoBottomAppBar extends StatelessWidget {
               onPressed: () {},
             ),
             if (centerLocations.contains(fabLocation)) const Spacer(),
-            IconButton(tooltip: 'Search', icon: const Icon(Icons.search), onPressed: () {}),
-            IconButton(tooltip: 'Favorite', icon: const Icon(Icons.favorite), onPressed: () {}),
+            IconButton(
+              tooltip: 'Search',
+              icon: const Icon(Icons.search),
+              onPressed: () {},
+            ),
+            IconButton(
+              tooltip: 'Favorite',
+              icon: const Icon(Icons.favorite),
+              onPressed: () {},
+            ),
           ],
         ),
       ),

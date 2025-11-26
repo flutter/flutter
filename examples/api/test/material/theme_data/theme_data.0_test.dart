@@ -3,22 +3,31 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/theme_data/theme_data.0.dart' as example;
+import 'package:flutter_api_samples/material/theme_data/theme_data.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('ThemeData basics', (WidgetTester tester) async {
     await tester.pumpWidget(const example.ThemeDataExampleApp());
 
-    final ColorScheme colorScheme = ColorScheme.fromSeed(seedColor: Colors.indigo);
+    final ColorScheme colorScheme = ColorScheme.fromSeed(
+      seedColor: Colors.indigo,
+    );
 
     final Material fabMaterial = tester.widget<Material>(
-      find.descendant(of: find.byType(FloatingActionButton), matching: find.byType(Material)),
+      find.descendant(
+        of: find.byType(FloatingActionButton),
+        matching: find.byType(Material),
+      ),
     );
     expect(fabMaterial.color, colorScheme.tertiary);
 
     final RichText iconRichText = tester.widget<RichText>(
-      find.descendant(of: find.byIcon(Icons.add), matching: find.byType(RichText)),
+      find.descendant(
+        of: find.byIcon(Icons.add),
+        matching: find.byType(RichText),
+      ),
     );
     expect(iconRichText.text.style!.color, colorScheme.onTertiary);
 

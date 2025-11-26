@@ -50,7 +50,10 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
           tileColor: colorScheme.primaryContainer,
           title: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[Text('enabled: true'), Text('requestFocusOnTap: true')],
+            children: <Widget>[
+              Text('enabled: true'),
+              Text('requestFocusOnTap: true'),
+            ],
           ),
           subtitle: Column(
             children: <Widget>[
@@ -65,7 +68,9 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
                 },
                 dropdownMenuEntries: menuEntries,
               ),
-              const Text('Text cursor is shown when hovering over the DropdownMenu.'),
+              const Text(
+                'Text cursor is shown when hovering over the DropdownMenu.',
+              ),
             ],
           ),
         ),
@@ -74,7 +79,10 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
           tileColor: colorScheme.primaryContainer,
           title: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[Text('enabled: true'), Text('requestFocusOnTap: false')],
+            children: <Widget>[
+              Text('enabled: true'),
+              Text('requestFocusOnTap: false'),
+            ],
           ),
           subtitle: Column(
             children: <Widget>[
@@ -89,7 +97,9 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
                 },
                 dropdownMenuEntries: menuEntries,
               ),
-              const Text('Clickable cursor is shown when hovering over the DropdownMenu.'),
+              const Text(
+                'Clickable cursor is shown when hovering over the DropdownMenu.',
+              ),
             ],
           ),
         ),
@@ -98,7 +108,10 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
           tileColor: colorScheme.onInverseSurface,
           title: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[Text('enabled: false'), Text('requestFocusOnTap: true')],
+            children: <Widget>[
+              Text('enabled: false'),
+              Text('requestFocusOnTap: true'),
+            ],
           ),
           subtitle: Column(
             children: <Widget>[
@@ -114,7 +127,9 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
                 },
                 dropdownMenuEntries: menuEntries,
               ),
-              const Text('Default cursor is shown when hovering over the DropdownMenu.'),
+              const Text(
+                'Default cursor is shown when hovering over the DropdownMenu.',
+              ),
             ],
           ),
         ),
@@ -123,7 +138,10 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
           tileColor: colorScheme.onInverseSurface,
           title: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[Text('enabled: false'), Text('requestFocusOnTap: false')],
+            children: <Widget>[
+              Text('enabled: false'),
+              Text('requestFocusOnTap: false'),
+            ],
           ),
           subtitle: Column(
             children: <Widget>[
@@ -139,7 +157,9 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
                 },
                 dropdownMenuEntries: menuEntries,
               ),
-              const Text('Default cursor is shown when hovering over the DropdownMenu.'),
+              const Text(
+                'Default cursor is shown when hovering over the DropdownMenu.',
+              ),
             ],
           ),
         ),

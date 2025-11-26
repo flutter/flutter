@@ -58,7 +58,8 @@ class _FocusListenerContainerState extends State<FocusListenerContainer> {
 
   @override
   Widget build(BuildContext context) {
-    final OutlinedBorder effectiveBorder = widget.border ?? const RoundedRectangleBorder();
+    final OutlinedBorder effectiveBorder =
+        widget.border ?? const RoundedRectangleBorder();
     return ListenableBuilder(
       listenable: _focusNode,
       child: Focus(
@@ -72,7 +73,9 @@ class _FocusListenerContainerState extends State<FocusListenerContainer> {
           padding: widget.padding,
           decoration: ShapeDecoration(
             color: _focusNode.hasFocus ? widget.focusedColor : null,
-            shape: effectiveBorder.copyWith(side: _focusNode.hasFocus ? widget.focusedSide : null),
+            shape: effectiveBorder.copyWith(
+              side: _focusNode.hasFocus ? widget.focusedSide : null,
+            ),
           ),
           child: child,
         );
@@ -103,7 +106,9 @@ class _MyFieldState extends State<MyField> {
           child: TextField(
             controller: controller,
             onEditingComplete: () {
-              debugPrint('Field ${widget.label} changed to ${controller.value}');
+              debugPrint(
+                'Field ${widget.label} changed to ${controller.value}',
+              );
             },
           ),
         ),
@@ -135,7 +140,9 @@ class ListenableBuilderExample extends StatelessWidget {
                   FocusListenerContainer(
                     padding: const EdgeInsets.all(8),
                     border: const RoundedRectangleBorder(
-                      side: BorderSide(strokeAlign: BorderSide.strokeAlignOutside),
+                      side: BorderSide(
+                        strokeAlign: BorderSide.strokeAlignOutside,
+                      ),
                       borderRadius: BorderRadius.all(Radius.circular(5)),
                     ),
                     // The border side will get wider when the subtree has focus.

@@ -143,7 +143,9 @@ class CupertinoRadio<T> extends StatefulWidget {
   /// ```dart
   /// CupertinoRadio<SingingCharacter>(
   ///   value: SingingCharacter.lafayette,
+  ///   // ignore: deprecated_member_use
   ///   groupValue: _character,
+  ///   // ignore: deprecated_member_use
   ///   onChanged: (SingingCharacter? newValue) {
   ///     setState(() {
   ///       _character = newValue;

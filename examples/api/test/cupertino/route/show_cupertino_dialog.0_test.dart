@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_api_samples/cupertino/route/show_cupertino_dialog.0.dart' as example;
+import 'package:flutter_api_samples/cupertino/route/show_cupertino_dialog.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Tap on button displays cupertino dialog', (WidgetTester tester) async {
+  testWidgets('Tap on button displays cupertino dialog', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.CupertinoDialogApp());
 
     final Finder dialogTitle = find.text('Title');

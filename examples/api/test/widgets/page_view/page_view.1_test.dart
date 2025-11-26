@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/page_view/page_view.1.dart' as example;
+import 'package:flutter_api_samples/widgets/page_view/page_view.1.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('tapping Reverse button should reverse PageView', (WidgetTester tester) async {
+  testWidgets('tapping Reverse button should reverse PageView', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.PageViewExampleApp());
     final Finder pageView = find.byType(PageView);
     final Finder reverseFinder = find.text('Reverse items');

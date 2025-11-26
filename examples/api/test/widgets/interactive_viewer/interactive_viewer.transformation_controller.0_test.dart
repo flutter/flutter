@@ -8,7 +8,9 @@ import 'package:flutter_api_samples/widgets/interactive_viewer/interactive_viewe
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('The reset button resets the view with an animation', (WidgetTester tester) async {
+  testWidgets('The reset button resets the view with an animation', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.TransformationControllerExampleApp());
 
     expect(find.widgetWithText(AppBar, 'Controller demo'), findsOne);

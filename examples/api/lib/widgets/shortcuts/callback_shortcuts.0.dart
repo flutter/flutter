@@ -27,7 +27,8 @@ class CallbackShortcutsExample extends StatefulWidget {
   const CallbackShortcutsExample({super.key});
 
   @override
-  State<CallbackShortcutsExample> createState() => _CallbackShortcutsExampleState();
+  State<CallbackShortcutsExample> createState() =>
+      _CallbackShortcutsExampleState();
 }
 
 class _CallbackShortcutsExampleState extends State<CallbackShortcutsExample> {

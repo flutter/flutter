@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_api_samples/cupertino/dialog/cupertino_popup_surface.0.dart' as example;
+import 'package:flutter_api_samples/cupertino/dialog/cupertino_popup_surface.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -25,7 +26,10 @@ void main() {
     await tester.pumpWidget(const example.PopupSurfaceApp());
 
     // CupertinoSwitch is toggled on by default.
-    expect(tester.widget<CupertinoSwitch>(find.byType(CupertinoSwitch)).value, isTrue);
+    expect(
+      tester.widget<CupertinoSwitch>(find.byType(CupertinoSwitch)).value,
+      isTrue,
+    );
 
     // Tap on the CupertinoButton to show the CupertinoPopupSurface.
     await tester.tap(find.byType(CupertinoButton));

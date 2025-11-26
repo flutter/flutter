@@ -8,24 +8,37 @@ import 'package:flutter_api_samples/material/page_transitions_theme/page_transit
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('MaterialApp defines a custom PageTransitionsTheme', (WidgetTester tester) async {
+  testWidgets('MaterialApp defines a custom PageTransitionsTheme', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.PageTransitionsThemeApp());
 
     final Finder homePage = find.byType(example.HomePage);
     expect(homePage, findsOneWidget);
 
-    final PageTransitionsTheme theme = Theme.of(tester.element(homePage)).pageTransitionsTheme;
+    final PageTransitionsTheme theme = Theme.of(
+      tester.element(homePage),
+    ).pageTransitionsTheme;
     expect(theme.builders, isNotNull);
 
     // Check defined page transitions builder for each platform.
     for (final TargetPlatform platform in TargetPlatform.values) {
       switch (platform) {
         case TargetPlatform.iOS:
-          expect(theme.builders[platform], isA<CupertinoPageTransitionsBuilder>());
+          expect(
+            theme.builders[platform],
+            isA<CupertinoPageTransitionsBuilder>(),
+          );
         case TargetPlatform.linux:
-          expect(theme.builders[platform], isA<OpenUpwardsPageTransitionsBuilder>());
+          expect(
+            theme.builders[platform],
+            isA<OpenUpwardsPageTransitionsBuilder>(),
+          );
         case TargetPlatform.macOS:
-          expect(theme.builders[platform], isA<FadeUpwardsPageTransitionsBuilder>());
+          expect(
+            theme.builders[platform],
+            isA<FadeUpwardsPageTransitionsBuilder>(),
+          );
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.windows:

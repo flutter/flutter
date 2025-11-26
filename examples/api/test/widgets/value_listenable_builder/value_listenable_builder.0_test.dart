@@ -13,13 +13,19 @@ void main() {
 
     String getCount() {
       return (tester.widget(
-                find.descendant(of: find.byType(example.CountDisplay), matching: find.byType(Text)),
+                find.descendant(
+                  of: find.byType(example.CountDisplay),
+                  matching: find.byType(Text),
+                ),
               )
               as Text)
           .data!;
     }
 
-    expect(find.text('You have pushed the button this many times:'), findsOneWidget);
+    expect(
+      find.text('You have pushed the button this many times:'),
+      findsOneWidget,
+    );
     expect(find.text('0'), findsOneWidget);
     expect(find.byIcon(Icons.plus_one), findsOneWidget);
     expect(getCount(), equals('0'));

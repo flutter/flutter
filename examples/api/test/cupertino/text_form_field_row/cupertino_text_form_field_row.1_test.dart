@@ -8,15 +8,26 @@ import 'package:flutter_api_samples/cupertino/text_form_field_row/cupertino_text
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can enter text in CupertinoTextFormFieldRow', (WidgetTester tester) async {
+  testWidgets('Can enter text in CupertinoTextFormFieldRow', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.FormSectionApp());
 
     expect(find.byType(CupertinoFormSection), findsOneWidget);
     expect(find.byType(CupertinoTextFormFieldRow), findsNWidgets(5));
 
-    expect(find.widgetWithText(CupertinoTextFormFieldRow, 'abcd'), findsNothing);
-    await tester.enterText(find.byType(CupertinoTextFormFieldRow).first, 'abcd');
+    expect(
+      find.widgetWithText(CupertinoTextFormFieldRow, 'abcd'),
+      findsNothing,
+    );
+    await tester.enterText(
+      find.byType(CupertinoTextFormFieldRow).first,
+      'abcd',
+    );
     await tester.pump();
-    expect(find.widgetWithText(CupertinoTextFormFieldRow, 'abcd'), findsOneWidget);
+    expect(
+      find.widgetWithText(CupertinoTextFormFieldRow, 'abcd'),
+      findsOneWidget,
+    );
   });
 }

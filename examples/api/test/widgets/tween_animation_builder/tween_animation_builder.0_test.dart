@@ -37,7 +37,9 @@ void main() {
     expect(iconButton.iconSize, equals(endSize));
   });
 
-  testWidgets('Animates icon size on IconButton tap', (WidgetTester tester) async {
+  testWidgets('Animates icon size on IconButton tap', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.TweenAnimationBuilderExampleApp());
     await tester.pumpAndSettle();
 
@@ -91,7 +93,9 @@ void main() {
     expect(iconButton.iconSize, equals(beginSize));
   });
 
-  testWidgets('Animation target can be updated during the animation', (WidgetTester tester) async {
+  testWidgets('Animation target can be updated during the animation', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.TweenAnimationBuilderExampleApp());
     await tester.pumpAndSettle();
 

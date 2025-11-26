@@ -8,13 +8,17 @@ import 'package:flutter_api_samples/widgets/basic/listener.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Listener detects press & release, and cursor location', (WidgetTester tester) async {
+  testWidgets('Listener detects press & release, and cursor location', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const MaterialApp(home: example.ListenerExample()));
 
     expect(find.text('0 presses\n0 releases'), findsOneWidget);
     expect(find.text('The cursor is here: (0.00, 0.00)'), findsOneWidget);
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
     await gesture.addPointer();
     await gesture.down(
       tester.getCenter(

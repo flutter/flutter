@@ -5,7 +5,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/notification_listener/notification.0.dart' as example;
+import 'package:flutter_api_samples/widgets/notification_listener/notification.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -33,7 +34,9 @@ void main() {
     debugPrint = originalDebugPrint;
   });
 
-  testWidgets('Scrolling the scroll view triggers the notification', (WidgetTester tester) async {
+  testWidgets('Scrolling the scroll view triggers the notification', (
+    WidgetTester tester,
+  ) async {
     final DebugPrintCallback originalDebugPrint = debugPrint;
     final List<String> logs = <String>[];
     debugPrint = (String? message, {int? wrapWidth}) {
@@ -56,7 +59,9 @@ void main() {
     debugPrint = originalDebugPrint;
   });
 
-  testWidgets('Changing tabs triggers the notification', (WidgetTester tester) async {
+  testWidgets('Changing tabs triggers the notification', (
+    WidgetTester tester,
+  ) async {
     final DebugPrintCallback originalDebugPrint = debugPrint;
     final List<String> logs = <String>[];
     debugPrint = (String? message, {int? wrapWidth}) {

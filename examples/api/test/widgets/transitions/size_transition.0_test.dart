@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/transitions/size_transition.0.dart' as example;
+import 'package:flutter_api_samples/widgets/transitions/size_transition.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -12,7 +13,10 @@ void main() {
     expect(find.byType(FlutterLogo), findsOneWidget);
     expect(find.byType(Center), findsOneWidget);
     expect(
-      find.descendant(of: find.byType(Center), matching: find.byType(FlutterLogo)),
+      find.descendant(
+        of: find.byType(Center),
+        matching: find.byType(FlutterLogo),
+      ),
       findsOneWidget,
     );
     expect(find.byType(SizeTransition), findsOneWidget);
@@ -20,8 +24,16 @@ void main() {
     expect(
       tester.widget(find.byType(SizeTransition)),
       isA<SizeTransition>()
-          .having((SizeTransition transition) => transition.axis, 'axis', Axis.horizontal)
-          .having((SizeTransition transition) => transition.axisAlignment, 'axis alignment', -1)
+          .having(
+            (SizeTransition transition) => transition.axis,
+            'axis',
+            Axis.horizontal,
+          )
+          .having(
+            (SizeTransition transition) => transition.axisAlignment,
+            'axis alignment',
+            -1,
+          )
           .having(
             (SizeTransition transition) => transition.sizeFactor,
             'factor',

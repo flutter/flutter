@@ -200,7 +200,10 @@ class _VerticalPageTransition extends StatelessWidget {
       end: const Offset(0.0, -1.0),
     ).chain(CurveTween(curve: _curve));
 
-    return SlideTransition(position: secondaryAnimation.drive(tween), child: child);
+    return SlideTransition(
+      position: secondaryAnimation.drive(tween),
+      child: child,
+    );
   }
 
   @override

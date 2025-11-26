@@ -4,11 +4,14 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/cupertino/list_tile/cupertino_list_tile.0.dart' as example;
+import 'package:flutter_api_samples/cupertino/list_tile/cupertino_list_tile.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('CupertinoListTile respects properties', (WidgetTester tester) async {
+  testWidgets('CupertinoListTile respects properties', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.CupertinoListTileApp());
 
     expect(find.text('CupertinoListTile Sample'), findsOne);
@@ -30,7 +33,9 @@ void main() {
       const Key('CupertinoListTile with background color'),
     );
     expect(
-      tester.firstWidget<CupertinoListTile>(tileWithBackgroundFinder).backgroundColor,
+      tester
+          .firstWidget<CupertinoListTile>(tileWithBackgroundFinder)
+          .backgroundColor,
       Colors.lightBlue,
     );
   });

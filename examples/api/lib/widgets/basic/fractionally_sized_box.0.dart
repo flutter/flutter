@@ -33,7 +33,9 @@ class FractionallySizedBoxExample extends StatelessWidget {
         heightFactor: 0.5,
         alignment: FractionalOffset.center,
         child: DecoratedBox(
-          decoration: BoxDecoration(border: Border.all(color: Colors.blue, width: 4)),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.blue, width: 4),
+          ),
         ),
       ),
     );

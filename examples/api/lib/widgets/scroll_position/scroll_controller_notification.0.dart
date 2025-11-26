@@ -69,11 +69,15 @@ class _ScrollNotificationDemoState extends State<ScrollNotificationDemo> {
           itemCount: 50,
           itemBuilder: (_, int index) {
             return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 20.0),
+              padding: const EdgeInsets.symmetric(
+                vertical: 8.0,
+                horizontal: 20.0,
+              ),
               child: Text('Item $index'),
             );
           },
-          separatorBuilder: (_, _) => const Divider(indent: 20, endIndent: 20, thickness: 2),
+          separatorBuilder: (_, _) =>
+              const Divider(indent: 20, endIndent: 20, thickness: 2),
         ),
       ],
     );
@@ -89,7 +93,9 @@ class _ScrollNotificationDemoState extends State<ScrollNotificationDemo> {
     }
 
     return MaterialApp(
-      theme: ThemeData.from(colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey)),
+      theme: ThemeData.from(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
+      ),
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Listening to a ScrollPosition'),
@@ -98,7 +104,8 @@ class _ScrollNotificationDemoState extends State<ScrollNotificationDemo> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
-                if (!_useController) Text('Last notification: ${_lastNotification.runtimeType}'),
+                if (!_useController)
+                  Text('Last notification: ${_lastNotification.runtimeType}'),
                 if (!_useController) const SizedBox.square(dimension: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -106,13 +113,25 @@ class _ScrollNotificationDemoState extends State<ScrollNotificationDemo> {
                     const Text('with:'),
                     Radio<bool>(
                       value: true,
+                      // TODO(loic-sharma): Migrate to RadioGroup.
+                      // https://github.com/flutter/flutter/issues/179088
+                      // ignore: deprecated_member_use
                       groupValue: _useController,
+                      // TODO(loic-sharma): Migrate to RadioGroup.
+                      // https://github.com/flutter/flutter/issues/179088
+                      // ignore: deprecated_member_use
                       onChanged: _handleRadioChange,
                     ),
                     const Text('ScrollController'),
                     Radio<bool>(
                       value: false,
+                      // TODO(loic-sharma): Migrate to RadioGroup.
+                      // https://github.com/flutter/flutter/issues/179088
+                      // ignore: deprecated_member_use
                       groupValue: _useController,
+                      // TODO(loic-sharma): Migrate to RadioGroup.
+                      // https://github.com/flutter/flutter/issues/179088
+                      // ignore: deprecated_member_use
                       onChanged: _handleRadioChange,
                     ),
                     const Text('NotificationListener'),
