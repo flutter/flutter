@@ -126,45 +126,6 @@ public class FlutterEngineConnectionRegistryTest {
     assertEquals(3, listener1.callCount + listener2.callCount);
   }
 
-  @Test
-  public void softwareRendering() {
-    Context context = mock(Context.class);
-
-    FlutterEngine flutterEngine = mock(FlutterEngine.class);
-    PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
-    PlatformViewsController2 platformViewsController2 = mock(PlatformViewsController2.class);
-    PlatformViewsControllerDelegator platformViewsControllerDelegator =
-        mock(PlatformViewsControllerDelegator.class);
-    when(flutterEngine.getPlatformViewsControllerDelegator())
-        .thenReturn(platformViewsControllerDelegator);
-    when(flutterEngine.getPlatformViewsController()).thenReturn(platformViewsController);
-    when(flutterEngine.getPlatformViewsController2()).thenReturn(platformViewsController2);
-
-    FlutterLoader flutterLoader = mock(FlutterLoader.class);
-
-    ExclusiveAppComponent appComponent = mock(ExclusiveAppComponent.class);
-    Activity activity = mock(Activity.class);
-    when(appComponent.getAppComponent()).thenReturn(activity);
-
-    // Test attachToActivity with an Activity that has no Intent.
-    FlutterEngineConnectionRegistry registry =
-        new FlutterEngineConnectionRegistry(context, flutterEngine, flutterLoader, null);
-    registry.attachToActivity(appComponent, mock(Lifecycle.class));
-    verify(platformViewsController).setSoftwareRendering(false);
-
-    Intent intent = mock(Intent.class);
-    when(intent.getBooleanExtra("enable-software-rendering", false)).thenReturn(false);
-    when(activity.getIntent()).thenReturn(intent);
-
-    registry.attachToActivity(appComponent, mock(Lifecycle.class));
-    verify(platformViewsController, times(2)).setSoftwareRendering(false);
-
-    when(intent.getBooleanExtra("enable-software-rendering", false)).thenReturn(true);
-
-    registry.attachToActivity(appComponent, mock(Lifecycle.class));
-    verify(platformViewsController).setSoftwareRendering(true);
-  }
-
   private static class FakeFlutterPlugin implements FlutterPlugin {
     public int attachmentCallCount = 0;
     public int detachmentCallCount = 0;

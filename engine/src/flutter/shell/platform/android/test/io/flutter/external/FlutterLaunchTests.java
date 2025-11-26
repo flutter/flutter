@@ -1,6 +1,5 @@
 package io.flutter.external;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -26,7 +25,6 @@ public class FlutterLaunchTests {
 
     assertEquals("main", flutterActivity.getDartEntrypointFunctionName());
     assertEquals("/", flutterActivity.getInitialRoute());
-    assertArrayEquals(new String[] {}, flutterActivity.getFlutterShellArgs().toArray());
     assertTrue(flutterActivity.shouldAttachEngineToActivity());
     assertNull(flutterActivity.getCachedEngineId());
     assertTrue(flutterActivity.shouldDestroyEngineWithHost());

@@ -18,6 +18,7 @@ import '../framework/framework.dart';
 import '../framework/host_agent.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
+import 'android_utils.dart';
 
 /// Must match flutter_driver/lib/src/common.dart.
 ///
@@ -824,58 +825,18 @@ Future<void> _resetPlist(String testDirectory) async {
   await exec('git', <String>['checkout', file.path]);
 }
 
-void _addMetadataToManifest(String testDirectory, List<(String, String)> keyPairs) {
-  final String manifestPath = path.join(
-    testDirectory,
-    'android',
-    'app',
-    'src',
-    'main',
-    'AndroidManifest.xml',
-  );
-  final File file = File(manifestPath);
-
-  if (!file.existsSync()) {
-    throw Exception('AndroidManifest.xml not found at $manifestPath');
-  }
-
-  final String xmlStr = file.readAsStringSync();
-  final XmlDocument xmlDoc = XmlDocument.parse(xmlStr);
-  final XmlElement applicationNode = xmlDoc.findAllElements('application').first;
-
-  // Check if the meta-data node already exists.
-  for (final (String key, String value) in keyPairs) {
-    final Iterable<XmlElement> existingMetaData = applicationNode
-        .findAllElements('meta-data')
-        .where((XmlElement node) => node.getAttribute('android:name') == key);
-
-    if (existingMetaData.isNotEmpty) {
-      final XmlElement existingEntry = existingMetaData.first;
-      existingEntry.setAttribute('android:value', value);
-    } else {
-      final XmlElement metaData = XmlElement(XmlName('meta-data'), <XmlAttribute>[
-        XmlAttribute(XmlName('android:name'), key),
-        XmlAttribute(XmlName('android:value'), value),
-      ]);
-      applicationNode.children.add(metaData);
-    }
-  }
-
-  file.writeAsStringSync(xmlDoc.toXmlString(pretty: true, indent: '    '));
-}
-
 void _addSurfaceControlSupportToManifest(String testDirectory) {
   final List<(String, String)> keyPairs = <(String, String)>[
     ('io.flutter.embedding.android.EnableSurfaceControl', 'true'),
   ];
-  _addMetadataToManifest(testDirectory, keyPairs);
+  addMetadataToManifest(testDirectory, keyPairs);
 }
 
 void _addMergedPlatformThreadSupportToManifest(String testDirectory) {
   final List<(String, String)> keyPairs = <(String, String)>[
     ('io.flutter.embedding.android.EnableMergedPlatformUIThread', 'true'),
   ];
-  _addMetadataToManifest(testDirectory, keyPairs);
+  addMetadataToManifest(testDirectory, keyPairs);
 }
 
 /// Opens the file at testDirectory + 'android/app/src/main/AndroidManifest.xml'
@@ -886,7 +847,7 @@ void _addVulkanGPUTracingToManifest(String testDirectory) {
   final List<(String, String)> keyPairs = <(String, String)>[
     ('io.flutter.embedding.android.EnableVulkanGPUTracing', 'true'),
   ];
-  _addMetadataToManifest(testDirectory, keyPairs);
+  addMetadataToManifest(testDirectory, keyPairs);
 }
 
 /// Opens the file at testDirectory + 'android/app/src/main/AndroidManifest.xml'
@@ -897,7 +858,7 @@ void _addLazyShaderMode(String testDirectory) {
   final List<(String, String)> keyPairs = <(String, String)>[
     ('io.flutter.embedding.android.ImpellerLazyShaderInitialization', 'true'),
   ];
-  _addMetadataToManifest(testDirectory, keyPairs);
+  addMetadataToManifest(testDirectory, keyPairs);
 }
 
 /// Opens the file at testDirectory + 'android/app/src/main/AndroidManifest.xml'
@@ -913,7 +874,7 @@ void _addOpenGLESToManifest(String testDirectory) {
     ('io.flutter.embedding.android.ImpellerBackend', 'opengles'),
     ('io.flutter.embedding.android.EnableOpenGLGPUTracing', 'true'),
   ];
-  _addMetadataToManifest(testDirectory, keyPairs);
+  addMetadataToManifest(testDirectory, keyPairs);
 }
 
 Future<void> _resetManifest(String testDirectory) async {
