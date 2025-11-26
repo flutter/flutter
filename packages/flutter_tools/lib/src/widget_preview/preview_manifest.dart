@@ -178,7 +178,11 @@ class PreviewManifest {
   }
 
   void updatePubspecHash({String? updatedPubspecPath}) {
-    final PreviewManifestContents manifest = _tryLoadManifest()!;
+    final PreviewManifestContents? manifest = _tryLoadManifest();
+    if (manifest == null) {
+      generate();
+      return;
+    }
     manifest[kPubspecHashes] = _calculatePubspecHashes(updatedPubspecPath: updatedPubspecPath);
     _updateManifest(manifest);
   }
