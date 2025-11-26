@@ -21,6 +21,7 @@ import 'banner.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'default_text_editing_shortcuts.dart';
+import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
@@ -39,6 +40,7 @@ import 'shortcuts.dart';
 import 'tap_region.dart';
 import 'text.dart';
 import 'title.dart';
+import 'tooltip.dart';
 import 'transitions.dart';
 import 'value_listenable_builder.dart';
 import 'widget_inspector.dart';
@@ -1756,6 +1758,18 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       }
       return true;
     }());
+
+    result = Focus(
+      canRequestFocus: false,
+      onKeyEvent: (FocusNode node, KeyEvent event) {
+        if ((event is! KeyDownEvent && event is! KeyRepeatEvent) ||
+            event.logicalKey != LogicalKeyboardKey.escape) {
+          return KeyEventResult.ignored;
+        }
+        return RawTooltip.dismissAllToolTips() ? KeyEventResult.handled : KeyEventResult.ignored;
+      },
+      child: result,
+    );
 
     final Widget? title;
     if (widget.onGenerateTitle != null) {
