@@ -19,15 +19,15 @@ class TestFontLoader extends FontLoader {
 
 void main() {
   test('Font loader test', () async {
-    final TestFontLoader tfl = TestFontLoader('TestFamily');
+    final tfl = TestFontLoader('TestFamily');
 
-    final List<Uint8List> expectedAssets = <Uint8List>[
+    final expectedAssets = <Uint8List>[
       Uint8List.fromList(<int>[100]),
       Uint8List.fromList(<int>[10, 20, 30]),
       Uint8List.fromList(<int>[200]),
     ];
 
-    for (final Uint8List asset in expectedAssets) {
+    for (final asset in expectedAssets) {
       tfl.addFont(Future<ByteData>.value(ByteData.view(asset.buffer)));
     }
     await tfl.load();
@@ -36,13 +36,13 @@ void main() {
   });
 
   test('FontLoader loads fonts in order', () async {
-    final TestFontLoader tfl = TestFontLoader('TestFamily');
+    final tfl = TestFontLoader('TestFamily');
 
-    final List<Uint8List> expectedAssets = <Uint8List>[
+    final expectedAssets = <Uint8List>[
       Uint8List.fromList(<int>[1]),
       Uint8List.fromList(<int>[2]),
     ];
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
 
     // Deliberately delay the load of the first font.
     tfl.addFont(() async {

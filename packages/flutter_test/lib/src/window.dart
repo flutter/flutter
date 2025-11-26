@@ -832,7 +832,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   Iterable<TestDisplay> get displays => _testDisplays.values;
 
   void _updateViewsAndDisplays() {
-    final List<Object> extraDisplayKeys = <Object>[..._testDisplays.keys];
+    final extraDisplayKeys = <Object>[..._testDisplays.keys];
     for (final Display display in _platformDispatcher.displays) {
       extraDisplayKeys.remove(display.id);
       if (!_testDisplays.containsKey(display.id)) {
@@ -841,7 +841,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     }
     extraDisplayKeys.forEach(_testDisplays.remove);
 
-    final List<Object> extraViewKeys = <Object>[..._testViews.keys];
+    final extraViewKeys = <Object>[..._testViews.keys];
     for (final FlutterView view in _platformDispatcher.views) {
       // TODO(pdblasi-google): Remove this try-catch once the Display API is stable and supported on all platforms
       late final TestDisplay display;

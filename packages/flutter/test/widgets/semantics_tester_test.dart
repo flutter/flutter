@@ -12,9 +12,9 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Semantics tester visits last child', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle();
-    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    final semantics = SemanticsTester(tester);
+    const textStyle = TextStyle();
+    final recognizer = TapGestureRecognizer();
     addTearDown(recognizer.dispose);
 
     await tester.pumpWidget(
@@ -30,7 +30,7 @@ void main() {
         maxLines: 1,
       ),
     );
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
           children: <TestSemantics>[
@@ -50,7 +50,7 @@ void main() {
   });
 
   testWidgets('Semantics tester support flags as an int', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       Semantics(
@@ -85,7 +85,7 @@ void main() {
   testWidgets('Semantics tester support flags as a list of SemanticsFlag', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       Semantics(
@@ -118,7 +118,7 @@ void main() {
   });
 
   testWidgets('Semantics tester support flags as a SemanticsFlags', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       Semantics(

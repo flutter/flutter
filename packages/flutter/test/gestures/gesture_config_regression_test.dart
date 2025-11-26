@@ -93,7 +93,7 @@ void main() {
     tester.view.gestureSettings = const ui.GestureSettings(physicalTouchSlop: 4);
     addTearDown(tester.view.reset);
 
-    final TestResult result = TestResult();
+    final result = TestResult();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -120,7 +120,7 @@ void main() {
     tester.view.gestureSettings = const ui.GestureSettings(physicalTouchSlop: 4);
     addTearDown(tester.view.reset);
 
-    final TestResult result = TestResult();
+    final result = TestResult();
 
     await tester.pumpWidget(
       MaterialApp(
