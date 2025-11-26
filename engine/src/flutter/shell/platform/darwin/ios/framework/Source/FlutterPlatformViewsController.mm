@@ -672,11 +672,11 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
       if (self.platformTaskRunner->RunsTasksOnCurrentThread()) {
         [self performResize:self.frameSize];
       } else {
-        fml::TaskRunner::RunNowOrPostTask(
-            self.platformTaskRunner, fml::MakeCopyable([self, frameSize = self.frameSize]() {
-              FML_DCHECK(self);
-              [self performResize:frameSize];
-            }));
+        fml::TaskRunner::RunNowOrPostTask(self.platformTaskRunner,
+                                          fml::MakeCopyable([self, frameSize = self.frameSize]() {
+                                            FML_DCHECK(self);
+                                            [self performResize:frameSize];
+                                          }));
       }
     }
 
