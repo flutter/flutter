@@ -38,6 +38,7 @@ Future<void> testMain() async {
         end: 7,
         style: paragraphStyle.textStyle.mergeWith(textStyle).mergeWith(defaultBackground),
         text: 'Options',
+        textDirection: TextDirection.ltr,
       ),
     );
   });

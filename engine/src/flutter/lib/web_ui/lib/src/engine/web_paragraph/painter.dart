@@ -77,7 +77,18 @@ abstract class Painter {
 class CanvasKitPainter extends Painter {
   @override
   void paintBackground(ui.Canvas canvas, LineBlock block, ui.Rect sourceRect, ui.Rect targetRect) {
-    canvas.drawRect(targetRect, block.style.background!);
+    // We need to snap the block edges because Skia draws rectangles with subpixel accuracy
+    // and we end up overlaps (only is a problem when the colors have transparency)
+    // or gaps between blocks (which looks unacceptable - vertical likes between blocks).
+    // Whether we snap to floor or ceil is irrelevant as long as we are consistent on both sides
+    // (and will possibly have problems when glyph boundaries are outside of advantage rectangles)
+    final snappedRect = ui.Rect.fromLTRB(
+      targetRect.left.roundToDouble(),
+      targetRect.top,
+      targetRect.right.roundToDouble(),
+      targetRect.bottom,
+    );
+    canvas.drawRect(snappedRect, block.style.background!);
   }
 
   @override
