@@ -211,6 +211,7 @@ class DropdownMenu<T extends Object> extends StatefulWidget {
     this.onSelected,
     this.focusNode,
     this.requestFocusOnTap,
+    this.selectOnly = false,
     this.expandedInsets,
     this.filterCallback,
     this.searchCallback,
@@ -506,6 +507,18 @@ class DropdownMenu<T extends Object> extends StatefulWidget {
   /// {@end-tool}
   final bool? requestFocusOnTap;
 
+  /// Determines if the dropdown menu behaves as a 'select' component.
+  ///
+  /// When true the inner text field is read only. If [requestFocusOnTap] is also true,
+  /// the text field is focusable and the current behaviors are activated:
+  ///
+  ///  * Enter key opens the menu if it is closed.
+  ///
+  ///  * The decoration reflects the focus state.
+  ///
+  /// Defaults to false.
+  final bool selectOnly;
+
   /// Descriptions of the menu items in the [DropdownMenu].
   ///
   /// This is a required parameter. It is recommended that at least one [DropdownMenuEntry]
@@ -659,6 +672,19 @@ class DropdownMenu<T extends Object> extends StatefulWidget {
 }
 
 class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
+  static const Map<ShortcutActivator, Intent> _commonShortcuts = <ShortcutActivator, Intent>{
+    SingleActivator(LogicalKeyboardKey.arrowLeft): ExtendSelectionByCharacterIntent(
+      forward: false,
+      collapseSelection: true,
+    ),
+    SingleActivator(LogicalKeyboardKey.arrowRight): ExtendSelectionByCharacterIntent(
+      forward: true,
+      collapseSelection: true,
+    ),
+    SingleActivator(LogicalKeyboardKey.arrowUp): _ArrowUpIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowDown): _ArrowDownIntent(),
+  };
+
   final GlobalKey _anchorKey = GlobalKey();
   final GlobalKey _leadingKey = GlobalKey();
   late List<GlobalKey> buttonItemKeys;
@@ -760,6 +786,9 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
           TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => true,
         };
   }
+
+  bool get selectOnly => widget.selectOnly;
+  bool get isButton => !canRequestFocus() || selectOnly;
 
   void refreshLeadingPadding() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -1018,6 +1047,14 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
     });
   }
 
+  void handleEnterKey(_EnterIntent _) {
+    if (selectOnly && !_controller.isOpen) {
+      _controller.open();
+      return;
+    }
+    _handleSubmitted();
+  }
+
   void handlePressed(MenuController controller, {bool focusForKeyboard = true}) {
     if (controller.isOpen) {
       currentHighlight = null;
@@ -1141,7 +1178,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
         widget.inputDecorationTheme ?? theme.inputDecorationTheme ?? defaults.inputDecorationTheme!;
 
     final MouseCursor? effectiveMouseCursor = switch (widget.enabled) {
-      true => canRequestFocus() ? SystemMouseCursors.text : SystemMouseCursors.click,
+      true => isButton ? SystemMouseCursors.click : SystemMouseCursors.text,
       false => null,
     };
 
@@ -1176,7 +1213,6 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
               );
 
         final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-        final bool isButton = !canRequestFocus();
         final Widget textField = Semantics(
           button: isButton,
           // This is set specificly for iOS because iOS does not have any native
@@ -1208,8 +1244,8 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
               mouseCursor: effectiveMouseCursor,
               focusNode: widget.focusNode,
               canRequestFocus: canRequestFocus(),
-              enableInteractiveSelection: canRequestFocus(),
-              readOnly: !canRequestFocus(),
+              enableInteractiveSelection: !isButton,
+              readOnly: isButton,
               keyboardType: widget.keyboardType,
               textAlign: widget.textAlign,
               textAlignVertical: TextAlignVertical.center,
@@ -1284,17 +1320,11 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
               );
 
         return Shortcuts(
-          shortcuts: const <ShortcutActivator, Intent>{
-            SingleActivator(LogicalKeyboardKey.arrowLeft): ExtendSelectionByCharacterIntent(
-              forward: false,
-              collapseSelection: true,
-            ),
-            SingleActivator(LogicalKeyboardKey.arrowRight): ExtendSelectionByCharacterIntent(
-              forward: true,
-              collapseSelection: true,
-            ),
-            SingleActivator(LogicalKeyboardKey.arrowUp): _ArrowUpIntent(),
-            SingleActivator(LogicalKeyboardKey.arrowDown): _ArrowDownIntent(),
+          shortcuts: <ShortcutActivator, Intent>{
+            ..._commonShortcuts,
+            // When selectOnly is true, a shortcut for the enter key is needed because
+            // the text field won't provide one.
+            if (selectOnly) const SingleActivator(LogicalKeyboardKey.enter): const _EnterIntent(),
           },
           child: body,
         );
@@ -1330,7 +1360,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
       actions: <Type, Action<Intent>>{
         _ArrowUpIntent: CallbackAction<_ArrowUpIntent>(onInvoke: handleUpKeyInvoke),
         _ArrowDownIntent: CallbackAction<_ArrowDownIntent>(onInvoke: handleDownKeyInvoke),
-        _EnterIntent: CallbackAction<_EnterIntent>(onInvoke: (_) => _handleSubmitted()),
+        _EnterIntent: CallbackAction<_EnterIntent>(onInvoke: handleEnterKey),
         DismissIntent: DismissMenuAction(controller: _controller),
       },
       child: Stack(
@@ -1377,7 +1407,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
               // the text field button by excluding semantics. Otherwise,
               // it will inappropriately announce whether this icon button
               // is selected or not.
-              excluding: !canRequestFocus(),
+              excluding: isButton,
               child: IconButton(
                 focusNode: _trailingIconButtonFocusNode,
                 isSelected: controller.isOpen,
