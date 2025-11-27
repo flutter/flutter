@@ -1,13 +1,13 @@
 In the interest of transparency, we want to share high-level details of our roadmap so that others can see our priorities and make plans based off the work we are doing.
 
-Our plans will evolve over time based on customer feedback and new market opportunities. We will use our surveys and feedback on GitHub issues to prioritize work. The list here shouldn't be viewed either as exhaustive nor a promise that we will complete all this work. If you have feedback about what you think we should work on, we encourage you to get in touch by [filing an issue](https://github.com/flutter/flutter/issues/new/choose), or using the "thumbs-up" emoji reaction on an issue's first comment. Because Flutter is an open source project, we invite contributions both towards the themes presented below and in other areas.
+Our plans will evolve over time based on customer feedback and new market opportunities. We will use our surveys and feedback on GitHub issues to prioritize work. The list here shouldn't be viewed as either exhaustive or a promise that we will complete all this work. If you have feedback about what you think we should work on, we encourage you to get in touch by [filing an issue](https://github.com/flutter/flutter/issues/new/choose), or using the "thumbs-up" emoji reaction on an issue's first comment. Because Flutter is an open source project, we invite contributions both towards the themes presented below and in other areas.
 
 _If you are a contributor or team of contributors with long-term plans for [contributing to Flutter](../../CONTRIBUTING.md), and would like your planned efforts reflected in the roadmap, please reach via email to `roadmap-input@flutter.dev`._
 
 # 2025
 
 This roadmap is aspirational. It represents primarily content gathered from those of us who work on Flutter as employees of Google. By now non-Google contributors outnumber those employed by Google, so this is not an exhaustive list of all the new and exciting things that we hope will come to Flutter this year!
-As aways in the software business it can be difficult to accurately forecast engineering work — even more so for an open source project. So please be mindful that what we cover here is a statement of intent and not a guarantee.
+As always in the software business it can be difficult to accurately forecast engineering work — even more so for an open source project. So please be mindful that what we cover here is a statement of intent and not a guarantee.
 
 ## Accessibility
 In 2024 we completed validation of several key use cases for accessibility on mobile platforms (iOS and Android). In 2025 we plan to focus on further accessibility support for the web platform.
@@ -27,7 +27,7 @@ On both iOS and Android, interoperability is critical to interface with platform
 ## Web platform
 In 2024 we made strong progress on performance and quality (such as app size reduction, and better use of multi-threading and improved app load times).
 
-In 2025 we plan further improvements in the core of Flutter web. This includes accessibility, text input, international text rendering, size, performance, and platform integration. We also want to continue to  improve Web performance using compilation to Wasm/WebAssembly.
+In 2025 we plan further improvements in the core of Flutter web. This includes accessibility, text input, international text rendering, size, performance, and platform integration. We also want to continue to improve Web performance using compilation to Wasm/WebAssembly.
 
 The new JS interop mechanism for Dart that supports both JS and Wasm compilation is complete. Next, we plan on removing the legacy HTML and JS libraries in 2025 (see breaking change announcement).
 
@@ -60,7 +60,7 @@ We also plan on investigating support for cross-compiling Dart AOT executables (
 ## Releases
 We plan to have four stable releases and 12 beta releases during 2025, similar to 2024. To improve the predictability and regularity of these releases, and to reduce regressions in stable releases, we'll invest in further test coverage.
 
-We'll also make investments to improve our ability to expedite the release of any needed hotfix/patch  releases.
+We'll also make investments to improve our ability to expedite the release of any needed hotfix/patch releases.
 
 ## Non-goals
 We're still not planning on investing in built-in support for code push or hot updates. For code push, our friends at shorebird.dev may have offerings of interest. For UI push (also known as server-driven UI), we recommend the rfw package.
