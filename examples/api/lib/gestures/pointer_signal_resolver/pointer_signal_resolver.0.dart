@@ -71,7 +71,10 @@ class _ColorChangerState extends State<ColorChanger> {
         },
         child: Stack(
           fit: StackFit.expand,
-          children: <Widget>[const AbsorbPointer(), if (widget.child != null) widget.child!],
+          children: <Widget>[
+            const AbsorbPointer(),
+            if (widget.child != null) widget.child!,
+          ],
         ),
       ),
     );
@@ -82,10 +85,12 @@ class PointerSignalResolverExample extends StatefulWidget {
   const PointerSignalResolverExample({super.key});
 
   @override
-  State<PointerSignalResolverExample> createState() => _PointerSignalResolverExampleState();
+  State<PointerSignalResolverExample> createState() =>
+      _PointerSignalResolverExampleState();
 }
 
-class _PointerSignalResolverExampleState extends State<PointerSignalResolverExample> {
+class _PointerSignalResolverExampleState
+    extends State<PointerSignalResolverExample> {
   bool useResolver = false;
 
   @override
