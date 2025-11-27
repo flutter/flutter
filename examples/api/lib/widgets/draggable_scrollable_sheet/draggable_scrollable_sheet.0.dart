@@ -38,6 +38,8 @@ class _DraggableScrollableSheetExampleState
     extends State<DraggableScrollableSheetExample> {
   double _dragPosition = 0.5;
   late double _sheetPosition = _dragPosition;
+  final minChildSize = 0.25;
+  final maxChildSize = 1.0;
 
   @override
   Widget build(BuildContext context) {
@@ -51,21 +53,18 @@ class _DraggableScrollableSheetExampleState
           color: colorScheme.primary,
           child: Column(
             children: <Widget>[
-              Grabber(
-                onVerticalDragUpdate: (DragUpdateDetails details) {
-                  setState(() {
-                    _dragPosition -= details.delta.dy / screenHeight;
-                    if (_dragPosition < 0.25) {
-                      _sheetPosition = 0.25;
-                    } else if (_dragPosition > 1.0) {
-                      _sheetPosition = 1.0;
-                    } else {
-                      _sheetPosition = _dragPosition;
-                    }
-                  });
-                },
-                isOnDesktopAndWeb: _isOnDesktopAndWeb,
-              ),
+              if (_isOnDesktopAndWeb)
+                Grabber(
+                  onVerticalDragUpdate: (DragUpdateDetails details) {
+                    setState(() {
+                      _dragPosition -= details.delta.dy / screenHeight;
+                      _sheetPosition = _dragPosition.clamp(
+                        minChildSize,
+                        maxChildSize,
+                      );
+                    });
+                  },
+                ),
               Flexible(
                 child: ListView.builder(
                   controller: _isOnDesktopAndWeb ? null : scrollController,
@@ -102,20 +101,12 @@ class _DraggableScrollableSheetExampleState
 /// A draggable widget that accepts vertical drag gestures
 /// and is only visible on desktop and web platforms.
 class Grabber extends StatelessWidget {
-  const Grabber({
-    super.key,
-    required this.onVerticalDragUpdate,
-    required this.isOnDesktopAndWeb,
-  });
+  const Grabber({super.key, required this.onVerticalDragUpdate});
 
   final ValueChanged<DragUpdateDetails> onVerticalDragUpdate;
-  final bool isOnDesktopAndWeb;
 
   @override
   Widget build(BuildContext context) {
-    if (!isOnDesktopAndWeb) {
-      return const SizedBox.shrink();
-    }
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return GestureDetector(
