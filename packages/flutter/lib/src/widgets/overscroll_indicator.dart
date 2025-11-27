@@ -989,7 +989,7 @@ class _StretchController extends Listenable {
   /// Updates the [overscroll] value on each animation frame.
   /// Automatically disposes the controller when the animation completes.
   void animate(Simulation simulation) {
-    final AnimationController controller = AnimationController.unbounded(vsync: vsync)
+    final controller = AnimationController.unbounded(vsync: vsync)
       ..addListener(() {
         final double newOverscroll = _controller?.value ?? 0.0;
         overscroll = newOverscroll;
@@ -1016,7 +1016,7 @@ class _StretchController extends Listenable {
       _controller = null;
     }
 
-    final double pullDistance = normalizedOverscroll;
+    final pullDistance = normalizedOverscroll;
     final double absDistance = pullDistance.abs();
     final double linearIntensity = _stretchIntensity * absDistance;
     final double exponentialIntensity =
