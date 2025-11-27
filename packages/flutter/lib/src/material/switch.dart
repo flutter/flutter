@@ -323,7 +323,7 @@ class Switch extends StatelessWidget {
   ///   onChanged: (bool value) { },
   ///   thumbColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.disabled)) {
-  ///       return Colors.orange.withOpacity(.48);
+  ///       return Colors.orange.withValues(alpha: .48);
   ///     }
   ///     return Colors.orange;
   ///   }),
@@ -364,7 +364,7 @@ class Switch extends StatelessWidget {
   ///   onChanged: (bool value) { },
   ///   thumbColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.disabled)) {
-  ///       return Colors.orange.withOpacity(.48);
+  ///       return Colors.orange.withValues(alpha: .48);
   ///     }
   ///     return Colors.orange;
   ///   }),
@@ -405,7 +405,7 @@ class Switch extends StatelessWidget {
   ///   onChanged: (bool value) { },
   ///   trackOutlineColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.disabled)) {
-  ///       return Colors.orange.withOpacity(.48);
+  ///       return Colors.orange.withValues(alpha: .48);
   ///     }
   ///     return null; // Use the default color.
   ///   }),
