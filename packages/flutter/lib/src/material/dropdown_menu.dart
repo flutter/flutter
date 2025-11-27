@@ -509,10 +509,16 @@ class DropdownMenu<T extends Object> extends StatefulWidget {
 
   /// Determines if the dropdown menu behaves as a 'select' component.
   ///
-  /// When true the inner text field is read only. If [requestFocusOnTap] is also true,
-  /// the text field is focusable and the current behaviors are activated:
+  /// This is useful for mobile platforms where a dropdown menu is commonly used as
+  /// a 'select' widget (i.e., the user can only select from the list, not edit
+  /// the text field to search or filter).
   ///
-  ///  * Enter key opens the menu if it is closed.
+  /// When true, the inner text field is read-only.
+  ///
+  /// If the text field is also focusable (see [requestFocusOnTap]), the following
+  /// behaviors are also activated:
+  ///
+  ///  * Pressing Enter when the menu is closed opens it.
   ///
   ///  * The decoration reflects the focus state.
   ///
