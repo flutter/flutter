@@ -26,7 +26,7 @@ TabController createTabController({
   int initialIndex = 0,
   Duration? animationDuration,
 }) {
-  final TabController result = TabController(
+  final result = TabController(
     length: length,
     vsync: vsync,
     initialIndex: initialIndex,
@@ -111,7 +111,7 @@ class TabIndicatorRecordingCanvas extends TestRecordingCanvas {
   @override
   void drawLine(Offset p1, Offset p2, Paint paint) {
     // Assuming that the indicatorWeight is 2.0, the default.
-    const double indicatorWeight = 2.0;
+    const indicatorWeight = 2.0;
     if (paint.color == indicatorColor) {
       indicatorRect = Rect.fromPoints(p1, p2).inflate(indicatorWeight / 2.0);
     }
@@ -235,7 +235,7 @@ class TestIndicatorDecoration extends Decoration {
 
   @override
   BoxPainter createBoxPainter([VoidCallback? onChanged]) {
-    final TestIndicatorBoxPainter painter = TestIndicatorBoxPainter();
+    final painter = TestIndicatorBoxPainter();
     painters.add(painter);
     return painter;
   }
@@ -268,7 +268,7 @@ RRect tabIndicatorRRectElasticAnimation(
   Rect toRect,
   double progress,
 ) {
-  const double indicatorWeight = 3.0;
+  const indicatorWeight = 3.0;
   final double leftFraction = _accelerateInterpolation(progress);
   final double rightFraction = _decelerateInterpolation(progress);
 

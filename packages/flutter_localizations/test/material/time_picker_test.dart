@@ -37,7 +37,7 @@ void main() {
     );
 
     // TODO(yjbanov): also test `HH.mm` (in_ID), `a h:mm` (ko_KR) and `HH:mm น.` (th_TH) when we have .arb files for them
-    final List<Locale> locales = <Locale>[
+    final locales = <Locale>[
       const Locale('en', 'US'), //'h:mm a'
       const Locale('en', 'GB'), //'HH:mm'
       const Locale('es', 'ES'), //'H:mm'
@@ -46,7 +46,7 @@ void main() {
       const Locale('fa', 'IR'), //'H:mm' but RTL
     ];
 
-    for (final Locale locale in locales) {
+    for (final locale in locales) {
       final Offset center = await startPicker(
         tester,
         (TimeOfDay? time) {},
@@ -122,7 +122,7 @@ void main() {
     );
 
     // TODO(yjbanov): also test `HH.mm` (in_ID), `a h:mm` (ko_KR) and `HH:mm น.` (th_TH) when we have .arb files for them
-    final List<Locale> locales = <Locale>[
+    final locales = <Locale>[
       const Locale('en', 'US'), //'h:mm a'
       const Locale('en', 'GB'), //'HH:mm'
       const Locale('es', 'ES'), //'H:mm'
@@ -131,7 +131,7 @@ void main() {
       const Locale('fa', 'IR'), //'H:mm' but RTL
     ];
 
-    for (final Locale locale in locales) {
+    for (final locale in locales) {
       final Offset center = await startPicker(
         tester,
         (TimeOfDay? time) {},
@@ -207,7 +207,7 @@ void main() {
     );
 
     // TODO(yjbanov): also test `HH.mm` (in_ID), `a h:mm` (ko_KR) and `HH:mm น.` (th_TH) when we have .arb files for them
-    final List<Locale> locales = <Locale>[
+    final locales = <Locale>[
       const Locale('en', 'US'), //'h:mm a'
       const Locale('en', 'GB'), //'HH:mm'
       const Locale('es', 'ES'), //'H:mm'
@@ -216,7 +216,7 @@ void main() {
       const Locale('fa', 'IR'), //'H:mm' but RTL
     ];
 
-    for (final Locale locale in locales) {
+    for (final locale in locales) {
       final Offset center = await startPicker(
         tester,
         (TimeOfDay? time) {},
@@ -297,7 +297,7 @@ void main() {
     );
 
     // TODO(yjbanov): also test `HH.mm` (in_ID), `a h:mm` (ko_KR) and `HH:mm น.` (th_TH) when we have .arb files for them
-    final List<Locale> locales = <Locale>[
+    final locales = <Locale>[
       const Locale('en', 'US'), //'h:mm a'
       const Locale('en', 'GB'), //'HH:mm'
       const Locale('es', 'ES'), //'H:mm'
@@ -306,7 +306,7 @@ void main() {
       const Locale('fa', 'IR'), //'H:mm' but RTL
     ];
 
-    for (final Locale locale in locales) {
+    for (final locale in locales) {
       final Offset center = await startPicker(
         tester,
         (TimeOfDay? time) {},
@@ -382,7 +382,7 @@ void main() {
         .first;
 
     // TODO(yjbanov): also test `HH.mm` (in_ID), `a h:mm` (ko_KR) and `HH:mm น.` (th_TH) when we have .arb files for them
-    final List<Locale> locales = <Locale>[
+    final locales = <Locale>[
       const Locale('en', 'US'), //'h:mm a'
       const Locale('en', 'GB'), //'HH:mm'
       const Locale('es', 'ES'), //'H:mm'
@@ -391,7 +391,7 @@ void main() {
       const Locale('fa', 'IR'), //'H:mm' but RTL
     ];
 
-    for (final Locale locale in locales) {
+    for (final locale in locales) {
       await tester.pumpWidget(
         _TimePickerLauncher(
           onChanged: (TimeOfDay? time) {},
@@ -467,7 +467,7 @@ void main() {
         .first;
 
     // TODO(yjbanov): also test `HH.mm` (in_ID), `a h:mm` (ko_KR) and `HH:mm น.` (th_TH) when we have .arb files for them
-    final List<Locale> locales = <Locale>[
+    final locales = <Locale>[
       const Locale('en', 'US'), //'h:mm a'
       const Locale('en', 'GB'), //'HH:mm'
       const Locale('es', 'ES'), //'H:mm'
@@ -476,7 +476,7 @@ void main() {
       const Locale('fa', 'IR'), //'H:mm' but RTL
     ];
 
-    for (final Locale locale in locales) {
+    for (final locale in locales) {
       await tester.pumpWidget(
         _TimePickerLauncher(
           onChanged: (TimeOfDay? time) {},
@@ -535,16 +535,16 @@ void main() {
   testWidgets('Material2 uses single-ring 24-hour dial for all locales', (
     WidgetTester tester,
   ) async {
-    const List<Locale> locales = <Locale>[
+    const locales = <Locale>[
       Locale('en', 'US'), // h
       Locale('en', 'GB'), // HH
       Locale('es', 'ES'), // H
     ];
-    for (final Locale locale in locales) {
+    for (final locale in locales) {
       // Tap along the segment stretching from the center to the edge at
       // 12:00 AM position. Because there's only one ring, in the M2
       // DatePicker no matter where you tap the time will be the same.
-      for (int i = 1; i < 10; i++) {
+      for (var i = 1; i < 10; i++) {
         TimeOfDay? result;
         final Offset center = await startPicker(
           tester,
@@ -575,7 +575,7 @@ void main() {
       // For locales that display 24 hour time, factors 1-5 put the tap on the
       // inner ring's "12" (the inner ring goes from 12-23). Otherwise the offset
       // should land on the outer ring's "00".
-      for (int factor = startFactor; factor < endFactor; factor += 1) {
+      for (var factor = startFactor; factor < endFactor; factor += 1) {
         TimeOfDay? result;
         final Offset center = await startPicker(
           tester,
@@ -623,21 +623,8 @@ void main() {
     ); // 24 hour, outer ring
   });
 
-  const List<String> labels12To11 = <String>[
-    '12',
-    '1',
-    '2',
-    '3',
-    '4',
-    '5',
-    '6',
-    '7',
-    '8',
-    '9',
-    '10',
-    '11',
-  ];
-  const List<String> labels00To22TwoDigit = <String>[
+  const labels12To11 = <String>['12', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
+  const labels00To22TwoDigit = <String>[
     '00',
     '02',
     '04',
@@ -651,7 +638,7 @@ void main() {
     '20',
     '22',
   ]; // Material 2
-  const List<String> labels00To23TwoDigit = <String>[
+  const labels00To23TwoDigit = <String>[
     // Material 3
     '00',
     '1',
@@ -730,7 +717,7 @@ void main() {
     final CustomPaint dialPaint = tester.widget(dialCustomPaintFinder);
     final dynamic dialPainter = dialPaint.painter;
     // ignore: avoid_dynamic_calls
-    final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
+    final primaryLabels = dialPainter.primaryLabels as List<dynamic>;
     expect(
       primaryLabels.map<String>(
         // ignore: avoid_dynamic_calls
@@ -740,7 +727,7 @@ void main() {
     );
 
     // ignore: avoid_dynamic_calls
-    final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
+    final selectedLabels = dialPainter.selectedLabels as List<dynamic>;
     expect(
       selectedLabels.map<String>(
         // ignore: avoid_dynamic_calls
@@ -758,7 +745,7 @@ void main() {
     final CustomPaint dialPaint = tester.widget(dialCustomPaintFinder);
     final dynamic dialPainter = dialPaint.painter;
     // ignore: avoid_dynamic_calls
-    final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
+    final primaryLabels = dialPainter.primaryLabels as List<dynamic>;
     expect(
       primaryLabels.map<String>(
         // ignore: avoid_dynamic_calls
@@ -768,7 +755,7 @@ void main() {
     );
 
     // ignore: avoid_dynamic_calls
-    final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
+    final selectedLabels = dialPainter.selectedLabels as List<dynamic>;
     expect(
       selectedLabels.map<String>(
         // ignore: avoid_dynamic_calls
@@ -786,7 +773,7 @@ void main() {
     final CustomPaint dialPaint = tester.widget(dialCustomPaintFinder);
     final dynamic dialPainter = dialPaint.painter;
     // ignore: avoid_dynamic_calls
-    final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
+    final primaryLabels = dialPainter.primaryLabels as List<dynamic>;
     expect(
       primaryLabels.map<String>(
         // ignore: avoid_dynamic_calls
@@ -796,7 +783,7 @@ void main() {
     );
 
     // ignore: avoid_dynamic_calls
-    final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
+    final selectedLabels = dialPainter.selectedLabels as List<dynamic>;
     expect(
       selectedLabels.map<String>(
         // ignore: avoid_dynamic_calls
@@ -814,7 +801,7 @@ void main() {
     final CustomPaint dialPaint = tester.widget(dialCustomPaintFinder);
     final dynamic dialPainter = dialPaint.painter;
     // ignore: avoid_dynamic_calls
-    final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
+    final primaryLabels = dialPainter.primaryLabels as List<dynamic>;
     expect(
       primaryLabels.map<String>(
         // ignore: avoid_dynamic_calls
@@ -824,7 +811,7 @@ void main() {
     );
 
     // ignore: avoid_dynamic_calls
-    final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
+    final selectedLabels = dialPainter.selectedLabels as List<dynamic>;
     expect(
       selectedLabels.map<String>(
         // ignore: avoid_dynamic_calls
@@ -838,7 +825,7 @@ void main() {
   testWidgets('AM/PM buttons should be aligned to LTR in Hindi language - Portrait', (
     WidgetTester tester,
   ) async {
-    const Locale locale = Locale('hi', 'HI');
+    const locale = Locale('hi', 'HI');
 
     final Offset centerPortrait = await startPicker(
       tester,
@@ -862,7 +849,7 @@ void main() {
   testWidgets('AM/PM buttons should be aligned to LTR in Hindi language - Landscape', (
     WidgetTester tester,
   ) async {
-    const Locale locale = Locale('hi', 'HI');
+    const locale = Locale('hi', 'HI');
 
     final Offset centerLandscape = await startPicker(
       tester,
