@@ -4277,8 +4277,9 @@ abstract class ImageFilter {
 
   /// Creates an image filter from a [FragmentShader].
   ///
-  /// **Important:** This API is only supported when using the Impeller rendering engine.
-  /// On other backends, an [UnsupportedError] will be thrown.
+  /// > [!WARNING]
+  /// > This API is only supported when using the Impeller rendering engine.
+  /// > On other backends, an [UnsupportedError] will be thrown.
   ///
   /// To check at runtime whether this API is supported, use [isShaderFilterSupported].
   ///
@@ -4348,8 +4349,9 @@ abstract class ImageFilter {
 
   /// Whether [ImageFilter.shader] is supported on the current backend.
   ///
-  /// **Important:** This property indicates whether the Impeller rendering engine
-  /// is enabled. If `false`, attempting to use [ImageFilter.shader] will throw an [UnsupportedError].
+  /// > [!WARNING]
+  /// > This property indicates whether the Impeller rendering engine is enabled.
+  /// > If `false`, attempting to use [ImageFilter.shader] will throw an [UnsupportedError].
   static bool get isShaderFilterSupported => _impellerEnabled;
 
   // Converts this to a native DlImageFilter. See the comments of this method in
