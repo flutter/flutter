@@ -18,14 +18,14 @@ const Duration additionalDelay = Duration(milliseconds: 1);
 
 void main() {
   late MockOnEndFunction mockOnEndFunction;
-  const Key switchKey = Key('switchKey');
+  const switchKey = Key('switchKey');
 
   setUp(() {
     mockOnEndFunction = MockOnEndFunction();
   });
 
   testWidgets('BoxConstraintsTween control test', (WidgetTester tester) async {
-    final BoxConstraintsTween tween = BoxConstraintsTween(
+    final tween = BoxConstraintsTween(
       begin: BoxConstraints.tight(const Size(20.0, 50.0)),
       end: BoxConstraints.tight(const Size(10.0, 30.0)),
     );
@@ -37,16 +37,16 @@ void main() {
   });
 
   testWidgets('DecorationTween control test', (WidgetTester tester) async {
-    final DecorationTween tween = DecorationTween(
+    final tween = DecorationTween(
       begin: const BoxDecoration(color: Color(0xFF00FF00)),
       end: const BoxDecoration(color: Color(0xFFFFFF00)),
     );
-    final BoxDecoration result = tween.lerp(0.25) as BoxDecoration;
+    final result = tween.lerp(0.25) as BoxDecoration;
     expect(result.color, isSameColorAs(const Color(0xFF3FFF00)));
   });
 
   testWidgets('EdgeInsetsTween control test', (WidgetTester tester) async {
-    final EdgeInsetsTween tween = EdgeInsetsTween(
+    final tween = EdgeInsetsTween(
       begin: const EdgeInsets.symmetric(vertical: 50.0),
       end: const EdgeInsets.only(top: 10.0, bottom: 30.0),
     );
@@ -58,7 +58,7 @@ void main() {
   });
 
   testWidgets('Matrix4Tween control test', (WidgetTester tester) async {
-    final Matrix4Tween tween = Matrix4Tween(
+    final tween = Matrix4Tween(
       begin: Matrix4.translationValues(10.0, 20.0, 30.0),
       end: Matrix4.translationValues(14.0, 24.0, 34.0),
     );
@@ -610,9 +610,8 @@ void main() {
   });
 
   testWidgets('Ensure CurvedAnimations are disposed on widget change', (WidgetTester tester) async {
-    final GlobalKey<ImplicitlyAnimatedWidgetState<AnimatedOpacity>> key =
-        GlobalKey<ImplicitlyAnimatedWidgetState<AnimatedOpacity>>();
-    final ValueNotifier<Curve> curve = ValueNotifier<Curve>(const Interval(0.0, 0.5));
+    final key = GlobalKey<ImplicitlyAnimatedWidgetState<AnimatedOpacity>>();
+    final curve = ValueNotifier<Curve>(const Interval(0.0, 0.5));
     addTearDown(curve.dispose);
     await tester.pumpWidget(
       wrap(
@@ -635,7 +634,7 @@ void main() {
       fail('animation was null!');
     }
 
-    final CurvedAnimation firstCurvedAnimation = firstAnimation as CurvedAnimation;
+    final firstCurvedAnimation = firstAnimation as CurvedAnimation;
 
     expect(firstCurvedAnimation.isDisposed, isFalse);
 
@@ -648,7 +647,7 @@ void main() {
       fail('animation was null!');
     }
 
-    final CurvedAnimation secondCurvedAnimation = secondAnimation as CurvedAnimation;
+    final secondCurvedAnimation = secondAnimation as CurvedAnimation;
 
     expect(firstState, equals(secondState));
     expect(firstAnimation, isNot(equals(secondAnimation)));
@@ -664,20 +663,16 @@ void main() {
 
   group('Verify that default args match non-animated variants', () {
     const Widget child = SizedBox.shrink();
-    const Color color = Color(0x00000000);
+    const color = Color(0x00000000);
 
     testWidgets('PhysicalModel default args', (WidgetTester tester) async {
-      const AnimatedPhysicalModel animatedPhysicalModel = AnimatedPhysicalModel(
+      const animatedPhysicalModel = AnimatedPhysicalModel(
         duration: Duration.zero,
         color: color,
         shadowColor: color,
         child: child,
       );
-      const PhysicalModel physicalModel = PhysicalModel(
-        color: color,
-        shadowColor: color,
-        child: child,
-      );
+      const physicalModel = PhysicalModel(color: color, shadowColor: color, child: child);
       expect(identical(animatedPhysicalModel.shape, physicalModel.shape), isTrue);
       expect(identical(animatedPhysicalModel.clipBehavior, physicalModel.clipBehavior), isTrue);
       expect(identical(animatedPhysicalModel.borderRadius, physicalModel.borderRadius), isTrue);

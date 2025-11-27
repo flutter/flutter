@@ -8,6 +8,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/widget_preview/analytics.dart';
 import 'package:flutter_tools/src/widget_preview/preview_detector.dart';
 import 'package:test/fake.dart';
@@ -29,6 +30,9 @@ void main() {
       fs = MemoryFileSystem.test(style: FileSystemStyle.windows);
       watcher = FakeWatcher();
       logger = BufferLogger.test();
+      final FlutterProject project = FlutterProject.fromDirectoryTest(
+        fs.systemTempDirectory.createTempSync('root'),
+      );
       previewDetector = PreviewDetector(
         // Explicitly set the platform to Windows.
         platform: FakePlatform(operatingSystem: 'windows'),
@@ -40,7 +44,7 @@ void main() {
             fs: MemoryFileSystem.test(),
           ),
         ),
-        projectRoot: fs.systemTempDirectory.createTempSync('root'),
+        project: project,
         logger: logger,
         fs: fs,
         onChangeDetected: (_) {},

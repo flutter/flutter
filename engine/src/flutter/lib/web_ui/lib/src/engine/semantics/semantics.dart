@@ -133,7 +133,7 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
     bool? onOffSwitchLabels,
     bool? supportsAnnounce,
   }) {
-    final EngineAccessibilityFeaturesBuilder builder = EngineAccessibilityFeaturesBuilder(0);
+    final builder = EngineAccessibilityFeaturesBuilder(0);
 
     builder.accessibleNavigation = accessibleNavigation ?? this.accessibleNavigation;
     builder.invertColors = invertColors ?? this.invertColors;
@@ -244,6 +244,7 @@ class SemanticsNodeUpdate {
     required this.platformViewId,
     required this.scrollChildren,
     required this.scrollIndex,
+    required this.traversalParent,
     required this.scrollPosition,
     required this.scrollExtentMax,
     required this.scrollExtentMin,
@@ -262,6 +263,7 @@ class SemanticsNodeUpdate {
     this.tooltip,
     this.textDirection,
     required this.transform,
+    required this.hitTestTransform,
     required this.childrenInTraversalOrder,
     required this.childrenInHitTestOrder,
     required this.additionalActions,
@@ -304,6 +306,9 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final int scrollIndex;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final int? traversalParent;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final double scrollPosition;
@@ -358,6 +363,9 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final Float32List transform;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final Float32List hitTestTransform;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final Int32List childrenInTraversalOrder;
@@ -591,7 +599,7 @@ abstract class SemanticRole {
   /// - `transparent`: Rejects pointer events (passes through)
   /// - `defer`: Infers based on semantic properties (interactive behaviors, etc.)
   bool get acceptsPointerEvents {
-    final hitTestBehavior = semanticsObject.hitTestBehavior;
+    final ui.SemanticsHitTestBehavior hitTestBehavior = semanticsObject.hitTestBehavior;
 
     switch (hitTestBehavior) {
       case ui.SemanticsHitTestBehavior.opaque:
@@ -615,9 +623,9 @@ abstract class SemanticRole {
     // Interactive behaviors (Tappable, SemanticTextField, SemanticIncrementable)
     // override this to return true, ensuring buttons, text fields, and other
     // interactive elements receive pointer events when framework defers.
-    final behaviors = _behaviors;
+    final List<SemanticBehavior>? behaviors = _behaviors;
     if (behaviors != null) {
-      for (final behavior in behaviors) {
+      for (final SemanticBehavior behavior in behaviors) {
         if (behavior.shouldAcceptPointerEvents) {
           return true;
         }
@@ -640,7 +648,7 @@ abstract class SemanticRole {
     element.style
       ..position = 'absolute'
       ..overflow = 'visible';
-    element.setAttribute('id', '$kFlutterSemanticNodePrefix${semanticsObject.id}');
+    element.setAttribute('id', getIdAttribute(semanticsObject.id));
 
     // The root node has some properties that other nodes do not.
     if (semanticsObject.id == 0 && !configuration.debugShowSemanticsNodes) {
@@ -715,6 +723,11 @@ abstract class SemanticRole {
   /// Convenience getter for the [Focusable] behavior, if any.
   Focusable? get focusable => _focusable;
   Focusable? _focusable;
+
+  /// Convenience method to get the node id with prefix.
+  static String getIdAttribute(int semanticsId) {
+    return '$kFlutterSemanticNodePrefix$semanticsId';
+  }
 
   /// Adds generic focus management features.
   void addFocusManagement() {
@@ -824,6 +837,10 @@ abstract class SemanticRole {
     if (semanticsObject.isLocaleDirty) {
       semanticsObject.owner.addOneTimePostUpdateCallback(_updateLocale);
     }
+
+    if (semanticsObject.isTraversalParentDirty) {
+      semanticsObject.owner.addOneTimePostUpdateCallback(_updateTraversalParent);
+    }
   }
 
   void _updateIdentifier() {
@@ -843,7 +860,7 @@ abstract class SemanticRole {
           if (semanticNodeId == null) {
             continue;
           }
-          elementIds.add('$kFlutterSemanticNodePrefix$semanticNodeId');
+          elementIds.add(getIdAttribute(semanticNodeId));
         }
         if (elementIds.isNotEmpty) {
           setAttribute('aria-controls', elementIds.join(' '));
@@ -862,6 +879,32 @@ abstract class SemanticRole {
       return;
     }
     setAttribute('lang', locale);
+  }
+
+  void _updateTraversalParent() {
+    // Set up aria-owns relationship for traversal order.
+    if (semanticsObject.traversalParent != -1) {
+      final SemanticsObject? parent =
+          semanticsObject.owner._semanticsTree[semanticsObject.traversalParent!];
+      if (parent != null && parent.semanticRole != null) {
+        final List<String> children = parent.element.getAttribute('aria-owns')?.split(' ') ?? [];
+        children.add(getIdAttribute(semanticsObject.id));
+        parent.element.setAttribute('aria-owns', children.join(' '));
+      }
+    }
+    // Clean up aria-owns relationship.
+    else if (semanticsObject._previousTraversalParent != null &&
+        semanticsObject._previousTraversalParent != -1) {
+      final SemanticsObject? parent =
+          semanticsObject.owner._semanticsTree[semanticsObject._previousTraversalParent!];
+      if (parent != null) {
+        final List<String>? children = parent.element.getAttribute('aria-owns')?.split(' ');
+        if (children != null) {
+          children.removeWhere((String child) => child == getIdAttribute(semanticsObject.id));
+          parent.element.setAttribute('aria-owns', children.join(' '));
+        }
+      }
+    }
   }
 
   /// Applies the current [SemanticsObject.validationResult] to the DOM managed
@@ -1547,6 +1590,20 @@ class SemanticsObject {
     _dirtyFields |= _localeIndex;
   }
 
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  int? get traversalParent => _traversalParent;
+  int? _traversalParent;
+  int? _previousTraversalParent;
+
+  static const int _traversalParentIndex = 1 << 29;
+
+  /// Whether the [traversalParent] field has been updated but has not been
+  /// applied to the DOM yet.
+  bool get isTraversalParentDirty => _isDirty(_traversalParentIndex);
+  void _markTraversalParentDirty() {
+    _dirtyFields |= _traversalParentIndex;
+  }
+
   /// Bitfield showing which fields have been updated but have not yet been
   /// applied to the DOM.
   ///
@@ -1734,6 +1791,12 @@ class SemanticsObject {
       _markScrollIndexDirty();
     }
 
+    if (_traversalParent != update.traversalParent) {
+      _previousTraversalParent = _traversalParent;
+      _traversalParent = update.traversalParent;
+      _markTraversalParentDirty();
+    }
+
     if (_scrollExtentMax != update.scrollExtentMax) {
       _scrollExtentMax = update.scrollExtentMax;
       _markScrollExtentMaxDirty();
@@ -1874,7 +1937,7 @@ class SemanticsObject {
 
       // Remove all children from this semantics object.
       final int len = _currentChildrenInRenderOrder!.length;
-      for (int i = 0; i < len; i++) {
+      for (var i = 0; i < len; i++) {
         owner._detachObject(_currentChildrenInRenderOrder![i].id);
       }
       _currentChildrenInRenderOrder = null;
@@ -1891,7 +1954,7 @@ class SemanticsObject {
     // Always render in traversal order, because the accessibility traversal
     // is determined by the DOM order of elements.
     final childrenInRenderOrder = <SemanticsObject>[];
-    for (int i = 0; i < childCount; i++) {
+    for (var i = 0; i < childCount; i++) {
       childrenInRenderOrder.add(owner._semanticsTree[childrenInTraversalOrder[i]]!);
     }
 
@@ -1904,7 +1967,7 @@ class SemanticsObject {
     // the barrier).
     final bool zIndexMatters = childCount > 1;
     if (zIndexMatters) {
-      for (int i = 0; i < childCount; i++) {
+      for (var i = 0; i < childCount; i++) {
         final SemanticsObject child = owner._semanticsTree[childrenInHitTestOrder[i]]!;
 
         // Invert the z-index because hit-test order is inverted with respect to
@@ -1915,7 +1978,7 @@ class SemanticsObject {
 
     // Trivial case: previous list was empty => just populate the container.
     if (_currentChildrenInRenderOrder == null || _currentChildrenInRenderOrder!.isEmpty) {
-      for (final SemanticsObject child in childrenInRenderOrder) {
+      for (final child in childrenInRenderOrder) {
         element.append(child.element);
         owner._attachObject(parent: this, child: child);
       }
@@ -1924,7 +1987,7 @@ class SemanticsObject {
     }
 
     // At this point it is guaranteed to have had a non-empty previous child list.
-    final previousChildrenInRenderOrder = _currentChildrenInRenderOrder!;
+    final List<SemanticsObject> previousChildrenInRenderOrder = _currentChildrenInRenderOrder!;
     final int previousCount = previousChildrenInRenderOrder.length;
 
     // Both non-empty case.
@@ -1947,7 +2010,7 @@ class SemanticsObject {
     // the new child list.
     final intersectionIndicesOld = <int>[];
 
-    int newIndex = 0;
+    var newIndex = 0;
 
     // The smallest of the two child list lengths.
     final int minLength = math.min(previousCount, childCount);
@@ -1967,7 +2030,7 @@ class SemanticsObject {
     // If child lists are not identical, continue computing the intersection
     // between the two lists.
     while (newIndex < childCount) {
-      for (int oldIndex = 0; oldIndex < previousCount; oldIndex += 1) {
+      for (var oldIndex = 0; oldIndex < previousCount; oldIndex += 1) {
         if (previousChildrenInRenderOrder[oldIndex] == childrenInRenderOrder[newIndex]) {
           intersectionIndicesOld.add(oldIndex);
           break;
@@ -1980,14 +2043,14 @@ class SemanticsObject {
     // that do not need to be moved.
     final List<int?> longestSequence = longestIncreasingSubsequence(intersectionIndicesOld);
     final stationaryIds = <int>[];
-    for (int i = 0; i < longestSequence.length; i += 1) {
+    for (var i = 0; i < longestSequence.length; i += 1) {
       stationaryIds.add(
         previousChildrenInRenderOrder[intersectionIndicesOld[longestSequence[i]!]].id,
       );
     }
 
     // Remove children that are no longer in the list.
-    for (int i = 0; i < previousCount; i++) {
+    for (var i = 0; i < previousCount; i++) {
       if (!intersectionIndicesOld.contains(i)) {
         // Child not in the intersection. Must be removed.
         final int childId = previousChildrenInRenderOrder[i].id;
@@ -2197,7 +2260,7 @@ class SemanticsObject {
     // Reparent element.
     if (previousElement != element) {
       if (_currentChildrenInRenderOrder != null) {
-        for (final child in _currentChildrenInRenderOrder!) {
+        for (final SemanticsObject child in _currentChildrenInRenderOrder!) {
           element.append(child.element);
         }
       }
@@ -2323,8 +2386,8 @@ class SemanticsObject {
     final double translateX = -_rect!.left + horizontalScrollAdjustment;
     final double translateY = -_rect!.top + verticalScrollAdjustment;
 
-    for (final childIndex in _childrenInTraversalOrder!) {
-      final child = owner._semanticsTree[childIndex]!;
+    for (final int childIndex in _childrenInTraversalOrder!) {
+      final SemanticsObject child = owner._semanticsTree[childIndex]!;
 
       if (child.horizontalAdjustmentFromParent != translateX ||
           child.verticalAdjustmentFromParent != translateY) {
@@ -2355,7 +2418,7 @@ class SemanticsObject {
     }
 
     late Matrix4 effectiveTransform;
-    bool effectiveTransformIsIdentity = true;
+    var effectiveTransformIsIdentity = true;
 
     final double left = _rect!.left + horizontalAdjustmentFromParent;
     final double top = _rect!.top + verticalAdjustmentFromParent;
@@ -2385,7 +2448,7 @@ class SemanticsObject {
 
   /// Computes the size and position of children.
   void updateChildrenPositionAndSize() {
-    final Set<SemanticsObject> dirtyNodes = <SemanticsObject>{};
+    final dirtyNodes = <SemanticsObject>{};
     recomputeChildrenAdjustment(dirtyNodes);
 
     for (final node in dirtyNodes) {
@@ -2508,10 +2571,9 @@ class SemanticsObject {
 
   @override
   String toString() {
-    String result = super.toString();
+    var result = super.toString();
     assert(() {
-      final String children =
-          _childrenInTraversalOrder != null && _childrenInTraversalOrder!.isNotEmpty
+      final children = _childrenInTraversalOrder != null && _childrenInTraversalOrder!.isNotEmpty
           ? '[${_childrenInTraversalOrder!.join(', ')}]'
           : '<empty>';
       result = '$runtimeType(#$id, children: $children)';
@@ -2642,7 +2704,7 @@ class EngineSemantics {
     if (value == _semanticsEnabled) {
       return;
     }
-    final EngineAccessibilityFeatures original =
+    final original =
         EnginePlatformDispatcher.instance.configuration.accessibilityFeatures
             as EngineAccessibilityFeatures;
     final PlatformConfiguration newConfiguration = EnginePlatformDispatcher.instance.configuration
@@ -2754,7 +2816,7 @@ class EngineSemantics {
   /// This is used to deduplicate gestures detected by Flutter and gestures
   /// detected by the browser. Flutter-detected gestures have higher precedence.
   void _temporarilyDisableBrowserGestureMode() {
-    const Duration kDebounceThreshold = Duration(milliseconds: 500);
+    const kDebounceThreshold = Duration(milliseconds: 500);
     _getGestureModeClock()!.datetime = _now().add(kDebounceThreshold);
     if (_gestureMode != GestureMode.pointerEvents) {
       _gestureMode = GestureMode.pointerEvents;
@@ -2797,7 +2859,7 @@ class EngineSemantics {
     // For pointer event reference see:
     //
     // https://developer.mozilla.org/en-US/docs/Web/API/Pointer_events
-    const List<String> pointerEventTypes = <String>[
+    const pointerEventTypes = <String>[
       'pointerdown',
       'pointermove',
       'pointerleave',
@@ -2852,7 +2914,7 @@ class EngineSemantics {
   }
 
   void _notifyGestureModeListeners() {
-    for (int i = 0; i < _gestureModeListeners.length; i++) {
+    for (var i = 0; i < _gestureModeListeners.length; i++) {
       _gestureModeListeners[i](_gestureMode);
     }
   }
@@ -2874,7 +2936,7 @@ class EngineSemantics {
       return semanticsEnabled;
     }
 
-    const List<String> pointerDebouncedGestures = <String>['click', 'scroll'];
+    const pointerDebouncedGestures = <String>['click', 'scroll'];
 
     if (pointerDebouncedGestures.contains(eventType)) {
       return _gestureMode == GestureMode.browserGestures;
@@ -2973,7 +3035,7 @@ class EngineSemanticsOwner {
   void _finalizeTree() {
     // Collect all nodes that need to be permanently removed, i.e. nodes that
     // were detached from their parent, but not reattached to another parent.
-    final Set<SemanticsObject> removals = <SemanticsObject>{};
+    final removals = <SemanticsObject>{};
     for (final SemanticsObject detachmentRoot in _detachments) {
       // A detached node may or may not have some of its descendants reattached
       // elsewhere. Walk the descendant tree and find all descendants that were
@@ -2995,7 +3057,7 @@ class EngineSemanticsOwner {
       });
     }
 
-    for (final SemanticsObject removal in removals) {
+    for (final removal in removals) {
       _semanticsTree.remove(removal.id);
       removal.dispose();
     }
@@ -3044,7 +3106,7 @@ class EngineSemanticsOwner {
   // map. The two must be in total agreement. Every node in the map must be
   // somewhere in the tree.
   (bool, String) _computeNodeMapConsistencyMessage() {
-    final Map<int, List<int>> liveIds = <int, List<int>>{};
+    final liveIds = <int, List<int>>{};
 
     final SemanticsObject? root = _semanticsTree[0];
     if (root != null) {
@@ -3054,9 +3116,8 @@ class EngineSemanticsOwner {
     }
 
     final bool isConsistent = _semanticsTree.keys.every(liveIds.keys.contains);
-    final String heading =
-        'The semantics node map is ${isConsistent ? 'consistent' : 'inconsistent'}';
-    final StringBuffer message = StringBuffer('$heading:\n');
+    final heading = 'The semantics node map is ${isConsistent ? 'consistent' : 'inconsistent'}';
+    final message = StringBuffer('$heading:\n');
     message.writeln('  Nodes in tree:');
     for (final MapEntry<int, List<int>> entry in liveIds.entries) {
       message.writeln('    ${entry.key}: ${entry.value}');
@@ -3081,21 +3142,21 @@ class EngineSemanticsOwner {
     }());
 
     _phase = SemanticsUpdatePhase.updating;
-    final SemanticsUpdate update = uiUpdate as SemanticsUpdate;
+    final update = uiUpdate as SemanticsUpdate;
 
     // First, update each object's information about itself. This information is
     // later used to fix the parent-child and sibling relationships between
     // objects.
     final List<SemanticsNodeUpdate> nodeUpdates = update._nodeUpdates!;
-    for (final SemanticsNodeUpdate nodeUpdate in nodeUpdates) {
+    for (final nodeUpdate in nodeUpdates) {
       final SemanticsObject object = getOrCreateObject(nodeUpdate.id);
       object.updateSelf(nodeUpdate);
     }
 
-    final Set<SemanticsObject> nodesWithDirtyPositionsAndSizes = <SemanticsObject>{};
+    final nodesWithDirtyPositionsAndSizes = <SemanticsObject>{};
     // Second, fix the tree structure. This is moved out into its own loop,
     // because each object's own information must be updated first.
-    for (final SemanticsNodeUpdate nodeUpdate in nodeUpdates) {
+    for (final nodeUpdate in nodeUpdates) {
       final SemanticsObject object = _semanticsTree[nodeUpdate.id]!;
       object.updateChildren();
 
@@ -3173,7 +3234,7 @@ AFTER: $description
       });
 
       // Validate that all updates were applied
-      for (final SemanticsNodeUpdate update in nodeUpdates) {
+      for (final update in nodeUpdates) {
         // Node was added to the tree.
         assert(_semanticsTree.containsKey(update.id));
       }
@@ -3195,7 +3256,7 @@ AFTER: $description
   void reset() {
     final List<int> keys = _semanticsTree.keys.toList();
     final int len = keys.length;
-    for (int i = 0; i < len; i++) {
+    for (var i = 0; i < len; i++) {
       _detachObject(keys[i]);
     }
     _finalizeTree();
@@ -3239,13 +3300,13 @@ List<int> longestIncreasingSubsequence(List<int> list) {
   final int len = list.length;
   final predecessors = <int>[];
   final mins = <int>[0];
-  int longest = 0;
-  for (int i = 0; i < len; i++) {
+  var longest = 0;
+  for (var i = 0; i < len; i++) {
     // Binary search for the largest positive `j ≤ longest`
     // such that `list[mins[j]] < list[i]`
     final int elem = list[i];
-    int lo = 1;
-    int hi = longest;
+    var lo = 1;
+    var hi = longest;
     while (lo <= hi) {
       final int mid = (lo + hi) ~/ 2;
       if (list[mins[mid]] < elem) {
@@ -3256,7 +3317,7 @@ List<int> longestIncreasingSubsequence(List<int> list) {
     }
     // After searching, `lo` is 1 greater than the
     // length of the longest prefix of `list[i]`
-    final int expansionIndex = lo;
+    final expansionIndex = lo;
     // The predecessor of `list[i]` is the last index of
     // the subsequence of length `newLongest - 1`
     predecessors.add(mins[expansionIndex - 1]);

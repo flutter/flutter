@@ -240,7 +240,7 @@ class _AndroidSemanticsMatcher extends Matcher {
     Map<dynamic, dynamic> matchState,
     bool verbose,
   ) {
-    final String? failure = matchState['failure'] as String?;
+    final failure = matchState['failure'] as String?;
     return mismatchDescription.add(
       failure ?? 'hasAndroidSemantics matcher does not complete successfully',
     );

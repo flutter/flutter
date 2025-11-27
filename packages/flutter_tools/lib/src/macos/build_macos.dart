@@ -197,9 +197,21 @@ Future<void> buildMacOS({
     HostPlatform.darwin_x64 => 'x86_64',
     _ => throw UnimplementedError('Unsupported platform'),
   };
-  final String destination = buildInfo.isDebug
-      ? 'platform=${XcodeSdk.MacOSX.displayName},arch=$arch'
-      : XcodeSdk.MacOSX.genericPlatform;
+
+  // Determine the build destination
+  final String destination;
+  if (buildInfo.isDebug) {
+    // Debug builds default to current host architecture
+    destination = 'platform=${XcodeSdk.MacOSX.displayName},arch=$arch';
+  } else {
+    // Release builds default to universal binary
+    destination = XcodeSdk.MacOSX.genericPlatform;
+  }
+
+  // Get EXCLUDED_ARCHS from Xcode project build settings
+  // This allows developers to exclude specific architectures (e.g., x86_64)
+  // when dependencies don't support them
+  final String? excludedArches = buildSettings['EXCLUDED_ARCHS'];
 
   try {
     result = await globals.processUtils.stream(
@@ -223,6 +235,10 @@ Future<void> buildMacOS({
         'COMPILER_INDEX_STORE_ENABLE=NO',
         if (disabledSandboxEntitlementFile != null)
           'CODE_SIGN_ENTITLEMENTS=${disabledSandboxEntitlementFile.path}',
+        // Pass EXCLUDED_ARCHS from Xcode project to xcodebuild command
+        // This fixes Swift Package Manager not respecting EXCLUDED_ARCHS from the project
+        if (excludedArches != null && excludedArches.trim().isNotEmpty)
+          'EXCLUDED_ARCHS=$excludedArches',
         ...environmentVariablesAsXcodeBuildSettings(globals.platform),
       ],
       trace: true,
