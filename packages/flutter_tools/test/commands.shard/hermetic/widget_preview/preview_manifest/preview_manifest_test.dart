@@ -14,10 +14,9 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/widget_preview/preview_manifest.dart';
 import 'package:test/test.dart';
 
-import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../../../src/common.dart';
+import '../../../../src/context.dart';
 
-// TODO(bkonyi): test pubspec change detection for workspaces
 void main() {
   group('$PreviewManifest', () {
     late FlutterProject rootProject;

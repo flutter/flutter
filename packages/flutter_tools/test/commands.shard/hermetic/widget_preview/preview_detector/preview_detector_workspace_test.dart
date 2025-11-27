@@ -7,7 +7,6 @@ import 'package:flutter_tools/src/widget_preview/preview_detector.dart';
 import 'package:test/test.dart';
 
 import '../../../../src/common.dart';
-import '../../../../src/context.dart';
 import '../utils/preview_detector_test_utils.dart';
 import '../utils/preview_project.dart';
 
@@ -19,21 +18,6 @@ import '../utils/preview_project.dart';
 void main() {
   initializeTestPreviewDetectorState();
   group('$PreviewDetector - Workspace', () {
-    // Note: we don't use a MemoryFileSystem since we don't have a way to
-    // provide it to package:analyzer APIs without writing a significant amount
-    // of wrapper logic.
-    late PreviewDetector previewDetector;
-    late WidgetPreviewWorkspace workspace;
-
-    setUp(() {
-      previewDetector = createTestPreviewDetector();
-      workspace = WidgetPreviewWorkspace(workspaceRoot: previewDetector.projectRoot);
-    });
-
-    tearDown(() async {
-      await previewDetector.dispose();
-    });
-
     const simplePreviewSource = '''
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
@@ -48,22 +32,25 @@ import 'package:flutter/material.dart';
 Widget foo() => Text('Hello world!');
 ''';
 
-    testUsingContext(
-      'can detect previews in existing files in multiple workspace projects',
-      () async {
-        (await workspace.createWorkspaceProject(
-          name: 'foo',
-        )).writeFile((path: 'foo.dart', source: simplePreviewSource));
-        (await workspace.createWorkspaceProject(
-          name: 'bar',
-        )).writeFile((path: 'bar.dart', source: simplePreviewSource));
+    testPreviewDetector('can detect previews in existing files in multiple workspace projects', (
+      PreviewDetector previewDetector,
+    ) async {
+      final workspace = WidgetPreviewWorkspace(workspaceRoot: previewDetector.projectRoot);
+      (await workspace.createWorkspaceProject(
+        name: 'foo',
+      )).writeFile((path: 'foo.dart', source: simplePreviewSource));
+      (await workspace.createWorkspaceProject(
+        name: 'bar',
+      )).writeFile((path: 'bar.dart', source: simplePreviewSource));
 
-        final PreviewDependencyGraph mapping = await previewDetector.initialize();
-        expect(mapping.nodesWithPreviews.length, 2);
-      },
-    );
+      final PreviewDependencyGraph mapping = await previewDetector.initialize();
+      expect(mapping.nodesWithPreviews.length, 2);
+    });
 
-    testUsingContext('can detect previews in updated files', () async {
+    testPreviewDetector('can detect previews in updated files', (
+      PreviewDetector previewDetector,
+    ) async {
+      final workspace = WidgetPreviewWorkspace(workspaceRoot: previewDetector.projectRoot);
       // Create two projects with existing previews and one without.
       (await workspace.createWorkspaceProject(
         name: 'foo',
@@ -99,7 +86,10 @@ Widget foo() => Text('Hello world!');
       );
     });
 
-    testUsingContext('can detect previews in newly added projects', () async {
+    testPreviewDetector('can detect previews in newly added projects', (
+      PreviewDetector previewDetector,
+    ) async {
+      final workspace = WidgetPreviewWorkspace(workspaceRoot: previewDetector.projectRoot);
       // Create two projects with existing previews.
       (await workspace.createWorkspaceProject(
         name: 'foo',
@@ -124,7 +114,10 @@ Widget foo() => Text('Hello world!');
       );
     });
 
-    testUsingContext('can detect previews removed due to deleted project', () async {
+    testPreviewDetector('can detect previews removed due to deleted project', (
+      PreviewDetector previewDetector,
+    ) async {
+      final workspace = WidgetPreviewWorkspace(workspaceRoot: previewDetector.projectRoot);
       // Create three projects with existing previews.
       (await workspace.createWorkspaceProject(
         name: 'foo',
@@ -151,7 +144,10 @@ Widget foo() => Text('Hello world!');
       );
     });
 
-    testUsingContext("can detect changes in a subproject's pubspec.yaml", () async {
+    testPreviewDetector("can detect changes in a subproject's pubspec.yaml", (
+      PreviewDetector previewDetector,
+    ) async {
+      final workspace = WidgetPreviewWorkspace(workspaceRoot: previewDetector.projectRoot);
       // Create three empty projects in the same workspace.
       await workspace.createWorkspaceProject(name: 'foo');
       await workspace.createWorkspaceProject(name: 'bar');
@@ -169,7 +165,10 @@ Widget foo() => Text('Hello world!');
       );
     });
 
-    testUsingContext("can detect changes in a workspace's root pubspec.yaml", () async {
+    testPreviewDetector("can detect changes in a workspace's root pubspec.yaml", (
+      PreviewDetector previewDetector,
+    ) async {
+      final workspace = WidgetPreviewWorkspace(workspaceRoot: previewDetector.projectRoot);
       // Create three empty projects in the same workspace.
       await workspace.createWorkspaceProject(name: 'foo');
       await workspace.createWorkspaceProject(name: 'bar');
