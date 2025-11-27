@@ -70,8 +70,8 @@ void testMain() {
     () async {
       loader = null;
 
-      bool pluginsRegistered = false;
-      bool appRan = false;
+      var pluginsRegistered = false;
+      var appRan = false;
       void registerPluginsMock() {
         pluginsRegistered = true;
       }

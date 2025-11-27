@@ -63,7 +63,10 @@ class _StepperExampleState extends State<StepperExample> {
             child: const Text('Content for Step 1'),
           ),
         ),
-        const Step(title: Text('Step 2 title'), content: Text('Content for Step 2')),
+        const Step(
+          title: Text('Step 2 title'),
+          content: Text('Content for Step 2'),
+        ),
       ],
     );
   }

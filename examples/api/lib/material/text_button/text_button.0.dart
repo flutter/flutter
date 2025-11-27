@@ -44,7 +44,11 @@ class _TextButtonExampleAppState extends State<TextButtonExampleApp> {
 }
 
 class TextButtonExample extends StatefulWidget {
-  const TextButtonExample({super.key, required this.darkMode, required this.updateDarkMode});
+  const TextButtonExample({
+    super.key,
+    required this.darkMode,
+    required this.updateDarkMode,
+  });
 
   final bool darkMode;
   final ValueChanged<bool> updateDarkMode;
@@ -98,7 +102,11 @@ class _TextButtonExampleState extends State<TextButtonExample> {
     // Adapt colors that are not part of the color scheme to
     // the current dark/light mode. Used to define TextButton #7's
     // gradients.
-    final (Color color1, Color color2, Color color3) = switch (colorScheme.brightness) {
+    final (
+      Color color1,
+      Color color2,
+      Color color3,
+    ) = switch (colorScheme.brightness) {
       Brightness.light => (Colors.blue, Colors.orange, Colors.yellow),
       Brightness.dark => (Colors.purple, Colors.cyan, Colors.yellow),
     };
@@ -109,7 +117,9 @@ class _TextButtonExampleState extends State<TextButtonExample> {
     Decoration? statesToDecoration(Set<WidgetState> states) {
       if (states.contains(WidgetState.pressed)) {
         return BoxDecoration(
-          gradient: LinearGradient(colors: <Color>[color2, color2]), // solid fill
+          gradient: LinearGradient(
+            colors: <Color>[color2, color2],
+          ), // solid fill
         );
       }
       return BoxDecoration(
@@ -204,19 +214,23 @@ class _TextButtonExampleState extends State<TextButtonExample> {
       // theme or the MaterialApp theme's ThemeData.textButtonTheme.
       TextButton(
         style: TextButton.styleFrom(
-          foregroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
-            return ShaderMask(
-              shaderCallback: (Rect bounds) {
-                return LinearGradient(
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                  colors: <Color>[colorScheme.primary, colorScheme.onPrimary],
-                ).createShader(bounds);
+          foregroundBuilder:
+              (BuildContext context, Set<WidgetState> states, Widget? child) {
+                return ShaderMask(
+                  shaderCallback: (Rect bounds) {
+                    return LinearGradient(
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                      colors: <Color>[
+                        colorScheme.primary,
+                        colorScheme.onPrimary,
+                      ],
+                    ).createShader(bounds);
+                  },
+                  blendMode: BlendMode.srcATop,
+                  child: child,
+                );
               },
-              blendMode: BlendMode.srcATop,
-              child: child,
-            );
-          },
         ),
         onPressed: () {},
         child: const Text('TextButton #5'),
@@ -236,16 +250,17 @@ class _TextButtonExampleState extends State<TextButtonExample> {
       // outlines the button's shape.
       TextButton(
         style: TextButton.styleFrom(
-          foregroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
-            return DecoratedBox(
-              decoration: BoxDecoration(
-                border: states.contains(WidgetState.hovered)
-                    ? Border(bottom: BorderSide(color: colorScheme.primary))
-                    : const Border(), // essentially "no border"
-              ),
-              child: child,
-            );
-          },
+          foregroundBuilder:
+              (BuildContext context, Set<WidgetState> states, Widget? child) {
+                return DecoratedBox(
+                  decoration: BoxDecoration(
+                    border: states.contains(WidgetState.hovered)
+                        ? Border(bottom: BorderSide(color: colorScheme.primary))
+                        : const Border(), // essentially "no border"
+                  ),
+                  child: child,
+                );
+              },
         ),
         onPressed: () {},
         child: const Text('TextButton #6'),
@@ -273,15 +288,22 @@ class _TextButtonExampleState extends State<TextButtonExample> {
         style:
             TextButton.styleFrom(
               overlayColor: color2,
-              backgroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 500),
-                  decoration: statesToDecoration(states),
-                  child: child,
-                );
-              },
+              backgroundBuilder:
+                  (
+                    BuildContext context,
+                    Set<WidgetState> states,
+                    Widget? child,
+                  ) {
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 500),
+                      decoration: statesToDecoration(states),
+                      child: child,
+                    );
+                  },
             ).copyWith(
-              side: WidgetStateProperty.resolveWith<BorderSide?>((Set<WidgetState> states) {
+              side: WidgetStateProperty.resolveWith<BorderSide?>((
+                Set<WidgetState> states,
+              ) {
                 if (states.contains(WidgetState.hovered)) {
                   return BorderSide(width: 3, color: color3);
                 }
@@ -304,14 +326,18 @@ class _TextButtonExampleState extends State<TextButtonExample> {
         onPressed: () {},
         style: TextButton.styleFrom(
           foregroundColor: Colors.white,
-          backgroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
-            return Ink(
-              decoration: const BoxDecoration(
-                image: DecorationImage(image: grassImage, fit: BoxFit.cover),
-              ),
-              child: child,
-            );
-          },
+          backgroundBuilder:
+              (BuildContext context, Set<WidgetState> states, Widget? child) {
+                return Ink(
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: grassImage,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  child: child,
+                );
+              },
         ),
         child: const Text('TextButton #8'),
       ),
@@ -348,27 +374,28 @@ class _TextButtonExampleState extends State<TextButtonExample> {
         },
         style: TextButton.styleFrom(
           overlayColor: Colors.transparent,
-          foregroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
-            late final ImageProvider image;
-            if (currentAction != null) {
-              image = runningImage;
-            } else if (states.contains(WidgetState.pressed)) {
-              image = pressedImage;
-            } else if (states.contains(WidgetState.hovered)) {
-              image = hoveredImage;
-            } else {
-              image = defaultImage;
-            }
-            return AnimatedContainer(
-              width: 64,
-              height: 64,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.fastOutSlowIn,
-              decoration: BoxDecoration(
-                image: DecorationImage(image: image, fit: BoxFit.contain),
-              ),
-            );
-          },
+          foregroundBuilder:
+              (BuildContext context, Set<WidgetState> states, Widget? child) {
+                late final ImageProvider image;
+                if (currentAction != null) {
+                  image = runningImage;
+                } else if (states.contains(WidgetState.pressed)) {
+                  image = pressedImage;
+                } else if (states.contains(WidgetState.hovered)) {
+                  image = hoveredImage;
+                } else {
+                  image = defaultImage;
+                }
+                return AnimatedContainer(
+                  width: 64,
+                  height: 64,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.fastOutSlowIn,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(image: image, fit: BoxFit.contain),
+                  ),
+                );
+              },
         ),
         child: const Text('This child is not used'),
       ),
@@ -459,7 +486,10 @@ class TextButtonExampleSwitches extends StatelessWidget {
                 children: <Widget>[
                   const Expanded(child: Text('RTL Text')),
                   const SizedBox(width: 4),
-                  Switch(value: textDirection == TextDirection.rtl, onChanged: updateRTL),
+                  Switch(
+                    value: textDirection == TextDirection.rtl,
+                    onChanged: updateRTL,
+                  ),
                 ],
               ),
             ],

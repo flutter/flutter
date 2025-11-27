@@ -37,14 +37,19 @@ class DragBoundaryExampleAppState extends State<DragBoundaryExampleApp> {
                       child: GestureDetector(
                         behavior: HitTestBehavior.translucent,
                         onPanStart: (DragStartDetails details) {
-                          _initialPosition = details.localPosition - _currentPosition;
+                          _initialPosition =
+                              details.localPosition - _currentPosition;
                         },
                         onPanUpdate: (DragUpdateDetails details) {
-                          _currentPosition = details.localPosition - _initialPosition;
-                          final Rect withinBoundary = DragBoundary.forRectOf(
-                            context,
-                            useGlobalPosition: false,
-                          ).nearestPositionWithinBoundary(_currentPosition & _boxSize);
+                          _currentPosition =
+                              details.localPosition - _initialPosition;
+                          final Rect withinBoundary =
+                              DragBoundary.forRectOf(
+                                context,
+                                useGlobalPosition: false,
+                              ).nearestPositionWithinBoundary(
+                                _currentPosition & _boxSize,
+                              );
                           setState(() {
                             _currentPosition = withinBoundary.topLeft;
                           });

@@ -25,7 +25,7 @@ void testMain() {
     test('Handles navigation gracefully when no implicit view exists', () async {
       expect(EnginePlatformDispatcher.instance.implicitView, isNull);
 
-      final Completer<ByteData?> completer = Completer<ByteData?>();
+      final completer = Completer<ByteData?>();
       ui.PlatformDispatcher.instance.sendPlatformMessage(
         'flutter/navigation',
         codec.encodeMethodCall(
@@ -49,7 +49,7 @@ void testMain() {
     });
 
     test('Tracks pushed, replaced and popped routes', () async {
-      final Completer<void> completer = Completer<void>();
+      final completer = Completer<void>();
       ui.PlatformDispatcher.instance.sendPlatformMessage(
         'flutter/navigation',
         codec.encodeMethodCall(
