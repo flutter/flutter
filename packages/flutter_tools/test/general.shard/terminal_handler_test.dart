@@ -1405,20 +1405,20 @@ class TestRunner extends Fake implements ResidentRunner {
   }
 
   @override
-  Future<int?> run({
+  Future<int> run({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
     bool enableDevTools = false,
     String? route,
-  }) async => null;
+  }) async => -1;
 
   @override
-  Future<int?> attach({
+  Future<int> attach({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
     bool enableDevTools = false,
     bool needsFullRestart = true,
-  }) async => null;
+  }) async => -1;
 }
 
 class _TestSignals implements Signals {
