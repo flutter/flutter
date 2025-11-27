@@ -672,7 +672,7 @@ class DropdownMenu<T extends Object> extends StatefulWidget {
 }
 
 class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
-  static const Map<ShortcutActivator, Intent> _commonShortcuts = <ShortcutActivator, Intent>{
+  static const Map<ShortcutActivator, Intent> _editableShortcuts = <ShortcutActivator, Intent>{
     SingleActivator(LogicalKeyboardKey.arrowLeft): ExtendSelectionByCharacterIntent(
       forward: false,
       collapseSelection: true,
@@ -683,6 +683,14 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
     ),
     SingleActivator(LogicalKeyboardKey.arrowUp): _ArrowUpIntent(),
     SingleActivator(LogicalKeyboardKey.arrowDown): _ArrowDownIntent(),
+  };
+
+  static const Map<ShortcutActivator, Intent> _selectOnlyShortcuts = <ShortcutActivator, Intent>{
+    SingleActivator(LogicalKeyboardKey.arrowUp): _ArrowUpIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowDown): _ArrowDownIntent(),
+    // When selectOnly is true, a shortcut for the enter key is needed because
+    // the text field won't provide one.
+    SingleActivator(LogicalKeyboardKey.enter): _EnterIntent(),
   };
 
   final GlobalKey _anchorKey = GlobalKey();
@@ -1320,12 +1328,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
               );
 
         return Shortcuts(
-          shortcuts: <ShortcutActivator, Intent>{
-            ..._commonShortcuts,
-            // When selectOnly is true, a shortcut for the enter key is needed because
-            // the text field won't provide one.
-            if (selectOnly) const SingleActivator(LogicalKeyboardKey.enter): const _EnterIntent(),
-          },
+          shortcuts: selectOnly ? _selectOnlyShortcuts : _editableShortcuts,
           child: body,
         );
       },
