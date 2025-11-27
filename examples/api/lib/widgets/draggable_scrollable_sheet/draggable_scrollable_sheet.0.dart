@@ -36,12 +36,13 @@ class DraggableScrollableSheetExample extends StatefulWidget {
 
 class _DraggableScrollableSheetExampleState
     extends State<DraggableScrollableSheetExample> {
-  double _sheetPosition = 0.5;
-  final double _dragSensitivity = 600;
+  double _dragPosition = 0.5;
+  late double _sheetPosition = _dragPosition;
 
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final double screenHeight = MediaQuery.sizeOf(context).height;
 
     return DraggableScrollableSheet(
       initialChildSize: _sheetPosition,
@@ -53,12 +54,13 @@ class _DraggableScrollableSheetExampleState
               Grabber(
                 onVerticalDragUpdate: (DragUpdateDetails details) {
                   setState(() {
-                    _sheetPosition -= details.delta.dy / _dragSensitivity;
-                    if (_sheetPosition < 0.25) {
+                    _dragPosition -= details.delta.dy / screenHeight;
+                    if (_dragPosition < 0.25) {
                       _sheetPosition = 0.25;
-                    }
-                    if (_sheetPosition > 1.0) {
+                    } else if (_dragPosition > 1.0) {
                       _sheetPosition = 1.0;
+                    } else {
+                      _sheetPosition = _dragPosition;
                     }
                   });
                 },
@@ -98,7 +100,7 @@ class _DraggableScrollableSheetExampleState
 }
 
 /// A draggable widget that accepts vertical drag gestures
-/// and this is only visible on desktop and web platforms.
+/// and is only visible on desktop and web platforms.
 class Grabber extends StatelessWidget {
   const Grabber({
     super.key,
