@@ -80,6 +80,7 @@ class ExpansionPanel {
     required this.headerBuilder,
     required this.body,
     this.isExpanded = false,
+    this.expandable = true,
     this.canTapOnHeader = false,
     this.backgroundColor,
     this.splashColor,
@@ -98,6 +99,14 @@ class ExpansionPanel {
   ///
   /// Defaults to false.
   final bool isExpanded;
+
+  /// Whether the panel is expandable.
+  ///
+  /// When true, the expand/collapse icon is shown.
+  /// When false, the expand/collapse icon is hidden.
+  ///
+  /// Defaults to true.
+  final bool expandable;
 
   /// Defines the splash color of the panel if [canTapOnHeader] is true,
   /// or the splash color of the expand/collapse IconButton if [canTapOnHeader]
@@ -394,17 +403,23 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       final ExpansionPanel child = widget.children[index];
       final Widget headerWidget = child.headerBuilder(context, _isChildExpanded(index));
 
-      Widget expandIconPadded = Padding(
-        padding: const EdgeInsetsDirectional.only(end: 8.0),
-        child: IgnorePointer(
-          ignoring: child.canTapOnHeader,
-          child: ExpandIcon(
-            color: widget.expandIconColor,
-            isExpanded: _isChildExpanded(index),
-            padding: _kExpandIconPadding,
-            splashColor: child.splashColor,
-            highlightColor: child.highlightColor,
-            onPressed: (bool isExpanded) => _handlePressed(isExpanded, index),
+      Widget expandIconPadded = Visibility(
+        visible: child.expandable,
+        maintainSize: true,
+        maintainAnimation: true,
+        maintainState: true,
+        child: Padding(
+          padding: const EdgeInsetsDirectional.only(end: 8.0),
+          child: IgnorePointer(
+            ignoring: child.canTapOnHeader || !child.expandable,
+            child: ExpandIcon(
+              color: widget.expandIconColor,
+              isExpanded: _isChildExpanded(index),
+              padding: _kExpandIconPadding,
+              splashColor: child.splashColor,
+              highlightColor: child.highlightColor,
+              onPressed: (bool isExpanded) => _handlePressed(isExpanded, index),
+            ),
           ),
         ),
       );
@@ -435,7 +450,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
           expandIconPadded,
         ],
       );
-      if (child.canTapOnHeader) {
+      if (child.canTapOnHeader && child.expandable) {
         header = MergeSemantics(
           child: InkWell(
             splashColor: child.splashColor,
