@@ -1723,4 +1723,56 @@ void main() {
     expect(focusNode.hasFocus, isFalse);
     expect(findStatic(), findsOneWidget);
   });
+
+  testWidgets(
+    'CupertinoContextMenu can be opened with keyboard when CupertinoContextMenu is focused',
+    (WidgetTester tester) async {
+      final focusNode = FocusNode();
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: Column(
+              children: <Widget>[
+                SizedBox.shrink(
+                  child: CupertinoContextMenu(
+                    focusNode: focusNode,
+                    actions: <Widget>[
+                      CupertinoContextMenuAction(child: const Text('Action 1'), onPressed: () {}),
+                      CupertinoContextMenuAction(child: const Text('Action 2'), onPressed: () {}),
+                    ],
+                    child: const Text('Open Context Menu'),
+                  ),
+                ),
+                CupertinoButton(child: const Text('Button'), onPressed: () {}),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(focusNode.hasFocus, isFalse);
+
+      focusNode.requestFocus();
+      await tester.pumpAndSettle();
+
+      expect(focusNode.hasFocus, isTrue);
+      expect(findStatic(), findsNothing);
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+      expect(
+        focusNode.hasFocus,
+        isTrue,
+        reason: 'Focus should not move on Tab key down to allow key combo',
+      );
+      expect(findStatic(), findsNothing);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyM);
+      await tester.pumpAndSettle();
+
+      expect(findStatic(), findsOneWidget, reason: 'Tab+M key combo should open context menu');
+      expect(focusNode.hasFocus, isFalse, reason: 'Focus moves away when menu opens');
+    },
+  );
 }

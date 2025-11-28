@@ -638,12 +638,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
 
   KeyEventResult _onKeyEvent(FocusNode node, KeyEvent event) {
     if (event case KeyDownEvent(logicalKey: LogicalKeyboardKey.tab)) {
-      if (_lastKeyEvent == null) {
-        FocusScope.of(context).nextFocus();
-      }
-
       _lastKeyEvent = event;
-
       return KeyEventResult.handled;
     }
 
@@ -651,9 +646,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
       if (_lastKeyEvent case KeyDownEvent(logicalKey: LogicalKeyboardKey.tab)) {
         FocusScope.of(context).nextFocus();
       }
-
       _lastKeyEvent = event;
-
       return KeyEventResult.handled;
     }
 
