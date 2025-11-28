@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('windows')
+library;
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -9,6 +12,7 @@ import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
 
 import '../src/common.dart';
+import 'test_data/tools_entrypoint_env.dart';
 import 'test_utils.dart';
 
 final String flutterRootPath = getFlutterRoot();
@@ -26,7 +30,7 @@ Future<void> main() async {
     // the Dart SDK update.
     dartSdkStamp.deleteSync();
     final Future<String> runFuture = runDartBatch();
-    final Timer timer = Timer(const Duration(minutes: 5), () {
+    final timer = Timer(const Duration(minutes: 5), () {
       // This print is useful for people debugging this test. Normally we would
       // avoid printing in a test but this is an exception because it's useful
       // ambient information.
@@ -52,11 +56,24 @@ Future<void> main() async {
     // Do not assert on the exact unzipping method, as this could change on CI
     expect(output, contains(RegExp(r'Expanding downloaded archive with (.*)...')));
     expect(output, isNot(contains('Use the -Force parameter' /* Luke */)));
-  }, skip: !platform.isWindows); // [intended] Only Windows uses the batch entrypoint
+  });
+
+  // Regresion test for https://github.com/flutter/flutter/issues/171024.
+  test('shared.bat does not rebuild the flutter tool on a no-op pub upgrade', () async {
+    setupToolsEntrypointNewerPubpsec();
+
+    // Run flutter --version, observe we rebuild the tool.
+    ProcessResult result = await processManager.run(<String>[flutterBatch.path, '--version']);
+    expect(result.stderr, contains('Building flutter tool'));
+
+    // Now do it again.
+    result = await processManager.run(<String>[flutterBatch.path, '--version']);
+    expect(result.stderr, isNot(contains('Building flutter tool...')));
+  });
 }
 
 Future<String> runDartBatch() async {
-  String output = '';
+  var output = '';
   final Process process = await processManager.start(<String>[dartBatch.path]);
   final Future<Object?> stdoutFuture = process.stdout.transform<String>(utf8.decoder).forEach((
     String str,
@@ -90,6 +107,11 @@ Future<String> runDartBatch() async {
 // The executable batch entrypoint for the Dart binary.
 File get dartBatch {
   return flutterRoot.childDirectory('bin').childFile('dart.bat').absolute;
+}
+
+// The executable batch entrypoint for the Flutter binary.
+File get flutterBatch {
+  return flutterRoot.childDirectory('bin').childFile('flutter.bat').absolute;
 }
 
 // The Dart SDK's stamp file.

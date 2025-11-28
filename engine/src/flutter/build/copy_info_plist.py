@@ -10,6 +10,7 @@ engine.
 
 usage: copy_info_plist.py --source <src_path> --destination <dest_path>
                           --minversion=<deployment_target>
+                          --buildmode=<build_mode>
 """
 
 import argparse
@@ -44,6 +45,7 @@ def main():
       '--destination', help='Path to destination Info.plist', type=str, required=True
   )
   parser.add_argument('--minversion', help='Minimum device OS version like "9.0"', type=str)
+  parser.add_argument('--buildmode', help='Build Mode like Debug, Profile, Release', type=str)
 
   args = parser.parse_args()
 
@@ -51,7 +53,12 @@ def main():
   engine_path = os.path.join(_src_root_dir, 'flutter')
   revision = git_revision.get_repository_version(engine_path)
   clang_version = get_clang_version()
-  text = text.format(revision=revision, clang_version=clang_version, min_version=args.minversion)
+  text = text.format(
+      revision=revision,
+      clang_version=clang_version,
+      min_version=args.minversion,
+      build_mode=args.buildmode
+  )
 
   with open(args.destination, 'w') as outfile:
     outfile.write(text)

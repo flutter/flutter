@@ -515,6 +515,23 @@ class PlatformView {
                                CustomAccessibilityActionUpdates actions);
 
   //----------------------------------------------------------------------------
+  /// @brief      Used by the framework to set application locale in the
+  ///             embedding
+  ///
+  /// @param[in]  locale The application locale in BCP 47 format.
+  ///
+  virtual void SetApplicationLocale(std::string locale);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Used by the framework to tell the embedder to prepare or clear
+  ///             resoruce for accepting semantics tree.
+  ///
+  /// @param[in]  enabled  whether framework starts or stops sending semantics
+  ///                      updates
+  ///
+  virtual void SetSemanticsTreeEnabled(bool enabled);
+
+  //----------------------------------------------------------------------------
   /// @brief      Used by the framework to tell the embedder that it has
   ///             registered a listener on a given channel.
   ///
@@ -976,6 +993,13 @@ class PlatformView {
   ///
   /// @param[in]  request  The request to change the focus state of the view.
   virtual void RequestViewFocusChange(const ViewFocusChangeRequest& request);
+
+  //--------------------------------------------------------------------------
+  /// @brief      Performs any deferred setup of the Impeller context
+  ///
+  ///             This is intended to be called from the raster thread so that
+  ///             Impeller context creation can be moved off the startup path.
+  virtual void SetupImpellerContext() {}
 
  protected:
   // This is the only method called on the raster task runner.

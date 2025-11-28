@@ -42,7 +42,9 @@ class FocusableText extends StatelessWidget {
           return Container(
             padding: const EdgeInsets.all(8.0),
             // Change the color based on whether or not this Container has focus.
-            color: Focus.of(context).hasPrimaryFocus ? Colors.red : Colors.white,
+            color: Focus.of(context).hasPrimaryFocus
+                ? Colors.red
+                : Colors.white,
             child: Text(data),
           );
         },
@@ -58,9 +60,8 @@ class FocusExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: ListView.builder(
-        itemBuilder:
-            (BuildContext context, int index) =>
-                FocusableText('Item $index', autofocus: index == 0),
+        itemBuilder: (BuildContext context, int index) =>
+            FocusableText('Item $index', autofocus: index == 0),
         itemCount: 50,
       ),
     );

@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterMetalLayer.h"
+
 #import <Metal/Metal.h>
 #import <OCMock/OCMock.h>
 #import <QuartzCore/QuartzCore.h>
 #import <XCTest/XCTest.h>
 
-#include "flutter/fml/logging.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterMetalLayer.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 
 @interface FlutterMetalLayerTest : XCTestCase
 @end
@@ -76,10 +77,10 @@
 
 // For unknown reason sometimes CI fails to create IOSurface. Bail out
 // to prevent flakiness.
-#define BAIL_IF_NO_DRAWABLE(drawable)                \
-  if (drawable == nil) {                             \
-    FML_LOG(ERROR) << "Could not allocate drawable"; \
-    return;                                          \
+#define BAIL_IF_NO_DRAWABLE(drawable)                        \
+  if (drawable == nil) {                                     \
+    [FlutterLogger logError:@"Could not allocate drawable"]; \
+    return;                                                  \
   }
 
 - (void)testFlip {
@@ -291,6 +292,35 @@
   }
 
   XCTAssertNil(weakLayer);
+}
+
+- (void)testResizeAndPresent {
+  FlutterMetalLayer* layer = [self addMetalLayer];
+  TestCompositor* compositor = [[TestCompositor alloc] initWithLayer:layer];
+
+  id<CAMetalDrawable> oldSizeDrawable1 = [layer nextDrawable];
+  BAIL_IF_NO_DRAWABLE(oldSizeDrawable1);
+  id<CAMetalDrawable> oldSizeDrawable2 = [layer nextDrawable];
+  BAIL_IF_NO_DRAWABLE(oldSizeDrawable2);
+
+  const CGFloat newSize = 200;
+  layer.drawableSize = CGSizeMake(newSize, newSize);
+
+  // After resizing, present the drawables that were allocated using the old size.
+  [oldSizeDrawable1 present];
+  [compositor commitTransaction];
+  [oldSizeDrawable2 present];
+  [compositor commitTransaction];
+
+  // Verify that textures with the old size have been removed from the layer.
+  for (int i = 0; i < 4; i++) {
+    id<CAMetalDrawable> drawable = [layer nextDrawable];
+    [drawable present];
+    [compositor commitTransaction];
+    XCTAssertEqual(drawable.texture.width, newSize);
+  }
+
+  [self removeMetalLayer:layer];
 }
 
 @end

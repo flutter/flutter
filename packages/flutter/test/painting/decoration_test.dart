@@ -127,10 +127,10 @@ void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
   test('Decoration.lerp()', () {
-    const BoxDecoration a = BoxDecoration(color: Color(0xFFFFFFFF));
-    const BoxDecoration b = BoxDecoration(color: Color(0x00000000));
+    const a = BoxDecoration(color: Color(0xFFFFFFFF));
+    const b = BoxDecoration(color: Color(0x00000000));
 
-    BoxDecoration c = Decoration.lerp(a, b, 0.0)! as BoxDecoration;
+    var c = Decoration.lerp(a, b, 0.0)! as BoxDecoration;
     expect(c.color, equals(a.color));
 
     c = Decoration.lerp(a, b, 0.25)! as BoxDecoration;
@@ -147,15 +147,9 @@ void main() {
   });
 
   test('Decoration equality', () {
-    const BoxDecoration a = BoxDecoration(
-      color: Color(0xFFFFFFFF),
-      boxShadow: <BoxShadow>[BoxShadow()],
-    );
+    const a = BoxDecoration(color: Color(0xFFFFFFFF), boxShadow: <BoxShadow>[BoxShadow()]);
 
-    const BoxDecoration b = BoxDecoration(
-      color: Color(0xFFFFFFFF),
-      boxShadow: <BoxShadow>[BoxShadow()],
-    );
+    const b = BoxDecoration(color: Color(0xFFFFFFFF), boxShadow: <BoxShadow>[BoxShadow()]);
 
     expect(a.hashCode, equals(b.hashCode));
     expect(a, equals(b));
@@ -164,16 +158,16 @@ void main() {
   test('BoxDecorationImageListenerSync', () async {
     final ui.Image image = await createTestImage(width: 100, height: 100);
     final ImageProvider imageProvider = SynchronousTestImageProvider(image);
-    final DecorationImage backgroundImage = DecorationImage(image: imageProvider);
+    final backgroundImage = DecorationImage(image: imageProvider);
 
-    final BoxDecoration boxDecoration = BoxDecoration(image: backgroundImage);
-    bool onChangedCalled = false;
+    final boxDecoration = BoxDecoration(image: backgroundImage);
+    var onChangedCalled = false;
     final BoxPainter boxPainter = boxDecoration.createBoxPainter(() {
       onChangedCalled = true;
     });
 
-    final TestCanvas canvas = TestCanvas();
-    const ImageConfiguration imageConfiguration = ImageConfiguration(size: Size.zero);
+    final canvas = TestCanvas();
+    const imageConfiguration = ImageConfiguration(size: Size.zero);
     boxPainter.paint(canvas, Offset.zero, imageConfiguration);
 
     // The onChanged callback should not be invoked during the call to boxPainter.paint
@@ -184,16 +178,16 @@ void main() {
     final ui.Image image = await createTestImage(width: 10, height: 10);
     FakeAsync().run((FakeAsync async) {
       final ImageProvider imageProvider = AsyncTestImageProvider(image);
-      final DecorationImage backgroundImage = DecorationImage(image: imageProvider);
+      final backgroundImage = DecorationImage(image: imageProvider);
 
-      final BoxDecoration boxDecoration = BoxDecoration(image: backgroundImage);
-      bool onChangedCalled = false;
+      final boxDecoration = BoxDecoration(image: backgroundImage);
+      var onChangedCalled = false;
       final BoxPainter boxPainter = boxDecoration.createBoxPainter(() {
         onChangedCalled = true;
       });
 
-      final TestCanvas canvas = TestCanvas();
-      const ImageConfiguration imageConfiguration = ImageConfiguration(size: Size.zero);
+      final canvas = TestCanvas();
+      const imageConfiguration = ImageConfiguration(size: Size.zero);
       boxPainter.paint(canvas, Offset.zero, imageConfiguration);
 
       // The onChanged callback should be invoked asynchronously.
@@ -206,18 +200,18 @@ void main() {
   test('BoxDecorationImageListener does not change when image is clone', () async {
     final ui.Image image1 = await createTestImage(width: 10, height: 10, cache: false);
     final ui.Image image2 = await createTestImage(width: 10, height: 10, cache: false);
-    final MultiImageCompleter completer = MultiImageCompleter();
-    final MultiFrameImageProvider imageProvider = MultiFrameImageProvider(completer);
-    final DecorationImage backgroundImage = DecorationImage(image: imageProvider);
+    final completer = MultiImageCompleter();
+    final imageProvider = MultiFrameImageProvider(completer);
+    final backgroundImage = DecorationImage(image: imageProvider);
 
-    final BoxDecoration boxDecoration = BoxDecoration(image: backgroundImage);
-    bool onChangedCalled = false;
+    final boxDecoration = BoxDecoration(image: backgroundImage);
+    var onChangedCalled = false;
     final BoxPainter boxPainter = boxDecoration.createBoxPainter(() {
       onChangedCalled = true;
     });
 
-    final TestCanvas canvas = TestCanvas();
-    const ImageConfiguration imageConfiguration = ImageConfiguration(size: Size.zero);
+    final canvas = TestCanvas();
+    const imageConfiguration = ImageConfiguration(size: Size.zero);
     boxPainter.paint(canvas, Offset.zero, imageConfiguration);
 
     // The onChanged callback should be invoked asynchronously.
@@ -249,18 +243,18 @@ void main() {
       required bool expectClip,
     }) {
       FakeAsync().run((FakeAsync async) async {
-        final DelayedImageProvider imageProvider = DelayedImageProvider(image);
-        final DecorationImage backgroundImage = DecorationImage(image: imageProvider);
+        final imageProvider = DelayedImageProvider(image);
+        final backgroundImage = DecorationImage(image: imageProvider);
 
-        final BoxDecoration boxDecoration = BoxDecoration(
+        final boxDecoration = BoxDecoration(
           shape: shape,
           borderRadius: borderRadius,
           image: backgroundImage,
         );
 
-        final TestCanvas canvas = TestCanvas();
-        const ImageConfiguration imageConfiguration = ImageConfiguration(size: Size(100.0, 100.0));
-        bool onChangedCalled = false;
+        final canvas = TestCanvas();
+        const imageConfiguration = ImageConfiguration(size: Size(100.0, 100.0));
+        var onChangedCalled = false;
         final BoxPainter boxPainter = boxDecoration.createBoxPainter(() {
           onChangedCalled = true;
         });
@@ -277,10 +271,9 @@ void main() {
         boxPainter.paint(canvas, Offset.zero, imageConfiguration);
 
         // We expect a clip to precede the drawImageRect call.
-        final List<Invocation> commands =
-            canvas.invocations.where((Invocation invocation) {
-              return invocation.memberName == #clipPath || invocation.memberName == #drawImageRect;
-            }).toList();
+        final List<Invocation> commands = canvas.invocations.where((Invocation invocation) {
+          return invocation.memberName == #clipPath || invocation.memberName == #drawImageRect;
+        }).toList();
         if (expectClip) {
           // We expect a clip to precede the drawImageRect call.
           expect(commands.length, 2);
@@ -299,9 +292,9 @@ void main() {
   });
 
   test('DecorationImage test', () async {
-    const ColorFilter colorFilter = ui.ColorFilter.mode(Color(0xFF00FF00), BlendMode.src);
+    const colorFilter = ui.ColorFilter.mode(Color(0xFF00FF00), BlendMode.src);
     final ui.Image image = await createTestImage(width: 100, height: 100);
-    final DecorationImage backgroundImage = DecorationImage(
+    final backgroundImage = DecorationImage(
       image: SynchronousTestImageProvider(image),
       colorFilter: colorFilter,
       fit: BoxFit.contain,
@@ -314,11 +307,11 @@ void main() {
       isAntiAlias: true,
     );
 
-    final BoxDecoration boxDecoration = BoxDecoration(image: backgroundImage);
+    final boxDecoration = BoxDecoration(image: backgroundImage);
     final BoxPainter boxPainter = boxDecoration.createBoxPainter(() {
       assert(false);
     });
-    final TestCanvas canvas = TestCanvas();
+    final canvas = TestCanvas();
     boxPainter.paint(canvas, Offset.zero, const ImageConfiguration(size: Size(100.0, 100.0)));
 
     final Invocation call = canvas.invocations.singleWhere(
@@ -330,7 +323,7 @@ void main() {
     expect(call.positionalArguments[1], const Rect.fromLTRB(10.0, 20.0, 40.0, 60.0));
     expect(call.positionalArguments[2], const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0));
     expect(call.positionalArguments[3], isA<Paint>());
-    final Paint paint = call.positionalArguments[3] as Paint;
+    final paint = call.positionalArguments[3] as Paint;
     expect(paint.colorFilter, colorFilter);
     expect(paint.color, isSameColorAs(const Color(0x7F000000))); // 0.5 opacity
     expect(paint.filterQuality, FilterQuality.high);
@@ -350,9 +343,9 @@ void main() {
   });
 
   test('DecorationImage with null textDirection configuration should throw Error', () async {
-    const ColorFilter colorFilter = ui.ColorFilter.mode(Color(0xFF00FF00), BlendMode.src);
+    const colorFilter = ui.ColorFilter.mode(Color(0xFF00FF00), BlendMode.src);
     final ui.Image image = await createTestImage(width: 100, height: 100);
-    final DecorationImage backgroundImage = DecorationImage(
+    final backgroundImage = DecorationImage(
       image: SynchronousTestImageProvider(image),
       colorFilter: colorFilter,
       fit: BoxFit.contain,
@@ -364,11 +357,11 @@ void main() {
       invertColors: true,
       isAntiAlias: true,
     );
-    final BoxDecoration boxDecoration = BoxDecoration(image: backgroundImage);
+    final boxDecoration = BoxDecoration(image: backgroundImage);
     final BoxPainter boxPainter = boxDecoration.createBoxPainter(() {
       assert(false);
     });
-    final TestCanvas canvas = TestCanvas();
+    final canvas = TestCanvas();
     late FlutterError error;
     try {
       boxPainter.paint(canvas, Offset.zero, const ImageConfiguration(size: Size(100.0, 100.0)));
@@ -405,7 +398,7 @@ void main() {
 
   test('DecorationImage - error listener', () async {
     late String exception;
-    final DecorationImage backgroundImage = DecorationImage(
+    final backgroundImage = DecorationImage(
       image: const SynchronousErrorTestImageProvider('threw'),
       onError: (dynamic error, StackTrace? stackTrace) {
         exception = error as String;
@@ -503,10 +496,10 @@ void main() {
   });
 
   test('paintImage BoxFit.none scale test', () async {
-    for (double scale = 1.0; scale <= 4.0; scale += 1.0) {
-      final TestCanvas canvas = TestCanvas();
+    for (var scale = 1.0; scale <= 4.0; scale += 1.0) {
+      final canvas = TestCanvas();
 
-      const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 250.0);
+      const outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 250.0);
       final ui.Image image = await createTestImage(width: 100, height: 100);
 
       paintImage(
@@ -518,7 +511,7 @@ void main() {
         fit: BoxFit.none,
       );
 
-      const Size imageSize = Size(100.0, 100.0);
+      const imageSize = Size(100.0, 100.0);
 
       final Invocation call = canvas.invocations.firstWhere(
         (Invocation call) => call.memberName == #drawImageRect,
@@ -535,7 +528,7 @@ void main() {
       // Image should be scaled down (divided by scale)
       // and be positioned in the bottom right of the outputRect
       final Size expectedTileSize = imageSize / scale;
-      final Rect expectedTileRect = Rect.fromPoints(
+      final expectedTileRect = Rect.fromPoints(
         outputRect.bottomRight.translate(-expectedTileSize.width, -expectedTileSize.height),
         outputRect.bottomRight,
       );
@@ -546,11 +539,11 @@ void main() {
   });
 
   test('paintImage BoxFit.scaleDown scale test', () async {
-    for (double scale = 1.0; scale <= 4.0; scale += 1.0) {
-      final TestCanvas canvas = TestCanvas();
+    for (var scale = 1.0; scale <= 4.0; scale += 1.0) {
+      final canvas = TestCanvas();
 
       // container size > scaled image size
-      const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 250.0);
+      const outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 250.0);
       final ui.Image image = await createTestImage(width: 100, height: 100);
 
       paintImage(
@@ -562,7 +555,7 @@ void main() {
         fit: BoxFit.scaleDown,
       );
 
-      const Size imageSize = Size(100.0, 100.0);
+      const imageSize = Size(100.0, 100.0);
 
       final Invocation call = canvas.invocations.firstWhere(
         (Invocation call) => call.memberName == #drawImageRect,
@@ -579,7 +572,7 @@ void main() {
       // Image should be scaled down (divided by scale)
       // and be positioned in the bottom right of the outputRect
       final Size expectedTileSize = imageSize / scale;
-      final Rect expectedTileRect = Rect.fromPoints(
+      final expectedTileRect = Rect.fromPoints(
         outputRect.bottomRight.translate(-expectedTileSize.width, -expectedTileSize.height),
         outputRect.bottomRight,
       );
@@ -590,10 +583,10 @@ void main() {
   });
 
   test('paintImage BoxFit.scaleDown test', () async {
-    final TestCanvas canvas = TestCanvas();
+    final canvas = TestCanvas();
 
     // container height (20 px) < scaled image height (50 px)
-    const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 20.0);
+    const outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 20.0);
     final ui.Image image = await createTestImage(width: 100, height: 100);
 
     paintImage(
@@ -605,7 +598,7 @@ void main() {
       fit: BoxFit.scaleDown,
     );
 
-    const Size imageSize = Size(100.0, 100.0);
+    const imageSize = Size(100.0, 100.0);
 
     final Invocation call = canvas.invocations.firstWhere(
       (Invocation call) => call.memberName == #drawImageRect,
@@ -621,8 +614,8 @@ void main() {
 
     // Image should be scaled down to fit in height
     // and be positioned in the bottom right of the outputRect
-    const Size expectedTileSize = Size(20.0, 20.0);
-    final Rect expectedTileRect = Rect.fromPoints(
+    const expectedTileSize = Size(20.0, 20.0);
+    final expectedTileRect = Rect.fromPoints(
       outputRect.bottomRight.translate(-expectedTileSize.width, -expectedTileSize.height),
       outputRect.bottomRight,
     );
@@ -632,7 +625,7 @@ void main() {
   });
 
   test('paintImage boxFit, scale and alignment test', () async {
-    const List<BoxFit> boxFits = <BoxFit>[
+    const boxFits = <BoxFit>[
       BoxFit.contain,
       BoxFit.cover,
       BoxFit.fitWidth,
@@ -642,10 +635,10 @@ void main() {
       BoxFit.scaleDown,
     ];
 
-    for (final BoxFit boxFit in boxFits) {
-      final TestCanvas canvas = TestCanvas();
+    for (final boxFit in boxFits) {
+      final canvas = TestCanvas();
 
-      const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 250.0);
+      const outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 250.0);
       final ui.Image image = await createTestImage(width: 100, height: 100);
 
       paintImage(canvas: canvas, rect: outputRect, image: image, scale: 3.0, fit: boxFit);
@@ -664,11 +657,11 @@ void main() {
   });
 
   test('paintImage with repeatX and fitHeight', () async {
-    final TestCanvas canvas = TestCanvas();
+    final canvas = TestCanvas();
 
     // Paint a square image into an output rect that is twice as wide as it is
     // tall.  Two copies of the image should be painted, one next to the other.
-    const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 400.0, 200.0);
+    const outputRect = Rect.fromLTWH(30.0, 30.0, 400.0, 200.0);
     final ui.Image image = await createTestImage(width: 100, height: 100);
 
     paintImage(
@@ -680,14 +673,15 @@ void main() {
       repeat: ImageRepeat.repeatX,
     );
 
-    const Size imageSize = Size(100.0, 100.0);
+    const imageSize = Size(100.0, 100.0);
 
-    final List<Invocation> calls =
-        canvas.invocations.where((Invocation call) => call.memberName == #drawImageRect).toList();
-    final Set<Rect> tileRects = <Rect>{};
+    final List<Invocation> calls = canvas.invocations
+        .where((Invocation call) => call.memberName == #drawImageRect)
+        .toList();
+    final tileRects = <Rect>{};
 
     expect(calls, hasLength(2));
-    for (final Invocation call in calls) {
+    for (final call in calls) {
       expect(call.isMethod, isTrue);
       expect(call.positionalArguments, hasLength(4));
 
@@ -708,11 +702,11 @@ void main() {
   });
 
   test('paintImage with repeatY and fitWidth', () async {
-    final TestCanvas canvas = TestCanvas();
+    final canvas = TestCanvas();
 
     // Paint a square image into an output rect that is twice as tall as it is
     // wide.  Two copies of the image should be painted, one above the other.
-    const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 200.0, 400.0);
+    const outputRect = Rect.fromLTWH(30.0, 30.0, 200.0, 400.0);
     final ui.Image image = await createTestImage(width: 100, height: 100);
 
     paintImage(
@@ -724,14 +718,15 @@ void main() {
       repeat: ImageRepeat.repeatY,
     );
 
-    const Size imageSize = Size(100.0, 100.0);
+    const imageSize = Size(100.0, 100.0);
 
-    final List<Invocation> calls =
-        canvas.invocations.where((Invocation call) => call.memberName == #drawImageRect).toList();
-    final Set<Rect> tileRects = <Rect>{};
+    final List<Invocation> calls = canvas.invocations
+        .where((Invocation call) => call.memberName == #drawImageRect)
+        .toList();
+    final tileRects = <Rect>{};
 
     expect(calls, hasLength(2));
-    for (final Invocation call in calls) {
+    for (final call in calls) {
       expect(call.isMethod, isTrue);
       expect(call.positionalArguments, hasLength(4));
 
@@ -753,17 +748,17 @@ void main() {
 
   test('DecorationImage scale test', () async {
     final ui.Image image = await createTestImage(width: 100, height: 100);
-    final DecorationImage backgroundImage = DecorationImage(
+    final backgroundImage = DecorationImage(
       image: SynchronousTestImageProvider(image),
       scale: 4,
       alignment: Alignment.topLeft,
     );
 
-    final BoxDecoration boxDecoration = BoxDecoration(image: backgroundImage);
+    final boxDecoration = BoxDecoration(image: backgroundImage);
     final BoxPainter boxPainter = boxDecoration.createBoxPainter(() {
       assert(false);
     });
-    final TestCanvas canvas = TestCanvas();
+    final canvas = TestCanvas();
     boxPainter.paint(canvas, Offset.zero, const ImageConfiguration(size: Size(100.0, 100.0)));
 
     final Invocation call = canvas.invocations.firstWhere(
@@ -781,7 +776,7 @@ void main() {
 
     final ImageStream stream = provider.resolve(ImageConfiguration.empty);
 
-    final Completer<ImageInfo> infoCompleter = Completer<ImageInfo>();
+    final infoCompleter = Completer<ImageInfo>();
     void listener(ImageInfo image, bool syncCall) {
       assert(!infoCompleter.isCompleted);
       infoCompleter.complete(image);

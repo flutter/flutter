@@ -42,6 +42,7 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/runtime/dart_service_isolate.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 
 FLUTTER_ASSERT_ARC
@@ -100,17 +101,21 @@ FLUTTER_ASSERT_ARC
     return;
   }
 
-  FML_LOG(ERROR) << "Failed to register Dart VM Service port with mDNS with error " << err << ".";
+  NSString* errorMessage = [NSString
+      stringWithFormat:@"Failed to register Dart VM Service port with mDNS with error %d.", err];
+  [FlutterLogger logError:errorMessage];
   if (@available(iOS 14.0, *)) {
-    FML_LOG(ERROR) << "On iOS 14+, local network broadcast in apps need to be declared in "
-                   << "the app's Info.plist. Debug and profile Flutter apps and modules host "
-                   << "VM services on the local network to support debugging features such "
-                   << "as hot reload and DevTools. To make your Flutter app or module "
-                   << "attachable and debuggable, add a '" << registrationType << "' value "
-                   << "to the 'NSBonjourServices' key in your Info.plist for the Debug/"
-                   << "Profile configurations. " << "For more information, see "
-                   << "https://flutter.dev/docs/development/add-to-app/ios/"
-                      "project-setup#local-network-privacy-permissions";
+    errorMessage = [NSString
+        stringWithFormat:@"On iOS 14+, local network broadcast in apps need to be declared in "
+                          "the app's Info.plist. Debug and profile Flutter apps and modules host "
+                          "VM services on the local network to support debugging features such "
+                          "as hot reload and DevTools. To make your Flutter app or module "
+                          "attachable and debuggable, add a '%s' value to the 'NSBonjourServices' "
+                          "key in your Info.plist for the Debug/Profile configurations. For more "
+                          "information, see https://docs.flutter.dev/development/add-to-app/ios/"
+                          "project-setup#local-network-privacy-permissions",
+                         registrationType];
+    [FlutterLogger logError:errorMessage];
   }
 }
 
@@ -133,14 +138,13 @@ static void DNSSD_API RegistrationCallback(DNSServiceRef sdRef,
         << "denied. Check your 'Local Network' permissions for this app in the Privacy section of "
         << "the system Settings.";
 #else   // TARGET_IPHONE_SIMULATOR
-    FML_LOG(ERROR)
-        << "Could not register as server for FlutterDartVMServicePublisher, permission "
-        << "denied. Check your 'Local Network' permissions for this app in the Privacy section of "
-        << "the system Settings.";
+    [FlutterLogger logError:@"Could not register as server for FlutterDartVMServicePublisher, "
+                             "permission denied. Check your 'Local Network' permissions for this "
+                             "app in the Privacy section of the system Settings."];
 #endif  // TARGET_IPHONE_SIMULATOR
   } else {
-    FML_LOG(ERROR) << "Could not register as server for FlutterDartVMServicePublisher. Check your "
-                      "network settings and relaunch the application.";
+    [FlutterLogger logError:@"Could not register as server for FlutterDartVMServicePublisher. "
+                             "Check your network settings and relaunch the application."];
   }
 }
 

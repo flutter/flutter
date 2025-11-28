@@ -35,6 +35,7 @@ import io.flutter.embedding.engine.systemchannels.PlatformChannel;
 import io.flutter.embedding.engine.systemchannels.ProcessTextChannel;
 import io.flutter.embedding.engine.systemchannels.RestorationChannel;
 import io.flutter.embedding.engine.systemchannels.ScribeChannel;
+import io.flutter.embedding.engine.systemchannels.SensitiveContentChannel;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.embedding.engine.systemchannels.SpellCheckChannel;
 import io.flutter.embedding.engine.systemchannels.SystemChannel;
@@ -42,6 +43,7 @@ import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.plugin.platform.PlatformViewsController2;
+import io.flutter.plugin.platform.PlatformViewsControllerDelegator;
 import io.flutter.plugin.text.ProcessTextPlugin;
 import io.flutter.util.ViewUtils;
 import java.util.HashMap;
@@ -105,6 +107,7 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
   @NonNull private final PlatformChannel platformChannel;
   @NonNull private final ProcessTextChannel processTextChannel;
   @NonNull private final ScribeChannel scribeChannel;
+  @NonNull private final SensitiveContentChannel sensitiveContentChannel;
   @NonNull private final SettingsChannel settingsChannel;
   @NonNull private final SpellCheckChannel spellCheckChannel;
   @NonNull private final SystemChannel systemChannel;
@@ -113,6 +116,7 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
   // Platform Views.
   @NonNull private final PlatformViewsController platformViewsController;
   @NonNull private final PlatformViewsController2 platformViewsController2;
+  @NonNull private final PlatformViewsControllerDelegator platformViewsControllerDelegator;
 
   // Engine Lifecycle.
   @NonNull private final Set<EngineLifecycleListener> engineLifecycleListeners = new HashSet<>();
@@ -363,6 +367,7 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
     processTextChannel = new ProcessTextChannel(dartExecutor, context.getPackageManager());
     restorationChannel = new RestorationChannel(dartExecutor, waitForRestorationData);
     scribeChannel = new ScribeChannel(dartExecutor);
+    sensitiveContentChannel = new SensitiveContentChannel(dartExecutor);
     settingsChannel = new SettingsChannel(dartExecutor);
     spellCheckChannel = new SpellCheckChannel(dartExecutor);
     systemChannel = new SystemChannel(dartExecutor);
@@ -387,6 +392,8 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
     platformViewsController2.setRegistry(platformViewsController.getRegistry());
     platformViewsController2.setFlutterJNI(flutterJNI);
 
+    platformViewsController.setFlutterJNI(flutterJNI);
+
     flutterJNI.addEngineLifecycleListener(engineLifecycleListener);
     flutterJNI.setPlatformViewsController(platformViewsController);
     flutterJNI.setPlatformViewsController2(platformViewsController2);
@@ -403,6 +410,9 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
     this.renderer = new FlutterRenderer(flutterJNI);
     this.platformViewsController = platformViewsController;
     this.platformViewsController2 = platformViewsController2;
+
+    this.platformViewsControllerDelegator =
+        new PlatformViewsControllerDelegator(platformViewsController, platformViewsController2);
 
     this.pluginRegistry =
         new FlutterEngineConnectionRegistry(
@@ -647,6 +657,12 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
     return scribeChannel;
   }
 
+  /** System channel that handles getting and setting content sensitivity. */
+  @NonNull
+  public SensitiveContentChannel getSensitiveContentChannel() {
+    return sensitiveContentChannel;
+  }
+
   /** System channel that sends and receives spell check requests and results. */
   @NonNull
   public SpellCheckChannel getSpellCheckChannel() {
@@ -679,6 +695,11 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
   @NonNull
   public PlatformViewsController2 getPlatformViewsController2() {
     return platformViewsController2;
+  }
+
+  @NonNull
+  public PlatformViewsControllerDelegator getPlatformViewsControllerDelegator() {
+    return platformViewsControllerDelegator;
   }
 
   @NonNull

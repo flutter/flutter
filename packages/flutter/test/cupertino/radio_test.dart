@@ -20,7 +20,7 @@ import '../widgets/semantics_tester.dart';
 void main() {
   testWidgets('Radio control test', (WidgetTester tester) async {
     final Key key = UniqueKey();
-    final List<int?> log = <int?>[];
+    final log = <int?>[];
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -55,9 +55,7 @@ void main() {
 
     await tester.pumpWidget(
       CupertinoApp(
-        home: Center(
-          child: CupertinoRadio<int>(key: key, value: 1, groupValue: 2, onChanged: null),
-        ),
+        home: Center(child: CupertinoRadio<int>(key: key, value: 1, groupValue: 2)),
       ),
     );
 
@@ -66,9 +64,32 @@ void main() {
     expect(log, isEmpty);
   });
 
+  testWidgets('Radio disabled', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    final log = <int?>[];
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoRadio<int>(
+            key: key,
+            value: 1,
+            groupValue: 2,
+            enabled: false,
+            onChanged: log.add,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(key));
+
+    expect(log, equals(<int>[]));
+  });
+
   testWidgets('Radio can be toggled when toggleable is set', (WidgetTester tester) async {
     final Key key = UniqueKey();
-    final List<int?> log = <int?>[];
+    final log = <int?>[];
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -111,13 +132,7 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
-          child: CupertinoRadio<int>(
-            key: key,
-            value: 1,
-            groupValue: null,
-            onChanged: log.add,
-            toggleable: true,
-          ),
+          child: CupertinoRadio<int>(key: key, value: 1, onChanged: log.add, toggleable: true),
         ),
       ),
     );
@@ -128,7 +143,7 @@ void main() {
   });
 
   testWidgets('Radio selected semantics - platform adaptive', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -162,7 +177,7 @@ void main() {
   }, variant: TargetPlatformVariant.all());
 
   testWidgets('Radio semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -204,9 +219,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      const CupertinoApp(
-        home: Center(child: CupertinoRadio<int>(value: 1, groupValue: 2, onChanged: null)),
-      ),
+      const CupertinoApp(home: Center(child: CupertinoRadio<int>(value: 1, groupValue: 2))),
     );
 
     expect(
@@ -233,9 +246,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      const CupertinoApp(
-        home: Center(child: CupertinoRadio<int>(value: 2, groupValue: 2, onChanged: null)),
-      ),
+      const CupertinoApp(home: Center(child: CupertinoRadio<int>(value: 2, groupValue: 2))),
     );
 
     expect(
@@ -252,7 +263,7 @@ void main() {
   });
 
   testWidgets('has semantic events', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     final Key key = UniqueKey();
     dynamic semanticEvent;
     int? radioValue = 2;
@@ -299,10 +310,10 @@ void main() {
   testWidgets('Radio can be controlled by keyboard shortcuts', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     int? groupValue = 1;
-    const Key radioKey0 = Key('radio0');
-    const Key radioKey1 = Key('radio1');
-    const Key radioKey2 = Key('radio2');
-    final FocusNode focusNode2 = FocusNode(debugLabel: 'radio2');
+    const radioKey0 = Key('radio0');
+    const radioKey1 = Key('radio1');
+    const radioKey2 = Key('radio2');
+    final focusNode2 = FocusNode(debugLabel: 'radio2');
     addTearDown(focusNode2.dispose);
     Widget buildApp({bool enabled = true}) {
       return CupertinoApp(
@@ -317,41 +328,38 @@ void main() {
                     CupertinoRadio<int>(
                       key: radioKey0,
                       value: 0,
-                      onChanged:
-                          enabled
-                              ? (int? newValue) {
-                                setState(() {
-                                  groupValue = newValue;
-                                });
-                              }
-                              : null,
+                      onChanged: enabled
+                          ? (int? newValue) {
+                              setState(() {
+                                groupValue = newValue;
+                              });
+                            }
+                          : null,
                       groupValue: groupValue,
                       autofocus: true,
                     ),
                     CupertinoRadio<int>(
                       key: radioKey1,
                       value: 1,
-                      onChanged:
-                          enabled
-                              ? (int? newValue) {
-                                setState(() {
-                                  groupValue = newValue;
-                                });
-                              }
-                              : null,
+                      onChanged: enabled
+                          ? (int? newValue) {
+                              setState(() {
+                                groupValue = newValue;
+                              });
+                            }
+                          : null,
                       groupValue: groupValue,
                     ),
                     CupertinoRadio<int>(
                       key: radioKey2,
                       value: 2,
-                      onChanged:
-                          enabled
-                              ? (int? newValue) {
-                                setState(() {
-                                  groupValue = newValue;
-                                });
-                              }
-                              : null,
+                      onChanged: enabled
+                          ? (int? newValue) {
+                              setState(() {
+                                groupValue = newValue;
+                              });
+                            }
+                          : null,
                       groupValue: groupValue,
                       focusNode: focusNode2,
                     ),
@@ -440,15 +448,9 @@ void main() {
     Widget buildRadio(bool show) {
       return CupertinoApp(
         home: Center(
-          child:
-              show
-                  ? CupertinoRadio<bool>(
-                    key: key,
-                    value: true,
-                    groupValue: false,
-                    onChanged: (_) {},
-                  )
-                  : Container(),
+          child: show
+              ? CupertinoRadio<bool>(key: key, value: true, groupValue: false, onChanged: (_) {})
+              : Container(),
         ),
       );
     }
@@ -531,7 +533,7 @@ void main() {
         return CupertinoApp(
           home: Center(
             child: RepaintBoundary(
-              child: CupertinoRadio<int>(value: value, groupValue: groupValue, onChanged: null),
+              child: CupertinoRadio<int>(value: value, groupValue: groupValue),
             ),
           ),
         );
@@ -558,7 +560,7 @@ void main() {
           theme: const CupertinoThemeData(brightness: Brightness.dark),
           home: Center(
             child: RepaintBoundary(
-              child: CupertinoRadio<int>(value: value, groupValue: groupValue, onChanged: null),
+              child: CupertinoRadio<int>(value: value, groupValue: groupValue),
             ),
           ),
         );
@@ -578,12 +580,12 @@ void main() {
   );
 
   testWidgets('Radio can set inactive/active/fill colors', (WidgetTester tester) async {
-    const Color inactiveBorderColor = Color(0xffd1d1d6);
-    const Color activeColor = Color(0x0000000A);
-    const Color fillColor = Color(0x0000000B);
-    const Color inactiveColor = Color(0x0000000C);
-    const double innerRadius = 2.975;
-    const double outerRadius = 7.0;
+    const inactiveBorderColor = Color(0xffd1d1d6);
+    const activeColor = Color(0x0000000A);
+    const fillColor = Color(0x0000000B);
+    const inactiveColor = Color(0x0000000C);
+    const innerRadius = 2.975;
+    const outerRadius = 7.0;
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -633,13 +635,13 @@ void main() {
   });
 
   testWidgets('Radio is slightly darkened when pressed in light mode', (WidgetTester tester) async {
-    const Color activeInnerColor = Color(0xffffffff);
-    const Color activeOuterColor = Color(0xff007aff);
-    const Color inactiveBorderColor = Color(0xffd1d1d6);
-    const Color inactiveOuterColor = Color(0xffffffff);
-    const double innerRadius = 2.975;
-    const double outerRadius = 7.0;
-    const Color pressedShadowColor = Color(0x26ffffff);
+    const activeInnerColor = Color(0xffffffff);
+    const activeOuterColor = Color(0xff007aff);
+    const inactiveBorderColor = Color(0xffd1d1d6);
+    const inactiveOuterColor = Color(0xffffffff);
+    const innerRadius = 2.975;
+    const outerRadius = 7.0;
+    const pressedShadowColor = Color(0x26ffffff);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -688,12 +690,12 @@ void main() {
   });
 
   testWidgets('Radio is slightly lightened when pressed in dark mode', (WidgetTester tester) async {
-    const Color activeInnerColor = Color(0xffffffff);
-    const Color activeOuterColor = Color(0xff007aff);
-    const Color inactiveBorderColor = Color(0x40000000);
-    const double innerRadius = 2.975;
-    const double outerRadius = 7.0;
-    const Color pressedShadowColor = Color(0x26ffffff);
+    const activeInnerColor = Color(0xffffffff);
+    const activeOuterColor = Color(0xff007aff);
+    const inactiveBorderColor = Color(0x40000000);
+    const innerRadius = 2.975;
+    const outerRadius = 7.0;
+    const pressedShadowColor = Color(0x26ffffff);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -743,17 +745,17 @@ void main() {
   });
 
   testWidgets('Radio is focusable and has correct focus colors', (WidgetTester tester) async {
-    const Color activeInnerColor = Color(0xffffffff);
-    const Color activeOuterColor = Color(0xff007aff);
+    const activeInnerColor = Color(0xffffffff);
+    const activeOuterColor = Color(0xff007aff);
     final Color defaultFocusColor =
         HSLColor.fromColor(CupertinoColors.activeBlue.withOpacity(kCupertinoFocusColorOpacity))
             .withLightness(kCupertinoFocusColorBrightness)
             .withSaturation(kCupertinoFocusColorSaturation)
             .toColor();
-    const double innerRadius = 2.975;
-    const double outerRadius = 7.0;
+    const innerRadius = 2.975;
+    const outerRadius = 7.0;
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    final FocusNode node = FocusNode();
+    final node = FocusNode();
     addTearDown(node.dispose);
 
     await tester.pumpWidget(
@@ -783,13 +785,13 @@ void main() {
   });
 
   testWidgets('Radio can configure a focus color', (WidgetTester tester) async {
-    const Color activeInnerColor = Color(0xffffffff);
-    const Color activeOuterColor = Color(0xff007aff);
-    const Color focusColor = Color(0x0000000A);
-    const double innerRadius = 2.975;
-    const double outerRadius = 7.0;
+    const activeInnerColor = Color(0xffffffff);
+    const activeOuterColor = Color(0xff007aff);
+    const focusColor = Color(0x0000000A);
+    const innerRadius = 2.975;
+    const outerRadius = 7.0;
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    final FocusNode node = FocusNode();
+    final node = FocusNode();
     addTearDown(node.dispose);
 
     await tester.pumpWidget(
@@ -849,7 +851,7 @@ void main() {
   testWidgets('Mouse cursor resolves in disabled/hovered/focused states', (
     WidgetTester tester,
   ) async {
-    final FocusNode focusNode = FocusNode(debugLabel: 'Radio');
+    final focusNode = FocusNode(debugLabel: 'Radio');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     await tester.pumpWidget(
@@ -892,12 +894,7 @@ void main() {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(
-          child: CupertinoRadio<int>(
-            value: 1,
-            groupValue: 1,
-            onChanged: null,
-            mouseCursor: _RadioMouseCursor(),
-          ),
+          child: CupertinoRadio<int>(value: 1, groupValue: 1, mouseCursor: _RadioMouseCursor()),
         ),
       ),
     );
@@ -928,6 +925,42 @@ void main() {
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
+  });
+
+  // Regression tests for https://github.com/flutter/flutter/issues/170422
+  group('Radio accessibility announcements on various platforms', () {
+    testWidgets('Unselected radio should be vocalized via hint on iOS/macOS platform', (
+      WidgetTester tester,
+    ) async {
+      const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(child: CupertinoRadio<int>(value: 2, groupValue: 1, onChanged: (int? i) {})),
+        ),
+      );
+
+      final SemanticsNode semanticNode = tester.getSemantics(find.byType(Focus).last);
+      if (defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.macOS) {
+        expect(semanticNode.hint, localizations.radioButtonUnselectedLabel);
+      } else {
+        expect(semanticNode.hint, anyOf(isNull, isEmpty));
+      }
+    });
+
+    testWidgets('Selected radio should be vocalized via the selected flag on all platforms', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(child: CupertinoRadio<int>(value: 1, groupValue: 1, onChanged: (int? i) {})),
+        ),
+      );
+
+      final SemanticsNode semanticNode = tester.getSemantics(find.byType(Focus).last);
+      // Radio semantics should not have hint.
+      expect(semanticNode.hint, anyOf(isNull, isEmpty));
+    });
   });
 }
 

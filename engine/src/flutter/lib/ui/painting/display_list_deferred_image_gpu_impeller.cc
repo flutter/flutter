@@ -5,6 +5,7 @@
 #include "flutter/lib/ui/painting/display_list_deferred_image_gpu_impeller.h"
 
 #include <utility>
+#include <variant>
 
 #include "flutter/fml/make_copyable.h"
 
@@ -22,7 +23,7 @@ sk_sp<DlDeferredImageGPUImpeller> DlDeferredImageGPUImpeller::Make(
 
 sk_sp<DlDeferredImageGPUImpeller> DlDeferredImageGPUImpeller::Make(
     sk_sp<DisplayList> display_list,
-    const SkISize& size,
+    const DlISize& size,
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner) {
   return sk_sp<DlDeferredImageGPUImpeller>(new DlDeferredImageGPUImpeller(
@@ -70,7 +71,7 @@ bool DlDeferredImageGPUImpeller::isUIThreadSafe() const {
 
 // |DlImage|
 DlISize DlDeferredImageGPUImpeller::GetSize() const {
-  return wrapper_ ? ToDlISize(wrapper_->size()) : DlISize();
+  return wrapper_ ? wrapper_->size() : DlISize();
 }
 
 // |DlImage|
@@ -82,7 +83,7 @@ size_t DlDeferredImageGPUImpeller::GetApproximateByteSize() const {
                   ->GetTextureDescriptor()
                   .GetByteSizeOfBaseMipLevel();
     } else {
-      size += wrapper_->size().width() * wrapper_->size().height() * 4;
+      size += wrapper_->size().Area() * 4;
     }
   }
   return size;
@@ -91,13 +92,12 @@ size_t DlDeferredImageGPUImpeller::GetApproximateByteSize() const {
 std::shared_ptr<DlDeferredImageGPUImpeller::ImageWrapper>
 DlDeferredImageGPUImpeller::ImageWrapper::Make(
     sk_sp<DisplayList> display_list,
-    const SkISize& size,
+    const DlISize& size,
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner) {
   auto wrapper = std::shared_ptr<ImageWrapper>(new ImageWrapper(
-      std::move(display_list), size, std::move(snapshot_delegate),
-      std::move(raster_task_runner)));
-  wrapper->SnapshotDisplayList();
+      size, std::move(snapshot_delegate), std::move(raster_task_runner)));
+  wrapper->SnapshotDisplayList(std::move(display_list));
   return wrapper;
 }
 
@@ -106,53 +106,37 @@ DlDeferredImageGPUImpeller::ImageWrapper::Make(
     std::unique_ptr<LayerTree> layer_tree,
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner) {
-  auto wrapper = std::shared_ptr<ImageWrapper>(new ImageWrapper(
-      nullptr, ToSkISize(layer_tree->frame_size()),
-      std::move(snapshot_delegate), std::move(raster_task_runner)));
+  auto wrapper = std::shared_ptr<ImageWrapper>(
+      new ImageWrapper(layer_tree->frame_size(), std::move(snapshot_delegate),
+                       std::move(raster_task_runner)));
   wrapper->SnapshotDisplayList(std::move(layer_tree));
   return wrapper;
 }
 
 DlDeferredImageGPUImpeller::ImageWrapper::ImageWrapper(
-    sk_sp<DisplayList> display_list,
-    const SkISize& size,
+    const DlISize& size,
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner)
     : size_(size),
-      display_list_(std::move(display_list)),
       snapshot_delegate_(std::move(snapshot_delegate)),
       raster_task_runner_(std::move(raster_task_runner)) {}
 
-DlDeferredImageGPUImpeller::ImageWrapper::~ImageWrapper() {
-  fml::TaskRunner::RunNowOrPostTask(
-      raster_task_runner_, [id = reinterpret_cast<uintptr_t>(this),
-                            texture_registry = std::move(texture_registry_)]() {
-        if (texture_registry) {
-          texture_registry->UnregisterContextListener(id);
-        }
-      });
-}
+DlDeferredImageGPUImpeller::ImageWrapper::~ImageWrapper() = default;
 
-void DlDeferredImageGPUImpeller::ImageWrapper::OnGrContextCreated() {
-  FML_DCHECK(raster_task_runner_->RunsTasksOnCurrentThread());
-  SnapshotDisplayList();
-}
+void DlDeferredImageGPUImpeller::ImageWrapper::OnGrContextCreated() {}
 
-void DlDeferredImageGPUImpeller::ImageWrapper::OnGrContextDestroyed() {
-  // Impeller textures do not have threading requirements for deletion, and
-  texture_.reset();
-}
+void DlDeferredImageGPUImpeller::ImageWrapper::OnGrContextDestroyed() {}
 
 bool DlDeferredImageGPUImpeller::ImageWrapper::isTextureBacked() const {
   return texture_ && texture_->IsValid();
 }
 
 void DlDeferredImageGPUImpeller::ImageWrapper::SnapshotDisplayList(
-    std::unique_ptr<LayerTree> layer_tree) {
+    std::variant<sk_sp<DisplayList>, std::unique_ptr<LayerTree>> content) {
   fml::TaskRunner::RunNowOrPostTask(
       raster_task_runner_,
       fml::MakeCopyable([weak_this = weak_from_this(),
-                         layer_tree = std::move(layer_tree)]() {
+                         content = std::move(content)]() mutable {
         TRACE_EVENT0("flutter", "SnapshotDisplayList (impeller)");
         auto wrapper = weak_this.lock();
         if (!wrapper) {
@@ -163,17 +147,21 @@ void DlDeferredImageGPUImpeller::ImageWrapper::SnapshotDisplayList(
           return;
         }
 
-        wrapper->texture_registry_ = snapshot_delegate->GetTextureRegistry();
-        wrapper->texture_registry_->RegisterContextListener(
-            reinterpret_cast<uintptr_t>(wrapper.get()), weak_this);
+        sk_sp<DisplayList> display_list;
 
-        if (layer_tree) {
-          wrapper->display_list_ = layer_tree->Flatten(
-              DlRect::MakeWH(wrapper->size_.width(), wrapper->size_.height()),
-              wrapper->texture_registry_);
+        if (std::holds_alternative<sk_sp<DisplayList>>(content)) {
+          display_list = std::get<sk_sp<DisplayList>>(std::move(content));
+        } else if (std::holds_alternative<std::unique_ptr<LayerTree>>(
+                       content)) {
+          std::unique_ptr<LayerTree> layer_tree =
+              std::get<std::unique_ptr<LayerTree>>(std::move(content));
+          display_list = layer_tree->Flatten(
+              DlRect::MakeWH(wrapper->size_.width, wrapper->size_.height),
+              snapshot_delegate->GetTextureRegistry());
         }
+
         auto snapshot = snapshot_delegate->MakeRasterSnapshotSync(
-            wrapper->display_list_, wrapper->size_);
+            display_list, wrapper->size_);
         if (!snapshot) {
           std::scoped_lock lock(wrapper->error_mutex_);
           wrapper->error_ = "Failed to create snapshot.";

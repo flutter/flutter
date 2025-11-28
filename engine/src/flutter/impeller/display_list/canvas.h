@@ -18,14 +18,17 @@
 #include "impeller/display_list/paint.h"
 #include "impeller/entity/contents/atlas_contents.h"
 #include "impeller/entity/contents/clip_contents.h"
+#include "impeller/entity/contents/solid_rrect_like_blur_contents.h"
 #include "impeller/entity/contents/text_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_pass_clip_stack.h"
 #include "impeller/entity/geometry/geometry.h"
+#include "impeller/entity/geometry/round_rect_geometry.h"
+#include "impeller/entity/geometry/round_superellipse_geometry.h"
 #include "impeller/entity/geometry/vertices_geometry.h"
 #include "impeller/entity/inline_pass_context.h"
+#include "impeller/geometry/arc.h"
 #include "impeller/geometry/matrix.h"
-#include "impeller/geometry/path.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/round_rect.h"
 #include "impeller/geometry/vector.h"
@@ -93,25 +96,23 @@ enum class ContentBoundsPromise {
   kMayClipContents,
 };
 
-struct LazyRenderingConfig {
-  std::unique_ptr<EntityPassTarget> entity_pass_target;
-  std::unique_ptr<InlinePassContext> inline_pass_context;
+class LazyRenderingConfig {
+ public:
+  LazyRenderingConfig(ContentContext& renderer,
+                      std::unique_ptr<EntityPassTarget> p_entity_pass_target);
+
+  LazyRenderingConfig(LazyRenderingConfig&&) = default;
 
   /// Whether or not the clear color texture can still be updated.
-  bool IsApplyingClearColor() const { return !inline_pass_context->IsActive(); }
+  bool IsApplyingClearColor() const;
 
-  LazyRenderingConfig(ContentContext& renderer,
-                      std::unique_ptr<EntityPassTarget> p_entity_pass_target)
-      : entity_pass_target(std::move(p_entity_pass_target)) {
-    inline_pass_context =
-        std::make_unique<InlinePassContext>(renderer, *entity_pass_target);
-  }
+  EntityPassTarget* GetEntityPassTarget() const;
 
-  LazyRenderingConfig(ContentContext& renderer,
-                      std::unique_ptr<EntityPassTarget> entity_pass_target,
-                      std::unique_ptr<InlinePassContext> inline_pass_context)
-      : entity_pass_target(std::move(entity_pass_target)),
-        inline_pass_context(std::move(inline_pass_context)) {}
+  InlinePassContext* GetInlinePassContext() const;
+
+ private:
+  std::unique_ptr<EntityPassTarget> entity_pass_target_;
+  std::unique_ptr<InlinePassContext> inline_pass_context_;
 };
 
 class Canvas {
@@ -138,7 +139,7 @@ class Canvas {
                   const RenderTarget& render_target,
                   bool is_onscreen,
                   bool requires_readback,
-                  IRect cull_rect);
+                  IRect32 cull_rect);
 
   ~Canvas() = default;
 
@@ -197,11 +198,23 @@ class Canvas {
                 const Paint& paint,
                 bool reuse_depth = false);
 
+  void DrawDashedLine(const Point& p0,
+                      const Point& p1,
+                      Scalar on_length,
+                      Scalar off_length,
+                      const Paint& paint);
+
   void DrawRect(const Rect& rect, const Paint& paint);
 
   void DrawOval(const Rect& rect, const Paint& paint);
 
+  void DrawArc(const Arc& arc, const Paint& paint);
+
   void DrawRoundRect(const RoundRect& rect, const Paint& paint);
+
+  void DrawDiffRoundRect(const RoundRect& outer,
+                         const RoundRect& inner,
+                         const Paint& paint);
 
   void DrawRoundSuperellipse(const RoundSuperellipse& rse, const Paint& paint);
 
@@ -270,6 +283,32 @@ class Canvas {
   bool EnsureFinalMipmapGeneration() const;
 
  private:
+  class RRectLikeBlurShape {
+   public:
+    virtual ~RRectLikeBlurShape() = default;
+    virtual std::shared_ptr<SolidRRectLikeBlurContents> BuildBlurContent() = 0;
+    virtual Geometry& BuildGeometry(Rect rect, Scalar radius) = 0;
+  };
+
+  class RRectBlurShape : public RRectLikeBlurShape {
+   public:
+    std::shared_ptr<SolidRRectLikeBlurContents> BuildBlurContent() override;
+    Geometry& BuildGeometry(Rect rect, Scalar radius) override;
+
+   private:
+    std::optional<RoundRectGeometry> geom_;  // optional stack allocation
+  };
+
+  class RSuperellipseBlurShape : public RRectLikeBlurShape {
+   public:
+    std::shared_ptr<SolidRRectLikeBlurContents> BuildBlurContent() override;
+    Geometry& BuildGeometry(Rect rect, Scalar radius) override;
+
+   private:
+    std::optional<RoundSuperellipseGeometry>
+        geom_;  // optional stack allocation
+  };
+
   ContentContext& renderer_;
   RenderTarget render_target_;
   const bool is_onscreen_;
@@ -356,9 +395,22 @@ class Canvas {
 
   void AddRenderEntityToCurrentPass(Entity& entity, bool reuse_depth = false);
 
+  bool AttemptDrawAntialiasedCircle(const Point& center,
+                                    Scalar radius,
+                                    const Paint& paint);
+
   bool AttemptDrawBlurredRRect(const Rect& rect,
                                Size corner_radii,
                                const Paint& paint);
+
+  bool AttemptDrawBlurredRSuperellipse(const Rect& rect,
+                                       Size corner_radii,
+                                       const Paint& paint);
+
+  bool AttemptDrawBlurredRRectLike(const Rect& rect,
+                                   Size corner_radii,
+                                   const Paint& paint,
+                                   RRectLikeBlurShape& shape);
 
   /// For simple DrawImageRect calls, optimize any draws with a color filter
   /// into the corresponding atlas draw.

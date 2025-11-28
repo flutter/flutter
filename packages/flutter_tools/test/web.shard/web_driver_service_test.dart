@@ -17,8 +17,8 @@ void main() {
   testWithoutContext(
     'WebDriverService catches SocketExceptions cleanly and includes link to documentation',
     () async {
-      final BufferLogger logger = BufferLogger.test();
-      final WebDriverService service = WebDriverService(
+      final logger = BufferLogger.test();
+      final service = WebDriverService(
         logger: logger,
         terminal: Terminal.test(),
         platform: FakePlatform(),
@@ -26,7 +26,7 @@ void main() {
         processUtils: ProcessUtils(logger: logger, processManager: FakeProcessManager.empty()),
         dartSdkPath: 'dart',
       );
-      const String link = 'https://flutter.dev/to/integration-test-on-web';
+      const link = 'https://flutter.dev/to/integration-test-on-web';
       try {
         await service.startTest(
           'foo.test',

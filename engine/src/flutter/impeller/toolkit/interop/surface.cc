@@ -32,12 +32,10 @@ bool Surface::DrawDisplayList(const DisplayList& dl) const {
   auto& content_context = context_->GetAiksContext().GetContentContext();
   auto render_target = surface_->GetRenderTarget();
 
-  const auto cull_rect = IRect::MakeSize(surface_->GetSize());
-  auto skia_cull_rect =
-      SkIRect::MakeWH(cull_rect.GetWidth(), cull_rect.GetHeight());
+  const auto cull_rect = Rect::MakeSize(surface_->GetSize());
 
   auto result = RenderToTarget(content_context, render_target, display_list,
-                               skia_cull_rect, /*reset_host_buffer=*/true);
+                               cull_rect, /*reset_host_buffer=*/true);
   context_->GetContext()->ResetThreadLocalState();
   return result;
 }

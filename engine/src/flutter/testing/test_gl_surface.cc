@@ -26,11 +26,11 @@ namespace flutter::testing {
 
 TestGLOnscreenOnlySurface::TestGLOnscreenOnlySurface(
     std::shared_ptr<TestEGLContext> context,
-    SkISize size)
+    DlISize size)
     : surface_size_(size), egl_context_(std::move(context)) {
   const EGLint attributes[] = {
-      EGL_WIDTH,  size.width(),   //
-      EGL_HEIGHT, size.height(),  //
+      EGL_WIDTH,  size.width,   //
+      EGL_HEIGHT, size.height,  //
       EGL_NONE,
   };
 
@@ -49,7 +49,7 @@ TestGLOnscreenOnlySurface::~TestGLOnscreenOnlySurface() {
   FML_CHECK(result == EGL_TRUE) << GetEGLError();
 }
 
-const SkISize& TestGLOnscreenOnlySurface::GetSurfaceSize() const {
+const DlISize& TestGLOnscreenOnlySurface::GetSurfaceSize() const {
   return surface_size_;
 }
 
@@ -151,8 +151,8 @@ sk_sp<SkSurface> TestGLOnscreenOnlySurface::GetOnscreenSurface() {
   FML_CHECK(::eglGetCurrentContext() != EGL_NO_CONTEXT);
 
   GrGLFramebufferInfo framebuffer_info = {};
-  const uint32_t width = surface_size_.width();
-  const uint32_t height = surface_size_.height();
+  const uint32_t width = surface_size_.width;
+  const uint32_t height = surface_size_.height;
   framebuffer_info.fFBOID = GetFramebuffer(width, height);
 #if FML_OS_MACOSX
   framebuffer_info.fFormat = 0x8058;  // GL_RGBA8
@@ -207,7 +207,7 @@ sk_sp<SkImage> TestGLOnscreenOnlySurface::GetRasterSurfaceSnapshot() {
     return nullptr;
   }
 
-  auto host_snapshot = device_snapshot->makeRasterImage();
+  auto host_snapshot = device_snapshot->makeRasterImage(nullptr);
 
   if (!host_snapshot) {
     FML_LOG(ERROR) << "Could not create the host snapshot while attempting to "
@@ -222,11 +222,11 @@ uint32_t TestGLOnscreenOnlySurface::GetWindowFBOId() const {
   return 0u;
 }
 
-TestGLSurface::TestGLSurface(SkISize surface_size)
+TestGLSurface::TestGLSurface(DlISize surface_size)
     : TestGLSurface(std::make_shared<TestEGLContext>(), surface_size) {}
 
 TestGLSurface::TestGLSurface(std::shared_ptr<TestEGLContext> egl_context,
-                             SkISize surface_size)
+                             DlISize surface_size)
     : TestGLOnscreenOnlySurface(std::move(egl_context), surface_size) {
   {
     const EGLint offscreen_surface_attributes[] = {

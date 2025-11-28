@@ -338,8 +338,8 @@ mixin SchedulerBinding on BindingBase {
 
   @pragma('vm:notify-debugger-on-exception')
   void _executeTimingsCallbacks(List<FrameTiming> timings) {
-    final List<TimingsCallback> clonedCallbacks = List<TimingsCallback>.of(_timingsCallbacks);
-    for (final TimingsCallback callback in clonedCallbacks) {
+    final clonedCallbacks = List<TimingsCallback>.of(_timingsCallbacks);
+    for (final callback in clonedCallbacks) {
       try {
         if (_timingsCallbacks.contains(callback)) {
           callback(timings);
@@ -347,14 +347,13 @@ mixin SchedulerBinding on BindingBase {
       } catch (exception, stack) {
         InformationCollector? collector;
         assert(() {
-          collector =
-              () => <DiagnosticsNode>[
-                DiagnosticsProperty<TimingsCallback>(
-                  'The TimingsCallback that gets executed was',
-                  callback,
-                  style: DiagnosticsTreeStyle.errorProperty,
-                ),
-              ];
+          collector = () => <DiagnosticsNode>[
+            DiagnosticsProperty<TimingsCallback>(
+              'The TimingsCallback that gets executed was',
+              callback,
+              style: DiagnosticsTreeStyle.errorProperty,
+            ),
+          ];
           return true;
         }());
         FlutterError.reportError(
@@ -471,7 +470,7 @@ mixin SchedulerBinding on BindingBase {
     Flow? flow,
   }) {
     final bool isFirstTask = _taskQueue.isEmpty;
-    final _TaskEntry<T> entry = _TaskEntry<T>(task, priority.value, debugLabel, flow);
+    final entry = _TaskEntry<T>(task, priority.value, debugLabel, flow);
     _taskQueue.add(entry);
     if (isFirstTask && !locked) {
       _ensureEventLoopCallback();
@@ -540,19 +539,18 @@ mixin SchedulerBinding on BindingBase {
             stack: exceptionStack,
             library: 'scheduler library',
             context: ErrorDescription('during a task callback'),
-            informationCollector:
-                (callbackStack == null)
-                    ? null
-                    : () {
-                      return <DiagnosticsNode>[
-                        DiagnosticsStackTrace(
-                          '\nThis exception was thrown in the context of a scheduler callback. '
-                          'When the scheduler callback was _registered_ (as opposed to when the '
-                          'exception was thrown), this was the stack',
-                          callbackStack,
-                        ),
-                      ];
-                    },
+            informationCollector: (callbackStack == null)
+                ? null
+                : () {
+                    return <DiagnosticsNode>[
+                      DiagnosticsStackTrace(
+                        '\nThis exception was thrown in the context of a scheduler callback. '
+                        'When the scheduler callback was _registered_ (as opposed to when the '
+                        'exception was thrown), this was the stack',
+                        callbackStack,
+                      ),
+                    ];
+                  },
           ),
         );
       }
@@ -663,33 +661,30 @@ mixin SchedulerBinding on BindingBase {
         // even if the information collector is called after
         // the problem has been resolved.
         final int count = transientCallbackCount;
-        final Map<int, _FrameCallbackEntry> callbacks = Map<int, _FrameCallbackEntry>.of(
-          _transientCallbacks,
-        );
+        final callbacks = Map<int, _FrameCallbackEntry>.of(_transientCallbacks);
         FlutterError.reportError(
           FlutterErrorDetails(
             exception: reason,
             library: 'scheduler library',
-            informationCollector:
-                () => <DiagnosticsNode>[
-                  if (count == 1)
-                    // TODO(jacobr): I have added an extra line break in this case.
-                    ErrorDescription(
-                      'There was one transient callback left. '
-                      'The stack trace for when it was registered is as follows:',
-                    )
-                  else
-                    ErrorDescription(
-                      'There were $count transient callbacks left. '
-                      'The stack traces for when they were registered are as follows:',
-                    ),
-                  for (final int id in callbacks.keys)
-                    DiagnosticsStackTrace(
-                      '── callback $id ──',
-                      callbacks[id]!.debugStack,
-                      showSeparator: false,
-                    ),
-                ],
+            informationCollector: () => <DiagnosticsNode>[
+              if (count == 1)
+                // TODO(jacobr): I have added an extra line break in this case.
+                ErrorDescription(
+                  'There was one transient callback left. '
+                  'The stack trace for when it was registered is as follows:',
+                )
+              else
+                ErrorDescription(
+                  'There were $count transient callbacks left. '
+                  'The stack traces for when they were registered are as follows:',
+                ),
+              for (final int id in callbacks.keys)
+                DiagnosticsStackTrace(
+                  '── callback $id ──',
+                  callbacks[id]!.debugStack,
+                  showSeparator: false,
+                ),
+            ],
           ),
         );
       }
@@ -823,7 +818,7 @@ mixin SchedulerBinding on BindingBase {
   void addPostFrameCallback(FrameCallback callback, {String debugLabel = 'callback'}) {
     assert(() {
       if (debugTracePostFrameCallbacks) {
-        final FrameCallback originalCallback = callback;
+        final originalCallback = callback;
         callback = (Duration timeStamp) {
           Timeline.startSync(debugLabel);
           try {
@@ -1119,10 +1114,9 @@ mixin SchedulerBinding on BindingBase {
   /// These mechanisms together combine to ensure that the durations we give
   /// during frame callbacks are monotonically increasing.
   Duration _adjustForEpoch(Duration rawTimeStamp) {
-    final Duration rawDurationSinceEpoch =
-        _firstRawTimeStampInEpoch == null
-            ? Duration.zero
-            : rawTimeStamp - _firstRawTimeStampInEpoch!;
+    final Duration rawDurationSinceEpoch = _firstRawTimeStampInEpoch == null
+        ? Duration.zero
+        : rawTimeStamp - _firstRawTimeStampInEpoch!;
     return Duration(
       microseconds:
           (rawDurationSinceEpoch.inMicroseconds / timeDilation).round() +
@@ -1241,7 +1235,7 @@ mixin SchedulerBinding on BindingBase {
       _debugFrameNumber += 1;
 
       if (debugPrintBeginFrameBanner || debugPrintEndFrameBanner) {
-        final StringBuffer frameTimeStampDescription = StringBuffer();
+        final frameTimeStampDescription = StringBuffer();
         if (rawTimeStamp != null) {
           _debugDescribeTimeStamp(_currentFrameTimeStamp!, frameTimeStampDescription);
         } else {
@@ -1347,21 +1341,19 @@ mixin SchedulerBinding on BindingBase {
     try {
       // PERSISTENT FRAME CALLBACKS
       _schedulerPhase = SchedulerPhase.persistentCallbacks;
-      for (final FrameCallback callback in List<FrameCallback>.of(_persistentCallbacks)) {
+      for (final callback in List<FrameCallback>.of(_persistentCallbacks)) {
         _invokeFrameCallback(callback, _currentFrameTimeStamp!);
       }
 
       // POST-FRAME CALLBACKS
       _schedulerPhase = SchedulerPhase.postFrameCallbacks;
-      final List<FrameCallback> localPostFrameCallbacks = List<FrameCallback>.of(
-        _postFrameCallbacks,
-      );
+      final localPostFrameCallbacks = List<FrameCallback>.of(_postFrameCallbacks);
       _postFrameCallbacks.clear();
       if (!kReleaseMode) {
         FlutterTimeline.startSync('POST_FRAME');
       }
       try {
-        for (final FrameCallback callback in localPostFrameCallbacks) {
+        for (final callback in localPostFrameCallbacks) {
           _invokeFrameCallback(callback, _currentFrameTimeStamp!);
         }
       } finally {
@@ -1443,19 +1435,18 @@ mixin SchedulerBinding on BindingBase {
           stack: exceptionStack,
           library: 'scheduler library',
           context: ErrorDescription('during a scheduler callback'),
-          informationCollector:
-              (callbackStack == null)
-                  ? null
-                  : () {
-                    return <DiagnosticsNode>[
-                      DiagnosticsStackTrace(
-                        '\nThis exception was thrown in the context of a scheduler callback. '
-                        'When the scheduler callback was _registered_ (as opposed to when the '
-                        'exception was thrown), this was the stack',
-                        callbackStack,
-                      ),
-                    ];
-                  },
+          informationCollector: (callbackStack == null)
+              ? null
+              : () {
+                  return <DiagnosticsNode>[
+                    DiagnosticsStackTrace(
+                      '\nThis exception was thrown in the context of a scheduler callback. '
+                      'When the scheduler callback was _registered_ (as opposed to when the '
+                      'exception was thrown), this was the stack',
+                      callbackStack,
+                    ),
+                  ];
+                },
         ),
       );
     }

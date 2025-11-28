@@ -93,7 +93,7 @@ class CardCollectionState extends State<CardCollection> {
   }
 
   void _initFixedSizedCardModels() {
-    const int cardCount = 27;
+    const cardCount = 27;
     _cardModels = List<CardModel>.generate(cardCount, (int i) => CardModel(i, kFixedCardHeight));
   }
 
@@ -208,7 +208,7 @@ class CardCollectionState extends State<CardCollection> {
   }
 
   String _dismissDirectionText(DismissDirection direction) {
-    final String s = direction.toString();
+    final s = direction.toString();
     return "dismiss ${s.substring(s.indexOf('.') + 1)}";
   }
 
@@ -267,12 +267,11 @@ class CardCollectionState extends State<CardCollection> {
       title: Text(label),
       trailing: Checkbox(
         value: value,
-        onChanged:
-            enabled
-                ? (_) {
-                  callback();
-                }
-                : null,
+        onChanged: enabled
+            ? (_) {
+                callback();
+              }
+            : null,
       ),
     );
   }
@@ -288,12 +287,11 @@ class CardCollectionState extends State<CardCollection> {
     return ListTile(
       leading: Icon(icon),
       title: Text(label),
-      onTap:
-          enabled
-              ? () {
-                onChanged(itemValue);
-              }
-              : null,
+      onTap: enabled
+          ? () {
+              onChanged(itemValue);
+            }
+          : null,
       trailing: Radio<MaterialColor>(
         value: itemValue,
         groupValue: currentValue,
@@ -313,12 +311,11 @@ class CardCollectionState extends State<CardCollection> {
     return ListTile(
       leading: Icon(icon),
       title: Text(label),
-      onTap:
-          enabled
-              ? () {
-                onChanged(itemValue);
-              }
-              : null,
+      onTap: enabled
+          ? () {
+              onChanged(itemValue);
+            }
+          : null,
       trailing: Radio<DismissDirection>(
         value: itemValue,
         groupValue: currentValue,
@@ -338,12 +335,11 @@ class CardCollectionState extends State<CardCollection> {
     return ListTile(
       leading: Icon(icon),
       title: Text(label),
-      onTap:
-          enabled
-              ? () {
-                onChanged(itemValue);
-              }
-              : null,
+      onTap: enabled
+          ? () {
+              onChanged(itemValue);
+            }
+          : null,
       trailing: Radio<TextAlign>(
         value: itemValue,
         groupValue: currentValue,
@@ -380,24 +376,21 @@ class CardCollectionState extends State<CardCollection> {
         child: Container(
           height: cardModel.height,
           padding: const EdgeInsets.all(kCardMargins),
-          child:
-              _editable
-                  ? Center(
-                    child: TextField(
-                      key: GlobalObjectKey(cardModel),
-                      controller: cardModel.textController,
-                    ),
-                  )
-                  : DefaultTextStyle.merge(
-                    style: cardLabelStyle.copyWith(fontSize: _varyFontSizes ? 5.0 + index : null),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Text(cardModel.textController.text, textAlign: _textAlign),
-                      ],
-                    ),
+          child: _editable
+              ? Center(
+                  child: TextField(
+                    key: GlobalObjectKey(cardModel),
+                    controller: cardModel.textController,
                   ),
+                )
+              : DefaultTextStyle.merge(
+                  style: cardLabelStyle.copyWith(fontSize: _varyFontSizes ? 5.0 + index : null),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[Text(cardModel.textController.text, textAlign: _textAlign)],
+                  ),
+                ),
         ),
       ),
     );

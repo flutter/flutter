@@ -51,7 +51,7 @@ bool TemplaterMain(const fml::CommandLine& command_line) {
       rendered_template.size()};
 
   auto current_dir =
-      fml::OpenDirectory(std::filesystem::current_path().u8string().c_str(),
+      fml::OpenDirectory(std::filesystem::current_path().string().c_str(),
                          false, fml::FilePermission::kReadWrite);
   if (!current_dir.is_valid()) {
     FML_LOG(ERROR) << "Could not open current directory.";

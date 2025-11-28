@@ -130,6 +130,14 @@ void PlatformView::UpdateSemantics(
     // NOLINTNEXTLINE(performance-unnecessary-value-param)
     CustomAccessibilityActionUpdates actions) {}
 
+void PlatformView::SetApplicationLocale(
+    std::string locale  // NOLINT(performance-unnecessary-value-param)
+) {}
+
+void PlatformView::SetSemanticsTreeEnabled(
+    bool enabled  // NOLINT(performance-unnecessary-value-param)
+) {}
+
 void PlatformView::SendChannelUpdate(const std::string& name, bool listening) {}
 
 void PlatformView::HandlePlatformMessage(

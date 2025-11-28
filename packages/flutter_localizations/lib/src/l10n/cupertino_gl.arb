@@ -1,8 +1,8 @@
 {
   "datePickerHourSemanticsLabelOne": "$hour en punto",
   "datePickerHourSemanticsLabelOther": "$hour en punto",
-  "datePickerMinuteSemanticsLabelOne": "1 minuto",
-  "datePickerMinuteSemanticsLabelOther": "$minute minutos",
+  "datePickerMinuteSemanticsLabelOne": "1 minuto",
+  "datePickerMinuteSemanticsLabelOther": "$minute minutos",
   "datePickerDateOrder": "dmy",
   "datePickerDateTimeOrder": "date_time_dayPeriod",
   "anteMeridiemAbbreviation": "a.m.",
@@ -20,7 +20,7 @@
   "pasteButtonLabel": "Pegar",
   "selectAllButtonLabel": "Seleccionar todo",
   "tabSemanticsLabel": "Pestana $tabIndex de $tabCount",
-  "modalBarrierDismissLabel": "Ignorar",
+  "modalBarrierDismissLabel": "Pechar",
   "searchTextFieldPlaceholderLabel": "Fai unha busca",
   "noSpellCheckReplacementsLabel": "Non se encontrou ningunha substitución",
   "menuDismissLabel": "Pechar menú",
@@ -29,5 +29,11 @@
   "shareButtonLabel": "Compartir…",
   "clearButtonLabel": "Borrar",
   "cancelButtonLabel": "Cancelar",
-  "backButtonLabel": "Atrás"
+  "backButtonLabel": "Atrás",
+  "expansionTileExpandedHint": "tocar dúas veces para contraer",
+  "expansionTileCollapsedHint": "tocar dúas veces para despregar",
+  "expansionTileExpandedTapHint": "Contraer",
+  "expansionTileCollapsedTapHint": "Despregar para obter máis detalles",
+  "expandedHint": "Contraído",
+  "collapsedHint": "Despregado"
 }

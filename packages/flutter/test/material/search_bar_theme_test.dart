@@ -14,12 +14,12 @@ void main() {
 
   test('SearchBarThemeData lerp special cases', () {
     expect(SearchBarThemeData.lerp(null, null, 0), null);
-    const SearchBarThemeData data = SearchBarThemeData();
+    const data = SearchBarThemeData();
     expect(identical(SearchBarThemeData.lerp(data, data, 0.5), data), true);
   });
 
   test('SearchBarThemeData defaults', () {
-    const SearchBarThemeData themeData = SearchBarThemeData();
+    const themeData = SearchBarThemeData();
     expect(themeData.elevation, null);
     expect(themeData.backgroundColor, null);
     expect(themeData.shadowColor, null);
@@ -33,7 +33,7 @@ void main() {
     expect(themeData.constraints, null);
     expect(themeData.textCapitalization, null);
 
-    const SearchBarTheme theme = SearchBarTheme(data: SearchBarThemeData(), child: SizedBox());
+    const theme = SearchBarTheme(data: SearchBarThemeData(), child: SizedBox());
     expect(theme.data.elevation, null);
     expect(theme.data.backgroundColor, null);
     expect(theme.data.shadowColor, null);
@@ -49,20 +49,19 @@ void main() {
   });
 
   testWidgets('Default SearchBarThemeData debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const SearchBarThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
 
   testWidgets('SearchBarThemeData implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const SearchBarThemeData(
       elevation: MaterialStatePropertyAll<double>(3.0),
       backgroundColor: MaterialStatePropertyAll<Color>(Color(0xfffffff1)),
@@ -78,11 +77,10 @@ void main() {
       textCapitalization: TextCapitalization.characters,
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description[0], 'elevation: WidgetStatePropertyAll(3.0)');
     expect(description[1], 'backgroundColor: WidgetStatePropertyAll(${const Color(0xfffffff1)})');
@@ -111,56 +109,50 @@ void main() {
   });
 
   group('[Theme, SearchBarTheme, SearchBar properties overrides]', () {
-    const double elevationValue = 5.0;
-    const Color backgroundColorValue = Color(0xff000001);
-    const Color shadowColorValue = Color(0xff000001);
-    const Color surfaceTintColorValue = Color(0xff000001);
-    const Color overlayColorValue = Color(0xff000001);
-    const BorderSide sideValue = BorderSide(color: Color(0xff000004), width: 2.0);
+    const elevationValue = 5.0;
+    const backgroundColorValue = Color(0xff000001);
+    const shadowColorValue = Color(0xff000001);
+    const surfaceTintColorValue = Color(0xff000001);
+    const overlayColorValue = Color(0xff000001);
+    const sideValue = BorderSide(color: Color(0xff000004), width: 2.0);
     const OutlinedBorder shapeValue = RoundedRectangleBorder(
       side: sideValue,
       borderRadius: BorderRadius.all(Radius.circular(2.0)),
     );
-    const EdgeInsets paddingValue = EdgeInsets.symmetric(horizontal: 16.0);
-    const TextStyle textStyleValue = TextStyle(color: Color(0xff000005), fontSize: 20.0);
-    const TextStyle hintStyleValue = TextStyle(color: Color(0xff000006), fontSize: 18.0);
+    const paddingValue = EdgeInsets.symmetric(horizontal: 16.0);
+    const textStyleValue = TextStyle(color: Color(0xff000005), fontSize: 20.0);
+    const hintStyleValue = TextStyle(color: Color(0xff000006), fontSize: 18.0);
 
-    const MaterialStateProperty<double?> elevation = MaterialStatePropertyAll<double>(
-      elevationValue,
-    );
-    const MaterialStateProperty<Color?> backgroundColor = MaterialStatePropertyAll<Color>(
+    const WidgetStateProperty<double?> elevation = MaterialStatePropertyAll<double>(elevationValue);
+    const WidgetStateProperty<Color?> backgroundColor = MaterialStatePropertyAll<Color>(
       backgroundColorValue,
     );
-    const MaterialStateProperty<Color?> shadowColor = MaterialStatePropertyAll<Color>(
+    const WidgetStateProperty<Color?> shadowColor = MaterialStatePropertyAll<Color>(
       shadowColorValue,
     );
-    const MaterialStateProperty<Color?> surfaceTintColor = MaterialStatePropertyAll<Color>(
+    const WidgetStateProperty<Color?> surfaceTintColor = MaterialStatePropertyAll<Color>(
       surfaceTintColorValue,
     );
-    const MaterialStateProperty<Color?> overlayColor = MaterialStatePropertyAll<Color>(
+    const WidgetStateProperty<Color?> overlayColor = MaterialStatePropertyAll<Color>(
       overlayColorValue,
     );
-    const MaterialStateProperty<BorderSide?> side = MaterialStatePropertyAll<BorderSide>(sideValue);
-    const MaterialStateProperty<OutlinedBorder?> shape = MaterialStatePropertyAll<OutlinedBorder>(
+    const WidgetStateProperty<BorderSide?> side = MaterialStatePropertyAll<BorderSide>(sideValue);
+    const WidgetStateProperty<OutlinedBorder?> shape = MaterialStatePropertyAll<OutlinedBorder>(
       shapeValue,
     );
-    const MaterialStateProperty<EdgeInsetsGeometry?> padding = MaterialStatePropertyAll<EdgeInsets>(
+    const WidgetStateProperty<EdgeInsetsGeometry?> padding = MaterialStatePropertyAll<EdgeInsets>(
       paddingValue,
     );
-    const MaterialStateProperty<TextStyle?> textStyle = MaterialStatePropertyAll<TextStyle>(
+    const WidgetStateProperty<TextStyle?> textStyle = MaterialStatePropertyAll<TextStyle>(
       textStyleValue,
     );
-    const MaterialStateProperty<TextStyle?> hintStyle = MaterialStatePropertyAll<TextStyle>(
+    const WidgetStateProperty<TextStyle?> hintStyle = MaterialStatePropertyAll<TextStyle>(
       hintStyleValue,
     );
-    const BoxConstraints constraints = BoxConstraints(
-      minWidth: 250.0,
-      maxWidth: 300.0,
-      minHeight: 80.0,
-    );
+    const constraints = BoxConstraints(minWidth: 250.0, maxWidth: 300.0, minHeight: 80.0);
     const TextCapitalization textCapitalization = TextCapitalization.words;
 
-    const SearchBarThemeData searchBarTheme = SearchBarThemeData(
+    const searchBarTheme = SearchBarThemeData(
       elevation: elevation,
       backgroundColor: backgroundColor,
       shadowColor: shadowColor,
@@ -216,10 +208,9 @@ void main() {
           body: Center(
             // If the SearchBarThemeData widget is present, it's used
             // instead of the Theme's ThemeData.searchBarTheme.
-            child:
-                searchBarThemeData == null
-                    ? child
-                    : SearchBarTheme(data: searchBarThemeData, child: child),
+            child: searchBarThemeData == null
+                ? child
+                : SearchBarTheme(data: searchBarThemeData, child: child),
           ),
         ),
       );
@@ -235,9 +226,9 @@ void main() {
       matching: find.byType(InkWell),
     );
 
-    const Set<MaterialState> hovered = <MaterialState>{MaterialState.hovered};
-    const Set<MaterialState> focused = <MaterialState>{MaterialState.focused};
-    const Set<MaterialState> pressed = <MaterialState>{MaterialState.pressed};
+    const hovered = <WidgetState>{WidgetState.hovered};
+    const focused = <WidgetState>{WidgetState.focused};
+    const pressed = <WidgetState>{WidgetState.pressed};
 
     Future<void> checkSearchBar(WidgetTester tester) async {
       final Material material = tester.widget<Material>(findMaterial);

@@ -19,7 +19,6 @@ import 'debug.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'material_state.dart';
 import 'theme.dart';
 import 'tooltip.dart';
 
@@ -605,7 +604,12 @@ class _BottomNavigationTile extends StatelessWidget {
       selected: selected,
       button: true,
       container: true,
-      child: Stack(children: <Widget>[result, Semantics(label: indexLabel)]),
+      child: Stack(
+        children: <Widget>[
+          result,
+          Semantics(label: indexLabel),
+        ],
+      ),
     );
 
     return Expanded(flex: size, child: result);
@@ -631,9 +635,9 @@ class _Tile extends StatelessWidget {
         heightFactor: 1,
         child: Row(
           mainAxisSize: MainAxisSize.min,
+          spacing: 8,
           children: <Widget>[
             icon,
-            const SizedBox(width: 8),
             // Flexible lets the overflow property of
             // label to work and IntrinsicWidth gives label a
             // reasonable width preventing extra space before it.
@@ -672,7 +676,7 @@ class _TileIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color? iconColor = colorTween.evaluate(animation);
-    final IconThemeData defaultIconTheme = IconThemeData(color: iconColor, size: iconSize);
+    final defaultIconTheme = IconThemeData(color: iconColor, size: iconSize);
     final IconThemeData iconThemeData = IconThemeData.lerp(
       defaultIconTheme.merge(unselectedIconTheme),
       defaultIconTheme.merge(selectedIconTheme),
@@ -711,8 +715,11 @@ class _Label extends StatelessWidget {
     final double? selectedFontSize = selectedLabelStyle.fontSize;
     final double? unselectedFontSize = unselectedLabelStyle.fontSize;
 
-    final TextStyle customStyle =
-        TextStyle.lerp(unselectedLabelStyle, selectedLabelStyle, animation.value)!;
+    final TextStyle customStyle = TextStyle.lerp(
+      unselectedLabelStyle,
+      selectedLabelStyle,
+      animation.value,
+    )!;
     Widget text = DefaultTextStyle.merge(
       style: customStyle.copyWith(
         fontSize: selectedFontSize,
@@ -1035,16 +1042,14 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         );
     }
 
-    final List<Widget> tiles = <Widget>[];
-    for (int i = 0; i < widget.items.length; i++) {
-      final Set<MaterialState> states = <MaterialState>{
-        if (i == widget.currentIndex) MaterialState.selected,
-      };
+    final tiles = <Widget>[];
+    for (var i = 0; i < widget.items.length; i++) {
+      final states = <WidgetState>{if (i == widget.currentIndex) WidgetState.selected};
 
       final MouseCursor effectiveMouseCursor =
-          MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
+          WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
           bottomTheme.mouseCursor?.resolve(states) ??
-          MaterialStateMouseCursor.clickable.resolve(states);
+          WidgetStateMouseCursor.clickable.resolve(states);
 
       tiles.add(
         _BottomNavigationTile(
@@ -1053,14 +1058,12 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
           _animations[i],
           widget.iconSize,
           key: widget.items[i].key,
-          selectedIconTheme:
-              widget.useLegacyColorScheme
-                  ? widget.selectedIconTheme ?? bottomTheme.selectedIconTheme
-                  : effectiveSelectedIconTheme,
-          unselectedIconTheme:
-              widget.useLegacyColorScheme
-                  ? widget.unselectedIconTheme ?? bottomTheme.unselectedIconTheme
-                  : effectiveUnselectedIconTheme,
+          selectedIconTheme: widget.useLegacyColorScheme
+              ? widget.selectedIconTheme ?? bottomTheme.selectedIconTheme
+              : effectiveSelectedIconTheme,
+          unselectedIconTheme: widget.useLegacyColorScheme
+              ? widget.unselectedIconTheme ?? bottomTheme.unselectedIconTheme
+              : effectiveUnselectedIconTheme,
           selectedLabelStyle: effectiveSelectedLabelStyle,
           unselectedLabelStyle: effectiveUnselectedLabelStyle,
           enableFeedback: widget.enableFeedback ?? bottomTheme.enableFeedback ?? true,
@@ -1167,7 +1170,7 @@ class _Bar extends StatelessWidget {
       alignedChild = Align(
         alignment: Alignment.bottomCenter,
         heightFactor: 1,
-        child: SizedBox(width: MediaQuery.sizeOf(context).height, child: child),
+        child: SizedBox(width: MediaQuery.heightOf(context), child: child),
       );
     }
     return Material(elevation: elevation, color: color, child: alignedChild);
@@ -1244,7 +1247,7 @@ class _RadialPainter extends CustomPainter {
     if (circles.length != oldPainter.circles.length) {
       return true;
     }
-    for (int i = 0; i < circles.length; i += 1) {
+    for (var i = 0; i < circles.length; i += 1) {
       if (circles[i] != oldPainter.circles[i]) {
         return true;
       }
@@ -1255,15 +1258,15 @@ class _RadialPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     for (final _Circle circle in circles) {
-      final Paint paint = Paint()..color = circle.color;
-      final Rect rect = Rect.fromLTWH(0.0, 0.0, size.width, size.height);
+      final paint = Paint()..color = circle.color;
+      final rect = Rect.fromLTWH(0.0, 0.0, size.width, size.height);
       canvas.clipRect(rect);
       final double leftFraction = switch (textDirection) {
         TextDirection.rtl => 1.0 - circle.horizontalLeadingOffset,
         TextDirection.ltr => circle.horizontalLeadingOffset,
       };
-      final Offset center = Offset(leftFraction * size.width, size.height / 2.0);
-      final Tween<double> radiusTween = Tween<double>(begin: 0.0, end: _maxRadius(center, size));
+      final center = Offset(leftFraction * size.width, size.height / 2.0);
+      final radiusTween = Tween<double>(begin: 0.0, end: _maxRadius(center, size));
       canvas.drawCircle(center, radiusTween.transform(circle.animation.value), paint);
     }
   }

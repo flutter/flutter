@@ -15,7 +15,7 @@ Future<void> main() async {
     try {
       await runPluginProjectTest((FlutterPluginProject pluginProject) async {
         section('check main plugin file exists');
-        final File pluginMainKotlinFile = File(
+        final pluginMainKotlinFile = File(
           path.join(
             pluginProject.rootPath,
             'android',
@@ -90,7 +90,8 @@ class AaaPlugin: FlutterPlugin, MethodCallHandler {
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Task exception stack trace:\n$stackTrace');
       return TaskResult.failure(e.toString());
     }
   });

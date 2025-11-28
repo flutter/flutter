@@ -33,8 +33,6 @@ source_set("fml") {
     "hash_combine.h",
     "hex_codec.cc",
     "hex_codec.h",
-    "icu_util.cc",
-    "icu_util.h",
     "log_level.h",
     "log_settings.cc",
     "log_settings.h",
@@ -101,7 +99,7 @@ source_set("fml") {
     "wakeable.h",
   ]
 
-  if (enable_backtrace) {
+  if (enable_backtrace && !is_wasm) {
     sources += [ "backtrace.cc" ]
   } else {
     sources += [ "backtrace_stub.cc" ]
@@ -113,15 +111,24 @@ source_set("fml") {
     ":string_conversion",
   ]
 
-  deps = [ "//flutter/third_party/icu" ]
+  deps = []
+  if (target_os != "wasm") {
+    deps += [ "//flutter/third_party/icu" ]
+
+    sources += [
+      "icu_util.cc",
+      "icu_util.h",
+    ]
+  }
 
   if (enable_backtrace) {
     # This abseil dependency is only used by backtrace.cc.
-    deps += [ "//flutter/third_party/abseil-cpp/absl/debugging:symbolize" ]
+    deps += [ "//third_party/abseil-cpp/absl/debugging:symbolize" ]
   }
 
-  configs += [ "//flutter/third_party/icu:icu_config" ]
-
+  if (target_os != "wasm") {
+    configs += [ "//flutter/third_party/icu:icu_config" ]
+  }
   public_configs = [
     "//flutter:config",
     "//flutter/common:flutter_config",
@@ -189,6 +196,10 @@ source_set("fml") {
     ]
   }
 
+  if (is_qnx) {
+    sources += [ "platform/qnx/paths_qnx.cc" ]
+  }
+
   if (is_fuchsia) {
     sources += [
       "platform/fuchsia/log_interest_listener.cc",
@@ -203,7 +214,7 @@ source_set("fml") {
     ]
 
     public_deps += [
-      "${fuchsia_sdk}/fidl/fuchsia.diagnostics:fuchsia.diagnostics_cpp",
+      "${fuchsia_sdk}/fidl/fuchsia.diagnostics.types:fuchsia.diagnostics.types_cpp",
       "${fuchsia_sdk}/fidl/fuchsia.logger:fuchsia.logger_cpp",
       "${fuchsia_sdk}/pkg/async-cpp",
       "${fuchsia_sdk}/pkg/async-loop-cpp",

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
@@ -57,17 +58,19 @@ class Firefox extends Browser {
   /// Starts a new instance of Firefox open to the given [url], which may be a
   /// [Uri] or a [String].
   factory Firefox(Uri url, BrowserInstallation installation, {bool debug = false}) {
-    final Completer<Uri> remoteDebuggerCompleter = Completer<Uri>.sync();
+    final remoteDebuggerCompleter = Completer<Uri>.sync();
     return Firefox._(
       BrowserProcess(() async {
         // Using a profile on opening will prevent popups related to profiles.
-        const String profile = '''
+        const profile = '''
 user_pref("browser.shell.checkDefaultBrowser", false);
 user_pref("dom.disable_open_during_load", false);
 user_pref("dom.max_script_run_time", 0);
+user_pref("trailhead.firstrun.branches", "nofirstrun-empty");
+user_pref("browser.aboutwelcome.enabled", false);
 ''';
 
-        final Directory temporaryProfileDirectory = Directory(
+        final temporaryProfileDirectory = Directory(
           path.join(environment.webUiDartToolDir.path, 'firefox_profile'),
         );
 
@@ -80,21 +83,25 @@ user_pref("dom.max_script_run_time", 0);
         temporaryProfileDirectory.createSync(recursive: true);
         File(path.join(temporaryProfileDirectory.path, 'prefs.js')).writeAsStringSync(profile);
 
-        final bool isMac = Platform.isMacOS;
-        final List<String> args = <String>[
+        final args = <String>[
           url.toString(),
           '--profile',
           temporaryProfileDirectory.path,
           if (!debug) '--headless',
           '-width $kMaxScreenshotWidth',
           '-height $kMaxScreenshotHeight',
-          // On Mac Firefox uses the -- option prefix, while elsewhere it uses the - prefix.
-          '${isMac ? '-' : ''}-new-window',
-          '${isMac ? '-' : ''}-new-instance',
+          '-new-window',
+          '-new-instance',
           '--start-debugger-server $kDevtoolsPort',
         ];
 
         final Process process = await Process.start(installation.executable, args);
+        process.stdout
+            .transform<String>(const Utf8Decoder(allowMalformed: true))
+            .listen((String string) => print('[Firefox:stdout] $string'));
+        process.stderr
+            .transform<String>(const Utf8Decoder(allowMalformed: true))
+            .listen((String string) => print('[Firefox:stderr] $string'));
 
         remoteDebuggerCompleter.complete(
           getRemoteDebuggerUrl(Uri.parse('http://localhost:$kDevtoolsPort')),

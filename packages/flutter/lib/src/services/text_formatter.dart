@@ -194,21 +194,19 @@ class _TextEditingValueAccumulator {
     final _MutableTextRange? composingRegion = this.composingRegion;
     return TextEditingValue(
       text: stringBuffer.toString(),
-      composing:
-          composingRegion == null || composingRegion.base == composingRegion.extent
-              ? TextRange.empty
-              : TextRange(start: composingRegion.base, end: composingRegion.extent),
-      selection:
-          selection == null
-              ? const TextSelection.collapsed(offset: -1)
-              : TextSelection(
-                baseOffset: selection.base,
-                extentOffset: selection.extent,
-                // Try to preserve the selection affinity and isDirectional. This
-                // may not make sense if the selection has changed.
-                affinity: inputValue.selection.affinity,
-                isDirectional: inputValue.selection.isDirectional,
-              ),
+      composing: composingRegion == null || composingRegion.base == composingRegion.extent
+          ? TextRange.empty
+          : TextRange(start: composingRegion.base, end: composingRegion.extent),
+      selection: selection == null
+          ? const TextSelection.collapsed(offset: -1)
+          : TextSelection(
+              baseOffset: selection.base,
+              extentOffset: selection.extent,
+              // Try to preserve the selection affinity and isDirectional. This
+              // may not make sense if the selection has changed.
+              affinity: inputValue.selection.affinity,
+              isDirectional: inputValue.selection.isDirectional,
+            ),
     );
   }
 }
@@ -361,12 +359,12 @@ class FilteringTextInputFormatter extends TextInputFormatter {
     TextEditingValue oldValue, // unused.
     TextEditingValue newValue,
   ) {
-    final _TextEditingValueAccumulator formatState = _TextEditingValueAccumulator(newValue);
+    final formatState = _TextEditingValueAccumulator(newValue);
     assert(!formatState.debugFinalized);
 
     final Iterable<Match> matches = filterPattern.allMatches(newValue.text);
     Match? previousMatch;
-    for (final Match match in matches) {
+    for (final match in matches) {
       assert(match.end >= match.start);
       // Compute the non-match region between this `Match` and the previous
       // `Match`. Depending on the value of `allow`, either the match region or
@@ -395,10 +393,9 @@ class FilteringTextInputFormatter extends TextInputFormatter {
     int regionEnd,
     _TextEditingValueAccumulator state,
   ) {
-    final String replacementString =
-        isBannedRegion
-            ? (regionStart == regionEnd ? '' : this.replacementString)
-            : state.inputValue.text.substring(regionStart, regionEnd);
+    final String replacementString = isBannedRegion
+        ? (regionStart == regionEnd ? '' : this.replacementString)
+        : state.inputValue.text.substring(regionStart, regionEnd);
 
     state.stringBuffer.write(replacementString);
 
@@ -410,8 +407,9 @@ class FilteringTextInputFormatter extends TextInputFormatter {
 
     int adjustIndex(int originalIndex) {
       // The length added by adding the replacementString.
-      final int replacedLength =
-          originalIndex <= regionStart && originalIndex < regionEnd ? 0 : replacementString.length;
+      final int replacedLength = originalIndex <= regionStart && originalIndex < regionEnd
+          ? 0
+          : replacementString.length;
       // The length removed by removing the replacementRange.
       final int removedLength = originalIndex.clamp(regionStart, regionEnd) - regionStart;
       return replacedLength - removedLength;
@@ -541,7 +539,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   ///  * [Dart's documentation on runes and grapheme clusters](https://dart.dev/guides/language/language-tour#runes-and-grapheme-clusters).
   @visibleForTesting
   static TextEditingValue truncate(TextEditingValue value, int maxLength) {
-    final CharacterRange iterator = CharacterRange(value.text);
+    final iterator = CharacterRange(value.text);
     if (value.text.characters.length > maxLength) {
       iterator.expandNext(maxLength);
     }
@@ -553,13 +551,12 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
         baseOffset: math.min(value.selection.start, truncated.length),
         extentOffset: math.min(value.selection.end, truncated.length),
       ),
-      composing:
-          !value.composing.isCollapsed && truncated.length > value.composing.start
-              ? TextRange(
-                start: value.composing.start,
-                end: math.min(value.composing.end, truncated.length),
-              )
-              : TextRange.empty,
+      composing: !value.composing.isCollapsed && truncated.length > value.composing.start
+          ? TextRange(
+              start: value.composing.start,
+              end: math.min(value.composing.end, truncated.length),
+            )
+          : TextRange.empty,
     );
   }
 

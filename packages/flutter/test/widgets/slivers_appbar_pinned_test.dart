@@ -7,9 +7,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void verifyPaintPosition(GlobalKey key, Offset ideal, bool visible) {
-  final RenderSliver target = key.currentContext!.findRenderObject()! as RenderSliver;
+  final target = key.currentContext!.findRenderObject()! as RenderSliver;
   expect(target.parent, isA<RenderViewport>());
-  final SliverPhysicalParentData parentData = target.parentData! as SliverPhysicalParentData;
+  final parentData = target.parentData! as SliverPhysicalParentData;
   final Offset actual = parentData.paintOffset;
   expect(actual, ideal);
   final SliverGeometry geometry = target.geometry!;
@@ -18,7 +18,7 @@ void verifyPaintPosition(GlobalKey key, Offset ideal, bool visible) {
 
 void verifyActualBoxPosition(WidgetTester tester, Finder finder, int index, Rect ideal) {
   final RenderBox box = tester.renderObjectList<RenderBox>(finder).elementAt(index);
-  final Rect rect = Rect.fromPoints(
+  final rect = Rect.fromPoints(
     box.localToGlobal(Offset.zero),
     box.localToGlobal(box.size.bottomRight(Offset.zero)),
   );
@@ -27,7 +27,7 @@ void verifyActualBoxPosition(WidgetTester tester, Finder finder, int index, Rect
 
 void main() {
   testWidgets('Sliver appbars - pinned', (WidgetTester tester) async {
-    const double bigHeight = 550.0;
+    const bigHeight = 550.0;
     GlobalKey key1, key2, key3, key4, key5;
     await tester.pumpWidget(
       Directionality(
@@ -68,7 +68,7 @@ void main() {
   testWidgets('Sliver appbars - toStringDeep of maxExtent that throws', (
     WidgetTester tester,
   ) async {
-    final TestDelegateThatCanThrow delegateThatCanThrow = TestDelegateThatCanThrow();
+    final delegateThatCanThrow = TestDelegateThatCanThrow();
     GlobalKey key;
     await tester.pumpWidget(
       Directionality(
@@ -134,7 +134,7 @@ void main() {
   });
 
   testWidgets('Sliver appbars - pinned with slow scroll', (WidgetTester tester) async {
-    const double bigHeight = 550.0;
+    const bigHeight = 550.0;
     GlobalKey key1, key2, key3, key4, key5;
     await tester.pumpWidget(
       Directionality(
@@ -247,7 +247,7 @@ void main() {
   });
 
   testWidgets('Sliver appbars - pinned with less overlap', (WidgetTester tester) async {
-    const double bigHeight = 650.0;
+    const bigHeight = 650.0;
     GlobalKey key1, key2, key3, key4, key5;
     await tester.pumpWidget(
       Directionality(
@@ -293,11 +293,7 @@ void main() {
           physics: const BouncingScrollPhysics(),
           slivers: <Widget>[
             SliverPersistentHeader(delegate: TestDelegate(), pinned: true),
-            SliverList(
-              delegate: SliverChildListDelegate(<Widget>[
-                const SizedBox(height: 300.0, child: Text('X')),
-              ]),
-            ),
+            SliverList.list(children: const <Widget>[SizedBox(height: 300.0, child: Text('X'))]),
           ],
         ),
       ),
@@ -336,7 +332,9 @@ class TestDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(constraints: BoxConstraints(minHeight: minExtent, maxHeight: maxExtent));
+    return Container(
+      constraints: BoxConstraints(minHeight: minExtent, maxHeight: maxExtent),
+    );
   }
 
   @override
@@ -358,7 +356,9 @@ class TestDelegateThatCanThrow extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(constraints: BoxConstraints(minHeight: minExtent, maxHeight: maxExtent));
+    return Container(
+      constraints: BoxConstraints(minHeight: minExtent, maxHeight: maxExtent),
+    );
   }
 
   @override

@@ -14,7 +14,7 @@ void main() {
     required FocusNode editableFocusNode,
     required FocusNode spyFocusNode,
   }) {
-    final TextEditingController controller = TextEditingController(text: 'dummy text');
+    final controller = TextEditingController(text: 'dummy text');
     addTearDown(controller.dispose);
 
     return MaterialApp(
@@ -49,9 +49,9 @@ void main() {
   }
 
   group('iOS: do not handle delete/backspace events', () {
-    final TargetPlatformVariant iOS = TargetPlatformVariant.only(TargetPlatform.iOS);
-    final FocusNode editable = FocusNode();
-    final FocusNode spy = FocusNode();
+    final iOS = TargetPlatformVariant.only(TargetPlatform.iOS);
+    final editable = FocusNode();
+    final spy = FocusNode();
 
     testWidgets('backspace with and without word modifier', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
@@ -64,9 +64,9 @@ void main() {
       await tester.pump();
       final ActionSpyState state = tester.state<ActionSpyState>(find.byType(ActionSpy));
 
-      for (int altShiftState = 0; altShiftState < 1 << 2; altShiftState += 1) {
-        final bool alt = altShiftState & 0x1 != 0;
-        final bool shift = altShiftState & 0x2 != 0;
+      for (var altShiftState = 0; altShiftState < 1 << 2; altShiftState += 1) {
+        final alt = altShiftState & 0x1 != 0;
+        final shift = altShiftState & 0x2 != 0;
         await sendKeyCombination(
           tester,
           SingleActivator(LogicalKeyboardKey.backspace, alt: alt, shift: shift),
@@ -88,9 +88,9 @@ void main() {
       await tester.pump();
       final ActionSpyState state = tester.state<ActionSpyState>(find.byType(ActionSpy));
 
-      for (int altShiftState = 0; altShiftState < 1 << 2; altShiftState += 1) {
-        final bool alt = altShiftState & 0x1 != 0;
-        final bool shift = altShiftState & 0x2 != 0;
+      for (var altShiftState = 0; altShiftState < 1 << 2; altShiftState += 1) {
+        final alt = altShiftState & 0x1 != 0;
+        final shift = altShiftState & 0x2 != 0;
         await sendKeyCombination(
           tester,
           SingleActivator(LogicalKeyboardKey.delete, alt: alt, shift: shift),
@@ -114,13 +114,14 @@ void main() {
       await tester.pump();
       final ActionSpyState state = tester.state<ActionSpyState>(find.byType(ActionSpy));
 
-      for (int keyState = 0; keyState < 1 << 2; keyState += 1) {
-        final bool shift = keyState & 0x1 != 0;
-        final LogicalKeyboardKey key =
-            keyState & 0x2 != 0 ? LogicalKeyboardKey.delete : LogicalKeyboardKey.backspace;
+      for (var keyState = 0; keyState < 1 << 2; keyState += 1) {
+        final shift = keyState & 0x1 != 0;
+        final LogicalKeyboardKey key = keyState & 0x2 != 0
+            ? LogicalKeyboardKey.delete
+            : LogicalKeyboardKey.backspace;
 
         state.lastIntent = null;
-        final SingleActivator activator = SingleActivator(key, meta: true, shift: shift);
+        final activator = SingleActivator(key, meta: true, shift: shift);
         await sendKeyCombination(tester, activator);
         await tester.pump();
         expect(state.lastIntent, isA<DeleteToLineBreakIntent>(), reason: '$activator');
@@ -129,16 +130,16 @@ void main() {
   }, skip: kIsWeb); // [intended] specific tests target non-web.
 
   group('macOS does not accept shortcuts if focus under EditableText', () {
-    final TargetPlatformVariant macOSOnly = TargetPlatformVariant.only(TargetPlatform.macOS);
+    final macOSOnly = TargetPlatformVariant.only(TargetPlatform.macOS);
 
     testWidgets('word modifier + arrowLeft', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown(() {
         tester.binding.testTextInput.register();
       });
-      final FocusNode editable = FocusNode();
+      final editable = FocusNode();
       addTearDown(editable.dispose);
-      final FocusNode spy = FocusNode();
+      final spy = FocusNode();
       addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(editableFocusNode: editable, spyFocusNode: spy),
@@ -161,9 +162,9 @@ void main() {
       addTearDown(() {
         tester.binding.testTextInput.register();
       });
-      final FocusNode editable = FocusNode();
+      final editable = FocusNode();
       addTearDown(editable.dispose);
-      final FocusNode spy = FocusNode();
+      final spy = FocusNode();
       addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(editableFocusNode: editable, spyFocusNode: spy),
@@ -186,9 +187,9 @@ void main() {
       addTearDown(() {
         tester.binding.testTextInput.register();
       });
-      final FocusNode editable = FocusNode();
+      final editable = FocusNode();
       addTearDown(editable.dispose);
-      final FocusNode spy = FocusNode();
+      final spy = FocusNode();
       addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(editableFocusNode: editable, spyFocusNode: spy),
@@ -211,9 +212,9 @@ void main() {
       addTearDown(() {
         tester.binding.testTextInput.register();
       });
-      final FocusNode editable = FocusNode();
+      final editable = FocusNode();
       addTearDown(editable.dispose);
-      final FocusNode spy = FocusNode();
+      final spy = FocusNode();
       addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(editableFocusNode: editable, spyFocusNode: spy),
@@ -236,9 +237,9 @@ void main() {
       addTearDown(() {
         tester.binding.testTextInput.register();
       });
-      final FocusNode editable = FocusNode();
+      final editable = FocusNode();
       addTearDown(editable.dispose);
-      final FocusNode spy = FocusNode();
+      final spy = FocusNode();
       addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(editableFocusNode: editable, spyFocusNode: spy),
@@ -282,9 +283,9 @@ void main() {
       addTearDown(() {
         tester.binding.testTextInput.register();
       });
-      final FocusNode editable = FocusNode();
+      final editable = FocusNode();
       addTearDown(editable.dispose);
-      final FocusNode spy = FocusNode();
+      final spy = FocusNode();
       addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(editableFocusNode: editable, spyFocusNode: spy),
@@ -324,16 +325,16 @@ void main() {
   });
 
   group('macOS does accept shortcuts if focus above EditableText', () {
-    final TargetPlatformVariant macOSOnly = TargetPlatformVariant.only(TargetPlatform.macOS);
+    final macOSOnly = TargetPlatformVariant.only(TargetPlatform.macOS);
 
     testWidgets('word modifier + arrowLeft', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown(() {
         tester.binding.testTextInput.register();
       });
-      final FocusNode editable = FocusNode();
+      final editable = FocusNode();
       addTearDown(editable.dispose);
-      final FocusNode spy = FocusNode();
+      final spy = FocusNode();
       addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(editableFocusNode: editable, spyFocusNode: spy),
@@ -356,9 +357,9 @@ void main() {
       addTearDown(() {
         tester.binding.testTextInput.register();
       });
-      final FocusNode editable = FocusNode();
+      final editable = FocusNode();
       addTearDown(editable.dispose);
-      final FocusNode spy = FocusNode();
+      final spy = FocusNode();
       addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(editableFocusNode: editable, spyFocusNode: spy),
@@ -381,9 +382,9 @@ void main() {
       addTearDown(() {
         tester.binding.testTextInput.register();
       });
-      final FocusNode editable = FocusNode();
+      final editable = FocusNode();
       addTearDown(editable.dispose);
-      final FocusNode spy = FocusNode();
+      final spy = FocusNode();
       addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(editableFocusNode: editable, spyFocusNode: spy),
@@ -406,9 +407,9 @@ void main() {
       addTearDown(() {
         tester.binding.testTextInput.register();
       });
-      final FocusNode editable = FocusNode();
+      final editable = FocusNode();
       addTearDown(editable.dispose);
-      final FocusNode spy = FocusNode();
+      final spy = FocusNode();
       addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(editableFocusNode: editable, spyFocusNode: spy),
@@ -431,9 +432,9 @@ void main() {
       addTearDown(() {
         tester.binding.testTextInput.register();
       });
-      final FocusNode editable = FocusNode();
+      final editable = FocusNode();
       addTearDown(editable.dispose);
-      final FocusNode spy = FocusNode();
+      final spy = FocusNode();
       addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(editableFocusNode: editable, spyFocusNode: spy),
@@ -479,9 +480,9 @@ void main() {
       addTearDown(() {
         tester.binding.testTextInput.register();
       });
-      final FocusNode editable = FocusNode();
+      final editable = FocusNode();
       addTearDown(editable.dispose);
-      final FocusNode spy = FocusNode();
+      final spy = FocusNode();
       addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(editableFocusNode: editable, spyFocusNode: spy),
@@ -527,9 +528,9 @@ void main() {
     testWidgets(
       'are triggered when numlock is locked',
       (WidgetTester tester) async {
-        final FocusNode editable = FocusNode();
+        final editable = FocusNode();
         addTearDown(editable.dispose);
-        final FocusNode spy = FocusNode();
+        final spy = FocusNode();
         addTearDown(spy.dispose);
 
         await tester.pumpWidget(
@@ -692,9 +693,9 @@ void main() {
     testWidgets(
       'are triggered when numlock is unlocked',
       (WidgetTester tester) async {
-        final FocusNode editable = FocusNode();
+        final editable = FocusNode();
         addTearDown(editable.dispose);
-        final FocusNode spy = FocusNode();
+        final spy = FocusNode();
         addTearDown(spy.dispose);
 
         await tester.pumpWidget(
@@ -829,9 +830,9 @@ void main() {
     testWidgets(
       'update the editable text content when triggered on non-web',
       (WidgetTester tester) async {
-        final FocusNode focusNode = FocusNode();
+        final focusNode = FocusNode();
         addTearDown(focusNode.dispose);
-        final TextEditingController controller = TextEditingController(text: 'Flutter');
+        final controller = TextEditingController(text: 'Flutter');
         addTearDown(controller.dispose);
 
         await tester.pumpWidget(
@@ -870,9 +871,9 @@ void main() {
     testWidgets(
       'do not update the editable text content when triggered on web',
       (WidgetTester tester) async {
-        final FocusNode focusNode = FocusNode();
+        final focusNode = FocusNode();
         addTearDown(focusNode.dispose);
-        final TextEditingController controller = TextEditingController(text: 'Flutter');
+        final controller = TextEditingController(text: 'Flutter');
         addTearDown(controller.dispose);
 
         await tester.pumpWidget(
@@ -912,6 +913,219 @@ void main() {
       skip: !kIsWeb, // [intended] Web only.
     );
   });
+
+  testWidgets('Home and end keys on Android and Windows', (WidgetTester tester) async {
+    final editable = FocusNode();
+    addTearDown(editable.dispose);
+    final spy = FocusNode();
+    addTearDown(spy.dispose);
+
+    await tester.pumpWidget(
+      buildSpyAboveEditableText(editableFocusNode: editable, spyFocusNode: spy),
+    );
+    spy.requestFocus();
+    await tester.pump();
+    final ActionSpyState state = tester.state<ActionSpyState>(find.byType(ActionSpy));
+
+    // Press home.
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.home));
+    switch (defaultTargetPlatform) {
+      // These platforms do nothing when home/end are pressed.
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        expect(state.lastIntent, isNull);
+
+      // These platforms go to the line start/end.
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.windows:
+        expect(state.lastIntent, isA<ExtendSelectionToLineBreakIntent>());
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).forward, false);
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).collapseSelection, true);
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).continuesAtWrap, true);
+
+      // Linux goes to the line start/end but does not wrap.
+      case TargetPlatform.linux:
+        expect(state.lastIntent, isA<ExtendSelectionToLineBreakIntent>());
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).forward, false);
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).collapseSelection, true);
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).continuesAtWrap, false);
+    }
+
+    // Press end.
+    state.lastIntent = null;
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.end));
+    switch (defaultTargetPlatform) {
+      // These platforms do nothing when home/end are pressed.
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        expect(state.lastIntent, isNull);
+
+      // These platforms go to the line start/end.
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.windows:
+        expect(state.lastIntent, isA<ExtendSelectionToLineBreakIntent>());
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).forward, true);
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).collapseSelection, true);
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).continuesAtWrap, true);
+
+      // Linux goes to the line start/end but does not wrap.
+      case TargetPlatform.linux:
+        expect(state.lastIntent, isA<ExtendSelectionToLineBreakIntent>());
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).forward, true);
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).collapseSelection, true);
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).continuesAtWrap, false);
+    }
+
+    // Press home + shift.
+    state.lastIntent = null;
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.home, shift: true));
+    switch (defaultTargetPlatform) {
+      // These platforms select to the start of the document.
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        expect(state.lastIntent, isA<ExpandSelectionToDocumentBoundaryIntent>());
+        expect((state.lastIntent! as ExpandSelectionToDocumentBoundaryIntent).forward, false);
+
+      // These platforms select to the line start.
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.windows:
+        expect(state.lastIntent, isA<ExtendSelectionToLineBreakIntent>());
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).forward, false);
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).collapseSelection, false);
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).continuesAtWrap, true);
+
+      // Linux selects to the start but does not wrap.
+      case TargetPlatform.linux:
+        expect(state.lastIntent, isA<ExtendSelectionToLineBreakIntent>());
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).forward, false);
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).collapseSelection, false);
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).continuesAtWrap, false);
+    }
+
+    // Press end + shift.
+    state.lastIntent = null;
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.end, shift: true));
+    switch (defaultTargetPlatform) {
+      // These platforms select to the end of the document.
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        expect(state.lastIntent, isA<ExpandSelectionToDocumentBoundaryIntent>());
+        expect((state.lastIntent! as ExpandSelectionToDocumentBoundaryIntent).forward, true);
+
+      // These platforms select to the line end.
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.windows:
+        expect(state.lastIntent, isA<ExtendSelectionToLineBreakIntent>());
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).forward, true);
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).collapseSelection, false);
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).continuesAtWrap, true);
+
+      // Linux selects to the end but does not wrap.
+      case TargetPlatform.linux:
+        expect(state.lastIntent, isA<ExtendSelectionToLineBreakIntent>());
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).forward, true);
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).collapseSelection, false);
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).continuesAtWrap, false);
+    }
+
+    // Press home + control.
+    state.lastIntent = null;
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.home, control: true));
+    switch (defaultTargetPlatform) {
+      // These platforms do nothing.
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        expect(state.lastIntent, isNull);
+
+      // These platforms go to the line start/end.
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(state.lastIntent, isA<ExtendSelectionToDocumentBoundaryIntent>());
+        expect((state.lastIntent! as ExtendSelectionToDocumentBoundaryIntent).forward, false);
+        expect(
+          (state.lastIntent! as ExtendSelectionToDocumentBoundaryIntent).collapseSelection,
+          true,
+        );
+    }
+
+    // Press end + control.
+    state.lastIntent = null;
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.end, control: true));
+    switch (defaultTargetPlatform) {
+      // These platforms do nothing.
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        expect(state.lastIntent, isNull);
+
+      // These platforms go to the line start/end.
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(state.lastIntent, isA<ExtendSelectionToDocumentBoundaryIntent>());
+        expect((state.lastIntent! as ExtendSelectionToDocumentBoundaryIntent).forward, true);
+        expect(
+          (state.lastIntent! as ExtendSelectionToDocumentBoundaryIntent).collapseSelection,
+          true,
+        );
+    }
+
+    // Press home + control + shift.
+    state.lastIntent = null;
+    await sendKeyCombination(
+      tester,
+      const SingleActivator(LogicalKeyboardKey.home, control: true, shift: true),
+    );
+    switch (defaultTargetPlatform) {
+      // These platforms do nothing.
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        expect(state.lastIntent, isNull);
+
+      // These platforms go to the line start/end.
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(state.lastIntent, isA<ExtendSelectionToDocumentBoundaryIntent>());
+        expect((state.lastIntent! as ExtendSelectionToDocumentBoundaryIntent).forward, false);
+        expect(
+          (state.lastIntent! as ExtendSelectionToDocumentBoundaryIntent).collapseSelection,
+          false,
+        );
+    }
+
+    // Press end + control + shift.
+    state.lastIntent = null;
+    await sendKeyCombination(
+      tester,
+      const SingleActivator(LogicalKeyboardKey.end, control: true, shift: true),
+    );
+    switch (defaultTargetPlatform) {
+      // These platforms do nothing.
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        expect(state.lastIntent, isNull);
+
+      // These platforms go to the line start/end.
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(state.lastIntent, isA<ExtendSelectionToDocumentBoundaryIntent>());
+        expect((state.lastIntent! as ExtendSelectionToDocumentBoundaryIntent).forward, true);
+        expect(
+          (state.lastIntent! as ExtendSelectionToDocumentBoundaryIntent).collapseSelection,
+          false,
+        );
+    }
+  }, variant: TargetPlatformVariant.all());
 }
 
 class ActionSpy extends StatefulWidget {

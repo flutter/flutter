@@ -7,7 +7,7 @@ by Flutter.  This is an advanced topic and not intended for beginners.
 
 In this example we are demonstrating rendering a Flutter project inside of the GUI
 library [GLFW](https://www.glfw.org/).  For more information about using the
-embedder you can read the wiki article [Custom Flutter Engine Embedders](https://github.com/flutter/flutter/wiki/Custom-Flutter-Engine-Embedders).
+embedder you can read the wiki article [Custom Flutter Engine Embedders](https://github.com/flutter/flutter/blob/main/docs/engine/Custom-Flutter-Engine-Embedders.md).
 
 The key difference between this example and the other GLFW example in this
 folder is that the present example implements dirty region management (i.e.
@@ -24,8 +24,8 @@ The example has the following dependencies:
  * [GLFW](https://www.glfw.org/) - This can be installed by running `sudo apt-get install libglfw3`
  * [CMake](https://cmake.org/) - This can be installed by running `sudo apt-get install cmake`
  * [EGL](https://docs.mesa3d.org/egl.html) - This can be installed by running  `sudo apt-get install libglfw3-dev`
- * [Flutter](https://flutter.dev/) - This can be installed from the [Flutter webpage](https://flutter.dev/docs/get-started/install)
- * [Flutter Engine](https://flutter.dev) - This can be built or downloaded, see [Custom Flutter Engine Embedders](https://github.com/flutter/flutter/wiki/Custom-Flutter-Engine-Embedders) for more information.
+ * [Flutter](https://flutter.dev/) - This can be installed from the [Flutter webpage](https://docs.flutter.dev/get-started)
+ * [Flutter Engine](https://flutter.dev) - This can be built or downloaded, see [Custom Flutter Engine Embedders](https://github.com/flutter/flutter/blob/main/docs/engine/Custom-Flutter-Engine-Embedders.md) for more information.
 
 In order to **build** and **run** the example you should be able to go into this directory and run
 `./run.sh`.

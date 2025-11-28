@@ -178,9 +178,9 @@ static void fl_texture_registrar_impl_init(FlTextureRegistrarImpl* self) {
   g_mutex_init(&self->textures_mutex);
 }
 
-G_MODULE_EXPORT gboolean fl_texture_registrar_register_texture(
-    FlTextureRegistrar* self,
-    FlTexture* texture) {
+G_MODULE_EXPORT gboolean
+fl_texture_registrar_register_texture(FlTextureRegistrar* self,
+                                      FlTexture* texture) {
   g_return_val_if_fail(FL_IS_TEXTURE_REGISTRAR(self), FALSE);
   g_return_val_if_fail(FL_IS_TEXTURE(texture), FALSE);
 
@@ -194,18 +194,18 @@ FlTexture* fl_texture_registrar_lookup_texture(FlTextureRegistrar* self,
   return FL_TEXTURE_REGISTRAR_GET_IFACE(self)->lookup_texture(self, texture_id);
 }
 
-G_MODULE_EXPORT gboolean fl_texture_registrar_mark_texture_frame_available(
-    FlTextureRegistrar* self,
-    FlTexture* texture) {
+G_MODULE_EXPORT gboolean
+fl_texture_registrar_mark_texture_frame_available(FlTextureRegistrar* self,
+                                                  FlTexture* texture) {
   g_return_val_if_fail(FL_IS_TEXTURE_REGISTRAR(self), FALSE);
 
   return FL_TEXTURE_REGISTRAR_GET_IFACE(self)->mark_texture_frame_available(
       self, texture);
 }
 
-G_MODULE_EXPORT gboolean fl_texture_registrar_unregister_texture(
-    FlTextureRegistrar* self,
-    FlTexture* texture) {
+G_MODULE_EXPORT gboolean
+fl_texture_registrar_unregister_texture(FlTextureRegistrar* self,
+                                        FlTexture* texture) {
   g_return_val_if_fail(FL_IS_TEXTURE_REGISTRAR(self), FALSE);
 
   return FL_TEXTURE_REGISTRAR_GET_IFACE(self)->unregister_texture(self,

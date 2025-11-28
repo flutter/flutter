@@ -33,6 +33,7 @@ export 'package:flutter/rendering.dart' show AxisDirection;
 //     required super.mainAxis,
 //     required super.childManager,
 //     super.cacheExtent,
+//     super.cacheExtentStyle,
 //     super.clipBehavior = Clip.hardEdge,
 //   });
 //   @override
@@ -95,6 +96,7 @@ typedef TwoDimensionalIndexedWidgetBuilder =
 ///     required super.delegate,
 ///     required super.mainAxis,
 ///     super.cacheExtent,
+///     super.cacheExtentStyle,
 ///     super.clipBehavior = Clip.hardEdge,
 ///   });
 ///
@@ -109,6 +111,7 @@ typedef TwoDimensionalIndexedWidgetBuilder =
 ///       delegate: delegate,
 ///       childManager: context as TwoDimensionalChildManager,
 ///       cacheExtent: cacheExtent,
+///       cacheExtentStyle: cacheExtentStyle,
 ///       clipBehavior: clipBehavior,
 ///     );
 ///   }
@@ -123,6 +126,7 @@ typedef TwoDimensionalIndexedWidgetBuilder =
 ///       ..mainAxis = mainAxis
 ///       ..delegate = delegate
 ///       ..cacheExtent = cacheExtent
+///       ..cacheExtentStyle = cacheExtentStyle
 ///       ..clipBehavior = clipBehavior;
 ///   }
 /// }
@@ -148,6 +152,7 @@ abstract class TwoDimensionalViewport extends RenderObjectWidget {
     required this.delegate,
     required this.mainAxis,
     this.cacheExtent,
+    this.cacheExtentStyle,
     this.clipBehavior = Clip.hardEdge,
   }) : assert(
          verticalAxisDirection == AxisDirection.down || verticalAxisDirection == AxisDirection.up,
@@ -213,6 +218,9 @@ abstract class TwoDimensionalViewport extends RenderObjectWidget {
 
   /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
   final double? cacheExtent;
+
+  /// {@macro flutter.rendering.RenderViewportBase.cacheExtentStyle}
+  final CacheExtentStyle? cacheExtentStyle;
 
   /// {@macro flutter.material.Material.clipBehavior}
   final Clip clipBehavior;
@@ -294,8 +302,8 @@ class _TwoDimensionalViewportElement extends RenderObjectElement
   }
 
   static int _compareChildren(Element a, Element b) {
-    final ChildVicinity aSlot = a.slot! as ChildVicinity;
-    final ChildVicinity bSlot = b.slot! as ChildVicinity;
+    final aSlot = a.slot! as ChildVicinity;
+    final bSlot = b.slot! as ChildVicinity;
     return aSlot.compareTo(bSlot);
   }
 
@@ -519,6 +527,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     required Axis mainAxis,
     required TwoDimensionalChildManager childManager,
     double? cacheExtent,
+    CacheExtentStyle? cacheExtentStyle,
     Clip clipBehavior = Clip.hardEdge,
   }) : assert(
          verticalAxisDirection == AxisDirection.down || verticalAxisDirection == AxisDirection.up,
@@ -537,6 +546,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
        _delegate = delegate,
        _mainAxis = mainAxis,
        _cacheExtent = cacheExtent ?? RenderAbstractViewport.defaultCacheExtent,
+       _cacheExtentStyle = cacheExtentStyle ?? CacheExtentStyle.pixel,
        _clipBehavior = clipBehavior {
     assert(() {
       _debugDanglingKeepAlives = <RenderBox>[];
@@ -673,6 +683,17 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       return;
     }
     _cacheExtent = value;
+    markNeedsLayout();
+  }
+
+  /// {@macro flutter.rendering.RenderViewportBase.cacheExtentStyle}
+  CacheExtentStyle get cacheExtentStyle => _cacheExtentStyle ?? CacheExtentStyle.viewport;
+  CacheExtentStyle? _cacheExtentStyle;
+  set cacheExtentStyle(CacheExtentStyle? value) {
+    if (value == _cacheExtentStyle) {
+      return;
+    }
+    _cacheExtentStyle = value;
     markNeedsLayout();
   }
 
@@ -871,7 +892,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    final List<DiagnosticsNode> debugChildren = <DiagnosticsNode>[
+    final debugChildren = <DiagnosticsNode>[
       ..._children.keys.map<DiagnosticsNode>((ChildVicinity vicinity) {
         return _children[vicinity]!.toDiagnosticsNode(name: vicinity.toString());
       }),
@@ -950,16 +971,16 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     rect ??= target.paintBounds;
     // `child` will be the last RenderObject before the viewport when walking
     // up from `target`.
-    RenderObject child = target;
+    var child = target;
     while (child.parent != this) {
       child = child.parent!;
     }
 
     assert(child.parent == this);
-    final RenderBox box = child as RenderBox;
+    final box = child as RenderBox;
     final Rect rectLocal = MatrixUtils.transformRect(target.getTransformTo(child), rect);
 
-    double leadingScrollOffset = offset;
+    var leadingScrollOffset = offset;
 
     // The scroll offset of `rect` within `child`.
     leadingScrollOffset += switch (axisDirection) {
@@ -1003,7 +1024,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       AxisDirection.right => targetRect.translate(offsetDifference, 0.0),
     };
 
-    final RevealedOffset revealedOffset = RevealedOffset(offset: targetOffset, rect: targetRect);
+    final revealedOffset = RevealedOffset(offset: targetOffset, rect: targetRect);
     return revealedOffset;
   }
 
@@ -1266,9 +1287,11 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   }
 
   void _cacheKeepAlives() {
-    final List<RenderBox> remainingChildren =
-        _children.values.toSet().difference(_activeChildrenForLayoutPass.values.toSet()).toList();
-    for (final RenderBox child in remainingChildren) {
+    final List<RenderBox> remainingChildren = _children.values
+        .toSet()
+        .difference(_activeChildrenForLayoutPass.values.toSet())
+        .toList();
+    for (final child in remainingChildren) {
       final TwoDimensionalViewportParentData childParentData = parentDataOf(child);
       if (childParentData.keepAlive) {
         _keepAliveBucket[childParentData.vicinity] = child;
@@ -1299,7 +1322,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
         for (int minorIndex = _leadingYIndex!; minorIndex <= _trailingYIndex!; minorIndex++) {
           // Major
           for (int majorIndex = _leadingXIndex!; majorIndex <= _trailingXIndex!; majorIndex++) {
-            final ChildVicinity vicinity = ChildVicinity(xIndex: majorIndex, yIndex: minorIndex);
+            final vicinity = ChildVicinity(xIndex: majorIndex, yIndex: minorIndex);
             previousChild =
                 _completeChildParentData(vicinity, previousChild: previousChild) ?? previousChild;
           }
@@ -1310,7 +1333,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
         for (int minorIndex = _leadingXIndex!; minorIndex <= _trailingXIndex!; minorIndex++) {
           // Major
           for (int majorIndex = _leadingYIndex!; majorIndex <= _trailingYIndex!; majorIndex++) {
-            final ChildVicinity vicinity = ChildVicinity(xIndex: minorIndex, yIndex: majorIndex);
+            final vicinity = ChildVicinity(xIndex: minorIndex, yIndex: majorIndex);
             previousChild =
                 _completeChildParentData(vicinity, previousChild: previousChild) ?? previousChild;
           }
@@ -1350,7 +1373,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   }
 
   bool _debugCheckContentDimensions() {
-    const String hint =
+    const hint =
         'Subclasses should call applyContentDimensions on the '
         'verticalOffset and horizontalOffset to set the min and max scroll offset. '
         'If the contents exceed one or both sides of the viewportDimension, '

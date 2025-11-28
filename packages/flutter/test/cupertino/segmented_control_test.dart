@@ -13,6 +13,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
@@ -25,10 +26,10 @@ RenderBox getRenderSegmentedControl(WidgetTester tester) {
 }
 
 StatefulBuilder setupSimpleSegmentedControl() {
-  final Map<int, Widget> children = <int, Widget>{};
+  final children = <int, Widget>{};
   children[0] = const Text('Child 1');
   children[1] = const Text('Child 2');
-  int sharedValue = 0;
+  var sharedValue = 0;
 
   return StatefulBuilder(
     builder: (BuildContext context, StateSetter setState) {
@@ -48,7 +49,10 @@ StatefulBuilder setupSimpleSegmentedControl() {
 }
 
 Widget boilerplate({required Widget child}) {
-  return Directionality(textDirection: TextDirection.ltr, child: Center(child: child));
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: Center(child: child),
+  );
 }
 
 int getChildCount(WidgetTester tester) {
@@ -58,7 +62,7 @@ int getChildCount(WidgetTester tester) {
       .length;
 }
 
-ui.RRect getSurroundingRect(WidgetTester tester, {int child = 0}) {
+ui.RSuperellipse getSurroundingShape(WidgetTester tester, {int child = 0}) {
   return ((getRenderSegmentedControl(tester)
                       as RenderBoxContainerDefaultsMixin<
                         RenderBox,
@@ -68,7 +72,7 @@ ui.RRect getSurroundingRect(WidgetTester tester, {int child = 0}) {
                   .parentData!
               as dynamic)
           .surroundingRect
-      as ui.RRect;
+      as ui.RSuperellipse;
 }
 
 Size getChildSize(WidgetTester tester, {int child = 0}) {
@@ -94,12 +98,12 @@ Color getBackgroundColor(WidgetTester tester, int childIndex) {
 
 void main() {
   testWidgets('Tap changes toggle state', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
+    final children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
     children[2] = const Text('Child 3');
 
-    int sharedValue = 0;
+    var sharedValue = 0;
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -166,9 +170,9 @@ void main() {
   });
 
   testWidgets('Padding works', (WidgetTester tester) async {
-    const Key key = Key('Container');
+    const key = Key('Container');
 
-    final Map<int, Widget> children = <int, Widget>{};
+    final children = <int, Widget>{};
     children[0] = const SizedBox(height: double.infinity, child: Text('Child 1'));
     children[1] = const SizedBox(height: double.infinity, child: Text('Child 2'));
 
@@ -249,7 +253,7 @@ void main() {
   testWidgets('Value attribute must be the key of one of the children widgets', (
     WidgetTester tester,
   ) async {
-    final Map<int, Widget> children = <int, Widget>{};
+    final children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
 
@@ -276,11 +280,11 @@ void main() {
   testWidgets('Widgets have correct default text/icon styles, change correctly on selection', (
     WidgetTester tester,
   ) async {
-    final Map<int, Widget> children = <int, Widget>{};
+    final children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Icon(IconData(1));
 
-    int sharedValue = 0;
+    var sharedValue = 0;
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -319,11 +323,11 @@ void main() {
   });
 
   testWidgets('Segmented controls respects themes', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
+    final children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Icon(IconData(1));
 
-    int sharedValue = 0;
+    var sharedValue = 0;
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -366,11 +370,11 @@ void main() {
   testWidgets('SegmentedControl is correct when user provides custom colors', (
     WidgetTester tester,
   ) async {
-    final Map<int, Widget> children = <int, Widget>{};
+    final children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Icon(IconData(1));
 
-    int sharedValue = 0;
+    var sharedValue = 0;
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -427,7 +431,7 @@ void main() {
   });
 
   testWidgets('Widgets are centered within segments', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
+    final children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
 
@@ -454,11 +458,11 @@ void main() {
   });
 
   testWidgets('Tap calls onValueChanged', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
+    final children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
 
-    bool value = false;
+    var value = false;
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -485,11 +489,11 @@ void main() {
   testWidgets('State does not change if onValueChanged does not call setState()', (
     WidgetTester tester,
   ) async {
-    final Map<int, Widget> children = <int, Widget>{};
+    final children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
 
-    const int sharedValue = 0;
+    const sharedValue = 0;
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -534,12 +538,12 @@ void main() {
 
   testWidgets('Children can be non-Text or Icon widgets (in this case, '
       'a Container or Placeholder widget)', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
+    final children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = Container(constraints: const BoxConstraints.tightFor(width: 50.0, height: 50.0));
     children[2] = const Placeholder();
 
-    int sharedValue = 0;
+    var sharedValue = 0;
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -572,7 +576,7 @@ void main() {
   testWidgets('Null input for value results in no child initially selected', (
     WidgetTester tester,
   ) async {
-    final Map<int, Widget> children = <int, Widget>{};
+    final children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
 
@@ -645,7 +649,7 @@ void main() {
   testWidgets('Height of segmented control is determined by tallest widget', (
     WidgetTester tester,
   ) async {
-    final Map<int, Widget> children = <int, Widget>{};
+    final children = <int, Widget>{};
     children[0] = Container(constraints: const BoxConstraints.tightFor(height: 100.0));
     children[1] = Container(constraints: const BoxConstraints.tightFor(height: 400.0));
     children[2] = Container(constraints: const BoxConstraints.tightFor(height: 200.0));
@@ -674,7 +678,7 @@ void main() {
   testWidgets('Width of each segmented control segment is determined by widest widget', (
     WidgetTester tester,
   ) async {
-    final Map<int, Widget> children = <int, Widget>{};
+    final children = <int, Widget>{};
     children[0] = Container(constraints: const BoxConstraints.tightFor(width: 50.0));
     children[1] = Container(constraints: const BoxConstraints.tightFor(width: 100.0));
     children[2] = Container(constraints: const BoxConstraints.tightFor(width: 200.0));
@@ -703,13 +707,13 @@ void main() {
 
     expect(childWidth, 200.0);
 
-    expect(childWidth, getSurroundingRect(tester).width);
-    expect(childWidth, getSurroundingRect(tester, child: 1).width);
-    expect(childWidth, getSurroundingRect(tester, child: 2).width);
+    expect(childWidth, getSurroundingShape(tester).width);
+    expect(childWidth, getSurroundingShape(tester, child: 1).width);
+    expect(childWidth, getSurroundingShape(tester, child: 2).width);
   });
 
   testWidgets('Width is finite in unbounded space', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
+    final children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
 
@@ -741,7 +745,7 @@ void main() {
   testWidgets('Directionality test - RTL should reverse order of widgets', (
     WidgetTester tester,
   ) async {
-    final Map<int, Widget> children = <int, Widget>{};
+    final children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
 
@@ -764,11 +768,11 @@ void main() {
   });
 
   testWidgets('Correct initial selection and toggling behavior - RTL', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
+    final children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
 
-    int sharedValue = 0;
+    var sharedValue = 0;
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -807,12 +811,12 @@ void main() {
   });
 
   testWidgets('Segmented control semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
-    final Map<int, Widget> children = <int, Widget>{};
+    final children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
-    int sharedValue = 0;
+    var sharedValue = 0;
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -841,24 +845,31 @@ void main() {
         TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics.rootChild(
-              label: 'Child 1',
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isButton,
-                SemanticsFlag.isInMutuallyExclusiveGroup,
-                SemanticsFlag.hasSelectedState,
-                SemanticsFlag.isSelected,
+              role: SemanticsRole.radioGroup,
+              children: <TestSemantics>[
+                TestSemantics(
+                  label: 'Child 1',
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isButton,
+                    SemanticsFlag.isInMutuallyExclusiveGroup,
+                    SemanticsFlag.hasSelectedState,
+                    SemanticsFlag.isSelected,
+                    SemanticsFlag.isFocusable,
+                  ],
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                ),
+                TestSemantics(
+                  label: 'Child 2',
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isButton,
+                    SemanticsFlag.isInMutuallyExclusiveGroup,
+                    // Declares that it is selectable, but not currently selected.
+                    SemanticsFlag.hasSelectedState,
+                    SemanticsFlag.isFocusable,
+                  ],
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                ),
               ],
-              actions: <SemanticsAction>[SemanticsAction.tap],
-            ),
-            TestSemantics.rootChild(
-              label: 'Child 2',
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isButton,
-                SemanticsFlag.isInMutuallyExclusiveGroup,
-                // Declares that it is selectable, but not currently selected.
-                SemanticsFlag.hasSelectedState,
-              ],
-              actions: <SemanticsAction>[SemanticsAction.tap],
             ),
           ],
         ),
@@ -877,24 +888,32 @@ void main() {
         TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics.rootChild(
-              label: 'Child 1',
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isButton,
-                SemanticsFlag.isInMutuallyExclusiveGroup,
-                // Declares that it is selectable, but not currently selected.
-                SemanticsFlag.hasSelectedState,
+              role: SemanticsRole.radioGroup,
+              children: <TestSemantics>[
+                TestSemantics(
+                  label: 'Child 1',
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isButton,
+                    SemanticsFlag.isInMutuallyExclusiveGroup,
+                    // Declares that it is selectable, but not currently selected.
+                    SemanticsFlag.hasSelectedState,
+                    SemanticsFlag.isFocusable,
+                  ],
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                ),
+                TestSemantics(
+                  label: 'Child 2',
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isButton,
+                    SemanticsFlag.isInMutuallyExclusiveGroup,
+                    SemanticsFlag.hasSelectedState,
+                    SemanticsFlag.isSelected,
+                    SemanticsFlag.isFocusable,
+                    SemanticsFlag.isFocused,
+                  ],
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                ),
               ],
-              actions: <SemanticsAction>[SemanticsAction.tap],
-            ),
-            TestSemantics.rootChild(
-              label: 'Child 2',
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isButton,
-                SemanticsFlag.isInMutuallyExclusiveGroup,
-                SemanticsFlag.hasSelectedState,
-                SemanticsFlag.isSelected,
-              ],
-              actions: <SemanticsAction>[SemanticsAction.tap],
             ),
           ],
         ),
@@ -908,11 +927,11 @@ void main() {
   });
 
   testWidgets('Non-centered taps work on smaller widgets', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
+    final children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
 
-    int sharedValue = 1;
+    var sharedValue = 1;
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -947,7 +966,7 @@ void main() {
   });
 
   testWidgets('Hit-tests report accurate local position in segments', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
+    final children = <int, Widget>{};
     late TapDownDetails tapDownDetails;
     children[0] = GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -958,7 +977,7 @@ void main() {
     );
     children[1] = const Text('Child 2');
 
-    int sharedValue = 1;
+    var sharedValue = 1;
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -992,10 +1011,10 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/57326.
-    final Map<int, Widget> children = <int, Widget>{};
+    final children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const SizedBox();
-    int sharedValue = 0;
+    var sharedValue = 0;
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -1059,10 +1078,10 @@ void main() {
   });
 
   testWidgets('Animation is correct when widget is rebuilt', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
+    final children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
-    int sharedValue = 0;
+    var sharedValue = 0;
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -1211,11 +1230,11 @@ void main() {
   });
 
   testWidgets('Multiple segments are pressed', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
+    final children = <int, Widget>{};
     children[0] = const Text('A');
     children[1] = const Text('B');
     children[2] = const Text('C');
-    int sharedValue = 0;
+    var sharedValue = 0;
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -1260,11 +1279,11 @@ void main() {
   testWidgets('Transition is triggered while a transition is already occurring', (
     WidgetTester tester,
   ) async {
-    final Map<int, Widget> children = <int, Widget>{};
+    final children = <int, Widget>{};
     children[0] = const Text('A');
     children[1] = const Text('B');
     children[2] = const Text('C');
-    int sharedValue = 0;
+    var sharedValue = 0;
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -1352,11 +1371,11 @@ void main() {
   });
 
   testWidgets('Add segment while animation is running', (WidgetTester tester) async {
-    Map<int, Widget> children = <int, Widget>{};
+    var children = <int, Widget>{};
     children[0] = const Text('A');
     children[1] = const Text('B');
     children[2] = const Text('C');
-    int sharedValue = 0;
+    var sharedValue = 0;
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -1370,7 +1389,7 @@ void main() {
                   sharedValue = newValue;
                 });
                 if (sharedValue == 1) {
-                  children = Map<int, Widget>.from(children);
+                  children = Map<int, Widget>.of(children);
                   children[3] = const Text('D');
                 }
               },
@@ -1400,11 +1419,11 @@ void main() {
   });
 
   testWidgets('Remove segment while animation is running', (WidgetTester tester) async {
-    Map<int, Widget> children = <int, Widget>{};
+    var children = <int, Widget>{};
     children[0] = const Text('A');
     children[1] = const Text('B');
     children[2] = const Text('C');
-    int sharedValue = 0;
+    var sharedValue = 0;
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -1419,7 +1438,7 @@ void main() {
                 });
                 if (sharedValue == 1) {
                   children.remove(2);
-                  children = Map<int, Widget>.from(children);
+                  children = Map<int, Widget>.of(children);
                 }
               },
               groupValue: sharedValue,
@@ -1445,7 +1464,7 @@ void main() {
   });
 
   testWidgets('Remove currently animating segment', (WidgetTester tester) async {
-    Map<int, Widget> children = <int, Widget>{};
+    var children = <int, Widget>{};
     children[0] = const Text('A');
     children[1] = const Text('B');
     children[2] = const Text('C');
@@ -1464,7 +1483,7 @@ void main() {
                 });
                 if (sharedValue == 1) {
                   children.remove(1);
-                  children = Map<int, Widget>.from(children);
+                  children = Map<int, Widget>.of(children);
                   sharedValue = null;
                 }
               },
@@ -1497,8 +1516,8 @@ void main() {
 
   // Regression test: https://github.com/flutter/flutter/issues/43414.
   testWidgets("Quick double tap doesn't break the internal state", (WidgetTester tester) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('B'), 2: Text('C')};
-    int sharedValue = 0;
+    const children = <int, Widget>{0: Text('A'), 1: Text('B'), 2: Text('C')};
+    var sharedValue = 0;
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -1535,12 +1554,12 @@ void main() {
   });
 
   testWidgets('Golden Test Placeholder Widget', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
+    final children = <int, Widget>{};
     children[0] = Container();
     children[1] = const Placeholder();
     children[2] = Container();
 
-    const int currentValue = 0;
+    const currentValue = 0;
 
     await tester.pumpWidget(
       RepaintBoundary(
@@ -1569,12 +1588,12 @@ void main() {
   });
 
   testWidgets('Golden Test Pressed State', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
+    final children = <int, Widget>{};
     children[0] = const Text('A');
     children[1] = const Text('B');
     children[2] = const Text('C');
 
-    const int currentValue = 0;
+    const currentValue = 0;
 
     await tester.pumpWidget(
       RepaintBoundary(
@@ -1613,12 +1632,12 @@ void main() {
   testWidgets('Hovering over Cupertino segmented control updates cursor to clickable on Web', (
     WidgetTester tester,
   ) async {
-    final Map<int, Widget> children = <int, Widget>{};
+    final children = <int, Widget>{};
     children[0] = const Text('A');
     children[1] = const Text('B');
     children[2] = const Text('C');
 
-    const int currentValue = 0;
+    const currentValue = 0;
 
     await tester.pumpWidget(
       RepaintBoundary(
@@ -1661,15 +1680,15 @@ void main() {
   });
 
   testWidgets('Tap on disabled segment should not change its state', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{
+    final children = <int, Widget>{
       0: const Text('Child 1'),
       1: const Text('Child 2'),
       2: const Text('Child 3'),
     };
 
-    final Set<int> disabledChildren = <int>{1};
+    final disabledChildren = <int>{1};
 
-    int sharedValue = 0;
+    var sharedValue = 0;
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -1702,11 +1721,8 @@ void main() {
   testWidgets('Background color of disabled segment should be different than enabled segment', (
     WidgetTester tester,
   ) async {
-    final Map<int, Widget> children = <int, Widget>{
-      0: const Text('Child 1'),
-      1: const Text('Child 2'),
-    };
-    int sharedValue = 0;
+    final children = <int, Widget>{0: const Text('Child 1'), 1: const Text('Child 2')};
+    var sharedValue = 0;
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -1756,7 +1772,7 @@ void main() {
   testWidgets('Custom disabled color of disabled segment is showing as desired', (
     WidgetTester tester,
   ) async {
-    final Map<int, Widget> children = <int, Widget>{
+    final children = <int, Widget>{
       0: const Text('Child 1'),
       1: const Text('Child 2'),
       2: const Text('Child 3'),
@@ -1778,5 +1794,103 @@ void main() {
     );
 
     expect(getBackgroundColor(tester, 0), isSameColorAs(CupertinoColors.systemGrey2));
+  });
+
+  testWidgets('Segmented control can use arrow keys', (WidgetTester tester) async {
+    final children = <int, Widget>{};
+    children[0] = const Text('Child 1');
+    children[1] = const Text('Child 2');
+    children[2] = const Text('Child 3');
+
+    var sharedValue = 0;
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return boilerplate(
+            child: CupertinoSegmentedControl<int>(
+              children: children,
+              onValueChanged: (int newValue) {
+                setState(() {
+                  sharedValue = newValue;
+                });
+              },
+              groupValue: sharedValue,
+            ),
+          );
+        },
+      ),
+    );
+
+    expect(sharedValue, 0);
+
+    await tester.tap(find.text('Child 1'));
+    await tester.pumpAndSettle();
+    expect(sharedValue, 0);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(sharedValue, 1);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    expect(sharedValue, 2);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(sharedValue, 0);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(sharedValue, 2);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pumpAndSettle();
+    expect(sharedValue, 1);
+  });
+
+  testWidgets('Segmented control skips disabled segments with keyboard', (
+    WidgetTester tester,
+  ) async {
+    final children = <int, Widget>{};
+    children[0] = const Text('Child 1');
+    children[1] = const Text('Child 2');
+    children[2] = const Text('Child 3');
+
+    var sharedValue = 0;
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return boilerplate(
+            child: CupertinoSegmentedControl<int>(
+              children: children,
+              onValueChanged: (int newValue) {
+                setState(() {
+                  sharedValue = newValue;
+                });
+              },
+              groupValue: sharedValue,
+              disabledChildren: const <int>{1},
+            ),
+          );
+        },
+      ),
+    );
+
+    expect(sharedValue, 0);
+
+    await tester.tap(find.text('Child 1'));
+    await tester.pumpAndSettle();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(sharedValue, 2);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(sharedValue, 0);
   });
 }

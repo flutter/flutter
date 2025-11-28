@@ -58,7 +58,7 @@ class ImageGeneratorRegistry {
   std::shared_ptr<ImageGenerator> CreateCompatibleGenerator(
       const sk_sp<SkData>& buffer);
 
-  fml::WeakPtr<ImageGeneratorRegistry> GetWeakPtr() const;
+  fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry> GetWeakPtr() const;
 
  private:
   struct PrioritizedFactory {
@@ -85,7 +85,7 @@ class ImageGeneratorRegistry {
   using FactorySet = std::set<PrioritizedFactory, Compare>;
   FactorySet image_generator_factories_;
   size_t nonce_;
-  fml::WeakPtrFactory<ImageGeneratorRegistry> weak_factory_;
+  fml::TaskRunnerAffineWeakPtrFactory<ImageGeneratorRegistry> weak_factory_;
 };
 
 }  // namespace flutter

@@ -18,7 +18,8 @@ void main() {
 class FlexibleRouteTransitionsApp extends StatelessWidget {
   FlexibleRouteTransitionsApp({super.key});
 
-  final _MyRouteInformationParser _routeInformationParser = _MyRouteInformationParser();
+  final _MyRouteInformationParser _routeInformationParser =
+      _MyRouteInformationParser();
   final MyRouterDelegate _routerDelegate = MyRouterDelegate();
 
   @override
@@ -43,11 +44,16 @@ class FlexibleRouteTransitionsApp extends StatelessWidget {
   }
 }
 
-class _MyRouteInformationParser extends RouteInformationParser<MyPageConfiguration> {
+class _MyRouteInformationParser
+    extends RouteInformationParser<MyPageConfiguration> {
   @override
-  SynchronousFuture<MyPageConfiguration> parseRouteInformation(RouteInformation routeInformation) {
+  SynchronousFuture<MyPageConfiguration> parseRouteInformation(
+    RouteInformation routeInformation,
+  ) {
     return SynchronousFuture<MyPageConfiguration>(
-      MyPageConfiguration.values.firstWhere((MyPageConfiguration pageConfiguration) {
+      MyPageConfiguration.values.firstWhere((
+        MyPageConfiguration pageConfiguration,
+      ) {
         return pageConfiguration.uriString == routeInformation.uri.toString();
       }, orElse: () => MyPageConfiguration.unknown),
     );
@@ -124,18 +130,21 @@ class MyRouterDelegate extends RouterDelegate<MyPageConfiguration> {
       onDidRemovePage: (Page<dynamic> page) {
         _pages.remove(MyPageConfiguration.fromName(page.name!));
       },
-      pages:
-          _pages
-              .map(
-                (MyPageConfiguration page) => switch (page) {
-                  MyPageConfiguration.unknown => _MyUnknownPage<void>(),
-                  MyPageConfiguration.home => _MyHomePage<void>(routerDelegate: this),
-                  MyPageConfiguration.zoom => _ZoomPage<void>(routerDelegate: this),
-                  MyPageConfiguration.iOS => _IOSPage<void>(routerDelegate: this),
-                  MyPageConfiguration.vertical => _VerticalPage<void>(routerDelegate: this),
-                },
-              )
-              .toList(),
+      pages: _pages
+          .map(
+            (MyPageConfiguration page) => switch (page) {
+              MyPageConfiguration.unknown => _MyUnknownPage<void>(),
+              MyPageConfiguration.home => _MyHomePage<void>(
+                routerDelegate: this,
+              ),
+              MyPageConfiguration.zoom => _ZoomPage<void>(routerDelegate: this),
+              MyPageConfiguration.iOS => _IOSPage<void>(routerDelegate: this),
+              MyPageConfiguration.vertical => _VerticalPage<void>(
+                routerDelegate: this,
+              ),
+            },
+          )
+          .toList(),
     );
   }
 }
@@ -171,7 +180,10 @@ class _ZoomPage<T> extends MaterialPage<T> {
   _ZoomPage({required this.routerDelegate})
     : super(
         restorationId: 'zoom-page',
-        child: _MyPageScaffold(title: 'Zoom Route', routerDelegate: routerDelegate),
+        child: _MyPageScaffold(
+          title: 'Zoom Route',
+          routerDelegate: routerDelegate,
+        ),
       );
 
   final MyRouterDelegate routerDelegate;
@@ -184,7 +196,10 @@ class _IOSPage<T> extends CupertinoPage<T> {
   _IOSPage({required this.routerDelegate})
     : super(
         restorationId: 'ios-page',
-        child: _MyPageScaffold(title: 'Cupertino Route', routerDelegate: routerDelegate),
+        child: _MyPageScaffold(
+          title: 'Cupertino Route',
+          routerDelegate: routerDelegate,
+        ),
       );
 
   final MyRouterDelegate routerDelegate;
@@ -197,7 +212,10 @@ class _VerticalPage<T> extends _VerticalTransitionPage<T> {
   _VerticalPage({required this.routerDelegate})
     : super(
         restorationId: 'vertical-page',
-        child: _MyPageScaffold(title: 'Vertical Route', routerDelegate: routerDelegate),
+        child: _MyPageScaffold(
+          title: 'Vertical Route',
+          routerDelegate: routerDelegate,
+        ),
       );
 
   final MyRouterDelegate routerDelegate;
@@ -279,10 +297,13 @@ class _VerticalTransitionPage<T> extends Page<T> {
 }
 
 class _PageBasedVerticalPageRoute<T> extends PageRoute<T> {
-  _PageBasedVerticalPageRoute({required _VerticalTransitionPage<T> page, super.allowSnapshotting})
-    : super(settings: page);
+  _PageBasedVerticalPageRoute({
+    required _VerticalTransitionPage<T> page,
+    super.allowSnapshotting,
+  }) : super(settings: page);
 
-  _VerticalTransitionPage<T> get _page => settings as _VerticalTransitionPage<T>;
+  _VerticalTransitionPage<T> get _page =>
+      settings as _VerticalTransitionPage<T>;
 
   @override
   bool get maintainState => _page.maintainState;
@@ -389,7 +410,10 @@ class _VerticalPageTransition extends StatelessWidget {
       end: const Offset(0.0, -1.0),
     ).chain(CurveTween(curve: _curve));
 
-    return SlideTransition(position: secondaryAnimation.drive(tween), child: child);
+    return SlideTransition(
+      position: secondaryAnimation.drive(tween),
+      child: child,
+    );
   }
 
   @override
@@ -424,7 +448,9 @@ enum MyPageConfiguration {
   final String uriString;
 
   static MyPageConfiguration fromName(String testName) {
-    return values.firstWhere((MyPageConfiguration page) => page.name == testName);
+    return values.firstWhere(
+      (MyPageConfiguration page) => page.name == testName,
+    );
   }
 
   Uri get uri => Uri.parse(uriString);

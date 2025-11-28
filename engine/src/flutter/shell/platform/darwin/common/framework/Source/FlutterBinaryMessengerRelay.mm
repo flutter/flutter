@@ -4,7 +4,7 @@
 
 #import "flutter/shell/platform/darwin/common/framework/Source/FlutterBinaryMessengerRelay.h"
 
-#include "flutter/fml/logging.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 
 FLUTTER_ASSERT_ARC
 
@@ -23,7 +23,7 @@ FLUTTER_ASSERT_ARC
   if (self.parent) {
     [self.parent sendOnChannel:channel message:message binaryReply:nil];
   } else {
-    FML_LOG(WARNING) << "Communicating on a dead channel.";
+    [FlutterLogger logWarning:@"Communicating on a dead channel."];
   }
 }
 
@@ -33,7 +33,7 @@ FLUTTER_ASSERT_ARC
   if (self.parent) {
     [self.parent sendOnChannel:channel message:message binaryReply:callback];
   } else {
-    FML_LOG(WARNING) << "Communicating on a dead channel.";
+    [FlutterLogger logWarning:@"Communicating on a dead channel."];
   }
 }
 
@@ -51,7 +51,7 @@ FLUTTER_ASSERT_ARC
   if (self.parent) {
     return [self.parent setMessageHandlerOnChannel:channel binaryMessageHandler:handler];
   } else {
-    FML_LOG(WARNING) << "Communicating on a dead channel.";
+    [FlutterLogger logWarning:@"Communicating on a dead channel."];
     return -1;
   }
 }
@@ -65,7 +65,7 @@ FLUTTER_ASSERT_ARC
                               binaryMessageHandler:handler
                                          taskQueue:taskQueue];
   } else {
-    FML_LOG(WARNING) << "Communicating on a dead channel.";
+    [FlutterLogger logWarning:@"Communicating on a dead channel."];
     return -1;
   }
 }
@@ -74,7 +74,7 @@ FLUTTER_ASSERT_ARC
   if (self.parent) {
     return [self.parent cleanUpConnection:connection];
   } else {
-    FML_LOG(WARNING) << "Communicating on a dead channel.";
+    [FlutterLogger logWarning:@"Communicating on a dead channel."];
   }
 }
 

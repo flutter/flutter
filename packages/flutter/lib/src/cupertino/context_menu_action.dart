@@ -135,13 +135,11 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
   }
 
   Color get effectiveFocusBackgroundColor =>
-      HSLColor.fromColor(
-        (widget.focusColor ?? CupertinoColors.activeBlue).withOpacity(
-          CupertinoTheme.brightnessOf(context) == Brightness.light
-              ? kCupertinoButtonTintedOpacityLight
-              : kCupertinoButtonTintedOpacityDark,
-        ),
-      ).toColor();
+      (widget.focusColor ?? CupertinoColors.activeBlue).withValues(
+        alpha: CupertinoTheme.brightnessOf(context) == Brightness.light
+            ? kCupertinoButtonTintedOpacityLight
+            : kCupertinoButtonTintedOpacityDark,
+      );
 
   @override
   Widget build(BuildContext context) {

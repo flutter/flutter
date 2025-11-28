@@ -41,7 +41,7 @@ Future<BrowserInstallation> getEdgeInstallation(
     // Since Edge is included in Windows, always assume there will be one on the
     // system.
     infoLog.writeln('Using the system version that is already installed.');
-    final EdgeLauncher edgeLauncher = EdgeLauncher();
+    final edgeLauncher = EdgeLauncher();
     if (edgeLauncher.isInstalled) {
       infoLog.writeln('Launcher installation was skipped, already installed.');
     } else {
@@ -52,13 +52,12 @@ Future<BrowserInstallation> getEdgeInstallation(
 
     return BrowserInstallation(
       version: 'system',
-      executable:
-          io.Directory(
-            path.join(
-              edgeLauncher.launcherInstallationDir.path,
-              PlatformBinding.instance.getCommandToRunEdge(),
-            ),
-          ).path,
+      executable: io.Directory(
+        path.join(
+          edgeLauncher.launcherInstallationDir.path,
+          PlatformBinding.instance.getCommandToRunEdge(),
+        ),
+      ).path,
     );
   } else {
     infoLog.writeln('Unsupported version $requestedVersion.');
@@ -105,7 +104,7 @@ class EdgeLauncher {
       launcherInstallationDir.createSync(recursive: true);
     }
 
-    final Client client = Client();
+    final client = Client();
 
     try {
       // Download executable from Github.

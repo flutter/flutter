@@ -13,13 +13,15 @@
 @Tags(<String>['reduced-test-set', 'no-shuffle'])
 library;
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final ThemeData theme = ThemeData();
+  final theme = ThemeData();
 
   // The "can be constructed" tests that follow are primarily to ensure that any
   // animations started by the progress indicators are stopped at dispose() time.
@@ -169,8 +171,8 @@ void main() {
     expect(
       find.byType(LinearProgressIndicator),
       paints
-        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 4.0))
-        ..rect(rect: Rect.fromLTRB(0.0, 0.0, animationValue * 200.0, 4.0)),
+        ..rect(rect: Rect.fromLTRB(animationValue * 200.0, 0.0, 200.0, 4.0)) // Track
+        ..rect(rect: Rect.fromLTRB(0.0, 0.0, animationValue * 200.0, 4.0)), // Active indicator
     );
 
     expect(tester.binding.transientCallbackCount, 1);
@@ -197,7 +199,7 @@ void main() {
     expect(
       find.byType(LinearProgressIndicator),
       paints
-        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 4.0))
+        ..rect(rect: Rect.fromLTRB(0.0, 0.0, 200.0 - animationValue * 200.0, 4.0))
         ..rect(rect: Rect.fromLTRB(200.0 - animationValue * 200.0, 0.0, 200.0, 4.0)),
     );
 
@@ -280,7 +282,7 @@ void main() {
     );
 
     // With no color provided
-    const Color primaryColor = Color(0xff008800);
+    const primaryColor = Color(0xff008800);
     await tester.pumpWidget(
       Theme(
         data: theme.copyWith(colorScheme: ColorScheme.fromSwatch().copyWith(primary: primaryColor)),
@@ -305,7 +307,7 @@ void main() {
     );
 
     // With ProgressIndicatorTheme colors
-    const Color indicatorColor = Color(0xff0000ff);
+    const indicatorColor = Color(0xff0000ff);
     await tester.pumpWidget(
       Theme(
         data: theme.copyWith(
@@ -387,7 +389,10 @@ void main() {
     (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
-        Theme(data: theme, child: const Center(child: CircularProgressIndicator())),
+        Theme(
+          data: theme,
+          child: const Center(child: CircularProgressIndicator()),
+        ),
       );
 
       expect(tester.getSemantics(find.byType(CircularProgressIndicator)), matchesSemantics());
@@ -564,10 +569,30 @@ void main() {
     expect(tester.binding.transientCallbackCount, 0);
   });
 
+  testWidgets('LinearProgressIndicator reflects controller value', (WidgetTester tester) async {
+    final controller = AnimationController(vsync: tester, value: 0.5);
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SizedBox(width: 200, child: LinearProgressIndicator(controller: controller)),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints..rect(rect: const Rect.fromLTRB(127.79541015625, 0.0, 200.0, 4.0)),
+    );
+  });
+
   testWidgets('CircularProgressIndicator paint colors', (WidgetTester tester) async {
-    const Color green = Color(0xFF00FF00);
-    const Color blue = Color(0xFF0000FF);
-    const Color red = Color(0xFFFF0000);
+    const green = Color(0xFF00FF00);
+    const blue = Color(0xFF0000FF);
+    const red = Color(0xFFFF0000);
 
     // With valueColor & color provided
     await tester.pumpWidget(
@@ -583,7 +608,12 @@ void main() {
     expect(find.byType(CircularProgressIndicator), paints..arc(color: blue));
 
     // With just color provided
-    await tester.pumpWidget(Theme(data: theme, child: const CircularProgressIndicator(color: red)));
+    await tester.pumpWidget(
+      Theme(
+        data: theme,
+        child: const CircularProgressIndicator(color: red),
+      ),
+    );
     expect(find.byType(CircularProgressIndicator), paintsExactlyCountTimes(#drawArc, 1));
     expect(find.byType(CircularProgressIndicator), paints..arc(color: red));
 
@@ -634,9 +664,9 @@ void main() {
   });
 
   testWidgets('RefreshProgressIndicator paint colors', (WidgetTester tester) async {
-    const Color green = Color(0xFF00FF00);
-    const Color blue = Color(0xFF0000FF);
-    const Color red = Color(0xFFFF0000);
+    const green = Color(0xFF00FF00);
+    const blue = Color(0xFF0000FF);
+    const red = Color(0xFFFF0000);
 
     // With valueColor & color provided
     await tester.pumpWidget(
@@ -652,7 +682,12 @@ void main() {
     expect(find.byType(RefreshProgressIndicator), paints..arc(color: blue));
 
     // With just color provided
-    await tester.pumpWidget(Theme(data: theme, child: const RefreshProgressIndicator(color: red)));
+    await tester.pumpWidget(
+      Theme(
+        data: theme,
+        child: const RefreshProgressIndicator(color: red),
+      ),
+    );
     expect(find.byType(RefreshProgressIndicator), paintsExactlyCountTimes(#drawArc, 1));
     expect(find.byType(RefreshProgressIndicator), paints..arc(color: red));
 
@@ -757,9 +792,7 @@ void main() {
   testWidgets('Material2 - RefreshProgressIndicator uses expected animation', (
     WidgetTester tester,
   ) async {
-    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(
-      frameSize: const Size(50, 50),
-    );
+    final animationSheet = AnimationSheetBuilder(frameSize: const Size(50, 50));
     addTearDown(animationSheet.dispose);
 
     await tester.pumpFrames(
@@ -778,9 +811,7 @@ void main() {
   testWidgets('Material3 - RefreshProgressIndicator uses expected animation', (
     WidgetTester tester,
   ) async {
-    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(
-      frameSize: const Size(50, 50),
-    );
+    final animationSheet = AnimationSheetBuilder(frameSize: const Size(50, 50));
     addTearDown(animationSheet.dispose);
 
     await tester.pumpFrames(
@@ -904,8 +935,8 @@ void main() {
   testWidgets('LinearProgressIndicator can be made accessible', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     final GlobalKey key = GlobalKey();
-    const String label = 'Label';
-    const String value = '25%';
+    const label = 'Label';
+    const value = '25%';
     await tester.pumpWidget(
       Theme(
         data: theme,
@@ -934,7 +965,7 @@ void main() {
   ) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     final GlobalKey key = GlobalKey();
-    const String label = 'Label';
+    const label = 'Label';
     await tester.pumpWidget(
       Theme(
         data: theme,
@@ -979,7 +1010,7 @@ void main() {
   ) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     final GlobalKey key = GlobalKey();
-    const String label = 'Progress';
+    const label = 'Progress';
     await tester.pumpWidget(
       Theme(
         data: theme,
@@ -1001,8 +1032,8 @@ void main() {
   testWidgets('CircularProgressIndicator can be made accessible', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     final GlobalKey key = GlobalKey();
-    const String label = 'Label';
-    const String value = '25%';
+    const label = 'Label';
+    const value = '25%';
     await tester.pumpWidget(
       Theme(
         data: theme,
@@ -1029,8 +1060,8 @@ void main() {
   testWidgets('RefreshProgressIndicator can be made accessible', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     final GlobalKey key = GlobalKey();
-    const String label = 'Label';
-    const String value = '25%';
+    const label = 'Label';
+    const value = '25%';
     await tester.pumpWidget(
       Theme(
         data: theme,
@@ -1052,9 +1083,7 @@ void main() {
   testWidgets('Material2 - Indeterminate CircularProgressIndicator uses expected animation', (
     WidgetTester tester,
   ) async {
-    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(
-      frameSize: const Size(40, 40),
-    );
+    final animationSheet = AnimationSheetBuilder(frameSize: const Size(40, 40));
     addTearDown(animationSheet.dispose);
 
     await tester.pumpFrames(
@@ -1079,9 +1108,7 @@ void main() {
   testWidgets('Material3 - Indeterminate CircularProgressIndicator uses expected animation', (
     WidgetTester tester,
   ) async {
-    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(
-      frameSize: const Size(40, 40),
-    );
+    final animationSheet = AnimationSheetBuilder(frameSize: const Size(40, 40));
     addTearDown(animationSheet.dispose);
 
     await tester.pumpFrames(
@@ -1134,10 +1161,9 @@ void main() {
       );
 
       expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
-      final double actualProgress =
-          tester
-              .widget<CupertinoActivityIndicator>(find.byType(CupertinoActivityIndicator))
-              .progress;
+      final double actualProgress = tester
+          .widget<CupertinoActivityIndicator>(find.byType(CupertinoActivityIndicator))
+          .progress;
       expect(actualProgress, 0.5);
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{
@@ -1149,13 +1175,12 @@ void main() {
   testWidgets(
     'Adaptive CircularProgressIndicator can use backgroundColor to change tick color for iOS',
     (WidgetTester tester) async {
+      const color = Color(0xFF5D3FD3);
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(),
           home: const Scaffold(
-            body: Material(
-              child: CircularProgressIndicator.adaptive(backgroundColor: Color(0xFF5D3FD3)),
-            ),
+            body: Material(child: CircularProgressIndicator.adaptive(backgroundColor: color)),
           ),
         ),
       );
@@ -1164,7 +1189,9 @@ void main() {
         find.byType(CupertinoActivityIndicator),
         paints..rrect(
           rrect: const RRect.fromLTRBXY(-1, -10 / 3, 1, -10, 1, 1),
-          color: const Color(0x935D3FD3),
+          // The value of 47 comes from the alpha that is applied to the first
+          // tick.
+          color: color.withAlpha(47),
         ),
       );
     },
@@ -1199,12 +1226,12 @@ void main() {
   ) async {
     late BuildContext builderContext;
 
-    const ProgressIndicatorThemeData themeData = ProgressIndicatorThemeData(
+    const themeData = ProgressIndicatorThemeData(
       color: Color(0xFFFF0000),
       linearTrackColor: Color(0xFF00FF00),
     );
 
-    final ProgressIndicatorTheme progressTheme = ProgressIndicatorTheme(
+    final progressTheme = ProgressIndicatorTheme(
       data: themeData,
       child: Builder(
         builder: (BuildContext context) {
@@ -1214,7 +1241,11 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(MaterialApp(home: Theme(data: theme, child: progressTheme)));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Theme(data: theme, child: progressTheme),
+      ),
+    );
     final Widget wrappedTheme = progressTheme.wrap(builderContext, Container());
 
     // Make sure the returned widget is a new ProgressIndicatorTheme instance
@@ -1226,7 +1257,9 @@ void main() {
 
   testWidgets('Material3 - Default size of CircularProgressIndicator', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Scaffold(body: Material(child: CircularProgressIndicator()))),
+      const MaterialApp(
+        home: Scaffold(body: Material(child: CircularProgressIndicator())),
+      ),
     );
 
     expect(tester.getSize(find.byType(CircularProgressIndicator)), const Size(36, 36));
@@ -1275,7 +1308,7 @@ void main() {
     expect(innerPadding.padding, const EdgeInsets.all(12.0));
 
     // With values provided.
-    const double testElevation = 1.0;
+    const testElevation = 1.0;
     const EdgeInsetsGeometry testIndicatorMargin = EdgeInsets.all(6.0);
     const EdgeInsetsGeometry testIndicatorPadding = EdgeInsets.all(10.0);
     await pumpIndicator(
@@ -1337,6 +1370,119 @@ void main() {
     );
   });
 
+  testWidgets(
+    'Determinate LinearProgressIndicator when year2023 is false',
+    (WidgetTester tester) async {
+      Future<ui.Image> getGoldenImage({
+        required TextDirection textDirection,
+        double? trackGap,
+      }) async {
+        final value = ValueNotifier<double>(0);
+        addTearDown(value.dispose);
+
+        final animationSheet = AnimationSheetBuilder(frameSize: const Size(250, 30));
+        addTearDown(animationSheet.dispose);
+
+        final Widget target = Material(
+          child: Directionality(
+            textDirection: textDirection,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 50),
+              child: Center(
+                child: ValueListenableBuilder<double>(
+                  valueListenable: value,
+                  builder: (BuildContext context, double value, _) {
+                    return LinearProgressIndicator(
+                      year2023: false,
+                      value: value,
+                      trackGap: trackGap,
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+
+        for (var i = 0; i <= 50; i++) {
+          value.value = i * 0.02;
+          await tester.pumpWidget(animationSheet.record(target));
+        }
+
+        return animationSheet.collate(3);
+      }
+
+      await expectLater(
+        await getGoldenImage(textDirection: TextDirection.ltr),
+        matchesGoldenFile('m3_linear_progress_indicator.determinate.ltr.png'),
+      );
+
+      await expectLater(
+        await getGoldenImage(textDirection: TextDirection.rtl),
+        matchesGoldenFile('m3_linear_progress_indicator.determinate.rtl.png'),
+      );
+
+      await expectLater(
+        await getGoldenImage(textDirection: TextDirection.ltr, trackGap: 20),
+        matchesGoldenFile('m3_linear_progress_indicator.determinate.ltr.custom_track_gap.png'),
+      );
+
+      await expectLater(
+        await getGoldenImage(textDirection: TextDirection.rtl, trackGap: 20),
+        matchesGoldenFile('m3_linear_progress_indicator.determinate.rtl.custom_track_gap.png'),
+      );
+    },
+    skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
+  );
+
+  testWidgets(
+    'Indeterminate LinearProgressIndicator when year2023 is false',
+    (WidgetTester tester) async {
+      Future<ui.Image> getGoldenImage({
+        required TextDirection textDirection,
+        double? trackGap,
+      }) async {
+        final animationSheet = AnimationSheetBuilder(frameSize: const Size(250, 30));
+        addTearDown(animationSheet.dispose);
+
+        final Widget target = Material(
+          child: Directionality(
+            textDirection: textDirection,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 50),
+              child: Center(child: LinearProgressIndicator(year2023: false, trackGap: trackGap)),
+            ),
+          ),
+        );
+
+        await tester.pumpFrames(animationSheet.record(target), const Duration(milliseconds: 1800));
+
+        return animationSheet.collate(3);
+      }
+
+      await expectLater(
+        await getGoldenImage(textDirection: TextDirection.ltr),
+        matchesGoldenFile('m3_linear_progress_indicator.indeterminate.ltr.png'),
+      );
+
+      await expectLater(
+        await getGoldenImage(textDirection: TextDirection.rtl),
+        matchesGoldenFile('m3_linear_progress_indicator.indeterminate.rtl.png'),
+      );
+
+      await expectLater(
+        await getGoldenImage(textDirection: TextDirection.ltr, trackGap: 20),
+        matchesGoldenFile('m3_linear_progress_indicator.indeterminate.ltr.custom_track_gap.png'),
+      );
+
+      await expectLater(
+        await getGoldenImage(textDirection: TextDirection.rtl, trackGap: 20),
+        matchesGoldenFile('m3_linear_progress_indicator.indeterminate.rtl.custom_track_gap.png'),
+      );
+    },
+    skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
+  );
+
   testWidgets('Indeterminate LinearProgressIndicator does not paint stop indicator', (
     WidgetTester tester,
   ) async {
@@ -1372,8 +1518,8 @@ void main() {
   testWidgets('Can customise LinearProgressIndicator stop indicator when year2023 is false', (
     WidgetTester tester,
   ) async {
-    const Color stopIndicatorColor = Color(0XFF00FF00);
-    const double stopIndicatorRadius = 5.0;
+    const stopIndicatorColor = Color(0XFF00FF00);
+    const stopIndicatorRadius = 5.0;
     Widget buildIndicator({Color? stopIndicatorColor, double? stopIndicatorRadius}) {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -1461,7 +1607,7 @@ void main() {
   testWidgets('LinearProgressIndicator default track gap when year2023 is false', (
     WidgetTester tester,
   ) async {
-    const double defaultTrackGap = 4.0;
+    const defaultTrackGap = 4.0;
     Widget buildIndicator({required TextDirection textDirection}) {
       return Directionality(
         textDirection: textDirection,
@@ -1524,8 +1670,8 @@ void main() {
   testWidgets('Can customise LinearProgressIndicator track gap when year2023 is false', (
     WidgetTester tester,
   ) async {
-    const double customTrackGap = 12.0;
-    const double noTrackGap = 0.0;
+    const customTrackGap = 12.0;
+    const noTrackGap = 0.0;
     Widget buildIndicator({double? trackGap}) {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -1741,7 +1887,7 @@ void main() {
   testWidgets('CircularProgressIndicator.constraints can override default size', (
     WidgetTester tester,
   ) async {
-    const Size size = Size(64, 64);
+    const size = Size(64, 64);
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -1781,6 +1927,62 @@ void main() {
         ),
       ),
     );
+  });
+
+  testWidgets('CircularProgressIndicator reflects controller value', (WidgetTester tester) async {
+    final controller = AnimationController(vsync: tester, value: 0.5);
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SizedBox(
+              width: 200,
+              height: 200,
+              child: AnimatedBuilder(
+                animation: controller,
+                builder: (BuildContext context, Widget? child) {
+                  return CircularProgressIndicator(controller: controller);
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.byType(CircularProgressIndicator),
+      paints..arc(startAngle: 1.5707963267948966, sweepAngle: 0.001),
+    );
+  });
+
+  testWidgets('RefreshProgressIndicator does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(child: SizedBox.shrink(child: RefreshProgressIndicator())),
+      ),
+    );
+    expect(tester.getSize(find.byType(RefreshProgressIndicator)), Size.zero);
+  });
+
+  testWidgets('CircularProgressIndicator does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(child: SizedBox.shrink(child: CircularProgressIndicator())),
+      ),
+    );
+    expect(tester.getSize(find.byType(CircularProgressIndicator)), Size.zero);
+  });
+
+  testWidgets('LinearProgressIndicator does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(child: SizedBox.shrink(child: LinearProgressIndicator())),
+      ),
+    );
+    expect(tester.getSize(find.byType(LinearProgressIndicator)), Size.zero);
   });
 }
 

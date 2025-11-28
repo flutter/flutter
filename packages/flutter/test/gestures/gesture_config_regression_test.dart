@@ -23,9 +23,9 @@ class NestedScrollableCase extends StatelessWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: <Widget>[
-          SliverFixedExtentList(
+          SliverFixedExtentList.builder(
             itemExtent: 50.0,
-            delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+            itemBuilder: (BuildContext context, int index) {
               return Container(
                 alignment: Alignment.center,
                 child: GestureDetector(
@@ -40,7 +40,7 @@ class NestedScrollableCase extends StatelessWidget {
                   child: Text('List Item $index', key: ValueKey<int>(index)),
                 ),
               );
-            }),
+            },
           ),
         ],
       ),
@@ -58,9 +58,9 @@ class NestedDraggableCase extends StatelessWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: <Widget>[
-          SliverFixedExtentList(
+          SliverFixedExtentList.builder(
             itemExtent: 50.0,
-            delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+            itemBuilder: (BuildContext context, int index) {
               return Container(
                 alignment: Alignment.center,
                 child: Draggable<Object>(
@@ -78,7 +78,7 @@ class NestedDraggableCase extends StatelessWidget {
                   },
                 ),
               );
-            }),
+            },
           ),
         ],
       ),
@@ -93,10 +93,13 @@ void main() {
     tester.view.gestureSettings = const ui.GestureSettings(physicalTouchSlop: 4);
     addTearDown(tester.view.reset);
 
-    final TestResult result = TestResult();
+    final result = TestResult();
 
     await tester.pumpWidget(
-      MaterialApp(title: 'Scroll Bug', home: NestedScrollableCase(testResult: result)),
+      MaterialApp(
+        title: 'Scroll Bug',
+        home: NestedScrollableCase(testResult: result),
+      ),
     );
 
     // By dragging the scroll view more than the configured touch slop above but less than
@@ -117,10 +120,13 @@ void main() {
     tester.view.gestureSettings = const ui.GestureSettings(physicalTouchSlop: 4);
     addTearDown(tester.view.reset);
 
-    final TestResult result = TestResult();
+    final result = TestResult();
 
     await tester.pumpWidget(
-      MaterialApp(title: 'Scroll Bug', home: NestedDraggableCase(testResult: result)),
+      MaterialApp(
+        title: 'Scroll Bug',
+        home: NestedDraggableCase(testResult: result),
+      ),
     );
 
     // By dragging the scroll view more than the configured touch slop above but less than

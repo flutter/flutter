@@ -100,5 +100,17 @@ TEST(DisplayListUtils, SkDispatcherSetColorSourceDoesNotDitherIfNotGradient) {
   // Calling safe_paint(false) returns a nullptr
 }
 
+TEST(DisplayListUtils, DispatchSetColorSupportsWideGamut) {
+  SkCanvas canvas;
+  DlSkCanvasDispatcher dispatcher(&canvas);
+
+  DlColor dl_color(1, 1.05, .5, -0.05, DlColorSpace::kExtendedSRGB);
+  dispatcher.setColor(dl_color);
+  SkColor4f sk_color = dispatcher.paint().getColor4f();
+  EXPECT_EQ(dl_color.getRedF(), sk_color.fR);
+  EXPECT_EQ(dl_color.getGreenF(), sk_color.fG);
+  EXPECT_EQ(dl_color.getBlueF(), sk_color.fB);
+}
+
 }  // namespace testing
 }  // namespace flutter

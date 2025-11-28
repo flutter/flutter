@@ -25,25 +25,24 @@ void main() {
 
   test('NavigationBarThemeData lerp special cases', () {
     expect(NavigationBarThemeData.lerp(null, null, 0), null);
-    const NavigationBarThemeData data = NavigationBarThemeData();
+    const data = NavigationBarThemeData();
     expect(identical(NavigationBarThemeData.lerp(data, data, 0.5), data), true);
   });
 
   testWidgets('Default debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const NavigationBarThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
 
   testWidgets('NavigationBarThemeData implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const NavigationBarThemeData(
       height: 200.0,
       backgroundColor: Color(0x00000099),
@@ -59,11 +58,10 @@ void main() {
       labelPadding: EdgeInsets.all(8),
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(
       description,
@@ -87,19 +85,19 @@ void main() {
   testWidgets(
     'NavigationBarThemeData values are used when no NavigationBar properties are specified',
     (WidgetTester tester) async {
-      const double height = 200.0;
-      const Color backgroundColor = Color(0x00000001);
-      const double elevation = 42.0;
-      const Color indicatorColor = Color(0x00000002);
+      const height = 200.0;
+      const backgroundColor = Color(0x00000001);
+      const elevation = 42.0;
+      const indicatorColor = Color(0x00000002);
       const ShapeBorder indicatorShape = CircleBorder();
-      const double selectedIconSize = 25.0;
-      const double unselectedIconSize = 23.0;
-      const Color selectedIconColor = Color(0x00000003);
-      const Color unselectedIconColor = Color(0x00000004);
-      const double selectedIconOpacity = 0.99;
-      const double unselectedIconOpacity = 0.98;
-      const double selectedLabelFontSize = 13.0;
-      const double unselectedLabelFontSize = 11.0;
+      const selectedIconSize = 25.0;
+      const unselectedIconSize = 23.0;
+      const selectedIconColor = Color(0x00000003);
+      const unselectedIconColor = Color(0x00000004);
+      const selectedIconOpacity = 0.99;
+      const unselectedIconOpacity = 0.98;
+      const selectedLabelFontSize = 13.0;
+      const unselectedLabelFontSize = 11.0;
       const NavigationDestinationLabelBehavior labelBehavior =
           NavigationDestinationLabelBehavior.alwaysShow;
       const EdgeInsetsGeometry labelPadding = EdgeInsets.all(8);
@@ -114,8 +112,8 @@ void main() {
                 elevation: elevation,
                 indicatorColor: indicatorColor,
                 indicatorShape: indicatorShape,
-                iconTheme: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.selected)) {
+                iconTheme: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                  if (states.contains(WidgetState.selected)) {
                     return const IconThemeData(
                       size: selectedIconSize,
                       color: selectedIconColor,
@@ -128,8 +126,8 @@ void main() {
                     opacity: unselectedIconOpacity,
                   );
                 }),
-                labelTextStyle: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.selected)) {
+                labelTextStyle: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                  if (states.contains(WidgetState.selected)) {
                     return const TextStyle(fontSize: selectedLabelFontSize);
                   }
                   return const TextStyle(fontSize: unselectedLabelFontSize);
@@ -165,9 +163,9 @@ void main() {
   testWidgets(
     'NavigationBar values take priority over NavigationBarThemeData values when both properties are specified',
     (WidgetTester tester) async {
-      const double height = 200.0;
-      const Color backgroundColor = Color(0x00000001);
-      const double elevation = 42.0;
+      const height = 200.0;
+      const backgroundColor = Color(0x00000001);
+      const elevation = 42.0;
       const NavigationDestinationLabelBehavior labelBehavior =
           NavigationDestinationLabelBehavior.alwaysShow;
       const EdgeInsetsGeometry labelPadding = EdgeInsets.symmetric(horizontal: 16.0);
@@ -247,19 +245,19 @@ void main() {
     'NavigationBar respects NavigationBarTheme.overlayColor in active/pressed/hovered states',
     (WidgetTester tester) async {
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-      const Color hoverColor = Color(0xff0000ff);
-      const Color focusColor = Color(0xff00ffff);
-      const Color pressedColor = Color(0xffff00ff);
-      final MaterialStateProperty<Color?> overlayColor = MaterialStateProperty.resolveWith<Color>((
-        Set<MaterialState> states,
+      const hoverColor = Color(0xff0000ff);
+      const focusColor = Color(0xff00ffff);
+      const pressedColor = Color(0xffff00ff);
+      final WidgetStateProperty<Color?> overlayColor = WidgetStateProperty.resolveWith<Color>((
+        Set<WidgetState> states,
       ) {
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return hoverColor;
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return focusColor;
         }
-        if (states.contains(MaterialState.pressed)) {
+        if (states.contains(WidgetState.pressed)) {
           return pressedColor;
         }
         return Colors.transparent;
@@ -296,9 +294,9 @@ void main() {
         inkFeatures,
         kIsWeb
             ? (paints
-              ..rrect()
-              ..rrect()
-              ..circle(color: hoverColor))
+                ..rrect()
+                ..rrect()
+                ..circle(color: hoverColor))
             : (paints..circle(color: hoverColor)),
       );
 
@@ -310,12 +308,12 @@ void main() {
         inkFeatures,
         kIsWeb
             ? (paints
-              ..circle()
-              ..circle()
-              ..circle(color: pressedColor))
+                ..circle()
+                ..circle()
+                ..circle(color: pressedColor))
             : (paints
-              ..circle()
-              ..circle(color: pressedColor)),
+                ..circle()
+                ..circle(color: pressedColor)),
       );
 
       await gesture.up();
@@ -330,11 +328,11 @@ void main() {
         inkFeatures,
         kIsWeb
             ? (paints
-              ..circle()
-              ..circle(color: focusColor))
+                ..circle()
+                ..circle(color: focusColor))
             : (paints
-              ..circle()
-              ..circle(color: focusColor)),
+                ..circle()
+                ..circle(color: focusColor)),
       );
     },
   );

@@ -6,22 +6,27 @@
 #define FLUTTER_IMPELLER_ENTITY_GEOMETRY_ROUND_SUPERELLIPSE_GEOMETRY_H_
 
 #include "impeller/entity/geometry/geometry.h"
+#include "impeller/entity/geometry/stroke_path_geometry.h"
+#include "impeller/geometry/round_superellipse.h"
 #include "impeller/geometry/rounding_radii.h"
 
 namespace impeller {
-
-/// Geometry class that can generate vertices for a rounded superellipse.
+/// @brief A Geometry class that generates fillable vertices (with or without
+///        texture coordinates) directly from a round superellipse object
+///        regardless of radii uniformity.
 ///
 /// A rounded superellipse is a shape similar to a typical rounded rectangle
-/// (`RoundRect`), but with smoother transitions between the straight sides and
-/// the rounded corners. It resembles the `RoundedRectangle` shape in SwiftUI
-/// with the `.continuous` corner style. Technically, it is created by replacing
-/// the four corners of a superellipse (also known as a Lamé curve) with
-/// circular arcs.
+/// (`RoundSuperellipse`), but with smoother transitions between the straight
+/// sides and the rounded corners. It resembles the `RoundedRectangle` shape in
+/// SwiftUI with the `.continuous` corner style. Technically, it is created by
+/// replacing the four corners of a superellipse (also known as a Lamé curve)
+/// with circular arcs.
 ///
 /// The `bounds` defines the position and size of the shape. The `corner_radius`
 /// corresponds to SwiftUI's `cornerRadius` parameter, which is close to, but
 /// not exactly equals to, the radius of the corner circles.
+///
+/// @see |StrokeRoundSuperellipseGeometry|
 class RoundSuperellipseGeometry final : public Geometry {
  public:
   RoundSuperellipseGeometry(const Rect& bounds, const RoundingRadii& radii);
@@ -51,6 +56,27 @@ class RoundSuperellipseGeometry final : public Geometry {
 
   RoundSuperellipseGeometry& operator=(const RoundSuperellipseGeometry&) =
       delete;
+};
+
+/// @brief A Geometry class that produces fillable vertices representing
+///        the stroked outline of any |RoundSuperellipse| object regardless of
+///        radii uniformity.
+///
+/// This class uses the |StrokePathSourceGeometry| base class to do the work
+/// by providing a |RoundSuperellipsePathSoure| iterator.
+///
+/// @see |RoundSuperellipseGeometry|
+class StrokeRoundSuperellipseGeometry final : public StrokePathSourceGeometry {
+ public:
+  StrokeRoundSuperellipseGeometry(const RoundSuperellipse& round_superellipse,
+                                  const StrokeParameters& parameters);
+
+ protected:
+  // |StrokePathSourceGeometry|
+  const PathSource& GetSource() const override;
+
+ private:
+  const RoundSuperellipsePathSource round_superellipse_source_;
 };
 
 }  // namespace impeller

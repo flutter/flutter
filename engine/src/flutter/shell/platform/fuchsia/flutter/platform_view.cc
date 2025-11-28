@@ -342,6 +342,14 @@ void PlatformView::OnGetLayout(fuchsia::ui::composition::LayoutInfo info) {
                  pixel_ratio),  // physical_width
       std::round(view_logical_size_.value()[1] *
                  pixel_ratio),  // physical_height
+      std::round(view_logical_size_.value()[0] *
+                 pixel_ratio),  // physical_min_width_constraint
+      std::round(view_logical_size_.value()[0] *
+                 pixel_ratio),  // physical_max_width_constraint
+      std::round(view_logical_size_.value()[1] *
+                 pixel_ratio),  // physical_min_height_constraint
+      std::round(view_logical_size_.value()[1] *
+                 pixel_ratio),  // physical_max_height_constraint
       0.0f,                     // physical_padding_top
       0.0f,                     // physical_padding_right
       0.0f,                     // physical_padding_bottom

@@ -10,7 +10,7 @@ const List<int> items = <int>[0, 1, 2, 3, 4, 5];
 
 void main() {
   testWidgets('Tap item after scroll - horizontal', (WidgetTester tester) async {
-    final List<int> tapped = <int>[];
+    final tapped = <int>[];
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -21,16 +21,15 @@ void main() {
               dragStartBehavior: DragStartBehavior.down,
               itemExtent: 290.0,
               scrollDirection: Axis.horizontal,
-              children:
-                  items.map<Widget>((int item) {
-                    return GestureDetector(
-                      onTap: () {
-                        tapped.add(item);
-                      },
-                      dragStartBehavior: DragStartBehavior.down,
-                      child: Text('$item'),
-                    );
-                  }).toList(),
+              children: items.map<Widget>((int item) {
+                return GestureDetector(
+                  onTap: () {
+                    tapped.add(item);
+                  },
+                  dragStartBehavior: DragStartBehavior.down,
+                  child: Text('$item'),
+                );
+              }).toList(),
             ),
           ),
         ),
@@ -55,7 +54,7 @@ void main() {
   });
 
   testWidgets('Tap item after scroll - vertical', (WidgetTester tester) async {
-    final List<int> tapped = <int>[];
+    final tapped = <int>[];
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -65,16 +64,15 @@ void main() {
             child: ListView(
               dragStartBehavior: DragStartBehavior.down,
               itemExtent: 290.0,
-              children:
-                  items.map<Widget>((int item) {
-                    return GestureDetector(
-                      onTap: () {
-                        tapped.add(item);
-                      },
-                      dragStartBehavior: DragStartBehavior.down,
-                      child: Text('$item'),
-                    );
-                  }).toList(),
+              children: items.map<Widget>((int item) {
+                return GestureDetector(
+                  onTap: () {
+                    tapped.add(item);
+                  },
+                  dragStartBehavior: DragStartBehavior.down,
+                  child: Text('$item'),
+                );
+              }).toList(),
             ),
           ),
         ),
@@ -104,7 +102,7 @@ void main() {
   });
 
   testWidgets('Padding scroll anchor start', (WidgetTester tester) async {
-    final List<int> tapped = <int>[];
+    final tapped = <int>[];
 
     await tester.pumpWidget(
       Directionality(
@@ -112,15 +110,14 @@ void main() {
         child: ListView(
           itemExtent: 290.0,
           padding: const EdgeInsets.fromLTRB(5.0, 20.0, 15.0, 10.0),
-          children:
-              items.map<Widget>((int item) {
-                return GestureDetector(
-                  onTap: () {
-                    tapped.add(item);
-                  },
-                  child: Text('$item'),
-                );
-              }).toList(),
+          children: items.map<Widget>((int item) {
+            return GestureDetector(
+              onTap: () {
+                tapped.add(item);
+              },
+              child: Text('$item'),
+            );
+          }).toList(),
         ),
       ),
     );
@@ -139,7 +136,7 @@ void main() {
   });
 
   testWidgets('Padding scroll anchor end', (WidgetTester tester) async {
-    final List<int> tapped = <int>[];
+    final tapped = <int>[];
 
     await tester.pumpWidget(
       Directionality(
@@ -148,15 +145,14 @@ void main() {
           itemExtent: 290.0,
           reverse: true,
           padding: const EdgeInsets.fromLTRB(5.0, 20.0, 15.0, 10.0),
-          children:
-              items.map<Widget>((int item) {
-                return GestureDetector(
-                  onTap: () {
-                    tapped.add(item);
-                  },
-                  child: Text('$item'),
-                );
-              }).toList(),
+          children: items.map<Widget>((int item) {
+            return GestureDetector(
+              onTap: () {
+                tapped.add(item);
+              },
+              child: Text('$item'),
+            );
+          }).toList(),
         ),
       ),
     );
@@ -176,22 +172,21 @@ void main() {
 
   testWidgets('Tap immediately following clamped overscroll', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/5709
-    final List<int> tapped = <int>[];
+    final tapped = <int>[];
 
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: ListView(
           itemExtent: 200.0,
-          children:
-              items.map<Widget>((int item) {
-                return GestureDetector(
-                  onTap: () {
-                    tapped.add(item);
-                  },
-                  child: Text('$item'),
-                );
-              }).toList(),
+          children: items.map<Widget>((int item) {
+            return GestureDetector(
+              onTap: () {
+                tapped.add(item);
+              },
+              child: Text('$item'),
+            );
+          }).toList(),
         ),
       ),
     );

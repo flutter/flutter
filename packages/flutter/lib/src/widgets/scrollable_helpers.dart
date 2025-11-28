@@ -113,7 +113,7 @@ class ScrollableDetails {
 
   @override
   String toString() {
-    final List<String> description = <String>[];
+    final description = <String>[];
     description.add('axisDirection: $direction');
 
     void addIfNonNull(String prefix, Object? value) {
@@ -226,19 +226,25 @@ class EdgeDraggingAutoScroller {
   }
 
   Future<void> _scroll() async {
-    final RenderBox scrollRenderBox = scrollable.context.findRenderObject()! as RenderBox;
+    final scrollRenderBox = scrollable.context.findRenderObject()! as RenderBox;
+    final Matrix4 transform = scrollRenderBox.getTransformTo(null);
     final Rect globalRect = MatrixUtils.transformRect(
-      scrollRenderBox.getTransformTo(null),
+      transform,
       Rect.fromLTWH(0, 0, scrollRenderBox.size.width, scrollRenderBox.size.height),
     );
+    final Rect transformedDragTarget = MatrixUtils.transformRect(
+      transform,
+      _dragTargetRelatedToScrollOrigin,
+    );
+
     assert(
-      globalRect.size.width >= _dragTargetRelatedToScrollOrigin.size.width &&
-          globalRect.size.height >= _dragTargetRelatedToScrollOrigin.size.height,
+      (globalRect.size.width + precisionErrorTolerance) >= transformedDragTarget.size.width &&
+          (globalRect.size.height + precisionErrorTolerance) >= transformedDragTarget.size.height,
       'Drag target size is larger than scrollable size, which may cause bouncing',
     );
     _scrolling = true;
     double? newOffset;
-    const double overDragMax = 20.0;
+    const overDragMax = 20.0;
 
     final Offset deltaToOrigin = scrollable.deltaToScrollOrigin;
     final Offset viewportOrigin = globalRect.topLeft.translate(deltaToOrigin.dx, deltaToOrigin.dy);
@@ -295,7 +301,7 @@ class EdgeDraggingAutoScroller {
       _scrolling = false;
       return;
     }
-    final Duration duration = Duration(milliseconds: (1000 / velocityScalar).round());
+    final duration = Duration(milliseconds: (1000 / velocityScalar).round());
     await scrollable.position.animateTo(newOffset, duration: duration, curve: Curves.linear);
     onScrollViewScrolled?.call();
     if (_scrolling) {
@@ -402,7 +408,7 @@ class ScrollAction extends ContextAction<ScrollIntent> {
       return true;
     }
     final ScrollController? primaryScrollController = PrimaryScrollController.maybeOf(context);
-    return (primaryScrollController != null) && (primaryScrollController.hasClients);
+    return (primaryScrollController != null) && primaryScrollController.hasClients;
   }
 
   /// Returns the scroll increment for a single scroll request, for use when

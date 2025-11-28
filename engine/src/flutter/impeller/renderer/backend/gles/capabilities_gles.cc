@@ -26,6 +26,9 @@ static const constexpr char* kMultisampledRenderToTextureExt =
 static const constexpr char* kMultisampledRenderToTexture2Ext =
     "GL_EXT_multisampled_render_to_texture2";
 
+// https://registry.khronos.org/OpenGL/extensions/OES/OES_element_index_uint.txt
+static const constexpr char* kElementIndexUintExt = "GL_OES_element_index_uint";
+
 CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   {
     GLint value = 0;
@@ -122,6 +125,10 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   if (desc->HasExtension(kTextureBorderClampExt) ||
       desc->HasExtension(kNvidiaTextureBorderClampExt)) {
     supports_decal_sampler_address_mode_ = true;
+  }
+
+  if (desc->HasExtension(kElementIndexUintExt)) {
+    supports_32bit_primitive_indices_ = true;
   }
 
   if (desc->HasExtension(kMultisampledRenderToTextureExt)) {
@@ -223,6 +230,10 @@ bool CapabilitiesGLES::SupportsPrimitiveRestart() const {
   return false;
 }
 
+bool CapabilitiesGLES::Supports32BitPrimitiveIndices() const {
+  return supports_32bit_primitive_indices_;
+}
+
 bool CapabilitiesGLES::SupportsExtendedRangeFormats() const {
   return false;
 }
@@ -237,6 +248,10 @@ ISize CapabilitiesGLES::GetMaximumRenderPassAttachmentSize() const {
 
 size_t CapabilitiesGLES::GetMinimumUniformAlignment() const {
   return 256;
+}
+
+bool CapabilitiesGLES::NeedsPartitionedHostBuffer() const {
+  return false;
 }
 
 }  // namespace impeller

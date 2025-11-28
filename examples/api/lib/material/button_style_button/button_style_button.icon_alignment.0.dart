@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+// ignore: deprecated_member_use
 /// Flutter code sample for using [ButtonStyleButton.iconAlignment] parameter.
 
 void main() {
@@ -15,7 +16,9 @@ class ButtonStyleButtonIconAlignmentApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: Scaffold(body: ButtonStyleButtonIconAlignmentExample()));
+    return const MaterialApp(
+      home: Scaffold(body: ButtonStyleButtonIconAlignmentExample()),
+    );
   }
 }
 
@@ -100,13 +103,14 @@ class _ButtonStyleButtonIconAlignmentExampleState
                           });
                         },
                         selected: <IconAlignment>{_iconAlignment},
-                        segments:
-                            IconAlignment.values.map((IconAlignment iconAlignment) {
-                              return ButtonSegment<IconAlignment>(
-                                value: iconAlignment,
-                                label: Text(iconAlignment.name),
-                              );
-                            }).toList(),
+                        segments: IconAlignment.values.map((
+                          IconAlignment iconAlignment,
+                        ) {
+                          return ButtonSegment<IconAlignment>(
+                            value: iconAlignment,
+                            label: Text(iconAlignment.name),
+                          );
+                        }).toList(),
                       ),
                     ],
                   ),

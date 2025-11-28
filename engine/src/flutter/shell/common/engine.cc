@@ -13,6 +13,7 @@
 #include "flutter/assets/native_assets.h"
 #include "flutter/common/settings.h"
 #include "flutter/fml/trace_event.h"
+#include "flutter/impeller/core/runtime_types.h"
 #include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/shell/common/animator.h"
 #include "rapidjson/document.h"
@@ -70,7 +71,8 @@ Engine::Engine(Delegate& delegate,
                const fml::RefPtr<SkiaUnrefQueue>& unref_queue,
                fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
                const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch,
-               impeller::RuntimeStageBackend runtime_stage_type)
+               const std::shared_future<impeller::RuntimeStageBackend>&
+                   runtime_stage_backend)
     : Engine(delegate,
              dispatcher_maker,
              vm.GetConcurrentWorkerTaskRunner(),
@@ -102,9 +104,9 @@ Engine::Engine(Delegate& delegate,
           settings_
               .skia_deterministic_rendering_on_cpu,  // deterministic rendering
           vm.GetConcurrentWorkerTaskRunner(),        // concurrent task runner
+          runtime_stage_backend,                     // runtime stage
           settings_.enable_impeller,                 // enable impeller
-          settings_.enable_flutter_gpu,              // enable impeller
-          runtime_stage_type,                        // runtime stage type
+          settings_.enable_flutter_gpu               // enable impeller
       });
 }
 
@@ -148,7 +150,7 @@ std::unique_ptr<Engine> Engine::Spawn(
 
 Engine::~Engine() = default;
 
-fml::WeakPtr<Engine> Engine::GetWeakPtr() const {
+fml::TaskRunnerAffineWeakPtr<Engine> Engine::GetWeakPtr() const {
   return weak_factory_.GetWeakPtr();
 }
 
@@ -161,11 +163,12 @@ std::shared_ptr<AssetManager> Engine::GetAssetManager() {
   return asset_manager_;
 }
 
-fml::WeakPtr<ImageDecoder> Engine::GetImageDecoderWeakPtr() {
+fml::TaskRunnerAffineWeakPtr<ImageDecoder> Engine::GetImageDecoderWeakPtr() {
   return image_decoder_->GetWeakPtr();
 }
 
-fml::WeakPtr<ImageGeneratorRegistry> Engine::GetImageGeneratorRegistry() {
+fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry>
+Engine::GetImageGeneratorRegistry() {
   return image_generator_registry_.GetWeakPtr();
 }
 
@@ -224,6 +227,8 @@ Engine::RunStatus Engine::Run(RunConfiguration configuration) {
   last_entry_point_args_ = configuration.GetEntrypointArgs();
 #endif
 
+  last_engine_id_ = configuration.GetEngineId();
+
   UpdateAssetManager(configuration.GetAssetManager());
 
   if (runtime_controller_->IsRootIsolateRunning()) {
@@ -238,6 +243,19 @@ Engine::RunStatus Engine::Run(RunConfiguration configuration) {
       SetupDefaultFontManager();
     }
   };
+
+  if (settings_.merged_platform_ui_thread ==
+      Settings::MergedPlatformUIThread::kMergeAfterLaunch) {
+    // Queue a task to the UI task runner that sets the owner of the root
+    // isolate.  This task runs after the thread merge and will therefore be
+    // executed on the platform thread.  The task will run before any tasks
+    // queued by LaunchRootIsolate that execute the app's Dart code.
+    task_runners_.GetUITaskRunner()->PostTask([engine = GetWeakPtr()]() {
+      if (engine) {
+        engine->runtime_controller_->SetRootIsolateOwnerToCurrentThread();
+      }
+    });
+  }
 
   if (!runtime_controller_->LaunchRootIsolate(
           settings_,                                 //
@@ -260,6 +278,18 @@ Engine::RunStatus Engine::Run(RunConfiguration configuration) {
     HandlePlatformMessage(std::move(service_id_message));
   }
 
+  if (settings_.merged_platform_ui_thread ==
+      Settings::MergedPlatformUIThread::kMergeAfterLaunch) {
+    // Move the UI task runner to the platform thread.
+    bool success = fml::MessageLoopTaskQueues::GetInstance()->Merge(
+        task_runners_.GetPlatformTaskRunner()->GetTaskQueueId(),
+        task_runners_.GetUITaskRunner()->GetTaskQueueId());
+    if (!success) {
+      FML_LOG(ERROR)
+          << "Unable to move the UI task runner to the platform thread";
+    }
+  }
+
   return Engine::RunStatus::Success;
 }
 
@@ -273,11 +303,6 @@ void Engine::ReportTimings(std::vector<int64_t> timings) {
 
 void Engine::NotifyIdle(fml::TimeDelta deadline) {
   runtime_controller_->NotifyIdle(deadline);
-}
-
-void Engine::NotifyDestroyed() {
-  TRACE_EVENT0("flutter", "Engine::NotifyDestroyed");
-  runtime_controller_->NotifyDestroyed();
 }
 
 std::optional<uint32_t> Engine::GetUIIsolateReturnCode() {
@@ -504,6 +529,14 @@ void Engine::UpdateSemantics(int64_t view_id,
                                     std::move(actions));
 }
 
+void Engine::SetApplicationLocale(std::string locale) {
+  delegate_.OnEngineSetApplicationLocale(std::move(locale));
+}
+
+void Engine::SetSemanticsTreeEnabled(bool enabled) {
+  delegate_.OnEngineSetSemanticsTreeEnabled(enabled);
+}
+
 void Engine::HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) {
   if (message->channel() == kAssetChannel) {
     HandleAssetPlatformMessage(std::move(message));
@@ -588,6 +621,10 @@ const std::string& Engine::GetLastEntrypointLibrary() const {
 
 const std::vector<std::string>& Engine::GetLastEntrypointArgs() const {
   return last_entry_point_args_;
+}
+
+std::optional<int64_t> Engine::GetLastEngineId() const {
+  return last_engine_id_;
 }
 
 // |RuntimeDelegate|

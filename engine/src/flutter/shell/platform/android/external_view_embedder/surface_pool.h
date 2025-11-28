@@ -71,7 +71,7 @@ class SurfacePool {
   // Sets the frame size used by the layers in the pool.
   // If the current layers in the pool have a different frame size,
   // then they are deallocated as soon as |GetLayer| is called.
-  void SetFrameSize(SkISize frame_size);
+  void SetFrameSize(DlISize frame_size);
 
   // Returns true if the current pool has layers in use.
   bool HasLayers();
@@ -100,10 +100,10 @@ class SurfacePool {
   std::vector<std::shared_ptr<OverlayLayer>> layers_;
 
   // The frame size of the layers in the pool.
-  SkISize current_frame_size_;
+  DlISize current_frame_size_;
 
   // The frame size to be used by future layers.
-  SkISize requested_frame_size_;
+  DlISize requested_frame_size_;
 
   // Used to guard public methods.
   std::mutex mutex_;

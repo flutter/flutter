@@ -27,7 +27,7 @@ class AndroidSurfaceMock final : public GPUSurfaceGLDelegate,
               (GrDirectContext * gr_context),
               (override));
 
-  MOCK_METHOD(bool, OnScreenSurfaceResize, (const SkISize& size), (override));
+  MOCK_METHOD(bool, OnScreenSurfaceResize, (const DlISize& size), (override));
 
   MOCK_METHOD(bool, ResourceContextMakeCurrent, (), (override));
 

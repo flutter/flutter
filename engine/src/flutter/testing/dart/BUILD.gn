@@ -72,7 +72,7 @@ foreach(test, tests) {
 
 group("dart") {
   testonly = true
-  deps = [ "//flutter/testing/dart/observatory" ]
+  deps = [ "//flutter/testing/dart/vm_service" ]
   foreach(test, tests) {
     deps += [ ":compile_$test" ]
   }

@@ -24,7 +24,11 @@ class MouseRegionApp extends StatelessWidget {
 
 // A region that hides its content one second after being hovered.
 class MyTimedButton extends StatefulWidget {
-  const MyTimedButton({super.key, required this.onEnterButton, required this.onExitButton});
+  const MyTimedButton({
+    super.key,
+    required this.onEnterButton,
+    required this.onExitButton,
+  });
 
   final VoidCallback onEnterButton;
   final VoidCallback onExitButton;
@@ -58,25 +62,24 @@ class _MyTimedButton extends State<MyTimedButton> {
       width: 100,
       height: 100,
       child: MouseRegion(
-        child:
-            regionIsHidden
-                ? null
-                : MouseRegion(
-                  onEnter: (_) {
-                    widget.onEnterButton();
-                    setState(() {
-                      hovered = true;
-                    });
-                    startCountdown();
-                  },
-                  onExit: (_) {
-                    setState(() {
-                      hovered = false;
-                    });
-                    widget.onExitButton();
-                  },
-                  child: Container(color: Colors.red),
-                ),
+        child: regionIsHidden
+            ? null
+            : MouseRegion(
+                onEnter: (_) {
+                  widget.onEnterButton();
+                  setState(() {
+                    hovered = true;
+                  });
+                  startCountdown();
+                },
+                onExit: (_) {
+                  setState(() {
+                    hovered = false;
+                  });
+                  widget.onExitButton();
+                },
+                child: Container(color: Colors.red),
+              ),
       ),
     );
   }

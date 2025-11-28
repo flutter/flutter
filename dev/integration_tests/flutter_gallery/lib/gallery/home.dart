@@ -45,7 +45,7 @@ class _CategoryItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final bool isDark = theme.brightness == Brightness.dark;
+    final isDark = theme.brightness == Brightness.dark;
 
     // This repaint boundary prevents the entire _CategoriesPage from being
     // repainted when the button's ink splash animates.
@@ -92,7 +92,7 @@ class _CategoriesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     const double aspectRatio = 160.0 / 180.0;
     final List<GalleryDemoCategory> categoriesList = categories!.toList();
-    final int columnCount = (MediaQuery.of(context).orientation == Orientation.portrait) ? 2 : 3;
+    final columnCount = (MediaQuery.of(context).orientation == Orientation.portrait) ? 2 : 3;
 
     return Semantics(
       scopesRoute: true,
@@ -115,10 +115,9 @@ class _CategoriesPage extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: List<Widget>.generate(rowCount, (int rowIndex) {
-                  final int columnCountForRow =
-                      rowIndex == rowCount - 1
-                          ? categories!.length - columnCount * math.max<int>(0, rowCount - 1)
-                          : columnCount;
+                  final int columnCountForRow = rowIndex == rowCount - 1
+                      ? categories!.length - columnCount * math.max<int>(0, rowCount - 1)
+                      : columnCount;
 
                   return Row(
                     children: List<Widget>.generate(columnCountForRow, (int columnIndex) {
@@ -165,9 +164,9 @@ class _DemoItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final bool isDark = theme.brightness == Brightness.dark;
+    final isDark = theme.brightness == Brightness.dark;
     // The fontSize to use for computing the heuristic UI scaling factor.
-    const double defaultFontSize = 14.0;
+    const defaultFontSize = 14.0;
     final double containerScalingFactor =
         MediaQuery.textScalerOf(context).scale(defaultFontSize) / defaultFontSize;
     return RawMaterialButton(
@@ -236,10 +235,9 @@ class _DemosPage extends StatelessWidget {
           dragStartBehavior: DragStartBehavior.down,
           key: PageStorageKey<String>(category!.name),
           padding: EdgeInsets.only(top: 8.0, bottom: windowBottomPadding),
-          children:
-              kGalleryCategoryToDemos[category!]!.map<Widget>((GalleryDemo demo) {
-                return _DemoItem(demo: demo);
-              }).toList(),
+          children: kGalleryCategoryToDemos[category!]!.map<Widget>((GalleryDemo demo) {
+            return _DemoItem(demo: demo);
+          }).toList(),
         ),
       ),
     );
@@ -268,7 +266,7 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
   static Widget _topHomeLayout(Widget? currentChild, List<Widget> previousChildren) {
     return Stack(
       alignment: Alignment.topCenter,
-      children: <Widget>[...previousChildren, if (currentChild != null) currentChild],
+      children: <Widget>[...previousChildren, ?currentChild],
     );
   }
 
@@ -294,7 +292,7 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final bool isDark = theme.brightness == Brightness.dark;
+    final isDark = theme.brightness == Brightness.dark;
     final MediaQueryData media = MediaQuery.of(context);
     final bool centerHome = media.orientation == Orientation.portrait && media.size.height < 800.0;
 
@@ -322,14 +320,13 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
               duration: _kFrontLayerSwitchDuration,
               switchOutCurve: switchOutCurve,
               switchInCurve: switchInCurve,
-              child:
-                  _category == null
-                      ? const _FlutterLogo()
-                      : IconButton(
-                        icon: const BackButtonIcon(),
-                        tooltip: 'Back',
-                        onPressed: () => setState(() => _category = null),
-                      ),
+              child: _category == null
+                  ? const _FlutterLogo()
+                  : IconButton(
+                      icon: const BackButtonIcon(),
+                      tooltip: 'Back',
+                      onPressed: () => setState(() => _category = null),
+                    ),
             ),
             frontTitle: AnimatedSwitcher(
               duration: _kFrontLayerSwitchDuration,
@@ -341,15 +338,14 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
               switchOutCurve: switchOutCurve,
               switchInCurve: switchInCurve,
               layoutBuilder: centerHome ? _centerHomeLayout : _topHomeLayout,
-              child:
-                  _category != null
-                      ? _DemosPage(_category)
-                      : _CategoriesPage(
-                        categories: kAllGalleryDemoCategories,
-                        onCategoryTap: (GalleryDemoCategory category) {
-                          setState(() => _category = category);
-                        },
-                      ),
+              child: _category != null
+                  ? _DemosPage(_category)
+                  : _CategoriesPage(
+                      categories: kAllGalleryDemoCategories,
+                      onCategoryTap: (GalleryDemoCategory category) {
+                        setState(() => _category = category);
+                      },
+                    ),
             ),
           ),
         ),

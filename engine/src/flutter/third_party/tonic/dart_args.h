@@ -47,7 +47,7 @@ class DartArgIterator {
 };
 
 // Classes for generating and storing an argument pack of integer indices
-// (based on well-known "indices trick", see: http://goo.gl/bKKojn):
+// (based on well-known "indices trick"):
 template <size_t... indices>
 struct IndicesHolder {};
 

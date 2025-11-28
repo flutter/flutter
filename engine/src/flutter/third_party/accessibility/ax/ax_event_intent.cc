@@ -28,10 +28,6 @@ bool operator==(const AXEventIntent& a, const AXEventIntent& b) {
          a.move_direction == b.move_direction;
 }
 
-bool operator!=(const AXEventIntent& a, const AXEventIntent& b) {
-  return !(a == b);
-}
-
 std::string AXEventIntent::ToString() const {
   return std::string("AXEventIntent(") + ui::ToString(command) + ',' +
          ui::ToString(text_boundary) + ',' + ui::ToString(move_direction) + ')';

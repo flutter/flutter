@@ -12,9 +12,9 @@ void main() {
   testWidgets('can change semantics in a branch blocked by BlockSemantics', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
           id: 1,
@@ -49,7 +49,10 @@ Widget buildWidget({required String blockedText, bool blocking = true}) {
       fit: StackFit.expand,
       children: <Widget>[
         Semantics(container: true, child: ListView(children: <Widget>[Text(blockedText)])),
-        BlockSemantics(blocking: blocking, child: Semantics(label: 'hello', container: true)),
+        BlockSemantics(
+          blocking: blocking,
+          child: Semantics(label: 'hello', container: true),
+        ),
       ],
     ),
   );

@@ -34,12 +34,11 @@ final class PredictiveBackEvent {
   /// Creates an [PredictiveBackEvent] from a Map, typically used when converting
   /// data received from a platform channel.
   factory PredictiveBackEvent.fromMap(Map<String?, Object?> map) {
-    final List<Object?>? touchOffset = map['touchOffset'] as List<Object?>?;
+    final touchOffset = map['touchOffset'] as List<Object?>?;
     return PredictiveBackEvent._(
-      touchOffset:
-          touchOffset == null
-              ? null
-              : Offset((touchOffset[0]! as num).toDouble(), (touchOffset[1]! as num).toDouble()),
+      touchOffset: touchOffset == null
+          ? null
+          : Offset((touchOffset[0]! as num).toDouble(), (touchOffset[1]! as num).toDouble()),
       progress: (map['progress']! as num).toDouble(),
       swipeEdge: SwipeEdge.values[map['swipeEdge']! as int],
     );

@@ -37,8 +37,8 @@ String get testSelector {
 
 /// Runs a specific web test
 Future<void> runWebTest(WebTest test) async {
-  ui_web.debugEmulateFlutterTesterEnvironment = true;
-  final Completer<void> completer = Completer<void>();
+  ui_web.TestEnvironment.setUp(const ui_web.TestEnvironment.flutterTester());
+  final completer = Completer<void>();
   await ui_web.bootstrapEngine(runApp: () => completer.complete());
   await completer.future;
 
@@ -65,18 +65,17 @@ StreamChannel<Object?> _serializeSuite(EntryPoint Function() getMain, {bool hide
     RemoteListener.start(getMain, hidePrints: hidePrints);
 
 StreamChannel<Object?> _postMessageChannel() {
-  final StreamChannelController<Object?> controller = StreamChannelController<Object?>(sync: true);
-  final web.MessageChannel channel = web.MessageChannel();
+  final controller = StreamChannelController<Object?>(sync: true);
+  final channel = web.MessageChannel();
   web.window.parent!.postMessage(
     'port'.toJS,
     web.window.location.origin,
     <JSObject>[channel.port2].toJS,
   );
 
-  final JSFunction eventCallback =
-      (web.Event event) {
-        controller.local.sink.add(event.data.dartify());
-      }.toJS;
+  final JSFunction eventCallback = (web.Event event) {
+    controller.local.sink.add(event.data.dartify());
+  }.toJS;
   channel.port1.addEventListener('message'.toJS, eventCallback);
   channel.port1.start();
   controller.local.stream.listen(

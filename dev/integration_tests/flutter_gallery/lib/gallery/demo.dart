@@ -128,32 +128,27 @@ class _TabbedComponentDemoScaffoldState extends State<TabbedComponentDemoScaffol
           ],
           bottom: TabBar(
             isScrollable: widget.isScrollable,
-            tabs:
-                widget.demos!
-                    .map<Widget>((ComponentDemoTabData data) => Tab(text: data.tabName))
-                    .toList(),
+            tabs: widget.demos!
+                .map<Widget>((ComponentDemoTabData data) => Tab(text: data.tabName))
+                .toList(),
           ),
         ),
         body: TabBarView(
-          children:
-              widget.demos!.map<Widget>((ComponentDemoTabData demo) {
-                return SafeArea(
-                  top: false,
-                  bottom: false,
-                  child: Column(
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Text(
-                          demo.description!,
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                      ),
-                      Expanded(child: demo.demoWidget!),
-                    ],
+          children: widget.demos!.map<Widget>((ComponentDemoTabData demo) {
+            return SafeArea(
+              top: false,
+              bottom: false,
+              child: Column(
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(demo.description!, style: Theme.of(context).textTheme.titleMedium),
                   ),
-                );
-              }).toList(),
+                  Expanded(child: demo.demoWidget!),
+                ],
+              ),
+            );
+          }).toList(),
         ),
       ),
     );
@@ -186,10 +181,9 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final SyntaxHighlighterStyle style =
-        Theme.brightnessOf(context) == Brightness.dark
-            ? SyntaxHighlighterStyle.darkThemeStyle
-            : SyntaxHighlighterStyle.lightThemeStyle;
+    final SyntaxHighlighterStyle style = Theme.brightnessOf(context) == Brightness.dark
+        ? SyntaxHighlighterStyle.darkThemeStyle
+        : SyntaxHighlighterStyle.lightThemeStyle;
 
     Widget body;
     if (_exampleCode == null) {

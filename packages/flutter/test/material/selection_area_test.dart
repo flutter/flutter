@@ -13,7 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/process_text_utils.dart';
 
 Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
-  const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
+  const caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
   final Offset localOffset = paragraph.getOffsetForCaret(TextPosition(offset: offset), caret);
   return paragraph.localToGlobal(localOffset);
 }
@@ -78,7 +78,10 @@ void main() {
             body: SelectionArea(
               child: SizedBox(
                 height: 100,
-                child: FittedBox(fit: BoxFit.fill, child: Text('test', key: textKey)),
+                child: FittedBox(
+                  fit: BoxFit.fill,
+                  child: Text('test', key: textKey),
+                ),
               ),
             ),
           ),
@@ -128,13 +131,59 @@ void main() {
   );
 
   testWidgets(
-    'builds the default context menu by default',
+    'builds the default context menu by default on Android and iOS web',
     (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
+      final focusNode = FocusNode();
       addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(home: SelectionArea(focusNode: focusNode, child: const Text('How are you?'))),
+        MaterialApp(
+          home: SelectionArea(focusNode: focusNode, child: const Text('How are you?')),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+
+      // Show the toolbar by longpressing.
+      final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)),
+      );
+      final TestGesture gesture = await tester.startGesture(
+        textOffsetToPosition(paragraph1, 6),
+      ); // at the 'r'
+      addTearDown(gesture.removePointer);
+      await tester.pump(const Duration(milliseconds: 500));
+      // `are` is selected.
+      expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+    },
+    // TODO(Renzo-Olivares): Remove this test when the web context menu
+    // for Android and iOS is re-enabled.
+    // See: https://github.com/flutter/flutter/issues/177123.
+    // [intended] Android and iOS use the flutter rendered menu on the web.
+    skip:
+        !kIsWeb ||
+        !<TargetPlatform>{
+          TargetPlatform.android,
+          TargetPlatform.iOS,
+        }.contains(defaultTargetPlatform),
+  );
+
+  testWidgets(
+    'builds the default context menu by default',
+    (WidgetTester tester) async {
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectionArea(focusNode: focusNode, child: const Text('How are you?')),
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -164,19 +213,17 @@ void main() {
     'builds a custom context menu if provided',
     (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
-      final FocusNode focusNode = FocusNode();
+      final focusNode = FocusNode();
       addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
           home: SelectionArea(
             focusNode: focusNode,
-            contextMenuBuilder: (
-              BuildContext context,
-              SelectableRegionState selectableRegionState,
-            ) {
-              return Placeholder(key: key);
-            },
+            contextMenuBuilder:
+                (BuildContext context, SelectableRegionState selectableRegionState) {
+                  return Placeholder(key: key);
+                },
             child: const Text('How are you?'),
           ),
         ),
@@ -210,7 +257,7 @@ void main() {
   testWidgets(
     'Text processing actions are added to the toolbar',
     (WidgetTester tester) async {
-      final MockProcessTextHandler mockProcessTextHandler = MockProcessTextHandler();
+      final mockProcessTextHandler = MockProcessTextHandler();
       TestWidgetsFlutterBinding.ensureInitialized().defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.processText,
         mockProcessTextHandler.handleMethodCall,
@@ -222,11 +269,13 @@ void main() {
         ),
       );
 
-      final FocusNode focusNode = FocusNode();
+      final focusNode = FocusNode();
       addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(home: SelectionArea(focusNode: focusNode, child: const Text('How are you?'))),
+        MaterialApp(
+          home: SelectionArea(focusNode: focusNode, child: const Text('How are you?')),
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -250,7 +299,7 @@ void main() {
       expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
 
       // The text processing actions are visible on Android only.
-      final bool areTextActionsSupported = defaultTargetPlatform == TargetPlatform.android;
+      final areTextActionsSupported = defaultTargetPlatform == TargetPlatform.android;
       expect(find.text(fakeAction1Label), areTextActionsSupported ? findsOneWidget : findsNothing);
       expect(find.text(fakeAction2Label), areTextActionsSupported ? findsOneWidget : findsNothing);
     },
@@ -308,7 +357,7 @@ void main() {
   testWidgets(
     'stopping drag of end handle will show the toolbar',
     (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
+      final focusNode = FocusNode();
       addTearDown(focusNode.dispose);
 
       // Regression test for https://github.com/flutter/flutter/issues/119314
@@ -364,4 +413,297 @@ void main() {
     variant: TargetPlatformVariant.mobile(),
     skip: kIsWeb, // [intended]
   );
+
+  testWidgets(
+    'Can only drag one selection handle at a time on iOS',
+    (WidgetTester tester) async {
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Scaffold(
+            body: Padding(
+              padding: const EdgeInsets.only(top: 64),
+              child: Center(
+                child: SelectionArea(
+                  focusNode: focusNode,
+                  child: const Text('one two three four five'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.text('one two three four five'), matching: find.byType(RichText)),
+      );
+      final TestGesture gesture = await tester.startGesture(
+        textOffsetToPosition(paragraph, 11),
+      ); // at the 'e'.
+      addTearDown(gesture.removePointer);
+      await tester.pump(const Duration(milliseconds: 500));
+      await gesture.up();
+      await tester.pumpAndSettle();
+      final List<TextBox> boxes = paragraph.getBoxesForSelection(paragraph.selections[0]);
+      expect(boxes.length, 1);
+      await tester.pumpAndSettle();
+      // There is a selection now.
+      expect(paragraph.selections.length, 1);
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 8, extentOffset: 13));
+
+      // This is the position of the selection handle displayed at the end.
+      final Offset endHandlePos = paragraph.localToGlobal(boxes[0].toRect().bottomRight);
+      await gesture.down(endHandlePos);
+      await gesture.moveTo(
+        textOffsetToPosition(paragraph, 22) + Offset(0, paragraph.size.height / 2),
+      );
+      await tester.pumpAndSettle();
+
+      expect(paragraph.selections.length, 1);
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 8, extentOffset: 22));
+
+      // Attempt to move the start handle while still touching the end handle.
+      final Offset startHandlePos = paragraph.localToGlobal(boxes[0].toRect().bottomLeft);
+      final TestGesture startHandleGesture = await tester.startGesture(startHandlePos);
+      addTearDown(startHandleGesture.removePointer);
+      await tester.pump();
+      await startHandleGesture.moveTo(
+        textOffsetToPosition(paragraph, 0) + Offset(0, paragraph.size.height / 2),
+      );
+      await tester.pump();
+      await gesture.up();
+      await startHandleGesture.up();
+      await tester.pumpAndSettle();
+      // Selection should not change when dragging start handle.
+      expect(paragraph.selections.length, 1);
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 8, extentOffset: 22));
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    skip: kIsWeb, // [intended]
+  );
+
+  testWidgets(
+    'Can only drag one selection handle at a time on Android web',
+    (WidgetTester tester) async {
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Scaffold(
+            body: Padding(
+              padding: const EdgeInsets.only(top: 64),
+              child: Center(
+                child: SelectionArea(
+                  focusNode: focusNode,
+                  child: const Text('one two three four five'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.text('one two three four five'), matching: find.byType(RichText)),
+      );
+      final TestGesture gesture = await tester.startGesture(
+        textOffsetToPosition(paragraph, 11),
+      ); // at the 'e'.
+      addTearDown(gesture.removePointer);
+      await tester.pump(const Duration(milliseconds: 500));
+      await gesture.up();
+      await tester.pumpAndSettle();
+      final List<TextBox> boxes = paragraph.getBoxesForSelection(paragraph.selections[0]);
+      expect(boxes.length, 1);
+      await tester.pumpAndSettle();
+      // There is a selection now.
+      expect(paragraph.selections.length, 1);
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 8, extentOffset: 13));
+
+      // This is the position of the selection handle displayed at the end.
+      final Offset endHandlePos = paragraph.localToGlobal(boxes[0].toRect().bottomRight);
+      await gesture.down(endHandlePos);
+      await gesture.moveTo(
+        textOffsetToPosition(paragraph, 22) + Offset(0, paragraph.size.height / 2),
+      );
+      await tester.pumpAndSettle();
+
+      expect(paragraph.selections.length, 1);
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 8, extentOffset: 22));
+
+      // Attempt to move the start handle while still touching the end handle.
+      final Offset startHandlePos = paragraph.localToGlobal(boxes[0].toRect().bottomLeft);
+      final TestGesture startHandleGesture = await tester.startGesture(startHandlePos);
+      addTearDown(startHandleGesture.removePointer);
+      await tester.pump();
+      await startHandleGesture.moveTo(
+        textOffsetToPosition(paragraph, 0) + Offset(0, paragraph.size.height / 2),
+      );
+      await tester.pump();
+      await gesture.up();
+      await startHandleGesture.up();
+      await tester.pumpAndSettle();
+      // Selection should not change when dragging start handle.
+      expect(paragraph.selections.length, 1);
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 8, extentOffset: 22));
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+    skip: !kIsWeb, // [intended] on native both selection handles can be dragged at a time.
+  );
+
+  testWidgets(
+    'Can drag both selection handles at a time on Android',
+    (WidgetTester tester) async {
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Scaffold(
+            body: Padding(
+              padding: const EdgeInsets.only(top: 64),
+              child: Center(
+                child: SelectionArea(
+                  focusNode: focusNode,
+                  child: const Text('one two three four five'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.text('one two three four five'), matching: find.byType(RichText)),
+      );
+      final TestGesture gesture = await tester.startGesture(
+        textOffsetToPosition(paragraph, 11),
+      ); // at the 'e'.
+      addTearDown(gesture.removePointer);
+      await tester.pump(const Duration(milliseconds: 500));
+      await gesture.up();
+      await tester.pumpAndSettle();
+      final List<TextBox> boxes = paragraph.getBoxesForSelection(paragraph.selections[0]);
+      expect(boxes.length, 1);
+      await tester.pumpAndSettle();
+      // There is a selection now.
+      expect(paragraph.selections.length, 1);
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 8, extentOffset: 13));
+
+      // This is the position of the selection handle displayed at the end.
+      final Offset endHandlePos = paragraph.localToGlobal(boxes[0].toRect().bottomRight);
+      await gesture.down(endHandlePos);
+      await gesture.moveTo(
+        textOffsetToPosition(paragraph, 22) + Offset(0, paragraph.size.height / 2),
+      );
+      await tester.pumpAndSettle();
+
+      expect(paragraph.selections.length, 1);
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 8, extentOffset: 22));
+
+      // Attempt to move the start handle while still touching the end handle.
+      final Offset startHandlePos = paragraph.localToGlobal(boxes[0].toRect().bottomLeft);
+      final TestGesture startHandleGesture = await tester.startGesture(startHandlePos);
+      addTearDown(startHandleGesture.removePointer);
+      await tester.pump();
+      await startHandleGesture.moveTo(
+        textOffsetToPosition(paragraph, 0) + Offset(0, paragraph.size.height / 2),
+      );
+      await tester.pump();
+      await gesture.up();
+      await startHandleGesture.up();
+      await tester.pumpAndSettle();
+      // Selection changes when dragging start handle.
+      expect(paragraph.selections.length, 1);
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 22));
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+    skip: kIsWeb, // [intended] on web only one selection handle can be dragged at a time.
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/174246 .
+  // This is a control case against its Web counterpart in
+  // html_element_view_test.dart.
+  testWidgets('SelectionArea applies correct mouse cursors in its empty region', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey innerRegion = GlobalKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          // Region 1 (fullscreen)
+          body: MouseRegion(
+            cursor: SystemMouseCursors.grab,
+            child: Center(
+              child: Container(
+                decoration: BoxDecoration(border: Border.all()),
+                // Region 2 (SelectionArea)
+                child: SelectionArea(
+                  child: Padding(
+                    padding: const EdgeInsetsGeometry.all(40),
+                    // Region 3 (inner MouseRegion)
+                    child: MouseRegion(
+                      key: innerRegion,
+                      cursor: SystemMouseCursors.forbidden,
+                      onHover: (_) {},
+                      child: Container(color: const Color(0xFFAA9933), width: 200, height: 50),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    const region1 = Offset(10, 10);
+    final Offset region2 = tester.getTopLeft(find.byKey(innerRegion)) - const Offset(3, 3);
+    final Offset region3 = tester.getCenter(find.byKey(innerRegion));
+
+    final TestGesture gesture = await tester.startGesture(region1, kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.grab,
+    );
+
+    await gesture.moveTo(region2);
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.grab,
+    );
+
+    await gesture.moveTo(region3);
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.forbidden,
+    );
+
+    await gesture.moveTo(region2);
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.grab,
+    );
+  }, skip: kIsWeb); // There's a Web version in html_element_view_test.dart
+
+  testWidgets('SelectionArea does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: SelectionArea(child: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SelectionArea)), Size.zero);
+  });
 }

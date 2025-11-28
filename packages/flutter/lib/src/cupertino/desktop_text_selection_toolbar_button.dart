@@ -93,13 +93,12 @@ class _CupertinoDesktopTextSelectionToolbarButtonState
               CupertinoTextSelectionToolbarButton.getButtonLabel(context, widget.buttonItem!),
           overflow: TextOverflow.ellipsis,
           style: _kToolbarButtonFontStyle.copyWith(
-            color:
-                _isHovered
-                    ? CupertinoTheme.of(context).primaryContrastingColor
-                    : const CupertinoDynamicColor.withBrightness(
-                      color: CupertinoColors.black,
-                      darkColor: CupertinoColors.white,
-                    ).resolveFrom(context),
+            color: _isHovered
+                ? CupertinoTheme.of(context).primaryContrastingColor
+                : const CupertinoDynamicColor.withBrightness(
+                    color: CupertinoColors.black,
+                    darkColor: CupertinoColors.white,
+                  ).resolveFrom(context),
           ),
         );
 

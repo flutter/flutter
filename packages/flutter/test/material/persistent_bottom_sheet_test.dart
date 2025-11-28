@@ -80,7 +80,9 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/83668
   testWidgets('Scaffold.bottomSheet update test', (WidgetTester tester) async {
     Widget buildFrame(Widget? bottomSheet) {
-      return MaterialApp(home: Scaffold(body: const Placeholder(), bottomSheet: bottomSheet));
+      return MaterialApp(
+        home: Scaffold(body: const Placeholder(), bottomSheet: bottomSheet),
+      );
     }
 
     await tester.pumpWidget(buildFrame(const Text('I love Flutter!')));
@@ -93,11 +95,16 @@ void main() {
   testWidgets(
     'Verify that a BottomSheet can be rebuilt with ScaffoldFeatureController.setState()',
     (WidgetTester tester) async {
-      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-      int buildCount = 0;
+      final scaffoldKey = GlobalKey<ScaffoldState>();
+      var buildCount = 0;
 
       await tester.pumpWidget(
-        MaterialApp(home: Scaffold(key: scaffoldKey, body: const Center(child: Text('body')))),
+        MaterialApp(
+          home: Scaffold(
+            key: scaffoldKey,
+            body: const Center(child: Text('body')),
+          ),
+        ),
       );
 
       final PersistentBottomSheetController bottomSheet = scaffoldKey.currentState!.showBottomSheet(
@@ -155,10 +162,15 @@ void main() {
   });
 
   testWidgets('Verify that a scrollable BottomSheet can be dismissed', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(
-      MaterialApp(home: Scaffold(key: scaffoldKey, body: const Center(child: Text('body')))),
+      MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          body: const Center(child: Text('body')),
+        ),
+      ),
     );
 
     scaffoldKey.currentState!.showBottomSheet((BuildContext context) {
@@ -186,10 +198,15 @@ void main() {
   testWidgets(
     'Verify DraggableScrollableSheet.shouldCloseOnMinExtent == false prevents dismissal',
     (WidgetTester tester) async {
-      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+      final scaffoldKey = GlobalKey<ScaffoldState>();
 
       await tester.pumpWidget(
-        MaterialApp(home: Scaffold(key: scaffoldKey, body: const Center(child: Text('body')))),
+        MaterialApp(
+          home: Scaffold(
+            key: scaffoldKey,
+            body: const Center(child: Text('body')),
+          ),
+        ),
       );
 
       scaffoldKey.currentState!.showBottomSheet((BuildContext context) {
@@ -222,10 +239,15 @@ void main() {
   );
 
   testWidgets('Verify that a BottomSheet animates non-linearly', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(
-      MaterialApp(home: Scaffold(key: scaffoldKey, body: const Center(child: Text('body')))),
+      MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          body: const Center(child: Text('body')),
+        ),
+      ),
     );
 
     scaffoldKey.currentState!.showBottomSheet((BuildContext context) {
@@ -256,10 +278,15 @@ void main() {
   testWidgets('Verify that a scrollControlled BottomSheet can be dismissed', (
     WidgetTester tester,
   ) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(
-      MaterialApp(home: Scaffold(key: scaffoldKey, body: const Center(child: Text('body')))),
+      MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          body: const Center(child: Text('body')),
+        ),
+      ),
     );
 
     scaffoldKey.currentState!.showBottomSheet((BuildContext context) {
@@ -401,7 +428,7 @@ void main() {
   testWidgets('Verify that a scrollable BottomSheet hides the fab when scrolled up', (
     WidgetTester tester,
   ) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -453,9 +480,13 @@ void main() {
 
   testWidgets('showBottomSheet()', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
-    await tester.pumpWidget(MaterialApp(home: Scaffold(body: Placeholder(key: key))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: Placeholder(key: key)),
+      ),
+    );
 
-    int buildCount = 0;
+    var buildCount = 0;
     showBottomSheet(
       context: key.currentContext!,
       builder: (BuildContext context) {
@@ -566,7 +597,9 @@ void main() {
   testWidgets('Scaffold.bottomSheet should be updated without creating a new RO'
       ' when the new widget has the same key and type.', (WidgetTester tester) async {
     Widget buildFrame(String text) {
-      return MaterialApp(home: Scaffold(body: const Placeholder(), bottomSheet: Text(text)));
+      return MaterialApp(
+        home: Scaffold(body: const Placeholder(), bottomSheet: Text(text)),
+      );
     }
 
     await tester.pumpWidget(buildFrame('I love Flutter!'));
@@ -582,16 +615,21 @@ void main() {
   });
 
   testWidgets('Verify that visual properties are passed through', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final scaffoldKey = GlobalKey<ScaffoldState>();
     const Color color = Colors.pink;
-    const double elevation = 9.0;
+    const elevation = 9.0;
     const ShapeBorder shape = BeveledRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(12)),
     );
     const Clip clipBehavior = Clip.antiAlias;
 
     await tester.pumpWidget(
-      MaterialApp(home: Scaffold(key: scaffoldKey, body: const Center(child: Text('body')))),
+      MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          body: const Center(child: Text('body')),
+        ),
+      ),
     );
 
     scaffoldKey.currentState!.showBottomSheet(
@@ -626,7 +664,12 @@ void main() {
   ) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
     await tester.pumpWidget(
-      MaterialApp(home: Scaffold(key: scaffoldKey, body: const Center(child: Text('body')))),
+      MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          body: const Center(child: Text('body')),
+        ),
+      ),
     );
 
     final PersistentBottomSheetController bottomSheet = scaffoldKey.currentState!.showBottomSheet((

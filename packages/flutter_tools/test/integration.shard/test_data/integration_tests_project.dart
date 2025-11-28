@@ -11,7 +11,7 @@ import 'tests_project.dart';
 
 class IntegrationTestsProject extends Project implements TestsProject {
   @override
-  final String pubspec = '''
+  final pubspec = '''
   name: test
   environment:
     sdk: ^3.7.0-0
@@ -31,7 +31,7 @@ class IntegrationTestsProject extends Project implements TestsProject {
   String get main => '// Unused';
 
   @override
-  final String testContent = r'''
+  final testContent = r'''
   import 'package:flutter_test/flutter_test.dart';
   import 'package:integration_test/integration_test.dart';
 

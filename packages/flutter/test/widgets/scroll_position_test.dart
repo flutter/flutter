@@ -24,7 +24,7 @@ class ThePositiveNumbers extends StatelessWidget {
 }
 
 Future<void> performTest(WidgetTester tester, bool maintainState) async {
-  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  final navigatorKey = GlobalKey<NavigatorState>();
   await tester.pumpWidget(
     Directionality(
       textDirection: TextDirection.ltr,
@@ -138,7 +138,7 @@ void main() {
   testWidgets("ScrollPosition jumpTo() doesn't call notifyListeners twice", (
     WidgetTester tester,
   ) async {
-    int count = 0;
+    var count = 0;
     await tester.pumpWidget(
       MaterialApp(
         home: ListView.builder(
@@ -165,31 +165,29 @@ void main() {
 
   testWidgets('scroll alignment is honored by ensureVisible', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(11, (int index) => index).toList();
-    final List<FocusNode> nodes =
-        List<FocusNode>.generate(
-          11,
-          (int index) => FocusNode(debugLabel: 'Item ${index + 1}'),
-        ).toList();
+    final List<FocusNode> nodes = List<FocusNode>.generate(
+      11,
+      (int index) => FocusNode(debugLabel: 'Item ${index + 1}'),
+    ).toList();
     addTearDown(() {
-      for (final FocusNode node in nodes) {
+      for (final node in nodes) {
         node.dispose();
       }
     });
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: ListView(
           controller: controller,
-          children:
-              items.map<Widget>((int item) {
-                return Focus(
-                  key: ValueKey<int>(item),
-                  focusNode: nodes[item],
-                  child: Container(height: 110),
-                );
-              }).toList(),
+          children: items.map<Widget>((int item) {
+            return Focus(
+              key: ValueKey<int>(item),
+              focusNode: nodes[item],
+              child: Container(height: 110),
+            );
+          }).toList(),
         ),
       ),
     );
@@ -238,8 +236,8 @@ void main() {
   });
 
   testWidgets('jumpTo recommends deferred loading', (WidgetTester tester) async {
-    int loadedWithDeferral = 0;
-    int buildCount = 0;
+    var loadedWithDeferral = 0;
+    var buildCount = 0;
     const double height = 500;
     await tester.pumpWidget(
       MaterialApp(

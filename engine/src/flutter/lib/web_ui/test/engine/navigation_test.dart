@@ -25,11 +25,11 @@ void testMain() {
     test('Handles navigation gracefully when no implicit view exists', () async {
       expect(EnginePlatformDispatcher.instance.implicitView, isNull);
 
-      final Completer<ByteData?> completer = Completer<ByteData?>();
+      final completer = Completer<ByteData?>();
       ui.PlatformDispatcher.instance.sendPlatformMessage(
         'flutter/navigation',
         codec.encodeMethodCall(
-          const MethodCall('routeUpdated', <String, dynamic>{'routeName': '/foo'}),
+          const MethodCall('routeInformationUpdated', <String, dynamic>{'location': '/foo'}),
         ),
         (ByteData? response) => completer.complete(response),
       );
@@ -49,11 +49,11 @@ void testMain() {
     });
 
     test('Tracks pushed, replaced and popped routes', () async {
-      final Completer<void> completer = Completer<void>();
+      final completer = Completer<void>();
       ui.PlatformDispatcher.instance.sendPlatformMessage(
         'flutter/navigation',
         codec.encodeMethodCall(
-          const MethodCall('routeUpdated', <String, dynamic>{'routeName': '/foo'}),
+          const MethodCall('routeInformationUpdated', <String, dynamic>{'location': '/foo'}),
         ),
         (_) => completer.complete(),
       );

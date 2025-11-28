@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -13,8 +14,8 @@ PopupMenuThemeData _popupMenuThemeM2() {
     shape: const BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
     elevation: 12.0,
     textStyle: const TextStyle(color: Color(0xffffffff), textBaseline: TextBaseline.alphabetic),
-    mouseCursor: MaterialStateProperty.resolveWith<MouseCursor?>((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    mouseCursor: WidgetStateProperty.resolveWith<MouseCursor?>((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return SystemMouseCursors.contextMenu;
       }
       return SystemMouseCursors.alias;
@@ -30,14 +31,14 @@ PopupMenuThemeData _popupMenuThemeM3() {
     elevation: 12.0,
     shadowColor: const Color(0xff00ff00),
     surfaceTintColor: const Color(0xff00ff00),
-    labelTextStyle: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    labelTextStyle: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return const TextStyle(color: Color(0xfff99ff0), fontSize: 12.0);
       }
       return const TextStyle(color: Color(0xfff12099), fontSize: 17.0);
     }),
-    mouseCursor: MaterialStateProperty.resolveWith<MouseCursor?>((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    mouseCursor: WidgetStateProperty.resolveWith<MouseCursor?>((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return SystemMouseCursors.contextMenu;
       }
       return SystemMouseCursors.alias;
@@ -55,12 +56,12 @@ void main() {
 
   test('PopupMenuThemeData lerp special cases', () {
     expect(PopupMenuThemeData.lerp(null, null, 0), null);
-    const PopupMenuThemeData data = PopupMenuThemeData();
+    const data = PopupMenuThemeData();
     expect(identical(PopupMenuThemeData.lerp(data, data, 0.5), data), true);
   });
 
   test('PopupMenuThemeData null fields by default', () {
-    const PopupMenuThemeData popupMenuTheme = PopupMenuThemeData();
+    const popupMenuTheme = PopupMenuThemeData();
     expect(popupMenuTheme.color, null);
     expect(popupMenuTheme.shape, null);
     expect(popupMenuTheme.menuPadding, null);
@@ -74,20 +75,19 @@ void main() {
   });
 
   testWidgets('Default PopupMenuThemeData debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const PopupMenuThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
 
   testWidgets('PopupMenuThemeData implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     PopupMenuThemeData(
       color: const Color(0xfffffff1),
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0))),
@@ -96,24 +96,23 @@ void main() {
       shadowColor: const Color(0xfffffff2),
       surfaceTintColor: const Color(0xfffffff3),
       textStyle: const TextStyle(color: Color(0xfffffff4)),
-      labelTextStyle: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      labelTextStyle: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return const TextStyle(color: Color(0xfffffff5), fontSize: 12.0);
         }
         return const TextStyle(color: Color(0xfffffff6), fontSize: 17.0);
       }),
       enableFeedback: false,
-      mouseCursor: MaterialStateMouseCursor.clickable,
+      mouseCursor: WidgetStateMouseCursor.clickable,
       position: PopupMenuPosition.over,
       iconColor: const Color(0xfffffff8),
       iconSize: 31.0,
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'color: ${const Color(0xfffffff1)}',
@@ -137,7 +136,7 @@ void main() {
     final Key popupButtonApp = UniqueKey();
     final Key enabledPopupItemKey = UniqueKey();
     final Key disabledPopupItemKey = UniqueKey();
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -232,7 +231,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
 
     // Test unchecked CheckedPopupMenuItem label.
@@ -371,18 +370,18 @@ void main() {
     final Key popupButtonApp = UniqueKey();
     final Key popupItemKey = UniqueKey();
 
-    const Color color = Color(0xfff11fff);
-    const Color surfaceTintColor = Color(0xfff12fff);
-    const Color shadowColor = Color(0xfff13fff);
+    const color = Color(0xfff11fff);
+    const surfaceTintColor = Color(0xfff12fff);
+    const shadowColor = Color(0xfff13fff);
     const ShapeBorder shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(9.0)),
     );
     const EdgeInsets menuPadding = EdgeInsets.zero;
-    const double elevation = 7.0;
-    const TextStyle textStyle = TextStyle(color: Color(0xfff14fff), fontSize: 19.0);
+    const elevation = 7.0;
+    const textStyle = TextStyle(color: Color(0xfff14fff), fontSize: 19.0);
     const MouseCursor cursor = SystemMouseCursors.forbidden;
-    const Color iconColor = Color(0xfff15fff);
-    const double iconSize = 21.5;
+    const iconColor = Color(0xfff15fff);
+    const iconSize = 21.5;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -405,13 +404,13 @@ void main() {
                   return <PopupMenuEntry<void>>[
                     PopupMenuItem<void>(
                       key: popupItemKey,
-                      labelTextStyle: MaterialStateProperty.all<TextStyle>(textStyle),
+                      labelTextStyle: WidgetStateProperty.all<TextStyle>(textStyle),
                       mouseCursor: cursor,
                       child: const Text('Example'),
                     ),
                     CheckedPopupMenuItem<void>(
                       checked: true,
-                      labelTextStyle: MaterialStateProperty.all<TextStyle>(textStyle),
+                      labelTextStyle: WidgetStateProperty.all<TextStyle>(textStyle),
                       child: const Text('Checked item'),
                     ),
                   ];
@@ -479,7 +478,7 @@ void main() {
       final Key popupButtonApp = UniqueKey();
       final Key enabledPopupItemKey = UniqueKey();
       final Key disabledPopupItemKey = UniqueKey();
-      final ThemeData theme = ThemeData(useMaterial3: false);
+      final theme = ThemeData(useMaterial3: false);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -573,7 +572,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-        SystemMouseCursors.click,
+        kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
       );
 
       // Check popup menu padding.
@@ -684,8 +683,8 @@ void main() {
       const ShapeBorder shape = RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(9.0)),
       );
-      const double elevation = 7.0;
-      const TextStyle textStyle = TextStyle(color: Color(0xffffffef), fontSize: 19.0);
+      const elevation = 7.0;
+      const textStyle = TextStyle(color: Color(0xffffffef), fontSize: 19.0);
       const MouseCursor cursor = SystemMouseCursors.forbidden;
 
       await tester.pumpWidget(
@@ -706,7 +705,7 @@ void main() {
                     return <PopupMenuEntry<void>>[
                       PopupMenuItem<void>(
                         key: popupItemKey,
-                        labelTextStyle: MaterialStateProperty.all<TextStyle>(textStyle),
+                        labelTextStyle: WidgetStateProperty.all<TextStyle>(textStyle),
                         mouseCursor: cursor,
                         child: const Text('Example'),
                       ),
@@ -754,8 +753,8 @@ void main() {
   });
 }
 
-Set<MaterialState> enabled = <MaterialState>{};
-Set<MaterialState> disabled = <MaterialState>{MaterialState.disabled};
+Set<WidgetState> enabled = <WidgetState>{};
+Set<WidgetState> disabled = <WidgetState>{WidgetState.disabled};
 
 TextStyle? _iconStyle(WidgetTester tester, IconData icon) {
   return tester

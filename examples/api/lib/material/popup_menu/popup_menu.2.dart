@@ -19,11 +19,12 @@ class PopupMenuApp extends StatelessWidget {
 
 enum AnimationStyles { defaultStyle, custom, none }
 
-const List<(AnimationStyles, String)> animationStyleSegments = <(AnimationStyles, String)>[
-  (AnimationStyles.defaultStyle, 'Default'),
-  (AnimationStyles.custom, 'Custom'),
-  (AnimationStyles.none, 'None'),
-];
+const List<(AnimationStyles, String)> animationStyleSegments =
+    <(AnimationStyles, String)>[
+      (AnimationStyles.defaultStyle, 'Default'),
+      (AnimationStyles.custom, 'Custom'),
+      (AnimationStyles.none, 'None'),
+    ];
 
 enum Menu { preview, share, getLink, remove, download }
 
@@ -35,7 +36,9 @@ class PopupMenuExample extends StatefulWidget {
 }
 
 class _PopupMenuExampleState extends State<PopupMenuExample> {
-  Set<AnimationStyles> _animationStyleSelection = <AnimationStyles>{AnimationStyles.defaultStyle};
+  Set<AnimationStyles> _animationStyleSelection = <AnimationStyles>{
+    AnimationStyles.defaultStyle,
+  };
   AnimationStyle? _animationStyle;
 
   @override
@@ -68,60 +71,60 @@ class _PopupMenuExampleState extends State<PopupMenuExample> {
                       }
                     });
                   },
-                  segments:
-                      animationStyleSegments.map<ButtonSegment<AnimationStyles>>((
+                  segments: animationStyleSegments
+                      .map<ButtonSegment<AnimationStyles>>((
                         (AnimationStyles, String) shirt,
                       ) {
                         return ButtonSegment<AnimationStyles>(
                           value: shirt.$1,
                           label: Text(shirt.$2),
                         );
-                      }).toList(),
+                      })
+                      .toList(),
                 ),
                 const SizedBox(height: 10),
                 PopupMenuButton<Menu>(
                   popUpAnimationStyle: _animationStyle,
                   icon: const Icon(Icons.more_vert),
                   onSelected: (Menu item) {},
-                  itemBuilder:
-                      (BuildContext context) => <PopupMenuEntry<Menu>>[
-                        const PopupMenuItem<Menu>(
-                          value: Menu.preview,
-                          child: ListTile(
-                            leading: Icon(Icons.visibility_outlined),
-                            title: Text('Preview'),
-                          ),
-                        ),
-                        const PopupMenuItem<Menu>(
-                          value: Menu.share,
-                          child: ListTile(
-                            leading: Icon(Icons.share_outlined),
-                            title: Text('Share'),
-                          ),
-                        ),
-                        const PopupMenuItem<Menu>(
-                          value: Menu.getLink,
-                          child: ListTile(
-                            leading: Icon(Icons.link_outlined),
-                            title: Text('Get link'),
-                          ),
-                        ),
-                        const PopupMenuDivider(),
-                        const PopupMenuItem<Menu>(
-                          value: Menu.remove,
-                          child: ListTile(
-                            leading: Icon(Icons.delete_outline),
-                            title: Text('Remove'),
-                          ),
-                        ),
-                        const PopupMenuItem<Menu>(
-                          value: Menu.download,
-                          child: ListTile(
-                            leading: Icon(Icons.download_outlined),
-                            title: Text('Download'),
-                          ),
-                        ),
-                      ],
+                  itemBuilder: (BuildContext context) => <PopupMenuEntry<Menu>>[
+                    const PopupMenuItem<Menu>(
+                      value: Menu.preview,
+                      child: ListTile(
+                        leading: Icon(Icons.visibility_outlined),
+                        title: Text('Preview'),
+                      ),
+                    ),
+                    const PopupMenuItem<Menu>(
+                      value: Menu.share,
+                      child: ListTile(
+                        leading: Icon(Icons.share_outlined),
+                        title: Text('Share'),
+                      ),
+                    ),
+                    const PopupMenuItem<Menu>(
+                      value: Menu.getLink,
+                      child: ListTile(
+                        leading: Icon(Icons.link_outlined),
+                        title: Text('Get link'),
+                      ),
+                    ),
+                    const PopupMenuDivider(),
+                    const PopupMenuItem<Menu>(
+                      value: Menu.remove,
+                      child: ListTile(
+                        leading: Icon(Icons.delete_outline),
+                        title: Text('Remove'),
+                      ),
+                    ),
+                    const PopupMenuItem<Menu>(
+                      value: Menu.download,
+                      child: ListTile(
+                        leading: Icon(Icons.download_outlined),
+                        title: Text('Download'),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

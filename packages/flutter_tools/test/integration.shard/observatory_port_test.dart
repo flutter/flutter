@@ -13,7 +13,7 @@ import 'test_data/basic_project.dart';
 import 'test_utils.dart';
 
 Future<int> getFreePort() async {
-  int port = 0;
+  var port = 0;
   final ServerSocket serverSocket = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
   port = serverSocket.port;
   await serverSocket.close();
@@ -21,7 +21,7 @@ Future<int> getFreePort() async {
 }
 
 Future<void> waitForVmServiceMessage(Process process, int port) async {
-  final Completer<void> completer = Completer<void>();
+  final completer = Completer<void>();
   process.stdout.transform(utf8.decoder).listen((String line) {
     printOnFailure(line);
     if (line.contains(
@@ -42,7 +42,7 @@ Future<void> waitForVmServiceMessage(Process process, int port) async {
 
 void main() {
   late Directory tempDir;
-  final BasicProject project = BasicProject();
+  final project = BasicProject();
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('run_test.');

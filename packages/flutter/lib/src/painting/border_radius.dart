@@ -11,6 +11,7 @@ library;
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
+import 'debug.dart';
 
 /// Base class for [BorderRadius] that allows for text-direction aware resolution.
 ///
@@ -229,9 +230,9 @@ abstract class BorderRadiusGeometry {
       }
     } else {
       // visuals aren't the same and at least one isn't zero
-      final StringBuffer result = StringBuffer();
+      final result = StringBuffer();
       result.write('BorderRadius.only(');
-      bool comma = false;
+      var comma = false;
       if (_topLeft != Radius.zero) {
         result.write('topLeft: $_topLeft');
         comma = true;
@@ -269,9 +270,9 @@ abstract class BorderRadiusGeometry {
       }
     } else {
       // logicals aren't the same and at least one isn't zero
-      final StringBuffer result = StringBuffer();
+      final result = StringBuffer();
       result.write('BorderRadiusDirectional.only(');
-      bool comma = false;
+      var comma = false;
       if (_topStart != Radius.zero) {
         result.write('topStart: $_topStart');
         comma = true;
@@ -785,7 +786,7 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
 
   @override
   BorderRadius resolve(TextDirection? direction) {
-    assert(direction != null);
+    assert(debugCheckCanResolveTextDirection(direction, '$BorderRadiusDirectional'));
     switch (direction!) {
       case TextDirection.rtl:
         return BorderRadius.only(
@@ -914,7 +915,7 @@ class _MixedBorderRadius extends BorderRadiusGeometry {
 
   @override
   BorderRadius resolve(TextDirection? direction) {
-    assert(direction != null);
+    assert(debugCheckCanResolveTextDirection(direction, '$_MixedBorderRadius'));
     switch (direction!) {
       case TextDirection.rtl:
         return BorderRadius.only(

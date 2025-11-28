@@ -10,6 +10,7 @@
 #include <string>
 #include <string_view>
 #include <utility>
+#include <vector>
 
 #include "impeller.h"
 
@@ -25,7 +26,7 @@
 
 // Tripping this assertion means that the C++ wrapper needs to be updated to
 // account for impeller.h changes as necessary.
-static_assert(IMPELLER_VERSION == IMPELLER_MAKE_VERSION(1, 1, 3, 0),
+static_assert(IMPELLER_VERSION == IMPELLER_MAKE_VERSION(1, 1, 4, 0),
               "C++ bindings must be for the same version as the C API.");
 
 namespace IMPELLER_HPP_NAMESPACE {
@@ -50,6 +51,7 @@ struct Proc {
   PROC(ImpellerColorFilterRelease)                                \
   PROC(ImpellerColorFilterRetain)                                 \
   PROC(ImpellerColorSourceCreateConicalGradientNew)               \
+  PROC(ImpellerColorSourceCreateFragmentProgramNew)               \
   PROC(ImpellerColorSourceCreateImageNew)                         \
   PROC(ImpellerColorSourceCreateLinearGradientNew)                \
   PROC(ImpellerColorSourceCreateRadialGradientNew)                \
@@ -97,6 +99,9 @@ struct Proc {
   PROC(ImpellerDisplayListBuilderTranslate)                       \
   PROC(ImpellerDisplayListRelease)                                \
   PROC(ImpellerDisplayListRetain)                                 \
+  PROC(ImpellerFragmentProgramNew)                                \
+  PROC(ImpellerFragmentProgramRelease)                            \
+  PROC(ImpellerFragmentProgramRetain)                             \
   PROC(ImpellerGetVersion)                                        \
   PROC(ImpellerGlyphInfoGetGraphemeClusterBounds)                 \
   PROC(ImpellerGlyphInfoGetGraphemeClusterCodeUnitRangeBegin)     \
@@ -109,6 +114,7 @@ struct Proc {
   PROC(ImpellerImageFilterCreateComposeNew)                       \
   PROC(ImpellerImageFilterCreateDilateNew)                        \
   PROC(ImpellerImageFilterCreateErodeNew)                         \
+  PROC(ImpellerImageFilterCreateFragmentProgramNew)               \
   PROC(ImpellerImageFilterCreateMatrixNew)                        \
   PROC(ImpellerImageFilterRelease)                                \
   PROC(ImpellerImageFilterRetain)                                 \
@@ -120,10 +126,10 @@ struct Proc {
   PROC(ImpellerLineMetricsGetCodeUnitStartIndex)                  \
   PROC(ImpellerLineMetricsGetDescent)                             \
   PROC(ImpellerLineMetricsGetHeight)                              \
-  PROC(ImpellerLineMetricsIsHardbreak)                            \
   PROC(ImpellerLineMetricsGetLeft)                                \
   PROC(ImpellerLineMetricsGetUnscaledAscent)                      \
   PROC(ImpellerLineMetricsGetWidth)                               \
+  PROC(ImpellerLineMetricsIsHardbreak)                            \
   PROC(ImpellerLineMetricsRelease)                                \
   PROC(ImpellerLineMetricsRetain)                                 \
   PROC(ImpellerMaskFilterCreateBlurNew)                           \
@@ -168,6 +174,7 @@ struct Proc {
   PROC(ImpellerParagraphStyleRelease)                             \
   PROC(ImpellerParagraphStyleRetain)                              \
   PROC(ImpellerParagraphStyleSetBackground)                       \
+  PROC(ImpellerParagraphStyleSetEllipsis)                         \
   PROC(ImpellerParagraphStyleSetFontFamily)                       \
   PROC(ImpellerParagraphStyleSetFontSize)                         \
   PROC(ImpellerParagraphStyleSetFontStyle)                        \
@@ -178,6 +185,7 @@ struct Proc {
   PROC(ImpellerParagraphStyleSetMaxLines)                         \
   PROC(ImpellerParagraphStyleSetTextAlignment)                    \
   PROC(ImpellerParagraphStyleSetTextDirection)                    \
+  PROC(ImpellerParagraphStyleSetTextDecoration)                   \
   PROC(ImpellerPathBuilderAddArc)                                 \
   PROC(ImpellerPathBuilderAddOval)                                \
   PROC(ImpellerPathBuilderAddRect)                                \
@@ -192,6 +200,7 @@ struct Proc {
   PROC(ImpellerPathBuilderRelease)                                \
   PROC(ImpellerPathBuilderRetain)                                 \
   PROC(ImpellerPathBuilderTakePathNew)                            \
+  PROC(ImpellerPathGetBounds)                                     \
   PROC(ImpellerPathRelease)                                       \
   PROC(ImpellerPathRetain)                                        \
   PROC(ImpellerSurfaceCreateWrappedFBONew)                        \
@@ -230,7 +239,7 @@ struct ProcTable {
     return true;
   }
 
-#define IMPELLER_HPP_PROC(name) Proc<decltype(name)> name = {#name, nullptr};
+#define IMPELLER_HPP_PROC(name) Proc<decltype(name)> name = {#name};
   IMPELLER_HPP_EACH_PROC(IMPELLER_HPP_PROC)
 #undef IMPELLER_HPP_PROC
 };
@@ -309,6 +318,7 @@ IMPELLER_HPP_DEFINE_TRAITS(ImpellerColorSource);
 IMPELLER_HPP_DEFINE_TRAITS(ImpellerContext);
 IMPELLER_HPP_DEFINE_TRAITS(ImpellerDisplayList);
 IMPELLER_HPP_DEFINE_TRAITS(ImpellerDisplayListBuilder);
+IMPELLER_HPP_DEFINE_TRAITS(ImpellerFragmentProgram);
 IMPELLER_HPP_DEFINE_TRAITS(ImpellerGlyphInfo);
 IMPELLER_HPP_DEFINE_TRAITS(ImpellerImageFilter);
 IMPELLER_HPP_DEFINE_TRAITS(ImpellerLineMetrics);
@@ -326,7 +336,7 @@ IMPELLER_HPP_DEFINE_TRAITS(ImpellerVulkanSwapchain);
 
 #undef IMPELLER_HPP_DEFINE_TRAITS
 
-class Mapping final {
+class Mapping {
  public:
   Mapping(const uint8_t* mapping,
           size_t size,
@@ -334,6 +344,12 @@ class Mapping final {
       : mapping_(mapping),
         size_(size),
         release_callback_(std::move(release_callback)) {}
+
+  ~Mapping() {
+    if (release_callback_) {
+      release_callback_();
+    }
+  }
 
   const uint8_t* GetMapping() const { return mapping_; }
 
@@ -348,7 +364,7 @@ class Mapping final {
 //------------------------------------------------------------------------------
 /// @see      ImpellerContext
 ///
-class Context final : public Object<ImpellerContext, ImpellerContextTraits> {
+class Context : public Object<ImpellerContext, ImpellerContextTraits> {
  public:
   Context(ImpellerContext context, AdoptTag tag) : Object(context, tag) {}
 
@@ -385,7 +401,7 @@ class Context final : public Object<ImpellerContext, ImpellerContextTraits> {
 //------------------------------------------------------------------------------
 /// @see      ImpellerTexture
 ///
-class Texture final : public Object<ImpellerTexture, ImpellerTextureTraits> {
+class Texture : public Object<ImpellerTexture, ImpellerTextureTraits> {
  public:
   Texture(ImpellerTexture texture, AdoptTag adopt) : Object(texture, adopt) {}
 
@@ -436,7 +452,7 @@ class Texture final : public Object<ImpellerTexture, ImpellerTextureTraits> {
 //------------------------------------------------------------------------------
 /// @see      ImpellerColorFilter
 ///
-class ColorFilter final
+class ColorFilter
     : public Object<ImpellerColorFilter, ImpellerColorFilterTraits> {
  public:
   ColorFilter(ImpellerColorFilter filter, AdoptTag tag) : Object(filter, tag) {}
@@ -461,9 +477,31 @@ class ColorFilter final
 };
 
 //------------------------------------------------------------------------------
+/// @see      ImpellerFragmentProgram
+///
+class FragmentProgram
+    : public Object<ImpellerFragmentProgram, ImpellerFragmentProgramTraits> {
+ public:
+  FragmentProgram(ImpellerFragmentProgram program, AdoptTag tag)
+      : Object(program, tag) {}
+
+  static FragmentProgram WithData(std::unique_ptr<Mapping> data) {
+    ImpellerMapping c_mapping = {};
+    c_mapping.data = data->GetMapping();
+    c_mapping.length = data->GetSize();
+    c_mapping.on_release = [](void* user_data) {
+      delete reinterpret_cast<Mapping*>(user_data);
+    };
+    return FragmentProgram(
+        gGlobalProcTable.ImpellerFragmentProgramNew(&c_mapping, data.release()),
+        AdoptTag::kAdopt);
+  }
+};
+
+//------------------------------------------------------------------------------
 /// @see      ImpellerColorSource
 ///
-class ColorSource final
+class ColorSource
     : public Object<ImpellerColorSource, ImpellerColorSourceTraits> {
  public:
   ColorSource(ImpellerColorSource source, AdoptTag tag) : Object(source, tag) {}
@@ -587,12 +625,32 @@ class ColorSource final
             ),
         AdoptTag::kAdopt);
   }
+
+  //----------------------------------------------------------------------------
+  /// @see      ImpellerColorSourceCreateFragmentProgramNew
+  ///
+  static ColorSource FragmentProgram(
+      const Context& context,
+      const FragmentProgram& program,
+      const std::vector<ImpellerTexture>& samplers,
+      const Mapping* uniform_data) {
+    return ColorSource(
+        gGlobalProcTable.ImpellerColorSourceCreateFragmentProgramNew(
+            context.Get(),                                                   //
+            program.Get(),                                                   //
+            const_cast<ImpellerTexture*>(samplers.data()),                   //
+            samplers.size(),                                                 //
+            uniform_data != nullptr ? uniform_data->GetMapping() : nullptr,  //
+            uniform_data != nullptr ? uniform_data->GetSize() : 0u           //
+            ),
+        AdoptTag::kAdopt);
+  }
 };
 
 //------------------------------------------------------------------------------
 /// @see      ImpellerImageFilter
 ///
-class ImageFilter final
+class ImageFilter
     : public Object<ImpellerImageFilter, ImpellerImageFilterTraits> {
  public:
   ImageFilter(ImpellerImageFilter filter, AdoptTag tag) : Object(filter, tag) {}
@@ -645,13 +703,32 @@ class ImageFilter final
         gGlobalProcTable.ImpellerImageFilterCreateMatrixNew(&matrix, sampling),
         AdoptTag::kAdopt);
   }
+
+  //----------------------------------------------------------------------------
+  /// @see      ImpellerImageFilterCreateFragmentProgramNew
+  ///
+  static ImageFilter FragmentProgram(
+      const Context& context,
+      const FragmentProgram& program,
+      const std::vector<ImpellerTexture>& samplers,
+      const Mapping* uniform_data) {
+    return ImageFilter(
+        gGlobalProcTable.ImpellerImageFilterCreateFragmentProgramNew(
+            context.Get(),                                                   //
+            program.Get(),                                                   //
+            const_cast<ImpellerTexture*>(samplers.data()),                   //
+            samplers.size(),                                                 //
+            uniform_data != nullptr ? uniform_data->GetMapping() : nullptr,  //
+            uniform_data != nullptr ? uniform_data->GetSize() : 0u           //
+            ),
+        AdoptTag::kAdopt);
+  }
 };
 
 //------------------------------------------------------------------------------
 /// @see      ImpellerMaskFilter
 ///
-class MaskFilter final
-    : public Object<ImpellerMaskFilter, ImpellerMaskFilterTraits> {
+class MaskFilter : public Object<ImpellerMaskFilter, ImpellerMaskFilterTraits> {
  public:
   MaskFilter(ImpellerMaskFilter filter, AdoptTag tag) : Object(filter, tag) {}
 
@@ -668,8 +745,7 @@ class MaskFilter final
 //------------------------------------------------------------------------------
 /// @see      ImpellerGlyphInfo
 ///
-class GlyphInfo final
-    : public Object<ImpellerGlyphInfo, ImpellerGlyphInfoTraits> {
+class GlyphInfo : public Object<ImpellerGlyphInfo, ImpellerGlyphInfoTraits> {
  public:
   GlyphInfo(ImpellerGlyphInfo info, AdoptTag tag) : Object(info, tag) {}
 
@@ -693,7 +769,9 @@ class GlyphInfo final
   /// @see      ImpellerGlyphInfoGetGraphemeClusterBounds
   ///
   ImpellerRect GetGraphemeClusterBounds() const {
-    return gGlobalProcTable.ImpellerGlyphInfoGetGraphemeClusterBounds(Get());
+    ImpellerRect rect = {};
+    gGlobalProcTable.ImpellerGlyphInfoGetGraphemeClusterBounds(Get(), &rect);
+    return rect;
   }
 
   //----------------------------------------------------------------------------
@@ -714,7 +792,7 @@ class GlyphInfo final
 //------------------------------------------------------------------------------
 /// @see      ImpellerLineMetrics
 ///
-class LineMetrics final
+class LineMetrics
     : public Object<ImpellerLineMetrics, ImpellerLineMetricsTraits> {
  public:
   LineMetrics(ImpellerLineMetrics metrics, AdoptTag tag)
@@ -811,8 +889,7 @@ class LineMetrics final
 //------------------------------------------------------------------------------
 /// @see      ImpellerParagraph
 ///
-class Paragraph final
-    : public Object<ImpellerParagraph, ImpellerParagraphTraits> {
+class Paragraph : public Object<ImpellerParagraph, ImpellerParagraphTraits> {
  public:
   Paragraph(ImpellerParagraph paragraph, AdoptTag tag)
       : Object(paragraph, AdoptTag::kAdopt) {}
@@ -910,15 +987,17 @@ class Paragraph final
   /// @see      ImpellerParagraphGetWordBoundary
   ///
   ImpellerRange GetWordBoundary(size_t code_unit_index) {
-    return gGlobalProcTable.ImpellerParagraphGetWordBoundary(Get(),
-                                                             code_unit_index);
+    ImpellerRange range = {};
+    gGlobalProcTable.ImpellerParagraphGetWordBoundary(Get(), code_unit_index,
+                                                      &range);
+    return range;
   }
 };
 
 //------------------------------------------------------------------------------
 /// @see      ImpellerPaint
 ///
-class Paint final : public Object<ImpellerPaint, ImpellerPaintTraits> {
+class Paint : public Object<ImpellerPaint, ImpellerPaintTraits> {
  public:
   Paint() : Object(gGlobalProcTable.ImpellerPaintNew(), AdoptTag::kAdopt) {}
 
@@ -1014,7 +1093,7 @@ class Paint final : public Object<ImpellerPaint, ImpellerPaintTraits> {
 //------------------------------------------------------------------------------
 /// @see      ImpellerParagraphStyle
 ///
-class ParagraphStyle final
+class ParagraphStyle
     : public Object<ImpellerParagraphStyle, ImpellerParagraphStyleTraits> {
  public:
   ParagraphStyle()
@@ -1086,6 +1165,14 @@ class ParagraphStyle final
   }
 
   //----------------------------------------------------------------------------
+  /// @see      ImpellerParagraphStyleSetEllipsis
+  ///
+  ParagraphStyle& SetEllipsis(const char* ellipsis) {
+    gGlobalProcTable.ImpellerParagraphStyleSetEllipsis(Get(), ellipsis);
+    return *this;
+  }
+
+  //----------------------------------------------------------------------------
   /// @see      ImpellerParagraphStyleSetMaxLines
   ///
   ParagraphStyle& SetMaxLines(uint32_t max_lines) {
@@ -1108,13 +1195,22 @@ class ParagraphStyle final
     gGlobalProcTable.ImpellerParagraphStyleSetTextDirection(Get(), direction);
     return *this;
   }
+
+  //----------------------------------------------------------------------------
+  /// @see      ImpellerParagraphStyleSetTextDecoration
+  ///
+  ParagraphStyle& SetTextDecoration(const ImpellerTextDecoration& decoration) {
+    gGlobalProcTable.ImpellerParagraphStyleSetTextDecoration(Get(),
+                                                             &decoration);
+    return *this;
+  }
 };
 
 //------------------------------------------------------------------------------
 /// @see      ImpellerTypographyContext
 ///
-class TypographyContext final : public Object<ImpellerTypographyContext,
-                                              ImpellerTypographyContextTraits> {
+class TypographyContext : public Object<ImpellerTypographyContext,
+                                        ImpellerTypographyContextTraits> {
  public:
   TypographyContext()
       : Object(gGlobalProcTable.ImpellerTypographyContextNew(),
@@ -1146,7 +1242,7 @@ class TypographyContext final : public Object<ImpellerTypographyContext,
 //------------------------------------------------------------------------------
 /// @see      ImpellerParagraphBuilder
 ///
-class ParagraphBuilder final
+class ParagraphBuilder
     : public Object<ImpellerParagraphBuilder, ImpellerParagraphBuilderTraits> {
  public:
   explicit ParagraphBuilder(const TypographyContext& context)
@@ -1208,15 +1304,21 @@ class ParagraphBuilder final
 //------------------------------------------------------------------------------
 /// @see      ImpellerPath
 ///
-class Path final : public Object<ImpellerPath, ImpellerPathTraits> {
+class Path : public Object<ImpellerPath, ImpellerPathTraits> {
  public:
   Path(ImpellerPath path, AdoptTag tag) : Object(path, tag) {}
+
+  ImpellerRect GetBounds() const {
+    ImpellerRect bounds = {};
+    gGlobalProcTable.ImpellerPathGetBounds(Get(), &bounds);
+    return bounds;
+  }
 };
 
 //------------------------------------------------------------------------------
 /// @see      ImpellerPathBuilder
 ///
-class PathBuilder final
+class PathBuilder
     : public Object<ImpellerPathBuilder, ImpellerPathBuilderTraits> {
  public:
   PathBuilder()
@@ -1329,7 +1431,7 @@ class PathBuilder final
 //------------------------------------------------------------------------------
 /// @see      ImpellerDisplayList
 ///
-class DisplayList final
+class DisplayList
     : public Object<ImpellerDisplayList, ImpellerDisplayListTraits> {
  public:
   DisplayList(ImpellerDisplayList display_list, AdoptTag tag)
@@ -1339,7 +1441,7 @@ class DisplayList final
 //------------------------------------------------------------------------------
 /// @see      ImpellerSurface
 ///
-class Surface final : public Object<ImpellerSurface, ImpellerSurfaceTraits> {
+class Surface : public Object<ImpellerSurface, ImpellerSurfaceTraits> {
  public:
   explicit Surface(ImpellerSurface surface) : Object(surface) {}
 
@@ -1391,7 +1493,7 @@ class Surface final : public Object<ImpellerSurface, ImpellerSurfaceTraits> {
 //------------------------------------------------------------------------------
 /// @see      ImpellerVulkanSwapchain
 ///
-class VulkanSwapchain final
+class VulkanSwapchain
     : public Object<ImpellerVulkanSwapchain, ImpellerVulkanSwapchainTraits> {
  public:
   VulkanSwapchain(ImpellerVulkanSwapchain swapchain, AdoptTag tag)
@@ -1420,9 +1522,8 @@ class VulkanSwapchain final
 //------------------------------------------------------------------------------
 /// @see      ImpellerDisplayListBuilder
 ///
-class DisplayListBuilder final
-    : public Object<ImpellerDisplayListBuilder,
-                    ImpellerDisplayListBuilderTraits> {
+class DisplayListBuilder : public Object<ImpellerDisplayListBuilder,
+                                         ImpellerDisplayListBuilderTraits> {
  public:
   //----------------------------------------------------------------------------
   /// @see      ImpellerDisplayListBuilderNew

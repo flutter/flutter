@@ -112,6 +112,7 @@ typedef MaterialPropertyResolver<T> = WidgetPropertyResolver<T>;
 /// This example defines a [MaterialStateColor] with a const constructor.
 ///
 /// ```dart
+/// // ignore: deprecated_member_use
 /// class MyColor extends MaterialStateColor {
 ///   const MyColor() : super(_defaultColor);
 ///
@@ -119,7 +120,9 @@ typedef MaterialPropertyResolver<T> = WidgetPropertyResolver<T>;
 ///   static const int _pressedColor = 0xdeadbeef;
 ///
 ///   @override
+///   // ignore: deprecated_member_use
 ///   Color resolve(Set<MaterialState> states) {
+///     // ignore: deprecated_member_use
 ///     if (states.contains(MaterialState.pressed)) {
 ///       return const Color(_pressedColor);
 ///     }
@@ -222,7 +225,7 @@ typedef MaterialStateBorderSide = WidgetStateBorderSide;
 /// implementation of [MaterialStateOutlinedBorder], that resolves to
 /// [RoundedRectangleBorder] when its widget is selected.
 ///
-/// ** See code in examples/api/lib/material/material_state/material_state_outlined_border.0.dart **
+/// ** See code in examples/api/lib/widgets/widget_state/widget_state_outlined_border.0.dart **
 /// {@end-tool}
 ///
 /// This class should only be used for parameters which are documented to take
@@ -505,7 +508,7 @@ class _WidgetInputBorderMapper extends WidgetStateMapper<InputBorder>
 ///
 /// Material state properties represent values that depend on a widget's material
 /// "state". The state is encoded as a set of [MaterialState] values, like
-/// [MaterialState.focused], [MaterialState.hovered], [MaterialState.pressed]. For
+/// [WidgetState.focused], [WidgetState.hovered], [WidgetState.pressed]. For
 /// example the [InkWell.overlayColor] defines the color that fills the ink well
 /// when it's pressed (the "splash color"), focused, or hovered. The [InkWell]
 /// uses the overlay color's [resolve] method to compute the color for the
@@ -569,7 +572,7 @@ typedef MaterialStatePropertyAll<T> = WidgetStatePropertyAll<T>;
 /// the widget. The widget is responsible for ensuring that the
 /// controller's [value] tracks its intrinsic state. For example one
 /// cannot request the keyboard focus for a widget by adding
-/// [MaterialState.focused] to its controller. When the widget gains the
+/// [WidgetState.focused] to its controller. When the widget gains the
 /// or loses the focus it will [update] its controller's [value] and
 /// notify listeners of the change.
 ///

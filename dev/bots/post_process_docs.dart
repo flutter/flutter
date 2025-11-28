@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'package:file/local.dart';
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 
@@ -11,6 +12,8 @@ import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart' as platform;
 
 import 'package:process/process.dart';
+
+import 'utils.dart';
 
 class CommandException implements Exception {}
 
@@ -46,11 +49,18 @@ Future<void> postProcess() async {
 
   // Generate versions file.
   await runProcessWithValidations(<String>['flutter', '--version'], docsPath);
-  final File versionFile = File('version');
-  final String version = versionFile.readAsStringSync();
+  final String version;
+  switch (await Version.resolveIn(const LocalFileSystem().directory(checkoutPath))) {
+    case VersionError(:final String error):
+      print('Could not read flutter version: $error');
+      exit(1);
+    case VersionOk(version: final String parsedVersion):
+      version = parsedVersion;
+  }
+
   // Recreate footer
   final String publishPath = path.join(docsPath, '..', 'docs', 'doc', 'flutter', 'footer.js');
-  final File footerFile = File(publishPath)..createSync(recursive: true);
+  final footerFile = File(publishPath)..createSync(recursive: true);
   createFooter(footerFile, version);
 }
 
@@ -61,7 +71,7 @@ Future<String> gitRevision({
   @visibleForTesting platform.Platform platform = const platform.LocalPlatform(),
   @visibleForTesting ProcessManager processManager = const LocalProcessManager(),
 }) async {
-  const int kGitRevisionLength = 10;
+  const kGitRevisionLength = 10;
 
   final ProcessResult gitResult = processManager.runSync(<String>['git', 'rev-parse', 'HEAD']);
   if (gitResult.exitCode != 0) {
@@ -110,7 +120,7 @@ Future<String> getBranchName({
   @visibleForTesting platform.Platform platform = const platform.LocalPlatform(),
   @visibleForTesting ProcessManager processManager = const LocalProcessManager(),
 }) async {
-  final RegExp gitBranchRegexp = RegExp(r'^## (.*)');
+  final gitBranchRegexp = RegExp(r'^## (.*)');
   final String? luciBranch = platform.environment['LUCI_BRANCH'];
   if (luciBranch != null && luciBranch.trim().isNotEmpty) {
     return luciBranch.trim();
@@ -143,7 +153,7 @@ Future<void> createFooter(
   final String timestamp = timestampParam ?? DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now());
   final String gitBranch = branchParam ?? await getBranchName();
   final String revision = revisionParam ?? await gitRevision();
-  final String gitBranchOut = gitBranch.isEmpty ? '' : '• $gitBranch';
+  final gitBranchOut = gitBranch.isEmpty ? '' : '• $gitBranch';
   footerFile.writeAsStringSync('''
 (function() {
   var span = document.querySelector('footer>span');

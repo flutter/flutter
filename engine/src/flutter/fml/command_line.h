@@ -66,7 +66,6 @@ class CommandLine final {
     bool operator==(const Option& other) const {
       return name == other.name && value == other.value;
     }
-    bool operator!=(const Option& other) const { return !operator==(other); }
 
     std::string name;
     std::string value;
@@ -103,7 +102,6 @@ class CommandLine final {
            options_ == other.options_ &&
            positional_args_ == other.positional_args_;
   }
-  bool operator!=(const CommandLine& other) const { return !operator==(other); }
 
   // Returns true if this command line has the option |name| (and if |index| is
   // non-null, sets |*index| to the index of the *last* occurrence of the given

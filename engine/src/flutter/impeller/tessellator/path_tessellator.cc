@@ -37,9 +37,7 @@ class PathPruner : public impeller::PathReceiver {
   explicit PathPruner(SegmentReceiver& receiver, bool is_stroking = false)
       : receiver_(receiver), is_stroking_(is_stroking) {}
 
-  void SetPathInfo(impeller::FillType fill_type, bool is_convex) override {}
-
-  void MoveTo(const Point& p2) override {
+  void MoveTo(const Point& p2, bool will_be_closed) override {
     if (is_stroking_) {
       if (contour_has_segments_ && !contour_has_points_) {
         // If we had actual path segments, but none of them went anywhere
@@ -65,6 +63,7 @@ class PathPruner : public impeller::PathReceiver {
     }
     contour_origin_ = current_point_ = p2;
     contour_has_segments_ = contour_has_points_ = false;
+    contour_will_be_closed_ = will_be_closed;
     // We will not record a BeginContour for this potential new contour
     // until we get an actual segment within the contour.
     // See SegmentEncountered()
@@ -150,7 +149,7 @@ class PathPruner : public impeller::PathReceiver {
     // See SegmentEncountered()
   }
 
-  void PathEnd() override {
+  void PathEnd() {
     if (!is_stroking_ && current_point_ != contour_origin_) {
       FML_DCHECK(contour_has_segments_);
       FML_DCHECK(contour_has_points_);
@@ -167,13 +166,14 @@ class PathPruner : public impeller::PathReceiver {
 
   void SegmentEncountered() {
     if (!contour_has_segments_) {
-      receiver_.BeginContour(contour_origin_);
+      receiver_.BeginContour(contour_origin_, contour_will_be_closed_);
       contour_has_segments_ = true;
     }
   }
 
   bool contour_has_segments_ = false;
   bool contour_has_points_ = false;
+  bool contour_will_be_closed_ = false;
   Point contour_origin_;
   Point current_point_;
 };
@@ -182,7 +182,7 @@ class StorageCounter : public SegmentReceiver {
  public:
   explicit StorageCounter(impeller::Scalar scale) : scale_(scale) {}
 
-  void BeginContour(Point origin) override {
+  void BeginContour(Point origin, bool will_be_closed) override {
     // This is a new contour
     contour_count_++;
 
@@ -194,17 +194,21 @@ class StorageCounter : public SegmentReceiver {
   void RecordLine(Point p1, Point p2) override { point_count_++; }
 
   void RecordQuad(Point p1, Point cp, Point p2) override {
-    point_count_ += std::ceil(ComputeQuadradicSubdivisions(scale_, p1, cp, p2));
+    size_t count =  //
+        std::ceilf(ComputeQuadradicSubdivisions(scale_, p1, cp, p2));
+    point_count_ += std::max<size_t>(count, 1);
   }
 
   void RecordConic(Point p1, Point cp, Point p2, Scalar weight) override {
-    point_count_ +=
-        std::ceil(ComputeConicSubdivisions(scale_, p1, cp, p2, weight));
+    size_t count =  //
+        std::ceilf(ComputeConicSubdivisions(scale_, p1, cp, p2, weight));
+    point_count_ += std::max<size_t>(count, 1);
   }
 
   void RecordCubic(Point p1, Point cp1, Point cp2, Point p2) override {
-    point_count_ +=
-        std::ceil(ComputeCubicSubdivisions(scale_, p1, cp1, cp2, p2));
+    size_t count =  //
+        std::ceilf(ComputeCubicSubdivisions(scale_, p1, cp1, cp2, p2));
+    point_count_ += std::max<size_t>(count, 1);
   }
 
   void EndContour(Point origin, bool with_close) override {
@@ -228,7 +232,9 @@ class PathFillWriter : public SegmentReceiver {
   PathFillWriter(VertexWriter& writer, Scalar scale)
       : writer_(writer), scale_(scale) {}
 
-  void BeginContour(Point origin) override { writer_.Write(origin); }
+  void BeginContour(Point origin, bool will_be_closed) override {
+    writer_.Write(origin);
+  }
 
   void RecordLine(Point p1, Point p2) override { writer_.Write(p2); }
 
@@ -274,27 +280,37 @@ class PathFillWriter : public SegmentReceiver {
 
 namespace impeller {
 
-void PathTessellator::PathToFilledSegments(const PathSource& path,
+void PathTessellator::PathToFilledSegments(const PathSource& source,
                                            SegmentReceiver& receiver) {
   PathPruner pruner(receiver, false);
-  path.Dispatch(pruner);
+  source.Dispatch(pruner);
+  pruner.PathEnd();
+}
+
+void PathTessellator::PathToStrokedSegments(const PathSource& source,
+                                            SegmentReceiver& receiver) {
+  PathPruner pruner(receiver, true);
+  source.Dispatch(pruner);
+  pruner.PathEnd();
 }
 
 std::pair<size_t, size_t> PathTessellator::CountFillStorage(
-    const PathSource& path,
+    const PathSource& source,
     Scalar scale) {
   StorageCounter counter(scale);
   PathPruner pruner(counter, false);
-  path.Dispatch(pruner);
+  source.Dispatch(pruner);
+  pruner.PathEnd();
   return {counter.GetPointCount(), counter.GetContourCount()};
 }
 
-void PathTessellator::PathToFilledVertices(const PathSource& path,
+void PathTessellator::PathToFilledVertices(const PathSource& source,
                                            VertexWriter& writer,
                                            Scalar scale) {
   PathFillWriter path_writer(writer, scale);
   PathPruner pruner(path_writer, false);
-  path.Dispatch(pruner);
+  source.Dispatch(pruner);
+  pruner.PathEnd();
 }
 
 }  // namespace impeller

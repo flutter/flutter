@@ -4,105 +4,137 @@
 
 #include "export.h"
 #include "helpers.h"
-#include "third_party/skia/include/core/SkImage.h"
-#include "third_party/skia/include/effects/SkGradientShader.h"
-#include "third_party/skia/include/effects/SkRuntimeEffect.h"
+#include "live_objects.h"
 #include "wrappers.h"
 
+#include "flutter/display_list/effects/dl_color_source.h"
+#include "flutter/display_list/effects/dl_runtime_effect_skia.h"
+#include "third_party/skia/include/core/SkImage.h"
+#include "third_party/skia/include/effects/SkRuntimeEffect.h"
+
 using namespace Skwasm;
+using namespace flutter;
 
-SKWASM_EXPORT SkShader* shader_createLinearGradient(
-    SkPoint* endPoints,  // Two points
-    SkColor* colors,
-    SkScalar* stops,
+namespace Skwasm {
+struct UniformData {
+  std::shared_ptr<std::vector<uint8_t>> data;
+};
+}  // namespace Skwasm
+
+SKWASM_EXPORT sp_wrapper<DlColorSource>* shader_createLinearGradient(
+    DlPoint* endPoints,  // Two points
+    uint32_t* colors,
+    DlScalar* stops,
     int count,  // Number of stops/colors
-    SkTileMode tileMode,
-    SkScalar* matrix33  // Can be nullptr
+    DlTileMode tileMode,
+    DlScalar* matrix33  // Can be nullptr
 ) {
+  liveShaderCount++;
+  std::vector<DlColor> dlColors;
+  dlColors.resize(count);
+  for (int i = 0; i < count; i++) {
+    dlColors[i] = DlColor(colors[i]);
+  }
   if (matrix33) {
-    SkMatrix localMatrix = createMatrix(matrix33);
-    return SkGradientShader::MakeLinear(endPoints, colors, stops, count,
-                                        tileMode, 0, &localMatrix)
-        .release();
+    auto matrix = createDlMatrixFrom3x3(matrix33);
+    return new sp_wrapper<DlColorSource>(
+        DlColorSource::MakeLinear(endPoints[0], endPoints[1], count,
+                                  dlColors.data(), stops, tileMode, &matrix));
   } else {
-    return SkGradientShader::MakeLinear(endPoints, colors, stops, count,
-                                        tileMode)
-        .release();
+    return new sp_wrapper<DlColorSource>(DlColorSource::MakeLinear(
+        endPoints[0], endPoints[1], count, dlColors.data(), stops, tileMode));
   }
 }
 
-SKWASM_EXPORT SkShader* shader_createRadialGradient(SkScalar centerX,
-                                                    SkScalar centerY,
-                                                    SkScalar radius,
-                                                    SkColor* colors,
-                                                    SkScalar* stops,
-                                                    int count,
-                                                    SkTileMode tileMode,
-                                                    SkScalar* matrix33) {
-  if (matrix33) {
-    SkMatrix localMatrix = createMatrix(matrix33);
-    return SkGradientShader::MakeRadial({centerX, centerY}, radius, colors,
-                                        stops, count, tileMode, 0, &localMatrix)
-        .release();
-  } else {
-    return SkGradientShader::MakeRadial({centerX, centerY}, radius, colors,
-                                        stops, count, tileMode)
-        .release();
-  }
-}
-
-SKWASM_EXPORT SkShader* shader_createConicalGradient(
-    SkPoint* endPoints,  // Two points
-    SkScalar startRadius,
-    SkScalar endRadius,
-    SkColor* colors,
-    SkScalar* stops,
+SKWASM_EXPORT sp_wrapper<DlColorSource>* shader_createRadialGradient(
+    DlScalar centerX,
+    DlScalar centerY,
+    DlScalar radius,
+    uint32_t* colors,
+    DlScalar* stops,
     int count,
-    SkTileMode tileMode,
-    SkScalar* matrix33) {
+    DlTileMode tileMode,
+    DlScalar* matrix33) {
+  liveShaderCount++;
+  std::vector<DlColor> dlColors;
+  dlColors.resize(count);
+  for (int i = 0; i < count; i++) {
+    dlColors[i] = DlColor(colors[i]);
+  }
   if (matrix33) {
-    SkMatrix localMatrix = createMatrix(matrix33);
-    return SkGradientShader::MakeTwoPointConical(
-               endPoints[0], startRadius, endPoints[1], endRadius, colors,
-               stops, count, tileMode, 0, &localMatrix)
-        .release();
-
+    auto localMatrix = createDlMatrixFrom3x3(matrix33);
+    return new sp_wrapper<DlColorSource>(DlColorSource::MakeRadial(
+        DlPoint{centerX, centerY}, radius, count, dlColors.data(), stops,
+        tileMode, &localMatrix));
   } else {
-    return SkGradientShader::MakeTwoPointConical(endPoints[0], startRadius,
-                                                 endPoints[1], endRadius,
-                                                 colors, stops, count, tileMode)
-        .release();
+    return new sp_wrapper<DlColorSource>(
+        DlColorSource::MakeRadial(DlPoint{centerX, centerY}, radius, count,
+                                  dlColors.data(), stops, tileMode));
   }
 }
 
-SKWASM_EXPORT SkShader* shader_createSweepGradient(SkScalar centerX,
-                                                   SkScalar centerY,
-                                                   SkColor* colors,
-                                                   SkScalar* stops,
-                                                   int count,
-                                                   SkTileMode tileMode,
-                                                   SkScalar startAngle,
-                                                   SkScalar endAngle,
-                                                   SkScalar* matrix33) {
+SKWASM_EXPORT sp_wrapper<DlColorSource>* shader_createConicalGradient(
+    DlPoint* endPoints,  // Two points
+    DlScalar startRadius,
+    DlScalar endRadius,
+    uint32_t* colors,
+    DlScalar* stops,
+    int count,
+    DlTileMode tileMode,
+    DlScalar* matrix33) {
+  liveShaderCount++;
+  std::vector<DlColor> dlColors;
+  dlColors.resize(count);
+  for (int i = 0; i < count; i++) {
+    dlColors[i] = DlColor(colors[i]);
+  }
   if (matrix33) {
-    SkMatrix localMatrix = createMatrix(matrix33);
-    return SkGradientShader::MakeSweep(centerX, centerY, colors, stops, count,
-                                       tileMode, startAngle, endAngle, 0,
-                                       &localMatrix)
-        .release();
+    auto localMatrix = createDlMatrixFrom3x3(matrix33);
+    return new sp_wrapper<DlColorSource>(DlColorSource::MakeConical(
+        endPoints[0], startRadius, endPoints[1], endRadius, count,
+        dlColors.data(), stops, tileMode, &localMatrix));
   } else {
-    return SkGradientShader::MakeSweep(centerX, centerY, colors, stops, count,
-                                       tileMode, startAngle, endAngle, 0,
-                                       nullptr)
-        .release();
+    return new sp_wrapper<DlColorSource>(DlColorSource::MakeConical(
+        endPoints[0], startRadius, endPoints[1], endRadius, count,
+        dlColors.data(), stops, tileMode));
   }
 }
 
-SKWASM_EXPORT void shader_dispose(SkShader* shader) {
-  shader->unref();
+SKWASM_EXPORT sp_wrapper<DlColorSource>* shader_createSweepGradient(
+    DlScalar centerX,
+    DlScalar centerY,
+    uint32_t* colors,
+    DlScalar* stops,
+    int count,
+    DlTileMode tileMode,
+    DlScalar startAngle,
+    DlScalar endAngle,
+    DlScalar* matrix33) {
+  liveShaderCount++;
+  std::vector<DlColor> dlColors;
+  dlColors.resize(count);
+  for (int i = 0; i < count; i++) {
+    dlColors[i] = DlColor(colors[i]);
+  }
+  if (matrix33) {
+    auto localMatrix = createDlMatrixFrom3x3(matrix33);
+    return new sp_wrapper<DlColorSource>(DlColorSource::MakeSweep(
+        DlPoint{centerX, centerY}, startAngle, endAngle, count, dlColors.data(),
+        stops, tileMode, &localMatrix));
+  } else {
+    return new sp_wrapper<DlColorSource>(DlColorSource::MakeSweep(
+        DlPoint{centerX, centerY}, startAngle, endAngle, count, dlColors.data(),
+        stops, tileMode));
+  }
+}
+
+SKWASM_EXPORT void shader_dispose(sp_wrapper<DlColorSource>* shader) {
+  liveShaderCount--;
+  delete shader;
 }
 
 SKWASM_EXPORT SkRuntimeEffect* runtimeEffect_create(SkString* source) {
+  liveRuntimeEffectCount++;
   auto result = SkRuntimeEffect::MakeForShader(*source);
   if (result.effect == nullptr) {
     printf("Failed to compile shader. Error text:\n%s",
@@ -114,6 +146,7 @@ SKWASM_EXPORT SkRuntimeEffect* runtimeEffect_create(SkString* source) {
 }
 
 SKWASM_EXPORT void runtimeEffect_dispose(SkRuntimeEffect* effect) {
+  liveRuntimeEffectCount--;
   effect->unref();
 }
 
@@ -121,36 +154,50 @@ SKWASM_EXPORT size_t runtimeEffect_getUniformSize(SkRuntimeEffect* effect) {
   return effect->uniformSize();
 }
 
-SKWASM_EXPORT SkShader* shader_createRuntimeEffectShader(
+SKWASM_EXPORT sp_wrapper<DlColorSource>* shader_createRuntimeEffectShader(
     SkRuntimeEffect* runtimeEffect,
-    SkData* uniforms,
-    SkShader** children,
+    UniformData* uniforms,
+    sp_wrapper<DlColorSource>** children,
     size_t childCount) {
-  std::vector<sk_sp<SkShader>> childPointers;
+  liveShaderCount++;
+  std::vector<std::shared_ptr<DlColorSource>> childPointers;
+  childPointers.resize(childCount);
   for (size_t i = 0; i < childCount; i++) {
-    childPointers.emplace_back(sk_ref_sp<SkShader>(children[i]));
+    childPointers[i] = children[i]->shared();
   }
 
-  return runtimeEffect
-      ->makeShader(sk_ref_sp<SkData>(uniforms), childPointers.data(),
-                   childCount, nullptr)
-      .release();
+  return new sp_wrapper<DlColorSource>(DlColorSource::MakeRuntimeEffect(
+      DlRuntimeEffectSkia::Make(sk_ref_sp(runtimeEffect)),
+      std::move(childPointers), uniforms->data));
 }
 
-SKWASM_EXPORT SkShader* shader_createFromImage(SkImage* image,
-                                               SkTileMode tileModeX,
-                                               SkTileMode tileModeY,
-                                               FilterQuality quality,
-                                               SkScalar* matrix33) {
+SKWASM_EXPORT sp_wrapper<DlColorSource>* shader_createFromImage(
+    SkImage* image,
+    DlTileMode tileModeX,
+    DlTileMode tileModeY,
+    FilterQuality quality,
+    DlScalar* matrix33) {
+  liveShaderCount++;
   if (matrix33) {
-    SkMatrix localMatrix = createMatrix(matrix33);
-    return image
-        ->makeShader(tileModeX, tileModeY, samplingOptionsForQuality(quality),
-                     &localMatrix)
-        .release();
+    auto localMatrix = createDlMatrixFrom3x3(matrix33);
+    return new sp_wrapper<DlColorSource>(DlColorSource::MakeImage(
+        DlImage::Make(image), tileModeX, tileModeY,
+        samplingOptionsForQuality(quality), &localMatrix));
   } else {
-    return image
-        ->makeShader(tileModeX, tileModeY, samplingOptionsForQuality(quality))
-        .release();
+    return new sp_wrapper<DlColorSource>(
+        DlColorSource::MakeImage(DlImage::Make(image), tileModeX, tileModeY,
+                                 samplingOptionsForQuality(quality)));
   }
+}
+
+SKWASM_EXPORT UniformData* uniformData_create(int size) {
+  return new UniformData{std::make_shared<std::vector<uint8_t>>(size)};
+}
+
+SKWASM_EXPORT void uniformData_dispose(UniformData* data) {
+  delete data;
+}
+
+SKWASM_EXPORT void* uniformData_getPointer(UniformData* data) {
+  return data->data->data();
 }

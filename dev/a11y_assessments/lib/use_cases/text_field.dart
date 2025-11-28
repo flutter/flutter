@@ -7,6 +7,8 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class TextFieldUseCase extends UseCase {
+  TextFieldUseCase() : super(useCaseCategory: UseCaseCategory.core);
+
   @override
   String get name => 'TextField';
 

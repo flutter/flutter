@@ -14,6 +14,7 @@ import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../convert.dart';
+import '../globals.dart' as globals;
 
 /// An interface to the Dart analysis server.
 class AnalysisServer {
@@ -45,12 +46,11 @@ class AnalysisServer {
   final bool suppressAnalytics;
 
   Process? _process;
-  final StreamController<bool> _analyzingController = StreamController<bool>.broadcast();
-  final StreamController<FileAnalysisErrors> _errorsController =
-      StreamController<FileAnalysisErrors>.broadcast();
-  bool _didServerErrorOccur = false;
+  final _analyzingController = StreamController<bool>.broadcast();
+  final _errorsController = StreamController<FileAnalysisErrors>.broadcast();
+  var _didServerErrorOccur = false;
 
-  int _id = 0;
+  var _id = 0;
 
   Future<void> start() async {
     final String snapshot = _fileSystem.path.join(
@@ -59,7 +59,7 @@ class AnalysisServer {
       'snapshots',
       'analysis_server.dart.snapshot',
     );
-    final List<String> command = <String>[
+    final command = <String>[
       _fileSystem.path.join(sdkPath, 'bin', 'dart'),
       snapshot,
       '--disable-server-feature-completion',
@@ -75,14 +75,10 @@ class AnalysisServer {
     // This callback hookup can't throw.
     unawaited(_process!.exitCode.whenComplete(() => _process = null));
 
-    final Stream<String> errorStream = _process!.stderr
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter());
+    final Stream<String> errorStream = _process!.stderr.transform(utf8LineDecoder);
     errorStream.listen(_handleError);
 
-    final Stream<String> inStream = _process!.stdout
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter());
+    final Stream<String> inStream = _process!.stdout.transform(utf8LineDecoder);
     inStream.listen(_handleServerResponse);
 
     _sendCommand('server.setSubscriptions', <String, dynamic>{
@@ -95,7 +91,7 @@ class AnalysisServer {
     });
   }
 
-  final List<String> _logs = <String>[];
+  final _logs = <String>[];
 
   /// Aggregated STDOUT and STDERR logs from the server.
   ///
@@ -138,12 +134,15 @@ class AnalysisServer {
   void _handleServerResponse(String line) {
     _logs.add('[stdout] $line');
     _logger.printTrace('<== $line');
+    if (line.startsWith(globals.kVMServiceMessageRegExp)) {
+      return;
+    }
 
     final dynamic response = json.decode(line);
 
     if (response is Map<String, dynamic>) {
       if (response['event'] != null) {
-        final String event = response['event'] as String;
+        final event = response['event'] as String;
         final dynamic params = response['params'];
         Map<String, dynamic>? paramsMap;
         if (params is Map<String, dynamic>) {
@@ -174,8 +173,7 @@ class AnalysisServer {
   void _handleStatus(Map<String, dynamic> statusInfo) {
     // {"event":"server.status","params":{"analysis":{"isAnalyzing":true}}}
     if (statusInfo['analysis'] != null && !_analyzingController.isClosed) {
-      final bool isAnalyzing =
-          (statusInfo['analysis'] as Map<String, dynamic>)['isAnalyzing'] as bool;
+      final isAnalyzing = (statusInfo['analysis'] as Map<String, dynamic>)['isAnalyzing'] as bool;
       _analyzingController.add(isAnalyzing);
     }
   }
@@ -191,20 +189,19 @@ class AnalysisServer {
 
   void _handleAnalysisIssues(Map<String, dynamic> issueInfo) {
     // {"event":"analysis.errors","params":{"file":"/Users/.../lib/main.dart","errors":[]}}
-    final String file = issueInfo['file'] as String;
-    final List<dynamic> errorsList = issueInfo['errors'] as List<dynamic>;
-    final List<AnalysisError> errors =
-        errorsList
-            .map<Map<String, dynamic>>((dynamic e) => castStringKeyedMap(e) ?? <String, dynamic>{})
-            .map<AnalysisError>((Map<String, dynamic> json) {
-              return AnalysisError(
-                WrittenError.fromJson(json),
-                fileSystem: _fileSystem,
-                platform: _platform,
-                terminal: _terminal,
-              );
-            })
-            .toList();
+    final file = issueInfo['file'] as String;
+    final errorsList = issueInfo['errors'] as List<dynamic>;
+    final List<AnalysisError> errors = errorsList
+        .map<Map<String, dynamic>>((dynamic e) => castStringKeyedMap(e) ?? <String, dynamic>{})
+        .map<AnalysisError>((Map<String, dynamic> json) {
+          return AnalysisError(
+            WrittenError.fromJson(json),
+            fileSystem: _fileSystem,
+            platform: _platform,
+            terminal: _terminal,
+          );
+        })
+        .toList();
     if (!_errorsController.isClosed) {
       _errorsController.add(FileAnalysisErrors(file, errors));
     }
@@ -308,7 +305,7 @@ class WrittenError {
   ///      "hasFix":false
   ///  }
   static WrittenError fromJson(Map<String, dynamic> json) {
-    final Map<String, dynamic> location = json['location'] as Map<String, dynamic>;
+    final location = json['location'] as Map<String, dynamic>;
     return WrittenError._(
       severity: json['severity'] as String,
       type: json['type'] as String,
@@ -331,7 +328,7 @@ class WrittenError {
   final int startColumn;
   final int offset;
 
-  static final Map<String, AnalysisSeverity> _severityMap = <String, AnalysisSeverity>{
+  static final _severityMap = <String, AnalysisSeverity>{
     'INFO': AnalysisSeverity.info,
     'WARNING': AnalysisSeverity.warning,
     'ERROR': AnalysisSeverity.error,

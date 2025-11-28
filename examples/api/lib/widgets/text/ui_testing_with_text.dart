@@ -73,7 +73,8 @@ class _MyAppState extends State<MyApp> {
                           semanticsIdentifier: 'Hello to the automation tool',
                         ),
                         TextSpan(
-                          text: ' this text contains neither identifier nor label.',
+                          text:
+                              ' this text contains neither identifier nor label.',
                           style: customStyle2,
                         ),
                       ],
@@ -103,11 +104,10 @@ class _MyAppState extends State<MyApp> {
                                 text: ' Learn more',
                                 semanticsIdentifier: 'learn_more_link',
                                 style: const TextStyle(color: Colors.blue),
-                                recognizer:
-                                    TapGestureRecognizer()
-                                      ..onTap = () {
-                                        print('Learn more');
-                                      },
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    print('Learn more');
+                                  },
                               ),
                             ],
                           ),
@@ -132,11 +132,10 @@ class _MyAppState extends State<MyApp> {
                                 text: ' Find out more',
                                 semanticsIdentifier: 'learn_more_link',
                                 style: const TextStyle(color: Colors.blue),
-                                recognizer:
-                                    TapGestureRecognizer()
-                                      ..onTap = () {
-                                        print('Learn more');
-                                      },
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    print('Learn more');
+                                  },
                               ),
                             ],
                           ),

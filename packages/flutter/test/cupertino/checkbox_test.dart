@@ -26,7 +26,9 @@ void main() {
     final SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoCheckbox(value: false, onChanged: (bool? b) {}))),
+      CupertinoApp(
+        home: Center(child: CupertinoCheckbox(value: false, onChanged: (bool? b) {})),
+      ),
     );
 
     expect(
@@ -42,7 +44,9 @@ void main() {
     );
 
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoCheckbox(value: true, onChanged: (bool? b) {}))),
+      CupertinoApp(
+        home: Center(child: CupertinoCheckbox(value: true, onChanged: (bool? b) {})),
+      ),
     );
 
     expect(
@@ -199,7 +203,7 @@ void main() {
   });
 
   testWidgets('has semantics for tristate', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoCheckbox(tristate: true, value: null, onChanged: (bool? newValue) {}),
@@ -271,7 +275,7 @@ void main() {
         semanticEvent = message;
       },
     );
-    final SemanticsTester semanticsTester = SemanticsTester(tester);
+    final semanticsTester = SemanticsTester(tester);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -376,14 +380,13 @@ void main() {
             builder: (BuildContext context, StateSetter setState) {
               return CupertinoCheckbox(
                 value: value,
-                onChanged:
-                    enabled
-                        ? (bool? newValue) {
-                          setState(() {
-                            value = newValue;
-                          });
-                        }
-                        : null,
+                onChanged: enabled
+                    ? (bool? newValue) {
+                        setState(() {
+                          value = newValue;
+                        });
+                      }
+                    : null,
                 autofocus: true,
               );
             },
@@ -409,12 +412,12 @@ void main() {
     expect(value, isTrue);
   });
 
-  testWidgets('Checkbox respects shape and side', (WidgetTester tester) async {
-    const RoundedRectangleBorder roundedRectangleBorder = RoundedRectangleBorder(
+  testWidgets('Checkbox respects shape and side on mobile', (WidgetTester tester) async {
+    const roundedRectangleBorder = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(5)),
     );
 
-    const BorderSide side = BorderSide(width: 4, color: Color(0xfff44336));
+    const side = BorderSide(width: 4, color: Color(0xfff44336));
 
     Widget buildApp() {
       return CupertinoApp(
@@ -447,6 +450,77 @@ void main() {
         color: const Color(0xfff44336),
         outer: RRect.fromLTRBR(15.0, 15.0, 29.0, 29.0, const Radius.circular(5)),
         inner: RRect.fromLTRBR(19.0, 19.0, 25.0, 25.0, const Radius.circular(1)),
+      ),
+    );
+  }, variant: TargetPlatformVariant.mobile());
+
+  testWidgets('Checkbox respects shape and side on desktop', (WidgetTester tester) async {
+    const roundedRectangleBorder = RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(5)),
+    );
+
+    const side = BorderSide(width: 4, color: Color(0xfff44336));
+
+    Widget buildApp() {
+      return CupertinoApp(
+        home: Center(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return CupertinoCheckbox(
+                value: false,
+                onChanged: (bool? newValue) {},
+                shape: roundedRectangleBorder,
+                side: side,
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.widget<CupertinoCheckbox>(find.byType(CupertinoCheckbox)).shape,
+      roundedRectangleBorder,
+    );
+    expect(tester.widget<CupertinoCheckbox>(find.byType(CupertinoCheckbox)).side, side);
+    expect(
+      find.byType(CupertinoCheckbox),
+      paints..drrect(
+        color: const Color(0xfff44336),
+        outer: RRect.fromLTRBR(0.0, 0.0, 14.0, 14.0, const Radius.circular(5)),
+        inner: RRect.fromLTRBR(4.0, 4.0, 10.0, 10.0, const Radius.circular(1)),
+      ),
+    );
+  }, variant: TargetPlatformVariant.desktop());
+
+  testWidgets('Checkbox respects tap target size', (WidgetTester tester) async {
+    Widget buildApp() {
+      return CupertinoApp(
+        home: Center(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return CupertinoCheckbox(
+                value: false,
+                onChanged: (bool? newValue) {},
+                tapTargetSize: const Size.square(20.0),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(CupertinoCheckbox),
+      paints..drrect(
+        outer: RRect.fromLTRBR(3.0, 3.0, 17.0, 17.0, const Radius.circular(4)),
+        inner: RRect.fromLTRBR(4.0, 4.0, 16.0, 16.0, const Radius.circular(3)),
       ),
     );
   });
@@ -497,7 +571,7 @@ void main() {
     WidgetTester tester,
   ) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
+    final focusNode = FocusNode(debugLabel: 'Checkbox');
     addTearDown(focusNode.dispose);
 
     Widget buildCheckbox({required bool value, required bool enabled}) {
@@ -649,8 +723,8 @@ void main() {
   testWidgets('Checkbox fill color resolves in enabled/disabled states', (
     WidgetTester tester,
   ) async {
-    const Color activeEnabledFillColor = Color(0xFF000001);
-    const Color activeDisabledFillColor = Color(0xFF000002);
+    const activeEnabledFillColor = Color(0xFF000001);
+    const activeDisabledFillColor = Color(0xFF000002);
 
     Color getFillColor(Set<WidgetState> states) {
       if (states.contains(WidgetState.disabled)) {
@@ -687,10 +761,10 @@ void main() {
   testWidgets('Checkbox fill color take precedence over active/inactive colors', (
     WidgetTester tester,
   ) async {
-    const Color activeEnabledFillColor = Color(0xFF000001);
-    const Color activeDisabledFillColor = Color(0xFF000002);
-    const Color activeColor = Color(0xFF000003);
-    const Color inactiveColor = Color(0xFF000004);
+    const activeEnabledFillColor = Color(0xFF000001);
+    const activeDisabledFillColor = Color(0xFF000002);
+    const activeColor = Color(0xFF000003);
+    const inactiveColor = Color(0xFF000004);
 
     Color getFillColor(Set<WidgetState> states) {
       if (states.contains(WidgetState.disabled)) {
@@ -729,13 +803,13 @@ void main() {
   testWidgets('Checkbox fill color resolves in hovered/focused states', (
     WidgetTester tester,
   ) async {
-    final FocusNode focusNode = FocusNode(debugLabel: 'checkbox');
+    final focusNode = FocusNode(debugLabel: 'checkbox');
     addTearDown(focusNode.dispose);
 
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    const Color hoveredFillColor = Color(0xFF000001);
-    const Color focusedFillColor = Color(0xFF000002);
-    const Color transparentColor = Color(0x00000000);
+    const hoveredFillColor = Color(0xFF000001);
+    const focusedFillColor = Color(0xFF000002);
+    const transparentColor = Color(0x00000000);
 
     Color getFillColor(Set<WidgetState> states) {
       if (states.contains(WidgetState.hovered)) {
@@ -781,16 +855,16 @@ void main() {
   });
 
   testWidgets('Checkbox configures focus color', (WidgetTester tester) async {
-    const Color defaultCheckColor = Color(0xffffffff);
-    const Color defaultActiveFillColor = Color(0xff007aff);
+    const defaultCheckColor = Color(0xffffffff);
+    const defaultActiveFillColor = Color(0xff007aff);
     final Color defaultFocusColor =
         HSLColor.fromColor(CupertinoColors.activeBlue.withOpacity(kCupertinoFocusColorOpacity))
             .withLightness(kCupertinoFocusColorBrightness)
             .withSaturation(kCupertinoFocusColorSaturation)
             .toColor();
-    const Color testFocusColor = Color(0xffaabbcc);
+    const testFocusColor = Color(0xffaabbcc);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    final FocusNode node = FocusNode();
+    final node = FocusNode();
     addTearDown(node.dispose);
 
     Widget buildApp({Color? focusColor, bool autofocus = false, FocusNode? focusNode}) {
@@ -839,13 +913,15 @@ void main() {
   });
 
   testWidgets('Checkbox is darkened when pressed in light mode', (WidgetTester tester) async {
-    const Color defaultCheckColor = Color(0xffffffff);
-    const Color defaultActiveFillColor = Color(0xff007aff);
-    const Color defaultInactiveFillColor = Color(0xffffffff);
-    const Color pressedDarkShadow = Color(0x26ffffff);
+    const defaultCheckColor = Color(0xffffffff);
+    const defaultActiveFillColor = Color(0xff007aff);
+    const defaultInactiveFillColor = Color(0xffffffff);
+    const pressedDarkShadow = Color(0x26ffffff);
 
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoCheckbox(value: false, onChanged: (_) {}))),
+      CupertinoApp(
+        home: Center(child: CupertinoCheckbox(value: false, onChanged: (_) {})),
+      ),
     );
 
     final TestGesture gesture1 = await tester.startGesture(
@@ -863,7 +939,9 @@ void main() {
     );
 
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoCheckbox(value: true, onChanged: (_) {}))),
+      CupertinoApp(
+        home: Center(child: CupertinoCheckbox(value: true, onChanged: (_) {})),
+      ),
     );
 
     final TestGesture gesture2 = await tester.startGesture(
@@ -888,10 +966,10 @@ void main() {
   });
 
   testWidgets('Checkbox is lightened when pressed in dark mode', (WidgetTester tester) async {
-    const Color checkColor = Color(0xffdee8f8);
-    const Color defaultActiveFillColor = Color(0xff3264d7);
-    const Color defaultInactiveFillColor = Color(0xff000000);
-    const Color pressedLightShadow = Color(0x26ffffff);
+    const checkColor = Color(0xffdee8f8);
+    const defaultActiveFillColor = Color(0xff3264d7);
+    const defaultInactiveFillColor = Color(0xff000000);
+    const pressedLightShadow = Color(0x26ffffff);
 
     await tester.pumpWidget(
       CupertinoApp(

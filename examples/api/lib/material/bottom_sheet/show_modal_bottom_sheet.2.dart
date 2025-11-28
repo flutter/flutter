@@ -24,21 +24,25 @@ class ModalBottomSheetApp extends StatelessWidget {
 
 enum AnimationStyles { defaultStyle, custom, none }
 
-const List<(AnimationStyles, String)> animationStyleSegments = <(AnimationStyles, String)>[
-  (AnimationStyles.defaultStyle, 'Default'),
-  (AnimationStyles.custom, 'Custom'),
-  (AnimationStyles.none, 'None'),
-];
+const List<(AnimationStyles, String)> animationStyleSegments =
+    <(AnimationStyles, String)>[
+      (AnimationStyles.defaultStyle, 'Default'),
+      (AnimationStyles.custom, 'Custom'),
+      (AnimationStyles.none, 'None'),
+    ];
 
 class ModalBottomSheetExample extends StatefulWidget {
   const ModalBottomSheetExample({super.key});
 
   @override
-  State<ModalBottomSheetExample> createState() => _ModalBottomSheetExampleState();
+  State<ModalBottomSheetExample> createState() =>
+      _ModalBottomSheetExampleState();
 }
 
 class _ModalBottomSheetExampleState extends State<ModalBottomSheetExample> {
-  Set<AnimationStyles> _animationStyleSelection = <AnimationStyles>{AnimationStyles.defaultStyle};
+  Set<AnimationStyles> _animationStyleSelection = <AnimationStyles>{
+    AnimationStyles.defaultStyle,
+  };
   AnimationStyle? _animationStyle;
 
   @override
@@ -62,12 +66,16 @@ class _ModalBottomSheetExampleState extends State<ModalBottomSheetExample> {
                 _animationStyleSelection = styles;
               });
             },
-            segments:
-                animationStyleSegments.map<ButtonSegment<AnimationStyles>>((
+            segments: animationStyleSegments
+                .map<ButtonSegment<AnimationStyles>>((
                   (AnimationStyles, String) shirt,
                 ) {
-                  return ButtonSegment<AnimationStyles>(value: shirt.$1, label: Text(shirt.$2));
-                }).toList(),
+                  return ButtonSegment<AnimationStyles>(
+                    value: shirt.$1,
+                    label: Text(shirt.$2),
+                  );
+                })
+                .toList(),
           ),
           const SizedBox(height: 10),
           ElevatedButton(

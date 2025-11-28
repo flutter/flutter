@@ -4,12 +4,17 @@
 
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
+import 'package:meta/meta.dart';
 
 import 'base/common.dart';
 import 'base/file_system.dart';
 
 /// Placeholder for base href
-const String kBaseHrefPlaceholder = r'$FLUTTER_BASE_HREF';
+const kBaseHrefPlaceholder = r'$FLUTTER_BASE_HREF';
+const kStaticAssetsUrlPlaceholder = r'$FLUTTER_STATIC_ASSETS_URL';
+
+const _kServiceWorkerDeprecationNotice =
+    "Flutter's service worker is deprecated and will be removed in a future Flutter release.";
 
 class WebTemplateWarning {
   WebTemplateWarning(this.warningText, this.lineNumber);
@@ -29,18 +34,15 @@ class WebTemplateWarning {
 /// }
 /// ```
 class WebTemplate {
-  WebTemplate(this._content);
+  const WebTemplate(this._content);
 
-  String get content => _content;
-  String _content;
+  final String _content;
 
-  Document _getDocument() => parse(_content);
-
-  /// Parses the base href from the index.html file.
-  String getBaseHref() {
-    final Element? baseElement = _getDocument().querySelector('base');
-    final String? baseHref =
-        baseElement?.attributes == null ? null : baseElement!.attributes['href'];
+  static String baseHref(String html) {
+    final Element? baseElement = parse(html).querySelector('base');
+    final String? baseHref = baseElement?.attributes == null
+        ? null
+        : baseElement!.attributes['href'];
 
     if (baseHref == null || baseHref == kBaseHrefPlaceholder) {
       return '';
@@ -68,11 +70,11 @@ class WebTemplate {
     return <WebTemplateWarning>[
       ..._getWarningsForPattern(
         RegExp('(const|var) serviceWorkerVersion = null'),
-        'Local variable for "serviceWorkerVersion" is deprecated. Use "{{flutter_service_worker_version}}" template token instead. See https://docs.flutter.dev/platform-integration/web/initialization for more details.',
+        '$_kServiceWorkerDeprecationNotice See https://github.com/flutter/flutter/issues/156910 for more details.',
       ),
       ..._getWarningsForPattern(
         "navigator.serviceWorker.register('flutter_service_worker.js')",
-        'Manual service worker registration deprecated. Use flutter.js service worker bootstrapping instead. See https://docs.flutter.dev/platform-integration/web/initialization for more details.',
+        '$_kServiceWorkerDeprecationNotice See https://github.com/flutter/flutter/issues/156910 for more details.',
       ),
       ..._getWarningsForPattern(
         '_flutter.loader.loadEntrypoint(',
@@ -89,52 +91,64 @@ class WebTemplate {
   }
 
   WebTemplateWarning _getWarningForMatch(Match match, String warningText) {
-    final int lineCount =
-        RegExp(r'(\r\n|\r|\n)').allMatches(_content.substring(0, match.start)).length;
+    final int lineCount = RegExp(
+      r'(\r\n|\r|\n)',
+    ).allMatches(_content.substring(0, match.start)).length;
     return WebTemplateWarning(warningText, lineCount + 1);
   }
 
-  /// Applies substitutions to the content of the index.html file.
-  void applySubstitutions({
+  /// Applies substitutions to the content of the index.html file and returns the result.
+  @useResult
+  String withSubstitutions({
     required String baseHref,
     required String? serviceWorkerVersion,
     required File flutterJsFile,
     String? buildConfig,
     String? flutterBootstrapJs,
+    String? staticAssetsUrl,
   }) {
-    if (_content.contains(kBaseHrefPlaceholder)) {
-      _content = _content.replaceAll(kBaseHrefPlaceholder, baseHref);
+    String newContent = _content;
+
+    if (newContent.contains(kBaseHrefPlaceholder)) {
+      newContent = newContent.replaceAll(kBaseHrefPlaceholder, baseHref);
+    }
+
+    if (newContent.contains(kStaticAssetsUrlPlaceholder) && staticAssetsUrl != null) {
+      newContent = newContent.replaceAll(kStaticAssetsUrlPlaceholder, staticAssetsUrl);
     }
 
     if (serviceWorkerVersion != null) {
-      _content = _content
+      newContent = newContent
           .replaceFirst(
             // Support older `var` syntax as well as new `const` syntax
             RegExp('(const|var) serviceWorkerVersion = null'),
-            'const serviceWorkerVersion = "$serviceWorkerVersion"',
+            'const serviceWorkerVersion = "$serviceWorkerVersion" /* $_kServiceWorkerDeprecationNotice */',
           )
           // This is for legacy index.html that still uses the old service
           // worker loading mechanism.
           .replaceFirst(
             "navigator.serviceWorker.register('flutter_service_worker.js')",
-            "navigator.serviceWorker.register('flutter_service_worker.js?v=$serviceWorkerVersion')",
+            "navigator.serviceWorker.register('flutter_service_worker.js?v=$serviceWorkerVersion') /* $_kServiceWorkerDeprecationNotice */",
           );
     }
-    _content = _content.replaceAll(
+    newContent = newContent.replaceAll(
       '{{flutter_service_worker_version}}',
-      serviceWorkerVersion != null ? '"$serviceWorkerVersion"' : 'null',
+      serviceWorkerVersion != null
+          ? '"$serviceWorkerVersion" /* $_kServiceWorkerDeprecationNotice */'
+          : 'null /* $_kServiceWorkerDeprecationNotice */',
     );
     if (buildConfig != null) {
-      _content = _content.replaceAll('{{flutter_build_config}}', buildConfig);
+      newContent = newContent.replaceAll('{{flutter_build_config}}', buildConfig);
     }
 
-    if (_content.contains('{{flutter_js}}')) {
-      _content = _content.replaceAll('{{flutter_js}}', flutterJsFile.readAsStringSync());
+    if (newContent.contains('{{flutter_js}}')) {
+      newContent = newContent.replaceAll('{{flutter_js}}', flutterJsFile.readAsStringSync());
     }
 
     if (flutterBootstrapJs != null) {
-      _content = _content.replaceAll('{{flutter_bootstrap_js}}', flutterBootstrapJs);
+      newContent = newContent.replaceAll('{{flutter_bootstrap_js}}', flutterBootstrapJs);
     }
+    return newContent;
   }
 }
 
@@ -154,7 +168,7 @@ String stripTrailingSlash(String path) {
   return path;
 }
 
-const String _kBasePathExample = '''
+const _kBasePathExample = '''
 For example, to serve from the root use:
 
     <base href="/">

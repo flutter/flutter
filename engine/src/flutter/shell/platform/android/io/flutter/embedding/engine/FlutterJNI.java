@@ -10,13 +10,10 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
-import android.graphics.ColorSpace;
-import android.graphics.ImageDecoder;
 import android.graphics.SurfaceTexture;
 import android.os.Build;
 import android.os.Looper;
 import android.util.DisplayMetrics;
-import android.util.Size;
 import android.util.TypedValue;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -31,6 +28,7 @@ import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterEngine.EngineLifecycleListener;
 import io.flutter.embedding.engine.dart.PlatformMessageHandler;
 import io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager;
+import io.flutter.embedding.engine.image.FlutterImageDecoder;
 import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorsStack;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.embedding.engine.renderer.SurfaceTextureWrapper;
@@ -43,7 +41,6 @@ import io.flutter.util.Preconditions;
 import io.flutter.view.AccessibilityBridge;
 import io.flutter.view.FlutterCallbackInformation;
 import io.flutter.view.TextureRegistry;
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -147,7 +144,7 @@ public class FlutterJNI {
     if (FlutterJNI.loadLibraryCalled) {
       Log.w(TAG, "FlutterJNI.loadLibrary called more than once");
     }
-    ReLinker.loadLibrary(context, "flutter");
+    ReLinker.log(msg -> Log.d(TAG, msg)).loadLibrary(context, "flutter");
     FlutterJNI.loadLibraryCalled = true;
   }
 
@@ -254,20 +251,6 @@ public class FlutterJNI {
    */
   @Nullable
   public static String getVMServiceUri() {
-    return vmServiceUri;
-  }
-
-  /**
-   * VM Service URI for the VM instance.
-   *
-   * <p>Its value is set by the native engine once {@link #init(Context, String[], String, String,
-   * String, long, int)} is run.
-   *
-   * @deprecated replaced by {@link #getVMServiceUri()}.
-   */
-  @Deprecated
-  @Nullable
-  public static String getObservatoryUri() {
     return vmServiceUri;
   }
 
@@ -545,7 +528,6 @@ public class FlutterJNI {
    * Removes a {@link FlutterUiDisplayListener} that was added with {@link
    * #addIsDisplayingFlutterUiListener(FlutterUiDisplayListener)}.
    */
-  @UiThread
   public void removeIsDisplayingFlutterUiListener(@NonNull FlutterUiDisplayListener listener) {
     ensureRunningOnMainThread();
     flutterUiDisplayListeners.remove(listener);
@@ -566,26 +548,11 @@ public class FlutterJNI {
   @Nullable
   public static Bitmap decodeImage(@NonNull ByteBuffer buffer, long imageGeneratorAddress) {
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_28) {
-      ImageDecoder.Source source = ImageDecoder.createSource(buffer);
-      try {
-        return ImageDecoder.decodeBitmap(
-            source,
-            (decoder, info, src) -> {
-              // i.e. ARGB_8888
-              decoder.setTargetColorSpace(ColorSpace.get(ColorSpace.Named.SRGB));
-              // TODO(bdero): Switch to ALLOCATOR_HARDWARE for devices that have
-              // `AndroidBitmap_getHardwareBuffer` (API 30+) available once Skia supports
-              // `SkImage::MakeFromAHardwareBuffer` via dynamic lookups:
-              // https://skia-review.googlesource.com/c/skia/+/428960
-              decoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE);
-
-              Size size = info.getSize();
-              nativeImageHeaderCallback(imageGeneratorAddress, size.getWidth(), size.getHeight());
-            });
-      } catch (IOException e) {
-        Log.e(TAG, "Failed to decode image", e);
-        return null;
-      }
+      return FlutterImageDecoder.decodeImage(
+          buffer,
+          (width, height) -> {
+            nativeImageHeaderCallback(imageGeneratorAddress, width, height);
+          });
     }
     return null;
   }
@@ -814,6 +781,16 @@ public class FlutterJNI {
     ensureRunningOnMainThread();
     if (accessibilityDelegate != null) {
       accessibilityDelegate.updateSemantics(buffer, strings, stringAttributeArgs);
+    }
+  }
+
+  /** Invoked by native to set application locale in Android. */
+  @SuppressWarnings("unused")
+  @UiThread
+  private void setApplicationLocale(@NonNull String locale) {
+    ensureRunningOnMainThread();
+    if (accessibilityDelegate != null) {
+      accessibilityDelegate.setLocale(locale);
     }
   }
 
@@ -1391,6 +1368,18 @@ public class FlutterJNI {
         viewId, x, y, width, height, viewWidth, viewHeight, mutatorsStack);
   }
 
+  @UiThread
+  @SuppressWarnings("unused")
+  @SuppressLint("NewApi")
+  public void hidePlatformView2(int viewId) {
+    ensureRunningOnMainThread();
+    if (platformViewsController2 == null) {
+      throw new RuntimeException(
+          "platformViewsController must be set before attempting to hide a platform view");
+    }
+    platformViewsController2.hidePlatformView(viewId);
+  }
+
   // ----- Start Localization Support ----
 
   /** Sets the localization plugin that is used in various localization methods. */
@@ -1645,6 +1634,13 @@ public class FlutterJNI {
         @NonNull ByteBuffer buffer,
         @NonNull String[] strings,
         @NonNull ByteBuffer[] stringAttributeArgs);
+
+    /**
+     * Sets the locale for the assistive technologies.
+     *
+     * <p>Must be called on the main thread
+     */
+    void setLocale(@NonNull String locale);
   }
 
   public interface AsyncWaitForVsyncDelegate {

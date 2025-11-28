@@ -89,6 +89,9 @@ void DisplayListMatrixClipState::clipRRect(const DlRoundRect& rrect,
   if (rrect.IsRect()) {
     return clipRect(bounds, op, is_aa);
   }
+  if (rrect.IsOval()) {
+    return clipOval(bounds, op, is_aa);
+  }
   switch (op) {
     case DlClipOp::kIntersect:
       adjustCullRect(bounds, op, is_aa);
@@ -113,6 +116,9 @@ void DisplayListMatrixClipState::clipRSuperellipse(
   DlRect bounds = rse.GetBounds();
   if (rse.IsRect()) {
     return clipRect(bounds, op, is_aa);
+  }
+  if (rse.IsOval()) {
+    return clipOval(bounds, op, is_aa);
   }
   switch (op) {
     case DlClipOp::kIntersect:

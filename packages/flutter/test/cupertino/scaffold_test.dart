@@ -61,7 +61,7 @@ void main() {
       darkColor: Color(0xEE333333),
     );
 
-    const CupertinoDynamicColor backgroundColor = CupertinoDynamicColor.withBrightness(
+    const backgroundColor = CupertinoDynamicColor.withBrightness(
       color: Color(0xFFFFFFFF),
       darkColor: Color(0xFF000000),
     );
@@ -205,7 +205,7 @@ void main() {
   );
 
   testWidgets('Contents are between opaque bars', (WidgetTester tester) async {
-    const Center page1Center = Center();
+    const page1Center = Center();
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -226,12 +226,12 @@ void main() {
           tabBuilder: (BuildContext context, int index) {
             return index == 0
                 ? const CupertinoPageScaffold(
-                  navigationBar: CupertinoNavigationBar(
-                    backgroundColor: CupertinoColors.white,
-                    middle: Text('Title'),
-                  ),
-                  child: page1Center,
-                )
+                    navigationBar: CupertinoNavigationBar(
+                      backgroundColor: CupertinoColors.white,
+                      middle: Text('Title'),
+                    ),
+                    child: page1Center,
+                  )
                 : const Stack();
           },
         ),
@@ -244,7 +244,7 @@ void main() {
   testWidgets('Contents have automatic sliver padding between translucent bars', (
     WidgetTester tester,
   ) async {
-    const SizedBox content = SizedBox(height: 600.0, width: 600.0);
+    const content = SizedBox(height: 600.0, width: 600.0);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -266,9 +266,9 @@ void main() {
             tabBuilder: (BuildContext context, int index) {
               return index == 0
                   ? CupertinoPageScaffold(
-                    navigationBar: const CupertinoNavigationBar(middle: Text('Title')),
-                    child: ListView(children: const <Widget>[content]),
-                  )
+                      navigationBar: const CupertinoNavigationBar(middle: Text('Title')),
+                      child: ListView(children: const <Widget>[content]),
+                    )
                   : const Stack();
             },
           ),
@@ -403,11 +403,10 @@ void main() {
   testWidgets('Decorated with white background by default', (WidgetTester tester) async {
     await tester.pumpWidget(const CupertinoApp(home: CupertinoPageScaffold(child: Center())));
 
-    final DecoratedBox decoratedBox =
-        tester.widgetList(find.byType(DecoratedBox)).elementAt(1) as DecoratedBox;
+    final decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1) as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
-    final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+    final decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.color, isSameColorAs(CupertinoColors.white));
   });
 
@@ -418,11 +417,10 @@ void main() {
       ),
     );
 
-    final DecoratedBox decoratedBox =
-        tester.widgetList(find.byType(DecoratedBox)).elementAt(1) as DecoratedBox;
+    final decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1) as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
-    final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+    final decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.color, const Color(0xFF010203));
   });
 
@@ -495,15 +493,13 @@ void main() {
             viewInsets: EdgeInsets.only(bottom: showKeyboard ? 300 : 20),
           ),
           child: CupertinoPageScaffold(
-            navigationBar:
-                showNavigationBar ? const CupertinoNavigationBar(middle: Text('Title')) : null,
+            navigationBar: showNavigationBar
+                ? const CupertinoNavigationBar(middle: Text('Title'))
+                : null,
             child: Builder(
-              builder:
-                  (BuildContext context) => Center(
-                    child: CupertinoTextField(
-                      placeholder: MediaQuery.viewInsetsOf(context).toString(),
-                    ),
-                  ),
+              builder: (BuildContext context) => Center(
+                child: CupertinoTextField(placeholder: MediaQuery.viewInsetsOf(context).toString()),
+              ),
             ),
           ),
         ),
@@ -511,7 +507,7 @@ void main() {
     }
 
     // CupertinoPageScaffold should consume the viewInsets in all cases
-    final String expectedViewInsets = EdgeInsets.zero.toString();
+    final expectedViewInsets = EdgeInsets.zero.toString();
 
     // When there is a nav bar and no keyboard.
     await tester.pumpWidget(buildFrame(true, false));

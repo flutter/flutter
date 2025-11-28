@@ -34,7 +34,7 @@ void mockFlutterAssets() {
   }
   final String assetFolderPath = Platform.environment['UNIT_TEST_ASSETS']!;
   assert(Platform.environment['APP_NAME'] != null);
-  final String prefix = 'packages/${Platform.environment['APP_NAME']!}/';
+  final prefix = 'packages/${Platform.environment['APP_NAME']!}/';
 
   /// Navigation related actions (pop, push, replace) broadcasts these actions via
   /// platform messages.
@@ -50,7 +50,7 @@ void mockFlutterAssets() {
     (ByteData? message) {
       assert(message != null);
       String key = utf8.decode(message!.buffer.asUint8List());
-      File asset = File(path.join(assetFolderPath, key));
+      var asset = File(path.join(assetFolderPath, key));
 
       if (!asset.existsSync()) {
         // For tests in package, it will load assets with its own package prefix.
@@ -66,7 +66,7 @@ void mockFlutterAssets() {
         }
       }
 
-      final Uint8List encoded = Uint8List.fromList(asset.readAsBytesSync());
+      final encoded = Uint8List.fromList(asset.readAsBytesSync());
       return SynchronousFuture<ByteData>(encoded.buffer.asByteData());
     },
   );
@@ -432,12 +432,11 @@ class _MockHttpResponse implements HttpClientResponse {
   }) {
     return _delegate.firstWhere(
       test,
-      orElse:
-          orElse == null
-              ? null
-              : () {
-                return Uint8List.fromList(orElse());
-              },
+      orElse: orElse == null
+          ? null
+          : () {
+              return Uint8List.fromList(orElse());
+            },
     );
   }
 
@@ -477,12 +476,11 @@ class _MockHttpResponse implements HttpClientResponse {
   }) {
     return _delegate.lastWhere(
       test,
-      orElse:
-          orElse == null
-              ? null
-              : () {
-                return Uint8List.fromList(orElse());
-              },
+      orElse: orElse == null
+          ? null
+          : () {
+              return Uint8List.fromList(orElse());
+            },
     );
   }
 
@@ -516,12 +514,11 @@ class _MockHttpResponse implements HttpClientResponse {
   }) {
     return _delegate.singleWhere(
       test,
-      orElse:
-          orElse == null
-              ? null
-              : () {
-                return Uint8List.fromList(orElse());
-              },
+      orElse: orElse == null
+          ? null
+          : () {
+              return Uint8List.fromList(orElse());
+            },
     );
   }
 

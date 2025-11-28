@@ -33,7 +33,7 @@ void doTests() {
     });
 
     test('returns physical size of element (width * dpr)', () {
-      const double dpr = 2.5;
+      const dpr = 2.5;
       const double logicalWidth = 50;
       const double logicalHeight = 75;
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(dpr);
@@ -42,7 +42,7 @@ void doTests() {
         ..style.width = '${logicalWidth}px'
         ..style.height = '${logicalHeight}px';
 
-      const ui.Size expected = ui.Size(logicalWidth * dpr, logicalHeight * dpr);
+      const expected = ui.Size(logicalWidth * dpr, logicalHeight * dpr);
 
       final ui.Size computed = provider.computePhysicalSize();
 
@@ -68,7 +68,7 @@ void doTests() {
 
     test('from viewport physical size (simulated keyboard) - always zero', () {
       // Simulate a 100px tall keyboard showing...
-      const double dpr = 2.5;
+      const dpr = 2.5;
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(dpr);
       const double keyboardGap = 100;
       final double physicalHeight = (domWindow.visualViewport!.height! + keyboardGap) * dpr;
@@ -129,10 +129,10 @@ void doTests() {
 
     test('funnels DPR change events too', () async {
       // Override the source of DPR events...
-      final StreamController<double> dprController = StreamController<double>.broadcast();
+      final dprController = StreamController<double>.broadcast();
 
       // Inject the dprController stream into the CustomElementDimensionsProvider.
-      final CustomElementDimensionsProvider provider = CustomElementDimensionsProvider(
+      final provider = CustomElementDimensionsProvider(
         sizeSource,
         onDprChange: dprController.stream,
       );
@@ -147,7 +147,7 @@ void doTests() {
 
     test('closed by onHotRestart', () async {
       // Register an onDone listener for the stream
-      final Completer<bool> completer = Completer<bool>();
+      final completer = Completer<bool>();
       provider.onResize.listen(
         null,
         onDone: () {

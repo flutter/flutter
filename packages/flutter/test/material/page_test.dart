@@ -16,74 +16,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets(
-    'test page transition (_FadeUpwardsPageTransition)',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: const Material(child: Text('Page 1')),
-          theme: ThemeData(
-            pageTransitionsTheme: const PageTransitionsTheme(
-              builders: <TargetPlatform, PageTransitionsBuilder>{
-                TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
-              },
-            ),
-          ),
-          routes: <String, WidgetBuilder>{
-            '/next': (BuildContext context) {
-              return const Material(child: Text('Page 2'));
-            },
-          },
-        ),
-      );
-
-      final Offset widget1TopLeft = tester.getTopLeft(find.text('Page 1'));
-
-      tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 1));
-
-      FadeTransition widget2Opacity =
-          tester.element(find.text('Page 2')).findAncestorWidgetOfExactType<FadeTransition>()!;
-      Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
-      final Size widget2Size = tester.getSize(find.text('Page 2'));
-
-      // Android transition is vertical only.
-      expect(widget1TopLeft.dx == widget2TopLeft.dx, true);
-      // Page 1 is above page 2 mid-transition.
-      expect(widget1TopLeft.dy < widget2TopLeft.dy, true);
-      // Animation begins 3/4 of the way up the page.
-      expect(widget2TopLeft.dy < widget2Size.height / 4.0, true);
-      // Animation starts with page 2 being near transparent.
-      expect(widget2Opacity.opacity.value < 0.01, true);
-
-      await tester.pump(const Duration(milliseconds: 300));
-
-      // Page 2 covers page 1.
-      expect(find.text('Page 1'), findsNothing);
-      expect(find.text('Page 2'), isOnstage);
-
-      tester.state<NavigatorState>(find.byType(Navigator)).pop();
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 1));
-
-      widget2Opacity =
-          tester.element(find.text('Page 2')).findAncestorWidgetOfExactType<FadeTransition>()!;
-      widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
-
-      // Page 2 starts to move down.
-      expect(widget1TopLeft.dy < widget2TopLeft.dy, true);
-      // Page 2 starts to lose opacity.
-      expect(widget2Opacity.opacity.value < 1.0, true);
-
-      await tester.pump(const Duration(milliseconds: 300));
-
-      expect(find.text('Page 1'), isOnstage);
-      expect(find.text('Page 2'), findsNothing);
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.android),
-  );
-
-  testWidgets(
     'test page transition (CupertinoPageTransition)',
     (WidgetTester tester) async {
       final Key page2Key = UniqueKey();
@@ -107,10 +39,9 @@ void main() {
 
       Offset widget1TransientTopLeft = tester.getTopLeft(find.text('Page 1'));
       Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
-      final RenderDecoratedBox box =
-          tester
-              .element(find.byKey(page2Key))
-              .findAncestorRenderObjectOfType<RenderDecoratedBox>()!;
+      final RenderDecoratedBox box = tester
+          .element(find.byKey(page2Key))
+          .findAncestorRenderObjectOfType<RenderDecoratedBox>()!;
 
       // Page 1 is moving to the left.
       expect(widget1TransientTopLeft.dx < widget1InitialTopLeft.dx, true);
@@ -127,7 +58,7 @@ void main() {
       // rather than relative to the screen so assert that the shadow starts at
       // offset.dx = 0.
       final PaintPattern paintsShadow = paints;
-      for (int i = 0; i < 0.05 * 800; i += 1) {
+      for (var i = 0; i < 0.05 * 800; i += 1) {
         paintsShadow.rect(rect: Rect.fromLTWH(-i.toDouble() - 1.0, 0.0, 1.0, 600));
       }
       expect(box, paintsShadow);
@@ -189,6 +120,13 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(
+            pageTransitionsTheme: const PageTransitionsTheme(
+              builders: <TargetPlatform, PageTransitionsBuilder>{
+                TargetPlatform.android: ZoomPageTransitionsBuilder(),
+              },
+            ),
+          ),
           onGenerateRoute: (RouteSettings settings) {
             return MaterialPageRoute<void>(
               allowSnapshotting: false,
@@ -267,11 +205,20 @@ void main() {
         RepaintBoundary(
           key: key,
           child: MaterialApp(
-            theme: ThemeData(useMaterial3: false),
+            theme: ThemeData(
+              useMaterial3: false,
+              pageTransitionsTheme: const PageTransitionsTheme(
+                builders: <TargetPlatform, PageTransitionsBuilder>{
+                  TargetPlatform.android: ZoomPageTransitionsBuilder(),
+                },
+              ),
+            ),
             onGenerateRoute: (RouteSettings settings) {
               return MaterialPageRoute<void>(
                 builder: (BuildContext context) {
-                  return const Scaffold(body: Scaffold(body: Material(child: SizedBox.shrink())));
+                  return const Scaffold(
+                    body: Scaffold(body: Material(child: SizedBox.shrink())),
+                  );
                 },
               );
             },
@@ -312,10 +259,19 @@ void main() {
           key: key,
           child: MaterialApp(
             debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
+            theme: ThemeData(
+              pageTransitionsTheme: const PageTransitionsTheme(
+                builders: <TargetPlatform, PageTransitionsBuilder>{
+                  TargetPlatform.android: ZoomPageTransitionsBuilder(),
+                },
+              ),
+            ),
             onGenerateRoute: (RouteSettings settings) {
               return MaterialPageRoute<void>(
                 builder: (BuildContext context) {
-                  return const Scaffold(body: Scaffold(body: Material(child: SizedBox.shrink())));
+                  return const Scaffold(
+                    body: Scaffold(body: Material(child: SizedBox.shrink())),
+                  );
                 },
               );
             },
@@ -571,20 +527,22 @@ void main() {
   );
 
   testWidgets('back gesture while OS changes', (WidgetTester tester) async {
-    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/':
-          (BuildContext context) => Material(
-            child: TextButton(
-              child: const Text('PUSH'),
-              onPressed: () {
-                Navigator.of(context).pushNamed('/b');
-              },
-            ),
-          ),
+    final routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => Material(
+        child: TextButton(
+          child: const Text('PUSH'),
+          onPressed: () {
+            Navigator.of(context).pushNamed('/b');
+          },
+        ),
+      ),
       '/b': (BuildContext context) => const Text('HELLO'),
     };
     await tester.pumpWidget(
-      MaterialApp(theme: ThemeData(platform: TargetPlatform.iOS), routes: routes),
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        routes: routes,
+      ),
     );
     await tester.tap(find.text('PUSH'));
     expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 2);
@@ -604,7 +562,10 @@ void main() {
     expect(helloPosition1.dy, helloPosition2.dy);
     expect(Theme.of(tester.element(find.text('HELLO'))).platform, TargetPlatform.iOS);
     await tester.pumpWidget(
-      MaterialApp(theme: ThemeData(platform: TargetPlatform.android), routes: routes),
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.android),
+        routes: routes,
+      ),
     );
     // Now we have to let the theme animation run through.
     // This takes three frames (including the first one above):
@@ -634,7 +595,10 @@ void main() {
     expect(find.text('HELLO'), findsNothing);
 
     await tester.pumpWidget(
-      MaterialApp(theme: ThemeData(platform: TargetPlatform.macOS), routes: routes),
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.macOS),
+        routes: routes,
+      ),
     );
     await tester.tap(find.text('PUSH'));
     expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 2);
@@ -701,18 +665,25 @@ void main() {
           onGenerateRoute: (RouteSettings settings) {
             if (settings.name == '/') {
               return PageRouteBuilder<void>(
-                pageBuilder: (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) {
-                  return Scaffold(appBar: AppBar(title: const Text('Page 1')), body: Container());
-                },
+                pageBuilder:
+                    (
+                      BuildContext context,
+                      Animation<double> animation,
+                      Animation<double> secondaryAnimation,
+                    ) {
+                      return Scaffold(
+                        appBar: AppBar(title: const Text('Page 1')),
+                        body: Container(),
+                      );
+                    },
               );
             }
             return MaterialPageRoute<void>(
               builder: (BuildContext context) {
-                return Scaffold(appBar: AppBar(title: const Text('Page 2')), body: Container());
+                return Scaffold(
+                  appBar: AppBar(title: const Text('Page 2')),
+                  body: Container(),
+                );
               },
               fullscreenDialog: true,
             );
@@ -838,7 +809,7 @@ void main() {
             return MaterialPageRoute<void>(
               settings: settings,
               builder: (BuildContext context) {
-                final String pageNumber = settings.name == '/' ? '1' : '2';
+                final pageNumber = settings.name == '/' ? '1' : '2';
                 return Center(child: Text('Page $pageNumber'));
               },
             );
@@ -880,7 +851,7 @@ void main() {
             return MaterialPageRoute<void>(
               settings: settings,
               builder: (BuildContext context) {
-                final String pageNumber = settings.name == '/' ? '1' : '2';
+                final pageNumber = settings.name == '/' ? '1' : '2';
                 return Center(child: Text('Page $pageNumber'));
               },
             );
@@ -1025,8 +996,8 @@ void main() {
 
       final GlobalKey homeScaffoldKey = GlobalKey();
       final GlobalKey pageScaffoldKey = GlobalKey();
-      int homeTapCount = 0;
-      int pageTapCount = 0;
+      var homeTapCount = 0;
+      var pageTapCount = 0;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -1105,8 +1076,8 @@ void main() {
 
       final GlobalKey homeScaffoldKey = GlobalKey();
       final GlobalKey pageScaffoldKey = GlobalKey();
-      int homeTapCount = 0;
-      int pageTapCount = 0;
+      var homeTapCount = 0;
+      var pageTapCount = 0;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -1125,8 +1096,9 @@ void main() {
       expect(homeTapCount, 1);
       expect(pageTapCount, 0);
 
-      final ValueNotifier<bool> notifier =
-          Navigator.of(homeScaffoldKey.currentContext!).userGestureInProgressNotifier;
+      final ValueNotifier<bool> notifier = Navigator.of(
+        homeScaffoldKey.currentContext!,
+      ).userGestureInProgressNotifier;
       expect(notifier.value, false);
 
       Navigator.push<void>(
@@ -1217,10 +1189,8 @@ void main() {
 
   testWidgets('MaterialPage works', (WidgetTester tester) async {
     final LocalKey pageKey = UniqueKey();
-    final TransitionDetector detector = TransitionDetector();
-    List<Page<void>> myPages = <Page<void>>[
-      MaterialPage<void>(key: pageKey, child: const Text('first')),
-    ];
+    final detector = TransitionDetector();
+    var myPages = <Page<void>>[MaterialPage<void>(key: pageKey, child: const Text('first'))];
     await tester.pumpWidget(
       buildNavigator(
         view: tester.view,
@@ -1259,8 +1229,8 @@ void main() {
   testWidgets('MaterialPage can toggle MaintainState', (WidgetTester tester) async {
     final LocalKey pageKeyOne = UniqueKey();
     final LocalKey pageKeyTwo = UniqueKey();
-    final TransitionDetector detector = TransitionDetector();
-    List<Page<void>> myPages = <Page<void>>[
+    final detector = TransitionDetector();
+    var myPages = <Page<void>>[
       MaterialPage<void>(key: pageKeyOne, maintainState: false, child: const Text('first')),
       MaterialPage<void>(key: pageKeyTwo, child: const Text('second')),
     ];
@@ -1308,7 +1278,7 @@ void main() {
   testWidgets('MaterialPage does not lose its state when transitioning out', (
     WidgetTester tester,
   ) async {
-    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    final navigator = GlobalKey<NavigatorState>();
     await tester.pumpWidget(KeepsStateTestWidget(navigatorKey: navigator));
     expect(find.text('subpage'), findsOneWidget);
     expect(find.text('home'), findsNothing);
@@ -1426,7 +1396,7 @@ void main() {
     'Setting MaterialPageRoute.requestFocus to false does not request focus on the page',
     (WidgetTester tester) async {
       late BuildContext savedContext;
-      const String pageTwoText = 'Page Two';
+      const pageTwoText = 'Page Two';
       await tester.pumpWidget(
         MaterialApp(
           home: Builder(

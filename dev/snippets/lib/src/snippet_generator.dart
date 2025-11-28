@@ -42,8 +42,8 @@ class SnippetGenerator {
   /// Takes into account the [type] and doesn't substitute in the id and the app
   /// if not a [SnippetType.sample] snippet.
   String interpolateSkeleton(CodeSample sample, String skeleton) {
-    final List<String> codeParts = <String>[];
-    const HtmlEscape htmlEscape = HtmlEscape();
+    final codeParts = <String>[];
+    const htmlEscape = HtmlEscape();
     String? language;
     for (final SkeletonInjection injection in sample.parts) {
       if (!injection.name.startsWith('code')) {
@@ -61,17 +61,16 @@ class SnippetGenerator {
     // Only insert a div for the description if there actually is some text there.
     // This means that the {{description}} marker in the skeleton needs to
     // be inside of an {@inject-html} block.
-    final String description =
-        sample.description.trim().isNotEmpty
-            ? '<div class="snippet-description">{@end-inject-html}${sample.description.trim()}{@inject-html}</div>'
-            : '';
+    final description = sample.description.trim().isNotEmpty
+        ? '<div class="snippet-description">{@end-inject-html}${sample.description.trim()}{@inject-html}</div>'
+        : '';
 
     // DartPad only supports stable or main as valid channels. Use main
     // if not on stable so that local runs will work (although they will
     // still take their sample code from the master docs server).
-    final String channel = sample.metadata['channel'] == 'stable' ? 'stable' : 'main';
+    final channel = sample.metadata['channel'] == 'stable' ? 'stable' : 'main';
 
-    final Map<String, String> substitutions = <String, String>{
+    final substitutions = <String, String>{
       'description': description,
       'code': htmlEscape.convert(codeParts.join('\n')),
       'language': language ?? 'dart',
@@ -93,115 +92,14 @@ class SnippetGenerator {
     });
   }
 
-  /// Consolidates all of the snippets and the assumptions into one snippet, in
-  /// order to create a compilable result.
-  Iterable<SourceLine> consolidateSnippets(List<CodeSample> samples, {bool addMarkers = false}) {
-    if (samples.isEmpty) {
-      return <SourceLine>[];
-    }
-    final Iterable<SnippetSample> snippets = samples.whereType<SnippetSample>();
-    final List<SourceLine> snippetLines = <SourceLine>[...snippets.first.assumptions];
-    for (final SnippetSample sample in snippets) {
-      parseInput(sample);
-      snippetLines.addAll(_processBlocks(sample));
-    }
-    return snippetLines;
-  }
-
-  /// A RegExp that matches a Dart constructor.
-  static final RegExp _constructorRegExp = RegExp(r'(const\s+)?_*[A-Z][a-zA-Z0-9<>._]*\(');
-
-  /// A serial number so that we can create unique expression names when we
-  /// generate them.
-  int _expressionId = 0;
-
-  List<SourceLine> _surround(String prefix, Iterable<SourceLine> body, String suffix) {
-    return <SourceLine>[
-      if (prefix.isNotEmpty) SourceLine(prefix),
-      ...body,
-      if (suffix.isNotEmpty) SourceLine(suffix),
-    ];
-  }
-
-  /// Process one block of sample code (the part inside of "```" markers).
-  /// Splits any sections denoted by "// ..." into separate blocks to be
-  /// processed separately. Uses a primitive heuristic to make sample blocks
-  /// into valid Dart code.
-  List<SourceLine> _processBlocks(CodeSample sample) {
-    final List<SourceLine> block =
-        sample.parts
-            .expand<SourceLine>((SkeletonInjection injection) => injection.contents)
-            .toList();
-    if (block.isEmpty) {
-      return <SourceLine>[];
-    }
-    return _processBlock(block);
-  }
-
-  List<SourceLine> _processBlock(List<SourceLine> block) {
-    final String firstLine = block.first.text;
-    if (firstLine.startsWith('new ') || firstLine.startsWith(_constructorRegExp)) {
-      _expressionId += 1;
-      return _surround('dynamic expression$_expressionId = ', block, ';');
-    } else if (firstLine.startsWith('await ')) {
-      _expressionId += 1;
-      return _surround('Future<void> expression$_expressionId() async { ', block, ' }');
-    } else if (block.first.text.startsWith('class ') || block.first.text.startsWith('enum ')) {
-      return block;
-    } else if ((block.first.text.startsWith('_') || block.first.text.startsWith('final ')) &&
-        block.first.text.contains(' = ')) {
-      _expressionId += 1;
-      return _surround('void expression$_expressionId() { ', block.toList(), ' }');
-    } else {
-      final List<SourceLine> buffer = <SourceLine>[];
-      int blocks = 0;
-      SourceLine? subLine;
-      final List<SourceLine> subsections = <SourceLine>[];
-      for (int index = 0; index < block.length; index += 1) {
-        // Each section of the dart code that is either split by a blank line, or with
-        // '// ...' is treated as a separate code block.
-        if (block[index].text.trim().isEmpty || block[index].text == '// ...') {
-          if (subLine == null) {
-            continue;
-          }
-          blocks += 1;
-          subsections.addAll(_processBlock(buffer));
-          buffer.clear();
-          assert(buffer.isEmpty);
-          subLine = null;
-        } else if (block[index].text.startsWith('// ')) {
-          if (buffer.length > 1) {
-            // don't include leading comments
-            // so that it doesn't start with "// " and get caught in this again
-            buffer.add(SourceLine('/${block[index].text}'));
-          }
-        } else {
-          subLine ??= block[index];
-          buffer.add(block[index]);
-        }
-      }
-      if (blocks > 0) {
-        if (subLine != null) {
-          subsections.addAll(_processBlock(buffer));
-        }
-        // Combine all of the subsections into one section, now that they've been processed.
-        return subsections;
-      } else {
-        return block;
-      }
-    }
-  }
-
   /// Parses the input for the various code and description segments, and
   /// returns a set of skeleton injections in the order found.
   List<SkeletonInjection> parseInput(CodeSample sample) {
-    bool inCodeBlock = false;
-    final List<SourceLine> description = <SourceLine>[];
-    final List<SkeletonInjection> components = <SkeletonInjection>[];
+    var inCodeBlock = false;
+    final description = <SourceLine>[];
+    final components = <SkeletonInjection>[];
     String? language;
-    final RegExp codeStartEnd = RegExp(
-      r'^\s*```(?<language>[-\w]+|[-\w]+ (?<section>[-\w]+))?\s*$',
-    );
+    final codeStartEnd = RegExp(r'^\s*```(?<language>[-\w]+|[-\w]+ (?<section>[-\w]+))?\s*$');
     for (final SourceLine line in sample.input) {
       final RegExpMatch? match = codeStartEnd.firstMatch(line.text);
       if (match != null) {
@@ -232,8 +130,8 @@ class SnippetGenerator {
         components.last.contents.add(line);
       }
     }
-    final List<String> descriptionLines = <String>[];
-    bool lastWasWhitespace = false;
+    final descriptionLines = <String>[];
+    var lastWasWhitespace = false;
     for (final String line in description.map<String>((SourceLine line) => line.text.trimRight())) {
       final bool onlyWhitespace = line.trim().isEmpty;
       if (onlyWhitespace && descriptionLines.isEmpty) {
@@ -277,8 +175,8 @@ class SnippetGenerator {
     return sample.description.splitMapJoin(
       '\n',
       onMatch: (Match match) => match.group(0)!,
-      onNonMatch:
-          (String nonmatch) => nonmatch.trimRight().isEmpty ? '//' : '// ${nonmatch.trimRight()}',
+      onNonMatch: (String nonmatch) =>
+          nonmatch.trimRight().isEmpty ? '//' : '// ${nonmatch.trimRight()}',
     );
   }
 
@@ -357,30 +255,29 @@ class SnippetGenerator {
   ///
   /// Not used for "sample" and "dartpad" samples, which use their own template.
   List<SourceLine> get headers {
-    return _headers ??=
-        <String>[
-          '// generated code',
-          '// ignore_for_file: unused_import',
-          '// ignore_for_file: unused_element',
-          '// ignore_for_file: unused_local_variable',
-          "import 'dart:async';",
-          "import 'dart:convert';",
-          "import 'dart:math' as math;",
-          "import 'dart:typed_data';",
-          "import 'dart:ui' as ui;",
-          "import 'package:flutter_test/flutter_test.dart';",
-          for (final File file in _listDartFiles(
-            FlutterInformation.instance
-                .getFlutterRoot()
-                .childDirectory('packages')
-                .childDirectory('flutter')
-                .childDirectory('lib'),
-          )) ...<String>[
-            '',
-            '// ${file.path}',
-            "import 'package:flutter/${path.basename(file.path)}';",
-          ],
-        ].map<SourceLine>((String code) => SourceLine(code)).toList();
+    return _headers ??= <String>[
+      '// generated code',
+      '// ignore_for_file: unused_import',
+      '// ignore_for_file: unused_element',
+      '// ignore_for_file: unused_local_variable',
+      "import 'dart:async';",
+      "import 'dart:convert';",
+      "import 'dart:math' as math;",
+      "import 'dart:typed_data';",
+      "import 'dart:ui' as ui;",
+      "import 'package:flutter_test/flutter_test.dart';",
+      for (final File file in _listDartFiles(
+        FlutterInformation.instance
+            .getFlutterRoot()
+            .childDirectory('packages')
+            .childDirectory('flutter')
+            .childDirectory('lib'),
+      )) ...<String>[
+        '',
+        '// ${file.path}',
+        "import 'package:flutter/${path.basename(file.path)}';",
+      ],
+    ].map<SourceLine>((String code) => SourceLine(code)).toList();
   }
 
   List<SourceLine>? _headers;

@@ -6,12 +6,12 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final OverlayPortalController controller1 = OverlayPortalController(debugLabel: 'controller1');
+  final controller1 = OverlayPortalController(debugLabel: 'controller1');
   setUp(controller1.show);
 
   testWidgets('Basic test', (WidgetTester tester) async {
     late StateSetter setState;
-    Matrix4 transform = Matrix4.identity();
+    var transform = Matrix4.identity();
     late final OverlayEntry overlayEntry;
     addTearDown(() {
       overlayEntry
@@ -44,19 +44,17 @@ void main() {
                         alignment: Alignment.topLeft,
                         child: OverlayPortal.overlayChildLayoutBuilder(
                           controller: controller1,
-                          overlayChildBuilder: (
-                            BuildContext context,
-                            OverlayChildLayoutInfo layoutInfo,
-                          ) {
-                            paintTransform = layoutInfo.childPaintTransform;
-                            regularChildSize = layoutInfo.childSize;
-                            regularChildRectInTheater = MatrixUtils.transformRect(
-                              paintTransform,
-                              Offset.zero & layoutInfo.childSize,
-                            );
-                            theaterSize = layoutInfo.overlaySize;
-                            return const SizedBox();
-                          },
+                          overlayChildBuilder:
+                              (BuildContext context, OverlayChildLayoutInfo layoutInfo) {
+                                paintTransform = layoutInfo.childPaintTransform;
+                                regularChildSize = layoutInfo.childSize;
+                                regularChildRectInTheater = MatrixUtils.transformRect(
+                                  paintTransform,
+                                  Offset.zero & layoutInfo.childSize,
+                                );
+                                theaterSize = layoutInfo.overlaySize;
+                                return const SizedBox();
+                              },
                           child: const SizedBox(width: 40, height: 50),
                         ),
                       );
@@ -90,14 +88,13 @@ void main() {
     late StateSetter setState;
     late final OverlayEntry overlayEntry;
     addTearDown(
-      () =>
-          overlayEntry
-            ..remove()
-            ..dispose(),
+      () => overlayEntry
+        ..remove()
+        ..dispose(),
     );
 
     late Size regularChildSize;
-    Size childSize = const Size(40, 50);
+    var childSize = const Size(40, 50);
 
     await tester.pumpWidget(
       Directionality(
@@ -114,13 +111,11 @@ void main() {
                       setState = setter;
                       return OverlayPortal.overlayChildLayoutBuilder(
                         controller: controller1,
-                        overlayChildBuilder: (
-                          BuildContext context,
-                          OverlayChildLayoutInfo layoutInfo,
-                        ) {
-                          regularChildSize = layoutInfo.childSize;
-                          return const SizedBox();
-                        },
+                        overlayChildBuilder:
+                            (BuildContext context, OverlayChildLayoutInfo layoutInfo) {
+                              regularChildSize = layoutInfo.childSize;
+                              return const SizedBox();
+                            },
                         child: SizedBox.fromSize(size: childSize),
                       );
                     },
@@ -144,13 +139,12 @@ void main() {
     WidgetTester tester,
   ) async {
     late StateSetter setState;
-    Color color = const Color(0x12345678);
+    var color = const Color(0x12345678);
     late final OverlayEntry overlayEntry;
     addTearDown(
-      () =>
-          overlayEntry
-            ..remove()
-            ..dispose(),
+      () => overlayEntry
+        ..remove()
+        ..dispose(),
     );
 
     Widget builder(BuildContext _, OverlayChildLayoutInfo _) => ColoredBox(color: color);
@@ -188,10 +182,9 @@ void main() {
   testWidgets('Positioned works in the builder', (WidgetTester tester) async {
     late final OverlayEntry overlayEntry;
     addTearDown(
-      () =>
-          overlayEntry
-            ..remove()
-            ..dispose(),
+      () => overlayEntry
+        ..remove()
+        ..dispose(),
     );
 
     final GlobalKey key = GlobalKey();
@@ -229,13 +222,12 @@ void main() {
 
   testWidgets('Rebuilds when the layout info changes', (WidgetTester tester) async {
     late StateSetter setState;
-    Matrix4 transform = Matrix4.identity();
+    var transform = Matrix4.identity();
     late final OverlayEntry overlayEntry;
     addTearDown(
-      () =>
-          overlayEntry
-            ..remove()
-            ..dispose(),
+      () => overlayEntry
+        ..remove()
+        ..dispose(),
     );
 
     late Matrix4 paintTransform;
@@ -285,10 +277,9 @@ void main() {
   testWidgets('Still works if child and overlay child are null', (WidgetTester tester) async {
     late final OverlayEntry overlayEntry;
     addTearDown(
-      () =>
-          overlayEntry
-            ..remove()
-            ..dispose(),
+      () => overlayEntry
+        ..remove()
+        ..dispose(),
     );
 
     late Size regularChildSize;
@@ -324,10 +315,9 @@ void main() {
   testWidgets('Screams if RenderFollower is spotted in path', (WidgetTester tester) async {
     late final OverlayEntry overlayEntry;
     addTearDown(
-      () =>
-          overlayEntry
-            ..remove()
-            ..dispose(),
+      () => overlayEntry
+        ..remove()
+        ..dispose(),
     );
 
     await tester.pumpWidget(

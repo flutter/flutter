@@ -8,9 +8,11 @@
 #include <iomanip>
 
 #include "flutter/display_list/display_list.h"
+#include "flutter/display_list/dl_canvas.h"
 #include "flutter/display_list/effects/dl_color_filters.h"
 #include "flutter/display_list/effects/dl_color_sources.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
+#include "flutter/impeller/typographer/text_frame.h"
 
 namespace flutter::testing {
 
@@ -286,22 +288,19 @@ std::ostream& operator<<(std::ostream& os, DlImageSampling sampling) {
   }
 }
 
-static std::ostream& operator<<(std::ostream& os, const SkTextBlob* blob) {
-  if (blob == nullptr) {
-    return os << "no text";
+static std::ostream& operator<<(std::ostream& os, const flutter::DlText* text) {
+  auto blob = text->GetTextBlob();
+  if (blob != nullptr) {
+    return os << "&SkTextBlob(ID: " << blob->uniqueID() << ", " << blob->bounds() << ")";
   }
-  return os << "&SkTextBlob(ID: " << blob->uniqueID() << ", " << blob->bounds() << ")";
-}
-
-static std::ostream& operator<<(std::ostream& os,
-                                const impeller::TextFrame* frame) {
-  if (frame == nullptr) {
-    return os << "no text";
+  auto frame = text->GetTextFrame();
+  if (frame != nullptr) {
+    auto bounds = frame->GetBounds();
+    return os << "&TextFrame("
+              << bounds.GetLeft() << ", " << bounds.GetTop() << " => "
+              << bounds.GetRight() << ", " << bounds.GetBottom() << ")";
   }
-  auto bounds = frame->GetBounds();
-  return os << "&TextFrame("
-            << bounds.GetLeft() << ", " << bounds.GetTop() << " => "
-            << bounds.GetRight() << ", " << bounds.GetBottom() << ")";
+  return os << "no text";
 }
 
 std::ostream& operator<<(std::ostream& os, const DlVertexMode& mode) {
@@ -646,30 +645,15 @@ DisplayListStreamDispatcher::DlPathStreamer::~DlPathStreamer() {
     dispatcher_.startl() << "}" << std::endl;
   }
 }
-void DisplayListStreamDispatcher::DlPathStreamer::RecommendSizes(
-    size_t verb_count, size_t point_count) {
-  FML_DCHECK(!done_with_info_);
-  dispatcher_.startl() << "sizes:  "
-      << verb_count << " verbs, " << point_count << " points" << std::endl;
-};
-void DisplayListStreamDispatcher::DlPathStreamer::RecommendBounds(
-    const DlRect& bounds) {
-  FML_DCHECK(!done_with_info_);
-  dispatcher_.startl() << "bounds: " << bounds << std::endl;
-};
-void DisplayListStreamDispatcher::DlPathStreamer::SetPathInfo(
-    DlPathFillType fill_type, bool is_convex) {
-  FML_DCHECK(!done_with_info_);
-  dispatcher_.startl() << "info:   "
-      << fill_type << ", convex: " << is_convex << std::endl;
-}
-void DisplayListStreamDispatcher::DlPathStreamer::MoveTo(const DlPoint& p2) {
+void DisplayListStreamDispatcher::DlPathStreamer::MoveTo(const DlPoint& p2,
+                                                         bool will_be_closed) {
   if (!done_with_info_) {
     done_with_info_ = true;
     dispatcher_.startl() << "{" << std::endl;
     dispatcher_.indent(2);
   }
-  dispatcher_.startl() << "MoveTo(" << p2 << ")," << std::endl;
+  dispatcher_.startl() << "MoveTo(" << p2 << ", " << will_be_closed << "),"
+                       << std::endl;
 }
 void DisplayListStreamDispatcher::DlPathStreamer::LineTo(const DlPoint& p2) {
   FML_DCHECK(done_with_info_);
@@ -700,7 +684,11 @@ void DisplayListStreamDispatcher::DlPathStreamer::Close() {
   dispatcher_.startl() << "Close()," << std::endl;
 }
 void DisplayListStreamDispatcher::out(const DlVerbosePath& path) {
-  os_ << "DlPath(" << std::endl;
+  os_ << "DlPath(" << path.path.GetFillType() << ", ";
+  if (path.path.IsConvex()) {
+    os_ << "(convex), ";
+  }
+  os_ << path.path.GetBounds() << "," << std::endl;
   indent(2);
   {
     DlPathStreamer streamer(*this);
@@ -986,21 +974,12 @@ void DisplayListStreamDispatcher::drawDisplayList(
            << "opacity: " << opacity
            << ");" << std::endl;
 }
-void DisplayListStreamDispatcher::drawTextBlob(const sk_sp<SkTextBlob> blob,
+void DisplayListStreamDispatcher::drawText(const std::shared_ptr<DlText>& text,
                                                DlScalar x,
                                                DlScalar y) {
-  startl() << "drawTextBlob("
-           << blob.get() << ", "
+  startl() << "drawText("
+           << text.get() << ", "
            << x << ", " << y << ");" << std::endl;
-}
-
-void DisplayListStreamDispatcher::drawTextFrame(
-    const std::shared_ptr<impeller::TextFrame>& text_frame,
-    DlScalar x,
-    DlScalar y) {
-  startl() << "drawTextFrame("
-    << text_frame.get() << ", "
-    << x << ", " << y << ");" << std::endl;
 }
 
 void DisplayListStreamDispatcher::drawShadow(const DlPath& path,

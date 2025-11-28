@@ -26,8 +26,9 @@ Future<void> pumpTest(
   await tester.pumpWidget(
     MaterialApp(
       scrollBehavior: const NoScrollbarBehavior().copyWith(
-        dragDevices:
-            enableMouseDrag ? <ui.PointerDeviceKind>{...ui.PointerDeviceKind.values} : null,
+        dragDevices: enableMouseDrag
+            ? <ui.PointerDeviceKind>{...ui.PointerDeviceKind.values}
+            : null,
         pointerAxisModifiers: axisModifier,
       ),
       theme: ThemeData(platform: platform),
@@ -94,13 +95,13 @@ double getScrollOffset(WidgetTester tester, {bool last = true}) {
 
 double getScrollVelocity(WidgetTester tester) {
   final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
-  final ScrollPosition position = viewport.offset as ScrollPosition;
+  final position = viewport.offset as ScrollPosition;
   return position.activity!.velocity;
 }
 
 void resetScrollOffset(WidgetTester tester) {
   final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
-  final ScrollPosition position = viewport.offset as ScrollPosition;
+  final position = viewport.offset as ScrollPosition;
   position.jumpTo(0.0);
 }
 
@@ -156,7 +157,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final Key key = UniqueKey();
-    bool tapped = false;
+    var tapped = false;
     await tester.pumpWidget(
       MaterialApp(
         home: Stack(
@@ -476,7 +477,7 @@ void main() {
   testWidgets('Scroll pointer signals are handled on Fuchsia', (WidgetTester tester) async {
     await pumpTest(tester, TargetPlatform.fuchsia);
     final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
-    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     // Create a hover event so that |testPointer| has a location when generating the scroll.
     testPointer.hover(scrollEventLocation);
     await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
@@ -495,7 +496,7 @@ void main() {
 
     await pumpDoubleScrollableTest(tester, TargetPlatform.fuchsia);
     final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport).last);
-    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     // Create a hover event so that |testPointer| has a location when generating the scroll.
     testPointer.hover(scrollEventLocation);
     await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
@@ -510,7 +511,7 @@ void main() {
   ) async {
     await pumpTest(tester, TargetPlatform.fuchsia, scrollable: false);
     final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
-    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     // Create a hover event so that |testPointer| has a location when generating the scroll.
     testPointer.hover(scrollEventLocation);
     await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
@@ -522,11 +523,11 @@ void main() {
     (WidgetTester tester) async {
       await pumpTest(tester, debugDefaultTargetPlatformOverride, scrollable: false);
       final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
-      final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+      final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
       // Create a hover event so that |testPointer| has a location when generating the scroll.
       testPointer.hover(scrollEventLocation);
 
-      bool allowedPlatformDefault = false;
+      var allowedPlatformDefault = false;
       await tester.sendEventToBinding(
         testPointer.scroll(
           const Offset(0.0, 20.0),
@@ -551,7 +552,7 @@ void main() {
       await pumpTest(tester, debugDefaultTargetPlatformOverride, scrollDirection: Axis.horizontal);
 
       final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
-      final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+      final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
       // Create a hover event so that |testPointer| has a location when generating the scroll.
       testPointer.hover(scrollEventLocation);
 
@@ -569,7 +570,7 @@ void main() {
       await tester.pump();
 
       // Vertical input not accepted
-      bool allowedPlatformDefault = false;
+      var allowedPlatformDefault = false;
       await tester.sendEventToBinding(
         testPointer.scroll(
           const Offset(0.0, 20.0),
@@ -592,7 +593,7 @@ void main() {
     (WidgetTester tester) async {
       ScrollDirection? lastUserScrollingDirection;
 
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
 
       await pumpTest(tester, TargetPlatform.fuchsia, controller: controller);
@@ -608,7 +609,7 @@ void main() {
       expect(lastUserScrollingDirection, ScrollDirection.reverse);
 
       final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
-      final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+      final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
       // Create a hover event so that |testPointer| has a location when generating the scroll.
       testPointer.hover(scrollEventLocation);
       await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
@@ -631,7 +632,7 @@ void main() {
     await pumpTest(tester, TargetPlatform.fuchsia, reverse: true);
 
     final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
-    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     // Create a hover event so that |testPointer| has a location when generating the scroll.
     testPointer.hover(scrollEventLocation);
     await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -20.0)));
@@ -643,7 +644,7 @@ void main() {
     await pumpTest(tester, debugDefaultTargetPlatformOverride, scrollDirection: Axis.horizontal);
 
     final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
-    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     // Create a hover event so that |testPointer| has a location when generating the scroll.
     testPointer.hover(scrollEventLocation);
     await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
@@ -666,7 +667,7 @@ void main() {
     await pumpTest(tester, debugDefaultTargetPlatformOverride, scrollDirection: Axis.horizontal);
 
     final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
-    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.trackpad);
+    final testPointer = TestPointer(1, ui.PointerDeviceKind.trackpad);
     // Create a hover event so that |testPointer| has a location when generating the scroll.
     testPointer.hover(scrollEventLocation);
     await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
@@ -694,7 +695,7 @@ void main() {
     );
 
     final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
-    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     // Create a hover event so that |testPointer| has a location when generating the scroll.
     testPointer.hover(scrollEventLocation);
     await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
@@ -724,7 +725,7 @@ void main() {
       );
 
       final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
-      final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+      final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
       // Create a hover event so that |testPointer| has a location when generating the scroll.
       testPointer.hover(scrollEventLocation);
       await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
@@ -752,10 +753,9 @@ void main() {
       return tester.pumpWidget(
         MaterialApp(
           home: CustomScrollView(
-            physics:
-                canDrag
-                    ? const AlwaysScrollableScrollPhysics()
-                    : const NeverScrollableScrollPhysics(),
+            physics: canDrag
+                ? const AlwaysScrollableScrollPhysics()
+                : const NeverScrollableScrollPhysics(),
             slivers: <Widget>[
               SliverToBoxAdapter(
                 child: SizedBox(height: 2000, child: GestureDetector(onTap: () {})),
@@ -830,10 +830,10 @@ void main() {
   });
 
   testWidgets('Can recommendDeferredLoadingForContext - animation', (WidgetTester tester) async {
-    final List<String> widgetTracker = <String>[];
-    int cheapWidgets = 0;
-    int expensiveWidgets = 0;
-    final ScrollController controller = ScrollController();
+    final widgetTracker = <String>[];
+    var cheapWidgets = 0;
+    var expensiveWidgets = 0;
+    final controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -888,8 +888,8 @@ void main() {
   });
 
   testWidgets('Can recommendDeferredLoadingForContext - ballistics', (WidgetTester tester) async {
-    int cheapWidgets = 0;
-    int expensiveWidgets = 0;
+    var cheapWidgets = 0;
+    var expensiveWidgets = 0;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -931,8 +931,8 @@ void main() {
   testWidgets('Can recommendDeferredLoadingForContext - override heuristic', (
     WidgetTester tester,
   ) async {
-    int cheapWidgets = 0;
-    int expensiveWidgets = 0;
+    var cheapWidgets = 0;
+    var expensiveWidgets = 0;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -952,7 +952,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final ScrollPosition position = Scrollable.of(find.byType(SizedBox).evaluate().first).position;
-    final SuperPessimisticScrollPhysics physics = position.physics as SuperPessimisticScrollPhysics;
+    final physics = position.physics as SuperPessimisticScrollPhysics;
 
     expect(find.byKey(const ValueKey<String>('Box 0')), findsOneWidget);
     expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsNothing);
@@ -979,8 +979,8 @@ void main() {
   testWidgets(
     'Can recommendDeferredLoadingForContext - override heuristic and always return true',
     (WidgetTester tester) async {
-      int cheapWidgets = 0;
-      int expensiveWidgets = 0;
+      var cheapWidgets = 0;
+      var expensiveWidgets = 0;
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -999,8 +999,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final ScrollPosition position =
-          Scrollable.of(find.byType(SizedBox).evaluate().first).position;
+      final ScrollPosition position = Scrollable.of(
+        find.byType(SizedBox).evaluate().first,
+      ).position;
 
       expect(find.byKey(const ValueKey<String>('Cheap box 0')), findsOneWidget);
       expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsNothing);
@@ -1024,7 +1025,7 @@ void main() {
   );
 
   testWidgets('ensureVisible does not move PageViews', (WidgetTester tester) async {
-    final PageController controller = PageController();
+    final controller = PageController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -1103,7 +1104,7 @@ void main() {
 
   testWidgets('ensureVisible does not move TabViews', (WidgetTester tester) async {
     final TickerProvider vsync = TestTickerProvider();
-    final TabController controller = TabController(length: 3, vsync: vsync);
+    final controller = TabController(length: 3, vsync: vsync);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -1184,9 +1185,9 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/70948
-    final ScrollController outerController = ScrollController();
+    final outerController = ScrollController();
     addTearDown(outerController.dispose);
-    final ScrollController innerController = ScrollController();
+    final innerController = ScrollController();
     addTearDown(innerController.dispose);
 
     await tester.pumpWidget(
@@ -1224,7 +1225,7 @@ void main() {
     expect(outerController.position.pixels, 0.0);
     expect(innerController.position.pixels, 0.0);
     final Offset outerScrollable = tester.getCenter(find.text('SingleChildScrollView 3'));
-    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     // Hover over the outer scroll view and create a pointer scroll.
     testPointer.hover(outerScrollable);
     await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
@@ -1248,7 +1249,7 @@ void main() {
   testWidgets('Zero offset pointer scroll should not trigger an assertion.', (
     WidgetTester tester,
   ) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
 
     Widget build(double height) {
@@ -1279,7 +1280,7 @@ void main() {
 
     // Hover over the scroll view and create a zero offset pointer scroll.
     final Offset scrollable = tester.getCenter(find.byType(SingleChildScrollView));
-    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     testPointer.hover(scrollable);
     await tester.sendEventToBinding(testPointer.scroll(Offset.zero));
 
@@ -1437,7 +1438,7 @@ void main() {
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/40419.
     final SemanticsHandle handle = tester.ensureSemantics();
-    final UniqueKey listView = UniqueKey();
+    final listView = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
         home: TickerMode(
@@ -1504,7 +1505,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final SemanticsHandle handle = tester.ensureSemantics();
-    final UniqueKey key = UniqueKey();
+    final key = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1533,7 +1534,7 @@ void main() {
     });
     expect(syntheticScrollableNode!.hasFlag(ui.SemanticsFlag.hasImplicitScrolling), isTrue);
 
-    int numberOfChild = 0;
+    var numberOfChild = 0;
     syntheticScrollableNode!.visitChildren((SemanticsNode node) {
       expect(node.isTagged(RenderViewport.useTwoPaneSemantics), isTrue);
       numberOfChild += 1;
@@ -1551,7 +1552,7 @@ void main() {
     await tester.pump(); // trigger fling
     expect(getScrollOffset(tester), dragOffset);
     await tester.pump(const Duration(milliseconds: 200));
-    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     await tester.sendEventToBinding(testPointer.hover(tester.getCenter(find.byType(Scrollable))));
     await tester.sendEventToBinding(testPointer.scrollInertiaCancel()); // Cancel partway through.
     await tester.pump();
@@ -1561,7 +1562,7 @@ void main() {
   });
 
   testWidgets('Swapping viewports in a scrollable does not crash', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     final GlobalKey key = GlobalKey();
     final GlobalKey key1 = GlobalKey();
     Widget buildScrollable(bool withViewPort) {
@@ -1569,7 +1570,7 @@ void main() {
         key: key,
         viewportBuilder: (BuildContext context, ViewportOffset position) {
           if (withViewPort) {
-            final ViewportOffset offset = ViewportOffset.zero();
+            final offset = ViewportOffset.zero();
             addTearDown(() => offset.dispose());
             return Viewport(
               slivers: <Widget>[
@@ -1644,10 +1645,9 @@ void main() {
 
     expect(getScrollOffset(tester), 200);
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));
-    String types(ScrollPhysics? value) =>
-        value!.parent == null
-            ? '${value.runtimeType}'
-            : '${value.runtimeType} ${types(value.parent)}';
+    String types(ScrollPhysics? value) => value!.parent == null
+        ? '${value.runtimeType}'
+        : '${value.runtimeType} ${types(value.parent)}';
 
     expect(
       types(scrollable.resolvedPhysics),
@@ -1656,7 +1656,7 @@ void main() {
   });
 
   testWidgets('dragDevices change updates widget', (WidgetTester tester) async {
-    bool enable = false;
+    var enable = false;
 
     await tester.pumpWidget(
       Builder(
@@ -1669,13 +1669,10 @@ void main() {
                     scrollBehavior: const MaterialScrollBehavior().copyWith(
                       dragDevices: <ui.PointerDeviceKind>{if (enable) ui.PointerDeviceKind.mouse},
                     ),
-                    viewportBuilder:
-                        (BuildContext context, ViewportOffset position) => Viewport(
-                          offset: position,
-                          slivers: const <Widget>[
-                            SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
-                          ],
-                        ),
+                    viewportBuilder: (BuildContext context, ViewportOffset position) => Viewport(
+                      offset: position,
+                      slivers: const <Widget>[SliverToBoxAdapter(child: SizedBox(height: 2000.0))],
+                    ),
                   ),
                   floatingActionButton: FloatingActionButton(
                     onPressed: () {
@@ -1732,13 +1729,10 @@ void main() {
                   body: Scrollable(
                     physics: const ScrollPhysics(),
                     scrollBehavior: scrollBehavior,
-                    viewportBuilder:
-                        (BuildContext context, ViewportOffset position) => Viewport(
-                          offset: position,
-                          slivers: const <Widget>[
-                            SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
-                          ],
-                        ),
+                    viewportBuilder: (BuildContext context, ViewportOffset position) => Viewport(
+                      offset: position,
+                      slivers: const <Widget>[SliverToBoxAdapter(child: SizedBox(height: 2000.0))],
+                    ),
                   ),
                   floatingActionButton: FloatingActionButton(
                     onPressed: () {

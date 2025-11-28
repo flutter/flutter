@@ -47,12 +47,16 @@ typedef struct {
 typedef struct {
 } MockSurface;
 
+typedef struct {
+} MockImage;
+
 static MockEpoxy* mock = nullptr;
 static bool display_initialized = false;
 static MockDisplay mock_display;
 static MockConfig mock_config;
 static MockContext mock_context;
 static MockSurface mock_surface;
+static MockImage mock_image;
 
 static EGLint mock_error = EGL_SUCCESS;
 
@@ -145,6 +149,10 @@ EGLContext _eglCreateContext(EGLDisplay dpy,
   }
 
   mock_error = EGL_SUCCESS;
+  return &mock_context;
+}
+
+EGLContext _eglGetCurrentContext() {
   return &mock_context;
 }
 
@@ -271,6 +279,16 @@ EGLDisplay _eglGetDisplay(EGLNativeDisplayType display_id) {
   return &mock_display;
 }
 
+EGLDisplay _eglGetCurrentDisplay() {
+  return &mock_display;
+}
+
+EGLDisplay _eglGetPlatformDisplayEXT(EGLenum platform,
+                                     void* native_display,
+                                     const EGLint* attrib_list) {
+  return &mock_display;
+}
+
 EGLint _eglGetError() {
   EGLint error = mock_error;
   mock_error = EGL_SUCCESS;
@@ -357,9 +375,29 @@ EGLBoolean _eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
   return bool_success();
 }
 
+EGLImage _eglCreateImage(EGLDisplay dpy,
+                         EGLContext ctx,
+                         EGLenum target,
+                         EGLClientBuffer buffer,
+                         const EGLAttrib* attrib_list) {
+  mock->eglCreateImage(dpy, ctx, target, buffer, attrib_list);
+  return &mock_image;
+}
+
 static GLuint bound_texture_2d;
 
 static std::map<GLenum, GLuint> framebuffer_renderbuffers;
+
+static GLboolean enable_blend = GL_FALSE;
+static GLboolean enable_scissor_test = GL_FALSE;
+
+static void _setEnable(GLenum cap, GLboolean value) {
+  if (cap == GL_BLEND) {
+    enable_blend = value;
+  } else if (cap == GL_SCISSOR_TEST) {
+    enable_scissor_test = value;
+  }
+}
 
 void _glAttachShader(GLuint program, GLuint shader) {}
 
@@ -401,11 +439,33 @@ GLuint _glCreateShader(GLenum shaderType) {
   return 0;
 }
 
-void _glDeleteFramebuffers(GLsizei n, const GLuint* framebuffers) {}
+void _glDeleteFramebuffers(GLsizei n, const GLuint* framebuffers) {
+  if (mock) {
+    mock->glDeleteFramebuffers(n, framebuffers);
+  }
+}
+
+void _glDeleteRenderbuffers(GLsizei n, const GLuint* renderbuffers) {
+  if (mock) {
+    mock->glDeleteRenderbuffers(n, renderbuffers);
+  }
+}
 
 void _glDeleteShader(GLuint shader) {}
 
-void _glDeleteTextures(GLsizei n, const GLuint* textures) {}
+void _glDeleteTextures(GLsizei n, const GLuint* textures) {
+  if (mock) {
+    mock->glDeleteTextures(n, textures);
+  }
+}
+
+static void _glDisable(GLenum cap) {
+  _setEnable(cap, GL_FALSE);
+}
+
+static void _glEnable(GLenum cap) {
+  _setEnable(cap, GL_TRUE);
+}
 
 static void _glFramebufferRenderbuffer(GLenum target,
                                        GLenum attachment,
@@ -424,17 +484,26 @@ static void _glGenTextures(GLsizei n, GLuint* textures) {
   for (GLsizei i = 0; i < n; i++) {
     textures[i] = 0;
   }
+  if (mock) {
+    mock->glGenTextures(n, textures);
+  }
 }
 
 static void _glGenFramebuffers(GLsizei n, GLuint* framebuffers) {
   for (GLsizei i = 0; i < n; i++) {
     framebuffers[i] = 0;
   }
+  if (mock) {
+    mock->glGenFramebuffers(n, framebuffers);
+  }
 }
 
 static void _glGenRenderbuffers(GLsizei n, GLuint* renderbuffers) {
   for (GLsizei i = 0; i < n; i++) {
     renderbuffers[i] = 0;
+  }
+  if (mock) {
+    mock->glGenRenderbuffers(n, renderbuffers);
   }
 }
 
@@ -482,6 +551,16 @@ static void _glGetShaderInfoLog(GLuint shader,
 
 static const GLubyte* _glGetString(GLenum pname) {
   return mock->glGetString(pname);
+}
+
+static GLboolean _glIsEnabled(GLenum cap) {
+  if (cap == GL_BLEND) {
+    return enable_blend;
+  } else if (cap == GL_SCISSOR_TEST) {
+    return enable_scissor_test;
+  } else {
+    return GL_FALSE;
+  }
 }
 
 static void _glTexParameterf(GLenum target, GLenum pname, GLfloat param) {}
@@ -568,6 +647,9 @@ EGLBoolean (*epoxy_eglGetConfigAttrib)(EGLDisplay dpy,
                                        EGLint attribute,
                                        EGLint* value);
 EGLDisplay (*epoxy_eglGetDisplay)(EGLNativeDisplayType display_id);
+EGLDisplay (*epoxy_eglGetPlatformDisplayEXT)(EGLenum platform,
+                                             void* native_display,
+                                             const EGLint* attrib_list);
 EGLint (*epoxy_eglGetError)();
 void (*(*epoxy_eglGetProcAddress)(const char* procname))(void);
 EGLBoolean (*epoxy_eglInitialize)(EGLDisplay dpy, EGLint* major, EGLint* minor);
@@ -576,6 +658,11 @@ EGLBoolean (*epoxy_eglMakeCurrent)(EGLDisplay dpy,
                                    EGLSurface read,
                                    EGLContext ctx);
 EGLBoolean (*epoxy_eglSwapBuffers)(EGLDisplay dpy, EGLSurface surface);
+EGLImage (*epoxy_eglCreateImage)(EGLDisplay dpy,
+                                 EGLContext ctx,
+                                 EGLenum target,
+                                 EGLClientBuffer buffer,
+                                 const EGLAttrib* attrib_list);
 
 void (*epoxy_glAttachShader)(GLuint program, GLuint shader);
 void (*epoxy_glBindFramebuffer)(GLenum target, GLuint framebuffer);
@@ -638,16 +725,20 @@ static void library_init() {
   epoxy_eglBindAPI = _eglBindAPI;
   epoxy_eglChooseConfig = _eglChooseConfig;
   epoxy_eglCreateContext = _eglCreateContext;
+  epoxy_eglGetCurrentContext = _eglGetCurrentContext;
   epoxy_eglCreatePbufferSurface = _eglCreatePbufferSurface;
   epoxy_eglCreateWindowSurface = _eglCreateWindowSurface;
   epoxy_eglGetConfigAttrib = _eglGetConfigAttrib;
   epoxy_eglGetDisplay = _eglGetDisplay;
+  epoxy_eglGetCurrentDisplay = _eglGetCurrentDisplay;
+  epoxy_eglGetPlatformDisplayEXT = _eglGetPlatformDisplayEXT;
   epoxy_eglGetError = _eglGetError;
   epoxy_eglGetProcAddress = _eglGetProcAddress;
   epoxy_eglInitialize = _eglInitialize;
   epoxy_eglMakeCurrent = _eglMakeCurrent;
   epoxy_eglQueryContext = _eglQueryContext;
   epoxy_eglSwapBuffers = _eglSwapBuffers;
+  epoxy_eglCreateImage = _eglCreateImage;
 
   epoxy_glAttachShader = _glAttachShader;
   epoxy_glBindFramebuffer = _glBindFramebuffer;
@@ -659,8 +750,11 @@ static void library_init() {
   epoxy_glCreateProgram = _glCreateProgram;
   epoxy_glCreateShader = _glCreateShader;
   epoxy_glDeleteFramebuffers = _glDeleteFramebuffers;
+  epoxy_glDeleteRenderbuffers = _glDeleteRenderbuffers;
   epoxy_glDeleteShader = _glDeleteShader;
   epoxy_glDeleteTextures = _glDeleteTextures;
+  epoxy_glDisable = _glDisable;
+  epoxy_glEnable = _glEnable;
   epoxy_glFramebufferRenderbuffer = _glFramebufferRenderbuffer;
   epoxy_glFramebufferTexture2D = _glFramebufferTexture2D;
   epoxy_glGenFramebuffers = _glGenFramebuffers;
@@ -674,6 +768,7 @@ static void library_init() {
   epoxy_glGetShaderiv = _glGetShaderiv;
   epoxy_glGetShaderInfoLog = _glGetShaderInfoLog;
   epoxy_glGetString = _glGetString;
+  epoxy_glIsEnabled = _glIsEnabled;
   epoxy_glLinkProgram = _glLinkProgram;
   epoxy_glRenderbufferStorage = _glRenderbufferStorage;
   epoxy_glShaderSource = _glShaderSource;

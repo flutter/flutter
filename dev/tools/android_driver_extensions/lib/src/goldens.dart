@@ -81,7 +81,7 @@ abstract class GoldenFileComparator {
     if (version == null) {
       return key;
     }
-    final String keyString = key.toString();
+    final keyString = key.toString();
     final String extension = path.extension(keyString);
     return Uri.parse('${keyString.split(extension).join()}.$version$extension');
   }
@@ -111,7 +111,7 @@ final class NaiveLocalFileComparator extends GoldenFileComparator {
         'when running "flutter drive" to establish a baseline, and then subequent '
         '"flutter drive" instances will be tested against that (local) golden.\n'
         '\n'
-        'See the documentation at dev/tools/android_engine_test/README.md for '
+        'See the documentation at dev/integration_tests/android_engine_test/README.md for '
         'details.',
       );
     }
@@ -120,7 +120,7 @@ final class NaiveLocalFileComparator extends GoldenFileComparator {
       return false;
     }
 
-    for (int i = 0; i < goldenBytes.length; i++) {
+    for (var i = 0; i < goldenBytes.length; i++) {
       if (goldenBytes[i] != imageBytes[i]) {
         return false;
       }

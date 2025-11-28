@@ -6,7 +6,7 @@ apply plugin: 'com.android.application'
 
 android {
     namespace = "io.flutter.addtoapp"
-    compileSdk = 35
+    compileSdk = 36
 
     // Flutter's CI installs the NDK at a non-standard path.
     // This non-standard structure is initially created by
@@ -24,8 +24,8 @@ android {
 
     defaultConfig {
         applicationId = "io.flutter.addtoapp"
-        minSdk = 21
-        targetSdk = 35
+        minSdk = 24
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
     }

@@ -317,7 +317,7 @@ class PlatformDispatcher {
   // Updates the available displays.
   void _updateDisplays(List<Display> displays) {
     _displays.clear();
-    for (final Display display in displays) {
+    for (final display in displays) {
       _displays[display.id] = display;
     }
     _invoke(onMetricsChanged, _onMetricsChangedZone);
@@ -481,8 +481,8 @@ class PlatformDispatcher {
     const int kBytesPerPointerData = _kPointerDataFieldCount * kStride;
     final int length = packet.lengthInBytes ~/ kBytesPerPointerData;
     assert(length * kBytesPerPointerData == packet.lengthInBytes);
-    final List<PointerData> data = <PointerData>[];
-    for (int i = 0; i < length; ++i) {
+    final data = <PointerData>[];
+    for (var i = 0; i < length; ++i) {
       int offset = i * _kPointerDataFieldCount;
       data.add(
         PointerData(
@@ -531,21 +531,19 @@ class PlatformDispatcher {
     return PointerDataPacket(data: data);
   }
 
-  static ChannelCallback _keyDataListener(KeyDataCallback onKeyData, Zone zone) => (
-    ByteData? packet,
-    PlatformMessageResponseCallback callback,
-  ) {
-    _invoke1<KeyData>(
-      (KeyData keyData) {
-        final bool handled = onKeyData(keyData);
-        final Uint8List response = Uint8List(1);
-        response[0] = handled ? 1 : 0;
-        callback(response.buffer.asByteData());
-      },
-      zone,
-      _unpackKeyData(packet!),
-    );
-  };
+  static ChannelCallback _keyDataListener(KeyDataCallback onKeyData, Zone zone) =>
+      (ByteData? packet, PlatformMessageResponseCallback callback) {
+        _invoke1<KeyData>(
+          (KeyData keyData) {
+            final bool handled = onKeyData(keyData);
+            final response = Uint8List(1);
+            response[0] = handled ? 1 : 0;
+            callback(response.buffer.asByteData());
+          },
+          zone,
+          _unpackKeyData(packet!),
+        );
+      };
 
   /// A callback that is invoked when key data is available.
   ///
@@ -575,16 +573,15 @@ class PlatformDispatcher {
   static KeyData _unpackKeyData(ByteData packet) {
     const int kStride = Int64List.bytesPerElement;
 
-    int offset = 0;
+    var offset = 0;
     final int charDataSize = packet.getUint64(kStride * offset++, _kFakeHostEndian);
-    final String? character =
-        charDataSize == 0
-            ? null
-            : utf8.decoder.convert(
-              packet.buffer.asUint8List(kStride * (offset + _kKeyDataFieldCount), charDataSize),
-            );
+    final String? character = charDataSize == 0
+        ? null
+        : utf8.decoder.convert(
+            packet.buffer.asUint8List(kStride * (offset + _kKeyDataFieldCount), charDataSize),
+          );
 
-    final KeyData keyData = KeyData(
+    final keyData = KeyData(
       timeStamp: Duration(microseconds: packet.getUint64(kStride * offset++, _kFakeHostEndian)),
       type: KeyEventType.values[packet.getInt64(kStride * offset++, _kFakeHostEndian)],
       physical: packet.getUint64(kStride * offset++, _kFakeHostEndian),
@@ -638,8 +635,8 @@ class PlatformDispatcher {
   // Called from the engine, via hooks.dart
   void _reportTimings(List<int> timings) {
     assert(timings.length % FrameTiming._dataLength == 0);
-    final List<FrameTiming> frameTimings = <FrameTiming>[];
-    for (int i = 0; i < timings.length; i += FrameTiming._dataLength) {
+    final frameTimings = <FrameTiming>[];
+    for (var i = 0; i < timings.length; i += FrameTiming._dataLength) {
       frameTimings.add(FrameTiming._(timings.sublist(i, i + FrameTiming._dataLength)));
     }
     _invoke1(onReportTimings, _onReportTimingsZone, frameTimings);
@@ -718,6 +715,26 @@ class PlatformDispatcher {
 
   @Native<Void Function(Int64)>(symbol: 'PlatformConfigurationNativeApi::RegisterBackgroundIsolate')
   external static void __registerBackgroundIsolate(int rootIsolateId);
+
+  /// Informs the engine whether the framework is generating a semantics tree.
+  ///
+  /// Only framework knows when semantics tree should be generated. It uses this
+  /// method to notify the engine whether the framework will generate a semantics tree.
+  ///
+  /// In the case where platforms want to enable semantics, e.g. when
+  /// assistive technologies are enabled, it notifies framework through
+  /// [onSemanticsEnabledChanged].
+  ///
+  /// After this has been set to true, platforms are expected to prepare for accepting
+  /// semantics update sent via [FlutterView.updateSemantics]. When this is set to false, platforms
+  /// may dispose any resources associated with processing semantics as no further
+  /// semantics updates will be sent via [FlutterView.updateSemantics].
+  ///
+  /// One must call this method with true before sending update through [updateSemantics].
+  void setSemanticsTreeEnabled(bool enabled) => _setSemanticsTreeEnabled(enabled);
+
+  @Native<Void Function(Bool)>(symbol: 'PlatformConfigurationNativeApi::SetSemanticsTreeEnabled')
+  external static void _setSemanticsTreeEnabled(bool update);
 
   /// Deprecated. Migrate to [ChannelBuffers.setListener] instead.
   ///
@@ -912,7 +929,7 @@ class PlatformDispatcher {
 
   // Called from the engine, via hooks.dart
   void _updateAccessibilityFeatures(int values) {
-    final AccessibilityFeatures newFeatures = AccessibilityFeatures._(values);
+    final newFeatures = AccessibilityFeatures._(values);
     final _PlatformConfiguration previousConfiguration = _configuration;
     if (newFeatures == previousConfiguration.accessibilityFeatures) {
       return;
@@ -959,6 +976,15 @@ class PlatformDispatcher {
   /// list has not been set or is empty.
   Locale get locale => locales.isEmpty ? const Locale.fromSubtags() : locales.first;
 
+  /// Sets the locale for the application in engine.
+  ///
+  /// This is typically called by framework to set the locale based on which
+  /// locale the Flutter app actually uses.
+  void setApplicationLocale(Locale locale) => _setApplicationLocale(locale.toLanguageTag());
+
+  @Native<Void Function(Handle)>(symbol: 'PlatformConfigurationNativeApi::SetApplicationLocale')
+  external static void _setApplicationLocale(String locale);
+
   /// The full system-reported supported locales of the device.
   ///
   /// This establishes the language and formatting conventions that application
@@ -985,8 +1011,8 @@ class PlatformDispatcher {
   /// This method returns synchronously and is a direct call to
   /// platform specific APIs without invoking method channels.
   Locale? computePlatformResolvedLocale(List<Locale> supportedLocales) {
-    final List<String?> supportedLocalesData = <String?>[];
-    for (final Locale locale in supportedLocales) {
+    final supportedLocalesData = <String?>[];
+    for (final locale in supportedLocales) {
       supportedLocalesData.add(locale.languageCode);
       supportedLocalesData.add(locale.countryCode);
       supportedLocalesData.add(locale.scriptCode);
@@ -1031,12 +1057,12 @@ class PlatformDispatcher {
 
   // Called from the engine, via hooks.dart
   void _updateLocales(List<String> locales) {
-    const int stringsPerLocale = 4;
+    const stringsPerLocale = 4;
     final int numLocales = locales.length ~/ stringsPerLocale;
     final _PlatformConfiguration previousConfiguration = _configuration;
-    final List<Locale> newLocales = <Locale>[];
-    bool localesDiffer = numLocales != previousConfiguration.locales.length;
-    for (int localeIndex = 0; localeIndex < numLocales; localeIndex++) {
+    final newLocales = <Locale>[];
+    var localesDiffer = numLocales != previousConfiguration.locales.length;
+    for (var localeIndex = 0; localeIndex < numLocales; localeIndex++) {
       final String countryCode = locales[localeIndex * stringsPerLocale + 1];
       final String scriptCode = locales[localeIndex * stringsPerLocale + 2];
 
@@ -1094,6 +1120,59 @@ class PlatformDispatcher {
   ///
   /// This option is used by [showTimePicker].
   bool get alwaysUse24HourFormat => _configuration.alwaysUse24HourFormat;
+
+  /// The system-suggested height of the text, as a multiple of the font size.
+  ///
+  /// This value takes precedence over any text height specified at the
+  /// application level. For example, at framework level, in the [TextStyle]
+  /// for [Text], [SelectableText], and [EditableText] widgets, this value
+  /// overrides the existing value of [TextStyle.height] and [StrutStyle.height].
+  ///
+  /// Returns null when no override has been set by the system.
+  ///
+  /// If this value changes, [onMetricsChanged] will be called.
+  double? get lineHeightScaleFactorOverride => _configuration.lineHeightScaleFactorOverride;
+
+  /// The system-suggested amount of additional space (in logical pixels)
+  /// to add between each letter.
+  ///
+  /// A negative value can be used to bring the letters closer.
+  ///
+  /// This value takes precedence over any text letter spacing specified at the
+  /// application level. For example, at framework level, in the [TextStyle]
+  /// for [Text], [SelectableText], and [EditableText] widgets, this value
+  /// overrides the existing value of [TextStyle.letterSpacing].
+  ///
+  /// Returns null when no override has been set by the system.
+  ///
+  /// If this value changes, [onMetricsChanged] will be called.
+  double? get letterSpacingOverride => _configuration.letterSpacingOverride;
+
+  /// The system-suggested amount of additional space (in logical pixels)
+  /// to add between each sequence of white-space (i.e. between each word).
+  ///
+  /// A negative value can be used to bring the words closer.
+  ///
+  /// This value takes precedence over any text word spacing specified at the
+  /// application level. For example, at framework level, in the [TextStyle]
+  /// for [Text], [SelectableText], and [EditableText] widgets, this value
+  /// overrides the existing value of [TextStyle.wordSpacing].
+  ///
+  /// Returns null when no override has been set by the system.
+  ///
+  /// If this value changes, [onMetricsChanged] will be called.
+  double? get wordSpacingOverride => _configuration.wordSpacingOverride;
+
+  /// The system-suggested amount of additional space (in logical pixels)
+  /// to add following each paragraph in text.
+  ///
+  /// This value takes precedence over any text paragraph spacing specified at
+  /// the application level.
+  ///
+  /// Returns null when no override has been set by the system.
+  ///
+  /// If this value changes, [onMetricsChanged] will be called.
+  double? get paragraphSpacingOverride => _configuration.paragraphSpacingOverride;
 
   /// The system-reported text scale.
   ///
@@ -1196,22 +1275,21 @@ class PlatformDispatcher {
 
   // Called from the engine, via hooks.dart
   void _updateUserSettingsData(String jsonData) {
-    final Map<String, Object?> data = json.decode(jsonData) as Map<String, Object?>;
+    final data = json.decode(jsonData) as Map<String, Object?>;
     if (data.isEmpty) {
       return;
     }
 
     final double textScaleFactor = (data['textScaleFactor']! as num).toDouble();
-    final bool alwaysUse24HourFormat = data['alwaysUse24HourFormat']! as bool;
-    final bool? nativeSpellCheckServiceDefined = data['nativeSpellCheckServiceDefined'] as bool?;
+    final alwaysUse24HourFormat = data['alwaysUse24HourFormat']! as bool;
+    final nativeSpellCheckServiceDefined = data['nativeSpellCheckServiceDefined'] as bool?;
     if (nativeSpellCheckServiceDefined != null) {
       _nativeSpellCheckServiceDefined = nativeSpellCheckServiceDefined;
     } else {
       _nativeSpellCheckServiceDefined = false;
     }
 
-    final bool? supportsShowingSystemContextMenu =
-        data['supportsShowingSystemContextMenu'] as bool?;
+    final supportsShowingSystemContextMenu = data['supportsShowingSystemContextMenu'] as bool?;
     if (supportsShowingSystemContextMenu != null) {
       _supportsShowingSystemContextMenu = supportsShowingSystemContextMenu;
     } else {
@@ -1219,7 +1297,7 @@ class PlatformDispatcher {
     }
 
     // This field is optional.
-    final bool? brieflyShowPassword = data['brieflyShowPassword'] as bool?;
+    final brieflyShowPassword = data['brieflyShowPassword'] as bool?;
     if (brieflyShowPassword != null) {
       _brieflyShowPassword = brieflyShowPassword;
     }
@@ -1228,15 +1306,15 @@ class PlatformDispatcher {
       'light' => Brightness.light,
       final Object? value => throw StateError('$value is not a valid platformBrightness.'),
     };
-    final String? systemFontFamily = data['systemFontFamily'] as String?;
-    final int? configurationId = data['configurationId'] as int?;
+    final systemFontFamily = data['systemFontFamily'] as String?;
+    final configurationId = data['configurationId'] as int?;
     final _PlatformConfiguration previousConfiguration = _configuration;
-    final bool platformBrightnessChanged =
+    final platformBrightnessChanged =
         previousConfiguration.platformBrightness != platformBrightness;
-    final bool textScaleFactorChanged = previousConfiguration.textScaleFactor != textScaleFactor;
-    final bool alwaysUse24HourFormatChanged =
+    final textScaleFactorChanged = previousConfiguration.textScaleFactor != textScaleFactor;
+    final alwaysUse24HourFormatChanged =
         previousConfiguration.alwaysUse24HourFormat != alwaysUse24HourFormat;
-    final bool systemFontFamilyChanged = previousConfiguration.systemFontFamily != systemFontFamily;
+    final systemFontFamilyChanged = previousConfiguration.systemFontFamily != systemFontFamily;
     if (!platformBrightnessChanged &&
         !textScaleFactorChanged &&
         !alwaysUse24HourFormatChanged &&
@@ -1785,6 +1863,10 @@ class _PlatformConfiguration {
     this.defaultRouteName,
     this.systemFontFamily,
     this.configurationId,
+    this.lineHeightScaleFactorOverride,
+    this.letterSpacingOverride,
+    this.wordSpacingOverride,
+    this.paragraphSpacingOverride,
   });
 
   _PlatformConfiguration copyWith({
@@ -1808,6 +1890,10 @@ class _PlatformConfiguration {
       defaultRouteName: defaultRouteName ?? this.defaultRouteName,
       systemFontFamily: systemFontFamily ?? this.systemFontFamily,
       configurationId: configurationId ?? this.configurationId,
+      lineHeightScaleFactorOverride: lineHeightScaleFactorOverride,
+      letterSpacingOverride: letterSpacingOverride,
+      wordSpacingOverride: wordSpacingOverride,
+      paragraphSpacingOverride: paragraphSpacingOverride,
     );
   }
 
@@ -1855,6 +1941,25 @@ class _PlatformConfiguration {
   /// configuration updates from the embedder yet. The _getScaledFontSize
   /// function should not be called in either case.
   final int? configurationId;
+
+  /// The system-reported height of the text, as a multiple of the font size.
+  final double? lineHeightScaleFactorOverride;
+
+  /// The system-reported amount of additional space (in logical pixels)
+  /// to add between each letter.
+  ///
+  /// A negative value can be used to bring the letters closer.
+  final double? letterSpacingOverride;
+
+  /// The system-reported amount of additional space (in logical pixels)
+  /// to add between each sequence of white-space (i.e. between each word).
+  ///
+  /// A negative value can be used to bring the words closer.
+  final double? wordSpacingOverride;
+
+  /// The system-reported amount of additional space (in logical pixels)
+  /// to add between each paragraph in text.
+  final double? paragraphSpacingOverride;
 }
 
 /// An immutable view configuration.
@@ -1869,11 +1974,15 @@ class _ViewConfiguration {
     this.gestureSettings = const GestureSettings(),
     this.displayFeatures = const <DisplayFeature>[],
     this.displayId = 0,
+    this.viewConstraints = const ViewConstraints(maxWidth: 0, maxHeight: 0),
   });
 
   /// The identifier for a display for this view, in
   /// [PlatformDispatcher._displays].
   final int displayId;
+
+  /// The sizing constraints for this view in physical pixels.
+  final ViewConstraints viewConstraints;
 
   /// The pixel density of the output surface.
   final double devicePixelRatio;
@@ -2927,7 +3036,7 @@ class Locale {
   String toLanguageTag() => _rawToString('-');
 
   String _rawToString(String separator) {
-    final StringBuffer out = StringBuffer(languageCode);
+    final out = StringBuffer(languageCode);
     if (scriptCode != null && scriptCode!.isNotEmpty) {
       out.write('$separator$scriptCode');
     }

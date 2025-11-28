@@ -20,7 +20,9 @@ class FlexibleSpaceBarExampleApp extends StatelessWidget {
       ),
       home: Scaffold(
         body: CustomScrollView(
-          physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
           slivers: <Widget>[
             SliverAppBar(
               stretch: true,
@@ -57,8 +59,8 @@ class FlexibleSpaceBarExampleApp extends StatelessWidget {
                 ),
               ),
             ),
-            SliverList(
-              delegate: SliverChildListDelegate(const <Widget>[
+            SliverList.list(
+              children: const <Widget>[
                 ListTile(
                   leading: Icon(Icons.wb_sunny),
                   title: Text('Sunday'),
@@ -70,7 +72,7 @@ class FlexibleSpaceBarExampleApp extends StatelessWidget {
                   subtitle: Text('sunny, h: 80, l: 65'),
                 ),
                 // ListTiles++
-              ]),
+              ],
             ),
           ],
         ),

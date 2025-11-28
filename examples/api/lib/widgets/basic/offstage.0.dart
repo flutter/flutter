@@ -34,7 +34,8 @@ class _OffstageExampleState extends State<OffstageExample> {
   bool _offstage = true;
 
   Size _getFlutterLogoSize() {
-    final RenderBox renderLogo = _key.currentContext!.findRenderObject()! as RenderBox;
+    final RenderBox renderLogo =
+        _key.currentContext!.findRenderObject()! as RenderBox;
     return renderLogo.size;
   }
 
@@ -43,7 +44,10 @@ class _OffstageExampleState extends State<OffstageExample> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        Offstage(offstage: _offstage, child: FlutterLogo(key: _key, size: 150.0)),
+        Offstage(
+          offstage: _offstage,
+          child: FlutterLogo(key: _key, size: 150.0),
+        ),
         Text('Flutter logo is offstage: $_offstage'),
         ElevatedButton(
           child: const Text('Toggle Offstage Value'),
@@ -58,7 +62,11 @@ class _OffstageExampleState extends State<OffstageExample> {
             child: const Text('Get Flutter Logo size'),
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Flutter Logo size is ${_getFlutterLogoSize()}')),
+                SnackBar(
+                  content: Text(
+                    'Flutter Logo size is ${_getFlutterLogoSize()}',
+                  ),
+                ),
               );
             },
           ),

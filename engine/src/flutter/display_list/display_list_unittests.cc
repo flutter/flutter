@@ -12,14 +12,21 @@
 #include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_paint.h"
+#include "flutter/display_list/dl_text_skia.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
+#include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/display_list/geometry/dl_rtree.h"
 #include "flutter/display_list/skia/dl_sk_dispatcher.h"
 #include "flutter/display_list/testing/dl_test_snippets.h"
 #include "flutter/display_list/utils/dl_receiver_utils.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/math.h"
-#include "flutter/impeller/typographer/backends/skia/text_frame_skia.h"
+
+#if IMPELLER_SUPPORTS_RENDERING
+#include "flutter/impeller/display_list/dl_text_impeller.h"  // nogncheck
+#include "flutter/impeller/typographer/backends/skia/text_frame_skia.h"  //nogncheck
+#endif
+
 #include "flutter/testing/assertions_skia.h"
 #include "flutter/testing/display_list_testing.h"
 #include "flutter/testing/testing.h"
@@ -797,9 +804,9 @@ TEST_F(DisplayListTest, SingleOpDisplayListsCompareToEachOther) {
     }
 
     for (size_t i = 0; i < lists_a.size(); i++) {
-      sk_sp<DisplayList> listA = lists_a[i];
+      const sk_sp<DisplayList>& listA = lists_a[i];
       for (size_t j = 0; j < lists_b.size(); j++) {
-        sk_sp<DisplayList> listB = lists_b[j];
+        const sk_sp<DisplayList>& listB = lists_b[j];
         auto desc = group.op_name + "(variant " + std::to_string(i + 1) +
                     " ==? variant " + std::to_string(j + 1) + ")";
         if (i == j ||
@@ -1223,7 +1230,13 @@ TEST_F(DisplayListTest, SingleOpsMightSupportGroupOpacityBlendMode) {
     static auto display_list = builder.Build();
     RUN_TESTS2(canvas.DrawDisplayList(display_list);, false);
   }
-  RUN_TESTS2(canvas.DrawTextBlob(GetTestTextBlob(1), 0, 0, paint);, false);
+  RUN_TESTS2(canvas.DrawText(DlTextSkia::Make(GetTestTextBlob(1)), 0, 0, paint);
+             , false);
+#if IMPELLER_SUPPORTS_RENDERING
+  RUN_TESTS2(
+      canvas.DrawText(DlTextImpeller::Make(GetTestTextFrame(1)), 0, 0, paint);
+      , false);
+#endif
   RUN_TESTS2(canvas.DrawShadow(kTestPath1, DlColor::kBlack(), 1.0, false, 1.0);
              , false);
 
@@ -1790,7 +1803,8 @@ TEST_F(DisplayListTest, FlutterSvgIssue661BoundsWereEmpty) {
                              {32.3f, 14.615f},    //
                              {32.3f, 19.34f});
   path_builder1.Close();
-  DlPath dl_path1 = DlPath(path_builder1, DlPathFillType::kNonZero);
+  path_builder1.SetFillType(DlPathFillType::kNonZero);
+  DlPath dl_path1 = path_builder1.TakePath();
 
   DlPathBuilder path_builder2;
   path_builder2.MoveTo({37.5f, 19.33f});
@@ -1803,7 +1817,8 @@ TEST_F(DisplayListTest, FlutterSvgIssue661BoundsWereEmpty) {
                              {37.495f, 11.756f},  //
                              {37.5f, 19.33f});
   path_builder2.Close();
-  DlPath dl_path2 = DlPath(path_builder2, DlPathFillType::kNonZero);
+  path_builder2.SetFillType(DlPathFillType::kNonZero);
+  DlPath dl_path2 = path_builder2.TakePath();
 
   DisplayListBuilder builder;
   DlPaint paint = DlPaint(DlColor::kWhite()).setAntiAlias(true);
@@ -3513,7 +3528,11 @@ TEST_F(DisplayListTest, NopOperationsOmittedFromRecords) {
           builder.DrawAtlas(kTestImage1, xforms, rects, nullptr, 2,
                             DlBlendMode::kSrcOver, DlImageSampling::kLinear,
                             nullptr, &paint);
-          builder.DrawTextBlob(GetTestTextBlob(1), 10, 10, paint);
+          builder.DrawText(DlTextSkia::Make(GetTestTextBlob(1)), 10, 10, paint);
+#if IMPELLER_SUPPORTS_RENDERING
+          builder.DrawText(DlTextImpeller::Make(GetTestTextFrame(1)), 10, 10,
+                           paint);
+#endif
 
           // Dst mode eliminates most rendering ops except for
           // the following two, so we'll prune those manually...
@@ -4648,7 +4667,10 @@ class ClipExpector : public virtual DlOpReceiver,
   std::vector<ClipExpectation> clip_expectations_;
 
   template <typename T>
-  void check(T shape, DlClipOp clip_op, bool is_aa, bool is_oval = false) {
+  void check(const T& shape,
+             DlClipOp clip_op,
+             bool is_aa,
+             bool is_oval = false) {
     ASSERT_LT(index_, clip_expectations_.size())
         << label() << std::endl
         << "extra clip shape = " << shape << (is_oval ? " (oval)" : "");
@@ -4877,7 +4899,7 @@ TEST_F(DisplayListTest, ClipPathNonCulling) {
   path_builder.LineTo({1000.0f, 0.0f});
   path_builder.LineTo({0.0f, 1000.0f});
   path_builder.Close();
-  DlPath path = DlPath(path_builder);
+  DlPath path = path_builder.TakePath();
 
   // Double checking that the path does indeed contain the clip. But,
   // sadly, the Builder will not check paths for coverage to this level
@@ -5248,7 +5270,6 @@ TEST_F(DisplayListTest, ClipRectRRectPathPromoteToClipRect) {
   DlRoundRect clip_rrect = DlRoundRect::MakeRect(clip_rect);
   DlRect draw_rect = clip_rect.Expand(2.0f, 2.0f);
   DlPath clip_path = DlPath::MakeRoundRect(clip_rrect);
-  ASSERT_TRUE(clip_path.IsRoundRect());
 
   DisplayListBuilder builder;
   builder.ClipPath(clip_path, DlClipOp::kIntersect, false);
@@ -5269,7 +5290,6 @@ TEST_F(DisplayListTest, ClipOvalRRectPathPromoteToClipOval) {
   DlRoundRect clip_rrect = DlRoundRect::MakeOval(clip_rect);
   DlRect draw_rect = clip_rect.Expand(2.0f, 2.0f);
   DlPath clip_path = DlPath::MakeRoundRect(clip_rrect);
-  ASSERT_TRUE(clip_path.IsRoundRect());
 
   DisplayListBuilder builder;
   builder.ClipPath(clip_path, DlClipOp::kIntersect, false);
@@ -5485,29 +5505,33 @@ TEST_F(DisplayListTest, BoundedRenderOpsDoNotReportUnbounded) {
     ASSERT_LT(blob->bounds().width(), draw_rect.GetWidth());
     ASSERT_LT(blob->bounds().height(), draw_rect.GetHeight());
 
+    auto text = DlTextSkia::Make(blob);
     // Draw once at upper left and again at lower right to fill the bounds.
-    builder.DrawTextBlob(blob, draw_rect.GetLeft() - blob->bounds().left(),
-                         draw_rect.GetTop() - blob->bounds().top(), DlPaint());
-    builder.DrawTextBlob(blob, draw_rect.GetRight() - blob->bounds().right(),
-                         draw_rect.GetBottom() - blob->bounds().bottom(),
-                         DlPaint());
+    builder.DrawText(text, draw_rect.GetLeft() - blob->bounds().left(),
+                     draw_rect.GetTop() - blob->bounds().top(), DlPaint());
+    builder.DrawText(text, draw_rect.GetRight() - blob->bounds().right(),
+                     draw_rect.GetBottom() - blob->bounds().bottom(),
+                     DlPaint());
   });
 
+#if IMPELLER_SUPPORTS_RENDERING
   test_bounded("DrawTextFrame", [](DlCanvas& builder) {
     auto blob = GetTestTextBlob("Hello");
-    auto frame = impeller::MakeTextFrameFromTextBlobSkia(blob);
 
     // Make sure the blob fits within the draw_rect bounds.
     ASSERT_LT(blob->bounds().width(), draw_rect.GetWidth());
     ASSERT_LT(blob->bounds().height(), draw_rect.GetHeight());
 
+    auto text = DlTextImpeller::MakeFromBlob(blob);
+
     // Draw once at upper left and again at lower right to fill the bounds.
-    builder.DrawTextFrame(frame, draw_rect.GetLeft() - blob->bounds().left(),
-                          draw_rect.GetTop() - blob->bounds().top(), DlPaint());
-    builder.DrawTextFrame(frame, draw_rect.GetRight() - blob->bounds().right(),
-                          draw_rect.GetBottom() - blob->bounds().bottom(),
-                          DlPaint());
+    builder.DrawText(text, draw_rect.GetLeft() - blob->bounds().left(),
+                     draw_rect.GetTop() - blob->bounds().top(), DlPaint());
+    builder.DrawText(text, draw_rect.GetRight() - blob->bounds().right(),
+                     draw_rect.GetBottom() - blob->bounds().bottom(),
+                     DlPaint());
   });
+#endif
 
   test_bounded("DrawBoundedDisplayList", [](DlCanvas& builder) {
     DisplayListBuilder nested_builder(root_cull);
@@ -5913,6 +5937,67 @@ TEST_F(DisplayListTest, DisplayListDetectsRuntimeEffect) {
     });
     display_list->Dispatch(expector);
   }
+}
+
+namespace {
+typedef void BuilderTransformer(DisplayListBuilder& builder);
+
+sk_sp<DisplayList> TestSaveLayerWithMatrix(BuilderTransformer transform) {
+  const DlScalar xoffset = 50;
+  const DlScalar yoffset = 50;
+  const DlScalar sigma = 10.0;
+
+  DisplayListBuilder builder;
+
+  const auto blur_filter =
+      DlImageFilter::MakeBlur(sigma, sigma, DlTileMode::kClamp);
+
+  builder.Translate(xoffset, yoffset);
+  transform(builder);
+
+  const DlPaint paint;
+  builder.DrawImage(kTestImage1, DlPoint(100.0, 100.0),
+                    DlImageSampling::kNearestNeighbor, &paint);
+
+  DlPaint save_paint;
+  save_paint.setBlendMode(DlBlendMode::kSrc);
+  builder.SaveLayer(std::nullopt, &save_paint, blur_filter.get());
+  builder.Restore();
+
+  return builder.Build();
+}
+}  // namespace
+
+TEST_F(DisplayListTest, SaveLayerWithValidScaleDoesNotCrash) {
+  EXPECT_NE(TestSaveLayerWithMatrix([](DisplayListBuilder& builder) {
+              builder.Scale(0.7, 0.7);
+              EXPECT_TRUE(builder.GetMatrix().IsInvertible());
+            }),
+            nullptr);
+}
+
+TEST_F(DisplayListTest, SaveLayerWithZeroXScaleDoesNotCrash) {
+  EXPECT_NE(TestSaveLayerWithMatrix([](DisplayListBuilder& builder) {
+              builder.Scale(0.0, 0.7);
+              EXPECT_FALSE(builder.GetMatrix().IsInvertible());
+            }),
+            nullptr);
+}
+
+TEST_F(DisplayListTest, SaveLayerWithZeroYScaleDoesNotCrash) {
+  EXPECT_NE(TestSaveLayerWithMatrix([](DisplayListBuilder& builder) {
+              builder.Scale(0.7, 0.0);
+              EXPECT_FALSE(builder.GetMatrix().IsInvertible());
+            }),
+            nullptr);
+}
+
+TEST_F(DisplayListTest, SaveLayerWithLinearSkewDoesNotCrash) {
+  EXPECT_NE(TestSaveLayerWithMatrix([](DisplayListBuilder& builder) {
+              builder.Skew(1.0f, 1.0f);
+              EXPECT_FALSE(builder.GetMatrix().IsInvertible());
+            }),
+            nullptr);
 }
 
 }  // namespace testing

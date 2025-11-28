@@ -67,9 +67,7 @@ import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowContentResolver;
 import org.robolectric.shadows.ShadowInputMethodManager;
 
-@Config(
-    manifest = Config.NONE,
-    shadows = {InputConnectionAdaptorTest.TestImm.class})
+@Config(shadows = {InputConnectionAdaptorTest.TestImm.class})
 @RunWith(AndroidJUnit4.class)
 public class InputConnectionAdaptorTest {
   private final Context ctx = ApplicationProvider.getApplicationContext();

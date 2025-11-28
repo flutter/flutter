@@ -4,6 +4,7 @@
 
 #include "impeller/entity/contents/content_context.h"
 
+#include <format>
 #include <memory>
 #include <utility>
 
@@ -17,6 +18,7 @@
 #include "impeller/entity/entity.h"
 #include "impeller/entity/render_target_cache.h"
 #include "impeller/renderer/command_buffer.h"
+#include "impeller/renderer/pipeline.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/render_target.h"
@@ -27,6 +29,56 @@
 namespace impeller {
 
 namespace {
+
+/// A generic version of `Variants` which mostly exists to reduce code size.
+class GenericVariants {
+ public:
+  void Set(const ContentContextOptions& options,
+           std::unique_ptr<GenericRenderPipelineHandle> pipeline) {
+    uint64_t p_key = options.ToKey();
+    for (const auto& [key, pipeline] : pipelines_) {
+      if (key == p_key) {
+        return;
+      }
+    }
+    pipelines_.push_back(std::make_pair(p_key, std::move(pipeline)));
+  }
+
+  void SetDefault(const ContentContextOptions& options,
+                  std::unique_ptr<GenericRenderPipelineHandle> pipeline) {
+    default_options_ = options;
+    if (pipeline) {
+      Set(options, std::move(pipeline));
+    }
+  }
+
+  GenericRenderPipelineHandle* Get(const ContentContextOptions& options) const {
+    uint64_t p_key = options.ToKey();
+    for (const auto& [key, pipeline] : pipelines_) {
+      if (key == p_key) {
+        return pipeline.get();
+      }
+    }
+    return nullptr;
+  }
+
+  void SetDefaultDescriptor(std::optional<PipelineDescriptor> desc) {
+    desc_ = std::move(desc);
+  }
+
+  size_t GetPipelineCount() const { return pipelines_.size(); }
+
+  bool IsDefault(const ContentContextOptions& opts) {
+    return default_options_.has_value() &&
+           opts.ToKey() == default_options_.value().ToKey();
+  }
+
+ protected:
+  std::optional<PipelineDescriptor> desc_;
+  std::optional<ContentContextOptions> default_options_;
+  std::vector<std::pair<uint64_t, std::unique_ptr<GenericRenderPipelineHandle>>>
+      pipelines_;
+};
 
 /// Holds multiple Pipelines associated with the same PipelineHandle types.
 ///
@@ -42,7 +94,7 @@ namespace {
 ///  - impeller::RenderPipelineHandle<> - The type of objects this typically
 ///    contains.
 template <class PipelineHandleT>
-class Variants {
+class Variants : public GenericVariants {
   static_assert(
       ShaderStageCompatibilityChecker<
           typename PipelineHandleT::VertexShader,
@@ -55,32 +107,20 @@ class Variants {
 
   void Set(const ContentContextOptions& options,
            std::unique_ptr<PipelineHandleT> pipeline) {
-    uint64_t p_key = options.ToKey();
-    for (const auto& [key, pipeline] : pipelines_) {
-      if (key == p_key) {
-        return;
-      }
-    }
-    pipelines_.push_back(std::make_pair(p_key, std::move(pipeline)));
+    GenericVariants::Set(options, std::move(pipeline));
   }
 
   void SetDefault(const ContentContextOptions& options,
                   std::unique_ptr<PipelineHandleT> pipeline) {
-    default_options_ = options;
-    if (pipeline) {
-      Set(options, std::move(pipeline));
-    }
-  }
-
-  void SetDefaultDescriptor(std::optional<PipelineDescriptor> desc) {
-    desc_ = std::move(desc);
+    GenericVariants::SetDefault(options, std::move(pipeline));
   }
 
   void CreateDefault(const Context& context,
                      const ContentContextOptions& options,
                      const std::vector<Scalar>& constants = {}) {
-    auto desc = PipelineHandleT::Builder::MakeDefaultPipelineDescriptor(
-        context, constants);
+    std::optional<PipelineDescriptor> desc =
+        PipelineHandleT::Builder::MakeDefaultPipelineDescriptor(context,
+                                                                constants);
     if (!desc.has_value()) {
       VALIDATION_LOG << "Failed to create default pipeline.";
       return;
@@ -96,18 +136,7 @@ class Variants {
   }
 
   PipelineHandleT* Get(const ContentContextOptions& options) const {
-    uint64_t p_key = options.ToKey();
-    for (const auto& [key, pipeline] : pipelines_) {
-      if (key == p_key) {
-        return pipeline.get();
-      }
-    }
-    return nullptr;
-  }
-
-  bool IsDefault(const ContentContextOptions& opts) {
-    return default_options_.has_value() &&
-           opts.ToKey() == default_options_.value().ToKey();
+    return static_cast<PipelineHandleT*>(GenericVariants::Get(options));
   }
 
   PipelineHandleT* GetDefault(const Context& context) {
@@ -120,16 +149,11 @@ class Variants {
     }
     SetDefault(default_options_.value(), std::make_unique<PipelineHandleT>(
                                              context, desc_, /*async=*/false));
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
     return Get(default_options_.value());
   }
 
-  size_t GetPipelineCount() const { return pipelines_.size(); }
-
  private:
-  std::optional<PipelineDescriptor> desc_;
-  std::optional<ContentContextOptions> default_options_;
-  std::vector<std::pair<uint64_t, std::unique_ptr<PipelineHandleT>>> pipelines_;
-
   Variants(const Variants&) = delete;
 
   Variants& operator=(const Variants&) = delete;
@@ -167,8 +191,7 @@ RenderPipelineHandleT* CreateIfNeeded(
       /*async=*/false, [&opts, variants_count = container.GetPipelineCount()](
                            PipelineDescriptor& desc) {
         opts.ApplyToPipelineDescriptor(desc);
-        desc.SetLabel(
-            SPrintF("%s V#%zu", desc.GetLabel().data(), variants_count));
+        desc.SetLabel(std::format("{} V#{}", desc.GetLabel(), variants_count));
       });
   std::unique_ptr<RenderPipelineHandleT> variant =
       std::make_unique<RenderPipelineHandleT>(std::move(variant_future));
@@ -207,6 +230,7 @@ struct ContentContext::Pipelines {
   Variants<BlendScreenPipeline> blend_screen;
   Variants<BlendSoftLightPipeline> blend_softlight;
   Variants<BorderMaskBlurPipeline> border_mask_blur;
+  Variants<CirclePipeline> circle;
   Variants<ClipPipeline> clip;
   Variants<ColorMatrixColorFilterPipeline> color_matrix_color_filter;
   Variants<ConicalGradientFillConicalPipeline> conical_gradient_fill;
@@ -264,6 +288,7 @@ struct ContentContext::Pipelines {
   Variants<RadialGradientSSBOFillPipeline> radial_gradient_ssbo_fill;
   Variants<RadialGradientUniformFillPipeline> radial_gradient_uniform_fill;
   Variants<RRectBlurPipeline> rrect_blur;
+  Variants<RSuperellipseBlurPipeline> rsuperellipse_blur;
   Variants<SolidFillPipeline> solid_fill;
   Variants<SrgbToLinearFilterPipeline> srgb_to_linear_filter;
   Variants<SweepGradientFillPipeline> sweep_gradient_fill;
@@ -527,12 +552,13 @@ ContentContext::ContentContext(
       lazy_glyph_atlas_(
           std::make_shared<LazyGlyphAtlas>(std::move(typographer_context))),
       pipelines_(new Pipelines()),
-      tessellator_(std::make_shared<Tessellator>()),
+      tessellator_(std::make_shared<Tessellator>(
+          context_->GetCapabilities()->Supports32BitPrimitiveIndices())),
       render_target_cache_(render_target_allocator == nullptr
                                ? std::make_shared<RenderTargetCache>(
                                      context_->GetResourceAllocator())
                                : std::move(render_target_allocator)),
-      host_buffer_(HostBuffer::Create(
+      data_host_buffer_(HostBuffer::Create(
           context_->GetResourceAllocator(),
           context_->GetIdleWaiter(),
           context_->GetCapabilities()->GetMinimumUniformAlignment())),
@@ -541,6 +567,16 @@ ContentContext::ContentContext(
     return;
   }
 
+  // On most backends, indexes and other data can be allocated into the same
+  // buffers. However, some backends (namely WebGL) require indexes used in
+  // indexed draws to be allocated separately from other data. For those
+  // backends, we allocate a separate host buffer just for indexes.
+  indexes_host_buffer_ =
+      context_->GetCapabilities()->NeedsPartitionedHostBuffer()
+          ? HostBuffer::Create(
+                context_->GetResourceAllocator(), context_->GetIdleWaiter(),
+                context_->GetCapabilities()->GetMinimumUniformAlignment())
+          : data_host_buffer_;
   {
     TextureDescriptor desc;
     desc.storage_mode = StorageMode::kDevicePrivate;
@@ -552,8 +588,8 @@ ContentContext::ContentContext(
     std::shared_ptr<CommandBuffer> cmd_buffer =
         GetContext()->CreateCommandBuffer();
     std::shared_ptr<BlitPass> blit_pass = cmd_buffer->CreateBlitPass();
-    HostBuffer& host_buffer = GetTransientsBuffer();
-    BufferView buffer_view = host_buffer.Emplace(data);
+    HostBuffer& data_host_buffer = GetTransientsDataBuffer();
+    BufferView buffer_view = data_host_buffer.Emplace(data);
     blit_pass->AddCopy(buffer_view, empty_texture_);
 
     if (!blit_pass->EncodeCommands() || !GetContext()
@@ -595,6 +631,7 @@ ContentContext::ContentContext(
     pipelines_->texture.CreateDefault(*context_, options);
     pipelines_->fast_gradient.CreateDefault(*context_, options);
     pipelines_->line.CreateDefault(*context_, options);
+    pipelines_->circle.CreateDefault(*context_, options);
 
     if (context_->GetCapabilities()->SupportsSSBO()) {
       pipelines_->linear_gradient_ssbo_fill.CreateDefault(*context_, options);
@@ -664,6 +701,8 @@ ContentContext::ContentContext(
     pipelines_->texture_downsample.CreateDefault(
         *context_, options_no_msaa_no_depth_stencil);
     pipelines_->rrect_blur.CreateDefault(*context_, options_trianglestrip);
+    pipelines_->rsuperellipse_blur.CreateDefault(*context_,
+                                                 options_trianglestrip);
     pipelines_->texture_strict_src.CreateDefault(*context_, options);
     pipelines_->tiled_texture.CreateDefault(*context_, options,
                                             {supports_decal});
@@ -952,6 +991,17 @@ void ContentContext::ClearCachedRuntimeEffectPipeline(
   }
 }
 
+void ContentContext::ResetTransientsBuffers() {
+  data_host_buffer_->Reset();
+
+  // We should only reset the indexes host buffer if it is actually different
+  // from the data host buffer. Otherwise we'll end up resetting the same host
+  // buffer twice.
+  if (data_host_buffer_ != indexes_host_buffer_) {
+    indexes_host_buffer_->Reset();
+  }
+}
+
 void ContentContext::InitializeCommonlyUsedShadersIfNeeded() const {
   if (GetContext()->GetFlags().lazy_shader_mode) {
     return;
@@ -1064,6 +1114,11 @@ PipelineRef ContentContext::GetConicalGradientFillPipeline(
 PipelineRef ContentContext::GetRRectBlurPipeline(
     ContentContextOptions opts) const {
   return GetPipeline(this, pipelines_->rrect_blur, opts);
+}
+
+PipelineRef ContentContext::GetRSuperellipseBlurPipeline(
+    ContentContextOptions opts) const {
+  return GetPipeline(this, pipelines_->rsuperellipse_blur, opts);
 }
 
 PipelineRef ContentContext::GetSweepGradientFillPipeline(
@@ -1443,6 +1498,11 @@ PipelineRef ContentContext::GetDrawVerticesUberPipeline(
   } else {
     return GetPipeline(this, pipelines_->vertices_uber_2_, opts);
   }
+}
+
+PipelineRef ContentContext::GetCirclePipeline(
+    ContentContextOptions opts) const {
+  return GetPipeline(this, pipelines_->circle, opts);
 }
 
 PipelineRef ContentContext::GetLinePipeline(ContentContextOptions opts) const {

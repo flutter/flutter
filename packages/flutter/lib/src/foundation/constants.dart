@@ -80,7 +80,7 @@ const double precisionErrorTolerance = 1e-10;
 ///   in tests with [debugDefaultTargetPlatformOverride].
 /// * [dart:io.Platform], a way to find out the browser's platform that is not
 ///   overridable in tests.
-const bool kIsWeb = bool.fromEnvironment('dart.library.js_util');
+const bool kIsWeb = bool.fromEnvironment('dart.library.js_interop');
 
 /// A constant that is true if the application was compiled to WebAssembly.
 ///

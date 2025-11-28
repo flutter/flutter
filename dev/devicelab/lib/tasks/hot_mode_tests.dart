@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
+import 'package:yaml_edit/yaml_edit.dart';
 
 import '../framework/devices.dart';
 import '../framework/framework.dart';
@@ -15,9 +16,14 @@ import '../framework/running_processes.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
-final Directory _editedFlutterGalleryDir = dir(
-  path.join(Directory.systemTemp.path, 'edited_flutter_gallery'),
+final Directory _editedFlutterGalleryWorkspaceDir = dir(
+  path.join(Directory.systemTemp.path, 'gallery_workspace'),
 );
+
+final Directory _editedFlutterGalleryDir = dir(
+  path.join(_editedFlutterGalleryWorkspaceDir.path, 'edited_flutter_gallery'),
+);
+
 final Directory flutterGalleryDir = dir(
   path.join(flutterDirectory.path, 'dev/integration_tests/flutter_gallery'),
 );
@@ -42,7 +48,7 @@ TaskFunction createHotModeTest({
     }
     final File benchmarkFile = file(path.join(_editedFlutterGalleryDir.path, 'hot_benchmark.json'));
     rm(benchmarkFile);
-    final List<String> options = <String>[
+    final options = <String>[
       '--hot',
       '-d',
       deviceIdOverride!,
@@ -52,9 +58,9 @@ TaskFunction createHotModeTest({
       '--no-publish-port',
       '--verbose',
       '--uninstall-first',
-      if (additionalOptions != null) ...additionalOptions,
+      ...?additionalOptions,
     ];
-    int hotReloadCount = 0;
+    var hotReloadCount = 0;
     late Map<String, dynamic> smallReloadData;
     late Map<String, dynamic> mediumReloadData;
     late Map<String, dynamic> largeReloadData;
@@ -64,6 +70,15 @@ TaskFunction createHotModeTest({
       rmTree(_editedFlutterGalleryDir);
       mkdirs(_editedFlutterGalleryDir);
       recursiveCopy(flutterGalleryDir, _editedFlutterGalleryDir);
+
+      final String rootPubspec = File(
+        path.join(flutterDirectory.path, 'pubspec.yaml'),
+      ).readAsStringSync();
+      final yamlEditor = YamlEditor(rootPubspec);
+      yamlEditor.update(<String>['workspace'], <String>['edited_flutter_gallery']);
+      File(
+        path.join(_editedFlutterGalleryDir.parent.path, 'pubspec.yaml'),
+      ).writeAsStringSync(yamlEditor.toString());
 
       try {
         await inDirectory<void>(_editedFlutterGalleryDir, () async {
@@ -143,8 +158,8 @@ TaskFunction createHotModeTest({
           // state. Frontend loads up from previously generated kernel files.
           {
             final Process process = await startFlutter('run', options: options);
-            final Completer<void> stdoutDone = Completer<void>();
-            final Completer<void> stderrDone = Completer<void>();
+            final stdoutDone = Completer<void>();
+            final stderrDone = Completer<void>();
             process.stdout
                 .transform<String>(utf8.decoder)
                 .transform<String>(const LineSplitter())
@@ -282,8 +297,8 @@ Future<Map<String, dynamic>> captureReloadData({
 }) async {
   final Process process = await startFlutter('run', options: options);
 
-  final Completer<void> stdoutDone = Completer<void>();
-  final Completer<void> stderrDone = Completer<void>();
+  final stdoutDone = Completer<void>();
+  final stderrDone = Completer<void>();
   process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((
     String line,
   ) {
@@ -298,16 +313,15 @@ Future<Map<String, dynamic>> captureReloadData({
 
   await Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
   await process.exitCode;
-  final Map<String, dynamic> result =
-      json.decode(benchmarkFile.readAsStringSync()) as Map<String, dynamic>;
+  final result = json.decode(benchmarkFile.readAsStringSync()) as Map<String, dynamic>;
   benchmarkFile.deleteSync();
   return result;
 }
 
 Future<void> _checkAppRunning(bool shouldBeRunning) async {
   late Set<RunningProcessInfo> galleryProcesses;
-  for (int i = 0; i < 10; i++) {
-    final String exe = Platform.isWindows ? '.exe' : '';
+  for (var i = 0; i < 10; i++) {
+    final exe = Platform.isWindows ? '.exe' : '';
     galleryProcesses = await getRunningProcesses(
       processName: 'Flutter Gallery$exe',
       processManager: const LocalProcessManager(),

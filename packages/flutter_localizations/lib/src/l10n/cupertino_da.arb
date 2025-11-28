@@ -21,7 +21,7 @@
   "clearButtonLabel": "Ryd",
   "selectAllButtonLabel": "Vælg alt",
   "tabSemanticsLabel": "Fane $tabIndex af $tabCount",
-  "modalBarrierDismissLabel": "Afvis",
+  "modalBarrierDismissLabel": "Luk",
   "searchTextFieldPlaceholderLabel": "Søg",
   "noSpellCheckReplacementsLabel": "Der blev ikke fundet nogen erstatninger",
   "menuDismissLabel": "Luk menu",
@@ -29,5 +29,11 @@
   "searchWebButtonLabel": "Søg på nettet",
   "shareButtonLabel": "Del…",
   "cancelButtonLabel": "Annuller",
-  "backButtonLabel": "Tilbage"
+  "backButtonLabel": "Tilbage",
+  "expansionTileExpandedHint": "tryk to gange for at skjule",
+  "expansionTileCollapsedHint": "tryk to gange for at udvide",
+  "expansionTileExpandedTapHint": "Skjul",
+  "expansionTileCollapsedTapHint": "Udvid for at få flere oplysninger",
+  "expandedHint": "Skjult",
+  "collapsedHint": "Udvidet"
 }

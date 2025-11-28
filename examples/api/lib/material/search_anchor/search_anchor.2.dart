@@ -35,25 +35,25 @@ class _SearchBarAppState extends State<SearchBarApp> {
                   },
                 );
               },
-              suggestionsBuilder: (BuildContext context, SearchController controller) {
-                return List<ListTile>.generate(5, (int index) {
-                  final String item = 'item $index';
-                  return ListTile(
-                    title: Text(item),
-                    onTap: () {
-                      setState(() {
-                        controller.closeView(item);
-                      });
-                    },
-                  );
-                });
-              },
+              suggestionsBuilder:
+                  (BuildContext context, SearchController controller) {
+                    return List<ListTile>.generate(5, (int index) {
+                      final String item = 'item $index';
+                      return ListTile(
+                        title: Text(item),
+                        onTap: () {
+                          setState(() {
+                            controller.closeView(item);
+                          });
+                        },
+                      );
+                    });
+                  },
             ),
             Center(
-              child:
-                  controller.text.isEmpty
-                      ? const Text('No item selected')
-                      : Text('Selected item: ${controller.value.text}'),
+              child: controller.text.isEmpty
+                  ? const Text('No item selected')
+                  : Text('Selected item: ${controller.value.text}'),
             ),
           ],
         ),

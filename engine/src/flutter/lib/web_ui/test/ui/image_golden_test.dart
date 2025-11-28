@@ -72,14 +72,13 @@ Future<void> testMain() async {
     fakeAssetManager.popAssetScope(assetScope);
   });
 
-  const ui.Rect drawRegion = ui.Rect.fromLTWH(0, 0, 300, 300);
-  const ui.Rect imageRegion = ui.Rect.fromLTWH(0, 0, 150, 150);
+  const drawRegion = ui.Rect.fromLTWH(0, 0, 300, 300);
 
   // Emits a set of rendering tests for an image
   // `imageGenerator` should produce an image that is 150x150 pixels.
   void emitImageTests(String name, Future<ui.Image> Function() imageGenerator) {
     group(name, () {
-      final List<ui.Image> images = <ui.Image>[];
+      final images = <ui.Image>[];
 
       Future<ui.Image> generateImage() async {
         final ui.Image image = await imageGenerator();
@@ -88,7 +87,7 @@ Future<void> testMain() async {
       }
 
       tearDown(() {
-        for (final ui.Image image in images) {
+        for (final image in images) {
           image.dispose();
         }
         images.clear();
@@ -97,8 +96,8 @@ Future<void> testMain() async {
       test('drawImage', () async {
         final ui.Image image = await generateImage();
 
-        final ui.PictureRecorder recorder = ui.PictureRecorder();
-        final ui.Canvas canvas = ui.Canvas(recorder, drawRegion);
+        final recorder = ui.PictureRecorder();
+        final canvas = ui.Canvas(recorder, drawRegion);
         canvas.drawImage(image, ui.Offset.zero, ui.Paint()..filterQuality = ui.FilterQuality.none);
         canvas.drawImage(
           image,
@@ -124,9 +123,14 @@ Future<void> testMain() async {
       test('drawImageRect', () async {
         final ui.Image image = await generateImage();
 
-        final ui.PictureRecorder recorder = ui.PictureRecorder();
-        final ui.Canvas canvas = ui.Canvas(recorder, drawRegion);
-        const ui.Rect srcRect = ui.Rect.fromLTRB(50, 50, 100, 100);
+        final recorder = ui.PictureRecorder();
+        final canvas = ui.Canvas(recorder, drawRegion);
+        final srcRect = ui.Rect.fromLTRB(
+          image.width / 3,
+          image.height / 3,
+          2 * image.width / 3,
+          2 * image.height / 3,
+        );
         canvas.drawImageRect(
           image,
           srcRect,
@@ -159,15 +163,16 @@ Future<void> testMain() async {
 
       test('drawImageNine', () async {
         final ui.Image image = await generateImage();
-
-        final ui.PictureRecorder recorder = ui.PictureRecorder();
-        final ui.Canvas canvas = ui.Canvas(recorder, drawRegion);
-        canvas.drawImageNine(
-          image,
-          const ui.Rect.fromLTRB(50, 50, 100, 100),
-          drawRegion,
-          ui.Paint(),
+        final srcRect = ui.Rect.fromLTRB(
+          image.width / 3,
+          image.height / 3,
+          2 * image.width / 3,
+          2 * image.height / 3,
         );
+
+        final recorder = ui.PictureRecorder();
+        final canvas = ui.Canvas(recorder, drawRegion);
+        canvas.drawImageNine(image, srcRect, drawRegion, ui.Paint());
 
         await drawPictureUsingCurrentRenderer(recorder.endRecording());
 
@@ -175,12 +180,12 @@ Future<void> testMain() async {
       });
 
       test('image_shader_cubic_rotated', () async {
-        final ui.PictureRecorder recorder = ui.PictureRecorder();
-        final ui.Canvas canvas = ui.Canvas(recorder, drawRegion);
+        final recorder = ui.PictureRecorder();
+        final canvas = ui.Canvas(recorder, drawRegion);
         final Float64List matrix = Matrix4.rotationZ(pi / 6).toFloat64();
         Future<void> drawOvalWithShader(ui.Rect rect, ui.FilterQuality quality) async {
           final ui.Image image = await generateImage();
-          final ui.ImageShader shader = ui.ImageShader(
+          final shader = ui.ImageShader(
             image,
             ui.TileMode.repeated,
             ui.TileMode.repeated,
@@ -222,8 +227,8 @@ Future<void> testMain() async {
         // Image
         shader.setImageSampler(0, image);
 
-        final ui.PictureRecorder recorder = ui.PictureRecorder();
-        final ui.Canvas canvas = ui.Canvas(recorder, drawRegion);
+        final recorder = ui.PictureRecorder();
+        final canvas = ui.Canvas(recorder, drawRegion);
         canvas.drawCircle(const ui.Offset(150, 150), 100, ui.Paint()..shader = shader);
 
         await drawPictureUsingCurrentRenderer(recorder.endRecording());
@@ -235,15 +240,10 @@ Future<void> testMain() async {
         final ui.Image image = await generateImage();
 
         final Float64List matrix = Matrix4.rotationZ(pi / 6).toFloat64();
-        final ui.ImageShader shader = ui.ImageShader(
-          image,
-          ui.TileMode.decal,
-          ui.TileMode.decal,
-          matrix,
-        );
+        final shader = ui.ImageShader(image, ui.TileMode.decal, ui.TileMode.decal, matrix);
 
         // Draw an octagon
-        const List<ui.Offset> vertexValues = <ui.Offset>[
+        const vertexValues = <ui.Offset>[
           ui.Offset(50, 0),
           ui.Offset(100, 0),
           ui.Offset(150, 50),
@@ -253,10 +253,22 @@ Future<void> testMain() async {
           ui.Offset(0, 100),
           ui.Offset(0, 50),
         ];
-        final ui.Vertices vertices = ui.Vertices(
+        final double imageWidth = image.width.toDouble();
+        final double imageHeight = image.height.toDouble();
+        final texCoords = <ui.Offset>[
+          ui.Offset(imageWidth / 3, 0),
+          ui.Offset(2 * imageWidth / 3, 0),
+          ui.Offset(imageWidth, imageHeight / 3),
+          ui.Offset(imageWidth, 2 * imageHeight / 3),
+          ui.Offset(2 * imageWidth / 3, imageHeight),
+          ui.Offset(imageWidth / 3, imageHeight),
+          ui.Offset(0, 2 * imageHeight / 3),
+          ui.Offset(0, imageHeight / 3),
+        ];
+        final vertices = ui.Vertices(
           ui.VertexMode.triangles,
           vertexValues,
-          textureCoordinates: vertexValues,
+          textureCoordinates: texCoords,
           indices: <int>[
             0, 1, 2, //
             0, 2, 3, //
@@ -267,8 +279,8 @@ Future<void> testMain() async {
           ],
         );
 
-        final ui.PictureRecorder recorder = ui.PictureRecorder();
-        final ui.Canvas canvas = ui.Canvas(recorder, drawRegion);
+        final recorder = ui.PictureRecorder();
+        final canvas = ui.Canvas(recorder, drawRegion);
         canvas.drawVertices(vertices, ui.BlendMode.srcOver, ui.Paint()..shader = shader);
 
         await drawPictureUsingCurrentRenderer(recorder.endRecording());
@@ -298,12 +310,12 @@ Future<void> testMain() async {
   }
 
   emitImageTests('picture_toImage', () {
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = ui.Canvas(recorder, imageRegion);
-    for (int y = 0; y < 15; y++) {
-      for (int x = 0; x < 15; x++) {
-        final ui.Offset center = ui.Offset(x * 10 + 5, y * 10 + 5);
-        final ui.Color color = ui.Color.fromRGBO(
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder, const ui.Rect.fromLTWH(0, 0, 150, 150));
+    for (var y = 0; y < 15; y++) {
+      for (var x = 0; x < 15; x++) {
+        final center = ui.Offset(x * 10 + 5, y * 10 + 5);
+        final color = ui.Color.fromRGBO(
           (center.dx * 256 / 150).round(),
           (center.dy * 256 / 150).round(),
           0,
@@ -316,10 +328,10 @@ Future<void> testMain() async {
   });
 
   Uint8List generatePixelData(int width, int height, ui.Color Function(double, double) generator) {
-    final Uint8List data = Uint8List(width * height * 4);
-    int outputIndex = 0;
-    for (int y = 0; y < height; y++) {
-      for (int x = 0; x < width; x++) {
+    final data = Uint8List(width * height * 4);
+    var outputIndex = 0;
+    for (var y = 0; y < height; y++) {
+      for (var x = 0; x < width; x++) {
         final ui.Color pixelColor = generator((2.0 * x / width) - 1.0, (2.0 * y / height) - 1.0);
         data[outputIndex++] = pixelColor.red;
         data[outputIndex++] = pixelColor.green;
@@ -341,7 +353,7 @@ Future<void> testMain() async {
         1,
       );
     });
-    final Completer<ui.Image> completer = Completer<ui.Image>();
+    final completer = Completer<ui.Image>();
     ui.decodeImageFromPixels(pixels, 150, 150, ui.PixelFormat.rgba8888, completer.complete);
     return completer.future;
   });
@@ -357,7 +369,7 @@ Future<void> testMain() async {
         1,
       );
     });
-    final Completer<ui.Image> completer = Completer<ui.Image>();
+    final completer = Completer<ui.Image>();
     ui.decodeImageFromPixels(
       pixels,
       50,
@@ -411,7 +423,7 @@ Future<void> testMain() async {
       );
       final String url = domWindow.URL.createObjectURL(svgBlob);
       final DomHTMLImageElement image = createDomHTMLImageElement();
-      final Completer<void> completer = Completer<void>();
+      final completer = Completer<void>();
       late final DomEventListener loadListener;
       loadListener = createDomEventListener((DomEvent event) {
         completer.complete();
@@ -454,7 +466,7 @@ Future<void> testMain() async {
       );
       final String url = domWindow.URL.createObjectURL(svgBlob);
       final DomHTMLImageElement image = createDomHTMLImageElement();
-      final Completer<void> completer = Completer<void>();
+      final completer = Completer<void>();
       late final DomEventListener loadListener;
       loadListener = createDomEventListener((DomEvent event) {
         completer.complete();
@@ -488,4 +500,57 @@ Future<void> testMain() async {
     codec.dispose();
     return info.image;
   });
+
+  emitImageTests('animated_gif_list', () async {
+    final ByteBuffer data = await httpFetchByteBuffer('/test_images/alphabetAnim.gif');
+    final ui.Codec codec = await renderer.instantiateImageCodec(data.asUint8List());
+    expect(codec.frameCount, 13);
+
+    // The second frame of this gif is more interesting to test than the first,
+    // so skip the first frame.
+    await codec.getNextFrame();
+    final ui.FrameInfo info = await codec.getNextFrame();
+    codec.dispose();
+    return info.image;
+  });
+
+  emitImageTests('animated_webp_list', () async {
+    final ByteBuffer data = await httpFetchByteBuffer('/test_images/stoplight.webp');
+    final ui.Codec codec = await renderer.instantiateImageCodec(data.asUint8List());
+    expect(codec.frameCount, 3);
+
+    final ui.FrameInfo info = await codec.getNextFrame();
+    codec.dispose();
+    return info.image;
+  });
+
+  if (!isCanvasKit) {
+    // CanvasKit doesn't do the correct thing for animated images for the
+    // `instantiateImageCodecFromUrl` code path.
+    // See https://github.com/flutter/flutter/issues/166803
+    emitImageTests('animated_gif_uri', () async {
+      final ui.Codec codec = await renderer.instantiateImageCodecFromUrl(
+        Uri(path: '/test_images/alphabetAnim.gif'),
+      );
+      expect(codec.frameCount, 13);
+
+      // The second frame of this gif is more interesting to test than the first,
+      // so skip the first frame.
+      await codec.getNextFrame();
+      final ui.FrameInfo info = await codec.getNextFrame();
+      codec.dispose();
+      return info.image;
+    });
+
+    emitImageTests('animated_webp_uri', () async {
+      final ui.Codec codec = await renderer.instantiateImageCodecFromUrl(
+        Uri(path: '/test_images/stoplight.webp'),
+      );
+      expect(codec.frameCount, 3);
+
+      final ui.FrameInfo info = await codec.getNextFrame();
+      codec.dispose();
+      return info.image;
+    });
+  }
 }

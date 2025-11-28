@@ -56,7 +56,7 @@ void main() {
 
     testWithoutContext('Install and uninstall are no-ops that report success', () async {
       final FakeDesktopDevice device = setUpDesktopDevice();
-      final FakeApplicationPackage package = FakeApplicationPackage();
+      final package = FakeApplicationPackage();
 
       expect(await device.uninstallApp(package), true);
       expect(await device.isAppInstalled(package), true);
@@ -72,15 +72,15 @@ void main() {
   group('Starting and stopping application', () {
     testWithoutContext('Stop without start is a successful no-op', () async {
       final FakeDesktopDevice device = setUpDesktopDevice();
-      final FakeApplicationPackage package = FakeApplicationPackage();
+      final package = FakeApplicationPackage();
 
       expect(await device.stopApp(package), true);
     });
 
     testWithoutContext('Can run from prebuilt application', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final Completer<void> completer = Completer<void>();
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      final completer = Completer<void>();
+      final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: const <String>['debug'],
           stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
@@ -96,7 +96,7 @@ void main() {
         BuildInfo.debug,
       );
       fileSystem.file(executableName).writeAsStringSync('\n');
-      final FakeApplicationPackage package = FakeApplicationPackage();
+      final package = FakeApplicationPackage();
       final LaunchResult result = await device.startApp(
         package,
         prebuiltApplication: true,
@@ -108,12 +108,12 @@ void main() {
     });
 
     testWithoutContext('Null executable path fails gracefully', () async {
-      final BufferLogger logger = BufferLogger.test();
+      final logger = BufferLogger.test();
       final DesktopDevice device = setUpDesktopDevice(
         nullExecutablePathForDevice: true,
         logger: logger,
       );
-      final FakeApplicationPackage package = FakeApplicationPackage();
+      final package = FakeApplicationPackage();
       final LaunchResult result = await device.startApp(
         package,
         prebuiltApplication: true,
@@ -125,8 +125,8 @@ void main() {
     });
 
     testWithoutContext('stopApp kills process started by startApp', () async {
-      final Completer<void> completer = Completer<void>();
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      final completer = Completer<void>();
+      final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: const <String>['debug'],
           stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
@@ -134,7 +134,7 @@ void main() {
         ),
       ]);
       final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
-      final FakeApplicationPackage package = FakeApplicationPackage();
+      final package = FakeApplicationPackage();
       final LaunchResult result = await device.startApp(
         package,
         prebuiltApplication: true,
@@ -149,37 +149,39 @@ void main() {
   testWithoutContext(
     'startApp supports DebuggingOptions through FLUTTER_ENGINE_SWITCH environment variables',
     () async {
-      final Completer<void> completer = Completer<void>();
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      final completer = Completer<void>();
+      final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: const <String>['debug'],
           stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
           completer: completer,
           environment: const <String, String>{
             'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
-            'FLUTTER_ENGINE_SWITCH_2': 'trace-startup=true',
-            'FLUTTER_ENGINE_SWITCH_3': 'enable-software-rendering=true',
-            'FLUTTER_ENGINE_SWITCH_4': 'skia-deterministic-rendering=true',
-            'FLUTTER_ENGINE_SWITCH_5': 'trace-skia=true',
-            'FLUTTER_ENGINE_SWITCH_6': 'trace-allowlist=foo,bar',
-            'FLUTTER_ENGINE_SWITCH_7': 'trace-skia-allowlist=skia.a,skia.b',
-            'FLUTTER_ENGINE_SWITCH_8': 'trace-systrace=true',
-            'FLUTTER_ENGINE_SWITCH_9': 'trace-to-file=path/to/trace.binpb',
-            'FLUTTER_ENGINE_SWITCH_10': 'endless-trace-buffer=true',
-            'FLUTTER_ENGINE_SWITCH_11': 'purge-persistent-cache=true',
-            'FLUTTER_ENGINE_SWITCH_12': 'enable-impeller=false',
-            'FLUTTER_ENGINE_SWITCH_13': 'enable-checked-mode=true',
-            'FLUTTER_ENGINE_SWITCH_14': 'verify-entry-points=true',
-            'FLUTTER_ENGINE_SWITCH_15': 'start-paused=true',
-            'FLUTTER_ENGINE_SWITCH_16': 'disable-service-auth-codes=true',
-            'FLUTTER_ENGINE_SWITCH_17': 'use-test-fonts=true',
-            'FLUTTER_ENGINE_SWITCH_18': 'verbose-logging=true',
-            'FLUTTER_ENGINE_SWITCHES': '18',
+            'FLUTTER_ENGINE_SWITCH_2': 'profile-startup=true',
+            'FLUTTER_ENGINE_SWITCH_3': 'trace-startup=true',
+            'FLUTTER_ENGINE_SWITCH_4': 'enable-software-rendering=true',
+            'FLUTTER_ENGINE_SWITCH_5': 'skia-deterministic-rendering=true',
+            'FLUTTER_ENGINE_SWITCH_6': 'trace-skia=true',
+            'FLUTTER_ENGINE_SWITCH_7': 'trace-allowlist=foo,bar',
+            'FLUTTER_ENGINE_SWITCH_8': 'trace-skia-allowlist=skia.a,skia.b',
+            'FLUTTER_ENGINE_SWITCH_9': 'trace-systrace=true',
+            'FLUTTER_ENGINE_SWITCH_10': 'trace-to-file=path/to/trace.binpb',
+            'FLUTTER_ENGINE_SWITCH_11': 'endless-trace-buffer=true',
+            'FLUTTER_ENGINE_SWITCH_12': 'profile-microtasks=true',
+            'FLUTTER_ENGINE_SWITCH_13': 'purge-persistent-cache=true',
+            'FLUTTER_ENGINE_SWITCH_14': 'enable-impeller=false',
+            'FLUTTER_ENGINE_SWITCH_15': 'enable-checked-mode=true',
+            'FLUTTER_ENGINE_SWITCH_16': 'verify-entry-points=true',
+            'FLUTTER_ENGINE_SWITCH_17': 'start-paused=true',
+            'FLUTTER_ENGINE_SWITCH_18': 'disable-service-auth-codes=true',
+            'FLUTTER_ENGINE_SWITCH_19': 'use-test-fonts=true',
+            'FLUTTER_ENGINE_SWITCH_20': 'verbose-logging=true',
+            'FLUTTER_ENGINE_SWITCHES': '20',
           },
         ),
       ]);
       final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
-      final FakeApplicationPackage package = FakeApplicationPackage();
+      final package = FakeApplicationPackage();
       final LaunchResult result = await device.startApp(
         package,
         prebuiltApplication: true,
@@ -196,6 +198,8 @@ void main() {
           traceSystrace: true,
           traceToFile: 'path/to/trace.binpb',
           endlessTraceBuffer: true,
+          profileMicrotasks: true,
+          profileStartup: true,
           purgePersistentCache: true,
           useTestFonts: true,
           verboseSystemLogs: true,
@@ -209,8 +213,8 @@ void main() {
   testWithoutContext(
     'startApp supports DebuggingOptions through FLUTTER_ENGINE_SWITCH environment variables when debugging is disabled',
     () async {
-      final Completer<void> completer = Completer<void>();
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      final completer = Completer<void>();
+      final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: const <String>['debug'],
           stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
@@ -225,7 +229,7 @@ void main() {
         ),
       ]);
       final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
-      final FakeApplicationPackage package = FakeApplicationPackage();
+      final package = FakeApplicationPackage();
       final LaunchResult result = await device.startApp(
         package,
         prebuiltApplication: true,
@@ -253,8 +257,8 @@ void main() {
   });
 
   testWithoutContext('startApp supports dartEntrypointArgs', () async {
-    final Completer<void> completer = Completer<void>();
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final completer = Completer<void>();
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: const <String>['debug', 'arg1', 'arg2'],
         stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
@@ -262,7 +266,7 @@ void main() {
       ),
     ]);
     final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
-    final FakeApplicationPackage package = FakeApplicationPackage();
+    final package = FakeApplicationPackage();
     final LaunchResult result = await device.startApp(
       package,
       prebuiltApplication: true,
@@ -276,8 +280,8 @@ void main() {
   });
 
   testWithoutContext('Device logger captures all output', () async {
-    final Completer<void> exitCompleter = Completer<void>();
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final exitCompleter = Completer<void>();
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: const <String>['debug', 'arg1', 'arg2'],
         exitCode: -1,
@@ -296,7 +300,7 @@ void main() {
     // Start looking for 'Oops' in the stream before starting the app.
     expect(device.getLogReader().logLines, emits('Oops'));
 
-    final FakeApplicationPackage package = FakeApplicationPackage();
+    final package = FakeApplicationPackage();
     await device.startApp(
       package,
       prebuiltApplication: true,
@@ -308,7 +312,7 @@ void main() {
   });
 
   testWithoutContext('Desktop devices pass through the enable-impeller flag', () async {
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>['debug'],
         exitCode: -1,
@@ -323,7 +327,7 @@ void main() {
     ]);
     final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
 
-    final FakeApplicationPackage package = FakeApplicationPackage();
+    final package = FakeApplicationPackage();
     await device.startApp(
       package,
       prebuiltApplication: true,
@@ -336,7 +340,7 @@ void main() {
   });
 
   testWithoutContext('Desktop devices pass through the --no-enable-impeller flag', () async {
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>['debug'],
         exitCode: -1,
@@ -351,7 +355,7 @@ void main() {
     ]);
     final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
 
-    final FakeApplicationPackage package = FakeApplicationPackage();
+    final package = FakeApplicationPackage();
     await device.startApp(
       package,
       prebuiltApplication: true,
@@ -363,18 +367,48 @@ void main() {
     );
   });
 
+  testWithoutContext('Desktop devices pass through the enable-flutter-gpu flag', () async {
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>['debug'],
+        exitCode: -1,
+        environment: <String, String>{
+          'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
+          'FLUTTER_ENGINE_SWITCH_2': 'enable-impeller=true',
+          'FLUTTER_ENGINE_SWITCH_3': 'enable-flutter-gpu=true',
+          'FLUTTER_ENGINE_SWITCH_4': 'enable-checked-mode=true',
+          'FLUTTER_ENGINE_SWITCH_5': 'verify-entry-points=true',
+          'FLUTTER_ENGINE_SWITCHES': '5',
+        },
+      ),
+    ]);
+    final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
+
+    final package = FakeApplicationPackage();
+    await device.startApp(
+      package,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        enableImpeller: ImpellerStatus.enabled,
+        enableFlutterGpu: true,
+        dartEntrypointArgs: <String>[],
+      ),
+    );
+  });
+
   testUsingContext(
     'macOS devices print warning if Dart VM not found within timeframe in CI',
     () async {
-      final BufferLogger logger = BufferLogger.test();
-      final FakeMacOSDevice device = FakeMacOSDevice(
+      final logger = BufferLogger.test();
+      final device = FakeMacOSDevice(
         fileSystem: MemoryFileSystem.test(),
         processManager: FakeProcessManager.any(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
         logger: logger,
       );
 
-      final FakeApplicationPackage package = FakeApplicationPackage();
+      final package = FakeApplicationPackage();
 
       FakeAsync().run((FakeAsync fakeAsync) {
         device.startApp(
@@ -431,10 +465,10 @@ class FakeDesktopDevice extends DesktopDevice {
          operatingSystemUtils: operatingSystemUtils,
        );
 
-  /// The [mainPath] last passed to [buildForDevice].
+  /// The `mainPath` last passed to [buildForDevice].
   String? lastBuiltMainPath;
 
-  /// The [buildInfo] last passed to [buildForDevice].
+  /// The `buildInfo` last passed to [buildForDevice].
   BuildInfo? lastBuildInfo;
 
   final bool nullExecutablePathForDevice;
@@ -446,7 +480,7 @@ class FakeDesktopDevice extends DesktopDevice {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) => true;
@@ -493,7 +527,7 @@ class FakeMacOSDevice extends MacOSDevice {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) => true;

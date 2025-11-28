@@ -42,14 +42,17 @@ class SafeAreaExampleApp extends StatelessWidget {
       theme: theme,
       debugShowCheckedModeBanner: false,
       home: Builder(
-        builder:
-            (BuildContext context) => Scaffold(
-              appBar: Toggle.appBar.of(context) ? appBar : null,
-              body: const DefaultTextStyle(
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black),
-                child: Center(child: SafeAreaExample()),
-              ),
+        builder: (BuildContext context) => Scaffold(
+          appBar: Toggle.appBar.of(context) ? appBar : null,
+          body: const DefaultTextStyle(
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
             ),
+            child: Center(child: SafeAreaExample()),
+          ),
+        ),
       ),
     );
   }
@@ -62,11 +65,10 @@ class SafeAreaExample extends StatelessWidget {
     children: <Widget>[
       const SizedBox(height: 6),
       Builder(
-        builder:
-            (BuildContext context) => Text(
-              Toggle.safeArea.of(context) ? 'safe area!' : 'no safe area',
-              style: const TextStyle(fontSize: 24),
-            ),
+        builder: (BuildContext context) => Text(
+          Toggle.safeArea.of(context) ? 'safe area!' : 'no safe area',
+          style: const TextStyle(fontSize: 24),
+        ),
       ),
       const Spacer(flex: 2),
       for (final Value data in Value.allValues) ...data.controls,
@@ -92,7 +94,10 @@ sealed class Value implements Enum {
 
   List<Widget> get controls;
 
-  static const List<Value> allValues = <Value>[...Inset.values, ...Toggle.values];
+  static const List<Value> allValues = <Value>[
+    ...Inset.values,
+    ...Toggle.values,
+  ];
 }
 
 enum Inset implements Value {
@@ -111,20 +116,20 @@ enum Inset implements Value {
     bottom => model.insets.bottom,
   };
 
-  double of(BuildContext context) => _getValue(Model.of<_InsetModel>(context, this));
+  double of(BuildContext context) =>
+      _getValue(Model.of<_InsetModel>(context, this));
 
   @override
   List<Widget> get controls => <Widget>[
     Text(label),
     Builder(
-      builder:
-          (BuildContext context) => Slider(
-            max: 50,
-            value: of(context),
-            onChanged: (double newValue) {
-              InsetsState.instance.changeInset(this, newValue);
-            },
-          ),
+      builder: (BuildContext context) => Slider(
+        max: 50,
+        value: of(context),
+        onChanged: (double newValue) {
+          InsetsState.instance.changeInset(this, newValue);
+        },
+      ),
     ),
     const Spacer(),
   ];
@@ -144,19 +149,19 @@ enum Toggle implements Value {
     safeArea => model.buildSafeArea,
   };
 
-  bool of(BuildContext context) => _getValue(Model.of<_ToggleModel>(context, this));
+  bool of(BuildContext context) =>
+      _getValue(Model.of<_ToggleModel>(context, this));
 
   @override
   List<Widget> get controls => <Widget>[
     Builder(
-      builder:
-          (BuildContext context) => SwitchListTile(
-            title: Text(label),
-            value: of(context),
-            onChanged: (bool value) {
-              InsetsState.instance.toggle(this, value);
-            },
-          ),
+      builder: (BuildContext context) => SwitchListTile(
+        title: Text(label),
+        value: of(context),
+        onChanged: (bool value) {
+          InsetsState.instance.toggle(this, value);
+        },
+      ),
     ),
   ];
 }
@@ -173,7 +178,9 @@ abstract class Model<E extends Value> extends InheritedModel<E> {
 
   @override
   bool updateShouldNotifyDependent(Model<E> oldWidget, Set<E> dependencies) {
-    return dependencies.any((E data) => data._getValue(this) != data._getValue(oldWidget));
+    return dependencies.any(
+      (E data) => data._getValue(this) != data._getValue(oldWidget),
+    );
   }
 }
 
@@ -254,15 +261,14 @@ class InsetsState extends State<Insets> {
     final Widget app = _ToggleModel(
       togglers: _togglers,
       child: Builder(
-        builder:
-            (BuildContext context) => MediaQuery(
-              data: MediaQuery.of(context).copyWith(
-                viewInsets: EdgeInsets.only(top: insets.top),
-                viewPadding: insets,
-                padding: insets,
-              ),
-              child: const SafeAreaExampleApp(),
-            ),
+        builder: (BuildContext context) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            viewInsets: EdgeInsets.only(top: insets.top),
+            viewPadding: insets,
+            padding: insets,
+          ),
+          child: const SafeAreaExampleApp(),
+        ),
       ),
     );
 

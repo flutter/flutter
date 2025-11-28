@@ -61,13 +61,13 @@ final class HeaderGuardCheck {
 
     if (badFiles.isNotEmpty) {
       _stdOut.writeln('The following ${badFiles.length} files have invalid header guards:');
-      for (final HeaderFile headerFile in badFiles) {
+      for (final headerFile in badFiles) {
         _stdOut.writeln('  ${headerFile.path}');
       }
 
       // If we're fixing, fix the files.
       if (fix) {
-        for (final HeaderFile headerFile in badFiles) {
+        for (final headerFile in badFiles) {
           headerFile.fix(engineRoot: source.flutterDir.path);
         }
 
@@ -82,8 +82,8 @@ final class HeaderGuardCheck {
   }
 
   Iterable<io.File> _findIncludedHeaderFiles() sync* {
-    final Queue<String> queue = Queue<String>();
-    final Set<String> yielded = <String>{};
+    final queue = Queue<String>();
+    final yielded = <String>{};
     if (include.isEmpty) {
       queue.add(source.flutterDir.path);
     } else {
@@ -99,7 +99,7 @@ final class HeaderGuardCheck {
         if (_isExcluded(path)) {
           continue;
         }
-        final io.Directory directory = io.Directory(path);
+        final directory = io.Directory(path);
         for (final io.FileSystemEntity entity in directory.listSync(recursive: true)) {
           if (entity is io.File && entity.path.endsWith('.h')) {
             queue.add(entity.path);
@@ -112,7 +112,7 @@ final class HeaderGuardCheck {
   }
 
   bool _isExcluded(String path) {
-    final rootPath = source.flutterDir.parent.parent.parent.path;
+    final String rootPath = source.flutterDir.parent.parent.parent.path;
     for (final String excludePath in exclude) {
       final String relativePath = p.relative(excludePath, from: rootPath);
       if (p.isWithin(relativePath, path) || p.equals(relativePath, path)) {
@@ -123,8 +123,8 @@ final class HeaderGuardCheck {
   }
 
   Iterable<HeaderFile> _checkFiles(Iterable<io.File> headers) sync* {
-    for (final io.File header in headers) {
-      final HeaderFile headerFile = HeaderFile.parse(header.path);
+    for (final header in headers) {
+      final headerFile = HeaderFile.parse(header.path);
       if (headerFile.pragmaOnce != null) {
         _stdErr.writeln(headerFile.pragmaOnce!.message('Unexpected #pragma once'));
         yield headerFile;
@@ -161,37 +161,35 @@ final class HeaderGuardCheck {
 
 final Engine? _engine = Engine.tryFindWithin(p.dirname(p.fromUri(io.Platform.script)));
 
-final ArgParser _parser =
-    ArgParser()
-      ..addFlag('fix', help: 'Automatically fixes most header guards.')
-      ..addOption(
-        'root',
-        abbr: 'r',
-        help: 'Path to the engine source root.',
-        valueHelp: 'path/to/engine/src',
-        defaultsTo: _engine?.srcDir.path,
-      )
-      ..addMultiOption(
-        'include',
-        abbr: 'i',
-        help: 'Paths to include in the check.',
-        valueHelp: 'path/to/dir/or/file (relative to the engine root)',
-        defaultsTo: <String>[],
-      )
-      ..addMultiOption(
-        'exclude',
-        abbr: 'e',
-        help: 'Paths to exclude from the check.',
-        valueHelp: 'path/to/dir/or/file (relative to the engine root)',
-        defaultsTo:
-            _engine != null
-                ? <String>[
-                  'engine/src/build',
-                  'engine/src/flutter/build',
-                  'engine/src/flutter/buildtools',
-                  'engine/src/flutter/impeller/compiler/code_gen_template.h',
-                  'engine/src/flutter/prebuilts',
-                  'engine/src/flutter/third_party',
-                ]
-                : null,
-      );
+final ArgParser _parser = ArgParser()
+  ..addFlag('fix', help: 'Automatically fixes most header guards.')
+  ..addOption(
+    'root',
+    abbr: 'r',
+    help: 'Path to the engine source root.',
+    valueHelp: 'path/to/engine/src',
+    defaultsTo: _engine?.srcDir.path,
+  )
+  ..addMultiOption(
+    'include',
+    abbr: 'i',
+    help: 'Paths to include in the check.',
+    valueHelp: 'path/to/dir/or/file (relative to the engine root)',
+    defaultsTo: <String>[],
+  )
+  ..addMultiOption(
+    'exclude',
+    abbr: 'e',
+    help: 'Paths to exclude from the check.',
+    valueHelp: 'path/to/dir/or/file (relative to the engine root)',
+    defaultsTo: _engine != null
+        ? <String>[
+            'engine/src/build',
+            'engine/src/flutter/build',
+            'engine/src/flutter/buildtools',
+            'engine/src/flutter/impeller/compiler/code_gen_template.h',
+            'engine/src/flutter/prebuilts',
+            'engine/src/flutter/third_party',
+          ]
+        : null,
+  );

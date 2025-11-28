@@ -19,12 +19,12 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../convert.dart';
+import '../darwin/darwin.dart';
 import '../doctor_validator.dart';
 import '../globals.dart' as globals;
 import '../ios/application_package.dart';
 import '../ios/mac.dart';
 import '../ios/plist_parser.dart';
-import '../project.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
 
@@ -51,10 +51,10 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
   }
 
   @override
-  final String name = 'ios';
+  final name = 'ios';
 
   @override
-  final String description = 'Build an iOS application bundle.';
+  final description = 'Build an iOS application bundle.';
 
   @override
   final XcodeBuildAction xcodeBuildAction = XcodeBuildAction.build;
@@ -132,13 +132,13 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   }
 
   @override
-  final String name = 'ipa';
+  final name = 'ipa';
 
   @override
-  final List<String> aliases = <String>['xcarchive'];
+  final aliases = <String>['xcarchive'];
 
   @override
-  final String description = 'Build an iOS archive bundle and IPA for distribution.';
+  final description = 'Build an iOS archive bundle and IPA for distribution.';
 
   @override
   final XcodeBuildAction xcodeBuildAction = XcodeBuildAction.archive;
@@ -147,7 +147,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   final EnvironmentType environmentType = EnvironmentType.physical;
 
   @override
-  final bool configOnly = false;
+  final configOnly = false;
 
   String? get exportOptionsPlist => stringArg('export-options-plist');
 
@@ -201,13 +201,13 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       return <_ImageAssetFileKey, String>{};
     }
 
-    final Map<_ImageAssetFileKey, String> iconInfo = <_ImageAssetFileKey, String>{};
+    final iconInfo = <_ImageAssetFileKey, String>{};
     for (final dynamic image in images) {
-      final Map<String, dynamic> imageMap = image as Map<String, dynamic>;
-      final String? idiom = imageMap['idiom'] as String?;
-      final String? size = imageMap['size'] as String?;
-      final String? scale = imageMap['scale'] as String?;
-      final String? fileName = imageMap['filename'] as String?;
+      final imageMap = image as Map<String, dynamic>;
+      final idiom = imageMap['idiom'] as String?;
+      final size = imageMap['size'] as String?;
+      final scale = imageMap['scale'] as String?;
+      final fileName = imageMap['filename'] as String?;
 
       // requiresSize must match the actual presence of size in json.
       if (requiresSize != (size != null) || idiom == null || scale == null || fileName == null) {
@@ -217,8 +217,10 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       final double? parsedSize;
       if (size != null) {
         // for example, "64x64". Parse the width since it is a square.
-        final Iterable<double> parsedSizes =
-            size.split('x').map((String element) => double.tryParse(element)).whereType<double>();
+        final Iterable<double> parsedSizes = size
+            .split('x')
+            .map((String element) => double.tryParse(element))
+            .whereType<double>();
         if (parsedSizes.isEmpty) {
           continue;
         }
@@ -228,8 +230,10 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       }
 
       // for example, "3x".
-      final Iterable<int> parsedScales =
-          scale.split('x').map((String element) => int.tryParse(element)).whereType<int>();
+      final Iterable<int> parsedScales = scale
+          .split('x')
+          .map((String element) => int.tryParse(element))
+          .whereType<int>();
       if (parsedScales.isEmpty) {
         continue;
       }
@@ -326,7 +330,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       requiresSize: true,
     );
 
-    final List<ValidationMessage> validationMessages = <ValidationMessage>[];
+    final validationMessages = <ValidationMessage>[];
 
     final bool usesTemplate = _isAssetStillUsingTemplateFiles(
       templateImageInfoMap: templateInfoMap,
@@ -372,7 +376,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       requiresSize: false,
     );
 
-    final List<ValidationMessage> validationMessages = <ValidationMessage>[];
+    final validationMessages = <ValidationMessage>[];
 
     final bool usesTemplate = _isAssetStillUsingTemplateFiles(
       templateImageInfoMap: templateInfoMap,
@@ -404,7 +408,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       return <ValidationMessage>[];
     }
 
-    final Map<String, String?> xcodeProjectSettingsMap = <String, String?>{};
+    final xcodeProjectSettingsMap = <String, String?>{};
 
     xcodeProjectSettingsMap['Version Number'] = globals.plistParser.getValueFromFile<String>(
       plistPath,
@@ -429,15 +433,16 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       PlistParser.kCFBundleIdentifierKey,
     );
 
-    final List<ValidationMessage> validationMessages =
-        xcodeProjectSettingsMap.entries.map((MapEntry<String, String?> entry) {
-          final String title = entry.key;
-          final String? info = entry.value;
-          return _createValidationMessage(
-            isValid: info != null,
-            message: '$title: ${info ?? "Missing"}',
-          );
-        }).toList();
+    final List<ValidationMessage> validationMessages = xcodeProjectSettingsMap.entries.map((
+      MapEntry<String, String?> entry,
+    ) {
+      final String title = entry.key;
+      final String? info = entry.value;
+      return _createValidationMessage(
+        isValid: info != null,
+        message: '$title: ${info ?? "Missing"}',
+      );
+    }).toList();
 
     final bool hasMissingSettings = xcodeProjectSettingsMap.values.any(
       (String? element) => element == null,
@@ -470,7 +475,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     final BuildInfo buildInfo = await cachedBuildInfo;
     final FlutterCommandResult xcarchiveResult = await super.runCommand();
 
-    final List<ValidationResult?> validationResults = <ValidationResult?>[];
+    final validationResults = <ValidationResult?>[];
     validationResults.add(
       _createValidationResult(
         'App Settings Validation',
@@ -516,10 +521,9 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     final String absoluteOutputPath = globals.fs.path.absolute(relativeOutputPath);
     final String absoluteArchivePath = globals.fs.path.absolute(app.archiveBundleOutputPath);
     String? exportOptions = exportOptionsPlist;
-    String? exportMethod =
-        exportOptions != null
-            ? globals.plistParser.getValueFromFile<String?>(exportOptions, 'method')
-            : null;
+    String? exportMethod = exportOptions != null
+        ? globals.plistParser.getValueFromFile<String?>(exportOptions, 'method')
+        : null;
     exportMethod ??= _getVersionAppropriateExportMethod(stringArg('export-method')!);
     final bool isAppStoreUpload =
         exportMethod == 'app-store' || exportMethod == 'app-store-connect';
@@ -555,7 +559,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     }
 
     if (result.exitCode != 0) {
-      final StringBuffer errorMessage = StringBuffer();
+      final errorMessage = StringBuffer();
 
       // "error:" prefixed lines are the nicely formatted error message, the
       // rest is the same message but printed as a IDEFoundationErrorDomain.
@@ -585,10 +589,9 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
     final Directory outputDirectory = globals.fs.directory(absoluteOutputPath);
     final int? directorySize = globals.os.getDirectorySize(outputDirectory);
-    final String appSize =
-        (buildInfo.mode == BuildMode.debug || directorySize == null)
-            ? '' // Don't display the size when building a debug variant.
-            : ' (${getSizeAsPlatformMB(directorySize)})';
+    final appSize = (buildInfo.mode == BuildMode.debug || directorySize == null)
+        ? '' // Don't display the size when building a debug variant.
+        : ' (${getSizeAsPlatformMB(directorySize)})';
 
     globals.printStatus(
       '${globals.terminal.successMark} '
@@ -617,7 +620,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
   File _createExportPlist(String exportMethod) {
     // Create the plist to be passed into xcodebuild -exportOptionsPlist.
-    final StringBuffer plistContents = StringBuffer('''
+    final plistContents = StringBuffer('''
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -703,7 +706,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   late final Future<BuildInfo> cachedBuildInfo = getBuildInfo();
 
   late final Future<BuildableIOSApp> buildableIOSApp = () async {
-    final BuildableIOSApp? app =
+    final app =
         await applicationPackages?.getPackageForPlatform(
               TargetPlatform.ios,
               buildInfo: await cachedBuildInfo,
@@ -723,17 +726,16 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    defaultBuildMode =
-        environmentType == EnvironmentType.simulator ? BuildMode.debug : BuildMode.release;
+    defaultBuildMode = environmentType == EnvironmentType.simulator
+        ? BuildMode.debug
+        : BuildMode.release;
     final BuildInfo buildInfo = await cachedBuildInfo;
 
     if (!supported) {
       throwToolExit('Building for iOS is only supported on macOS.');
     }
     if (environmentType == EnvironmentType.simulator && !buildInfo.supportsSimulator) {
-      throwToolExit(
-        '${sentenceCase(buildInfo.friendlyModeName)} mode is not supported for simulators.',
-      );
+      throwToolExit('${buildInfo.mode.uppercaseName} mode is not supported for simulators.');
     }
     if (configOnly && buildInfo.codeSizeDirectory != null) {
       throwToolExit('Cannot analyze code size without performing a full build.');
@@ -747,7 +749,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
 
     final BuildableIOSApp app = await buildableIOSApp;
 
-    final String logTarget = environmentType == EnvironmentType.simulator ? 'simulator' : 'device';
+    final logTarget = environmentType == EnvironmentType.simulator ? 'simulator' : 'device';
     final String typeName = globals.artifacts!.getEngineType(TargetPlatform.ios, buildInfo.mode);
     globals.printStatus(switch (xcodeBuildAction) {
       XcodeBuildAction.build => 'Building $app for $logTarget ($typeName)...',
@@ -775,16 +777,17 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
         analytics: globals.analytics,
         fileSystem: globals.fs,
         logger: globals.logger,
-        platform: SupportedPlatform.ios,
+        platform: FlutterDarwinPlatform.ios,
         project: app.project.parent,
       );
-      final String presentParticiple =
-          xcodeBuildAction == XcodeBuildAction.build ? 'building' : 'archiving';
+      final presentParticiple = xcodeBuildAction == XcodeBuildAction.build
+          ? 'building'
+          : 'archiving';
       throwToolExit('Encountered error while $presentParticiple for $logTarget.');
     }
 
     if (buildInfo.codeSizeDirectory != null) {
-      final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
+      final sizeAnalyzer = SizeAnalyzer(
         fileSystem: globals.fs,
         logger: globals.logger,
         analytics: analytics,
@@ -807,12 +810,11 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
 
       Directory? appDirectory;
       if (outputAppDirectoryCandidate.existsSync()) {
-        appDirectory =
-            outputAppDirectoryCandidate.listSync().whereType<Directory>().where((
-              Directory directory,
-            ) {
-              return globals.fs.path.extension(directory.path) == '.app';
-            }).first;
+        appDirectory = outputAppDirectoryCandidate.listSync().whereType<Directory>().where((
+          Directory directory,
+        ) {
+          return globals.fs.path.extension(directory.path) == '.app';
+        }).first;
       }
       if (appDirectory == null) {
         throwToolExit(
@@ -844,10 +846,9 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     if (result.output != null) {
       final Directory outputDirectory = globals.fs.directory(result.output);
       final int? directorySize = globals.os.getDirectorySize(outputDirectory);
-      final String appSize =
-          (buildInfo.mode == BuildMode.debug || directorySize == null)
-              ? '' // Don't display the size when building a debug variant.
-              : ' (${getSizeAsPlatformMB(directorySize)})';
+      final appSize = (buildInfo.mode == BuildMode.debug || directorySize == null)
+          ? '' // Don't display the size when building a debug variant.
+          : ' (${getSizeAsPlatformMB(directorySize)})';
 
       globals.printStatus(
         '${globals.terminal.successMark} '
@@ -865,8 +866,9 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
         PlistParser.kFLTEnableImpellerKey,
       );
 
-      final String buildLabel =
-          impellerEnabled == false ? 'plist-impeller-disabled' : 'plist-impeller-enabled';
+      final buildLabel = impellerEnabled == false
+          ? 'plist-impeller-disabled'
+          : 'plist-impeller-enabled';
       globals.analytics.send(Event.flutterBuildInfo(label: buildLabel, buildType: 'ios'));
 
       return FlutterCommandResult.success();

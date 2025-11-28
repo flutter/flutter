@@ -59,11 +59,10 @@ class InkHighlight extends InteractiveInkFeature {
 
        _textDirection = textDirection,
        _rectCallback = rectCallback {
-    _alphaController =
-        AnimationController(duration: fadeDuration, vsync: controller.vsync)
-          ..addListener(controller.markNeedsPaint)
-          ..addStatusListener(_handleAlphaStatusChanged)
-          ..forward();
+    _alphaController = AnimationController(duration: fadeDuration, vsync: controller.vsync)
+      ..addListener(controller.markNeedsPaint)
+      ..addStatusListener(_handleAlphaStatusChanged)
+      ..forward();
     _alpha = _alphaController.drive(IntTween(begin: 0, end: color.alpha));
 
     controller.addInkFeature(this);
@@ -116,7 +115,7 @@ class InkHighlight extends InteractiveInkFeature {
         canvas.drawCircle(rect.center, _radius ?? Material.defaultSplashRadius, paint);
       case BoxShape.rectangle:
         if (_borderRadius != BorderRadius.zero) {
-          final RRect clipRRect = RRect.fromRectAndCorners(
+          final clipRRect = RRect.fromRectAndCorners(
             rect,
             topLeft: _borderRadius.topLeft,
             topRight: _borderRadius.topRight,
@@ -133,7 +132,7 @@ class InkHighlight extends InteractiveInkFeature {
 
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
-    final Paint paint = Paint()..color = color.withAlpha(_alpha.value);
+    final paint = Paint()..color = color.withAlpha(_alpha.value);
     final Offset? originOffset = MatrixUtils.getAsTranslation(transform);
     final Rect rect = _rectCallback != null ? _rectCallback() : Offset.zero & referenceBox.size;
     if (originOffset == null) {

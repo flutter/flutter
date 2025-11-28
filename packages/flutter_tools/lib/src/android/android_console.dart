@@ -58,7 +58,7 @@ class AndroidConsole {
     if (_queue == null) {
       return null;
     }
-    final StringBuffer output = StringBuffer();
+    final output = StringBuffer();
     while (true) {
       if (!await _queue!.hasNext) {
         destroy();

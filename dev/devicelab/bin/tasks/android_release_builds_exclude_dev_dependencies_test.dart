@@ -15,18 +15,11 @@ Future<void> main() async {
   await task(() async {
     try {
       await runProjectTest((FlutterProject flutterProject) async {
-        utils.section(
-          'Configure plugins to be marked as dev dependencies in .flutter-plugins-dependencies file',
-        );
-
-        // Enable plugins being marked as dev dependncies in the .flutter-plugins-dependencies file.
-        await utils.flutter('config', options: <String>['--explicit-package-dependencies']);
-
         // Create dev_dependency plugin to use for test.
         final Directory tempDir = Directory.systemTemp.createTempSync(
           'android_release_builds_exclude_dev_dependencies_test.',
         );
-        const String devDependencyPluginOrg = 'com.example.dev_dependency_plugin';
+        const devDependencyPluginOrg = 'com.example.dev_dependency_plugin';
 
         utils.section('Create plugin dev_dependency_plugin that supports Android');
 
@@ -47,19 +40,17 @@ Future<void> main() async {
         utils.section(
           'Verify the app includes/excludes dev_dependency_plugin as dependency in each build mode as expected',
         );
-        final List<String> buildModesToTest = <String>['debug', 'profile', 'release'];
-        for (final String buildMode in buildModesToTest) {
-          final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
-          final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
-          final RegExp regExpToMatchDevDependencyPlugin = RegExp(
-            r'--- project :dev_dependency_plugin',
-          );
-          final RegExp regExpToMatchDevDependencyPluginWithTransitiveDependencies = RegExp(
+        final buildModesToTest = <String>['debug', 'profile', 'release'];
+        for (final buildMode in buildModesToTest) {
+          final gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
+          final gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
+          final regExpToMatchDevDependencyPlugin = RegExp(r'--- project :dev_dependency_plugin');
+          final regExpToMatchDevDependencyPluginWithTransitiveDependencies = RegExp(
             r'--- project :dev_dependency_plugin\n(\s)*\+--- org.jetbrains.kotlin.*\s\(\*\)\n(\s)*\\---\sio.flutter:flutter_embedding_' +
                 buildMode,
           );
-          const String stringToMatchFlutterEmbedding = '+--- io.flutter:flutter_embedding_release:';
-          final bool isTestingReleaseMode = buildMode == 'release';
+          const stringToMatchFlutterEmbedding = '+--- io.flutter:flutter_embedding_release:';
+          final isTestingReleaseMode = buildMode == 'release';
 
           utils.section('Query the dependencies of the app built with $buildMode');
 
@@ -91,12 +82,11 @@ Future<void> main() async {
 
           // Ensure that release builds have no reference to the dev dependency plugin and make sure
           // that it is included with expected transitive dependencies for debug, profile builds.
-          final bool appIncludesDevDependencyAsExpected =
-              isTestingReleaseMode
-                  ? !appDependencies.contains(regExpToMatchDevDependencyPlugin)
-                  : appDependencies.contains(
-                    regExpToMatchDevDependencyPluginWithTransitiveDependencies,
-                  );
+          final bool appIncludesDevDependencyAsExpected = isTestingReleaseMode
+              ? !appDependencies.contains(regExpToMatchDevDependencyPlugin)
+              : appDependencies.contains(
+                  regExpToMatchDevDependencyPluginWithTransitiveDependencies,
+                );
           if (!appIncludesDevDependencyAsExpected) {
             throw TaskResult.failure(
               'Expected to${isTestingReleaseMode ? ' not' : ''} find dev_dependency_plugin as a dependency of the app built in $buildMode mode but did${isTestingReleaseMode ? '' : ' not'}.',
@@ -107,7 +97,8 @@ Future<void> main() async {
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Task exception stack trace:\n$stackTrace');
       return TaskResult.failure(e.toString());
     }
   });

@@ -12,7 +12,7 @@ import 'base/bot_detector.dart';
 import 'base/common.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
-import 'convert.dart';
+import 'base/utils.dart';
 import 'resident_runner.dart';
 
 /// An implementation of the devtools launcher that uses `dart devtools` to
@@ -33,17 +33,17 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
   late final String _dartExecutable = _artifacts.getArtifactPath(Artifact.engineDartBinary);
   final Logger _logger;
   final BotDetector _botDetector;
-  final Completer<void> _processStartCompleter = Completer<void>();
+  final _processStartCompleter = Completer<void>();
 
   io.Process? _devToolsProcess;
-  bool _devToolsProcessKilled = false;
+  var _devToolsProcessKilled = false;
   @visibleForTesting
   Future<void>? devToolsProcessExit;
 
-  static final RegExp _serveDevToolsPattern = RegExp(
+  static final _serveDevToolsPattern = RegExp(
     r'Serving DevTools at ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+?)\.?$',
   );
-  static final RegExp _serveDtdPattern = RegExp(
+  static final _serveDtdPattern = RegExp(
     r'Serving the Dart Tooling Daemon at (ws:\/\/[a-zA-Z0-9:/=_\-\.\[\]]+?)\.?$',
   );
 
@@ -65,10 +65,8 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
       ]);
       _processStartCompleter.complete();
 
-      final Completer<Uri> devToolsCompleter = Completer<Uri>();
-      _devToolsProcess!.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((
-        String line,
-      ) {
+      final devToolsCompleter = Completer<Uri>();
+      _devToolsProcess!.stdout.transform(utf8LineDecoder).listen((String line) {
         final Match? dtdMatch = _serveDtdPattern.firstMatch(line);
         if (dtdMatch != null) {
           final String uri = dtdMatch[1]!;
@@ -80,10 +78,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
           devToolsCompleter.complete(Uri.parse(url));
         }
       });
-      _devToolsProcess!.stderr
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .listen(_logger.printError);
+      _devToolsProcess!.stderr.transform(utf8LineDecoder).listen(_logger.printError);
 
       final bool runningOnBot = await _botDetector.isRunningOnBot;
       devToolsProcessExit = _devToolsProcess!.exitCode.then((int exitCode) {

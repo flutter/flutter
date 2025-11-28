@@ -11,7 +11,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'material_state.dart';
 import 'navigation_drawer.dart';
 import 'theme.dart';
 
@@ -22,9 +21,8 @@ import 'theme.dart';
 /// widgets.
 ///
 /// Descendant widgets obtain the current [NavigationDrawerThemeData] object
-/// using `NavigationDrawerTheme.of(context)`. Instances of
-/// [NavigationDrawerThemeData] can be customized with
-/// [NavigationDrawerThemeData.copyWith].
+/// using [NavigationDrawerTheme.of]. Instances of [NavigationDrawerThemeData]
+/// can be customized with [NavigationDrawerThemeData.copyWith].
 ///
 /// Typically a [NavigationDrawerThemeData] is specified as part of the
 /// overall [Theme] with [ThemeData.navigationDrawerTheme]. Alternatively, a
@@ -85,14 +83,14 @@ class NavigationDrawerThemeData with Diagnosticable {
   /// [NavigationDestination] labels.
   ///
   /// You can use this to specify a different style when the label is selected.
-  final MaterialStateProperty<TextStyle?>? labelTextStyle;
+  final WidgetStateProperty<TextStyle?>? labelTextStyle;
 
   /// The theme to merge with the default icon theme for
   /// [NavigationDestination] icons.
   ///
   /// You can use this to specify a different icon theme when the icon is
   /// selected.
-  final MaterialStateProperty<IconThemeData?>? iconTheme;
+  final WidgetStateProperty<IconThemeData?>? iconTheme;
 
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
@@ -105,8 +103,8 @@ class NavigationDrawerThemeData with Diagnosticable {
     Color? indicatorColor,
     ShapeBorder? indicatorShape,
     Size? indicatorSize,
-    MaterialStateProperty<TextStyle?>? labelTextStyle,
-    MaterialStateProperty<IconThemeData?>? iconTheme,
+    WidgetStateProperty<TextStyle?>? labelTextStyle,
+    WidgetStateProperty<IconThemeData?>? iconTheme,
   }) {
     return NavigationDrawerThemeData(
       tileHeight: tileHeight ?? this.tileHeight,
@@ -144,13 +142,13 @@ class NavigationDrawerThemeData with Diagnosticable {
       indicatorColor: Color.lerp(a?.indicatorColor, b?.indicatorColor, t),
       indicatorShape: ShapeBorder.lerp(a?.indicatorShape, b?.indicatorShape, t),
       indicatorSize: Size.lerp(a?.indicatorSize, a?.indicatorSize, t),
-      labelTextStyle: MaterialStateProperty.lerp<TextStyle?>(
+      labelTextStyle: WidgetStateProperty.lerp<TextStyle?>(
         a?.labelTextStyle,
         b?.labelTextStyle,
         t,
         TextStyle.lerp,
       ),
-      iconTheme: MaterialStateProperty.lerp<IconThemeData?>(
+      iconTheme: WidgetStateProperty.lerp<IconThemeData?>(
         a?.iconTheme,
         b?.iconTheme,
         t,
@@ -208,14 +206,14 @@ class NavigationDrawerThemeData with Diagnosticable {
     );
     properties.add(DiagnosticsProperty<Size>('indicatorSize', indicatorSize, defaultValue: null));
     properties.add(
-      DiagnosticsProperty<MaterialStateProperty<TextStyle?>>(
+      DiagnosticsProperty<WidgetStateProperty<TextStyle?>>(
         'labelTextStyle',
         labelTextStyle,
         defaultValue: null,
       ),
     );
     properties.add(
-      DiagnosticsProperty<MaterialStateProperty<IconThemeData?>>(
+      DiagnosticsProperty<WidgetStateProperty<IconThemeData?>>(
         'iconTheme',
         iconTheme,
         defaultValue: null,
@@ -243,13 +241,20 @@ class NavigationDrawerTheme extends InheritedTheme {
   /// type values for descendant [NavigationDrawer] widgets.
   final NavigationDrawerThemeData data;
 
-  /// The closest instance of this class that encloses the given context.
+  /// Retrieves the [NavigationDrawerThemeData] from the closest
+  /// ancestor [NavigationDrawerTheme].
   ///
   /// If there is no enclosing [NavigationDrawerTheme] widget, then
   /// [ThemeData.navigationDrawerTheme] is used.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// NavigationDrawerThemeData theme = NavigationDrawerTheme.of(context);
+  /// ```
   static NavigationDrawerThemeData of(BuildContext context) {
-    final NavigationDrawerTheme? navigationDrawerTheme =
-        context.dependOnInheritedWidgetOfExactType<NavigationDrawerTheme>();
+    final NavigationDrawerTheme? navigationDrawerTheme = context
+        .dependOnInheritedWidgetOfExactType<NavigationDrawerTheme>();
     return navigationDrawerTheme?.data ?? Theme.of(context).navigationDrawerTheme;
   }
 

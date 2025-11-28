@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection';
-
 import 'package:flutter/material.dart';
 
 // Common constants between SlowMotionSetting and SettingsListItem.
@@ -81,7 +79,7 @@ class SettingsListItem<T> extends StatefulWidget {
     required this.isExpanded,
   });
 
-  final LinkedHashMap<T, DisplayOption> optionsMap;
+  final Map<T, DisplayOption> optionsMap;
   final String title;
   final T selectedOption;
   final ValueChanged<T> onOptionChanged;
@@ -175,7 +173,9 @@ class _SettingsListItemState<T> extends State<SettingsListItem<T?>>
         ),
         Padding(
           padding: _childrenPadding.value,
-          child: ClipRect(child: Align(heightFactor: _childrenHeightFactor.value, child: child)),
+          child: ClipRect(
+            child: Align(heightFactor: _childrenHeightFactor.value, child: child),
+          ),
         ),
       ],
     );

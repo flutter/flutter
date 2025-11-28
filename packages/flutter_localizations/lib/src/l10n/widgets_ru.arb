@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "Искать в интернете",
   "shareButtonLabel": "Поделиться",
   "pasteButtonLabel": "Вставить",
-  "selectAllButtonLabel": "Выбрать все"
+  "selectAllButtonLabel": "Выбрать все",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found",
+  "radioButtonUnselectedLabel": "Not selected"
 }

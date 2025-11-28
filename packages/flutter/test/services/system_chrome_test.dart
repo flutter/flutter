@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui show AppLifecycleState;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -11,7 +12,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('SystemChrome overlay style test', (WidgetTester tester) async {
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
@@ -80,7 +81,7 @@ void main() {
   });
 
   test('setPreferredOrientations control test', () async {
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
@@ -103,7 +104,7 @@ void main() {
   });
 
   test('setApplicationSwitcherDescription control test', () async {
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
@@ -146,7 +147,7 @@ void main() {
   });
 
   test('setEnabledSystemUIMode control test', () async {
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
@@ -181,7 +182,7 @@ void main() {
   });
 
   test('setEnabledSystemUIMode passes correct overlays for manual configuration', () async {
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
@@ -207,7 +208,7 @@ void main() {
   });
 
   test('setSystemUIChangeCallback control test', () async {
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
@@ -225,25 +226,137 @@ void main() {
     expect(log.single, isMethodCall('SystemChrome.setSystemUIChangeListener', arguments: null));
   });
 
-  test('toString works as intended', () async {
-    const SystemUiOverlayStyle systemUiOverlayStyle = SystemUiOverlayStyle();
+  group('SystemUiOverlayStyle', () {
+    test('toString default values should be null', () async {
+      const systemUiOverlayStyle = SystemUiOverlayStyle();
 
-    expect(
-      systemUiOverlayStyle.toString(),
-      'SystemUiOverlayStyle({'
-      'systemNavigationBarColor: null, '
-      'systemNavigationBarDividerColor: null, '
-      'systemStatusBarContrastEnforced: null, '
-      'statusBarColor: null, '
-      'statusBarBrightness: null, '
-      'statusBarIconBrightness: null, '
-      'systemNavigationBarIconBrightness: null, '
-      'systemNavigationBarContrastEnforced: null})',
-    );
+      final result = systemUiOverlayStyle.toString();
+      expect(result, startsWith('SystemUiOverlayStyle#'));
+      expect(result, contains('systemNavigationBarColor: null'));
+      expect(result, contains('systemNavigationBarDividerColor: null'));
+      expect(result, contains('systemStatusBarContrastEnforced: null'));
+      expect(result, contains('statusBarColor: null'));
+      expect(result, contains('statusBarBrightness: null'));
+      expect(result, contains('statusBarIconBrightness: null'));
+      expect(result, contains('systemNavigationBarIconBrightness: null'));
+      expect(result, contains('systemNavigationBarContrastEnforced: null'));
+    });
+
+    test('toString works as intended with actual values', () {
+      const style = SystemUiOverlayStyle(
+        systemNavigationBarColor: Color(0xFF123456),
+        systemNavigationBarDividerColor: Color(0xFF654321),
+        systemStatusBarContrastEnforced: true,
+        statusBarColor: Color(0xFFABCDEF),
+        statusBarBrightness: Brightness.dark,
+        statusBarIconBrightness: Brightness.light,
+        systemNavigationBarIconBrightness: Brightness.dark,
+        systemNavigationBarContrastEnforced: false,
+      );
+
+      final result = style.toString();
+      expect(result, startsWith('SystemUiOverlayStyle#'));
+      expect(
+        result,
+        contains(
+          'systemNavigationBarColor: Color(alpha: 1.0000, red: 0.0706, green: 0.2039, blue: 0.3373, colorSpace: ColorSpace.sRGB)',
+        ),
+      );
+      expect(
+        result,
+        contains(
+          'systemNavigationBarDividerColor: Color(alpha: 1.0000, red: 0.3961, green: 0.2627, blue: 0.1294, colorSpace: ColorSpace.sRGB)',
+        ),
+      );
+      expect(result, contains('systemStatusBarContrastEnforced: true'));
+      expect(
+        result,
+        contains(
+          'statusBarColor: Color(alpha: 1.0000, red: 0.6706, green: 0.8039, blue: 0.9373, colorSpace: ColorSpace.sRGB)',
+        ),
+      );
+      expect(result, contains('statusBarBrightness: Brightness.dark'));
+      expect(result, contains('statusBarIconBrightness: Brightness.light'));
+      expect(result, contains('systemNavigationBarIconBrightness: Brightness.dark'));
+      expect(result, contains('systemNavigationBarContrastEnforced: false'));
+    });
+
+    test('==, hashCode basics', () {
+      const style1 = SystemUiOverlayStyle(
+        systemNavigationBarColor: Color(0xFF123456),
+        statusBarBrightness: Brightness.dark,
+      );
+      const style2 = SystemUiOverlayStyle(
+        systemNavigationBarColor: Color(0xFF123456),
+        statusBarBrightness: Brightness.dark,
+      );
+      const style3 = SystemUiOverlayStyle(
+        systemNavigationBarColor: Color(0xFF654321),
+        statusBarBrightness: Brightness.dark,
+      );
+
+      expect(style1, equals(style2));
+      expect(style1, isNot(equals(style3)));
+      expect(style1 == style2, isTrue);
+      expect(style1 == style3, isFalse);
+
+      expect(style1.hashCode, equals(style2.hashCode));
+      expect(style1.hashCode, isNot(equals(style3.hashCode)));
+    });
+
+    test('copyWith can override properties', () {
+      const style1 = SystemUiOverlayStyle(
+        systemNavigationBarColor: Color(0xFF123456),
+        statusBarBrightness: Brightness.dark,
+        systemStatusBarContrastEnforced: true,
+      );
+
+      final SystemUiOverlayStyle style2 = style1.copyWith(
+        systemNavigationBarColor: const Color(0xFF654321),
+        statusBarIconBrightness: Brightness.light,
+      );
+
+      expect(style2.systemNavigationBarColor, equals(const Color(0xFF654321)));
+      expect(style2.statusBarBrightness, equals(Brightness.dark));
+      expect(style2.systemStatusBarContrastEnforced, equals(true));
+      expect(style2.statusBarIconBrightness, equals(Brightness.light));
+      expect(style2.systemNavigationBarDividerColor, isNull);
+    });
+
+    test('SystemUiOverlayStyle implements debugFillProperties', () {
+      final builder = DiagnosticPropertiesBuilder();
+
+      const SystemUiOverlayStyle(
+        systemNavigationBarColor: Color(0xFF123456),
+        systemNavigationBarDividerColor: Color(0xFF654321),
+        systemNavigationBarIconBrightness: Brightness.light,
+        systemNavigationBarContrastEnforced: true,
+        statusBarColor: Color(0xFFABCDEF),
+        statusBarBrightness: Brightness.dark,
+        statusBarIconBrightness: Brightness.light,
+        systemStatusBarContrastEnforced: false,
+      ).debugFillProperties(builder);
+
+      final List<String> description = builder.properties
+          .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
+
+      expect(description, <String>[
+        'systemNavigationBarColor: Color(alpha: 1.0000, red: 0.0706, green: 0.2039, blue: 0.3373, colorSpace: ColorSpace.sRGB)',
+        'systemNavigationBarDividerColor: Color(alpha: 1.0000, red: 0.3961, green: 0.2627, blue: 0.1294, colorSpace: ColorSpace.sRGB)',
+        'systemNavigationBarIconBrightness: Brightness.light',
+        'systemNavigationBarContrastEnforced: true',
+        'statusBarColor: Color(alpha: 1.0000, red: 0.6706, green: 0.8039, blue: 0.9373, colorSpace: ColorSpace.sRGB)',
+        'statusBarBrightness: Brightness.dark',
+        'statusBarIconBrightness: Brightness.light',
+        'systemStatusBarContrastEnforced: false',
+      ]);
+    });
   });
 
   testWidgets('SystemChrome handles detached lifecycle state', (WidgetTester tester) async {
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
@@ -253,7 +366,7 @@ void main() {
       },
     );
 
-    const SystemUiOverlayStyle systemUiOverlayStyle = SystemUiOverlayStyle();
+    const systemUiOverlayStyle = SystemUiOverlayStyle();
     SystemChrome.setSystemUIOverlayStyle(systemUiOverlayStyle);
     await tester.idle();
     expect(log.length, equals(1));

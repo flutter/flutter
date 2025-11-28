@@ -24,7 +24,7 @@ dev_dependencies:
 {{/withFfi}}
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -107,6 +107,14 @@ flutter:
       macos:
         pluginClass: {{pluginClass}}
 {{/macos}}
+{{#darwin}}
+      ios:
+        pluginClass: {{pluginClass}}
+        sharedDarwinSource: true
+      macos:
+        pluginClass: {{pluginClass}}
+        sharedDarwinSource: true
+{{/darwin}}
 {{#windows}}
       windows:
         pluginClass: {{pluginClass}}CApi

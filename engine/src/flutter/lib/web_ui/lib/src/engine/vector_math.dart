@@ -28,25 +28,25 @@ class Matrix4 {
     double arg13,
     double arg14,
     double arg15,
-  ) =>
-      Matrix4.zero()..setValues(
-        arg0,
-        arg1,
-        arg2,
-        arg3,
-        arg4,
-        arg5,
-        arg6,
-        arg7,
-        arg8,
-        arg9,
-        arg10,
-        arg11,
-        arg12,
-        arg13,
-        arg14,
-        arg15,
-      );
+  ) => Matrix4.zero()
+    ..setValues(
+      arg0,
+      arg1,
+      arg2,
+      arg3,
+      arg4,
+      arg5,
+      arg6,
+      arg7,
+      arg8,
+      arg9,
+      arg10,
+      arg11,
+      arg12,
+      arg13,
+      arg14,
+      arg15,
+    );
 
   /// Zero matrix.
   Matrix4.zero() : _m4storage = Float32List(16);
@@ -64,7 +64,7 @@ class Matrix4 {
 
   /// Constructs a matrix that is the inverse of [other].
   factory Matrix4.inverted(Matrix4 other) {
-    final Matrix4 r = Matrix4.zero();
+    final r = Matrix4.zero();
     final double determinant = r.copyInverse(other);
     if (determinant == 0.0) {
       throw ArgumentError.value(other, 'other', 'Matrix cannot be inverted');
@@ -73,22 +73,19 @@ class Matrix4 {
   }
 
   /// Rotation of [radians_] around X.
-  factory Matrix4.rotationX(double radians) =>
-      Matrix4.zero()
-        .._m4storage[15] = 1.0
-        ..setRotationX(radians);
+  factory Matrix4.rotationX(double radians) => Matrix4.zero()
+    .._m4storage[15] = 1.0
+    ..setRotationX(radians);
 
   /// Rotation of [radians_] around Y.
-  factory Matrix4.rotationY(double radians) =>
-      Matrix4.zero()
-        .._m4storage[15] = 1.0
-        ..setRotationY(radians);
+  factory Matrix4.rotationY(double radians) => Matrix4.zero()
+    .._m4storage[15] = 1.0
+    ..setRotationY(radians);
 
   /// Rotation of [radians_] around Z.
-  factory Matrix4.rotationZ(double radians) =>
-      Matrix4.zero()
-        .._m4storage[15] = 1.0
-        ..setRotationZ(radians);
+  factory Matrix4.rotationZ(double radians) => Matrix4.zero()
+    .._m4storage[15] = 1.0
+    ..setRotationZ(radians);
 
   /// Translation matrix.
   factory Matrix4.translation(Vector3 translation) =>
@@ -99,12 +96,11 @@ class Matrix4 {
       Matrix4.identity()..setTranslationRaw(x, y, z);
 
   /// Scale matrix.
-  factory Matrix4.diagonal3Values(double x, double y, double z) =>
-      Matrix4.zero()
-        .._m4storage[15] = 1.0
-        .._m4storage[10] = z
-        .._m4storage[5] = y
-        .._m4storage[0] = x;
+  factory Matrix4.diagonal3Values(double x, double y, double z) => Matrix4.zero()
+    .._m4storage[15] = 1.0
+    .._m4storage[10] = z
+    .._m4storage[5] = y
+    .._m4storage[0] = x;
 
   /// Constructs Matrix4 with given [Float32List] as [storage].
   Matrix4.fromFloat32List(this._m4storage);
@@ -122,7 +118,7 @@ class Matrix4 {
   /// Returns a matrix that is the inverse of [other] if [other] is invertible,
   /// otherwise `null`.
   static Matrix4? tryInvert(Matrix4 other) {
-    final Matrix4 r = Matrix4.zero();
+    final r = Matrix4.zero();
     final double determinant = r.copyInverse(other);
     if (determinant == 0.0) {
       return null;
@@ -247,7 +243,7 @@ class Matrix4 {
 
   /// Translate this matrix by x, y, and z.
   void translate(double x, [double y = 0.0, double z = 0.0]) {
-    const double tw = 1.0;
+    const tw = 1.0;
     final double t1 =
         _m4storage[0] * x + _m4storage[4] * y + _m4storage[8] * z + _m4storage[12] * tw;
     final double t2 =
@@ -264,10 +260,10 @@ class Matrix4 {
 
   /// Scale this matrix by a [Vector3], [Vector4], or x,y,z
   void scale(double x, [double? y, double? z]) {
-    final double sx = x;
+    final sx = x;
     final double sy = y ?? x;
     final double sz = z ?? x;
-    const double sw = 1.0;
+    const sw = 1.0;
     _m4storage[15] *= sw;
     _m4storage[0] *= sx;
     _m4storage[1] *= sx;
@@ -978,7 +974,7 @@ class Matrix4 {
 
   /// Copies [this] into [array] starting at [offset].
   void copyIntoArray(List<num> array, [int offset = 0]) {
-    final int i = offset;
+    final i = offset;
     array[i + 15] = _m4storage[15];
     array[i + 14] = _m4storage[14];
     array[i + 13] = _m4storage[13];
@@ -999,7 +995,7 @@ class Matrix4 {
 
   /// Copies elements from [array] into [this] starting at [offset].
   void copyFromArray(List<double> array, [int offset = 0]) {
-    final int i = offset;
+    final i = offset;
     _m4storage[15] = array[i + 15];
     _m4storage[14] = array[i + 14];
     _m4storage[13] = array[i + 13];
@@ -1032,7 +1028,7 @@ class Matrix4 {
 
   @override
   String toString() {
-    String result = super.toString();
+    var result = super.toString();
     assert(() {
       String fmt(int index) {
         return storage[index].toStringAsFixed(2);
@@ -1079,7 +1075,7 @@ extension Vector3Extension on Vector3 {
 /// * https://bugs.chromium.org/p/v8/issues/detail?id=9199
 /// * https://bugs.chromium.org/p/v8/issues/detail?id=2022
 Float32List toMatrix32(Float64List matrix64) {
-  final Float32List matrix32 = Float32List(16);
+  final matrix32 = Float32List(16);
   matrix32[15] = matrix64[15];
   matrix32[14] = matrix64[14];
   matrix32[13] = matrix64[13];
@@ -1112,7 +1108,7 @@ Float32List toMatrix32(Float64List matrix64) {
 /// * https://bugs.chromium.org/p/v8/issues/detail?id=9199
 /// * https://bugs.chromium.org/p/v8/issues/detail?id=2022
 Float64List toMatrix64(Float32List matrix32) {
-  final Float64List matrix64 = Float64List(16);
+  final matrix64 = Float64List(16);
   matrix64[15] = matrix32[15];
   matrix64[14] = matrix32[14];
   matrix64[13] = matrix32[13];

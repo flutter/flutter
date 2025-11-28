@@ -30,7 +30,23 @@ class Allocator {
   std::shared_ptr<DeviceBuffer> CreateBuffer(
       const DeviceBufferDescriptor& desc);
 
-  std::shared_ptr<Texture> CreateTexture(const TextureDescriptor& desc);
+  //------------------------------------------------------------------------------
+  /// @brief      Creates a new texture.
+  ///
+  /// @param[in]  desc        The descriptor of the texture to create.
+  /// @param[in]  threadsafe  Whether mutations to this texture should be
+  ///                         protected with a threadsafe barrier.
+  ///
+  ///                         This parameter only affects the OpenGLES rendering
+  ///                         backend.
+  ///
+  ///                         If any interaction with this texture (including
+  ///                         creation) will be done on a thread other than
+  ///                         where the OpenGLES context resides, then
+  ///                         `threadsafe`, must be set to `true`.
+  ///
+  std::shared_ptr<Texture> CreateTexture(const TextureDescriptor& desc,
+                                         bool threadsafe = false);
 
   //------------------------------------------------------------------------------
   /// @brief      Minimum value for `row_bytes` on a Texture. The row
@@ -62,7 +78,8 @@ class Allocator {
       const DeviceBufferDescriptor& desc) = 0;
 
   virtual std::shared_ptr<Texture> OnCreateTexture(
-      const TextureDescriptor& desc) = 0;
+      const TextureDescriptor& desc,
+      bool threadsafe = false) = 0;
 
  private:
   Allocator(const Allocator&) = delete;

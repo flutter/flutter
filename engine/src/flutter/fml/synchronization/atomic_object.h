@@ -14,7 +14,7 @@ template <typename T>
 class AtomicObject {
  public:
   AtomicObject() = default;
-  explicit AtomicObject(T object) : object_(object) {}
+  explicit AtomicObject(T object) : object_(std::move(object)) {}
 
   T Load() const {
     std::scoped_lock lock(mutex_);

@@ -15,7 +15,10 @@ class FocusExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(appBar: AppBar(title: const Text('Focus Sample')), body: const FocusExample()),
+      home: Scaffold(
+        appBar: AppBar(title: const Text('Focus Sample')),
+        body: const FocusExample(),
+      ),
     );
   }
 }
@@ -32,7 +35,9 @@ class _FocusExampleState extends State<FocusExample> {
 
   KeyEventResult _handleKeyPress(FocusNode node, KeyEvent event) {
     if (event is KeyDownEvent) {
-      debugPrint('Focus node ${node.debugLabel} got key event: ${event.logicalKey}');
+      debugPrint(
+        'Focus node ${node.debugLabel} got key event: ${event.logicalKey}',
+      );
       switch (event.logicalKey) {
         case LogicalKeyboardKey.keyR:
           debugPrint('Changing color to red.');
@@ -86,7 +91,11 @@ class _FocusExampleState extends State<FocusExample> {
                     height: 100,
                     alignment: Alignment.center,
                     color: hasFocus ? _color : Colors.white,
-                    child: Text(hasFocus ? "I'm in color! Press R,G,B!" : 'Press to focus'),
+                    child: Text(
+                      hasFocus
+                          ? "I'm in color! Press R,G,B!"
+                          : 'Press to focus',
+                    ),
                   ),
                 ),
               );

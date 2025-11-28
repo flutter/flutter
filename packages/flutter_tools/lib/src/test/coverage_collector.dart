@@ -41,8 +41,8 @@ class CoverageCollector extends TestWatcher {
   Set<String>? libraryNames;
 
   final coverage.Resolver? resolver;
-  final Map<String, List<List<int>>?> _ignoredLinesInFilesCache = <String, List<List<int>>?>{};
-  final Map<String, Set<int>> _coverableLineCache = <String, Set<int>>{};
+  final _ignoredLinesInFilesCache = <String, List<List<int>>?>{};
+  final _coverableLineCache = <String, Set<int>>{};
 
   final TestTimeRecorder? testTimeRecorder;
 
@@ -212,16 +212,15 @@ class CoverageCollector extends TestWatcher {
           resolver ?? this.resolver ?? await CoverageCollector.getResolver(packagesPath);
       final String packagePath = globals.fs.currentDirectory.path;
       // find paths for libraryNames so we can include them to report
-      final List<String>? libraryPaths =
-          libraryNames
-              ?.map((String e) => usedResolver.resolve('package:$e'))
-              .whereType<String>()
-              .toList();
-      final List<String>? reportOn =
-          coverageDirectory == null ? libraryPaths : <String>[coverageDirectory.path];
-      formatter =
-          (Map<String, coverage.HitMap> hitmap) =>
-              hitmap.formatLcov(usedResolver, reportOn: reportOn, basePath: packagePath);
+      final List<String>? libraryPaths = libraryNames
+          ?.map((String e) => usedResolver.resolve('package:$e'))
+          .whereType<String>()
+          .toList();
+      final List<String>? reportOn = coverageDirectory == null
+          ? libraryPaths
+          : <String>[coverageDirectory.path];
+      formatter = (Map<String, coverage.HitMap> hitmap) =>
+          hitmap.formatLcov(usedResolver, reportOn: reportOn, basePath: packagePath);
     }
     final String result = formatter(_globalHitmap!);
     _globalHitmap = null;
@@ -239,13 +238,12 @@ class CoverageCollector extends TestWatcher {
       return false;
     }
 
-    final File coverageFile =
-        globals.fs.file(coveragePath)
-          ..createSync(recursive: true)
-          ..writeAsStringSync(coverageData, flush: true);
+    final File coverageFile = globals.fs.file(coveragePath)
+      ..createSync(recursive: true)
+      ..writeAsStringSync(coverageData, flush: true);
     _logMessage('wrote coverage data to $coveragePath (size=${coverageData.length})');
 
-    const String baseCoverageData = 'coverage/lcov.base.info';
+    const baseCoverageData = 'coverage/lcov.base.info';
     if (mergeCoverageData) {
       if (!globals.fs.isFileSync(baseCoverageData)) {
         _logMessage('Missing "$baseCoverageData". Unable to merge coverage data.', error: true);
@@ -253,7 +251,7 @@ class CoverageCollector extends TestWatcher {
       }
 
       if (globals.os.which('lcov') == null) {
-        String installMessage = 'Please install lcov.';
+        var installMessage = 'Please install lcov.';
         if (globals.platform.isLinux) {
           installMessage = 'Consider running "sudo apt-get install lcov".';
         } else if (globals.platform.isMacOS) {

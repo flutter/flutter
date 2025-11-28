@@ -3,17 +3,17 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  const Offset forcePressOffset = Offset(400.0, 50.0);
+  const forcePressOffset = Offset(400.0, 50.0);
 
   testWidgets('Uncontested scrolls start immediately', (WidgetTester tester) async {
-    bool didStartDrag = false;
+    var didStartDrag = false;
     double? updatedDragDelta;
-    bool didEndDrag = false;
+    var didEndDrag = false;
 
     final Widget widget = GestureDetector(
       onVerticalDragStart: (DragStartDetails details) {
@@ -33,14 +33,14 @@ void main() {
     expect(updatedDragDelta, isNull);
     expect(didEndDrag, isFalse);
 
-    const Offset firstLocation = Offset(10.0, 10.0);
+    const firstLocation = Offset(10.0, 10.0);
     final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
     expect(didStartDrag, isTrue);
     didStartDrag = false;
     expect(updatedDragDelta, isNull);
     expect(didEndDrag, isFalse);
 
-    const Offset secondLocation = Offset(10.0, 9.0);
+    const secondLocation = Offset(10.0, 9.0);
     await gesture.moveTo(secondLocation);
     expect(didStartDrag, isFalse);
     expect(updatedDragDelta, -1.0);
@@ -57,11 +57,11 @@ void main() {
   });
 
   testWidgets('Match two scroll gestures in succession', (WidgetTester tester) async {
-    int gestureCount = 0;
-    double dragDistance = 0.0;
+    var gestureCount = 0;
+    var dragDistance = 0.0;
 
-    const Offset downLocation = Offset(10.0, 10.0);
-    const Offset upLocation = Offset(10.0, 50.0); // must be far enough to be more than kTouchSlop
+    const downLocation = Offset(10.0, 10.0);
+    const upLocation = Offset(10.0, 50.0); // must be far enough to be more than kTouchSlop
 
     final Widget widget = GestureDetector(
       dragStartBehavior: DragStartBehavior.down,
@@ -96,9 +96,9 @@ void main() {
   });
 
   testWidgets("Pan doesn't crash", (WidgetTester tester) async {
-    bool didStartPan = false;
+    var didStartPan = false;
     Offset? panDelta;
-    bool didEndPan = false;
+    var didEndPan = false;
 
     await tester.pumpWidget(
       GestureDetector(
@@ -128,8 +128,8 @@ void main() {
   });
 
   testWidgets('DragEndDetails returns the last known position', (WidgetTester tester) async {
-    Offset updateOffset = const Offset(10.0, 10.0);
-    const EdgeInsets paddingOffset = EdgeInsets.all(10.0);
+    var updateOffset = const Offset(10.0, 10.0);
+    const paddingOffset = EdgeInsets.all(10.0);
     Offset? endOffset;
     Offset? globalEndOffset;
 
@@ -162,7 +162,7 @@ void main() {
   });
 
   group('Tap', () {
-    final ButtonVariant buttonVariant = ButtonVariant(
+    final buttonVariant = ButtonVariant(
       values: <int>[kPrimaryButton, kSecondaryButton, kTertiaryButton],
       descriptions: <int, String>{
         kPrimaryButton: 'primary',
@@ -191,24 +191,21 @@ void main() {
                   width: 100.0,
                   height: 100.0,
                   child: GestureDetector(
-                    onTap:
-                        ButtonVariant.button == kPrimaryButton
-                            ? () {
-                              didTap = true;
-                            }
-                            : null,
-                    onSecondaryTap:
-                        ButtonVariant.button == kSecondaryButton
-                            ? () {
-                              didTap = true;
-                            }
-                            : null,
-                    onTertiaryTapDown:
-                        ButtonVariant.button == kTertiaryButton
-                            ? (_) {
-                              didTap = true;
-                            }
-                            : null,
+                    onTap: ButtonVariant.button == kPrimaryButton
+                        ? () {
+                            didTap = true;
+                          }
+                        : null,
+                    onSecondaryTap: ButtonVariant.button == kSecondaryButton
+                        ? () {
+                            didTap = true;
+                          }
+                        : null,
+                    onTertiaryTapDown: ButtonVariant.button == kTertiaryButton
+                        ? (_) {
+                            didTap = true;
+                          }
+                        : null,
                     behavior: behavior,
                   ),
                 ),
@@ -248,28 +245,25 @@ void main() {
     }, variant: buttonVariant);
 
     testWidgets('Empty', (WidgetTester tester) async {
-      bool didTap = false;
+      var didTap = false;
       await tester.pumpWidget(
         Center(
           child: GestureDetector(
-            onTap:
-                ButtonVariant.button == kPrimaryButton
-                    ? () {
-                      didTap = true;
-                    }
-                    : null,
-            onSecondaryTap:
-                ButtonVariant.button == kSecondaryButton
-                    ? () {
-                      didTap = true;
-                    }
-                    : null,
-            onTertiaryTapUp:
-                ButtonVariant.button == kTertiaryButton
-                    ? (_) {
-                      didTap = true;
-                    }
-                    : null,
+            onTap: ButtonVariant.button == kPrimaryButton
+                ? () {
+                    didTap = true;
+                  }
+                : null,
+            onSecondaryTap: ButtonVariant.button == kSecondaryButton
+                ? () {
+                    didTap = true;
+                  }
+                : null,
+            onTertiaryTapUp: ButtonVariant.button == kTertiaryButton
+                ? (_) {
+                    didTap = true;
+                  }
+                : null,
           ),
         ),
       );
@@ -279,28 +273,25 @@ void main() {
     }, variant: buttonVariant);
 
     testWidgets('Only container', (WidgetTester tester) async {
-      bool didTap = false;
+      var didTap = false;
       await tester.pumpWidget(
         Center(
           child: GestureDetector(
-            onTap:
-                ButtonVariant.button == kPrimaryButton
-                    ? () {
-                      didTap = true;
-                    }
-                    : null,
-            onSecondaryTap:
-                ButtonVariant.button == kSecondaryButton
-                    ? () {
-                      didTap = true;
-                    }
-                    : null,
-            onTertiaryTapUp:
-                ButtonVariant.button == kTertiaryButton
-                    ? (_) {
-                      didTap = true;
-                    }
-                    : null,
+            onTap: ButtonVariant.button == kPrimaryButton
+                ? () {
+                    didTap = true;
+                  }
+                : null,
+            onSecondaryTap: ButtonVariant.button == kSecondaryButton
+                ? () {
+                    didTap = true;
+                  }
+                : null,
+            onTertiaryTapUp: ButtonVariant.button == kTertiaryButton
+                ? (_) {
+                    didTap = true;
+                  }
+                : null,
             child: Container(),
           ),
         ),
@@ -318,8 +309,9 @@ void main() {
           child: GestureDetector(
             onTap: ButtonVariant.button == kPrimaryButton ? inputCallback : null,
             onSecondaryTap: ButtonVariant.button == kSecondaryButton ? inputCallback : null,
-            onTertiaryTapUp:
-                ButtonVariant.button == kTertiaryButton ? (_) => inputCallback() : null,
+            onTertiaryTapUp: ButtonVariant.button == kTertiaryButton
+                ? (_) => inputCallback()
+                : null,
             child: Container(),
           ),
         ),
@@ -334,8 +326,9 @@ void main() {
           child: GestureDetector(
             onTap: ButtonVariant.button == kPrimaryButton ? inputCallback : null,
             onSecondaryTap: ButtonVariant.button == kSecondaryButton ? inputCallback : null,
-            onTertiaryTapUp:
-                ButtonVariant.button == kTertiaryButton ? (_) => inputCallback() : null,
+            onTertiaryTapUp: ButtonVariant.button == kTertiaryButton
+                ? (_) => inputCallback()
+                : null,
             child: Container(),
           ),
         ),
@@ -349,10 +342,10 @@ void main() {
     }, variant: buttonVariant);
 
     testWidgets('Tap down occurs after kPressTimeout', (WidgetTester tester) async {
-      int tapDown = 0;
-      int tap = 0;
-      int tapCancel = 0;
-      int longPress = 0;
+      var tapDown = 0;
+      var tap = 0;
+      var tapCancel = 0;
+      var longPress = 0;
 
       await tester.pumpWidget(
         Container(
@@ -379,82 +372,70 @@ void main() {
                       () => LongPressGestureRecognizer(),
                       (LongPressGestureRecognizer instance) {
                         instance
-                          ..onLongPress =
-                              ButtonVariant.button == kPrimaryButton
-                                  ? () {
-                                    longPress += 1;
-                                  }
-                                  : null
-                          ..onSecondaryLongPress =
-                              ButtonVariant.button == kSecondaryButton
-                                  ? () {
-                                    longPress += 1;
-                                  }
-                                  : null
-                          ..onTertiaryLongPress =
-                              ButtonVariant.button == kTertiaryButton
-                                  ? () {
-                                    longPress += 1;
-                                  }
-                                  : null;
+                          ..onLongPress = ButtonVariant.button == kPrimaryButton
+                              ? () {
+                                  longPress += 1;
+                                }
+                              : null
+                          ..onSecondaryLongPress = ButtonVariant.button == kSecondaryButton
+                              ? () {
+                                  longPress += 1;
+                                }
+                              : null
+                          ..onTertiaryLongPress = ButtonVariant.button == kTertiaryButton
+                              ? () {
+                                  longPress += 1;
+                                }
+                              : null;
                       },
                     ),
               },
               child: GestureDetector(
-                onTapDown:
-                    ButtonVariant.button == kPrimaryButton
-                        ? (TapDownDetails details) {
-                          tapDown += 1;
-                        }
-                        : null,
-                onSecondaryTapDown:
-                    ButtonVariant.button == kSecondaryButton
-                        ? (TapDownDetails details) {
-                          tapDown += 1;
-                        }
-                        : null,
-                onTertiaryTapDown:
-                    ButtonVariant.button == kTertiaryButton
-                        ? (TapDownDetails details) {
-                          tapDown += 1;
-                        }
-                        : null,
-                onTap:
-                    ButtonVariant.button == kPrimaryButton
-                        ? () {
-                          tap += 1;
-                        }
-                        : null,
-                onSecondaryTap:
-                    ButtonVariant.button == kSecondaryButton
-                        ? () {
-                          tap += 1;
-                        }
-                        : null,
-                onTertiaryTapUp:
-                    ButtonVariant.button == kTertiaryButton
-                        ? (TapUpDetails details) {
-                          tap += 1;
-                        }
-                        : null,
-                onTapCancel:
-                    ButtonVariant.button == kPrimaryButton
-                        ? () {
-                          tapCancel += 1;
-                        }
-                        : null,
-                onSecondaryTapCancel:
-                    ButtonVariant.button == kSecondaryButton
-                        ? () {
-                          tapCancel += 1;
-                        }
-                        : null,
-                onTertiaryTapCancel:
-                    ButtonVariant.button == kTertiaryButton
-                        ? () {
-                          tapCancel += 1;
-                        }
-                        : null,
+                onTapDown: ButtonVariant.button == kPrimaryButton
+                    ? (TapDownDetails details) {
+                        tapDown += 1;
+                      }
+                    : null,
+                onSecondaryTapDown: ButtonVariant.button == kSecondaryButton
+                    ? (TapDownDetails details) {
+                        tapDown += 1;
+                      }
+                    : null,
+                onTertiaryTapDown: ButtonVariant.button == kTertiaryButton
+                    ? (TapDownDetails details) {
+                        tapDown += 1;
+                      }
+                    : null,
+                onTap: ButtonVariant.button == kPrimaryButton
+                    ? () {
+                        tap += 1;
+                      }
+                    : null,
+                onSecondaryTap: ButtonVariant.button == kSecondaryButton
+                    ? () {
+                        tap += 1;
+                      }
+                    : null,
+                onTertiaryTapUp: ButtonVariant.button == kTertiaryButton
+                    ? (TapUpDetails details) {
+                        tap += 1;
+                      }
+                    : null,
+                onTapCancel: ButtonVariant.button == kPrimaryButton
+                    ? () {
+                        tapCancel += 1;
+                      }
+                    : null,
+                onSecondaryTapCancel: ButtonVariant.button == kSecondaryButton
+                    ? () {
+                        tapCancel += 1;
+                      }
+                    : null,
+                onTertiaryTapCancel: ButtonVariant.button == kTertiaryButton
+                    ? () {
+                        tapCancel += 1;
+                      }
+                    : null,
               ),
             ),
           ),
@@ -496,7 +477,7 @@ void main() {
     }, variant: buttonVariant);
 
     testWidgets('Long Press Up Callback called after long press', (WidgetTester tester) async {
-      int longPressUp = 0;
+      var longPressUp = 0;
 
       await tester.pumpWidget(
         Container(
@@ -518,24 +499,21 @@ void main() {
                       () => LongPressGestureRecognizer(),
                       (LongPressGestureRecognizer instance) {
                         instance
-                          ..onLongPressUp =
-                              ButtonVariant.button == kPrimaryButton
-                                  ? () {
-                                    longPressUp += 1;
-                                  }
-                                  : null
-                          ..onSecondaryLongPressUp =
-                              ButtonVariant.button == kSecondaryButton
-                                  ? () {
-                                    longPressUp += 1;
-                                  }
-                                  : null
-                          ..onTertiaryLongPressUp =
-                              ButtonVariant.button == kTertiaryButton
-                                  ? () {
-                                    longPressUp += 1;
-                                  }
-                                  : null;
+                          ..onLongPressUp = ButtonVariant.button == kPrimaryButton
+                              ? () {
+                                  longPressUp += 1;
+                                }
+                              : null
+                          ..onSecondaryLongPressUp = ButtonVariant.button == kSecondaryButton
+                              ? () {
+                                  longPressUp += 1;
+                                }
+                              : null
+                          ..onTertiaryLongPressUp = ButtonVariant.button == kTertiaryButton
+                              ? () {
+                                  longPressUp += 1;
+                                }
+                              : null;
                       },
                     ),
               },
@@ -563,7 +541,7 @@ void main() {
   testWidgets(
     'Primary and secondary long press callbacks should work together in GestureDetector',
     (WidgetTester tester) async {
-      bool primaryLongPress = false, secondaryLongPress = false;
+      var primaryLongPress = false, secondaryLongPress = false;
 
       await tester.pumpWidget(
         Container(
@@ -603,10 +581,10 @@ void main() {
   );
 
   testWidgets('Force Press Callback called after force press', (WidgetTester tester) async {
-    int forcePressStart = 0;
-    int forcePressPeaked = 0;
-    int forcePressUpdate = 0;
-    int forcePressEnded = 0;
+    var forcePressStart = 0;
+    var forcePressPeaked = 0;
+    var forcePressUpdate = 0;
+    var forcePressEnded = 0;
 
     await tester.pumpWidget(
       Container(
@@ -694,8 +672,8 @@ void main() {
   testWidgets('Force Press Callback not called if long press triggered before force press', (
     WidgetTester tester,
   ) async {
-    int forcePressStart = 0;
-    int longPressTimes = 0;
+    var forcePressStart = 0;
+    var longPressTimes = 0;
 
     await tester.pumpWidget(
       Container(
@@ -713,7 +691,7 @@ void main() {
     );
 
     final int pointerValue = tester.nextPointer;
-    const double maxPressure = 6.0;
+    const maxPressure = 6.0;
 
     final TestGesture gesture = await tester.createGesture();
 
@@ -765,8 +743,8 @@ void main() {
   testWidgets('Force Press Callback not called if drag triggered before force press', (
     WidgetTester tester,
   ) async {
-    int forcePressStart = 0;
-    int horizontalDragStart = 0;
+    var forcePressStart = 0;
+    var horizontalDragStart = 0;
 
     await tester.pumpWidget(
       Container(
@@ -820,24 +798,318 @@ void main() {
     expect(forcePressStart, 0);
   });
 
+  group('default semantics', () {
+    testWidgets('tap', (WidgetTester tester) async {
+      TapDownDetails? receivedTapDownDetails;
+      TapUpDetails? receivedTapUpDetails;
+      var tapped = false;
+      final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+      final key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: RawGestureDetector(
+                key: key,
+                gestures: <Type, GestureRecognizerFactory>{
+                  TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+                    () => TapGestureRecognizer(postAcceptSlopTolerance: null),
+                    (TapGestureRecognizer instance) {
+                      instance.onTapDown = (TapDownDetails details) {
+                        receivedTapDownDetails = details;
+                      };
+                      instance.onTapUp = (TapUpDetails details) {
+                        receivedTapUpDetails = details;
+                      };
+                      instance.onTap = () {
+                        tapped = true;
+                      };
+                    },
+                  ),
+                },
+                child: const SizedBox(width: 20, height: 20),
+              ),
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode node = tester.semantics.find(find.byKey(key));
+      expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+
+      semanticsOwner.performAction(node.id, SemanticsAction.tap);
+      await tester.pump();
+      expect(receivedTapDownDetails!.localPosition, const Offset(10, 10));
+      expect(receivedTapDownDetails!.globalPosition, const Offset(400, 300));
+      expect(receivedTapUpDetails!.localPosition, const Offset(10, 10));
+      expect(receivedTapUpDetails!.globalPosition, const Offset(400, 300));
+      expect(tapped, isTrue);
+    });
+
+    testWidgets('long press', (WidgetTester tester) async {
+      LongPressDownDetails? receivedLongPressDownDetails;
+      LongPressStartDetails? receivedLongPressStartDetails;
+      LongPressEndDetails? receivedLongPressEndDetails;
+      var pressed = false;
+      var upped = false;
+      final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+      final key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: RawGestureDetector(
+                key: key,
+                gestures: <Type, GestureRecognizerFactory>{
+                  LongPressGestureRecognizer:
+                      GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
+                        () => LongPressGestureRecognizer(),
+                        (LongPressGestureRecognizer instance) {
+                          instance.onLongPressDown = (LongPressDownDetails details) {
+                            receivedLongPressDownDetails = details;
+                          };
+                          instance.onLongPressStart = (LongPressStartDetails details) {
+                            receivedLongPressStartDetails = details;
+                          };
+                          instance.onLongPressEnd = (LongPressEndDetails details) {
+                            receivedLongPressEndDetails = details;
+                          };
+                          instance.onLongPressUp = () {
+                            upped = true;
+                          };
+                          instance.onLongPress = () {
+                            pressed = true;
+                          };
+                        },
+                      ),
+                },
+                child: const SizedBox(width: 20, height: 20),
+              ),
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode node = tester.semantics.find(find.byKey(key));
+      expect(node.getSemanticsData().hasAction(SemanticsAction.longPress), isTrue);
+
+      semanticsOwner.performAction(node.id, SemanticsAction.longPress);
+      await tester.pump();
+      expect(receivedLongPressDownDetails!.localPosition, const Offset(10, 10));
+      expect(receivedLongPressDownDetails!.globalPosition, const Offset(400, 300));
+      expect(receivedLongPressStartDetails!.localPosition, const Offset(10, 10));
+      expect(receivedLongPressStartDetails!.globalPosition, const Offset(400, 300));
+      expect(receivedLongPressEndDetails!.localPosition, const Offset(10, 10));
+      expect(receivedLongPressEndDetails!.globalPosition, const Offset(400, 300));
+      expect(pressed, isTrue);
+      expect(upped, isTrue);
+    });
+
+    testWidgets('horizontal drag', (WidgetTester tester) async {
+      DragDownDetails? receivedDragDownDetails;
+      DragStartDetails? receivedDragStartDetails;
+      DragUpdateDetails? receivedDragUpdateDetails;
+      DragEndDetails? receivedDragEndDetails;
+      final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+      final key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: RawGestureDetector(
+                key: key,
+                gestures: <Type, GestureRecognizerFactory>{
+                  HorizontalDragGestureRecognizer:
+                      GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
+                        () => HorizontalDragGestureRecognizer(),
+                        (HorizontalDragGestureRecognizer instance) {
+                          instance.onDown = (DragDownDetails details) {
+                            receivedDragDownDetails = details;
+                          };
+                          instance.onStart = (DragStartDetails details) {
+                            receivedDragStartDetails = details;
+                          };
+                          instance.onUpdate = (DragUpdateDetails details) {
+                            receivedDragUpdateDetails = details;
+                          };
+                          instance.onEnd = (DragEndDetails details) {
+                            receivedDragEndDetails = details;
+                          };
+                        },
+                      ),
+                },
+                child: const SizedBox(width: 20, height: 20),
+              ),
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode node = tester.semantics.find(find.byKey(key));
+      expect(node.getSemanticsData().hasAction(SemanticsAction.scrollRight), isTrue);
+
+      semanticsOwner.performAction(node.id, SemanticsAction.scrollRight);
+      await tester.pump();
+      expect(receivedDragDownDetails!.localPosition, const Offset(10, 10));
+      expect(receivedDragDownDetails!.globalPosition, const Offset(400, 300));
+      expect(receivedDragStartDetails!.localPosition, const Offset(10, 10));
+      expect(receivedDragStartDetails!.globalPosition, const Offset(400, 300));
+      final Offset delta = receivedDragUpdateDetails!.delta;
+      final Offset local = const Offset(10, 10) + delta;
+      final RenderObject object = tester.renderObject(find.byKey(key));
+      final Matrix4 transform = object.getTransformTo(null);
+      final Offset global = MatrixUtils.transformPoint(transform, local);
+      expect(receivedDragEndDetails!.localPosition, local);
+      expect(receivedDragEndDetails!.globalPosition, global);
+    });
+
+    testWidgets('vertical drag', (WidgetTester tester) async {
+      DragDownDetails? receivedDragDownDetails;
+      DragStartDetails? receivedDragStartDetails;
+      DragUpdateDetails? receivedDragUpdateDetails;
+      DragEndDetails? receivedDragEndDetails;
+      final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+      final key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: RawGestureDetector(
+                key: key,
+                gestures: <Type, GestureRecognizerFactory>{
+                  VerticalDragGestureRecognizer:
+                      GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
+                        () => VerticalDragGestureRecognizer(),
+                        (VerticalDragGestureRecognizer instance) {
+                          instance.onDown = (DragDownDetails details) {
+                            receivedDragDownDetails = details;
+                          };
+                          instance.onStart = (DragStartDetails details) {
+                            receivedDragStartDetails = details;
+                          };
+                          instance.onUpdate = (DragUpdateDetails details) {
+                            receivedDragUpdateDetails = details;
+                          };
+                          instance.onEnd = (DragEndDetails details) {
+                            receivedDragEndDetails = details;
+                          };
+                        },
+                      ),
+                },
+                child: const SizedBox(width: 20, height: 20),
+              ),
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode node = tester.semantics.find(find.byKey(key));
+      expect(node.getSemanticsData().hasAction(SemanticsAction.scrollUp), isTrue);
+
+      semanticsOwner.performAction(node.id, SemanticsAction.scrollUp);
+      await tester.pump();
+      expect(receivedDragDownDetails!.localPosition, const Offset(10, 10));
+      expect(receivedDragDownDetails!.globalPosition, const Offset(400, 300));
+      expect(receivedDragStartDetails!.localPosition, const Offset(10, 10));
+      expect(receivedDragStartDetails!.globalPosition, const Offset(400, 300));
+      final Offset delta = receivedDragUpdateDetails!.delta;
+      final Offset local = const Offset(10, 10) + delta;
+      final RenderObject object = tester.renderObject(find.byKey(key));
+      final Matrix4 transform = object.getTransformTo(null);
+      final Offset global = MatrixUtils.transformPoint(transform, local);
+      expect(receivedDragEndDetails!.localPosition, local);
+      expect(receivedDragEndDetails!.globalPosition, global);
+    });
+
+    testWidgets('pan', (WidgetTester tester) async {
+      DragDownDetails? receivedDragDownDetails;
+      DragStartDetails? receivedDragStartDetails;
+      DragUpdateDetails? receivedDragUpdateDetails;
+      DragEndDetails? receivedDragEndDetails;
+      final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+      final key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: RawGestureDetector(
+                key: key,
+                gestures: <Type, GestureRecognizerFactory>{
+                  PanGestureRecognizer: GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
+                    () => PanGestureRecognizer(),
+                    (PanGestureRecognizer instance) {
+                      instance.onDown = (DragDownDetails details) {
+                        receivedDragDownDetails = details;
+                      };
+                      instance.onStart = (DragStartDetails details) {
+                        receivedDragStartDetails = details;
+                      };
+                      instance.onUpdate = (DragUpdateDetails details) {
+                        receivedDragUpdateDetails = details;
+                      };
+                      instance.onEnd = (DragEndDetails details) {
+                        receivedDragEndDetails = details;
+                      };
+                    },
+                  ),
+                },
+                child: const SizedBox(width: 20, height: 20),
+              ),
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode node = tester.semantics.find(find.byKey(key));
+      expect(node.getSemanticsData().hasAction(SemanticsAction.scrollRight), isTrue);
+
+      semanticsOwner.performAction(node.id, SemanticsAction.scrollRight);
+      await tester.pump();
+      expect(receivedDragDownDetails!.localPosition, const Offset(10, 10));
+      expect(receivedDragDownDetails!.globalPosition, const Offset(400, 300));
+      expect(receivedDragStartDetails!.localPosition, const Offset(10, 10));
+      expect(receivedDragStartDetails!.globalPosition, const Offset(400, 300));
+      Offset delta = receivedDragUpdateDetails!.delta;
+
+      expect(receivedDragEndDetails!.localPosition, const Offset(10, 10) + delta);
+      expect(receivedDragEndDetails!.globalPosition, const Offset(400, 300) + delta);
+
+      // scroll vertically
+      receivedDragDownDetails = null;
+      receivedDragStartDetails = null;
+      receivedDragUpdateDetails = null;
+      receivedDragEndDetails = null;
+
+      expect(node.getSemanticsData().hasAction(SemanticsAction.scrollUp), isTrue);
+
+      semanticsOwner.performAction(node.id, SemanticsAction.scrollUp);
+      await tester.pump();
+      expect(receivedDragDownDetails!.localPosition, const Offset(10, 10));
+      expect(receivedDragDownDetails!.globalPosition, const Offset(400, 300));
+      expect(receivedDragStartDetails!.localPosition, const Offset(10, 10));
+      expect(receivedDragStartDetails!.globalPosition, const Offset(400, 300));
+      delta = receivedDragUpdateDetails!.delta;
+      final Offset local = const Offset(10, 10) + delta;
+      final RenderObject object = tester.renderObject(find.byKey(key));
+      final Matrix4 transform = object.getTransformTo(null);
+      final Offset global = MatrixUtils.transformPoint(transform, local);
+      expect(receivedDragEndDetails!.localPosition, local);
+      expect(receivedDragEndDetails!.globalPosition, global);
+    });
+  });
+
   group("RawGestureDetectorState's debugFillProperties", () {
     testWidgets('when default', (WidgetTester tester) async {
-      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      final builder = DiagnosticPropertiesBuilder();
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(RawGestureDetector(key: key));
       key.currentState!.debugFillProperties(builder);
 
-      final List<String> description =
-          builder.properties
-              .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-              .map((DiagnosticsNode node) => node.toString())
-              .toList();
+      final List<String> description = builder.properties
+          .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
 
       expect(description, <String>['gestures: <none>']);
     });
 
     testWidgets('should show gestures, custom semantics and behavior', (WidgetTester tester) async {
-      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      final builder = DiagnosticPropertiesBuilder();
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(
         RawGestureDetector(
@@ -864,11 +1136,10 @@ void main() {
       );
       key.currentState!.debugFillProperties(builder);
 
-      final List<String> description =
-          builder.properties
-              .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-              .map((DiagnosticsNode node) => node.toString())
-              .toList();
+      final List<String> description = builder.properties
+          .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
 
       expect(description, <String>[
         'gestures: tap, long press',
@@ -880,7 +1151,7 @@ void main() {
     testWidgets('should not show semantics when excludeFromSemantics is true', (
       WidgetTester tester,
     ) async {
-      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      final builder = DiagnosticPropertiesBuilder();
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(
         RawGestureDetector(
@@ -892,11 +1163,10 @@ void main() {
       );
       key.currentState!.debugFillProperties(builder);
 
-      final List<String> description =
-          builder.properties
-              .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-              .map((DiagnosticsNode node) => node.toString())
-              .toList();
+      final List<String> description = builder.properties
+          .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
 
       expect(description, <String>['gestures: <none>', 'excludeFromSemantics: true']);
     });
@@ -949,7 +1219,7 @@ void main() {
       });
 
       testWidgets('replaceGestureRecognizers not during layout', (WidgetTester tester) async {
-        final GlobalKey<RawGestureDetectorState> key = GlobalKey<RawGestureDetectorState>();
+        final key = GlobalKey<RawGestureDetectorState>();
         await tester.pumpWidget(
           Directionality(
             textDirection: TextDirection.ltr,
@@ -991,9 +1261,9 @@ void main() {
 
   testWidgets('supportedDevices update test', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/111716
-    bool didStartPan = false;
+    var didStartPan = false;
     Offset? panDelta;
-    bool didEndPan = false;
+    var didEndPan = false;
     Widget buildFrame(Set<PointerDeviceKind>? supportedDevices) {
       return GestureDetector(
         onPanStart: (DragStartDetails details) {
@@ -1074,9 +1344,9 @@ void main() {
   });
 
   testWidgets('supportedDevices is respected', (WidgetTester tester) async {
-    bool didStartPan = false;
+    var didStartPan = false;
     Offset? panDelta;
-    bool didEndPan = false;
+    var didEndPan = false;
 
     await tester.pumpWidget(
       GestureDetector(
@@ -1130,7 +1400,7 @@ void main() {
     testWidgets('onDoubleTap is called even if onDoubleTapDown has not been not provided', (
       WidgetTester tester,
     ) async {
-      final List<String> log = <String>[];
+      final log = <String>[];
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -1151,7 +1421,7 @@ void main() {
     testWidgets('onDoubleTapDown is called even if onDoubleTap has not been not provided', (
       WidgetTester tester,
     ) async {
-      final List<String> log = <String>[];
+      final log = <String>[];
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,

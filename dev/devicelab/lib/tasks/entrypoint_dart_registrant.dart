@@ -14,7 +14,8 @@ import '../framework/utils.dart';
 const String _messagePrefix = 'entrypoint:';
 const String _entrypointName = 'entrypoint';
 
-const String _dartCode = '''
+const String _dartCode =
+    '''
 import 'package:flutter/widgets.dart';
 
 @pragma('vm:entry-point')
@@ -30,7 +31,8 @@ void $_entrypointName() {
 }
 ''';
 
-const String _kotlinCode = '''
+const String _kotlinCode =
+    '''
 package com.example.entrypoint_dart_registrant
 
 import io.flutter.embedding.android.FlutterActivity
@@ -43,15 +45,15 @@ class MainActivity: FlutterActivity() {
 ''';
 
 Future<TaskResult> _runWithTempDir(Directory tempDir) async {
-  const String testDirName = 'entrypoint_dart_registrant';
-  final String testPath = '${tempDir.path}/$testDirName';
+  const testDirName = 'entrypoint_dart_registrant';
+  final testPath = '${tempDir.path}/$testDirName';
   await inDirectory(tempDir, () async {
     await flutter('create', options: <String>['--platforms', 'android', testDirName]);
   });
-  final String mainPath = '${tempDir.path}/$testDirName/lib/main.dart';
+  final mainPath = '${tempDir.path}/$testDirName/lib/main.dart';
   print(mainPath);
   File(mainPath).writeAsStringSync(_dartCode);
-  final String activityPath =
+  final activityPath =
       '${tempDir.path}/$testDirName/android/app/src/main/kotlin/com/example/entrypoint_dart_registrant/MainActivity.kt';
   File(activityPath).writeAsStringSync(_kotlinCode);
   final Device device = await devices.workingDevice;
@@ -62,7 +64,7 @@ Future<TaskResult> _runWithTempDir(Directory tempDir) async {
     await flutter('pub', options: <String>['add', 'path_provider:2.0.9']);
     // The problem only manifested on release builds, so we test release.
     final Process process = await startFlutter('run', options: <String>['--release']);
-    final Completer<String> completer = Completer<String>();
+    final completer = Completer<String>();
     final StreamSubscription<String> stdoutSub = process.stdout
         .transform<String>(const Utf8Decoder())
         .transform<String>(const LineSplitter())
@@ -72,8 +74,19 @@ Future<TaskResult> _runWithTempDir(Directory tempDir) async {
             completer.complete(line);
           }
         });
-    final String entrypoint = await completer.future;
+    final StreamSubscription<String> stderrSub = process.stderr
+        .transform<String>(const Utf8Decoder())
+        .transform<String>(const LineSplitter())
+        .listen((String line) async {
+          print(line);
+        });
+    final Object result = await Future.any(<Future<Object>>[completer.future, process.exitCode]);
+    if (result is int) {
+      throw Exception('flutter run failed, exitCode=$result');
+    }
+    final entrypoint = result as String;
     await stdoutSub.cancel();
+    await stderrSub.cancel();
     process.stdin.write('q');
     await process.stdin.flush();
     process.kill(ProcessSignal.sigint);

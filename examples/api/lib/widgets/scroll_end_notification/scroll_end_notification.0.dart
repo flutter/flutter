@@ -24,10 +24,12 @@ class ScrollEndNotificationExample extends StatefulWidget {
   const ScrollEndNotificationExample({super.key});
 
   @override
-  State<ScrollEndNotificationExample> createState() => _ScrollEndNotificationExampleState();
+  State<ScrollEndNotificationExample> createState() =>
+      _ScrollEndNotificationExampleState();
 }
 
-class _ScrollEndNotificationExampleState extends State<ScrollEndNotificationExample> {
+class _ScrollEndNotificationExampleState
+    extends State<ScrollEndNotificationExample> {
   static const int itemCount = 25;
   static const double itemExtent = 100;
 
@@ -58,13 +60,13 @@ class _ScrollEndNotificationExampleState extends State<ScrollEndNotificationExam
     }
     if (notification is ScrollEndNotification) {
       final ScrollMetrics m = notification.metrics;
-      final int lastIndex = ((m.extentBefore + m.extentInside) ~/ itemExtent).clamp(
-        0,
-        itemCount - 1,
-      );
-      final double alignedScrollOffset = itemExtent * (lastIndex + 1) - m.extentInside;
+      final int lastIndex = ((m.extentBefore + m.extentInside) ~/ itemExtent)
+          .clamp(0, itemCount - 1);
+      final double alignedScrollOffset =
+          itemExtent * (lastIndex + 1) - m.extentInside;
       final double scrollOffset = scrollController.position.pixels;
-      if (scrollOffset > 0 && (scrollOffset - lastScrollOffset).abs() > itemExtent) {
+      if (scrollOffset > 0 &&
+          (scrollOffset - lastScrollOffset).abs() > itemExtent) {
         SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
           scrollController.animateTo(
             alignedScrollOffset,
@@ -91,14 +93,19 @@ class _ScrollEndNotificationExampleState extends State<ScrollEndNotificationExam
               child: CustomScrollView(
                 controller: scrollController,
                 slivers: <Widget>[
-                  SliverFixedExtentList(
+                  SliverFixedExtentList.builder(
                     itemExtent: itemExtent,
-                    delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+                    itemCount: itemCount,
+                    itemBuilder: (BuildContext context, int index) {
                       return Item(
                         title: 'Item $index',
-                        color: Color.lerp(Colors.red, Colors.blue, index / itemCount)!,
+                        color: Color.lerp(
+                          Colors.red,
+                          Colors.blue,
+                          index / itemCount,
+                        )!,
                       );
-                    }, childCount: itemCount),
+                    },
                   ),
                 ],
               ),
@@ -118,6 +125,9 @@ class Item extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(color: color, child: ListTile(textColor: Colors.white, title: Text(title)));
+    return Card(
+      color: color,
+      child: ListTile(textColor: Colors.white, title: Text(title)),
+    );
   }
 }

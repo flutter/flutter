@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/transitions/positioned_transition.0.dart' as example;
+import 'package:flutter_api_samples/widgets/transitions/positioned_transition.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -14,7 +15,9 @@ void main() {
     expect(find.byType(PositionedTransition), findsOneWidget);
   });
 
-  testWidgets('Animates repeatedly every 2 seconds', (WidgetTester tester) async {
+  testWidgets('Animates repeatedly every 2 seconds', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.PositionedTransitionExampleApp());
 
     expect(

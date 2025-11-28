@@ -29,5 +29,11 @@
   "shareButtonLabel": "பகிர்...",
   "clearButtonLabel": "அழி",
   "cancelButtonLabel": "ரத்துசெய்",
-  "backButtonLabel": "பின்செல்"
+  "backButtonLabel": "பின்செல்",
+  "expansionTileExpandedHint": "சுருக்க இருமுறை தட்டவும்",
+  "expansionTileCollapsedHint": "விரிவாக்க இருமுறை தட்டுங்கள்",
+  "expansionTileExpandedTapHint": "சுருக்கும்",
+  "expansionTileCollapsedTapHint": "கூடுதல் விவரங்களுக்கு விரிவாக்கலாம்",
+  "expandedHint": "சுருக்கப்பட்டது",
+  "collapsedHint": "விரிவாக்கப்பட்டது"
 }

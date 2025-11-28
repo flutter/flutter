@@ -12,14 +12,16 @@
 #include "impeller/core/formats.h"
 #include "impeller/core/host_buffer.h"
 #include "impeller/core/vertex_buffer.h"
-#include "impeller/geometry/path.h"
+#include "impeller/geometry/arc.h"
 #include "impeller/geometry/path_source.h"
 #include "impeller/geometry/point.h"
+#include "impeller/geometry/stroke_parameters.h"
 #include "impeller/geometry/trig.h"
 
 namespace impeller {
 
 /// The size of the point arena buffer stored on the tessellator.
+[[maybe_unused]]
 static constexpr size_t kPointArenaSize = 4096u;
 
 //------------------------------------------------------------------------------
@@ -33,14 +35,33 @@ static constexpr size_t kPointArenaSize = 4096u;
 ///             called from multiple threads.
 ///
 class Tessellator {
- private:
+ public:
   /// Essentially just a vector of Trig objects, but supports storing a
   /// reference to either a cached vector or a locally generated vector.
   /// The constructor will fill the vector with quarter circular samples
   /// for the indicated number of equal divisions if the vector is new.
+  ///
+  /// A given instance of Trigs will always contain at least 2 entries
+  /// which is the minimum number of samples to traverse a quarter circle
+  /// in a single step. The first sample will always be (0, 1) and the last
+  /// sample will always be (1, 0).
   class Trigs {
    public:
+    explicit Trigs(Scalar pixel_radius);
+
+    // Utility forwards of the indicated vector methods.
+    size_t inline size() const { return trigs_.size(); }
+    std::vector<Trig>::iterator inline begin() const { return trigs_.begin(); }
+    std::vector<Trig>::iterator inline end() const { return trigs_.end(); }
+    const inline Trig& operator[](size_t index) const { return trigs_[index]; }
+
+    size_t inline GetSteps() const { return trigs_.size() - 1u; }
+
+   private:
+    friend class Tessellator;
+
     explicit Trigs(std::vector<Trig>& trigs, size_t divisions) : trigs_(trigs) {
+      FML_DCHECK(divisions >= 1);
       init(divisions);
       FML_DCHECK(trigs_.size() == divisions + 1);
     }
@@ -48,16 +69,11 @@ class Tessellator {
     explicit Trigs(size_t divisions)
         : local_storage_(std::make_unique<std::vector<Trig>>()),
           trigs_(*local_storage_) {
+      FML_DCHECK(divisions >= 1);
       init(divisions);
       FML_DCHECK(trigs_.size() == divisions + 1);
     }
 
-    // Utility forwards of the indicated vector methods.
-    auto inline size() const { return trigs_.size(); }
-    auto inline begin() const { return trigs_.begin(); }
-    auto inline end() const { return trigs_.end(); }
-
-   private:
     // nullptr if a cached vector is used, otherwise the actual storage
     std::unique_ptr<std::vector<Trig>> local_storage_;
 
@@ -70,7 +86,6 @@ class Tessellator {
     void init(size_t divisions);
   };
 
- public:
   enum class Result {
     kSuccess,
     kInputError,
@@ -171,7 +186,44 @@ class Tessellator {
                               Data&& data);
   };
 
-  Tessellator();
+  /// @brief  The |VertexGenerator| implementation common to all shapes
+  ///         that are based on a polygonal representation of an ellipse.
+  class ArcVertexGenerator : public virtual VertexGenerator {
+   public:
+    /// |VertexGenerator|
+    PrimitiveType GetTriangleType() const override;
+
+    /// |VertexGenerator|
+    size_t GetVertexCount() const override;
+
+    /// |VertexGenerator|
+    void GenerateVertices(const TessellatedVertexProc& proc) const override;
+
+   private:
+    friend class Tessellator;
+
+    const Arc::Iteration iteration_;
+    const Trigs trigs_;
+    const Rect oval_bounds_;
+    const bool use_center_;
+    const Scalar half_width_;
+    const Cap cap_;
+    const bool supports_triangle_fans_;
+
+    ArcVertexGenerator(const Arc::Iteration& iteration,
+                       Trigs&& trigs,
+                       const Rect& oval_bounds,
+                       bool use_center,
+                       bool supports_triangle_fans);
+
+    ArcVertexGenerator(const Arc::Iteration& iteration,
+                       Trigs&& trigs,
+                       const Rect& oval_bounds,
+                       Scalar half_width,
+                       Cap cap);
+  };
+
+  explicit Tessellator(bool supports_32bit_primitive_indices = true);
 
   virtual ~Tessellator();
 
@@ -188,31 +240,11 @@ class Tessellator {
   ///
   /// @return A vertex buffer containing all data from the provided curve.
   VertexBuffer TessellateConvex(const PathSource& path,
-                                HostBuffer& host_buffer,
+                                HostBuffer& data_host_buffer,
+                                HostBuffer& indexes_host_buffer,
                                 Scalar tolerance,
                                 bool supports_primitive_restart = false,
                                 bool supports_triangle_fan = false);
-
-  //----------------------------------------------------------------------------
-  /// @brief      Given a path, create a line strip primitive structure.
-  ///
-  ///             A line strip is a series of vertices that draws a line
-  ///             rendered at a specified width (in our case, always 1.0
-  ///             physical pixel) that is tessellated by the rasterizer. See
-  ///             also PrimitiveType::kLineStrip.
-  ///
-  /// @param[in]  path  The path to tessellate.
-  /// @param[in]  host_buffer  The host buffer for allocation of vertices/index
-  ///                          data.
-  /// @param[in]  tolerance  The tolerance value for conversion of the path to
-  ///                        a polyline. This value is often derived from the
-  ///                        Matrix::GetMaxBasisLengthXY of the CTM applied to
-  ///                        the path for rendering.
-  ///
-  /// @return A vertex buffer containing all data from the provided curve.
-  VertexBuffer GenerateLineStrip(const Path& path,
-                                 HostBuffer& host_buffer,
-                                 Scalar tolerance);
 
   /// Visible for testing.
   ///
@@ -224,13 +256,6 @@ class Tessellator {
                                        Scalar tolerance);
 
   //----------------------------------------------------------------------------
-  /// @brief      Create a temporary polyline. Only one per-process can exist at
-  ///             a time.
-  ///
-  ///             The tessellator itself is not a thread safe class and should
-  ///             only be used from the raster thread.
-  Path::Polyline CreateTempPolyline(const Path& path, Scalar tolerance);
-
   /// @brief   The pixel tolerance used by the algorighm to determine how
   ///          many divisions to create for a circle.
   ///
@@ -267,6 +292,42 @@ class Tessellator {
                                           const Point& center,
                                           Scalar radius,
                                           Scalar half_width);
+
+  /// @brief   Create a |VertexGenerator| that can produce vertices for
+  ///          a stroked arc inscribed within the given oval_bounds with
+  ///          the given stroke half_width with enough polygon sub-divisions
+  ///          to provide reasonable fidelity when viewed under the given
+  ///          view transform. The outer edge of the stroked arc is
+  ///          generated at (radius + half_width) and the inner edge is
+  ///          generated at (radius - half_width).
+  ///
+  ///          Note that the view transform is only used to choose the
+  ///          number of sample points to use per quarter circle and the
+  ///          returned points are not transformed by it, instead they are
+  ///          relative to the coordinate space of the oval bounds.
+  ArcVertexGenerator FilledArc(const Matrix& view_transform,
+                               const Arc& arc,
+                               bool supports_triangle_fans);
+
+  /// @brief   Create a |VertexGenerator| that can produce vertices for
+  ///          a stroked arc inscribed within the given oval_bounds with
+  ///          the given stroke half_width with enough polygon sub-divisions
+  ///          to provide reasonable fidelity when viewed under the given
+  ///          view transform. The outer edge of the stroked arc is
+  ///          generated at (radius + half_width) and the inner edge is
+  ///          generated at (radius - half_width).
+  ///
+  ///          Note that the arc may not include the center and its bounds
+  ///          must be a perfect circle (width == height)
+  ///
+  ///          Note that the view transform is only used to choose the
+  ///          number of sample points to use per quarter circle and the
+  ///          returned points are not transformed by it, instead they are
+  ///          relative to the coordinate space of the oval bounds.
+  ArcVertexGenerator StrokedArc(const Matrix& view_transform,
+                                const Arc& arc,
+                                Cap cap,
+                                Scalar half_width);
 
   /// @brief   Create a |VertexGenerator| that can produce vertices for
   ///          a line with round end caps of the given radius with enough
@@ -310,14 +371,30 @@ class Tessellator {
   /// Retrieve a pre-allocated arena of kPointArenaSize points.
   std::vector<Point>& GetStrokePointCache();
 
- protected:
+  /// Return a vector of Trig (cos, sin pairs) structs for a 90 degree
+  /// circle quadrant of the specified pixel radius
+  Trigs GetTrigsForDeviceRadius(Scalar pixel_radius);
+
+ private:
+  class ConvexTessellator {
+   public:
+    virtual ~ConvexTessellator() = default;
+    virtual VertexBuffer TessellateConvex(const PathSource& path,
+                                          HostBuffer& data_host_buffer,
+                                          HostBuffer& indexes_host_buffer,
+                                          Scalar tolerance,
+                                          bool supports_primitive_restart,
+                                          bool supports_triangle_fan) = 0;
+  };
+  template <typename IndexT>
+  friend class ConvexTessellatorImpl;
+
   /// Used for polyline generation.
-  std::unique_ptr<std::vector<Point>> point_buffer_;
-  std::unique_ptr<std::vector<uint16_t>> index_buffer_;
+  std::unique_ptr<ConvexTessellator> convex_tessellator_;
+
   /// Used for stroke path generation.
   std::vector<Point> stroke_points_;
 
- private:
   // Data for various Circle/EllipseGenerator classes, cached per
   // Tessellator instance which is usually the foreground life of an app
   // if not longer.
@@ -333,6 +410,25 @@ class Tessellator {
   static void GenerateStrokedCircle(const Trigs& trigs,
                                     const EllipticalVertexGenerator::Data& data,
                                     const TessellatedVertexProc& proc);
+
+  static void GenerateFilledArcFan(const Trigs& trigs,
+                                   const Arc::Iteration& iteration,
+                                   const Rect& oval_bounds,
+                                   bool use_center,
+                                   const TessellatedVertexProc& proc);
+
+  static void GenerateFilledArcStrip(const Trigs& trigs,
+                                     const Arc::Iteration& iteration,
+                                     const Rect& oval_bounds,
+                                     bool use_center,
+                                     const TessellatedVertexProc& proc);
+
+  static void GenerateStrokedArc(const Trigs& trigs,
+                                 const Arc::Iteration& iteration,
+                                 const Rect& oval_bounds,
+                                 Scalar half_width,
+                                 Cap cap,
+                                 const TessellatedVertexProc& proc);
 
   static void GenerateRoundCapLine(const Trigs& trigs,
                                    const EllipticalVertexGenerator::Data& data,

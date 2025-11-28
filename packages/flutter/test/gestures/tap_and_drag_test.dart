@@ -20,58 +20,56 @@ void main() {
   void setUpTapAndPanGestureRecognizer({
     bool eagerVictoryOnDrag = true, // This is the default for [BaseTapAndDragGestureRecognizer].
   }) {
-    tapAndDrag =
-        TapAndPanGestureRecognizer()
-          ..dragStartBehavior = DragStartBehavior.down
-          ..eagerVictoryOnDrag = eagerVictoryOnDrag
-          ..maxConsecutiveTap = 3
-          ..onTapDown = (TapDragDownDetails details) {
-            events.add('down#${details.consecutiveTapCount}');
-          }
-          ..onTapUp = (TapDragUpDetails details) {
-            events.add('up#${details.consecutiveTapCount}');
-          }
-          ..onDragStart = (TapDragStartDetails details) {
-            events.add('panstart#${details.consecutiveTapCount}');
-          }
-          ..onDragUpdate = (TapDragUpdateDetails details) {
-            events.add('panupdate#${details.consecutiveTapCount}');
-          }
-          ..onDragEnd = (TapDragEndDetails details) {
-            events.add('panend#${details.consecutiveTapCount}');
-          }
-          ..onCancel = () {
-            events.add('cancel');
-          };
+    tapAndDrag = TapAndPanGestureRecognizer()
+      ..dragStartBehavior = DragStartBehavior.down
+      ..eagerVictoryOnDrag = eagerVictoryOnDrag
+      ..maxConsecutiveTap = 3
+      ..onTapDown = (TapDragDownDetails details) {
+        events.add('down#${details.consecutiveTapCount}');
+      }
+      ..onTapUp = (TapDragUpDetails details) {
+        events.add('up#${details.consecutiveTapCount}');
+      }
+      ..onDragStart = (TapDragStartDetails details) {
+        events.add('panstart#${details.consecutiveTapCount}');
+      }
+      ..onDragUpdate = (TapDragUpdateDetails details) {
+        events.add('panupdate#${details.consecutiveTapCount}');
+      }
+      ..onDragEnd = (TapDragEndDetails details) {
+        events.add('panend#${details.consecutiveTapCount}');
+      }
+      ..onCancel = () {
+        events.add('cancel');
+      };
     addTearDown(tapAndDrag.dispose);
   }
 
   void setUpTapAndHorizontalDragGestureRecognizer({
     bool eagerVictoryOnDrag = true, // This is the default for [BaseTapAndDragGestureRecognizer].
   }) {
-    tapAndDrag =
-        TapAndHorizontalDragGestureRecognizer()
-          ..dragStartBehavior = DragStartBehavior.down
-          ..eagerVictoryOnDrag = eagerVictoryOnDrag
-          ..maxConsecutiveTap = 3
-          ..onTapDown = (TapDragDownDetails details) {
-            events.add('down#${details.consecutiveTapCount}');
-          }
-          ..onTapUp = (TapDragUpDetails details) {
-            events.add('up#${details.consecutiveTapCount}');
-          }
-          ..onDragStart = (TapDragStartDetails details) {
-            events.add('horizontaldragstart#${details.consecutiveTapCount}');
-          }
-          ..onDragUpdate = (TapDragUpdateDetails details) {
-            events.add('horizontaldragupdate#${details.consecutiveTapCount}');
-          }
-          ..onDragEnd = (TapDragEndDetails details) {
-            events.add('horizontaldragend#${details.consecutiveTapCount}');
-          }
-          ..onCancel = () {
-            events.add('cancel');
-          };
+    tapAndDrag = TapAndHorizontalDragGestureRecognizer()
+      ..dragStartBehavior = DragStartBehavior.down
+      ..eagerVictoryOnDrag = eagerVictoryOnDrag
+      ..maxConsecutiveTap = 3
+      ..onTapDown = (TapDragDownDetails details) {
+        events.add('down#${details.consecutiveTapCount}');
+      }
+      ..onTapUp = (TapDragUpDetails details) {
+        events.add('up#${details.consecutiveTapCount}');
+      }
+      ..onDragStart = (TapDragStartDetails details) {
+        events.add('horizontaldragstart#${details.consecutiveTapCount}');
+      }
+      ..onDragUpdate = (TapDragUpdateDetails details) {
+        events.add('horizontaldragupdate#${details.consecutiveTapCount}');
+      }
+      ..onDragEnd = (TapDragEndDetails details) {
+        events.add('horizontaldragend#${details.consecutiveTapCount}');
+      }
+      ..onCancel = () {
+        events.add('cancel');
+      };
     addTearDown(tapAndDrag.dispose);
   }
 
@@ -80,49 +78,49 @@ void main() {
   });
 
   // Down/up pair 1: normal tap sequence
-  const PointerDownEvent down1 = PointerDownEvent(pointer: 1, position: Offset(10.0, 10.0));
+  const down1 = PointerDownEvent(pointer: 1, position: Offset(10.0, 10.0));
 
-  const PointerUpEvent up1 = PointerUpEvent(pointer: 1, position: Offset(11.0, 9.0));
+  const up1 = PointerUpEvent(pointer: 1, position: Offset(11.0, 9.0));
 
-  const PointerCancelEvent cancel1 = PointerCancelEvent(pointer: 1);
+  const cancel1 = PointerCancelEvent(pointer: 1);
 
   // Down/up pair 2: normal tap sequence close to pair 1
-  const PointerDownEvent down2 = PointerDownEvent(pointer: 2, position: Offset(12.0, 12.0));
+  const down2 = PointerDownEvent(pointer: 2, position: Offset(12.0, 12.0));
 
-  const PointerUpEvent up2 = PointerUpEvent(pointer: 2, position: Offset(13.0, 11.0));
+  const up2 = PointerUpEvent(pointer: 2, position: Offset(13.0, 11.0));
 
   // Down/up pair 3: normal tap sequence close to pair 1
-  const PointerDownEvent down3 = PointerDownEvent(pointer: 3, position: Offset(12.0, 12.0));
+  const down3 = PointerDownEvent(pointer: 3, position: Offset(12.0, 12.0));
 
-  const PointerUpEvent up3 = PointerUpEvent(pointer: 3, position: Offset(13.0, 11.0));
+  const up3 = PointerUpEvent(pointer: 3, position: Offset(13.0, 11.0));
 
   // Down/up pair 4: normal tap sequence far away from pair 1
-  const PointerDownEvent down4 = PointerDownEvent(pointer: 4, position: Offset(130.0, 130.0));
+  const down4 = PointerDownEvent(pointer: 4, position: Offset(130.0, 130.0));
 
-  const PointerUpEvent up4 = PointerUpEvent(pointer: 4, position: Offset(131.0, 129.0));
+  const up4 = PointerUpEvent(pointer: 4, position: Offset(131.0, 129.0));
 
   // Down/move/up sequence 5: intervening motion
-  const PointerDownEvent down5 = PointerDownEvent(pointer: 5, position: Offset(10.0, 10.0));
+  const down5 = PointerDownEvent(pointer: 5, position: Offset(10.0, 10.0));
 
-  const PointerMoveEvent move5 = PointerMoveEvent(pointer: 5, position: Offset(25.0, 25.0));
+  const move5 = PointerMoveEvent(pointer: 5, position: Offset(25.0, 25.0));
 
-  const PointerUpEvent up5 = PointerUpEvent(pointer: 5, position: Offset(25.0, 25.0));
+  const up5 = PointerUpEvent(pointer: 5, position: Offset(25.0, 25.0));
 
   // Mouse Down/move/up sequence 6: intervening motion - kPrecisePointerPanSlop
-  const PointerDownEvent down6 = PointerDownEvent(
+  const down6 = PointerDownEvent(
     kind: PointerDeviceKind.mouse,
     pointer: 6,
     position: Offset(10.0, 10.0),
   );
 
-  const PointerMoveEvent move6 = PointerMoveEvent(
+  const move6 = PointerMoveEvent(
     kind: PointerDeviceKind.mouse,
     pointer: 6,
     position: Offset(15.0, 15.0),
     delta: Offset(5.0, 5.0),
   );
 
-  const PointerUpEvent up6 = PointerUpEvent(
+  const up6 = PointerUpEvent(
     kind: PointerDeviceKind.mouse,
     pointer: 6,
     position: Offset(15.0, 15.0),
@@ -240,7 +238,7 @@ void main() {
   testGesture('Should recognize drag', (GestureTester tester) {
     setUpTapAndPanGestureRecognizer();
 
-    final TestPointer pointer = TestPointer(5);
+    final pointer = TestPointer(5);
     final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
     tapAndDrag.addPointer(down);
     tester.closeArena(5);
@@ -254,7 +252,7 @@ void main() {
   testGesture('Recognizes consecutive taps + drag', (GestureTester tester) {
     setUpTapAndPanGestureRecognizer();
 
-    final TestPointer pointer = TestPointer(5);
+    final pointer = TestPointer(5);
     final PointerDownEvent downA = pointer.down(const Offset(10.0, 10.0));
     tapAndDrag.addPointer(downA);
     tester.closeArena(5);
@@ -429,17 +427,16 @@ void main() {
     setUpTapAndPanGestureRecognizer();
 
     // This is a regression test for https://github.com/flutter/flutter/issues/122141.
-    final TapGestureRecognizer taps =
-        TapGestureRecognizer()
-          ..onTapDown = (TapDownDetails details) {
-            events.add('tapdown');
-          }
-          ..onTapUp = (TapUpDetails details) {
-            events.add('tapup');
-          }
-          ..onTapCancel = () {
-            events.add('tapscancel');
-          };
+    final taps = TapGestureRecognizer()
+      ..onTapDown = (TapDownDetails details) {
+        events.add('tapdown');
+      }
+      ..onTapUp = (TapUpDetails details) {
+        events.add('tapup');
+      }
+      ..onTapCancel = () {
+        events.add('tapscancel');
+      };
     addTearDown(taps.dispose);
 
     tapAndDrag.addPointer(down6);
@@ -458,23 +455,22 @@ void main() {
     (GestureTester tester) {
       setUpTapAndPanGestureRecognizer();
 
-      final PanGestureRecognizer pans =
-          PanGestureRecognizer()
-            ..onStart = (DragStartDetails details) {
-              events.add('panstart');
-            }
-            ..onUpdate = (DragUpdateDetails details) {
-              events.add('panupdate');
-            }
-            ..onEnd = (DragEndDetails details) {
-              events.add('panend');
-            }
-            ..onCancel = () {
-              events.add('pancancel');
-            };
+      final pans = PanGestureRecognizer()
+        ..onStart = (DragStartDetails details) {
+          events.add('panstart');
+        }
+        ..onUpdate = (DragUpdateDetails details) {
+          events.add('panupdate');
+        }
+        ..onEnd = (DragEndDetails details) {
+          events.add('panend');
+        }
+        ..onCancel = () {
+          events.add('pancancel');
+        };
       addTearDown(pans.dispose);
 
-      final TestPointer pointer = TestPointer(5);
+      final pointer = TestPointer(5);
       final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
       // When competing against another [DragGestureRecognizer], the recognizer
       // that first in the arena will win after sweep is called.
@@ -493,7 +489,7 @@ void main() {
     (GestureTester tester) {
       setUpTapAndHorizontalDragGestureRecognizer();
 
-      final TestPointer pointer = TestPointer(5);
+      final pointer = TestPointer(5);
       final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
 
       tapAndDrag.addPointer(downB);
@@ -515,23 +511,22 @@ void main() {
     (GestureTester tester) {
       setUpTapAndHorizontalDragGestureRecognizer();
 
-      final VerticalDragGestureRecognizer verticalDrag =
-          VerticalDragGestureRecognizer()
-            ..onStart = (DragStartDetails details) {
-              events.add('verticalstart');
-            }
-            ..onUpdate = (DragUpdateDetails details) {
-              events.add('verticalupdate');
-            }
-            ..onEnd = (DragEndDetails details) {
-              events.add('verticalend');
-            }
-            ..onCancel = () {
-              events.add('verticalcancel');
-            };
+      final verticalDrag = VerticalDragGestureRecognizer()
+        ..onStart = (DragStartDetails details) {
+          events.add('verticalstart');
+        }
+        ..onUpdate = (DragUpdateDetails details) {
+          events.add('verticalupdate');
+        }
+        ..onEnd = (DragEndDetails details) {
+          events.add('verticalend');
+        }
+        ..onCancel = () {
+          events.add('verticalcancel');
+        };
       addTearDown(verticalDrag.dispose);
 
-      final TestPointer pointer = TestPointer(5);
+      final pointer = TestPointer(5);
       final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
 
       tapAndDrag.addPointer(downB);
@@ -550,23 +545,22 @@ void main() {
     (GestureTester tester) {
       setUpTapAndPanGestureRecognizer();
 
-      final VerticalDragGestureRecognizer verticalDrag =
-          VerticalDragGestureRecognizer()
-            ..onStart = (DragStartDetails details) {
-              events.add('verticalstart');
-            }
-            ..onUpdate = (DragUpdateDetails details) {
-              events.add('verticalupdate');
-            }
-            ..onEnd = (DragEndDetails details) {
-              events.add('verticalend');
-            }
-            ..onCancel = () {
-              events.add('verticalcancel');
-            };
+      final verticalDrag = VerticalDragGestureRecognizer()
+        ..onStart = (DragStartDetails details) {
+          events.add('verticalstart');
+        }
+        ..onUpdate = (DragUpdateDetails details) {
+          events.add('verticalupdate');
+        }
+        ..onEnd = (DragEndDetails details) {
+          events.add('verticalend');
+        }
+        ..onCancel = () {
+          events.add('verticalcancel');
+        };
       addTearDown(verticalDrag.dispose);
 
-      final TestPointer pointer = TestPointer(5);
+      final pointer = TestPointer(5);
       final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
 
       tapAndDrag.addPointer(downB);
@@ -585,23 +579,22 @@ void main() {
     (GestureTester tester) {
       setUpTapAndHorizontalDragGestureRecognizer();
 
-      final VerticalDragGestureRecognizer verticalDrag =
-          VerticalDragGestureRecognizer()
-            ..onStart = (DragStartDetails details) {
-              events.add('verticalstart');
-            }
-            ..onUpdate = (DragUpdateDetails details) {
-              events.add('verticalupdate');
-            }
-            ..onEnd = (DragEndDetails details) {
-              events.add('verticalend');
-            }
-            ..onCancel = () {
-              events.add('verticalcancel');
-            };
+      final verticalDrag = VerticalDragGestureRecognizer()
+        ..onStart = (DragStartDetails details) {
+          events.add('verticalstart');
+        }
+        ..onUpdate = (DragUpdateDetails details) {
+          events.add('verticalupdate');
+        }
+        ..onEnd = (DragEndDetails details) {
+          events.add('verticalend');
+        }
+        ..onCancel = () {
+          events.add('verticalcancel');
+        };
       addTearDown(verticalDrag.dispose);
 
-      final TestPointer pointer = TestPointer(5);
+      final pointer = TestPointer(5);
       final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
 
       tapAndDrag.addPointer(downB);
@@ -625,23 +618,22 @@ void main() {
     (GestureTester tester) {
       setUpTapAndPanGestureRecognizer();
 
-      final VerticalDragGestureRecognizer verticalDrag =
-          VerticalDragGestureRecognizer()
-            ..onStart = (DragStartDetails details) {
-              events.add('verticalstart');
-            }
-            ..onUpdate = (DragUpdateDetails details) {
-              events.add('verticalupdate');
-            }
-            ..onEnd = (DragEndDetails details) {
-              events.add('verticalend');
-            }
-            ..onCancel = () {
-              events.add('verticalcancel');
-            };
+      final verticalDrag = VerticalDragGestureRecognizer()
+        ..onStart = (DragStartDetails details) {
+          events.add('verticalstart');
+        }
+        ..onUpdate = (DragUpdateDetails details) {
+          events.add('verticalupdate');
+        }
+        ..onEnd = (DragEndDetails details) {
+          events.add('verticalend');
+        }
+        ..onCancel = () {
+          events.add('verticalcancel');
+        };
       addTearDown(verticalDrag.dispose);
 
-      final TestPointer pointer = TestPointer(5);
+      final pointer = TestPointer(5);
       final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
 
       tapAndDrag.addPointer(downB);
@@ -658,23 +650,22 @@ void main() {
     'Recognizer loses when competing against a DragGestureRecognizer for a drag when eagerVictoryOnDrag is disabled',
     (GestureTester tester) {
       setUpTapAndPanGestureRecognizer(eagerVictoryOnDrag: false);
-      final PanGestureRecognizer pans =
-          PanGestureRecognizer()
-            ..onStart = (DragStartDetails details) {
-              events.add('panstart');
-            }
-            ..onUpdate = (DragUpdateDetails details) {
-              events.add('panupdate');
-            }
-            ..onEnd = (DragEndDetails details) {
-              events.add('panend');
-            }
-            ..onCancel = () {
-              events.add('pancancel');
-            };
+      final pans = PanGestureRecognizer()
+        ..onStart = (DragStartDetails details) {
+          events.add('panstart');
+        }
+        ..onUpdate = (DragUpdateDetails details) {
+          events.add('panupdate');
+        }
+        ..onEnd = (DragEndDetails details) {
+          events.add('panend');
+        }
+        ..onCancel = () {
+          events.add('pancancel');
+        };
       addTearDown(pans.dispose);
 
-      final TestPointer pointer = TestPointer(5);
+      final pointer = TestPointer(5);
       final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
       // When competing against another [DragGestureRecognizer], the [TapAndPanGestureRecognizer]
       // will only win when it is the last recognizer in the arena.
@@ -690,36 +681,34 @@ void main() {
 
   testGesture('Drag state is properly reset after losing GestureArena', (GestureTester tester) {
     setUpTapAndHorizontalDragGestureRecognizer(eagerVictoryOnDrag: false);
-    final HorizontalDragGestureRecognizer horizontalDrag =
-        HorizontalDragGestureRecognizer()
-          ..onStart = (DragStartDetails details) {
-            events.add('basichorizontalstart');
-          }
-          ..onUpdate = (DragUpdateDetails details) {
-            events.add('basichorizontalupdate');
-          }
-          ..onEnd = (DragEndDetails details) {
-            events.add('basichorizontalend');
-          }
-          ..onCancel = () {
-            events.add('basichorizontalcancel');
-          };
+    final horizontalDrag = HorizontalDragGestureRecognizer()
+      ..onStart = (DragStartDetails details) {
+        events.add('basichorizontalstart');
+      }
+      ..onUpdate = (DragUpdateDetails details) {
+        events.add('basichorizontalupdate');
+      }
+      ..onEnd = (DragEndDetails details) {
+        events.add('basichorizontalend');
+      }
+      ..onCancel = () {
+        events.add('basichorizontalcancel');
+      };
     addTearDown(horizontalDrag.dispose);
 
-    final LongPressGestureRecognizer longpress =
-        LongPressGestureRecognizer()
-          ..onLongPressStart = (LongPressStartDetails details) {
-            events.add('longpressstart');
-          }
-          ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
-            events.add('longpressmoveupdate');
-          }
-          ..onLongPressEnd = (LongPressEndDetails details) {
-            events.add('longpressend');
-          }
-          ..onLongPressCancel = () {
-            events.add('longpresscancel');
-          };
+    final longpress = LongPressGestureRecognizer()
+      ..onLongPressStart = (LongPressStartDetails details) {
+        events.add('longpressstart');
+      }
+      ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
+        events.add('longpressmoveupdate');
+      }
+      ..onLongPressEnd = (LongPressEndDetails details) {
+        events.add('longpressend');
+      }
+      ..onLongPressCancel = () {
+        events.add('longpresscancel');
+      };
     addTearDown(longpress.dispose);
 
     FlutterErrorDetails? errorDetails;
@@ -728,7 +717,7 @@ void main() {
       errorDetails = details;
     };
 
-    final TestPointer pointer = TestPointer(5);
+    final pointer = TestPointer(5);
     final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
     // When competing against another [DragGestureRecognizer], the [TapAndPanGestureRecognizer]
     // will only win when it is the last recognizer in the arena.
@@ -757,23 +746,22 @@ void main() {
   ) {
     setUpTapAndPanGestureRecognizer();
 
-    final LongPressGestureRecognizer longpress =
-        LongPressGestureRecognizer()
-          ..onLongPressStart = (LongPressStartDetails details) {
-            events.add('longpressstart');
-          }
-          ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
-            events.add('longpressmoveupdate');
-          }
-          ..onLongPressEnd = (LongPressEndDetails details) {
-            events.add('longpressend');
-          }
-          ..onLongPressCancel = () {
-            events.add('longpresscancel');
-          };
+    final longpress = LongPressGestureRecognizer()
+      ..onLongPressStart = (LongPressStartDetails details) {
+        events.add('longpressstart');
+      }
+      ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
+        events.add('longpressmoveupdate');
+      }
+      ..onLongPressEnd = (LongPressEndDetails details) {
+        events.add('longpressend');
+      }
+      ..onLongPressCancel = () {
+        events.add('longpresscancel');
+      };
     addTearDown(longpress.dispose);
 
-    final TestPointer pointer = TestPointer(5);
+    final pointer = TestPointer(5);
     final PointerDownEvent downA = pointer.down(const Offset(10.0, 10.0));
     tapAndDrag.addPointer(downA);
     longpress.addPointer(downA);
@@ -811,30 +799,28 @@ void main() {
     (GestureTester tester) {
       setUpTapAndPanGestureRecognizer();
 
-      final TapGestureRecognizer taps =
-          TapGestureRecognizer()
-            ..onTapDown = (TapDownDetails details) {
-              events.add('tapdown');
-            }
-            ..onTapUp = (TapUpDetails details) {
-              events.add('tapup');
-            }
-            ..onTapCancel = () {
-              events.add('tapscancel');
-            };
+      final taps = TapGestureRecognizer()
+        ..onTapDown = (TapDownDetails details) {
+          events.add('tapdown');
+        }
+        ..onTapUp = (TapUpDetails details) {
+          events.add('tapup');
+        }
+        ..onTapCancel = () {
+          events.add('tapscancel');
+        };
       addTearDown(taps.dispose);
 
-      final DoubleTapGestureRecognizer doubleTaps =
-          DoubleTapGestureRecognizer()
-            ..onDoubleTapDown = (TapDownDetails details) {
-              events.add('doubletapdown');
-            }
-            ..onDoubleTap = () {
-              events.add('doubletapup');
-            }
-            ..onDoubleTapCancel = () {
-              events.add('doubletapcancel');
-            };
+      final doubleTaps = DoubleTapGestureRecognizer()
+        ..onDoubleTapDown = (TapDownDetails details) {
+          events.add('doubletapdown');
+        }
+        ..onDoubleTap = () {
+          events.add('doubletapup');
+        }
+        ..onDoubleTapCancel = () {
+          events.add('doubletapcancel');
+        };
       addTearDown(doubleTaps.dispose);
 
       tapAndDrag.addPointer(down1);
@@ -855,17 +841,16 @@ void main() {
     (GestureTester tester) {
       setUpTapAndPanGestureRecognizer();
 
-      final TapGestureRecognizer taps =
-          TapGestureRecognizer()
-            ..onTapDown = (TapDownDetails details) {
-              events.add('tapdown');
-            }
-            ..onTapUp = (TapUpDetails details) {
-              events.add('tapup');
-            }
-            ..onTapCancel = () {
-              events.add('tapscancel');
-            };
+      final taps = TapGestureRecognizer()
+        ..onTapDown = (TapDownDetails details) {
+          events.add('tapdown');
+        }
+        ..onTapUp = (TapUpDetails details) {
+          events.add('tapup');
+        }
+        ..onTapCancel = () {
+          events.add('tapscancel');
+        };
       addTearDown(taps.dispose);
       tapAndDrag.addPointer(down1);
       taps.addPointer(down1);
@@ -882,17 +867,16 @@ void main() {
   ) {
     setUpTapAndPanGestureRecognizer();
 
-    final TapGestureRecognizer taps =
-        TapGestureRecognizer()
-          ..onTapDown = (TapDownDetails details) {
-            events.add('tapdown');
-          }
-          ..onTapUp = (TapUpDetails details) {
-            events.add('tapup');
-          }
-          ..onTapCancel = () {
-            events.add('tapscancel');
-          };
+    final taps = TapGestureRecognizer()
+      ..onTapDown = (TapDownDetails details) {
+        events.add('tapdown');
+      }
+      ..onTapUp = (TapUpDetails details) {
+        events.add('tapup');
+      }
+      ..onTapCancel = () {
+        events.add('tapscancel');
+      };
     addTearDown(taps.dispose);
 
     tapAndDrag.addPointer(down5);
@@ -920,20 +904,19 @@ void main() {
     (GestureTester tester) {
       setUpTapAndPanGestureRecognizer();
 
-      final PanGestureRecognizer pans =
-          PanGestureRecognizer()
-            ..onStart = (DragStartDetails details) {
-              events.add('panstart');
-            }
-            ..onUpdate = (DragUpdateDetails details) {
-              events.add('panupdate');
-            }
-            ..onEnd = (DragEndDetails details) {
-              events.add('panend');
-            }
-            ..onCancel = () {
-              events.add('pancancel');
-            };
+      final pans = PanGestureRecognizer()
+        ..onStart = (DragStartDetails details) {
+          events.add('panstart');
+        }
+        ..onUpdate = (DragUpdateDetails details) {
+          events.add('panupdate');
+        }
+        ..onEnd = (DragEndDetails details) {
+          events.add('panend');
+        }
+        ..onCancel = () {
+          events.add('pancancel');
+        };
       addTearDown(pans.dispose);
 
       tapAndDrag.addPointer(down5);
@@ -990,13 +973,12 @@ void main() {
 
   // This is a regression test for https://github.com/flutter/flutter/issues/102084.
   testGesture('Does not call onDragEnd if not provided', (GestureTester tester) {
-    tapAndDrag =
-        TapAndDragGestureRecognizer()
-          ..dragStartBehavior = DragStartBehavior.down
-          ..maxConsecutiveTap = 3
-          ..onTapDown = (TapDragDownDetails details) {
-            events.add('down#${details.consecutiveTapCount}');
-          };
+    tapAndDrag = TapAndDragGestureRecognizer()
+      ..dragStartBehavior = DragStartBehavior.down
+      ..maxConsecutiveTap = 3
+      ..onTapDown = (TapDragDownDetails details) {
+        events.add('down#${details.consecutiveTapCount}');
+      };
     addTearDown(tapAndDrag.dispose);
 
     FlutterErrorDetails? errorDetails;
@@ -1030,17 +1012,16 @@ void main() {
 
   testGesture('Contains correct positions in the drag end details', (GestureTester tester) {
     late TapDragEndDetails tapDragEndDetails;
-    tapAndDrag =
-        TapAndHorizontalDragGestureRecognizer()
-          ..dragStartBehavior = DragStartBehavior.down
-          ..eagerVictoryOnDrag = true
-          ..maxConsecutiveTap = 3
-          ..onDragEnd = (TapDragEndDetails details) {
-            tapDragEndDetails = details;
-          };
+    tapAndDrag = TapAndHorizontalDragGestureRecognizer()
+      ..dragStartBehavior = DragStartBehavior.down
+      ..eagerVictoryOnDrag = true
+      ..maxConsecutiveTap = 3
+      ..onDragEnd = (TapDragEndDetails details) {
+        tapDragEndDetails = details;
+      };
     addTearDown(tapAndDrag.dispose);
 
-    final TestPointer pointer = TestPointer(5);
+    final pointer = TestPointer(5);
     final PointerDownEvent pointerDown = pointer.down(const Offset(10.0, 10.0));
 
     tapAndDrag.addPointer(pointerDown);

@@ -32,7 +32,7 @@ class TestBundle {
   final List<CompileConfiguration> compileConfigs;
 }
 
-enum CanvasKitVariant { full, chromium }
+enum CanvasKitVariant { full, chromium, experimentalWebParagraph }
 
 enum BrowserName { chrome, edge, firefox, safari }
 
@@ -40,32 +40,45 @@ class RunConfiguration {
   RunConfiguration(
     this.name,
     this.browser,
+    this.browserFlags,
     this.variant,
     this.crossOriginIsolated,
     this.forceSingleThreadedSkwasm,
+    this.wasmAllowList,
   );
 
   final String name;
   final BrowserName browser;
+  final List<String> browserFlags;
   final CanvasKitVariant? variant;
   final bool crossOriginIsolated;
   final bool forceSingleThreadedSkwasm;
+  final Map<String, bool> wasmAllowList;
 }
 
 class ArtifactDependencies {
   ArtifactDependencies({
+    required this.canvasKitExperimentalWebParagraph,
     required this.canvasKit,
     required this.canvasKitChromium,
     required this.skwasm,
   });
 
-  ArtifactDependencies.none() : canvasKit = false, canvasKitChromium = false, skwasm = false;
+  ArtifactDependencies.none()
+    : canvasKitExperimentalWebParagraph = false,
+      canvasKit = false,
+      canvasKitChromium = false,
+      skwasm = false;
+
+  final bool canvasKitExperimentalWebParagraph;
   final bool canvasKit;
   final bool canvasKitChromium;
   final bool skwasm;
 
   ArtifactDependencies operator |(ArtifactDependencies other) {
     return ArtifactDependencies(
+      canvasKitExperimentalWebParagraph:
+          canvasKitExperimentalWebParagraph || other.canvasKitExperimentalWebParagraph,
       canvasKit: canvasKit || other.canvasKit,
       canvasKitChromium: canvasKitChromium || other.canvasKitChromium,
       skwasm: skwasm || other.skwasm,
@@ -74,6 +87,8 @@ class ArtifactDependencies {
 
   ArtifactDependencies operator &(ArtifactDependencies other) {
     return ArtifactDependencies(
+      canvasKitExperimentalWebParagraph:
+          canvasKitExperimentalWebParagraph && other.canvasKitExperimentalWebParagraph,
       canvasKit: canvasKit && other.canvasKit,
       canvasKitChromium: canvasKitChromium && other.canvasKitChromium,
       skwasm: skwasm && other.skwasm,
@@ -82,12 +97,13 @@ class ArtifactDependencies {
 }
 
 class TestSuite {
-  TestSuite(this.name, this.testBundle, this.runConfig, this.artifactDependencies);
+  TestSuite(this.name, this.testBundle, this.runConfig, this.artifactDependencies, this.enableCi);
 
   String name;
   TestBundle testBundle;
   RunConfiguration runConfig;
   ArtifactDependencies artifactDependencies;
+  bool enableCi;
 }
 
 class FeltConfig {
@@ -100,17 +116,17 @@ class FeltConfig {
   );
 
   factory FeltConfig.fromFile(String filePath) {
-    final io.File configFile = io.File(filePath);
-    final YamlMap yaml = loadYaml(configFile.readAsStringSync()) as YamlMap;
+    final configFile = io.File(filePath);
+    final yaml = loadYaml(configFile.readAsStringSync()) as YamlMap;
 
-    final List<CompileConfiguration> compileConfigs = <CompileConfiguration>[];
-    final Map<String, CompileConfiguration> compileConfigsByName = <String, CompileConfiguration>{};
+    final compileConfigs = <CompileConfiguration>[];
+    final compileConfigsByName = <String, CompileConfiguration>{};
     for (final dynamic node in yaml['compile-configs'] as YamlList) {
-      final YamlMap configYaml = node as YamlMap;
-      final String name = configYaml['name'] as String;
+      final configYaml = node as YamlMap;
+      final name = configYaml['name'] as String;
       final Compiler compiler = Compiler.values.byName(configYaml['compiler'] as String);
       final Renderer renderer = Renderer.values.byName(configYaml['renderer'] as String);
-      final CompileConfiguration config = CompileConfiguration(name, compiler, renderer);
+      final config = CompileConfiguration(name, compiler, renderer);
       compileConfigs.add(config);
       if (compileConfigsByName.containsKey(name)) {
         throw AssertionError('Duplicate compile config name: $name');
@@ -118,13 +134,13 @@ class FeltConfig {
       compileConfigsByName[name] = config;
     }
 
-    final List<TestSet> testSets = <TestSet>[];
-    final Map<String, TestSet> testSetsByName = <String, TestSet>{};
+    final testSets = <TestSet>[];
+    final testSetsByName = <String, TestSet>{};
     for (final dynamic node in yaml['test-sets'] as YamlList) {
-      final YamlMap testSetYaml = node as YamlMap;
-      final String name = testSetYaml['name'] as String;
-      final String directory = testSetYaml['directory'] as String;
-      final TestSet testSet = TestSet(name, directory);
+      final testSetYaml = node as YamlMap;
+      final name = testSetYaml['name'] as String;
+      final directory = testSetYaml['directory'] as String;
+      final testSet = TestSet(name, directory);
       testSets.add(testSet);
       if (testSetsByName.containsKey(name)) {
         throw AssertionError('Duplicate test set name: $name');
@@ -132,12 +148,12 @@ class FeltConfig {
       testSetsByName[name] = testSet;
     }
 
-    final List<TestBundle> testBundles = <TestBundle>[];
-    final Map<String, TestBundle> testBundlesByName = <String, TestBundle>{};
+    final testBundles = <TestBundle>[];
+    final testBundlesByName = <String, TestBundle>{};
     for (final dynamic node in yaml['test-bundles'] as YamlList) {
-      final YamlMap testBundleYaml = node as YamlMap;
-      final String name = testBundleYaml['name'] as String;
-      final String testSetName = testBundleYaml['test-set'] as String;
+      final testBundleYaml = node as YamlMap;
+      final name = testBundleYaml['name'] as String;
+      final testSetName = testBundleYaml['test-set'] as String;
       final TestSet? testSet = testSetsByName[testSetName];
       if (testSet == null) {
         throw AssertionError(
@@ -149,12 +165,11 @@ class FeltConfig {
       if (compileConfigsValue is String) {
         compileConfigs = <CompileConfiguration>[compileConfigsByName[compileConfigsValue]!];
       } else {
-        compileConfigs =
-            (compileConfigsValue as List<dynamic>)
-                .map((dynamic configName) => compileConfigsByName[configName as String]!)
-                .toList();
+        compileConfigs = (compileConfigsValue as List<dynamic>)
+            .map((dynamic configName) => compileConfigsByName[configName as String]!)
+            .toList();
       }
-      final TestBundle bundle = TestBundle(name, testSet, compileConfigs);
+      final bundle = TestBundle(name, testSet, compileConfigs);
       testBundles.add(bundle);
       if (testBundlesByName.containsKey(name)) {
         throw AssertionError('Duplicate test bundle name: $name');
@@ -162,24 +177,30 @@ class FeltConfig {
       testBundlesByName[name] = bundle;
     }
 
-    final List<RunConfiguration> runConfigs = <RunConfiguration>[];
-    final Map<String, RunConfiguration> runConfigsByName = <String, RunConfiguration>{};
+    final runConfigs = <RunConfiguration>[];
+    final runConfigsByName = <String, RunConfiguration>{};
     for (final dynamic node in yaml['run-configs'] as YamlList) {
-      final YamlMap runConfigYaml = node as YamlMap;
-      final String name = runConfigYaml['name'] as String;
+      final runConfigYaml = node as YamlMap;
+      final name = runConfigYaml['name'] as String;
       final BrowserName browser = BrowserName.values.byName(runConfigYaml['browser'] as String);
+      final List<String> browserFlags =
+          (runConfigYaml['browser-flags'] as YamlList?)?.cast<String>() ?? <String>[];
       final dynamic variantNode = runConfigYaml['canvaskit-variant'];
-      final CanvasKitVariant? variant =
-          variantNode == null ? null : CanvasKitVariant.values.byName(variantNode as String);
+      final CanvasKitVariant? variant = variantNode == null
+          ? null
+          : CanvasKitVariant.values.byName(variantNode as String);
       final bool crossOriginIsolated = runConfigYaml['cross-origin-isolated'] as bool? ?? false;
       final bool forceSingleThreadedSkwasm =
           runConfigYaml['force-single-threaded-skwasm'] as bool? ?? false;
-      final RunConfiguration runConfig = RunConfiguration(
+      final YamlMap wasmAllowList = (runConfigYaml['wasm-allow-list'] as YamlMap?) ?? YamlMap();
+      final runConfig = RunConfiguration(
         name,
         browser,
+        browserFlags,
         variant,
         crossOriginIsolated,
         forceSingleThreadedSkwasm,
+        wasmAllowList.cast<String, bool>(),
       );
       runConfigs.add(runConfig);
       if (runConfigsByName.containsKey(name)) {
@@ -188,31 +209,37 @@ class FeltConfig {
       runConfigsByName[name] = runConfig;
     }
 
-    final List<TestSuite> testSuites = <TestSuite>[];
+    final testSuites = <TestSuite>[];
     for (final dynamic node in yaml['test-suites'] as YamlList) {
-      final YamlMap testSuiteYaml = node as YamlMap;
-      final String name = testSuiteYaml['name'] as String;
-      final String testBundleName = testSuiteYaml['test-bundle'] as String;
+      final testSuiteYaml = node as YamlMap;
+      final name = testSuiteYaml['name'] as String;
+      final testBundleName = testSuiteYaml['test-bundle'] as String;
       final TestBundle? bundle = testBundlesByName[testBundleName];
       if (bundle == null) {
         throw AssertionError(
           'Test bundle not found with name: `$testBundleName` (referenced by test suite: `$name`)',
         );
       }
-      final String runConfigName = testSuiteYaml['run-config'] as String;
+      final runConfigName = testSuiteYaml['run-config'] as String;
       final RunConfiguration? runConfig = runConfigsByName[runConfigName];
       if (runConfig == null) {
         throw AssertionError(
           'Run config not found with name: `$runConfigName` (referenced by test suite: `$name`)',
         );
       }
-      bool canvasKit = false;
-      bool canvasKitChromium = false;
-      bool skwasm = false;
+      var canvasKitExperimentalWebParagraph = false;
+      var canvasKit = false;
+      var canvasKitChromium = false;
+      var skwasm = false;
       final dynamic depsNode = testSuiteYaml['artifact-deps'];
       if (depsNode != null) {
         for (final dynamic dep in depsNode as YamlList) {
           switch (dep as String) {
+            case 'canvaskit_experimental_webparagraph':
+              if (canvasKitExperimentalWebParagraph) {
+                throw AssertionError('Artifact dep $dep listed twice in suite $name.');
+              }
+              canvasKitExperimentalWebParagraph = true;
             case 'canvaskit':
               if (canvasKit) {
                 throw AssertionError('Artifact dep $dep listed twice in suite $name.');
@@ -233,12 +260,14 @@ class FeltConfig {
           }
         }
       }
-      final ArtifactDependencies artifactDeps = ArtifactDependencies(
+      final artifactDeps = ArtifactDependencies(
+        canvasKitExperimentalWebParagraph: canvasKitExperimentalWebParagraph,
         canvasKit: canvasKit,
         canvasKitChromium: canvasKitChromium,
         skwasm: skwasm,
       );
-      final TestSuite suite = TestSuite(name, bundle, runConfig, artifactDeps);
+      final bool enableCi = (testSuiteYaml['enable-ci'] as bool?) ?? true;
+      final suite = TestSuite(name, bundle, runConfig, artifactDeps, enableCi);
       testSuites.add(suite);
     }
     return FeltConfig(compileConfigs, testSets, testBundles, runConfigs, testSuites);

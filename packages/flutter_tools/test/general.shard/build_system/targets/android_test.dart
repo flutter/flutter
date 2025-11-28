@@ -36,7 +36,7 @@ void main() {
   });
 
   testUsingContext('debug bundle contains expected resources', () async {
-    final Environment environment = Environment.test(
+    final environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
       defines: <String, String>{kBuildMode: 'debug'},
@@ -80,7 +80,7 @@ void main() {
   });
 
   testUsingContext('debug bundle contains expected resources with bundle SkSL', () async {
-    final Environment environment = Environment.test(
+    final environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
       defines: <String, String>{kBuildMode: 'debug'},
@@ -119,7 +119,7 @@ void main() {
   });
 
   testWithoutContext('profile bundle contains expected resources', () async {
-    final Environment environment = Environment.test(
+    final environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
       defines: <String, String>{kBuildMode: 'profile'},
@@ -139,7 +139,7 @@ void main() {
   });
 
   testWithoutContext('release bundle contains expected resources', () async {
-    final Environment environment = Environment.test(
+    final environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
       defines: <String, String>{kBuildMode: 'release'},
@@ -160,7 +160,7 @@ void main() {
 
   testUsingContext('AndroidAot can build provided target platform', () async {
     processManager = FakeProcessManager.empty();
-    final Environment environment = Environment.test(
+    final environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
       defines: <String, String>{kBuildMode: 'release'},
@@ -188,7 +188,7 @@ void main() {
     environment.buildDir.createSync(recursive: true);
     environment.buildDir.childFile('app.dill').createSync();
     environment.buildDir.childFile('native_assets.json').createSync();
-    const AndroidAot androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
+    const androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
 
     await androidAot.build(environment);
 
@@ -197,7 +197,7 @@ void main() {
 
   testUsingContext('AndroidAot provide code size information.', () async {
     processManager = FakeProcessManager.empty();
-    final Environment environment = Environment.test(
+    final environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
       defines: <String, String>{kBuildMode: 'release', kCodeSizeDirectory: 'code_size_1'},
@@ -227,7 +227,7 @@ void main() {
     environment.buildDir.createSync(recursive: true);
     environment.buildDir.childFile('app.dill').createSync();
     environment.buildDir.childFile('native_assets.json').createSync();
-    const AndroidAot androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
+    const androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
 
     await androidAot.build(environment);
 
@@ -236,7 +236,7 @@ void main() {
 
   testUsingContext('kExtraGenSnapshotOptions passes values to gen_snapshot', () async {
     processManager = FakeProcessManager.empty();
-    final Environment environment = Environment.test(
+    final environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
       defines: <String, String>{
@@ -279,7 +279,7 @@ void main() {
     '--no-strip in kExtraGenSnapshotOptions suppresses --strip gen_snapshot flag',
     () async {
       processManager = FakeProcessManager.empty();
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         outputDir: fileSystem.directory('out')..createSync(),
         defines: <String, String>{
@@ -318,7 +318,7 @@ void main() {
   );
 
   testWithoutContext('android aot bundle copies so from abi directory', () async {
-    final Environment environment = Environment.test(
+    final environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
       defines: <String, String>{kBuildMode: 'release'},
@@ -328,8 +328,8 @@ void main() {
       logger: logger,
     );
     environment.buildDir.createSync(recursive: true);
-    const AndroidAot androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
-    const AndroidAotBundle androidAotBundle = AndroidAotBundle(androidAot);
+    const androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
+    const androidAotBundle = AndroidAotBundle(androidAot);
     // Create required files.
     environment.buildDir
         .childDirectory('arm64-v8a')
@@ -345,7 +345,7 @@ void main() {
   });
 
   test('copyDeferredComponentSoFiles copies all files to correct locations', () {
-    final Environment environment = Environment.test(
+    final environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('/out')..createSync(),
       defines: <String, String>{kBuildMode: 'release'},
@@ -374,11 +374,11 @@ void main() {
     so6.createSync(recursive: true);
     so6.writeAsStringSync('lib3');
 
-    final List<DeferredComponent> components = <DeferredComponent>[
+    final components = <DeferredComponent>[
       DeferredComponent(name: 'component2', libraries: <String>['lib1']),
       DeferredComponent(name: 'component3', libraries: <String>['lib2']),
     ];
-    final List<LoadingUnit> loadingUnits = <LoadingUnit>[
+    final loadingUnits = <LoadingUnit>[
       LoadingUnit(id: 2, libraries: <String>['lib1'], path: '/unit2/abi1/part.so'),
       LoadingUnit(id: 3, libraries: <String>['lib2'], path: '/unit3/abi1/part.so'),
       LoadingUnit(id: 4, libraries: <String>['lib3'], path: '/unit4/abi1/part.so'),
@@ -387,7 +387,7 @@ void main() {
       LoadingUnit(id: 3, libraries: <String>['lib2'], path: '/unit3/abi2/part.so'),
       LoadingUnit(id: 4, libraries: <String>['lib3'], path: '/unit4/abi2/part.so'),
     ];
-    for (final DeferredComponent component in components) {
+    for (final component in components) {
       component.assignLoadingUnits(loadingUnits);
     }
     final Directory buildDir = fileSystem.directory('/build');
@@ -442,7 +442,7 @@ void main() {
   });
 
   test('copyDeferredComponentSoFiles copies files for only listed abis', () {
-    final Environment environment = Environment.test(
+    final environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('/out')..createSync(),
       defines: <String, String>{kBuildMode: 'release'},
@@ -471,11 +471,11 @@ void main() {
     so6.createSync(recursive: true);
     so6.writeAsStringSync('lib3');
 
-    final List<DeferredComponent> components = <DeferredComponent>[
+    final components = <DeferredComponent>[
       DeferredComponent(name: 'component2', libraries: <String>['lib1']),
       DeferredComponent(name: 'component3', libraries: <String>['lib2']),
     ];
-    final List<LoadingUnit> loadingUnits = <LoadingUnit>[
+    final loadingUnits = <LoadingUnit>[
       LoadingUnit(id: 2, libraries: <String>['lib1'], path: '/unit2/abi1/part.so'),
       LoadingUnit(id: 3, libraries: <String>['lib2'], path: '/unit3/abi1/part.so'),
       LoadingUnit(id: 4, libraries: <String>['lib3'], path: '/unit4/abi1/part.so'),
@@ -484,7 +484,7 @@ void main() {
       LoadingUnit(id: 3, libraries: <String>['lib2'], path: '/unit3/abi2/part.so'),
       LoadingUnit(id: 4, libraries: <String>['lib3'], path: '/unit4/abi2/part.so'),
     ];
-    for (final DeferredComponent component in components) {
+    for (final component in components) {
       component.assignLoadingUnits(loadingUnits);
     }
     final Directory buildDir = fileSystem.directory('/build');
@@ -530,7 +530,7 @@ void main() {
           .file(artifacts.getHostArtifact(HostArtifact.impellerc))
           .createSync(recursive: true);
 
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         outputDir: fileSystem.directory('out')..createSync(),
         defines: <String, String>{kBuildMode: 'debug'},
@@ -553,7 +553,7 @@ void main() {
       fileSystem
           .file('pubspec.yaml')
           .writeAsStringSync('name: hello\nflutter:\n  shaders:\n    - shader.glsl');
-      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'hello');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'hello');
       fileSystem.file('shader.glsl').writeAsStringSync('test');
 
       processManager.addCommands(<FakeCommand>[

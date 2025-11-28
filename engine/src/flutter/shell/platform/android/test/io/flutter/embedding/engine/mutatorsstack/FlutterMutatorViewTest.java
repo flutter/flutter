@@ -26,7 +26,6 @@ import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 
-@Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
 public class FlutterMutatorViewTest {
   private final Context ctx = ApplicationProvider.getApplicationContext();
@@ -47,7 +46,7 @@ public class FlutterMutatorViewTest {
 
       final Matrix screenMatrix = new Matrix();
       screenMatrix.postTranslate(1, 2);
-      assertTrue(matrixCaptor.getValue().equals(screenMatrix));
+      assertEquals(matrixCaptor.getValue(), screenMatrix);
     }
 
     reset(touchProcessor);
@@ -60,7 +59,7 @@ public class FlutterMutatorViewTest {
 
       final Matrix screenMatrix = new Matrix();
       screenMatrix.postTranslate(1, 2);
-      assertTrue(matrixCaptor.getValue().equals(screenMatrix));
+      assertEquals(matrixCaptor.getValue(), screenMatrix);
     }
 
     reset(touchProcessor);
@@ -73,7 +72,7 @@ public class FlutterMutatorViewTest {
 
       final Matrix screenMatrix = new Matrix();
       screenMatrix.postTranslate(3, 4);
-      assertTrue(matrixCaptor.getValue().equals(screenMatrix));
+      assertEquals(matrixCaptor.getValue(), screenMatrix);
     }
 
     reset(touchProcessor);
@@ -86,7 +85,7 @@ public class FlutterMutatorViewTest {
 
       final Matrix screenMatrix = new Matrix();
       screenMatrix.postTranslate(7, 8);
-      assertTrue(matrixCaptor.getValue().equals(screenMatrix));
+      assertEquals(matrixCaptor.getValue(), screenMatrix);
     }
   }
 

@@ -16,7 +16,7 @@ import '../widgets/editable_text_utils.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  final MockClipboard mockClipboard = MockClipboard();
+  final mockClipboard = MockClipboard();
   TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
     SystemChannels.platform,
     mockClipboard.handleMethodCall,
@@ -31,10 +31,14 @@ void main() {
   testWidgets(
     'can use the desktop cut/copy/paste buttons on Mac',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(text: 'blah1 blah2');
+      final controller = TextEditingController(text: 'blah1 blah2');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextFormField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextFormField(controller: controller)),
+          ),
+        ),
       );
 
       // Initially, the menu is not shown and there is no selection.
@@ -103,10 +107,14 @@ void main() {
   testWidgets(
     'can use the desktop cut/copy/paste buttons on Windows and Linux',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(text: 'blah1 blah2');
+      final controller = TextEditingController(text: 'blah1 blah2');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextFormField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextFormField(controller: controller)),
+          ),
+        ),
       );
 
       // Initially, the menu is not shown and there is no selection.
@@ -245,10 +253,14 @@ void main() {
   testWidgets(
     '$SelectionOverlay is not leaking',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(text: 'blah1 blah2');
+      final controller = TextEditingController(text: 'blah1 blah2');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
+        ),
       );
 
       final Offset startBlah1 = textOffsetToPosition(tester, 0);
@@ -264,7 +276,7 @@ void main() {
   testWidgets(
     'the desktop cut/copy/paste buttons are disabled for read-only obscured form fields',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(text: 'blah1 blah2');
+      final controller = TextEditingController(text: 'blah1 blah2');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         MaterialApp(
@@ -278,7 +290,7 @@ void main() {
 
       // Initially, the menu is not shown and there is no selection.
       expect(find.byType(CupertinoButton), findsNothing);
-      const TextSelection invalidSelection = TextSelection(baseOffset: -1, extentOffset: -1);
+      const invalidSelection = TextSelection(baseOffset: -1, extentOffset: -1);
       expect(controller.selection, invalidSelection);
 
       final Offset midBlah1 = textOffsetToPosition(tester, 2);
@@ -305,7 +317,7 @@ void main() {
   testWidgets(
     'the desktop cut/copy buttons are disabled for obscured form fields',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(text: 'blah1 blah2');
+      final controller = TextEditingController(text: 'blah1 blah2');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         MaterialApp(
@@ -317,7 +329,7 @@ void main() {
 
       // Initially, the menu is not shown and there is no selection.
       expect(find.byType(CupertinoButton), findsNothing);
-      const TextSelection invalidSelection = TextSelection(baseOffset: -1, extentOffset: -1);
+      const invalidSelection = TextSelection(baseOffset: -1, extentOffset: -1);
       expect(controller.selection, invalidSelection);
 
       final Offset midBlah1 = textOffsetToPosition(tester, 2);
@@ -366,7 +378,11 @@ void main() {
     const TextAlign alignment = TextAlign.center;
 
     await tester.pumpWidget(
-      MaterialApp(home: Material(child: Center(child: TextFormField(textAlign: alignment)))),
+      MaterialApp(
+        home: Material(
+          child: Center(child: TextFormField(textAlign: alignment)),
+        ),
+      ),
     );
 
     final Finder textFieldFinder = find.byType(TextField);
@@ -377,11 +393,13 @@ void main() {
   });
 
   testWidgets('Passes scrollPhysics to underlying TextField', (WidgetTester tester) async {
-    const ScrollPhysics scrollPhysics = ScrollPhysics();
+    const scrollPhysics = ScrollPhysics();
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: Center(child: TextFormField(scrollPhysics: scrollPhysics))),
+        home: Material(
+          child: Center(child: TextFormField(scrollPhysics: scrollPhysics)),
+        ),
       ),
     );
 
@@ -397,7 +415,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: Center(child: TextFormField(textAlignVertical: textAlignVertical))),
+        home: Material(
+          child: Center(child: TextFormField(textAlignVertical: textAlignVertical)),
+        ),
       ),
     );
 
@@ -411,7 +431,9 @@ void main() {
   testWidgets('Passes textInputAction to underlying TextField', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: Center(child: TextFormField(textInputAction: TextInputAction.next))),
+        home: Material(
+          child: Center(child: TextFormField(textInputAction: TextInputAction.next)),
+        ),
       ),
     );
 
@@ -427,7 +449,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: Center(child: TextFormField(onEditingComplete: onEditingComplete))),
+        home: Material(
+          child: Center(child: TextFormField(onEditingComplete: onEditingComplete)),
+        ),
       ),
     );
 
@@ -439,9 +463,9 @@ void main() {
   });
 
   testWidgets('Passes cursor attributes to underlying TextField', (WidgetTester tester) async {
-    const double cursorWidth = 3.14;
-    const double cursorHeight = 6.28;
-    const Radius cursorRadius = Radius.circular(4);
+    const cursorWidth = 3.14;
+    const cursorHeight = 6.28;
+    const cursorRadius = Radius.circular(4);
     const Color cursorColor = Colors.purple;
 
     await tester.pumpWidget(
@@ -470,7 +494,7 @@ void main() {
   });
 
   testWidgets('onFieldSubmit callbacks are called', (WidgetTester tester) async {
-    bool called = false;
+    var called = false;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -515,7 +539,7 @@ void main() {
   });
 
   testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
-    int validateCalled = 0;
+    var validateCalled = 0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -540,7 +564,7 @@ void main() {
   });
 
   testWidgets('validate is called if widget is enabled', (WidgetTester tester) async {
-    int validateCalled = 0;
+    var validateCalled = 0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -566,9 +590,9 @@ void main() {
   });
 
   testWidgets('Disabled field hides helper and counter in M2', (WidgetTester tester) async {
-    const String helperText = 'helper text';
-    const String counterText = 'counter text';
-    const String errorText = 'error text';
+    const helperText = 'helper text';
+    const counterText = 'counter text';
+    const errorText = 'error text';
     Widget buildFrame(bool enabled, bool hasError) {
       return MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -619,14 +643,10 @@ void main() {
         home: Material(
           child: Center(
             child: TextFormField(
-              buildCounter: (
-                BuildContext context, {
-                int? currentLength,
-                int? maxLength,
-                bool? isFocused,
-              }) {
-                return Text('$currentLength of $maxLength');
-              },
+              buildCounter:
+                  (BuildContext context, {int? currentLength, int? maxLength, bool? isFocused}) {
+                    return Text('$currentLength of $maxLength');
+                  },
               maxLength: 10,
             ),
           ),
@@ -680,7 +700,7 @@ void main() {
   }, skip: isBrowser); // [intended] We do not use Flutter-rendered context menu on the Web.
 
   testWidgets('onTap is called upon tap', (WidgetTester tester) async {
-    int tapCount = 0;
+    var tapCount = 0;
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -707,7 +727,7 @@ void main() {
   });
 
   testWidgets('onTapOutside is called upon tap outside', (WidgetTester tester) async {
-    int tapOutsideCount = 0;
+    var tapOutsideCount = 0;
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -744,9 +764,9 @@ void main() {
       final GlobalKey keyA = GlobalKey();
       final GlobalKey keyB = GlobalKey();
       final GlobalKey keyC = GlobalKey();
-      bool outsideClickA = false;
-      bool outsideClickB = false;
-      bool outsideClickC = false;
+      var outsideClickA = false;
+      var outsideClickB = false;
+      var outsideClickC = false;
       await tester.pumpWidget(
         MaterialApp(
           home: Align(
@@ -829,7 +849,9 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: Center(child: TextFormField(initialValue: 'initialValue'))),
+        home: Material(
+          child: Center(child: TextFormField(initialValue: 'initialValue')),
+        ),
       ),
     );
 
@@ -847,11 +869,15 @@ void main() {
   testWidgets('reset resets the text fields value to the controller initial value', (
     WidgetTester tester,
   ) async {
-    final TextEditingController controller = TextEditingController(text: 'initialValue');
+    final controller = TextEditingController(text: 'initialValue');
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(home: Material(child: Center(child: TextFormField(controller: controller)))),
+      MaterialApp(
+        home: Material(
+          child: Center(child: TextFormField(controller: controller)),
+        ),
+      ),
     );
 
     await tester.enterText(find.byType(TextFormField), 'changedValue');
@@ -869,7 +895,11 @@ void main() {
   testWidgets("didChange resets the text field's value to empty when passed null", (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(MaterialApp(home: Material(child: Center(child: TextFormField()))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: Center(child: TextFormField())),
+      ),
+    );
 
     await tester.enterText(find.byType(TextFormField), 'changedValue');
     await tester.pump();
@@ -888,7 +918,11 @@ void main() {
   testWidgets("reset resets the text field's value to empty when initialValue is null", (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(MaterialApp(home: Material(child: Center(child: TextFormField()))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: Center(child: TextFormField())),
+      ),
+    );
 
     await tester.enterText(find.byType(TextFormField), 'changedValue');
     await tester.pump();
@@ -907,7 +941,9 @@ void main() {
   testWidgets('didChange changes text fields value', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: Center(child: TextFormField(initialValue: 'initialValue'))),
+        home: Material(
+          child: Center(child: TextFormField(initialValue: 'initialValue')),
+        ),
       ),
     );
 
@@ -925,7 +961,7 @@ void main() {
   testWidgets('onChanged callbacks value and FormFieldState.value are sync', (
     WidgetTester tester,
   ) async {
-    bool called = false;
+    var called = false;
 
     late FormFieldState<String> state;
 
@@ -967,7 +1003,7 @@ void main() {
   });
 
   testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
-    int validateCalled = 0;
+    var validateCalled = 0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1051,12 +1087,14 @@ void main() {
   });
 
   testWidgets('Passes scrollController to underlying TextField', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
+    final scrollController = ScrollController();
     addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: Center(child: TextFormField(scrollController: scrollController))),
+        home: Material(
+          child: Center(child: TextFormField(scrollController: scrollController)),
+        ),
       ),
     );
 
@@ -1145,10 +1183,14 @@ void main() {
   testWidgets(
     'Right clicking menu behavior',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(text: 'blah1 blah2');
+      final controller = TextEditingController(text: 'blah1 blah2');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextFormField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextFormField(controller: controller)),
+          ),
+        ),
       );
 
       // Initially, the menu is not shown and there is no selection.
@@ -1219,7 +1261,7 @@ void main() {
   testWidgets('spellCheckConfiguration passes through to EditableText', (
     WidgetTester tester,
   ) async {
-    final SpellCheckConfiguration mySpellCheckConfiguration = SpellCheckConfiguration(
+    final mySpellCheckConfiguration = SpellCheckConfiguration(
       spellCheckService: DefaultSpellCheckService(),
       misspelledTextStyle: TextField.materialMisspelledTextStyle,
     );
@@ -1247,14 +1289,15 @@ void main() {
   });
 
   testWidgets('magnifierConfiguration passes through to EditableText', (WidgetTester tester) async {
-    final TextMagnifierConfiguration myTextMagnifierConfiguration = TextMagnifierConfiguration(
-      magnifierBuilder: (
-        BuildContext context,
-        MagnifierController controller,
-        ValueNotifier<MagnifierInfo> notifier,
-      ) {
-        return const Placeholder();
-      },
+    final myTextMagnifierConfiguration = TextMagnifierConfiguration(
+      magnifierBuilder:
+          (
+            BuildContext context,
+            MagnifierController controller,
+            ValueNotifier<MagnifierInfo> notifier,
+          ) {
+            return const Placeholder();
+          },
     );
 
     await tester.pumpWidget(
@@ -1270,14 +1313,14 @@ void main() {
   });
 
   testWidgets('Passes undoController to undoController TextField', (WidgetTester tester) async {
-    final UndoHistoryController undoController = UndoHistoryController(
-      value: UndoHistoryValue.empty,
-    );
+    final undoController = UndoHistoryController(value: UndoHistoryValue.empty);
     addTearDown(undoController.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: Center(child: TextFormField(undoController: undoController))),
+        home: Material(
+          child: Center(child: TextFormField(undoController: undoController)),
+        ),
       ),
     );
 
@@ -1291,7 +1334,7 @@ void main() {
   testWidgets('Passes cursorOpacityAnimates to cursorOpacityAnimates TextField', (
     WidgetTester tester,
   ) async {
-    const bool cursorOpacityAnimates = true;
+    const cursorOpacityAnimates = true;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1311,8 +1354,9 @@ void main() {
   testWidgets('Passes contentInsertionConfiguration to contentInsertionConfiguration TextField', (
     WidgetTester tester,
   ) async {
-    final ContentInsertionConfiguration contentInsertionConfiguration =
-        ContentInsertionConfiguration(onContentInserted: (KeyboardInsertedContent value) {});
+    final contentInsertionConfiguration = ContentInsertionConfiguration(
+      onContentInserted: (KeyboardInsertedContent value) {},
+    );
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1335,7 +1379,11 @@ void main() {
     const Clip clipBehavior = Clip.antiAlias;
 
     await tester.pumpWidget(
-      MaterialApp(home: Material(child: Center(child: TextFormField(clipBehavior: clipBehavior)))),
+      MaterialApp(
+        home: Material(
+          child: Center(child: TextFormField(clipBehavior: clipBehavior)),
+        ),
+      ),
     );
 
     final Finder textFieldFinder = find.byType(TextField);
@@ -1346,11 +1394,13 @@ void main() {
   });
 
   testWidgets('Passes scribbleEnabled to scribbleEnabled TextField', (WidgetTester tester) async {
-    const bool scribbleEnabled = false;
+    const scribbleEnabled = false;
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: Center(child: TextFormField(scribbleEnabled: scribbleEnabled))),
+        home: Material(
+          child: Center(child: TextFormField(scribbleEnabled: scribbleEnabled)),
+        ),
       ),
     );
 
@@ -1362,11 +1412,13 @@ void main() {
   });
 
   testWidgets('Passes canRequestFocus to canRequestFocus TextField', (WidgetTester tester) async {
-    const bool canRequestFocus = false;
+    const canRequestFocus = false;
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: Center(child: TextFormField(canRequestFocus: canRequestFocus))),
+        home: Material(
+          child: Center(child: TextFormField(canRequestFocus: canRequestFocus)),
+        ),
       ),
     );
 
@@ -1444,7 +1496,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: Center(child: TextFormField(dragStartBehavior: dragStartBehavior))),
+        home: Material(
+          child: Center(child: TextFormField(dragStartBehavior: dragStartBehavior)),
+        ),
       ),
     );
 
@@ -1459,7 +1513,9 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(home: Material(child: Center(child: TextFormField(onTapAlwaysCalled: true)))),
+      MaterialApp(
+        home: Material(child: Center(child: TextFormField(onTapAlwaysCalled: true))),
+      ),
     );
 
     final Finder textFieldFinder = find.byType(TextField);
@@ -1469,10 +1525,24 @@ void main() {
     expect(textFieldWidget.onTapAlwaysCalled, isTrue);
   });
 
+  testWidgets('Passes hintLocales to hintLocales TextField', (WidgetTester tester) async {
+    const hintLocales = <Locale>[Locale('fr', 'FR')];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(child: TextFormField(hintLocales: hintLocales)),
+        ),
+      ),
+    );
+
+    final TextField textFieldWidget = tester.widget(find.byType(TextField));
+    expect(textFieldWidget.hintLocales, hintLocales);
+  });
+
   testWidgets('Error color for cursor while validating', (WidgetTester tester) async {
-    const Color themeErrorColor = Color(0xff111111);
-    const Color errorStyleColor = Color(0xff777777);
-    const Color cursorErrorColor = Color(0xffbbbbbb);
+    const themeErrorColor = Color(0xff111111);
+    const errorStyleColor = Color(0xff777777);
+    const cursorErrorColor = Color(0xffbbbbbb);
 
     Widget buildWidget({Color? errorStyleColor, Color? cursorErrorColor}) {
       return MaterialApp(
@@ -1514,9 +1584,9 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/123009.
-    final GlobalKey<FormFieldState<String>> stateKey = GlobalKey<FormFieldState<String>>();
-    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-    String value = 'initialValue';
+    final stateKey = GlobalKey<FormFieldState<String>>();
+    final formKey = GlobalKey<FormState>();
+    var value = 'initialValue';
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1554,10 +1624,10 @@ void main() {
   testWidgets('isValid returns false when forceErrorText is set and will change error display', (
     WidgetTester tester,
   ) async {
-    final GlobalKey<FormFieldState<String>> fieldKey1 = GlobalKey<FormFieldState<String>>();
-    final GlobalKey<FormFieldState<String>> fieldKey2 = GlobalKey<FormFieldState<String>>();
-    const String forceErrorText = 'Forcing error.';
-    const String validString = 'Valid string';
+    final fieldKey1 = GlobalKey<FormFieldState<String>>();
+    final fieldKey2 = GlobalKey<FormFieldState<String>>();
+    const forceErrorText = 'Forcing error.';
+    const validString = 'Valid string';
     String? validator(String? s) => s == validString ? null : 'Error text';
 
     await tester.pumpWidget(
@@ -1603,8 +1673,8 @@ void main() {
   testWidgets('forceErrorText will override InputDecoration.error when both are provided', (
     WidgetTester tester,
   ) async {
-    const String forceErrorText = 'Forcing error';
-    const String decorationErrorText = 'Decoration';
+    const forceErrorText = 'Forcing error';
+    const decorationErrorText = 'Decoration';
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1656,19 +1726,24 @@ void main() {
     testWidgets(
       'iOS uses the system context menu by default if supported',
       (WidgetTester tester) async {
-        TestWidgetsFlutterBinding.instance.platformDispatcher.supportsShowingSystemContextMenu =
-            true;
-        _updateMediaQueryFromView(tester);
+        tester.platformDispatcher.supportsShowingSystemContextMenu = true;
         addTearDown(() {
-          TestWidgetsFlutterBinding.instance.platformDispatcher
-              .resetSupportsShowingSystemContextMenu();
-          _updateMediaQueryFromView(tester);
+          tester.platformDispatcher.resetSupportsShowingSystemContextMenu();
+          tester.view.reset();
         });
 
-        final TextEditingController controller = TextEditingController(text: 'one two three');
+        final controller = TextEditingController(text: 'one two three');
         addTearDown(controller.dispose);
         await tester.pumpWidget(
-          MaterialApp(home: Material(child: TextField(controller: controller))),
+          // Don't wrap with the global View so that the change to
+          // platformDispatcher is read.
+          wrapWithView: false,
+          View(
+            view: tester.view,
+            child: MaterialApp(
+              home: Material(child: TextField(controller: controller)),
+            ),
+          ),
         );
 
         // No context menu shown.
@@ -1688,24 +1763,130 @@ void main() {
       variant: TargetPlatformVariant.only(TargetPlatform.iOS),
     );
   });
-}
 
-// Trigger MediaQuery to update itself based on the View, which is not
-// recreated between tests. This is necessary when changing something on
-// TestPlatformDispatcher and expecting it to be picked up by MediaQuery.
-// TODO(justinmc): This hack can be removed if
-// https://github.com/flutter/flutter/issues/165519 is fixed.
-void _updateMediaQueryFromView(WidgetTester tester) {
-  expect(find.byType(MediaQuery), findsOneWidget);
-  final WidgetsBindingObserver widgetsBindingObserver =
-      tester.state(
-            find.ancestor(
-              of: find.byType(MediaQuery),
-              matching: find.byWidgetPredicate(
-                (Widget w) => '${w.runtimeType}' == '_MediaQueryFromView',
+  testWidgets(
+    'readOnly disallows SystemContextMenu',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/170521.
+      tester.platformDispatcher.supportsShowingSystemContextMenu = true;
+      final controller = TextEditingController(text: 'abcdefghijklmnopqr');
+      addTearDown(() {
+        tester.platformDispatcher.resetSupportsShowingSystemContextMenu();
+        tester.view.reset();
+        controller.dispose();
+      });
+
+      var readOnly = true;
+      late StateSetter setState;
+
+      await tester.pumpWidget(
+        // Don't wrap with the global View so that the change to
+        // platformDispatcher is read.
+        wrapWithView: false,
+        View(
+          view: tester.view,
+          child: MaterialApp(
+            home: Material(
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setter) {
+                  setState = setter;
+                  return TextFormField(readOnly: readOnly, controller: controller);
+                },
               ),
             ),
-          )
-          as WidgetsBindingObserver;
-  widgetsBindingObserver.didChangeMetrics();
+          ),
+        ),
+      );
+
+      final Duration waitDuration = SelectionOverlay.fadeDuration > kDoubleTapTimeout
+          ? SelectionOverlay.fadeDuration
+          : kDoubleTapTimeout;
+
+      // Double tap to select the text.
+      await tester.tapAt(textOffsetToPosition(tester, 5));
+      await tester.pump(kDoubleTapTimeout ~/ 2);
+      await tester.tapAt(textOffsetToPosition(tester, 5));
+      await tester.pump(waitDuration);
+
+      // No error as in https://github.com/flutter/flutter/issues/170521.
+
+      // The Flutter-drawn context menu is shown. The SystemContextMenu is not
+      // shown because readOnly is true.
+      expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+      expect(find.byType(SystemContextMenu), findsNothing);
+
+      // Turn off readOnly and hide the context menu.
+      setState(() {
+        readOnly = false;
+      });
+      await tester.tap(find.text('Copy'));
+      await tester.pump(waitDuration);
+
+      expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+      expect(find.byType(SystemContextMenu), findsNothing);
+
+      // Double tap to show the context menu again.
+      await tester.tapAt(textOffsetToPosition(tester, 5));
+      await tester.pump(kDoubleTapTimeout ~/ 2);
+      await tester.tapAt(textOffsetToPosition(tester, 5));
+      await tester.pump(waitDuration);
+
+      // Now iOS is showing the SystemContextMenu while others continue to show
+      // the Flutter-drawn context menu.
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+          expect(find.byType(SystemContextMenu), findsOneWidget);
+        case TargetPlatform.macOS:
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+      }
+    },
+    variant: TargetPlatformVariant.all(),
+    skip: kIsWeb, // [intended] on web the browser handles the context menu.
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/176391.
+  testWidgets('TextFormField can inherit decoration from local InputDecorationThemeData', (
+    WidgetTester tester,
+  ) async {
+    const decoration = InputDecoration(labelText: 'Label');
+    const decorationTheme = InputDecorationThemeData(labelStyle: TextStyle(color: Colors.green));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: InputDecorationTheme(
+            data: decorationTheme,
+            child: TextFormField(decoration: decoration),
+          ),
+        ),
+      ),
+    );
+
+    final InputDecorator decorator = tester.widget(find.byType(InputDecorator));
+    final InputDecoration expectedDecoration = decoration
+        .applyDefaults(decorationTheme)
+        .copyWith(enabled: true, hintMaxLines: 1);
+    expect(decorator.decoration, expectedDecoration);
+  });
+
+  testWidgets('TextFormField does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final controller = TextEditingController(text: 'X');
+    addTearDown(tester.view.reset);
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(child: TextFormField(controller: controller)),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(TextFormField)), Size.zero);
+    controller.selection = const TextSelection.collapsed(offset: 0);
+    tester.pump();
+  });
 }

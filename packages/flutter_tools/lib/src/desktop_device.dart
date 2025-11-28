@@ -11,8 +11,8 @@ import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
+import 'base/utils.dart';
 import 'build_info.dart';
-import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'device_port_forwarder.dart';
@@ -42,8 +42,8 @@ abstract class DesktopDevice extends Device {
   final ProcessManager _processManager;
   final FileSystem _fileSystem;
   final OperatingSystemUtils _operatingSystemUtils;
-  final Set<Process> _runningProcesses = <Process>{};
-  final DesktopLogReader _deviceLogReader = DesktopLogReader();
+  final _runningProcesses = <Process>{};
+  final _deviceLogReader = DesktopLogReader();
 
   @override
   DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
@@ -122,7 +122,7 @@ abstract class DesktopDevice extends Device {
     }
 
     Process process;
-    final List<String> command = <String>[executable, ...debuggingOptions.dartEntrypointArgs];
+    final command = <String>[executable, ...debuggingOptions.dartEntrypointArgs];
     try {
       process = await _processManager.start(
         command,
@@ -139,7 +139,7 @@ abstract class DesktopDevice extends Device {
     if (debuggingOptions.buildInfo.isRelease) {
       return LaunchResult.succeeded();
     }
-    final ProtocolDiscovery vmServiceDiscovery = ProtocolDiscovery.vmService(
+    final vmServiceDiscovery = ProtocolDiscovery.vmService(
       _deviceLogReader,
       devicePort: debuggingOptions.deviceVmServicePort,
       hostPort: debuggingOptions.hostVmServicePort,
@@ -150,7 +150,7 @@ abstract class DesktopDevice extends Device {
       Timer? timer;
       if (this is MacOSDevice) {
         if (await globals.isRunningOnBot) {
-          const int defaultTimeout = 5;
+          const defaultTimeout = 5;
           timer = Timer(const Duration(minutes: defaultTimeout), () {
             // As of macOS 14, if sandboxing is enabled and the app is not codesigned,
             // a dialog will prompt the user to allow the app to run. This will
@@ -200,10 +200,10 @@ abstract class DesktopDevice extends Device {
 
   @override
   Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
-    bool succeeded = true;
+    var succeeded = true;
     // Walk a copy of _runningProcesses, since the exit handler removes from the
     // set.
-    for (final Process process in Set<Process>.of(_runningProcesses)) {
+    for (final process in Set<Process>.of(_runningProcesses)) {
       succeeded &= _processManager.killPid(process.pid);
     }
     return succeeded;
@@ -222,7 +222,7 @@ abstract class DesktopDevice extends Device {
   });
 
   /// Returns the path to the executable to run for [package] on this device for
-  /// the given [buildMode].
+  /// the given [BuildInfo.mode].
   String? executablePathForDevice(ApplicationPackage package, BuildInfo buildInfo);
 
   /// Called after a process is attached, allowing any device-specific extra
@@ -234,15 +234,15 @@ abstract class DesktopDevice extends Device {
   /// arguments.
   ///
   /// The format of the environment variables is:
-  ///   * FLUTTER_ENGINE_SWITCHES to the number of switches.
-  ///   * FLUTTER_ENGINE_SWITCH_<N> (indexing from 1) to the individual switches.
+  ///   * `FLUTTER_ENGINE_SWITCHES` to the number of switches.
+  ///   * `FLUTTER_ENGINE_SWITCH_<N>` (indexing from 1) to the individual switches.
   Map<String, String> _computeEnvironment(
     DebuggingOptions debuggingOptions,
     bool traceStartup,
     String? route,
   ) {
-    int flags = 0;
-    final Map<String, String> environment = <String, String>{};
+    var flags = 0;
+    final environment = <String, String>{};
 
     void addFlag(String value) {
       flags += 1;
@@ -255,6 +255,9 @@ abstract class DesktopDevice extends Device {
 
     addFlag('enable-dart-profiling=true');
 
+    if (debuggingOptions.profileStartup) {
+      addFlag('profile-startup=true');
+    }
     if (traceStartup) {
       addFlag('trace-startup=true');
     }
@@ -285,6 +288,9 @@ abstract class DesktopDevice extends Device {
     if (debuggingOptions.endlessTraceBuffer) {
       addFlag('endless-trace-buffer=true');
     }
+    if (debuggingOptions.profileMicrotasks) {
+      addFlag('profile-microtasks=true');
+    }
     if (debuggingOptions.purgePersistentCache) {
       addFlag('purge-persistent-cache=true');
     }
@@ -294,6 +300,9 @@ abstract class DesktopDevice extends Device {
       case ImpellerStatus.disabled:
       case ImpellerStatus.platformDefault:
         addFlag('enable-impeller=false');
+    }
+    if (debuggingOptions.enableFlutterGpu) {
+      addFlag('enable-flutter-gpu=true');
     }
     // Options only supported when there is a VM Service connection between the
     // tool and the device, usually in debug or profile mode.
@@ -330,7 +339,7 @@ abstract class DesktopDevice extends Device {
 /// A log reader for desktop applications that delegates to a [Process] stdout
 /// and stderr streams.
 class DesktopLogReader extends DeviceLogReader {
-  final StreamController<List<int>> _inputController = StreamController<List<int>>.broadcast();
+  final _inputController = StreamController<List<int>>.broadcast();
 
   /// Begin listening to the stdout and stderr streams of the provided [process].
   void initializeProcess(Process process) {
@@ -353,7 +362,7 @@ class DesktopLogReader extends DeviceLogReader {
 
   @override
   Stream<String> get logLines {
-    return _inputController.stream.transform(utf8.decoder).transform(const LineSplitter());
+    return _inputController.stream.transform(utf8LineDecoder);
   }
 
   @override

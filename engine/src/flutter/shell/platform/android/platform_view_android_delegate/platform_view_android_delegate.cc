@@ -7,27 +7,27 @@
 #include <utility>
 
 namespace flutter {
-
+namespace {
 void putStringAttributesIntoBuffer(
     const StringAttributes& attributes,
-    int32_t* buffer_int32,
-    size_t& position,
+    int32_t* buffer,
+    size_t* position,
     std::vector<std::vector<uint8_t>>& string_attribute_args) {
   if (attributes.empty()) {
-    buffer_int32[position++] = -1;
+    buffer[(*position)++] = PlatformViewAndroidDelegate::kEmptyStringIndex;
     return;
   }
-  buffer_int32[position++] = attributes.size();
+  buffer[(*position)++] = attributes.size();
   for (const auto& attribute : attributes) {
-    buffer_int32[position++] = attribute->start;
-    buffer_int32[position++] = attribute->end;
-    buffer_int32[position++] = static_cast<int32_t>(attribute->type);
+    buffer[(*position)++] = attribute->start;
+    buffer[(*position)++] = attribute->end;
+    buffer[(*position)++] = static_cast<int32_t>(attribute->type);
     switch (attribute->type) {
       case StringAttributeType::kSpellOut:
-        buffer_int32[position++] = -1;
+        buffer[(*position)++] = PlatformViewAndroidDelegate::kEmptyStringIndex;
         break;
       case StringAttributeType::kLocale:
-        buffer_int32[position++] = string_attribute_args.size();
+        buffer[(*position)++] = string_attribute_args.size();
         std::shared_ptr<LocaleStringAttribute> locale_attribute =
             std::static_pointer_cast<LocaleStringAttribute>(attribute);
         string_attribute_args.push_back(
@@ -37,9 +37,123 @@ void putStringAttributesIntoBuffer(
   }
 }
 
+void putStringIntoBuffer(const std::string& string,
+                         int32_t* buffer,
+                         size_t* position,
+                         std::vector<std::string>& strings) {
+  if (string.empty()) {
+    buffer[(*position)++] = PlatformViewAndroidDelegate::kEmptyStringIndex;
+  } else {
+    buffer[(*position)++] = strings.size();
+    strings.push_back(string);
+  }
+}
+
+int64_t flagsToInt64(flutter::SemanticsFlags flags) {
+  int64_t result = 0;
+  if (flags.isChecked != flutter::SemanticsCheckState::kNone) {
+    result |= (INT64_C(1) << 0);
+  }
+  if (flags.isChecked == flutter::SemanticsCheckState::kTrue) {
+    result |= (INT64_C(1) << 1);
+  }
+  if (flags.isSelected == flutter::SemanticsTristate::kTrue) {
+    result |= (INT64_C(1) << 2);
+  }
+  if (flags.isButton) {
+    result |= (INT64_C(1) << 3);
+  }
+  if (flags.isTextField) {
+    result |= (INT64_C(1) << 4);
+  }
+  if (flags.isFocused == flutter::SemanticsTristate::kTrue) {
+    result |= (INT64_C(1) << 5);
+  }
+  if (flags.isEnabled != flutter::SemanticsTristate::kNone) {
+    result |= (INT64_C(1) << 6);
+  }
+  if (flags.isEnabled == flutter::SemanticsTristate::kTrue) {
+    result |= (INT64_C(1) << 7);
+  }
+  if (flags.isInMutuallyExclusiveGroup) {
+    result |= (INT64_C(1) << 8);
+  }
+  if (flags.isHeader) {
+    result |= (INT64_C(1) << 9);
+  }
+  if (flags.isObscured) {
+    result |= (INT64_C(1) << 10);
+  }
+  if (flags.scopesRoute) {
+    result |= (INT64_C(1) << 11);
+  }
+  if (flags.namesRoute) {
+    result |= (INT64_C(1) << 12);
+  }
+  if (flags.isHidden) {
+    result |= (INT64_C(1) << 13);
+  }
+  if (flags.isImage) {
+    result |= (INT64_C(1) << 14);
+  }
+  if (flags.isLiveRegion) {
+    result |= (INT64_C(1) << 15);
+  }
+  if (flags.isToggled != flutter::SemanticsTristate::kNone) {
+    result |= (INT64_C(1) << 16);
+  }
+  if (flags.isToggled == flutter::SemanticsTristate::kTrue) {
+    result |= (INT64_C(1) << 17);
+  }
+  if (flags.hasImplicitScrolling) {
+    result |= (INT64_C(1) << 18);
+  }
+  if (flags.isMultiline) {
+    result |= (INT64_C(1) << 19);
+  }
+  if (flags.isReadOnly) {
+    result |= (INT64_C(1) << 20);
+  }
+  if (flags.isFocused != flutter::SemanticsTristate::kNone) {
+    result |= (INT64_C(1) << 21);
+  }
+  if (flags.isLink) {
+    result |= (INT64_C(1) << 22);
+  }
+  if (flags.isSlider) {
+    result |= (INT64_C(1) << 23);
+  }
+  if (flags.isKeyboardKey) {
+    result |= (INT64_C(1) << 24);
+  }
+  if (flags.isChecked == flutter::SemanticsCheckState::kMixed) {
+    result |= (INT64_C(1) << 25);
+  }
+  if (flags.isExpanded != flutter::SemanticsTristate::kNone) {
+    result |= (INT64_C(1) << 26);
+  }
+  if (flags.isExpanded == flutter::SemanticsTristate::kTrue) {
+    result |= (INT64_C(1) << 27);
+  }
+  if (flags.isSelected != flutter::SemanticsTristate::kNone) {
+    result |= (INT64_C(1) << 28);
+  }
+  if (flags.isRequired != flutter::SemanticsTristate::kNone) {
+    result |= (INT64_C(1) << 29);
+  }
+  if (flags.isRequired == flutter::SemanticsTristate::kTrue) {
+    result |= (INT64_C(1) << 30);
+  }
+  if (flags.isAccessibilityFocusBlocked) {
+    result |= (INT64_C(1) << 31);
+  }
+  return result;
+}
+}  // namespace
+
 PlatformViewAndroidDelegate::PlatformViewAndroidDelegate(
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade)
-    : jni_facade_(std::move(jni_facade)){};
+    : jni_facade_(std::move(jni_facade)) {};
 
 void PlatformViewAndroidDelegate::UpdateSemantics(
     const flutter::SemanticsNodeUpdates& update,
@@ -85,7 +199,9 @@ void PlatformViewAndroidDelegate::UpdateSemantics(
       // sending.
       const flutter::SemanticsNode& node = value.second;
       buffer_int32[position++] = node.id;
-      buffer_int32[position++] = node.flags;
+      int64_t flags = flagsToInt64(node.flags);
+      std::memcpy(&buffer_int32[position], &flags, 8);
+      position += 2;
       buffer_int32[position++] = node.actions;
       buffer_int32[position++] = node.maxValueLength;
       buffer_int32[position++] = node.currentValueLength;
@@ -94,78 +210,40 @@ void PlatformViewAndroidDelegate::UpdateSemantics(
       buffer_int32[position++] = node.platformViewId;
       buffer_int32[position++] = node.scrollChildren;
       buffer_int32[position++] = node.scrollIndex;
+      buffer_int32[position++] = node.traversalParent;
       buffer_float32[position++] = static_cast<float>(node.scrollPosition);
       buffer_float32[position++] = static_cast<float>(node.scrollExtentMax);
       buffer_float32[position++] = static_cast<float>(node.scrollExtentMin);
 
-      if (node.identifier.empty()) {
-        buffer_int32[position++] = -1;
-      } else {
-        buffer_int32[position++] = strings.size();
-        strings.push_back(node.identifier);
-      }
+      putStringIntoBuffer(node.identifier, buffer_int32, &position, strings);
 
-      if (node.label.empty()) {
-        buffer_int32[position++] = -1;
-      } else {
-        buffer_int32[position++] = strings.size();
-        strings.push_back(node.label);
-      }
-
+      putStringIntoBuffer(node.label, buffer_int32, &position, strings);
       putStringAttributesIntoBuffer(node.labelAttributes, buffer_int32,
-                                    position, string_attribute_args);
-      if (node.value.empty()) {
-        buffer_int32[position++] = -1;
-      } else {
-        buffer_int32[position++] = strings.size();
-        strings.push_back(node.value);
-      }
+                                    &position, string_attribute_args);
 
+      putStringIntoBuffer(node.value, buffer_int32, &position, strings);
       putStringAttributesIntoBuffer(node.valueAttributes, buffer_int32,
-                                    position, string_attribute_args);
-      if (node.increasedValue.empty()) {
-        buffer_int32[position++] = -1;
-      } else {
-        buffer_int32[position++] = strings.size();
-        strings.push_back(node.increasedValue);
-      }
+                                    &position, string_attribute_args);
 
+      putStringIntoBuffer(node.increasedValue, buffer_int32, &position,
+                          strings);
       putStringAttributesIntoBuffer(node.increasedValueAttributes, buffer_int32,
-                                    position, string_attribute_args);
-      if (node.decreasedValue.empty()) {
-        buffer_int32[position++] = -1;
-      } else {
-        buffer_int32[position++] = strings.size();
-        strings.push_back(node.decreasedValue);
-      }
+                                    &position, string_attribute_args);
 
+      putStringIntoBuffer(node.decreasedValue, buffer_int32, &position,
+                          strings);
       putStringAttributesIntoBuffer(node.decreasedValueAttributes, buffer_int32,
-                                    position, string_attribute_args);
+                                    &position, string_attribute_args);
 
-      if (node.hint.empty()) {
-        buffer_int32[position++] = -1;
-      } else {
-        buffer_int32[position++] = strings.size();
-        strings.push_back(node.hint);
-      }
+      putStringIntoBuffer(node.hint, buffer_int32, &position, strings);
+      putStringAttributesIntoBuffer(node.hintAttributes, buffer_int32,
+                                    &position, string_attribute_args);
 
-      putStringAttributesIntoBuffer(node.hintAttributes, buffer_int32, position,
-                                    string_attribute_args);
+      putStringIntoBuffer(node.tooltip, buffer_int32, &position, strings);
+      putStringIntoBuffer(node.linkUrl, buffer_int32, &position, strings);
+      putStringIntoBuffer(node.locale, buffer_int32, &position, strings);
 
-      if (node.tooltip.empty()) {
-        buffer_int32[position++] = -1;
-      } else {
-        buffer_int32[position++] = strings.size();
-        strings.push_back(node.tooltip);
-      }
-
-      if (node.linkUrl.empty()) {
-        buffer_int32[position++] = -1;
-      } else {
-        buffer_int32[position++] = strings.size();
-        strings.push_back(node.linkUrl);
-      }
-
+      buffer_int32[position++] = node.headingLevel;
       buffer_int32[position++] = node.textDirection;
       buffer_float32[position++] = node.rect.left();
       buffer_float32[position++] = node.rect.top();
@@ -173,12 +251,14 @@ void PlatformViewAndroidDelegate::UpdateSemantics(
       buffer_float32[position++] = node.rect.bottom();
       node.transform.getColMajor(&buffer_float32[position]);
       position += 16;
-
+      node.hitTestTransform.getColMajor(&buffer_float32[position]);
+      position += 16;
       buffer_int32[position++] = node.childrenInTraversalOrder.size();
       for (int32_t child : node.childrenInTraversalOrder) {
         buffer_int32[position++] = child;
       }
 
+      buffer_int32[position++] = node.childrenInHitTestOrder.size();
       for (int32_t child : node.childrenInHitTestOrder) {
         buffer_int32[position++] = child;
       }
@@ -204,18 +284,10 @@ void PlatformViewAndroidDelegate::UpdateSemantics(
       const flutter::CustomAccessibilityAction& action = value.second;
       actions_buffer_int32[actions_position++] = action.id;
       actions_buffer_int32[actions_position++] = action.overrideId;
-      if (action.label.empty()) {
-        actions_buffer_int32[actions_position++] = -1;
-      } else {
-        actions_buffer_int32[actions_position++] = action_strings.size();
-        action_strings.push_back(action.label);
-      }
-      if (action.hint.empty()) {
-        actions_buffer_int32[actions_position++] = -1;
-      } else {
-        actions_buffer_int32[actions_position++] = action_strings.size();
-        action_strings.push_back(action.hint);
-      }
+      putStringIntoBuffer(action.label, actions_buffer_int32, &actions_position,
+                          action_strings);
+      putStringIntoBuffer(action.hint, actions_buffer_int32, &actions_position,
+                          action_strings);
     }
 
     // Calling NewDirectByteBuffer in API level 22 and below with a size of zero

@@ -90,10 +90,9 @@ class MyHttpOverrides extends HttpOverrides {
 Future<void> main() async {
   HttpOverrides.global = MyHttpOverrides();
 
-  final SecurityContext serverContext =
-      SecurityContext()
-        ..useCertificateChainBytes(certificate.codeUnits)
-        ..usePrivateKeyBytes(privateKey.codeUnits);
+  final serverContext = SecurityContext()
+    ..useCertificateChainBytes(certificate.codeUnits)
+    ..usePrivateKeyBytes(privateKey.codeUnits);
 
   final HttpServer httpServer = await HttpServer.bindSecure('localhost', 0, serverContext);
   final int port = httpServer.port;
@@ -103,7 +102,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final ByteData byteData = await rootBundle.load('images/coast.jpg');
   httpServer.listen((HttpRequest request) async {
-    const int chunk_size = 2048;
+    const chunk_size = 2048;
     int offset = byteData.offsetInBytes;
     while (offset < byteData.lengthInBytes) {
       final int length = min(byteData.lengthInBytes - offset, chunk_size);
@@ -169,16 +168,15 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final List<AnimationController> controllers = <AnimationController>[
+    final controllers = <AnimationController>[
       for (int i = 0; i < images; i++)
         AnimationController(duration: const Duration(milliseconds: 3600), vsync: this)..repeat(),
     ];
-    final List<Completer<bool>> completers = <Completer<bool>>[
-      for (int i = 0; i < images; i++) Completer<bool>(),
-    ];
-    final List<Future<bool>> futures =
-        completers.map((Completer<bool> completer) => completer.future).toList();
-    final DateTime started = DateTime.now();
+    final completers = <Completer<bool>>[for (int i = 0; i < images; i++) Completer<bool>()];
+    final List<Future<bool>> futures = completers
+        .map((Completer<bool> completer) => completer.future)
+        .toList();
+    final started = DateTime.now();
     Future.wait(futures).then((_) {
       debugPrint(
         '===image_list=== all loaded in ${DateTime.now().difference(started).inMilliseconds}ms.',
@@ -209,8 +207,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     List<Completer<bool>> completers,
     List<AnimationController> controllers,
   ) {
-    final List<Widget> list = <Widget>[];
-    for (int i = 0; i < count; i++) {
+    final list = <Widget>[];
+    for (var i = 0; i < count; i++) {
       list.add(
         Flexible(
           fit: FlexFit.tight,

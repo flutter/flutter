@@ -16,6 +16,7 @@
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/closure.h"
 #include "flutter/fml/mapping.h"
+#include "flutter/fml/task_queue_id.h"
 #include "flutter/fml/time/time_point.h"
 #include "flutter/fml/unique_fd.h"
 
@@ -70,8 +71,10 @@ class FrameTiming {
 };
 
 using TaskObserverAdd =
-    std::function<void(intptr_t /* key */, fml::closure /* callback */)>;
-using TaskObserverRemove = std::function<void(intptr_t /* key */)>;
+    std::function<fml::TaskQueueId(intptr_t /* key */,
+                                   fml::closure /* callback */)>;
+using TaskObserverRemove =
+    std::function<void(fml::TaskQueueId /* queue */, intptr_t /* key */)>;
 using UnhandledExceptionCallback =
     std::function<bool(const std::string& /* error */,
                        const std::string& /* stack trace */)>;
@@ -128,7 +131,7 @@ struct Settings {
   // Path to a library containing the application's compiled Dart code.
   // This is a vector so that the embedder can provide fallback paths in
   // case the primary path to the library can not be loaded.
-  std::vector<std::string> application_library_path;
+  std::vector<std::string> application_library_paths;
 
   // Path to a library containing compiled Dart code usable for launching
   // the VM service isolate.
@@ -155,8 +158,10 @@ struct Settings {
   bool purge_persistent_cache = false;
   bool endless_trace_buffer = false;
   bool enable_dart_profiling = false;
+  bool profile_startup = false;
   bool disable_dart_asserts = false;
   bool enable_serial_gc = false;
+  bool profile_microtasks = false;
 
   // Whether embedder only allows secure connections.
   bool may_insecurely_connect_to_all_domains = true;
@@ -217,7 +222,7 @@ struct Settings {
 #if FML_OS_ANDROID || FML_OS_IOS || FML_OS_IOS_SIMULATOR
   // On iOS devices, Impeller is the default with no opt-out and this field is
   // const.
-#if FML_OS_IOS || FML_OS_IOS_SIMULATOR
+#if FML_OS_IOS || FML_OS_IOS_SIMULATOR || SLIMPELLER
   static constexpr const
 #endif                              // FML_OS_IOS && !FML_OS_IOS_SIMULATOR
       bool enable_impeller = true;  // NOLINT(readability-identifier-naming)
@@ -359,9 +364,20 @@ struct Settings {
   /// This is used by the runOnPlatformThread API.
   bool enable_platform_isolates = false;
 
-  // If true, the UI thread is the platform thread on supported
-  // platforms.
-  bool merged_platform_ui_thread = true;
+  enum class MergedPlatformUIThread {
+    // Use separate threads for the UI and platform task runners.
+    kDisabled,
+    // Use the platform thread for both the UI and platform task runners.
+    kEnabled,
+    // Start the engine on a separate UI thread and then move the UI task
+    // runner to the platform thread after the engine is initialized.
+    // This can improve app launch latency by allowing other work to run on
+    // the platform thread during engine startup.
+    kMergeAfterLaunch
+  };
+
+  MergedPlatformUIThread merged_platform_ui_thread =
+      MergedPlatformUIThread::kEnabled;
 };
 
 }  // namespace flutter

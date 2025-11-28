@@ -7,7 +7,7 @@
 
 #include <cstdint>
 
-#include "impeller/geometry/path_builder.h"
+#include "flutter/display_list/geometry/dl_path_builder.h"
 
 #ifdef _WIN32
 #define IMPELLER_API __declspec(dllexport)
@@ -18,6 +18,8 @@
 extern "C" {
 
 namespace impeller {
+
+using PathBuilder = flutter::DlPathBuilder;
 
 struct IMPELLER_API Vertices {
   float* points;

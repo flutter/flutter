@@ -92,26 +92,24 @@ void main() {
     'Default text selection color',
     (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
-      final OverlayEntry overlayEntry = OverlayEntry(
-        builder:
-            (BuildContext context) => SelectableRegion(
-              selectionControls: emptyTextSelectionControls,
-              child: Align(
-                key: key,
-                alignment: Alignment.topLeft,
-                child: const Text(
-                  'Éxp',
-                  textDirection: TextDirection.ltr,
-                  style: TextStyle(fontSize: _crispText, color: Color(0xFF000000)),
-                ),
-              ),
+      final overlayEntry = OverlayEntry(
+        builder: (BuildContext context) => SelectableRegion(
+          selectionControls: emptyTextSelectionControls,
+          child: Align(
+            key: key,
+            alignment: Alignment.topLeft,
+            child: const Text(
+              'Éxp',
+              textDirection: TextDirection.ltr,
+              style: TextStyle(fontSize: _crispText, color: Color(0xFF000000)),
             ),
+          ),
+        ),
       );
       addTearDown(
-        () =>
-            overlayEntry
-              ..remove()
-              ..dispose(),
+        () => overlayEntry
+          ..remove()
+          ..dispose(),
       );
       await tester.pumpWidget(
         ColoredBox(
@@ -177,15 +175,15 @@ Future<void> _expectColors(
   Map<Offset, Color>? spotChecks,
 ]) async {
   final TestWidgetsFlutterBinding binding = tester.binding;
-  final ui.Image image =
-      (await binding.runAsync<ui.Image>(() => captureImage(finder.evaluate().single)))!;
+  final ui.Image image = (await binding.runAsync<ui.Image>(
+    () => captureImage(finder.evaluate().single),
+  ))!;
   addTearDown(image.dispose);
-  final ByteData bytes =
-      (await binding.runAsync<ByteData?>(
-        () => image.toByteData(format: ui.ImageByteFormat.rawStraightRgba),
-      ))!;
-  final Set<int> actualColorValues = <int>{};
-  for (int offset = 0; offset < bytes.lengthInBytes; offset += 4) {
+  final ByteData bytes = (await binding.runAsync<ByteData?>(
+    () => image.toByteData(format: ui.ImageByteFormat.rawStraightRgba),
+  ))!;
+  final actualColorValues = <int>{};
+  for (var offset = 0; offset < bytes.lengthInBytes; offset += 4) {
     actualColorValues.add(
       (bytes.getUint8(offset + 3) << 24) +
           (bytes.getUint8(offset + 0) << 16) +

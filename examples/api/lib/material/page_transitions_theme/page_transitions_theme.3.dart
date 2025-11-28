@@ -56,15 +56,16 @@ class HomePage extends StatelessWidget {
                 elevation: 0,
                 color: Theme.of(context).colorScheme.surfaceContainerLowest,
                 child: ListView(
-                  children: List<Widget>.generate(Colors.primaries.length, (int index) {
+                  children: List<Widget>.generate(Colors.primaries.length, (
+                    int index,
+                  ) {
                     final Text kittenName = Text('Kitten $index');
                     final CircleAvatar avatar = CircleAvatar(
                       backgroundColor: Colors.primaries[index],
                     );
-                    final String message =
-                        index.isEven
-                            ? 'Hello hooman! My name is Kitten $index'
-                            : "What's up hooman! My name is Kitten $index";
+                    final String message = index.isEven
+                        ? 'Hello hooman! My name is Kitten $index'
+                        : "What's up hooman! My name is Kitten $index";
                     return ListTile(
                       leading: avatar,
                       title: kittenName,
@@ -73,12 +74,11 @@ class HomePage extends StatelessWidget {
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute<SecondPage>(
-                            builder:
-                                (BuildContext context) => SecondPage(
-                                  kittenName: kittenName,
-                                  avatar: avatar,
-                                  message: message,
-                                ),
+                            builder: (BuildContext context) => SecondPage(
+                              kittenName: kittenName,
+                              avatar: avatar,
+                              message: message,
+                            ),
                           ),
                         );
                       },

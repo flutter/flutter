@@ -7,40 +7,9 @@
 #include "flutter/fml/logging.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/KeyCodeMap_Internal.h"
+#import "flutter/shell/platform/darwin/ios/ios_test_flutter_swift/ios_test_flutter_swift.h"
 
 FLUTTER_ASSERT_ARC;
-
-@implementation FakeUIPressProxy
-- (instancetype)initWithData:(UIPressPhase)phase
-                         key:(UIKey*)key
-                        type:(UIEventType)type
-                   timestamp:(NSTimeInterval)timestamp API_AVAILABLE(ios(13.4)) {
-  self = [super init];
-  if (self) {
-    _dataPhase = phase;
-    _dataKey = [key copy];
-    _dataType = type;
-    _dataTimestamp = timestamp;
-  }
-  return self;
-}
-
-- (UIPressPhase)phase API_AVAILABLE(ios(13.4)) {
-  return _dataPhase;
-}
-
-- (UIKey*)key API_AVAILABLE(ios(13.4)) {
-  return _dataKey;
-}
-
-- (UIEventType)type API_AVAILABLE(ios(13.4)) {
-  return _dataType;
-}
-
-- (NSTimeInterval)timestamp API_AVAILABLE(ios(13.4)) {
-  return _dataTimestamp;
-}
-@end
 
 @implementation FakeUIKey
 - (instancetype)initWithData:(UIKeyboardHIDUsage)keyCode
@@ -121,10 +90,10 @@ FlutterUIPressProxy* keyEventWithPhase(UIPressPhase phase,
                            characters:[NSString stringWithUTF8String:characters]
           charactersIgnoringModifiers:[NSString stringWithUTF8String:charactersIgnoringModifiers]];
 
-  return [[FakeUIPressProxy alloc] initWithData:phase
-                                            key:key
-                                           type:UIEventTypePresses
-                                      timestamp:timestamp];
+  return [[FakeUIPressProxy alloc] initWithPhase:phase
+                                             key:key
+                                            type:UIEventTypePresses
+                                       timestamp:timestamp];
 }
 }  // namespace testing
 }  // namespace flutter

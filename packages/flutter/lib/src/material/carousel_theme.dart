@@ -11,10 +11,13 @@ import 'carousel.dart';
 import 'material.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines default property values for descendant [CarouselView] widgets.
 ///
 /// Descendant widgets obtain the current [CarouselViewThemeData] object using
-/// `CarouselViewTheme.of(context)`. Instances of [CarouselViewThemeData] can be
+/// [CarouselViewTheme.of]. Instances of [CarouselViewThemeData] can be
 /// customized with [CarouselViewThemeData.copyWith].
 ///
 /// Typically a [CarouselViewThemeData] is specified as part of the overall [Theme]
@@ -36,6 +39,7 @@ class CarouselViewThemeData with Diagnosticable {
     this.overlayColor,
     this.shape,
     this.padding,
+    this.itemClipBehavior,
   });
 
   /// The amount of space to surround each carousel item with.
@@ -60,6 +64,14 @@ class CarouselViewThemeData with Diagnosticable {
   /// Overrides the default value for [CarouselView.shape].
   final OutlinedBorder? shape;
 
+  /// The clip behavior for each carousel item.
+  ///
+  /// The item content will be clipped (or not) according to this option.
+  /// Refer to the [Clip] enum for more details on the different clip options.
+  ///
+  /// Overrides the default value for [CarouselView.itemClipBehavior].
+  final Clip? itemClipBehavior;
+
   /// The highlight color to indicate the carousel items are in pressed, hovered
   /// or focused states.
   ///
@@ -74,6 +86,7 @@ class CarouselViewThemeData with Diagnosticable {
     OutlinedBorder? shape,
     WidgetStateProperty<Color?>? overlayColor,
     EdgeInsets? padding,
+    Clip? itemClipBehavior,
   }) {
     return CarouselViewThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -81,6 +94,7 @@ class CarouselViewThemeData with Diagnosticable {
       shape: shape ?? this.shape,
       overlayColor: overlayColor ?? this.overlayColor,
       padding: padding ?? this.padding,
+      itemClipBehavior: itemClipBehavior ?? this.itemClipBehavior,
     );
   }
 
@@ -102,11 +116,13 @@ class CarouselViewThemeData with Diagnosticable {
         Color.lerp,
       ),
       padding: EdgeInsets.lerp(a?.padding, b?.padding, t),
+      itemClipBehavior: t < 0.5 ? a?.itemClipBehavior : b?.itemClipBehavior,
     );
   }
 
   @override
-  int get hashCode => Object.hash(backgroundColor, elevation, shape, overlayColor, padding);
+  int get hashCode =>
+      Object.hash(backgroundColor, elevation, shape, overlayColor, padding, itemClipBehavior);
 
   @override
   bool operator ==(Object other) {
@@ -121,7 +137,8 @@ class CarouselViewThemeData with Diagnosticable {
         other.elevation == elevation &&
         other.shape == shape &&
         other.overlayColor == overlayColor &&
-        other.padding == padding;
+        other.padding == padding &&
+        other.itemClipBehavior == itemClipBehavior;
   }
 
   @override
@@ -138,6 +155,7 @@ class CarouselViewThemeData with Diagnosticable {
       ),
     );
     properties.add(DiagnosticsProperty<EdgeInsets>('padding', padding, defaultValue: null));
+    properties.add(EnumProperty<Clip>('itemClipBehavior', itemClipBehavior, defaultValue: null));
   }
 }
 
@@ -165,9 +183,15 @@ class CarouselViewTheme extends InheritedTheme {
   /// Returns the configuration [data] from the closest [CarouselViewTheme] ancestor.
   ///
   /// If there is no ancestor, it returns [ThemeData.carouselViewTheme].
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// CarouselViewThemeData theme = CarouselViewTheme.of(context);
+  /// ```
   static CarouselViewThemeData of(BuildContext context) {
-    final CarouselViewTheme? inheritedTheme =
-        context.dependOnInheritedWidgetOfExactType<CarouselViewTheme>();
+    final CarouselViewTheme? inheritedTheme = context
+        .dependOnInheritedWidgetOfExactType<CarouselViewTheme>();
     return inheritedTheme?.data ?? Theme.of(context).carouselViewTheme;
   }
 

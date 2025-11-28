@@ -31,24 +31,22 @@ class OnTapPage extends StatelessWidget {
 
 void main() {
   testWidgets('Push and Pop should send platform messages', (WidgetTester tester) async {
-    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/':
-          (BuildContext context) => OnTapPage(
-            id: '/',
-            onTap: () {
-              Navigator.pushNamed(context, '/A');
-            },
-          ),
-      '/A':
-          (BuildContext context) => OnTapPage(
-            id: 'A',
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
+    final routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => OnTapPage(
+        id: '/',
+        onTap: () {
+          Navigator.pushNamed(context, '/A');
+        },
+      ),
+      '/A': (BuildContext context) => OnTapPage(
+        id: 'A',
+        onTap: () {
+          Navigator.pop(context);
+        },
+      ),
     };
 
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
 
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (
       MethodCall methodCall,
@@ -97,7 +95,7 @@ void main() {
   });
 
   testWidgets('Navigator does not report route name by default', (WidgetTester tester) async {
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (
       MethodCall methodCall,
     ) async {
@@ -121,7 +119,10 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Navigator(
-          pages: const <Page<void>>[TestPage(name: '/'), TestPage(name: '/abc')],
+          pages: const <Page<void>>[
+            TestPage(name: '/'),
+            TestPage(name: '/abc'),
+          ],
           onPopPage: (Route<void> route, void result) => false,
         ),
       ),
@@ -132,25 +133,23 @@ void main() {
   });
 
   testWidgets('Replace should send platform messages', (WidgetTester tester) async {
-    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/':
-          (BuildContext context) => OnTapPage(
-            id: '/',
-            onTap: () {
-              Navigator.pushNamed(context, '/A');
-            },
-          ),
-      '/A':
-          (BuildContext context) => OnTapPage(
-            id: 'A',
-            onTap: () {
-              Navigator.pushReplacementNamed(context, '/B');
-            },
-          ),
+    final routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => OnTapPage(
+        id: '/',
+        onTap: () {
+          Navigator.pushNamed(context, '/A');
+        },
+      ),
+      '/A': (BuildContext context) => OnTapPage(
+        id: 'A',
+        onTap: () {
+          Navigator.pushReplacementNamed(context, '/B');
+        },
+      ),
       '/B': (BuildContext context) => OnTapPage(id: 'B', onTap: () {}),
     };
 
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
 
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (
       MethodCall methodCall,
@@ -199,7 +198,7 @@ void main() {
   });
 
   testWidgets('Nameless routes should send platform messages', (WidgetTester tester) async {
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (
       MethodCall methodCall,
     ) async {
@@ -244,7 +243,7 @@ void main() {
   });
 
   testWidgets('PlatformRouteInformationProvider reports URL', (WidgetTester tester) async {
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (
       MethodCall methodCall,
     ) async {
@@ -252,11 +251,11 @@ void main() {
       return null;
     });
 
-    final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
+    final provider = PlatformRouteInformationProvider(
       initialRouteInformation: RouteInformation(uri: Uri.parse('initial')),
     );
     addTearDown(provider.dispose);
-    final SimpleRouterDelegate delegate = SimpleRouterDelegate(
+    final delegate = SimpleRouterDelegate(
       reportConfiguration: true,
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());

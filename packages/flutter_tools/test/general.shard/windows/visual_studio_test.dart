@@ -14,7 +14,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
 
-const String programFilesPath = r'C:\Program Files (x86)';
+const programFilesPath = r'C:\Program Files (x86)';
 const String visualStudioPath = programFilesPath + r'\Microsoft Visual Studio\2017\Community';
 const String cmakePath =
     visualStudioPath + r'\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe';
@@ -30,7 +30,7 @@ final Platform windowsPlatform = FakePlatform(
 );
 
 // A minimum version of a response where a VS installation was found.
-const Map<String, dynamic> _defaultResponse = <String, dynamic>{
+const _defaultResponse = <String, dynamic>{
   'installationPath': visualStudioPath,
   'displayName': 'Visual Studio Community 2019',
   'installationVersion': '16.2.29306.81',
@@ -42,7 +42,7 @@ const Map<String, dynamic> _defaultResponse = <String, dynamic>{
 };
 
 // A minimum version of a response where a VS 2022 installation was found.
-const Map<String, dynamic> _vs2022Response = <String, dynamic>{
+const _vs2022Response = <String, dynamic>{
   'installationPath': visualStudioPath,
   'displayName': 'Visual Studio Community 2022',
   'installationVersion': '17.0.31903.59',
@@ -53,8 +53,20 @@ const Map<String, dynamic> _vs2022Response = <String, dynamic>{
   'catalog': <String, dynamic>{'productDisplayVersion': '17.0.0'},
 };
 
+// A minimum version of a response where a VS 2026 installation was found.
+const _vs2026Response = <String, dynamic>{
+  'installationPath': visualStudioPath,
+  'displayName': 'Visual Studio Community 2026',
+  'installationVersion': '18.0.11116.177',
+  'isRebootRequired': false,
+  'isComplete': true,
+  'isLaunchable': true,
+  'isPrerelease': false,
+  'catalog': <String, dynamic>{'productDisplayVersion': 'Insiders [11116.177]'},
+};
+
 // A minimum version of a response where a Build Tools installation was found.
-const Map<String, dynamic> _defaultBuildToolsResponse = <String, dynamic>{
+const _defaultBuildToolsResponse = <String, dynamic>{
   'installationPath': visualStudioPath,
   'displayName': 'Visual Studio Build Tools 2019',
   'installationVersion': '16.7.30413.136',
@@ -66,7 +78,7 @@ const Map<String, dynamic> _defaultBuildToolsResponse = <String, dynamic>{
 };
 
 // A response for a VS installation that's too old.
-const Map<String, dynamic> _tooOldResponse = <String, dynamic>{
+const _tooOldResponse = <String, dynamic>{
   'installationPath': visualStudioPath,
   'displayName': 'Visual Studio Community 2017',
   'installationVersion': '15.9.28307.665',
@@ -79,14 +91,14 @@ const Map<String, dynamic> _tooOldResponse = <String, dynamic>{
 
 // A version of a response that doesn't include certain installation status
 // information that might be missing in older vswhere.
-const Map<String, dynamic> _missingStatusResponse = <String, dynamic>{
+const _missingStatusResponse = <String, dynamic>{
   'installationPath': visualStudioPath,
   'displayName': 'Visual Studio Community 2017',
   'installationVersion': '16.4.29609.76',
   'catalog': <String, dynamic>{'productDisplayVersion': '16.4.1'},
 };
 
-const String _malformedDescriptionResponse = r'''
+const _malformedDescriptionResponse = r'''
 [
   {
     "installationPath": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community",
@@ -105,7 +117,7 @@ const String _malformedDescriptionResponse = r'''
 
 // Arguments for a vswhere query to search for an installation with the
 // requirements.
-const List<String> _requirements = <String>[
+const _requirements = <String>[
   'Microsoft.VisualStudio.Workload.NativeDesktop',
   'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
   'Microsoft.VisualStudio.Component.VC.CMake.Project',
@@ -113,7 +125,7 @@ const List<String> _requirements = <String>[
 
 // Arguments for a vswhere query to search for a Build Tools installation with the
 // requirements.
-const List<String> _requirementsBuildTools = <String>[
+const _requirementsBuildTools = <String>[
   'Microsoft.VisualStudio.Workload.VCTools',
   'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
   'Microsoft.VisualStudio.Component.VC.CMake.Project',
@@ -137,8 +149,9 @@ void setMockVswhereResponse(
   fileSystem.file(clPath).createSync(recursive: true);
   final String finalResponse =
       responseOverride ?? (response != null ? json.encode(<Map<String, dynamic>>[response]) : '[]');
-  final List<String> requirementArguments =
-      requiredComponents == null ? <String>[] : <String>['-requires', ...requiredComponents];
+  final requirementArguments = requiredComponents == null
+      ? <String>[]
+      : <String>['-requires', ...requiredComponents];
 
   processManager.addCommand(
     FakeCommand(
@@ -292,17 +305,16 @@ void setMockSdkRegResponse(
   bool registryPresent = true,
   bool filesPresent = true,
 }) {
-  const String registryPath =
+  const registryPath =
       r'HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v10.0';
-  const String registryKey = r'InstallationFolder';
-  const String installationPath = r'C:\Program Files (x86)\Windows Kits\10\';
-  final String stdout =
-      registryPresent
-          ? '''
+  const registryKey = r'InstallationFolder';
+  const installationPath = r'C:\Program Files (x86)\Windows Kits\10\';
+  final stdout = registryPresent
+      ? '''
 $registryPath
     $registryKey    REG_SZ    $installationPath
 '''
-          : '''
+      : '''
 
 ERROR: The system was unable to find the specified registry key or value.
 ''';
@@ -327,10 +339,10 @@ ERROR: The system was unable to find the specified registry key or value.
 
 // Create a visual studio instance with a FakeProcessManager.
 VisualStudioFixture setUpVisualStudio() {
-  final FakeProcessManager processManager = FakeProcessManager.empty();
+  final processManager = FakeProcessManager.empty();
   final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
-  final BufferLogger logger = BufferLogger.test();
-  final VisualStudio visualStudio = VisualStudio(
+  final logger = BufferLogger.test();
+  final visualStudio = VisualStudio(
     fileSystem: fileSystem,
     platform: windowsPlatform,
     logger: logger,
@@ -359,7 +371,7 @@ void setNoViableToolchainInstallation(VisualStudioFixture fixture) {
 void main() {
   group('Visual Studio', () {
     testWithoutContext('isInstalled throws when PROGRAMFILES(X86) env not set', () {
-      final VisualStudio visualStudio = VisualStudio(
+      final visualStudio = VisualStudio(
         logger: BufferLogger.test(),
         fileSystem: MemoryFileSystem.test(style: FileSystemStyle.windows),
         platform: FakePlatform(operatingSystem: 'windows'),
@@ -376,7 +388,7 @@ void main() {
     testWithoutContext('isInstalled and cmakePath correct when vswhere is missing', () {
       final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
       const Exception exception = ProcessException('vswhere', <String>[]);
-      final FakeProcessManager fakeProcessManager = FakeProcessManager.empty();
+      final fakeProcessManager = FakeProcessManager.empty();
 
       setMockCompatibleVisualStudioInstallation(
         null,
@@ -408,7 +420,7 @@ void main() {
       );
       setMockAnyVisualStudioInstallation(null, fileSystem, fakeProcessManager, null, exception);
 
-      final VisualStudio visualStudio = VisualStudio(
+      final visualStudio = VisualStudio(
         logger: BufferLogger.test(),
         fileSystem: fileSystem,
         platform: windowsPlatform,
@@ -422,7 +434,7 @@ void main() {
 
     testWithoutContext('isInstalled returns false when vswhere returns non-zero', () {
       final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
-      final FakeProcessManager fakeProcessManager = FakeProcessManager.empty();
+      final fakeProcessManager = FakeProcessManager.empty();
 
       setMockCompatibleVisualStudioInstallation(null, fileSystem, fakeProcessManager, 1);
       setMockCompatibleVisualStudioBuildToolsInstallation(null, fileSystem, fakeProcessManager, 1);
@@ -430,7 +442,7 @@ void main() {
       setMockPrereleaseVisualStudioBuildToolsInstallation(null, fileSystem, fakeProcessManager, 1);
       setMockAnyVisualStudioInstallation(null, fileSystem, fakeProcessManager, 1);
 
-      final VisualStudio visualStudio = VisualStudio(
+      final visualStudio = VisualStudio(
         logger: BufferLogger.test(),
         fileSystem: fileSystem,
         platform: windowsPlatform,
@@ -552,8 +564,7 @@ void main() {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
-      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
-        ..['isPrerelease'] = true;
+      final response = Map<String, dynamic>.of(_defaultResponse)..['isPrerelease'] = true;
       setMockCompatibleVisualStudioInstallation(null, fixture.fileSystem, fixture.processManager);
       setMockCompatibleVisualStudioBuildToolsInstallation(
         null,
@@ -576,7 +587,7 @@ void main() {
         final VisualStudioFixture fixture = setUpVisualStudio();
         final VisualStudio visualStudio = fixture.visualStudio;
 
-        final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultBuildToolsResponse)
+        final response = Map<String, dynamic>.of(_defaultBuildToolsResponse)
           ..['isPrerelease'] = true;
         setMockCompatibleVisualStudioInstallation(null, fixture.fileSystem, fixture.processManager);
         setMockCompatibleVisualStudioBuildToolsInstallation(
@@ -621,8 +632,7 @@ void main() {
 
       setNoViableToolchainInstallation(fixture);
 
-      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
-        ..['isComplete'] = false;
+      final response = Map<String, dynamic>.of(_defaultResponse)..['isComplete'] = false;
       setMockAnyVisualStudioInstallation(response, fixture.fileSystem, fixture.processManager);
 
       expect(visualStudio.isInstalled, true);
@@ -635,8 +645,7 @@ void main() {
 
       setNoViableToolchainInstallation(fixture);
 
-      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
-        ..['isLaunchable'] = false;
+      final response = Map<String, dynamic>.of(_defaultResponse)..['isLaunchable'] = false;
       setMockAnyVisualStudioInstallation(response, fixture.fileSystem, fixture.processManager);
 
       expect(visualStudio.isInstalled, true);
@@ -649,8 +658,7 @@ void main() {
 
       setNoViableToolchainInstallation(fixture);
 
-      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
-        ..['isRebootRequired'] = true;
+      final response = Map<String, dynamic>.of(_defaultResponse)..['isRebootRequired'] = true;
       setMockAnyVisualStudioInstallation(response, fixture.fileSystem, fixture.processManager);
 
       expect(visualStudio.isInstalled, true);
@@ -696,8 +704,7 @@ void main() {
         final VisualStudioFixture fixture = setUpVisualStudio();
         final VisualStudio visualStudio = fixture.visualStudio;
 
-        final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
-          ..['isRebootRequired'] = true;
+        final response = Map<String, dynamic>.of(_defaultResponse)..['isRebootRequired'] = true;
         setMockCompatibleVisualStudioInstallation(
           response,
           fixture.fileSystem,
@@ -714,8 +721,7 @@ void main() {
         final VisualStudioFixture fixture = setUpVisualStudio();
         final VisualStudio visualStudio = fixture.visualStudio;
 
-        final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
-          ..['isRebootRequired'] = true;
+        final response = Map<String, dynamic>.of(_defaultResponse)..['isRebootRequired'] = true;
         setMockCompatibleVisualStudioInstallation(
           response,
           fixture.fileSystem,
@@ -835,12 +841,33 @@ void main() {
       expect(visualStudio.vcvarsPath, equals(vcvarsPath));
     });
 
+    testWithoutContext('properties return the right value for Visual Studio 2026', () {
+      final VisualStudioFixture fixture = setUpVisualStudio();
+      final VisualStudio visualStudio = fixture.visualStudio;
+
+      setMockCompatibleVisualStudioInstallation(
+        _vs2026Response,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+
+      expect(visualStudio.isInstalled, true);
+      expect(visualStudio.isAtLeastMinimumVersion, true);
+      expect(visualStudio.hasNecessaryComponents, true);
+      expect(visualStudio.cmakePath, equals(cmakePath));
+      expect(visualStudio.cmakeGenerator, equals('Visual Studio 18 2026'));
+      expect(visualStudio.clPath, equals(clPath));
+      expect(visualStudio.libPath, equals(libPath));
+      expect(visualStudio.linkPath, equals(linkPath));
+      expect(visualStudio.vcvarsPath, equals(vcvarsPath));
+    });
+
     testWithoutContext('Metadata is for compatible version when latest is missing components', () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
       // Return a different version for queries without the required packages.
-      final Map<String, dynamic> olderButCompleteVersionResponse = <String, dynamic>{
+      final olderButCompleteVersionResponse = <String, dynamic>{
         'installationPath': visualStudioPath,
         'displayName': 'Visual Studio Community 2017',
         'installationVersion': '15.9.28307.665',
@@ -853,7 +880,7 @@ void main() {
         fixture.processManager,
       );
       // Return a different version for queries without the required packages.
-      final Map<String, dynamic> incompleteVersionResponse = <String, dynamic>{
+      final incompleteVersionResponse = <String, dynamic>{
         'installationPath': visualStudioPath,
         'displayName': 'Visual Studio Community 2019',
         'installationVersion': '16.1.1.1',
@@ -909,8 +936,7 @@ void main() {
     });
 
     testWithoutContext('Ignores unicode replacement char in unused properties', () {
-      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
-        ..['unused'] = 'Bad UTF8 \u{FFFD}';
+      final response = Map<String, dynamic>.of(_defaultResponse)..['unused'] = 'Bad UTF8 \u{FFFD}';
 
       setMockCompatibleVisualStudioInstallation(
         response,
@@ -930,8 +956,7 @@ void main() {
     });
 
     testWithoutContext('Throws ToolExit on bad UTF-8 in installationPath', () {
-      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
-        ..['installationPath'] = '\u{FFFD}';
+      final response = Map<String, dynamic>.of(_defaultResponse)..['installationPath'] = '\u{FFFD}';
 
       setMockCompatibleVisualStudioInstallation(
         response,
@@ -948,7 +973,7 @@ void main() {
     });
 
     testWithoutContext('Throws ToolExit on bad UTF-8 in installationVersion', () {
-      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
+      final response = Map<String, dynamic>.of(_defaultResponse)
         ..['installationVersion'] = '\u{FFFD}';
 
       setMockCompatibleVisualStudioInstallation(
@@ -966,8 +991,7 @@ void main() {
     });
 
     testWithoutContext('Ignores bad UTF-8 in displayName', () {
-      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
-        ..['displayName'] = '\u{FFFD}';
+      final response = Map<String, dynamic>.of(_defaultResponse)..['displayName'] = '\u{FFFD}';
 
       setMockCompatibleVisualStudioInstallation(
         response,
@@ -988,11 +1012,9 @@ void main() {
     });
 
     testWithoutContext("Ignores bad UTF-8 in catalog's productDisplayVersion", () {
-      final Map<String, dynamic> catalog = Map<String, dynamic>.of(
-        _defaultResponse['catalog'] as Map<String, dynamic>,
-      )..['productDisplayVersion'] = '\u{FFFD}';
-      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
-        ..['catalog'] = catalog;
+      final catalog = Map<String, dynamic>.of(_defaultResponse['catalog'] as Map<String, dynamic>)
+        ..['productDisplayVersion'] = '\u{FFFD}';
+      final response = Map<String, dynamic>.of(_defaultResponse)..['catalog'] = catalog;
 
       setMockCompatibleVisualStudioInstallation(
         response,
@@ -1039,11 +1061,11 @@ void main() {
 
   group(VswhereDetails, () {
     test('Accepts empty JSON', () {
-      const bool meetsRequirements = true;
-      final Map<String, dynamic> json = <String, dynamic>{};
-      const String msvcVersion = '';
+      const meetsRequirements = true;
+      final json = <String, dynamic>{};
+      const msvcVersion = '';
 
-      final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, json, msvcVersion);
+      final result = VswhereDetails.fromJson(meetsRequirements, json, msvcVersion);
 
       expect(result.installationPath, null);
       expect(result.displayName, null);
@@ -1057,11 +1079,11 @@ void main() {
     });
 
     test('Ignores unknown JSON properties', () {
-      const bool meetsRequirements = true;
-      final Map<String, dynamic> json = <String, dynamic>{'hello': 'world'};
-      const String msvcVersion = '';
+      const meetsRequirements = true;
+      final json = <String, dynamic>{'hello': 'world'};
+      const msvcVersion = '';
 
-      final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, json, msvcVersion);
+      final result = VswhereDetails.fromJson(meetsRequirements, json, msvcVersion);
 
       expect(result.installationPath, null);
       expect(result.displayName, null);
@@ -1075,14 +1097,10 @@ void main() {
     });
 
     test('Accepts JSON', () {
-      const bool meetsRequirements = true;
-      const String msvcVersion = '';
+      const meetsRequirements = true;
+      const msvcVersion = '';
 
-      final VswhereDetails result = VswhereDetails.fromJson(
-        meetsRequirements,
-        _defaultResponse,
-        msvcVersion,
-      );
+      final result = VswhereDetails.fromJson(meetsRequirements, _defaultResponse, msvcVersion);
 
       expect(result.installationPath, visualStudioPath);
       expect(result.displayName, 'Visual Studio Community 2019');
@@ -1096,47 +1114,40 @@ void main() {
     });
 
     test('Installation that does not satisfy requirements is not usable', () {
-      const bool meetsRequirements = false;
-      const String msvcVersion = '';
+      const meetsRequirements = false;
+      const msvcVersion = '';
 
-      final VswhereDetails result = VswhereDetails.fromJson(
-        meetsRequirements,
-        _defaultResponse,
-        msvcVersion,
-      );
+      final result = VswhereDetails.fromJson(meetsRequirements, _defaultResponse, msvcVersion);
 
       expect(result.isUsable, isFalse);
     });
 
     test('Incomplete installation is not usable', () {
-      const bool meetsRequirements = true;
-      final Map<String, dynamic> json = Map<String, dynamic>.of(_defaultResponse)
-        ..['isComplete'] = false;
-      const String msvcVersion = '';
+      const meetsRequirements = true;
+      final json = Map<String, dynamic>.of(_defaultResponse)..['isComplete'] = false;
+      const msvcVersion = '';
 
-      final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, json, msvcVersion);
+      final result = VswhereDetails.fromJson(meetsRequirements, json, msvcVersion);
 
       expect(result.isUsable, isFalse);
     });
 
     test('Unlaunchable installation is not usable', () {
-      const bool meetsRequirements = true;
-      final Map<String, dynamic> json = Map<String, dynamic>.of(_defaultResponse)
-        ..['isLaunchable'] = false;
-      const String msvcVersion = '';
+      const meetsRequirements = true;
+      final json = Map<String, dynamic>.of(_defaultResponse)..['isLaunchable'] = false;
+      const msvcVersion = '';
 
-      final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, json, msvcVersion);
+      final result = VswhereDetails.fromJson(meetsRequirements, json, msvcVersion);
 
       expect(result.isUsable, isFalse);
     });
 
     test('Installation that requires reboot is not usable', () {
-      const bool meetsRequirements = true;
-      final Map<String, dynamic> json = Map<String, dynamic>.of(_defaultResponse)
-        ..['isRebootRequired'] = true;
-      const String msvcVersion = '';
+      const meetsRequirements = true;
+      final json = Map<String, dynamic>.of(_defaultResponse)..['isRebootRequired'] = true;
+      const msvcVersion = '';
 
-      final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, json, msvcVersion);
+      final result = VswhereDetails.fromJson(meetsRequirements, json, msvcVersion);
 
       expect(result.isUsable, isFalse);
     });

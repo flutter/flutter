@@ -145,7 +145,7 @@ class FlutterView {
   ///
   /// The view can take on any [Size] that fulfills these constraints. These
   /// constraints are typically used by an UI framework as the input for its
-  /// layout algorithm to determine an approrpiate size for the view. To size
+  /// layout algorithm to determine an appropriate size for the view. To size
   /// the view, the selected size must be provided to the [render] method and it
   /// must satisfy the constraints.
   ///
@@ -164,10 +164,7 @@ class FlutterView {
   /// See also:
   ///
   ///  * [physicalSize], which returns the current size of the view.
-  // TODO(goderbauer): Wire this up so embedders can configure it. This will
-  //   also require to message the size provided to the render call back to the
-  //   embedder.
-  ViewConstraints get physicalConstraints => ViewConstraints.tight(physicalSize);
+  ViewConstraints get physicalConstraints => _viewConfiguration.viewConstraints;
 
   /// The current dimensions of the rectangle as last reported by the platform
   /// into which scenes rendered in this view are drawn.
@@ -390,9 +387,8 @@ class FlutterView {
 
   /// Change the retained semantics data about this [FlutterView].
   ///
-  /// If [PlatformDispatcher.semanticsEnabled] is true, the user has requested that this function
-  /// be called whenever the semantic content of this [FlutterView]
-  /// changes.
+  /// [PlatformDispatcher.setSemanticsTreeEnabled] must be called with true
+  /// before sending update through this method.
   ///
   /// This function disposes the given update, which means the semantics update
   /// cannot be used further.
@@ -775,7 +771,7 @@ class SingletonFlutterWindow extends FlutterView {
   /// method of the [FlutterActivity](/javadoc/io/flutter/embedding/android/FlutterActivity.html)'s
   /// intent builder.
   ///
-  /// On a standalone engine, see https://flutter.dev/docs/development/add-to-app/android/add-flutter-screen#initial-route-with-a-cached-engine.
+  /// On a standalone engine, see https://docs.flutter.dev/development/add-to-app/android/add-flutter-screen#initial-route-with-a-cached-engine.
   ///
   /// ## iOS
   ///
@@ -783,7 +779,7 @@ class SingletonFlutterWindow extends FlutterView {
   /// [`FlutterViewController.setInitialRoute`](/ios-embedder/interface_flutter_view_controller.html#a7f269c2da73312f856d42611cc12a33f)
   /// initializer.
   ///
-  /// On a standalone engine, see https://flutter.dev/docs/development/add-to-app/ios/add-flutter-screen#route.
+  /// On a standalone engine, see https://docs.flutter.dev/development/add-to-app/ios/add-flutter-screen#route.
   ///
   /// See also:
   ///
@@ -931,6 +927,7 @@ class AccessibilityFeatures {
   static const int _kReduceMotionIndex = 1 << 4;
   static const int _kHighContrastIndex = 1 << 5;
   static const int _kOnOffSwitchLabelsIndex = 1 << 6;
+  static const int _kNoAnnounceIndex = 1 << 7;
 
   // A bitfield which represents each enabled feature.
   final int _index;
@@ -968,9 +965,29 @@ class AccessibilityFeatures {
   /// Only supported on iOS.
   bool get onOffSwitchLabels => _kOnOffSwitchLabelsIndex & _index != 0;
 
+  /// Whether the platform supports accessibility  announcement API,
+  /// i.e. [SemanticsService.announce].
+  ///
+  /// Some platforms do not support or discourage the use of
+  /// announcement. Using [SemanticsService.announce] on those platform
+  /// may be ignored. Consider using other way to convey message to the
+  /// user. For example, Android discourages the uses of direct message
+  /// announcement, and rather encourages using other semantic
+  /// properties such as [SemanticsProperties.liveRegion] to convey
+  /// message to the user.
+  ///
+  /// Returns `false` on platforms where announcements are deprecated or
+  /// unsupported by the underlying platform.
+  ///
+  /// Returns `true` on platforms where such announcements are
+  /// generally supported without discouragement. (iOS, web etc)
+  // This index check is inverted (== 0 vs != 0); far more platforms support
+  // "announce" than discourage it.
+  bool get supportsAnnounce => _kNoAnnounceIndex & _index == 0;
+
   @override
   String toString() {
-    final List<String> features = <String>[];
+    final features = <String>[];
     if (accessibleNavigation) {
       features.add('accessibleNavigation');
     }
@@ -991,6 +1008,9 @@ class AccessibilityFeatures {
     }
     if (onOffSwitchLabels) {
       features.add('onOffSwitchLabels');
+    }
+    if (supportsAnnounce) {
+      features.add('supportsAnnounce');
     }
     return 'AccessibilityFeatures$features';
   }

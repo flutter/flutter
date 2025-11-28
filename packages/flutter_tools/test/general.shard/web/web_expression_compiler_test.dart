@@ -6,7 +6,7 @@ import 'package:dwds/dwds.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/compile.dart';
-import 'package:flutter_tools/src/isolated/devfs_web.dart';
+import 'package:flutter_tools/src/isolated/web_expression_compiler.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -29,6 +29,7 @@ void main() {
     );
 
     final ExpressionCompilationResult result = await expressionCompiler.compileExpressionToJs(
+      '',
       '',
       '',
       1,
@@ -55,6 +56,7 @@ void main() {
     final ExpressionCompilationResult result = await expressionCompiler.compileExpressionToJs(
       '',
       '',
+      '',
       1,
       1,
       <String, String>{},
@@ -74,6 +76,7 @@ void main() {
     );
 
     final ExpressionCompilationResult result = await expressionCompiler.compileExpressionToJs(
+      '',
       '',
       '',
       1,
@@ -105,6 +108,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
   @override
   Future<CompilerOutput?> compileExpressionToJs(
     String libraryUri,
+    String scriptUri,
     int line,
     int column,
     Map<String, String> jsModules,

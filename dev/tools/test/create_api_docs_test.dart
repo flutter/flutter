@@ -252,14 +252,14 @@ void main() {
       publishRoot.createSync(recursive: true);
       packageRoot.createSync(recursive: true);
       docsRoot.createSync(recursive: true);
-      final List<String> files = <String>[
+      final files = <String>[
         'README.md',
         'analysis_options.yaml',
         'dartdoc_options.yaml',
         searchTemplate.path,
         publishRoot.childFile('opensearch.xml').path,
       ];
-      for (final String file in files) {
+      for (final file in files) {
         docsRoot.childFile(file).createSync(recursive: true);
       }
       searchTemplate.writeAsStringSync('{SITE_URL}');
@@ -338,15 +338,13 @@ void main() {
     test('.generateConfiguration generates pubspec.yaml', () async {
       configurator.generateConfiguration();
       expect(packageRoot.childFile('pubspec.yaml').existsSync(), isTrue);
-      expect(packageRoot.childFile('pubspec.yaml').readAsStringSync(), contains('flutter_gpu:'));
-      expect(
-        packageRoot.childFile('pubspec.yaml').readAsStringSync(),
-        contains('dependency_overrides:'),
-      );
-      expect(
-        packageRoot.childFile('pubspec.yaml').readAsStringSync(),
-        contains('platform_integration:'),
-      );
+
+      final String pubspecContents = packageRoot.childFile('pubspec.yaml').readAsStringSync();
+
+      expect(pubspecContents, contains('flutter_gpu:'));
+      expect(pubspecContents, contains("sdk: '^2.14.0-360.0.dev'"));
+      expect(pubspecContents, contains('dependency_overrides:'));
+      expect(pubspecContents, contains('platform_integration:'));
     });
 
     test('.generateConfiguration generates fake lib', () async {
@@ -574,9 +572,9 @@ void main() {
             }
             publishRoot.childDirectory('flutter').childFile('index.html').createSync();
 
-            final Directory widgetsDir = publishRoot
-              .childDirectory('flutter')
-              .childDirectory('widgets')..createSync(recursive: true);
+            final Directory widgetsDir =
+                publishRoot.childDirectory('flutter').childDirectory('widgets')
+                  ..createSync(recursive: true);
             widgetsDir.childFile('showGeneralDialog.html').writeAsStringSync('''
 <pre id="longSnippet1">
   <code class="language-dart">
@@ -585,8 +583,9 @@ void main() {
 </pre>
 ''');
             expect(publishRoot.childDirectory('flutter').existsSync(), isTrue);
-            (widgetsDir.childDirectory('ModalRoute')
-              ..createSync(recursive: true)).childFile('barrierColor.html').writeAsStringSync('''
+            (widgetsDir.childDirectory(
+              'ModalRoute',
+            )..createSync(recursive: true)).childFile('barrierColor.html').writeAsStringSync('''
 <pre id="sample-code">
   <code class="language-dart">
     class FooClass {
@@ -595,8 +594,7 @@ void main() {
   </code>
 </pre>
 ''');
-            const String queryParams =
-                'split=1&run=true&sample_id=widgets.Listener.123&channel=main';
+            const queryParams = 'split=1&run=true&sample_id=widgets.Listener.123&channel=main';
             widgetsDir.childFile('Listener-class.html').writeAsStringSync('''
 <iframe class="snippet-dartpad" src="https://dartpad.dev/embed-flutter.html?$queryParams">
 </iframe>
@@ -611,7 +609,8 @@ void main() {
 }
 
 const String branchName = 'stable';
-const String testVersionInfo = '''
+const String testVersionInfo =
+    '''
 {
   "frameworkVersion": "2.5.0",
   "channel": "$branchName",

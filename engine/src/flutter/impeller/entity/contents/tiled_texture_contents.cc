@@ -63,13 +63,14 @@ std::shared_ptr<Texture> TiledTextureContents::CreateFilterTexture(
   }
   auto color_filter_contents = color_filter_(FilterInput::Make(texture_));
   auto snapshot = color_filter_contents->RenderToSnapshot(
-      renderer,      // renderer
-      Entity(),      // entity
-      std::nullopt,  // coverage_limit
-      std::nullopt,  // sampler_descriptor
-      true,          // msaa_enabled
-      /*mip_count=*/1,
-      "TiledTextureContents Snapshot");  // label
+      /*renderer=*/renderer,
+      /*entity=*/Entity(),
+      /*options=*/
+      {.coverage_limit = std::nullopt,
+       .sampler_descriptor = std::nullopt,
+       .msaa_enabled = true,
+       .mip_count = 1,
+       .label = "TiledTextureContents Snapshot"});
   if (snapshot.has_value()) {
     return snapshot.value().texture;
   }
@@ -140,7 +141,7 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
         },
         frame_info,
         [this, &renderer](RenderPass& pass) {
-          auto& host_buffer = renderer.GetTransientsBuffer();
+          auto& data_host_buffer = renderer.GetTransientsDataBuffer();
 #ifdef IMPELLER_DEBUG
           pass.SetCommandLabel("TextureFill External");
 #endif  // IMPELLER_DEBUG
@@ -152,7 +153,8 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
           frag_info.y_tile_mode =
               static_cast<Scalar>(sampler_descriptor_.height_address_mode);
           frag_info.alpha = GetOpacityFactor();
-          FSExternal::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
+          FSExternal::BindFragInfo(pass,
+                                   data_host_buffer.EmplaceUniform(frag_info));
 
           SamplerDescriptor sampler_desc;
           // OES_EGL_image_external states that only CLAMP_TO_EDGE is valid,
@@ -180,7 +182,7 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
   return ColorSourceContents::DrawGeometry<VS>(
       renderer, entity, pass, pipeline_callback, frame_info,
       [this, &renderer, &entity](RenderPass& pass) {
-        auto& host_buffer = renderer.GetTransientsBuffer();
+        auto& data_host_buffer = renderer.GetTransientsDataBuffer();
 #ifdef IMPELLER_DEBUG
         pass.SetCommandLabel("TextureFill");
 #endif  // IMPELLER_DEBUG
@@ -191,7 +193,7 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
         frag_info.alpha =
             GetOpacityFactor() *
             GetGeometry()->ComputeAlphaCoverage(entity.GetTransform());
-        FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
+        FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform(frag_info));
 
         if (color_filter_) {
           auto filtered_texture = CreateFilterTexture(renderer);
@@ -216,11 +218,7 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
 std::optional<Snapshot> TiledTextureContents::RenderToSnapshot(
     const ContentContext& renderer,
     const Entity& entity,
-    std::optional<Rect> coverage_limit,
-    const std::optional<SamplerDescriptor>& sampler_descriptor,
-    bool msaa_enabled,
-    int32_t mip_count,
-    std::string_view label) const {
+    const SnapshotOptions& options) const {
   std::optional<Rect> geometry_coverage = GetGeometry()->GetCoverage({});
   if (GetInverseEffectTransform().IsIdentity() &&
       GetGeometry()->IsAxisAlignedRect() &&
@@ -237,19 +235,20 @@ std::optional<Snapshot> TiledTextureContents::RenderToSnapshot(
         .texture = texture_,
         .transform = Matrix::MakeTranslation(coverage->GetOrigin()) *
                      Matrix::MakeScale(scale),
-        .sampler_descriptor = sampler_descriptor.value_or(sampler_descriptor_),
+        .sampler_descriptor =
+            options.sampler_descriptor.value_or(sampler_descriptor_),
         .opacity = GetOpacityFactor(),
     };
   }
 
   return Contents::RenderToSnapshot(
-      renderer,                                          // renderer
-      entity,                                            // entity
-      std::nullopt,                                      // coverage_limit
-      sampler_descriptor.value_or(sampler_descriptor_),  // sampler_descriptor
-      true,                                              // msaa_enabled
-      /*mip_count=*/1,
-      label);  // label
+      renderer, entity,
+      {.coverage_limit = std::nullopt,
+       .sampler_descriptor =
+           options.sampler_descriptor.value_or(sampler_descriptor_),
+       .msaa_enabled = true,
+       .mip_count = 1,
+       .label = options.label});
 }
 
 }  // namespace impeller

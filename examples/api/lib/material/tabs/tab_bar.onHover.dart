@@ -13,7 +13,7 @@ class TabBarApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(theme: ThemeData(useMaterial3: true), home: const TabBarExample());
+    return const MaterialApp(home: TabBarExample());
   }
 }
 
@@ -25,7 +25,11 @@ class TabBarExample extends StatefulWidget {
 }
 
 class _TabBarExampleState extends State<TabBarExample> {
-  final List<Color> tabColors = <Color>[Colors.purple, Colors.purple, Colors.purple];
+  final List<Color> tabColors = <Color>[
+    Colors.purple,
+    Colors.purple,
+    Colors.purple,
+  ];
 
   @override
   Widget build(BuildContext context) {

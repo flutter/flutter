@@ -11,14 +11,14 @@ import '../src/common.dart';
 
 void main() {
   testWithoutContext('dispose does not throw exception if no process is present', () {
-    final ForwardedPort forwardedPort = ForwardedPort(123, 456);
+    final forwardedPort = ForwardedPort(123, 456);
     expect(forwardedPort.context, isNull);
     forwardedPort.dispose();
   });
 
   testWithoutContext('dispose kills process if process was available', () {
-    final FakeProcess process = FakeProcess();
-    final ForwardedPort forwardedPort = ForwardedPort.withContext(123, 456, process);
+    final process = FakeProcess();
+    final forwardedPort = ForwardedPort.withContext(123, 456, process);
     forwardedPort.dispose();
 
     expect(forwardedPort.context, isNotNull);

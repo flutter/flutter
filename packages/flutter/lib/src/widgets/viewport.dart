@@ -16,7 +16,7 @@ import 'debug.dart';
 import 'framework.dart';
 import 'scroll_notification.dart';
 
-export 'package:flutter/rendering.dart' show AxisDirection, GrowthDirection;
+export 'package:flutter/rendering.dart' show AxisDirection, GrowthDirection, SliverPaintOrder;
 
 /// A widget through which a portion of larger content can be viewed, typically
 /// in combination with a [Scrollable].
@@ -69,6 +69,7 @@ class Viewport extends MultiChildRenderObjectWidget {
     this.center,
     this.cacheExtent,
     this.cacheExtentStyle = CacheExtentStyle.pixel,
+    this.paintOrder = SliverPaintOrder.firstIsTop,
     this.clipBehavior = Clip.hardEdge,
     List<Widget> slivers = const <Widget>[],
   }) : assert(center == null || slivers.where((Widget child) => child.key == center).length == 1),
@@ -135,6 +136,11 @@ class Viewport extends MultiChildRenderObjectWidget {
   /// {@macro flutter.rendering.RenderViewportBase.cacheExtentStyle}
   final CacheExtentStyle cacheExtentStyle;
 
+  /// {@macro flutter.rendering.RenderViewportBase.paintOrder}
+  ///
+  /// Defaults to [SliverPaintOrder.firstIsTop].
+  final SliverPaintOrder paintOrder;
+
   /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge].
@@ -189,6 +195,7 @@ class Viewport extends MultiChildRenderObjectWidget {
       offset: offset,
       cacheExtent: cacheExtent,
       cacheExtentStyle: cacheExtentStyle,
+      paintOrder: paintOrder,
       clipBehavior: clipBehavior,
     );
   }
@@ -203,6 +210,7 @@ class Viewport extends MultiChildRenderObjectWidget {
       ..offset = offset
       ..cacheExtent = cacheExtent
       ..cacheExtentStyle = cacheExtentStyle
+      ..paintOrder = paintOrder
       ..clipBehavior = clipBehavior;
   }
 
@@ -261,9 +269,9 @@ class _ViewportElement extends MultiChildRenderObjectElement
 
   void _updateCenter() {
     // TODO(ianh): cache the keys to make this faster
-    final Viewport viewport = widget as Viewport;
+    final viewport = widget as Viewport;
     if (viewport.center != null) {
-      int elementIndex = 0;
+      var elementIndex = 0;
       for (final Element e in children) {
         if (e.widget.key == viewport.center) {
           renderObject.center = e.renderObject as RenderSliver?;
@@ -314,7 +322,7 @@ class _ViewportElement extends MultiChildRenderObjectElement
   void debugVisitOnstageChildren(ElementVisitor visitor) {
     children
         .where((Element e) {
-          final RenderSliver renderSliver = e.renderObject! as RenderSliver;
+          final renderSliver = e.renderObject! as RenderSliver;
           return renderSliver.geometry!.visible;
         })
         .forEach(visitor);
@@ -357,6 +365,7 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
     this.axisDirection = AxisDirection.down,
     this.crossAxisDirection,
     required this.offset,
+    this.paintOrder = SliverPaintOrder.firstIsTop,
     this.clipBehavior = Clip.hardEdge,
     List<Widget> slivers = const <Widget>[],
   }) : super(children: slivers);
@@ -389,6 +398,11 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
   /// Typically a [ScrollPosition].
   final ViewportOffset offset;
 
+  /// {@macro flutter.rendering.RenderViewportBase.paintOrder}
+  ///
+  /// Defaults to [SliverPaintOrder.firstIsTop].
+  final SliverPaintOrder paintOrder;
+
   /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge].
@@ -401,6 +415,7 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
       crossAxisDirection:
           crossAxisDirection ?? Viewport.getDefaultCrossAxisDirection(context, axisDirection),
       offset: offset,
+      paintOrder: paintOrder,
       clipBehavior: clipBehavior,
     );
   }
@@ -412,6 +427,7 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
       ..crossAxisDirection =
           crossAxisDirection ?? Viewport.getDefaultCrossAxisDirection(context, axisDirection)
       ..offset = offset
+      ..paintOrder = paintOrder
       ..clipBehavior = clipBehavior;
   }
 

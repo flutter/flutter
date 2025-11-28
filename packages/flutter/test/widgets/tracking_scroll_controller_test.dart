@@ -7,9 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('TrackingScrollController saves offset', (WidgetTester tester) async {
-    final TrackingScrollController controller = TrackingScrollController();
+    final controller = TrackingScrollController();
     addTearDown(controller.dispose);
-    const double listItemHeight = 100.0;
+    const listItemHeight = 100.0;
 
     await tester.pumpWidget(
       Directionality(
@@ -18,11 +18,10 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return ListView(
               controller: controller,
-              children:
-                  List<Widget>.generate(
-                    10,
-                    (int i) => SizedBox(height: listItemHeight, child: Text('Page$index-Item$i')),
-                  ).toList(),
+              children: List<Widget>.generate(
+                10,
+                (int i) => SizedBox(height: listItemHeight, child: Text('Page$index-Item$i')),
+              ).toList(),
             );
           },
         ),
@@ -59,9 +58,9 @@ void main() {
   });
 
   testWidgets('TrackingScrollController saves offset', (WidgetTester tester) async {
-    int attach = 0;
-    int detach = 0;
-    final TrackingScrollController controller = TrackingScrollController(
+    var attach = 0;
+    var detach = 0;
+    final controller = TrackingScrollController(
       onAttach: (_) {
         attach++;
       },
@@ -70,7 +69,7 @@ void main() {
       },
     );
     addTearDown(controller.dispose);
-    const double listItemHeight = 100.0;
+    const listItemHeight = 100.0;
 
     await tester.pumpWidget(
       Directionality(
@@ -79,11 +78,10 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return ListView(
               controller: controller,
-              children:
-                  List<Widget>.generate(
-                    10,
-                    (int i) => SizedBox(height: listItemHeight, child: Text('Page$index-Item$i')),
-                  ).toList(),
+              children: List<Widget>.generate(
+                10,
+                (int i) => SizedBox(height: listItemHeight, child: Text('Page$index-Item$i')),
+              ).toList(),
             );
           },
         ),

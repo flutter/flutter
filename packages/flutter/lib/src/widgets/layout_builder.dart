@@ -176,8 +176,7 @@ class _LayoutBuilderElement<LayoutInfoType> extends RenderObjectElement {
   @override
   void update(AbstractLayoutBuilder<LayoutInfoType> newWidget) {
     assert(widget != newWidget);
-    final AbstractLayoutBuilder<LayoutInfoType> oldWidget =
-        widget as AbstractLayoutBuilder<LayoutInfoType>;
+    final oldWidget = widget as AbstractLayoutBuilder<LayoutInfoType>;
     super.update(newWidget);
     assert(widget == newWidget);
 
@@ -238,10 +237,9 @@ class _LayoutBuilderElement<LayoutInfoType> extends RenderObjectElement {
             ErrorDescription('building $widget'),
             e,
             stack,
-            informationCollector:
-                () => <DiagnosticsNode>[
-                  if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(this)),
-                ],
+            informationCollector: () => <DiagnosticsNode>[
+              if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(this)),
+            ],
           ),
         );
       }
@@ -254,10 +252,9 @@ class _LayoutBuilderElement<LayoutInfoType> extends RenderObjectElement {
             ErrorDescription('building $widget'),
             e,
             stack,
-            informationCollector:
-                () => <DiagnosticsNode>[
-                  if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(this)),
-                ],
+            informationCollector: () => <DiagnosticsNode>[
+              if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(this)),
+            ],
           ),
         );
         _child = updateChild(null, built, slot);
@@ -267,8 +264,9 @@ class _LayoutBuilderElement<LayoutInfoType> extends RenderObjectElement {
       }
     }
 
-    final VoidCallback? callback =
-        _needsBuild || (layoutInfo != _previousLayoutInfo) ? updateChildCallback : null;
+    final VoidCallback? callback = _needsBuild || (layoutInfo != _previousLayoutInfo)
+        ? updateChildCallback
+        : null;
     owner!.buildScope(this, callback);
   }
 
@@ -302,8 +300,12 @@ class _LayoutBuilderElement<LayoutInfoType> extends RenderObjectElement {
 /// Provides a [layoutCallback] implementation which, if needed, invokes
 /// [AbstractLayoutBuilder]'s builder callback.
 ///
-/// Implementers must provide a [layoutInfo] implementation that is safe to
-/// access in [layoutCallback], which is called in [performLayout].
+/// Implementers can override the [layoutInfo] implementation with a value
+/// that is safe to access in [layoutCallback], which is called in
+/// [performLayout]. The default [layoutInfo] returns the incoming
+/// [Constraints].
+///
+/// This mixin replaces [RenderConstrainedLayoutBuilder].
 mixin RenderAbstractLayoutBuilderMixin<LayoutInfoType, ChildType extends RenderObject>
     on RenderObjectWithChildMixin<ChildType>, RenderObjectWithLayoutCallbackMixin {
   LayoutCallback<Constraints>? _callback;
@@ -334,10 +336,17 @@ mixin RenderAbstractLayoutBuilderMixin<LayoutInfoType, ChildType extends RenderO
   ///
   /// This is typically the information that are only made available in
   /// [performLayout], which is inaccessible for regular [Builder] widget,
-  /// such as the incoming [Constraints].
+  /// such as the incoming [Constraints], which are the default value.
   @protected
-  LayoutInfoType get layoutInfo;
+  LayoutInfoType get layoutInfo => constraints as LayoutInfoType;
 }
+
+/// Generic mixin for [RenderObject]s created by an [AbstractLayoutBuilder] with
+/// the the same `LayoutInfoType`.
+///
+/// Use [RenderAbstractLayoutBuilderMixin] instead, which replaces this mixin.
+typedef RenderConstrainedLayoutBuilder<LayoutInfoType, ChildType extends RenderObject> =
+    RenderAbstractLayoutBuilderMixin<LayoutInfoType, ChildType>;
 
 /// Builds a widget tree that can depend on the parent widget's size.
 ///
@@ -476,10 +485,6 @@ class _RenderLayoutBuilder extends RenderBox
 
     return true;
   }
-
-  @protected
-  @override
-  BoxConstraints get layoutInfo => constraints;
 }
 
 FlutterErrorDetails _reportException(
@@ -488,7 +493,7 @@ FlutterErrorDetails _reportException(
   StackTrace stack, {
   InformationCollector? informationCollector,
 }) {
-  final FlutterErrorDetails details = FlutterErrorDetails(
+  final details = FlutterErrorDetails(
     exception: exception,
     stack: stack,
     library: 'widgets library',

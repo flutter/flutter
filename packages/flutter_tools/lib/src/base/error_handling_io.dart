@@ -21,7 +21,7 @@ import 'package:file/file.dart';
 import 'package:path/path.dart' as p; // flutter_ignore: package_path_import
 import 'package:process/process.dart';
 
-import 'common.dart' show throwToolExit;
+import 'common.dart' show ToolExit, throwToolExit;
 import 'platform.dart';
 
 // The Flutter tool hits file system and process errors that only the end-user can address.
@@ -33,11 +33,11 @@ import 'platform.dart';
 
 /// On Windows this is error code 2: ERROR_FILE_NOT_FOUND, and on
 /// macOS/Linux it is error code 2/ENOENT: No such file or directory.
-const int kSystemCodeCannotFindFile = 2;
+const kSystemCodeCannotFindFile = 2;
 
 /// On Windows this error is 3: ERROR_PATH_NOT_FOUND, and on
 /// macOS/Linux, it is error code 3/ESRCH: No such process.
-const int kSystemCodePathNotFound = 3;
+const kSystemCodePathNotFound = 3;
 
 /// A [FileSystem] that throws a [ToolExit] on certain errors.
 ///
@@ -111,7 +111,7 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
     return true;
   }
 
-  static bool _noExitOnFailure = false;
+  static var _noExitOnFailure = false;
 
   @override
   Directory get currentDirectory {
@@ -265,8 +265,9 @@ class ErrorHandlingFile extends ForwardingFileSystemEntity<File, io.File> with F
       () => delegate.createSync(recursive: recursive),
       platform: _platform,
       failureMessage: 'Flutter failed to create file at "${delegate.path}"',
-      posixPermissionSuggestion:
-          recursive ? null : _posixPermissionSuggestion(<String>[delegate.parent.path]),
+      posixPermissionSuggestion: recursive
+          ? null
+          : _posixPermissionSuggestion(<String>[delegate.parent.path]),
     );
   }
 
@@ -317,9 +318,9 @@ class ErrorHandlingFile extends ForwardingFileSystemEntity<File, io.File> with F
           source = delegate.openSync();
           sink = resultFile.openSync(mode: FileMode.writeOnly);
           // 64k is the same sized buffer used by dart:io for `File.openRead`.
-          final Uint8List buffer = Uint8List(64 * 1024);
+          final buffer = Uint8List(64 * 1024);
           final int totalBytes = source.lengthSync();
-          int bytes = 0;
+          var bytes = 0;
           while (bytes < totalBytes) {
             final int chunkLength = source.readIntoSync(buffer);
             sink.writeFromSync(buffer, 0, chunkLength);
@@ -398,8 +399,9 @@ class ErrorHandlingDirectory extends ForwardingFileSystemEntity<Directory, io.Di
       () => delegate.createSync(recursive: recursive),
       platform: _platform,
       failureMessage: 'Flutter failed to create a directory at "${delegate.path}"',
-      posixPermissionSuggestion:
-          recursive ? null : _posixPermissionSuggestion(delegate.parent.path),
+      posixPermissionSuggestion: recursive
+          ? null
+          : _posixPermissionSuggestion(delegate.parent.path),
     );
   }
 
@@ -427,8 +429,9 @@ class ErrorHandlingDirectory extends ForwardingFileSystemEntity<Directory, io.Di
       () async => wrap(await delegate.create(recursive: recursive)),
       platform: _platform,
       failureMessage: 'Flutter failed to create a directory at "${delegate.path}"',
-      posixPermissionSuggestion:
-          recursive ? null : _posixPermissionSuggestion(delegate.parent.path),
+      posixPermissionSuggestion: recursive
+          ? null
+          : _posixPermissionSuggestion(delegate.parent.path),
     );
   }
 
@@ -498,7 +501,7 @@ class ErrorHandlingLink extends ForwardingFileSystemEntity<Link, io.Link> with F
   String toString() => delegate.toString();
 }
 
-const String _kNoExecutableFound =
+const _kNoExecutableFound =
     'The Flutter tool could not locate an executable with suitable permissions';
 
 Future<T> _run<T>(
@@ -579,7 +582,7 @@ T _runSync<T>(
 
 /// A [ProcessManager] that throws a [ToolExit] on certain errors.
 ///
-/// If a [ProcessException] is not caused by the Flutter tool, and can only be
+/// If a [io.ProcessException] is not caused by the Flutter tool, and can only be
 /// addressed by the user, it should be caught by this [ProcessManager] and thrown
 /// as a [ToolExit] using [throwToolExit].
 ///
@@ -700,9 +703,9 @@ void _handlePosixException(
   // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno.h
   // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno-base.h
   // https://github.com/apple/darwin-xnu/blob/main/bsd/dev/dtrace/scripts/errno.d
-  const int eperm = 1;
-  const int enospc = 28;
-  const int eacces = 13;
+  const eperm = 1;
+  const enospc = 28;
+  const eacces = 13;
   // Catch errors and bail when:
   String? errorMessage;
   switch (errorCode) {
@@ -713,7 +716,7 @@ void _handlePosixException(
           'Free up space and try again.';
     case eperm:
     case eacces:
-      final StringBuffer errorBuffer = StringBuffer();
+      final errorBuffer = StringBuffer();
       if (message != null && message.isNotEmpty) {
         errorBuffer.writeln('$message.');
       } else {
@@ -741,10 +744,10 @@ void _handleMacOSException(
   String? posixPermissionSuggestion,
 ) {
   // https://github.com/apple/darwin-xnu/blob/main/bsd/dev/dtrace/scripts/errno.d
-  const int ebadarch = 86;
-  const int eagain = 35;
+  const ebadarch = 86;
+  const eagain = 35;
   if (errorCode == ebadarch) {
-    final StringBuffer errorBuffer = StringBuffer();
+    final errorBuffer = StringBuffer();
     if (message != null) {
       errorBuffer.writeln('$message.');
     }
@@ -758,7 +761,7 @@ void _handleMacOSException(
     _throwFileSystemException(errorBuffer.toString());
   }
   if (errorCode == eagain) {
-    final StringBuffer errorBuffer = StringBuffer();
+    final errorBuffer = StringBuffer();
     if (message != null) {
       errorBuffer.writeln('$message.');
     }
@@ -774,11 +777,11 @@ void _handleMacOSException(
 void _handleWindowsException(Exception e, String? message, int errorCode) {
   // From:
   // https://docs.microsoft.com/en-us/windows/win32/debug/system-error-codes
-  const int kDeviceFull = 112;
-  const int kUserMappedSectionOpened = 1224;
-  const int kAccessDenied = 5;
-  const int kFatalDeviceHardwareError = 483;
-  const int kDeviceDoesNotExist = 433;
+  const kDeviceFull = 112;
+  const kUserMappedSectionOpened = 1224;
+  const kAccessDenied = 5;
+  const kFatalDeviceHardwareError = 483;
+  const kDeviceDoesNotExist = 433;
 
   // Catch errors and bail when:
   String? errorMessage;

@@ -24,10 +24,13 @@ if (current_toolchain == default_toolchain && target_sysroot != "") {
   if (use_default_linux_sysroot && !is_fuchsia) {
     if (current_cpu == "x64") {
       sysroot =
-          rebase_path("//build/linux/debian_sid_amd64-sysroot", root_build_dir)
-    } else {
+          rebase_path("//build/linux/debian_bullseye_amd64-sysroot", root_build_dir)
+    } else if (current_cpu == "arm64") {
       sysroot =
-          rebase_path("//build/linux/debian_sid_arm64-sysroot", root_build_dir)
+          rebase_path("//build/linux/debian_bullseye_arm64-sysroot", root_build_dir)
+    } else if (current_cpu == "riscv64") {
+      sysroot =
+          rebase_path("//build/linux/debian_trixie_riscv64-sysroot", root_build_dir)
     }
     assert(
         exec_script("//build/dir_exists.py", [ sysroot ], "string") == "True",
@@ -36,10 +39,10 @@ if (current_toolchain == default_toolchain && target_sysroot != "") {
     sysroot = ""
   }
 } else if (is_mac) {
-  import("//build/config/mac/mac_sdk.gni")
+  import("//build/config/darwin/darwin_sdk.gni")
   sysroot = mac_sdk_path
 } else if (is_ios) {
-  import("//build/config/ios/ios_sdk.gni")
+  import("//build/config/darwin/darwin_sdk.gni")
   sysroot = ios_sdk_path
 } else {
   sysroot = ""

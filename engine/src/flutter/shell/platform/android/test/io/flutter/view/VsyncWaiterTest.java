@@ -23,9 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.robolectric.annotation.Config;
 
-@Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
 public class VsyncWaiterTest {
   @Before
@@ -46,7 +44,7 @@ public class VsyncWaiterTest {
     verify(mockFlutterJNI, times(1)).setAsyncWaitForVsyncDelegate(delegateCaptor.capture());
     delegateCaptor.getValue().asyncWaitForVsync(1);
     shadowOf(Looper.getMainLooper()).idle();
-    verify(mockFlutterJNI, times(1)).onVsync(anyLong(), eq(1000000000l / 10l), eq(1l));
+    verify(mockFlutterJNI, times(1)).onVsync(anyLong(), eq(1000000000L / 10L), eq(1L));
   }
 
   @Test
@@ -73,7 +71,7 @@ public class VsyncWaiterTest {
     verify(mockFlutterJNI, times(1)).setAsyncWaitForVsyncDelegate(delegateCaptor.capture());
     delegateCaptor.getValue().asyncWaitForVsync(1);
     shadowOf(Looper.getMainLooper()).idle();
-    verify(mockFlutterJNI, times(1)).onVsync(anyLong(), eq(1000000000l / 90l), eq(1l));
+    verify(mockFlutterJNI, times(1)).onVsync(anyLong(), eq(1000000000L / 90L), eq(1L));
 
     when(mockDisplay.getRefreshRate()).thenReturn(60.0f);
     displayListenerCaptor.getValue().onDisplayChanged(Display.DEFAULT_DISPLAY);
@@ -81,7 +79,7 @@ public class VsyncWaiterTest {
 
     delegateCaptor.getValue().asyncWaitForVsync(1);
     shadowOf(Looper.getMainLooper()).idle();
-    verify(mockFlutterJNI, times(1)).onVsync(anyLong(), eq(1000000000l / 60l), eq(1l));
+    verify(mockFlutterJNI, times(1)).onVsync(anyLong(), eq(1000000000L / 60L), eq(1L));
   }
 
   @Test
