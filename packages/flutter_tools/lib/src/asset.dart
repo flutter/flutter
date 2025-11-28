@@ -674,7 +674,7 @@ class ManifestAssetBundle implements AssetBundle {
   }
 
   @override
-  var additionalDependencies = <File>[];
+  List<File> additionalDependencies = <File>[];
   void _setIfChanged(String key, DevFSContent content, AssetKind assetKind) {
     final DevFSContent? oldContent = entries[key]?.content;
     // In the case that the content is unchanged, we want to avoid an overwrite

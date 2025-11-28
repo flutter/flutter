@@ -21,8 +21,7 @@ void main() {
   group('AndroidView', () {
     testWidgets('Create Android view', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeAndroidPlatformViewsController viewsController =
-          FakeAndroidPlatformViewsController();
+      final viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
@@ -50,8 +49,7 @@ void main() {
 
     testWidgets('Create Android view with params', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeAndroidPlatformViewsController viewsController =
-          FakeAndroidPlatformViewsController();
+      final viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
@@ -71,7 +69,7 @@ void main() {
 
       final FakeAndroidPlatformView fakeView = viewsController.views.first;
       final Uint8List rawCreationParams = fakeView.creationParams!;
-      final ByteData byteData = ByteData.view(
+      final byteData = ByteData.view(
         rawCreationParams.buffer,
         rawCreationParams.offsetInBytes,
         rawCreationParams.lengthInBytes,
@@ -94,8 +92,7 @@ void main() {
     });
 
     testWidgets('Zero sized Android view is not created', (WidgetTester tester) async {
-      final FakeAndroidPlatformViewsController viewsController =
-          FakeAndroidPlatformViewsController();
+      final viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
@@ -111,8 +108,7 @@ void main() {
 
     testWidgets('Resize Android view', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeAndroidPlatformViewsController viewsController =
-          FakeAndroidPlatformViewsController();
+      final viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
       await tester.pumpWidget(
         const Center(
@@ -138,7 +134,7 @@ void main() {
 
       final Layer textureParentLayer = tester.layers[tester.layers.length - 2];
       expect(textureParentLayer, isA<ClipRectLayer>());
-      final ClipRectLayer clipRect = textureParentLayer as ClipRectLayer;
+      final clipRect = textureParentLayer as ClipRectLayer;
       expect(clipRect.clipRect, const Rect.fromLTWH(0.0, 0.0, 100.0, 50.0));
       expect(
         viewsController.views,
@@ -170,8 +166,7 @@ void main() {
 
     testWidgets('Change Android view type', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeAndroidPlatformViewsController viewsController =
-          FakeAndroidPlatformViewsController();
+      final viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
       viewsController.registerViewType('maps');
       await tester.pumpWidget(
@@ -208,8 +203,7 @@ void main() {
     });
 
     testWidgets('Dispose Android view', (WidgetTester tester) async {
-      final FakeAndroidPlatformViewsController viewsController =
-          FakeAndroidPlatformViewsController();
+      final viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
       await tester.pumpWidget(
         const Center(
@@ -228,8 +222,7 @@ void main() {
 
     testWidgets('Android view survives widget tree change', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeAndroidPlatformViewsController viewsController =
-          FakeAndroidPlatformViewsController();
+      final viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(
@@ -267,8 +260,7 @@ void main() {
 
     testWidgets('Android view gets touch events', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeAndroidPlatformViewsController viewsController =
-          FakeAndroidPlatformViewsController();
+      final viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
       await tester.pumpWidget(
         const Align(
@@ -303,11 +295,10 @@ void main() {
 
     testWidgets('Android view transparent hit test behavior', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeAndroidPlatformViewsController viewsController =
-          FakeAndroidPlatformViewsController();
+      final viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
 
-      int numPointerDownsOnParent = 0;
+      var numPointerDownsOnParent = 0;
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -347,11 +338,10 @@ void main() {
 
     testWidgets('Android view translucent hit test behavior', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeAndroidPlatformViewsController viewsController =
-          FakeAndroidPlatformViewsController();
+      final viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
 
-      int numPointerDownsOnParent = 0;
+      var numPointerDownsOnParent = 0;
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -400,11 +390,10 @@ void main() {
 
     testWidgets('Android view opaque hit test behavior', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeAndroidPlatformViewsController viewsController =
-          FakeAndroidPlatformViewsController();
+      final viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
 
-      int numPointerDownsOnParent = 0;
+      var numPointerDownsOnParent = 0;
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -451,8 +440,7 @@ void main() {
       WidgetTester tester,
     ) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeAndroidPlatformViewsController viewsController =
-          FakeAndroidPlatformViewsController();
+      final viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
       await tester.pumpWidget(
         Align(
@@ -490,8 +478,7 @@ void main() {
 
     testWidgets('Android view directionality', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeAndroidPlatformViewsController viewsController =
-          FakeAndroidPlatformViewsController();
+      final viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('maps');
       await tester.pumpWidget(
         const Center(
@@ -540,8 +527,7 @@ void main() {
 
     testWidgets('Android view ambient directionality', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeAndroidPlatformViewsController viewsController =
-          FakeAndroidPlatformViewsController();
+      final viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('maps');
       await tester.pumpWidget(
         const Directionality(
@@ -588,10 +574,9 @@ void main() {
 
     testWidgets('Android view can lose gesture arenas', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeAndroidPlatformViewsController viewsController =
-          FakeAndroidPlatformViewsController();
+      final viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
-      bool verticalDragAcceptedByParent = false;
+      var verticalDragAcceptedByParent = false;
       await tester.pumpWidget(
         Align(
           alignment: Alignment.topLeft,
@@ -621,10 +606,9 @@ void main() {
 
     testWidgets('Android view drag gesture recognizer', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeAndroidPlatformViewsController viewsController =
-          FakeAndroidPlatformViewsController();
+      final viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
-      bool verticalDragAcceptedByParent = false;
+      var verticalDragAcceptedByParent = false;
       await tester.pumpWidget(
         Align(
           alignment: Alignment.topLeft,
@@ -639,8 +623,7 @@ void main() {
                 viewType: 'webview',
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<VerticalDragGestureRecognizer>(() {
-                    final VerticalDragGestureRecognizer recognizer =
-                        VerticalDragGestureRecognizer();
+                    final recognizer = VerticalDragGestureRecognizer();
                     addTearDown(recognizer.dispose);
                     return recognizer;
                   }),
@@ -681,10 +664,9 @@ void main() {
 
     testWidgets('Android view long press gesture recognizer', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeAndroidPlatformViewsController viewsController =
-          FakeAndroidPlatformViewsController();
+      final viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
-      bool longPressAccessedByParent = false;
+      var longPressAccessedByParent = false;
       await tester.pumpWidget(
         Align(
           alignment: Alignment.topLeft,
@@ -699,7 +681,7 @@ void main() {
                 viewType: 'webview',
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<LongPressGestureRecognizer>(() {
-                    final LongPressGestureRecognizer recognizer = LongPressGestureRecognizer();
+                    final recognizer = LongPressGestureRecognizer();
                     addTearDown(recognizer.dispose);
                     return recognizer;
                   }),
@@ -733,10 +715,9 @@ void main() {
 
     testWidgets('Android view tap gesture recognizer', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeAndroidPlatformViewsController viewsController =
-          FakeAndroidPlatformViewsController();
+      final viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
-      bool tapAccessedByParent = false;
+      var tapAccessedByParent = false;
       await tester.pumpWidget(
         Align(
           alignment: Alignment.topLeft,
@@ -751,7 +732,7 @@ void main() {
                 viewType: 'webview',
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<TapGestureRecognizer>(() {
-                    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+                    final recognizer = TapGestureRecognizer();
                     addTearDown(recognizer.dispose);
                     return recognizer;
                   }),
@@ -787,10 +768,9 @@ void main() {
       WidgetTester tester,
     ) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeAndroidPlatformViewsController viewsController =
-          FakeAndroidPlatformViewsController();
+      final viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
-      bool verticalDragAcceptedByParent = false;
+      var verticalDragAcceptedByParent = false;
       // The long press recognizer rejects the gesture after the AndroidView gets the pointer up event.
       // This test makes sure that the Android view can win the gesture after it got the pointer up event.
       await tester.pumpWidget(
@@ -833,8 +813,7 @@ void main() {
 
     testWidgets('Android view rebuilt during gesture', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeAndroidPlatformViewsController viewsController =
-          FakeAndroidPlatformViewsController();
+      final viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
       await tester.pumpWidget(
         const Align(
@@ -887,8 +866,7 @@ void main() {
 
     testWidgets('Android view with eager gesture recognizer', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeAndroidPlatformViewsController viewsController =
-          FakeAndroidPlatformViewsController();
+      final viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
       await tester.pumpWidget(
         Align(
@@ -902,7 +880,7 @@ void main() {
                 viewType: 'webview',
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<OneSequenceGestureRecognizer>(() {
-                    final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+                    final recognizer = EagerGestureRecognizer();
                     addTearDown(recognizer.dispose);
                     return recognizer;
                   }),
@@ -941,15 +919,14 @@ void main() {
     testWidgets('RenderAndroidView reconstructed with same gestureRecognizers does not crash', (
       WidgetTester tester,
     ) async {
-      final FakeAndroidPlatformViewsController viewsController =
-          FakeAndroidPlatformViewsController();
+      final viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
 
-      final AndroidView androidView = AndroidView(
+      final androidView = AndroidView(
         viewType: 'webview',
         gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
           Factory<EagerGestureRecognizer>(() {
-            final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+            final recognizer = EagerGestureRecognizer();
             addTearDown(recognizer.dispose);
             return recognizer;
           }),
@@ -963,14 +940,13 @@ void main() {
     });
 
     testWidgets('AndroidView rebuilt with same gestureRecognizers', (WidgetTester tester) async {
-      final FakeAndroidPlatformViewsController viewsController =
-          FakeAndroidPlatformViewsController();
+      final viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
 
-      int factoryInvocationCount = 0;
+      var factoryInvocationCount = 0;
       EagerGestureRecognizer constructRecognizer() {
         factoryInvocationCount += 1;
-        final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+        final recognizer = EagerGestureRecognizer();
         addTearDown(recognizer.dispose);
         return recognizer;
       }
@@ -1003,8 +979,7 @@ void main() {
       final SemanticsHandle handle = tester.ensureSemantics();
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       expect(currentViewId, greaterThanOrEqualTo(0));
-      final FakeAndroidPlatformViewsController viewsController =
-          FakeAndroidPlatformViewsController();
+      final viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
 
       viewsController.createCompleter = Completer<void>();
@@ -1051,8 +1026,7 @@ void main() {
 
     testWidgets('AndroidView can take input focus', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeAndroidPlatformViewsController viewsController =
-          FakeAndroidPlatformViewsController();
+      final viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
 
       viewsController.createCompleter = Completer<void>();
@@ -1103,8 +1077,7 @@ void main() {
       WidgetTester tester,
     ) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeAndroidPlatformViewsController viewsController =
-          FakeAndroidPlatformViewsController();
+      final viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
 
       viewsController.createCompleter = Completer<void>();
@@ -1155,8 +1128,7 @@ void main() {
 
     testWidgets('AndroidView clears platform focus when unfocused', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeAndroidPlatformViewsController viewsController =
-          FakeAndroidPlatformViewsController();
+      final viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
 
       viewsController.createCompleter = Completer<void>();
@@ -1200,8 +1172,7 @@ void main() {
     });
 
     testWidgets('can set and update clipBehavior', (WidgetTester tester) async {
-      final FakeAndroidPlatformViewsController viewsController =
-          FakeAndroidPlatformViewsController();
+      final viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
@@ -1246,8 +1217,7 @@ void main() {
     testWidgets('clip is handled correctly during resizing', (WidgetTester tester) async {
       // Regressing test for https://github.com/flutter/flutter/issues/67343
 
-      final FakeAndroidPlatformViewsController viewsController =
-          FakeAndroidPlatformViewsController();
+      final viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
 
       Widget buildView(double width, double height, Clip clipBehavior) {
@@ -1287,8 +1257,7 @@ void main() {
     });
 
     testWidgets('offset is sent to the platform', (WidgetTester tester) async {
-      final FakeAndroidPlatformViewsController viewsController =
-          FakeAndroidPlatformViewsController();
+      final viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
@@ -1313,7 +1282,7 @@ void main() {
     testWidgets('AndroidViewSurface sets pointTransformer of view controller', (
       WidgetTester tester,
     ) async {
-      final AndroidViewSurface surface = AndroidViewSurface(
+      final surface = AndroidViewSurface(
         controller: controller,
         hitTestBehavior: PlatformViewHitTestBehavior.opaque,
         gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
@@ -1325,7 +1294,7 @@ void main() {
     testWidgets('AndroidViewSurface defaults to texture-based rendering', (
       WidgetTester tester,
     ) async {
-      final AndroidViewSurface surface = AndroidViewSurface(
+      final surface = AndroidViewSurface(
         controller: controller,
         hitTestBehavior: PlatformViewHitTestBehavior.opaque,
         gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
@@ -1344,7 +1313,7 @@ void main() {
       WidgetTester tester,
     ) async {
       controller.requiresViewComposition = true;
-      final AndroidViewSurface surface = AndroidViewSurface(
+      final surface = AndroidViewSurface(
         controller: controller,
         hitTestBehavior: PlatformViewHitTestBehavior.opaque,
         gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
@@ -1363,7 +1332,7 @@ void main() {
     testWidgets('AndroidViewSurface can switch to view-based rendering after creation', (
       WidgetTester tester,
     ) async {
-      final AndroidViewSurface surface = AndroidViewSurface(
+      final surface = AndroidViewSurface(
         controller: controller,
         hitTestBehavior: PlatformViewHitTestBehavior.opaque,
         gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
@@ -1410,7 +1379,7 @@ void main() {
   group('UiKitView', () {
     testWidgets('Create UIView', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
@@ -1431,7 +1400,7 @@ void main() {
 
     testWidgets('Change UIView view type', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
       viewsController.registerViewType('maps');
       await tester.pumpWidget(
@@ -1461,7 +1430,7 @@ void main() {
     });
 
     testWidgets('Dispose UIView ', (WidgetTester tester) async {
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
       await tester.pumpWidget(
         const Center(
@@ -1479,7 +1448,7 @@ void main() {
     });
 
     testWidgets('Dispose UIView before creation completed ', (WidgetTester tester) async {
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
       viewsController.creationDelay = Completer<void>();
       await tester.pumpWidget(
@@ -1501,7 +1470,7 @@ void main() {
 
     testWidgets('UIView survives widget tree change', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(
@@ -1532,7 +1501,7 @@ void main() {
 
     testWidgets('Create UIView with params', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
@@ -1552,7 +1521,7 @@ void main() {
 
       final FakeUiKitView fakeView = viewsController.views.first;
       final Uint8List rawCreationParams = fakeView.creationParams!;
-      final ByteData byteData = ByteData.view(
+      final byteData = ByteData.view(
         rawCreationParams.buffer,
         rawCreationParams.offsetInBytes,
         rawCreationParams.lengthInBytes,
@@ -1570,7 +1539,7 @@ void main() {
 
     testWidgets('UiKitView accepts gestures', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
@@ -1598,10 +1567,10 @@ void main() {
 
     testWidgets('UiKitView transparent hit test behavior', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
 
-      int numPointerDownsOnParent = 0;
+      var numPointerDownsOnParent = 0;
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -1643,10 +1612,10 @@ void main() {
 
     testWidgets('UiKitView translucent hit test behavior', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
 
-      int numPointerDownsOnParent = 0;
+      var numPointerDownsOnParent = 0;
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -1688,10 +1657,10 @@ void main() {
 
     testWidgets('UiKitView opaque hit test behavior', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
 
-      int numPointerDownsOnParent = 0;
+      var numPointerDownsOnParent = 0;
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -1728,10 +1697,10 @@ void main() {
 
     testWidgets('UiKitView can lose gesture arenas', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
 
-      bool verticalDragAcceptedByParent = false;
+      var verticalDragAcceptedByParent = false;
       await tester.pumpWidget(
         Align(
           alignment: Alignment.topLeft,
@@ -1766,9 +1735,9 @@ void main() {
 
     testWidgets('UiKitView tap gesture recognizers', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
-      bool gestureAcceptedByParent = false;
+      var gestureAcceptedByParent = false;
       await tester.pumpWidget(
         Align(
           alignment: Alignment.topLeft,
@@ -1783,8 +1752,7 @@ void main() {
                 viewType: 'webview',
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<VerticalDragGestureRecognizer>(() {
-                    final VerticalDragGestureRecognizer recognizer =
-                        VerticalDragGestureRecognizer();
+                    final recognizer = VerticalDragGestureRecognizer();
                     addTearDown(recognizer.dispose);
                     return recognizer;
                   }),
@@ -1811,9 +1779,9 @@ void main() {
 
     testWidgets('UiKitView long press gesture recognizers', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
-      bool gestureAcceptedByParent = false;
+      var gestureAcceptedByParent = false;
       await tester.pumpWidget(
         Align(
           alignment: Alignment.topLeft,
@@ -1828,7 +1796,7 @@ void main() {
                 viewType: 'webview',
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<LongPressGestureRecognizer>(() {
-                    final LongPressGestureRecognizer recognizer = LongPressGestureRecognizer();
+                    final recognizer = LongPressGestureRecognizer();
                     addTearDown(recognizer.dispose);
                     return recognizer;
                   }),
@@ -1853,9 +1821,9 @@ void main() {
 
     testWidgets('UiKitView drag gesture recognizers', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
-      bool verticalDragAcceptedByParent = false;
+      var verticalDragAcceptedByParent = false;
       await tester.pumpWidget(
         Align(
           alignment: Alignment.topLeft,
@@ -1870,7 +1838,7 @@ void main() {
                 viewType: 'webview',
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<TapGestureRecognizer>(() {
-                    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+                    final recognizer = TapGestureRecognizer();
                     addTearDown(recognizer.dispose);
                     return recognizer;
                   }),
@@ -1897,9 +1865,9 @@ void main() {
       WidgetTester tester,
     ) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
-      bool verticalDragAcceptedByParent = false;
+      var verticalDragAcceptedByParent = false;
       // The long press recognizer rejects the gesture after the AndroidView gets the pointer up event.
       // This test makes sure that the Android view can win the gesture after it got the pointer up event.
       await tester.pumpWidget(
@@ -1934,7 +1902,7 @@ void main() {
 
     testWidgets('UiKitView rebuilt during gesture', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
       await tester.pumpWidget(
         const Align(
@@ -1973,7 +1941,7 @@ void main() {
 
     testWidgets('UiKitView with eager gesture recognizer', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
       await tester.pumpWidget(
         Align(
@@ -1987,7 +1955,7 @@ void main() {
                 viewType: 'webview',
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<OneSequenceGestureRecognizer>(() {
-                    final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+                    final recognizer = EagerGestureRecognizer();
                     addTearDown(recognizer.dispose);
                     return recognizer;
                   }),
@@ -2019,7 +1987,7 @@ void main() {
 
     testWidgets('UiKitView rejects gestures absorbed by siblings', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
@@ -2050,7 +2018,7 @@ void main() {
         // Opaque container is on top of the UiKitView positioned at (left=0, top=500, right=300, bottom=600).
         // Touch on (550, 150) is expected to be absorbed by the container.
         final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-        final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+        final viewsController = FakeIosPlatformViewsController();
         viewsController.registerViewType('webview');
 
         await tester.pumpWidget(
@@ -2094,13 +2062,13 @@ void main() {
     );
 
     testWidgets('UiKitView rebuilt with same gestureRecognizers', (WidgetTester tester) async {
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
 
-      int factoryInvocationCount = 0;
+      var factoryInvocationCount = 0;
       EagerGestureRecognizer constructRecognizer() {
         factoryInvocationCount += 1;
-        final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+        final recognizer = EagerGestureRecognizer();
         addTearDown(recognizer.dispose);
         return recognizer;
       }
@@ -2131,7 +2099,7 @@ void main() {
 
     testWidgets('UiKitView can take input focus', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
 
       final GlobalKey containerKey = GlobalKey();
@@ -2183,7 +2151,7 @@ void main() {
       WidgetTester tester,
     ) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
@@ -2219,7 +2187,7 @@ void main() {
     });
 
     testWidgets('FocusNode is disposed on UIView dispose', (WidgetTester tester) async {
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
@@ -2243,7 +2211,7 @@ void main() {
       final SemanticsHandle handle = tester.ensureSemantics();
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       expect(currentViewId, greaterThanOrEqualTo(0));
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
@@ -2285,7 +2253,7 @@ void main() {
   group('AppKitView', () {
     testWidgets('Create AppView', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
+      final viewsController = FakeMacosPlatformViewsController();
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
@@ -2306,7 +2274,7 @@ void main() {
 
     testWidgets('Change AppKitView view type', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
+      final viewsController = FakeMacosPlatformViewsController();
       viewsController.registerViewType('webview');
       viewsController.registerViewType('maps');
       await tester.pumpWidget(
@@ -2336,7 +2304,7 @@ void main() {
     });
 
     testWidgets('Dispose AppKitView ', (WidgetTester tester) async {
-      final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
+      final viewsController = FakeMacosPlatformViewsController();
       viewsController.registerViewType('webview');
       await tester.pumpWidget(
         const Center(
@@ -2354,7 +2322,7 @@ void main() {
     });
 
     testWidgets('Dispose AppKitView before creation completed ', (WidgetTester tester) async {
-      final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
+      final viewsController = FakeMacosPlatformViewsController();
       viewsController.registerViewType('webview');
       viewsController.creationDelay = Completer<void>();
       await tester.pumpWidget(
@@ -2376,7 +2344,7 @@ void main() {
 
     testWidgets('AppKitView survives widget tree change', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
+      final viewsController = FakeMacosPlatformViewsController();
       viewsController.registerViewType('webview');
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(
@@ -2407,7 +2375,7 @@ void main() {
 
     testWidgets('Create AppKitView with params', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
+      final viewsController = FakeMacosPlatformViewsController();
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
@@ -2427,7 +2395,7 @@ void main() {
 
       final FakeAppKitView fakeView = viewsController.views.first;
       final Uint8List rawCreationParams = fakeView.creationParams!;
-      final ByteData byteData = ByteData.view(
+      final byteData = ByteData.view(
         rawCreationParams.buffer,
         rawCreationParams.offsetInBytes,
         rawCreationParams.lengthInBytes,
@@ -2447,7 +2415,7 @@ void main() {
     // https://github.com/flutter/flutter/issues/128519
     testWidgets('AppKitView accepts gestures', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
+      final viewsController = FakeMacosPlatformViewsController();
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
@@ -2475,10 +2443,10 @@ void main() {
 
     testWidgets('AppKitView transparent hit test behavior', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
+      final viewsController = FakeMacosPlatformViewsController();
       viewsController.registerViewType('webview');
 
-      int numPointerDownsOnParent = 0;
+      var numPointerDownsOnParent = 0;
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -2520,10 +2488,10 @@ void main() {
 
     testWidgets('AppKitView translucent hit test behavior', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
+      final viewsController = FakeMacosPlatformViewsController();
       viewsController.registerViewType('webview');
 
-      int numPointerDownsOnParent = 0;
+      var numPointerDownsOnParent = 0;
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -2565,10 +2533,10 @@ void main() {
 
     testWidgets('AppKitView opaque hit test behavior', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
+      final viewsController = FakeMacosPlatformViewsController();
       viewsController.registerViewType('webview');
 
-      int numPointerDownsOnParent = 0;
+      var numPointerDownsOnParent = 0;
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -2605,10 +2573,10 @@ void main() {
 
     testWidgets('UiKitView can lose gesture arenas', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
 
-      bool verticalDragAcceptedByParent = false;
+      var verticalDragAcceptedByParent = false;
       await tester.pumpWidget(
         Align(
           alignment: Alignment.topLeft,
@@ -2643,9 +2611,9 @@ void main() {
 
     testWidgets('UiKitView tap gesture recognizers', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
-      bool gestureAcceptedByParent = false;
+      var gestureAcceptedByParent = false;
       await tester.pumpWidget(
         Align(
           alignment: Alignment.topLeft,
@@ -2660,8 +2628,7 @@ void main() {
                 viewType: 'webview',
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<VerticalDragGestureRecognizer>(() {
-                    final VerticalDragGestureRecognizer recognizer =
-                        VerticalDragGestureRecognizer();
+                    final recognizer = VerticalDragGestureRecognizer();
                     addTearDown(recognizer.dispose);
                     return recognizer;
                   }),
@@ -2688,9 +2655,9 @@ void main() {
 
     testWidgets('UiKitView long press gesture recognizers', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
-      bool gestureAcceptedByParent = false;
+      var gestureAcceptedByParent = false;
       await tester.pumpWidget(
         Align(
           alignment: Alignment.topLeft,
@@ -2705,7 +2672,7 @@ void main() {
                 viewType: 'webview',
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<LongPressGestureRecognizer>(() {
-                    final LongPressGestureRecognizer recognizer = LongPressGestureRecognizer();
+                    final recognizer = LongPressGestureRecognizer();
                     addTearDown(recognizer.dispose);
                     return recognizer;
                   }),
@@ -2730,9 +2697,9 @@ void main() {
 
     testWidgets('UiKitView drag gesture recognizers', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
-      bool verticalDragAcceptedByParent = false;
+      var verticalDragAcceptedByParent = false;
       await tester.pumpWidget(
         Align(
           alignment: Alignment.topLeft,
@@ -2747,7 +2714,7 @@ void main() {
                 viewType: 'webview',
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<TapGestureRecognizer>(() {
-                    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+                    final recognizer = TapGestureRecognizer();
                     addTearDown(recognizer.dispose);
                     return recognizer;
                   }),
@@ -2774,9 +2741,9 @@ void main() {
       WidgetTester tester,
     ) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
-      bool verticalDragAcceptedByParent = false;
+      var verticalDragAcceptedByParent = false;
       // The long press recognizer rejects the gesture after the AndroidView gets the pointer up event.
       // This test makes sure that the Android view can win the gesture after it got the pointer up event.
       await tester.pumpWidget(
@@ -2811,7 +2778,7 @@ void main() {
 
     testWidgets('UiKitView rebuilt during gesture', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
       await tester.pumpWidget(
         const Align(
@@ -2850,7 +2817,7 @@ void main() {
 
     testWidgets('UiKitView with eager gesture recognizer', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
       await tester.pumpWidget(
         Align(
@@ -2864,7 +2831,7 @@ void main() {
                 viewType: 'webview',
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<OneSequenceGestureRecognizer>(() {
-                    final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+                    final recognizer = EagerGestureRecognizer();
                     addTearDown(recognizer.dispose);
                     return recognizer;
                   }),
@@ -2896,7 +2863,7 @@ void main() {
 
     testWidgets('UiKitView rejects gestures absorbed by siblings', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
@@ -2927,7 +2894,7 @@ void main() {
         // Opaque container is on top of the UiKitView positioned at (left=0, top=500, right=300, bottom=600).
         // Touch on (550, 150) is expected to be absorbed by the container.
         final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-        final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+        final viewsController = FakeIosPlatformViewsController();
         viewsController.registerViewType('webview');
 
         await tester.pumpWidget(
@@ -2971,13 +2938,13 @@ void main() {
     );
 
     testWidgets('UiKitView rebuilt with same gestureRecognizers', (WidgetTester tester) async {
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
 
-      int factoryInvocationCount = 0;
+      var factoryInvocationCount = 0;
       EagerGestureRecognizer constructRecognizer() {
         factoryInvocationCount += 1;
-        final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+        final recognizer = EagerGestureRecognizer();
         addTearDown(recognizer.dispose);
         return recognizer;
       }
@@ -3008,7 +2975,7 @@ void main() {
 
     testWidgets('AppKitView can take input focus', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
+      final viewsController = FakeMacosPlatformViewsController();
       viewsController.registerViewType('webview');
 
       final GlobalKey containerKey = GlobalKey();
@@ -3060,7 +3027,7 @@ void main() {
       WidgetTester tester,
     ) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
+      final viewsController = FakeMacosPlatformViewsController();
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
@@ -3096,7 +3063,7 @@ void main() {
     });
 
     testWidgets('FocusNode is disposed on UIView dispose', (WidgetTester tester) async {
-      final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
+      final viewsController = FakeMacosPlatformViewsController();
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
@@ -3120,7 +3087,7 @@ void main() {
       final SemanticsHandle handle = tester.ensureSemantics();
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       expect(currentViewId, greaterThanOrEqualTo(0));
-      final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
+      final viewsController = FakeMacosPlatformViewsController();
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
@@ -3169,7 +3136,7 @@ void main() {
     testWidgets('PlatformViewSurface should create platform view layer', (
       WidgetTester tester,
     ) async {
-      final PlatformViewSurface surface = PlatformViewSurface(
+      final surface = PlatformViewSurface(
         controller: controller,
         hitTestBehavior: PlatformViewHitTestBehavior.opaque,
         gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
@@ -3179,7 +3146,7 @@ void main() {
     });
 
     testWidgets('PlatformViewSurface can lose gesture arenas', (WidgetTester tester) async {
-      bool verticalDragAcceptedByParent = false;
+      var verticalDragAcceptedByParent = false;
       await tester.pumpWidget(
         Align(
           alignment: Alignment.topLeft,
@@ -3214,7 +3181,7 @@ void main() {
     testWidgets('PlatformViewSurface gesture recognizers dispatch events', (
       WidgetTester tester,
     ) async {
-      bool verticalDragAcceptedByParent = false;
+      var verticalDragAcceptedByParent = false;
       await tester.pumpWidget(
         Align(
           alignment: Alignment.topLeft,
@@ -3230,8 +3197,7 @@ void main() {
                 hitTestBehavior: PlatformViewHitTestBehavior.opaque,
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<VerticalDragGestureRecognizer>(() {
-                    final VerticalDragGestureRecognizer recognizer =
-                        VerticalDragGestureRecognizer();
+                    final recognizer = VerticalDragGestureRecognizer();
                     addTearDown(recognizer.dispose);
                     return recognizer;
                   }),
@@ -3253,7 +3219,7 @@ void main() {
     testWidgets('PlatformViewSurface can claim gesture after all pointers are up', (
       WidgetTester tester,
     ) async {
-      bool verticalDragAcceptedByParent = false;
+      var verticalDragAcceptedByParent = false;
       // The long press recognizer rejects the gesture after the PlatformViewSurface gets the pointer up event.
       // This test makes sure that the PlatformViewSurface can win the gesture after it got the pointer up event.
       await tester.pumpWidget(
@@ -3337,7 +3303,7 @@ void main() {
                 hitTestBehavior: PlatformViewHitTestBehavior.opaque,
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<OneSequenceGestureRecognizer>(() {
-                    final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+                    final recognizer = EagerGestureRecognizer();
                     addTearDown(recognizer.dispose);
                     return recognizer;
                   }),
@@ -3364,15 +3330,15 @@ void main() {
     testWidgets('PlatformViewRenderBox reconstructed with same gestureRecognizers', (
       WidgetTester tester,
     ) async {
-      int factoryInvocationCount = 0;
+      var factoryInvocationCount = 0;
       EagerGestureRecognizer constructRecognizer() {
         ++factoryInvocationCount;
-        final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+        final recognizer = EagerGestureRecognizer();
         addTearDown(recognizer.dispose);
         return recognizer;
       }
 
-      final PlatformViewSurface platformViewSurface = PlatformViewSurface(
+      final platformViewSurface = PlatformViewSurface(
         controller: controller,
         hitTestBehavior: PlatformViewHitTestBehavior.opaque,
         gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
@@ -3390,10 +3356,10 @@ void main() {
     testWidgets('PlatformViewSurface rebuilt with same gestureRecognizers', (
       WidgetTester tester,
     ) async {
-      int factoryInvocationCount = 0;
+      var factoryInvocationCount = 0;
       EagerGestureRecognizer constructRecognizer() {
         ++factoryInvocationCount;
-        final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+        final recognizer = EagerGestureRecognizer();
         addTearDown(recognizer.dispose);
         return recognizer;
       }
@@ -3428,7 +3394,7 @@ void main() {
 
         late PlatformViewCreatedCallback onPlatformViewCreatedCallBack;
 
-        final PlatformViewLink platformViewLink = PlatformViewLink(
+        final platformViewLink = PlatformViewLink(
           viewType: 'webview',
           onCreatePlatformView: (PlatformViewCreationParams params) {
             onPlatformViewCreatedCallBack = params.onPlatformViewCreated;
@@ -3527,7 +3493,7 @@ void main() {
       late PlatformViewCreatedCallback onPlatformViewCreatedCallBack;
       late PlatformViewController controller;
 
-      final PlatformViewLink platformViewLink = PlatformViewLink(
+      final platformViewLink = PlatformViewLink(
         viewType: 'webview',
         onCreatePlatformView: (PlatformViewCreationParams params) {
           onPlatformViewCreatedCallBack = params.onPlatformViewCreated;
@@ -3585,7 +3551,7 @@ void main() {
 
       late FakeAndroidViewController controller;
 
-      final PlatformViewLink platformViewLink = PlatformViewLink(
+      final platformViewLink = PlatformViewLink(
         viewType: 'webview',
         onCreatePlatformView: (PlatformViewCreationParams params) {
           controller = FakeAndroidViewController(params.id, requiresSize: true);
@@ -3629,7 +3595,7 @@ void main() {
       late PlatformViewCreatedCallback onPlatformViewCreatedCallBack;
       late PlatformViewController controller;
 
-      final PlatformViewLink platformViewLink = PlatformViewLink(
+      final platformViewLink = PlatformViewLink(
         viewType: 'webview',
         onCreatePlatformView: (PlatformViewCreationParams params) {
           onPlatformViewCreatedCallBack = params.onPlatformViewCreated;
@@ -3677,7 +3643,7 @@ void main() {
 
     testWidgets('PlatformViewLink Widget dispose', (WidgetTester tester) async {
       late FakePlatformViewController disposedController;
-      final PlatformViewLink platformViewLink = PlatformViewLink(
+      final platformViewLink = PlatformViewLink(
         viewType: 'webview',
         onCreatePlatformView: (PlatformViewCreationParams params) {
           disposedController = FakePlatformViewController(params.id);
@@ -3705,7 +3671,7 @@ void main() {
     ) async {
       late PlatformViewCreationParams creationParams;
       late FakePlatformViewController controller;
-      final PlatformViewLink platformViewLink = PlatformViewLink(
+      final platformViewLink = PlatformViewLink(
         viewType: 'webview',
         onCreatePlatformView: (PlatformViewCreationParams params) {
           creationParams = params;
@@ -3731,7 +3697,7 @@ void main() {
     testWidgets('PlatformViewLink widget survives widget tree change', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final List<int> ids = <int>[];
+      final ids = <int>[];
 
       FakePlatformViewController controller;
 
@@ -3770,9 +3736,9 @@ void main() {
       WidgetTester tester,
     ) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final List<int> ids = <int>[];
-      final List<int> surfaceViewIds = <int>[];
-      final List<String> viewTypes = <String>[];
+      final ids = <int>[];
+      final surfaceViewIds = <int>[];
+      final viewTypes = <String>[];
 
       PlatformViewLink createPlatformViewLink(String viewType) {
         return PlatformViewLink(
@@ -3815,7 +3781,7 @@ void main() {
     testWidgets('PlatformViewLink can take any widget to return in the SurfaceFactory', (
       WidgetTester tester,
     ) async {
-      final PlatformViewLink platformViewLink = PlatformViewLink(
+      final platformViewLink = PlatformViewLink(
         viewType: 'webview',
         onCreatePlatformView: (PlatformViewCreationParams params) {
           params.onPlatformViewCreated(params.id);
@@ -3835,7 +3801,7 @@ void main() {
       final GlobalKey containerKey = GlobalKey();
       late FakePlatformViewController controller;
       late ValueChanged<bool> focusChanged;
-      final PlatformViewLink platformViewLink = PlatformViewLink(
+      final platformViewLink = PlatformViewLink(
         viewType: 'webview',
         onCreatePlatformView: (PlatformViewCreationParams params) {
           params.onPlatformViewCreated(params.id);
@@ -3899,7 +3865,7 @@ void main() {
       late FakePlatformViewController controller;
       late int viewId;
 
-      final PlatformViewLink platformViewLink = PlatformViewLink(
+      final platformViewLink = PlatformViewLink(
         viewType: 'test',
         onCreatePlatformView: (PlatformViewCreationParams params) {
           viewId = params.id;
@@ -3945,9 +3911,9 @@ void main() {
   });
 
   testWidgets('Platform views respect hitTestBehavior', (WidgetTester tester) async {
-    final FakePlatformViewController controller = FakePlatformViewController(0);
+    final controller = FakePlatformViewController(0);
 
-    final List<String> logs = <String>[];
+    final logs = <String>[];
 
     // -------------------------
     // | MouseRegion1          |       MouseRegion1

@@ -15,7 +15,7 @@ import 'package:path/path.dart' as path;
 void main(List<String> args) async {
   final Engine? engine = Engine.tryFindWithin();
 
-  final ArgParser parser = ArgParser()
+  final parser = ArgParser()
     ..addFlag('help', abbr: 'h', help: 'Prints usage information.', negatable: false)
     ..addOption(
       'image-magick-convert-bin',
@@ -67,10 +67,10 @@ void main(List<String> args) async {
   }
 
   final String relativeDir = engine?.flutterDir.path ?? '';
-  final String imageMagickConvertBin = results['image-magick-convert-bin'] as String;
-  final String annotation = results['annotation'] as String;
-  final String source = results['source'] as String;
-  final String output = results['output'] as String;
+  final imageMagickConvertBin = results['image-magick-convert-bin'] as String;
+  final annotation = results['annotation'] as String;
+  final source = results['source'] as String;
+  final output = results['output'] as String;
 
   print(
     'Writing annotation "$annotation" on images in '
@@ -83,7 +83,7 @@ void main(List<String> args) async {
   ).listSync().whereType<File>().map((File file) => file.path).toList();
 
   // For each source image, write the annotation and save it in the output directory.
-  for (final String sourceImage in sourceImages) {
+  for (final sourceImage in sourceImages) {
     final String outputImage = path.join(
       output,
       '${path.basenameWithoutExtension(sourceImage)}.png',

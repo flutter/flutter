@@ -13,12 +13,8 @@ import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 class TestPlugin {
   static void registerWith(Registrar registrar) {
-    final MethodChannel channel = MethodChannel(
-      'test_plugin',
-      const StandardMethodCodec(),
-      registrar.messenger,
-    );
-    final TestPlugin testPlugin = TestPlugin();
+    final channel = MethodChannel('test_plugin', const StandardMethodCodec(), registrar.messenger);
+    final testPlugin = TestPlugin();
     channel.setMethodCallHandler(testPlugin.handleMethodCall);
   }
 
@@ -46,16 +42,16 @@ void main() {
     test('can register a plugin', () {
       TestPlugin.calledMethods.clear();
 
-      const MethodChannel frameworkChannel = MethodChannel('test_plugin');
+      const frameworkChannel = MethodChannel('test_plugin');
       frameworkChannel.invokeMethod<void>('test1');
 
       expect(TestPlugin.calledMethods, equals(<String>['test1']));
     });
 
     test('can send a message from the plugin to the framework', () async {
-      const StandardMessageCodec codec = StandardMessageCodec();
+      const codec = StandardMessageCodec();
 
-      final List<String> loggedMessages = <String>[];
+      final loggedMessages = <String>[];
       ServicesBinding.instance.defaultBinaryMessenger.setMessageHandler('test_send', (
         ByteData? data,
       ) {
