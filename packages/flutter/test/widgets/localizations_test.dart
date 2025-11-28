@@ -109,11 +109,9 @@ void main() {
   testWidgets('LocalizationsResolver.update notifies listeners when supportedLocales changes', (
     WidgetTester tester,
   ) async {
-    final LocalizationsResolver resolver = LocalizationsResolver(
-      supportedLocales: <Locale>[const Locale('en')],
-    );
+    final resolver = LocalizationsResolver(supportedLocales: <Locale>[const Locale('en')]);
 
-    bool notified = false;
+    var notified = false;
     resolver.addListener(() {
       notified = true;
     });
@@ -133,11 +131,11 @@ void main() {
   testWidgets('LocalizationsResolver.update does not notify when resolved locale unchanged', (
     WidgetTester tester,
   ) async {
-    final LocalizationsResolver resolver = LocalizationsResolver(
+    final resolver = LocalizationsResolver(
       supportedLocales: <Locale>[const Locale('en'), const Locale('de')],
     );
 
-    bool notified = false;
+    var notified = false;
     resolver.addListener(() {
       notified = true;
     });
