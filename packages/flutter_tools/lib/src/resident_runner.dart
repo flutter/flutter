@@ -1215,7 +1215,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   ///
   /// Returns the exit code that we should use for the flutter tool process; 0
   /// for success, 1 for user error (e.g. bad arguments), 2 for other failures.
-  Future<int?> run({
+  Future<int> run({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
     String? route,
@@ -1225,7 +1225,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   ///
   /// [needsFullRestart] defaults to `true`, and controls if the frontend server should
   /// compile a full dill. This should be set to `false` if this is called in [ResidentRunner.run], since that method already performs an initial compilation.
-  Future<int?> attach({
+  Future<int> attach({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
     bool needsFullRestart = true,

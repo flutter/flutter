@@ -2170,7 +2170,7 @@ flutter:
         nativeAssetsYamlFile: 'foo.yaml',
       );
 
-      final int? result = await residentRunner.run();
+      final int result = await residentRunner.run();
       expect(result, 0);
 
       expect(residentCompiler.recompileCalled, true);
