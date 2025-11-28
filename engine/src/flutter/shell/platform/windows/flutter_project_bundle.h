@@ -103,7 +103,7 @@ class FlutterProjectBundle {
   FlutterUIThreadPolicy ui_thread_policy_;
 
   // Whether IAccessibleEx support is enabled.
-  bool iaccessibleex_enabled_ = true;
+  bool iaccessibleex_enabled_;
 };
 
 }  // namespace flutter
