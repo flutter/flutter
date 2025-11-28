@@ -696,8 +696,10 @@ abstract interface class PredictiveBackRoute {
 ///
 /// ```dart
 /// class PanelDemo extends StatefulWidget {
+///   const PanelDemo({super.key});
+///
 ///   @override
-///   _PanelDemoState createState() => _PanelDemoState();
+///   State<PanelDemo> createState() => _PanelDemoState();
 /// }
 ///
 /// class _PanelDemoState extends State<PanelDemo> {
@@ -722,14 +724,11 @@ abstract interface class PredictiveBackRoute {
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
-///       appBar: AppBar(title: Text('LocalHistoryEntry Example')),
+///       appBar: AppBar(title: const Text('LocalHistoryEntry Example')),
 ///       body: Stack(
 ///         children: [
 ///           Center(
-///             child: ElevatedButton(
-///               onPressed: _openPanel,
-///               child: Text('Open Panel'),
-///             ),
+///             child: ElevatedButton(onPressed: _openPanel, child: const Text('Open Panel')),
 ///           ),
 ///           if (_isPanelOpen)
 ///             Align(
@@ -737,7 +736,7 @@ abstract interface class PredictiveBackRoute {
 ///               child: Container(
 ///                 height: 200,
 ///                 color: Colors.blueAccent,
-///                 child: Center(
+///                 child: const Center(
 ///                   child: Text(
 ///                     'Press back to close this panel',
 ///                     style: TextStyle(color: Colors.white, fontSize: 18),
