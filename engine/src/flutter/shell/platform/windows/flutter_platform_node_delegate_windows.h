@@ -23,6 +23,8 @@ class FlutterPlatformNodeDelegateWindows : public FlutterPlatformNodeDelegate {
                                      FlutterWindowsView* view);
   virtual ~FlutterPlatformNodeDelegateWindows();
 
+  bool IsIAccessibleExEnabled() override { return true; }
+
   // |ui::AXPlatformNodeDelegate|
   void Init(std::weak_ptr<OwnerBridge> bridge, ui::AXNode* node) override;
 

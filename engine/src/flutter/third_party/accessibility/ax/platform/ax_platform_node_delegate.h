@@ -61,7 +61,7 @@ class AX_EXPORT AXPlatformNodeDelegate {
  public:
   virtual ~AXPlatformNodeDelegate() = default;
 
-  virtual bool IsIAccessibleExEnabled() = 0;
+  virtual bool IsIAccessibleExEnabled() { return false; }
 
   // Get the accessibility data that should be exposed for this node.
   // Virtually all of the information is obtained from this structure
