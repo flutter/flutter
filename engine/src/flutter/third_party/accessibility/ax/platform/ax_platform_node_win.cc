@@ -2599,7 +2599,7 @@ IFACEMETHODIMP AXPlatformNodeWin::QueryService(REFGUID guidService,
                                                void** object) {
   COM_OBJECT_VALIDATE_1_ARG(object);
 
-  if (guidService == IID_IAccessible || (guidService == IID_IAccessibleEx && _IAccessibleExEnabled)) {
+  if (guidService == IID_IAccessible || (guidService == IID_IAccessibleEx && delegate_->IsIAccessibleExEnabled())) {
     return QueryInterface(riid, object);
   }
 
