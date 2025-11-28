@@ -13,9 +13,9 @@ void main() {
   const TextTheme defaultGeometryThemeM3 = Typography.englishLike2021;
 
   test('ThemeDataTween control test', () {
-    final ThemeData light = ThemeData();
-    final ThemeData dark = ThemeData.dark();
-    final ThemeDataTween tween = ThemeDataTween(begin: light, end: dark);
+    final light = ThemeData();
+    final dark = ThemeData.dark();
+    final tween = ThemeDataTween(begin: light, end: dark);
     expect(tween.lerp(0.25), equals(ThemeData.lerp(light, dark, 0.25)));
   });
 
@@ -67,7 +67,10 @@ void main() {
       await tester.pumpWidget(
         MediaQuery(
           data: const MediaQueryData(platformBrightness: Brightness.dark),
-          child: Theme(data: ThemeData(brightness: Brightness.light), child: const SizedBox()),
+          child: Theme(
+            data: ThemeData(brightness: Brightness.light),
+            child: const SizedBox(),
+          ),
         ),
       );
 
@@ -110,7 +113,10 @@ void main() {
       await tester.pumpWidget(
         MediaQuery(
           data: const MediaQueryData(platformBrightness: Brightness.dark),
-          child: Theme(data: ThemeData(brightness: Brightness.light), child: const SizedBox()),
+          child: Theme(
+            data: ThemeData(brightness: Brightness.light),
+            child: const SizedBox(),
+          ),
         ),
       );
 
@@ -135,10 +141,10 @@ void main() {
 
   testWidgets('Theme overrides selection style', (WidgetTester tester) async {
     final Key key = UniqueKey();
-    const Color defaultSelectionColor = Color(0x11111111);
-    const Color defaultCursorColor = Color(0x22222222);
-    const Color themeSelectionColor = Color(0x33333333);
-    const Color themeCursorColor = Color(0x44444444);
+    const defaultSelectionColor = Color(0x11111111);
+    const defaultCursorColor = Color(0x22222222);
+    const themeSelectionColor = Color(0x33333333);
+    const themeCursorColor = Color(0x44444444);
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(brightness: Brightness.dark),
@@ -222,8 +228,8 @@ void main() {
   });
 
   testWidgets('ThemeData.localize memoizes the result', (WidgetTester tester) async {
-    final ThemeData light = ThemeData();
-    final ThemeData dark = ThemeData.dark();
+    final light = ThemeData();
+    final dark = ThemeData.dark();
 
     // Same input, same output.
     expect(
@@ -247,14 +253,14 @@ void main() {
   testWidgets('Material2 - ThemeData with null typography uses proper defaults', (
     WidgetTester tester,
   ) async {
-    final ThemeData m2Theme = ThemeData(useMaterial3: false);
+    final m2Theme = ThemeData(useMaterial3: false);
     expect(m2Theme.typography, Typography.material2014());
   });
 
   testWidgets('Material3 - ThemeData with null typography uses proper defaults', (
     WidgetTester tester,
   ) async {
-    final ThemeData m3Theme = ThemeData();
+    final m3Theme = ThemeData();
     expect(m3Theme.typography, Typography.material2021(colorScheme: m3Theme.colorScheme));
   });
 
@@ -357,7 +363,7 @@ void main() {
   });
 
   testWidgets('Dialog inherits shadowed app theme', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(brightness: Brightness.dark),
@@ -391,7 +397,7 @@ void main() {
   });
 
   testWidgets("Scaffold inherits theme's scaffoldBackgroundColor", (WidgetTester tester) async {
-    const Color green = Color(0xFF00FF00);
+    const green = Color(0xFF00FF00);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -464,7 +470,7 @@ void main() {
     WidgetTester tester,
   ) async {
     testBuildCalled = 0;
-    ThemeData themeData = ThemeData(primaryColor: const Color(0xFF000000));
+    var themeData = ThemeData(primaryColor: const Color(0xFF000000));
 
     Widget buildTheme() {
       return Theme(data: themeData, child: const Test());
@@ -494,8 +500,8 @@ void main() {
   testWidgets('Text geometry set in Theme has higher precedence than that of Localizations', (
     WidgetTester tester,
   ) async {
-    const double kMagicFontSize = 4321.0;
-    final ThemeData fallback = ThemeData.fallback();
+    const kMagicFontSize = 4321.0;
+    final fallback = ThemeData.fallback();
     final ThemeData customTheme = fallback.copyWith(
       primaryTextTheme: fallback.primaryTextTheme.copyWith(
         bodyMedium: fallback.primaryTextTheme.bodyMedium!.copyWith(fontSize: kMagicFontSize),
@@ -561,7 +567,7 @@ void main() {
       ];
     }
 
-    for (final TextTheme textTheme in <TextTheme>[theme.textTheme, theme.primaryTextTheme]) {
+    for (final textTheme in <TextTheme>[theme.textTheme, theme.primaryTextTheme]) {
       for (final TextStyle style in extractStyles(
         textTheme,
       ).map<TextStyle>((TextStyle style) => _TextStyleProxy(style))) {
@@ -627,7 +633,7 @@ void main() {
       ];
     }
 
-    for (final TextTheme textTheme in <TextTheme>[theme.textTheme, theme.primaryTextTheme]) {
+    for (final textTheme in <TextTheme>[theme.textTheme, theme.primaryTextTheme]) {
       for (final TextStyle style in extractStyles(
         textTheme,
       ).map<TextStyle>((TextStyle style) => _TextStyleProxy(style))) {
@@ -756,6 +762,30 @@ void main() {
         ),
       );
       expect(CupertinoTheme.brightnessOf(context!), Brightness.light);
+    });
+
+    testWidgets('Cupertino widgets correctly get the right text theme in dark mode', (
+      WidgetTester tester,
+    ) async {
+      final GlobalKey textFieldKey = GlobalKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.dark(),
+          home: Scaffold(body: CupertinoTextField(key: textFieldKey)),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+      // Default CupertinoTextStyle color is a CupertinoDynamicColor.
+      final CupertinoThemeData cupertinoThemeData = CupertinoTheme.of(textFieldKey.currentContext!);
+      expect(cupertinoThemeData.textTheme.textStyle.color, isA<CupertinoDynamicColor>());
+      final themeTextStyleColor =
+          cupertinoThemeData.textTheme.textStyle.color! as CupertinoDynamicColor;
+
+      // The value of the textfield's color should resolve to the theme's dark color.
+      expect(state.widget.style.color?.value, equals(themeTextStyleColor.darkColor.value));
     });
 
     testWidgets('Material2 - Can override material theme', (WidgetTester tester) async {

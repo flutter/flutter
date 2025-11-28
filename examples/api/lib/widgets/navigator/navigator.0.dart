@@ -51,7 +51,9 @@ class CollectPersonalInfoPage extends StatelessWidget {
         onTap: () {
           // This moves from the personal info page to the credentials page,
           // replacing this page with that one.
-          Navigator.of(context).pushReplacementNamed('signup/choose_credentials');
+          Navigator.of(
+            context,
+          ).pushReplacementNamed('signup/choose_credentials');
         },
         child: Container(
           color: Colors.lightBlue,
@@ -103,17 +105,16 @@ class SignUpPage extends StatelessWidget {
           case 'signup/choose_credentials':
             // Assume ChooseCredentialsPage collects new credentials and then
             // invokes 'onSignupComplete()'.
-            builder =
-                (BuildContext _) => ChooseCredentialsPage(
-                  onSignupComplete: () {
-                    // Referencing Navigator.of(context) from here refers to the
-                    // top level Navigator because SignUpPage is above the
-                    // nested Navigator that it created. Therefore, this pop()
-                    // will pop the entire "sign up" journey and return to the
-                    // "/" route, AKA HomePage.
-                    Navigator.of(context).pop();
-                  },
-                );
+            builder = (BuildContext _) => ChooseCredentialsPage(
+              onSignupComplete: () {
+                // Referencing Navigator.of(context) from here refers to the
+                // top level Navigator because SignUpPage is above the
+                // nested Navigator that it created. Therefore, this pop()
+                // will pop the entire "sign up" journey and return to the
+                // "/" route, AKA HomePage.
+                Navigator.of(context).pop();
+              },
+            );
           default:
             throw Exception('Invalid route: ${settings.name}');
         }

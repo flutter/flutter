@@ -177,26 +177,24 @@ void main(List<String> args) {
 
   final ArgResults argResults = _handleArguments(args);
 
-  final File iconsFile = File(
-    path.normalize(path.absolute(argResults[_iconsPathOption] as String)),
-  );
+  final iconsFile = File(path.normalize(path.absolute(argResults[_iconsPathOption] as String)));
   if (!iconsFile.existsSync()) {
     stderr.writeln('Error: Icons file not found: ${iconsFile.path}');
     exit(1);
   }
-  final File iconsTemplateFile = File(
+  final iconsTemplateFile = File(
     path.normalize(path.absolute(argResults[_iconsTemplatePathOption] as String)),
   );
   if (!iconsTemplateFile.existsSync()) {
     stderr.writeln('Error: Icons template file not found: ${iconsTemplateFile.path}');
     exit(1);
   }
-  final File newCodepointsFile = File(argResults[_newCodepointsPathOption] as String);
+  final newCodepointsFile = File(argResults[_newCodepointsPathOption] as String);
   if (!newCodepointsFile.existsSync()) {
     stderr.writeln('Error: New codepoints file not found: ${newCodepointsFile.path}');
     exit(1);
   }
-  final File oldCodepointsFile = File(argResults[_oldCodepointsPathOption] as String);
+  final oldCodepointsFile = File(argResults[_oldCodepointsPathOption] as String);
   if (!oldCodepointsFile.existsSync()) {
     stderr.writeln('Error: Old codepoints file not found: ${oldCodepointsFile.path}');
     exit(1);
@@ -232,9 +230,7 @@ void main(List<String> args) {
   } else {
     iconsFile.writeAsStringSync(newIconsContents);
 
-    final SplayTreeMap<String, String> sortedNewTokenPairMap = SplayTreeMap<String, String>.of(
-      newTokenPairMap,
-    );
+    final sortedNewTokenPairMap = SplayTreeMap<String, String>.of(newTokenPairMap);
     _regenerateCodepointsFile(oldCodepointsFile, sortedNewTokenPairMap);
 
     sortedNewTokenPairMap.removeWhere(
@@ -245,52 +241,50 @@ void main(List<String> args) {
 }
 
 ArgResults _handleArguments(List<String> args) {
-  final ArgParser argParser =
-      ArgParser()
-        ..addOption(
-          _iconsPathOption,
-          defaultsTo: _defaultIconsPath,
-          help: 'Location of the material icons file',
-        )
-        ..addOption(
-          _iconsTemplatePathOption,
-          defaultsTo: _defaultIconsPath,
-          help:
-              'Location of the material icons file template. Usually the same as --$_iconsPathOption',
-        )
-        ..addOption(
-          _newCodepointsPathOption,
-          defaultsTo: _defaultNewCodepointsPath,
-          help: 'Location of the new codepoints directory',
-        )
-        ..addOption(
-          _oldCodepointsPathOption,
-          defaultsTo: _defaultOldCodepointsPath,
-          help: 'Location of the existing codepoints directory',
-        )
-        ..addOption(
-          _fontFamilyOption,
-          defaultsTo: _defaultFontFamily,
-          help: 'The font family to use for the IconData constants',
-        )
-        ..addMultiOption(
-          _possibleStyleSuffixesOption,
-          defaultsTo: _defaultPossibleStyleSuffixes,
-          help:
-              'A comma-separated list of suffixes (typically an optional '
-              'family + a style) e.g. _outlined, _monoline_filled',
-        )
-        ..addOption(
-          _classNameOption,
-          defaultsTo: _defaultClassName,
-          help: 'The containing class for all icons',
-        )
-        ..addFlag(
-          _enforceSafetyChecks,
-          defaultsTo: true,
-          help: 'Whether to exit if safety checks fail (e.g. codepoints are missing or unstable',
-        )
-        ..addFlag(_dryRunOption);
+  final argParser = ArgParser()
+    ..addOption(
+      _iconsPathOption,
+      defaultsTo: _defaultIconsPath,
+      help: 'Location of the material icons file',
+    )
+    ..addOption(
+      _iconsTemplatePathOption,
+      defaultsTo: _defaultIconsPath,
+      help: 'Location of the material icons file template. Usually the same as --$_iconsPathOption',
+    )
+    ..addOption(
+      _newCodepointsPathOption,
+      defaultsTo: _defaultNewCodepointsPath,
+      help: 'Location of the new codepoints directory',
+    )
+    ..addOption(
+      _oldCodepointsPathOption,
+      defaultsTo: _defaultOldCodepointsPath,
+      help: 'Location of the existing codepoints directory',
+    )
+    ..addOption(
+      _fontFamilyOption,
+      defaultsTo: _defaultFontFamily,
+      help: 'The font family to use for the IconData constants',
+    )
+    ..addMultiOption(
+      _possibleStyleSuffixesOption,
+      defaultsTo: _defaultPossibleStyleSuffixes,
+      help:
+          'A comma-separated list of suffixes (typically an optional '
+          'family + a style) e.g. _outlined, _monoline_filled',
+    )
+    ..addOption(
+      _classNameOption,
+      defaultsTo: _defaultClassName,
+      help: 'The containing class for all icons',
+    )
+    ..addFlag(
+      _enforceSafetyChecks,
+      defaultsTo: true,
+      help: 'Whether to exit if safety checks fail (e.g. codepoints are missing or unstable',
+    )
+    ..addFlag(_dryRunOption);
   argParser.addFlag(
     'help',
     abbr: 'h',
@@ -310,9 +304,9 @@ Map<String, String> stringToTokenPairMap(String codepointData) {
     codepointData,
   ).map((String line) => line.trim()).where((String line) => line.isNotEmpty);
 
-  final Map<String, String> pairs = <String, String>{};
+  final pairs = <String, String>{};
 
-  for (final String line in cleanData) {
+  for (final line in cleanData) {
     final List<String> tokens = line.split(' ');
     if (tokens.length != 2) {
       throw FormatException('Unexpected codepoint data: $line');
@@ -330,17 +324,16 @@ String _regenerateIconsFile(
   String className,
   bool enforceSafetyChecks,
 ) {
-  final List<Icon> newIcons =
-      tokenPairMap.entries
-          .map(
-            (MapEntry<String, String> entry) =>
-                Icon(entry, fontFamily: fontFamily, className: className),
-          )
-          .toList();
+  final List<Icon> newIcons = tokenPairMap.entries
+      .map(
+        (MapEntry<String, String> entry) =>
+            Icon(entry, fontFamily: fontFamily, className: className),
+      )
+      .toList();
   newIcons.sort((Icon a, Icon b) => a._compareTo(b));
 
-  final StringBuffer buf = StringBuffer();
-  bool generating = false;
+  final buf = StringBuffer();
+  var generating = false;
 
   for (final String line in LineSplitter.split(templateFileContents)) {
     if (!generating) {
@@ -350,10 +343,10 @@ String _regenerateIconsFile(
     // Generate for PlatformAdaptiveIcons
     if (line.contains(_beginPlatformAdaptiveGeneratedMark)) {
       generating = true;
-      final List<String> platformAdaptiveDeclarations = <String>[];
+      final platformAdaptiveDeclarations = <String>[];
       _platformAdaptiveIdentifiers.forEach((String flutterId, List<String> ids) {
         // Automatically finds and generates all icon declarations.
-        for (final String style in <String>['', '_outlined', '_rounded', '_sharp']) {
+        for (final style in <String>['', '_outlined', '_rounded', '_sharp']) {
           try {
             final Icon agnosticIcon = newIcons.firstWhere(
               (Icon icon) => icon.id == '${ids[0]}$style',
@@ -389,8 +382,9 @@ String _regenerateIconsFile(
     // Generate for Icons
     if (line.contains(_beginGeneratedMark)) {
       generating = true;
-      final String iconDeclarationsString =
-          newIcons.map((Icon icon) => icon.fullDeclaration).join();
+      final String iconDeclarationsString = newIcons
+          .map((Icon icon) => icon.fullDeclaration)
+          .join();
       buf.write(iconDeclarationsString);
     } else if (line.contains(_endGeneratedMark)) {
       generating = false;
@@ -426,7 +420,7 @@ bool testIsSuperset(Map<String, String> newCodepoints, Map<String, String> oldCo
 @visibleForTesting
 bool testIsStable(Map<String, String> newCodepoints, Map<String, String> oldCodepoints) {
   final int oldCodepointsCount = oldCodepoints.length;
-  final List<String> unstable = <String>[
+  final unstable = <String>[
     for (final MapEntry<String, String>(:String key, :String value) in oldCodepoints.entries)
       if (newCodepoints.containsKey(key) && value != newCodepoints[key]) key,
   ];
@@ -445,7 +439,7 @@ bool testIsStable(Map<String, String> newCodepoints, Map<String, String> oldCode
 void _regenerateCodepointsFile(File oldCodepointsFile, Map<String, String> tokenPairMap) {
   stderr.writeln('Regenerating old codepoints file ${oldCodepointsFile.path}');
 
-  final StringBuffer buf = StringBuffer();
+  final buf = StringBuffer();
   tokenPairMap.forEach((String key, String value) => buf.writeln('$key $value'));
   oldCodepointsFile.writeAsStringSync(buf.toString());
 }
@@ -457,11 +451,12 @@ void _generateIconDemo(File demoFilePath, Map<String, String> tokenPairMap) {
   }
   stderr.writeln('Generating icon demo at $_defaultDemoFilePath');
 
-  final StringBuffer newIconUsages = StringBuffer();
+  final newIconUsages = StringBuffer();
   for (final MapEntry<String, String> entry in tokenPairMap.entries) {
     newIconUsages.writeln(Icon(entry).usage);
   }
-  final String demoFileContents = '''
+  final demoFileContents =
+      '''
     import 'package:flutter/material.dart';
 
     void main() => runApp(const IconDemo());
@@ -561,13 +556,15 @@ class Icon {
   String get declaration =>
       "static const IconData $flutterId = IconData(0x$hexCodepoint, fontFamily: '$fontFamily'${isMirroredInRTL ? ', matchTextDirection: true' : ''});";
 
-  String get fullDeclaration => '''
+  String get fullDeclaration =>
+      '''
 
   /// $dartDoc.
   $declaration
 ''';
 
-  String platformAdaptiveDeclaration(String fullFlutterId, Icon iOSIcon) => '''
+  String platformAdaptiveDeclaration(String fullFlutterId, Icon iOSIcon) =>
+      '''
 
   /// Platform-adaptive icon for $dartDoc and ${iOSIcon.dartDoc}.;
   IconData get $fullFlutterId => !_isCupertino() ? $className.$flutterId : $className.${iOSIcon.flutterId};

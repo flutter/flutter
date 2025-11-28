@@ -12,7 +12,7 @@ import 'convert.dart';
 import 'globals.dart' as globals;
 
 String get defaultMainPath => globals.fs.path.join('lib', 'main.dart');
-const String defaultManifestPath = 'pubspec.yaml';
+const defaultManifestPath = 'pubspec.yaml';
 String get defaultDepfilePath => globals.fs.path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
 
 String getDefaultApplicationKernelPath({required bool trackWidgetCreation}) {
@@ -29,15 +29,14 @@ String getDefaultCachedKernelPath({
   FileSystem? fileSystem,
   Config? config,
 }) {
-  final StringBuffer buffer = StringBuffer();
-  final List<String> cacheFrontEndOptions =
-      extraFrontEndOptions.toList()
-        ..removeWhere((String arg) => arg.startsWith('--enable-experiment='));
+  final buffer = StringBuffer();
+  final List<String> cacheFrontEndOptions = extraFrontEndOptions.toList()
+    ..removeWhere((String arg) => arg.startsWith('--enable-experiment='));
   buffer.writeAll(dartDefines);
   buffer.writeAll(cacheFrontEndOptions);
-  String buildPrefix = '';
+  var buildPrefix = '';
   if (buffer.isNotEmpty) {
-    final String output = buffer.toString();
+    final output = buffer.toString();
     final Digest digest = md5.convert(utf8.encode(output));
     buildPrefix = '${hex.encode(digest.bytes)}.';
   }
@@ -57,4 +56,4 @@ String getKernelPathForTransformerOptions(String path, {required bool trackWidge
   return path;
 }
 
-const String defaultPrivateKeyPath = 'privatekey.der';
+const defaultPrivateKeyPath = 'privatekey.der';

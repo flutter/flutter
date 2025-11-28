@@ -92,16 +92,15 @@ class ButtonsDemo {
           }
         });
       },
-      items:
-          <String>['One', 'Two', 'Free', 'Four'].map<DropdownMenuItem<String>>((String value) {
-            return DropdownMenuItem<String>(value: value, child: Text(value));
-          }).toList(),
+      items: <String>['One', 'Two', 'Free', 'Four'].map<DropdownMenuItem<String>>((String value) {
+        return DropdownMenuItem<String>(value: value, child: Text(value));
+      }).toList(),
     );
     // END
 
     // START buttons_icon
     // Member variable holding toggle value.
-    late bool value = true;
+    late var value = true;
 
     // Toggleable icon button.
     IconButton(
@@ -179,12 +178,12 @@ class SelectionControls {
     );
 
     // Creates a disabled radio button.
-    const Radio<int>(value: 0, groupValue: 0, onChanged: null);
+    const Radio<int>(value: 0, groupValue: 0);
     // END
 
     // START selectioncontrols_switch
     // Member variable holding value.
-    bool switchValue = false;
+    var switchValue = false;
 
     // Create a switch.
     Switch(

@@ -138,8 +138,9 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int?> {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    final Iterable<int> suggestions =
-        query.isEmpty ? _history : _data.where((int i) => '$i'.startsWith(query));
+    final Iterable<int> suggestions = query.isEmpty
+        ? _history
+        : _data.where((int i) => '$i'.startsWith(query));
 
     return _SuggestionList(
       query: query,

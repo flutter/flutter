@@ -27,9 +27,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.annotation.Config;
 
-@Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
 @TargetApi(API_LEVELS.API_35)
 public class KeyEventChannelTest {
@@ -62,11 +60,7 @@ public class KeyEventChannelTest {
     KeyEventChannel.FlutterKeyEvent flutterKeyEvent =
         new KeyEventChannel.FlutterKeyEvent(keyEvent, null);
     keyEventChannel.sendFlutterKeyEvent(
-        flutterKeyEvent,
-        false,
-        (isHandled) -> {
-          handled[0] = isHandled;
-        });
+        flutterKeyEvent, false, (isHandled) -> handled[0] = isHandled);
 
     ArgumentCaptor<ByteBuffer> byteBufferArgumentCaptor = ArgumentCaptor.forClass(ByteBuffer.class);
     ArgumentCaptor<BinaryMessenger.BinaryReply> replyArgumentCaptor =
@@ -90,11 +84,7 @@ public class KeyEventChannelTest {
     KeyEventChannel.FlutterKeyEvent flutterKeyEvent =
         new KeyEventChannel.FlutterKeyEvent(keyEvent, null);
     keyEventChannel.sendFlutterKeyEvent(
-        flutterKeyEvent,
-        false,
-        (isHandled) -> {
-          handled[0] = isHandled;
-        });
+        flutterKeyEvent, false, (isHandled) -> handled[0] = isHandled);
 
     ArgumentCaptor<ByteBuffer> byteBufferArgumentCaptor = ArgumentCaptor.forClass(ByteBuffer.class);
     ArgumentCaptor<BinaryMessenger.BinaryReply> replyArgumentCaptor =

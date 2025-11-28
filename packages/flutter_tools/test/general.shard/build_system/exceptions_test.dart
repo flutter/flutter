@@ -11,27 +11,21 @@ import '../../src/common.dart';
 
 void main() {
   test('Exceptions', () {
-    final MissingInputException missingInputException = MissingInputException(<File>[
+    final missingInputException = MissingInputException(<File>[
       globals.fs.file('foo'),
       globals.fs.file('bar'),
     ], 'example');
-    final CycleException cycleException = CycleException(<Target>{
+    final cycleException = CycleException(<Target>{
       TestTarget()..name = 'foo',
       TestTarget()..name = 'bar',
     });
-    final InvalidPatternException invalidPatternException = InvalidPatternException('ABC');
-    final MissingOutputException missingOutputException = MissingOutputException(<File>[
+    final invalidPatternException = InvalidPatternException('ABC');
+    final missingOutputException = MissingOutputException(<File>[
       globals.fs.file('foo'),
       globals.fs.file('bar'),
     ], 'example');
-    final MisplacedOutputException misplacedOutputException = MisplacedOutputException(
-      'foo',
-      'example',
-    );
-    final MissingDefineException missingDefineException = MissingDefineException(
-      'foobar',
-      'example',
-    );
+    final misplacedOutputException = MisplacedOutputException('foo', 'example');
+    final missingDefineException = MissingDefineException('foobar', 'example');
 
     expect(
       missingInputException.toString(),

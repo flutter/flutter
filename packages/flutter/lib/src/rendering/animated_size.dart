@@ -85,15 +85,13 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     VoidCallback? onEnd,
   }) : _vsync = vsync,
        _clipBehavior = clipBehavior {
-    _controller = AnimationController(
-      vsync: vsync,
-      duration: duration,
-      reverseDuration: reverseDuration,
-    )..addListener(() {
-      if (_controller.value != _lastValue) {
-        markNeedsLayout();
-      }
-    });
+    _controller =
+        AnimationController(vsync: vsync, duration: duration, reverseDuration: reverseDuration)
+          ..addListener(() {
+            if (_controller.value != _lastValue) {
+              markNeedsLayout();
+            }
+          });
     _animation = CurvedAnimation(parent: _controller, curve: curve);
     _onEnd = onEnd;
   }
@@ -400,6 +398,24 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
       _clipRectLayer.layer = null;
       super.paint(context, offset);
     }
+  }
+
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final double? result = child.getDryBaseline(constraints, baseline);
+    if (result == null) {
+      return null;
+    }
+    // For RenderAnimatedSize, we need to account for the animated size,
+    // not just the child size, to match the offset calculation in alignChild().
+    final Size childSize = child.getDryLayout(constraints);
+    final Size mySize = getDryLayout(constraints);
+    final Offset offset = resolvedAlignment.alongOffset((mySize - childSize) as Offset);
+    return result + offset.dy;
   }
 
   final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();

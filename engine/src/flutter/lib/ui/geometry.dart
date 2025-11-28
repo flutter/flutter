@@ -419,7 +419,7 @@ class Size extends OffsetBase {
   ///  * [isFinite], which checks whether both dimensions are finite.
   static const Size infinite = Size(double.infinity, double.infinity);
 
-  /// Whether this size encloses a non-zero area.
+  /// Whether this size encloses a zero area.
   ///
   /// Negative areas are considered empty.
   bool get isEmpty => width <= 0.0 || height <= 0.0;
@@ -533,7 +533,7 @@ class Size extends OffsetBase {
   /// The offset to the center of the right edge of the rectangle described by the
   /// given offset (which is interpreted as the top-left corner) and this size.
   ///
-  /// See also [Rect.centerLeft].
+  /// See also [Rect.centerRight].
   Offset centerRight(Offset origin) => Offset(origin.dx + width, origin.dy + height / 2.0);
 
   /// The offset to the intersection of the bottom and left edges of the
@@ -547,7 +547,7 @@ class Size extends OffsetBase {
   /// the given offset (which is interpreted as the top-left corner) and this
   /// size.
   ///
-  /// See also [Rect.bottomLeft].
+  /// See also [Rect.bottomCenter].
   Offset bottomCenter(Offset origin) => Offset(origin.dx + width / 2.0, origin.dy + height);
 
   /// The offset to the intersection of the bottom and right edges of the
@@ -679,7 +679,7 @@ class Rect {
       );
 
   Float32List _getValue32() {
-    final Float32List result = Float32List(4);
+    final result = Float32List(4);
     result[0] = left;
     result[1] = top;
     result[2] = right;
@@ -845,7 +845,7 @@ class Rect {
 
   /// The offset to the center of the right edge of this rectangle.
   ///
-  /// See also [Size.centerLeft].
+  /// See also [Size.centerRight].
   Offset get centerRight => Offset(right, top + height / 2.0);
 
   /// The offset to the intersection of the bottom and left edges of this rectangle.
@@ -855,7 +855,7 @@ class Rect {
 
   /// The offset to the center of the bottom edge of this rectangle.
   ///
-  /// See also [Size.bottomLeft].
+  /// See also [Size.bottomCenter].
   Offset get bottomCenter => Offset(left + width / 2.0, bottom);
 
   /// The offset to the intersection of the bottom and right edges of this rectangle.
@@ -1090,7 +1090,7 @@ class Radius {
     return x == y
         ? 'Radius.circular(${x.toStringAsFixed(1)})'
         : 'Radius.elliptical(${x.toStringAsFixed(1)}, '
-            '${y.toStringAsFixed(1)})';
+              '${y.toStringAsFixed(1)})';
   }
 }
 
@@ -1239,7 +1239,7 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
   /// corners. The middle of a corner is the intersection of the curve with its
   /// respective quadrant bisector.
   Rect get safeInnerRect {
-    const double kInsetFactor = 0.29289321881; // 1-cos(pi/4)
+    const kInsetFactor = 0.29289321881; // 1-cos(pi/4)
 
     final double leftRadius = math.max(blRadiusX, tlRadiusX);
     final double topRadius = math.max(tlRadiusY, trRadiusY);
@@ -1376,7 +1376,7 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
   /// See the [Skia scaling implementation](https://github.com/google/skia/blob/main/src/core/SkRRect.cpp)
   /// for more details.
   T scaleRadii() {
-    double scale = 1.0;
+    var scale = 1.0;
     scale = _getMin(scale, blRadiusY, tlRadiusY, height);
     scale = _getMin(scale, tlRadiusX, trRadiusX, width);
     scale = _getMin(scale, trRadiusY, brRadiusY, height);
@@ -1493,7 +1493,7 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
   );
 
   String _toString({required String className}) {
-    final String rect =
+    final rect =
         '${left.toStringAsFixed(1)}, '
         '${top.toStringAsFixed(1)}, '
         '${right.toStringAsFixed(1)}, '
@@ -1702,7 +1702,7 @@ class RRect extends _RRectLike<RRect> {
   );
 
   Float32List _getValue32() {
-    final Float32List result = Float32List(12);
+    final result = Float32List(12);
     result[0] = left;
     result[1] = top;
     result[2] = right;

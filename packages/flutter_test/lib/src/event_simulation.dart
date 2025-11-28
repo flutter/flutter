@@ -240,10 +240,7 @@ abstract final class KeyEventSimulator {
 
     assert(key.debugName != null);
 
-    final Map<String, dynamic> result = <String, dynamic>{
-      'type': isDown ? 'keydown' : 'keyup',
-      'keymap': platform,
-    };
+    final result = <String, dynamic>{'type': isDown ? 'keydown' : 'keyup', 'keymap': platform};
 
     final String resultCharacter = character ?? _keyLabel(key) ?? '';
     void assignWeb() {
@@ -282,8 +279,9 @@ abstract final class KeyEventSimulator {
         result['keyCode'] = keyCode;
         result['scanCode'] = scanCode;
         result['modifiers'] = _getGlfwModifierFlags(key, isDown);
-        result['unicodeScalarValues'] =
-            resultCharacter.isNotEmpty ? resultCharacter.codeUnitAt(0) : 0;
+        result['unicodeScalarValues'] = resultCharacter.isNotEmpty
+            ? resultCharacter.codeUnitAt(0)
+            : 0;
       case 'macos':
         result['keyCode'] = scanCode;
         if (resultCharacter.isNotEmpty) {
@@ -310,7 +308,7 @@ abstract final class KeyEventSimulator {
   }
 
   static int _getAndroidModifierFlags(LogicalKeyboardKey newKey, bool isDown) {
-    int result = 0;
+    var result = 0;
     final Set<LogicalKeyboardKey> pressed = RawKeyboard.instance.keysPressed;
     if (isDown) {
       pressed.add(newKey);
@@ -358,7 +356,7 @@ abstract final class KeyEventSimulator {
   }
 
   static int _getGlfwModifierFlags(LogicalKeyboardKey newKey, bool isDown) {
-    int result = 0;
+    var result = 0;
     final Set<LogicalKeyboardKey> pressed = RawKeyboard.instance.keysPressed;
     if (isDown) {
       pressed.add(newKey);
@@ -388,7 +386,7 @@ abstract final class KeyEventSimulator {
   }
 
   static int _getWindowsModifierFlags(LogicalKeyboardKey newKey, bool isDown) {
-    int result = 0;
+    var result = 0;
     final Set<LogicalKeyboardKey> pressed = RawKeyboard.instance.keysPressed;
     if (isDown) {
       pressed.add(newKey);
@@ -441,7 +439,7 @@ abstract final class KeyEventSimulator {
   }
 
   static int _getFuchsiaModifierFlags(LogicalKeyboardKey newKey, bool isDown) {
-    int result = 0;
+    var result = 0;
     final Set<LogicalKeyboardKey> pressed = RawKeyboard.instance.keysPressed;
     if (isDown) {
       pressed.add(newKey);
@@ -479,7 +477,7 @@ abstract final class KeyEventSimulator {
   }
 
   static int _getWebModifierFlags(LogicalKeyboardKey newKey, bool isDown) {
-    int result = 0;
+    var result = 0;
     final Set<LogicalKeyboardKey> pressed = RawKeyboard.instance.keysPressed;
     if (isDown) {
       pressed.add(newKey);
@@ -523,7 +521,7 @@ abstract final class KeyEventSimulator {
   }
 
   static int _getMacOsModifierFlags(LogicalKeyboardKey newKey, bool isDown) {
-    int result = 0;
+    var result = 0;
     final Set<LogicalKeyboardKey> pressed = RawKeyboard.instance.keysPressed;
     if (isDown) {
       pressed.add(newKey);
@@ -554,7 +552,7 @@ abstract final class KeyEventSimulator {
     if (pressed.contains(LogicalKeyboardKey.altRight)) {
       result |= RawKeyEventDataMacOs.modifierRightOption | RawKeyEventDataMacOs.modifierOption;
     }
-    final Set<LogicalKeyboardKey> functionKeys = <LogicalKeyboardKey>{
+    final functionKeys = <LogicalKeyboardKey>{
       LogicalKeyboardKey.f1,
       LogicalKeyboardKey.f2,
       LogicalKeyboardKey.f3,
@@ -590,7 +588,7 @@ abstract final class KeyEventSimulator {
   }
 
   static int _getIOSModifierFlags(LogicalKeyboardKey newKey, bool isDown) {
-    int result = 0;
+    var result = 0;
     final Set<LogicalKeyboardKey> pressed = RawKeyboard.instance.keysPressed;
     if (isDown) {
       pressed.add(newKey);
@@ -621,7 +619,7 @@ abstract final class KeyEventSimulator {
     if (pressed.contains(LogicalKeyboardKey.altRight)) {
       result |= RawKeyEventDataIos.modifierRightOption | RawKeyEventDataIos.modifierOption;
     }
-    final Set<LogicalKeyboardKey> functionKeys = <LogicalKeyboardKey>{
+    final functionKeys = <LogicalKeyboardKey>{
       LogicalKeyboardKey.f1,
       LogicalKeyboardKey.f2,
       LogicalKeyboardKey.f3,
@@ -660,7 +658,7 @@ abstract final class KeyEventSimulator {
     ValueGetter<Map<String, dynamic>> buildKeyData,
   ) async {
     return TestAsyncUtils.guard<bool>(() async {
-      final Completer<bool> result = Completer<bool>();
+      final result = Completer<bool>();
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(buildKeyData()),
@@ -678,17 +676,16 @@ abstract final class KeyEventSimulator {
     });
   }
 
-  static final Map<String, PhysicalKeyboardKey> _debugNameToPhysicalKey =
-      (() {
-        final Map<String, PhysicalKeyboardKey> result = <String, PhysicalKeyboardKey>{};
-        for (final PhysicalKeyboardKey key in PhysicalKeyboardKey.knownPhysicalKeys) {
-          final String? debugName = key.debugName;
-          if (debugName != null) {
-            result[debugName] = key;
-          }
-        }
-        return result;
-      })();
+  static final Map<String, PhysicalKeyboardKey> _debugNameToPhysicalKey = (() {
+    final result = <String, PhysicalKeyboardKey>{};
+    for (final PhysicalKeyboardKey key in PhysicalKeyboardKey.knownPhysicalKeys) {
+      final String? debugName = key.debugName;
+      if (debugName != null) {
+        result[debugName] = key;
+      }
+    }
+    return result;
+  })();
   static PhysicalKeyboardKey _findPhysicalKey(LogicalKeyboardKey key) {
     final PhysicalKeyboardKey? result = _debugNameToPhysicalKey[key.debugName];
     assert(result != null, 'Physical key for $key not found in known physical keys');

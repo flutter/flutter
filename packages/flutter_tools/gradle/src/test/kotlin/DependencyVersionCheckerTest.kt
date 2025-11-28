@@ -16,6 +16,7 @@ import com.flutter.gradle.DependencyVersionChecker.OUT_OF_SUPPORT_RANGE_PROPERTY
 import com.flutter.gradle.DependencyVersionChecker.POTENTIAL_JAVA_FIX
 import com.flutter.gradle.DependencyVersionChecker.errorAGPVersion
 import com.flutter.gradle.DependencyVersionChecker.errorGradleVersion
+import com.flutter.gradle.DependencyVersionChecker.errorJavaVersion
 import com.flutter.gradle.DependencyVersionChecker.errorKGPVersion
 import com.flutter.gradle.DependencyVersionChecker.errorMinSdkVersion
 import com.flutter.gradle.DependencyVersionChecker.getErrorMessage
@@ -27,7 +28,6 @@ import com.flutter.gradle.DependencyVersionChecker.getPotentialSDKFix
 import com.flutter.gradle.DependencyVersionChecker.getWarnMessage
 import com.flutter.gradle.DependencyVersionChecker.warnAGPVersion
 import com.flutter.gradle.DependencyVersionChecker.warnGradleVersion
-import com.flutter.gradle.DependencyVersionChecker.warnJavaVersion
 import com.flutter.gradle.DependencyVersionChecker.warnKGPVersion
 import com.flutter.gradle.DependencyVersionChecker.warnMinSdkVersion
 import io.mockk.every
@@ -51,16 +51,18 @@ private const val FAKE_PROJECT_ROOT_DIR = "/fake/root/dir"
 
 // The following values will need to be modified when the corresponding "warn$DepName" versions
 // are updated in DependencyVersionChecker.kt
-private const val SUPPORTED_GRADLE_VERSION: String = "7.4.2"
-private val SUPPORTED_JAVA_VERSION: JavaVersion = JavaVersion.VERSION_11
-private val SUPPORTED_AGP_VERSION: AndroidPluginVersion = AndroidPluginVersion(8, 3, 0)
-private const val SUPPORTED_KGP_VERSION: String = "1.8.10"
+// These values should match the flutter create template values.
+// In //packages/flutter_tools/lib/src/android/gradle_utils.dart
+private const val SUPPORTED_GRADLE_VERSION: String = "8.12"
+private val SUPPORTED_JAVA_VERSION: JavaVersion = JavaVersion.VERSION_17
+private val SUPPORTED_AGP_VERSION: AndroidPluginVersion = AndroidPluginVersion(8, 9, 1)
+private const val SUPPORTED_KGP_VERSION: String = "2.1.0"
 private val SUPPORTED_SDK_VERSION: MinSdkVersion = MinSdkVersion("release", 30)
 
 class DependencyVersionCheckerTest {
     @Test
     fun `AGP version in error range results in DependencyValidationException`() {
-        val exampleErrorAgpVersion = AndroidPluginVersion(4, 2, 0)
+        val exampleErrorAgpVersion = AndroidPluginVersion(8, 1, 0)
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(agpVersion = exampleErrorAgpVersion)
 
         val mockExtraPropertiesExtension = mockProject.extra
@@ -130,7 +132,7 @@ class DependencyVersionCheckerTest {
 
     @Test
     fun `KGP version in warn range results in warning logs`() {
-        val exampleWarnKgpVersion = "1.8.0"
+        val exampleWarnKgpVersion = "1.8.20"
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(kgpVersion = exampleWarnKgpVersion)
 
         val mockExtraPropertiesExtension = mockProject.extra
@@ -152,31 +154,31 @@ class DependencyVersionCheckerTest {
         verify(exactly = 0) { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) }
     }
 
-    // No test for Java version in error range, as the lowest supported Java version is also the
+    // No test for Java version in warn range, as the lowest supported Java version is also the
     // lowest possible.
-
     @Test
-    fun `Java version in warn range results in warning logs`() {
-        val exampleWarnJavaVersion = JavaVersion.VERSION_1_8
-        val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(javaVersion = exampleWarnJavaVersion)
+    fun `Java version in error range results in error logs`() {
+        val exampleErrorJavaVersion = JavaVersion.VERSION_16
+        val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(javaVersion = exampleErrorJavaVersion)
 
         val mockExtraPropertiesExtension = mockProject.extra
         every { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, false) } returns Unit
+        every { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) } returns Unit
         val mockLogger = mockProject.logger
         every { mockLogger.error(any()) } returns Unit
 
-        DependencyVersionChecker.checkDependencyVersions(mockProject)
-        verify {
-            mockLogger.error(
-                getWarnMessage(
+        val dependencyValidationException =
+            assertFailsWith<DependencyValidationException> { DependencyVersionChecker.checkDependencyVersions(mockProject) }
+        assert(
+            dependencyValidationException.message ==
+                getErrorMessage(
                     JAVA_NAME,
-                    exampleWarnJavaVersion.toString(),
-                    warnJavaVersion.toString(),
+                    exampleErrorJavaVersion.toString(),
+                    errorJavaVersion.toString(),
                     POTENTIAL_JAVA_FIX
                 )
-            )
-        }
-        verify(exactly = 0) { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) }
+        )
+        verify(exactly = 1) { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) }
     }
 
     @Test
@@ -204,7 +206,7 @@ class DependencyVersionCheckerTest {
 
     @Test
     fun `Gradle version in warn range results in warning logs`() {
-        val exampleWarnGradleVersion = "7.4.0"
+        val exampleWarnGradleVersion = "8.5.0"
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(gradleVersion = exampleWarnGradleVersion)
 
         val mockExtraPropertiesExtension = mockProject.extra
@@ -228,7 +230,7 @@ class DependencyVersionCheckerTest {
 
     @Test
     fun `min SDK version in warn range results in warning logs`() {
-        val exampleWarnSDKVersion = 19
+        val exampleWarnSDKVersion = 23
         val flavorName1 = "flavor1"
         val flavorName2 = "flavor2"
         val mockProject =
@@ -340,8 +342,8 @@ class DependencyVersionCheckerTest {
 
         assertEquals(
             dependencyValidationException.message,
-            "Error: Your project's minimum Android SDK (flavor='flavor') version (0) is lower than " +
-                "Flutter's minimum supported version of 1. Please upgrade your minimum Android SDK " +
+            "Error: Your project's minimum Android SDK (flavor='flavor') version ($version) is lower than " +
+                "Flutter's minimum supported version of $errorMinSdkVersion. Please upgrade your minimum Android SDK " +
                 "(flavor='flavor') version. \n" +
                 "Alternatively, use the flag \"--android-skip-build-dependency-validation\" to " +
                 "bypass this check.\n" +
@@ -358,7 +360,7 @@ class DependencyVersionCheckerTest {
         val mockExtraPropertiesExtension = mockk<ExtraPropertiesExtension>()
         val projectDir = "projectDir"
         val flavor = "flavor"
-        val version = 20
+        val version = 23
 
         every { mockExtraPropertiesExtension.set(any(), any()) } returns Unit
         every { mockLogger.error(any()) } returns Unit
@@ -377,8 +379,8 @@ class DependencyVersionCheckerTest {
         assertEquals(
             warningMessageSlot.captured,
             "Warning: Flutter support for your project's minimum Android SDK (flavor='flavor') " +
-                "version (20) will soon be dropped. Please upgrade your minimum Android SDK " +
-                "(flavor='flavor') version to a version of at least 21 soon.\n" +
+                "version ($version) will soon be dropped. Please upgrade your minimum Android SDK " +
+                "(flavor='flavor') version to a version of at least $warnMinSdkVersion soon.\n" +
                 "Alternatively, use the flag \"--android-skip-build-dependency-validation\" to " +
                 "bypass this check.\n" +
                 "\n" +
@@ -475,7 +477,6 @@ private object MockProjectFactory {
                 val variant = mockk<Variant>()
                 every { variant.name } returns it.flavor
                 every { variant.minSdk } returns mockk { every { apiLevel } returns it.version }
-                every { variant.minSdkVersion } returns mockk { every { apiLevel } returns it.version }
                 onVariantsFnSlot.captured.invoke(variant)
             }
             return@answers Unit

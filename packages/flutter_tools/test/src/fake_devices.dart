@@ -28,7 +28,6 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
         'hotReload': true,
         'hotRestart': true,
         'screenshot': false,
-        'fastStart': false,
         'flutterExit': true,
         'hardwareRendering': true,
         'startPaused': true,
@@ -50,7 +49,6 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
         'hotReload': true,
         'hotRestart': true,
         'screenshot': false,
-        'fastStart': false,
         'flutterExit': true,
         'hardwareRendering': true,
         'startPaused': true,
@@ -75,7 +73,6 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
         'hotReload': true,
         'hotRestart': true,
         'screenshot': false,
-        'fastStart': false,
         'flutterExit': true,
         'hardwareRendering': true,
         'startPaused': true,
@@ -102,7 +99,6 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
         'hotReload': true,
         'hotRestart': true,
         'screenshot': false,
-        'fastStart': false,
         'flutterExit': true,
         'hardwareRendering': true,
         'startPaused': true,
@@ -180,7 +176,7 @@ class FakeDevice extends Device {
   bool isSupportedForProject(FlutterProject flutterProject) => _isSupportedForProject;
 
   @override
-  bool isSupported() => _isSupported;
+  Future<bool> isSupported() async => _isSupported;
 
   @override
   bool get supportsFlavors => _supportsFlavors;
@@ -214,12 +210,15 @@ class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
   FakePollingDeviceDiscovery({this.requiresExtendedWirelessDeviceDiscovery = false})
     : super('mock');
 
-  final List<Device> _devices = <Device>[];
-  final StreamController<Device> _onAddedController = StreamController<Device>.broadcast();
-  final StreamController<Device> _onRemovedController = StreamController<Device>.broadcast();
+  final _devices = <Device>[];
+  final _onAddedController = StreamController<Device>.broadcast();
+  final _onRemovedController = StreamController<Device>.broadcast();
 
   @override
-  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
+  Future<List<Device>> pollingGetDevices({
+    Duration? timeout,
+    bool forWirelessDiscovery = false,
+  }) async {
     lastPollingTimeout = timeout;
     return _devices;
   }
@@ -255,9 +254,17 @@ class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
   bool discoverDevicesCalled = false;
 
   @override
-  Future<List<Device>> discoverDevices({Duration? timeout, DeviceDiscoveryFilter? filter}) {
+  Future<List<Device>> discoverDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+    bool forWirelessDiscovery = false,
+  }) {
     discoverDevicesCalled = true;
-    return super.discoverDevices(timeout: timeout);
+    return super.discoverDevices(
+      timeout: timeout,
+      filter: filter,
+      forWirelessDiscovery: forWirelessDiscovery,
+    );
   }
 
   @override
@@ -282,16 +289,16 @@ class FakeDeviceLogReader extends DeviceLogReader {
 
   bool disposed = false;
 
-  final List<String> _lineQueue = <String>[];
-  late final StreamController<String> _linesController = StreamController<String>.broadcast(
-    onListen: () {
-      _lineQueue.forEach(_linesController.add);
-      _lineQueue.clear();
-    },
-  );
+  final _lineQueue = <String>[];
+  late final _linesController = StreamController<String>.broadcast(onListen: _onListen);
 
   @override
   Stream<String> get logLines => _linesController.stream;
+
+  void _onListen() {
+    _lineQueue.forEach(_linesController.add);
+    _lineQueue.clear();
+  }
 
   void addLine(String line) {
     if (_linesController.hasListener) {

@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
 
+#include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
@@ -196,22 +197,14 @@ vk::ImageView TextureVK::GetRenderTargetView() const {
   return source_->GetRenderTargetView();
 }
 
-void TextureVK::SetCachedFramebuffer(
-    const SharedHandleVK<vk::Framebuffer>& framebuffer) {
-  source_->SetCachedFramebuffer(framebuffer);
+void TextureVK::SetCachedFrameData(const FramebufferAndRenderPass& data,
+                                   SampleCount sample_count) {
+  source_->SetCachedFrameData(data, sample_count);
 }
 
-void TextureVK::SetCachedRenderPass(
-    const SharedHandleVK<vk::RenderPass>& render_pass) {
-  source_->SetCachedRenderPass(render_pass);
-}
-
-SharedHandleVK<vk::Framebuffer> TextureVK::GetCachedFramebuffer() const {
-  return source_->GetCachedFramebuffer();
-}
-
-SharedHandleVK<vk::RenderPass> TextureVK::GetCachedRenderPass() const {
-  return source_->GetCachedRenderPass();
+const FramebufferAndRenderPass& TextureVK::GetCachedFrameData(
+    SampleCount sample_count) const {
+  return source_->GetCachedFrameData(sample_count);
 }
 
 void TextureVK::SetMipMapGenerated() {

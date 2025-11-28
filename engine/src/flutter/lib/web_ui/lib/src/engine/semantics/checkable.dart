@@ -31,9 +31,9 @@ enum _CheckableKind {
 }
 
 _CheckableKind _checkableKindFromSemanticsFlag(SemanticsObject semanticsObject) {
-  if (semanticsObject.hasFlag(ui.SemanticsFlag.isInMutuallyExclusiveGroup)) {
+  if (semanticsObject.flags.isInMutuallyExclusiveGroup) {
     return _CheckableKind.radio;
-  } else if (semanticsObject.hasFlag(ui.SemanticsFlag.hasToggledState)) {
+  } else if (semanticsObject.flags.isToggled != ui.Tristate.none) {
     return _CheckableKind.toggle;
   } else {
     return _CheckableKind.checkbox;
@@ -102,8 +102,8 @@ class SemanticCheckable extends SemanticRole {
 
       setAttribute(
         'aria-checked',
-        (semanticsObject.hasFlag(ui.SemanticsFlag.isChecked) ||
-                semanticsObject.hasFlag(ui.SemanticsFlag.isToggled))
+        (semanticsObject.flags.isChecked == ui.CheckedState.isTrue ||
+                semanticsObject.flags.isToggled == ui.Tristate.isTrue)
             ? 'true'
             : 'false',
       );
@@ -147,13 +147,31 @@ class SemanticCheckable extends SemanticRole {
 class Selectable extends SemanticBehavior {
   Selectable(super.semanticsObject, super.owner);
 
+  // Roles confirmed to support aria-selected according to ARIA spec.
+  // See: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-selected
+  static const Set<ui.SemanticsRole> _rolesSupportingAriaSelected = {
+    // Note: Flutter currently supports row and tab from the list (gridcell, option, row, tab).
+    ui.SemanticsRole.row,
+    ui.SemanticsRole.tab,
+  };
+
   @override
   void update() {
     if (semanticsObject.isFlagsDirty) {
       if (semanticsObject.isSelectable) {
-        owner.setAttribute('aria-selected', semanticsObject.isSelected);
+        final ui.SemanticsRole currentRole = semanticsObject.role;
+        final bool isSelected = semanticsObject.isSelected;
+
+        if (_rolesSupportingAriaSelected.contains(currentRole)) {
+          owner.setAttribute('aria-selected', isSelected);
+          owner.removeAttribute('aria-current');
+        } else {
+          owner.removeAttribute('aria-selected');
+          owner.setAttribute('aria-current', isSelected);
+        }
       } else {
         owner.removeAttribute('aria-selected');
+        owner.removeAttribute('aria-current');
       }
     }
   }

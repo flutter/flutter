@@ -13,17 +13,17 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/utils.dart';
 import '../cache.dart';
-import '../convert.dart';
 import '../device.dart';
 import 'code_signing.dart';
 
 // Error message patterns from ios-deploy output
-const String noProvisioningProfileErrorOne = 'Error 0xe8008015';
-const String noProvisioningProfileErrorTwo = 'Error 0xe8000067';
-const String deviceLockedError = 'e80000e2';
-const String deviceLockedErrorMessage = 'the device was not, or could not be, unlocked';
-const String unknownAppLaunchError = 'Error 0xe8000022';
+const noProvisioningProfileErrorOne = 'Error 0xe8008015';
+const noProvisioningProfileErrorTwo = 'Error 0xe8000067';
+const deviceLockedError = 'e80000e2';
+const deviceLockedErrorMessage = 'the device was not, or could not be, unlocked';
+const unknownAppLaunchError = 'Error 0xe8000022';
 
 class IOSDeploy {
   IOSDeploy({
@@ -51,7 +51,7 @@ class IOSDeploy {
     // Python script that uses package 'six'. LLDB.framework relies on the
     // python at the front of the path, which may not include package 'six'.
     // Ensure that we pick up the system install of python, which includes it.
-    final Map<String, String> environment = Map<String, String>.of(_platform.environment);
+    final environment = Map<String, String>.of(_platform.environment);
     environment['PATH'] = '/usr/bin:${environment['PATH']}';
     environment.addEntries(<MapEntry<String, String>>[_cache.dyLdLibEntry]);
     return environment;
@@ -61,7 +61,7 @@ class IOSDeploy {
   ///
   /// Uses ios-deploy and returns the exit code.
   Future<int> uninstallApp({required String deviceId, required String bundleId}) async {
-    final List<String> launchCommand = <String>[
+    final launchCommand = <String>[
       _binaryPath,
       '--id',
       deviceId,
@@ -89,7 +89,7 @@ class IOSDeploy {
     Directory? appDeltaDirectory,
   }) async {
     appDeltaDirectory?.createSync(recursive: true);
-    final List<String> launchCommand = <String>[
+    final launchCommand = <String>[
       _binaryPath,
       '--id',
       deviceId,
@@ -123,7 +123,7 @@ class IOSDeploy {
   }) {
     appDeltaDirectory?.createSync(recursive: true);
     // Interactive debug session to support sending the lldb detach command.
-    final List<String> launchCommand = <String>[
+    final launchCommand = <String>[
       'script',
       '-t',
       '0',
@@ -160,7 +160,7 @@ class IOSDeploy {
     Directory? appDeltaDirectory,
   }) async {
     appDeltaDirectory?.createSync(recursive: true);
-    final List<String> launchCommand = <String>[
+    final launchCommand = <String>[
       _binaryPath,
       '--id',
       deviceId,
@@ -182,7 +182,7 @@ class IOSDeploy {
   }
 
   Future<bool> isAppInstalled({required String bundleId, required String deviceId}) async {
-    final List<String> launchCommand = <String>[
+    final launchCommand = <String>[
       _binaryPath,
       '--id',
       deviceId,
@@ -246,7 +246,7 @@ class IOSDeployDebugger {
   Process? _iosDeployProcess;
 
   Stream<String> get logLines => _debuggerOutput.stream;
-  final StreamController<String> _debuggerOutput = StreamController<String>.broadcast();
+  final _debuggerOutput = StreamController<String>.broadcast();
 
   bool get debuggerAttached => _debuggerState == _IOSDeployDebuggerState.attached;
   _IOSDeployDebuggerState _debuggerState;
@@ -257,33 +257,33 @@ class IOSDeployDebugger {
   // (lldb)    platform select remote-'ios' --sysroot
   // https://github.com/ios-control/ios-deploy/blob/1.11.2-beta.1/src/ios-deploy/ios-deploy.m#L33
   // This regex is to get the configurable lldb prompt. By default this prompt will be "lldb".
-  static final RegExp _lldbPlatformSelect = RegExp(r"\s*platform select remote-'ios' --sysroot");
+  static final _lldbPlatformSelect = RegExp(r"\s*platform select remote-'ios' --sysroot");
 
   // (lldb)     run
   // https://github.com/ios-control/ios-deploy/blob/1.11.2-beta.1/src/ios-deploy/ios-deploy.m#L51
-  static final RegExp _lldbProcessExit = RegExp(r'Process \d* exited with status =');
+  static final _lldbProcessExit = RegExp(r'Process \d* exited with status =');
 
   // (lldb) Process 6152 stopped
-  static final RegExp _lldbProcessStopped = RegExp(r'Process \d* stopped');
+  static final _lldbProcessStopped = RegExp(r'Process \d* stopped');
 
   // (lldb) Process 6152 detached
-  static final RegExp _lldbProcessDetached = RegExp(r'Process \d* detached');
+  static final _lldbProcessDetached = RegExp(r'Process \d* detached');
 
   // (lldb) Process 6152 resuming
-  static final RegExp _lldbProcessResuming = RegExp(r'Process \d+ resuming');
+  static final _lldbProcessResuming = RegExp(r'Process \d+ resuming');
 
   // Symbol Path: /Users/swarming/Library/Developer/Xcode/iOS DeviceSupport/16.2 (20C65) arm64e/Symbols
-  static final RegExp _symbolsPathPattern = RegExp(r'.*Symbol Path: ');
+  static final _symbolsPathPattern = RegExp(r'.*Symbol Path: ');
 
   // Send signal to stop (pause) the app. Used before a backtrace dump.
-  static const String _signalStop = 'process signal SIGSTOP';
-  static const String _signalStopError = 'Failed to send signal 17';
+  static const _signalStop = 'process signal SIGSTOP';
+  static const _signalStopError = 'Failed to send signal 17';
 
-  static const String _processResume = 'process continue';
-  static const String _processInterrupt = 'process interrupt';
+  static const _processResume = 'process continue';
+  static const _processInterrupt = 'process interrupt';
 
   // Print backtrace for all threads while app is stopped.
-  static const String _backTraceAll = 'thread backtrace all';
+  static const _backTraceAll = 'thread backtrace all';
 
   /// If this is non-null, then the app process is paused and awaiting backtrace logging.
   ///
@@ -291,14 +291,14 @@ class IOSDeployDebugger {
   Completer<void>? _processResumeCompleter;
 
   // Process 525 exited with status = -1 (0xffffffff) lost connection
-  static final RegExp _lostConnectionPattern = RegExp(
+  static final _lostConnectionPattern = RegExp(
     r'exited with status = -1 \(0xffffffff\) lost connection',
   );
 
   /// Whether ios-deploy received a message matching [_lostConnectionPattern],
   /// indicating that it lost connection to the device.
   bool get lostConnection => _lostConnection;
-  bool _lostConnection = false;
+  var _lostConnection = false;
 
   /// Launch the app on the device, and attach the debugger.
   ///
@@ -308,167 +308,165 @@ class IOSDeployDebugger {
 
     // (lldb)     run
     // https://github.com/ios-control/ios-deploy/blob/1.11.2-beta.1/src/ios-deploy/ios-deploy.m#L51
-    RegExp lldbRun = RegExp(r'\(lldb\)\s*run');
+    var lldbRun = RegExp(r'\(lldb\)\s*run');
 
-    final Completer<bool> debuggerCompleter = Completer<bool>();
+    final debuggerCompleter = Completer<bool>();
 
-    bool receivedLogs = false;
+    var receivedLogs = false;
     try {
       _iosDeployProcess = await _processUtils.start(_launchCommand, environment: _iosDeployEnv);
       String? lastLineFromDebugger;
-      final StreamSubscription<String> stdoutSubscription = _iosDeployProcess!.stdout
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen((String line) {
-            _monitorIOSDeployFailure(line, _logger);
+      final StreamSubscription<String>
+      stdoutSubscription = _iosDeployProcess!.stdout.transform(utf8LineDecoder).listen((
+        String line,
+      ) {
+        _monitorIOSDeployFailure(line, _logger);
 
-            // (lldb)    platform select remote-'ios' --sysroot
-            // Use the configurable custom lldb prompt in the regex. The developer can set this prompt to anything.
-            // For example `settings set prompt "(mylldb)"` in ~/.lldbinit results in:
-            // "(mylldb)    platform select remote-'ios' --sysroot"
-            if (_lldbPlatformSelect.hasMatch(line)) {
-              final String platformSelect = _lldbPlatformSelect.stringMatch(line) ?? '';
-              if (platformSelect.isEmpty) {
-                return;
-              }
-              final int promptEndIndex = line.indexOf(platformSelect);
-              if (promptEndIndex == -1) {
-                return;
-              }
-              final String prompt = line.substring(0, promptEndIndex);
-              lldbRun = RegExp(RegExp.escape(prompt) + r'\s*run');
-              _logger.printTrace(line);
-              return;
-            }
+        // (lldb)    platform select remote-'ios' --sysroot
+        // Use the configurable custom lldb prompt in the regex. The developer can set this prompt to anything.
+        // For example `settings set prompt "(mylldb)"` in ~/.lldbinit results in:
+        // "(mylldb)    platform select remote-'ios' --sysroot"
+        if (_lldbPlatformSelect.hasMatch(line)) {
+          final String platformSelect = _lldbPlatformSelect.stringMatch(line) ?? '';
+          if (platformSelect.isEmpty) {
+            return;
+          }
+          final int promptEndIndex = line.indexOf(platformSelect);
+          if (promptEndIndex == -1) {
+            return;
+          }
+          final String prompt = line.substring(0, promptEndIndex);
+          lldbRun = RegExp(RegExp.escape(prompt) + r'\s*run');
+          _logger.printTrace(line);
+          return;
+        }
 
-            // Symbol Path: /Users/swarming/Library/Developer/Xcode/iOS DeviceSupport/16.2 (20C65) arm64e/Symbols
-            if (_symbolsPathPattern.hasMatch(line)) {
-              _logger.printTrace('Detected path to iOS debug symbols: "$line"');
-              final String prefix = _symbolsPathPattern.stringMatch(line) ?? '';
-              if (prefix.isEmpty) {
-                return;
-              }
-              symbolsDirectoryPath = line.substring(prefix.length);
-              return;
-            }
+        // Symbol Path: /Users/swarming/Library/Developer/Xcode/iOS DeviceSupport/16.2 (20C65) arm64e/Symbols
+        if (_symbolsPathPattern.hasMatch(line)) {
+          _logger.printTrace('Detected path to iOS debug symbols: "$line"');
+          final String prefix = _symbolsPathPattern.stringMatch(line) ?? '';
+          if (prefix.isEmpty) {
+            return;
+          }
+          symbolsDirectoryPath = line.substring(prefix.length);
+          return;
+        }
 
-            // (lldb)     run
-            // success
-            // 2020-09-15 13:42:25.185474-0700 Runner[477:181141] flutter: The Dart VM service is listening on http://127.0.0.1:57782/
-            if (lldbRun.hasMatch(line)) {
-              _logger.printTrace(line);
-              _debuggerState = _IOSDeployDebuggerState.launching;
-              return;
-            }
-            // Next line after "run" must be "success", or the attach failed.
-            // Example: "error: process launch failed"
-            if (_debuggerState == _IOSDeployDebuggerState.launching) {
-              _logger.printTrace(line);
-              final bool attachSuccess = line == 'success';
-              _debuggerState =
-                  attachSuccess
-                      ? _IOSDeployDebuggerState.attached
-                      : _IOSDeployDebuggerState.detached;
-              if (!debuggerCompleter.isCompleted) {
-                debuggerCompleter.complete(attachSuccess);
-              }
-              return;
-            }
+        // (lldb)     run
+        // success
+        // 2020-09-15 13:42:25.185474-0700 Runner[477:181141] flutter: The Dart VM service is listening on http://127.0.0.1:57782/
+        if (lldbRun.hasMatch(line)) {
+          _logger.printTrace(line);
+          _debuggerState = _IOSDeployDebuggerState.launching;
+          return;
+        }
+        // Next line after "run" must be "success", or the attach failed.
+        // Example: "error: process launch failed"
+        if (_debuggerState == _IOSDeployDebuggerState.launching) {
+          _logger.printTrace(line);
+          final attachSuccess = line == 'success';
+          _debuggerState = attachSuccess
+              ? _IOSDeployDebuggerState.attached
+              : _IOSDeployDebuggerState.detached;
+          if (!debuggerCompleter.isCompleted) {
+            debuggerCompleter.complete(attachSuccess);
+          }
+          return;
+        }
 
-            // (lldb) process signal SIGSTOP
-            // or
-            // process signal SIGSTOP
-            if (line.contains(_signalStop)) {
-              // The app is about to be stopped. Only show in verbose mode.
-              _logger.printTrace(line);
-              return;
-            }
+        // (lldb) process signal SIGSTOP
+        // or
+        // process signal SIGSTOP
+        if (line.contains(_signalStop)) {
+          // The app is about to be stopped. Only show in verbose mode.
+          _logger.printTrace(line);
+          return;
+        }
 
-            // error: Failed to send signal 17: failed to send signal 17
-            if (line.contains(_signalStopError)) {
-              // The stop signal failed, force exit.
-              exit();
-              return;
-            }
+        // error: Failed to send signal 17: failed to send signal 17
+        if (line.contains(_signalStopError)) {
+          // The stop signal failed, force exit.
+          exit();
+          return;
+        }
 
-            if (line == _backTraceAll) {
-              // The app is stopped and the backtrace for all threads will be printed.
-              _logger.printTrace(line);
-              // Even though we're not "detached", just stopped, mark as detached so the backtrace
-              // is only show in verbose.
-              _debuggerState = _IOSDeployDebuggerState.detached;
+        if (line == _backTraceAll) {
+          // The app is stopped and the backtrace for all threads will be printed.
+          _logger.printTrace(line);
+          // Even though we're not "detached", just stopped, mark as detached so the backtrace
+          // is only show in verbose.
+          _debuggerState = _IOSDeployDebuggerState.detached;
 
-              // If we paused the app and are waiting to resume it, complete the completer
-              final Completer<void>? processResumeCompleter = _processResumeCompleter;
-              if (processResumeCompleter != null) {
-                _processResumeCompleter = null;
-                processResumeCompleter.complete();
-              }
-              return;
-            }
+          // If we paused the app and are waiting to resume it, complete the completer
+          final Completer<void>? processResumeCompleter = _processResumeCompleter;
+          if (processResumeCompleter != null) {
+            _processResumeCompleter = null;
+            processResumeCompleter.complete();
+          }
+          return;
+        }
 
-            if (line.contains('PROCESS_STOPPED') || _lldbProcessStopped.hasMatch(line)) {
-              // The app has been stopped. Dump the backtrace, and detach.
-              _logger.printTrace(line);
-              _iosDeployProcess?.stdin.writeln(_backTraceAll);
-              if (_processResumeCompleter == null) {
-                detach();
-              }
-              return;
-            }
+        if (line.contains('PROCESS_STOPPED') || _lldbProcessStopped.hasMatch(line)) {
+          // The app has been stopped. Dump the backtrace, and detach.
+          _logger.printTrace(line);
+          _iosDeployProcess?.stdin.writeln(_backTraceAll);
+          if (_processResumeCompleter == null) {
+            detach();
+          }
+          return;
+        }
 
-            if (line.contains('PROCESS_EXITED') || _lldbProcessExit.hasMatch(line)) {
-              // The app exited or crashed, so exit. Continue passing debugging
-              // messages to the log reader until it exits to capture crash dumps.
-              _logger.printTrace(line);
-              if (line.contains(_lostConnectionPattern)) {
-                _lostConnection = true;
-              }
-              exit();
-              return;
-            }
-            if (_lldbProcessDetached.hasMatch(line)) {
-              // The debugger has detached from the app, and there will be no more debugging messages.
-              // Kill the ios-deploy process.
-              _logger.printTrace(line);
-              exit();
-              return;
-            }
+        if (line.contains('PROCESS_EXITED') || _lldbProcessExit.hasMatch(line)) {
+          // The app exited or crashed, so exit. Continue passing debugging
+          // messages to the log reader until it exits to capture crash dumps.
+          _logger.printTrace(line);
+          if (line.contains(_lostConnectionPattern)) {
+            _lostConnection = true;
+          }
+          exit();
+          return;
+        }
+        if (_lldbProcessDetached.hasMatch(line)) {
+          // The debugger has detached from the app, and there will be no more debugging messages.
+          // Kill the ios-deploy process.
+          _logger.printTrace(line);
+          exit();
+          return;
+        }
 
-            if (_lldbProcessResuming.hasMatch(line)) {
-              _logger.printTrace(line);
-              // we marked this detached when we received [_backTraceAll]
-              _debuggerState = _IOSDeployDebuggerState.attached;
-              return;
-            }
+        if (_lldbProcessResuming.hasMatch(line)) {
+          _logger.printTrace(line);
+          // we marked this detached when we received [_backTraceAll]
+          _debuggerState = _IOSDeployDebuggerState.attached;
+          return;
+        }
 
-            if (_debuggerState != _IOSDeployDebuggerState.attached) {
-              _logger.printTrace(line);
-              return;
-            }
-            if (lastLineFromDebugger != null && lastLineFromDebugger!.isNotEmpty && line.isEmpty) {
-              // The lldb console stream from ios-deploy is separated lines by an extra \r\n.
-              // To avoid all lines being double spaced, if the last line from the
-              // debugger was not an empty line, skip this empty line.
-              // This will still cause "legit" logged newlines to be doubled...
-            } else if (!_debuggerOutput.isClosed) {
-              _debuggerOutput.add(line);
+        if (_debuggerState != _IOSDeployDebuggerState.attached) {
+          _logger.printTrace(line);
+          return;
+        }
+        if (lastLineFromDebugger != null && lastLineFromDebugger!.isNotEmpty && line.isEmpty) {
+          // The lldb console stream from ios-deploy is separated lines by an extra \r\n.
+          // To avoid all lines being double spaced, if the last line from the
+          // debugger was not an empty line, skip this empty line.
+          // This will still cause "legit" logged newlines to be doubled...
+        } else if (!_debuggerOutput.isClosed) {
+          _debuggerOutput.add(line);
 
-              // Sometimes the `ios-deploy` process does not return logs from the
-              // application after attaching, such as the Dart VM url. In CI,
-              // `idevicesyslog` is used as a fallback to get logs. Print a
-              // message to indicate whether logs were received from `ios-deploy`
-              // to help with debugging.
-              if (!receivedLogs) {
-                _logger.printTrace('Received logs from ios-deploy.');
-                receivedLogs = true;
-              }
-            }
-            lastLineFromDebugger = line;
-          });
+          // Sometimes the `ios-deploy` process does not return logs from the
+          // application after attaching, such as the Dart VM url. In CI,
+          // `idevicesyslog` is used as a fallback to get logs. Print a
+          // message to indicate whether logs were received from `ios-deploy`
+          // to help with debugging.
+          if (!receivedLogs) {
+            _logger.printTrace('Received logs from ios-deploy.');
+            receivedLogs = true;
+          }
+        }
+        lastLineFromDebugger = line;
+      });
       final StreamSubscription<String> stderrSubscription = _iosDeployProcess!.stderr
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
+          .transform(utf8LineDecoder)
           .listen((String line) {
             _monitorIOSDeployFailure(line, _logger);
             _logger.printTrace(line);
@@ -520,7 +518,7 @@ class IOSDeployDebugger {
     if (!debuggerAttached) {
       return;
     }
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     _processResumeCompleter = completer;
     try {
       // Stop the app, which will prompt the backtrace to be printed for all threads in the stdoutSubscription handler.
@@ -555,7 +553,7 @@ class IOSDeployDebugger {
     final Directory currentDeviceSupportDir = symbolsDirectory.parent;
     final List<FileSystemEntity> symbolStatusFiles = currentDeviceSupportDir.listSync();
     _logger.printTrace('Symbol files:');
-    for (final FileSystemEntity file in symbolStatusFiles) {
+    for (final file in symbolStatusFiles) {
       _logger.printTrace('  ${file.basename}');
     }
   }

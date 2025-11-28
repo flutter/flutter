@@ -26,6 +26,7 @@ class ChromeOptions {
     this.headless,
     this.debugPort,
     this.enableWasmGC = false,
+    this.silent = false,
   });
 
   /// If not null passed as `--user-data-dir`.
@@ -57,6 +58,9 @@ class ChromeOptions {
 
   /// Whether to enable experimental WasmGC flags
   final bool enableWasmGC;
+
+  /// Disables Chrome stdio outputs.
+  final bool silent;
 }
 
 /// A function called when the Chrome process encounters an error.
@@ -74,7 +78,7 @@ class Chrome {
     });
   }
 
-  /// Launches Chrome with the give [options].
+  /// Launches Chrome with the given [options].
   ///
   /// The [onError] callback is called with an error message when the Chrome
   /// process encounters an error. In particular, [onError] is called when the
@@ -94,12 +98,11 @@ class Chrome {
       print('Launching Chrome...');
     }
 
-    final String jsFlags =
-        options.enableWasmGC
-            ? <String>['--experimental-wasm-gc', '--experimental-wasm-type-reflection'].join(' ')
-            : '';
-    final bool withDebugging = options.debugPort != null;
-    final List<String> args = <String>[
+    final String jsFlags = options.enableWasmGC
+        ? <String>['--experimental-wasm-gc', '--experimental-wasm-type-reflection'].join(' ')
+        : '';
+    final withDebugging = options.debugPort != null;
+    final args = <String>[
       if (options.userDataDirectory != null) '--user-data-dir=${options.userDataDirectory}',
       if (options.url != null) options.url!,
       if (io.Platform.environment['CHROME_NO_SANDBOX'] == 'true') '--no-sandbox',
@@ -120,12 +123,34 @@ class Chrome {
     final io.Process chromeProcess = await _spawnChromiumProcess(
       _findSystemChromeExecutable(),
       args,
+      silent: options.silent,
       workingDirectory: workingDirectory,
     );
 
     WipConnection? debugConnection;
     if (withDebugging) {
-      debugConnection = await _connectToChromeDebugPort(chromeProcess, options.debugPort!);
+      debugConnection = await _connectToChromeDebugPort(options.debugPort!, options.url);
+    }
+
+    return Chrome._(chromeProcess, onError, debugConnection);
+  }
+
+  /// Connects to an existing Chrome process with the given [options].
+  ///
+  /// The [onError] callback is called with an error message when the Chrome
+  /// process encounters an error. In particular, [onError] is called when the
+  /// Chrome process exits prematurely, i.e. before [stop] is called.
+  static Future<Chrome> connect(
+    io.Process chromeProcess,
+    ChromeOptions options, {
+    String? workingDirectory,
+    required ChromeErrorCallback onError,
+  }) async {
+    final withDebugging = options.debugPort != null;
+
+    WipConnection? debugConnection;
+    if (withDebugging) {
+      debugConnection = await _connectToChromeDebugPort(options.debugPort!, options.url);
     }
 
     return Chrome._(chromeProcess, onError, debugConnection);
@@ -242,13 +267,12 @@ String _findSystemChromeExecutable() {
   } else if (io.Platform.isMacOS) {
     return '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
   } else if (io.Platform.isWindows) {
-    const String kWindowsExecutable = r'Google\Chrome\Application\chrome.exe';
-    final List<String> kWindowsPrefixes =
-        <String?>[
-          io.Platform.environment['LOCALAPPDATA'],
-          io.Platform.environment['PROGRAMFILES'],
-          io.Platform.environment['PROGRAMFILES(X86)'],
-        ].whereType<String>().toList();
+    const kWindowsExecutable = r'Google\Chrome\Application\chrome.exe';
+    final List<String> kWindowsPrefixes = <String?>[
+      io.Platform.environment['LOCALAPPDATA'],
+      io.Platform.environment['PROGRAMFILES'],
+      io.Platform.environment['PROGRAMFILES(X86)'],
+    ].whereType<String>().toList();
     final String windowsPrefix = kWindowsPrefixes.firstWhere((String prefix) {
       final String expectedPath = path.join(prefix, kWindowsExecutable);
       return io.File(expectedPath).existsSync();
@@ -260,12 +284,12 @@ String _findSystemChromeExecutable() {
 }
 
 /// Waits for Chrome to print DevTools URI and connects to it.
-Future<WipConnection> _connectToChromeDebugPort(io.Process chromeProcess, int port) async {
+Future<WipConnection> _connectToChromeDebugPort(int port, String? tabUrl) async {
   final Uri devtoolsUri = await _getRemoteDebuggerUrl(Uri.parse('http://localhost:$port'));
   print('Connecting to DevTools: $devtoolsUri');
-  final ChromeConnection chromeConnection = ChromeConnection('localhost', port);
+  final chromeConnection = ChromeConnection('localhost', port);
   final Iterable<ChromeTab> tabs = (await chromeConnection.getTabs()).where((ChromeTab tab) {
-    return tab.url.startsWith('http://localhost');
+    return tab.url.startsWith(tabUrl ?? 'http://localhost');
   });
   final ChromeTab tab = tabs.single;
   final WipConnection debugConnection = await tab.connect();
@@ -275,11 +299,10 @@ Future<WipConnection> _connectToChromeDebugPort(io.Process chromeProcess, int po
 
 /// Gets the Chrome debugger URL for the web page being benchmarked.
 Future<Uri> _getRemoteDebuggerUrl(Uri base) async {
-  final io.HttpClient client = io.HttpClient();
+  final client = io.HttpClient();
   final io.HttpClientRequest request = await client.getUrl(base.resolve('/json/list'));
   final io.HttpClientResponse response = await request.close();
-  final List<dynamic>? jsonObject =
-      await json.fuse(utf8).decoder.bind(response).single as List<dynamic>?;
+  final jsonObject = await json.fuse(utf8).decoder.bind(response).single as List<dynamic>?;
   if (jsonObject == null || jsonObject.isEmpty) {
     return base;
   }
@@ -325,10 +348,10 @@ class BlinkTraceSummary {
       events = events.where((BlinkTraceEvent element) => element.pid == tabPid).toList();
 
       // Extract frame data.
-      final List<BlinkFrame> frames = <BlinkFrame>[];
-      int skipCount = 0;
-      BlinkFrame frame = BlinkFrame();
-      for (final BlinkTraceEvent event in events) {
+      final frames = <BlinkFrame>[];
+      var skipCount = 0;
+      var frame = BlinkFrame();
+      for (final event in events) {
         if (event.isBeginFrame) {
           frame.beginFrame = event;
         } else if (event.isUpdateAllLifecyclePhases) {
@@ -366,7 +389,7 @@ class BlinkTraceSummary {
         ),
       );
     } catch (_) {
-      final io.File traceFile = io.File('./chrome-trace.json');
+      final traceFile = io.File('./chrome-trace.json');
       io.stderr.writeln(
         'Failed to interpret the Chrome trace contents. The trace was saved in ${traceFile.path}',
       );
@@ -572,7 +595,7 @@ class BlinkTraceEvent {
 ///
 /// Returns null if the value is null.
 int? _readInt(Map<String, dynamic> json, String key) {
-  final num? jsonValue = json[key] as num?;
+  final jsonValue = json[key] as num?;
   return jsonValue?.toInt();
 }
 
@@ -591,6 +614,7 @@ const String _kGlibcError = 'Inconsistency detected by ld.so';
 Future<io.Process> _spawnChromiumProcess(
   String executable,
   List<String> args, {
+  required bool silent,
   String? workingDirectory,
 }) async {
   // Keep attempting to launch the browser until one of:
@@ -604,17 +628,21 @@ Future<io.Process> _spawnChromiumProcess(
     );
 
     process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((String line) {
-      print('[CHROME STDOUT]: $line');
+      if (!silent) {
+        print('[CHROME STDOUT]: $line');
+      }
     });
 
     // Wait until the DevTools are listening before trying to connect. This is
     // only required for flutter_test --platform=chrome and not flutter run.
-    bool hitGlibcBug = false;
+    var hitGlibcBug = false;
     await process.stderr
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .map((String line) {
-          print('[CHROME STDERR]:$line');
+          if (!silent) {
+            print('[CHROME STDERR]:$line');
+          }
           if (line.contains(_kGlibcError)) {
             hitGlibcBug = true;
           }

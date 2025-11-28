@@ -63,7 +63,9 @@ TEST(FlutterViewControllerTest, CreateDestroy) {
   testing::ScopedStubFlutterWindowsApi scoped_api_stub(
       std::make_unique<TestWindowsApi>());
   auto test_api = static_cast<TestWindowsApi*>(scoped_api_stub.stub());
-  { FlutterViewController controller(100, 100, project); }
+  {
+    FlutterViewController controller(100, 100, project);
+  }
   EXPECT_TRUE(test_api->view_controller_destroyed());
   // Per the C API, once a view controller has taken ownership of an engine
   // the engine destruction method should not be called.

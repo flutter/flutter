@@ -137,20 +137,20 @@ class KeyData {
   // JavaScript only support 32-bit bitwise operations and needs to use division
   // instead.
   static int _nonValueBits(int n) {
-    const int valueMask = 0x000FFFFFFFF;
+    const valueMask = 0x000FFFFFFFF;
     // `n >> valueMaskWidth` is equivalent to `n / divisorForValueMask`.
     const int divisorForValueMask = valueMask + 1;
-    const int valueMaskWidth = 32;
+    const valueMaskWidth = 32;
 
     // Equivalent to assert(divisorForValueMask == (1 << valueMaskWidth)).
-    const int firstDivisorWidth = 28;
+    const firstDivisorWidth = 28;
     assert(
       divisorForValueMask == (1 << firstDivisorWidth) * (1 << (valueMaskWidth - firstDivisorWidth)),
     );
 
     // JS only supports up to 2^53 - 1, therefore non-value bits can only
     // contain (maxSafeIntegerWidth - valueMaskWidth) bits.
-    const int maxSafeIntegerWidth = 52;
+    const maxSafeIntegerWidth = 52;
     const int nonValueMask = (1 << (maxSafeIntegerWidth - valueMaskWidth)) - 1;
 
     if (identical(0, 0.0)) {
@@ -162,36 +162,35 @@ class KeyData {
   }
 
   String _logicalToString() {
-    final String result = '0x${logical.toRadixString(16)}';
+    final result = '0x${logical.toRadixString(16)}';
     final int planeNum = _nonValueBits(logical) & 0x0FF;
-    final String planeDescription =
-        (() {
-          switch (planeNum) {
-            case 0x000:
-              return ' (Unicode)';
-            case 0x001:
-              return ' (Unprintable)';
-            case 0x002:
-              return ' (Flutter)';
-            case 0x011:
-              return ' (Android)';
-            case 0x012:
-              return ' (Fuchsia)';
-            case 0x013:
-              return ' (iOS)';
-            case 0x014:
-              return ' (macOS)';
-            case 0x015:
-              return ' (GTK)';
-            case 0x016:
-              return ' (Windows)';
-            case 0x017:
-              return ' (Web)';
-            case 0x018:
-              return ' (GLFW)';
-          }
-          return '';
-        })();
+    final String planeDescription = (() {
+      switch (planeNum) {
+        case 0x000:
+          return ' (Unicode)';
+        case 0x001:
+          return ' (Unprintable)';
+        case 0x002:
+          return ' (Flutter)';
+        case 0x011:
+          return ' (Android)';
+        case 0x012:
+          return ' (Fuchsia)';
+        case 0x013:
+          return ' (iOS)';
+        case 0x014:
+          return ' (macOS)';
+        case 0x015:
+          return ' (GTK)';
+        case 0x016:
+          return ' (Windows)';
+        case 0x017:
+          return ' (Web)';
+        case 0x018:
+          return ' (GLFW)';
+      }
+      return '';
+    })();
     return '$result$planeDescription';
   }
 

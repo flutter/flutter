@@ -26,20 +26,23 @@ class TestCustomPainter extends CustomPainter {
 
 void main() {
   testWidgets('Do we paint when coming back from a navigation', (WidgetTester tester) async {
-    final List<String> log = <String>[];
+    final log = <String>[];
     log.add('0');
     await tester.pumpWidget(
       MaterialApp(
         routes: <String, WidgetBuilder>{
-          '/':
-              (BuildContext context) => RepaintBoundary(
-                child: RepaintBoundary(
-                  child: FlipWidget(
-                    left: CustomPaint(painter: TestCustomPainter(log: log, name: 'left')),
-                    right: CustomPaint(painter: TestCustomPainter(log: log, name: 'right')),
-                  ),
+          '/': (BuildContext context) => RepaintBoundary(
+            child: RepaintBoundary(
+              child: FlipWidget(
+                left: CustomPaint(
+                  painter: TestCustomPainter(log: log, name: 'left'),
+                ),
+                right: CustomPaint(
+                  painter: TestCustomPainter(log: log, name: 'right'),
                 ),
               ),
+            ),
+          ),
           '/second': (BuildContext context) => Container(),
         },
       ),

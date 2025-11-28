@@ -14,6 +14,7 @@
 /// @docImport 'scaffold.dart';
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/widgets.dart';
 
@@ -250,7 +251,7 @@ class Drawer extends StatelessWidget {
     assert(debugCheckHasMaterialLocalizations(context));
     final DrawerThemeData drawerTheme = DrawerTheme.of(context);
     String? label = semanticLabel;
-    switch (Theme.of(context).platform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         break;
@@ -261,9 +262,10 @@ class Drawer extends StatelessWidget {
         label = semanticLabel ?? MaterialLocalizations.of(context).drawerLabel;
     }
     final bool useMaterial3 = Theme.of(context).useMaterial3;
-    final bool isDrawerStart = DrawerController.maybeOf(context)?.alignment != DrawerAlignment.end;
-    final DrawerThemeData defaults =
-        useMaterial3 ? _DrawerDefaultsM3(context) : _DrawerDefaultsM2(context);
+    final isDrawerStart = DrawerController.maybeOf(context)?.alignment != DrawerAlignment.end;
+    final DrawerThemeData defaults = useMaterial3
+        ? _DrawerDefaultsM3(context)
+        : _DrawerDefaultsM2(context);
     final ShapeBorder? effectiveShape =
         shape ??
         (isDrawerStart
@@ -283,10 +285,9 @@ class Drawer extends StatelessWidget {
           surfaceTintColor:
               surfaceTintColor ?? drawerTheme.surfaceTintColor ?? defaults.surfaceTintColor,
           shape: effectiveShape,
-          clipBehavior:
-              effectiveShape != null
-                  ? (clipBehavior ?? drawerTheme.clipBehavior ?? defaults.clipBehavior!)
-                  : Clip.none,
+          clipBehavior: effectiveShape != null
+              ? (clipBehavior ?? drawerTheme.clipBehavior ?? defaults.clipBehavior!)
+              : Clip.none,
           child: child,
         ),
       ),
@@ -339,6 +340,7 @@ class DrawerController extends StatefulWidget {
     this.scrimColor,
     this.edgeDragWidth,
     this.enableOpenDragGesture = true,
+    this.drawerBarrierDismissible = true,
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
@@ -354,6 +356,13 @@ class DrawerController extends StatefulWidget {
 
   /// Optional callback that is called when a [Drawer] is opened or closed.
   final DrawerCallback? drawerCallback;
+
+  /// Whether tapping the barrier behind the [Drawer] dismisses it.
+  ///
+  /// Defaults to true.
+  ///
+  /// If false, tapping the barrier will not dismiss the drawer.
+  final bool drawerBarrierDismissible;
 
   /// {@template flutter.material.DrawerController.dragStartBehavior}
   /// Determines the way that drag start behavior is handled.
@@ -497,18 +506,8 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
   @protected
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _scrimColorTween = _buildScrimColorTween();
-  }
-
-  @protected
-  @override
   void didUpdateWidget(DrawerController oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.scrimColor != oldWidget.scrimColor) {
-      _scrimColorTween = _buildScrimColorTween();
-    }
 
     if (_controller.status.isAnimating) {
       return; // Don't snap the drawer open or shut while the user is dragging.
@@ -580,7 +579,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   final GlobalKey _drawerKey = GlobalKey();
 
   double get _width {
-    final RenderBox? box = _drawerKey.currentContext?.findRenderObject() as RenderBox?;
+    final box = _drawerKey.currentContext?.findRenderObject() as RenderBox?;
     // return _kWidth if drawer not being shown currently
     return box?.size.width ?? _kWidth;
   }
@@ -637,15 +636,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     widget.drawerCallback?.call(false);
   }
 
-  late ColorTween _scrimColorTween;
   final GlobalKey _gestureDetectorKey = GlobalKey();
-
-  ColorTween _buildScrimColorTween() {
-    return ColorTween(
-      begin: Colors.transparent,
-      end: widget.scrimColor ?? DrawerTheme.of(context).scrimColor ?? Colors.black54,
-    );
-  }
 
   AlignmentDirectional get _drawerOuterAlignment => switch (widget.alignment) {
     DrawerAlignment.start => AlignmentDirectional.centerStart,
@@ -695,7 +686,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       }
     } else {
       final bool platformHasBackButton;
-      switch (Theme.of(context).platform) {
+      switch (defaultTargetPlatform) {
         case TargetPlatform.android:
           platformHasBackButton = true;
         case TargetPlatform.iOS:
@@ -706,14 +697,15 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           platformHasBackButton = false;
       }
 
-      Widget drawerScrim = const LimitedBox(
-        maxWidth: 0.0,
-        maxHeight: 0.0,
-        child: SizedBox.expand(),
+      final Color scrimColor =
+          widget.scrimColor ?? DrawerTheme.of(context).scrimColor ?? Colors.black54;
+      final Color effectiveScrimColor = scrimColor.withValues(
+        alpha: scrimColor.a * _controller.value,
       );
-      if (_scrimColorTween.evaluate(_controller) case final Color color) {
-        drawerScrim = ColoredBox(color: color, child: drawerScrim);
-      }
+      final Widget drawerScrim = ColoredBox(
+        color: effectiveScrimColor,
+        child: const LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()),
+      );
 
       final Widget child = _DrawerControllerScope(
         controller: widget,
@@ -725,7 +717,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                   // On Android, the back button is used to dismiss a modal.
                   excluding: platformHasBackButton,
                   child: GestureDetector(
-                    onTap: close,
+                    onTap: widget.drawerBarrierDismissible ? close : null,
                     child: Semantics(
                       label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
                       child: drawerScrim,

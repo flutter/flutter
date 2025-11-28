@@ -30,7 +30,7 @@ class EmbedderRenderTargetSkia final : public EmbedderRenderTarget {
   std::shared_ptr<impeller::AiksContext> GetAiksContext() const override;
 
   // |EmbedderRenderTarget|
-  SkISize GetRenderTargetSize() const override;
+  DlISize GetRenderTargetSize() const override;
 
   // |EmbedderRenderTarget|
   SetCurrentResult MaybeMakeCurrent() const override;

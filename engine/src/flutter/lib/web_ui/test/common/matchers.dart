@@ -77,7 +77,7 @@ double _rectDistance(Rect a, Rect b) {
 }
 
 double _sizeDistance(Size a, Size b) {
-  final Offset delta = (b - a) as Offset;
+  final delta = (b - a) as Offset;
   return delta.distance;
 }
 
@@ -266,17 +266,19 @@ class HtmlPatternMatcher extends Matcher {
       return false;
     }
 
-    final List<String> mismatches = <String>[];
+    final mismatches = <String>[];
     matchState['mismatches'] = mismatches;
 
-    final html.Element element =
-        html.parseFragment((object as DomElement).outerHTML).children.single;
+    final html.Element element = html
+        .parseFragment((object as DomElement).outerHTML)
+        .children
+        .single;
     _matchElements(_Breadcrumbs.root, mismatches, element, pattern);
     return mismatches.isEmpty;
   }
 
   static bool _areTagsEqual(html.Element a, html.Element b) {
-    const Map<String, String> synonyms = <String, String>{
+    const synonyms = <String, String>{
       'sem': 'flt-semantics',
       'sem-img': 'flt-semantics-img',
       'sem-tf': 'flt-semantics-text-field',
@@ -324,7 +326,9 @@ class HtmlPatternMatcher extends Matcher {
     html.Element pattern,
   ) {
     for (final MapEntry<Object, String> attribute in pattern.attributes.entries) {
-      final (expectedName, expectMissing) = _parseExpectedAttributeName(attribute.key as String);
+      final (String expectedName, bool expectMissing) = _parseExpectedAttributeName(
+        attribute.key as String,
+      );
       final String expectedValue = attribute.value;
       final _Breadcrumbs breadcrumb = parent.attribute(expectedName);
 
@@ -361,7 +365,7 @@ class HtmlPatternMatcher extends Matcher {
   }
 
   static Map<String, String> parseStyle(html.Element element) {
-    final Map<String, String> result = <String, String>{};
+    final result = <String, String>{};
 
     final String rawStyle = element.attributes['style']!;
     for (final String attribute in rawStyle.split(';')) {
@@ -403,8 +407,8 @@ class HtmlPatternMatcher extends Matcher {
   // `white-space: pre` white space does matter, but Flutter Web doesn't use
   // them, at least not in tests, so it's OK to ignore.
   List<html.Node> _cleanUpNodeList(html.NodeList nodeList) {
-    final List<html.Node> cleanNodes = <html.Node>[];
-    for (int i = 0; i < nodeList.length; i++) {
+    final cleanNodes = <html.Node>[];
+    for (var i = 0; i < nodeList.length; i++) {
       final html.Node node = nodeList[i];
       assert(
         node is html.Element || node is html.Text,
@@ -445,7 +449,7 @@ class HtmlPatternMatcher extends Matcher {
       return;
     }
 
-    for (int i = 0; i < expectedChildNodes.length; i++) {
+    for (var i = 0; i < expectedChildNodes.length; i++) {
       final html.Node expectedChild = expectedChildNodes[i];
       final html.Node actualChild = actualChildNodes[i];
 
@@ -488,8 +492,8 @@ class HtmlPatternMatcher extends Matcher {
     mismatchDescription.add('${(object as DomElement).outerHTML!}\n\n');
     mismatchDescription.add('Specifically:\n');
 
-    final List<String> mismatches = matchState['mismatches']! as List<String>;
-    for (final String mismatch in mismatches) {
+    final mismatches = matchState['mismatches']! as List<String>;
+    for (final mismatch in mismatches) {
       mismatchDescription.add(' - $mismatch\n');
     }
 
@@ -502,7 +506,7 @@ Matcher listEqual(List<int> source, {int tolerance = 0}) {
     if (source.length != target.length) {
       return false;
     }
-    for (int i = 0; i < source.length; i += 1) {
+    for (var i = 0; i < source.length; i += 1) {
       if ((source[i] - target[i]).abs() > tolerance) {
         return false;
       }

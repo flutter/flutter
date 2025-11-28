@@ -23,7 +23,8 @@ class PinnedHeaderSliverExample extends StatefulWidget {
   const PinnedHeaderSliverExample({super.key});
 
   @override
-  State<PinnedHeaderSliverExample> createState() => _PinnedHeaderSliverExampleState();
+  State<PinnedHeaderSliverExample> createState() =>
+      _PinnedHeaderSliverExampleState();
 }
 
 class _PinnedHeaderSliverExampleState extends State<PinnedHeaderSliverExample> {
@@ -60,8 +61,12 @@ class _PinnedHeaderSliverExampleState extends State<PinnedHeaderSliverExample> {
           alignment: Alignment.center,
           padding: const EdgeInsets.symmetric(vertical: 48),
           child: Text(
-            count.isOdd ? 'Alternative Title\nWith Two Lines' : 'PinnedHeaderSliver',
-            style: theme.textTheme.headlineMedium!.copyWith(color: colorScheme.onPrimaryContainer),
+            count.isOdd
+                ? 'Alternative Title\nWith Two Lines'
+                : 'PinnedHeaderSliver',
+            style: theme.textTheme.headlineMedium!.copyWith(
+              color: colorScheme.onPrimaryContainer,
+            ),
           ),
         ),
       ),
@@ -73,7 +78,10 @@ class _PinnedHeaderSliverExampleState extends State<PinnedHeaderSliverExample> {
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: CustomScrollView(
             controller: scrollController,
-            slivers: <Widget>[PinnedHeaderSliver(child: header), const ItemList()],
+            slivers: <Widget>[
+              PinnedHeaderSliver(child: header),
+              const ItemList(),
+            ],
           ),
         ),
       ),
@@ -98,13 +106,17 @@ class ItemList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    return SliverList(
-      delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+    return SliverList.builder(
+      itemCount: itemCount,
+      itemBuilder: (BuildContext context, int index) {
         return Card(
           color: colorScheme.onSecondary,
-          child: ListTile(textColor: colorScheme.secondary, title: Text('Item $index')),
+          child: ListTile(
+            textColor: colorScheme.secondary,
+            title: Text('Item $index'),
+          ),
         );
-      }, childCount: itemCount),
+      },
     );
   }
 }

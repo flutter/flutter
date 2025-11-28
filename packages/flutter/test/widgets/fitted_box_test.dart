@@ -15,7 +15,10 @@ void main() {
       Center(
         child: SizedBox(
           width: 200.0,
-          child: FittedBox(key: outside, child: SizedBox(key: inside, width: 100.0, height: 50.0)),
+          child: FittedBox(
+            key: outside,
+            child: SizedBox(key: inside, width: 100.0, height: 50.0),
+          ),
         ),
       ),
     );
@@ -44,7 +47,10 @@ void main() {
         child: SizedBox(
           width: 200.0,
           height: 200.0,
-          child: FittedBox(key: outside, child: SizedBox(key: inside, width: 100.0, height: 50.0)),
+          child: FittedBox(
+            key: outside,
+            child: SizedBox(key: inside, width: 100.0, height: 50.0),
+          ),
         ),
       ),
     );
@@ -97,7 +103,11 @@ void main() {
 
   testWidgets('FittedBox with no child', (WidgetTester tester) async {
     final Key key = UniqueKey();
-    await tester.pumpWidget(Center(child: FittedBox(key: key, fit: BoxFit.cover)));
+    await tester.pumpWidget(
+      Center(
+        child: FittedBox(key: key, fit: BoxFit.cover),
+      ),
+    );
 
     final RenderBox box = tester.firstRenderObject(find.byKey(key));
     expect(box.size.width, 0.0);
@@ -361,11 +371,11 @@ void main() {
   });
 
   testWidgets('FittedBox layers - none - clip', (WidgetTester tester) async {
-    final List<double> values = <double>[10.0, 50.0, 100.0];
-    for (final double a in values) {
-      for (final double b in values) {
-        for (final double c in values) {
-          for (final double d in values) {
+    final values = <double>[10.0, 50.0, 100.0];
+    for (final a in values) {
+      for (final b in values) {
+        for (final c in values) {
+          for (final d in values) {
             await tester.pumpWidget(
               Center(
                 child: SizedBox(
@@ -396,7 +406,7 @@ void main() {
 
   testWidgets('Big child into small fitted box - hit testing', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
-    bool pointerDown = false;
+    var pointerDown = false;
     await tester.pumpWidget(
       Center(
         child: SizedBox(
@@ -562,7 +572,7 @@ void main() {
 }
 
 List<Type> getLayers() {
-  final List<Type> layers = <Type>[];
+  final layers = <Type>[];
   Layer? container = RendererBinding.instance.renderView.debugLayer;
   while (container is ContainerLayer) {
     layers.add(container.runtimeType);

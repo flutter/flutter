@@ -47,8 +47,8 @@ class _ListTileExampleState extends State<ListTileExample> {
                   titleAlignment = value;
                 });
               },
-              itemBuilder:
-                  (BuildContext context) => <PopupMenuEntry<ListTileTitleAlignment>>[
+              itemBuilder: (BuildContext context) =>
+                  <PopupMenuEntry<ListTileTitleAlignment>>[
                     const PopupMenuItem<ListTileTitleAlignment>(
                       value: ListTileTitleAlignment.threeLine,
                       child: Text('threeLine'),

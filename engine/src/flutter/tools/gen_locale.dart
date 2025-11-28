@@ -19,7 +19,7 @@ const String registry =
     'https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry';
 
 Map<String, List<String>> parseSection(String section) {
-  final Map<String, List<String>> result = <String, List<String>>{};
+  final result = <String, List<String>>{};
   late List<String> lastHeading;
   for (final String line in section.split('\n')) {
     if (line == '') {
@@ -41,20 +41,17 @@ Map<String, List<String>> parseSection(String section) {
 }
 
 Future<void> main() async {
-  final HttpClient client = HttpClient();
-  final String body =
-      (await (await (await client.getUrl(Uri.parse(registry))).close())
-              .transform(utf8.decoder)
-              .toList())
-          .join();
-  final List<Map<String, List<String>>> sections =
-      body.split('%%').map<Map<String, List<String>>>(parseSection).toList();
-  final Map<String, List<String>> outputs = <String, List<String>>{
-    'language': <String>[],
-    'region': <String>[],
-  };
+  final client = HttpClient();
+  final String body = (await (await (await client.getUrl(
+    Uri.parse(registry),
+  )).close()).transform(utf8.decoder).toList()).join();
+  final List<Map<String, List<String>>> sections = body
+      .split('%%')
+      .map<Map<String, List<String>>>(parseSection)
+      .toList();
+  final outputs = <String, List<String>>{'language': <String>[], 'region': <String>[]};
   String? fileDate;
-  for (final Map<String, List<String>> section in sections) {
+  for (final section in sections) {
     if (fileDate == null) {
       // first block should contain a File-Date metadata line.
       fileDate = section['File-Date']!.single;
@@ -68,10 +65,9 @@ Future<void> main() async {
       final List<String> descriptions = section['Description']!;
       assert(descriptions.isNotEmpty);
       assert(section.containsKey('Deprecated'));
-      final String comment =
-          section.containsKey('Comment')
-              ? section['Comment']!.single
-              : 'deprecated ${section['Deprecated']!.single}';
+      final String comment = section.containsKey('Comment')
+          ? section['Comment']!.single
+          : 'deprecated ${section['Deprecated']!.single}';
       final String preferredValue = section['Preferred-Value']!.single;
       outputs[type]!.add("'$subtag': '$preferredValue', // ${descriptions.join(", ")}; $comment");
     }

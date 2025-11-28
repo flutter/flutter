@@ -25,17 +25,11 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/fake_vm_services.dart';
 
-final vm_service.Event fakeUnpausedEvent = vm_service.Event(
-  kind: vm_service.EventKind.kResume,
-  timestamp: 0,
-);
+final fakeUnpausedEvent = vm_service.Event(kind: vm_service.EventKind.kResume, timestamp: 0);
 
-final vm_service.Event fakePausedEvent = vm_service.Event(
-  kind: vm_service.EventKind.kPauseException,
-  timestamp: 0,
-);
+final fakePausedEvent = vm_service.Event(kind: vm_service.EventKind.kPauseException, timestamp: 0);
 
-final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
+final fakeUnpausedIsolate = vm_service.Isolate(
   id: '1',
   pauseEvent: fakeUnpausedEvent,
   breakpoints: <vm_service.Breakpoint>[],
@@ -53,7 +47,7 @@ final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   isolateFlags: <vm_service.IsolateFlag>[],
 );
 
-final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
+final fakePausedIsolate = vm_service.Isolate(
   id: '1',
   pauseEvent: fakePausedEvent,
   breakpoints: <vm_service.Breakpoint>[
@@ -79,7 +73,7 @@ final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
   isolateFlags: <vm_service.IsolateFlag>[],
 );
 
-final vm_service.VM fakeVM = vm_service.VM(
+final fakeVM = vm_service.VM(
   isolates: <vm_service.IsolateRef>[fakeUnpausedIsolate],
   pid: 1,
   hostCPU: '',
@@ -94,26 +88,26 @@ final vm_service.VM fakeVM = vm_service.VM(
   systemIsolates: <vm_service.IsolateRef>[],
 );
 
-final FlutterView fakeFlutterView = FlutterView(id: 'a', uiIsolate: fakeUnpausedIsolate);
+final fakeFlutterView = FlutterView(id: 'a', uiIsolate: fakeUnpausedIsolate);
 
-final FakeVmServiceRequest listViews = FakeVmServiceRequest(
+final listViews = FakeVmServiceRequest(
   method: kListViewsMethod,
   jsonResponse: <String, Object>{
     'views': <Object>[fakeFlutterView.toJson()],
   },
 );
 
-const FakeVmServiceRequest setAssetBundlePath = FakeVmServiceRequest(
+const setAssetBundlePath = FakeVmServiceRequest(
   method: '_flutter.setAssetBundlePath',
   args: <String, Object>{'viewId': 'a', 'assetDirectory': 'build/flutter_assets', 'isolateId': '1'},
 );
 
-const FakeVmServiceRequest evict = FakeVmServiceRequest(
+const evict = FakeVmServiceRequest(
   method: 'ext.flutter.evict',
   args: <String, Object>{'value': 'asset', 'isolateId': '1'},
 );
 
-const FakeVmServiceRequest evictShader = FakeVmServiceRequest(
+const evictShader = FakeVmServiceRequest(
   method: 'ext.ui.window.reinitializeShader',
   args: <String, Object>{'assetKey': 'foo.frag', 'isolateId': '1'},
 );
@@ -130,6 +124,15 @@ class FakeDartDevelopmentService extends Fake
   Uri? get uri => null;
 
   @override
+  Uri? get devToolsUri => null;
+
+  @override
+  Uri? get dtdUri => null;
+
+  @override
+  Future<void> handleHotRestart(FlutterDevice? device) async {}
+
+  @override
   void shutdown() {}
 }
 
@@ -141,8 +144,7 @@ class FakeDartDevelopmentServiceException implements DartDevelopmentServiceExcep
 
   @override
   final String message;
-  static const String defaultMessage =
-      'A DDS instance is already connected at http://localhost:8181';
+  static const defaultMessage = 'A DDS instance is already connected at http://localhost:8181';
 
   @override
   Map<String, Object?> toJson() {
@@ -239,7 +241,6 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     required DebuggingOptions debuggingOptions,
     int? hostVmServicePort,
     bool? ipv6 = false,
-    bool allowExistingDdsInstance = false,
   }) async {}
 
   @override
@@ -264,6 +265,9 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   Future<void> updateReloadStatus(bool wasReloadSuccessful) async {}
+
+  @override
+  Future<void> handleHotRestart() async {}
 }
 
 class FakeDelegateFlutterDevice extends FlutterDevice {
@@ -288,7 +292,6 @@ class FakeDelegateFlutterDevice extends FlutterDevice {
     required DebuggingOptions debuggingOptions,
     int? hostVmServicePort,
     bool? ipv6 = false,
-    bool allowExistingDdsInstance = false,
   }) async {}
 
   final DevFS fakeDevFS;
@@ -396,6 +399,9 @@ class FakeDevice extends Fake implements Device {
 
   @override
   String get displayName => name;
+
+  @override
+  Uri? devToolsUri;
 
   @override
   late DartDevelopmentService dds = FakeDartDevelopmentService();

@@ -47,31 +47,27 @@ class _SnackBarExampleState extends State<SnackBarExample> {
       ),
       body: ListView(
         children: <Widget>[
-          ExpansionTile(
-            title: const Text('Behavior'),
-            initiallyExpanded: true,
-            children: <Widget>[
-              RadioListTile<SnackBarBehavior>(
-                title: const Text('Fixed'),
-                value: SnackBarBehavior.fixed,
-                groupValue: _snackBarBehavior,
-                onChanged: (SnackBarBehavior? value) {
-                  setState(() {
-                    _snackBarBehavior = value;
-                  });
-                },
-              ),
-              RadioListTile<SnackBarBehavior>(
-                title: const Text('Floating'),
-                value: SnackBarBehavior.floating,
-                groupValue: _snackBarBehavior,
-                onChanged: (SnackBarBehavior? value) {
-                  setState(() {
-                    _snackBarBehavior = value;
-                  });
-                },
-              ),
-            ],
+          RadioGroup<SnackBarBehavior>(
+            groupValue: _snackBarBehavior,
+            onChanged: (SnackBarBehavior? value) {
+              setState(() {
+                _snackBarBehavior = value;
+              });
+            },
+            child: const ExpansionTile(
+              title: Text('Behavior'),
+              initiallyExpanded: true,
+              children: <Widget>[
+                RadioListTile<SnackBarBehavior>(
+                  title: Text('Fixed'),
+                  value: SnackBarBehavior.fixed,
+                ),
+                RadioListTile<SnackBarBehavior>(
+                  title: Text('Floating'),
+                  value: SnackBarBehavior.floating,
+                ),
+              ],
+            ),
           ),
           ExpansionTile(
             title: const Text('Content'),
@@ -107,12 +103,11 @@ class _SnackBarExampleState extends State<SnackBarExample> {
               SwitchListTile(
                 title: const Text('Long Action Label'),
                 value: _longActionLabel,
-                onChanged:
-                    !_withAction
-                        ? null
-                        : (bool value) => setState(() {
-                          _longActionLabel = value;
-                        }),
+                onChanged: !_withAction
+                    ? null
+                    : (bool value) => setState(() {
+                        _longActionLabel = value;
+                      }),
               ),
             ],
           ),
@@ -124,10 +119,9 @@ class _SnackBarExampleState extends State<SnackBarExample> {
                 value: _sliderValue,
                 divisions: 20,
                 label: _sliderValue.toStringAsFixed(2),
-                onChanged:
-                    (double value) => setState(() {
-                      _sliderValue = value;
-                    }),
+                onChanged: (double value) => setState(() {
+                  _sliderValue = value;
+                }),
               ),
             ],
           ),
@@ -139,22 +133,22 @@ class _SnackBarExampleState extends State<SnackBarExample> {
   }
 
   SnackBar _snackBar() {
-    final SnackBarAction? action =
-        _withAction
-            ? SnackBarAction(
-              label: _longActionLabel ? 'Long Action Text' : 'Action',
-              onPressed: () {
-                // Code to execute.
-              },
-            )
-            : null;
-    final double? width = _snackBarBehavior == SnackBarBehavior.floating ? 400.0 : null;
-    final String label =
-        _multiLine
-            ? 'A Snack Bar with quite a lot of text which spans across multiple '
-                'lines. You can look at how the Action Label moves around when trying '
-                'to layout this text.'
-            : 'Single Line Snack Bar';
+    final SnackBarAction? action = _withAction
+        ? SnackBarAction(
+            label: _longActionLabel ? 'Long Action Text' : 'Action',
+            onPressed: () {
+              // Code to execute.
+            },
+          )
+        : null;
+    final double? width = _snackBarBehavior == SnackBarBehavior.floating
+        ? 400.0
+        : null;
+    final String label = _multiLine
+        ? 'A Snack Bar with quite a lot of text which spans across multiple '
+              'lines. You can look at how the Action Label moves around when trying '
+              'to layout this text.'
+        : 'Single Line Snack Bar';
     return SnackBar(
       content: Text(label),
       showCloseIcon: _withIcon,

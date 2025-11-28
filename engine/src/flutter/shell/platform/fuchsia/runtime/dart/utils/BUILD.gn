@@ -60,7 +60,7 @@ template("make_utils") {
 action("generate_build_info_cc_file") {
   inputs = [
     "build_info_in.cc",
-    "//fuchsia/sdk/$host_os/meta/manifest.json",
+    "//third_party/fuchsia-sdk/sdk/meta/manifest.json",
     "$dart_src/.git/logs/HEAD",
   ]
   outputs = [ "$target_gen_dir/build_info.cc" ]
@@ -103,7 +103,7 @@ executable("dart_utils_unittests") {
     ":utils",
     ":utils_fixtures",
     "$dart_src/runtime:libdart_jit",
-    "$dart_src/runtime/bin:dart_io_api",
+    "$dart_src/runtime/bin:common_embedder_dart_io",
     "${fuchsia_sdk}/pkg/inspect_component_cpp",
     "${fuchsia_sdk}/pkg/sys_cpp",
     "//flutter/testing",

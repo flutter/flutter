@@ -12,7 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Container control tests:', () {
-    final Container container = Container(
+    final container = Container(
       alignment: Alignment.bottomRight,
       padding: const EdgeInsets.all(7.0),
       // uses color, not decoration:
@@ -611,7 +611,7 @@ void main() {
   testWidgets('giving clipBehaviour not a Clip.None, will add a ClipPath to the tree', (
     WidgetTester tester,
   ) async {
-    final Container container = Container(
+    final container = Container(
       clipBehavior: Clip.hardEdge,
       decoration: const BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(1))),
       child: const SizedBox(),
@@ -655,7 +655,7 @@ void main() {
   });
 
   testWidgets('Container is hittable only when having decorations', (WidgetTester tester) async {
-    bool tapped = false;
+    var tapped = false;
     await tester.pumpWidget(
       GestureDetector(
         onTap: () {
@@ -732,10 +732,33 @@ void main() {
     },
   );
 
+  testWidgets(
+    'Container with BorderRadiusDirectional and no Directionality throws a detailed error',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(),
+            borderRadius: const BorderRadiusDirectional.all(Radius.circular(1.0)),
+          ),
+        ),
+      );
+
+      expect(
+        tester.takeException(),
+        isFlutterError.having(
+          (FlutterError e) => e.message,
+          'message',
+          allOf(contains('No TextDirection found.'), contains('without a Directionality ancestor')),
+        ),
+      );
+    },
+  );
+
   testWidgets('using clipBehaviour and shadow, should not clip the shadow', (
     WidgetTester tester,
   ) async {
-    final Container container = Container(
+    final container = Container(
       clipBehavior: Clip.hardEdge,
       decoration: const BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(30)),
@@ -746,7 +769,9 @@ void main() {
     );
 
     await tester.pumpWidget(
-      RepaintBoundary(child: Padding(padding: const EdgeInsets.all(30.0), child: container)),
+      RepaintBoundary(
+        child: Padding(padding: const EdgeInsets.all(30.0), child: container),
+      ),
     );
 
     await expectLater(

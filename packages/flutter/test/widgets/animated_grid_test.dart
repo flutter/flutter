@@ -11,8 +11,8 @@ void main() {
   testWidgets('SliverAnimatedGrid.builder respects findChildIndexCallback', (
     WidgetTester tester,
   ) async {
-    bool finderCalled = false;
-    int itemCount = 7;
+    var finderCalled = false;
+    var itemCount = 7;
     late StateSetter stateSetter;
 
     await tester.pumpWidget(
@@ -25,9 +25,8 @@ void main() {
               slivers: <Widget>[
                 SliverAnimatedGrid(
                   initialItemCount: itemCount,
-                  itemBuilder:
-                      (BuildContext context, int index, Animation<double> animation) =>
-                          Container(key: Key('$index'), height: 2000.0),
+                  itemBuilder: (BuildContext context, int index, Animation<double> animation) =>
+                      Container(key: Key('$index'), height: 2000.0),
                   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                     maxCrossAxisExtent: 100.0,
                     mainAxisSpacing: 10.0,
@@ -58,7 +57,7 @@ void main() {
       return SizedBox(height: 100.0, child: Center(child: Text('item $index')));
     }
 
-    final GlobalKey<AnimatedGridState> listKey = GlobalKey<AnimatedGridState>();
+    final listKey = GlobalKey<AnimatedGridState>();
 
     await tester.pumpWidget(
       Directionality(
@@ -123,7 +122,7 @@ void main() {
 
   group('SliverAnimatedGrid', () {
     testWidgets('initialItemCount', (WidgetTester tester) async {
-      final Map<int, Animation<double>> animations = <int, Animation<double>>{};
+      final animations = <int, Animation<double>>{};
 
       await tester.pumpWidget(
         Directionality(
@@ -156,7 +155,7 @@ void main() {
     });
 
     testWidgets('insert', (WidgetTester tester) async {
-      final GlobalKey<SliverAnimatedGridState> listKey = GlobalKey<SliverAnimatedGridState>();
+      final listKey = GlobalKey<SliverAnimatedGridState>();
 
       await tester.pumpWidget(
         Directionality(
@@ -181,11 +180,10 @@ void main() {
         ),
       );
 
-      double itemScale(int index) =>
-          tester
-              .widget<ScaleTransition>(find.byKey(ValueKey<int>(index), skipOffstage: false))
-              .scale
-              .value;
+      double itemScale(int index) => tester
+          .widget<ScaleTransition>(find.byKey(ValueKey<int>(index), skipOffstage: false))
+          .scale
+          .value;
       double itemLeft(int index) =>
           tester.getTopLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dx;
       double itemRight(int index) =>
@@ -238,7 +236,7 @@ void main() {
     });
 
     testWidgets('insertAll', (WidgetTester tester) async {
-      final GlobalKey<SliverAnimatedGridState> listKey = GlobalKey<SliverAnimatedGridState>();
+      final listKey = GlobalKey<SliverAnimatedGridState>();
 
       await tester.pumpWidget(
         Directionality(
@@ -263,11 +261,10 @@ void main() {
         ),
       );
 
-      double itemScale(int index) =>
-          tester
-              .widget<ScaleTransition>(find.byKey(ValueKey<int>(index), skipOffstage: false))
-              .scale
-              .value;
+      double itemScale(int index) => tester
+          .widget<ScaleTransition>(find.byKey(ValueKey<int>(index), skipOffstage: false))
+          .scale
+          .value;
       double itemLeft(int index) =>
           tester.getTopLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dx;
       double itemRight(int index) =>
@@ -296,8 +293,8 @@ void main() {
     });
 
     testWidgets('remove', (WidgetTester tester) async {
-      final GlobalKey<SliverAnimatedGridState> listKey = GlobalKey<SliverAnimatedGridState>();
-      final List<int> items = <int>[0, 1, 2];
+      final listKey = GlobalKey<SliverAnimatedGridState>();
+      final items = <int>[0, 1, 2];
 
       Widget buildItem(BuildContext context, int item, Animation<double> animation) {
         return ScaleTransition(
@@ -330,11 +327,10 @@ void main() {
         ),
       );
 
-      double itemScale(int index) =>
-          tester
-              .widget<ScaleTransition>(find.byKey(ValueKey<int>(index), skipOffstage: false))
-              .scale
-              .value;
+      double itemScale(int index) => tester
+          .widget<ScaleTransition>(find.byKey(ValueKey<int>(index), skipOffstage: false))
+          .scale
+          .value;
       double itemLeft(int index) =>
           tester.getTopLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dx;
       double itemRight(int index) =>
@@ -377,8 +373,8 @@ void main() {
     });
 
     testWidgets('removeAll', (WidgetTester tester) async {
-      final GlobalKey<SliverAnimatedGridState> listKey = GlobalKey<SliverAnimatedGridState>();
-      final List<int> items = <int>[0, 1, 2];
+      final listKey = GlobalKey<SliverAnimatedGridState>();
+      final items = <int>[0, 1, 2];
 
       Widget buildItem(BuildContext context, int item, Animation<double> animation) {
         return ScaleTransition(
@@ -428,18 +424,15 @@ void main() {
     });
 
     testWidgets('works in combination with other slivers', (WidgetTester tester) async {
-      final GlobalKey<SliverAnimatedGridState> listKey = GlobalKey<SliverAnimatedGridState>();
+      final listKey = GlobalKey<SliverAnimatedGridState>();
 
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: CustomScrollView(
             slivers: <Widget>[
-              SliverList(
-                delegate: SliverChildListDelegate(<Widget>[
-                  const SizedBox(height: 100),
-                  const SizedBox(height: 100),
-                ]),
+              SliverList.list(
+                children: const <Widget>[SizedBox(height: 100), SizedBox(height: 100)],
               ),
               SliverAnimatedGrid(
                 key: listKey,
@@ -492,8 +485,8 @@ void main() {
     testWidgets(
       'passes correctly derived index of findChildIndexCallback to the inner SliverChildBuilderDelegate',
       (WidgetTester tester) async {
-        final List<int> items = <int>[0, 1, 2, 3];
-        final GlobalKey<SliverAnimatedGridState> listKey = GlobalKey<SliverAnimatedGridState>();
+        final items = <int>[0, 1, 2, 3];
+        final listKey = GlobalKey<SliverAnimatedGridState>();
 
         await tester.pumpWidget(
           Directionality(
@@ -522,8 +515,11 @@ void main() {
         );
 
         // get all list entries in order
-        final List<Text> listEntries =
-            find.byType(Text).evaluate().map((Element e) => e.widget as Text).toList();
+        final List<Text> listEntries = find
+            .byType(Text)
+            .evaluate()
+            .map((Element e) => e.widget as Text)
+            .toList();
 
         // check that the list is rendered in the correct order
         expect(listEntries[0].data, equals('item 0'));
@@ -546,8 +542,11 @@ void main() {
         await tester.pumpAndSettle();
 
         // get all list entries in order
-        final List<Text> reorderedListEntries =
-            find.byType(Text).evaluate().map((Element e) => e.widget as Text).toList();
+        final List<Text> reorderedListEntries = find
+            .byType(Text)
+            .evaluate()
+            .map((Element e) => e.widget as Text)
+            .toList();
 
         // check that the stateful items of the list are rendered in the order provided by findChildIndexCallback
         expect(reorderedListEntries[0].data, equals('item 3'));
@@ -632,7 +631,7 @@ void main() {
   });
 
   testWidgets('AnimatedGrid applies MediaQuery padding', (WidgetTester tester) async {
-    const EdgeInsets padding = EdgeInsets.all(30.0);
+    const padding = EdgeInsets.all(30.0);
     EdgeInsets? innerMediaQueryPadding;
     await tester.pumpWidget(
       Directionality(

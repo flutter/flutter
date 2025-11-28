@@ -15,16 +15,17 @@ GeometryResult CoverGeometry::GetPositionBuffer(const ContentContext& renderer,
                                                 RenderPass& pass) const {
   auto rect = Rect::MakeSize(pass.GetRenderTargetSize());
   constexpr uint16_t kRectIndicies[4] = {0, 1, 2, 3};
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto& data_host_buffer = renderer.GetTransientsDataBuffer();
+  auto& indexes_host_buffer = renderer.GetTransientsIndexesBuffer();
   return GeometryResult{
       .type = PrimitiveType::kTriangleStrip,
       .vertex_buffer =
           {
-              .vertex_buffer = host_buffer.Emplace(
+              .vertex_buffer = data_host_buffer.Emplace(
                   rect.GetTransformedPoints(entity.GetTransform().Invert())
                       .data(),
                   8 * sizeof(float), alignof(float)),
-              .index_buffer = host_buffer.Emplace(
+              .index_buffer = indexes_host_buffer.Emplace(
                   kRectIndicies, 4 * sizeof(uint16_t), alignof(uint16_t)),
               .vertex_count = 4,
               .index_type = IndexType::k16bit,

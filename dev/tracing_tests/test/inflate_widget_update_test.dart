@@ -23,10 +23,10 @@ void main() {
       TestRoot.state.updateKey();
     });
 
-    int buildCount = 0;
+    var buildCount = 0;
     for (final TimelineEvent event in await fetchTimelineEvents()) {
       if (event.json!['name'] == 'BUILD') {
-        final String ph = event.json!['ph'] as String;
+        final ph = event.json!['ph'] as String;
         if (ph == 'B') {
           buildCount++;
         } else if (ph == 'E') {
@@ -67,6 +67,9 @@ class TestRootState extends State<TestRoot> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(key: _localKey, child: SizedBox(key: _globalKey, width: 100, height: 100));
+    return Center(
+      key: _localKey,
+      child: SizedBox(key: _globalKey, width: 100, height: 100),
+    );
   }
 }

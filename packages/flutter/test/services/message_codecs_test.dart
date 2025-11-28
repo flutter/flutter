@@ -34,7 +34,7 @@ void main() {
       const MessageCodec<String?> string = StringCodec();
       final ByteData helloWorldByteData = string.encodeMessage('hello world')!;
       final ByteData helloByteData = string.encodeMessage('hello')!;
-      final ByteData offsetByteData = ByteData.view(
+      final offsetByteData = ByteData.view(
         helloWorldByteData.buffer,
         helloByteData.lengthInBytes,
         helloWorldByteData.lengthInBytes - helloByteData.lengthInBytes,
@@ -45,7 +45,7 @@ void main() {
   });
   group('Standard method codec', () {
     const MethodCodec method = StandardMethodCodec();
-    const StandardMessageCodec messageCodec = StandardMessageCodec();
+    const messageCodec = StandardMessageCodec();
 
     test('Should encode and decode objects produced from codec', () {
       final ByteData? data = messageCodec.encodeMessage(<Object, Object>{'foo': true, 3: 'fizz'});
@@ -71,7 +71,7 @@ void main() {
     });
 
     test('should decode error envelope with native stacktrace.', () {
-      final WriteBuffer buffer = WriteBuffer();
+      final buffer = WriteBuffer();
       buffer.putUint8(1);
       messageCodec.writeValue(buffer, 'errorCode');
       messageCodec.writeValue(buffer, 'errorMessage');
@@ -100,9 +100,9 @@ void main() {
     });
   });
   group('Json method codec', () {
-    const JsonCodec json = JsonCodec();
-    const StringCodec stringCodec = StringCodec();
-    const JSONMethodCodec jsonMethodCodec = JSONMethodCodec();
+    const json = JsonCodec();
+    const stringCodec = StringCodec();
+    const jsonMethodCodec = JSONMethodCodec();
     test('should decode error envelope without native stacktrace', () {
       final ByteData errorData = jsonMethodCodec.encodeErrorEnvelope(
         code: 'errorCode',
@@ -145,7 +145,7 @@ void main() {
       checkEncodeDecode<dynamic>(json, 'special chars >\u263A\u{1F602}<');
     });
     test('should encode and decode composite message', () {
-      final List<dynamic> message = <dynamic>[
+      final message = <dynamic>[
         null,
         true,
         false,
@@ -205,7 +205,7 @@ void main() {
       checkEncodeDecode<dynamic>(standard, 'special chars >\u263A\u{1F602}<');
     });
     test('should encode and decode composite message', () {
-      final List<dynamic> message = <dynamic>[
+      final message = <dynamic>[
         null,
         true,
         false,
@@ -269,9 +269,9 @@ void main() {
   });
 
   test('toString works as intended', () async {
-    const MethodCall methodCall = MethodCall('sample method');
-    final PlatformException platformException = PlatformException(code: '100');
-    final MissingPluginException missingPluginException = MissingPluginException();
+    const methodCall = MethodCall('sample method');
+    final platformException = PlatformException(code: '100');
+    final missingPluginException = MissingPluginException();
 
     expect(methodCall.toString(), 'MethodCall(sample method, null)');
     expect(platformException.toString(), 'PlatformException(100, null, null, null)');

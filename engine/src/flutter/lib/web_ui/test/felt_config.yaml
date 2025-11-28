@@ -18,6 +18,10 @@ compile-configs:
     renderer: skwasm
 
 test-sets:
+  # Tests for the new WebParagraph
+  - name: experimental-webparagraph
+    directory: webparagraph
+
   # Tests for non-renderer logic
   - name: engine
     directory: engine
@@ -35,6 +39,10 @@ test-sets:
     directory: fallbacks
 
 test-bundles:
+  - name: dart2js-canvaskit-experimental-webparagraph
+    test-set: experimental-webparagraph
+    compile-configs: dart2js-canvaskit
+
   - name: dart2js-canvaskit-engine
     test-set: engine
     compile-configs: dart2js-canvaskit
@@ -62,6 +70,15 @@ test-bundles:
       - dart2js-canvaskit
 
 run-configs:
+  - name: chrome-experimental-webparagraph
+    browser: chrome
+    browser-flags:
+      - --enable-experimental-web-platform-features
+      # This is supposed to be the right flag, but for some reason it doesn't work at the moment so
+      # we are using the more general one above.
+      # - --enable-features=ExtendedTextMetrics
+    canvaskit-variant: experimentalWebParagraph
+
   - name: chrome
     browser: chrome
     canvaskit-variant: chromium
@@ -93,11 +110,30 @@ run-configs:
     browser: firefox
     canvaskit-variant: full
 
+  - name: firefox-wasm
+    browser: firefox
+    canvaskit-variant: full
+    wasm-allow-list:
+      gecko: true
+
   - name: safari
     browser: safari
     canvaskit-variant: full
 
+  - name: safari-wasm
+    browser: safari
+    canvaskit-variant: full
+    wasm-allow-list:
+      webkit: true
+
+
 test-suites:
+  - name: chrome-dart2js-experimental-webparagraph-ui
+    test-bundle: dart2js-canvaskit-experimental-webparagraph
+    run-config: chrome-experimental-webparagraph
+    artifact-deps: [ canvaskit_experimental_webparagraph ]
+    enable-ci: false
+
   - name: chrome-dart2js-canvaskit-engine
     test-bundle: dart2js-canvaskit-engine
     run-config: chrome
@@ -163,6 +199,12 @@ test-suites:
     run-config: firefox
     artifact-deps: [ canvaskit ]
 
+  - name: firefox-dart2wasm-skwasm-ui
+    test-bundle: dart2wasm-skwasm-ui
+    run-config: firefox-wasm
+    artifact-deps: [ skwasm ]
+    enable-ci: false
+
   - name: safari-dart2js-canvaskit-engine
     test-bundle: dart2js-canvaskit-engine
     run-config: safari
@@ -178,10 +220,27 @@ test-suites:
     run-config: safari
     artifact-deps: [ canvaskit ]
 
+  - name: safari-dart2wasm-canvaskit-engine
+    test-bundle: dart2wasm-canvaskit-engine
+    run-config: safari-wasm
+    artifact-deps: [ canvaskit ]
+    enable-ci: false
+
+  - name: safari-dart2wasm-skwasm-ui
+    test-bundle: dart2wasm-skwasm-ui
+    run-config: safari-wasm
+    artifact-deps: [ skwasm ]
+    enable-ci: false
+
   - name: chrome-dart2wasm-canvaskit-engine
     test-bundle: dart2wasm-canvaskit-engine
     run-config: chrome
     artifact-deps: [ canvaskit_chromium ]
+
+  - name: firefox-dart2wasm-canvaskit-engine
+    test-bundle: dart2wasm-canvaskit-engine
+    run-config: firefox-wasm
+    artifact-deps: [ canvaskit ]
 
   - name: chrome-coi-dart2wasm-skwasm-ui
     test-bundle: dart2wasm-skwasm-ui

@@ -7,6 +7,8 @@ import 'dart:js_interop';
 import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
+import '../compositing/rasterizer.dart';
+import '../compositing/render_canvas.dart';
 import '../configuration.dart';
 import '../display.dart';
 import '../dom.dart';
@@ -14,9 +16,6 @@ import '../platform_dispatcher.dart';
 import '../util.dart';
 import 'canvas.dart';
 import 'canvaskit_api.dart';
-import 'picture.dart';
-import 'rasterizer.dart';
-import 'render_canvas.dart';
 import 'util.dart';
 
 // Only supported in profile/release mode. Allows Flutter to use MSAA but
@@ -36,7 +35,7 @@ class Surface extends DisplayCanvas {
 
   /// Returns the underlying CanvasKit Surface. Should only be used in tests.
   CkSurface? debugGetCkSurface() {
-    bool assertsEnabled = false;
+    var assertsEnabled = false;
     assert(() {
       assertsEnabled = true;
       return true;
@@ -90,7 +89,7 @@ class Surface extends DisplayCanvas {
 
   /// Returns the underlying OffscreenCanvas. Should only be used in tests.
   DomOffscreenCanvas? debugGetOffscreenCanvas() {
-    bool assertsEnabled = false;
+    var assertsEnabled = false;
     assert(() {
       assertsEnabled = true;
       return true;
@@ -140,11 +139,11 @@ class Surface extends DisplayCanvas {
   Future<void> rasterizeToCanvas(
     BitmapSize bitmapSize,
     RenderCanvas canvas,
-    List<CkPicture> pictures,
+    ui.Picture picture,
   ) async {
     final CkCanvas skCanvas = getCanvas();
     skCanvas.clear(const ui.Color(0x00000000));
-    pictures.forEach(skCanvas.drawPicture);
+    skCanvas.drawPicture(picture);
     flush();
 
     if (browserSupportsCreateImageBitmap) {
@@ -393,8 +392,8 @@ class Surface extends DisplayCanvas {
     _contextLost = false;
 
     if (webGLVersion != -1 && !configuration.canvasKitForceCpuOnly) {
-      int glContext = 0;
-      final SkWebGLContextOptions options = SkWebGLContextOptions(
+      var glContext = 0;
+      final options = SkWebGLContextOptions(
         // Default to no anti-aliasing. Paint commands can be explicitly
         // anti-aliased by setting their `Paint` object's `antialias` property.
         antialias: _kUsingMSAA ? 1 : 0,
@@ -524,7 +523,7 @@ class CkSurface {
 
   CkCanvas getCanvas() {
     assert(!_isDisposed, 'Attempting to use the canvas of a disposed surface');
-    return CkCanvas(surface.getCanvas());
+    return CkCanvas.fromSkCanvas(surface.getCanvas());
   }
 
   /// The underlying CanvasKit surface object.

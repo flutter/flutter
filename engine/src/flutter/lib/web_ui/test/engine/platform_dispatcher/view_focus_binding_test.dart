@@ -17,15 +17,12 @@ void testMain() {
     late EnginePlatformDispatcher dispatcher;
 
     setUp(() {
-      ViewFocusBinding.isEnabled = true;
-
       dispatcher = EnginePlatformDispatcher.instance;
       dispatchedViewFocusEvents = <ui.ViewFocusEvent>[];
       dispatcher.onViewFocusChange = dispatchedViewFocusEvents.add;
     });
 
     tearDown(() {
-      ViewFocusBinding.isEnabled = false;
       EngineSemantics.instance.semanticsEnabled = false;
     });
 
@@ -276,7 +273,7 @@ void testMain() {
 
 EngineFlutterView createAndRegisterView(EnginePlatformDispatcher dispatcher) {
   final DomElement div = createDomElement('div');
-  final EngineFlutterView view = EngineFlutterView(dispatcher, div);
+  final view = EngineFlutterView(dispatcher, div);
   domDocument.body!.append(div);
   dispatcher.viewManager.registerView(view);
   return view;

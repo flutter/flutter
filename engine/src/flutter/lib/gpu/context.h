@@ -30,7 +30,9 @@ class Context : public RefCountedDartWrappable<Context> {
   explicit Context(std::shared_ptr<impeller::Context> context);
   ~Context() override;
 
-  std::shared_ptr<impeller::Context> GetContext();
+  impeller::Context& GetContext();
+
+  std::shared_ptr<impeller::Context>& GetContextShared();
 
  private:
   /// An Impeller context that takes precedent over the IO state context when

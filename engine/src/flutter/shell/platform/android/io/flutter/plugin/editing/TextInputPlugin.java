@@ -11,6 +11,7 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.LocaleList;
 import android.text.Editable;
 import android.text.InputType;
 import android.util.SparseArray;
@@ -26,6 +27,8 @@ import android.view.inputmethod.InputMethodManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.inputmethod.EditorInfoCompat;
 import io.flutter.Log;
 import io.flutter.embedding.android.KeyboardManager;
@@ -89,6 +92,18 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_30) {
       imeSyncCallback = new ImeSyncDeferringInsetsCallback(view);
       imeSyncCallback.install();
+
+      // When the IME is hidden, we need to restart the input method manager to accomodate
+      // some keyboards like the Samsung keyboard that may be caching old state.
+      imeSyncCallback.setImeVisibilityListener(
+          new ImeSyncDeferringInsetsCallback.ImeVisibilityListener() {
+            @Override
+            public void onImeVisibilityChanged(boolean visible) {
+              if (!visible) {
+                mImm.restartInput(mView);
+              }
+            }
+          });
     }
 
     this.textInputChannel = textInputChannel;
@@ -349,6 +364,10 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     }
     outAttrs.imeOptions |= enterAction;
 
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_24 && configuration.hintLocales != null) {
+      outAttrs.hintLocales = new LocaleList(configuration.hintLocales);
+    }
+
     if (configuration.contentCommitMimeTypes != null) {
       String[] imgTypeString = configuration.contentCommitMimeTypes;
       EditorInfoCompat.setContentMimeTypes(outAttrs, imgTypeString);
@@ -578,6 +597,12 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     inputTarget = new InputTarget(InputTarget.Type.NO_TARGET, 0);
     unlockPlatformViewInputConnection();
     lastClientRect = null;
+    // When the IME is hidden, we need to restart the input method manager to accomodate
+    // some keyboards like the Samsung keyboard that may be caching old state.
+    WindowInsetsCompat insets = ViewCompat.getRootWindowInsets(mView);
+    if (insets != null && !insets.isVisible(WindowInsetsCompat.Type.ime())) {
+      mImm.restartInput(mView);
+    }
   }
 
   private static class InputTarget {

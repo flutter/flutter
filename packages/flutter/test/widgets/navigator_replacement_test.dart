@@ -45,7 +45,7 @@ void main() {
 
   group('pushAndRemoveUntil', () {
     testWidgets('notifies appropriately', (WidgetTester tester) async {
-      final TestObserver observer = TestObserver();
+      final observer = TestObserver();
       final Widget myApp = MaterialApp(
         home: const Material(child: Text('home')),
         routes: <String, WidgetBuilder>{
@@ -58,7 +58,7 @@ void main() {
       await tester.pumpWidget(myApp);
 
       final NavigatorState navigator = tester.state(find.byType(Navigator));
-      final List<String> log = <String>[];
+      final log = <String>[];
       observer
         ..onPushed = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
           log.add(
@@ -153,21 +153,20 @@ void main() {
     testWidgets(
       'Hero transition triggers when preceding route contains hero, and predicate route does not',
       (WidgetTester tester) async {
-        const String kHeroTag = 'hero';
+        const kHeroTag = 'hero';
         final Widget myApp = MaterialApp(
           initialRoute: '/',
           routes: <String, WidgetBuilder>{
             '/': (BuildContext context) => const Material(child: Text('home')),
-            '/a':
-                (BuildContext context) =>
-                    const Material(child: Hero(tag: kHeroTag, child: Text('a'))),
-            '/b':
-                (BuildContext context) => const Material(
-                  child: Padding(
-                    padding: EdgeInsets.all(100.0),
-                    child: Hero(tag: kHeroTag, child: Text('b')),
-                  ),
-                ),
+            '/a': (BuildContext context) => const Material(
+              child: Hero(tag: kHeroTag, child: Text('a')),
+            ),
+            '/b': (BuildContext context) => const Material(
+              child: Padding(
+                padding: EdgeInsets.all(100.0),
+                child: Hero(tag: kHeroTag, child: Text('b')),
+              ),
+            ),
           },
         );
 
@@ -200,7 +199,7 @@ void main() {
     testWidgets(
       'Hero transition does not trigger when preceding route does not contain hero, but predicate route does',
       (WidgetTester tester) async {
-        const String kHeroTag = 'hero';
+        const kHeroTag = 'hero';
         final Widget myApp = MaterialApp(
           theme: ThemeData(
             pageTransitionsTheme: const PageTransitionsTheme(
@@ -211,17 +210,16 @@ void main() {
           ),
           initialRoute: '/',
           routes: <String, WidgetBuilder>{
-            '/':
-                (BuildContext context) =>
-                    const Material(child: Hero(tag: kHeroTag, child: Text('home'))),
+            '/': (BuildContext context) => const Material(
+              child: Hero(tag: kHeroTag, child: Text('home')),
+            ),
             '/a': (BuildContext context) => const Material(child: Text('a')),
-            '/b':
-                (BuildContext context) => const Material(
-                  child: Padding(
-                    padding: EdgeInsets.all(100.0),
-                    child: Hero(tag: kHeroTag, child: Text('b')),
-                  ),
-                ),
+            '/b': (BuildContext context) => const Material(
+              child: Padding(
+                padding: EdgeInsets.all(100.0),
+                child: Hero(tag: kHeroTag, child: Text('b')),
+              ),
+            ),
           },
         );
 

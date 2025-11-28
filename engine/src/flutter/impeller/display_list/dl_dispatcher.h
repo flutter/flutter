@@ -238,14 +238,9 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
                        DlScalar opacity) override;
 
   // |flutter::DlOpReceiver|
-  void drawTextBlob(const sk_sp<SkTextBlob> blob,
-                    DlScalar x,
-                    DlScalar y) override;
-
-  // |flutter::DlOpReceiver|
-  void drawTextFrame(const std::shared_ptr<impeller::TextFrame>& text_frame,
-                     DlScalar x,
-                     DlScalar y) override;
+  void drawText(const std::shared_ptr<flutter::DlText>& text,
+                DlScalar x,
+                DlScalar y) override;
 
   // |flutter::DlOpReceiver|
   void drawShadow(const DlPath& path,
@@ -272,7 +267,7 @@ class CanvasDlDispatcher : public DlDispatcherBase {
                      bool is_onscreen,
                      bool has_root_backdrop_filter,
                      flutter::DlBlendMode max_root_blend_mode,
-                     IRect cull_rect);
+                     IRect32 cull_rect);
 
   ~CanvasDlDispatcher() = default;
 
@@ -344,19 +339,22 @@ class FirstPassDispatcher : public flutter::IgnoreAttributeDispatchHelper,
   // 2x3 2D affine subset of a 4x4 transform in row major order
   void transform2DAffine(DlScalar mxx, DlScalar mxy, DlScalar mxt,
                          DlScalar myx, DlScalar myy, DlScalar myt) override;
+  // clang-format on
 
+  // clang-format off
   // full 4x4 transform in row major order
   void transformFullPerspective(
       DlScalar mxx, DlScalar mxy, DlScalar mxz, DlScalar mxt,
       DlScalar myx, DlScalar myy, DlScalar myz, DlScalar myt,
       DlScalar mzx, DlScalar mzy, DlScalar mzz, DlScalar mzt,
       DlScalar mwx, DlScalar mwy, DlScalar mwz, DlScalar mwt) override;
+  // clang-format on
 
   void transformReset() override;
 
-  void drawTextFrame(const std::shared_ptr<impeller::TextFrame>& text_frame,
-                     DlScalar x,
-                     DlScalar y) override;
+  void drawText(const std::shared_ptr<flutter::DlText>& text,
+                DlScalar x,
+                DlScalar y) override;
 
   void drawDisplayList(const sk_sp<flutter::DisplayList> display_list,
                        DlScalar opacity) override;
@@ -382,7 +380,8 @@ class FirstPassDispatcher : public flutter::IgnoreAttributeDispatchHelper,
   // |flutter::DlOpReceiver|
   void setImageFilter(const flutter::DlImageFilter* filter) override;
 
-  std::pair<std::unordered_map<int64_t, BackdropData>, size_t> TakeBackdropData();
+  std::pair<std::unordered_map<int64_t, BackdropData>, size_t>
+  TakeBackdropData();
 
  private:
   const Rect GetCurrentLocalCullingBounds() const;
@@ -410,11 +409,12 @@ std::shared_ptr<Texture> DisplayListToTexture(
 ///
 /// If [is_onscreen] is true, then the onscreen command buffer will be
 /// submitted via Context::SubmitOnscreen.
-bool RenderToTarget(ContentContext& context, RenderTarget render_target,
-                         const sk_sp<flutter::DisplayList>& display_list,
-                         SkIRect cull_rect,
-                         bool reset_host_buffer,
-                         bool is_onscreen = true);
+bool RenderToTarget(ContentContext& context,
+                    RenderTarget render_target,
+                    const sk_sp<flutter::DisplayList>& display_list,
+                    Rect cull_rect,
+                    bool reset_host_buffer,
+                    bool is_onscreen = true);
 
 }  // namespace impeller
 

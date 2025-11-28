@@ -25,7 +25,7 @@ class BenchMouseRegionGridScroll extends WidgetRecorder {
 
   // Use a non-trivial border to force Web to switch painter
   Border _getBorder(int columnIndex, int rowIndex) {
-    const BorderSide defaultBorderSide = BorderSide();
+    const defaultBorderSide = BorderSide();
 
     return Border(
       left: columnIndex == 0 ? defaultBorderSide : BorderSide.none,
@@ -51,8 +51,8 @@ class BenchMouseRegionGridScroll extends WidgetRecorder {
 
   @override
   Widget createWidget() {
-    const int rowsCount = 60;
-    const int columnsCount = 20;
+    const rowsCount = 60;
+    const columnsCount = 20;
     const double containerSize = 20;
     return Directionality(
       textDirection: TextDirection.ltr,
@@ -65,23 +65,22 @@ class BenchMouseRegionGridScroll extends WidgetRecorder {
             itemCount: rowsCount,
             cacheExtent: rowsCount * containerSize,
             physics: const ClampingScrollPhysics(),
-            itemBuilder:
-                (BuildContext context, int rowIndex) => Row(
-                  children: List<Widget>.generate(
-                    columnsCount,
-                    (int columnIndex) => MouseRegion(
-                      onEnter: (_) {},
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: _getBorder(columnIndex, rowIndex),
-                          color: Color.fromARGB(255, rowIndex * 20 % 256, 127, 127),
-                        ),
-                        width: containerSize,
-                        height: containerSize,
-                      ),
+            itemBuilder: (BuildContext context, int rowIndex) => Row(
+              children: List<Widget>.generate(
+                columnsCount,
+                (int columnIndex) => MouseRegion(
+                  onEnter: (_) {},
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: _getBorder(columnIndex, rowIndex),
+                      color: Color.fromARGB(255, rowIndex * 20 % 256, 127, 127),
                     ),
+                    width: containerSize,
+                    height: containerSize,
                   ),
                 ),
+              ),
+            ),
           ),
         ),
       ),
@@ -139,7 +138,7 @@ class _Tester {
 
     await gesture.down(start, timeStamp: currentTime);
 
-    for (int frame = 0; frame < fullFrames; frame += 1) {
+    for (var frame = 0; frame < fullFrames; frame += 1) {
       currentTime += fullFrameDuration;
       await gesture.moveBy(fullFrameOffset, timeStamp: currentTime);
       await _UntilNextFrame.wait();

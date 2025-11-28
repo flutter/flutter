@@ -182,7 +182,7 @@ class Typography with Diagnosticable {
     TextTheme? tall,
   }) {
     assert(platform != null || (black != null && white != null));
-    final Typography base = Typography._withPlatform(
+    final base = Typography._withPlatform(
       platform,
       black,
       white,
@@ -194,10 +194,12 @@ class Typography with Diagnosticable {
     // Ensure they are all uniformly dark or light, with
     // no color variation based on style as it was in previous
     // versions of Material Design.
-    final Color dark =
-        colorScheme.brightness == Brightness.light ? colorScheme.onSurface : colorScheme.surface;
-    final Color light =
-        colorScheme.brightness == Brightness.light ? colorScheme.surface : colorScheme.onSurface;
+    final Color dark = colorScheme.brightness == Brightness.light
+        ? colorScheme.onSurface
+        : colorScheme.surface;
+    final Color light = colorScheme.brightness == Brightness.light
+        ? colorScheme.surface
+        : colorScheme.onSurface;
     return base.copyWith(
       black: base.black.apply(displayColor: dark, bodyColor: dark, decorationColor: dark),
       white: base.white.apply(displayColor: light, bodyColor: light, decorationColor: light),
@@ -357,7 +359,7 @@ class Typography with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final Typography defaultTypography = Typography.material2014();
+    final defaultTypography = Typography.material2014();
     properties.add(
       DiagnosticsProperty<TextTheme>('black', black, defaultValue: defaultTypography.black),
     );

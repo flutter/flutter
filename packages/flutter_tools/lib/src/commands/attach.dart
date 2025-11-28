@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -20,9 +21,10 @@ import '../commands/daemon.dart';
 import '../compile.dart';
 import '../daemon.dart';
 import '../device.dart';
-import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
+import '../hook_runner.dart' show hookRunner;
 import '../ios/devices.dart';
+import '../ios/simulators.dart';
 import '../macos/macos_ipad_device.dart';
 import '../mdns_discovery.dart';
 import '../project.dart';
@@ -129,19 +131,11 @@ class AttachCommand extends FlutterCommand {
             'using "--machine" instead.',
         hide: !verboseHelp,
       )
-      ..addOption('project-root', hide: !verboseHelp, help: 'Normally used only in run target.')
-      ..addFlag(
-        'machine',
-        hide: !verboseHelp,
-        negatable: false,
-        help:
-            'Handle machine structured JSON command input and provide output '
-            'and progress in machine-friendly format.',
-      );
+      ..addOption('project-root', hide: !verboseHelp, help: 'Normally used only in run target.');
+    addMachineOutputFlag(verboseHelp: verboseHelp);
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addDdsOptions(verboseHelp: verboseHelp);
     addDevToolsOptions(verboseHelp: verboseHelp);
-    addServeObservatoryOptions(verboseHelp: verboseHelp);
     usesDeviceTimeoutOption();
     usesDeviceConnectionOption();
   }
@@ -156,10 +150,10 @@ class AttachCommand extends FlutterCommand {
   final FileSystem _fileSystem;
 
   @override
-  final String name = 'attach';
+  final name = 'attach';
 
   @override
-  final String description = r'''
+  final description = r'''
 Attach to a running app.
 
 For attaching to Android or iOS devices, simply using `flutter attach` is
@@ -206,8 +200,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     }
     return uri;
   }
-
-  bool get serveObservatory => boolArg('serve-observatory');
 
   String? get appId {
     return stringArg('app-id');
@@ -277,26 +269,24 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   Future<void> _attachToDevice(Device device) async {
     final FlutterProject flutterProject = FlutterProject.current();
 
-    final Daemon? daemon =
-        boolArg('machine')
-            ? Daemon(
-              DaemonConnection(
-                daemonStreams: DaemonStreams.fromStdio(_stdio, logger: _logger),
-                logger: _logger,
-              ),
-              notifyingLogger:
-                  (_logger is NotifyingLogger)
-                      ? _logger
-                      : NotifyingLogger(verbose: _logger.isVerbose, parent: _logger),
-              logToStdout: true,
-            )
-            : null;
+    final Daemon? daemon = boolArg('machine')
+        ? Daemon(
+            DaemonConnection(
+              daemonStreams: DaemonStreams.fromStdio(_stdio, logger: _logger),
+              logger: _logger,
+            ),
+            notifyingLogger: (_logger is NotifyingLogger)
+                ? _logger
+                : NotifyingLogger(verbose: _logger.isVerbose, parent: _logger),
+            logToStdout: true,
+          )
+        : null;
 
     Stream<Uri>? vmServiceUri;
     final bool usesIpv6 = ipv6!;
     final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
     final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
-    final String hostname = usesIpv6 ? ipv6Loopback : ipv4Loopback;
+    final hostname = usesIpv6 ? ipv6Loopback : ipv4Loopback;
     final bool isWirelessIOSDevice = (device is IOSDevice) && device.isWirelesslyConnected;
 
     if ((debugPort == null && debugUri == null) || isWirelessIOSDevice) {
@@ -316,8 +306,20 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       final Status discoveryStatus = _logger.startSpinner(
         timeout: const Duration(seconds: 30),
         slowWarningCallback: () {
-          // On iOS we rely on mDNS to find Dart VM Service. Remind the user to allow local network permissions on the device.
-          if (_isIOSDevice(device)) {
+          // On iOS we rely on mDNS to find Dart VM Service.
+          if (device is IOSSimulator) {
+            // mDNS on simulators stopped working in macOS 15.4.
+            // See https://github.com/flutter/flutter/issues/166333.
+            return 'The Dart VM Service was not discovered after 30 seconds. '
+                'This may be due to limited mDNS support in the iOS Simulator.\n\n'
+                'Click "Allow" to the prompt on your device asking if you would like to find and connect devices on your local network. '
+                'If you selected "Don\'t Allow", you can turn it on in Settings > Your App Name > Local Network. '
+                "If you don't see your app in the Settings, uninstall the app and rerun to see the prompt again.\n\n"
+                'If you do not receive a prompt, either run "flutter attach" before starting the '
+                'app or use the Dart VM service URL from the Xcode console with '
+                '"flutter attach --debug-url=<URL>".\n';
+          } else if (_isIOSDevice(device)) {
+            // Remind the user to allow local network permissions on the device.
             return 'The Dart VM Service was not discovered after 30 seconds. This is taking much longer than expected...\n\n'
                 'Click "Allow" to the prompt on your device asking if you would like to find and connect devices on your local network. '
                 'If you selected "Don\'t Allow", you can turn it on in Settings > Your App Name > Local Network. '
@@ -326,26 +328,23 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
           return 'The Dart VM Service was not discovered after 30 seconds. This is taking much longer than expected...\n';
         },
+        warningColor: TerminalColor.cyan,
       );
 
       vmServiceUri = vmServiceDiscovery.uris;
 
       // Stop the timer once we receive the first uri.
-      vmServiceUri = vmServiceUri.map((Uri uri) {
-        discoveryStatus.stop();
-        return uri;
-      });
+      vmServiceUri = streamWithCallbackOnFirstItem(vmServiceUri, () => discoveryStatus.stop());
     } else {
-      vmServiceUri =
-          Stream<Uri>.fromFuture(
-            buildVMServiceUri(
-              device,
-              debugUri?.host ?? hostname,
-              debugPort ?? debugUri!.port,
-              hostVmservicePort,
-              debugUri?.path,
-            ),
-          ).asBroadcastStream();
+      vmServiceUri = Stream<Uri>.fromFuture(
+        buildVMServiceUri(
+          device,
+          debugUri?.host ?? hostname,
+          debugPort ?? debugUri!.port,
+          hostVmservicePort,
+          debugUri?.path,
+        ),
+      ).asBroadcastStream();
     }
 
     _terminal.usesTerminalUi = daemon == null;
@@ -370,7 +369,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
               return runner.attach(
                 connectionInfoCompleter: connectionInfoCompleter,
                 appStartedCompleter: appStartedCompleter,
-                allowExistingDdsInstance: true,
               );
             },
             device,
@@ -378,7 +376,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             true,
             _fileSystem.currentDirectory,
             LaunchMode.attach,
-            _logger as AppRunLogger,
+            _logger as MachineOutputLogger,
           );
         } on Exception catch (error) {
           throwToolExit(error.toString());
@@ -393,7 +391,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           flutterProject: flutterProject,
           usesIpv6: usesIpv6,
         );
-        final Completer<void> onAppStart = Completer<void>.sync();
+        final onAppStart = Completer<void>.sync();
         TerminalHandler? terminalHandler;
         unawaited(
           onAppStart.future.whenComplete(() {
@@ -411,10 +409,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
                   ..setupTerminal();
           }),
         );
-        result = await runner.attach(
-          appStartedCompleter: onAppStart,
-          allowExistingDdsInstance: true,
-        );
+        result = await runner.attach(appStartedCompleter: onAppStart);
         if (result != 0) {
           throwToolExit(null, exitCode: result);
         }
@@ -436,10 +431,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       }
       rethrow;
     } finally {
-      final List<ForwardedPort> ports = device.portForwarder!.forwardedPorts.toList();
-      for (final ForwardedPort port in ports) {
-        await device.portForwarder!.unforward(port);
-      }
       // However we exited from the runner, ensure the terminal has line mode
       // and echo mode enabled before we return the user to the shell.
       try {
@@ -467,13 +458,12 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       platform: _platform,
     );
     flutterDevice.vmServiceUris = vmServiceUris;
-    final List<FlutterDevice> flutterDevices = <FlutterDevice>[flutterDevice];
-    final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
+    final flutterDevices = <FlutterDevice>[flutterDevice];
+    final debuggingOptions = DebuggingOptions.enabled(
       buildInfo,
       enableDds: enableDds,
       ddsPort: ddsPort,
       devToolsServerAddress: devToolsServerAddress,
-      serveObservatory: serveObservatory,
       usingCISystem: usingCISystem,
       debugLogsDirectoryPath: debugLogsDirectoryPath,
       enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
@@ -483,17 +473,23 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
     return buildInfo.isDebug
         ? _hotRunnerFactory.build(
-          flutterDevices,
-          target: targetFile,
-          debuggingOptions: debuggingOptions,
-          packagesFilePath: globalResults![FlutterGlobalOptions.kPackagesOption] as String?,
-          projectRootPath: stringArg('project-root'),
-          dillOutputPath: stringArg('output-dill'),
-          flutterProject: flutterProject,
-          nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
-          analytics: analytics,
-        )
-        : ColdRunner(flutterDevices, target: targetFile, debuggingOptions: debuggingOptions);
+            flutterDevices,
+            target: targetFile,
+            debuggingOptions: debuggingOptions,
+            packagesFilePath: globalResults![FlutterGlobalOptions.kPackagesOption] as String?,
+            projectRootPath: stringArg('project-root'),
+            dillOutputPath: stringArg('output-dill'),
+            flutterProject: flutterProject,
+            nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
+            analytics: analytics,
+            logger: _logger,
+          )
+        : ColdRunner(
+            flutterDevices,
+            target: targetFile,
+            debuggingOptions: debuggingOptions,
+            dartBuilder: hookRunner,
+          );
   }
 
   Future<void> _validateArguments() async {}
@@ -518,6 +514,7 @@ class HotRunnerFactory {
     FlutterProject? flutterProject,
     String? nativeAssetsYamlFile,
     required Analytics analytics,
+    Logger? logger,
   }) => HotRunner(
     devices,
     target: target,
@@ -530,5 +527,19 @@ class HotRunnerFactory {
     stayResident: stayResident,
     nativeAssetsYamlFile: nativeAssetsYamlFile,
     analytics: analytics,
+    dartBuilder: hookRunner,
+    logger: logger,
   );
+}
+
+@visibleForTesting
+Stream<T> streamWithCallbackOnFirstItem<T>(Stream<T> stream, void Function() callback) {
+  var called = false;
+  return stream.map((i) {
+    if (!called) {
+      callback();
+      called = true;
+    }
+    return i;
+  });
 }

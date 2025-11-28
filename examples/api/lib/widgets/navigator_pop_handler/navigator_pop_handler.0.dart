@@ -80,12 +80,13 @@ class _NestedNavigatorsPage extends StatefulWidget {
 }
 
 class _NestedNavigatorsPageState extends State<_NestedNavigatorsPage> {
-  final GlobalKey<NavigatorState> _nestedNavigatorKey = GlobalKey<NavigatorState>();
+  final GlobalKey<NavigatorState> _nestedNavigatorKey =
+      GlobalKey<NavigatorState>();
 
   @override
   Widget build(BuildContext context) {
-    return NavigatorPopHandler(
-      onPop: () {
+    return NavigatorPopHandler<void>(
+      onPopWithResult: (void result) {
         _nestedNavigatorKey.currentState!.maybePop();
       },
       child: Navigator(
@@ -97,16 +98,16 @@ class _NestedNavigatorsPageState extends State<_NestedNavigatorsPage> {
           return switch (settings.name) {
             'nested_navigators/one' => MaterialPageRoute<void>(
               settings: const RouteSettings(name: 'nested_navigators/one'),
-              builder:
-                  (BuildContext context) => _NestedNavigatorsPageOne(
-                    onBack: () {
-                      Navigator.of(rootContext).pop();
-                    },
-                  ),
+              builder: (BuildContext context) => _NestedNavigatorsPageOne(
+                onBack: () {
+                  Navigator.of(rootContext).pop();
+                },
+              ),
             ),
             'nested_navigators/one/another_one' => MaterialPageRoute<void>(
               settings: const RouteSettings(name: 'nested_navigators/one'),
-              builder: (BuildContext context) => const _NestedNavigatorsPageTwo(),
+              builder: (BuildContext context) =>
+                  const _NestedNavigatorsPageTwo(),
             ),
             _ => MaterialPageRoute<void>(
               settings: const RouteSettings(name: 'unknown_page'),
@@ -138,7 +139,9 @@ class _NestedNavigatorsPageOne extends StatelessWidget {
             const Text('A system back here returns to the home page.'),
             TextButton(
               onPressed: () {
-                Navigator.of(context).restorablePushNamed('nested_navigators/one/another_one');
+                Navigator.of(
+                  context,
+                ).restorablePushNamed('nested_navigators/one/another_one');
               },
               child: const Text('Go to another route in this nested Navigator'),
             ),
@@ -168,7 +171,9 @@ class _NestedNavigatorsPageTwo extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text('Nested Navigators Page Two'),
-            const Text('A system back here will go back to Nested Navigators Page One'),
+            const Text(
+              'A system back here will go back to Nested Navigators Page One',
+            ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
@@ -190,7 +195,10 @@ class _UnknownPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.grey.withBlue(180),
       body: const Center(
-        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[Text('404')]),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[Text('404')],
+        ),
       ),
     );
   }

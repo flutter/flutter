@@ -28,7 +28,7 @@ final class AssetTransformer {
        _dartBinaryPath = dartBinaryPath,
        _buildMode = buildMode;
 
-  static const String buildModeEnvVar = 'FLUTTER_BUILD_MODE';
+  static const buildModeEnvVar = 'FLUTTER_BUILD_MODE';
 
   final ProcessManager _processManager;
   final FileSystem _fileSystem;
@@ -38,7 +38,7 @@ final class AssetTransformer {
   /// The [Source] inputs that targets using this should depend on.
   ///
   /// See [Target.inputs].
-  static const List<Source> inputs = <Source>[
+  static const inputs = <Source>[
     Source.pattern(
       '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/asset_transformer.dart',
     ),
@@ -55,7 +55,7 @@ final class AssetTransformer {
   }) async {
     final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync();
 
-    int transformStep = 0;
+    var transformStep = 0;
     File nextTempFile() {
       final String basename = _fileSystem.path.basename(asset.path);
       final String ext = _fileSystem.path.extension(asset.path);
@@ -69,7 +69,7 @@ final class AssetTransformer {
     await asset.copy(tempInputFile.path);
     File tempOutputFile = nextTempFile();
 
-    final Stopwatch stopwatch = Stopwatch()..start();
+    final stopwatch = Stopwatch()..start();
     try {
       for (final (int i, AssetTransformerEntry transformer) in transformerEntries.indexed) {
         final AssetTransformationFailure? transformerFailure = await _applyTransformer(
@@ -111,18 +111,13 @@ final class AssetTransformer {
     required String workingDirectory,
     required Logger logger,
   }) async {
-    final List<String> transformerArguments = <String>[
+    final transformerArguments = <String>[
       '--input=${asset.absolute.path}',
       '--output=${output.absolute.path}',
-      ...?transformer.args,
+      ...transformer.args,
     ];
 
-    final List<String> command = <String>[
-      _dartBinaryPath,
-      'run',
-      transformer.package,
-      ...transformerArguments,
-    ];
+    final command = <String>[_dartBinaryPath, 'run', transformer.package, ...transformerArguments];
 
     // Delete the output file if it already exists for whatever reason.
     // With this, we can check for the existence of the file after transformation
@@ -135,8 +130,8 @@ final class AssetTransformer {
       workingDirectory: workingDirectory,
       environment: <String, String>{AssetTransformer.buildModeEnvVar: _buildMode.cliName},
     );
-    final String stdout = result.stdout as String;
-    final String stderr = result.stderr as String;
+    final stdout = result.stdout as String;
+    final stderr = result.stderr as String;
 
     if (result.exitCode != 0) {
       return AssetTransformationFailure(
@@ -175,7 +170,7 @@ final class DevelopmentAssetTransformer {
 
   final AssetTransformer _transformer;
   final FileSystem _fileSystem;
-  final Pool _transformationPool = Pool(4);
+  final _transformationPool = Pool(4);
   final Logger _logger;
 
   /// Re-transforms an asset and returns a [DevFSContent] that should be synced
@@ -193,7 +188,7 @@ final class DevelopmentAssetTransformer {
     );
     ErrorHandlingFileSystem.deleteIfExists(output);
     File? inputFile;
-    bool cleanupInput = false;
+    var cleanupInput = false;
     Uint8List result;
     PoolResource? resource;
     try {

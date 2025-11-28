@@ -4,6 +4,63 @@
 
 #include "flutter/shell/platform/embedder/embedder_semantics_update.h"
 
+namespace {
+FlutterCheckState ToFlutterCheckState(flutter::SemanticsCheckState state) {
+  switch (state) {
+    case flutter::SemanticsCheckState::kNone:
+      return kFlutterCheckStateNone;
+    case flutter::SemanticsCheckState::kTrue:
+      return kFlutterCheckStateTrue;
+    case flutter::SemanticsCheckState::kFalse:
+      return kFlutterCheckStateFalse;
+    case flutter::SemanticsCheckState::kMixed:
+      return kFlutterCheckStateMixed;
+  }
+}
+
+FlutterTristate ToFlutterTristate(flutter::SemanticsTristate state) {
+  switch (state) {
+    case flutter::SemanticsTristate::kNone:
+      return kFlutterTristateNone;
+    case flutter::SemanticsTristate::kTrue:
+      return kFlutterTristateTrue;
+    case flutter::SemanticsTristate::kFalse:
+      return kFlutterTristateFalse;
+  }
+}
+
+std::unique_ptr<FlutterSemanticsFlags> ConvertToFlutterSemanticsFlags(
+    const flutter::SemanticsFlags& source) {
+  return std::make_unique<FlutterSemanticsFlags>(FlutterSemanticsFlags{
+      .is_checked = ToFlutterCheckState(source.isChecked),
+      .is_selected = ToFlutterTristate(source.isSelected),
+      .is_enabled = ToFlutterTristate(source.isEnabled),
+      .is_toggled = ToFlutterTristate(source.isToggled),
+      .is_expanded = ToFlutterTristate(source.isExpanded),
+      .is_required = ToFlutterTristate(source.isRequired),
+      .is_focused = ToFlutterTristate(source.isFocused),
+      .is_button = source.isButton,
+      .is_text_field = source.isTextField,
+      .is_in_mutually_exclusive_group = source.isInMutuallyExclusiveGroup,
+      .is_header = source.isHeader,
+      .is_obscured = source.isObscured,
+      .scopes_route = source.scopesRoute,
+      .names_route = source.namesRoute,
+      .is_hidden = source.isHidden,
+      .is_image = source.isImage,
+      .is_live_region = source.isLiveRegion,
+      .has_implicit_scrolling = source.hasImplicitScrolling,
+      .is_multiline = source.isMultiline,
+      .is_read_only = source.isReadOnly,
+      .is_link = source.isLink,
+      .is_slider = source.isSlider,
+      .is_keyboard_key = source.isKeyboardKey,
+      .is_accessibility_focus_blocked = source.isAccessibilityFocusBlocked,
+  });
+}
+
+}  // namespace
+
 namespace flutter {
 
 EmbedderSemanticsUpdate::EmbedderSemanticsUpdate(
@@ -26,6 +83,109 @@ EmbedderSemanticsUpdate::EmbedderSemanticsUpdate(
   };
 }
 
+// This function is for backward compatibility and contains only a subset of
+// the flags. New flags will be added only to `FlutterSemanticsFlags`, not
+// `FlutterSemanticsFlag`.
+FlutterSemanticsFlag SemanticsFlagsToInt(const SemanticsFlags& flags) {
+  int result = 0;
+
+  if (flags.isChecked != SemanticsCheckState::kNone) {
+    result |= (1 << 0);
+  }
+  if (flags.isChecked == SemanticsCheckState::kTrue) {
+    result |= (1 << 1);
+  }
+  if (flags.isSelected == SemanticsTristate::kTrue) {
+    result |= (1 << 2);
+  }
+  if (flags.isButton) {
+    result |= (1 << 3);
+  }
+  if (flags.isTextField) {
+    result |= (1 << 4);
+  }
+  if (flags.isFocused == SemanticsTristate::kTrue) {
+    result |= (1 << 5);
+  }
+  if (flags.isEnabled != SemanticsTristate::kNone) {
+    result |= (1 << 6);
+  }
+  if (flags.isEnabled == SemanticsTristate::kTrue) {
+    result |= (1 << 7);
+  }
+  if (flags.isInMutuallyExclusiveGroup) {
+    result |= (1 << 8);
+  }
+  if (flags.isHeader) {
+    result |= (1 << 9);
+  }
+  if (flags.isObscured) {
+    result |= (1 << 10);
+  }
+  if (flags.scopesRoute) {
+    result |= (1 << 11);
+  }
+  if (flags.namesRoute) {
+    result |= (1 << 12);
+  }
+  if (flags.isHidden) {
+    result |= (1 << 13);
+  }
+  if (flags.isImage) {
+    result |= (1 << 14);
+  }
+  if (flags.isLiveRegion) {
+    result |= (1 << 15);
+  }
+  if (flags.isToggled != SemanticsTristate::kNone) {
+    result |= (1 << 16);
+  }
+  if (flags.isToggled == SemanticsTristate::kTrue) {
+    result |= (1 << 17);
+  }
+  if (flags.hasImplicitScrolling) {
+    result |= (1 << 18);
+  }
+  if (flags.isMultiline) {
+    result |= (1 << 19);
+  }
+  if (flags.isReadOnly) {
+    result |= (1 << 20);
+  }
+  if (flags.isFocused != SemanticsTristate::kNone) {
+    result |= (1 << 21);
+  }
+  if (flags.isLink) {
+    result |= (1 << 22);
+  }
+  if (flags.isSlider) {
+    result |= (1 << 23);
+  }
+  if (flags.isKeyboardKey) {
+    result |= (1 << 24);
+  }
+  if (flags.isChecked == SemanticsCheckState::kMixed) {
+    result |= (1 << 25);
+  }
+  if (flags.isExpanded != SemanticsTristate::kNone) {
+    result |= (1 << 26);
+  }
+  if (flags.isExpanded == SemanticsTristate::kTrue) {
+    result |= (1 << 27);
+  }
+  if (flags.isSelected != SemanticsTristate::kNone) {
+    result |= (1 << 28);
+  }
+  if (flags.isRequired != SemanticsTristate::kNone) {
+    result |= (1 << 29);
+  }
+  if (flags.isRequired == SemanticsTristate::kTrue) {
+    result |= (1 << 30);
+  }
+
+  return static_cast<FlutterSemanticsFlag>(result);
+}
+
 void EmbedderSemanticsUpdate::AddNode(const SemanticsNode& node) {
   SkMatrix transform = node.transform.asM33();
   FlutterTransformation flutter_transform{
@@ -41,7 +201,7 @@ void EmbedderSemanticsUpdate::AddNode(const SemanticsNode& node) {
   nodes_.push_back({
       sizeof(FlutterSemanticsNode),
       node.id,
-      static_cast<FlutterSemanticsFlag>(node.flags),
+      SemanticsFlagsToInt(node.flags),
       static_cast<FlutterSemanticsAction>(node.actions),
       node.textSelectionBase,
       node.textSelectionExtent,
@@ -50,8 +210,8 @@ void EmbedderSemanticsUpdate::AddNode(const SemanticsNode& node) {
       node.scrollPosition,
       node.scrollExtentMax,
       node.scrollExtentMin,
-      node.elevation,
-      node.thickness,
+      0.0,
+      0.0,
       node.label.c_str(),
       node.hint.c_str(),
       node.value.c_str(),
@@ -92,6 +252,7 @@ EmbedderSemanticsUpdate2::EmbedderSemanticsUpdate2(
     const SemanticsNodeUpdates& nodes,
     const CustomAccessibilityActionUpdates& actions) {
   nodes_.reserve(nodes.size());
+  flags_.reserve(nodes.size());
   node_pointers_.reserve(nodes.size());
   actions_.reserve(actions.size());
   action_pointers_.reserve(actions.size());
@@ -138,11 +299,12 @@ void EmbedderSemanticsUpdate2::AddNode(const SemanticsNode& node) {
       CreateStringAttributes(node.increasedValueAttributes);
   auto decreased_value_attributes =
       CreateStringAttributes(node.decreasedValueAttributes);
+  flags_.emplace_back(ConvertToFlutterSemanticsFlags(node.flags));
 
   nodes_.push_back({
       sizeof(FlutterSemanticsNode2),
       node.id,
-      static_cast<FlutterSemanticsFlag>(node.flags),
+      SemanticsFlagsToInt(node.flags),
       static_cast<FlutterSemanticsAction>(node.actions),
       node.textSelectionBase,
       node.textSelectionExtent,
@@ -151,8 +313,8 @@ void EmbedderSemanticsUpdate2::AddNode(const SemanticsNode& node) {
       node.scrollPosition,
       node.scrollExtentMax,
       node.scrollExtentMin,
-      node.elevation,
-      node.thickness,
+      0.0,
+      0.0,
       node.label.c_str(),
       node.hint.c_str(),
       node.value.c_str(),
@@ -179,6 +341,9 @@ void EmbedderSemanticsUpdate2::AddNode(const SemanticsNode& node) {
       increased_value_attributes.attributes,
       decreased_value_attributes.count,
       decreased_value_attributes.attributes,
+      flags_.back().get(),
+      node.headingLevel,
+      node.identifier.c_str(),
   });
 }
 

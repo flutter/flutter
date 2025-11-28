@@ -113,10 +113,7 @@ void main() {
   });
 
   testWidgets('copyWith works', (WidgetTester tester) async {
-    const CupertinoThemeData originalTheme = CupertinoThemeData(
-      brightness: Brightness.dark,
-      applyThemeToAll: true,
-    );
+    const originalTheme = CupertinoThemeData(brightness: Brightness.dark, applyThemeToAll: true);
 
     final CupertinoThemeData theme = await testTheme(
       tester,
@@ -139,15 +136,17 @@ void main() {
     WidgetTester tester,
   ) async {
     const CupertinoDynamicColor primaryColor = CupertinoColors.systemRed;
-    const CupertinoThemeData themeData = CupertinoThemeData(primaryColor: primaryColor);
+    const themeData = CupertinoThemeData(primaryColor: primaryColor);
 
     final IconThemeData resultingIconTheme = await testIconTheme(tester, themeData);
 
     expect(resultingIconTheme.color, isSameColorAs(primaryColor));
 
     // Works in dark mode if primaryColor is a CupertinoDynamicColor.
-    final Color darkColor =
-        (await testIconTheme(tester, themeData.copyWith(brightness: Brightness.dark))).color!;
+    final Color darkColor = (await testIconTheme(
+      tester,
+      themeData.copyWith(brightness: Brightness.dark),
+    )).color!;
 
     expect(darkColor, isSameColorAs(primaryColor.darkColor));
   });
@@ -170,11 +169,12 @@ void main() {
   });
 
   testWidgets('CupertinoTheme diagnostics', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const CupertinoThemeData().debugFillProperties(builder);
 
-    final Set<String> description =
-        builder.properties.map((DiagnosticsNode node) => node.name.toString()).toSet();
+    final Set<String> description = builder.properties
+        .map((DiagnosticsNode node) => node.name.toString())
+        .toSet();
 
     expect(
       setEquals(description, <String>{
@@ -193,6 +193,7 @@ void main() {
         'navActionTextStyle',
         'pickerTextStyle',
         'dateTimePickerTextStyle',
+        'selectionHandleColor',
       }),
       isTrue,
     );
@@ -210,7 +211,7 @@ void main() {
   });
 
   testWidgets('CupertinoThemeData equality', (WidgetTester tester) async {
-    const CupertinoThemeData a = CupertinoThemeData(brightness: Brightness.dark);
+    const a = CupertinoThemeData(brightness: Brightness.dark);
     final CupertinoThemeData b = a.copyWith();
     final CupertinoThemeData c = a.copyWith(brightness: Brightness.light);
     expect(a, equals(b));
@@ -219,6 +220,14 @@ void main() {
     expect(c, isNot(equals(a)));
     expect(b, isNot(equals(c)));
     expect(c, isNot(equals(b)));
+  });
+
+  testWidgets('NoDefaultCupertinoThemeData equality', (WidgetTester tester) async {
+    const a = NoDefaultCupertinoThemeData();
+    final NoDefaultCupertinoThemeData b = a.copyWith();
+    final NoDefaultCupertinoThemeData c = a.copyWith(brightness: Brightness.light);
+    expect(a, equals(b));
+    expect(a, isNot(c));
   });
 
   late Brightness currentBrightness;
@@ -237,7 +246,7 @@ void main() {
 
   void dynamicColorsTestGroup() {
     testWidgets('CupertinoTheme.of resolves colors', (WidgetTester tester) async {
-      final CupertinoThemeData data = CupertinoThemeData(
+      final data = CupertinoThemeData(
         brightness: currentBrightness,
         primaryColor: CupertinoColors.systemRed,
       );
@@ -249,12 +258,9 @@ void main() {
 
     testWidgets('CupertinoTheme.of resolves default values', (WidgetTester tester) async {
       const CupertinoDynamicColor primaryColor = CupertinoColors.systemRed;
-      final CupertinoThemeData data = CupertinoThemeData(
-        brightness: currentBrightness,
-        primaryColor: primaryColor,
-      );
+      final data = CupertinoThemeData(brightness: currentBrightness, primaryColor: primaryColor);
 
-      const CupertinoDynamicColor barBackgroundColor = CupertinoDynamicColor.withBrightness(
+      const barBackgroundColor = CupertinoDynamicColor.withBrightness(
         color: Color(0xF0F9F9F9),
         darkColor: Color(0xF01D1D1D),
       );
@@ -264,6 +270,7 @@ void main() {
       colorMatches(theme.primaryContrastingColor, CupertinoColors.white);
       colorMatches(theme.barBackgroundColor, barBackgroundColor);
       colorMatches(theme.scaffoldBackgroundColor, CupertinoColors.systemBackground);
+      colorMatches(theme.selectionHandleColor, CupertinoColors.systemBlue);
       colorMatches(theme.textTheme.textStyle.color, CupertinoColors.label);
       colorMatches(theme.textTheme.actionTextStyle.color, primaryColor);
       colorMatches(theme.textTheme.tabLabelTextStyle.color, CupertinoColors.inactiveGray);

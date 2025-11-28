@@ -28,8 +28,8 @@ void main() {
     });
 
     testUsingContext('General Info Project Validator', () async {
-      final BufferLogger loggerTest = BufferLogger.test();
-      final AnalyzeCommand command = AnalyzeCommand(
+      final loggerTest = BufferLogger.test();
+      final command = AnalyzeCommand(
         artifacts: globals.artifacts!,
         fileSystem: fileSystem,
         logger: loggerTest,
@@ -49,17 +49,17 @@ void main() {
         '../../dev/integration_tests/flutter_gallery',
       ]);
 
-      const String expected =
+      const expected =
           '\n'
-          '┌───────────────────────────────────────────────────────────────────┐\n'
-          '│ General Info                                                      │\n'
-          '│ [✓] App Name: flutter_gallery                                     │\n'
-          '│ [✓] Supported Platforms: android, ios, web, macos, linux, windows │\n'
-          '│ [✓] Is Flutter Package: yes                                       │\n'
-          '│ [✓] Uses Material Design: yes                                     │\n'
-          '│ [✓] Is Plugin: no                                                 │\n'
-          '│ [✓] Java/Gradle/Android Gradle Plugin: ${AndroidProject.validJavaGradleAgpString} │\n'
-          '└───────────────────────────────────────────────────────────────────┘\n';
+          '┌───────────────────────────────────────────────────────────────────────────┐\n'
+          '│ General Info                                                              │\n'
+          '│ [✓] App Name: flutter_gallery                                             │\n'
+          '│ [✓] Supported Platforms: android, ios, web, macos, linux, windows         │\n'
+          '│ [✓] Is Flutter Package: yes                                               │\n'
+          '│ [✓] Uses Material Design: yes                                             │\n'
+          '│ [✓] Is Plugin: no                                                         │\n'
+          '│ [✓] Java/Gradle/KGP/Android Gradle Plugin: ${AndroidProject.validJavaGradleAgpKgpString} │\n'
+          '└───────────────────────────────────────────────────────────────────────────┘\n';
 
       expect(loggerTest.statusText, contains(expected));
     });
@@ -96,8 +96,7 @@ void main() {
       expect(result.stdout, isNot(contains(',\n}'))); // No trailing commas allowed in JSON
       expect((result.stdout as String).endsWith('}\n'), true);
 
-      final Map<String, dynamic> decoded =
-          jsonDecode(result.stdout as String) as Map<String, dynamic>;
+      final decoded = jsonDecode(result.stdout as String) as Map<String, dynamic>;
 
       expect(decoded.containsKey('FlutterProject.android.exists'), true);
       expect(decoded.containsKey('FlutterProject.ios.exists'), true);

@@ -7,7 +7,6 @@ import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
@@ -278,7 +277,7 @@ void testMain() {
 
   test('FragmentProgram can be created from JSON IPLR bundle', () {
     final Uint8List data = utf8.encode(kJsonIPLR);
-    final CkFragmentProgram program = CkFragmentProgram.fromBytes('test', data);
+    final program = CkFragmentProgram.fromBytes('test', data);
 
     expect(program.effect, isNotNull);
     expect(program.floatCount, 32);
@@ -287,7 +286,7 @@ void testMain() {
     expect(program.name, 'test');
 
     {
-      final CkFragmentShader shader = program.fragmentShader() as CkFragmentShader;
+      final shader = program.fragmentShader() as CkFragmentShader;
 
       shader.setFloat(0, 4);
       expect(reason: 'SkShaders are created lazily', shader.ref, isNull);
@@ -304,7 +303,7 @@ void testMain() {
     }
 
     {
-      final CkFragmentShader shader = program.fragmentShader() as CkFragmentShader;
+      final shader = program.fragmentShader() as CkFragmentShader;
       shader.setFloat(0, 5);
 
       final SkShader skShader1 = shader.getSkShader(ui.FilterQuality.none);
@@ -328,6 +327,9 @@ void testMain() {
         isNot(same(skShader2)),
       );
 
+      final ui.UniformFloatSlot slot = shader.getUniformFloat('u_rotation1', 1);
+      expect(slot.shaderIndex, equals(3));
+
       shader.dispose();
       expect(shader.debugDisposed, true);
       expect(
@@ -341,7 +343,7 @@ void testMain() {
 
   test('FragmentProgram can be created from JSON IPLR bundle with arrays and matrices', () {
     final Uint8List data = utf8.encode(kJsonArrayIPLR);
-    final CkFragmentProgram program = CkFragmentProgram.fromBytes('test', data);
+    final program = CkFragmentProgram.fromBytes('test', data);
 
     expect(program.effect, isNotNull);
     expect(

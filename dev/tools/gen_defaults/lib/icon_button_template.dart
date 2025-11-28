@@ -21,11 +21,11 @@ class IconButtonTemplate extends TokenTemplate {
       case 'md.comp.filled-tonal-icon-button':
         return '''
 
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return ${componentColor('$tokenGroup.disabled.container')};
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return ${componentColor('$tokenGroup.selected.container')};
       }
       if (toggleable) { // toggleable but unselected case
@@ -36,14 +36,14 @@ class IconButtonTemplate extends TokenTemplate {
       case 'md.comp.outlined-icon-button':
         return '''
 
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        if (states.contains(MaterialState.selected)) {
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
+        if (states.contains(WidgetState.selected)) {
           return ${componentColor('$tokenGroup.disabled.selected.container')};
         }
         return Colors.transparent;
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return ${componentColor('$tokenGroup.selected.container')};
       }
       return Colors.transparent;
@@ -60,11 +60,11 @@ class IconButtonTemplate extends TokenTemplate {
       case 'md.comp.filled-tonal-icon-button':
         return '''
 
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return ${componentColor('$tokenGroup.disabled.icon')};
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return ${componentColor('$tokenGroup.toggle.selected.icon')};
       }
       if (toggleable) { // toggleable but unselected case
@@ -76,11 +76,11 @@ class IconButtonTemplate extends TokenTemplate {
       case 'md.comp.icon-button':
         return '''
 
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return ${componentColor('$tokenGroup.disabled.icon')};
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return ${componentColor('$tokenGroup.selected.icon')};
       }
       return ${componentColor('$tokenGroup.unselected.icon')};
@@ -97,61 +97,61 @@ class IconButtonTemplate extends TokenTemplate {
       case 'md.comp.filled-tonal-icon-button':
         return '''
 
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
-        if (states.contains(MaterialState.pressed)) {
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
+        if (states.contains(WidgetState.pressed)) {
           return ${componentColor('$tokenGroup.toggle.selected.pressed.state-layer')}.withOpacity(${opacity('$tokenGroup.pressed.state-layer.opacity')});
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return ${componentColor('$tokenGroup.toggle.selected.hover.state-layer')}.withOpacity(${opacity('$tokenGroup.hover.state-layer.opacity')});
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return ${componentColor('$tokenGroup.toggle.selected.focus.state-layer')}.withOpacity(${opacity('$tokenGroup.focus.state-layer.opacity')});
         }
       }
       if (toggleable) { // toggleable but unselected case
-        if (states.contains(MaterialState.pressed)) {
+        if (states.contains(WidgetState.pressed)) {
           return ${componentColor('$tokenGroup.toggle.unselected.pressed.state-layer')}.withOpacity(${opacity('$tokenGroup.pressed.state-layer.opacity')});
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return ${componentColor('$tokenGroup.toggle.unselected.hover.state-layer')}.withOpacity(${opacity('$tokenGroup.hover.state-layer.opacity')});
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return ${componentColor('$tokenGroup.toggle.unselected.focus.state-layer')}.withOpacity(${opacity('$tokenGroup.focus.state-layer.opacity')});
         }
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return ${componentColor('$tokenGroup.pressed.state-layer')};
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return ${componentColor('$tokenGroup.hover.state-layer')};
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return ${componentColor('$tokenGroup.focus.state-layer')};
       }
       return Colors.transparent;
     })''';
       case 'md.comp.outlined-icon-button':
         return '''
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
-        if (states.contains(MaterialState.pressed)) {
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
+        if (states.contains(WidgetState.pressed)) {
           return ${componentColor('$tokenGroup.selected.pressed.state-layer')}.withOpacity(${opacity('$tokenGroup.pressed.state-layer.opacity')});
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return ${componentColor('$tokenGroup.selected.hover.state-layer')}.withOpacity(${opacity('$tokenGroup.hover.state-layer.opacity')});
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return ${componentColor('$tokenGroup.selected.focus.state-layer')}.withOpacity(${opacity('$tokenGroup.focus.state-layer.opacity')});
         }
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return ${componentColor('$tokenGroup.unselected.pressed.state-layer')}.withOpacity(${opacity('$tokenGroup.pressed.state-layer.opacity')});
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return ${componentColor('$tokenGroup.unselected.hover.state-layer')}.withOpacity(${opacity('$tokenGroup.hover.state-layer.opacity')});
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return ${componentColor('$tokenGroup.unselected.focus.state-layer')}.withOpacity(${opacity('$tokenGroup.focus.state-layer.opacity')});
       }
       return Colors.transparent;
@@ -159,25 +159,25 @@ class IconButtonTemplate extends TokenTemplate {
       case 'md.comp.icon-button':
         return '''
 
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
-        if (states.contains(MaterialState.pressed)) {
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
+        if (states.contains(WidgetState.pressed)) {
           return ${componentColor('$tokenGroup.selected.pressed.state-layer')};
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return ${componentColor('$tokenGroup.selected.hover.state-layer')};
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return ${componentColor('$tokenGroup.selected.focus.state-layer')};
         }
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return ${componentColor('$tokenGroup.unselected.pressed.state-layer')};
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return ${componentColor('$tokenGroup.unselected.hover.state-layer')};
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return ${componentColor('$tokenGroup.unselected.focus.state-layer')};
       }
       return Colors.transparent;
@@ -217,11 +217,11 @@ class IconButtonTemplate extends TokenTemplate {
     if (tokenAvailable('$tokenGroup.unselected.outline.color')) {
       return '''
 
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return null;
       } else {
-        if (states.contains(MaterialState.disabled)) {
+        if (states.contains(WidgetState.disabled)) {
           return BorderSide(color: ${componentColor('$tokenGroup.disabled.unselected.outline')});
         }
         return BorderSide(color: ${componentColor('$tokenGroup.unselected.outline')});
@@ -240,7 +240,8 @@ class IconButtonTemplate extends TokenTemplate {
   }
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends ButtonStyle {
   _${blockName}DefaultsM3(this.context, this.toggleable)
     : super(
@@ -256,57 +257,51 @@ class _${blockName}DefaultsM3 extends ButtonStyle {
   // No default text style
 
   @override
-  MaterialStateProperty<Color?>? get backgroundColor =>${_backgroundColor()};
+  WidgetStateProperty<Color?>? get backgroundColor =>${_backgroundColor()};
 
   @override
-  MaterialStateProperty<Color?>? get foregroundColor =>${_foregroundColor()};
+  WidgetStateProperty<Color?>? get foregroundColor =>${_foregroundColor()};
 
  @override
-  MaterialStateProperty<Color?>? get overlayColor =>${_overlayColor()};
+  WidgetStateProperty<Color?>? get overlayColor =>${_overlayColor()};
 
   @override
-  MaterialStateProperty<double>? get elevation =>
+  WidgetStateProperty<double>? get elevation =>
     const MaterialStatePropertyAll<double>(0.0);
 
   @override
-  MaterialStateProperty<Color>? get shadowColor =>
+  WidgetStateProperty<Color>? get shadowColor =>
     ${_elevationColor("$tokenGroup.container.shadow-color")};
 
   @override
-  MaterialStateProperty<Color>? get surfaceTintColor =>
+  WidgetStateProperty<Color>? get surfaceTintColor =>
     ${_elevationColor("$tokenGroup.container.surface-tint-layer.color")};
 
   @override
-  MaterialStateProperty<EdgeInsetsGeometry>? get padding =>
+  WidgetStateProperty<EdgeInsetsGeometry>? get padding =>
     const MaterialStatePropertyAll<EdgeInsetsGeometry>(EdgeInsets.all(8.0));
 
   @override
-  MaterialStateProperty<Size>? get minimumSize =>${_minimumSize()};
+  WidgetStateProperty<Size>? get minimumSize =>${_minimumSize()};
 
   // No default fixedSize
 
   @override
-  MaterialStateProperty<Size>? get maximumSize =>
+  WidgetStateProperty<Size>? get maximumSize =>
     const MaterialStatePropertyAll<Size>(Size.infinite);
 
   @override
-  MaterialStateProperty<double>? get iconSize =>
+  WidgetStateProperty<double>? get iconSize =>
     const MaterialStatePropertyAll<double>(${getToken("$tokenGroup.icon.size")});
 
   @override
-  MaterialStateProperty<BorderSide?>? get side =>${_side()};
+  WidgetStateProperty<BorderSide?>? get side =>${_side()};
 
   @override
-  MaterialStateProperty<OutlinedBorder>? get shape =>${_shape()};
+  WidgetStateProperty<OutlinedBorder>? get shape =>${_shape()};
 
   @override
-  MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return SystemMouseCursors.basic;
-      }
-      return SystemMouseCursors.click;
-    });
+  WidgetStateProperty<MouseCursor?>? get mouseCursor => WidgetStateMouseCursor.adaptiveClickable;
 
   @override
   VisualDensity? get visualDensity => VisualDensity.standard;

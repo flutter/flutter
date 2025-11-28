@@ -40,14 +40,22 @@ class _DrawerExampleState extends State<DrawerExample> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(title: const Text('Drawer Demo')),
-      body: Center(child: ElevatedButton(onPressed: _openDrawer, child: const Text('Open Drawer'))),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: _openDrawer,
+          child: const Text('Open Drawer'),
+        ),
+      ),
       drawer: Drawer(
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               const Text('This is the Drawer'),
-              ElevatedButton(onPressed: _closeDrawer, child: const Text('Close Drawer')),
+              ElevatedButton(
+                onPressed: _closeDrawer,
+                child: const Text('Close Drawer'),
+              ),
             ],
           ),
         ),

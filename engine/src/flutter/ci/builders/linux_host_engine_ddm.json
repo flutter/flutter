@@ -7,6 +7,9 @@
         "Tests to run on linux hosts should go in one of the other linux_ build ",
         "definition files."
     ],
+    "luci_flags": {
+      "upload_content_hash": true
+    },
     "builds": [
         {
             "archives": [
@@ -15,7 +18,7 @@
                     "base_path": "out/ci/host_debug_ddm/zip_archives/",
                     "type": "gcs",
                     "include_paths": [
-                        "out/ci/host_debug_ddm/zip_archives/dart-sdk-linux-x64-ddm.zip"
+                        "out/ci/host_debug_ddm/zip_archives/linux-x64-ddm/artifacts.zip"
                     ],
                     "realm": "production"
                 }
@@ -34,32 +37,20 @@
                 "ci/host_debug_ddm",
                 "--runtime-mode",
                 "debug",
-                "--no-prebuilt-dart-sdk",
-                "--gn-args=dart_dynamic_modules=true",
+                "--prebuilt-dart-sdk",
+                "--no-lto",
                 "--rbe",
-                "--no-goma"
+                "--no-goma",
+                "--gn-args=dart_dynamic_modules=true"
             ],
             "name": "ci/host_debug_ddm",
-            "description": "Produces experimental debug mode Linux host-side tooling with dynamic modules enabled.",
+            "description": "Produces debug mode Linux host-side tooling with dynamic modules enabled.",
             "ninja": {
                 "config": "ci/host_debug_ddm",
                 "targets": [
-                    "flutter/build/archives:dart_sdk_archive"
+                    "flutter/build/archives:artifacts"
                 ]
             }
         }
-    ],
-    "generators": {
-        "tasks": [
-            {
-                "name": "Verify-export-symbols-release-binaries",
-                "parameters": [
-                    "src/out/ci",
-                    "src/flutter/buildtools"
-                ],
-                "script": "flutter/testing/symbols/verify_exported.dart",
-                "language": "dart"
-            }
-        ]
-    }
+    ]
 }

@@ -12,13 +12,13 @@
 #include "flutter/impeller/golden_tests/golden_digest.h"
 #include "flutter/impeller/golden_tests/metal_screenshotter.h"
 #include "flutter/impeller/golden_tests/vulkan_screenshotter.h"
-#include "flutter/third_party/abseil-cpp/absl/base/no_destructor.h"
 #include "fml/closure.h"
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "impeller/typographer/typographer_context.h"
+#include "third_party/abseil-cpp/absl/base/no_destructor.h"
 
 #define GLFW_INCLUDE_NONE
 #include "third_party/glfw/include/GLFW/glfw3.h"
@@ -132,6 +132,11 @@ void GoldenPlaygroundTest::SetTypographerContext(
 
 void GoldenPlaygroundTest::TearDown() {
   ASSERT_FALSE(dlopen("/usr/local/lib/libMoltenVK.dylib", RTLD_NOLOAD));
+
+  auto context = GetContext();
+  if (context) {
+    context->DisposeThreadLocalCachedResources();
+  }
 }
 
 namespace {
@@ -222,10 +227,16 @@ bool GoldenPlaygroundTest::OpenPlaygroundHere(
   AiksContext renderer(GetContext(), typographer_context_);
 
   std::unique_ptr<testing::Screenshot> screenshot;
+  Point content_scale =
+      pimpl_->screenshotter->GetPlayground().GetContentScale();
+
+  ISize physical_window_size(
+      std::round(pimpl_->window_size.width * content_scale.x),
+      std::round(pimpl_->window_size.height * content_scale.y));
   for (int i = 0; i < 2; ++i) {
     auto display_list = callback();
     auto texture =
-        DisplayListToTexture(display_list, pimpl_->window_size, renderer);
+        DisplayListToTexture(display_list, physical_window_size, renderer);
     screenshot = pimpl_->screenshotter->MakeScreenshot(renderer, texture);
   }
   return SaveScreenshot(std::move(screenshot));
@@ -274,6 +285,9 @@ RuntimeStage::Map GoldenPlaygroundTest::OpenAssetAsRuntimeStage(
 }
 
 std::shared_ptr<Context> GoldenPlaygroundTest::GetContext() const {
+  if (!pimpl_->screenshotter) {
+    return nullptr;
+  }
   return pimpl_->screenshotter->GetPlayground().GetContext();
 }
 
@@ -320,9 +334,14 @@ fml::Status GoldenPlaygroundTest::SetCapabilities(
 std::unique_ptr<testing::Screenshot> GoldenPlaygroundTest::MakeScreenshot(
     const sk_sp<flutter::DisplayList>& list) {
   AiksContext renderer(GetContext(), typographer_context_);
+  Point content_scale =
+      pimpl_->screenshotter->GetPlayground().GetContentScale();
 
+  ISize physical_window_size(
+      std::round(pimpl_->window_size.width * content_scale.x),
+      std::round(pimpl_->window_size.height * content_scale.y));
   return pimpl_->screenshotter->MakeScreenshot(
-      renderer, DisplayListToTexture(list, pimpl_->window_size, renderer));
+      renderer, DisplayListToTexture(list, physical_window_size, renderer));
 }
 
 }  // namespace impeller

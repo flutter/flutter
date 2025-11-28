@@ -191,6 +191,29 @@ These APIs can take a variety of forms, including specific methods to check indi
 
 *We currently have many cases of APIs that do not follow this guidance because they predate it. This is technical debt, rather than something that should be pointed to as a justification for adding new APIs that do not.*
 
+### Documentation
+
+In federated plugins, platform-specific behaviors are controlled by the platform implementation packages, so documentation about platform-specific behaviors should, when at all possible, only be in the platform implementation packages. Any cross-package platform documentation is very likely to become stale, or be misleading depending on the resolved package versions. It also does not scale to unendorsed implementations. Some best practices:
+- READMEs of app-facing packages should delegate documentation of platform-specific details to implementation package READMEs, where details can be updated in sync with the implementation, and link to those platform-specific READMEs. [`google_sign_in` configuration](https://pub.dev/packages/google_sign_in#setup) is an example of this pattern.
+- Do not make definitive statements about platform support in documentation comments in either the app-facing or platform interface packages. For example, if a parameter supports Android but not iOS it is much better to say "May not be supported on all platforms" (and if necessary include a note in the iOS README) than to say "This only works on Android", which will become incorrect if iOS support is added later and could be incorrect for any third-party unendorsed implementation.
+  - It's fine to include examples as long as the statements aren't definitive. For example, this comment from `google_sign_in`:
+    > The amount of allowable UI is up to the platform to determine, but it should be minimal. Possible examples include FedCM on the web, and One Tap on Android.
+
+    This sets expectations, without claiming that a given platform definitely will or will not behave a certain way.
+
+*We currently have cases of comments that do not follow this guidance because they predate it. This is technical debt, rather than something that should be pointed to as a justification for adding new comments that do it.*
+
+### OS version support
+
+Whenever feasible, plugins should support the same OS versions that [Flutter supports](https://docs.flutter.dev/reference/supported-platforms). When a plugin's platform implementation is updated to require a version of Flutter that drops a previously-supported OS version, the plugin should be updated to drop that version as well (for example, updating minimim versions in native build files and removing runtime version checks for versions that are no longer supported).
+
+If a new plugin is being created, or a plugin is being extended to a new platform, it's fine to require a newer OS version if there is a good reason to do so. For instance, if it would require adding significant already-deprecated codepaths that would cause a maintenance burden, it may not be worth supporting older OS verions.
+
+For existing plugins, dropping support for OS versions that are still supported by Flutter (or supported by older versions of Flutter that are still within the allowance of the package's pubspec.yaml Flutter constraint) is **very disruptive**: because `pub` does not have information about OS version support, dropping previously-supported OS versions is build breaking for clients. There are three possible approaches to dropping an OS version from an existing plugin:
+1. Wait for Flutter to drop that version, then set the minimum SDK version accordingly before/while dropping the OS version in the plugin. This means that a client still targetting the dropped version can never resolve to the version of the package that dropped support, so it is a no-op for clients. This is the **strongly preferred** approach.
+2. Drop the version as a breaking change. Keep in mind that this must be a breaking change not only for the implementation package, but also for the app-facing package when updating to use the new major version of the implementation package, so should be discussed with the ecosystem team in advance. This approach ensures that clients have appropriate breaking change notification, and have to opt in to the new version.
+3. While it is **strongly discouraged**, in rare cases we have dropped OS version support without a major version change. This should be done only if a major version change would be disruptive to the ecosystem and the OS version drop cannot be delayed until after Flutter has dropped it. For example, if continuing to support an older OS version would require continuing to use an older version of an SDK that has a significant security vulnerability, this approach could be warranted. This should only be done if the costs of one of the two previous approaches is so high that causing unexpected build breakage for plugin clients is a better outcome.
+
 ## Languages
 
 On some platforms, there are multiple native languages that can be used to write plugins; repository policy limits the languages that are used in some cases. These are currently the allowed languages for each platform:
@@ -232,7 +255,7 @@ Many packages use [`mockito`](https://pub.dev/packages/mockito) for unit tests. 
 
 ## Changing federated plugins
 
-Most of the plugins in flutter/packages are [federated](https://flutter.dev/docs/development/packages-and-plugins/developing-packages#federated-plugins). Because a logical plugin consists of multiple packages, and our CI tests using published package dependencies—in order to ensure that every PR can be published without breaking the ecosystem—changes that span multiple packages will need to be done in multiple PRs. This is common when adding new features.
+Most of the plugins in flutter/packages are [federated](https://docs.flutter.dev/packages-and-plugins/developing-packages#federated-plugins). Because a logical plugin consists of multiple packages, and our CI tests using published package dependencies—in order to ensure that every PR can be published without breaking the ecosystem—changes that span multiple packages will need to be done in multiple PRs. This is common when adding new features.
 
 We are investigating ways to streamline this, but currently the process for a multi-package PR is:
 

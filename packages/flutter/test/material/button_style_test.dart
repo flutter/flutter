@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -16,12 +15,12 @@ void main() {
 
   test('ButtonStyle lerp special cases', () {
     expect(ButtonStyle.lerp(null, null, 0), null);
-    const ButtonStyle data = ButtonStyle();
+    const data = ButtonStyle();
     expect(identical(ButtonStyle.lerp(data, data, 0.5), data), true);
   });
 
   test('ButtonStyle defaults', () {
-    const ButtonStyle style = ButtonStyle();
+    const style = ButtonStyle();
     expect(style.textStyle, isNull);
     expect(style.backgroundColor, isNull);
     expect(style.foregroundColor, isNull);
@@ -49,20 +48,19 @@ void main() {
   });
 
   testWidgets('Default ButtonStyle debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const ButtonStyle().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
 
   testWidgets('ButtonStyle debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const ButtonStyle(
       textStyle: MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 10.0)),
       backgroundColor: MaterialStatePropertyAll<Color>(Color(0xfffffff1)),
@@ -84,11 +82,10 @@ void main() {
       enableFeedback: true,
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'textStyle: WidgetStatePropertyAll(TextStyle(inherit: true, size: 10.0))',
@@ -113,50 +110,46 @@ void main() {
   });
 
   testWidgets('ButtonStyle copyWith, merge', (WidgetTester tester) async {
-    const MaterialStateProperty<TextStyle> textStyle = MaterialStatePropertyAll<TextStyle>(
+    const WidgetStateProperty<TextStyle> textStyle = MaterialStatePropertyAll<TextStyle>(
       TextStyle(fontSize: 10),
     );
-    const MaterialStateProperty<Color> backgroundColor = MaterialStatePropertyAll<Color>(
+    const WidgetStateProperty<Color> backgroundColor = MaterialStatePropertyAll<Color>(
       Color(0xfffffff1),
     );
-    const MaterialStateProperty<Color> foregroundColor = MaterialStatePropertyAll<Color>(
+    const WidgetStateProperty<Color> foregroundColor = MaterialStatePropertyAll<Color>(
       Color(0xfffffff2),
     );
-    const MaterialStateProperty<Color> overlayColor = MaterialStatePropertyAll<Color>(
+    const WidgetStateProperty<Color> overlayColor = MaterialStatePropertyAll<Color>(
       Color(0xfffffff3),
     );
-    const MaterialStateProperty<Color> shadowColor = MaterialStatePropertyAll<Color>(
+    const WidgetStateProperty<Color> shadowColor = MaterialStatePropertyAll<Color>(
       Color(0xfffffff4),
     );
-    const MaterialStateProperty<Color> surfaceTintColor = MaterialStatePropertyAll<Color>(
+    const WidgetStateProperty<Color> surfaceTintColor = MaterialStatePropertyAll<Color>(
       Color(0xfffffff5),
     );
-    const MaterialStateProperty<double> elevation = MaterialStatePropertyAll<double>(1);
-    const MaterialStateProperty<EdgeInsets> padding = MaterialStatePropertyAll<EdgeInsets>(
+    const WidgetStateProperty<double> elevation = MaterialStatePropertyAll<double>(1);
+    const WidgetStateProperty<EdgeInsets> padding = MaterialStatePropertyAll<EdgeInsets>(
       EdgeInsets.all(1),
     );
-    const MaterialStateProperty<Size> minimumSize = MaterialStatePropertyAll<Size>(Size(1, 2));
-    const MaterialStateProperty<Size> fixedSize = MaterialStatePropertyAll<Size>(Size(3, 4));
-    const MaterialStateProperty<Size> maximumSize = MaterialStatePropertyAll<Size>(Size(5, 6));
-    const MaterialStateProperty<Color> iconColor = MaterialStatePropertyAll<Color>(
-      Color(0xfffffff6),
-    );
-    const MaterialStateProperty<double> iconSize = MaterialStatePropertyAll<double>(48.0);
-    const MaterialStateProperty<BorderSide> side = MaterialStatePropertyAll<BorderSide>(
-      BorderSide(),
-    );
-    const MaterialStateProperty<OutlinedBorder> shape = MaterialStatePropertyAll<OutlinedBorder>(
+    const WidgetStateProperty<Size> minimumSize = MaterialStatePropertyAll<Size>(Size(1, 2));
+    const WidgetStateProperty<Size> fixedSize = MaterialStatePropertyAll<Size>(Size(3, 4));
+    const WidgetStateProperty<Size> maximumSize = MaterialStatePropertyAll<Size>(Size(5, 6));
+    const WidgetStateProperty<Color> iconColor = MaterialStatePropertyAll<Color>(Color(0xfffffff6));
+    const WidgetStateProperty<double> iconSize = MaterialStatePropertyAll<double>(48.0);
+    const WidgetStateProperty<BorderSide> side = MaterialStatePropertyAll<BorderSide>(BorderSide());
+    const WidgetStateProperty<OutlinedBorder> shape = MaterialStatePropertyAll<OutlinedBorder>(
       StadiumBorder(),
     );
-    const MaterialStateProperty<MouseCursor> mouseCursor = MaterialStatePropertyAll<MouseCursor>(
+    const WidgetStateProperty<MouseCursor> mouseCursor = MaterialStatePropertyAll<MouseCursor>(
       SystemMouseCursors.forbidden,
     );
     const VisualDensity visualDensity = VisualDensity.compact;
     const MaterialTapTargetSize tapTargetSize = MaterialTapTargetSize.shrinkWrap;
-    const Duration animationDuration = Duration(seconds: 1);
-    const bool enableFeedback = true;
+    const animationDuration = Duration(seconds: 1);
+    const enableFeedback = true;
 
-    const ButtonStyle style = ButtonStyle(
+    const style = ButtonStyle(
       textStyle: textStyle,
       backgroundColor: backgroundColor,
       foregroundColor: foregroundColor,
@@ -216,20 +209,16 @@ void main() {
     expect(ButtonStyle.lerp(null, null, 0.5), null);
     expect(ButtonStyle.lerp(null, null, 1), null);
 
-    const BorderSide blackSide = BorderSide();
-    const BorderSide whiteSide = BorderSide(color: Color(0xFFFFFFFF));
-    const BorderSide emptyBlackSide = BorderSide(width: 0, color: Color(0x00000000));
+    const blackSide = BorderSide();
+    const whiteSide = BorderSide(color: Color(0xFFFFFFFF));
+    const emptyBlackSide = BorderSide(width: 0, color: Color(0x00000000));
 
-    const ButtonStyle blackStyle = ButtonStyle(
-      side: MaterialStatePropertyAll<BorderSide>(blackSide),
-    );
-    const ButtonStyle whiteStyle = ButtonStyle(
-      side: MaterialStatePropertyAll<BorderSide>(whiteSide),
-    );
+    const blackStyle = ButtonStyle(side: MaterialStatePropertyAll<BorderSide>(blackSide));
+    const whiteStyle = ButtonStyle(side: MaterialStatePropertyAll<BorderSide>(whiteSide));
 
-    // MaterialState.all<Foo>(value) properties resolve to value
+    // WidgetState.all<Foo>(value) properties resolve to value
     // for any set of MaterialStates.
-    const Set<MaterialState> states = <MaterialState>{};
+    const states = <WidgetState>{};
 
     expect(ButtonStyle.lerp(blackStyle, blackStyle, 0)?.side?.resolve(states), blackSide);
     expect(ButtonStyle.lerp(blackStyle, blackStyle, 0.5)?.side?.resolve(states), blackSide);

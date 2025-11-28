@@ -98,12 +98,11 @@ class PointerRouter {
     } catch (exception, stack) {
       InformationCollector? collector;
       assert(() {
-        collector =
-            () => <DiagnosticsNode>[
-              DiagnosticsProperty<PointerRouter>('router', this, level: DiagnosticLevel.debug),
-              DiagnosticsProperty<PointerRoute>('route', route, level: DiagnosticLevel.debug),
-              DiagnosticsProperty<PointerEvent>('event', event, level: DiagnosticLevel.debug),
-            ];
+        collector = () => <DiagnosticsNode>[
+          DiagnosticsProperty<PointerRouter>('router', this, level: DiagnosticLevel.debug),
+          DiagnosticsProperty<PointerRoute>('route', route, level: DiagnosticLevel.debug),
+          DiagnosticsProperty<PointerEvent>('event', event, level: DiagnosticLevel.debug),
+        ];
         return true;
       }());
       FlutterError.reportError(
@@ -124,9 +123,7 @@ class PointerRouter {
   /// PointerRouter object.
   void route(PointerEvent event) {
     final Map<PointerRoute, Matrix4?>? routes = _routeMap[event.pointer];
-    final Map<PointerRoute, Matrix4?> copiedGlobalRoutes = Map<PointerRoute, Matrix4?>.of(
-      _globalRoutes,
-    );
+    final copiedGlobalRoutes = Map<PointerRoute, Matrix4?>.of(_globalRoutes);
     if (routes != null) {
       _dispatchEventToRoutes(event, routes, Map<PointerRoute, Matrix4?>.of(routes));
     }

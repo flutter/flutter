@@ -9,13 +9,17 @@ namespace impeller {
 SeparatedVector2::SeparatedVector2() = default;
 
 SeparatedVector2::SeparatedVector2(Vector2 direction, Scalar magnitude)
-    : direction(direction), magnitude(magnitude){};
+    : direction(direction), magnitude(magnitude) {};
 
 SeparatedVector2::SeparatedVector2(Vector2 vector)
-    : direction(vector.Normalize()), magnitude(vector.GetLength()){};
+    : direction(vector.Normalize()), magnitude(vector.GetLength()) {};
 
 Vector2 SeparatedVector2::GetVector() const {
   return direction * magnitude;
+}
+
+Vector2 SeparatedVector2::GetDirection() const {
+  return direction;
 }
 
 Scalar SeparatedVector2::GetAlignment(const SeparatedVector2& other) const {
@@ -24,6 +28,10 @@ Scalar SeparatedVector2::GetAlignment(const SeparatedVector2& other) const {
 
 Radians SeparatedVector2::AngleTo(const SeparatedVector2& other) const {
   return direction.AngleTo(other.direction);
+}
+
+Scalar SeparatedVector2::Cross(const SeparatedVector2& other) const {
+  return direction.Cross(other.direction);
 }
 
 }  // namespace impeller

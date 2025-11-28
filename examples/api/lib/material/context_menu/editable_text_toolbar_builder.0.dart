@@ -23,7 +23,8 @@ class EditableTextToolbarBuilderExampleApp extends StatefulWidget {
 class _EditableTextToolbarBuilderExampleAppState
     extends State<EditableTextToolbarBuilderExampleApp> {
   final TextEditingController _controller = TextEditingController(
-    text: 'Right click (desktop) or long press (mobile) to see the menu with custom buttons.',
+    text:
+        'Right click (desktop) or long press (mobile) to see the menu with custom buttons.',
   );
 
   @override
@@ -55,14 +56,17 @@ class _EditableTextToolbarBuilderExampleAppState
               const SizedBox(height: 20.0),
               TextField(
                 controller: _controller,
-                contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
-                  return AdaptiveTextSelectionToolbar(
-                    anchors: editableTextState.contextMenuAnchors,
-                    // Build the default buttons, but make them look custom.
-                    // In a real project you may want to build different
-                    // buttons depending on the platform.
-                    children:
-                        editableTextState.contextMenuButtonItems.map((
+                contextMenuBuilder:
+                    (
+                      BuildContext context,
+                      EditableTextState editableTextState,
+                    ) {
+                      return AdaptiveTextSelectionToolbar(
+                        anchors: editableTextState.contextMenuAnchors,
+                        // Build the default buttons, but make them look custom.
+                        // In a real project you may want to build different
+                        // buttons depending on the platform.
+                        children: editableTextState.contextMenuButtonItems.map((
                           ContextMenuButtonItem buttonItem,
                         ) {
                           return CupertinoButton(
@@ -82,8 +86,8 @@ class _EditableTextToolbarBuilderExampleAppState
                             ),
                           );
                         }).toList(),
-                  );
-                },
+                      );
+                    },
               ),
             ],
           ),

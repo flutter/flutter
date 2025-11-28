@@ -13,7 +13,7 @@ For more information on embedders, see the
 > [!CAUTION]
 > This is a best effort attempt to document the Windows embedder. It is not
 > guaranteed to be up to date or complete. If you find a discrepancy, please
-> [send a pull request](https://github.com/flutter/engine/compare)!
+> [send a pull request](https://github.com/flutter/flutter/compare)!
 
 See also:
 
@@ -28,9 +28,9 @@ launches the Windows embedder.
 
 See:
 
-1. [Setting up the Engine development environment](https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment)
-2. [Compiling for Windows](https://github.com/flutter/flutter/wiki/Compiling-the-engine#compiling-for-windows)
-3. [Debugging Windows builds with Visual Studio](https://github.com/flutter/flutter/wiki/Debugging-the-engine#debugging-windows-builds-with-visual-studio)
+1. [Setting up the Engine development environment](https://github.com/flutter/flutter/blob/main/docs/engine/contributing/Setting-up-the-Engine-development-environment.md)
+2. [Compiling for Windows](https://github.com/flutter/flutter/blob/main/docs/engine/contributing/Compiling-the-engine.md#compiling-for-windows)
+3. [Debugging Windows builds with Visual Studio](https://github.com/flutter/flutter/blob/main/docs/engine/Debugging-the-engine.md#debugging-windows-builds-with-visual-studio)
 
 ### Notable files
 

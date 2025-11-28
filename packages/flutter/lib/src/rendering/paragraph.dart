@@ -7,7 +7,6 @@
 /// @docImport 'editable.dart';
 library;
 
-import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:ui'
     as ui
@@ -148,28 +147,28 @@ mixin RenderInlineChildrenContainerDefaults
     ChildLayouter layoutChild,
     ChildBaselineGetter getBaseline,
   ) {
-    final TextParentData parentData = child.parentData! as TextParentData;
+    final parentData = child.parentData! as TextParentData;
     final PlaceholderSpan? span = parentData.span;
     assert(span != null);
     return span == null
         ? PlaceholderDimensions.empty
         : PlaceholderDimensions(
-          size: layoutChild(child, childConstraints),
-          alignment: span.alignment,
-          baseline: span.baseline,
-          baselineOffset: switch (span.alignment) {
-            ui.PlaceholderAlignment.aboveBaseline ||
-            ui.PlaceholderAlignment.belowBaseline ||
-            ui.PlaceholderAlignment.bottom ||
-            ui.PlaceholderAlignment.middle ||
-            ui.PlaceholderAlignment.top => null,
-            ui.PlaceholderAlignment.baseline => getBaseline(
-              child,
-              childConstraints,
-              span.baseline!,
-            ),
-          },
-        );
+            size: layoutChild(child, childConstraints),
+            alignment: span.alignment,
+            baseline: span.baseline,
+            baselineOffset: switch (span.alignment) {
+              ui.PlaceholderAlignment.aboveBaseline ||
+              ui.PlaceholderAlignment.belowBaseline ||
+              ui.PlaceholderAlignment.bottom ||
+              ui.PlaceholderAlignment.middle ||
+              ui.PlaceholderAlignment.top => null,
+              ui.PlaceholderAlignment.baseline => getBaseline(
+                child,
+                childConstraints,
+                span.baseline!,
+              ),
+            },
+          );
   }
 
   /// Computes the layout for every inline child using the `maxWidth` constraint.
@@ -195,7 +194,7 @@ mixin RenderInlineChildrenContainerDefaults
     ChildLayouter layoutChild,
     ChildBaselineGetter getChildBaseline,
   ) {
-    final BoxConstraints constraints = BoxConstraints(maxWidth: maxWidth);
+    final constraints = BoxConstraints(maxWidth: maxWidth);
     return <PlaceholderDimensions>[
       for (RenderBox? child = firstChild; child != null; child = childAfter(child))
         _layoutChild(child, constraints, layoutChild, getChildBaseline),
@@ -217,7 +216,7 @@ mixin RenderInlineChildrenContainerDefaults
   @protected
   void positionInlineChildren(List<ui.TextBox> boxes) {
     RenderBox? child = firstChild;
-    for (final ui.TextBox box in boxes) {
+    for (final box in boxes) {
       if (child == null) {
         assert(
           false,
@@ -225,12 +224,12 @@ mixin RenderInlineChildrenContainerDefaults
         );
         return;
       }
-      final TextParentData textParentData = child.parentData! as TextParentData;
+      final textParentData = child.parentData! as TextParentData;
       textParentData._offset = Offset(box.left, box.top);
       child = childAfter(child);
     }
     while (child != null) {
-      final TextParentData textParentData = child.parentData! as TextParentData;
+      final textParentData = child.parentData! as TextParentData;
       textParentData._offset = null;
       child = childAfter(child);
     }
@@ -243,12 +242,12 @@ mixin RenderInlineChildrenContainerDefaults
   /// `transform` to indicate they're invisible thus should not be painted.
   @protected
   void defaultApplyPaintTransform(RenderBox child, Matrix4 transform) {
-    final TextParentData childParentData = child.parentData! as TextParentData;
+    final childParentData = child.parentData! as TextParentData;
     final Offset? offset = childParentData.offset;
     if (offset == null) {
       transform.setZero();
     } else {
-      transform.translate(offset.dx, offset.dy);
+      transform.translateByDouble(offset.dx, offset.dy, 0, 1);
     }
   }
 
@@ -260,7 +259,7 @@ mixin RenderInlineChildrenContainerDefaults
   void paintInlineChildren(PaintingContext context, Offset offset) {
     RenderBox? child = firstChild;
     while (child != null) {
-      final TextParentData childParentData = child.parentData! as TextParentData;
+      final childParentData = child.parentData! as TextParentData;
       final Offset? childOffset = childParentData.offset;
       if (childOffset == null) {
         return;
@@ -278,7 +277,7 @@ mixin RenderInlineChildrenContainerDefaults
   bool hitTestInlineChildren(BoxHitTestResult result, Offset position) {
     RenderBox? child = firstChild;
     while (child != null) {
-      final TextParentData childParentData = child.parentData! as TextParentData;
+      final childParentData = child.parentData! as TextParentData;
       final Offset? childOffset = childParentData.offset;
       if (childOffset == null) {
         return false;
@@ -286,9 +285,8 @@ mixin RenderInlineChildrenContainerDefaults
       final bool isHit = result.addWithPaintOffset(
         offset: childOffset,
         position: position,
-        hitTest:
-            (BoxHitTestResult result, Offset transformed) =>
-                child!.hitTest(result, position: transformed),
+        hitTest: (BoxHitTestResult result, Offset transformed) =>
+            child!.hitTest(result, position: transformed),
       );
       if (isHit) {
         return true;
@@ -297,6 +295,15 @@ mixin RenderInlineChildrenContainerDefaults
     }
     return false;
   }
+}
+
+class _UnspecifiedTextScaler extends TextScaler {
+  const _UnspecifiedTextScaler();
+  @override
+  Never get textScaleFactor => throw UnimplementedError();
+
+  @override
+  Never scale(double fontSize) => throw UnimplementedError();
 }
 
 /// A render object that displays a paragraph of text.
@@ -321,7 +328,7 @@ class RenderParagraph extends RenderBox
       'This feature was deprecated after v3.12.0-2.0.pre.',
     )
     double textScaleFactor = 1.0,
-    TextScaler textScaler = TextScaler.noScaling,
+    TextScaler textScaler = const _UnspecifiedTextScaler(),
     int? maxLines,
     Locale? locale,
     StrutStyle? strutStyle,
@@ -333,7 +340,7 @@ class RenderParagraph extends RenderBox
   }) : assert(text.debugAssertIsValid()),
        assert(maxLines == null || maxLines > 0),
        assert(
-         identical(textScaler, TextScaler.noScaling) || textScaleFactor == 1.0,
+         identical(textScaler, const _UnspecifiedTextScaler()) || textScaleFactor == 1.0,
          'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
        ),
        _softWrap = softWrap,
@@ -343,8 +350,9 @@ class RenderParagraph extends RenderBox
          text: text,
          textAlign: textAlign,
          textDirection: textDirection,
-         textScaler:
-             textScaler == TextScaler.noScaling ? TextScaler.linear(textScaleFactor) : textScaler,
+         textScaler: textScaler == const _UnspecifiedTextScaler()
+             ? TextScaler.linear(textScaleFactor)
+             : textScaler,
          maxLines: maxLines,
          ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
          locale: locale,
@@ -424,7 +432,7 @@ class RenderParagraph extends RenderBox
     if (_lastSelectableFragments == null) {
       return const <TextSelection>[];
     }
-    final List<TextSelection> results = <TextSelection>[];
+    final results = <TextSelection>[];
     for (final _SelectableFragment fragment in _lastSelectableFragments!) {
       if (fragment._textSelectionStart != null && fragment._textSelectionEnd != null) {
         results.add(
@@ -476,8 +484,8 @@ class RenderParagraph extends RenderBox
 
   List<_SelectableFragment> _getSelectableFragments() {
     final String plainText = text.toPlainText(includeSemanticsLabels: false);
-    final List<_SelectableFragment> result = <_SelectableFragment>[];
-    int start = 0;
+    final result = <_SelectableFragment>[];
+    var start = 0;
     while (start < plainText.length) {
       int end = plainText.indexOf(_placeholderCharacter, start);
       if (start != end) {
@@ -798,10 +806,10 @@ class RenderParagraph extends RenderBox
     // graphemeClusterLayoutBounds rects.
     final InlineSpan? spanHit =
         glyph != null && glyph.graphemeClusterLayoutBounds.contains(position)
-            ? _textPainter.text!.getSpanForPosition(
-              TextPosition(offset: glyph.graphemeClusterCodeUnitRange.start),
-            )
-            : null;
+        ? _textPainter.text!.getSpanForPosition(
+            TextPosition(offset: glyph.graphemeClusterCodeUnitRange.start),
+          )
+        : null;
     switch (spanHit) {
       case final HitTestTarget span:
         result.add(HitTestEntry(span));
@@ -929,7 +937,7 @@ class RenderParagraph extends RenderBox
           _overflowShader = null;
         case TextOverflow.fade:
           _needsClipping = true;
-          final TextPainter fadeSizePainter = TextPainter(
+          final fadeSizePainter = TextPainter(
             text: TextSpan(style: _textPainter.text!.style, text: '\u2026'),
             textDirection: textDirection,
             textScaler: textScaler,
@@ -975,7 +983,7 @@ class RenderParagraph extends RenderBox
     _layoutTextWithConstraints(constraints);
     assert(() {
       if (debugRepaintTextRainbowEnabled) {
-        final Paint paint = Paint()..color = debugCurrentRepaintColor.toColor();
+        final paint = Paint()..color = debugCurrentRepaintColor.toColor();
         context.canvas.drawRect(offset & size, paint);
       }
       return true;
@@ -999,6 +1007,11 @@ class RenderParagraph extends RenderBox
       }
     }
 
+    assert(() {
+      _textPainter.debugPaintTextLayoutBoxes = debugPaintTextLayoutBoxes;
+      return true;
+    }());
+
     _textPainter.paint(context.canvas, offset);
 
     paintInlineChildren(context, offset);
@@ -1006,10 +1019,9 @@ class RenderParagraph extends RenderBox
     if (_needsClipping) {
       if (_overflowShader != null) {
         context.canvas.translate(offset.dx, offset.dy);
-        final Paint paint =
-            Paint()
-              ..blendMode = BlendMode.modulate
-              ..shader = _overflowShader;
+        final paint = Paint()
+          ..blendMode = BlendMode.modulate
+          ..shader = _overflowShader;
         context.canvas.drawRect(Offset.zero & size, paint);
       }
       context.canvas.restore();
@@ -1142,8 +1154,8 @@ class RenderParagraph extends RenderBox
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     _semanticsInfo = text.getSemanticsInformation();
-    bool needsAssembleSemanticsNode = false;
-    bool needsChildConfigurationsDelegate = false;
+    var needsAssembleSemanticsNode = false;
+    var needsChildConfigurationsDelegate = false;
     for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
       if (info.recognizer != null || info.semanticsIdentifier != null) {
         needsAssembleSemanticsNode = true;
@@ -1159,9 +1171,9 @@ class RenderParagraph extends RenderBox
       config.childConfigurationsDelegate = _childSemanticsConfigurationsDelegate;
     } else {
       if (_cachedAttributedLabels == null) {
-        final StringBuffer buffer = StringBuffer();
-        int offset = 0;
-        final List<StringAttribute> attributes = <StringAttribute>[];
+        final buffer = StringBuffer();
+        var offset = 0;
+        final attributes = <StringAttribute>[];
         for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
           final String label = info.semanticsLabel ?? info.text;
           for (final StringAttribute infoAttribute in info.stringAttributes) {
@@ -1190,11 +1202,10 @@ class RenderParagraph extends RenderBox
   ChildSemanticsConfigurationsResult _childSemanticsConfigurationsDelegate(
     List<SemanticsConfiguration> childConfigs,
   ) {
-    final ChildSemanticsConfigurationsResultBuilder builder =
-        ChildSemanticsConfigurationsResultBuilder();
-    int placeholderIndex = 0;
-    int childConfigsIndex = 0;
-    int attributedLabelCacheIndex = 0;
+    final builder = ChildSemanticsConfigurationsResultBuilder();
+    var placeholderIndex = 0;
+    var childConfigsIndex = 0;
+    var attributedLabelCacheIndex = 0;
     InlineSpanSemanticsInformation? seenTextInfo;
     _cachedCombinedSemanticsInfos ??= combineSemanticsInfo(_semanticsInfo!);
     for (final InlineSpanSemanticsInformation info in _cachedCombinedSemanticsInfos!) {
@@ -1257,7 +1268,7 @@ class RenderParagraph extends RenderBox
   // can be re-used when [assembleSemanticsNode] is called again. This ensures
   // stable ids for the [SemanticsNode]s of [TextSpan]s across
   // [assembleSemanticsNode] invocations.
-  LinkedHashMap<Key, SemanticsNode>? _cachedChildNodes;
+  Map<Key, SemanticsNode>? _cachedChildNodes;
 
   @override
   void assembleSemanticsNode(
@@ -1266,21 +1277,18 @@ class RenderParagraph extends RenderBox
     Iterable<SemanticsNode> children,
   ) {
     assert(_semanticsInfo != null && _semanticsInfo!.isNotEmpty);
-    final List<SemanticsNode> newChildren = <SemanticsNode>[];
+    final newChildren = <SemanticsNode>[];
     TextDirection currentDirection = textDirection;
     Rect currentRect;
-    double ordinal = 0.0;
-    int start = 0;
-    int placeholderIndex = 0;
-    int childIndex = 0;
+    var ordinal = 0.0;
+    var start = 0;
+    var placeholderIndex = 0;
+    var childIndex = 0;
     RenderBox? child = firstChild;
-    final LinkedHashMap<Key, SemanticsNode> newChildCache = LinkedHashMap<Key, SemanticsNode>();
+    final newChildCache = <Key, SemanticsNode>{};
     _cachedCombinedSemanticsInfos ??= combineSemanticsInfo(_semanticsInfo!);
     for (final InlineSpanSemanticsInformation info in _cachedCombinedSemanticsInfos!) {
-      final TextSelection selection = TextSelection(
-        baseOffset: start,
-        extentOffset: start + info.text.length,
-      );
+      final selection = TextSelection(baseOffset: start, extentOffset: start + info.text.length);
       start += info.text.length;
 
       if (info.isPlaceholder) {
@@ -1291,7 +1299,7 @@ class RenderParagraph extends RenderBox
                 .elementAt(childIndex)
                 .isTagged(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {
           final SemanticsNode childNode = children.elementAt(childIndex);
-          final TextParentData parentData = child!.parentData! as TextParentData;
+          final parentData = child!.parentData! as TextParentData;
           // parentData.scale may be null if the render object is truncated.
           if (parentData.offset != null) {
             newChildren.add(childNode);
@@ -1301,7 +1309,7 @@ class RenderParagraph extends RenderBox
         child = childAfter(child!);
         placeholderIndex += 1;
       } else {
-        final TextDirection initialDirection = currentDirection;
+        final initialDirection = currentDirection;
         final List<ui.TextBox> rects = getBoxesForSelection(selection);
         if (rects.isEmpty) {
           continue;
@@ -1328,15 +1336,14 @@ class RenderParagraph extends RenderBox
           rect.right.ceilToDouble() + 4.0,
           rect.bottom.ceilToDouble() + 4.0,
         );
-        final SemanticsConfiguration configuration =
-            SemanticsConfiguration()
-              ..sortKey = OrdinalSortKey(ordinal++)
-              ..textDirection = initialDirection
-              ..identifier = info.semanticsIdentifier ?? ''
-              ..attributedLabel = AttributedString(
-                info.semanticsLabel ?? info.text,
-                attributes: info.stringAttributes,
-              );
+        final configuration = SemanticsConfiguration()
+          ..sortKey = OrdinalSortKey(ordinal++)
+          ..textDirection = initialDirection
+          ..identifier = info.semanticsIdentifier ?? ''
+          ..attributedLabel = AttributedString(
+            info.semanticsLabel ?? info.text,
+            attributes: info.stringAttributes,
+          );
         switch (info.recognizer) {
           case TapGestureRecognizer(onTap: final VoidCallback? handler):
           case DoubleTapGestureRecognizer(onDoubleTap: final VoidCallback? handler):
@@ -1361,7 +1368,7 @@ class RenderParagraph extends RenderBox
         if (_cachedChildNodes?.isNotEmpty ?? false) {
           newChild = _cachedChildNodes!.remove(_cachedChildNodes!.keys.first)!;
         } else {
-          final UniqueKey key = UniqueKey();
+          final key = UniqueKey();
           newChild = SemanticsNode(key: key, showOnScreen: _createShowOnScreenFor(key));
         }
         newChild
@@ -1476,20 +1483,16 @@ class _SelectableFragment
     final Offset startOffsetInParagraphCoordinates = paragraph._getOffsetForPosition(
       TextPosition(offset: selectionStart),
     );
-    final Offset endOffsetInParagraphCoordinates =
-        selectionStart == selectionEnd
-            ? startOffsetInParagraphCoordinates
-            : paragraph._getOffsetForPosition(TextPosition(offset: selectionEnd));
-    final bool flipHandles = isReversed != (TextDirection.rtl == paragraph.textDirection);
-    final TextSelection selection = TextSelection(
-      baseOffset: selectionStart,
-      extentOffset: selectionEnd,
-    );
-    final List<Rect> selectionRects = <Rect>[];
+    final Offset endOffsetInParagraphCoordinates = selectionStart == selectionEnd
+        ? startOffsetInParagraphCoordinates
+        : paragraph._getOffsetForPosition(TextPosition(offset: selectionEnd));
+    final flipHandles = isReversed != (TextDirection.rtl == paragraph.textDirection);
+    final selection = TextSelection(baseOffset: selectionStart, extentOffset: selectionEnd);
+    final selectionRects = <Rect>[];
     for (final TextBox textBox in paragraph.getBoxesForSelection(selection)) {
       selectionRects.add(textBox.toRect());
     }
-    final bool selectionCollapsed = selectionStart == selectionEnd;
+    final selectionCollapsed = selectionStart == selectionEnd;
     final (
       TextSelectionHandleType startSelectionHandleType,
       TextSelectionHandleType endSelectionHandleType,
@@ -1524,7 +1527,7 @@ class _SelectableFragment
     switch (event.type) {
       case SelectionEventType.startEdgeUpdate:
       case SelectionEventType.endEdgeUpdate:
-        final SelectionEdgeUpdateEvent edgeUpdate = event as SelectionEdgeUpdateEvent;
+        final edgeUpdate = event as SelectionEdgeUpdateEvent;
         final TextGranularity granularity = event.granularity;
 
         switch (granularity) {
@@ -1555,11 +1558,10 @@ class _SelectableFragment
       case SelectionEventType.selectAll:
         result = _handleSelectAll();
       case SelectionEventType.selectWord:
-        final SelectWordSelectionEvent selectWord = event as SelectWordSelectionEvent;
+        final selectWord = event as SelectWordSelectionEvent;
         result = _handleSelectWord(selectWord.globalPosition);
       case SelectionEventType.selectParagraph:
-        final SelectParagraphSelectionEvent selectParagraph =
-            event as SelectParagraphSelectionEvent;
+        final selectParagraph = event as SelectParagraphSelectionEvent;
         if (selectParagraph.absorb) {
           _handleSelectAll();
           result = SelectionResult.next;
@@ -1568,16 +1570,14 @@ class _SelectableFragment
           result = _handleSelectParagraph(selectParagraph.globalPosition);
         }
       case SelectionEventType.granularlyExtendSelection:
-        final GranularlyExtendSelectionEvent granularlyExtendSelection =
-            event as GranularlyExtendSelectionEvent;
+        final granularlyExtendSelection = event as GranularlyExtendSelectionEvent;
         result = _handleGranularlyExtendSelection(
           granularlyExtendSelection.forward,
           granularlyExtendSelection.isEnd,
           granularlyExtendSelection.granularity,
         );
       case SelectionEventType.directionallyExtendSelection:
-        final DirectionallyExtendSelectionEvent directionallyExtendSelection =
-            event as DirectionallyExtendSelectionEvent;
+        final directionallyExtendSelection = event as DirectionallyExtendSelectionEvent;
         result = _handleDirectionallyExtendSelection(
           directionallyExtendSelection.dx,
           directionallyExtendSelection.isEnd,
@@ -1634,7 +1634,7 @@ class _SelectableFragment
       if (_selectableContainsOriginTextBoundary &&
           existingSelectionStart != null &&
           existingSelectionEnd != null) {
-        final bool isSamePosition = position.offset == existingSelectionEnd.offset;
+        final isSamePosition = position.offset == existingSelectionEnd.offset;
         final bool isSelectionInverted =
             existingSelectionStart.offset > existingSelectionEnd.offset;
         final bool shouldSwapEdges =
@@ -1694,7 +1694,7 @@ class _SelectableFragment
         // When the selection is inverted by the new position it is necessary to
         // swap the start edge (moving edge) with the end edge (static edge) to
         // maintain the origin text boundary within the selection.
-        final bool isSamePosition = position.offset == existingSelectionEnd.offset;
+        final isSamePosition = position.offset == existingSelectionEnd.offset;
         final bool isSelectionInverted =
             existingSelectionStart.offset > existingSelectionEnd.offset;
         final bool shouldSwapEdges =
@@ -1733,7 +1733,7 @@ class _SelectableFragment
       if (_selectableContainsOriginTextBoundary &&
           existingSelectionStart != null &&
           existingSelectionEnd != null) {
-        final bool isSamePosition = position.offset == existingSelectionStart.offset;
+        final isSamePosition = position.offset == existingSelectionStart.offset;
         final bool isSelectionInverted =
             existingSelectionStart.offset > existingSelectionEnd.offset;
         final bool shouldSwapEdges =
@@ -1793,7 +1793,7 @@ class _SelectableFragment
         // When the selection is inverted by the new position it is necessary to
         // swap the end edge (moving edge) with the start edge (static edge) to
         // maintain the origin text boundary within the selection.
-        final bool isSamePosition = position.offset == existingSelectionStart.offset;
+        final isSamePosition = position.offset == existingSelectionStart.offset;
         final bool isSelectionInverted =
             existingSelectionStart.offset > existingSelectionEnd.offset;
         final bool shouldSwapEdges =
@@ -1844,8 +1844,9 @@ class _SelectableFragment
     // we do not need to look up the text boundary for that position. This is to
     // maintain a selectables selection collapsed at 0 when the local position is
     // not located inside its rect.
-    _TextBoundaryRecord? textBoundary =
-        _rect.contains(localPosition) ? getTextBoundary(position) : null;
+    _TextBoundaryRecord? textBoundary = _rect.contains(localPosition)
+        ? getTextBoundary(position)
+        : null;
     if (textBoundary != null &&
         (textBoundary.boundaryStart.offset < range.start &&
                 textBoundary.boundaryEnd.offset <= range.start ||
@@ -1860,19 +1861,19 @@ class _SelectableFragment
     final TextPosition targetPosition = _clampTextPosition(
       isEnd
           ? _updateSelectionEndEdgeByTextBoundary(
-            textBoundary,
-            getTextBoundary,
-            position,
-            existingSelectionStart,
-            existingSelectionEnd,
-          )
+              textBoundary,
+              getTextBoundary,
+              position,
+              existingSelectionStart,
+              existingSelectionEnd,
+            )
           : _updateSelectionStartEdgeByTextBoundary(
-            textBoundary,
-            getTextBoundary,
-            position,
-            existingSelectionStart,
-            existingSelectionEnd,
-          ),
+              textBoundary,
+              getTextBoundary,
+              position,
+              existingSelectionStart,
+              existingSelectionEnd,
+            ),
     );
 
     _setSelectionPosition(targetPosition, isEnd: isEnd);
@@ -1939,7 +1940,7 @@ class _SelectableFragment
     TextPosition? existingSelectionStart,
     TextPosition? existingSelectionEnd,
   ) {
-    const bool isEnd = false;
+    const isEnd = false;
     if (_selectableContainsOriginTextBoundary &&
         existingSelectionStart != null &&
         existingSelectionEnd != null) {
@@ -1958,18 +1959,17 @@ class _SelectableFragment
         final _TextBoundaryRecord originTextBoundary = getTextBoundary(
           forwardSelection
               ? TextPosition(
-                offset: existingSelectionEnd.offset - 1,
-                affinity: existingSelectionEnd.affinity,
-              )
+                  offset: existingSelectionEnd.offset - 1,
+                  affinity: existingSelectionEnd.affinity,
+                )
               : existingSelectionEnd,
           fullText,
         );
         final TextPosition targetPosition;
-        final int pivotOffset =
-            forwardSelection
-                ? originTextBoundary.boundaryEnd.offset
-                : originTextBoundary.boundaryStart.offset;
-        final bool shouldSwapEdges = !forwardSelection != (position.offset > pivotOffset);
+        final int pivotOffset = forwardSelection
+            ? originTextBoundary.boundaryEnd.offset
+            : originTextBoundary.boundaryStart.offset;
+        final shouldSwapEdges = !forwardSelection != (position.offset > pivotOffset);
         if (position.offset < pivotOffset) {
           targetPosition = boundaryAtPosition.boundaryStart;
         } else if (position.offset > pivotOffset) {
@@ -2024,9 +2024,9 @@ class _SelectableFragment
         final _TextBoundaryRecord originTextBoundary = getTextBoundary(
           forwardSelection
               ? TextPosition(
-                offset: existingSelectionEnd.offset - 1,
-                affinity: existingSelectionEnd.affinity,
-              )
+                  offset: existingSelectionEnd.offset - 1,
+                  affinity: existingSelectionEnd.affinity,
+                )
               : existingSelectionEnd,
           fullText,
         );
@@ -2054,7 +2054,7 @@ class _SelectableFragment
       // selectable fragment. Keep searching until we find the end of the
       // boundary. Do not search when the current drag position is on a placeholder
       // to allow traversal to reach that placeholder.
-      final bool positionOnPlaceholder =
+      final positionOnPlaceholder =
           paragraph.getWordBoundary(position).textInside(fullText) == _placeholderCharacter;
       if (!paragraphContainsPosition || positionOnPlaceholder) {
         return null;
@@ -2118,7 +2118,7 @@ class _SelectableFragment
     TextPosition? existingSelectionStart,
     TextPosition? existingSelectionEnd,
   ) {
-    const bool isEnd = true;
+    const isEnd = true;
     if (_selectableContainsOriginTextBoundary &&
         existingSelectionStart != null &&
         existingSelectionEnd != null) {
@@ -2138,17 +2138,16 @@ class _SelectableFragment
           forwardSelection
               ? existingSelectionStart
               : TextPosition(
-                offset: existingSelectionStart.offset - 1,
-                affinity: existingSelectionStart.affinity,
-              ),
+                  offset: existingSelectionStart.offset - 1,
+                  affinity: existingSelectionStart.affinity,
+                ),
           fullText,
         );
         final TextPosition targetPosition;
-        final int pivotOffset =
-            forwardSelection
-                ? originTextBoundary.boundaryStart.offset
-                : originTextBoundary.boundaryEnd.offset;
-        final bool shouldSwapEdges = !forwardSelection != (position.offset < pivotOffset);
+        final int pivotOffset = forwardSelection
+            ? originTextBoundary.boundaryStart.offset
+            : originTextBoundary.boundaryEnd.offset;
+        final shouldSwapEdges = !forwardSelection != (position.offset < pivotOffset);
         if (position.offset < pivotOffset) {
           targetPosition = boundaryAtPosition.boundaryStart;
         } else if (position.offset > pivotOffset) {
@@ -2204,9 +2203,9 @@ class _SelectableFragment
           forwardSelection
               ? existingSelectionStart
               : TextPosition(
-                offset: existingSelectionStart.offset - 1,
-                affinity: existingSelectionStart.affinity,
-              ),
+                  offset: existingSelectionStart.offset - 1,
+                  affinity: existingSelectionStart.affinity,
+                ),
           fullText,
         );
         if (forwardSelection && clampedPosition.offset == range.start) {
@@ -2233,7 +2232,7 @@ class _SelectableFragment
       // selectable fragment. Keep searching until we find the end of the
       // boundary. Do not search when the current drag position is on a placeholder
       // to allow traversal to reach that placeholder.
-      final bool positionOnPlaceholder =
+      final positionOnPlaceholder =
           paragraph.getWordBoundary(position).textInside(fullText) == _placeholderCharacter;
       if (!paragraphContainsPosition || positionOnPlaceholder) {
         return null;
@@ -2304,7 +2303,7 @@ class _SelectableFragment
     TextPosition? existingSelectionStart,
     TextPosition? existingSelectionEnd,
   ) {
-    const bool isEnd = false;
+    const isEnd = false;
     if (_selectableContainsOriginTextBoundary &&
         existingSelectionStart != null &&
         existingSelectionEnd != null) {
@@ -2312,7 +2311,7 @@ class _SelectableFragment
       // selection.
       final bool forwardSelection = existingSelectionEnd.offset >= existingSelectionStart.offset;
       final RenderParagraph originParagraph = _getOriginParagraph();
-      final bool fragmentBelongsToOriginParagraph = originParagraph == paragraph;
+      final fragmentBelongsToOriginParagraph = originParagraph == paragraph;
       if (fragmentBelongsToOriginParagraph) {
         return _updateSelectionStartEdgeByMultiSelectableTextBoundary(
           getTextBoundary,
@@ -2348,11 +2347,10 @@ class _SelectableFragment
           originText,
         );
         final TextPosition targetPosition;
-        final int pivotOffset =
-            forwardSelection
-                ? originTextBoundary.boundaryEnd.offset
-                : originTextBoundary.boundaryStart.offset;
-        final bool shouldSwapEdges =
+        final int pivotOffset = forwardSelection
+            ? originTextBoundary.boundaryEnd.offset
+            : originTextBoundary.boundaryStart.offset;
+        final shouldSwapEdges =
             !forwardSelection != (positionRelativeToOriginParagraph.offset > pivotOffset);
         if (positionRelativeToOriginParagraph.offset < pivotOffset) {
           targetPosition = boundaryAtPosition.boundaryStart;
@@ -2371,7 +2369,7 @@ class _SelectableFragment
         final TextPosition originParagraphPlaceholderTextPosition = _getPositionInParagraph(
           originParagraph,
         );
-        final TextRange originParagraphPlaceholderRange = TextRange(
+        final originParagraphPlaceholderRange = TextRange(
           start: originParagraphPlaceholderTextPosition.offset,
           end: originParagraphPlaceholderTextPosition.offset + _placeholderLength,
         );
@@ -2415,7 +2413,7 @@ class _SelectableFragment
         final TextPosition originParagraphPlaceholderTextPosition = _getPositionInParagraph(
           originParagraph,
         );
-        final TextRange originParagraphPlaceholderRange = TextRange(
+        final originParagraphPlaceholderRange = TextRange(
           start: originParagraphPlaceholderTextPosition.offset,
           end: originParagraphPlaceholderTextPosition.offset + _placeholderLength,
         );
@@ -2470,7 +2468,7 @@ class _SelectableFragment
           targetDetails.localPosition,
         );
         final String targetText = targetParagraph.text.toPlainText(includeSemanticsLabels: false);
-        final bool positionOnPlaceholder =
+        final positionOnPlaceholder =
             targetParagraph
                 .getWordBoundary(positionRelativeToTargetParagraph)
                 .textInside(targetText) ==
@@ -2491,7 +2489,7 @@ class _SelectableFragment
         final TextPosition targetParagraphPlaceholderTextPosition = _getPositionInParagraph(
           targetParagraph,
         );
-        final TextRange targetParagraphPlaceholderRange = TextRange(
+        final targetParagraphPlaceholderRange = TextRange(
           start: targetParagraphPlaceholderTextPosition.offset,
           end: targetParagraphPlaceholderTextPosition.offset + _placeholderLength,
         );
@@ -2557,7 +2555,7 @@ class _SelectableFragment
     TextPosition? existingSelectionStart,
     TextPosition? existingSelectionEnd,
   ) {
-    const bool isEnd = true;
+    const isEnd = true;
     if (_selectableContainsOriginTextBoundary &&
         existingSelectionStart != null &&
         existingSelectionEnd != null) {
@@ -2565,7 +2563,7 @@ class _SelectableFragment
       // selection.
       final bool forwardSelection = existingSelectionEnd.offset >= existingSelectionStart.offset;
       final RenderParagraph originParagraph = _getOriginParagraph();
-      final bool fragmentBelongsToOriginParagraph = originParagraph == paragraph;
+      final fragmentBelongsToOriginParagraph = originParagraph == paragraph;
       if (fragmentBelongsToOriginParagraph) {
         return _updateSelectionEndEdgeByMultiSelectableTextBoundary(
           getTextBoundary,
@@ -2601,11 +2599,10 @@ class _SelectableFragment
           originText,
         );
         final TextPosition targetPosition;
-        final int pivotOffset =
-            forwardSelection
-                ? originTextBoundary.boundaryStart.offset
-                : originTextBoundary.boundaryEnd.offset;
-        final bool shouldSwapEdges =
+        final int pivotOffset = forwardSelection
+            ? originTextBoundary.boundaryStart.offset
+            : originTextBoundary.boundaryEnd.offset;
+        final shouldSwapEdges =
             !forwardSelection != (positionRelativeToOriginParagraph.offset < pivotOffset);
         if (positionRelativeToOriginParagraph.offset < pivotOffset) {
           targetPosition = boundaryAtPosition.boundaryStart;
@@ -2624,7 +2621,7 @@ class _SelectableFragment
         final TextPosition originParagraphPlaceholderTextPosition = _getPositionInParagraph(
           originParagraph,
         );
-        final TextRange originParagraphPlaceholderRange = TextRange(
+        final originParagraphPlaceholderRange = TextRange(
           start: originParagraphPlaceholderTextPosition.offset,
           end: originParagraphPlaceholderTextPosition.offset + _placeholderLength,
         );
@@ -2668,7 +2665,7 @@ class _SelectableFragment
         final TextPosition originParagraphPlaceholderTextPosition = _getPositionInParagraph(
           originParagraph,
         );
-        final TextRange originParagraphPlaceholderRange = TextRange(
+        final originParagraphPlaceholderRange = TextRange(
           start: originParagraphPlaceholderTextPosition.offset,
           end: originParagraphPlaceholderTextPosition.offset + _placeholderLength,
         );
@@ -2723,7 +2720,7 @@ class _SelectableFragment
           targetDetails.localPosition,
         );
         final String targetText = targetParagraph.text.toPlainText(includeSemanticsLabels: false);
-        final bool positionOnPlaceholder =
+        final positionOnPlaceholder =
             targetParagraph
                 .getWordBoundary(positionRelativeToTargetParagraph)
                 .textInside(targetText) ==
@@ -2744,7 +2741,7 @@ class _SelectableFragment
         final TextPosition targetParagraphPlaceholderTextPosition = _getPositionInParagraph(
           targetParagraph,
         );
-        final TextRange targetParagraphPlaceholderRange = TextRange(
+        final targetParagraphPlaceholderRange = TextRange(
           start: targetParagraphPlaceholderTextPosition.offset,
           end: targetParagraphPlaceholderTextPosition.offset + _placeholderLength,
         );
@@ -2827,41 +2824,39 @@ class _SelectableFragment
 
     final SelectionResult? result;
     if (_isPlaceholder()) {
-      result =
-          isEnd
-              ? _updateSelectionEndEdgeAtPlaceholderByMultiSelectableTextBoundary(
-                getTextBoundary,
-                globalPosition,
-                paragraph.paintBounds.contains(localPosition),
-                positionInFullText,
-                existingSelectionStart,
-                existingSelectionEnd,
-              )
-              : _updateSelectionStartEdgeAtPlaceholderByMultiSelectableTextBoundary(
-                getTextBoundary,
-                globalPosition,
-                paragraph.paintBounds.contains(localPosition),
-                positionInFullText,
-                existingSelectionStart,
-                existingSelectionEnd,
-              );
+      result = isEnd
+          ? _updateSelectionEndEdgeAtPlaceholderByMultiSelectableTextBoundary(
+              getTextBoundary,
+              globalPosition,
+              paragraph.paintBounds.contains(localPosition),
+              positionInFullText,
+              existingSelectionStart,
+              existingSelectionEnd,
+            )
+          : _updateSelectionStartEdgeAtPlaceholderByMultiSelectableTextBoundary(
+              getTextBoundary,
+              globalPosition,
+              paragraph.paintBounds.contains(localPosition),
+              positionInFullText,
+              existingSelectionStart,
+              existingSelectionEnd,
+            );
     } else {
-      result =
-          isEnd
-              ? _updateSelectionEndEdgeByMultiSelectableTextBoundary(
-                getTextBoundary,
-                paragraph.paintBounds.contains(localPosition),
-                positionInFullText,
-                existingSelectionStart,
-                existingSelectionEnd,
-              )
-              : _updateSelectionStartEdgeByMultiSelectableTextBoundary(
-                getTextBoundary,
-                paragraph.paintBounds.contains(localPosition),
-                positionInFullText,
-                existingSelectionStart,
-                existingSelectionEnd,
-              );
+      result = isEnd
+          ? _updateSelectionEndEdgeByMultiSelectableTextBoundary(
+              getTextBoundary,
+              paragraph.paintBounds.contains(localPosition),
+              positionInFullText,
+              existingSelectionStart,
+              existingSelectionEnd,
+            )
+          : _updateSelectionStartEdgeByMultiSelectableTextBoundary(
+              getTextBoundary,
+              paragraph.paintBounds.contains(localPosition),
+              positionInFullText,
+              existingSelectionStart,
+              existingSelectionEnd,
+            );
     }
     if (result != null) {
       return result;
@@ -2871,8 +2866,9 @@ class _SelectableFragment
     // we do not need to look up the text boundary for that position. This is to
     // maintain a selectables selection collapsed at 0 when the local position is
     // not located inside its rect.
-    _TextBoundaryRecord? textBoundary =
-        _boundingBoxesContains(localPosition) ? getClampedTextBoundary(position) : null;
+    _TextBoundaryRecord? textBoundary = _boundingBoxesContains(localPosition)
+        ? getClampedTextBoundary(position)
+        : null;
     if (textBoundary != null &&
         (textBoundary.boundaryStart.offset < range.start &&
                 textBoundary.boundaryEnd.offset <= range.start ||
@@ -2887,19 +2883,19 @@ class _SelectableFragment
     final TextPosition targetPosition = _clampTextPosition(
       isEnd
           ? _updateSelectionEndEdgeByTextBoundary(
-            textBoundary,
-            getClampedTextBoundary,
-            position,
-            existingSelectionStart,
-            existingSelectionEnd,
-          )
+              textBoundary,
+              getClampedTextBoundary,
+              position,
+              existingSelectionStart,
+              existingSelectionEnd,
+            )
           : _updateSelectionStartEdgeByTextBoundary(
-            textBoundary,
-            getClampedTextBoundary,
-            position,
-            existingSelectionStart,
-            existingSelectionEnd,
-          ),
+              textBoundary,
+              getClampedTextBoundary,
+              position,
+              existingSelectionStart,
+              existingSelectionEnd,
+            ),
     );
 
     _setSelectionPosition(targetPosition, isEnd: isEnd);
@@ -2947,7 +2943,7 @@ class _SelectableFragment
     while (current != null) {
       if (current is RenderParagraph) {
         if (current._lastSelectableFragments != null) {
-          bool paragraphContainsOriginTextBoundary = false;
+          var paragraphContainsOriginTextBoundary = false;
           for (final _SelectableFragment fragment in current._lastSelectableFragments!) {
             if (fragment._selectableContainsOriginTextBoundary) {
               paragraphContainsOriginTextBoundary = true;
@@ -3083,7 +3079,7 @@ class _SelectableFragment
         textBoundary.boundaryEnd.offset > range.end) {
       return SelectionResult.next;
     }
-    final TextRange boundaryAsRange = TextRange(
+    final boundaryAsRange = TextRange(
       start: textBoundary.boundaryStart.offset,
       end: textBoundary.boundaryEnd.offset,
     );
@@ -3148,7 +3144,7 @@ class _SelectableFragment
   }
 
   _TextBoundaryRecord _getParagraphBoundaryAtPosition(TextPosition position, String text) {
-    final ParagraphBoundary paragraphBoundary = ParagraphBoundary(text);
+    final paragraphBoundary = ParagraphBoundary(text);
     // Use position.offset - 1 when `position` is at the end of the selectable to retrieve
     // the previous text boundary's location.
     final int paragraphStart =
@@ -3160,13 +3156,13 @@ class _SelectableFragment
         0;
     final int paragraphEnd =
         paragraphBoundary.getTrailingTextBoundaryAt(position.offset) ?? text.length;
-    final TextRange paragraphRange = TextRange(start: paragraphStart, end: paragraphEnd);
+    final paragraphRange = TextRange(start: paragraphStart, end: paragraphEnd);
     assert(paragraphRange.isNormalized);
     return _adjustTextBoundaryAtPosition(paragraphRange, position);
   }
 
   _TextBoundaryRecord _getClampedParagraphBoundaryAtPosition(TextPosition position) {
-    final ParagraphBoundary paragraphBoundary = ParagraphBoundary(fullText);
+    final paragraphBoundary = ParagraphBoundary(fullText);
     // Use position.offset - 1 when `position` is at the end of the selectable to retrieve
     // the previous text boundary's location.
     int paragraphStart =
@@ -3178,19 +3174,17 @@ class _SelectableFragment
         0;
     int paragraphEnd =
         paragraphBoundary.getTrailingTextBoundaryAt(position.offset) ?? fullText.length;
-    paragraphStart =
-        paragraphStart < range.start
-            ? range.start
-            : paragraphStart > range.end
-            ? range.end
-            : paragraphStart;
-    paragraphEnd =
-        paragraphEnd > range.end
-            ? range.end
-            : paragraphEnd < range.start
-            ? range.start
-            : paragraphEnd;
-    final TextRange paragraphRange = TextRange(start: paragraphStart, end: paragraphEnd);
+    paragraphStart = paragraphStart < range.start
+        ? range.start
+        : paragraphStart > range.end
+        ? range.end
+        : paragraphStart;
+    paragraphEnd = paragraphEnd > range.end
+        ? range.end
+        : paragraphEnd < range.start
+        ? range.start
+        : paragraphEnd;
+    final paragraphRange = TextRange(start: paragraphStart, end: paragraphEnd);
     assert(paragraphRange.isNormalized);
     return _adjustTextBoundaryAtPosition(paragraphRange, position);
   }
@@ -3211,8 +3205,10 @@ class _SelectableFragment
           return SelectionResult.next;
       }
     }
-    final double baselineInParagraphCoordinates =
-        MatrixUtils.transformPoint(transform, Offset(horizontalBaseline, 0)).dx;
+    final double baselineInParagraphCoordinates = MatrixUtils.transformPoint(
+      transform,
+      Offset(horizontalBaseline, 0),
+    ).dx;
     assert(!baselineInParagraphCoordinates.isNaN);
     final TextPosition newPosition;
     final SelectionResult result;
@@ -3230,16 +3226,15 @@ class _SelectableFragment
         result = moveResult.value;
       case SelectionExtendDirection.forward:
       case SelectionExtendDirection.backward:
-        _textSelectionEnd ??=
-            movement == SelectionExtendDirection.forward
-                ? TextPosition(offset: range.start)
-                : TextPosition(offset: range.end, affinity: TextAffinity.upstream);
+        _textSelectionEnd ??= movement == SelectionExtendDirection.forward
+            ? TextPosition(offset: range.start)
+            : TextPosition(offset: range.end, affinity: TextAffinity.upstream);
         _textSelectionStart ??= _textSelectionEnd;
         final TextPosition targetedEdge = isExtent ? _textSelectionEnd! : _textSelectionStart!;
         final Offset edgeOffsetInParagraphCoordinates = paragraph._getOffsetForPosition(
           targetedEdge,
         );
-        final Offset baselineOffsetInParagraphCoordinates = Offset(
+        final baselineOffsetInParagraphCoordinates = Offset(
           baselineInParagraphCoordinates,
           // Use half of line height to point to the middle of the line.
           edgeOffsetInParagraphCoordinates.dy - paragraph._textPainter.preferredLineHeight / 2,
@@ -3260,10 +3255,9 @@ class _SelectableFragment
     bool isExtent,
     TextGranularity granularity,
   ) {
-    _textSelectionEnd ??=
-        forward
-            ? TextPosition(offset: range.start)
-            : TextPosition(offset: range.end, affinity: TextAffinity.upstream);
+    _textSelectionEnd ??= forward
+        ? TextPosition(offset: range.start)
+        : TextPosition(offset: range.end, affinity: TextAffinity.upstream);
     _textSelectionStart ??= _textSelectionEnd;
     final TextPosition targetedEdge = isExtent ? _textSelectionEnd! : _textSelectionStart!;
     if (forward && (targetedEdge.offset == range.end)) {
@@ -3331,10 +3325,9 @@ class _SelectableFragment
     bool forward,
     TextBoundary textBoundary,
   ) {
-    final int newOffset =
-        forward
-            ? textBoundary.getTrailingTextBoundaryAt(end.offset) ?? range.end
-            : textBoundary.getLeadingTextBoundaryAt(end.offset - 1) ?? range.start;
+    final int newOffset = forward
+        ? textBoundary.getTrailingTextBoundaryAt(end.offset) ?? range.end
+        : textBoundary.getLeadingTextBoundaryAt(end.offset - 1) ?? range.start;
     return TextPosition(offset: newOffset);
   }
 
@@ -3354,7 +3347,7 @@ class _SelectableFragment
           assert(end.offset == 0);
           return const TextPosition(offset: 0);
         }
-        final CharacterBoundary characterBoundary = CharacterBoundary(fullText);
+        final characterBoundary = CharacterBoundary(fullText);
         caretOffset =
             math.max(
               0,
@@ -3364,10 +3357,9 @@ class _SelectableFragment
       case TextAffinity.downstream:
         caretOffset = end.offset;
     }
-    final int offset =
-        forward
-            ? textBoundary.getTrailingTextBoundaryAt(caretOffset) ?? range.end
-            : textBoundary.getLeadingTextBoundaryAt(caretOffset) ?? range.start;
+    final int offset = forward
+        ? textBoundary.getTrailingTextBoundaryAt(caretOffset) ?? range.end
+        : textBoundary.getLeadingTextBoundaryAt(caretOffset) ?? range.start;
     return TextPosition(offset: offset);
   }
 
@@ -3379,7 +3371,7 @@ class _SelectableFragment
     final List<ui.LineMetrics> lines = paragraph._textPainter.computeLineMetrics();
     final Offset offset = paragraph.getOffsetForCaret(position, Rect.zero);
     int currentLine = lines.length - 1;
-    for (final ui.LineMetrics lineMetrics in lines) {
+    for (final lineMetrics in lines) {
       if (lineMetrics.baseline > offset.dy) {
         currentLine = lineMetrics.lineNumber;
         break;
@@ -3480,12 +3472,12 @@ class _SelectableFragment
       );
       if (boxes.isNotEmpty) {
         _cachedBoundingBoxes = <Rect>[];
-        for (final TextBox textBox in boxes) {
+        for (final textBox in boxes) {
           _cachedBoundingBoxes!.add(textBox.toRect());
         }
       } else {
         final Offset offset = paragraph._getOffsetForPosition(TextPosition(offset: range.start));
-        final Rect rect = Rect.fromPoints(
+        final rect = Rect.fromPoints(
           offset,
           offset.translate(0, -paragraph._textPainter.preferredLineHeight),
         );
@@ -3503,7 +3495,7 @@ class _SelectableFragment
       );
       if (boxes.isNotEmpty) {
         Rect result = boxes.first.toRect();
-        for (int index = 1; index < boxes.length; index += 1) {
+        for (var index = 1; index < boxes.length; index += 1) {
           result = result.expandToInclude(boxes[index].toRect());
         }
         _cachedRect = result;
@@ -3536,14 +3528,13 @@ class _SelectableFragment
       return;
     }
     if (paragraph.selectionColor != null) {
-      final TextSelection selection = TextSelection(
+      final selection = TextSelection(
         baseOffset: _textSelectionStart!.offset,
         extentOffset: _textSelectionEnd!.offset,
       );
-      final Paint selectionPaint =
-          Paint()
-            ..style = PaintingStyle.fill
-            ..color = paragraph.selectionColor!;
+      final selectionPaint = Paint()
+        ..style = PaintingStyle.fill
+        ..color = paragraph.selectionColor!;
       for (final TextBox textBox in paragraph.getBoxesForSelection(selection)) {
         context.canvas.drawRect(textBox.toRect().shift(offset), selectionPaint);
       }

@@ -79,7 +79,7 @@ class UndoManager {
 
   Future<dynamic> _handleUndoManagerInvocation(MethodCall methodCall) async {
     final String method = methodCall.method;
-    final List<dynamic> args = methodCall.arguments as List<dynamic>;
+    final args = methodCall.arguments as List<dynamic>;
     if (method == 'UndoManagerClient.handleUndo') {
       assert(_currentClient != null, 'There must be a current UndoManagerClient.');
       _currentClient!.handlePlatformUndo(_toUndoDirection(args[0] as String));
@@ -101,10 +101,9 @@ class UndoManager {
     return switch (direction) {
       'undo' => UndoDirection.undo,
       'redo' => UndoDirection.redo,
-      _ =>
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('Unknown undo direction: $direction'),
-        ]),
+      _ => throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('Unknown undo direction: $direction'),
+      ]),
     };
   }
 }

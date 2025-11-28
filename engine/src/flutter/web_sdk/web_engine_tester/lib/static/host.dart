@@ -120,9 +120,9 @@ void main() {
       final MultiChannel<dynamic> serverChannel = _connectToServer();
       serverChannel.stream.listen((dynamic message) {
         if (message['command'] == 'loadSuite') {
-          final int channelId = message['channel'] as int;
-          final String url = message['url'] as String;
-          final int messageId = message['id'] as int;
+          final channelId = message['channel'] as int;
+          final url = message['url'] as String;
+          final messageId = message['id'] as int;
           final VirtualChannel<dynamic> suiteChannel = serverChannel.virtualChannel(channelId);
           final StreamChannel<dynamic> iframeChannel = _connectToIframe(url, messageId);
           suiteChannel.pipe(iframeChannel);
@@ -137,8 +137,9 @@ void main() {
           for (final DomSubscription subscription in _domSubscriptions.remove(message['id'])!) {
             subscription.cancel();
           }
-          for (final StreamSubscription<dynamic> subscription
-              in _streamSubscriptions.remove(message['id'])!) {
+          for (final StreamSubscription<dynamic> subscription in _streamSubscriptions.remove(
+            message['id'],
+          )!) {
             subscription.cancel();
           }
         }
@@ -152,18 +153,16 @@ void main() {
       );
 
       _jsApi = _JSApi(
-        resume:
-            () {
-              if (!domDocument.body!.classList.contains('paused')) {
-                return;
-              }
-              domDocument.body!.classList.remove('paused');
-              serverChannel.sink.add(<String, String>{'command': 'resume'});
-            }.toJS,
-        restartCurrent:
-            () {
-              serverChannel.sink.add(<String, String>{'command': 'restart'});
-            }.toJS,
+        resume: () {
+          if (!domDocument.body!.classList.contains('paused')) {
+            return;
+          }
+          domDocument.body!.classList.remove('paused');
+          serverChannel.sink.add(<String, String>{'command': 'resume'});
+        }.toJS,
+        restartCurrent: () {
+          serverChannel.sink.add(<String, String>{'command': 'restart'});
+        }.toJS,
       );
     },
     (dynamic error, StackTrace stackTrace) {
@@ -179,11 +178,11 @@ MultiChannel<dynamic> _connectToServer() {
   // [BrowserManager] with which this communicates.
   final DomWebSocket webSocket = createDomWebSocket(_currentUrl.queryParameters['managerUrl']!);
 
-  final StreamChannelController<dynamic> controller = StreamChannelController<dynamic>(sync: true);
+  final controller = StreamChannelController<dynamic>(sync: true);
   webSocket.addEventListener(
     'message',
     createDomEventListener((DomEvent message) {
-      final String data = (message as DomMessageEvent).data as String;
+      final data = (message as DomMessageEvent).data as String;
       controller.local.sink.add(jsonDecode(data));
     }),
   );
@@ -200,16 +199,11 @@ MultiChannel<dynamic> _connectToServer() {
 StreamChannel<dynamic> _connectToIframe(String url, int id) {
   final DomHTMLIFrameElement iframe = createDomHTMLIFrameElement();
   _iframes[id] = iframe;
-  iframe
-    ..src = url
-    ..width = '1000'
-    ..height = '1000';
-  domDocument.body!.appendChild(iframe);
 
-  final StreamChannelController<dynamic> controller = StreamChannelController<dynamic>(sync: true);
+  final controller = StreamChannelController<dynamic>(sync: true);
 
-  final List<DomSubscription> domSubscriptions = <DomSubscription>[];
-  final List<StreamSubscription<dynamic>> streamSubscriptions = <StreamSubscription<dynamic>>[];
+  final domSubscriptions = <DomSubscription>[];
+  final streamSubscriptions = <StreamSubscription<dynamic>>[];
   _domSubscriptions[id] = domSubscriptions;
   _streamSubscriptions[id] = streamSubscriptions;
   domSubscriptions.add(
@@ -217,7 +211,7 @@ StreamChannel<dynamic> _connectToIframe(String url, int id) {
       domWindow,
       'message',
       createDomEventListener((DomEvent event) {
-        final DomMessageEvent message = event as DomMessageEvent;
+        final message = event as DomMessageEvent;
         // A message on the Window can theoretically come from any website. It's
         // very unlikely that a malicious site would care about hacking someone's
         // unit tests, let alone be able to find the test server while it's
@@ -225,14 +219,6 @@ StreamChannel<dynamic> _connectToIframe(String url, int id) {
         if (message.origin != domWindow.location.origin) {
           return;
         }
-        // We have to do these ugly casts because the message is cross-origin
-        // which isn't handled cleanly by dart:js_interop.
-        if (((message.source as DomMessageEventSource?)?.location as DomMessageEventLocation?)
-                ?.href !=
-            iframe.src) {
-          return;
-        }
-
         message.stopPropagation();
 
         if (message.data == 'port') {
@@ -276,6 +262,12 @@ StreamChannel<dynamic> _connectToIframe(String url, int id) {
       }),
     ),
   );
+
+  iframe
+    ..src = url
+    ..width = '1000'
+    ..height = '1000';
+  domDocument.body!.appendChild(iframe);
 
   return controller.foreign;
 }

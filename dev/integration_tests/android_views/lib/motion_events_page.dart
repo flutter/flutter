@@ -99,7 +99,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
               child: ElevatedButton(
                 child: const Text('SAVE'),
                 onPressed: () {
-                  const StandardMessageCodec codec = StandardMessageCodec();
+                  const codec = StandardMessageCodec();
                   saveRecordedEvents(codec.encodeMessage(flutterViewEvents)!, context);
                 },
               ),
@@ -129,17 +129,16 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
   }
 
   Future<String> playEventsFile() async {
-    const StandardMessageCodec codec = StandardMessageCodec();
+    const codec = StandardMessageCodec();
     try {
       final ByteData data = await rootBundle.load(
         'packages/assets_for_android_views/assets/touchEvents',
       );
-      final List<dynamic> unTypedRecordedEvents = codec.decodeMessage(data) as List<dynamic>;
-      final List<Map<String, dynamic>> recordedEvents =
-          unTypedRecordedEvents
-              .cast<Map<dynamic, dynamic>>()
-              .map<Map<String, dynamic>>((Map<dynamic, dynamic> e) => e.cast<String, dynamic>())
-              .toList();
+      final unTypedRecordedEvents = codec.decodeMessage(data) as List<dynamic>;
+      final List<Map<String, dynamic>> recordedEvents = unTypedRecordedEvents
+          .cast<Map<dynamic, dynamic>>()
+          .map<Map<String, dynamic>>((Map<dynamic, dynamic> e) => e.cast<String, dynamic>())
+          .toList();
       await channel.invokeMethod<void>('pipeFlutterViewEvents');
       await viewChannel?.invokeMethod<void>('pipeTouchEvents');
       print('replaying ${recordedEvents.length} motion events');
@@ -154,8 +153,8 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
         return 'Synthesized ${flutterViewEvents.length} events but the embedded view received ${embeddedViewEvents.length} events';
       }
 
-      final StringBuffer diff = StringBuffer();
-      for (int i = 0; i < flutterViewEvents.length; ++i) {
+      final diff = StringBuffer();
+      for (var i = 0; i < flutterViewEvents.length; ++i) {
         final String currentDiff = diffMotionEvents(flutterViewEvents[i], embeddedViewEvents[i]);
         if (currentDiff.isEmpty) {
           continue;
@@ -187,7 +186,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
     try {
       final Directory? outDir = await getExternalStorageDirectory();
       // This test only runs on Android so we can assume path separator is '/'.
-      final File file = File('${outDir?.path}/$kEventsFileName');
+      final file = File('${outDir?.path}/$kEventsFileName');
       await file.writeAsBytes(data.buffer.asUint8List(0, data.lengthInBytes), flush: true);
       if (!context.mounted) {
         return;
@@ -233,7 +232,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
   Future<dynamic> onMethodChannelCall(MethodCall call) {
     switch (call.method) {
       case 'onTouch':
-        final Map<dynamic, dynamic> map = call.arguments as Map<dynamic, dynamic>;
+        final map = call.arguments as Map<dynamic, dynamic>;
         flutterViewEvents.insert(0, map.cast<String, dynamic>());
         if (flutterViewEvents.length > kEventsBufferSize) {
           flutterViewEvents.removeLast();
@@ -246,7 +245,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
   Future<dynamic> onViewMethodChannelCall(MethodCall call) {
     switch (call.method) {
       case 'onTouch':
-        final Map<dynamic, dynamic> map = call.arguments as Map<dynamic, dynamic>;
+        final map = call.arguments as Map<dynamic, dynamic>;
         embeddedViewEvents.insert(0, map.cast<String, dynamic>());
         if (embeddedViewEvents.length > kEventsBufferSize) {
           embeddedViewEvents.removeLast();
@@ -275,7 +274,7 @@ class TouchEventDiff extends StatelessWidget {
     Color color;
     final String diff = diffMotionEvents(originalEvent, synthesizedEvent);
     String msg;
-    final int action = synthesizedEvent['action'] as int;
+    final action = synthesizedEvent['action'] as int;
     final String actionName = getActionName(getActionMasked(action), action);
     if (diff.isEmpty) {
       color = Colors.green;
@@ -296,8 +295,8 @@ class TouchEventDiff extends StatelessWidget {
   }
 
   void prettyPrintEvent(Map<String, dynamic> event) {
-    final StringBuffer buffer = StringBuffer();
-    final int action = event['action'] as int;
+    final buffer = StringBuffer();
+    final action = event['action'] as int;
     final int maskedAction = getActionMasked(action);
     final String actionName = getActionName(maskedAction, action);
 
@@ -306,9 +305,9 @@ class TouchEventDiff extends StatelessWidget {
       buffer.write('pointer: ${getPointerIdx(action)} ');
     }
 
-    final List<Map<dynamic, dynamic>> coords =
-        (event['pointerCoords'] as List<dynamic>).cast<Map<dynamic, dynamic>>();
-    for (int i = 0; i < coords.length; i++) {
+    final List<Map<dynamic, dynamic>> coords = (event['pointerCoords'] as List<dynamic>)
+        .cast<Map<dynamic, dynamic>>();
+    for (var i = 0; i < coords.length; i++) {
       buffer.write(
         'p$i x: ${coords[i]['x']} y: ${coords[i]['y']}, pressure: ${coords[i]['pressure']} ',
       );

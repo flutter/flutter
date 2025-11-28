@@ -5,7 +5,6 @@
 /// @docImport 'package:flutter/cupertino.dart';
 library;
 
-import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, LineMetrics, SemanticsInputType, TextBox;
 
@@ -182,12 +181,9 @@ class VerticalCaretMovementRun implements Iterator<TextPosition> {
     }
     assert(lineNumber != _currentLine);
 
-    final Offset newOffset = Offset(_currentOffset.dx, _lineMetrics[lineNumber].baseline);
+    final newOffset = Offset(_currentOffset.dx, _lineMetrics[lineNumber].baseline);
     final TextPosition closestPosition = _editable._textPainter.getPositionForOffset(newOffset);
-    final MapEntry<Offset, TextPosition> position = MapEntry<Offset, TextPosition>(
-      newOffset,
-      closestPosition,
-    );
+    final position = MapEntry<Offset, TextPosition>(newOffset, closestPosition);
     _positionCache[lineNumber] = position;
     return position;
   }
@@ -324,8 +320,8 @@ class RenderEditable extends RenderBox
     bool paintCursorAboveText = false,
     Offset cursorOffset = Offset.zero,
     double devicePixelRatio = 1.0,
-    ui.BoxHeightStyle selectionHeightStyle = ui.BoxHeightStyle.tight,
-    ui.BoxWidthStyle selectionWidthStyle = ui.BoxWidthStyle.tight,
+    ui.BoxHeightStyle selectionHeightStyle = ui.BoxHeightStyle.max,
+    ui.BoxWidthStyle selectionWidthStyle = ui.BoxWidthStyle.max,
     bool? enableInteractiveSelection,
     this.floatingCursorAddedMargin = const EdgeInsets.fromLTRB(4, 4, 4, 5),
     TextRange? promptRectRange,
@@ -356,8 +352,9 @@ class RenderEditable extends RenderBox
          text: text,
          textAlign: textAlign,
          textDirection: textDirection,
-         textScaler:
-             textScaler == TextScaler.noScaling ? TextScaler.linear(textScaleFactor) : textScaler,
+         textScaler: textScaler == TextScaler.noScaling
+             ? TextScaler.linear(textScaleFactor)
+             : textScaler,
          locale: locale,
          maxLines: maxLines == 1 ? 1 : null,
          strutStyle: strutStyle,
@@ -433,17 +430,14 @@ class RenderEditable extends RenderBox
   }
 
   void _updateForegroundPainter(RenderEditablePainter? newPainter) {
-    final _CompositeRenderEditablePainter effectivePainter =
-        newPainter == null
-            ? _builtInForegroundPainters
-            : _CompositeRenderEditablePainter(
-              painters: <RenderEditablePainter>[_builtInForegroundPainters, newPainter],
-            );
+    final _CompositeRenderEditablePainter effectivePainter = newPainter == null
+        ? _builtInForegroundPainters
+        : _CompositeRenderEditablePainter(
+            painters: <RenderEditablePainter>[_builtInForegroundPainters, newPainter],
+          );
 
     if (_foregroundRenderObject == null) {
-      final _RenderEditableCustomPaint foregroundRenderObject = _RenderEditableCustomPaint(
-        painter: effectivePainter,
-      );
+      final foregroundRenderObject = _RenderEditableCustomPaint(painter: effectivePainter);
       adoptChild(foregroundRenderObject);
       _foregroundRenderObject = foregroundRenderObject;
     } else {
@@ -468,17 +462,14 @@ class RenderEditable extends RenderBox
   }
 
   void _updatePainter(RenderEditablePainter? newPainter) {
-    final _CompositeRenderEditablePainter effectivePainter =
-        newPainter == null
-            ? _builtInPainters
-            : _CompositeRenderEditablePainter(
-              painters: <RenderEditablePainter>[_builtInPainters, newPainter],
-            );
+    final _CompositeRenderEditablePainter effectivePainter = newPainter == null
+        ? _builtInPainters
+        : _CompositeRenderEditablePainter(
+            painters: <RenderEditablePainter>[_builtInPainters, newPainter],
+          );
 
     if (_backgroundRenderObject == null) {
-      final _RenderEditableCustomPaint backgroundRenderObject = _RenderEditableCustomPaint(
-        painter: effectivePainter,
-      );
+      final backgroundRenderObject = _RenderEditableCustomPaint(painter: effectivePainter);
       adoptChild(backgroundRenderObject);
       _backgroundRenderObject = backgroundRenderObject;
     } else {
@@ -722,7 +713,7 @@ class RenderEditable extends RenderBox
     // happens in paragraph.cc's layout and TextPainter's
     // _applyFloatingPointHack. Ideally, the rounding mismatch will be fixed and
     // this can be changed to be a strict check instead of an approximation.
-    const double visibleRegionSlop = 0.5;
+    const visibleRegionSlop = 0.5;
     _selectionStartInViewport.value = visibleRegion
         .inflate(visibleRegionSlop)
         .contains(startOffset + effectiveOffset);
@@ -1308,7 +1299,7 @@ class RenderEditable extends RenderBox
   // can be re-used when [assembleSemanticsNode] is called again. This ensures
   // stable ids for the [SemanticsNode]s of [TextSpan]s across
   // [assembleSemanticsNode] invocations.
-  LinkedHashMap<Key, SemanticsNode>? _cachedChildNodes;
+  Map<Key, SemanticsNode>? _cachedChildNodes;
 
   /// Returns a list of rects that bound the given selection, and the text
   /// direction. The text direction is used by the engine to calculate
@@ -1318,7 +1309,11 @@ class RenderEditable extends RenderBox
   List<TextBox> getBoxesForSelection(TextSelection selection) {
     _computeTextMetricsIfNeeded();
     return _textPainter
-        .getBoxesForSelection(selection)
+        .getBoxesForSelection(
+          selection,
+          boxHeightStyle: selectionHeightStyle,
+          boxWidthStyle: selectionWidthStyle,
+        )
         .map(
           (TextBox textBox) => TextBox.fromLTRBD(
             textBox.left + _paintOffset.dx,
@@ -1353,9 +1348,9 @@ class RenderEditable extends RenderBox
       if (obscureText) {
         _cachedAttributedValue = AttributedString(obscuringCharacter * plainText.length);
       } else {
-        final StringBuffer buffer = StringBuffer();
-        int offset = 0;
-        final List<StringAttribute> attributes = <StringAttribute>[];
+        final buffer = StringBuffer();
+        var offset = 0;
+        final attributes = <StringAttribute>[];
         for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
           final String label = info.semanticsLabel ?? info.text;
           for (final StringAttribute infoAttribute in info.stringAttributes) {
@@ -1381,6 +1376,7 @@ class RenderEditable extends RenderBox
       ..isMultiline = _isMultiline
       ..textDirection = textDirection
       ..isFocused = hasFocus
+      ..isFocusable = true
       ..isTextField = true
       ..isReadOnly = readOnly
       // This is the default for customer that uses RenderEditable directly.
@@ -1412,7 +1408,10 @@ class RenderEditable extends RenderBox
 
   void _handleSetText(String text) {
     textSelectionDelegate.userUpdateTextEditingValue(
-      TextEditingValue(text: text, selection: TextSelection.collapsed(offset: text.length)),
+      TextEditingValue(
+        text: text,
+        selection: TextSelection.collapsed(offset: text.length),
+      ),
       SelectionChangedCause.keyboard,
     );
   }
@@ -1424,21 +1423,18 @@ class RenderEditable extends RenderBox
     Iterable<SemanticsNode> children,
   ) {
     assert(_semanticsInfo != null && _semanticsInfo!.isNotEmpty);
-    final List<SemanticsNode> newChildren = <SemanticsNode>[];
+    final newChildren = <SemanticsNode>[];
     TextDirection currentDirection = textDirection;
     Rect currentRect;
-    double ordinal = 0.0;
-    int start = 0;
-    int placeholderIndex = 0;
-    int childIndex = 0;
+    var ordinal = 0.0;
+    var start = 0;
+    var placeholderIndex = 0;
+    var childIndex = 0;
     RenderBox? child = firstChild;
-    final LinkedHashMap<Key, SemanticsNode> newChildCache = LinkedHashMap<Key, SemanticsNode>();
+    final newChildCache = <Key, SemanticsNode>{};
     _cachedCombinedSemanticsInfos ??= combineSemanticsInfo(_semanticsInfo!);
     for (final InlineSpanSemanticsInformation info in _cachedCombinedSemanticsInfos!) {
-      final TextSelection selection = TextSelection(
-        baseOffset: start,
-        extentOffset: start + info.text.length,
-      );
+      final selection = TextSelection(baseOffset: start, extentOffset: start + info.text.length);
       start += info.text.length;
 
       if (info.isPlaceholder) {
@@ -1449,7 +1445,7 @@ class RenderEditable extends RenderBox
                 .elementAt(childIndex)
                 .isTagged(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {
           final SemanticsNode childNode = children.elementAt(childIndex);
-          final TextParentData parentData = child!.parentData! as TextParentData;
+          final parentData = child!.parentData! as TextParentData;
           assert(parentData.offset != null);
           newChildren.add(childNode);
           childIndex += 1;
@@ -1457,7 +1453,7 @@ class RenderEditable extends RenderBox
         child = childAfter(child!);
         placeholderIndex += 1;
       } else {
-        final TextDirection initialDirection = currentDirection;
+        final initialDirection = currentDirection;
         final List<ui.TextBox> rects = _textPainter.getBoxesForSelection(selection);
         if (rects.isEmpty) {
           continue;
@@ -1484,14 +1480,13 @@ class RenderEditable extends RenderBox
           rect.right.ceilToDouble() + 4.0,
           rect.bottom.ceilToDouble() + 4.0,
         );
-        final SemanticsConfiguration configuration =
-            SemanticsConfiguration()
-              ..sortKey = OrdinalSortKey(ordinal++)
-              ..textDirection = initialDirection
-              ..attributedLabel = AttributedString(
-                info.semanticsLabel ?? info.text,
-                attributes: info.stringAttributes,
-              );
+        final configuration = SemanticsConfiguration()
+          ..sortKey = OrdinalSortKey(ordinal++)
+          ..textDirection = initialDirection
+          ..attributedLabel = AttributedString(
+            info.semanticsLabel ?? info.text,
+            attributes: info.stringAttributes,
+          );
         switch (info.recognizer) {
           case TapGestureRecognizer(onTap: final VoidCallback? handler):
           case DoubleTapGestureRecognizer(onDoubleTap: final VoidCallback? handler):
@@ -1516,7 +1511,7 @@ class RenderEditable extends RenderBox
         if (_cachedChildNodes?.isNotEmpty ?? false) {
           newChild = _cachedChildNodes!.remove(_cachedChildNodes!.keys.first)!;
         } else {
-          final UniqueKey key = UniqueKey();
+          final key = UniqueKey();
           newChild = SemanticsNode(key: key, showOnScreen: _createShowOnScreenFor(key));
         }
         newChild
@@ -1648,10 +1643,9 @@ class RenderEditable extends RenderBox
     _foregroundRenderObject?.attach(owner);
     _backgroundRenderObject?.attach(owner);
 
-    _tap =
-        TapGestureRecognizer(debugOwner: this)
-          ..onTapDown = _handleTapDown
-          ..onTap = _handleTap;
+    _tap = TapGestureRecognizer(debugOwner: this)
+      ..onTapDown = _handleTapDown
+      ..onTap = _handleTap;
     _longPress = LongPressGestureRecognizer(debugOwner: this)..onLongPress = _handleLongPress;
     _offset.addListener(markNeedsPaint);
     _showHideCursor();
@@ -1741,14 +1735,13 @@ class RenderEditable extends RenderBox
 
     final Offset paintOffset = _paintOffset;
 
-    final List<ui.TextBox> boxes =
-        selection.isCollapsed
-            ? <ui.TextBox>[]
-            : _textPainter.getBoxesForSelection(
-              selection,
-              boxHeightStyle: selectionHeightStyle,
-              boxWidthStyle: selectionWidthStyle,
-            );
+    final List<ui.TextBox> boxes = selection.isCollapsed
+        ? <ui.TextBox>[]
+        : _textPainter.getBoxesForSelection(
+            selection,
+            boxHeightStyle: selectionHeightStyle,
+            boxWidthStyle: selectionWidthStyle,
+          );
     if (boxes.isEmpty) {
       // TODO(mpcomplete): This doesn't work well at an RTL/LTR boundary.
       final Offset caretOffset = _textPainter.getOffsetForCaret(selection.extent, _caretPrototype);
@@ -1912,8 +1905,8 @@ class RenderEditable extends RenderBox
     if (cachedValue != null) {
       return cachedValue;
     }
-    int count = 0;
-    for (int index = 0; index < text.length; index += 1) {
+    var count = 0;
+    for (var index = 0; index < text.length; index += 1) {
       switch (text.codeUnitAt(index)) {
         case 0x000A: // LF
         case 0x0085: // NEL
@@ -2002,10 +1995,10 @@ class RenderEditable extends RenderBox
     // graphemeClusterLayoutBounds rects.
     final InlineSpan? spanHit =
         glyph != null && glyph.graphemeClusterLayoutBounds.contains(effectivePosition)
-            ? _textPainter.text!.getSpanForPosition(
-              TextPosition(offset: glyph.graphemeClusterCodeUnitRange.start),
-            )
-            : null;
+        ? _textPainter.text!.getSpanForPosition(
+            TextPosition(offset: glyph.graphemeClusterCodeUnitRange.start),
+          )
+        : null;
     switch (spanHit) {
       case final HitTestTarget span:
         result.add(HitTestEntry(span));
@@ -2128,13 +2121,14 @@ class RenderEditable extends RenderBox
     final TextPosition fromPosition = _textPainter.getPositionForOffset(
       globalToLocal(from) - _paintOffset,
     );
-    final TextPosition? toPosition =
-        to == null ? null : _textPainter.getPositionForOffset(globalToLocal(to) - _paintOffset);
+    final TextPosition? toPosition = to == null
+        ? null
+        : _textPainter.getPositionForOffset(globalToLocal(to) - _paintOffset);
 
     final int baseOffset = fromPosition.offset;
     final int extentOffset = toPosition?.offset ?? fromPosition.offset;
 
-    final TextSelection newSelection = TextSelection(
+    final newSelection = TextSelection(
       baseOffset: baseOffset,
       extentOffset: extentOffset,
       affinity: fromPosition.affinity,
@@ -2171,12 +2165,12 @@ class RenderEditable extends RenderBox
       globalToLocal(from) - _paintOffset,
     );
     final TextSelection fromWord = getWordAtOffset(fromPosition);
-    final TextPosition toPosition =
-        to == null
-            ? fromPosition
-            : _textPainter.getPositionForOffset(globalToLocal(to) - _paintOffset);
-    final TextSelection toWord =
-        toPosition == fromPosition ? fromWord : getWordAtOffset(toPosition);
+    final TextPosition toPosition = to == null
+        ? fromPosition
+        : _textPainter.getPositionForOffset(globalToLocal(to) - _paintOffset);
+    final TextSelection toWord = toPosition == fromPosition
+        ? fromWord
+        : getWordAtOffset(toPosition);
     final bool isFromWordBeforeToWord = fromWord.start < toWord.end;
 
     _setSelection(
@@ -2373,10 +2367,9 @@ class RenderEditable extends RenderBox
         ),
       )
       ..layout(minWidth: minWidth, maxWidth: maxWidth);
-    final double width =
-        forceLine
-            ? constraints.maxWidth
-            : constraints.constrainWidth(_textIntrinsics.size.width + _caretMargin);
+    final double width = forceLine
+        ? constraints.maxWidth
+        : constraints.constrainWidth(_textIntrinsics.size.width + _caretMargin);
     return Size(width, constraints.constrainHeight(_preferredHeight(constraints.maxWidth)));
   }
 
@@ -2416,10 +2409,9 @@ class RenderEditable extends RenderBox
     positionInlineChildren(_textPainter.inlinePlaceholderBoxes!);
     _computeCaretPrototype();
 
-    final double width =
-        forceLine
-            ? constraints.maxWidth
-            : constraints.constrainWidth(_textPainter.width + _caretMargin);
+    final double width = forceLine
+        ? constraints.maxWidth
+        : constraints.constrainWidth(_textPainter.width + _caretMargin);
     assert(maxLines != 1 || _textPainter.maxLines == 1);
     final double preferredHeight = switch (maxLines) {
       null => math.max(_textPainter.height, preferredLineHeight * (minLines ?? 0)),
@@ -2432,9 +2424,9 @@ class RenderEditable extends RenderBox
     };
 
     size = Size(width, constraints.constrainHeight(preferredHeight));
-    final Size contentSize = Size(_textPainter.width + _caretMargin, _textPainter.height);
+    final contentSize = Size(_textPainter.width + _caretMargin, _textPainter.height);
 
-    final BoxConstraints painterConstraints = BoxConstraints.tight(contentSize);
+    final painterConstraints = BoxConstraints.tight(contentSize);
 
     _foregroundRenderObject?.layout(painterConstraints);
     _backgroundRenderObject?.layout(painterConstraints);
@@ -2478,7 +2470,7 @@ class RenderEditable extends RenderBox
     final double leftBound = -floatingCursorAddedMargin.left;
     final double rightBound =
         math.min(size.width, _textPainter.width) + floatingCursorAddedMargin.right;
-    final Rect boundingRects = Rect.fromLTRB(leftBound, topBound, rightBound, bottomBound);
+    final boundingRects = Rect.fromLTRB(leftBound, topBound, rightBound, bottomBound);
 
     if (shouldResetOrigin != null) {
       _shouldResetOrigin = shouldResetOrigin;
@@ -2559,10 +2551,9 @@ class RenderEditable extends RenderBox
     if (_floatingCursorOn) {
       _floatingCursorTextPosition = lastTextPosition;
       final double? animationValue = _resetFloatingCursorAnimationValue;
-      final EdgeInsets sizeAdjustment =
-          animationValue != null
-              ? EdgeInsets.lerp(_kFloatingCursorSizeIncrease, EdgeInsets.zero, animationValue)!
-              : _kFloatingCursorSizeIncrease;
+      final EdgeInsets sizeAdjustment = animationValue != null
+          ? EdgeInsets.lerp(_kFloatingCursorSizeIncrease, EdgeInsets.zero, animationValue)!
+          : _kFloatingCursorSizeIncrease;
       _caretPainter.floatingCursorRect = sizeAdjustment
           .inflateRect(_caretPrototype)
           .shift(boundedOffset);
@@ -2576,7 +2567,7 @@ class RenderEditable extends RenderBox
     // TODO(LongCatIsLooong): include line boundaries information in
     // ui.LineMetrics, then we can get rid of this.
     final Offset offset = _textPainter.getOffsetForCaret(startPosition, Rect.zero);
-    for (final ui.LineMetrics lineMetrics in metrics) {
+    for (final lineMetrics in metrics) {
       if (lineMetrics.baseline > offset.dy) {
         return MapEntry<int, Offset>(
           lineMetrics.lineNumber,
@@ -2921,13 +2912,15 @@ class _TextHighlightPainter extends RenderEditablePainter {
 
     highlightPaint.color = color;
     final TextPainter textPainter = renderEditable._textPainter;
-    final List<TextBox> boxes = textPainter.getBoxesForSelection(
-      TextSelection(baseOffset: range.start, extentOffset: range.end),
-      boxHeightStyle: selectionHeightStyle,
-      boxWidthStyle: selectionWidthStyle,
-    );
+    final Set<TextBox> boxes = textPainter
+        .getBoxesForSelection(
+          TextSelection(baseOffset: range.start, extentOffset: range.end),
+          boxHeightStyle: selectionHeightStyle,
+          boxWidthStyle: selectionWidthStyle,
+        )
+        .toSet();
 
-    for (final TextBox box in boxes) {
+    for (final box in boxes) {
       canvas.drawRect(
         box
             .toRect()
@@ -3051,7 +3044,7 @@ class _CaretPainter extends RenderEditablePainter {
       if (radius == null) {
         canvas.drawRect(integralRect, caretPaint);
       } else {
-        final RRect caretRRect = RRect.fromRectAndRadius(integralRect, radius);
+        final caretRRect = RRect.fromRectAndRadius(integralRect, radius);
         canvas.drawRRect(caretRRect, caretPaint);
       }
     }
@@ -3069,14 +3062,14 @@ class _CaretPainter extends RenderEditablePainter {
 
     final Rect? floatingCursorRect = this.floatingCursorRect;
 
-    final Color? caretColor =
-        floatingCursorRect == null
-            ? this.caretColor
-            : showRegularCaret
-            ? backgroundCursorColor
-            : null;
-    final TextPosition caretTextPosition =
-        floatingCursorRect == null ? selection.extent : renderEditable._floatingCursorTextPosition;
+    final Color? caretColor = floatingCursorRect == null
+        ? this.caretColor
+        : showRegularCaret
+        ? backgroundCursorColor
+        : null;
+    final TextPosition caretTextPosition = floatingCursorRect == null
+        ? selection.extent
+        : renderEditable._floatingCursorTextPosition;
 
     if (caretColor != null) {
       paintRegularCursor(canvas, renderEditable, caretColor, caretTextPosition);

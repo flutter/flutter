@@ -173,7 +173,7 @@ TEST_F(AccessibilityBridgeTest, RequestAnnounce) {
 TEST_F(AccessibilityBridgeTest, PopulatesIsKeyboardKeyAttribute) {
   flutter::SemanticsNode node0;
   node0.id = 0;
-  node0.flags = static_cast<int>(flutter::SemanticsFlags::kIsKeyboardKey);
+  node0.flags.isKeyboardKey = true;
 
   accessibility_bridge_->AddSemanticsNodeUpdate({{0, node0}}, 1.f);
   RunLoopUntilIdle();
@@ -190,28 +190,28 @@ TEST_F(AccessibilityBridgeTest, UpdatesNodeRoles) {
 
   flutter::SemanticsNode node0;
   node0.id = 0;
-  node0.flags |= static_cast<int>(flutter::SemanticsFlags::kIsButton);
+  node0.flags.isButton = true;
   node0.childrenInTraversalOrder = {1, 2, 3, 4, 5, 6, 7, 8};
   node0.childrenInHitTestOrder = {1, 2, 3, 4, 5, 6, 7, 8};
   updates.emplace(0, node0);
 
   flutter::SemanticsNode node1;
   node1.id = 1;
-  node1.flags |= static_cast<int>(flutter::SemanticsFlags::kIsHeader);
+  node1.flags.isHeader = true;
   node1.childrenInTraversalOrder = {};
   node1.childrenInHitTestOrder = {};
   updates.emplace(1, node1);
 
   flutter::SemanticsNode node2;
   node2.id = 2;
-  node2.flags |= static_cast<int>(flutter::SemanticsFlags::kIsImage);
+  node2.flags.isImage = true;
   node2.childrenInTraversalOrder = {};
   node2.childrenInHitTestOrder = {};
   updates.emplace(2, node2);
 
   flutter::SemanticsNode node3;
   node3.id = 3;
-  node3.flags |= static_cast<int>(flutter::SemanticsFlags::kIsTextField);
+  node3.flags.isTextField = true;
   node3.childrenInTraversalOrder = {};
   node3.childrenInHitTestOrder = {};
   updates.emplace(3, node3);
@@ -220,37 +220,36 @@ TEST_F(AccessibilityBridgeTest, UpdatesNodeRoles) {
   node4.childrenInTraversalOrder = {};
   node4.childrenInHitTestOrder = {};
   node4.id = 4;
-  node4.flags |= static_cast<int>(flutter::SemanticsFlags::kIsSlider);
+  node4.flags.isSlider = true;
   updates.emplace(4, node4);
 
   flutter::SemanticsNode node5;
   node5.childrenInTraversalOrder = {};
   node5.childrenInHitTestOrder = {};
   node5.id = 5;
-  node5.flags |= static_cast<int>(flutter::SemanticsFlags::kIsLink);
+  node5.flags.isLink = true;
   updates.emplace(5, node5);
 
   flutter::SemanticsNode node6;
   node6.childrenInTraversalOrder = {};
   node6.childrenInHitTestOrder = {};
   node6.id = 6;
-  node6.flags |= static_cast<int>(flutter::SemanticsFlags::kHasCheckedState);
-  node6.flags |=
-      static_cast<int>(flutter::SemanticsFlags::kIsInMutuallyExclusiveGroup);
+  node6.flags.isChecked = flutter::SemanticsCheckState::kFalse;
+  node6.flags.isInMutuallyExclusiveGroup = true;
   updates.emplace(6, node6);
 
   flutter::SemanticsNode node7;
   node7.childrenInTraversalOrder = {};
   node7.childrenInHitTestOrder = {};
   node7.id = 7;
-  node7.flags |= static_cast<int>(flutter::SemanticsFlags::kHasCheckedState);
+  node7.flags.isChecked = flutter::SemanticsCheckState::kFalse;
   updates.emplace(7, node7);
 
   flutter::SemanticsNode node8;
   node8.childrenInTraversalOrder = {};
   node8.childrenInHitTestOrder = {};
   node8.id = 8;
-  node8.flags |= static_cast<int>(flutter::SemanticsFlags::kHasToggledState);
+  node8.flags.isToggled = flutter::SemanticsTristate::kFalse;
   updates.emplace(7, node8);
 
   accessibility_bridge_->AddSemanticsNodeUpdate(std::move(updates), 1.f);
@@ -335,7 +334,7 @@ TEST_F(AccessibilityBridgeTest, DeletesChildrenTransitively) {
 TEST_F(AccessibilityBridgeTest, PopulatesRoleButton) {
   flutter::SemanticsNode node0;
   node0.id = 0;
-  node0.flags = static_cast<int>(flutter::SemanticsFlags::kIsButton);
+  node0.flags.isButton = true;
 
   accessibility_bridge_->AddSemanticsNodeUpdate({{0, node0}}, 1.f);
   RunLoopUntilIdle();
@@ -351,7 +350,7 @@ TEST_F(AccessibilityBridgeTest, PopulatesRoleButton) {
 TEST_F(AccessibilityBridgeTest, PopulatesRoleImage) {
   flutter::SemanticsNode node0;
   node0.id = 0;
-  node0.flags = static_cast<int>(flutter::SemanticsFlags::kIsImage);
+  node0.flags.isImage = true;
 
   accessibility_bridge_->AddSemanticsNodeUpdate({{0, node0}}, 1.f);
   RunLoopUntilIdle();
@@ -383,7 +382,7 @@ TEST_F(AccessibilityBridgeTest, PopulatesRoleSlider) {
 TEST_F(AccessibilityBridgeTest, PopulatesRoleHeader) {
   flutter::SemanticsNode node0;
   node0.id = 0;
-  node0.flags = static_cast<int>(flutter::SemanticsFlags::kIsHeader);
+  node0.flags.isHeader = true;
 
   accessibility_bridge_->AddSemanticsNodeUpdate({{0, node0}}, 1.f);
   RunLoopUntilIdle();
@@ -399,11 +398,9 @@ TEST_F(AccessibilityBridgeTest, PopulatesRoleHeader) {
 TEST_F(AccessibilityBridgeTest, PopulatesCheckedState) {
   flutter::SemanticsNode node0;
   node0.id = 0;
-  // HasCheckedState = true
   // IsChecked = true
   // IsSelected = false
-  node0.flags |= static_cast<int>(flutter::SemanticsFlags::kHasCheckedState);
-  node0.flags |= static_cast<int>(flutter::SemanticsFlags::kIsChecked);
+  node0.flags.isChecked = flutter::SemanticsCheckState::kTrue;
   node0.value = "value";
 
   accessibility_bridge_->AddSemanticsNodeUpdate({{0, node0}}, 1.f);
@@ -432,10 +429,9 @@ TEST_F(AccessibilityBridgeTest, PopulatesCheckedState) {
 TEST_F(AccessibilityBridgeTest, PopulatesSelectedState) {
   flutter::SemanticsNode node0;
   node0.id = 0;
-  // HasCheckedState = false
   // IsChecked = false
   // IsSelected = true
-  node0.flags = static_cast<int>(flutter::SemanticsFlags::kIsSelected);
+  node0.flags.isSelected = flutter::SemanticsTristate::kTrue;
 
   accessibility_bridge_->AddSemanticsNodeUpdate({{0, node0}}, 1.f);
   RunLoopUntilIdle();
@@ -461,8 +457,7 @@ TEST_F(AccessibilityBridgeTest, PopulatesSelectedState) {
 TEST_F(AccessibilityBridgeTest, PopulatesToggledState) {
   flutter::SemanticsNode node0;
   node0.id = 0;
-  node0.flags |= static_cast<int>(flutter::SemanticsFlags::kHasToggledState);
-  node0.flags |= static_cast<int>(flutter::SemanticsFlags::kIsToggled);
+  node0.flags.isToggled = flutter::SemanticsTristate::kTrue;
 
   accessibility_bridge_->AddSemanticsNodeUpdate({{0, node0}}, 1.f);
   RunLoopUntilIdle();
@@ -486,10 +481,7 @@ TEST_F(AccessibilityBridgeTest, PopulatesToggledState) {
 TEST_F(AccessibilityBridgeTest, PopulatesEnabledState) {
   flutter::SemanticsNode node0;
   node0.id = 0;
-  // HasEnabledState = true
-  // IsEnabled = true
-  node0.flags |= static_cast<int>(flutter::SemanticsFlags::kHasEnabledState);
-  node0.flags |= static_cast<int>(flutter::SemanticsFlags::kIsEnabled);
+  node0.flags.isEnabled = flutter::SemanticsTristate::kTrue;
   node0.value = "value";
 
   accessibility_bridge_->AddSemanticsNodeUpdate({{0, node0}}, 1.f);
@@ -516,7 +508,7 @@ TEST_F(AccessibilityBridgeTest, PopulatesEnabledState) {
 TEST_F(AccessibilityBridgeTest, ApplyViewPixelRatioToRoot) {
   flutter::SemanticsNode node0;
   node0.id = 0;
-  node0.flags = static_cast<int>(flutter::SemanticsFlags::kIsSelected);
+  node0.flags.isSelected = flutter::SemanticsTristate::kTrue;
 
   accessibility_bridge_->AddSemanticsNodeUpdate({{0, node0}}, 1.25f);
   RunLoopUntilIdle();
@@ -536,7 +528,7 @@ TEST_F(AccessibilityBridgeTest, DoesNotPopulatesHiddenState) {
   // IsChecked = false
   // IsSelected = false
   // IsHidden = true
-  node0.flags = static_cast<int>(flutter::SemanticsFlags::kIsHidden);
+  node0.flags.isHidden = true;
 
   accessibility_bridge_->AddSemanticsNodeUpdate({{0, node0}}, 1.f);
   RunLoopUntilIdle();
@@ -886,7 +878,7 @@ TEST_F(AccessibilityBridgeTest, HitTest) {
   flutter::SemanticsNode node0;
   node0.id = 0;
   node0.rect.setLTRB(0, 0, 100, 100);
-  node0.flags |= static_cast<int32_t>(flutter::SemanticsFlags::kIsFocusable);
+  node0.flags.isFocused = flutter::SemanticsTristate::kFalse;
 
   flutter::SemanticsNode node1;
   node1.id = 1;
@@ -911,7 +903,7 @@ TEST_F(AccessibilityBridgeTest, HitTest) {
   node4.id = 4;
   node4.rect.setLTRB(10, 10, 20, 20);
   node4.transform.setTranslate(20, 20, 0);
-  node4.flags |= static_cast<int32_t>(flutter::SemanticsFlags::kIsFocusable);
+  node4.flags.isFocused = flutter::SemanticsTristate::kFalse;
 
   node0.childrenInTraversalOrder = {1, 2, 3, 4};
   node0.childrenInHitTestOrder = {1, 2, 3, 4};
@@ -955,8 +947,7 @@ TEST_F(AccessibilityBridgeTest, HitTestWithPixelRatio) {
   flutter::SemanticsNode node0;
   node0.id = 0;
   node0.rect.setLTRB(0, 0, 100, 100);
-  node0.flags |= static_cast<int32_t>(flutter::SemanticsFlags::kIsFocusable);
-
+  node0.flags.isFocused = flutter::SemanticsTristate::kFalse;
   flutter::SemanticsNode node1;
   node1.id = 1;
   node1.rect.setLTRB(10, 10, 20, 20);
@@ -998,7 +989,7 @@ TEST_F(AccessibilityBridgeTest, HitTestUnfocusableChild) {
   flutter::SemanticsNode node2;
   node2.id = 2;
   node2.rect.setLTRB(50, 50, 100, 100);
-  node2.flags |= static_cast<int32_t>(flutter::SemanticsFlags::kIsFocusable);
+  node2.flags.isFocused = flutter::SemanticsTristate::kFalse;
 
   node0.childrenInTraversalOrder = {1, 2};
   node0.childrenInHitTestOrder = {1, 2};
@@ -1028,17 +1019,16 @@ TEST_F(AccessibilityBridgeTest, HitTestOverlapping) {
   flutter::SemanticsNode node0;
   node0.id = 0;
   node0.rect.setLTRB(0, 0, 100, 100);
-  node0.flags |= static_cast<int32_t>(flutter::SemanticsFlags::kIsFocusable);
-
+  node0.flags.isFocused = flutter::SemanticsTristate::kFalse;
   flutter::SemanticsNode node1;
   node1.id = 1;
   node1.rect.setLTRB(0, 0, 100, 100);
-  node1.flags |= static_cast<int32_t>(flutter::SemanticsFlags::kIsFocusable);
+  node1.flags.isFocused = flutter::SemanticsTristate::kFalse;
 
   flutter::SemanticsNode node2;
   node2.id = 2;
   node2.rect.setLTRB(25, 10, 45, 20);
-  node2.flags |= static_cast<int32_t>(flutter::SemanticsFlags::kIsFocusable);
+  node2.flags.isFocused = flutter::SemanticsTristate::kFalse;
 
   node0.childrenInTraversalOrder = {1, 2};
   node0.childrenInHitTestOrder = {2, 1};
@@ -1141,7 +1131,7 @@ TEST_F(AccessibilityBridgeTest, InspectData) {
   node0.label = "node0";
   node0.hint = "node0_hint";
   node0.value = "value";
-  node0.flags |= static_cast<int>(flutter::SemanticsFlags::kIsButton);
+  node0.flags.isButton = true;
   node0.childrenInTraversalOrder = {1};
   node0.childrenInHitTestOrder = {1};
   node0.rect.setLTRB(0, 0, 100, 100);
@@ -1149,7 +1139,7 @@ TEST_F(AccessibilityBridgeTest, InspectData) {
 
   flutter::SemanticsNode node1;
   node1.id = 1;
-  node1.flags |= static_cast<int>(flutter::SemanticsFlags::kIsHeader);
+  node1.flags.isHeader = true;
   node1.childrenInTraversalOrder = {};
   node1.childrenInHitTestOrder = {};
   updates.emplace(1, node1);

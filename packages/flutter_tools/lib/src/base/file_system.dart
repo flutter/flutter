@@ -47,10 +47,10 @@ class FileSystemUtils {
   /// directory.
   Directory getUniqueDirectory(Directory dir, String baseName) {
     final FileSystem fs = dir.fileSystem;
-    int i = 1;
+    var i = 1;
 
     while (true) {
-      final String name = '${baseName}_${i.toString().padLeft(2, '0')}';
+      final name = '${baseName}_${i.toString().padLeft(2, '0')}';
       final Directory directory = fs.directory(_fileSystem.path.join(dir.path, name));
       if (!directory.existsSync()) {
         return directory;
@@ -63,7 +63,17 @@ class FileSystemUtils {
   ///
   /// On Windows it replaces all '\' with '\\'. On other platforms, it returns the
   /// path unchanged.
-  String escapePath(String path) => _platform.isWindows ? path.replaceAll(r'\', r'\\') : path;
+  String escapePath(String path) {
+    if (_platform.isWindows) {
+      path = path.replaceAll(r'\', r'\\');
+      if (path.startsWith(RegExp('[a-z]:'))) {
+        // ensure that the drive letter is upper case see
+        // https://youtrack.jetbrains.com/issue/IDEA-329756/Importing-symlinked-Gradle-included-build-fails#focus=Comments-27-11721320.0-0
+        return path[0].toUpperCase() + path.substring(1);
+      }
+    }
+    return path;
+  }
 
   /// Returns true if the file system [entity] has not been modified since the
   /// latest modification to [referenceFile].
@@ -87,8 +97,9 @@ class FileSystemUtils {
 
   /// Return the absolute path of the user's home directory.
   String? get homeDirPath {
-    String? path =
-        _platform.isWindows ? _platform.environment['USERPROFILE'] : _platform.environment['HOME'];
+    String? path = _platform.isWindows
+        ? _platform.environment['USERPROFILE']
+        : _platform.environment['HOME'];
     if (path != null) {
       path = _fileSystem.path.absolute(path);
     }
@@ -162,10 +173,10 @@ void copyDirectory(
 
 File _getUniqueFile(Directory dir, String baseName, String ext) {
   final FileSystem fs = dir.fileSystem;
-  int i = 1;
+  var i = 1;
 
   while (true) {
-    final String name = '${baseName}_${i.toString().padLeft(2, '0')}.$ext';
+    final name = '${baseName}_${i.toString().padLeft(2, '0')}.$ext';
     final File file = fs.file(dir.fileSystem.path.join(dir.path, name));
     if (!file.existsSync()) {
       file.createSync(recursive: true);
@@ -194,14 +205,14 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
   }) : this(signals, fatalSignals, ShutdownHooks());
 
   Directory? _systemTemp;
-  final Map<ProcessSignal, Object> _signalTokens = <ProcessSignal, Object>{};
+  final _signalTokens = <ProcessSignal, Object>{};
 
   final ShutdownHooks shutdownHooks;
 
   // Indicates that `dispose()` has been invoked or some shutdown hook has executed,
   // resulting in the underlying temporary directory being cleaned up.
   bool get disposed => _disposed;
-  bool _disposed = false;
+  var _disposed = false;
 
   Future<void> dispose() async {
     _tryToDeleteTemp();

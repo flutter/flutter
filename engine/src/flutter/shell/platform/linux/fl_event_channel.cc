@@ -234,10 +234,10 @@ G_MODULE_EXPORT gboolean fl_event_channel_send_error(FlEventChannel* self,
   return TRUE;
 }
 
-G_MODULE_EXPORT gboolean fl_event_channel_send_end_of_stream(
-    FlEventChannel* self,
-    GCancellable* cancellable,
-    GError** error) {
+G_MODULE_EXPORT gboolean
+fl_event_channel_send_end_of_stream(FlEventChannel* self,
+                                    GCancellable* cancellable,
+                                    GError** error) {
   g_return_val_if_fail(FL_IS_EVENT_CHANNEL(self), FALSE);
   fl_binary_messenger_send_on_channel(self->messenger, self->name, nullptr,
                                       cancellable, nullptr, nullptr);

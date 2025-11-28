@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/build_info.dart';
 
 import '../integration.shard/test_utils.dart';
 import '../src/common.dart';
@@ -15,27 +17,22 @@ void main() {
 
   setUpAll(() {
     processManager.runSync(<String>[flutterBin, 'config', '--enable-macos-desktop']);
-
-    // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-    // See https://github.com/flutter/flutter/issues/160257 for details.
-    if (!explicitPackageDependencies.master.enabledByDefault) {
-      processManager.runSync(<String>[flutterBin, 'config', '--explicit-package-dependencies']);
-    }
   });
 
-  tearDownAll(() {
-    // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-    // See https://github.com/flutter/flutter/issues/160257 for details.
-    if (!explicitPackageDependencies.master.enabledByDefault) {
-      processManager.runSync(<String>[flutterBin, 'config', '--no-explicit-package-dependencies']);
-    }
-  });
-
-  for (final String buildMode in <String>['Debug', 'Release']) {
-    test('verify $buildMode FlutterMacOS.xcframework artifact', () {
+  for (final buildMode in <BuildMode>[BuildMode.debug, BuildMode.profile, BuildMode.release]) {
+    test('verify ${buildMode.cliName} FlutterMacOS.xcframework artifact', () {
       final String flutterRoot = getFlutterRoot();
 
-      final String artifactDir = (buildMode == 'Debug') ? 'darwin-x64' : 'darwin-x64-release';
+      final String artifactDir;
+      switch (buildMode) {
+        case BuildMode.debug:
+        case BuildMode.jitRelease:
+          artifactDir = 'darwin-x64';
+        case BuildMode.profile:
+          artifactDir = 'darwin-x64-profile';
+        case BuildMode.release:
+          artifactDir = 'darwin-x64-release';
+      }
       final Directory xcframeworkArtifact = fileSystem.directory(
         fileSystem.path.join(
           flutterRoot,
@@ -72,7 +69,39 @@ void main() {
       final String artifactStat = frameworkArtifact.statSync().mode.toRadixString(8);
       expect(artifactStat, '40755');
 
-      if (buildMode == 'Release') {
+      // Verify Info.plist has correct engine version and build mode
+      final File engineInfo = fileSystem.file(
+        fileSystem.path.join(flutterRoot, 'bin', 'cache', 'engine_stamp.json'),
+      );
+      expect(engineInfo, exists);
+
+      final String engineVersion;
+      if (json.decode(engineInfo.readAsStringSync().trim()) as Map<String, Object?> case {
+        'git_revision': final String parsedVersion,
+      }) {
+        engineVersion = parsedVersion;
+      } else {
+        fail('engine_stamp.json missing "git_revision" key');
+      }
+
+      final File infoPlist = fileSystem.file(
+        fileSystem.path.joinAll(<String>[
+          xcframeworkArtifact.path,
+          'macos-arm64_x86_64',
+          'FlutterMacOS.framework',
+          'Versions',
+          'A',
+          'Resources',
+          'Info.plist',
+        ]),
+      );
+      expect(infoPlist, exists);
+
+      final String infoPlistContents = infoPlist.readAsStringSync();
+      expect(infoPlistContents, contains(engineVersion));
+      expect(infoPlistContents, contains(buildMode.cliName));
+
+      if (buildMode == BuildMode.release) {
         final Directory dsymArtifact = fileSystem.directory(
           fileSystem.path.joinAll(<String>[
             xcframeworkArtifact.path,
@@ -91,7 +120,7 @@ void main() {
     });
   }
 
-  for (final String buildMode in <String>['Debug', 'Release']) {
+  for (final buildMode in <String>['Debug', 'Release']) {
     final String buildModeLower = buildMode.toLowerCase();
 
     test('flutter build macos --$buildModeLower builds a valid app', () {
@@ -122,7 +151,7 @@ void main() {
       podfileLock.setLastModifiedSync(DateTime.now().subtract(const Duration(days: 1)));
       expect(podfileLock.lastModifiedSync().isBefore(podfile.lastModifiedSync()), isTrue);
 
-      final List<String> buildCommand = <String>[
+      final buildCommand = <String>[
         flutterBin,
         ...getLocalEngineArguments(),
         'build',
@@ -264,7 +293,7 @@ void main() {
 }
 
 void _checkFatBinary(File file, String buildModeLower, String expectedType) {
-  final String archs = processManager.runSync(<String>['file', file.path]).stdout as String;
+  final archs = processManager.runSync(<String>['file', file.path]).stdout as String;
 
   final bool containsX64 = archs.contains('Mach-O 64-bit $expectedType x86_64');
   final bool containsArm = archs.contains('Mach-O 64-bit $expectedType arm64');

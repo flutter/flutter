@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "البحث على الويب",
   "shareButtonLabel": "مشاركة",
   "pasteButtonLabel": "لصق",
-  "selectAllButtonLabel": "اختيار الكل"
+  "selectAllButtonLabel": "اختيار الكل",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found",
+  "radioButtonUnselectedLabel": "Not selected"
 }

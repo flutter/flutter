@@ -29,7 +29,8 @@ class CardTemplate extends TokenTemplate {
   }
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends CardThemeData {
   _${blockName}DefaultsM3(this.context)
     : super(

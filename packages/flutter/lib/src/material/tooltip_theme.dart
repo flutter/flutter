@@ -309,7 +309,7 @@ class TooltipThemeData with Diagnosticable {
 /// TooltipTheme(
 ///   data: TooltipThemeData(
 ///     decoration: BoxDecoration(
-///       color: Colors.blue.withOpacity(0.9),
+///       color: Colors.blue.withValues(alpha: 0.9),
 ///       borderRadius: BorderRadius.zero,
 ///     ),
 ///   ),
@@ -338,7 +338,7 @@ class TooltipTheme extends InheritedTheme {
   /// The properties for descendant [Tooltip] widgets.
   final TooltipThemeData data;
 
-  /// Returns the ambient tooltip theme.
+  /// Retrieves the [TooltipThemeData] from the closest ancestor [TooltipTheme].
   ///
   /// The result comes from the closest [TooltipTheme] ancestor if any,
   /// and otherwise from [Theme.of] and [ThemeData.tooltipTheme].

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "export.h"
+#include "live_objects.h"
 #include "third_party/skia/include/core/SkFontMgr.h"
 #include "third_party/skia/include/ports/SkFontMgr_empty.h"
 #include "third_party/skia/modules/skparagraph/include/FontCollection.h"
@@ -15,6 +16,7 @@ using namespace skia::textlayout;
 using namespace Skwasm;
 
 SKWASM_EXPORT FlutterFontCollection* fontCollection_create() {
+  liveFontCollectionCount++;
   auto collection = sk_make_sp<FontCollection>();
   auto provider = sk_make_sp<TypefaceFontProvider>();
   collection->enableFontFallback();
@@ -26,6 +28,7 @@ SKWASM_EXPORT FlutterFontCollection* fontCollection_create() {
 }
 
 SKWASM_EXPORT void fontCollection_dispose(FlutterFontCollection* collection) {
+  liveFontCollectionCount--;
   delete collection;
 }
 
@@ -35,11 +38,13 @@ static sk_sp<SkFontMgr> default_fontmgr() {
 }
 
 SKWASM_EXPORT SkTypeface* typeface_create(SkData* fontData) {
+  liveTypefaceCount++;
   auto typeface = default_fontmgr()->makeFromData(sk_ref_sp<SkData>(fontData));
   return typeface.release();
 }
 
 SKWASM_EXPORT void typeface_dispose(SkTypeface* typeface) {
+  liveTypefaceCount--;
   typeface->unref();
 }
 
@@ -56,7 +61,8 @@ SKWASM_EXPORT int typefaces_filterCoveredCodePoints(SkTypeface** typefaces,
   int remainingCodePointCount = codePointCount;
   for (int typefaceIndex = 0; typefaceIndex < typefaceCount; typefaceIndex++) {
     typefaces[typefaceIndex]->unicharsToGlyphs(
-        codePoints, remainingCodePointCount, glyphPointer);
+        {codePoints, remainingCodePointCount},
+        {glyphPointer, remainingCodePointCount});
     int outputIndex = 0;
     for (int inputIndex = 0; inputIndex < remainingCodePointCount;
          inputIndex++) {

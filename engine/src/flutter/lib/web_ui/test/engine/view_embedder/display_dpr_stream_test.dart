@@ -26,8 +26,10 @@ void doTests() {
     });
 
     test('funnels display DPR on every mediaQuery "change" event.', () async {
-      final Future<List<double>> dprs =
-          dprStream.dprChanged.take(3).timeout(const Duration(seconds: 1)).toList();
+      final Future<List<double>> dprs = dprStream.dprChanged
+          .take(3)
+          .timeout(const Duration(seconds: 1))
+          .toList();
 
       // Simulate the events
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(6.9);

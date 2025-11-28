@@ -44,18 +44,24 @@ class CustomNetworkImage extends ImageProvider<Uri> {
 
   @override
   ImageStreamCompleter loadImage(Uri key, ImageDecoderCallback decode) {
-    final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
+    final StreamController<ImageChunkEvent> chunkEvents =
+        StreamController<ImageChunkEvent>();
     debugPrint('Fetching "$key"...');
     return MultiFrameImageStreamCompleter(
       codec: _httpClient
           .getUrl(key)
-          .then<HttpClientResponse>((HttpClientRequest request) => request.close())
+          .then<HttpClientResponse>(
+            (HttpClientRequest request) => request.close(),
+          )
           .then<Uint8List>((HttpClientResponse response) {
             return consolidateHttpClientResponseBytes(
               response,
               onBytesReceived: (int cumulative, int? total) {
                 chunkEvents.add(
-                  ImageChunkEvent(cumulativeBytesLoaded: cumulative, expectedTotalBytes: total),
+                  ImageChunkEvent(
+                    cumulativeBytesLoaded: cumulative,
+                    expectedTotalBytes: total,
+                  ),
                 );
               },
             );
@@ -72,16 +78,16 @@ class CustomNetworkImage extends ImageProvider<Uri> {
       chunkEvents: chunkEvents.stream,
       scale: 1.0,
       debugLabel: '"key"',
-      informationCollector:
-          () => <DiagnosticsNode>[
-            DiagnosticsProperty<ImageProvider>('Image provider', this),
-            DiagnosticsProperty<Uri>('URL', key),
-          ],
+      informationCollector: () => <DiagnosticsNode>[
+        DiagnosticsProperty<ImageProvider>('Image provider', this),
+        DiagnosticsProperty<Uri>('URL', key),
+      ],
     );
   }
 
   @override
-  String toString() => '${objectRuntimeType(this, 'CustomNetworkImage')}("$url")';
+  String toString() =>
+      '${objectRuntimeType(this, 'CustomNetworkImage')}("$url")';
 }
 
 void main() => runApp(const ExampleApp());

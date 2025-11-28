@@ -52,11 +52,11 @@ void main() {
     'Expect thrown exception with statusCode - evicts from cache and drains',
     () async {
       const int errorStatusCode = HttpStatus.notFound;
-      const String requestUrl = 'foo-url';
+      const requestUrl = 'foo-url';
 
       httpClient.request.response.statusCode = errorStatusCode;
 
-      final Completer<dynamic> caughtError = Completer<dynamic>();
+      final caughtError = Completer<dynamic>();
 
       final ImageProvider imageProvider = NetworkImage(nonconst(requestUrl));
       expect(imageCache.pendingImageCount, 0);
@@ -97,11 +97,11 @@ void main() {
     'Expect thrown exception with statusCode - evicts from cache and drains, when using ResizeImage',
     () async {
       const int errorStatusCode = HttpStatus.notFound;
-      const String requestUrl = 'foo-url';
+      const requestUrl = 'foo-url';
 
       httpClient.request.response.statusCode = errorStatusCode;
 
-      final Completer<dynamic> caughtError = Completer<dynamic>();
+      final caughtError = Completer<dynamic>();
 
       final ImageProvider imageProvider = ResizeImage(
         NetworkImage(nonconst(requestUrl)),
@@ -146,10 +146,10 @@ void main() {
     'Uses the HttpClient provided by debugNetworkImageHttpClientProvider if set',
     () async {
       httpClient.thrownError = 'client1';
-      final List<dynamic> capturedErrors = <dynamic>[];
+      final capturedErrors = <dynamic>[];
 
       Future<void> loadNetworkImage() async {
-        final NetworkImage networkImage = NetworkImage(nonconst('foo'));
+        final networkImage = NetworkImage(nonconst('foo'));
         final ImageStreamCompleter completer = networkImage.loadBuffer(networkImage, basicDecoder);
         completer.addListener(
           ImageStreamListener(
@@ -164,7 +164,7 @@ void main() {
 
       await loadNetworkImage();
       expect(capturedErrors, <dynamic>['client1']);
-      final _FakeHttpClient client2 = _FakeHttpClient();
+      final client2 = _FakeHttpClient();
       client2.thrownError = 'client2';
       debugNetworkImageHttpClientProvider = () => client2;
       await loadNetworkImage();
@@ -176,13 +176,13 @@ void main() {
 
   test('Propagates http client errors during resolve()', () async {
     httpClient.thrownError = Error();
-    bool uncaught = false;
+    var uncaught = false;
 
     final FlutterExceptionHandler? oldError = FlutterError.onError;
     await runZoned(
       () async {
         const ImageProvider imageProvider = NetworkImage('asdasdasdas');
-        final Completer<bool> caughtError = Completer<bool>();
+        final caughtError = Completer<bool>();
         FlutterError.onError = (FlutterErrorDetails details) {
           throw Error();
         };
@@ -198,15 +198,16 @@ void main() {
         expect(await caughtError.future, true);
       },
       zoneSpecification: ZoneSpecification(
-        handleUncaughtError: (
-          Zone zone,
-          ZoneDelegate zoneDelegate,
-          Zone parent,
-          Object error,
-          StackTrace stackTrace,
-        ) {
-          uncaught = true;
-        },
+        handleUncaughtError:
+            (
+              Zone zone,
+              ZoneDelegate zoneDelegate,
+              Zone parent,
+              Object error,
+              StackTrace stackTrace,
+            ) {
+              uncaught = true;
+            },
       ),
     );
     expect(uncaught, false);
@@ -214,12 +215,12 @@ void main() {
   });
 
   test('Notifies listeners of chunk events', () async {
-    const int chunkSize = 8;
-    final List<Uint8List> chunks = <Uint8List>[
+    const chunkSize = 8;
+    final chunks = <Uint8List>[
       for (int offset = 0; offset < kTransparentImage.length; offset += chunkSize)
         Uint8List.fromList(kTransparentImage.skip(offset).take(chunkSize).toList()),
     ];
-    final Completer<void> imageAvailable = Completer<void>();
+    final imageAvailable = Completer<void>();
 
     httpClient.request.response
       ..statusCode = HttpStatus.ok
@@ -228,7 +229,7 @@ void main() {
 
     final ImageProvider imageProvider = NetworkImage(nonconst('foo'));
     final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
-    final List<ImageChunkEvent> events = <ImageChunkEvent>[];
+    final events = <ImageChunkEvent>[];
     result.addListener(
       ImageStreamListener(
         (ImageInfo image, bool synchronousCall) {
@@ -244,7 +245,7 @@ void main() {
     );
     await imageAvailable.future;
     expect(events.length, chunks.length);
-    for (int i = 0; i < events.length; i++) {
+    for (var i = 0; i < events.length; i++) {
       expect(
         events[i].cumulativeBytesLoaded,
         math.min((i + 1) * chunkSize, kTransparentImage.length),
@@ -254,7 +255,7 @@ void main() {
   }, skip: isBrowser); // [intended] Browser loads images through <img> not Http.
 
   test('NetworkImage is evicted from cache on SocketException', () async {
-    final _FakeHttpClient mockHttpClient = _FakeHttpClient();
+    final mockHttpClient = _FakeHttpClient();
     mockHttpClient.thrownError = const SocketException('test exception');
     debugNetworkImageHttpClientProvider = () => mockHttpClient;
 
@@ -266,7 +267,7 @@ void main() {
 
     expect(imageCache.pendingImageCount, 1);
     expect(imageCache.statusForKey(imageProvider).pending, true);
-    final Completer<dynamic> caughtError = Completer<dynamic>();
+    final caughtError = Completer<dynamic>();
     result.addListener(
       ImageStreamListener(
         (ImageInfo info, bool syncCall) {},
@@ -287,10 +288,55 @@ void main() {
     debugNetworkImageHttpClientProvider = null;
   }, skip: isBrowser); // [intended] Browser does not resolve images this way.
 
+  test('Network image with same arguments uses cache', () async {
+    final mockHttpClient = _FakeHttpClient();
+    debugNetworkImageHttpClientProvider = () => mockHttpClient;
+    mockHttpClient.request.response
+      ..statusCode = HttpStatus.ok
+      ..contentLength = kTransparentImage.length
+      ..content = <Uint8List>[Uint8List.fromList(kTransparentImage)];
+
+    final imageAvailable1 = Completer<void>();
+    final ImageProvider imageProvider1 = NetworkImage(
+      nonconst('testing.url'),
+      headers: nonconst(<String, String>{'key': 'value'}),
+    );
+    expect(imageCache.liveImageCount, 0);
+
+    final ImageStream result1 = imageProvider1.resolve(ImageConfiguration.empty);
+    result1.addListener(
+      ImageStreamListener((ImageInfo image, bool synchronousCall) {
+        imageAvailable1.complete();
+      }),
+    );
+    await imageAvailable1.future;
+    expect(imageCache.liveImageCount, 1);
+
+    // NetworkImage should not make another request.
+    mockHttpClient.request.response.statusCode = HttpStatus.badRequest;
+
+    final imageAvailable2 = Completer<void>();
+    final ImageProvider imageProvider2 = NetworkImage(
+      nonconst('testing.url'),
+      headers: nonconst(<String, String>{'key': 'value'}),
+    );
+
+    final ImageStream result2 = imageProvider2.resolve(ImageConfiguration.empty);
+    result2.addListener(
+      ImageStreamListener((ImageInfo image, bool synchronousCall) {
+        imageAvailable2.complete();
+      }),
+    );
+    await imageAvailable2.future;
+    expect(imageCache.liveImageCount, 1);
+
+    debugNetworkImageHttpClientProvider = null;
+  }, skip: isBrowser); // [intended] Browser does not resolve images this way.
+
   test('Network image sets tag', () async {
-    const String url = 'http://test.png';
-    const int chunkSize = 8;
-    final List<Uint8List> chunks = <Uint8List>[
+    const url = 'http://test.png';
+    const chunkSize = 8;
+    final chunks = <Uint8List>[
       for (int offset = 0; offset < kTransparentImage.length; offset += chunkSize)
         Uint8List.fromList(kTransparentImage.skip(offset).take(chunkSize).toList()),
     ];
@@ -299,7 +345,7 @@ void main() {
       ..contentLength = kTransparentImage.length
       ..content = chunks;
 
-    const NetworkImage provider = NetworkImage(url);
+    const provider = NetworkImage(url);
 
     final ImageStreamCompleter completer = provider.loadBuffer(provider, noOpDecoderBufferCallback);
 
@@ -340,6 +386,9 @@ class _FakeHttpClientRequest extends Fake implements HttpClientRequest {
   final _FakeHttpClientResponse response = _FakeHttpClientResponse();
 
   @override
+  final HttpHeaders headers = _FakeHttpHeaders();
+
+  @override
   Future<HttpClientResponse> close() async {
     return response;
   }
@@ -377,4 +426,9 @@ class _FakeHttpClientResponse extends Fake implements HttpClientResponse {
     drained = true;
     return futureValue ?? futureValue as E; // Mirrors the implementation in Stream.
   }
+}
+
+class _FakeHttpHeaders extends Fake implements HttpHeaders {
+  @override
+  void add(String name, Object value, {bool preserveHeaderCase = false}) {}
 }

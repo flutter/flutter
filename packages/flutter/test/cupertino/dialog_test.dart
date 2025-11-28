@@ -82,7 +82,7 @@ void main() {
   });
 
   testWidgets('Taps on button calls onPressed', (WidgetTester tester) async {
-    bool didDelete = false;
+    var didDelete = false;
 
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
@@ -163,7 +163,7 @@ void main() {
   testWidgets('Taps at the padding of buttons calls onPressed', (WidgetTester tester) async {
     // Ensures that the entire button responds to hit tests, not just the text
     // part.
-    bool wasPressed = false;
+    var wasPressed = false;
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
@@ -250,7 +250,7 @@ void main() {
   });
 
   testWidgets('Taps on the content can be slided to other buttons', (WidgetTester tester) async {
-    bool wasPressed = false;
+    var wasPressed = false;
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
@@ -287,7 +287,7 @@ void main() {
   });
 
   testWidgets('Taps on the barrier can not be slided to buttons', (WidgetTester tester) async {
-    bool wasPressed = false;
+    var wasPressed = false;
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
@@ -527,7 +527,7 @@ void main() {
   ) async {
     // Legacy buttons are implemented with [GestureDetector.onTap]. Apps that
     // use customized legacy buttons should continue to work.
-    bool wasPressed = false;
+    var wasPressed = false;
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
@@ -681,7 +681,7 @@ void main() {
   });
 
   testWidgets('Has semantic annotations', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoAlertDialog(
@@ -803,7 +803,7 @@ void main() {
   testWidgets('Pressing on disabled buttons does not trigger highlight', (
     WidgetTester tester,
   ) async {
-    bool pressedEnable = false;
+    var pressedEnable = false;
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
@@ -889,7 +889,7 @@ void main() {
   testWidgets('Message is scrollable, has correct padding with large text sizes', (
     WidgetTester tester,
   ) async {
-    final ScrollController scrollController = ScrollController();
+    final scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
@@ -946,7 +946,7 @@ void main() {
   });
 
   testWidgets('Dialog respects small constraints.', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
+    final scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
@@ -975,7 +975,7 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    const double topAndBottomMargin = 40.0;
+    const topAndBottomMargin = 40.0;
     const double topAndBottomPadding = 24.0 * 2;
     const double leftAndRightPadding = 40.0 * 2;
     final Finder modalFinder = find.byType(ClipRSuperellipse);
@@ -990,7 +990,7 @@ void main() {
   testWidgets('Button list is scrollable, has correct position with large text sizes.', (
     WidgetTester tester,
   ) async {
-    final ScrollController actionScrollController = ScrollController();
+    final actionScrollController = ScrollController();
     addTearDown(actionScrollController.dispose);
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
@@ -1056,7 +1056,7 @@ void main() {
   });
 
   testWidgets('Title Section is empty, Button section is not empty.', (WidgetTester tester) async {
-    final ScrollController actionScrollController = ScrollController();
+    final actionScrollController = ScrollController();
     addTearDown(actionScrollController.dispose);
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
@@ -1101,7 +1101,7 @@ void main() {
   });
 
   testWidgets('Button section is empty, Title section is not empty.', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
+    final scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
@@ -1140,7 +1140,7 @@ void main() {
   testWidgets('Actions section height for 1 button is height of button.', (
     WidgetTester tester,
   ) async {
-    final ScrollController scrollController = ScrollController();
+    final scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
@@ -1168,7 +1168,7 @@ void main() {
   testWidgets('Actions section height for 2 side-by-side buttons is height of tallest button.', (
     WidgetTester tester,
   ) async {
-    final ScrollController scrollController = ScrollController();
+    final scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     late double dividerWidth; // Will be set when the dialog builder runs. Needs a BuildContext.
     await tester.pumpWidget(
@@ -1211,9 +1211,9 @@ void main() {
   testWidgets(
     'Actions section height for 2 stacked buttons with enough room is height of both buttons.',
     (WidgetTester tester) async {
-      final ScrollController scrollController = ScrollController();
+      final scrollController = ScrollController();
       addTearDown(scrollController.dispose);
-      const double dividerThickness = 0.3;
+      const dividerThickness = 0.3;
       await tester.pumpWidget(
         createAppWithButtonThatLaunchesDialog(
           dialogBuilder: (BuildContext context) {
@@ -1257,7 +1257,7 @@ void main() {
   testWidgets(
     'Actions section height for 2 stacked buttons without enough room and regular font is 1.5 buttons tall.',
     (WidgetTester tester) async {
-      final ScrollController scrollController = ScrollController();
+      final scrollController = ScrollController();
       addTearDown(scrollController.dispose);
       await tester.pumpWidget(
         createAppWithButtonThatLaunchesDialog(
@@ -1290,7 +1290,7 @@ void main() {
   testWidgets(
     'Actions section height for 2 stacked buttons without enough room and large accessibility font is 50% of dialog height.',
     (WidgetTester tester) async {
-      final ScrollController scrollController = ScrollController();
+      final scrollController = ScrollController();
       addTearDown(scrollController.dispose);
       await tester.pumpWidget(
         createAppWithButtonThatLaunchesDialog(
@@ -1330,7 +1330,7 @@ void main() {
   testWidgets('Actions section height for 3 buttons without enough room is 1.5 buttons tall.', (
     WidgetTester tester,
   ) async {
-    final ScrollController scrollController = ScrollController();
+    final scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
@@ -1361,14 +1361,14 @@ void main() {
     expect(option1ButtonBox.size.width, actionsSectionBox.size.width);
 
     // Expected Height = button 1 + divider + 1/2 button 2 = 67.80000000000001
-    const double expectedHeight = 67.80000000000001;
+    const expectedHeight = 67.80000000000001;
     expect(actionsSectionBox.size.height, moreOrLessEquals(expectedHeight));
   });
 
   testWidgets('Actions section correctly renders overscrolls', (WidgetTester tester) async {
     // Verifies that when the actions section overscrolls, the overscroll part
     // is correctly covered with background.
-    final ScrollController actionScrollController = ScrollController();
+    final actionScrollController = ScrollController();
     addTearDown(actionScrollController.dispose);
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
@@ -1424,7 +1424,7 @@ void main() {
   ) async {
     // When the scroll is really far, the overscroll might be longer than the
     // actions section, causing overflow if not controlled.
-    final ScrollController actionScrollController = ScrollController();
+    final actionScrollController = ScrollController();
     addTearDown(actionScrollController.dispose);
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
@@ -1697,7 +1697,7 @@ void main() {
   });
 
   testWidgets('showCupertinoDialog - custom barrierLabel', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -1738,6 +1738,60 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('showCupertinoDialog - custom barrierColor', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return Center(
+              child: Column(
+                children: <Widget>[
+                  CupertinoButton(
+                    child: const Text('Custom BarrierColor'),
+                    onPressed: () {
+                      showCupertinoDialog<void>(
+                        context: context,
+                        barrierColor: Colors.red,
+                        builder: (BuildContext context) {
+                          return CupertinoAlertDialog(
+                            title: const Text('Title'),
+                            content: const Text('Content'),
+                            actions: <Widget>[
+                              const CupertinoDialogAction(child: Text('Yes')),
+                              CupertinoDialogAction(
+                                child: const Text('No'),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Custom BarrierColor'));
+    await tester.pumpAndSettle();
+    expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, equals(Colors.red));
+
+    await tester.tap(find.text('No'));
+    await tester.pumpAndSettle();
+    expect(
+      find.byWidgetPredicate(
+        (Widget widget) => widget is ModalBarrier && widget.color == Colors.red,
+      ),
+      findsNothing,
+    );
+  });
+
   testWidgets('CupertinoDialogRoute is state restorable', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(restorationScopeId: 'app', home: _RestorableDialogTestWidget()),
@@ -1769,7 +1823,7 @@ void main() {
     'Conflicting scrollbars are not applied by ScrollBehavior to CupertinoAlertDialog',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/83819
-      final ScrollController actionScrollController = ScrollController();
+      final actionScrollController = ScrollController();
       addTearDown(actionScrollController.dispose);
       await tester.pumpWidget(
         createAppWithButtonThatLaunchesDialog(
@@ -1819,15 +1873,14 @@ void main() {
       ),
     );
 
-    final List<CupertinoScrollbar> scrollbars =
-        find
-            .descendant(
-              of: find.byType(CupertinoAlertDialog),
-              matching: find.byType(CupertinoScrollbar),
-            )
-            .evaluate()
-            .map((Element e) => e.widget as CupertinoScrollbar)
-            .toList();
+    final List<CupertinoScrollbar> scrollbars = find
+        .descendant(
+          of: find.byType(CupertinoAlertDialog),
+          matching: find.byType(CupertinoScrollbar),
+        )
+        .evaluate()
+        .map((Element e) => e.widget as CupertinoScrollbar)
+        .toList();
 
     expect(scrollbars.length, 2);
     expect(scrollbars[0].controller != scrollbars[1].controller, isTrue);
@@ -1997,9 +2050,9 @@ void main() {
   testWidgets('CupertinoAlertDialog divider spans full width and applies color', (
     WidgetTester tester,
   ) async {
-    const double kCupertinoDialogWidth = 270.0;
-    const double kDividerThickness = 0.3;
-    const Size expectedSize = Size(kCupertinoDialogWidth, kDividerThickness);
+    const kCupertinoDialogWidth = 270.0;
+    const kDividerThickness = 0.3;
+    const expectedSize = Size(kCupertinoDialogWidth, kDividerThickness);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -2028,7 +2081,7 @@ void main() {
     final Iterable<Element> elements = decoratedBoxFinder.evaluate().where((
       Element decoratedBoxElement,
     ) {
-      final DecoratedBox decoratedBox = decoratedBoxElement.widget as DecoratedBox;
+      final decoratedBox = decoratedBoxElement.widget as DecoratedBox;
       return (decoratedBox.decoration is BoxDecoration?) &&
           (decoratedBox.decoration as BoxDecoration?)?.color ==
               CupertinoDynamicColor.resolve(CupertinoColors.separator, decoratedBoxElement) &&
@@ -2038,61 +2091,126 @@ void main() {
     expect(elements.length, 1, reason: 'No DecoratedBox matches the specified criteria.');
   });
 
-  testWidgets(
-    'CupertinoDialogAction in CupertinoDialog can be focused and unfocused',
-    (WidgetTester tester) async {
-      final FocusNode focusNodeOne = FocusNode(debugLabel: 'CupertinoDialogAction One');
-      final FocusNode focusNodeTwo = FocusNode(debugLabel: 'CupertinoDialogAction Two');
-
-      addTearDown(focusNodeOne.dispose);
-      addTearDown(focusNodeTwo.dispose);
-
+  testWidgets('Check for Directionality', (WidgetTester tester) async {
+    Future<void> pumpWidget({required bool isLTR}) async {
       await tester.pumpWidget(
-        TestScaffoldApp(
-          theme: const CupertinoThemeData(brightness: Brightness.light),
-          dialog: CupertinoAlertDialog(
-            content: const Text('The content'),
-            actions: <Widget>[
+        CupertinoApp(
+          home: Directionality(
+            textDirection: isLTR ? TextDirection.ltr : TextDirection.rtl,
+            child: const CupertinoAlertDialog(
+              actions: <CupertinoDialogAction>[
+                CupertinoDialogAction(isDefaultAction: true, child: Text('No')),
+                CupertinoDialogAction(child: Text('Yes')),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await pumpWidget(isLTR: true);
+    Offset yesButton = tester.getCenter(find.text('Yes'));
+    Offset noButton = tester.getCenter(find.text('No'));
+    expect(yesButton.dx > noButton.dx, true);
+    await pumpWidget(isLTR: false);
+    yesButton = tester.getCenter(find.text('Yes'));
+    noButton = tester.getCenter(find.text('No'));
+    expect(yesButton.dx > noButton.dx, false);
+  });
+
+  testWidgets('CupertinoDialogAction.mouseCursor can customize the mouse cursor', (
+    WidgetTester tester,
+  ) async {
+    const SystemMouseCursor customCursor = SystemMouseCursors.grab;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: CupertinoAlertDialog(
+            actions: <CupertinoDialogAction>[
               CupertinoDialogAction(
+                mouseCursor: customCursor,
+                child: const Text('Yes'),
                 onPressed: () {},
-                focusNode: focusNodeOne,
-                child: const Text('One'),
-              ),
-              CupertinoDialogAction(
-                onPressed: () {},
-                focusNode: focusNodeTwo,
-                child: const Text('Two'),
               ),
             ],
           ),
         ),
-      );
+      ),
+    );
 
-      await tester.tap(find.text('Go'));
-      await tester.pumpAndSettle();
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+    await gesture.addPointer(location: const Offset(10, 10));
+    await tester.pumpAndSettle();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+    );
 
-      expect(focusNodeOne.hasPrimaryFocus, isFalse);
-      expect(focusNodeTwo.hasPrimaryFocus, isFalse);
+    final Offset actionSheetAction = tester.getCenter(find.text('Yes'));
+    await gesture.moveTo(actionSheetAction);
+    await tester.pumpAndSettle();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), customCursor);
+  });
 
-      focusNodeOne.requestFocus();
-      await tester.pumpAndSettle();
+  testWidgets('CupertinoDialogAction in CupertinoDialog can be focused and unfocused', (
+    WidgetTester tester,
+  ) async {
+    final FocusNode focusNodeOne = FocusNode(debugLabel: 'CupertinoDialogAction One');
+    final FocusNode focusNodeTwo = FocusNode(debugLabel: 'CupertinoDialogAction Two');
 
-      expect(focusNodeOne.hasPrimaryFocus, isTrue);
-      expect(focusNodeTwo.hasPrimaryFocus, isFalse);
+    addTearDown(focusNodeOne.dispose);
+    addTearDown(focusNodeTwo.dispose);
 
-      focusNodeTwo.requestFocus();
-      await tester.pumpAndSettle();
+    await tester.pumpWidget(
+      TestScaffoldApp(
+        theme: const CupertinoThemeData(brightness: Brightness.light),
+        dialog: CupertinoAlertDialog(
+          content: const Text('The content'),
+          actions: <Widget>[
+            CupertinoDialogAction(
+              onPressed: () {},
+              focusNode: focusNodeOne,
+              child: const Text('One'),
+            ),
+            CupertinoDialogAction(
+              onPressed: () {},
+              focusNode: focusNodeTwo,
+              child: const Text('Two'),
+            ),
+          ],
+        ),
+      ),
+    );
 
-      expect(focusNodeOne.hasPrimaryFocus, isFalse);
-      expect(focusNodeTwo.hasPrimaryFocus, isTrue);
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
 
-      focusNodeTwo.unfocus();
-      await tester.pumpAndSettle();
+    expect(focusNodeOne.hasPrimaryFocus, isFalse);
+    expect(focusNodeTwo.hasPrimaryFocus, isFalse);
 
-      expect(focusNodeOne.hasPrimaryFocus, isFalse);
-      expect(focusNodeTwo.hasPrimaryFocus, isFalse);
-    },
-  );
+    focusNodeOne.requestFocus();
+    await tester.pumpAndSettle();
+
+    expect(focusNodeOne.hasPrimaryFocus, isTrue);
+    expect(focusNodeTwo.hasPrimaryFocus, isFalse);
+
+    focusNodeTwo.requestFocus();
+    await tester.pumpAndSettle();
+
+    expect(focusNodeOne.hasPrimaryFocus, isFalse);
+    expect(focusNodeTwo.hasPrimaryFocus, isTrue);
+
+    focusNodeTwo.unfocus();
+    await tester.pumpAndSettle();
+
+    expect(focusNodeOne.hasPrimaryFocus, isFalse);
+    expect(focusNodeTwo.hasPrimaryFocus, isFalse);
+  });
 
   testWidgets(
     'CupertinoDialogActions in CupertinoDialog can be traversed with keyboard when onPressed is not null',
@@ -2235,10 +2353,9 @@ void main() {
 
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
-    final Color defaultLDarkFocusColor =
-        HSLColor.fromColor(
-          CupertinoColors.activeBlue.withOpacity(kCupertinoButtonTintedOpacityDark),
-        ).toColor();
+    final Color defaultLDarkFocusColor = HSLColor.fromColor(
+      CupertinoColors.activeBlue.withOpacity(kCupertinoButtonTintedOpacityDark),
+    ).toColor();
 
     await tester.pumpWidget(
       TestScaffoldApp(
@@ -2246,11 +2363,7 @@ void main() {
         dialog: CupertinoAlertDialog(
           content: const Text('The content'),
           actions: <Widget>[
-            CupertinoDialogAction(
-              onPressed: () {},
-              focusNode: focusNode,
-              child: const Text('One'),
-            ),
+            CupertinoDialogAction(onPressed: () {}, focusNode: focusNode, child: const Text('One')),
           ],
         ),
       ),
@@ -2290,10 +2403,9 @@ void main() {
 
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
-    final Color defaultLightFocusColor =
-        HSLColor.fromColor(
-          CupertinoColors.activeBlue.withOpacity(kCupertinoButtonTintedOpacityLight),
-        ).toColor();
+    final Color defaultLightFocusColor = HSLColor.fromColor(
+      CupertinoColors.activeBlue.withOpacity(kCupertinoButtonTintedOpacityLight),
+    ).toColor();
 
     await tester.pumpWidget(
       TestScaffoldApp(
@@ -2301,11 +2413,7 @@ void main() {
         dialog: CupertinoAlertDialog(
           content: const Text('The content'),
           actions: <Widget>[
-            CupertinoDialogAction(
-              onPressed: () {},
-              focusNode: focusNode,
-              child: const Text('One'),
-            ),
+            CupertinoDialogAction(onPressed: () {}, focusNode: focusNode, child: const Text('One')),
           ],
         ),
       ),
@@ -2336,121 +2444,121 @@ void main() {
     expect(getDecoration().color, isNull);
   });
 
-  testWidgets('CupertinoDialogAction has correct focused appearance in light theme when focus color is overridden', (
-    WidgetTester tester,
-  ) async {
-    final FocusNode focusNode = FocusNode(debugLabel: 'CupertinoDialogAction');
+  testWidgets(
+    'CupertinoDialogAction has correct focused appearance in light theme when focus color is overridden',
+    (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'CupertinoDialogAction');
 
-    addTearDown(focusNode.dispose);
+      addTearDown(focusNode.dispose);
 
-    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+      tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
-    const Color focusColor = Colors.teal;
+      const Color focusColor = Colors.teal;
 
-    final Color defaultLightFocusColor =
-        HSLColor.fromColor(
-          focusColor.withOpacity(kCupertinoButtonTintedOpacityLight),
-        ).toColor();
+      final Color defaultLightFocusColor = HSLColor.fromColor(
+        focusColor.withOpacity(kCupertinoButtonTintedOpacityLight),
+      ).toColor();
 
-    await tester.pumpWidget(
-      TestScaffoldApp(
-        theme: const CupertinoThemeData(brightness: Brightness.light),
-        dialog: CupertinoAlertDialog(
-          content: const Text('The content'),
-          actions: <Widget>[
-            CupertinoDialogAction(
-              onPressed: () {},
-              focusColor: focusColor,
-              focusNode: focusNode,
-              child: const Text('One'),
-            ),
-          ],
+      await tester.pumpWidget(
+        TestScaffoldApp(
+          theme: const CupertinoThemeData(brightness: Brightness.light),
+          dialog: CupertinoAlertDialog(
+            content: const Text('The content'),
+            actions: <Widget>[
+              CupertinoDialogAction(
+                onPressed: () {},
+                focusColor: focusColor,
+                focusNode: focusNode,
+                child: const Text('One'),
+              ),
+            ],
+          ),
         ),
-      ),
-    );
-
-    await tester.tap(find.text('Go'));
-    await tester.pumpAndSettle();
-
-    BoxDecoration getDecoration() {
-      final Finder decoratedBoxFinder = find.descendant(
-        of: find.byType(CupertinoDialogAction),
-        matching: find.byType(DecoratedBox),
       );
 
-      return tester.widget<DecoratedBox>(decoratedBoxFinder).decoration as BoxDecoration;
-    }
+      await tester.tap(find.text('Go'));
+      await tester.pumpAndSettle();
 
-    expect(getDecoration().color, isNull);
+      BoxDecoration getDecoration() {
+        final Finder decoratedBoxFinder = find.descendant(
+          of: find.byType(CupertinoDialogAction),
+          matching: find.byType(DecoratedBox),
+        );
 
-    focusNode.requestFocus();
-    await tester.pumpAndSettle();
+        return tester.widget<DecoratedBox>(decoratedBoxFinder).decoration as BoxDecoration;
+      }
 
-    expect(getDecoration().color, defaultLightFocusColor);
+      expect(getDecoration().color, isNull);
 
-    focusNode.unfocus();
-    await tester.pumpAndSettle();
+      focusNode.requestFocus();
+      await tester.pumpAndSettle();
 
-    expect(getDecoration().color, isNull);
-  });
+      expect(getDecoration().color, defaultLightFocusColor);
 
-  testWidgets('CupertinoDialogAction has correct focused appearance in dark theme when focus color is overridden', (
-    WidgetTester tester,
-  ) async {
-    final FocusNode focusNode = FocusNode(debugLabel: 'CupertinoDialogAction');
+      focusNode.unfocus();
+      await tester.pumpAndSettle();
 
-    addTearDown(focusNode.dispose);
+      expect(getDecoration().color, isNull);
+    },
+  );
 
-    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+  testWidgets(
+    'CupertinoDialogAction has correct focused appearance in dark theme when focus color is overridden',
+    (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'CupertinoDialogAction');
 
-    const Color focusColor = Colors.teal;
+      addTearDown(focusNode.dispose);
 
-    final Color defaultDarkFocusColor =
-        HSLColor.fromColor(
-          focusColor.withOpacity(kCupertinoButtonTintedOpacityDark),
-        ).toColor();
+      tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
-    await tester.pumpWidget(
-      TestScaffoldApp(
-        theme: const CupertinoThemeData(brightness: Brightness.dark),
-        dialog: CupertinoAlertDialog(
-          content: const Text('The content'),
-          actions: <Widget>[
-            CupertinoDialogAction(
-              onPressed: () {},
-              focusColor: focusColor,
-              focusNode: focusNode,
-              child: const Text('One'),
-            ),
-          ],
+      const Color focusColor = Colors.teal;
+
+      final Color defaultDarkFocusColor = HSLColor.fromColor(
+        focusColor.withOpacity(kCupertinoButtonTintedOpacityDark),
+      ).toColor();
+
+      await tester.pumpWidget(
+        TestScaffoldApp(
+          theme: const CupertinoThemeData(brightness: Brightness.dark),
+          dialog: CupertinoAlertDialog(
+            content: const Text('The content'),
+            actions: <Widget>[
+              CupertinoDialogAction(
+                onPressed: () {},
+                focusColor: focusColor,
+                focusNode: focusNode,
+                child: const Text('One'),
+              ),
+            ],
+          ),
         ),
-      ),
-    );
-
-    await tester.tap(find.text('Go'));
-    await tester.pumpAndSettle();
-
-    BoxDecoration getDecoration() {
-      final Finder decoratedBoxFinder = find.descendant(
-        of: find.byType(CupertinoDialogAction),
-        matching: find.byType(DecoratedBox),
       );
 
-      return tester.widget<DecoratedBox>(decoratedBoxFinder).decoration as BoxDecoration;
-    }
+      await tester.tap(find.text('Go'));
+      await tester.pumpAndSettle();
 
-    expect(getDecoration().color, isNull);
+      BoxDecoration getDecoration() {
+        final Finder decoratedBoxFinder = find.descendant(
+          of: find.byType(CupertinoDialogAction),
+          matching: find.byType(DecoratedBox),
+        );
 
-    focusNode.requestFocus();
-    await tester.pumpAndSettle();
+        return tester.widget<DecoratedBox>(decoratedBoxFinder).decoration as BoxDecoration;
+      }
 
-    expect(getDecoration().color, defaultDarkFocusColor);
+      expect(getDecoration().color, isNull);
 
-    focusNode.unfocus();
-    await tester.pumpAndSettle();
+      focusNode.requestFocus();
+      await tester.pumpAndSettle();
 
-    expect(getDecoration().color, isNull);
-  });
+      expect(getDecoration().color, defaultDarkFocusColor);
+
+      focusNode.unfocus();
+      await tester.pumpAndSettle();
+
+      expect(getDecoration().color, isNull);
+    },
+  );
 }
 
 RenderBox findActionButtonRenderBoxByTitle(WidgetTester tester, String title) {
@@ -2493,7 +2601,9 @@ Widget boilerplate(Widget child) {
 }
 
 Widget createAppWithCenteredButton(Widget child) {
-  return CupertinoApp(home: Center(child: CupertinoButton(onPressed: null, child: child)));
+  return CupertinoApp(
+    home: Center(child: CupertinoButton(onPressed: null, child: child)),
+  );
 }
 
 @pragma('vm:entry-point')
@@ -2539,6 +2649,7 @@ class _RestorableDialogTestWidget extends StatelessWidget {
 // The `theme` will be applied to the app and determines the background.
 class TestScaffoldApp extends StatefulWidget {
   const TestScaffoldApp({super.key, required this.theme, required this.dialog});
+
   final CupertinoThemeData theme;
   final Widget dialog;
 
@@ -2559,28 +2670,26 @@ class TestScaffoldAppState extends State<TestScaffoldApp> {
       debugShowCheckedModeBanner: false,
       theme: widget.theme,
       home: Builder(
-        builder:
-            (BuildContext context) => CupertinoPageScaffold(
-              child: Center(
-                child:
-                    _pressedButton
-                        ? Container()
-                        : CupertinoButton(
-                          onPressed: () {
-                            setState(() {
-                              _pressedButton = true;
-                            });
-                            showCupertinoDialog<void>(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return widget.dialog;
-                              },
-                            );
-                          },
-                          child: const Text('Go'),
-                        ),
-              ),
-            ),
+        builder: (BuildContext context) => CupertinoPageScaffold(
+          child: Center(
+            child: _pressedButton
+                ? Container()
+                : CupertinoButton(
+                    onPressed: () {
+                      setState(() {
+                        _pressedButton = true;
+                      });
+                      showCupertinoDialog<void>(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return widget.dialog;
+                        },
+                      );
+                    },
+                    child: const Text('Go'),
+                  ),
+          ),
+        ),
       ),
     );
   }

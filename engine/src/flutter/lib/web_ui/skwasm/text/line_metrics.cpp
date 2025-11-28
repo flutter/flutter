@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "../export.h"
+#include "../live_objects.h"
 #include "third_party/skia/modules/skparagraph/include/Paragraph.h"
 
 using namespace skia::textlayout;
@@ -16,6 +17,7 @@ SKWASM_EXPORT LineMetrics* lineMetrics_create(bool hardBreak,
                                               double left,
                                               double baseline,
                                               size_t lineNumber) {
+  liveLineMetricsCount++;
   auto metrics = new LineMetrics();
   metrics->fHardBreak = hardBreak;
   metrics->fAscent = ascent;
@@ -30,6 +32,7 @@ SKWASM_EXPORT LineMetrics* lineMetrics_create(bool hardBreak,
 }
 
 SKWASM_EXPORT void lineMetrics_dispose(LineMetrics* metrics) {
+  liveLineMetricsCount--;
   delete metrics;
 }
 

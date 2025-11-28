@@ -8,7 +8,11 @@ import 'package:flutter/services.dart';
 /// Flutter code sample for [Action.overridable].
 
 void main() {
-  runApp(const MaterialApp(home: Scaffold(body: Center(child: VerificationCodeGenerator()))));
+  runApp(
+    const MaterialApp(
+      home: Scaffold(body: Center(child: VerificationCodeGenerator())),
+    ),
+  );
 }
 
 const CopyTextIntent copyTextIntent = CopyTextIntent._();
@@ -22,13 +26,13 @@ class CopyableText extends StatelessWidget {
 
   final String text;
 
-  void _copy(CopyTextIntent intent) => Clipboard.setData(ClipboardData(text: text));
+  void _copy(CopyTextIntent intent) =>
+      Clipboard.setData(ClipboardData(text: text));
 
   @override
   Widget build(BuildContext context) {
-    final Action<CopyTextIntent> defaultCopyAction = CallbackAction<CopyTextIntent>(
-      onInvoke: _copy,
-    );
+    final Action<CopyTextIntent> defaultCopyAction =
+        CallbackAction<CopyTextIntent>(onInvoke: _copy);
     return Shortcuts(
       shortcuts: const <ShortcutActivator, Intent>{
         SingleActivator(LogicalKeyboardKey.keyC, control: true): copyTextIntent,

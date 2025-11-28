@@ -18,10 +18,10 @@ if (use_rbe) {
   local_wrapper =
       rebase_path("//flutter/build/rbe/local_wrapper.sh", root_build_dir)
   compiler_args = rewrapper_command + [
-    "--remote_wrapper=$remote_wrapper",
-    "--local_wrapper=$local_wrapper",
-    "--labels=type=compile,compiler=clang,lang=cpp ",
-  ]
+                    "--remote_wrapper=$remote_wrapper",
+                    "--local_wrapper=$local_wrapper",
+                    "--labels=type=compile,compiler=clang,lang=cpp ",
+                  ]
   compiler_prefix = string_join(" ", compiler_args)
   link_prefix = ""
 } else if (use_ccache) {
@@ -132,23 +132,6 @@ gcc_toolchain("clang_x86") {
   toolchain_cpu = "x86"
   toolchain_os = "linux"
   is_clang = true
-}
-
-gcc_toolchain("x86") {
-  prefix = ""
-  asm = "${prefix}gcc"
-  cc = "${compiler_prefix}${prefix}gcc"
-  cxx = "${compiler_prefix}${prefix}g++"
-
-  readelf = "${prefix}readelf"
-  nm = "${prefix}nm"
-  ar = "${prefix}ar"
-  ld = "${link_prefix}${prefix}g++"
-  strip = "${prefix}strip"
-
-  toolchain_cpu = "x86"
-  toolchain_os = "linux"
-  is_clang = false
 }
 
 gcc_toolchain("clang_x64") {

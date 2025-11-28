@@ -5,9 +5,11 @@
 #ifndef FLUTTER_IMPELLER_TOOLKIT_INTEROP_PATH_BUILDER_H_
 #define FLUTTER_IMPELLER_TOOLKIT_INTEROP_PATH_BUILDER_H_
 
-#include "flutter/third_party/skia/include/core/SkPath.h"
-#include "impeller/geometry/path.h"
-#include "impeller/geometry/path_builder.h"
+#include "flutter/third_party/skia/include/core/SkPathBuilder.h"
+#include "impeller/geometry/path_source.h"
+#include "impeller/geometry/point.h"
+#include "impeller/geometry/rect.h"
+#include "impeller/geometry/rounding_radii.h"
 #include "impeller/toolkit/interop/impeller.h"
 #include "impeller/toolkit/interop/object.h"
 #include "impeller/toolkit/interop/path.h"
@@ -51,7 +53,7 @@ class PathBuilder final
   ScopedObject<Path> CopyPath(FillType fill);
 
  private:
-  SkPath builder_;
+  SkPathBuilder builder_;
 };
 
 }  // namespace impeller::interop

@@ -68,6 +68,10 @@ impeller_shaders("shader_fixtures") {
     "texture.vert",
   ]
 
+  if (impeller_enable_vulkan) {
+    vulkan_exclusions = [ "half.frag" ]
+  }
+
   if (impeller_enable_opengles) {
     gles_exclusions = [
       "sample.comp",
@@ -79,15 +83,20 @@ impeller_shaders("shader_fixtures") {
 }
 
 impellerc("runtime_stages") {
+  mnemonic = "IMPELLERC_IPLR"
   shaders = [
     "ink_sparkle.frag",
     "runtime_stage_example.frag",
     "runtime_stage_filter_example.frag",
+    "interop_runtime_stage_cs.frag",
     "runtime_stage_simple.frag",
     "runtime_stage_position.frag",
+    "runtime_stage_filter_circle.frag",
+    "runtime_stage_filter_warp.frag",
     "gradient.frag",
     "uniforms_and_sampler_1.frag",
     "uniforms_and_sampler_2.frag",
+    "runtime_stage_border.frag",
   ]
   sl_file_extension = "iplr"
 
@@ -122,10 +131,12 @@ test_fixtures("file_fixtures") {
     "monkey.png",
     "multiple_stages.hlsl",
     "nine_patch_corners.png",
+    "nine_patch2.png",
     "resources_limit.vert",
     "sample.comp",
     "sample.frag",
     "sample.vert",
+    "check_gles_definition.frag",
     "sample_with_binding.vert",
     "simple.vert.hlsl",
     "sa%m#ple.vert",

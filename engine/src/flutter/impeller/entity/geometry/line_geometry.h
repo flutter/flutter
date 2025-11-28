@@ -11,7 +11,7 @@ namespace impeller {
 
 class LineGeometry final : public Geometry {
  public:
-  explicit LineGeometry(Point p0, Point p1, Scalar width, Cap cap);
+  explicit LineGeometry(Point p0, Point p1, const StrokeParameters& stroke);
 
   ~LineGeometry() override;
 

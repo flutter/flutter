@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,7 +14,7 @@ import '../widgets/semantics_tester.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  final MockClipboard mockClipboard = MockClipboard();
+  final mockClipboard = MockClipboard();
 
   setUp(() async {
     // Fill the clipboard so that the Paste option is available in the text
@@ -32,7 +34,7 @@ void main() {
   });
 
   testWidgets('Changing query moves cursor to the end of query', (WidgetTester tester) async {
-    final _TestSearchDelegate delegate = _TestSearchDelegate();
+    final delegate = _TestSearchDelegate();
     addTearDown(() => delegate.dispose());
 
     await tester.pumpWidget(TestHomePage(delegate: delegate));
@@ -54,9 +56,9 @@ void main() {
   });
 
   testWidgets('Can open and close search', (WidgetTester tester) async {
-    final _TestSearchDelegate delegate = _TestSearchDelegate();
+    final delegate = _TestSearchDelegate();
     addTearDown(() => delegate.dispose());
-    final List<String> selectedResults = <String>[];
+    final selectedResults = <String>[];
 
     await tester.pumpWidget(TestHomePage(delegate: delegate, results: selectedResults));
 
@@ -92,9 +94,9 @@ void main() {
   ) async {
     // regression test for https://github.com/flutter/flutter/issues/18145
 
-    final _TestSearchDelegate delegate = _TestSearchDelegate();
+    final delegate = _TestSearchDelegate();
     addTearDown(() => delegate.dispose());
-    final List<String?> selectedResults = <String?>[];
+    final selectedResults = <String?>[];
 
     await tester.pumpWidget(TestHomePage(delegate: delegate, results: selectedResults));
 
@@ -137,9 +139,50 @@ void main() {
     expect(find.text('Suggestions'), findsOneWidget);
   });
 
+  testWidgets('Can close search with escape button and return null', (WidgetTester tester) async {
+    final delegate = _TestSearchDelegate();
+    addTearDown(() => delegate.dispose());
+    final selectedResults = <String?>[];
+
+    await tester.pumpWidget(TestHomePage(delegate: delegate, results: selectedResults));
+
+    // We are on the homepage.
+    expect(find.text('HomeBody'), findsOneWidget);
+    expect(find.text('HomeTitle'), findsOneWidget);
+    expect(find.text('Suggestions'), findsNothing);
+
+    // Open search.
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('HomeBody'), findsNothing);
+    expect(find.text('HomeTitle'), findsNothing);
+    expect(find.text('Suggestions'), findsOneWidget);
+    expect(find.text('Bottom'), findsOneWidget);
+
+    // Simulate escape button.
+    await simulateKeyDownEvent(LogicalKeyboardKey.escape, platform: 'windows');
+    await tester.pumpAndSettle();
+
+    expect(selectedResults, <String?>[null]);
+
+    // We are on the homepage again.
+    expect(find.text('HomeBody'), findsOneWidget);
+    expect(find.text('HomeTitle'), findsOneWidget);
+    expect(find.text('Suggestions'), findsNothing);
+
+    // Open search again.
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('HomeBody'), findsNothing);
+    expect(find.text('HomeTitle'), findsNothing);
+    expect(find.text('Suggestions'), findsOneWidget);
+  });
+
   testWidgets('Hint text color overridden', (WidgetTester tester) async {
-    const String searchHintText = 'Enter search terms';
-    final _TestSearchDelegate delegate = _TestSearchDelegate(searchHint: searchHintText);
+    const searchHintText = 'Enter search terms';
+    final delegate = _TestSearchDelegate(searchHint: searchHintText);
     addTearDown(() => delegate.dispose());
 
     await tester.pumpWidget(TestHomePage(delegate: delegate));
@@ -151,7 +194,7 @@ void main() {
   });
 
   testWidgets('Requests suggestions', (WidgetTester tester) async {
-    final _TestSearchDelegate delegate = _TestSearchDelegate();
+    final delegate = _TestSearchDelegate();
     addTearDown(() => delegate.dispose());
 
     await tester.pumpWidget(TestHomePage(delegate: delegate));
@@ -179,9 +222,9 @@ void main() {
   });
 
   testWidgets('Shows Results and closes search', (WidgetTester tester) async {
-    final _TestSearchDelegate delegate = _TestSearchDelegate();
+    final delegate = _TestSearchDelegate();
     addTearDown(() => delegate.dispose());
-    final List<String> selectedResults = <String>[];
+    final selectedResults = <String>[];
 
     await tester.pumpWidget(TestHomePage(delegate: delegate, results: selectedResults));
     await tester.tap(find.byTooltip('Search'));
@@ -213,7 +256,7 @@ void main() {
   });
 
   testWidgets('Can switch between results and suggestions', (WidgetTester tester) async {
-    final _TestSearchDelegate delegate = _TestSearchDelegate();
+    final delegate = _TestSearchDelegate();
     addTearDown(() => delegate.dispose());
 
     await tester.pumpWidget(TestHomePage(delegate: delegate));
@@ -282,7 +325,7 @@ void main() {
   });
 
   testWidgets('Fresh search always starts with empty query', (WidgetTester tester) async {
-    final _TestSearchDelegate delegate = _TestSearchDelegate();
+    final delegate = _TestSearchDelegate();
     addTearDown(() => delegate.dispose());
 
     await tester.pumpWidget(TestHomePage(delegate: delegate));
@@ -301,7 +344,7 @@ void main() {
   });
 
   testWidgets('Initial queries are honored', (WidgetTester tester) async {
-    final _TestSearchDelegate delegate = _TestSearchDelegate();
+    final delegate = _TestSearchDelegate();
     addTearDown(() => delegate.dispose());
 
     expect(delegate.query, '');
@@ -316,7 +359,7 @@ void main() {
   });
 
   testWidgets('Initial query null re-used previous query', (WidgetTester tester) async {
-    final _TestSearchDelegate delegate = _TestSearchDelegate();
+    final delegate = _TestSearchDelegate();
     addTearDown(() => delegate.dispose());
 
     delegate.query = 'Foo';
@@ -329,7 +372,7 @@ void main() {
   });
 
   testWidgets('Changing query shows up in search field', (WidgetTester tester) async {
-    final _TestSearchDelegate delegate = _TestSearchDelegate();
+    final delegate = _TestSearchDelegate();
     addTearDown(() => delegate.dispose());
 
     await tester.pumpWidget(TestHomePage(delegate: delegate, passInInitialQuery: true));
@@ -348,7 +391,7 @@ void main() {
   });
 
   testWidgets('transitionAnimation runs while search fades in/out', (WidgetTester tester) async {
-    final _TestSearchDelegate delegate = _TestSearchDelegate();
+    final delegate = _TestSearchDelegate();
     addTearDown(() => delegate.dispose());
 
     await tester.pumpWidget(TestHomePage(delegate: delegate, passInInitialQuery: true));
@@ -374,15 +417,15 @@ void main() {
   });
 
   testWidgets('Closing nested search returns to search', (WidgetTester tester) async {
-    final List<String?> nestedSearchResults = <String?>[];
-    final _TestSearchDelegate nestedSearchDelegate = _TestSearchDelegate(
+    final nestedSearchResults = <String?>[];
+    final nestedSearchDelegate = _TestSearchDelegate(
       suggestions: 'Nested Suggestions',
       result: 'Nested Result',
     );
     addTearDown(nestedSearchDelegate.dispose);
 
-    final List<String> selectedResults = <String>[];
-    final _TestSearchDelegate delegate = _TestSearchDelegate(
+    final selectedResults = <String>[];
+    final delegate = _TestSearchDelegate(
       actions: <Widget>[
         Builder(
           builder: (BuildContext context) {
@@ -441,8 +484,8 @@ void main() {
   ) async {
     late _TestSearchDelegate delegate;
     addTearDown(() => delegate.dispose());
-    final List<String?> nestedSearchResults = <String?>[];
-    final _TestSearchDelegate nestedSearchDelegate = _TestSearchDelegate(
+    final nestedSearchResults = <String?>[];
+    final nestedSearchDelegate = _TestSearchDelegate(
       suggestions: 'Nested Suggestions',
       result: 'Nested Result',
       actions: <Widget>[
@@ -461,7 +504,7 @@ void main() {
     );
     addTearDown(nestedSearchDelegate.dispose);
 
-    final List<String> selectedResults = <String>[];
+    final selectedResults = <String>[];
     delegate = _TestSearchDelegate(
       actions: <Widget>[
         Builder(
@@ -510,10 +553,10 @@ void main() {
   });
 
   testWidgets('Custom searchFieldLabel value', (WidgetTester tester) async {
-    const String searchHint = 'custom search hint';
+    const searchHint = 'custom search hint';
     final String defaultSearchHint = const DefaultMaterialLocalizations().searchFieldLabel;
 
-    final _TestSearchDelegate delegate = _TestSearchDelegate(searchHint: searchHint);
+    final delegate = _TestSearchDelegate(searchHint: searchHint);
     addTearDown(() => delegate.dispose());
 
     await tester.pumpWidget(TestHomePage(delegate: delegate));
@@ -529,7 +572,7 @@ void main() {
   ) async {
     final String searchHint = const DefaultMaterialLocalizations().searchFieldLabel;
 
-    final _TestSearchDelegate delegate = _TestSearchDelegate();
+    final delegate = _TestSearchDelegate();
     addTearDown(() => delegate.dispose());
 
     await tester.pumpWidget(TestHomePage(delegate: delegate));
@@ -540,10 +583,10 @@ void main() {
   });
 
   testWidgets('Custom searchFieldStyle value', (WidgetTester tester) async {
-    const String searchHintText = 'Enter search terms';
-    const TextStyle searchFieldStyle = TextStyle(color: Colors.red, fontSize: 3);
+    const searchHintText = 'Enter search terms';
+    const searchFieldStyle = TextStyle(color: Colors.red, fontSize: 3);
 
-    final _TestSearchDelegate delegate = _TestSearchDelegate(
+    final delegate = _TestSearchDelegate(
       searchHint: searchHintText,
       searchFieldStyle: searchFieldStyle,
     );
@@ -563,7 +606,7 @@ void main() {
   });
 
   testWidgets('Default autocorrect and enableSuggestions value', (WidgetTester tester) async {
-    final _TestSearchDelegate delegate = _TestSearchDelegate();
+    final delegate = _TestSearchDelegate();
     addTearDown(() => delegate.dispose());
 
     await tester.pumpWidget(TestHomePage(delegate: delegate));
@@ -577,7 +620,7 @@ void main() {
   });
 
   testWidgets('Custom autocorrect value', (WidgetTester tester) async {
-    final _TestSearchDelegate delegate = _TestSearchDelegate(autocorrect: false);
+    final delegate = _TestSearchDelegate(autocorrect: false);
     addTearDown(() => delegate.dispose());
 
     await tester.pumpWidget(TestHomePage(delegate: delegate));
@@ -590,7 +633,7 @@ void main() {
   });
 
   testWidgets('Custom enableSuggestions value', (WidgetTester tester) async {
-    final _TestSearchDelegate delegate = _TestSearchDelegate(enableSuggestions: false);
+    final delegate = _TestSearchDelegate(enableSuggestions: false);
     addTearDown(() => delegate.dispose());
 
     await tester.pumpWidget(TestHomePage(delegate: delegate));
@@ -603,7 +646,7 @@ void main() {
   });
 
   testWidgets('keyboard show search button by default', (WidgetTester tester) async {
-    final _TestSearchDelegate delegate = _TestSearchDelegate();
+    final delegate = _TestSearchDelegate();
     addTearDown(() => delegate.dispose());
 
     await tester.pumpWidget(TestHomePage(delegate: delegate));
@@ -618,7 +661,7 @@ void main() {
   testWidgets('Custom textInputAction results in keyboard with corresponding button', (
     WidgetTester tester,
   ) async {
-    final _TestSearchDelegate delegate = _TestSearchDelegate(textInputAction: TextInputAction.done);
+    final delegate = _TestSearchDelegate(textInputAction: TextInputAction.done);
     addTearDown(() => delegate.dispose());
 
     await tester.pumpWidget(TestHomePage(delegate: delegate));
@@ -630,7 +673,7 @@ void main() {
 
   testWidgets('Custom flexibleSpace value', (WidgetTester tester) async {
     const Widget flexibleSpace = Text('custom flexibleSpace');
-    final _TestSearchDelegate delegate = _TestSearchDelegate(flexibleSpace: flexibleSpace);
+    final delegate = _TestSearchDelegate(flexibleSpace: flexibleSpace);
     addTearDown(() => delegate.dispose());
 
     await tester.pumpWidget(TestHomePage(delegate: delegate));
@@ -651,60 +694,65 @@ void main() {
       final bool isCupertino =
           debugDefaultTargetPlatformOverride == TargetPlatform.iOS ||
           debugDefaultTargetPlatformOverride == TargetPlatform.macOS;
-      final TestSemantics textField =
-          kIsWeb
-              ? TestSemantics(
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isHeader,
-                  if (!isCupertino) SemanticsFlag.namesRoute,
-                ],
-                children: <TestSemantics>[
-                  TestSemantics(
-                    id: 9,
-                    flags: <SemanticsFlag>[
-                      SemanticsFlag.isTextField,
-                      SemanticsFlag.hasEnabledState,
-                      SemanticsFlag.isEnabled,
-                      SemanticsFlag.isFocused,
-                    ],
-                    actions: <SemanticsAction>[
-                      if (isDesktop) SemanticsAction.didGainAccessibilityFocus,
-                      if (isDesktop) SemanticsAction.didLoseAccessibilityFocus,
-                      SemanticsAction.tap,
-                      SemanticsAction.focus,
-                      SemanticsAction.setSelection,
-                      SemanticsAction.setText,
-                      SemanticsAction.paste,
-                    ],
-                    label: 'Search',
-                    textDirection: TextDirection.ltr,
-                    textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
-                  ),
-                ],
-              )
-              : TestSemantics(
-                id: 9,
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isTextField,
-                  SemanticsFlag.hasEnabledState,
-                  SemanticsFlag.isEnabled,
-                  SemanticsFlag.isFocused,
-                  SemanticsFlag.isHeader,
-                  if (!isCupertino) SemanticsFlag.namesRoute,
-                ],
-                actions: <SemanticsAction>[
-                  if (isDesktop) SemanticsAction.didGainAccessibilityFocus,
-                  if (isDesktop) SemanticsAction.didLoseAccessibilityFocus,
-                  SemanticsAction.tap,
-                  SemanticsAction.focus,
-                  SemanticsAction.setSelection,
-                  SemanticsAction.setText,
-                  SemanticsAction.paste,
-                ],
-                label: 'Search',
-                textDirection: TextDirection.ltr,
-                textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
-              );
+      final textField = kIsWeb
+          ? TestSemantics(
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isHeader,
+                if (!isCupertino) SemanticsFlag.namesRoute,
+              ],
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 9,
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isEnabled,
+                    SemanticsFlag.isFocused,
+                    SemanticsFlag.isFocusable,
+                  ],
+                  actions: <SemanticsAction>[
+                    if (isDesktop) SemanticsAction.didGainAccessibilityFocus,
+                    if (isDesktop) SemanticsAction.didLoseAccessibilityFocus,
+                    SemanticsAction.tap,
+                    SemanticsAction.focus,
+                    SemanticsAction.setSelection,
+                    SemanticsAction.setText,
+                    SemanticsAction.paste,
+                  ],
+                  label: 'Search',
+                  currentValueLength: 0,
+                  inputType: SemanticsInputType.search,
+                  textDirection: TextDirection.ltr,
+                  textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
+                ),
+              ],
+            )
+          : TestSemantics(
+              id: 9,
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isTextField,
+                SemanticsFlag.hasEnabledState,
+                SemanticsFlag.isEnabled,
+                SemanticsFlag.isFocused,
+                SemanticsFlag.isFocusable,
+                SemanticsFlag.isHeader,
+                if (!isCupertino) SemanticsFlag.namesRoute,
+              ],
+              actions: <SemanticsAction>[
+                if (isDesktop) SemanticsAction.didGainAccessibilityFocus,
+                if (isDesktop) SemanticsAction.didLoseAccessibilityFocus,
+                SemanticsAction.tap,
+                SemanticsAction.focus,
+                SemanticsAction.setSelection,
+                SemanticsAction.setText,
+                SemanticsAction.paste,
+              ],
+              label: 'Search',
+              currentValueLength: 0,
+              inputType: SemanticsInputType.search,
+              textDirection: TextDirection.ltr,
+              textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
+            );
 
       return TestSemantics.root(
         children: <TestSemantics>[
@@ -789,8 +837,8 @@ void main() {
     }
 
     testWidgets('includes routeName on Android', (WidgetTester tester) async {
-      final SemanticsTester semantics = SemanticsTester(tester);
-      final _TestSearchDelegate delegate = _TestSearchDelegate(flexibleSpace: flexibleSpace);
+      final semantics = SemanticsTester(tester);
+      final delegate = _TestSearchDelegate(flexibleSpace: flexibleSpace);
       addTearDown(() => delegate.dispose());
 
       await tester.pumpWidget(TestHomePage(delegate: delegate));
@@ -814,8 +862,8 @@ void main() {
     testWidgets(
       'does not include routeName',
       (WidgetTester tester) async {
-        final SemanticsTester semantics = SemanticsTester(tester);
-        final _TestSearchDelegate delegate = _TestSearchDelegate(flexibleSpace: flexibleSpace);
+        final semantics = SemanticsTester(tester);
+        final delegate = _TestSearchDelegate(flexibleSpace: flexibleSpace);
         addTearDown(() => delegate.dispose());
 
         await tester.pumpWidget(TestHomePage(delegate: delegate));
@@ -851,60 +899,65 @@ void main() {
       final bool isCupertino =
           debugDefaultTargetPlatformOverride == TargetPlatform.iOS ||
           debugDefaultTargetPlatformOverride == TargetPlatform.macOS;
-      final TestSemantics textField =
-          kIsWeb
-              ? TestSemantics(
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isHeader,
-                  if (!isCupertino) SemanticsFlag.namesRoute,
-                ],
-                children: <TestSemantics>[
-                  TestSemantics(
-                    id: 11,
-                    flags: <SemanticsFlag>[
-                      SemanticsFlag.isTextField,
-                      SemanticsFlag.hasEnabledState,
-                      SemanticsFlag.isEnabled,
-                      SemanticsFlag.isFocused,
-                    ],
-                    actions: <SemanticsAction>[
-                      if (isDesktop) SemanticsAction.didGainAccessibilityFocus,
-                      if (isDesktop) SemanticsAction.didLoseAccessibilityFocus,
-                      SemanticsAction.tap,
-                      SemanticsAction.focus,
-                      SemanticsAction.setSelection,
-                      SemanticsAction.setText,
-                      SemanticsAction.paste,
-                    ],
-                    label: 'Search',
-                    textDirection: TextDirection.ltr,
-                    textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
-                  ),
-                ],
-              )
-              : TestSemantics(
-                id: 11,
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isTextField,
-                  SemanticsFlag.hasEnabledState,
-                  SemanticsFlag.isEnabled,
-                  SemanticsFlag.isFocused,
-                  SemanticsFlag.isHeader,
-                  if (!isCupertino) SemanticsFlag.namesRoute,
-                ],
-                actions: <SemanticsAction>[
-                  if (isDesktop) SemanticsAction.didGainAccessibilityFocus,
-                  if (isDesktop) SemanticsAction.didLoseAccessibilityFocus,
-                  SemanticsAction.tap,
-                  SemanticsAction.focus,
-                  SemanticsAction.setSelection,
-                  SemanticsAction.setText,
-                  SemanticsAction.paste,
-                ],
-                label: 'Search',
-                textDirection: TextDirection.ltr,
-                textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
-              );
+      final textField = kIsWeb
+          ? TestSemantics(
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isHeader,
+                if (!isCupertino) SemanticsFlag.namesRoute,
+              ],
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 11,
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isEnabled,
+                    SemanticsFlag.isFocused,
+                    SemanticsFlag.isFocusable,
+                  ],
+                  actions: <SemanticsAction>[
+                    if (isDesktop) SemanticsAction.didGainAccessibilityFocus,
+                    if (isDesktop) SemanticsAction.didLoseAccessibilityFocus,
+                    SemanticsAction.tap,
+                    SemanticsAction.focus,
+                    SemanticsAction.setSelection,
+                    SemanticsAction.setText,
+                    SemanticsAction.paste,
+                  ],
+                  label: 'Search',
+                  inputType: SemanticsInputType.search,
+                  currentValueLength: 0,
+                  textDirection: TextDirection.ltr,
+                  textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
+                ),
+              ],
+            )
+          : TestSemantics(
+              id: 11,
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isTextField,
+                SemanticsFlag.hasEnabledState,
+                SemanticsFlag.isEnabled,
+                SemanticsFlag.isFocused,
+                SemanticsFlag.isFocusable,
+                SemanticsFlag.isHeader,
+                if (!isCupertino) SemanticsFlag.namesRoute,
+              ],
+              actions: <SemanticsAction>[
+                if (isDesktop) SemanticsAction.didGainAccessibilityFocus,
+                if (isDesktop) SemanticsAction.didLoseAccessibilityFocus,
+                SemanticsAction.tap,
+                SemanticsAction.focus,
+                SemanticsAction.setSelection,
+                SemanticsAction.setText,
+                SemanticsAction.paste,
+              ],
+              label: 'Search',
+              inputType: SemanticsInputType.search,
+              currentValueLength: 0,
+              textDirection: TextDirection.ltr,
+              textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
+            );
       return TestSemantics.root(
         children: <TestSemantics>[
           TestSemantics(
@@ -969,8 +1022,8 @@ void main() {
     }
 
     testWidgets('includes routeName on Android', (WidgetTester tester) async {
-      final SemanticsTester semantics = SemanticsTester(tester);
-      final _TestSearchDelegate delegate = _TestSearchDelegate();
+      final semantics = SemanticsTester(tester);
+      final delegate = _TestSearchDelegate();
       addTearDown(() => delegate.dispose());
 
       await tester.pumpWidget(TestHomePage(delegate: delegate));
@@ -994,8 +1047,8 @@ void main() {
     testWidgets(
       'does not include routeName',
       (WidgetTester tester) async {
-        final SemanticsTester semantics = SemanticsTester(tester);
-        final _TestSearchDelegate delegate = _TestSearchDelegate();
+        final semantics = SemanticsTester(tester);
+        final delegate = _TestSearchDelegate();
         addTearDown(() => delegate.dispose());
 
         await tester.pumpWidget(TestHomePage(delegate: delegate));
@@ -1023,12 +1076,10 @@ void main() {
   });
 
   testWidgets('Custom searchFieldDecorationTheme value', (WidgetTester tester) async {
-    const InputDecorationTheme searchFieldDecorationTheme = InputDecorationTheme(
+    const searchFieldDecorationTheme = InputDecorationTheme(
       hintStyle: TextStyle(color: _TestSearchDelegate.hintTextColor),
     );
-    final _TestSearchDelegate delegate = _TestSearchDelegate(
-      searchFieldDecorationTheme: searchFieldDecorationTheme,
-    );
+    final delegate = _TestSearchDelegate(searchFieldDecorationTheme: searchFieldDecorationTheme);
     addTearDown(() => delegate.dispose());
 
     await tester.pumpWidget(TestHomePage(delegate: delegate));
@@ -1036,15 +1087,15 @@ void main() {
     await tester.pumpAndSettle();
 
     final ThemeData textFieldTheme = Theme.of(tester.element(find.byType(TextField)));
-    expect(textFieldTheme.inputDecorationTheme, searchFieldDecorationTheme);
+    expect(textFieldTheme.inputDecorationTheme, searchFieldDecorationTheme.data);
   });
 
   // Regression test for: https://github.com/flutter/flutter/issues/66781
   testWidgets('text in search bar contrasts background (light mode)', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData(useMaterial3: false);
-    final _TestSearchDelegate delegate = _TestSearchDelegate(defaultAppBarTheme: true);
+    final themeData = ThemeData(useMaterial3: false);
+    final delegate = _TestSearchDelegate(defaultAppBarTheme: true);
     addTearDown(() => delegate.dispose());
-    const String query = 'search query';
+    const query = 'search query';
 
     await tester.pumpWidget(
       TestHomePage(
@@ -1058,12 +1109,11 @@ void main() {
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
 
-    final Material appBarBackground =
-        tester
-            .widgetList<Material>(
-              find.descendant(of: find.byType(AppBar), matching: find.byType(Material)),
-            )
-            .first;
+    final Material appBarBackground = tester
+        .widgetList<Material>(
+          find.descendant(of: find.byType(AppBar), matching: find.byType(Material)),
+        )
+        .first;
     expect(appBarBackground.color, Colors.white);
 
     final TextField textField = tester.widget<TextField>(find.byType(TextField));
@@ -1073,10 +1123,10 @@ void main() {
 
   // Regression test for: https://github.com/flutter/flutter/issues/66781
   testWidgets('text in search bar contrasts background (dark mode)', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData.dark(useMaterial3: false);
-    final _TestSearchDelegate delegate = _TestSearchDelegate(defaultAppBarTheme: true);
+    final themeData = ThemeData.dark(useMaterial3: false);
+    final delegate = _TestSearchDelegate(defaultAppBarTheme: true);
     addTearDown(() => delegate.dispose());
-    const String query = 'search query';
+    const query = 'search query';
 
     await tester.pumpWidget(
       TestHomePage(
@@ -1090,12 +1140,11 @@ void main() {
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
 
-    final Material appBarBackground =
-        tester
-            .widgetList<Material>(
-              find.descendant(of: find.byType(AppBar), matching: find.byType(Material)),
-            )
-            .first;
+    final Material appBarBackground = tester
+        .widgetList<Material>(
+          find.descendant(of: find.byType(AppBar), matching: find.byType(Material)),
+        )
+        .first;
     expect(appBarBackground.color, themeData.primaryColor);
 
     final TextField textField = tester.widget<TextField>(find.byType(TextField));
@@ -1109,9 +1158,9 @@ void main() {
   ) async {
     // The search delegate page is displayed with no issues
     // even with a null return values for [buildLeading], [buildActions] and [flexibleSpace].
-    final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate();
+    final delegate = _TestEmptySearchDelegate();
     addTearDown(delegate.dispose);
-    final List<String> selectedResults = <String>[];
+    final selectedResults = <String>[];
 
     await tester.pumpWidget(TestHomePage(delegate: delegate, results: selectedResults));
 
@@ -1143,8 +1192,8 @@ void main() {
   });
 
   testWidgets('Leading width size is 16', (WidgetTester tester) async {
-    final _TestSearchDelegate delegate = _TestSearchDelegate();
-    final List<String> selectedResults = <String>[];
+    final delegate = _TestSearchDelegate();
+    final selectedResults = <String>[];
     delegate.leadingWidth = 16;
 
     await tester.pumpWidget(TestHomePage(delegate: delegate, results: selectedResults));
@@ -1164,10 +1213,10 @@ void main() {
   });
 
   testWidgets('showSearch with useRootNavigator', (WidgetTester tester) async {
-    final _MyNavigatorObserver rootObserver = _MyNavigatorObserver();
-    final _MyNavigatorObserver localObserver = _MyNavigatorObserver();
+    final rootObserver = _MyNavigatorObserver();
+    final localObserver = _MyNavigatorObserver();
 
-    final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate();
+    final delegate = _TestEmptySearchDelegate();
     addTearDown(delegate.dispose);
 
     await tester.pumpWidget(
@@ -1178,28 +1227,27 @@ void main() {
           onGenerateRoute: (RouteSettings settings) {
             if (settings.name == 'nested') {
               return MaterialPageRoute<dynamic>(
-                builder:
-                    (BuildContext context) => Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        TextButton(
-                          onPressed: () async {
-                            await showSearch(
-                              context: context,
-                              delegate: delegate,
-                              useRootNavigator: true,
-                            );
-                          },
-                          child: const Text('showSearchRootNavigator'),
-                        ),
-                        TextButton(
-                          onPressed: () async {
-                            await showSearch(context: context, delegate: delegate);
-                          },
-                          child: const Text('showSearchLocalNavigator'),
-                        ),
-                      ],
+                builder: (BuildContext context) => Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    TextButton(
+                      onPressed: () async {
+                        await showSearch(
+                          context: context,
+                          delegate: delegate,
+                          useRootNavigator: true,
+                        );
+                      },
+                      child: const Text('showSearchRootNavigator'),
                     ),
+                    TextButton(
+                      onPressed: () async {
+                        await showSearch(context: context, delegate: delegate);
+                      },
+                      child: const Text('showSearchLocalNavigator'),
+                    ),
+                  ],
+                ),
                 settings: settings,
               );
             }
@@ -1246,9 +1294,9 @@ void main() {
   testWidgets('Query text field shows toolbar initially', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/95588
 
-    final _TestSearchDelegate delegate = _TestSearchDelegate();
+    final delegate = _TestSearchDelegate();
     addTearDown(() => delegate.dispose());
-    final List<String> selectedResults = <String>[];
+    final selectedResults = <String>[];
 
     await tester.pumpWidget(TestHomePage(delegate: delegate, results: selectedResults));
 
@@ -1275,33 +1323,32 @@ void main() {
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
   testWidgets('showSearch with maintainState on the route', (WidgetTester tester) async {
-    final _MyNavigatorObserver navigationObserver = _MyNavigatorObserver();
+    final navigationObserver = _MyNavigatorObserver();
 
-    final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate();
+    final delegate = _TestEmptySearchDelegate();
     addTearDown(delegate.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         navigatorObservers: <NavigatorObserver>[navigationObserver],
         home: Builder(
-          builder:
-              (BuildContext context) => Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  TextButton(
-                    onPressed: () async {
-                      await showSearch(context: context, delegate: delegate);
-                    },
-                    child: const Text('showSearch'),
-                  ),
-                  TextButton(
-                    onPressed: () async {
-                      await showSearch(context: context, delegate: delegate, maintainState: true);
-                    },
-                    child: const Text('showSearchWithMaintainState'),
-                  ),
-                ],
+          builder: (BuildContext context) => Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              TextButton(
+                onPressed: () async {
+                  await showSearch(context: context, delegate: delegate);
+                },
+                child: const Text('showSearch'),
               ),
+              TextButton(
+                onPressed: () async {
+                  await showSearch(context: context, delegate: delegate, maintainState: true);
+                },
+                child: const Text('showSearchWithMaintainState'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1417,7 +1464,7 @@ class _TestSearchDelegate extends SearchDelegate<String> {
     return theme.copyWith(
       inputDecorationTheme:
           searchFieldDecorationTheme ??
-          InputDecorationTheme(
+          InputDecorationThemeData(
             hintStyle: searchFieldStyle ?? const TextStyle(color: hintTextColor),
           ),
     );

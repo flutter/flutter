@@ -1,0 +1,174 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/toolchain/rbe.gni")
+
+assert(host_os == "mac")
+
+# Common args across all Apple platforms.
+declare_args() {
+  # The MACOSX_DEPLOYMENT_TARGET variable used when compiling.
+  # Must be of the form x.x.x for Info.plist files.
+  mac_deployment_target = ""
+
+  # Path to the host Xcode toolchain (XcodeDefault.xctoolchain).
+  mac_host_toolchain_path = ""
+
+  # Path to the macOS platform.
+  mac_platform_path = ""
+
+  # Path to a specific version of the macOS SDK, not including a backslash at
+  # the end.
+  mac_sdk_path = ""
+
+  mac_swift_lib_paths = []
+
+  # Version of iOS that we're targeting for tests.
+  mac_testing_deployment_target = "14.0"
+
+  # Path to the iOS platform to use.
+  #
+  # When empty, this will use the default platform based on the value of
+  # use_ios_simulator.
+  ios_platform_path = ""
+
+  # Path to the iOS SDK to use.
+  #
+  # When empty this will use the default SDK based on the value of
+  # use_ios_simulator.
+  ios_sdk_path = ""
+
+  # Set to true when targeting a simulator build on iOS. False means that the
+  # target is for running on the device. The default value is to use the
+  # Simulator except when targeting GYP's Xcode builds (for compat with the
+  # existing GYP build).
+  use_ios_simulator = true
+
+  # Alias for use_ios_simulator used by Skia.
+  ios_use_simulator = true
+
+  # Version of iOS that we're targeting.
+  ios_deployment_target = "13.0"
+
+  # The path to the iOS device platform.
+  ios_device_platform_path = ""
+
+  # The path to the iOS simulator platform.
+  ios_simulator_platform_path = ""
+
+  # The path to the iOS device SDK.
+  ios_device_sdk_path = ""
+
+  # The path to the iOS simulator SDK.
+  ios_simulator_sdk_path = ""
+
+  # The path to iOS SDK Swift libraries.
+  ios_swift_lib_paths = []
+
+  # Version of iOS that we're targeting for tests.
+  ios_testing_deployment_target = "13.0"
+}
+
+# Must be set above or by gn.
+assert(mac_deployment_target != "")
+assert(defined(use_ios_simulator))
+assert(defined(ios_use_simulator))
+assert(ios_deployment_target != "")
+assert(ios_testing_deployment_target != "")
+
+# Run darwin_sdk.py to determine SDK paths if necessary.
+_need_darwin_sdk_run = false
+if (mac_host_toolchain_path == "" ||  #
+    mac_sdk_path == "" ||  #
+    mac_platform_path == "") {
+  _need_darwin_sdk_run = true
+}
+if (is_ios) {
+  if (use_ios_simulator &&
+      (ios_simulator_platform_path == "" || ios_simulator_sdk_path == "")) {
+    _need_darwin_sdk_run = true
+  }
+  if (!use_ios_simulator &&
+      (ios_device_platform_path == "" || ios_device_sdk_path == "")) {
+    _need_darwin_sdk_run = true
+  }
+}
+if (_need_darwin_sdk_run) {
+  _args = [ "--print-paths" ]
+  if (use_rbe && create_xcode_symlinks) {
+    # RBE has a restriction that paths cannot come from outside the build root.
+    _args += [
+      "--symlink",
+      rebase_path("//flutter/prebuilts"),
+    ]
+  }
+  _sdk_result =
+      exec_script(rebase_path("//build/mac/darwin_sdk.py"), _args, "scope")
+}
+
+# Set SDK paths.
+if (mac_host_toolchain_path == "") {
+  mac_host_toolchain_path = _sdk_result.toolchain_path
+}
+assert(mac_host_toolchain_path != "")
+
+if (mac_sdk_path == "") {
+  mac_sdk_path = _sdk_result.macosx_sdk_path
+}
+assert(mac_sdk_path != "")
+
+if (mac_platform_path == "") {
+  mac_platform_path = _sdk_result.macosx_platform_path
+}
+assert(mac_platform_path != "")
+
+if (mac_swift_lib_paths == []) {
+  mac_swift_lib_paths += [
+    rebase_path("$mac_sdk_path/usr/lib/swift"),
+    rebase_path("$mac_host_toolchain_path/usr/lib/swift/macosx"),
+  ]
+}
+
+if (is_ios) {
+  if (ios_platform_path == "" || ios_sdk_path == "") {
+    if (use_ios_simulator) {
+      if (ios_simulator_platform_path == "") {
+        ios_simulator_platform_path = _sdk_result.iphonesimulator_platform_path
+      }
+      if (ios_simulator_sdk_path == "") {
+        ios_simulator_sdk_path = _sdk_result.iphonesimulator_sdk_path
+      }
+    } else {
+      if (ios_device_platform_path == "") {
+        ios_device_platform_path = _sdk_result.iphoneos_platform_path
+      }
+      if (ios_device_sdk_path == "") {
+        ios_device_sdk_path = _sdk_result.iphoneos_sdk_path
+      }
+    }
+
+    if (use_ios_simulator) {
+      assert(ios_simulator_platform_path != "")
+      assert(ios_simulator_sdk_path != "")
+      ios_platform_path = ios_simulator_platform_path
+      ios_sdk_path = ios_simulator_sdk_path
+    } else {
+      assert(ios_device_platform_path != "")
+      assert(ios_device_sdk_path != "")
+      ios_platform_path = ios_device_platform_path
+      ios_sdk_path = ios_device_sdk_path
+    }
+  }
+
+  if (ios_swift_lib_paths == []) {
+    ios_swift_lib_paths += [ rebase_path("$ios_sdk_path/usr/lib/swift") ]
+    if (use_ios_simulator) {
+      ios_swift_lib_paths += [ rebase_path(
+              "$mac_host_toolchain_path/usr/lib/swift/iphonesimulator") ]
+    } else {
+      ios_swift_lib_paths +=
+          [ rebase_path("$mac_host_toolchain_path/usr/lib/swift/iphoneos") ]
+    }
+  }
+}

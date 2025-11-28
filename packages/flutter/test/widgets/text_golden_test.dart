@@ -55,9 +55,9 @@ void main() {
   });
 
   testWidgets('Text Foreground', (WidgetTester tester) async {
-    const Color black = Color(0xFF000000);
-    const Color red = Color(0xFFFF0000);
-    const Color blue = Color(0xFF0000FF);
+    const black = Color(0xFF000000);
+    const red = Color(0xFFFF0000);
+    const blue = Color(0xFF0000FF);
     final Shader linearGradient = const LinearGradient(
       colors: <Color>[red, blue],
     ).createShader(const Rect.fromLTWH(0.0, 0.0, 50.0, 20.0));
@@ -70,10 +70,9 @@ void main() {
             'Hello',
             textDirection: TextDirection.ltr,
             style: TextStyle(
-              foreground:
-                  Paint()
-                    ..color = black
-                    ..shader = linearGradient,
+              foreground: Paint()
+                ..color = black
+                ..shader = linearGradient,
             ),
           ),
         ),
@@ -93,11 +92,10 @@ void main() {
             'Hello',
             textDirection: TextDirection.ltr,
             style: TextStyle(
-              foreground:
-                  Paint()
-                    ..color = black
-                    ..style = PaintingStyle.stroke
-                    ..strokeWidth = 2.0,
+              foreground: Paint()
+                ..color = black
+                ..style = PaintingStyle.stroke
+                ..strokeWidth = 2.0,
             ),
           ),
         ),
@@ -117,12 +115,11 @@ void main() {
             'Hello',
             textDirection: TextDirection.ltr,
             style: TextStyle(
-              foreground:
-                  Paint()
-                    ..color = black
-                    ..style = PaintingStyle.stroke
-                    ..strokeWidth = 2.0
-                    ..shader = linearGradient,
+              foreground: Paint()
+                ..color = black
+                ..style = PaintingStyle.stroke
+                ..strokeWidth = 2.0
+                ..shader = linearGradient,
             ),
           ),
         ),
@@ -141,8 +138,8 @@ void main() {
   testWidgets('Text Background', (WidgetTester tester) async {
     const Color red = Colors.red;
     const Color blue = Colors.blue;
-    const Color translucentGreen = Color(0x5000F000);
-    const Color translucentDarkRed = Color(0x500F0000);
+    const translucentGreen = Color(0x5000F000);
+    const translucentDarkRed = Color(0x500F0000);
     await tester.pumpWidget(
       Align(
         alignment: Alignment.topLeft,
@@ -374,7 +371,7 @@ void main() {
   });
 
   testWidgets('Decoration thickness', (WidgetTester tester) async {
-    final TextDecoration allDecorations = TextDecoration.combine(<TextDecoration>[
+    final allDecorations = TextDecoration.combine(<TextDecoration>[
       TextDecoration.underline,
       TextDecoration.overline,
       TextDecoration.lineThrough,
@@ -405,7 +402,7 @@ void main() {
   });
 
   testWidgets('Decoration thickness', (WidgetTester tester) async {
-    final TextDecoration allDecorations = TextDecoration.combine(<TextDecoration>[
+    final allDecorations = TextDecoration.combine(<TextDecoration>[
       TextDecoration.underline,
       TextDecoration.overline,
       TextDecoration.lineThrough,

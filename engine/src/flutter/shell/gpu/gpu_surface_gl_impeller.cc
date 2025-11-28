@@ -49,7 +49,7 @@ bool GPUSurfaceGLImpeller::IsValid() {
 
 // |Surface|
 std::unique_ptr<SurfaceFrame> GPUSurfaceGLImpeller::AcquireFrame(
-    const SkISize& size) {
+    const DlISize& size) {
   if (!IsValid()) {
     FML_LOG(ERROR) << "OpenGL surface was invalid.";
     return nullptr;
@@ -87,20 +87,20 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLImpeller::AcquireFrame(
         [](const SurfaceFrame& surface_frame) { return true; }, size);
   }
 
-  GLFrameInfo frame_info = {static_cast<uint32_t>(size.width()),
-                            static_cast<uint32_t>(size.height())};
+  GLFrameInfo frame_info = {static_cast<uint32_t>(size.width),
+                            static_cast<uint32_t>(size.height)};
   const GLFBOInfo fbo_info = delegate_->GLContextFBO(frame_info);
   auto surface = impeller::SurfaceGLES::WrapFBO(
-      impeller_context_,                            // context
-      swap_callback,                                // swap_callback
-      fbo_info.fbo_id,                              // fbo
-      impeller::PixelFormat::kR8G8B8A8UNormInt,     // color_format
-      impeller::ISize{size.width(), size.height()}  // fbo_size
+      impeller_context_,                         // context
+      swap_callback,                             // swap_callback
+      fbo_info.fbo_id,                           // fbo
+      impeller::PixelFormat::kR8G8B8A8UNormInt,  // color_format
+      impeller::ISize{size.width, size.height}   // fbo_size
   );
 
   impeller::RenderTarget render_target = surface->GetRenderTarget();
 
-  SurfaceFrame::EncodeCallback encode_calback =
+  SurfaceFrame::EncodeCallback encode_callback =
       [aiks_context = aiks_context_,  //
        render_target](SurfaceFrame& surface_frame,
                       DlCanvas* canvas) mutable -> bool {
@@ -114,12 +114,12 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLImpeller::AcquireFrame(
       return false;
     }
 
-    auto cull_rect = render_target.GetRenderTargetSize();
-    SkIRect sk_cull_rect = SkIRect::MakeWH(cull_rect.width, cull_rect.height);
+    auto cull_rect =
+        impeller::Rect::MakeSize(render_target.GetRenderTargetSize());
     return impeller::RenderToTarget(aiks_context->GetContentContext(),  //
                                     render_target,                      //
                                     display_list,                       //
-                                    sk_cull_rect,                       //
+                                    cull_rect,                          //
                                     /*reset_host_buffer=*/true          //
     );
     return true;
@@ -128,7 +128,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLImpeller::AcquireFrame(
   return std::make_unique<SurfaceFrame>(
       nullptr,                                // surface
       delegate_->GLContextFramebufferInfo(),  // framebuffer info
-      encode_calback,                         // encode callback
+      encode_callback,                        // encode callback
       fml::MakeCopyable([surface = std::move(surface)](const SurfaceFrame&) {
         return surface->Present();
       }),                         // submit callback
@@ -139,7 +139,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLImpeller::AcquireFrame(
 }
 
 // |Surface|
-SkMatrix GPUSurfaceGLImpeller::GetRootTransformation() const {
+DlMatrix GPUSurfaceGLImpeller::GetRootTransformation() const {
   // This backend does not currently support root surface transformations. Just
   // return identity.
   return {};

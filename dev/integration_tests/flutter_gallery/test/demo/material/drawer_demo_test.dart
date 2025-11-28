@@ -9,7 +9,10 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Drawer header does not scroll', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(theme: ThemeData(platform: TargetPlatform.iOS), home: const DrawerDemo()),
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: const DrawerDemo(),
+      ),
     );
 
     await tester.tap(find.text('Tap here to open the drawer'));

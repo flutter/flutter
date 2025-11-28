@@ -146,7 +146,7 @@ class KeyPad extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData themeData = ThemeData(
+    final themeData = ThemeData(
       primarySwatch: Colors.purple,
       brightness: Brightness.dark,
       platform: Theme.of(context).platform,
@@ -214,7 +214,9 @@ class KeyRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(child: Row(mainAxisAlignment: MainAxisAlignment.center, children: keys));
+    return Expanded(
+      child: Row(mainAxisAlignment: MainAxisAlignment.center, children: keys),
+    );
   }
 }
 

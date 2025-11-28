@@ -11,6 +11,12 @@ Flutter other than the actual writing of the code. For guidance on
 designing APIs, documenting, and formatting your code, see the
 [Style guide for Flutter repo](Style-guide-for-Flutter-repo.md) document.
 
+Across the document we use the word "tree" to mean "the health state of flutter/flutter repository". Tree status is shown:
+
+- On our [build dashboard](https://flutter-dashboard.appspot.com/)
+- On every PR (referred to as "Tree Status")
+- In the [tree-status](https://discord.com/channels/608014603317936148/613398423093116959) Discord channel
+
 ## Overview
 
 The general process for submitting code to a Flutter repository is as follows:
@@ -55,6 +61,12 @@ The general process for submitting code to a Flutter repository is as follows:
 6. Submit this branch as a PR to the relevant Flutter repository.
    _(See also: [Signing commits](./Signing-commits.md))_
 
+   All submissions to Google Open Source projects need to follow
+   [Google’s Contributor License Agreement (CLA)](https://cla.developers.google.com/),
+   in which contributors agree that their contribution is an original work of authorship.
+   This doesn’t prohibit the use of coding assistance tools, but what’s submitted does
+   need to be a contributor’s original creation.
+
 7. Get your code reviewed (see below). You should probably reach out to the relevant
    expert(s) for the areas you touched and ask them to review your PR directly.
    GitHub sometimes recommends specific reviewers; if you're not sure who to ask,
@@ -84,7 +96,7 @@ _See also: [What should I work on?](What-should-I-work-on.md)_
 
 ## Tests
 
-Every change in the flutter/engine, flutter/flutter, and flutter/packages repos
+Every change in the flutter/flutter and flutter/packages repos
 must be tested; consider using the code coverage tools to check that all your
 new code is covered by tests (see [Test coverage for package:flutter](./testing/Test-coverage-for-package-flutter.md)).
 
@@ -140,7 +152,7 @@ feel empowered to ask for tests.
 ## Using git
 
 Assuming your environment has been configured according to the instructions in
-[Setting up the Engine development environment](../engine/contributing/Setting-up-the-Engine-development-environment.md),
+[Setting up the Engine development environment](../../docs/engine/contributing/Setting-up-the-Engine-development-environment.md),
 [Setting up the Framework development environment](Setting-up-the-Framework-development-environment.md), or
 [Setting up the Packages development environment](../ecosystem/contributing/Setting-up-the-Packages-development-environment.md),
 follow these steps to start working on a patch:
@@ -301,12 +313,6 @@ the repository yet, then wait for one of the project maintainers to submit it fo
 
 If you do have access, add the "autosubmit" label. A bot will land the PR for you.
 
-
-### Squashing commits
-
-When you squash commits, by default, GitHub will concatenate all your commit messages to form a unified commit message.  This often yields an overly verbose commit message with many unhelpful entries (e.g. "fix typo").  Please double-check (and hand-edit if necessary) your commit message before merging such that the message contains a helpful description of the overall change.
-
-
 ## Tree breakage (regressions in functionality)
 
 If a check-in has caused a regression on the main branch (sometimes "master") for any of the flutter repositories,
@@ -369,9 +375,9 @@ behavior, reverting an [auto-roller](../infra/Autorollers.md)
 (e.g., an engine-roller commit like https://github.com/flutter/flutter/commit/fdcb57b69eff2162e9aead6dec0f8058788e7608)
 commit could cause some complications:
 
-1. The auto-roller commit usually include multiple commits of the source repo (e.g., engine-roller
-commit includes multiple commits of https://github.com/flutter/engine). This can be applied
-recursively as the engine-roller commit includes a dart-roller commit, or a skia-roller commit.
+1. The auto-roller commit usually include multiple commits of the source repo (e.g., skia-roller
+commit includes multiple commits of https://github.com/google/skia). This can be applied
+recursively as some rollers might include a commit from another roller.
 Therefore, a roller commit could actually include a ton of leaf-level commits, which makes it
 really hard to triage which leaf commit actually caused the regression.
 
@@ -398,7 +404,7 @@ If you're working on a feature that requires changes in both the [framework](htt
 
 ## Handling breaking changes
 
-In general, we want to avoid making changes to Flutter, our plugins, or our packages, that force developers using Flutter to change their code in order to upgrade to new versions of Flutter. See [our compatibility policy](https://flutter.dev/docs/resources/compatibility).
+In general, we want to avoid making changes to Flutter, our plugins, or our packages, that force developers using Flutter to change their code in order to upgrade to new versions of Flutter. See [our compatibility policy](https://docs.flutter.dev/resources/compatibility).
 
 Sometimes, however, doing this is necessary for the greater good. We want our APIs to be
 intuitive; if being backwards-compatible requires making an API into something that we would
@@ -452,7 +458,7 @@ During this process, each individual PR does not break any tests, so it should n
 Once everything has landed:
 
 * update your migration guide based on your experience migrating everyone,
-* update the timeline on the guide, and push it to [the flutter.dev Web site](https://flutter.dev/docs/release/breaking-changes) (don't forget to update the [index](https://github.com/flutter/website/blob/main/src/content/release/breaking-changes/index.md) of that directory as well),
+* update the timeline on the guide, and push it to [the flutter.dev Web site](https://docs.flutter.dev/release/breaking-changes) (don't forget to update the [index](https://github.com/flutter/website/blob/main/src/content/release/breaking-changes/index.md) of that directory as well),
 * e-mail a copy to [flutter-announce@](https://groups.google.com/g/flutter-announce),
 * notify the `#announcements` channel on our [Chat](Chat.md), and
 * add the [**c: API break** label](https://github.com/flutter/flutter/labels/c%3A%20API%20break) to the relevant issues, so they get listed in the upcoming Release notes.
@@ -483,7 +489,7 @@ In other words:
 
 Using this standard form ensures that we can write a script to detect all deprecated APIs and remove them. We have a test that verifies that this syntax is followed.
 
-To determine the latest beta version, see <https://flutter.dev/docs/development/tools/sdk/releases>.
+To determine the latest beta version, see <https://docs.flutter.dev/install/archive>.
 
 When adding a deprecation notice to the framework, a flutter fix should be included with your change. This helps users migrate to the new API as easily as possible. To learn more about authoring fixes, see [Data driven Fixes](Data-driven-Fixes.md). If a fix cannot be written for the new API, please file an issue in https://github.com/dart-lang/sdk and link to it in your change.
 

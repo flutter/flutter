@@ -21,7 +21,8 @@ class CustomScrollViewExample extends StatefulWidget {
   const CustomScrollViewExample({super.key});
 
   @override
-  State<CustomScrollViewExample> createState() => _CustomScrollViewExampleState();
+  State<CustomScrollViewExample> createState() =>
+      _CustomScrollViewExampleState();
 }
 
 class _CustomScrollViewExampleState extends State<CustomScrollViewExample> {
@@ -47,26 +48,28 @@ class _CustomScrollViewExampleState extends State<CustomScrollViewExample> {
       body: CustomScrollView(
         center: centerKey,
         slivers: <Widget>[
-          SliverList(
-            delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+          SliverList.builder(
+            itemCount: top.length,
+            itemBuilder: (BuildContext context, int index) {
               return Container(
                 alignment: Alignment.center,
                 color: Colors.blue[200 + top[index] % 4 * 100],
                 height: 100 + top[index] % 4 * 20.0,
                 child: Text('Item: ${top[index]}'),
               );
-            }, childCount: top.length),
+            },
           ),
-          SliverList(
+          SliverList.builder(
             key: centerKey,
-            delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+            itemCount: bottom.length,
+            itemBuilder: (BuildContext context, int index) {
               return Container(
                 alignment: Alignment.center,
                 color: Colors.blue[200 + bottom[index] % 4 * 100],
                 height: 100 + bottom[index] % 4 * 20.0,
                 child: Text('Item: ${bottom[index]}'),
               );
-            }, childCount: bottom.length),
+            },
           ),
         ],
       ),

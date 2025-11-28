@@ -37,6 +37,9 @@ class PlatformViewManager {
   /// rendering of PlatformViews into the web app.
   static PlatformViewManager instance = PlatformViewManager();
 
+  /// The attribute name used to hide platform views from accessibility.
+  static const String _ariaHiddenAttribute = 'aria-hidden';
+
   // The factory functions, indexed by the viewType
   final Map<String, Function> _factories = <String, Function>{};
 
@@ -119,7 +122,7 @@ class PlatformViewManager {
   /// The resulting DOM for the `contents` of a Platform View looks like this:
   ///
   /// ```html
-  /// <flt-platform-view id="flt-pv-VIEW_ID" slot="...">
+  /// <flt-platform-view id="flt-pv-VIEW_ID" slot="..." aria-hidden="true">
   ///   <arbitrary-html-elements />
   /// </flt-platform-view-slot>
   /// ```
@@ -131,6 +134,9 @@ class PlatformViewManager {
   /// a place where to attach the `slot` property, that will tell the browser
   /// what `slot` tag will reveal this `contents`, **without modifying the returned
   /// html from the `factory` function**.
+  ///
+  /// By default, platform views are hidden from accessibility using aria-hidden.
+  /// The semantics layer will remove this when a semantic node is created.
   DomElement renderContent(String viewType, int viewId, Object? params) {
     assert(
       knowsViewType(viewType),
@@ -141,10 +147,9 @@ class PlatformViewManager {
     _viewIdToType[viewId] = viewType;
 
     return _contents.putIfAbsent(viewId, () {
-      final DomElement wrapper =
-          domDocument.createElement('flt-platform-view')
-            ..id = getPlatformViewDomId(viewId)
-            ..setAttribute('slot', slotName);
+      final DomElement wrapper = domDocument.createElement('flt-platform-view')
+        ..id = getPlatformViewDomId(viewId)
+        ..setAttribute('slot', slotName);
 
       final Function factoryFunction = _factories[viewType]!;
       final DomElement content;
@@ -158,6 +163,8 @@ class PlatformViewManager {
 
       _ensureContentCorrectlySized(content, viewType);
       wrapper.append(content);
+
+      wrapper.setAttribute(_ariaHiddenAttribute, 'true');
 
       return wrapper;
     });
@@ -209,6 +216,23 @@ class PlatformViewManager {
   /// Returns `true` if the given [viewId] is a platform view with a visible
   /// component.
   bool isVisible(int viewId) => !isInvisible(viewId);
+
+  /// Updates the accessibility attributes of a platform view.
+  ///
+  /// This is called by the semantics layer to hide or show platform views
+  /// from screen readers based on semantic properties like ExcludeSemantics.
+  void updatePlatformViewAccessibility(int viewId, bool isHidden) {
+    final DomElement? wrapper = getSlottedContent(viewId);
+    if (wrapper == null) {
+      return;
+    }
+
+    if (isHidden) {
+      wrapper.setAttribute(_ariaHiddenAttribute, 'true');
+    } else {
+      wrapper.removeAttribute(_ariaHiddenAttribute);
+    }
+  }
 
   /// Clears the state. Used in tests.
   void debugClear() {

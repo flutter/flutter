@@ -183,7 +183,6 @@ class NetworkAssetBundle extends AssetBundle {
 ///
 /// Binary resources (from [load]) are not cached.
 abstract class CachingAssetBundle extends AssetBundle {
-  // TODO(ianh): Replace this with an intelligent cache, see https://github.com/flutter/flutter/issues/3568
   final Map<String, Future<String>> _stringCache = <String, Future<String>>{};
   final Map<String, Future<dynamic>> _structuredDataCache = <String, Future<dynamic>>{};
   final Map<String, Future<dynamic>> _structuredBinaryDataCache = <String, Future<dynamic>>{};
@@ -352,7 +351,7 @@ class PlatformAssetBundle extends CachingAssetBundle {
       final ByteData bytes = await load(key);
       return ui.ImmutableBuffer.fromUint8List(Uint8List.sublistView(bytes));
     }
-    bool debugUsePlatformChannel = false;
+    var debugUsePlatformChannel = false;
     assert(() {
       // dart:io is safe to use here since we early return for web
       // above. If that code is changed, this needs to be guarded on

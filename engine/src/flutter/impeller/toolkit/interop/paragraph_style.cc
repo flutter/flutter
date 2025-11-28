@@ -4,13 +4,15 @@
 
 #include "impeller/toolkit/interop/paragraph_style.h"
 
+#include "flutter/fml/string_conversion.h"
+
 namespace impeller::interop {
 
 ParagraphStyle::ParagraphStyle() = default;
 
 ParagraphStyle::~ParagraphStyle() = default;
 
-void ParagraphStyle::SetFontWeight(txt::FontWeight weight) {
+void ParagraphStyle::SetFontWeight(int weight) {
   style_.font_weight = weight;
 }
 
@@ -64,11 +66,32 @@ txt::TextStyle ParagraphStyle::CreateTextStyle() const {
   if (background_) {
     style.background = background_->GetPaint();
   }
+  if (decoration_.has_value()) {
+    const auto& decoration = decoration_.value();
+    style.decoration = decoration.types;
+    style.decoration_color = ToSkiaType(decoration.color);
+    style.decoration_style = ToTxtType(decoration.style);
+    style.decoration_thickness_multiplier = decoration.thickness_multiplier;
+  }
+
   return style;
 }
 
 const txt::ParagraphStyle& ParagraphStyle::GetParagraphStyle() const {
   return style_;
+}
+
+void ParagraphStyle::SetTextDecoration(
+    const ImpellerTextDecoration& decoration) {
+  decoration_ = decoration;
+}
+
+void ParagraphStyle::SetEllipsis(const std::string& string) {
+  if (string.empty()) {
+    style_.ellipsis = {};
+    return;
+  }
+  style_.ellipsis = fml::Utf8ToUtf16(string);
 }
 
 }  // namespace impeller::interop

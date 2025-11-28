@@ -9,7 +9,7 @@
 #include <Metal/Metal.h>
 #include <UIKit/UIKit.h>
 
-#include "flutter/fml/logging.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 
 FLUTTER_ASSERT_ARC
@@ -30,9 +30,9 @@ extern CFTimeInterval display_link_target;
 
   NSUInteger _nextDrawableId;
 
+  // Access to these variables must be synchronized.
   NSMutableSet<FlutterTexture*>* _availableTextures;
   NSUInteger _totalTextures;
-
   FlutterTexture* _front;
 
   // There must be a CADisplayLink scheduled *on main thread* otherwise
@@ -135,15 +135,16 @@ extern CFTimeInterval display_link_target;
 }
 
 - (void)addPresentedHandler:(nonnull MTLDrawablePresentedHandler)block {
-  FML_LOG(WARNING) << "FlutterMetalLayer drawable does not implement addPresentedHandler:";
+  [FlutterLogger logWarning:@"FlutterMetalLayer drawable does not implement addPresentedHandler:"];
 }
 
 - (void)presentAtTime:(CFTimeInterval)presentationTime {
-  FML_LOG(WARNING) << "FlutterMetalLayer drawable does not implement presentAtTime:";
+  [FlutterLogger logWarning:@"FlutterMetalLayer drawable does not implement presentAtTime:"];
 }
 
 - (void)presentAfterMinimumDuration:(CFTimeInterval)duration {
-  FML_LOG(WARNING) << "FlutterMetalLayer drawable does not implement presentAfterMinimumDuration:";
+  [FlutterLogger
+      logWarning:@"FlutterMetalLayer drawable does not implement presentAfterMinimumDuration:"];
 }
 
 - (void)flutterPrepareForPresent:(nonnull id<MTLCommandBuffer>)commandBuffer {
@@ -247,20 +248,26 @@ extern CFTimeInterval display_link_target;
 }
 
 - (void)setDrawableSize:(CGSize)drawableSize {
-  [_availableTextures removeAllObjects];
-  _front = nil;
-  _totalTextures = 0;
-  _drawableSize = drawableSize;
+  @synchronized(self) {
+    [_availableTextures removeAllObjects];
+    _front = nil;
+    _totalTextures = 0;
+    _drawableSize = drawableSize;
+  }
 }
 
 - (void)didEnterBackground:(id)notification {
-  [_availableTextures removeAllObjects];
-  _totalTextures = _front != nil ? 1 : 0;
+  @synchronized(self) {
+    [_availableTextures removeAllObjects];
+    _totalTextures = _front != nil ? 1 : 0;
+  }
   _displayLink.paused = YES;
 }
 
 - (CGSize)drawableSize {
-  return _drawableSize;
+  @synchronized(self) {
+    return _drawableSize;
+  }
 }
 
 - (IOSurface*)createIOSurface {
@@ -276,7 +283,9 @@ extern CFTimeInterval display_link_target;
     pixelFormat = kCVPixelFormatType_40ARGBLEWideGamut;
     bytesPerElement = 8;
   } else {
-    FML_LOG(ERROR) << "Unsupported pixel format: " << self.pixelFormat;
+    NSString* errorMessage =
+        [NSString stringWithFormat:@"Unsupported pixel format: %lu", self.pixelFormat];
+    [FlutterLogger logError:errorMessage];
     return nil;
   }
   size_t bytesPerRow =
@@ -294,8 +303,9 @@ extern CFTimeInterval display_link_target;
 
   IOSurfaceRef res = IOSurfaceCreate((CFDictionaryRef)options);
   if (res == nil) {
-    FML_LOG(ERROR) << "Failed to create IOSurface with options "
-                   << options.debugDescription.UTF8String;
+    NSString* errorMessage = [NSString
+        stringWithFormat:@"Failed to create IOSurface with options %@", options.debugDescription];
+    [FlutterLogger logError:errorMessage];
     return nil;
   }
 
@@ -414,6 +424,10 @@ extern CFTimeInterval display_link_target;
 
 - (void)presentTexture:(FlutterTexture*)texture {
   @synchronized(self) {
+    if (texture.texture.width != _drawableSize.width ||
+        texture.texture.height != _drawableSize.height) {
+      return;
+    }
     if (_front != nil) {
       [_availableTextures addObject:_front];
     }
@@ -431,8 +445,14 @@ extern CFTimeInterval display_link_target;
 }
 
 - (void)returnTexture:(FlutterTexture*)texture {
+  if (texture == nil) {
+    return;
+  }
   @synchronized(self) {
-    [_availableTextures addObject:texture];
+    if (texture.texture.width == _drawableSize.width &&
+        texture.texture.height == _drawableSize.height) {
+      [_availableTextures addObject:texture];
+    }
   }
 }
 

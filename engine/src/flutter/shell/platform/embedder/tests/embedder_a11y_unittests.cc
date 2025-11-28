@@ -40,7 +40,7 @@ TEST_F(EmbedderTest, CannotProvideMultipleSemanticsCallbacks) {
   {
     auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
     EmbedderConfigBuilder builder(context);
-    builder.SetSurface(SkISize::Make(1, 1));
+    builder.SetSurface(DlISize(1, 1));
     builder.GetProjectArgs().update_semantics_callback =
         [](const FlutterSemanticsUpdate* update, void* user_data) {};
     builder.GetProjectArgs().update_semantics_callback2 =
@@ -53,7 +53,7 @@ TEST_F(EmbedderTest, CannotProvideMultipleSemanticsCallbacks) {
   {
     auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
     EmbedderConfigBuilder builder(context);
-    builder.SetSurface(SkISize::Make(1, 1));
+    builder.SetSurface(DlISize(1, 1));
     builder.GetProjectArgs().update_semantics_callback2 =
         [](const FlutterSemanticsUpdate2* update, void* user_data) {};
     builder.GetProjectArgs().update_semantics_node_callback =
@@ -68,7 +68,7 @@ TEST_F(EmbedderTest, CannotProvideMultipleSemanticsCallbacks) {
   {
     auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
     EmbedderConfigBuilder builder(context);
-    builder.SetSurface(SkISize::Make(1, 1));
+    builder.SetSurface(DlISize(1, 1));
     builder.GetProjectArgs().update_semantics_callback =
         [](const FlutterSemanticsUpdate* update, void* user_data) {};
     builder.GetProjectArgs().update_semantics_node_callback =
@@ -83,7 +83,7 @@ TEST_F(EmbedderTest, CannotProvideMultipleSemanticsCallbacks) {
   {
     auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
     EmbedderConfigBuilder builder(context);
-    builder.SetSurface(SkISize::Make(1, 1));
+    builder.SetSurface(DlISize(1, 1));
     builder.GetProjectArgs().update_semantics_callback2 =
         [](const FlutterSemanticsUpdate2* update, void* user_data) {};
     builder.GetProjectArgs().update_semantics_callback =
@@ -163,6 +163,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV3Callbacks) {
           ASSERT_EQ(9.0, node->transform.pers2);
           ASSERT_EQ(std::strncmp(kTooltip, node->tooltip, sizeof(kTooltip) - 1),
                     0);
+          ASSERT_EQ(node->heading_level, 0);
 
           if (node->id == 128) {
             ASSERT_EQ(0x3f3, node->platform_view_id);
@@ -176,7 +177,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV3Callbacks) {
       });
 
   EmbedderConfigBuilder builder(context);
-  builder.SetSurface(SkISize::Make(1, 1));
+  builder.SetSurface(DlISize(1, 1));
   builder.SetDartEntrypoint("a11y_main");
 
   auto engine = builder.LaunchEngine();
@@ -301,6 +302,11 @@ TEST_F(EmbedderA11yTest, A11yStringAttributes) {
 
         auto node = update->nodes[0];
 
+        // Verify identifier
+        {
+          ASSERT_EQ(std::string(node->identifier), "identifier");
+        }
+
         // Verify label
         {
           ASSERT_EQ(std::string(node->label), "What is the meaning of life?");
@@ -379,7 +385,7 @@ TEST_F(EmbedderA11yTest, A11yStringAttributes) {
       });
 
   EmbedderConfigBuilder builder(context);
-  builder.SetSurface(SkISize::Make(1, 1));
+  builder.SetSurface(DlISize(1, 1));
   builder.SetDartEntrypoint("a11y_string_attributes");
 
   auto engine = builder.LaunchEngine();
@@ -458,6 +464,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV2Callbacks) {
       ASSERT_EQ(8.0, node->transform.pers1);
       ASSERT_EQ(9.0, node->transform.pers2);
       ASSERT_EQ(std::strncmp(kTooltip, node->tooltip, sizeof(kTooltip) - 1), 0);
+      ASSERT_EQ(node->heading_level, 0);
 
       if (node->id == 128) {
         ASSERT_EQ(0x3f3, node->platform_view_id);
@@ -471,7 +478,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV2Callbacks) {
   });
 
   EmbedderConfigBuilder builder(context);
-  builder.SetSurface(SkISize::Make(1, 1));
+  builder.SetSurface(DlISize(1, 1));
   builder.SetDartEntrypoint("a11y_main");
 
   auto engine = builder.LaunchEngine();
@@ -668,7 +675,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV1Callbacks) {
       });
 
   EmbedderConfigBuilder builder(context);
-  builder.SetSurface(SkISize::Make(1, 1));
+  builder.SetSurface(DlISize(1, 1));
   builder.SetDartEntrypoint("a11y_main");
 
   auto engine = builder.LaunchEngine();
@@ -840,7 +847,7 @@ TEST_F(EmbedderA11yTest, A11yTreesAreConsistentWithMultipleViews) {
       });
 
   EmbedderConfigBuilder builder(context);
-  builder.SetSurface(SkISize::Make(1, 1));
+  builder.SetSurface(DlISize(1, 1));
   builder.SetDartEntrypoint("a11y_main_multi_view");
 
   auto engine = builder.LaunchEngine();

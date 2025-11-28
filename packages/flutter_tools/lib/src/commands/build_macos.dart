@@ -28,7 +28,7 @@ class BuildMacosCommand extends BuildSubCommand {
   }
 
   @override
-  final String name = 'macos';
+  final name = 'macos';
 
   @override
   bool get hidden => !featureFlags.isMacOSEnabled || !globals.platform.isMacOS;
@@ -57,6 +57,7 @@ class BuildMacosCommand extends BuildSubCommand {
     if (!supported) {
       throwToolExit('"build macos" only supported on macOS hosts.');
     }
+
     await buildMacOS(
       flutterProject: project,
       buildInfo: buildInfo,

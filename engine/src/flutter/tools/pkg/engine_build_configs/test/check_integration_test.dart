@@ -214,4 +214,31 @@ void main() {
 
     expect(stderr.toString(), contains('❌ All builder files conform to release_build standards'));
   });
+
+  test('fails if archives.include_paths containts duplicates', () {
+    addConfig('android_debug', [
+      {
+        'name': 'ci/android_debug',
+        'archives': <Object?>[
+          {
+            'include_paths': <Object?>['out/android_debug/zip_archives/android-arm/artifacts.zip'],
+          },
+        ],
+      },
+    ]);
+    addConfig('android_debug2', [
+      {
+        'name': 'ci/android_debug2',
+        'archives': <Object?>[
+          {
+            'include_paths': <Object?>['out/android_debug2/zip_archives/android-arm/artifacts.zip'],
+          },
+        ],
+      },
+    ]);
+
+    run(['--engine-src-path=${tmpFlutterEngineSrc.path}'], allowFailure: true);
+
+    expect(stderr.toString(), contains('❌ Archive paths must be unique'));
+  });
 }

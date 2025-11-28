@@ -10,7 +10,7 @@ void main() {
   testWidgets('_SliverScrollingPersistentHeader should update stretchConfiguration', (
     WidgetTester tester,
   ) async {
-    for (final double stretchTriggerOffset in <double>[10.0, 20.0]) {
+    for (final stretchTriggerOffset in <double>[10.0, 20.0]) {
       await tester.pumpWidget(
         MaterialApp(
           home: CustomScrollView(
@@ -35,15 +35,16 @@ void main() {
       isNotEmpty,
     );
 
-    final RenderSliverScrollingPersistentHeader render =
-        tester.allRenderObjects.whereType<RenderSliverScrollingPersistentHeader>().first;
+    final RenderSliverScrollingPersistentHeader render = tester.allRenderObjects
+        .whereType<RenderSliverScrollingPersistentHeader>()
+        .first;
     expect(render.stretchConfiguration?.stretchTriggerOffset, 20);
   });
 
   testWidgets('_SliverPinnedPersistentHeader should update stretchConfiguration', (
     WidgetTester tester,
   ) async {
-    for (final double stretchTriggerOffset in <double>[10.0, 20.0]) {
+    for (final stretchTriggerOffset in <double>[10.0, 20.0]) {
       await tester.pumpWidget(
         MaterialApp(
           home: CustomScrollView(
@@ -69,15 +70,16 @@ void main() {
       isNotEmpty,
     );
 
-    final RenderSliverPinnedPersistentHeader render =
-        tester.allRenderObjects.whereType<RenderSliverPinnedPersistentHeader>().first;
+    final RenderSliverPinnedPersistentHeader render = tester.allRenderObjects
+        .whereType<RenderSliverPinnedPersistentHeader>()
+        .first;
     expect(render.stretchConfiguration?.stretchTriggerOffset, 20);
   });
 
   testWidgets('_SliverPinnedPersistentHeader should update showOnScreenConfiguration', (
     WidgetTester tester,
   ) async {
-    for (final double maxShowOnScreenExtent in <double>[1000, 2000]) {
+    for (final maxShowOnScreenExtent in <double>[1000, 2000]) {
       await tester.pumpWidget(
         MaterialApp(
           home: CustomScrollView(
@@ -103,8 +105,9 @@ void main() {
       isNotEmpty,
     );
 
-    final RenderSliverPinnedPersistentHeader render =
-        tester.allRenderObjects.whereType<RenderSliverPinnedPersistentHeader>().first;
+    final RenderSliverPinnedPersistentHeader render = tester.allRenderObjects
+        .whereType<RenderSliverPinnedPersistentHeader>()
+        .first;
     expect(render.showOnScreenConfiguration?.maxShowOnScreenExtent, 2000);
   });
 }

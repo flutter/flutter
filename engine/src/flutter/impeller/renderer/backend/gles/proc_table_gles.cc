@@ -4,18 +4,19 @@
 
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 
+#include <format>
 #include <sstream>
 
+#include "GLES3/gl3.h"
 #include "impeller/base/allocation.h"
 #include "impeller/base/comparable.h"
-#include "impeller/base/strings.h"
 #include "impeller/base/validation.h"
 #include "impeller/renderer/backend/gles/capabilities_gles.h"
 #include "impeller/renderer/capabilities.h"
 
 namespace impeller {
 
-const char* GLErrorToString(GLenum value) {
+std::string_view GLErrorToString(GLenum value) {
   switch (value) {
     case GL_NO_ERROR:
       return "GL_NO_ERROR";
@@ -89,7 +90,7 @@ ProcTableGLES::ProcTableGLES(  // NOLINT(google-readability-function-size)
   }
 
 #define IMPELLER_PROC(proc_ivar)                                \
-  if (auto fn_ptr = resolver(proc_ivar.name)) {                 \
+  if (auto fn_ptr = resolver(proc_ivar.name.data())) {          \
     proc_ivar.function =                                        \
         reinterpret_cast<decltype(proc_ivar.function)>(fn_ptr); \
     proc_ivar.error_fn = error_fn;                              \
@@ -115,7 +116,7 @@ ProcTableGLES::ProcTableGLES(  // NOLINT(google-readability-function-size)
 #undef IMPELLER_PROC
 
 #define IMPELLER_PROC(proc_ivar)                                \
-  if (auto fn_ptr = resolver(proc_ivar.name)) {                 \
+  if (auto fn_ptr = resolver(proc_ivar.name.data())) {          \
     proc_ivar.function =                                        \
         reinterpret_cast<decltype(proc_ivar.function)>(fn_ptr); \
     proc_ivar.error_fn = error_fn;                              \
@@ -139,6 +140,10 @@ ProcTableGLES::ProcTableGLES(  // NOLINT(google-readability-function-size)
 
   if (!description_->HasExtension("GL_EXT_discard_framebuffer")) {
     DiscardFramebufferEXT.Reset();
+  }
+
+  if (!description_->HasExtension("GL_ANGLE_framebuffer_blit")) {
+    BlitFramebufferANGLE.Reset();
   }
 
   capabilities_ = std::make_shared<CapabilitiesGLES>(*this);
@@ -276,8 +281,9 @@ std::string ProcTableGLES::DescribeCurrentFramebuffer() const {
     return "The default framebuffer (FBO0) was bound.";
   }
   if (IsFramebuffer(framebuffer) == GL_FALSE) {
-    return SPrintF("The framebuffer binding (%d) was not a valid framebuffer.",
-                   framebuffer);
+    return std::format(
+        "The framebuffer binding ({}) was not a valid framebuffer.",
+        framebuffer);
   }
 
   GLenum status = CheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -440,5 +446,12 @@ std::string ProcTableGLES::GetProgramInfoLogString(GLuint program) const {
   return std::string{reinterpret_cast<const char*>(allocation.GetBuffer()),
                      static_cast<size_t>(length)};
 }
+
+GLenum ProcTableGLES::CheckFramebufferStatusDebug(GLenum target) const {
+#ifdef IMPELLER_DEBUG
+  return CheckFramebufferStatus(target);
+#endif
+  return GL_FRAMEBUFFER_COMPLETE;
+};
 
 }  // namespace impeller

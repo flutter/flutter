@@ -7,6 +7,7 @@
 Sets up githooks.
 '''
 
+import argparse
 import os
 import subprocess
 import sys
@@ -23,16 +24,36 @@ def IsWindows():
 
 
 def Main(argv):
+  parser = argparse.ArgumentParser()
+
+  parser.add_argument('--unset', action=argparse.BooleanOptionalAction, default=False)
+
+  args = parser.parse_args()
+
   git = 'git'
-  githooks = os.path.join(FLUTTER_DIR, 'tools', 'githooks')
   if IsWindows():
     git = 'git.bat'
-  result = subprocess.run([
+
+  command = [
       git,
       'config',
-      'core.hooksPath',
-      githooks,
-  ], cwd=FLUTTER_DIR)
+  ]
+
+  if args.unset:
+    command += [
+        '--unset',
+        'core.hooksPath',
+    ]
+    print('Uninstalling Git Hooks')
+  else:
+    githooks = os.path.join(FLUTTER_DIR, 'tools', 'githooks')
+    command += [
+        'core.hooksPath',
+        githooks,
+    ]
+    print('Installing Git Hooks')
+
+  result = subprocess.run(command, cwd=FLUTTER_DIR)
   return result.returncode
 
 

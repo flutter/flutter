@@ -29,5 +29,11 @@
   "modalBarrierDismissLabel": "بىكار قىلىش",
   "menuDismissLabel": "تىزىملىكنى بىكار قىلىش",
   "cancelButtonLabel": "بىكار قىلىش",
-  "backButtonLabel": "Back"
+  "backButtonLabel": "Back",
+  "expansionTileExpandedHint": "يىغىش ئۈچۈن قوش چېكىڭ",
+  "expansionTileCollapsedHint": "يېيىش ئۈچۈن قوش چېكىڭ",
+  "expansionTileExpandedTapHint": "يىغىش",
+  "expansionTileCollapsedTapHint": "تېخىمۇ كۆپ تەپسىلاتلار ئۈچۈن يېيىڭ",
+  "expandedHint": "يىغىلدى",
+  "collapsedHint": "يېيىلدى"
 }

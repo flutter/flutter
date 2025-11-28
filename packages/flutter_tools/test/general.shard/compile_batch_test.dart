@@ -17,11 +17,8 @@ import '../src/fake_process_manager.dart';
 
 void main() {
   testWithoutContext('StdoutHandler can parse output for successful batch compilation', () async {
-    final BufferLogger logger = BufferLogger.test();
-    final StdoutHandler stdoutHandler = StdoutHandler(
-      logger: logger,
-      fileSystem: MemoryFileSystem.test(),
-    );
+    final logger = BufferLogger.test();
+    final stdoutHandler = StdoutHandler(logger: logger, fileSystem: MemoryFileSystem.test());
 
     stdoutHandler.reset();
     'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0'
@@ -34,11 +31,8 @@ void main() {
   });
 
   testWithoutContext('StdoutHandler can parse output for failed batch compilation', () async {
-    final BufferLogger logger = BufferLogger.test();
-    final StdoutHandler stdoutHandler = StdoutHandler(
-      logger: logger,
-      fileSystem: MemoryFileSystem.test(),
-    );
+    final logger = BufferLogger.test();
+    final stdoutHandler = StdoutHandler(logger: logger, fileSystem: MemoryFileSystem.test());
 
     stdoutHandler.reset();
     'result abc\nline1\nline2\nabc\nabc'.split('\n').forEach(stdoutHandler.handler);
@@ -51,14 +45,11 @@ void main() {
   testWithoutContext(
     'KernelCompiler passes correct configuration to frontend server process',
     () async {
-      final BufferLogger logger = BufferLogger.test();
-      final StdoutHandler stdoutHandler = StdoutHandler(
-        logger: logger,
-        fileSystem: MemoryFileSystem.test(),
-      );
-      final Completer<void> completer = Completer<void>();
+      final logger = BufferLogger.test();
+      final stdoutHandler = StdoutHandler(logger: logger, fileSystem: MemoryFileSystem.test());
+      final completer = Completer<void>();
 
-      final KernelCompiler kernelCompiler = KernelCompiler(
+      final kernelCompiler = KernelCompiler(
         artifacts: Artifacts.test(),
         fileSystem: MemoryFileSystem.test(),
         fileSystemRoots: <String>[],
@@ -104,14 +95,11 @@ void main() {
   );
 
   testWithoutContext('KernelCompiler returns null if StdoutHandler returns null', () async {
-    final BufferLogger logger = BufferLogger.test();
-    final StdoutHandler stdoutHandler = StdoutHandler(
-      logger: logger,
-      fileSystem: MemoryFileSystem.test(),
-    );
-    final Completer<void> completer = Completer<void>();
+    final logger = BufferLogger.test();
+    final stdoutHandler = StdoutHandler(logger: logger, fileSystem: MemoryFileSystem.test());
+    final completer = Completer<void>();
 
-    final KernelCompiler kernelCompiler = KernelCompiler(
+    final kernelCompiler = KernelCompiler(
       artifacts: Artifacts.test(),
       fileSystem: MemoryFileSystem.test(),
       fileSystemRoots: <String>[],
@@ -158,14 +146,11 @@ void main() {
   testWithoutContext(
     'KernelCompiler returns null if frontend_server process exits with non-zero code',
     () async {
-      final BufferLogger logger = BufferLogger.test();
-      final StdoutHandler stdoutHandler = StdoutHandler(
-        logger: logger,
-        fileSystem: MemoryFileSystem.test(),
-      );
-      final Completer<void> completer = Completer<void>();
+      final logger = BufferLogger.test();
+      final stdoutHandler = StdoutHandler(logger: logger, fileSystem: MemoryFileSystem.test());
+      final completer = Completer<void>();
 
-      final KernelCompiler kernelCompiler = KernelCompiler(
+      final kernelCompiler = KernelCompiler(
         artifacts: Artifacts.test(),
         fileSystem: MemoryFileSystem.test(),
         fileSystemRoots: <String>[],
@@ -214,14 +199,11 @@ void main() {
   testWithoutContext(
     'KernelCompiler passes correct AOT config to frontend_server in aot/profile mode',
     () async {
-      final BufferLogger logger = BufferLogger.test();
-      final StdoutHandler stdoutHandler = StdoutHandler(
-        logger: logger,
-        fileSystem: MemoryFileSystem.test(),
-      );
-      final Completer<void> completer = Completer<void>();
+      final logger = BufferLogger.test();
+      final stdoutHandler = StdoutHandler(logger: logger, fileSystem: MemoryFileSystem.test());
+      final completer = Completer<void>();
 
-      final KernelCompiler kernelCompiler = KernelCompiler(
+      final kernelCompiler = KernelCompiler(
         artifacts: Artifacts.test(),
         fileSystem: MemoryFileSystem.test(),
         fileSystemRoots: <String>[],
@@ -271,14 +253,11 @@ void main() {
   );
 
   testWithoutContext('passes correct AOT config to kernel compiler in aot/release mode', () async {
-    final BufferLogger logger = BufferLogger.test();
-    final StdoutHandler stdoutHandler = StdoutHandler(
-      logger: logger,
-      fileSystem: MemoryFileSystem.test(),
-    );
-    final Completer<void> completer = Completer<void>();
+    final logger = BufferLogger.test();
+    final stdoutHandler = StdoutHandler(logger: logger, fileSystem: MemoryFileSystem.test());
+    final completer = Completer<void>();
 
-    final KernelCompiler kernelCompiler = KernelCompiler(
+    final kernelCompiler = KernelCompiler(
       artifacts: Artifacts.test(),
       fileSystem: MemoryFileSystem.test(),
       fileSystemRoots: <String>[],
@@ -327,14 +306,11 @@ void main() {
   });
 
   testWithoutContext('KernelCompiler passes dartDefines to the frontend_server', () async {
-    final BufferLogger logger = BufferLogger.test();
-    final StdoutHandler stdoutHandler = StdoutHandler(
-      logger: logger,
-      fileSystem: MemoryFileSystem.test(),
-    );
-    final Completer<void> completer = Completer<void>();
+    final logger = BufferLogger.test();
+    final stdoutHandler = StdoutHandler(logger: logger, fileSystem: MemoryFileSystem.test());
+    final completer = Completer<void>();
 
-    final KernelCompiler kernelCompiler = KernelCompiler(
+    final kernelCompiler = KernelCompiler(
       artifacts: Artifacts.test(),
       fileSystem: MemoryFileSystem.test(),
       fileSystemRoots: <String>[],
@@ -383,14 +359,11 @@ void main() {
   });
 
   testWithoutContext('KernelCompiler maps a file to a multi-root scheme if provided', () async {
-    final BufferLogger logger = BufferLogger.test();
-    final StdoutHandler stdoutHandler = StdoutHandler(
-      logger: logger,
-      fileSystem: MemoryFileSystem.test(),
-    );
-    final Completer<void> completer = Completer<void>();
+    final logger = BufferLogger.test();
+    final stdoutHandler = StdoutHandler(logger: logger, fileSystem: MemoryFileSystem.test());
+    final completer = Completer<void>();
 
-    final KernelCompiler kernelCompiler = KernelCompiler(
+    final kernelCompiler = KernelCompiler(
       artifacts: Artifacts.test(),
       fileSystem: MemoryFileSystem.test(),
       fileSystemRoots: <String>['/foo/bar/fizz'],
@@ -437,14 +410,11 @@ void main() {
   });
 
   testWithoutContext('KernelCompiler uses generated entrypoint', () async {
-    final BufferLogger logger = BufferLogger.test();
-    final StdoutHandler stdoutHandler = StdoutHandler(
-      logger: logger,
-      fileSystem: MemoryFileSystem.test(),
-    );
-    final Completer<void> completer = Completer<void>();
-    final MemoryFileSystem fs = MemoryFileSystem.test();
-    final KernelCompiler kernelCompiler = KernelCompiler(
+    final logger = BufferLogger.test();
+    final stdoutHandler = StdoutHandler(logger: logger, fileSystem: MemoryFileSystem.test());
+    final completer = Completer<void>();
+    final fs = MemoryFileSystem.test();
+    final kernelCompiler = KernelCompiler(
       artifacts: Artifacts.test(),
       fileSystem: fs,
       fileSystemRoots: <String>['/foo/bar/fizz'],
@@ -504,14 +474,11 @@ void main() {
   });
 
   testWithoutContext('KernelCompiler passes native assets', () async {
-    final BufferLogger logger = BufferLogger.test();
-    final StdoutHandler stdoutHandler = StdoutHandler(
-      logger: logger,
-      fileSystem: MemoryFileSystem.test(),
-    );
-    final Completer<void> completer = Completer<void>();
+    final logger = BufferLogger.test();
+    final stdoutHandler = StdoutHandler(logger: logger, fileSystem: MemoryFileSystem.test());
+    final completer = Completer<void>();
 
-    final KernelCompiler kernelCompiler = KernelCompiler(
+    final kernelCompiler = KernelCompiler(
       artifacts: Artifacts.test(),
       fileSystem: MemoryFileSystem.test(),
       fileSystemRoots: <String>[],

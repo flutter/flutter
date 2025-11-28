@@ -133,7 +133,7 @@
   "drawerLabel": "導覽選單",
   "popupMenuLabel": "彈出式選單",
   "dialogLabel": "對話方塊",
-  "alertDialogLabel": "快訊",
+  "alertDialogLabel": "警告",
   "searchFieldLabel": "搜尋",
   "reorderItemToStart": "移至開頭",
   "reorderItemToEnd": "移至結尾",

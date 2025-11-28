@@ -19,6 +19,7 @@
 namespace flutter {
 namespace testing {
 
+[[maybe_unused]]
 static const std::string kEmojiFontFile =
 #if FML_OS_MACOSX
     "Apple Color Emoji.ttc";
@@ -26,6 +27,7 @@ static const std::string kEmojiFontFile =
     "NotoColorEmoji.ttf";
 #endif
 
+[[maybe_unused]]
 static const std::string kEmojiFontName =
 #if FML_OS_MACOSX
     "Apple Color Emoji";
@@ -60,16 +62,17 @@ class DlOpRecorder final : public virtual DlOpReceiver,
     dashed_lines_.emplace_back(p0, p1, DlPoint(on_length, off_length));
   }
 
-  void drawTextFrame(const std::shared_ptr<impeller::TextFrame>& text_frame,
-                     SkScalar x,
-                     SkScalar y) override {
-    text_frames_.push_back(text_frame);
-  }
-
-  void drawTextBlob(const sk_sp<SkTextBlob> blob,
-                    SkScalar x,
-                    SkScalar y) override {
-    blobs_.push_back(blob);
+  void drawText(const std::shared_ptr<DlText>& text,
+                SkScalar x,
+                SkScalar y) override {
+    auto blob = text->GetTextBlob();
+    if (blob) {
+      blobs_.push_back(sk_ref_sp(blob));
+    } else {
+      auto frame = text->GetTextFrame();
+      FML_CHECK(frame);
+      text_frames_.push_back(frame);
+    }
   }
 
   void drawRect(const DlRect& rect) override { rects_.push_back(rect); }
@@ -94,9 +97,9 @@ class PainterTestBase : public CanvasTestBase<T> {
  protected:
   txt::TextStyle makeDecoratedStyle(txt::TextDecorationStyle style) {
     auto t_style = txt::TextStyle();
-    t_style.color = SK_ColorBLACK;                // default
-    t_style.font_weight = txt::FontWeight::w400;  // normal
-    t_style.font_size = 14;                       // default
+    t_style.color = SK_ColorBLACK;  // default
+    t_style.font_weight = txt::FontWeight::normal;
+    t_style.font_size = 14;  // default
     t_style.decoration = txt::TextDecoration::kUnderline;
     t_style.decoration_style = style;
     t_style.decoration_color = SK_ColorBLACK;
@@ -106,23 +109,24 @@ class PainterTestBase : public CanvasTestBase<T> {
 
   txt::TextStyle makeEmoji() {
     auto t_style = txt::TextStyle();
-    t_style.color = SK_ColorBLACK;                // default
-    t_style.font_weight = txt::FontWeight::w400;  // normal
-    t_style.font_size = 14;                       // default
+    t_style.color = SK_ColorBLACK;  // default
+    t_style.font_weight = txt::FontWeight::normal;
+    t_style.font_size = 14;  // default
     t_style.font_families.push_back(kEmojiFontName);
     return t_style;
   }
 
   txt::TextStyle makeStyle() {
     auto t_style = txt::TextStyle();
-    t_style.color = SK_ColorBLACK;                // default
-    t_style.font_weight = txt::FontWeight::w400;  // normal
-    t_style.font_size = 14;                       // default
+    t_style.color = SK_ColorBLACK;  // default
+    t_style.font_weight = txt::FontWeight::normal;
+    t_style.font_size = 14;  // default
     t_style.font_families.push_back("ahem");
     return t_style;
   }
 
-  sk_sp<DisplayList> drawText(txt::TextStyle style, std::u16string text) const {
+  sk_sp<DisplayList> drawText(const txt::TextStyle& style,
+                              const std::u16string& text) const {
     auto pb_skia = makeParagraphBuilder();
     pb_skia.PushStyle(style);
     pb_skia.AddText(text);
@@ -136,7 +140,7 @@ class PainterTestBase : public CanvasTestBase<T> {
     return builder.Build();
   }
 
-  sk_sp<DisplayList> draw(txt::TextStyle style) const {
+  sk_sp<DisplayList> draw(const txt::TextStyle& style) const {
     auto pb_skia = makeParagraphBuilder();
     pb_skia.PushStyle(style);
     pb_skia.AddText(u"Hello World!");
@@ -231,7 +235,7 @@ TEST_F(PainterTest, DrawDashedLineImpeller) {
   EXPECT_EQ(recorder.dashedLineCount(), 1);
 }
 
-TEST_F(PainterTest, DrawTextFrameImpeller) {
+TEST_F(PainterTest, DrawTextImpeller) {
   PretendImpellerIsEnabled(true);
 
   auto recorder = DlOpRecorder();

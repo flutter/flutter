@@ -6,44 +6,33 @@ import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
 import 'package:yaml/yaml.dart';
 
-import '../android/android.dart' as android_common;
-import '../android/android_workflow.dart';
 import '../android/gradle_utils.dart' as gradle;
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/utils.dart';
-import '../build_info.dart';
-import '../build_system/build_system.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../dart/generate_synthetic_packages.dart';
 import '../flutter_project_metadata.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
 
-const List<String> _kAvailablePlatforms = <String>[
-  'ios',
-  'android',
-  'windows',
-  'linux',
-  'macos',
-  'web',
-];
+const _kAvailablePlatforms = <String>['ios', 'android', 'windows', 'linux', 'macos', 'web'];
 
 /// A list of all possible create platforms, even those that may not be enabled
 /// with the current config.
-const List<String> kAllCreatePlatforms = <String>[
+const kAllCreatePlatforms = <String>[
   'ios',
   'android',
   'windows',
   'linux',
   'macos',
   'web',
+  'darwin',
 ];
 
-const String _kDefaultPlatformArgumentHelp =
+const _kDefaultPlatformArgumentHelp =
     '(required) The platforms supported by this project. '
     'Platform folders (e.g. android/) will be generated in the target project. '
     'Adding desktop platforms requires the corresponding desktop config setting to be enabled.';
@@ -57,7 +46,7 @@ mixin CreateBase on FlutterCommand {
   /// this
   @visibleForTesting
   @protected
-  static final RegExp kWindowsDrivePattern = RegExp(r'^[a-zA-Z]:$');
+  static final kWindowsDrivePattern = RegExp(r'^[a-zA-Z]:$');
 
   /// The output directory of the command.
   @protected
@@ -113,13 +102,14 @@ mixin CreateBase on FlutterCommand {
   ///
   /// The help message of the argument is replaced with `customHelp` if `customHelp` is not null.
   @protected
-  void addPlatformsOptions({String? customHelp}) {
+  void addPlatformsOptions({String? customHelp, required Map<String, String> allowedHelp}) {
     argParser.addMultiOption(
       'platforms',
       help: customHelp ?? _kDefaultPlatformArgumentHelp,
       aliases: <String>['platform'],
       defaultsTo: <String>[..._kAvailablePlatforms],
-      allowed: <String>[..._kAvailablePlatforms],
+      allowed: <String>[...kAllCreatePlatforms],
+      allowedHelp: allowedHelp,
     );
   }
 
@@ -132,7 +122,7 @@ mixin CreateBase on FlutterCommand {
     }
 
     if (rest.length > 1) {
-      String message = 'Multiple output directories specified.';
+      var message = 'Multiple output directories specified.';
       for (final String arg in rest) {
         if (arg.startsWith('-')) {
           message += '\nTry moving $arg to be immediately following $name';
@@ -163,10 +153,7 @@ mixin CreateBase on FlutterCommand {
     final File metadataFile = globals.fs.file(
       globals.fs.path.join(projectDir.absolute.path, '.metadata'),
     );
-    final FlutterProjectMetadata projectMetadata = FlutterProjectMetadata(
-      metadataFile,
-      globals.logger,
-    );
+    final projectMetadata = FlutterProjectMetadata(metadataFile, globals.logger);
     final FlutterTemplateType? projectType = projectMetadata.projectType;
     if (projectType != null) {
       return projectType;
@@ -236,8 +223,7 @@ mixin CreateBase on FlutterCommand {
     // If the destination directory is actually a file, then we refuse to
     // overwrite, on the theory that the user probably didn't expect it to exist.
     if (globals.fs.isFileSync(projectDirPath)) {
-      final String message =
-          "Invalid project name: '$projectDirPath' - refers to an existing file.";
+      final message = "Invalid project name: '$projectDirPath' - refers to an existing file.";
       throwToolExit(
         overwrite ? '$message Refusing to overwrite a file with a directory.' : message,
         exitCode: 2,
@@ -319,7 +305,6 @@ mixin CreateBase on FlutterCommand {
     String? projectDescription,
     String? androidLanguage,
     String? iosDevelopmentTeam,
-    String? iosLanguage,
     required String flutterRoot,
     required String dartSdkVersionBounds,
     String? agpVersion,
@@ -336,11 +321,13 @@ mixin CreateBase on FlutterCommand {
     bool linux = false,
     bool macos = false,
     bool windows = false,
+    bool darwin = false,
     bool implementationTests = false,
   }) {
     final String pluginDartClass = _createPluginClassName(projectName);
-    final String pluginClass =
-        pluginDartClass.endsWith('Plugin') ? pluginDartClass : '${pluginDartClass}Plugin';
+    final pluginClass = pluginDartClass.endsWith('Plugin')
+        ? pluginDartClass
+        : '${pluginDartClass}Plugin';
     final String pluginClassSnakeCase = snakeCase(pluginClass);
     final String pluginClassCapitalSnakeCase = pluginClassSnakeCase.toUpperCase();
     final String pluginClassLowerCamelCase =
@@ -350,7 +337,7 @@ mixin CreateBase on FlutterCommand {
     final String windowsIdentifier = createWindowsIdentifier(organization, projectName);
     // Linux uses the same scheme as the Android identifier.
     // https://developer.gnome.org/gio/stable/GApplication.html#g-application-id-is-valid
-    final String linuxIdentifier = androidIdentifier;
+    final linuxIdentifier = androidIdentifier;
 
     return <String, Object?>{
       'organization': organization,
@@ -359,12 +346,13 @@ mixin CreateBase on FlutterCommand {
       'androidIdentifier': androidIdentifier,
       'iosIdentifier': appleIdentifier,
       'macosIdentifier': appleIdentifier,
+      'darwinIdentifier': appleIdentifier,
       'linuxIdentifier': linuxIdentifier,
       'windowsIdentifier': windowsIdentifier,
       'description': projectDescription,
       'dartSdk': '$flutterRoot/bin/cache/dart-sdk',
-      'androidMinApiLevel': android_common.minApiLevel,
-      'androidSdkVersion': kAndroidSdkMinVersion,
+      'androidMinApiLevel': gradle.minSdkVersion,
+      'androidSdkVersion': gradle.minSdkVersion,
       'pluginClass': pluginClass,
       'pluginClassSnakeCase': pluginClassSnakeCase,
       'pluginClassLowerCamelCase': pluginClassLowerCamelCase,
@@ -379,7 +367,6 @@ mixin CreateBase on FlutterCommand {
       'withPluginHook': withFfiPluginHook || withFfiPackage || withPlatformChannelPluginHook,
       'withEmptyMain': withEmptyMain,
       'androidLanguage': androidLanguage,
-      'iosLanguage': iosLanguage,
       'hasIosDevelopmentTeam': iosDevelopmentTeam != null && iosDevelopmentTeam.isNotEmpty,
       'iosDevelopmentTeam': iosDevelopmentTeam ?? '',
       'flutterRevision': escapeYamlString(globals.flutterVersion.frameworkRevision),
@@ -389,6 +376,8 @@ mixin CreateBase on FlutterCommand {
       'web': web,
       'linux': linux,
       'macos': macos,
+      'darwin': darwin,
+      'sharedDarwinSource': darwin,
       'windows': windows,
       'year': DateTime.now().year,
       'dartSdkVersionBounds': dartSdkVersionBounds,
@@ -474,7 +463,7 @@ mixin CreateBase on FlutterCommand {
     bool generateMetadata = true,
     FlutterTemplateType? projectType,
   }) async {
-    int generatedCount = 0;
+    var generatedCount = 0;
     generatedCount += await renderMerged(
       <String>[...templateNames],
       directory,
@@ -493,35 +482,9 @@ mixin CreateBase on FlutterCommand {
     final bool macOSPlatform = templateContext['macos'] as bool? ?? false;
     final bool windowsPlatform = templateContext['windows'] as bool? ?? false;
     final bool webPlatform = templateContext['web'] as bool? ?? false;
+    final bool darwinPlatform = templateContext['darwin'] as bool? ?? false;
 
-    if (shouldCallPubGet) {
-      final Environment environment = Environment(
-        artifacts: globals.artifacts!,
-        logger: globals.logger,
-        cacheDir: globals.cache.getRoot(),
-        engineVersion: globals.flutterVersion.engineRevision,
-        fileSystem: globals.fs,
-        flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-        outputDir: globals.fs.directory(getBuildDirectory()),
-        processManager: globals.processManager,
-        platform: globals.platform,
-        analytics: globals.analytics,
-        projectDir: project.directory,
-        packageConfigPath: packageConfigPath(),
-        generateDartPluginRegistry: true,
-      );
-
-      // Generate the l10n synthetic package that will be injected into the
-      // package_config in the call to pub.get() below.
-      await generateLocalizationsSyntheticPackage(
-        environment: environment,
-        buildSystem: globals.buildSystem,
-        buildTargets: globals.buildTargets,
-      );
-    }
-    final List<SupportedPlatform> platformsForMigrateConfig = <SupportedPlatform>[
-      SupportedPlatform.root,
-    ];
+    final platformsForMigrateConfig = <SupportedPlatform>[SupportedPlatform.root];
     if (androidPlatform) {
       gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
       platformsForMigrateConfig.add(SupportedPlatform.android);
@@ -534,6 +497,14 @@ mixin CreateBase on FlutterCommand {
     }
     if (macOSPlatform) {
       platformsForMigrateConfig.add(SupportedPlatform.macos);
+    }
+    if (darwinPlatform) {
+      if (!platformsForMigrateConfig.contains(SupportedPlatform.ios)) {
+        platformsForMigrateConfig.add(SupportedPlatform.ios);
+      }
+      if (!platformsForMigrateConfig.contains(SupportedPlatform.macos)) {
+        platformsForMigrateConfig.add(SupportedPlatform.macos);
+      }
     }
     if (webPlatform) {
       platformsForMigrateConfig.add(SupportedPlatform.web);
@@ -548,7 +519,7 @@ mixin CreateBase on FlutterCommand {
       final File metadataFile = globals.fs.file(
         globals.fs.path.join(projectDir.absolute.path, '.metadata'),
       );
-      final FlutterProjectMetadata metadata = FlutterProjectMetadata.explicit(
+      final metadata = FlutterProjectMetadata.explicit(
         file: metadataFile,
         versionRevision: globals.flutterVersion.frameworkRevision,
         versionChannel: globals.flutterVersion.getBranchName(), // may contain PII
@@ -576,26 +547,27 @@ mixin CreateBase on FlutterCommand {
   /// Android application ID is specified in: https://developer.android.com/studio/build/application-id
   /// All characters must be alphanumeric or an underscore [a-zA-Z0-9_].
   static String createAndroidIdentifier(String organization, String name) {
-    String tmpIdentifier = '$organization.$name';
-    final RegExp disallowed = RegExp(r'[^\w\.]');
+    var tmpIdentifier = '$organization.$name';
+    final disallowed = RegExp(r'[^\w\.]');
     tmpIdentifier = tmpIdentifier.replaceAll(disallowed, '');
 
     // It must have at least two segments (one or more dots).
-    final List<String> segments =
-        tmpIdentifier.split('.').where((String segment) => segment.isNotEmpty).toList();
+    final List<String> segments = tmpIdentifier
+        .split('.')
+        .where((String segment) => segment.isNotEmpty)
+        .toList();
     while (segments.length < 2) {
       segments.add('untitled');
     }
 
     // Each segment must start with a letter.
-    final RegExp segmentPatternRegex = RegExp(r'^[a-zA-Z][\w]*$');
-    final List<String> prefixedSegments =
-        segments.map((String segment) {
-          if (!segmentPatternRegex.hasMatch(segment)) {
-            return 'u$segment';
-          }
-          return segment;
-        }).toList();
+    final segmentPatternRegex = RegExp(r'^[a-zA-Z][\w]*$');
+    final List<String> prefixedSegments = segments.map((String segment) {
+      if (!segmentPatternRegex.hasMatch(segment)) {
+        return 'u$segment';
+      }
+      return segment;
+    }).toList();
     return prefixedSegments.join('.');
   }
 
@@ -614,13 +586,15 @@ mixin CreateBase on FlutterCommand {
   /// Create a UTI (https://en.wikipedia.org/wiki/Uniform_Type_Identifier) from a base name
   static String createUTIIdentifier(String organization, String name) {
     name = camelCase(name);
-    String tmpIdentifier = '$organization.$name';
-    final RegExp disallowed = RegExp(r'[^a-zA-Z0-9\-\.\u0080-\uffff]+');
+    var tmpIdentifier = '$organization.$name';
+    final disallowed = RegExp(r'[^a-zA-Z0-9\-\.\u0080-\uffff]+');
     tmpIdentifier = tmpIdentifier.replaceAll(disallowed, '');
 
     // It must have at least two segments (one or more dots).
-    final List<String> segments =
-        tmpIdentifier.split('.').where((String segment) => segment.isNotEmpty).toList();
+    final List<String> segments = tmpIdentifier
+        .split('.')
+        .where((String segment) => segment.isNotEmpty)
+        .toList();
     while (segments.length < 2) {
       segments.add('untitled');
     }
@@ -650,7 +624,7 @@ mixin CreateBase on FlutterCommand {
         'Exception details: $e',
       );
     }
-    final Map<String, Object?> manifest = json.decode(manifestFileContents) as Map<String, Object?>;
+    final manifest = json.decode(manifestFileContents) as Map<String, Object?>;
     return Set<Uri>.from(
       (manifest['files']! as List<Object?>).cast<String>().map<Uri>(
         (String path) => Uri.file(globals.fs.path.join(flutterToolsAbsolutePath, path)),
@@ -659,7 +633,7 @@ mixin CreateBase on FlutterCommand {
   }
 
   int _injectGradleWrapper(FlutterProject project) {
-    int filesCreated = 0;
+    var filesCreated = 0;
     copyDirectory(
       globals.cache.getArtifactDirectory('gradle_wrapper'),
       project.android.hostAppGradleRoot,
@@ -678,11 +652,11 @@ mixin CreateBase on FlutterCommand {
 // A valid Dart identifier that can be used for a package, i.e. no
 // capital letters.
 // https://dart.dev/language#important-concepts
-final RegExp _identifierRegExp = RegExp('[a-z_][a-z0-9_]*');
+final _identifierRegExp = RegExp('[a-z_][a-z0-9_]*');
 
 // non-contextual dart keywords.
 // https://dart.dev/language/keywords
-const Set<String> _keywords = <String>{
+const _keywords = <String>{
   'abstract',
   'as',
   'assert',
@@ -754,7 +728,7 @@ const Set<String> _keywords = <String>{
   'yield',
 };
 
-const Set<String> _packageDependencies = <String>{'collection', 'flutter', 'flutter_test', 'meta'};
+const _packageDependencies = <String>{'collection', 'flutter', 'flutter_test', 'meta'};
 
 /// Whether [name] is a valid Pub package.
 @visibleForTesting

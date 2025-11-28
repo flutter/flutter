@@ -5,6 +5,7 @@
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -76,12 +77,12 @@ final ShapeBorder _defaultM3DialogShape = RoundedRectangleBorder(
 );
 
 void main() {
-  final ThemeData material3Theme = ThemeData(brightness: Brightness.dark);
-  final ThemeData material2Theme = ThemeData(useMaterial3: false, brightness: Brightness.dark);
+  final material3Theme = ThemeData(brightness: Brightness.dark);
+  final material2Theme = ThemeData(useMaterial3: false, brightness: Brightness.dark);
 
   testWidgets('Dialog is scrollable', (WidgetTester tester) async {
-    bool didPressOk = false;
-    final AlertDialog dialog = AlertDialog(
+    var didPressOk = false;
+    final dialog = AlertDialog(
       content: Container(height: 5000.0, width: 300.0, color: Colors.green[500]),
       actions: <Widget>[
         TextButton(
@@ -104,7 +105,7 @@ void main() {
 
   testWidgets('Dialog background color from AlertDialog', (WidgetTester tester) async {
     const Color customColor = Colors.pink;
-    const AlertDialog dialog = AlertDialog(backgroundColor: customColor, actions: <Widget>[]);
+    const dialog = AlertDialog(backgroundColor: customColor, actions: <Widget>[]);
     await tester.pumpWidget(
       _buildAppWithDialog(dialog, theme: ThemeData(brightness: Brightness.dark)),
     );
@@ -119,14 +120,14 @@ void main() {
   testWidgets('Dialog background defaults to ColorScheme.surfaceContainerHigh', (
     WidgetTester tester,
   ) async {
-    final ThemeData theme = ThemeData(
+    final theme = ThemeData(
       colorScheme: ThemeData().colorScheme.copyWith(
         surface: Colors.orange,
         background: Colors.green,
         surfaceContainerHigh: Colors.red,
       ),
     );
-    const Dialog dialog = Dialog(child: SizedBox(width: 200, height: 200));
+    const dialog = Dialog(child: SizedBox(width: 200, height: 200));
     await tester.pumpWidget(_buildAppWithDialog(dialog, theme: theme));
 
     await tester.tap(find.text('X'));
@@ -137,11 +138,7 @@ void main() {
   });
 
   testWidgets('Material2 - Dialog Defaults', (WidgetTester tester) async {
-    const AlertDialog dialog = AlertDialog(
-      title: Text('Title'),
-      content: Text('Y'),
-      actions: <Widget>[],
-    );
+    const dialog = AlertDialog(title: Text('Title'), content: Text('Y'), actions: <Widget>[]);
     await tester.pumpWidget(_buildAppWithDialog(dialog, theme: material2Theme));
 
     await tester.tap(find.text('X'));
@@ -159,11 +156,7 @@ void main() {
   });
 
   testWidgets('Material3 - Dialog Defaults', (WidgetTester tester) async {
-    const AlertDialog dialog = AlertDialog(
-      title: Text('Title'),
-      content: Text('Y'),
-      actions: <Widget>[],
-    );
+    const dialog = AlertDialog(title: Text('Title'), content: Text('Y'), actions: <Widget>[]);
     await tester.pumpWidget(_buildAppWithDialog(dialog, theme: material3Theme));
 
     await tester.tap(find.text('X'));
@@ -176,7 +169,7 @@ void main() {
   });
 
   testWidgets('Material2 - Dialog.fullscreen Defaults', (WidgetTester tester) async {
-    const String dialogTextM2 = 'Fullscreen Dialog - M2';
+    const dialogTextM2 = 'Fullscreen Dialog - M2';
 
     await tester.pumpWidget(
       _buildAppWithDialog(
@@ -201,7 +194,7 @@ void main() {
   });
 
   testWidgets('Material3 - Dialog.fullscreen Defaults', (WidgetTester tester) async {
-    const String dialogTextM3 = 'Fullscreen Dialog - M3';
+    const dialogTextM3 = 'Fullscreen Dialog - M3';
 
     await tester.pumpWidget(
       _buildAppWithDialog(
@@ -226,10 +219,10 @@ void main() {
   });
 
   testWidgets('Custom dialog elevation', (WidgetTester tester) async {
-    const double customElevation = 12.0;
-    const Color shadowColor = Color(0xFF000001);
-    const Color surfaceTintColor = Color(0xFF000002);
-    const AlertDialog dialog = AlertDialog(
+    const customElevation = 12.0;
+    const shadowColor = Color(0xFF000001);
+    const surfaceTintColor = Color(0xFF000002);
+    const dialog = AlertDialog(
       actions: <Widget>[],
       elevation: customElevation,
       shadowColor: shadowColor,
@@ -247,9 +240,9 @@ void main() {
   });
 
   testWidgets('Custom Title Text Style', (WidgetTester tester) async {
-    const String titleText = 'Title';
-    const TextStyle titleTextStyle = TextStyle(color: Colors.pink);
-    const AlertDialog dialog = AlertDialog(
+    const titleText = 'Title';
+    const titleTextStyle = TextStyle(color: Colors.pink);
+    const dialog = AlertDialog(
       title: Text(titleText),
       titleTextStyle: titleTextStyle,
       actions: <Widget>[],
@@ -264,9 +257,9 @@ void main() {
   });
 
   testWidgets('Custom Content Text Style', (WidgetTester tester) async {
-    const String contentText = 'Content';
-    const TextStyle contentTextStyle = TextStyle(color: Colors.pink);
-    const AlertDialog dialog = AlertDialog(
+    const contentText = 'Content';
+    const contentTextStyle = TextStyle(color: Colors.pink);
+    const dialog = AlertDialog(
       content: Text(contentText),
       contentTextStyle: contentTextStyle,
       actions: <Widget>[],
@@ -281,7 +274,7 @@ void main() {
   });
 
   testWidgets('AlertDialog custom clipBehavior', (WidgetTester tester) async {
-    const AlertDialog dialog = AlertDialog(actions: <Widget>[], clipBehavior: Clip.antiAlias);
+    const dialog = AlertDialog(actions: <Widget>[], clipBehavior: Clip.antiAlias);
     await tester.pumpWidget(_buildAppWithDialog(dialog));
 
     await tester.tap(find.text('X'));
@@ -292,7 +285,7 @@ void main() {
   });
 
   testWidgets('SimpleDialog custom clipBehavior', (WidgetTester tester) async {
-    const SimpleDialog dialog = SimpleDialog(clipBehavior: Clip.antiAlias, children: <Widget>[]);
+    const dialog = SimpleDialog(clipBehavior: Clip.antiAlias, children: <Widget>[]);
     await tester.pumpWidget(_buildAppWithDialog(dialog));
 
     await tester.tap(find.text('X'));
@@ -303,10 +296,10 @@ void main() {
   });
 
   testWidgets('Custom dialog shape', (WidgetTester tester) async {
-    const RoundedRectangleBorder customBorder = RoundedRectangleBorder(
+    const customBorder = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(16.0)),
     );
-    const AlertDialog dialog = AlertDialog(actions: <Widget>[], shape: customBorder);
+    const dialog = AlertDialog(actions: <Widget>[], shape: customBorder);
     await tester.pumpWidget(_buildAppWithDialog(dialog));
 
     await tester.tap(find.text('X'));
@@ -317,8 +310,8 @@ void main() {
   });
 
   testWidgets('Null dialog shape', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
-    const AlertDialog dialog = AlertDialog(actions: <Widget>[]);
+    final theme = ThemeData();
+    const dialog = AlertDialog(actions: <Widget>[]);
     await tester.pumpWidget(_buildAppWithDialog(dialog, theme: theme));
 
     await tester.tap(find.text('X'));
@@ -333,7 +326,7 @@ void main() {
 
   testWidgets('Rectangular dialog shape', (WidgetTester tester) async {
     const ShapeBorder customBorder = Border();
-    const AlertDialog dialog = AlertDialog(actions: <Widget>[], shape: customBorder);
+    const dialog = AlertDialog(actions: <Widget>[], shape: customBorder);
     await tester.pumpWidget(_buildAppWithDialog(dialog));
 
     await tester.tap(find.text('X'));
@@ -344,7 +337,7 @@ void main() {
   });
 
   testWidgets('Custom dialog alignment', (WidgetTester tester) async {
-    const AlertDialog dialog = AlertDialog(actions: <Widget>[], alignment: Alignment.bottomLeft);
+    const dialog = AlertDialog(actions: <Widget>[], alignment: Alignment.bottomLeft);
     await tester.pumpWidget(_buildAppWithDialog(dialog));
 
     await tester.tap(find.text('X'));
@@ -360,7 +353,9 @@ void main() {
   testWidgets('Simple dialog control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: Material(child: Center(child: ElevatedButton(onPressed: null, child: Text('Go')))),
+        home: Material(
+          child: Center(child: ElevatedButton(onPressed: null, child: Text('Go'))),
+        ),
       ),
     );
 
@@ -392,9 +387,12 @@ void main() {
   });
 
   testWidgets('Can show dialog using navigator global key', (WidgetTester tester) async {
-    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    final navigator = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
-      MaterialApp(navigatorKey: navigator, home: const Material(child: Center(child: Text('Go')))),
+      MaterialApp(
+        navigatorKey: navigator,
+        home: const Material(child: Center(child: Text('Go'))),
+      ),
     );
 
     final Future<int?> result = showDialog<int>(
@@ -423,8 +421,8 @@ void main() {
   });
 
   testWidgets('Custom padding on SimpleDialogOption', (WidgetTester tester) async {
-    const EdgeInsets customPadding = EdgeInsets.fromLTRB(4, 10, 8, 6);
-    final SimpleDialog dialog = SimpleDialog(
+    const customPadding = EdgeInsets.fromLTRB(4, 10, 8, 6);
+    final dialog = SimpleDialog(
       title: const Text('Title'),
       children: <Widget>[
         SimpleDialogOption(
@@ -451,7 +449,9 @@ void main() {
   testWidgets('Barrier dismissible', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: Material(child: Center(child: ElevatedButton(onPressed: null, child: Text('Go')))),
+        home: Material(
+          child: Center(child: ElevatedButton(onPressed: null, child: Text('Go'))),
+        ),
       ),
     );
 
@@ -529,8 +529,8 @@ void main() {
   });
 
   testWidgets('Dialog hides underlying semantics tree', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    const String buttonText = 'A button covered by dialog overlay';
+    final semantics = SemanticsTester(tester);
+    const buttonText = 'A button covered by dialog overlay';
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -543,7 +543,7 @@ void main() {
 
     final BuildContext context = tester.element(find.text(buttonText));
 
-    const String alertText = 'A button in an overlay alert';
+    const alertText = 'A button in an overlay alert';
     showDialog<void>(
       context: context,
       builder: (BuildContext context) {
@@ -560,7 +560,7 @@ void main() {
   });
 
   testWidgets('AlertDialog.actionsPadding defaults', (WidgetTester tester) async {
-    final AlertDialog dialog = AlertDialog(
+    final dialog = AlertDialog(
       title: const Text('title'),
       content: const Text('content'),
       actions: <Widget>[ElevatedButton(onPressed: () {}, child: const Text('button'))],
@@ -585,7 +585,7 @@ void main() {
   testWidgets('AlertDialog.actionsPadding surrounds actions with padding', (
     WidgetTester tester,
   ) async {
-    final AlertDialog dialog = AlertDialog(
+    final dialog = AlertDialog(
       title: const Text('title'),
       content: const Text('content'),
       actions: <Widget>[ElevatedButton(onPressed: () {}, child: const Text('button'))],
@@ -614,7 +614,7 @@ void main() {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
 
-    final AlertDialog dialog = AlertDialog(
+    final dialog = AlertDialog(
       title: const Text('title'),
       content: const Text('content'),
       actions: <Widget>[
@@ -664,7 +664,7 @@ void main() {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
 
-    final AlertDialog dialog = AlertDialog(
+    final dialog = AlertDialog(
       title: const Text('title'),
       content: const Text('content'),
       actions: <Widget>[
@@ -714,7 +714,7 @@ void main() {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
 
-    final AlertDialog dialog = AlertDialog(
+    final dialog = AlertDialog(
       title: const Text('title'),
       content: const Text('content'),
       actions: <Widget>[
@@ -762,8 +762,8 @@ void main() {
   });
 
   group('Dialog children padding is correct', () {
-    final List<double> textScaleFactors = <double>[0.5, 1.0, 1.5, 2.0, 3.0];
-    final Map<double, double> paddingScaleFactors = <double, double>{
+    final textScaleFactors = <double>[0.5, 1.0, 1.5, 2.0, 3.0];
+    final paddingScaleFactors = <double, double>{
       0.5: 1.0,
       1.0: 1.0,
       1.5: 2.0 / 3.0,
@@ -776,8 +776,9 @@ void main() {
     final GlobalKey contentKey = GlobalKey();
     final GlobalKey childrenKey = GlobalKey();
 
-    final Finder dialogFinder =
-        find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first;
+    final Finder dialogFinder = find
+        .descendant(of: find.byType(Dialog), matching: find.byType(Material))
+        .first;
     final Finder iconFinder = find.byKey(iconKey);
     final Finder titleFinder = find.byKey(titleKey);
     final Finder contentFinder = find.byKey(contentKey);
@@ -895,18 +896,16 @@ void main() {
     final Widget icon = Icon(Icons.ac_unit, key: iconKey);
     final Widget title = Text('title', key: titleKey);
     final Widget content = Text('content', key: contentKey);
-    final List<Widget> actions = <Widget>[
-      ElevatedButton(onPressed: () {}, child: const Text('button')),
-    ];
-    final List<Widget> children = <Widget>[
+    final actions = <Widget>[ElevatedButton(onPressed: () {}, child: const Text('button'))];
+    final children = <Widget>[
       SimpleDialogOption(key: childrenKey, child: const Text('child'), onPressed: () {}),
     ];
 
-    for (final double textScaleFactor in textScaleFactors) {
+    for (final textScaleFactor in textScaleFactors) {
       testWidgets(
         'AlertDialog padding is correct when only icon and actions are specified [textScaleFactor]=$textScaleFactor',
         (WidgetTester tester) async {
-          final AlertDialog dialog = AlertDialog(icon: icon, actions: actions);
+          final dialog = AlertDialog(icon: icon, actions: actions);
 
           await openDialog(tester, dialog, textScaleFactor);
 
@@ -953,7 +952,7 @@ void main() {
       testWidgets(
         'AlertDialog padding is correct when only icon, title and actions are specified [textScaleFactor]=$textScaleFactor',
         (WidgetTester tester) async {
-          final AlertDialog dialog = AlertDialog(icon: icon, title: title, actions: actions);
+          final dialog = AlertDialog(icon: icon, title: title, actions: actions);
 
           await openDialog(tester, dialog, textScaleFactor);
 
@@ -1010,11 +1009,11 @@ void main() {
         },
       );
 
-      for (final bool isM3 in <bool>[true, false]) {
+      for (final isM3 in <bool>[true, false]) {
         testWidgets(
           'AlertDialog padding is correct when only icon, content and actions are specified [textScaleFactor]=$textScaleFactor [isM3]=$isM3',
           (WidgetTester tester) async {
-            final AlertDialog dialog = AlertDialog(icon: icon, content: content, actions: actions);
+            final dialog = AlertDialog(icon: icon, content: content, actions: actions);
 
             await openDialog(tester, dialog, textScaleFactor, isM3: isM3);
 
@@ -1085,7 +1084,7 @@ void main() {
       testWidgets(
         'AlertDialog padding is correct when only title and actions are specified [textScaleFactor]=$textScaleFactor',
         (WidgetTester tester) async {
-          final AlertDialog dialog = AlertDialog(title: title, actions: actions);
+          final dialog = AlertDialog(title: title, actions: actions);
 
           await openDialog(tester, dialog, textScaleFactor);
 
@@ -1132,7 +1131,7 @@ void main() {
       testWidgets(
         'AlertDialog padding is correct when only content and actions are specified [textScaleFactor]=$textScaleFactor',
         (WidgetTester tester) async {
-          final AlertDialog dialog = AlertDialog(content: content, actions: actions);
+          final dialog = AlertDialog(content: content, actions: actions);
 
           await openDialog(tester, dialog, textScaleFactor);
 
@@ -1184,7 +1183,7 @@ void main() {
       testWidgets(
         'AlertDialog padding is correct when title, content, and actions are specified [textScaleFactor]=$textScaleFactor',
         (WidgetTester tester) async {
-          final AlertDialog dialog = AlertDialog(title: title, content: content, actions: actions);
+          final dialog = AlertDialog(title: title, content: content, actions: actions);
 
           await openDialog(tester, dialog, textScaleFactor);
 
@@ -1249,7 +1248,7 @@ void main() {
       testWidgets(
         'SimpleDialog padding is correct when only children are specified [textScaleFactor]=$textScaleFactor',
         (WidgetTester tester) async {
-          final SimpleDialog dialog = SimpleDialog(children: children);
+          final dialog = SimpleDialog(children: children);
 
           await openDialog(tester, dialog, textScaleFactor);
 
@@ -1283,7 +1282,7 @@ void main() {
       testWidgets(
         'SimpleDialog padding is correct when title and children are specified [textScaleFactor]=$textScaleFactor',
         (WidgetTester tester) async {
-          final SimpleDialog dialog = SimpleDialog(title: title, children: children);
+          final dialog = SimpleDialog(title: title, children: children);
 
           await openDialog(tester, dialog, textScaleFactor);
 
@@ -1335,7 +1334,7 @@ void main() {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
 
-    final AlertDialog dialog = AlertDialog(
+    final dialog = AlertDialog(
       title: const Text('title'),
       content: const Text('content'),
       actions: <Widget>[
@@ -1370,7 +1369,7 @@ void main() {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
 
-    final AlertDialog dialog = AlertDialog(
+    final dialog = AlertDialog(
       title: const Text('title'),
       content: const Text('content'),
       actions: <Widget>[
@@ -1403,7 +1402,7 @@ void main() {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
 
-    final AlertDialog dialog = AlertDialog(
+    final dialog = AlertDialog(
       title: const Text('title'),
       content: const Text('content'),
       actions: <Widget>[
@@ -1435,7 +1434,7 @@ void main() {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
 
-    final AlertDialog dialog = AlertDialog(
+    final dialog = AlertDialog(
       title: const Text('title'),
       content: const Text('content'),
       actions: <Widget>[
@@ -1479,14 +1478,15 @@ void main() {
           child: Navigator(
             onGenerateRoute: (_) {
               return PageRouteBuilder<void>(
-                pageBuilder: (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) {
-                  outerContext = context;
-                  return Container();
-                },
+                pageBuilder:
+                    (
+                      BuildContext context,
+                      Animation<double> animation,
+                      Animation<double> secondaryAnimation,
+                    ) {
+                      outerContext = context;
+                      return Container();
+                    },
               );
             },
           ),
@@ -1532,7 +1532,10 @@ void main() {
       const Rect.fromLTRB(10.0 + 40.0, 20.0 + 24.0, 800.0 - (40.0 + 30.0), 600.0 - (24.0 + 40.0)),
     );
     await tester.pumpWidget(
-      const MediaQuery(data: MediaQueryData(), child: Dialog(child: Placeholder())),
+      const MediaQuery(
+        data: MediaQueryData(),
+        child: Dialog(child: Placeholder()),
+      ),
     );
     expect(
       // no change because this is an animation
@@ -1549,7 +1552,7 @@ void main() {
 
   testWidgets('Dialog insetPadding added to outside of dialog', (WidgetTester tester) async {
     // The default testing screen (800, 600)
-    const Rect screenRect = Rect.fromLTRB(0.0, 0.0, 800.0, 600.0);
+    const screenRect = Rect.fromLTRB(0.0, 0.0, 800.0, 600.0);
 
     // Test with no padding.
     await tester.pumpWidget(
@@ -1585,7 +1588,15 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/78229.
   testWidgets('AlertDialog has correct semantics for content in iOS', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
+    const localizations = DefaultMaterialLocalizations();
+
+    // With the change to defaultTargetPlatform
+    // (see https://github.com/flutter/flutter/issues/176566),
+    // the actual platform (not theme.platform) determines the semantics.
+    // By default:
+    // On iOS/macOS, no "Alert" label should be added in title.
+    // On other platforms, an "Alert" label is added.
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1597,6 +1608,10 @@ void main() {
         ),
       ),
     );
+
+    final bool isIOSorMacOS =
+        defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS;
 
     expect(
       semantics,
@@ -1617,35 +1632,82 @@ void main() {
                         TestSemantics(
                           id: 4,
                           role: SemanticsRole.alertDialog,
-                          children: <TestSemantics>[
-                            TestSemantics(id: 5, label: 'title', textDirection: TextDirection.ltr),
-                            // The content semantics does not merge into the semantics
-                            // node 4.
-                            TestSemantics(
-                              id: 6,
-                              children: <TestSemantics>[
-                                TestSemantics(
-                                  id: 7,
-                                  label: 'some content',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                                TestSemantics(
-                                  id: 8,
-                                  label: 'more content',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                              ],
-                            ),
-                            TestSemantics(
-                              id: 9,
-                              flags: <SemanticsFlag>[
-                                SemanticsFlag.isButton,
-                                SemanticsFlag.hasEnabledState,
-                              ],
-                              label: 'action',
-                              textDirection: TextDirection.ltr,
-                            ),
-                          ],
+                          children: isIOSorMacOS
+                              ? <TestSemantics>[
+                                  TestSemantics(
+                                    id: 5,
+                                    label: 'title',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                  // The content semantics does not merge into the semantics
+                                  // node 4.
+                                  TestSemantics(
+                                    id: 6,
+                                    children: <TestSemantics>[
+                                      TestSemantics(
+                                        id: 7,
+                                        label: 'some content',
+                                        textDirection: TextDirection.ltr,
+                                      ),
+                                      TestSemantics(
+                                        id: 8,
+                                        label: 'more content',
+                                        textDirection: TextDirection.ltr,
+                                      ),
+                                    ],
+                                  ),
+                                  TestSemantics(
+                                    id: 9,
+                                    flags: <SemanticsFlag>[
+                                      SemanticsFlag.isButton,
+                                      SemanticsFlag.hasEnabledState,
+                                    ],
+                                    label: 'action',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                ]
+                              : <TestSemantics>[
+                                  TestSemantics(
+                                    id: 5,
+                                    flags: <SemanticsFlag>[
+                                      SemanticsFlag.scopesRoute,
+                                      SemanticsFlag.namesRoute,
+                                    ],
+                                    label: localizations.alertDialogLabel,
+                                    textDirection: TextDirection.ltr,
+                                    children: <TestSemantics>[
+                                      TestSemantics(
+                                        id: 6,
+                                        label: 'title',
+                                        textDirection: TextDirection.ltr,
+                                      ),
+                                      TestSemantics(
+                                        id: 7,
+                                        children: <TestSemantics>[
+                                          TestSemantics(
+                                            id: 8,
+                                            label: 'some content',
+                                            textDirection: TextDirection.ltr,
+                                          ),
+                                          TestSemantics(
+                                            id: 9,
+                                            label: 'more content',
+                                            textDirection: TextDirection.ltr,
+                                          ),
+                                        ],
+                                      ),
+                                      TestSemantics(
+                                        id: 10,
+                                        flags: <SemanticsFlag>[
+                                          SemanticsFlag.isButton,
+                                          SemanticsFlag.hasEnabledState,
+                                        ],
+                                        label: 'action',
+                                        textDirection: TextDirection.ltr,
+                                      ),
+                                    ],
+                                  ),
+                                ],
                         ),
                       ],
                     ),
@@ -1667,7 +1729,7 @@ void main() {
   testWidgets('AlertDialog widget always contains alert route semantics for android', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1731,7 +1793,7 @@ void main() {
   });
 
   testWidgets('SimpleDialog does not introduce additional node', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1774,17 +1836,32 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/78229.
   testWidgets('SimpleDialog has correct semantics for title in iOS', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
+    const localizations = DefaultMaterialLocalizations();
+
+    // With the change to defaultTargetPlatform
+    // (see https://github.com/flutter/flutter/issues/176566),
+    // the actual platform (not theme.platform) determines the semantics.
+    // By default:
+    // On iOS/macOS, no "Alert" label should be added in title.
+    // On other platforms, an "Alert" label is added.
 
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.iOS),
         home: const SimpleDialog(
           title: Text('title'),
-          children: <Widget>[Text('content'), TextButton(onPressed: null, child: Text('action'))],
+          children: <Widget>[
+            Text('content'),
+            TextButton(onPressed: null, child: Text('action')),
+          ],
         ),
       ),
     );
+
+    final bool isIOSorMacOS =
+        defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS;
 
     expect(
       semantics,
@@ -1805,31 +1882,74 @@ void main() {
                         TestSemantics(
                           id: 4,
                           role: SemanticsRole.dialog,
-                          children: <TestSemantics>[
-                            // Title semantics does not merge into the semantics
-                            // node 4.
-                            TestSemantics(id: 5, label: 'title', textDirection: TextDirection.ltr),
-                            TestSemantics(
-                              id: 6,
-                              flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
-                              children: <TestSemantics>[
-                                TestSemantics(
-                                  id: 7,
-                                  label: 'content',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                                TestSemantics(
-                                  id: 8,
-                                  flags: <SemanticsFlag>[
-                                    SemanticsFlag.isButton,
-                                    SemanticsFlag.hasEnabledState,
-                                  ],
-                                  label: 'action',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                              ],
-                            ),
-                          ],
+                          children: isIOSorMacOS
+                              ? <TestSemantics>[
+                                  // Title semantics does not merge into the semantics
+                                  // node 4.
+                                  TestSemantics(
+                                    id: 5,
+                                    label: 'title',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                  TestSemantics(
+                                    id: 6,
+                                    flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                                    children: <TestSemantics>[
+                                      TestSemantics(
+                                        id: 7,
+                                        label: 'content',
+                                        textDirection: TextDirection.ltr,
+                                      ),
+                                      TestSemantics(
+                                        id: 8,
+                                        flags: <SemanticsFlag>[
+                                          SemanticsFlag.isButton,
+                                          SemanticsFlag.hasEnabledState,
+                                        ],
+                                        label: 'action',
+                                        textDirection: TextDirection.ltr,
+                                      ),
+                                    ],
+                                  ),
+                                ]
+                              : <TestSemantics>[
+                                  TestSemantics(
+                                    id: 5,
+                                    flags: <SemanticsFlag>[
+                                      SemanticsFlag.scopesRoute,
+                                      SemanticsFlag.namesRoute,
+                                    ],
+                                    label: localizations.dialogLabel,
+                                    textDirection: TextDirection.ltr,
+                                    children: <TestSemantics>[
+                                      TestSemantics(
+                                        id: 6,
+                                        label: 'title',
+                                        textDirection: TextDirection.ltr,
+                                      ),
+                                      TestSemantics(
+                                        id: 7,
+                                        flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                                        children: <TestSemantics>[
+                                          TestSemantics(
+                                            id: 8,
+                                            label: 'content',
+                                            textDirection: TextDirection.ltr,
+                                          ),
+                                          TestSemantics(
+                                            id: 9,
+                                            flags: <SemanticsFlag>[
+                                              SemanticsFlag.isButton,
+                                              SemanticsFlag.hasEnabledState,
+                                            ],
+                                            label: 'action',
+                                            textDirection: TextDirection.ltr,
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ],
                         ),
                       ],
                     ),
@@ -1849,8 +1969,8 @@ void main() {
   });
 
   testWidgets('Dismissible.confirmDismiss defers to an AlertDialog', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    final List<int> dismissedItems = <int>[];
+    final scaffoldKey = GlobalKey<ScaffoldState>();
+    final dismissedItems = <int>[];
 
     // Dismiss is confirmed IFF confirmDismiss() returns true.
     Future<bool?> confirmDismiss(DismissDirection dismissDirection) async {
@@ -1901,11 +2021,10 @@ void main() {
                 padding: const EdgeInsets.all(16.0),
                 child: ListView(
                   itemExtent: 100.0,
-                  children:
-                      <int>[0, 1, 2, 3, 4]
-                          .where((int i) => !dismissedItems.contains(i))
-                          .map<Widget>((int item) => buildDismissibleItem(item, setState))
-                          .toList(),
+                  children: <int>[0, 1, 2, 3, 4]
+                      .where((int i) => !dismissedItems.contains(i))
+                      .map<Widget>((int item) => buildDismissibleItem(item, setState))
+                      .toList(),
                 ),
               ),
             );
@@ -2065,8 +2184,8 @@ void main() {
   });
 
   testWidgets('showDialog uses root navigator by default', (WidgetTester tester) async {
-    final DialogObserver rootObserver = DialogObserver();
-    final DialogObserver nestedObserver = DialogObserver();
+    final rootObserver = DialogObserver();
+    final nestedObserver = DialogObserver();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2104,8 +2223,8 @@ void main() {
   testWidgets('showDialog uses nested navigator if useRootNavigator is false', (
     WidgetTester tester,
   ) async {
-    final DialogObserver rootObserver = DialogObserver();
-    final DialogObserver nestedObserver = DialogObserver();
+    final rootObserver = DialogObserver();
+    final nestedObserver = DialogObserver();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2165,7 +2284,7 @@ void main() {
     expect(error, isNotNull);
     expect(error, isFlutterError);
     if (error is FlutterError) {
-      final ErrorSummary summary = error.diagnostics.first as ErrorSummary;
+      final summary = error.diagnostics.first as ErrorSummary;
       expect(summary.toString(), 'This BuildContext is no longer valid.');
     }
   });
@@ -2287,7 +2406,7 @@ void main() {
   group('AlertDialog.scrollable: ', () {
     testWidgets('Title is scrollable', (WidgetTester tester) async {
       final Key titleKey = UniqueKey();
-      final AlertDialog dialog = AlertDialog(
+      final dialog = AlertDialog(
         title: Container(key: titleKey, color: Colors.green, height: 1000),
         scrollable: true,
       );
@@ -2303,7 +2422,7 @@ void main() {
 
     testWidgets('Content is scrollable', (WidgetTester tester) async {
       final Key contentKey = UniqueKey();
-      final AlertDialog dialog = AlertDialog(
+      final dialog = AlertDialog(
         content: Container(key: contentKey, color: Colors.orange, height: 1000),
         scrollable: true,
       );
@@ -2320,7 +2439,7 @@ void main() {
     testWidgets('Title and content are scrollable', (WidgetTester tester) async {
       final Key titleKey = UniqueKey();
       final Key contentKey = UniqueKey();
-      final AlertDialog dialog = AlertDialog(
+      final dialog = AlertDialog(
         title: Container(key: titleKey, color: Colors.green, height: 400),
         content: Container(key: contentKey, color: Colors.orange, height: 400),
         scrollable: true,
@@ -2370,7 +2489,7 @@ void main() {
     );
 
     final BuildContext context = tester.element(find.text('Go'));
-    const RouteSettings exampleSetting = RouteSettings(name: 'simple');
+    const exampleSetting = RouteSettings(name: 'simple');
 
     final Future<int?> result = showDialog<int>(
       context: context,
@@ -2403,7 +2522,7 @@ void main() {
   });
 
   testWidgets('showDialog - custom barrierLabel', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2525,23 +2644,22 @@ void main() {
   });
 
   testWidgets('Uses closed loop focus traversal', (WidgetTester tester) async {
-    final FocusNode okNode = FocusNode();
-    final FocusNode cancelNode = FocusNode();
+    final okNode = FocusNode();
+    final cancelNode = FocusNode();
 
     Future<bool> nextFocus() async {
-      final bool result = Actions.invoke(primaryFocus!.context!, const NextFocusIntent())! as bool;
+      final result = Actions.invoke(primaryFocus!.context!, const NextFocusIntent())! as bool;
       await tester.pump();
       return result;
     }
 
     Future<bool> previousFocus() async {
-      final bool result =
-          Actions.invoke(primaryFocus!.context!, const PreviousFocusIntent())! as bool;
+      final result = Actions.invoke(primaryFocus!.context!, const PreviousFocusIntent())! as bool;
       await tester.pump();
       return result;
     }
 
-    final AlertDialog dialog = AlertDialog(
+    final dialog = AlertDialog(
       content: const Text('Test dialog'),
       actions: <Widget>[
         TextButton(focusNode: okNode, onPressed: () {}, child: const Text('OK')),
@@ -2585,15 +2703,12 @@ void main() {
   testWidgets('Adaptive AlertDialog shows correct widget on each platform', (
     WidgetTester tester,
   ) async {
-    final AlertDialog dialog = AlertDialog.adaptive(
+    final dialog = AlertDialog.adaptive(
       content: Container(height: 5000.0, width: 300.0, color: Colors.green[500]),
       actions: <Widget>[TextButton(onPressed: () {}, child: const Text('OK'))],
     );
 
-    for (final TargetPlatform platform in <TargetPlatform>[
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    ]) {
+    for (final platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
       await tester.pumpWidget(_buildAppWithDialog(dialog, theme: ThemeData(platform: platform)));
       await tester.pumpAndSettle();
 
@@ -2606,7 +2721,7 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    for (final TargetPlatform platform in <TargetPlatform>[
+    for (final platform in <TargetPlatform>[
       TargetPlatform.android,
       TargetPlatform.fuchsia,
       TargetPlatform.linux,
@@ -2683,14 +2798,13 @@ void main() {
   });
 
   testWidgets('Applies AnimationStyle to showAdaptiveDialog', (WidgetTester tester) async {
-    const AnimationStyle animationStyle = AnimationStyle(
-      duration: Duration(seconds: 1),
-      curve: Curves.easeInOut,
-    );
+    const animationStyle = AnimationStyle(duration: Duration(seconds: 1), curve: Curves.easeInOut);
 
     await tester.pumpWidget(
       const MaterialApp(
-        home: Material(child: Center(child: ElevatedButton(onPressed: null, child: Text('Go')))),
+        home: Material(
+          child: Center(child: ElevatedButton(onPressed: null, child: Text('Go'))),
+        ),
       ),
     );
     final BuildContext context = tester.element(find.text('Go'));
@@ -2716,18 +2830,18 @@ void main() {
   });
 
   testWidgets('Uses open focus traversal when overridden', (WidgetTester tester) async {
-    final FocusNode okNode = FocusNode();
+    final okNode = FocusNode();
     addTearDown(okNode.dispose);
-    final FocusNode cancelNode = FocusNode();
+    final cancelNode = FocusNode();
     addTearDown(cancelNode.dispose);
 
     Future<bool> nextFocus() async {
-      final bool result = Actions.invoke(primaryFocus!.context!, const NextFocusIntent())! as bool;
+      final result = Actions.invoke(primaryFocus!.context!, const NextFocusIntent())! as bool;
       await tester.pump();
       return result;
     }
 
-    final AlertDialog dialog = AlertDialog(
+    final dialog = AlertDialog(
       content: const Text('Test dialog'),
       actions: <Widget>[
         TextButton(focusNode: okNode, onPressed: () {}, child: const Text('OK')),
@@ -2758,17 +2872,17 @@ void main() {
   });
 
   testWidgets('Dialog.insetPadding is nullable', (WidgetTester tester) async {
-    const Dialog dialog = Dialog();
+    const dialog = Dialog();
     expect(dialog.insetPadding, isNull);
   });
 
   testWidgets('AlertDialog.insetPadding is nullable', (WidgetTester tester) async {
-    const AlertDialog alertDialog = AlertDialog();
+    const alertDialog = AlertDialog();
     expect(alertDialog.insetPadding, isNull);
   });
 
   testWidgets('SimpleDialog.insetPadding is nullable', (WidgetTester tester) async {
-    const SimpleDialog simpleDialog = SimpleDialog();
+    const simpleDialog = SimpleDialog();
     expect(simpleDialog.insetPadding, isNull);
   });
 
@@ -2776,7 +2890,7 @@ void main() {
   testWidgets('Can pass a null value to AlertDialog.adaptive clip behavior', (
     WidgetTester tester,
   ) async {
-    for (final Clip? clipBehavior in <Clip?>[null, ...Clip.values]) {
+    for (final clipBehavior in <Clip?>[null, ...Clip.values]) {
       AlertDialog.adaptive(clipBehavior: clipBehavior);
     }
   });
@@ -2785,9 +2899,9 @@ void main() {
     WidgetTester tester,
   ) async {
     late BuildContext savedContext;
-    final FocusNode focusNode = FocusNode();
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
-    const String dialogText = 'Dialog Text';
+    const dialogText = 'Dialog Text';
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -2855,8 +2969,8 @@ void main() {
   });
 
   testWidgets('requestFocus works correctly in showDialog.', (WidgetTester tester) async {
-    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-    final FocusNode focusNode = FocusNode();
+    final navigatorKey = GlobalKey<NavigatorState>();
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     await tester.pumpWidget(
       MaterialApp(
@@ -2889,6 +3003,313 @@ void main() {
     await tester.pumpAndSettle();
     expect(FocusScope.of(tester.element(find.text('dialog'))).hasFocus, false);
     expect(focusNode.hasFocus, true);
+  });
+
+  testWidgets('Dialog respects the given constraints', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _buildAppWithDialog(
+        const Dialog(
+          constraints: BoxConstraints(maxWidth: 560),
+          child: SizedBox(width: 1000, height: 100),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(SizedBox)).width, 560);
+  });
+
+  testWidgets('AlertDialog respects the default constraints', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _buildAppWithDialog(const AlertDialog(content: SizedBox(), contentPadding: EdgeInsets.zero)),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(SizedBox)).width, 280);
+  });
+
+  testWidgets('AlertDialog respects the given constraints', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _buildAppWithDialog(
+        const AlertDialog(
+          constraints: BoxConstraints(maxWidth: 560),
+          content: SizedBox(width: 1000, height: 100),
+          contentPadding: EdgeInsets.zero,
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(SizedBox)).width, 560);
+  });
+
+  testWidgets('SimpleDialog respects the default constraints', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _buildAppWithDialog(
+        const SimpleDialog(contentPadding: EdgeInsets.zero, children: <Widget>[SizedBox()]),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(SizedBox)).width, 280);
+  });
+
+  testWidgets('SimpleDialog respects the given constraints', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _buildAppWithDialog(
+        const SimpleDialog(
+          constraints: BoxConstraints(maxWidth: 560),
+          contentPadding: EdgeInsets.zero,
+          children: <Widget>[SizedBox(width: 1000, height: 100)],
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(SizedBox)).width, 560);
+  });
+
+  testWidgets('test no back gesture on fullscreen dialogs', (WidgetTester tester) async {
+    // no back button in app bar for RawDialogRoute with full screen dialog set to true
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return TextButton(
+                child: const Text('X'),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    RawDialogRoute<void>(
+                      pageBuilder:
+                          (
+                            BuildContext context,
+                            Animation<double> animation,
+                            Animation<double> secondaryAnimation,
+                          ) {
+                            return Scaffold(
+                              appBar: AppBar(title: const Text('title')),
+                              body: const Text('body'),
+                            );
+                          },
+                      fullscreenDialog: true,
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(BackButton), findsNothing);
+    expect(find.byType(CloseButton), findsOneWidget);
+  });
+
+  testWidgets('SimpleDialog does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: SimpleDialog(title: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SimpleDialog)), Size.zero);
+  });
+
+  testWidgets('SimpleDialogOption does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: SizedBox.shrink(child: SimpleDialogOption(child: Text('X'))),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SimpleDialogOption)), Size.zero);
+  });
+
+  testWidgets('Dialog does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: Dialog(child: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Dialog)).isEmpty, isTrue);
+  });
+
+  testWidgets('AlertDialog does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: AlertDialog(content: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(AlertDialog)).isEmpty, isTrue);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/177001
+  group('Dialog semantics for mismatched platforms', () {
+    Future<void> pumpDialogWithTheme({
+      required WidgetTester tester,
+      required Widget dialog,
+      required TargetPlatform themePlatform,
+    }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: themePlatform),
+          home: Material(
+            child: Builder(
+              builder: (BuildContext context) {
+                return Center(
+                  child: ElevatedButton(
+                    child: const Text('X'),
+                    onPressed: () {
+                      showDialog<void>(context: context, builder: (BuildContext context) => dialog);
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('AlertDialog', (WidgetTester tester) async {
+      final semantics = SemanticsTester(tester);
+      const localizations = DefaultMaterialLocalizations();
+
+      final bool isIOSorMacOS =
+          defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.macOS;
+
+      // Test with theme.platform = Android on different real platforms.
+      await pumpDialogWithTheme(
+        tester: tester,
+        themePlatform: TargetPlatform.android,
+        dialog: const AlertDialog(title: Text('Title'), content: Text('Y'), actions: <Widget>[]),
+      );
+
+      // Dismiss the first dialog.
+      Navigator.of(tester.element(find.text('Title'))).pop();
+      await tester.pumpAndSettle();
+
+      // Test with theme.platform = iOS on different real platforms.
+      await pumpDialogWithTheme(
+        tester: tester,
+        themePlatform: TargetPlatform.iOS,
+        dialog: const AlertDialog(title: Text('Title'), content: Text('Y'), actions: <Widget>[]),
+      );
+
+      if (isIOSorMacOS) {
+        // On iOS/macOS, semantic label should be omitted and namesRoute flag should not exist.
+        expect(
+          semantics,
+          isNot(
+            includesNodeWith(
+              label: localizations.alertDialogLabel,
+              flags: <SemanticsFlag>[SemanticsFlag.namesRoute, SemanticsFlag.scopesRoute],
+            ),
+          ),
+        );
+      } else {
+        // On other platforms, semantic label should be added and namesRoute should exist.
+        expect(
+          semantics,
+          includesNodeWith(
+            label: localizations.alertDialogLabel,
+            flags: <SemanticsFlag>[SemanticsFlag.namesRoute, SemanticsFlag.scopesRoute],
+          ),
+        );
+      }
+
+      semantics.dispose();
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets('SimpleDialog', (WidgetTester tester) async {
+      final semantics = SemanticsTester(tester);
+      const localizations = DefaultMaterialLocalizations();
+
+      final bool isIOSorMacOS =
+          defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.macOS;
+
+      // Test with theme.platform = Android on different real platforms.
+      await pumpDialogWithTheme(
+        tester: tester,
+        themePlatform: TargetPlatform.android,
+        dialog: const SimpleDialog(
+          title: Text('Title'),
+          children: <Widget>[
+            Text('content'),
+            TextButton(onPressed: null, child: Text('action')),
+          ],
+        ),
+      );
+
+      // Dismiss the first dialog.
+      Navigator.of(tester.element(find.text('Title'))).pop();
+      await tester.pumpAndSettle();
+
+      // Test with theme.platform = iOS on different real platforms.
+      await pumpDialogWithTheme(
+        tester: tester,
+        themePlatform: TargetPlatform.iOS,
+        dialog: const SimpleDialog(
+          title: Text('Title'),
+          children: <Widget>[
+            Text('content'),
+            TextButton(onPressed: null, child: Text('action')),
+          ],
+        ),
+      );
+
+      if (isIOSorMacOS) {
+        // On iOS/macOS, semantic label should be omitted and namesRoute flag should not exist.
+        expect(
+          semantics,
+          isNot(
+            includesNodeWith(
+              label: localizations.dialogLabel,
+              flags: <SemanticsFlag>[SemanticsFlag.namesRoute, SemanticsFlag.scopesRoute],
+            ),
+          ),
+        );
+      } else {
+        // On other platforms, semantic label should be added and namesRoute should exist.
+        expect(
+          semantics,
+          includesNodeWith(
+            label: localizations.dialogLabel,
+            flags: <SemanticsFlag>[SemanticsFlag.namesRoute, SemanticsFlag.scopesRoute],
+          ),
+        );
+      }
+
+      semantics.dispose();
+    }, variant: TargetPlatformVariant.all());
   });
 }
 

@@ -1,4 +1,15 @@
 {
+  "_comment": [
+      "The builds defined in this file should not contain tests, ",
+      "and the file should not contain builds that are essentially tests. ",
+      "The only builds in this file should be the builds necessary to produce ",
+      "release artifacts. ",
+      "Tests to run on linux hosts should go in one of the other linux_ build ",
+      "definition files."
+  ],
+  "luci_flags": {
+    "upload_content_hash": true
+  },
   "builds": [
     {
       "name": "ci/wasm_release",

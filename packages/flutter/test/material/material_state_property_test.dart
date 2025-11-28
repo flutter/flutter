@@ -32,7 +32,7 @@ void main() {
   });
 
   test('MaterialStatePropertyAll', () {
-    const MaterialStatePropertyAll<int> value = MaterialStatePropertyAll<int>(123);
+    const value = MaterialStatePropertyAll<int>(123);
     expect(value.resolve(<MaterialState>{}), 123);
     expect(value.resolve(<MaterialState>{MaterialState.hovered}), 123);
     expect(value.resolve(<MaterialState>{MaterialState.focused}), 123);
@@ -64,33 +64,30 @@ void main() {
     );
 
     // Using `0.0` interpolation value.
-    TextStyle textStyle =
-        MaterialStateProperty.lerp<TextStyle?>(
-          textStyle1,
-          textStyle2,
-          0.0,
-          TextStyle.lerp,
-        )!.resolve(enabled)!;
+    TextStyle textStyle = MaterialStateProperty.lerp<TextStyle?>(
+      textStyle1,
+      textStyle2,
+      0.0,
+      TextStyle.lerp,
+    )!.resolve(enabled)!;
     expect(textStyle.fontSize, 14.0);
 
     // Using `0.5` interpolation value.
-    textStyle =
-        MaterialStateProperty.lerp<TextStyle?>(
-          textStyle1,
-          textStyle2,
-          0.5,
-          TextStyle.lerp,
-        )!.resolve(enabled)!;
+    textStyle = MaterialStateProperty.lerp<TextStyle?>(
+      textStyle1,
+      textStyle2,
+      0.5,
+      TextStyle.lerp,
+    )!.resolve(enabled)!;
     expect(textStyle.fontSize, 17.0);
 
     // Using `1.0` interpolation value.
-    textStyle =
-        MaterialStateProperty.lerp<TextStyle?>(
-          textStyle1,
-          textStyle2,
-          1.0,
-          TextStyle.lerp,
-        )!.resolve(enabled)!;
+    textStyle = MaterialStateProperty.lerp<TextStyle?>(
+      textStyle1,
+      textStyle2,
+      1.0,
+      TextStyle.lerp,
+    )!.resolve(enabled)!;
     expect(textStyle.fontSize, 20.0);
   });
 }

@@ -21,13 +21,8 @@ Future<void> main() async {
     }
     print('\nUsing JAVA_HOME=$javaHome');
 
-    // TODO(matanlurey): Remove after default.
-    // https://github.com/flutter/flutter/issues/160257
-    section('Opt-in to --explicit-package-dependencies');
-    await flutter('config', options: <String>['--explicit-package-dependencies']);
-
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_module_test.');
-    final Directory projectDir = Directory(path.join(tempDir.path, 'hello'));
+    final projectDir = Directory(path.join(tempDir.path, 'hello'));
     try {
       section('Create module project');
 
@@ -72,7 +67,7 @@ Future<void> main() async {
 
       section('Add plugins to pubspec.yaml');
 
-      final File modulePubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
+      final modulePubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
       String content = modulePubspec.readAsStringSync();
       content = content.replaceFirst(
         '${Platform.lineTerminator}dependencies:${Platform.lineTerminator}',
@@ -270,7 +265,8 @@ Future<void> main() async {
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Task exception stack trace:\n$stackTrace');
       return TaskResult.failure(e.toString());
     } finally {
       rmTree(tempDir);

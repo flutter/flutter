@@ -113,9 +113,8 @@ class ImageCache {
     }
     TimelineTask? debugTimelineTask;
     if (!kReleaseMode) {
-      debugTimelineTask =
-          TimelineTask()
-            ..start('ImageCache.setMaximumSize', arguments: <String, dynamic>{'value': value});
+      debugTimelineTask = TimelineTask()
+        ..start('ImageCache.setMaximumSize', arguments: <String, dynamic>{'value': value});
     }
     _maximumSize = value;
     if (maximumSize == 0) {
@@ -152,9 +151,8 @@ class ImageCache {
     }
     TimelineTask? debugTimelineTask;
     if (!kReleaseMode) {
-      debugTimelineTask =
-          TimelineTask()
-            ..start('ImageCache.setMaximumSizeBytes', arguments: <String, dynamic>{'value': value});
+      debugTimelineTask = TimelineTask()
+        ..start('ImageCache.setMaximumSizeBytes', arguments: <String, dynamic>{'value': value});
     }
     _maximumSizeBytes = value;
     if (_maximumSizeBytes == 0) {
@@ -297,16 +295,15 @@ class ImageCache {
   void _trackLiveImage(Object key, ImageStreamCompleter completer, int? sizeBytes) {
     // Avoid adding unnecessary callbacks to the completer.
     _liveImages.putIfAbsent(key, () {
-          // Even if no callers to ImageProvider.resolve have listened to the stream,
-          // the cache is listening to the stream and will remove itself once the
-          // image completes to move it from pending to keepAlive.
-          // Even if the cache size is 0, we still add this tracker, which will add
-          // a keep alive handle to the stream.
-          return _LiveImage(completer, () {
-            _liveImages.remove(key);
-          });
-        }).sizeBytes ??=
-        sizeBytes;
+      // Even if no callers to ImageProvider.resolve have listened to the stream,
+      // the cache is listening to the stream and will remove itself once the
+      // image completes to move it from pending to keepAlive.
+      // Even if the cache size is 0, we still add this tracker, which will add
+      // a keep alive handle to the stream.
+      return _LiveImage(completer, () {
+        _liveImages.remove(key);
+      });
+    }).sizeBytes ??= sizeBytes;
   }
 
   /// Returns the previously cached [ImageStream] for the given key, if available;
@@ -327,9 +324,8 @@ class ImageCache {
   }) {
     TimelineTask? debugTimelineTask;
     if (!kReleaseMode) {
-      debugTimelineTask =
-          TimelineTask()
-            ..start('ImageCache.putIfAbsent', arguments: <String, dynamic>{'key': key.toString()});
+      debugTimelineTask = TimelineTask()
+        ..start('ImageCache.putIfAbsent', arguments: <String, dynamic>{'key': key.toString()});
     }
     ImageStreamCompleter? result = _pendingImages[key]?.completer;
     // Nothing needs to be done because the image hasn't loaded yet.
@@ -395,7 +391,7 @@ class ImageCache {
     // A multi-frame provider may call the listener more than once. We need do make
     // sure that some cleanup works won't run multiple times, such as finishing the
     // tracing task or removing the listeners
-    bool listenedOnce = false;
+    var listenedOnce = false;
 
     // We shouldn't use the _pendingImages map if the cache is disabled, but we
     // will have to listen to the image at least once so we don't leak it in
@@ -408,7 +404,7 @@ class ImageCache {
         sizeBytes = info.sizeBytes;
         info.dispose();
       }
-      final _CachedImage image = _CachedImage(result!, sizeBytes: sizeBytes);
+      final image = _CachedImage(result!, sizeBytes: sizeBytes);
 
       _trackLiveImage(key, result, sizeBytes);
 
@@ -436,7 +432,7 @@ class ImageCache {
       listenedOnce = true;
     }
 
-    final ImageStreamListener streamListener = ImageStreamListener(listener);
+    final streamListener = ImageStreamListener(listener);
     pendingImage = _PendingImage(result, streamListener);
     if (trackPendingImage) {
       _pendingImages[key] = pendingImage;
@@ -492,7 +488,7 @@ class ImageCache {
   // Remove images from the cache until both the length and bytes are below
   // maximum, or the cache is empty.
   void _checkCacheSize(TimelineTask? timelineTask) {
-    final Map<String, dynamic> finishArgs = <String, dynamic>{};
+    final finishArgs = <String, dynamic>{};
     if (!kReleaseMode) {
       timelineTask!.start('checkCacheSize');
       finishArgs['evictedKeys'] = <String>[];

@@ -21,7 +21,7 @@ void testMain() {
     setUp(() {
       EngineSemantics.instance.semanticsEnabled = false;
       desktopSemanticsEnabler = DesktopSemanticsEnabler();
-      placeholder = desktopSemanticsEnabler.prepareAccessibilityPlaceholder();
+      placeholder = desktopSemanticsEnabler.accessibilityPlaceholder;
       domDocument.body!.append(placeholder!);
     });
 
@@ -64,6 +64,28 @@ void testMain() {
       }
     });
 
+    test('Tab key should not enable semantics', () async {
+      final testSemanticsEnabler = FakeSemanticsEnabler();
+
+      // Tab should not enable semantics
+      {
+        final DomKeyboardEvent event = createDomKeyboardEvent('keydown', <String, Object>{
+          'key': 'Tab',
+        });
+        expect(testSemanticsEnabler.shouldEnableSemantics(event), isTrue);
+        expect(testSemanticsEnabler.tryEnableSemanticsCallCount, 0);
+      }
+
+      // Enter key is allowed to try to enable semantics
+      {
+        final DomKeyboardEvent event = createDomKeyboardEvent('keydown', <String, Object>{
+          'key': 'Enter',
+        });
+        expect(testSemanticsEnabler.shouldEnableSemantics(event), isFalse);
+        expect(testSemanticsEnabler.tryEnableSemanticsCallCount, 1);
+      }
+    });
+
     test(
       'Relevant events targeting placeholder should not be forwarded to the framework',
       () async {
@@ -75,6 +97,16 @@ void testMain() {
         expect(shouldForwardToFramework, isFalse);
       },
     );
+
+    test('Can update placeholder label', () {
+      const testLabel = 'Test label for placeholder';
+      desktopSemanticsEnabler.updatePlaceholderLabel(testLabel);
+      expect(placeholder!.getAttribute('aria-label'), testLabel);
+
+      const anotherLabel = 'Another label for placeholder';
+      desktopSemanticsEnabler.dispose();
+      expect(() => desktopSemanticsEnabler.updatePlaceholderLabel(anotherLabel), returnsNormally);
+    });
 
     test('disposes of the placeholder', () {
       domDocument.body!.append(placeholder!);
@@ -94,7 +126,7 @@ void testMain() {
       setUp(() {
         EngineSemantics.instance.semanticsEnabled = false;
         mobileSemanticsEnabler = MobileSemanticsEnabler();
-        placeholder = mobileSemanticsEnabler.prepareAccessibilityPlaceholder();
+        placeholder = mobileSemanticsEnabler.accessibilityPlaceholder;
         domDocument.body!.append(placeholder!);
       });
 
@@ -122,12 +154,25 @@ void testMain() {
         expect(shouldForwardToFramework, isTrue);
       });
 
+      test('Can update placeholder label', () {
+        const testLabel = 'Test label for placeholder';
+        mobileSemanticsEnabler.updatePlaceholderLabel(testLabel);
+        expect(placeholder!.getAttribute('aria-label'), testLabel);
+
+        const anotherLabel = 'Another label for placeholder';
+        mobileSemanticsEnabler.dispose();
+        expect(() => mobileSemanticsEnabler.updatePlaceholderLabel(anotherLabel), returnsNormally);
+      });
+
       test('Enables semantics when receiving a relevant event', () {
         expect(mobileSemanticsEnabler.semanticsActivationTimer, isNull);
 
         // Send a click off center
+        // Use fractional coordinates to avoid triggering assistive technology detection logic.
+        // The platform dispatcher's _isIntegerCoordinateNavigation() method
+        // detects assistive technology clicks by checking for integer coordinates.
         placeholder!.dispatchEvent(
-          createDomMouseEvent('click', <Object?, Object?>{'clientX': 0, 'clientY': 0}),
+          createDomMouseEvent('click', <Object?, Object?>{'clientX': 0.5, 'clientY': 0.5}),
         );
         expect(mobileSemanticsEnabler.semanticsActivationTimer, isNull);
 
@@ -150,4 +195,27 @@ void testMain() {
     // We can run `MobileSemanticsEnabler` tests in mobile browsers and in desktop Chrome.
     skip: isDesktop && ui_web.browser.browserEngine != ui_web.BrowserEngine.blink,
   );
+}
+
+class FakeSemanticsEnabler extends SemanticsEnabler {
+  @override
+  void dispose() {
+    throw UnimplementedError();
+  }
+
+  @override
+  bool get isWaitingToEnableSemantics => true;
+
+  @override
+  void updatePlaceholderLabel(String message) {
+    throw UnimplementedError();
+  }
+
+  int tryEnableSemanticsCallCount = 0;
+
+  @override
+  bool tryEnableSemantics(DomEvent event) {
+    tryEnableSemanticsCallCount += 1;
+    return false;
+  }
 }

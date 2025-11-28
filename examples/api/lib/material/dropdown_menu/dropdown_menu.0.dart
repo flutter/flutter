@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 // has the default outlined border and demos using the
 // [DropdownMenuEntry] style parameter to customize its appearance.
 // The second dropdown menu customizes the appearance of the dropdown
-// menu's text field with its [InputDecorationTheme] parameter.
+// menu's text field with its [DropdownMenu.inputDecorationTheme] parameter.
 
 void main() {
   runApp(const DropdownMenuExample());
@@ -56,7 +56,11 @@ enum IconLabel {
 
   static final List<IconEntry> entries = UnmodifiableListView<IconEntry>(
     values.map<IconEntry>(
-      (IconLabel icon) => IconEntry(value: icon, label: icon.label, leadingIcon: Icon(icon.icon)),
+      (IconLabel icon) => IconEntry(
+        value: icon,
+        label: icon.label,
+        leadingIcon: Icon(icon.icon),
+      ),
     ),
   );
 }
@@ -135,10 +139,15 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      Text('You selected a ${selectedColor?.label} ${selectedIcon?.label}'),
+                      Text(
+                        'You selected a ${selectedColor?.label} ${selectedIcon?.label}',
+                      ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 5),
-                        child: Icon(selectedIcon?.icon, color: selectedColor?.color),
+                        child: Icon(
+                          selectedIcon?.icon,
+                          color: selectedColor?.color,
+                        ),
                       ),
                     ],
                   ),

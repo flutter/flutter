@@ -26,7 +26,7 @@ Iterable<SingleActivator> allModifierVariants(LogicalKeyboardKey trigger) {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  final MockClipboard mockClipboard = MockClipboard();
+  final mockClipboard = MockClipboard();
 
   setUp(() async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
@@ -43,22 +43,22 @@ void main() {
     );
   });
 
-  const String testText =
+  const testText =
       'Now is the time for\n' // 20
       'all good people\n' // 20 + 16 => 36
       'to come to the aid\n' // 36 + 19 => 55
       'of their country.'; // 55 + 17 => 72
-  const String testCluster = '👨‍👩‍👦👨‍👩‍👦👨‍👩‍👦'; // 8 * 3
+  const testCluster = '👨‍👩‍👦👨‍👩‍👦👨‍👩‍👦'; // 8 * 3
 
   // Exactly 20 characters each line.
-  const String testSoftwrapText =
+  const testSoftwrapText =
       '0123456789ABCDEFGHIJ'
       '0123456789ABCDEFGHIJ'
       '0123456789ABCDEFGHIJ'
       '0123456789ABCDEFGHIJ';
 
-  const String testVerticalText = '1\n2\n3\n4\n5\n6\n7\n8\n9';
-  const String longText =
+  const testVerticalText = '1\n2\n3\n4\n5\n6\n7\n8\n9';
+  const longText =
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit, '
       'sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. '
       'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris '
@@ -67,10 +67,10 @@ void main() {
       'sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. '
       'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris '
       'nisi ut aliquip ex ea commodo consequat. ';
-  final TextEditingController controller = TextEditingController(text: testText);
-  final ScrollController scrollController = ScrollController();
+  final controller = TextEditingController(text: testText);
+  final scrollController = ScrollController();
 
-  final FocusNode focusNode = FocusNode();
+  final focusNode = FocusNode();
   Widget buildEditableText({
     TextAlign textAlign = TextAlign.left,
     bool readOnly = false,
@@ -113,7 +113,7 @@ void main() {
   group(
     'Common text editing shortcuts: ',
     () {
-      final TargetPlatformVariant allExceptApple = TargetPlatformVariant.all(
+      final allExceptApple = TargetPlatformVariant.all(
         excluding: <TargetPlatform>{TargetPlatform.macOS, TargetPlatform.iOS},
       );
 
@@ -1536,7 +1536,7 @@ void main() {
               buildEditableText(style: const TextStyle(fontSize: 13.0, height: 1.17)),
             );
 
-            for (int i = 1; i <= 49; i++) {
+            for (var i = 1; i <= 49; i++) {
               await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowDown));
               await tester.pump();
               expect(
@@ -1546,7 +1546,7 @@ void main() {
               );
             }
 
-            for (int i = 49; i >= 1; i--) {
+            for (var i = 49; i >= 1; i--) {
               await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowUp));
               await tester.pump();
               expect(
@@ -1577,7 +1577,7 @@ void main() {
   );
 
   group('macOS shortcuts', () {
-    final TargetPlatformVariant macOSOnly = TargetPlatformVariant.only(TargetPlatform.macOS);
+    final macOSOnly = TargetPlatformVariant.only(TargetPlatform.macOS);
 
     testWidgets('word modifier + arrowLeft', (WidgetTester tester) async {
       controller.text = testText;
@@ -1783,10 +1783,10 @@ void main() {
   }, skip: kIsWeb); // [intended] on web these keys are handled by the browser.
 
   group('Web does not accept', () {
-    final TargetPlatformVariant allExceptApple = TargetPlatformVariant.all(
+    final allExceptApple = TargetPlatformVariant.all(
       excluding: <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS},
     );
-    const TargetPlatformVariant appleOnly = TargetPlatformVariant(<TargetPlatform>{
+    const appleOnly = TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.macOS,
       TargetPlatform.iOS,
     });
@@ -2001,8 +2001,7 @@ void main() {
       );
       await tester.pump();
 
-      final Map<String, dynamic> clipboardData =
-          mockClipboard.clipboardData as Map<String, dynamic>;
+      final clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
       expect(clipboardData['text'], 'empty');
     }, variant: allExceptApple);
 
@@ -2014,8 +2013,7 @@ void main() {
       await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, meta: true));
       await tester.pump();
 
-      final Map<String, dynamic> clipboardData =
-          mockClipboard.clipboardData as Map<String, dynamic>;
+      final clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
       expect(clipboardData['text'], 'empty');
     }, variant: appleOnly);
 
@@ -2030,8 +2028,7 @@ void main() {
       );
       await tester.pump();
 
-      final Map<String, dynamic> clipboardData =
-          mockClipboard.clipboardData as Map<String, dynamic>;
+      final clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
       expect(clipboardData['text'], 'empty');
       expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 4));
     }, variant: allExceptApple);
@@ -2044,8 +2041,7 @@ void main() {
       await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyX, meta: true));
       await tester.pump();
 
-      final Map<String, dynamic> clipboardData =
-          mockClipboard.clipboardData as Map<String, dynamic>;
+      final clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
       expect(clipboardData['text'], 'empty');
       expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 4));
     }, variant: appleOnly);
@@ -2077,14 +2073,14 @@ void main() {
   }, skip: !kIsWeb); // [intended] specific tests target web.
 
   group('Web does accept', () {
-    final TargetPlatformVariant macOSOnly = TargetPlatformVariant.only(TargetPlatform.macOS);
-    const TargetPlatformVariant desktopExceptMacOS = TargetPlatformVariant(<TargetPlatform>{
+    final macOSOnly = TargetPlatformVariant.only(TargetPlatform.macOS);
+    const desktopExceptMacOS = TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.linux,
       TargetPlatform.windows,
     });
 
     testWidgets('select up', (WidgetTester tester) async {
-      const SingleActivator selectUp = SingleActivator(LogicalKeyboardKey.arrowUp, shift: true);
+      const selectUp = SingleActivator(LogicalKeyboardKey.arrowUp, shift: true);
       controller.text = testVerticalText;
       controller.selection = const TextSelection.collapsed(offset: 5);
 
@@ -2101,7 +2097,7 @@ void main() {
     }, variant: TargetPlatformVariant.desktop());
 
     testWidgets('select down', (WidgetTester tester) async {
-      const SingleActivator selectDown = SingleActivator(LogicalKeyboardKey.arrowDown, shift: true);
+      const selectDown = SingleActivator(LogicalKeyboardKey.arrowDown, shift: true);
       controller.text = testVerticalText;
       controller.selection = const TextSelection.collapsed(offset: 5);
 
@@ -2118,11 +2114,10 @@ void main() {
     }, variant: TargetPlatformVariant.desktop());
 
     testWidgets('select all up', (WidgetTester tester) async {
-      final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
-      final SingleActivator selectAllUp =
-          isMacOS
-              ? const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, meta: true)
-              : const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, alt: true);
+      final isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
+      final selectAllUp = isMacOS
+          ? const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, meta: true)
+          : const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, alt: true);
       controller.text = testVerticalText;
       controller.selection = const TextSelection.collapsed(offset: 5);
 
@@ -2139,11 +2134,10 @@ void main() {
     }, variant: TargetPlatformVariant.desktop());
 
     testWidgets('select all down', (WidgetTester tester) async {
-      final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
-      final SingleActivator selectAllDown =
-          isMacOS
-              ? const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, meta: true)
-              : const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, alt: true);
+      final isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
+      final selectAllDown = isMacOS
+          ? const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, meta: true)
+          : const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, alt: true);
       controller.text = testVerticalText;
       controller.selection = const TextSelection.collapsed(offset: 5);
 
@@ -2160,7 +2154,7 @@ void main() {
     }, variant: TargetPlatformVariant.desktop());
 
     testWidgets('select left', (WidgetTester tester) async {
-      const SingleActivator selectLeft = SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true);
+      const selectLeft = SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true);
       controller.text = 'testing';
       controller.selection = const TextSelection.collapsed(offset: 5);
 
@@ -2177,10 +2171,7 @@ void main() {
     }, variant: TargetPlatformVariant.desktop());
 
     testWidgets('select right', (WidgetTester tester) async {
-      const SingleActivator selectRight = SingleActivator(
-        LogicalKeyboardKey.arrowRight,
-        shift: true,
-      );
+      const selectRight = SingleActivator(LogicalKeyboardKey.arrowRight, shift: true);
       controller.text = 'testing';
       controller.selection = const TextSelection.collapsed(offset: 5);
 
@@ -2199,10 +2190,7 @@ void main() {
     testWidgets(
       'select left should not expand selection if selection is disabled',
       (WidgetTester tester) async {
-        const SingleActivator selectLeft = SingleActivator(
-          LogicalKeyboardKey.arrowLeft,
-          shift: true,
-        );
+        const selectLeft = SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true);
         controller.text = 'testing';
         controller.selection = const TextSelection.collapsed(offset: 5);
 
@@ -2223,10 +2211,7 @@ void main() {
     testWidgets(
       'select right should not expand selection if selection is disabled',
       (WidgetTester tester) async {
-        const SingleActivator selectRight = SingleActivator(
-          LogicalKeyboardKey.arrowRight,
-          shift: true,
-        );
+        const selectRight = SingleActivator(LogicalKeyboardKey.arrowRight, shift: true);
         controller.text = 'testing';
         controller.selection = const TextSelection.collapsed(offset: 5);
 
@@ -2245,11 +2230,10 @@ void main() {
     );
 
     testWidgets('select all left', (WidgetTester tester) async {
-      final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
-      final SingleActivator selectAllLeft =
-          isMacOS
-              ? const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, meta: true)
-              : const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, alt: true);
+      final isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
+      final selectAllLeft = isMacOS
+          ? const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, meta: true)
+          : const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, alt: true);
       controller.text = 'testing';
       controller.selection = const TextSelection.collapsed(offset: 5);
 
@@ -2266,11 +2250,10 @@ void main() {
     }, variant: TargetPlatformVariant.desktop());
 
     testWidgets('select all right', (WidgetTester tester) async {
-      final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
-      final SingleActivator selectAllRight =
-          isMacOS
-              ? const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, meta: true)
-              : const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, alt: true);
+      final isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
+      final selectAllRight = isMacOS
+          ? const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, meta: true)
+          : const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, alt: true);
       controller.text = 'testing';
       controller.selection = const TextSelection.collapsed(offset: 5);
 
@@ -2287,7 +2270,7 @@ void main() {
     }, variant: TargetPlatformVariant.desktop());
     group('macOS only', () {
       testWidgets('pageUp scrolls 80% of viewport dimension upwards', (WidgetTester tester) async {
-        const SingleActivator pageUp = SingleActivator(LogicalKeyboardKey.pageUp);
+        const pageUp = SingleActivator(LogicalKeyboardKey.pageUp);
 
         controller.text = longText;
         controller.selection = TextSelection.collapsed(offset: controller.text.length);
@@ -2318,7 +2301,7 @@ void main() {
       testWidgets('pageUp + shift scrolls upwards and modifies selection', (
         WidgetTester tester,
       ) async {
-        const SingleActivator pageUp = SingleActivator(LogicalKeyboardKey.pageUp, shift: true);
+        const pageUp = SingleActivator(LogicalKeyboardKey.pageUp, shift: true);
 
         controller.text = longText;
         controller.selection = TextSelection.collapsed(offset: controller.text.length);
@@ -2345,7 +2328,7 @@ void main() {
       testWidgets('pageDown scrolls 80% of viewport dimension downwards', (
         WidgetTester tester,
       ) async {
-        const SingleActivator pageDown = SingleActivator(LogicalKeyboardKey.pageDown);
+        const pageDown = SingleActivator(LogicalKeyboardKey.pageDown);
 
         controller.text = longText;
         controller.selection = const TextSelection.collapsed(offset: 0);
@@ -2376,7 +2359,7 @@ void main() {
       testWidgets('pageDown + shift scrolls downwards and modifies selection', (
         WidgetTester tester,
       ) async {
-        const SingleActivator pageDown = SingleActivator(LogicalKeyboardKey.pageDown, shift: true);
+        const pageDown = SingleActivator(LogicalKeyboardKey.pageDown, shift: true);
 
         controller.text = longText;
         controller.selection = const TextSelection.collapsed(offset: 0);
@@ -2401,7 +2384,7 @@ void main() {
       }, variant: macOSOnly);
 
       testWidgets('end scrolls to the end of the text field', (WidgetTester tester) async {
-        const SingleActivator end = SingleActivator(LogicalKeyboardKey.end);
+        const end = SingleActivator(LogicalKeyboardKey.end);
 
         controller.text = longText;
         controller.selection = const TextSelection.collapsed(offset: 0);
@@ -2431,7 +2414,7 @@ void main() {
       testWidgets('end + shift scrolls to the end of the text field and selects everything', (
         WidgetTester tester,
       ) async {
-        const SingleActivator end = SingleActivator(LogicalKeyboardKey.end, shift: true);
+        const end = SingleActivator(LogicalKeyboardKey.end, shift: true);
 
         controller.text = longText;
         controller.selection = const TextSelection.collapsed(offset: 0);
@@ -2459,7 +2442,7 @@ void main() {
       }, variant: macOSOnly);
 
       testWidgets('home scrolls to the beginning of the text field', (WidgetTester tester) async {
-        const SingleActivator home = SingleActivator(LogicalKeyboardKey.home);
+        const home = SingleActivator(LogicalKeyboardKey.home);
 
         controller.text = longText;
         controller.selection = TextSelection.collapsed(offset: controller.text.length);
@@ -2489,7 +2472,7 @@ void main() {
       testWidgets(
         'home + shift scrolls to the beginning of text field and selects everything',
         (WidgetTester tester) async {
-          const SingleActivator home = SingleActivator(LogicalKeyboardKey.home, shift: true);
+          const home = SingleActivator(LogicalKeyboardKey.home, shift: true);
 
           controller.text = longText;
           controller.selection = TextSelection.collapsed(offset: controller.text.length);
@@ -2524,7 +2507,7 @@ void main() {
 
     group('non-macOS', () {
       testWidgets('pageUp scrolls up and modifies selection', (WidgetTester tester) async {
-        const SingleActivator pageUp = SingleActivator(LogicalKeyboardKey.pageUp);
+        const pageUp = SingleActivator(LogicalKeyboardKey.pageUp);
 
         final int initialSelectionOffset = controller.text.length;
 
@@ -2547,7 +2530,7 @@ void main() {
       }, variant: desktopExceptMacOS);
 
       testWidgets('pageUp + shift scrolls up and modifies selection', (WidgetTester tester) async {
-        const SingleActivator pageUp = SingleActivator(LogicalKeyboardKey.pageUp, shift: true);
+        const pageUp = SingleActivator(LogicalKeyboardKey.pageUp, shift: true);
 
         final int initialSelectionOffset = controller.text.length;
 
@@ -2571,9 +2554,9 @@ void main() {
       }, variant: desktopExceptMacOS);
 
       testWidgets('pageDown scrolls down and modifies selection', (WidgetTester tester) async {
-        const SingleActivator pageDown = SingleActivator(LogicalKeyboardKey.pageDown);
+        const pageDown = SingleActivator(LogicalKeyboardKey.pageDown);
 
-        const int initialSelectionOffset = 0;
+        const initialSelectionOffset = 0;
 
         controller.text = longText;
         controller.selection = const TextSelection.collapsed(offset: initialSelectionOffset);
@@ -2596,9 +2579,9 @@ void main() {
       testWidgets('pageDown + shift scrolls down and modifies selection', (
         WidgetTester tester,
       ) async {
-        const SingleActivator pageDown = SingleActivator(LogicalKeyboardKey.pageDown, shift: true);
+        const pageDown = SingleActivator(LogicalKeyboardKey.pageDown, shift: true);
 
-        const int initialSelectionOffset = 0;
+        const initialSelectionOffset = 0;
 
         controller.text = longText;
         controller.selection = const TextSelection.collapsed(offset: initialSelectionOffset);
@@ -2622,8 +2605,8 @@ void main() {
       testWidgets('end moves selection to the end of the line, no scroll', (
         WidgetTester tester,
       ) async {
-        const SingleActivator end = SingleActivator(LogicalKeyboardKey.end);
-        const int initialSelectionOffset = 0;
+        const end = SingleActivator(LogicalKeyboardKey.end);
+        const initialSelectionOffset = 0;
 
         controller.text = longText;
         controller.selection = const TextSelection.collapsed(offset: initialSelectionOffset);
@@ -2646,8 +2629,8 @@ void main() {
       testWidgets(
         'end + shift highlights selection to the end of the line, no scroll',
         (WidgetTester tester) async {
-          const SingleActivator end = SingleActivator(LogicalKeyboardKey.end, shift: true);
-          const int initialSelectionOffset = 0;
+          const end = SingleActivator(LogicalKeyboardKey.end, shift: true);
+          const initialSelectionOffset = 0;
 
           controller.text = longText;
           controller.selection = const TextSelection.collapsed(offset: initialSelectionOffset);
@@ -2673,7 +2656,7 @@ void main() {
       testWidgets('home moves selection to the beginning of the line, no scroll', (
         WidgetTester tester,
       ) async {
-        const SingleActivator home = SingleActivator(LogicalKeyboardKey.home);
+        const home = SingleActivator(LogicalKeyboardKey.home);
         final int initialSelectionOffset = controller.text.length;
 
         controller.text = longText;
@@ -2697,7 +2680,7 @@ void main() {
       testWidgets(
         'home + shift highlights selection to the beginning of the line, no scroll',
         (WidgetTester tester) async {
-          const SingleActivator home = SingleActivator(LogicalKeyboardKey.home, shift: true);
+          const home = SingleActivator(LogicalKeyboardKey.home, shift: true);
           final int initialSelectionOffset = controller.text.length;
 
           controller.text = longText;
@@ -2724,7 +2707,7 @@ void main() {
       testWidgets(
         'end + ctrl scrolls to the end of the text field and changes selection on Windows',
         (WidgetTester tester) async {
-          const SingleActivator end = SingleActivator(LogicalKeyboardKey.end, control: true);
+          const end = SingleActivator(LogicalKeyboardKey.end, control: true);
 
           controller.text = longText;
           controller.selection = const TextSelection.collapsed(offset: 0);
@@ -2756,11 +2739,7 @@ void main() {
       testWidgets(
         'end + shift + ctrl scrolls to the end of the text field and highlights everything on Windows',
         (WidgetTester tester) async {
-          const SingleActivator end = SingleActivator(
-            LogicalKeyboardKey.end,
-            control: true,
-            shift: true,
-          );
+          const end = SingleActivator(LogicalKeyboardKey.end, control: true, shift: true);
 
           controller.text = longText;
           controller.selection = const TextSelection.collapsed(offset: 0);
@@ -2795,7 +2774,7 @@ void main() {
       testWidgets(
         'home + ctrl scrolls to the beginning of the text field and changes selection on Windows',
         (WidgetTester tester) async {
-          const SingleActivator home = SingleActivator(LogicalKeyboardKey.home, control: true);
+          const home = SingleActivator(LogicalKeyboardKey.home, control: true);
 
           controller.text = longText;
           controller.selection = TextSelection.collapsed(offset: controller.text.length);
@@ -2827,11 +2806,7 @@ void main() {
       testWidgets(
         'home + shift + ctrl scrolls to the beginning of the text field and highlights everything on Windows',
         (WidgetTester tester) async {
-          const SingleActivator home = SingleActivator(
-            LogicalKeyboardKey.home,
-            control: true,
-            shift: true,
-          );
+          const home = SingleActivator(LogicalKeyboardKey.home, control: true, shift: true);
 
           controller.text = longText;
           controller.selection = TextSelection.collapsed(offset: controller.text.length);
@@ -2864,4 +2839,154 @@ void main() {
       );
     });
   }, skip: !kIsWeb); // [intended] specific tests target web.
+
+  group(
+    'Web does not accept',
+    () {
+      testWidgets('character modifier + arrowLeft in composing', (WidgetTester tester) async {
+        const arrowLeft = SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true);
+
+        controller.value = const TextEditingValue(
+          text: testText,
+          selection: TextSelection(baseOffset: 0, extentOffset: 3),
+          composing: TextRange(start: 0, end: 3),
+        );
+
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
+
+        await sendKeyCombination(tester, arrowLeft);
+        await tester.pump();
+
+        // selection should not change.
+        expect(controller.text, testText);
+        expect(
+          controller.selection,
+          const TextSelection(baseOffset: 0, extentOffset: 3),
+          reason: arrowLeft.toString(),
+        );
+      });
+
+      testWidgets('character modifier + arrowRight in composing', (WidgetTester tester) async {
+        const arrowRight = SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true);
+
+        controller.value = const TextEditingValue(
+          text: testText,
+          selection: TextSelection(baseOffset: 0, extentOffset: 3),
+          composing: TextRange(start: 0, end: 3),
+        );
+
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
+
+        await sendKeyCombination(tester, arrowRight);
+        await tester.pump();
+
+        // selection should not change.
+        expect(controller.text, testText);
+        expect(
+          controller.selection,
+          const TextSelection(baseOffset: 0, extentOffset: 3),
+          reason: arrowRight.toString(),
+        );
+      });
+
+      testWidgets('character modifier + arrowUp in composing', (WidgetTester tester) async {
+        const arrowUp = SingleActivator(LogicalKeyboardKey.arrowUp, shift: true);
+
+        controller.value = const TextEditingValue(
+          text: testText,
+          selection: TextSelection(baseOffset: 0, extentOffset: 3),
+          composing: TextRange(start: 0, end: 3),
+        );
+
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
+
+        await sendKeyCombination(tester, arrowUp);
+        await tester.pump();
+
+        // selection should not change.
+        expect(controller.text, testText);
+        expect(
+          controller.selection,
+          const TextSelection(baseOffset: 0, extentOffset: 3),
+          reason: arrowUp.toString(),
+        );
+      });
+
+      testWidgets('character modifier + arrowDown in composing', (WidgetTester tester) async {
+        const arrowDown = SingleActivator(LogicalKeyboardKey.arrowDown, shift: true);
+
+        controller.value = const TextEditingValue(
+          text: testText,
+          selection: TextSelection(baseOffset: 0, extentOffset: 3),
+          composing: TextRange(start: 0, end: 3),
+        );
+
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
+
+        await sendKeyCombination(tester, arrowDown);
+        await tester.pump();
+
+        // selection should not change.
+        expect(controller.text, testText);
+        expect(
+          controller.selection,
+          const TextSelection(baseOffset: 0, extentOffset: 3),
+          reason: arrowDown.toString(),
+        );
+      });
+
+      testWidgets('home in composing', (WidgetTester tester) async {
+        const home = SingleActivator(LogicalKeyboardKey.home);
+
+        controller.value = const TextEditingValue(
+          text: testText,
+          selection: TextSelection(baseOffset: 0, extentOffset: 3),
+          composing: TextRange(start: 0, end: 3),
+        );
+
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
+
+        await sendKeyCombination(tester, home);
+        await tester.pump();
+
+        // selection should not change.
+        expect(controller.text, testText);
+        expect(
+          controller.selection,
+          const TextSelection(baseOffset: 0, extentOffset: 3),
+          reason: home.toString(),
+        );
+      });
+
+      testWidgets('end in composing', (WidgetTester tester) async {
+        const end = SingleActivator(LogicalKeyboardKey.end);
+
+        controller.value = const TextEditingValue(
+          text: testText,
+          selection: TextSelection(baseOffset: 0, extentOffset: 3),
+          composing: TextRange(start: 0, end: 3),
+        );
+
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
+
+        await sendKeyCombination(tester, end);
+        await tester.pump();
+
+        // selection should not change.
+        expect(controller.text, testText);
+        expect(
+          controller.selection,
+          const TextSelection(baseOffset: 0, extentOffset: 3),
+          reason: end.toString(),
+        );
+      });
+    },
+    skip: !kIsWeb, // [intended] specific tests target web.
+  );
 }

@@ -65,7 +65,7 @@ template("dart_embedder_resources") {
 source_set("platform_message_handler") {
   sources = [ "platform_message_handler.h" ]
   public_configs = [ "//flutter:config" ]
-  deps = [ "//flutter/fml:fml" ]
+  deps = [ "//flutter/fml" ]
 }
 
 source_set("display") {
@@ -77,7 +77,7 @@ source_set("display") {
     "variable_refresh_rate_reporter.h",
   ]
   public_configs = [ "//flutter:config" ]
-  deps = [ "//flutter/fml:fml" ]
+  deps = [ "//flutter/fml" ]
 }
 
 source_set("common") {
@@ -148,6 +148,7 @@ source_set("common") {
     "//flutter/lib/ui",
     "//flutter/runtime",
     "//flutter/shell/common:base64",
+    "//flutter/shell/geometry",
     "//flutter/shell/profiling",
     "//flutter/skia",
   ]

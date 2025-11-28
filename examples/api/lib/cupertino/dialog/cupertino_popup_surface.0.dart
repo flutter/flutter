@@ -42,7 +42,8 @@ class _PopupSurfaceExampleState extends State<PopupSurfaceExample> {
                 const SizedBox(width: 16.0),
                 CupertinoSwitch(
                   value: _shouldPaintSurface,
-                  onChanged: (bool value) => setState(() => _shouldPaintSurface = value),
+                  onChanged: (bool value) =>
+                      setState(() => _shouldPaintSurface = value),
                 ),
               ],
             ),
@@ -70,13 +71,14 @@ class _PopupSurfaceExampleState extends State<PopupSurfaceExample> {
                 Expanded(
                   child: Container(
                     alignment: Alignment.center,
-                    decoration:
-                        _shouldPaintSurface
-                            ? null
-                            : BoxDecoration(
-                              color: CupertinoTheme.of(context).scaffoldBackgroundColor,
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
+                    decoration: _shouldPaintSurface
+                        ? null
+                        : BoxDecoration(
+                            color: CupertinoTheme.of(
+                              context,
+                            ).scaffoldBackgroundColor,
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
                     child: const Text('This is a popup surface.'),
                   ),
                 ),
@@ -84,12 +86,14 @@ class _PopupSurfaceExampleState extends State<PopupSurfaceExample> {
                 SizedBox(
                   width: double.infinity,
                   child: CupertinoButton(
-                    color:
-                        _shouldPaintSurface
-                            ? null
-                            : CupertinoTheme.of(context).scaffoldBackgroundColor,
+                    color: _shouldPaintSurface
+                        ? null
+                        : CupertinoTheme.of(context).scaffoldBackgroundColor,
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Close', style: TextStyle(color: CupertinoColors.systemBlue)),
+                    child: const Text(
+                      'Close',
+                      style: TextStyle(color: CupertinoColors.systemBlue),
+                    ),
                   ),
                 ),
               ],

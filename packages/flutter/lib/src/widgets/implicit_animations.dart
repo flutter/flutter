@@ -185,18 +185,18 @@ class Matrix4Tween extends Tween<Matrix4> {
   Matrix4 lerp(double t) {
     assert(begin != null);
     assert(end != null);
-    final Vector3 beginTranslation = Vector3.zero();
-    final Vector3 endTranslation = Vector3.zero();
-    final Quaternion beginRotation = Quaternion.identity();
-    final Quaternion endRotation = Quaternion.identity();
-    final Vector3 beginScale = Vector3.zero();
-    final Vector3 endScale = Vector3.zero();
+    final beginTranslation = Vector3.zero();
+    final endTranslation = Vector3.zero();
+    final beginRotation = Quaternion.identity();
+    final endRotation = Quaternion.identity();
+    final beginScale = Vector3.zero();
+    final endScale = Vector3.zero();
     begin!.decompose(beginTranslation, beginRotation, beginScale);
     end!.decompose(endTranslation, endRotation, endScale);
     final Vector3 lerpTranslation = beginTranslation * (1.0 - t) + endTranslation * t;
     // TODO(alangardner): Implement lerp for constant rotation
-    final Quaternion lerpRotation =
-        (beginRotation.scaled(1.0 - t) + endRotation.scaled(t)).normalized();
+    final Quaternion lerpRotation = (beginRotation.scaled(1.0 - t) + endRotation.scaled(t))
+        .normalized();
     final Vector3 lerpScale = beginScale * (1.0 - t) + endScale * t;
     return Matrix4.compose(lerpTranslation, lerpRotation, lerpScale);
   }
@@ -419,7 +419,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   }
 
   bool _constructTweens() {
-    bool shouldStartAnimation = false;
+    var shouldStartAnimation = false;
     forEachTween((
       Tween<dynamic>? tween,
       dynamic targetValue,
@@ -631,11 +631,10 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
          'The color argument is just a shorthand for "decoration: BoxDecoration(color: color)".',
        ),
        decoration = decoration ?? (color != null ? BoxDecoration(color: color) : null),
-       constraints =
-           (width != null || height != null)
-               ? constraints?.tighten(width: width, height: height) ??
-                   BoxConstraints.tightFor(width: width, height: height)
-               : constraints;
+       constraints = (width != null || height != null)
+           ? constraints?.tighten(width: width, height: height) ??
+                 BoxConstraints.tightFor(width: width, height: height)
+           : constraints;
 
   /// The [child] contained by the container.
   ///
@@ -2297,8 +2296,9 @@ class _AnimatedPhysicalModelState extends AnimatedWidgetBaseState<AnimatedPhysic
       borderRadius: _borderRadius!.evaluate(animation),
       elevation: _elevation!.evaluate(animation),
       color: widget.animateColor ? _color!.evaluate(animation)! : widget.color,
-      shadowColor:
-          widget.animateShadowColor ? _shadowColor!.evaluate(animation)! : widget.shadowColor,
+      shadowColor: widget.animateShadowColor
+          ? _shadowColor!.evaluate(animation)!
+          : widget.shadowColor,
       child: widget.child,
     );
   }

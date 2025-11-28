@@ -16,15 +16,14 @@ void writeCustomDevicesConfigFile(
   final File file = dir.childFile('.flutter_custom_devices.json');
   file.writeAsStringSync(
     jsonEncode(<String, dynamic>{
-      'custom-devices':
-          configs != null
-              ? configs.map<dynamic>((CustomDeviceConfig c) => c.toJson()).toList()
-              : json,
+      'custom-devices': configs != null
+          ? configs.map<dynamic>((CustomDeviceConfig c) => c.toJson()).toList()
+          : json,
     }),
   );
 }
 
-final CustomDeviceConfig testConfig = CustomDeviceConfig(
+final testConfig = CustomDeviceConfig(
   id: 'testid',
   label: 'testlabel',
   sdkNameAndVersion: 'testsdknameandversion',
@@ -39,7 +38,7 @@ final CustomDeviceConfig testConfig = CustomDeviceConfig(
   forwardPortSuccessRegex: RegExp('testforwardportsuccess'),
 );
 
-const Map<String, dynamic> testConfigJson = <String, dynamic>{
+const testConfigJson = <String, dynamic>{
   'id': 'testid',
   'label': 'testlabel',
   'sdkNameAndVersion': 'testsdknameandversion',

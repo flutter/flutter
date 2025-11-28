@@ -405,7 +405,7 @@ class DisplayListOpFlags : DisplayListFlags {
   static constexpr DisplayListAttributeFlags kDrawDisplayListFlags{
       kIgnoresPaint  //
   };
-  static constexpr DisplayListAttributeFlags kDrawTextBlobFlags{
+  static constexpr DisplayListAttributeFlags kDrawTextFlags{
       DisplayListAttributeFlags(kBasePaintFlags |         //
                                 kBaseStrokeOrFillFlags |  //
                                 kMayHaveJoins)            //
@@ -413,6 +413,13 @@ class DisplayListOpFlags : DisplayListFlags {
   };
   static constexpr DisplayListAttributeFlags kDrawShadowFlags{
       kIgnoresPaint  //
+  };
+
+  // Flags for usage in drawParagraph internal conversion.
+  static constexpr DisplayListAttributeFlags kDrawParagraphFlags{
+      kBasePaintFlags |         //
+      kBaseStrokeOrFillFlags |  //
+      kAnySpecialGeometryMask   //
   };
 };
 

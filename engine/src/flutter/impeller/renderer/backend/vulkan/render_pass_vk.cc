@@ -81,8 +81,11 @@ SharedHandleVK<vk::RenderPass> RenderPassVK::CreateVKRenderPass(
     const SharedHandleVK<vk::RenderPass>& recycled_renderpass,
     const std::shared_ptr<CommandBufferVK>& command_buffer,
     bool is_swapchain) const {
-  RenderPassBuilderVK builder;
+  if (recycled_renderpass != nullptr) {
+    return recycled_renderpass;
+  }
 
+  RenderPassBuilderVK builder;
   render_target_.IterateAllColorAttachments([&](size_t bind_point,
                                                 const ColorAttachment&
                                                     attachment) -> bool {
@@ -114,10 +117,6 @@ SharedHandleVK<vk::RenderPass> RenderPassVK::CreateVKRenderPass(
     );
   }
 
-  if (recycled_renderpass != nullptr) {
-    return recycled_renderpass;
-  }
-
   auto pass = builder.Build(context.GetDevice());
 
   if (!pass) {
@@ -146,30 +145,23 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
     return true;
   });
 
-  SharedHandleVK<vk::RenderPass> recycled_render_pass;
-  SharedHandleVK<vk::Framebuffer> recycled_framebuffer;
+  FramebufferAndRenderPass frame_data;
+  bool is_swapchain = false;
+  SampleCount sample_count =
+      color_image_vk_->GetTextureDescriptor().sample_count;
   if (resolve_image_vk_) {
-    recycled_render_pass =
-        TextureVK::Cast(*resolve_image_vk_).GetCachedRenderPass();
-    recycled_framebuffer =
-        TextureVK::Cast(*resolve_image_vk_).GetCachedFramebuffer();
+    frame_data =
+        TextureVK::Cast(*resolve_image_vk_).GetCachedFrameData(sample_count);
+    is_swapchain = TextureVK::Cast(*resolve_image_vk_).IsSwapchainImage();
   } else {
-    recycled_render_pass =
-        TextureVK::Cast(*color_image_vk_).GetCachedRenderPass();
-    recycled_framebuffer =
-        TextureVK::Cast(*color_image_vk_).GetCachedFramebuffer();
+    frame_data =
+        TextureVK::Cast(*color_image_vk_).GetCachedFrameData(sample_count);
+    is_swapchain = TextureVK::Cast(*color_image_vk_).IsSwapchainImage();
   }
 
   const auto& target_size = render_target_.GetRenderTargetSize();
 
-  bool is_swapchain = false;
-  if (resolve_image_vk_) {
-    is_swapchain = TextureVK::Cast(*resolve_image_vk_).IsSwapchainImage();
-  } else {
-    is_swapchain = TextureVK::Cast(*color_image_vk_).IsSwapchainImage();
-  }
-
-  render_pass_ = CreateVKRenderPass(vk_context, recycled_render_pass,
+  render_pass_ = CreateVKRenderPass(vk_context, frame_data.render_pass,
                                     command_buffer_, is_swapchain);
   if (!render_pass_) {
     VALIDATION_LOG << "Could not create renderpass.";
@@ -177,9 +169,9 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
     return;
   }
 
-  auto framebuffer = (recycled_framebuffer == nullptr)
+  auto framebuffer = (frame_data.framebuffer == nullptr)
                          ? CreateVKFramebuffer(vk_context, *render_pass_)
-                         : recycled_framebuffer;
+                         : frame_data.framebuffer;
   if (!framebuffer) {
     VALIDATION_LOG << "Could not create framebuffer.";
     is_valid_ = false;
@@ -191,12 +183,16 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
     is_valid_ = false;
     return;
   }
+
+  frame_data.framebuffer = framebuffer;
+  frame_data.render_pass = render_pass_;
+
   if (resolve_image_vk_) {
-    TextureVK::Cast(*resolve_image_vk_).SetCachedFramebuffer(framebuffer);
-    TextureVK::Cast(*resolve_image_vk_).SetCachedRenderPass(render_pass_);
+    TextureVK::Cast(*resolve_image_vk_)
+        .SetCachedFrameData(frame_data, sample_count);
   } else {
-    TextureVK::Cast(*color_image_vk_).SetCachedFramebuffer(framebuffer);
-    TextureVK::Cast(*color_image_vk_).SetCachedRenderPass(render_pass_);
+    TextureVK::Cast(*color_image_vk_)
+        .SetCachedFrameData(frame_data, sample_count);
   }
 
   // If the resolve image exists and has mipmaps, transition mip levels besides
@@ -253,7 +249,7 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
   command_buffer_vk_.setViewport(0, 1, &viewport);
 
   // Set the initial scissor.
-  const auto sc = IRect::MakeSize(target_size);
+  const auto sc = IRect32::MakeSize(target_size);
   vk::Rect2D scissor =
       vk::Rect2D()
           .setOffset(vk::Offset2D(sc.GetX(), sc.GetY()))
@@ -400,7 +396,7 @@ void RenderPassVK::SetViewport(Viewport viewport) {
 }
 
 // |RenderPass|
-void RenderPassVK::SetScissor(IRect scissor) {
+void RenderPassVK::SetScissor(IRect32 scissor) {
   vk::Rect2D scissor_vk =
       vk::Rect2D()
           .setOffset(vk::Offset2D(scissor.GetX(), scissor.GetY()))

@@ -27,7 +27,9 @@ void main() {
 
   testWidgets('Icon opacity', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Center(child: IconTheme(data: const IconThemeData(opacity: 0.5), child: ImageIcon(image))),
+      Center(
+        child: IconTheme(data: const IconThemeData(opacity: 0.5), child: ImageIcon(image)),
+      ),
     );
 
     expect(tester.widget<Image>(find.byType(Image)).color!.alpha, equals(128));
@@ -44,7 +46,9 @@ void main() {
 
   testWidgets('ImageIcon sizing - sized theme', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Center(child: IconTheme(data: IconThemeData(size: 36.0), child: ImageIcon(null))),
+      const Center(
+        child: IconTheme(data: IconThemeData(size: 36.0), child: ImageIcon(null)),
+      ),
     );
 
     final RenderBox renderObject = tester.renderObject(find.byType(ImageIcon));
@@ -64,7 +68,9 @@ void main() {
 
   testWidgets('ImageIcon sizing - sizeless theme, default size', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Center(child: IconTheme(data: IconThemeData(), child: ImageIcon(null))),
+      const Center(
+        child: IconTheme(data: IconThemeData(), child: ImageIcon(null)),
+      ),
     );
 
     final RenderBox renderObject = tester.renderObject(find.byType(ImageIcon));
@@ -77,7 +83,10 @@ void main() {
       const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: IconTheme(data: IconThemeData(), child: ImageIcon(null, semanticLabel: 'test')),
+          child: IconTheme(
+            data: IconThemeData(),
+            child: ImageIcon(null, semanticLabel: 'test'),
+          ),
         ),
       ),
     );

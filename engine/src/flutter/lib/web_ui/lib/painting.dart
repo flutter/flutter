@@ -282,7 +282,7 @@ abstract class Paint {
   factory Paint() => engine.renderer.createPaint();
 
   factory Paint.from(Paint other) {
-    final Paint paint = Paint();
+    final paint = Paint();
     paint
       ..blendMode = other.blendMode
       ..color = other.color
@@ -443,6 +443,7 @@ class ColorFilter implements ImageFilter {
   const factory ColorFilter.matrix(List<double> matrix) = engine.EngineColorFilter.matrix;
   const factory ColorFilter.linearToSrgbGamma() = engine.EngineColorFilter.linearToSrgbGamma;
   const factory ColorFilter.srgbToLinearGamma() = engine.EngineColorFilter.srgbToLinearGamma;
+  factory ColorFilter.saturation(double saturation) = engine.EngineColorFilter.saturation;
 }
 
 // These enum values must be kept in sync with SkBlurStyle.
@@ -517,7 +518,7 @@ class _MatrixColorTransform implements _ColorTransform {
 }
 
 _ColorTransform _getColorTransform(ColorSpace source, ColorSpace destination) {
-  const _MatrixColorTransform srgbToP3 = _MatrixColorTransform(<double>[
+  const srgbToP3 = _MatrixColorTransform(<double>[
     0.808052267214446, 0.220292047628890, -0.139648846160100,
     0.145738111193222, //
     0.096480880462996, 0.916386732581291, -0.086093928394828,
@@ -531,35 +532,23 @@ _ColorTransform _getColorTransform(ColorSpace source, ColorSpace destination) {
     -0.109450321455370, //
     0.214813187718391, 0.054268702864647, 1.406898424029350, -0.364892765879631,
   ]);
-  switch (source) {
-    case ColorSpace.sRGB:
-      switch (destination) {
-        case ColorSpace.sRGB:
-          return const _IdentityColorTransform();
-        case ColorSpace.extendedSRGB:
-          return const _IdentityColorTransform();
-        case ColorSpace.displayP3:
-          return srgbToP3;
-      }
-    case ColorSpace.extendedSRGB:
-      switch (destination) {
-        case ColorSpace.sRGB:
-          return const _ClampTransform(_IdentityColorTransform());
-        case ColorSpace.extendedSRGB:
-          return const _IdentityColorTransform();
-        case ColorSpace.displayP3:
-          return const _ClampTransform(srgbToP3);
-      }
-    case ColorSpace.displayP3:
-      switch (destination) {
-        case ColorSpace.sRGB:
-          return const _ClampTransform(p3ToSrgb);
-        case ColorSpace.extendedSRGB:
-          return p3ToSrgb;
-        case ColorSpace.displayP3:
-          return const _IdentityColorTransform();
-      }
-  }
+  return switch (source) {
+    ColorSpace.sRGB => switch (destination) {
+      ColorSpace.sRGB => const _IdentityColorTransform(),
+      ColorSpace.extendedSRGB => const _IdentityColorTransform(),
+      ColorSpace.displayP3 => srgbToP3,
+    },
+    ColorSpace.extendedSRGB => switch (destination) {
+      ColorSpace.sRGB => const _ClampTransform(_IdentityColorTransform()),
+      ColorSpace.extendedSRGB => const _IdentityColorTransform(),
+      ColorSpace.displayP3 => const _ClampTransform(srgbToP3),
+    },
+    ColorSpace.displayP3 => switch (destination) {
+      ColorSpace.sRGB => const _ClampTransform(p3ToSrgb),
+      ColorSpace.extendedSRGB => p3ToSrgb,
+      ColorSpace.displayP3 => const _IdentityColorTransform(),
+    },
+  };
 }
 
 // This needs to be kept in sync with the "_FilterQuality" enum in skwasm's canvas.cpp
@@ -604,24 +593,19 @@ enum ImageByteFormat { rawRgba, rawStraightRgba, rawUnmodified, png }
 // This must be kept in sync with the `PixelFormat` enum in Skwasm's image.cpp.
 enum PixelFormat { rgba8888, bgra8888, rgbaFloat32 }
 
+enum TargetPixelFormat { dontCare, rgbaFloat32 }
+
 typedef ImageDecoderCallback = void Function(Image result);
 
 abstract class FrameInfo {
-  FrameInfo._();
-  Duration get duration => Duration(milliseconds: _durationMillis);
-  int get _durationMillis => 0;
+  Duration get duration;
   Image get image;
 }
 
-class Codec {
-  Codec._();
-  int get frameCount => 0;
-  int get repetitionCount => 0;
-  Future<FrameInfo> getNextFrame() {
-    return engine.futurize<FrameInfo>(_getNextFrame);
-  }
-
-  String? _getNextFrame(engine.Callback<FrameInfo> callback) => null;
+abstract class Codec {
+  int get frameCount;
+  int get repetitionCount;
+  Future<FrameInfo> getNextFrame();
   void dispose() {}
 }
 
@@ -642,39 +626,45 @@ Future<Codec> instantiateImageCodecFromBuffer(
   int? targetWidth,
   int? targetHeight,
   bool allowUpscaling = true,
-}) => engine.renderer.instantiateImageCodec(
-  buffer._list!,
-  targetWidth: targetWidth,
-  targetHeight: targetHeight,
-  allowUpscaling: allowUpscaling,
-);
+}) {
+  try {
+    return engine.renderer.instantiateImageCodec(
+      buffer._list!,
+      targetWidth: targetWidth,
+      targetHeight: targetHeight,
+      allowUpscaling: allowUpscaling,
+    );
+  } finally {
+    buffer.dispose();
+  }
+}
 
 Future<Codec> instantiateImageCodecWithSize(
   ImmutableBuffer buffer, {
   TargetImageSizeCallback? getTargetSize,
 }) async {
-  if (getTargetSize == null) {
-    return engine.renderer.instantiateImageCodec(buffer._list!);
-  } else {
-    final Codec codec = await engine.renderer.instantiateImageCodec(buffer._list!);
-    try {
-      final FrameInfo info = await codec.getNextFrame();
-      try {
-        final int width = info.image.width;
-        final int height = info.image.height;
-        final TargetImageSize targetSize = getTargetSize(width, height);
-        return engine.renderer.instantiateImageCodec(
-          buffer._list!,
-          targetWidth: targetSize.width,
-          targetHeight: targetSize.height,
-          allowUpscaling: false,
-        );
-      } finally {
-        info.image.dispose();
-      }
-    } finally {
-      codec.dispose();
+  Codec? codec;
+  FrameInfo? info;
+  try {
+    if (getTargetSize == null) {
+      return engine.renderer.instantiateImageCodec(buffer._list!);
+    } else {
+      codec = await engine.renderer.instantiateImageCodec(buffer._list!);
+      info = await codec.getNextFrame();
+      final int width = info.image.width;
+      final int height = info.image.height;
+      final TargetImageSize targetSize = getTargetSize(width, height);
+      return engine.renderer.instantiateImageCodec(
+        buffer._list!,
+        targetWidth: targetSize.width,
+        targetHeight: targetSize.height,
+        allowUpscaling: false,
+      );
     }
+  } finally {
+    info?.image.dispose();
+    codec?.dispose();
+    buffer.dispose();
   }
 }
 
@@ -713,18 +703,19 @@ Future<Codec> createBmp(Uint8List pixels, int width, int height, int rowBytes, P
   final bool swapRedBlue = switch (format) {
     PixelFormat.bgra8888 => true,
     PixelFormat.rgba8888 => false,
-    PixelFormat.rgbaFloat32 =>
-      throw UnimplementedError('RGB conversion from rgbaFloat32 data is not implemented'),
+    PixelFormat.rgbaFloat32 => throw UnimplementedError(
+      'RGB conversion from rgbaFloat32 data is not implemented',
+    ),
   };
 
   // See https://en.wikipedia.org/wiki/BMP_file_format for format examples.
   // The header is in the 108-byte BITMAPV4HEADER format, or as called by
   // Chromium, WindowsV4. Do not use the 56-byte or 52-byte Adobe formats, since
   // they're not supported.
-  const int dibSize = 0x6C /* 108: BITMAPV4HEADER */;
+  const dibSize = 0x6C /* 108: BITMAPV4HEADER */;
   const int headerSize = dibSize + 0x0E;
   final int bufferSize = headerSize + (width * height * 4);
-  final ByteData bmpData = ByteData(bufferSize);
+  final bmpData = ByteData(bufferSize);
   // 'BM' header
   bmpData.setUint16(0x00, 0x424D);
   // Size of data
@@ -762,12 +753,12 @@ Future<Codec> createBmp(Uint8List pixels, int width, int height, int rowBytes, P
   // Bitmask A
   bmpData.setUint32(0x42, 0xFF000000, Endian.little);
 
-  int destinationByte = headerSize;
-  final Uint32List combinedPixels = Uint32List.sublistView(pixels);
+  var destinationByte = headerSize;
+  final combinedPixels = Uint32List.sublistView(pixels);
   // BMP is scanlined from bottom to top. Rearrange here.
   for (int rowCount = height - 1; rowCount >= 0; rowCount -= 1) {
     int sourcePixel = rowCount * rowBytes;
-    for (int colCount = 0; colCount < width; colCount += 1) {
+    for (var colCount = 0; colCount < width; colCount += 1) {
       bmpData.setUint32(destinationByte, combinedPixels[sourcePixel], Endian.little);
       destinationByte += 4;
       sourcePixel += 1;
@@ -787,6 +778,7 @@ void decodeImageFromPixels(
   int? targetWidth,
   int? targetHeight,
   bool allowUpscaling = true,
+  TargetPixelFormat targetFormat = TargetPixelFormat.dontCare,
 }) => engine.renderer.decodeImageFromPixels(
   pixels,
   width,
@@ -853,15 +845,15 @@ class Shadow {
     }
     a ??= <Shadow>[];
     b ??= <Shadow>[];
-    final List<Shadow> result = <Shadow>[];
+    final result = <Shadow>[];
     final int commonLength = math.min(a.length, b.length);
-    for (int i = 0; i < commonLength; i += 1) {
+    for (var i = 0; i < commonLength; i += 1) {
       result.add(Shadow.lerp(a[i], b[i], t)!);
     }
-    for (int i = commonLength; i < a.length; i += 1) {
+    for (var i = commonLength; i < a.length; i += 1) {
       result.add(a[i].scale(1.0 - t));
     }
-    for (int i = commonLength; i < b.length; i += 1) {
+    for (var i = commonLength; i < b.length; i += 1) {
       result.add(b[i].scale(t));
     }
     return result;
@@ -904,7 +896,7 @@ abstract class ImageShader implements Shader {
 class ImmutableBuffer {
   ImmutableBuffer._(this._length);
   static Future<ImmutableBuffer> fromUint8List(Uint8List list) async {
-    final ImmutableBuffer instance = ImmutableBuffer._(list.length);
+    final instance = ImmutableBuffer._(list.length);
     instance._list = list;
     return instance;
   }
@@ -952,7 +944,7 @@ class ImageDescriptor {
   ImageDescriptor._() : _width = null, _height = null, _rowBytes = null, _format = null;
 
   static Future<ImageDescriptor> encoded(ImmutableBuffer buffer) async {
-    final ImageDescriptor descriptor = ImageDescriptor._();
+    final descriptor = ImageDescriptor._();
     descriptor._data = buffer._list;
     return descriptor;
   }
@@ -972,7 +964,11 @@ class ImageDescriptor {
   int get bytesPerPixel =>
       throw UnsupportedError('ImageDescriptor.bytesPerPixel is not supported on web.');
   void dispose() => _data = null;
-  Future<Codec> instantiateCodec({int? targetWidth, int? targetHeight}) async {
+  Future<Codec> instantiateCodec({
+    int? targetWidth,
+    int? targetHeight,
+    TargetPixelFormat targetFormat = TargetPixelFormat.dontCare,
+  }) async {
     if (_data == null) {
       throw StateError('Object is disposed');
     }
@@ -997,6 +993,24 @@ abstract class FragmentProgram {
   FragmentShader fragmentShader();
 }
 
+abstract class UniformFloatSlot {
+  UniformFloatSlot(this.name, this.index);
+
+  void set(double val);
+
+  int get shaderIndex;
+
+  final String name;
+
+  final int index;
+}
+
+abstract class ImageSamplerSlot {
+  void set(Image val);
+  int get shaderIndex;
+  String get name;
+}
+
 abstract class FragmentShader implements Shader {
   void setFloat(int index, double value);
 
@@ -1007,4 +1021,8 @@ abstract class FragmentShader implements Shader {
 
   @override
   bool get debugDisposed;
+
+  UniformFloatSlot getUniformFloat(String name, [int? index]);
+
+  ImageSamplerSlot getImageSampler(String name);
 }

@@ -6,11 +6,11 @@
 
 #include <algorithm>
 #include <cmath>
+#include <format>
 #include <functional>
 #include <sstream>
 #include <type_traits>
 
-#include "impeller/base/strings.h"
 #include "impeller/geometry/constants.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/vector.h"
@@ -136,7 +136,7 @@ static constexpr inline Color ApplyBlendedColor(Color dst,
   return src + dst * (1.0f - src.alpha);
 }
 
-static constexpr inline Color DoColorBlend(
+static inline Color DoColorBlend(
     Color dst,
     Color src,
     const std::function<Vector3(Vector3, Vector3)>& blend_rgb_func) {
@@ -144,7 +144,7 @@ static constexpr inline Color DoColorBlend(
   return ApplyBlendedColor(dst, src, blend_result).Unpremultiply();
 }
 
-static constexpr inline Color DoColorBlendComponents(
+static inline Color DoColorBlendComponents(
     Color dst,
     Color src,
     const std::function<Scalar(Scalar, Scalar)>& blend_func) {
@@ -331,12 +331,8 @@ Color Color::SRGBToLinear() const {
 }
 
 std::string ColorToString(const Color& color) {
-  return SPrintF("R=%.1f,G=%.1f,B=%.1f,A=%.1f",  //
-                 color.red,                      //
-                 color.green,                    //
-                 color.blue,                     //
-                 color.alpha                     //
-  );
+  return std::format("R={:.1f},G={:.1f},B={:.1f},A={:.1f}", color.red,
+                     color.green, color.blue, color.alpha);
 }
 
 }  // namespace impeller

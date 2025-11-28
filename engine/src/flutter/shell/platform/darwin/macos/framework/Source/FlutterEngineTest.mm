@@ -4,7 +4,6 @@
 
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
-#include "shell/platform/darwin/macos/framework/Source/FlutterResizeSynchronizer.h"
 
 #include <objc/objc.h>
 
@@ -18,6 +17,8 @@
 #include "flutter/shell/platform/common/accessibility_bridge.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/common/framework/Source/FlutterBinaryMessengerRelay.h"
+#import "flutter/shell/platform/darwin/common/test_utils_swift/test_utils_swift.h"
+#import "flutter/shell/platform/darwin/macos/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterAppDelegate.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterAppLifecycleDelegate.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterPluginMacOS.h"
@@ -150,18 +151,20 @@ TEST_F(FlutterEngineTest, HasNonNullExecutableName) {
   ASSERT_FALSE(executable_name.empty());
 
   // Block until notified by the Dart test of the value of Platform.executable.
-  fml::AutoResetWaitableEvent latch;
+  BOOL signaled = NO;
   AddNativeCallback("NotifyStringValue", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
                       const auto dart_string = tonic::DartConverter<std::string>::FromDart(
                           Dart_GetNativeArgument(args, 0));
                       EXPECT_EQ(executable_name, dart_string);
-                      latch.Signal();
+                      signaled = YES;
                     }));
 
   // Launch the test entrypoint.
   EXPECT_TRUE([engine runWithEntrypoint:@"executableNameNotNull"]);
 
-  latch.Wait();
+  while (!signaled) {
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1, YES);
+  }
 }
 
 #ifndef FLUTTER_RELEASE
@@ -203,31 +206,33 @@ TEST_F(FlutterEngineTest, MessengerSend) {
 
 TEST_F(FlutterEngineTest, CanLogToStdout) {
   // Block until completion of print statement.
-  fml::AutoResetWaitableEvent latch;
+  BOOL signaled = NO;
   AddNativeCallback("SignalNativeTest",
-                    CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { latch.Signal(); }));
+                    CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { signaled = YES; }));
 
   // Replace stdout stream buffer with our own.
-  StreamCapture stdout_capture(&std::cout);
+  FlutterStringOutputWriter* writer = [[FlutterStringOutputWriter alloc] init];
+  writer.expectedOutput = @"Hello logging";
+  FlutterLogger.outputWriter = writer;
 
   // Launch the test entrypoint.
   FlutterEngine* engine = GetFlutterEngine();
   EXPECT_TRUE([engine runWithEntrypoint:@"canLogToStdout"]);
   ASSERT_TRUE(engine.running);
 
-  latch.Wait();
-
-  stdout_capture.Stop();
+  while (!signaled) {
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1, YES);
+  }
 
   // Verify hello world was written to stdout.
-  EXPECT_TRUE(stdout_capture.GetOutput().find("Hello logging") != std::string::npos);
+  EXPECT_TRUE(writer.gotExpectedOutput);
 }
 
 TEST_F(FlutterEngineTest, DISABLED_BackgroundIsBlack) {
   FlutterEngine* engine = GetFlutterEngine();
 
   // Latch to ensure the entire layer tree has been generated and presented.
-  fml::AutoResetWaitableEvent latch;
+  BOOL signaled = NO;
   AddNativeCallback("SignalNativeTest", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
                       CALayer* rootLayer = engine.viewController.flutterView.layer;
                       EXPECT_TRUE(rootLayer.backgroundColor != nil);
@@ -236,7 +241,7 @@ TEST_F(FlutterEngineTest, DISABLED_BackgroundIsBlack) {
                             [NSColor colorWithCGColor:rootLayer.backgroundColor];
                         EXPECT_EQ(actualBackgroundColor, [NSColor blackColor]);
                       }
-                      latch.Signal();
+                      signaled = YES;
                     }));
 
   // Launch the test entrypoint.
@@ -249,14 +254,16 @@ TEST_F(FlutterEngineTest, DISABLED_BackgroundIsBlack) {
   [viewController loadView];
   viewController.flutterView.frame = CGRectMake(0, 0, 800, 600);
 
-  latch.Wait();
+  while (!signaled) {
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1, YES);
+  }
 }
 
 TEST_F(FlutterEngineTest, DISABLED_CanOverrideBackgroundColor) {
   FlutterEngine* engine = GetFlutterEngine();
 
   // Latch to ensure the entire layer tree has been generated and presented.
-  fml::AutoResetWaitableEvent latch;
+  BOOL signaled = NO;
   AddNativeCallback("SignalNativeTest", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
                       CALayer* rootLayer = engine.viewController.flutterView.layer;
                       EXPECT_TRUE(rootLayer.backgroundColor != nil);
@@ -265,7 +272,7 @@ TEST_F(FlutterEngineTest, DISABLED_CanOverrideBackgroundColor) {
                             [NSColor colorWithCGColor:rootLayer.backgroundColor];
                         EXPECT_EQ(actualBackgroundColor, [NSColor whiteColor]);
                       }
-                      latch.Signal();
+                      signaled = YES;
                     }));
 
   // Launch the test entrypoint.
@@ -279,7 +286,9 @@ TEST_F(FlutterEngineTest, DISABLED_CanOverrideBackgroundColor) {
   viewController.flutterView.frame = CGRectMake(0, 0, 800, 600);
   viewController.flutterView.backgroundColor = [NSColor whiteColor];
 
-  latch.Wait();
+  while (!signaled) {
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1, YES);
+  }
 }
 
 TEST_F(FlutterEngineTest, CanToggleAccessibility) {
@@ -311,8 +320,11 @@ TEST_F(FlutterEngineTest, CanToggleAccessibility) {
   EXPECT_TRUE(enabled_called);
   // Send flutter semantics updates.
   FlutterSemanticsNode2 root;
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
+  FlutterSemanticsFlags child_flags = FlutterSemanticsFlags{0};
   root.id = 0;
-  root.flags = static_cast<FlutterSemanticsFlag>(0);
+  root.flags2 = &flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   root.actions = static_cast<FlutterSemanticsAction>(0);
   root.text_selection_base = -1;
   root.text_selection_extent = -1;
@@ -326,10 +338,12 @@ TEST_F(FlutterEngineTest, CanToggleAccessibility) {
   int32_t children[] = {1};
   root.children_in_traversal_order = children;
   root.custom_accessibility_actions_count = 0;
+  root.identifier = "";
 
   FlutterSemanticsNode2 child1;
   child1.id = 1;
-  child1.flags = static_cast<FlutterSemanticsFlag>(0);
+  child1.flags2 = &child_flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   child1.actions = static_cast<FlutterSemanticsAction>(0);
   child1.text_selection_base = -1;
   child1.text_selection_extent = -1;
@@ -341,6 +355,7 @@ TEST_F(FlutterEngineTest, CanToggleAccessibility) {
   child1.tooltip = "";
   child1.child_count = 0;
   child1.custom_accessibility_actions_count = 0;
+  child1.identifier = "";
 
   FlutterSemanticsUpdate2 update;
   update.node_count = 2;
@@ -401,8 +416,11 @@ TEST_F(FlutterEngineTest, CanToggleAccessibilityWhenHeadless) {
   EXPECT_TRUE(enabled_called);
   // Send flutter semantics updates.
   FlutterSemanticsNode2 root;
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
+  FlutterSemanticsFlags child_flags = FlutterSemanticsFlags{0};
   root.id = 0;
-  root.flags = static_cast<FlutterSemanticsFlag>(0);
+  root.flags2 = &flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   root.actions = static_cast<FlutterSemanticsAction>(0);
   root.text_selection_base = -1;
   root.text_selection_extent = -1;
@@ -419,7 +437,8 @@ TEST_F(FlutterEngineTest, CanToggleAccessibilityWhenHeadless) {
 
   FlutterSemanticsNode2 child1;
   child1.id = 1;
-  child1.flags = static_cast<FlutterSemanticsFlag>(0);
+  child1.flags2 = &child_flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   child1.actions = static_cast<FlutterSemanticsAction>(0);
   child1.text_selection_base = -1;
   child1.text_selection_extent = -1;
@@ -483,18 +502,17 @@ TEST_F(FlutterEngineTest, ProducesAccessibilityTreeWhenAddingViews) {
 }
 
 TEST_F(FlutterEngineTest, NativeCallbacks) {
-  fml::AutoResetWaitableEvent latch;
-  bool latch_called = false;
-  AddNativeCallback("SignalNativeTest", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                      latch_called = true;
-                      latch.Signal();
-                    }));
+  BOOL latch_called = NO;
+  AddNativeCallback("SignalNativeTest",
+                    CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { latch_called = YES; }));
 
   FlutterEngine* engine = GetFlutterEngine();
   EXPECT_TRUE([engine runWithEntrypoint:@"nativeCallback"]);
   ASSERT_TRUE(engine.running);
 
-  latch.Wait();
+  while (!latch_called) {
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1, YES);
+  }
   ASSERT_TRUE(latch_called);
 }
 
@@ -728,6 +746,21 @@ TEST_F(FlutterEngineTest, PublishedValueReturnsLastPublished) {
   EXPECT_EQ([engine valuePublishedByPlugin:pluginName], secondValue);
 }
 
+TEST_F(FlutterEngineTest, RegistrarForwardViewControllerLookUpToEngine) {
+  NSString* fixtures = @(flutter::testing::GetFixturesPath());
+  FlutterDartProject* project = [[FlutterDartProject alloc]
+      initWithAssetsPath:fixtures
+             ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:project];
+
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  id<FlutterPluginRegistrar> registrar = [engine registrarForPlugin:@"MyPlugin"];
+
+  EXPECT_EQ([registrar viewController], viewController);
+}
+
 // If a channel overrides a previous channel with the same name, cleaning
 // the previous channel should not affect the new channel.
 //
@@ -872,7 +905,7 @@ TEST_F(FlutterEngineTest, ResponseFromBackgroundThread) {
 TEST_F(FlutterEngineTest, CanGetEngineForId) {
   FlutterEngine* engine = GetFlutterEngine();
 
-  fml::AutoResetWaitableEvent latch;
+  BOOL signaled = NO;
   std::optional<int64_t> engineId;
   AddNativeCallback("NotifyEngineId", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
                       const auto argument = Dart_GetNativeArgument(args, 0);
@@ -880,11 +913,13 @@ TEST_F(FlutterEngineTest, CanGetEngineForId) {
                         const auto id = tonic::DartConverter<int64_t>::FromDart(argument);
                         engineId = id;
                       }
-                      latch.Signal();
+                      signaled = YES;
                     }));
 
   EXPECT_TRUE([engine runWithEntrypoint:@"testEngineId"]);
-  latch.Wait();
+  while (!signaled) {
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1, YES);
+  }
 
   EXPECT_TRUE(engineId.has_value());
   if (!engineId.has_value()) {
@@ -900,9 +935,9 @@ TEST_F(FlutterEngineTest, ResizeSynchronizerNotBlockingRasterThreadAfterShutdown
 
   std::thread rasterThread([&threadSynchronizer] {
     [threadSynchronizer performCommitForSize:CGSizeMake(100, 100)
+                                  afterDelay:0
                                       notify:^{
-                                      }
-                                       delay:0];
+                                      }];
   });
 
   rasterThread.join();

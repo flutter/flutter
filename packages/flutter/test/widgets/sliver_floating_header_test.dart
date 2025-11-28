@@ -20,13 +20,14 @@ void main() {
                   Axis.horizontal => const SizedBox(width: 200, child: Text('header')),
                 },
               ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+              SliverList.builder(
+                itemCount: 100,
+                itemBuilder: (BuildContext context, int index) {
                   return switch (axis) {
                     Axis.vertical => SizedBox(height: 100, child: Text('item $index')),
                     Axis.horizontal => SizedBox(width: 100, child: Text('item $index')),
                   };
-                }, childCount: 100),
+                },
               ),
             ],
           ),
@@ -57,7 +58,7 @@ void main() {
       expect(getHeaderRect().height, 200);
 
       // First and last visible items, each item has height=100
-      const int visibleItemCount = 4; // viewport height - header height = 400
+      const visibleItemCount = 4; // viewport height - header height = 400
       expect(find.text('item 0'), findsOneWidget);
       expect(find.text('item ${visibleItemCount - 1}'), findsOneWidget);
 
@@ -88,7 +89,7 @@ void main() {
       expect(getHeaderRect().height, 600);
 
       // First and last visible items. Each item has width=100
-      const int visibleItemCount = 6; // 600 = viewport width - header width
+      const visibleItemCount = 6; // 600 = viewport width - header width
       expect(find.text('item 0'), findsOneWidget);
       expect(find.text('item ${visibleItemCount - 1}'), findsOneWidget);
 
@@ -119,7 +120,7 @@ void main() {
       expect(getHeaderRect().height, 200);
 
       // First and last visible items, each item has height=100
-      const int visibleItemCount = 4; // viewport height - header height = 400
+      const visibleItemCount = 4; // viewport height - header height = 400
       expect(find.text('item 0'), findsOneWidget);
       expect(find.text('item ${visibleItemCount - 1}'), findsOneWidget);
 
@@ -150,7 +151,7 @@ void main() {
       expect(getHeaderRect().height, 600);
 
       // First and last visible items. Each item has width=100
-      const int visibleItemCount = 6; // 600 = viewport width - header width
+      const visibleItemCount = 6; // 600 = viewport width - header width
       expect(find.text('item 0'), findsOneWidget);
       expect(find.text('item ${visibleItemCount - 1}'), findsOneWidget);
 
@@ -187,10 +188,11 @@ void main() {
                 ),
                 child: SizedBox(height: 200, child: Text('header')),
               ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+              SliverList.builder(
+                itemCount: 100,
+                itemBuilder: (BuildContext context, int index) {
                   return SizedBox(height: 100, child: Text('item $index'));
-                }, childCount: 100),
+                },
               ),
             ],
           ),
@@ -246,10 +248,11 @@ void main() {
                 snapMode: snapMode,
                 child: const SizedBox(height: 200, child: Text('header')),
               ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+              SliverList.builder(
+                itemCount: 100,
+                itemBuilder: (BuildContext context, int index) {
                   return SizedBox(height: 100, child: Text('item $index'));
-                }, childCount: 100),
+                },
               ),
             ],
           ),

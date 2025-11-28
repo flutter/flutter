@@ -6,6 +6,7 @@ import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../devfs.dart';
+import '../../isolated/native_assets/dart_hook_result.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -16,7 +17,7 @@ import 'icon_tree_shaker.dart';
 import 'native_assets.dart';
 
 /// The only files/subdirectories we care about.
-const List<String> _kWindowsArtifacts = <String>[
+const _kWindowsArtifacts = <String>[
   'flutter_windows.dll',
   'flutter_windows.dll.exp',
   'flutter_windows.dll.lib',
@@ -28,7 +29,7 @@ const List<String> _kWindowsArtifacts = <String>[
   'flutter_windows.h',
 ];
 
-const String _kWindowsDepfile = 'windows_engine_sources.d';
+const _kWindowsDepfile = 'windows_engine_sources.d';
 
 /// Copies the Windows desktop embedding files to the copy directory.
 class UnpackWindows extends Target {
@@ -61,7 +62,7 @@ class UnpackWindows extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, name);
     }
-    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final String engineSourcePath = environment.artifacts.getArtifactPath(
       Artifact.windowsDesktopPath,
       platform: targetPlatform,
@@ -106,6 +107,7 @@ abstract class BundleWindowsAssets extends Target {
 
   @override
   List<Target> get dependencies => <Target>[
+    const DartBuildForNative(),
     const KernelSnapshot(),
     const InstallCodeAssets(),
     UnpackWindows(targetPlatform),
@@ -129,7 +131,7 @@ abstract class BundleWindowsAssets extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'bundle_windows_assets');
     }
-    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Directory outputDirectory = environment.outputDir.childDirectory('flutter_assets');
     if (!outputDirectory.existsSync()) {
       outputDirectory.createSync();
@@ -141,9 +143,11 @@ abstract class BundleWindowsAssets extends Target {
           .childFile('app.dill')
           .copySync(outputDirectory.childFile('kernel_blob.bin').path);
     }
+    final DartHooksResult dartHookResult = await DartBuild.loadHookResult(environment);
     final Depfile depfile = await copyAssets(
       environment,
       outputDirectory,
+      dartHookResult: dartHookResult,
       targetPlatform: targetPlatform,
       buildMode: buildMode,
       additionalContent: <String, DevFSContent>{

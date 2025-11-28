@@ -7,17 +7,12 @@
 
 #include <cstdint>
 
+#include "flutter/display_list/geometry/dl_path.h"
 #include "fml/status_or.h"
 #include "impeller/geometry/rational.h"
 #include "impeller/typographer/glyph.h"
 #include "impeller/typographer/glyph_atlas.h"
 #include "impeller/typographer/text_run.h"
-
-// TODO(https://github.com/flutter/flutter/issues/166593): This is required to
-// break a cyclical dependency between display list, impeller, and typographer.
-namespace flutter {
-class DlPath;
-}
 
 namespace impeller {
 

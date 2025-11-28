@@ -174,7 +174,7 @@ bool EmbedderTestBackingStoreProducerGL::CreateSurface(
   FML_CHECK(test_egl_context_);
   auto surface = std::make_unique<TestGLOnscreenOnlySurface>(
       test_egl_context_,
-      SkSize::Make(config->size.width, config->size.height).toRound());
+      DlISize(std::round(config->size.width), std::round(config->size.height)));
 
   auto make_current = [](void* user_data, bool* invalidate_state) -> bool {
     *invalidate_state = false;

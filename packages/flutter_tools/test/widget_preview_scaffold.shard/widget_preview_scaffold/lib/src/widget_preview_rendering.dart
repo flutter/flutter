@@ -5,7 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart' show kIsWeb, ValueListenable;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -14,24 +14,32 @@ import 'package:flutter/widget_previews.dart';
 
 import 'package:stack_trace/stack_trace.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:widget_preview_scaffold/src/dtd/editor_service.dart';
+import 'package:widget_preview_scaffold/src/theme/ide_theme.dart';
+import 'package:widget_preview_scaffold/src/theme/theme.dart';
 
-import 'controls.dart';
-import 'dtd_services.dart';
-import 'generated_preview.dart';
-import 'utils.dart';
-import 'widget_preview.dart';
+import 'package:widget_preview_scaffold/src/controls.dart';
+import 'package:widget_preview_scaffold/src/generated_preview.dart';
+import 'package:widget_preview_scaffold/src/utils.dart';
+import 'package:widget_preview_scaffold/src/widget_preview.dart';
+import 'package:widget_preview_scaffold/src/widget_preview_inspector_service.dart';
+import 'package:widget_preview_scaffold/src/widget_preview_scaffold_controller.dart';
 
 /// Displayed when an unhandled exception is thrown when initializing the widget
 /// tree for a preview (i.e., before the build phase).
 ///
 /// Provides users with details about the thrown exception, including the exception
 /// contents and a scrollable stack trace.
-class _WidgetPreviewErrorWidget extends StatelessWidget {
-  _WidgetPreviewErrorWidget({
+class WidgetPreviewErrorWidget extends StatelessWidget {
+  WidgetPreviewErrorWidget({
+    super.key,
+    required this.controller,
     required this.error,
     required StackTrace stackTrace,
     required this.size,
   }) : trace = Trace.from(stackTrace).terse;
+
+  final WidgetPreviewScaffoldController controller;
 
   /// The [Object] that was thrown, resulting in an unhandled exception.
   final Object error;
@@ -44,32 +52,39 @@ class _WidgetPreviewErrorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle boldStyle = fixBlurryText(
-      TextStyle(fontWeight: FontWeight.bold),
-    );
-
+    final theme = Theme.of(context);
     return SizedBox(
       height: size.height,
       child: SingleChildScrollView(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
             Text.rich(
               TextSpan(
-                children: <TextSpan>[
+                children: [
                   TextSpan(
                     text: 'Failed to initialize widget tree: ',
-                    style: boldStyle,
+                    style: theme.boldTextStyle,
                   ),
-                  // TODO(bkonyi): use monospace font
-                  TextSpan(text: error.toString()),
+                  TextSpan(text: error.toString(), style: theme.fixedFontStyle),
                 ],
               ),
             ),
-            Text('Stacktrace:', style: boldStyle),
-            // TODO(bkonyi): use monospace font
-            SelectableText.rich(
-              TextSpan(children: _formatFrames(trace.frames)),
+            Text('Stacktrace:', style: theme.boldTextStyle),
+            ValueListenableBuilder(
+              valueListenable: controller.editorServiceAvailable,
+              builder: (context, editorServiceAvailable, child) {
+                return SelectableText.rich(
+                  TextSpan(
+                    children: _formatFrames(
+                      theme,
+                      trace.frames,
+                      editorServiceAvailable,
+                    ),
+                    style: theme.fixedFontStyle,
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -77,7 +92,11 @@ class _WidgetPreviewErrorWidget extends StatelessWidget {
     );
   }
 
-  List<TextSpan> _formatFrames(List<Frame> frames) {
+  List<TextSpan> _formatFrames(
+    ThemeData theme,
+    List<Frame> frames,
+    bool editorServiceAvailable,
+  ) {
     // Figure out the longest path so we know how much to pad.
     final int longest = frames
         .map((frame) => frame.location.length)
@@ -86,20 +105,38 @@ class _WidgetPreviewErrorWidget extends StatelessWidget {
     // Print out the stack trace nicely formatted.
     return frames.map<TextSpan>((frame) {
       if (frame is UnparsedFrame) return TextSpan(text: '$frame\n');
+      // The Editor.navigateToCode service can't handle Dart core library paths,
+      // so don't allow for navigation to them. Also disable navigation if the
+      // Editor service isn't available.
+      final isLinkable =
+          (frame.uri.isScheme('file') || frame.uri.isScheme('package')) &&
+          editorServiceAvailable;
+      final style = isLinkable
+          ? theme.fixedFontLinkStyle
+          : theme.fixedFontStyle;
       return TextSpan(
-        children: <TextSpan>[
+        children: [
           TextSpan(
             text: frame.location,
-            style: linkTextStyle,
-            recognizer:
-                TapGestureRecognizer()
-                  ..onTap = () {
-                    // TODO(bkonyi): notify IDEs to navigate to the source location via DTD.
-                  },
+            style: style,
+            recognizer: isLinkable
+                ? (TapGestureRecognizer()
+                    ..onTap = () async {
+                      final resolvedUri = await controller.dtdServices
+                          .resolveUri(frame.uri);
+                      controller.dtdServices.navigateToCode(
+                        CodeLocation(
+                          uri: resolvedUri.toString(),
+                          line: frame.line,
+                          column: frame.column,
+                        ),
+                      );
+                    })
+                : null,
           ),
           TextSpan(text: ' ' * (longest - frame.location.length)),
           const TextSpan(text: '  '),
-          TextSpan(text: '${frame.member}\n'),
+          TextSpan(text: '${frame.member}\n', style: style),
         ],
       );
     }).toList();
@@ -112,37 +149,26 @@ class _WidgetPreviewErrorWidget extends StatelessWidget {
 class NoPreviewsDetectedWidget extends StatelessWidget {
   const NoPreviewsDetectedWidget({super.key});
 
-  // TODO(bkonyi): update with actual documentation on flutter.dev.
-  static Uri documentationUrl = Uri.https(
-    'github.com',
-    'flutter/flutter/blob/master/packages/flutter/'
-        'lib/src/widget_previews/widget_previews.dart',
-  );
+  static Uri documentationUrl = Uri.https('flutter.dev', 'to/widget-previews');
 
   @override
   Widget build(BuildContext context) {
-    // TODO(bkonyi): base this on the current color theme (dark vs light)
-    final style = fixBlurryText(TextStyle(color: Colors.black));
+    final theme = Theme.of(context);
     return Center(
       child: Column(
-        children: <Widget>[
-          Text(
-            'No previews detected',
-            style: style.copyWith(fontWeight: FontWeight.bold),
-          ),
+        children: [
+          Text('No previews detected', style: theme.boldTextStyle),
           const VerticalSpacer(),
           Text('Read more about getting started with widget previews at:'),
           Text.rich(
             TextSpan(
               text: documentationUrl.toString(),
-              style: linkTextStyle,
-              recognizer:
-                  TapGestureRecognizer()
-                    ..onTap = () {
-                      launchUrl(documentationUrl);
-                    },
+              style: theme.linkTextStyle,
+              recognizer: TapGestureRecognizer()
+                ..onTap = () {
+                  launchUrl(documentationUrl);
+                },
             ),
-            style: style,
           ),
         ],
       ),
@@ -150,10 +176,138 @@ class NoPreviewsDetectedWidget extends StatelessWidget {
   }
 }
 
-class WidgetPreviewWidget extends StatefulWidget {
-  const WidgetPreviewWidget({super.key, required this.preview});
+/// A wrapper that serves as the root entry for a single preview in the widget inspector.
+class PreviewWidget extends StatelessWidget {
+  const PreviewWidget({super.key, required this.preview, required this.child});
 
   final WidgetPreview preview;
+  final Widget child;
+
+  @override
+  StatelessElement createElement() => PreviewWidgetElement(this);
+
+  @override
+  Widget build(BuildContext context) {
+    return child;
+  }
+
+  @override
+  String toStringShort() {
+    final StringBuffer buffer = StringBuffer(
+      '@${preview.previewData.runtimeType}',
+    );
+    if (preview.name != null) {
+      buffer.write('(name: "${preview.name}")');
+    }
+    return buffer.toString();
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    preview.debugFillProperties(properties);
+  }
+}
+
+/// A custom [StatelessElement] with the sole purpose of simplifying identifying
+/// selections of @Preview annotations in the widget inspector.
+class PreviewWidgetElement extends StatelessElement {
+  PreviewWidgetElement(super.widget);
+}
+
+class WidgetPreviewGroupWidget extends StatelessWidget {
+  const WidgetPreviewGroupWidget({
+    super.key,
+    required this.controller,
+    required this.group,
+  });
+
+  final WidgetPreviewScaffoldController controller;
+  final WidgetPreviewGroup group;
+
+  // Spacing values for the grid layout
+  static const _gridSpacing = 8.0;
+  static const _gridRunSpacing = 8.0;
+
+  /// The default radius of a Material 3 `Card`, as per documentation for `Card.shape`.
+  // TODO(bkonyi): inherit this from the theme.
+  static const _kCardRadius = Radius.circular(12);
+
+  Widget _buildGridViewFlex(List<WidgetPreview> previews) {
+    return Wrap(
+      spacing: WidgetPreviewGroupWidget._gridSpacing,
+      runSpacing: WidgetPreviewGroupWidget._gridRunSpacing,
+      alignment: WrapAlignment.start,
+      children: [
+        for (final WidgetPreview preview in previews)
+          WidgetPreviewWidget(controller: controller, preview: preview),
+      ],
+    );
+  }
+
+  Widget _buildVerticalListView(List<WidgetPreview> previews) {
+    return Column(
+      children: [
+        for (final preview in previews)
+          Center(
+            child: WidgetPreviewWidget(
+              controller: controller,
+              preview: preview,
+            ),
+          ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      child: ListTileTheme(
+        data: ListTileTheme.of(context).copyWith(
+          dense: true,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(_kCardRadius),
+          ),
+        ),
+        child: Theme(
+          // Prevents divider lines appearing at the top and bottom of the
+          // expanded ExpansionTile.
+          data: theme.copyWith(dividerColor: Colors.transparent),
+          child: ExpansionTile(
+            key: PageStorageKey(group.name),
+            title: Text(group.name),
+            initiallyExpanded: true,
+            children: [
+              ValueListenableBuilder<LayoutType>(
+                valueListenable: controller.layoutTypeListenable,
+                builder: (context, selectedLayout, _) {
+                  return switch (selectedLayout) {
+                    LayoutType.gridView => _buildGridViewFlex(group.previews),
+                    LayoutType.listView => _buildVerticalListView(
+                      group.previews,
+                    ),
+                  };
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class WidgetPreviewWidget extends StatefulWidget {
+  const WidgetPreviewWidget({
+    super.key,
+    required this.preview,
+    required this.controller,
+  });
+
+  final WidgetPreview preview;
+
+  final WidgetPreviewScaffoldController controller;
 
   @override
   State<WidgetPreviewWidget> createState() => WidgetPreviewWidgetState();
@@ -228,7 +382,12 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
             key: key,
             child: WidgetPreviewTheming(
               theme: widget.preview.theme,
-              child: widget.preview.builder(),
+              child: EnableWidgetInspectorScope(
+                child: PreviewWidget(
+                  preview: widget.preview,
+                  child: widget.preview.previewBuilder(),
+                ),
+              ),
             ),
           );
           if (performRestart) {
@@ -243,7 +402,8 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
           // Catch any unhandled exceptions and display an error widget instead of taking
           // down the entire preview environment.
           errorThrownDuringTreeConstruction = true;
-          return _WidgetPreviewErrorWidget(
+          return WidgetPreviewErrorWidget(
+            controller: widget.controller,
             error: error,
             stackTrace: stackTrace,
             size: maxSizeConstraints.biggest,
@@ -252,12 +412,41 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
       },
     );
 
-    preview = _WidgetPreviewWrapper(
-      previewerConstraints: maxSizeConstraints,
-      child: SizedBox(
-        width: widget.preview.width,
-        height: widget.preview.height,
-        child: preview,
+    final Size? size = widget.preview.size;
+
+    // Add support for selecting only previewed widgets via the widget
+    // inspector.
+    preview = ValueListenableBuilder(
+      valueListenable:
+          WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier,
+      builder: (context, enableWidgetInspector, child) {
+        // Don't allow inspecting the error widget.
+        if (child is WidgetPreviewErrorWidget) {
+          return child;
+        }
+        if (enableWidgetInspector) {
+          return WidgetInspector(
+            // TODO(bkonyi): wire up inspector controls for individual previews or
+            // the entire preview environment. This currently requires users to
+            // to enable widget selection via the Widget Inspector tool in DevTools.
+
+            // These buttons would be rendered on top of the previewed widget, so
+            // don't display them.
+            exitWidgetSelectionButtonBuilder: null,
+            moveExitWidgetSelectionButtonBuilder: null,
+            tapBehaviorButtonBuilder: null,
+            child: child!,
+          );
+        }
+        return child!;
+      },
+      child: _WidgetPreviewWrapper(
+        previewerConstraints: maxSizeConstraints,
+        child: SizedBox(
+          width: size?.width == double.infinity ? null : size?.width,
+          height: size?.height == double.infinity ? null : size?.height,
+          child: preview,
+        ),
       ),
     );
 
@@ -267,56 +456,117 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
       child: preview,
     );
 
+    preview = WidgetPreviewLocalizations(
+      localizationsData: widget.preview.localizations,
+      child: preview,
+    );
+
+    // Override the asset resolution behavior to automatically insert
+    // 'packages/$packageName/` in front of non-package paths as some previews
+    // may reference assets that are within the current project and wouldn't
+    // normally require a package specifier.
+    // TODO(bkonyi): this doesn't modify the behavior of asset loading logic in
+    // the engine implementation. This means that any asset loading done by
+    // APIs provided in dart:ui won't work correctly for non-package asset
+    // paths (e.g., shaders loaded by `FragmentProgram.fromAsset()`).
+    //
+    // See https://github.com/flutter/flutter/issues/171284
+    preview = DefaultAssetBundle(
+      bundle: PreviewAssetBundle(packageName: widget.preview.packageName),
+      child: preview,
+    );
+
+    final hasName = widget.preview.name != null;
     preview = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        if (widget.preview.name != null) ...[
-          Text(
-            widget.preview.name!,
-            style: fixBlurryText(
-              TextStyle(fontSize: 16, fontWeight: FontWeight.w300),
+        if (hasName)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              widget.preview.name!,
+              style: fixBlurryText(
+                TextStyle(fontSize: 16, fontWeight: FontWeight.w300),
+              ),
             ),
           ),
-          const VerticalSpacer(),
-        ],
-        InteractiveViewerWrapper(
-          transformationController: transformationController,
-          child: preview,
-        ),
-        const VerticalSpacer(),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          // If an unhandled exception was caught and we're displaying an error
-          // widget, these controls should be disabled.
-          // TODO(bkonyi): improve layout of controls.
-          children: [
-            ZoomControls(
-              transformationController: transformationController,
-              enabled: !errorThrownDuringTreeConstruction,
-            ),
-            const SizedBox(width: 30),
-            BrightnessToggleButton(
-              enabled: !errorThrownDuringTreeConstruction,
-              brightnessListenable: brightnessListenable,
-            ),
-            const SizedBox(width: 10),
-            SoftRestartButton(
-              enabled: !errorThrownDuringTreeConstruction,
-              softRestartListenable: softRestartListenable,
-            ),
-          ],
+        Container(
+          padding: const EdgeInsets.symmetric(
+            // TODO(bkonyi): use theming or define global constants.
+            horizontal: 16.0,
+          ).add(hasName ? const EdgeInsets.only(top: 8.0) : EdgeInsets.zero),
+          decoration: hasName
+              ? BoxDecoration(
+                  border: Border(top: Divider.createBorderSide(context)),
+                )
+              : null,
+          child: Column(
+            children: [
+              InteractiveViewerWrapper(
+                transformationController: transformationController,
+                child: preview,
+              ),
+              const VerticalSpacer(),
+              Builder(
+                builder: (context) {
+                  return _WidgetPreviewControlRow(
+                    transformationController: transformationController,
+                    errorThrownDuringTreeConstruction:
+                        errorThrownDuringTreeConstruction,
+                    brightnessListenable: brightnessListenable,
+                    softRestartListenable: softRestartListenable,
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ],
     );
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: Card(
+      child: Card.outlined(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+          padding: const EdgeInsets.symmetric(vertical: 16.0),
           child: preview,
         ),
       ),
+    );
+  }
+}
+
+class _WidgetPreviewControlRow extends StatelessWidget {
+  const _WidgetPreviewControlRow({
+    required this.transformationController,
+    required this.errorThrownDuringTreeConstruction,
+    required this.brightnessListenable,
+    required this.softRestartListenable,
+  });
+
+  final TransformationController transformationController;
+  final bool errorThrownDuringTreeConstruction;
+  final ValueNotifier<Brightness> brightnessListenable;
+  final ValueNotifier<bool> softRestartListenable;
+
+  @override
+  Widget build(BuildContext context) {
+    // Don't show controls if an error occurred.
+    if (errorThrownDuringTreeConstruction) {
+      return Container();
+    }
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      // If an unhandled exception was caught and we're displaying an error
+      // widget, these controls should be disabled.
+      // TODO(bkonyi): improve layout of controls.
+      children: [
+        ZoomControls(transformationController: transformationController),
+        const SizedBox(width: 30),
+        BrightnessToggleButton(brightnessListenable: brightnessListenable),
+        const SizedBox(width: 10),
+        SoftRestartButton(softRestartListenable: softRestartListenable),
+      ],
     );
   }
 }
@@ -405,15 +655,81 @@ class WidgetPreviewMediaQueryOverride extends StatelessWidget {
     }
 
     var size = Size(
-      preview.width ?? mediaQueryData.size.width,
-      preview.height ?? mediaQueryData.size.height,
+      preview.size?.width ?? mediaQueryData.size.width,
+      preview.size?.height ?? mediaQueryData.size.height,
     );
 
-    if (preview.width != null || preview.height != null) {
+    if (preview.size != null) {
       mediaQueryData = mediaQueryData.copyWith(size: size);
     }
 
     return mediaQueryData;
+  }
+}
+
+/// Wraps [child] with a [Localizations] with localization data from
+/// [localizationsData].
+class WidgetPreviewLocalizations extends StatefulWidget {
+  const WidgetPreviewLocalizations({
+    super.key,
+    required this.localizationsData,
+    required this.child,
+  });
+
+  final PreviewLocalizationsData? localizationsData;
+  final Widget child;
+
+  @override
+  State<WidgetPreviewLocalizations> createState() =>
+      _WidgetPreviewLocalizationsState();
+}
+
+class _WidgetPreviewLocalizationsState
+    extends State<WidgetPreviewLocalizations> {
+  PreviewLocalizationsData get _localizationsData => widget.localizationsData!;
+  late final LocalizationsResolver _localizationsResolver =
+      LocalizationsResolver(
+        supportedLocales: _localizationsData.supportedLocales,
+        locale: _localizationsData.locale,
+        localeListResolutionCallback:
+            _localizationsData.localeListResolutionCallback,
+        localeResolutionCallback: _localizationsData.localeResolutionCallback,
+        localizationsDelegates: _localizationsData.localizationsDelegates,
+      );
+
+  @override
+  void didUpdateWidget(WidgetPreviewLocalizations oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final PreviewLocalizationsData? localizationsData =
+        widget.localizationsData;
+    if (localizationsData == null) {
+      return;
+    }
+    _localizationsResolver.update(
+      supportedLocales: localizationsData.supportedLocales,
+      locale: localizationsData.locale,
+      localeListResolutionCallback:
+          localizationsData.localeListResolutionCallback,
+      localeResolutionCallback: localizationsData.localeResolutionCallback,
+      localizationsDelegates: localizationsData.localizationsDelegates,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.localizationsData == null) {
+      return widget.child;
+    }
+    return ListenableBuilder(
+      listenable: _localizationsResolver,
+      builder: (context, _) {
+        return Localizations(
+          locale: _localizationsResolver.locale,
+          delegates: _localizationsResolver.localizationsDelegates.toList(),
+          child: widget.child,
+        );
+      },
+    );
   }
 }
 
@@ -432,11 +748,8 @@ class WidgetPreviewerWindowConstraints extends InheritedWidget {
   final BoxConstraints constraints;
 
   static BoxConstraints getRootConstraints(BuildContext context) {
-    final result =
-        context
-            .dependOnInheritedWidgetOfExactType<
-              WidgetPreviewerWindowConstraints
-            >();
+    final result = context
+        .dependOnInheritedWidgetOfExactType<WidgetPreviewerWindowConstraints>();
     assert(
       result != null,
       'No WidgetPreviewerWindowConstraints founds in context',
@@ -536,10 +849,9 @@ class _WidgetPreviewWrapperBox extends RenderShiftedBox {
       // the previewer. In this case, apply finite constraints (e.g., the
       // constraints for the root of the previewer). Otherwise, use the
       // widget's actual constraints.
-      _constraintOverride =
-          minInstrinsicHeight == 0
-              ? _previewerConstraints
-              : const BoxConstraints();
+      _constraintOverride = minInstrinsicHeight == 0
+          ? _previewerConstraints
+          : const BoxConstraints();
     }
     super.layout(constraints, parentUsesSize: parentUsesSize);
   }
@@ -558,26 +870,43 @@ class _WidgetPreviewWrapperBox extends RenderShiftedBox {
 }
 
 /// Custom [AssetBundle] used to map original asset paths from the parent
-/// project to those in the preview project.
+/// projects to those in the preview project.
 class PreviewAssetBundle extends PlatformAssetBundle {
+  PreviewAssetBundle({required this.packageName});
+
+  /// The name of the package in which a preview was defined.
+  ///
+  /// For example, if a preview is defined in 'package:foo/src/bar.dart', this
+  /// will have the value 'foo'.
+  ///
+  /// This should only be null if the preview is defined in a file that's not
+  /// part of a Flutter library (e.g., is defined in a test).
+  // TODO(bkonyi): verify what the behavior should be in this scenario.
+  final String? packageName;
+
   // Assets shipped via package dependencies have paths that start with
   // 'packages'.
   static const String _kPackagesPrefix = 'packages';
 
+  // TODO(bkonyi): when loading an invalid asset path that doesn't start with
+  // 'packages', this throws a FlutterError referencing the modified key
+  // instead of the original. We should catch the error and rethrow one with
+  // the original key in the error message.
   @override
   Future<ByteData> load(String key) {
     // These assets are always present or are shipped via a package and aren't
     // actually located in the parent project, meaning their paths did not need
     // to be modified.
     if (key == 'AssetManifest.bin' ||
-        key == 'AssetManifest.json' ||
+        key == 'AssetManifest.bin.json' ||
         key == 'FontManifest.json' ||
-        key.startsWith(_kPackagesPrefix)) {
+        key.startsWith(_kPackagesPrefix) ||
+        packageName == null) {
       return super.load(key);
     }
-    // Other assets are from the parent project. Map their keys to those found
-    // in the pubspec.yaml of the preview envirnment.
-    return super.load('../../$key');
+    // Other assets are from the parent project. Map their keys to package
+    // paths corresponding to the package containing the preview.
+    return super.load(_toPackagePath(key));
   }
 
   @override
@@ -587,9 +916,11 @@ class PreviewAssetBundle extends PlatformAssetBundle {
       return ImmutableBuffer.fromUint8List(Uint8List.sublistView(bytes));
     }
     return await ImmutableBuffer.fromAsset(
-      key.startsWith(_kPackagesPrefix) ? key : '../../$key',
+      key.startsWith(_kPackagesPrefix) ? key : _toPackagePath(key),
     );
   }
+
+  String _toPackagePath(String key) => '$_kPackagesPrefix/$packageName/$key';
 }
 
 /// Main entrypoint for the widget previewer.
@@ -598,160 +929,142 @@ class PreviewAssetBundle extends PlatformAssetBundle {
 /// the preview scaffold project which prevents us from being able to use hot
 /// restart to iterate on this file.
 Future<void> mainImpl() async {
-  // TODO(bkonyi): store somewhere.
-  await WidgetPreviewScaffoldDtdServices().connect();
-  runApp(WidgetPreviewScaffold(previews: previews));
+  final controller = WidgetPreviewScaffoldController(previews: previews);
+  await controller.initialize();
+  // WARNING: do not move this line. This constructor sets
+  // [WidgetInspectorService.instance] to the custom service for the widget
+  // previewer. If [WidgetsFlutterBinding.ensureInitialized()] is invoked before
+  // the custom service is set, inspector service extensions will be registered
+  // against the wrong service.
+  WidgetPreviewScaffoldInspectorService(dtdServices: controller.dtdServices);
+  final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
+  // Disable the injection of [WidgetInspector] into the widget tree built by
+  // [WidgetsApp]. [WidgetInspector] instances will be created for each
+  // individual preview so the widget inspector won't allow for users to select
+  // widgets that make up the widget preview scaffolding.
+  binding.debugExcludeRootWidgetInspector = true;
+  runWidget(
+    DisableWidgetInspectorScope(
+      child: binding.wrapWithDefaultView(
+        // Forces the set of previews to be recalculated after a hot reload.
+        HotReloadListener(
+          onHotReload: controller.onHotReload,
+          child: WidgetPreviewScaffold(
+            controller: controller,
+            ideTheme: getIdeTheme(),
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
-/// Define the Enum for Layout Types
-enum LayoutType { gridView, listView }
-
 class WidgetPreviewScaffold extends StatelessWidget {
-  WidgetPreviewScaffold({super.key, required this.previews});
+  const WidgetPreviewScaffold({
+    super.key,
+    required this.controller,
+    this.ideTheme = const IdeTheme(),
+  });
 
-  final List<WidgetPreview> Function() previews;
+  final WidgetPreviewScaffoldController controller;
+  final IdeTheme ideTheme;
 
-  // Positioning values for positioning the previewer
-  final double _previewLeftPadding = 60.0;
-  final double _previewRightPadding = 20.0;
-
-  // Positioning values for the toggle layout buttons
-  final double _toggleButtonsTopPadding = 20.0;
-  final double _toggleButtonsLeftPadding = 20.0;
-
-  // Spacing values for the grid layout
-  final double _gridSpacing = 8.0;
-  final double _gridRunSpacing = 8.0;
-
-  // Notifier to manage layout state, default to GridView
-  final ValueNotifier<LayoutType> _selectedLayout = ValueNotifier<LayoutType>(
-    LayoutType.gridView,
-  );
-
-  // Function to toggle layouts based on enum value
-  void _toggleLayout(LayoutType layout) {
-    _selectedLayout.value = layout;
-  }
-
-  Widget _buildGridViewFlex(List<WidgetPreview> previewList) {
-    return SingleChildScrollView(
-      child: Wrap(
-        spacing: _gridSpacing,
-        runSpacing: _gridRunSpacing,
-        alignment: WrapAlignment.start,
-        children: <Widget>[
-          for (final WidgetPreview preview in previewList)
-            WidgetPreviewWidget(preview: preview),
-        ],
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: themeFor(
+        isDarkTheme: false,
+        ideTheme: ideTheme,
+        theme: ThemeData(),
       ),
-    );
-  }
-
-  Widget _buildVerticalListView(List<WidgetPreview> previewList) {
-    return ListView.builder(
-      itemCount: previewList.length,
-      itemBuilder: (context, index) {
-        final preview = previewList[index];
-        return Center(child: WidgetPreviewWidget(preview: preview));
-      },
-    );
-  }
-
-  Widget _displayToggleLayoutButtons() {
-    return Positioned(
-      top: _toggleButtonsTopPadding,
-      left: _toggleButtonsLeftPadding,
-      child: Container(
-        padding: EdgeInsets.all(8.0),
-        decoration: BoxDecoration(
-          color: Colors.grey[300],
-          borderRadius: BorderRadius.circular(8.0),
-        ),
+      darkTheme: themeFor(
+        isDarkTheme: true,
+        ideTheme: ideTheme,
+        theme: ThemeData.dark(),
+      ),
+      themeMode: ideTheme.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+      home: Material(
         child: Column(
           children: [
-            ValueListenableBuilder<LayoutType>(
-              valueListenable: _selectedLayout,
-              builder: (context, selectedLayout, _) {
-                return Column(
-                  children: [
-                    IconButton(
-                      onPressed: () => _toggleLayout(LayoutType.gridView),
-                      icon: Icon(Icons.grid_on),
-                      color:
-                          selectedLayout == LayoutType.gridView
-                              ? Colors.blue
-                              : Colors.black,
-                    ),
-                    IconButton(
-                      onPressed: () => _toggleLayout(LayoutType.listView),
-                      icon: Icon(Icons.view_list),
-                      color:
-                          selectedLayout == LayoutType.listView
-                              ? Colors.blue
-                              : Colors.black,
-                    ),
-                  ],
-                );
-              },
+            // Display the previewer
+            Expanded(
+              child: Container(
+                padding: EdgeInsets.all(8.0),
+                child: WidgetPreviews(controller: controller),
+              ),
             ),
+            WidgetPreviewControls(controller: controller),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _displayPreviewer(Widget previewView) {
-    return Positioned.fill(
-      left: _previewLeftPadding,
-      right: _previewRightPadding,
-      child: Container(padding: EdgeInsets.all(8.0), child: previewView),
-    );
-  }
+/// The set of controls used to control the preview environment.
+class WidgetPreviewControls extends StatelessWidget {
+  const WidgetPreviewControls({super.key, required this.controller});
+
+  static const _controlsPadding = 20.0;
+  final WidgetPreviewScaffoldController controller;
 
   @override
   Widget build(BuildContext context) {
-    final List<WidgetPreview> previewList = previews();
-    Widget previewView;
-    if (previewList.isEmpty) {
-      previewView = Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[NoPreviewsDetectedWidget()],
-      );
-    } else {
-      previewView = LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          return WidgetPreviewerWindowConstraints(
-            constraints: constraints,
-            child: ValueListenableBuilder<LayoutType>(
-              valueListenable: _selectedLayout,
-              builder: (context, selectedLayout, _) {
-                return switch (selectedLayout) {
-                  LayoutType.gridView => _buildGridViewFlex(previewList),
-                  LayoutType.listView => _buildVerticalListView(previewList),
-                };
-              },
-            ),
-          );
-        },
-      );
-    }
-
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Material(
-        color: Colors.transparent,
-        child: DefaultAssetBundle(
-          bundle: PreviewAssetBundle(),
-          child: Stack(
-            children: [
-              // Display the previewer
-              _displayPreviewer(previewView),
-              // Display the layout toggle buttons
-              _displayToggleLayoutButtons(),
-            ],
-          ),
-        ),
+    return Container(
+      padding: EdgeInsets.only(
+        bottom: _controlsPadding,
+        left: _controlsPadding,
+        right: _controlsPadding,
       ),
+      child: Row(
+        children: [
+          LayoutTypeSelector(controller: controller),
+          HorizontalSpacer(),
+          FilterBySelectedFileToggle(controller: controller),
+          Spacer(),
+          WidgetPreviewerRestartButton(controller: controller),
+        ],
+      ),
+    );
+  }
+}
+
+/// Renders the set of currently selected widget previews.
+class WidgetPreviews extends StatelessWidget {
+  const WidgetPreviews({super.key, required this.controller});
+
+  final WidgetPreviewScaffoldController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<WidgetPreviewGroups>(
+      valueListenable: controller.filteredPreviewSetListenable,
+      builder: (context, previewGroups, _) {
+        if (previewGroups.isEmpty) {
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [NoPreviewsDetectedWidget()],
+          );
+        }
+        return LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            final previewGroupsList = previewGroups.toList();
+            return WidgetPreviewerWindowConstraints(
+              constraints: constraints,
+              child: ListView.builder(
+                itemCount: previewGroups.length,
+                itemBuilder: (context, index) {
+                  return WidgetPreviewGroupWidget(
+                    controller: controller,
+                    group: previewGroupsList[index],
+                  );
+                },
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "Căutați pe web",
   "shareButtonLabel": "Trimiteți",
   "pasteButtonLabel": "Inserați",
-  "selectAllButtonLabel": "Selectați tot"
+  "selectAllButtonLabel": "Selectați tot",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found",
+  "radioButtonUnselectedLabel": "Not selected"
 }

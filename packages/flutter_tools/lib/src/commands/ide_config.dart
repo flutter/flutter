@@ -34,13 +34,13 @@ class IdeConfigCommand extends FlutterCommand {
   }
 
   @override
-  final String name = 'ide-config';
+  final name = 'ide-config';
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
 
   @override
-  final String description =
+  final description =
       'Configure the IDE for use in the Flutter tree.\n\n'
       'If run on a Flutter tree that is already configured for the IDE, this '
       'command will add any new configurations, recreate any files that are '
@@ -52,12 +52,12 @@ class IdeConfigCommand extends FlutterCommand {
       'Currently, IntelliJ is the default (and only) IDE that may be configured.';
 
   @override
-  final bool hidden = true;
+  final hidden = true;
 
   @override
   String get invocation => '${runner?.executableName} $name';
 
-  static const String _ideName = 'intellij';
+  static const _ideName = 'intellij';
   Directory get _templateDirectory {
     return globals.fs.directory(
       globals.fs.path.join(
@@ -104,7 +104,7 @@ class IdeConfigCommand extends FlutterCommand {
     // Test byte by byte. We're assuming that these are small files.
     final List<int> srcBytes = src.readAsBytesSync();
     final List<int> destBytes = dest.readAsBytesSync();
-    for (int i = 0; i < srcBytes.length; ++i) {
+    for (var i = 0; i < srcBytes.length; ++i) {
       if (srcBytes[i] != destBytes[i]) {
         return false;
       }
@@ -118,9 +118,9 @@ class IdeConfigCommand extends FlutterCommand {
       return;
     }
 
-    final Set<String> manifest = <String>{};
+    final manifest = <String>{};
     final Iterable<File> flutterFiles = _flutterRoot.listSync(recursive: true).whereType<File>();
-    for (final File srcFile in flutterFiles) {
+    for (final srcFile in flutterFiles) {
       final String relativePath = globals.fs.path.relative(
         srcFile.path,
         from: _flutterRoot.absolute.path,
@@ -134,7 +134,7 @@ class IdeConfigCommand extends FlutterCommand {
       }
 
       // Skip files we aren't interested in.
-      final RegExp trackedIdeaFileRegExp = RegExp(r'(\.name|modules.xml|vcs.xml)$');
+      final trackedIdeaFileRegExp = RegExp(r'(\.name|modules.xml|vcs.xml)$');
       final bool isATrackedIdeaFile =
           _hasDirectoryInPath(srcFile, '.idea') &&
           (trackedIdeaFileRegExp.hasMatch(relativePath) ||
@@ -187,9 +187,10 @@ class IdeConfigCommand extends FlutterCommand {
 
     // Look for any files under the template dir that don't exist in the manifest and remove
     // them.
-    final Iterable<File> templateFiles =
-        _templateDirectory.listSync(recursive: true).whereType<File>();
-    for (final File templateFile in templateFiles) {
+    final Iterable<File> templateFiles = _templateDirectory
+        .listSync(recursive: true)
+        .whereType<File>();
+    for (final templateFile in templateFiles) {
       final String relativePath = globals.fs.path.relative(
         templateFile.absolute.path,
         from: _templateDirectory.absolute.path,
@@ -241,7 +242,7 @@ class IdeConfigCommand extends FlutterCommand {
     }
 
     globals.printStatus('Updating IDE configuration for Flutter tree at $dirPath...');
-    int generatedCount = 0;
+    var generatedCount = 0;
     generatedCount += _renderTemplate(_ideName, dirPath, <String, Object>{
       'withRootModule': boolArg('with-root-module'),
       'android': true,
@@ -258,7 +259,7 @@ class IdeConfigCommand extends FlutterCommand {
   }
 
   int _renderTemplate(String templateName, String dirPath, Map<String, Object> context) {
-    final Template template = Template(
+    final template = Template(
       _templateDirectory,
       null,
       fileSystem: globals.fs,

@@ -57,7 +57,7 @@ void testMain() {
         value: 'hi',
         isFocused: true,
       );
-      final SemanticTextField textField = textFieldSemantics.semanticRole! as SemanticTextField;
+      final textField = textFieldSemantics.semanticRole! as SemanticTextField;
 
       // ensureInitialized() isn't called prior to calling dispose() here.
       // Since we are conditionally calling dispose() on our
@@ -97,7 +97,7 @@ void testMain() {
       //                test was a false positive. We should revise this test and
       //                make sure it tests the right things:
       //                https://github.com/flutter/flutter/issues/147200
-      final node = owner().debugSemanticsTree![0]!;
+      final SemanticsObject node = owner().debugSemanticsTree![0]!;
       final textFieldRole = node.semanticRole! as SemanticTextField;
       final inputElement = textFieldRole.editableElement as DomHTMLInputElement;
       expect(inputElement.tagName.toLowerCase(), 'input');
@@ -111,7 +111,7 @@ void testMain() {
 
       expectSemanticsTree(owner(), '<sem><input type="password" /></sem>');
 
-      final node = owner().debugSemanticsTree![0]!;
+      final SemanticsObject node = owner().debugSemanticsTree![0]!;
       final textFieldRole = node.semanticRole! as SemanticTextField;
       final inputElement = textFieldRole.editableElement as DomHTMLInputElement;
       expect(inputElement.disabled, isFalse);
@@ -124,7 +124,8 @@ void testMain() {
         ui.SemanticsInputType.url: 'url',
         ui.SemanticsInputType.phone: 'tel',
         ui.SemanticsInputType.search: 'search',
-        ui.SemanticsInputType.email: 'email',
+        // Email uses type="text" to preserve selection APIs under semantics.
+        ui.SemanticsInputType.email: 'text',
       };
       for (final ui.SemanticsInputType type in ui.SemanticsInputType.values) {
         createTextFieldSemantics(value: 'text', inputType: type);
@@ -133,10 +134,23 @@ void testMain() {
       }
     });
 
+    test('email input uses type=text with inputmode=email and autocomplete=email', () {
+      createTextFieldSemantics(value: 'text', inputType: ui.SemanticsInputType.email);
+
+      final SemanticsObject node = owner().debugSemanticsTree![0]!;
+      final textFieldRole = node.semanticRole! as SemanticTextField;
+      final inputElement = textFieldRole.editableElement as DomHTMLInputElement;
+
+      expect(inputElement.type, 'text');
+      expect(inputElement.getAttribute('inputmode'), 'email');
+      expect(inputElement.getAttribute('autocapitalize'), 'none');
+      expect(inputElement.autocomplete, 'email');
+    });
+
     test('renders a disabled text field', () {
       createTextFieldSemantics(isEnabled: false, value: 'hello');
       expectSemanticsTree(owner(), '''<sem><input /></sem>''');
-      final node = owner().debugSemanticsTree![0]!;
+      final SemanticsObject node = owner().debugSemanticsTree![0]!;
       final textFieldRole = node.semanticRole! as SemanticTextField;
       final inputElement = textFieldRole.editableElement as DomHTMLInputElement;
       expect(inputElement.tagName.toLowerCase(), 'input');
@@ -147,8 +161,9 @@ void testMain() {
       final logger = SemanticsActionLogger();
       createTextFieldSemantics(value: 'hello');
 
-      final textField =
-          owner().semanticsHost.querySelector('input[data-semantics-role="text-field"]')!;
+      final DomElement textField = owner().semanticsHost.querySelector(
+        'input[data-semantics-role="text-field"]',
+      )!;
 
       expect(owner().semanticsHost.ownerDocument?.activeElement, isNot(textField));
 
@@ -166,8 +181,8 @@ void testMain() {
     test('Syncs semantic state from framework', () async {
       expect(owner().semanticsHost.ownerDocument?.activeElement, domDocument.body);
 
-      int changeCount = 0;
-      int actionCount = 0;
+      var changeCount = 0;
+      var actionCount = 0;
       strategy.enable(
         singlelineConfig,
         onChange: (_, _) {
@@ -179,7 +194,7 @@ void testMain() {
       );
 
       // Create
-      final textFieldSemantics = createTextFieldSemantics(
+      final SemanticsObject textFieldSemantics = createTextFieldSemantics(
         value: 'hello',
         label: 'greeting',
         isFocused: true,
@@ -237,7 +252,7 @@ void testMain() {
     test('Does not overwrite text value and selection editing state on semantic updates', () {
       strategy.enable(singlelineConfig, onChange: (_, _) {}, onAction: (_) {});
 
-      final textFieldSemantics = createTextFieldSemantics(
+      final SemanticsObject textFieldSemantics = createTextFieldSemantics(
         value: 'hello',
         textSelectionBase: 1,
         textSelectionExtent: 3,
@@ -261,7 +276,7 @@ void testMain() {
 
       strategy.enable(singlelineConfig, onChange: (_, _) {}, onAction: (_) {});
 
-      final textFieldSemantics = createTextFieldSemantics(
+      final SemanticsObject textFieldSemantics = createTextFieldSemantics(
         value: 'hello',
         textSelectionBase: 1,
         textSelectionExtent: 3,
@@ -283,6 +298,8 @@ void testMain() {
         'text': 'updated',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState), testTextEditing);
 
@@ -298,7 +315,10 @@ void testMain() {
       expect(owner().semanticsHost.ownerDocument?.activeElement, domDocument.body);
 
       strategy.enable(singlelineConfig, onChange: (_, _) {}, onAction: (_) {});
-      final textFieldSemantics = createTextFieldSemantics(value: 'hello', isFocused: true);
+      final SemanticsObject textFieldSemantics = createTextFieldSemantics(
+        value: 'hello',
+        isFocused: true,
+      );
 
       final textField = textFieldSemantics.semanticRole! as SemanticTextField;
       expect(textField.editableElement, strategy.domElement);
@@ -317,7 +337,10 @@ void testMain() {
       expect(strategy.domElement, isNull);
 
       // During the semantics update the DOM element is created and is focused on.
-      final textFieldSemantics = createTextFieldSemantics(value: 'hello', isFocused: true);
+      final SemanticsObject textFieldSemantics = createTextFieldSemantics(
+        value: 'hello',
+        isFocused: true,
+      );
       expect(strategy.domElement, isNotNull);
       expect(owner().semanticsHost.ownerDocument?.activeElement, strategy.domElement);
 
@@ -351,7 +374,7 @@ void testMain() {
       expect(owner().semanticsHost.ownerDocument?.activeElement, domDocument.body);
 
       // The input will have focus after editing state is set and semantics updated.
-      strategy.setEditingState(EditingState(text: 'foo'));
+      strategy.setEditingState(EditingState(text: 'foo', baseOffset: 0, extentOffset: 0));
 
       // NOTE: at this point some browsers, e.g. some versions of Safari will
       //       have set the focus on the editing element as a result of setting
@@ -447,18 +470,23 @@ void testMain() {
         children: <SemanticsNodeUpdate>[
           builder.updateNode(
             id: 1,
-            isEnabled: true,
-            isTextField: true,
+            flags: ui.SemanticsFlags(
+              isEnabled: ui.Tristate.isTrue,
+              isTextField: true,
+              isFocused: focusFieldId == 1 ? ui.Tristate.isTrue : ui.Tristate.isFalse,
+            ),
             value: 'Hello',
-            isFocused: focusFieldId == 1,
+
             rect: const ui.Rect.fromLTRB(0, 0, 50, 10),
           ),
           builder.updateNode(
             id: 2,
-            isEnabled: true,
-            isTextField: true,
+            flags: ui.SemanticsFlags(
+              isEnabled: ui.Tristate.isTrue,
+              isTextField: true,
+              isFocused: focusFieldId == 2 ? ui.Tristate.isTrue : ui.Tristate.isFalse,
+            ),
             value: 'World',
-            isFocused: focusFieldId == 2,
             rect: const ui.Rect.fromLTRB(0, 20, 50, 10),
           ),
         ],
@@ -470,8 +498,8 @@ void testMain() {
       strategy.enable(singlelineConfig, onChange: (_, _) {}, onAction: (_) {});
 
       // Switch between the two fields a few times.
-      for (int i = 0; i < 5; i++) {
-        final SemanticsTester tester = SemanticsTester(owner());
+      for (var i = 0; i < 5; i++) {
+        final tester = SemanticsTester(owner());
         createTwoFieldSemantics(tester, focusFieldId: 1);
         expect(tester.apply().length, 3);
 
@@ -519,15 +547,18 @@ SemanticsObject createTextFieldSemantics({
   final tester = SemanticsTester(owner());
   tester.updateNode(
     id: 0,
-    isEnabled: isEnabled,
     label: label,
     value: value,
-    isTextField: true,
-    isFocused: isFocused,
-    isMultiline: isMultiline,
-    isObscured: isObscured,
-    hasRequiredState: isRequired != null,
-    isRequired: isRequired,
+    flags: ui.SemanticsFlags(
+      isEnabled: isEnabled ? ui.Tristate.isTrue : ui.Tristate.none,
+      isTextField: true,
+      isFocused: isFocused ? ui.Tristate.isTrue : ui.Tristate.isFalse,
+      isMultiline: isMultiline,
+      isObscured: isObscured,
+      isRequired: isRequired == null
+          ? ui.Tristate.none
+          : (isRequired ? ui.Tristate.isTrue : ui.Tristate.isFalse),
+    ),
     hasTap: true,
     rect: rect,
     textDirection: ui.TextDirection.ltr,

@@ -14,7 +14,7 @@ void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() async {
-    final MockClipboard mockClipboard = MockClipboard();
+    final mockClipboard = MockClipboard();
     TestWidgetsFlutterBinding.ensureInitialized().defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
       mockClipboard.handleMethodCall,
@@ -33,22 +33,21 @@ void main() {
 
   test('showing and hiding one controller', () {
     // Create an active connection, which is required to show the system menu.
-    final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue(text: 'test1'));
+    final client = FakeTextInputClient(const TextEditingValue(text: 'test1'));
     final TextInputConnection connection = TextInput.attach(client, client.configuration);
     addTearDown(() {
       connection.close();
     });
 
-    final List<Map<String, double>> targetRects = <Map<String, double>>[];
-    int hideCount = 0;
+    final targetRects = <Map<String, double>>[];
+    var hideCount = 0;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
       (MethodCall methodCall) async {
         switch (methodCall.method) {
           case 'ContextMenu.showSystemContextMenu':
-            final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
-            final Map<String, dynamic> untypedTargetRect =
-                arguments['targetRect'] as Map<String, dynamic>;
+            final arguments = methodCall.arguments as Map<String, dynamic>;
+            final untypedTargetRect = arguments['targetRect'] as Map<String, dynamic>;
             final Map<String, double> lastTargetRect = untypedTargetRect.map((
               String key,
               dynamic value,
@@ -69,7 +68,7 @@ void main() {
       );
     });
 
-    final SystemContextMenuController controller = SystemContextMenuController();
+    final controller = SystemContextMenuController();
     addTearDown(() {
       controller.dispose();
     });
@@ -79,10 +78,8 @@ void main() {
     expect(controller.isVisible, isFalse);
 
     // Showing calls the platform.
-    const Rect rect1 = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
-    final List<IOSSystemContextMenuItemData> items = <IOSSystemContextMenuItemData>[
-      const IOSSystemContextMenuItemDataCopy(),
-    ];
+    const rect1 = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+    final items = <IOSSystemContextMenuItemData>[const IOSSystemContextMenuItemDataCopy()];
     controller.showWithItems(rect1, items);
     expect(targetRects, hasLength(1));
     expect(targetRects.last['x'], rect1.left);
@@ -96,7 +93,7 @@ void main() {
     expect(targetRects, hasLength(1));
 
     // Showing a new rect calls the platform.
-    const Rect rect2 = Rect.fromLTWH(1.0, 1.0, 200.0, 200.0);
+    const rect2 = Rect.fromLTWH(1.0, 1.0, 200.0, 200.0);
     controller.showWithItems(rect2, items);
     expect(targetRects, hasLength(2));
     expect(targetRects.last['x'], rect2.left);
@@ -130,22 +127,21 @@ void main() {
 
   test('the system can hide the menu with handleSystemHide', () async {
     // Create an active connection, which is required to show the system menu.
-    final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue(text: 'test1'));
+    final client = FakeTextInputClient(const TextEditingValue(text: 'test1'));
     final TextInputConnection connection = TextInput.attach(client, client.configuration);
     addTearDown(() {
       connection.close();
     });
 
-    final List<Map<String, double>> targetRects = <Map<String, double>>[];
-    int hideCount = 0;
+    final targetRects = <Map<String, double>>[];
+    var hideCount = 0;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
       (MethodCall methodCall) async {
         switch (methodCall.method) {
           case 'ContextMenu.showSystemContextMenu':
-            final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
-            final Map<String, dynamic> untypedTargetRect =
-                arguments['targetRect'] as Map<String, dynamic>;
+            final arguments = methodCall.arguments as Map<String, dynamic>;
+            final untypedTargetRect = arguments['targetRect'] as Map<String, dynamic>;
             final Map<String, double> lastTargetRect = untypedTargetRect.map((
               String key,
               dynamic value,
@@ -166,8 +162,8 @@ void main() {
       );
     });
 
-    int systemHideCount = 0;
-    final SystemContextMenuController controller = SystemContextMenuController(
+    var systemHideCount = 0;
+    final controller = SystemContextMenuController(
       onSystemHide: () {
         systemHideCount += 1;
       },
@@ -182,10 +178,8 @@ void main() {
     expect(systemHideCount, 0);
 
     // Showing calls the platform.
-    const Rect rect1 = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
-    final List<IOSSystemContextMenuItemData> items = <IOSSystemContextMenuItemData>[
-      const IOSSystemContextMenuItemDataCopy(),
-    ];
+    const rect1 = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+    final items = <IOSSystemContextMenuItemData>[const IOSSystemContextMenuItemDataCopy()];
     controller.showWithItems(rect1, items);
     expect(controller.isVisible, isTrue);
     expect(targetRects, hasLength(1));
@@ -215,33 +209,31 @@ void main() {
 
   test('showing a second controller while one is visible is an error', () {
     // Create an active connection, which is required to show the system menu.
-    final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue(text: 'test1'));
+    final client = FakeTextInputClient(const TextEditingValue(text: 'test1'));
     final TextInputConnection connection = TextInput.attach(client, client.configuration);
     addTearDown(() {
       connection.close();
     });
 
-    final SystemContextMenuController controller1 = SystemContextMenuController();
+    final controller1 = SystemContextMenuController();
     addTearDown(() {
       controller1.dispose();
     });
     expect(controller1.isVisible, isFalse);
-    const Rect rect1 = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
-    final List<IOSSystemContextMenuItemData> items = <IOSSystemContextMenuItemData>[
-      const IOSSystemContextMenuItemDataCopy(),
-    ];
+    const rect1 = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+    final items = <IOSSystemContextMenuItemData>[const IOSSystemContextMenuItemDataCopy()];
     expect(() {
       controller1.showWithItems(rect1, items);
     }, isNot(throwsAssertionError));
     expect(controller1.isVisible, isTrue);
 
-    final SystemContextMenuController controller2 = SystemContextMenuController();
+    final controller2 = SystemContextMenuController();
     addTearDown(() {
       controller2.dispose();
     });
     expect(controller1.isVisible, isTrue);
     expect(controller2.isVisible, isFalse);
-    const Rect rect2 = Rect.fromLTWH(1.0, 1.0, 200.0, 200.0);
+    const rect2 = Rect.fromLTWH(1.0, 1.0, 200.0, 200.0);
     expect(() {
       controller2.showWithItems(rect2, items);
     }, throwsAssertionError);
@@ -255,22 +247,21 @@ void main() {
 
   test('showing and hiding two controllers', () {
     // Create an active connection, which is required to show the system menu.
-    final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue(text: 'test1'));
+    final client = FakeTextInputClient(const TextEditingValue(text: 'test1'));
     final TextInputConnection connection = TextInput.attach(client, client.configuration);
     addTearDown(() {
       connection.close();
     });
 
-    final List<Map<String, double>> targetRects = <Map<String, double>>[];
-    int hideCount = 0;
+    final targetRects = <Map<String, double>>[];
+    var hideCount = 0;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
       (MethodCall methodCall) async {
         switch (methodCall.method) {
           case 'ContextMenu.showSystemContextMenu':
-            final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
-            final Map<String, dynamic> untypedTargetRect =
-                arguments['targetRect'] as Map<String, dynamic>;
+            final arguments = methodCall.arguments as Map<String, dynamic>;
+            final untypedTargetRect = arguments['targetRect'] as Map<String, dynamic>;
             final Map<String, double> lastTargetRect = untypedTargetRect.map((
               String key,
               dynamic value,
@@ -291,7 +282,7 @@ void main() {
       );
     });
 
-    final SystemContextMenuController controller1 = SystemContextMenuController();
+    final controller1 = SystemContextMenuController();
     addTearDown(() {
       controller1.dispose();
     });
@@ -301,10 +292,8 @@ void main() {
     expect(hideCount, 0);
 
     // Showing calls the platform.
-    const Rect rect1 = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
-    final List<IOSSystemContextMenuItemData> items = <IOSSystemContextMenuItemData>[
-      const IOSSystemContextMenuItemDataCopy(),
-    ];
+    const rect1 = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+    final items = <IOSSystemContextMenuItemData>[const IOSSystemContextMenuItemDataCopy()];
     controller1.showWithItems(rect1, items);
     expect(controller1.isVisible, isTrue);
     expect(targetRects, hasLength(1));
@@ -316,12 +305,12 @@ void main() {
     expect(hideCount, 1);
 
     // Showing a new controller calls the platform.
-    final SystemContextMenuController controller2 = SystemContextMenuController();
+    final controller2 = SystemContextMenuController();
     addTearDown(() {
       controller2.dispose();
     });
     expect(controller2.isVisible, isFalse);
-    const Rect rect2 = Rect.fromLTWH(1.0, 1.0, 200.0, 200.0);
+    const rect2 = Rect.fromLTWH(1.0, 1.0, 200.0, 200.0);
     controller2.showWithItems(rect2, items);
     expect(controller1.isVisible, isFalse);
     expect(controller2.isVisible, isTrue);
@@ -346,26 +335,24 @@ void main() {
 
   test('showing a controller with custom items', () {
     // Create an active connection, which is required to show the system menu.
-    final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue(text: 'test1'));
+    final client = FakeTextInputClient(const TextEditingValue(text: 'test1'));
     final TextInputConnection connection = TextInput.attach(client, client.configuration);
     addTearDown(() {
       connection.close();
     });
 
-    final List<List<IOSSystemContextMenuItemData>> itemsReceived =
-        <List<IOSSystemContextMenuItemData>>[];
+    final itemsReceived = <List<IOSSystemContextMenuItemData>>[];
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
       (MethodCall methodCall) async {
         switch (methodCall.method) {
           case 'ContextMenu.showSystemContextMenu':
-            final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
-            final List<dynamic> untypedItems = arguments['items'] as List<dynamic>;
-            final List<IOSSystemContextMenuItemData> lastItems =
-                untypedItems.map((dynamic value) {
-                  final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
-                  return systemContextMenuItemDataFromJson(itemJson);
-                }).toList();
+            final arguments = methodCall.arguments as Map<String, dynamic>;
+            final untypedItems = arguments['items'] as List<dynamic>;
+            final List<IOSSystemContextMenuItemData> lastItems = untypedItems.map((dynamic value) {
+              final itemJson = value as Map<String, dynamic>;
+              return systemContextMenuItemDataFromJson(itemJson);
+            }).toList();
             itemsReceived.add(lastItems);
         }
         return;
@@ -378,7 +365,7 @@ void main() {
       );
     });
 
-    final SystemContextMenuController controller = SystemContextMenuController();
+    final controller = SystemContextMenuController();
     addTearDown(() {
       controller.dispose();
     });
@@ -386,8 +373,8 @@ void main() {
     expect(controller.isVisible, isFalse);
 
     // Showing calls the platform.
-    const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
-    final List<IOSSystemContextMenuItemData> items1 = <IOSSystemContextMenuItemData>[
+    const rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+    final items1 = <IOSSystemContextMenuItemData>[
       const IOSSystemContextMenuItemDataCut(),
       const IOSSystemContextMenuItemDataCopy(),
       const IOSSystemContextMenuItemDataPaste(),
@@ -409,9 +396,7 @@ void main() {
     expect(itemsReceived, hasLength(1));
 
     // Showing new items calls the platform.
-    final List<IOSSystemContextMenuItemData> items2 = <IOSSystemContextMenuItemData>[
-      const IOSSystemContextMenuItemDataCut(),
-    ];
+    final items2 = <IOSSystemContextMenuItemData>[const IOSSystemContextMenuItemDataCut()];
     controller.showWithItems(rect, items2);
     expect(controller.isVisible, isTrue);
     expect(itemsReceived, hasLength(2));
@@ -424,26 +409,24 @@ void main() {
 
   test('showing a controller with empty items', () {
     // Create an active connection, which is required to show the system menu.
-    final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue(text: 'test1'));
+    final client = FakeTextInputClient(const TextEditingValue(text: 'test1'));
     final TextInputConnection connection = TextInput.attach(client, client.configuration);
     addTearDown(() {
       connection.close();
     });
 
-    final List<List<IOSSystemContextMenuItemData>> itemsReceived =
-        <List<IOSSystemContextMenuItemData>>[];
+    final itemsReceived = <List<IOSSystemContextMenuItemData>>[];
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
       (MethodCall methodCall) async {
         switch (methodCall.method) {
           case 'ContextMenu.showSystemContextMenu':
-            final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
-            final List<dynamic> untypedItems = arguments['items'] as List<dynamic>;
-            final List<IOSSystemContextMenuItemData> lastItems =
-                untypedItems.map((dynamic value) {
-                  final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
-                  return systemContextMenuItemDataFromJson(itemJson);
-                }).toList();
+            final arguments = methodCall.arguments as Map<String, dynamic>;
+            final untypedItems = arguments['items'] as List<dynamic>;
+            final List<IOSSystemContextMenuItemData> lastItems = untypedItems.map((dynamic value) {
+              final itemJson = value as Map<String, dynamic>;
+              return systemContextMenuItemDataFromJson(itemJson);
+            }).toList();
             itemsReceived.add(lastItems);
         }
         return;
@@ -456,15 +439,15 @@ void main() {
       );
     });
 
-    final SystemContextMenuController controller = SystemContextMenuController();
+    final controller = SystemContextMenuController();
     addTearDown(() {
       controller.dispose();
     });
 
     expect(controller.isVisible, isFalse);
 
-    const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
-    final List<IOSSystemContextMenuItemData> items = <IOSSystemContextMenuItemData>[];
+    const rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+    final items = <IOSSystemContextMenuItemData>[];
 
     expect(() {
       controller.showWithItems(rect, items);
@@ -474,9 +457,9 @@ void main() {
   });
 
   testWidgets('showing a controller for an EditableText', (WidgetTester tester) async {
-    final TextEditingController textEditingController = TextEditingController(text: 'test');
-    final FocusNode focusNode = FocusNode();
-    final GlobalKey<EditableTextState> key = GlobalKey<EditableTextState>();
+    final textEditingController = TextEditingController(text: 'test');
+    final focusNode = FocusNode();
+    final key = GlobalKey<EditableTextState>();
     late final WidgetsLocalizations localizations;
     addTearDown(() {
       textEditingController.dispose();
@@ -533,12 +516,13 @@ void main() {
         editableTextState.textEditingValue.selection,
       ),
     );
-    final List<IOSSystemContextMenuItemData> defaultItemDatas =
-        defaultItems.map((IOSSystemContextMenuItem item) => item.getData(localizations)).toList();
+    final List<IOSSystemContextMenuItemData> defaultItemDatas = defaultItems
+        .map((IOSSystemContextMenuItem item) => item.getData(localizations))
+        .toList();
 
     expect(defaultItemDatas, isNotEmpty);
 
-    final SystemContextMenuController systemContextMenuController = SystemContextMenuController();
+    final systemContextMenuController = SystemContextMenuController();
     addTearDown(() {
       systemContextMenuController.dispose();
     });
@@ -546,5 +530,292 @@ void main() {
     expect(systemContextMenuController.isVisible, isFalse);
     systemContextMenuController.showWithItems(anchor, defaultItemDatas);
     expect(systemContextMenuController.isVisible, isTrue);
+  });
+
+  test('custom action callbacks are properly managed', () {
+    final client = FakeTextInputClient(const TextEditingValue(text: 'test'));
+    final TextInputConnection connection = TextInput.attach(client, client.configuration);
+    addTearDown(() {
+      connection.close();
+    });
+
+    var action1Called = false;
+    var action2Called = false;
+
+    final controller = SystemContextMenuController();
+    addTearDown(() {
+      controller.dispose();
+    });
+
+    final items = <IOSSystemContextMenuItemData>[
+      IOSSystemContextMenuItemDataCustom(
+        title: 'Action 1',
+        onPressed: () {
+          action1Called = true;
+        },
+      ),
+      IOSSystemContextMenuItemDataCustom(
+        title: 'Action 2',
+        onPressed: () {
+          action2Called = true;
+        },
+      ),
+    ];
+
+    const rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+    controller.showWithItems(rect, items);
+
+    expect(controller.isVisible, isTrue);
+
+    // Get the actual callback IDs from the items.
+    final String callbackId1 = (items[0] as IOSSystemContextMenuItemDataCustom).callbackId;
+    final String callbackId2 = (items[1] as IOSSystemContextMenuItemDataCustom).callbackId;
+
+    controller.handleCustomContextMenuAction(callbackId1);
+    expect(action1Called, isTrue);
+    expect(action2Called, isFalse);
+
+    controller.handleCustomContextMenuAction(callbackId2);
+    expect(action1Called, isTrue);
+    expect(action2Called, isTrue);
+
+    controller.hide();
+    expect(controller.isVisible, isFalse);
+
+    expect(() => controller.handleCustomContextMenuAction(callbackId1), throwsAssertionError);
+  });
+
+  test('multiple controllers handle callbacks independently', () {
+    final client1 = FakeTextInputClient(const TextEditingValue(text: 'test1'));
+    final TextInputConnection connection1 = TextInput.attach(client1, client1.configuration);
+    addTearDown(() {
+      connection1.close();
+    });
+
+    var controller1ActionCalled = false;
+    var controller2ActionCalled = false;
+
+    final controller1 = SystemContextMenuController();
+    final controller2 = SystemContextMenuController();
+    addTearDown(() {
+      controller1.dispose();
+      controller2.dispose();
+    });
+
+    final items1 = <IOSSystemContextMenuItemData>[
+      IOSSystemContextMenuItemDataCustom(
+        title: 'Controller 1 Action',
+        onPressed: () {
+          controller1ActionCalled = true;
+        },
+      ),
+    ];
+
+    final items2 = <IOSSystemContextMenuItemData>[
+      IOSSystemContextMenuItemDataCustom(
+        title: 'Controller 2 Action',
+        onPressed: () {
+          controller2ActionCalled = true;
+        },
+      ),
+    ];
+
+    const rect1 = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+    const rect2 = Rect.fromLTWH(100.0, 100.0, 100.0, 100.0);
+
+    controller1.showWithItems(rect1, items1);
+    expect(controller1.isVisible, isTrue);
+
+    controller1.hide();
+    expect(controller1.isVisible, isFalse);
+
+    controller2.showWithItems(rect2, items2);
+    expect(controller2.isVisible, isTrue);
+
+    // Get the actual callback ID from the items.
+    final String callbackId2 = (items2[0] as IOSSystemContextMenuItemDataCustom).callbackId;
+
+    controller2.handleCustomContextMenuAction(callbackId2);
+    expect(controller2ActionCalled, isTrue);
+    expect(controller1ActionCalled, isFalse);
+
+    // Get the actual callback ID from controller1's items.
+    final String callbackId1 = (items1[0] as IOSSystemContextMenuItemDataCustom).callbackId;
+
+    expect(() => controller1.handleCustomContextMenuAction(callbackId1), throwsAssertionError);
+  });
+
+  test('platform dismissal clears callbacks', () {
+    final client = FakeTextInputClient(const TextEditingValue(text: 'test'));
+    final TextInputConnection connection = TextInput.attach(client, client.configuration);
+    addTearDown(() {
+      connection.close();
+    });
+
+    var actionCalled = false;
+
+    final controller = SystemContextMenuController();
+    addTearDown(() {
+      controller.dispose();
+    });
+
+    final items = <IOSSystemContextMenuItemData>[
+      IOSSystemContextMenuItemDataCustom(
+        title: 'Test Action',
+        onPressed: () {
+          actionCalled = true;
+        },
+      ),
+    ];
+
+    const rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+    controller.showWithItems(rect, items);
+    expect(controller.isVisible, isTrue);
+
+    controller.handleSystemHide();
+    expect(controller.isVisible, isFalse);
+
+    // Get the actual callback ID from the item.
+    final String callbackId = (items[0] as IOSSystemContextMenuItemDataCustom).callbackId;
+
+    expect(() => controller.handleCustomContextMenuAction(callbackId), throwsAssertionError);
+    expect(actionCalled, isFalse);
+  });
+
+  test('calling handleCustomContextMenuAction with no systemContextMenuClient', () {
+    // Don't create a controller or set any client.
+    ServicesBinding.systemContextMenuClient = null;
+
+    expect(() async {
+      final ByteData message = const JSONMethodCodec().encodeMethodCall(
+        const MethodCall('ContextMenu.onPerformCustomAction', <dynamic>[0, 'test-id']),
+      );
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/platform',
+        message,
+        (_) {},
+      );
+    }, returnsNormally);
+  });
+
+  test('handleCustomContextMenuAction with non-existent callbackId', () {
+    final client = FakeTextInputClient(const TextEditingValue(text: 'test'));
+    final TextInputConnection connection = TextInput.attach(client, client.configuration);
+    addTearDown(() {
+      connection.close();
+    });
+
+    final controller = SystemContextMenuController();
+    addTearDown(() {
+      controller.dispose();
+    });
+
+    final items = <IOSSystemContextMenuItemData>[
+      IOSSystemContextMenuItemDataCustom(title: 'Test Action', onPressed: () {}),
+    ];
+
+    const rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+    controller.showWithItems(rect, items);
+    expect(controller.isVisible, isTrue);
+
+    expect(() => controller.handleCustomContextMenuAction('non-existent-id'), throwsAssertionError);
+  });
+
+  test('handleCustomContextMenuAction after hide clears callbacks', () {
+    final client = FakeTextInputClient(const TextEditingValue(text: 'test'));
+    final TextInputConnection connection = TextInput.attach(client, client.configuration);
+    addTearDown(() {
+      connection.close();
+    });
+
+    var actionCalled = false;
+
+    final controller = SystemContextMenuController();
+    addTearDown(() {
+      controller.dispose();
+    });
+
+    final items = <IOSSystemContextMenuItemData>[
+      IOSSystemContextMenuItemDataCustom(
+        title: 'Test Action',
+        onPressed: () {
+          actionCalled = true;
+        },
+      ),
+    ];
+
+    const rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+    controller.showWithItems(rect, items);
+    expect(controller.isVisible, isTrue);
+
+    final String callbackId = (items[0] as IOSSystemContextMenuItemDataCustom).callbackId;
+
+    // Test that it works before hiding.
+    controller.handleCustomContextMenuAction(callbackId);
+    expect(actionCalled, isTrue);
+    actionCalled = false;
+
+    controller.hide();
+    expect(controller.isVisible, isFalse);
+
+    expect(() => controller.handleCustomContextMenuAction(callbackId), throwsAssertionError);
+    expect(actionCalled, isFalse);
+  });
+
+  test('showing new menu invalidates old menu callbacks', () {
+    final client = FakeTextInputClient(const TextEditingValue(text: 'test'));
+    final TextInputConnection connection = TextInput.attach(client, client.configuration);
+    addTearDown(() {
+      connection.close();
+    });
+
+    var oldActionCalled = false;
+    var newActionCalled = false;
+
+    final controller = SystemContextMenuController();
+    addTearDown(() {
+      controller.dispose();
+    });
+
+    // First menu with old action.
+    final oldItems = <IOSSystemContextMenuItemData>[
+      IOSSystemContextMenuItemDataCustom(
+        title: 'Old Action',
+        onPressed: () {
+          oldActionCalled = true;
+        },
+      ),
+    ];
+
+    const rect1 = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+    controller.showWithItems(rect1, oldItems);
+    expect(controller.isVisible, isTrue);
+
+    final String oldCallbackId = (oldItems[0] as IOSSystemContextMenuItemDataCustom).callbackId;
+
+    // Show new menu with new action.
+    final newItems = <IOSSystemContextMenuItemData>[
+      IOSSystemContextMenuItemDataCustom(
+        title: 'New Action',
+        onPressed: () {
+          newActionCalled = true;
+        },
+      ),
+    ];
+
+    const rect2 = Rect.fromLTWH(100.0, 100.0, 100.0, 100.0);
+    controller.showWithItems(rect2, newItems);
+    expect(controller.isVisible, isTrue);
+
+    final String newCallbackId = (newItems[0] as IOSSystemContextMenuItemDataCustom).callbackId;
+
+    // Old callback should not work.
+    expect(() => controller.handleCustomContextMenuAction(oldCallbackId), throwsAssertionError);
+    expect(oldActionCalled, isFalse);
+
+    // New callback should work.
+    controller.handleCustomContextMenuAction(newCallbackId);
+    expect(newActionCalled, isTrue);
+    expect(oldActionCalled, isFalse);
   });
 }

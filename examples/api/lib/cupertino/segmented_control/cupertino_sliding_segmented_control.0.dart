@@ -32,11 +32,13 @@ class SegmentedControlExample extends StatefulWidget {
   const SegmentedControlExample({super.key});
 
   @override
-  State<SegmentedControlExample> createState() => _SegmentedControlExampleState();
+  State<SegmentedControlExample> createState() =>
+      _SegmentedControlExampleState();
 }
 
 class _SegmentedControlExampleState extends State<SegmentedControlExample> {
   Sky _selectedSegment = Sky.midnight;
+  bool _isMomentary = false;
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +51,7 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
           thumbColor: skyColors[_selectedSegment]!,
           // This represents the currently selected segmented control.
           groupValue: _selectedSegment,
+          isMomentary: _isMomentary,
           // Callback that sets the selected segmented control.
           onValueChanged: (Sky? value) {
             if (value != null) {
@@ -60,23 +63,55 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
           children: const <Sky, Widget>{
             Sky.midnight: Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Text('Midnight', style: TextStyle(color: CupertinoColors.white)),
+              child: Text(
+                'Midnight',
+                style: TextStyle(color: CupertinoColors.white),
+              ),
             ),
             Sky.viridian: Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Text('Viridian', style: TextStyle(color: CupertinoColors.white)),
+              child: Text(
+                'Viridian',
+                style: TextStyle(color: CupertinoColors.white),
+              ),
             ),
             Sky.cerulean: Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Text('Cerulean', style: TextStyle(color: CupertinoColors.white)),
+              child: Text(
+                'Cerulean',
+                style: TextStyle(color: CupertinoColors.white),
+              ),
             ),
           },
         ),
       ),
       child: Center(
-        child: Text(
-          'Selected Segment: ${_selectedSegment.name}',
-          style: const TextStyle(color: CupertinoColors.white),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text(
+              'Selected Segment: ${_selectedSegment.name}',
+              style: const TextStyle(color: CupertinoColors.white),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                const Text(
+                  'Momentary mode: ',
+                  style: TextStyle(color: CupertinoColors.white),
+                ),
+                CupertinoSwitch(
+                  value: _isMomentary,
+                  onChanged: (bool value) {
+                    setState(() {
+                      _isMomentary = value;
+                    });
+                  },
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

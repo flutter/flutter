@@ -177,7 +177,7 @@ bool debugHighlightDeprecatedWidgets = false;
 
 Key? _firstNonUniqueKey(Iterable<Widget> widgets) {
   final Set<Key> keySet = HashSet<Key>();
-  for (final Widget widget in widgets) {
+  for (final widget in widgets) {
     if (widget.key == null) {
       continue;
     }
@@ -357,6 +357,11 @@ bool debugCheckHasMediaQuery(BuildContext context) {
 /// hit.
 ///
 /// Does nothing if asserts are disabled. Always returns true.
+///
+/// See also:
+///
+///  * [debugCheckHasDirectionality], which is a similar, but more general
+///    painting-library level function.
 bool debugCheckHasDirectionality(
   BuildContext context, {
   String? why,

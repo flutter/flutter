@@ -22,7 +22,7 @@ class _NestedMouseRegion extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget current = child;
-    for (int i = 0; i < nests; i++) {
+    for (var i = 0; i < nests; i++) {
       current = MouseRegion(onEnter: (_) {}, child: child);
     }
     return current;
@@ -42,12 +42,12 @@ class BenchMouseRegionGridHover extends WidgetRecorder {
   late _Tester _tester;
 
   void handleDataPoint(Duration duration) {
-    profile!.addDataPoint('hitTestDuration', duration, reported: true);
+    profile?.addDataPoint('hitTestDuration', duration, reported: true);
   }
 
   // Use a non-trivial border to force Web to switch painter
   Border _getBorder(int columnIndex, int rowIndex) {
-    const BorderSide defaultBorderSide = BorderSide();
+    const defaultBorderSide = BorderSide();
 
     return Border(
       left: columnIndex == 0 ? defaultBorderSide : BorderSide.none,
@@ -73,8 +73,8 @@ class BenchMouseRegionGridHover extends WidgetRecorder {
 
   @override
   Widget createWidget() {
-    const int rowsCount = 60;
-    const int columnsCount = 20;
+    const rowsCount = 60;
+    const columnsCount = 20;
     const double containerSize = 20;
     return Directionality(
       textDirection: TextDirection.ltr,
@@ -87,26 +87,25 @@ class BenchMouseRegionGridHover extends WidgetRecorder {
             itemCount: rowsCount,
             cacheExtent: rowsCount * containerSize,
             physics: const ClampingScrollPhysics(),
-            itemBuilder:
-                (BuildContext context, int rowIndex) => _NestedMouseRegion(
-                  nests: 10,
-                  child: Row(
-                    children: List<Widget>.generate(
-                      columnsCount,
-                      (int columnIndex) => _NestedMouseRegion(
-                        nests: 10,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            border: _getBorder(columnIndex, rowIndex),
-                            color: Color.fromARGB(255, rowIndex * 20 % 256, 127, 127),
-                          ),
-                          width: containerSize,
-                          height: containerSize,
-                        ),
+            itemBuilder: (BuildContext context, int rowIndex) => _NestedMouseRegion(
+              nests: 10,
+              child: Row(
+                children: List<Widget>.generate(
+                  columnsCount,
+                  (int columnIndex) => _NestedMouseRegion(
+                    nests: 10,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: _getBorder(columnIndex, rowIndex),
+                        color: Color.fromARGB(255, rowIndex * 20 % 256, 127, 127),
                       ),
+                      width: containerSize,
+                      height: containerSize,
                     ),
                   ),
                 ),
+              ),
+            ),
           ),
         ),
       ),
@@ -137,6 +136,8 @@ class _Tester {
   static const Duration hoverDuration = Duration(milliseconds: 20);
 
   bool _stopped = false;
+  final Completer<void> _finished = Completer<void>();
+  Future<void> get finished => _finished.future;
 
   TestGesture get gesture {
     return _gesture ??= TestGesture(
@@ -153,7 +154,7 @@ class _Tester {
 
   Future<void> _hoverTo(Offset location, Duration duration) async {
     currentTime += duration;
-    final Stopwatch stopwatch = Stopwatch()..start();
+    final stopwatch = Stopwatch()..start();
     await gesture.moveTo(location, timeStamp: currentTime);
     stopwatch.stop();
     onDataPoint(stopwatch.elapsed);
@@ -168,6 +169,7 @@ class _Tester {
       await _hoverTo(const Offset(370, 390), hoverDuration);
       await _hoverTo(const Offset(390, 30), hoverDuration);
     }
+    _finished.complete();
   }
 
   void stop() {

@@ -25,10 +25,9 @@ extension HtmlElementViewImpl on HtmlElementView {
   }) {
     return HtmlElementView(
       key: key,
-      viewType:
-          isVisible
-              ? ui_web.PlatformViewRegistry.defaultVisibleViewType
-              : ui_web.PlatformViewRegistry.defaultInvisibleViewType,
+      viewType: isVisible
+          ? ui_web.PlatformViewRegistry.defaultVisibleViewType
+          : ui_web.PlatformViewRegistry.defaultInvisibleViewType,
       onPlatformViewCreated: _createPlatformViewCallbackForElementCallback(onElementCreated),
       creationParams: <dynamic, dynamic>{'tagName': tagName},
       hitTestBehavior: hitTestBehavior,
@@ -58,11 +57,7 @@ extension HtmlElementViewImpl on HtmlElementView {
 
   /// Creates the controller and kicks off its initialization.
   _HtmlElementViewController _createController(PlatformViewCreationParams params) {
-    final _HtmlElementViewController controller = _HtmlElementViewController(
-      params.id,
-      viewType,
-      creationParams,
-    );
+    final controller = _HtmlElementViewController(params.id, viewType, creationParams);
     controller._initialize().then((_) {
       params.onPlatformViewCreated(params.id);
       onPlatformViewCreated?.call(params.id);
@@ -78,7 +73,7 @@ PlatformViewCreatedCallback? _createPlatformViewCallbackForElementCallback(
     return null;
   }
   return (int id) {
-    onElementCreated(_platformViewsRegistry.getViewById(id));
+    onElementCreated(ui_web.platformViewRegistry.getViewById(id));
   };
 }
 
@@ -98,11 +93,7 @@ class _HtmlElementViewController extends PlatformViewController {
   bool _initialized = false;
 
   Future<void> _initialize() async {
-    final Map<String, dynamic> args = <String, dynamic>{
-      'id': viewId,
-      'viewType': viewType,
-      'params': creationParams,
-    };
+    final args = <String, dynamic>{'id': viewId, 'viewType': viewType, 'params': creationParams};
     await SystemChannels.platform_views.invokeMethod<void>('create', args);
     _initialized = true;
   }
@@ -126,11 +117,3 @@ class _HtmlElementViewController extends PlatformViewController {
     }
   }
 }
-
-/// Overrides the [ui_web.PlatformViewRegistry] used by [HtmlElementView].
-///
-/// This is used for testing view factory registration.
-@visibleForTesting
-ui_web.PlatformViewRegistry? debugOverridePlatformViewRegistry;
-ui_web.PlatformViewRegistry get _platformViewsRegistry =>
-    debugOverridePlatformViewRegistry ?? ui_web.platformViewRegistry;

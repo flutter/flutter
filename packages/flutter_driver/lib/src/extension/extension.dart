@@ -67,7 +67,7 @@ class _DriverBinding extends BindingBase
   @override
   void initServiceExtensions() {
     super.initServiceExtensions();
-    final FlutterDriverExtension extension = FlutterDriverExtension(
+    final extension = FlutterDriverExtension(
       _handler,
       _silenceErrors,
       _enableTextEntryEmulation,
@@ -138,7 +138,7 @@ class _DriverBinding extends BindingBase
 ///   String get finderType => 'SomeFinder';
 ///
 ///   @override
-///   SerializableFinder deserialize(Map<String, String> params, DeserializeFinderFactory finderFactory) {
+///   SerializableFinder deserialize(Map<String, String> params, DeserializeFinderFactory finderFactory, {String? path}) {
 ///     return SomeFinder(params['title']!);
 ///   }
 ///
@@ -373,11 +373,11 @@ class FlutterDriverExtension
       registerTextInput();
     }
 
-    for (final FinderExtension finder in finders) {
+    for (final finder in finders) {
       _finderExtensions[finder.finderType] = finder;
     }
 
-    for (final CommandExtension command in commands) {
+    for (final command in commands) {
       _commandExtensions[command.commandKind] = command;
     }
   }
@@ -423,12 +423,11 @@ class FlutterDriverExtension
       final Result response = await responseFuture;
       return _makeResponse(response.toJson());
     } on TimeoutException catch (error, stackTrace) {
-      final String message = 'Timeout while executing $commandKind: $error\n$stackTrace';
+      final message = 'Timeout while executing $commandKind: $error\n$stackTrace';
       _log(message);
       return _makeResponse(message, isError: true);
     } catch (error, stackTrace) {
-      final String message =
-          'Uncaught extension error while executing $commandKind: $error\n$stackTrace';
+      final message = 'Uncaught extension error while executing $commandKind: $error\n$stackTrace';
       if (!_silenceErrors) {
         _log(message);
       }
@@ -441,13 +440,13 @@ class FlutterDriverExtension
   }
 
   @override
-  SerializableFinder deserializeFinder(Map<String, String> json) {
+  SerializableFinder deserializeFinder(Map<String, String> json, {String? path}) {
     final String? finderType = json['finderType'];
     if (_finderExtensions.containsKey(finderType)) {
       return _finderExtensions[finderType]!.deserialize(json, this);
     }
 
-    return super.deserializeFinder(json);
+    return super.deserializeFinder(json, path: path);
   }
 
   @override
@@ -461,13 +460,17 @@ class FlutterDriverExtension
   }
 
   @override
-  Command deserializeCommand(Map<String, String> params, DeserializeFinderFactory finderFactory) {
+  Command deserializeCommand(
+    Map<String, String> params,
+    DeserializeFinderFactory finderFactory, {
+    String? path,
+  }) {
     final String? kind = params['command'];
     if (_commandExtensions.containsKey(kind)) {
       return _commandExtensions[kind]!.deserialize(params, finderFactory, this);
     }
 
-    return super.deserializeCommand(params, finderFactory);
+    return super.deserializeCommand(params, finderFactory, path: path);
   }
 
   @override

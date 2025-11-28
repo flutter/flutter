@@ -139,14 +139,18 @@ void main() {
     await tester.pumpWidget(const ProbeWidget(key: Key('b')));
     expect(ProbeWidgetState.buildCount, equals(2));
     await tester.pumpWidget(
-      FlipWidget(key: flipKey, left: Container(), right: const ProbeWidget(key: Key('c'))),
+      FlipWidget(
+        key: flipKey,
+        left: Container(),
+        right: const ProbeWidget(key: Key('c')),
+      ),
     );
     expect(ProbeWidgetState.buildCount, equals(2));
-    final FlipWidgetState flipState1 = flipKey.currentState! as FlipWidgetState;
+    final flipState1 = flipKey.currentState! as FlipWidgetState;
     flipState1.flip();
     await tester.pump();
     expect(ProbeWidgetState.buildCount, equals(3));
-    final FlipWidgetState flipState2 = flipKey.currentState! as FlipWidgetState;
+    final flipState2 = flipKey.currentState! as FlipWidgetState;
     flipState2.flip();
     await tester.pump();
     expect(ProbeWidgetState.buildCount, equals(3));
@@ -162,8 +166,8 @@ void main() {
 
   testWidgets(
     'Setting state during dispose is forbidden',
-    experimentalLeakTesting:
-        LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
       await tester.pumpWidget(const BadDisposeWidget());
       expect(tester.takeException(), isNull);
@@ -176,9 +180,9 @@ void main() {
     final GlobalKey key1 = GlobalKey(debugLabel: 'key1');
     final GlobalKey key2 = GlobalKey(debugLabel: 'key2');
 
-    bool didMiddle = false;
+    var didMiddle = false;
     late Widget middle;
-    final List<StateSetter> setStates = <StateSetter>[];
+    final setStates = <StateSetter>[];
     Widget builder(BuildContext context, StateSetter setState) {
       setStates.add(setState);
       final bool returnMiddle = !didMiddle;
@@ -189,10 +193,16 @@ void main() {
     }
 
     final Widget part1 = Wrapper(
-      child: KeyedSubtree(key: key1, child: StatefulBuilder(builder: builder)),
+      child: KeyedSubtree(
+        key: key1,
+        child: StatefulBuilder(builder: builder),
+      ),
     );
     final Widget part2 = Wrapper(
-      child: KeyedSubtree(key: key2, child: StatefulBuilder(builder: builder)),
+      child: KeyedSubtree(
+        key: key2,
+        child: StatefulBuilder(builder: builder),
+      ),
     );
 
     middle = part2;
@@ -205,7 +215,7 @@ void main() {
       state.oldBuilt = state.built!;
       state.trigger();
     }
-    for (final StateSetter setState in setStates) {
+    for (final setState in setStates) {
       setState(() {});
     }
 

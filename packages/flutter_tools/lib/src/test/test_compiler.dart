@@ -25,7 +25,7 @@ final class _CompilationRequest {
 
   /// Invoked when compilation is completed with the compilation output path.
   Future<TestCompilerResult> get result => _result.future;
-  final Completer<TestCompilerResult> _result = Completer<TestCompilerResult>();
+  final _result = Completer<TestCompilerResult>();
 }
 
 /// The result of [TestCompiler.compile].
@@ -92,9 +92,9 @@ final class TestCompilerFailure extends TestCompilerResult {
 class TestCompiler {
   /// Creates a new [TestCompiler] which acts as a frontend_server proxy.
   ///
-  /// [trackWidgetCreation] configures whether the kernel transform is applied
-  /// to the output. This also changes the output file to include a '.track`
-  /// extension.
+  /// [BuildInfo.trackWidgetCreation] configures whether
+  /// the kernel transform is applied to the output.
+  /// This also changes the output file to include a '.track` extension.
   ///
   /// [flutterProject] is the project for which we are running tests.
   ///
@@ -140,9 +140,8 @@ class TestCompiler {
     );
   }
 
-  final StreamController<_CompilationRequest> compilerController =
-      StreamController<_CompilationRequest>();
-  final List<_CompilationRequest> compilationQueue = <_CompilationRequest>[];
+  final compilerController = StreamController<_CompilationRequest>();
+  final compilationQueue = <_CompilationRequest>[];
   final FlutterProject? flutterProject;
   final BuildInfo buildInfo;
   final String testFilePath;
@@ -157,7 +156,7 @@ class TestCompiler {
     if (compilerController.isClosed) {
       throw StateError('TestCompiler is already disposed.');
     }
-    final _CompilationRequest request = _CompilationRequest(dartEntrypointPath);
+    final request = _CompilationRequest(dartEntrypointPath);
     compilerController.add(request);
     return request.result;
   }
@@ -179,7 +178,7 @@ class TestCompiler {
   /// Create the resident compiler used to compile the test.
   @visibleForTesting
   Future<ResidentCompiler?> createCompiler() async {
-    final ResidentCompiler residentCompiler = ResidentCompiler(
+    final residentCompiler = ResidentCompiler(
       globals.artifacts!.getArtifactPath(Artifact.flutterPatchedSdkPath),
       artifacts: globals.artifacts!,
       logger: globals.logger,
@@ -196,6 +195,7 @@ class TestCompiler {
       fileSystem: globals.fs,
       fileSystemRoots: buildInfo.fileSystemRoots,
       fileSystemScheme: buildInfo.fileSystemScheme,
+      shutdownHooks: globals.shutdownHooks,
     );
     return residentCompiler;
   }
@@ -213,15 +213,15 @@ class TestCompiler {
     while (compilationQueue.isNotEmpty) {
       final _CompilationRequest request = compilationQueue.first;
       globals.printTrace('Compiling ${request.mainUri}');
-      final Stopwatch compilerTime = Stopwatch()..start();
+      final compilerTime = Stopwatch()..start();
       final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Compile);
-      bool firstCompile = false;
+      var firstCompile = false;
       if (compiler == null) {
         compiler = await createCompiler();
         firstCompile = true;
       }
 
-      final List<Uri> invalidatedRegistrantFiles = <Uri>[];
+      final invalidatedRegistrantFiles = <Uri>[];
       if (flutterProject != null) {
         // Update the generated registrant to use the test target's main.
         final String mainUriString =

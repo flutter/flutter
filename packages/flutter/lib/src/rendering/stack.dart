@@ -272,7 +272,7 @@ class StackParentData extends ContainerBoxParentData<RenderBox> {
 
   @override
   String toString() {
-    final List<String> values = <String>[
+    final values = <String>[
       if (top != null) 'top=${debugFormatDouble(top)}',
       if (right != null) 'right=${debugFormatDouble(right)}',
       if (bottom != null) 'bottom=${debugFormatDouble(bottom)}',
@@ -484,10 +484,10 @@ class RenderStack extends RenderBox
     RenderBox? firstChild,
     double Function(RenderBox child) mainChildSizeGetter,
   ) {
-    double extent = 0.0;
-    RenderBox? child = firstChild;
+    var extent = 0.0;
+    var child = firstChild;
     while (child != null) {
-      final StackParentData childParentData = child.parentData! as StackParentData;
+      final childParentData = child.parentData! as StackParentData;
       if (!childParentData.isPositioned) {
         extent = math.max(extent, mainChildSizeGetter(child));
       }
@@ -574,11 +574,10 @@ class RenderStack extends RenderBox
     Alignment alignment,
     TextBaseline baseline,
   ) {
-    final StackParentData childParentData = child.parentData! as StackParentData;
-    final BoxConstraints childConstraints =
-        childParentData.isPositioned
-            ? childParentData.positionedChildConstraints(stackSize)
-            : nonPositionedChildConstraints;
+    final childParentData = child.parentData! as StackParentData;
+    final BoxConstraints childConstraints = childParentData.isPositioned
+        ? childParentData.positionedChildConstraints(stackSize)
+        : nonPositionedChildConstraints;
     final double? baselineOffset = child.getDryBaseline(childConstraints, baseline);
     if (baselineOffset == null) {
       return null;
@@ -622,7 +621,7 @@ class RenderStack extends RenderBox
   }
 
   Size _computeSize({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
-    bool hasNonPositionedChildren = false;
+    var hasNonPositionedChildren = false;
     if (childCount == 0) {
       return constraints.biggest.isFinite ? constraints.biggest : constraints.smallest;
     }
@@ -638,7 +637,7 @@ class RenderStack extends RenderBox
 
     RenderBox? child = firstChild;
     while (child != null) {
-      final StackParentData childParentData = child.parentData! as StackParentData;
+      final childParentData = child.parentData! as StackParentData;
 
       if (!childParentData.isPositioned) {
         hasNonPositionedChildren = true;
@@ -661,7 +660,15 @@ class RenderStack extends RenderBox
       size = constraints.biggest;
     }
 
-    assert(size.isFinite);
+    assert(
+      size.isFinite,
+      'A Stack requires bounded constraints from its parent. '
+      'This error commonly occurs when a Stack is placed inside a widget like Column, '
+      'ListView, or other widgets that do not constrain their children. '
+      'To fix this, wrap the Stack in a widget that provides finite height and width constraints, '
+      'such as a SizedBox or ConstrainedBox. '
+      'Use Expanded only if the parent is a Flex widget like Row or Column.',
+    );
     return size;
   }
 
@@ -675,7 +682,7 @@ class RenderStack extends RenderBox
     final Alignment resolvedAlignment = _resolvedAlignment;
     RenderBox? child = firstChild;
     while (child != null) {
-      final StackParentData childParentData = child.parentData! as StackParentData;
+      final childParentData = child.parentData! as StackParentData;
 
       if (!childParentData.isPositioned) {
         childParentData.offset = resolvedAlignment.alongOffset(size - child.size as Offset);
@@ -793,7 +800,7 @@ class RenderIndexedStack extends RenderStack {
       return null;
     }
     RenderBox? child = firstChild;
-    for (int i = 0; i < index && child != null; i += 1) {
+    for (var i = 0; i < index && child != null; i += 1) {
       child = childAfter(child);
     }
     assert(firstChild == null || child != null);
@@ -806,7 +813,7 @@ class RenderIndexedStack extends RenderStack {
     if (displayedChild == null) {
       return null;
     }
-    final StackParentData childParentData = displayedChild.parentData! as StackParentData;
+    final childParentData = displayedChild.parentData! as StackParentData;
     final BaselineOffset offset =
         BaselineOffset(displayedChild.getDistanceToActualBaseline(baseline)) +
         childParentData.offset.dy;
@@ -843,7 +850,7 @@ class RenderIndexedStack extends RenderStack {
     if (displayedChild == null) {
       return false;
     }
-    final StackParentData childParentData = displayedChild.parentData! as StackParentData;
+    final childParentData = displayedChild.parentData! as StackParentData;
     return result.addWithPaintOffset(
       offset: childParentData.offset,
       position: position,
@@ -860,7 +867,7 @@ class RenderIndexedStack extends RenderStack {
     if (displayedChild == null) {
       return;
     }
-    final StackParentData childParentData = displayedChild.parentData! as StackParentData;
+    final childParentData = displayedChild.parentData! as StackParentData;
     context.paintChild(displayedChild, childParentData.offset + offset);
   }
 
@@ -872,8 +879,8 @@ class RenderIndexedStack extends RenderStack {
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    final List<DiagnosticsNode> children = <DiagnosticsNode>[];
-    int i = 0;
+    final children = <DiagnosticsNode>[];
+    var i = 0;
     RenderObject? child = firstChild;
     while (child != null) {
       children.add(

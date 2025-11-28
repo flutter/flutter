@@ -117,6 +117,7 @@ abstract class ScrollView extends StatelessWidget {
     this.anchor = 0.0,
     this.cacheExtent,
     this.semanticChildCount,
+    this.paintOrder = SliverPaintOrder.firstIsTop,
     this.dragStartBehavior = DragStartBehavior.start,
     this.keyboardDismissBehavior,
     this.restorationId,
@@ -370,6 +371,11 @@ abstract class ScrollView extends StatelessWidget {
   ///  * [SemanticsConfiguration.scrollChildCount], the corresponding semantics property.
   final int? semanticChildCount;
 
+  /// {@macro flutter.rendering.RenderViewportBase.paintOrder}
+  ///
+  /// Defaults to [SliverPaintOrder.firstIsTop].
+  final SliverPaintOrder paintOrder;
+
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
@@ -462,6 +468,7 @@ abstract class ScrollView extends StatelessWidget {
         axisDirection: axisDirection,
         offset: offset,
         slivers: slivers,
+        paintOrder: paintOrder,
         clipBehavior: clipBehavior,
       );
     }
@@ -472,6 +479,7 @@ abstract class ScrollView extends StatelessWidget {
       cacheExtent: cacheExtent,
       center: center,
       anchor: anchor,
+      paintOrder: paintOrder,
       clipBehavior: clipBehavior,
     );
   }
@@ -485,10 +493,11 @@ abstract class ScrollView extends StatelessWidget {
         primary ??
         controller == null && PrimaryScrollController.shouldInherit(context, scrollDirection);
 
-    final ScrollController? scrollController =
-        effectivePrimary ? PrimaryScrollController.maybeOf(context) : controller;
+    final ScrollController? scrollController = effectivePrimary
+        ? PrimaryScrollController.maybeOf(context)
+        : controller;
 
-    final Scrollable scrollable = Scrollable(
+    final scrollable = Scrollable(
       dragStartBehavior: dragStartBehavior,
       axisDirection: axisDirection,
       controller: scrollController,
@@ -503,11 +512,10 @@ abstract class ScrollView extends StatelessWidget {
       clipBehavior: clipBehavior,
     );
 
-    final Widget scrollableResult =
-        effectivePrimary && scrollController != null
-            // Further descendant ScrollViews will not inherit the same PrimaryScrollController
-            ? PrimaryScrollController.none(child: scrollable)
-            : scrollable;
+    final Widget scrollableResult = effectivePrimary && scrollController != null
+        // Further descendant ScrollViews will not inherit the same PrimaryScrollController
+        ? PrimaryScrollController.none(child: scrollable)
+        : scrollable;
 
     final ScrollViewKeyboardDismissBehavior effectiveKeyboardDismissBehavior =
         keyboardDismissBehavior ??
@@ -701,6 +709,7 @@ class CustomScrollView extends ScrollView {
     super.center,
     super.anchor,
     super.cacheExtent,
+    super.paintOrder,
     this.slivers = const <Widget>[],
     super.semanticChildCount,
     super.dragStartBehavior,
@@ -870,17 +879,15 @@ abstract class BoxScrollView extends ScrollView {
           right: 0.0,
         );
         // Consume the main axis padding with SliverPadding.
-        effectivePadding =
-            scrollDirection == Axis.vertical
-                ? mediaQueryVerticalPadding
-                : mediaQueryHorizontalPadding;
+        effectivePadding = scrollDirection == Axis.vertical
+            ? mediaQueryVerticalPadding
+            : mediaQueryHorizontalPadding;
         // Leave behind the cross axis padding.
         sliver = MediaQuery(
           data: mediaQuery.copyWith(
-            padding:
-                scrollDirection == Axis.vertical
-                    ? mediaQueryHorizontalPadding
-                    : mediaQueryVerticalPadding,
+            padding: scrollDirection == Axis.vertical
+                ? mediaQueryHorizontalPadding
+                : mediaQueryVerticalPadding,
           ),
           child: sliver,
         );
@@ -1412,6 +1419,20 @@ class ListView extends BoxScrollView {
   ///
   /// {@macro flutter.widgets.PageView.findChildIndexCallback}
   ///
+  /// {@template flutter.widgets.ListView.separated.findItemIndexCallback}
+  /// The [findItemIndexCallback] returns item indices (excluding separators),
+  /// unlike the deprecated [findChildIndexCallback] which returns child indices
+  /// (including both items and separators).
+  ///
+  /// For example, in a list with 3 items and 2 separators:
+  /// * Item indices: 0, 1, 2
+  /// * Child indices: 0 (item), 1 (separator), 2 (item), 3 (separator), 4 (item)
+  ///
+  /// This callback should be implemented if the order of items may change at a
+  /// later time. If null, reordering items may result in state-loss as widgets
+  /// may not map to their existing [RenderObject]s.
+  /// {@endtemplate}
+  ///
   /// {@tool snippet}
   ///
   /// This example shows how to create [ListView] whose [ListTile] list items
@@ -1447,7 +1468,16 @@ class ListView extends BoxScrollView {
     super.shrinkWrap,
     super.padding,
     required NullableIndexedWidgetBuilder itemBuilder,
+    @Deprecated(
+      'Use findItemIndexCallback instead. '
+      'findChildIndexCallback returns child indices (which include separators), '
+      'while findItemIndexCallback returns item indices (which do not). '
+      'If you were multiplying results by 2 to account for separators, '
+      'you can remove that workaround when migrating to findItemIndexCallback. '
+      'This feature was deprecated after v3.37.0-1.0.pre.',
+    )
     ChildIndexGetter? findChildIndexCallback,
+    ChildIndexGetter? findItemIndexCallback,
     required IndexedWidgetBuilder separatorBuilder,
     required int itemCount,
     bool addAutomaticKeepAlives = true,
@@ -1460,6 +1490,11 @@ class ListView extends BoxScrollView {
     super.clipBehavior,
     super.hitTestBehavior,
   }) : assert(itemCount >= 0),
+       assert(
+         findItemIndexCallback == null || findChildIndexCallback == null,
+         'Cannot provide both findItemIndexCallback and findChildIndexCallback. '
+         'Use findItemIndexCallback as findChildIndexCallback is deprecated.',
+       ),
        itemExtent = null,
        itemExtentBuilder = null,
        prototypeItem = null,
@@ -1471,7 +1506,12 @@ class ListView extends BoxScrollView {
            }
            return separatorBuilder(context, itemIndex);
          },
-         findChildIndexCallback: findChildIndexCallback,
+         findChildIndexCallback: findItemIndexCallback != null
+             ? (Key key) {
+                 final int? itemIndex = findItemIndexCallback(key);
+                 return itemIndex == null ? null : itemIndex * 2;
+               }
+             : findChildIndexCallback,
          childCount: _computeActualChildCount(itemCount),
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,

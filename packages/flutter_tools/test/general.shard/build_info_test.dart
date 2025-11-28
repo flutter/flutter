@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/build_info.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/test_build_system.dart';
 
 void main() {
   late BufferLogger logger;
@@ -221,7 +222,7 @@ void main() {
   });
 
   testWithoutContext('toBuildSystemEnvironment encoding of standard values', () {
-    const BuildInfo buildInfo = BuildInfo(
+    const buildInfo = BuildInfo(
       BuildMode.debug,
       '',
       treeShakeIcons: true,
@@ -259,7 +260,7 @@ void main() {
   });
 
   testWithoutContext('toEnvironmentConfig encoding of standard values', () {
-    const BuildInfo buildInfo = BuildInfo(
+    const buildInfo = BuildInfo(
       BuildMode.debug,
       'strawberry',
       treeShakeIcons: true,
@@ -292,7 +293,7 @@ void main() {
   });
 
   testWithoutContext('toGradleConfig encoding of standard values', () {
-    const BuildInfo buildInfo = BuildInfo(
+    const buildInfo = BuildInfo(
       BuildMode.debug,
       '',
       treeShakeIcons: true,
@@ -309,7 +310,7 @@ void main() {
     );
 
     expect(buildInfo.toGradleConfig(), <String>[
-      '-Pdart-defines=Zm9vPTI=,YmFyPTI=',
+      '-Pdart-defines=${encodeDartDefinesMap(<String, String>{'foo': '2', 'bar': '2'})}',
       '-Pdart-obfuscation=true',
       '-Pfrontend-server-starter-path=foo/bar/frontend_server_starter.dart',
       '-Pextra-front-end-options=--enable-experiment=non-nullable,bar',
@@ -357,5 +358,32 @@ void main() {
       decodeDartDefines(<String, String>{kDartDefines: 'MTIzMiw0NTY=,Mg=='}, kDartDefines),
       <String>['1232,456', '2'],
     );
+  });
+
+  testWithoutContext('BuildMode names', () {
+    for (final BuildMode buildMode in BuildMode.values) {
+      switch (buildMode) {
+        case BuildMode.debug:
+          expect(buildMode.cliName, 'debug');
+          expect(buildMode.uppercaseName, 'Debug');
+          expect(buildMode.friendlyName, 'debug');
+          expect(buildMode.uppercaseFriendlyName, 'Debug');
+        case BuildMode.profile:
+          expect(buildMode.cliName, 'profile');
+          expect(buildMode.uppercaseName, 'Profile');
+          expect(buildMode.friendlyName, 'profile');
+          expect(buildMode.uppercaseFriendlyName, 'Profile');
+        case BuildMode.release:
+          expect(buildMode.cliName, 'release');
+          expect(buildMode.uppercaseName, 'Release');
+          expect(buildMode.friendlyName, 'release');
+          expect(buildMode.uppercaseFriendlyName, 'Release');
+        case BuildMode.jitRelease:
+          expect(buildMode.cliName, 'jit_release');
+          expect(buildMode.uppercaseName, 'Jit_release');
+          expect(buildMode.friendlyName, 'jit release');
+          expect(buildMode.uppercaseFriendlyName, 'Jit release');
+      }
+    }
   });
 }

@@ -24,19 +24,19 @@ void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
   );
   expect(element, isNotNull);
   expect(element.renderObject, isA<RenderStack>());
-  final RenderStack renderObject = element.renderObject as RenderStack;
+  final renderObject = element.renderObject as RenderStack;
   try {
     RenderObject? child = renderObject.firstChild;
-    for (final TestParentData expected in expectedParentData) {
+    for (final expected in expectedParentData) {
       expect(child, isA<RenderDecoratedBox>());
-      final RenderDecoratedBox decoratedBox = child! as RenderDecoratedBox;
+      final decoratedBox = child! as RenderDecoratedBox;
       expect(decoratedBox.parentData, isA<StackParentData>());
-      final StackParentData parentData = decoratedBox.parentData! as StackParentData;
+      final parentData = decoratedBox.parentData! as StackParentData;
       expect(parentData.top, equals(expected.top));
       expect(parentData.right, equals(expected.right));
       expect(parentData.bottom, equals(expected.bottom));
       expect(parentData.left, equals(expected.left));
-      final StackParentData? decoratedBoxParentData = decoratedBox.parentData as StackParentData?;
+      final decoratedBoxParentData = decoratedBox.parentData as StackParentData?;
       child = decoratedBoxParentData?.nextSibling;
     }
     expect(child, isNull);
@@ -84,9 +84,9 @@ void main() {
       kNonPositioned,
     ]);
 
-    const DecoratedBox kDecoratedBoxA = DecoratedBox(decoration: kBoxDecorationA);
-    const DecoratedBox kDecoratedBoxB = DecoratedBox(decoration: kBoxDecorationB);
-    const DecoratedBox kDecoratedBoxC = DecoratedBox(decoration: kBoxDecorationC);
+    const kDecoratedBoxA = DecoratedBox(decoration: kBoxDecorationA);
+    const kDecoratedBoxB = DecoratedBox(decoration: kBoxDecorationB);
+    const kDecoratedBoxC = DecoratedBox(decoration: kBoxDecorationC);
 
     await tester.pumpWidget(
       const Stack(
@@ -160,7 +160,10 @@ void main() {
       const Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Positioned(right: 10.0, child: FlipWidget(left: kDecoratedBoxA, right: kDecoratedBoxB)),
+          Positioned(
+            right: 10.0,
+            child: FlipWidget(left: kDecoratedBoxA, right: kDecoratedBoxB),
+          ),
         ],
       ),
     );
@@ -176,7 +179,10 @@ void main() {
       const Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Positioned(top: 7.0, child: FlipWidget(left: kDecoratedBoxA, right: kDecoratedBoxB)),
+          Positioned(
+            top: 7.0,
+            child: FlipWidget(left: kDecoratedBoxA, right: kDecoratedBoxB),
+          ),
         ],
       ),
     );
@@ -454,18 +460,21 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(OneAncestorWidget(child: Container()));
-    DummyParentData parentData =
-        tester.renderObject(find.byType(Container)).parentData! as DummyParentData;
+    var parentData = tester.renderObject(find.byType(Container)).parentData! as DummyParentData;
     expect(parentData.string, isNull);
 
     await tester.pumpWidget(
-      OneAncestorWidget(child: TestParentDataWidget(string: 'Foo', child: Container())),
+      OneAncestorWidget(
+        child: TestParentDataWidget(string: 'Foo', child: Container()),
+      ),
     );
     parentData = tester.renderObject(find.byType(Container)).parentData! as DummyParentData;
     expect(parentData.string, 'Foo');
 
     await tester.pumpWidget(
-      AnotherAncestorWidget(child: TestParentDataWidget(string: 'Bar', child: Container())),
+      AnotherAncestorWidget(
+        child: TestParentDataWidget(string: 'Bar', child: Container()),
+      ),
     );
     parentData = tester.renderObject(find.byType(Container)).parentData! as DummyParentData;
     expect(parentData.string, 'Bar');
@@ -487,7 +496,7 @@ class SubclassPositioned extends Positioned {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is StackParentData);
-    final StackParentData parentData = renderObject.parentData! as StackParentData;
+    final parentData = renderObject.parentData! as StackParentData;
     parentData.bottom = bottom;
   }
 }
@@ -500,7 +509,7 @@ class CustomPositionedWidget extends ParentDataWidget<StackParentData> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is StackParentData);
-    final StackParentData parentData = renderObject.parentData! as StackParentData;
+    final parentData = renderObject.parentData! as StackParentData;
     parentData.bottom = bottom;
   }
 
@@ -516,7 +525,7 @@ class TestParentDataWidget extends ParentDataWidget<DummyParentData> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is DummyParentData);
-    final DummyParentData parentData = renderObject.parentData! as DummyParentData;
+    final parentData = renderObject.parentData! as DummyParentData;
     parentData.string = string;
   }
 

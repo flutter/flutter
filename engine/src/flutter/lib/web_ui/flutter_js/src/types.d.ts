@@ -6,10 +6,8 @@ type JSCompileTarget = "dart2js" | "dartdevc";
 type WasmCompileTarget = "dart2wasm";
 
 export type CompileTarget = JSCompileTarget | WasmCompileTarget;
-
-export type WebRenderer =
-  "canvaskit" |
-  "skwasm";
+export type WebRenderer = "canvaskit" | "skwasm";
+export type BrowserEngine = "blink" | "gecko" | "webkit" | "unknown";
 
 interface ApplicationBuildBase {
   renderer: WebRenderer;
@@ -29,17 +27,20 @@ export interface WasmApplicationBuild extends ApplicationBuildBase {
 export type ApplicationBuild = JSApplicationBuild | WasmApplicationBuild;
 
 export interface BuildConfig {
+  /** @deprecated Flutter's service worker is deprecated and will be removed in a future Flutter release*/
   serviceWorkerVersion: string;
   engineRevision: string;
-  useLocalCanvasKit: bool?;
+  useLocalCanvasKit?: boolean;
   builds: ApplicationBuild[];
 }
 
 export interface BrowserEnvironment {
+  browserEngine: BrowserEngine;
   hasImageCodecs: boolean;
   hasChromiumBreakIterators: boolean;
   supportsWasmGC: boolean;
   crossOriginIsolated: boolean;
+  webGLVersion: number;
 }
 
 type CanvasKitVariant =
@@ -47,21 +48,29 @@ type CanvasKitVariant =
   "full" |
   "chromium";
 
-export interface FlutterConfiguration {
-  assetBase: string?;
-  canvasKitBaseUrl: string?;
-  canvasKitVariant: CanvasKitVariant?;
-  renderer: WebRenderer?;
-  hostElement: HtmlElement?;
-  fontFallbackBaseUrl: string?;
-  entryPointBaseUrl: string?;
-  forceSingleThreadedSkwasm: boolean?;
+type WasmAllowList = {
+  [k in BrowserEngine]?: boolean;
 }
 
+export interface FlutterConfiguration {
+  assetBase?: string;
+  canvasKitBaseUrl?: string;
+  canvasKitVariant?: CanvasKitVariant;
+  renderer?: WebRenderer;
+  hostElement?: HTMLElement;
+  fontFallbackBaseUrl?: string;
+  /** @deprecated use `entrypointBaseUrl` instead*/
+  entryPointBaseUrl?: string;
+  entrypointBaseUrl?: string;
+  forceSingleThreadedSkwasm?: boolean;
+  wasmAllowList?: WasmAllowList;
+}
+
+/** @deprecated Flutter's service worker is deprecated and will be removed in a future Flutter release*/
 export interface ServiceWorkerSettings {
   serviceWorkerVersion: string;
-  serviceWorkerUrl: string?;
-  timeoutMillis: number?;
+  serviceWorkerUrl?: string;
+  timeoutMillis?: number;
 }
 
 export interface AppRunner {

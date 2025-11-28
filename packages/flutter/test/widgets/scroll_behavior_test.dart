@@ -24,10 +24,9 @@ class TestScrollBehavior extends ScrollBehavior {
 
   @override
   GestureVelocityTrackerBuilder velocityTrackerBuilder(BuildContext context) {
-    lastCreatedBuilder =
-        flag
-            ? (PointerEvent ev) => VelocityTracker.withKind(ev.kind)
-            : (PointerEvent ev) => IOSScrollViewFlingVelocityTracker(ev.kind);
+    lastCreatedBuilder = flag
+        ? (PointerEvent ev) => VelocityTracker.withKind(ev.kind)
+        : (PointerEvent ev) => IOSScrollViewFlingVelocityTracker(ev.kind);
     return lastCreatedBuilder;
   }
 }
@@ -36,7 +35,7 @@ void main() {
   testWidgets(
     'Assert in buildScrollbar that controller != null when using it',
     (WidgetTester tester) async {
-      const ScrollBehavior defaultBehavior = ScrollBehavior();
+      const defaultBehavior = ScrollBehavior();
       late BuildContext capturedContext;
 
       await tester.pumpWidget(
@@ -54,7 +53,7 @@ void main() {
         ),
       );
 
-      const ScrollableDetails details = ScrollableDetails(direction: AxisDirection.down);
+      const details = ScrollableDetails(direction: AxisDirection.down);
       final Widget child = Container();
 
       switch (defaultTargetPlatform) {
@@ -158,11 +157,11 @@ void main() {
   );
 
   testWidgets('ScrollBehavior multitouchDragStrategy test - 1', (WidgetTester tester) async {
-    const ScrollBehavior behavior1 = ScrollBehavior();
+    const behavior1 = ScrollBehavior();
     final ScrollBehavior behavior2 = const ScrollBehavior().copyWith(
       multitouchDragStrategy: MultitouchDragStrategy.sumAllPointers,
     );
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(() => controller.dispose());
 
     Widget buildFrame(ScrollBehavior behavior) {
@@ -220,11 +219,11 @@ void main() {
   testWidgets(
     'ScrollBehavior multitouchDragStrategy test (non-Apple platforms) - 2',
     (WidgetTester tester) async {
-      const ScrollBehavior behavior1 = ScrollBehavior();
+      const behavior1 = ScrollBehavior();
       final ScrollBehavior behavior2 = const ScrollBehavior().copyWith(
         multitouchDragStrategy: MultitouchDragStrategy.averageBoundaryPointers,
       );
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       late BuildContext capturedContext;
       addTearDown(() => controller.dispose());
 
@@ -299,11 +298,11 @@ void main() {
   testWidgets(
     'ScrollBehavior multitouchDragStrategy test (Apple platforms) - 3',
     (WidgetTester tester) async {
-      const ScrollBehavior behavior1 = ScrollBehavior();
+      const behavior1 = ScrollBehavior();
       final ScrollBehavior behavior2 = const ScrollBehavior().copyWith(
         multitouchDragStrategy: MultitouchDragStrategy.latestPointer,
       );
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       late BuildContext capturedContext;
       addTearDown(() => controller.dispose());
 
@@ -375,7 +374,7 @@ void main() {
   group('ScrollBehavior configuration is maintained over multiple copies', () {
     testWidgets('dragDevices', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/91673
-      const ScrollBehavior defaultBehavior = ScrollBehavior();
+      const defaultBehavior = ScrollBehavior();
       expect(defaultBehavior.dragDevices, <PointerDeviceKind>{
         PointerDeviceKind.touch,
         PointerDeviceKind.stylus,
@@ -495,8 +494,8 @@ void main() {
           child: ScrollConfiguration(
             behavior: behavior,
             child: Builder(
-              builder:
-                  (BuildContext context) => SingleChildScrollView(child: Container(height: 1000)),
+              builder: (BuildContext context) =>
+                  SingleChildScrollView(child: Container(height: 1000)),
             ),
           ),
         ),
@@ -505,7 +504,7 @@ void main() {
 
     testWidgets('scrollbar', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/91673
-      const ScrollBehavior defaultBehavior = ScrollBehavior();
+      const defaultBehavior = ScrollBehavior();
       await tester.pumpWidget(wrap(defaultBehavior));
       // Default adds a scrollbar
       expect(find.byType(RawScrollbar), findsOneWidget);
@@ -525,7 +524,7 @@ void main() {
 
     testWidgets('overscroll', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/91673
-      const ScrollBehavior defaultBehavior = ScrollBehavior();
+      const defaultBehavior = ScrollBehavior();
       await tester.pumpWidget(wrap(defaultBehavior));
       // Default adds a glowing overscroll indicator
       expect(find.byType(GlowingOverscrollIndicator), findsOneWidget);

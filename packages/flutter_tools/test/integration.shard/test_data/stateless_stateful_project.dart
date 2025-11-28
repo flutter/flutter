@@ -7,7 +7,7 @@ import 'project.dart';
 
 class HotReloadProject extends Project {
   @override
-  final String pubspec = '''
+  final pubspec = '''
   name: test
   environment:
     sdk: ^3.7.0-0

@@ -15,13 +15,11 @@ void main() {
     root = RenderPositionedBox(
       child: RenderConstrainedBox(
         additionalConstraints: BoxConstraints.tight(const Size(200.0, 200.0)),
-        child:
-            test = RenderFractionallySizedOverflowBox(
-              widthFactor: 2.0,
-              heightFactor: 0.5,
-              child:
-                  leaf = RenderConstrainedBox(additionalConstraints: const BoxConstraints.expand()),
-            ),
+        child: test = RenderFractionallySizedOverflowBox(
+          widthFactor: 2.0,
+          heightFactor: 0.5,
+          child: leaf = RenderConstrainedBox(additionalConstraints: const BoxConstraints.expand()),
+        ),
       ),
     );
     layout(root);
@@ -38,7 +36,7 @@ void main() {
 
     result = 'no exception';
     try {
-      const BoxConstraints constraints = BoxConstraints(
+      const constraints = BoxConstraints(
         minWidth: double.nan,
         maxWidth: double.nan,
         minHeight: 2.0,
@@ -59,7 +57,7 @@ void main() {
 
     result = 'no exception';
     try {
-      const BoxConstraints constraints = BoxConstraints(minHeight: double.nan);
+      const constraints = BoxConstraints(minHeight: double.nan);
       assert(constraints.debugAssertIsValid());
     } on FlutterError catch (e) {
       result = '$e';
@@ -75,7 +73,7 @@ void main() {
 
     result = 'no exception';
     try {
-      const BoxConstraints constraints = BoxConstraints(minHeight: double.nan, maxWidth: 0.0 / 0.0);
+      const constraints = BoxConstraints(minHeight: double.nan, maxWidth: 0.0 / 0.0);
       assert(constraints.debugAssertIsValid());
     } on FlutterError catch (e) {
       result = '$e';

@@ -123,10 +123,9 @@ abstract class FlutterDriver {
   ///
   /// Resumes the application if it is currently paused (e.g. at a breakpoint).
   ///
-  /// The `dartVmServiceUrl` parameter is the URL to Dart observatory
-  /// (a.k.a. VM service). If not specified, the URL specified by the
-  /// `VM_SERVICE_URL` environment variable is used. One or the other must be
-  /// specified.
+  /// The `dartVmServiceUrl` parameter is the URL to the Dart VM service. If
+  /// not specified, the URL specified by the `VM_SERVICE_URL` environment
+  /// variable is used. One or the other must be specified.
   ///
   /// The `printCommunication` parameter determines whether the command
   /// communication between the test and the app should be printed to stdout.
@@ -273,7 +272,7 @@ abstract class FlutterDriver {
     OffsetType type, {
     Duration? timeout,
   }) async {
-    final GetOffset command = GetOffset(finder, type, timeout: timeout);
+    final command = GetOffset(finder, type, timeout: timeout);
     final GetOffsetResult result = GetOffsetResult.fromJson(await sendCommand(command));
     return DriverOffset(result.dx, result.dy);
   }
@@ -466,7 +465,7 @@ abstract class FlutterDriver {
     // looking for finally scrolls onscreen. We add an initial pause to give it
     // the chance to complete if the item is already onscreen; if not, scroll
     // repeatedly until we either find the item or time out.
-    bool isVisible = false;
+    var isVisible = false;
     waitFor(item, timeout: timeout).then<void>((_) {
       isVisible = true;
     });

@@ -15,54 +15,50 @@ import 'package:path/path.dart' as path;
 void main(List<String> args) async {
   final Engine? engine = Engine.tryFindWithin();
 
-  final ArgParser parser =
-      ArgParser()
-        ..addFlag('help', abbr: 'h', help: 'Prints usage information.', negatable: false)
-        ..addOption(
-          'image-magick-convert-bin',
-          help: 'The path to the ImageMagick `convert` executable.',
-          defaultsTo: 'convert',
-          hide: true,
-        )
-        ..addOption(
-          'annotation',
-          abbr: 'a',
-          help: 'The text to write on the images.',
-          defaultsTo:
-              engine == null
-                  ? null
-                  : await GitRepo.fromRoot(engine.flutterDir).headSha(short: true),
-        )
-        ..addOption(
-          'source',
-          abbr: 's',
-          help: 'The directory containing the images to be modified.',
-          defaultsTo:
-              engine == null
-                  ? null
-                  : path.join(
-                    engine.flutterDir.path,
-                    'testing',
-                    'skia_gold_client',
-                    'tool',
-                    'source_images',
-                  ),
-        )
-        ..addOption(
-          'output',
-          abbr: 'o',
-          help: 'The directory to save the modified images in.',
-          defaultsTo:
-              engine == null
-                  ? null
-                  : path.join(
-                    engine.flutterDir.path,
-                    'testing',
-                    'skia_gold_client',
-                    'tool',
-                    'e2e_fixtures',
-                  ),
-        );
+  final parser = ArgParser()
+    ..addFlag('help', abbr: 'h', help: 'Prints usage information.', negatable: false)
+    ..addOption(
+      'image-magick-convert-bin',
+      help: 'The path to the ImageMagick `convert` executable.',
+      defaultsTo: 'convert',
+      hide: true,
+    )
+    ..addOption(
+      'annotation',
+      abbr: 'a',
+      help: 'The text to write on the images.',
+      defaultsTo: engine == null
+          ? null
+          : await GitRepo.fromRoot(engine.flutterDir).headSha(short: true),
+    )
+    ..addOption(
+      'source',
+      abbr: 's',
+      help: 'The directory containing the images to be modified.',
+      defaultsTo: engine == null
+          ? null
+          : path.join(
+              engine.flutterDir.path,
+              'testing',
+              'skia_gold_client',
+              'tool',
+              'source_images',
+            ),
+    )
+    ..addOption(
+      'output',
+      abbr: 'o',
+      help: 'The directory to save the modified images in.',
+      defaultsTo: engine == null
+          ? null
+          : path.join(
+              engine.flutterDir.path,
+              'testing',
+              'skia_gold_client',
+              'tool',
+              'e2e_fixtures',
+            ),
+    );
 
   final ArgResults results = parser.parse(args);
   if (results['help'] as bool) {
@@ -71,10 +67,10 @@ void main(List<String> args) async {
   }
 
   final String relativeDir = engine?.flutterDir.path ?? '';
-  final String imageMagickConvertBin = results['image-magick-convert-bin'] as String;
-  final String annotation = results['annotation'] as String;
-  final String source = results['source'] as String;
-  final String output = results['output'] as String;
+  final imageMagickConvertBin = results['image-magick-convert-bin'] as String;
+  final annotation = results['annotation'] as String;
+  final source = results['source'] as String;
+  final output = results['output'] as String;
 
   print(
     'Writing annotation "$annotation" on images in '
@@ -82,11 +78,12 @@ void main(List<String> args) async {
     '${path.relative(output, from: relativeDir)}.',
   );
 
-  final List<String> sourceImages =
-      Directory(source).listSync().whereType<File>().map((File file) => file.path).toList();
+  final List<String> sourceImages = Directory(
+    source,
+  ).listSync().whereType<File>().map((File file) => file.path).toList();
 
   // For each source image, write the annotation and save it in the output directory.
-  for (final String sourceImage in sourceImages) {
+  for (final sourceImage in sourceImages) {
     final String outputImage = path.join(
       output,
       '${path.basenameWithoutExtension(sourceImage)}.png',

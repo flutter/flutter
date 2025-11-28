@@ -135,7 +135,7 @@ void PassBindingsCacheMTL::SetViewport(const Viewport& viewport) {
   viewport_ = viewport;
 }
 
-void PassBindingsCacheMTL::SetScissor(const IRect& scissor) {
+void PassBindingsCacheMTL::SetScissor(const IRect32& scissor) {
   if (scissor_.has_value() && scissor_.value() == scissor) {
     return;
   }

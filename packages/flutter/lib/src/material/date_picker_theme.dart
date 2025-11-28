@@ -80,13 +80,19 @@ class DatePickerThemeData with Diagnosticable {
     this.rangeSelectionBackgroundColor,
     this.rangeSelectionOverlayColor,
     this.dividerColor,
-    this.inputDecorationTheme,
+    // TODO(bleroux): Clean this up once `InputDecorationTheme` is fully normalized.
+    Object? inputDecorationTheme,
     this.cancelButtonStyle,
     this.confirmButtonStyle,
     this.locale,
     this.toggleButtonTextStyle,
     this.subHeaderForegroundColor,
-  });
+  }) : assert(
+         inputDecorationTheme == null ||
+             (inputDecorationTheme is InputDecorationTheme ||
+                 inputDecorationTheme is InputDecorationThemeData),
+       ),
+       _inputDecorationTheme = inputDecorationTheme;
 
   /// Overrides the default value of [Dialog.backgroundColor].
   final Color? backgroundColor;
@@ -165,14 +171,64 @@ class DatePickerThemeData with Diagnosticable {
   /// grid of the date picker.
   ///
   /// This will be used instead of the color provided in [dayStyle].
+  ///
+  /// This supports different colors based on the [WidgetState]s of
+  /// the day button, such as `WidgetState.selected`, `WidgetState.hovered`,
+  /// `WidgetState.focused`, and `WidgetState.disabled`.
+  ///
+  /// ```dart
+  /// dayBackgroundColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+  ///   if (states.contains(WidgetState.selected)) {
+  ///     return Theme.of(context).colorScheme.primary;
+  ///   }
+  ///   return null; // Use the default color.
+  /// })
+  /// ```
+  ///
+  /// See also:
+  ///   * [dayOverlayColor] which applies an overlay over the day labels depending on the [WidgetState].
   final WidgetStateProperty<Color?>? dayForegroundColor;
 
   /// Overrides the default color used to paint the background of the
   /// day labels in the grid of the date picker.
+  ///
+  /// This supports different colors based on the [WidgetState]s of
+  /// the day button, such as `WidgetState.selected`, `WidgetState.hovered`,
+  /// `WidgetState.focused`, and `WidgetState.disabled`.
+  ///
+  /// ```dart
+  /// dayBackgroundColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+  ///   if (states.contains(WidgetState.selected)) {
+  ///     return Theme.of(context).colorScheme.primary;
+  ///   }
+  ///   return null; // Use the default color.
+  /// })
+  /// ```
+  /// See also:
+  ///   * [dayOverlayColor] which applies an overlay over the day labels depending on the [WidgetState].
   final WidgetStateProperty<Color?>? dayBackgroundColor;
 
   /// Overrides the default highlight color that's typically used to
   /// indicate that a day in the grid is focused, hovered, or pressed.
+  ///
+  /// This supports different colors based on the [WidgetState]s of
+  /// the day button. The overlay color is usually used with an opacity to
+  /// create hover, focus, and press effects.
+  ///
+  /// ```dart
+  /// dayOverlayColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+  ///   if (states.contains(WidgetState.pressed)) {
+  ///     return Colors.blue.withValues(alpha: 0.12);
+  ///   }
+  ///   if (states.contains(WidgetState.hovered)) {
+  ///     return Colors.blue.withValues(alpha: 0.08);
+  ///   }
+  ///   if (states.contains(WidgetState.focused)) {
+  ///     return Colors.blue.withValues(alpha: 0.12);
+  ///   }
+  ///   return null; // Use the default color.
+  /// })
+  /// ```
   final WidgetStateProperty<Color?>? dayOverlayColor;
 
   /// Overrides the default shape used to paint the shape decoration of the
@@ -363,7 +419,17 @@ class DatePickerThemeData with Diagnosticable {
 
   /// Overrides the [InputDatePickerFormField]'s input decoration theme.
   /// If this is null, [ThemeData.inputDecorationTheme] is used instead.
-  final InputDecorationTheme? inputDecorationTheme;
+  // TODO(bleroux): Clean this up once `InputDecorationTheme` is fully normalized.
+  InputDecorationThemeData? get inputDecorationTheme {
+    if (_inputDecorationTheme == null) {
+      return null;
+    }
+    return _inputDecorationTheme is InputDecorationTheme
+        ? _inputDecorationTheme.data
+        : _inputDecorationTheme as InputDecorationThemeData;
+  }
+
+  final Object? _inputDecorationTheme;
 
   /// Overrides the default style of the cancel button of a [DatePickerDialog].
   final ButtonStyle? cancelButtonStyle;
@@ -881,7 +947,7 @@ class DatePickerThemeData with Diagnosticable {
     );
     properties.add(ColorProperty('dividerColor', dividerColor, defaultValue: null));
     properties.add(
-      DiagnosticsProperty<InputDecorationTheme>(
+      DiagnosticsProperty<InputDecorationThemeData>(
         'inputDecorationTheme',
         inputDecorationTheme,
         defaultValue: null,
@@ -969,8 +1035,8 @@ class DatePickerTheme extends InheritedTheme {
   ///
   /// See also:
   ///
-  ///  * [of], which will return [ThemeData.datePickerTheme] if it doesn't
-  ///    find a [DatePickerTheme] ancestor, instead of returning null.
+  ///  * [of], which will return the data from [ThemeData.datePickerTheme] if
+  ///    it doesn't find a [DatePickerTheme] ancestor, instead of returning null.
   ///  * [defaults], which will return the default properties used when no
   ///    other [DatePickerTheme] has been provided.
   static DatePickerThemeData? maybeOf(BuildContext context) {
@@ -984,8 +1050,8 @@ class DatePickerTheme extends InheritedTheme {
   ///
   /// See also:
   ///
-  ///  * [of], which will return [ThemeData.datePickerTheme] if it doesn't
-  ///    find a [DatePickerTheme] ancestor, instead of returning null.
+  ///  * [of], which will return the data from [ThemeData.datePickerTheme] if
+  ///    it doesn't find a [DatePickerTheme] ancestor, instead of returning null.
   ///  * [maybeOf], which returns null if it doesn't find a
   ///    [DatePickerTheme] ancestor.
   static DatePickerThemeData defaults(BuildContext context) {

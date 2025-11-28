@@ -5,29 +5,6 @@
 #include "flutter/shell/platform/linux/fl_accessible_node.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 
-// Maps Flutter semantics flags to ATK flags.
-static struct {
-  AtkStateType state;
-  FlutterSemanticsFlag flag;
-  gboolean invert;
-} flag_mapping[] = {
-    {ATK_STATE_SHOWING, kFlutterSemanticsFlagIsObscured, TRUE},
-    {ATK_STATE_VISIBLE, kFlutterSemanticsFlagIsHidden, TRUE},
-    {ATK_STATE_CHECKABLE, kFlutterSemanticsFlagHasCheckedState, FALSE},
-    {ATK_STATE_FOCUSABLE, kFlutterSemanticsFlagIsFocusable, FALSE},
-    {ATK_STATE_FOCUSED, kFlutterSemanticsFlagIsFocused, FALSE},
-    {ATK_STATE_CHECKED,
-     static_cast<FlutterSemanticsFlag>(kFlutterSemanticsFlagIsChecked |
-                                       kFlutterSemanticsFlagIsToggled),
-     FALSE},
-    {ATK_STATE_SELECTED, kFlutterSemanticsFlagIsSelected, FALSE},
-    {ATK_STATE_ENABLED, kFlutterSemanticsFlagIsEnabled, FALSE},
-    {ATK_STATE_SENSITIVE, kFlutterSemanticsFlagIsEnabled, FALSE},
-    {ATK_STATE_READ_ONLY, kFlutterSemanticsFlagIsReadOnly, FALSE},
-    {ATK_STATE_EDITABLE, kFlutterSemanticsFlagIsTextField, FALSE},
-    {ATK_STATE_INVALID, static_cast<FlutterSemanticsFlag>(0), FALSE},
-};
-
 // Maps Flutter semantics actions to ATK actions.
 typedef struct {
   FlutterSemanticsAction action;
@@ -60,6 +37,8 @@ static ActionData action_mapping[] = {
     {kFlutterSemanticsActionMoveCursorBackwardByWord,
      "MoveCursorBackwardByWord"},
     {kFlutterSemanticsActionFocus, "Focus"},
+    {kFlutterSemanticsActionExpand, "Expand"},
+    {kFlutterSemanticsActionCollapse, "Collapse"},
     {static_cast<FlutterSemanticsAction>(0), nullptr}};
 
 struct FlAccessibleNodePrivate {
@@ -81,7 +60,7 @@ struct FlAccessibleNodePrivate {
   GPtrArray* actions;
   gsize actions_length;
   GPtrArray* children;
-  FlutterSemanticsFlag flags;
+  FlutterSemanticsFlags flags;
 };
 
 enum { PROP_0, PROP_ENGINE, PROP_VIEW_ID, PROP_ID, PROP_LAST };
@@ -104,17 +83,41 @@ G_DEFINE_TYPE_WITH_CODE(
             G_IMPLEMENT_INTERFACE(ATK_TYPE_ACTION,
                                   fl_accessible_node_action_interface_init))
 
-// Returns TRUE if [flag] has changed between [old_flags] and [flags].
-static gboolean flag_is_changed(FlutterSemanticsFlag old_flags,
-                                FlutterSemanticsFlag flags,
-                                FlutterSemanticsFlag flag) {
-  return (old_flags & flag) != (flags & flag);
+// Returns TRUE if [flags] indicate this element is checkable.
+static gboolean is_checkable(FlutterSemanticsFlags flags) {
+  return flags.is_checked != kFlutterCheckStateNone ||
+         flags.is_toggled != kFlutterTristateNone;
 }
 
-// Returns TRUE if [flag] is set in [flags].
-static gboolean has_flag(FlutterSemanticsFlag flags,
-                         FlutterSemanticsFlag flag) {
-  return (flags & flag) != 0;
+// Returns TRUE if [flags] indicate this element is checked.
+static gboolean is_checked(FlutterSemanticsFlags flags) {
+  return flags.is_checked == kFlutterCheckStateTrue ||
+         flags.is_toggled == kFlutterTristateTrue;
+}
+
+// Returns TRUE if [flags] indicate this element is focusable.
+static gboolean is_focusable(FlutterSemanticsFlags flags) {
+  return flags.is_focused != kFlutterTristateNone;
+}
+
+// Returns TRUE if [flags] indicate this element is focused.
+static gboolean is_focused(FlutterSemanticsFlags flags) {
+  return flags.is_focused == kFlutterTristateTrue;
+}
+
+// Returns TRUE if [flags] indicate this element is selected.
+static gboolean is_selected(FlutterSemanticsFlags flags) {
+  return flags.is_selected == kFlutterTristateTrue;
+}
+
+// Returns TRUE if [flags] indicate this element is sensitive.
+static gboolean is_sensitive(FlutterSemanticsFlags flags) {
+  return flags.is_enabled != kFlutterTristateNone;
+}
+
+// Returns TRUE if [flags] indicate this element is enabled.
+static gboolean is_enabled(FlutterSemanticsFlags flags) {
+  return flags.is_enabled == kFlutterTristateTrue;
 }
 
 // Returns TRUE if [action] is set in [actions].
@@ -224,36 +227,35 @@ static AtkObject* fl_accessible_node_ref_child(AtkObject* accessible, gint i) {
 // Implements AtkObject::get_role.
 static AtkRole fl_accessible_node_get_role(AtkObject* accessible) {
   FlAccessibleNodePrivate* priv = FL_ACCESSIBLE_NODE_GET_PRIVATE(accessible);
-  if ((priv->flags & kFlutterSemanticsFlagIsButton) != 0) {
+  if (priv->flags.is_button) {
     return ATK_ROLE_PUSH_BUTTON;
   }
-  if ((priv->flags & kFlutterSemanticsFlagIsInMutuallyExclusiveGroup) != 0 &&
-      (priv->flags & kFlutterSemanticsFlagHasCheckedState) != 0) {
+  if (priv->flags.is_in_mutually_exclusive_group &&
+      priv->flags.is_checked != kFlutterCheckStateNone) {
     return ATK_ROLE_RADIO_BUTTON;
   }
-  if ((priv->flags & kFlutterSemanticsFlagHasCheckedState) != 0) {
+  if (priv->flags.is_checked != kFlutterCheckStateNone) {
     return ATK_ROLE_CHECK_BOX;
   }
-  if ((priv->flags & kFlutterSemanticsFlagHasToggledState) != 0) {
+  if (priv->flags.is_toggled != kFlutterTristateNone) {
     return ATK_ROLE_TOGGLE_BUTTON;
   }
-  if ((priv->flags & kFlutterSemanticsFlagIsSlider) != 0) {
+  if (priv->flags.is_slider) {
     return ATK_ROLE_SLIDER;
   }
-  if ((priv->flags & kFlutterSemanticsFlagIsTextField) != 0 &&
-      (priv->flags & kFlutterSemanticsFlagIsObscured) != 0) {
+  if (priv->flags.is_text_field && priv->flags.is_obscured) {
     return ATK_ROLE_PASSWORD_TEXT;
   }
-  if ((priv->flags & kFlutterSemanticsFlagIsTextField) != 0) {
+  if (priv->flags.is_text_field) {
     return ATK_ROLE_TEXT;
   }
-  if ((priv->flags & kFlutterSemanticsFlagIsHeader) != 0) {
+  if (priv->flags.is_header) {
     return ATK_ROLE_HEADER;
   }
-  if ((priv->flags & kFlutterSemanticsFlagIsLink) != 0) {
+  if (priv->flags.is_link) {
     return ATK_ROLE_LINK;
   }
-  if ((priv->flags & kFlutterSemanticsFlagIsImage) != 0) {
+  if (priv->flags.is_image) {
     return ATK_ROLE_IMAGE;
   }
 
@@ -266,14 +268,38 @@ static AtkStateSet* fl_accessible_node_ref_state_set(AtkObject* accessible) {
 
   AtkStateSet* state_set = atk_state_set_new();
 
-  for (int i = 0; flag_mapping[i].state != ATK_STATE_INVALID; i++) {
-    gboolean enabled = has_flag(priv->flags, flag_mapping[i].flag);
-    if (flag_mapping[i].invert) {
-      enabled = !enabled;
-    }
-    if (enabled) {
-      atk_state_set_add_state(state_set, flag_mapping[i].state);
-    }
+  if (!priv->flags.is_obscured) {
+    atk_state_set_add_state(state_set, ATK_STATE_SHOWING);
+  }
+  if (!priv->flags.is_hidden) {
+    atk_state_set_add_state(state_set, ATK_STATE_VISIBLE);
+  }
+  if (is_checkable(priv->flags)) {
+    atk_state_set_add_state(state_set, ATK_STATE_CHECKABLE);
+  }
+  if (is_checked(priv->flags)) {
+    atk_state_set_add_state(state_set, ATK_STATE_CHECKED);
+  }
+  if (is_focusable(priv->flags)) {
+    atk_state_set_add_state(state_set, ATK_STATE_FOCUSABLE);
+  }
+  if (is_focused(priv->flags)) {
+    atk_state_set_add_state(state_set, ATK_STATE_FOCUSED);
+  }
+  if (is_selected(priv->flags)) {
+    atk_state_set_add_state(state_set, ATK_STATE_SELECTED);
+  }
+  if (is_enabled(priv->flags)) {
+    atk_state_set_add_state(state_set, ATK_STATE_ENABLED);
+  }
+  if (is_sensitive(priv->flags)) {
+    atk_state_set_add_state(state_set, ATK_STATE_SENSITIVE);
+  }
+  if (priv->flags.is_read_only) {
+    atk_state_set_add_state(state_set, ATK_STATE_READ_ONLY);
+  }
+  if (priv->flags.is_text_field) {
+    atk_state_set_add_state(state_set, ATK_STATE_EDITABLE);
   }
 
   return state_set;
@@ -363,24 +389,63 @@ static void fl_accessible_node_set_extents_impl(FlAccessibleNode* self,
   priv->height = height;
 }
 
+// Check two boolean flags are different, in a way that handles true values
+// being different (e.g. 1 and 2).
+static bool flag_changed(bool old_flag, bool new_flag) {
+  return !old_flag != !new_flag;
+}
+
 // Implements FlAccessibleNode::set_flags.
 static void fl_accessible_node_set_flags_impl(FlAccessibleNode* self,
-                                              FlutterSemanticsFlag flags) {
+                                              FlutterSemanticsFlags* flags) {
   FlAccessibleNodePrivate* priv = FL_ACCESSIBLE_NODE_GET_PRIVATE(self);
 
-  FlutterSemanticsFlag old_flags = priv->flags;
-  priv->flags = flags;
+  FlutterSemanticsFlags old_flags = priv->flags;
+  priv->flags = *flags;
 
-  for (int i = 0; flag_mapping[i].state != ATK_STATE_INVALID; i++) {
-    if (flag_is_changed(old_flags, flags, flag_mapping[i].flag)) {
-      gboolean enabled = has_flag(flags, flag_mapping[i].flag);
-      if (flag_mapping[i].invert) {
-        enabled = !enabled;
-      }
-
-      atk_object_notify_state_change(ATK_OBJECT(self), flag_mapping[i].state,
-                                     enabled);
-    }
+  if (flag_changed(old_flags.is_obscured, flags->is_obscured)) {
+    atk_object_notify_state_change(ATK_OBJECT(self), ATK_STATE_SHOWING,
+                                   !flags->is_obscured);
+  }
+  if (flag_changed(old_flags.is_hidden, flags->is_hidden)) {
+    atk_object_notify_state_change(ATK_OBJECT(self), ATK_STATE_VISIBLE,
+                                   !flags->is_hidden);
+  }
+  if (flag_changed(is_checkable(old_flags), is_checkable(priv->flags))) {
+    atk_object_notify_state_change(ATK_OBJECT(self), ATK_STATE_CHECKABLE,
+                                   is_checkable(priv->flags));
+  }
+  if (flag_changed(is_checked(old_flags), is_checked(priv->flags))) {
+    atk_object_notify_state_change(ATK_OBJECT(self), ATK_STATE_CHECKED,
+                                   is_checked(priv->flags));
+  }
+  if (flag_changed(is_focusable(old_flags), is_focusable(priv->flags))) {
+    atk_object_notify_state_change(ATK_OBJECT(self), ATK_STATE_FOCUSABLE,
+                                   is_focusable(priv->flags));
+  }
+  if (flag_changed(is_focused(old_flags), is_focused(priv->flags))) {
+    atk_object_notify_state_change(ATK_OBJECT(self), ATK_STATE_FOCUSED,
+                                   is_focused(priv->flags));
+  }
+  if (flag_changed(is_selected(old_flags), is_selected(priv->flags))) {
+    atk_object_notify_state_change(ATK_OBJECT(self), ATK_STATE_SELECTED,
+                                   is_selected(priv->flags));
+  }
+  if (flag_changed(is_sensitive(old_flags), is_sensitive(priv->flags))) {
+    atk_object_notify_state_change(ATK_OBJECT(self), ATK_STATE_SENSITIVE,
+                                   is_sensitive(priv->flags));
+  }
+  if (flag_changed(is_enabled(old_flags), is_enabled(priv->flags))) {
+    atk_object_notify_state_change(ATK_OBJECT(self), ATK_STATE_ENABLED,
+                                   is_enabled(priv->flags));
+  }
+  if (flag_changed(old_flags.is_read_only, flags->is_read_only)) {
+    atk_object_notify_state_change(ATK_OBJECT(self), ATK_STATE_READ_ONLY,
+                                   flags->is_read_only);
+  }
+  if (flag_changed(old_flags.is_text_field, flags->is_text_field)) {
+    atk_object_notify_state_change(ATK_OBJECT(self), ATK_STATE_EDITABLE,
+                                   flags->is_text_field);
   }
 }
 
@@ -557,7 +622,7 @@ void fl_accessible_node_set_extents(FlAccessibleNode* self,
 }
 
 void fl_accessible_node_set_flags(FlAccessibleNode* self,
-                                  FlutterSemanticsFlag flags) {
+                                  FlutterSemanticsFlags* flags) {
   g_return_if_fail(FL_IS_ACCESSIBLE_NODE(self));
 
   return FL_ACCESSIBLE_NODE_GET_CLASS(self)->set_flags(self, flags);

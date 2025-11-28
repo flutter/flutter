@@ -19,7 +19,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
 
-class MockServer implements shelf.Server {
+class FakeServer implements shelf.Server {
   shelf.Handler? mountedHandler;
 
   @override
@@ -52,11 +52,11 @@ void main() {
     operatingSystemUtils = FakeOperatingSystemUtils();
     tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_web_platform_test.');
 
-    for (final HostArtifact artifact in <HostArtifact>[
+    for (final artifact in <HostArtifact>[
       HostArtifact.webPrecompiledAmdCanvaskitSdk,
       HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk,
     ]) {
-      final File artifactFile = artifacts.getHostArtifact(artifact) as File;
+      final artifactFile = artifacts.getHostArtifact(artifact) as File;
       artifactFile.createSync();
       artifactFile.writeAsStringSync(artifact.name);
     }
@@ -69,7 +69,7 @@ void main() {
   testUsingContext(
     'FlutterWebPlatform serves the correct dart_sdk.js (amd module system) for the passed web renderer',
     () async {
-      final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+      final chromiumLauncher = ChromiumLauncher(
         fileSystem: fileSystem,
         platform: platform,
         processManager: processManager,
@@ -77,7 +77,7 @@ void main() {
         browserFinder: (Platform platform, FileSystem filesystem) => 'chrome',
         logger: logger,
       );
-      final MockServer server = MockServer();
+      final server = FakeServer();
       final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
         'ProjectRoot',
         flutterProject: FlutterProject.fromDirectoryTest(tempDir),
@@ -115,7 +115,7 @@ void main() {
   testUsingContext(
     'FlutterWebPlatform serves the correct dart_sdk.js (ddc library bundle module system) for the passed web renderer',
     () async {
-      final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+      final chromiumLauncher = ChromiumLauncher(
         fileSystem: fileSystem,
         platform: platform,
         processManager: processManager,
@@ -123,7 +123,7 @@ void main() {
         browserFinder: (Platform platform, FileSystem filesystem) => 'chrome',
         logger: logger,
       );
-      final MockServer server = MockServer();
+      final server = FakeServer();
       final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
         'ProjectRoot',
         flutterProject: FlutterProject.fromDirectoryTest(tempDir),
@@ -133,6 +133,7 @@ void main() {
           packageConfigPath: '.dart_tool/package_config.json',
           treeShakeIcons: false,
           extraFrontEndOptions: <String>['--dartdevc-module-format=ddc', '--canary'],
+          webEnableHotReload: true,
         ),
         webMemoryFS: WebMemoryFS(),
         fileSystem: fileSystem,

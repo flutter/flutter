@@ -10,7 +10,9 @@ void main() {
     const Widget title = Text('CupertinoListTile');
 
     await tester.pumpWidget(
-      const CupertinoApp(home: Center(child: CupertinoListTile(title: title))),
+      const CupertinoApp(
+        home: Center(child: CupertinoListTile(title: title)),
+      ),
     );
 
     expect(tester.widget<Text>(find.byType(Text)), title);
@@ -22,7 +24,9 @@ void main() {
 
     await tester.pumpWidget(
       const CupertinoApp(
-        home: Center(child: CupertinoListTile(title: Icon(CupertinoIcons.add), subtitle: subtitle)),
+        home: Center(
+          child: CupertinoListTile(title: Icon(CupertinoIcons.add), subtitle: subtitle),
+        ),
       ),
     );
 
@@ -50,7 +54,9 @@ void main() {
 
     await tester.pumpWidget(
       const CupertinoApp(
-        home: Center(child: CupertinoListTile(title: Icon(CupertinoIcons.add), trailing: trailing)),
+        home: Center(
+          child: CupertinoListTile(title: Icon(CupertinoIcons.add), trailing: trailing),
+        ),
       ),
     );
 
@@ -65,7 +71,9 @@ void main() {
 
     await tester.pumpWidget(
       const CupertinoApp(
-        home: Center(child: CupertinoListTile(leading: leading, title: Text('CupertinoListTile'))),
+        home: Center(
+          child: CupertinoListTile(leading: leading, title: Text('CupertinoListTile')),
+        ),
       ),
     );
 
@@ -232,10 +240,9 @@ void main() {
                     title: const Text('CupertinoListTile'),
                     backgroundColor: backgroundColor,
                     backgroundColorActivated: backgroundColorActivated,
-                    onTap:
-                        () => Navigator.of(context).push(
-                          CupertinoPageRoute<Widget>(builder: (BuildContext context) => secondPage),
-                        ),
+                    onTap: () => Navigator.of(context).push(
+                      CupertinoPageRoute<Widget>(builder: (BuildContext context) => secondPage),
+                    ),
                   ),
                 ),
               ),
@@ -445,7 +452,7 @@ void main() {
 
   testWidgets('onTap with delay does not throw an exception', (WidgetTester tester) async {
     const Widget title = Text('CupertinoListTile');
-    bool showTile = true;
+    var showTile = true;
 
     Future<void> onTap() async {
       showTile = false;
@@ -499,7 +506,7 @@ void main() {
   });
 
   testWidgets('Leading and trailing animate on listtile long press', (WidgetTester tester) async {
-    bool value = false;
+    var value = false;
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoPageScaffold(
@@ -507,10 +514,9 @@ void main() {
             builder: (BuildContext context, StateSetter setState) {
               return CupertinoListTile(
                 title: const Text(''),
-                onTap:
-                    () => setState(() {
-                      value = !value;
-                    }),
+                onTap: () => setState(() {
+                  value = !value;
+                }),
                 leading: CupertinoSwitch(value: value, onChanged: (_) {}),
                 trailing: CupertinoSwitch(value: value, onChanged: (_) {}),
               );
@@ -520,9 +526,9 @@ void main() {
       ),
     );
 
-    final CurvedAnimation firstPosition =
+    final firstPosition =
         (tester.state(find.byType(CupertinoSwitch).first) as dynamic).position as CurvedAnimation;
-    final CurvedAnimation lastPosition =
+    final lastPosition =
         (tester.state(find.byType(CupertinoSwitch).last) as dynamic).position as CurvedAnimation;
 
     expect(firstPosition.value, 0.0);

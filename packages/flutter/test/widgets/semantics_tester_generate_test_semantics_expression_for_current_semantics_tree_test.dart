@@ -55,17 +55,16 @@ void _tests() {
   //
   // This test is flexible w.r.t. leading and trailing whitespace.
   testWidgets('generates code', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     await pumpTestWidget(tester);
-    final String code =
-        semantics
-            .generateTestSemanticsExpressionForCurrentSemanticsTree(
-              DebugSemanticsDumpOrder.inverseHitTest,
-            )
-            .split('\n')
-            .map<String>((String line) => line.trim())
-            .join('\n')
-            .trim();
+    final String code = semantics
+        .generateTestSemanticsExpressionForCurrentSemanticsTree(
+          DebugSemanticsDumpOrder.inverseHitTest,
+        )
+        .split('\n')
+        .map<String>((String line) => line.trim())
+        .join('\n')
+        .trim();
 
     File? findThisTestFile(Directory directory) {
       for (final FileSystemEntity entity in directory.listSync()) {
@@ -87,19 +86,18 @@ void _tests() {
     final File thisTestFile = findThisTestFile(Directory.current)!;
     expect(thisTestFile, isNotNull);
     String expectedCode = thisTestFile.readAsStringSync();
-    expectedCode =
-        expectedCode
-            .substring(expectedCode.indexOf('v' * 12) + 12, expectedCode.indexOf('^' * 12) - 3)
-            .split('\n')
-            .map<String>((String line) => line.trim())
-            .join('\n')
-            .trim();
+    expectedCode = expectedCode
+        .substring(expectedCode.indexOf('v' * 12) + 12, expectedCode.indexOf('^' * 12) - 3)
+        .split('\n')
+        .map<String>((String line) => line.trim())
+        .join('\n')
+        .trim();
     semantics.dispose();
     expect('$code,', expectedCode);
   });
 
   testWidgets('generated code is correct', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     await pumpTestWidget(tester);
     expect(
       semantics,

@@ -75,7 +75,7 @@ class WindowsPlatformBinding extends PlatformBinding {
 
   @override
   String getFirefoxDownloadUrl(String version) =>
-      'https://download-installer.cdn.mozilla.net/pub/firefox/releases/$version/win64/en-US/'
+      'https://ftp.mozilla.org/pub/firefox/releases/$version/win64/en-US/'
       '${getFirefoxDownloadFilename(version)}';
 
   @override
@@ -109,11 +109,11 @@ class LinuxPlatformBinding extends PlatformBinding {
 
   @override
   String getFirefoxDownloadUrl(String version) =>
-      'https://download-installer.cdn.mozilla.net/pub/firefox/releases/$version/linux-x86_64/en-US/'
+      'https://ftp.mozilla.org/pub/firefox/releases/$version/linux-x86_64/en-US/'
       '${getFirefoxDownloadFilename(version)}';
 
   @override
-  String getFirefoxDownloadFilename(String version) => 'firefox-$version.tar.bz2';
+  String getFirefoxDownloadFilename(String version) => 'firefox-$version.tar.xz';
 
   @override
   String getFirefoxExecutablePath(io.Directory versionDir) =>
@@ -145,7 +145,7 @@ abstract class MacPlatformBinding extends PlatformBinding {
 
   @override
   String getFirefoxDownloadUrl(String version) =>
-      'https://download-installer.cdn.mozilla.net/pub/firefox/releases/$version/mac/en-US/'
+      'https://ftp.mozilla.org/pub/firefox/releases/$version/mac/en-US/'
       '${getFirefoxDownloadFilename(version)}';
 
   @override
@@ -243,7 +243,7 @@ bool get isLuci => io.Platform.environment['LUCI_CONTEXT'] != null;
 bool get isCi => isLuci;
 
 final String gitRevision = () {
-  final result = io.Process.runSync(
+  final io.ProcessResult result = io.Process.runSync(
     'git',
     <String>['rev-parse', 'HEAD'],
     workingDirectory: path.join(environment.engineSrcDir.path, 'flutter'),
@@ -253,6 +253,31 @@ final String gitRevision = () {
   if (result.exitCode != 0) {
     throw ToolExit(
       'Failed to get git revision. Exit code: ${result.exitCode} Error: ${result.stderr}',
+    );
+  }
+  return (result.stdout as String).trim();
+}();
+
+final String contentHash = () {
+  final String executable;
+  final List<String> args;
+  if (io.Platform.isWindows) {
+    executable = 'powershell';
+    args = <String>[path.join('bin', 'internal', 'content_aware_hash.ps1')];
+  } else {
+    executable = path.join('bin', 'internal', 'content_aware_hash.sh');
+    args = <String>[];
+  }
+  final io.ProcessResult result = io.Process.runSync(
+    executable,
+    args,
+    workingDirectory: environment.flutterRootDir.path,
+    stderrEncoding: utf8,
+    stdoutEncoding: utf8,
+  );
+  if (result.exitCode != 0) {
+    throw ToolExit(
+      'Failed to get content hash. Exit code: ${result.exitCode} Error: ${result.stderr}',
     );
   }
   return (result.stdout as String).trim();
@@ -268,9 +293,13 @@ const List<String> kAllBrowserNames = <String>[kChrome, kEdge, kFirefox, kSafari
 /// Creates an environment for a browser.
 ///
 /// The [browserName] matches the browser name passed as the `--browser` option.
-BrowserEnvironment getBrowserEnvironment(BrowserName browserName, {required bool useDwarf}) {
+BrowserEnvironment getBrowserEnvironment(
+  BrowserName browserName, {
+  required bool useDwarf,
+  required List<String> browserFlags,
+}) {
   return switch (browserName) {
-    BrowserName.chrome => ChromeEnvironment(useDwarf: useDwarf),
+    BrowserName.chrome => ChromeEnvironment(useDwarf: useDwarf, flags: browserFlags),
     BrowserName.edge => EdgeEnvironment(),
     BrowserName.firefox => FirefoxEnvironment(),
     BrowserName.safari => SafariMacOsEnvironment(),

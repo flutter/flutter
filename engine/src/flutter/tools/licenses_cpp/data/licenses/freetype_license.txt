@@ -1,0 +1,3 @@
+freetype license
+^The FreeType Project LICENSE
+(?s)The FreeType Project LICENSE.*2006-Jan-27.*1\. No Warranty.*2. Redistribution.*

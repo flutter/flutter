@@ -138,7 +138,7 @@
   "menuBarMenuLabel": "Nabídka na liště s nabídkou",
   "currentDateLabel": "Dnes",
   "scrimLabel": "Scrim",
-  "bottomSheetLabel": "Spodní tabulka",
+  "bottomSheetLabel": "Spodní panel",
   "scrimOnTapHint": "Zavřít $modalRouteContentName",
   "keyboardKeyShift": "Shift",
   "expansionTileExpandedHint": "dvojitým klepnutím sbalíte",

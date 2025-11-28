@@ -32,7 +32,7 @@ String getArtifactPath() {
 String? _findMatchId(List<String> idList, String idPattern) {
   String? candidate;
   idPattern = idPattern.toLowerCase();
-  for (final String id in idList) {
+  for (final id in idList) {
     if (id.toLowerCase() == idPattern) {
       return id;
     }
@@ -56,6 +56,7 @@ enum DeviceOperatingSystem {
   ios,
   linux,
   macos,
+  webServer,
   windows,
 }
 
@@ -80,6 +81,8 @@ abstract class DeviceDiscovery {
         return LinuxDeviceDiscovery();
       case DeviceOperatingSystem.macos:
         return MacosDeviceDiscovery();
+      case DeviceOperatingSystem.webServer:
+        return WebServerDeviceDiscovery();
       case DeviceOperatingSystem.windows:
         return WindowsDeviceDiscovery();
       case DeviceOperatingSystem.fake:
@@ -255,17 +258,16 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
   /// [workingDevice].
   @override
   Future<void> chooseWorkingDevice() async {
-    final List<AndroidDevice> allDevices =
-        (await discoverDevices())
-            .map<AndroidDevice>((String id) => AndroidDevice(deviceId: id))
-            .toList();
+    final List<AndroidDevice> allDevices = (await discoverDevices())
+        .map<AndroidDevice>((String id) => AndroidDevice(deviceId: id))
+        .toList();
 
     if (allDevices.isEmpty) {
       throw const DeviceException('No Android devices detected');
     }
 
     if (cpu != null) {
-      for (final AndroidDevice device in allDevices) {
+      for (final device in allDevices) {
         if (await _matchesCPURequirement(device)) {
           _workingDevice = device;
           break;
@@ -307,8 +309,8 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
   @override
   Future<List<String>> discoverDevices() async {
     final List<String> output = (await eval(adbPath, <String>['devices', '-l'])).trim().split('\n');
-    final List<String> results = <String>[];
-    for (final String line in output) {
+    final results = <String>[];
+    for (final line in output) {
       // Skip lines like: * daemon started successfully *
       if (line.startsWith('* daemon ')) {
         continue;
@@ -337,10 +339,10 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<Map<String, HealthCheckResult>> checkDevices() async {
-    final Map<String, HealthCheckResult> results = <String, HealthCheckResult>{};
+    final results = <String, HealthCheckResult>{};
     for (final String deviceId in await discoverDevices()) {
       try {
-        final AndroidDevice device = AndroidDevice(deviceId: deviceId);
+        final device = AndroidDevice(deviceId: deviceId);
         // Just a smoke test that we can read wakefulness state
         // TODO(yjbanov): check battery level
         await device._getWakefulness();
@@ -432,6 +434,40 @@ class MacosDeviceDiscovery implements DeviceDiscovery {
   Future<Device> get workingDevice async => _device;
 }
 
+class WebServerDeviceDiscovery implements DeviceDiscovery {
+  factory WebServerDeviceDiscovery() {
+    return _instance ??= WebServerDeviceDiscovery._();
+  }
+
+  WebServerDeviceDiscovery._();
+
+  static WebServerDeviceDiscovery? _instance;
+
+  static const WebServerDevice _device = WebServerDevice();
+
+  @override
+  Future<Map<String, HealthCheckResult>> checkDevices() async {
+    return <String, HealthCheckResult>{};
+  }
+
+  @override
+  Future<void> chooseWorkingDevice() async {}
+
+  @override
+  Future<void> chooseWorkingDeviceById(String deviceId) async {}
+
+  @override
+  Future<List<String>> discoverDevices() async {
+    return <String>['web-server'];
+  }
+
+  @override
+  Future<void> performPreflightTasks() async {}
+
+  @override
+  Future<Device> get workingDevice async => _device;
+}
+
 class WindowsDeviceDiscovery implements DeviceDiscovery {
   factory WindowsDeviceDiscovery() {
     return _instance ??= WindowsDeviceDiscovery._();
@@ -501,10 +537,9 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
   /// Picks the first connected Fuchsia device.
   @override
   Future<void> chooseWorkingDevice() async {
-    final List<FuchsiaDevice> allDevices =
-        (await discoverDevices())
-            .map<FuchsiaDevice>((String id) => FuchsiaDevice(deviceId: id))
-            .toList();
+    final List<FuchsiaDevice> allDevices = (await discoverDevices())
+        .map<FuchsiaDevice>((String id) => FuchsiaDevice(deviceId: id))
+        .toList();
 
     if (allDevices.isEmpty) {
       throw const DeviceException('No Fuchsia devices detected');
@@ -536,8 +571,8 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
       's',
     ])).trim().split('\n');
 
-    final List<String> devices = <String>[];
-    for (final String line in output) {
+    final devices = <String>[];
+    for (final line in output) {
       final List<String> parts = line.split(' ');
       assert(parts.length == 2);
       devices.add(parts.last); // The device id.
@@ -547,7 +582,7 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<Map<String, HealthCheckResult>> checkDevices() async {
-    final Map<String, HealthCheckResult> results = <String, HealthCheckResult>{};
+    final results = <String, HealthCheckResult>{};
     for (final String deviceId in await discoverDevices()) {
       try {
         final int resolveResult = await exec(_ffx, <String>['target', 'list', '-f', 'a', deviceId]);
@@ -650,9 +685,8 @@ class AndroidDevice extends Device {
     final String powerInfo = await shellEval('dumpsys', <String>['power']);
     // A motoG4 phone returns `mWakefulness=Awake`.
     // A Samsung phone returns `getWakefullnessLocked()=Awake`.
-    final RegExp wakefulnessRegexp = RegExp(r'.*(mWakefulness=|getWakefulnessLocked\(\)=).*');
-    final String wakefulness = grep(wakefulnessRegexp, from: powerInfo).single.split('=')[1].trim();
-    return wakefulness;
+    final wakefulnessRegexp = RegExp(r'(?:mWakefulness|getWakefulnessLocked\(\))=\s*([a-zA-Z]+)');
+    return wakefulnessRegexp.allMatches(powerInfo).single.group(1)!;
   }
 
   Future<bool> isArm64() async {
@@ -786,11 +820,11 @@ class AndroidDevice extends Device {
 
   @override
   Stream<String> get logcat {
-    final Completer<void> stdoutDone = Completer<void>();
-    final Completer<void> stderrDone = Completer<void>();
-    final Completer<void> processDone = Completer<void>();
-    final Completer<void> abort = Completer<void>();
-    bool aborted = false;
+    final stdoutDone = Completer<void>();
+    final stderrDone = Completer<void>();
+    final processDone = Completer<void>();
+    final abort = Completer<void>();
+    var aborted = false;
     late final StreamController<String> stream;
     stream = StreamController<String>(
       onListen: () async {
@@ -884,7 +918,7 @@ class AndroidDevice extends Device {
     print('Waiting for device.');
     final String waitOut = await adb(<String>['wait-for-device']);
     print(waitOut);
-    const RetryOptions retryOptions = RetryOptions(
+    const retryOptions = RetryOptions(
       delayFactor: Duration(seconds: 1),
       maxAttempts: 10,
       maxDelay: Duration(minutes: 1),
@@ -930,8 +964,9 @@ class IosDeviceDiscovery implements DeviceDiscovery {
   /// [workingDevice].
   @override
   Future<void> chooseWorkingDevice() async {
-    final List<IosDevice> allDevices =
-        (await discoverDevices()).map<IosDevice>((String id) => IosDevice(deviceId: id)).toList();
+    final List<IosDevice> allDevices = (await discoverDevices())
+        .map<IosDevice>((String id) => IosDevice(deviceId: id))
+        .toList();
 
     if (allDevices.isEmpty) {
       throw const DeviceException('No iOS devices detected');
@@ -958,7 +993,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<List<String>> discoverDevices() async {
-    final List<dynamic> results =
+    final results =
         json.decode(
               await eval(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
                 'devices',
@@ -982,7 +1017,6 @@ class IosDeviceDiscovery implements DeviceDiscovery {
     //       "hotReload": true,
     //       "hotRestart": true,
     //       "screenshot": true,
-    //       "fastStart": false,
     //       "flutterExit": true,
     //       "hardwareRendering": false,
     //       "startPaused": false
@@ -990,10 +1024,10 @@ class IosDeviceDiscovery implements DeviceDiscovery {
     //   }
     // ]
 
-    final List<String> deviceIds = <String>[];
+    final deviceIds = <String>[];
 
     for (final dynamic result in results) {
-      final Map<String, dynamic> device = result as Map<String, dynamic>;
+      final device = result as Map<String, dynamic>;
       if (device['targetPlatform'] == 'ios' &&
           device['id'] != null &&
           device['emulator'] != true &&
@@ -1010,7 +1044,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<Map<String, HealthCheckResult>> checkDevices() async {
-    final Map<String, HealthCheckResult> results = <String, HealthCheckResult>{};
+    final results = <String, HealthCheckResult>{};
     for (final String deviceId in await discoverDevices()) {
       // TODO(ianh): do a more meaningful connectivity check than just recording the ID
       results['ios-device-$deviceId'] = HealthCheckResult.success();
@@ -1043,11 +1077,12 @@ class IosDevice extends Device {
   }
 
   String get dyldLibraryPath {
-    final List<String> dylibsPaths = <String>[
+    final dylibsPaths = <String>[
       path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'libimobiledevice'),
       path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'openssl'),
-      path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'usbmuxd'),
+      path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'libusbmuxd'),
       path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'libplist'),
+      path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'libimobiledeviceglue'),
     ];
     return dylibsPaths.join(':');
   }
@@ -1210,6 +1245,61 @@ class MacosDevice extends Device {
 
   @override
   String get deviceId => 'macos';
+
+  @override
+  Future<Map<String, dynamic>> getMemoryStats(String packageName) async {
+    return <String, dynamic>{};
+  }
+
+  @override
+  Future<void> home() async {}
+
+  @override
+  Future<bool> isAsleep() async {
+    return false;
+  }
+
+  @override
+  Future<bool> isAwake() async {
+    return true;
+  }
+
+  @override
+  Stream<String> get logcat => const Stream<String>.empty();
+
+  @override
+  Future<void> clearLogs() async {}
+
+  @override
+  Future<void> reboot() async {}
+
+  @override
+  Future<void> sendToSleep() async {}
+
+  @override
+  Future<void> stop(String packageName) async {}
+
+  @override
+  Future<void> tap(int x, int y) async {}
+
+  @override
+  Future<void> togglePower() async {}
+
+  @override
+  Future<void> unlock() async {}
+
+  @override
+  Future<void> wakeUp() async {}
+
+  @override
+  Future<void> awaitDevice() async {}
+}
+
+class WebServerDevice extends Device {
+  const WebServerDevice();
+
+  @override
+  String get deviceId => 'web-server';
 
   @override
   Future<Map<String, dynamic>> getMemoryStats(String packageName) async {
@@ -1503,7 +1593,7 @@ class FakeDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<Map<String, HealthCheckResult>> checkDevices() async {
-    final Map<String, HealthCheckResult> results = <String, HealthCheckResult>{};
+    final results = <String, HealthCheckResult>{};
     for (final String deviceId in await discoverDevices()) {
       results['fake-device-$deviceId'] = HealthCheckResult.success();
     }

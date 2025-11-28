@@ -15,6 +15,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -33,12 +34,14 @@ import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
 import android.os.Build;
+import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import androidx.activity.OnBackPressedCallback;
 import androidx.fragment.app.FragmentActivity;
+import androidx.test.core.app.ActivityScenario;
 import androidx.test.core.app.ApplicationProvider;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel.Brightness;
@@ -57,7 +60,6 @@ import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLooper;
 
-@Config(manifest = Config.NONE)
 @RunWith(RobolectricTestRunner.class)
 public class PlatformPluginTest {
   private final Context ctx = ApplicationProvider.getApplicationContext();
@@ -646,51 +648,56 @@ public class PlatformPluginTest {
     verify(mockActivity, never()).finish();
   }
 
-  @SuppressWarnings("deprecation")
-  // Robolectric.setupActivity.
-  // TODO(reidbaker): https://github.com/flutter/flutter/issues/133151
   @Test
   public void popSystemNavigatorFlutterFragment() {
-    // Migrate to ActivityScenario by following https://github.com/robolectric/robolectric/pull/4736
-    FragmentActivity activity = spy(Robolectric.setupActivity(FragmentActivity.class));
-    final AtomicBoolean onBackPressedCalled = new AtomicBoolean(false);
-    OnBackPressedCallback backCallback =
-        new OnBackPressedCallback(true) {
-          @Override
-          public void handleOnBackPressed() {
-            onBackPressedCalled.set(true);
-          }
-        };
-    activity.getOnBackPressedDispatcher().addCallback(backCallback);
+    try (ActivityScenario<FragmentActivity> scenario =
+        ActivityScenario.launch(FragmentActivity.class)) {
+      scenario.onActivity(
+          fragmentActivity -> {
+            FragmentActivity activity = spy(fragmentActivity);
+            final AtomicBoolean onBackPressedCalled = new AtomicBoolean(false);
+            OnBackPressedCallback backCallback =
+                new OnBackPressedCallback(true) {
+                  @Override
+                  public void handleOnBackPressed() {
+                    onBackPressedCalled.set(true);
+                  }
+                };
+            activity.getOnBackPressedDispatcher().addCallback(backCallback);
 
-    PlatformPluginDelegate mockPlatformPluginDelegate = mock(PlatformPluginDelegate.class);
-    when(mockPlatformPluginDelegate.popSystemNavigator()).thenReturn(false);
-    PlatformPlugin platformPlugin =
-        new PlatformPlugin(activity, mockPlatformChannel, mockPlatformPluginDelegate);
+            PlatformPluginDelegate mockPlatformPluginDelegate = mock(PlatformPluginDelegate.class);
+            when(mockPlatformPluginDelegate.popSystemNavigator()).thenReturn(false);
+            PlatformPlugin platformPlugin =
+                new PlatformPlugin(activity, mockPlatformChannel, mockPlatformPluginDelegate);
 
-    platformPlugin.mPlatformMessageHandler.popSystemNavigator();
+            platformPlugin.mPlatformMessageHandler.popSystemNavigator();
 
-    verify(activity, never()).finish();
-    verify(mockPlatformPluginDelegate, times(1)).popSystemNavigator();
-    assertTrue(onBackPressedCalled.get());
+            verify(activity, never()).finish();
+            verify(mockPlatformPluginDelegate, times(1)).popSystemNavigator();
+            assertTrue(onBackPressedCalled.get());
+          });
+    }
   }
 
-  @SuppressWarnings("deprecation")
-  // Robolectric.setupActivity.
-  // TODO(reidbaker): https://github.com/flutter/flutter/issues/133151
   @Test
   public void doesNotDoAnythingByDefaultIfFragmentPopSystemNavigatorOverridden() {
-    FragmentActivity activity = spy(Robolectric.setupActivity(FragmentActivity.class));
-    PlatformPluginDelegate mockPlatformPluginDelegate = mock(PlatformPluginDelegate.class);
-    when(mockPlatformPluginDelegate.popSystemNavigator()).thenReturn(true);
-    PlatformPlugin platformPlugin =
-        new PlatformPlugin(activity, mockPlatformChannel, mockPlatformPluginDelegate);
+    try (ActivityScenario<FragmentActivity> scenario =
+        ActivityScenario.launch(FragmentActivity.class)) {
+      scenario.onActivity(
+          fragmentActivity -> {
+            FragmentActivity activity = spy(fragmentActivity);
+            PlatformPluginDelegate mockPlatformPluginDelegate = mock(PlatformPluginDelegate.class);
+            when(mockPlatformPluginDelegate.popSystemNavigator()).thenReturn(true);
+            PlatformPlugin platformPlugin =
+                new PlatformPlugin(activity, mockPlatformChannel, mockPlatformPluginDelegate);
 
-    platformPlugin.mPlatformMessageHandler.popSystemNavigator();
+            platformPlugin.mPlatformMessageHandler.popSystemNavigator();
 
-    verify(mockPlatformPluginDelegate, times(1)).popSystemNavigator();
-    // No longer perform the default action when overridden.
-    verify(activity, never()).finish();
+            verify(mockPlatformPluginDelegate, times(1)).popSystemNavigator();
+            // No longer perform the default action when overridden.
+            verify(activity, never()).finish();
+          });
+    }
   }
 
   @Test
@@ -746,5 +753,107 @@ public class PlatformPluginTest {
     assertEquals(sendToIntent.getAction(), Intent.ACTION_SEND);
     assertEquals(sendToIntent.getType(), "text/plain");
     assertEquals(sendToIntent.getStringExtra(Intent.EXTRA_TEXT), expectedContent);
+  }
+
+  @Config(sdk = API_LEVELS.API_29)
+  @Test
+  public void vibrateHapticFeedbackWhenApiLevelIsLessThan30() {
+    View fakeDecorView = mock(View.class);
+    Window fakeWindow = mock(Window.class);
+    Activity mockActivity = mock(Activity.class);
+    when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
+    when(mockActivity.getWindow()).thenReturn(fakeWindow);
+    PlatformPlugin platformPlugin = new PlatformPlugin(mockActivity, mockPlatformChannel);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.STANDARD);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+    clearInvocations(fakeDecorView);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.LIGHT_IMPACT);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+    clearInvocations(fakeDecorView);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.MEDIUM_IMPACT);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+    clearInvocations(fakeDecorView);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.HEAVY_IMPACT);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
+    clearInvocations(fakeDecorView);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.SELECTION_CLICK);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
+    clearInvocations(fakeDecorView);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.SUCCESS_NOTIFICATION);
+    verify(fakeDecorView, never()).performHapticFeedback(HapticFeedbackConstants.CONFIRM);
+    clearInvocations(fakeDecorView);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.WARNING_NOTIFICATION);
+    verify(fakeDecorView, never()).performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+    clearInvocations(fakeDecorView);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.ERROR_NOTIFICATION);
+    verify(fakeDecorView, never()).performHapticFeedback(HapticFeedbackConstants.REJECT);
+    clearInvocations(fakeDecorView);
+  }
+
+  @Config(minSdk = API_LEVELS.API_30)
+  @Test
+  public void vibrateHapticFeedbackWhenApiLevelIsHigherOrEquals30() {
+    View fakeDecorView = mock(View.class);
+    Window fakeWindow = mock(Window.class);
+    Activity mockActivity = mock(Activity.class);
+    when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
+    when(mockActivity.getWindow()).thenReturn(fakeWindow);
+    PlatformPlugin platformPlugin = new PlatformPlugin(mockActivity, mockPlatformChannel);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.STANDARD);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+    clearInvocations(fakeDecorView);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.LIGHT_IMPACT);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+    clearInvocations(fakeDecorView);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.MEDIUM_IMPACT);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+    clearInvocations(fakeDecorView);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.HEAVY_IMPACT);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
+    clearInvocations(fakeDecorView);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.SELECTION_CLICK);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
+    clearInvocations(fakeDecorView);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.SUCCESS_NOTIFICATION);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.CONFIRM);
+    clearInvocations(fakeDecorView);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.WARNING_NOTIFICATION);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+    clearInvocations(fakeDecorView);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.ERROR_NOTIFICATION);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.REJECT);
+    clearInvocations(fakeDecorView);
   }
 }

@@ -4,6 +4,8 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
+
 import 'constants.dart';
 import 'events.dart';
 import 'recognizer.dart';
@@ -92,7 +94,7 @@ class _PointerPanZoomData {
 }
 
 /// Details for [GestureScaleStartCallback].
-class ScaleStartDetails {
+class ScaleStartDetails with Diagnosticable {
   /// Creates details for [GestureScaleStartCallback].
   ScaleStartDetails({
     this.focalPoint = Offset.zero,
@@ -142,12 +144,17 @@ class ScaleStartDetails {
   final PointerDeviceKind? kind;
 
   @override
-  String toString() =>
-      'ScaleStartDetails(focalPoint: $focalPoint, localFocalPoint: $localFocalPoint, pointersCount: $pointerCount)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('focalPoint', focalPoint));
+    properties.add(DiagnosticsProperty<Offset>('localFocalPoint', localFocalPoint));
+    properties.add(IntProperty('pointerCount', pointerCount));
+    properties.add(DiagnosticsProperty<Duration?>('sourceTimeStamp', sourceTimeStamp));
+  }
 }
 
 /// Details for [GestureScaleUpdateCallback].
-class ScaleUpdateDetails {
+class ScaleUpdateDetails with Diagnosticable {
   /// Creates details for [GestureScaleUpdateCallback].
   ///
   /// The [scale], [horizontalScale], and [verticalScale] arguments must be
@@ -247,21 +254,22 @@ class ScaleUpdateDetails {
   final Duration? sourceTimeStamp;
 
   @override
-  String toString() =>
-      'ScaleUpdateDetails('
-      'focalPoint: $focalPoint,'
-      ' localFocalPoint: $localFocalPoint,'
-      ' scale: $scale,'
-      ' horizontalScale: $horizontalScale,'
-      ' verticalScale: $verticalScale,'
-      ' rotation: $rotation,'
-      ' pointerCount: $pointerCount,'
-      ' focalPointDelta: $focalPointDelta,'
-      ' sourceTimeStamp: $sourceTimeStamp)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('focalPointDelta', focalPointDelta));
+    properties.add(DiagnosticsProperty<Offset>('focalPoint', focalPoint));
+    properties.add(DiagnosticsProperty<Offset>('localFocalPoint', localFocalPoint));
+    properties.add(DoubleProperty('scale', scale));
+    properties.add(DoubleProperty('horizontalScale', horizontalScale));
+    properties.add(DoubleProperty('verticalScale', verticalScale));
+    properties.add(DoubleProperty('rotation', rotation));
+    properties.add(IntProperty('pointerCount', pointerCount));
+    properties.add(DiagnosticsProperty<Duration?>('sourceTimeStamp', sourceTimeStamp));
+  }
 }
 
 /// Details for [GestureScaleEndCallback].
-class ScaleEndDetails {
+class ScaleEndDetails with Diagnosticable {
   /// Creates details for [GestureScaleEndCallback].
   ScaleEndDetails({this.velocity = Velocity.zero, this.scaleVelocity = 0, this.pointerCount = 0});
 
@@ -278,8 +286,12 @@ class ScaleEndDetails {
   final int pointerCount;
 
   @override
-  String toString() =>
-      'ScaleEndDetails(velocity: $velocity, scaleVelocity: $scaleVelocity, pointerCount: $pointerCount)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Velocity>('velocity', velocity));
+    properties.add(DoubleProperty('scaleVelocity', scaleVelocity));
+    properties.add(IntProperty('pointerCount', pointerCount));
+  }
 }
 
 /// Signature for when the pointers in contact with the screen have established
@@ -473,7 +485,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   double _computeRotationFactor() {
-    double factor = 0.0;
+    var factor = 0.0;
     if (_initialLine != null && _currentLine != null) {
       final double fx = _initialLine!.pointerStartLocation.dx;
       final double fy = _initialLine!.pointerStartLocation.dy;
@@ -532,8 +544,8 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void handleEvent(PointerEvent event) {
     assert(_state != _ScaleState.ready);
-    bool didChangeConfiguration = false;
-    bool shouldStartIfAccepted = false;
+    var didChangeConfiguration = false;
+    var shouldStartIfAccepted = false;
     if (event is PointerMoveEvent) {
       final VelocityTracker tracker = _velocityTrackers[event.pointer]!;
       if (!event.synthesized) {
@@ -618,9 +630,9 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     // Span is the average deviation from focal point. Horizontal and vertical
     // spans are the average deviations from the focal point's horizontal and
     // vertical coordinates, respectively.
-    double totalDeviation = 0.0;
-    double totalHorizontalDeviation = 0.0;
-    double totalVerticalDeviation = 0.0;
+    var totalDeviation = 0.0;
+    var totalHorizontalDeviation = 0.0;
+    var totalVerticalDeviation = 0.0;
     for (final int pointer in _pointerLocations.keys) {
       totalDeviation += (pointerFocalPoint - _pointerLocations[pointer]!).distance;
       totalHorizontalDeviation += (pointerFocalPoint.dx - _pointerLocations[pointer]!.dx).abs();
@@ -778,12 +790,11 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
             localFocalPoint: _localFocalPoint,
             pointerCount: pointerCount,
             sourceTimeStamp: _initialEventTimestamp,
-            kind:
-                _pointerQueue.isNotEmpty
-                    ? getKindForPointer(_pointerQueue.first)
-                    : _pointerPanZooms.isNotEmpty
-                    ? getKindForPointer(_pointerPanZooms.keys.first)
-                    : null,
+            kind: _pointerQueue.isNotEmpty
+                ? getKindForPointer(_pointerQueue.first)
+                : _pointerPanZooms.isNotEmpty
+                ? getKindForPointer(_pointerPanZooms.keys.first)
+                : null,
           ),
         );
       });

@@ -7,9 +7,8 @@
 
 #include <stdint.h>
 
+#include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/fml/macros.h"
-#include "third_party/skia/include/core/SkSize.h"
-#include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/ganesh/mtl/GrMtlTypes.h"
 
 namespace flutter {
@@ -66,7 +65,7 @@ class GPUSurfaceMetalDelegate {
   /// called when the specified render target type is `kCAMetalLayer`.
   ///
   virtual GPUCAMetalLayerHandle GetCAMetalLayer(
-      const SkISize& frame_info) const = 0;
+      const DlISize& frame_info) const = 0;
 
   //------------------------------------------------------------------------------
   /// @brief Presents the drawable to the "screen". The drawable is obtained
@@ -83,7 +82,7 @@ class GPUSurfaceMetalDelegate {
   /// @brief Returns the handle to the MTLTexture to render to. This is only
   /// called when the specified render target type is `kMTLTexture`.
   ///
-  virtual GPUMTLTextureInfo GetMTLTexture(const SkISize& frame_info) const = 0;
+  virtual GPUMTLTextureInfo GetMTLTexture(const DlISize& frame_info) const = 0;
 
   //------------------------------------------------------------------------------
   /// @brief Presents the texture with `texture_id` to the "screen".

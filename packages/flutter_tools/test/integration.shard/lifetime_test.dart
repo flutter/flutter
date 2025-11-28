@@ -15,10 +15,10 @@ import 'test_utils.dart';
 /// This duration is arbitrary but is ideally:
 /// a) Long enough to ensure that if the app is crashing at startup, we notice.
 /// b) As short as possible, to avoid inflating build times.
-const Duration requiredLifespan = Duration(seconds: 5);
+const requiredLifespan = Duration(seconds: 5);
 
 void main() {
-  final BasicProject project = BasicProject();
+  final project = BasicProject();
   late FlutterRunTestDriver flutter;
   late Directory tempDir;
 

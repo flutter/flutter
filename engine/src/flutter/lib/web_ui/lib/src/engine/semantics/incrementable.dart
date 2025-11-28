@@ -41,7 +41,7 @@ class SemanticIncrementable extends SemanticRole {
           return;
         }
         _pendingResync = true;
-        final int newInputValue = int.parse(_element.value!);
+        final int newInputValue = int.parse(_element.value);
         if (newInputValue > _currentSurrogateValue) {
           _currentSurrogateValue += 1;
           EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
@@ -69,6 +69,14 @@ class SemanticIncrementable extends SemanticRole {
     };
     EngineSemantics.instance.addGestureModeListener(_gestureModeListener);
     _focusManager.manage(semanticsObject.id, _element);
+  }
+
+  @override
+  bool get acceptsPointerEvents {
+    return switch (semanticsObject.hitTestBehavior) {
+      ui.SemanticsHitTestBehavior.transparent => false,
+      _ => true,
+    };
   }
 
   @override
@@ -145,20 +153,22 @@ class SemanticIncrementable extends SemanticRole {
 
     _pendingResync = false;
 
-    final String surrogateTextValue = '$_currentSurrogateValue';
+    final surrogateTextValue = '$_currentSurrogateValue';
     _element.value = surrogateTextValue;
     _element.setAttribute('aria-valuenow', surrogateTextValue);
     _element.setAttribute('aria-valuetext', semanticsObject.value!);
 
     final bool canIncrease = semanticsObject.increasedValue!.isNotEmpty;
-    final String surrogateMaxTextValue =
-        canIncrease ? '${_currentSurrogateValue + 1}' : surrogateTextValue;
+    final surrogateMaxTextValue = canIncrease
+        ? '${_currentSurrogateValue + 1}'
+        : surrogateTextValue;
     _element.max = surrogateMaxTextValue;
     _element.setAttribute('aria-valuemax', surrogateMaxTextValue);
 
     final bool canDecrease = semanticsObject.decreasedValue!.isNotEmpty;
-    final String surrogateMinTextValue =
-        canDecrease ? '${_currentSurrogateValue - 1}' : surrogateTextValue;
+    final surrogateMinTextValue = canDecrease
+        ? '${_currentSurrogateValue - 1}'
+        : surrogateTextValue;
     _element.min = surrogateMinTextValue;
     _element.setAttribute('aria-valuemin', surrogateMinTextValue);
   }

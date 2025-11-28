@@ -118,6 +118,10 @@ settings:
     '*.ipp': cpp
     csetjmp: cpp
     cfenv: cpp
+    execution: cpp
+    print: cpp
+    source_location: cpp
+    syncstream: cpp
   C_Cpp.default.includePath:
     - ${default}
     - ${workspaceFolder}/..
@@ -148,6 +152,11 @@ settings:
       runTask:
         before:
           - shell_unittests_arm64
+    - name: licenses_cpp_testrunner
+      pattern: ../out/host_debug_unopt_arm64/licenses_cpp_testrunner
+      runTask:
+        before:
+          - licenses_cpp_testrunner
     - name: ui_unittests_arm64
       pattern: ../out/host_debug_unopt_arm64/ui_unittests
       runTask:
@@ -221,6 +230,13 @@ tasks:
         - host_debug_unopt_arm64
         - //flutter/display_list:display_list_unittests
     - <<: *et-task
+      label: licenses_cpp_testrunner
+      args:
+        - build
+        - -c
+        - host_debug_unopt_arm64
+        - //flutter/tools/licenses_cpp:licenses_cpp_testrunner
+    - <<: *et-task
       label: shell_unittests_arm64
       args:
         - build
@@ -253,6 +269,17 @@ tasks:
         - -c
         - ios_debug_unopt
     - <<: *et-task
+      label: ios_debug_sim_unopt_arm64
+      args:
+        - build
+        - -c
+        - host_debug_unopt_arm64
+        - "&&"
+        - *et-cmd
+        - build
+        - -c
+        - ios_debug_sim_unopt_arm64
+    - <<: *et-task
       label: android_debug_unopt_arm64
       args:
         - build
@@ -272,7 +299,7 @@ extensions:
     # Flutter and Dart extensions.
     - Dart-Code.dart-code
     # Supports C/C++ in the engine.
-    # See https://github.com/flutter/flutter/blob/main/engine/src/flutter/docs/contributing/Setting-up-the-Engine-development-environment.md#vscode-with-cc-intellisense-cc
+    # See https://github.com/flutter/flutter/blob/main/docs/engine/contributing/Setting-up-the-Engine-development-environment.md#vscode-with-cc-intellisense-cc
     - llvm-vs-code-extensions.vscode-clangd
     # Auto-formats C/C++ code.
     # https://github.com/flutter/flutter/blob/main/engine/src/flutter/CONTRIBUTING.md#cc

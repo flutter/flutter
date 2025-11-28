@@ -16,6 +16,9 @@ if (flutter_runtime_mode == "jit_release") {
   if (dart_dynamic_modules) {
     android_zip_archive_dir += "-ddm"
   }
+  if (dart_disable_secure_socket) {
+    android_zip_archive_dir += "-size-exp"
+  }
 }
 
 # Creates a zip file in the $root_build_dir/zip_archives folder.

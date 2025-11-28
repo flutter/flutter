@@ -17,7 +17,7 @@ Future<int> fetchDependencies(Environment environment) async {
     return 1;
   }
 
-  final dotGclientPath = findDotGclient(environment);
+  final String? dotGclientPath = findDotGclient(environment);
 
   if (dotGclientPath == null) {
     environment.logger.error(
@@ -42,8 +42,9 @@ Future<int> fetchDependencies(Environment environment) async {
     result = await environment.processRunner.runProcess(
       <String>['gclient', 'sync', '-D'],
       runInShell: true,
-      startMode:
-          environment.verbose ? io.ProcessStartMode.inheritStdio : io.ProcessStartMode.normal,
+      startMode: environment.verbose
+          ? io.ProcessStartMode.inheritStdio
+          : io.ProcessStartMode.normal,
       workingDirectory: dotGclient.parent,
     );
   } finally {

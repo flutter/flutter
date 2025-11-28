@@ -7,6 +7,8 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class SliderUseCase extends UseCase {
+  SliderUseCase() : super(useCaseCategory: UseCaseCategory.core);
+
   @override
   String get name => 'Slider';
 
@@ -26,7 +28,6 @@ class MainWidget extends StatefulWidget {
 
 class MainWidgetState extends State<MainWidget> {
   double currentSliderValue = 20;
-  static const String accessibilityLabel = 'Accessibility Test Slider';
 
   String pageTitle = getUseCaseName(SliderUseCase());
 
@@ -38,19 +39,22 @@ class MainWidgetState extends State<MainWidget> {
         title: Semantics(headingLevel: 1, child: Text('$pageTitle demo')),
       ),
       body: Center(
-        child: Semantics(
-          label: accessibilityLabel,
-          child: Slider(
-            value: currentSliderValue,
-            max: 100,
-            divisions: 5,
-            label: currentSliderValue.round().toString(),
-            onChanged: (double value) {
-              setState(() {
-                currentSliderValue = value;
-              });
-            },
-          ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const Text('My Slider'),
+            Slider(
+              value: currentSliderValue,
+              max: 100,
+              divisions: 5,
+              label: currentSliderValue.round().toString(),
+              onChanged: (double value) {
+                setState(() {
+                  currentSliderValue = value;
+                });
+              },
+            ),
+          ],
         ),
       ),
     );

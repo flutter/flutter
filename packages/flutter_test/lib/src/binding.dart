@@ -486,7 +486,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   Future<void> setLocale(String languageCode, String countryCode) {
     return TestAsyncUtils.guard<void>(() async {
       assert(inTest);
-      final Locale locale = Locale(languageCode, countryCode == '' ? null : countryCode);
+      final locale = Locale(languageCode, countryCode == '' ? null : countryCode);
       dispatchLocalesChanged(<Locale>[locale]);
     });
   }
@@ -574,7 +574,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     }
     final FlutterView view = renderView.flutterView;
     if (_surfaceSize != null && view == platformDispatcher.implicitView) {
-      final BoxConstraints constraints = BoxConstraints.tight(_surfaceSize!);
+      final constraints = BoxConstraints.tight(_surfaceSize!);
       return ViewConfiguration(
         logicalConstraints: constraints,
         physicalConstraints: constraints * view.devicePixelRatio,
@@ -595,7 +595,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// after this method was invoked, even if they are zero-time timers.
   Future<void> idle() {
     return TestAsyncUtils.guard<void>(() {
-      final Completer<void> completer = Completer<void>();
+      final completer = Completer<void>();
       Timer.run(() {
         completer.complete();
       });
@@ -876,7 +876,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
     _oldExceptionHandler = FlutterError.onError;
     _oldStackTraceDemangler = FlutterError.demangleStackTrace;
-    int exceptionCount = 0; // number of un-taken exceptions
+    var exceptionCount = 0; // number of un-taken exceptions
     FlutterError.onError = (FlutterErrorDetails details) {
       if (_pendingExceptionDetails != null) {
         debugPrint =
@@ -913,7 +913,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       }
       return stack;
     };
-    final Completer<void> testCompleter = Completer<void>();
+    final testCompleter = Completer<void>();
     final VoidCallback testCompletionHandler = _createTestCompletionHandler(
       description,
       testCompleter,
@@ -980,7 +980,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
           level: DiagnosticLevel.error,
         );
       }
-      final List<DiagnosticsNode> omittedFrames = <DiagnosticsNode>[];
+      final omittedFrames = <DiagnosticsNode>[];
       final int stackLinesToOmit = reportExpectCall(stack, omittedFrames);
       FlutterError.reportError(
         FlutterErrorDetails(
@@ -1021,16 +1021,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       _parentZone!.run<void>(testCompletionHandler);
     }
 
-    final ZoneSpecification errorHandlingZoneSpecification = ZoneSpecification(
-      handleUncaughtError: (
-        Zone self,
-        ZoneDelegate parent,
-        Zone zone,
-        Object exception,
-        StackTrace stack,
-      ) {
-        handleUncaughtError(exception, stack);
-      },
+    final errorHandlingZoneSpecification = ZoneSpecification(
+      handleUncaughtError:
+          (Zone self, ZoneDelegate parent, Zone zone, Object exception, StackTrace stack) {
+            handleUncaughtError(exception, stack);
+          },
     );
     _parentZone = Zone.current;
     final Zone testZone = _parentZone!.fork(specification: errorHandlingZoneSpecification);
@@ -1072,6 +1067,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         Container(key: UniqueKey(), child: _postTestMessage),
       ); // Unmount any remaining widgets.
       await pump();
+      _restorationManager?.dispose();
+      _restorationManager = null;
       if (registerTestTextInput) {
         _testTextInput.unregister();
       }
@@ -1363,29 +1360,25 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         scheduleMicrotask: (Zone self, ZoneDelegate parent, Zone zone, void Function() f) {
           _rootDelegate.scheduleMicrotask(zone, f);
         },
-        createTimer: (
-          Zone self,
-          ZoneDelegate parent,
-          Zone zone,
-          Duration duration,
-          void Function() f,
-        ) {
-          return _rootDelegate.createTimer(zone, duration, f);
-        },
-        createPeriodicTimer: (
-          Zone self,
-          ZoneDelegate parent,
-          Zone zone,
-          Duration period,
-          void Function(Timer timer) f,
-        ) {
-          return _rootDelegate.createPeriodicTimer(zone, period, f);
-        },
+        createTimer:
+            (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void Function() f) {
+              return _rootDelegate.createTimer(zone, duration, f);
+            },
+        createPeriodicTimer:
+            (
+              Zone self,
+              ZoneDelegate parent,
+              Zone zone,
+              Duration period,
+              void Function(Timer timer) f,
+            ) {
+              return _rootDelegate.createPeriodicTimer(zone, period, f);
+            },
       ),
     );
 
     return realAsyncZone.run<Future<T?>>(() {
-      final Completer<T?> result = Completer<T?>();
+      final result = Completer<T?>();
       _pendingAsyncTasks = Completer<void>();
       try {
         callback().then(result.complete).catchError((Object exception, StackTrace stack) {
@@ -1563,7 +1556,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(_currentFakeAsync == null);
     assert(_clock == null);
 
-    final FakeAsync fakeAsync = FakeAsync();
+    final fakeAsync = FakeAsync();
     _currentFakeAsync = fakeAsync; // reset in postTest
     _clock = fakeAsync.getClock(DateTime.utc(2015));
     late Future<void> testBodyResult;
@@ -1609,7 +1602,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
     assert(inTest);
 
-    bool timersPending = false;
+    var timersPending = false;
     if (_currentFakeAsync!.periodicTimerCount != 0 ||
         _currentFakeAsync!.nonPeriodicTimerCount != 0) {
       debugPrint('Pending timers:');
@@ -1910,11 +1903,10 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   void _markViewsNeedPaint([int? viewId]) {
     _viewNeedsPaint = true;
-    final Iterable<RenderView> toMark =
-        viewId == null
-            ? renderViews
-            : renderViews.where((RenderView renderView) => renderView.flutterView.viewId == viewId);
-    for (final RenderView renderView in toMark) {
+    final Iterable<RenderView> toMark = viewId == null
+        ? renderViews
+        : renderViews.where((RenderView renderView) => renderView.flutterView.viewId == viewId);
+    for (final renderView in toMark) {
       renderView.markNeedsPaint();
     }
   }
@@ -1950,19 +1942,17 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         _renderViewToPointerIdToPointerRecord[renderView];
     if (pointerIdToRecord != null && pointerIdToRecord.isNotEmpty) {
       final double radius = renderView.size.shortestSide * 0.05;
-      final Path path =
-          Path()
-            ..addOval(Rect.fromCircle(center: Offset.zero, radius: radius))
-            ..moveTo(0.0, -radius * 2.0)
-            ..lineTo(0.0, radius * 2.0)
-            ..moveTo(-radius * 2.0, 0.0)
-            ..lineTo(radius * 2.0, 0.0);
+      final path = Path()
+        ..addOval(Rect.fromCircle(center: Offset.zero, radius: radius))
+        ..moveTo(0.0, -radius * 2.0)
+        ..lineTo(0.0, radius * 2.0)
+        ..moveTo(-radius * 2.0, 0.0)
+        ..lineTo(radius * 2.0, 0.0);
       final Canvas canvas = context.canvas;
-      final Paint paint =
-          Paint()
-            ..strokeWidth = radius / 10.0
-            ..style = PaintingStyle.stroke;
-      bool dirty = false;
+      final paint = Paint()
+        ..strokeWidth = radius / 10.0
+        ..style = PaintingStyle.stroke;
+      var dirty = false;
       for (final _LiveTestPointerRecord record in pointerIdToRecord.values) {
         paint.color = record.color.withOpacity(
           record.decay < 0 ? (record.decay / (_kPointerDecay - 1)) : 1.0,
@@ -2283,7 +2273,7 @@ class TestViewConfiguration implements ViewConfiguration {
       shiftX = 0.0;
       shiftY = (actualHeight - desiredHeight * scale) / 2.0;
     }
-    final Matrix4 matrix = Matrix4.compose(
+    final matrix = Matrix4.compose(
       Vector3(shiftX, shiftY, 0.0), // translation
       Quaternion.identity(), // rotation
       Vector3(scale, scale, 1.0), // scale

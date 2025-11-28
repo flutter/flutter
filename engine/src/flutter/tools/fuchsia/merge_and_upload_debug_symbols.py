@@ -18,6 +18,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+from get_content_hash import get_content_hash
 
 # Path to the engine root checkout. This is used to calculate absolute
 # paths if relative ones are passed to the script.
@@ -77,14 +78,16 @@ def CheckCIPDPackageExists(package_name, tag):
     return True
 
 
-def ProcessCIPDPackage(upload, cipd_yaml, engine_version, out_dir, target_arch):
+def ProcessCIPDPackage(upload, cipd_yaml, engine_version, content_hash, out_dir, target_arch):
   _packaging_dir = GetPackagingDir(out_dir)
-  tag = 'git_revision:%s' % engine_version
   package_name = 'flutter/fuchsia-debug-symbols-%s' % target_arch
-  already_exists = CheckCIPDPackageExists(package_name, tag)
-  if already_exists:
-    print('CIPD package %s tag %s already exists!' % (package_name, tag))
 
+  git_tag = 'git_revision:%s' % engine_version
+  already_exists = CheckCIPDPackageExists(package_name, git_tag)
+  if already_exists:
+    print('CIPD package %s tag %s already exists!' % (package_name, git_tag))
+
+  tag_content_hash = False
   if upload and IsLinux() and not already_exists:
     command = [
         'cipd',
@@ -94,23 +97,53 @@ def ProcessCIPDPackage(upload, cipd_yaml, engine_version, out_dir, target_arch):
         '-ref',
         'latest',
         '-tag',
-        tag,
+        git_tag,
         '-verification-timeout',
         '10m0s',
     ]
+    tag_content_hash = True
   else:
     command = [
         'cipd', 'pkg-build', '-pkg-def', cipd_yaml, '-out',
         os.path.join(_packaging_dir, 'fuchsia-debug-symbols-%s.cipd' % target_arch)
     ]
 
+  RunCIPDCommandWithRetries(command, _packaging_dir)
+
+  if tag_content_hash:
+    TagBuildWithContentHash(package_name, content_hash, git_tag, _packaging_dir)
+
+
+def TagBuildWithContentHash(package_name, content_hash, git_tag, _packaging_dir):
+  content_tag = 'content_aware_hash:%s' % content_hash
+  already_exists = CheckCIPDPackageExists(package_name, content_tag)
+  if already_exists:
+    print('CIPD package %s tag %s already exists!' % (package_name, content_tag))
+    # content hash can match multiple PRs and we cannot tag multiple times.
+    return
+
+  # Tag the new content hash for the git_revision. This is done separately due
+  # to a race condition: https://github.com/flutter/flutter/issues/173137
+  command = [
+      'cipd',
+      'set-tag',
+      package_name,
+      '-tag',
+      content_tag,
+      '-version',
+      git_tag,
+  ]
+  RunCIPDCommandWithRetries(command, _packaging_dir)
+
+
+def RunCIPDCommandWithRetries(command, working_dir):
   # Retry up to three times.  We've seen CIPD fail on verification in some
   # instances. Normally verification takes slightly more than 1 minute when
   # it succeeds.
   num_tries = 3
   for tries in range(num_tries):
     try:
-      subprocess.check_call(command, cwd=_packaging_dir)
+      subprocess.check_call(command, cwd=working_dir)
       break
     except subprocess.CalledProcessError as error:
       print('Failed %s times.\nError was: %s' % (tries + 1, error))
@@ -210,11 +243,16 @@ def main():
   # on presubmit.
   should_upload = args.upload
   engine_version = args.engine_version
-  if not engine_version:
+  content_hash = ''
+  if engine_version:
+    # When content hashing is enabled, the engine version will be a content
+    # hash instead of a git revision.
+    content_hash = get_content_hash()
+  else:
     engine_version = 'HEAD'
     should_upload = False
 
-  ProcessCIPDPackage(should_upload, cipd_def, engine_version, out_dir, arch)
+  ProcessCIPDPackage(should_upload, cipd_def, engine_version, content_hash, out_dir, arch)
   return 0
 
 

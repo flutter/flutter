@@ -10,7 +10,7 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Semantics 7 - Merging', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     String label;
 
@@ -31,7 +31,10 @@ void main() {
             MergeSemantics(
               child: Stack(
                 fit: StackFit.expand,
-                children: <Widget>[Semantics(checked: true), Semantics(label: label)],
+                children: <Widget>[
+                  Semantics(checked: true),
+                  Semantics(label: label),
+                ],
               ),
             ),
           ],
@@ -80,7 +83,10 @@ void main() {
             MergeSemantics(
               child: Stack(
                 fit: StackFit.expand,
-                children: <Widget>[Semantics(checked: true), Semantics(label: label)],
+                children: <Widget>[
+                  Semantics(checked: true),
+                  Semantics(label: label),
+                ],
               ),
             ),
           ],

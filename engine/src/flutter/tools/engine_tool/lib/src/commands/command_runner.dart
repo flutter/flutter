@@ -14,6 +14,7 @@ import 'format_command.dart';
 import 'lint_command.dart';
 import 'query_command.dart';
 import 'run_command.dart';
+import 'stamp_command.dart';
 import 'test_command.dart';
 
 const int _usageLineLength = 100;
@@ -31,7 +32,7 @@ final class ToolCommandRunner extends CommandRunner<int> {
             'for more information see https://flutter.dev/to/et.',
         usageLineLength: _usageLineLength,
       ) {
-    final List<Command<int>> commands = <Command<int>>[
+    final commands = <Command<int>>[
       CleanupCommand(environment: environment, usageLineLength: _usageLineLength),
       FetchCommand(environment: environment, usageLineLength: _usageLineLength),
       FormatCommand(environment: environment, usageLineLength: _usageLineLength),
@@ -55,6 +56,7 @@ final class ToolCommandRunner extends CommandRunner<int> {
         help: help,
         usageLineLength: _usageLineLength,
       ),
+      StampCommand(environment: environment),
     ];
     commands.forEach(addCommand);
 

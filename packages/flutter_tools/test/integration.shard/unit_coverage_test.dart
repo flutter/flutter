@@ -21,7 +21,8 @@ void main() {
   });
 
   testWithoutContext('Can parse and output summaries for code coverage', () async {
-    final File coverageFile = tempDir.childFile('info.lcov')..writeAsStringSync('''
+    final File coverageFile = tempDir.childFile('info.lcov')
+      ..writeAsStringSync('''
 SF:lib/src/artifacts.dart
 DA:15,10
 DA:17,7

@@ -4,10 +4,12 @@
 
 import 'dart:async';
 import 'dart:ui' as ui;
+import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide NetworkImage;
-import 'package:flutter/src/painting/_network_image_web.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/src/painting/_network_image_web.dart' hide NetworkImage;
 import 'package:flutter/src/painting/_web_image_info_web.dart';
 import 'package:flutter/src/web.dart' as web_shim;
 import 'package:flutter/src/widgets/_web_image_web.dart';
@@ -15,15 +17,19 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:web/web.dart' as web;
 
 import '../image_data.dart';
+import '../widgets/web_platform_view_registry_utils.dart';
 import '_test_http_request.dart';
 
 late final ui.Image testImage;
 
 void runTests() {
   _TestBinding.ensureInitialized();
+  late FakePlatformViewRegistry fakePlatformViewRegistry;
 
   setUpAll(() async {
     testImage = await createTestImage();
+    fakePlatformViewRegistry = FakePlatformViewRegistry();
+    ui_web.debugOverridePlatformViewRegistry(fakePlatformViewRegistry);
   });
 
   tearDown(() {
@@ -32,20 +38,23 @@ void runTests() {
     _TestBinding.instance.overrideCodec = null;
   });
 
+  tearDownAll(() {
+    ui_web.debugOverridePlatformViewRegistry(null);
+  });
+
   testWidgets('loads an image from the network with headers', (WidgetTester tester) async {
-    final TestHttpRequest testHttpRequest =
-        TestHttpRequest()
-          ..status = 200
-          ..mockEvent = MockEvent('load', web.Event('test error'))
-          ..response = (Uint8List.fromList(kTransparentImage)).buffer;
+    final testHttpRequest = TestHttpRequest()
+      ..status = 200
+      ..mockEvent = MockEvent('load', web.Event('test error'))
+      ..response = (Uint8List.fromList(kTransparentImage)).buffer;
 
     httpRequestFactory = () {
       return testHttpRequest.getMock() as web_shim.XMLHttpRequest;
     };
 
-    const Map<String, String> headers = <String, String>{'flutter': 'flutter', 'second': 'second'};
+    const headers = <String, String>{'flutter': 'flutter', 'second': 'second'};
 
-    final Image image = Image.network(_uniqueUrl(tester.testDescription), headers: headers);
+    final image = Image.network(_uniqueUrl(tester.testDescription), headers: headers);
 
     await tester.pumpWidget(image);
 
@@ -55,18 +64,17 @@ void runTests() {
   testWidgets('loads an image from the network with unsuccessful HTTP code', (
     WidgetTester tester,
   ) async {
-    final TestHttpRequest testHttpRequest =
-        TestHttpRequest()
-          ..status = 404
-          ..mockEvent = MockEvent('error', web.Event('test error'));
+    final testHttpRequest = TestHttpRequest()
+      ..status = 404
+      ..mockEvent = MockEvent('error', web.Event('test error'));
 
     httpRequestFactory = () {
       return testHttpRequest.getMock() as web_shim.XMLHttpRequest;
     };
 
-    const Map<String, String> headers = <String, String>{'flutter': 'flutter', 'second': 'second'};
+    const headers = <String, String>{'flutter': 'flutter', 'second': 'second'};
 
-    final Image image = Image.network(_uniqueUrl(tester.testDescription), headers: headers);
+    final image = Image.network(_uniqueUrl(tester.testDescription), headers: headers);
 
     await tester.pumpWidget(image);
     expect(
@@ -80,20 +88,19 @@ void runTests() {
   });
 
   testWidgets('loads an image from the network with empty response', (WidgetTester tester) async {
-    final TestHttpRequest testHttpRequest =
-        TestHttpRequest()
-          ..status = 200
-          ..mockEvent = MockEvent('load', web.Event('successful load'))
-          ..response = (Uint8List.fromList(<int>[])).buffer;
+    final testHttpRequest = TestHttpRequest()
+      ..status = 200
+      ..mockEvent = MockEvent('load', web.Event('successful load'))
+      ..response = (Uint8List.fromList(<int>[])).buffer;
 
     httpRequestFactory = () {
       return testHttpRequest.getMock() as web_shim.XMLHttpRequest;
     };
 
-    const Map<String, String> headers = <String, String>{'flutter': 'flutter', 'second': 'second'};
+    const headers = <String, String>{'flutter': 'flutter', 'second': 'second'};
 
     final String url = _uniqueUrl(tester.testDescription);
-    final Image image = Image.network(url, headers: headers);
+    final image = Image.network(url, headers: headers);
 
     await tester.pumpWidget(image);
     expect(tester.takeException().toString(), 'HTTP request failed, statusCode: 200, $url');
@@ -102,11 +109,10 @@ void runTests() {
   testWidgets('When strategy is default, emits an error if the image is cross-origin', (
     WidgetTester tester,
   ) async {
-    final TestHttpRequest failingRequest =
-        TestHttpRequest()
-          ..status = 500
-          ..mockEvent = MockEvent('load', web.Event('bytes inaccessible'))
-          ..response = (Uint8List.fromList(<int>[])).buffer;
+    final failingRequest = TestHttpRequest()
+      ..status = 500
+      ..mockEvent = MockEvent('load', web.Event('bytes inaccessible'))
+      ..response = (Uint8List.fromList(<int>[])).buffer;
 
     httpRequestFactory = () {
       return failingRequest.getMock() as web_shim.XMLHttpRequest;
@@ -116,7 +122,7 @@ void runTests() {
       throw UnimplementedError();
     };
 
-    final NetworkImage networkImage = NetworkImage(_uniqueUrl(tester.testDescription));
+    final networkImage = NetworkImage(_uniqueUrl(tester.testDescription));
     ImageInfo? imageInfo;
     Object? recordedError;
     Completer<void>? imageCompleter;
@@ -146,12 +152,11 @@ void runTests() {
   testWidgets('When strategy is .fallback, emits a WebImageInfo if the image is cross-origin', (
     WidgetTester tester,
   ) async {
-    final TestHttpRequest failingRequest =
-        TestHttpRequest()
-          ..status = 500
-          ..mockEvent = MockEvent('load', web.Event('bytes inaccessible'))
-          ..response = (Uint8List.fromList(<int>[])).buffer;
-    final TestImgElement testImg = TestImgElement();
+    final failingRequest = TestHttpRequest()
+      ..status = 500
+      ..mockEvent = MockEvent('load', web.Event('bytes inaccessible'))
+      ..response = (Uint8List.fromList(<int>[])).buffer;
+    final testImg = TestImgElement();
 
     httpRequestFactory = () {
       return failingRequest.getMock() as web_shim.XMLHttpRequest;
@@ -162,10 +167,7 @@ void runTests() {
     };
 
     final String url = _uniqueUrl(tester.testDescription);
-    final NetworkImage networkImage = NetworkImage(
-      url,
-      webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
-    );
+    final networkImage = NetworkImage(url, webHtmlElementStrategy: WebHtmlElementStrategy.fallback);
     ImageInfo? imageInfo;
     Object? recordedError;
     Completer<void>? imageCompleter;
@@ -192,19 +194,18 @@ void runTests() {
     expect(recordedError, isNull);
     expect(imageInfo, isA<WebImageInfo>());
 
-    final WebImageInfo webImageInfo = imageInfo! as WebImageInfo;
+    final webImageInfo = imageInfo! as WebImageInfo;
     expect(webImageInfo.htmlImage.src, equals(url));
   });
 
   testWidgets(
     'When strategy is .fallback, emits an error if the image is cross-origin but fails to decode',
     (WidgetTester tester) async {
-      final TestHttpRequest failingRequest =
-          TestHttpRequest()
-            ..status = 500
-            ..mockEvent = MockEvent('load', web.Event('bytes inaccessible'))
-            ..response = (Uint8List.fromList(<int>[])).buffer;
-      final TestImgElement testImg = TestImgElement();
+      final failingRequest = TestHttpRequest()
+        ..status = 500
+        ..mockEvent = MockEvent('load', web.Event('bytes inaccessible'))
+        ..response = (Uint8List.fromList(<int>[])).buffer;
+      final testImg = TestImgElement();
 
       httpRequestFactory = () {
         return failingRequest.getMock() as web_shim.XMLHttpRequest;
@@ -214,7 +215,7 @@ void runTests() {
         return testImg.getMock() as web_shim.HTMLImageElement;
       };
 
-      final NetworkImage networkImage = NetworkImage(
+      final networkImage = NetworkImage(
         _uniqueUrl(tester.testDescription),
         webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
       );
@@ -249,12 +250,11 @@ void runTests() {
   testWidgets('When strategy is .prefer, emits an WebImageInfo if the image is same-origin', (
     WidgetTester tester,
   ) async {
-    final TestHttpRequest testHttpRequest =
-        TestHttpRequest()
-          ..status = 200
-          ..mockEvent = MockEvent('load', web.Event('test error'))
-          ..response = (Uint8List.fromList(kTransparentImage)).buffer;
-    final TestImgElement testImg = TestImgElement();
+    final testHttpRequest = TestHttpRequest()
+      ..status = 200
+      ..mockEvent = MockEvent('load', web.Event('test error'))
+      ..response = (Uint8List.fromList(kTransparentImage)).buffer;
+    final testImg = TestImgElement();
 
     httpRequestFactory = () {
       return testHttpRequest.getMock() as web_shim.XMLHttpRequest;
@@ -265,10 +265,7 @@ void runTests() {
     };
 
     final String url = _uniqueUrl(tester.testDescription);
-    final NetworkImage networkImage = NetworkImage(
-      url,
-      webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
-    );
+    final networkImage = NetworkImage(url, webHtmlElementStrategy: WebHtmlElementStrategy.prefer);
     ImageInfo? imageInfo;
     Object? recordedError;
     Completer<void>? imageCompleter;
@@ -295,19 +292,18 @@ void runTests() {
     expect(recordedError, isNull);
     expect(imageInfo, isA<WebImageInfo>());
 
-    final WebImageInfo webImageInfo = imageInfo! as WebImageInfo;
+    final webImageInfo = imageInfo! as WebImageInfo;
     expect(webImageInfo.htmlImage.src, equals(url));
   });
 
   testWidgets('When strategy is .prefer, emits a normal image if headers is not null', (
     WidgetTester tester,
   ) async {
-    final TestHttpRequest testHttpRequest =
-        TestHttpRequest()
-          ..status = 200
-          ..mockEvent = MockEvent('load', web.Event('test error'))
-          ..response = (Uint8List.fromList(kTransparentImage)).buffer;
-    final TestImgElement testImg = TestImgElement();
+    final testHttpRequest = TestHttpRequest()
+      ..status = 200
+      ..mockEvent = MockEvent('load', web.Event('test error'))
+      ..response = (Uint8List.fromList(kTransparentImage)).buffer;
+    final testImg = TestImgElement();
 
     httpRequestFactory = () {
       return testHttpRequest.getMock() as web_shim.XMLHttpRequest;
@@ -317,7 +313,7 @@ void runTests() {
       return testImg.getMock() as web_shim.HTMLImageElement;
     };
 
-    final NetworkImage networkImage = NetworkImage(
+    final networkImage = NetworkImage(
       _uniqueUrl(tester.testDescription),
       webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
       headers: const <String, String>{'flutter': 'flutter', 'second': 'second'},
@@ -353,10 +349,10 @@ void runTests() {
   testWidgets('Image renders an image using a Platform View if the image info is WebImageInfo', (
     WidgetTester tester,
   ) async {
-    final TestImgElement testImg = TestImgElement();
+    final testImg = TestImgElement();
 
-    final _TestImageStreamCompleter streamCompleter = _TestImageStreamCompleter();
-    final _TestImageProvider imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
+    final streamCompleter = _TestImageStreamCompleter();
+    final imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
 
     await tester.pumpWidget(Image(image: imageProvider));
 
@@ -375,17 +371,16 @@ void runTests() {
   });
 
   testWidgets('Does not crash when disposed between frames', (WidgetTester tester) async {
-    final TestHttpRequest testHttpRequest =
-        TestHttpRequest()
-          ..status = 200
-          ..mockEvent = MockEvent('load', web.Event('test error'))
-          ..response = (Uint8List.fromList(kTransparentImage)).buffer;
+    final testHttpRequest = TestHttpRequest()
+      ..status = 200
+      ..mockEvent = MockEvent('load', web.Event('test error'))
+      ..response = (Uint8List.fromList(kTransparentImage)).buffer;
 
     httpRequestFactory = () {
       return testHttpRequest.getMock() as web_shim.XMLHttpRequest;
     };
 
-    final Completer<void> secondFrameLock = Completer<void>();
+    final secondFrameLock = Completer<void>();
 
     // Override the codec so that the 2nd frame is delayed.
     _TestBinding.instance.overrideCodec = _TwoFrameCodec(
@@ -410,6 +405,222 @@ void runTests() {
     secondFrameLock.complete();
     expect(imageCache.currentSize, 0);
     // The test passes if there are no crashes.
+  });
+
+  testWidgets('Can handle gestures when using a Platform View', (WidgetTester tester) async {
+    final testImg = TestImgElement();
+    // Give the test img naturalHeight and naturalWidth so it can be hit by a
+    // tap gesture.
+    testImg
+      ..src = _uniqueUrl(tester.testDescription)
+      ..naturalWidth = 10
+      ..naturalHeight = 10;
+
+    final streamCompleter = _TestImageStreamCompleter();
+    final imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
+    final Key containerKey = UniqueKey();
+    var taps = 0;
+
+    await tester.pumpWidget(
+      GestureDetector(
+        onTap: () => taps++,
+        child: Container(
+          key: containerKey,
+          width: 200,
+          height: 200,
+          // Add a color to make it a visible container. This ensures that
+          // GestureDetector's default hit test behavior works.
+          color: const Color(0xFF00FF00),
+          child: Image(image: imageProvider),
+        ),
+      ),
+    );
+    streamCompleter.setData(
+      imageInfo: WebImageInfo(testImg.getMock() as web_shim.HTMLImageElement),
+    );
+    await tester.pumpAndSettle();
+    expect(taps, isZero);
+    await tester.tap(find.byKey(containerKey), warnIfMissed: false);
+    expect(taps, 1);
+  });
+
+  testWidgets('Creates an <img> with width and height set', (WidgetTester tester) async {
+    final testImg = TestImgElement();
+    testImg.src = _uniqueUrl(tester.testDescription);
+
+    final streamCompleter = _TestImageStreamCompleter();
+    final imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
+
+    await tester.pumpWidget(Image(image: imageProvider));
+    streamCompleter.setData(
+      imageInfo: WebImageInfo(testImg.getMock() as web_shim.HTMLImageElement),
+    );
+    await tester.pumpAndSettle();
+    final FakePlatformView imgElementPlatformView = fakePlatformViewRegistry.views.single;
+    expect(imgElementPlatformView.htmlElement, isA<web.HTMLImageElement>());
+    final imgElement = imgElementPlatformView.htmlElement as web.HTMLImageElement;
+    expect(imgElement.src, testImg.src);
+    expect(imgElement.style.width, '100%');
+    expect(imgElement.style.height, '100%');
+  });
+
+  testWidgets('Creates an <img> with pointer-events: none', (WidgetTester tester) async {
+    final testImg = TestImgElement();
+    testImg.src = _uniqueUrl(tester.testDescription);
+
+    final streamCompleter = _TestImageStreamCompleter();
+    final imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
+
+    await tester.pumpWidget(Image(image: imageProvider));
+    streamCompleter.setData(
+      imageInfo: WebImageInfo(testImg.getMock() as web_shim.HTMLImageElement),
+    );
+    await tester.pumpAndSettle();
+    final FakePlatformView imgElementPlatformView = fakePlatformViewRegistry.views.single;
+    expect(imgElementPlatformView.htmlElement, isA<web.HTMLImageElement>());
+    final imgElement = imgElementPlatformView.htmlElement as web.HTMLImageElement;
+    expect(imgElement.style.pointerEvents, 'none');
+  });
+
+  group('RenderWebImage', () {
+    testWidgets('BoxFit.contain centers and sizes the image correctly', (
+      WidgetTester tester,
+    ) async {
+      final testImg = TestImgElement();
+      testImg
+        ..src = _uniqueUrl(tester.testDescription)
+        ..naturalWidth = 200
+        ..naturalHeight = 100;
+      final image = WebImageInfo(testImg.getMock() as web_shim.HTMLImageElement);
+      await tester.pumpWidget(
+        Center(
+          child: SizedBox(
+            width: 300,
+            height: 300,
+            child: RawWebImage(image: image, fit: BoxFit.contain),
+          ),
+        ),
+      );
+
+      final RenderWebImage renderWebImage = tester.renderObject(find.byType(RawWebImage));
+      expect(renderWebImage.size, const Size(300, 300));
+
+      final RenderBox child = renderWebImage.child!;
+      expect(child.size, const Size(300, 150));
+
+      final parentData = child.parentData! as BoxParentData;
+      expect(parentData.offset, const Offset(0, 75));
+    });
+
+    testWidgets('BoxFit.cover sizes and clips the image correctly', (WidgetTester tester) async {
+      final testImg = TestImgElement();
+      testImg
+        ..src = _uniqueUrl(tester.testDescription)
+        ..naturalWidth = 200
+        ..naturalHeight = 100;
+      final image = WebImageInfo(testImg.getMock() as web_shim.HTMLImageElement);
+      await tester.pumpWidget(
+        RepaintBoundary(
+          child: Center(
+            child: SizedBox(
+              width: 300,
+              height: 300,
+              child: RawWebImage(image: image, fit: BoxFit.cover, alignment: Alignment.bottomRight),
+            ),
+          ),
+        ),
+      );
+
+      // Pump and settle so the layer tree updates.
+      await tester.pumpAndSettle();
+
+      final RenderWebImage renderWebImage = tester.renderObject(find.byType(RawWebImage));
+      expect(renderWebImage.size, const Size(300, 300));
+
+      final RenderBox child = renderWebImage.child!;
+      expect(child.size, const Size(600, 300));
+
+      final parentData = child.parentData! as BoxParentData;
+      expect(parentData.offset, const Offset(-300, 0));
+
+      expect(tester.layers, contains(isA<ClipRectLayer>()));
+      final ClipRectLayer clipLayer = tester.layers.whereType<ClipRectLayer>().first;
+      expect(clipLayer.clipRect, const Rect.fromLTWH(250, 150, 300, 300));
+    });
+
+    testWidgets('BoxFit.none does not scale and clips when necessary', (WidgetTester tester) async {
+      final testImg = TestImgElement();
+      testImg
+        ..src = _uniqueUrl(tester.testDescription)
+        ..naturalWidth = 200
+        ..naturalHeight = 100;
+      final image = WebImageInfo(testImg.getMock() as web_shim.HTMLImageElement);
+      await tester.pumpWidget(
+        RepaintBoundary(
+          child: Center(
+            child: SizedBox(
+              width: 100,
+              height: 50,
+              child: RawWebImage(image: image, fit: BoxFit.none, alignment: Alignment.topLeft),
+            ),
+          ),
+        ),
+      );
+
+      // Pump and settle so the layer tree updates.
+      await tester.pumpAndSettle();
+
+      final RenderWebImage renderWebImage = tester.renderObject(find.byType(RawWebImage));
+      expect(renderWebImage.size, const Size(100, 50));
+
+      final RenderBox child = renderWebImage.child!;
+      expect(child.size, const Size(200, 100));
+
+      final parentData = child.parentData! as BoxParentData;
+      expect(parentData.offset, Offset.zero);
+
+      expect(tester.layers, contains(isA<ClipRectLayer>()));
+    });
+
+    testWidgets('Alignment works correctly with various BoxFit values', (
+      WidgetTester tester,
+    ) async {
+      final testImg = TestImgElement();
+      testImg
+        ..src = _uniqueUrl(tester.testDescription)
+        ..naturalWidth = 200
+        ..naturalHeight = 100;
+      final image = WebImageInfo(testImg.getMock() as web_shim.HTMLImageElement);
+      await tester.pumpWidget(
+        Center(
+          child: SizedBox(
+            width: 300,
+            height: 300,
+            child: RawWebImage(image: image, fit: BoxFit.contain, alignment: Alignment.topLeft),
+          ),
+        ),
+      );
+
+      RenderWebImage renderWebImage = tester.renderObject(find.byType(RawWebImage));
+      RenderBox child = renderWebImage.child!;
+      var parentData = child.parentData! as BoxParentData;
+      expect(parentData.offset, Offset.zero);
+
+      await tester.pumpWidget(
+        Center(
+          child: SizedBox(
+            width: 300,
+            height: 300,
+            child: RawWebImage(image: image, fit: BoxFit.contain, alignment: Alignment.bottomRight),
+          ),
+        ),
+      );
+
+      renderWebImage = tester.renderObject(find.byType(RawWebImage));
+      child = renderWebImage.child!;
+      parentData = child.parentData! as BoxParentData;
+      expect(parentData.offset, const Offset(0, 150));
+    });
   });
 }
 
@@ -518,7 +729,7 @@ class _TestImageStreamCompleter extends ImageStreamCompleter {
       _currentImage = imageInfo;
     }
     final List<ImageStreamListener> localListeners = listeners.toList();
-    for (final ImageStreamListener listener in localListeners) {
+    for (final listener in localListeners) {
       if (imageInfo != null) {
         listener.onImage(imageInfo.clone(), false);
       }
@@ -530,7 +741,7 @@ class _TestImageStreamCompleter extends ImageStreamCompleter {
 
   void setError({required Object exception, StackTrace? stackTrace}) {
     final List<ImageStreamListener> localListeners = listeners.toList();
-    for (final ImageStreamListener listener in localListeners) {
+    for (final listener in localListeners) {
       listener.onError?.call(exception, stackTrace);
     }
   }

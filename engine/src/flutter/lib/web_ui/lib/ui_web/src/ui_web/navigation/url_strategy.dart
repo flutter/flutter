@@ -11,10 +11,9 @@ import 'package:ui/ui.dart' as ui;
 import '../testing.dart';
 import 'platform_location.dart';
 
-UrlStrategy _realDefaultUrlStrategy =
-    debugEmulateFlutterTesterEnvironment
-        ? TestUrlStrategy.fromEntry(const TestHistoryEntry('default', null, '/'))
-        : const HashUrlStrategy();
+UrlStrategy _realDefaultUrlStrategy = TestEnvironment.instance.defaultToTestUrlStrategy
+    ? TestUrlStrategy.fromEntry(const TestHistoryEntry('default', null, '/'))
+    : const HashUrlStrategy();
 
 UrlStrategy get _defaultUrlStrategy => debugDefaultUrlStrategyOverride ?? _realDefaultUrlStrategy;
 
@@ -214,7 +213,7 @@ class HashUrlStrategy implements UrlStrategy {
   /// This is useful, for example, to wait until the browser has handled the
   /// `history.back` transition.
   Future<void> _waitForPopState() {
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     late ui.VoidCallback unsubscribe;
     unsubscribe = addPopStateListener((_) {
       unsubscribe();

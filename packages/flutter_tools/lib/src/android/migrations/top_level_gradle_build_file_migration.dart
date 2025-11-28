@@ -6,13 +6,13 @@ import '../../base/file_system.dart';
 import '../../base/project_migrator.dart';
 import '../../project.dart';
 
-const String _eagerCleanTaskDeclaration = '''
+const _eagerCleanTaskDeclaration = '''
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
 ''';
 
-const String _lazyCleanTaskDeclaration = '''
+const _lazyCleanTaskDeclaration = '''
 tasks.register("clean", Delete) {
     delete rootProject.layout.buildDirectory
 }

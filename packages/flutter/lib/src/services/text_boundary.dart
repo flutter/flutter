@@ -81,8 +81,10 @@ class CharacterBoundary extends TextBoundary {
     if (position < 0) {
       return null;
     }
-    final int graphemeStart =
-        CharacterRange.at(_text, min(position, _text.length)).stringBeforeLength;
+    final int graphemeStart = CharacterRange.at(
+      _text,
+      min(position, _text.length),
+    ).stringBeforeLength;
     assert(CharacterRange.at(_text, graphemeStart).isEmpty);
     return graphemeStart;
   }
@@ -92,7 +94,7 @@ class CharacterBoundary extends TextBoundary {
     if (position >= _text.length) {
       return null;
     }
-    final CharacterRange rangeAtPosition = CharacterRange.at(_text, max(0, position + 1));
+    final rangeAtPosition = CharacterRange.at(_text, max(0, position + 1));
     final int nextBoundary = rangeAtPosition.stringBeforeLength + rangeAtPosition.current.length;
     assert(nextBoundary == _text.length || CharacterRange.at(_text, nextBoundary).isEmpty);
     return nextBoundary;
@@ -105,17 +107,17 @@ class CharacterBoundary extends TextBoundary {
     } else if (position >= _text.length) {
       return TextRange(start: getLeadingTextBoundaryAt(position) ?? -1, end: -1);
     }
-    final CharacterRange rangeAtPosition = CharacterRange.at(_text, position);
+    final rangeAtPosition = CharacterRange.at(_text, position);
     return rangeAtPosition.isNotEmpty
         ? TextRange(
-          start: rangeAtPosition.stringBeforeLength,
-          end: rangeAtPosition.stringBeforeLength + rangeAtPosition.current.length,
-        )
+            start: rangeAtPosition.stringBeforeLength,
+            end: rangeAtPosition.stringBeforeLength + rangeAtPosition.current.length,
+          )
         // rangeAtPosition is empty means `position` is a grapheme boundary.
         : TextRange(
-          start: rangeAtPosition.stringBeforeLength,
-          end: getTrailingTextBoundaryAt(position) ?? -1,
-        );
+            start: rangeAtPosition.stringBeforeLength,
+            end: getTrailingTextBoundaryAt(position) ?? -1,
+          );
   }
 }
 
@@ -164,7 +166,7 @@ class ParagraphBoundary extends TextBoundary {
       return 0;
     }
 
-    int index = position;
+    var index = position;
 
     if (index > 1 && _text.codeUnitAt(index) == 0x0A && _text.codeUnitAt(index - 1) == 0x0D) {
       index -= 2;
@@ -196,7 +198,7 @@ class ParagraphBoundary extends TextBoundary {
       return 0;
     }
 
-    int index = position;
+    var index = position;
 
     while (!TextLayoutMetrics.isLineTerminator(_text.codeUnitAt(index))) {
       index += 1;

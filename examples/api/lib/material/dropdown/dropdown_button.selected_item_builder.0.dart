@@ -65,15 +65,17 @@ class _DropdownButtonExampleState extends State<DropdownButtonExample> {
                     constraints: const BoxConstraints(minWidth: 100),
                     child: Text(
                       item,
-                      style: const TextStyle(color: Colors.blue, fontWeight: FontWeight.w600),
+                      style: const TextStyle(
+                        color: Colors.blue,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   );
                 }).toList();
               },
-              items:
-                  cities.keys.map<DropdownMenuItem<String>>((String item) {
-                    return DropdownMenuItem<String>(value: item, child: Text(item));
-                  }).toList(),
+              items: cities.keys.map<DropdownMenuItem<String>>((String item) {
+                return DropdownMenuItem<String>(value: item, child: Text(item));
+              }).toList(),
             ),
           ),
         ],

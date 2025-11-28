@@ -81,7 +81,7 @@ class RemoveFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
     }
 
     // Embed and thin frameworks in a script instead of using Xcode's link / embed build phases.
-    const String thinBinaryScript = r'xcode_backend.sh\" thin';
+    const thinBinaryScript = r'xcode_backend.sh\" thin';
     if (line.contains(thinBinaryScript) && !line.contains(' embed')) {
       return line.replaceFirst(thinBinaryScript, r'xcode_backend.sh\" embed_and_thin');
     }

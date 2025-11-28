@@ -19,29 +19,22 @@ Environment? _environment;
 /// Contains various environment variables, such as common file paths and command-line options.
 class Environment {
   factory Environment() {
-    final bool isMacosArm = ffi.Abi.current() == ffi.Abi.macosArm64;
-    final io.File dartExecutable = io.File(io.Platform.resolvedExecutable);
-    final io.File self = io.File.fromUri(io.Platform.script);
+    final isMacosArm = ffi.Abi.current() == ffi.Abi.macosArm64;
+    final dartExecutable = io.File(io.Platform.resolvedExecutable);
+    final self = io.File.fromUri(io.Platform.script);
 
     final io.Directory engineSrcDir = self.parent.parent.parent.parent.parent;
-    final io.Directory engineToolsDir = io.Directory(
-      pathlib.join(engineSrcDir.path, 'flutter', 'tools'),
-    );
-    final io.Directory outDir = io.Directory(pathlib.join(engineSrcDir.path, 'out'));
-    final io.Directory wasmReleaseOutDir = io.Directory(pathlib.join(outDir.path, 'wasm_release'));
-    final io.Directory wasmProfileOutDir = io.Directory(pathlib.join(outDir.path, 'wasm_profile'));
-    final io.Directory wasmDebugUnoptOutDir = io.Directory(
-      pathlib.join(outDir.path, 'wasm_debug_unopt'),
-    );
-    final io.Directory hostDebugUnoptDir = io.Directory(
-      pathlib.join(outDir.path, 'host_debug_unopt'),
-    );
+    final io.Directory flutterRootDir = engineSrcDir.parent.parent;
+    final engineToolsDir = io.Directory(pathlib.join(engineSrcDir.path, 'flutter', 'tools'));
+    final outDir = io.Directory(pathlib.join(engineSrcDir.path, 'out'));
+    final wasmReleaseOutDir = io.Directory(pathlib.join(outDir.path, 'wasm_release'));
+    final wasmProfileOutDir = io.Directory(pathlib.join(outDir.path, 'wasm_profile'));
+    final wasmDebugUnoptOutDir = io.Directory(pathlib.join(outDir.path, 'wasm_debug_unopt'));
+    final hostDebugUnoptDir = io.Directory(pathlib.join(outDir.path, 'host_debug_unopt'));
     final io.Directory dartSdkDir = dartExecutable.parent.parent;
-    final io.Directory webUiRootDir = io.Directory(
-      pathlib.join(engineSrcDir.path, 'flutter', 'lib', 'web_ui'),
-    );
+    final webUiRootDir = io.Directory(pathlib.join(engineSrcDir.path, 'flutter', 'lib', 'web_ui'));
 
-    for (final io.Directory expectedDirectory in <io.Directory>[engineSrcDir, webUiRootDir]) {
+    for (final expectedDirectory in <io.Directory>[engineSrcDir, webUiRootDir]) {
       if (!expectedDirectory.existsSync()) {
         throw ToolExit('$expectedDirectory does not exist.');
       }
@@ -52,6 +45,7 @@ class Environment {
       isMacosArm: isMacosArm,
       webUiRootDir: webUiRootDir,
       engineSrcDir: engineSrcDir,
+      flutterRootDir: flutterRootDir,
       engineToolsDir: engineToolsDir,
       outDir: outDir,
       wasmReleaseOutDir: wasmReleaseOutDir,
@@ -67,6 +61,7 @@ class Environment {
     required this.isMacosArm,
     required this.webUiRootDir,
     required this.engineSrcDir,
+    required this.flutterRootDir,
     required this.engineToolsDir,
     required this.outDir,
     required this.wasmReleaseOutDir,
@@ -136,6 +131,9 @@ class Environment {
     'bin',
     'dart2wasm.dart',
   );
+
+  /// Path to the root flutter directory (which itself contains `engine/src/flutter`).
+  final io.Directory flutterRootDir;
 
   /// Path to where github.com/flutter/engine is checked out inside the engine workspace.
   io.Directory get flutterDirectory => io.Directory(pathlib.join(engineSrcDir.path, 'flutter'));

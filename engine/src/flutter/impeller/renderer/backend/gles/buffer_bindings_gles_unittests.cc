@@ -33,12 +33,48 @@ TEST(BufferBindingsGLESTest, BindUniformData) {
                                              .name = "foobar",
                                              .offset = 0,
                                              .size = sizeof(float),
-                                             .byte_length = sizeof(float)}}};
+                                             .byte_length = sizeof(float),
+                                             .array_elements = 0}}};
   std::shared_ptr<ReactorGLES> reactor;
   std::shared_ptr<Allocation> backing_store = std::make_shared<Allocation>();
   ASSERT_TRUE(backing_store->Truncate(Bytes{sizeof(float)}));
   DeviceBufferGLES device_buffer(DeviceBufferDescriptor{.size = sizeof(float)},
                                  reactor, backing_store);
+  BufferView buffer_view(&device_buffer, Range(0, sizeof(float)));
+  bound_buffers.push_back(BufferResource(&shader_metadata, buffer_view));
+
+  EXPECT_TRUE(bindings.BindUniformData(mock_gl->GetProcTable(), bound_textures,
+                                       bound_buffers, Range{0, 0},
+                                       Range{0, 1}));
+}
+
+TEST(BufferBindingsGLESTest, BindArrayData) {
+  BufferBindingsGLES bindings;
+  absl::flat_hash_map<std::string, GLint> uniform_bindings;
+  uniform_bindings["SHADERMETADATA.FOOBAR[0]"] = 1;
+  bindings.SetUniformBindings(std::move(uniform_bindings));
+  auto mock_gles_impl = std::make_unique<MockGLESImpl>();
+
+  EXPECT_CALL(*mock_gles_impl, Uniform1fv(_, _, _)).Times(1);
+
+  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gles_impl));
+  std::vector<BufferResource> bound_buffers;
+  std::vector<TextureAndSampler> bound_textures;
+
+  ShaderMetadata shader_metadata = {
+      .name = "shader_metadata",
+      .members = {ShaderStructMemberMetadata{.type = ShaderType::kFloat,
+                                             .name = "foobar",
+                                             .offset = 0,
+                                             .size = sizeof(float),
+                                             .byte_length = sizeof(float) * 4,
+                                             .array_elements = 4}}};
+  std::shared_ptr<ReactorGLES> reactor;
+  std::shared_ptr<Allocation> backing_store = std::make_shared<Allocation>();
+  ASSERT_TRUE(backing_store->Truncate(Bytes{sizeof(float) * 4}));
+  DeviceBufferGLES device_buffer(
+      DeviceBufferDescriptor{.size = sizeof(float) * 4}, reactor,
+      backing_store);
   BufferView buffer_view(&device_buffer, Range(0, sizeof(float)));
   bound_buffers.push_back(BufferResource(&shader_metadata, buffer_view));
 

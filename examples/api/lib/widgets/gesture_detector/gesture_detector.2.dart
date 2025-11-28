@@ -32,10 +32,12 @@ class NestedGestureDetectorsExample extends StatefulWidget {
   const NestedGestureDetectorsExample({super.key});
 
   @override
-  State<NestedGestureDetectorsExample> createState() => _NestedGestureDetectorsExampleState();
+  State<NestedGestureDetectorsExample> createState() =>
+      _NestedGestureDetectorsExampleState();
 }
 
-class _NestedGestureDetectorsExampleState extends State<NestedGestureDetectorsExample> {
+class _NestedGestureDetectorsExampleState
+    extends State<NestedGestureDetectorsExample> {
   bool _isYellowTranslucent = false;
   _OnTapWinner _winner = _OnTapWinner.none;
   final Border highlightBorder = Border.all(color: Colors.red, width: 5);
@@ -65,8 +67,9 @@ class _NestedGestureDetectorsExampleState extends State<NestedGestureDetectorsEx
                 // parent-child hit testing. A tap on 'Yellow' is also in
                 // 'Green' bounds. Both enter the gesture arena, 'Yellow' wins
                 // because it is in front.
-                behavior:
-                    _isYellowTranslucent ? HitTestBehavior.translucent : HitTestBehavior.opaque,
+                behavior: _isYellowTranslucent
+                    ? HitTestBehavior.translucent
+                    : HitTestBehavior.opaque,
                 onTap: () {
                   debugPrint('Yellow onTap');
                   setState(() {
@@ -76,7 +79,9 @@ class _NestedGestureDetectorsExampleState extends State<NestedGestureDetectorsEx
                 child: Container(
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    border: _winner == _OnTapWinner.yellow ? highlightBorder : null,
+                    border: _winner == _OnTapWinner.yellow
+                        ? highlightBorder
+                        : null,
                     color: Colors.amber,
                   ),
                   width: 200,

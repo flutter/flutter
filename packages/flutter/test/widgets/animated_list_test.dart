@@ -11,8 +11,8 @@ void main() {
   testWidgets('SliverAnimatedList.builder respects findChildIndexCallback', (
     WidgetTester tester,
   ) async {
-    bool finderCalled = false;
-    int itemCount = 7;
+    var finderCalled = false;
+    var itemCount = 7;
     late StateSetter stateSetter;
 
     await tester.pumpWidget(
@@ -25,9 +25,8 @@ void main() {
               slivers: <Widget>[
                 SliverAnimatedList(
                   initialItemCount: itemCount,
-                  itemBuilder:
-                      (BuildContext context, int index, Animation<double> animation) =>
-                          Container(key: Key('$index'), height: 2000.0),
+                  itemBuilder: (BuildContext context, int index, Animation<double> animation) =>
+                      Container(key: Key('$index'), height: 2000.0),
                   findChildIndexCallback: (Key key) {
                     finderCalled = true;
                     return null;
@@ -53,7 +52,7 @@ void main() {
       return SizedBox(height: 100.0, child: Center(child: Text('item $index')));
     }
 
-    final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
+    final listKey = GlobalKey<AnimatedListState>();
 
     await tester.pumpWidget(
       Directionality(
@@ -108,9 +107,76 @@ void main() {
     expect(find.text('removing item'), findsNothing);
   });
 
+  testWidgets('AnimatedList should safely execute removeAllItems during long removal of one item', (
+    WidgetTester tester,
+  ) async {
+    Widget builder(BuildContext context, int index, Animation<double> animation) {
+      return SizedBox(height: 100.0, child: Center(child: Text('item $index')));
+    }
+
+    final listKey = GlobalKey<AnimatedListState>();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: AnimatedList(key: listKey, initialItemCount: 2, itemBuilder: builder),
+      ),
+    );
+
+    // Check that one AnimatedList with 2 items (item 0, item 1).
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is SliverAnimatedList &&
+            widget.initialItemCount == 2 &&
+            widget.itemBuilder == builder;
+      }),
+      findsOneWidget,
+    );
+    expect(find.byType(Text), findsExactly(2));
+    expect(find.text('item 0'), findsOne);
+    expect(find.text('item 1'), findsOne);
+
+    // Insert 1 item and check state (item 0, item 1, item 2).
+    listKey.currentState!.insertItem(0, duration: const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(find.byType(Text), findsExactly(3));
+    expect(find.text('item 0'), findsOne);
+    expect(find.text('item 1'), findsOne);
+    expect(find.text('item 2'), findsOne);
+
+    // Removing item 2 and check state (item 0, item 1, removing item 2).
+    listKey.currentState!.removeItem(2, (BuildContext context, Animation<double> animation) {
+      return const SizedBox(height: 100.0, child: Center(child: Text('removing item 2')));
+    }, duration: const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(find.byType(Text), findsExactly(3));
+    expect(find.text('item 0'), findsOne);
+    expect(find.text('item 1'), findsOne);
+    expect(find.text('removing item 2'), findsOne);
+    expect(find.text('item 2'), findsNothing);
+
+    // Call removeAllItems and check state (removing all items, removing all items, removing item 2).
+    listKey.currentState!.removeAllItems((BuildContext context, Animation<double> animation) {
+      return const SizedBox(height: 100.0, child: Center(child: Text('removing all items')));
+    }, duration: const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(find.byType(Text), findsExactly(3));
+    expect(find.text('removing all items'), findsExactly(2));
+    expect(find.text('removing item 2'), findsWidgets);
+    expect(find.text('item 0'), findsNothing);
+    expect(find.text('item 1'), findsNothing);
+    expect(find.text('item 2'), findsNothing);
+
+    // After animation is done completed, list should be empty.
+    await tester.pumpAndSettle();
+    expect(find.byType(Text), findsNothing);
+    expect(find.text('removing one item'), findsNothing);
+    expect(find.text('removing all items'), findsNothing);
+  });
+
   group('SliverAnimatedList', () {
     testWidgets('initialItemCount', (WidgetTester tester) async {
-      final Map<int, Animation<double>> animations = <int, Animation<double>>{};
+      final animations = <int, Animation<double>>{};
 
       await tester.pumpWidget(
         Directionality(
@@ -138,7 +204,7 @@ void main() {
     });
 
     testWidgets('insert', (WidgetTester tester) async {
-      final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
+      final listKey = GlobalKey<SliverAnimatedListState>();
 
       await tester.pumpWidget(
         Directionality(
@@ -215,7 +281,7 @@ void main() {
 
     // Test for insertAllItems with SliverAnimatedList
     testWidgets('insertAll', (WidgetTester tester) async {
-      final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
+      final listKey = GlobalKey<SliverAnimatedListState>();
 
       await tester.pumpWidget(
         Directionality(
@@ -268,8 +334,8 @@ void main() {
 
     // Test for removeAllItems with SliverAnimatedList
     testWidgets('remove', (WidgetTester tester) async {
-      final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
-      final List<int> items = <int>[0, 1, 2];
+      final listKey = GlobalKey<SliverAnimatedListState>();
+      final items = <int>[0, 1, 2];
 
       Widget buildItem(BuildContext context, int item, Animation<double> animation) {
         return SizeTransition(
@@ -343,8 +409,8 @@ void main() {
 
     // Test for removeAllItems with SliverAnimatedList
     testWidgets('removeAll', (WidgetTester tester) async {
-      final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
-      final List<int> items = <int>[0, 1, 2];
+      final listKey = GlobalKey<SliverAnimatedListState>();
+      final items = <int>[0, 1, 2];
 
       Widget buildItem(BuildContext context, int item, Animation<double> animation) {
         return SizeTransition(
@@ -392,18 +458,15 @@ void main() {
     });
 
     testWidgets('works in combination with other slivers', (WidgetTester tester) async {
-      final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
+      final listKey = GlobalKey<SliverAnimatedListState>();
 
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: CustomScrollView(
             slivers: <Widget>[
-              SliverList(
-                delegate: SliverChildListDelegate(<Widget>[
-                  const SizedBox(height: 100),
-                  const SizedBox(height: 100),
-                ]),
+              SliverList.list(
+                children: const <Widget>[SizedBox(height: 100), SizedBox(height: 100)],
               ),
               SliverAnimatedList(
                 key: listKey,
@@ -447,8 +510,8 @@ void main() {
     testWidgets(
       'passes correctly derived index of findChildIndexCallback to the inner SliverChildBuilderDelegate',
       (WidgetTester tester) async {
-        final List<int> items = <int>[0, 1, 2, 3];
-        final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
+        final items = <int>[0, 1, 2, 3];
+        final listKey = GlobalKey<SliverAnimatedListState>();
 
         await tester.pumpWidget(
           Directionality(
@@ -472,8 +535,11 @@ void main() {
         );
 
         // get all list entries in order
-        final List<Text> listEntries =
-            find.byType(Text).evaluate().map((Element e) => e.widget as Text).toList();
+        final List<Text> listEntries = find
+            .byType(Text)
+            .evaluate()
+            .map((Element e) => e.widget as Text)
+            .toList();
 
         // check that the list is rendered in the correct order
         expect(listEntries[0].data, equals('item 0'));
@@ -496,8 +562,11 @@ void main() {
         await tester.pumpAndSettle();
 
         // get all list entries in order
-        final List<Text> reorderedListEntries =
-            find.byType(Text).evaluate().map((Element e) => e.widget as Text).toList();
+        final List<Text> reorderedListEntries = find
+            .byType(Text)
+            .evaluate()
+            .map((Element e) => e.widget as Text)
+            .toList();
 
         // check that the stateful items of the list are rendered in the order provided by findChildIndexCallback
         expect(reorderedListEntries[0].data, equals('item 3'));
@@ -580,7 +649,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/115040
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
 
     addTearDown(controller.dispose);
 
@@ -602,7 +671,7 @@ void main() {
   });
 
   testWidgets('AnimatedList applies MediaQuery padding', (WidgetTester tester) async {
-    const EdgeInsets padding = EdgeInsets.all(30.0);
+    const padding = EdgeInsets.all(30.0);
     EdgeInsets? innerMediaQueryPadding;
     await tester.pumpWidget(
       Directionality(
@@ -649,7 +718,7 @@ void main() {
     }
 
     Widget itemRemovalBuilder(BuildContext context, int? index, Animation<double> animation) {
-      final String text = index != null ? 'removing item $index' : 'removing item';
+      final text = index != null ? 'removing item $index' : 'removing item';
       return SizedBox(height: 100.0, child: Center(child: Text(text)));
     }
 
@@ -677,7 +746,7 @@ void main() {
       return itemsSeparators.allCandidates.map((Element e) => e.widget).whereType<Text>().toList();
     }
 
-    final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
+    final listKey = GlobalKey<AnimatedListState>();
 
     await tester.pumpWidget(
       Directionality(

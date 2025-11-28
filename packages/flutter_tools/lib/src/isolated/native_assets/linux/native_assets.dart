@@ -2,46 +2,82 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:native_assets_cli/code_assets_builder.dart';
+import 'package:code_assets/code_assets.dart';
 
 import '../../../base/common.dart';
 import '../../../base/file_system.dart';
 import '../../../base/io.dart';
 import '../../../globals.dart' as globals;
 
-/// Flutter expects `clang++` to be on the path on Linux hosts.
+/// Returns a [CCompilerConfig] matching a toolchain that would be used to compile the main app with
+/// CMake on Linux.
 ///
-/// Search for the accompanying `clang`, `ar`, and `ld`.
-Future<CCompilerConfig> cCompilerConfigLinux() async {
-  const String kClangPlusPlusBinary = 'clang++';
-  const String kClangBinary = 'clang';
-  const String kArBinary = 'llvm-ar';
-  const String kLdBinary = 'ld.lld';
+/// Flutter expects `clang++` to be on the path on Linux hosts, which this uses to search for the
+/// accompanying `clang`, `ar`, and `ld`.
+///
+/// If [throwIfNotFound] is false, this is allowed to fail (in which case `null`) is returned. This
+/// is used for `flutter test` setups, where no main app is compiled and we thus don't want a
+/// `clang` toolchain to be a requirement.
+Future<CCompilerConfig?> cCompilerConfigLinux({required bool throwIfNotFound}) async {
+  const kClangPlusPlusBinary = 'clang++';
+  // NOTE: these binaries sometimes have different names depending on the installation;
+  // thus, we check for a few possible options (in order of preference).
+  const kClangBinaryOptions = ['clang'];
+  const kArBinaryOptions = ['llvm-ar', 'ar'];
+  const kLdBinaryOptions = ['ld.lld', 'ld'];
 
   final ProcessResult whichResult = await globals.processManager.run(<String>[
     'which',
     kClangPlusPlusBinary,
   ]);
   if (whichResult.exitCode != 0) {
-    throwToolExit('Failed to find $kClangPlusPlusBinary on PATH.');
+    if (throwIfNotFound) {
+      throwToolExit('Failed to find $kClangPlusPlusBinary on PATH.');
+    } else {
+      return null;
+    }
   }
   File clangPpFile = globals.fs.file((whichResult.stdout as String).trim());
   clangPpFile = globals.fs.file(await clangPpFile.resolveSymbolicLinks());
 
   final Directory clangDir = clangPpFile.parent;
-  final Map<String, Uri> binaryPaths = <String, Uri>{};
-  for (final String binary in <String>[kClangBinary, kArBinary, kLdBinary]) {
-    final File binaryFile = clangDir.childFile(binary);
-    if (!await binaryFile.exists()) {
-      throwToolExit("Failed to find $binary relative to $clangPpFile: $binaryFile doesn't exist.");
+  Uri? findExecutable({required List<String> possibleExecutableNames, required Directory path}) {
+    final Uri? found = _findExecutableIfExists(
+      possibleExecutableNames: possibleExecutableNames,
+      path: path,
+    );
+
+    if (found == null && throwIfNotFound) {
+      throwToolExit('Failed to find any of $possibleExecutableNames in $path');
     }
-    binaryPaths[binary] = binaryFile.uri;
+
+    return found;
   }
-  final Uri? archiver = binaryPaths[kArBinary];
-  final Uri? compiler = binaryPaths[kClangBinary];
-  final Uri? linker = binaryPaths[kLdBinary];
-  if (archiver == null || compiler == null || linker == null) {
-    throwToolExit('Clang could not be found.');
+
+  final Uri? linker = findExecutable(path: clangDir, possibleExecutableNames: kLdBinaryOptions);
+  final Uri? compiler = findExecutable(
+    path: clangDir,
+    possibleExecutableNames: kClangBinaryOptions,
+  );
+  final Uri? archiver = findExecutable(path: clangDir, possibleExecutableNames: kArBinaryOptions);
+
+  if (linker == null || compiler == null || archiver == null) {
+    assert(!throwIfNotFound); // otherwise, findExecutable would have thrown
+    return null;
   }
-  return CCompilerConfig(archiver: archiver, compiler: compiler, linker: linker);
+  return CCompilerConfig(linker: linker, compiler: compiler, archiver: archiver);
+}
+
+/// Searches for an executable with a name in [possibleExecutableNames]
+/// at [path] and returns the first one it finds, if one is found.
+/// Otherwise, returns `null`.
+Uri? _findExecutableIfExists({
+  required List<String> possibleExecutableNames,
+  required Directory path,
+}) {
+  return possibleExecutableNames
+      .map((execName) => path.childFile(execName))
+      .where((file) => file.existsSync())
+      .map((file) => file.uri)
+      .firstOrNull;
 }

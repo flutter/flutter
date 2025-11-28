@@ -176,29 +176,23 @@ void decodeStrut(Dart_Handle strut_data,
   }
   paragraph_style.strut_enabled = true;
 
-  const uint8_t* uint8_data = static_cast<const uint8_t*>(byte_data.data());
-  uint8_t mask = uint8_data[0];
+  const int32_t* int32_data = static_cast<const int32_t*>(byte_data.data());
+  int32_t mask = int32_data[0];
 
-  // Data is stored in order of increasing size, eg, 8 bit ints will be before
-  // any 32 bit ints. In addition, the order of decoding is the same order
-  // as it is encoded, and the order is used to maintain consistency.
-  size_t byte_count = 1;
+  size_t int32_count = 1;
   if (mask & kSFontWeightMask) {
-    paragraph_style.strut_font_weight =
-        static_cast<txt::FontWeight>(uint8_data[byte_count++]);
+    paragraph_style.strut_font_weight = int32_data[int32_count++];
   }
   if (mask & kSFontStyleMask) {
     paragraph_style.strut_font_style =
-        static_cast<txt::FontStyle>(uint8_data[byte_count++]);
+        static_cast<txt::FontStyle>(int32_data[int32_count++]);
   }
 
   paragraph_style.strut_half_leading = mask & kSLeadingDistributionMask;
 
   std::vector<float> float_data;
-  float_data.resize((byte_data.length_in_bytes() - byte_count) / 4);
-  memcpy(float_data.data(),
-         static_cast<const char*>(byte_data.data()) + byte_count,
-         byte_data.length_in_bytes() - byte_count);
+  float_data.resize((byte_data.length_in_bytes() / 4) - int32_count);
+  memcpy(float_data.data(), int32_data + int32_count, float_data.size() * 4);
   size_t float_count = 0;
   if (mask & kSFontSizeMask) {
     paragraph_style.strut_font_size = float_data[float_count++];
@@ -251,8 +245,7 @@ ParagraphBuilder::ParagraphBuilder(
     }
 
     if (mask & kPSFontWeightMask) {
-      style.font_weight =
-          static_cast<txt::FontWeight>(encoded[kPSFontWeightIndex]);
+      style.font_weight = encoded[kPSFontWeightIndex];
     }
 
     if (mask & kPSFontStyleMask) {
@@ -423,8 +416,7 @@ void ParagraphBuilder::pushStyle(const tonic::Int32List& encoded,
   if (mask & (kTSFontWeightMask | kTSFontStyleMask | kTSFontSizeMask |
               kTSLetterSpacingMask | kTSWordSpacingMask)) {
     if (mask & kTSFontWeightMask) {
-      style.font_weight =
-          static_cast<txt::FontWeight>(encoded[kTSFontWeightIndex]);
+      style.font_weight = encoded[kTSFontWeightIndex];
     }
 
     if (mask & kTSFontStyleMask) {
@@ -458,7 +450,8 @@ void ParagraphBuilder::pushStyle(const tonic::Int32List& encoded,
     Paint background(background_objects, background_data);
     if (background.isNotNull()) {
       DlPaint dl_paint;
-      background.toDlPaint(dl_paint, DlTileMode::kDecal);
+      background.paint(dl_paint, DisplayListOpFlags::kDrawParagraphFlags,
+                       DlTileMode::kDecal);
       style.background = dl_paint;
     }
   }
@@ -467,7 +460,8 @@ void ParagraphBuilder::pushStyle(const tonic::Int32List& encoded,
     Paint foreground(foreground_objects, foreground_data);
     if (foreground.isNotNull()) {
       DlPaint dl_paint;
-      foreground.toDlPaint(dl_paint, DlTileMode::kDecal);
+      foreground.paint(dl_paint, DisplayListOpFlags::kDrawParagraphFlags,
+                       DlTileMode::kDecal);
       style.foreground = dl_paint;
     }
   }

@@ -2,22 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/painting.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Linear TextScaler', () {
     test('equality', () {
-      const TextScaler a = TextScaler.linear(3.0);
+      const a = TextScaler.linear(3.0);
       final TextScaler b = TextScaler.noScaling.clamp(minScaleFactor: 3.0);
       // Creates a non-const TextScaler instance.
-      final TextScaler c = TextScaler.linear(3.0); // ignore: prefer_const_constructors
+      final c = TextScaler.linear(3.0); // ignore: prefer_const_constructors
       final TextScaler d = TextScaler.noScaling
           .clamp(minScaleFactor: 1, maxScaleFactor: 5)
           .clamp(minScaleFactor: 3, maxScaleFactor: 6);
 
-      final List<TextScaler> list = <TextScaler>[a, b, c, d];
-      for (final TextScaler lhs in list) {
+      final list = <TextScaler>[a, b, c, d];
+      for (final lhs in list) {
         expect(list, everyElement(lhs));
       }
     });
@@ -41,6 +41,21 @@ void main() {
           ),
         ),
       );
+    });
+  });
+
+  group('SystemTextScaler', () {
+    testWidgets('equality', (WidgetTester tester) async {
+      addTearDown(() => tester.platformDispatcher.clearAllTestValues());
+
+      tester.platformDispatcher.textScaleFactorTestValue = 123;
+      final TextScaler scaler1 = MediaQueryData.fromView(tester.view).textScaler;
+      tester.platformDispatcher.textScaleFactorTestValue = 345;
+      final TextScaler scaler2 = MediaQueryData.fromView(tester.view).textScaler;
+      tester.platformDispatcher.textScaleFactorTestValue = 123;
+      final TextScaler scaler3 = MediaQueryData.fromView(tester.view).textScaler;
+      expect(scaler1, scaler3);
+      expect(scaler1, isNot(scaler2));
     });
   });
 }

@@ -27,15 +27,15 @@ class ProjectBuildLocationMigration extends ProjectMigrator {
 
   @override
   String migrateLine(String line) {
-    const String legacyBuildLocation = 'location = "group:Runner.xcodeproj"';
-    const String defaultBuildLocation = 'location = "self:"';
+    const legacyBuildLocation = 'location = "group:Runner.xcodeproj"';
+    const defaultBuildLocation = 'location = "self:"';
 
     return line.replaceAll(legacyBuildLocation, defaultBuildLocation);
   }
 
   @override
   String migrateFileContents(String fileContents) {
-    const String podLocation = '''
+    const podLocation = '''
    <FileRef
       location = "group:Pods/Pods.xcodeproj">
    </FileRef>

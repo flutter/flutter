@@ -18,7 +18,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:vector_math/vector_math_64.dart';
+import 'package:vector_math/vector_math_64.dart' show Vector4;
 
 import 'debug.dart';
 
@@ -174,7 +174,7 @@ abstract class Layer with DiagnosticableTreeMixin {
     if (_callbacks.isEmpty) {
       return;
     }
-    for (final VoidCallback callback in List<VoidCallback>.of(_callbacks.values)) {
+    for (final callback in List<VoidCallback>.of(_callbacks.values)) {
       callback();
     }
   }
@@ -658,7 +658,7 @@ abstract class Layer with DiagnosticableTreeMixin {
   ///    at the given position.
   ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
   S? find<S extends Object>(Offset localPosition) {
-    final AnnotationResult<S> result = AnnotationResult<S>();
+    final result = AnnotationResult<S>();
     findAnnotations<S>(result, localPosition, onlyFirst: true);
     return result.entries.isEmpty ? null : result.entries.first.annotation;
   }
@@ -684,7 +684,7 @@ abstract class Layer with DiagnosticableTreeMixin {
   ///    given position.
   ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
   AnnotationResult<S> findAllAnnotations<S extends Object>(Offset localPosition) {
-    final AnnotationResult<S> result = AnnotationResult<S>();
+    final result = AnnotationResult<S>();
     findAnnotations<S>(result, localPosition, onlyFirst: false);
     return result;
   }
@@ -1415,7 +1415,7 @@ class ContainerLayer extends Layer {
     if (firstChild == null) {
       return <Layer>[];
     }
-    final List<Layer> children = <Layer>[];
+    final children = <Layer>[];
     Layer? child = firstChild;
     while (child != null) {
       children.add(child);
@@ -1429,12 +1429,12 @@ class ContainerLayer extends Layer {
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    final List<DiagnosticsNode> children = <DiagnosticsNode>[];
+    final children = <DiagnosticsNode>[];
     if (firstChild == null) {
       return children;
     }
     Layer? child = firstChild;
-    int count = 1;
+    var count = 1;
     while (true) {
       children.add(child!.toDiagnosticsNode(name: 'child $count'));
       if (child == lastChild) {
@@ -1491,7 +1491,7 @@ class OffsetLayer extends ContainerLayer {
   @override
   void applyTransform(Layer? child, Matrix4 transform) {
     assert(child != null);
-    transform.translate(offset.dx, offset.dy);
+    transform.translateByDouble(offset.dx, offset.dy, 0, 1);
   }
 
   @override
@@ -1517,9 +1517,9 @@ class OffsetLayer extends ContainerLayer {
   }
 
   ui.Scene _createSceneForImage(Rect bounds, {double pixelRatio = 1.0}) {
-    final ui.SceneBuilder builder = ui.SceneBuilder();
-    final Matrix4 transform = Matrix4.diagonal3Values(pixelRatio, pixelRatio, 1);
-    transform.translate(-(bounds.left + offset.dx), -(bounds.top + offset.dy));
+    final builder = ui.SceneBuilder();
+    final transform = Matrix4.diagonal3Values(pixelRatio, pixelRatio, 1);
+    transform.translateByDouble(-(bounds.left + offset.dx), -(bounds.top + offset.dy), 0, 1);
     builder.pushTransform(transform.storage);
     return buildScene(builder);
   }
@@ -1658,7 +1658,7 @@ class ClipRectLayer extends ContainerLayer {
   @override
   void addToScene(ui.SceneBuilder builder) {
     assert(clipRect != null);
-    bool enabled = true;
+    var enabled = true;
     assert(() {
       enabled = !debugDisableClipLayers;
       return true;
@@ -1745,7 +1745,7 @@ class ClipRRectLayer extends ContainerLayer {
   @override
   void addToScene(ui.SceneBuilder builder) {
     assert(clipRRect != null);
-    bool enabled = true;
+    var enabled = true;
     assert(() {
       enabled = !debugDisableClipLayers;
       return true;
@@ -1835,7 +1835,7 @@ class ClipRSuperellipseLayer extends ContainerLayer {
   @override
   void addToScene(ui.SceneBuilder builder) {
     assert(clipRSuperellipse != null);
-    bool enabled = true;
+    var enabled = true;
     assert(() {
       enabled = !debugDisableClipLayers;
       return true;
@@ -1922,7 +1922,7 @@ class ClipPathLayer extends ContainerLayer {
   @override
   void addToScene(ui.SceneBuilder builder) {
     assert(clipPath != null);
-    bool enabled = true;
+    var enabled = true;
     assert(() {
       enabled = !debugDisableClipLayers;
       return true;
@@ -2167,7 +2167,7 @@ class OpacityLayer extends OffsetLayer {
     assert(alpha != null);
 
     // Don't add this layer if there's no child.
-    bool enabled = firstChild != null;
+    var enabled = firstChild != null;
     if (!enabled) {
       // Ensure the engineLayer is disposed.
       engineLayer = null;
@@ -2578,7 +2578,7 @@ class LeaderLayer extends ContainerLayer {
   @override
   void applyTransform(Layer? child, Matrix4 transform) {
     if (offset != Offset.zero) {
-      transform.translate(offset.dx, offset.dy);
+      transform.translateByDouble(offset.dx, offset.dy, 0, 1);
     }
   }
 
@@ -2674,7 +2674,7 @@ class FollowerLayer extends ContainerLayer {
     if (_invertedTransform == null) {
       return null;
     }
-    final Vector4 vector = Vector4(localPosition.dx, localPosition.dy, 0.0, 1.0);
+    final vector = Vector4(localPosition.dx, localPosition.dy, 0.0, 1.0);
     final Vector4 result = _invertedTransform!.transform(vector);
     return Offset(result[0] - linkedOffset!.dx, result[1] - linkedOffset!.dy);
   }
@@ -2708,7 +2708,7 @@ class FollowerLayer extends ContainerLayer {
     if (_lastTransform == null) {
       return null;
     }
-    final Matrix4 result = Matrix4.translationValues(-_lastOffset!.dx, -_lastOffset!.dy, 0.0);
+    final result = Matrix4.translationValues(-_lastOffset!.dx, -_lastOffset!.dy, 0.0);
     result.multiply(_lastTransform!);
     return result;
   }
@@ -2721,7 +2721,7 @@ class FollowerLayer extends ContainerLayer {
   /// null.
   static Matrix4 _collectTransformForLayerChain(List<ContainerLayer?> layers) {
     // Initialize our result matrix.
-    final Matrix4 result = Matrix4.identity();
+    final result = Matrix4.identity();
     // Apply each layer to the matrix in turn, starting from the last layer,
     // and providing the previous layer as the child.
     for (int index = layers.length - 1; index > 0; index -= 1) {
@@ -2809,10 +2809,10 @@ class FollowerLayer extends ContainerLayer {
     );
 
     // Stores [leader, ..., commonAncestor] after calling _pathsToCommonAncestor.
-    final List<ContainerLayer> forwardLayers = <ContainerLayer>[leader];
+    final forwardLayers = <ContainerLayer>[leader];
     // Stores [this (follower), ..., commonAncestor] after calling
     // _pathsToCommonAncestor.
-    final List<ContainerLayer> inverseLayers = <ContainerLayer>[this];
+    final inverseLayers = <ContainerLayer>[this];
 
     final Layer? ancestor = _pathsToCommonAncestor(leader, this, forwardLayers, inverseLayers);
     assert(ancestor != null, 'LeaderLayer and FollowerLayer do not have a common ancestor.');
@@ -2826,7 +2826,7 @@ class FollowerLayer extends ContainerLayer {
     // of the leader layer, to account for the leader's additional paint offset
     // and layer offset (LeaderLayer.offset).
     leader.applyTransform(null, forwardTransform);
-    forwardTransform.translate(linkedOffset!.dx, linkedOffset!.dy);
+    forwardTransform.translateByDouble(linkedOffset!.dx, linkedOffset!.dy, 0, 1);
 
     final Matrix4 inverseTransform = _collectTransformForLayerChain(inverseLayers);
 
@@ -2874,7 +2874,7 @@ class FollowerLayer extends ContainerLayer {
       builder.pop();
     } else {
       _lastOffset = null;
-      final Matrix4 matrix = Matrix4.translationValues(unlinkedOffset!.dx, unlinkedOffset!.dy, .0);
+      final matrix = Matrix4.translationValues(unlinkedOffset!.dx, unlinkedOffset!.dy, .0);
       engineLayer = builder.pushTransform(
         matrix.storage,
         oldLayer: _engineLayer as ui.TransformEngineLayer?,
@@ -3012,7 +3012,7 @@ class AnnotatedRegionLayer<T extends Object> extends ContainerLayer {
     if (T == S) {
       isAbsorbed = isAbsorbed || opaque;
       final Object untypedValue = value;
-      final S typedValue = untypedValue as S;
+      final typedValue = untypedValue as S;
       result.add(AnnotationEntry<S>(annotation: typedValue, localPosition: localPosition - offset));
     }
     return isAbsorbed;

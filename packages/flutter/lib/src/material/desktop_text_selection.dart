@@ -183,17 +183,17 @@ class _DesktopTextSelectionControlsToolbarState
     }
 
     final EdgeInsets mediaQueryPadding = MediaQuery.paddingOf(context);
-    final Offset midpointAnchor = Offset(
+    final midpointAnchor = Offset(
       clampDouble(
         widget.selectionMidpoint.dx - widget.globalEditableRegion.left,
         mediaQueryPadding.left,
-        MediaQuery.sizeOf(context).width - mediaQueryPadding.right,
+        MediaQuery.widthOf(context) - mediaQueryPadding.right,
       ),
       widget.selectionMidpoint.dy - widget.globalEditableRegion.top,
     );
 
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final List<Widget> items = <Widget>[];
+    final items = <Widget>[];
 
     void addToolbarButton(String text, VoidCallback onPressed) {
       items.add(

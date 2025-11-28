@@ -27,15 +27,13 @@ Future<void> main() async {
           ...baseApkFiles,
           'lib/armeabi-v7a/libflutter.so',
           'lib/arm64-v8a/libflutter.so',
-          // Debug mode intentionally includes `x86` and `x86_64`.
-          'lib/x86/libflutter.so',
+          // Debug mode intentionally includes `x86_64`.
           'lib/x86_64/libflutter.so',
         ], apkFiles);
 
         checkCollectionDoesNotContain<String>(<String>[
           'lib/arm64-v8a/libapp.so',
           'lib/armeabi-v7a/libapp.so',
-          'lib/x86/libapp.so',
           'lib/x86_64/libapp.so',
         ], apkFiles);
 
@@ -135,8 +133,8 @@ Future<void> main() async {
 
         // When the platform-target isn't specified, we generate the snapshots
         // for arm and arm64.
-        final List<String> targetPlatforms = <String>['arm64-v8a', 'armeabi-v7a'];
-        for (final String targetPlatform in targetPlatforms) {
+        final targetPlatforms = <String>['arm64-v8a', 'armeabi-v7a'];
+        for (final targetPlatform in targetPlatforms) {
           final String androidArmSnapshotPath = path.join(
             project.rootPath,
             'build',
@@ -171,7 +169,8 @@ Future<void> main() async {
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Task exception stack trace:\n$stackTrace');
       return TaskResult.failure(e.toString());
     }
   });

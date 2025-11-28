@@ -10,8 +10,12 @@
 #include "flutter/common/graphics/gl_context_switch.h"
 #include "flutter/flow/embedded_views.h"
 #include "flutter/fml/macros.h"
-#include "third_party/skia/include/core/SkMatrix.h"
+
+#if !SLIMPELLER
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLInterface.h"
+#else
+struct GrGLInterface;
+#endif  // !SLIMPELLER
 
 namespace flutter {
 
@@ -28,7 +32,7 @@ struct GLFBOInfo {
   // The frame buffer's ID.
   uint32_t fbo_id;
   // The frame buffer's existing damage (i.e. damage since it was last used).
-  const std::optional<SkIRect> existing_damage;
+  const std::optional<DlIRect> existing_damage;
 };
 
 // Information passed during presentation of a frame.
@@ -37,7 +41,7 @@ struct GLPresentInfo {
 
   // The frame damage is a hint to compositor telling it which parts of front
   // buffer need to be updated.
-  const std::optional<SkIRect>& frame_damage;
+  const std::optional<DlIRect>& frame_damage;
 
   // Time at which this frame is scheduled to be presented. This is a hint
   // that can be passed to the platform to drop queued frames.
@@ -45,7 +49,7 @@ struct GLPresentInfo {
 
   // The buffer damage refers to the region that needs to be set as damaged
   // within the frame buffer.
-  const std::optional<SkIRect>& buffer_damage;
+  const std::optional<DlIRect>& buffer_damage;
 };
 
 class GPUSurfaceGLDelegate {
@@ -61,7 +65,7 @@ class GPUSurfaceGLDelegate {
 
   // Inform the GL Context that there's going to be no writing beyond
   // the specified region
-  virtual void GLContextSetDamageRegion(const std::optional<SkIRect>& region) {}
+  virtual void GLContextSetDamageRegion(const std::optional<DlIRect>& region) {}
 
   // Called to present the main GL surface. This is only called for the main GL
   // context and not any of the contexts dedicated for IO.
@@ -83,7 +87,7 @@ class GPUSurfaceGLDelegate {
 
   // A transformation applied to the onscreen surface before the canvas is
   // flushed.
-  virtual SkMatrix GLContextSurfaceTransformation() const;
+  virtual DlMatrix GLContextSurfaceTransformation() const;
 
   virtual sk_sp<const GrGLInterface> GetGLInterface() const;
 

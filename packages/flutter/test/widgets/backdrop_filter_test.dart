@@ -15,7 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Backdrop key is passed to backdrop Layer', (WidgetTester tester) async {
-    final BackdropKey backdropKey = BackdropKey();
+    final backdropKey = BackdropKey();
 
     Widget build({required bool enableKeys}) {
       return MaterialApp(
@@ -105,8 +105,9 @@ void main() {
 
     await tester.pumpWidget(build());
 
-    final List<BackdropFilterLayer> layers =
-        tester.layers.whereType<BackdropFilterLayer>().toList();
+    final List<BackdropFilterLayer> layers = tester.layers
+        .whereType<BackdropFilterLayer>()
+        .toList();
 
     expect(layers.length, 2);
     expect(layers[0].backdropKey, layers[1].backdropKey);

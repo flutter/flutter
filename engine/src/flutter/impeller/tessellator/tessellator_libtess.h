@@ -8,7 +8,7 @@
 #include <functional>
 #include <memory>
 
-#include "impeller/geometry/path.h"
+#include "flutter/impeller/geometry/path_source.h"
 
 struct TESStesselator;
 
@@ -51,7 +51,7 @@ class TessellatorLibtess {
   /// @brief      Generates filled triangles from the path. A callback is
   ///             invoked once for the entire tessellation.
   ///
-  /// @param[in]  path  The path to tessellate.
+  /// @param[in]  source  The path source to tessellate.
   /// @param[in]  tolerance  The tolerance value for conversion of the path to
   ///                        a polyline. This value is often derived from the
   ///                        Matrix::GetMaxBasisLength of the CTM applied to the
@@ -60,7 +60,7 @@ class TessellatorLibtess {
   ///
   /// @return The result status of the tessellation.
   ///
-  TessellatorLibtess::Result Tessellate(const Path& path,
+  TessellatorLibtess::Result Tessellate(const PathSource& source,
                                         Scalar tolerance,
                                         const BuilderCallback& callback);
 

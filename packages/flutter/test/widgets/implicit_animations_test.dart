@@ -18,14 +18,14 @@ const Duration additionalDelay = Duration(milliseconds: 1);
 
 void main() {
   late MockOnEndFunction mockOnEndFunction;
-  const Key switchKey = Key('switchKey');
+  const switchKey = Key('switchKey');
 
   setUp(() {
     mockOnEndFunction = MockOnEndFunction();
   });
 
   testWidgets('BoxConstraintsTween control test', (WidgetTester tester) async {
-    final BoxConstraintsTween tween = BoxConstraintsTween(
+    final tween = BoxConstraintsTween(
       begin: BoxConstraints.tight(const Size(20.0, 50.0)),
       end: BoxConstraints.tight(const Size(10.0, 30.0)),
     );
@@ -37,16 +37,16 @@ void main() {
   });
 
   testWidgets('DecorationTween control test', (WidgetTester tester) async {
-    final DecorationTween tween = DecorationTween(
+    final tween = DecorationTween(
       begin: const BoxDecoration(color: Color(0xFF00FF00)),
       end: const BoxDecoration(color: Color(0xFFFFFF00)),
     );
-    final BoxDecoration result = tween.lerp(0.25) as BoxDecoration;
+    final result = tween.lerp(0.25) as BoxDecoration;
     expect(result.color, isSameColorAs(const Color(0xFF3FFF00)));
   });
 
   testWidgets('EdgeInsetsTween control test', (WidgetTester tester) async {
-    final EdgeInsetsTween tween = EdgeInsetsTween(
+    final tween = EdgeInsetsTween(
       begin: const EdgeInsets.symmetric(vertical: 50.0),
       end: const EdgeInsets.only(top: 10.0, bottom: 30.0),
     );
@@ -58,7 +58,7 @@ void main() {
   });
 
   testWidgets('Matrix4Tween control test', (WidgetTester tester) async {
-    final Matrix4Tween tween = Matrix4Tween(
+    final tween = Matrix4Tween(
       begin: Matrix4.translationValues(10.0, 20.0, 30.0),
       end: Matrix4.translationValues(14.0, 24.0, 34.0),
     );
@@ -217,11 +217,14 @@ void main() {
 
   testWidgets('AnimatedSlide transition test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      wrap(child: TestAnimatedWidget(switchKey: switchKey, state: _TestAnimatedSlideWidgetState())),
+      wrap(
+        child: TestAnimatedWidget(switchKey: switchKey, state: _TestAnimatedSlideWidgetState()),
+      ),
     );
 
-    final RebuildCountingState<StatefulWidget> state =
-        tester.widget<TestAnimatedWidget>(find.byType(TestAnimatedWidget)).rebuildState!;
+    final RebuildCountingState<StatefulWidget> state = tester
+        .widget<TestAnimatedWidget>(find.byType(TestAnimatedWidget))
+        .rebuildState!;
     final Finder switchFinder = find.byKey(switchKey);
     final SlideTransition slideWidget = tester.widget<SlideTransition>(
       find.ancestor(of: find.byType(Placeholder), matching: find.byType(SlideTransition)).first,
@@ -272,11 +275,14 @@ void main() {
 
   testWidgets('AnimatedScale transition test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      wrap(child: TestAnimatedWidget(switchKey: switchKey, state: _TestAnimatedScaleWidgetState())),
+      wrap(
+        child: TestAnimatedWidget(switchKey: switchKey, state: _TestAnimatedScaleWidgetState()),
+      ),
     );
 
-    final RebuildCountingState<StatefulWidget> state =
-        tester.widget<TestAnimatedWidget>(find.byType(TestAnimatedWidget)).rebuildState!;
+    final RebuildCountingState<StatefulWidget> state = tester
+        .widget<TestAnimatedWidget>(find.byType(TestAnimatedWidget))
+        .rebuildState!;
     final Finder switchFinder = find.byKey(switchKey);
     final ScaleTransition scaleWidget = tester.widget<ScaleTransition>(
       find.ancestor(of: find.byType(Placeholder), matching: find.byType(ScaleTransition)).first,
@@ -332,8 +338,9 @@ void main() {
       ),
     );
 
-    final RebuildCountingState<StatefulWidget> state =
-        tester.widget<TestAnimatedWidget>(find.byType(TestAnimatedWidget)).rebuildState!;
+    final RebuildCountingState<StatefulWidget> state = tester
+        .widget<TestAnimatedWidget>(find.byType(TestAnimatedWidget))
+        .rebuildState!;
     final Finder switchFinder = find.byKey(switchKey);
     final RotationTransition rotationWidget = tester.widget<RotationTransition>(
       find.ancestor(of: find.byType(Placeholder), matching: find.byType(RotationTransition)).first,
@@ -389,8 +396,9 @@ void main() {
       ),
     );
 
-    final RebuildCountingState<StatefulWidget> state =
-        tester.widget<TestAnimatedWidget>(find.byType(TestAnimatedWidget)).rebuildState!;
+    final RebuildCountingState<StatefulWidget> state = tester
+        .widget<TestAnimatedWidget>(find.byType(TestAnimatedWidget))
+        .rebuildState!;
     final Finder switchFinder = find.byKey(switchKey);
     final FadeTransition opacityWidget = tester.widget<FadeTransition>(
       find.ancestor(of: find.byType(Placeholder), matching: find.byType(FadeTransition)).first,
@@ -472,8 +480,9 @@ void main() {
       ),
     );
 
-    final RebuildCountingState<StatefulWidget> state =
-        tester.widget<TestAnimatedWidget>(find.byType(TestAnimatedWidget)).rebuildState!;
+    final RebuildCountingState<StatefulWidget> state = tester
+        .widget<TestAnimatedWidget>(find.byType(TestAnimatedWidget))
+        .rebuildState!;
     final Finder switchFinder = find.byKey(switchKey);
     final SliverFadeTransition opacityWidget = tester.widget<SliverFadeTransition>(
       find
@@ -601,22 +610,20 @@ void main() {
   });
 
   testWidgets('Ensure CurvedAnimations are disposed on widget change', (WidgetTester tester) async {
-    final GlobalKey<ImplicitlyAnimatedWidgetState<AnimatedOpacity>> key =
-        GlobalKey<ImplicitlyAnimatedWidgetState<AnimatedOpacity>>();
-    final ValueNotifier<Curve> curve = ValueNotifier<Curve>(const Interval(0.0, 0.5));
+    final key = GlobalKey<ImplicitlyAnimatedWidgetState<AnimatedOpacity>>();
+    final curve = ValueNotifier<Curve>(const Interval(0.0, 0.5));
     addTearDown(curve.dispose);
     await tester.pumpWidget(
       wrap(
         child: ValueListenableBuilder<Curve>(
           valueListenable: curve,
-          builder:
-              (_, Curve c, _) => AnimatedOpacity(
-                key: key,
-                opacity: 1.0,
-                duration: const Duration(seconds: 1),
-                curve: c,
-                child: Container(color: Colors.green),
-              ),
+          builder: (_, Curve c, _) => AnimatedOpacity(
+            key: key,
+            opacity: 1.0,
+            duration: const Duration(seconds: 1),
+            curve: c,
+            child: Container(color: Colors.green),
+          ),
         ),
       ),
     );
@@ -627,7 +634,7 @@ void main() {
       fail('animation was null!');
     }
 
-    final CurvedAnimation firstCurvedAnimation = firstAnimation as CurvedAnimation;
+    final firstCurvedAnimation = firstAnimation as CurvedAnimation;
 
     expect(firstCurvedAnimation.isDisposed, isFalse);
 
@@ -640,7 +647,7 @@ void main() {
       fail('animation was null!');
     }
 
-    final CurvedAnimation secondCurvedAnimation = secondAnimation as CurvedAnimation;
+    final secondCurvedAnimation = secondAnimation as CurvedAnimation;
 
     expect(firstState, equals(secondState));
     expect(firstAnimation, isNot(equals(secondAnimation)));
@@ -656,20 +663,16 @@ void main() {
 
   group('Verify that default args match non-animated variants', () {
     const Widget child = SizedBox.shrink();
-    const Color color = Color(0x00000000);
+    const color = Color(0x00000000);
 
     testWidgets('PhysicalModel default args', (WidgetTester tester) async {
-      const AnimatedPhysicalModel animatedPhysicalModel = AnimatedPhysicalModel(
+      const animatedPhysicalModel = AnimatedPhysicalModel(
         duration: Duration.zero,
         color: color,
         shadowColor: color,
         child: child,
       );
-      const PhysicalModel physicalModel = PhysicalModel(
-        color: color,
-        shadowColor: color,
-        child: child,
-      );
+      const physicalModel = PhysicalModel(color: color, shadowColor: color, child: child);
       expect(identical(animatedPhysicalModel.shape, physicalModel.shape), isTrue);
       expect(identical(animatedPhysicalModel.clipBehavior, physicalModel.clipBehavior), isTrue);
       expect(identical(animatedPhysicalModel.borderRadius, physicalModel.borderRadius), isTrue);
@@ -720,8 +723,8 @@ class TestAnimatedWidget extends StatefulWidget {
 
   RebuildCountingState<StatefulWidget>? get rebuildState =>
       state is RebuildCountingState<StatefulWidget>
-          ? state as RebuildCountingState<StatefulWidget>
-          : null;
+      ? state as RebuildCountingState<StatefulWidget>
+      : null;
 
   @override
   State<StatefulWidget> createState() => state; // ignore: no_logic_in_create_state, this test predates the lint
@@ -914,10 +917,9 @@ class _TestAnimatedDefaultTextStyleWidgetState extends _TestAnimatedWidgetState 
     return AnimatedDefaultTextStyle(
       duration: duration,
       onEnd: widget.callback,
-      style:
-          toggle
-              ? const TextStyle(fontStyle: FontStyle.italic)
-              : const TextStyle(fontStyle: FontStyle.normal),
+      style: toggle
+          ? const TextStyle(fontStyle: FontStyle.italic)
+          : const TextStyle(fontStyle: FontStyle.normal),
       child: child,
     );
   }
