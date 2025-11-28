@@ -2314,13 +2314,12 @@ class _CupertinoDialogActionState extends State<CupertinoDialogAction> implement
     });
   }
 
-  Color get effectiveFocusBackgroundColor => HSLColor.fromColor(
-    (widget.focusColor ?? CupertinoColors.activeBlue).withOpacity(
-      CupertinoTheme.brightnessOf(context) == Brightness.light
-          ? kCupertinoButtonTintedOpacityLight
-          : kCupertinoButtonTintedOpacityDark,
-    ),
-  ).toColor();
+  Color get effectiveFocusBackgroundColor =>
+      (widget.focusColor ?? CupertinoColors.activeBlue).withValues(
+        alpha: CupertinoTheme.brightnessOf(context) == Brightness.light
+            ? kCupertinoButtonTintedOpacityLight
+            : kCupertinoButtonTintedOpacityDark,
+      );
 
   // Dialog action content shrinks to fit, up to a certain point, and if it still
   // cannot fit at the minimum size, the text content is ellipsized.

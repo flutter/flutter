@@ -2353,9 +2353,9 @@ void main() {
 
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
-    final Color defaultLDarkFocusColor = HSLColor.fromColor(
-      CupertinoColors.activeBlue.withOpacity(kCupertinoButtonTintedOpacityDark),
-    ).toColor();
+    final Color defaultLDarkFocusColor = CupertinoColors.activeBlue.withValues(
+      alpha: kCupertinoButtonTintedOpacityDark,
+    );
 
     await tester.pumpWidget(
       TestScaffoldApp(
@@ -2403,9 +2403,9 @@ void main() {
 
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
-    final Color defaultLightFocusColor = HSLColor.fromColor(
-      CupertinoColors.activeBlue.withOpacity(kCupertinoButtonTintedOpacityLight),
-    ).toColor();
+    final Color defaultLightFocusColor = CupertinoColors.activeBlue.withValues(
+      alpha: kCupertinoButtonTintedOpacityLight,
+    );
 
     await tester.pumpWidget(
       TestScaffoldApp(
@@ -2455,9 +2455,9 @@ void main() {
 
       const Color focusColor = Colors.teal;
 
-      final Color defaultLightFocusColor = HSLColor.fromColor(
-        focusColor.withOpacity(kCupertinoButtonTintedOpacityLight),
-      ).toColor();
+      final Color defaultLightFocusColor = focusColor.withValues(
+        alpha: kCupertinoButtonTintedOpacityLight,
+      );
 
       await tester.pumpWidget(
         TestScaffoldApp(
@@ -2513,9 +2513,9 @@ void main() {
 
       const Color focusColor = Colors.teal;
 
-      final Color defaultDarkFocusColor = HSLColor.fromColor(
-        focusColor.withOpacity(kCupertinoButtonTintedOpacityDark),
-      ).toColor();
+      final Color defaultDarkFocusColor = focusColor.withValues(
+        alpha: kCupertinoButtonTintedOpacityDark,
+      );
 
       await tester.pumpWidget(
         TestScaffoldApp(
