@@ -43,7 +43,7 @@ class ReactorWorker final : public impeller::ReactorGLES::Worker {
 };
 
 EmbedderSurfaceGLImpeller::EmbedderSurfaceGLImpeller(
-    EmbedderSurfaceGLSkia::GLDispatchTable gl_dispatch_table,
+    GLDispatchTable gl_dispatch_table,
     bool fbo_reset_after_present,
     std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder)
     : gl_dispatch_table_(std::move(gl_dispatch_table)),
