@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
-import '../../semantics.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'context_menu.dart';
