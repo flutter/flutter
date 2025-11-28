@@ -2099,11 +2099,17 @@ class _CupertinoAlertActionSection extends StatelessWidget {
       );
     }
 
-    return CupertinoScrollbar(
-      controller: scrollController,
-      child: SingleChildScrollView(
+    return CupertinoFocusHalo.withRRect(
+      borderRadius: BorderRadius.only(
+        bottomLeft: CupertinoPopupSurface._clipper.bottomLeft,
+        bottomRight: CupertinoPopupSurface._clipper.bottomRight,
+      ),
+      child: CupertinoScrollbar(
         controller: scrollController,
-        child: _AlertDialogActionsLayout(dividerThickness: _kDividerThickness, children: column),
+        child: SingleChildScrollView(
+          controller: scrollController,
+          child: _AlertDialogActionsLayout(dividerThickness: _kDividerThickness, children: column),
+        ),
       ),
     );
   }

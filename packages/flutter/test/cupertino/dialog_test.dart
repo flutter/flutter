@@ -2160,8 +2160,8 @@ void main() {
   testWidgets('CupertinoDialogAction in CupertinoDialog can be focused and unfocused', (
     WidgetTester tester,
   ) async {
-    final FocusNode focusNodeOne = FocusNode(debugLabel: 'CupertinoDialogAction One');
-    final FocusNode focusNodeTwo = FocusNode(debugLabel: 'CupertinoDialogAction Two');
+    final focusNodeOne = FocusNode(debugLabel: 'CupertinoDialogAction One');
+    final focusNodeTwo = FocusNode(debugLabel: 'CupertinoDialogAction Two');
 
     addTearDown(focusNodeOne.dispose);
     addTearDown(focusNodeTwo.dispose);
@@ -2215,8 +2215,8 @@ void main() {
   testWidgets(
     'CupertinoDialogActions in CupertinoDialog can be traversed with keyboard when onPressed is not null',
     (WidgetTester tester) async {
-      final FocusNode focusNodeOne = FocusNode(debugLabel: 'CupertinoDialogAction One');
-      final FocusNode focusNodeTwo = FocusNode(debugLabel: 'CupertinoDialogAction Two');
+      final focusNodeOne = FocusNode(debugLabel: 'CupertinoDialogAction One');
+      final focusNodeTwo = FocusNode(debugLabel: 'CupertinoDialogAction Two');
 
       addTearDown(focusNodeOne.dispose);
       addTearDown(focusNodeTwo.dispose);
@@ -2267,8 +2267,8 @@ void main() {
   testWidgets(
     'CupertinoDialogActions in CupertinoDialog cannot be traversed with keyboard when onPressed is null',
     (WidgetTester tester) async {
-      final FocusNode focusNodeOne = FocusNode(debugLabel: 'CupertinoDialogAction One');
-      final FocusNode focusNodeTwo = FocusNode(debugLabel: 'CupertinoDialogAction Two');
+      final focusNodeOne = FocusNode(debugLabel: 'CupertinoDialogAction One');
+      final focusNodeTwo = FocusNode(debugLabel: 'CupertinoDialogAction Two');
 
       addTearDown(focusNodeOne.dispose);
       addTearDown(focusNodeTwo.dispose);
@@ -2315,7 +2315,7 @@ void main() {
   testWidgets('CupertinoDialogAction in CupertinoDialog can be selected with keyboard', (
     WidgetTester tester,
   ) async {
-    bool isOneSelected = false;
+    var isOneSelected = false;
 
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
@@ -2347,7 +2347,7 @@ void main() {
   testWidgets('CupertinoDialogAction has correct default focused appearance in dark theme', (
     WidgetTester tester,
   ) async {
-    final FocusNode focusNode = FocusNode(debugLabel: 'CupertinoDialogAction');
+    final focusNode = FocusNode(debugLabel: 'CupertinoDialogAction');
 
     addTearDown(focusNode.dispose);
 
@@ -2397,7 +2397,7 @@ void main() {
   testWidgets('CupertinoDialogAction has correct default focused appearance in light theme', (
     WidgetTester tester,
   ) async {
-    final FocusNode focusNode = FocusNode(debugLabel: 'CupertinoDialogAction');
+    final focusNode = FocusNode(debugLabel: 'CupertinoDialogAction');
 
     addTearDown(focusNode.dispose);
 
@@ -2447,7 +2447,7 @@ void main() {
   testWidgets(
     'CupertinoDialogAction has correct focused appearance in light theme when focus color is overridden',
     (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode(debugLabel: 'CupertinoDialogAction');
+      final focusNode = FocusNode(debugLabel: 'CupertinoDialogAction');
 
       addTearDown(focusNode.dispose);
 
@@ -2505,7 +2505,7 @@ void main() {
   testWidgets(
     'CupertinoDialogAction has correct focused appearance in dark theme when focus color is overridden',
     (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode(debugLabel: 'CupertinoDialogAction');
+      final focusNode = FocusNode(debugLabel: 'CupertinoDialogAction');
 
       addTearDown(focusNode.dispose);
 
