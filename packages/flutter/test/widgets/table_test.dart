@@ -1062,30 +1062,30 @@ void main() {
   });
 
   group('TableCell colSpan and rowSpan tests', () {
-    const double spannedCellHeight = 50.0;
-    const double regularCellHeight = 80.0;
-    const double tableWidth = 300.0;
+    const spannedCellHeight = 50.0;
+    const regularCellHeight = 80.0;
+    const tableWidth = 300.0;
 
     testWidgets('TableCell with default colSpan and rowSpan', (WidgetTester tester) async {
-      const TableCell cell = TableCell(child: Text('Cell'));
+      const cell = TableCell(child: Text('Cell'));
       expect(cell.colSpan, equals(1));
       expect(cell.rowSpan, equals(1));
     });
 
     testWidgets('TableCell with custom colSpan', (WidgetTester tester) async {
-      const TableCell cell = TableCell(colSpan: 3, child: Text('Cell'));
+      const cell = TableCell(colSpan: 3, child: Text('Cell'));
       expect(cell.colSpan, equals(3));
       expect(cell.rowSpan, equals(1));
     });
 
     testWidgets('TableCell with custom rowSpan', (WidgetTester tester) async {
-      const TableCell cell = TableCell(rowSpan: 2, child: Text('Cell'));
+      const cell = TableCell(rowSpan: 2, child: Text('Cell'));
       expect(cell.colSpan, equals(1));
       expect(cell.rowSpan, equals(2));
     });
 
     testWidgets('TableCell with both colSpan and rowSpan', (WidgetTester tester) async {
-      const TableCell cell = TableCell(colSpan: 2, rowSpan: 3, child: Text('Cell'));
+      const cell = TableCell(colSpan: 2, rowSpan: 3, child: Text('Cell'));
       expect(cell.colSpan, equals(2));
       expect(cell.rowSpan, equals(3));
     });
@@ -1279,7 +1279,7 @@ void main() {
     });
 
     testWidgets('TableCell parent data contains colSpan and rowSpan', (WidgetTester tester) async {
-      const ValueKey<String> testKey = ValueKey<String>('TestCell');
+      const testKey = ValueKey<String>('TestCell');
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
