@@ -260,6 +260,8 @@ class FlutterWindowsEngine {
   // Returns true if the semantics tree is enabled.
   bool semantics_enabled() const { return semantics_enabled_; }
 
+  bool iaccessibleex_enabled() const { return true; }
+
   // Refresh accessibility features and send them to the engine.
   void UpdateAccessibilityFeatures();
 
