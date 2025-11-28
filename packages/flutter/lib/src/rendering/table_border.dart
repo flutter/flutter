@@ -38,7 +38,7 @@ class TableBorder {
     BorderStyle style = BorderStyle.solid,
     BorderRadius borderRadius = BorderRadius.zero,
   }) {
-    final BorderSide side = BorderSide(color: color, width: width, style: style);
+    final side = BorderSide(color: color, width: width, style: style);
     return TableBorder(
       top: side,
       right: side,
@@ -143,7 +143,7 @@ class TableBorder {
     if (_outerBorderIsUniform && borderRadius != BorderRadius.zero) {
       final RRect outer = borderRadius.toRRect(rect);
       final RRect inner = outer.deflate(top.width);
-      final Paint paint = Paint()..color = top.color;
+      final paint = Paint()..color = top.color;
       canvas.drawDRRect(outer, inner, paint);
       return;
     }
@@ -180,7 +180,7 @@ class TableBorder {
     required BorderSide left,
   }) {
     final RRect borderRect = borderRadius.toRRect(rect);
-    final Paint paint = Paint()..color = color;
+    final paint = Paint()..color = color;
 
     final RRect inner = EdgeInsets.fromLTRB(
       left.strokeInset,
@@ -269,7 +269,7 @@ class TableBorder {
       ..style = PaintingStyle.stroke;
     path.reset();
 
-    for (final double x in columns) {
+    for (final x in columns) {
       path.moveTo(rect.left + x, rect.top);
       path.lineTo(rect.left + x, rect.bottom);
     }
@@ -294,7 +294,7 @@ class TableBorder {
       ..style = PaintingStyle.stroke;
     path.reset();
 
-    for (final double y in rows) {
+    for (final y in rows) {
       path.moveTo(rect.left, rect.top + y);
       path.lineTo(rect.right, rect.top + y);
     }
@@ -323,13 +323,13 @@ class TableBorder {
 
     double yOffset = rect.top;
 
-    for (int y = 0; y < rowHeights.length; y++) {
+    for (var y = 0; y < rowHeights.length; y++) {
       final double nextY = yOffset + rowHeights[y];
       final Set<int> hiddenCols = y < spannedColumnsPerRow.length
           ? spannedColumnsPerRow[y]
           : const <int>{};
 
-      for (int x = 0; x < columnList.length; x++) {
+      for (var x = 0; x < columnList.length; x++) {
         if (hiddenCols.contains(x + 1)) {
           continue;
         }
@@ -367,17 +367,17 @@ class TableBorder {
 
     // Compute absolute column offsets including the left and right edges.
     final int columnCount = columnList.length;
-    final Float64List columnOffsets = Float64List(columnCount + 2);
+    final columnOffsets = Float64List(columnCount + 2);
     columnOffsets[0] = rect.left;
-    for (int i = 0; i < columnCount; i++) {
+    for (var i = 0; i < columnCount; i++) {
       columnOffsets[i + 1] = rect.left + columnList[i];
     }
     columnOffsets[columnCount + 1] = rect.right;
 
-    for (int y = 0; y < rowList.length; y++) {
+    for (var y = 0; y < rowList.length; y++) {
       final double yPos = rect.top + rowList[y];
 
-      for (int x = 0; x < columnOffsets.length - 1; x++) {
+      for (var x = 0; x < columnOffsets.length - 1; x++) {
         final Set<int> hiddenRows = x < spannedRowsPerColumn.length
             ? spannedRowsPerColumn[x]
             : const <int>{};
@@ -446,8 +446,8 @@ class TableBorder {
     assert(rows.isEmpty || (rows.first >= 0.0 && rows.last <= rect.height));
     assert(columns.isEmpty || (columns.first >= 0.0 && columns.last <= rect.width));
 
-    final Paint paint = Paint();
-    final Path path = Path();
+    final paint = Paint();
+    final path = Path();
 
     // Determine which types of spans exist to choose the optimal rendering path.
     final bool hasRowSpans = spannedRowsPerColumn.isNotEmpty;

@@ -140,7 +140,7 @@ import java.util.List;
  *   <li>When you are unsure when/if you will need to display a Flutter experience.
  * </ul>
  *
- * <p>See https://flutter.dev/docs/development/add-to-app/performance for additional performance
+ * <p>See https://docs.flutter.dev/development/add-to-app/performance for additional performance
  * explorations on engine loading.
  *
  * <p>The following illustrates how to pre-warm and cache a {@link

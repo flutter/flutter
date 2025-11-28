@@ -25,7 +25,11 @@ class AutocompleteExampleApp extends StatelessWidget {
 class AutocompleteBasicExample extends StatelessWidget {
   const AutocompleteBasicExample({super.key});
 
-  static const List<String> _options = <String>['aardvark', 'bobcat', 'chameleon'];
+  static const List<String> _options = <String>[
+    'aardvark',
+    'bobcat',
+    'chameleon',
+  ];
 
   @override
   Widget build(BuildContext context) {

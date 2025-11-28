@@ -376,3 +376,12 @@ void gtk_clipboard_request_text(GtkClipboard* clipboard,
                                 gpointer user_data) {
   check_thread();
 }
+
+void atk_object_notify_state_change(AtkObject* accessible,
+                                    AtkState state,
+                                    gboolean value) {
+  check_thread();
+  if (mock != nullptr) {
+    mock->atk_object_notify_state_change(accessible, state, value);
+  }
+}

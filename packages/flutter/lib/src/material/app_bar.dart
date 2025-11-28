@@ -633,6 +633,16 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// {@template flutter.material.appbar.excludeHeaderSemantics}
   /// Whether the title should be wrapped with header [Semantics].
   ///
+  /// If false, the title will be used as [SemanticsProperties.namesRoute]
+  /// for Android, Fuchsia, Linux, and Windows platform. This means the title is
+  /// announced by screen reader when transition to this route.
+  ///
+  /// The accessibility behavior is platform adaptive, based on the device's
+  /// actual platform rather than the theme's platform setting. This ensures that
+  /// assistive technologies like VoiceOver on iOS and macOS receive the correct
+  /// `namesRoute` semantic information, even when the app's theme is configured
+  /// to mimic a different platform's appearance.
+  ///
   /// Defaults to false.
   /// {@endtemplate}
   final bool excludeHeaderSemantics;
@@ -911,7 +921,7 @@ class _AppBarState extends State<AppBar> {
 
     final FlexibleSpaceBarSettings? settings = context
         .dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>();
-    final Set<WidgetState> states = <WidgetState>{
+    final states = <WidgetState>{
       if (settings?.isScrolledUnder ?? _scrolledUnder) WidgetState.scrolledUnder,
     };
 
@@ -936,7 +946,7 @@ class _AppBarState extends State<AppBar> {
       Theme.of(context).colorScheme.surfaceContainer,
     );
 
-    final Color effectiveBackgroundColor = states.contains(WidgetState.scrolledUnder)
+    final effectiveBackgroundColor = states.contains(WidgetState.scrolledUnder)
         ? scrolledUnderBackground
         : backgroundColor;
 
@@ -1066,7 +1076,7 @@ class _AppBarState extends State<AppBar> {
       title = _AppBarTitleBox(child: title);
       if (!widget.excludeHeaderSemantics) {
         title = Semantics(
-          namesRoute: switch (theme.platform) {
+          namesRoute: switch (defaultTargetPlatform) {
             TargetPlatform.android ||
             TargetPlatform.fuchsia ||
             TargetPlatform.linux ||
@@ -2461,7 +2471,7 @@ class _RenderExpandedTitleBox extends RenderShiftedBox {
     }
     size = constraints.biggest;
     child.layout(constraints.widthConstraints().deflate(padding), parentUsesSize: true);
-    final BoxParentData childParentData = child.parentData! as BoxParentData;
+    final childParentData = child.parentData! as BoxParentData;
     childParentData.offset = _childOffsetFromSize(child.size, size);
   }
 }

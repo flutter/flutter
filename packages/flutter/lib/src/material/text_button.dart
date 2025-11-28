@@ -93,7 +93,7 @@ class TextButton extends ButtonStyleButton {
     super.statesController,
     super.isSemanticButton,
     required Widget super.child,
-  });
+  }) : _addPadding = false;
 
   /// Create a text button from a pair of widgets that serve as the button's
   /// [icon] and [label].
@@ -101,56 +101,38 @@ class TextButton extends ButtonStyleButton {
   /// The icon and label are arranged in a row and padded by 8 logical pixels
   /// at the ends, with an 8 pixel gap in between.
   ///
-  /// If [icon] is null, will create a [TextButton] instead.
+  /// If [icon] is null, this constructor will create a [TextButton]
+  /// that doesn't display an icon.
   ///
   /// {@macro flutter.material.ButtonStyleButton.iconAlignment}
   ///
-  factory TextButton.icon({
-    Key? key,
-    required VoidCallback? onPressed,
-    VoidCallback? onLongPress,
-    ValueChanged<bool>? onHover,
-    ValueChanged<bool>? onFocusChange,
-    ButtonStyle? style,
-    FocusNode? focusNode,
-    bool? autofocus,
-    Clip? clipBehavior,
-    MaterialStatesController? statesController,
+  TextButton.icon({
+    super.key,
+    required super.onPressed,
+    super.onLongPress,
+    super.onHover,
+    super.onFocusChange,
+    super.style,
+    super.focusNode,
+    super.autofocus = false,
+    super.clipBehavior = Clip.none,
+    super.statesController,
     Widget? icon,
     required Widget label,
     IconAlignment? iconAlignment,
-  }) {
-    if (icon == null) {
-      return TextButton(
-        key: key,
-        onPressed: onPressed,
-        onLongPress: onLongPress,
-        onHover: onHover,
-        onFocusChange: onFocusChange,
-        style: style,
-        focusNode: focusNode,
-        autofocus: autofocus ?? false,
-        clipBehavior: clipBehavior ?? Clip.none,
-        statesController: statesController,
-        child: label,
-      );
-    }
-    return _TextButtonWithIcon(
-      key: key,
-      onPressed: onPressed,
-      onLongPress: onLongPress,
-      onHover: onHover,
-      onFocusChange: onFocusChange,
-      style: style,
-      focusNode: focusNode,
-      autofocus: autofocus ?? false,
-      clipBehavior: clipBehavior ?? Clip.none,
-      statesController: statesController,
-      icon: icon,
-      label: label,
-      iconAlignment: iconAlignment,
-    );
-  }
+  }) : _addPadding = icon != null,
+       super(
+         child: icon != null
+             ? _TextButtonWithIconChild(
+                 label: label,
+                 icon: icon,
+                 buttonStyle: style,
+                 iconAlignment: iconAlignment,
+               )
+             : label,
+       );
+
+  final bool _addPadding;
 
   /// A static convenience method that constructs a text button
   /// [ButtonStyle] given simple values.
@@ -334,9 +316,7 @@ class TextButton extends ButtonStyleButton {
   /// * `maximumSize` - Size.infinite
   /// * `side` - null
   /// * `shape` - RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))
-  /// * `mouseCursor`
-  ///   * disabled - SystemMouseCursors.basic
-  ///   * others - SystemMouseCursors.click
+  /// * `mouseCursor` - WidgetStateMouseCursor.adaptiveClickable
   /// * `visualDensity` - theme.visualDensity
   /// * `tapTargetSize` - theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration
@@ -384,9 +364,7 @@ class TextButton extends ButtonStyleButton {
   /// * `maximumSize` - Size.infinite
   /// * `side` - null
   /// * `shape` - StadiumBorder()
-  /// * `mouseCursor`
-  ///   * disabled - SystemMouseCursors.basic
-  ///   * others - SystemMouseCursors.click
+  /// * `mouseCursor` - WidgetStateMouseCursor.adaptiveClickable
   /// * `visualDensity` - theme.visualDensity
   /// * `tapTargetSize` - theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration
@@ -401,8 +379,7 @@ class TextButton extends ButtonStyleButton {
   ButtonStyle defaultStyleOf(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
-
-    return Theme.of(context).useMaterial3
+    final ButtonStyle buttonStyle = theme.useMaterial3
         ? _TextButtonDefaultsM3(context)
         : styleFrom(
             foregroundColor: colorScheme.primary,
@@ -416,7 +393,7 @@ class TextButton extends ButtonStyleButton {
             minimumSize: const Size(64, 36),
             maximumSize: Size.infinite,
             shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
-            enabledMouseCursor: SystemMouseCursors.click,
+            enabledMouseCursor: kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
             disabledMouseCursor: SystemMouseCursors.basic,
             visualDensity: theme.visualDensity,
             tapTargetSize: theme.materialTapTargetSize,
@@ -425,6 +402,27 @@ class TextButton extends ButtonStyleButton {
             alignment: Alignment.center,
             splashFactory: InkRipple.splashFactory,
           );
+
+    // Only apply padding when TextButton has an Icon.
+    if (_addPadding) {
+      final double defaultFontSize =
+          buttonStyle.textStyle?.resolve(const <WidgetState>{})?.fontSize ?? 14.0;
+      final double effectiveTextScale =
+          MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
+      final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
+        theme.useMaterial3
+            ? const EdgeInsetsDirectional.fromSTEB(12, 8, 16, 8)
+            : const EdgeInsets.all(8),
+        const EdgeInsets.symmetric(horizontal: 4),
+        const EdgeInsets.symmetric(horizontal: 4),
+        effectiveTextScale,
+      );
+      return buttonStyle.copyWith(
+        padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(scaledPadding),
+      );
+    }
+
+    return buttonStyle;
   }
 
   /// Returns the [TextButtonThemeData.style] of the closest
@@ -447,51 +445,6 @@ EdgeInsetsGeometry _scaledPadding(BuildContext context) {
     const EdgeInsets.symmetric(horizontal: 4),
     effectiveTextScale,
   );
-}
-
-class _TextButtonWithIcon extends TextButton {
-  _TextButtonWithIcon({
-    super.key,
-    required super.onPressed,
-    super.onLongPress,
-    super.onHover,
-    super.onFocusChange,
-    super.style,
-    super.focusNode,
-    bool? autofocus,
-    super.clipBehavior,
-    super.statesController,
-    required Widget icon,
-    required Widget label,
-    IconAlignment? iconAlignment,
-  }) : super(
-         autofocus: autofocus ?? false,
-         child: _TextButtonWithIconChild(
-           icon: icon,
-           label: label,
-           buttonStyle: style,
-           iconAlignment: iconAlignment,
-         ),
-       );
-
-  @override
-  ButtonStyle defaultStyleOf(BuildContext context) {
-    final bool useMaterial3 = Theme.of(context).useMaterial3;
-    final ButtonStyle buttonStyle = super.defaultStyleOf(context);
-    final double defaultFontSize =
-        buttonStyle.textStyle?.resolve(const <WidgetState>{})?.fontSize ?? 14.0;
-    final double effectiveTextScale =
-        MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
-    final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
-      useMaterial3 ? const EdgeInsetsDirectional.fromSTEB(12, 8, 16, 8) : const EdgeInsets.all(8),
-      const EdgeInsets.symmetric(horizontal: 4),
-      const EdgeInsets.symmetric(horizontal: 4),
-      effectiveTextScale,
-    );
-    return buttonStyle.copyWith(
-      padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(scaledPadding),
-    );
-  }
 }
 
 class _TextButtonWithIconChild extends StatelessWidget {
@@ -636,13 +589,7 @@ class _TextButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  WidgetStateProperty<MouseCursor?>? get mouseCursor =>
-    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-      if (states.contains(WidgetState.disabled)) {
-        return SystemMouseCursors.basic;
-      }
-      return SystemMouseCursors.click;
-    });
+  WidgetStateProperty<MouseCursor?>? get mouseCursor => WidgetStateMouseCursor.adaptiveClickable;
 
   @override
   VisualDensity? get visualDensity => Theme.of(context).visualDensity;

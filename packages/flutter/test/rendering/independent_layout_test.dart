@@ -34,23 +34,23 @@ class TestLayout {
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
-  final ViewConfiguration testConfiguration = ViewConfiguration(
+  final testConfiguration = ViewConfiguration(
     logicalConstraints: BoxConstraints.tight(const Size(800.0, 600.0)),
   );
 
   test('onscreen layout does not affect offscreen', () {
-    final TestLayout onscreen = TestLayout();
-    final TestLayout offscreen = TestLayout();
+    final onscreen = TestLayout();
+    final offscreen = TestLayout();
     expect(onscreen.child.hasSize, isFalse);
     expect(onscreen.painted, isFalse);
     expect(offscreen.child.hasSize, isFalse);
     expect(offscreen.painted, isFalse);
     // Attach the offscreen to a custom render view and owner
-    final RenderView renderView = RenderView(
+    final renderView = RenderView(
       configuration: testConfiguration,
       view: RendererBinding.instance.platformDispatcher.views.single,
     );
-    final PipelineOwner pipelineOwner = PipelineOwner();
+    final pipelineOwner = PipelineOwner();
     renderView.attach(pipelineOwner);
     renderView.child = offscreen.root;
     renderView.prepareInitialFrame();
@@ -73,18 +73,18 @@ void main() {
   });
 
   test('offscreen layout does not affect onscreen', () {
-    final TestLayout onscreen = TestLayout();
-    final TestLayout offscreen = TestLayout();
+    final onscreen = TestLayout();
+    final offscreen = TestLayout();
     expect(onscreen.child.hasSize, isFalse);
     expect(onscreen.painted, isFalse);
     expect(offscreen.child.hasSize, isFalse);
     expect(offscreen.painted, isFalse);
     // Attach the offscreen to a custom render view and owner
-    final RenderView renderView = RenderView(
+    final renderView = RenderView(
       configuration: testConfiguration,
       view: RendererBinding.instance.platformDispatcher.views.single,
     );
-    final PipelineOwner pipelineOwner = PipelineOwner();
+    final pipelineOwner = PipelineOwner();
     renderView.attach(pipelineOwner);
     renderView.child = offscreen.root;
     renderView.prepareInitialFrame();

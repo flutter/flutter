@@ -64,7 +64,7 @@ void main() {
       // Needs https://github.com/flutter/flutter/issues/129659
       return;
     }
-    final String testAssetName =
+    final testAssetName =
         'test_reorder_uniforms_${DateTime.now().millisecondsSinceEpoch}.frag.iplr';
     final String buildDir = Platform.environment['FLUTTER_BUILD_DIRECTORY']!;
     final String assetsDir = path.join(buildDir, 'gen/flutter/lib/ui/assets');
@@ -72,7 +72,7 @@ void main() {
     final String shaderSrcB = path.join(assetsDir, 'uniforms_reordered.frag.iplr');
     final String shaderSrcC = path.join(assetsDir, testAssetName);
 
-    final File fileC = File(shaderSrcC);
+    final fileC = File(shaderSrcC);
     final Uint8List sourceA = File(shaderSrcA).readAsBytesSync();
     final Uint8List sourceB = File(shaderSrcB).readAsBytesSync();
 
@@ -99,15 +99,14 @@ void main() {
       // Needs https://github.com/flutter/flutter/issues/129659
       return;
     }
-    final String testAssetName =
-        'test_insert_uniforms_${DateTime.now().millisecondsSinceEpoch}.frag.iplr';
+    final testAssetName = 'test_insert_uniforms_${DateTime.now().millisecondsSinceEpoch}.frag.iplr';
     final String buildDir = Platform.environment['FLUTTER_BUILD_DIRECTORY']!;
     final String assetsDir = path.join(buildDir, 'gen/flutter/lib/ui/assets');
     final String shaderSrcA = path.join(assetsDir, 'uniforms.frag.iplr');
     final String shaderSrcB = path.join(assetsDir, 'uniforms_inserted.frag.iplr');
     final String shaderSrcC = path.join(assetsDir, testAssetName);
 
-    final File fileC = File(shaderSrcC);
+    final fileC = File(shaderSrcC);
     final Uint8List sourceA = File(shaderSrcA).readAsBytesSync();
     final Uint8List sourceB = File(shaderSrcB).readAsBytesSync();
 
@@ -124,6 +123,41 @@ void main() {
       expect(slot.shaderIndex, 7);
       // Make sure there is no crash here.
       slot.set(1.0);
+    } finally {
+      if (fileC.existsSync()) {
+        fileC.deleteSync();
+      }
+    }
+  });
+
+  test('reorder samplers', () async {
+    if (impellerEnabled) {
+      // Needs https://github.com/flutter/flutter/issues/129659
+      return;
+    }
+    final testAssetName =
+        'test_reorder_samplers_${DateTime.now().millisecondsSinceEpoch}.frag.iplr';
+    final String buildDir = Platform.environment['FLUTTER_BUILD_DIRECTORY']!;
+    final String assetsDir = path.join(buildDir, 'gen/flutter/lib/ui/assets');
+    final String shaderSrcA = path.join(assetsDir, 'double_sampler.frag.iplr');
+    final String shaderSrcB = path.join(assetsDir, 'double_sampler_swapped.frag.iplr');
+    final String shaderSrcC = path.join(assetsDir, testAssetName);
+
+    final fileC = File(shaderSrcC);
+    final Uint8List sourceA = File(shaderSrcA).readAsBytesSync();
+    final Uint8List sourceB = File(shaderSrcB).readAsBytesSync();
+
+    fileC.writeAsBytesSync(sourceA, flush: true);
+
+    try {
+      final FragmentProgram program = await FragmentProgram.fromAsset(testAssetName);
+      final FragmentShader shader = program.fragmentShader();
+      final ImageSamplerSlot slot = shader.getImageSampler('tex_a');
+      expect(slot.shaderIndex, 0);
+
+      fileC.writeAsBytesSync(sourceB, flush: true);
+      await _performReload(testAssetName);
+      expect(slot.shaderIndex, 1);
     } finally {
       if (fileC.existsSync()) {
         fileC.deleteSync();

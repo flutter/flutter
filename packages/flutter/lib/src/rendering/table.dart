@@ -113,8 +113,8 @@ class IntrinsicColumnWidth extends TableColumnWidth {
 
   @override
   double minIntrinsicWidth(Iterable<RenderBox> cells, double containerWidth) {
-    double result = 0.0;
-    for (final RenderBox cell in cells) {
+    var result = 0.0;
+    for (final cell in cells) {
       result = math.max(result, cell.getMinIntrinsicWidth(double.infinity));
     }
     return result;
@@ -122,8 +122,8 @@ class IntrinsicColumnWidth extends TableColumnWidth {
 
   @override
   double maxIntrinsicWidth(Iterable<RenderBox> cells, double containerWidth) {
-    double result = 0.0;
-    for (final RenderBox cell in cells) {
+    var result = 0.0;
+    for (final cell in cells) {
       result = math.max(result, cell.getMaxIntrinsicWidth(double.infinity));
     }
     return result;
@@ -431,13 +431,13 @@ class RenderTable extends RenderBox {
     _columns = value;
     _children = List<RenderBox?>.filled(columns * rows, null);
     final int columnsToCopy = math.min(columns, oldColumns);
-    for (int y = 0; y < rows; y += 1) {
-      for (int x = 0; x < columnsToCopy; x += 1) {
+    for (var y = 0; y < rows; y += 1) {
+      for (var x = 0; x < columnsToCopy; x += 1) {
         _children[x + y * columns] = oldChildren[x + y * oldColumns];
       }
     }
     if (oldColumns > columns) {
-      for (int y = 0; y < rows; y += 1) {
+      for (var y = 0; y < rows; y += 1) {
         for (int x = columns; x < oldColumns; x += 1) {
           final int xy = x + y * oldColumns;
           if (oldChildren[xy] != null) {
@@ -626,7 +626,7 @@ class RenderTable extends RenderBox {
     // semantics tree.
     for (final RenderBox? child in _children) {
       if (child != null && child.hasSize) {
-        final TableCellParentData cellParentData = child.parentData! as TableCellParentData;
+        final cellParentData = child.parentData! as TableCellParentData;
         if (cellParentData.rowSpan != 0 && cellParentData.colSpan != 0) {
           visitor(child);
         }
@@ -649,9 +649,9 @@ class RenderTable extends RenderBox {
     SemanticsConfiguration config,
     Iterable<SemanticsNode> children,
   ) {
-    final List<SemanticsNode> rows = <SemanticsNode>[];
+    final rows = <SemanticsNode>[];
 
-    final List<List<List<SemanticsNode>>> rawCells = List<List<List<SemanticsNode>>>.generate(
+    final rawCells = List<List<List<SemanticsNode>>>.generate(
       _rows,
       (int rowIndex) =>
           List<List<SemanticsNode>>.generate(_columns, (int columnIndex) => <SemanticsNode>[]),
@@ -690,11 +690,11 @@ class RenderTable extends RenderBox {
       final Offset offset =
           (previousTransform != null ? MatrixUtils.getAsTranslation(previousTransform) : null) ??
           Offset.zero;
-      final Matrix4 newTransform = Matrix4.translationValues(offset.dx + dx, offset.dy + dy, 0);
+      final newTransform = Matrix4.translationValues(offset.dx + dx, offset.dy + dy, 0);
       node.transform = newTransform;
     }
 
-    for (final SemanticsNode child in children) {
+    for (final child in children) {
       if (_idToIndexMap.containsKey(child.id)) {
         final _Index index = _idToIndexMap[child.id]!;
         final int y = index.y;
@@ -712,7 +712,7 @@ class RenderTable extends RenderBox {
       }
     }
 
-    for (int y = 0; y < _rows; y++) {
+    for (var y = 0; y < _rows; y++) {
       final Rect rowBox = getRowBox(y);
       // Skip row if it's empty
       if (rowBox.height == 0) {
@@ -728,9 +728,9 @@ class RenderTable extends RenderBox {
           ));
 
       // The list of cells of this Row.
-      final List<SemanticsNode> cells = <SemanticsNode>[];
+      final cells = <SemanticsNode>[];
 
-      for (int x = 0; x < columns; x++) {
+      for (var x = 0; x < columns; x++) {
         final List<SemanticsNode> rawChildrens = rawCells[y][x];
         if (rawChildrens.isEmpty) {
           continue;
@@ -749,7 +749,7 @@ class RenderTable extends RenderBox {
         if (!addCellWrapper) {
           cell = rawChildrens.single;
         } else {
-          final _Index index = _Index(y, x);
+          final index = _Index(y, x);
           cell = _cachedCells.putIfAbsent(index, () => SemanticsNode())
             ..updateWith(
               config: SemanticsConfiguration()..role = SemanticsRole.cell,
@@ -771,7 +771,7 @@ class RenderTable extends RenderBox {
             ..transform = Matrix4.translationValues(_columnLefts!.elementAt(x), 0, 0)
             ..rect = Rect.fromLTWH(0, 0, cellWidth, rowBox.height);
         }
-        for (final SemanticsNode child in rawChildrens) {
+        for (final child in rawChildrens) {
           _idToIndexMap[child.id] = _Index(y, x);
 
           // Shift child transform.
@@ -850,8 +850,8 @@ class RenderTable extends RenderBox {
     // to dropChild a child that's remaining with us, because that
     // would clear their parentData field)
     final Set<RenderBox> lostChildren = HashSet<RenderBox>();
-    for (int y = 0; y < _rows; y += 1) {
-      for (int x = 0; x < _columns; x += 1) {
+    for (var y = 0; y < _rows; y += 1) {
+      for (var x = 0; x < _columns; x += 1) {
         final int xyOld = x + y * _columns;
         final int xyNew = x + y * columns;
         if (_children[xyOld] != null &&
@@ -861,9 +861,9 @@ class RenderTable extends RenderBox {
       }
     }
     // adopt cells that are arriving, and cross cells that are just moving off our list of lostChildren
-    int y = 0;
+    var y = 0;
     while (y * columns < cells.length) {
-      for (int x = 0; x < columns; x += 1) {
+      for (var x = 0; x < columns; x += 1) {
         final int xyNew = x + y * columns;
         final int xyOld = x + y * _columns;
         if (cells[xyNew] != null &&
@@ -912,7 +912,7 @@ class RenderTable extends RenderBox {
     assert(_children.length == rows * columns);
     _rows += 1;
     _children.addAll(cells);
-    for (final RenderBox? cell in cells) {
+    for (final cell in cells) {
       if (cell != null) {
         adoptChild(cell);
       }
@@ -983,8 +983,8 @@ class RenderTable extends RenderBox {
   @override
   double computeMinIntrinsicWidth(double height) {
     assert(_children.length == rows * columns);
-    double totalMinWidth = 0.0;
-    for (int x = 0; x < columns; x += 1) {
+    var totalMinWidth = 0.0;
+    for (var x = 0; x < columns; x += 1) {
       final TableColumnWidth columnWidth = _columnWidths[x] ?? defaultColumnWidth;
       final Iterable<RenderBox> columnCells = column(x);
       totalMinWidth += columnWidth.minIntrinsicWidth(columnCells, double.infinity);
@@ -995,8 +995,8 @@ class RenderTable extends RenderBox {
   @override
   double computeMaxIntrinsicWidth(double height) {
     assert(_children.length == rows * columns);
-    double totalMaxWidth = 0.0;
-    for (int x = 0; x < columns; x += 1) {
+    var totalMaxWidth = 0.0;
+    for (var x = 0; x < columns; x += 1) {
       final TableColumnWidth columnWidth = _columnWidths[x] ?? defaultColumnWidth;
       final Iterable<RenderBox> columnCells = column(x);
       totalMaxWidth += columnWidth.maxIntrinsicWidth(columnCells, double.infinity);
@@ -1010,10 +1010,10 @@ class RenderTable extends RenderBox {
     // honorable mention, most likely to improve if taught about memoization award
     assert(_children.length == rows * columns);
     final List<double> widths = _computeColumnWidths(BoxConstraints.tightForFinite(width: width));
-    double rowTop = 0.0;
-    for (int y = 0; y < rows; y += 1) {
-      double rowHeight = 0.0;
-      for (int x = 0; x < columns; x += 1) {
+    var rowTop = 0.0;
+    for (var y = 0; y < rows; y += 1) {
+      var rowHeight = 0.0;
+      for (var x = 0; x < columns; x += 1) {
         final int xy = x + y * columns;
         final RenderBox? child = _children[xy];
         if (child != null) {
@@ -1046,7 +1046,7 @@ class RenderTable extends RenderBox {
   // The following uses sync* because it is public API documented to return a
   // lazy iterable.
   Iterable<RenderBox> column(int x) sync* {
-    for (int y = 0; y < rows; y += 1) {
+    for (var y = 0; y < rows; y += 1) {
       final int xy = x + y * columns;
       final RenderBox? child = _children[xy];
       if (child != null) {
@@ -1064,7 +1064,7 @@ class RenderTable extends RenderBox {
   Iterable<RenderBox> row(int y) sync* {
     final int start = y * columns;
     final int end = (y + 1) * columns;
-    for (int xy = start; xy < end; xy += 1) {
+    for (var xy = start; xy < end; xy += 1) {
       final RenderBox? child = _children[xy];
       if (child != null) {
         yield child;
@@ -1085,14 +1085,13 @@ class RenderTable extends RenderBox {
     //    necessary, applying minimum column widths as we go
 
     // 1. apply ideal widths, and collect information we'll need later
-    final List<double> widths = List<double>.filled(columns, 0.0);
-    final List<double> minWidths = List<double>.filled(columns, 0.0);
-    final List<double?> flexes = List<double?>.filled(columns, null);
-    double tableWidth = 0.0; // running tally of the sum of widths[x] for all x
-    double unflexedTableWidth =
-        0.0; // sum of the maxIntrinsicWidths of any column that has null flex
-    double totalFlex = 0.0;
-    for (int x = 0; x < columns; x += 1) {
+    final widths = List<double>.filled(columns, 0.0);
+    final minWidths = List<double>.filled(columns, 0.0);
+    final flexes = List<double?>.filled(columns, null);
+    var tableWidth = 0.0; // running tally of the sum of widths[x] for all x
+    var unflexedTableWidth = 0.0; // sum of the maxIntrinsicWidths of any column that has null flex
+    var totalFlex = 0.0;
+    for (var x = 0; x < columns; x += 1) {
       final TableColumnWidth columnWidth = _columnWidths[x] ?? defaultColumnWidth;
       final Iterable<RenderBox> columnCells = column(x);
       // apply ideal width (maxIntrinsicWidth)
@@ -1142,7 +1141,7 @@ class RenderTable extends RenderBox {
         final double remainingWidth = targetWidth - unflexedTableWidth;
         assert(remainingWidth.isFinite);
         assert(remainingWidth >= 0.0);
-        for (int x = 0; x < columns; x += 1) {
+        for (var x = 0; x < columns; x += 1) {
           if (flexes[x] != null) {
             final double flexedWidth = remainingWidth * flexes[x]! / totalFlex;
             assert(flexedWidth.isFinite);
@@ -1161,7 +1160,7 @@ class RenderTable extends RenderBox {
     //    minWidth.
     else if (tableWidth < minWidthConstraint) {
       final double delta = (minWidthConstraint - tableWidth) / columns;
-      for (int x = 0; x < columns; x += 1) {
+      for (var x = 0; x < columns; x += 1) {
         widths[x] = widths[x] + delta;
       }
       tableWidth = minWidthConstraint;
@@ -1191,8 +1190,8 @@ class RenderTable extends RenderBox {
       // available columns, then do the same to the non-flexible ones.
       int availableColumns = columns;
       while (deficit > precisionErrorTolerance && totalFlex > precisionErrorTolerance) {
-        double newTotalFlex = 0.0;
-        for (int x = 0; x < columns; x += 1) {
+        var newTotalFlex = 0.0;
+        for (var x = 0; x < columns; x += 1) {
           if (flexes[x] != null) {
             final double newWidth = widths[x] - deficit * flexes[x]! / totalFlex;
             assert(newWidth.isFinite);
@@ -1220,8 +1219,8 @@ class RenderTable extends RenderBox {
         // of columns that aren't at their minWidth.
         final double delta = deficit / availableColumns;
         assert(delta != 0);
-        int newAvailableColumns = 0;
-        for (int x = 0; x < columns; x += 1) {
+        var newAvailableColumns = 0;
+        for (var x = 0; x < columns; x += 1) {
           final double availableDelta = widths[x] - minWidths[x];
           if (availableDelta > 0.0) {
             if (availableDelta <= delta) {
@@ -1266,26 +1265,26 @@ class RenderTable extends RenderBox {
     }
 
     // Pre-allocate lists with correct size for better performance
-    final List<Set<int>> logicalSpannedColumnsPerRow = List<Set<int>>.generate(
+    final logicalSpannedColumnsPerRow = List<Set<int>>.generate(
       rows,
       (_) => <int>{},
       growable: false,
     );
-    final List<Set<int>> logicalSpannedRowsPerColumn = List<Set<int>>.generate(
+    final logicalSpannedRowsPerColumn = List<Set<int>>.generate(
       columns,
       (_) => <int>{},
       growable: false,
     );
 
-    for (int y = 0; y < rows; y++) {
-      for (int x = 0; x < columns; x++) {
+    for (var y = 0; y < rows; y++) {
+      for (var x = 0; x < columns; x++) {
         final int xy = x + y * columns;
         final RenderBox? child = _children[xy];
         if (child == null) {
           continue;
         }
 
-        final TableCellParentData parentData = child.parentData! as TableCellParentData;
+        final parentData = child.parentData! as TableCellParentData;
         final int colSpan = parentData.colSpan;
         final int rowSpan = parentData.rowSpan;
 
@@ -1338,22 +1337,22 @@ class RenderTable extends RenderBox {
 
         // Mark vertical dividers to skip for the first row of the span.
         if (colSpan > 1) {
-          for (int dx = 1; dx < maxColSpan; dx++) {
+          for (var dx = 1; dx < maxColSpan; dx++) {
             logicalSpannedColumnsPerRow[y].add(x + dx);
           }
         }
 
         // Mark horizontal dividers to skip for the first column of the span.
         if (rowSpan > 1) {
-          for (int dy = 1; dy < maxRowSpan; dy++) {
+          for (var dy = 1; dy < maxRowSpan; dy++) {
             logicalSpannedRowsPerColumn[x].add(y + dy);
           }
         }
 
         // Mark internal dividers to skip for cells that span both rows and columns.
         if (colSpan > 1 && rowSpan > 1) {
-          for (int dx = 1; dx < maxColSpan; dx++) {
-            for (int dy = 1; dy < maxRowSpan; dy++) {
+          for (var dx = 1; dx < maxColSpan; dx++) {
+            for (var dy = 1; dy < maxRowSpan; dy++) {
               logicalSpannedRowsPerColumn[x + dx].add(y + dy);
               logicalSpannedColumnsPerRow[y + dy].add(x + dx);
             }
@@ -1389,7 +1388,7 @@ class RenderTable extends RenderBox {
   void _updateCachedRowHeights() {
     if (_rowTops.length > 1) {
       _cachedRowHeights = Float64List(_rowTops.length - 1);
-      for (int i = 0; i < _cachedRowHeights.length; i++) {
+      for (var i = 0; i < _cachedRowHeights.length; i++) {
         _cachedRowHeights[i] = _rowTops[i + 1] - _rowTops[i];
       }
     } else {
@@ -1437,13 +1436,13 @@ class RenderTable extends RenderBox {
     }
     final List<double> widths = _computeColumnWidths(constraints);
     double? baselineOffset;
-    for (int col = 0; col < columns; col += 1) {
+    for (var col = 0; col < columns; col += 1) {
       final RenderBox? child = _children[col];
-      final BoxConstraints childConstraints = BoxConstraints.tightFor(width: widths[col]);
+      final childConstraints = BoxConstraints.tightFor(width: widths[col]);
       if (child == null) {
         continue;
       }
-      final TableCellParentData childParentData = child.parentData! as TableCellParentData;
+      final childParentData = child.parentData! as TableCellParentData;
       final double? childBaseline = switch (childParentData.verticalAlignment ??
           defaultVerticalAlignment) {
         TableCellVerticalAlignment.baseline => child.getDryBaseline(childConstraints, baseline),
@@ -1468,16 +1467,16 @@ class RenderTable extends RenderBox {
       return constraints.constrain(Size.zero);
     }
     final List<double> widths = _computeColumnWidths(constraints);
-    final Float64List pendingRowSpanHeights = Float64List(rows);
+    final pendingRowSpanHeights = Float64List(rows);
     final double tableWidth = widths.fold(0.0, (double a, double b) => a + b);
-    double rowTop = 0.0;
-    for (int y = 0; y < rows; y += 1) {
-      double rowHeight = 0.0;
-      for (int x = 0; x < columns; x += 1) {
+    var rowTop = 0.0;
+    for (var y = 0; y < rows; y += 1) {
+      var rowHeight = 0.0;
+      for (var x = 0; x < columns; x += 1) {
         final int xy = x + y * columns;
         final RenderBox? child = _children[xy];
         if (child != null) {
-          final TableCellParentData childParentData = child.parentData! as TableCellParentData;
+          final childParentData = child.parentData! as TableCellParentData;
           final int rowSpan = childParentData.rowSpan;
           switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
             case TableCellVerticalAlignment.baseline:
@@ -1543,21 +1542,17 @@ class RenderTable extends RenderBox {
       return;
     }
     final List<double> widths = _computeColumnWidths(constraints);
-    final List<Set<int>> hiddenCells = List<Set<int>>.generate(
-      rows,
-      (_) => <int>{},
-      growable: false,
-    );
+    final hiddenCells = List<Set<int>>.generate(rows, (_) => <int>{}, growable: false);
     // Use typed lists for predictable memory layout and faster indexed access.
-    final Float64List positions = Float64List(columns);
-    final Float64List pendingRowSpanHeights = Float64List(rows);
-    final Float64List rowHeights = Float64List(rows);
-    final Float64List beforeBaselineDistances = Float64List(rows);
+    final positions = Float64List(columns);
+    final pendingRowSpanHeights = Float64List(rows);
+    final rowHeights = Float64List(rows);
+    final beforeBaselineDistances = Float64List(rows);
     // Use flat arrays instead of nested lists for better cache locality.
-    final Float64List spanWidths = Float64List(rows * columns); // [row][col] = row * columns + col
-    final Float64List baselines = Float64List(rows * columns); // [row][col] = row * columns + col
+    final spanWidths = Float64List(rows * columns); // [row][col] = row * columns + col
+    final baselines = Float64List(rows * columns); // [row][col] = row * columns + col
 
-    bool hasCellSpans = false;
+    var hasCellSpans = false;
 
     switch (textDirection) {
       case TextDirection.rtl:
@@ -1569,7 +1564,7 @@ class RenderTable extends RenderBox {
         _tableWidth = positions.first + widths.first;
       case TextDirection.ltr:
         positions[0] = 0.0;
-        for (int x = 1; x < columns; x += 1) {
+        for (var x = 1; x < columns; x += 1) {
           positions[x] = positions[x - 1] + widths[x - 1];
         }
         _columnLefts = positions;
@@ -1579,21 +1574,21 @@ class RenderTable extends RenderBox {
     _baselineDistance = null;
 
     // First layout pass: measure children and collect span information.
-    double rowTop = 0.0;
-    for (int y = 0; y < rows; y += 1) {
-      double rowHeight = 0.0;
-      bool haveBaseline = false;
-      double beforeBaselineDistance = 0.0;
-      double afterBaselineDistance = 0.0;
+    var rowTop = 0.0;
+    for (var y = 0; y < rows; y += 1) {
+      var rowHeight = 0.0;
+      var haveBaseline = false;
+      var beforeBaselineDistance = 0.0;
+      var afterBaselineDistance = 0.0;
       final Set<int> currentRowHiddenCells = hiddenCells[y];
 
-      for (int x = 0; x < columns; x += 1) {
+      for (var x = 0; x < columns; x += 1) {
         final int xy = x + y * columns;
         final RenderBox? child = _children[xy];
         if (child == null) {
           continue;
         }
-        final TableCellParentData childParentData = child.parentData! as TableCellParentData;
+        final childParentData = child.parentData! as TableCellParentData;
         childParentData.x = x;
         childParentData.y = y;
 
@@ -1601,8 +1596,8 @@ class RenderTable extends RenderBox {
         final int rowSpan = childParentData.rowSpan;
 
         // Compute the total width covered by this cell's column span.
-        double spanWidth = 0.0;
-        for (int i = 0; i < colSpan && (x + i) < columns; i++) {
+        var spanWidth = 0.0;
+        for (var i = 0; i < colSpan && (x + i) < columns; i++) {
           spanWidth += widths[x + i];
         }
         spanWidths[y * columns + x] = spanWidth;
@@ -1610,8 +1605,8 @@ class RenderTable extends RenderBox {
         // Mark hidden cells that are covered by a spanning cell.
         if (colSpan > 1 || rowSpan > 1) {
           hasCellSpans = true;
-          for (int dx = 0; dx < colSpan && x + dx < columns; dx++) {
-            for (int dy = 0; dy < rowSpan && y + dy < rows; dy++) {
+          for (var dx = 0; dx < colSpan && x + dx < columns; dx++) {
+            for (var dy = 0; dy < rowSpan && y + dy < rows; dy++) {
               if (dx == 0 && dy == 0) {
                 continue;
               }
@@ -1711,20 +1706,20 @@ class RenderTable extends RenderBox {
 
     // Second layout pass: position children using final row heights.
     rowTop = 0.0;
-    for (int y = 0; y < rows; y += 1) {
+    for (var y = 0; y < rows; y += 1) {
       _rowTops.add(rowTop);
       final double beforeBaselineDistance = beforeBaselineDistances[y];
       final double rowHeight = rowHeights[y];
       final Set<int> currentRowHiddenCells = hiddenCells[y];
 
-      for (int x = 0; x < columns; x += 1) {
+      for (var x = 0; x < columns; x += 1) {
         final int xy = x + y * columns;
         final RenderBox? child = _children[xy];
         if (child == null) {
           continue;
         }
 
-        final TableCellParentData childParentData = child.parentData! as TableCellParentData;
+        final childParentData = child.parentData! as TableCellParentData;
         final int rowSpan = childParentData.rowSpan;
         final bool isHiddenCell = currentRowHiddenCells.contains(x);
         if (isHiddenCell) {
@@ -1732,10 +1727,10 @@ class RenderTable extends RenderBox {
         }
 
         // Compute the total height covered by this cell's row span.
-        double spanHeight = rowHeight;
+        var spanHeight = rowHeight;
         if (rowSpan > 1) {
           spanHeight = 0.0;
-          for (int dy = 0; dy < rowSpan && (y + dy) < rows; dy++) {
+          for (var dy = 0; dy < rowSpan && (y + dy) < rows; dy++) {
             spanHeight += rowHeights[y + dy];
           }
         }
@@ -1785,7 +1780,7 @@ class RenderTable extends RenderBox {
     for (int index = _children.length - 1; index >= 0; index -= 1) {
       final RenderBox? child = _children[index];
       if (child != null && child.hasSize) {
-        final BoxParentData childParentData = child.parentData! as BoxParentData;
+        final childParentData = child.parentData! as BoxParentData;
         final bool isHit = result.addWithPaintOffset(
           offset: childParentData.offset,
           position: position,
@@ -1807,7 +1802,7 @@ class RenderTable extends RenderBox {
     assert(_children.length == rows * columns);
     if (rows * columns == 0) {
       if (border != null) {
-        final Rect borderRect = Rect.fromLTWH(offset.dx, offset.dy, _tableWidth, 0.0);
+        final borderRect = Rect.fromLTWH(offset.dx, offset.dy, _tableWidth, 0.0);
         border!.paint(
           context.canvas,
           borderRect,
@@ -1822,7 +1817,7 @@ class RenderTable extends RenderBox {
     if (_rowDecorations != null) {
       assert(_rowDecorations!.length == _rowDecorationPainters!.length);
       final Canvas canvas = context.canvas;
-      for (int y = 0; y < rows; y += 1) {
+      for (var y = 0; y < rows; y += 1) {
         if (_rowDecorations!.length <= y) {
           break;
         }
@@ -1836,10 +1831,10 @@ class RenderTable extends RenderBox {
         }
       }
     }
-    for (int index = 0; index < _children.length; index += 1) {
+    for (var index = 0; index < _children.length; index += 1) {
       final RenderBox? child = _children[index];
       if (child != null && child.hasSize) {
-        final BoxParentData childParentData = child.parentData! as BoxParentData;
+        final childParentData = child.parentData! as BoxParentData;
         context.paintChild(child, childParentData.offset + offset);
       }
     }
@@ -1849,7 +1844,7 @@ class RenderTable extends RenderBox {
       // The border rect might not fill the entire height of this render object
       // if the rows underflow. We always force the columns to fill the width of
       // the render object, which means the columns cannot underflow.
-      final Rect borderRect = Rect.fromLTWH(offset.dx, offset.dy, _tableWidth, _rowTops.last);
+      final borderRect = Rect.fromLTWH(offset.dx, offset.dy, _tableWidth, _rowTops.last);
       final Iterable<double> rows = _rowTops.getRange(1, _rowTops.length - 1);
       final Iterable<double> columns = _columnLefts!.skip(1);
 

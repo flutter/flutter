@@ -16,6 +16,8 @@ impeller_shaders("entity_shaders") {
   shaders = [
     "shaders/blending/advanced_blend.vert",
     "shaders/blending/advanced_blend.frag",
+    "shaders/circle.frag",
+    "shaders/circle.vert",
     "shaders/clip.frag",
     "shaders/clip.vert",
     "shaders/glyph_atlas.frag",
@@ -113,6 +115,8 @@ impeller_component("entity") {
     "contents/anonymous_contents.h",
     "contents/atlas_contents.cc",
     "contents/atlas_contents.h",
+    "contents/circle_contents.cc",
+    "contents/circle_contents.h",
     "contents/clip_contents.cc",
     "contents/clip_contents.h",
     "contents/color_source_contents.cc",
@@ -243,7 +247,7 @@ impeller_component("entity") {
     "../renderer",
     "../typographer",
     "//flutter/display_list",
-    "//flutter/third_party/abseil-cpp/absl/container:flat_hash_map",
+    "//third_party/abseil-cpp/absl/container:flat_hash_map",
   ]
 
   deps = [ "//flutter/fml" ]
@@ -290,6 +294,7 @@ impeller_component("entity_unittests") {
     "../geometry:geometry_asserts",
     "../playground:playground_test",
     "//flutter/display_list/testing:display_list_testing",
+    "//flutter/impeller/renderer/testing:mocks",
     "//flutter/impeller/typographer/backends/skia:typographer_skia_backend",
     "//flutter/txt",
   ]

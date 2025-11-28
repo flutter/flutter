@@ -1,50 +1,0 @@
-Running `dart pub get` in 'engine/src/flutter/lib/web_ui'
-Filtering suites...
-  chrome-dart2js-canvaskit-engine rejected for reason: chrome-dart2js-canvaskit-engine does not match filter.
-  chrome-dart2js-canvaskit-canvaskit rejected for reason: chrome-dart2js-canvaskit-canvaskit does not match filter.
-  chrome-dart2js-canvaskit-ui rejected for reason: chrome-dart2js-canvaskit-ui does not match filter.
-  chrome-full-dart2js-canvaskit-canvaskit rejected for reason: chrome-full-dart2js-canvaskit-canvaskit does not match filter.
-  chrome-full-dart2js-canvaskit-ui rejected for reason: chrome-full-dart2js-canvaskit-ui does not match filter.
-  edge-dart2js-canvaskit-engine rejected for reason: Current platform (linux) does not support browser BrowserName.edge
-  edge-dart2js-canvaskit-canvaskit rejected for reason: Current platform (linux) does not support browser BrowserName.edge
-  edge-dart2js-canvaskit-ui rejected for reason: Current platform (linux) does not support browser BrowserName.edge
-  edge-full-dart2js-canvaskit-canvaskit rejected for reason: Current platform (linux) does not support browser BrowserName.edge
-  edge-full-dart2js-canvaskit-ui rejected for reason: Current platform (linux) does not support browser BrowserName.edge
-  firefox-dart2js-canvaskit-engine rejected for reason: BrowserName.firefox does not match filter.
-  firefox-dart2js-canvaskit-canvaskit rejected for reason: BrowserName.firefox does not match filter.
-  firefox-dart2js-canvaskit-ui rejected for reason: BrowserName.firefox does not match filter.
-  firefox-dart2wasm-skwasm-ui rejected for reason: BrowserName.firefox does not match filter.
-  safari-dart2js-canvaskit-engine rejected for reason: Current platform (linux) does not support browser BrowserName.safari
-  safari-dart2js-canvaskit-canvaskit rejected for reason: Current platform (linux) does not support browser BrowserName.safari
-  safari-dart2js-canvaskit-ui rejected for reason: Current platform (linux) does not support browser BrowserName.safari
-  safari-dart2wasm-canvaskit-engine rejected for reason: Current platform (linux) does not support browser BrowserName.safari
-  safari-dart2wasm-skwasm-ui rejected for reason: Current platform (linux) does not support browser BrowserName.safari
-  chrome-dart2wasm-canvaskit-engine rejected for reason: chrome-dart2wasm-canvaskit-engine does not match filter.
-  firefox-dart2wasm-canvaskit-engine rejected for reason: BrowserName.firefox does not match filter.
-  chrome-coi-dart2wasm-skwasm-ui rejected for reason: chrome-coi-dart2wasm-skwasm-ui does not match filter.
-  chrome-force-st-dart2wasm-skwasm-ui rejected for reason: chrome-force-st-dart2wasm-skwasm-ui does not match filter.
-  chrome-fallbacks rejected for reason: chrome-fallbacks does not match filter.
-  chrome-coi-fallbacks rejected for reason: chrome-coi-fallbacks does not match filter.
-  chrome-force-st-fallbacks rejected for reason: chrome-force-st-fallbacks does not match filter.
-  firefox-fallbacks rejected for reason: BrowserName.firefox does not match filter.
-  safari-fallbacks rejected for reason: Current platform (linux) does not support browser BrowserName.safari
-Suites:
-  chrome-dart2js-experimental-webparagraph-ui
-Bundles:
-  dart2js-canvaskit-ui
-Artifacts:
-  canvaskit_experimental_webparagraph
-Copied artifacts: CanvasKit (Experimental Web Paragraph)
-Compiling test bundle dart2js-canvaskit-ui...
-Compiled 15,384,181 input bytes (10,390,781 characters source) to 1,903,888 characters JavaScript in 4.95 seconds using N/A MB of memory
-  text/web_paragraph_test.dart                                                    Completed compilation of dart2js-canvaskit-ui in 5129ms.                         
-Created SkiaGoldClient. Dimensions: {Browser: chrome, Renderer: canvaskit, CanvasKitVariant: experimentalWebParagraph}
-[chrome-dart2js-experimental-webparagraph-ui] Running...
-00:00 +0: loading text/web_paragraph_test.dart                                                                                                                                                         00:00 +0: loading text/web_paragraph_test.dart                                                                                                                                                         
-[CHROME STDERR]:
-[CHROME STDERR]:DevTools listening on ws://127.0.0.1:12345/devtools/browser/db983f82-8efb-4744-85e2-95ea95e27bee
-HTTP 404: favicon.ico
-00:00 +0: (setUpAll)                                                                                                                                                                                   00:00 +0: Draw WebParagraph LTR/RTL multi Line with RTL by default                                                                                                                                     00:01 +0: Draw WebParagraph LTR/RTL multi Line with RTL by default                                                                                                                                     00:01 +0: loading text/web_paragraph_test.dart                                                                                                                                                         
-Screenshot generated: file:///usr/local/google/home/jlavrova/Sources/flutter/engine/src/flutter/lib/web_ui/.dart_tool/skia_gold/chrome-dart2js-experimental-webparagraph-ui/web_paragraph_canvas_mix_multilined_rtl.png
-00:01 +1: Draw WebParagraph LTR/RTL multi Line with RTL by default                                                                                                                                     00:01 +1: (tearDownAll)                                                                                                                                                                                00:01 +1: All tests passed!                                                                                                                                                                            
-[chrome-dart2js-experimental-webparagraph-ui] All tests passed!

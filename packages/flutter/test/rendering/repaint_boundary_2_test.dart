@@ -40,7 +40,7 @@ class RelayoutBoundariesCrashState extends State<RelayoutBoundariesCrash> {
         child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             // Make the outer SizedBoxes relayout without making the Placeholders relayout.
-            final double dimension = !_mode ? 10.0 : 20.0;
+            final dimension = !_mode ? 10.0 : 20.0;
             return Column(
               children: <Widget>[
                 SizedBox(width: dimension, height: dimension, child: const Placeholder()),

@@ -216,7 +216,9 @@ class Radio<T> extends StatefulWidget {
   /// ```dart
   /// Radio<SingingCharacter>(
   ///   value: SingingCharacter.lafayette,
+  ///   // ignore: deprecated_member_use
   ///   groupValue: _character,
+  ///   // ignore: deprecated_member_use
   ///   onChanged: (SingingCharacter? newValue) {
   ///     setState(() {
   ///       _character = newValue;
@@ -234,8 +236,8 @@ class Radio<T> extends StatefulWidget {
 
   /// {@macro flutter.widget.RawRadio.mouseCursor}
   ///
-  /// If null, then the value of [RadioThemeData.mouseCursor] is used.
-  /// If that is also null, then [WidgetStateMouseCursor.clickable] is used.
+  /// If null, the value of [RadioThemeData.mouseCursor] is used. If that is
+  /// also null, [WidgetStateMouseCursor.adaptiveClickable] is used.
   final MouseCursor? mouseCursor;
 
   /// {@macro flutter.widget.RawRadio.toggleable}
@@ -275,7 +277,7 @@ class Radio<T> extends StatefulWidget {
   ///   value: 1,
   ///   fillColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.disabled)) {
-  ///       return Colors.orange.withOpacity(.32);
+  ///       return Colors.orange.withValues(alpha: .32);
   ///     }
   ///     return Colors.orange;
   ///   })
@@ -544,7 +546,10 @@ class _RadioState<T> extends State<Radio<T>> {
         WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
           return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
               radioTheme.mouseCursor?.resolve(states) ??
-              WidgetStateProperty.resolveAs<MouseCursor>(WidgetStateMouseCursor.clickable, states);
+              WidgetStateProperty.resolveAs<MouseCursor>(
+                WidgetStateMouseCursor.adaptiveClickable,
+                states,
+              );
         });
     return RawRadio<T>(
       value: widget.value,
@@ -702,14 +707,14 @@ class _RadioPaintState extends State<_RadioPaint> {
         radioTheme.overlayColor?.resolve(hoveredStates) ??
         defaults.overlayColor!.resolve(hoveredStates)!;
 
-    final Set<WidgetState> activePressedStates = activeStates..add(WidgetState.pressed);
+    final activePressedStates = activeStates..add(WidgetState.pressed);
     final Color effectiveActivePressedOverlayColor =
         widget.overlayColor?.resolve(activePressedStates) ??
         radioTheme.overlayColor?.resolve(activePressedStates) ??
         activeColor?.withAlpha(kRadialReactionAlpha) ??
         defaults.overlayColor!.resolve(activePressedStates)!;
 
-    final Set<WidgetState> inactivePressedStates = inactiveStates..add(WidgetState.pressed);
+    final inactivePressedStates = inactiveStates..add(WidgetState.pressed);
     final Color effectiveInactivePressedOverlayColor =
         widget.overlayColor?.resolve(inactivePressedStates) ??
         radioTheme.overlayColor?.resolve(inactivePressedStates) ??
@@ -853,7 +858,7 @@ class _RadioPainter extends ToggleablePainter {
     );
 
     // Background
-    final Paint backgroundPaint = Paint()
+    final backgroundPaint = Paint()
       ..color = Color.lerp(inactiveBackgroundColor, activeBackgroundColor, position.value)!
       ..style = PaintingStyle.fill;
     canvas.drawCircle(center, _kOuterRadius, backgroundPaint);
@@ -864,7 +869,7 @@ class _RadioPainter extends ToggleablePainter {
 
     // Inner circle
     if (!position.isDismissed) {
-      final Paint innerCirclePaint = Paint()
+      final innerCirclePaint = Paint()
         ..style = PaintingStyle.fill
         ..color = Color.lerp(inactiveColor, activeColor, position.value)!;
       canvas.drawCircle(center, innerRadius * position.value, innerCirclePaint);

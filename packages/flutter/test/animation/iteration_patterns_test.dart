@@ -12,11 +12,11 @@ void main() {
   });
 
   test('AnimationController with mutating listener', () {
-    final AnimationController controller = AnimationController(
+    final controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
-    final List<String> log = <String>[];
+    final log = <String>[];
 
     void listener1() {
       log.add('listener1');
@@ -54,11 +54,11 @@ void main() {
   });
 
   test('AnimationController with mutating status listener', () {
-    final AnimationController controller = AnimationController(
+    final controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
-    final List<String> log = <String>[];
+    final log = <String>[];
 
     void listener1(AnimationStatus status) {
       log.add('listener1');
@@ -98,12 +98,12 @@ void main() {
   });
 
   testWidgets('AnimationController with throwing listener', (WidgetTester tester) async {
-    final AnimationController controller = AnimationController(
+    final controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
     addTearDown(controller.dispose);
-    final List<String> log = <String>[];
+    final log = <String>[];
 
     void listener1() {
       log.add('listener1');
@@ -128,11 +128,11 @@ void main() {
   });
 
   testWidgets('AnimationController with throwing status listener', (WidgetTester tester) async {
-    final AnimationController controller = AnimationController(
+    final controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
-    final List<String> log = <String>[];
+    final log = <String>[];
 
     void listener1(AnimationStatus status) {
       log.add('listener1');

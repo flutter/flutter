@@ -97,3 +97,16 @@ class WindowSettingsAccessor extends InheritedWidget {
     return windowSettings != oldWidget.windowSettings;
   }
 }
+
+class CallbackDialogWindowControllerDelegate
+    with DialogWindowControllerDelegate {
+  CallbackDialogWindowControllerDelegate({required this.onDestroyed});
+
+  @override
+  void onWindowDestroyed() {
+    onDestroyed();
+    super.onWindowDestroyed();
+  }
+
+  final VoidCallback onDestroyed;
+}

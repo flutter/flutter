@@ -44,12 +44,12 @@ import '../../src/test_flutter_command_runner.dart';
 
 class FakeStdio extends Fake implements Stdio {
   @override
-  var stdinHasTerminal = false;
+  bool stdinHasTerminal = false;
 }
 
 class FakeProcessInfo extends Fake implements ProcessInfo {
   @override
-  var maxRss = 0;
+  int maxRss = 0;
 }
 
 void main() {
@@ -1547,10 +1547,10 @@ class FakeHotRunner extends Fake implements HotRunner {
   late Future<int> Function(Completer<DebugConnectionInfo>?, Completer<void>?, bool) onAttach;
 
   @override
-  var exited = false;
+  bool exited = false;
 
   @override
-  var isWaitingForVmService = true;
+  bool isWaitingForVmService = true;
 
   @override
   Future<int> attach({
@@ -1563,10 +1563,10 @@ class FakeHotRunner extends Fake implements HotRunner {
   }
 
   @override
-  var supportsServiceProtocol = false;
+  bool supportsServiceProtocol = false;
 
   @override
-  var stayResident = true;
+  bool stayResident = true;
 
   @override
   void printHelp({required bool details, bool reloadIsRestart = false}) {}
@@ -1626,7 +1626,7 @@ class RecordingPortForwarder implements DevicePortForwarder {
   }
 
   @override
-  var forwardedPorts = <ForwardedPort>[];
+  List<ForwardedPort> forwardedPorts = <ForwardedPort>[];
 
   @override
   Future<void> unforward(ForwardedPort forwardedPort) async {
@@ -2112,7 +2112,7 @@ class FakeMDnsClient extends Fake implements MDnsClient {
 
 class TestDeviceManager extends DeviceManager {
   TestDeviceManager({required super.logger});
-  var devices = <Device>[];
+  List<Device> devices = <Device>[];
 
   @override
   List<DeviceDiscovery> get deviceDiscoverers {
@@ -2129,10 +2129,10 @@ class FakeTerminal extends Fake implements AnsiTerminal {
   final bool stdinHasTerminal;
 
   @override
-  var usesTerminalUi = false;
+  bool usesTerminalUi = false;
 
   @override
-  var singleCharMode = false;
+  bool singleCharMode = false;
 
   @override
   Stream<String> get keystrokes => StreamController<String>().stream;
