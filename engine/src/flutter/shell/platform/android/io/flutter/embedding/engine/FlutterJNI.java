@@ -700,7 +700,11 @@ public class FlutterJNI {
       int minWidth,
       int maxWidth,
       int minHeight,
-      int maxHeight) {
+      int maxHeight,
+      int physicalDisplayCornerRadiusTopLeft,
+      int physicalDisplayCornerRadiusTopRight,
+      int physicalDisplayCornerRadiusBottomRight,
+      int physicalDisplayCornerRadiusBottomLeft) {
     ensureRunningOnMainThread();
     ensureAttachedToNative();
     Log.d(TAG, "Sending viewport metrics to the engine.");
@@ -728,7 +732,11 @@ public class FlutterJNI {
         minWidth,
         maxWidth,
         minHeight,
-        maxHeight);
+        maxHeight,
+        physicalDisplayCornerRadiusTopLeft,
+        physicalDisplayCornerRadiusTopRight,
+        physicalDisplayCornerRadiusBottomRight,
+        physicalDisplayCornerRadiusBottomLeft);
   }
 
   private native void nativeSetViewportMetrics(
@@ -755,7 +763,11 @@ public class FlutterJNI {
       int physicalWidthMin,
       int physicalWidthMax,
       int physicalHeightMin,
-      int physicalHeightMax);
+      int physicalHeightMax,
+      int physicalDisplayCornerRadiusTopLeft,
+      int physicalDisplayCornerRadiusTopRight,
+      int physicalDisplayCornerRadiusBottomRight,
+      int physicalDisplayCornerRadiusBottomLeft);
 
   // ----- End Render Surface Support -----
 

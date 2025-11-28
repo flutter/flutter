@@ -24,6 +24,7 @@ abstract class FlutterView {
   GestureSettings get gestureSettings;
   List<DisplayFeature> get displayFeatures;
   Display get display;
+  DisplayCornerRadii? get displayCornerRadii;
   void render(Scene scene, {Size? size});
   void updateSemantics(SemanticsUpdate update) => platformDispatcher.updateSemantics(update);
 }

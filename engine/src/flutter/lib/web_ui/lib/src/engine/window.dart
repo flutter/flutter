@@ -264,6 +264,9 @@ class EngineFlutterView implements ui.FlutterView {
   List<ui.DisplayFeature> get displayFeatures => _viewConfiguration.displayFeatures;
 
   @override
+  ui.DisplayCornerRadii? get displayCornerRadii => _viewConfiguration.displayCornerRadii;
+
+  @override
   EngineFlutterDisplay get display => EngineFlutterDisplay.instance;
 
   @override

@@ -823,7 +823,7 @@ void hooksTests() async {
     window.onMetricsChanged!();
     _callHook(
       '_updateWindowMetrics',
-      25,
+      29,
       0, // window Id
       0.1234, // device pixel ratio
       0.0, // width
@@ -849,6 +849,10 @@ void hooksTests() async {
       0.0, // maxWidth
       0.0, // minHeight
       0.0, // maxHeight
+      -1.0, // display corner radius top left
+      -1.0, // display corner radius top right
+      -1.0, // display corner radius bottom right
+      -1.0, // display corner radius bottom left
     );
 
     expectIdentical(originalZone, callbackZone);
@@ -941,7 +945,7 @@ void hooksTests() async {
   await test('View padding/insets/viewPadding/systemGestureInsets', () {
     _callHook(
       '_updateWindowMetrics',
-      25,
+      29,
       0, // window Id
       1.0, // devicePixelRatio
       800.0, // width
@@ -967,6 +971,10 @@ void hooksTests() async {
       1000.0, // maxWidth
       0.0, // minHeight
       1000.0, // maxHeight
+      -1.0, // display corner radius top left
+      -1.0, // display corner radius top right
+      -1.0, // display corner radius bottom right
+      -1.0, // display corner radius bottom left
     );
 
     expectEquals(window.viewInsets.bottom, 0.0);
@@ -976,7 +984,7 @@ void hooksTests() async {
 
     _callHook(
       '_updateWindowMetrics',
-      25,
+      29,
       0, // window Id
       1.0, // devicePixelRatio
       800.0, // width
@@ -1002,6 +1010,10 @@ void hooksTests() async {
       0.0, // maxWidth
       0.0, // minHeight
       0.0, // maxHeight
+      -1.0, // display corner radius top left
+      -1.0, // display corner radius top right
+      -1.0, // display corner radius bottom right
+      -1.0, // display corner radius bottom left
     );
 
     expectEquals(window.viewInsets.bottom, 400.0);
@@ -1013,7 +1025,7 @@ void hooksTests() async {
   await test('Window physical touch slop', () {
     _callHook(
       '_updateWindowMetrics',
-      25,
+      29,
       0, // window Id
       1.0, // devicePixelRatio
       800.0, // width
@@ -1039,13 +1051,17 @@ void hooksTests() async {
       0.0, // maxWidth
       0.0, // minHeight
       0.0, // maxHeight
+      -1.0, // display corner radius top left
+      -1.0, // display corner radius top right
+      -1.0, // display corner radius bottom right
+      -1.0, // display corner radius bottom left
     );
 
     expectEquals(window.gestureSettings, GestureSettings(physicalTouchSlop: 11.0));
 
     _callHook(
       '_updateWindowMetrics',
-      25,
+      29,
       0, // window Id
       1.0, // devicePixelRatio
       800.0, // width
@@ -1071,13 +1087,17 @@ void hooksTests() async {
       0.0, // maxWidth
       0.0, // minHeight
       0.0, // maxHeight
+      -1.0, // display corner radius top left
+      -1.0, // display corner radius top right
+      -1.0, // display corner radius bottom right
+      -1.0, // display corner radius bottom left
     );
 
     expectEquals(window.gestureSettings, GestureSettings(physicalTouchSlop: null));
 
     _callHook(
       '_updateWindowMetrics',
-      25,
+      29,
       0, // window Id
       1.0, // devicePixelRatio
       800.0, // width
@@ -1103,9 +1123,129 @@ void hooksTests() async {
       0.0, // maxWidth
       0.0, // minHeight
       0.0, // maxHeight
+      -1.0, // display corner radius top left
+      -1.0, // display corner radius top right
+      -1.0, // display corner radius bottom right
+      -1.0, // display corner radius bottom left
     );
 
     expectEquals(window.gestureSettings, GestureSettings(physicalTouchSlop: 22.0));
+  });
+
+  await test('Display corner radii', () {
+    _callHook(
+      '_updateWindowMetrics',
+      29,
+      0, // window Id
+      3.0, // devicePixelRatio
+      800.0, // width
+      600.0, // height
+      50.0, // paddingTop
+      0.0, // paddingRight
+      40.0, // paddingBottom
+      0.0, // paddingLeft
+      0.0, // insetTop
+      0.0, // insetRight
+      0.0, // insetBottom
+      0.0, // insetLeft
+      0.0, // systemGestureInsetTop
+      0.0, // systemGestureInsetRight
+      0.0, // systemGestureInsetBottom
+      0.0, // systemGestureInsetLeft
+      11.0, // physicalTouchSlop
+      <double>[], // display features bounds
+      <int>[], // display features types
+      <int>[], // display features states
+      0, // Display ID
+      0.0, // minWidth
+      0.0, // maxWidth
+      0.0, // minHeight
+      0.0, // maxHeight
+      11.0, // display corner radius top left
+      22.0, // display corner radius top right
+      33.0, // display corner radius bottom right
+      44.0, // display corner radius bottom left
+    );
+
+    expectEquals(
+      window.displayCornerRadii,
+      DisplayCornerRadii(topLeft: 11.0, topRight: 22.0, bottomRight: 33.0, bottomLeft: 44.0),
+    );
+
+    _callHook(
+      '_updateWindowMetrics',
+      29,
+      0, // window Id
+      3.0, // devicePixelRatio
+      800.0, // width
+      600.0, // height
+      50.0, // paddingTop
+      0.0, // paddingRight
+      40.0, // paddingBottom
+      0.0, // paddingLeft
+      0.0, // insetTop
+      0.0, // insetRight
+      400.0, // insetBottom
+      0.0, // insetLeft
+      0.0, // systemGestureInsetTop
+      0.0, // systemGestureInsetRight
+      44.0, // systemGestureInsetBottom
+      0.0, // systemGestureInsetLeft
+      -1.0, // physicalTouchSlop
+      <double>[], // display features bounds
+      <int>[], // display features types
+      <int>[], // display features states
+      0, // Display ID
+      0.0, // minWidth
+      0.0, // maxWidth
+      0.0, // minHeight
+      0.0, // maxHeight
+      -1.0, // display corner radius top left
+      -1.0, // display corner radius top right
+      -1.0, // display corner radius bottom right
+      -1.0, // display corner radius bottom left
+    );
+
+    expectEquals(window.displayCornerRadii, null);
+
+    _callHook(
+      '_updateWindowMetrics',
+      29,
+      0, // window Id
+      3.0, // devicePixelRatio
+      800.0, // width
+      600.0, // height
+      50.0, // paddingTop
+      0.0, // paddingRight
+      40.0, // paddingBottom
+      0.0, // paddingLeft
+      0.0, // insetTop
+      0.0, // insetRight
+      400.0, // insetBottom
+      0.0, // insetLeft
+      0.0, // systemGestureInsetTop
+      0.0, // systemGestureInsetRight
+      44.0, // systemGestureInsetBottom
+      0.0, // systemGestureInsetLeft
+      22.0, // physicalTouchSlop
+      <double>[], // display features bounds
+      <int>[], // display features types
+      <int>[], // display features states
+      0, // Display ID
+      0.0, // minWidth
+      0.0, // maxWidth
+      0.0, // minHeight
+      0.0, // maxHeight
+      99.0, // display corner radius top left
+      99.0, // display corner radius top right
+      99.0, // display corner radius bottom right
+      99.0, // display corner radius bottom left
+    );
+
+    expectEquals(
+      window.displayCornerRadii,
+      DisplayCornerRadii(topLeft: 99.0, topRight: 99.0, bottomRight: 99.0, bottomLeft: 99.0),
+    );
   });
 
   await test('onLocaleChanged preserves callback zone', () {
@@ -1503,4 +1643,8 @@ external void _callHook(
   Object? arg23,
   Object? arg24,
   Object? arg25,
+  Object? arg26,
+  Object? arg27,
+  Object? arg28,
+  Object? arg29,
 ]);
