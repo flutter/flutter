@@ -194,7 +194,19 @@ sealed class CodeAssetTarget extends AssetBuildTarget {
 
   late final CCompilerConfig? cCompilerConfigSync;
 
-  Future<void> setCCompilerConfig();
+  /// On platforms where the Flutter app is compiled with a native toolchain, configures this target
+  /// to contain a [CCompilerConfig] matching that toolchain.
+  ///
+  /// While hooks are supposed to be able to find a toolchain on their own, we want them to use the
+  /// same tools used to build the main app to make static linking easier in the future. So if we're
+  /// e.g. on Linux and use `clang` to compile the app, hooks should use the same `clang` as a
+  /// compiler too.
+  ///
+  /// If [mustMatchAppBuild] is true (the default), this should throw if the expected toolchain
+  /// could not be found. For `flutter test` setups where no app is compiled, we _prefer_ to use the
+  /// same toolchain but would allow not passing a [CCompilerConfig] if that fails. This allows
+  /// hooks that only download code assets instead of compiling them to still function.
+  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true});
 
   List<CodeAssetExtension> get codeAssetExtensions {
     return <CodeAssetExtension>[
@@ -223,7 +235,9 @@ class WindowsAssetTarget extends CodeAssetTarget {
   ];
 
   @override
-  Future<void> setCCompilerConfig() async => cCompilerConfigSync = await cCompilerConfigWindows();
+  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async =>
+      // TODO(simolus3): Respect the mustMatchAppBuild option in cCompilerConfigWindows.
+      cCompilerConfigSync = await cCompilerConfigWindows();
 }
 
 final class LinuxAssetTarget extends CodeAssetTarget {
@@ -231,7 +245,8 @@ final class LinuxAssetTarget extends CodeAssetTarget {
     : super(os: OS.linux);
 
   @override
-  Future<void> setCCompilerConfig() async => cCompilerConfigSync = await cCompilerConfigLinux();
+  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async =>
+      cCompilerConfigSync = await cCompilerConfigLinux(throwIfNotFound: mustMatchAppBuild);
 
   @override
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
@@ -252,7 +267,8 @@ final class IOSAssetTarget extends CodeAssetTarget {
   final FileSystem fileSystem;
 
   @override
-  Future<void> setCCompilerConfig() async => cCompilerConfigSync = await cCompilerConfigMacOS();
+  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async =>
+      cCompilerConfigSync = await cCompilerConfigMacOS(throwIfNotFound: mustMatchAppBuild);
 
   IOSCodeConfig _getIOSConfig(Map<String, String> environmentDefines, FileSystem fileSystem) {
     final String? sdkRoot = environmentDefines[kSdkRoot];
@@ -299,7 +315,8 @@ final class MacOSAssetTarget extends CodeAssetTarget {
   }
 
   @override
-  Future<void> setCCompilerConfig() async => cCompilerConfigSync = await cCompilerConfigMacOS();
+  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async =>
+      cCompilerConfigSync = await cCompilerConfigMacOS(throwIfNotFound: mustMatchAppBuild);
 }
 
 final class AndroidAssetTarget extends CodeAssetTarget {
@@ -315,7 +332,8 @@ final class AndroidAssetTarget extends CodeAssetTarget {
   final AndroidCodeConfig? _androidCodeConfig;
 
   @override
-  Future<void> setCCompilerConfig() async => cCompilerConfigSync = await cCompilerConfigAndroid();
+  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async =>
+      cCompilerConfigSync = await cCompilerConfigAndroid();
 
   @override
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
@@ -362,7 +380,8 @@ final class FlutterTesterAssetTarget extends CodeAssetTarget {
   CCompilerConfig? get cCompilerConfigSync => subtarget.cCompilerConfigSync;
 
   @override
-  Future<void> setCCompilerConfig() async => subtarget.setCCompilerConfig();
+  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) =>
+      subtarget.setCCompilerConfig(mustMatchAppBuild: false);
 }
 
 List<AndroidArch> _androidArchs(TargetPlatform targetPlatform, String? androidArchsEnvironment) {
