@@ -13,6 +13,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -1552,5 +1553,174 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(CupertinoContextMenu)), Size.zero);
+  });
+
+  testWidgets('CupertinoContextMenu renders correct focus border when focused', (
+    WidgetTester tester,
+  ) async {
+    final focusNode = FocusNode();
+
+    final focusBorderRadius = BorderRadius.circular(1.5);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: CupertinoContextMenu(
+              focusBorderRadius: focusBorderRadius,
+              focusNode: focusNode,
+              actions: <Widget>[
+                CupertinoContextMenuAction(child: const Text('Action 1'), onPressed: () {}),
+                CupertinoContextMenuAction(child: const Text('Action 2'), onPressed: () {}),
+              ],
+              child: const Text('Open Context Menu'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    ShapeBorder findBorder() {
+      final Finder decoratedBoxFinder = find.descendant(
+        of: find.byType(CupertinoFocusHalo),
+        matching: find.byType(DecoratedBox),
+      );
+
+      final box = tester.widget(decoratedBoxFinder) as DecoratedBox;
+      final decoration = box.decoration as ShapeDecoration;
+
+      return decoration.shape;
+    }
+
+    RoundedSuperellipseBorder getExpectedHaloBorder({required bool hasFocus}) =>
+        RoundedSuperellipseBorder(
+          side: hasFocus
+              ? BorderSide(
+                  color:
+                      HSLColor.fromColor(
+                            CupertinoColors.activeBlue.withOpacity(kCupertinoFocusColorOpacity),
+                          )
+                          .withLightness(kCupertinoFocusColorBrightness)
+                          .withSaturation(kCupertinoFocusColorSaturation)
+                          .toColor(),
+                  width: 3.5,
+                )
+              : BorderSide.none,
+          borderRadius: focusBorderRadius,
+        );
+
+    expect(focusNode.hasFocus, isFalse);
+    expect(findBorder(), getExpectedHaloBorder(hasFocus: false));
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    expect(focusNode.hasFocus, isTrue);
+    expect(findBorder(), getExpectedHaloBorder(hasFocus: true));
+  });
+
+  testWidgets(
+    'CupertinoContextMenu focus can be traversed and focus is moved to next node only after tab is released',
+    (WidgetTester tester) async {
+      final focusNode = FocusNode();
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: Column(
+              children: [
+                SizedBox.shrink(
+                  child: CupertinoContextMenu(
+                    focusNode: focusNode,
+                    actions: <Widget>[
+                      CupertinoContextMenuAction(child: const Text('Action 1'), onPressed: () {}),
+                      CupertinoContextMenuAction(child: const Text('Action 2'), onPressed: () {}),
+                    ],
+                    child: const Text('Open Context Menu'),
+                  ),
+                ),
+                CupertinoButton(child: const Text('Button'), onPressed: () {}),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(focusNode.hasFocus, isFalse);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+
+      expect(focusNode.hasFocus, isTrue);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+
+      expect(focusNode.hasFocus, isFalse);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+
+      expect(focusNode.hasFocus, isTrue);
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+
+      expect(focusNode.hasFocus, isTrue);
+
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+
+      expect(focusNode.hasFocus, isFalse);
+    },
+  );
+
+  testWidgets('CupertinoContextMenu can be focused and opened with keyboard', (
+    WidgetTester tester,
+  ) async {
+    final focusNode = FocusNode();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: Column(
+            children: [
+              SizedBox.shrink(
+                child: CupertinoContextMenu(
+                  focusNode: focusNode,
+                  actions: <Widget>[
+                    CupertinoContextMenuAction(child: const Text('Action 1'), onPressed: () {}),
+                    CupertinoContextMenuAction(child: const Text('Action 2'), onPressed: () {}),
+                  ],
+                  child: const Text('Open Context Menu'),
+                ),
+              ),
+              CupertinoButton(child: const Text('Button'), onPressed: () {}),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(focusNode.hasFocus, isFalse);
+    expect(findStatic(), findsNothing);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+
+    expect(focusNode.hasFocus, isTrue);
+    expect(findStatic(), findsNothing);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+
+    expect(focusNode.hasFocus, isTrue);
+    expect(findStatic(), findsNothing);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyM);
+
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isFalse);
+    expect(findStatic(), findsOneWidget);
   });
 }

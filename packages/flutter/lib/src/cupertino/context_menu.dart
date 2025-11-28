@@ -14,12 +14,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
-import 'package:flutter/widgets.dart';
 
 import '../services/hardware_keyboard.dart';
-import 'colors.dart';
-import 'localizations.dart';
-import 'scrollbar.dart';
 
 // The scale of the child at the time that the CupertinoContextMenu opens.
 // This value was eyeballed from a physical device running iOS 13.1.2.
