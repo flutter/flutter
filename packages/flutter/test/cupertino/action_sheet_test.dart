@@ -1978,7 +1978,6 @@ void main() {
     },
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
-
   testWidgets(
     'CupertinoActionSheet appearance changes correctly when actions or cancel button is focused',
     (WidgetTester tester) async {
@@ -1991,19 +1990,6 @@ void main() {
       addTearDown(focusNodeCancel.dispose);
 
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-
-      final defaultFocusedBorder = Border.fromBorderSide(
-        BorderSide(
-          color:
-              HSLColor.fromColor(
-                    CupertinoColors.activeBlue.withOpacity(kCupertinoFocusColorOpacity),
-                  )
-                  .withLightness(kCupertinoFocusColorBrightness)
-                  .withSaturation(kCupertinoFocusColorSaturation)
-                  .toColor(),
-          width: 3.5,
-        ),
-      );
 
       await tester.pumpWidget(
         createAppWithButtonThatLaunchesActionSheet(
@@ -2054,42 +2040,79 @@ void main() {
         matching: decoratedBoxBetweenTraversalGroupAndButtonBackgroundFinder,
       );
 
-      BoxBorder? getBorder(Finder decoratedBoxFinder) {
+      ShapeBorder findBorder(Finder decoratedBoxFinder) {
         final box = tester.widget(decoratedBoxFinder) as DecoratedBox;
-        final decoration = box.decoration as BoxDecoration;
+        final decoration = box.decoration as ShapeDecoration;
 
-        return decoration.border;
+        return decoration.shape;
       }
+
+      RoundedSuperellipseBorder getExpectedActionHaloBorder({required bool hasFocus}) =>
+          RoundedSuperellipseBorder(
+            side: hasFocus
+                ? BorderSide(
+                    color:
+                        HSLColor.fromColor(
+                              CupertinoColors.activeBlue.withOpacity(kCupertinoFocusColorOpacity),
+                            )
+                            .withLightness(kCupertinoFocusColorBrightness)
+                            .withSaturation(kCupertinoFocusColorSaturation)
+                            .toColor(),
+                    width: 3.5,
+                  )
+                : BorderSide.none,
+            borderRadius: kCupertinoButtonSizeBorderRadius[CupertinoButtonSize.large]!.copyWith(
+              topLeft: Radius.zero,
+              topRight: Radius.zero,
+            ),
+          );
+
+      RoundedSuperellipseBorder getExpectedCancelHaloBorder({required bool hasFocus}) =>
+          RoundedSuperellipseBorder(
+            side: hasFocus
+                ? BorderSide(
+                    color:
+                        HSLColor.fromColor(
+                              CupertinoColors.activeBlue.withOpacity(kCupertinoFocusColorOpacity),
+                            )
+                            .withLightness(kCupertinoFocusColorBrightness)
+                            .withSaturation(kCupertinoFocusColorSaturation)
+                            .toColor(),
+                    width: 3.5,
+                  )
+                : BorderSide.none,
+            borderRadius: kCupertinoButtonSizeBorderRadius[CupertinoButtonSize.large],
+          );
 
       expect(actionsDecoratedBoxFinder, findsOneWidget);
       expect(cancelDecoratedBoxFinder, findsOneWidget);
 
-      expect(getBorder(actionsDecoratedBoxFinder), isNull);
-      expect(getBorder(cancelDecoratedBoxFinder), isNull);
+      expect(findBorder(actionsDecoratedBoxFinder), getExpectedActionHaloBorder(hasFocus: false));
+      expect(findBorder(cancelDecoratedBoxFinder), getExpectedCancelHaloBorder(hasFocus: false));
 
       focusNodeOne.requestFocus();
       await tester.pumpAndSettle();
 
-      expect(getBorder(actionsDecoratedBoxFinder), defaultFocusedBorder);
-      expect(getBorder(cancelDecoratedBoxFinder), isNull);
+      expect(findBorder(actionsDecoratedBoxFinder), getExpectedActionHaloBorder(hasFocus: true));
+      expect(findBorder(cancelDecoratedBoxFinder), getExpectedCancelHaloBorder(hasFocus: false));
 
       focusNodeTwo.requestFocus();
       await tester.pumpAndSettle();
 
-      expect(getBorder(actionsDecoratedBoxFinder), defaultFocusedBorder);
-      expect(getBorder(cancelDecoratedBoxFinder), isNull);
+      expect(findBorder(actionsDecoratedBoxFinder), getExpectedActionHaloBorder(hasFocus: true));
+      expect(findBorder(cancelDecoratedBoxFinder), getExpectedCancelHaloBorder(hasFocus: false));
 
       focusNodeCancel.requestFocus();
       await tester.pumpAndSettle();
 
-      expect(getBorder(actionsDecoratedBoxFinder), isNull);
-      expect(getBorder(cancelDecoratedBoxFinder), defaultFocusedBorder);
+      expect(findBorder(actionsDecoratedBoxFinder), getExpectedActionHaloBorder(hasFocus: false));
+      expect(findBorder(cancelDecoratedBoxFinder), getExpectedCancelHaloBorder(hasFocus: true));
 
       focusNodeCancel.unfocus();
       await tester.pumpAndSettle();
 
-      expect(getBorder(actionsDecoratedBoxFinder), isNull);
-      expect(getBorder(cancelDecoratedBoxFinder), isNull);
+      expect(findBorder(actionsDecoratedBoxFinder), getExpectedActionHaloBorder(hasFocus: false));
+      expect(findBorder(cancelDecoratedBoxFinder), getExpectedCancelHaloBorder(hasFocus: false));
     },
   );
 
