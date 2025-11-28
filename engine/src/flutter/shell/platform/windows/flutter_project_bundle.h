@@ -77,6 +77,8 @@ class FlutterProjectBundle {
   // Returns thread policy for running the UI isolate.
   FlutterUIThreadPolicy ui_thread_policy() { return ui_thread_policy_; }
 
+  bool iaccessibleex_enabled() const { return true; }
+
  private:
   std::filesystem::path assets_path_;
   std::filesystem::path icu_path_;
