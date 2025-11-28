@@ -765,7 +765,7 @@ abstract interface class PredictiveBackRoute {
 /// ```
 /// {@end-tool}
 ///
-/// ## See also
+/// See also
 ///
 /// * [LocalHistoryRoute], which manages a stack of local history entries.
 /// * [ModalRoute.addLocalHistoryEntry], which adds an entry to a route.
