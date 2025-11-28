@@ -53,6 +53,7 @@ class AXPlatformNodeWin;
 class AX_EXPORT __declspec(uuid("26f5641a-246d-457b-a96d-07f3fae6acf2"))
     AXPlatformNodeWin : public CComObjectRootEx<CComMultiThreadModel>,
                         public IDispatchImpl<IAccessible>,
+                        public IAccessibleEx,
                         public IExpandCollapseProvider,
                         public IGridItemProvider,
                         public IGridProvider,
@@ -79,6 +80,7 @@ class AX_EXPORT __declspec(uuid("26f5641a-246d-457b-a96d-07f3fae6acf2"))
   // an interface.
   COM_INTERFACE_ENTRY(AXPlatformNodeWin)
   COM_INTERFACE_ENTRY(IAccessible)
+  COM_INTERFACE_ENTRY(IAccessibleEx)
   COM_INTERFACE_ENTRY(IDispatch)
   COM_INTERFACE_ENTRY(IExpandCollapseProvider)
   COM_INTERFACE_ENTRY(IGridItemProvider)
@@ -186,6 +188,21 @@ class AX_EXPORT __declspec(uuid("26f5641a-246d-457b-a96d-07f3fae6acf2"))
                                   VARIANT var_id,
                                   LONG* topic_id) override;
   IFACEMETHODIMP put_accName(VARIANT var_id, BSTR put_name) override;
+
+  //
+  // IAccessibleEx methods.
+  //
+
+  IFACEMETHODIMP GetObjectForChild(LONG child_id,
+                                   IAccessibleEx** result) override;
+
+  IFACEMETHODIMP GetIAccessiblePair(IAccessible** accessible,
+                                    LONG* child_id) override;
+
+  // IAccessibleEx methods not implemented.
+  IFACEMETHODIMP
+  ConvertReturnedElement(IRawElementProviderSimple* element,
+                         IAccessibleEx** acc) override;
 
   //
   // IExpandCollapseProvider methods.

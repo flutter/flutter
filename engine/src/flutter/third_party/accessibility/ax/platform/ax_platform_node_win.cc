@@ -1197,6 +1197,34 @@ IFACEMETHODIMP AXPlatformNodeWin::put_accName(VARIANT var_id, BSTR put_name) {
 }
 
 //
+// IAccessibleEx implementation.
+//
+
+IFACEMETHODIMP AXPlatformNodeWin::GetObjectForChild(LONG child_id,
+                                                    IAccessibleEx** result) {
+  // No support for child IDs in this implementation.
+  COM_OBJECT_VALIDATE_1_ARG(result);
+  *result = nullptr;
+  return S_OK;
+}
+
+IFACEMETHODIMP AXPlatformNodeWin::GetIAccessiblePair(IAccessible** accessible,
+                                                     LONG* child_id) {
+  COM_OBJECT_VALIDATE_2_ARGS(accessible, child_id);
+  *accessible = static_cast<IAccessible*>(this);
+  (*accessible)->AddRef();
+  *child_id = CHILDID_SELF;
+  return S_OK;
+}
+
+// IAccessibleEx methods not implemented.
+IFACEMETHODIMP
+AXPlatformNodeWin::ConvertReturnedElement(IRawElementProviderSimple* element,
+                                          IAccessibleEx** acc) {
+  return E_NOTIMPL;
+}
+
+//
 // IExpandCollapseProvider implementation.
 //
 
@@ -2571,7 +2599,7 @@ IFACEMETHODIMP AXPlatformNodeWin::QueryService(REFGUID guidService,
                                                void** object) {
   COM_OBJECT_VALIDATE_1_ARG(object);
 
-  if (guidService == IID_IAccessible) {
+  if (guidService == IID_IAccessible || guidService == IID_IAccessibleEx) {
     return QueryInterface(riid, object);
   }
 
