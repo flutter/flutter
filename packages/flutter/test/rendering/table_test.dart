@@ -561,95 +561,221 @@ void main() {
       expect(spanningCell.size.height, equals(200.0));
     });
 
-    test('TableCellVerticalAlignment works correctly with colSpan and rowSpan', () {
-      late RenderTable table;
-      const double testCellSize = 50;
-      const double regularCellSize = 80;
+    group('TableCellVerticalAlignment works correctly with colSpan and rowSpan', () {
+      const double spannedCellHeight = 50.0;
+      const double regularCellHeight = 80.0;
+      const double tableWidth = 300.0;
 
-      void testAlignment(
-        TableCellVerticalAlignment verticalAlignment,
-        void Function(Size rowSpanningSize, Size columnSpanningSize) handler,
-      ) {
-        table = RenderTable(textDirection: TextDirection.ltr, columns: 3, rows: 2);
-        final RenderBox rowSpanningCell = constrainedBox(
-          const BoxConstraints(minHeight: testCellSize, maxHeight: testCellSize),
-        );
-        final RenderBox columnSpanningCell = constrainedBox(
-          const BoxConstraints(minHeight: testCellSize, maxHeight: testCellSize),
-        );
-        final RenderBox regularCell1 = constrainedBox(
-          const BoxConstraints(minHeight: regularCellSize, maxHeight: regularCellSize),
-        );
-        final RenderBox regularCell2 = constrainedBox(
-          const BoxConstraints(minHeight: regularCellSize, maxHeight: regularCellSize),
-        );
-
-        final TableCellParentData rowSpanningCellParentData = TableCellParentData()
-          ..rowSpan = 2
-          ..verticalAlignment = verticalAlignment;
-        rowSpanningCell.parentData = rowSpanningCellParentData;
-
-        final TableCellParentData columnSpanningCellParentData = TableCellParentData()
-          ..colSpan = 2
-          ..verticalAlignment = verticalAlignment;
-        columnSpanningCell.parentData = columnSpanningCellParentData;
-
-        table.setChild(0, 0, rowSpanningCell); // column 0 , rows 0-1
-        table.setChild(1, 0, columnSpanningCell); // column 1-2 , rows 0
-        table.setChild(1, 1, regularCell1); // column 1, row 1
-        table.setChild(2, 1, regularCell2); // column 2, row 1
-
-        layout(table, constraints: const BoxConstraints.tightFor(width: 300.0));
-
-        expect(columnSpanningCellParentData.colSpan, equals(2));
-        expect(rowSpanningCellParentData.rowSpan, equals(2));
-        expect(columnSpanningCellParentData.verticalAlignment, equals(verticalAlignment));
-        expect(rowSpanningCellParentData.verticalAlignment, equals(verticalAlignment));
-
-        expect(rowSpanningCell.size.width, equals(table.size.width / 3));
-        expect(columnSpanningCell.size.width, equals(table.size.width / 3 * 2));
-
-        handler(rowSpanningCell.size, columnSpanningCell.size);
+      // Helper to create a fixed-size RenderBox
+      RenderBox createBox(double height) {
+        return RenderConstrainedBox(additionalConstraints: BoxConstraints.tightFor(height: height));
       }
 
-      testAlignment(TableCellVerticalAlignment.fill, (
-        Size rowSpanningSize,
-        Size columnSpanningSize,
-      ) {
-        expect(rowSpanningSize.height, equals(table.size.height));
-        expect(columnSpanningSize.height, equals(table.size.height - regularCellSize));
+      // Helper to setup the table structure
+      // Layout:
+      // Row 0: | RowSpan 0-1 | ColSpan 1-2         |
+      // Row 1: |             | Reg 1       | Reg 2 |
+      (RenderTable, RenderBox, RenderBox) setupTable(TableCellVerticalAlignment alignment) {
+        final RenderTable table = RenderTable(
+          textDirection: TextDirection.ltr,
+          columns: 3,
+          rows: 2,
+        );
+
+        final RenderBox rowSpanningCell = createBox(spannedCellHeight);
+        final RenderBox colSpanningCell = createBox(spannedCellHeight);
+        final RenderBox regularCell1 = createBox(regularCellHeight);
+        final RenderBox regularCell2 = createBox(regularCellHeight);
+
+        // Setup Row Spanning Cell (Col 0, Rows 0-1)
+        rowSpanningCell.parentData = TableCellParentData()
+          ..rowSpan = 2
+          ..verticalAlignment = alignment;
+        table.setChild(0, 0, rowSpanningCell);
+
+        // Setup Column Spanning Cell (Col 1-2, Row 0)
+        colSpanningCell.parentData = TableCellParentData()
+          ..colSpan = 2
+          ..verticalAlignment = alignment;
+        table.setChild(1, 0, colSpanningCell);
+
+        // Setup Regular Cells (Row 1)
+        table.setChild(1, 1, regularCell1);
+        table.setChild(2, 1, regularCell2);
+
+        table.layout(const BoxConstraints.tightFor(width: tableWidth));
+
+        return (table, rowSpanningCell, colSpanningCell);
+      }
+
+      test('Common constraints and dimensions', () {
+        final (RenderTable table, RenderBox rowSpanCell, RenderBox colSpanCell) = setupTable(
+          TableCellVerticalAlignment.top,
+        );
+
+        // Column width logic: 300 width / 3 columns = 100 per column
+        expect(rowSpanCell.size.width, equals(100.0), reason: 'Spans 1 column');
+        expect(colSpanCell.size.width, equals(200.0), reason: 'Spans 2 columns');
+
+        final TableCellParentData rowData = rowSpanCell.parentData! as TableCellParentData;
+        final TableCellParentData colData = colSpanCell.parentData! as TableCellParentData;
+
+        expect(rowData.rowSpan, equals(2));
+        expect(colData.colSpan, equals(2));
       });
 
-      testAlignment(TableCellVerticalAlignment.intrinsicHeight, (
-        Size rowSpanningSize,
-        Size columnSpanningSize,
-      ) {
-        expect(rowSpanningSize.height, equals(table.size.height));
-        expect(columnSpanningSize.height, lessThanOrEqualTo(regularCellSize));
+      test('Alignment: Fill', () {
+        final (RenderTable table, RenderBox rowSpanCell, RenderBox colSpanCell) = setupTable(
+          TableCellVerticalAlignment.fill,
+        );
+
+        // In Fill, the cell expands to match the row(s) height.
+        // Row 1 is driven by regularCell (80.0).
+        // Row 0 matches the intrinsic height of the content or the span.
+        // Total Table Height = Row 0 Height + Row 1 Height.
+
+        expect(
+          rowSpanCell.size.height,
+          equals(table.size.height),
+          reason: 'RowSpan should fill total table height',
+        );
+
+        expect(
+          colSpanCell.size.height,
+          equals(table.size.height - regularCellHeight),
+          reason: 'ColSpan should fill Row 0 (Total - Row 1)',
+        );
       });
 
-      testAlignment(TableCellVerticalAlignment.top, (
-        Size rowSpanningSize,
-        Size columnSpanningSize,
-      ) {
-        expect(rowSpanningSize.height, equals(testCellSize));
-        expect(columnSpanningSize.height, equals(testCellSize));
+      test('Alignment: IntrinsicHeight', () {
+        final (RenderTable table, RenderBox rowSpanCell, RenderBox colSpanCell) = setupTable(
+          TableCellVerticalAlignment.intrinsicHeight,
+        );
+
+        expect(colSpanCell.size.height, equals(spannedCellHeight));
+        expect(rowSpanCell.size.height, equals(table.size.height));
       });
 
-      testAlignment(TableCellVerticalAlignment.middle, (
-        Size rowSpanningSize,
-        Size columnSpanningSize,
-      ) {
-        expect(rowSpanningSize.height, equals(testCellSize));
-        expect(columnSpanningSize.height, equals(testCellSize));
+      test('Alignment: Top', () {
+        final (_, RenderBox rowSpanCell, RenderBox colSpanCell) = setupTable(
+          TableCellVerticalAlignment.top,
+        );
+
+        expect(rowSpanCell.size.height, equals(spannedCellHeight));
+        expect(colSpanCell.size.height, equals(spannedCellHeight));
+
+        final TableCellParentData rowData = rowSpanCell.parentData! as TableCellParentData;
+        final TableCellParentData colData = colSpanCell.parentData! as TableCellParentData;
+
+        expect(rowData.offset.dy, equals(0.0), reason: 'Should start at top of table');
+        expect(colData.offset.dy, equals(0.0), reason: 'Should start at top of Row 0');
       });
 
-      testAlignment(TableCellVerticalAlignment.bottom, (
-        Size rowSpanningSize,
-        Size columnSpanningSize,
-      ) {
-        expect(rowSpanningSize.height, equals(testCellSize));
-        expect(columnSpanningSize.height, equals(testCellSize));
+      test('Alignment: Middle', () {
+        final (RenderTable table, RenderBox rowSpanCell, RenderBox colSpanCell) = setupTable(
+          TableCellVerticalAlignment.middle,
+        );
+
+        expect(rowSpanCell.size.height, equals(spannedCellHeight));
+        expect(colSpanCell.size.height, equals(spannedCellHeight));
+
+        final TableCellParentData rowData = rowSpanCell.parentData! as TableCellParentData;
+        final TableCellParentData colData = colSpanCell.parentData! as TableCellParentData;
+
+        // Available space calculations
+        final double totalTableHeight = table.size.height;
+        final double row0Height = totalTableHeight - regularCellHeight;
+
+        // Math: (AvailableSpace - CellSize) / 2
+        expect(rowData.offset.dy, (totalTableHeight - spannedCellHeight) / 2);
+        expect(colData.offset.dy, (row0Height - spannedCellHeight) / 2);
+      });
+
+      test('Alignment: Bottom', () {
+        final (RenderTable table, RenderBox rowSpanCell, RenderBox colSpanCell) = setupTable(
+          TableCellVerticalAlignment.bottom,
+        );
+
+        expect(rowSpanCell.size.height, equals(spannedCellHeight));
+        expect(colSpanCell.size.height, equals(spannedCellHeight));
+
+        final TableCellParentData rowData = rowSpanCell.parentData! as TableCellParentData;
+        final TableCellParentData colData = colSpanCell.parentData! as TableCellParentData;
+
+        final double totalTableHeight = table.size.height;
+        final double row0Height = totalTableHeight - regularCellHeight;
+
+        // Math: AvailableSpace - CellSize
+        expect(rowData.offset.dy, totalTableHeight - spannedCellHeight);
+        expect(colData.offset.dy, row0Height - spannedCellHeight);
+      });
+
+      test('Alignment: Baseline', () {
+        final RenderTable table = RenderTable(
+          textDirection: TextDirection.ltr,
+          columns: 3,
+          rows: 2,
+          defaultVerticalAlignment: TableCellVerticalAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+        );
+
+        // Create RenderParagraph cells with different font sizes
+        final RenderParagraph rowSpanningCell = RenderParagraph(
+          const TextSpan(text: 'RowSpan', style: TextStyle(fontSize: 20)),
+          textDirection: TextDirection.ltr,
+        );
+        final RenderParagraph colSpanningCell = RenderParagraph(
+          const TextSpan(text: 'ColSpan', style: TextStyle(fontSize: 40)),
+          textDirection: TextDirection.ltr,
+        );
+        final RenderParagraph regularCell1 = RenderParagraph(
+          const TextSpan(text: 'Reg1', style: TextStyle(fontSize: 12)),
+          textDirection: TextDirection.ltr,
+        );
+        final RenderParagraph regularCell2 = RenderParagraph(
+          const TextSpan(text: 'Reg2', style: TextStyle(fontSize: 12)),
+          textDirection: TextDirection.ltr,
+        );
+
+        // Setup Row Spanning Cell (Col 0, Rows 0-1)
+        rowSpanningCell.parentData = TableCellParentData()
+          ..rowSpan = 2
+          ..verticalAlignment = TableCellVerticalAlignment.baseline;
+        table.setChild(0, 0, rowSpanningCell);
+
+        // Setup Column Spanning Cell (Col 1-2, Row 0)
+        colSpanningCell.parentData = TableCellParentData()
+          ..colSpan = 2
+          ..verticalAlignment = TableCellVerticalAlignment.baseline;
+        table.setChild(1, 0, colSpanningCell);
+
+        // Setup Regular Cells (Row 1) - need baseline alignment too
+        regularCell1.parentData = TableCellParentData()
+          ..verticalAlignment = TableCellVerticalAlignment.baseline;
+        regularCell2.parentData = TableCellParentData()
+          ..verticalAlignment = TableCellVerticalAlignment.baseline;
+        table.setChild(1, 1, regularCell1);
+        table.setChild(2, 1, regularCell2);
+
+        // Use the layout helper from rendering_tester.dart
+        layout(table, constraints: const BoxConstraints.tightFor(width: tableWidth));
+
+        final TableCellParentData rowData = rowSpanningCell.parentData! as TableCellParentData;
+        final TableCellParentData colData = colSpanningCell.parentData! as TableCellParentData;
+        final TableCellParentData reg1Data = regularCell1.parentData! as TableCellParentData;
+        final TableCellParentData reg2Data = regularCell2.parentData! as TableCellParentData;
+
+        // For baseline alignment, cells in the same row should align at their baselines
+        // The larger font (ColSpan 40px) will be positioned higher, smaller font (RowSpan 20px) lower
+        // so that their baselines match
+
+        // Both cells in row 0 should have aligned baselines
+        // The cell with larger font should start higher (smaller offset.dy)
+        // so its baseline matches the cell with smaller font
+        expect(colData.offset.dy, lessThan(rowData.offset.dy));
+
+        // For row 1, cells with same font size should have same offset
+        expect(reg1Data.offset.dy, equals(reg2Data.offset.dy));
       });
     });
   });

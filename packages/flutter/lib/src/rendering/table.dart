@@ -620,6 +620,20 @@ class RenderTable extends RenderBox {
     config.explicitChildNodes = true;
   }
 
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    // Skip hidden cells as they are not laid out and should not appear in the
+    // semantics tree.
+    for (final RenderBox? child in _children) {
+      if (child != null && child.hasSize) {
+        final TableCellParentData cellParentData = child.parentData! as TableCellParentData;
+        if (cellParentData.rowSpan != 0 && cellParentData.colSpan != 0) {
+          visitor(child);
+        }
+      }
+    }
+  }
+
   final Map<int, _Index> _idToIndexMap = <int, _Index>{};
   final Map<int, SemanticsNode> _cachedRows = <int, SemanticsNode>{};
   final Map<_Index, SemanticsNode> _cachedCells = <_Index, SemanticsNode>{};
@@ -1247,8 +1261,7 @@ class RenderTable extends RenderBox {
   /// This is called during layout to avoid recomputation during paint.
   void _computeSpanInformation() {
     if (rows == 0 || columns == 0) {
-      _cachedSpannedColumnsPerRow = const <Set<int>>[];
-      _cachedSpannedRowsPerColumn = const <Set<int>>[];
+      _invalidateSpanCache();
       return;
     }
 
@@ -1390,6 +1403,19 @@ class RenderTable extends RenderBox {
     super.markNeedsLayout();
   }
 
+  /// Computes the visual x-position for a cell, adjusting for text direction
+  /// and column span.
+  double _computeCellX({
+    required Float64List positions,
+    required int columnIndex,
+    required int colSpan,
+  }) {
+    return switch (textDirection) {
+      TextDirection.ltr => positions[columnIndex],
+      TextDirection.rtl => positions[columnIndex + colSpan - 1],
+    };
+  }
+
   /// Returns the position and dimensions of the box that the given
   /// row covers, in this render object's coordinate space (so the
   /// left coordinate is always 0.0).
@@ -1491,11 +1517,11 @@ class RenderTable extends RenderBox {
       // Update pending heights - subtract rowHeight from future rows
       for (int futureY = y + 1; futureY < rows; futureY++) {
         if (pendingRowSpanHeights[futureY] > 0) {
-          pendingRowSpanHeights[futureY] -= rowHeight;
-          // Ensure it doesn't go negative
-          if (pendingRowSpanHeights[futureY] < 0) {
-            pendingRowSpanHeights[futureY] = 0.0;
-          }
+          pendingRowSpanHeights[futureY] = clampDouble(
+            pendingRowSpanHeights[futureY] - rowHeight,
+            0.0,
+            double.infinity,
+          );
         }
       }
       rowTop += rowHeight;
@@ -1522,8 +1548,6 @@ class RenderTable extends RenderBox {
       (_) => <int>{},
       growable: false,
     );
-    // Predefine a zero-size constraint to avoid repeated allocations.
-    const BoxConstraints zeroConstraints = BoxConstraints.tightFor(width: 0, height: 0);
     // Use typed lists for predictable memory layout and faster indexed access.
     final Float64List positions = Float64List(columns);
     final Float64List pendingRowSpanHeights = Float64List(rows);
@@ -1533,7 +1557,6 @@ class RenderTable extends RenderBox {
     final Float64List spanWidths = Float64List(rows * columns); // [row][col] = row * columns + col
     final Float64List baselines = Float64List(rows * columns); // [row][col] = row * columns + col
 
-    final bool isTextDirectionRtl = textDirection == TextDirection.rtl;
     bool hasCellSpans = false;
 
     switch (textDirection) {
@@ -1598,6 +1621,9 @@ class RenderTable extends RenderBox {
         }
 
         final bool isHiddenCell = currentRowHiddenCells.contains(x);
+        if (isHiddenCell) {
+          continue;
+        }
 
         // Layout the child according to its vertical alignment.
         switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
@@ -1624,11 +1650,11 @@ class RenderTable extends RenderBox {
             } else {
               if (!isHiddenCell) {
                 rowHeight = math.max(rowHeight, child.size.height);
-                // Compute the visual x-position, adjusting for RTL and colspan.
-                double cellX = positions[x];
-                if (isTextDirectionRtl && colSpan > 1) {
-                  cellX = positions[x + colSpan - 1];
-                }
+                final double cellX = _computeCellX(
+                  positions: positions,
+                  columnIndex: x,
+                  colSpan: colSpan,
+                );
                 childParentData.offset = Offset(cellX, rowTop);
               }
             }
@@ -1665,10 +1691,11 @@ class RenderTable extends RenderBox {
       // Adjust pending heights for future rows by subtracting the current height.
       for (int futureY = y + 1; futureY < rows; futureY++) {
         if (pendingRowSpanHeights[futureY] > 0) {
-          pendingRowSpanHeights[futureY] -= rowHeight;
-          if (pendingRowSpanHeights[futureY] < 0) {
-            pendingRowSpanHeights[futureY] = 0.0;
-          }
+          pendingRowSpanHeights[futureY] = clampDouble(
+            pendingRowSpanHeights[futureY] - rowHeight,
+            0.0,
+            double.infinity,
+          );
         }
       }
 
@@ -1700,50 +1727,41 @@ class RenderTable extends RenderBox {
         final TableCellParentData childParentData = child.parentData! as TableCellParentData;
         final int rowSpan = childParentData.rowSpan;
         final bool isHiddenCell = currentRowHiddenCells.contains(x);
-
         if (isHiddenCell) {
-          child.layout(zeroConstraints);
-          childParentData.offset = Offset.zero;
-        } else {
-          // Compute the total height covered by this cell's row span.
-          double spanHeight = rowHeight;
-          if (rowSpan > 1) {
-            spanHeight = 0.0;
-            for (int dy = 0; dy < rowSpan && (y + dy) < rows; dy++) {
-              spanHeight += rowHeights[y + dy];
-            }
-          }
+          continue;
+        }
 
-          // Compute the visual x-position, adjusting for RTL and colspan.
-          final int colSpan = childParentData.colSpan;
-          double cellX = positions[x];
-          if (isTextDirectionRtl && colSpan > 1) {
-            cellX = positions[x + colSpan - 1];
+        // Compute the total height covered by this cell's row span.
+        double spanHeight = rowHeight;
+        if (rowSpan > 1) {
+          spanHeight = 0.0;
+          for (int dy = 0; dy < rowSpan && (y + dy) < rows; dy++) {
+            spanHeight += rowHeights[y + dy];
           }
+        }
 
-          // Set the child's final offset based on vertical alignment.
-          switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
-            case TableCellVerticalAlignment.baseline:
-              childParentData.offset = Offset(
-                cellX,
-                rowTop + beforeBaselineDistance - baselines[y * columns + x],
-              );
-            case TableCellVerticalAlignment.top:
-              childParentData.offset = Offset(cellX, rowTop);
-            case TableCellVerticalAlignment.middle:
-              childParentData.offset = Offset(
-                cellX,
-                rowTop + (spanHeight - child.size.height) / 2.0,
-              );
-            case TableCellVerticalAlignment.bottom:
-              childParentData.offset = Offset(cellX, rowTop + spanHeight - child.size.height);
-            case TableCellVerticalAlignment.fill:
-            case TableCellVerticalAlignment.intrinsicHeight:
-              final double spanWidth = spanWidths[y * columns + x];
+        final int colSpan = childParentData.colSpan;
+        final double cellX = _computeCellX(positions: positions, columnIndex: x, colSpan: colSpan);
 
-              child.layout(BoxConstraints.tightFor(width: spanWidth, height: spanHeight));
-              childParentData.offset = Offset(cellX, rowTop);
-          }
+        // Set the child's final offset based on vertical alignment.
+        switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
+          case TableCellVerticalAlignment.baseline:
+            childParentData.offset = Offset(
+              cellX,
+              rowTop + beforeBaselineDistance - baselines[y * columns + x],
+            );
+          case TableCellVerticalAlignment.top:
+            childParentData.offset = Offset(cellX, rowTop);
+          case TableCellVerticalAlignment.middle:
+            childParentData.offset = Offset(cellX, rowTop + (spanHeight - child.size.height) / 2.0);
+          case TableCellVerticalAlignment.bottom:
+            childParentData.offset = Offset(cellX, rowTop + spanHeight - child.size.height);
+          case TableCellVerticalAlignment.fill:
+          case TableCellVerticalAlignment.intrinsicHeight:
+            final double spanWidth = spanWidths[y * columns + x];
+
+            child.layout(BoxConstraints.tightFor(width: spanWidth, height: spanHeight));
+            childParentData.offset = Offset(cellX, rowTop);
         }
       }
 
@@ -1766,7 +1784,7 @@ class RenderTable extends RenderBox {
     assert(_children.length == rows * columns);
     for (int index = _children.length - 1; index >= 0; index -= 1) {
       final RenderBox? child = _children[index];
-      if (child != null) {
+      if (child != null && child.hasSize) {
         final BoxParentData childParentData = child.parentData! as BoxParentData;
         final bool isHit = result.addWithPaintOffset(
           offset: childParentData.offset,
@@ -1820,7 +1838,7 @@ class RenderTable extends RenderBox {
     }
     for (int index = 0; index < _children.length; index += 1) {
       final RenderBox? child = _children[index];
-      if (child != null) {
+      if (child != null && child.hasSize) {
         final BoxParentData childParentData = child.parentData! as BoxParentData;
         context.paintChild(child, childParentData.offset + offset);
       }
