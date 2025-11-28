@@ -114,6 +114,8 @@ class DartProject {
   // Defaults to UIThreadPolicy::Default.
   UIThreadPolicy ui_thread_policy() const { return ui_thread_policy_; }
 
+  bool iaccessibleex_enabled() const { return true; }
+
  private:
   // Accessors for internals are private, so that they can be changed if more
   // flexible options for project structures are needed later without it
