@@ -135,7 +135,7 @@ void main() {
     final TestGesture drag2 = await tester.startGesture(const Offset(10.0, 500.0));
     expect(await tester.pumpAndSettle(), 1); // Nothing to animate
     await drag2.moveTo(const Offset(10.0, 100.0));
-    expect(await tester.pumpAndSettle(), 2); // Nothing to animate, only one semantics update
+    expect(await tester.pumpAndSettle(), 1); // Nothing to animate, only one semantics update
     expect(position.maxScrollExtent, 900.0);
     expect(position.pixels, lessThanOrEqualTo(900.0));
     expect(position.activity, isInstanceOf<DragScrollActivity>());
@@ -155,7 +155,7 @@ void main() {
     expect(position.minScrollExtent, 0.0);
     expect(position.maxScrollExtent, 100.0);
     expect(position.pixels, 50.0);
-    expect(await tester.pumpAndSettle(), 2); // Nothing to animate, only one semantics update
+    expect(await tester.pumpAndSettle(), 1); // Nothing to animate, only one semantics update
     expect(position.minScrollExtent, 0.0);
     expect(position.maxScrollExtent, 100.0);
     expect(position.pixels, 50.0);
@@ -358,7 +358,7 @@ void main() {
     await drag2.up();
 
     // verify there's a ballistic animation from overscroll
-    expect(await tester.pumpAndSettle(), 9);
+    expect(await tester.pumpAndSettle(), 8);
   });
 }
 

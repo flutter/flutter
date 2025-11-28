@@ -233,7 +233,7 @@ void main() {
       expect(getScrollOffset(tester), heldPosition);
       await gesture.up();
       // Once the hold is let go, it should still snap back to origin.
-      expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 3);
+      expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 2);
       expect(getScrollOffset(tester), 0.0);
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{

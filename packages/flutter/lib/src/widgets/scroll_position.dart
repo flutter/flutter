@@ -638,6 +638,13 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
             currentMetrics.axisDirection == _lastMetrics!.axisDirection);
   }
 
+  void _dispatchMetricsUpdateNotification() {
+    if (!_haveScheduledUpdateNotification) {
+      scheduleMicrotask(didUpdateScrollMetrics);
+      _haveScheduledUpdateNotification = true;
+    }
+  }
+
   @override
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
     assert(haveDimensions == (_lastMetrics != null));
@@ -668,14 +675,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     );
 
     if (_isMetricsChanged()) {
-      // It is too late to send useful notifications, because the potential
-      // listeners have, by definition, already been built this frame. To make
-      // sure the notification is sent at all, we delay it until after the frame
-      // is complete.
-      if (!_haveScheduledUpdateNotification) {
-        scheduleMicrotask(didUpdateScrollMetrics);
-        _haveScheduledUpdateNotification = true;
-      }
+      _dispatchMetricsUpdateNotification();
       _lastMetrics = copyWith();
     }
     return true;
@@ -1120,6 +1120,10 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   @override
   void notifyListeners() {
     _updateSemanticActions(); // will potentially request a semantics update.
+    if (haveDimensions) {
+      _dispatchMetricsUpdateNotification();
+      _lastMetrics = copyWith();
+    }
     super.notifyListeners();
   }
 
