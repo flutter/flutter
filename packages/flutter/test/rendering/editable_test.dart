@@ -44,7 +44,13 @@ class _FakeEditableTextState with TextSelectionDelegate {
   TextSelection? selection;
 
   @override
+  void showToolbar() {}
+
+  @override
   void hideToolbar([bool hideHandles = true]) {}
+
+  @override
+  void toggleToolbar() {}
 
   @override
   void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause) {
