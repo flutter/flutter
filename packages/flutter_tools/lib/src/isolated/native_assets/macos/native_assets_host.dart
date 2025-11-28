@@ -168,23 +168,35 @@ Future<void> codesignDylib(
 /// Flutter expects `xcrun` to be on the path on macOS hosts.
 ///
 /// Use the `clang`, `ar`, and `ld` that would be used if run with `xcrun`.
-Future<CCompilerConfig> cCompilerConfigMacOS() async {
-  return CCompilerConfig(
-    compiler: await _findXcrunBinary('clang'),
-    archiver: await _findXcrunBinary('ar'),
-    linker: await _findXcrunBinary('ld'),
-  );
+///
+/// If no XCode installation was found, [throwIfNotFound] controls whether this
+/// throws or returns `null`.
+Future<CCompilerConfig?> cCompilerConfigMacOS({required bool throwIfNotFound}) async {
+  final Uri? compiler = await _findXcrunBinary('clang', throwIfNotFound);
+  final Uri? archiver = await _findXcrunBinary('ar', throwIfNotFound);
+  final Uri? linker = await _findXcrunBinary('ld', throwIfNotFound);
+
+  if (compiler == null || archiver == null || linker == null) {
+    assert(!throwIfNotFound);
+    return null;
+  }
+
+  return CCompilerConfig(compiler: compiler, archiver: archiver, linker: linker);
 }
 
 /// Invokes `xcrun --find` to find the full path to [binaryName].
-Future<Uri> _findXcrunBinary(String binaryName) async {
+Future<Uri?> _findXcrunBinary(String binaryName, bool throwIfNotFound) async {
   final ProcessResult xcrunResult = await globals.processManager.run(<String>[
     'xcrun',
     '--find',
     binaryName,
   ]);
   if (xcrunResult.exitCode != 0) {
-    throwToolExit('Failed to find $binaryName with xcrun:\n${xcrunResult.stderr}');
+    if (throwIfNotFound) {
+      throwToolExit('Failed to find $binaryName with xcrun:\n${xcrunResult.stderr}');
+    } else {
+      return null;
+    }
   }
   return Uri.file((xcrunResult.stdout as String).trim());
 }
