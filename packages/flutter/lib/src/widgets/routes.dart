@@ -694,7 +694,17 @@ abstract interface class PredictiveBackRoute {
 ///
 /// ## Example
 ///
+/// {@tool dartpad}
+/// This example demonstrates how to use a [LocalHistoryEntry] to show a panel that can be
+/// dismissed with the back button.
+///
 /// ```dart
+/// import 'package:flutter/material.dart';
+///
+/// void main() {
+///   runApp(const MaterialApp(home: PanelDemo()));
+/// }
+///
 /// class PanelDemo extends StatefulWidget {
 ///   const PanelDemo({super.key});
 ///
@@ -707,6 +717,9 @@ abstract interface class PredictiveBackRoute {
 ///   LocalHistoryEntry? _entry;
 ///
 ///   void _openPanel() {
+///     if (_isPanelOpen) {
+///       return;
+///     }
 ///     _entry = LocalHistoryEntry(
 ///       onRemove: () {
 ///         setState(() {
@@ -726,7 +739,7 @@ abstract interface class PredictiveBackRoute {
 ///     return Scaffold(
 ///       appBar: AppBar(title: const Text('LocalHistoryEntry Example')),
 ///       body: Stack(
-///         children: [
+///         children: <Widget>[
 ///           Center(
 ///             child: ElevatedButton(onPressed: _openPanel, child: const Text('Open Panel')),
 ///           ),
@@ -750,6 +763,7 @@ abstract interface class PredictiveBackRoute {
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// ## See also
 ///
