@@ -1945,7 +1945,7 @@ void main() {
           await tester.pumpWidget(buildGoldenTable(alignment: TableCellVerticalAlignment.fill));
           await expectLater(
             find.byType(RepaintBoundary),
-            matchesGoldenFile('table.vertical_alignment.fill.png'),
+            matchesGoldenFile('table.vertical_alignment_fill.png'),
           );
         });
 
@@ -1953,7 +1953,7 @@ void main() {
           await tester.pumpWidget(buildGoldenTable(alignment: TableCellVerticalAlignment.top));
           await expectLater(
             find.byType(RepaintBoundary),
-            matchesGoldenFile('table.vertical_alignment.top.png'),
+            matchesGoldenFile('table.vertical_alignment_top.png'),
           );
         });
 
@@ -1963,7 +1963,7 @@ void main() {
           );
           await expectLater(
             find.byType(RepaintBoundary),
-            matchesGoldenFile('table.vertical_alignment.intrinsicHeight.png'),
+            matchesGoldenFile('table.vertical_alignment_intrinsicHeight.png'),
           );
         });
 
@@ -1971,7 +1971,7 @@ void main() {
           await tester.pumpWidget(buildGoldenTable(alignment: TableCellVerticalAlignment.middle));
           await expectLater(
             find.byType(RepaintBoundary),
-            matchesGoldenFile('table.vertical_alignment.middle.png'),
+            matchesGoldenFile('table.vertical_alignment_middle.png'),
           );
         });
 
@@ -1979,7 +1979,7 @@ void main() {
           await tester.pumpWidget(buildGoldenTable(alignment: TableCellVerticalAlignment.bottom));
           await expectLater(
             find.byType(RepaintBoundary),
-            matchesGoldenFile('table.vertical_alignment.bottom.png'),
+            matchesGoldenFile('table.vertical_alignment_bottom.png'),
           );
         });
 
@@ -2025,7 +2025,7 @@ void main() {
           );
           await expectLater(
             find.byType(RepaintBoundary),
-            matchesGoldenFile('table.vertical_alignment.baseline.png'),
+            matchesGoldenFile('table.vertical_alignment_baseline.png'),
           );
         });
       });
