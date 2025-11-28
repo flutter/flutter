@@ -679,6 +679,85 @@ abstract interface class PredictiveBackRoute {
 }
 
 /// An entry in the history of a [LocalHistoryRoute].
+///
+/// A [LocalHistoryEntry] represents a "mini" navigation state within a route.
+/// It allows widgets or UI components to handle the back button or pop
+/// operations locally without affecting the main navigator stack.
+///
+/// Typically used for widgets such as dialogs, bottom sheets, or
+/// inline expandable panels that can be dismissed independently
+/// of the surrounding route.
+///
+/// When a local history entry is removed (e.g., via the back button),
+/// the [onRemove] callback is called first. Only after all local history
+/// entries have been removed will the route itself be popped.
+///
+/// ## Example
+///
+/// ```dart
+/// class PanelDemo extends StatefulWidget {
+///   @override
+///   _PanelDemoState createState() => _PanelDemoState();
+/// }
+///
+/// class _PanelDemoState extends State<PanelDemo> {
+///   bool _isPanelOpen = false;
+///   LocalHistoryEntry? _entry;
+///
+///   void _openPanel() {
+///     _entry = LocalHistoryEntry(
+///       onRemove: () {
+///         setState(() {
+///           _isPanelOpen = false;
+///           _entry = null;
+///         });
+///       },
+///     );
+///     ModalRoute.of(context)?.addLocalHistoryEntry(_entry!);
+///     setState(() {
+///       _isPanelOpen = true;
+///     });
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Scaffold(
+///       appBar: AppBar(title: Text('LocalHistoryEntry Example')),
+///       body: Stack(
+///         children: [
+///           Center(
+///             child: ElevatedButton(
+///               onPressed: _openPanel,
+///               child: Text('Open Panel'),
+///             ),
+///           ),
+///           if (_isPanelOpen)
+///             Align(
+///               alignment: Alignment.bottomCenter,
+///               child: Container(
+///                 height: 200,
+///                 color: Colors.blueAccent,
+///                 child: Center(
+///                   child: Text(
+///                     'Press back to close this panel',
+///                     style: TextStyle(color: Colors.white, fontSize: 18),
+///                   ),
+///                 ),
+///               ),
+///             ),
+///         ],
+///       ),
+///     );
+///   }
+/// }
+/// ```
+///
+/// ## See also
+///
+/// * [LocalHistoryRoute], which manages a stack of local history entries.
+/// * [ModalRoute.addLocalHistoryEntry], which adds an entry to a route.
+/// * [showModalBottomSheet], which internally uses local history entries
+///   to handle back button behavior.
 class LocalHistoryEntry {
   /// Creates an entry in the history of a [LocalHistoryRoute].
   ///
