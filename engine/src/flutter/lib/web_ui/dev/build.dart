@@ -97,8 +97,8 @@ class BuildCommand extends Command<bool> with ArgUtils<bool> {
     if (embedDwarf && runtimeMode != RuntimeMode.debug) {
       throw ToolExit('Embedding DWARF data requires debug runtime mode.');
     }
-    final FilePath libPath = FilePath.fromWebUi('lib');
-    final List<PipelineStep> steps = <PipelineStep>[
+    final libPath = FilePath.fromWebUi('lib');
+    final steps = <PipelineStep>[
       GnPipelineStep(host: host, runtimeMode: runtimeMode, embedDwarf: embedDwarf),
       NinjaPipelineStep(
         host: host,
@@ -106,7 +106,7 @@ class BuildCommand extends Command<bool> with ArgUtils<bool> {
         targets: targets.map((String target) => targetAliases[target] ?? target),
       ),
     ];
-    final Pipeline buildPipeline = Pipeline(steps: steps);
+    final buildPipeline = Pipeline(steps: steps);
     await buildPipeline.run();
 
     if (isWatchMode) {

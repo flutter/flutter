@@ -1276,7 +1276,7 @@ void main() {
 }
 
 class FakeHttpServer extends Fake implements HttpServer {
-  var closed = false;
+  bool closed = false;
 
   @override
   Future<void> close({bool force = false}) async {

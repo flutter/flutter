@@ -73,7 +73,7 @@ void testMain() {
     expect(const Size(3.0, 4.0).aspectRatio, 3.0 / 4.0);
   });
   test('Radius.clamp() operates as expected', () {
-    final RRect rrectMin = RRect.fromLTRBR(
+    final rrectMin = RRect.fromLTRBR(
       1,
       3,
       5,
@@ -88,7 +88,7 @@ void testMain() {
     expect(rrectMin.trRadius, equals(const Radius.circular(0)));
     expect(rrectMin.blRadius, equals(const Radius.circular(0)));
 
-    final RRect rrectMax = RRect.fromLTRBR(
+    final rrectMax = RRect.fromLTRBR(
       1,
       3,
       5,
@@ -103,7 +103,7 @@ void testMain() {
     expect(rrectMax.trRadius, equals(const Radius.circular(10)));
     expect(rrectMax.blRadius, equals(const Radius.circular(10)));
 
-    final RRect rrectMix = RRect.fromLTRBR(
+    final rrectMix = RRect.fromLTRBR(
       1,
       3,
       5,
@@ -121,7 +121,7 @@ void testMain() {
     expect(rrectMix.trRadius, equals(const Radius.elliptical(0, 10)));
     expect(rrectMix.blRadius, equals(const Radius.elliptical(0, 10)));
 
-    final RRect rrectMix1 = RRect.fromLTRBR(
+    final rrectMix1 = RRect.fromLTRBR(
       1,
       3,
       5,
@@ -140,7 +140,7 @@ void testMain() {
     expect(rrectMix1.blRadius, equals(const Radius.elliptical(10, 0)));
   });
   test('Radius.clampValues() operates as expected', () {
-    final RRect rrectMin = RRect.fromLTRBR(
+    final rrectMin = RRect.fromLTRBR(
       1,
       3,
       5,
@@ -155,7 +155,7 @@ void testMain() {
     expect(rrectMin.trRadius, equals(const Radius.circular(0)));
     expect(rrectMin.blRadius, equals(const Radius.circular(0)));
 
-    final RRect rrectMax = RRect.fromLTRBR(
+    final rrectMax = RRect.fromLTRBR(
       1,
       3,
       5,
@@ -170,7 +170,7 @@ void testMain() {
     expect(rrectMax.trRadius, equals(const Radius.elliptical(10, 20)));
     expect(rrectMax.blRadius, equals(const Radius.elliptical(10, 20)));
 
-    final RRect rrectMix = RRect.fromLTRBR(
+    final rrectMix = RRect.fromLTRBR(
       1,
       3,
       5,
@@ -188,7 +188,7 @@ void testMain() {
     expect(rrectMix.trRadius, equals(const Radius.elliptical(5, 20)));
     expect(rrectMix.blRadius, equals(const Radius.elliptical(5, 20)));
 
-    final RRect rrectMix2 = RRect.fromLTRBR(
+    final rrectMix2 = RRect.fromLTRBR(
       1,
       3,
       5,
@@ -207,7 +207,7 @@ void testMain() {
     expect(rrectMix2.blRadius, equals(const Radius.elliptical(10, 6)));
   });
   test('RRect asserts when corner radii are negative', () {
-    bool assertsEnabled = false;
+    var assertsEnabled = false;
     assert(() {
       assertsEnabled = true;
       return true;

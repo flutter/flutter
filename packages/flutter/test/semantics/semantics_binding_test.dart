@@ -12,7 +12,7 @@ void main() {
   ) async {
     expect(SemanticsBinding.instance.semanticsEnabled, isFalse);
 
-    final List<bool> status = <bool>[];
+    final status = <bool>[];
     void listener() {
       status.add(SemanticsBinding.instance.semanticsEnabled);
     }
@@ -51,7 +51,7 @@ void main() {
   ) async {
     expect(SemanticsBinding.instance.semanticsEnabled, isFalse);
 
-    final List<bool> status = <bool>[];
+    final status = <bool>[];
     void listener() {
       status.add(SemanticsBinding.instance.semanticsEnabled);
     }

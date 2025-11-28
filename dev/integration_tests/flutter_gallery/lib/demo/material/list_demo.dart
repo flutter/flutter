@@ -225,7 +225,7 @@ class _ListDemoState extends State<ListDemo> {
 
   @override
   Widget build(BuildContext context) {
-    final String layoutText = _dense != null ? ' \u2013 Dense' : '';
+    final layoutText = _dense != null ? ' \u2013 Dense' : '';
     final String? itemTypeText = switch (_itemType) {
       _MaterialListType.oneLine || _MaterialListType.oneLineWithAvatar => 'Single-line',
       _MaterialListType.twoLine => 'Two-line',

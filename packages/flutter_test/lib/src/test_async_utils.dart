@@ -69,16 +69,16 @@ abstract final class TestAsyncUtils {
         _scopeStack: true, // so we can recognize this as our own zone
       },
     );
-    final _AsyncScope scope = _AsyncScope(StackTrace.current, zone);
+    final scope = _AsyncScope(StackTrace.current, zone);
     _scopeStack.add(scope);
     final Future<T> result = scope.zone.run<Future<T>>(body);
     late T resultValue; // This is set when the body of work completes with a result value.
     Future<T> completionHandler(dynamic error, StackTrace? stack) {
       assert(_scopeStack.isNotEmpty);
       assert(_scopeStack.contains(scope));
-      bool leaked = false;
+      var leaked = false;
       _AsyncScope closedScope;
-      final List<DiagnosticsNode> information = <DiagnosticsNode>[];
+      final information = <DiagnosticsNode>[];
       while (_scopeStack.isNotEmpty) {
         closedScope = _scopeStack.removeLast();
         if (closedScope == scope) {
@@ -181,7 +181,7 @@ abstract final class TestAsyncUtils {
     // and we would want to show _scopeStack[1]'s creationStack. In the second
     // example, the current zone would not be in the _scopeStack, and we would
     // want to show _scopeStack[0]'s creationStack.
-    int skipCount = 0;
+    var skipCount = 0;
     _AsyncScope candidateScope = _scopeStack.last;
     _AsyncScope scope;
     do {
@@ -199,7 +199,7 @@ abstract final class TestAsyncUtils {
       }
       candidateScope = _scopeStack[_scopeStack.length - skipCount - 1];
     } while (candidateScope.zone != zone);
-    final List<DiagnosticsNode> information = <DiagnosticsNode>[
+    final information = <DiagnosticsNode>[
       ErrorSummary('Guarded function conflict.'),
       ErrorHint('You must use "await" with all Future-returning test APIs.'),
     ];
@@ -214,7 +214,7 @@ abstract final class TestAsyncUtils {
       information,
     );
     if (originalGuarder != null && collidingGuarder != null) {
-      final String originalKind = originalGuarder.className == null ? 'function' : 'method';
+      final originalKind = originalGuarder.className == null ? 'function' : 'method';
       String originalName;
       if (originalGuarder.className == null) {
         originalName = '$originalKind (${originalGuarder.methodName})';
@@ -236,12 +236,12 @@ abstract final class TestAsyncUtils {
           ),
         );
       }
-      final String again =
+      final again =
           (originalGuarder.callerFile == collidingGuarder.callerFile) &&
               (originalGuarder.callerLine == collidingGuarder.callerLine)
           ? 'again '
           : '';
-      final String collidingKind = collidingGuarder.className == null ? 'function' : 'method';
+      final collidingKind = collidingGuarder.className == null ? 'function' : 'method';
       String collidingName;
       if ((originalGuarder.className == collidingGuarder.className) &&
           (originalGuarder.methodName == collidingGuarder.methodName)) {
@@ -317,7 +317,7 @@ abstract final class TestAsyncUtils {
   /// This is used at the end of tests to ensure that nothing leaks out of the test.
   static void verifyAllScopesClosed() {
     if (_scopeStack.isNotEmpty) {
-      final List<DiagnosticsNode> information = <DiagnosticsNode>[
+      final information = <DiagnosticsNode>[
         ErrorSummary('Asynchronous call to guarded function leaked.'),
         ErrorHint('You must use "await" with all Future-returning test APIs.'),
       ];
@@ -364,9 +364,9 @@ abstract final class TestAsyncUtils {
         .toList();
     assert(stack.last == '');
     stack.removeLast();
-    final RegExp getClassPattern = RegExp(r'^#[0-9]+ +([^. ]+)');
+    final getClassPattern = RegExp(r'^#[0-9]+ +([^. ]+)');
     Match? lineMatch;
-    int index = -1;
+    var index = -1;
     do {
       // skip past frames that are from this class
       index += 1;
@@ -378,7 +378,7 @@ abstract final class TestAsyncUtils {
     } while (lineMatch.group(1) == _className);
     // try to parse the stack to find the interesting frame
     if (index < stack.length) {
-      final RegExp guardPattern = RegExp(r'^#[0-9]+ +(?:([^. ]+)\.)?([^. ]+)');
+      final guardPattern = RegExp(r'^#[0-9]+ +(?:([^. ]+)\.)?([^. ]+)');
       final Match? guardMatch = guardPattern.matchAsPrefix(
         stack[index],
       ); // find the class that called us
@@ -399,7 +399,7 @@ abstract final class TestAsyncUtils {
           break;
         }
         if (index < stack.length) {
-          final RegExp callerPattern = RegExp(r'^#[0-9]+ .* \((.+?):([0-9]+)(?::[0-9]+)?\)$');
+          final callerPattern = RegExp(r'^#[0-9]+ .* \((.+?):([0-9]+)(?::[0-9]+)?\)$');
           final Match? callerMatch = callerPattern.matchAsPrefix(
             stack[index],
           ); // extract the caller's info

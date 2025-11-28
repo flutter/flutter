@@ -4,11 +4,14 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/segmented_button/segmented_button.0.dart' as example;
+import 'package:flutter_api_samples/material/segmented_button/segmented_button.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Segmented button can be used with a single selection', (WidgetTester tester) async {
+  testWidgets('Segmented button can be used with a single selection', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.SegmentedButtonApp());
 
     void expectOneCalendarButton(example.Calendar period) {
@@ -70,7 +73,8 @@ void main() {
       expect(
         find.byWidgetPredicate(
           (Widget widget) =>
-              widget is SegmentedButton<example.Sizes> && setEquals(widget.selected, sizes),
+              widget is SegmentedButton<example.Sizes> &&
+              setEquals(widget.selected, sizes),
         ),
         findsOne,
       );
@@ -83,7 +87,10 @@ void main() {
     expect(find.text('L'), findsOne);
     expect(find.text('XL'), findsOne);
 
-    expectSizeButtons(const <example.Sizes>{example.Sizes.large, example.Sizes.extraLarge});
+    expectSizeButtons(const <example.Sizes>{
+      example.Sizes.large,
+      example.Sizes.extraLarge,
+    });
 
     // Select everything.
     await tester.tap(find.text('XS'));

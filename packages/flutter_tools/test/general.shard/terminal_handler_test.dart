@@ -1205,14 +1205,14 @@ class FakeResidentRunner extends ResidentHandlers {
   FakeResidentRunner(FlutterDevice device, this.logger, this.fileSystem)
     : flutterDevices = <FlutterDevice>[device];
 
-  var calledDetach = false;
-  var calledPrint = false;
-  var calledExit = false;
-  var calledPrintWithDetails = false;
-  var calledReload = false;
-  var calledRestart = false;
-  var reloadExitCode = 0;
-  var fatalReloadError = false;
+  bool calledDetach = false;
+  bool calledPrint = false;
+  bool calledExit = false;
+  bool calledPrintWithDetails = false;
+  bool calledReload = false;
+  bool calledRestart = false;
+  int reloadExitCode = 0;
+  bool fatalReloadError = false;
 
   @override
   final Logger logger;
@@ -1224,31 +1224,31 @@ class FakeResidentRunner extends ResidentHandlers {
   final List<FlutterDevice> flutterDevices;
 
   @override
-  var canHotReload = true;
+  bool canHotReload = true;
 
   @override
-  var hotMode = true;
+  bool hotMode = true;
 
   @override
-  var isRunningDebug = true;
+  bool isRunningDebug = true;
 
   @override
-  var isRunningProfile = false;
+  bool isRunningProfile = false;
 
   @override
-  var isRunningRelease = false;
+  bool isRunningRelease = false;
 
   @override
-  var stayResident = true;
+  bool stayResident = true;
 
   @override
-  var supportsRestart = true;
+  bool supportsRestart = true;
 
   @override
-  var supportsDetach = true;
+  bool supportsDetach = true;
 
   @override
-  var supportsServiceProtocol = true;
+  bool supportsServiceProtocol = true;
 
   @override
   Future<void> cleanupAfterSignal() async {}
@@ -1301,7 +1301,7 @@ class FakeDevice extends Fake implements Device {
   Future<bool> isSupported() async => true;
 
   @override
-  var supportsScreenshot = false;
+  bool supportsScreenshot = false;
 
   @override
   String get name => 'Fake Device';
@@ -1310,7 +1310,7 @@ class FakeDevice extends Fake implements Device {
   String get displayName => name;
 
   @override
-  var dds = DartDevelopmentService(logger: FakeLogger());
+  DartDevelopmentService dds = DartDevelopmentService(logger: FakeLogger());
 
   @override
   Future<void> takeScreenshot(File file) async {
@@ -1391,7 +1391,7 @@ TerminalHandler setUpTerminalHandler(
 class FakeResidentCompiler extends Fake implements ResidentCompiler {}
 
 class TestRunner extends Fake implements ResidentRunner {
-  var hasHelpBeenPrinted = false;
+  bool hasHelpBeenPrinted = false;
 
   @override
   Future<void> cleanupAfterSignal() async {}
