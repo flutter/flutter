@@ -110,6 +110,13 @@ class DartProject {
   // Defaults to UIThreadPolicy::Default.
   UIThreadPolicy ui_thread_policy() const { return ui_thread_policy_; }
 
+  // Sets whether to enable IAccessibleEx support for accessibility.
+  void set_iaccessibleex_enabled(bool enabled) {
+    iaccessibleex_enabled_ = enabled;
+  }
+
+  bool iaccessibleex_enabled() const { return iaccessibleex_enabled_; }
+
  private:
   // Accessors for internals are private, so that they can be changed if more
   // flexible options for project structures are needed later without it
@@ -138,6 +145,8 @@ class DartProject {
   GpuPreference gpu_preference_ = GpuPreference::NoPreference;
   // Thread policy for UI isolate.
   UIThreadPolicy ui_thread_policy_ = UIThreadPolicy::Default;
+  // Whether to enable IAccessibleEx support for accessibility.
+  bool iaccessibleex_enabled_ = true;
 };
 
 }  // namespace flutter
