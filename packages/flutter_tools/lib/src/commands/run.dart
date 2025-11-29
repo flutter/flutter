@@ -36,6 +36,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   RunCommandBase({required bool verboseHelp}) {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false);
     usesDartDefineOption();
+    usesWebDefineOption();
     usesFlavorOption();
     usesWebResourcesCdnFlag();
     addNativeNullAssertions(hide: !verboseHelp);
@@ -744,6 +745,7 @@ class RunCommand extends RunCommandBase {
         platform: globals.platform,
         outputPreferences: globals.outputPreferences,
         systemClock: globals.systemClock,
+        webDefines: extractWebDefines(),
       );
     }
     return ColdRunner(
