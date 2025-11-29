@@ -16,7 +16,13 @@ class ScrollEndNotificationApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: ScrollEndNotificationExample());
+    return MaterialApp(
+      // Overridden scroll behavior for sample clarity - does not build
+      // a default Scrollbar (as it does on some platforms) because
+      // this sample demonstrates manual Scrollbar use.
+      scrollBehavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+      home: const ScrollEndNotificationExample(),
+    );
   }
 }
 

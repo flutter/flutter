@@ -18,6 +18,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/scrollbar_utils.dart';
+
 const Duration _kScrollbarFadeDuration = Duration(milliseconds: 300);
 const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 const Color _kAndroidThumbIdleColor = Color(0xffbcbcbc);
@@ -55,16 +57,9 @@ Widget _buildBoilerplate({
     textDirection: textDirection,
     child: MediaQuery(
       data: MediaQueryData(padding: padding),
-      child: ScrollConfiguration(behavior: const NoScrollbarBehavior(), child: child),
+      child: ScrollConfiguration(behavior: const NoScrollbarMaterialBehavior(), child: child),
     ),
   );
-}
-
-class NoScrollbarBehavior extends MaterialScrollBehavior {
-  const NoScrollbarBehavior();
-
-  @override
-  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) => child;
 }
 
 void main() {
@@ -737,6 +732,7 @@ void main() {
   testWidgets('Scrollbar never goes away until finger lift', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
+        scrollBehavior: NoScrollbarMaterialBehavior(),
         home: Scrollbar(
           child: SingleChildScrollView(child: SizedBox(width: 4000.0, height: 4000.0)),
         ),
@@ -802,6 +798,8 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
+        // Manually insert Scrollbar into widget tree versus MaterialApp's default.
+        scrollBehavior: const NoScrollbarMaterialBehavior(),
         home: PrimaryScrollController(
           controller: scrollController,
           child: Scrollbar(
@@ -1288,7 +1286,7 @@ void main() {
           child: MediaQuery(
             data: const MediaQueryData(),
             child: ScrollConfiguration(
-              behavior: const NoScrollbarBehavior(),
+              behavior: const NoScrollbarMaterialBehavior(),
               child: Scrollbar(
                 key: key2,
                 child: SingleChildScrollView(
@@ -1418,6 +1416,8 @@ void main() {
     final scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
+        // Manually insert Scrollbar into widget tree versus MaterialApp's default.
+        scrollBehavior: const NoScrollbarMaterialBehavior(),
         home: PrimaryScrollController(
           controller: scrollController,
           child: Scrollbar(
@@ -1504,6 +1504,8 @@ void main() {
     final scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
+        // Manually insert Scrollbar into widget tree versus MaterialApp's default.
+        scrollBehavior: const NoScrollbarMaterialBehavior(),
         theme: ThemeData(useMaterial3: false),
         home: PrimaryScrollController(
           controller: scrollController,
@@ -1759,6 +1761,9 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
   testWidgets('Scrollbar does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
+        // Manually insert Scrollbar into widget tree versus MaterialApp's default
+        // for clarity.
+        scrollBehavior: NoScrollbarMaterialBehavior(),
         home: Center(
           child: SizedBox.shrink(child: Scrollbar(child: SingleChildScrollView())),
         ),
