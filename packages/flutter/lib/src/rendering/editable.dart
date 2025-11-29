@@ -292,7 +292,7 @@ class RenderEditable extends RenderBox
     bool? hasFocus,
     required LayerLink startHandleLayerLink,
     required LayerLink endHandleLayerLink,
-    int? maxLines = 1,
+    num? maxLines = 1,
     int? minLines,
     bool expands = false,
     StrutStyle? strutStyle,
@@ -964,11 +964,11 @@ class RenderEditable extends RenderBox
   /// When this is not null, the intrinsic height of the render object is the
   /// height of one line of text multiplied by this value. In other words, this
   /// also controls the height of the actual editing widget.
-  int? get maxLines => _maxLines;
-  int? _maxLines;
+  num? get maxLines => _maxLines;
+  num? _maxLines;
 
   /// The value may be null. If it is not null, then it must be greater than zero.
-  set maxLines(int? value) {
+  set maxLines(num? value) {
     assert(value == null || value > 0);
     if (maxLines == value) {
       return;
@@ -1921,8 +1921,8 @@ class RenderEditable extends RenderBox
   }
 
   double _preferredHeight(double width) {
-    final int? maxLines = this.maxLines;
-    final int? minLines = this.minLines ?? maxLines;
+    final num? maxLines = this.maxLines;
+    final num? minLines = this.minLines ?? maxLines;
     final double minHeight = preferredLineHeight * (minLines ?? 0);
     assert(maxLines != 1 || _textIntrinsics.maxLines == 1);
 
@@ -2416,7 +2416,7 @@ class RenderEditable extends RenderBox
     final double preferredHeight = switch (maxLines) {
       null => math.max(_textPainter.height, preferredLineHeight * (minLines ?? 0)),
       1 => _textPainter.height,
-      final int maxLines => clampDouble(
+      final num maxLines => clampDouble(
         _textPainter.height,
         preferredLineHeight * (minLines ?? maxLines),
         preferredLineHeight * maxLines,
@@ -2718,7 +2718,7 @@ class RenderEditable extends RenderBox
     super.debugFillProperties(properties);
     properties.add(ColorProperty('cursorColor', cursorColor));
     properties.add(DiagnosticsProperty<ValueNotifier<bool>>('showCursor', showCursor));
-    properties.add(IntProperty('maxLines', maxLines));
+    properties.add(DiagnosticsProperty<num>('maxLines', maxLines));
     properties.add(IntProperty('minLines', minLines));
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(ColorProperty('selectionColor', selectionColor));
