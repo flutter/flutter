@@ -274,6 +274,36 @@ public class FlutterJNITest {
     verify(platformViewsController, times(1)).createOverlaySurface();
   }
 
+  @Test
+  public void setSemanticsTreeEnabled_callsAccessibilityDelegate() {
+    FlutterJNI.AccessibilityDelegate accessibilityDelegate =
+        mock(FlutterJNI.AccessibilityDelegate.class);
+
+    FlutterJNI flutterJNI = new FlutterJNI();
+    flutterJNI.setAccessibilityDelegate(accessibilityDelegate);
+
+    // --- Execute Test ---
+    flutterJNI.setSemanticsTreeEnabled(true);
+
+    // --- Verify Results ---
+    verify(accessibilityDelegate, times(1)).setSemanticsTreeEnabled(true);
+  }
+
+  @Test
+  public void setSemanticsTreeEnabled_callsAccessibilityDelegateWhenFalse() {
+    FlutterJNI.AccessibilityDelegate accessibilityDelegate =
+        mock(FlutterJNI.AccessibilityDelegate.class);
+
+    FlutterJNI flutterJNI = new FlutterJNI();
+    flutterJNI.setAccessibilityDelegate(accessibilityDelegate);
+
+    // --- Execute Test ---
+    flutterJNI.setSemanticsTreeEnabled(false);
+
+    // --- Verify Results ---
+    verify(accessibilityDelegate, times(1)).setSemanticsTreeEnabled(false);
+  }
+
   @Test(expected = IllegalArgumentException.class)
   public void invokePlatformMessageResponseCallback_wantsDirectBuffer() {
     FlutterJNI flutterJNI = new FlutterJNI();

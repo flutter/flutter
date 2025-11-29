@@ -175,7 +175,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   //
   // See the Flutter docs on SemanticsNode:
   // https://api.flutter.dev/flutter/semantics/SemanticsNode-class.html
-  @NonNull private final Map<Integer, SemanticsNode> flutterSemanticsTree = new HashMap<>();
+  @NonNull @VisibleForTesting
+  final Map<Integer, SemanticsNode> flutterSemanticsTree = new HashMap<>();
 
   // The set of all custom Flutter accessibility actions that are present in the running
   // Flutter app, stored as a Map from each action's ID to the definition of the custom
@@ -389,6 +390,11 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         public void setLocale(String locale) {
           AccessibilityBridge.this.setLocale(locale);
         }
+
+        @Override
+        public void resetSemantics() {
+          AccessibilityBridge.this.reset();
+        }
       };
 
   // Listener that is notified when accessibility is turned on/off.
@@ -401,11 +407,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 return;
               }
               if (accessibilityEnabled) {
-                accessibilityChannel.setAccessibilityMessageHandler(accessibilityMessageHandler);
                 accessibilityChannel.onAndroidAccessibilityEnabled();
               } else {
                 setAccessibleNavigation(false);
-                accessibilityChannel.setAccessibilityMessageHandler(null);
                 accessibilityChannel.onAndroidAccessibilityDisabled();
               }
 
@@ -481,6 +485,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     this.contentResolver = contentResolver;
     this.accessibilityViewEmbedder = accessibilityViewEmbedder;
     this.platformViewsAccessibilityDelegate = platformViewsAccessibilityDelegate;
+    accessibilityChannel.setAccessibilityMessageHandler(accessibilityMessageHandler);
     // Tell Flutter whether accessibility is initially active or not. Then register a listener
     // to be notified of changes in the future.
     accessibilityStateChangeListener.onAccessibilityStateChanged(accessibilityManager.isEnabled());
@@ -2176,7 +2181,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
    *   <li>Sends a {@link AccessibilityEvent#TYPE_WINDOW_CONTENT_CHANGED} event
    * </ul>
    */
-  // TODO(mattcarroll): under what conditions is this method expected to be invoked?
   public void reset() {
     flutterSemanticsTree.clear();
     if (accessibilityFocusedSemanticsNode != null) {
