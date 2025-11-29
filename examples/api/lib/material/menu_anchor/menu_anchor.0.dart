@@ -109,6 +109,7 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         MenuAnchor(
+          animated: true,
           childFocusNode: _buttonFocusNode,
           menuChildren: <Widget>[
             MenuItemButton(
@@ -128,6 +129,7 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
                 child: Text(MenuEntry.showMessage.label),
               ),
             SubmenuButton(
+              animated: true,
               menuChildren: <Widget>[
                 MenuItemButton(
                   onPressed: () => _activate(MenuEntry.colorRed),
