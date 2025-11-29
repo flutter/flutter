@@ -28,9 +28,16 @@ function follow_links() (
   echo "$file"
 )
 
-PROG_NAME="$(follow_links "${BASH_SOURCE[0]}")"
-BIN_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
-FLUTTER_ROOT="$BIN_DIR/../../.."
-DART="$FLUTTER_ROOT/bin/dart"
+# Run `dart xcode_backend.dart` with the dart from the Flutter SDK.
+# Prefer the FLUTTER_ROOT environment variable if set, otherwise fallback
+# to path resolution via symlink canonicalization.
+if [[ -z "$FLUTTER_ROOT" ]]; then
+  PROG_NAME="$(follow_links "${BASH_SOURCE[0]}")"
+  BIN_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
+  FLUTTER_ROOT="$BIN_DIR/../../.."
+fi
 
-"$DART" "$BIN_DIR/xcode_backend.dart" "$@" "ios"
+DART="$FLUTTER_ROOT/bin/dart"
+XCODE_BACKEND_DART="$(dirname "${BASH_SOURCE[0]}")/xcode_backend.dart"
+
+exec "$DART" "$XCODE_BACKEND_DART" "$@" "ios"
