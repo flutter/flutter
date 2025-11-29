@@ -30,6 +30,13 @@ f16vec4 IPHalfUnpremultiply(f16vec4 color) {
   return f16vec4(color.rgb / color.a, color.a);
 }
 
+f16vec4 IPHalfUnpremultiplyOpaque(f16vec4 color) {
+  if (color.a == 0.0hf) {
+    return f16vec4(0.0hf);
+  }
+  return color / color.a;
+}
+
 /// Convert an unpremultiplied color (a color which has its color components
 /// separated from its alpha value) to a premultiplied color.
 ///

@@ -28,6 +28,7 @@ std::shared_ptr<FilterContents> WrapInput(const flutter::DlImageFilter* filter,
           input,                                                    //
           Sigma(blur_filter->sigma_x()),                            //
           Sigma(blur_filter->sigma_y()),                            //
+          blur_filter->bounds(),                                    //
           static_cast<Entity::TileMode>(blur_filter->tile_mode()),  //
           FilterContents::BlurStyle::kNormal                        //
       );
