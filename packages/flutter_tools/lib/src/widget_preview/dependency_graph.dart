@@ -201,7 +201,7 @@ final class LibraryPreviewNode {
   /// transitive dependency outside the previewed project (e.g., in a path or Git dependency, or
   /// a modified package).
   // TODO(bkonyi): determine how to best handle compile time errors in non-analyzed dependencies.
-  var dependencyHasErrors = false;
+  bool dependencyHasErrors = false;
 
   /// `true` if this library contains compile time errors.
   bool get hasErrors => errors.isNotEmpty;

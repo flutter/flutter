@@ -13,21 +13,19 @@ import 'package:integration_test/integration_test.dart';
 
 // See: https://developer.apple.com/documentation/metal/mtlpixelformat/mtlpixelformatbgr10_xr.
 double _decodeBGR10(int x) {
-  const double max = 1.25098;
-  const double min = -0.752941;
-  const double intercept = min;
+  const max = 1.25098;
+  const min = -0.752941;
+  const intercept = min;
   const double slope = (max - min) / 1024.0;
   return (x * slope) + intercept;
 }
 
 Uint8List _convertBGRA10XRToBGRA8888(Uint8List bgra10xr) {
-  final ByteData inputByteData = ByteData.sublistView(bgra10xr);
-  final Uint8List bgra8888 = Uint8List(
-    bgra10xr.lengthInBytes ~/ 2,
-  ); // 8 bytes per pixel -> 4 bytes per pixel
-  final ByteData outputByteData = ByteData.view(bgra8888.buffer);
+  final inputByteData = ByteData.sublistView(bgra10xr);
+  final bgra8888 = Uint8List(bgra10xr.lengthInBytes ~/ 2); // 8 bytes per pixel -> 4 bytes per pixel
+  final outputByteData = ByteData.view(bgra8888.buffer);
 
-  for (int i = 0, j = 0; i < bgra10xr.lengthInBytes; i += 8, j += 4) {
+  for (var i = 0, j = 0; i < bgra10xr.lengthInBytes; i += 8, j += 4) {
     final int pixel = inputByteData.getUint64(i, Endian.host);
 
     final double blue10 = _decodeBGR10((pixel >> 6) & 0x3ff);
@@ -37,7 +35,7 @@ Uint8List _convertBGRA10XRToBGRA8888(Uint8List bgra10xr) {
     final int blue8 = (blue10.clamp(0.0, 1.0) * 255).round();
     final int green8 = (green10.clamp(0.0, 1.0) * 255).round();
     final int red8 = (red10.clamp(0.0, 1.0) * 255).round();
-    const int alpha8 = 255; // Assuming opaque for BGRA8888
+    const alpha8 = 255; // Assuming opaque for BGRA8888
 
     final int bgra8888Pixel = (alpha8 << 24) | (red8 << 16) | (green8 << 8) | blue8;
     outputByteData.setUint32(j, bgra8888Pixel, Endian.host);
@@ -46,8 +44,8 @@ Uint8List _convertBGRA10XRToBGRA8888(Uint8List bgra10xr) {
 }
 
 Future<ui.Image> _getScreenshot() async {
-  const MethodChannel channel = MethodChannel('flutter/screenshot');
-  final List<Object?> result = await channel.invokeMethod('test') as List<Object?>;
+  const channel = MethodChannel('flutter/screenshot');
+  final result = await channel.invokeMethod('test') as List<Object?>;
 
   expect(result, isNotNull);
   expect(result.length, 4);
@@ -55,7 +53,7 @@ Future<ui.Image> _getScreenshot() async {
 
   expect(format, equals('MTLPixelFormatBGRA10_XR'));
 
-  final Completer<ui.Image> completer = Completer<ui.Image>();
+  final completer = Completer<ui.Image>();
   final Uint8List pixels = _convertBGRA10XRToBGRA8888(bytes);
   ui.decodeImageFromPixels(
     pixels,
@@ -73,6 +71,20 @@ void main() {
 
   group('end-to-end test', () {
     testWidgets('renders sdfs with rgba32f', (WidgetTester tester) async {
+      app.gTargetPixelFormat = ui.TargetPixelFormat.rgbaFloat32;
+      app.main();
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+      await _getScreenshot();
+      // TODO(gaaclarke): Turn this into a golden test. This turned out to be
+      // quite involved so it's deferred.
+      // expect(
+      //   screenshot,
+      //   matchesGoldenFile('high_bitrate_images.rbga32f'),
+      // );
+    });
+
+    testWidgets('renders sdfs with r32f', (WidgetTester tester) async {
+      app.gTargetPixelFormat = ui.TargetPixelFormat.rFloat32;
       app.main();
       await tester.pumpAndSettle(const Duration(seconds: 2));
       await _getScreenshot();

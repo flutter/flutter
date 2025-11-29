@@ -15,16 +15,16 @@ Future<void> main() async {
     // Uses runTest directly so that the test does not get hung up waiting for
     // the error reporter to be reset to the original one.
 
-    final Completer<FlutterErrorDetails> errorCompleter = Completer<FlutterErrorDetails>();
+    final errorCompleter = Completer<FlutterErrorDetails>();
     final TestExceptionReporter oldReporter = reportTestException;
     reportTestException = (FlutterErrorDetails details, String testDescription) {
       errorCompleter.complete(details);
       reportTestException = oldReporter;
     };
 
-    final AutomatedTestWidgetsFlutterBinding binding = AutomatedTestWidgetsFlutterBinding();
+    final binding = AutomatedTestWidgetsFlutterBinding();
     await binding.runTest(() async {
-      final Completer<String> completer = Completer<String>();
+      final completer = Completer<String>();
 
       completer.future.then(
         (String value) {},

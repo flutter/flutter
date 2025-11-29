@@ -305,7 +305,7 @@ class SelectableRegion extends StatefulWidget {
     required final VoidCallback onSelectAll,
     required final VoidCallback? onShare,
   }) {
-    final bool canCopy = selectionGeometry.status == SelectionStatus.uncollapsed;
+    final canCopy = selectionGeometry.status == SelectionStatus.uncollapsed;
     final bool canSelectAll = selectionGeometry.hasContent;
     // The share button is not supported on the web.
     final bool platformCanShare =
@@ -325,7 +325,7 @@ class SelectableRegion extends StatefulWidget {
     final bool canShare = onShare != null && platformCanShare;
 
     // On Android, the share button is before the select all button.
-    final bool showShareBeforeSelectAll = defaultTargetPlatform == TargetPlatform.android;
+    final showShareBeforeSelectAll = defaultTargetPlatform == TargetPlatform.android;
 
     // Determine which buttons will appear so that the order and total number is
     // known. A button's position in the menu can slightly affect its
@@ -604,7 +604,7 @@ class SelectableRegionState extends State<SelectableRegion>
   // This method should be used in all instances when details.consecutiveTapCount
   // would be used.
   int _getEffectiveConsecutiveTapCount(int rawCount) {
-    int maxConsecutiveTap = 3;
+    var maxConsecutiveTap = 3;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -1262,10 +1262,10 @@ class SelectableRegionState extends State<SelectableRegion>
     SelectionPoint selectionPoint,
   ) {
     final Vector3 globalTransform = _selectable!.getTransformTo(null).getTranslation();
-    final Offset globalTransformAsOffset = Offset(globalTransform.x, globalTransform.y);
+    final globalTransformAsOffset = Offset(globalTransform.x, globalTransform.y);
     final Offset globalSelectionPointPosition =
         selectionPoint.localPosition + globalTransformAsOffset;
-    final Rect caretRect = Rect.fromLTWH(
+    final caretRect = Rect.fromLTWH(
       globalSelectionPointPosition.dx,
       globalSelectionPointPosition.dy - selectionPoint.lineHeight,
       0,
@@ -1601,15 +1601,13 @@ class SelectableRegionState extends State<SelectableRegion>
   ///    for the default context menu buttons.
   TextSelectionToolbarAnchors get contextMenuAnchors {
     if (_lastSecondaryTapDownPosition != null) {
-      final TextSelectionToolbarAnchors anchors = TextSelectionToolbarAnchors(
-        primaryAnchor: _lastSecondaryTapDownPosition!,
-      );
+      final anchors = TextSelectionToolbarAnchors(primaryAnchor: _lastSecondaryTapDownPosition!);
       // Clear the state of _lastSecondaryTapDownPosition after use since a user may
       // access contextMenuAnchors and receive invalid anchors for their context menu.
       _lastSecondaryTapDownPosition = null;
       return anchors;
     }
-    final RenderBox renderBox = context.findRenderObject()! as RenderBox;
+    final renderBox = context.findRenderObject()! as RenderBox;
     return TextSelectionToolbarAnchors.fromSelection(
       renderBox: renderBox,
       startGlyphHeight: startGlyphHeight,
@@ -1757,7 +1755,7 @@ class SelectableRegionState extends State<SelectableRegion>
   }
 
   List<ContextMenuButtonItem> get _textProcessingActionButtonItems {
-    final List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
+    final buttonItems = <ContextMenuButtonItem>[];
     final SelectedContent? data = _selectable?.getSelectedContent();
     if (data == null) {
       return buttonItems;
@@ -2151,7 +2149,7 @@ class StaticSelectionContainerDelegate extends MultiSelectableSelectionContainer
     }
     final int start = min(currentSelectionStartIndex, currentSelectionEndIndex);
     final int end = max(currentSelectionStartIndex, currentSelectionEndIndex);
-    for (int index = start; index <= end; index += 1) {
+    for (var index = start; index <= end; index += 1) {
       didReceiveSelectionEventFor(selectable: selectables[index]);
     }
     _updateLastSelectionEdgeLocationsFromGeometries();
@@ -2314,7 +2312,7 @@ class StaticSelectionContainerDelegate extends MultiSelectableSelectionContainer
   @override
   void ensureChildUpdated(Selectable selectable) {
     if (_lastEndEdgeUpdateGlobalPosition != null && _hasReceivedEndEvent.add(selectable)) {
-      final SelectionEdgeUpdateEvent synthesizedEvent = SelectionEdgeUpdateEvent.forEnd(
+      final synthesizedEvent = SelectionEdgeUpdateEvent.forEnd(
         globalPosition: _lastEndEdgeUpdateGlobalPosition!,
       );
       if (currentSelectionEndIndex == -1) {
@@ -2323,7 +2321,7 @@ class StaticSelectionContainerDelegate extends MultiSelectableSelectionContainer
       selectable.dispatchSelectionEvent(synthesizedEvent);
     }
     if (_lastStartEdgeUpdateGlobalPosition != null && _hasReceivedStartEvent.add(selectable)) {
-      final SelectionEdgeUpdateEvent synthesizedEvent = SelectionEdgeUpdateEvent.forStart(
+      final synthesizedEvent = SelectionEdgeUpdateEvent.forStart(
         globalPosition: _lastStartEdgeUpdateGlobalPosition!,
       );
       if (currentSelectionStartIndex == -1) {
@@ -2470,8 +2468,8 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     final List<Selectable> mergingSelectables = _additions.toList()..sort(compareOrder);
     final List<Selectable> existingSelectables = selectables;
     selectables = <Selectable>[];
-    int mergingIndex = 0;
-    int existingIndex = 0;
+    var mergingIndex = 0;
+    var existingIndex = 0;
     int selectionStartIndex = currentSelectionStartIndex;
     int selectionEndIndex = currentSelectionEndIndex;
     // Merge two sorted lists.
@@ -2556,7 +2554,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
 
   static Rect _getBoundingBox(Selectable selectable) {
     Rect result = selectable.boundingBoxes.first;
-    for (int index = 1; index < selectable.boundingBoxes.length; index += 1) {
+    for (var index = 1; index < selectable.boundingBoxes.length; index += 1) {
       result = result.expandToInclude(selectable.boundingBoxes[index]);
     }
     return result;
@@ -2699,7 +2697,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
 
     // Need to collect selection rects from selectables ranging from the
     // currentSelectionStartIndex to the currentSelectionEndIndex.
-    final List<Rect> selectionRects = <Rect>[];
+    final selectionRects = <Rect>[];
     final Rect? drawableArea = hasSize
         ? Rect.fromLTWH(0, 0, containerSize.width, containerSize.height)
         : null;
@@ -2821,15 +2819,15 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   /// Copies the selected contents of all [Selectable]s.
   @override
   SelectedContent? getSelectedContent() {
-    final List<SelectedContent> selections = <SelectedContent>[
+    final selections = <SelectedContent>[
       for (final Selectable selectable in selectables)
         if (selectable.getSelectedContent() case final SelectedContent data) data,
     ];
     if (selections.isEmpty) {
       return null;
     }
-    final StringBuffer buffer = StringBuffer();
-    for (final SelectedContent selection in selections) {
+    final buffer = StringBuffer();
+    for (final selection in selections) {
       buffer.write(selection.plainText);
     }
     return SelectedContent(plainText: buffer.toString());
@@ -2852,9 +2850,9 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
       return null;
     }
-    int startOffset = 0;
-    int endOffset = 0;
-    bool foundStart = false;
+    var startOffset = 0;
+    var endOffset = 0;
+    var foundStart = false;
     bool forwardSelection = currentSelectionEndIndex >= currentSelectionStartIndex;
     if (currentSelectionEndIndex == currentSelectionStartIndex) {
       // Determining selection direction is inaccurate if currentSelectionStartIndex == currentSelectionEndIndex.
@@ -2864,7 +2862,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       forwardSelection =
           rangeAtSelectableInSelection.endOffset >= rangeAtSelectableInSelection.startOffset;
     }
-    for (int index = 0; index < selections.length; index++) {
+    for (var index = 0; index < selections.length; index++) {
       final _SelectionInfo selection = selections[index];
       if (selection.range == null) {
         if (foundStart) {
@@ -2910,7 +2908,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   /// this method will return `null`.
   @override
   SelectedContentRange? getSelection() {
-    final List<_SelectionInfo> selections = <_SelectionInfo>[
+    final selections = <_SelectionInfo>[
       for (final Selectable selectable in selectables)
         (contentLength: selectable.contentLength, range: selectable.getSelection()),
     ];
@@ -2942,7 +2940,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     }
     final int skipStart = min(currentSelectionStartIndex, currentSelectionEndIndex);
     final int skipEnd = max(currentSelectionStartIndex, currentSelectionEndIndex);
-    for (int index = 0; index < selectables.length; index += 1) {
+    for (var index = 0; index < selectables.length; index += 1) {
       if (index >= skipStart && index <= skipEnd) {
         continue;
       }
@@ -2973,8 +2971,8 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       effectiveGlobalPosition = (event as SelectParagraphSelectionEvent).globalPosition;
     }
     SelectionResult? lastSelectionResult;
-    for (int index = 0; index < selectables.length; index += 1) {
-      bool globalRectsContainPosition = false;
+    for (var index = 0; index < selectables.length; index += 1) {
+      var globalRectsContainPosition = false;
       if (selectables[index].boundingBoxes.isNotEmpty) {
         for (final Rect rect in selectables[index].boundingBoxes) {
           final Rect globalRect = MatrixUtils.transformRect(
@@ -3148,7 +3146,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
 
   @override
   SelectionResult dispatchSelectionEvent(SelectionEvent event) {
-    final bool selectionWillBeInProgress = event is! ClearSelectionEvent;
+    final selectionWillBeInProgress = event is! ClearSelectionEvent;
     if (!_selectionInProgress && selectionWillBeInProgress) {
       // Sort the selectable every time a selection start.
       selectables.sort(compareOrder);
@@ -3229,10 +3227,10 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     assert(
       (isEnd && currentSelectionEndIndex == -1) || (!isEnd && currentSelectionStartIndex == -1),
     );
-    int newIndex = -1;
-    bool hasFoundEdgeIndex = false;
+    var newIndex = -1;
+    var hasFoundEdgeIndex = false;
     SelectionResult? result;
-    for (int index = 0; index < selectables.length && !hasFoundEdgeIndex; index += 1) {
+    for (var index = 0; index < selectables.length && !hasFoundEdgeIndex; index += 1) {
       final Selectable child = selectables[index];
       final SelectionResult childResult = dispatchSelectionEventToChild(child, event);
       switch (childResult) {
@@ -3299,10 +3297,10 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     //
     // This can happen when there is a scrollable child and the edge being adjusted
     // has been scrolled out of view.
-    final bool isCurrentEdgeWithinViewport = isEnd
+    final isCurrentEdgeWithinViewport = isEnd
         ? _selectionGeometry.endSelectionPoint != null
         : _selectionGeometry.startSelectionPoint != null;
-    final bool isOppositeEdgeWithinViewport = isEnd
+    final isOppositeEdgeWithinViewport = isEnd
         ? _selectionGeometry.startSelectionPoint != null
         : _selectionGeometry.endSelectionPoint != null;
     int newIndex = switch ((isEnd, isCurrentEdgeWithinViewport, isOppositeEdgeWithinViewport)) {

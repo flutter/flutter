@@ -7,8 +7,7 @@ publish_to: 'none'
 version: 1.0.0
 
 environment:
-  sdk: ^3.8.0-0
-  flutter: ">=2.5.0-6.0.pre.30 <3.0.0"
+  sdk: ^3.9.0-0
 resolution: workspace
 
 
@@ -34,9 +33,10 @@ dev_dependencies:
     sdk: flutter
   flutter_web_plugins:
     sdk: flutter
+  flutter_lints: ^6.0.0
 
 
 flutter:
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: p9pqmd
+# PUBSPEC CHECKSUM: 1vgq65

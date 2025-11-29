@@ -382,10 +382,10 @@ class _TestProcessInfo implements ProcessInfo {
   final FileSystem _fileSystem;
 
   @override
-  var currentRss = 1000;
+  int currentRss = 1000;
 
   @override
-  var maxRss = 2000;
+  int maxRss = 2000;
 
   @override
   File writePidFile(String pidFile) {

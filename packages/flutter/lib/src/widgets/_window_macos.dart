@@ -12,6 +12,7 @@ import 'package:flutter/rendering.dart';
 
 import '../foundation/_features.dart';
 import '_window.dart';
+import '_window_positioner.dart';
 import 'binding.dart';
 
 // Do not import this file in production applications or packages published
@@ -68,7 +69,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
     }
 
     assert(
-      PlatformDispatcher.instance.engineId != null,
+      WidgetsBinding.instance.platformDispatcher.engineId != null,
       'WindowingOwnerMacOS must be created after the engine has been initialized.',
     );
   }
@@ -80,7 +81,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
     BoxConstraints? preferredConstraints,
     String? title,
   }) {
-    final RegularWindowControllerMacOS res = RegularWindowControllerMacOS(
+    final res = RegularWindowControllerMacOS(
       owner: this,
       delegate: delegate,
       preferredSize: preferredSize,
@@ -98,7 +99,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
     BaseWindowController? parent,
     String? title,
   }) {
-    final DialogWindowControllerMacOS res = DialogWindowControllerMacOS(
+    final res = DialogWindowControllerMacOS(
       owner: this,
       delegate: delegate,
       preferredSize: preferredSize,
@@ -109,6 +110,18 @@ class WindowingOwnerMacOS extends WindowingOwner {
     return res;
   }
 
+  @internal
+  @override
+  TooltipWindowController createTooltipWindowController({
+    required TooltipWindowControllerDelegate delegate,
+    required BoxConstraints preferredConstraints,
+    required Rect anchorRect,
+    required WindowPositioner positioner,
+    required BaseWindowController parent,
+  }) {
+    throw UnimplementedError('Tooltip windows are not yet implemented on MacOS.');
+  }
+
   final List<BaseWindowController> _activeControllers = <BaseWindowController>[];
 
   /// Returns the window handle for the given [view], or null is the window
@@ -117,7 +130,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
   /// The window handle is a pointer to the NSWindow instance.
   static Pointer<Void> getWindowHandle(FlutterView view) {
     return _MacOSPlatformInterface.getWindowHandle(
-      PlatformDispatcher.instance.engineId!,
+      WidgetsBinding.instance.platformDispatcher.engineId!,
       view.viewId,
     );
   }
@@ -554,7 +567,10 @@ class _MacOSPlatformInterface {
         ..constraints.maxWidth = preferredConstraints.maxWidth
         ..constraints.maxHeight = preferredConstraints.maxHeight;
     }
-    final int viewId = _createRegularWindow(PlatformDispatcher.instance.engineId!, request);
+    final int viewId = _createRegularWindow(
+      WidgetsBinding.instance.platformDispatcher.engineId!,
+      request,
+    );
     _allocator.free(request);
     return viewId;
   }
@@ -595,7 +611,10 @@ class _MacOSPlatformInterface {
         ..constraints.maxHeight = preferredConstraints.maxHeight;
     }
     try {
-      final int viewId = _createDialogWindow(PlatformDispatcher.instance.engineId!, request);
+      final int viewId = _createDialogWindow(
+        WidgetsBinding.instance.platformDispatcher.engineId!,
+        request,
+      );
       return viewId;
     } finally {
       _allocator.free(request);
@@ -606,7 +625,7 @@ class _MacOSPlatformInterface {
   external static void _destroyWindow(int engineId, Pointer<Void> handle);
 
   static void destroyWindow(Pointer<Void> windowHandle) {
-    _destroyWindow(PlatformDispatcher.instance.engineId!, windowHandle);
+    _destroyWindow(WidgetsBinding.instance.platformDispatcher.engineId!, windowHandle);
   }
 
   @Native<_Size Function(Pointer<Void>)>(symbol: 'InternalFlutter_Window_GetContentSize')
@@ -738,7 +757,7 @@ extension _Utf8Pointer on Pointer<_Utf8> {
   }
 
   static int _length(Pointer<Uint8> codeUnits) {
-    int length = 0;
+    var length = 0;
     while (codeUnits[length] != 0) {
       length++;
     }
