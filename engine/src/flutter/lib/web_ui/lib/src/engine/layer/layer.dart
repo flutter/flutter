@@ -22,10 +22,10 @@ abstract class Layer implements ui.EngineLayer {
   /// Implement layer visitor.
   R accept<R>(LayerVisitor<R> visitor);
 
-  // TODO(dnfield): Implement ui.EngineLayer.dispose for CanvasKit.
-  // https://github.com/flutter/flutter/issues/82878
   @override
-  void dispose() {}
+  void dispose() {
+    // This is a no-op for all Layer types except PictureLayer.
+  }
 }
 
 /// A layer that contains child layers.
@@ -228,6 +228,12 @@ class PictureLayer extends Layer {
 
   @override
   bool get needsPainting => super.needsPainting && !isCulled;
+
+  @override
+  void dispose() {
+    picture.dispose();
+    super.dispose();
+  }
 }
 
 /// A layer which contains a [ui.ColorFilter].
