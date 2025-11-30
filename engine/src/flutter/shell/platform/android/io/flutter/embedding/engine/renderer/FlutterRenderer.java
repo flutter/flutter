@@ -1230,7 +1230,16 @@ public class FlutterRenderer implements TextureRegistry {
             + viewportMetrics.displayFeatures.size()
             + "\n"
             + "Display Cutouts: "
-            + viewportMetrics.displayCutouts.size());
+            + viewportMetrics.displayCutouts.size()
+            + "\n"
+            + "Display Corner Radii - TL: "
+            + viewportMetrics.displayCornerRadiusTopLeft
+            + ", TR: "
+            + viewportMetrics.displayCornerRadiusTopRight
+            + ", BR: "
+            + viewportMetrics.displayCornerRadiusBottomRight
+            + ", BL: "
+            + viewportMetrics.displayCornerRadiusBottomLeft);
 
     int totalFeaturesAndCutouts =
         viewportMetrics.displayFeatures.size() + viewportMetrics.displayCutouts.size();
@@ -1272,7 +1281,11 @@ public class FlutterRenderer implements TextureRegistry {
         viewportMetrics.physicalTouchSlop,
         displayFeaturesBounds,
         displayFeaturesType,
-        displayFeaturesState);
+        displayFeaturesState,
+        viewportMetrics.displayCornerRadiusTopLeft,
+        viewportMetrics.displayCornerRadiusTopRight,
+        viewportMetrics.displayCornerRadiusBottomRight,
+        viewportMetrics.displayCornerRadiusBottomLeft);
   }
 
   public Bitmap getBitmap() {
@@ -1349,6 +1362,10 @@ public class FlutterRenderer implements TextureRegistry {
     public int systemGestureInsetBottom = 0;
     public int systemGestureInsetLeft = 0;
     public int physicalTouchSlop = unsetValue;
+    public int displayCornerRadiusTopLeft = unsetValue;
+    public int displayCornerRadiusTopRight = unsetValue;
+    public int displayCornerRadiusBottomRight = unsetValue;
+    public int displayCornerRadiusBottomLeft = unsetValue;
 
     /**
      * Whether this instance contains valid metrics for the Flutter application.

@@ -672,7 +672,11 @@ public class FlutterJNI {
       int physicalTouchSlop,
       int[] displayFeaturesBounds,
       int[] displayFeaturesType,
-      int[] displayFeaturesState) {
+      int[] displayFeaturesState,
+      int physicalDisplayCornerRadiusTopLeft,
+      int physicalDisplayCornerRadiusTopRight,
+      int physicalDisplayCornerRadiusBottomRight,
+      int physicalDisplayCornerRadiusBottomLeft) {
     ensureRunningOnMainThread();
     ensureAttachedToNative();
     nativeSetViewportMetrics(
@@ -695,7 +699,11 @@ public class FlutterJNI {
         physicalTouchSlop,
         displayFeaturesBounds,
         displayFeaturesType,
-        displayFeaturesState);
+        displayFeaturesState,
+        physicalDisplayCornerRadiusTopLeft,
+        physicalDisplayCornerRadiusTopRight,
+        physicalDisplayCornerRadiusBottomRight,
+        physicalDisplayCornerRadiusBottomLeft);
   }
 
   private native void nativeSetViewportMetrics(
@@ -718,7 +726,11 @@ public class FlutterJNI {
       int physicalTouchSlop,
       int[] displayFeaturesBounds,
       int[] displayFeaturesType,
-      int[] displayFeaturesState);
+      int[] displayFeaturesState,
+      int physicalDisplayCornerRadiusTopLeft,
+      int physicalDisplayCornerRadiusTopRight,
+      int physicalDisplayCornerRadiusBottomRight,
+      int physicalDisplayCornerRadiusBottomLeft);
 
   // ----- End Render Surface Support -----
 
