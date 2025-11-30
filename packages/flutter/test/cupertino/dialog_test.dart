@@ -2156,6 +2156,15 @@ void main() {
     await tester.pumpAndSettle();
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), customCursor);
   });
+
+  testWidgets('CupertinoAlertDialog does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(child: SizedBox.shrink(child: CupertinoAlertDialog())),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoAlertDialog)), Size.zero);
+  });
 }
 
 RenderBox findActionButtonRenderBoxByTitle(WidgetTester tester, String title) {
