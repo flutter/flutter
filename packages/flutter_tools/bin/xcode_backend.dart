@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:io';
 
 void main(List<String> arguments) {
@@ -332,7 +333,15 @@ class Context {
     required bool codesign,
     String? expandedCodeSignIdentity,
   }) {
-    // Copy the native assets.
+    // Copy native assets referenced in the native_assets.json file for the
+    // current build.
+    final String targetBuildDir = environment['TARGET_BUILD_DIR']!;
+    final lastBuildIdFile = File('$targetBuildDir/.last_build_id');
+    if (!lastBuildIdFile.existsSync()) {
+      throw Exception('Expected earlier build step to have written ${lastBuildIdFile.path}');
+    }
+    final String lastBuildId = lastBuildIdFile.readAsStringSync();
+
     final String sourceRoot = environment['SOURCE_ROOT'] ?? '';
     var projectPath = '$sourceRoot/..';
     if (environment['FLUTTER_APPLICATION_PATH'] != null) {
@@ -349,30 +358,68 @@ class Context {
       return;
     }
 
-    if (verbose) {
-      print('♦ Copying native assets from $nativeAssetsPath.');
+    final Set<String> referencedFrameworks = {};
+    final nativeAssetsJson = File(
+      '$projectPath/.dart_tool/flutter_build/$lastBuildId/native_assets.json',
+    );
+    if (!nativeAssetsJson.existsSync()) {
+      if (verbose) {
+        print("♦ No native assets to bundle. ${nativeAssetsJson.path} doesn't exist.");
+      }
+      return;
     }
-    for (final FileSystemEntity entity in nativeAssetsDir.listSync()) {
-      if (entity is Directory) {
-        final String? frameworkName = parseFrameworkNameFromDirectory(entity);
-        if (frameworkName != null) {
-          runRsync(
-            extraArgs: <String>[
-              '--filter',
-              '- native_assets.yaml',
-              '--filter',
-              '- native_assets.json',
-            ],
-            entity.path,
-            xcodeFrameworksDir,
-          );
-          if (codesign && expandedCodeSignIdentity != null) {
-            _codesignFramework(
-              expandedCodeSignIdentity,
-              '$xcodeFrameworksDir/$frameworkName.framework/$frameworkName',
+    // native_assets.json looks like this: {
+    //   "format-version":[1,0,0],
+    //   "native-assets":{
+    //     "ios_arm64":{
+    //       "package:sqlite3/src/ffi/libsqlite3.g.dart":[
+    //         "absolute",
+    //         "sqlite3arm64ios.framework/sqlite3arm64ios"
+    //       ]
+    //     }
+    //   }
+    // }
+    final nativeAssetsSpec = json.decode(nativeAssetsJson.readAsStringSync()) as Map;
+    for (final Object? perPlatform
+        in (nativeAssetsSpec['native-assets'] as Map<String, Object?>).values) {
+      for (final Object? asset in (perPlatform! as Map<String, Object?>).values) {
+        if (asset case ['absolute', final String frameworkPath]) {
+          // frameworkPath is usually something like sqlite3arm64ios.framework/sqlite3arm64ios
+          final [String directory, String name] = frameworkPath.split('/');
+          if (directory != '$name.framework') {
+            throw Exception(
+              'Unexpected framework path: $frameworkPath. Should be $name.framework/$name',
             );
           }
+
+          referencedFrameworks.add(name);
         }
+      }
+    }
+
+    if (verbose) {
+      print('♦ Copying native assets ${referencedFrameworks.join(', ')} from $nativeAssetsPath.');
+    }
+
+    for (final framework in referencedFrameworks) {
+      final frameworkDirectory = Directory('$nativeAssetsPath$framework.framework');
+      if (!frameworkDirectory.existsSync()) {
+        throw Exception(
+          'The native assets specification at ${nativeAssetsJson.path} references $framework, '
+          'which was not found in $nativeAssetsPath.',
+        );
+      }
+
+      runRsync(
+        extraArgs: <String>['--filter', '- native_assets.yaml', '--filter', '- native_assets.json'],
+        frameworkDirectory.path,
+        xcodeFrameworksDir,
+      );
+      if (codesign && expandedCodeSignIdentity != null) {
+        _codesignFramework(
+          expandedCodeSignIdentity,
+          '$xcodeFrameworksDir/$framework.framework/$framework',
+        );
       }
     }
   }
@@ -386,28 +433,6 @@ class Context {
       '--',
       frameworkPath,
     ]);
-  }
-
-  /// Parse the [dir]'s path to get the framework name. For example,
-  /// `/path/to/framework_name.framework/` would parse to `framework_name`.
-  ///
-  /// Returns null if [dir] is not a `.framework`.
-  static String? parseFrameworkNameFromDirectory(Directory dir) {
-    final List<String> pathSegments = dir.uri.pathSegments;
-    if (pathSegments.isEmpty) {
-      return null;
-    }
-    final String basename;
-    if (pathSegments.last.isEmpty && pathSegments.length > 1) {
-      basename = pathSegments[pathSegments.length - 2];
-    } else {
-      basename = pathSegments.last;
-    }
-    final int extensionIndex = basename.indexOf('.framework');
-    if (extensionIndex == -1) {
-      return null;
-    }
-    return basename.substring(0, extensionIndex);
   }
 
   /// Add the vmService publisher Bonjour service to the produced app bundle Info.plist.
