@@ -7,26 +7,33 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  Border getExpectedHaloBorder() => Border.fromBorderSide(
-    BorderSide(
-      color: HSLColor.fromColor(CupertinoColors.activeBlue.withOpacity(kCupertinoFocusColorOpacity))
-          .withLightness(kCupertinoFocusColorBrightness)
-          .withSaturation(kCupertinoFocusColorSaturation)
-          .toColor(),
-      width: 3.5,
-    ),
-  );
+  RoundedSuperellipseBorder getExpectedHaloBorder({required bool hasFocus}) =>
+      RoundedSuperellipseBorder(
+        side: hasFocus
+            ? BorderSide(
+                color:
+                    HSLColor.fromColor(
+                          CupertinoColors.activeBlue.withOpacity(kCupertinoFocusColorOpacity),
+                        )
+                        .withLightness(kCupertinoFocusColorBrightness)
+                        .withSaturation(kCupertinoFocusColorSaturation)
+                        .toColor(),
+                width: 3.5,
+              )
+            : BorderSide.none,
+        borderRadius: BorderRadius.zero,
+      );
 
-  BoxBorder? findBorder(GlobalKey groupKey, WidgetTester tester) {
+  ShapeBorder findBorder(GlobalKey groupKey, WidgetTester tester) {
     final Finder groupDecoratedBoxFinder = find.descendant(
       of: find.byKey(groupKey),
       matching: find.byType(DecoratedBox),
     );
 
     final box = tester.widget(groupDecoratedBoxFinder) as DecoratedBox;
-    final decoration = box.decoration as BoxDecoration;
+    final decoration = box.decoration as ShapeDecoration;
 
-    return decoration.border;
+    return decoration.shape;
   }
 
   testWidgets(
@@ -74,32 +81,32 @@ void main() {
         ),
       );
 
-      expect(findBorder(group1Key, tester), isNull);
-      expect(findBorder(group2Key, tester), isNull);
+      expect(findBorder(group1Key, tester), getExpectedHaloBorder(hasFocus: false));
+      expect(findBorder(group2Key, tester), getExpectedHaloBorder(hasFocus: false));
 
       group1Child1FocusNode.requestFocus();
       await tester.pumpAndSettle();
 
-      expect(findBorder(group1Key, tester), getExpectedHaloBorder());
-      expect(findBorder(group2Key, tester), isNull);
+      expect(findBorder(group1Key, tester), getExpectedHaloBorder(hasFocus: true));
+      expect(findBorder(group2Key, tester), getExpectedHaloBorder(hasFocus: false));
 
       group1Child2FocusNode.requestFocus();
       await tester.pumpAndSettle();
 
-      expect(findBorder(group1Key, tester), getExpectedHaloBorder());
-      expect(findBorder(group2Key, tester), isNull);
+      expect(findBorder(group1Key, tester), getExpectedHaloBorder(hasFocus: true));
+      expect(findBorder(group2Key, tester), getExpectedHaloBorder(hasFocus: false));
 
       group2Child1FocusNode.requestFocus();
       await tester.pumpAndSettle();
 
-      expect(findBorder(group1Key, tester), isNull);
-      expect(findBorder(group2Key, tester), getExpectedHaloBorder());
+      expect(findBorder(group1Key, tester), getExpectedHaloBorder(hasFocus: false));
+      expect(findBorder(group2Key, tester), getExpectedHaloBorder(hasFocus: true));
 
       group2Child1FocusNode.unfocus();
       await tester.pumpAndSettle();
 
-      expect(findBorder(group1Key, tester), isNull);
-      expect(findBorder(group2Key, tester), isNull);
+      expect(findBorder(group1Key, tester), getExpectedHaloBorder(hasFocus: false));
+      expect(findBorder(group2Key, tester), getExpectedHaloBorder(hasFocus: false));
     },
   );
 
@@ -150,26 +157,26 @@ void main() {
         ),
       );
 
-      expect(findBorder(group1Key, tester), isNull);
-      expect(findBorder(group2Key, tester), isNull);
+      expect(findBorder(group1Key, tester), getExpectedHaloBorder(hasFocus: false));
+      expect(findBorder(group2Key, tester), getExpectedHaloBorder(hasFocus: false));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pumpAndSettle();
 
-      expect(findBorder(group1Key, tester), getExpectedHaloBorder());
-      expect(findBorder(group2Key, tester), isNull);
+      expect(findBorder(group1Key, tester), getExpectedHaloBorder(hasFocus: true));
+      expect(findBorder(group2Key, tester), getExpectedHaloBorder(hasFocus: false));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pumpAndSettle();
 
-      expect(findBorder(group1Key, tester), getExpectedHaloBorder());
-      expect(findBorder(group2Key, tester), isNull);
+      expect(findBorder(group1Key, tester), getExpectedHaloBorder(hasFocus: true));
+      expect(findBorder(group2Key, tester), getExpectedHaloBorder(hasFocus: false));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pumpAndSettle();
 
-      expect(findBorder(group1Key, tester), isNull);
-      expect(findBorder(group2Key, tester), getExpectedHaloBorder());
+      expect(findBorder(group1Key, tester), getExpectedHaloBorder(hasFocus: false));
+      expect(findBorder(group2Key, tester), getExpectedHaloBorder(hasFocus: true));
     },
   );
 }
