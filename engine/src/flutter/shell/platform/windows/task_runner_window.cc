@@ -7,10 +7,84 @@
 #include <timeapi.h>
 #include <algorithm>
 #include <chrono>
+#include <functional>
+#include <mutex>
+#include <thread>
 
 #include "flutter/fml/logging.h"
 
 namespace flutter {
+
+// Background timer thread. Necessary because neither SetTimer nor
+// CreateThreadpoolTimer have good enough accuracy not to affect the
+// framerate.
+class TimerThread {
+ public:
+  explicit TimerThread(std::function<void()> callback)
+      : callback_(std::move(callback)),
+        thread_([this]() { TimerThreadMain(); }),
+        next_fire_time_(std::chrono::time_point<
+                        std::chrono::high_resolution_clock>::max()) {}
+
+  void Stop() {
+    {
+      std::lock_guard<std::mutex> lock(mutex_);
+      callback_ = nullptr;
+    }
+    cv_.notify_all();
+    thread_.join();
+  }
+
+  ~TimerThread() {
+    // Ensure that Stop() has been called.
+    FML_DCHECK(callback_ == nullptr);
+  }
+
+  // Schedules the callback to be called at specified time point. If there is
+  // already a callback scheduled earlier than the specified time point, does
+  // nothing.
+  void ScheduleAt(
+      std::chrono::time_point<std::chrono::high_resolution_clock> time_point) {
+    {
+      std::lock_guard<std::mutex> lock(mutex_);
+      if (time_point < next_fire_time_) {
+        next_fire_time_ = time_point;
+      }
+      ++schedule_counter_;
+      cv_.notify_all();
+    }
+  }
+
+ private:
+  void TimerThreadMain() {
+    std::unique_lock<std::mutex> lock(mutex_);
+    while (callback_ != nullptr) {
+      cv_.wait_until(lock, next_fire_time_, [this]() {
+        return std::chrono::high_resolution_clock::now() >= next_fire_time_ ||
+               callback_ == nullptr;
+      });
+      auto scheduled_count = schedule_counter_;
+      if (callback_) {
+        lock.unlock();
+        callback_();
+        lock.lock();
+      }
+      // If nothing was scheduled in the meanwhile park the timer.
+      if (scheduled_count == schedule_counter_ &&
+          next_fire_time_ <= std::chrono::high_resolution_clock::now()) {
+        next_fire_time_ =
+            std::chrono::time_point<std::chrono::high_resolution_clock>::max();
+      }
+    }
+  }
+
+  std::chrono::time_point<std::chrono::high_resolution_clock> next_fire_time_;
+  std::mutex mutex_;
+  std::condition_variable cv_;
+  std::thread thread_;
+  std::function<void()> callback_;
+  uint64_t schedule_counter_ = 0;
+};
 
 // Timer used for PollOnce timeout.
 static const uintptr_t kPollTimeoutTimerId = 1;
@@ -21,16 +95,10 @@ TaskRunnerWindow::TaskRunnerWindow() {
       CreateWindowEx(0, window_class.lpszClassName, L"", 0, 0, 0, 0, 0,
                      HWND_MESSAGE, nullptr, window_class.hInstance, nullptr);
 
-  timer_ = CreateThreadpoolTimer(TimerProc, this, nullptr);
-  if (!timer_) {
-    FML_LOG(ERROR) << "Failed to create threadpool timer, error: "
-                   << GetLastError();
-    FML_CHECK(timer_);
-  }
-
   if (window_handle_) {
     SetWindowLongPtr(window_handle_, GWLP_USERDATA,
                      reinterpret_cast<LONG_PTR>(this));
+    timer_thread_ = std::make_unique<TimerThread>([this]() { OnTimer(); });
   } else {
     auto error = GetLastError();
     LPWSTR message = nullptr;
@@ -44,18 +112,10 @@ TaskRunnerWindow::TaskRunnerWindow() {
   }
 
   thread_id_ = GetCurrentThreadId();
-
-  // Increase timer precision for this process (the call only affects
-  // current process since Windows 10, version 2004).
-  timeBeginPeriod(1);
 }
 
 TaskRunnerWindow::~TaskRunnerWindow() {
-  SetThreadpoolTimer(timer_, nullptr, 0, 0);
-  // Ensures that no callbacks will run after CloseThreadpoolTimer.
-  // https://learn.microsoft.com/en-us/windows/win32/api/threadpoolapiset/nf-threadpoolapiset-closethreadpooltimer#remarks
-  WaitForThreadpoolTimerCallbacks(timer_, TRUE);
-  CloseThreadpoolTimer(timer_);
+  timer_thread_->Stop();
 
   if (window_handle_) {
     DestroyWindow(window_handle_);
@@ -98,7 +158,7 @@ void TaskRunnerWindow::WakeUp() {
   // Future.delayed(Duration.zero) deadlocks the main thread. (See
   // https://github.com/flutter/flutter/issues/173843)
   if (thread_id_ == GetCurrentThreadId() && GetQueueStatus(QS_ALLEVENTS) != 0) {
-    SetTimer(std::chrono::nanoseconds::zero());
+    SetTimer(std::chrono::milliseconds(1));
     return;
   }
 
@@ -143,18 +203,7 @@ void TaskRunnerWindow::ProcessTasks() {
 }
 
 void TaskRunnerWindow::SetTimer(std::chrono::nanoseconds when) {
-  if (when == std::chrono::nanoseconds::max()) {
-    SetThreadpoolTimer(timer_, nullptr, 0, 0);
-  } else {
-    auto microseconds =
-        std::chrono::duration_cast<std::chrono::microseconds>(when).count();
-    ULARGE_INTEGER ticks;
-    ticks.QuadPart = -static_cast<LONGLONG>(microseconds * 10);
-    FILETIME ft;
-    ft.dwLowDateTime = ticks.LowPart;
-    ft.dwHighDateTime = ticks.HighPart;
-    SetThreadpoolTimer(timer_, &ft, 0, 0);
-  }
+  timer_thread_->ScheduleAt(std::chrono::high_resolution_clock::now() + when);
 }
 
 WNDCLASS TaskRunnerWindow::RegisterWindowClass() {
