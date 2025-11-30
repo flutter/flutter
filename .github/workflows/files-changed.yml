@@ -10,6 +10,11 @@ on:
       - opened
       - synchronize
 
+permissions:
+  contents: read
+  pull-requests: read
+  actions: write
+
 jobs:
   generate-json:
     runs-on: ubuntu-latest
