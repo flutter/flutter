@@ -8,7 +8,9 @@
 #include <windows.h>
 
 #include <chrono>
+#include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -16,7 +18,34 @@
 
 namespace flutter {
 
-class TimerThread;
+// Background timer thread. Necessary because neither SetTimer nor
+// CreateThreadpoolTimer have good enough accuracy not to affect the
+// framerate.
+class TimerThread {
+ public:
+  explicit TimerThread(std::function<void()> callback);
+
+  void Start();
+  void Stop();
+
+  ~TimerThread();
+
+  // Schedules the callback to be called at specified time point. If there is
+  // already a callback scheduled earlier than the specified time point, does
+  // nothing.
+  void ScheduleAt(
+      std::chrono::time_point<std::chrono::high_resolution_clock> time_point);
+
+ private:
+  void TimerThreadMain();
+
+  std::mutex mutex_;
+  std::condition_variable cv_;
+  std::function<void()> callback_;
+  uint64_t schedule_counter_ = 0;
+  std::chrono::time_point<std::chrono::high_resolution_clock> next_fire_time_;
+  std::optional<std::thread> thread_;
+};
 
 // Hidden HWND responsible for processing flutter tasks on main thread
 class TaskRunnerWindow {
@@ -71,7 +100,7 @@ class TaskRunnerWindow {
   std::wstring window_class_name_;
   std::vector<Delegate*> delegates_;
   DWORD thread_id_ = 0;
-  std::unique_ptr<TimerThread> timer_thread_;
+  TimerThread timer_thread_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(TaskRunnerWindow);
 };

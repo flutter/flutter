@@ -15,81 +15,75 @@
 
 namespace flutter {
 
-// Background timer thread. Necessary because neither SetTimer nor
-// CreateThreadpoolTimer have good enough accuracy not to affect the
-// framerate.
-class TimerThread {
- public:
-  explicit TimerThread(std::function<void()> callback)
-      : callback_(std::move(callback)),
-        next_fire_time_(
-            std::chrono::time_point<std::chrono::high_resolution_clock>::max()),
-        thread_([this]() { TimerThreadMain(); }) {}
+TimerThread::TimerThread(std::function<void()> callback)
+    : callback_(std::move(callback)),
+      next_fire_time_(
+          std::chrono::time_point<std::chrono::high_resolution_clock>::max()) {}
 
-  void Stop() {
-    {
-      std::lock_guard<std::mutex> lock(mutex_);
-      callback_ = nullptr;
+void TimerThread::Start() {
+  FML_DCHECK(!thread_);
+  thread_ =
+      std::make_optional<std::thread>(&TimerThread::TimerThreadMain, this);
+}
+
+void TimerThread::Stop() {
+  if (!thread_) {
+    return;
+  }
+  {
+    std::lock_guard<std::mutex> lock(mutex_);
+    callback_ = nullptr;
+  }
+  cv_.notify_all();
+  thread_->join();
+}
+
+TimerThread::~TimerThread() {
+  // Ensure that Stop() has been called if Start() has been called.
+  FML_DCHECK(callback_ == nullptr || !thread_);
+}
+
+// Schedules the callback to be called at specified time point. If there is
+// already a callback scheduled earlier than the specified time point, does
+// nothing.
+void TimerThread::ScheduleAt(
+    std::chrono::time_point<std::chrono::high_resolution_clock> time_point) {
+  {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (time_point < next_fire_time_) {
+      next_fire_time_ = time_point;
     }
+    ++schedule_counter_;
     cv_.notify_all();
-    thread_.join();
   }
+}
 
-  ~TimerThread() {
-    // Ensure that Stop() has been called.
-    FML_DCHECK(callback_ == nullptr);
-  }
-
-  // Schedules the callback to be called at specified time point. If there is
-  // already a callback scheduled earlier than the specified time point, does
-  // nothing.
-  void ScheduleAt(
-      std::chrono::time_point<std::chrono::high_resolution_clock> time_point) {
-    {
-      std::lock_guard<std::mutex> lock(mutex_);
-      if (time_point < next_fire_time_) {
-        next_fire_time_ = time_point;
-      }
-      ++schedule_counter_;
-      cv_.notify_all();
+void TimerThread::TimerThreadMain() {
+  std::unique_lock<std::mutex> lock(mutex_);
+  while (callback_ != nullptr) {
+    cv_.wait_until(lock, next_fire_time_, [this]() {
+      return std::chrono::high_resolution_clock::now() >= next_fire_time_ ||
+             callback_ == nullptr;
+    });
+    auto scheduled_count = schedule_counter_;
+    if (callback_) {
+      lock.unlock();
+      callback_();
+      lock.lock();
+    }
+    // If nothing was scheduled in the meanwhile park the timer.
+    if (scheduled_count == schedule_counter_ &&
+        next_fire_time_ <= std::chrono::high_resolution_clock::now()) {
+      next_fire_time_ =
+          std::chrono::time_point<std::chrono::high_resolution_clock>::max();
     }
   }
-
- private:
-  void TimerThreadMain() {
-    std::unique_lock<std::mutex> lock(mutex_);
-    while (callback_ != nullptr) {
-      cv_.wait_until(lock, next_fire_time_, [this]() {
-        return std::chrono::high_resolution_clock::now() >= next_fire_time_ ||
-               callback_ == nullptr;
-      });
-      auto scheduled_count = schedule_counter_;
-      if (callback_) {
-        lock.unlock();
-        callback_();
-        lock.lock();
-      }
-      // If nothing was scheduled in the meanwhile park the timer.
-      if (scheduled_count == schedule_counter_ &&
-          next_fire_time_ <= std::chrono::high_resolution_clock::now()) {
-        next_fire_time_ =
-            std::chrono::time_point<std::chrono::high_resolution_clock>::max();
-      }
-    }
-  }
-
-  std::mutex mutex_;
-  std::condition_variable cv_;
-  std::function<void()> callback_;
-  uint64_t schedule_counter_ = 0;
-  std::chrono::time_point<std::chrono::high_resolution_clock> next_fire_time_;
-  std::thread thread_;
-};
+}
 
 // Timer used for PollOnce timeout.
 static const uintptr_t kPollTimeoutTimerId = 1;
 
-TaskRunnerWindow::TaskRunnerWindow() {
+TaskRunnerWindow::TaskRunnerWindow() : timer_thread_([this]() { OnTimer(); }) {
   WNDCLASS window_class = RegisterWindowClass();
   window_handle_ =
       CreateWindowEx(0, window_class.lpszClassName, L"", 0, 0, 0, 0, 0,
@@ -98,7 +92,7 @@ TaskRunnerWindow::TaskRunnerWindow() {
   if (window_handle_) {
     SetWindowLongPtr(window_handle_, GWLP_USERDATA,
                      reinterpret_cast<LONG_PTR>(this));
-    timer_thread_ = std::make_unique<TimerThread>([this]() { OnTimer(); });
+    timer_thread_.Start();
   } else {
     auto error = GetLastError();
     LPWSTR message = nullptr;
@@ -115,7 +109,7 @@ TaskRunnerWindow::TaskRunnerWindow() {
 }
 
 TaskRunnerWindow::~TaskRunnerWindow() {
-  timer_thread_->Stop();
+  timer_thread_.Stop();
 
   if (window_handle_) {
     DestroyWindow(window_handle_);
@@ -204,10 +198,10 @@ void TaskRunnerWindow::ProcessTasks() {
 
 void TaskRunnerWindow::SetTimer(std::chrono::nanoseconds when) {
   if (when == std::chrono::nanoseconds::max()) {
-    timer_thread_->ScheduleAt(
+    timer_thread_.ScheduleAt(
         std::chrono::time_point<std::chrono::high_resolution_clock>::max());
   } else {
-    timer_thread_->ScheduleAt(std::chrono::high_resolution_clock::now() + when);
+    timer_thread_.ScheduleAt(std::chrono::high_resolution_clock::now() + when);
   }
 }
 

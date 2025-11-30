@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <atomic>
+#include <chrono>
 #include "flutter/shell/platform/windows/task_runner.h"
 
 #include "flutter/fml/macros.h"
 #include "gtest/gtest.h"
+#include "shell/platform/windows/task_runner_window.h"
 
 namespace flutter {
 namespace testing {
@@ -86,6 +89,30 @@ TEST(TaskRunnerTest, MaybeExecuteTaskOnlyExpired) {
 
   std::set<uint64_t> only_task_expired_before_now{task_expired_before_now};
   EXPECT_EQ(executed_task, only_task_expired_before_now);
+}
+
+TEST(TaskRunnerTest, TimerThreadDoesNotCancelEarlierScheduledTasks) {
+  std::atomic_bool signaled = false;
+  std::optional<std::chrono::high_resolution_clock::time_point> callback_time;
+  TimerThread timer_thread([&]() {
+    callback_time = std::chrono::high_resolution_clock::now();
+    signaled = true;
+  });
+  timer_thread.Start();
+  auto now = std::chrono::high_resolution_clock::now();
+  // Make sure that subsequent call to schedule does not cancel earlier task
+  // as documented in TimerThread::ScheduleAt.
+  timer_thread.ScheduleAt(now + std::chrono::milliseconds(20));
+  timer_thread.ScheduleAt(now + std::chrono::seconds(10));
+
+  while (!signaled.load()) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+  }
+
+  EXPECT_TRUE(callback_time.has_value());
+  EXPECT_GE(*callback_time, now + std::chrono::milliseconds(20));
+
+  timer_thread.Stop();
 }
 
 }  // namespace testing
