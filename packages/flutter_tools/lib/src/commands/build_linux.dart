@@ -23,13 +23,15 @@ class BuildLinuxCommand extends BuildSubCommand {
   }) : _operatingSystemUtils = operatingSystemUtils,
        super(verboseHelp: verboseHelp) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
-    final defaultTargetPlatform = (_operatingSystemUtils.hostPlatform == HostPlatform.linux_arm64)
-        ? 'linux-arm64'
-        : 'linux-x64';
+    final String defaultTargetPlatform = switch (_operatingSystemUtils.hostPlatform) {
+      HostPlatform.linux_arm64 => 'linux-arm64',
+      HostPlatform.linux_riscv64 => 'linux-riscv64',
+      _ => 'linux-x64',
+    };
     argParser.addOption(
       'target-platform',
       defaultsTo: defaultTargetPlatform,
-      allowed: <String>['linux-arm64', 'linux-x64'],
+      allowed: <String>['linux-arm64', 'linux-x64', 'linux-riscv64'],
       help: 'The target platform for which the app is compiled.',
     );
     argParser.addOption(
@@ -80,8 +82,7 @@ class BuildLinuxCommand extends BuildSubCommand {
       throwToolExit('"build linux" only supported on Linux hosts.');
     }
     // Cross-building for x64 targets on arm64 hosts is not supported.
-    if (_operatingSystemUtils.hostPlatform != HostPlatform.linux_x64 &&
-        targetPlatform != TargetPlatform.linux_arm64) {
+    if (_operatingSystemUtils.hostPlatform != HostPlatform.linux_x64 && needCrossBuild) {
       throwToolExit('"cross-building" only supported on Linux x64 hosts.');
     }
     // TODO(fujino): https://github.com/flutter/flutter/issues/74929
