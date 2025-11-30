@@ -1766,4 +1766,36 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     );
     expect(tester.getSize(find.byType(Scrollbar)), Size.zero);
   });
+
+  testWidgets('Scrollbar gestures disabled when maxScrollExtent == minScrollExtent', (
+    WidgetTester tester,
+  ) async {
+    final scrollController = ScrollController();
+    await tester.pumpWidget(
+      _buildBoilerplate(
+        child: SizedBox(
+          height: 200.0,
+          width: 300.0,
+          child: Scrollbar(
+            interactive: true,
+            controller: scrollController,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(height: 200.0, width: 300.0),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final RawGestureDetector gestureDetector = tester.widget<RawGestureDetector>(
+      find.descendant(of: find.byType(Scrollbar), matching: find.byType(RawGestureDetector)).first,
+    );
+
+    // When maxScrollExtent == minScrollExtent, gestures should be disabled.
+    expect(gestureDetector.gestures.length, 0);
+
+    scrollController.dispose();
+  });
 }
