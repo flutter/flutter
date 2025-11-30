@@ -30,6 +30,7 @@ import android.view.inputmethod.InputMethodManager;
 import androidx.annotation.NonNull;
 import androidx.core.view.inputmethod.InputConnectionCompat;
 import io.flutter.Log;
+import io.flutter.embedding.android.KeyboardManager;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.systemchannels.ScribeChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
@@ -45,7 +46,7 @@ public class InputConnectionAdaptor extends BaseInputConnection
   private static final String TAG = "InputConnectionAdaptor";
 
   public interface KeyboardDelegate {
-    public boolean handleEvent(@NonNull KeyEvent keyEvent);
+    public boolean handleEvent(@NonNull KeyEvent keyEvent, KeyboardManager.ViewDelegate viewDelegate);
   }
 
   private final View mFlutterView;
@@ -298,7 +299,7 @@ public class InputConnectionAdaptor extends BaseInputConnection
   // occur, and need a chance to be handled by the framework.
   @Override
   public boolean sendKeyEvent(KeyEvent event) {
-    return keyboardDelegate.handleEvent(event);
+    return keyboardDelegate.handleEvent(event, (KeyboardManager.ViewDelegate) mFlutterView);
   }
 
   public boolean handleKeyEvent(KeyEvent event) {

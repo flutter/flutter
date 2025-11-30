@@ -8,6 +8,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/shell/gpu/gpu_surface_metal_delegate.h"
 #include "flutter/shell/platform/darwin/ios/ios_surface.h"
+#include <Metal/Metal.h>
 
 @class CAMetalLayer;
 
@@ -25,6 +26,8 @@ class SK_API_AVAILABLE_CA_METAL_LAYER IOSSurfaceMetalImpeller final
 
   // |IOSSurface|
   ~IOSSurfaceMetalImpeller();
+
+  MTLPixelFormat GetPixelFormat() const;
 
  private:
   CAMetalLayer* layer_;

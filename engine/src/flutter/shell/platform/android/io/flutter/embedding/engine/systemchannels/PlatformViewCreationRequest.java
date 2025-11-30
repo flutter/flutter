@@ -31,6 +31,9 @@ public class PlatformViewCreationRequest {
   }
 
   /** The ID of the platform view as seen by the Flutter side. */
+  public final long flutterViewId;
+
+  /** The ID of the platform view as seen by the Flutter side. */
   public final int viewId;
 
   /** The type of Android {@code View} to create for this platform view. */
@@ -64,17 +67,18 @@ public class PlatformViewCreationRequest {
   // TODO(gmackall): we can give each of these static constructors a corresponding private
   // constructor.
   public static PlatformViewCreationRequest createHCPPRequest(
-      int viewId, String viewType, int direction, ByteBuffer params) {
-    return new PlatformViewCreationRequest(viewId, viewType, 0, 0, 0, 0, direction, null, params);
+      long flutterViewId, int viewId, String viewType, int direction, ByteBuffer params) {
+    return new PlatformViewCreationRequest(flutterViewId, viewId, viewType, 0, 0, 0, 0, direction, null, params);
   }
 
   public static PlatformViewCreationRequest createHybridCompositionRequest(
-      int viewId, String viewType, int direction, ByteBuffer params) {
+      long flutterViewId, int viewId, String viewType, int direction, ByteBuffer params) {
     return new PlatformViewCreationRequest(
-        viewId, viewType, 0, 0, 0, 0, direction, RequestedDisplayMode.HYBRID_ONLY, params);
+        flutterViewId, viewId, viewType, 0, 0, 0, 0, direction, RequestedDisplayMode.HYBRID_ONLY, params);
   }
 
   public static PlatformViewCreationRequest createTLHCWithFallbackRequest(
+      long flutterViewId,
       int viewId,
       String viewType,
       double top,
@@ -85,6 +89,7 @@ public class PlatformViewCreationRequest {
       boolean hybridFallback,
       ByteBuffer params) {
     return new PlatformViewCreationRequest(
+        flutterViewId,
         viewId,
         viewType,
         top,
@@ -104,6 +109,7 @@ public class PlatformViewCreationRequest {
    */
   @VisibleForTesting
   public PlatformViewCreationRequest(
+      long flutterViewId,
       int viewId,
       @NonNull String viewType,
       double logicalTop,
@@ -112,7 +118,7 @@ public class PlatformViewCreationRequest {
       double logicalHeight,
       int direction,
       @Nullable ByteBuffer params) {
-    this(
+    this(flutterViewId,
         viewId,
         viewType,
         logicalTop,
@@ -129,6 +135,7 @@ public class PlatformViewCreationRequest {
    * mode-specific named constructors above where possible.
    */
   public PlatformViewCreationRequest(
+      long flutterViewId,
       int viewId,
       @NonNull String viewType,
       double logicalTop,
@@ -138,6 +145,7 @@ public class PlatformViewCreationRequest {
       int direction,
       @Nullable RequestedDisplayMode displayMode,
       @Nullable ByteBuffer params) {
+    this.flutterViewId = flutterViewId;
     this.viewId = viewId;
     this.viewType = viewType;
     this.logicalTop = logicalTop;

@@ -15,21 +15,35 @@ import java.util.HashMap;
 /** A mandatory plugin that handles mouse cursor requests. */
 @RequiresApi(API_LEVELS.API_24)
 public class MouseCursorPlugin {
-  @NonNull private final MouseCursorViewDelegate mView;
+//  @NonNull private final MouseCursorViewDelegate mView;
+
+  @NonNull private final HashMap<Long, MouseCursorViewDelegate> mViewDelegates;
+
   @NonNull private final MouseCursorChannel mouseCursorChannel;
 
-  public MouseCursorPlugin(
-      @NonNull MouseCursorViewDelegate view, @NonNull MouseCursorChannel mouseCursorChannel) {
-    mView = view;
+  public MouseCursorPlugin(@NonNull MouseCursorChannel mouseCursorChannel) {
+//    mView = view;
+
+    mViewDelegates = new HashMap<>();
 
     this.mouseCursorChannel = mouseCursorChannel;
     mouseCursorChannel.setMethodHandler(
         new MouseCursorChannel.MouseCursorMethodHandler() {
           @Override
           public void activateSystemCursor(@NonNull String kind) {
-            mView.setPointerIcon(resolveSystemCursor(kind));
+            // See https://github.com/flutter/flutter/issues/140226
+            MouseCursorViewDelegate delegate = mViewDelegates.get(0L);
+            delegate.setPointerIcon(resolveSystemCursor(kind, delegate));
           }
         });
+  }
+
+  public void attachToView(long flutterViewId, @NonNull MouseCursorViewDelegate viewDelegate) {
+    mViewDelegates.put(flutterViewId, viewDelegate);
+  }
+
+  public void detachFromView(long flutterViewId) {
+    mViewDelegates.remove(flutterViewId);
   }
 
   /**
@@ -37,7 +51,7 @@ public class MouseCursorPlugin {
    *
    * <p>This method guarantees to return a non-null object.
    */
-  private PointerIcon resolveSystemCursor(@NonNull String kind) {
+  private PointerIcon resolveSystemCursor(@NonNull String kind, MouseCursorViewDelegate viewDelegate) {
     if (MouseCursorPlugin.systemCursorConstants == null) {
       // Initialize the map when first used, because the map can grow big in the future (~70)
       // and most mobile devices will not use them.
@@ -86,7 +100,7 @@ public class MouseCursorPlugin {
 
     final int cursorConstant =
         MouseCursorPlugin.systemCursorConstants.getOrDefault(kind, PointerIcon.TYPE_ARROW);
-    return mView.getSystemPointerIcon(cursorConstant);
+    return viewDelegate.getSystemPointerIcon(cursorConstant);
   }
 
   /**
@@ -96,6 +110,7 @@ public class MouseCursorPlugin {
    */
   public void destroy() {
     mouseCursorChannel.setMethodHandler(null);
+    mViewDelegates.clear();
   }
 
   /**
