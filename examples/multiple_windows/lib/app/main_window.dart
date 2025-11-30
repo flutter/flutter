@@ -7,12 +7,94 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
+import 'package:flutter/src/widgets/_window_positioner.dart';
 
 import 'regular_window_content.dart';
 import 'window_settings_dialog.dart';
 import 'models.dart';
 import 'regular_window_edit_dialog.dart';
 import 'dialog_window_edit_dialog.dart';
+
+/// Tracks global rect of an [Element].
+class ElementPositionTracker {
+  ElementPositionTracker(this.element) {
+    _register(this);
+  }
+
+  final BuildContext element;
+
+  /// Returns current global rect for tracked element or `null` if not available.
+  Rect? getGlobalRect() {
+    final rect = _getGlobalRect();
+    _lastReportedRect = rect;
+    return rect;
+  }
+
+  /// Disposes this tracker causing it to stop providing updates. The tracker is
+  /// automatically disposed when tracked element is unmounted.
+  void dispose() {
+    _unregister(this);
+  }
+
+  /// Callback invoked every time the global position of the tracked element changes
+  /// compared to last result of [getGlobalRect].
+  void Function(Rect rect)? onGlobalRectChange;
+
+  static bool _persistentCallbackRegistered = false;
+  static final _trackers = <ElementPositionTracker>[];
+
+  static void _register(ElementPositionTracker tracker) {
+    if (!_persistentCallbackRegistered) {
+      _persistentCallbackRegistered = true;
+      WidgetsBinding.instance.addPersistentFrameCallback((_) {
+        _update();
+      });
+    }
+    _trackers.add(tracker);
+  }
+
+  static void _unregister(ElementPositionTracker tracker) {
+    _trackers.remove(tracker);
+  }
+
+  static void _update() {
+    final trackersCopy = List<ElementPositionTracker>.from(
+      _trackers,
+      growable: false,
+    );
+    for (final tracker in trackersCopy) {
+      tracker._updateSelf();
+    }
+  }
+
+  Rect? _lastReportedRect;
+
+  Rect? _getGlobalRect() {
+    if (!element.mounted) {
+      return null;
+    }
+    final renderBox = tooltipKey.currentContext?.findRenderObject();
+    if (renderBox is! RenderBox) {
+      return null;
+    }
+    final transform = renderBox.getTransformTo(null);
+    final rect = Offset.zero & renderBox.size;
+    final globalRect = MatrixUtils.transformRect(transform, rect);
+    return globalRect;
+  }
+
+  void _updateSelf() {
+    final rect = _getGlobalRect();
+    if (rect == null) {
+      _unregister(this);
+      return;
+    }
+    if (_lastReportedRect != rect) {
+      _lastReportedRect = rect;
+    }
+    onGlobalRectChange?.call(rect);
+  }
+}
 
 class MainWindow extends StatelessWidget {
   const MainWindow({super.key});
@@ -101,7 +183,7 @@ class _WindowsTable extends StatelessWidget {
         context: context,
         controller: dialog,
       ),
-      TooltipWindowController() => null,
+      final TooltipWindowController tooltip => throw UnimplementedError(),
     };
   }
 
@@ -137,6 +219,8 @@ class _WindowsTable extends StatelessWidget {
     );
   }
 }
+
+final tooltipKey = GlobalKey();
 
 class _WindowCreatorCard extends StatelessWidget {
   @override
@@ -180,6 +264,44 @@ class _WindowCreatorCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 OutlinedButton(
+                  key: tooltipKey,
+                  onPressed: () {
+                    // Tracks the global position of tooltip button.
+                    final tracker = ElementPositionTracker(
+                      tooltipKey.currentContext!,
+                    );
+                    final UniqueKey key = UniqueKey();
+                    final controller = TooltipWindowController(
+                      anchorRect: tracker.getGlobalRect()!,
+                      positioner: WindowPositioner(
+                        childAnchor: WindowPositionerAnchor.left,
+                        parentAnchor: WindowPositionerAnchor.right,
+                        offset: const Offset(10, 0),
+                        constraintAdjustment:
+                            WindowPositionerConstraintAdjustment(
+                              slideX: true,
+                              slideY: true,
+                            ),
+                      ),
+                      delegate: _TooltipWindowControllerDelegate(
+                        onDestroyed: () {
+                          windowManager.remove(key);
+                          tracker.dispose();
+                        },
+                      ),
+                      parent: windowManager.windows.first.controller,
+                    );
+                    tracker.onGlobalRectChange = (rect) {
+                      controller.updatePosition(anchorRect: rect);
+                    };
+                    windowManager.add(
+                      KeyedWindow(key: key, controller: controller),
+                    );
+                  },
+                  child: Text('Tooltip'),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton(
                   onPressed: () async {
                     final UniqueKey key = UniqueKey();
                     windowManager.add(
@@ -215,4 +337,16 @@ class _WindowCreatorCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _TooltipWindowControllerDelegate extends TooltipWindowControllerDelegate {
+  _TooltipWindowControllerDelegate({required this.onDestroyed});
+
+  @override
+  void onWindowDestroyed() {
+    onDestroyed();
+    super.onWindowDestroyed();
+  }
+
+  final VoidCallback onDestroyed;
 }

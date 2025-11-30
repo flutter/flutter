@@ -108,7 +108,8 @@ FlutterWindowsView::FlutterWindowsView(
     std::shared_ptr<WindowsProcTable> windows_proc_table)
     : view_id_(view_id),
       engine_(engine),
-      windows_proc_table_(std::move(windows_proc_table)) {
+      windows_proc_table_(std::move(windows_proc_table)),
+      view_alive_(std::make_shared<int>(0)) {
   if (windows_proc_table_ == nullptr) {
     windows_proc_table_ = std::make_shared<WindowsProcTable>();
   }
@@ -154,6 +155,20 @@ bool FlutterWindowsView::OnFrameGenerated(size_t width, size_t height) {
   // Called on the raster thread.
   std::unique_lock<std::mutex> lock(resize_mutex_);
 
+  if (IsSizedToContent()) {
+    if (!ResizeRenderSurface(width, height)) {
+      return false;
+    }
+    std::weak_ptr<int> weak_view_alive = view_alive_;
+    engine_->task_runner()->PostTask([this, width, height, weak_view_alive]() {
+      if (weak_view_alive.lock().get() == nullptr) {
+        return;
+      }
+      sizing_delegate_->DidUpdateViewSize(width, height);
+    });
+    return true;
+  }
+
   if (surface_ == nullptr || !surface_->IsValid()) {
     return false;
   }
@@ -185,6 +200,11 @@ void FlutterWindowsView::ForceRedraw() {
 
 // Called on the platform thread.
 bool FlutterWindowsView::OnWindowSizeChanged(size_t width, size_t height) {
+  if (IsSizedToContent()) {
+    // No resize synchronization needed for views sized to content.
+    return true;
+  }
+
   if (!engine_->egl_manager()) {
     SendWindowMetrics(width, height, binding_handler_->GetDpiScale());
     return true;
@@ -372,8 +392,17 @@ void FlutterWindowsView::SendWindowMetrics(size_t width,
   FlutterEngineDisplayId display_id = binding_handler_->GetDisplayId();
   FlutterWindowMetricsEvent event = {};
   event.struct_size = sizeof(event);
-  event.width = width;
-  event.height = height;
+  if (IsSizedToContent()) {
+    auto min_size = sizing_delegate_->GetMinimumViewSize();
+    auto max_size = sizing_delegate_->GetMaximumViewSize();
+    event.min_width_constraint = static_cast<size_t>(min_size.width());
+    event.min_height_constraint = static_cast<size_t>(min_size.height());
+    event.max_width_constraint = static_cast<size_t>(max_size.width());
+    event.max_height_constraint = static_cast<size_t>(max_size.height());
+  } else {
+    event.width = width;
+    event.height = height;
+  }
   event.pixel_ratio = pixel_ratio;
   event.display_id = display_id;
   event.view_id = view_id_;
@@ -387,8 +416,17 @@ FlutterWindowMetricsEvent FlutterWindowsView::CreateWindowMetricsEvent() const {
 
   FlutterWindowMetricsEvent event = {};
   event.struct_size = sizeof(event);
-  event.width = bounds.width;
-  event.height = bounds.height;
+  if (IsSizedToContent()) {
+    auto min_size = sizing_delegate_->GetMinimumViewSize();
+    auto max_size = sizing_delegate_->GetMaximumViewSize();
+    event.min_width_constraint = static_cast<size_t>(min_size.width());
+    event.min_height_constraint = static_cast<size_t>(min_size.height());
+    event.max_width_constraint = static_cast<size_t>(max_size.width());
+    event.max_height_constraint = static_cast<size_t>(max_size.height());
+  } else {
+    event.width = bounds.width;
+    event.height = bounds.height;
+  }
   event.pixel_ratio = pixel_ratio;
   event.display_id = display_id;
   event.view_id = view_id_;
@@ -846,6 +884,15 @@ bool FlutterWindowsView::NeedsVsync() const {
   // the system itself synchronizes with vsync.
   // See: https://learn.microsoft.com/windows/win32/dwm/composition-ovw
   return !windows_proc_table_->DwmIsCompositionEnabled();
+}
+
+bool FlutterWindowsView::IsSizedToContent() const {
+  if (sizing_delegate_ != nullptr) {
+    auto max_size = sizing_delegate_->GetMaximumViewSize();
+    return max_size.width() != 0 && max_size.height() != 0;
+  } else {
+    return false;
+  }
 }
 
 }  // namespace flutter

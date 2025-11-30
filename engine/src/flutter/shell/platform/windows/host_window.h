@@ -21,6 +21,7 @@ namespace flutter {
 class WindowManager;
 class WindowsProcTable;
 class FlutterWindowsView;
+class FlutterWindowsViewSizingDelegate;
 class FlutterWindowsViewController;
 
 // A Win32 window that hosts a |FlutterWindow| in its client area.
@@ -62,6 +63,13 @@ class HostWindow {
       const WindowSizeRequest& preferred_size,
       const WindowConstraints& preferred_constraints,
       LPCWSTR title,
+      HWND parent);
+
+  static std::unique_ptr<HostWindow> CreateTooltipWindow(
+      WindowManager* window_manager,
+      FlutterWindowsEngine* engine,
+      const WindowConstraints& preferred_constraints,
+      GetWindowPositionCallback get_position_callback,
       HWND parent);
 
   // Returns the instance pointer for |hwnd| or nullptr if invalid.
@@ -130,7 +138,8 @@ class HostWindow {
              const BoxConstraints& box_constraints,
              Rect const initial_window_rect,
              LPCWSTR title,
-             std::optional<HWND> const& owner_window);
+             std::optional<HWND> const& owner_window,
+             FlutterWindowsViewSizingDelegate* sizing_delegate = nullptr);
 
   // Calculates the required window size, in physical coordinates, to
   // accommodate the given |client_size|, in logical coordinates, constrained by
