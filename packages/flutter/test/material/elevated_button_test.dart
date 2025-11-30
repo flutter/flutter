@@ -1906,6 +1906,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: SelectionArea(
+          cursorWidth: 2.0,
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
               enabledMouseCursor: SystemMouseCursors.click,
