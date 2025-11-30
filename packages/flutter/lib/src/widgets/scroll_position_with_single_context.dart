@@ -11,9 +11,11 @@ library;
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -125,10 +127,67 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     }
   }
 
+  /// Platform channel for scroll propagation to parent/host window on web.
+  /// Used for nested scrolling when Flutter is embedded in a host page.
+  /// Fixes GitHub issue #157435 (touch scroll not propagating to host page).
+  static const BasicMessageChannel<Object?> _scrollChannel = BasicMessageChannel<Object?>(
+    'flutter/scroll',
+    JSONMessageCodec(),
+  );
+
   @override
   void applyUserOffset(double delta) {
     updateUserScrollDirection(delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse);
-    setPixels(pixels - physics.applyPhysicsToUserOffset(this, delta));
+
+    // Check if we're at boundary BEFORE applying the scroll
+    final bool wasAtMin = pixels <= minScrollExtent;
+    final bool wasAtMax = pixels >= maxScrollExtent;
+    
+    final double physicsOffset = physics.applyPhysicsToUserOffset(this, delta);
+    final double targetPixels = pixels - physicsOffset;
+    setPixels(targetPixels);
+
+    // On web, propagate scroll to parent when at boundary.
+    // Note: With BouncingScrollPhysics, overscroll is always 0 (allows rubber-band).
+    // So we check if we WERE at boundary and user is trying to scroll further.
+    if (kIsWeb) {
+      // Scrolling down (negative delta = finger moving up = content moving up = scroll down)
+      // User wants to scroll down but we're at or past max
+      final bool shouldPropagateDown = delta < 0 && (wasAtMax || pixels >= maxScrollExtent);
+      // Scrolling up (positive delta = finger moving down = content moving down = scroll up)
+      // User wants to scroll up but we're at or past min
+      final bool shouldPropagateUp = delta > 0 && (wasAtMin || pixels <= minScrollExtent);
+      
+      if (shouldPropagateDown || shouldPropagateUp) {
+        // Use the full delta for smooth scrolling, not the physics-reduced amount.
+        // physicsOffset is reduced for rubber-banding which makes propagation jerky.
+        _propagateOverscrollToParent(delta);
+      }
+    }
+  }
+
+  /// Sends overscroll delta to the engine to scroll the parent/host window.
+  void _propagateOverscrollToParent(double overscroll) {
+    // Convert overscroll to x/y delta based on axis direction.
+    // Note: overscroll is positive when scrolling past max, negative past min.
+    double deltaX = 0.0;
+    double deltaY = 0.0;
+    switch (axisDirection) {
+      case AxisDirection.up:
+        deltaY = overscroll;
+      case AxisDirection.down:
+        deltaY = -overscroll;
+      case AxisDirection.left:
+        deltaX = overscroll;
+      case AxisDirection.right:
+        deltaX = -overscroll;
+    }
+
+    // Send to engine via platform channel (fire-and-forget, no await needed)
+    _scrollChannel.send(<String, dynamic>{
+      'deltaX': deltaX,
+      'deltaY': deltaY,
+    });
   }
 
   @override
