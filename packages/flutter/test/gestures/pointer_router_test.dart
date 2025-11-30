@@ -7,6 +7,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   test('Should route pointers', () {
     var callbackRan = false;
     void callback(PointerEvent event) {
