@@ -268,18 +268,24 @@ class ChoiceCard<T extends Object?> extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Padding(padding: const EdgeInsets.all(8.0), child: Text(title)),
-                for (final T choice in choices)
-                  RadioSelection<T>(
-                    value: choice,
-                    groupValue: value,
-                    onChanged: onChanged,
-                    child: Text(choiceLabels[choice]!),
+            child: RadioGroup<T>(
+              groupValue: value,
+              onChanged: onChanged,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(title),
                   ),
-              ],
+                  for (final T choice in choices)
+                    RadioSelection<T>(
+                      value: choice,
+                      onChanged: onChanged,
+                      child: Text(choiceLabels[choice]!),
+                    ),
+                ],
+              ),
             ),
           ),
         ),
@@ -322,13 +328,11 @@ class RadioSelection<T extends Object?> extends StatefulWidget {
   const RadioSelection({
     super.key,
     required this.value,
-    required this.groupValue,
     required this.onChanged,
     required this.child,
   });
 
   final T value;
-  final T? groupValue;
   final ValueChanged<T?> onChanged;
   final Widget child;
 
@@ -344,17 +348,7 @@ class _RadioSelectionState<T extends Object?> extends State<RadioSelection<T>> {
       children: <Widget>[
         Padding(
           padding: const EdgeInsetsDirectional.only(end: 8),
-          child: Radio<T>(
-            // TODO(loic-sharma): Migrate to RadioGroup.
-            // https://github.com/flutter/flutter/issues/179088
-            // ignore: deprecated_member_use
-            groupValue: widget.groupValue,
-            value: widget.value,
-            // TODO(loic-sharma): Migrate to RadioGroup.
-            // https://github.com/flutter/flutter/issues/179088
-            // ignore: deprecated_member_use
-            onChanged: widget.onChanged,
-          ),
+          child: Radio<T>(value: widget.value),
         ),
         GestureDetector(
           onTap: () => widget.onChanged(widget.value),
