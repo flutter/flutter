@@ -22,9 +22,9 @@ class TimerThread {
  public:
   explicit TimerThread(std::function<void()> callback)
       : callback_(std::move(callback)),
-        thread_([this]() { TimerThreadMain(); }),
-        next_fire_time_(std::chrono::time_point<
-                        std::chrono::high_resolution_clock>::max()) {}
+        next_fire_time_(
+            std::chrono::time_point<std::chrono::high_resolution_clock>::max()),
+        thread_([this]() { TimerThreadMain(); }) {}
 
   void Stop() {
     {
@@ -78,12 +78,12 @@ class TimerThread {
     }
   }
 
-  std::chrono::time_point<std::chrono::high_resolution_clock> next_fire_time_;
   std::mutex mutex_;
   std::condition_variable cv_;
-  std::thread thread_;
   std::function<void()> callback_;
   uint64_t schedule_counter_ = 0;
+  std::chrono::time_point<std::chrono::high_resolution_clock> next_fire_time_;
+  std::thread thread_;
 };
 
 // Timer used for PollOnce timeout.
@@ -203,7 +203,12 @@ void TaskRunnerWindow::ProcessTasks() {
 }
 
 void TaskRunnerWindow::SetTimer(std::chrono::nanoseconds when) {
-  timer_thread_->ScheduleAt(std::chrono::high_resolution_clock::now() + when);
+  if (when == std::chrono::nanoseconds::max()) {
+    timer_thread_->ScheduleAt(
+        std::chrono::time_point<std::chrono::high_resolution_clock>::max());
+  } else {
+    timer_thread_->ScheduleAt(std::chrono::high_resolution_clock::now() + when);
+  }
 }
 
 WNDCLASS TaskRunnerWindow::RegisterWindowClass() {
