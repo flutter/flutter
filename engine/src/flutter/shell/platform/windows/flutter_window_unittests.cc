@@ -25,30 +25,6 @@ using ::testing::Return;
 namespace {
 static constexpr int32_t kDefaultPointerDeviceId = 0;
 
-class InjectableFlutterWindow : public FlutterWindow {
- public:
-  InjectableFlutterWindow(
-      int width,
-      int height,
-      std::shared_ptr<DisplayManagerWin32> const& display_manager,
-      std::shared_ptr<WindowsProcTable> windows_proc_table = nullptr,
-      std::unique_ptr<TextInputManager> text_input_manager = nullptr,
-      std::unique_ptr<KeyboardManager> keyboard_manager = nullptr)
-      : FlutterWindow(width,
-                      height,
-                      display_manager,
-                      std::move(windows_proc_table),
-                      std::move(text_input_manager),
-                      std::move(keyboard_manager)) {}
-
-  // Simulates a WindowProc message from the OS.
-  LRESULT InjectWindowMessage(UINT const message,
-                              WPARAM const wparam,
-                              LPARAM const lparam) {
-    return HandleMessage(message, wparam, lparam);
-  }
-};
-
 class MockFlutterWindow : public FlutterWindow {
  public:
   MockFlutterWindow(bool reset_view_on_exit = true)
@@ -133,15 +109,6 @@ class MockFlutterWindowsView : public FlutterWindowsView {
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockFlutterWindowsView);
-};
-
-class MockKeyboardManager : public KeyboardManager {
- public:
-  MockKeyboardManager() : KeyboardManager(nullptr) {}
-  MOCK_METHOD(bool,
-              HandleMessage,
-              (UINT const, WPARAM const, LPARAM const),
-              (override));
 };
 
 class FlutterWindowTest : public WindowsTest {};
@@ -341,19 +308,6 @@ TEST_F(FlutterWindowTest, OnThemeChange) {
   EXPECT_CALL(delegate, OnHighContrastChanged).Times(1);
 
   win32window.InjectWindowMessage(WM_THEMECHANGED, 0, 0);
-}
-
-TEST_F(FlutterWindowTest, VkMenuSysKeyDownMessageIsAlwaysHandled) {
-  std::unique_ptr<FlutterWindowsEngine> engine =
-      FlutterWindowsEngineBuilder{GetContext()}.Build();
-  std::unique_ptr<MockKeyboardManager> keyboard_manager =
-      std::make_unique<MockKeyboardManager>();
-  EXPECT_CALL(*keyboard_manager, HandleMessage)
-      .WillOnce(testing::Return(false));
-  InjectableFlutterWindow window(800, 600, engine->display_manager(), nullptr,
-                                 nullptr, std::move(keyboard_manager));
-
-  EXPECT_EQ(window.InjectWindowMessage(WM_SYSKEYDOWN, VK_MENU, 0), 0);
 }
 
 // The window should return no root accessibility node if
