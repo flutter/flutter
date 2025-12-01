@@ -11,11 +11,9 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   testGesture('Should recognize pan', (GestureTester tester) {
-    final MultiTapGestureRecognizer tap = MultiTapGestureRecognizer(
-      longTapDelay: kLongPressTimeout,
-    );
+    final tap = MultiTapGestureRecognizer(longTapDelay: kLongPressTimeout);
 
-    final List<String> log = <String>[];
+    final log = <String>[];
 
     tap.onTapDown = (int pointer, TapDownDetails details) {
       log.add('tap-down $pointer');
@@ -33,7 +31,7 @@ void main() {
       log.add('tap-cancel $pointer');
     };
 
-    final TestPointer pointer5 = TestPointer(5);
+    final pointer5 = TestPointer(5);
     final PointerDownEvent down5 = pointer5.down(const Offset(10.0, 10.0));
     tap.addPointer(down5);
     tester.closeArena(5);
@@ -42,7 +40,7 @@ void main() {
     tester.route(down5);
     expect(log, isEmpty);
 
-    final TestPointer pointer6 = TestPointer(6);
+    final pointer6 = TestPointer(6);
     final PointerDownEvent down6 = pointer6.down(const Offset(15.0, 15.0));
     tap.addPointer(down6);
     tester.closeArena(6);
@@ -78,12 +76,12 @@ void main() {
   });
 
   testGesture('Can filter based on device kind', (GestureTester tester) {
-    final MultiTapGestureRecognizer tap = MultiTapGestureRecognizer(
+    final tap = MultiTapGestureRecognizer(
       longTapDelay: kLongPressTimeout,
       supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch},
     );
 
-    final List<String> log = <String>[];
+    final log = <String>[];
 
     tap.onTapDown = (int pointer, TapDownDetails details) {
       log.add('tap-down $pointer');
@@ -101,7 +99,7 @@ void main() {
       log.add('tap-cancel $pointer');
     };
 
-    final TestPointer touchPointer5 = TestPointer(5);
+    final touchPointer5 = TestPointer(5);
     final PointerDownEvent down5 = touchPointer5.down(const Offset(10.0, 10.0));
     tap.addPointer(down5);
     tester.closeArena(5);
@@ -110,14 +108,14 @@ void main() {
     tester.route(down5);
     expect(log, isEmpty);
 
-    final TestPointer mousePointer6 = TestPointer(6, PointerDeviceKind.mouse);
+    final mousePointer6 = TestPointer(6, PointerDeviceKind.mouse);
     final PointerDownEvent down6 = mousePointer6.down(const Offset(20.0, 20.0));
     tap.addPointer(down6);
     tester.closeArena(6);
     // Mouse down should be ignored by the recognizer.
     expect(log, isEmpty);
 
-    final TestPointer touchPointer7 = TestPointer(7);
+    final touchPointer7 = TestPointer(7);
     final PointerDownEvent down7 = touchPointer7.down(const Offset(15.0, 15.0));
     tap.addPointer(down7);
     tester.closeArena(7);

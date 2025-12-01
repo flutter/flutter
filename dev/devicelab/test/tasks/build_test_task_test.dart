@@ -10,10 +10,7 @@ import 'package:flutter_devicelab/framework/task_result.dart';
 import '../common.dart';
 
 void main() {
-  final Map<String, String> isolateParams = <String, String>{
-    'runFlutterConfig': 'false',
-    'timeoutInMinutes': '1',
-  };
+  final isolateParams = <String, String>{'runFlutterConfig': 'false', 'timeoutInMinutes': '1'};
 
   test('runs build and test when no args are passed', () async {
     final TaskResult result = await runTask(
@@ -45,7 +42,7 @@ void main() {
   });
 
   test('sets environment', () async {
-    final StringBuffer capturedPrintLines = StringBuffer();
+    final capturedPrintLines = StringBuffer();
     await runZoned<Future<void>>(
       () async {
         await runTask(
@@ -62,7 +59,7 @@ void main() {
         },
       ),
     );
-    final String capturedPrint = capturedPrintLines.toString();
+    final capturedPrint = capturedPrintLines.toString();
     expect(
       capturedPrint,
       contains(

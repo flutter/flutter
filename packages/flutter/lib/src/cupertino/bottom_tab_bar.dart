@@ -206,11 +206,11 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   List<Widget> _buildTabItems(BuildContext context) {
-    final List<Widget> result = <Widget>[];
+    final result = <Widget>[];
     final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
 
-    for (int index = 0; index < items.length; index += 1) {
-      final bool active = index == currentIndex;
+    for (var index = 0; index < items.length; index += 1) {
+      final active = index == currentIndex;
       result.add(
         _wrapActiveItem(
           context,

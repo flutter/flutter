@@ -310,7 +310,7 @@ class SkwasmRenderer extends Renderer {
     int? targetHeight,
     bool allowUpscaling = true,
   }) {
-    final SkwasmImage pixelImage = SkwasmImage.fromPixels(pixels, width, height, format);
+    final pixelImage = SkwasmImage.fromPixels(pixels, width, height, format);
     final ui.Image scaledImage = scaleImageIfNeeded(
       pixelImage,
       targetWidth: targetWidth,
@@ -339,7 +339,7 @@ class SkwasmRenderer extends Renderer {
       throw Exception('Could not determine content type of image from data');
     }
     if (browserSupportsImageDecoder) {
-      final SkwasmBrowserImageDecoder baseDecoder = SkwasmBrowserImageDecoder(
+      final baseDecoder = SkwasmBrowserImageDecoder(
         contentType: contentType.mimeType,
         dataSource: list.toJS,
         debugSource: 'encoded image bytes',
@@ -375,7 +375,7 @@ class SkwasmRenderer extends Renderer {
       throw Exception('Could not determine content type of image at url $uri');
     }
     if (browserSupportsImageDecoder) {
-      final SkwasmBrowserImageDecoder decoder = SkwasmBrowserImageDecoder(
+      final decoder = SkwasmBrowserImageDecoder(
         contentType: contentType,
         dataSource: response.body,
         debugSource: uri.toString(),
@@ -480,7 +480,7 @@ class SkwasmRenderer extends Renderer {
       withStackScope((StackScope scope) {
         final Pointer<Uint32> counts = scope.allocUint32Array(28);
         skwasmGetLiveObjectCounts(counts);
-        final Map<String, dynamic> countsJson = <String, dynamic>{
+        final countsJson = <String, dynamic>{
           'lineBreakBufferCount': counts[0],
           'unicodePositionBufferCount': counts[1],
           'lineMetricsCount': counts[2],
@@ -513,8 +513,8 @@ class SkwasmRenderer extends Renderer {
         downloadDebugInfo('live_object_counts', countsJson);
       });
 
-      int i = 0;
-      for (final viewRasterizer in rasterizers.values) {
+      var i = 0;
+      for (final ViewRasterizer viewRasterizer in rasterizers.values) {
         final Map<String, dynamic>? debugJson = viewRasterizer.dumpDebugInfo();
         if (debugJson != null) {
           downloadDebugInfo('flutter-scene$i', debugJson);

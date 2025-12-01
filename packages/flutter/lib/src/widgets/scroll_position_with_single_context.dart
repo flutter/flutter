@@ -181,7 +181,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
       return Future<void>.value();
     }
 
-    final DrivenScrollActivity activity = DrivenScrollActivity(
+    final activity = DrivenScrollActivity(
       this,
       from: pixels,
       to: to,
@@ -252,10 +252,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   @override
   ScrollHoldController hold(VoidCallback holdCancelCallback) {
     final double previousVelocity = activity!.velocity;
-    final HoldScrollActivity holdActivity = HoldScrollActivity(
-      delegate: this,
-      onHoldCanceled: holdCancelCallback,
-    );
+    final holdActivity = HoldScrollActivity(delegate: this, onHoldCanceled: holdCancelCallback);
     beginActivity(holdActivity);
     _heldPreviousVelocity = previousVelocity;
     return holdActivity;
@@ -265,7 +262,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
 
   @override
   Drag drag(DragStartDetails details, VoidCallback dragCancelCallback) {
-    final ScrollDragController drag = ScrollDragController(
+    final drag = ScrollDragController(
       delegate: this,
       details: details,
       onDragCanceled: dragCancelCallback,

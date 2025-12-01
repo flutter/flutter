@@ -36,7 +36,7 @@ void setUpUnitTests({
       // The following parameters are hard-coded in Flutter's test embedder. Since
       // we don't have an embedder yet this is the lowest-most layer we can put
       // this stuff in.
-      const double devicePixelRatio = 3.0;
+      const devicePixelRatio = 3.0;
       engine.EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(devicePixelRatio);
       engine.EnginePlatformDispatcher.instance.implicitView?.debugPhysicalSizeOverride =
           const ui.Size(800 * devicePixelRatio, 600 * devicePixelRatio);
@@ -70,7 +70,7 @@ void setUpImplicitView() {
 }
 
 Future<void> bootstrapAndRunApp({bool withImplicitView = false}) async {
-  final Completer<void> completer = Completer<void>();
+  final completer = Completer<void>();
   await ui_web.bootstrapEngine(runApp: () => completer.complete());
   await completer.future;
   if (!withImplicitView) {

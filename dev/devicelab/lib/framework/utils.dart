@@ -22,7 +22,7 @@ String cwd = Directory.current.path;
 ///
 /// This is set as an environment variable when running the task, see runTask in runner.dart.
 String? get localEngineFromEnv {
-  const bool isDefined = bool.hasEnvironment('localEngine');
+  const isDefined = bool.hasEnvironment('localEngine');
   return isDefined ? const String.fromEnvironment('localEngine') : null;
 }
 
@@ -30,7 +30,7 @@ String? get localEngineFromEnv {
 ///
 /// This is set as an environment variable when running the task, see runTask in runner.dart.
 String? get localEngineHostFromEnv {
-  const bool isDefined = bool.hasEnvironment('localEngineHost');
+  const isDefined = bool.hasEnvironment('localEngineHost');
   return isDefined ? const String.fromEnvironment('localEngineHost') : null;
 }
 
@@ -39,7 +39,7 @@ String? get localEngineHostFromEnv {
 ///
 /// This is set as an environment variable when running the task, see runTask in runner.dart.
 String? get localEngineSrcPathFromEnv {
-  const bool isDefined = bool.hasEnvironment('localEngineSrcPath');
+  const isDefined = bool.hasEnvironment('localEngineSrcPath');
   return isDefined ? const String.fromEnvironment('localEngineSrcPath') : null;
 }
 
@@ -47,7 +47,7 @@ String? get localEngineSrcPathFromEnv {
 ///
 /// This is set as an environment variable when running the task, see runTask in runner.dart.
 String? get localWebSdkFromEnv {
-  const bool isDefined = bool.hasEnvironment('localWebSdk');
+  const isDefined = bool.hasEnvironment('localWebSdk');
   return isDefined ? const String.fromEnvironment('localWebSdk') : null;
 }
 
@@ -85,7 +85,7 @@ class HealthCheckResult {
 
   @override
   String toString() {
-    final StringBuffer buf = StringBuffer(succeeded ? 'succeeded' : 'failed');
+    final buf = StringBuffer(succeeded ? 'succeeded' : 'failed');
     if (details != null && details!.trim().isNotEmpty) {
       buf.writeln();
       // Indent details by 4 spaces
@@ -150,7 +150,7 @@ void recursiveCopy(Directory source, Directory target) {
     if (entity is Directory && !entity.path.contains('.dart_tool')) {
       recursiveCopy(entity, Directory(path.join(target.path, name)));
     } else if (entity is File) {
-      final File dest = File(path.join(target.path, name));
+      final dest = File(path.join(target.path, name));
       dest.writeAsBytesSync(entity.readAsBytesSync());
       // Preserve executable bit
       final String modes = entity.statSync().modeString();
@@ -281,11 +281,9 @@ Future<Process> startProcess(
       true, // set to false to pretend not to be on a bot (e.g. to test user-facing outputs)
   String? workingDirectory,
 }) async {
-  final String command = '$executable ${arguments?.join(" ") ?? ""}';
+  final command = '$executable ${arguments?.join(" ") ?? ""}';
   final String finalWorkingDirectory = workingDirectory ?? cwd;
-  final Map<String, String> newEnvironment = Map<String, String>.from(
-    environment ?? <String, String>{},
-  );
+  final newEnvironment = Map<String, String>.from(environment ?? <String, String>{});
   newEnvironment['BOT'] = isBot ? 'true' : 'false';
   newEnvironment['LANG'] = 'en_US.UTF-8';
   print('Executing "$command" in "$finalWorkingDirectory" with environment $newEnvironment');
@@ -295,7 +293,7 @@ Future<Process> startProcess(
     environment: newEnvironment,
     workingDirectory: finalWorkingDirectory,
   );
-  final ProcessInfo processInfo = ProcessInfo(command, process);
+  final processInfo = ProcessInfo(command, process);
   _runningProcesses.add(processInfo);
 
   unawaited(
@@ -391,8 +389,8 @@ Future<void> forwardStandardStreams(
   bool printStdout = true,
   bool printStderr = true,
 }) {
-  final Completer<void> stdoutDone = Completer<void>();
-  final Completer<void> stderrDone = Completer<void>();
+  final stdoutDone = Completer<void>();
+  final stderrDone = Completer<void>();
   process.stdout
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
@@ -460,7 +458,7 @@ List<String> _flutterCommandArgs(
   bool driveWithDds = false,
 }) {
   // Commands support the --device-timeout flag.
-  final Set<String> supportedDeviceTimeoutCommands = <String>{
+  final supportedDeviceTimeoutCommands = <String>{
     'attach',
     'devices',
     'drive',
@@ -725,7 +723,7 @@ T requireConfigProperty<T>(Map<String, dynamic> map, String propertyName) {
   if (!map.containsKey(propertyName)) {
     fail('Configuration property not found: $propertyName');
   }
-  final T result = map[propertyName] as T;
+  final result = map[propertyName] as T;
   return result;
 }
 
@@ -754,7 +752,7 @@ Iterable<String> grep(Pattern pattern, {required String from}) {
 ///
 ///     }
 Future<void> runAndCaptureAsyncStacks(Future<void> Function() callback) {
-  final Completer<void> completer = Completer<void>();
+  final completer = Completer<void>();
   Chain.capture(() async {
     await callback();
     completer.complete();
@@ -835,7 +833,7 @@ void checkSymlinkExists(String file) {
 
 /// Check that `collection` contains all entries in `values`.
 void checkCollectionContains<T>(Iterable<T> values, Iterable<T> collection) {
-  for (final T value in values) {
+  for (final value in values) {
     if (!collection.contains(value)) {
       throw TaskResult.failure('Expected to find `$value` in `$collection`.');
     }
@@ -844,7 +842,7 @@ void checkCollectionContains<T>(Iterable<T> values, Iterable<T> collection) {
 
 /// Check that `collection` does not contain any entries in `values`
 void checkCollectionDoesNotContain<T>(Iterable<T> values, Iterable<T> collection) {
-  for (final T value in values) {
+  for (final value in values) {
     if (collection.contains(value)) {
       throw TaskResult.failure('Did not expect to find `$value` in `$collection`.');
     }
@@ -855,7 +853,7 @@ void checkCollectionDoesNotContain<T>(Iterable<T> values, Iterable<T> collection
 /// [Pattern]s, otherwise throws a [TaskResult].
 void checkFileContains(List<Pattern> patterns, String filePath) {
   final String fileContent = File(filePath).readAsStringSync();
-  for (final Pattern pattern in patterns) {
+  for (final pattern in patterns) {
     if (!fileContent.contains(pattern)) {
       throw TaskResult.failure(
         'Expected to find `$pattern` in `$filePath` '
@@ -891,7 +889,7 @@ Future<T> retry<T>(
   int maxAttempts = 5,
   Duration delayDuration = const Duration(seconds: 3),
 }) async {
-  int attempt = 0;
+  var attempt = 0;
   while (true) {
     attempt++; // first invocation is the first attempt
     try {
