@@ -35,7 +35,7 @@ void main() {
     });
 
     testWidgets('BackButton onPressed overrides default pop behavior', (WidgetTester tester) async {
-      bool customCallbackWasCalled = false;
+      var customCallbackWasCalled = false;
       await tester.pumpWidget(
         MaterialApp(
           home: const Material(child: Text('Home')),
@@ -316,7 +316,7 @@ void main() {
     testWidgets('CloseButton onPressed overrides default pop behavior', (
       WidgetTester tester,
     ) async {
-      bool customCallbackWasCalled = false;
+      var customCallbackWasCalled = false;
       await tester.pumpWidget(
         MaterialApp(
           home: const Material(child: Text('Home')),

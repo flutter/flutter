@@ -79,7 +79,7 @@ interface class MetricsResultWriter {
     required TaskResult result,
     String? gitBranch,
   }) {
-    final Map<String, dynamic> updateRequest = <String, dynamic>{
+    final updateRequest = <String, dynamic>{
       'CommitBranch': gitBranch,
       'CommitSha': commitSha,
       'BuilderName': builderName,
@@ -90,10 +90,10 @@ interface class MetricsResultWriter {
     // Make a copy of result data because we may alter it for validation below.
     updateRequest['ResultData'] = result.data;
 
-    final List<String> validScoreKeys = <String>[];
+    final validScoreKeys = <String>[];
     if (result.benchmarkScoreKeys != null) {
       for (final String scoreKey in result.benchmarkScoreKeys!) {
-        final Object score = result.data![scoreKey] as Object;
+        final score = result.data![scoreKey] as Object;
         if (score is num) {
           // Convert all metrics to double, which provide plenty of precision
           // without having to add support for multiple numeric types in Cocoon.

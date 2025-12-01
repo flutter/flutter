@@ -22,7 +22,7 @@ void main() {
 
   void testTraversal(String description, TraversalTestFunction testFunction) {
     testWidgets(description, (WidgetTester tester) async {
-      final TraversalTester traversalTester = TraversalTester(tester);
+      final traversalTester = TraversalTester(tester);
       await testFunction(traversalTester);
       traversalTester.dispose();
     });
@@ -126,7 +126,7 @@ void main() {
   testTraversal('Semantics traverses vertically overlapping nodes horizontally', (
     TraversalTester tester,
   ) async {
-    final Map<String, Rect> children = <String, Rect>{
+    final children = <String, Rect>{
       'A': Offset.zero & tenByTen,
       'B': const Offset(20.0, 5.0) & tenByTen,
       'C': const Offset(40.0, 0.0) & tenByTen,
@@ -185,7 +185,7 @@ void main() {
   testTraversal('Semantics traverses vertical groups, then horizontal groups, then knots', (
     TraversalTester tester,
   ) async {
-    final Map<String, Rect> children = <String, Rect>{
+    final children = <String, Rect>{
       'A': Offset.zero & tenByTen,
       'B': const Offset(20.0, 0.0) & tenByTen,
       'C': const Offset(40.0, 0.0) & tenByTen,
@@ -251,7 +251,7 @@ void main() {
   testTraversal('Semantics sorts knots', (TraversalTester tester) async {
     const double start = -math.pi + math.pi / 8.0;
 
-    for (int i = 0; i < 8; i += 1) {
+    for (var i = 0; i < 8; i += 1) {
       final double angle = start + i.toDouble() * math.pi / 4.0;
       // These values should be truncated so that double precision rounding
       // issues won't impact the heights/widths and throw off the traversal
@@ -259,7 +259,7 @@ void main() {
       final double dx = (math.cos(angle) * 15.0) / 10.0;
       final double dy = (math.sin(angle) * 15.0) / 10.0;
 
-      final Map<String, Rect> children = <String, Rect>{
+      final children = <String, Rect>{
         'A': const Offset(10.0, 10.0) & tenByTen,
         'B': Offset(10.0 + dx, 10.0 + dy) & tenByTen,
       };
