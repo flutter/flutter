@@ -437,7 +437,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   Offset _getDefaultPositionDelegate(TooltipPositionContext context) {
     final double effectiveVerticalOffset =
         widget.verticalOffset ?? _tooltipTheme.verticalOffset ?? _defaultVerticalOffset;
-    final TooltipPositionContext resolvedContext = TooltipPositionContext(
+    final resolvedContext = TooltipPositionContext(
       target: context.target,
       targetSize: context.targetSize,
       tooltipSize: context.tooltipSize,
@@ -491,7 +491,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
           ),
         ),
     };
-    final BoxConstraints defaultConstraints = BoxConstraints(
+    final defaultConstraints = BoxConstraints(
       minHeight: widget.height ?? _tooltipTheme.height ?? _getDefaultTooltipHeight(),
     );
 

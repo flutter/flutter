@@ -21,7 +21,7 @@ Finder _findTooltipContainer(String tooltipText) {
 
 void main() {
   testWidgets('Does tooltip end up in the right place - center', (WidgetTester tester) async {
-    final GlobalKey<RawTooltipState> tooltipKey = GlobalKey<RawTooltipState>();
+    final tooltipKey = GlobalKey<RawTooltipState>();
     late final OverlayEntry entry;
     addTearDown(
       () => entry
@@ -78,7 +78,7 @@ void main() {
   });
 
   testWidgets('Does tooltip end up in the right place - top left', (WidgetTester tester) async {
-    final GlobalKey<RawTooltipState> tooltipKey = GlobalKey<RawTooltipState>();
+    final tooltipKey = GlobalKey<RawTooltipState>();
     late final OverlayEntry entry;
     addTearDown(
       () => entry
@@ -139,7 +139,7 @@ void main() {
   testWidgets('Does tooltip end up in the right place - center prefer above fits', (
     WidgetTester tester,
   ) async {
-    final GlobalKey<RawTooltipState> tooltipKey = GlobalKey<RawTooltipState>();
+    final tooltipKey = GlobalKey<RawTooltipState>();
     late final OverlayEntry entry;
     addTearDown(
       () => entry
@@ -199,7 +199,7 @@ void main() {
   testWidgets('Does tooltip end up in the right place - center prefer above does not fit', (
     WidgetTester tester,
   ) async {
-    final GlobalKey<RawTooltipState> tooltipKey = GlobalKey<RawTooltipState>();
+    final tooltipKey = GlobalKey<RawTooltipState>();
     late final OverlayEntry entry;
     addTearDown(
       () => entry
@@ -269,7 +269,7 @@ void main() {
   testWidgets('Does tooltip end up in the right place - center prefer below fits', (
     WidgetTester tester,
   ) async {
-    final GlobalKey<RawTooltipState> tooltipKey = GlobalKey<RawTooltipState>();
+    final tooltipKey = GlobalKey<RawTooltipState>();
     late final OverlayEntry entry;
     addTearDown(
       () => entry
@@ -327,7 +327,7 @@ void main() {
   testWidgets('Does tooltip end up in the right place - way off to the right', (
     WidgetTester tester,
   ) async {
-    final GlobalKey<RawTooltipState> tooltipKey = GlobalKey<RawTooltipState>();
+    final tooltipKey = GlobalKey<RawTooltipState>();
     late final OverlayEntry entry;
     addTearDown(
       () => entry
@@ -390,7 +390,7 @@ void main() {
   testWidgets('Does tooltip end up in the right place - near the edge', (
     WidgetTester tester,
   ) async {
-    final GlobalKey<RawTooltipState> tooltipKey = GlobalKey<RawTooltipState>();
+    final tooltipKey = GlobalKey<RawTooltipState>();
     late final OverlayEntry entry;
     addTearDown(
       () => entry
@@ -567,8 +567,8 @@ void main() {
     WidgetTester tester,
   ) async {
     // Specs: https://github.com/flutter/flutter/issues/4182
-    const Duration showDuration = Duration(seconds: 1);
-    const Duration eternity = Duration(days: 9999);
+    const showDuration = Duration(seconds: 1);
+    const eternity = Duration(days: 9999);
     await setWidgetForTooltipMode(tester, TooltipTriggerMode.longPress, showDuration: showDuration);
 
     final Finder tooltip = find.byType(RawTooltip);
@@ -594,7 +594,7 @@ void main() {
   testWidgets('RawTooltip is dismissed after a long press and showDuration expired', (
     WidgetTester tester,
   ) async {
-    const Duration showDuration = Duration(seconds: 3);
+    const showDuration = Duration(seconds: 3);
     await setWidgetForTooltipMode(tester, TooltipTriggerMode.longPress, showDuration: showDuration);
 
     final Finder tooltip = find.byType(RawTooltip);
@@ -615,7 +615,7 @@ void main() {
   testWidgets('RawTooltip is dismissed after a tap and showDuration expired', (
     WidgetTester tester,
   ) async {
-    const Duration showDuration = Duration(seconds: 3);
+    const showDuration = Duration(seconds: 3);
     await setWidgetForTooltipMode(tester, TooltipTriggerMode.tap, showDuration: showDuration);
 
     final Finder tooltip = find.byType(RawTooltip);
@@ -677,7 +677,7 @@ void main() {
     'Tooltip is dismissed after a tap and showDuration expired when competing with a GestureDetector',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/98854
-      const Duration showDuration = Duration(seconds: 3);
+      const showDuration = Duration(seconds: 3);
       await tester.pumpWidget(
         WidgetsApp(
           color: const Color(0x00000000),
@@ -886,7 +886,7 @@ void main() {
   testWidgets('Tooltip shows without delay when the mouse moves from another tooltip', (
     WidgetTester tester,
   ) async {
-    const Duration waitDuration = Duration(milliseconds: 700);
+    const waitDuration = Duration(milliseconds: 700);
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
       return gesture.removePointer();
@@ -950,7 +950,7 @@ void main() {
   testWidgets(
     'Tooltip shows/hides when the mouse hovers, and then exits and re-enters in quick succession',
     (WidgetTester tester) async {
-      const Duration waitDuration = Duration(milliseconds: 700);
+      const waitDuration = Duration(milliseconds: 700);
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       addTearDown(() async {
         return gesture.removePointer();
@@ -998,7 +998,7 @@ void main() {
       }
 
       Future<void> performSequence(Iterable<Future<void> Function()> actions) async {
-        for (final Future<void> Function() action in actions) {
+        for (final action in actions) {
           await action();
         }
       }
@@ -1110,9 +1110,9 @@ void main() {
   testWidgets('Tooltip should not show more than one tooltip when hovered', (
     WidgetTester tester,
   ) async {
-    const Duration waitDuration = Duration(milliseconds: 500);
-    final UniqueKey innerKey = UniqueKey();
-    final UniqueKey outerKey = UniqueKey();
+    const waitDuration = Duration(milliseconds: 500);
+    final innerKey = UniqueKey();
+    final outerKey = UniqueKey();
     await tester.pumpWidget(
       WidgetsApp(
         color: const Color(0x00000000),
@@ -1188,7 +1188,7 @@ void main() {
 
   testWidgets('Tooltip does not attempt to show after unmount', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/54096.
-    const Duration waitDuration = Duration(seconds: 1);
+    const waitDuration = Duration(seconds: 1);
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
       return gesture.removePointer();
@@ -1252,8 +1252,8 @@ void main() {
   });
 
   testWidgets('Does tooltip contribute semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    final GlobalKey<RawTooltipState> tooltipKey = GlobalKey<RawTooltipState>();
+    final semantics = SemanticsTester(tester);
+    final tooltipKey = GlobalKey<RawTooltipState>();
     late final OverlayEntry entry;
     addTearDown(
       () => entry
@@ -1290,7 +1290,7 @@ void main() {
       ),
     );
 
-    final TestSemantics expected = TestSemantics.root(
+    final expected = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(id: 1, tooltip: 'TIP', textDirection: TextDirection.ltr),
       ],
@@ -1303,7 +1303,7 @@ void main() {
 
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    final TestSemantics expected1 = TestSemantics.root(
+    final expected1 = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
           id: 1,
@@ -1319,8 +1319,8 @@ void main() {
   }, skip: kIsWeb); // [intended] the web traversal order by using ARIA-OWNS.
 
   testWidgets('Tooltip semantics does not merge into child', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    final GlobalKey<RawTooltipState> tooltipKey = GlobalKey<RawTooltipState>();
+    final semantics = SemanticsTester(tester);
+    final tooltipKey = GlobalKey<RawTooltipState>();
     late final OverlayEntry entry;
     addTearDown(
       () => entry
@@ -1404,7 +1404,7 @@ void main() {
   }, skip: kIsWeb); // [intended] the web traversal order by using ARIA-OWNS.
 
   testWidgets('Haptic feedback', (WidgetTester tester) async {
-    final FeedbackTester feedback = FeedbackTester();
+    final feedback = FeedbackTester();
     await tester.pumpWidget(
       WidgetsApp(
         color: const Color(0x00000000),
@@ -1437,7 +1437,7 @@ void main() {
   });
 
   testWidgets('Semantics included', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       WidgetsApp(
@@ -1496,7 +1496,7 @@ void main() {
   });
 
   testWidgets('Semantics excluded', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       WidgetsApp(
@@ -1549,14 +1549,14 @@ void main() {
   });
 
   testWidgets('has semantic events', (WidgetTester tester) async {
-    final List<dynamic> semanticEvents = <dynamic>[];
+    final semanticEvents = <dynamic>[];
     tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(
       SystemChannels.accessibility,
       (dynamic message) async {
         semanticEvents.add(message);
       },
     );
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       WidgetsApp(
@@ -1606,7 +1606,7 @@ void main() {
     );
   });
   testWidgets('default Tooltip debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
 
     RawTooltip(
       semanticsTooltip: 'message',
@@ -1631,7 +1631,7 @@ void main() {
   });
 
   testWidgets('Tooltip implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
 
     // Not checking controller, inputFormatters, focusNode
     RawTooltip(
@@ -1714,7 +1714,7 @@ void main() {
   });
 
   testWidgets('Tooltip onTriggered is called when Tooltip triggers', (WidgetTester tester) async {
-    bool onTriggeredCalled = false;
+    var onTriggeredCalled = false;
     void onTriggered() => onTriggeredCalled = true;
 
     await setWidgetForTooltipMode(tester, TooltipTriggerMode.longPress, onTriggered: onTriggered);
@@ -1732,7 +1732,7 @@ void main() {
   testWidgets('Tooltip onTriggered is not called when Tooltip is hovered', (
     WidgetTester tester,
   ) async {
-    bool onTriggeredCalled = false;
+    var onTriggeredCalled = false;
     void onTriggered() => onTriggeredCalled = true;
 
     const Duration waitDuration = Duration.zero;
@@ -1885,7 +1885,7 @@ void main() {
   testWidgets('Hovered tooltips with showDuration set do dismiss when hovering elsewhere', (
     WidgetTester tester,
   ) async {
-    const Duration showDuration = Duration(seconds: 1);
+    const showDuration = Duration(seconds: 1);
 
     await tester.pumpWidget(
       WidgetsApp(
@@ -1984,7 +1984,7 @@ void main() {
   testWidgets('Hovered tooltips hide after stopping the hover and exitDuration expires', (
     WidgetTester tester,
   ) async {
-    const Duration exitDuration = Duration(seconds: 1);
+    const exitDuration = Duration(seconds: 1);
     await tester.pumpWidget(
       WidgetsApp(
         color: const Color(0x00000000),
@@ -2144,7 +2144,7 @@ void main() {
   });
 
   testWidgets('Tooltip does not block other mouse regions', (WidgetTester tester) async {
-    bool entered = false;
+    var entered = false;
 
     await tester.pumpWidget(
       WidgetsApp(
@@ -2185,7 +2185,7 @@ void main() {
 
   testWidgets('Does not rebuild on mouse connect/disconnect', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/117627
-    int buildCount = 0;
+    var buildCount = 0;
     await tester.pumpWidget(
       WidgetsApp(
         color: const Color(0x00000000),
@@ -2487,7 +2487,7 @@ void main() {
       ),
     );
     final RawTooltipState tooltipState = tester.state(find.byType(RawTooltip));
-    final Element element = tooltipState.context as Element;
+    final element = tooltipState.context as Element;
     // The Tooltip widget itself is almost stateless thus doesn't need
     // rebuilding.
     expect(element.dirty, isFalse);

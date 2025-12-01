@@ -224,7 +224,7 @@ class _RenderExclusiveMouseRegion extends RenderMouseRegion {
 
   @override
   bool hitTest(BoxHitTestResult result, {required Offset position}) {
-    bool isHit = false;
+    var isHit = false;
     final bool outermost = isOutermostMouseRegion;
     isOutermostMouseRegion = false;
     if (size.contains(position)) {
@@ -467,7 +467,7 @@ class RawTooltip extends StatefulWidget {
     if (_openedTooltips.isNotEmpty) {
       // Avoid concurrent modification.
       final List<RawTooltipState> openedTooltips = _openedTooltips.toList();
-      for (final RawTooltipState state in openedTooltips) {
+      for (final state in openedTooltips) {
         assert(state.mounted);
         state._scheduleDismissTooltip(withDelay: Duration.zero);
       }
@@ -632,7 +632,7 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
 
   void _handlePointerDown(PointerDownEvent event) {
     // PointerDeviceKinds that don't support hovering.
-    const Set<PointerDeviceKind> triggerModeDeviceKinds = <PointerDeviceKind>{
+    const triggerModeDeviceKinds = <PointerDeviceKind>{
       PointerDeviceKind.invertedStylus,
       PointerDeviceKind.stylus,
       PointerDeviceKind.touch,
@@ -756,7 +756,7 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     final List<RawTooltipState> tooltipsToDismiss = RawTooltip._openedTooltips
         .where((RawTooltipState tooltip) => tooltip._activeHoveringPointerDevices.isEmpty)
         .toList();
-    for (final RawTooltipState tooltip in tooltipsToDismiss) {
+    for (final tooltip in tooltipsToDismiss) {
       assert(tooltip.mounted);
       tooltip._scheduleDismissTooltip(withDelay: Duration.zero);
     }
