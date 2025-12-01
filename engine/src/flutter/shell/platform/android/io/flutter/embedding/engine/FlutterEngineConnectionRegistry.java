@@ -10,8 +10,6 @@ import android.content.BroadcastReceiver;
 import android.content.ContentProvider;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -61,7 +59,7 @@ import java.util.Set;
 
   // Standard FlutterPlugin
   @NonNull private final FlutterEngine flutterEngine;
-  @NonNull private final Context appContext;
+  @NonNull private final FlutterLoader flutterLoader;
   @NonNull private final FlutterPlugin.FlutterPluginBinding pluginBinding;
 
   // ActivityAware
@@ -103,7 +101,7 @@ import java.util.Set;
       @NonNull FlutterLoader flutterLoader,
       @Nullable FlutterEngineGroup group) {
     this.flutterEngine = flutterEngine;
-    this.appContext = appContext;
+    this.flutterLoader = flutterLoader;
     pluginBinding =
         new FlutterPlugin.FlutterPluginBinding(
             appContext,
@@ -347,25 +345,8 @@ import java.util.Set;
     }
 
     // Check manifest for software rendering configuration.
-    try {
-      ApplicationInfo applicationInfo =
-          appContext
-              .getPackageManager()
-              .getApplicationInfo(appContext.getPackageName(), PackageManager.GET_META_DATA);
-      Bundle applicationMetaData = applicationInfo.metaData;
-      if (applicationMetaData != null) {
-        final boolean useSoftwareRendering =
-            applicationMetaData.getBoolean(
-                FlutterShellArgs.ENABLE_SOFTWARE_RENDERING.metadataKey, false);
-        flutterEngine.getPlatformViewsController().setSoftwareRendering(useSoftwareRendering);
-      }
-    } catch (PackageManager.NameNotFoundException e) {
-      Log.w(
-          TAG,
-          "Could not set software rendering because application manifest metadata not found for package with name: "
-              + appContext.getPackageName()
-              + ".");
-    }
+    boolean useSoftwareRendering = flutterLoader.getSofwareRenderingEnabledViaManifest();
+    flutterEngine.getPlatformViewsController().setSoftwareRendering(useSoftwareRendering);
 
     // Activate the PlatformViewsController. This must happen before any plugins attempt
     // to use it, otherwise an error stack trace will appear that says there is no
