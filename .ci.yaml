@@ -76,7 +76,7 @@ platform_properties:
         [
           {"dependency": "android_sdk", "version": "version:36v4"},
           {"dependency": "android_virtual_device", "version": "android_36_google_apis_x64.textpb"},
-          {"dependency": "avd_cipd_version", "version": "build_id:8699815938758639089"},
+          {"dependency": "avd_cipd_version", "version": "build_id:8702355247321119617"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
