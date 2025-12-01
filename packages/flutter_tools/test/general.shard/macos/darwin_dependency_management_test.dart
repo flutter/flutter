@@ -831,7 +831,7 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 class FakeSwiftPackageManager extends Fake implements SwiftPackageManager {
   FakeSwiftPackageManager({this.expectedPlugins});
 
-  var generated = false;
+  bool generated = false;
   final List<Plugin>? expectedPlugins;
 
   @override
@@ -850,8 +850,8 @@ class FakeCocoaPods extends Fake implements CocoaPods {
 
   File? podFile;
 
-  var podfileSetup = false;
-  var addedPodDependencyToFlutterXcconfig = false;
+  bool podfileSetup = false;
+  bool addedPodDependencyToFlutterXcconfig = false;
   bool configIncludesPods;
 
   @override

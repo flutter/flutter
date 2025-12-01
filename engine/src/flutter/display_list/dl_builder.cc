@@ -461,11 +461,7 @@ void DisplayListBuilder::saveLayer(const DlRect& bounds,
   // with its full bounds and the right op_index so that it doesn't
   // get culled during rendering.
   if (will_be_unbounded) {
-    // Accumulate should always return true here because if the
-    // clip was empty then that would have been caught up above
-    // when we tested the PaintResult.
-    [[maybe_unused]] bool unclipped = AccumulateUnbounded();
-    FML_DCHECK(unclipped);
+    AccumulateUnbounded();
   }
 
   // Accumulate information for the SaveInfo we are about to push onto the

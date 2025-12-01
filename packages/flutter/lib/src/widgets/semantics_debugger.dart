@@ -207,7 +207,7 @@ class _SemanticsDebuggerPainter extends CustomPainter {
       _paint(canvas, rootNode, _findDepth(rootNode), 0, 0);
     }
     if (pointerPosition != null) {
-      final Paint paint = Paint();
+      final paint = Paint();
       paint.color = const Color(0x7F0090FF);
       canvas.drawCircle(pointerPosition!, 10.0 * devicePixelRatio, paint);
     }
@@ -224,9 +224,9 @@ class _SemanticsDebuggerPainter extends CustomPainter {
   @visibleForTesting
   String getMessage(SemanticsNode node) {
     final SemanticsData data = node.getSemanticsData();
-    final List<String> annotations = <String>[];
+    final annotations = <String>[];
 
-    bool wantsTap = false;
+    var wantsTap = false;
     if (data.flagsCollection.isChecked != CheckedState.none) {
       annotations.add(
         data.flagsCollection.isChecked == CheckedState.isTrue ? 'checked' : 'unchecked',
@@ -312,7 +312,7 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     final Rect rect = node.rect;
     canvas.save();
     canvas.clipRect(rect);
-    final TextPainter textPainter = TextPainter()
+    final textPainter = TextPainter()
       ..text = TextSpan(style: labelStyle, text: message)
       ..textDirection = TextDirection
           .ltr // _getMessage always returns LTR text, even if node.label is RTL
@@ -328,7 +328,7 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     if (!node.hasChildren || node.mergeAllDescendantsIntoThisNode) {
       return 1;
     }
-    int childrenDepth = 0;
+    var childrenDepth = 0;
     node.visitChildren((SemanticsNode child) {
       childrenDepth = math.max(childrenDepth, _findDepth(child));
       return true;
@@ -349,16 +349,16 @@ class _SemanticsDebuggerPainter extends CustomPainter {
       final Color lineColor = _colorForNode(indexInParent, level);
       final Rect innerRect = rect.deflate(rank * 1.0);
       if (innerRect.isEmpty) {
-        final Paint fill = Paint()
+        final fill = Paint()
           ..color = lineColor
           ..style = PaintingStyle.fill;
         canvas.drawRect(rect, fill);
       } else {
-        final Paint fill = Paint()
+        final fill = Paint()
           ..color = const Color(0xFFFFFFFF)
           ..style = PaintingStyle.fill;
         canvas.drawRect(rect, fill);
-        final Paint line = Paint()
+        final line = Paint()
           ..strokeWidth = rank * 2.0
           ..color = lineColor
           ..style = PaintingStyle.stroke;
@@ -369,7 +369,7 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     if (!node.mergeAllDescendantsIntoThisNode) {
       final int childRank = rank - 1;
       final int childLevel = level + 1;
-      int childIndex = 0;
+      var childIndex = 0;
       node.visitChildren((SemanticsNode child) {
         _paint(canvas, child, childRank, childIndex, childLevel);
         childIndex += 1;

@@ -116,7 +116,9 @@ class _CategoryListItemState extends State<CategoryListItem> with SingleTickerPr
         ),
         Padding(
           padding: _childrenPadding.value,
-          child: ClipRect(child: Align(heightFactor: _childrenHeightFactor.value, child: child)),
+          child: ClipRect(
+            child: Align(heightFactor: _childrenHeightFactor.value, child: child),
+          ),
         ),
       ],
     );
@@ -127,10 +129,9 @@ class _CategoryListItemState extends State<CategoryListItem> with SingleTickerPr
     return AnimatedBuilder(
       animation: _controller.view,
       builder: _buildHeaderWithChildren,
-      child:
-          _controller.isDismissed
-              ? null
-              : _ExpandedCategoryDemos(category: widget.category, demos: widget.demos),
+      child: _controller.isDismissed
+          ? null
+          : _ExpandedCategoryDemos(category: widget.category, demos: widget.demos),
     );
   }
 }
@@ -202,13 +203,12 @@ class _CategoryHeader extends StatelessWidget {
                 ),
                 Opacity(
                   opacity: chevronOpacity,
-                  child:
-                      chevronOpacity != 0
-                          ? Padding(
-                            padding: const EdgeInsetsDirectional.only(start: 8, end: 32),
-                            child: Icon(Icons.keyboard_arrow_up, color: colorScheme.onSurface),
-                          )
-                          : null,
+                  child: chevronOpacity != 0
+                      ? Padding(
+                          padding: const EdgeInsetsDirectional.only(start: 8, end: 32),
+                          child: Icon(Icons.keyboard_arrow_up, color: colorScheme.onSurface),
+                        )
+                      : null,
                 ),
               ],
             ),

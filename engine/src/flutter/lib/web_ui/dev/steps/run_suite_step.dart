@@ -75,7 +75,7 @@ class RunSuiteStep implements PipelineStep {
       browserEnvironment.packageTestConfigurationYamlFile,
     );
     final String bundleBuildPath = getBundleBuildDirectory(suite.testBundle).path;
-    final List<String> testArgs = <String>[
+    final testArgs = <String>[
       ...<String>['-r', 'compact'],
       // Disable concurrency. Running with concurrency proved to be flaky.
       '--concurrency=1',
@@ -105,7 +105,7 @@ class RunSuiteStep implements PipelineStep {
     print('[${suite.name.ansiCyan}] Running...');
 
     // We want to run tests with the test set's directory as a working directory.
-    final io.Directory testSetDirectory = io.Directory(
+    final testSetDirectory = io.Directory(
       pathlib.join(environment.webUiTestDir.path, suite.testBundle.testSet.directory),
     );
     final dynamic originalCwd = io.Directory.current;
@@ -133,7 +133,7 @@ class RunSuiteStep implements PipelineStep {
   }
 
   io.Directory _prepareTestResultsDirectory() {
-    final io.Directory resultsDirectory = io.Directory(
+    final resultsDirectory = io.Directory(
       pathlib.join(environment.webUiTestResultsDirectory.path, suite.name),
     );
     if (resultsDirectory.existsSync()) {
@@ -145,7 +145,7 @@ class RunSuiteStep implements PipelineStep {
 
   List<String> _collectTestPaths() {
     final io.Directory bundleBuild = getBundleBuildDirectory(suite.testBundle);
-    final io.File resultsJsonFile = io.File(pathlib.join(bundleBuild.path, 'results.json'));
+    final resultsJsonFile = io.File(pathlib.join(bundleBuild.path, 'results.json'));
     if (!resultsJsonFile.existsSync()) {
       throw ToolExit(
         'Could not find built bundle ${suite.testBundle.name.ansiMagenta} for suite ${suite.name.ansiCyan}.',
@@ -154,10 +154,10 @@ class RunSuiteStep implements PipelineStep {
     final String jsonString = resultsJsonFile.readAsStringSync();
     final jsonContents = const JsonDecoder().convert(jsonString) as Map<String, Object?>;
     final results = jsonContents['results']! as Map<String, Object?>;
-    final List<String> testPaths = <String>[];
+    final testPaths = <String>[];
     results.forEach((Object? k, Object? v) {
-      final String result = v! as String;
-      final String testPath = k! as String;
+      final result = v! as String;
+      final testPath = k! as String;
       if (testFiles != null) {
         if (!testFiles!.contains(FilePath.fromTestSet(suite.testBundle.testSet, testPath))) {
           return;
@@ -189,7 +189,7 @@ class RunSuiteStep implements PipelineStep {
     if (workDirectory.existsSync()) {
       workDirectory.deleteSync(recursive: true);
     }
-    final bool isWasm = suite.testBundle.compileConfigs.first.compiler == Compiler.dart2wasm;
+    final isWasm = suite.testBundle.compileConfigs.first.compiler == Compiler.dart2wasm;
     final bool singleThreaded =
         suite.runConfig.forceSingleThreadedSkwasm || !suite.runConfig.crossOriginIsolated;
     final String rendererName = switch (renderer) {
@@ -203,9 +203,9 @@ class RunSuiteStep implements PipelineStep {
       'Renderer': rendererName,
       'CanvasKitVariant': ?variant?.name,
     };
-    final SkiaGoldClient skiaClient = SkiaGoldClient(workDirectory, dimensions: dimensions);
+    final skiaClient = SkiaGoldClient(workDirectory, dimensions: dimensions);
 
-    final (success, reason) = await _checkSkiaClient(skiaClient);
+    final (bool success, String? reason) = await _checkSkiaClient(skiaClient);
     if (success) {
       print('Created SkiaGoldClient. Dimensions: $dimensions');
       return skiaClient;

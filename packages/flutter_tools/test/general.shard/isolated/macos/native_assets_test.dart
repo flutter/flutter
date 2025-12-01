@@ -6,6 +6,7 @@ import 'package:code_assets/code_assets.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -350,6 +351,20 @@ void main() {
           // Multi arch.
           expect(buildRunner.buildInvocations, flutterTester ? 1 : 2);
           expect(buildRunner.linkInvocations, buildMode == BuildMode.release ? 2 : 0);
+
+          if (!flutterTester) {
+            // Not running on the host system, so the code asset has been turned into a framework.
+            final Directory frameworkRoot = fileSystem.directory(
+              '/build/native_assets/macos/bar.framework',
+            );
+
+            // MacOS frameworks use symlinks for versioned content:
+            // https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPFrameworks/Concepts/FrameworkAnatomy.html
+            expect(frameworkRoot.childLink('bar').targetSync(), 'Versions/Current/bar');
+            expect(frameworkRoot.childLink('Resources').targetSync(), 'Versions/Current/Resources');
+
+            expect(frameworkRoot.childLink('Versions/Current').targetSync(), 'A');
+          }
         },
       );
     }
@@ -377,7 +392,7 @@ void main() {
         return;
       }
 
-      final CCompilerConfig result = await cCompilerConfigMacOS();
+      final CCompilerConfig result = (await cCompilerConfigMacOS(throwIfNotFound: true))!;
       expect(
         result.compiler,
         Uri.file(
@@ -415,10 +430,52 @@ void main() {
         return;
       }
 
-      final CCompilerConfig result = await cCompilerConfigMacOS();
+      final CCompilerConfig result = (await cCompilerConfigMacOS(throwIfNotFound: true))!;
       expect(result.compiler, Uri.file('/nix/store/random-path-to-clang-wrapper/bin/clang'));
       expect(result.archiver, Uri.file('/nix/store/random-path-to-clang-wrapper/bin/ar'));
       expect(result.linker, Uri.file('/nix/store/random-path-to-clang-wrapper/bin/ld'));
+    },
+  );
+
+  testUsingContext(
+    'missing xcode when required',
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        for (final binary in <String>['clang', 'ar', 'ld'])
+          FakeCommand(
+            command: <Pattern>['xcrun', '--find', binary],
+            exitCode: 1,
+            stderr: 'not found',
+          ),
+      ]),
+    },
+    () async {
+      if (!const LocalPlatform().isMacOS) {
+        return;
+      }
+
+      await expectLater(cCompilerConfigMacOS(throwIfNotFound: true), throwsA(isA<ToolExit>()));
+    },
+  );
+
+  testUsingContext(
+    'missing xcode when not required',
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        for (final binary in <String>['clang', 'ar', 'ld'])
+          FakeCommand(
+            command: <Pattern>['xcrun', '--find', binary],
+            exitCode: 1,
+            stderr: 'not found',
+          ),
+      ]),
+    },
+    () async {
+      if (!const LocalPlatform().isMacOS) {
+        return;
+      }
+
+      expect(await cCompilerConfigMacOS(throwIfNotFound: false), isNull);
     },
   );
 }

@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
@@ -47,6 +48,12 @@ const _kSharedConfig = <String>[
   '-isysroot',
   'path/to/iPhoneOS.sdk',
 ];
+
+FakeCommand createPlutilFakeCommand(File infoPlist) {
+  return FakeCommand(
+    command: <String>['plutil', '-replace', 'MinimumOSVersion', '-string', '13.0', infoPlist.path],
+  );
+}
 
 void main() {
   late Environment environment;
@@ -203,6 +210,84 @@ void main() {
   );
 
   testUsingContext(
+    'IosAssetBundle warns if plutil fails',
+    () async {
+      environment.defines[kBuildMode] = 'debug';
+      environment.defines[kCodesignIdentity] = 'ABC123';
+
+      fileSystem
+          .file(artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug))
+          .createSync();
+      fileSystem
+          .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
+          .createSync();
+      fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_app');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+      fileSystem
+          .file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
+          .createSync(recursive: true);
+      environment.buildDir.childFile('app.dill').createSync(recursive: true);
+      environment.buildDir.childFile('native_assets.json').createSync();
+      environment.buildDir
+          .childDirectory('App.framework')
+          .childFile('App')
+          .createSync(recursive: true);
+
+      final File infoPlist = environment.outputDir
+          .childDirectory('App.framework')
+          .childFile('Info.plist');
+      final File frameworkBinary = environment.outputDir
+          .childDirectory('App.framework')
+          .childFile('App');
+
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            'plutil',
+            '-replace',
+            'MinimumOSVersion',
+            '-string',
+            '13.0',
+            infoPlist.path,
+          ],
+          exitCode: 1,
+          stderr: 'plutil: error: invalid argument',
+        ),
+
+        FakeCommand(
+          command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', frameworkBinary.path],
+        ),
+        FakeCommand(
+          command: <String>[
+            'codesign',
+            '--force',
+            '--sign',
+            'ABC123',
+            '--timestamp=none',
+            frameworkBinary.path,
+          ],
+        ),
+      ]);
+
+      await const DebugIosApplicationBundle().build(environment);
+
+      final fakeStdio = globals.stdio as FakeStdio;
+      expect(
+        fakeStdio.buffer.toString(),
+        contains(
+          'warning: Failed to update MinimumOSVersion in ${infoPlist.path}. This may cause AppStore validation failures.',
+        ),
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Platform: () => macPlatform,
+      Stdio: () => FakeStdio(),
+    },
+  );
+  testUsingContext(
     'DebugIosApplicationBundle',
     () async {
       environment.defines[kBuildMode] = 'debug';
@@ -233,7 +318,9 @@ void main() {
 
       final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
       final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
+      final File infoPlist = frameworkDirectory.childFile('Info.plist');
       processManager.addCommands(<FakeCommand>[
+        createPlutilFakeCommand(infoPlist),
         FakeCommand(
           command: <String>[
             'xattr',
@@ -323,7 +410,9 @@ void main() {
 
       final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
       final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
+      final File infoPlist = frameworkDirectory.childFile('Info.plist');
       processManager.addCommands(<FakeCommand>[
+        createPlutilFakeCommand(infoPlist),
         FakeCommand(
           command: <String>[
             'xattr',
@@ -410,6 +499,7 @@ void main() {
 
       final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
       final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
+      final File infoPlist = frameworkDirectory.childFile('Info.plist');
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(
           command: <String>[
@@ -424,6 +514,7 @@ void main() {
             '--include=/./shader_lib',
           ],
         ),
+        createPlutilFakeCommand(infoPlist),
         FakeCommand(
           command: <String>[
             'xattr',
@@ -497,7 +588,9 @@ void main() {
 
       final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
       final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
+      final File infoPlist = frameworkDirectory.childFile('Info.plist');
       processManager.addCommands(<FakeCommand>[
+        createPlutilFakeCommand(infoPlist),
         FakeCommand(
           command: <String>[
             'xattr',
@@ -565,7 +658,9 @@ void main() {
 
       final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
       final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
+      final File infoPlist = frameworkDirectory.childFile('Info.plist');
       processManager.addCommands(<FakeCommand>[
+        createPlutilFakeCommand(infoPlist),
         FakeCommand(
           command: <String>[
             'xattr',
@@ -694,8 +789,7 @@ void main() {
   group('copies Flutter.framework', () {
     late Directory outputDir;
     late File binary;
-    late FakeCommand copyPhysicalDebugFrameworkCommand;
-    late FakeCommand copyPhysicalReleaseFrameworkCommand;
+    late FakeCommand copyPhysicalFrameworkCommand;
     late FakeCommand copyPhysicalFrameworkDsymCommand;
     late FakeCommand copyPhysicalFrameworkDsymCommandFailure;
     late FakeCommand lipoCommandNonFatResult;
@@ -708,7 +802,7 @@ void main() {
       outputDir = fileSystem.directory('output');
       binary = outputDir.childDirectory('Flutter.framework').childFile('Flutter');
 
-      copyPhysicalDebugFrameworkCommand = FakeCommand(
+      copyPhysicalFrameworkCommand = FakeCommand(
         command: <String>[
           'rsync',
           '-av',
@@ -717,18 +811,6 @@ void main() {
           '- .DS_Store/',
           '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
           'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.physical',
-          outputDir.path,
-        ],
-      );
-      copyPhysicalReleaseFrameworkCommand = FakeCommand(
-        command: <String>[
-          'rsync',
-          '-av',
-          '--delete',
-          '--filter',
-          '- .DS_Store/',
-          '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
-          'Artifact.flutterFramework.TargetPlatform.ios.release.EnvironmentType.physical',
           outputDir.path,
         ],
       );
@@ -741,7 +823,7 @@ void main() {
           '--filter',
           '- .DS_Store/',
           '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
-          'Artifact.flutterFrameworkDsym.TargetPlatform.ios.release.EnvironmentType.physical',
+          'Artifact.flutterFrameworkDsym.TargetPlatform.ios.debug.EnvironmentType.physical',
           outputDir.path,
         ],
       );
@@ -754,7 +836,7 @@ void main() {
           '--filter',
           '- .DS_Store/',
           '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
-          'Artifact.flutterFrameworkDsym.TargetPlatform.ios.release.EnvironmentType.physical',
+          'Artifact.flutterFrameworkDsym.TargetPlatform.ios.debug.EnvironmentType.physical',
           outputDir.path,
         ],
         exitCode: 1,
@@ -827,7 +909,7 @@ void main() {
         outputDir: outputDir,
         defines: <String, String>{kIosArchs: 'arm64', kSdkRoot: 'path/to/iPhoneOS.sdk'},
       );
-      processManager.addCommand(copyPhysicalDebugFrameworkCommand);
+      processManager.addCommand(copyPhysicalFrameworkCommand);
       await expectLater(
         const DebugUnpackIOS().build(environment),
         throwsA(
@@ -846,7 +928,7 @@ void main() {
         artifacts.getArtifactPath(
           Artifact.flutterFrameworkDsym,
           platform: TargetPlatform.ios,
-          mode: BuildMode.release,
+          mode: BuildMode.debug,
           environmentType: EnvironmentType.physical,
         ),
       );
@@ -861,9 +943,12 @@ void main() {
         outputDir: outputDir,
         defines: <String, String>{kIosArchs: 'arm64', kSdkRoot: 'path/to/iPhoneOS.sdk'},
       );
-      processManager.addCommands(<FakeCommand>[copyPhysicalFrameworkDsymCommandFailure]);
+      processManager.addCommands(<FakeCommand>[
+        copyPhysicalFrameworkCommand,
+        copyPhysicalFrameworkDsymCommandFailure,
+      ]);
       await expectLater(
-        const ReleaseUnpackIOSDsym().build(environment),
+        const DebugUnpackIOS().build(environment),
         throwsA(
           isException.having(
             (Exception exception) => exception.toString(),
@@ -888,7 +973,7 @@ void main() {
       );
 
       processManager.addCommands(<FakeCommand>[
-        copyPhysicalDebugFrameworkCommand,
+        copyPhysicalFrameworkCommand,
         FakeCommand(
           command: <String>['lipo', '-info', binary.path],
           stdout: 'Architectures in the fat file:',
@@ -928,7 +1013,7 @@ void main() {
       );
 
       processManager.addCommands(<FakeCommand>[
-        copyPhysicalDebugFrameworkCommand,
+        copyPhysicalFrameworkCommand,
         FakeCommand(
           command: <String>['lipo', '-info', binary.path],
           stdout: 'Architectures in the fat file:',
@@ -1062,7 +1147,7 @@ void main() {
       );
 
       processManager.addCommands(<FakeCommand>[
-        copyPhysicalDebugFrameworkCommand,
+        copyPhysicalFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
         xattrCommand,
@@ -1092,7 +1177,7 @@ void main() {
       );
 
       processManager.addCommands(<FakeCommand>[
-        copyPhysicalDebugFrameworkCommand,
+        copyPhysicalFrameworkCommand,
         FakeCommand(
           command: <String>['lipo', '-info', binary.path],
           stdout: 'Architectures in the fat file:',
@@ -1132,7 +1217,7 @@ void main() {
       );
 
       processManager.addCommands(<FakeCommand>[
-        copyPhysicalDebugFrameworkCommand,
+        copyPhysicalFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
         xattrCommand,
@@ -1161,7 +1246,7 @@ void main() {
       );
 
       processManager.addCommands(<FakeCommand>[
-        copyPhysicalDebugFrameworkCommand,
+        copyPhysicalFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
         xattrCommand,
@@ -1196,13 +1281,13 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('codesigns framework in release mode', () async {
+    testWithoutContext('codesigns framework', () async {
       binary.createSync(recursive: true);
       final Directory dSYM = fileSystem.directory(
         artifacts.getArtifactPath(
           Artifact.flutterFrameworkDsym,
           platform: TargetPlatform.ios,
-          mode: BuildMode.release,
+          mode: BuildMode.debug,
           environmentType: EnvironmentType.physical,
         ),
       );
@@ -1223,41 +1308,8 @@ void main() {
       );
 
       processManager.addCommands(<FakeCommand>[
+        copyPhysicalFrameworkCommand,
         copyPhysicalFrameworkDsymCommand,
-        copyPhysicalReleaseFrameworkCommand,
-        lipoCommandNonFatResult,
-        lipoVerifyArm64Command,
-        xattrCommand,
-        FakeCommand(command: <String>['codesign', '--force', '--sign', 'ABC123', binary.path]),
-      ]);
-      const Target target = ReleaseUnpackIOS();
-      for (final Target dep in target.dependencies) {
-        await dep.build(environment);
-      }
-      await target.build(environment);
-
-      expect(processManager, hasNoRemainingExpectations);
-    });
-
-    testWithoutContext('codesigns framework in debug mode', () async {
-      binary.createSync(recursive: true);
-
-      final environment = Environment.test(
-        fileSystem.currentDirectory,
-        processManager: processManager,
-        artifacts: artifacts,
-        logger: logger,
-        fileSystem: fileSystem,
-        outputDir: outputDir,
-        defines: <String, String>{
-          kIosArchs: 'arm64',
-          kSdkRoot: 'path/to/iPhoneOS.sdk',
-          kCodesignIdentity: 'ABC123',
-        },
-      );
-
-      processManager.addCommands(<FakeCommand>[
-        copyPhysicalDebugFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
         xattrCommand,
@@ -1272,11 +1324,7 @@ void main() {
           ],
         ),
       ]);
-      const Target target = DebugUnpackIOS();
-      for (final Target dep in target.dependencies) {
-        await dep.build(environment);
-      }
-      await target.build(environment);
+      await const DebugUnpackIOS().build(environment);
 
       expect(processManager, hasNoRemainingExpectations);
     });

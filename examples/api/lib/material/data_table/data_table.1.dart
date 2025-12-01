@@ -41,10 +41,14 @@ class _DataTableExampleState extends State<DataTableExample> {
         rows: List<DataRow>.generate(
           numItems,
           (int index) => DataRow(
-            color: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+            color: WidgetStateProperty.resolveWith<Color?>((
+              Set<WidgetState> states,
+            ) {
               // All rows will have the same selected color.
               if (states.contains(WidgetState.selected)) {
-                return Theme.of(context).colorScheme.primary.withValues(alpha: 0.08);
+                return Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.08);
               }
               // Even rows will have a grey color.
               if (index.isEven) {

@@ -11,7 +11,7 @@ import '../image_data.dart';
 
 void main() {
   test('ColorScheme lerp special cases', () {
-    const ColorScheme scheme = ColorScheme.light();
+    const scheme = ColorScheme.light();
     expect(identical(ColorScheme.lerp(scheme, scheme, 0.5), scheme), true);
   });
 
@@ -20,7 +20,7 @@ void main() {
     // https://material.io/design/color/dark-theme.html#ui-application
     // with the new Material 3 colors defaulting to values from the M2
     // baseline.
-    const ColorScheme scheme = ColorScheme.light();
+    const scheme = ColorScheme.light();
     expect(scheme.brightness, Brightness.light);
     expect(scheme.primary, const Color(0xff6200ee));
     expect(scheme.onPrimary, const Color(0xffffffff));
@@ -78,7 +78,7 @@ void main() {
     // https://material.io/design/color/dark-theme.html#ui-application
     // with the new Material 3 colors defaulting to values from the M2
     // baseline.
-    const ColorScheme scheme = ColorScheme.dark();
+    const scheme = ColorScheme.dark();
     expect(scheme.brightness, Brightness.dark);
     expect(scheme.primary, const Color(0xffbb86fc));
     expect(scheme.onPrimary, const Color(0xff000000));
@@ -136,7 +136,7 @@ void main() {
     // https://material.io/design/color/dark-theme.html#ui-application
     // with the new Material 3 colors defaulting to values from the M2
     // baseline.
-    const ColorScheme scheme = ColorScheme.highContrastLight();
+    const scheme = ColorScheme.highContrastLight();
     expect(scheme.brightness, Brightness.light);
     expect(scheme.primary, const Color(0xff0000ba));
     expect(scheme.onPrimary, const Color(0xffffffff));
@@ -194,7 +194,7 @@ void main() {
     // https://material.io/design/color/dark-theme.html#ui-application
     // with the new Material 3 colors defaulting to values from the M2
     // baseline.
-    const ColorScheme scheme = ColorScheme.highContrastDark();
+    const scheme = ColorScheme.highContrastDark();
     expect(scheme.brightness, Brightness.dark);
     expect(scheme.primary, const Color(0xffefb7ff));
     expect(scheme.onPrimary, const Color(0xff000000));
@@ -248,11 +248,11 @@ void main() {
   });
 
   test('can generate a light scheme from a seed color', () {
-    final ColorScheme scheme = ColorScheme.fromSeed(seedColor: Colors.blue);
+    final scheme = ColorScheme.fromSeed(seedColor: Colors.blue);
     expect(scheme.primary, const Color(0xff36618e));
     expect(scheme.onPrimary, const Color(0xffffffff));
     expect(scheme.primaryContainer, const Color(0xffd1e4ff));
-    expect(scheme.onPrimaryContainer, const Color(0xff001d36));
+    expect(scheme.onPrimaryContainer, const Color(0xff194975));
     expect(scheme.primaryFixed, const Color(0xffd1e4ff));
     expect(scheme.primaryFixedDim, const Color(0xffa0cafd));
     expect(scheme.onPrimaryFixed, const Color(0xff001d36));
@@ -260,7 +260,7 @@ void main() {
     expect(scheme.secondary, const Color(0xff535f70));
     expect(scheme.onSecondary, const Color(0xffffffff));
     expect(scheme.secondaryContainer, const Color(0xffd7e3f7));
-    expect(scheme.onSecondaryContainer, const Color(0xff101c2b));
+    expect(scheme.onSecondaryContainer, const Color(0xff3b4858));
     expect(scheme.secondaryFixed, const Color(0xffd7e3f7));
     expect(scheme.secondaryFixedDim, const Color(0xffbbc7db));
     expect(scheme.onSecondaryFixed, const Color(0xff101c2b));
@@ -268,7 +268,7 @@ void main() {
     expect(scheme.tertiary, const Color(0xff6b5778));
     expect(scheme.onTertiary, const Color(0xffffffff));
     expect(scheme.tertiaryContainer, const Color(0xfff2daff));
-    expect(scheme.onTertiaryContainer, const Color(0xff251431));
+    expect(scheme.onTertiaryContainer, const Color(0xff523f5f));
     expect(scheme.tertiaryFixed, const Color(0xfff2daff));
     expect(scheme.tertiaryFixedDim, const Color(0xffd6bee4));
     expect(scheme.onTertiaryFixed, const Color(0xff251431));
@@ -276,7 +276,7 @@ void main() {
     expect(scheme.error, const Color(0xffba1a1a));
     expect(scheme.onError, const Color(0xffffffff));
     expect(scheme.errorContainer, const Color(0xffffdad6));
-    expect(scheme.onErrorContainer, const Color(0xff410002));
+    expect(scheme.onErrorContainer, const Color(0xff93000a));
     expect(scheme.outline, const Color(0xff73777f));
     expect(scheme.outlineVariant, const Color(0xffc3c7cf));
     expect(scheme.background, const Color(0xfff8f9ff));
@@ -408,10 +408,7 @@ void main() {
   });
 
   test('can generate a dark scheme from a seed color', () {
-    final ColorScheme scheme = ColorScheme.fromSeed(
-      seedColor: Colors.blue,
-      brightness: Brightness.dark,
-    );
+    final scheme = ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.dark);
     expect(scheme.primary, const Color(0xffa0cafd));
     expect(scheme.onPrimary, const Color(0xff003258));
     expect(scheme.primaryContainer, const Color(0xff194975));
@@ -465,12 +462,9 @@ void main() {
   });
 
   test('can override specific colors in a generated scheme', () {
-    final ColorScheme baseScheme = ColorScheme.fromSeed(seedColor: Colors.blue);
-    const Color primaryOverride = Color(0xffabcdef);
-    final ColorScheme scheme = ColorScheme.fromSeed(
-      seedColor: Colors.blue,
-      primary: primaryOverride,
-    );
+    final baseScheme = ColorScheme.fromSeed(seedColor: Colors.blue);
+    const primaryOverride = Color(0xffabcdef);
+    final scheme = ColorScheme.fromSeed(seedColor: Colors.blue, primary: primaryOverride);
     expect(scheme.primary, primaryOverride);
     // The rest should be the same.
     expect(scheme.onPrimary, baseScheme.onPrimary);
@@ -527,7 +521,7 @@ void main() {
   test(
     'can generate a light scheme from an imageProvider',
     () async {
-      final Uint8List blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
+      final blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
       final ImageProvider image = MemoryImage(blueSquareBytes);
 
       final ColorScheme scheme = await ColorScheme.fromImageProvider(provider: image);
@@ -536,7 +530,7 @@ void main() {
       expect(scheme.primary, const Color(0xff575992));
       expect(scheme.onPrimary, const Color(0xffffffff));
       expect(scheme.primaryContainer, const Color(0xffe1e0ff));
-      expect(scheme.onPrimaryContainer, const Color(0xff13144b));
+      expect(scheme.onPrimaryContainer, const Color(0xff3f4178));
       expect(scheme.primaryFixed, const Color(0xffe1e0ff));
       expect(scheme.primaryFixedDim, const Color(0xffc0c1ff));
       expect(scheme.onPrimaryFixed, const Color(0xff13144b));
@@ -544,7 +538,7 @@ void main() {
       expect(scheme.secondary, const Color(0xff5d5c72));
       expect(scheme.onSecondary, const Color(0xffffffff));
       expect(scheme.secondaryContainer, const Color(0xffe2e0f9));
-      expect(scheme.onSecondaryContainer, const Color(0xff191a2c));
+      expect(scheme.onSecondaryContainer, const Color(0xff454559));
       expect(scheme.secondaryFixed, const Color(0xffe2e0f9));
       expect(scheme.secondaryFixedDim, const Color(0xffc6c4dd));
       expect(scheme.onSecondaryFixed, const Color(0xff191a2c));
@@ -552,7 +546,7 @@ void main() {
       expect(scheme.tertiary, const Color(0xff79536a));
       expect(scheme.onTertiary, const Color(0xffffffff));
       expect(scheme.tertiaryContainer, const Color(0xffffd8ec));
-      expect(scheme.onTertiaryContainer, const Color(0xff2e1125));
+      expect(scheme.onTertiaryContainer, const Color(0xff5f3c51));
       expect(scheme.tertiaryFixed, const Color(0xffffd8ec));
       expect(scheme.tertiaryFixedDim, const Color(0xffe9b9d3));
       expect(scheme.onTertiaryFixed, const Color(0xff2e1125));
@@ -560,7 +554,7 @@ void main() {
       expect(scheme.error, const Color(0xffba1a1a));
       expect(scheme.onError, const Color(0xffffffff));
       expect(scheme.errorContainer, const Color(0xffffdad6));
-      expect(scheme.onErrorContainer, const Color(0xff410002));
+      expect(scheme.onErrorContainer, const Color(0xff93000a));
       expect(scheme.background, const Color(0xfffcf8ff));
       expect(scheme.onBackground, const Color(0xff1b1b21));
       expect(scheme.surface, const Color(0xfffcf8ff));
@@ -589,7 +583,7 @@ void main() {
   test(
     'can generate a dark scheme from an imageProvider',
     () async {
-      final Uint8List blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
+      final blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
       final ImageProvider image = MemoryImage(blueSquareBytes);
 
       final ColorScheme scheme = await ColorScheme.fromImageProvider(
@@ -659,7 +653,7 @@ void main() {
   });
 
   test('fromImageProvider() asserts on invalid contrast levels', () async {
-    final Uint8List blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
+    final blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
     final ImageProvider image = MemoryImage(blueSquareBytes);
 
     expect(
@@ -676,7 +670,7 @@ void main() {
   test(
     'fromImageProvider() propagates TimeoutException or Failed to render image when image cannot be rendered',
     () async {
-      final Uint8List blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
+      final blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
 
       // Corrupt the image's bytelist so it cannot be read.
       final Uint8List corruptImage = blueSquareBytes.sublist(5);
@@ -698,7 +692,7 @@ void main() {
   testWidgets(
     'generated scheme "on" colors meet a11y contrast guidelines',
     (WidgetTester tester) async {
-      final ColorScheme colors = ColorScheme.fromSeed(seedColor: Colors.teal);
+      final colors = ColorScheme.fromSeed(seedColor: Colors.teal);
 
       Widget label(String text, Color textColor, Color background) {
         return Container(
@@ -783,7 +777,7 @@ void main() {
             contrastLevel: 0.0,
           ),
         };
-        final ColorScheme colorScheme = ColorScheme.fromSeed(
+        final colorScheme = ColorScheme.fromSeed(
           seedColor: seedColor,
           dynamicSchemeVariant: schemeVariant,
         );
@@ -1022,7 +1016,7 @@ void main() {
       Brightness brightness,
       double contrastLevel,
     ) {
-      final bool isDark = brightness == Brightness.dark;
+      final isDark = brightness == Brightness.dark;
       final DynamicScheme dynamicScheme = switch (schemeVariant) {
         DynamicSchemeVariant.tonalSpot => SchemeTonalSpot(
           sourceColorHct: sourceColor,
@@ -1071,7 +1065,7 @@ void main() {
         ),
       };
 
-      final ColorScheme colorScheme = ColorScheme.fromSeed(
+      final colorScheme = ColorScheme.fromSeed(
         seedColor: seedColor,
         brightness: brightness,
         dynamicSchemeVariant: schemeVariant,
@@ -1242,8 +1236,8 @@ void main() {
   testWidgets('ColorScheme.of(context) is equivalent to Theme.of(context).colorScheme', (
     WidgetTester tester,
   ) async {
-    const Key sizedBoxKey = Key('sizedBox');
-    final ColorScheme colorScheme = ColorScheme.fromSeed(seedColor: Colors.red);
+    const sizedBoxKey = Key('sizedBox');
+    final colorScheme = ColorScheme.fromSeed(seedColor: Colors.red);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1264,7 +1258,7 @@ void main() {
     'ColorScheme from an invalid network image should only throw one error',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/170413
-      final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
+      final errors = <FlutterErrorDetails>[];
       final FlutterExceptionHandler? oldHandler = FlutterError.onError;
       FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
 

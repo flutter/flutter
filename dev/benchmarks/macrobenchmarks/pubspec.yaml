@@ -2,7 +2,7 @@ name: macrobenchmarks
 description: Performance benchmarks using flutter drive.
 
 environment:
-  sdk: ^3.8.0-0
+  sdk: ^3.9.0-0
 
 resolution: workspace
 

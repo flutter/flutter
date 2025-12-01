@@ -28,11 +28,12 @@ class MaterialStateExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InputDecorationTheme(
-      prefixIconColor: const WidgetStateColor.fromMap(<WidgetStatesConstraint, Color>{
-        WidgetState.error: Colors.red,
-        WidgetState.focused: Colors.blue,
-        WidgetState.any: Colors.grey,
-      }),
+      prefixIconColor:
+          const WidgetStateColor.fromMap(<WidgetStatesConstraint, Color>{
+            WidgetState.error: Colors.red,
+            WidgetState.focused: Colors.blue,
+            WidgetState.any: Colors.grey,
+          }),
       child: TextFormField(
         initialValue: 'example.com',
         decoration: const InputDecoration(prefixIcon: Icon(Icons.web)),

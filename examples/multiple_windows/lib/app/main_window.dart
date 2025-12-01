@@ -101,6 +101,7 @@ class _WindowsTable extends StatelessWidget {
         context: context,
         controller: dialog,
       ),
+      TooltipWindowController() => null,
     };
   }
 
@@ -108,6 +109,7 @@ class _WindowsTable extends StatelessWidget {
     return switch (controller) {
       RegularWindowController() => 'Regular',
       DialogWindowController() => 'Dialog',
+      TooltipWindowController() => 'Tooltip',
     };
   }
 

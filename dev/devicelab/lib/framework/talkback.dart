@@ -31,7 +31,7 @@ Future<Version> getTalkbackVersion() async {
   }
   final List<String> lines = (result.stdout as String).split('\n');
   String? version;
-  for (final String line in lines) {
+  for (final line in lines) {
     if (line.contains('versionName')) {
       version = line.replaceAll(RegExp(r'\s*versionName='), '');
       break;
@@ -42,9 +42,7 @@ Future<Version> getTalkbackVersion() async {
   }
 
   // Android doesn't quite use semver, so convert the version string to semver form.
-  final RegExp startVersion = RegExp(
-    r'(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(\.(?<build>\d+))?',
-  );
+  final startVersion = RegExp(r'(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(\.(?<build>\d+))?');
   final RegExpMatch? match = startVersion.firstMatch(version);
   if (match == null) {
     return Version(0, 0, 0);

@@ -3,8 +3,7 @@ description: Demonstrates how to use the integration_test plugin.
 publish_to: 'none'
 
 environment:
-  sdk: ^3.8.0-0
-  flutter: ">=1.6.7"
+  sdk: ^3.9.0-0
 resolution: workspace
 
 

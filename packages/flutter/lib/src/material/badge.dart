@@ -187,7 +187,7 @@ class Badge extends StatelessWidget {
     );
     final double effectiveWidthOffset;
     final Widget badge;
-    final bool hasLabel = label != null;
+    final hasLabel = label != null;
     if (hasLabel) {
       final double minSize = effectiveWidthOffset =
           largeSize ?? badgeTheme.largeSize ?? defaults.largeSize!;
@@ -224,7 +224,7 @@ class Badge extends StatelessWidget {
     final AlignmentGeometry effectiveAlignment =
         alignment ?? badgeTheme.alignment ?? defaults.alignment!;
     final TextDirection textDirection = Directionality.of(context);
-    final Offset defaultOffset = textDirection == TextDirection.ltr
+    final defaultOffset = textDirection == TextDirection.ltr
         ? const Offset(4, -4)
         : const Offset(-4, -4);
     // Adds a offset const Offset(0, 8) to avoiding breaking customers after
@@ -348,7 +348,7 @@ class _RenderBadge extends RenderAligningShiftedBox {
     child!.layout(const BoxConstraints(), parentUsesSize: true);
     final double badgeSize = child!.size.height;
     final Alignment resolvedAlignment = alignment.resolve(textDirection);
-    final BoxParentData childParentData = child!.parentData! as BoxParentData;
+    final childParentData = child!.parentData! as BoxParentData;
     Offset badgeLocation =
         offset + resolvedAlignment.alongOffset(Offset(size.width - widthOffset, size.height));
     if (hasLabel) {
@@ -375,7 +375,7 @@ class _RenderBadge extends RenderAligningShiftedBox {
     }
 
     // Child is laid out with unconstrained BoxConstraints in performLayout.
-    const BoxConstraints childConstraints = BoxConstraints();
+    const childConstraints = BoxConstraints();
     final double? childBaseline = child.getDryBaseline(childConstraints, baseline);
     if (childBaseline == null) {
       return null;

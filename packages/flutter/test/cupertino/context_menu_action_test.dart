@@ -10,11 +10,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   // Constants taken from _ContextMenuActionState.
-  const CupertinoDynamicColor kBackgroundColor = CupertinoDynamicColor.withBrightness(
+  const kBackgroundColor = CupertinoDynamicColor.withBrightness(
     color: Color(0xFFF1F1F1),
     darkColor: Color(0xFF212122),
   );
-  const CupertinoDynamicColor kBackgroundColorPressed = CupertinoDynamicColor.withBrightness(
+  const kBackgroundColorPressed = CupertinoDynamicColor.withBrightness(
     color: Color(0xFFDDDDDD),
     darkColor: Color(0xFF3F3F40),
   );
@@ -27,8 +27,8 @@ void main() {
     bool isDefaultAction = false,
     Brightness? brightness,
   }) {
-    final UniqueKey actionKey = UniqueKey();
-    final CupertinoContextMenuAction action = CupertinoContextMenuAction(
+    final actionKey = UniqueKey();
+    final action = CupertinoContextMenuAction(
       key: actionKey,
       onPressed: onPressed,
       trailingIcon: CupertinoIcons.home,
@@ -64,7 +64,7 @@ void main() {
   }
 
   testWidgets('responds to taps', (WidgetTester tester) async {
-    bool wasPressed = false;
+    var wasPressed = false;
     await tester.pumpWidget(
       getApp(
         onPressed: () {

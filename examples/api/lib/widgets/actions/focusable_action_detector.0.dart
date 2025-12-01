@@ -33,25 +33,34 @@ class _FadButtonState extends State<FadButton> {
   bool _hovering = false;
   bool _on = false;
   late final Map<Type, Action<Intent>> _actionMap;
-  final Map<ShortcutActivator, Intent> _shortcutMap = const <ShortcutActivator, Intent>{
-    SingleActivator(LogicalKeyboardKey.keyX): ActivateIntent(),
-  };
+  final Map<ShortcutActivator, Intent> _shortcutMap =
+      const <ShortcutActivator, Intent>{
+        SingleActivator(LogicalKeyboardKey.keyX): ActivateIntent(),
+      };
 
   @override
   void initState() {
     super.initState();
     _actionMap = <Type, Action<Intent>>{
-      ActivateIntent: CallbackAction<Intent>(onInvoke: (Intent intent) => _toggleState()),
+      ActivateIntent: CallbackAction<Intent>(
+        onInvoke: (Intent intent) => _toggleState(),
+      ),
     };
   }
 
   Color get color {
     Color baseColor = Colors.lightBlue;
     if (_focused) {
-      baseColor = Color.alphaBlend(Colors.black.withOpacity(0.25), baseColor);
+      baseColor = Color.alphaBlend(
+        Colors.black.withValues(alpha: 0.25),
+        baseColor,
+      );
     }
     if (_hovering) {
-      baseColor = Color.alphaBlend(Colors.black.withOpacity(0.1), baseColor);
+      baseColor = Color.alphaBlend(
+        Colors.black.withValues(alpha: 0.1),
+        baseColor,
+      );
     }
     return baseColor;
   }
@@ -85,7 +94,11 @@ class _FadButtonState extends State<FadButton> {
         onShowHoverHighlight: _handleHoveHighlight,
         child: Row(
           children: <Widget>[
-            Container(padding: const EdgeInsets.all(10.0), color: color, child: widget.child),
+            Container(
+              padding: const EdgeInsets.all(10.0),
+              color: color,
+              child: widget.child,
+            ),
             Container(
               width: 30,
               height: 30,
@@ -103,10 +116,12 @@ class FocusableActionDetectorExample extends StatefulWidget {
   const FocusableActionDetectorExample({super.key});
 
   @override
-  State<FocusableActionDetectorExample> createState() => _FocusableActionDetectorExampleState();
+  State<FocusableActionDetectorExample> createState() =>
+      _FocusableActionDetectorExampleState();
 }
 
-class _FocusableActionDetectorExampleState extends State<FocusableActionDetectorExample> {
+class _FocusableActionDetectorExampleState
+    extends State<FocusableActionDetectorExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,7 +132,10 @@ class _FocusableActionDetectorExampleState extends State<FocusableActionDetector
           children: <Widget>[
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: TextButton(onPressed: () {}, child: const Text('Press Me')),
+              child: TextButton(
+                onPressed: () {},
+                child: const Text('Press Me'),
+              ),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),

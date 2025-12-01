@@ -98,11 +98,11 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
 
   @override
   void performLayout(Size size) {
-    double leadingWidth = 0.0;
-    double trailingWidth = 0.0;
+    var leadingWidth = 0.0;
+    var trailingWidth = 0.0;
 
     if (hasChild(_ToolbarSlot.leading)) {
-      final BoxConstraints constraints = BoxConstraints(
+      final constraints = BoxConstraints(
         maxWidth: size.width,
         minHeight: size.height, // The height should be exactly the height of the bar.
         maxHeight: size.height,
@@ -116,7 +116,7 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
     }
 
     if (hasChild(_ToolbarSlot.trailing)) {
-      final BoxConstraints constraints = BoxConstraints.loose(size);
+      final constraints = BoxConstraints.loose(size);
       final Size trailingSize = layoutChild(_ToolbarSlot.trailing, constraints);
       final double trailingX = switch (textDirection) {
         TextDirection.rtl => 0.0,
@@ -136,7 +136,7 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
       final Size middleSize = layoutChild(_ToolbarSlot.middle, constraints);
 
       final double middleStartMargin = leadingWidth + middleSpacing;
-      double middleStart = middleStartMargin;
+      var middleStart = middleStartMargin;
       final double middleY = (size.height - middleSize.height) / 2.0;
       // If the centered middle will not fit between the leading and trailing
       // widgets, then align its left or right edge with the adjacent boundary.

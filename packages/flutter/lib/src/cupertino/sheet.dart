@@ -160,7 +160,7 @@ Future<T?> showCupertinoSheet<T>({
 
   final WidgetBuilder? effectivePageBuilder = builder ?? pageBuilder;
   final WidgetBuilder widgetBuilder;
-  final GlobalKey<NavigatorState> nestedNavigatorKey = GlobalKey<NavigatorState>();
+  final nestedNavigatorKey = GlobalKey<NavigatorState>();
   if (!useNestedNavigation) {
     widgetBuilder = effectivePageBuilder!;
   } else {
@@ -252,7 +252,7 @@ class CupertinoSheetTransition extends StatefulWidget {
 
     final Curve curve = linear ? Curves.linear : Curves.linearToEaseOut;
     final Curve reverseCurve = linear ? Curves.linear : Curves.easeInToLinear;
-    final CurvedAnimation curvedAnimation = CurvedAnimation(
+    final curvedAnimation = CurvedAnimation(
       curve: curve,
       reverseCurve: reverseCurve,
       parent: secondaryAnimation,
@@ -275,8 +275,8 @@ class CupertinoSheetTransition extends StatefulWidget {
     final Animation<double> scaleAnimation = curvedAnimation.drive(_kScaleTween);
     curvedAnimation.dispose();
 
-    final bool isDarkMode = CupertinoTheme.brightnessOf(context) == Brightness.dark;
-    final Color overlayColor = isDarkMode ? const Color(0xFFc8c8c8) : const Color(0xFF000000);
+    final isDarkMode = CupertinoTheme.brightnessOf(context) == Brightness.dark;
+    final overlayColor = isDarkMode ? const Color(0xFFc8c8c8) : const Color(0xFF000000);
 
     final Widget? contrastedChild = child != null && !secondaryAnimation.isDismissed
         ? Stack(
@@ -331,7 +331,7 @@ class CupertinoSheetTransition extends StatefulWidget {
   ) {
     const Curve curve = Curves.linearToEaseOut;
     const Curve reverseCurve = Curves.easeInToLinear;
-    final CurvedAnimation curvedAnimation = CurvedAnimation(
+    final curvedAnimation = CurvedAnimation(
       curve: curve,
       reverseCurve: reverseCurve,
       parent: secondaryAnimation,
@@ -443,7 +443,7 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition>
         ? _kBottomUpTweenWhenCoveringOtherSheet
         : _kBottomUpTween;
 
-    final CurvedAnimation curvedAnimation = CurvedAnimation(
+    final curvedAnimation = CurvedAnimation(
       parent: animation,
       curve: linearTransition ? Curves.linear : Curves.fastEaseInToSlowEaseOut,
       reverseCurve: linearTransition ? Curves.linear : Curves.fastEaseInToSlowEaseOut.flipped,

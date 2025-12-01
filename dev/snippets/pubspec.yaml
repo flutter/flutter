@@ -2,7 +2,7 @@ name: snippets
 description: A package for parsing and manipulating code samples in Flutter repo dartdoc comments.
 
 environment:
-  sdk: ^3.8.0-0
+  sdk: ^3.9.0-0
 
 resolution: workspace
 

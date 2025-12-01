@@ -8,7 +8,9 @@ import 'package:flutter_api_samples/cupertino/segmented_control/cupertino_slidin
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can change a selected segmented control', (WidgetTester tester) async {
+  testWidgets('Can change a selected segmented control', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.SegmentedControlApp());
 
     expect(find.text('Selected Segment: midnight'), findsOneWidget);
@@ -22,7 +24,9 @@ void main() {
 
     // Verify momentary mode is initially off.
     expect(find.text('Momentary mode: '), findsOneWidget);
-    final CupertinoSwitch momentarySwitch = tester.widget(find.byType(CupertinoSwitch));
+    final CupertinoSwitch momentarySwitch = tester.widget(
+      find.byType(CupertinoSwitch),
+    );
     expect(momentarySwitch.value, isFalse);
 
     // Toggle momentary mode on.
@@ -30,7 +34,9 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify switch is now on.
-    final CupertinoSwitch updatedSwitch = tester.widget(find.byType(CupertinoSwitch));
+    final CupertinoSwitch updatedSwitch = tester.widget(
+      find.byType(CupertinoSwitch),
+    );
     expect(updatedSwitch.value, isTrue);
 
     // In momentary mode, tapping a segment should change the selection.

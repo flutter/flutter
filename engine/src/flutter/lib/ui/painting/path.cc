@@ -222,7 +222,7 @@ void CanvasPath::addPath(CanvasPath* path, double dx, double dy) {
     Dart_ThrowException(ToDart("Path.addPath called with non-genuine Path."));
     return;
   }
-  sk_path_.addPath(path->sk_path_.snapshot(), SafeNarrow(dx), SafeNarrow(dy),
+  sk_path_.addPath(path->path().GetSkPath(), SafeNarrow(dx), SafeNarrow(dy),
                    SkPath::kAppend_AddPathMode);
   resetVolatility();
 }
@@ -244,7 +244,7 @@ void CanvasPath::addPathWithMatrix(CanvasPath* path,
   matrix4.Release();
   matrix.setTranslateX(matrix.getTranslateX() + SafeNarrow(dx));
   matrix.setTranslateY(matrix.getTranslateY() + SafeNarrow(dy));
-  sk_path_.addPath(path->sk_path_.snapshot(), matrix,
+  sk_path_.addPath(path->path().GetSkPath(), matrix,
                    SkPath::kAppend_AddPathMode);
   resetVolatility();
 }
@@ -255,7 +255,7 @@ void CanvasPath::extendWithPath(CanvasPath* path, double dx, double dy) {
         ToDart("Path.extendWithPath called with non-genuine Path."));
     return;
   }
-  sk_path_.addPath(path->sk_path_.snapshot(), SafeNarrow(dx), SafeNarrow(dy),
+  sk_path_.addPath(path->path().GetSkPath(), SafeNarrow(dx), SafeNarrow(dy),
                    SkPath::kExtend_AddPathMode);
   resetVolatility();
 }
@@ -277,7 +277,7 @@ void CanvasPath::extendWithPathAndMatrix(CanvasPath* path,
   matrix4.Release();
   matrix.setTranslateX(matrix.getTranslateX() + SafeNarrow(dx));
   matrix.setTranslateY(matrix.getTranslateY() + SafeNarrow(dy));
-  sk_path_.addPath(path->sk_path_.snapshot(), matrix,
+  sk_path_.addPath(path->path().GetSkPath(), matrix,
                    SkPath::kExtend_AddPathMode);
   resetVolatility();
 }
@@ -298,10 +298,8 @@ bool CanvasPath::contains(double x, double y) {
 
 void CanvasPath::shift(Dart_Handle path_handle, double dx, double dy) {
   fml::RefPtr<CanvasPath> path = Create(path_handle);
-  auto& other_mutable_path = path->sk_path_;
-  other_mutable_path =
-      sk_path_.snapshot().makeOffset(SafeNarrow(dx), SafeNarrow(dy));
-  resetVolatility();
+  path->sk_path_ = sk_path_;
+  path->sk_path_.offset(SafeNarrow(dx), SafeNarrow(dy));
 }
 
 void CanvasPath::transform(Dart_Handle path_handle,
@@ -310,8 +308,8 @@ void CanvasPath::transform(Dart_Handle path_handle,
   auto sk_matrix = ToSkMatrix(matrix4);
   matrix4.Release();
   fml::RefPtr<CanvasPath> path = Create(path_handle);
-  auto& other_mutable_path = path->sk_path_;
-  other_mutable_path = sk_path_.snapshot().makeTransform(sk_matrix);
+  path->sk_path_ = sk_path_;
+  path->sk_path_.transform(sk_matrix);
 }
 
 tonic::Float32List CanvasPath::getBounds() {
@@ -326,7 +324,7 @@ tonic::Float32List CanvasPath::getBounds() {
 
 bool CanvasPath::op(CanvasPath* path1, CanvasPath* path2, int operation) {
   std::optional<SkPath> result =
-      Op(path1->sk_path_.snapshot(), path2->sk_path_.snapshot(),
+      Op(path1->path().GetSkPath(), path2->path().GetSkPath(),
          static_cast<SkPathOp>(operation));
   if (result) {
     sk_path_ = result.value();

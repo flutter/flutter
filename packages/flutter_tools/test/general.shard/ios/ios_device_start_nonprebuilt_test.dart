@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -1445,6 +1446,12 @@ name: my_app
   schemeFile.writeAsStringSync(_validScheme);
   // This is the expected output directory.
   fileSystem.directory('build/ios/iphoneos/My Super Awesome App.app').createSync(recursive: true);
+
+  // Create a dummy Info.plist with `UIApplicationSceneManifest` to spoof that the project has
+  // migrated to UIScene and avoid UIScene errors.
+  fileSystem.file('ios/Runner/Info.plist')
+    ..createSync(recursive: true)
+    ..writeAsStringSync('UIApplicationSceneManifest');
 }
 
 IOSDevice setUpIOSDevice({
@@ -1709,6 +1716,7 @@ class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {
     required String bundlePath,
     required String bundleId,
     required List<String> launchArguments,
+    required ShutdownHooks shutdownHooks,
   }) async {
     return true;
   }

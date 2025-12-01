@@ -49,8 +49,8 @@ final Map<int, Completer<Object?>> _pending = <int, Completer<Object?>>{};
 int _nextId = 0;
 
 Future<SendPort> _spawnPlatformIsolate() {
-  final Completer<SendPort> sendPortCompleter = Completer<SendPort>();
-  final RawReceivePort receiver = RawReceivePort()..keepIsolateAlive = false;
+  final sendPortCompleter = Completer<SendPort>();
+  final receiver = RawReceivePort()..keepIsolateAlive = false;
   receiver.handler = (Object? message) {
     if (message == null) {
       // This is the platform isolate's onExit handler.
@@ -80,7 +80,7 @@ Future<SendPort> _spawnPlatformIsolate() {
         } else {
           // onError handler message, uncaught async error.
           // Both values are strings, so calling `toString` is efficient.
-          final RemoteError error = RemoteError(remoteError!.toString(), remoteStack.toString());
+          final error = RemoteError(remoteError!.toString(), remoteStack.toString());
           resultCompleter.completeError(error, error.stackTrace);
         }
       } else {
@@ -109,7 +109,7 @@ Future<SendPort> _spawnPlatformIsolate() {
 
 Future<R> _sendComputation<R>(SendPort port, FutureOr<R> Function() computation) {
   final int id = ++_nextId;
-  final Completer<R> resultCompleter = Completer<R>();
+  final resultCompleter = Completer<R>();
   _pending[id] = resultCompleter;
   port.send(_ComputationRequest(id, computation));
   return resultCompleter.future;
@@ -124,7 +124,7 @@ void _safeSend(SendPort sendPort, int id, Object? result, Object? error, Object?
 }
 
 void _platformIsolateMain(Isolate parentIsolate, SendPort sendPort) {
-  final RawReceivePort computationPort = RawReceivePort();
+  final computationPort = RawReceivePort();
   computationPort.handler = (_ComputationRequest? message) {
     if (message == null) {
       // The parent isolate has shutdown. Allow this isolate to shutdown.

@@ -17,7 +17,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Navigation bar updates destinations when tapped', (WidgetTester tester) async {
-    int mutatedIndex = -1;
+    var mutatedIndex = -1;
     final Widget widget = _buildWidget(
       NavigationBar(
         destinations: const <Widget>[
@@ -62,7 +62,7 @@ void main() {
   });
 
   testWidgets('NavigationBar can update elevation', (WidgetTester tester) async {
-    const double elevation = 42.0;
+    const elevation = 42.0;
 
     await tester.pumpWidget(
       _buildWidget(
@@ -81,7 +81,7 @@ void main() {
   });
 
   testWidgets('NavigationBar adds bottom padding to height', (WidgetTester tester) async {
-    const double bottomPadding = 40.0;
+    const bottomPadding = 40.0;
 
     await tester.pumpWidget(
       _buildWidget(
@@ -120,7 +120,7 @@ void main() {
   testWidgets('NavigationBar respects the notch/system navigation bar in landscape mode', (
     WidgetTester tester,
   ) async {
-    const double safeAreaPadding = 40.0;
+    const safeAreaPadding = 40.0;
     Widget navigationBar() {
       return NavigationBar(
         destinations: const <Widget>[
@@ -231,7 +231,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // M3 settings from the token database.
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
     await tester.pumpWidget(
       _buildWidget(
         NavigationBar(
@@ -256,7 +256,7 @@ void main() {
   testWidgets('Material2 - NavigationBar shows tooltips with text scaling', (
     WidgetTester tester,
   ) async {
-    const String label = 'A';
+    const label = 'A';
 
     Widget buildApp({required TextScaler textScaler}) {
       return MediaQuery(
@@ -300,7 +300,7 @@ void main() {
     expect(find.text(label), findsNWidgets(2));
 
     // The default size of a tooltip with the text A.
-    const Size defaultTooltipSize = Size(14.0, 14.0);
+    const defaultTooltipSize = Size(14.0, 14.0);
     expect(tester.getSize(find.text(label).last), defaultTooltipSize);
     // The duration is needed to ensure the tooltip disappears.
     await tester.pumpAndSettle(const Duration(seconds: 2));
@@ -317,7 +317,7 @@ void main() {
   testWidgets('Material3 - NavigationBar shows tooltips with text scaling', (
     WidgetTester tester,
   ) async {
-    const String label = 'A';
+    const label = 'A';
 
     Widget buildApp({required TextScaler textScaler}) {
       return MediaQuery(
@@ -373,7 +373,7 @@ void main() {
   testWidgets('Material3 - NavigationBar label can scale and has maxScaleFactor', (
     WidgetTester tester,
   ) async {
-    const String label = 'A';
+    const label = 'A';
 
     Widget buildApp({required TextScaler textScaler}) {
       return MediaQuery(
@@ -665,7 +665,7 @@ void main() {
   });
 
   testWidgets('Navigation bar does not grow with text scale factor', (WidgetTester tester) async {
-    const int animationMilliseconds = 800;
+    const animationMilliseconds = 800;
 
     Widget widget({TextScaler textScaler = TextScaler.noScaling}) {
       return _buildWidget(
@@ -693,7 +693,7 @@ void main() {
 
   testWidgets('Material3 - Navigation indicator renders ripple', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/116751.
-    int selectedIndex = 0;
+    var selectedIndex = 0;
 
     Widget buildWidget({NavigationDestinationLabelBehavior? labelBehavior}) {
       return MaterialApp(
@@ -723,9 +723,9 @@ void main() {
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
       (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
     );
-    Offset indicatorCenter = const Offset(600, 30);
-    const Size includedIndicatorSize = Size(64, 32);
-    const Size excludedIndicatorSize = Size(74, 40);
+    var indicatorCenter = const Offset(600, 30);
+    const includedIndicatorSize = Size(64, 32);
+    const excludedIndicatorSize = Size(74, 40);
 
     // Test ripple when NavigationBar is using `NavigationDestinationLabelBehavior.alwaysShow` (default).
     expect(
@@ -957,8 +957,8 @@ void main() {
   testWidgets('Material3 - Navigation indicator moves to selected item', (
     WidgetTester tester,
   ) async {
-    final ThemeData theme = ThemeData();
-    int index = 0;
+    final theme = ThemeData();
+    var index = 0;
 
     Widget buildNavigationBar({Color? indicatorColor, ShapeBorder? indicatorShape}) {
       return MaterialApp(
@@ -995,7 +995,7 @@ void main() {
   });
 
   testWidgets('Navigation indicator scale transform', (WidgetTester tester) async {
-    int selectedIndex = 0;
+    var selectedIndex = 0;
 
     Widget buildNavigationBar() {
       return MaterialApp(
@@ -1040,8 +1040,8 @@ void main() {
   testWidgets('Material3 - Navigation destination updates indicator color and shape', (
     WidgetTester tester,
   ) async {
-    final ThemeData theme = ThemeData();
-    const Color color = Color(0xff0000ff);
+    final theme = ThemeData();
+    const color = Color(0xff0000ff);
     const ShapeBorder shape = RoundedRectangleBorder();
 
     Widget buildNavigationBar({Color? indicatorColor, ShapeBorder? indicatorShape}) {
@@ -1094,7 +1094,7 @@ void main() {
   });
 
   testWidgets('Destinations respect their disabled state', (WidgetTester tester) async {
-    int selectedIndex = 0;
+    var selectedIndex = 0;
 
     await tester.pumpWidget(
       _buildWidget(
@@ -1124,9 +1124,9 @@ void main() {
     WidgetTester tester,
   ) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    const Color hoverColor = Color(0xff0000ff);
-    const Color focusColor = Color(0xff00ffff);
-    const Color pressedColor = Color(0xffff00ff);
+    const hoverColor = Color(0xff0000ff);
+    const focusColor = Color(0xff00ffff);
+    const pressedColor = Color(0xffff00ff);
     final WidgetStateProperty<Color?> overlayColor = WidgetStateProperty.resolveWith<Color>((
       Set<WidgetState> states,
     ) {
@@ -1251,8 +1251,8 @@ void main() {
     testWidgets('Material2 - Navigation destination updates indicator color and shape', (
       WidgetTester tester,
     ) async {
-      final ThemeData theme = ThemeData(useMaterial3: false);
-      const Color color = Color(0xff0000ff);
+      final theme = ThemeData(useMaterial3: false);
+      const color = Color(0xff0000ff);
       const ShapeBorder shape = RoundedRectangleBorder();
 
       Widget buildNavigationBar({Color? indicatorColor, ShapeBorder? indicatorShape}) {
@@ -1290,7 +1290,7 @@ void main() {
 
     testWidgets('Material2 - Navigation indicator renders ripple', (WidgetTester tester) async {
       // This is a regression test for https://github.com/flutter/flutter/issues/116751.
-      int selectedIndex = 0;
+      var selectedIndex = 0;
 
       Widget buildWidget({NavigationDestinationLabelBehavior? labelBehavior}) {
         return MaterialApp(
@@ -1321,9 +1321,9 @@ void main() {
       final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
         (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
       );
-      Offset indicatorCenter = const Offset(600, 33);
-      const Size includedIndicatorSize = Size(64, 32);
-      const Size excludedIndicatorSize = Size(74, 40);
+      var indicatorCenter = const Offset(600, 33);
+      const includedIndicatorSize = Size(64, 32);
+      const excludedIndicatorSize = Size(74, 40);
 
       // Test ripple when NavigationBar is using `NavigationDestinationLabelBehavior.alwaysShow` (default).
       expect(
@@ -1566,7 +1566,7 @@ void main() {
           home: Scaffold(
             bottomNavigationBar: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
-                int selectedIndex = 0;
+                var selectedIndex = 0;
                 return NavigationBar(
                   selectedIndex: selectedIndex,
                   destinations: const <Widget>[
@@ -1608,8 +1608,8 @@ void main() {
   testWidgets('NavigationBar.labelPadding overrides NavigationDestination.label padding', (
     WidgetTester tester,
   ) async {
-    const String selectedText = 'Home';
-    const String unselectedText = 'Settings';
+    const selectedText = 'Home';
+    const unselectedText = 'Settings';
     const EdgeInsetsGeometry labelPadding = EdgeInsets.all(8);
     Widget buildNavigationBar({EdgeInsetsGeometry? labelPadding}) {
       return MaterialApp(
@@ -1638,10 +1638,10 @@ void main() {
   testWidgets('NavigationBar.labelTextStyle overrides NavigationDestination.label text style', (
     WidgetTester tester,
   ) async {
-    const String selectedText = 'Home';
-    const String unselectedText = 'Settings';
-    const String disabledText = 'Bookmark';
-    final ThemeData theme = ThemeData();
+    const selectedText = 'Home';
+    const unselectedText = 'Settings';
+    const disabledText = 'Bookmark';
+    final theme = ThemeData();
     Widget buildNavigationBar({WidgetStateProperty<TextStyle?>? labelTextStyle}) {
       return MaterialApp(
         theme: theme,
@@ -1682,9 +1682,9 @@ void main() {
       equals(theme.colorScheme.onSurfaceVariant.withOpacity(0.38)),
     );
 
-    const TextStyle selectedTextStyle = TextStyle(fontSize: 15, color: Color(0xFF00FF00));
-    const TextStyle unselectedTextStyle = TextStyle(fontSize: 15, color: Color(0xFF0000FF));
-    const TextStyle disabledTextStyle = TextStyle(fontSize: 16, color: Color(0xFFFF0000));
+    const selectedTextStyle = TextStyle(fontSize: 15, color: Color(0xFF00FF00));
+    const unselectedTextStyle = TextStyle(fontSize: 15, color: Color(0xFF0000FF));
+    const disabledTextStyle = TextStyle(fontSize: 16, color: Color(0xFFFF0000));
     await tester.pumpWidget(
       buildNavigationBar(
         labelTextStyle:

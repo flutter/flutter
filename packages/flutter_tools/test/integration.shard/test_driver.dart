@@ -83,7 +83,7 @@ abstract final class FlutterTestDriver {
   /// it's registered (e.g., `s0.hotRestart`).
   late final Future<String> flutterMemoryInfoService;
 
-  var lastTime = '';
+  String lastTime = '';
   void debugPrint(String message, {String topic = ''}) {
     const maxLength = 2500;
     final truncatedMessage = message.length > maxLength
@@ -854,7 +854,7 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
     return 0;
   }
 
-  var id = 1;
+  int id = 1;
   Future<Object?> _sendRequest(String method, Object? params) async {
     final int requestId = id++;
     final request = <String, Object?>{'id': requestId, 'method': method, 'params': params};

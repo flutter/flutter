@@ -805,7 +805,7 @@ void createPaths() {
 }
 
 void pathOps0() {
-  final Path path0 = Path();
+  final path0 = Path();
   path0.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(20, 20, 60, 60), const Radius.circular(10)),
   );
@@ -819,7 +819,7 @@ void pathOps0() {
 }
 
 void pathOps1() {
-  final Path path1 = Path();
+  final path1 = Path();
   path1.addOval(const Rect.fromLTRB(20, 20, 60, 60));
   gBounds = path1.getBounds();
   gBounds = path1.getBounds();
@@ -837,7 +837,7 @@ void pathOps1() {
 }
 
 void pathOps2() {
-  final Path path2 = Path();
+  final path2 = Path();
   path2.moveTo(20, 60);
   path2.quadraticBezierTo(60, 20, 60, 60);
   path2.close();
@@ -859,7 +859,7 @@ void pathOps2() {
 }
 
 void pathOps3() {
-  final Path path3 = Path();
+  final path3 = Path();
   path3.moveTo(20, 30);
   path3.lineTo(40, 20);
   path3.lineTo(60, 30);
@@ -882,7 +882,7 @@ void pathOps3() {
 }
 
 void pathOps4() {
-  final Path path4 = Path();
+  final path4 = Path();
   path4.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(8, 8, 328, 248), const Radius.circular(16)),
   );
@@ -891,7 +891,7 @@ void pathOps4() {
 }
 
 void pathOps5() {
-  final Path path5 = Path();
+  final path5 = Path();
   path5.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(8, 8, 328, 248), const Radius.circular(16)),
   );
@@ -900,14 +900,14 @@ void pathOps5() {
 }
 
 void pathOps6() {
-  final Path path6 = Path();
+  final path6 = Path();
   path6.addRRect(RRect.fromRectAndRadius(const Rect.fromLTRB(0, 136, 970, 1144), Radius.zero));
   gBounds = path6.getBounds();
   allPaths.add(path6);
 }
 
 void pathOps7() {
-  final Path path7 = Path();
+  final path7 = Path();
   path7.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 179.5, 200), const Radius.circular(10)),
   );
@@ -964,7 +964,7 @@ void pathOps8() {
 }
 
 void pathOps9() {
-  final Path path9 = Path();
+  final path9 = Path();
   path9.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 179.5, 200), const Radius.circular(10)),
   );
@@ -1021,7 +1021,7 @@ void pathOps10() {
 }
 
 void pathOps11() {
-  final Path path11 = Path();
+  final path11 = Path();
   path11.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 179.5, 200), const Radius.circular(10)),
   );
@@ -1078,7 +1078,7 @@ void pathOps12() {
 }
 
 void pathOps13() {
-  final Path path13 = Path();
+  final path13 = Path();
   path13.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 179.5, 200), const Radius.circular(10)),
   );
@@ -1135,7 +1135,7 @@ void pathOps14() {
 }
 
 void pathOps15() {
-  final Path path15 = Path();
+  final path15 = Path();
   path15.addOval(const Rect.fromLTRB(0, 0, 58, 58));
   gFillType = path15.fillType;
   path16 = path15.shift(const Offset(860, 79));
@@ -1156,7 +1156,7 @@ void pathOps16() {
 }
 
 void pathOps17() {
-  final Path path17 = Path();
+  final path17 = Path();
   path17.addRRect(
     RRect.fromRectAndRadius(
       const Rect.fromLTRB(0, 0, 250.66666666666666, 585),
@@ -1214,7 +1214,7 @@ void pathOps18() {
 }
 
 void pathOps19() {
-  final Path path19 = Path();
+  final path19 = Path();
   path19.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(81, 0, 331.66666666666663, 84), Radius.zero),
   );
@@ -1223,7 +1223,7 @@ void pathOps19() {
 }
 
 void pathOps20() {
-  final Path path20 = Path();
+  final path20 = Path();
   path20.reset();
   path20.moveTo(331.66666666666663, 86);
   path20.lineTo(81, 86);
@@ -1236,7 +1236,7 @@ void pathOps20() {
 }
 
 void pathOps21() {
-  final Path path21 = Path();
+  final path21 = Path();
   path21.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 87), Radius.zero),
   );
@@ -1245,7 +1245,7 @@ void pathOps21() {
 }
 
 void pathOps22() {
-  final Path path22 = Path();
+  final path22 = Path();
   path22.reset();
   path22.moveTo(234.66666666666666, 87);
   path22.lineTo(96, 87);
@@ -1258,7 +1258,7 @@ void pathOps22() {
 }
 
 void pathOps23() {
-  final Path path23 = Path();
+  final path23 = Path();
   path23.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 101), Radius.zero),
   );
@@ -1267,7 +1267,7 @@ void pathOps23() {
 }
 
 void pathOps24() {
-  final Path path24 = Path();
+  final path24 = Path();
   path24.reset();
   path24.moveTo(234.66666666666666, 101);
   path24.lineTo(96, 101);
@@ -1280,7 +1280,7 @@ void pathOps24() {
 }
 
 void pathOps25() {
-  final Path path25 = Path();
+  final path25 = Path();
   path25.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 101), Radius.zero),
   );
@@ -1289,7 +1289,7 @@ void pathOps25() {
 }
 
 void pathOps26() {
-  final Path path26 = Path();
+  final path26 = Path();
   path26.reset();
   path26.moveTo(234.66666666666666, 101);
   path26.lineTo(96, 101);
@@ -1302,7 +1302,7 @@ void pathOps26() {
 }
 
 void pathOps27() {
-  final Path path27 = Path();
+  final path27 = Path();
   path27.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 101), Radius.zero),
   );
@@ -1311,7 +1311,7 @@ void pathOps27() {
 }
 
 void pathOps28() {
-  final Path path28 = Path();
+  final path28 = Path();
   path28.reset();
   path28.moveTo(234.66666666666666, 101);
   path28.lineTo(96, 101);
@@ -1324,7 +1324,7 @@ void pathOps28() {
 }
 
 void pathOps29() {
-  final Path path29 = Path();
+  final path29 = Path();
   path29.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 87), Radius.zero),
   );
@@ -1333,7 +1333,7 @@ void pathOps29() {
 }
 
 void pathOps30() {
-  final Path path30 = Path();
+  final path30 = Path();
   path30.reset();
   path30.moveTo(234.66666666666666, 87);
   path30.lineTo(96, 87);
@@ -1344,7 +1344,7 @@ void pathOps30() {
 }
 
 void pathOps31() {
-  final Path path31 = Path();
+  final path31 = Path();
   path31.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 87), Radius.zero),
   );
@@ -1353,7 +1353,7 @@ void pathOps31() {
 }
 
 void pathOps32() {
-  final Path path32 = Path();
+  final path32 = Path();
   path32.reset();
   path32.moveTo(234.66666666666666, 87);
   path32.lineTo(96, 87);
@@ -1364,7 +1364,7 @@ void pathOps32() {
 }
 
 void pathOps33() {
-  final Path path33 = Path();
+  final path33 = Path();
   path33.addRRect(
     RRect.fromRectAndRadius(
       const Rect.fromLTRB(0, 0, 250.66666666666666, 585),
@@ -1422,7 +1422,7 @@ void pathOps34() {
 }
 
 void pathOps35() {
-  final Path path35 = Path();
+  final path35 = Path();
   path35.addRRect(
     RRect.fromRectAndRadius(
       const Rect.fromLTRB(359.66666666666663, 0, 610.3333333333333, 84),
@@ -1434,7 +1434,7 @@ void pathOps35() {
 }
 
 void pathOps36() {
-  final Path path36 = Path();
+  final path36 = Path();
   path36.reset();
   path36.moveTo(610.3333333333333, 86);
   path36.lineTo(359.66666666666663, 86);
@@ -1447,7 +1447,7 @@ void pathOps36() {
 }
 
 void pathOps37() {
-  final Path path37 = Path();
+  final path37 = Path();
   path37.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 87), Radius.zero),
   );
@@ -1456,7 +1456,7 @@ void pathOps37() {
 }
 
 void pathOps38() {
-  final Path path38 = Path();
+  final path38 = Path();
   path38.reset();
   path38.moveTo(234.66666666666666, 87);
   path38.lineTo(96, 87);
@@ -1469,7 +1469,7 @@ void pathOps38() {
 }
 
 void pathOps39() {
-  final Path path39 = Path();
+  final path39 = Path();
   path39.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 87), Radius.zero),
   );
@@ -1478,7 +1478,7 @@ void pathOps39() {
 }
 
 void pathOps40() {
-  final Path path40 = Path();
+  final path40 = Path();
   path40.reset();
   path40.moveTo(234.66666666666666, 87);
   path40.lineTo(96, 87);
@@ -1491,7 +1491,7 @@ void pathOps40() {
 }
 
 void pathOps41() {
-  final Path path41 = Path();
+  final path41 = Path();
   path41.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 73), Radius.zero),
   );
@@ -1500,7 +1500,7 @@ void pathOps41() {
 }
 
 void pathOps42() {
-  final Path path42 = Path();
+  final path42 = Path();
   path42.reset();
   path42.moveTo(234.66666666666666, 73);
   path42.lineTo(96, 73);
@@ -1513,7 +1513,7 @@ void pathOps42() {
 }
 
 void pathOps43() {
-  final Path path43 = Path();
+  final path43 = Path();
   path43.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 87), Radius.zero),
   );
@@ -1522,7 +1522,7 @@ void pathOps43() {
 }
 
 void pathOps44() {
-  final Path path44 = Path();
+  final path44 = Path();
   path44.reset();
   path44.moveTo(234.66666666666666, 87);
   path44.lineTo(96, 87);
@@ -1535,7 +1535,7 @@ void pathOps44() {
 }
 
 void pathOps45() {
-  final Path path45 = Path();
+  final path45 = Path();
   path45.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 87), Radius.zero),
   );
@@ -1544,7 +1544,7 @@ void pathOps45() {
 }
 
 void pathOps46() {
-  final Path path46 = Path();
+  final path46 = Path();
   path46.reset();
   path46.moveTo(234.66666666666666, 87);
   path46.lineTo(96, 87);
@@ -1557,7 +1557,7 @@ void pathOps46() {
 }
 
 void pathOps47() {
-  final Path path47 = Path();
+  final path47 = Path();
   path47.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 87), Radius.zero),
   );
@@ -1566,7 +1566,7 @@ void pathOps47() {
 }
 
 void pathOps48() {
-  final Path path48 = Path();
+  final path48 = Path();
   path48.reset();
   path48.moveTo(234.66666666666666, 87);
   path48.lineTo(96, 87);
@@ -1577,7 +1577,7 @@ void pathOps48() {
 }
 
 void pathOps49() {
-  final Path path49 = Path();
+  final path49 = Path();
   path49.addRRect(
     RRect.fromRectAndRadius(
       const Rect.fromLTRB(0, 0, 250.66666666666669, 585),
@@ -1635,7 +1635,7 @@ void pathOps50() {
 }
 
 void pathOps51() {
-  final Path path51 = Path();
+  final path51 = Path();
   path51.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(638.3333333333333, 0, 889, 84), Radius.zero),
   );
@@ -1644,7 +1644,7 @@ void pathOps51() {
 }
 
 void pathOps52() {
-  final Path path52 = Path();
+  final path52 = Path();
   path52.reset();
   path52.moveTo(889, 86);
   path52.lineTo(638.3333333333333, 86);
@@ -1657,7 +1657,7 @@ void pathOps52() {
 }
 
 void pathOps53() {
-  final Path path53 = Path();
+  final path53 = Path();
   path53.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666669, 87), Radius.zero),
   );
@@ -1666,7 +1666,7 @@ void pathOps53() {
 }
 
 void pathOps54() {
-  final Path path54 = Path();
+  final path54 = Path();
   path54.reset();
   path54.moveTo(234.66666666666669, 87);
   path54.lineTo(96, 87);
@@ -1679,7 +1679,7 @@ void pathOps54() {
 }
 
 void pathOps55() {
-  final Path path55 = Path();
+  final path55 = Path();
   path55.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666669, 87), Radius.zero),
   );
@@ -1688,7 +1688,7 @@ void pathOps55() {
 }
 
 void pathOps56() {
-  final Path path56 = Path();
+  final path56 = Path();
   path56.reset();
   path56.moveTo(234.66666666666669, 87);
   path56.lineTo(96, 87);
@@ -1701,7 +1701,7 @@ void pathOps56() {
 }
 
 void pathOps57() {
-  final Path path57 = Path();
+  final path57 = Path();
   path57.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666669, 73), Radius.zero),
   );
@@ -1710,7 +1710,7 @@ void pathOps57() {
 }
 
 void pathOps58() {
-  final Path path58 = Path();
+  final path58 = Path();
   path58.reset();
   path58.moveTo(234.66666666666669, 73);
   path58.lineTo(96, 73);
@@ -1723,7 +1723,7 @@ void pathOps58() {
 }
 
 void pathOps59() {
-  final Path path59 = Path();
+  final path59 = Path();
   path59.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 520, 560), const Radius.circular(40)),
   );
@@ -1750,14 +1750,14 @@ void pathOps60() {
 }
 
 void pathOps61() {
-  final Path path61 = Path();
+  final path61 = Path();
   path61.addRRect(RRect.fromRectAndRadius(const Rect.fromLTRB(450, 136, 970, 696), Radius.zero));
   gBounds = path61.getBounds();
   allPaths.add(path61);
 }
 
 void pathOps62() {
-  final Path path62 = Path();
+  final path62 = Path();
   path62.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 456, 52), const Radius.circular(10)),
   );
@@ -1774,7 +1774,7 @@ void pathOps63() {
 }
 
 void pathOps64() {
-  final Path path64 = Path();
+  final path64 = Path();
   path64.reset();
   path64.moveTo(56, 40);
   path64.lineTo(56, 40);
@@ -1785,7 +1785,7 @@ void pathOps64() {
 }
 
 void pathOps65() {
-  final Path path65 = Path();
+  final path65 = Path();
   path65.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 456, 52), const Radius.circular(10)),
   );
@@ -1802,7 +1802,7 @@ void pathOps66() {
 }
 
 void pathOps67() {
-  final Path path67 = Path();
+  final path67 = Path();
   path67.reset();
   path67.moveTo(56, 40);
   path67.lineTo(56, 40);
@@ -1813,7 +1813,7 @@ void pathOps67() {
 }
 
 void pathOps68() {
-  final Path path68 = Path();
+  final path68 = Path();
   path68.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 456, 52), const Radius.circular(10)),
   );
@@ -1830,7 +1830,7 @@ void pathOps69() {
 }
 
 void pathOps70() {
-  final Path path70 = Path();
+  final path70 = Path();
   path70.reset();
   path70.moveTo(56, 40);
   path70.lineTo(56, 40);
@@ -1841,7 +1841,7 @@ void pathOps70() {
 }
 
 void pathOps71() {
-  final Path path71 = Path();
+  final path71 = Path();
   path71.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 456, 52), const Radius.circular(10)),
   );
@@ -1858,7 +1858,7 @@ void pathOps72() {
 }
 
 void pathOps73() {
-  final Path path73 = Path();
+  final path73 = Path();
   path73.reset();
   path73.moveTo(56, 40);
   path73.lineTo(56, 40);
@@ -1869,7 +1869,7 @@ void pathOps73() {
 }
 
 void pathOps74() {
-  final Path path74 = Path();
+  final path74 = Path();
   path74.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 456, 52), const Radius.circular(10)),
   );
@@ -1886,7 +1886,7 @@ void pathOps75() {
 }
 
 void pathOps76() {
-  final Path path76 = Path();
+  final path76 = Path();
   path76.reset();
   path76.moveTo(56, 40);
   path76.lineTo(56, 40);
@@ -1897,7 +1897,7 @@ void pathOps76() {
 }
 
 void pathOps77() {
-  final Path path77 = Path();
+  final path77 = Path();
   path77.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 456, 50), const Radius.circular(10)),
   );
@@ -1914,7 +1914,7 @@ void pathOps78() {
 }
 
 void pathOps79() {
-  final Path path79 = Path();
+  final path79 = Path();
   path79.addRRect(
     RRect.fromRectAndCorners(
       const Rect.fromLTRB(0, 0, 64, 56),
@@ -1944,7 +1944,7 @@ void pathOps80() {
 }
 
 void pathOps81() {
-  final Path path81 = Path();
+  final path81 = Path();
   path81.addRRect(RRect.fromRectAndRadius(const Rect.fromLTRB(0, 136, 970, 1144), Radius.zero));
   gBounds = path81.getBounds();
   allPaths.add(path81);
@@ -1956,7 +1956,7 @@ void pathOps82() {
 }
 
 void pathOps83() {
-  final Path path83 = Path();
+  final path83 = Path();
   path83.addRRect(RRect.fromRectAndRadius(const Rect.fromLTRB(450, 136, 970, 696), Radius.zero));
   gBounds = path83.getBounds();
   allPaths.add(path83);
@@ -1968,7 +1968,7 @@ void pathOps84() {
 }
 
 void pathOps85() {
-  final Path path85 = Path();
+  final path85 = Path();
   path85.addRRect(RRect.fromRectAndRadius(const Rect.fromLTRB(0, 136, 970, 1144), Radius.zero));
   gBounds = path85.getBounds();
   allPaths.add(path85);
@@ -1980,7 +1980,7 @@ void pathOps86() {
 }
 
 void pathOps87() {
-  final Path path87 = Path();
+  final path87 = Path();
   path87.addRRect(RRect.fromRectAndRadius(const Rect.fromLTRB(450, 136, 970, 696), Radius.zero));
   gBounds = path87.getBounds();
   allPaths.add(path87);
@@ -1992,7 +1992,7 @@ void pathOps88() {
 }
 
 void pathOps89() {
-  final Path path89 = Path();
+  final path89 = Path();
   path89.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666669, 87), Radius.zero),
   );
@@ -2001,7 +2001,7 @@ void pathOps89() {
 }
 
 void pathOps90() {
-  final Path path90 = Path();
+  final path90 = Path();
   path90.reset();
   path90.moveTo(234.66666666666669, 87);
   path90.lineTo(96, 87);
@@ -2014,7 +2014,7 @@ void pathOps90() {
 }
 
 void pathOps91() {
-  final Path path91 = Path();
+  final path91 = Path();
   path91.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666669, 73), Radius.zero),
   );
@@ -2023,7 +2023,7 @@ void pathOps91() {
 }
 
 void pathOps92() {
-  final Path path92 = Path();
+  final path92 = Path();
   path92.reset();
   path92.moveTo(234.66666666666669, 73);
   path92.lineTo(96, 73);
@@ -2036,7 +2036,7 @@ void pathOps92() {
 }
 
 void pathOps93() {
-  final Path path93 = Path();
+  final path93 = Path();
   path93.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 101), Radius.zero),
   );
@@ -2045,7 +2045,7 @@ void pathOps93() {
 }
 
 void pathOps94() {
-  final Path path94 = Path();
+  final path94 = Path();
   path94.reset();
   path94.moveTo(234.66666666666666, 101);
   path94.lineTo(96, 101);
@@ -2058,7 +2058,7 @@ void pathOps94() {
 }
 
 void pathOps95() {
-  final Path path95 = Path();
+  final path95 = Path();
   path95.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 87), Radius.zero),
   );
@@ -2067,7 +2067,7 @@ void pathOps95() {
 }
 
 void pathOps96() {
-  final Path path96 = Path();
+  final path96 = Path();
   path96.reset();
   path96.moveTo(234.66666666666666, 87);
   path96.lineTo(96, 87);
@@ -2080,7 +2080,7 @@ void pathOps96() {
 }
 
 void pathOps97() {
-  final Path path97 = Path();
+  final path97 = Path();
   path97.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 101), Radius.zero),
   );
@@ -2089,7 +2089,7 @@ void pathOps97() {
 }
 
 void pathOps98() {
-  final Path path98 = Path();
+  final path98 = Path();
   path98.reset();
   path98.moveTo(234.66666666666666, 101);
   path98.lineTo(96, 101);
@@ -2102,7 +2102,7 @@ void pathOps98() {
 }
 
 void pathOps99() {
-  final Path path99 = Path();
+  final path99 = Path();
   path99.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 101), Radius.zero),
   );
@@ -2111,7 +2111,7 @@ void pathOps99() {
 }
 
 void pathOps100() {
-  final Path path100 = Path();
+  final path100 = Path();
   path100.reset();
   path100.moveTo(234.66666666666666, 101);
   path100.lineTo(96, 101);
@@ -2124,7 +2124,7 @@ void pathOps100() {
 }
 
 void pathOps101() {
-  final Path path101 = Path();
+  final path101 = Path();
   path101.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 73), Radius.zero),
   );
@@ -2133,7 +2133,7 @@ void pathOps101() {
 }
 
 void pathOps102() {
-  final Path path102 = Path();
+  final path102 = Path();
   path102.reset();
   path102.moveTo(234.66666666666666, 73);
   path102.lineTo(96, 73);
@@ -2146,7 +2146,7 @@ void pathOps102() {
 }
 
 void pathOps103() {
-  final Path path103 = Path();
+  final path103 = Path();
   path103.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 87), Radius.zero),
   );
@@ -2155,7 +2155,7 @@ void pathOps103() {
 }
 
 void pathOps104() {
-  final Path path104 = Path();
+  final path104 = Path();
   path104.reset();
   path104.moveTo(234.66666666666666, 87);
   path104.lineTo(96, 87);
@@ -2166,7 +2166,7 @@ void pathOps104() {
 }
 
 void pathOps105() {
-  final Path path105 = Path();
+  final path105 = Path();
   path105.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 87), Radius.zero),
   );
@@ -2175,7 +2175,7 @@ void pathOps105() {
 }
 
 void pathOps106() {
-  final Path path106 = Path();
+  final path106 = Path();
   path106.reset();
   path106.moveTo(234.66666666666666, 87);
   path106.lineTo(96, 87);
@@ -2186,7 +2186,7 @@ void pathOps106() {
 }
 
 void pathOps107() {
-  final Path path107 = Path();
+  final path107 = Path();
   path107.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 87), Radius.zero),
   );
@@ -2195,7 +2195,7 @@ void pathOps107() {
 }
 
 void pathOps108() {
-  final Path path108 = Path();
+  final path108 = Path();
   path108.reset();
   path108.moveTo(234.66666666666666, 87);
   path108.lineTo(96, 87);
@@ -2208,7 +2208,7 @@ void pathOps108() {
 }
 
 void pathOps109() {
-  final Path path109 = Path();
+  final path109 = Path();
   path109.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 87), Radius.zero),
   );
@@ -2217,7 +2217,7 @@ void pathOps109() {
 }
 
 void pathOps110() {
-  final Path path110 = Path();
+  final path110 = Path();
   path110.reset();
   path110.moveTo(234.66666666666666, 87);
   path110.lineTo(96, 87);
@@ -2230,7 +2230,7 @@ void pathOps110() {
 }
 
 void pathOps111() {
-  final Path path111 = Path();
+  final path111 = Path();
   path111.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 87), Radius.zero),
   );
@@ -2239,7 +2239,7 @@ void pathOps111() {
 }
 
 void pathOps112() {
-  final Path path112 = Path();
+  final path112 = Path();
   path112.reset();
   path112.moveTo(234.66666666666666, 87);
   path112.lineTo(96, 87);
@@ -2252,7 +2252,7 @@ void pathOps112() {
 }
 
 void pathOps113() {
-  final Path path113 = Path();
+  final path113 = Path();
   path113.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 87), Radius.zero),
   );
@@ -2261,7 +2261,7 @@ void pathOps113() {
 }
 
 void pathOps114() {
-  final Path path114 = Path();
+  final path114 = Path();
   path114.reset();
   path114.moveTo(234.66666666666666, 87);
   path114.lineTo(96, 87);
@@ -2274,7 +2274,7 @@ void pathOps114() {
 }
 
 void pathOps115() {
-  final Path path115 = Path();
+  final path115 = Path();
   path115.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 87), Radius.zero),
   );
@@ -2283,7 +2283,7 @@ void pathOps115() {
 }
 
 void pathOps116() {
-  final Path path116 = Path();
+  final path116 = Path();
   path116.reset();
   path116.moveTo(234.66666666666666, 87);
   path116.lineTo(96, 87);
@@ -2294,7 +2294,7 @@ void pathOps116() {
 }
 
 void pathOps117() {
-  final Path path117 = Path();
+  final path117 = Path();
   path117.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666669, 87), Radius.zero),
   );
@@ -2303,7 +2303,7 @@ void pathOps117() {
 }
 
 void pathOps118() {
-  final Path path118 = Path();
+  final path118 = Path();
   path118.reset();
   path118.moveTo(234.66666666666669, 87);
   path118.lineTo(96, 87);
@@ -2341,7 +2341,7 @@ void pathOps123() {
 }
 
 void pathOps124() {
-  final Path path124 = Path();
+  final path124 = Path();
   path124.reset();
   path124.moveTo(56, 40);
   path124.lineTo(56, 40);
@@ -2357,7 +2357,7 @@ void pathOps125() {
 }
 
 void pathOps126() {
-  final Path path126 = Path();
+  final path126 = Path();
   path126.reset();
   path126.moveTo(56, 40);
   path126.lineTo(56, 40);
@@ -2373,7 +2373,7 @@ void pathOps127() {
 }
 
 void pathOps128() {
-  final Path path128 = Path();
+  final path128 = Path();
   path128.reset();
   path128.moveTo(56, 40);
   path128.lineTo(56, 40);
@@ -2389,7 +2389,7 @@ void pathOps129() {
 }
 
 void pathOps130() {
-  final Path path130 = Path();
+  final path130 = Path();
   path130.reset();
   path130.moveTo(56, 40);
   path130.lineTo(56, 40);
@@ -2410,7 +2410,7 @@ void pathOps132() {
 }
 
 void pathOps133() {
-  final Path path133 = Path();
+  final path133 = Path();
   path133.reset();
   path133.moveTo(56, 40);
   path133.lineTo(56, 40);
@@ -2426,7 +2426,7 @@ void pathOps134() {
 }
 
 void pathOps135() {
-  final Path path135 = Path();
+  final path135 = Path();
   path135.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(81, 0, 331.66666666666663, 84), Radius.zero),
   );
@@ -2435,7 +2435,7 @@ void pathOps135() {
 }
 
 void pathOps136() {
-  final Path path136 = Path();
+  final path136 = Path();
   path136.reset();
   path136.moveTo(331.66666666666663, 86);
   path136.lineTo(81, 86);
@@ -2453,7 +2453,7 @@ void pathOps137() {
 }
 
 void pathOps138() {
-  final Path path138 = Path();
+  final path138 = Path();
   path138.addRRect(
     RRect.fromRectAndRadius(
       const Rect.fromLTRB(359.66666666666663, 0, 610.3333333333333, 84),
@@ -2465,7 +2465,7 @@ void pathOps138() {
 }
 
 void pathOps139() {
-  final Path path139 = Path();
+  final path139 = Path();
   path139.reset();
   path139.moveTo(610.3333333333333, 86);
   path139.lineTo(359.66666666666663, 86);
@@ -2483,7 +2483,7 @@ void pathOps140() {
 }
 
 void pathOps141() {
-  final Path path141 = Path();
+  final path141 = Path();
   path141.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(638.3333333333333, 0, 889, 84), Radius.zero),
   );
@@ -2492,7 +2492,7 @@ void pathOps141() {
 }
 
 void pathOps142() {
-  final Path path142 = Path();
+  final path142 = Path();
   path142.reset();
   path142.moveTo(889, 86);
   path142.lineTo(638.3333333333333, 86);
@@ -2510,7 +2510,7 @@ void pathOps143() {
 }
 
 void pathOps144() {
-  final Path path144 = Path();
+  final path144 = Path();
   path144.addRRect(RRect.fromRectAndRadius(const Rect.fromLTRB(0, 136, 970, 1144), Radius.zero));
   gBounds = path144.getBounds();
   allPaths.add(path144);
@@ -2522,7 +2522,7 @@ void pathOps145() {
 }
 
 void pathOps146() {
-  final Path path146 = Path();
+  final path146 = Path();
   path146.addRRect(RRect.fromRectAndRadius(const Rect.fromLTRB(450, 136, 970, 696), Radius.zero));
   gBounds = path146.getBounds();
   allPaths.add(path146);
@@ -2534,7 +2534,7 @@ void pathOps147() {
 }
 
 void pathOps149() {
-  final Path path149 = Path();
+  final path149 = Path();
   path149.reset();
   path149.moveTo(-2, 0);
   path149.cubicTo(-2, -1.100000023841858, -1.100000023841858, -2, 0, -2);
@@ -2545,7 +2545,7 @@ void pathOps149() {
 }
 
 void pathOps150() {
-  final Path path150 = Path();
+  final path150 = Path();
   path150.reset();
   path150.fillType = PathFillType.nonZero;
   gBounds = path150.getBounds();
@@ -2561,7 +2561,7 @@ void pathOps150() {
 }
 
 void pathOps155() {
-  final Path path155 = Path();
+  final path155 = Path();
   path155.reset();
   path155.moveTo(-3, -9);
   path155.cubicTo(-3, -10.649999618530273, -1.649999976158142, -12, 0, -12);
@@ -2577,7 +2577,7 @@ void pathOps155() {
 }
 
 void pathOps156() {
-  final Path path156 = Path();
+  final path156 = Path();
   path156.reset();
   path156.fillType = PathFillType.nonZero;
   gBounds = path156.getBounds();
@@ -2593,7 +2593,7 @@ void pathOps156() {
 }
 
 void pathOps161() {
-  final Path path161 = Path();
+  final path161 = Path();
   path161.reset();
   path161.moveTo(-2, -10);
   path161.cubicTo(-2, -11.100000381469727, -1.100000023841858, -12, 0, -12);
@@ -2609,7 +2609,7 @@ void pathOps161() {
 }
 
 void pathOps162() {
-  final Path path162 = Path();
+  final path162 = Path();
   path162.reset();
   path162.fillType = PathFillType.nonZero;
   gBounds = path162.getBounds();
@@ -2625,7 +2625,7 @@ void pathOps162() {
 }
 
 void pathOps164() {
-  final Path path164 = Path();
+  final path164 = Path();
   path164.reset();
   path164.moveTo(-3, -9);
   path164.cubicTo(-3, -10.649999618530273, -1.649999976158142, -12, 0, -12);
@@ -2641,7 +2641,7 @@ void pathOps164() {
 }
 
 void pathOps165() {
-  final Path path165 = Path();
+  final path165 = Path();
   path165.reset();
   path165.fillType = PathFillType.nonZero;
   gBounds = path165.getBounds();
@@ -2657,7 +2657,7 @@ void pathOps165() {
 }
 
 void pathOps167() {
-  final Path path167 = Path();
+  final path167 = Path();
   path167.reset();
   path167.moveTo(2, 0);
   path167.cubicTo(2, 1.1100000143051147, 1.100000023841858, 2, 0, 2);
@@ -2668,7 +2668,7 @@ void pathOps167() {
 }
 
 void pathOps168() {
-  final Path path168 = Path();
+  final path168 = Path();
   path168.reset();
   path168.fillType = PathFillType.nonZero;
   gBounds = path168.getBounds();
@@ -2684,7 +2684,7 @@ void pathOps168() {
 }
 
 void pathOps173() {
-  final Path path173 = Path();
+  final path173 = Path();
   path173.reset();
   path173.moveTo(-2, -10);
   path173.cubicTo(-2, -11.100000381469727, -1.100000023841858, -12, 0, -12);
@@ -2700,7 +2700,7 @@ void pathOps173() {
 }
 
 void pathOps174() {
-  final Path path174 = Path();
+  final path174 = Path();
   path174.reset();
   path174.fillType = PathFillType.nonZero;
   gBounds = path174.getBounds();
@@ -2716,7 +2716,7 @@ void pathOps174() {
 }
 
 void pathOps178() {
-  final Path path178 = Path();
+  final path178 = Path();
   path178.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666669, 105), Radius.zero),
   );
@@ -2725,7 +2725,7 @@ void pathOps178() {
 }
 
 void pathOps179() {
-  final Path path179 = Path();
+  final path179 = Path();
   path179.reset();
   path179.moveTo(234.66666666666669, 105);
   path179.lineTo(96, 105);
@@ -2738,7 +2738,7 @@ void pathOps179() {
 }
 
 void pathOps180() {
-  final Path path180 = Path();
+  final path180 = Path();
   path180.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666669, 94), Radius.zero),
   );
@@ -2747,7 +2747,7 @@ void pathOps180() {
 }
 
 void pathOps181() {
-  final Path path181 = Path();
+  final path181 = Path();
   path181.reset();
   path181.moveTo(234.66666666666669, 94);
   path181.lineTo(96, 94);
@@ -2760,7 +2760,7 @@ void pathOps181() {
 }
 
 void pathOps182() {
-  final Path path182 = Path();
+  final path182 = Path();
   path182.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 105), Radius.zero),
   );
@@ -2769,7 +2769,7 @@ void pathOps182() {
 }
 
 void pathOps183() {
-  final Path path183 = Path();
+  final path183 = Path();
   path183.reset();
   path183.moveTo(234.66666666666666, 105);
   path183.lineTo(96, 105);
@@ -2780,7 +2780,7 @@ void pathOps183() {
 }
 
 void pathOps184() {
-  final Path path184 = Path();
+  final path184 = Path();
   path184.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 105), Radius.zero),
   );
@@ -2789,7 +2789,7 @@ void pathOps184() {
 }
 
 void pathOps185() {
-  final Path path185 = Path();
+  final path185 = Path();
   path185.reset();
   path185.moveTo(234.66666666666666, 105);
   path185.lineTo(96, 105);
@@ -2802,7 +2802,7 @@ void pathOps185() {
 }
 
 void pathOps186() {
-  final Path path186 = Path();
+  final path186 = Path();
   path186.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 120), Radius.zero),
   );
@@ -2811,7 +2811,7 @@ void pathOps186() {
 }
 
 void pathOps187() {
-  final Path path187 = Path();
+  final path187 = Path();
   path187.reset();
   path187.moveTo(234.66666666666666, 120);
   path187.lineTo(96, 120);
@@ -2824,7 +2824,7 @@ void pathOps187() {
 }
 
 void pathOps188() {
-  final Path path188 = Path();
+  final path188 = Path();
   path188.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 139), Radius.zero),
   );
@@ -2833,7 +2833,7 @@ void pathOps188() {
 }
 
 void pathOps189() {
-  final Path path189 = Path();
+  final path189 = Path();
   path189.reset();
   path189.moveTo(234.66666666666666, 139);
   path189.lineTo(96, 139);
@@ -2846,7 +2846,7 @@ void pathOps189() {
 }
 
 void pathOps190() {
-  final Path path190 = Path();
+  final path190 = Path();
   path190.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 75), Radius.zero),
   );
@@ -2855,7 +2855,7 @@ void pathOps190() {
 }
 
 void pathOps191() {
-  final Path path191 = Path();
+  final path191 = Path();
   path191.reset();
   path191.moveTo(234.66666666666666, 75);
   path191.lineTo(96, 75);
@@ -2868,7 +2868,7 @@ void pathOps191() {
 }
 
 void pathOps192() {
-  final Path path192 = Path();
+  final path192 = Path();
   path192.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 90), Radius.zero),
   );
@@ -2877,7 +2877,7 @@ void pathOps192() {
 }
 
 void pathOps193() {
-  final Path path193 = Path();
+  final path193 = Path();
   path193.reset();
   path193.moveTo(234.66666666666666, 90);
   path193.lineTo(96, 90);
@@ -2888,7 +2888,7 @@ void pathOps193() {
 }
 
 void pathOps194() {
-  final Path path194 = Path();
+  final path194 = Path();
   path194.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 105), Radius.zero),
   );
@@ -2896,7 +2896,7 @@ void pathOps194() {
 }
 
 void pathOps195() {
-  final Path path195 = Path();
+  final path195 = Path();
   path195.reset();
   path195.moveTo(234.66666666666666, 105);
   path195.lineTo(96, 105);
@@ -2907,7 +2907,7 @@ void pathOps195() {
 }
 
 void pathOps196() {
-  final Path path196 = Path();
+  final path196 = Path();
   path196.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 90), Radius.zero),
   );
@@ -2916,7 +2916,7 @@ void pathOps196() {
 }
 
 void pathOps197() {
-  final Path path197 = Path();
+  final path197 = Path();
   path197.reset();
   path197.moveTo(234.66666666666666, 90);
   path197.lineTo(96, 90);
@@ -2929,7 +2929,7 @@ void pathOps197() {
 }
 
 void pathOps198() {
-  final Path path198 = Path();
+  final path198 = Path();
   path198.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 90), Radius.zero),
   );
@@ -2938,7 +2938,7 @@ void pathOps198() {
 }
 
 void pathOps199() {
-  final Path path199 = Path();
+  final path199 = Path();
   path199.reset();
   path199.moveTo(234.66666666666666, 90);
   path199.lineTo(96, 90);
@@ -2951,7 +2951,7 @@ void pathOps199() {
 }
 
 void pathOps200() {
-  final Path path200 = Path();
+  final path200 = Path();
   path200.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 90), Radius.zero),
   );
@@ -2960,7 +2960,7 @@ void pathOps200() {
 }
 
 void pathOps201() {
-  final Path path201 = Path();
+  final path201 = Path();
   path201.reset();
   path201.moveTo(234.66666666666666, 90);
   path201.lineTo(96, 90);
@@ -2973,7 +2973,7 @@ void pathOps201() {
 }
 
 void pathOps202() {
-  final Path path202 = Path();
+  final path202 = Path();
   path202.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 90), Radius.zero),
   );
@@ -2982,7 +2982,7 @@ void pathOps202() {
 }
 
 void pathOps203() {
-  final Path path203 = Path();
+  final path203 = Path();
   path203.reset();
   path203.moveTo(234.66666666666666, 90);
   path203.lineTo(96, 90);
@@ -2995,7 +2995,7 @@ void pathOps203() {
 }
 
 void pathOps204() {
-  final Path path204 = Path();
+  final path204 = Path();
   path204.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 90), Radius.zero),
   );
@@ -3004,7 +3004,7 @@ void pathOps204() {
 }
 
 void pathOps205() {
-  final Path path205 = Path();
+  final path205 = Path();
   path205.reset();
   path205.moveTo(234.66666666666666, 90);
   path205.lineTo(96, 90);
@@ -3015,7 +3015,7 @@ void pathOps205() {
 }
 
 void pathOps206() {
-  final Path path206 = Path();
+  final path206 = Path();
   path206.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666669, 90), Radius.zero),
   );
@@ -3024,7 +3024,7 @@ void pathOps206() {
 }
 
 void pathOps207() {
-  final Path path207 = Path();
+  final path207 = Path();
   path207.reset();
   path207.moveTo(234.66666666666669, 90);
   path207.lineTo(96, 90);
@@ -3057,7 +3057,7 @@ void pathOps211() {
 }
 
 void pathOps212() {
-  final Path path212 = Path();
+  final path212 = Path();
   path212.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 456, 54), const Radius.circular(10)),
   );
@@ -3078,7 +3078,7 @@ void pathOps213() {
 }
 
 void pathOps214() {
-  final Path path214 = Path();
+  final path214 = Path();
   path214.reset();
   path214.moveTo(56, 42);
   path214.lineTo(56, 42);
@@ -3089,7 +3089,7 @@ void pathOps214() {
 }
 
 void pathOps215() {
-  final Path path215 = Path();
+  final path215 = Path();
   path215.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 456, 54), const Radius.circular(10)),
   );
@@ -3110,7 +3110,7 @@ void pathOps216() {
 }
 
 void pathOps217() {
-  final Path path217 = Path();
+  final path217 = Path();
   path217.reset();
   path217.moveTo(56, 42);
   path217.lineTo(56, 42);
@@ -3121,7 +3121,7 @@ void pathOps217() {
 }
 
 void pathOps218() {
-  final Path path218 = Path();
+  final path218 = Path();
   path218.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 456, 54), const Radius.circular(10)),
   );
@@ -3142,7 +3142,7 @@ void pathOps219() {
 }
 
 void pathOps220() {
-  final Path path220 = Path();
+  final path220 = Path();
   path220.reset();
   path220.moveTo(56, 42);
   path220.lineTo(56, 42);
@@ -3153,7 +3153,7 @@ void pathOps220() {
 }
 
 void pathOps221() {
-  final Path path221 = Path();
+  final path221 = Path();
   path221.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 456, 54), const Radius.circular(10)),
   );
@@ -3174,7 +3174,7 @@ void pathOps222() {
 }
 
 void pathOps223() {
-  final Path path223 = Path();
+  final path223 = Path();
   path223.reset();
   path223.moveTo(56, 42);
   path223.lineTo(56, 42);
@@ -3185,7 +3185,7 @@ void pathOps223() {
 }
 
 void pathOps224() {
-  final Path path224 = Path();
+  final path224 = Path();
   path224.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 456, 51), const Radius.circular(10)),
   );
@@ -3204,7 +3204,7 @@ void pathOps225() {
 }
 
 void pathOps226() {
-  final Path path226 = Path();
+  final path226 = Path();
   path226.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 456, 54), const Radius.circular(10)),
   );
@@ -3225,7 +3225,7 @@ void pathOps227() {
 }
 
 void pathOps228() {
-  final Path path228 = Path();
+  final path228 = Path();
   path228.reset();
   path228.moveTo(56, 42);
   path228.lineTo(56, 42);
@@ -3241,7 +3241,7 @@ void pathOps229() {
 }
 
 void pathOps230() {
-  final Path path230 = Path();
+  final path230 = Path();
   path230.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(81, 0, 331.66666666666663, 84), Radius.zero),
   );
@@ -3250,7 +3250,7 @@ void pathOps230() {
 }
 
 void pathOps231() {
-  final Path path231 = Path();
+  final path231 = Path();
   path231.reset();
   path231.moveTo(331.66666666666663, 86);
   path231.lineTo(81, 86);
@@ -3268,7 +3268,7 @@ void pathOps232() {
 }
 
 void pathOps233() {
-  final Path path233 = Path();
+  final path233 = Path();
   path233.addRRect(
     RRect.fromRectAndRadius(
       const Rect.fromLTRB(359.66666666666663, 0, 610.3333333333333, 84),
@@ -3280,7 +3280,7 @@ void pathOps233() {
 }
 
 void pathOps234() {
-  final Path path234 = Path();
+  final path234 = Path();
   path234.reset();
   path234.moveTo(610.3333333333333, 86);
   path234.lineTo(359.66666666666663, 86);
@@ -3298,7 +3298,7 @@ void pathOps235() {
 }
 
 void pathOps236() {
-  final Path path236 = Path();
+  final path236 = Path();
   path236.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(638.3333333333333, 0, 889, 84), Radius.zero),
   );
@@ -3307,7 +3307,7 @@ void pathOps236() {
 }
 
 void pathOps237() {
-  final Path path237 = Path();
+  final path237 = Path();
   path237.reset();
   path237.moveTo(889, 86);
   path237.lineTo(638.3333333333333, 86);
@@ -3325,7 +3325,7 @@ void pathOps238() {
 }
 
 void pathOps239() {
-  final Path path239 = Path();
+  final path239 = Path();
   path239.addRRect(RRect.fromRectAndRadius(const Rect.fromLTRB(0, 136, 970, 1144), Radius.zero));
   gBounds = path239.getBounds();
   gBounds = path239.getBounds();
@@ -3341,7 +3341,7 @@ void pathOps240() {
 }
 
 void pathOps241() {
-  final Path path241 = Path();
+  final path241 = Path();
   path241.addRRect(RRect.fromRectAndRadius(const Rect.fromLTRB(450, 136, 970, 696), Radius.zero));
   gBounds = path241.getBounds();
   gBounds = path241.getBounds();
@@ -3355,7 +3355,7 @@ void pathOps242() {
 }
 
 void pathOps243() {
-  final Path path243 = Path();
+  final path243 = Path();
   path243.moveTo(-3.0000008960834634, -8.999999251003146);
   path243.cubicTo(
     -3.0000008960834634,
@@ -3426,7 +3426,7 @@ void pathOps243() {
 }
 
 void pathOps244() {
-  final Path path244 = Path();
+  final path244 = Path();
   path244.moveTo(-2.0000008960834634, -9.999999251003146);
   path244.cubicTo(
     -2.0000008960834634,
@@ -3497,7 +3497,7 @@ void pathOps244() {
 }
 
 void pathOps245() {
-  final Path path245 = Path();
+  final path245 = Path();
   path245.moveTo(2.0000006178626677, 7.489968538720859e-7);
   path245.cubicTo(
     2.0000006178626677,
@@ -3535,7 +3535,7 @@ void pathOps245() {
 }
 
 void pathOps246() {
-  final Path path246 = Path();
+  final path246 = Path();
   path246.moveTo(-3.0000008960834634, -9.000000721237882);
   path246.cubicTo(
     -3.0000008960834634,
@@ -3606,7 +3606,7 @@ void pathOps246() {
 }
 
 void pathOps247() {
-  final Path path247 = Path();
+  final path247 = Path();
   path247.moveTo(-2.0000008960834634, -10.000000721237882);
   path247.cubicTo(
     -2.0000008960834634,
@@ -3677,7 +3677,7 @@ void pathOps247() {
 }
 
 void pathOps248() {
-  final Path path248 = Path();
+  final path248 = Path();
   path248.moveTo(-2.0000005026809617, 2.324364061223605e-7);
   path248.cubicTo(
     -2.0000005026809617,
@@ -3715,7 +3715,7 @@ void pathOps248() {
 }
 
 void pathOps249() {
-  final Path path249 = Path();
+  final path249 = Path();
   path249.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 90), Radius.zero),
   );
@@ -3724,7 +3724,7 @@ void pathOps249() {
 }
 
 void pathOps250() {
-  final Path path250 = Path();
+  final path250 = Path();
   path250.reset();
   path250.moveTo(234.66666666666666, 90);
   path250.lineTo(96, 90);
@@ -3735,7 +3735,7 @@ void pathOps250() {
 }
 
 void pathOps251() {
-  final Path path251 = Path();
+  final path251 = Path();
   path251.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666669, 105), Radius.zero),
   );
@@ -3744,7 +3744,7 @@ void pathOps251() {
 }
 
 void pathOps252() {
-  final Path path252 = Path();
+  final path252 = Path();
   path252.reset();
   path252.moveTo(234.66666666666669, 105);
   path252.lineTo(96, 105);
@@ -3757,7 +3757,7 @@ void pathOps252() {
 }
 
 void pathOps253() {
-  final Path path253 = Path();
+  final path253 = Path();
   path253.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666669, 90), Radius.zero),
   );
@@ -3766,7 +3766,7 @@ void pathOps253() {
 }
 
 void pathOps254() {
-  final Path path254 = Path();
+  final path254 = Path();
   path254.reset();
   path254.moveTo(234.66666666666669, 90);
   path254.lineTo(96, 90);
@@ -3779,7 +3779,7 @@ void pathOps254() {
 }
 
 void pathOps255() {
-  final Path path255 = Path();
+  final path255 = Path();
   path255.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 90), Radius.zero),
   );
@@ -3788,7 +3788,7 @@ void pathOps255() {
 }
 
 void pathOps256() {
-  final Path path256 = Path();
+  final path256 = Path();
   path256.reset();
   path256.moveTo(234.66666666666666, 90);
   path256.lineTo(96, 90);
@@ -3799,7 +3799,7 @@ void pathOps256() {
 }
 
 void pathOps257() {
-  final Path path257 = Path();
+  final path257 = Path();
   path257.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 90), Radius.zero),
   );
@@ -3808,7 +3808,7 @@ void pathOps257() {
 }
 
 void pathOps258() {
-  final Path path258 = Path();
+  final path258 = Path();
   path258.reset();
   path258.moveTo(234.66666666666666, 90);
   path258.lineTo(96, 90);
@@ -3821,7 +3821,7 @@ void pathOps258() {
 }
 
 void pathOps259() {
-  final Path path259 = Path();
+  final path259 = Path();
   path259.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 105), Radius.zero),
   );
@@ -3830,7 +3830,7 @@ void pathOps259() {
 }
 
 void pathOps260() {
-  final Path path260 = Path();
+  final path260 = Path();
   path260.reset();
   path260.moveTo(234.66666666666666, 105);
   path260.lineTo(96, 105);
@@ -3843,7 +3843,7 @@ void pathOps260() {
 }
 
 void pathOps261() {
-  final Path path261 = Path();
+  final path261 = Path();
   path261.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 90), Radius.zero),
   );
@@ -3852,7 +3852,7 @@ void pathOps261() {
 }
 
 void pathOps262() {
-  final Path path262 = Path();
+  final path262 = Path();
   path262.reset();
   path262.moveTo(234.66666666666666, 90);
   path262.lineTo(96, 90);
@@ -3865,7 +3865,7 @@ void pathOps262() {
 }
 
 void pathOps263() {
-  final Path path263 = Path();
+  final path263 = Path();
   path263.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 90), Radius.zero),
   );
@@ -3874,7 +3874,7 @@ void pathOps263() {
 }
 
 void pathOps264() {
-  final Path path264 = Path();
+  final path264 = Path();
   path264.reset();
   path264.moveTo(234.66666666666666, 90);
   path264.lineTo(96, 90);
@@ -3887,7 +3887,7 @@ void pathOps264() {
 }
 
 void pathOps265() {
-  final Path path265 = Path();
+  final path265 = Path();
   path265.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 90), Radius.zero),
   );
@@ -3896,7 +3896,7 @@ void pathOps265() {
 }
 
 void pathOps266() {
-  final Path path266 = Path();
+  final path266 = Path();
   path266.reset();
   path266.moveTo(234.66666666666666, 90);
   path266.lineTo(96, 90);
@@ -3909,7 +3909,7 @@ void pathOps266() {
 }
 
 void pathOps267() {
-  final Path path267 = Path();
+  final path267 = Path();
   path267.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 75), Radius.zero),
   );
@@ -3918,7 +3918,7 @@ void pathOps267() {
 }
 
 void pathOps268() {
-  final Path path268 = Path();
+  final path268 = Path();
   path268.reset();
   path268.moveTo(234.66666666666666, 75);
   path268.lineTo(96, 75);
@@ -3931,7 +3931,7 @@ void pathOps268() {
 }
 
 void pathOps269() {
-  final Path path269 = Path();
+  final path269 = Path();
   path269.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 105), Radius.zero),
   );
@@ -3940,7 +3940,7 @@ void pathOps269() {
 }
 
 void pathOps270() {
-  final Path path270 = Path();
+  final path270 = Path();
   path270.reset();
   path270.moveTo(234.66666666666666, 105);
   path270.lineTo(96, 105);
@@ -3951,7 +3951,7 @@ void pathOps270() {
 }
 
 void pathOps271() {
-  final Path path271 = Path();
+  final path271 = Path();
   path271.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 139), Radius.zero),
   );
@@ -3960,7 +3960,7 @@ void pathOps271() {
 }
 
 void pathOps272() {
-  final Path path272 = Path();
+  final path272 = Path();
   path272.reset();
   path272.moveTo(234.66666666666666, 139);
   path272.lineTo(96, 139);
@@ -3973,7 +3973,7 @@ void pathOps272() {
 }
 
 void pathOps273() {
-  final Path path273 = Path();
+  final path273 = Path();
   path273.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 120), Radius.zero),
   );
@@ -3982,7 +3982,7 @@ void pathOps273() {
 }
 
 void pathOps274() {
-  final Path path274 = Path();
+  final path274 = Path();
   path274.reset();
   path274.moveTo(234.66666666666666, 120);
   path274.lineTo(96, 120);
@@ -3995,7 +3995,7 @@ void pathOps274() {
 }
 
 void pathOps275() {
-  final Path path275 = Path();
+  final path275 = Path();
   path275.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666669, 94), Radius.zero),
   );
@@ -4004,7 +4004,7 @@ void pathOps275() {
 }
 
 void pathOps276() {
-  final Path path276 = Path();
+  final path276 = Path();
   path276.reset();
   path276.moveTo(234.66666666666669, 94);
   path276.lineTo(96, 94);
@@ -4047,7 +4047,7 @@ void pathOps282() {
 }
 
 void pathOps283() {
-  final Path path283 = Path();
+  final path283 = Path();
   path283.reset();
   path283.moveTo(56, 42);
   path283.lineTo(56, 42);
@@ -4063,7 +4063,7 @@ void pathOps284() {
 }
 
 void pathOps285() {
-  final Path path285 = Path();
+  final path285 = Path();
   path285.reset();
   path285.moveTo(56, 42);
   path285.lineTo(56, 42);
@@ -4079,7 +4079,7 @@ void pathOps286() {
 }
 
 void pathOps287() {
-  final Path path287 = Path();
+  final path287 = Path();
   path287.reset();
   path287.moveTo(56, 42);
   path287.lineTo(56, 42);
@@ -4095,7 +4095,7 @@ void pathOps288() {
 }
 
 void pathOps289() {
-  final Path path289 = Path();
+  final path289 = Path();
   path289.reset();
   path289.moveTo(56, 42);
   path289.lineTo(56, 42);
@@ -4111,7 +4111,7 @@ void pathOps290() {
 }
 
 void pathOps291() {
-  final Path path291 = Path();
+  final path291 = Path();
   path291.reset();
   path291.moveTo(56, 42);
   path291.lineTo(56, 42);
@@ -4127,7 +4127,7 @@ void pathOps292() {
 }
 
 void pathOps293() {
-  final Path path293 = Path();
+  final path293 = Path();
   path293.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(81, 0, 331.66666666666663, 84), Radius.zero),
   );
@@ -4136,7 +4136,7 @@ void pathOps293() {
 }
 
 void pathOps294() {
-  final Path path294 = Path();
+  final path294 = Path();
   path294.reset();
   path294.moveTo(331.66666666666663, 86);
   path294.lineTo(81, 86);
@@ -4154,7 +4154,7 @@ void pathOps295() {
 }
 
 void pathOps296() {
-  final Path path296 = Path();
+  final path296 = Path();
   path296.addRRect(
     RRect.fromRectAndRadius(
       const Rect.fromLTRB(359.66666666666663, 0, 610.3333333333333, 84),
@@ -4166,7 +4166,7 @@ void pathOps296() {
 }
 
 void pathOps297() {
-  final Path path297 = Path();
+  final path297 = Path();
   path297.reset();
   path297.moveTo(610.3333333333333, 86);
   path297.lineTo(359.66666666666663, 86);
@@ -4184,7 +4184,7 @@ void pathOps298() {
 }
 
 void pathOps299() {
-  final Path path299 = Path();
+  final path299 = Path();
   path299.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(638.3333333333333, 0, 889, 84), Radius.zero),
   );
@@ -4193,7 +4193,7 @@ void pathOps299() {
 }
 
 void pathOps300() {
-  final Path path300 = Path();
+  final path300 = Path();
   path300.reset();
   path300.moveTo(889, 86);
   path300.lineTo(638.3333333333333, 86);
@@ -4211,7 +4211,7 @@ void pathOps301() {
 }
 
 void pathOps302() {
-  final Path path302 = Path();
+  final path302 = Path();
   path302.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666669, 94), Radius.zero),
   );
@@ -4220,7 +4220,7 @@ void pathOps302() {
 }
 
 void pathOps303() {
-  final Path path303 = Path();
+  final path303 = Path();
   path303.reset();
   path303.moveTo(234.66666666666669, 94);
   path303.lineTo(96, 94);
@@ -4233,7 +4233,7 @@ void pathOps303() {
 }
 
 void pathOps304() {
-  final Path path304 = Path();
+  final path304 = Path();
   path304.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 105), Radius.zero),
   );
@@ -4242,7 +4242,7 @@ void pathOps304() {
 }
 
 void pathOps305() {
-  final Path path305 = Path();
+  final path305 = Path();
   path305.reset();
   path305.moveTo(234.66666666666666, 105);
   path305.lineTo(96, 105);
@@ -4253,7 +4253,7 @@ void pathOps305() {
 }
 
 void pathOps306() {
-  final Path path306 = Path();
+  final path306 = Path();
   path306.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666669, 105), Radius.zero),
   );
@@ -4262,7 +4262,7 @@ void pathOps306() {
 }
 
 void pathOps307() {
-  final Path path307 = Path();
+  final path307 = Path();
   path307.reset();
   path307.moveTo(234.66666666666669, 105);
   path307.lineTo(96, 105);
@@ -4275,7 +4275,7 @@ void pathOps307() {
 }
 
 void pathOps308() {
-  final Path path308 = Path();
+  final path308 = Path();
   path308.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 105), Radius.zero),
   );
@@ -4284,7 +4284,7 @@ void pathOps308() {
 }
 
 void pathOps309() {
-  final Path path309 = Path();
+  final path309 = Path();
   path309.reset();
   path309.moveTo(234.66666666666666, 105);
   path309.lineTo(96, 105);
@@ -4297,7 +4297,7 @@ void pathOps309() {
 }
 
 void pathOps310() {
-  final Path path310 = Path();
+  final path310 = Path();
   path310.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 120), Radius.zero),
   );
@@ -4306,7 +4306,7 @@ void pathOps310() {
 }
 
 void pathOps311() {
-  final Path path311 = Path();
+  final path311 = Path();
   path311.reset();
   path311.moveTo(234.66666666666666, 120);
   path311.lineTo(96, 120);
@@ -4319,7 +4319,7 @@ void pathOps311() {
 }
 
 void pathOps312() {
-  final Path path312 = Path();
+  final path312 = Path();
   path312.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 139), Radius.zero),
   );
@@ -4328,7 +4328,7 @@ void pathOps312() {
 }
 
 void pathOps313() {
-  final Path path313 = Path();
+  final path313 = Path();
   path313.reset();
   path313.moveTo(234.66666666666666, 139);
   path313.lineTo(96, 139);
@@ -4341,7 +4341,7 @@ void pathOps313() {
 }
 
 void pathOps314() {
-  final Path path314 = Path();
+  final path314 = Path();
   path314.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 75), Radius.zero),
   );
@@ -4350,7 +4350,7 @@ void pathOps314() {
 }
 
 void pathOps315() {
-  final Path path315 = Path();
+  final path315 = Path();
   path315.reset();
   path315.moveTo(234.66666666666666, 75);
   path315.lineTo(96, 75);
@@ -4363,7 +4363,7 @@ void pathOps315() {
 }
 
 void pathOps316() {
-  final Path path316 = Path();
+  final path316 = Path();
   path316.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 90), Radius.zero),
   );
@@ -4372,7 +4372,7 @@ void pathOps316() {
 }
 
 void pathOps317() {
-  final Path path317 = Path();
+  final path317 = Path();
   path317.reset();
   path317.moveTo(234.66666666666666, 90);
   path317.lineTo(96, 90);
@@ -4383,7 +4383,7 @@ void pathOps317() {
 }
 
 void pathOps318() {
-  final Path path318 = Path();
+  final path318 = Path();
   path318.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 90), Radius.zero),
   );
@@ -4392,7 +4392,7 @@ void pathOps318() {
 }
 
 void pathOps319() {
-  final Path path319 = Path();
+  final path319 = Path();
   path319.reset();
   path319.moveTo(234.66666666666666, 90);
   path319.lineTo(96, 90);
@@ -4405,7 +4405,7 @@ void pathOps319() {
 }
 
 void pathOps320() {
-  final Path path320 = Path();
+  final path320 = Path();
   path320.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 90), Radius.zero),
   );
@@ -4414,7 +4414,7 @@ void pathOps320() {
 }
 
 void pathOps321() {
-  final Path path321 = Path();
+  final path321 = Path();
   path321.reset();
   path321.moveTo(234.66666666666666, 90);
   path321.lineTo(96, 90);
@@ -4427,7 +4427,7 @@ void pathOps321() {
 }
 
 void pathOps322() {
-  final Path path322 = Path();
+  final path322 = Path();
   path322.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 90), Radius.zero),
   );
@@ -4436,7 +4436,7 @@ void pathOps322() {
 }
 
 void pathOps323() {
-  final Path path323 = Path();
+  final path323 = Path();
   path323.reset();
   path323.moveTo(234.66666666666666, 90);
   path323.lineTo(96, 90);
@@ -4449,7 +4449,7 @@ void pathOps323() {
 }
 
 void pathOps324() {
-  final Path path324 = Path();
+  final path324 = Path();
   path324.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 90), Radius.zero),
   );
@@ -4458,7 +4458,7 @@ void pathOps324() {
 }
 
 void pathOps325() {
-  final Path path325 = Path();
+  final path325 = Path();
   path325.reset();
   path325.moveTo(234.66666666666666, 90);
   path325.lineTo(96, 90);
@@ -4471,7 +4471,7 @@ void pathOps325() {
 }
 
 void pathOps326() {
-  final Path path326 = Path();
+  final path326 = Path();
   path326.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 90), Radius.zero),
   );
@@ -4480,7 +4480,7 @@ void pathOps326() {
 }
 
 void pathOps327() {
-  final Path path327 = Path();
+  final path327 = Path();
   path327.reset();
   path327.moveTo(234.66666666666666, 90);
   path327.lineTo(96, 90);
@@ -4491,7 +4491,7 @@ void pathOps327() {
 }
 
 void pathOps328() {
-  final Path path328 = Path();
+  final path328 = Path();
   path328.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666669, 90), Radius.zero),
   );
@@ -4500,7 +4500,7 @@ void pathOps328() {
 }
 
 void pathOps329() {
-  final Path path329 = Path();
+  final path329 = Path();
   path329.reset();
   path329.moveTo(234.66666666666669, 90);
   path329.lineTo(96, 90);
@@ -4538,7 +4538,7 @@ void pathOps334() {
 }
 
 void pathOps335() {
-  final Path path335 = Path();
+  final path335 = Path();
   path335.reset();
   path335.moveTo(56, 42);
   path335.lineTo(56, 42);
@@ -4554,7 +4554,7 @@ void pathOps336() {
 }
 
 void pathOps337() {
-  final Path path337 = Path();
+  final path337 = Path();
   path337.reset();
   path337.moveTo(56, 42);
   path337.lineTo(56, 42);
@@ -4570,7 +4570,7 @@ void pathOps338() {
 }
 
 void pathOps339() {
-  final Path path339 = Path();
+  final path339 = Path();
   path339.reset();
   path339.moveTo(56, 42);
   path339.lineTo(56, 42);
@@ -4586,7 +4586,7 @@ void pathOps340() {
 }
 
 void pathOps341() {
-  final Path path341 = Path();
+  final path341 = Path();
   path341.reset();
   path341.moveTo(56, 42);
   path341.lineTo(56, 42);
@@ -4602,7 +4602,7 @@ void pathOps342() {
 }
 
 void pathOps343() {
-  final Path path343 = Path();
+  final path343 = Path();
   path343.reset();
   path343.moveTo(56, 42);
   path343.lineTo(56, 42);
@@ -4628,7 +4628,7 @@ void pathOps346() {
 }
 
 void pathOps347() {
-  final Path path347 = Path();
+  final path347 = Path();
   path347.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(81, 0, 331.66666666666663, 84), Radius.zero),
   );
@@ -4637,7 +4637,7 @@ void pathOps347() {
 }
 
 void pathOps348() {
-  final Path path348 = Path();
+  final path348 = Path();
   path348.reset();
   path348.moveTo(331.66666666666663, 86);
   path348.lineTo(81, 86);
@@ -4655,7 +4655,7 @@ void pathOps349() {
 }
 
 void pathOps350() {
-  final Path path350 = Path();
+  final path350 = Path();
   path350.addRRect(
     RRect.fromRectAndRadius(
       const Rect.fromLTRB(359.66666666666663, 0, 610.3333333333333, 84),
@@ -4667,7 +4667,7 @@ void pathOps350() {
 }
 
 void pathOps351() {
-  final Path path351 = Path();
+  final path351 = Path();
   path351.reset();
   path351.moveTo(610.3333333333333, 86);
   path351.lineTo(359.66666666666663, 86);
@@ -4685,7 +4685,7 @@ void pathOps352() {
 }
 
 void pathOps353() {
-  final Path path353 = Path();
+  final path353 = Path();
   path353.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(638.3333333333333, 0, 889, 84), Radius.zero),
   );
@@ -4694,7 +4694,7 @@ void pathOps353() {
 }
 
 void pathOps354() {
-  final Path path354 = Path();
+  final path354 = Path();
   path354.reset();
   path354.moveTo(889, 86);
   path354.lineTo(638.3333333333333, 86);
@@ -4707,7 +4707,7 @@ void pathOps354() {
 }
 
 void pathOps355() {
-  final Path path355 = Path();
+  final path355 = Path();
   path355.addRRect(RRect.fromRectAndRadius(const Rect.fromLTRB(0, 136, 970, 1144), Radius.zero));
   gBounds = path355.getBounds();
   gBounds = path355.getBounds();
@@ -4742,7 +4742,7 @@ void pathOps356() {
 }
 
 void pathOps357() {
-  final Path path357 = Path();
+  final path357 = Path();
   path357.addRRect(RRect.fromRectAndRadius(const Rect.fromLTRB(450, 136, 970, 696), Radius.zero));
   gBounds = path357.getBounds();
   allPaths.add(path357);
@@ -4779,7 +4779,7 @@ void pathOps363() {
 }
 
 void pathOps364() {
-  final Path path364 = Path();
+  final path364 = Path();
   path364.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(81, 0, 331.66666666666663, 84), Radius.zero),
   );
@@ -4788,7 +4788,7 @@ void pathOps364() {
 }
 
 void pathOps365() {
-  final Path path365 = Path();
+  final path365 = Path();
   path365.reset();
   path365.moveTo(331.66666666666663, 86);
   path365.lineTo(81, 86);
@@ -4806,7 +4806,7 @@ void pathOps366() {
 }
 
 void pathOps367() {
-  final Path path367 = Path();
+  final path367 = Path();
   path367.addRRect(
     RRect.fromRectAndRadius(
       const Rect.fromLTRB(359.66666666666663, 0, 610.3333333333333, 84),
@@ -4818,7 +4818,7 @@ void pathOps367() {
 }
 
 void pathOps368() {
-  final Path path368 = Path();
+  final path368 = Path();
   path368.reset();
   path368.moveTo(610.3333333333333, 86);
   path368.lineTo(359.66666666666663, 86);
@@ -4836,7 +4836,7 @@ void pathOps369() {
 }
 
 void pathOps370() {
-  final Path path370 = Path();
+  final path370 = Path();
   path370.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(638.3333333333333, 0, 889, 84), Radius.zero),
   );
@@ -4845,7 +4845,7 @@ void pathOps370() {
 }
 
 void pathOps371() {
-  final Path path371 = Path();
+  final path371 = Path();
   path371.reset();
   path371.moveTo(889, 86);
   path371.lineTo(638.3333333333333, 86);
@@ -4883,7 +4883,7 @@ void pathOps376() {
 }
 
 void pathOps377() {
-  final Path path377 = Path();
+  final path377 = Path();
   path377.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(81, 0, 331.66666666666663, 84), Radius.zero),
   );
@@ -4892,7 +4892,7 @@ void pathOps377() {
 }
 
 void pathOps378() {
-  final Path path378 = Path();
+  final path378 = Path();
   path378.reset();
   path378.moveTo(331.66666666666663, 86);
   path378.lineTo(81, 86);
@@ -4910,7 +4910,7 @@ void pathOps379() {
 }
 
 void pathOps380() {
-  final Path path380 = Path();
+  final path380 = Path();
   path380.addRRect(
     RRect.fromRectAndRadius(
       const Rect.fromLTRB(359.66666666666663, 0, 610.3333333333333, 84),
@@ -4922,7 +4922,7 @@ void pathOps380() {
 }
 
 void pathOps381() {
-  final Path path381 = Path();
+  final path381 = Path();
   path381.reset();
   path381.moveTo(610.3333333333333, 86);
   path381.lineTo(359.66666666666663, 86);
@@ -4940,7 +4940,7 @@ void pathOps382() {
 }
 
 void pathOps383() {
-  final Path path383 = Path();
+  final path383 = Path();
   path383.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(638.3333333333333, 0, 889, 84), Radius.zero),
   );
@@ -4949,7 +4949,7 @@ void pathOps383() {
 }
 
 void pathOps384() {
-  final Path path384 = Path();
+  final path384 = Path();
   path384.reset();
   path384.moveTo(889, 86);
   path384.lineTo(638.3333333333333, 86);
@@ -4987,7 +4987,7 @@ void pathOps389() {
 }
 
 void pathOps390() {
-  final Path path390 = Path();
+  final path390 = Path();
   path390.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(81, 0, 331.66666666666663, 84), Radius.zero),
   );
@@ -4996,7 +4996,7 @@ void pathOps390() {
 }
 
 void pathOps391() {
-  final Path path391 = Path();
+  final path391 = Path();
   path391.reset();
   path391.moveTo(331.66666666666663, 86);
   path391.lineTo(81, 86);
@@ -5014,7 +5014,7 @@ void pathOps392() {
 }
 
 void pathOps393() {
-  final Path path393 = Path();
+  final path393 = Path();
   path393.addRRect(
     RRect.fromRectAndRadius(
       const Rect.fromLTRB(359.66666666666663, 0, 610.3333333333333, 84),
@@ -5026,7 +5026,7 @@ void pathOps393() {
 }
 
 void pathOps394() {
-  final Path path394 = Path();
+  final path394 = Path();
   path394.reset();
   path394.moveTo(610.3333333333333, 86);
   path394.lineTo(359.66666666666663, 86);
@@ -5044,7 +5044,7 @@ void pathOps395() {
 }
 
 void pathOps396() {
-  final Path path396 = Path();
+  final path396 = Path();
   path396.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(638.3333333333333, 0, 889, 84), Radius.zero),
   );
@@ -5053,7 +5053,7 @@ void pathOps396() {
 }
 
 void pathOps397() {
-  final Path path397 = Path();
+  final path397 = Path();
   path397.reset();
   path397.moveTo(889, 86);
   path397.lineTo(638.3333333333333, 86);
@@ -5091,7 +5091,7 @@ void pathOps402() {
 }
 
 void pathOps403() {
-  final Path path403 = Path();
+  final path403 = Path();
   path403.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(81, 0, 331.66666666666663, 84), Radius.zero),
   );
@@ -5100,7 +5100,7 @@ void pathOps403() {
 }
 
 void pathOps404() {
-  final Path path404 = Path();
+  final path404 = Path();
   path404.reset();
   path404.moveTo(331.66666666666663, 86);
   path404.lineTo(81, 86);
@@ -5118,7 +5118,7 @@ void pathOps405() {
 }
 
 void pathOps406() {
-  final Path path406 = Path();
+  final path406 = Path();
   path406.addRRect(
     RRect.fromRectAndRadius(
       const Rect.fromLTRB(359.66666666666663, 0, 610.3333333333333, 84),
@@ -5130,7 +5130,7 @@ void pathOps406() {
 }
 
 void pathOps407() {
-  final Path path407 = Path();
+  final path407 = Path();
   path407.reset();
   path407.moveTo(610.3333333333333, 86);
   path407.lineTo(359.66666666666663, 86);
@@ -5148,7 +5148,7 @@ void pathOps408() {
 }
 
 void pathOps409() {
-  final Path path409 = Path();
+  final path409 = Path();
   path409.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(638.3333333333333, 0, 889, 84), Radius.zero),
   );
@@ -5157,7 +5157,7 @@ void pathOps409() {
 }
 
 void pathOps410() {
-  final Path path410 = Path();
+  final path410 = Path();
   path410.reset();
   path410.moveTo(889, 86);
   path410.lineTo(638.3333333333333, 86);
@@ -5195,7 +5195,7 @@ void pathOps415() {
 }
 
 void pathOps416() {
-  final Path path416 = Path();
+  final path416 = Path();
   path416.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(81, 0, 331.66666666666663, 84), Radius.zero),
   );
@@ -5204,7 +5204,7 @@ void pathOps416() {
 }
 
 void pathOps417() {
-  final Path path417 = Path();
+  final path417 = Path();
   path417.reset();
   path417.moveTo(331.66666666666663, 86);
   path417.lineTo(81, 86);
@@ -5222,7 +5222,7 @@ void pathOps418() {
 }
 
 void pathOps419() {
-  final Path path419 = Path();
+  final path419 = Path();
   path419.addRRect(
     RRect.fromRectAndRadius(
       const Rect.fromLTRB(359.66666666666663, 0, 610.3333333333333, 84),
@@ -5234,7 +5234,7 @@ void pathOps419() {
 }
 
 void pathOps420() {
-  final Path path420 = Path();
+  final path420 = Path();
   path420.reset();
   path420.moveTo(610.3333333333333, 86);
   path420.lineTo(359.66666666666663, 86);
@@ -5252,7 +5252,7 @@ void pathOps421() {
 }
 
 void pathOps422() {
-  final Path path422 = Path();
+  final path422 = Path();
   path422.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(638.3333333333333, 0, 889, 84), Radius.zero),
   );
@@ -5261,7 +5261,7 @@ void pathOps422() {
 }
 
 void pathOps423() {
-  final Path path423 = Path();
+  final path423 = Path();
   path423.reset();
   path423.moveTo(889, 86);
   path423.lineTo(638.3333333333333, 86);
@@ -5299,7 +5299,7 @@ void pathOps428() {
 }
 
 void pathOps429() {
-  final Path path429 = Path();
+  final path429 = Path();
   path429.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(81, 0, 331.66666666666663, 84), Radius.zero),
   );
@@ -5308,7 +5308,7 @@ void pathOps429() {
 }
 
 void pathOps430() {
-  final Path path430 = Path();
+  final path430 = Path();
   path430.reset();
   path430.moveTo(331.66666666666663, 86);
   path430.lineTo(81, 86);
@@ -5326,7 +5326,7 @@ void pathOps431() {
 }
 
 void pathOps432() {
-  final Path path432 = Path();
+  final path432 = Path();
   path432.addRRect(
     RRect.fromRectAndRadius(
       const Rect.fromLTRB(359.66666666666663, 0, 610.3333333333333, 84),
@@ -5338,7 +5338,7 @@ void pathOps432() {
 }
 
 void pathOps433() {
-  final Path path433 = Path();
+  final path433 = Path();
   path433.reset();
   path433.moveTo(610.3333333333333, 86);
   path433.lineTo(359.66666666666663, 86);
@@ -5356,7 +5356,7 @@ void pathOps434() {
 }
 
 void pathOps435() {
-  final Path path435 = Path();
+  final path435 = Path();
   path435.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(638.3333333333333, 0, 889, 84), Radius.zero),
   );
@@ -5365,7 +5365,7 @@ void pathOps435() {
 }
 
 void pathOps436() {
-  final Path path436 = Path();
+  final path436 = Path();
   path436.reset();
   path436.moveTo(889, 86);
   path436.lineTo(638.3333333333333, 86);
@@ -5403,7 +5403,7 @@ void pathOps441() {
 }
 
 void pathOps442() {
-  final Path path442 = Path();
+  final path442 = Path();
   path442.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(81, 0, 331.66666666666663, 84), Radius.zero),
   );
@@ -5412,7 +5412,7 @@ void pathOps442() {
 }
 
 void pathOps443() {
-  final Path path443 = Path();
+  final path443 = Path();
   path443.reset();
   path443.moveTo(331.66666666666663, 86);
   path443.lineTo(81, 86);
@@ -5430,7 +5430,7 @@ void pathOps444() {
 }
 
 void pathOps445() {
-  final Path path445 = Path();
+  final path445 = Path();
   path445.addRRect(
     RRect.fromRectAndRadius(
       const Rect.fromLTRB(359.66666666666663, 0, 610.3333333333333, 84),
@@ -5442,7 +5442,7 @@ void pathOps445() {
 }
 
 void pathOps446() {
-  final Path path446 = Path();
+  final path446 = Path();
   path446.reset();
   path446.moveTo(610.3333333333333, 86);
   path446.lineTo(359.66666666666663, 86);
@@ -5460,7 +5460,7 @@ void pathOps447() {
 }
 
 void pathOps448() {
-  final Path path448 = Path();
+  final path448 = Path();
   path448.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(638.3333333333333, 0, 889, 84), Radius.zero),
   );
@@ -5469,7 +5469,7 @@ void pathOps448() {
 }
 
 void pathOps449() {
-  final Path path449 = Path();
+  final path449 = Path();
   path449.reset();
   path449.moveTo(889, 86);
   path449.lineTo(638.3333333333333, 86);
@@ -5507,7 +5507,7 @@ void pathOps454() {
 }
 
 void pathOps455() {
-  final Path path455 = Path();
+  final path455 = Path();
   path455.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(81, 0, 331.66666666666663, 84), Radius.zero),
   );
@@ -5516,7 +5516,7 @@ void pathOps455() {
 }
 
 void pathOps456() {
-  final Path path456 = Path();
+  final path456 = Path();
   path456.reset();
   path456.moveTo(331.66666666666663, 86);
   path456.lineTo(81, 86);
@@ -5534,7 +5534,7 @@ void pathOps457() {
 }
 
 void pathOps458() {
-  final Path path458 = Path();
+  final path458 = Path();
   path458.addRRect(
     RRect.fromRectAndRadius(
       const Rect.fromLTRB(359.66666666666663, 0, 610.3333333333333, 84),
@@ -5546,7 +5546,7 @@ void pathOps458() {
 }
 
 void pathOps459() {
-  final Path path459 = Path();
+  final path459 = Path();
   path459.reset();
   path459.moveTo(610.3333333333333, 86);
   path459.lineTo(359.66666666666663, 86);
@@ -5564,7 +5564,7 @@ void pathOps460() {
 }
 
 void pathOps461() {
-  final Path path461 = Path();
+  final path461 = Path();
   path461.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(638.3333333333333, 0, 889, 84), Radius.zero),
   );
@@ -5573,7 +5573,7 @@ void pathOps461() {
 }
 
 void pathOps462() {
-  final Path path462 = Path();
+  final path462 = Path();
   path462.reset();
   path462.moveTo(889, 86);
   path462.lineTo(638.3333333333333, 86);
@@ -5611,7 +5611,7 @@ void pathOps467() {
 }
 
 void pathOps468() {
-  final Path path468 = Path();
+  final path468 = Path();
   path468.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(81, 0, 331.66666666666663, 84), Radius.zero),
   );
@@ -5620,7 +5620,7 @@ void pathOps468() {
 }
 
 void pathOps469() {
-  final Path path469 = Path();
+  final path469 = Path();
   path469.reset();
   path469.moveTo(331.66666666666663, 86);
   path469.lineTo(81, 86);
@@ -5638,7 +5638,7 @@ void pathOps470() {
 }
 
 void pathOps471() {
-  final Path path471 = Path();
+  final path471 = Path();
   path471.addRRect(
     RRect.fromRectAndRadius(
       const Rect.fromLTRB(359.66666666666663, 0, 610.3333333333333, 84),
@@ -5650,7 +5650,7 @@ void pathOps471() {
 }
 
 void pathOps472() {
-  final Path path472 = Path();
+  final path472 = Path();
   path472.reset();
   path472.moveTo(610.3333333333333, 86);
   path472.lineTo(359.66666666666663, 86);
@@ -5668,7 +5668,7 @@ void pathOps473() {
 }
 
 void pathOps474() {
-  final Path path474 = Path();
+  final path474 = Path();
   path474.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(638.3333333333333, 0, 889, 84), Radius.zero),
   );
@@ -5677,7 +5677,7 @@ void pathOps474() {
 }
 
 void pathOps475() {
-  final Path path475 = Path();
+  final path475 = Path();
   path475.reset();
   path475.moveTo(889, 86);
   path475.lineTo(638.3333333333333, 86);
@@ -5715,7 +5715,7 @@ void pathOps480() {
 }
 
 void pathOps481() {
-  final Path path481 = Path();
+  final path481 = Path();
   path481.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(81, 0, 331.66666666666663, 84), Radius.zero),
   );
@@ -5724,7 +5724,7 @@ void pathOps481() {
 }
 
 void pathOps482() {
-  final Path path482 = Path();
+  final path482 = Path();
   path482.reset();
   path482.moveTo(331.66666666666663, 86);
   path482.lineTo(81, 86);
@@ -5742,7 +5742,7 @@ void pathOps483() {
 }
 
 void pathOps484() {
-  final Path path484 = Path();
+  final path484 = Path();
   path484.addRRect(
     RRect.fromRectAndRadius(
       const Rect.fromLTRB(359.66666666666663, 0, 610.3333333333333, 84),
@@ -5754,7 +5754,7 @@ void pathOps484() {
 }
 
 void pathOps485() {
-  final Path path485 = Path();
+  final path485 = Path();
   path485.reset();
   path485.moveTo(610.3333333333333, 86);
   path485.lineTo(359.66666666666663, 86);
@@ -5772,7 +5772,7 @@ void pathOps486() {
 }
 
 void pathOps487() {
-  final Path path487 = Path();
+  final path487 = Path();
   path487.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(638.3333333333333, 0, 889, 84), Radius.zero),
   );
@@ -5781,7 +5781,7 @@ void pathOps487() {
 }
 
 void pathOps488() {
-  final Path path488 = Path();
+  final path488 = Path();
   path488.reset();
   path488.moveTo(889, 86);
   path488.lineTo(638.3333333333333, 86);
@@ -5819,7 +5819,7 @@ void pathOps493() {
 }
 
 void pathOps494() {
-  final Path path494 = Path();
+  final path494 = Path();
   path494.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(81, 0, 331.66666666666663, 84), Radius.zero),
   );
@@ -5828,7 +5828,7 @@ void pathOps494() {
 }
 
 void pathOps495() {
-  final Path path495 = Path();
+  final path495 = Path();
   path495.reset();
   path495.moveTo(331.66666666666663, 86);
   path495.lineTo(81, 86);
@@ -5846,7 +5846,7 @@ void pathOps496() {
 }
 
 void pathOps497() {
-  final Path path497 = Path();
+  final path497 = Path();
   path497.addRRect(
     RRect.fromRectAndRadius(
       const Rect.fromLTRB(359.66666666666663, 0, 610.3333333333333, 84),
@@ -5858,7 +5858,7 @@ void pathOps497() {
 }
 
 void pathOps498() {
-  final Path path498 = Path();
+  final path498 = Path();
   path498.reset();
   path498.moveTo(610.3333333333333, 86);
   path498.lineTo(359.66666666666663, 86);
@@ -5876,7 +5876,7 @@ void pathOps499() {
 }
 
 void pathOps500() {
-  final Path path500 = Path();
+  final path500 = Path();
   path500.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(638.3333333333333, 0, 889, 84), Radius.zero),
   );
@@ -5885,7 +5885,7 @@ void pathOps500() {
 }
 
 void pathOps501() {
-  final Path path501 = Path();
+  final path501 = Path();
   path501.reset();
   path501.moveTo(889, 86);
   path501.lineTo(638.3333333333333, 86);
@@ -5923,7 +5923,7 @@ void pathOps506() {
 }
 
 void pathOps507() {
-  final Path path507 = Path();
+  final path507 = Path();
   path507.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(81, 0, 331.66666666666663, 84), Radius.zero),
   );
@@ -5932,7 +5932,7 @@ void pathOps507() {
 }
 
 void pathOps508() {
-  final Path path508 = Path();
+  final path508 = Path();
   path508.reset();
   path508.moveTo(331.66666666666663, 86);
   path508.lineTo(81, 86);
@@ -5950,7 +5950,7 @@ void pathOps509() {
 }
 
 void pathOps510() {
-  final Path path510 = Path();
+  final path510 = Path();
   path510.addRRect(
     RRect.fromRectAndRadius(
       const Rect.fromLTRB(359.66666666666663, 0, 610.3333333333333, 84),
@@ -5962,7 +5962,7 @@ void pathOps510() {
 }
 
 void pathOps511() {
-  final Path path511 = Path();
+  final path511 = Path();
   path511.reset();
   path511.moveTo(610.3333333333333, 86);
   path511.lineTo(359.66666666666663, 86);
@@ -5980,7 +5980,7 @@ void pathOps512() {
 }
 
 void pathOps513() {
-  final Path path513 = Path();
+  final path513 = Path();
   path513.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(638.3333333333333, 0, 889, 84), Radius.zero),
   );
@@ -5989,7 +5989,7 @@ void pathOps513() {
 }
 
 void pathOps514() {
-  final Path path514 = Path();
+  final path514 = Path();
   path514.reset();
   path514.moveTo(889, 86);
   path514.lineTo(638.3333333333333, 86);
@@ -6027,7 +6027,7 @@ void pathOps519() {
 }
 
 void pathOps520() {
-  final Path path520 = Path();
+  final path520 = Path();
   path520.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(81, 0, 331.66666666666663, 84), Radius.zero),
   );
@@ -6036,7 +6036,7 @@ void pathOps520() {
 }
 
 void pathOps521() {
-  final Path path521 = Path();
+  final path521 = Path();
   path521.reset();
   path521.moveTo(331.66666666666663, 86);
   path521.lineTo(81, 86);
@@ -6054,7 +6054,7 @@ void pathOps522() {
 }
 
 void pathOps523() {
-  final Path path523 = Path();
+  final path523 = Path();
   path523.addRRect(
     RRect.fromRectAndRadius(
       const Rect.fromLTRB(359.66666666666663, 0, 610.3333333333333, 84),
@@ -6066,7 +6066,7 @@ void pathOps523() {
 }
 
 void pathOps524() {
-  final Path path524 = Path();
+  final path524 = Path();
   path524.reset();
   path524.moveTo(610.3333333333333, 86);
   path524.lineTo(359.66666666666663, 86);
@@ -6084,7 +6084,7 @@ void pathOps525() {
 }
 
 void pathOps526() {
-  final Path path526 = Path();
+  final path526 = Path();
   path526.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(638.3333333333333, 0, 889, 84), Radius.zero),
   );
@@ -6093,7 +6093,7 @@ void pathOps526() {
 }
 
 void pathOps527() {
-  final Path path527 = Path();
+  final path527 = Path();
   path527.reset();
   path527.moveTo(889, 86);
   path527.lineTo(638.3333333333333, 86);
@@ -6131,7 +6131,7 @@ void pathOps532() {
 }
 
 void pathOps533() {
-  final Path path533 = Path();
+  final path533 = Path();
   path533.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(81, 0, 331.66666666666663, 84), Radius.zero),
   );
@@ -6140,7 +6140,7 @@ void pathOps533() {
 }
 
 void pathOps534() {
-  final Path path534 = Path();
+  final path534 = Path();
   path534.reset();
   path534.moveTo(331.66666666666663, 86);
   path534.lineTo(81, 86);
@@ -6158,7 +6158,7 @@ void pathOps535() {
 }
 
 void pathOps536() {
-  final Path path536 = Path();
+  final path536 = Path();
   path536.addRRect(
     RRect.fromRectAndRadius(
       const Rect.fromLTRB(359.66666666666663, 0, 610.3333333333333, 84),
@@ -6170,7 +6170,7 @@ void pathOps536() {
 }
 
 void pathOps537() {
-  final Path path537 = Path();
+  final path537 = Path();
   path537.reset();
   path537.moveTo(610.3333333333333, 86);
   path537.lineTo(359.66666666666663, 86);
@@ -6188,7 +6188,7 @@ void pathOps538() {
 }
 
 void pathOps539() {
-  final Path path539 = Path();
+  final path539 = Path();
   path539.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(638.3333333333333, 0, 889, 84), Radius.zero),
   );
@@ -6197,7 +6197,7 @@ void pathOps539() {
 }
 
 void pathOps540() {
-  final Path path540 = Path();
+  final path540 = Path();
   path540.reset();
   path540.moveTo(889, 86);
   path540.lineTo(638.3333333333333, 86);
@@ -6235,7 +6235,7 @@ void pathOps545() {
 }
 
 void pathOps546() {
-  final Path path546 = Path();
+  final path546 = Path();
   path546.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(81, 0, 331.66666666666663, 84), Radius.zero),
   );
@@ -6244,7 +6244,7 @@ void pathOps546() {
 }
 
 void pathOps547() {
-  final Path path547 = Path();
+  final path547 = Path();
   path547.reset();
   path547.moveTo(331.66666666666663, 86);
   path547.lineTo(81, 86);
@@ -6262,7 +6262,7 @@ void pathOps548() {
 }
 
 void pathOps549() {
-  final Path path549 = Path();
+  final path549 = Path();
   path549.addRRect(
     RRect.fromRectAndRadius(
       const Rect.fromLTRB(359.66666666666663, 0, 610.3333333333333, 84),
@@ -6274,7 +6274,7 @@ void pathOps549() {
 }
 
 void pathOps550() {
-  final Path path550 = Path();
+  final path550 = Path();
   path550.reset();
   path550.moveTo(610.3333333333333, 86);
   path550.lineTo(359.66666666666663, 86);
@@ -6292,7 +6292,7 @@ void pathOps551() {
 }
 
 void pathOps552() {
-  final Path path552 = Path();
+  final path552 = Path();
   path552.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(638.3333333333333, 0, 889, 84), Radius.zero),
   );
@@ -6301,7 +6301,7 @@ void pathOps552() {
 }
 
 void pathOps553() {
-  final Path path553 = Path();
+  final path553 = Path();
   path553.reset();
   path553.moveTo(889, 86);
   path553.lineTo(638.3333333333333, 86);
@@ -6346,7 +6346,7 @@ void pathOps558() {
 }
 
 void pathOps559() {
-  final Path path559 = Path();
+  final path559 = Path();
   path559.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(81, 0, 331.66666666666663, 84), Radius.zero),
   );
@@ -6355,7 +6355,7 @@ void pathOps559() {
 }
 
 void pathOps560() {
-  final Path path560 = Path();
+  final path560 = Path();
   path560.reset();
   path560.moveTo(331.66666666666663, 86);
   path560.lineTo(81, 86);
@@ -6373,7 +6373,7 @@ void pathOps561() {
 }
 
 void pathOps562() {
-  final Path path562 = Path();
+  final path562 = Path();
   path562.addRRect(
     RRect.fromRectAndRadius(
       const Rect.fromLTRB(359.66666666666663, 0, 610.3333333333333, 84),
@@ -6385,7 +6385,7 @@ void pathOps562() {
 }
 
 void pathOps563() {
-  final Path path563 = Path();
+  final path563 = Path();
   path563.reset();
   path563.moveTo(610.3333333333333, 86);
   path563.lineTo(359.66666666666663, 86);
@@ -6403,7 +6403,7 @@ void pathOps564() {
 }
 
 void pathOps565() {
-  final Path path565 = Path();
+  final path565 = Path();
   path565.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(638.3333333333333, 0, 889, 84), Radius.zero),
   );
@@ -6412,7 +6412,7 @@ void pathOps565() {
 }
 
 void pathOps566() {
-  final Path path566 = Path();
+  final path566 = Path();
   path566.reset();
   path566.moveTo(889, 86);
   path566.lineTo(638.3333333333333, 86);
@@ -6425,7 +6425,7 @@ void pathOps566() {
 }
 
 void pathOps567() {
-  final Path path567 = Path();
+  final path567 = Path();
   path567.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 120), Radius.zero),
   );
@@ -6434,7 +6434,7 @@ void pathOps567() {
 }
 
 void pathOps568() {
-  final Path path568 = Path();
+  final path568 = Path();
   path568.reset();
   path568.moveTo(234.66666666666666, 120);
   path568.lineTo(96, 120);
@@ -6447,7 +6447,7 @@ void pathOps568() {
 }
 
 void pathOps569() {
-  final Path path569 = Path();
+  final path569 = Path();
   path569.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 120), Radius.zero),
   );
@@ -6456,7 +6456,7 @@ void pathOps569() {
 }
 
 void pathOps570() {
-  final Path path570 = Path();
+  final path570 = Path();
   path570.reset();
   path570.moveTo(234.66666666666666, 120);
   path570.lineTo(96, 120);
@@ -6469,7 +6469,7 @@ void pathOps570() {
 }
 
 void pathOps571() {
-  final Path path571 = Path();
+  final path571 = Path();
   path571.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(116.39999999999999, 136, 853.6, 1144), Radius.zero),
   );
@@ -6478,7 +6478,7 @@ void pathOps571() {
 }
 
 void pathOps572() {
-  final Path path572 = Path();
+  final path572 = Path();
   path572.addRRect(
     RRect.fromRectAndCorners(
       const Rect.fromLTRB(0, 0, 312.6, 880),
@@ -6499,7 +6499,7 @@ void pathOps573() {
 }
 
 void pathOps574() {
-  final Path path574 = Path();
+  final path574 = Path();
   path574.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(525, 248, 837.6, 1128), Radius.zero),
   );
@@ -6508,14 +6508,14 @@ void pathOps574() {
 }
 
 void pathOps575() {
-  final Path path575 = Path();
+  final path575 = Path();
   path575.addRRect(RRect.fromRectAndRadius(const Rect.fromLTRB(525, 248, 837.6, 304), Radius.zero));
   gBounds = path575.getBounds();
   allPaths.add(path575);
 }
 
 void pathOps576() {
-  final Path path576 = Path();
+  final path576 = Path();
   path576.moveTo(0, 0);
   path576.lineTo(220.60000000000002, 0);
   path576.quadraticBezierTo(235.60000000000002, 0, 237.569696969697, 7.817946907441011);
@@ -6540,7 +6540,7 @@ void pathOps577() {
 }
 
 void pathOps578() {
-  final Path path578 = Path();
+  final path578 = Path();
   path578.addOval(const Rect.fromLTRB(0, 0, 56, 56));
   gFillType = path578.fillType;
   path579 = path578.shift(const Offset(765.6, 1052));
@@ -6553,7 +6553,7 @@ void pathOps579() {
 }
 
 void pathOps580() {
-  final Path path580 = Path();
+  final path580 = Path();
   path580.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(116.39999999999999, 136, 853.6, 192), Radius.zero),
   );
@@ -6562,7 +6562,7 @@ void pathOps580() {
 }
 
 void pathOps581() {
-  final Path path581 = Path();
+  final path581 = Path();
   path581.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 120), Radius.zero),
   );
@@ -6571,7 +6571,7 @@ void pathOps581() {
 }
 
 void pathOps582() {
-  final Path path582 = Path();
+  final path582 = Path();
   path582.reset();
   path582.moveTo(234.66666666666666, 120);
   path582.lineTo(96, 120);
@@ -6584,7 +6584,7 @@ void pathOps582() {
 }
 
 void pathOps583() {
-  final Path path583 = Path();
+  final path583 = Path();
   path583.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 120), Radius.zero),
   );
@@ -6593,7 +6593,7 @@ void pathOps583() {
 }
 
 void pathOps584() {
-  final Path path584 = Path();
+  final path584 = Path();
   path584.reset();
   path584.moveTo(234.66666666666666, 120);
   path584.lineTo(96, 120);
@@ -6606,7 +6606,7 @@ void pathOps584() {
 }
 
 void pathOps585() {
-  final Path path585 = Path();
+  final path585 = Path();
   path585.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 120), Radius.zero),
   );
@@ -6615,7 +6615,7 @@ void pathOps585() {
 }
 
 void pathOps586() {
-  final Path path586 = Path();
+  final path586 = Path();
   path586.reset();
   path586.moveTo(234.66666666666666, 120);
   path586.lineTo(96, 120);
@@ -6628,7 +6628,7 @@ void pathOps586() {
 }
 
 void pathOps587() {
-  final Path path587 = Path();
+  final path587 = Path();
   path587.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 120), Radius.zero),
   );
@@ -6637,7 +6637,7 @@ void pathOps587() {
 }
 
 void pathOps588() {
-  final Path path588 = Path();
+  final path588 = Path();
   path588.reset();
   path588.moveTo(234.66666666666666, 120);
   path588.lineTo(96, 120);
@@ -6650,7 +6650,7 @@ void pathOps588() {
 }
 
 void pathOps589() {
-  final Path path589 = Path();
+  final path589 = Path();
   path589.addRRect(
     RRect.fromRectAndRadius(const Rect.fromLTRB(0, 0, 250.66666666666666, 120), Radius.zero),
   );
@@ -6659,7 +6659,7 @@ void pathOps589() {
 }
 
 void pathOps590() {
-  final Path path590 = Path();
+  final path590 = Path();
   path590.reset();
   path590.moveTo(234.66666666666666, 120);
   path590.lineTo(96, 120);
@@ -6672,7 +6672,7 @@ void pathOps590() {
 }
 
 void pathOps596() {
-  final Path path596 = Path();
+  final path596 = Path();
   path596.reset();
   path596.moveTo(56, 42);
   path596.lineTo(56, 42);
@@ -6683,7 +6683,7 @@ void pathOps596() {
 }
 
 void pathOps598() {
-  final Path path598 = Path();
+  final path598 = Path();
   path598.reset();
   path598.moveTo(56, 42);
   path598.lineTo(56, 42);
@@ -6694,7 +6694,7 @@ void pathOps598() {
 }
 
 void pathOps600() {
-  final Path path600 = Path();
+  final path600 = Path();
   path600.reset();
   path600.moveTo(56, 42);
   path600.lineTo(56, 42);
@@ -6705,7 +6705,7 @@ void pathOps600() {
 }
 
 void pathOps602() {
-  final Path path602 = Path();
+  final path602 = Path();
   path602.reset();
   path602.moveTo(56, 42);
   path602.lineTo(56, 42);
@@ -6716,7 +6716,7 @@ void pathOps602() {
 }
 
 void pathOps604() {
-  final Path path604 = Path();
+  final path604 = Path();
   path604.reset();
   path604.moveTo(56, 42);
   path604.lineTo(56, 42);
@@ -6727,13 +6727,13 @@ void pathOps604() {
 }
 
 void pathOps605() {
-  final Path path605 = Path();
+  final path605 = Path();
   path605.addRRect(RRect.fromRectAndRadius(const Rect.fromLTRB(0, 136, 970, 1144), Radius.zero));
   allPaths.add(path605);
 }
 
 void pathOps607() {
-  final Path path607 = Path();
+  final path607 = Path();
   path607.addRRect(RRect.fromRectAndRadius(const Rect.fromLTRB(450, 136, 970, 696), Radius.zero));
   allPaths.add(path607);
 }

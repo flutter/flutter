@@ -35,17 +35,17 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('Image.network uses cacheWidth and cacheHeight', (WidgetTester tester) async {
-    const int expectedCacheHeight = 9;
-    const int expectedCacheWidth = 11;
+    const expectedCacheHeight = 9;
+    const expectedCacheWidth = 11;
     await tester.pumpAndSettle();
 
-    final Image image = Image.network(
+    final image = Image.network(
       'assets/packages/flutter_gallery_assets/assets/icons/material/material.png',
       cacheHeight: 9,
       cacheWidth: 11,
     );
 
-    bool called = false;
+    var called = false;
 
     Future<ui.Codec> decode(
       ui.ImmutableBuffer buffer, {
@@ -67,13 +67,13 @@ void main() {
     final ImageProvider resizeImage = image.image;
     expect(image.image, isA<ResizeImage>());
 
-    final LoadTestImageProvider testProvider = LoadTestImageProvider(image.image);
+    final testProvider = LoadTestImageProvider(image.image);
     final ImageStreamCompleter streamCompleter = testProvider.testLoad(
       await resizeImage.obtainKey(ImageConfiguration.empty),
       decode,
     );
 
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     int? imageInfoCachedWidth;
     int? imageInfoCachedHeight;
     streamCompleter.addListener(

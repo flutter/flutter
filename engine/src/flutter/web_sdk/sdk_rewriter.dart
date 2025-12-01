@@ -50,7 +50,7 @@ List<Replacer> generateApiFilePatterns(
   bool isPublic,
   List<String> extraImports,
 ) {
-  final String libraryPrefix = isPublic ? '' : '_';
+  final libraryPrefix = isPublic ? '' : '_';
   return <Replacer>[
     AllReplacer(RegExp('library\\s+$libraryName;'), '''
 @JS()
@@ -81,7 +81,7 @@ part '$libraryName/${match.group(1)}';
 }
 
 List<Replacer> generatePartsPatterns(String libraryName, bool isPublic) {
-  final String libraryPrefix = isPublic ? '' : '_';
+  final libraryPrefix = isPublic ? '' : '_';
   return <Replacer>[
     AllReplacer(RegExp('part\\s+of\\s+$libraryName;'), 'part of dart.$libraryPrefix$libraryName;'),
     // Remove library-level JS annotations.
@@ -120,18 +120,18 @@ final Map<Pattern, String> extraImportsMap = <Pattern, String>{
 // So far this only requires a replace of the library declarations.
 void main(List<String> arguments) {
   final ArgResults results = argParser.parse(arguments);
-  final Directory directory = Directory(results['output-dir'] as String);
-  final String inputDirectoryPath = results['input-dir'] as String;
-  final String? excludePattern = results['exclude-pattern'] as String?;
-  final String stampfilePath = results['stamp'] as String;
-  final String depfilePath = results['depfile'] as String;
-  final String buildDirPath = results['build-dir'] as String;
+  final directory = Directory(results['output-dir'] as String);
+  final inputDirectoryPath = results['input-dir'] as String;
+  final excludePattern = results['exclude-pattern'] as String?;
+  final stampfilePath = results['stamp'] as String;
+  final depfilePath = results['depfile'] as String;
+  final buildDirPath = results['build-dir'] as String;
 
   String Function(String source)? preprocessor;
   List<Replacer> replacementPatterns;
   String? libraryName;
 
-  final bool isPublic = results['public'] as bool;
+  final isPublic = results['public'] as bool;
 
   if (results['ui'] as bool) {
     replacementPatterns = uiPatterns;
@@ -144,7 +144,7 @@ void main(List<String> arguments) {
     replacementPatterns = generatePartsPatterns(libraryName, isPublic);
   }
 
-  final List<String> inputFiles = <String>[];
+  final inputFiles = <String>[];
   final List<FileSystemEntity> entries = Directory(
     inputDirectoryPath,
   ).listSync(recursive: true, followLinks: false);
@@ -169,7 +169,7 @@ void main(List<String> arguments) {
       throw Exception('library-name must be specified if api-file is specified');
     }
 
-    final String inputFilePath = results['api-file'] as String;
+    final inputFilePath = results['api-file'] as String;
     final String outputFilePath = path.join(directory.path, path.basename(inputFilePath));
 
     final List<String> extraImports = getExtraImportsForLibrary(libraryName);
@@ -188,7 +188,7 @@ void main(List<String> arguments) {
 }
 
 void writeDepfile(String depfilePath, String stampfilePath, List<String> inputFiles) {
-  final StringBuffer outBuf = StringBuffer();
+  final outBuf = StringBuffer();
   outBuf.write('$stampfilePath: ');
   outBuf.write(inputFiles.join(' '));
   File(depfilePath).writeAsStringSync(outBuf.toString());
@@ -200,7 +200,7 @@ List<String> getExtraImportsForLibrary(String libraryName) {
     return <String>[];
   }
 
-  final List<String> extraImports = <String>[];
+  final extraImports = <String>[];
   for (final MapEntry<Pattern, String> entry in extraImportsMap.entries) {
     // A library shouldn't import itself.
     if (entry.key.matchAsPrefix(libraryName) == null) {
@@ -219,8 +219,8 @@ void processFile(
   String Function(String source)? preprocessor,
   List<Replacer> replacementPatterns,
 ) {
-  final File inputFile = File(inputFilePath);
-  final File outputFile = File(outputFilePath)..createSync(recursive: true);
+  final inputFile = File(inputFilePath);
+  final outputFile = File(outputFilePath)..createSync(recursive: true);
   outputFile.writeAsStringSync(
     processSource(inputFile.readAsStringSync(), preprocessor, replacementPatterns),
   );
@@ -237,7 +237,7 @@ String processSource(
   for (final Replacer replacer in stripMetaPatterns) {
     source = replacer.perform(source);
   }
-  for (final Replacer replacer in replacementPatterns) {
+  for (final replacer in replacementPatterns) {
     source = replacer.perform(source);
   }
   return source;
@@ -249,10 +249,10 @@ String processSource(
 // and code comments. Imports are disallowed. Instead, the required imports are
 // added by this script during the rewrite.
 String validateApiFile(String apiFilePath, String apiFileCode, String libraryName) {
-  final List<String> expectedLines = <String>['library $libraryName;'];
+  final expectedLines = <String>['library $libraryName;'];
 
   final List<String> lines = apiFileCode.split('\n');
-  for (int i = 0; i < lines.length; i += 1) {
+  for (var i = 0; i < lines.length; i += 1) {
     final int lineNumber = i + 1;
     final String line = lines[i].trim();
 

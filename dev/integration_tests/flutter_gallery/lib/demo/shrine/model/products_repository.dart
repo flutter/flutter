@@ -5,7 +5,7 @@
 import 'product.dart';
 
 List<Product> loadProducts(Category category) {
-  const List<Product> allProducts = <Product>[
+  const allProducts = <Product>[
     Product(
       category: Category.accessories,
       id: 0,

@@ -3,13 +3,16 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_api_samples/cupertino/picker/cupertino_picker.0.dart' as example;
+import 'package:flutter_api_samples/cupertino/picker/cupertino_picker.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 const Offset _kRowOffset = Offset(0.0, -50.0);
 
 void main() {
-  testWidgets('Change selected fruit using CupertinoPicker', (WidgetTester tester) async {
+  testWidgets('Change selected fruit using CupertinoPicker', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.CupertinoPickerApp());
 
     // Open the Cupertino picker.
@@ -17,7 +20,9 @@ void main() {
     await tester.pumpAndSettle();
 
     // Test the initial item.
-    CupertinoPicker picker = tester.widget<CupertinoPicker>(find.byType(CupertinoPicker));
+    CupertinoPicker picker = tester.widget<CupertinoPicker>(
+      find.byType(CupertinoPicker),
+    );
     expect(picker.scrollController!.initialItem, 0);
 
     // Drag the wheel to change fruit selection.

@@ -52,8 +52,8 @@ void main() {
     saveText = null;
   });
 
-  const Size wideWindowSize = Size(1920.0, 1080.0);
-  const Size narrowWindowSize = Size(1070.0, 1770.0);
+  const wideWindowSize = Size(1920.0, 1080.0);
+  const narrowWindowSize = Size(1070.0, 1770.0);
 
   Future<void> preparePicker(
     WidgetTester tester,
@@ -173,7 +173,7 @@ void main() {
   });
 
   testWidgets('Default Dialog properties (calendar mode)', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
       final Material dialogMaterial = tester.widget<Material>(
         find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first,
@@ -192,7 +192,7 @@ void main() {
   });
 
   testWidgets('Default Dialog properties (input mode)', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
       final Material dialogMaterial = tester.widget<Material>(
         find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first,
@@ -211,13 +211,13 @@ void main() {
   });
 
   testWidgets('Scaffold and AppBar defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
       final Scaffold scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
       expect(scaffold.backgroundColor, null);
 
       final AppBar appBar = tester.widget<AppBar>(find.byType(AppBar));
-      final IconThemeData iconTheme = IconThemeData(color: theme.colorScheme.onSurfaceVariant);
+      final iconTheme = IconThemeData(color: theme.colorScheme.onSurfaceVariant);
       expect(appBar.iconTheme, iconTheme);
       expect(appBar.actionsIconTheme, iconTheme);
       expect(appBar.elevation, 0);
@@ -230,8 +230,8 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/122056
 
     // Common screen size roughly based on a Pixel 1
-    const Size kCommonScreenSizePortrait = Size(1070, 1770);
-    const Size kCommonScreenSizeLandscape = Size(1770, 1070);
+    const kCommonScreenSizePortrait = Size(1070, 1770);
+    const kCommonScreenSizeLandscape = Size(1770, 1070);
 
     Future<void> showPicker(WidgetTester tester, Size size) async {
       addTearDown(tester.view.reset);
@@ -703,7 +703,7 @@ void main() {
   });
 
   group('Haptic feedback', () {
-    const Duration hapticFeedbackInterval = Duration(milliseconds: 10);
+    const hapticFeedbackInterval = Duration(milliseconds: 10);
     late FeedbackTester feedback;
 
     setUp(() {
@@ -945,7 +945,7 @@ void main() {
     });
 
     testWidgets('Default Dialog properties (input mode)', (WidgetTester tester) async {
-      final ThemeData theme = ThemeData();
+      final theme = ThemeData();
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
         final Material dialogMaterial = tester.widget<Material>(
           find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first,
@@ -1174,11 +1174,11 @@ void main() {
         // ignore: avoid_dynamic_calls
         final dynamic /*_InputBorderTween*/ inputBorderTween = inputBorderPainter.border;
         // ignore: avoid_dynamic_calls
-        final Animation<double> animation = inputBorderPainter.borderAnimation as Animation<double>;
+        final animation = inputBorderPainter.borderAnimation as Animation<double>;
         // ignore: avoid_dynamic_calls
-        final InputBorder actualBorder = inputBorderTween.evaluate(animation) as InputBorder;
+        final actualBorder = inputBorderTween.evaluate(animation) as InputBorder;
         // ignore: avoid_dynamic_calls
-        final Color containerColor = inputBorderPainter.blendedColor as Color;
+        final containerColor = inputBorderPainter.blendedColor as Color;
 
         expect(actualBorder, equals(expectedBorder));
         expect(containerColor, equals(expectedContainerColor));
@@ -1506,7 +1506,7 @@ void main() {
     });
   });
 
-  for (final TextInputType? keyboardType in <TextInputType?>[null, TextInputType.emailAddress]) {
+  for (final keyboardType in <TextInputType?>[null, TextInputType.emailAddress]) {
     testWidgets('DateRangePicker takes keyboardType $keyboardType', (WidgetTester tester) async {
       late BuildContext buttonContext;
       const InputBorder border = InputBorder.none;
@@ -1661,7 +1661,7 @@ void main() {
   // This is a regression test for https://github.com/flutter/flutter/issues/154393.
   testWidgets('DateRangePicker close button shape should be square', (WidgetTester tester) async {
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
-      final ThemeData theme = ThemeData();
+      final theme = ThemeData();
       final Finder buttonFinder = find.widgetWithIcon(IconButton, Icons.close);
       expect(tester.getSize(buttonFinder), const Size(48.0, 48.0));
 
@@ -1742,7 +1742,7 @@ void main() {
     });
 
     testWidgets('Default Dialog properties (calendar mode)', (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(useMaterial3: false);
+      final theme = ThemeData(useMaterial3: false);
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
         final Material dialogMaterial = tester.widget<Material>(
           find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first,
@@ -1761,13 +1761,13 @@ void main() {
     });
 
     testWidgets('Scaffold and AppBar defaults', (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(useMaterial3: false);
+      final theme = ThemeData(useMaterial3: false);
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
         final Scaffold scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
         expect(scaffold.backgroundColor, theme.colorScheme.surface);
 
         final AppBar appBar = tester.widget<AppBar>(find.byType(AppBar));
-        final IconThemeData iconTheme = IconThemeData(color: theme.colorScheme.onPrimary);
+        final iconTheme = IconThemeData(color: theme.colorScheme.onPrimary);
         expect(appBar.iconTheme, iconTheme);
         expect(appBar.actionsIconTheme, iconTheme);
         expect(appBar.elevation, null);
@@ -1788,7 +1788,7 @@ void main() {
       });
 
       testWidgets('Default Dialog properties (input mode)', (WidgetTester tester) async {
-        final ThemeData theme = ThemeData(useMaterial3: false);
+        final theme = ThemeData(useMaterial3: false);
         await preparePicker(tester, (Future<DateTimeRange?> range) async {
           final Material dialogMaterial = tester.widget<Material>(
             find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first,
@@ -2088,7 +2088,7 @@ class _RestorableDateRangePickerDialogTestWidgetState
     return DialogRoute<DateTimeRange?>(
       context: context,
       builder: (BuildContext context) {
-        final Map<dynamic, dynamic> args = arguments! as Map<dynamic, dynamic>;
+        final args = arguments! as Map<dynamic, dynamic>;
         return DateRangePickerDialog(
           restorationId: 'date_picker_dialog',
           initialEntryMode: DatePickerEntryMode.values[args['datePickerEntryMode'] as int],
@@ -2105,10 +2105,9 @@ class _RestorableDateRangePickerDialogTestWidgetState
     final DateTime? startDateTime = _startDate.value;
     final DateTime? endDateTime = _endDate.value;
     // Example: "25/7/1994"
-    final String startDateTimeString =
+    final startDateTimeString =
         '${startDateTime?.day}/${startDateTime?.month}/${startDateTime?.year}';
-    final String endDateTimeString =
-        '${endDateTime?.day}/${endDateTime?.month}/${endDateTime?.year}';
+    final endDateTimeString = '${endDateTime?.day}/${endDateTime?.month}/${endDateTime?.year}';
     return Scaffold(
       body: Center(
         child: Column(

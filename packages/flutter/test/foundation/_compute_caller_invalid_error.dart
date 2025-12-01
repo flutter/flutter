@@ -9,7 +9,7 @@ import 'dart:isolate';
 import 'package:flutter/src/foundation/_isolates_io.dart';
 
 int getLength(String s) {
-  final ReceivePort r = ReceivePort();
+  final r = ReceivePort();
   try {
     throw r;
   } finally {
@@ -18,9 +18,9 @@ int getLength(String s) {
 }
 
 Future<void> main() async {
-  const String s = 'hello world';
+  const s = 'hello world';
 
-  bool wasError = false;
+  var wasError = false;
   try {
     await compute(getLength, s);
   } on RemoteError {

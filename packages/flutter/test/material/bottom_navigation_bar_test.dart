@@ -86,8 +86,8 @@ void main() {
   });
 
   testWidgets('Material2 - Fixed BottomNavigationBar defaults', (WidgetTester tester) async {
-    const Color primaryColor = Color(0xFF000001);
-    const Color unselectedWidgetColor = Color(0xFF000002);
+    const primaryColor = Color(0xFF000001);
+    const unselectedWidgetColor = Color(0xFF000002);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -107,8 +107,8 @@ void main() {
       ),
     );
 
-    const double selectedFontSize = 14.0;
-    const double unselectedFontSize = 12.0;
+    const selectedFontSize = 14.0;
+    const unselectedFontSize = 12.0;
     final TextStyle selectedFontStyle = tester
         .renderObject<RenderParagraph>(find.text('AC'))
         .text
@@ -155,8 +155,8 @@ void main() {
   });
 
   testWidgets('Material3 - Fixed BottomNavigationBar defaults', (WidgetTester tester) async {
-    const Color primaryColor = Color(0xFF000001);
-    const Color unselectedWidgetColor = Color(0xFF000002);
+    const primaryColor = Color(0xFF000001);
+    const unselectedWidgetColor = Color(0xFF000002);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -176,8 +176,8 @@ void main() {
       ),
     );
 
-    const double selectedFontSize = 14.0;
-    const double unselectedFontSize = 12.0;
+    const selectedFontSize = 14.0;
+    const unselectedFontSize = 12.0;
     final TextStyle selectedFontStyle = tester
         .renderObject<RenderParagraph>(find.text('AC'))
         .text
@@ -224,8 +224,8 @@ void main() {
   });
 
   testWidgets('Custom selected and unselected font styles', (WidgetTester tester) async {
-    const TextStyle selectedTextStyle = TextStyle(fontWeight: FontWeight.w200, fontSize: 18.0);
-    const TextStyle unselectedTextStyle = TextStyle(fontWeight: FontWeight.w600, fontSize: 12.0);
+    const selectedTextStyle = TextStyle(fontWeight: FontWeight.w200, fontSize: 18.0);
+    const unselectedTextStyle = TextStyle(fontWeight: FontWeight.w600, fontSize: 12.0);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -267,10 +267,10 @@ void main() {
   });
 
   testWidgets('font size on text styles overrides font size params', (WidgetTester tester) async {
-    const TextStyle selectedTextStyle = TextStyle(fontSize: 18.0);
-    const TextStyle unselectedTextStyle = TextStyle(fontSize: 12.0);
-    const double selectedFontSize = 17.0;
-    const double unselectedFontSize = 11.0;
+    const selectedTextStyle = TextStyle(fontSize: 18.0);
+    const unselectedTextStyle = TextStyle(fontSize: 12.0);
+    const selectedFontSize = 17.0;
+    const unselectedFontSize = 11.0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -308,8 +308,8 @@ void main() {
   });
 
   testWidgets('Custom selected and unselected icon themes', (WidgetTester tester) async {
-    const IconThemeData selectedIconTheme = IconThemeData(size: 36, color: Color(0x00000001));
-    const IconThemeData unselectedIconTheme = IconThemeData(size: 18, color: Color(0x00000002));
+    const selectedIconTheme = IconThemeData(size: 36, color: Color(0x00000001));
+    const unselectedIconTheme = IconThemeData(size: 18, color: Color(0x00000002));
 
     await tester.pumpWidget(
       MaterialApp(
@@ -338,10 +338,10 @@ void main() {
   testWidgets('color on icon theme overrides selected and unselected item colors', (
     WidgetTester tester,
   ) async {
-    const IconThemeData selectedIconTheme = IconThemeData(size: 36, color: Color(0x00000001));
-    const IconThemeData unselectedIconTheme = IconThemeData(size: 18, color: Color(0x00000002));
-    const Color selectedItemColor = Color(0x00000003);
-    const Color unselectedItemColor = Color(0x00000004);
+    const selectedIconTheme = IconThemeData(size: 36, color: Color(0x00000001));
+    const unselectedIconTheme = IconThemeData(size: 18, color: Color(0x00000002));
+    const selectedItemColor = Color(0x00000003);
+    const unselectedItemColor = Color(0x00000004);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -378,11 +378,11 @@ void main() {
   });
 
   testWidgets('Padding is calculated properly on items - all labels', (WidgetTester tester) async {
-    const double selectedFontSize = 16.0;
-    const double selectedIconSize = 36.0;
-    const double unselectedIconSize = 20.0;
-    const IconThemeData selectedIconTheme = IconThemeData(size: selectedIconSize);
-    const IconThemeData unselectedIconTheme = IconThemeData(size: unselectedIconSize);
+    const selectedFontSize = 16.0;
+    const selectedIconSize = 36.0;
+    const unselectedIconSize = 20.0;
+    const selectedIconTheme = IconThemeData(size: selectedIconSize);
+    const unselectedIconTheme = IconThemeData(size: unselectedIconSize);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -416,11 +416,11 @@ void main() {
   testWidgets('Padding is calculated properly on items - selected labels only', (
     WidgetTester tester,
   ) async {
-    const double selectedFontSize = 16.0;
-    const double selectedIconSize = 36.0;
-    const double unselectedIconSize = 20.0;
-    const IconThemeData selectedIconTheme = IconThemeData(size: selectedIconSize);
-    const IconThemeData unselectedIconTheme = IconThemeData(size: unselectedIconSize);
+    const selectedFontSize = 16.0;
+    const selectedIconSize = 36.0;
+    const unselectedIconSize = 20.0;
+    const selectedIconTheme = IconThemeData(size: selectedIconSize);
+    const unselectedIconTheme = IconThemeData(size: unselectedIconSize);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -453,11 +453,11 @@ void main() {
   });
 
   testWidgets('Padding is calculated properly on items - no labels', (WidgetTester tester) async {
-    const double selectedFontSize = 16.0;
-    const double selectedIconSize = 36.0;
-    const double unselectedIconSize = 20.0;
-    const IconThemeData selectedIconTheme = IconThemeData(size: selectedIconSize);
-    const IconThemeData unselectedIconTheme = IconThemeData(size: unselectedIconSize);
+    const selectedFontSize = 16.0;
+    const selectedIconSize = 36.0;
+    const unselectedIconSize = 20.0;
+    const selectedIconTheme = IconThemeData(size: selectedIconSize);
+    const unselectedIconTheme = IconThemeData(size: unselectedIconSize);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -505,7 +505,7 @@ void main() {
       ),
     );
 
-    const double selectedFontSize = 14.0;
+    const selectedFontSize = 14.0;
     expect(
       tester.renderObject<RenderParagraph>(find.text('AC')).text.style!.fontSize,
       selectedFontSize,
@@ -533,7 +533,7 @@ void main() {
       ),
     );
 
-    const double selectedFontSize = 14.0;
+    const selectedFontSize = 14.0;
     expect(
       tester.renderObject<RenderParagraph>(find.text('AC')).text.style!.fontSize,
       selectedFontSize,
@@ -548,12 +548,12 @@ void main() {
   });
 
   testWidgets('Fixed BottomNavigationBar custom font size, color', (WidgetTester tester) async {
-    const Color primaryColor = Color(0xFF000000);
-    const Color unselectedWidgetColor = Color(0xFFD501FF);
-    const Color selectedColor = Color(0xFF0004FF);
-    const Color unselectedColor = Color(0xFFE5FF00);
-    const double selectedFontSize = 18.0;
-    const double unselectedFontSize = 14.0;
+    const primaryColor = Color(0xFF000000);
+    const unselectedWidgetColor = Color(0xFFD501FF);
+    const selectedColor = Color(0xFF0004FF);
+    const unselectedColor = Color(0xFFE5FF00);
+    const selectedFontSize = 18.0;
+    const unselectedFontSize = 14.0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -619,12 +619,12 @@ void main() {
   });
 
   testWidgets('Shifting BottomNavigationBar custom font size, color', (WidgetTester tester) async {
-    const Color primaryColor = Color(0xFF000000);
-    const Color unselectedWidgetColor = Color(0xFFD501FF);
-    const Color selectedColor = Color(0xFF0004FF);
-    const Color unselectedColor = Color(0xFFE5FF00);
-    const double selectedFontSize = 18.0;
-    const double unselectedFontSize = 14.0;
+    const primaryColor = Color(0xFF000000);
+    const unselectedWidgetColor = Color(0xFFD501FF);
+    const selectedColor = Color(0xFF0004FF);
+    const unselectedColor = Color(0xFFE5FF00);
+    const selectedFontSize = 18.0;
+    const unselectedFontSize = 14.0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -665,12 +665,12 @@ void main() {
   testWidgets(
     'label style color should override itemColor only for the label for BottomNavigationBarType.fixed',
     (WidgetTester tester) async {
-      const Color primaryColor = Color(0xFF000000);
-      const Color unselectedWidgetColor = Color(0xFFD501FF);
-      const Color selectedColor = Color(0xFF0004FF);
-      const Color unselectedColor = Color(0xFFE5FF00);
-      const Color selectedLabelColor = Color(0xFFFF9900);
-      const Color unselectedLabelColor = Color(0xFF92F74E);
+      const primaryColor = Color(0xFF000000);
+      const unselectedWidgetColor = Color(0xFFD501FF);
+      const selectedColor = Color(0xFF0004FF);
+      const unselectedColor = Color(0xFFE5FF00);
+      const selectedLabelColor = Color(0xFFFF9900);
+      const unselectedLabelColor = Color(0xFF92F74E);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -714,12 +714,12 @@ void main() {
   testWidgets(
     'label style color should override itemColor only for the label for BottomNavigationBarType.shifting',
     (WidgetTester tester) async {
-      const Color primaryColor = Color(0xFF000000);
-      const Color unselectedWidgetColor = Color(0xFFD501FF);
-      const Color selectedColor = Color(0xFF0004FF);
-      const Color unselectedColor = Color(0xFFE5FF00);
-      const Color selectedLabelColor = Color(0xFFFF9900);
-      const Color unselectedLabelColor = Color(0xFF92F74E);
+      const primaryColor = Color(0xFF000000);
+      const unselectedWidgetColor = Color(0xFFD501FF);
+      const selectedColor = Color(0xFF0004FF);
+      const unselectedColor = Color(0xFFE5FF00);
+      const selectedLabelColor = Color(0xFFFF9900);
+      const unselectedLabelColor = Color(0xFF92F74E);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -763,21 +763,18 @@ void main() {
   testWidgets('iconTheme color should override itemColor for BottomNavigationBarType.fixed', (
     WidgetTester tester,
   ) async {
-    const Color primaryColor = Color(0xFF000000);
-    const Color unselectedWidgetColor = Color(0xFFD501FF);
-    const Color selectedColor = Color(0xFF0004FF);
-    const Color unselectedColor = Color(0xFFE5FF00);
-    const Color selectedLabelColor = Color(0xFFFF9900);
-    const Color unselectedLabelColor = Color(0xFF92F74E);
-    const Color selectedIconThemeColor = Color(0xFF1E7723);
-    const Color unselectedIconThemeColor = Color(0xFF009688);
-    const IconThemeData selectedIconTheme = IconThemeData(size: 20, color: selectedIconThemeColor);
-    const IconThemeData unselectedIconTheme = IconThemeData(
-      size: 18,
-      color: unselectedIconThemeColor,
-    );
-    const TextStyle selectedTextStyle = TextStyle(fontSize: 18.0, color: selectedLabelColor);
-    const TextStyle unselectedTextStyle = TextStyle(fontSize: 18.0, color: unselectedLabelColor);
+    const primaryColor = Color(0xFF000000);
+    const unselectedWidgetColor = Color(0xFFD501FF);
+    const selectedColor = Color(0xFF0004FF);
+    const unselectedColor = Color(0xFFE5FF00);
+    const selectedLabelColor = Color(0xFFFF9900);
+    const unselectedLabelColor = Color(0xFF92F74E);
+    const selectedIconThemeColor = Color(0xFF1E7723);
+    const unselectedIconThemeColor = Color(0xFF009688);
+    const selectedIconTheme = IconThemeData(size: 20, color: selectedIconThemeColor);
+    const unselectedIconTheme = IconThemeData(size: 18, color: unselectedIconThemeColor);
+    const selectedTextStyle = TextStyle(fontSize: 18.0, color: selectedLabelColor);
+    const unselectedTextStyle = TextStyle(fontSize: 18.0, color: unselectedLabelColor);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -811,19 +808,16 @@ void main() {
   testWidgets('iconTheme color should override itemColor for BottomNavigationBarType.shifted', (
     WidgetTester tester,
   ) async {
-    const Color primaryColor = Color(0xFF000000);
-    const Color unselectedWidgetColor = Color(0xFFD501FF);
-    const Color selectedLabelColor = Color(0xFFFF9900);
-    const Color unselectedLabelColor = Color(0xFF92F74E);
-    const Color selectedIconThemeColor = Color(0xFF1E7723);
-    const Color unselectedIconThemeColor = Color(0xFF009688);
-    const IconThemeData selectedIconTheme = IconThemeData(size: 20, color: selectedIconThemeColor);
-    const IconThemeData unselectedIconTheme = IconThemeData(
-      size: 18,
-      color: unselectedIconThemeColor,
-    );
-    const TextStyle selectedTextStyle = TextStyle(fontSize: 18.0, color: selectedLabelColor);
-    const TextStyle unselectedTextStyle = TextStyle(fontSize: 18.0, color: unselectedLabelColor);
+    const primaryColor = Color(0xFF000000);
+    const unselectedWidgetColor = Color(0xFFD501FF);
+    const selectedLabelColor = Color(0xFFFF9900);
+    const unselectedLabelColor = Color(0xFF92F74E);
+    const selectedIconThemeColor = Color(0xFF1E7723);
+    const unselectedIconThemeColor = Color(0xFF009688);
+    const selectedIconTheme = IconThemeData(size: 20, color: selectedIconThemeColor);
+    const unselectedIconTheme = IconThemeData(size: 18, color: unselectedIconThemeColor);
+    const selectedTextStyle = TextStyle(fontSize: 18.0, color: selectedLabelColor);
+    const unselectedTextStyle = TextStyle(fontSize: 18.0, color: unselectedLabelColor);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -855,15 +849,12 @@ void main() {
   testWidgets('iconTheme color should override itemColor color for BottomNavigationBarType.fixed', (
     WidgetTester tester,
   ) async {
-    const Color primaryColor = Color(0xFF000000);
-    const Color unselectedWidgetColor = Color(0xFFD501FF);
-    const Color selectedIconThemeColor = Color(0xFF1E7723);
-    const Color unselectedIconThemeColor = Color(0xFF009688);
-    const IconThemeData selectedIconTheme = IconThemeData(size: 20, color: selectedIconThemeColor);
-    const IconThemeData unselectedIconTheme = IconThemeData(
-      size: 18,
-      color: unselectedIconThemeColor,
-    );
+    const primaryColor = Color(0xFF000000);
+    const unselectedWidgetColor = Color(0xFFD501FF);
+    const selectedIconThemeColor = Color(0xFF1E7723);
+    const unselectedIconThemeColor = Color(0xFF009688);
+    const selectedIconTheme = IconThemeData(size: 20, color: selectedIconThemeColor);
+    const unselectedIconTheme = IconThemeData(size: 18, color: unselectedIconThemeColor);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -893,17 +884,14 @@ void main() {
   testWidgets('iconTheme color should override itemColor for BottomNavigationBarType.shifted', (
     WidgetTester tester,
   ) async {
-    const Color primaryColor = Color(0xFF000000);
-    const Color unselectedWidgetColor = Color(0xFFD501FF);
-    const Color selectedColor = Color(0xFF0004FF);
-    const Color unselectedColor = Color(0xFFE5FF00);
-    const Color selectedIconThemeColor = Color(0xFF1E7723);
-    const Color unselectedIconThemeColor = Color(0xFF009688);
-    const IconThemeData selectedIconTheme = IconThemeData(size: 20, color: selectedIconThemeColor);
-    const IconThemeData unselectedIconTheme = IconThemeData(
-      size: 18,
-      color: unselectedIconThemeColor,
-    );
+    const primaryColor = Color(0xFF000000);
+    const unselectedWidgetColor = Color(0xFFD501FF);
+    const selectedColor = Color(0xFF0004FF);
+    const unselectedColor = Color(0xFFE5FF00);
+    const selectedIconThemeColor = Color(0xFF1E7723);
+    const unselectedIconThemeColor = Color(0xFF009688);
+    const selectedIconTheme = IconThemeData(size: 20, color: selectedIconThemeColor);
+    const unselectedIconTheme = IconThemeData(size: 18, color: unselectedIconThemeColor);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1043,7 +1031,7 @@ void main() {
   });
 
   testWidgets('setting selectedFontSize to zero hides all labels', (WidgetTester tester) async {
-    const double customElevation = 3.0;
+    const customElevation = 3.0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1593,7 +1581,7 @@ void main() {
   testWidgets(
     'Material2 - BottomNavigationBar shows tool tips with text scaling on long press when labels are provided',
     (WidgetTester tester) async {
-      const String label = 'Foo';
+      const label = 'Foo';
 
       Widget buildApp({required double textScaleFactor}) {
         return MediaQuery.withClampedTextScaling(
@@ -1652,7 +1640,7 @@ void main() {
   testWidgets(
     'Material3 - BottomNavigationBar shows tool tips with text scaling on long press when labels are provided',
     (WidgetTester tester) async {
-      const String label = 'Foo';
+      const label = 'Foo';
 
       Widget buildApp({required TextScaler textScaler}) {
         return MediaQuery(
@@ -1739,8 +1727,8 @@ void main() {
   testWidgets('BottomNavigationBar limits width of tiles with long labels', (
     WidgetTester tester,
   ) async {
-    final String longTextA = List<String>.generate(100, (int index) => 'A').toString();
-    final String longTextB = List<String>.generate(100, (int index) => 'B').toString();
+    final longTextA = List<String>.generate(100, (int index) => 'A').toString();
+    final longTextB = List<String>.generate(100, (int index) => 'B').toString();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1840,9 +1828,9 @@ void main() {
   });
 
   testWidgets('BottomNavigationBar inactiveIcon shown', (WidgetTester tester) async {
-    const Key filled = Key('filled');
-    const Key stroked = Key('stroked');
-    int selectedItem = 0;
+    const filled = Key('filled');
+    const stroked = Key('stroked');
+    var selectedItem = 0;
 
     await tester.pumpWidget(
       boilerplate(
@@ -2093,7 +2081,7 @@ void main() {
   group('Material2 - BottomNavigationBar shifting backgroundColor with transition', () {
     // Regression test for: https://github.com/flutter/flutter/issues/22226
     Widget runTest() {
-      int currentIndex = 0;
+      var currentIndex = 0;
       return MaterialApp(
         theme: ThemeData(useMaterial3: false),
         home: StatefulBuilder(
@@ -2128,12 +2116,12 @@ void main() {
       );
     }
 
-    for (int pump = 1; pump < 9; pump++) {
+    for (var pump = 1; pump < 9; pump++) {
       testWidgets('pump $pump', (WidgetTester tester) async {
         await tester.pumpWidget(runTest());
         await tester.tap(find.text('Green'));
 
-        for (int i = 0; i < pump; i++) {
+        for (var i = 0; i < pump; i++) {
           await tester.pump(const Duration(milliseconds: 30));
         }
         await expectLater(
@@ -2147,7 +2135,7 @@ void main() {
   group('Material3 - BottomNavigationBar shifting backgroundColor with transition', () {
     // Regression test for: https://github.com/flutter/flutter/issues/22226
     Widget runTest() {
-      int currentIndex = 0;
+      var currentIndex = 0;
 
       return MaterialApp(
         home: StatefulBuilder(
@@ -2182,12 +2170,12 @@ void main() {
       );
     }
 
-    for (int pump = 1; pump < 9; pump++) {
+    for (var pump = 1; pump < 9; pump++) {
       testWidgets('pump $pump', (WidgetTester tester) async {
         await tester.pumpWidget(runTest());
         await tester.tap(find.text('Green'));
 
-        for (int i = 0; i < pump; i++) {
+        for (var i = 0; i < pump; i++) {
           await tester.pump(const Duration(milliseconds: 30));
         }
         await expectLater(
@@ -2460,7 +2448,7 @@ void main() {
     }
 
     testWidgets('BottomNavigationBar with enabled feedback', (WidgetTester tester) async {
-      const bool enableFeedback = true;
+      const enableFeedback = true;
 
       await tester.pumpWidget(feedbackBoilerplate(enableFeedback: enableFeedback));
 
@@ -2471,7 +2459,7 @@ void main() {
     });
 
     testWidgets('BottomNavigationBar with disabled feedback', (WidgetTester tester) async {
-      const bool enableFeedback = false;
+      const enableFeedback = false;
 
       await tester.pumpWidget(feedbackBoilerplate(enableFeedback: enableFeedback));
 
@@ -2495,7 +2483,7 @@ void main() {
     testWidgets('BottomNavigationBar with disabled feedback using BottomNavigationBarTheme', (
       WidgetTester tester,
     ) async {
-      const bool enableFeedbackTheme = false;
+      const enableFeedbackTheme = false;
 
       await tester.pumpWidget(feedbackBoilerplate(enableFeedbackTheme: enableFeedbackTheme));
 
@@ -2508,8 +2496,8 @@ void main() {
     testWidgets(
       'BottomNavigationBar.enableFeedback overrides BottomNavigationBarTheme.enableFeedback',
       (WidgetTester tester) async {
-        const bool enableFeedbackTheme = false;
-        const bool enableFeedback = true;
+        const enableFeedbackTheme = false;
+        const enableFeedback = true;
 
         await tester.pumpWidget(
           feedbackBoilerplate(
@@ -2527,7 +2515,7 @@ void main() {
   });
 
   testWidgets('BottomNavigationBar excludes semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2684,8 +2672,8 @@ void main() {
     );
 
     const double navigationBarTop = 600 - kBottomNavigationBarHeight; // 544
-    const double selectedFontSize = 14.0;
-    const double m3LineHeight = 1.43;
+    const selectedFontSize = 14.0;
+    const m3LineHeight = 1.43;
     final double labelHeight = (selectedFontSize * m3LineHeight).floorToDouble(); // 20
     const double navigationTileVerticalPadding = selectedFontSize / 2; // 7.0
     final double navigationTileHeight =
@@ -2825,8 +2813,8 @@ void main() {
     );
 
     const double navigationBarTop = 600 - kBottomNavigationBarHeight; // 544
-    const double selectedFontSize = 14.0;
-    const double m3LineHeight = 1.43;
+    const selectedFontSize = 14.0;
+    const m3LineHeight = 1.43;
     final double labelHeight = (selectedFontSize * m3LineHeight).floorToDouble(); // 20
     const double navigationTileVerticalPadding = selectedFontSize / 2; // 7.0
     final double navigationTileHeight =
@@ -2850,7 +2838,7 @@ void main() {
     // The layout of the unselected item's label is slightly different; not
     // checking that here.
     final double firstLabelWidth = tester.getSize(find.text('Title0')).width;
-    const double itemWidth = iconWidth; // 200
+    const itemWidth = iconWidth; // 200
     const double firstItemLeft = 150;
     const double firstLabelCenter = firstItemLeft + itemWidth / 2; // 250
 
@@ -2965,8 +2953,8 @@ void main() {
     );
 
     const double navigationBarTop = 600 - kBottomNavigationBarHeight; // 544
-    const double selectedFontSize = 14.0;
-    const double m3LineHeight = 1.43;
+    const selectedFontSize = 14.0;
+    const m3LineHeight = 1.43;
     final double labelHeight = (selectedFontSize * m3LineHeight).floorToDouble(); // 20
     const double navigationTileVerticalPadding = selectedFontSize / 2; // 7.0
     // Icon and label are in the same row.
@@ -3070,8 +3058,8 @@ void main() {
   });
 
   testWidgets('BottomNavigationBar keys passed through', (WidgetTester tester) async {
-    const Key key1 = Key('key1');
-    const Key key2 = Key('key2');
+    const key1 = Key('key1');
+    const key2 = Key('key2');
 
     await tester.pumpWidget(
       boilerplate(

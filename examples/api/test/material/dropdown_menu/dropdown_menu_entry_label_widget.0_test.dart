@@ -9,7 +9,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('DropdownEntryLabelWidget appears', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.DropdownMenuEntryLabelWidgetExampleApp());
+    await tester.pumpWidget(
+      const example.DropdownMenuEntryLabelWidgetExampleApp(),
+    );
 
     const String longText =
         'is a color that sings of hope, A hue that shines like gold. It is the color of dreams, A shade that never grows old.';

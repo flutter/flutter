@@ -51,7 +51,7 @@ class MailPreviewCard extends StatelessWidget {
       closedBuilder: (BuildContext context, void Function() openContainer) {
         final bool isDesktop = isDisplayDesktop(context);
         final ColorScheme colorScheme = theme.colorScheme;
-        final _MailPreview mailPreview = _MailPreview(
+        final mailPreview = _MailPreview(
           id: id,
           email: email,
           onTap: openContainer,
@@ -288,7 +288,7 @@ class _MailPreviewActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isDark = Theme.brightnessOf(context) == Brightness.dark;
+    final isDark = Theme.brightnessOf(context) == Brightness.dark;
     final Color color = isDark ? ReplyColors.white50 : ReplyColors.blue600;
     final bool isDesktop = isDisplayDesktop(context);
     final Color starredIconColor = isStarred ? Theme.of(context).colorScheme.secondary : color;
@@ -310,7 +310,10 @@ class _MailPreviewActionBar extends StatelessWidget {
             ),
             onPressed: onDelete,
           ),
-          IconButton(icon: Icon(Icons.more_vert, color: color), onPressed: () {}),
+          IconButton(
+            icon: Icon(Icons.more_vert, color: color),
+            onPressed: () {},
+          ),
           const SizedBox(width: 12),
         ],
         ProfileAvatar(avatar: avatar),

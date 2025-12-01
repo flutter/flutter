@@ -12,7 +12,7 @@ void main() {
 
 void testMain() {
   group('PlatformViewManager', () {
-    const int viewId = 6;
+    const viewId = 6;
 
     group('createPlatformViewSlot', () {
       test('can render slot, even for views that might have never been rendered before', () async {

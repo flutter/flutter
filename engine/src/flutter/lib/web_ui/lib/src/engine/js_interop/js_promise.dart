@@ -29,7 +29,7 @@ extension CustomFutureOfJSAnyToJSPromise<T extends JSAny?> on Future<T> {
             if (!stackTraceString.startsWith('\n')) {
               userError += '\nDart stack trace:\n$stackTraceString';
             }
-            final wrapper = errorConstructor.callAsConstructor<JSObject>(userError.toJS);
+            final JSObject wrapper = errorConstructor.callAsConstructor<JSObject>(userError.toJS);
             reject.callAsFunction(reject, wrapper);
           },
         );

@@ -147,12 +147,12 @@ class DefaultSpellCheckService implements SpellCheckService {
     List<SuggestionSpan> oldResults,
     List<SuggestionSpan> newResults,
   ) {
-    final List<SuggestionSpan> mergedResults = <SuggestionSpan>[];
+    final mergedResults = <SuggestionSpan>[];
 
     SuggestionSpan oldSpan;
     SuggestionSpan newSpan;
-    int oldSpanPointer = 0;
-    int newSpanPointer = 0;
+    var oldSpanPointer = 0;
+    var newSpanPointer = 0;
 
     while (oldSpanPointer < oldResults.length && newSpanPointer < newResults.length) {
       oldSpan = oldResults[oldSpanPointer];
@@ -196,7 +196,7 @@ class DefaultSpellCheckService implements SpellCheckService {
       return null;
     }
 
-    List<SuggestionSpan> suggestionSpans = <SuggestionSpan>[
+    var suggestionSpans = <SuggestionSpan>[
       for (final Map<dynamic, dynamic> resultMap in rawResults.cast<Map<dynamic, dynamic>>())
         SuggestionSpan(
           TextRange(start: resultMap['startIndex'] as int, end: resultMap['endIndex'] as int),
@@ -207,7 +207,7 @@ class DefaultSpellCheckService implements SpellCheckService {
     if (lastSavedResults != null) {
       // Merge current and previous spell check results if between requests,
       // the text has not changed but the spell check results have.
-      final bool textHasNotChanged = lastSavedResults!.spellCheckedText == text;
+      final textHasNotChanged = lastSavedResults!.spellCheckedText == text;
       final bool spansHaveChanged = listEquals(lastSavedResults!.suggestionSpans, suggestionSpans);
 
       if (textHasNotChanged && spansHaveChanged) {

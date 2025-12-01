@@ -171,7 +171,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   @override
   final Device device;
 
-  var stopEchoingDeviceLogCount = 0;
+  int stopEchoingDeviceLogCount = 0;
 
   @override
   Future<void> stopEchoingDeviceLog() async {
@@ -181,7 +181,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   @override
   FlutterVmService get vmService => FakeFlutterVmService();
 
-  var runColdCode = 0;
+  int runColdCode = 0;
 
   @override
   Future<int> runCold({ColdRunner? coldRunner, String? route}) async {
@@ -194,10 +194,10 @@ class FakeDevice extends Fake implements Device {
   Future<bool> isSupported() async => true;
 
   @override
-  var supportsHotReload = false;
+  bool supportsHotReload = false;
 
   @override
-  var supportsHotRestart = false;
+  bool supportsHotRestart = false;
 
   @override
   Future<String> get sdkNameAndVersion async => 'Android 10';
@@ -214,7 +214,7 @@ class FakeDevice extends Fake implements Device {
   @override
   DartDevelopmentService get dds => FakeDartDevelopmentService();
 
-  var wasDisposed = false;
+  bool wasDisposed = false;
 
   @override
   Future<void> dispose() async {

@@ -34,7 +34,7 @@ Future<void> main() async {
     // Keep issuing taps until we get the requested data. The actual setup
     // of the platform view is asynchronous so we might have to tap more than
     // once to  get a response.
-    bool stop = false;
+    var stop = false;
     inputEventWasVerified.whenComplete(() => stop = true);
     while (!stop) {
       // We must use the Android input tool to get verified input events.

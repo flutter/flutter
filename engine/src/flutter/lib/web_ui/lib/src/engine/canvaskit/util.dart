@@ -22,7 +22,7 @@ class CanvasKitError extends Error {
 
 /// Creates a new color array.
 Float32List makeFreshSkColor(ui.Color color) {
-  final Float32List result = Float32List(4);
+  final result = Float32List(4);
   result[0] = color.red / 255.0;
   result[1] = color.green / 255.0;
   result[2] = color.blue / 255.0;
@@ -88,7 +88,7 @@ void drawSkShadow(
   final ui.Color inAmbient = color.withAlpha((color.alpha * ckShadowAmbientAlpha).round());
   final ui.Color inSpot = color.withAlpha((color.alpha * ckShadowSpotAlpha).round());
 
-  final SkTonalColors inTonalColors = SkTonalColors(
+  final inTonalColors = SkTonalColors(
     ambient: makeFreshSkColor(inAmbient),
     spot: makeFreshSkColor(inSpot),
   );

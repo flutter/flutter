@@ -42,10 +42,9 @@ class _BackdropState extends State<Backdrop> with TickerProviderStateMixin {
     super.initState();
     _settingsPanelController = AnimationController(
       vsync: this,
-      duration:
-          widget.isDesktop
-              ? settingsPanelMobileAnimationDuration
-              : settingsPanelDesktopAnimationDuration,
+      duration: widget.isDesktop
+          ? settingsPanelMobileAnimationDuration
+          : settingsPanelDesktopAnimationDuration,
     );
     _iconController = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
     _settingsPageFocusNode = FocusNode();
@@ -113,19 +112,18 @@ class _BackdropState extends State<Backdrop> with TickerProviderStateMixin {
       builder: (BuildContext context, bool isSettingsOpen, Widget? child) {
         return ExcludeSemantics(
           excluding: !isSettingsOpen,
-          child:
-              isSettingsOpen
-                  ? KeyboardListener(
-                    includeSemantics: false,
-                    focusNode: _settingsPageFocusNode,
-                    onKeyEvent: (KeyEvent event) {
-                      if (event.logicalKey == LogicalKeyboardKey.escape) {
-                        _toggleSettings();
-                      }
-                    },
-                    child: FocusScope(child: _settingsPage),
-                  )
-                  : ExcludeFocus(child: _settingsPage),
+          child: isSettingsOpen
+              ? KeyboardListener(
+                  includeSemantics: false,
+                  focusNode: _settingsPageFocusNode,
+                  onKeyEvent: (KeyEvent event) {
+                    if (event.logicalKey == LogicalKeyboardKey.escape) {
+                      _toggleSettings();
+                    }
+                  },
+                  child: FocusScope(child: _settingsPage),
+                )
+              : ExcludeFocus(child: _settingsPage),
         );
       },
     );
@@ -175,10 +173,9 @@ class _BackdropState extends State<Backdrop> with TickerProviderStateMixin {
             Semantics(
               sortKey: const OrdinalSortKey(3),
               child: ScaleTransition(
-                alignment:
-                    Directionality.of(context) == TextDirection.ltr
-                        ? Alignment.topRight
-                        : Alignment.topLeft,
+                alignment: Directionality.of(context) == TextDirection.ltr
+                    ? Alignment.topRight
+                    : Alignment.topLeft,
                 scale: CurvedAnimation(
                   parent: _settingsPanelController,
                   curve: Curves.fastOutSlowIn,
@@ -250,16 +247,14 @@ class _SettingsIcon extends AnimatedWidget {
         label: _settingsSemanticLabel(isSettingsOpenNotifier.value, context),
         child: SizedBox(
           width: _settingsButtonWidth,
-          height:
-              isDesktop
-                  ? _settingsButtonHeightDesktop
-                  : _settingsButtonHeightMobile + safeAreaTopPadding,
+          height: isDesktop
+              ? _settingsButtonHeightDesktop
+              : _settingsButtonHeightMobile + safeAreaTopPadding,
           child: Material(
             borderRadius: const BorderRadiusDirectional.only(bottomStart: Radius.circular(10)),
-            color:
-                isSettingsOpenNotifier.value & !animationController.isAnimating
-                    ? Colors.transparent
-                    : Theme.of(context).colorScheme.secondaryContainer,
+            color: isSettingsOpenNotifier.value & !animationController.isAnimating
+                ? Colors.transparent
+                : Theme.of(context).colorScheme.secondaryContainer,
             clipBehavior: Clip.antiAlias,
             child: InkWell(
               onTap: () {

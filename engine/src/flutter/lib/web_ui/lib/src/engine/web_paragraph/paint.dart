@@ -101,9 +101,9 @@ class TextPaint {
       final int end = block.isLtr
           ? block.clusterRangeWithoutWhitespaces.end
           : block.clusterRangeWithoutWhitespaces.start - 1;
-      final int step = block.isLtr ? 1 : -1;
-      for (int i = start; i != end; i += step) {
-        final clusterText = layout.allClusters[i];
+      final step = block.isLtr ? 1 : -1;
+      for (var i = start; i != end; i += step) {
+        final WebCluster clusterText = layout.allClusters[i];
         // We need to adjust the canvas size to fit the block in case there is scaling or zoom involved
         final (ui.Rect sourceRect, ui.Rect targetRect) = calculateCluster(
           layout,
@@ -149,18 +149,18 @@ class TextPaint {
     double devicePixelRatio,
   ) {
     // Define the text cluster bounds
-    final pos = webTextCluster.bounds.left - webTextCluster.advance.left;
+    final double pos = webTextCluster.bounds.left - webTextCluster.advance.left;
 
     // Define the text cluster bounds
     // Source rect must take in account the scaling
-    final ui.Rect sourceRect = ui.Rect.fromLTWH(
+    final sourceRect = ui.Rect.fromLTWH(
       pos * devicePixelRatio,
       0,
       webTextCluster.bounds.width.ceilToDouble() * devicePixelRatio,
       webTextCluster.advance.height.ceilToDouble() * devicePixelRatio,
     );
     // Target rect will be scaled by the canvas transform, so we don't scale it here
-    final ui.Rect zeroRect = ui.Rect.fromLTWH(
+    final zeroRect = ui.Rect.fromLTWH(
       pos,
       0,
       webTextCluster.bounds.width.ceilToDouble(),
@@ -201,14 +201,14 @@ class TextPaint {
 
     // Define the text clusters rect (using advances, not selected rects)
     // Source rect must take in account the scaling
-    final ui.Rect sourceRect = ui.Rect.fromLTWH(
+    final sourceRect = ui.Rect.fromLTWH(
       0,
       0,
       advance.width * devicePixelRatio,
       advance.height * devicePixelRatio,
     );
     // Target rect will be scaled by the canvas transform, so we don't scale it here
-    final ui.Rect zeroRect = ui.Rect.fromLTWH(0, 0, advance.width, advance.height);
+    final zeroRect = ui.Rect.fromLTWH(0, 0, advance.width, advance.height);
 
     // We shift the target rect to the correct x position inside the line and
     // the correct y position of the line itself

@@ -1294,8 +1294,8 @@ class FakeSmallGroupDoctor extends Doctor {
 }
 
 class FakeDeviceManager extends Fake implements DeviceManager {
-  var diagnostics = <String>[];
-  var devices = <Device>[];
+  List<String> diagnostics = <String>[];
+  List<Device> devices = <Device>[];
 
   @override
   Future<List<Device>> getAllDevices({DeviceDiscoveryFilter? filter}) async => devices;

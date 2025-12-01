@@ -385,7 +385,7 @@ class Ticker {
 
   @override
   String toString({bool debugIncludeStack = false}) {
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     buffer.write('${objectRuntimeType(this, 'Ticker')}(');
     assert(() {
       buffer.write(debugLabel ?? '');

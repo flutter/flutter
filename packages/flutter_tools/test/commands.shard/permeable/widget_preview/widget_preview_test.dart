@@ -19,6 +19,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/widget_preview.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
@@ -149,10 +150,6 @@ void main() {
     return fs.directory(await createProject(tempDir, arguments: <String>['--pub']));
   }
 
-  Directory widgetPreviewScaffoldFromRootProject({required Directory rootProject}) {
-    return rootProject.childDirectory('.dart_tool').childDirectory('widget_preview_scaffold');
-  }
-
   Future<void> runWidgetPreviewCommand(List<String> arguments) async {
     final CommandRunner<void> runner = createTestCommandRunner(
       WidgetPreviewCommand(
@@ -210,15 +207,12 @@ void main() {
       '--verbose',
       ?rootProject?.path,
     ]);
-    final Directory widgetPreviewScaffoldDir = widgetPreviewScaffoldFromRootProject(
-      rootProject: rootProject ?? current,
-    );
     // Don't perform analysis on Windows since `dart pub add` will use '\' for
     // path dependencies and cause analysis to fail.
     // TODO(bkonyi): enable analysis on Windows once https://github.com/dart-lang/pub/issues/4520
     // is resolved.
     if (!platform.isWindows) {
-      await analyzeProject(widgetPreviewScaffoldDir.path);
+      await analyzeProject(WidgetPreviewStartCommand.widgetPreviewScaffold.path);
     }
     fs.currentDirectory = current;
   }
@@ -265,6 +259,37 @@ void main() {
         }
         expectNoPreviewLaunchTimingEvents();
       });
+
+      testUsingContext(
+        'Flutter Web is disabled',
+        () async {
+          try {
+            await startWidgetPreview(rootProject: await createRootProject());
+            fail('Successfully executed with Flutter Web disabled.');
+          } on ToolExit catch (e) {
+            expect(
+              e.message,
+              'Error: Widget Previews requires Flutter Web to be enabled. Please run '
+              "'flutter config --enable-web' to enable Flutter Web and try again.",
+            );
+          }
+          expectNoPreviewLaunchTimingEvents();
+        },
+        overrides: {
+          FeatureFlags: () => TestFeatureFlags(
+            // ignore: avoid_redundant_argument_values, readability
+            isWebEnabled: false,
+          ),
+          Pub: () => Pub.test(
+            fileSystem: fs,
+            logger: logger,
+            processManager: loggingProcessManager,
+            botDetector: botDetector,
+            platform: platform,
+            stdio: mockStdio,
+          ),
+        },
+      );
     });
 
     testUsingContext(
@@ -372,19 +397,17 @@ List<_i1.WidgetPreview> previews() => [
       'start finds existing previews and injects them into ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
       () async {
         final Directory rootProject = await createRootProject();
-        final Directory widgetPreviewScaffoldDir = widgetPreviewScaffoldFromRootProject(
-          rootProject: rootProject,
-        );
         rootProject
             .childDirectory('lib')
             .childFile('foo.dart')
             .writeAsStringSync(samplePreviewFile);
 
-        final File generatedFile = widgetPreviewScaffoldDir.childFile(
+        await startWidgetPreview(rootProject: rootProject);
+
+        final File generatedFile = WidgetPreviewStartCommand.widgetPreviewScaffold.childFile(
           PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
         );
 
-        await startWidgetPreview(rootProject: rootProject);
         expect(generatedFile.readAsStringSync().stripScriptUris, expectedGeneratedFileContents);
         expectSinglePreviewLaunchTimingEvent();
       },
@@ -406,22 +429,18 @@ List<_i1.WidgetPreview> previews() => [
       'start finds existing previews in the CWD and injects them into ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
       () async {
         final Directory rootProject = await createRootProject();
-        final Directory widgetPreviewScaffoldDir = widgetPreviewScaffoldFromRootProject(
-          rootProject: rootProject,
-        );
         rootProject
             .childDirectory('lib')
             .childFile('foo.dart')
             .writeAsStringSync(samplePreviewFile);
 
-        final File generatedFile = widgetPreviewScaffoldDir.childFile(
-          PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
-        );
-
         // Try to execute using the CWD.
-
         fs.currentDirectory = rootProject;
         await startWidgetPreview(rootProject: null);
+
+        final File generatedFile = WidgetPreviewStartCommand.widgetPreviewScaffold.childFile(
+          PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
+        );
 
         expect(generatedFile.readAsStringSync().stripScriptUris, expectedGeneratedFileContents);
         expectSinglePreviewLaunchTimingEvent();

@@ -49,7 +49,9 @@ class _RadioExampleState extends State<RadioExample> {
             title: const Text('Fill color'),
             leading: Radio<RadioType>(
               value: RadioType.fillColor,
-              fillColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
+              fillColor: WidgetStateColor.resolveWith((
+                Set<WidgetState> states,
+              ) {
                 if (states.contains(WidgetState.selected)) {
                   return Colors.deepPurple;
                 } else {
@@ -62,7 +64,9 @@ class _RadioExampleState extends State<RadioExample> {
             title: const Text('Background color'),
             leading: Radio<RadioType>(
               value: RadioType.backgroundColor,
-              backgroundColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
+              backgroundColor: WidgetStateColor.resolveWith((
+                Set<WidgetState> states,
+              ) {
                 if (states.contains(WidgetState.selected)) {
                   return Colors.greenAccent.withValues(alpha: 0.5);
                 } else {
@@ -75,7 +79,9 @@ class _RadioExampleState extends State<RadioExample> {
             title: const Text('Side'),
             leading: Radio<RadioType>(
               value: RadioType.side,
-              side: WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
+              side: WidgetStateBorderSide.resolveWith((
+                Set<WidgetState> states,
+              ) {
                 if (states.contains(WidgetState.selected)) {
                   return const BorderSide(
                     color: Colors.red,

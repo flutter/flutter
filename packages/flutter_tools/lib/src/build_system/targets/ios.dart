@@ -285,6 +285,7 @@ abstract class UnpackIOS extends UnpackDarwin {
       targetPlatform: TargetPlatform.ios,
       buildMode: buildMode,
     );
+    await _copyFrameworkDysm(environment, sdkRoot: sdkRoot, environmentType: environmentType);
 
     final File frameworkBinary = environment.outputDir
         .childDirectory(FlutterDarwinPlatform.ios.frameworkName)
@@ -295,6 +296,40 @@ abstract class UnpackIOS extends UnpackDarwin {
     }
     await thinFramework(environment, frameworkBinaryPath, archs);
     await _signFramework(environment, frameworkBinary, buildMode);
+  }
+
+  Future<void> _copyFrameworkDysm(
+    Environment environment, {
+    required String sdkRoot,
+    EnvironmentType? environmentType,
+  }) async {
+    // Copy Flutter framework dSYM (debug symbol) bundle, if present.
+    final Directory frameworkDsym = environment.fileSystem.directory(
+      environment.artifacts.getArtifactPath(
+        Artifact.flutterFrameworkDsym,
+        platform: TargetPlatform.ios,
+        mode: buildMode,
+        environmentType: environmentType,
+      ),
+    );
+    if (frameworkDsym.existsSync()) {
+      final ProcessResult result = await environment.processManager.run(<String>[
+        'rsync',
+        '-av',
+        '--delete',
+        '--filter',
+        '- .DS_Store/',
+        '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+        frameworkDsym.path,
+        environment.outputDir.path,
+      ]);
+      if (result.exitCode != 0) {
+        throw Exception(
+          'Failed to copy framework dSYM (exit ${result.exitCode}:\n'
+          '${result.stdout}\n---\n${result.stderr}',
+        );
+      }
+    }
   }
 }
 
@@ -307,9 +342,6 @@ class ReleaseUnpackIOS extends UnpackIOS {
 
   @override
   BuildMode get buildMode => BuildMode.release;
-
-  @override
-  List<Target> get dependencies => [...super.dependencies, const ReleaseUnpackIOSDsym()];
 }
 
 /// Unpack the profile prebuilt engine framework.
@@ -332,45 +364,6 @@ class DebugUnpackIOS extends UnpackIOS {
 
   @override
   BuildMode get buildMode => BuildMode.debug;
-}
-
-class ReleaseUnpackIOSDsym extends ReleaseUnpackDarwinDsym {
-  const ReleaseUnpackIOSDsym();
-
-  @override
-  String get name => 'release_unpack_ios_dsym';
-
-  @override
-  TargetPlatform get targetPlatform => TargetPlatform.ios;
-
-  @override
-  Artifact get dsymArtifact => Artifact.flutterFrameworkDsym;
-
-  @override
-  List<Source> get inputs => <Source>[
-    ...super.inputs,
-    const Source.pattern(
-      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart',
-    ),
-  ];
-
-  @override
-  List<Source> get outputs => const <Source>[
-    Source.pattern('{OUTPUT_DIR}/Flutter.framework.dSYM/Contents/Resources/DWARF/Flutter'),
-  ];
-
-  @override
-  Future<void> build(Environment environment) async {
-    final String? sdkRoot = environment.defines[kSdkRoot];
-    if (sdkRoot == null) {
-      throw MissingDefineException(kSdkRoot, name);
-    }
-    final EnvironmentType? environmentType = environmentTypeFromSdkroot(
-      sdkRoot,
-      environment.fileSystem,
-    );
-    await copyFrameworkDsym(environment, environmentType: environmentType);
-  }
 }
 
 // TODO(gaaclarke): Remove this after a reasonable amount of time where the
@@ -730,9 +723,12 @@ abstract class IosAssetBundle extends Target {
     );
 
     // Copy the plist from either the project or module.
-    flutterProject.ios.appFrameworkInfoPlist.copySync(
-      environment.outputDir.childDirectory('App.framework').childFile('Info.plist').path,
-    );
+    final File appFrameworkInfoPlist = environment.outputDir
+        .childDirectory('App.framework')
+        .childFile('Info.plist');
+    flutterProject.ios.appFrameworkInfoPlist.copySync(appFrameworkInfoPlist.path);
+
+    await _updateMinimumOSVersion(appFrameworkInfoPlist, environment);
 
     await _signFramework(environment, frameworkBinary, buildMode);
   }
@@ -830,6 +826,25 @@ class ReleaseIosApplicationBundle extends _IosAssetBundleWithDSYM {
         );
       }
     }
+  }
+}
+
+/// Update the MinimumOSVersion key in the given Info.plist file.
+Future<void> _updateMinimumOSVersion(File infoPlist, Environment environment) async {
+  final minimumOSVersion = FlutterDarwinPlatform.ios.deploymentTarget().toString();
+  final plutilArgs = <String>[
+    'plutil',
+    '-replace',
+    'MinimumOSVersion',
+    '-string',
+    minimumOSVersion,
+    infoPlist.path,
+  ];
+  final ProcessResult result = await environment.processManager.run(plutilArgs);
+  if (result.exitCode != 0) {
+    printXcodeWarning(
+      'Failed to update MinimumOSVersion in ${infoPlist.path}. This may cause AppStore validation failures. Please file an issue at https://github.com/flutter/flutter/issues/new/choose',
+    );
   }
 }
 

@@ -51,7 +51,7 @@ class SkwasmAnimatedImageDecoder implements ui.Codec {
   factory SkwasmAnimatedImageDecoder(Uint8List imageData, [int? width, int? height]) {
     final SkDataHandle data = skDataCreate(imageData.length);
     final Pointer<Int8> dataPointer = skDataGetPointer(data).cast<Int8>();
-    for (int i = 0; i < imageData.length; i++) {
+    for (var i = 0; i < imageData.length; i++) {
       dataPointer[i] = imageData[i];
     }
     final AnimatedImageHandle handle = animatedImageCreate(data, width ?? 0, height ?? 0);
@@ -83,10 +83,10 @@ class SkwasmAnimatedImageDecoder implements ui.Codec {
 
   @override
   Future<ui.FrameInfo> getNextFrame() async {
-    final Duration duration = Duration(
+    final duration = Duration(
       milliseconds: animatedImageGetCurrentFrameDurationMilliseconds(handle),
     );
-    final SkwasmImage image = SkwasmImage(animatedImageGetCurrentFrame(handle));
+    final image = SkwasmImage(animatedImageGetCurrentFrame(handle));
     final ui.FrameInfo frameInfo = AnimatedImageFrameInfo(duration, image);
     return frameInfo;
   }

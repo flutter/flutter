@@ -50,70 +50,48 @@ void main() {
         buildDirectory.createSync(recursive: true);
       });
 
-      Future<void> removesBuildAndDartToolShared(bool setupWidgetPreview) async {
-        final FlutterProject projectUnderTest = setupProjectUnderTest(
-          fs.currentDirectory,
-          setupXcodeWorkspace: true,
-          setupWidgetPreview: setupWidgetPreview,
-        );
-        // Xcode is installed and version satisfactory.
-        xcodeProjectInterpreter.isInstalled = true;
-        xcodeProjectInterpreter.version = Version(1000, 0, 0);
-        await CleanCommand().runCommand();
-
-        expect(buildDirectory, isNot(exists));
-        if (setupWidgetPreview) {
-          expect(projectUnderTest.dartTool, exists);
-          expect(projectUnderTest.widgetPreviewScaffold, exists);
-          expect(projectUnderTest.dartTool.listSync(), hasLength(1));
-        } else {
-          expect(projectUnderTest.dartTool, isNot(exists));
-        }
-        expect(projectUnderTest.android.ephemeralDirectory, isNot(exists));
-
-        expect(projectUnderTest.ios.ephemeralDirectory, isNot(exists));
-        expect(projectUnderTest.ios.ephemeralModuleDirectory, isNot(exists));
-        expect(projectUnderTest.ios.generatedXcodePropertiesFile, isNot(exists));
-        expect(projectUnderTest.ios.generatedEnvironmentVariableExportScript, isNot(exists));
-        expect(projectUnderTest.ios.deprecatedCompiledDartFramework, isNot(exists));
-        expect(projectUnderTest.ios.deprecatedProjectFlutterFramework, isNot(exists));
-        expect(projectUnderTest.ios.flutterPodspec, isNot(exists));
-        expect(projectUnderTest.ios.flutterPluginSwiftPackageDirectory, isNot(exists));
-
-        expect(projectUnderTest.linux.ephemeralDirectory, isNot(exists));
-        expect(projectUnderTest.macos.ephemeralDirectory, isNot(exists));
-        expect(projectUnderTest.macos.flutterPluginSwiftPackageDirectory, isNot(exists));
-        expect(projectUnderTest.windows.ephemeralDirectory, isNot(exists));
-
-        expect(projectUnderTest.flutterPluginsDependenciesFile, isNot(exists));
-        expect(
-          projectUnderTest.directory.childDirectory('.dart_tool').childFile('package_config.json'),
-          isNot(exists),
-        );
-
-        expect(xcodeProjectInterpreter.workspaces, const <CleanWorkspaceCall>[
-          CleanWorkspaceCall('/ios/Runner.xcworkspace', 'Runner', false),
-          CleanWorkspaceCall('/ios/Runner.xcworkspace', 'custom-scheme', false),
-          CleanWorkspaceCall('/macos/Runner.xcworkspace', 'Runner', false),
-          CleanWorkspaceCall('/macos/Runner.xcworkspace', 'custom-scheme', false),
-        ]);
-      }
-
       testUsingContext(
         '$CleanCommand removes build and .dart_tool and ephemeral directories, cleans Xcode for iOS and macOS',
-        () => removesBuildAndDartToolShared(false),
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          Xcode: () => xcode,
-          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
-        },
-      );
+        () async {
+          final FlutterProject projectUnderTest = setupProjectUnderTest(fs.currentDirectory, true);
+          // Xcode is installed and version satisfactory.
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(1000, 0, 0);
+          await CleanCommand().runCommand();
 
-      testUsingContext(
-        '$CleanCommand removes build and ephemeral directories, cleans Xcode for iOS and macOS, '
-        'deletes .dart_tools except .dart_tools/widget_preview_scaffold',
-        () => removesBuildAndDartToolShared(true),
+          expect(buildDirectory, isNot(exists));
+          expect(projectUnderTest.dartTool, isNot(exists));
+          expect(projectUnderTest.android.ephemeralDirectory, isNot(exists));
+
+          expect(projectUnderTest.ios.ephemeralDirectory, isNot(exists));
+          expect(projectUnderTest.ios.ephemeralModuleDirectory, isNot(exists));
+          expect(projectUnderTest.ios.generatedXcodePropertiesFile, isNot(exists));
+          expect(projectUnderTest.ios.generatedEnvironmentVariableExportScript, isNot(exists));
+          expect(projectUnderTest.ios.deprecatedCompiledDartFramework, isNot(exists));
+          expect(projectUnderTest.ios.deprecatedProjectFlutterFramework, isNot(exists));
+          expect(projectUnderTest.ios.flutterPodspec, isNot(exists));
+          expect(projectUnderTest.ios.flutterPluginSwiftPackageDirectory, isNot(exists));
+
+          expect(projectUnderTest.linux.ephemeralDirectory, isNot(exists));
+          expect(projectUnderTest.macos.ephemeralDirectory, isNot(exists));
+          expect(projectUnderTest.macos.flutterPluginSwiftPackageDirectory, isNot(exists));
+          expect(projectUnderTest.windows.ephemeralDirectory, isNot(exists));
+
+          expect(projectUnderTest.flutterPluginsDependenciesFile, isNot(exists));
+          expect(
+            projectUnderTest.directory
+                .childDirectory('.dart_tool')
+                .childFile('package_config.json'),
+            isNot(exists),
+          );
+
+          expect(xcodeProjectInterpreter.workspaces, const <CleanWorkspaceCall>[
+            CleanWorkspaceCall('/ios/Runner.xcworkspace', 'Runner', false),
+            CleanWorkspaceCall('/ios/Runner.xcworkspace', 'custom-scheme', false),
+            CleanWorkspaceCall('/macos/Runner.xcworkspace', 'Runner', false),
+            CleanWorkspaceCall('/macos/Runner.xcworkspace', 'custom-scheme', false),
+          ]);
+        },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
@@ -125,7 +103,7 @@ void main() {
       testUsingContext(
         '$CleanCommand removes a specific xcode scheme --scheme',
         () async {
-          setupProjectUnderTest(fs.currentDirectory, setupXcodeWorkspace: true);
+          setupProjectUnderTest(fs.currentDirectory, true);
           // Xcode is installed and version satisfactory.
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
@@ -150,7 +128,7 @@ void main() {
       testUsingContext(
         '$CleanCommand does not run when there is no xcworkspace',
         () async {
-          setupProjectUnderTest(fs.currentDirectory);
+          setupProjectUnderTest(fs.currentDirectory, false);
           // Xcode is installed and version satisfactory.
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
@@ -169,7 +147,7 @@ void main() {
       testUsingContext(
         '$CleanCommand throws when given an invalid value for --scheme',
         () async {
-          setupProjectUnderTest(fs.currentDirectory, setupXcodeWorkspace: true);
+          setupProjectUnderTest(fs.currentDirectory, true);
           // Xcode is installed and version satisfactory.
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
@@ -195,7 +173,7 @@ void main() {
       testUsingContext(
         '$CleanCommand cleans Xcode verbosely for iOS and macOS',
         () async {
-          setupProjectUnderTest(fs.currentDirectory, setupXcodeWorkspace: true);
+          setupProjectUnderTest(fs.currentDirectory, true);
           // Xcode is installed and version satisfactory.
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
@@ -290,11 +268,7 @@ void main() {
   });
 }
 
-FlutterProject setupProjectUnderTest(
-  Directory currentDirectory, {
-  bool setupXcodeWorkspace = false,
-  bool setupWidgetPreview = false,
-}) {
+FlutterProject setupProjectUnderTest(Directory currentDirectory, bool setupXcodeWorkspace) {
   // This needs to be run within testWithoutContext and not setUp since FlutterProject uses context.
   final FlutterProject projectUnderTest = FlutterProject.fromDirectory(currentDirectory);
   if (setupXcodeWorkspace) {
@@ -306,10 +280,6 @@ FlutterProject setupProjectUnderTest(
         .createSync(recursive: true);
   }
   projectUnderTest.dartTool.createSync(recursive: true);
-  if (setupWidgetPreview) {
-    projectUnderTest.widgetPreviewScaffold.createSync();
-  }
-
   writePackageConfigFiles(directory: projectUnderTest.directory, mainLibName: 'my_app');
 
   projectUnderTest.android.ephemeralDirectory.createSync(recursive: true);
@@ -334,10 +304,10 @@ FlutterProject setupProjectUnderTest(
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
   @override
-  var isInstalled = true;
+  bool isInstalled = true;
 
   @override
-  var version = Version(0, 0, 0);
+  Version version = Version(0, 0, 0);
 
   @override
   Future<XcodeProjectInfo> getInfo(String projectPath, {String? projectFilename}) async {

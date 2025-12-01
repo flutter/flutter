@@ -33,7 +33,7 @@ class SafariMacOsEnvironment extends BrowserEnvironment {
 
   @override
   Future<void> prepare() async {
-    int retryCount = 0;
+    var retryCount = 0;
 
     while (true) {
       try {
@@ -92,7 +92,7 @@ $stackTrace
     } catch (_) {
       print('safaridriver failed to reach a healthy state.');
 
-      final badDriver = webDriver;
+      final WebDriver? badDriver = webDriver;
       webDriver = null; // let's not keep faulty driver around
 
       if (badDriver != null) {
@@ -143,7 +143,7 @@ $stackTrace
   /// See also: https://github.com/flutter/flutter/issues/163790
   Future<WebDriver> _createDriverSessionWithRetry() async {
     const kSessionRetryCount = 10;
-    int retryCount = 0;
+    var retryCount = 0;
     while (true) {
       // Give Safari a chance to launch.
       //
@@ -152,7 +152,7 @@ $stackTrace
 
       retryCount += 1;
       try {
-        final candidateDriver = await createDriver(
+        final WebDriver candidateDriver = await createDriver(
           uri: _driverUri,
           desired: <String, dynamic>{'browserName': packageTestRuntime.identifier},
         );
@@ -190,14 +190,14 @@ $stackTrace
     // 100ms seems enough in most cases, but feel free to revisit this.
     await Future<void>.delayed(const Duration(milliseconds: 100));
 
-    int retryCount = 0;
+    var retryCount = 0;
     while (true) {
       retryCount += 1;
       final httpClient = HttpClient();
       try {
-        final request = await httpClient.get('localhost', _portNumber, '/status');
-        final response = await request.close();
-        final stringData = await response.transform(utf8.decoder).join();
+        final HttpClientRequest request = await httpClient.get('localhost', _portNumber, '/status');
+        final HttpClientResponse response = await request.close();
+        final String stringData = await response.transform(utf8.decoder).join();
         final jsonResponse = json.decode(stringData) as Map<String, Object?>;
         final value = jsonResponse['value']! as Map<String, Object?>;
         final ready = value['ready']! as bool;

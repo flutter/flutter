@@ -41,12 +41,13 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: tabCount, vsync: this)..addListener(() {
-      // Set state to make sure that the [_RallyTab] widgets get updated when changing tabs.
-      setState(() {
-        tabIndex.value = _tabController.index;
+    _tabController = TabController(length: tabCount, vsync: this)
+      ..addListener(() {
+        // Set state to make sure that the [_RallyTab] widgets get updated when changing tabs.
+        setState(() {
+          tabIndex.value = _tabController.index;
+        });
       });
-    });
   }
 
   @override
@@ -62,11 +63,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     final bool isDesktop = isDisplayDesktop(context);
     Widget tabBarView;
     if (isDesktop) {
-      final bool isTextDirectionRtl =
+      final isTextDirectionRtl =
           GalleryOptions.of(context).resolvedTextDirection() == TextDirection.rtl;
       final int verticalRotation = isTextDirectionRtl ? turnsToRotateLeft : turnsToRotateRight;
-      final int revertVerticalRotation =
-          isTextDirectionRtl ? turnsToRotateRight : turnsToRotateLeft;
+      final int revertVerticalRotation = isTextDirectionRtl
+          ? turnsToRotateRight
+          : turnsToRotateLeft;
       tabBarView = Row(
         children: <Widget>[
           Container(
@@ -87,13 +89,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 RotatedBox(
                   quarterTurns: verticalRotation,
                   child: _RallyTabBar(
-                    tabs:
-                        _buildTabs(context: context, theme: theme, isVertical: true).map((
-                          Widget widget,
-                        ) {
-                          // Revert the rotation on the tabs.
-                          return RotatedBox(quarterTurns: revertVerticalRotation, child: widget);
-                        }).toList(),
+                    tabs: _buildTabs(context: context, theme: theme, isVertical: true).map((
+                      Widget widget,
+                    ) {
+                      // Revert the rotation on the tabs.
+                      return RotatedBox(quarterTurns: revertVerticalRotation, child: widget);
+                    }).toList(),
                     tabController: _tabController,
                   ),
                 ),
@@ -106,11 +107,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               quarterTurns: verticalRotation,
               child: TabBarView(
                 controller: _tabController,
-                children:
-                    _buildTabViews().map((Widget widget) {
-                      // Revert the rotation on the tab views.
-                      return RotatedBox(quarterTurns: revertVerticalRotation, child: widget);
-                    }).toList(),
+                children: _buildTabViews().map((Widget widget) {
+                  // Revert the rotation on the tab views.
+                  return RotatedBox(quarterTurns: revertVerticalRotation, child: widget);
+                }).toList(),
               ),
             ),
           ),
@@ -123,7 +123,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             tabs: _buildTabs(context: context, theme: theme),
             tabController: _tabController,
           ),
-          Expanded(child: TabBarView(controller: _tabController, children: _buildTabViews())),
+          Expanded(
+            child: TabBarView(controller: _tabController, children: _buildTabViews()),
+          ),
         ],
       );
     }
@@ -310,7 +312,7 @@ class _RallyTabState extends State<_RallyTab> with SingleTickerProviderStateMixi
     // unit, and there is always 1 expanded tab which is 1 unit + any extra
     // space determined by the multiplier.
     final double width = MediaQuery.of(context).size.width;
-    const int expandedTitleWidthMultiplier = 2;
+    const expandedTitleWidthMultiplier = 2;
     final double unitWidth = width / (tabCount + expandedTitleWidthMultiplier);
 
     return ConstrainedBox(

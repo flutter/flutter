@@ -59,7 +59,7 @@ Future<void> runSmokeTests({
   final File flutterExe = flutterDir
       .childDirectory('bin')
       .childFile(_kPlatform.isWindows ? 'flutter.bat' : 'flutter');
-  final List<String> cmd = <String>[
+  final cmd = <String>[
     // If we're in a container with no X display, then use the virtual framebuffer.
     if (_kPlatform.isLinux &&
         (_kPlatform.environment['DISPLAY'] == null || _kPlatform.environment['DISPLAY']!.isEmpty))
@@ -111,11 +111,11 @@ Future<File> generateTest(Directory apiDir) async {
   });
 
   // Collect the examples, and import them all as separate symbols.
-  final List<ExampleInfo> infoList = <ExampleInfo>[
+  final infoList = <ExampleInfo>[
     for (final File example in examples) ExampleInfo(example, examplesLibDir),
   ];
   infoList.sort((ExampleInfo a, ExampleInfo b) => a.importPath.compareTo(b.importPath));
-  final List<String> imports = <String>[
+  final imports = <String>[
     "import 'package:flutter/widgets.dart';",
     "import 'package:flutter/scheduler.dart';",
     "import 'package:flutter_test/flutter_test.dart';",
@@ -124,7 +124,7 @@ Future<File> generateTest(Directory apiDir) async {
       "import 'package:flutter_api_samples/${info.importPath}' as ${info.importName};",
   ]..sort();
 
-  final StringBuffer buffer = StringBuffer();
+  final buffer = StringBuffer();
   buffer.writeln('// Temporary generated file. Do not commit.');
   buffer.writeln("import 'dart:io';");
   buffer.writeAll(imports, '\n');
@@ -144,7 +144,7 @@ void main() {
   }
 
 ''');
-  for (final ExampleInfo info in infoList) {
+  for (final info in infoList) {
     buffer.writeln('''
   testWidgets(
     'Smoke test ${info.importPath}',
@@ -184,10 +184,10 @@ Future<String> runCommand(
   List<String>? output,
   Map<String, String>? environment,
 }) async {
-  final List<int> stdoutOutput = <int>[];
-  final List<int> combinedOutput = <int>[];
-  final Completer<void> stdoutComplete = Completer<void>();
-  final Completer<void> stderrComplete = Completer<void>();
+  final stdoutOutput = <int>[];
+  final combinedOutput = <int>[];
+  final stdoutComplete = Completer<void>();
+  final stderrComplete = Completer<void>();
 
   late Process process;
   Future<int> allComplete() async {

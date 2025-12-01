@@ -983,7 +983,7 @@ class FontFeature {
 
   void _encode(ByteData byteData) {
     assert(feature.codeUnits.every((int c) => c >= 0x20 && c <= 0x7F));
-    for (int i = 0; i < 4; i++) {
+    for (var i = 0; i < 4; i++) {
       byteData.setUint8(i, feature.codeUnitAt(i));
     }
     byteData.setInt32(4, value, _kFakeHostEndian);
@@ -1178,7 +1178,7 @@ class FontVariation {
 
   void _encode(ByteData byteData) {
     assert(axis.codeUnits.every((int c) => c >= 0x20 && c <= 0x7F));
-    for (int i = 0; i < 4; i++) {
+    for (var i = 0; i < 4; i++) {
       byteData.setUint8(i, axis.codeUnitAt(i));
     }
     byteData.setFloat32(4, value, _kFakeHostEndian);
@@ -1350,8 +1350,8 @@ class TextDecoration {
 
   /// Creates a decoration that paints the union of all the given decorations.
   factory TextDecoration.combine(List<TextDecoration> decorations) {
-    int mask = 0;
-    for (final TextDecoration decoration in decorations) {
+    var mask = 0;
+    for (final decoration in decorations) {
       mask |= decoration._mask;
     }
     return TextDecoration._(mask);
@@ -1389,7 +1389,7 @@ class TextDecoration {
     if (_mask == 0) {
       return 'TextDecoration.none';
     }
-    final List<String> values = <String>[];
+    final values = <String>[];
     if (_mask & underline._mask != 0) {
       values.add('underline');
     }
@@ -1577,7 +1577,7 @@ bool _listEquals<T>(List<T>? a, List<T>? b) {
   if (b == null || a.length != b.length) {
     return false;
   }
-  for (int index = 0; index < a.length; index += 1) {
+  for (var index = 0; index < a.length; index += 1) {
     if (a[index] != b[index]) {
       return false;
     }
@@ -1633,7 +1633,7 @@ Int32List _encodeTextStyle(
   List<FontFeature>? fontFeatures,
   List<FontVariation>? fontVariations,
 ) {
-  final Int32List result = Int32List(9);
+  final result = Int32List(9);
   // The 0th bit of result[0] is reserved for leadingDistribution.
 
   if (color != null) {
@@ -1883,7 +1883,7 @@ class TextStyle {
   @override
   String toString() {
     final List<String>? fontFamilyFallback = _fontFamilyFallback;
-    final String heightText = _encoded[0] & 0x02000 == 0x02000
+    final heightText = _encoded[0] & 0x02000 == 0x02000
         ? (_height == kTextHeightNone ? 'kTextHeightNone' : '${_height}x')
         : 'unspecified';
     return 'TextStyle('
@@ -1948,7 +1948,7 @@ Int32List _encodeParagraphStyle(
   String? ellipsis,
   Locale? locale,
 ) {
-  final Int32List result = Int32List(7); // also update paragraph_builder.cc
+  final result = Int32List(7); // also update paragraph_builder.cc
   if (textAlign != null) {
     result[0] |= 1 << 1;
     result[1] = textAlign.index;
@@ -2193,9 +2193,9 @@ ByteData _encodeStrut(
     return ByteData(0);
   }
 
-  final ByteData data = ByteData(24); // Max size is 24 bytes
-  int bitmask = 0;
-  int byteCount = 4;
+  final data = ByteData(24); // Max size is 24 bytes
+  var bitmask = 0;
+  var byteCount = 4;
   if (fontWeight != null) {
     bitmask |= 1 << 0;
     data.setInt32(byteCount, fontWeight.value, _kFakeHostEndian);
@@ -3235,9 +3235,9 @@ base class _NativeParagraph extends NativeFieldWrapperClass1 implements Paragrap
 
   List<TextBox> _decodeTextBoxes(Float32List encoded) {
     final int count = encoded.length ~/ 5;
-    final List<TextBox> boxes = <TextBox>[];
-    int position = 0;
-    for (int index = 0; index < count; index += 1) {
+    final boxes = <TextBox>[];
+    var position = 0;
+    for (var index = 0; index < count; index += 1) {
       boxes.add(
         TextBox.fromLTRBD(
           encoded[position++],
@@ -3318,10 +3318,10 @@ base class _NativeParagraph extends NativeFieldWrapperClass1 implements Paragrap
   @override
   TextRange getLineBoundary(TextPosition position) {
     final List<int> boundary = _getLineBoundary(position.offset);
-    final TextRange line = TextRange(start: boundary[0], end: boundary[1]);
+    final line = TextRange(start: boundary[0], end: boundary[1]);
 
     final List<int> nextBoundary = _getLineBoundary(position.offset + 1);
-    final TextRange nextLine = TextRange(start: nextBoundary[0], end: nextBoundary[1]);
+    final nextLine = TextRange(start: nextBoundary[0], end: nextBoundary[1]);
     // If there is no next line, because we're at the end of the field, return line.
     if (!nextLine.isValid) {
       return line;
@@ -3352,8 +3352,8 @@ base class _NativeParagraph extends NativeFieldWrapperClass1 implements Paragrap
   List<LineMetrics> computeLineMetrics() {
     final Float64List encoded = _computeLineMetrics();
     final int count = encoded.length ~/ 9;
-    int position = 0;
-    final List<LineMetrics> metrics = <LineMetrics>[
+    var position = 0;
+    final metrics = <LineMetrics>[
       for (int index = 0; index < count; index += 1)
         LineMetrics(
           hardBreak: encoded[position++] != 0,
@@ -3608,7 +3608,7 @@ base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements P
 
   @override
   void pushStyle(TextStyle style) {
-    final List<String> fullFontFamilies = <String>[];
+    final fullFontFamilies = <String>[];
     fullFontFamilies.add(style._fontFamily);
     final List<String>? fontFamilyFallback = style._fontFamilyFallback;
     if (fontFamilyFallback != null) {
@@ -3629,7 +3629,7 @@ base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements P
     final List<FontFeature>? fontFeatures = style._fontFeatures;
     if (fontFeatures != null) {
       encodedFontFeatures = ByteData(fontFeatures.length * FontFeature._kEncodedSize);
-      int byteOffset = 0;
+      var byteOffset = 0;
       for (final FontFeature feature in fontFeatures) {
         feature._encode(
           ByteData.view(encodedFontFeatures.buffer, byteOffset, FontFeature._kEncodedSize),
@@ -3642,7 +3642,7 @@ base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements P
     final List<FontVariation>? fontVariations = style._fontVariations;
     if (fontVariations != null) {
       encodedFontVariations = ByteData(fontVariations.length * FontVariation._kEncodedSize);
-      int byteOffset = 0;
+      var byteOffset = 0;
       for (final FontVariation variation in fontVariations) {
         variation._encode(
           ByteData.view(encodedFontVariations.buffer, byteOffset, FontVariation._kEncodedSize),
@@ -3768,7 +3768,7 @@ base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements P
 
   @override
   Paragraph build() {
-    final _NativeParagraph paragraph = _NativeParagraph._();
+    final paragraph = _NativeParagraph._();
     _build(paragraph);
     return paragraph;
   }
@@ -3798,7 +3798,7 @@ final ByteData _fontChangeMessage = utf8
     .asByteData();
 
 FutureOr<void> _sendFontChangeMessage() async {
-  const String kSystemChannelName = 'flutter/system';
+  const kSystemChannelName = 'flutter/system';
   if (PlatformDispatcher.instance.onPlatformMessage != null) {
     _invoke3<String, ByteData?, PlatformMessageResponseCallback>(
       PlatformDispatcher.instance.onPlatformMessage,

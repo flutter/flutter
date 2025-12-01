@@ -379,7 +379,7 @@ void main() {
 class _FakePub extends Fake implements Pub {
   _FakePub();
 
-  var pubspecs = <String, List<Pubspec>>{};
+  Map<String, List<Pubspec>> pubspecs = <String, List<Pubspec>>{};
 
   @override
   Future<void> interactively(

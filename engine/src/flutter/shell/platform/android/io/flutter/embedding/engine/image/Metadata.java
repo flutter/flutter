@@ -32,7 +32,7 @@ class Metadata {
   static Metadata create(
       @NonNull ByteBuffer buffer, @NonNull FlutterImageDecoder.HeaderListener headerListener) {
     Metadata metadata = new Metadata();
-    byte[] bytes = new ImageUtils().getBytes(buffer);
+    byte[] bytes = ImageUtils.getBytes(buffer);
     // Use bitmap decode to get the mimetype and original dimensions.
     BitmapMetadataReader.read(bytes, metadata);
     // For non-heif images, we'll let the default implementation ImageDecoder handle the rest.

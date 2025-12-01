@@ -36,9 +36,7 @@ void main() {
   }();
 
   const FileSystem localFs = LocalFileSystem();
-  final _FlutterRootUnderTest flutterRoot = _FlutterRootUnderTest.findWithin(
-    forcePowershell: usePowershellOnPosix,
-  );
+  final flutterRoot = _FlutterRootUnderTest.findWithin(forcePowershell: usePowershellOnPosix);
 
   late Directory tmpDir;
   late _FlutterRootUnderTest testRoot;
@@ -105,8 +103,8 @@ void main() {
 
     if (const LocalPlatform().isWindows || usePowershellOnPosix) {
       // Copy a minimal set of environment variables needed to run the update_engine_version script in PowerShell.
-      const List<String> powerShellVariables = <String>['SYSTEMROOT', 'PATH', 'PATHEXT'];
-      for (final String key in powerShellVariables) {
+      const powerShellVariables = <String>['SYSTEMROOT', 'PATH', 'PATHEXT'];
+      for (final key in powerShellVariables) {
         final String? value = io.Platform.environment[key];
         if (value != null) {
           environment[key] = value;
@@ -154,7 +152,7 @@ void main() {
 
   void writeCommit(Iterable<String> files) {
     commitCount++;
-    for (final String relativePath in files) {
+    for (final relativePath in files) {
       localFs.file(localFs.path.join(testRoot.root.path, relativePath))
         ..createSync(recursive: true)
         ..writeAsStringSync('$commitCount');

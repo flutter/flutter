@@ -48,14 +48,14 @@ void main() {
   });
 
   test('Table control test: constrained flex columns', () {
-    final RenderTable table = RenderTable(textDirection: TextDirection.ltr);
-    final List<RenderBox> children = List<RenderBox>.generate(6, (_) => RenderPositionedBox());
+    final table = RenderTable(textDirection: TextDirection.ltr);
+    final children = List<RenderBox>.generate(6, (_) => RenderPositionedBox());
 
     table.setFlatChildren(6, children);
     layout(table, constraints: const BoxConstraints.tightFor(width: 100.0));
 
     const double expectedWidth = 100.0 / 6;
-    for (final RenderBox child in children) {
+    for (final child in children) {
       expect(child.size.width, moreOrLessEquals(expectedWidth));
     }
   });
@@ -210,10 +210,7 @@ void main() {
   });
 
   test('Table border painting', () {
-    final RenderTable table = RenderTable(
-      textDirection: TextDirection.rtl,
-      border: TableBorder.all(),
-    );
+    final table = RenderTable(textDirection: TextDirection.rtl, border: TableBorder.all());
     layout(table);
     table.setFlatChildren(1, <RenderBox>[]);
     pumpFrame();
@@ -296,8 +293,8 @@ void main() {
   });
 
   test('Table flex sizing', () {
-    const BoxConstraints cellConstraints = BoxConstraints.tightFor(width: 100, height: 100);
-    final RenderTable table = RenderTable(
+    const cellConstraints = BoxConstraints.tightFor(width: 100, height: 100);
+    final table = RenderTable(
       textDirection: TextDirection.rtl,
       children: <List<RenderBox>>[
         List<RenderBox>.generate(
@@ -321,7 +318,7 @@ void main() {
   });
 
   test('Table paints a borderRadius', () {
-    final RenderTable table = RenderTable(
+    final table = RenderTable(
       textDirection: TextDirection.ltr,
       border: TableBorder.all(borderRadius: const BorderRadius.all(Radius.circular(8.0))),
     );
@@ -346,7 +343,7 @@ void main() {
   });
 
   test('MaxColumnWidth.flex returns the correct result', () {
-    MaxColumnWidth columnWidth = const MaxColumnWidth(
+    var columnWidth = const MaxColumnWidth(
       FixedColumnWidth(100), // returns null from .flex
       FlexColumnWidth(), // returns 1 from .flex
     );
@@ -363,7 +360,7 @@ void main() {
   });
 
   test('MinColumnWidth.flex returns the correct result', () {
-    MinColumnWidth columnWidth = const MinColumnWidth(
+    var columnWidth = const MinColumnWidth(
       FixedColumnWidth(100), // returns null from .flex
       FlexColumnWidth(), // returns 1 from .flex
     );
@@ -380,10 +377,10 @@ void main() {
   });
 
   test('TableRows with different constraints, but vertically with intrinsicHeight', () {
-    const BoxConstraints firstConstraints = BoxConstraints.tightFor(width: 100, height: 100);
-    const BoxConstraints secondConstraints = BoxConstraints.tightFor(width: 200, height: 200);
+    const firstConstraints = BoxConstraints.tightFor(width: 100, height: 100);
+    const secondConstraints = BoxConstraints.tightFor(width: 200, height: 200);
 
-    final RenderTable table = RenderTable(
+    final table = RenderTable(
       textDirection: TextDirection.rtl,
       defaultVerticalAlignment: TableCellVerticalAlignment.intrinsicHeight,
       children: <List<RenderBox>>[
@@ -395,7 +392,7 @@ void main() {
       columnWidths: const <int, TableColumnWidth>{0: FlexColumnWidth(), 1: FlexColumnWidth()},
     );
 
-    const Size size = Size(300.0, 300.0);
+    const size = Size(300.0, 300.0);
 
     // Layout the table with a fixed size.
     layout(table, constraints: BoxConstraints.tight(size));

@@ -78,7 +78,9 @@ class WidgetStateInputBorderExample extends StatelessWidget {
   /// such as when rebuilding a [Theme] widget.
   static UnderlineInputBorder veryCoolBorder(Set<WidgetState> states) {
     if (states.disabled) {
-      return const UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey));
+      return const UnderlineInputBorder(
+        borderSide: BorderSide(color: Colors.grey),
+      );
     }
 
     const Color dullViolet = Color(0xFF502080);
@@ -95,7 +97,9 @@ class WidgetStateInputBorderExample extends StatelessWidget {
   Widget build(BuildContext context) {
     final InputDecoration decoration = InputDecoration(
       border: const WidgetStateInputBorder.resolveWith(veryCoolBorder),
-      labelText: enabled ? 'Type something awesome…' : '(click below to enable)',
+      labelText: enabled
+          ? 'Type something awesome…'
+          : '(click below to enable)',
     );
 
     return AnimatedFractionallySizedBox(

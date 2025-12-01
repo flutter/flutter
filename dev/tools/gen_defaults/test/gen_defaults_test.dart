@@ -33,7 +33,7 @@ void main() {
     final Directory tempDir = Directory.systemTemp.createTempSync('gen_defaults');
     try {
       // Create a temporary file with some content.
-      final File tempFile = File(path.join(tempDir.path, 'test_template.txt'));
+      final tempFile = File(path.join(tempDir.path, 'test_template.txt'));
       tempFile.createSync();
       tempFile.writeAsStringSync('''
 // This is a file with stuff in it.
@@ -43,11 +43,7 @@ void main() {
 
       // Have a test template append new parameterized content to the end of
       // the file.
-      final Map<String, dynamic> tokens = <String, dynamic>{
-        'version': '0.0',
-        'foo': 'Foobar',
-        'bar': 'Barfoo',
-      };
+      final tokens = <String, dynamic>{'version': '0.0', 'foo': 'Foobar', 'bar': 'Barfoo'};
       TestTemplate('Test', tempFile.path, tokens).updateFile();
 
       expect(tempFile.readAsStringSync(), '''
@@ -78,7 +74,7 @@ static final String tokenBar = 'Barfoo';
     final Directory tempDir = Directory.systemTemp.createTempSync('gen_defaults');
     try {
       // Create a temporary file with some content.
-      final File tempFile = File(path.join(tempDir.path, 'test_template.txt'));
+      final tempFile = File(path.join(tempDir.path, 'test_template.txt'));
       tempFile.createSync();
       tempFile.writeAsStringSync('''
 // This is a file with stuff in it.
@@ -102,11 +98,7 @@ static final String tokenBar = 'Barfoo';
 
       // Have a test template append new parameterized content to the end of
       // the file.
-      final Map<String, dynamic> tokens = <String, dynamic>{
-        'version': '0.0',
-        'foo': 'foo',
-        'bar': 'bar',
-      };
+      final tokens = <String, dynamic>{'version': '0.0', 'foo': 'foo', 'bar': 'bar'};
       TestTemplate('Test', tempFile.path, tokens).updateFile();
 
       expect(tempFile.readAsStringSync(), '''
@@ -137,7 +129,7 @@ static final String tokenBar = 'bar';
     final Directory tempDir = Directory.systemTemp.createTempSync('gen_defaults');
     try {
       // Create a temporary file with some content.
-      final File tempFile = File(path.join(tempDir.path, 'test_template.txt'));
+      final tempFile = File(path.join(tempDir.path, 'test_template.txt'));
       tempFile.createSync();
       tempFile.writeAsStringSync('''
 // This is a file with stuff in it.
@@ -147,11 +139,7 @@ static final String tokenBar = 'bar';
 
       // Update file with a template for 'Block 1'
       {
-        final Map<String, dynamic> tokens = <String, dynamic>{
-          'version': '0.0',
-          'foo': 'foo',
-          'bar': 'bar',
-        };
+        final tokens = <String, dynamic>{'version': '0.0', 'foo': 'foo', 'bar': 'bar'};
         TestTemplate('Block 1', tempFile.path, tokens).updateFile();
       }
       expect(tempFile.readAsStringSync(), '''
@@ -177,11 +165,7 @@ static final String tokenBar = 'bar';
       // Update file with a template for 'Block 2', which should append but not
       // disturb the code in 'Block 1'.
       {
-        final Map<String, dynamic> tokens = <String, dynamic>{
-          'version': '0.0',
-          'foo': 'bar',
-          'bar': 'foo',
-        };
+        final tokens = <String, dynamic>{'version': '0.0', 'foo': 'bar', 'bar': 'foo'};
         TestTemplate('Block 2', tempFile.path, tokens).updateFile();
       }
       expect(tempFile.readAsStringSync(), '''
@@ -221,11 +205,7 @@ static final String tokenBar = 'foo';
       // Update 'Block 1' again which should just update that block,
       // leaving 'Block 2' undisturbed.
       {
-        final Map<String, dynamic> tokens = <String, dynamic>{
-          'version': '0.0',
-          'foo': 'FOO',
-          'bar': 'BAR',
-        };
+        final tokens = <String, dynamic>{'version': '0.0', 'foo': 'FOO', 'bar': 'BAR'};
         TestTemplate('Block 1', tempFile.path, tokens).updateFile();
       }
       expect(tempFile.readAsStringSync(), '''
@@ -267,7 +247,7 @@ static final String tokenBar = 'foo';
   });
 
   test('Templates can get proper shapes from given data', () {
-    const Map<String, dynamic> tokens = <String, dynamic>{
+    const tokens = <String, dynamic>{
       'foo.shape': 'shape.large',
       'bar.shape': 'shape.full',
       'shape.large': <String, dynamic>{
@@ -279,7 +259,7 @@ static final String tokenBar = 'foo';
       },
       'shape.full': <String, dynamic>{'family': 'SHAPE_FAMILY_CIRCULAR'},
     };
-    final TestTemplate template = TestTemplate('Test', 'foobar.dart', tokens);
+    final template = TestTemplate('Test', 'foobar.dart', tokens);
     expect(
       template.shape('foo'),
       'const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(1.0), topRight: Radius.circular(2.0), bottomLeft: Radius.circular(3.0), bottomRight: Radius.circular(4.0)))',
@@ -288,13 +268,13 @@ static final String tokenBar = 'foo';
   });
 
   group('Tokens logger', () {
-    final List<String> printLog = List<String>.empty(growable: true);
-    final Map<String, List<String>> versionMap = <String, List<String>>{};
-    final Map<String, dynamic> allTokens = <String, dynamic>{};
+    final printLog = List<String>.empty(growable: true);
+    final versionMap = <String, List<String>>{};
+    final allTokens = <String, dynamic>{};
 
     // Add to printLog instead of printing to stdout
     void Function() overridePrint(void Function() testFn) => () {
-      final ZoneSpecification spec = ZoneSpecification(
+      final spec = ZoneSpecification(
         print: (_, _, _, String msg) {
           printLog.add(msg);
         },
@@ -315,7 +295,7 @@ static final String tokenBar = 'foo';
 
     String errorColoredString(String str) => '\x1B[31m$str\x1B[0m';
 
-    const Map<String, List<String>> testVersions = <String, List<String>>{
+    const testVersions = <String, List<String>>{
       'v1.0.0': <String>['file_1.json'],
       'v2.0.0': <String>['file_2.json, file_3.json'],
     };

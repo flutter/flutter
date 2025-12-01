@@ -1749,5 +1749,29 @@ TEST(FlutterWindowsViewTest, WindowMetricsEventContainsDisplayId) {
   FlutterWindowMetricsEvent event = view.CreateWindowMetricsEvent();
   EXPECT_EQ(event.display_id, 12);
 }
+
+TEST(FlutterWindowsViewTest, SizeChangeTriggersMetricsEventWhichHasDisplayId) {
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+  EngineModifier modifier(engine.get());
+
+  auto window_binding_handler =
+      std::make_unique<NiceMock<MockWindowBindingHandler>>();
+  EXPECT_CALL(*window_binding_handler, GetDisplayId)
+      .WillOnce(testing::Return(12));
+  FlutterWindowsView view{kImplicitViewId, engine.get(),
+                          std::move(window_binding_handler)};
+
+  bool received_metrics = false;
+  modifier.embedder_api().SendWindowMetricsEvent = MOCK_ENGINE_PROC(
+      SendWindowMetricsEvent,
+      ([&received_metrics](auto engine,
+                           const FlutterWindowMetricsEvent* event) {
+        received_metrics = true;
+        EXPECT_EQ(event->display_id, 12);
+        return kSuccess;
+      }));
+  view.OnWindowSizeChanged(100, 100);
+  EXPECT_TRUE(received_metrics);
+}
 }  // namespace testing
 }  // namespace flutter

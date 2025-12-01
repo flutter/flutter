@@ -10,8 +10,7 @@ void main() {
   test(
     'setSemanticsTreeEnabled calls when the semantics is enabled before binding initialized',
     () async {
-      final SemanticsTestBindingWithInitialEnabled binding =
-          SemanticsTestBindingWithInitialEnabled();
+      final binding = SemanticsTestBindingWithInitialEnabled();
       expect(binding.platformDispatcher.semanticsTreeEnabled, isTrue);
     },
   );

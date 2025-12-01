@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/list_tile/list_tile.1.dart' as example;
+import 'package:flutter_api_samples/material/list_tile/list_tile.1.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -17,7 +18,10 @@ void main() {
     // The ListTile widget is wrapped in a Card widget.
     for (int i = 0; i < totalTiles; i++) {
       expect(
-        find.ancestor(of: find.byType(ListTile).at(i), matching: find.byType(Card).at(i)),
+        find.ancestor(
+          of: find.byType(ListTile).at(i),
+          matching: find.byType(Card).at(i),
+        ),
         findsOneWidget,
       );
     }

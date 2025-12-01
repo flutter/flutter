@@ -40,18 +40,11 @@ Future<shelf.Response> _applyProxyRules(
     if (!rule.matches(requestPath)) {
       continue;
     }
-
-    /// Rewrites the request path based on the matching rule by:
-    /// 1. Getting the base target URI from the rule.
-    /// 2. Replacing the request path according to the rule's replacement logic.
-    /// 3. Resolving the final target URL by combining the target URI and the rewritten
-    ///    request path.
-    final Uri targetUri = rule.getTargetUri();
-    final String rewrittenPath = rule.replace(requestPath);
-    final Uri finalTargetUrl = targetUri.resolve(rewrittenPath);
+    final shelf.Handler handler = proxyHandler(rule.targetUri, proxyName: 'flutter_tools');
+    final Uri finalTargetUrl = rule.finalTargetUri(request.requestedUri);
     try {
       final shelf.Request proxyBackendRequest = proxyRequest(request, finalTargetUrl);
-      final shelf.Response proxyResponse = await proxyHandler(targetUri)(proxyBackendRequest);
+      final shelf.Response proxyResponse = await handler(proxyBackendRequest);
       logger.printStatus('$_kLogEntryPrefix Matched "$requestPath". Requesting "$finalTargetUrl"');
       logger.printTrace('$_kLogEntryPrefix Matched with proxy rule: $rule');
       if (proxyResponse.statusCode == 404) {

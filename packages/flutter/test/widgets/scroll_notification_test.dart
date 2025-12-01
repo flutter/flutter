@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('ScrollMetricsNotification test', (WidgetTester tester) async {
-    final List<Notification> events = <Notification>[];
+    final events = <Notification>[];
     Widget buildFrame(double height) {
       return NotificationListener<Notification>(
         onNotification: (Notification value) {
@@ -21,7 +21,7 @@ void main() {
 
     await tester.pumpWidget(buildFrame(1200.0));
     expect(events.length, 1);
-    ScrollMetricsNotification event = events[0] as ScrollMetricsNotification;
+    var event = events[0] as ScrollMetricsNotification;
     expect(event.metrics.extentBefore, 0.0);
     expect(event.metrics.extentInside, 600.0);
     expect(event.metrics.extentAfter, 600.0);
@@ -90,7 +90,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(notification, isA<ScrollStartNotification>());
     expect(notification.depth, equals(0));
-    final ScrollStartNotification start = notification as ScrollStartNotification;
+    final start = notification as ScrollStartNotification;
     expect(start.dragDetails, isNotNull);
     expect(start.dragDetails!.globalPosition, equals(const Offset(100.0, 100.0)));
 
@@ -98,7 +98,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(notification, isA<ScrollUpdateNotification>());
     expect(notification.depth, equals(0));
-    final ScrollUpdateNotification update = notification as ScrollUpdateNotification;
+    final update = notification as ScrollUpdateNotification;
     expect(update.dragDetails, isNotNull);
     expect(update.dragDetails!.globalPosition, equals(const Offset(90.0, 90.0)));
     expect(update.dragDetails!.delta, equals(const Offset(0.0, -10.0)));
@@ -107,16 +107,16 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(notification, isA<ScrollEndNotification>());
     expect(notification.depth, equals(0));
-    final ScrollEndNotification end = notification as ScrollEndNotification;
+    final end = notification as ScrollEndNotification;
     expect(end.dragDetails, isNotNull);
     expect(end.dragDetails!.velocity, equals(Velocity.zero));
   });
 
   testWidgets('Scroll notification depth', (WidgetTester tester) async {
-    final List<Type> depth0Types = <Type>[];
-    final List<Type> depth1Types = <Type>[];
-    final List<int> depth0Values = <int>[];
-    final List<int> depth1Values = <int>[];
+    final depth0Types = <Type>[];
+    final depth1Types = <Type>[];
+    final depth0Values = <int>[];
+    final depth1Values = <int>[];
 
     await tester.pumpWidget(
       NotificationListener<ScrollNotification>(
@@ -155,7 +155,7 @@ void main() {
     await gesture.up();
     await tester.pump(const Duration(seconds: 1));
 
-    final List<Type> types = <Type>[
+    final types = <Type>[
       ScrollStartNotification,
       UserScrollNotification,
       ScrollUpdateNotification,
@@ -170,7 +170,7 @@ void main() {
   });
 
   testWidgets('ScrollNotifications bubble past Scaffold Material', (WidgetTester tester) async {
-    final List<Type> notificationTypes = <Type>[];
+    final notificationTypes = <Type>[];
 
     await tester.pumpWidget(
       MaterialApp(
@@ -207,7 +207,7 @@ void main() {
     await gesture.up();
     await tester.pump(const Duration(seconds: 1));
 
-    final List<Type> types = <Type>[
+    final types = <Type>[
       ScrollStartNotification,
       UserScrollNotification,
       ScrollUpdateNotification,
@@ -247,7 +247,7 @@ void main() {
     expect(notification, isA<ScrollStartNotification>());
     expect(notification!.depth, equals(0));
 
-    final ScrollStartNotification start = notification! as ScrollStartNotification;
+    final start = notification! as ScrollStartNotification;
     expect(start.dragDetails, isNotNull);
     expect(start.dragDetails!.globalPosition, equals(const Offset(100.0, 100.0)));
 
@@ -255,7 +255,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(notification, isA<ScrollUpdateNotification>());
     expect(notification!.depth, equals(0));
-    final ScrollUpdateNotification update = notification! as ScrollUpdateNotification;
+    final update = notification! as ScrollUpdateNotification;
     expect(update.dragDetails, isNotNull);
     expect(update.dragDetails!.globalPosition, equals(const Offset(90.0, 90.0)));
     expect(update.dragDetails!.delta, equals(const Offset(0.0, -10.0)));
@@ -264,7 +264,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(notification, isA<ScrollEndNotification>());
     expect(notification!.depth, equals(0));
-    final ScrollEndNotification end = notification! as ScrollEndNotification;
+    final end = notification! as ScrollEndNotification;
     expect(end.dragDetails, isNotNull);
     expect(end.dragDetails!.velocity, equals(Velocity.zero));
 
@@ -287,7 +287,7 @@ void main() {
   testWidgets('ScrollBar thumb drag triggers scroll start-update-end notifications', (
     WidgetTester tester,
   ) async {
-    final ScrollController scrollController = ScrollController();
+    final scrollController = ScrollController();
     ScrollNotification? notification;
 
     addTearDown(scrollController.dispose);

@@ -888,7 +888,7 @@ class RunCommand extends RunCommandBase {
       }),
     );
     try {
-      final int? result = await runner.run(
+      final int result = await runner.run(
         appStartedCompleter: appStartedTimeRecorder,
         route: route,
       );

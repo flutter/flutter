@@ -19,17 +19,17 @@ void main() {
 
     test('empty metrics', () async {
       final File file = fileSystem.file('success_file');
-      const String output = '''
+      const output = '''
       {"missing": "entry"}
       {"other": true}''';
       file.writeAsStringSync(output);
-      final TestFileReporterResults result = TestFileReporterResults.fromFile(file);
+      final result = TestFileReporterResults.fromFile(file);
       expect(result.allTestSpecs, isEmpty);
     });
 
     test('have metrics', () async {
       final File file = fileSystem.file('success_file');
-      const String output = '''
+      const output = '''
       {"protocolVersion":"0.1.1","runnerVersion":"1.21.6","pid":93376,"type":"start","time":0}
       {"suite":{"id":0,"platform":"vm","path":"test/general.shard/project_validator_result_test.dart"},"type":"suite","time":0}
       {"count":1,"time":12,"type":"allSuites"}
@@ -58,17 +58,17 @@ void main() {
 
     test('missing success entry', () async {
       final File file = fileSystem.file('success_file');
-      const String output = '''
+      const output = '''
       {"suite":{"id":1,"platform":"vm","path":"other_path"},"type":"suite","time":1000}
       {"group":{"id":7,"suiteID":1,"parentID":2,"name":"name","metadata":{"skip":false,"skipReason":null},"testCount":1,"line":82,"column":3,"url":"file:///file"},"type":"group","time":5000}''';
       file.writeAsStringSync(output);
-      final TestFileReporterResults result = TestFileReporterResults.fromFile(file);
+      final result = TestFileReporterResults.fromFile(file);
       expect(result.hasFailedTests, true);
     });
 
     test('has failed stack traces', () async {
       final File file = fileSystem.file('success_file');
-      const String output = '''
+      const output = '''
       {"protocolVersion":"0.1.1","runnerVersion":"1.22.1","pid":47372,"type":"start","time":0}
       {"suite":{"id":0,"platform":"vm","path":"test/tool_subsharding_test.dart"},"type":"suite","time":0}
       {"test":{"id":1,"name":"loading test/tool_subsharding_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":2}
@@ -87,7 +87,7 @@ void main() {
       {"testID":6,"error":"my error","isFailure":true,"type":"error","time":1107}
       {"success":false,"type":"done","time":1120}''';
       file.writeAsStringSync(output);
-      final TestFileReporterResults result = TestFileReporterResults.fromFile(file);
+      final result = TestFileReporterResults.fromFile(file);
       expect(result.hasFailedTests, true);
       expect(result.errors.length == 3, true);
       expect(result.errors[0].contains('Expected: <true>  Actual: <false>'), true);

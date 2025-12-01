@@ -13,7 +13,7 @@ void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
   test('Describe transform control test', () {
-    final Matrix4 identity = Matrix4.identity();
+    final identity = Matrix4.identity();
     final List<String> description = debugDescribeTransform(identity);
     expect(description, <String>[
       '[0] 1.0,0.0,0.0,0.0',
@@ -24,8 +24,8 @@ void main() {
   });
 
   test('transform property test', () {
-    final Matrix4 transform = Matrix4.diagonal3(Vector3.all(2.0));
-    final TransformProperty simple = TransformProperty('transform', transform);
+    final transform = Matrix4.diagonal3(Vector3.all(2.0));
+    final simple = TransformProperty('transform', transform);
     expect(simple.name, equals('transform'));
     expect(simple.value, same(transform));
     expect(
@@ -43,12 +43,12 @@ void main() {
       equals('transform: [2.0,0.0,0.0,0.0; 0.0,2.0,0.0,0.0; 0.0,0.0,2.0,0.0; 0.0,0.0,0.0,1.0]'),
     );
 
-    final TransformProperty nullProperty = TransformProperty('transform', null);
+    final nullProperty = TransformProperty('transform', null);
     expect(nullProperty.name, equals('transform'));
     expect(nullProperty.value, isNull);
     expect(nullProperty.toString(), equals('transform: null'));
 
-    final TransformProperty hideNull = TransformProperty('transform', null, defaultValue: null);
+    final hideNull = TransformProperty('transform', null, defaultValue: null);
     expect(hideNull.value, isNull);
     expect(hideNull.toString(), equals('transform: null'));
   });
@@ -86,7 +86,7 @@ void main() {
     debugPaintSizeEnabled = true;
     RenderSliver s;
     RenderBox b;
-    final RenderViewport root = RenderViewport(
+    final root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       children: <RenderSliver>[
@@ -159,7 +159,7 @@ void main() {
   test('debugPaintPadding from render objects with inverted direction vertical', () {
     debugPaintSizeEnabled = true;
     RenderSliver s;
-    final RenderViewport root = RenderViewport(
+    final root = RenderViewport(
       axisDirection: AxisDirection.up,
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
@@ -173,10 +173,7 @@ void main() {
       ],
     );
     layout(root);
-    final PaintingContext context = PaintingContext(
-      ContainerLayer(),
-      const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
-    );
+    final context = PaintingContext(ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0));
     s.debugPaint(context, const Offset(0.0, 500));
     debugPaintSizeEnabled = false;
   });
@@ -184,7 +181,7 @@ void main() {
   test('debugPaintPadding from render objects with inverted direction horizontal', () {
     debugPaintSizeEnabled = true;
     RenderSliver s;
-    final RenderViewport root = RenderViewport(
+    final root = RenderViewport(
       axisDirection: AxisDirection.left,
       crossAxisDirection: AxisDirection.down,
       offset: ViewportOffset.zero(),
@@ -198,10 +195,7 @@ void main() {
       ],
     );
     layout(root);
-    final PaintingContext context = PaintingContext(
-      ContainerLayer(),
-      const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
-    );
+    final context = PaintingContext(ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0));
     s.debugPaint(context, const Offset(0.0, 500));
     debugPaintSizeEnabled = false;
   });
@@ -209,23 +203,20 @@ void main() {
   test('debugDisableOpacity keeps things in the right spot', () {
     debugDisableOpacityLayers = true;
 
-    final RenderDecoratedBox blackBox = RenderDecoratedBox(
+    final blackBox = RenderDecoratedBox(
       decoration: const BoxDecoration(color: Color(0xff000000)),
       child: RenderConstrainedBox(
         additionalConstraints: BoxConstraints.tight(const Size.square(20.0)),
       ),
     );
-    final RenderOpacity root = RenderOpacity(
-      opacity: .5,
-      child: RenderRepaintBoundary(child: blackBox),
-    );
+    final root = RenderOpacity(opacity: .5, child: RenderRepaintBoundary(child: blackBox));
     layout(root, phase: EnginePhase.compositingBits);
 
-    final OffsetLayer rootLayer = OffsetLayer();
-    final PaintingContext context = PaintingContext(rootLayer, const Rect.fromLTWH(0, 0, 500, 500));
+    final rootLayer = OffsetLayer();
+    final context = PaintingContext(rootLayer, const Rect.fromLTWH(0, 0, 500, 500));
     context.paintChild(root, const Offset(40, 40));
 
-    final OpacityLayer opacityLayer = rootLayer.firstChild! as OpacityLayer;
+    final opacityLayer = rootLayer.firstChild! as OpacityLayer;
     expect(opacityLayer.offset, const Offset(40, 40));
     debugDisableOpacityLayers = false;
   });

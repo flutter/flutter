@@ -231,7 +231,10 @@ class FlutterProject {
 
   /// The location of the generated scaffolding project for hosting widget
   /// previews from this project.
-  Directory get widgetPreviewScaffold => dartTool.childDirectory('widget_preview_scaffold');
+  // TODO(bkonyi): don't create this project in $TMP.
+  // See https://github.com/flutter/flutter/issues/179036
+  late final Directory widgetPreviewScaffold = directory.fileSystem.systemTempDirectory
+      .createTempSync('widget_preview_scaffold');
 
   /// The directory containing the generated code for this project.
   Directory get generated => directory.absolute
@@ -327,6 +330,18 @@ class FlutterProject {
       throwToolExit('Please correct the pubspec.yaml file at $path');
     }
     return manifest;
+  }
+
+  /// Reloads the content of [pubspecFile] and updates the contents of [manifest].
+  void reloadManifest({required Logger logger, required FileSystem fs}) {
+    _manifest = _readManifest(pubspecFile.path, logger: logger, fileSystem: fs);
+  }
+
+  /// Returns the MD5 hash of the contents of [manifest], ensuring [manifest] is up to date before
+  /// calculating the hash.
+  String computeManifestMD5Hash({required Logger logger, required FileSystem fs}) {
+    reloadManifest(logger: logger, fs: fs);
+    return _manifest.computeMD5Hash();
   }
 
   /// Replaces the content of [pubspecFile] with the contents of [updated] and

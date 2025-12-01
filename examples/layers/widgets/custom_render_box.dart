@@ -30,7 +30,7 @@ class RenderDots extends RenderConstrainedBox {
     final Canvas canvas = context.canvas;
     canvas.drawRect(offset & size, Paint()..color = const Color(0xFF0000FF));
 
-    final Paint paint = Paint()..color = const Color(0xFF00FF00);
+    final paint = Paint()..color = const Color(0xFF00FF00);
     for (final Offset point in _dots.values) {
       canvas.drawCircle(point, 50.0, paint);
     }

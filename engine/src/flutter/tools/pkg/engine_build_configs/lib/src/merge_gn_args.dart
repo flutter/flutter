@@ -60,7 +60,7 @@ import 'package:meta/meta.dart';
 /// ... prints "[--no-foo, --bar, --baz]".
 List<String> mergeGnArgs({required List<String> buildArgs, required List<String> extraArgs}) {
   // Make a copy of buildArgs so replacements can be made.
-  final newBuildArgs = List.of(buildArgs);
+  final List<String> newBuildArgs = List.of(buildArgs);
 
   // Index "extraArgs" as map of "flag-without-no" => true/false.
   final indexedExtra = <String, bool>{};
@@ -72,21 +72,21 @@ List<String> mergeGnArgs({required List<String> buildArgs, required List<String>
         'Each argument must be in the form "--flag" or "--no-flag".',
       );
     }
-    final (name, value) = _extractRawFlag(extraArg);
+    final (String name, bool value) = _extractRawFlag(extraArg);
     indexedExtra[name] = value;
   }
 
   // Iterate over newBuildArgs and replace if applicable.
   for (var i = 0; i < newBuildArgs.length; i++) {
     // It is valid to have non-flags (i.e. --runtime-mode=debug) here. Skip.
-    final buildArg = newBuildArgs[i];
+    final String buildArg = newBuildArgs[i];
     if (!_isFlag(buildArg)) {
       continue;
     }
 
     // If there is no repalcement value, leave as-is.
-    final (name, value) = _extractRawFlag(buildArg);
-    final replaceWith = indexedExtra.remove(name);
+    final (String name, bool value) = _extractRawFlag(buildArg);
+    final bool? replaceWith = indexedExtra.remove(name);
     if (replaceWith == null) {
       continue;
     }
@@ -108,7 +108,7 @@ bool _isFlag(String arg) {
 }
 
 (String, bool) _extractRawFlag(String flagArgument) {
-  var rawFlag = flagArgument.substring(2);
+  String rawFlag = flagArgument.substring(2);
   var flagValue = true;
   if (rawFlag.startsWith('no-')) {
     rawFlag = rawFlag.substring(3);

@@ -39,7 +39,10 @@ class DialogExample extends StatelessWidget {
               onPressed: () => Navigator.pop(context, 'Cancel'),
               child: const Text('Cancel'),
             ),
-            TextButton(onPressed: () => Navigator.pop(context, 'OK'), child: const Text('OK')),
+            TextButton(
+              onPressed: () => Navigator.pop(context, 'OK'),
+              child: const Text('OK'),
+            ),
           ],
         ),
       ),

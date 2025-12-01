@@ -65,7 +65,10 @@ class _RawMenuAnchorExampleState extends State<RawMenuAnchorExample> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Expanded(flex: 3, child: Text(_selectedAnimal?.label ?? 'Select One')),
+                  Expanded(
+                    flex: 3,
+                    child: Text(_selectedAnimal?.label ?? 'Select One'),
+                  ),
                   const Flexible(child: Icon(Icons.arrow_drop_down, size: 16)),
                 ],
               ),
@@ -107,12 +110,17 @@ class CustomMenu extends StatelessWidget {
   final MenuController controller;
   final FocusNode focusNode;
 
-  static const Map<ShortcutActivator, Intent> _shortcuts = <ShortcutActivator, Intent>{
-    SingleActivator(LogicalKeyboardKey.gameButtonA): ActivateIntent(),
-    SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowDown): DirectionalFocusIntent(TraversalDirection.down),
-    SingleActivator(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(TraversalDirection.up),
-  };
+  static const Map<ShortcutActivator, Intent> _shortcuts =
+      <ShortcutActivator, Intent>{
+        SingleActivator(LogicalKeyboardKey.gameButtonA): ActivateIntent(),
+        SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
+        SingleActivator(LogicalKeyboardKey.arrowDown): DirectionalFocusIntent(
+          TraversalDirection.down,
+        ),
+        SingleActivator(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(
+          TraversalDirection.up,
+        ),
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -163,20 +171,27 @@ class RawMenuAnchorApp extends StatelessWidget {
   const RawMenuAnchorApp({super.key});
 
   static const ButtonStyle menuButtonStyle = ButtonStyle(
-    overlayColor: WidgetStatePropertyAll<Color>(Color.fromARGB(55, 139, 195, 255)),
+    overlayColor: WidgetStatePropertyAll<Color>(
+      Color.fromARGB(55, 139, 195, 255),
+    ),
     iconSize: WidgetStatePropertyAll<double>(17),
-    padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.symmetric(horizontal: 12)),
+    padding: WidgetStatePropertyAll<EdgeInsets>(
+      EdgeInsets.symmetric(horizontal: 12),
+    ),
   );
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData.from(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-          dynamicSchemeVariant: DynamicSchemeVariant.vibrant,
-        ),
-      ).copyWith(menuButtonTheme: const MenuButtonThemeData(style: menuButtonStyle)),
+      theme:
+          ThemeData.from(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.blue,
+              dynamicSchemeVariant: DynamicSchemeVariant.vibrant,
+            ),
+          ).copyWith(
+            menuButtonTheme: const MenuButtonThemeData(style: menuButtonStyle),
+          ),
       home: const Scaffold(body: Center(child: RawMenuAnchorExample())),
     );
   }
