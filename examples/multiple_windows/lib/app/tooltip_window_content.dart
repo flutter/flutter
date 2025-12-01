@@ -1,3 +1,10 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// ignore_for_file: invalid_use_of_internal_member
+// ignore_for_file: implementation_imports
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter/src/widgets/_window.dart';
 
@@ -33,7 +40,10 @@ class _TooltipWindowContentState extends State<TooltipWindowContent>
     Future<void>.delayed(const Duration(seconds: 10), () {
       widget.controller.destroy();
     });
-    _animationController = AnimationController(duration: const Duration(seconds: 1), vsync: this);
+    _animationController = AnimationController(
+      duration: const Duration(seconds: 1),
+      vsync: this,
+    );
     _animationController.repeat(reverse: true);
   }
 
@@ -42,7 +52,8 @@ class _TooltipWindowContentState extends State<TooltipWindowContent>
     return AnimatedBuilder(
       animation: _animationController,
       builder: (context, _) {
-        final double padding = 20 + (16.0 * _animationController.value).ceilToDouble() / 1.0;
+        final double padding =
+            20 + (16.0 * _animationController.value).ceilToDouble() / 1.0;
         // print('Padding: $padding');
         return DefaultTextStyle(
           style: const TextStyle(
