@@ -47,12 +47,12 @@ class _GpuSdfCanvasState extends State<GpuSdfCanvas> {
   }
 
   ui.Image _loadImage(ui.FragmentShader shader) {
-    const Size size = Size(512, 512);
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final Canvas canvas = Canvas(recorder);
+    const size = Size(512, 512);
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
     shader.setFloat(0, size.width);
     shader.setFloat(1, size.height);
-    final Paint paint = Paint()..shader = _circle;
+    final paint = Paint()..shader = _circle;
     canvas.drawRect(Offset.zero & size, paint);
     final ui.Picture picture = recorder.endRecording();
     return picture.toImageSync(
@@ -83,7 +83,7 @@ class GpuSdfPainter extends CustomPainter {
     shader.setFloat(0, size.width);
     shader.setFloat(1, size.height);
     shader.setImageSampler(0, image);
-    final Paint paint = Paint()..shader = shader;
+    final paint = Paint()..shader = shader;
     canvas.drawRect(Offset.zero & size, paint);
   }
 
