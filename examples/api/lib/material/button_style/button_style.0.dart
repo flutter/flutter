@@ -57,7 +57,10 @@ class ButtonTypesGroup extends StatelessWidget {
         children: <Widget>[
           ElevatedButton(onPressed: onPressed, child: const Text('Elevated')),
           FilledButton(onPressed: onPressed, child: const Text('Filled')),
-          FilledButton.tonal(onPressed: onPressed, child: const Text('Filled Tonal')),
+          FilledButton.tonal(
+            onPressed: onPressed,
+            child: const Text('Filled Tonal'),
+          ),
           OutlinedButton(onPressed: onPressed, child: const Text('Outlined')),
           TextButton(onPressed: onPressed, child: const Text('Text')),
         ],
