@@ -9,7 +9,9 @@ on:
     branches: master
     types: [labeled]
 
-permissions: write-all
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
   cherrypick_not_merged_remove_label:
