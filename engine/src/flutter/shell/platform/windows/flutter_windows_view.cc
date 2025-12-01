@@ -661,11 +661,9 @@ void FlutterWindowsView::SendPointerEventWithData(
   event.view_id = view_id_;
   event.rotation = (double)state->rotation * (M_PI / 180);
   event.pressure = state->pressure;
-  if (event.pressure != 0) {
-    // Normalized between 0 and 1024 by the windows API
-    event.pressure_min = 0;
-    event.pressure_max = kMaxPenPressure;
-  }
+  // Normalized between 0 and 1024 by the windows API
+  event.pressure_min = 0;
+  event.pressure_max = kMaxPenPressure;
 
   // Set metadata that's always the same regardless of the event.
   event.struct_size = sizeof(event);
