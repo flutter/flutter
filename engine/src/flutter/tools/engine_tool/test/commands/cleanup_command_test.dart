@@ -14,7 +14,7 @@ import '../src/utils.dart';
 
 void main() {
   test('prints instead of deleting when --dry-run', () async {
-    final fakeNow = DateTime.now().add(const Duration(days: 100));
+    final DateTime fakeNow = DateTime.now().add(const Duration(days: 100));
     final testEnv = TestEnvironment.withTestEngine(now: () => fakeNow);
     addTearDown(testEnv.cleanup);
 
@@ -23,7 +23,7 @@ void main() {
 
     final runner = ToolCommandRunner(environment: testEnv.environment, configs: {});
 
-    final result = await runner.run(['cleanup', '--dry-run']);
+    final int result = await runner.run(['cleanup', '--dry-run']);
     expect(result, 0);
 
     expect(targetDir.existsSync(), true, reason: '--dry-run should not delete directories');
@@ -39,7 +39,7 @@ void main() {
   });
 
   test('uses 30 days if --untouched-since is omitted', () async {
-    final fakeNow = DateTime.now().add(const Duration(days: 32));
+    final DateTime fakeNow = DateTime.now().add(const Duration(days: 32));
     final testEnv = TestEnvironment.withTestEngine(now: () => fakeNow);
     addTearDown(testEnv.cleanup);
 
@@ -48,7 +48,7 @@ void main() {
 
     final runner = ToolCommandRunner(environment: testEnv.environment, configs: {});
 
-    final result = await runner.run(['cleanup']);
+    final int result = await runner.run(['cleanup']);
     expect(result, 0);
 
     expect(targetDir.existsSync(), false, reason: 'Should be > 30 days since accessed');
@@ -72,7 +72,7 @@ void main() {
 
     final runner = ToolCommandRunner(environment: testEnv.environment, configs: {});
 
-    final result = await runner.run(['cleanup', '--untouched-since=${fakeNow.year + 1}-01-01']);
+    final int result = await runner.run(['cleanup', '--untouched-since=${fakeNow.year + 1}-01-01']);
     expect(result, 0);
 
     expect(

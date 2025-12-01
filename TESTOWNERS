@@ -19,6 +19,11 @@
 /dev/devicelab/bin/tasks/android_stack_size_test.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/android_verified_input_test.dart @gmackall @flutter/android
 /dev/devicelab/bin/tasks/android_view_scroll_perf__timeline_summary.dart @jtmcdole @flutter/engine
+/dev/devicelab/bin/tasks/animated_advanced_blend_perf__timeline_summary.dart @gaaclarke @flutter/engine
+/dev/devicelab/bin/tasks/animated_advanced_blend_perf_ios__timeline_summary.dart @gaaclarke @flutter/engine
+/dev/devicelab/bin/tasks/animated_advanced_blend_perf_opengles__timeline_summary.dart @gaaclarke @flutter/engine
+/dev/devicelab/bin/tasks/animated_blur_backdrop_filter_perf__timeline_summary.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/animated_blur_backdrop_filter_perf_opengles__timeline_summary.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/animated_complex_image_filtered_perf__e2e_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/animated_complex_opacity_perf__e2e_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/animated_image_gc_perf.dart @jtmcdole @flutter/engine
@@ -33,11 +38,21 @@
 /dev/devicelab/bin/tasks/complex_layout_android__compile.dart @reidbaker @flutter/tool
 /dev/devicelab/bin/tasks/complex_layout_android__scroll_smoothness.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_scroll_perf__devtools_memory.dart @jtmcdole @flutter/engine
+/dev/devicelab/bin/tasks/complex_layout_scroll_perf_impeller__timeline_summary.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/complex_layout_scroll_perf_impeller_gles__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_semantics_perf.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/cubic_bezier_perf__e2e_summary.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/cubic_bezier_perf_sksl_warmup__e2e_summary.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/cull_opacity_perf__e2e_summary.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/devtools_profile_start_test.dart @bkonyi @flutter/tool
+/dev/devicelab/bin/tasks/draw_arcs_all_fill_styles_perf__timeline_summary.dart @b-luk @flutter/engine
+/dev/devicelab/bin/tasks/draw_arcs_all_stroke_styles_perf__timeline_summary.dart @b-luk @flutter/engine
+/dev/devicelab/bin/tasks/draw_atlas_perf__timeline_summary.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/draw_atlas_perf_opengles__timeline_summary.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/draw_vertices_perf__timeline_summary.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/draw_vertices_perf_opengles__timeline_summary.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/dynamic_path_stroke_tessellation_perf__timeline_summary.dart @flar @flutter/engine
+/dev/devicelab/bin/tasks/dynamic_path_tessellation_perf__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/embedded_android_views_integration_test.dart @gmackall @flutter/android
 /dev/devicelab/bin/tasks/engine_dependency_proxy_test.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/fast_scroll_heavy_gridview__memory.dart @jtmcdole @flutter/engine
@@ -46,13 +61,13 @@
 /dev/devicelab/bin/tasks/flutter_gallery__image_cache_memory.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery__memory_nav.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery__start_up.dart @jtmcdole @flutter/engine
-/dev/devicelab/bin/tasks/flutter_gallery_lazy__start_up.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery__start_up_delayed.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery__transition_perf.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery__transition_perf_e2e.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery__transition_perf_hybrid.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery__transition_perf_with_semantics.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery_android__compile.dart @reidbaker @flutter/tool
+/dev/devicelab/bin/tasks/flutter_gallery_lazy__start_up.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery_sksl_warmup__transition_perf.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery_sksl_warmup__transition_perf_e2e.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery_v2_chrome_run_test.dart @yjbanov @flutter/web
@@ -64,6 +79,7 @@
 /dev/devicelab/bin/tasks/gradient_dynamic_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/gradient_static_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/gradle_java8_compile_test.dart @jesswrd @flutter/android
+/dev/devicelab/bin/tasks/high_bitrate_images_ios.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle_linux__benchmark.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/hybrid_android_views_integration_test.dart @gmackall @flutter/android
 /dev/devicelab/bin/tasks/image_list_jit_reported_duration.dart @jtmcdole @flutter/engine
@@ -84,36 +100,22 @@
 /dev/devicelab/bin/tasks/opacity_peephole_opacity_of_grid_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/picture_cache_perf__e2e_summary.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/platform_channels_benchmarks.dart @gaaclarke @flutter/engine
+/dev/devicelab/bin/tasks/platform_views_hcpp_scroll_perf__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/platform_views_scroll_perf__timeline_summary.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/platform_views_scroll_perf_impeller__timeline_summary.dart @bdero @flutter/engine
 /dev/devicelab/bin/tasks/plugin_dependencies_test.dart @stuartmorgan-g @flutter/tool
 /dev/devicelab/bin/tasks/routing_test.dart @bkonyi @flutter/tool
+/dev/devicelab/bin/tasks/rrect_blur_perf__timeline_summary.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/shader_mask_cache_perf__e2e_summary.dart @flar @flutter/engine
-/dev/devicelab/bin/tasks/spell_check_test_ios.dart @LongCatIsLooong @flutter/ios
+/dev/devicelab/bin/tasks/slider_perf_android.dart @tahatesser @flutter/framework
 /dev/devicelab/bin/tasks/spell_check_test.dart @camsim99 @flutter/android
+/dev/devicelab/bin/tasks/spell_check_test_ios.dart @LongCatIsLooong @flutter/ios
+/dev/devicelab/bin/tasks/static_path_stroke_tessellation_perf__timeline_summary.dart @flar @flutter/engine
+/dev/devicelab/bin/tasks/static_path_tessellation_perf__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/textfield_perf__e2e_summary.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/very_long_picture_scrolling_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/web_size__compile_test.dart @yjbanov @flutter/web
-/dev/devicelab/bin/tasks/high_bitrate_images_ios.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/wide_gamut_ios.dart @gaaclarke @flutter/engine
-/dev/devicelab/bin/tasks/animated_advanced_blend_perf__timeline_summary.dart @gaaclarke @flutter/engine
-/dev/devicelab/bin/tasks/animated_advanced_blend_perf_ios__timeline_summary.dart @gaaclarke @flutter/engine
-/dev/devicelab/bin/tasks/animated_advanced_blend_perf_opengles__timeline_summary.dart @gaaclarke @flutter/engine
-/dev/devicelab/bin/tasks/animated_blur_backdrop_filter_perf__timeline_summary.dart @jonahwilliams @flutter/engine
-/dev/devicelab/bin/tasks/animated_blur_backdrop_filter_perf_opengles__timeline_summary.dart @gaaclarke @flutter/engine
-/dev/devicelab/bin/tasks/slider_perf_android.dart @tahatesser @flutter/framework
-/dev/devicelab/bin/tasks/draw_vertices_perf_opengles__timeline_summary.dart @jonahwilliams @flutter/engine
-/dev/devicelab/bin/tasks/draw_atlas_perf_opengles__timeline_summary.dart @jonahwilliams @flutter/engine
-/dev/devicelab/bin/tasks/draw_vertices_perf__timeline_summary.dart @jonahwilliams @flutter/engine
-/dev/devicelab/bin/tasks/draw_atlas_perf__timeline_summary.dart @jonahwilliams @flutter/engine
-/dev/devicelab/bin/tasks/static_path_tessellation_perf__timeline_summary.dart @jonahwilliams @flutter/engine
-/dev/devicelab/bin/tasks/dynamic_path_tessellation_perf__timeline_summary.dart @jonahwilliams @flutter/engine
-/dev/devicelab/bin/tasks/static_path_stroke_tessellation_perf__timeline_summary.dart @flar @flutter/engine
-/dev/devicelab/bin/tasks/dynamic_path_stroke_tessellation_perf__timeline_summary.dart @flar @flutter/engine
-/dev/devicelab/bin/tasks/complex_layout_scroll_perf_impeller__timeline_summary.dart @jonahwilliams @flutter/engine
-/dev/devicelab/bin/tasks/complex_layout_scroll_perf_impeller_gles__timeline_summary.dart @jonahwilliams @flutter/engine
-/dev/devicelab/bin/tasks/rrect_blur_perf__timeline_summary.dart @gaaclarke @flutter/engine
-/dev/devicelab/bin/tasks/platform_views_hcpp_scroll_perf__timeline_summary.dart @jonahwilliams @flutter/engine
 
 ## Windows Android DeviceLab tests
 /dev/devicelab/bin/tasks/basic_material_app_win__compile.dart @bkonyi @flutter/tool
@@ -170,6 +172,7 @@
 /dev/devicelab/bin/tasks/tiles_scroll_perf__timeline_summary.dart @jtmcdole @flutter/engine
 
 ## Mac iOS DeviceLab tests
+/dev/devicelab/bin/tasks/animated_blur_backdrop_filter_perf_ios__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/animated_complex_opacity_perf_ios__e2e_summary.dart @hellohuanlin @flutter/engine
 /dev/devicelab/bin/tasks/animation_with_microtasks_perf_ios__timeline_summary.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/backdrop_filter_perf_ios__timeline_summary.dart @louisehsu @flutter/engine
@@ -181,6 +184,13 @@
 /dev/devicelab/bin/tasks/complex_layout_scroll_perf_bad_ios__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_scroll_perf_ios__timeline_summary.dart @louisehsu @flutter/engine
 /dev/devicelab/bin/tasks/cubic_bezier_perf_ios_sksl_warmup__timeline_summary.dart @jtmcdole @flutter/engine
+/dev/devicelab/bin/tasks/draw_arcs_all_fill_styles_perf_ios__timeline_summary.dart @b-luk @flutter/engine
+/dev/devicelab/bin/tasks/draw_arcs_all_stroke_styles_perf_ios__timeline_summary.dart @b-luk @flutter/engine
+/dev/devicelab/bin/tasks/draw_atlas_perf_ios__timeline_summary.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/draw_points_perf_ios__timeline_summary.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/draw_vertices_perf_ios__timeline_summary.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/dynamic_path_stroke_tessellation_perf_ios__timeline_summary.dart @flar @flutter/engine
+/dev/devicelab/bin/tasks/dynamic_path_tessellation_perf_ios__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/external_textures_integration_test_ios.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/flavors_test_ios.dart @vashworth @flutter/tool
 /dev/devicelab/bin/tasks/flutter_gallery__transition_perf_e2e_ios.dart @jtmcdole @flutter/engine
@@ -191,9 +201,9 @@
 /dev/devicelab/bin/tasks/fullscreen_textfield_perf_ios__e2e_summary.dart @LongCatIsLooong @flutter/engine
 /dev/devicelab/bin/tasks/hello_world_ios__compile.dart @vashworth @flutter/engine
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle_ios__benchmark.dart @louisehsu @flutter/tool
+/dev/devicelab/bin/tasks/imagefiltered_transform_animation_perf_ios__timeline_summary.dart @louisehsu @flutter/engine
 /dev/devicelab/bin/tasks/imitation_game_flutter__compile.dart @louisehsu @flutter/tool
 /dev/devicelab/bin/tasks/imitation_game_swiftui__compile.dart @louisehsu @flutter/tool
-/dev/devicelab/bin/tasks/imagefiltered_transform_animation_perf_ios__timeline_summary.dart @louisehsu @flutter/engine
 /dev/devicelab/bin/tasks/integration_test_test_ios.dart @LongCatIsLooong @flutter/engine
 /dev/devicelab/bin/tasks/integration_ui_ios_driver.dart LongCatIsLooong @flutter/tool
 /dev/devicelab/bin/tasks/integration_ui_ios_frame_number.dart @jtmcdole @flutter/engine
@@ -222,24 +232,21 @@
 /dev/devicelab/bin/tasks/platform_views_scroll_perf_non_intersecting_impeller_ios__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/post_backdrop_filter_perf_ios__timeline_summary.dart @louisehsu @flutter/engine
 /dev/devicelab/bin/tasks/route_test_ios.dart @LongCatIsLooong @flutter/tool
+/dev/devicelab/bin/tasks/rrect_blur_perf_ios__timeline_summary.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/simple_animation_perf_ios.dart @LongCatIsLooong @flutter/engine
+/dev/devicelab/bin/tasks/static_path_stroke_tessellation_perf_ios__timeline_summary.dart @flar @flutter/engine
+/dev/devicelab/bin/tasks/static_path_tessellation_perf_ios__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/tiles_scroll_perf_ios__timeline_summary.dart @louisehsu @flutter/engine
 /dev/devicelab/bin/tasks/very_long_picture_scrolling_perf_ios__e2e_summary.dart @flar @flutter/engine
-/dev/devicelab/bin/tasks/animated_blur_backdrop_filter_perf_ios__timeline_summary.dart @jonahwilliams @flutter/engine
-/dev/devicelab/bin/tasks/draw_points_perf_ios__timeline_summary.dart @jonahwilliams @flutter/engine
-/dev/devicelab/bin/tasks/draw_vertices_perf_ios__timeline_summary.dart @jonahwilliams @flutter/engine
-/dev/devicelab/bin/tasks/draw_atlas_perf_ios__timeline_summary.dart @jonahwilliams @flutter/engine
-/dev/devicelab/bin/tasks/static_path_tessellation_perf_ios__timeline_summary.dart @jonahwilliams @flutter/engine
-/dev/devicelab/bin/tasks/dynamic_path_tessellation_perf_ios__timeline_summary.dart @jonahwilliams @flutter/engine
-/dev/devicelab/bin/tasks/static_path_stroke_tessellation_perf_ios__timeline_summary.dart @flar @flutter/engine
-/dev/devicelab/bin/tasks/dynamic_path_stroke_tessellation_perf_ios__timeline_summary.dart @flar @flutter/engine
-/dev/devicelab/bin/tasks/rrect_blur_perf_ios__timeline_summary.dart @gaaclarke @flutter/engine
 
 ## Host only DeviceLab tests
-/dev/devicelab/bin/tasks/animated_complex_opacity_perf_macos__e2e_summary.dart @cbracken @flutter/desktop
+/dev/devicelab/bin/tasks/android_display_cutout.dart @reidbaker @flutter/android
 /dev/devicelab/bin/tasks/android_release_builds_exclude_dev_dependencies_test.dart @camsim99 @flutter/android
+/dev/devicelab/bin/tasks/animated_complex_opacity_perf_macos__e2e_summary.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/basic_material_app_macos__compile.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/build_aar_module_test.dart @bkonyi @flutter/tool
+/dev/devicelab/bin/tasks/build_android_host_app_with_module_aar.dart @mboetger @flutter/android
+/dev/devicelab/bin/tasks/build_android_host_app_with_module_source.dart @mboetger @flutter/android
 /dev/devicelab/bin/tasks/build_ios_framework_module_test.dart @vashworth @flutter/tool
 /dev/devicelab/bin/tasks/channels_integration_test_macos.dart @gaaclarke @flutter/desktop
 /dev/devicelab/bin/tasks/complex_layout_macos__compile.dart @cbracken @flutter/desktop
@@ -271,11 +278,12 @@
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle_win_target__benchmark.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/integration_ui_test_test_macos.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/ios_debug_workflow.dart @vashworth @flutter/ios
+/dev/devicelab/bin/tasks/linux_desktop_impeller.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/linux_feature_flags_test.dart @loic-sharma @flutter/desktop
+/dev/devicelab/bin/tasks/mac_desktop_impeller.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/macos_chrome_dev_mode.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/module_custom_host_app_name_test.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/module_host_with_custom_build_test.dart @bkonyi @flutter/tool
-/dev/devicelab/bin/tasks/build_android_host_app_with_module_aar.dart @mboetger @flutter/android
-/dev/devicelab/bin/tasks/build_android_host_app_with_module_source.dart @mboetger @flutter/android
 /dev/devicelab/bin/tasks/module_test_ios.dart @vashworth @flutter/tool
 /dev/devicelab/bin/tasks/module_uiscene_test_ios.dart @vashworth @flutter/ios
 /dev/devicelab/bin/tasks/native_assets_ios_simulator.dart @dcharkes @flutter/ios
@@ -304,16 +312,12 @@
 /dev/devicelab/bin/tasks/web_benchmarks_ddc_hot_reload.dart @yjbanov @flutter/web
 /dev/devicelab/bin/tasks/web_benchmarks_skwasm.dart @eyebrowsoffire @flutter/web
 /dev/devicelab/bin/tasks/web_benchmarks_skwasm_st.dart @eyebrowsoffire @flutter/web
-/dev/devicelab/bin/tasks/windows_desktop_impeller.dart @jonahwilliams @flutter/engine
-/dev/devicelab/bin/tasks/windows_home_scroll_perf__timeline_summary.dart @jonahwilliams @flutter/engine
-/dev/devicelab/bin/tasks/windows_startup_test.dart @loic-sharma @flutter/desktop
 /dev/devicelab/bin/tasks/windowing_test_linux.dart @robert-ancell @flutter/desktop
 /dev/devicelab/bin/tasks/windowing_test_macos.dart @knopp @flutter/desktop
 /dev/devicelab/bin/tasks/windowing_test_windows.dart @mattkae @flutter/desktop
-/dev/devicelab/bin/tasks/mac_desktop_impeller.dart @jonahwilliams @flutter/engine
-/dev/devicelab/bin/tasks/linux_desktop_impeller.dart @jonahwilliams @flutter/engine
-/dev/devicelab/bin/tasks/linux_feature_flags_test.dart @loic-sharma @flutter/desktop
-/dev/devicelab/bin/tasks/android_display_cutout.dart @reidbaker @flutter/android
+/dev/devicelab/bin/tasks/windows_desktop_impeller.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/windows_home_scroll_perf__timeline_summary.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/windows_startup_test.dart @loic-sharma @flutter/desktop
 
 ## Host only framework tests
 # Linux docs_deploy_stable
@@ -339,8 +343,10 @@
 # https://github.com/flutter/flutter/issues/82068
 #
 # analyze @Piinks @flutter/framework
-# android_engine_vulkan_tests @reidbaker @flutter/android
 # android_engine_opengles_tests @reidbaker @flutter/android
+# android_engine_vulkan_tests @reidbaker @flutter/android
+# android_java11_tool_integration_tests @jesswrd @flutter/android
+# android_preview_tool_integration_tests @reidbaker @flutter/android
 # build_tests @bkonyi @flutter/tool
 # ci_yaml flutter roller @keyonghan @flutter/infra
 # coverage @christopherfujino @flutter/infra
@@ -355,8 +361,6 @@
 # test_ownership @keyonghan
 # tool_host_cross_arch_tests @bkonyi @flutter/tool
 # tool_integration_tests @bkonyi @flutter/tool
-# android_preview_tool_integration_tests @reidbaker @flutter/android
-# android_java11_tool_integration_tests @jesswrd @flutter/android
 # tool_tests @bkonyi @flutter/tool
 # verify_binaries_codesigned @cbracken @flutter/releases
 # verify_binaries_pre_codesigned @vashworth @flutter/releases

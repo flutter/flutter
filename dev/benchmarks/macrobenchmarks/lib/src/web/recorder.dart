@@ -50,7 +50,7 @@ const String kProfileApplyFrame = 'apply_frame';
 ///
 ///  * [timeAsyncAction], which measures the time of asynchronous work.
 Duration timeAction(VoidCallback action) {
-  final Stopwatch stopwatch = Stopwatch()..start();
+  final stopwatch = Stopwatch()..start();
   action();
   stopwatch.stop();
   return stopwatch.elapsed;
@@ -62,7 +62,7 @@ Duration timeAction(VoidCallback action) {
 ///
 ///  * [timeAction], which measures the time of synchronous work.
 Future<Duration> timeAsyncAction(AsyncCallback action) async {
-  final Stopwatch stopwatch = Stopwatch()..start();
+  final stopwatch = Stopwatch()..start();
   await action();
   stopwatch.stop();
   return stopwatch.elapsed;
@@ -259,7 +259,7 @@ abstract class SceneBuilderRecorder extends Recorder {
 
   @override
   Future<Profile> run() {
-    final Completer<Profile> profileCompleter = Completer<Profile>();
+    final profileCompleter = Completer<Profile>();
     _profile = Profile(name: name);
 
     PlatformDispatcher.instance.onBeginFrame = (_) {
@@ -274,7 +274,7 @@ abstract class SceneBuilderRecorder extends Recorder {
     PlatformDispatcher.instance.onDrawFrame = () {
       try {
         _profile!.record('drawFrameDuration', () {
-          final SceneBuilder sceneBuilder = SceneBuilder();
+          final sceneBuilder = SceneBuilder();
           onDrawFrame(sceneBuilder);
           _profile!.record('sceneBuildDuration', () {
             final Scene scene = sceneBuilder.build();
@@ -696,7 +696,7 @@ class Timeseries {
         ? _computeAverage(name, outliers)
         : cleanAverage;
 
-    final List<AnnotatedSample> annotatedValues = <AnnotatedSample>[
+    final annotatedValues = <AnnotatedSample>[
       for (final double warmUpValue in warmUpValues)
         AnnotatedSample(
           magnitude: warmUpValue,
@@ -816,7 +816,7 @@ class TimeseriesStats {
 
   @override
   String toString() {
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     buffer.writeln(
       '$name: (samples: $cleanSampleCount clean/$outlierSampleCount '
       'outliers/${cleanSampleCount + outlierSampleCount} '
@@ -1025,8 +1025,8 @@ class Profile {
   /// Returns a JSON representation of the profile that will be sent to the
   /// server.
   Map<String, dynamic> toJson() {
-    final List<String> scoreKeys = <String>[];
-    final Map<String, dynamic> json = <String, dynamic>{'name': name, 'scoreKeys': scoreKeys};
+    final scoreKeys = <String>[];
+    final json = <String, dynamic>{'name': name, 'scoreKeys': scoreKeys};
 
     for (final String key in scoreData.keys) {
       final Timeseries timeseries = scoreData[key]!;
@@ -1053,7 +1053,7 @@ class Profile {
 
   @override
   String toString() {
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     buffer.writeln('name: $name');
     for (final String key in scoreData.keys) {
       final Timeseries timeseries = scoreData[key]!;
@@ -1064,7 +1064,7 @@ class Profile {
       final dynamic value = extraData[key];
       if (value is List) {
         buffer.writeln('$key:');
-        for (final dynamic item in value) {
+        for (final Object? item in value) {
           buffer.writeln(' - $item');
         }
       } else {

@@ -49,14 +49,14 @@ class TokenLogger {
 
   /// Prints version usage to the console.
   void printVersionUsage({required bool verbose}) {
-    final String versionsString = 'Versions used: ${_versionMap.keys.join(', ')}';
+    final versionsString = 'Versions used: ${_versionMap.keys.join(', ')}';
     print(versionsString);
     if (verbose) {
       for (final String version in _versionMap.keys) {
         print('  $version:');
-        final List<String> files = List<String>.from(_versionMap[version]!);
+        final files = List<String>.from(_versionMap[version]!);
         files.sort();
-        for (final String file in files) {
+        for (final file in files) {
           print('    $file');
         }
       }
@@ -96,9 +96,9 @@ class TokenLogger {
 
   /// Dumps version and tokens usage to a file.
   void dumpToFile(String path) {
-    final File file = File(path);
+    final file = File(path);
     file.createSync(recursive: true);
-    final String versionsString = 'Versions used, ${_versionMap.keys.join(', ')}';
+    final versionsString = 'Versions used, ${_versionMap.keys.join(', ')}';
     file.writeAsStringSync('$versionsString\n${_usedTokens.join(',\n')}\n');
   }
 }

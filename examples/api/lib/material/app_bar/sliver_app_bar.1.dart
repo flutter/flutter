@@ -49,7 +49,9 @@ class _SliverAppBarExampleState extends State<SliverAppBarExample> {
           const SliverToBoxAdapter(
             child: SizedBox(
               height: 20,
-              child: Center(child: Text('Scroll to see the SliverAppBar in effect.')),
+              child: Center(
+                child: Text('Scroll to see the SliverAppBar in effect.'),
+              ),
             ),
           ),
           SliverList.builder(
@@ -58,7 +60,9 @@ class _SliverAppBarExampleState extends State<SliverAppBarExample> {
               return Container(
                 color: index.isOdd ? Colors.white : Colors.black12,
                 height: 100.0,
-                child: Center(child: Text('$index', textScaler: const TextScaler.linear(5))),
+                child: Center(
+                  child: Text('$index', textScaler: const TextScaler.linear(5)),
+                ),
               );
             },
           ),
