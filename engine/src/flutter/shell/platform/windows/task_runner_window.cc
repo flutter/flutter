@@ -48,14 +48,12 @@ TimerThread::~TimerThread() {
 // nothing.
 void TimerThread::ScheduleAt(
     std::chrono::time_point<std::chrono::high_resolution_clock> time_point) {
-  {
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (time_point < next_fire_time_) {
-      next_fire_time_ = time_point;
-    }
-    ++schedule_counter_;
-    cv_.notify_all();
+  std::lock_guard<std::mutex> lock(mutex_);
+  if (time_point < next_fire_time_) {
+    next_fire_time_ = time_point;
   }
+  ++schedule_counter_;
+  cv_.notify_all();
 }
 
 void TimerThread::TimerThreadMain() {
