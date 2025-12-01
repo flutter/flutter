@@ -340,7 +340,7 @@ import java.util.Set;
             TAG,
             "Setting engine flags on Android via Intent is no longer supported. To enable software rendering, set the "
                 + FlutterShellArgs.ENABLE_SOFTWARE_RENDERING.metadataKey
-                + " metadata in the application manifest. See https://github.com/flutter/flutter/blob/master/docs/engine/Android-Flutter-Shell-Arguments.md for more info.");
+                + " metadata in the application manifest. See https://github.com/flutter/flutter/blob/main/docs/engine/Android-Flutter-Shell-Arguments.md for more info.");
       }
     }
 
