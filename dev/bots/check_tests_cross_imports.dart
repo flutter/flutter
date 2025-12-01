@@ -196,14 +196,13 @@ class TestsCrossImportChecker {
     );
 
     // Find any cross imports that are not in the known list.
-    // TODO(justinmc): This error logic is backwards??
-    var error = true;
+    var valid = true;
     final Set<File> unknownWidgetsTestsImportingMaterial = _getUnknowns(
       widgetsTestsImportingMaterial,
       _knownCrossImports,
     );
     if (unknownWidgetsTestsImportingMaterial.isNotEmpty) {
-      error = false;
+      valid = false;
       foundError(
         _getImportError(
           files: unknownWidgetsTestsImportingMaterial,
@@ -217,7 +216,7 @@ class TestsCrossImportChecker {
       _knownCrossImports,
     );
     if (unknownWidgetsTestsImportingCupertino.isNotEmpty) {
-      error = false;
+      valid = false;
       foundError(
         _getImportError(
           files: unknownWidgetsTestsImportingCupertino,
@@ -231,7 +230,7 @@ class TestsCrossImportChecker {
       _knownCrossImports,
     );
     if (unknownCupertinoTestsImportingMaterial.isNotEmpty) {
-      error = false;
+      valid = false;
       foundError(
         _getImportError(
           files: unknownCupertinoTestsImportingMaterial,
@@ -247,7 +246,7 @@ class TestsCrossImportChecker {
       widgetsTestsImportingMaterial.union(widgetsTestsImportingCupertino),
     );
     if (fixedWidgetsCrossImports.isNotEmpty) {
-      error = false;
+      valid = false;
       foundError(_getFixedImportError(fixedWidgetsCrossImports, _Library.widgets).split('\n'));
     }
     final Set<String> fixedCupertinoCrossImports = _differencePaths(
@@ -255,11 +254,11 @@ class TestsCrossImportChecker {
       cupertinoTestsImportingMaterial,
     );
     if (fixedCupertinoCrossImports.isNotEmpty) {
-      error = false;
+      valid = false;
       foundError(_getFixedImportError(fixedCupertinoCrossImports, _Library.cupertino).split('\n'));
     }
 
-    return error;
+    return valid;
   }
 
   /// Returns the File's relative path.
