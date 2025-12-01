@@ -20,7 +20,7 @@ final String _flutterRoot = path.dirname(path.dirname(path.dirname(_scriptLocati
 final String _testDirectoryPath = path.join(_flutterRoot, 'packages', 'flutter', 'test');
 
 void main(List<String> args) {
-  final ArgParser argParser = ArgParser();
+  final argParser = ArgParser();
   argParser.addFlag('help', negatable: false, help: 'Print help for this command.');
   argParser.addOption(
     'test',
@@ -58,10 +58,7 @@ void main(List<String> args) {
   final Directory tests = filesystem.directory(parsedArgs['test']! as String);
   final Directory flutterRoot = filesystem.directory(parsedArgs['flutter-root']! as String);
 
-  final TestsCrossImportChecker checker = TestsCrossImportChecker(
-    testsDirectory: tests,
-    flutterRoot: flutterRoot,
-  );
+  final checker = TestsCrossImportChecker(testsDirectory: tests, flutterRoot: flutterRoot);
 
   if (!checker.check()) {
     reportErrorsAndExit('Some errors were found in the framework test imports.');
@@ -88,7 +85,7 @@ class TestsCrossImportChecker {
   static Set<String> _differencePaths(Set<String> knownPaths, Set<File> files) {
     final Set<String> testPaths = files.map((File file) {
       final int index = file.absolute.path.indexOf('packages/flutter/test');
-      final int indexNormalized = index == -1 ? 0 : index;
+      final indexNormalized = index == -1 ? 0 : index;
       return file.absolute.path.substring(indexNormalized);
     }).toSet();
     return knownPaths.difference(testPaths);
@@ -141,8 +138,8 @@ class TestsCrossImportChecker {
 
   /// Returns a Set of all Files that import the given Library.
   static Set<File> _getFilesWithImports(Set<File> testFiles, _Library library) {
-    final Set<File> filesWithCrossImports = <File>{};
-    for (final File testFile in testFiles) {
+    final filesWithCrossImports = <File>{};
+    for (final testFile in testFiles) {
       if (_containsImport(testFile, library)) {
         filesWithCrossImports.add(testFile);
       }
@@ -157,10 +154,10 @@ class TestsCrossImportChecker {
   /// cross-import.
   static String _getFixedImportError(Set<String> fixedPaths, _Library library) {
     assert(fixedPaths.isNotEmpty);
-    final StringBuffer buffer = StringBuffer(
+    final buffer = StringBuffer(
       'Huzzah! The following tests in ${library.name} no longer contain cross imports!\n',
     );
-    for (final String path in fixedPaths) {
+    for (final path in fixedPaths) {
       buffer.writeln('  $path');
     }
     final String knownListName = switch (library) {
@@ -179,7 +176,7 @@ class TestsCrossImportChecker {
   bool check() {
     filesystem.currentDirectory = flutterRoot;
 
-    final Map<_Library, Set<File>> filesByLibrary = <_Library, Set<File>>{};
+    final filesByLibrary = <_Library, Set<File>>{};
     for (final _Library library in _Library.values) {
       filesByLibrary[library] = _getTestFiles(testsDirectory, library);
     }
@@ -200,13 +197,12 @@ class TestsCrossImportChecker {
 
     // Find any cross imports that are not in the known list.
     // TODO(justinmc): This error logic is backwards??
-    bool error = true;
+    var error = true;
     final Set<File> unknownWidgetsTestsImportingMaterial = _getUnknowns(
       widgetsTestsImportingMaterial,
       _knownCrossImports,
     );
     if (unknownWidgetsTestsImportingMaterial.isNotEmpty) {
-      // TODO(justinmc): Not sure why this is getting detected wrong.
       error = false;
       foundError(
         _getImportError(
@@ -279,12 +275,12 @@ class TestsCrossImportChecker {
     required String testLibraryName,
     required String importedLibraryName,
   }) {
-    final StringBuffer buffer = StringBuffer(
+    final buffer = StringBuffer(
       files.length < 2
           ? 'The following test in $testLibraryName has a disallowed import of $importedLibraryName. Refactor it or move it to $importedLibraryName.\n'
           : 'The following ${files.length} tests in $testLibraryName have a disallowed import of $importedLibraryName. Refactor them or move them to $importedLibraryName.\n',
     );
-    for (final File file in files) {
+    for (final file in files) {
       buffer.writeln('  ${_getRelativePath(file)}');
     }
     return buffer.toString().trimRight();
