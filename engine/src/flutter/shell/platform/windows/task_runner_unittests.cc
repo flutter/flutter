@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <atomic>
-#include <chrono>
 #include "flutter/shell/platform/windows/task_runner.h"
 
+#include <atomic>
+#include <chrono>
+
 #include "flutter/fml/macros.h"
+#include "flutter/shell/platform/windows/task_runner_window.h"
 #include "gtest/gtest.h"
-#include "shell/platform/windows/task_runner_window.h"
 
 namespace flutter {
 namespace testing {
