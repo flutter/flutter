@@ -12,7 +12,7 @@ void main() {
     runApp(const SizedBox());
     final RenderObject renderObject = tester.renderObject(find.byType(SizedBox));
 
-    RenderObject parent = renderObject;
+    var parent = renderObject;
     while (parent.parent != null) {
       parent = parent.parent!;
     }
@@ -25,7 +25,7 @@ void main() {
   testWidgets('can manually attach RootWidget to build owner', (WidgetTester tester) async {
     expect(find.byType(ColoredBox), findsNothing);
 
-    final RootWidget rootWidget = RootWidget(
+    final rootWidget = RootWidget(
       child: View(
         view: FakeFlutterView(tester.view),
         child: const ColoredBox(color: Colors.orange),

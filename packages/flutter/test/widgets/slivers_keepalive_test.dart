@@ -9,7 +9,7 @@ void main() {
   testWidgets('Sliver with keep alive without key - should dispose after reordering', (
     WidgetTester tester,
   ) async {
-    List<Widget> childList = <Widget>[
+    var childList = <Widget>[
       const WidgetTest0(text: 'child 0', keepAlive: true),
       const WidgetTest1(text: 'child 1', keepAlive: true),
       const WidgetTest2(text: 'child 2', keepAlive: true),
@@ -34,7 +34,7 @@ void main() {
   testWidgets('Sliver without keep alive without key - should dispose after reordering', (
     WidgetTester tester,
   ) async {
-    List<Widget> childList = <Widget>[
+    var childList = <Widget>[
       const WidgetTest0(text: 'child 0'),
       const WidgetTest1(text: 'child 1'),
       const WidgetTest2(text: 'child 2'),
@@ -59,7 +59,7 @@ void main() {
   testWidgets('Sliver without keep alive with key - should dispose after reordering', (
     WidgetTester tester,
   ) async {
-    List<Widget> childList = <Widget>[
+    var childList = <Widget>[
       WidgetTest0(text: 'child 0', key: GlobalKey()),
       WidgetTest1(text: 'child 1', key: GlobalKey()),
       WidgetTest2(text: 'child 2', key: GlobalKey()),
@@ -84,7 +84,7 @@ void main() {
   testWidgets('Sliver with keep alive with key - should not dispose after reordering', (
     WidgetTester tester,
   ) async {
-    List<Widget> childList = <Widget>[
+    var childList = <Widget>[
       WidgetTest0(text: 'child 0', key: GlobalKey(), keepAlive: true),
       WidgetTest1(text: 'child 1', key: GlobalKey(), keepAlive: true),
       WidgetTest2(text: 'child 2', key: GlobalKey(), keepAlive: true),
@@ -108,7 +108,7 @@ void main() {
   testWidgets('Sliver with keep alive with Unique key - should not dispose after reordering', (
     WidgetTester tester,
   ) async {
-    List<Widget> childList = <Widget>[
+    var childList = <Widget>[
       WidgetTest0(text: 'child 0', key: UniqueKey(), keepAlive: true),
       WidgetTest1(text: 'child 1', key: UniqueKey(), keepAlive: true),
       WidgetTest2(text: 'child 2', key: UniqueKey(), keepAlive: true),
@@ -132,7 +132,7 @@ void main() {
   testWidgets('Sliver with keep alive with Value key - should not dispose after reordering', (
     WidgetTester tester,
   ) async {
-    List<Widget> childList = <Widget>[
+    var childList = <Widget>[
       const WidgetTest0(text: 'child 0', key: ValueKey<int>(0), keepAlive: true),
       const WidgetTest1(text: 'child 1', key: ValueKey<int>(1), keepAlive: true),
       const WidgetTest2(text: 'child 2', key: ValueKey<int>(2), keepAlive: true),
@@ -154,7 +154,7 @@ void main() {
   });
 
   testWidgets('Sliver complex case 1', (WidgetTester tester) async {
-    List<Widget> childList = <Widget>[
+    var childList = <Widget>[
       WidgetTest0(text: 'child 0', key: GlobalKey(), keepAlive: true),
       WidgetTest1(text: 'child 1', key: GlobalKey(), keepAlive: true),
       const WidgetTest2(text: 'child 2', keepAlive: true),
@@ -198,7 +198,7 @@ void main() {
   });
 
   testWidgets('Sliver complex case 2', (WidgetTester tester) async {
-    List<Widget> childList = <Widget>[
+    var childList = <Widget>[
       WidgetTest0(text: 'child 0', key: GlobalKey(), keepAlive: true),
       WidgetTest1(text: 'child 1', key: UniqueKey()),
       const WidgetTest2(text: 'child 2', keepAlive: true),
@@ -241,7 +241,7 @@ void main() {
   });
 
   testWidgets('Sliver with SliverChildBuilderDelegate', (WidgetTester tester) async {
-    List<Widget> childList = <Widget>[
+    var childList = <Widget>[
       WidgetTest0(text: 'child 0', key: UniqueKey(), keepAlive: true),
       WidgetTest1(text: 'child 1', key: GlobalKey()),
       const WidgetTest2(text: 'child 2', keepAlive: true),
@@ -286,7 +286,7 @@ void main() {
   testWidgets('SliverFillViewport should not dispose widget with key during in screen reordering', (
     WidgetTester tester,
   ) async {
-    List<Widget> childList = <Widget>[
+    var childList = <Widget>[
       WidgetTest0(text: 'child 0', key: UniqueKey(), keepAlive: true),
       WidgetTest1(text: 'child 1', key: UniqueKey()),
       const WidgetTest2(text: 'child 2', keepAlive: true),
@@ -319,7 +319,7 @@ void main() {
   testWidgets('SliverList should not dispose widget with key during in screen reordering', (
     WidgetTester tester,
   ) async {
-    List<Widget> childList = <Widget>[
+    var childList = <Widget>[
       WidgetTest0(text: 'child 0', key: UniqueKey(), keepAlive: true),
       const WidgetTest1(text: 'child 1', keepAlive: true),
       WidgetTest2(text: 'child 2', key: UniqueKey()),
@@ -355,7 +355,7 @@ void main() {
   });
 
   testWidgets('SliverList remove child from child list', (WidgetTester tester) async {
-    List<Widget> childList = <Widget>[
+    var childList = <Widget>[
       WidgetTest0(text: 'child 0', key: UniqueKey(), keepAlive: true),
       const WidgetTest1(text: 'child 1', keepAlive: true),
       WidgetTest2(text: 'child 2', key: UniqueKey()),
@@ -405,7 +405,7 @@ class _SwitchingChildBuilderTest extends State<SwitchingChildBuilderTest> {
     super.initState();
     children = widget.children;
     _mapKeyToIndex = <Key, int>{};
-    for (int index = 0; index < children.length; index += 1) {
+    for (var index = 0; index < children.length; index += 1) {
       final Key? key = children[index].key;
       if (key != null) {
         _mapKeyToIndex[key] = index;
@@ -419,7 +419,7 @@ class _SwitchingChildBuilderTest extends State<SwitchingChildBuilderTest> {
     if (oldWidget.children != widget.children) {
       children = widget.children;
       _mapKeyToIndex = <Key, int>{};
-      for (int index = 0; index < children.length; index += 1) {
+      for (var index = 0; index < children.length; index += 1) {
         final Key? key = children[index].key;
         if (key != null) {
           _mapKeyToIndex[key] = index;

@@ -52,8 +52,8 @@ class _MouseState {
 
   @override
   String toString() {
-    final String describeLatestEvent = 'latestEvent: ${describeIdentity(latestEvent)}';
-    final String describeAnnotations = 'annotations: [list of ${annotations.length}]';
+    final describeLatestEvent = 'latestEvent: ${describeIdentity(latestEvent)}';
+    final describeAnnotations = 'annotations: [list of ${annotations.length}]';
     return '${describeIdentity(this)}($describeLatestEvent, $describeAnnotations)';
   }
 }
@@ -229,7 +229,7 @@ class MouseTracker extends ChangeNotifier {
   }
 
   Map<MouseTrackerAnnotation, Matrix4> _hitTestInViewResultToAnnotations(HitTestResult result) {
-    final Map<MouseTrackerAnnotation, Matrix4> annotations = <MouseTrackerAnnotation, Matrix4>{};
+    final annotations = <MouseTrackerAnnotation, Matrix4>{};
     for (final HitTestEntry entry in result.path) {
       final Object target = entry.target;
       if (target is MouseTrackerAnnotation) {
@@ -409,7 +409,7 @@ class MouseTracker extends ChangeNotifier {
 
     // Send exit events to annotations that are in last but not in next, in
     // hit-test order.
-    final PointerExitEvent baseExitEvent = PointerExitEvent.fromMouseEvent(latestEvent);
+    final baseExitEvent = PointerExitEvent.fromMouseEvent(latestEvent);
     lastAnnotations.forEach((MouseTrackerAnnotation annotation, Matrix4 transform) {
       if (annotation.validForMouseTracker && !nextAnnotations.containsKey(annotation)) {
         annotation.onExit?.call(baseExitEvent.transformed(lastAnnotations[annotation]));
@@ -421,7 +421,7 @@ class MouseTracker extends ChangeNotifier {
     final List<MouseTrackerAnnotation> enteringAnnotations = nextAnnotations.keys
         .where((MouseTrackerAnnotation annotation) => !lastAnnotations.containsKey(annotation))
         .toList();
-    final PointerEnterEvent baseEnterEvent = PointerEnterEvent.fromMouseEvent(latestEvent);
+    final baseEnterEvent = PointerEnterEvent.fromMouseEvent(latestEvent);
     for (final MouseTrackerAnnotation annotation in enteringAnnotations.reversed) {
       if (annotation.validForMouseTracker) {
         annotation.onEnter?.call(baseEnterEvent.transformed(nextAnnotations[annotation]));

@@ -141,7 +141,7 @@ void main() {
 }
 
 class FakeAndroidBuilder extends Fake implements AndroidBuilder {
-  var variants = const <String>[];
+  List<String> variants = const <String>[];
   String? outputVariant;
   final outputPath = '/';
 

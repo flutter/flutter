@@ -74,10 +74,10 @@ class BeveledRectangleBorder extends OutlinedBorder {
   }
 
   Path _getPath(RRect rrect) {
-    final Offset centerLeft = Offset(rrect.left, rrect.center.dy);
-    final Offset centerRight = Offset(rrect.right, rrect.center.dy);
-    final Offset centerTop = Offset(rrect.center.dx, rrect.top);
-    final Offset centerBottom = Offset(rrect.center.dx, rrect.bottom);
+    final centerLeft = Offset(rrect.left, rrect.center.dy);
+    final centerRight = Offset(rrect.right, rrect.center.dy);
+    final centerTop = Offset(rrect.center.dx, rrect.top);
+    final centerBottom = Offset(rrect.center.dx, rrect.bottom);
 
     final double tlRadiusX = math.max(0.0, rrect.tlRadiusX);
     final double tlRadiusY = math.max(0.0, rrect.tlRadiusY);
@@ -88,7 +88,7 @@ class BeveledRectangleBorder extends OutlinedBorder {
     final double brRadiusX = math.max(0.0, rrect.brRadiusX);
     final double brRadiusY = math.max(0.0, rrect.brRadiusY);
 
-    final List<Offset> vertices = <Offset>[
+    final vertices = <Offset>[
       Offset(rrect.left, math.min(centerLeft.dy, rrect.top + tlRadiusY)),
       Offset(math.min(centerTop.dx, rrect.left + tlRadiusX), rrect.top),
       Offset(math.max(centerTop.dx, rrect.right - trRadiusX), rrect.top),

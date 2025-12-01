@@ -371,11 +371,11 @@ void main() {
   });
 
   testWidgets('FittedBox layers - none - clip', (WidgetTester tester) async {
-    final List<double> values = <double>[10.0, 50.0, 100.0];
-    for (final double a in values) {
-      for (final double b in values) {
-        for (final double c in values) {
-          for (final double d in values) {
+    final values = <double>[10.0, 50.0, 100.0];
+    for (final a in values) {
+      for (final b in values) {
+        for (final c in values) {
+          for (final d in values) {
             await tester.pumpWidget(
               Center(
                 child: SizedBox(
@@ -406,7 +406,7 @@ void main() {
 
   testWidgets('Big child into small fitted box - hit testing', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
-    bool pointerDown = false;
+    var pointerDown = false;
     await tester.pumpWidget(
       Center(
         child: SizedBox(
@@ -572,7 +572,7 @@ void main() {
 }
 
 List<Type> getLayers() {
-  final List<Type> layers = <Type>[];
+  final layers = <Type>[];
   Layer? container = RendererBinding.instance.renderView.debugLayer;
   while (container is ContainerLayer) {
     layers.add(container.runtimeType);

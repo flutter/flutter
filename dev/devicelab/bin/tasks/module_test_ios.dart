@@ -24,7 +24,7 @@ Future<void> main() async {
     section('Create Flutter module project');
 
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_module_test.');
-    final Directory projectDir = Directory(path.join(tempDir.path, 'hello'));
+    final projectDir = Directory(path.join(tempDir.path, 'hello'));
     try {
       await inDirectory(tempDir, () async {
         await flutter(
@@ -34,7 +34,7 @@ Future<void> main() async {
       });
 
       // Copy test dart files to new module app.
-      final Directory flutterModuleLibSource = Directory(
+      final flutterModuleLibSource = Directory(
         path.join(
           flutterDirectory.path,
           'dev',
@@ -44,24 +44,24 @@ Future<void> main() async {
           'lib',
         ),
       );
-      final Directory flutterModuleLibDestination = Directory(path.join(projectDir.path, 'lib'));
+      final flutterModuleLibDestination = Directory(path.join(projectDir.path, 'lib'));
 
       // These test files don't have a .dart extension so the analyzer will ignore them. They aren't in a
       // package and don't work on their own outside of the test module just created.
-      final File main = File(path.join(flutterModuleLibSource.path, 'main'));
+      final main = File(path.join(flutterModuleLibSource.path, 'main'));
       main.copySync(path.join(flutterModuleLibDestination.path, 'main.dart'));
 
-      final File marquee = File(path.join(flutterModuleLibSource.path, 'marquee'));
+      final marquee = File(path.join(flutterModuleLibSource.path, 'marquee'));
       marquee.copySync(path.join(flutterModuleLibDestination.path, 'marquee.dart'));
 
       section('Create package with native assets');
 
-      const String ffiPackageName = 'ffi_package';
+      const ffiPackageName = 'ffi_package';
       await createFfiPackage(ffiPackageName, tempDir);
 
       section('Add FFI package');
 
-      final File pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
+      final pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
       String content = await pubspec.readAsString();
       content = content.replaceFirst('dependencies:\n', '''
 dependencies:
@@ -84,7 +84,7 @@ dependencies:
         path.join(projectDir.path, '.ios', 'Flutter', 'engine', 'Flutter.xcframework'),
       );
 
-      final Directory ephemeralIOSHostApp = Directory(
+      final ephemeralIOSHostApp = Directory(
         path.join(projectDir.path, 'build', 'ios', 'iphoneos', 'Runner.app'),
       );
 
@@ -126,7 +126,7 @@ dependencies:
         await flutter('build', options: <String>['ios', '--no-codesign', '--simulator', '--debug']);
       });
 
-      final Directory ephemeralSimulatorHostApp = Directory(
+      final ephemeralSimulatorHostApp = Directory(
         path.join(projectDir.path, 'build', 'ios', 'iphonesimulator', 'Runner.app'),
       );
 
@@ -162,7 +162,7 @@ dependencies:
       // Make a fake Dart-only plugin, since there are no existing examples.
       section('Create local plugin');
 
-      const String dartPluginName = 'dartplugin';
+      const dartPluginName = 'dartplugin';
       await _createFakeDartPlugin(dartPluginName, tempDir);
 
       section('Add plugins');
@@ -196,7 +196,7 @@ dependencies:
         return TaskResult.failure('Failed to build ephemeral host .app with CocoaPods');
       }
 
-      final File podfileLockFile = File(path.join(projectDir.path, '.ios', 'Podfile.lock'));
+      final podfileLockFile = File(path.join(projectDir.path, '.ios', 'Podfile.lock'));
       final String podfileLockOutput = podfileLockFile.readAsStringSync();
       if (!podfileLockOutput.contains(':path: Flutter') ||
           !podfileLockOutput.contains(':path: Flutter/FlutterPluginRegistrant') ||
@@ -262,21 +262,21 @@ dependencies:
 
       section('Add to existing iOS Objective-C app');
 
-      final Directory objectiveCHostApp = Directory(path.join(tempDir.path, 'hello_host_app'));
+      final objectiveCHostApp = Directory(path.join(tempDir.path, 'hello_host_app'));
       mkdir(objectiveCHostApp);
       recursiveCopy(
         Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'ios_host_app')),
         objectiveCHostApp,
       );
 
-      final Directory objectiveCBuildDirectory = Directory(path.join(tempDir.path, 'build-objc'));
+      final objectiveCBuildDirectory = Directory(path.join(tempDir.path, 'build-objc'));
 
       await inDirectory(objectiveCHostApp, () async {
         section('Validate iOS Objective-C host app Podfile');
 
-        final File podfile = File(path.join(objectiveCHostApp.path, 'Podfile'));
+        final podfile = File(path.join(objectiveCHostApp.path, 'Podfile'));
         final String correctPodfileContents = await podfile.readAsString();
-        final File podfileMissingPostInstall = File(
+        final podfileMissingPostInstall = File(
           path.join(objectiveCHostApp.path, 'PodfileMissingPostInstall'),
         );
 
@@ -300,7 +300,7 @@ dependencies:
             'pod install unexpectedly succeed without "flutter_post_install" post_install block',
           );
         }
-        String podfileContent = correctPodfileContents;
+        var podfileContent = correctPodfileContents;
         await podfile.writeAsString(podfileContent, flush: true);
 
         await exec(
@@ -309,7 +309,7 @@ dependencies:
           environment: <String, String>{'LANG': 'en_US.UTF-8'},
         );
 
-        File hostPodfileLockFile = File(path.join(objectiveCHostApp.path, 'Podfile.lock'));
+        var hostPodfileLockFile = File(path.join(objectiveCHostApp.path, 'Podfile.lock'));
         String hostPodfileLockOutput = hostPodfileLockFile.readAsStringSync();
         if (!hostPodfileLockOutput.contains(':path: "../hello/.ios/Flutter"') ||
             !hostPodfileLockOutput.contains(
@@ -362,7 +362,7 @@ dependencies:
         }
 
         // Check the tool is no longer copying to the legacy App.framework location.
-        final File dummyAppFramework = File(
+        final dummyAppFramework = File(
           path.join(projectDir.path, '.ios', 'Flutter', 'App.framework', 'App'),
         );
         checkFileNotExists(dummyAppFramework.path);
@@ -438,7 +438,7 @@ dependencies:
       section('Archive iOS Objective-C host app');
 
       await inDirectory(objectiveCHostApp, () async {
-        final Directory objectiveCBuildArchiveDirectory = Directory(
+        final objectiveCBuildArchiveDirectory = Directory(
           path.join(tempDir.path, 'build-objc-archive'),
         );
         await exec(
@@ -610,7 +610,7 @@ dependencies:
 
       section('Add to existing iOS Swift app');
 
-      final Directory swiftHostApp = Directory(path.join(tempDir.path, 'hello_host_app_swift'));
+      final swiftHostApp = Directory(path.join(tempDir.path, 'hello_host_app_swift'));
       mkdir(swiftHostApp);
       recursiveCopy(
         Directory(
@@ -619,7 +619,7 @@ dependencies:
         swiftHostApp,
       );
 
-      final Directory swiftBuildDirectory = Directory(path.join(tempDir.path, 'build-swift'));
+      final swiftBuildDirectory = Directory(path.join(tempDir.path, 'build-swift'));
 
       await inDirectory(swiftHostApp, () async {
         await exec(
@@ -691,8 +691,8 @@ Future<void> _createFakeDartPlugin(String name, Directory parent) async {
   final String pluginDir = path.join(parent.path, name);
 
   // Convert the metadata to Dart-only.
-  final String dartPluginClass = 'DartClassFor$name';
-  final File pubspec = File(path.join(pluginDir, 'pubspec.yaml'));
+  final dartPluginClass = 'DartClassFor$name';
+  final pubspec = File(path.join(pluginDir, 'pubspec.yaml'));
   String content = await pubspec.readAsString();
   content = content.replaceAll(
     RegExp(r' pluginClass: .*?\n'),
@@ -701,7 +701,7 @@ Future<void> _createFakeDartPlugin(String name, Directory parent) async {
   await pubspec.writeAsString(content, flush: true);
 
   // Add the Dart registration hook that the build will generate a call to.
-  final File dartCode = File(path.join(pluginDir, 'lib', '$name.dart'));
+  final dartCode = File(path.join(pluginDir, 'lib', '$name.dart'));
   content = await dartCode.readAsString();
   content =
       '''

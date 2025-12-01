@@ -7,27 +7,21 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('MaterialPointArcTween control test', () {
-    final MaterialPointArcTween a = MaterialPointArcTween(
-      begin: Offset.zero,
-      end: const Offset(0.0, 10.0),
-    );
+    final a = MaterialPointArcTween(begin: Offset.zero, end: const Offset(0.0, 10.0));
 
-    final MaterialPointArcTween b = MaterialPointArcTween(
-      begin: Offset.zero,
-      end: const Offset(0.0, 10.0),
-    );
+    final b = MaterialPointArcTween(begin: Offset.zero, end: const Offset(0.0, 10.0));
 
     expect(a, hasOneLineDescription);
     expect(a.toString(), equals(b.toString()));
   });
 
   test('MaterialRectArcTween control test', () {
-    final MaterialRectArcTween a = MaterialRectArcTween(
+    final a = MaterialRectArcTween(
       begin: const Rect.fromLTWH(0.0, 0.0, 10.0, 10.0),
       end: const Rect.fromLTWH(0.0, 10.0, 10.0, 10.0),
     );
 
-    final MaterialRectArcTween b = MaterialRectArcTween(
+    final b = MaterialRectArcTween(
       begin: const Rect.fromLTWH(0.0, 0.0, 10.0, 10.0),
       end: const Rect.fromLTWH(0.0, 10.0, 10.0, 10.0),
     );
@@ -36,10 +30,7 @@ void main() {
   });
 
   test('on-axis MaterialPointArcTween', () {
-    MaterialPointArcTween tween = MaterialPointArcTween(
-      begin: Offset.zero,
-      end: const Offset(0.0, 10.0),
-    );
+    var tween = MaterialPointArcTween(begin: Offset.zero, end: const Offset(0.0, 10.0));
     expect(tween.lerp(0.5), equals(const Offset(0.0, 5.0)));
     expect(tween, hasOneLineDescription);
 
@@ -48,7 +39,7 @@ void main() {
   });
 
   test('on-axis MaterialRectArcTween', () {
-    MaterialRectArcTween tween = MaterialRectArcTween(
+    var tween = MaterialRectArcTween(
       begin: const Rect.fromLTWH(0.0, 0.0, 10.0, 10.0),
       end: const Rect.fromLTWH(0.0, 10.0, 10.0, 10.0),
     );
@@ -63,10 +54,10 @@ void main() {
   });
 
   test('MaterialPointArcTween', () {
-    const Offset begin = Offset(180.0, 110.0);
-    const Offset end = Offset(37.0, 250.0);
+    const begin = Offset(180.0, 110.0);
+    const end = Offset(37.0, 250.0);
 
-    MaterialPointArcTween tween = MaterialPointArcTween(begin: begin, end: end);
+    var tween = MaterialPointArcTween(begin: begin, end: end);
     expect(tween.lerp(0.0), begin);
     expect(tween.lerp(0.25), within<Offset>(distance: 2.0, from: const Offset(126.0, 120.0)));
     expect(tween.lerp(0.75), within<Offset>(distance: 2.0, from: const Offset(48.0, 196.0)));
@@ -80,8 +71,8 @@ void main() {
   });
 
   test('MaterialRectArcTween', () {
-    const Rect begin = Rect.fromLTRB(180.0, 100.0, 330.0, 200.0);
-    const Rect end = Rect.fromLTRB(32.0, 275.0, 132.0, 425.0);
+    const begin = Rect.fromLTRB(180.0, 100.0, 330.0, 200.0);
+    const end = Rect.fromLTRB(32.0, 275.0, 132.0, 425.0);
 
     bool sameRect(Rect a, Rect b) {
       return (a.left - b.left).abs() < 2.0 &&
@@ -90,7 +81,7 @@ void main() {
           (a.bottom - b.bottom).abs() < 2.0;
     }
 
-    MaterialRectArcTween tween = MaterialRectArcTween(begin: begin, end: end);
+    var tween = MaterialRectArcTween(begin: begin, end: end);
     expect(tween.lerp(0.0), begin);
     expect(sameRect(tween.lerp(0.25), const Rect.fromLTRB(120.0, 113.0, 259.0, 237.0)), isTrue);
     expect(sameRect(tween.lerp(0.75), const Rect.fromLTRB(42.3, 206.5, 153.5, 354.7)), isTrue);

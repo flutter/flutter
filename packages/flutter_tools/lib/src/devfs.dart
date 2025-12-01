@@ -28,10 +28,10 @@ const _kFontManifest = 'FontManifest.json';
 
 class DevFSConfig {
   /// Should DevFS assume that symlink targets are stable?
-  var cacheSymlinks = false;
+  bool cacheSymlinks = false;
 
   /// Should DevFS assume that there are no symlinks to directories?
-  var noDirectorySymlinks = false;
+  bool noDirectorySymlinks = false;
 }
 
 DevFSConfig? get devFSConfig => context.get<DevFSConfig>();
@@ -489,12 +489,12 @@ class DevFS {
   final shaderPathsToEvict = <String>{};
 
   // A flag to indicate whether we have called `setAssetDirectory` on the target device.
-  var hasSetAssetDirectory = false;
+  bool hasSetAssetDirectory = false;
 
   /// Whether the font manifest was uploaded during [update].
-  var didUpdateFontManifest = false;
+  bool didUpdateFontManifest = false;
 
-  var sources = <Uri>[];
+  List<Uri> sources = <Uri>[];
   DateTime? lastCompiled;
   DateTime? _previousCompiled;
   PackageConfig? lastPackageConfig;

@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 // This file is for testings that require a `LiveTestWidgetsFlutterBinding`
 void main() {
-  final LiveTestWidgetsFlutterBinding binding = LiveTestWidgetsFlutterBinding();
+  final binding = LiveTestWidgetsFlutterBinding();
   testWidgets('Input PointerAddedEvent', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: Text('Test')));
     await tester.pump();
@@ -41,7 +41,7 @@ void main() {
   });
 
   testWidgets('hitTesting works when using setSurfaceSize', (WidgetTester tester) async {
-    int invocations = 0;
+    var invocations = 0;
     await tester.pumpWidget(
       MaterialApp(
         home: Center(

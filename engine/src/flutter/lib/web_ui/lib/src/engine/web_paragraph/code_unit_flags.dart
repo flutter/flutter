@@ -32,7 +32,7 @@ class AllCodeUnitFlags {
     final List<CodeUnitInfo> ckFlags = canvasKit.CodeUnits.compute(_text);
     assert(ckFlags.length == _allFlags.length);
 
-    for (int i = 0; i < _allFlags.length; i++) {
+    for (var i = 0; i < _allFlags.length; i++) {
       _allFlags[i] = ckFlags[i].flags;
     }
 
@@ -41,15 +41,15 @@ class AllCodeUnitFlags {
     final SegmentationResult result = segmentText(_text);
 
     // Fill out grapheme flags
-    for (final index in result.graphemes) {
+    for (final int index in result.graphemes) {
       _allFlags[index] |= CodeUnitFlag.grapheme._bitmask;
     }
     // Fill out word flags
-    for (final index in result.words) {
+    for (final int index in result.words) {
       _allFlags[index] |= CodeUnitFlag.wordBreak._bitmask;
     }
     // Fill out line break flags
-    for (int i = 0; i < result.breaks.length; i += 2) {
+    for (var i = 0; i < result.breaks.length; i += 2) {
       final int index = result.breaks[i];
       final int type = result.breaks[i + 1];
 

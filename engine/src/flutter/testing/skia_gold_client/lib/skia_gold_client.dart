@@ -92,7 +92,7 @@ interface class SkiaGoldClient {
        _environment = environment ?? io.Platform.environment,
        _engineRoot = engineRoot ?? Engine.findWithin() {
     // Lookup the release version from the engine repository.
-    final io.File releaseVersionFile = io.File(
+    final releaseVersionFile = io.File(
       path.join(_engineRoot.flutterDir.path, '.engine-release.version'),
     );
 
@@ -191,11 +191,11 @@ interface class SkiaGoldClient {
   /// Indicates whether the client has already been authorized to communicate
   /// with the Skia Gold backend.
   bool get _isAuthorized {
-    final io.File authFile = io.File(path.join(_tempPath, 'auth_opt.json'));
+    final authFile = io.File(path.join(_tempPath, 'auth_opt.json'));
 
     if (authFile.existsSync()) {
       final String contents = authFile.readAsStringSync();
-      final Map<String, dynamic> decoded = json.decode(contents) as Map<String, dynamic>;
+      final decoded = json.decode(contents) as Map<String, dynamic>;
       return !(decoded['GSUtil'] as bool);
     }
     return false;
@@ -218,7 +218,7 @@ interface class SkiaGoldClient {
     if (_isAuthorized) {
       return;
     }
-    final List<String> authCommand = <String>[
+    final authCommand = <String>[
       _goldctl,
       'auth',
       if (verbose) '--verbose',
@@ -230,7 +230,7 @@ interface class SkiaGoldClient {
     final io.ProcessResult result = await _runCommand(authCommand);
 
     if (result.exitCode != 0) {
-      final StringBuffer buf = StringBuffer()
+      final buf = StringBuffer()
         ..writeln('Skia Gold authorization failed.')
         ..writeln(
           'Luci environments authenticate using the file provided '
@@ -258,14 +258,14 @@ interface class SkiaGoldClient {
   /// The `imgtest` command collects and uploads test results to the Skia Gold
   /// backend, the `init` argument initializes the current test.
   Future<void> _imgtestInit() async {
-    final io.File keys = io.File(_keysPath);
-    final io.File failures = io.File(_failuresPath);
+    final keys = io.File(_keysPath);
+    final failures = io.File(_failuresPath);
 
     await keys.writeAsString(_getKeysJSON());
     await failures.create();
     final String commitHash = await _getCurrentCommit();
 
-    final List<String> imgtestInitCommand = <String>[
+    final imgtestInitCommand = <String>[
       _goldctl,
       'imgtest',
       'init',
@@ -286,7 +286,7 @@ interface class SkiaGoldClient {
     final io.ProcessResult result = await _runCommand(imgtestInitCommand);
 
     if (result.exitCode != 0) {
-      final StringBuffer buf = StringBuffer()
+      final buf = StringBuffer()
         ..writeln('Skia Gold imgtest init failed.')
         ..writeln('An error occurred when initializing golden file test with ')
         ..writeln('goldctl.');
@@ -392,7 +392,7 @@ interface class SkiaGoldClient {
   ) async {
     await _initOnce(_imgtestInit);
 
-    final List<String> imgtestCommand = <String>[
+    final imgtestCommand = <String>[
       _goldctl,
       'imgtest',
       'add',
@@ -416,7 +416,7 @@ interface class SkiaGoldClient {
     final io.ProcessResult result = await _runCommand(imgtestCommand);
 
     if (result.exitCode != 0) {
-      final StringBuffer buf = StringBuffer()
+      final buf = StringBuffer()
         ..writeln('Skia Gold received an unapproved image in post-submit ')
         ..writeln('testing. Golden file images in flutter/engine are triaged ')
         ..writeln('in pre-submit during code review for the given PR.')
@@ -444,14 +444,14 @@ interface class SkiaGoldClient {
   /// The `imgtest` command collects and uploads test results to the Skia Gold
   /// backend, the `init` argument initializes the current tryjob.
   Future<void> _tryjobInit() async {
-    final io.File keys = io.File(_keysPath);
-    final io.File failures = io.File(_failuresPath);
+    final keys = io.File(_keysPath);
+    final failures = io.File(_failuresPath);
 
     await keys.writeAsString(_getKeysJSON());
     await failures.create();
     final String commitHash = await _getCurrentCommit();
 
-    final List<String> tryjobInitCommand = <String>[
+    final tryjobInitCommand = <String>[
       _goldctl,
       'imgtest',
       'init',
@@ -477,7 +477,7 @@ interface class SkiaGoldClient {
     final io.ProcessResult result = await _runCommand(tryjobInitCommand);
 
     if (result.exitCode != 0) {
-      final StringBuffer buf = StringBuffer()
+      final buf = StringBuffer()
         ..writeln('Skia Gold tryjobInit failure.')
         ..writeln('An error occurred when initializing golden file tryjob with ')
         ..writeln('goldctl.');
@@ -511,7 +511,7 @@ interface class SkiaGoldClient {
   ) async {
     await _initOnce(_tryjobInit);
 
-    final List<String> tryjobCommand = <String>[
+    final tryjobCommand = <String>[
       _goldctl,
       'imgtest',
       'add',
@@ -526,7 +526,7 @@ interface class SkiaGoldClient {
     ];
 
     final io.ProcessResult result = await _runCommand(tryjobCommand);
-    final String resultStdout = result.stdout.toString();
+    final resultStdout = result.stdout.toString();
     if (result.exitCode == 0) {
       // In "verbose" (debugging) mode, print the output of the tryjob anyway.
       if (verbose) {
@@ -538,7 +538,7 @@ interface class SkiaGoldClient {
       final bool isUntriaged = resultStdout.contains('Untriaged');
       final bool isNegative = resultStdout.contains('negative image');
       if (!isUntriaged && !isNegative) {
-        final StringBuffer buf = StringBuffer()
+        final buf = StringBuffer()
           ..writeln('Unexpected Gold tryjobAdd failure.')
           ..writeln('Tryjob execution for golden file test $testName failed for')
           ..writeln('a reason unrelated to pixel comparison.');
@@ -571,7 +571,7 @@ interface class SkiaGoldClient {
     // - "fuzzy": Allows for customizing the thresholds of pixel differences.
     // - "sobel": Same as "fuzzy" but performs edge detection before performing
     //            a fuzzy match.
-    const String algorithm = 'fuzzy';
+    const algorithm = 'fuzzy';
 
     // The number of pixels in this image that are allowed to differ from the
     // baseline. It's okay for this to be a slightly high number like 10% of the
@@ -638,10 +638,7 @@ interface class SkiaGoldClient {
   /// Currently, the only key value pairs being tracked are the platform and
   /// browser the image was rendered on.
   Map<String, dynamic> _getKeys() {
-    final Map<String, dynamic> initialKeys = <String, dynamic>{
-      'CI': 'luci',
-      'Platform': io.Platform.operatingSystem,
-    };
+    final initialKeys = <String, dynamic>{'CI': 'luci', 'Platform': io.Platform.operatingSystem};
     if (dimensions != null) {
       initialKeys.addAll(dimensions!);
     }
@@ -668,13 +665,9 @@ interface class SkiaGoldClient {
   /// the image keys.
   @visibleForTesting
   String getTraceID(String testName) {
-    final Map<String, dynamic> keys = <String, dynamic>{
-      ..._getKeys(),
-      'name': testName,
-      'source_type': _instance,
-    };
+    final keys = <String, dynamic>{..._getKeys(), 'name': testName, 'source_type': _instance};
     final String jsonTrace = json.encode(keys);
-    final String md5Sum = md5.convert(utf8.encode(jsonTrace)).toString();
+    final md5Sum = md5.convert(utf8.encode(jsonTrace)).toString();
     return md5Sum;
   }
 }

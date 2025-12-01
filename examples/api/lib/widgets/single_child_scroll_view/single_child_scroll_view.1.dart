@@ -28,7 +28,9 @@ class SingleChildScrollViewExample extends StatelessWidget {
         builder: (BuildContext context, BoxConstraints viewportConstraints) {
           return SingleChildScrollView(
             child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: viewportConstraints.maxHeight),
+              constraints: BoxConstraints(
+                minHeight: viewportConstraints.maxHeight,
+              ),
               child: IntrinsicHeight(
                 child: Column(
                   children: <Widget>[

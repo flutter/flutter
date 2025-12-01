@@ -81,7 +81,7 @@ void main() {
 }
 
 class FakeDeviceManager extends Fake implements DeviceManager {
-  var devices = <Device>[];
+  List<Device> devices = <Device>[];
 
   @override
   String? specifiedDeviceId;

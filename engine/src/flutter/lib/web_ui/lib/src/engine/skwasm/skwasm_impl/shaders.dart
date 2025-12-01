@@ -219,14 +219,14 @@ class SkwasmFragmentProgram extends SkwasmObjectWrapper<RawRuntimeEffect>
     : super(handle, _registry);
 
   factory SkwasmFragmentProgram.fromBytes(String name, Uint8List bytes) {
-    final ShaderData shaderData = ShaderData.fromBytes(bytes);
+    final shaderData = ShaderData.fromBytes(bytes);
 
     // TODO(jacksongardner): Can we avoid this copy?
     final List<int> sourceData = utf8.encode(shaderData.source);
     final SkStringHandle sourceString = skStringAllocate(sourceData.length);
     final Pointer<Int8> sourceBuffer = skStringGetData(sourceString);
-    int i = 0;
-    for (final int byte in sourceData) {
+    var i = 0;
+    for (final byte in sourceData) {
       sourceBuffer[i] = byte;
       i++;
     }
@@ -251,8 +251,8 @@ class SkwasmFragmentProgram extends SkwasmObjectWrapper<RawRuntimeEffect>
   int get uniformSize => runtimeEffectGetUniformSize(handle);
 
   int _getShaderIndex(String name, int index) {
-    int result = 0;
-    for (final uniform in _shaderData.uniforms) {
+    var result = 0;
+    for (final UniformData uniform in _shaderData.uniforms) {
       if (uniform.name == name) {
         if (index < 0 || index >= uniform.floatCount) {
           throw IndexError.withLength(index, uniform.floatCount);
@@ -296,7 +296,7 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
         Pointer<ShaderHandle> childShaders = nullptr;
         if (_childShaders.isNotEmpty) {
           childShaders = s.allocPointerArray(_childShaders.length).cast<ShaderHandle>();
-          for (int i = 0; i < _childShaders.length; i++) {
+          for (var i = 0; i < _childShaders.length; i++) {
             final SkwasmShader? child = _childShaders[i];
             childShaders[i] = child != null ? child.handle : nullptr;
           }
@@ -355,7 +355,7 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
       _nativeShader = null;
     }
 
-    final SkwasmImageShader shader = SkwasmImageShader.imageShader(
+    final shader = SkwasmImageShader.imageShader(
       image as SkwasmImage,
       ui.TileMode.clamp,
       ui.TileMode.clamp,
@@ -374,7 +374,7 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
   @override
   ui.UniformFloatSlot getUniformFloat(String name, [int? index]) {
     index ??= 0;
-    final shaderIndex = _program._getShaderIndex(name, index);
+    final int shaderIndex = _program._getShaderIndex(name, index);
     return SkwasmUniformFloatSlot._(this, index, name, shaderIndex);
   }
 

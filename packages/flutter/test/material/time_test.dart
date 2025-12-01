@@ -61,9 +61,7 @@ void main() {
 
   group('RestorableTimeOfDay tests', () {
     testWidgets('value is not accessible when not registered', (WidgetTester tester) async {
-      final RestorableTimeOfDay property = RestorableTimeOfDay(
-        const TimeOfDay(hour: 20, minute: 4),
-      );
+      final property = RestorableTimeOfDay(const TimeOfDay(hour: 20, minute: 4));
       addTearDown(property.dispose);
       expect(() => property.value, throwsAssertionError);
     });
@@ -105,7 +103,7 @@ void main() {
 
       // Restores to previous values.
       await tester.restartAndRestore();
-      final _RestorableWidgetState oldState = state;
+      final oldState = state;
       state = tester.state(find.byType(_RestorableWidget));
       expect(state, isNot(same(oldState)));
 
@@ -149,7 +147,7 @@ void main() {
 
       final _RestorableWidgetState state = tester.state(find.byType(_RestorableWidget));
 
-      final List<String> notifyLog = <String>[];
+      final notifyLog = <String>[];
 
       state.timeOfDay.addListener(() {
         notifyLog.add('hello world');

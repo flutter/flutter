@@ -10,7 +10,7 @@ void main() {
   testWidgets('_SliverScrollingPersistentHeader should update stretchConfiguration', (
     WidgetTester tester,
   ) async {
-    for (final double stretchTriggerOffset in <double>[10.0, 20.0]) {
+    for (final stretchTriggerOffset in <double>[10.0, 20.0]) {
       await tester.pumpWidget(
         MaterialApp(
           home: CustomScrollView(
@@ -44,7 +44,7 @@ void main() {
   testWidgets('_SliverPinnedPersistentHeader should update stretchConfiguration', (
     WidgetTester tester,
   ) async {
-    for (final double stretchTriggerOffset in <double>[10.0, 20.0]) {
+    for (final stretchTriggerOffset in <double>[10.0, 20.0]) {
       await tester.pumpWidget(
         MaterialApp(
           home: CustomScrollView(
@@ -79,7 +79,7 @@ void main() {
   testWidgets('_SliverPinnedPersistentHeader should update showOnScreenConfiguration', (
     WidgetTester tester,
   ) async {
-    for (final double maxShowOnScreenExtent in <double>[1000, 2000]) {
+    for (final maxShowOnScreenExtent in <double>[1000, 2000]) {
       await tester.pumpWidget(
         MaterialApp(
           home: CustomScrollView(

@@ -22,7 +22,9 @@ void main() {
     expect(findCardOne().elevation, null);
 
     // Dragged card is elevated.
-    final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Card 1')));
+    final TestGesture drag = await tester.startGesture(
+      tester.getCenter(find.text('Card 1')),
+    );
     await tester.pump(kLongPressTimeout + kPressTimeout);
     await tester.pumpAndSettle();
     expect(findCardOne().elevation, 6);

@@ -213,7 +213,7 @@ class HashUrlStrategy implements UrlStrategy {
   /// This is useful, for example, to wait until the browser has handled the
   /// `history.back` transition.
   Future<void> _waitForPopState() {
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     late ui.VoidCallback unsubscribe;
     unsubscribe = addPopStateListener((_) {
       unsubscribe();

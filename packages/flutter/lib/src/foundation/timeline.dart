@@ -131,7 +131,7 @@ abstract final class FlutterTimeline {
     if (!_collectionEnabled) {
       throw StateError('Timeline metric collection not enabled.');
     }
-    final AggregatedTimings result = AggregatedTimings(_buffer.computeTimings());
+    final result = AggregatedTimings(_buffer.computeTimings());
     debugReset();
     return result;
   }
@@ -202,7 +202,7 @@ final class AggregatedTimings {
   late final List<AggregatedTimedBlock> aggregatedBlocks = _computeAggregatedBlocks();
 
   List<AggregatedTimedBlock> _computeAggregatedBlocks() {
-    final Map<String, (double, int)> aggregate = <String, (double, int)>{};
+    final aggregate = <String, (double, int)>{};
     for (final TimedBlock block in timedBlocks) {
       final (double, int) previousValue = aggregate.putIfAbsent(block.name, () => (0, 0));
       aggregate[block.name] = (previousValue.$1 + block.duration, previousValue.$2 + 1);
@@ -373,7 +373,7 @@ final class _BlockBuffer {
       '${List<String>.generate(_stackPointer, (int i) => _nameStack[i]!).join(', ')}',
     );
 
-    final List<TimedBlock> result = <TimedBlock>[];
+    final result = <TimedBlock>[];
     final int length = _finishes.length;
     final List<double> starts = _starts.extractElements();
     final List<double> finishes = _finishes.extractElements();
@@ -383,7 +383,7 @@ final class _BlockBuffer {
     assert(finishes.length == length);
     assert(names.length == length);
 
-    for (int i = 0; i < length; i++) {
+    for (var i = 0; i < length; i++) {
       result.add(TimedBlock(start: starts[i], end: finishes[i], name: names[i]));
     }
 

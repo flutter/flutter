@@ -86,12 +86,7 @@ class PluginEventChannel<T> {
       // this class be const is convenient since it allows references
       // to be obtained by using the constructor rather than having
       // to literally pass references around.
-      final _EventChannelHandler<T> handler = _EventChannelHandler<T>(
-        name,
-        codec,
-        controller,
-        messenger,
-      );
+      final handler = _EventChannelHandler<T>(name, codec, controller, messenger);
       messenger.setMessageHandler(name, handler.handle);
     }
   }

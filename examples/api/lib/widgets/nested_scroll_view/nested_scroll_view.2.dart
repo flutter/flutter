@@ -47,7 +47,9 @@ class NestedScrollViewExample extends StatelessWidget {
               // be associated with the NestedScrollView.
               slivers: <Widget>[
                 SliverOverlapInjector(
-                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                    context,
+                  ),
                 ),
                 SliverFixedExtentList.builder(
                   itemExtent: 48.0,

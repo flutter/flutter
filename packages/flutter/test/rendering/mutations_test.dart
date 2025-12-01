@@ -39,9 +39,9 @@ void main() {
 
   test('moving children', () {
     RenderBox child1, child2;
-    bool movedChild1 = false;
-    bool movedChild2 = false;
-    final RenderFlex block = RenderFlex(textDirection: TextDirection.ltr);
+    var movedChild1 = false;
+    var movedChild2 = false;
+    final block = RenderFlex(textDirection: TextDirection.ltr);
     block.add(
       child1 = RenderLayoutTestBox(() {
         movedChild1 = true;
@@ -122,7 +122,7 @@ void main() {
 
     test('marking itself dirty in performLayout', () {
       late RenderBox child1;
-      final RenderFlex block = RenderFlex(textDirection: TextDirection.ltr);
+      final block = RenderFlex(textDirection: TextDirection.ltr);
       block.add(
         child1 = RenderLayoutTestBox(
           () {},
@@ -146,7 +146,7 @@ void main() {
 
     test('marking a sibling dirty in performLayout', () {
       late RenderBox child1, child2;
-      final RenderFlex block = RenderFlex(textDirection: TextDirection.ltr);
+      final block = RenderFlex(textDirection: TextDirection.ltr);
       block.add(child1 = RenderLayoutTestBox(() {}));
       block.add(
         child2 = RenderLayoutTestBox(
@@ -175,7 +175,7 @@ void main() {
 
     test('marking a descendant dirty in performLayout', () {
       late RenderBox child1;
-      final RenderFlex block = RenderFlex(textDirection: TextDirection.ltr);
+      final block = RenderFlex(textDirection: TextDirection.ltr);
       block.add(child1 = RenderLayoutTestBox(() {}));
       block.add(RenderLayoutTestBox(child1.markNeedsLayout));
 
@@ -195,7 +195,7 @@ void main() {
 
     test('marking an out-of-band mutation in performLayout', () {
       late RenderProxyBox child1, child11, child2, child21;
-      final RenderFlex block = RenderFlex(textDirection: TextDirection.ltr);
+      final block = RenderFlex(textDirection: TextDirection.ltr);
       block.add(child1 = RenderLayoutTestBox(() {}));
       block.add(child2 = RenderLayoutTestBox(() {}));
       child1.child = child11 = RenderLayoutTestBox(() {});

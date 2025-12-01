@@ -21,12 +21,12 @@ void main() {
   });
 
   group('SemanticsNode', () {
-    const SemanticsTag tag1 = SemanticsTag('Tag One');
-    const SemanticsTag tag2 = SemanticsTag('Tag Two');
-    const SemanticsTag tag3 = SemanticsTag('Tag Three');
+    const tag1 = SemanticsTag('Tag One');
+    const tag2 = SemanticsTag('Tag Two');
+    const tag3 = SemanticsTag('Tag Three');
 
     test('tagging', () {
-      final SemanticsNode node = SemanticsNode();
+      final node = SemanticsNode();
 
       expect(node.isTagged(tag1), isFalse);
       expect(node.isTagged(tag2), isFalse);
@@ -41,9 +41,9 @@ void main() {
     });
 
     test('getSemanticsData includes tags', () {
-      final Set<SemanticsTag> tags = <SemanticsTag>{tag1, tag2};
+      final tags = <SemanticsTag>{tag1, tag2};
 
-      final SemanticsNode node = SemanticsNode()
+      final node = SemanticsNode()
         ..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
         ..tags = tags;
 
@@ -51,7 +51,7 @@ void main() {
 
       tags.add(tag3);
 
-      final SemanticsConfiguration config = SemanticsConfiguration()
+      final config = SemanticsConfiguration()
         ..isSemanticBoundary = true
         ..isMergingSemanticsOfDescendants = true;
 
@@ -68,7 +68,7 @@ void main() {
     });
 
     test('SemanticsConfiguration can set both string label/value/hint and attributed version', () {
-      final SemanticsConfiguration config = SemanticsConfiguration();
+      final config = SemanticsConfiguration();
       config.label = 'label1';
       expect(config.label, 'label1');
       expect(config.attributedLabel.string, 'label1');
@@ -173,18 +173,16 @@ void main() {
     });
 
     test('provides the correct isMergedIntoParent value', () {
-      final SemanticsNode root = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
-      final SemanticsNode node1 = SemanticsNode()..rect = const Rect.fromLTRB(1.0, 0.0, 10.0, 10.0);
-      final SemanticsNode node11 = SemanticsNode()
-        ..rect = const Rect.fromLTRB(2.0, 0.0, 10.0, 10.0);
-      final SemanticsNode node12 = SemanticsNode()
-        ..rect = const Rect.fromLTRB(3.0, 0.0, 10.0, 10.0);
+      final root = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
+      final node1 = SemanticsNode()..rect = const Rect.fromLTRB(1.0, 0.0, 10.0, 10.0);
+      final node11 = SemanticsNode()..rect = const Rect.fromLTRB(2.0, 0.0, 10.0, 10.0);
+      final node12 = SemanticsNode()..rect = const Rect.fromLTRB(3.0, 0.0, 10.0, 10.0);
 
-      final SemanticsConfiguration noMergeConfig = SemanticsConfiguration()
+      final noMergeConfig = SemanticsConfiguration()
         ..isSemanticBoundary = true
         ..isMergingSemanticsOfDescendants = false;
 
-      final SemanticsConfiguration mergeConfig = SemanticsConfiguration()
+      final mergeConfig = SemanticsConfiguration()
         ..isSemanticBoundary = true
         ..isMergingSemanticsOfDescendants = true;
 
@@ -229,12 +227,12 @@ void main() {
     });
 
     test('sendSemanticsUpdate verifies no invisible nodes', () {
-      const Rect invisibleRect = Rect.fromLTRB(0.0, 0.0, 0.0, 10.0);
-      const Rect visibleRect = Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
+      const invisibleRect = Rect.fromLTRB(0.0, 0.0, 0.0, 10.0);
+      const visibleRect = Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
 
-      final SemanticsOwner owner = SemanticsOwner(onSemanticsUpdate: (SemanticsUpdate update) {});
-      final SemanticsNode root = SemanticsNode.root(owner: owner)..rect = invisibleRect;
-      final SemanticsNode child = SemanticsNode();
+      final owner = SemanticsOwner(onSemanticsUpdate: (SemanticsUpdate update) {});
+      final root = SemanticsNode.root(owner: owner)..rect = invisibleRect;
+      final child = SemanticsNode();
 
       // It's ok to have an invisible root.
       expect(owner.sendSemanticsUpdate, returnsNormally);
@@ -322,13 +320,13 @@ void main() {
     });
 
     test('mutate existing semantic node list errors', () {
-      final SemanticsNode node = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
+      final node = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
 
-      final SemanticsConfiguration config = SemanticsConfiguration()
+      final config = SemanticsConfiguration()
         ..isSemanticBoundary = true
         ..isMergingSemanticsOfDescendants = true;
 
-      final List<SemanticsNode> children = <SemanticsNode>[
+      final children = <SemanticsNode>[
         SemanticsNode()..rect = const Rect.fromLTRB(5.0, 5.0, 10.0, 10.0),
       ];
 
@@ -362,7 +360,7 @@ void main() {
 
       {
         late FlutterError error;
-        final List<SemanticsNode> modifiedChildren = <SemanticsNode>[
+        final modifiedChildren = <SemanticsNode>[
           SemanticsNode()..rect = const Rect.fromLTRB(5.0, 5.0, 10.0, 10.0),
           SemanticsNode()..rect = const Rect.fromLTRB(10.0, 10.0, 20.0, 20.0),
         ];
@@ -414,7 +412,7 @@ void main() {
         addTearDown(handle.dispose);
 
         TestRender middle;
-        final TestRender root = TestRender(
+        final root = TestRender(
           hasTapAction: true,
           isSemanticBoundary: true,
           child: TestRender(
@@ -456,12 +454,12 @@ void main() {
     );
 
     test('updateWith marks node as dirty when role changes', () {
-      final SemanticsNode node = SemanticsNode();
+      final node = SemanticsNode();
 
       expect(node.role, SemanticsRole.none);
       expect(node.debugIsDirty, isFalse);
 
-      final SemanticsConfiguration config = SemanticsConfiguration()..role = SemanticsRole.tab;
+      final config = SemanticsConfiguration()..role = SemanticsRole.tab;
       node.updateWith(config: config);
 
       expect(node.role, config.role);
@@ -470,9 +468,9 @@ void main() {
   });
 
   test('toStringDeep() does not throw with transform == null', () {
-    final SemanticsNode child1 = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 5.0, 5.0);
-    final SemanticsNode child2 = SemanticsNode()..rect = const Rect.fromLTRB(5.0, 0.0, 10.0, 5.0);
-    final SemanticsNode root = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 5.0);
+    final child1 = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 5.0, 5.0);
+    final child2 = SemanticsNode()..rect = const Rect.fromLTRB(5.0, 0.0, 10.0, 5.0);
+    final root = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 5.0);
     root.updateWith(config: null, childrenInInversePaintOrder: <SemanticsNode>[child1, child2]);
 
     expect(root.transform, isNull);
@@ -506,7 +504,7 @@ void main() {
   });
 
   test('OrdinalSortKey compares correctly when names are the same', () {
-    const List<List<SemanticsSortKey>> tests = <List<SemanticsSortKey>>[
+    const tests = <List<SemanticsSortKey>>[
       <SemanticsSortKey>[OrdinalSortKey(0.0), OrdinalSortKey(0.0)],
       <SemanticsSortKey>[OrdinalSortKey(0.0), OrdinalSortKey(1.0)],
       <SemanticsSortKey>[OrdinalSortKey(1.0), OrdinalSortKey(0.0)],
@@ -516,9 +514,9 @@ void main() {
       <SemanticsSortKey>[OrdinalSortKey(1.0, name: 'a'), OrdinalSortKey(0.0, name: 'a')],
       <SemanticsSortKey>[OrdinalSortKey(1.0, name: 'a'), OrdinalSortKey(1.0, name: 'a')],
     ];
-    final List<int> expectedResults = <int>[0, -1, 1, 0, 0, -1, 1, 0];
+    final expectedResults = <int>[0, -1, 1, 0, 0, -1, 1, 0];
     assert(tests.length == expectedResults.length);
-    final List<int> results = <int>[
+    final results = <int>[
       for (final List<SemanticsSortKey> tuple in tests) tuple[0].compareTo(tuple[1]),
     ];
     expect(results, orderedEquals(expectedResults));
@@ -531,7 +529,7 @@ void main() {
   });
 
   test('OrdinalSortKey compares correctly when the names are different', () {
-    const List<List<SemanticsSortKey>> tests = <List<SemanticsSortKey>>[
+    const tests = <List<SemanticsSortKey>>[
       <SemanticsSortKey>[OrdinalSortKey(0.0), OrdinalSortKey(0.0, name: 'bar')],
       <SemanticsSortKey>[OrdinalSortKey(0.0), OrdinalSortKey(1.0, name: 'bar')],
       <SemanticsSortKey>[OrdinalSortKey(1.0), OrdinalSortKey(0.0, name: 'bar')],
@@ -549,18 +547,18 @@ void main() {
       <SemanticsSortKey>[OrdinalSortKey(1.0, name: 'bar'), OrdinalSortKey(0.0, name: 'foo')],
       <SemanticsSortKey>[OrdinalSortKey(1.0, name: 'bar'), OrdinalSortKey(1.0, name: 'foo')],
     ];
-    final List<int> expectedResults = <int>[-1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1];
+    final expectedResults = <int>[-1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1];
     assert(tests.length == expectedResults.length);
-    final List<int> results = <int>[
+    final results = <int>[
       for (final List<SemanticsSortKey> tuple in tests) tuple[0].compareTo(tuple[1]),
     ];
     expect(results, orderedEquals(expectedResults));
   });
 
   test('toStringDeep respects childOrder parameter', () {
-    final SemanticsNode child1 = SemanticsNode()..rect = const Rect.fromLTRB(15.0, 0.0, 20.0, 5.0);
-    final SemanticsNode child2 = SemanticsNode()..rect = const Rect.fromLTRB(10.0, 0.0, 15.0, 5.0);
-    final SemanticsNode root = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 20.0, 5.0);
+    final child1 = SemanticsNode()..rect = const Rect.fromLTRB(15.0, 0.0, 20.0, 5.0);
+    final child2 = SemanticsNode()..rect = const Rect.fromLTRB(10.0, 0.0, 15.0, 5.0);
+    final root = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 20.0, 5.0);
     root.updateWith(config: null, childrenInInversePaintOrder: <SemanticsNode>[child1, child2]);
     expect(
       root.toStringDeep(),
@@ -598,7 +596,7 @@ void main() {
       '     Rect.fromLTRB(10.0, 0.0, 15.0, 5.0)\n',
     );
 
-    final SemanticsNode child3 = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 5.0);
+    final child3 = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 5.0);
     child3.updateWith(
       config: null,
       childrenInInversePaintOrder: <SemanticsNode>[
@@ -607,8 +605,7 @@ void main() {
       ],
     );
 
-    final SemanticsNode rootComplex = SemanticsNode()
-      ..rect = const Rect.fromLTRB(0.0, 0.0, 25.0, 5.0);
+    final rootComplex = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 25.0, 5.0);
     rootComplex.updateWith(
       config: null,
       childrenInInversePaintOrder: <SemanticsNode>[child1, child2, child3],
@@ -682,7 +679,7 @@ void main() {
   });
 
   test('debug properties', () {
-    final SemanticsNode minimalProperties = SemanticsNode();
+    final minimalProperties = SemanticsNode();
     expect(
       minimalProperties.toStringDeep(),
       'SemanticsNode#1\n'
@@ -726,7 +723,7 @@ void main() {
       '   headingLevel: 0\n',
     );
 
-    final SemanticsConfiguration config = SemanticsConfiguration()
+    final config = SemanticsConfiguration()
       ..isSemanticBoundary = true
       ..isMergingSemanticsOfDescendants = true
       ..onScrollUp = () {}
@@ -738,7 +735,7 @@ void main() {
       ..label = 'Use all the properties'
       ..textDirection = TextDirection.rtl
       ..sortKey = const OrdinalSortKey(1.0);
-    final SemanticsNode allProperties = SemanticsNode()
+    final allProperties = SemanticsNode()
       ..rect = const Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
       ..transform = Matrix4.translation(Vector3(10.0, 10.0, 0.0))
       ..updateWith(config: config);
@@ -767,7 +764,7 @@ void main() {
       'label: "Use all the properties", textDirection: rtl)',
     );
 
-    final SemanticsNode scaled = SemanticsNode()
+    final scaled = SemanticsNode()
       ..rect = const Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
       ..transform = Matrix4.diagonal3(Vector3(10.0, 10.0, 1.0));
     expect(
@@ -784,13 +781,13 @@ void main() {
   });
 
   test('blocked actions debug properties', () {
-    final SemanticsConfiguration config = SemanticsConfiguration()
+    final config = SemanticsConfiguration()
       ..isBlockingUserActions = true
       ..onScrollUp = () {}
       ..onLongPress = () {}
       ..onShowOnScreen = () {}
       ..onDidGainAccessibilityFocus = () {};
-    final SemanticsNode blocked = SemanticsNode()
+    final blocked = SemanticsNode()
       ..rect = const Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
       ..transform = Matrix4.translation(Vector3(10.0, 10.0, 0.0))
       ..updateWith(config: config);
@@ -808,7 +805,7 @@ void main() {
   });
 
   test('validation result debug properties', () {
-    final SemanticsNode nodeWithValidationResult = SemanticsNode()
+    final nodeWithValidationResult = SemanticsNode()
       ..updateWith(
         config: SemanticsConfiguration()..validationResult = SemanticsValidationResult.valid,
       );
@@ -825,16 +822,16 @@ void main() {
   });
 
   test('Custom actions debug properties', () {
-    final SemanticsConfiguration configuration = SemanticsConfiguration();
-    const CustomSemanticsAction action1 = CustomSemanticsAction(label: 'action1');
-    const CustomSemanticsAction action2 = CustomSemanticsAction(label: 'action2');
-    const CustomSemanticsAction action3 = CustomSemanticsAction(label: 'action3');
+    final configuration = SemanticsConfiguration();
+    const action1 = CustomSemanticsAction(label: 'action1');
+    const action2 = CustomSemanticsAction(label: 'action2');
+    const action3 = CustomSemanticsAction(label: 'action3');
     configuration.customSemanticsActions = <CustomSemanticsAction, VoidCallback>{
       action1: () {},
       action2: () {},
       action3: () {},
     };
-    final SemanticsNode actionNode = SemanticsNode();
+    final actionNode = SemanticsNode();
     actionNode.updateWith(config: configuration);
 
     expect(
@@ -876,13 +873,13 @@ void main() {
   });
 
   test('Attributed String can concat', () {
-    final AttributedString string1 = AttributedString(
+    final string1 = AttributedString(
       'string1',
       attributes: <StringAttribute>[
         SpellOutStringAttribute(range: const TextRange(start: 0, end: 4)),
       ],
     );
-    final AttributedString string2 = AttributedString(
+    final string2 = AttributedString(
       'string2',
       attributes: <StringAttribute>[
         LocaleStringAttribute(
@@ -903,34 +900,33 @@ void main() {
   });
 
   test('Semantics id does not repeat', () {
-    final SemanticsOwner owner = SemanticsOwner(onSemanticsUpdate: (SemanticsUpdate update) {});
-    const int expectId = 1400;
+    final owner = SemanticsOwner(onSemanticsUpdate: (SemanticsUpdate update) {});
+    const expectId = 1400;
     SemanticsNode? nodeToRemove;
-    for (int i = 0; i < kMaxFrameworkAccessibilityIdentifier; i++) {
-      final SemanticsNode node = SemanticsNode();
+    for (var i = 0; i < kMaxFrameworkAccessibilityIdentifier; i++) {
+      final node = SemanticsNode();
       node.attach(owner);
       if (node.id == expectId) {
         nodeToRemove = node;
       }
     }
     nodeToRemove!.detach();
-    final SemanticsNode newNode = SemanticsNode();
+    final newNode = SemanticsNode();
     newNode.attach(owner);
     // Id is reused.
     expect(newNode.id, expectId);
   });
 
   test('performActionAt can hit test on merged semantics node', () {
-    bool tapped = false;
-    final SemanticsOwner owner = SemanticsOwner(onSemanticsUpdate: (SemanticsUpdate update) {});
-    final SemanticsNode root = SemanticsNode.root(owner: owner)
-      ..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
-    final SemanticsNode merged = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
-    final SemanticsConfiguration mergeConfig = SemanticsConfiguration()
+    var tapped = false;
+    final owner = SemanticsOwner(onSemanticsUpdate: (SemanticsUpdate update) {});
+    final root = SemanticsNode.root(owner: owner)..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
+    final merged = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
+    final mergeConfig = SemanticsConfiguration()
       ..isSemanticBoundary = true
       ..isMergingSemanticsOfDescendants = true
       ..onTap = () => tapped = true;
-    final SemanticsConfiguration rootConfig = SemanticsConfiguration()..isSemanticBoundary = true;
+    final rootConfig = SemanticsConfiguration()..isSemanticBoundary = true;
 
     merged.updateWith(config: mergeConfig, childrenInInversePaintOrder: <SemanticsNode>[]);
     root.updateWith(config: rootConfig, childrenInInversePaintOrder: <SemanticsNode>[merged]);
@@ -940,15 +936,14 @@ void main() {
   });
 
   test('Tags show up in debug properties', () {
-    final SemanticsNode actionNode = SemanticsNode()
-      ..tags = <SemanticsTag>{RenderViewport.useTwoPaneSemantics};
+    final actionNode = SemanticsNode()..tags = <SemanticsTag>{RenderViewport.useTwoPaneSemantics};
 
     expect(actionNode.toStringDeep(), contains('\n   tags: RenderViewport.twoPane\n'));
   });
 
   test('SemanticsConfiguration getter/setter', () {
-    final SemanticsConfiguration config = SemanticsConfiguration();
-    const CustomSemanticsAction customAction = CustomSemanticsAction(label: 'test');
+    final config = SemanticsConfiguration();
+    const customAction = CustomSemanticsAction(label: 'test');
 
     expect(config.isSemanticBoundary, isFalse);
     expect(config.isButton, isFalse);
@@ -1051,13 +1046,13 @@ void main() {
   });
 
   test('SemanticsNode.indexInParent appears in string output', () async {
-    final SemanticsNode node = SemanticsNode()..indexInParent = 10;
+    final node = SemanticsNode()..indexInParent = 10;
     expect(node.toString(), contains('indexInParent: 10'));
   });
 
   group('SemanticsLabelBuilder', () {
     test('basic functionality with default separator', () {
-      final SemanticsLabelBuilder builder = SemanticsLabelBuilder();
+      final builder = SemanticsLabelBuilder();
       expect(builder.isEmpty, isTrue);
       expect(builder.length, 0);
 
@@ -1073,7 +1068,7 @@ void main() {
     });
 
     test('custom separator', () {
-      final SemanticsLabelBuilder builder = SemanticsLabelBuilder(separator: ', ');
+      final builder = SemanticsLabelBuilder(separator: ', ');
       builder
         ..addPart('One')
         ..addPart('Two')
@@ -1084,7 +1079,7 @@ void main() {
     });
 
     test('empty separator', () {
-      final SemanticsLabelBuilder builder = SemanticsLabelBuilder(separator: '');
+      final builder = SemanticsLabelBuilder(separator: '');
       builder
         ..addPart('Hello')
         ..addPart('World');
@@ -1094,7 +1089,7 @@ void main() {
     });
 
     test('ignores empty parts', () {
-      final SemanticsLabelBuilder builder = SemanticsLabelBuilder();
+      final builder = SemanticsLabelBuilder();
       builder
         ..addPart('Hello')
         ..addPart('')
@@ -1106,7 +1101,7 @@ void main() {
     });
 
     test('single part', () {
-      final SemanticsLabelBuilder builder = SemanticsLabelBuilder();
+      final builder = SemanticsLabelBuilder();
       builder.addPart('Single');
 
       final String label = builder.build();
@@ -1114,13 +1109,13 @@ void main() {
     });
 
     test('empty builder', () {
-      final SemanticsLabelBuilder builder = SemanticsLabelBuilder();
+      final builder = SemanticsLabelBuilder();
       final String label = builder.build();
       expect(label, '');
     });
 
     test('clear functionality', () {
-      final SemanticsLabelBuilder builder = SemanticsLabelBuilder();
+      final builder = SemanticsLabelBuilder();
       builder
         ..addPart('Hello')
         ..addPart('world');
@@ -1136,7 +1131,7 @@ void main() {
     });
 
     test('reusable builder', () {
-      final SemanticsLabelBuilder builder = SemanticsLabelBuilder();
+      final builder = SemanticsLabelBuilder();
 
       // First use
       builder
@@ -1153,7 +1148,7 @@ void main() {
     });
 
     test('reuse without clearing', () {
-      final SemanticsLabelBuilder builder = SemanticsLabelBuilder();
+      final builder = SemanticsLabelBuilder();
 
       // First use
       builder
@@ -1178,7 +1173,7 @@ void main() {
 
   group('SemanticsLabelBuilder text direction', () {
     test('no text direction embedding when overall direction is null', () {
-      final SemanticsLabelBuilder builder = SemanticsLabelBuilder();
+      final builder = SemanticsLabelBuilder();
       builder
         ..addPart('Hello', textDirection: TextDirection.ltr)
         ..addPart('مرحبا', textDirection: TextDirection.rtl);
@@ -1188,7 +1183,7 @@ void main() {
     });
 
     test('text direction embedding with LTR overall direction', () {
-      final SemanticsLabelBuilder builder = SemanticsLabelBuilder(textDirection: TextDirection.ltr);
+      final builder = SemanticsLabelBuilder(textDirection: TextDirection.ltr);
       builder
         ..addPart('Hello', textDirection: TextDirection.ltr)
         ..addPart('مرحبا', textDirection: TextDirection.rtl)
@@ -1199,7 +1194,7 @@ void main() {
     });
 
     test('text direction embedding with RTL overall direction', () {
-      final SemanticsLabelBuilder builder = SemanticsLabelBuilder(textDirection: TextDirection.rtl);
+      final builder = SemanticsLabelBuilder(textDirection: TextDirection.rtl);
       builder
         ..addPart('مرحبا', textDirection: TextDirection.rtl)
         ..addPart('Hello', textDirection: TextDirection.ltr);
@@ -1209,7 +1204,7 @@ void main() {
     });
 
     test('no embedding when all parts have same direction', () {
-      final SemanticsLabelBuilder builder = SemanticsLabelBuilder(textDirection: TextDirection.ltr);
+      final builder = SemanticsLabelBuilder(textDirection: TextDirection.ltr);
       builder
         ..addPart('Hello', textDirection: TextDirection.ltr)
         ..addPart('world', textDirection: TextDirection.ltr);
@@ -1219,7 +1214,7 @@ void main() {
     });
 
     test('part direction falls back to overall direction', () {
-      final SemanticsLabelBuilder builder = SemanticsLabelBuilder(textDirection: TextDirection.ltr);
+      final builder = SemanticsLabelBuilder(textDirection: TextDirection.ltr);
       builder
         ..addPart('Hello')
         ..addPart('world');
@@ -1229,10 +1224,7 @@ void main() {
     });
 
     test('complex multilingual example', () {
-      final SemanticsLabelBuilder builder = SemanticsLabelBuilder(
-        textDirection: TextDirection.ltr,
-        separator: ', ',
-      );
+      final builder = SemanticsLabelBuilder(textDirection: TextDirection.ltr, separator: ', ');
       builder
         ..addPart('Welcome', textDirection: TextDirection.ltr)
         ..addPart('مرحبا', textDirection: TextDirection.rtl) // Arabic
@@ -1245,7 +1237,7 @@ void main() {
 
   group('Edge cases and error handling', () {
     test('very long labels', () {
-      final SemanticsLabelBuilder builder = SemanticsLabelBuilder();
+      final builder = SemanticsLabelBuilder();
       final String longText = 'A' * 1000;
 
       builder
@@ -1259,9 +1251,9 @@ void main() {
     });
 
     test('many parts', () {
-      final SemanticsLabelBuilder builder = SemanticsLabelBuilder();
+      final builder = SemanticsLabelBuilder();
 
-      for (int i = 0; i < 100; i++) {
+      for (var i = 0; i < 100; i++) {
         builder.addPart('part$i');
       }
 
@@ -1272,7 +1264,7 @@ void main() {
     });
 
     test('special characters in separators', () {
-      final SemanticsLabelBuilder builder = SemanticsLabelBuilder(separator: ' | ');
+      final builder = SemanticsLabelBuilder(separator: ' | ');
       builder
         ..addPart('first')
         ..addPart('second')
@@ -1283,7 +1275,7 @@ void main() {
     });
 
     test('Unicode characters in content', () {
-      final SemanticsLabelBuilder builder = SemanticsLabelBuilder();
+      final builder = SemanticsLabelBuilder();
       builder
         ..addPart('Emoji: 😀🎉')
         ..addPart('Math: ∑∆π')

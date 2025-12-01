@@ -379,7 +379,7 @@ class FakeCrashReportSender extends MockClient {
         return Response('test-report-id', 200);
       });
 
-  static var sendCalls = 0;
+  static int sendCalls = 0;
 }
 
 class CrashingCrashReportSender extends MockClient {

@@ -21,7 +21,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final ThemeData theme = ThemeData();
+  final theme = ThemeData();
 
   // The "can be constructed" tests that follow are primarily to ensure that any
   // animations started by the progress indicators are stopped at dispose() time.
@@ -282,7 +282,7 @@ void main() {
     );
 
     // With no color provided
-    const Color primaryColor = Color(0xff008800);
+    const primaryColor = Color(0xff008800);
     await tester.pumpWidget(
       Theme(
         data: theme.copyWith(colorScheme: ColorScheme.fromSwatch().copyWith(primary: primaryColor)),
@@ -307,7 +307,7 @@ void main() {
     );
 
     // With ProgressIndicatorTheme colors
-    const Color indicatorColor = Color(0xff0000ff);
+    const indicatorColor = Color(0xff0000ff);
     await tester.pumpWidget(
       Theme(
         data: theme.copyWith(
@@ -570,7 +570,7 @@ void main() {
   });
 
   testWidgets('LinearProgressIndicator reflects controller value', (WidgetTester tester) async {
-    final AnimationController controller = AnimationController(vsync: tester, value: 0.5);
+    final controller = AnimationController(vsync: tester, value: 0.5);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -590,9 +590,9 @@ void main() {
   });
 
   testWidgets('CircularProgressIndicator paint colors', (WidgetTester tester) async {
-    const Color green = Color(0xFF00FF00);
-    const Color blue = Color(0xFF0000FF);
-    const Color red = Color(0xFFFF0000);
+    const green = Color(0xFF00FF00);
+    const blue = Color(0xFF0000FF);
+    const red = Color(0xFFFF0000);
 
     // With valueColor & color provided
     await tester.pumpWidget(
@@ -664,9 +664,9 @@ void main() {
   });
 
   testWidgets('RefreshProgressIndicator paint colors', (WidgetTester tester) async {
-    const Color green = Color(0xFF00FF00);
-    const Color blue = Color(0xFF0000FF);
-    const Color red = Color(0xFFFF0000);
+    const green = Color(0xFF00FF00);
+    const blue = Color(0xFF0000FF);
+    const red = Color(0xFFFF0000);
 
     // With valueColor & color provided
     await tester.pumpWidget(
@@ -792,9 +792,7 @@ void main() {
   testWidgets('Material2 - RefreshProgressIndicator uses expected animation', (
     WidgetTester tester,
   ) async {
-    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(
-      frameSize: const Size(50, 50),
-    );
+    final animationSheet = AnimationSheetBuilder(frameSize: const Size(50, 50));
     addTearDown(animationSheet.dispose);
 
     await tester.pumpFrames(
@@ -813,9 +811,7 @@ void main() {
   testWidgets('Material3 - RefreshProgressIndicator uses expected animation', (
     WidgetTester tester,
   ) async {
-    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(
-      frameSize: const Size(50, 50),
-    );
+    final animationSheet = AnimationSheetBuilder(frameSize: const Size(50, 50));
     addTearDown(animationSheet.dispose);
 
     await tester.pumpFrames(
@@ -939,8 +935,8 @@ void main() {
   testWidgets('LinearProgressIndicator can be made accessible', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     final GlobalKey key = GlobalKey();
-    const String label = 'Label';
-    const String value = '25%';
+    const label = 'Label';
+    const value = '25%';
     await tester.pumpWidget(
       Theme(
         data: theme,
@@ -969,7 +965,7 @@ void main() {
   ) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     final GlobalKey key = GlobalKey();
-    const String label = 'Label';
+    const label = 'Label';
     await tester.pumpWidget(
       Theme(
         data: theme,
@@ -1014,7 +1010,7 @@ void main() {
   ) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     final GlobalKey key = GlobalKey();
-    const String label = 'Progress';
+    const label = 'Progress';
     await tester.pumpWidget(
       Theme(
         data: theme,
@@ -1036,8 +1032,8 @@ void main() {
   testWidgets('CircularProgressIndicator can be made accessible', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     final GlobalKey key = GlobalKey();
-    const String label = 'Label';
-    const String value = '25%';
+    const label = 'Label';
+    const value = '25%';
     await tester.pumpWidget(
       Theme(
         data: theme,
@@ -1064,8 +1060,8 @@ void main() {
   testWidgets('RefreshProgressIndicator can be made accessible', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     final GlobalKey key = GlobalKey();
-    const String label = 'Label';
-    const String value = '25%';
+    const label = 'Label';
+    const value = '25%';
     await tester.pumpWidget(
       Theme(
         data: theme,
@@ -1087,9 +1083,7 @@ void main() {
   testWidgets('Material2 - Indeterminate CircularProgressIndicator uses expected animation', (
     WidgetTester tester,
   ) async {
-    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(
-      frameSize: const Size(40, 40),
-    );
+    final animationSheet = AnimationSheetBuilder(frameSize: const Size(40, 40));
     addTearDown(animationSheet.dispose);
 
     await tester.pumpFrames(
@@ -1114,9 +1108,7 @@ void main() {
   testWidgets('Material3 - Indeterminate CircularProgressIndicator uses expected animation', (
     WidgetTester tester,
   ) async {
-    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(
-      frameSize: const Size(40, 40),
-    );
+    final animationSheet = AnimationSheetBuilder(frameSize: const Size(40, 40));
     addTearDown(animationSheet.dispose);
 
     await tester.pumpFrames(
@@ -1183,7 +1175,7 @@ void main() {
   testWidgets(
     'Adaptive CircularProgressIndicator can use backgroundColor to change tick color for iOS',
     (WidgetTester tester) async {
-      const Color color = Color(0xFF5D3FD3);
+      const color = Color(0xFF5D3FD3);
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(),
@@ -1234,12 +1226,12 @@ void main() {
   ) async {
     late BuildContext builderContext;
 
-    const ProgressIndicatorThemeData themeData = ProgressIndicatorThemeData(
+    const themeData = ProgressIndicatorThemeData(
       color: Color(0xFFFF0000),
       linearTrackColor: Color(0xFF00FF00),
     );
 
-    final ProgressIndicatorTheme progressTheme = ProgressIndicatorTheme(
+    final progressTheme = ProgressIndicatorTheme(
       data: themeData,
       child: Builder(
         builder: (BuildContext context) {
@@ -1316,7 +1308,7 @@ void main() {
     expect(innerPadding.padding, const EdgeInsets.all(12.0));
 
     // With values provided.
-    const double testElevation = 1.0;
+    const testElevation = 1.0;
     const EdgeInsetsGeometry testIndicatorMargin = EdgeInsets.all(6.0);
     const EdgeInsetsGeometry testIndicatorPadding = EdgeInsets.all(10.0);
     await pumpIndicator(
@@ -1385,12 +1377,10 @@ void main() {
         required TextDirection textDirection,
         double? trackGap,
       }) async {
-        final ValueNotifier<double> value = ValueNotifier<double>(0);
+        final value = ValueNotifier<double>(0);
         addTearDown(value.dispose);
 
-        final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(
-          frameSize: const Size(250, 30),
-        );
+        final animationSheet = AnimationSheetBuilder(frameSize: const Size(250, 30));
         addTearDown(animationSheet.dispose);
 
         final Widget target = Material(
@@ -1414,7 +1404,7 @@ void main() {
           ),
         );
 
-        for (int i = 0; i <= 50; i++) {
+        for (var i = 0; i <= 50; i++) {
           value.value = i * 0.02;
           await tester.pumpWidget(animationSheet.record(target));
         }
@@ -1452,9 +1442,7 @@ void main() {
         required TextDirection textDirection,
         double? trackGap,
       }) async {
-        final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(
-          frameSize: const Size(250, 30),
-        );
+        final animationSheet = AnimationSheetBuilder(frameSize: const Size(250, 30));
         addTearDown(animationSheet.dispose);
 
         final Widget target = Material(
@@ -1530,8 +1518,8 @@ void main() {
   testWidgets('Can customise LinearProgressIndicator stop indicator when year2023 is false', (
     WidgetTester tester,
   ) async {
-    const Color stopIndicatorColor = Color(0XFF00FF00);
-    const double stopIndicatorRadius = 5.0;
+    const stopIndicatorColor = Color(0XFF00FF00);
+    const stopIndicatorRadius = 5.0;
     Widget buildIndicator({Color? stopIndicatorColor, double? stopIndicatorRadius}) {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -1619,7 +1607,7 @@ void main() {
   testWidgets('LinearProgressIndicator default track gap when year2023 is false', (
     WidgetTester tester,
   ) async {
-    const double defaultTrackGap = 4.0;
+    const defaultTrackGap = 4.0;
     Widget buildIndicator({required TextDirection textDirection}) {
       return Directionality(
         textDirection: textDirection,
@@ -1682,8 +1670,8 @@ void main() {
   testWidgets('Can customise LinearProgressIndicator track gap when year2023 is false', (
     WidgetTester tester,
   ) async {
-    const double customTrackGap = 12.0;
-    const double noTrackGap = 0.0;
+    const customTrackGap = 12.0;
+    const noTrackGap = 0.0;
     Widget buildIndicator({double? trackGap}) {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -1899,7 +1887,7 @@ void main() {
   testWidgets('CircularProgressIndicator.constraints can override default size', (
     WidgetTester tester,
   ) async {
-    const Size size = Size(64, 64);
+    const size = Size(64, 64);
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -1942,7 +1930,7 @@ void main() {
   });
 
   testWidgets('CircularProgressIndicator reflects controller value', (WidgetTester tester) async {
-    final AnimationController controller = AnimationController(vsync: tester, value: 0.5);
+    final controller = AnimationController(vsync: tester, value: 0.5);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(

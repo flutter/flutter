@@ -12,7 +12,9 @@ void main() {
     final ButtonStyleButton button = tester.widget<ButtonStyleButton>(
       find.descendant(
         of: find.byType(example.SaveButton),
-        matching: find.byWidgetPredicate((Widget widget) => widget is TextButton),
+        matching: find.byWidgetPredicate(
+          (Widget widget) => widget is TextButton,
+        ),
       ),
     );
 
@@ -71,7 +73,9 @@ void main() {
     expect(saveButtonColor, equals(Colors.red));
   });
 
-  testWidgets('SaveButton tap resets dirty status and adds log', (WidgetTester tester) async {
+  testWidgets('SaveButton tap resets dirty status and adds log', (
+    WidgetTester tester,
+  ) async {
     final List<String?> log = <String?>[];
 
     final DebugPrintCallback originalDebugPrint = debugPrint;
@@ -85,7 +89,10 @@ void main() {
     Color? saveButtonColor = getSaveButtonColor(tester);
     expect(saveButtonColor, equals(Colors.green));
     expect(
-      find.descendant(of: find.byType(example.SaveButton), matching: find.text('0')),
+      find.descendant(
+        of: find.byType(example.SaveButton),
+        matching: find.text('0'),
+      ),
       findsOneWidget,
     );
 
@@ -98,7 +105,10 @@ void main() {
     saveButtonColor = getSaveButtonColor(tester);
     expect(saveButtonColor, equals(Colors.red));
     expect(
-      find.descendant(of: find.byType(example.SaveButton), matching: find.text('0')),
+      find.descendant(
+        of: find.byType(example.SaveButton),
+        matching: find.text('0'),
+      ),
       findsOneWidget,
     );
 
@@ -114,7 +124,10 @@ void main() {
     saveButtonColor = getSaveButtonColor(tester);
     expect(saveButtonColor, equals(Colors.green));
     expect(
-      find.descendant(of: find.byType(example.SaveButton), matching: find.text('-1')),
+      find.descendant(
+        of: find.byType(example.SaveButton),
+        matching: find.text('-1'),
+      ),
       findsOneWidget,
     );
 

@@ -52,9 +52,9 @@ class CiConfig {
     }
     final y.YamlList targetsList = targetsNode;
 
-    final Map<String, CiTarget> result = <String, CiTarget>{};
+    final result = <String, CiTarget>{};
     for (final y.YamlNode yamlTarget in targetsList.nodes) {
-      final CiTarget target = CiTarget.fromYaml(yamlTarget);
+      final target = CiTarget.fromYaml(yamlTarget);
       if (!target.valid) {
         return CiConfig._error(target.error);
       }
@@ -116,7 +116,7 @@ class CiTarget {
       );
       return CiTarget._error(error);
     }
-    final CiTargetProperties properties = CiTargetProperties.fromYaml(propertiesNode);
+    final properties = CiTargetProperties.fromYaml(propertiesNode);
     if (!properties.valid) {
       return CiTarget._error(properties.error);
     }

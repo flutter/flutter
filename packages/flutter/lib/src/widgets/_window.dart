@@ -20,6 +20,7 @@ import 'package:flutter/foundation.dart';
 
 import '../foundation/_features.dart';
 import '_window_io.dart' if (dart.library.js_interop) '_window_web.dart' as window_impl;
+import '_window_positioner.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'framework.dart';
@@ -620,6 +621,148 @@ abstract class DialogWindowController extends BaseWindowController {
   void setMinimized(bool minimized);
 }
 
+/// Delegate class for tooltip window controller.
+///
+/// {@macro flutter.widgets.windowing.experimental}
+///
+/// See also:
+///
+/// * [TooltipWindowController], the controller that creates and manages tooltip windows.
+/// * [TooltipWindow], the widget for a tooltip window.
+/// * [RegularWindowControllerDelegate], the delegate for regular window controllers.
+mixin class TooltipWindowControllerDelegate {
+  /// Invoked when the user attempts to close the window.
+  ///
+  /// The default implementation destroys the window. Subclasses
+  /// can override the behavior to delay or prevent the window from closing.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  ///
+  /// See also:
+  ///
+  /// * [onWindowDestroyed], which is invoked after the window is closed.
+  @internal
+  void onWindowCloseRequested(TooltipWindowController controller) {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+
+    controller.destroy();
+  }
+
+  /// Invoked after the window is closed.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  ///
+  /// See also:
+  ///
+  /// * [onWindowCloseRequested], which is invoked when the user attempts to close the window.
+  @internal
+  void onWindowDestroyed() {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+  }
+}
+
+/// A controller for a tooltip window.
+///
+/// A tooltip window is a small window that displays brief, informative text
+/// when a user hovers over or focuses on a UI element. Tooltip windows are
+/// typically used to provide additional context or explanations for UI elements
+/// without cluttering the main interface. As such, it may not receive input
+/// focus from the user. It will however stay open when another window receives
+/// input focus.
+///
+/// This class does not interact with the widget tree. Instead, it is typically
+/// provided to the [TooltipWindow] widget, which renders the content inside the
+/// tooltip window.
+///
+/// The user of this class is responsible for managing the lifecycle of the window.
+/// When the window is no longer needed, the user should call [destroy] on this
+/// controller to release the resources associated with the window.
+///
+/// {@tool dartpad}
+/// An example usage of [TooltipWindowController] looks like:
+///
+/// ** See code in examples/api/lib/widgets/windows/tooltip.0.dart **
+/// {@end-tool}
+///
+/// Children of a [TooltipWindow] widget can access the [TooltipWindowController]
+/// via the [WindowScope] inherited widget.
+///
+/// {@macro flutter.widgets.windowing.experimental}
+abstract class TooltipWindowController extends BaseWindowController {
+  /// Creates a [TooltipWindowController] with the provided properties.
+  ///
+  /// Upon construction, the window is created by the platform.
+  ///
+  /// The [parent] argument specifies the parent window of this tooltip.
+  ///
+  /// The [anchorRect] argument specifies the rectangle in the parent's coordinate
+  /// space to which the tooltip is anchored.
+  ///
+  /// The [positioner] argument specifies how the tooltip should be positioned
+  /// relative to the [anchorRect].
+  ///
+  /// {@macro flutter.widgets.windowing.constraints}
+  ///
+  /// The [delegate] argument can be used to listen to the window's
+  /// lifecycle. For example, it can be used to save state before
+  /// a window is closed.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  factory TooltipWindowController({
+    required BaseWindowController parent,
+    required Rect anchorRect,
+    required WindowPositioner positioner,
+    BoxConstraints? preferredConstraints,
+    TooltipWindowControllerDelegate? delegate,
+  }) {
+    WidgetsFlutterBinding.ensureInitialized();
+    final WindowingOwner owner = WidgetsBinding.instance.windowingOwner;
+    final TooltipWindowController controller = owner.createTooltipWindowController(
+      parent: parent,
+      preferredConstraints: preferredConstraints ?? const BoxConstraints(),
+      delegate: delegate ?? TooltipWindowControllerDelegate(),
+      anchorRect: anchorRect,
+      positioner: positioner,
+    );
+    return controller;
+  }
+
+  /// Creates an empty [TooltipWindowController].
+  ///
+  /// This method is only intended to be used by subclasses of the
+  /// [TooltipWindowController].
+  ///
+  /// Users who want to instantiate a new [TooltipWindowController] should
+  /// always use the factory method to create a controller that is valid
+  /// for their particular platform.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  @protected
+  TooltipWindowController.empty();
+
+  /// The parent controller of this tooltip.
+  ///
+  /// The tooltip will be destroyed if its parent is destroyed.
+  BaseWindowController get parent;
+
+  /// Request change to the constraints of the window.
+  ///
+  /// The [constraints] describes the new constraints that the window should
+  /// satisfy. If the constraints disagree with the current size of the window,
+  /// the platform might resize the window to satisfy the new constraints.
+  ///
+  /// The platform is free to ignore this request.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void setConstraints(BoxConstraints constraints);
+}
+
 /// [WindowingOwner] is responsible for creating and managing window controllers.
 ///
 /// A custom implementation can be provided by setting [WidgetsBinding.windowingOwner].
@@ -656,6 +799,22 @@ abstract class WindowingOwner {
     BoxConstraints? preferredConstraints,
     BaseWindowController? parent,
     String? title,
+  });
+
+  /// Creates a [TooltipWindowController] with the provided properties.
+  ///
+  /// Most app developers should use [TooltipWindowController]'s constructor
+  /// instead of calling this method directly. This method allows platforms
+  /// to inject platform-specific logic.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  TooltipWindowController createTooltipWindowController({
+    required TooltipWindowControllerDelegate delegate,
+    required BoxConstraints preferredConstraints,
+    required Rect anchorRect,
+    required WindowPositioner positioner,
+    required BaseWindowController parent,
   });
 }
 
@@ -701,6 +860,17 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
     String? title,
   }) {
     throw UnsupportedError(errorMessage);
+  }
+
+  @override
+  TooltipWindowController createTooltipWindowController({
+    required TooltipWindowControllerDelegate delegate,
+    required BoxConstraints preferredConstraints,
+    required Rect anchorRect,
+    required WindowPositioner positioner,
+    required BaseWindowController parent,
+  }) {
+    throw UnimplementedError(errorMessage);
   }
 }
 
@@ -888,6 +1058,50 @@ class DialogWindow extends StatelessWidget {
   }
 }
 
+@internal
+class TooltipWindow extends StatelessWidget {
+  /// Creates a tooltip window widget.
+  ///
+  /// The [controller] creates the native backing window into which the
+  /// [child] widget is rendered.
+  ///
+  /// It is up to the caller to destroy the window by calling
+  /// [TooltipWindowController.destroy] when the window is no longer needed.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  TooltipWindow({super.key, required this.controller, required this.child}) {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+  }
+
+  /// Controller for this widget.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  final TooltipWindowController controller;
+
+  /// The content rendered into this window.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  final Widget child;
+
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: controller,
+      builder: (BuildContext context, Widget? widget) => WindowScope(
+        controller: controller,
+        child: View(view: controller.rootView, child: child),
+      ),
+    );
+  }
+}
+
 enum _WindowControllerAspect { contentSize, title, activated, maximized, minimized, fullscreen }
 
 /// Provides descendants with access to the [BaseWindowController] associated with
@@ -1019,6 +1233,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
     return switch (controller) {
       RegularWindowController() => controller.title,
       DialogWindowController() => controller.title,
+      TooltipWindowController() => '',
     };
   }
 
@@ -1040,6 +1255,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
     return switch (controller) {
       RegularWindowController() => controller.title,
       DialogWindowController() => controller.title,
+      TooltipWindowController() => '',
     };
   }
 
@@ -1062,6 +1278,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
     return switch (controller) {
       RegularWindowController() => controller.isActivated,
       DialogWindowController() => controller.isActivated,
+      TooltipWindowController() => false,
     };
   }
 
@@ -1084,6 +1301,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
     return switch (controller) {
       RegularWindowController() => controller.isActivated,
       DialogWindowController() => controller.isActivated,
+      TooltipWindowController() => false,
     };
   }
 
@@ -1106,6 +1324,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
     return switch (controller) {
       RegularWindowController() => controller.isMinimized,
       DialogWindowController() => controller.isMinimized,
+      TooltipWindowController() => false,
     };
   }
 
@@ -1128,6 +1347,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
     return switch (controller) {
       RegularWindowController() => controller.isMinimized,
       DialogWindowController() => controller.isMinimized,
+      TooltipWindowController() => false,
     };
   }
 
@@ -1150,6 +1370,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
     return switch (controller) {
       RegularWindowController() => controller.isMaximized,
       DialogWindowController() => false,
+      TooltipWindowController() => false,
     };
   }
 
@@ -1172,6 +1393,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
     return switch (controller) {
       RegularWindowController() => controller.isMaximized,
       DialogWindowController() => false,
+      TooltipWindowController() => false,
     };
   }
 
@@ -1195,6 +1417,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
     return switch (controller) {
       RegularWindowController() => controller.isFullscreen,
       DialogWindowController() => false,
+      TooltipWindowController() => false,
     };
   }
 
@@ -1217,6 +1440,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
     return switch (controller) {
       RegularWindowController() => controller.isFullscreen,
       DialogWindowController() => false,
+      TooltipWindowController() => false,
     };
   }
 
@@ -1280,6 +1504,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
                 regular.title != (oldWidget.controller as RegularWindowController).title,
               final DialogWindowController dialog =>
                 dialog.title != (oldWidget.controller as DialogWindowController).title,
+              TooltipWindowController() => false,
             },
             _WindowControllerAspect.activated => switch (controller) {
               final RegularWindowController regular =>
@@ -1287,12 +1512,14 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
                     (oldWidget.controller as RegularWindowController).isActivated,
               final DialogWindowController dialog =>
                 dialog.isActivated != (oldWidget.controller as DialogWindowController).isActivated,
+              TooltipWindowController() => false,
             },
             _WindowControllerAspect.maximized => switch (controller) {
               final RegularWindowController regular =>
                 regular.isMaximized !=
                     (oldWidget.controller as RegularWindowController).isMaximized,
               DialogWindowController() => false,
+              TooltipWindowController() => false,
             },
             _WindowControllerAspect.minimized => switch (controller) {
               final RegularWindowController regular =>
@@ -1300,12 +1527,14 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
                     (oldWidget.controller as RegularWindowController).isMinimized,
               final DialogWindowController dialog =>
                 dialog.isMinimized != (oldWidget.controller as DialogWindowController).isMinimized,
+              TooltipWindowController() => false,
             },
             _WindowControllerAspect.fullscreen => switch (controller) {
               final RegularWindowController regular =>
                 regular.isFullscreen !=
                     (oldWidget.controller as RegularWindowController).isFullscreen,
               DialogWindowController() => false,
+              TooltipWindowController() => false,
             },
           },
     );

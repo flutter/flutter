@@ -254,7 +254,7 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
 
   static const kTesterDeviceId = 'flutter-tester';
 
-  static var showFlutterTesterDevice = false;
+  static bool showFlutterTesterDevice = false;
 
   final FlutterTesterDevice _testerDevice;
 

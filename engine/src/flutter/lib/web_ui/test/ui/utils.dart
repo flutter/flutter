@@ -13,15 +13,15 @@ import 'package:ui/ui.dart';
 import '../common/rendering.dart';
 
 Picture drawPicture(void Function(Canvas) drawCommands) {
-  final PictureRecorder recorder = PictureRecorder();
-  final Canvas canvas = Canvas(recorder);
+  final recorder = PictureRecorder();
+  final canvas = Canvas(recorder);
   drawCommands(canvas);
   return recorder.endRecording();
 }
 
 /// Draws the [Picture]. This is in preparation for a golden test.
 Future<void> drawPictureUsingCurrentRenderer(Picture picture) async {
-  final SceneBuilder sb = SceneBuilder();
+  final sb = SceneBuilder();
   sb.pushOffset(0, 0);
   sb.addPicture(Offset.zero, picture);
   await renderScene(sb.build());
@@ -29,7 +29,7 @@ Future<void> drawPictureUsingCurrentRenderer(Picture picture) async {
 
 // Sends a platform message to create a Platform View with the given id and viewType.
 Future<void> createPlatformView(int id, String viewType) {
-  final Completer<void> completer = Completer<void>();
+  final completer = Completer<void>();
   const MethodCodec codec = StandardMethodCodec();
   PlatformDispatcher.instance.sendPlatformMessage(
     'flutter/platform_views',
@@ -41,7 +41,7 @@ Future<void> createPlatformView(int id, String viewType) {
 
 /// Disposes of the platform view with the given [id].
 Future<void> disposePlatformView(int id) {
-  final Completer<void> completer = Completer<void>();
+  final completer = Completer<void>();
   const MethodCodec codec = StandardMethodCodec();
   PlatformDispatcher.instance.sendPlatformMessage(
     'flutter/platform_views',
@@ -58,8 +58,8 @@ Future<bool> matchImage(Image left, Image right) async {
   int getPixel(ByteData data, int x, int y) => data.getUint32((x + y * left.width) * 4);
   final ByteData leftData = (await left.toByteData())!;
   final ByteData rightData = (await right.toByteData())!;
-  for (int y = 0; y < left.height; y++) {
-    for (int x = 0; x < left.width; x++) {
+  for (var y = 0; y < left.height; y++) {
+    for (var x = 0; x < left.width; x++) {
       if (getPixel(leftData, x, y) != getPixel(rightData, x, y)) {
         return false;
       }

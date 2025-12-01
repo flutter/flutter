@@ -69,14 +69,18 @@ void testMain() {
 
       // Tab should not enable semantics
       {
-        final event = createDomKeyboardEvent('keydown', <String, Object>{'key': 'Tab'});
+        final DomKeyboardEvent event = createDomKeyboardEvent('keydown', <String, Object>{
+          'key': 'Tab',
+        });
         expect(testSemanticsEnabler.shouldEnableSemantics(event), isTrue);
         expect(testSemanticsEnabler.tryEnableSemanticsCallCount, 0);
       }
 
       // Enter key is allowed to try to enable semantics
       {
-        final event = createDomKeyboardEvent('keydown', <String, Object>{'key': 'Enter'});
+        final DomKeyboardEvent event = createDomKeyboardEvent('keydown', <String, Object>{
+          'key': 'Enter',
+        });
         expect(testSemanticsEnabler.shouldEnableSemantics(event), isFalse);
         expect(testSemanticsEnabler.tryEnableSemanticsCallCount, 1);
       }
@@ -95,11 +99,11 @@ void testMain() {
     );
 
     test('Can update placeholder label', () {
-      const String testLabel = 'Test label for placeholder';
+      const testLabel = 'Test label for placeholder';
       desktopSemanticsEnabler.updatePlaceholderLabel(testLabel);
       expect(placeholder!.getAttribute('aria-label'), testLabel);
 
-      const String anotherLabel = 'Another label for placeholder';
+      const anotherLabel = 'Another label for placeholder';
       desktopSemanticsEnabler.dispose();
       expect(() => desktopSemanticsEnabler.updatePlaceholderLabel(anotherLabel), returnsNormally);
     });
@@ -151,11 +155,11 @@ void testMain() {
       });
 
       test('Can update placeholder label', () {
-        const String testLabel = 'Test label for placeholder';
+        const testLabel = 'Test label for placeholder';
         mobileSemanticsEnabler.updatePlaceholderLabel(testLabel);
         expect(placeholder!.getAttribute('aria-label'), testLabel);
 
-        const String anotherLabel = 'Another label for placeholder';
+        const anotherLabel = 'Another label for placeholder';
         mobileSemanticsEnabler.dispose();
         expect(() => mobileSemanticsEnabler.updatePlaceholderLabel(anotherLabel), returnsNormally);
       });

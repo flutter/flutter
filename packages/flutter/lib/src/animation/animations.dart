@@ -555,7 +555,7 @@ class TrainHoppingAnimation extends Animation<double>
   double? _lastValue;
   void _valueChangeHandler() {
     assert(_currentTrain != null);
-    bool hop = false;
+    var hop = false;
     if (_nextTrain != null) {
       assert(_mode != null);
       hop = switch (_mode!) {

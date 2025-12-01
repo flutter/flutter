@@ -112,7 +112,7 @@ Uint32List fragmentUsingIntlSegmenter(String text, IntlSegmenterGranularity gran
   final DomSegmenter segmenter = _intlSegmenters[granularity]!;
   final DomIteratorWrapper<DomSegment> iterator = segmenter.segment(text).iterator();
 
-  final List<int> breaks = <int>[];
+  final breaks = <int>[];
   while (iterator.moveNext()) {
     breaks.add(iterator.current.index);
   }
@@ -134,12 +134,12 @@ Uint32List fragmentUsingV8LineBreaker(String text) {
   );
 
   final int size = (fragments.length + 1) * 2;
-  final Uint32List typedArray = Uint32List(size);
+  final typedArray = Uint32List(size);
 
   typedArray[0] = 0; // start index
   typedArray[1] = kSoftLineBreak; // break type
 
-  for (int i = 0; i < fragments.length; i++) {
+  for (var i = 0; i < fragments.length; i++) {
     final LineBreakFragment fragment = fragments[i];
     final int uint32Index = 2 + i * 2;
     typedArray[uint32Index] = fragment.end;

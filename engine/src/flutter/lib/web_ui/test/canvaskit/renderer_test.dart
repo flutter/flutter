@@ -79,28 +79,28 @@ void testMain() {
     });
 
     test('always renders most recent picture and skips intermediate pictures', () async {
-      final TestRasterizer testRasterizer = TestRasterizer();
+      final testRasterizer = TestRasterizer();
       CanvasKitRenderer.instance.debugOverrideRasterizer(testRasterizer);
 
       // Create another view to render into to force the renderer to make
       // a [ViewRasterizer] for it.
-      final EngineFlutterView testView = EngineFlutterView(
+      final testView = EngineFlutterView(
         EnginePlatformDispatcher.instance,
         createDomElement('test-view'),
       );
       EnginePlatformDispatcher.instance.viewManager.registerView(testView);
 
-      final List<LayerTree> treesToRender = <LayerTree>[];
-      final List<Future<void>> renderFutures = <Future<void>>[];
-      for (int i = 1; i < 20; i++) {
-        final ui.PictureRecorder recorder = ui.PictureRecorder();
-        final ui.Canvas canvas = ui.Canvas(recorder);
+      final treesToRender = <LayerTree>[];
+      final renderFutures = <Future<void>>[];
+      for (var i = 1; i < 20; i++) {
+        final recorder = ui.PictureRecorder();
+        final canvas = ui.Canvas(recorder);
         canvas.drawRect(
           const ui.Rect.fromLTWH(0, 0, 50, 50),
           ui.Paint()..color = const ui.Color(0xff00ff00),
         );
         final ui.Picture picture = recorder.endRecording();
-        final ui.SceneBuilder builder = ui.SceneBuilder();
+        final builder = ui.SceneBuilder();
         builder.addPicture(ui.Offset.zero, picture);
         final ui.Scene scene = builder.build();
         treesToRender.add((scene as LayerScene).layerTree);
@@ -116,48 +116,43 @@ void testMain() {
     });
 
     test('can render multiple frames at once into multiple views', () async {
-      final TestRasterizer testRasterizer = TestRasterizer();
+      final testRasterizer = TestRasterizer();
       CanvasKitRenderer.instance.debugOverrideRasterizer(testRasterizer);
 
       // Create another view to render into to force the renderer to make
       // a [ViewRasterizer] for it.
-      final EngineFlutterView testView1 = EngineFlutterView(
+      final testView1 = EngineFlutterView(
         EnginePlatformDispatcher.instance,
         createDomElement('test-view'),
       );
       EnginePlatformDispatcher.instance.viewManager.registerView(testView1);
-      final EngineFlutterView testView2 = EngineFlutterView(
+      final testView2 = EngineFlutterView(
         EnginePlatformDispatcher.instance,
         createDomElement('test-view'),
       );
       EnginePlatformDispatcher.instance.viewManager.registerView(testView2);
-      final EngineFlutterView testView3 = EngineFlutterView(
+      final testView3 = EngineFlutterView(
         EnginePlatformDispatcher.instance,
         createDomElement('test-view'),
       );
       EnginePlatformDispatcher.instance.viewManager.registerView(testView3);
 
-      final Map<EngineFlutterView, List<LayerTree>> treesToRender =
-          <EngineFlutterView, List<LayerTree>>{};
+      final treesToRender = <EngineFlutterView, List<LayerTree>>{};
       treesToRender[testView1] = <LayerTree>[];
       treesToRender[testView2] = <LayerTree>[];
       treesToRender[testView3] = <LayerTree>[];
-      final List<Future<void>> renderFutures = <Future<void>>[];
+      final renderFutures = <Future<void>>[];
 
-      for (int i = 1; i < 20; i++) {
-        for (final EngineFlutterView testView in <EngineFlutterView>[
-          testView1,
-          testView2,
-          testView3,
-        ]) {
-          final ui.PictureRecorder recorder = ui.PictureRecorder();
-          final ui.Canvas canvas = ui.Canvas(recorder);
+      for (var i = 1; i < 20; i++) {
+        for (final testView in <EngineFlutterView>[testView1, testView2, testView3]) {
+          final recorder = ui.PictureRecorder();
+          final canvas = ui.Canvas(recorder);
           canvas.drawRect(
             const ui.Rect.fromLTWH(0, 0, 50, 50),
             ui.Paint()..color = const ui.Color(0xff00ff00),
           );
           final ui.Picture picture = recorder.endRecording();
-          final ui.SceneBuilder builder = ui.SceneBuilder();
+          final builder = ui.SceneBuilder();
           builder.addPicture(ui.Offset.zero, picture);
           final ui.Scene scene = builder.build();
           treesToRender[testView]!.add((scene as LayerScene).layerTree);

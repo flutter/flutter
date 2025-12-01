@@ -62,7 +62,7 @@ bool get isChrome110OrOlder {
   if (_cachedIsChrome110OrOlder != null) {
     return _cachedIsChrome110OrOlder!;
   }
-  final RegExp chromeRegexp = RegExp(r'Chrom(e|ium)\/([0-9]+)\.');
+  final chromeRegexp = RegExp(r'Chrom(e|ium)\/([0-9]+)\.');
   final RegExpMatch? match = chromeRegexp.firstMatch(ui_web.browser.userAgent);
   if (match != null) {
     final int chromeVersion = int.parse(match.group(2)!);
@@ -146,7 +146,7 @@ bool get isSafari174OrNewer {
   if (!isSafari) {
     return false;
   }
-  final RegExp safariRegexp = RegExp(r'Version\/([0-9]+)\.([0-9]+)');
+  final safariRegexp = RegExp(r'Version\/([0-9]+)\.([0-9]+)');
   final RegExpMatch? match = safariRegexp.firstMatch(ui_web.browser.userAgent);
   if (match != null) {
     final int majorVersion = int.parse(match.group(1)!);
@@ -163,7 +163,7 @@ bool get isFirefox119OrNewer {
   if (!isFirefox) {
     return false;
   }
-  final RegExp firefoxRegexp = RegExp(r'Firefox\/([0-9]+)');
+  final firefoxRegexp = RegExp(r'Firefox\/([0-9]+)');
   final RegExpMatch? match = firefoxRegexp.firstMatch(ui_web.browser.userAgent);
   if (match != null) {
     final int version = int.parse(match.group(1)!);

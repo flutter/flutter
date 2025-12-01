@@ -10,21 +10,21 @@ import 'package:meta/meta.dart';
 @immutable
 class CustomerTest {
   factory CustomerTest(File testFile) {
-    final String errorPrefix = 'Could not parse: ${testFile.path}\n';
-    final List<String> contacts = <String>[];
-    final List<String> fetch = <String>[];
-    final List<String> setup = <String>[];
-    final List<Directory> update = <Directory>[];
-    final List<String> test = <String>[];
+    final errorPrefix = 'Could not parse: ${testFile.path}\n';
+    final contacts = <String>[];
+    final fetch = <String>[];
+    final setup = <String>[];
+    final update = <Directory>[];
+    final test = <String>[];
     int? iterations;
-    bool hasTests = false;
+    var hasTests = false;
     for (final String line in testFile.readAsLinesSync().map((String line) => line.trim())) {
       if (line.isEmpty || line.startsWith('#')) {
         // Blank line or comment.
         continue;
       }
 
-      final bool isUnknownDirective =
+      final isUnknownDirective =
           _TestDirective.values.firstWhereOrNull((_TestDirective d) => line.startsWith(d.name)) ==
           null;
       if (isUnknownDirective) {
@@ -77,7 +77,7 @@ class CustomerTest {
         '${errorPrefix}No "${_TestDirective.contact.name}" directives specified. At least one contact e-mail address must be specified.',
       );
     }
-    for (final String email in contacts) {
+    for (final email in contacts) {
       if (!email.contains(_email) || email.endsWith('@example.com')) {
         throw FormatException(
           '${errorPrefix}The following e-mail address appears to be an invalid e-mail address: $email',
@@ -160,7 +160,7 @@ class CustomerTest {
     final List<_PlatformType> platforms = platformAgnostic
         ? <_PlatformType>[_PlatformType.all]
         : _PlatformType.values;
-    for (final _PlatformType platform in platforms) {
+    for (final platform in platforms) {
       final String directiveName = _directive(directive, platform: platform);
       if (line.startsWith(directiveName) && platform.conditionMet) {
         directiveValues.add(line.substring(directiveName.length));

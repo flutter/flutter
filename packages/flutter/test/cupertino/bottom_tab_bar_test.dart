@@ -108,12 +108,12 @@ Future<void> main() async {
   });
 
   testWidgets('Active and inactive colors dark mode', (WidgetTester tester) async {
-    const CupertinoDynamicColor dynamicActiveColor = CupertinoDynamicColor.withBrightness(
+    const dynamicActiveColor = CupertinoDynamicColor.withBrightness(
       color: Color(0xFF000000),
       darkColor: Color(0xFF000001),
     );
 
-    const CupertinoDynamicColor dynamicInactiveColor = CupertinoDynamicColor.withBrightness(
+    const dynamicInactiveColor = CupertinoDynamicColor.withBrightness(
       color: Color(0xFF000002),
       darkColor: Color(0xFF000003),
     );
@@ -155,7 +155,7 @@ Future<void> main() async {
     );
 
     // Border color is resolved correctly.
-    final BoxDecoration decoration1 = renderDecoratedBox.decoration as BoxDecoration;
+    final decoration1 = renderDecoratedBox.decoration as BoxDecoration;
     expect(decoration1.border!.top.color.value, 0x4D000000);
 
     // Switch to dark mode.
@@ -192,7 +192,7 @@ Future<void> main() async {
     expect(actualActive.text.style!.color!.value, 0xFF000001);
 
     // Border color is resolved correctly.
-    final BoxDecoration decoration2 = renderDecoratedBox.decoration as BoxDecoration;
+    final decoration2 = renderDecoratedBox.decoration as BoxDecoration;
     expect(decoration2.border!.top.color.value, 0x29000000);
   });
 
@@ -257,8 +257,8 @@ Future<void> main() async {
   });
 
   testWidgets('Use active icon', (WidgetTester tester) async {
-    final MemoryImage activeIcon = MemoryImage(Uint8List.fromList(kBlueSquarePng));
-    final MemoryImage inactiveIcon = MemoryImage(Uint8List.fromList(kTransparentImage));
+    final activeIcon = MemoryImage(Uint8List.fromList(kBlueSquarePng));
+    final inactiveIcon = MemoryImage(Uint8List.fromList(kTransparentImage));
 
     await pumpWidgetWithBoilerplate(
       tester,
@@ -295,7 +295,7 @@ Future<void> main() async {
   });
 
   testWidgets('Adjusts height to account for bottom padding', (WidgetTester tester) async {
-    final CupertinoTabBar tabBar = CupertinoTabBar(
+    final tabBar = CupertinoTabBar(
       items: <BottomNavigationBarItem>[
         BottomNavigationBarItem(
           icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
@@ -341,8 +341,8 @@ Future<void> main() async {
 
   testWidgets('Set custom height', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/51704
-    const double tabBarHeight = 56.0;
-    final CupertinoTabBar tabBar = CupertinoTabBar(
+    const tabBarHeight = 56.0;
+    final tabBar = CupertinoTabBar(
       height: tabBarHeight,
       items: <BottomNavigationBarItem>[
         BottomNavigationBarItem(
@@ -372,7 +372,7 @@ Future<void> main() async {
     expect(tester.getSize(find.byType(CupertinoTabBar)).height, tabBarHeight);
 
     // Verify height with bottom padding.
-    const double bottomPadding = 40.0;
+    const bottomPadding = 40.0;
     await pumpWidgetWithBoilerplate(
       tester,
       MediaQuery(
@@ -391,8 +391,8 @@ Future<void> main() async {
   testWidgets('Ensure bar height will not change when toggle keyboard', (
     WidgetTester tester,
   ) async {
-    const double tabBarHeight = 56.0;
-    final CupertinoTabBar tabBar = CupertinoTabBar(
+    const tabBarHeight = 56.0;
+    final tabBar = CupertinoTabBar(
       height: tabBarHeight,
       items: <BottomNavigationBarItem>[
         BottomNavigationBarItem(
@@ -406,7 +406,7 @@ Future<void> main() async {
       ],
     );
 
-    const double bottomPadding = 34.0;
+    const bottomPadding = 34.0;
 
     // Test the height is correct when keyboard not showing.
     // So viewInset should be 0.0.
@@ -527,7 +527,7 @@ Future<void> main() async {
   });
 
   testWidgets('tabs announce semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await pumpWidgetWithBoilerplate(
       tester,
@@ -567,8 +567,8 @@ Future<void> main() async {
   });
 
   testWidgets('Label of items should be nullable', (WidgetTester tester) async {
-    final MemoryImage iconProvider = MemoryImage(Uint8List.fromList(kTransparentImage));
-    final List<int> itemsTapped = <int>[];
+    final iconProvider = MemoryImage(Uint8List.fromList(kTransparentImage));
+    final itemsTapped = <int>[];
 
     await pumpWidgetWithBoilerplate(
       tester,
@@ -618,7 +618,7 @@ Future<void> main() async {
     );
 
     final DecoratedBox decoratedBox = tester.widget(find.byType(DecoratedBox));
-    final BoxDecoration boxDecoration = decoratedBox.decoration as BoxDecoration;
+    final boxDecoration = decoratedBox.decoration as BoxDecoration;
     expect(boxDecoration.border, isNotNull);
 
     await pumpWidgetWithBoilerplate(
@@ -643,8 +643,7 @@ Future<void> main() async {
     );
 
     final DecoratedBox decoratedBoxHiddenBorder = tester.widget(find.byType(DecoratedBox));
-    final BoxDecoration boxDecorationHiddenBorder =
-        decoratedBoxHiddenBorder.decoration as BoxDecoration;
+    final boxDecorationHiddenBorder = decoratedBoxHiddenBorder.decoration as BoxDecoration;
     expect(boxDecorationHiddenBorder.border, isNull);
   });
 

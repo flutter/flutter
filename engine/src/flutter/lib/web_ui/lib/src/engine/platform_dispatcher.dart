@@ -71,7 +71,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   /// Compute accessibility features based on the current value of high contrast flag
   static EngineAccessibilityFeatures computeAccessibilityFeatures() {
-    final EngineAccessibilityFeaturesBuilder builder = EngineAccessibilityFeaturesBuilder(0);
+    final builder = EngineAccessibilityFeaturesBuilder(0);
     if (HighContrastSupport.instance.isHighContrastEnabled) {
       builder.highContrast = true;
     }
@@ -448,7 +448,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     ui.PlatformMessageResponseCallback? callback,
   ) {
     // In widget tests we want to bypass processing of platform messages.
-    bool returnImmediately = false;
+    var returnImmediately = false;
     assert(() {
       if (ui_web.TestEnvironment.instance.ignorePlatformMessages) {
         returnImmediately = true;
@@ -464,7 +464,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       print('Sent platform message on channel: "$name"');
     }
 
-    bool allowDebugEcho = false;
+    var allowDebugEcho = false;
     assert(() {
       allowDebugEcho = true;
       return true;
@@ -486,7 +486,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
               decoded.arguments is int,
               'Argument to Skia.setResourceCacheMaxBytes must be an int, but was ${(decoded.arguments as Object?).runtimeType}',
             );
-            final int cacheSizeInBytes = decoded.arguments as int;
+            final cacheSizeInBytes = decoded.arguments as int;
             renderer.resourceCacheMaxBytes = cacheSizeInBytes;
 
             replyToPlatformMessage(callback, jsonCodec.encodeSuccessEnvelope(<bool>[true]));
@@ -517,12 +517,12 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
             }
             return;
           case 'HapticFeedback.vibrate':
-            final String? type = decoded.arguments as String?;
+            final type = decoded.arguments as String?;
             vibrate(_getHapticFeedbackDuration(type));
             replyToPlatformMessage(callback, jsonCodec.encodeSuccessEnvelope(true));
             return;
           case 'SystemChrome.setApplicationSwitcherDescription':
-            final Map<String, Object?> arguments = decoded.arguments as Map<String, Object?>;
+            final arguments = decoded.arguments as Map<String, Object?>;
             final String label = arguments['label'] as String? ?? '';
             // TODO(web): Stop setting the color from here, https://github.com/flutter/flutter/issues/123365
             final int primaryColor = arguments['primaryColor'] as int? ?? 0xFF000000;
@@ -531,13 +531,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
             replyToPlatformMessage(callback, jsonCodec.encodeSuccessEnvelope(true));
             return;
           case 'SystemChrome.setSystemUIOverlayStyle':
-            final Map<String, Object?> arguments = decoded.arguments as Map<String, Object?>;
-            final int? statusBarColor = arguments['statusBarColor'] as int?;
+            final arguments = decoded.arguments as Map<String, Object?>;
+            final statusBarColor = arguments['statusBarColor'] as int?;
             setThemeColor(statusBarColor == null ? null : ui.Color(statusBarColor));
             replyToPlatformMessage(callback, jsonCodec.encodeSuccessEnvelope(true));
             return;
           case 'SystemChrome.setPreferredOrientations':
-            final List<dynamic> arguments = decoded.arguments as List<dynamic>;
+            final arguments = decoded.arguments as List<dynamic>;
             ScreenOrientation.instance.setPreferredOrientation(arguments).then((bool success) {
               replyToPlatformMessage(callback, jsonCodec.encodeSuccessEnvelope(success));
             });
@@ -547,12 +547,12 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
             replyToPlatformMessage(callback, jsonCodec.encodeSuccessEnvelope(true));
             return;
           case 'Clipboard.setData':
-            final Map<String, Object?> arguments = decoded.arguments as Map<String, Object?>;
-            final String? text = arguments['text'] as String?;
+            final arguments = decoded.arguments as Map<String, Object?>;
+            final text = arguments['text'] as String?;
             ClipboardMessageHandler().setDataMethodCall(callback, text);
             return;
           case 'Clipboard.getData':
-            final String? format = decoded.arguments as String?;
+            final format = decoded.arguments as String?;
             ClipboardMessageHandler().getDataMethodCall(callback, format);
             return;
           case 'Clipboard.hasStrings':
@@ -585,7 +585,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
       case 'flutter/mousecursor':
         final MethodCall decoded = standardCodec.decodeMethodCall(data);
-        final Map<dynamic, dynamic> arguments = decoded.arguments as Map<dynamic, dynamic>;
+        final arguments = decoded.arguments as Map<dynamic, dynamic>;
         switch (decoded.method) {
           case 'activateSystemCursor':
             // TODO(mdebbar): Once the framework starts sending us a viewId, we
@@ -605,13 +605,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       case PlatformViewMessageHandler.channelName:
         // `arguments` can be a Map<String, Object> for `create`,
         // but an `int` for `dispose`, hence why `dynamic` everywhere.
-        final MethodCall(:String method, :dynamic arguments) = standardCodec.decodeMethodCall(data);
+        final MethodCall(:String method, :Object? arguments) = standardCodec.decodeMethodCall(data);
         PlatformViewMessageHandler.instance.handlePlatformViewCall(method, arguments, callback!);
         return;
 
       case 'flutter/accessibility':
         // In widget tests we want to bypass processing of platform messages.
-        const StandardMessageCodec codec = StandardMessageCodec();
+        const codec = StandardMessageCodec();
         final EngineSemantics semantics = EngineSemantics.instance;
         if (semantics.semanticsEnabled) {
           semantics.accessibilityAnnouncements.handleMessage(codec, data);
@@ -661,8 +661,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     ui.PlatformMessageResponseCallback? callback,
   ) async {
     try {
-      final HttpFetchResponse response =
-          await ui_web.assetManager.loadAsset(url) as HttpFetchResponse;
+      final response = await ui_web.assetManager.loadAsset(url) as HttpFetchResponse;
       final ByteBuffer assetData = await response.asByteBuffer();
       replyToPlatformMessage(callback, assetData.asByteData());
     } catch (error) {
@@ -672,11 +671,11 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   }
 
   int _getHapticFeedbackDuration(String? type) {
-    const int vibrateLongPress = 50;
-    const int vibrateLightImpact = 10;
-    const int vibrateMediumImpact = 20;
-    const int vibrateHeavyImpact = 30;
-    const int vibrateSelectionClick = 10;
+    const vibrateLongPress = 50;
+    const vibrateLightImpact = 10;
+    const vibrateMediumImpact = 20;
+    const vibrateHeavyImpact = 30;
+    const vibrateSelectionClick = 10;
 
     return switch (type) {
       'HapticFeedbackType.lightImpact' => vibrateLightImpact,
@@ -744,7 +743,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   ///  * [RendererBinding], the Flutter framework class which manages layout and
   ///    painting.
   Future<void> render(ui.Scene scene, [ui.FlutterView? view]) async {
-    final EngineFlutterView? target = (view ?? implicitView) as EngineFlutterView?;
+    final target = (view ?? implicitView) as EngineFlutterView?;
     assert(target != null, 'Calling render without a FlutterView');
     if (target == null) {
       // If there is no view to render into, then this is a no-op.
@@ -952,9 +951,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       return const <ui.Locale>[_defaultLocale];
     }
 
-    final List<ui.Locale> locales = <ui.Locale>[];
+    final locales = <ui.Locale>[];
     for (final String language in languages) {
-      final DomLocale domLocale = DomLocale(language);
+      final domLocale = DomLocale(language);
       locales.add(
         ui.Locale.fromSubtags(
           languageCode: domLocale.language,
@@ -1015,14 +1014,14 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// Set the callback function for updating [textScaleFactor] based on
   /// font-size changes in the browser's <html> element.
   void _addFontSizeObserver() {
-    const String styleAttribute = 'style';
+    const styleAttribute = 'style';
 
     _fontSizeObserver = createDomMutationObserver((
       JSArray<JSAny?> mutations,
       DomMutationObserver _,
     ) {
       for (final JSAny? mutation in mutations.toDart) {
-        final DomMutationRecord record = mutation! as DomMutationRecord;
+        final record = mutation! as DomMutationRecord;
         if (record.type == 'attributes' && record.attributeName == styleAttribute) {
           final double newTextScaleFactor = findBrowserTextScaleFactor();
           _updateTextScaleFactor(newTextScaleFactor);
@@ -1099,7 +1098,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _typographyMeasurementElement!.text = 'flutter typography measurement';
     // The element should be hidden from screen readers.
     _typographyMeasurementElement!.setAttribute('aria-hidden', 'true');
-    const double spacingDefault = 9999.0;
+    const spacingDefault = 9999.0;
     _typographyMeasurementElement!.style
       // The element should be positioned off-screen above
       // the window and not visible.
@@ -1151,10 +1150,10 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         'margin-bottom',
       )?.toDouble();
 
-      bool computedLineHeightScaleFactorChanged = false;
-      bool computedLetterSpacingChanged = false;
-      bool computedWordSpacingChanged = false;
-      bool computedParagraphSpacingChanged = false;
+      var computedLineHeightScaleFactorChanged = false;
+      var computedLetterSpacingChanged = false;
+      var computedWordSpacingChanged = false;
+      var computedParagraphSpacingChanged = false;
 
       computedLineHeightScaleFactorChanged = _updateLineHeightScaleFactorOverride(
         computedLineHeightScaleFactor == defaultLineHeightFactor
@@ -1257,8 +1256,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// callback if [_highContrast] changed.
   void _updateHighContrast(bool value) {
     if (configuration.accessibilityFeatures.highContrast != value) {
-      final EngineAccessibilityFeatures original =
-          configuration.accessibilityFeatures as EngineAccessibilityFeatures;
+      final original = configuration.accessibilityFeatures as EngineAccessibilityFeatures;
       configuration = configuration.copyWith(
         accessibilityFeatures: original.copyWith(highContrast: value),
       );
@@ -1283,7 +1281,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     );
 
     _brightnessMediaQueryListener = (DomEvent event) {
-      final DomMediaQueryListEvent mqEvent = event as DomMediaQueryListEvent;
+      final mqEvent = event as DomMediaQueryListEvent;
       _updatePlatformBrightness(mqEvent.matches! ? ui.Brightness.dark : ui.Brightness.light);
     }.toJS;
     _brightnessMediaQuery.addListener(_brightnessMediaQueryListener);
@@ -1529,11 +1527,11 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   /// Finds the navigation target by traversing up the DOM tree
   NavigationTarget? _findNavigationTarget(DomEvent event) {
-    DomNode? currentNode = event.target as DomNode?;
+    var currentNode = event.target as DomNode?;
 
     while (currentNode != null) {
       if (currentNode.isA<DomElement>()) {
-        final DomElement element = currentNode as DomElement;
+        final element = currentNode as DomElement;
         final String? semanticsId = element.getAttribute('id');
 
         if (semanticsId != null && semanticsId.startsWith(kFlutterSemanticNodePrefix)) {
@@ -1604,7 +1602,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     final Iterable<DomElement> candidates = element.querySelectorAll(
       '[id^="$kFlutterSemanticNodePrefix"]',
     );
-    for (final DomElement candidate in candidates) {
+    for (final candidate in candidates) {
       if (_supportsSemanticsFocusAction(candidate)) {
         return candidate;
       }
@@ -1619,7 +1617,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       return false;
     }
 
-    final DomMouseEvent mouseEvent = event as DomMouseEvent;
+    final mouseEvent = event as DomMouseEvent;
     final double clientX = mouseEvent.clientX;
     final double clientY = mouseEvent.clientY;
 
@@ -1674,7 +1672,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       return false;
     }
 
-    final DomElement? element = event.target as DomElement?;
+    final element = event.target as DomElement?;
     if (element == null) {
       return false;
     }

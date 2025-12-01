@@ -153,7 +153,7 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
     }
 
     // In touch screen laptops, the touch is received as a mouse click
-    const Set<String> kInterestingEventTypes = <String>{
+    const kInterestingEventTypes = <String>{
       'click',
       'keyup',
       'keydown',
@@ -169,7 +169,7 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
     }
 
     // Check for the event target.
-    final bool enableConditionPassed = event.target == _semanticsPlaceholder;
+    final enableConditionPassed = event.target == _semanticsPlaceholder;
 
     if (!enableConditionPassed) {
       // This was not a semantics activating event; forward as normal.
@@ -305,7 +305,7 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
     // ios-safari browsers which starts sending `pointer` events instead of
     // `touch` events. (Tested with 12.1 which uses touch events vs 13.5
     // which uses pointer events.)
-    const Set<String> kInterestingEventTypes = <String>{
+    const kInterestingEventTypes = <String>{
       'click',
       'touchstart',
       'touchend',
@@ -340,20 +340,20 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
     // than normal, but the app will continue functioning as normal. Our
     // semantics tree is designed to not interfere with Flutter's gesture
     // detection.
-    bool enableConditionPassed = false;
+    var enableConditionPassed = false;
     late final DomPoint activationPoint;
 
     switch (event.type) {
       case 'click':
-        final DomMouseEvent click = event as DomMouseEvent;
+        final click = event as DomMouseEvent;
         activationPoint = click.offset;
       case 'touchstart':
       case 'touchend':
-        final DomTouchEvent touchEvent = event as DomTouchEvent;
+        final touchEvent = event as DomTouchEvent;
         activationPoint = touchEvent.changedTouches.first.client;
       case 'pointerdown':
       case 'pointerup':
-        final DomPointerEvent touch = event as DomPointerEvent;
+        final touch = event as DomPointerEvent;
         activationPoint = touch.client;
       default:
         // The event is not relevant, forward to framework as normal.

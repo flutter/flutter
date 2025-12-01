@@ -12,7 +12,10 @@ void main() {
     await tester.pumpWidget(const MaterialApp(home: example.ExampleWidget()));
 
     expect(find.byType(Text), findsOneWidget);
-    expect((tester.widget(find.byType(Text).first) as Text).style!.fontFamily, equals('Piazzolla'));
+    expect(
+      (tester.widget(find.byType(Text).first) as Text).style!.fontFamily,
+      equals('Piazzolla'),
+    );
     expect(
       (tester.widget(find.byType(Text).first) as Text).style!.fontFeatures,
       equals(const <FontFeature>[FontFeature.oldstyleFigures()]),

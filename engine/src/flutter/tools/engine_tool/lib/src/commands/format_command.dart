@@ -58,10 +58,10 @@ final class FormatCommand extends CommandBase {
 
   @override
   Future<int> run() async {
-    final bool all = argResults![allFlag]! as bool;
-    final bool dryRun = argResults![dryRunFlag]! as bool;
-    final bool quiet = argResults![quietFlag]! as bool;
-    final bool verbose = globalResults![verboseFlag] as bool;
+    final all = argResults![allFlag]! as bool;
+    final dryRun = argResults![dryRunFlag]! as bool;
+    final quiet = argResults![quietFlag]! as bool;
+    final verbose = globalResults![verboseFlag] as bool;
     final String formatPath = p.join(
       environment.engine.flutterDir.path,
       'ci',
@@ -76,10 +76,10 @@ final class FormatCommand extends CommandBase {
       if (!dryRun) '--fix',
       if (verbose) '--verbose',
     ], workingDirectory: environment.engine.flutterDir.path);
-    final Completer<void> stdoutComplete = Completer<void>();
-    final Completer<void> stderrComplete = Completer<void>();
+    final stdoutComplete = Completer<void>();
+    final stderrComplete = Completer<void>();
 
-    final _FormatStreamer streamer = _FormatStreamer(environment.logger, dryRun, quiet);
+    final streamer = _FormatStreamer(environment.logger, dryRun, quiet);
     process.stdout
         .transform<String>(const Utf8Decoder())
         .transform(const LineSplitter())

@@ -40,6 +40,7 @@ class _SliderExampleState extends State<SliderExample> {
           spacing: 16,
           children: <Widget>[
             Slider(
+              // ignore: deprecated_member_use
               year2023: year2023,
               value: _currentSliderValue,
               max: 100,
@@ -50,6 +51,7 @@ class _SliderExampleState extends State<SliderExample> {
               },
             ),
             Slider(
+              // ignore: deprecated_member_use
               year2023: year2023,
               value: _currentDiscreteSliderValue,
               max: 100,

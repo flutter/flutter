@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 
 /// Verifies Dart semantics governed by flags set by Flutter tooling.
 void main() {
-  String greeting = 'hello';
+  var greeting = 'hello';
   Future<void> changeGreeting() async {
     greeting += ' 1';
     await Future<void>.value();

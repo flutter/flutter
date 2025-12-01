@@ -103,30 +103,54 @@ class BidsStatus extends StatelessWidget {
             case ConnectionState.none:
               children = const <Widget>[
                 Icon(Icons.info, color: Colors.blue, size: 60),
-                Padding(padding: EdgeInsets.only(top: 16), child: Text('Select a lot')),
+                Padding(
+                  padding: EdgeInsets.only(top: 16),
+                  child: Text('Select a lot'),
+                ),
               ];
             case ConnectionState.waiting:
               children = const <Widget>[
-                SizedBox(width: 60, height: 60, child: CircularProgressIndicator()),
-                Padding(padding: EdgeInsets.only(top: 16), child: Text('Awaiting bids...')),
+                SizedBox(
+                  width: 60,
+                  height: 60,
+                  child: CircularProgressIndicator(),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 16),
+                  child: Text('Awaiting bids...'),
+                ),
               ];
             case ConnectionState.active:
               children = <Widget>[
-                const Icon(Icons.check_circle_outline, color: Colors.green, size: 60),
-                Padding(padding: const EdgeInsets.only(top: 16), child: Text('\$${snapshot.data}')),
+                const Icon(
+                  Icons.check_circle_outline,
+                  color: Colors.green,
+                  size: 60,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: Text('\$${snapshot.data}'),
+                ),
               ];
             case ConnectionState.done:
               children = <Widget>[
                 const Icon(Icons.info, color: Colors.blue, size: 60),
                 Padding(
                   padding: const EdgeInsets.only(top: 16),
-                  child: Text(snapshot.hasData ? '\$${snapshot.data} (closed)' : '(closed)'),
+                  child: Text(
+                    snapshot.hasData
+                        ? '\$${snapshot.data} (closed)'
+                        : '(closed)',
+                  ),
                 ),
               ];
           }
         }
 
-        return Column(mainAxisAlignment: MainAxisAlignment.center, children: children);
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: children,
+        );
       },
     );
   }

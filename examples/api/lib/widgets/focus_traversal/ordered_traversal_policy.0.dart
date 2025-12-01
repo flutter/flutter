@@ -23,7 +23,12 @@ class OrderedTraversalPolicyExampleApp extends StatelessWidget {
 }
 
 class DemoButton extends StatelessWidget {
-  const DemoButton({super.key, required this.name, this.autofocus = false, required this.order});
+  const DemoButton({
+    super.key,
+    required this.name,
+    this.autofocus = false,
+    required this.order,
+  });
 
   final String name;
   final bool autofocus;

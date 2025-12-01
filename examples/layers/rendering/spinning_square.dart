@@ -34,7 +34,7 @@ void main() {
   // transform before painting its child. Each frame of the animation, we'll
   // update the transform of this render object to cause the green square to
   // spin.
-  final RenderTransform spin = RenderTransform(
+  final spin = RenderTransform(
     transform: Matrix4.identity(),
     alignment: Alignment.center,
     child: square,
@@ -46,14 +46,14 @@ void main() {
 
   // To make the square spin, we use an animation that repeats every 1800
   // milliseconds.
-  final AnimationController animation = AnimationController(
+  final animation = AnimationController(
     duration: const Duration(milliseconds: 1800),
     vsync: const NonStopVSync(),
   )..repeat();
   // The animation will produce a value between 0.0 and 1.0 each frame, but we
   // want to rotate the square using a value between 0.0 and math.pi. To change
   // the range of the animation, we use a Tween.
-  final Tween<double> tween = Tween<double>(begin: 0.0, end: math.pi);
+  final tween = Tween<double>(begin: 0.0, end: math.pi);
   // We add a listener to the animation, which will be called every time the
   // animation ticks.
   animation.addListener(() {

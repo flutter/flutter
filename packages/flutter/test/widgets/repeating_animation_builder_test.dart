@@ -8,8 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('RepeatingAnimationBuilder', () {
     testWidgets('Repeats animation continuously', (WidgetTester tester) async {
-      final List<double> values = <double>[];
-      const Duration duration = Duration(milliseconds: 100);
+      final values = <double>[];
+      const duration = Duration(milliseconds: 100);
 
       await tester.pumpWidget(
         RepeatingAnimationBuilder<double>(
@@ -35,7 +35,7 @@ void main() {
     });
 
     testWidgets('Reverses animation when repeatMode is reverse', (WidgetTester tester) async {
-      final List<double> values = <double>[];
+      final values = <double>[];
 
       await tester.pumpWidget(
         RepeatingAnimationBuilder<double>(
@@ -49,15 +49,15 @@ void main() {
         ),
       );
 
-      for (int i = 0; i < 20; i++) {
+      for (var i = 0; i < 20; i++) {
         await tester.pump(const Duration(milliseconds: 20));
       }
 
       expect(values.first, 0.0);
       expect(values.any((double v) => v == 1.0), isTrue, reason: 'Should reach max');
 
-      bool foundReverse = false;
-      for (int i = 1; i < values.length; i++) {
+      var foundReverse = false;
+      for (var i = 1; i < values.length; i++) {
         if (values[i] < values[i - 1] && values[i - 1] > 0.5 && values[i] < 0.9) {
           foundReverse = true;
           break;
@@ -67,7 +67,7 @@ void main() {
     });
 
     testWidgets('Handles pause and unpause correctly', (WidgetTester tester) async {
-      final List<int> values = <int>[];
+      final values = <int>[];
       Widget buildWidget({required bool paused}) {
         return RepeatingAnimationBuilder<int>(
           duration: const Duration(seconds: 1),
@@ -95,7 +95,7 @@ void main() {
     });
 
     testWidgets('Animates even when begin equals end', (WidgetTester tester) async {
-      final List<int> values = <int>[];
+      final values = <int>[];
       await tester.pumpWidget(
         RepeatingAnimationBuilder<int>(
           duration: const Duration(seconds: 1),
@@ -116,7 +116,7 @@ void main() {
     testWidgets('Animates when endpoints match but intermediate values change', (
       WidgetTester tester,
     ) async {
-      final List<double> values = <double>[];
+      final values = <double>[];
 
       await tester.pumpWidget(
         RepeatingAnimationBuilder<double>(
@@ -166,7 +166,7 @@ void main() {
     });
 
     testWidgets('Supports animatables without explicit begin/end', (WidgetTester tester) async {
-      final List<double> values = <double>[];
+      final values = <double>[];
 
       await tester.pumpWidget(
         RepeatingAnimationBuilder<double>(

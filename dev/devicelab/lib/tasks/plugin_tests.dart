@@ -17,7 +17,7 @@ import '../framework/utils.dart';
 /// Combines several TaskFunctions with trivial success value into one.
 TaskFunction combine(List<TaskFunction> tasks) {
   return () async {
-    for (final TaskFunction task in tasks) {
+    for (final task in tasks) {
       final TaskResult result = await task();
       if (result.failed) {
         return result;
@@ -55,7 +55,7 @@ class PluginTest {
     // FFI plugins do not have support for `flutter test`.
     // `flutter test` does not do a native build.
     // Supporting `flutter test` would require invoking a native build.
-    final bool runFlutterTest = template != 'plugin_ffi';
+    final runFlutterTest = template != 'plugin_ffi';
     try {
       section('Create plugin');
       final _FlutterProject plugin = await _FlutterProject.create(
@@ -78,7 +78,7 @@ class PluginTest {
         if (!dartOnlyPlugin) {
           await plugin.example.runNativeTests(buildTarget);
           if (buildTarget == 'ios') {
-            bool runResult = false;
+            var runResult = false;
             await testWithNewIOSSimulator('TestPluginExample', (String deviceId) async {
               runResult = await plugin.example.runApp(options: <String>['-d', deviceId]);
             });
@@ -141,7 +141,7 @@ class PluginTest {
   ) async {
     // The tool requires that a directory that looks like an engine build
     // actually exists when passing --local-engine, so create a fake skeleton.
-    final Directory buildDir = Directory(path.join(fakeEngineSourcePath, 'out', 'foo'));
+    final buildDir = Directory(path.join(fakeEngineSourcePath, 'out', 'foo'));
     buildDir.createSync(recursive: true);
     // Currently this test is only implemented for macOS; it can be extended to
     // others as needed.
@@ -193,7 +193,7 @@ class _FlutterProject {
   Future<void> addPlugin(String plugin, {String? pluginPath}) async {
     final File pubspec = pubspecFile;
     String content = await pubspec.readAsString();
-    final String dependency = pluginPath != null ? '$plugin:\n    path: $pluginPath' : '$plugin:';
+    final dependency = pluginPath != null ? '$plugin:\n    path: $pluginPath' : '$plugin:';
     content = content.replaceFirst('\ndependencies:\n', '\ndependencies:\n  $dependency\n');
     await pubspec.writeAsString(content, flush: true);
   }
@@ -201,7 +201,7 @@ class _FlutterProject {
   /// Converts a plugin created from the standard template to a Dart-only
   /// plugin.
   Future<void> convertDefaultPluginToDartPlugin() async {
-    final String dartPluginClass = 'DartClassFor$name';
+    final dartPluginClass = 'DartClassFor$name';
     // Convert the metadata.
     final File pubspec = pubspecFile;
     String content = await pubspec.readAsString();
@@ -212,7 +212,7 @@ class _FlutterProject {
     await pubspec.writeAsString(content, flush: true);
 
     // Add the Dart registration hook that the build will generate a call to.
-    final File dartCode = File(path.join(rootPath, 'lib', '$name.dart'));
+    final dartCode = File(path.join(rootPath, 'lib', '$name.dart'));
     content = await dartCode.readAsString();
     content =
         '''
@@ -225,9 +225,9 @@ class $dartPluginClass {
     await dartCode.writeAsString(content, flush: true);
 
     // Remove any native plugin code.
-    const List<String> platforms = <String>['android', 'ios', 'linux', 'macos', 'windows'];
-    for (final String platform in platforms) {
-      final Directory platformDir = Directory(path.join(rootPath, platform));
+    const platforms = <String>['android', 'ios', 'linux', 'macos', 'windows'];
+    for (final platform in platforms) {
+      final platformDir = Directory(path.join(rootPath, platform));
       if (platformDir.existsSync()) {
         await platformDir.delete(recursive: true);
       }
@@ -240,8 +240,8 @@ class $dartPluginClass {
     // Convert the metadata.
     final File pubspec = pubspecFile;
     String pubspecContent = await pubspec.readAsString();
-    const String originalIOSKey = '\n      ios:\n';
-    const String originalMacOSKey = '\n      macos:\n';
+    const originalIOSKey = '\n      ios:\n';
+    const originalMacOSKey = '\n      macos:\n';
     if (!pubspecContent.contains(originalIOSKey) || !pubspecContent.contains(originalMacOSKey)) {
       print(pubspecContent);
       throw TaskResult.failure('Missing expected darwin platform plugin keys');
@@ -257,14 +257,14 @@ class $dartPluginClass {
     await pubspec.writeAsString(pubspecContent, flush: true);
 
     // Copy ios to darwin, and delete macos.
-    final Directory iosDir = Directory(path.join(rootPath, 'ios'));
-    final Directory darwinDir = Directory(path.join(rootPath, 'darwin'));
+    final iosDir = Directory(path.join(rootPath, 'ios'));
+    final darwinDir = Directory(path.join(rootPath, 'darwin'));
     recursiveCopy(iosDir, darwinDir);
 
     await iosDir.delete(recursive: true);
     await Directory(path.join(rootPath, 'macos')).delete(recursive: true);
 
-    final File podspec = File(path.join(darwinDir.path, '$name.podspec'));
+    final podspec = File(path.join(darwinDir.path, '$name.podspec'));
     String podspecContent = await podspec.readAsString();
     if (!podspecContent.contains('s.platform =')) {
       print(podspecContent);
@@ -283,13 +283,13 @@ class $dartPluginClass {
     // Make PlugintestPlugin.swift compile on iOS and macOS with target conditionals.
     // If SwiftPM is disabled, the file will be in `darwin/Classes/`.
     // Otherwise, the file will be in `darwin/<plugin>/Sources/<plugin>/`.
-    final String pluginClass = '${name[0].toUpperCase()}${name.substring(1)}Plugin';
+    final pluginClass = '${name[0].toUpperCase()}${name.substring(1)}Plugin';
     print('pluginClass: $pluginClass');
-    File pluginRegister = File(path.join(darwinDir.path, 'Classes', '$pluginClass.swift'));
+    var pluginRegister = File(path.join(darwinDir.path, 'Classes', '$pluginClass.swift'));
     if (!pluginRegister.existsSync()) {
       pluginRegister = File(path.join(darwinDir.path, name, 'Sources', name, '$pluginClass.swift'));
     }
-    final String pluginRegisterContent =
+    final pluginRegisterContent =
         '''
 #if os(macOS)
 import FlutterMacOS
@@ -390,7 +390,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
           throw TaskResult.failure('Platform unit tests failed');
         }
       case 'windows':
-        final String arch = Abi.current() == Abi.windowsX64 ? 'x64' : 'arm64';
+        final arch = Abi.current() == Abi.windowsX64 ? 'x64' : 'arm64';
         if (await exec(
               path.join(
                 rootPath,
@@ -427,14 +427,14 @@ public class $pluginClass: NSObject, FlutterPlugin {
           '--template=$template',
           '--org',
           'io.flutter.devicelab',
-          ...options,
+          if (template == 'app' && isDarwin) '--platforms=$target' else ...options,
           name,
         ],
         environment: environment,
       );
     });
 
-    final _FlutterProject project = _FlutterProject(directory, name);
+    final project = _FlutterProject(directory, name);
     if (template == 'plugin' && isDarwin) {
       project._reduceDarwinPluginMinimumVersion(name, target);
     }
@@ -446,7 +446,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
   Future<void> addCocoapodsTransitiveFlutterDependency() async {
     final String iosDirectoryPath = path.join(rootPath, 'ios');
 
-    final File nativePod = File(path.join(iosDirectoryPath, 'NativePod', 'NativePod.podspec'));
+    final nativePod = File(path.join(iosDirectoryPath, 'NativePod', 'NativePod.podspec'));
     nativePod.createSync(recursive: true);
     nativePod.writeAsStringSync('''
 Pod::Spec.new do |s|
@@ -462,7 +462,7 @@ Pod::Spec.new do |s|
 end
 ''');
 
-    final File nativePodClass = File(
+    final nativePodClass = File(
       path.join(iosDirectoryPath, 'NativePod', 'Classes', 'NativePodTest.m'),
     );
     nativePodClass.createSync(recursive: true);
@@ -478,7 +478,7 @@ end
 @end
 ''');
 
-    final File podfileFile = File(path.join(iosDirectoryPath, 'Podfile'));
+    final podfileFile = File(path.join(iosDirectoryPath, 'Podfile'));
     final List<String> podfileContents = podfileFile.readAsLinesSync();
     final int index = podfileContents.indexWhere(
       (String line) => line.contains('flutter_install_all_ios_pods'),
@@ -490,14 +490,25 @@ end
   // Make the platform version artificially low to test that the "deployment
   // version too low" warning is never emitted.
   void _reduceDarwinPluginMinimumVersion(String plugin, String target) {
-    final File podspec = File(path.join(rootPath, target, '$plugin.podspec'));
+    var podspec = File(path.join(rootPath, target, '$plugin.podspec'));
+    if (!podspec.existsSync()) {
+      // Fallback to darwin directory for shared darwin plugins
+      podspec = File(path.join(rootPath, 'darwin', '$plugin.podspec'));
+    }
     if (!podspec.existsSync()) {
       throw TaskResult.failure('podspec file missing at ${podspec.path}');
     }
-    final String versionString = target == 'ios'
-        ? "s.platform = :ios, '13.0'"
-        : "s.platform = :osx, '10.11'";
     String podspecContent = podspec.readAsStringSync();
+    final bool isMultiPlatform = podspecContent.contains('s.osx.deployment_target');
+    final String versionString;
+    if (isMultiPlatform) {
+      versionString = target == 'ios'
+          ? "s.ios.deployment_target = '13.0'"
+          : "s.osx.deployment_target = '10.15'";
+    } else {
+      versionString = target == 'ios' ? "s.platform = :ios, '13.0'" : "s.platform = :osx, '10.11'";
+    }
+
     if (!podspecContent.contains(versionString)) {
       throw TaskResult.failure(
         'Update this test to match plugin minimum $target deployment version',
@@ -505,20 +516,18 @@ end
     }
     // Add transitive dependency on AppAuth 1.6 targeting iOS 8 and macOS 10.9, which no longer builds in Xcode
     // to test the version is forced higher and builds.
-    const String iosContent = '''
-s.platform = :ios, '10.0'
-s.dependency 'AppAuth', '1.6.0'
-''';
+    final String replacementContent;
+    if (isMultiPlatform) {
+      replacementContent = target == 'ios'
+          ? "s.ios.deployment_target = '10.0'\n  s.dependency 'AppAuth', '1.6.0'"
+          : "s.osx.deployment_target = '10.8'\n  s.dependency 'AppAuth', '1.6.0'";
+    } else {
+      replacementContent = target == 'ios'
+          ? "s.platform = :ios, '10.0'\ns.dependency 'AppAuth', '1.6.0'"
+          : "s.platform = :osx, '10.8'\ns.dependency 'AppAuth', '1.6.0'";
+    }
 
-    const String macosContent = '''
-s.platform = :osx, '10.8'
-s.dependency 'AppAuth', '1.6.0'
-''';
-
-    podspecContent = podspecContent.replaceFirst(
-      versionString,
-      target == 'ios' ? iosContent : macosContent,
-    );
+    podspecContent = podspecContent.replaceFirst(versionString, replacementContent);
     podspec.writeAsStringSync(podspecContent, flush: true);
   }
 
@@ -567,7 +576,7 @@ s.dependency 'AppAuth', '1.6.0'
         }
 
         if (validateNativeBuildProject) {
-          final File generatedSwiftManifest = File(
+          final generatedSwiftManifest = File(
             path.join(
               rootPath,
               target,
@@ -581,7 +590,7 @@ s.dependency 'AppAuth', '1.6.0'
           final bool swiftPackageManagerEnabled = generatedSwiftManifest.existsSync();
 
           if (!swiftPackageManagerEnabled) {
-            final File podsProject = File(
+            final podsProject = File(
               path.join(rootPath, target, 'Pods', 'Pods.xcodeproj', 'project.pbxproj'),
             );
             if (!podsProject.existsSync()) {
@@ -626,7 +635,7 @@ s.dependency 'AppAuth', '1.6.0'
             }
 
             if (localEngine != null) {
-              final RegExp localEngineSearchPath = RegExp(
+              final localEngineSearchPath = RegExp(
                 'FRAMEWORK_SEARCH_PATHS\\s*=[^;]*${localEngine.path}',
               );
               if (!localEngineSearchPath.hasMatch(podsProjectContent)) {
@@ -658,10 +667,10 @@ s.dependency 'AppAuth', '1.6.0'
   Future<bool> runApp({required List<String> options}) async {
     return inDirectory(Directory(rootPath), () async {
       final Process process = await startFlutter('run', options: options);
-      final Completer<void> stdoutDone = Completer<void>();
-      final Completer<void> stderrDone = Completer<void>();
+      final stdoutDone = Completer<void>();
+      final stderrDone = Completer<void>();
 
-      bool engineError = false;
+      var engineError = false;
 
       void onStdout(String line) {
         print('stdout: $line');

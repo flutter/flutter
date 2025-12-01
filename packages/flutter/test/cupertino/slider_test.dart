@@ -34,7 +34,7 @@ void main() {
 
   testWidgets('Slider does not move when tapped (LTR)', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
-    double value = 0.0;
+    var value = 0.0;
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -72,7 +72,7 @@ void main() {
 
   testWidgets('Slider does not move when tapped (RTL)', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
-    double value = 0.0;
+    var value = 0.0;
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -112,8 +112,8 @@ void main() {
     WidgetTester tester,
   ) async {
     final Key sliderKey = UniqueKey();
-    double value = 0.0;
-    int numberOfTimesOnChangeStartIsCalled = 0;
+    var value = 0.0;
+    var numberOfTimesOnChangeStartIsCalled = 0;
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -157,8 +157,8 @@ void main() {
     WidgetTester tester,
   ) async {
     final Key sliderKey = UniqueKey();
-    double value = 0.0;
-    int numberOfTimesOnChangeEndIsCalled = 0;
+    var value = 0.0;
+    var numberOfTimesOnChangeEndIsCalled = 0;
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -200,7 +200,7 @@ void main() {
 
   testWidgets('Slider moves when dragged (LTR)', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
-    double value = 0.0;
+    var value = 0.0;
     late double startValue;
     late double endValue;
 
@@ -257,7 +257,7 @@ void main() {
   testWidgets(
     'Slider emits haptic feedback when hitting edge',
     (WidgetTester tester) async {
-      final List<MethodCall> hapticLog = <MethodCall>[];
+      final hapticLog = <MethodCall>[];
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
         MethodCall methodCall,
       ) async {
@@ -266,7 +266,7 @@ void main() {
       });
 
       final Key sliderKey = UniqueKey();
-      double value = 0.0;
+      var value = 0.0;
 
       await tester.pumpWidget(
         Directionality(
@@ -297,7 +297,7 @@ void main() {
       const double unit = CupertinoThumbPainter.radius;
       final Offset topLeft = tester.getTopLeft(find.byKey(sliderKey));
       Offset thumbCenter = topLeft + const Offset(unit, unit);
-      const Offset delta = Offset(50.0, 0.0);
+      const delta = Offset(50.0, 0.0);
       await tester.dragFrom(thumbCenter, delta);
       await tester.pump();
 
@@ -343,7 +343,7 @@ void main() {
   testWidgets(
     'Slider does not emit haptic feedback on non-iOS platforms',
     (WidgetTester tester) async {
-      final List<MethodCall> hapticLog = <MethodCall>[];
+      final hapticLog = <MethodCall>[];
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
         MethodCall methodCall,
       ) async {
@@ -352,7 +352,7 @@ void main() {
       });
 
       final Key sliderKey = UniqueKey();
-      double value = 0.0;
+      var value = 0.0;
 
       await tester.pumpWidget(
         Directionality(
@@ -392,7 +392,7 @@ void main() {
 
   testWidgets('Slider moves when dragged (RTL)', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
-    double value = 0.0;
+    var value = 0.0;
     late double startValue;
     late double endValue;
 
@@ -451,7 +451,7 @@ void main() {
   });
 
   testWidgets('Slider Semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       MediaQuery(
@@ -513,7 +513,7 @@ void main() {
 
   testWidgets('Slider Semantics can be updated', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
-    double value = 0.5;
+    var value = 0.5;
     await tester.pumpWidget(
       CupertinoApp(
         home: Directionality(
@@ -607,7 +607,7 @@ void main() {
   });
 
   testWidgets('Themes can be overridden by dynamic colors', (WidgetTester tester) async {
-    const CupertinoDynamicColor activeColor = CupertinoDynamicColor(
+    const activeColor = CupertinoDynamicColor(
       color: Color(0x00000001),
       darkColor: Color(0x00000002),
       elevatedColor: Color(0x00000003),
@@ -784,7 +784,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final Key sliderKey = UniqueKey();
-    double value = 0.0;
+    var value = 0.0;
 
     await tester.pumpWidget(
       CupertinoApp(

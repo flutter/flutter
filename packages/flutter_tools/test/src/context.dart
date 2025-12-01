@@ -209,8 +209,8 @@ void _printBufferedErrors(AppContext testContext) {
 }
 
 class FakeDeviceManager implements DeviceManager {
-  var attachedDevices = <Device>[];
-  var wirelessDevices = <Device>[];
+  List<Device> attachedDevices = <Device>[];
+  List<Device> wirelessDevices = <Device>[];
 
   String? _specifiedDeviceId;
 

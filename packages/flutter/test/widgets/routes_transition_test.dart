@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('navigating with transitions of different lengths', (WidgetTester tester) async {
-    final TransitionDurationObserver observer = TransitionDurationObserver();
+    final observer = TransitionDurationObserver();
 
     await tester.pumpWidget(
       MaterialApp(

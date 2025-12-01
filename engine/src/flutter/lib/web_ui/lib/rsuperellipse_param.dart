@@ -55,12 +55,12 @@ class _RSuperellipseOctant {
     final double yJ = math.pow(1 - math.pow(xJOverA, n), 1 / n) * a;
     final double maxTheta = math.asin(math.pow(xJOverA, n / 2));
 
-    final double tanPhiJ = math.pow(xJ / yJ, n - 1) as double;
+    final tanPhiJ = math.pow(xJ / yJ, n - 1) as double;
     final double d = (xJ - tanPhiJ * yJ) / (1 - tanPhiJ);
     final double R = (a - d - g) * math.sqrt(2);
 
-    final Offset pointM = Offset(a - g, a - g);
-    final Offset pointJ = Offset(xJ, yJ);
+    final pointM = Offset(a - g, a - g);
+    final pointJ = Offset(xJ, yJ);
     final Offset circleCenter = radius == 0 ? pointM : _findCircleCenter(pointJ, pointM, R);
     final double circleMaxAngle = radius == 0
         ? 0
@@ -149,9 +149,9 @@ class _RSuperellipseOctant {
   }
 
   List<Offset> _superellipseArcPoints() {
-    final Offset start = Offset(0, seA);
+    final start = Offset(0, seA);
     final Offset end = circleStart;
-    const Offset startTangent = Offset(1, 0);
+    const startTangent = Offset(1, 0);
     final Offset circleStartVector = circleStart - circleCenter;
     final Offset endTangent =
         Offset(-circleStartVector.dy, circleStartVector.dx) / circleStartVector.distance;
@@ -189,7 +189,7 @@ class _RSuperellipseOctant {
   }
 
   static (double, double) _superellipseBezierFactors(double n) {
-    const List<(double, double)> kPrecomputedVariables = [
+    const kPrecomputedVariables = <(double, double)>[
       /*n= 2.0*/ (0.01339448, 0.05994973),
       /*n= 3.0*/ (0.13664115, 0.13592082),
       /*n= 4.0*/ (0.24545546, 0.14099516),
@@ -206,8 +206,8 @@ class _RSuperellipseOctant {
       /*n=15.0*/ (0.70678034, 0.06529512),
     ];
     final int kNumRecords = kPrecomputedVariables.length;
-    const double kStep = 1.00;
-    const double kMinN = 2.00;
+    const kStep = 1.00;
+    const kMinN = 2.00;
     final double kMaxN = kMinN + (kNumRecords - 1) * kStep;
 
     if (n >= kMaxN) {
@@ -230,14 +230,14 @@ class _RSuperellipseOctant {
   static Offset _findCircleCenter(Offset a, Offset b, double r) {
     final Offset aToB = b - a;
     final Offset m = (a + b) / 2;
-    final Offset cToM = Offset(-aToB.dy, aToB.dx);
+    final cToM = Offset(-aToB.dy, aToB.dx);
     final double distanceAm = aToB.distance / 2;
     final double distanceCm = math.sqrt(r * r - distanceAm * distanceAm);
     return m - cToM / cToM.distance * distanceCm;
   }
 
   static (double, double) _computeNAndXj(double ratio) {
-    const List<List<double>> kPrecomputedVariables = [
+    const kPrecomputedVariables = <List<double>>[
       /*ratio=2.00*/ [2.00000000, 1.13276676],
       /*ratio=2.10*/ [2.18349805, 1.20311921],
       /*ratio=2.20*/ [2.33888662, 1.28698796],
@@ -251,14 +251,14 @@ class _RSuperellipseOctant {
       /*ratio=5.00*/ [6.43023796, 2.98020421],
     ];
 
-    const double kMinRatio = 2.00;
+    const kMinRatio = 2.00;
     const double kFirstStepInverse = 10; // = 1 / 0.10
-    const double kFirstMaxRatio = 2.50;
+    const kFirstMaxRatio = 2.50;
     const double kFirstNumRecords = 6;
     const double kSecondStepInverse = 2; // = 1 / 0.50
-    const double kSecondMaxRatio = 5.00;
-    const double kThirdNSlope = 1.559599389;
-    const double kThirdFactorXjSlope = 0.522807185;
+    const kSecondMaxRatio = 5.00;
+    const kThirdNSlope = 1.559599389;
+    const kThirdFactorXjSlope = 0.522807185;
     final int kNumRecords = kPrecomputedVariables.length;
 
     if (ratio > kSecondMaxRatio) {
@@ -298,11 +298,11 @@ class _RSuperellipseOctant {
 class _RSuperellipseQuadrant {
   factory _RSuperellipseQuadrant(Offset center, Offset corner, Radius inRadii, Size sign) {
     final Offset cornerVector = corner - center;
-    final Size radii = Size(inRadii.x.abs(), inRadii.y.abs());
+    final radii = Size(inRadii.x.abs(), inRadii.y.abs());
 
     final double normRadius = radii.shortestSide;
     final Size forwardScale = normRadius == 0 ? const Size(1, 1) : radii / normRadius;
-    final Size normHalfSize = Size(
+    final normHalfSize = Size(
       cornerVector.dx.abs() / forwardScale.width,
       cornerVector.dy.abs() / forwardScale.height,
     );
@@ -388,14 +388,14 @@ class _RSuperellipsePathBuilder {
   // must also have a uniform radius.
   _RSuperellipsePathBuilder.normalized(double width, double height, double radiusX, double radiusY)
     : path = Path() {
-    final _RSuperellipsePath p = _RSuperellipsePath(path);
-    final _RSuperellipseQuadrant bottomRight = _RSuperellipseQuadrant(
+    final p = _RSuperellipsePath(path);
+    final bottomRight = _RSuperellipseQuadrant(
       Offset.zero,
       Offset(width / 2, height / 2),
       Radius.elliptical(radiusX, radiusY),
       const Size(1, 1),
     );
-    final Offset start = Offset(0, height / 2);
+    final start = Offset(0, height / 2);
     path.moveTo(start.dx, start.dy);
     bottomRight.addToPath(p, reverse: false);
     bottomRight.addToPath(p, reverse: true, extraScale: const Size(1, -1));
@@ -407,14 +407,14 @@ class _RSuperellipsePathBuilder {
 
   // Build a path for an RSuperellipse with arbitrary position and radii.
   _RSuperellipsePathBuilder.exact(RSuperellipse r) : path = Path() {
-    final _RSuperellipsePath p = _RSuperellipsePath(path);
+    final p = _RSuperellipsePath(path);
 
     final double topSplit = _split(r.left, r.right, r.tlRadiusX, r.trRadiusX);
     final double rightSplit = _split(r.top, r.bottom, r.trRadiusY, r.brRadiusY);
     final double bottomSplit = _split(r.left, r.right, r.blRadiusX, r.brRadiusX);
     final double leftSplit = _split(r.top, r.bottom, r.tlRadiusY, r.blRadiusY);
 
-    final Offset start = Offset(topSplit, r.top);
+    final start = Offset(topSplit, r.top);
     path.moveTo(start.dx, start.dy);
     _RSuperellipseQuadrant(
       Offset(topSplit, rightSplit),

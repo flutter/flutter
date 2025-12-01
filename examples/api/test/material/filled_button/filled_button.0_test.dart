@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/filled_button/filled_button.0.dart' as example;
+import 'package:flutter_api_samples/material/filled_button/filled_button.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -13,11 +14,23 @@ void main() {
     expect(find.widgetWithText(AppBar, 'FilledButton Sample'), findsOneWidget);
     final Finder disabledButton = find.widgetWithText(FilledButton, 'Disabled');
     expect(disabledButton, findsNWidgets(2));
-    expect(tester.widget<FilledButton>(disabledButton.first).onPressed.runtimeType, Null);
-    expect(tester.widget<FilledButton>(disabledButton.last).onPressed.runtimeType, Null);
+    expect(
+      tester.widget<FilledButton>(disabledButton.first).onPressed.runtimeType,
+      Null,
+    );
+    expect(
+      tester.widget<FilledButton>(disabledButton.last).onPressed.runtimeType,
+      Null,
+    );
     final Finder enabledButton = find.widgetWithText(FilledButton, 'Enabled');
     expect(enabledButton, findsNWidgets(2));
-    expect(tester.widget<FilledButton>(enabledButton.first).onPressed.runtimeType, VoidCallback);
-    expect(tester.widget<FilledButton>(enabledButton.last).onPressed.runtimeType, VoidCallback);
+    expect(
+      tester.widget<FilledButton>(enabledButton.first).onPressed.runtimeType,
+      VoidCallback,
+    );
+    expect(
+      tester.widget<FilledButton>(enabledButton.last).onPressed.runtimeType,
+      VoidCallback,
+    );
   });
 }
