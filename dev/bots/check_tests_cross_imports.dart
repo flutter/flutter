@@ -207,9 +207,6 @@ class TestsCrossImportChecker {
     );
     if (unknownWidgetsTestsImportingMaterial.isNotEmpty) {
       // TODO(justinmc): Not sure why this is getting detected wrong.
-      print(
-        'justin there is an unknown widgets test importing material: $unknownWidgetsTestsImportingMaterial.',
-      );
       error = false;
       foundError(
         _getImportError(
@@ -224,9 +221,6 @@ class TestsCrossImportChecker {
       _knownCrossImports,
     );
     if (unknownWidgetsTestsImportingCupertino.isNotEmpty) {
-      print(
-        'justin there is an unknown widgets test importing cupertino: $unknownWidgetsTestsImportingCupertino.',
-      );
       error = false;
       foundError(
         _getImportError(
@@ -241,9 +235,6 @@ class TestsCrossImportChecker {
       _knownCrossImports,
     );
     if (unknownCupertinoTestsImportingMaterial.isNotEmpty) {
-      print(
-        'justin there is an unknown cupertino test importing material: $unknownCupertinoTestsImportingMaterial.',
-      );
       error = false;
       foundError(
         _getImportError(

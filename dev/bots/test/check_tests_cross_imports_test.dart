@@ -15,9 +15,6 @@ import 'common.dart';
 void main() {
   late TestsCrossImportChecker checker;
   late FileSystem fs;
-  late Directory examples;
-  late Directory packages;
-  late Directory dartUIPath;
   late Directory flutterRoot;
 
   // TODO(justinmc): Reuse from main file, or refactor?
@@ -25,18 +22,13 @@ void main() {
   late Directory _testWidgetsDirectory;
   late Directory _testMaterialDirectory;
   late Directory _testCupertinoDirectory;
-  late final Set<Directory> _testDirectories = <Directory>{};
-
-  String getRelativePath(File file, [Directory? from]) {
-    from ??= flutterRoot;
-    return path.relative(file.absolute.path, from: flutterRoot.absolute.path);
-  }
+  late final _testDirectories = <Directory>{};
 
   // Writes a Material import into the given file.
   void writeImport(File file, [String importString = "import 'package:flutter/material.dart';"]) {
     file
       ..createSync(recursive: true)
-      ..writeAsStringSync("import 'package:flutter/material.dart';");
+      ..writeAsStringSync(importString);
   }
 
   File getFile(String filepath, Directory directory) {
@@ -51,14 +43,14 @@ void main() {
     Set<String> extraWidgetsImportingMaterial = const <String>{},
     Set<String> extraWidgetsImportingCupertino = const <String>{},
   }) {
-    final Map<Directory, Set<String>> knownFiles = <Directory, Set<String>>{
+    final knownFiles = <Directory, Set<String>>{
       _testWidgetsDirectory: knownWidgetsCrossImports,
       _testCupertinoDirectory: knownCupertinoCrossImports,
     };
 
     for (final MapEntry<Directory, Set<String>>(key: Directory directory, value: Set<String> files)
         in knownFiles.entries) {
-      for (final String filepath in files) {
+      for (final filepath in files) {
         if (excludes.contains(filepath)) {
           continue;
         }
@@ -66,16 +58,16 @@ void main() {
       }
     }
 
-    for (final String filepath in extraWidgetsImportingMaterial) {
+    for (final filepath in extraWidgetsImportingMaterial) {
       writeImport(getFile(filepath, _testWidgetsDirectory));
     }
-    for (final String filepath in extraWidgetsImportingCupertino) {
+    for (final filepath in extraWidgetsImportingCupertino) {
       writeImport(
         getFile(filepath, _testWidgetsDirectory),
         "import 'package:flutter/cupertino.dart';",
       );
     }
-    for (final String filepath in extraCupertinos) {
+    for (final filepath in extraCupertinos) {
       writeImport(getFile(filepath, _testCupertinoDirectory));
     }
   }
@@ -90,17 +82,6 @@ void main() {
       path.join(path.rootPrefix(fs.currentDirectory.absolute.path), 'flutter/sdk'),
     )..createSync(recursive: true);
     fs.currentDirectory = flutterRoot;
-    examples = flutterRoot.childDirectory('examples').childDirectory('api')
-      ..createSync(recursive: true);
-    packages = flutterRoot.childDirectory('packages')..createSync(recursive: true);
-    dartUIPath =
-        flutterRoot
-            .childDirectory('bin')
-            .childDirectory('cache')
-            .childDirectory('pkg')
-            .childDirectory('sky_engine')
-            .childDirectory('lib')
-          ..createSync(recursive: true);
 
     _testsDirectory =
         flutterRoot.childDirectory('packages').childDirectory('flutter').childDirectory('test')
@@ -123,7 +104,6 @@ void main() {
     );
   });
 
-  /*
   test('only all knowns have cross imports', () async {
     buildTestFiles();
     bool? success;
@@ -182,7 +162,7 @@ void main() {
   });
 
   test('unknown Widgets cross import of Material', () async {
-    const String extra = 'packages/flutter/test/widgets/foo_test.dart';
+    const extra = 'packages/flutter/test/widgets/foo_test.dart';
     buildTestFiles(extraWidgetsImportingMaterial: <String>{extra});
     bool? success;
     final String result = await capture(() async {
@@ -202,10 +182,9 @@ void main() {
     expect(result, equals('$lines\n'));
     expect(success, isFalse);
   });
-  */
 
   test('unknown Widgets cross import of Cupertino', () async {
-    const String extra = 'packages/flutter/test/widgets/foo_test.dart';
+    const extra = 'packages/flutter/test/widgets/foo_test.dart';
     buildTestFiles(extraWidgetsImportingCupertino: <String>{extra});
     bool? success;
     final String result = await capture(() async {
@@ -226,9 +205,8 @@ void main() {
     expect(success, isFalse);
   });
 
-  /*
   test('unknown Cupertino cross importing Material', () async {
-    const String extra = 'packages/flutter/test/cupertino/foo_test.dart';
+    const extra = 'packages/flutter/test/cupertino/foo_test.dart';
     buildTestFiles(extraCupertinos: <String>{extra});
     bool? success;
     final String result = await capture(() async {
@@ -248,46 +226,12 @@ void main() {
     expect(result, equals('$lines\n'));
     expect(success, isFalse);
   });
-  */
-
-  /*
-  test('check_code_samples.dart - checkCodeSamples catches missing tests', () async {
-    buildTestFiles(missingTests: true);
-    bool? success;
-    final String result = await capture(() async {
-      success = checker.checkCodeSamples();
-    }, shouldHaveErrors: true);
-    final String lines =
-        <String>[
-              '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════',
-              '║ The following example test files are missing:',
-              '║   examples/api/test/layer/bar_example.0_test.dart',
-              '╚═══════════════════════════════════════════════════════════════════════════════',
-            ]
-            .map((String line) {
-              return line.replaceAll('/', Platform.isWindows ? r'\' : '/');
-            })
-            .join('\n');
-    expect(result, equals('$lines\n'));
-    expect(success, equals(false));
-  });
-
-  test('check_code_samples.dart - checkCodeSamples succeeds', () async {
-    buildTestFiles();
-    bool? success;
-    final String result = await capture(() async {
-      success = checker.checkCodeSamples();
-    });
-    expect(result, isEmpty);
-    expect(success, equals(true));
-  });
-  */
 }
 
 typedef AsyncVoidCallback = Future<void> Function();
 
 Future<String> capture(AsyncVoidCallback callback, {bool shouldHaveErrors = false}) async {
-  final StringBuffer buffer = StringBuffer();
+  final buffer = StringBuffer();
   final PrintCallback oldPrint = print;
   try {
     print = (Object? line) {
