@@ -9,6 +9,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
@@ -2215,6 +2216,100 @@ public class AccessibilityBridgeTest {
     assertEquals(nodeInfo.isClickable(), true);
     List<AccessibilityNodeInfo.AccessibilityAction> actions = nodeInfo.getActionList();
     assertTrue(actions.contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK));
+  }
+
+  // Setup method for testing CollectionInfo
+  // The logic has branching based on SDK version. The version tests are below
+  public void itAddsCollectionInfo() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.addFlag(AccessibilityBridge.Flag.HAS_IMPLICIT_SCROLLING);
+    // test with 1 scrollChild
+    testSemanticsNode.scrollChildren = 1;
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertNull(nodeInfo.getCollectionInfo());
+    // test with 2 scrollChildren
+    testSemanticsNode.scrollChildren = 2;
+    testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    AccessibilityNodeInfo.CollectionInfo collectionInfo = nodeInfo.getCollectionInfo();
+    assertNotNull(collectionInfo);
+
+    assertTrue(collectionInfo.getRowCount() == testSemanticsNode.scrollChildren);
+    assertTrue(collectionInfo.getColumnCount() == 1); // 1 column for a list
+    assertFalse(collectionInfo.isHierarchical());
+  }
+
+  @Config(sdk = API_LEVELS.API_32)
+  @TargetApi(API_LEVELS.API_32)
+  @Test
+  public void itAddsCollectionInfoAPI32() {
+    // Testing CollectionInfo creation for API 32
+    itAddsCollectionInfo();
+  }
+
+  @Config(sdk = API_LEVELS.API_33)
+  @TargetApi(API_LEVELS.API_33)
+  @Test
+  public void itAddsCollectionInfoAPI33() {
+    // Testing CollectionInfo creation for API 33
+    itAddsCollectionInfo();
+  }
+
+  // Setup method for testing CollectionItemInfo
+  // The logic has branching based on SDK version. The version tests are below
+  public void itAddsCollectionItemInfo() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+
+    TestSemanticsNode parentTestSemanticsNode = new TestSemanticsNode();
+    parentTestSemanticsNode.addFlag(AccessibilityBridge.Flag.HAS_IMPLICIT_SCROLLING);
+    parentTestSemanticsNode.scrollChildren = 2;
+    parentTestSemanticsNode.id = 0;
+    // add children to parentTestSemanticsNode
+    TestSemanticsNode childNode1 = new TestSemanticsNode();
+    childNode1.id = 1;
+    childNode1.label = "Test 1";
+    TestSemanticsNode childNode2 = new TestSemanticsNode();
+    childNode2.id = 2;
+    childNode2.label = "Test 2";
+    parentTestSemanticsNode.addChild(childNode1);
+    parentTestSemanticsNode.addChild(childNode2);
+    TestSemanticsUpdate testSemanticsUpdate = parentTestSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(1);
+    AccessibilityNodeInfo.CollectionItemInfo itemInfo = nodeInfo.getCollectionItemInfo();
+    assertNotNull(itemInfo);
+
+    assertEquals(0, itemInfo.getRowIndex()); // first item in the list
+    assertEquals(1, itemInfo.getRowSpan());
+    assertEquals(0, itemInfo.getColumnIndex()); // only a single column
+    assertEquals(1, itemInfo.getColumnSpan());
+    // Note: CollectionItemInfo.isHeading() was deprecated in API 28, and since this test node
+    // doesn't have IS_HEADER flag,
+    // we expect it to not be a heading. The heading state is set during CollectionItemInfo
+    // construction.
+    // Documentation says to check AccessibilityNodeInfo.isHeading() instead.
+    assertFalse(nodeInfo.isHeading());
+  }
+
+  @Config(sdk = API_LEVELS.API_32)
+  @TargetApi(API_LEVELS.API_32)
+  @Test
+  public void itAddsCollectionItemInfoAPI32() {
+    // Testing CollectionItemInfo creation for API 32
+    itAddsCollectionItemInfo();
+  }
+
+  @Config(sdk = API_LEVELS.API_33)
+  @TargetApi(API_LEVELS.API_33)
+  @Test
+  public void itAddsCollectionItemInfoAPI33() {
+    // Testing CollectionItemInfo creation for API 33
+    itAddsCollectionItemInfo();
   }
 
   @Config(sdk = API_LEVELS.API_36)
