@@ -333,6 +333,7 @@ import java.util.Set;
 
     // Previously, --enable-software-rendering could be set here via Intent. Warn developers
     // about the new method for doing so if this was attempted.
+    // TODO(camsim99): Remove this warning after a stable release has passed: https://github.com/flutter/flutter/issues/179274.
     final Intent intent = activity.getIntent();
     if (intent != null) {
       if (intent.hasExtra("enable-software-rendering")) {
