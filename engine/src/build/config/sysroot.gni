@@ -19,18 +19,18 @@ if (current_toolchain == default_toolchain && target_sysroot != "") {
   sysroot = target_sysroot
 } else if (is_android) {
   import("//build/config/android/config.gni")
-  sysroot = rebase_path("$android_toolchain_root/sysroot", root_build_dir)
+  sysroot = rebase_path("$android_toolchain_root/sysroot")
 } else if (is_linux && !is_chromeos) {
   if (use_default_linux_sysroot && !is_fuchsia) {
     if (current_cpu == "x64") {
       sysroot =
-          rebase_path("//build/linux/debian_bullseye_amd64-sysroot", root_build_dir)
+          rebase_path("//build/linux/debian_bullseye_amd64-sysroot")
     } else if (current_cpu == "arm64") {
       sysroot =
-          rebase_path("//build/linux/debian_bullseye_arm64-sysroot", root_build_dir)
+          rebase_path("//build/linux/debian_bullseye_arm64-sysroot")
     } else if (current_cpu == "riscv64") {
       sysroot =
-          rebase_path("//build/linux/debian_trixie_riscv64-sysroot", root_build_dir)
+          rebase_path("//build/linux/debian_trixie_riscv64-sysroot")
     }
     assert(
         exec_script("//build/dir_exists.py", [ sysroot ], "string") == "True",
