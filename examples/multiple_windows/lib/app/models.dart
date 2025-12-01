@@ -69,7 +69,10 @@ class WindowSettings {
   WindowSettings({
     this.regularSize = const Size(400, 300),
     this.dialogSize = const Size(200, 200),
-    this.positioner = const WindowPositioner(),
+    this.positioner = const WindowPositioner(
+      parentAnchor: WindowPositionerAnchor.right,
+      childAnchor: WindowPositionerAnchor.left,
+    ),
   });
 
   /// The initial size for newly created regular windows.

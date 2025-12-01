@@ -5,7 +5,7 @@
 // ignore_for_file: invalid_use_of_internal_member
 // ignore_for_file: implementation_imports
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
 
 class TooltipWindowContent extends StatefulWidget {
@@ -26,7 +26,6 @@ class _TooltipWindowContentState extends State<TooltipWindowContent>
     with SingleTickerProviderStateMixin {
   @override
   void dispose() {
-    widget.controller.destroy();
     _animationController.dispose();
     super.dispose();
   }
@@ -36,10 +35,6 @@ class _TooltipWindowContentState extends State<TooltipWindowContent>
   @override
   void initState() {
     super.initState();
-    // Ensure the view is created before rendering.
-    Future<void>.delayed(const Duration(seconds: 10), () {
-      widget.controller.destroy();
-    });
     _animationController = AnimationController(
       duration: const Duration(seconds: 1),
       vsync: this,
@@ -52,23 +47,52 @@ class _TooltipWindowContentState extends State<TooltipWindowContent>
     return AnimatedBuilder(
       animation: _animationController,
       builder: (context, _) {
-        final double padding =
-            20 + (16.0 * _animationController.value).ceilToDouble() / 1.0;
-        // print('Padding: $padding');
-        return DefaultTextStyle(
-          style: const TextStyle(
-            color: Color(0xFF000000),
-            fontSize: 16.0,
-            fontWeight: FontWeight.w500,
-          ),
+        final double scale = 1.0 + (0.05 * _animationController.value);
+        return Transform.scale(
+          scale: scale,
           child: Container(
             decoration: BoxDecoration(
-              border: Border.all(color: const Color(0xFF444444), width: 1.0),
-              color: const Color(0xFFFF55FF),
-              borderRadius: BorderRadius.circular(14.0),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0x4D000000),
+                  blurRadius: 12.0,
+                  offset: Offset(0, 4),
+                ),
+              ],
             ),
-            padding: EdgeInsets.all(padding),
-            child: Text('Tooltip Window'),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  decoration: const BoxDecoration(
+                    color: Color(0x33FFFFFF),
+                    shape: BoxShape.circle,
+                  ),
+                  padding: const EdgeInsets.all(8),
+                  child: const Icon(
+                    Icons.info,
+                    color: Color(0xFFFFFFFF),
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  'Tooltip Window',
+                  style: TextStyle(
+                    color: Color(0xFFFFFFFF),
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
