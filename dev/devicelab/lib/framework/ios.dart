@@ -33,7 +33,7 @@ Future<String?> minPhoneOSVersion(String pathToBinary) async {
   lines.asMap().forEach((int index, String line) {
     if (line.contains('LC_VERSION_MIN_IPHONEOS') && lines.length - index - 1 > 3) {
       final String versionLine = lines.skip(index - 1).take(4).last;
-      final RegExp versionRegex = RegExp(r'\s*version\s*(\S*)');
+      final versionRegex = RegExp(r'\s*version\s*(\S*)');
       minVersion = versionRegex.firstMatch(versionLine)?.group(1);
     }
   });
@@ -67,8 +67,7 @@ Future<void> testWithNewIOSSimulator(
   // Next, get the preferred runtime build for the selected Xcode version. Preferred
   // means the runtime was either bundled with Xcode, exactly matched your SDK
   // version, or it's indicated a better match for your SDK.
-  final Map<String, Object?> decodeResult =
-      json.decode(runtimesForSelectedXcode) as Map<String, Object?>;
+  final decodeResult = json.decode(runtimesForSelectedXcode) as Map<String, Object?>;
   final String? iosKey = decodeResult.keys
       .where((String key) => key.contains('iphoneos'))
       .firstOrNull;
@@ -80,7 +79,7 @@ Future<void> testWithNewIOSSimulator(
 
   String? iOSSimRuntime;
 
-  final RegExp iOSRuntimePattern = RegExp(r'iOS .*\) - (.*)');
+  final iOSRuntimePattern = RegExp(r'iOS .*\) - (.*)');
 
   // [availableRuntimes] may include runtime versions greater than the selected
   // Xcode's greatest supported version. Use [runtimeBuildForSelectedXcode] when
@@ -220,7 +219,7 @@ Future<bool> runXcodeBuild({
 
   if (testResultExit != 0) {
     final Directory? dumpDirectory = hostAgent.dumpDirectory;
-    final Directory xcresultBundle = Directory(path.join(resultBundleTemp, 'result.xcresult'));
+    final xcresultBundle = Directory(path.join(resultBundleTemp, 'result.xcresult'));
     if (dumpDirectory != null) {
       if (xcresultBundle.existsSync()) {
         // Zip the test results to the artifacts directory for upload.
@@ -263,7 +262,7 @@ File? _createDisabledSandboxEntitlementFile(String platformDirectory, String con
     'Runner',
     '$entitlementDefaultFileName.entitlements',
   );
-  final File entitlementFile = File(entitlementFilePath);
+  final entitlementFile = File(entitlementFilePath);
 
   if (!entitlementFile.existsSync()) {
     print('Unable to find entitlements file at ${entitlementFile.path}');
@@ -274,7 +273,7 @@ File? _createDisabledSandboxEntitlementFile(String platformDirectory, String con
   final String tempEntitlementPath = Directory.systemTemp
       .createTempSync('flutter_disable_sandbox_entitlement.')
       .path;
-  final File disabledSandboxEntitlementFile = File(
+  final disabledSandboxEntitlementFile = File(
     path.join(
       tempEntitlementPath,
       '${entitlementDefaultFileName}WithDisabledSandboxing.entitlements',

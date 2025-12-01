@@ -32,8 +32,8 @@ void testMain() {
     });
 
     test('renders using non-recording canvas if weak refs are supported', () async {
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
-      final ui.Canvas canvas = ui.Canvas(recorder, kDefaultRegion);
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, kDefaultRegion);
       expect(canvas, isA<LayerCanvas>());
       await drawTestPicture(canvas as LayerCanvas);
       await drawPictureUsingCurrentRenderer(recorder.endRecording());
@@ -48,11 +48,11 @@ void testMain() {
         ui.Paint? foreground,
         ui.Paint? background,
       }) {
-        final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle());
+        final builder = ui.ParagraphBuilder(ui.ParagraphStyle());
         builder.pushStyle(
           ui.TextStyle(fontSize: 16, color: color, foreground: foreground, background: background),
         );
-        final StringBuffer text = StringBuffer();
+        final text = StringBuffer();
         if (color == null && foreground == null && background == null) {
           text.write('Default');
         } else {
@@ -78,7 +78,7 @@ void testMain() {
         return paragraph;
       }
 
-      final List<ParagraphFactory> variations = <ParagraphFactory>[
+      final variations = <ParagraphFactory>[
         () => createTestParagraph(),
         () => createTestParagraph(color: const ui.Color(0xFF009900)),
         () => createTestParagraph(foreground: ui.Paint()..color = const ui.Color(0xFF990000)),
@@ -93,22 +93,19 @@ void testMain() {
         ),
       ];
 
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
-      final ui.Canvas canvas = ui.Canvas(recorder, ui.Rect.largest);
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, ui.Rect.largest);
       canvas.translate(10, 10);
 
-      for (final ParagraphFactory from in variations) {
-        for (final ParagraphFactory to in variations) {
+      for (final from in variations) {
+        for (final to in variations) {
           canvas.save();
           final ui.Paragraph fromParagraph = from();
           canvas.drawParagraph(fromParagraph, ui.Offset.zero);
 
-          final ui.Offset leftEnd = ui.Offset(
-            fromParagraph.maxIntrinsicWidth + 10,
-            fromParagraph.height / 2,
-          );
-          final ui.Offset rightEnd = ui.Offset(middle - 10, leftEnd.dy);
-          const ui.Offset tipOffset = ui.Offset(-5, -5);
+          final leftEnd = ui.Offset(fromParagraph.maxIntrinsicWidth + 10, fromParagraph.height / 2);
+          final rightEnd = ui.Offset(middle - 10, leftEnd.dy);
+          const tipOffset = ui.Offset(-5, -5);
           canvas.drawLine(leftEnd, rightEnd, ui.Paint());
           canvas.drawLine(rightEnd, rightEnd + tipOffset, ui.Paint());
           canvas.drawLine(rightEnd, rightEnd + tipOffset.scale(1, -1), ui.Paint());
@@ -132,14 +129,14 @@ void testMain() {
     // Make sure we clear the canvas in between frames.
     test('empty frame after contentful frame', () async {
       // First draw a frame with a red rectangle
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
-      final ui.Canvas canvas = ui.Canvas(recorder, ui.Rect.largest);
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, ui.Rect.largest);
       canvas.drawRect(
         const ui.Rect.fromLTRB(20, 20, 100, 100),
         ui.Paint()..color = const ui.Color(0xffff0000),
       );
       final ui.Picture picture = recorder.endRecording();
-      final ui.SceneBuilder builder = ui.SceneBuilder();
+      final builder = ui.SceneBuilder();
       builder.pushOffset(0, 0);
       builder.addPicture(ui.Offset.zero, picture);
       final ui.Scene scene = builder.build();
@@ -147,7 +144,7 @@ void testMain() {
 
       // Now draw an empty layer tree and confirm that the red rectangle is
       // no longer drawn.
-      final ui.SceneBuilder emptySceneBuilder = ui.SceneBuilder();
+      final emptySceneBuilder = ui.SceneBuilder();
       emptySceneBuilder.pushOffset(0, 0);
       final ui.Scene emptyScene = emptySceneBuilder.build();
       await renderScene(emptyScene);
@@ -166,9 +163,9 @@ void testMain() {
         await createPlatformView(0, 'test-platform-view');
 
         ui.Picture makeTextPicture(String text, ui.Offset offset) {
-          final ui.PictureRecorder recorder = ui.PictureRecorder();
-          final ui.Canvas canvas = ui.Canvas(recorder, ui.Rect.largest);
-          final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle());
+          final recorder = ui.PictureRecorder();
+          final canvas = ui.Canvas(recorder, ui.Rect.largest);
+          final builder = ui.ParagraphBuilder(ui.ParagraphStyle());
           builder.addText(text);
           final ui.Paragraph paragraph = builder.build();
           paragraph.layout(const ui.ParagraphConstraints(width: 100));
@@ -181,8 +178,8 @@ void testMain() {
         }
 
         ui.Picture imageToPicture(ui.Image image, ui.Offset offset) {
-          final ui.PictureRecorder recorder = ui.PictureRecorder();
-          final ui.Canvas canvas = ui.Canvas(recorder, ui.Rect.largest);
+          final recorder = ui.PictureRecorder();
+          final canvas = ui.Canvas(recorder, ui.Rect.largest);
           canvas.drawImage(image, offset, ui.Paint());
           return recorder.endRecording();
         }
@@ -194,7 +191,7 @@ void testMain() {
         // Calling toByteData is essential to hit the bug.
         await helloImage.toByteData(format: ui.ImageByteFormat.png);
 
-        final ui.SceneBuilder sb = ui.SceneBuilder();
+        final sb = ui.SceneBuilder();
         sb.pushOffset(0, 0);
         sb.addPicture(ui.Offset.zero, helloPicture);
         sb.addPlatformView(0, width: 10, height: 10);
@@ -257,7 +254,7 @@ Future<void> drawTestPicture(LayerCanvas canvas) async {
   canvas.drawImage(await generateTestImage(), const ui.Offset(20, 20), ui.Paint());
 
   canvas.translate(60, 0);
-  final ui.RSTransform transform = ui.RSTransform.fromComponents(
+  final transform = ui.RSTransform.fromComponents(
     rotation: 0,
     scale: 1,
     anchorX: 0,
@@ -325,8 +322,8 @@ Future<void> drawTestPicture(LayerCanvas canvas) async {
 
   canvas.translate(60, 0);
   {
-    final ui.PictureRecorder otherRecorder = ui.PictureRecorder();
-    final ui.Canvas otherCanvas = ui.Canvas(otherRecorder, const ui.Rect.fromLTRB(0, 0, 40, 20));
+    final otherRecorder = ui.PictureRecorder();
+    final otherCanvas = ui.Canvas(otherRecorder, const ui.Rect.fromLTRB(0, 0, 40, 20));
     otherCanvas.drawCircle(
       const ui.Offset(30, 15),
       10,
@@ -377,7 +374,7 @@ Future<void> drawTestPicture(LayerCanvas canvas) async {
 
   canvas.translate(60, 0);
   final int restorePoint = canvas.getSaveCount();
-  for (int i = 0; i < 5; i++) {
+  for (var i = 0; i < 5; i++) {
     canvas.save();
     canvas.translate(10, 10);
     canvas.drawCircle(ui.Offset.zero, 5, ui.Paint());
@@ -394,10 +391,10 @@ Future<void> drawTestPicture(LayerCanvas canvas) async {
   canvas.restore();
 
   canvas.translate(60, 0);
-  final ui.Paint thickStroke = ui.Paint()
+  final thickStroke = ui.Paint()
     ..style = ui.PaintingStyle.stroke
     ..strokeWidth = 20;
-  final ui.Paint semitransparent = ui.Paint()..color = const ui.Color(0x66000000);
+  final semitransparent = ui.Paint()..color = const ui.Color(0x66000000);
 
   canvas.saveLayer(kDefaultRegion, semitransparent);
   canvas.drawLine(const ui.Offset(10, 10), const ui.Offset(50, 50), thickStroke);
@@ -448,7 +445,7 @@ Future<void> drawTestPicture(LayerCanvas canvas) async {
   canvas.save();
 
   canvas.save();
-  final Matrix4 matrix = Matrix4.identity();
+  final matrix = Matrix4.identity();
   matrix.translate(30, 30);
   matrix.scale(2, 1.5);
   canvas.transform(matrix.toFloat64());
@@ -484,7 +481,7 @@ Future<ui.Image> generateTestImage() {
   ctx.fillStyle = '#FF00FF';
   ctx.fillRect(10, 10, 10, 10);
   final Uint8List imageData = ctx.getImageData(0, 0, 20, 20).data.buffer.asUint8List();
-  final Completer<ui.Image> completer = Completer<ui.Image>();
+  final completer = Completer<ui.Image>();
   renderer.decodeImageFromPixels(imageData, 20, 20, ui.PixelFormat.rgba8888, (ui.Image result) {
     completer.complete(result);
   });
@@ -499,7 +496,7 @@ ui.Paragraph makeSimpleText(
   ui.FontWeight? fontWeight,
   ui.Color? color,
 }) {
-  final ui.ParagraphBuilder builder = ui.ParagraphBuilder(
+  final builder = ui.ParagraphBuilder(
     ui.ParagraphStyle(
       fontFamily: fontFamily ?? 'Roboto',
       fontSize: fontSize ?? 14,

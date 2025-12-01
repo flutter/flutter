@@ -41,16 +41,21 @@ class NotificationExample extends StatelessWidget {
             return true;
           },
           child: NestedScrollView(
-            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-              return <Widget>[
-                SliverAppBar(
-                  title: const Text('Notification Sample'),
-                  pinned: true,
-                  floating: true,
-                  bottom: TabBar(tabs: _tabs.map((String name) => Tab(text: name)).toList()),
-                ),
-              ];
-            },
+            headerSliverBuilder:
+                (BuildContext context, bool innerBoxIsScrolled) {
+                  return <Widget>[
+                    SliverAppBar(
+                      title: const Text('Notification Sample'),
+                      pinned: true,
+                      floating: true,
+                      bottom: TabBar(
+                        tabs: _tabs
+                            .map((String name) => Tab(text: name))
+                            .toList(),
+                      ),
+                    ),
+                  ];
+                },
             body: TabBarView(
               children: <Widget>[
                 ListView.builder(

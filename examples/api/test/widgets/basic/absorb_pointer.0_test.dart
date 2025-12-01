@@ -6,11 +6,14 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_api_samples/widgets/basic/absorb_pointer.0.dart' as example;
+import 'package:flutter_api_samples/widgets/basic/absorb_pointer.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('AbsorbPointer prevents hit testing on its child', (WidgetTester tester) async {
+  testWidgets('AbsorbPointer prevents hit testing on its child', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.AbsorbPointerApp());
 
     // Get the center of the stack.

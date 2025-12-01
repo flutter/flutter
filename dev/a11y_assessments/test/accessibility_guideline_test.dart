@@ -42,7 +42,7 @@ void main() {
       final SemanticsFinder tappables = find.semantics.byAction(SemanticsAction.tap);
       final int tappableCount = tappables.evaluate().length;
 
-      for (int i = 0; i < tappableCount; i++) {
+      for (var i = 0; i < tappableCount; i++) {
         final FinderBase<SemanticsNode> tappable = tappables.at(i);
         final SemanticsNode node = tappable.evaluate().first;
 

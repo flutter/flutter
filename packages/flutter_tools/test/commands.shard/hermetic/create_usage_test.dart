@@ -24,8 +24,8 @@ import '../../src/test_flutter_command_runner.dart';
 import '../../src/testbed.dart';
 
 class FakePub extends Fake implements Pub {
-  var calledGetOffline = 0;
-  var calledOnline = 0;
+  int calledGetOffline = 0;
+  int calledOnline = 0;
 
   @override
   Future<void> get({
