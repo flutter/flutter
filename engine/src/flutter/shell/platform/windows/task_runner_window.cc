@@ -114,8 +114,6 @@ TaskRunnerWindow::~TaskRunnerWindow() {
     window_handle_ = nullptr;
   }
   UnregisterClass(window_class_name_.c_str(), nullptr);
-
-  timeEndPeriod(1);
 }
 
 void TaskRunnerWindow::OnTimer() {
