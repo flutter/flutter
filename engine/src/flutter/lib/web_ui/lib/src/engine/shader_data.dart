@@ -30,14 +30,11 @@ class ShaderData {
       throw const FormatException('Invalid Shader Data');
     }
 
-    final List<UniformData> uniforms = List<UniformData>.filled(
-      rawUniforms.length,
-      UniformData.empty,
-    );
+    final uniforms = List<UniformData>.filled(rawUniforms.length, UniformData.empty);
 
-    int textureCount = 0;
-    int floatCount = 0;
-    for (int i = 0; i < rawUniforms.length; i += 1) {
+    var textureCount = 0;
+    var floatCount = 0;
+    for (var i = 0; i < rawUniforms.length; i += 1) {
       final Object? rawUniformData = rawUniforms[i];
       if (rawUniformData is! Map<String, Object?>) {
         throw const FormatException('Invalid Shader Data');
@@ -52,7 +49,7 @@ class ShaderData {
       if (type == null) {
         throw const FormatException('Invalid Shader Data');
       }
-      int uniformFloatCount = 0;
+      var uniformFloatCount = 0;
       if (type == UniformType.SampledImage) {
         textureCount += 1;
       } else {
