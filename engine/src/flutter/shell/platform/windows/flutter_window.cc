@@ -547,9 +547,9 @@ FlutterWindow::HandleMessage(UINT const message,
     case WM_POINTERLEAVE: {
       x_pos = GET_X_LPARAM(lparam);
       y_pos = GET_Y_LPARAM(lparam);
-      auto x = static_cast<double>(x_pos);
-      auto y = static_cast<double>(y_pos);
-      auto pointerId = GET_POINTERID_WPARAM(wparam);
+      auto const x = static_cast<double>(x_pos);
+      auto const y = static_cast<double>(y_pos);
+      auto const pointerId = GET_POINTERID_WPARAM(wparam);
       POINTER_INFO pointerInfo;
       if (windows_proc_table_->GetPointerInfo(pointerId, &pointerInfo)) {
         UINT32 pressure = 0;
@@ -575,6 +575,10 @@ FlutterWindow::HandleMessage(UINT const message,
             break;
           case PT_TOUCHPAD:
             device_kind = kFlutterPointerDeviceKindTrackpad;
+            break;
+          default:
+            assert(false, 'Unrecognized device key {}', pointerInfo.pointerType);
+            return kFlutterPlane.value;
         }
         if (message == WM_POINTERDOWN) {
           OnPointerDown(x, y, device_kind, touch_id, WM_LBUTTONDOWN, rotation,
