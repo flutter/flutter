@@ -73,7 +73,7 @@ void main() {
   test('Tester can still load through dart:ui', () async {
     /// Manually load font asset through dart.
     final Uint8List encoded = utf8.encode(Uri(path: Uri.encodeFull('Roboto-Medium.ttf')).path);
-    final Completer<Uint8List> result = Completer<Uint8List>();
+    final result = Completer<Uint8List>();
     PlatformDispatcher.instance.sendPlatformMessage('flutter/assets', encoded.buffer.asByteData(), (
       ByteData? data,
     ) {
@@ -92,7 +92,7 @@ void main() {
 }
 
 Future<List<int>> _createPictureFromFont(String fontFamily) async {
-  final ParagraphBuilder builder = ParagraphBuilder(
+  final builder = ParagraphBuilder(
     ParagraphStyle(
       fontFamily: fontFamily,
       fontStyle: FontStyle.normal,
@@ -104,8 +104,8 @@ Future<List<int>> _createPictureFromFont(String fontFamily) async {
   final Paragraph paragraph = builder.build();
   paragraph.layout(const ParagraphConstraints(width: 20 * 5.0));
 
-  final PictureRecorder recorder = PictureRecorder();
-  final Canvas canvas = Canvas(recorder);
+  final recorder = PictureRecorder();
+  final canvas = Canvas(recorder);
   canvas.drawParagraph(paragraph, Offset.zero);
 
   final Picture picture = recorder.endRecording();

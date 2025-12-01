@@ -207,7 +207,7 @@ void main() {
   });
 
   testWidgets('Throws FlutterError when onUnknownRoute returns null', (WidgetTester tester) async {
-    final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
+    final key = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabView(
@@ -288,7 +288,7 @@ void main() {
   });
 
   testWidgets('Handles Android back button', (WidgetTester tester) async {
-    final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
+    final key = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabScaffold(

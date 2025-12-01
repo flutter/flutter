@@ -529,7 +529,7 @@ class BackdropGroup extends InheritedWidget {
 ///                sigmaY: 40,
 ///              ),
 ///              child: Container(
-///                color: Colors.black.withOpacity(0.2),
+///                color: Colors.black.withValues(alpha: 0.2),
 ///                height: 200,
 ///                child: const Text('Blur item'),
 ///              ),
@@ -1709,7 +1709,7 @@ class Transform extends SingleChildRenderObjectWidget {
   }
 
   static Matrix4 _createZRotation(double sin, double cos) {
-    final Matrix4 result = Matrix4.zero();
+    final result = Matrix4.zero();
     result.storage[0] = cos;
     result.storage[1] = sin;
     result.storage[4] = -sin;
@@ -2548,8 +2548,7 @@ class LayoutId extends ParentDataWidget<MultiChildLayoutParentData> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is MultiChildLayoutParentData);
-    final MultiChildLayoutParentData parentData =
-        renderObject.parentData! as MultiChildLayoutParentData;
+    final parentData = renderObject.parentData! as MultiChildLayoutParentData;
     if (parentData.id != id) {
       parentData.id = id;
       renderObject.parent?.markNeedsLayout();
@@ -4818,7 +4817,7 @@ class IndexedStack extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> wrappedChildren = List<Widget>.generate(children.length, (int i) {
+    final wrappedChildren = List<Widget>.generate(children.length, (int i) {
       return Visibility(
         visible: i == index,
         maintainInteractivity: true,
@@ -5103,8 +5102,8 @@ class Positioned extends ParentDataWidget<StackParentData> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is StackParentData);
-    final StackParentData parentData = renderObject.parentData! as StackParentData;
-    bool needsLayout = false;
+    final parentData = renderObject.parentData! as StackParentData;
+    var needsLayout = false;
 
     if (parentData.left != left) {
       parentData.left = left;
@@ -6001,8 +6000,8 @@ class Flexible extends ParentDataWidget<FlexParentData> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is FlexParentData);
-    final FlexParentData parentData = renderObject.parentData! as FlexParentData;
-    bool needsLayout = false;
+    final parentData = renderObject.parentData! as FlexParentData;
+    var needsLayout = false;
 
     if (parentData.flex != flex) {
       parentData.flex = flex;
@@ -7272,7 +7271,7 @@ class Listener extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final List<String> listeners = <String>[
+    final listeners = <String>[
       if (onPointerDown != null) 'down',
       if (onPointerMove != null) 'move',
       if (onPointerUp != null) 'up',
@@ -7510,7 +7509,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final List<String> listeners = <String>[
+    final listeners = <String>[
       if (onEnter != null) 'enter',
       if (onExit != null) 'exit',
       if (onHover != null) 'hover',
@@ -8215,7 +8214,7 @@ class KeyedSubtree extends StatelessWidget {
       return items;
     }
 
-    final List<Widget> itemsWithUniqueKeys = <Widget>[
+    final itemsWithUniqueKeys = <Widget>[
       for (final (int i, Widget item) in items.indexed) KeyedSubtree.wrap(item, baseIndex + i),
     ];
 
@@ -8351,6 +8350,8 @@ typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSette
 /// This example shows using an inline StatefulBuilder that rebuilds and that
 /// also has state.
 ///
+// TODO(loic-sharma): Migrate to RadioGroup.
+// https://github.com/flutter/flutter/issues/179088
 /// ```dart
 /// await showDialog<void>(
 ///   context: context,
@@ -8364,7 +8365,9 @@ typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSette
 ///             children: List<Widget>.generate(4, (int index) {
 ///               return Radio<int>(
 ///                 value: index,
+///                 // ignore: deprecated_member_use
 ///                 groupValue: selectedRadio,
+///                 // ignore: deprecated_member_use
 ///                 onChanged: (int? value) {
 ///                   setState(() => selectedRadio = value);
 ///                 },

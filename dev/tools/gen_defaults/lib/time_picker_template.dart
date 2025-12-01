@@ -195,10 +195,10 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
         if (states.contains(WidgetState.pressed)) {
           overlayColor = ${componentColor('$hourMinuteComponent.selected.pressed.state-layer')};
         } else if (states.contains(WidgetState.hovered)) {
-          const double hoverOpacity = ${opacity('$hourMinuteComponent.hover.state-layer.opacity')};
+          const hoverOpacity = ${opacity('$hourMinuteComponent.hover.state-layer.opacity')};
           overlayColor = ${componentColor('$hourMinuteComponent.selected.hover.state-layer')}.withOpacity(hoverOpacity);
         } else if (states.contains(WidgetState.focused)) {
-          const double focusOpacity = ${opacity('$hourMinuteComponent.focus.state-layer.opacity')};
+          const focusOpacity = ${opacity('$hourMinuteComponent.focus.state-layer.opacity')};
           overlayColor = ${componentColor('$hourMinuteComponent.selected.focus.state-layer')}.withOpacity(focusOpacity);
         }
         return Color.alphaBlend(overlayColor, ${componentColor('$hourMinuteComponent.selected.container')});
@@ -207,10 +207,10 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
         if (states.contains(WidgetState.pressed)) {
           overlayColor = ${componentColor('$hourMinuteComponent.unselected.pressed.state-layer')};
         } else if (states.contains(WidgetState.hovered)) {
-          const double hoverOpacity = ${opacity('$hourMinuteComponent.hover.state-layer.opacity')};
+          const hoverOpacity = ${opacity('$hourMinuteComponent.hover.state-layer.opacity')};
           overlayColor = ${componentColor('$hourMinuteComponent.unselected.hover.state-layer')}.withOpacity(hoverOpacity);
         } else if (states.contains(WidgetState.focused)) {
-          const double focusOpacity = ${opacity('$hourMinuteComponent.focus.state-layer.opacity')};
+          const focusOpacity = ${opacity('$hourMinuteComponent.focus.state-layer.opacity')};
           overlayColor = ${componentColor('$hourMinuteComponent.unselected.focus.state-layer')}.withOpacity(focusOpacity);
         }
         return Color.alphaBlend(overlayColor, ${componentColor('$hourMinuteComponent.unselected.container')});

@@ -22,7 +22,7 @@ class LayerTree {
   /// to raster. If [ignoreRasterCache] is `true`, then there will be no
   /// attempt to register pictures to cache.
   void preroll(Frame frame) {
-    final PrerollVisitor prerollVisitor = PrerollVisitor(frame.viewEmbedder);
+    final prerollVisitor = PrerollVisitor(frame.viewEmbedder);
     rootLayer.accept(prerollVisitor);
   }
 
@@ -30,7 +30,7 @@ class LayerTree {
   /// tree. This paint pass is just used to measure the bounds for each picture
   /// so we can optimize the total number of canvases required.
   void measure(Frame frame, BitmapSize size) {
-    final MeasureVisitor measureVisitor = MeasureVisitor(size, frame.viewEmbedder);
+    final measureVisitor = MeasureVisitor(size, frame.viewEmbedder);
     if (rootLayer.needsPainting) {
       rootLayer.accept(measureVisitor);
     }
@@ -39,17 +39,17 @@ class LayerTree {
 
   /// Paints the layer tree into the given [frame].
   void paint(Frame frame) {
-    final NWayCanvas internalNodesCanvas = NWayCanvas();
+    final internalNodesCanvas = NWayCanvas();
     final Iterable<LayerCanvas> overlayCanvases = frame.viewEmbedder!.getOptimizedCanvases();
     overlayCanvases.forEach(internalNodesCanvas.addCanvas);
-    final PaintVisitor paintVisitor = PaintVisitor(internalNodesCanvas, frame.viewEmbedder!);
+    final paintVisitor = PaintVisitor(internalNodesCanvas, frame.viewEmbedder!);
     if (rootLayer.needsPainting) {
       rootLayer.accept(paintVisitor);
     }
   }
 
   Map<String, dynamic> dumpDebugInfo() {
-    final DebugInfoVisitor debugInfoVisitor = DebugInfoVisitor();
+    final debugInfoVisitor = DebugInfoVisitor();
     return rootLayer.accept(debugInfoVisitor);
   }
 
@@ -57,14 +57,14 @@ class LayerTree {
   ///
   /// This picture does not contain any platform views.
   ui.Picture flatten(ui.Size size) {
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = ui.Canvas(recorder, ui.Offset.zero & size);
-    final PrerollVisitor prerollVisitor = PrerollVisitor(null);
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder, ui.Offset.zero & size);
+    final prerollVisitor = PrerollVisitor(null);
     rootLayer.accept(prerollVisitor);
 
-    final NWayCanvas internalNodesCanvas = NWayCanvas();
+    final internalNodesCanvas = NWayCanvas();
     internalNodesCanvas.addCanvas(canvas as LayerCanvas);
-    final PaintVisitor paintVisitor = PaintVisitor.forToImage(internalNodesCanvas, canvas);
+    final paintVisitor = PaintVisitor.forToImage(internalNodesCanvas, canvas);
     if (rootLayer.needsPainting) {
       rootLayer.accept(paintVisitor);
     }
