@@ -571,10 +571,7 @@ size_t ArcVertexGenerator::GetVertexCount() const {
     }
   } else {
     // Filled arc using a triangle strip
-    count = 2 * (count - 2) + 1;
-    if (use_center_) {
-      count += 2;
-    }
+    count = (2 * count) - 1;
   }
   return count;
 }
@@ -811,7 +808,8 @@ void Tessellator::GenerateFilledArcStrip(const Trigs& trigs,
   if (use_center) {
     origin = center;
   } else {
-    origin = center + iteration.end * radii;
+    Point midpoint = (iteration.start + iteration.end) * 0.5f;
+    origin = center + midpoint * radii;
   }
 
   proc(center + iteration.start * radii);
@@ -822,12 +820,8 @@ void Tessellator::GenerateFilledArcStrip(const Trigs& trigs,
       proc(center + trigs[j] * quadrant.axis * radii);
     }
   }
-  if (use_center) {
-    // Vertices for iteration.end. This is only needed when use_center is true.
-    // Otherwise iteration.end is used for the origin so it is already handled.
-    proc(origin);
-    proc(center + iteration.end * radii);
-  }
+  proc(origin);
+  proc(center + iteration.end * radii);
 }
 
 void Tessellator::GenerateStrokedArc(const Trigs& trigs,
