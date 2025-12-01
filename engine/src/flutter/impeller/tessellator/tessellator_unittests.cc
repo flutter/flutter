@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
-
-#include "flutter/display_list/geometry/dl_path_builder.h"
+#include "impeller/geometry/constants.h"
 #include "impeller/geometry/geometry_asserts.h"
 #include "impeller/tessellator/tessellator.h"
 #include "impeller/tessellator/tessellator_libtess.h"
@@ -300,6 +300,82 @@ TEST(TessellatorTest, StrokedCircleTessellationVertices) {
   test({}, {10, 10}, 2.0, 1.0);
   test(Matrix::MakeScale({500.0, 500.0, 0.0}), {}, 2.0, 1.0);
   test(Matrix::MakeScale({0.002, 0.002, 0.0}), {}, 1000.0, 10.0);
+}
+
+TEST(TessellatorTest, FilledArcStripTessellationVertices) {
+  auto tessellator = std::make_shared<Tessellator>();
+
+  auto test = [&tessellator](const Matrix& transform, const Arc& arc) {
+    auto generator = tessellator->FilledArc(transform, arc,
+                                            /*supports_triangle_fans=*/false);
+    EXPECT_EQ(generator.GetTriangleType(), PrimitiveType::kTriangleStrip);
+
+    auto vertex_count = generator.GetVertexCount();
+    auto vertices = std::vector<Point>();
+    generator.GenerateVertices([&vertices](const Point& p) {  //
+      vertices.push_back(p);
+    });
+    EXPECT_EQ(vertices.size(), vertex_count);
+
+    auto center = arc.GetOvalBounds().GetCenter();
+    auto radius = arc.GetOvalSize().width * 0.5;
+
+    // Test position of first point
+    EXPECT_POINT_NEAR(
+        vertices[0],
+        Point(center.x + cos(Radians(arc.GetStart()).radians) * radius,
+              center.y + sin(Radians(arc.GetStart()).radians) * radius));
+
+    // Test position of last point
+    auto last_angle = arc.GetStart() + arc.GetSweep();
+    EXPECT_POINT_NEAR(
+        vertices[vertex_count - 1],
+        Point(center.x + cos(Radians(last_angle).radians) * radius,
+              center.y + sin(Radians(last_angle).radians) * radius));
+
+    // Test odd-indexed points. These are all the origin.
+    Point origin = arc.IncludeCenter()
+                       ? center
+                       : (vertices[0] + vertices[vertex_count - 1]) * 0.5f;
+    for (size_t i = 1; i < vertex_count; i += 2) {
+      EXPECT_POINT_NEAR(vertices[i], origin);
+    }
+
+    // Test even-indexed points. These are points on the outer edge of the arc.
+    auto previous_outer_point = vertices[0];
+    auto outer_increment_distance = (vertices[4] - vertices[2]).GetLength();
+    for (size_t i = 2; i < vertex_count; i += 2) {
+      // Each is |radius| from the center.
+      EXPECT_NEAR((vertices[i] - center).GetLength(), radius, kEhCloseEnough);
+
+      // Each is within |outer_increment_distance| from the previous
+      if (i == 2 || i == vertex_count - 1) {
+        // The very first and last points may be closer than
+        // |outer_increment_distance| to their adjacent outer points
+        EXPECT_LE((vertices[i] - previous_outer_point).GetLength(),
+                  outer_increment_distance + kEhCloseEnough);
+      } else {
+        // Other outer points are |outer_increment_distance| apart
+        EXPECT_NEAR((vertices[i] - previous_outer_point).GetLength(),
+                    outer_increment_distance, kEhCloseEnough);
+      }
+
+      previous_outer_point = vertices[i];
+    }
+  };
+
+  test({}, Arc(Rect::MakeXYWH(0, 0, 100, 100), Degrees(0), Degrees(90), false));
+  test({}, Arc(Rect::MakeXYWH(0, 0, 100, 100), Degrees(0), Degrees(90), true));
+
+  test({},
+       Arc(Rect::MakeXYWH(0, 0, 100, 100), Degrees(0), Degrees(-270), false));
+  test({},
+       Arc(Rect::MakeXYWH(0, 0, 100, 100), Degrees(0), Degrees(-270), true));
+
+  test({},
+       Arc(Rect::MakeXYWH(0, 0, 100, 100), Degrees(94), Degrees(322), false));
+  test({},
+       Arc(Rect::MakeXYWH(0, 0, 100, 100), Degrees(94), Degrees(322), true));
 }
 
 TEST(TessellatorTest, RoundCapLineTessellationVertices) {
