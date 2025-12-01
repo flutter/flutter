@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
             "trace-startup", "start-paused", "enable-dart-profiling");
         for (String flag : previouslySupportedFlagsViaIntent) {
             if (intent.hasExtra(flag)) {
-                Log.w("MainActivity", "Engine flags can no longer be set via Intent on Android. If you wish to set " + flag + ", see https://github.com/flutter/flutter/blob/master/docs/engine/Android-Flutter-Shell-Arguments.md for alternative methods.");
+                Log.w("MainActivity", "Engine flags can no longer be set via Intent on Android. If you wish to set " + flag + ", see https://github.com/flutter/flutter/blob/main/docs/engine/Android-Flutter-Shell-Arguments.md for alternative methods.");
                 break;
             }
         }
