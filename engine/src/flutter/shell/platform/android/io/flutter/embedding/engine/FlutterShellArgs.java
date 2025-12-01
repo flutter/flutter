@@ -61,6 +61,9 @@ public final class FlutterShellArgs {
      * Whenever possible, it is recommended to NOT allow this flag in release mode. Many flags are
      * designed for debugging purposes and if enabled in production, could expose sensitive
      * application data or make the app vulnerable to malicious actors.
+     *
+     * <p>If creating a flag that will be allowed in release, please leave a comment in the Javadoc
+     * explaining why it should be allowed in release.
      */
     private Flag(String commandLineArgument, String metaDataName, boolean allowedInRelease) {
       this.commandLineArgument = commandLineArgument;
@@ -76,61 +79,103 @@ public final class FlutterShellArgs {
 
   // Manifest flags allowed in release mode:
 
-  /** Ensures deterministic Skia rendering by skipping CPU feature swaps. */
-  private static final Flag SKIA_DETERMINISTIC_RENDERING =
-      new Flag("--skia-deterministic-rendering", "SkiaDeterministicRendering", true);
-
   /**
    * Specifies the path to the AOT shared library containing compiled Dart code.
    *
    * <p>The AOT shared library that the engine uses will default to the library set by this flag,
    * but will fall back to the libraries set internally by the embedding if the path specified by
    * this argument is invalid.
+   *
+   * <p>This is allowed in release to support the same AOT configuration regardless of build mode.
    */
   public static final Flag AOT_SHARED_LIBRARY_NAME =
       new Flag("--aot-shared-library-name=", "AOTSharedLibraryName", true);
 
-  /** Sets the directory containing Flutter assets. */
+  /**
+   * Sets the directory containing Flutter assets.
+   *
+   * <p>This is allowed in release to specify custom asset locations in production.
+   */
   public static final Flag FLUTTER_ASSETS_DIR =
       new Flag("--flutter-assets-dir=", "FlutterAssetsDir", true);
 
-  /** Sets the old generation heap size for the Dart VM in megabytes. */
+  /**
+   * Sets the old generation heap size for the Dart VM in megabytes.
+   *
+   * <p>This is allowed in release for performance tuning.
+   */
   public static final Flag OLD_GEN_HEAP_SIZE =
       new Flag("--old-gen-heap-size=", "OldGenHeapSize", true);
 
-  /** Enables or disables the Impeller renderer. */
+  /**
+   * Enables or disables the Impeller renderer.
+   *
+   * <p>This is allowed in release to control which rendering backend is used in production.
+   */
   private static final Flag ENABLE_IMPELLER =
       new Flag("--enable-impeller=", "EnableImpeller", true);
 
-  /** Specifies the backend to use for Impeller rendering. */
+  /**
+   * Specifies the backend to use for Impeller rendering.
+   *
+   * <p>This is allowed in release to select a specific graphics backend for Impeller in production.
+   */
   private static final Flag IMPELLER_BACKEND =
       new Flag("--impeller-backend=", "ImpellerBackend", true);
 
-  /** Enables Android SurfaceControl for rendering. */
+  /**
+   * Enables Android SurfaceControl for rendering.
+   *
+   * <p>This is allowed in release to opt-in to this rendering feature in production.
+   */
   private static final Flag ENABLE_SURFACE_CONTROL =
       new Flag("--enable-surface-control", "EnableSurfaceControl", true);
 
-  /** Enables the Flutter GPU backend. */
+  /**
+   * Enables the Flutter GPU backend.
+   *
+   * <p>This is allowed in release for developers to use the Flutter GPU backend in production.
+   */
   private static final Flag ENABLE_FLUTTER_GPU =
       new Flag("--enable-flutter-gpu", "EnableFlutterGPU", true);
 
-  /** Enables lazy initialization of Impeller shaders. */
+  /**
+   * Enables lazy initialization of Impeller shaders.
+   *
+   * <p>This is allowed in release for performance tuning of the Impeller backend.
+   */
   private static final Flag IMPELLER_LAZY_SHADER_MODE =
       new Flag("--impeller-lazy-shader-mode=", "ImpellerLazyShaderInitialization", true);
 
-  /** Enables antialiasing for lines in Impeller. */
+  /**
+   * Enables antialiasing for lines in Impeller.
+   *
+   * <p>This is allowed in release to control rendering quality in production.
+   */
   private static final Flag IMPELLER_ANTIALIAS_LINES =
       new Flag("--impeller-antialias-lines", "ImpellerAntialiasLines", true);
 
-  /** Specifies the path to the VM snapshot data file. */
+  /**
+   * Specifies the path to the VM snapshot data file.
+   *
+   * <p>This is allowed in release to support different snapshot configurations.
+   */
   public static final Flag VM_SNAPSHOT_DATA =
       new Flag("--vm-snapshot-data=", "VmSnapshotData", true);
 
-  /** Specifies the path to the isolate snapshot data file. */
+  /**
+   * Specifies the path to the isolate snapshot data file.
+   *
+   * <p>This is allowed in release to support different snapshot configurations.
+   */
   public static final Flag ISOLATE_SNAPSHOT_DATA =
       new Flag("--isolate-snapshot-data=", "IsolateSnapshotData", true);
 
   // Manifest flags NOT allowed in release mode:
+
+  /** Ensures deterministic Skia rendering by skipping CPU feature swaps. */
+  private static final Flag SKIA_DETERMINISTIC_RENDERING =
+      new Flag("--skia-deterministic-rendering", "SkiaDeterministicRendering");
 
   /** Use Skia software backend for rendering. */
   public static final Flag ENABLE_SOFTWARE_RENDERING =
@@ -232,7 +277,7 @@ public final class FlutterShellArgs {
   /** Disables the merging of the UI and platform threads. */
   @VisibleForTesting
   public static final Flag DISABLE_MERGED_PLATFORM_UI_THREAD =
-      new Flag("--no-enable-merged-platform-ui-thread", "DisableMergedPlatformUIThread", true);
+      new Flag("--no-enable-merged-platform-ui-thread", "DisableMergedPlatformUIThread");
 
   @VisibleForTesting
   public static final List<Flag> ALL_FLAGS =
