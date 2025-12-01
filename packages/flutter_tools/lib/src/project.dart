@@ -249,6 +249,7 @@ class FlutterProject {
     android.ephemeralDirectory,
     ios.ephemeralDirectory,
     ios.ephemeralModuleDirectory,
+    ios.symlinks,
     linux.ephemeralDirectory,
     macos.ephemeralDirectory,
     windows.ephemeralDirectory,
