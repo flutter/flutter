@@ -12,6 +12,7 @@ import 'package:flutter/rendering.dart';
 
 import '../foundation/_features.dart';
 import '_window.dart';
+import '_window_positioner.dart';
 import 'binding.dart';
 
 // Do not import this file in production applications or packages published
@@ -80,7 +81,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
     BoxConstraints? preferredConstraints,
     String? title,
   }) {
-    final RegularWindowControllerMacOS res = RegularWindowControllerMacOS(
+    final res = RegularWindowControllerMacOS(
       owner: this,
       delegate: delegate,
       preferredSize: preferredSize,
@@ -98,7 +99,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
     BaseWindowController? parent,
     String? title,
   }) {
-    final DialogWindowControllerMacOS res = DialogWindowControllerMacOS(
+    final res = DialogWindowControllerMacOS(
       owner: this,
       delegate: delegate,
       preferredSize: preferredSize,
@@ -107,6 +108,18 @@ class WindowingOwnerMacOS extends WindowingOwner {
     );
     _activeControllers.add(res);
     return res;
+  }
+
+  @internal
+  @override
+  TooltipWindowController createTooltipWindowController({
+    required TooltipWindowControllerDelegate delegate,
+    required BoxConstraints preferredConstraints,
+    required Rect anchorRect,
+    required WindowPositioner positioner,
+    required BaseWindowController parent,
+  }) {
+    throw UnimplementedError('Tooltip windows are not yet implemented on MacOS.');
   }
 
   final List<BaseWindowController> _activeControllers = <BaseWindowController>[];
@@ -744,7 +757,7 @@ extension _Utf8Pointer on Pointer<_Utf8> {
   }
 
   static int _length(Pointer<Uint8> codeUnits) {
-    int length = 0;
+    var length = 0;
     while (codeUnits[length] != 0) {
       length++;
     }

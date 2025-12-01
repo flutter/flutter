@@ -18,10 +18,12 @@ class RawMenuAnchorAnimationExample extends StatefulWidget {
   const RawMenuAnchorAnimationExample({super.key});
 
   @override
-  State<RawMenuAnchorAnimationExample> createState() => _RawMenuAnchorAnimationExampleState();
+  State<RawMenuAnchorAnimationExample> createState() =>
+      _RawMenuAnchorAnimationExampleState();
 }
 
-class _RawMenuAnchorAnimationExampleState extends State<RawMenuAnchorAnimationExample>
+class _RawMenuAnchorAnimationExampleState
+    extends State<RawMenuAnchorAnimationExample>
     with SingleTickerProviderStateMixin {
   late final AnimationController animationController;
   final MenuController menuController = MenuController();
@@ -31,12 +33,14 @@ class _RawMenuAnchorAnimationExampleState extends State<RawMenuAnchorAnimationEx
   void initState() {
     super.initState();
     animationController =
-        AnimationController(vsync: this, duration: const Duration(milliseconds: 300))
-          ..addStatusListener((AnimationStatus status) {
-            setState(() {
-              // Rebuild to reflect animation status changes on the UI.
-            });
+        AnimationController(
+          vsync: this,
+          duration: const Duration(milliseconds: 300),
+        )..addStatusListener((AnimationStatus status) {
+          setState(() {
+            // Rebuild to reflect animation status changes on the UI.
           });
+        });
   }
 
   @override
@@ -96,7 +100,9 @@ class _RawMenuAnchorAnimationExampleState extends State<RawMenuAnchorAnimationEx
                   scale: animationController.view,
                   child: FadeTransition(
                     opacity: animationController.drive(
-                      Animatable<double>.fromCallback((double value) => clampDouble(value, 0, 1)),
+                      Animatable<double>.fromCallback(
+                        (double value) => clampDouble(value, 0, 1),
+                      ),
                     ),
                     child: Material(
                       elevation: 8,
@@ -113,7 +119,10 @@ class _RawMenuAnchorAnimationExampleState extends State<RawMenuAnchorAnimationEx
                           child: Text(
                             'ANIMATION STATUS:\n${_animationStatus.name}',
                             textAlign: TextAlign.center,
-                            style: TextStyle(color: colorScheme.onPrimary, fontSize: 12),
+                            style: TextStyle(
+                              color: colorScheme.onPrimary,
+                              fontSize: 12,
+                            ),
                           ),
                         ),
                       ),
@@ -125,18 +134,21 @@ class _RawMenuAnchorAnimationExampleState extends State<RawMenuAnchorAnimationEx
           ),
         );
       },
-      builder: (BuildContext context, MenuController menuController, Widget? child) {
-        return FilledButton(
-          onPressed: () {
-            if (_animationStatus.isForwardOrCompleted) {
-              menuController.close();
-            } else {
-              menuController.open();
-            }
+      builder:
+          (BuildContext context, MenuController menuController, Widget? child) {
+            return FilledButton(
+              onPressed: () {
+                if (_animationStatus.isForwardOrCompleted) {
+                  menuController.close();
+                } else {
+                  menuController.open();
+                }
+              },
+              child: _animationStatus.isForwardOrCompleted
+                  ? const Text('Close')
+                  : const Text('Open'),
+            );
           },
-          child: _animationStatus.isForwardOrCompleted ? const Text('Close') : const Text('Open'),
-        );
-      },
     );
   }
 }
@@ -153,7 +165,9 @@ class RawMenuAnchorAnimationApp extends StatelessWidget {
           dynamicSchemeVariant: DynamicSchemeVariant.vibrant,
         ),
       ),
-      home: const Scaffold(body: Center(child: RawMenuAnchorAnimationExample())),
+      home: const Scaffold(
+        body: Center(child: RawMenuAnchorAnimationExample()),
+      ),
     );
   }
 }

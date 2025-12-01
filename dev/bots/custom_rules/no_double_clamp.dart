@@ -24,7 +24,7 @@ class _NoDoubleClamp implements AnalyzeRule {
 
   @override
   void applyTo(ResolvedUnitResult unit) {
-    final _DoubleClampVisitor visitor = _DoubleClampVisitor();
+    final visitor = _DoubleClampVisitor();
     unit.unit.visitChildren(visitor);
     final List<AstNode> violationsInUnit = visitor.clampAccessNodes;
     if (violationsInUnit.isNotEmpty) {

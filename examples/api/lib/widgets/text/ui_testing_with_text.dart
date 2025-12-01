@@ -73,7 +73,8 @@ class _MyAppState extends State<MyApp> {
                           semanticsIdentifier: 'Hello to the automation tool',
                         ),
                         TextSpan(
-                          text: ' this text contains neither identifier nor label.',
+                          text:
+                              ' this text contains neither identifier nor label.',
                           style: customStyle2,
                         ),
                       ],
