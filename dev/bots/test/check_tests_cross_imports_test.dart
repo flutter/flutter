@@ -44,8 +44,8 @@ void main() {
     Set<String> extraWidgetsImportingCupertino = const <String>{},
   }) {
     final knownFiles = <Directory, Set<String>>{
-      _testWidgetsDirectory: knownWidgetsCrossImports,
-      _testCupertinoDirectory: knownCupertinoCrossImports,
+      _testWidgetsDirectory: TestsCrossImportChecker.knownWidgetsCrossImports,
+      _testCupertinoDirectory: TestsCrossImportChecker.knownCupertinoCrossImports,
     };
 
     for (final MapEntry<Directory, Set<String>>(key: Directory directory, value: Set<String> files)
@@ -115,7 +115,7 @@ void main() {
   });
 
   test('not all widgets knowns have cross imports', () async {
-    buildTestFiles(excludes: <String>{knownWidgetsCrossImports.first});
+    buildTestFiles(excludes: <String>{TestsCrossImportChecker.knownWidgetsCrossImports.first});
     bool? success;
     final String result = await capture(() async {
       success = checker.check();
@@ -126,7 +126,7 @@ void main() {
               '║ Huzzah! The following tests in Widgets no longer contain cross imports!',
               '║   packages/flutter/test/widgets/basic_test.dart',
               '║ However, they now need to be removed from the',
-              '║ knownWidgetsCrossImports list in the script /usr/local/google/home/jmccandless/Projects/flutter/main.dart.',
+              '║ knownWidgetsCrossImports list in the script /dev/bots/check_tests_cross_imports.dart.',
               '╚═══════════════════════════════════════════════════════════════════════════════',
             ]
             .map((String line) {
@@ -138,7 +138,7 @@ void main() {
   });
 
   test('not all cupertino knowns have cross imports', () async {
-    final String excluded = knownCupertinoCrossImports.first;
+    final String excluded = TestsCrossImportChecker.knownCupertinoCrossImports.first;
     buildTestFiles(excludes: <String>{excluded});
     bool? success;
     final String result = await capture(() async {
@@ -150,7 +150,7 @@ void main() {
               '║ Huzzah! The following tests in Cupertino no longer contain cross imports!',
               '║   $excluded',
               '║ However, they now need to be removed from the',
-              '║ knownCupertinoCrossImports list in the script /usr/local/google/home/jmccandless/Projects/flutter/main.dart.',
+              '║ knownCupertinoCrossImports list in the script /dev/bots/check_tests_cross_imports.dart.',
               '╚═══════════════════════════════════════════════════════════════════════════════',
             ]
             .map((String line) {
