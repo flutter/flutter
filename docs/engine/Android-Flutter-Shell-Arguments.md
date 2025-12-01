@@ -42,8 +42,7 @@ When you run a standalone Flutter app with the Flutter tool, engine flags
 can be passed directly and are forwarded to the Android engine. Examples:
 
 ```bash
-flutter run -d android \
-    --trace-startup \
+flutter run --trace-startup \
     --enable-software-rendering \
     --dart-flags="--enable-asserts"
 ```
