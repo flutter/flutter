@@ -599,6 +599,25 @@ public class FlutterLoaderTest {
   }
 
   @Test
+  public void getSofwareRenderingEnabledViaManifest_returnsExpectedValueWhenSetViaManifest() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metadata = new Bundle();
+
+    metadata.putBoolean("io.flutter.embedding.android.EnableSoftwareRendering", true);
+
+    ctx.getApplicationInfo().metaData = metadata;
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(ctx, null);
+    shadowOf(getMainLooper()).idle();
+
+    assertTrue(flutterLoader.getSofwareRenderingEnabledViaManifest());
+  }
+
+  @Test
   public void itSetsSkiaDeterministicRenderingFromMetadata() {
     testFlagFromMetaData(
         "io.flutter.embedding.android.SkiaDeterministicRendering",

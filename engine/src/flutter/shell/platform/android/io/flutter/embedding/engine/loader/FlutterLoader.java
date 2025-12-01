@@ -56,6 +56,8 @@ public class FlutterLoader {
 
   private static FlutterLoader instance;
 
+  private boolean enableSoftwareRendering = false;
+
   /**
    * Creates a {@code FlutterLoader} that uses a default constructed {@link FlutterJNI} and {@link
    * ExecutorService}.
@@ -351,6 +353,12 @@ public class FlutterLoader {
                   } else if (flag == FlutterShellArgs.LEAK_VM) {
                     // Mark if leak VM is set to track whether or not to set default internally.
                     isLeakVMSet.set(true);
+                  } else if (flag == FlutterShellArgs.ENABLE_SOFTWARE_RENDERING) {
+                    // Enabling software rendering impacts platform views, so save this value
+                    // so that the PlatformViewsController can be properly configured.
+                    enableSoftwareRendering =
+                        applicationMetaData.getBoolean(
+                            FlutterShellArgs.ENABLE_SOFTWARE_RENDERING.metadataKey, false);
                   } else if (flag == FlutterShellArgs.AOT_SHARED_LIBRARY_NAME) {
                     // Perform security check for path containing application's compiled Dart
                     // code and potentially user-provided compiled native code.
@@ -530,6 +538,16 @@ public class FlutterLoader {
               + aotSharedLibraryPath
               + ". Please ensure that the library is vetted and placed in your application's internal storage.");
     }
+  }
+
+  /**
+   * Returns whether software rendering is enabled.
+   *
+   * <p>{@link #ensureInitializationComplete} must be called first in order to retrieve this value.
+   * Otherwise, this will return false.
+   */
+  public boolean getSofwareRenderingEnabledViaManifest() {
+    return enableSoftwareRendering;
   }
 
   /**
