@@ -44,6 +44,9 @@ class WidgetsLocalizationAf extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'Plak';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'Skuif af';
 
   @override
@@ -95,6 +98,9 @@ class WidgetsLocalizationAm extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'ለጥፍ';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'ወደ ታች ውሰድ';
@@ -150,6 +156,9 @@ class WidgetsLocalizationAr extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'لصق';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'نقل لأسفل';
 
   @override
@@ -201,6 +210,9 @@ class WidgetsLocalizationAs extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => "পে'ষ্ট কৰক";
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'তললৈ স্থানান্তৰ কৰক';
@@ -256,6 +268,9 @@ class WidgetsLocalizationAz extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'Yerləşdirin';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'Aşağı köçürün';
 
   @override
@@ -307,6 +322,9 @@ class WidgetsLocalizationBe extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'Уставіць';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Перамясціць уніз';
@@ -362,6 +380,9 @@ class WidgetsLocalizationBg extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'Поставяне';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'Преместване надолу';
 
   @override
@@ -413,6 +434,9 @@ class WidgetsLocalizationBn extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'পেস্ট করুন';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'নিচের দিকে সরান';
@@ -468,6 +492,9 @@ class WidgetsLocalizationBs extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'Zalijepi';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'Pomjeri nadolje';
 
   @override
@@ -519,6 +546,9 @@ class WidgetsLocalizationCa extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'Enganxa';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Mou avall';
@@ -574,6 +604,9 @@ class WidgetsLocalizationCs extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'Vložit';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'Přesunout dolů';
 
   @override
@@ -625,6 +658,9 @@ class WidgetsLocalizationCy extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'Gludo';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Symud i lawr';
@@ -680,6 +716,9 @@ class WidgetsLocalizationDa extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'Indsæt';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'Flyt ned';
 
   @override
@@ -731,6 +770,9 @@ class WidgetsLocalizationDe extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'Einsetzen';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Nach unten verschieben';
@@ -794,6 +836,9 @@ class WidgetsLocalizationEl extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'Επικόλληση';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'Μετακίνηση προς τα κάτω';
 
   @override
@@ -845,6 +890,9 @@ class WidgetsLocalizationEn extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'Paste';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Move down';
@@ -1031,6 +1079,9 @@ class WidgetsLocalizationEs extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'Pegar';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Mover hacia abajo';
@@ -1366,6 +1417,9 @@ class WidgetsLocalizationEt extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'Kleebi';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'Teisalda alla';
 
   @override
@@ -1417,6 +1471,9 @@ class WidgetsLocalizationEu extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'Itsatsi';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Eraman behera';
@@ -1472,6 +1529,9 @@ class WidgetsLocalizationFa extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'جای‌گذاری';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'انتقال به پایین';
 
   @override
@@ -1523,6 +1583,9 @@ class WidgetsLocalizationFi extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'Liitä';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Siirrä alas';
@@ -1578,6 +1641,9 @@ class WidgetsLocalizationFil extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'I-paste';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'Ilipat pababa';
 
   @override
@@ -1629,6 +1695,9 @@ class WidgetsLocalizationFr extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'Coller';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Déplacer vers le bas';
@@ -1701,6 +1770,9 @@ class WidgetsLocalizationGl extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'Pegar';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'Mover cara abaixo';
 
   @override
@@ -1752,6 +1824,9 @@ class WidgetsLocalizationGsw extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'Einsetzen';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Nach unten verschieben';
@@ -1807,6 +1882,9 @@ class WidgetsLocalizationGu extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'પેસ્ટ કરો';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'નીચે ખસેડો';
 
   @override
@@ -1858,6 +1936,9 @@ class WidgetsLocalizationHe extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'הדבקה';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'העברה למטה';
@@ -1913,6 +1994,9 @@ class WidgetsLocalizationHi extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'चिपकाएं';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'नीचे ले जाएं';
 
   @override
@@ -1964,6 +2048,9 @@ class WidgetsLocalizationHr extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'Zalijepi';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Pomakni prema dolje';
@@ -2019,6 +2106,9 @@ class WidgetsLocalizationHu extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'Beillesztés';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'Áthelyezés lefelé';
 
   @override
@@ -2070,6 +2160,9 @@ class WidgetsLocalizationHy extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'Տեղադրել';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Տեղափոխել ներքև';
@@ -2125,6 +2218,9 @@ class WidgetsLocalizationId extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'Tempel';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'Turunkan';
 
   @override
@@ -2176,6 +2272,9 @@ class WidgetsLocalizationIs extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'Líma';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Færa niður';
@@ -2231,6 +2330,9 @@ class WidgetsLocalizationIt extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'Incolla';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'Sposta giù';
 
   @override
@@ -2282,6 +2384,9 @@ class WidgetsLocalizationJa extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => '貼り付け';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => '下に移動';
@@ -2337,6 +2442,9 @@ class WidgetsLocalizationKa extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'ჩასმა';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'ქვემოთ გადატანა';
 
   @override
@@ -2388,6 +2496,9 @@ class WidgetsLocalizationKk extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'Қою';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Төменге жылжыту';
@@ -2443,6 +2554,9 @@ class WidgetsLocalizationKm extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'ដាក់​ចូល';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'ផ្លាស់ទី​ចុះ​ក្រោម';
 
   @override
@@ -2494,6 +2608,9 @@ class WidgetsLocalizationKn extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => '\u{c85}\u{c82}\u{c9f}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => '\u{c95}\u{cc6}\u{cb3}\u{c97}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
@@ -2549,6 +2666,9 @@ class WidgetsLocalizationKo extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => '붙여넣기';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => '아래로 이동';
 
   @override
@@ -2600,6 +2720,9 @@ class WidgetsLocalizationKy extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'Чаптоо';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Төмөн жылдыруу';
@@ -2655,6 +2778,9 @@ class WidgetsLocalizationLo extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'ວາງ';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'ຍ້າຍລົງ';
 
   @override
@@ -2706,6 +2832,9 @@ class WidgetsLocalizationLt extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'Įklijuoti';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Perkelti žemyn';
@@ -2761,6 +2890,9 @@ class WidgetsLocalizationLv extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'Ielīmēt';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'Pārvietot uz leju';
 
   @override
@@ -2812,6 +2944,9 @@ class WidgetsLocalizationMk extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'Залепи';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Преместете надолу';
@@ -2867,6 +3002,9 @@ class WidgetsLocalizationMl extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'ഒട്ടിക്കുക';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'താഴോട്ട് നീക്കുക';
 
   @override
@@ -2918,6 +3056,9 @@ class WidgetsLocalizationMn extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'Буулгах';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Доош зөөх';
@@ -2973,6 +3114,9 @@ class WidgetsLocalizationMr extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'पेस्ट करा';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'खाली हलवा';
 
   @override
@@ -3024,6 +3168,9 @@ class WidgetsLocalizationMs extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'Tampal';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Alih ke bawah';
@@ -3079,6 +3226,9 @@ class WidgetsLocalizationMy extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'ကူးထည့်ရန်';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'အောက်သို့ရွှေ့ရန်';
 
   @override
@@ -3130,6 +3280,9 @@ class WidgetsLocalizationNb extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'Lim inn';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Flytt ned';
@@ -3185,6 +3338,9 @@ class WidgetsLocalizationNe extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'टाँस्नुहोस्';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'तल सार्नुहोस्';
 
   @override
@@ -3236,6 +3392,9 @@ class WidgetsLocalizationNl extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'Plakken';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Omlaag verplaatsen';
@@ -3291,6 +3450,9 @@ class WidgetsLocalizationNo extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'Lim inn';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'Flytt ned';
 
   @override
@@ -3342,6 +3504,9 @@ class WidgetsLocalizationOr extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'ପେଷ୍ଟ କରନ୍ତୁ';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'ତଳକୁ ଯାଆନ୍ତୁ';
@@ -3397,6 +3562,9 @@ class WidgetsLocalizationPa extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'ਪੇਸਟ ਕਰੋ';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'ਹੇਠਾਂ ਲਿਜਾਓ';
 
   @override
@@ -3448,6 +3616,9 @@ class WidgetsLocalizationPl extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'Wklej';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Przenieś w dół';
@@ -3503,6 +3674,9 @@ class WidgetsLocalizationPs extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'پیټ کړئ';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'Move down';
 
   @override
@@ -3554,6 +3728,9 @@ class WidgetsLocalizationPt extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'Colar';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Mover para baixo';
@@ -3626,6 +3803,9 @@ class WidgetsLocalizationRo extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'Inserați';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'Mutați în jos';
 
   @override
@@ -3677,6 +3857,9 @@ class WidgetsLocalizationRu extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'Вставить';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Переместить вниз';
@@ -3732,6 +3915,9 @@ class WidgetsLocalizationSi extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'අලවන්න';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'පහළට ගෙන යන්න';
 
   @override
@@ -3783,6 +3969,9 @@ class WidgetsLocalizationSk extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'Prilepiť';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Presunúť nadol';
@@ -3838,6 +4027,9 @@ class WidgetsLocalizationSl extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'Prilepi';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'Premakni navzdol';
 
   @override
@@ -3891,6 +4083,9 @@ class WidgetsLocalizationSq extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'Ngjit';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'Lëvize poshtë';
 
   @override
@@ -3942,6 +4137,9 @@ class WidgetsLocalizationSr extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'Налепи';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Померите надоле';
@@ -4052,6 +4250,9 @@ class WidgetsLocalizationSv extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'Klistra in';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'Flytta nedåt';
 
   @override
@@ -4103,6 +4304,9 @@ class WidgetsLocalizationSw extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'Bandika';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Sogeza chini';
@@ -4158,6 +4362,9 @@ class WidgetsLocalizationTa extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'ஒட்டு';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'கீழே நகர்த்தவும்';
 
   @override
@@ -4209,6 +4416,9 @@ class WidgetsLocalizationTe extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'పేస్ట్ చేయండి';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'కిందికు జరుపు';
@@ -4264,6 +4474,9 @@ class WidgetsLocalizationTh extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'วาง';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'ย้ายลง';
 
   @override
@@ -4315,6 +4528,9 @@ class WidgetsLocalizationTl extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'I-paste';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Ilipat pababa';
@@ -4370,6 +4586,9 @@ class WidgetsLocalizationTr extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'Yapıştır';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'Aşağı taşı';
 
   @override
@@ -4421,6 +4640,9 @@ class WidgetsLocalizationUk extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'Вставити';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Перемістити вниз';
@@ -4476,6 +4698,9 @@ class WidgetsLocalizationUr extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'پیسٹ کریں';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'نیچے منتقل کریں';
 
   @override
@@ -4527,6 +4752,9 @@ class WidgetsLocalizationUz extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'Joylash';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Pastga siljitish';
@@ -4582,6 +4810,9 @@ class WidgetsLocalizationVi extends GlobalWidgetsLocalizations {
   String get pasteButtonLabel => 'Dán';
 
   @override
+  String get radioButtonUnselectedLabel => 'Not selected';
+
+  @override
   String get reorderItemDown => 'Di chuyển xuống';
 
   @override
@@ -4633,6 +4864,9 @@ class WidgetsLocalizationZh extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => '粘贴';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => '下移';
@@ -4763,6 +4997,9 @@ class WidgetsLocalizationZu extends GlobalWidgetsLocalizations {
 
   @override
   String get pasteButtonLabel => 'Namathisela';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Iya phansi';

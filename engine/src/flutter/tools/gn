@@ -439,7 +439,12 @@ def to_gn_args(args):
 
   gn_args['buildtools_path'] = '//flutter/buildtools'
 
+  if args.unoptimized and args.optimize_for_size:
+    raise Exception('--unoptimized and --optimize-for-size are mutually exclusive')
+
   gn_args['is_debug'] = args.unoptimized
+
+  gn_args['optimize_for_size'] = args.optimize_for_size
 
   gn_args.update(setup_git_versions())
 
@@ -480,6 +485,7 @@ def to_gn_args(args):
   gn_args['skia_use_expat'] = True
   gn_args['skia_use_fontconfig'] = args.enable_fontconfig
   gn_args['skia_use_icu'] = True
+  gn_args['skia_use_xps'] = False  # Flutter does not use XPS
   gn_args['is_official_build'] = True  # Disable Skia test utilities.
   gn_args['android_full_debug'] = args.target_os == 'android' and args.unoptimized
   if args.clang is None:
@@ -648,7 +654,7 @@ def to_gn_args(args):
   else:
     gn_args['skia_use_gl'] = args.target_os != 'fuchsia'
 
-  if sys.platform == 'darwin' and args.target_os not in ['android', 'fuchsia']:
+  if sys.platform == 'darwin' and args.target_os not in ['android', 'fuchsia', 'linux']:
     # OpenGL is deprecated on macOS > 10.11.
     # This is not necessarily needed but enabling this until we have a way to
     # build a macOS metal only shell and a gl only shell.
@@ -677,6 +683,9 @@ def to_gn_args(args):
 
   if args.arm_float_abi:
     gn_args['arm_float_abi'] = args.arm_float_abi
+
+  if args.arm_tune:
+    gn_args['arm_tune'] = args.arm_tune
 
   if args.dart_dynamic_modules:
     gn_args['dart_dynamic_modules'] = True
@@ -802,6 +811,7 @@ def to_gn_args(args):
     # Do not build unnecessary parts of the ANGLE tree.
     gn_args['angle_build_all'] = False
     gn_args['angle_has_astc_encoder'] = False
+    gn_args['angle_enable_libdrm'] = False
     # Force ANGLE context checks on Windows to prevent crashes.
     # TODO(loic-sharma): Remove this once ANGLE crashes have been fixed.
     # https://github.com/flutter/flutter/issues/114107
@@ -823,6 +833,8 @@ def to_gn_args(args):
     gn_args['angle_vulkan_headers_dir'] = '//flutter/third_party/vulkan-deps/vulkan-headers/src'
     gn_args['angle_vulkan_loader_dir'] = '//flutter/third_party/vulkan-deps/vulkan-loader/src'
     gn_args['angle_vulkan_tools_dir'] = '//flutter/third_party/vulkan-deps/vulkan-tools/src'
+    gn_args['angle_lunarg_vulkantools_dir'
+           ] = '//flutter/third_party/vulkan-deps/lunarg-vulkantools/src'
 
   if args.darwin_extension_safe:
     gn_args['darwin_extension_safe'] = True
@@ -840,6 +852,7 @@ def to_gn_wasm_args(args, gn_args):
   gn_args['target_os'] = 'wasm'
   gn_args['target_cpu'] = 'wasm'
   gn_args['wasm_use_dwarf'] = args.wasm_use_dwarf
+  gn_args['wasm_prioritize_size'] = args.optimize_for_size
   gn_args['skia_use_angle'] = False
   gn_args['skia_use_dng_sdk'] = False
   gn_args['skia_use_expat'] = False
@@ -896,7 +909,14 @@ def parse_args(args):
   parser = argparse.ArgumentParser(description='A script to run `gn gen`.')
 
   parser.add_argument('--unoptimized', default=False, action='store_true')
-
+  parser.add_argument(
+      '--optimize-for-size',
+      default=False,
+      action='store_true',
+      help='Optimize for code size rather than speed. '
+      'Optimized builds for Windows, iOS, and Android are '
+      'always optimized for size regardless of the value of this flag.'
+  )
   parser.add_argument(
       '--enable-unittests',
       action='store_true',
@@ -975,6 +995,16 @@ def parse_args(args):
   parser.add_argument('--windows-cpu', type=str, choices=['x64', 'arm64', 'x86'], default='x64')
   parser.add_argument('--simulator-cpu', type=str, choices=['x64', 'arm64'], default='x64')
   parser.add_argument('--arm-float-abi', type=str, choices=['hard', 'soft', 'softfp'])
+  parser.add_argument(
+      '--arm-tune',
+      type=str,
+      help='The specific cpu variant for which to generate code. '
+      'This value is passed directly to the compiler `-mtune` flag, '
+      'and is currently only supported for ARM. '
+      'See your compiler documentation for valid values to pass to this option, '
+      'for example for clang run `clang --target=aarch64-unknown-linux-gnu -mtune=?`. '
+      'The default is a generic cpu variant selected by the build system.'
+  )
 
   # Whether to compile in backtrace support.
   # Available for Windows and POSIX platforms whose libc includes execinfo.h.

@@ -915,7 +915,7 @@ class _FakeDeviceManager extends DeviceManager {
     : fakeDevices = devices ?? <FakeDeviceJsonData>[],
       super(logger: logger ?? testLogger);
 
-  var fakeDevices = <FakeDeviceJsonData>[];
+  List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[];
 
   @override
   Future<List<Device>> getAllDevices({DeviceDiscoveryFilter? filter}) async {
@@ -961,7 +961,7 @@ class FakeTerminal extends Fake implements AnsiTerminal {
   bool get isCliAnimationEnabled => supportsColor;
 
   @override
-  var singleCharMode = false;
+  bool singleCharMode = false;
 
   @override
   String clearLines(int numberOfLines) {
@@ -972,7 +972,7 @@ class FakeTerminal extends Fake implements AnsiTerminal {
 class FakeBufferLogger extends BufferLogger {
   FakeBufferLogger({super.terminal, super.outputPreferences, super.verbose}) : super.test();
 
-  var originalStatusText = '';
+  String originalStatusText = '';
 
   @override
   void printStatus(

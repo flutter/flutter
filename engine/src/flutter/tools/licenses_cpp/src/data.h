@@ -7,9 +7,9 @@
 
 #include <filesystem>
 
-#include "flutter/third_party/abseil-cpp/absl/status/statusor.h"
 #include "flutter/tools/licenses_cpp/src/catalog.h"
 #include "flutter/tools/licenses_cpp/src/filter.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 
 /// In memory representation of the contents of the data directory
 ///

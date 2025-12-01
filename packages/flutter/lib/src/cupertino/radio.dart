@@ -66,23 +66,21 @@ const List<double> _kDisabledDarkGradientOpacities = <double>[0.08, 0.14];
 /// deselected. The values are of type `T`, the type parameter of the
 /// [CupertinoRadio] class. Enums are commonly used for this purpose.
 ///
-/// The radio button itself does not maintain any state. Instead, selecting the
-/// radio invokes the [onChanged] callback, passing [value] as a parameter. If
-/// [groupValue] and [value] match, this radio will be selected. Most widgets
-/// will respond to [onChanged] by calling [State.setState] to update the
-/// radio button's [groupValue].
+/// This widget typically has a [RadioGroup] ancestor, which takes in a
+/// [RadioGroup.groupValue], and the [CupertinoRadio] under it with matching
+/// [value] will be selected.
 ///
 /// {@tool dartpad}
 /// Here is an example of CupertinoRadio widgets wrapped in CupertinoListTiles.
 ///
-/// The currently selected character is passed into `groupValue`, which is
+/// The currently selected character is passed into `RadioGroup.groupValue`, which is
 /// maintained by the example's `State`. In this case, the first [CupertinoRadio]
 /// will start off selected because `_character` is initialized to
 /// `SingingCharacter.lafayette`.
 ///
 /// If the second radio button is pressed, the example's state is updated
 /// with `setState`, updating `_character` to `SingingCharacter.jefferson`.
-/// This causes the buttons to rebuild with the updated `groupValue`, and
+/// This causes the buttons to rebuild with the updated `RadioGroup.groupValue`, and
 /// therefore the selection of the second button.
 ///
 /// ** See code in examples/api/lib/cupertino/radio/cupertino_radio.0.dart **
@@ -145,7 +143,9 @@ class CupertinoRadio<T> extends StatefulWidget {
   /// ```dart
   /// CupertinoRadio<SingingCharacter>(
   ///   value: SingingCharacter.lafayette,
+  ///   // ignore: deprecated_member_use
   ///   groupValue: _character,
+  ///   // ignore: deprecated_member_use
   ///   onChanged: (SingingCharacter? newValue) {
   ///     setState(() {
   ///       _character = newValue;
@@ -487,7 +487,7 @@ class _RadioPainter extends ToggleablePainter {
   }
 
   void _drawPressedOverlay(Canvas canvas, Offset center, double radius) {
-    final Paint pressedPaint = Paint()
+    final pressedPaint = Paint()
       ..color = brightness == Brightness.light
           ? CupertinoColors.black.withOpacity(_kPressedOverlayOpacity)
           : CupertinoColors.white.withOpacity(_kPressedOverlayOpacity);
@@ -501,18 +501,18 @@ class _RadioPainter extends ToggleablePainter {
     Color topColor,
     Color bottomColor,
   ) {
-    final LinearGradient fillGradient = LinearGradient(
+    final fillGradient = LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: <Color>[topColor, bottomColor],
     );
-    final Rect circleRect = Rect.fromCircle(center: center, radius: radius);
-    final Paint gradientPaint = Paint()..shader = fillGradient.createShader(circleRect);
+    final circleRect = Rect.fromCircle(center: center, radius: radius);
+    final gradientPaint = Paint()..shader = fillGradient.createShader(circleRect);
     canvas.drawPath(Path()..addOval(circleRect), gradientPaint);
   }
 
   void _drawOuterBorder(Canvas canvas, Offset center) {
-    final Paint borderPaint = Paint()
+    final borderPaint = Paint()
       ..style = PaintingStyle.stroke
       ..color = borderColor
       ..strokeWidth = _kBorderOutlineStrokeWidth;
@@ -525,17 +525,17 @@ class _RadioPainter extends ToggleablePainter {
 
     if (checkmarkStyle) {
       if (value ?? false) {
-        final Path path = Path();
-        final Paint checkPaint = Paint()
+        final path = Path();
+        final checkPaint = Paint()
           ..color = activeColor
           ..style = PaintingStyle.stroke
           ..strokeWidth = _kCheckmarkStrokeWidth
           ..strokeCap = StrokeCap.round;
         final double width = _size.width;
-        final Offset origin = Offset(center.dx - (width / 2), center.dy - (width / 2));
-        final Offset start = Offset(width * 0.25, width * 0.52);
-        final Offset mid = Offset(width * 0.46, width * 0.75);
-        final Offset end = Offset(width * 0.85, width * 0.29);
+        final origin = Offset(center.dx - (width / 2), center.dy - (width / 2));
+        final start = Offset(width * 0.25, width * 0.52);
+        final mid = Offset(width * 0.46, width * 0.75);
+        final end = Offset(width * 0.85, width * 0.29);
         path.moveTo(origin.dx + start.dx, origin.dy + start.dy);
         path.lineTo(origin.dx + mid.dx, origin.dy + mid.dy);
         canvas.drawPath(path, checkPaint);
@@ -545,7 +545,7 @@ class _RadioPainter extends ToggleablePainter {
       }
     } else {
       if (value ?? false) {
-        final Paint outerPaint = Paint()..color = activeColor;
+        final outerPaint = Paint()..color = activeColor;
         // Draw a gradient in dark mode if the radio is disabled.
         if (brightness == Brightness.dark && !isActive) {
           _drawFillGradient(
@@ -566,14 +566,14 @@ class _RadioPainter extends ToggleablePainter {
         if (downPosition != null) {
           _drawPressedOverlay(canvas, center, _kOuterRadius);
         }
-        final Paint innerPaint = Paint()..color = fillColor;
+        final innerPaint = Paint()..color = fillColor;
         canvas.drawCircle(center, _kInnerRadius, innerPaint);
         // Draw an outer border if the radio is disabled and selected.
         if (!isActive) {
           _drawOuterBorder(canvas, center);
         }
       } else {
-        final Paint paint = Paint();
+        final paint = Paint();
         paint.color = isActive ? inactiveColor : _kDisabledOuterColor;
         if (brightness == Brightness.dark) {
           _drawFillGradient(
@@ -598,7 +598,7 @@ class _RadioPainter extends ToggleablePainter {
       }
     }
     if (isFocused) {
-      final Paint focusPaint = Paint()
+      final focusPaint = Paint()
         ..style = PaintingStyle.stroke
         ..color = focusColor
         ..strokeWidth = _kFocusOutlineStrokeWidth;

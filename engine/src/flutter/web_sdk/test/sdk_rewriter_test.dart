@@ -8,7 +8,7 @@ import '../sdk_rewriter.dart';
 
 void main() {
   test('handles exports correctly in the engine library file', () {
-    const String source = '''
+    const source = '''
 // Comment 1
 
 library engine;
@@ -20,7 +20,7 @@ export'engine/file2.dart';
 export      'engine/file3.dart';
 ''';
 
-    const String expected = '''
+    const expected = '''
 // Comment 1
 
 @JS()
@@ -30,7 +30,6 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert' hide Codec;
 import 'dart:developer' as developer;
-import 'dart:js_util' as js_util;
 import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 import 'dart:math' as math;
@@ -56,11 +55,11 @@ part 'engine/file3.dart';
   });
 
   test('underscore is not added to library name for public library in API file', () {
-    const String source = '''
+    const source = '''
 library engine;
 ''';
 
-    const String expected = '''
+    const expected = '''
 @JS()
 library dart.engine;
 
@@ -68,7 +67,6 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert' hide Codec;
 import 'dart:developer' as developer;
-import 'dart:js_util' as js_util;
 import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 import 'dart:math' as math;
@@ -88,7 +86,7 @@ import 'dart:extra';
   });
 
   test('complains about non-compliant engine.dart file', () {
-    const String source = '''
+    const source = '''
 library engine;
 
 import 'dart:something';
@@ -117,7 +115,7 @@ export 'engine/file3.dart';
   });
 
   test('removes imports/exports from engine files', () {
-    const String source = '''
+    const source = '''
 import 'package:some_package/some_package.dart';
 import 'package:some_package/some_package/foo.dart';
 import 'package:some_package/some_package' as some_package;
@@ -135,7 +133,7 @@ void printSomething() {
 }
 ''';
 
-    const String expected = '''
+    const expected = '''
 part of dart._engine;
 
 
@@ -181,7 +179,7 @@ void printSomething() {
   });
 
   test('allows imports to line-break', () {
-    const String source = '''
+    const source = '''
 import 'package:some_package/some_package.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart'
     if (dart.library.html) 'package:ui/src/engine/skwasm/skwasm_stub.dart';
@@ -194,7 +192,7 @@ void printSomething() {
 }
 ''';
 
-    const String expected = '''
+    const expected = '''
 part of dart._engine;
 
 void printSomething() {

@@ -30,7 +30,48 @@ More information and tips:
 docs/releases/Hotfix-Documentation-Best-Practices.md
 -->
 
+## Flutter 3.38 Changes
+
+### [3.38.3](https://github.com/flutter/flutter/releases/tag/3.38.3)
+
+- [flutter/178772](https://github.com/flutter/flutter/issues/178772) Flutter engine reports a different version than the framework.
+- [flutter/178804](https://github.com/flutter/flutter/issues/178804) Bump Dart version to [3.10.1](https://github.com/dart-lang/sdk/blob/3.10.1/CHANGELOG.md#3101).
+
+### [3.38.2](https://github.com/flutter/flutter/releases/tag/3.38.2)
+
+- [flutter/178472](https://github.com/flutter/flutter/issues/178472) Widget preview command can crash on exit if in the middle of analyzing changes to a Dart file.
+- [flutter/178452](https://github.com/flutter/flutter/issues/178452) Flutter fails to build on iOS with error message: "Improperly formatted define flag" in add-to-app scenarios.
+- [flutter/178486](https://github.com/flutter/flutter/issues/178486) When running flutter widget-preview start with Flutter Web disabled, an exception is thrown and the widget previewer fails to start.
+- [flutter/178317](https://github.com/flutter/flutter/issues/178317) Running flutter pub get can crash the widget previewer when plugin dependencies are added or updated.
+- [flutter/178318](https://github.com/flutter/flutter/issues/178318) Certain flutter crash scenarios can result in multiple crash reports being submitted for a single process crash.
+- [flutter/176399](https://github.com/flutter/flutter/issues/176399) Visual Studio 2026 is not supported when compiling Windows desktop applications.
+- [flutter/175058](https://github.com/flutter/flutter/issues/175058) The widget previewer fails to start if flutter pub get has not been run in the target project.
+- [flutter/178421](https://github.com/flutter/flutter/issues/178421) When debugging from an IDE with a physical iOS 26 device, IDE installs an app but hangs on a white screen during launching.
+
+### [3.38.1](https://github.com/flutter/flutter/releases/tag/3.38.1)
+
+- [flutter/178400](https://github.com/flutter/flutter/issues/178400) Adds support for Dart 3.10 stable.
+
+### [3.38.0](https://github.com/flutter/flutter/releases/tag/3.38.0)
+
+Learn about what's new in this release in [the blog post](https://blog.flutter.dev/whats-new-in-flutter-3-38-3f7b258f7228), and check out the [CHANGELOG](https://docs.flutter.dev/release/release-notes/release-notes-3.38.0) for a detailed list of all the new changes.
+
 ## Flutter 3.35 Changes
+
+### [3.35.7](https://github.com/flutter/flutter/releases/tag/3.35.7)
+
+- [flutter/174082](https://github.com/flutter/flutter/issues/174082) Apps, on all platforms, that extend MenuController class see a compile time failure when building.
+- [flutter/173770](https://github.com/flutter/flutter/issues/173770) Mitigates a memory leak that occurs on Android, when `Activities` are not kept upon exit and an Activity is exited and re-entered.
+
+### [3.35.6](https://github.com/flutter/flutter/releases/tag/3.35.6)
+
+- [flutter/175669](https://github.com/flutter/flutter/issues/175669) `flutter analyze --suggestions` supports versions up to Java 25, Gradle 9 and AGP 9, Kotlin 2.2.20.
+- [flutter/172624](https://github.com/flutter/flutter/issues/172624) Fixes an issue that could result in a corrupt pipeline cache when using the Impeller Vulkan back end.
+
+### [3.35.5](https://github.com/flutter/flutter/releases/tag/3.35.5)
+
+ - [flutter/172105](https://github.com/flutter/flutter/issues/172105) Flutter view no longer hangs after multiple transitions on iOS add-to-app.
+ - [flutter/173106](https://github.com/flutter/flutter/issues/173106) Multiple cursors display correctly.
 
 ### [3.35.4](https://github.com/flutter/flutter/releases/tag/3.35.4)
 - [flutter/173474](https://github.com/flutter/flutter/issues/173474) - On all platforms PlatformDispatchers.instance.engineId no longer returns null after hot restart.

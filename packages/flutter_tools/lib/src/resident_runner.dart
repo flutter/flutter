@@ -1123,7 +1123,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     processManager: globals.processManager,
     platform: globals.platform,
     analytics: globals.analytics,
-    projectDir: globals.fs.currentDirectory,
+    projectDir: globals.fs.directory(projectRootPath),
     packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
     generateDartPluginRegistry: generateDartPluginRegistry,
     defines: <String, String>{
@@ -1165,7 +1165,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   /// - [attach] is used to explicitly connect to an already running app.
   @protected
   @visibleForTesting
-  var stopAppDuringCleanup = true;
+  bool stopAppDuringCleanup = true;
 
   bool get debuggingEnabled => debuggingOptions.debuggingEnabled;
 
@@ -1215,7 +1215,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   ///
   /// Returns the exit code that we should use for the flutter tool process; 0
   /// for success, 1 for user error (e.g. bad arguments), 2 for other failures.
-  Future<int?> run({
+  Future<int> run({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
     String? route,
@@ -1225,7 +1225,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   ///
   /// [needsFullRestart] defaults to `true`, and controls if the frontend server should
   /// compile a full dill. This should be set to `false` if this is called in [ResidentRunner.run], since that method already performs an initial compilation.
-  Future<int?> attach({
+  Future<int> attach({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
     bool needsFullRestart = true,
@@ -1468,11 +1468,11 @@ abstract class ResidentRunner extends ResidentHandlers {
         /// of the default URI encoding.
         String urlToDisplayString(Uri uri) {
           final base = StringBuffer(uri.withoutQueryParameters().toString());
-          base.write(
-            uri.queryParameters.keys
-                .map((String key) => '$key=${uri.queryParameters[key]}')
-                .join('&'),
-          );
+          if (uri.hasQuery) {
+            base.write(
+              '?${uri.queryParameters.keys.map((String key) => '$key=${uri.queryParameters[key]}').join('&')}',
+            );
+          }
           return base.toString();
         }
 
@@ -1867,11 +1867,14 @@ class TerminalHandler {
 }
 
 class DebugConnectionInfo {
-  DebugConnectionInfo({this.httpUri, this.wsUri, this.baseUri});
+  DebugConnectionInfo({this.httpUri, this.wsUri, this.baseUri, this.dtdUri, this.devToolsUri});
 
   final Uri? httpUri;
   final Uri? wsUri;
   final String? baseUri;
+
+  final Uri? dtdUri;
+  final Uri? devToolsUri;
 }
 
 /// Returns the next platform value for the switcher.

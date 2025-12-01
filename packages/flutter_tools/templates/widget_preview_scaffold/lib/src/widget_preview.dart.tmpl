@@ -31,14 +31,32 @@ class WidgetPreview {
   const WidgetPreview({
     required this.builder,
     required this.scriptUri,
+    required this.line,
+    required this.column,
     required this.previewData,
     required this.packageName,
+  });
+
+  @visibleForTesting
+  const WidgetPreview.test({
+    required this.builder,
+    required this.previewData,
+    this.scriptUri = '',
+    this.line = -1,
+    this.column = -1,
+    this.packageName = '',
   });
 
   /// The absolute file:// URI pointing to the script containing this preview.
   ///
   /// This matches the URI format sent by IDEs for active location change events.
   final String scriptUri;
+
+  /// The line at which the Preview annotation was applied.
+  final int line;
+
+  /// The column at which the Preview annotation was applied.
+  final int column;
 
   /// The name of the package in which a preview was defined.
   ///
@@ -104,6 +122,7 @@ class WidgetPreview {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     properties
       ..add(DiagnosticsProperty<String>('name', name, ifNull: 'not set'))
+      ..add(DiagnosticsProperty<String>('group', previewData.group))
       ..add(DiagnosticsProperty<Size>('size', size))
       ..add(DiagnosticsProperty<double>('textScaleFactor', textScaleFactor))
       ..add(DiagnosticsProperty<PreviewThemeData>('theme', theme))

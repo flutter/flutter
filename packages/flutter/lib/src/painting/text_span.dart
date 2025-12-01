@@ -289,7 +289,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     List<PlaceholderDimensions>? dimensions,
   }) {
     assert(debugAssertIsValid());
-    final bool hasStyle = style != null;
+    final hasStyle = style != null;
     if (hasStyle) {
       builder.pushStyle(style!.getTextStyle(textScaler: textScaler));
     }
@@ -485,7 +485,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     if (other.runtimeType != runtimeType) {
       return RenderComparison.layout;
     }
-    final TextSpan textSpan = other as TextSpan;
+    final textSpan = other as TextSpan;
     if (textSpan.text != text ||
         children?.length != textSpan.children?.length ||
         (style == null) != (textSpan.style == null)) {
@@ -504,7 +504,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
       }
     }
     if (children != null) {
-      for (int index = 0; index < children!.length; index += 1) {
+      for (var index = 0; index < children!.length; index += 1) {
         final RenderComparison candidate = children![index].compareTo(textSpan.children![index]);
         if (candidate.index > result.index) {
           result = candidate;

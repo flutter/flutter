@@ -511,6 +511,10 @@ bool CapabilitiesVK::SupportsPrimitiveRestart() const {
   return has_primitive_restart_;
 }
 
+bool CapabilitiesVK::Supports32BitPrimitiveIndices() const {
+  return true;
+}
+
 void CapabilitiesVK::SetOffscreenFormat(PixelFormat pixel_format) const {
   default_color_format_ = pixel_format;
 }
@@ -647,6 +651,8 @@ bool CapabilitiesVK::SetPhysicalDevice(
 
   minimum_uniform_alignment_ =
       device_properties_.limits.minUniformBufferOffsetAlignment;
+  minimum_storage_alignment_ =
+      device_properties_.limits.minStorageBufferOffsetAlignment;
 
   return true;
 }
@@ -728,6 +734,10 @@ PixelFormat CapabilitiesVK::GetDefaultGlyphAtlasFormat() const {
 
 size_t CapabilitiesVK::GetMinimumUniformAlignment() const {
   return minimum_uniform_alignment_;
+}
+
+size_t CapabilitiesVK::GetMinimumStorageBufferAlignment() const {
+  return minimum_storage_alignment_;
 }
 
 bool CapabilitiesVK::NeedsPartitionedHostBuffer() const {

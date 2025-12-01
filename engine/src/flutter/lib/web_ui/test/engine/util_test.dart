@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
@@ -104,55 +103,6 @@ void testMain() {
     expect(element.style.color, 'blue');
     setElementStyle(element, 'color', null);
     expect(element.style.color, '');
-  });
-
-  test('futurize turns a Callbacker into a Future', () async {
-    final Future<String> stringFuture = futurize((Callback<String> callback) {
-      scheduleMicrotask(() {
-        callback('hello');
-      });
-      return null;
-    });
-    expect(await stringFuture, 'hello');
-  });
-
-  test('futurize converts error string to exception', () async {
-    try {
-      await futurize((Callback<String> callback) {
-        return 'this is an error';
-      });
-      fail('Expected it to throw');
-    } on Exception catch (exception) {
-      expect('$exception', contains('this is an error'));
-    }
-  });
-
-  test('futurize converts async null into an async operation failure', () async {
-    final Future<String?> stringFuture = futurize((Callback<String?> callback) {
-      scheduleMicrotask(() {
-        callback(null);
-      });
-      return null;
-    });
-
-    try {
-      await stringFuture;
-      fail('Expected it to throw');
-    } on Exception catch (exception) {
-      expect('$exception', contains('operation failed'));
-    }
-  });
-
-  test('futurize converts sync null into a sync operation failure', () async {
-    try {
-      await futurize((Callback<String?> callback) {
-        callback(null);
-        return null;
-      });
-      fail('Expected it to throw');
-    } on Exception catch (exception) {
-      expect('$exception', contains('operation failed'));
-    }
   });
 
   test('unordered list equality', () {
