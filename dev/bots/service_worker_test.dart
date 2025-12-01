@@ -35,7 +35,7 @@ Future<void> runServiceWorkerCleanupTest({required bool headless}) async {
 
   AppServer? server;
 
-  const String oldCachingWorkerContent = '''
+  const oldCachingWorkerContent = '''
 'use strict';
 const CACHE_NAME = 'flutter-app-cache';
 self.addEventListener('install', (event) => {
@@ -65,9 +65,7 @@ self.addEventListener('fetch', (event) => {
 });
   ''';
 
-  final File serviceWorkerBuildFile = File(
-    path.join(_appBuildDirectory, 'flutter_service_worker.js'),
-  );
+  final serviceWorkerBuildFile = File(path.join(_appBuildDirectory, 'flutter_service_worker.js'));
 
   try {
     await runCommand(_flutter, <String>['clean'], workingDirectory: _testAppDirectory);
@@ -150,7 +148,7 @@ Future<void> _waitForAppToRequest(AppServer server, String file) async {
   print('Waiting for app to request "$file"');
   await Future.any(<Future<Object?>>[
     () async {
-      int tries = 1;
+      var tries = 1;
       while (!_requestedPaths.contains(file)) {
         if (tries++ % 40 == 0) {
           print('-- Still waiting for app to request "$file". Requested so far: $_requestedPaths');
@@ -169,15 +167,15 @@ Future<void> _waitForAppToRequest(AppServer server, String file) async {
 /// outside the standard test runner environment.
 void expect(Object? actual, Object? expected, {String? reason}) {
   final Matcher matcher = wrapMatcher(expected);
-  final Map<Object?, Object?> matchState = <Object?, Object?>{};
+  final matchState = <Object?, Object?>{};
   if (matcher.matches(actual, matchState)) {
     return;
   }
-  final StringDescription mismatchDescription = StringDescription();
+  final mismatchDescription = StringDescription();
   matcher.describeMismatch(actual, mismatchDescription, matchState, true);
 
-  final String which = mismatchDescription.toString();
-  final StringBuffer buffer = StringBuffer();
+  final which = mismatchDescription.toString();
+  final buffer = StringBuffer();
   buffer.writeln(_indent(_prettyPrint(expected), first: 'Expected: '));
   buffer.writeln(_indent(_prettyPrint(actual), first: '  Actual: '));
   if (which.isNotEmpty) {
@@ -199,7 +197,7 @@ String _indent(String text, {required String first}) {
   if (lines.length == 1) {
     return '$first$text';
   }
-  final StringBuffer buffer = StringBuffer('$first${lines.first}\n');
+  final buffer = StringBuffer('$first${lines.first}\n');
   for (final String line in lines.skip(1).take(lines.length - 2)) {
     buffer.writeln('$prefix$line');
   }

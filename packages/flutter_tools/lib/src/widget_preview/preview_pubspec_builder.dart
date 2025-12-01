@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 
 import '../base/deferred_component.dart';
+import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
@@ -57,10 +58,10 @@ class PreviewPubspecBuilder {
     'web',
   ];
 
-  /// Maps asset URIs to relative paths for the widget preview project to
+  /// Maps asset URIs to absolute paths for the widget preview project to
   /// include.
   @visibleForTesting
-  static Uri transformAssetUri(Uri uri) {
+  Uri transformAssetUri(Uri uri) {
     // Assets provided by packages always start with 'packages' and do not
     // require their URIs to be updated.
     if (uri.path.startsWith('packages')) {
@@ -68,20 +69,23 @@ class PreviewPubspecBuilder {
     }
     // Otherwise, the asset is contained within the root project and needs
     // to be referenced from the widget preview scaffold project's pubspec.
-    return Uri(path: '../../${uri.path}');
+    final Directory rootProjectDir = rootProject.directory;
+    final FileSystem fs = rootProjectDir.fileSystem;
+    return Uri(path: fs.path.join(rootProjectDir.absolute.path, uri.path));
   }
 
   @visibleForTesting
-  static AssetsEntry transformAssetsEntry(AssetsEntry asset) {
+  AssetsEntry transformAssetsEntry(AssetsEntry asset) {
     return AssetsEntry(
       uri: transformAssetUri(asset.uri),
       flavors: asset.flavors,
+      platforms: asset.platforms,
       transformers: asset.transformers,
     );
   }
 
   @visibleForTesting
-  static DeferredComponent transformDeferredComponent(DeferredComponent component) {
+  DeferredComponent transformDeferredComponent(DeferredComponent component) {
     return DeferredComponent(
       name: component.name,
       // TODO(bkonyi): verify these library paths are always package: paths from the parent project.
@@ -89,6 +93,8 @@ class PreviewPubspecBuilder {
       assets: component.assets.map(transformAssetsEntry).toList(),
     );
   }
+
+  PubOutputMode get _outputMode => verbose ? PubOutputMode.all : PubOutputMode.failuresOnly;
 
   Future<void> populatePreviewPubspec({
     required FlutterProject rootProject,
@@ -118,14 +124,12 @@ class PreviewPubspecBuilder {
         if (project.manifest.appName.isNotEmpty)
           // Use `json.encode` to handle escapes correctly.
           project.manifest.appName: json.encode(<String, Object?>{
-            // `pub add` interprets relative paths relative to the current directory.
-            'path': widgetPreviewScaffoldProject.directory.fileSystem.path.relative(
+            'path': widgetPreviewScaffoldProject.directory.fileSystem.path.absolute(
               project.directory.path,
             ),
           }),
     };
 
-    final PubOutputMode outputMode = verbose ? PubOutputMode.all : PubOutputMode.failuresOnly;
     await pub.interactively(
       <String>[
         pubAdd,
@@ -145,7 +149,7 @@ class PreviewPubspecBuilder {
       context: PubContext.pubAdd,
       command: pubAdd,
       touchesPackageConfig: true,
-      outputMode: outputMode,
+      outputMode: _outputMode,
     );
 
     // Adds dependencies required by the widget preview scaffolding.
@@ -160,18 +164,22 @@ class PreviewPubspecBuilder {
       context: PubContext.pubAdd,
       command: pubAdd,
       touchesPackageConfig: true,
-      outputMode: outputMode,
+      outputMode: _outputMode,
     );
 
+    await generatePackageConfig(widgetPreviewScaffoldProject: widgetPreviewScaffoldProject);
+    previewManifest.updatePubspecHash(updatedPubspecPath: updatedPubspecPath);
+  }
+
+  /// Generates `widget_preview_scaffold/.dart_tool/package_config.json`.
+  Future<void> generatePackageConfig({required FlutterProject widgetPreviewScaffoldProject}) async {
     // Generate package_config.json.
     await pub.get(
       context: PubContext.create,
       project: widgetPreviewScaffoldProject,
       offline: offline,
-      outputMode: outputMode,
+      outputMode: _outputMode,
     );
-
-    previewManifest.updatePubspecHash(updatedPubspecPath: updatedPubspecPath);
   }
 
   void onPubspecChangeDetected(String path) {

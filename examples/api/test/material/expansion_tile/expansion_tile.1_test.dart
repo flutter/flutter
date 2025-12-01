@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_api_samples/material/expansion_tile/expansion_tile.1.dart' as example;
+import 'package:flutter_api_samples/material/expansion_tile/expansion_tile.1.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Test the basics of ExpansionTileControllerApp', (WidgetTester tester) async {
+  testWidgets('Test the basics of ExpansionTileControllerApp', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.ExpansionTileControllerApp());
 
     expect(find.text('ExpansionTile Contents'), findsNothing);

@@ -4,7 +4,8 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/actions/action_listener.0.dart' as example;
+import 'package:flutter_api_samples/widgets/actions/action_listener.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -27,7 +28,10 @@ void main() {
       await tester.pump();
 
       expect(find.widgetWithText(OutlinedButton, 'Disable'), findsOne);
-      expect(find.widgetWithText(ElevatedButton, 'Call Action Listener'), findsOne);
+      expect(
+        find.widgetWithText(ElevatedButton, 'Call Action Listener'),
+        findsOne,
+      );
       expect(log, const <String?>['Action Listener was added']);
 
       await tester.tap(find.text('Call Action Listener'));
@@ -39,7 +43,10 @@ void main() {
       await tester.pump();
 
       expect(find.widgetWithText(OutlinedButton, 'Enable'), findsOne);
-      expect(log, const <String?>['Action Listener was added', 'Action Listener was removed']);
+      expect(log, const <String?>[
+        'Action Listener was added',
+        'Action Listener was removed',
+      ]);
     } finally {
       debugPrint = originalDebugPrint;
     }

@@ -49,7 +49,7 @@ abstract final class ElevationOverlay {
     }
 
     // Walk the opacity list and find the closest match(es) for the elevation.
-    int index = 0;
+    var index = 0;
     while (elevation >= _surfaceTintElevationOpacities[index].elevation) {
       // If we found it exactly or walked off the end of the list just return it.
       if (elevation == _surfaceTintElevationOpacities[index].elevation ||

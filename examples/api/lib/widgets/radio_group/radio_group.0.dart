@@ -31,7 +31,9 @@ class RadioExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(children: <Widget>[SingingCharacterRadioGroup(), GenreRadioGroup()]);
+    return const Column(
+      children: <Widget>[SingingCharacterRadioGroup(), GenreRadioGroup()],
+    );
   }
 }
 
@@ -39,10 +41,12 @@ class SingingCharacterRadioGroup extends StatefulWidget {
   const SingingCharacterRadioGroup({super.key});
 
   @override
-  State<SingingCharacterRadioGroup> createState() => SingingCharacterRadioGroupState();
+  State<SingingCharacterRadioGroup> createState() =>
+      SingingCharacterRadioGroupState();
 }
 
-class SingingCharacterRadioGroupState extends State<SingingCharacterRadioGroup> {
+class SingingCharacterRadioGroupState
+    extends State<SingingCharacterRadioGroup> {
   SingingCharacter? _character = SingingCharacter.lafayette;
 
   @override

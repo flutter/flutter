@@ -98,7 +98,7 @@ class CkColorFilterImageFilter extends CkImageFilter {
     SkImageFilterBorrow borrow, {
     ui.TileMode defaultBlurTileMode = ui.TileMode.clamp,
   }) {
-    final skImageFilter = colorFilter.initRawImageFilter();
+    final SkImageFilter skImageFilter = colorFilter.initRawImageFilter();
     borrow(skImageFilter);
     skImageFilter.delete();
   }
@@ -186,7 +186,7 @@ class _CkMatrixImageFilter extends CkImageFilter {
     SkImageFilterBorrow borrow, {
     ui.TileMode defaultBlurTileMode = ui.TileMode.clamp,
   }) {
-    final skImageFilter = canvasKit.ImageFilter.MakeMatrixTransform(
+    final SkImageFilter skImageFilter = canvasKit.ImageFilter.MakeMatrixTransform(
       toSkMatrixFromFloat64(matrix),
       toSkFilterOptions(filterQuality),
       null,
@@ -308,7 +308,7 @@ class _CkComposeImageFilter extends CkImageFilter {
   }) {
     outer.withSkImageFilter((skOuter) {
       inner.withSkImageFilter((skInner) {
-        final skImageFilter = canvasKit.ImageFilter.MakeCompose(skOuter, skInner);
+        final SkImageFilter skImageFilter = canvasKit.ImageFilter.MakeCompose(skOuter, skInner);
         borrow(skImageFilter);
         skImageFilter.delete();
       }, defaultBlurTileMode: defaultBlurTileMode);

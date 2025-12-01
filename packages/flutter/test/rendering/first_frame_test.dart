@@ -12,10 +12,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final TestRenderBinding binding = TestRenderBinding();
+  final binding = TestRenderBinding();
   test('Flutter dispatches first frame event on the web only', () async {
-    final Completer<void> completer = Completer<void>();
-    const MethodChannel firstFrameChannel = MethodChannel('flutter/service_worker');
+    final completer = Completer<void>();
+    const firstFrameChannel = MethodChannel('flutter/service_worker');
     binding.defaultBinaryMessenger.setMockMethodCallHandler(firstFrameChannel, (
       MethodCall methodCall,
     ) async {

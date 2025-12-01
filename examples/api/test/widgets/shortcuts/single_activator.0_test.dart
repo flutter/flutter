@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/services.dart';
-import 'package:flutter_api_samples/widgets/shortcuts/single_activator.0.dart' as example;
+import 'package:flutter_api_samples/widgets/shortcuts/single_activator.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -18,11 +19,16 @@ void main() {
     testWidgets('displays correct labels', (WidgetTester tester) async {
       await tester.pumpWidget(const example.SingleActivatorExampleApp());
 
-      expect(find.text('Add to the counter by pressing Ctrl+C'), findsOneWidget);
+      expect(
+        find.text('Add to the counter by pressing Ctrl+C'),
+        findsOneWidget,
+      );
       expect(find.text('count: 0'), findsOneWidget);
     });
 
-    testWidgets('updates counter when Ctrl-C combination pressed', (WidgetTester tester) async {
+    testWidgets('updates counter when Ctrl-C combination pressed', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(const example.SingleActivatorExampleApp());
 
       for (int counter = 0; counter < 10; counter++) {

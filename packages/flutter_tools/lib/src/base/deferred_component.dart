@@ -108,6 +108,9 @@ class DeferredComponent {
       if (asset.flavors.isNotEmpty) {
         out.write(' (flavors: ${asset.flavors.join(', ')})');
       }
+      if (asset.platforms.isNotEmpty) {
+        out.write(' (platforms: ${asset.platforms.join(', ')})');
+      }
     }
     return out.toString();
   }

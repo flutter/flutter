@@ -26,7 +26,7 @@ Future<void> runDriverTestForRoute(String routeName, DriverTestCallBack body) as
   // -320 comes from the logical pixels for a full screen scroll for the
   // smallest reference device, iPhone 4, whose physical screen dimensions are
   // 960px × 640px.
-  const double dyScroll = -320.0;
+  const dyScroll = -320.0;
   await driver.scrollUntilVisible(scrollable, button, dyScroll: dyScroll);
   await driver.tap(button);
 
@@ -56,7 +56,7 @@ void macroPerfTest(
       }
 
       timeline = await driver.traceAction(() async {
-        final Future<void> durationFuture = Future<void>.delayed(duration);
+        final durationFuture = Future<void>.delayed(duration);
         if (driverOps != null) {
           await driverOps(driver);
         }
@@ -66,7 +66,7 @@ void macroPerfTest(
 
     expect(timeline, isNotNull);
 
-    final TimelineSummary summary = TimelineSummary.summarize(timeline);
+    final summary = TimelineSummary.summarize(timeline);
     await summary.writeTimelineToFile(testName, pretty: true);
   }, timeout: Timeout.none);
 }

@@ -903,6 +903,7 @@ Rasterizer::ScreenshotFormat ToScreenshotFormat(impeller::PixelFormat format) {
     case impeller::PixelFormat::kR32G32B32A32Float:
     case impeller::PixelFormat::kB10G10R10XR:
     case impeller::PixelFormat::kB10G10R10A10XR:
+    case impeller::PixelFormat::kR32Float:
       FML_DCHECK(false);
       return Rasterizer::ScreenshotFormat::kUnknown;
     case impeller::PixelFormat::kR8G8B8A8UNormInt:

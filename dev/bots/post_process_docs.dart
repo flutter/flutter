@@ -60,7 +60,7 @@ Future<void> postProcess() async {
 
   // Recreate footer
   final String publishPath = path.join(docsPath, '..', 'docs', 'doc', 'flutter', 'footer.js');
-  final File footerFile = File(publishPath)..createSync(recursive: true);
+  final footerFile = File(publishPath)..createSync(recursive: true);
   createFooter(footerFile, version);
 }
 
@@ -71,7 +71,7 @@ Future<String> gitRevision({
   @visibleForTesting platform.Platform platform = const platform.LocalPlatform(),
   @visibleForTesting ProcessManager processManager = const LocalProcessManager(),
 }) async {
-  const int kGitRevisionLength = 10;
+  const kGitRevisionLength = 10;
 
   final ProcessResult gitResult = processManager.runSync(<String>['git', 'rev-parse', 'HEAD']);
   if (gitResult.exitCode != 0) {
@@ -120,7 +120,7 @@ Future<String> getBranchName({
   @visibleForTesting platform.Platform platform = const platform.LocalPlatform(),
   @visibleForTesting ProcessManager processManager = const LocalProcessManager(),
 }) async {
-  final RegExp gitBranchRegexp = RegExp(r'^## (.*)');
+  final gitBranchRegexp = RegExp(r'^## (.*)');
   final String? luciBranch = platform.environment['LUCI_BRANCH'];
   if (luciBranch != null && luciBranch.trim().isNotEmpty) {
     return luciBranch.trim();
@@ -153,7 +153,7 @@ Future<void> createFooter(
   final String timestamp = timestampParam ?? DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now());
   final String gitBranch = branchParam ?? await getBranchName();
   final String revision = revisionParam ?? await gitRevision();
-  final String gitBranchOut = gitBranch.isEmpty ? '' : '• $gitBranch';
+  final gitBranchOut = gitBranch.isEmpty ? '' : '• $gitBranch';
   footerFile.writeAsStringSync('''
 (function() {
   var span = document.querySelector('footer>span');

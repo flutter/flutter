@@ -31,7 +31,7 @@ void main() {
   });
 
   test('Cover and align', () async {
-    final TestCanvas canvas = TestCanvas();
+    final canvas = TestCanvas();
     paintImage(
       canvas: canvas,
       rect: const Rect.fromLTWH(50.0, 75.0, 200.0, 100.0),
@@ -60,13 +60,13 @@ void main() {
     );
     final FlutterExceptionHandler? oldFlutterError = FlutterError.onError;
 
-    final List<String> messages = <String>[];
+    final messages = <String>[];
     FlutterError.onError = (FlutterErrorDetails details) {
       messages.add(details.exceptionAsString());
     };
 
-    final TestCanvas canvas = TestCanvas();
-    const Rect rect = Rect.fromLTWH(50.0, 50.0, 100.0, 50.0);
+    final canvas = TestCanvas();
+    const rect = Rect.fromLTWH(50.0, 50.0, 100.0, 50.0);
 
     paintImage(
       canvas: canvas,
@@ -82,7 +82,7 @@ void main() {
         .toList();
 
     expect(commands[0].positionalArguments[0], rect);
-    final Paint paint = commands[0].positionalArguments[1] as Paint;
+    final paint = commands[0].positionalArguments[1] as Paint;
     expect(
       paint.colorFilter,
       const ColorFilter.matrix(<double>[
@@ -134,7 +134,7 @@ void main() {
     debugInvertOversizedImages = true;
     final FlutterExceptionHandler? oldFlutterError = FlutterError.onError;
 
-    final List<String> messages = <String>[];
+    final messages = <String>[];
     FlutterError.onError = (FlutterErrorDetails details) {
       messages.add(details.exceptionAsString());
     };
@@ -142,8 +142,8 @@ void main() {
     try {
       // Create a 290x290 sized image, which is ~24kb less than the allocated size,
       // and below the default debugImageOverheadAllowance size of 128kb.
-      const Rect rect = Rect.fromLTWH(50.0, 50.0, 290.0, 290.0);
-      final TestCanvas canvas = TestCanvas();
+      const rect = Rect.fromLTWH(50.0, 50.0, 290.0, 290.0);
+      final canvas = TestCanvas();
 
       paintImage(
         canvas: canvas,
@@ -161,7 +161,7 @@ void main() {
   });
 
   test('centerSlice with scale ≠ 1', () async {
-    final TestCanvas canvas = TestCanvas();
+    final canvas = TestCanvas();
     paintImage(
       canvas: canvas,
       rect: const Rect.fromLTRB(10, 20, 430, 420),
@@ -182,13 +182,13 @@ void main() {
 
   testWidgets('Reports Image painting', (WidgetTester tester) async {
     late ImageSizeInfo imageSizeInfo;
-    int count = 0;
+    var count = 0;
     debugOnPaintImage = (ImageSizeInfo info) {
       count += 1;
       imageSizeInfo = info;
     };
 
-    final TestCanvas canvas = TestCanvas();
+    final canvas = TestCanvas();
     paintImage(
       canvas: canvas,
       rect: const Rect.fromLTWH(50.0, 75.0, 200.0, 100.0),
@@ -221,13 +221,13 @@ void main() {
 
   testWidgets('Reports Image painting - change per frame', (WidgetTester tester) async {
     late ImageSizeInfo imageSizeInfo;
-    int count = 0;
+    var count = 0;
     debugOnPaintImage = (ImageSizeInfo info) {
       count += 1;
       imageSizeInfo = info;
     };
 
-    final TestCanvas canvas = TestCanvas();
+    final canvas = TestCanvas();
     paintImage(
       canvas: canvas,
       rect: const Rect.fromLTWH(50.0, 75.0, 200.0, 100.0),
@@ -264,13 +264,13 @@ void main() {
 
   testWidgets('Reports Image painting - no debug label', (WidgetTester tester) async {
     late ImageSizeInfo imageSizeInfo;
-    int count = 0;
+    var count = 0;
     debugOnPaintImage = (ImageSizeInfo info) {
       count += 1;
       imageSizeInfo = info;
     };
 
-    final TestCanvas canvas = TestCanvas();
+    final canvas = TestCanvas();
     paintImage(
       canvas: canvas,
       rect: const Rect.fromLTWH(50.0, 75.0, 200.0, 100.0),

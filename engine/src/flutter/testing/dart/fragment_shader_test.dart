@@ -24,18 +24,18 @@ void main() async {
 
     expect(rawData is Map<String, Object?>, true);
 
-    final Map<String, Object?> data = rawData! as Map<String, Object?>;
+    final data = rawData! as Map<String, Object?>;
     expect(data.keys.toList(), <String>['sksl']);
     expect(data['sksl'] is Map<String, Object?>, true);
 
-    final Map<String, Object?> skslData = data['sksl']! as Map<String, Object?>;
+    final skslData = data['sksl']! as Map<String, Object?>;
     expect(skslData['uniforms'] is List<Object?>, true);
 
     final Object? rawUniformData = (skslData['uniforms']! as List<Object?>)[0];
 
     expect(rawUniformData is Map<String, Object?>, true);
 
-    final Map<String, Object?> uniformData = rawUniformData! as Map<String, Object?>;
+    final uniformData = rawUniformData! as Map<String, Object?>;
 
     expect(uniformData['location'] is int, true);
   });
@@ -68,7 +68,7 @@ void main() async {
       shader.getUniformFloat('iMat2Uniform', 2),
       shader.getUniformFloat('iMat2Uniform', 3),
     ];
-    for (int i = 0; i < slots.length; ++i) {
+    for (var i = 0; i < slots.length; ++i) {
       expect(slots[i].shaderIndex, equals(i));
     }
   });
@@ -337,7 +337,7 @@ void main() async {
     final FragmentProgram program = await FragmentProgram.fromAsset('uniform_arrays.frag.iplr');
 
     final FragmentShader shader = program.fragmentShader();
-    for (int i = 0; i < 20; i++) {
+    for (var i = 0; i < 20; i++) {
       shader.setFloat(i, i.toDouble());
     }
 
@@ -366,7 +366,7 @@ void main() async {
     // The shader will not render green if the compiler doesn't keep the
     // uniforms in the right order.
     final FragmentShader shader = program.fragmentShader();
-    for (int i = 0; i < 32; i++) {
+    for (var i = 0; i < 32; i++) {
       shader.setFloat(i, i.toDouble());
     }
 
@@ -394,7 +394,7 @@ void main() async {
   });
 
   test('fromAsset throws an exception on invalid assetKey', () async {
-    bool throws = false;
+    var throws = false;
     try {
       await FragmentProgram.fromAsset('<invalid>');
     } catch (e) {
@@ -404,7 +404,7 @@ void main() async {
   });
 
   test('fromAsset throws an exception on invalid data', () async {
-    bool throws = false;
+    var throws = false;
     try {
       await FragmentProgram.fromAsset('DashInNooglerHat.jpg');
     } catch (e) {
@@ -442,13 +442,13 @@ void main() async {
       print('Skipped for Skia');
       return;
     }
-    const List<String> shaders = [
+    const shaders = <String>[
       'no_uniforms.frag.iplr',
       'missing_size.frag.iplr',
       'missing_texture.frag.iplr',
     ];
-    const List<(bool, bool)> errors = [(true, true), (true, false), (false, false)];
-    for (int i = 0; i < 3; i++) {
+    const errors = <(bool, bool)>[(true, true), (true, false), (false, false)];
+    for (var i = 0; i < 3; i++) {
       final String fileName = shaders[i];
       final FragmentProgram program = await FragmentProgram.fromAsset(fileName);
       final FragmentShader shader = program.fragmentShader();
@@ -460,7 +460,7 @@ void main() async {
         error = err;
       }
       expect(error is StateError, true);
-      final (floatError, samplerError) = errors[i];
+      final (bool floatError, bool samplerError) = errors[i];
       if (floatError) {
         expect(error.toString(), contains('shader has fewer than two float'));
       }
@@ -495,8 +495,8 @@ void main() async {
     }
     final FragmentProgram program = await FragmentProgram.fromAsset('filter_shader.frag.iplr');
     final FragmentShader shader = program.fragmentShader();
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder);
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder);
     canvas.drawPaint(
       Paint()
         ..color = const Color(0xFFFF0000)
@@ -504,7 +504,7 @@ void main() async {
     );
     final Image image = await recorder.endRecording().toImage(1, 1);
     final ByteData data = (await image.toByteData())!;
-    final Color color = Color(data.buffer.asUint32List()[0]);
+    final color = Color(data.buffer.asUint32List()[0]);
 
     expect(color, const Color(0xFF00FF00));
   });
@@ -517,13 +517,13 @@ void main() async {
     }
     final FragmentProgram program = await FragmentProgram.fromAsset('filter_shader.frag.iplr');
     final FragmentShader shader = program.fragmentShader();
-    final ImageFilter filter = ImageFilter.shader(shader);
+    final filter = ImageFilter.shader(shader);
 
     // The same shader is equal to itself.
     expect(filter, filter);
     expect(identical(filter, filter), true);
 
-    final ImageFilter filter_2 = ImageFilter.shader(shader);
+    final filter_2 = ImageFilter.shader(shader);
 
     // The different shader is equal as long as uniforms are identical.
     expect(filter, filter_2);
@@ -531,7 +531,7 @@ void main() async {
 
     // Not equal if uniforms change.
     shader.setFloat(0, 1);
-    final ImageFilter filter_3 = ImageFilter.shader(shader);
+    final filter_3 = ImageFilter.shader(shader);
 
     expect(filter, isNot(filter_3));
     expect(identical(filter, filter_3), false);
@@ -597,9 +597,9 @@ Future<ByteData?> _imageByteDataFromShader({
   required Shader shader,
   int imageDimension = 100,
 }) async {
-  final PictureRecorder recorder = PictureRecorder();
-  final Canvas canvas = Canvas(recorder);
-  final Paint paint = Paint()..shader = shader;
+  final recorder = PictureRecorder();
+  final canvas = Canvas(recorder);
+  final paint = Paint()..shader = shader;
   canvas.drawPaint(paint);
   final Picture picture = recorder.endRecording();
   final Image image = await picture.toImage(imageDimension, imageDimension);
@@ -645,12 +645,12 @@ String toHexString(int color) => '#${color.toRadixString(16)}';
 // 10x10 image where the left half is blue and the right half is
 // green.
 Future<Image> _createBlueGreenImage() async {
-  const int length = 10;
-  const int bytesPerPixel = 4;
-  final Uint8List pixels = Uint8List(length * length * bytesPerPixel);
-  int i = 0;
-  for (int y = 0; y < length; y++) {
-    for (int x = 0; x < length; x++) {
+  const length = 10;
+  const bytesPerPixel = 4;
+  final pixels = Uint8List(length * length * bytesPerPixel);
+  var i = 0;
+  for (var y = 0; y < length; y++) {
+    for (var x = 0; x < length; x++) {
       if (x < length / 2) {
         pixels[i + 2] = 0xFF; // blue channel
       } else {
@@ -660,7 +660,7 @@ Future<Image> _createBlueGreenImage() async {
       i += bytesPerPixel;
     }
   }
-  final ImageDescriptor descriptor = ImageDescriptor.raw(
+  final descriptor = ImageDescriptor.raw(
     await ImmutableBuffer.fromUint8List(pixels),
     width: length,
     height: length,
@@ -674,8 +674,8 @@ Future<Image> _createBlueGreenImage() async {
 
 // A 10x10 image where the left half is blue and the right half is green.
 Image _createBlueGreenImageSync() {
-  final PictureRecorder recorder = PictureRecorder();
-  final Canvas canvas = Canvas(recorder);
+  final recorder = PictureRecorder();
+  final canvas = Canvas(recorder);
   canvas.drawRect(const Rect.fromLTWH(0, 0, 5, 10), Paint()..color = const Color(0xFF0000FF));
   canvas.drawRect(const Rect.fromLTWH(5, 0, 5, 10), Paint()..color = const Color(0xFF00FF00));
   final Picture picture = recorder.endRecording();

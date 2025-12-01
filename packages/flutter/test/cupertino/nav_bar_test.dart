@@ -97,12 +97,12 @@ void main() {
   testWidgets(
     'Opaque background does not add blur effects, non-opaque background adds blur effects',
     (WidgetTester tester) async {
-      const CupertinoDynamicColor background = CupertinoDynamicColor.withBrightness(
+      const background = CupertinoDynamicColor.withBrightness(
         color: Color(0xFFE5E5E5),
         darkColor: Color(0xF3E5E5E5),
       );
 
-      final ScrollController scrollController = ScrollController();
+      final scrollController = ScrollController();
       addTearDown(scrollController.dispose);
 
       await tester.pumpWidget(
@@ -158,7 +158,7 @@ void main() {
   testWidgets("Background doesn't add blur effect when no content is scrolled under", (
     WidgetTester test,
   ) async {
-    final ScrollController scrollController = ScrollController();
+    final scrollController = ScrollController();
     addTearDown(scrollController.dispose);
 
     await test.pumpWidget(
@@ -222,7 +222,7 @@ void main() {
   });
 
   testWidgets('Nav bar displays correctly', (WidgetTester tester) async {
-    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    final navigator = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       CupertinoApp(
         navigatorKey: navigator,
@@ -453,7 +453,7 @@ void main() {
 
   testWidgets('Nav bar static components respect MediaQueryData', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/174642
-    const double value = 10.0;
+    const value = 10.0;
 
     void expectCustomMediaQueryData(BuildContext context) {
       expect(MediaQuery.platformBrightnessOf(context), Brightness.dark);
@@ -551,7 +551,7 @@ void main() {
 
   testWidgets('Large title nav bar scrolls', (WidgetTester tester) async {
     setWindowToPortrait(tester);
-    final ScrollController scrollController = ScrollController();
+    final scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       CupertinoApp(
@@ -575,8 +575,8 @@ void main() {
 
     List<Element> titles = tester.elementList(find.text('Title')).toList()
       ..sort((Element a, Element b) {
-        final RenderParagraph aParagraph = a.renderObject! as RenderParagraph;
-        final RenderParagraph bParagraph = b.renderObject! as RenderParagraph;
+        final aParagraph = a.renderObject! as RenderParagraph;
+        final bParagraph = b.renderObject! as RenderParagraph;
         return aParagraph.text.style!.fontSize!.compareTo(bParagraph.text.style!.fontSize!);
       });
 
@@ -600,8 +600,8 @@ void main() {
 
     titles = tester.elementList(find.text('Title')).toList()
       ..sort((Element a, Element b) {
-        final RenderParagraph aParagraph = a.renderObject! as RenderParagraph;
-        final RenderParagraph bParagraph = b.renderObject! as RenderParagraph;
+        final aParagraph = a.renderObject! as RenderParagraph;
+        final bParagraph = b.renderObject! as RenderParagraph;
         return aParagraph.text.style!.fontSize!.compareTo(bParagraph.text.style!.fontSize!);
       });
 
@@ -627,7 +627,7 @@ void main() {
 
   testWidgets('User specified middle is always visible in sliver', (WidgetTester tester) async {
     setWindowToPortrait(tester);
-    final ScrollController scrollController = ScrollController();
+    final scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     final Key segmentedControlsKey = UniqueKey();
     await tester.pumpWidget(
@@ -684,7 +684,7 @@ void main() {
     'User specified middle is only visible when sliver is collapsed if alwaysShowMiddle is false',
     (WidgetTester tester) async {
       setWindowToPortrait(tester);
-      final ScrollController scrollController = ScrollController();
+      final scrollController = ScrollController();
       addTearDown(scrollController.dispose);
       await tester.pumpWidget(
         CupertinoApp(
@@ -735,7 +735,7 @@ void main() {
 
   testWidgets('Small title can be overridden', (WidgetTester tester) async {
     setWindowToPortrait(tester);
-    final ScrollController scrollController = ScrollController();
+    final scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       CupertinoApp(
@@ -944,7 +944,7 @@ void main() {
       const CupertinoApp(home: CupertinoNavigationBar(middle: Text('Title'))),
     );
 
-    final DecoratedBox decoratedBox =
+    final decoratedBox =
         tester
                 .widgetList(
                   find.descendant(
@@ -956,7 +956,7 @@ void main() {
             as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
-    final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+    final decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.border, isNotNull);
 
     final BorderSide side = decoration.border!.bottom;
@@ -974,7 +974,7 @@ void main() {
       ),
     );
 
-    final DecoratedBox decoratedBox =
+    final decoratedBox =
         tester
                 .widgetList(
                   find.descendant(
@@ -986,7 +986,7 @@ void main() {
             as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
-    final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+    final decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.border, isNotNull);
 
     final BorderSide side = decoration.border!.bottom;
@@ -999,7 +999,7 @@ void main() {
       const CupertinoApp(home: CupertinoNavigationBar(middle: Text('Title'), border: null)),
     );
 
-    final DecoratedBox decoratedBox =
+    final decoratedBox =
         tester
                 .widgetList(
                   find.descendant(
@@ -1011,7 +1011,7 @@ void main() {
             as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
-    final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+    final decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.border, isNull);
   });
 
@@ -1026,7 +1026,7 @@ void main() {
       ),
     );
 
-    final DecoratedBox decoratedBox =
+    final decoratedBox =
         tester
                 .widgetList(
                   find.descendant(
@@ -1038,7 +1038,7 @@ void main() {
             as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
-    final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+    final decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.border, isNotNull);
 
     final BorderSide bottom = decoration.border!.bottom;
@@ -1058,7 +1058,7 @@ void main() {
       ),
     );
 
-    final DecoratedBox decoratedBox =
+    final decoratedBox =
         tester
                 .widgetList(
                   find.descendant(
@@ -1070,12 +1070,12 @@ void main() {
             as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
-    final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+    final decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.border, isNull);
   });
 
   testWidgets('CupertinoSliverNavigationBar has semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       const CupertinoApp(
@@ -1102,7 +1102,7 @@ void main() {
   });
 
   testWidgets('CupertinoNavigationBar has semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -1126,7 +1126,7 @@ void main() {
   });
 
   testWidgets('Large CupertinoNavigationBar has semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -1166,7 +1166,7 @@ void main() {
       ),
     );
 
-    final DecoratedBox decoratedBox =
+    final decoratedBox =
         tester
                 .widgetList(
                   find.descendant(
@@ -1178,7 +1178,7 @@ void main() {
             as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
-    final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+    final decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.border, isNotNull);
 
     final BorderSide top = decoration.border!.top;
@@ -1278,7 +1278,7 @@ void main() {
   testWidgets(
     'Nav bar background is transparent if `automaticBackgroundVisibility` is true and has no content scrolled under it',
     (WidgetTester tester) async {
-      final ScrollController scrollController = ScrollController();
+      final scrollController = ScrollController();
       addTearDown(scrollController.dispose);
 
       await tester.pumpWidget(
@@ -1297,7 +1297,7 @@ void main() {
 
       expect(scrollController.offset, 0.0);
 
-      final DecoratedBox decoratedBox =
+      final decoratedBox =
           tester
                   .widgetList(
                     find.descendant(
@@ -1309,7 +1309,7 @@ void main() {
               as DecoratedBox;
       expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
-      final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+      final decoration = decoratedBox.decoration as BoxDecoration;
       final BorderSide side = decoration.border!.bottom;
       expect(side.color.opacity, 0.0);
 
@@ -1319,7 +1319,7 @@ void main() {
       scrollController.jumpTo(100.0);
       await tester.pump();
 
-      final DecoratedBox decoratedBoxAfterScroll =
+      final decoratedBoxAfterScroll =
           tester
                   .widgetList(
                     find.descendant(
@@ -1353,7 +1353,7 @@ void main() {
         ),
       );
 
-      final DecoratedBox decoratedBox =
+      final decoratedBox =
           tester
                   .widgetList(
                     find.descendant(
@@ -1365,7 +1365,7 @@ void main() {
               as DecoratedBox;
       expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
-      final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+      final decoration = decoratedBox.decoration as BoxDecoration;
       final BorderSide side = decoration.border!.bottom;
       expect(side.color, const Color(0xFFAABBCC));
 
@@ -1390,7 +1390,7 @@ void main() {
       ),
     );
 
-    DecoratedBox decoratedBox =
+    var decoratedBox =
         tester
                 .widgetList(
                   find.descendant(
@@ -1402,7 +1402,7 @@ void main() {
             as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
-    BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+    var decoration = decoratedBox.decoration as BoxDecoration;
     BorderSide side = decoration.border!.bottom;
     expect(side.color, const Color(0xFFAABBCC));
 
@@ -1448,7 +1448,7 @@ void main() {
   testWidgets(
     'CupertinoSliverNavigationBar background is transparent if `automaticBackgroundVisibility` is true and has no content scrolled under it',
     (WidgetTester tester) async {
-      final ScrollController scrollController = ScrollController();
+      final scrollController = ScrollController();
       addTearDown(scrollController.dispose);
 
       await tester.pumpWidget(
@@ -1472,7 +1472,7 @@ void main() {
 
       expect(scrollController.offset, 0.0);
 
-      final DecoratedBox decoratedBox =
+      final decoratedBox =
           tester
                   .widgetList(
                     find.descendant(
@@ -1484,7 +1484,7 @@ void main() {
               as DecoratedBox;
       expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
-      final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+      final decoration = decoratedBox.decoration as BoxDecoration;
       final BorderSide side = decoration.border!.bottom;
       expect(side.color.opacity, 0.0);
 
@@ -1497,7 +1497,7 @@ void main() {
       scrollController.jumpTo(400.0);
       await tester.pump();
 
-      final DecoratedBox decoratedBoxAfterScroll =
+      final decoratedBoxAfterScroll =
           tester
                   .widgetList(
                     find.descendant(
@@ -1596,7 +1596,7 @@ void main() {
   testWidgets(
     'CupertinoNavigationBarBackButton with a custom onPressed callback can be placed anywhere',
     (WidgetTester tester) async {
-      bool backPressed = false;
+      var backPressed = false;
 
       await tester.pumpWidget(
         CupertinoApp(home: CupertinoNavigationBarBackButton(onPressed: () => backPressed = true)),
@@ -1652,7 +1652,7 @@ void main() {
   testWidgets('CupertinoNavigationBarBackButton onPressed overrides default pop behavior', (
     WidgetTester tester,
   ) async {
-    bool backPressed = false;
+    var backPressed = false;
     await tester.pumpWidget(const CupertinoApp(home: Placeholder()));
 
     tester
@@ -1703,9 +1703,9 @@ void main() {
 
   testWidgets('Nav bar contents text scale', (WidgetTester tester) async {
     setWindowToPortrait(tester);
-    const double scaleFactor = 1.18;
-    const double dampingRatio = 3.0;
-    const double iconSize = 10.0;
+    const scaleFactor = 1.18;
+    const dampingRatio = 3.0;
+    const iconSize = 10.0;
     await tester.pumpWidget(
       CupertinoApp(
         home: Builder(
@@ -1755,7 +1755,7 @@ void main() {
       ),
       isTrue,
     );
-    for (final String text in <String>['Search', 'leading', 'middle', 'trailing']) {
+    for (final text in <String>['Search', 'leading', 'middle', 'trailing']) {
       expect(
         barItems.any(
           (RichText t) =>
@@ -1764,17 +1764,17 @@ void main() {
         isTrue,
       );
     }
-    for (final IconData icon in <IconData>[CupertinoIcons.add, CupertinoIcons.xmark]) {
+    for (final icon in <IconData>[CupertinoIcons.add, CupertinoIcons.xmark]) {
       expect(tester.getSize(find.byIcon(icon)), const Size.square(scaleFactor * iconSize));
     }
   });
 
   testWidgets('Persistent nav bar text scaling clamps to upper bound', (WidgetTester tester) async {
     setWindowToPortrait(tester);
-    const double scaleFactor = 10.0;
-    const double maxScaleFactor = 1.235;
-    const double dampingRatio = 3.0;
-    const double iconSize = 10.0;
+    const scaleFactor = 10.0;
+    const maxScaleFactor = 1.235;
+    const dampingRatio = 3.0;
+    const iconSize = 10.0;
     await tester.pumpWidget(
       CupertinoApp(
         home: Builder(
@@ -1824,7 +1824,7 @@ void main() {
       ),
       isTrue,
     );
-    for (final String text in <String>['leading', 'middle', 'trailing']) {
+    for (final text in <String>['leading', 'middle', 'trailing']) {
       expect(
         barItems.any(
           (RichText t) =>
@@ -1842,16 +1842,16 @@ void main() {
       ),
       isTrue,
     );
-    for (final IconData icon in <IconData>[CupertinoIcons.add, CupertinoIcons.xmark]) {
+    for (final icon in <IconData>[CupertinoIcons.add, CupertinoIcons.xmark]) {
       expect(tester.getSize(find.byIcon(icon)), const Size.square(scaleFactor * iconSize));
     }
   });
 
   testWidgets('Nav bar text scaling clamps to lower bounds', (WidgetTester tester) async {
     setWindowToPortrait(tester);
-    const double scaleFactor = 0.5;
-    const double minScaleFactor = 0.9;
-    const double iconSize = 10.0;
+    const scaleFactor = 0.5;
+    const minScaleFactor = 0.9;
+    const iconSize = 10.0;
     await tester.pumpWidget(
       CupertinoApp(
         home: Builder(
@@ -1901,7 +1901,7 @@ void main() {
       ),
       isTrue,
     );
-    for (final String text in <String>['leading', 'middle', 'trailing']) {
+    for (final text in <String>['leading', 'middle', 'trailing']) {
       expect(
         barItems.any(
           (RichText t) => t.text.toPlainText() == text && t.textScaler == TextScaler.noScaling,
@@ -1917,14 +1917,14 @@ void main() {
       ),
       isTrue,
     );
-    for (final IconData icon in <IconData>[CupertinoIcons.add, CupertinoIcons.xmark]) {
+    for (final icon in <IconData>[CupertinoIcons.add, CupertinoIcons.xmark]) {
       expect(tester.getSize(find.byIcon(icon)), const Size.square(scaleFactor * iconSize));
     }
   });
 
   testWidgets('Active search view cancel button does not text scale', (WidgetTester tester) async {
     setWindowToPortrait(tester);
-    const double scaleFactor = 10.0;
+    const scaleFactor = 10.0;
     await tester.pumpWidget(
       CupertinoApp(
         home: Builder(
@@ -1979,8 +1979,8 @@ void main() {
   testWidgets(
     'CupertinoSliverNavigationBar stretches upon over-scroll and bounces back once over-scroll ends',
     (WidgetTester tester) async {
-      const Text trailingText = Text('Bar Button');
-      const Text titleText = Text('Large Title');
+      const trailingText = Text('Bar Button');
+      const titleText = Text('Large Title');
       setWindowToPortrait(tester);
 
       await tester.pumpWidget(
@@ -2034,8 +2034,8 @@ void main() {
   testWidgets(
     'CupertinoSliverNavigationBar does not stretch upon over-scroll if stretch parameter is false',
     (WidgetTester tester) async {
-      const Text trailingText = Text('Bar Button');
-      const Text titleText = Text('Large Title');
+      const trailingText = Text('Bar Button');
+      const titleText = Text('Large Title');
 
       await tester.pumpWidget(
         CupertinoApp(
@@ -2121,7 +2121,7 @@ void main() {
     'CupertinoSliverNavigationBar magnifies upon over-scroll and shrinks back once over-scroll ends',
     (WidgetTester tester) async {
       setWindowToPortrait(tester);
-      const Text titleText = Text('Large Title');
+      const titleText = Text('Large Title');
 
       await tester.pumpWidget(
         CupertinoApp(
@@ -2164,7 +2164,7 @@ void main() {
   testWidgets('CupertinoSliverNavigationBar large title text does not get clipped when magnified', (
     WidgetTester tester,
   ) async {
-    const Text titleText = Text('Very very very long large title');
+    const titleText = Text('Very very very long large title');
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -2198,7 +2198,7 @@ void main() {
   testWidgets('CupertinoSliverNavigationBar large title can be hit tested when magnified', (
     WidgetTester tester,
   ) async {
-    final ScrollController scrollController = ScrollController();
+    final scrollController = ScrollController();
     addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(
@@ -2228,10 +2228,10 @@ void main() {
   });
 
   testWidgets('NavigationBarBottomMode.automatic mode for bottom', (WidgetTester tester) async {
-    const double persistentHeight = 44.0;
-    const double largeTitleHeight = 44.0;
-    const double bottomHeight = 10.0;
-    final ScrollController controller = ScrollController();
+    const persistentHeight = 44.0;
+    const largeTitleHeight = 44.0;
+    const bottomHeight = 10.0;
+    final controller = ScrollController();
     setWindowToPortrait(tester);
 
     await tester.pumpWidget(
@@ -2288,9 +2288,9 @@ void main() {
   });
 
   testWidgets('NavigationBarBottomMode.always mode for bottom', (WidgetTester tester) async {
-    const double persistentHeight = 44.0;
-    const double largeTitleHeight = 44.0;
-    const double bottomHeight = 10.0;
+    const persistentHeight = 44.0;
+    const largeTitleHeight = 44.0;
+    const bottomHeight = 10.0;
     setWindowToPortrait(tester);
 
     await tester.pumpWidget(
@@ -2368,8 +2368,8 @@ void main() {
   testWidgets('Overscroll when stretched does not resize bottom in automatic mode', (
     WidgetTester tester,
   ) async {
-    const double bottomHeight = 10.0;
-    const double bottomDisplacement = 96.0;
+    const bottomHeight = 10.0;
+    const bottomDisplacement = 96.0;
     setWindowToPortrait(tester);
 
     await tester.pumpWidget(
@@ -2415,9 +2415,9 @@ void main() {
   testWidgets(
     'Large title snaps up to persistent nav bar when partially scrolled over halfway up',
     (WidgetTester tester) async {
-      final ScrollController scrollController = ScrollController();
+      final scrollController = ScrollController();
       addTearDown(scrollController.dispose);
-      const double largeTitleHeight = 52.0;
+      const largeTitleHeight = 52.0;
       setWindowToPortrait(tester);
 
       await tester.pumpWidget(
@@ -2461,9 +2461,9 @@ void main() {
   testWidgets(
     'Large title snaps back to extended height when partially scrolled halfway up or less',
     (WidgetTester tester) async {
-      final ScrollController scrollController = ScrollController();
+      final scrollController = ScrollController();
       addTearDown(scrollController.dispose);
-      const double largeTitleHeight = 52.0;
+      const largeTitleHeight = 52.0;
       setWindowToPortrait(tester);
 
       await tester.pumpWidget(
@@ -2506,10 +2506,10 @@ void main() {
   testWidgets(
     'Large title and bottom snap up when partially scrolled over halfway up in automatic mode',
     (WidgetTester tester) async {
-      final ScrollController scrollController = ScrollController();
+      final scrollController = ScrollController();
       addTearDown(scrollController.dispose);
-      const double largeTitleHeight = 52.0;
-      const double bottomHeight = 100.0;
+      const largeTitleHeight = 52.0;
+      const bottomHeight = 100.0;
       setWindowToPortrait(tester);
 
       await tester.pumpWidget(
@@ -2571,10 +2571,10 @@ void main() {
   testWidgets(
     'Large title and bottom snap down when partially scrolled halfway up or less in automatic mode',
     (WidgetTester tester) async {
-      final ScrollController scrollController = ScrollController();
+      final scrollController = ScrollController();
       addTearDown(scrollController.dispose);
-      const double largeTitleHeight = 52.0;
-      const double bottomHeight = 100.0;
+      const largeTitleHeight = 52.0;
+      const bottomHeight = 100.0;
       setWindowToPortrait(tester);
 
       await tester.pumpWidget(
@@ -2640,10 +2640,10 @@ void main() {
   testWidgets(
     'Large title and bottom snap up when partially scrolled over halfway up in always mode',
     (WidgetTester tester) async {
-      final ScrollController scrollController = ScrollController();
+      final scrollController = ScrollController();
       addTearDown(scrollController.dispose);
-      const double largeTitleHeight = 52.0;
-      const double bottomHeight = 100.0;
+      const largeTitleHeight = 52.0;
+      const bottomHeight = 100.0;
       setWindowToPortrait(tester);
 
       await tester.pumpWidget(
@@ -2708,9 +2708,9 @@ void main() {
   testWidgets(
     'Large title and bottom snap down when partially scrolled halfway up or less in always mode',
     (WidgetTester tester) async {
-      final ScrollController scrollController = ScrollController();
+      final scrollController = ScrollController();
       addTearDown(scrollController.dispose);
-      const double largeTitleHeight = 52.0;
+      const largeTitleHeight = 52.0;
       setWindowToPortrait(tester);
 
       await tester.pumpWidget(
@@ -2753,8 +2753,8 @@ void main() {
   );
 
   testWidgets('CupertinoNavigationBar with bottom widget', (WidgetTester tester) async {
-    const double persistentHeight = 44.0;
-    const double bottomHeight = 10.0;
+    const persistentHeight = 44.0;
+    const bottomHeight = 10.0;
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -2792,7 +2792,7 @@ void main() {
   });
 
   testWidgets('CupertinoNavigationBar has correct height', (WidgetTester tester) async {
-    const double persistentHeight = 44.0;
+    const persistentHeight = 44.0;
 
     await tester.pumpWidget(
       const CupertinoApp(
@@ -2818,8 +2818,8 @@ void main() {
   testWidgets('CupertinoNavigationBar with bottom widget has correct height', (
     WidgetTester tester,
   ) async {
-    const double persistentHeight = 44.0;
-    const double bottomHeight = 20.0;
+    const persistentHeight = 44.0;
+    const bottomHeight = 20.0;
 
     await tester.pumpWidget(
       const CupertinoApp(
@@ -2849,8 +2849,8 @@ void main() {
   });
 
   testWidgets('CupertinoNavigationBar.large has correct height', (WidgetTester tester) async {
-    const double persistentHeight = 44.0;
-    const double largeTitleExtension = 52.0;
+    const persistentHeight = 44.0;
+    const largeTitleExtension = 52.0;
 
     await tester.pumpWidget(
       const CupertinoApp(
@@ -2876,9 +2876,9 @@ void main() {
   testWidgets('CupertinoNavigationBar.large with bottom widget has correct height', (
     WidgetTester tester,
   ) async {
-    const double persistentHeight = 44.0;
-    const double largeTitleExtension = 52.0;
-    const double bottomHeight = 20.0;
+    const persistentHeight = 44.0;
+    const largeTitleExtension = 52.0;
+    const bottomHeight = 20.0;
 
     await tester.pumpWidget(
       const CupertinoApp(
@@ -3027,10 +3027,10 @@ void main() {
 
   testWidgets('onSearchableBottomTap callback', (WidgetTester tester) async {
     setWindowToPortrait(tester);
-    const Color activeSearchColor = Color(0x0000000A);
-    const Color inactiveSearchColor = Color(0x0000000B);
-    bool isSearchActive = false;
-    String text = '';
+    const activeSearchColor = Color(0x0000000A);
+    const inactiveSearchColor = Color(0x0000000B);
+    var isSearchActive = false;
+    var text = '';
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -3183,8 +3183,8 @@ void main() {
   testWidgets('Large title is hidden if middle is provided in landscape mode', (
     WidgetTester tester,
   ) async {
-    const String largeTitle = 'Large title';
-    const String middle = 'Middle';
+    const largeTitle = 'Large title';
+    const middle = 'Middle';
     await tester.pumpWidget(
       const CupertinoApp(
         home: CustomScrollView(
@@ -3208,7 +3208,7 @@ void main() {
   testWidgets('Large title is shown in middle position in landscape mode', (
     WidgetTester tester,
   ) async {
-    const String largeTitle = 'Large title';
+    const largeTitle = 'Large title';
     await tester.pumpWidget(
       const CupertinoApp(
         home: CustomScrollView(
@@ -3229,16 +3229,16 @@ void main() {
   testWidgets(
     'CupertinoSliverNavigationBar does not enter infinite animation loop when target exceeds maxScrollExtent and prevents buttons from being tapped',
     (WidgetTester tester) async {
-      const double largeTitleHeight = 52.0;
+      const largeTitleHeight = 52.0;
 
-      final ScrollController scrollController = ScrollController();
+      final scrollController = ScrollController();
       addTearDown(scrollController.dispose);
 
       tester.view.devicePixelRatio = 1;
       tester.binding.platformDispatcher.textScaleFactorTestValue = 1;
       setWindowToPortrait(tester, size: const Size(402, 874));
 
-      int count = 0;
+      var count = 0;
 
       await tester.pumpWidget(
         CupertinoApp(
@@ -3296,7 +3296,7 @@ void main() {
 
   testWidgets('Sliver nav bar middle can be updated', (WidgetTester tester) async {
     setWindowToPortrait(tester);
-    String middle = 'First';
+    var middle = 'First';
     late StateSetter setState;
 
     await tester.pumpWidget(

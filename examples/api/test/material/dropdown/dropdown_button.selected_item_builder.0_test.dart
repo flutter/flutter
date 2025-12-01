@@ -7,7 +7,9 @@ import 'package:flutter_api_samples/material/dropdown/dropdown_button.selected_i
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Select an item from DropdownButton', (WidgetTester tester) async {
+  testWidgets('Select an item from DropdownButton', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.DropdownButtonApp());
 
     expect(find.text('NYC'), findsOneWidget);

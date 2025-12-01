@@ -123,9 +123,7 @@ class PointerRouter {
   /// PointerRouter object.
   void route(PointerEvent event) {
     final Map<PointerRoute, Matrix4?>? routes = _routeMap[event.pointer];
-    final Map<PointerRoute, Matrix4?> copiedGlobalRoutes = Map<PointerRoute, Matrix4?>.of(
-      _globalRoutes,
-    );
+    final copiedGlobalRoutes = Map<PointerRoute, Matrix4?>.of(_globalRoutes);
     if (routes != null) {
       _dispatchEventToRoutes(event, routes, Map<PointerRoute, Matrix4?>.of(routes));
     }

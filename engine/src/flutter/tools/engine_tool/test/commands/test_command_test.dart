@@ -41,7 +41,7 @@ void main() {
         'linux_test_config': builders.buildConfig(path: 'ci/builders/linux_test_config.json'),
       },
     );
-    final result = await runner.run(['test', '//flutter/display_list:display_list_unittests']);
+    final int result = await runner.run(['test', '//flutter/display_list:display_list_unittests']);
 
     printOnFailure(testEnvironment.testLogs.map((t) => t.message).join('\n'));
     expect(result, equals(0));
@@ -95,7 +95,7 @@ void main() {
         'linux_test_config': builders.buildConfig(path: 'ci/builders/linux_test_config.json'),
       },
     );
-    final result = await runner.run(<String>['test', '//...']);
+    final int result = await runner.run(<String>['test', '//...']);
 
     printOnFailure(testEnvironment.testLogs.map((t) => t.message).join('\n'));
     expect(result, equals(0));

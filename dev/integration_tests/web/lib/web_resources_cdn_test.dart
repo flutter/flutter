@@ -16,7 +16,7 @@ Future<void> main() async {
 
 // Attempt to load CanvasKit resources hosted on gstatic.
 Future<bool> testFetchResources() async {
-  const String engineVersion = String.fromEnvironment('TEST_FLUTTER_ENGINE_VERSION');
+  const engineVersion = String.fromEnvironment('TEST_FLUTTER_ENGINE_VERSION');
   if (engineVersion.isEmpty) {
     return false;
   }

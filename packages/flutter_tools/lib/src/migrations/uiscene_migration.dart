@@ -28,7 +28,8 @@ class UISceneMigration extends ProjectMigrator {
   final IosProject _project;
 
   @visibleForTesting
-  static const originalSwiftAppDelegate = '''
+  static const originalSwiftAppDelegateTemplates = [
+    '''
 import Flutter
 import UIKit
 
@@ -42,9 +43,53 @@ import UIKit
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 }
-''';
+''',
+    '''
+import Flutter
+import UIKit
 
-  static const secondaryOriginalSwiftAppDelegate = '''
+@UIApplicationMain
+@objc class AppDelegate: FlutterAppDelegate {
+  override func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+  ) -> Bool {
+    GeneratedPluginRegistrant.register(with: self)
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+}
+''',
+    '''
+import UIKit
+import Flutter
+
+@UIApplicationMain
+@objc class AppDelegate: FlutterAppDelegate {
+  override func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+  ) -> Bool {
+    GeneratedPluginRegistrant.register(with: self)
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+}
+''',
+    '''
+import UIKit
+import Flutter
+
+@main
+@objc class AppDelegate: FlutterAppDelegate {
+  override func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+  ) -> Bool {
+    GeneratedPluginRegistrant.register(with: self)
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+}
+''',
+    '''
 import Flutter
 import UIKit
 
@@ -62,7 +107,8 @@ import UIKit
     GeneratedPluginRegistrant.register(with: registry)
   }
 }
-''';
+''',
+  ];
 
   @visibleForTesting
   static const originalObjCAppDelegateHeader = '''
@@ -198,10 +244,11 @@ import UIKit
   bool _migrateAppDelegate() {
     if (_project.appDelegateSwift.existsSync()) {
       final String projectAppDelegate = _project.appDelegateSwift.readAsStringSync().trim();
-      if (projectAppDelegate == originalSwiftAppDelegate.trim() ||
-          projectAppDelegate == secondaryOriginalSwiftAppDelegate.trim()) {
-        _project.appDelegateSwift.writeAsStringSync(newSwiftAppDelegate);
-        return true;
+      for (final String template in originalSwiftAppDelegateTemplates) {
+        if (template.trim() == projectAppDelegate) {
+          _project.appDelegateSwift.writeAsStringSync(newSwiftAppDelegate);
+          return true;
+        }
       }
       logger.printTrace('UIScene migration: AppDelegate does not match original template.');
       return false;

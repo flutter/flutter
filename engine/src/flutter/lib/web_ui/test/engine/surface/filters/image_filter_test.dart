@@ -16,11 +16,11 @@ void main() {
 void testMain() {
   group('ImageFilter constructors', () {
     test('matrix is copied', () {
-      final Matrix4 matrix = Matrix4.identity();
+      final matrix = Matrix4.identity();
       final Float64List storage = matrix.toFloat64();
-      final ImageFilter filter1 = ImageFilter.matrix(storage);
+      final filter1 = ImageFilter.matrix(storage);
       storage[0] = 2.0;
-      final ImageFilter filter2 = ImageFilter.matrix(storage);
+      final filter2 = ImageFilter.matrix(storage);
       expect(filter1, filter1);
       expect(filter2, filter2);
       expect(filter1, isNot(equals(filter2)));
@@ -28,14 +28,14 @@ void testMain() {
     });
 
     test('matrix tests all values on ==', () {
-      final Matrix4 matrix = Matrix4.identity();
+      final matrix = Matrix4.identity();
       final Float64List storage = matrix.toFloat64();
-      final ImageFilter filter1a = ImageFilter.matrix(storage, filterQuality: FilterQuality.none);
-      final ImageFilter filter1b = ImageFilter.matrix(storage, filterQuality: FilterQuality.high);
+      final filter1a = ImageFilter.matrix(storage, filterQuality: FilterQuality.none);
+      final filter1b = ImageFilter.matrix(storage, filterQuality: FilterQuality.high);
 
       storage[0] = 2.0;
-      final ImageFilter filter2a = ImageFilter.matrix(storage, filterQuality: FilterQuality.none);
-      final ImageFilter filter2b = ImageFilter.matrix(storage, filterQuality: FilterQuality.high);
+      final filter2a = ImageFilter.matrix(storage, filterQuality: FilterQuality.none);
+      final filter2b = ImageFilter.matrix(storage, filterQuality: FilterQuality.high);
 
       expect(filter1a, filter1a);
       expect(filter1a, isNot(equals(filter1b)));
@@ -59,21 +59,9 @@ void testMain() {
     });
 
     test('blur tests all values on ==', () {
-      final ImageFilter filter1 = ImageFilter.blur(
-        sigmaX: 2.0,
-        sigmaY: 2.0,
-        tileMode: TileMode.decal,
-      );
-      final ImageFilter filter2 = ImageFilter.blur(
-        sigmaX: 2.0,
-        sigmaY: 3.0,
-        tileMode: TileMode.decal,
-      );
-      final ImageFilter filter3 = ImageFilter.blur(
-        sigmaX: 2.0,
-        sigmaY: 2.0,
-        tileMode: TileMode.mirror,
-      );
+      final filter1 = ImageFilter.blur(sigmaX: 2.0, sigmaY: 2.0, tileMode: TileMode.decal);
+      final filter2 = ImageFilter.blur(sigmaX: 2.0, sigmaY: 3.0, tileMode: TileMode.decal);
+      final filter3 = ImageFilter.blur(sigmaX: 2.0, sigmaY: 2.0, tileMode: TileMode.mirror);
 
       expect(filter1, filter1);
       expect(filter1, isNot(equals(filter2)));

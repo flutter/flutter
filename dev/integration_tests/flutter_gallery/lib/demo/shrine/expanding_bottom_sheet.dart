@@ -426,15 +426,15 @@ class _ProductThumbnailRowState extends State<ProductThumbnailRow> {
   void _updateLists() {
     // Update _internalList based on the model
     _internalList = ScopedModel.of<AppStateModel>(context).productsInCart.keys.toList();
-    final Set<int> internalSet = Set<int>.from(_internalList);
-    final Set<int> listSet = Set<int>.from(_list.list);
+    final internalSet = Set<int>.from(_internalList);
+    final listSet = Set<int>.from(_list.list);
 
     final Set<int> difference = internalSet.difference(listSet);
     if (difference.isEmpty) {
       return;
     }
 
-    for (final int product in difference) {
+    for (final product in difference) {
       if (_internalList.length < _list.length) {
         _list.remove(product);
       } else if (_internalList.length > _list.length) {
@@ -443,7 +443,7 @@ class _ProductThumbnailRowState extends State<ProductThumbnailRow> {
     }
 
     while (_internalList.length != _list.length) {
-      int index = 0;
+      var index = 0;
       // Check bounds and that the list elements are the same
       while (_internalList.isNotEmpty &&
           _list.length > 0 &&
@@ -487,10 +487,10 @@ class ExtraProductsNumber extends StatelessWidget {
     // List created to be able to access products by index instead of ID.
     // Order is guaranteed because productsInCart returns a LinkedHashMap.
     final List<int> products = productMap.keys.toList();
-    int overflow = 0;
+    var overflow = 0;
     final int numProducts = products.length;
     if (numProducts > 3) {
-      for (int i = 3; i < numProducts; i++) {
+      for (var i = 3; i < numProducts; i++) {
         overflow += productMap[products[i]]!;
       }
     }
@@ -504,7 +504,7 @@ class ExtraProductsNumber extends StatelessWidget {
 
     final int numOverflowProducts = _calculateOverflow(model);
     // Maximum of 99 so padding doesn't get messy.
-    final int displayedOverflowProducts = numOverflowProducts <= 99 ? numOverflowProducts : 99;
+    final displayedOverflowProducts = numOverflowProducts <= 99 ? numOverflowProducts : 99;
     return Text(
       '+$displayedOverflowProducts',
       style: Theme.of(context).primaryTextTheme.labelLarge,

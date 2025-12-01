@@ -31,8 +31,8 @@ double sumBudgetDataAmountUsed(List<BudgetData> items) =>
 
 /// Utility function to sum up values in a list.
 double sumOf<T>(List<T> list, double Function(T elt) getValue) {
-  double sum = 0.0;
-  for (final T elt in list) {
+  var sum = 0.0;
+  for (final elt in list) {
     sum += getValue(elt);
   }
   return sum;

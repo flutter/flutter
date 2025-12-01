@@ -12,7 +12,7 @@ void main() {
 
   test('Adding/removing renderviews updates renderViews getter', () {
     final FlutterView flutterView = FakeFlutterView();
-    final RenderView view = RenderView(view: flutterView);
+    final view = RenderView(view: flutterView);
 
     expect(binding.renderViews, isEmpty);
     binding.addRenderView(view);
@@ -29,9 +29,9 @@ void main() {
 
   test('illegal add/remove renderviews', () {
     final FlutterView flutterView = FakeFlutterView();
-    final RenderView view1 = RenderView(view: flutterView);
-    final RenderView view2 = RenderView(view: flutterView);
-    final RenderView view3 = RenderView(view: FakeFlutterView(viewId: 200));
+    final view1 = RenderView(view: flutterView);
+    final view2 = RenderView(view: flutterView);
+    final view3 = RenderView(view: FakeFlutterView(viewId: 200));
 
     expect(binding.renderViews, isEmpty);
     binding.addRenderView(view1);
@@ -50,8 +50,8 @@ void main() {
   });
 
   test('changing metrics updates configuration', () {
-    final FakeFlutterView flutterView = FakeFlutterView();
-    final RenderView view = RenderView(view: flutterView);
+    final flutterView = FakeFlutterView();
+    final view = RenderView(view: flutterView);
     binding.addRenderView(view);
     expect(view.configuration.devicePixelRatio, 2.5);
     expect(view.configuration.logicalConstraints.isTight, isTrue);
@@ -70,12 +70,12 @@ void main() {
   });
 
   test('semantics actions are performed on the right view', () {
-    final FakeFlutterView flutterView1 = FakeFlutterView(viewId: 1);
-    final FakeFlutterView flutterView2 = FakeFlutterView(viewId: 2);
-    final RenderView renderView1 = RenderView(view: flutterView1);
-    final RenderView renderView2 = RenderView(view: flutterView2);
-    final PipelineOwnerSpy owner1 = PipelineOwnerSpy()..rootNode = renderView1;
-    final PipelineOwnerSpy owner2 = PipelineOwnerSpy()..rootNode = renderView2;
+    final flutterView1 = FakeFlutterView(viewId: 1);
+    final flutterView2 = FakeFlutterView(viewId: 2);
+    final renderView1 = RenderView(view: flutterView1);
+    final renderView2 = RenderView(view: flutterView2);
+    final owner1 = PipelineOwnerSpy()..rootNode = renderView1;
+    final owner2 = PipelineOwnerSpy()..rootNode = renderView2;
 
     binding.addRenderView(renderView1);
     binding.addRenderView(renderView2);
@@ -105,12 +105,12 @@ void main() {
   });
 
   test('all registered renderviews are asked to composite frame', () {
-    final FakeFlutterView flutterView1 = FakeFlutterView(viewId: 1);
-    final FakeFlutterView flutterView2 = FakeFlutterView(viewId: 2);
-    final RenderView renderView1 = RenderView(view: flutterView1);
-    final RenderView renderView2 = RenderView(view: flutterView2);
-    final PipelineOwner owner1 = PipelineOwner()..rootNode = renderView1;
-    final PipelineOwner owner2 = PipelineOwner()..rootNode = renderView2;
+    final flutterView1 = FakeFlutterView(viewId: 1);
+    final flutterView2 = FakeFlutterView(viewId: 2);
+    final renderView1 = RenderView(view: flutterView1);
+    final renderView2 = RenderView(view: flutterView2);
+    final owner1 = PipelineOwner()..rootNode = renderView1;
+    final owner2 = PipelineOwner()..rootNode = renderView2;
     binding.rootPipelineOwner.adoptChild(owner1);
     binding.rootPipelineOwner.adoptChild(owner2);
     binding.addRenderView(renderView1);
@@ -145,14 +145,14 @@ void main() {
   });
 
   test('hit-testing reaches the right view', () {
-    final FakeFlutterView flutterView1 = FakeFlutterView(viewId: 1);
-    final FakeFlutterView flutterView2 = FakeFlutterView(viewId: 2);
-    final RenderView renderView1 = RenderView(view: flutterView1);
-    final RenderView renderView2 = RenderView(view: flutterView2);
+    final flutterView1 = FakeFlutterView(viewId: 1);
+    final flutterView2 = FakeFlutterView(viewId: 2);
+    final renderView1 = RenderView(view: flutterView1);
+    final renderView2 = RenderView(view: flutterView2);
     binding.addRenderView(renderView1);
     binding.addRenderView(renderView2);
 
-    HitTestResult result = HitTestResult();
+    var result = HitTestResult();
     binding.hitTestInView(result, Offset.zero, 1);
     expect(result.path, hasLength(2));
     expect(result.path.first.target, renderView1);

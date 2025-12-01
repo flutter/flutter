@@ -91,6 +91,14 @@ class Ticker {
 
   TickerFuture? _future;
 
+  /// If true, this ticker will request frames using
+  /// [SchedulerBinding.scheduleForcedFrame] instead of [SchedulerBinding.scheduleFrame].
+  ///
+  /// This allows granular control to advance frames even when frames are
+  /// typically disabled (e.g. when the app is in the background). This should be
+  /// used sparingly as it can increase battery usage.
+  bool forceFrames = false;
+
   /// Whether this ticker has been silenced.
   ///
   /// While silenced, a ticker's clock can still run, but the callback will not
@@ -282,9 +290,15 @@ class Ticker {
   void scheduleTick({bool rescheduling = false}) {
     assert(!scheduled);
     assert(shouldScheduleTick);
+    if (forceFrames) {
+      SchedulerBinding.instance.scheduleForcedFrame();
+    } else {
+      SchedulerBinding.instance.scheduleFrame();
+    }
     _animationId = SchedulerBinding.instance.scheduleFrameCallback(
       _tick,
       rescheduling: rescheduling,
+      scheduleNewFrame: false,
     );
   }
 
@@ -371,7 +385,7 @@ class Ticker {
 
   @override
   String toString({bool debugIncludeStack = false}) {
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     buffer.write('${objectRuntimeType(this, 'Ticker')}(');
     assert(() {
       buffer.write(debugLabel ?? '');

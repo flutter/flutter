@@ -151,9 +151,9 @@ void main() {
 
   testWidgets('LayoutBuilder does not layout twice', (WidgetTester tester) async {
     // This widget marks itself dirty when the closest MediaQuery changes.
-    final _LayoutCount widget = _LayoutCount();
+    final widget = _LayoutCount();
     late StateSetter setState;
-    bool updated = false;
+    var updated = false;
 
     await tester.pumpWidget(
       Directionality(

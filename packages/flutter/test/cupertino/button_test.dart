@@ -30,7 +30,7 @@ void main() {
   });
 
   testWidgets('Minimum size parameter', (WidgetTester tester) async {
-    const double minSize = 60.0;
+    const minSize = 60.0;
     await tester.pumpWidget(
       boilerplate(
         child: const CupertinoButton(
@@ -49,7 +49,7 @@ void main() {
   });
 
   testWidgets('Minimum size minimumSize parameter', (WidgetTester tester) async {
-    const Size size = Size(60.0, 100.0);
+    const size = Size(60.0, 100.0);
     await tester.pumpWidget(
       boilerplate(
         child: const CupertinoButton(onPressed: null, minimumSize: size, child: SizedBox.shrink()),
@@ -74,7 +74,7 @@ void main() {
   });
 
   testWidgets('OnLongPress works!', (WidgetTester tester) async {
-    bool value = false;
+    var value = false;
     await tester.pumpWidget(
       boilerplate(
         child: CupertinoButton(
@@ -219,7 +219,7 @@ void main() {
   });
 
   testWidgets('Button takes taps', (WidgetTester tester) async {
-    bool value = false;
+    var value = false;
     await tester.pumpWidget(
       StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
@@ -317,7 +317,7 @@ void main() {
   });
 
   testWidgets('pressedOpacity parameter', (WidgetTester tester) async {
-    const double pressedOpacity = 0.5;
+    const pressedOpacity = 0.5;
     await tester.pumpWidget(
       boilerplate(
         child: CupertinoButton(
@@ -345,7 +345,7 @@ void main() {
   });
 
   testWidgets('Cupertino button is semantically a button', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       boilerplate(
         child: Center(
@@ -387,7 +387,7 @@ void main() {
       ),
     );
 
-    ShapeDecoration decoration =
+    var decoration =
         tester.widget<DecoratedBox>(find.widgetWithText(DecoratedBox, 'Skeuomorph me')).decoration
             as ShapeDecoration;
 
@@ -436,7 +436,7 @@ void main() {
       ),
     );
 
-    ShapeDecoration decoration =
+    var decoration =
         tester.widget<DecoratedBox>(find.widgetWithText(DecoratedBox, 'Skeuomorph me')).decoration
             as ShapeDecoration;
 
@@ -496,7 +496,7 @@ void main() {
       ),
     );
     expect(textStyle.color, CupertinoColors.activeBlue);
-    ShapeDecoration decoration =
+    var decoration =
         tester
                 .widget<DecoratedBox>(
                   find.descendant(
@@ -674,10 +674,10 @@ void main() {
   });
 
   testWidgets('Button can be focused and has default colors', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode(debugLabel: 'Button');
+    final focusNode = FocusNode(debugLabel: 'Button');
     addTearDown(focusNode.dispose);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    final BorderSide defaultFocusBorder = BorderSide(
+    final defaultFocusBorder = BorderSide(
       color: HSLColor.fromColor(CupertinoColors.activeBlue.withOpacity(kCupertinoFocusColorOpacity))
           .withLightness(kCupertinoFocusColorBrightness)
           .withSaturation(kCupertinoFocusColorSaturation)
@@ -724,7 +724,7 @@ void main() {
   });
 
   testWidgets('Button configures focus color', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode(debugLabel: 'Button');
+    final focusNode = FocusNode(debugLabel: 'Button');
     addTearDown(focusNode.dispose);
 
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
@@ -756,10 +756,10 @@ void main() {
   });
 
   testWidgets('CupertinoButton.onFocusChange callback', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode(debugLabel: 'CupertinoButton');
+    final focusNode = FocusNode(debugLabel: 'CupertinoButton');
     addTearDown(focusNode.dispose);
 
-    bool focused = false;
+    var focused = false;
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -789,7 +789,7 @@ void main() {
   testWidgets('IconThemeData falls back to default value when the TextStyle has a null size', (
     WidgetTester tester,
   ) async {
-    const IconThemeData defaultIconTheme = IconThemeData(size: kCupertinoButtonDefaultIconSize);
+    const defaultIconTheme = IconThemeData(size: kCupertinoButtonDefaultIconSize);
 
     IconThemeData? actualIconTheme;
 
@@ -839,7 +839,7 @@ void main() {
 
   testWidgets('Button can be activated by keyboard shortcuts', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    bool value = true;
+    var value = true;
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -928,7 +928,7 @@ void main() {
   });
 
   testWidgets('onPressed trigger takes into account MoveSlop.', (WidgetTester tester) async {
-    bool value = false;
+    var value = false;
     await tester.pumpWidget(
       boilerplate(
         child: CupertinoButton(
@@ -960,7 +960,7 @@ void main() {
   testWidgets('Mouse cursor resolves in enabled/disabled/pressed/focused states', (
     WidgetTester tester,
   ) async {
-    final FocusNode focusNode = FocusNode(debugLabel: 'Button');
+    final focusNode = FocusNode(debugLabel: 'Button');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     addTearDown(focusNode.dispose);
     Widget buildButton({required bool enabled, MouseCursor? cursor}) {
@@ -1022,7 +1022,7 @@ void main() {
   });
 
   testWidgets('CupertinoButton foregroundColor applies to its text', (WidgetTester tester) async {
-    const Color customForegroundColor = Color(0xFF5500FF);
+    const customForegroundColor = Color(0xFF5500FF);
 
     await tester.pumpWidget(
       boilerplate(
@@ -1042,7 +1042,7 @@ void main() {
   });
 
   testWidgets('CupertinoButton foregroundColor applies to its icon', (WidgetTester tester) async {
-    const Color customForegroundColor = Color(0xFF5500FF);
+    const customForegroundColor = Color(0xFF5500FF);
 
     await tester.pumpWidget(
       boilerplate(
@@ -1084,7 +1084,7 @@ void main() {
   testWidgets('CupertinoButton.filled foregroundColor applies to its text', (
     WidgetTester tester,
   ) async {
-    const Color customForegroundColor = Color(0xFF5500FF);
+    const customForegroundColor = Color(0xFF5500FF);
 
     await tester.pumpWidget(
       boilerplate(
@@ -1106,7 +1106,7 @@ void main() {
   testWidgets('CupertinoButton foregroundColor applies to its text when disabled', (
     WidgetTester tester,
   ) async {
-    const Color customForegroundColor = Color(0xFF5500FF);
+    const customForegroundColor = Color(0xFF5500FF);
 
     await tester.pumpWidget(
       boilerplate(
@@ -1151,7 +1151,6 @@ class _ButtonMouseCursor extends WidgetStateMouseCursor {
 }
 
 BorderSide _findBorder(WidgetTester tester, Finder finder) {
-  final ShapeDecoration decoration =
-      tester.widget<DecoratedBox>(finder).decoration as ShapeDecoration;
+  final decoration = tester.widget<DecoratedBox>(finder).decoration as ShapeDecoration;
   return (decoration.shape as RoundedSuperellipseBorder).side;
 }

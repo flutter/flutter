@@ -201,7 +201,7 @@ mixin CommandHandlerFactory {
         'disabled. You can enable it using `FlutterDriver.setTextEntryEmulation`.',
       );
     }
-    final EnterText enterTextCommand = command as EnterText;
+    final enterTextCommand = command as EnterText;
     _testTextInput.enterText(enterTextCommand.text);
     return Result.empty;
   }
@@ -213,13 +213,13 @@ mixin CommandHandlerFactory {
         'disabled. You can enable it using `FlutterDriver.setTextEntryEmulation`.',
       );
     }
-    final SendTextInputAction sendTextInputAction = command as SendTextInputAction;
+    final sendTextInputAction = command as SendTextInputAction;
     _testTextInput.receiveAction(TextInputAction.values[sendTextInputAction.textInputAction.index]);
     return Result.empty;
   }
 
   Future<RequestDataResult> _requestData(Command command) async {
-    final RequestData requestDataCommand = command as RequestData;
+    final requestDataCommand = command as RequestData;
     final DataHandler? dataHandler = getDataHandler();
     return RequestDataResult(
       dataHandler == null
@@ -229,7 +229,7 @@ mixin CommandHandlerFactory {
   }
 
   Future<Result> _setFrameSync(Command command) async {
-    final SetFrameSync setFrameSyncCommand = command as SetFrameSync;
+    final setFrameSyncCommand = command as SetFrameSync;
     _frameSync = setFrameSyncCommand.enabled;
     return Result.empty;
   }
@@ -239,7 +239,7 @@ mixin CommandHandlerFactory {
     WidgetController prober,
     CreateFinderFactory finderFactory,
   ) async {
-    final Tap tapCommand = command as Tap;
+    final tapCommand = command as Tap;
     final Finder computedFinder = await waitForElement(
       finderFactory.createFinder(tapCommand.finder).hitTestable(),
     );
@@ -248,25 +248,25 @@ mixin CommandHandlerFactory {
   }
 
   Future<Result> _waitFor(Command command, CreateFinderFactory finderFactory) async {
-    final WaitFor waitForCommand = command as WaitFor;
+    final waitForCommand = command as WaitFor;
     await waitForElement(finderFactory.createFinder(waitForCommand.finder));
     return Result.empty;
   }
 
   Future<Result> _waitForAbsent(Command command, CreateFinderFactory finderFactory) async {
-    final WaitForAbsent waitForAbsentCommand = command as WaitForAbsent;
+    final waitForAbsentCommand = command as WaitForAbsent;
     await waitForAbsentElement(finderFactory.createFinder(waitForAbsentCommand.finder));
     return Result.empty;
   }
 
   Future<Result> _waitForTappable(Command command, CreateFinderFactory finderFactory) async {
-    final WaitForTappable waitForTappableCommand = command as WaitForTappable;
+    final waitForTappableCommand = command as WaitForTappable;
     await waitForElement(finderFactory.createFinder(waitForTappableCommand.finder).hitTestable());
     return Result.empty;
   }
 
   Future<Result> _waitForCondition(Command command) async {
-    final WaitForCondition waitForConditionCommand = command as WaitForCondition;
+    final waitForConditionCommand = command as WaitForCondition;
     final WaitCondition condition = deserializeCondition(waitForConditionCommand.condition);
     await condition.wait();
     return Result.empty;
@@ -318,7 +318,7 @@ mixin CommandHandlerFactory {
     Command command,
     CreateFinderFactory finderFactory,
   ) async {
-    final GetSemanticsId semanticsCommand = command as GetSemanticsId;
+    final semanticsCommand = command as GetSemanticsId;
     final Finder target = await waitForElement(finderFactory.createFinder(semanticsCommand.finder));
     final Iterable<Element> elements = target.evaluate();
     if (elements.length > 1) {
@@ -338,7 +338,7 @@ mixin CommandHandlerFactory {
   }
 
   Future<GetOffsetResult> _getOffset(Command command, CreateFinderFactory finderFactory) async {
-    final GetOffset getOffsetCommand = command as GetOffset;
+    final getOffsetCommand = command as GetOffset;
     final Finder finder = await waitForElement(finderFactory.createFinder(getOffsetCommand.finder));
     final Element element = finder.evaluate().single;
     final RenderBox box = (element.renderObject as RenderBox?)!;
@@ -357,7 +357,7 @@ mixin CommandHandlerFactory {
     Command command,
     CreateFinderFactory finderFactory,
   ) async {
-    final GetDiagnosticsTree diagnosticsCommand = command as GetDiagnosticsTree;
+    final diagnosticsCommand = command as GetDiagnosticsTree;
     final Finder finder = await waitForElement(
       finderFactory.createFinder(diagnosticsCommand.finder),
     );
@@ -377,11 +377,11 @@ mixin CommandHandlerFactory {
   }
 
   Future<ScreenshotResult> _takeScreenshot(Command command) async {
-    final ScreenshotCommand screenshotCommand = command as ScreenshotCommand;
+    final screenshotCommand = command as ScreenshotCommand;
     final RenderView renderView = RendererBinding.instance.renderViews.first;
     // ignore: invalid_use_of_protected_member
     final ContainerLayer? layer = renderView.layer;
-    final OffsetLayer offsetLayer = layer! as OffsetLayer;
+    final offsetLayer = layer! as OffsetLayer;
     final ui.Image image = await offsetLayer.toImage(renderView.paintBounds);
     final ui.ImageByteFormat format = ui.ImageByteFormat.values[screenshotCommand.format.index];
     final ByteData buffer = (await image.toByteData(format: format))!;
@@ -393,7 +393,7 @@ mixin CommandHandlerFactory {
     WidgetController prober,
     CreateFinderFactory finderFactory,
   ) async {
-    final Scroll scrollCommand = command as Scroll;
+    final scrollCommand = command as Scroll;
     final Finder target = await waitForElement(finderFactory.createFinder(scrollCommand.finder));
     final int totalMoves =
         scrollCommand.duration.inMicroseconds *
@@ -402,11 +402,11 @@ mixin CommandHandlerFactory {
     final Offset delta = Offset(scrollCommand.dx, scrollCommand.dy) / totalMoves.toDouble();
     final Duration pause = scrollCommand.duration ~/ totalMoves;
     final Offset startLocation = prober.getCenter(target);
-    Offset currentLocation = startLocation;
-    final TestPointer pointer = TestPointer();
+    var currentLocation = startLocation;
+    final pointer = TestPointer();
     prober.binding.handlePointerEvent(pointer.down(startLocation));
     await Future<void>.value(); // so that down and move don't happen in the same microtask
-    for (int moves = 0; moves < totalMoves; moves += 1) {
+    for (var moves = 0; moves < totalMoves; moves += 1) {
       currentLocation = currentLocation + delta;
       prober.binding.handlePointerEvent(pointer.move(currentLocation));
       await Future<void>.delayed(pause);
@@ -417,7 +417,7 @@ mixin CommandHandlerFactory {
   }
 
   Future<Result> _scrollIntoView(Command command, CreateFinderFactory finderFactory) async {
-    final ScrollIntoView scrollIntoViewCommand = command as ScrollIntoView;
+    final scrollIntoViewCommand = command as ScrollIntoView;
     final Finder target = await waitForElement(
       finderFactory.createFinder(scrollIntoViewCommand.finder),
     );
@@ -430,7 +430,7 @@ mixin CommandHandlerFactory {
   }
 
   Future<GetTextResult> _getText(Command command, CreateFinderFactory finderFactory) async {
-    final GetText getTextCommand = command as GetText;
+    final getTextCommand = command as GetText;
     final Finder target = await waitForElement(finderFactory.createFinder(getTextCommand.finder));
 
     final Widget widget = target.evaluate().single.widget;
@@ -439,7 +439,7 @@ mixin CommandHandlerFactory {
     if (widget.runtimeType == Text) {
       text = (widget as Text).data;
     } else if (widget.runtimeType == RichText) {
-      final RichText richText = widget as RichText;
+      final richText = widget as RichText;
       text = richText.text.toPlainText(includeSemanticsLabels: false, includePlaceholders: false);
     } else if (widget.runtimeType == TextField) {
       text = (widget as TextField).controller?.text;
@@ -457,7 +457,7 @@ mixin CommandHandlerFactory {
   }
 
   Future<Result> _setTextEntryEmulation(Command command) async {
-    final SetTextEntryEmulation setTextEntryEmulationCommand = command as SetTextEntryEmulation;
+    final setTextEntryEmulationCommand = command as SetTextEntryEmulation;
     if (setTextEntryEmulationCommand.enabled) {
       _testTextInput.register();
     } else {
@@ -470,13 +470,13 @@ mixin CommandHandlerFactory {
   bool get _semanticsIsEnabled => SemanticsBinding.instance.semanticsEnabled;
 
   Future<SetSemanticsResult> _setSemantics(Command command) async {
-    final SetSemantics setSemanticsCommand = command as SetSemantics;
+    final setSemanticsCommand = command as SetSemantics;
     final bool semanticsWasEnabled = _semanticsIsEnabled;
     if (setSemanticsCommand.enabled && _semantics == null) {
       _semantics = SemanticsBinding.instance.ensureSemantics();
       if (!semanticsWasEnabled) {
         // wait for the first frame where semantics is enabled.
-        final Completer<void> completer = Completer<void>();
+        final completer = Completer<void>();
         SchedulerBinding.instance.addPostFrameCallback((Duration d) {
           completer.complete();
         });

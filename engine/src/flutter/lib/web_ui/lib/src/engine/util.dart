@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:math' as math;
@@ -14,61 +13,6 @@ import 'package:ui/ui.dart' as ui;
 import 'browser_detection.dart' show isIOS15, isMacOrIOS;
 import 'dom.dart';
 import 'vector_math.dart';
-
-/// Generic callback signature, used by [futurize].
-typedef Callback<T> = void Function(T result);
-
-/// Signature for a method that receives a [Callback].
-///
-/// Return value should be null on success, and a string error message on
-/// failure.
-typedef Callbacker<T> = String? Function(Callback<T> callback);
-
-/// Converts a method that receives a value-returning callback to a method that
-/// returns a Future.
-///
-/// Return a [String] to cause an [Exception] to be synchronously thrown with
-/// that string as a message.
-///
-/// If the callback is called with null, the future completes with an error.
-///
-/// Example usage:
-///
-/// ```dart
-/// typedef IntCallback = void Function(int result);
-///
-/// String _doSomethingAndCallback(IntCallback callback) {
-///   Timer(const Duration(seconds: 1), () { callback(1); });
-/// }
-///
-/// Future<int> doSomething() {
-///   return futurize(_doSomethingAndCallback);
-/// }
-/// ```
-// Keep this in sync with _futurize in lib/ui/fixtures/ui_test.dart.
-Future<T> futurize<T>(Callbacker<T> callbacker) {
-  final Completer<T> completer = Completer<T>.sync();
-  // If the callback synchronously throws an error, then synchronously
-  // rethrow that error instead of adding it to the completer. This
-  // prevents the Zone from receiving an uncaught exception.
-  bool isSync = true;
-  final String? error = callbacker((T? t) {
-    if (t == null) {
-      if (isSync) {
-        throw Exception('operation failed');
-      } else {
-        completer.completeError(Exception('operation failed'));
-      }
-    } else {
-      completer.complete(t);
-    }
-  });
-  isSync = false;
-  if (error != null) {
-    throw Exception(error);
-  }
-  return completer.future;
-}
 
 /// Converts [matrix] to CSS transform value.
 String matrix4ToCssTransform(Matrix4 matrix) {
@@ -118,7 +62,7 @@ enum TransformKind {
 /// Detects the kind of transform the [matrix] performs.
 TransformKind transformKindOf(List<double> matrix) {
   assert(matrix.length == 16);
-  final List<double> m = matrix;
+  final m = matrix;
 
   // If matrix contains scaling, rotation, z translation or
   // perspective transform, it is not considered simple.
@@ -179,7 +123,7 @@ String float64ListToCssTransform2d(List<double> matrix) {
 /// Converts [matrix] to a 3D CSS transform value.
 String float64ListToCssTransform3d(List<double> matrix) {
   assert(matrix.length == 16);
-  final List<double> m = matrix;
+  final m = matrix;
   if (m[0] == 1.0 &&
       m[1] == 0.0 &&
       m[2] == 0.0 &&
@@ -344,7 +288,7 @@ String colorValueToCssString(int value) {
     };
   } else {
     final double alpha = ((value >> 24) & 0xFF) / 255.0;
-    final StringBuffer sb = StringBuffer();
+    final sb = StringBuffer();
     sb.write('rgba(');
     sb.write(((value >> 16) & 0xFF).toString());
     sb.write(',');
@@ -427,8 +371,8 @@ String? canonicalizeFontFamily(String? fontFamily) {
 /// Converts a list of [Offset] to a typed array of floats.
 Float32List offsetListToFloat32List(List<ui.Offset> offsetList) {
   final int length = offsetList.length;
-  final Float32List floatList = Float32List(length * 2);
-  for (int i = 0, destIndex = 0; i < length; i++, destIndex += 2) {
+  final floatList = Float32List(length * 2);
+  for (var i = 0, destIndex = 0; i < length; i++, destIndex += 2) {
     floatList[destIndex] = offsetList[i].dx;
     floatList[destIndex + 1] = offsetList[i].dy;
   }
@@ -453,7 +397,7 @@ bool listEquals<T>(List<T>? a, List<T>? b) {
   if (b == null || a.length != b.length) {
     return false;
   }
-  for (int index = 0; index < a.length; index += 1) {
+  for (var index = 0; index < a.length; index += 1) {
     if (a[index] != b[index]) {
       return false;
     }
@@ -492,7 +436,7 @@ bool unorderedListEqual<T>(List<T>? a, List<T>? b) {
   }
 
   // Complex cases.
-  final Map<T, int> wordCounts = <T, int>{};
+  final wordCounts = <T, int>{};
   for (final T word in a) {
     final int count = wordCounts[word] ?? 0;
     wordCounts[word] = count + 1;
@@ -636,7 +580,7 @@ void setElementStyle(DomElement element, String name, String? value) {
 }
 
 void setThemeColor(ui.Color? color) {
-  DomHTMLMetaElement? theme = domDocument.querySelector('#flutterweb-theme') as DomHTMLMetaElement?;
+  var theme = domDocument.querySelector('#flutterweb-theme') as DomHTMLMetaElement?;
 
   if (color != null) {
     if (theme == null) {
@@ -669,7 +613,7 @@ void ensureMetaTag(String name, String content) {
 /// This is mostly useful for iterables containing non-null elements.
 extension FirstWhereOrNull<T> on Iterable<T> {
   T? firstWhereOrNull(bool Function(T element) test) {
-    for (final T element in this) {
+    for (final element in this) {
       if (test(element)) {
         return element;
       }
@@ -773,7 +717,7 @@ class LruCache<K extends Object, V extends Object> {
   }
 
   void _removeLeastRecentlyUsedValue() {
-    final bool didRemove = _itemMap.remove(_itemQueue.last.key) != null;
+    final didRemove = _itemMap.remove(_itemQueue.last.key) != null;
     assert(didRemove);
     _itemQueue.removeLast();
   }
@@ -826,9 +770,9 @@ String _generateDebugFilename(String filePrefix) {
 
 void downloadDebugInfo(String filePrefix, Map<String, dynamic> json) {
   final String jsonString = const JsonEncoder.withIndent(' ').convert(json);
-  final blob = createDomBlob([jsonString], {'type': 'application/json'});
-  final url = domWindow.URL.createObjectURL(blob);
-  final element = domDocument.createElement('a');
+  final DomBlob blob = createDomBlob([jsonString], {'type': 'application/json'});
+  final String url = domWindow.URL.createObjectURL(blob);
+  final DomElement element = domDocument.createElement('a');
   element.setAttribute('href', url);
   element.setAttribute('download', _generateDebugFilename(filePrefix));
   element.click();

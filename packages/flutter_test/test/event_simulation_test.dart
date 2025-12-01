@@ -35,7 +35,7 @@ void _verifyRawKeyEvent<T extends RawKeyEvent>(
 }
 
 Future<void> _shouldThrow<T extends Error>(AsyncValueGetter<void> func) async {
-  bool hasError = false;
+  var hasError = false;
   try {
     await func();
   } catch (e) {
@@ -65,8 +65,8 @@ void main() {
   testWidgets('simulates keyboard events (RawEvent)', (WidgetTester tester) async {
     debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.rawKeyData;
 
-    final List<RawKeyEvent> events = <RawKeyEvent>[];
-    final FocusNode focusNode = FocusNode();
+    final events = <RawKeyEvent>[];
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
@@ -86,7 +86,7 @@ void main() {
       await tester.idle();
 
       expect(events.length, 8);
-      for (int i = 0; i < events.length; ++i) {
+      for (var i = 0; i < events.length; ++i) {
         final bool isEven = i.isEven;
         if (isEven) {
           expect(events[i].runtimeType, equals(RawKeyDownEvent));
@@ -111,8 +111,8 @@ void main() {
   testWidgets('simulates keyboard events (KeyData then RawKeyEvent)', (WidgetTester tester) async {
     debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.keyDataThenRawKeyData;
 
-    final List<KeyEvent> events = <KeyEvent>[];
-    final FocusNode focusNode = FocusNode();
+    final events = <KeyEvent>[];
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
@@ -430,8 +430,8 @@ void main() {
   testWidgets('simulates using the correct transit mode: rawKeyData', (WidgetTester tester) async {
     debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.rawKeyData;
 
-    final List<Object> events = <Object>[];
-    final FocusNode focusNode = FocusNode();
+    final events = <Object>[];
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
@@ -510,8 +510,8 @@ void main() {
   ) async {
     debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.keyDataThenRawKeyData;
 
-    final List<Object> events = <Object>[];
-    final FocusNode focusNode = FocusNode();
+    final events = <Object>[];
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
@@ -567,8 +567,8 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/133955.
-    final List<RawKeyEvent> events = <RawKeyEvent>[];
-    final FocusNode focusNode = FocusNode();
+    final events = <RawKeyEvent>[];
+    final focusNode = FocusNode();
 
     await tester.pumpWidget(
       RawKeyboardListener(focusNode: focusNode, onKey: events.add, child: Container()),

@@ -60,8 +60,8 @@ class RollFallbackFontsCommand extends Command<bool> with ArgUtils<bool> {
   }
 
   Future<void> _generateFallbackFontData() async {
-    final http.Client client = http.Client();
-    final List<_FontInfo> fallbackFontInfo = <_FontInfo>[
+    final client = http.Client();
+    final fallbackFontInfo = <_FontInfo>[
       ...await _processSplitFallbackFonts(client, splitFallbackFonts),
       ...await _processFallbackFonts(client, apiFallbackFonts),
     ];
@@ -71,12 +71,12 @@ class RollFallbackFontsCommand extends Command<bool> with ArgUtils<bool> {
       throw ToolExit('Could not find license attribution at:\n - ${failedUrls.join('\n - ')}');
     }
 
-    final List<_Font> fallbackFontData = <_Font>[];
+    final fallbackFontData = <_Font>[];
 
-    final Map<String, String> charsetForFamily = <String, String>{};
+    final charsetForFamily = <String, String>{};
     final io.Directory fontDir = await io.Directory.systemTemp.createTemp('flutter_fallback_fonts');
     print('Downloading fonts into temp directory: ${fontDir.path}');
-    final AccumulatorSink<crypto.Digest> hashSink = AccumulatorSink<crypto.Digest>();
+    final hashSink = AccumulatorSink<crypto.Digest>();
     final ByteConversionSink hasher = crypto.sha256.startChunkedConversion(hashSink);
 
     for (final (:family, :uri) in fallbackFontInfo) {
@@ -86,7 +86,7 @@ class RollFallbackFontsCommand extends Command<bool> with ArgUtils<bool> {
         throw ToolExit('Failed to download font for $family');
       }
       final String urlSuffix = getUrlSuffix(uri);
-      final io.File fontFile = io.File(path.join(fontDir.path, urlSuffix));
+      final fontFile = io.File(path.join(fontDir.path, urlSuffix));
 
       final Uint8List bodyBytes = fontResponse.bodyBytes;
       hasher.add(utf8.encode(urlSuffix));
@@ -99,16 +99,16 @@ class RollFallbackFontsCommand extends Command<bool> with ArgUtils<bool> {
         '--',
         fontFile.path,
       ]);
-      final String encodedCharset = fcQueryResult.stdout as String;
+      final encodedCharset = fcQueryResult.stdout as String;
       charsetForFamily[family] = encodedCharset;
     }
 
-    final StringBuffer sb = StringBuffer();
+    final sb = StringBuffer();
 
-    int index = 0;
-    for (final _FontInfo fontInfo in fallbackFontInfo) {
-      final List<int> starts = <int>[];
-      final List<int> ends = <int>[];
+    var index = 0;
+    for (final fontInfo in fallbackFontInfo) {
+      final starts = <int>[];
+      final ends = <int>[];
       final String charset = charsetForFamily[fontInfo.family]!;
       for (final String range in charset.split(' ')) {
         // Range is one hexadecimal number or two, separated by `-`.
@@ -140,7 +140,7 @@ class RollFallbackFontsCommand extends Command<bool> with ArgUtils<bool> {
     sb.writeln();
     sb.writeln('List<NotoFont> getFallbackFontList() => <NotoFont>[');
 
-    for (final _Font font in fallbackFontData) {
+    for (final font in fallbackFontData) {
       final String family = font.info.family;
       final String urlSuffix = getUrlSuffix(font.info.uri);
       sb.writeln(" NotoFont('$family', '$urlSuffix'),");
@@ -149,13 +149,13 @@ class RollFallbackFontsCommand extends Command<bool> with ArgUtils<bool> {
     sb.writeln();
     sb.write(fontSetsCode);
 
-    final io.File fontDataFile = io.File(
+    final fontDataFile = io.File(
       path.join(environment.webUiRootDir.path, 'lib', 'src', 'engine', 'font_fallback_data.dart'),
     );
     await fontDataFile.writeAsString(sb.toString());
 
-    final io.File licenseFile = io.File(path.join(fontDir.path, 'LICENSE.txt'));
-    const String licenseString = r'''
+    final licenseFile = io.File(path.join(fontDir.path, 'LICENSE.txt'));
+    const licenseString = r'''
 © Copyright 2015-2021 Google LLC. All Rights Reserved.
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
@@ -257,8 +257,8 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     hasher.close();
 
     final crypto.Digest digest = hashSink.events.single;
-    final String versionString = digest.toString();
-    const String packageName = 'flutter/flutter_font_fallbacks';
+    final versionString = digest.toString();
+    const packageName = 'flutter/flutter_font_fallbacks';
     if (await cipdKnowsPackageVersion(package: packageName, versionTag: versionString)) {
       print('Package already exists with hash $versionString. Skipping upload');
     } else {
@@ -290,19 +290,18 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     if (apiKey.isEmpty) {
       throw UsageException('No Google Fonts API key provided', argParser.usage);
     }
-    final List<_FontInfo> processedFonts = <_FontInfo>[];
+    final processedFonts = <_FontInfo>[];
     final http.Response response = await client.get(
       Uri.parse('https://www.googleapis.com/webfonts/v1/webfonts?capability=WOFF2&key=$apiKey'),
     );
     if (response.statusCode != 200) {
       throw ToolExit('Failed to download Google Fonts list.');
     }
-    final Map<String, dynamic> googleFontsResult =
-        jsonDecode(response.body) as Map<String, dynamic>;
+    final googleFontsResult = jsonDecode(response.body) as Map<String, dynamic>;
     final List<Map<String, dynamic>> fontDatas = (googleFontsResult['items'] as List<dynamic>)
         .cast<Map<String, dynamic>>();
     for (final Map<String, Object?> fontData in fontDatas) {
-      final String family = fontData['family']! as String;
+      final family = fontData['family']! as String;
       if (requestedFonts.contains(family)) {
         final files = fontData['files']! as Map<String, Object?>;
         final Uri uri = Uri.parse(files['regular']! as String).replace(scheme: 'https');
@@ -316,8 +315,8 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     http.Client client,
     List<String> requestedFonts,
   ) async {
-    final List<_FontInfo> processedFonts = <_FontInfo>[];
-    for (final String font in requestedFonts) {
+    final processedFonts = <_FontInfo>[];
+    for (final font in requestedFonts) {
       final String modifiedFontName = font.replaceAll(' ', '+');
       final Uri cssUri = Uri.parse('https://fonts.googleapis.com/css2?family=$modifiedFontName');
       final http.Response response = await client.get(
@@ -333,10 +332,10 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       // Match the patterns that look like:
       // `src: url(...some url...)`
       final r = RegExp(r'src:\s*url\((https?://[^)]+?\.woff2)\)');
-      int familyCount = 0;
+      var familyCount = 0;
       // Give each font shard a unique family name.
-      for (final match in r.allMatches(cssString)) {
-        final String family = '$font $familyCount';
+      for (final RegExpMatch match in r.allMatches(cssString)) {
+        final family = '$font $familyCount';
         final Uri uri = Uri.parse(match.group(1)!);
         processedFonts.add((family: family, uri: uri));
         familyCount += 1;
@@ -500,7 +499,7 @@ const List<String> splitFallbackFonts = <String>[
 ];
 
 String getUrlSuffix(Uri fontUri) {
-  final String urlString = fontUri.toString();
+  final urlString = fontUri.toString();
   if (!urlString.startsWith(expectedUrlPrefix)) {
     throw ToolExit('Unexpected url format received from Google Fonts API: $urlString.');
   }
@@ -515,8 +514,8 @@ Future<List<String>> _checkForLicenseAttributions(
   http.Client client,
   List<_FontInfo> fallbackFontInfo,
 ) async {
-  const String googleFontsUpstream = 'https://github.com/google/fonts/tree/main/ofl';
-  const String attributionString =
+  const googleFontsUpstream = 'https://github.com/google/fonts/tree/main/ofl';
+  const attributionString =
       'This Font Software is licensed under the SIL Open Font License, Version 1.1.';
 
   final failedUrls = <String>[];
@@ -528,8 +527,8 @@ Future<List<String>> _checkForLicenseAttributions(
     uniqueFontPackageNames.add(fontPackageName);
   }
 
-  for (final String fontPackageName in uniqueFontPackageNames) {
-    final String fontLicenseUrl = '$googleFontsUpstream/$fontPackageName/OFL.txt';
+  for (final fontPackageName in uniqueFontPackageNames) {
+    final fontLicenseUrl = '$googleFontsUpstream/$fontPackageName/OFL.txt';
     final http.Response response = await client.get(Uri.parse(fontLicenseUrl));
     if (response.statusCode != 200) {
       failedUrls.add(fontLicenseUrl);
@@ -616,7 +615,7 @@ class _FontSet {
   }
 
   static int orderByLexicographicFontIndexes(_FontSet a, _FontSet b) {
-    for (int i = 0; i < a.length && i < b.length; i++) {
+    for (var i = 0; i < a.length && i < b.length; i++) {
       final int r = _Font.compare(a.fonts[i], b.fonts[i]);
       if (r != 0) {
         return r;
@@ -650,8 +649,8 @@ class _TrieNode {
   /// trie and return the same node, canonicalizing the sequence to its
   /// representative node.
   _TrieNode insertSequenceAtRoot(Iterable<_Font> fonts) {
-    _TrieNode node = this;
-    for (final _Font font in fonts) {
+    var node = this;
+    for (final font in fonts) {
       node = node._children[font] ??= _TrieNode();
     }
     return node;
@@ -739,8 +738,8 @@ class _TrieNode {
 /// [1]: https://en.wikipedia.org/wiki/Variable-length_quantity
 
 String _computeEncodedFontSets(List<_Font> fonts) {
-  final List<_Range> ranges = <_Range>[];
-  final List<_FontSet> allSets = <_FontSet>[];
+  final ranges = <_Range>[];
+  final allSets = <_FontSet>[];
 
   {
     // The fonts have their supported code points provided as list of inclusive
@@ -755,8 +754,8 @@ String _computeEncodedFontSets(List<_Font> fonts) {
     // the current set of fonts is canonicalized and recorded.
     //
     // There has to be a wiki article for this algorithm but I didn't find one.
-    final List<_Boundary> boundaries = <_Boundary>[];
-    for (final _Font font in fonts) {
+    final boundaries = <_Boundary>[];
+    for (final font in fonts) {
       for (final int start in font.starts) {
         boundaries.add(_Boundary(start, true, font));
       }
@@ -767,24 +766,24 @@ String _computeEncodedFontSets(List<_Font> fonts) {
     boundaries.sort(_Boundary.compare);
 
     // The trie root represents the empty set of fonts.
-    final _TrieNode trieRoot = _TrieNode();
-    final Set<_Font> currentElements = <_Font>{};
+    final trieRoot = _TrieNode();
+    final currentElements = <_Font>{};
 
     void newRange(int start, int end) {
       // Ensure we are using the canonical font order.
-      final List<_Font> fonts = List<_Font>.of(currentElements)..sort(_Font.compare);
+      final fonts = List<_Font>.of(currentElements)..sort(_Font.compare);
       final _TrieNode node = trieRoot.insertSequenceAtRoot(fonts);
       final _FontSet fontSet = node.fontSet ??= _FontSet(fonts);
       if (fontSet.rangeCount == 0) {
         allSets.add(fontSet);
       }
       fontSet.rangeCount++;
-      final _Range range = _Range(start, end, fontSet);
+      final range = _Range(start, end, fontSet);
       ranges.add(range);
     }
 
-    int start = 0;
-    for (final _Boundary boundary in boundaries) {
+    var start = 0;
+    for (final boundary in boundaries) {
       final int value = boundary.value;
       if (value > start) {
         // Boundary has changed, record the pending range `[start, value - 1]`,
@@ -812,14 +811,14 @@ String _computeEncodedFontSets(List<_Font> fonts) {
   // makes the range table encoding smaller, by about half.
   allSets.sort(_FontSet.orderByDecreasingRangeCount);
 
-  for (int i = 0; i < allSets.length; i++) {
+  for (var i = 0; i < allSets.length; i++) {
     allSets[i].index = i;
   }
 
-  final StringBuffer code = StringBuffer();
+  final code = StringBuffer();
 
-  final StringBuffer sb = StringBuffer();
-  int totalEncodedLength = 0;
+  final sb = StringBuffer();
+  var totalEncodedLength = 0;
 
   void encode(int value, int radix, int firstDigitCode) {
     final int prefix = value ~/ radix;
@@ -830,8 +829,8 @@ String _computeEncodedFontSets(List<_Font> fonts) {
     sb.writeCharCode(firstDigitCode + value.remainder(radix));
   }
 
-  for (final _FontSet fontSet in allSets) {
-    int previousFontIndex = -1;
+  for (final fontSet in allSets) {
+    var previousFontIndex = -1;
     for (final _Font font in fontSet.fonts) {
       final int fontIndexDelta = font.index - previousFontIndex;
       previousFontIndex = font.index;
@@ -840,7 +839,7 @@ String _computeEncodedFontSets(List<_Font> fonts) {
     if (fontSet != allSets.last) {
       sb.write(',');
     }
-    final String fragment = sb.toString();
+    final fragment = sb.toString();
     sb.clear();
     totalEncodedLength += fragment.length;
 
@@ -857,7 +856,7 @@ String _computeEncodedFontSets(List<_Font> fonts) {
     code.writeln("    '$fragment'");
   }
 
-  final StringBuffer declarations = StringBuffer();
+  final declarations = StringBuffer();
 
   final int references = allSets.fold(0, (int sum, _FontSet set) => sum + set.length);
   declarations
@@ -874,7 +873,7 @@ String _computeEncodedFontSets(List<_Font> fonts) {
   code.clear();
   totalEncodedLength = 0;
 
-  for (final _Range range in ranges) {
+  for (final range in ranges) {
     final int start = range.start;
     final int end = range.end;
     final int index = range.fontSet.index;
@@ -886,7 +885,7 @@ String _computeEncodedFontSets(List<_Font> fonts) {
     }
     encode(index, kRangeValueRadix, kRangeValueDigit0);
 
-    final String encoding = sb.toString();
+    final encoding = sb.toString();
     sb.clear();
     totalEncodedLength += encoding.length;
 

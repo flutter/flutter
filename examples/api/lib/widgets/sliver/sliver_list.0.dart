@@ -40,7 +40,9 @@ class _SliverListExampleState extends State<SliverListExample> {
       body: CustomScrollView(
         slivers: <Widget>[
           const SliverToBoxAdapter(
-            child: ListTile(title: Text('Press on the button to add items to the list.')),
+            child: ListTile(
+              title: Text('Press on the button to add items to the list.'),
+            ),
           ),
           SliverList.builder(
             itemCount: _itemCount,

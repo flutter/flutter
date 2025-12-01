@@ -42,7 +42,9 @@ class _DatePickerExampleState extends State<DatePickerExample> {
         padding: const EdgeInsets.only(top: 6.0),
         // The Bottom margin is provided to align the popup above the system
         // navigation bar.
-        margin: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        margin: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
         // Provide a background color for the popup.
         color: CupertinoColors.systemBackground.resolveFrom(context),
         // Use a SafeArea widget to avoid system overlaps.
@@ -54,9 +56,14 @@ class _DatePickerExampleState extends State<DatePickerExample> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('CupertinoDatePicker Sample')),
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('CupertinoDatePicker Sample'),
+      ),
       child: DefaultTextStyle(
-        style: TextStyle(color: CupertinoColors.label.resolveFrom(context), fontSize: 22.0),
+        style: TextStyle(
+          color: CupertinoColors.label.resolveFrom(context),
+          fontSize: 22.0,
+        ),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -165,7 +172,10 @@ class _DatePickerItem extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: children),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: children,
+        ),
       ),
     );
   }

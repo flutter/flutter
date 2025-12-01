@@ -105,7 +105,7 @@ class CkPicture implements LayerPicture {
     ckCanvas.clear(const ui.Color(0x00000000));
     ckCanvas.drawPicture(this);
     final SkImage skImage = ckSurface.surface.makeImageSnapshot();
-    final SkImageInfo imageInfo = SkImageInfo(
+    final imageInfo = SkImageInfo(
       alphaType: canvasKit.AlphaType.Premul,
       colorType: canvasKit.ColorType.RGBA_8888,
       colorSpace: SkColorSpaceSRGB,

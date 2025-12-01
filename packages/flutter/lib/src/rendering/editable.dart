@@ -181,12 +181,9 @@ class VerticalCaretMovementRun implements Iterator<TextPosition> {
     }
     assert(lineNumber != _currentLine);
 
-    final Offset newOffset = Offset(_currentOffset.dx, _lineMetrics[lineNumber].baseline);
+    final newOffset = Offset(_currentOffset.dx, _lineMetrics[lineNumber].baseline);
     final TextPosition closestPosition = _editable._textPainter.getPositionForOffset(newOffset);
-    final MapEntry<Offset, TextPosition> position = MapEntry<Offset, TextPosition>(
-      newOffset,
-      closestPosition,
-    );
+    final position = MapEntry<Offset, TextPosition>(newOffset, closestPosition);
     _positionCache[lineNumber] = position;
     return position;
   }
@@ -440,9 +437,7 @@ class RenderEditable extends RenderBox
           );
 
     if (_foregroundRenderObject == null) {
-      final _RenderEditableCustomPaint foregroundRenderObject = _RenderEditableCustomPaint(
-        painter: effectivePainter,
-      );
+      final foregroundRenderObject = _RenderEditableCustomPaint(painter: effectivePainter);
       adoptChild(foregroundRenderObject);
       _foregroundRenderObject = foregroundRenderObject;
     } else {
@@ -474,9 +469,7 @@ class RenderEditable extends RenderBox
           );
 
     if (_backgroundRenderObject == null) {
-      final _RenderEditableCustomPaint backgroundRenderObject = _RenderEditableCustomPaint(
-        painter: effectivePainter,
-      );
+      final backgroundRenderObject = _RenderEditableCustomPaint(painter: effectivePainter);
       adoptChild(backgroundRenderObject);
       _backgroundRenderObject = backgroundRenderObject;
     } else {
@@ -720,7 +713,7 @@ class RenderEditable extends RenderBox
     // happens in paragraph.cc's layout and TextPainter's
     // _applyFloatingPointHack. Ideally, the rounding mismatch will be fixed and
     // this can be changed to be a strict check instead of an approximation.
-    const double visibleRegionSlop = 0.5;
+    const visibleRegionSlop = 0.5;
     _selectionStartInViewport.value = visibleRegion
         .inflate(visibleRegionSlop)
         .contains(startOffset + effectiveOffset);
@@ -1355,9 +1348,9 @@ class RenderEditable extends RenderBox
       if (obscureText) {
         _cachedAttributedValue = AttributedString(obscuringCharacter * plainText.length);
       } else {
-        final StringBuffer buffer = StringBuffer();
-        int offset = 0;
-        final List<StringAttribute> attributes = <StringAttribute>[];
+        final buffer = StringBuffer();
+        var offset = 0;
+        final attributes = <StringAttribute>[];
         for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
           final String label = info.semanticsLabel ?? info.text;
           for (final StringAttribute infoAttribute in info.stringAttributes) {
@@ -1430,21 +1423,18 @@ class RenderEditable extends RenderBox
     Iterable<SemanticsNode> children,
   ) {
     assert(_semanticsInfo != null && _semanticsInfo!.isNotEmpty);
-    final List<SemanticsNode> newChildren = <SemanticsNode>[];
+    final newChildren = <SemanticsNode>[];
     TextDirection currentDirection = textDirection;
     Rect currentRect;
-    double ordinal = 0.0;
-    int start = 0;
-    int placeholderIndex = 0;
-    int childIndex = 0;
+    var ordinal = 0.0;
+    var start = 0;
+    var placeholderIndex = 0;
+    var childIndex = 0;
     RenderBox? child = firstChild;
-    final Map<Key, SemanticsNode> newChildCache = <Key, SemanticsNode>{};
+    final newChildCache = <Key, SemanticsNode>{};
     _cachedCombinedSemanticsInfos ??= combineSemanticsInfo(_semanticsInfo!);
     for (final InlineSpanSemanticsInformation info in _cachedCombinedSemanticsInfos!) {
-      final TextSelection selection = TextSelection(
-        baseOffset: start,
-        extentOffset: start + info.text.length,
-      );
+      final selection = TextSelection(baseOffset: start, extentOffset: start + info.text.length);
       start += info.text.length;
 
       if (info.isPlaceholder) {
@@ -1455,7 +1445,7 @@ class RenderEditable extends RenderBox
                 .elementAt(childIndex)
                 .isTagged(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {
           final SemanticsNode childNode = children.elementAt(childIndex);
-          final TextParentData parentData = child!.parentData! as TextParentData;
+          final parentData = child!.parentData! as TextParentData;
           assert(parentData.offset != null);
           newChildren.add(childNode);
           childIndex += 1;
@@ -1463,7 +1453,7 @@ class RenderEditable extends RenderBox
         child = childAfter(child!);
         placeholderIndex += 1;
       } else {
-        final TextDirection initialDirection = currentDirection;
+        final initialDirection = currentDirection;
         final List<ui.TextBox> rects = _textPainter.getBoxesForSelection(selection);
         if (rects.isEmpty) {
           continue;
@@ -1490,7 +1480,7 @@ class RenderEditable extends RenderBox
           rect.right.ceilToDouble() + 4.0,
           rect.bottom.ceilToDouble() + 4.0,
         );
-        final SemanticsConfiguration configuration = SemanticsConfiguration()
+        final configuration = SemanticsConfiguration()
           ..sortKey = OrdinalSortKey(ordinal++)
           ..textDirection = initialDirection
           ..attributedLabel = AttributedString(
@@ -1521,7 +1511,7 @@ class RenderEditable extends RenderBox
         if (_cachedChildNodes?.isNotEmpty ?? false) {
           newChild = _cachedChildNodes!.remove(_cachedChildNodes!.keys.first)!;
         } else {
-          final UniqueKey key = UniqueKey();
+          final key = UniqueKey();
           newChild = SemanticsNode(key: key, showOnScreen: _createShowOnScreenFor(key));
         }
         newChild
@@ -1915,8 +1905,8 @@ class RenderEditable extends RenderBox
     if (cachedValue != null) {
       return cachedValue;
     }
-    int count = 0;
-    for (int index = 0; index < text.length; index += 1) {
+    var count = 0;
+    for (var index = 0; index < text.length; index += 1) {
       switch (text.codeUnitAt(index)) {
         case 0x000A: // LF
         case 0x0085: // NEL
@@ -2138,7 +2128,7 @@ class RenderEditable extends RenderBox
     final int baseOffset = fromPosition.offset;
     final int extentOffset = toPosition?.offset ?? fromPosition.offset;
 
-    final TextSelection newSelection = TextSelection(
+    final newSelection = TextSelection(
       baseOffset: baseOffset,
       extentOffset: extentOffset,
       affinity: fromPosition.affinity,
@@ -2434,9 +2424,9 @@ class RenderEditable extends RenderBox
     };
 
     size = Size(width, constraints.constrainHeight(preferredHeight));
-    final Size contentSize = Size(_textPainter.width + _caretMargin, _textPainter.height);
+    final contentSize = Size(_textPainter.width + _caretMargin, _textPainter.height);
 
-    final BoxConstraints painterConstraints = BoxConstraints.tight(contentSize);
+    final painterConstraints = BoxConstraints.tight(contentSize);
 
     _foregroundRenderObject?.layout(painterConstraints);
     _backgroundRenderObject?.layout(painterConstraints);
@@ -2480,7 +2470,7 @@ class RenderEditable extends RenderBox
     final double leftBound = -floatingCursorAddedMargin.left;
     final double rightBound =
         math.min(size.width, _textPainter.width) + floatingCursorAddedMargin.right;
-    final Rect boundingRects = Rect.fromLTRB(leftBound, topBound, rightBound, bottomBound);
+    final boundingRects = Rect.fromLTRB(leftBound, topBound, rightBound, bottomBound);
 
     if (shouldResetOrigin != null) {
       _shouldResetOrigin = shouldResetOrigin;
@@ -2577,7 +2567,7 @@ class RenderEditable extends RenderBox
     // TODO(LongCatIsLooong): include line boundaries information in
     // ui.LineMetrics, then we can get rid of this.
     final Offset offset = _textPainter.getOffsetForCaret(startPosition, Rect.zero);
-    for (final ui.LineMetrics lineMetrics in metrics) {
+    for (final lineMetrics in metrics) {
       if (lineMetrics.baseline > offset.dy) {
         return MapEntry<int, Offset>(
           lineMetrics.lineNumber,
@@ -2930,7 +2920,7 @@ class _TextHighlightPainter extends RenderEditablePainter {
         )
         .toSet();
 
-    for (final TextBox box in boxes) {
+    for (final box in boxes) {
       canvas.drawRect(
         box
             .toRect()
@@ -3054,7 +3044,7 @@ class _CaretPainter extends RenderEditablePainter {
       if (radius == null) {
         canvas.drawRect(integralRect, caretPaint);
       } else {
-        final RRect caretRRect = RRect.fromRectAndRadius(integralRect, radius);
+        final caretRRect = RRect.fromRectAndRadius(integralRect, radius);
         canvas.drawRRect(caretRRect, caretPaint);
       }
     }

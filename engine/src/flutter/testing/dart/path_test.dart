@@ -9,20 +9,20 @@ import 'package:test/test.dart';
 
 void main() {
   test('path getBounds', () {
-    const Rect r = Rect.fromLTRB(1.0, 3.0, 5.0, 7.0);
-    final Path p = Path()..addRect(r);
+    const r = Rect.fromLTRB(1.0, 3.0, 5.0, 7.0);
+    final p = Path()..addRect(r);
     expect(p.getBounds(), equals(r));
     p.lineTo(20.0, 15.0);
     expect(p.getBounds(), equals(const Rect.fromLTRB(1.0, 3.0, 20.0, 15.0)));
   });
 
   test('path combine rect', () {
-    final Rect c1 = Rect.fromCircle(center: const Offset(10.0, 10.0), radius: 10.0);
-    final Rect c2 = Rect.fromCircle(center: const Offset(5.0, 5.0), radius: 10.0);
+    final c1 = Rect.fromCircle(center: const Offset(10.0, 10.0), radius: 10.0);
+    final c2 = Rect.fromCircle(center: const Offset(5.0, 5.0), radius: 10.0);
     final Rect c1UnionC2 = c1.expandToInclude(c2);
     final Rect c1IntersectC2 = c1.intersect(c2);
-    final Path pathCircle1 = Path()..addRect(c1);
-    final Path pathCircle2 = Path()..addRect(c2);
+    final pathCircle1 = Path()..addRect(c1);
+    final pathCircle2 = Path()..addRect(c2);
 
     final Path difference = Path.combine(PathOperation.difference, pathCircle1, pathCircle2);
     expect(difference.getBounds(), equals(c1));
@@ -46,12 +46,12 @@ void main() {
   });
 
   test('path combine oval', () {
-    final Rect c1 = Rect.fromCircle(center: const Offset(10.0, 10.0), radius: 10.0);
-    final Rect c2 = Rect.fromCircle(center: const Offset(5.0, 5.0), radius: 10.0);
+    final c1 = Rect.fromCircle(center: const Offset(10.0, 10.0), radius: 10.0);
+    final c2 = Rect.fromCircle(center: const Offset(5.0, 5.0), radius: 10.0);
     final Rect c1UnionC2 = c1.expandToInclude(c2);
     final Rect c1IntersectC2 = c1.intersect(c2);
-    final Path pathCircle1 = Path()..addOval(c1);
-    final Path pathCircle2 = Path()..addOval(c2);
+    final pathCircle1 = Path()..addOval(c1);
+    final pathCircle2 = Path()..addOval(c2);
 
     final Path difference = Path.combine(PathOperation.difference, pathCircle1, pathCircle2);
 
@@ -76,8 +76,8 @@ void main() {
   });
 
   test('path clone', () {
-    final Path p1 = Path()..lineTo(20.0, 20.0);
-    final Path p2 = Path.from(p1);
+    final p1 = Path()..lineTo(20.0, 20.0);
+    final p2 = Path.from(p1);
 
     expect(p1.getBounds(), equals(p2.getBounds()));
 
@@ -86,17 +86,17 @@ void main() {
   });
 
   test('shift tests', () {
-    const Rect bounds = Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
-    final Path p = Path()..addRect(bounds);
+    const bounds = Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
+    final p = Path()..addRect(bounds);
     expect(p.getBounds(), equals(bounds));
     final Path shifted = p.shift(const Offset(10, 10));
     expect(shifted.getBounds(), equals(const Rect.fromLTRB(10, 10, 20, 20)));
   });
 
   test('transformation tests', () {
-    const Rect bounds = Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
-    final Path p = Path()..addRect(bounds);
-    final Float64List scaleMatrix = Float64List.fromList(<double>[
+    const bounds = Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
+    final p = Path()..addRect(bounds);
+    final scaleMatrix = Float64List.fromList(<double>[
       2.5, 0.0, 0.0, 0.0, // first col
       0.0, 0.5, 0.0, 0.0, // second col
       0.0, 0.0, 1.0, 0.0, // third col
@@ -108,7 +108,7 @@ void main() {
 
     expect(pTransformed.getBounds(), equals(const Rect.fromLTRB(0.0, 0.0, 10 * 2.5, 10 * 0.5)));
 
-    final Path p2 = Path()..lineTo(10.0, 10.0);
+    final p2 = Path()..lineTo(10.0, 10.0);
 
     p.addPath(p2, const Offset(10.0, 10.0));
     expect(p.getBounds(), equals(const Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)));
@@ -124,7 +124,7 @@ void main() {
   });
 
   test('path metrics tests', () {
-    final Path simpleHorizontalLine = Path()..lineTo(10.0, 0.0);
+    final simpleHorizontalLine = Path()..lineTo(10.0, 0.0);
 
     // basic tests on horizontal line
     final PathMetrics simpleHorizontalMetrics = simpleHorizontalLine.computeMetrics();
@@ -154,7 +154,7 @@ void main() {
     expect(simpleMetricsClosed.iterator.moveNext(), isFalse);
 
     // test getTangentForOffset with vertical line
-    final Path simpleVerticalLine = Path()..lineTo(0.0, 10.0);
+    final simpleVerticalLine = Path()..lineTo(0.0, 10.0);
     final PathMetrics simpleMetricsVertical = simpleVerticalLine.computeMetrics()
       ..iterator.moveNext();
     final Tangent posTanVertical = simpleMetricsVertical.iterator.current.getTangentForOffset(5.0)!;
@@ -162,7 +162,7 @@ void main() {
     expect(posTanVertical.angle, closeTo(-1.5708, .0001)); // 90 degrees
 
     // test getTangentForOffset with diagonal line
-    final Path simpleDiagonalLine = Path()..lineTo(10.0, 10.0);
+    final simpleDiagonalLine = Path()..lineTo(10.0, 10.0);
     final PathMetrics simpleMetricsDiagonal = simpleDiagonalLine.computeMetrics()
       ..iterator.moveNext();
     final double midPoint = simpleMetricsDiagonal.iterator.current.length / 2;
@@ -173,7 +173,7 @@ void main() {
     expect(posTanDiagonal.angle, closeTo(-0.7853981633974483, .00001)); // ~45 degrees
 
     // test a multi-contour path
-    final Path multiContour = Path()
+    final multiContour = Path()
       ..lineTo(0.0, 10.0)
       ..moveTo(10.0, 10.0)
       ..lineTo(10.0, 15.0);
@@ -191,7 +191,7 @@ void main() {
   });
 
   test('PathMetrics can remember lengths and isClosed', () {
-    final Path path = Path()
+    final path = Path()
       ..lineTo(0, 10)
       ..close()
       ..moveTo(0, 15)
@@ -209,7 +209,7 @@ void main() {
   });
 
   test('PathMetrics on a mutated path', () {
-    final Path path = Path()..lineTo(0, 10);
+    final path = Path()..lineTo(0, 10);
     final PathMetrics metrics = path.computeMetrics();
     final PathMetric firstMetric = metrics.first;
     // We've consumed the iterator.
@@ -241,7 +241,7 @@ void main() {
   });
 
   test('PathMetrics on a mutated path', () {
-    final Path path = Path()
+    final path = Path()
       ..lineTo(0, 30)
       ..lineTo(40, 30)
       ..moveTo(100, 0)
@@ -259,7 +259,7 @@ void main() {
   test('RSuperellipse path is correct for a slim diagonal shape', () {
     // This test mirrors a similar test from "geometry_test.dart" and serves as
     // a smoke test.
-    final RSuperellipse rsuperellipse = RSuperellipse.fromLTRBAndCorners(
+    final rsuperellipse = RSuperellipse.fromLTRBAndCorners(
       -50,
       -50,
       50,
@@ -269,7 +269,7 @@ void main() {
       bottomLeft: const Radius.circular(99.0),
       bottomRight: const Radius.circular(1.0),
     );
-    final Path path = Path()
+    final path = Path()
       ..addRSuperellipse(rsuperellipse)
       ..close();
 

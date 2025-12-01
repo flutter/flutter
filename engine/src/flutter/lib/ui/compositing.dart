@@ -48,7 +48,7 @@ base class _NativeScene extends NativeFieldWrapperClass1 implements Scene {
       throw Exception('Invalid image dimensions.');
     }
 
-    final _Image image = _Image._();
+    final image = _Image._();
     final String? result = _toImageSync(width, height, image);
     if (result != null) {
       throw PictureRasterizationException._(result);
@@ -659,7 +659,7 @@ base class _NativeSceneBuilder extends NativeFieldWrapperClass1 implements Scene
     assert(_debugCheckCanBeUsedAsOldLayer(oldLayer, 'pushTransform'));
     final EngineLayer engineLayer = _NativeEngineLayer._();
     _pushTransform(engineLayer, matrix4, oldLayer?._nativeLayer);
-    final TransformEngineLayer layer = TransformEngineLayer._(engineLayer);
+    final layer = TransformEngineLayer._(engineLayer);
     assert(_debugPushLayer(layer));
     return layer;
   }
@@ -674,7 +674,7 @@ base class _NativeSceneBuilder extends NativeFieldWrapperClass1 implements Scene
     assert(_debugCheckCanBeUsedAsOldLayer(oldLayer, 'pushOffset'));
     final EngineLayer engineLayer = _NativeEngineLayer._();
     _pushOffset(engineLayer, dx, dy, oldLayer?._nativeLayer);
-    final OffsetEngineLayer layer = OffsetEngineLayer._(engineLayer);
+    final layer = OffsetEngineLayer._(engineLayer);
     assert(_debugPushLayer(layer));
     return layer;
   }
@@ -702,7 +702,7 @@ base class _NativeSceneBuilder extends NativeFieldWrapperClass1 implements Scene
       clipBehavior.index,
       oldLayer?._nativeLayer,
     );
-    final ClipRectEngineLayer layer = ClipRectEngineLayer._(engineLayer);
+    final layer = ClipRectEngineLayer._(engineLayer);
     assert(_debugPushLayer(layer));
     return layer;
   }
@@ -730,7 +730,7 @@ base class _NativeSceneBuilder extends NativeFieldWrapperClass1 implements Scene
     assert(_debugCheckCanBeUsedAsOldLayer(oldLayer, 'pushClipRRect'));
     final EngineLayer engineLayer = _NativeEngineLayer._();
     _pushClipRRect(engineLayer, rrect._getValue32(), clipBehavior.index, oldLayer?._nativeLayer);
-    final ClipRRectEngineLayer layer = ClipRRectEngineLayer._(engineLayer);
+    final layer = ClipRRectEngineLayer._(engineLayer);
     assert(_debugPushLayer(layer));
     return layer;
   }
@@ -760,7 +760,7 @@ base class _NativeSceneBuilder extends NativeFieldWrapperClass1 implements Scene
       clipBehavior.index,
       oldLayer?._nativeLayer,
     );
-    final ClipRSuperellipseEngineLayer layer = ClipRSuperellipseEngineLayer._(engineLayer);
+    final layer = ClipRSuperellipseEngineLayer._(engineLayer);
     assert(_debugPushLayer(layer));
     return layer;
   }
@@ -785,7 +785,7 @@ base class _NativeSceneBuilder extends NativeFieldWrapperClass1 implements Scene
     assert(_debugCheckCanBeUsedAsOldLayer(oldLayer, 'pushClipPath'));
     final EngineLayer engineLayer = _NativeEngineLayer._();
     _pushClipPath(engineLayer, path as _NativePath, clipBehavior.index, oldLayer?._nativeLayer);
-    final ClipPathEngineLayer layer = ClipPathEngineLayer._(engineLayer);
+    final layer = ClipPathEngineLayer._(engineLayer);
     assert(_debugPushLayer(layer));
     return layer;
   }
@@ -809,7 +809,7 @@ base class _NativeSceneBuilder extends NativeFieldWrapperClass1 implements Scene
     assert(_debugCheckCanBeUsedAsOldLayer(oldLayer, 'pushOpacity'));
     final EngineLayer engineLayer = _NativeEngineLayer._();
     _pushOpacity(engineLayer, alpha, offset!.dx, offset.dy, oldLayer?._nativeLayer);
-    final OpacityEngineLayer layer = OpacityEngineLayer._(engineLayer);
+    final layer = OpacityEngineLayer._(engineLayer);
     assert(_debugPushLayer(layer));
     return layer;
   }
@@ -831,7 +831,7 @@ base class _NativeSceneBuilder extends NativeFieldWrapperClass1 implements Scene
     final _ColorFilter nativeFilter = filter._toNativeColorFilter()!;
     final EngineLayer engineLayer = _NativeEngineLayer._();
     _pushColorFilter(engineLayer, nativeFilter, oldLayer?._nativeLayer);
-    final ColorFilterEngineLayer layer = ColorFilterEngineLayer._(engineLayer);
+    final layer = ColorFilterEngineLayer._(engineLayer);
     assert(_debugPushLayer(layer));
     return layer;
   }
@@ -851,7 +851,7 @@ base class _NativeSceneBuilder extends NativeFieldWrapperClass1 implements Scene
     final _ImageFilter nativeFilter = filter._toNativeImageFilter();
     final EngineLayer engineLayer = _NativeEngineLayer._();
     _pushImageFilter(engineLayer, nativeFilter, offset.dx, offset.dy, oldLayer?._nativeLayer);
-    final ImageFilterEngineLayer layer = ImageFilterEngineLayer._(engineLayer);
+    final layer = ImageFilterEngineLayer._(engineLayer);
     assert(_debugPushLayer(layer));
     return layer;
   }
@@ -883,7 +883,7 @@ base class _NativeSceneBuilder extends NativeFieldWrapperClass1 implements Scene
       backdropId,
       oldLayer?._nativeLayer,
     );
-    final BackdropFilterEngineLayer layer = BackdropFilterEngineLayer._(engineLayer);
+    final layer = BackdropFilterEngineLayer._(engineLayer);
     assert(_debugPushLayer(layer));
     return layer;
   }
@@ -920,7 +920,7 @@ base class _NativeSceneBuilder extends NativeFieldWrapperClass1 implements Scene
       filterQuality.index,
       oldLayer?._nativeLayer,
     );
-    final ShaderMaskEngineLayer layer = ShaderMaskEngineLayer._(engineLayer);
+    final layer = ShaderMaskEngineLayer._(engineLayer);
     assert(_debugPushLayer(layer));
     return layer;
   }
@@ -966,7 +966,7 @@ base class _NativeSceneBuilder extends NativeFieldWrapperClass1 implements Scene
   void addRetained(EngineLayer retainedLayer) {
     assert(retainedLayer is _EngineLayerWrapper);
     assert(() {
-      final _EngineLayerWrapper layer = retainedLayer as _EngineLayerWrapper;
+      final layer = retainedLayer as _EngineLayerWrapper;
 
       assert(layer._nativeLayer != null);
 
@@ -986,7 +986,7 @@ base class _NativeSceneBuilder extends NativeFieldWrapperClass1 implements Scene
       return true;
     }());
 
-    final _EngineLayerWrapper wrapper = retainedLayer as _EngineLayerWrapper;
+    final wrapper = retainedLayer as _EngineLayerWrapper;
     _addRetained(wrapper._nativeLayer!);
   }
 

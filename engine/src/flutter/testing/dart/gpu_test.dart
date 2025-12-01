@@ -67,7 +67,7 @@ RenderPassState createSimpleRenderPass({Vector4? clearColor}) {
 
   final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
 
-  final gpu.RenderTarget renderTarget = gpu.RenderTarget.singleColor(
+  final renderTarget = gpu.RenderTarget.singleColor(
     gpu.ColorAttachment(texture: renderTexture, clearValue: clearColor),
     depthStencilAttachment: gpu.DepthStencilAttachment(texture: depthStencilTexture),
   );
@@ -109,7 +109,7 @@ RenderPassState createSimpleRenderPassWithMSAA() {
 
   final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
 
-  final gpu.RenderTarget renderTarget = gpu.RenderTarget.singleColor(
+  final renderTarget = gpu.RenderTarget.singleColor(
     gpu.ColorAttachment(
       texture: renderTexture,
       resolveTexture: resolveTexture,
@@ -212,7 +212,7 @@ void main() async {
       Int8List.fromList(<int>[0, 1, 2, 3]).buffer.asByteData(),
     );
 
-    for (int i = 0; i < hostBuffer.frameCount; i++) {
+    for (var i = 0; i < hostBuffer.frameCount; i++) {
       hostBuffer.reset();
     }
     final gpu.BufferView view1 = hostBuffer.emplace(
@@ -316,8 +316,8 @@ void main() async {
   test('Texture.overwrite', () async {
     final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 2, 2);
 
-    const ui.Color red = ui.Color.fromARGB(0xFF, 0xFF, 0, 0);
-    const ui.Color green = ui.Color.fromARGB(0xFF, 0, 0xFF, 0);
+    const red = ui.Color.fromARGB(0xFF, 0xFF, 0, 0);
+    const green = ui.Color.fromARGB(0xFF, 0, 0xFF, 0);
     texture.overwrite(
       Int32List.fromList(<int>[red.value, green.value, green.value, red.value]).buffer.asByteData(),
     );
@@ -326,7 +326,7 @@ void main() async {
   test('Texture.overwrite throws for wrong buffer size', () async {
     final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 100, 100);
 
-    const ui.Color red = ui.Color.fromARGB(0xFF, 0xFF, 0, 0);
+    const red = ui.Color.fromARGB(0xFF, 0xFF, 0, 0);
     try {
       texture.overwrite(
         Int32List.fromList(<int>[red.value, red.value, red.value, red.value]).buffer.asByteData(),
@@ -370,14 +370,14 @@ void main() async {
   }, skip: !impellerEnabled);
 
   test('RenderPass.setStencilReference doesnt throw for valid values', () async {
-    final state = createSimpleRenderPass();
+    final RenderPassState state = createSimpleRenderPass();
 
     state.renderPass.setStencilReference(0);
     state.renderPass.setStencilReference(2 << 30);
   }, skip: !impellerEnabled);
 
   test('RenderPass.setStencilReference throws for invalid values', () async {
-    final state = createSimpleRenderPass();
+    final RenderPassState state = createSimpleRenderPass();
 
     try {
       state.renderPass.setStencilReference(-1);
@@ -395,7 +395,7 @@ void main() async {
   }, skip: !impellerEnabled);
 
   test('RenderPass.setStencilConfig doesnt throw for valid values', () async {
-    final state = createSimpleRenderPass();
+    final RenderPassState state = createSimpleRenderPass();
 
     state.renderPass.setStencilConfig(gpu.StencilConfig());
     state.renderPass.setStencilConfig(
@@ -412,7 +412,7 @@ void main() async {
   }, skip: !impellerEnabled);
 
   test('RenderPass.setStencilConfig throws for invalid masks', () async {
-    final state = createSimpleRenderPass();
+    final RenderPassState state = createSimpleRenderPass();
 
     try {
       state.renderPass.setStencilConfig(gpu.StencilConfig(readMask: -1));
@@ -442,7 +442,7 @@ void main() async {
   }, skip: !impellerEnabled);
 
   test('RenderPass.bindTexture throws for deviceTransient Textures', () async {
-    final state = createSimpleRenderPass();
+    final RenderPassState state = createSimpleRenderPass();
 
     final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
     // Although this is a non-texture uniform slot, it'll work fine for the
@@ -468,7 +468,7 @@ void main() async {
 
   // Performs no draw calls. Just clears the render target to a solid green color.
   test('Can render clear color', () async {
-    final state = createSimpleRenderPass(clearColor: Colors.lime);
+    final RenderPassState state = createSimpleRenderPass(clearColor: Colors.lime);
 
     state.commandBuffer.submit();
 
@@ -478,7 +478,7 @@ void main() async {
 
   // Regression test for https://github.com/flutter/flutter/issues/157324
   test('Can bind uniforms in range', () async {
-    final state = createSimpleRenderPass();
+    final RenderPassState state = createSimpleRenderPass();
 
     final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
     final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
@@ -490,7 +490,7 @@ void main() async {
       0, 0, 0, 1, // mvp
       0, 1, 0, 1, // color
     ]);
-    final uniformBuffer = gpu.gpuContext.createDeviceBufferWithCopy(vertInfoData);
+    final gpu.DeviceBuffer uniformBuffer = gpu.gpuContext.createDeviceBufferWithCopy(vertInfoData);
     final gooduniformBufferView = gpu.BufferView(
       uniformBuffer,
       offsetInBytes: 0,
@@ -513,7 +513,7 @@ void main() async {
 
   // Renders a green triangle pointing downwards.
   test('Can render triangle', () async {
-    final state = createSimpleRenderPass();
+    final RenderPassState state = createSimpleRenderPass();
     drawTriangle(state, Colors.lime);
     state.commandBuffer.submit();
 
@@ -523,7 +523,7 @@ void main() async {
 
   // Renders a green triangle pointing downwards using polygon mode line.
   test('Can render triangle with polygon mode line.', () async {
-    final state = createSimpleRenderPass();
+    final RenderPassState state = createSimpleRenderPass();
 
     final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
     state.renderPass.bindPipeline(pipeline);
@@ -568,7 +568,7 @@ void main() async {
   test(
     'Can render triangle with MSAA',
     () async {
-      final state = createSimpleRenderPassWithMSAA();
+      final RenderPassState state = createSimpleRenderPassWithMSAA();
       drawTriangle(state, Colors.lime);
       state.commandBuffer.submit();
 
@@ -582,7 +582,7 @@ void main() async {
     'Rendering with MSAA throws exception when offscreen MSAA is not supported',
     () async {
       try {
-        final state = createSimpleRenderPassWithMSAA();
+        final RenderPassState state = createSimpleRenderPassWithMSAA();
         drawTriangle(state, Colors.lime);
         state.commandBuffer.submit();
         fail('Exception not thrown when offscreen MSAA is not supported.');
@@ -600,7 +600,7 @@ void main() async {
 
   // Renders a hollow green triangle pointing downwards.
   test('Can render hollowed out triangle using stencil ops', () async {
-    final state = createSimpleRenderPass();
+    final RenderPassState state = createSimpleRenderPass();
 
     final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
     state.renderPass.bindPipeline(pipeline);
@@ -676,7 +676,7 @@ void main() async {
   }, skip: !impellerEnabled);
 
   test('Drawing respects cull mode', () async {
-    final state = createSimpleRenderPass();
+    final RenderPassState state = createSimpleRenderPass();
 
     final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
     state.renderPass.bindPipeline(pipeline);
@@ -686,7 +686,7 @@ void main() async {
 
     final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
     // Counter-clockwise triangle.
-    final List<double> triangle = [
+    final triangle = <double>[
       -0.5, 0.5, //
       0.0, -0.5, //
       0.5, 0.5, //
@@ -727,7 +727,7 @@ void main() async {
 
   // Renders a hexagon using line strip primitive type.
   test('Can render hollow hexagon using line strip primitive type', () async {
-    final state = createSimpleRenderPass();
+    final RenderPassState state = createSimpleRenderPass();
 
     final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
     state.renderPass.bindPipeline(pipeline);
@@ -766,7 +766,7 @@ void main() async {
 
   // Renders the middle part triangle using scissor.
   test('Can render portion of the triangle using scissor', () async {
-    final state = createSimpleRenderPass();
+    final RenderPassState state = createSimpleRenderPass();
 
     final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
     state.renderPass.bindPipeline(pipeline);
@@ -807,14 +807,14 @@ void main() async {
   }, skip: !impellerEnabled);
 
   test('RenderPass.setScissor doesnt throw for valid values', () async {
-    final state = createSimpleRenderPass();
+    final RenderPassState state = createSimpleRenderPass();
 
     state.renderPass.setScissor(gpu.Scissor(x: 25, width: 50, height: 100));
     state.renderPass.setScissor(gpu.Scissor(width: 50, height: 100));
   }, skip: !impellerEnabled);
 
   test('RenderPass.setScissor throws for invalid values', () async {
-    final state = createSimpleRenderPass();
+    final RenderPassState state = createSimpleRenderPass();
 
     try {
       state.renderPass.setScissor(gpu.Scissor(x: -1, width: 50, height: 100));
@@ -832,14 +832,14 @@ void main() async {
   }, skip: !impellerEnabled);
 
   test('RenderPass.setViewport doesnt throw for valid values', () async {
-    final state = createSimpleRenderPass();
+    final RenderPassState state = createSimpleRenderPass();
 
     state.renderPass.setViewport(gpu.Viewport(x: 25, width: 50, height: 100));
     state.renderPass.setViewport(gpu.Viewport(width: 50, height: 100));
   }, skip: !impellerEnabled);
 
   test('RenderPass.setViewport throws for invalid values', () async {
-    final state = createSimpleRenderPass();
+    final RenderPassState state = createSimpleRenderPass();
 
     try {
       state.renderPass.setViewport(gpu.Viewport(x: -1, width: 50, height: 100));
@@ -858,7 +858,7 @@ void main() async {
 
   // Renders the middle part triangle using viewport.
   test('Can render portion of the triangle using viewport', () async {
-    final state = createSimpleRenderPass();
+    final RenderPassState state = createSimpleRenderPass();
 
     final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
     state.renderPass.bindPipeline(pipeline);

@@ -25,7 +25,7 @@ class BrowserProcess {
         final Process process = await startBrowser();
         _processCompleter.complete(process);
 
-        final Uint8Buffer output = Uint8Buffer();
+        final output = Uint8Buffer();
         void drainOutput(Stream<List<int>> stream) {
           try {
             _ioSubscriptions.add(stream.listen(output.addAll, cancelOnError: true));
@@ -54,7 +54,7 @@ class BrowserProcess {
 
         if (!_closed && exitCode != 0) {
           final String outputString = utf8.decode(output);
-          String message = 'Browser process failed with exit code $exitCode.';
+          var message = 'Browser process failed with exit code $exitCode.';
           if (outputString.isNotEmpty) {
             message += '\nStandard output:\n$outputString';
           }

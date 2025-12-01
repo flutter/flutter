@@ -6,7 +6,9 @@ import 'package:flutter_api_samples/cupertino/expansion_tile/cupertino_expansion
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('CupertinoExpansionTile transition modes test', (WidgetTester tester) async {
+  testWidgets('CupertinoExpansionTile transition modes test', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const CupertinoExpansionTileApp());
 
     // Check initial labels.

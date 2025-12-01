@@ -4,7 +4,7 @@ description: A module that is embedded in the multiple_flutters benchmark test.
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.8.0-0
+  sdk: ^3.9.0-0
 
 resolution: workspace
 

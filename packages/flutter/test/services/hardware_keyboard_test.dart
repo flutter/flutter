@@ -140,7 +140,7 @@ void main() {
   testWidgets('KeyboardManager synthesizes modifier keys in rawKeyData mode', (
     WidgetTester tester,
   ) async {
-    final List<KeyEvent> events = <KeyEvent>[];
+    final events = <KeyEvent>[];
     HardwareKeyboard.instance.addHandler((KeyEvent event) {
       events.add(event);
       return false;
@@ -163,9 +163,9 @@ void main() {
   });
 
   testWidgets('Dispatch events to all handlers', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
-    final List<int> logs = <int>[];
+    final logs = <int>[];
 
     await tester.pumpWidget(
       KeyboardListener(
@@ -186,7 +186,7 @@ void main() {
 
     // Add a handler.
 
-    bool handler2Result = false;
+    var handler2Result = false;
     bool handler2(KeyEvent event) {
       logs.add(2);
       return handler2Result;
@@ -207,7 +207,7 @@ void main() {
     // Add another handler.
 
     handler2Result = false;
-    bool handler3Result = false;
+    var handler3Result = false;
     bool handler3(KeyEvent event) {
       logs.add(3);
       return handler3Result;
@@ -264,9 +264,9 @@ void main() {
   testWidgets(
     'Correctly convert down events that are synthesized released',
     (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
+      final focusNode = FocusNode();
       addTearDown(focusNode.dispose);
-      final List<KeyEvent> events = <KeyEvent>[];
+      final events = <KeyEvent>[];
 
       await tester.pumpWidget(
         KeyboardListener(
@@ -313,9 +313,9 @@ void main() {
   testWidgets(
     'Instantly dispatch synthesized key events when the queue is empty',
     (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
+      final focusNode = FocusNode();
       addTearDown(focusNode.dispose);
-      final List<int> logs = <int>[];
+      final logs = <int>[];
 
       await tester.pumpWidget(
         KeyboardListener(
@@ -355,11 +355,11 @@ void main() {
   testWidgets(
     'Postpone synthesized key events when the queue is not empty',
     (WidgetTester tester) async {
-      final FocusNode keyboardListenerFocusNode = FocusNode();
+      final keyboardListenerFocusNode = FocusNode();
       addTearDown(keyboardListenerFocusNode.dispose);
-      final FocusNode rawKeyboardListenerFocusNode = FocusNode();
+      final rawKeyboardListenerFocusNode = FocusNode();
       addTearDown(rawKeyboardListenerFocusNode.dispose);
-      final List<String> logs = <String>[];
+      final logs = <String>[];
 
       await tester.pumpWidget(
         RawKeyboardListener(
@@ -428,8 +428,8 @@ void main() {
   // but is only used so that *a* key data comes before the raw key message
   // and makes [KeyEventManager] infer [KeyDataTransitMode.keyDataThenRawKeyData].
   testWidgets('Empty keyData yields no event but triggers inference', (WidgetTester tester) async {
-    final List<KeyEvent> events = <KeyEvent>[];
-    final List<RawKeyEvent> rawEvents = <RawKeyEvent>[];
+    final events = <KeyEvent>[];
+    final rawEvents = <RawKeyEvent>[];
     tester.binding.keyboard.addHandler((KeyEvent event) {
       events.add(event);
       return true;
@@ -580,7 +580,7 @@ void main() {
   testWidgets('debugPrintKeyboardEvents causes logging of key events', (WidgetTester tester) async {
     final bool oldDebugPrintKeyboardEvents = debugPrintKeyboardEvents;
     final DebugPrintCallback oldDebugPrint = debugPrint;
-    final StringBuffer messages = StringBuffer();
+    final messages = StringBuffer();
     debugPrint = (String? message, {int? wrapWidth}) {
       messages.writeln(message ?? '');
     };
@@ -591,7 +591,7 @@ void main() {
       debugPrintKeyboardEvents = oldDebugPrintKeyboardEvents;
       debugPrint = oldDebugPrint;
     }
-    final String messagesStr = messages.toString();
+    final messagesStr = messages.toString();
     expect(messagesStr, contains('KEYBOARD: Key event received: '));
     expect(messagesStr, contains('KEYBOARD: Pressed state before processing the event:'));
     expect(messagesStr, contains('KEYBOARD: Pressed state after processing the event:'));

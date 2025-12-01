@@ -134,14 +134,14 @@ class _InternalNoPendingPlatformMessagesCondition implements WaitCondition {
 
   @override
   bool get condition {
-    final TestDefaultBinaryMessenger binaryMessenger =
+    final binaryMessenger =
         ServicesBinding.instance.defaultBinaryMessenger as TestDefaultBinaryMessenger;
     return binaryMessenger.pendingMessageCount == 0;
   }
 
   @override
   Future<void> wait() async {
-    final TestDefaultBinaryMessenger binaryMessenger =
+    final binaryMessenger =
         ServicesBinding.instance.defaultBinaryMessenger as TestDefaultBinaryMessenger;
     while (!condition) {
       await binaryMessenger.platformMessagesFinished;
@@ -164,7 +164,7 @@ class _InternalCombinedCondition implements WaitCondition {
         'Error occurred during deserializing from the given condition: ${condition.serialize()}',
       );
     }
-    final CombinedCondition combinedCondition = condition as CombinedCondition;
+    final combinedCondition = condition as CombinedCondition;
     final List<WaitCondition> conditions = combinedCondition.conditions
         .map(deserializeCondition)
         .toList();

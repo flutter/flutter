@@ -108,7 +108,7 @@ void main() {
       ),
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
-    final MockCanvas canvas = MockCanvas();
+    final canvas = MockCanvas();
     customPaint.painter!.paint(canvas, const Size(48.0, 48.0));
     expect(canvas.capturedPaint, hasColor(0xFF666666));
   });
@@ -127,7 +127,7 @@ void main() {
       ),
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
-    final MockCanvas canvas = MockCanvas();
+    final canvas = MockCanvas();
     customPaint.painter!.paint(canvas, const Size(48.0, 48.0));
     expect(canvas.capturedPaint, hasColor(0x80666666));
   });
@@ -147,7 +147,7 @@ void main() {
       ),
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
-    final MockCanvas canvas = MockCanvas();
+    final canvas = MockCanvas();
     customPaint.painter!.paint(canvas, const Size(48.0, 48.0));
     expect(canvas.capturedPaint, hasColor(0xFF0000FF));
   });
@@ -166,7 +166,7 @@ void main() {
       ),
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
-    final MockCanvas canvas = MockCanvas();
+    final canvas = MockCanvas();
     customPaint.painter!.paint(canvas, const Size(12.0, 12.0));
     // arrow_menu default size is 48x48 so we expect it to be scaled by 0.25.
     expect(canvas.capturedSx, 0.25);
@@ -188,7 +188,7 @@ void main() {
       ),
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
-    final MockCanvas canvas = MockCanvas();
+    final canvas = MockCanvas();
     customPaint.painter!.paint(canvas, const Size(12.0, 12.0));
     // arrow_menu default size is 48x48 so we expect it to be scaled by 2.
     expect(canvas.capturedSx, 2);
@@ -196,7 +196,7 @@ void main() {
   });
 
   testWidgets('Semantic label', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       const Directionality(
@@ -231,7 +231,7 @@ void main() {
       ),
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
-    final MockCanvas canvas = MockCanvas();
+    final canvas = MockCanvas();
     customPaint.painter!.paint(canvas, const Size(48.0, 48.0));
     expect(canvas.invocations, const <RecordedCanvasCall>[
       RecordedRotate(math.pi),
@@ -260,7 +260,7 @@ void main() {
       ),
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
-    final MockCanvas canvas = MockCanvas();
+    final canvas = MockCanvas();
     customPaint.painter!.paint(canvas, const Size(48.0, 48.0));
     expect(canvas.invocations, const <RecordedCanvasCall>[RecordedScale(0.5, 0.5)]);
     await expectLater(
@@ -284,7 +284,7 @@ void main() {
       ),
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
-    final MockCanvas canvas = MockCanvas();
+    final canvas = MockCanvas();
     customPaint.painter!.paint(canvas, const Size(48.0, 48.0));
     expect(canvas.invocations, const <RecordedCanvasCall>[
       RecordedRotate(math.pi),
@@ -294,7 +294,7 @@ void main() {
   });
 
   testWidgets('Direction has no effect on position of widget', (WidgetTester tester) async {
-    const AnimatedIcon icon = AnimatedIcon(
+    const icon = AnimatedIcon(
       progress: AlwaysStoppedAnimation<double>(0.0),
       icon: AnimatedIcons.arrow_menu,
     );
@@ -321,8 +321,8 @@ class PaintColorMatcher extends Matcher {
 
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    final Paint actualPaint = item as Paint;
-    final Color expected = Color(expectedColor);
+    final actualPaint = item as Paint;
+    final expected = Color(expectedColor);
     return actualPaint.color.colorSpace == expected.colorSpace &&
         (actualPaint.color.a - expected.a).abs() < threshold &&
         (actualPaint.color.r - expected.r).abs() < threshold &&

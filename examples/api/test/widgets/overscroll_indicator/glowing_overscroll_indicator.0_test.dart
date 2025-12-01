@@ -9,13 +9,20 @@ import 'package:flutter_api_samples/widgets/overscroll_indicator/glowing_overscr
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Displays widget tree when the example app is run', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.GlowingOverscrollIndicatorExampleApp());
+  testWidgets('Displays widget tree when the example app is run', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const example.GlowingOverscrollIndicatorExampleApp(),
+    );
 
     expect(
       find.descendant(
         of: find.byType(Scaffold),
-        matching: find.widgetWithText(AppBar, 'GlowingOverscrollIndicator Sample'),
+        matching: find.widgetWithText(
+          AppBar,
+          'GlowingOverscrollIndicator Sample',
+        ),
       ),
       findsOne,
     );
@@ -37,7 +44,10 @@ void main() {
     );
 
     expect(
-      find.descendant(of: customScrollViewFinder, matching: find.byType(SliverToBoxAdapter)),
+      find.descendant(
+        of: customScrollViewFinder,
+        matching: find.byType(SliverToBoxAdapter),
+      ),
       findsOne,
     );
 
@@ -64,7 +74,9 @@ void main() {
         matching: find.byType(GlowingOverscrollIndicator),
       ),
     );
-    final RenderSliver sliverAppBar = tester.renderObject<RenderSliver>(sliverAppBarFinder);
+    final RenderSliver sliverAppBar = tester.renderObject<RenderSliver>(
+      sliverAppBarFinder,
+    );
     final Matrix4 transform = overscrollIndicator.getTransformTo(sliverAppBar);
     final Offset? offset = MatrixUtils.getAsTranslation(transform);
     expect(offset?.dy, 0);
@@ -94,7 +106,10 @@ void main() {
     await tester.drag(find.byType(CustomScrollView), const Offset(0, 500));
     await tester.pump();
 
-    expect(leadingPaintOffset, MediaQuery.paddingOf(context).top + kToolbarHeight);
+    expect(
+      leadingPaintOffset,
+      MediaQuery.paddingOf(context).top + kToolbarHeight,
+    );
     expect(overscrollNotified, isTrue);
   });
 }

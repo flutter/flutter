@@ -5,11 +5,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_api_samples/material/selectable_region/selectable_region.0.dart' as example;
+import 'package:flutter_api_samples/material/selectable_region/selectable_region.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  Future<void> sendKeyCombination(WidgetTester tester, LogicalKeyboardKey key) async {
+  Future<void> sendKeyCombination(
+    WidgetTester tester,
+    LogicalKeyboardKey key,
+  ) async {
     final LogicalKeyboardKey modifier = switch (defaultTargetPlatform) {
       TargetPlatform.iOS || TargetPlatform.macOS => LogicalKeyboardKey.meta,
       _ => LogicalKeyboardKey.control,
@@ -21,21 +25,23 @@ void main() {
     await tester.pump();
   }
 
-  testWidgets('The icon can be selected with the text', (WidgetTester tester) async {
+  testWidgets('The icon can be selected with the text', (
+    WidgetTester tester,
+  ) async {
     String? clipboard;
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
-      MethodCall methodCall,
-    ) async {
-      if (methodCall.method == 'Clipboard.setData') {
-        clipboard = (methodCall.arguments as Map<String, dynamic>)['text'] as String;
-      }
-      return null;
-    });
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (MethodCall methodCall) async {
+        if (methodCall.method == 'Clipboard.setData') {
+          clipboard =
+              (methodCall.arguments as Map<String, dynamic>)['text'] as String;
+        }
+        return null;
+      },
+    );
     addTearDown(() {
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-        SystemChannels.platform,
-        null,
-      );
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.platform, null);
     });
 
     await tester.pumpWidget(const example.SelectableRegionExampleApp());

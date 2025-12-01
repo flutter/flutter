@@ -11,10 +11,14 @@ import 'package:flutter_api_samples/widgets/widget_state/widget_state_mouse_curs
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('ListTile displays correct mouse cursor when disabled', (WidgetTester tester) async {
+  testWidgets('ListTile displays correct mouse cursor when disabled', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.WidgetStateMouseCursorExampleApp());
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
     await gesture.addPointer(location: tester.getCenter(find.byType(ListTile)));
     addTearDown(gesture.removePointer);
 
@@ -38,14 +42,18 @@ void main() {
     expect(listTile.enabled, isTrue);
   });
 
-  testWidgets('ListTile displays correct mouse cursor when enabled', (WidgetTester tester) async {
+  testWidgets('ListTile displays correct mouse cursor when enabled', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.WidgetStateMouseCursorExampleApp());
 
     // Enable ListTile using Switch.
     await tester.tap(find.byType(Switch));
     await tester.pumpAndSettle();
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
     await gesture.addPointer(location: tester.getCenter(find.byType(ListTile)));
     addTearDown(gesture.removePointer);
 

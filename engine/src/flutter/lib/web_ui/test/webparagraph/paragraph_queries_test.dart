@@ -18,9 +18,9 @@ Future<void> testMain() async {
   setUpUnitTests();
 
   test('Paragraph getWordBoundary', () {
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.addText(
       'World domination is such an ugly phrase - I prefer to call it world optimisation. ',
     );
@@ -28,9 +28,9 @@ Future<void> testMain() async {
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
 
     final SegmentationResult result = segmentText(paragraph.text);
-    int start = 0;
-    for (final end in result.words.skip(1)) {
-      for (int i = start; i < end; i++) {
+    var start = 0;
+    for (final int end in result.words.skip(1)) {
+      for (var i = start; i < end; i++) {
         expect(
           paragraph.getWordBoundary(
             ui.TextPosition(offset: i /*affinity: ui.TextAffinity.downstream*/),
@@ -47,9 +47,9 @@ Future<void> testMain() async {
   });
 
   test('Paragraph getWordBoundary outside of the text', () {
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.addText(
       'World domination is such an ugly phrase - I prefer to call it world optimisation. ',
     );
@@ -83,8 +83,8 @@ Future<void> testMain() async {
   });
 
   test('Paragraph getWordBoundary empty text', () {
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final builder = WebParagraphBuilder(paragraphStyle);
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
 
@@ -103,9 +103,9 @@ Future<void> testMain() async {
   });
 
   test('Paragraph getWordBoundary only whitespaces', () {
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.addText('                     ');
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
@@ -124,9 +124,9 @@ Future<void> testMain() async {
   });
 
   test('Paragraph getLineBoundary', () {
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.addText('Line1\nLine2\nLine3');
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
@@ -165,13 +165,13 @@ Future<void> testMain() async {
   });
 
   test('Paragraph computeLineMetrics/getLineMetricsAt', () {
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.addText('Line1\nLine2\nLine3');
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
-    final lineMetrics = paragraph.computeLineMetrics();
+    final List<ui.LineMetrics> lineMetrics = paragraph.computeLineMetrics();
     expect(lineMetrics.length, 3);
     expect(lineMetrics[0].lineNumber, 0);
     expect(lineMetrics[1].lineNumber, 1);
@@ -180,9 +180,9 @@ Future<void> testMain() async {
   });
 
   test('Paragraph numberOfLines/getLineNumberAt', () {
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.addText('Line1\nLine2\nLine3');
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
@@ -193,18 +193,18 @@ Future<void> testMain() async {
   });
 
   test('Paragraph getGlyphInfoAt', () {
-    const double epsilon = 0.001;
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    const epsilon = 0.001;
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.addText('Line1\nLine2\nLine3');
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
-    for (final line in paragraph.getLayout().lines) {
+    for (final TextLine line in paragraph.getLayout().lines) {
       double left = line.advance.left;
-      for (final visualBlock in line.visualBlocks) {
+      for (final LineBlock visualBlock in line.visualBlocks) {
         for (int i = visualBlock.textRange.start; i < visualBlock.textRange.end; i++) {
-          final glyphInfo = paragraph.getGlyphInfoAt(i);
+          final ui.GlyphInfo? glyphInfo = paragraph.getGlyphInfoAt(i);
           if (glyphInfo != null) {
             expect(glyphInfo.graphemeClusterCodeUnitRange, ui.TextRange(start: i, end: i + 1));
             expect(
@@ -223,33 +223,33 @@ Future<void> testMain() async {
   });
 
   test('Paragraph getGlyphInfoAt for a single character', () {
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.addText('J');
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
-    final glyphInfo = paragraph.getGlyphInfoAt(0);
+    final ui.GlyphInfo? glyphInfo = paragraph.getGlyphInfoAt(0);
     expect(glyphInfo != null, true);
   });
 
   test('Paragraph getClosestGlyphInfoForOffset', () {
-    const double epsilon = 0.001;
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    const epsilon = 0.001;
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.addText('Line1\nLine2\nLine3');
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
-    for (final line in paragraph.getLayout().lines) {
-      for (final visualBlock in line.visualBlocks) {
+    for (final TextLine line in paragraph.getLayout().lines) {
+      for (final LineBlock visualBlock in line.visualBlocks) {
         for (int i = visualBlock.textRange.start; i < visualBlock.textRange.end; i++) {
-          final glyphInfo = paragraph.getGlyphInfoAt(i);
+          final ui.GlyphInfo? glyphInfo = paragraph.getGlyphInfoAt(i);
           if (glyphInfo != null) {
             final center = ui.Offset(
               glyphInfo.graphemeClusterLayoutBounds.left + epsilon,
               glyphInfo.graphemeClusterLayoutBounds.center.dy,
             );
-            final closestGlyphInfo = paragraph.getClosestGlyphInfoForOffset(center);
+            final ui.GlyphInfo? closestGlyphInfo = paragraph.getClosestGlyphInfoForOffset(center);
             if (closestGlyphInfo != null) {
               expect(closestGlyphInfo, equals(glyphInfo));
             } else {
@@ -264,9 +264,9 @@ Future<void> testMain() async {
   });
 
   test('Paragraph empty text', () {
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.addText('');
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
@@ -279,9 +279,9 @@ Future<void> testMain() async {
   });
 
   test('Paragraph whitespaces', () {
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.addText(' ');
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));

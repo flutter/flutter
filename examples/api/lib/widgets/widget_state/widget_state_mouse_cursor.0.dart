@@ -44,10 +44,12 @@ class WidgetStateMouseCursorExample extends StatefulWidget {
   const WidgetStateMouseCursorExample({super.key});
 
   @override
-  State<WidgetStateMouseCursorExample> createState() => _WidgetStateMouseCursorExampleState();
+  State<WidgetStateMouseCursorExample> createState() =>
+      _WidgetStateMouseCursorExampleState();
 }
 
-class _WidgetStateMouseCursorExampleState extends State<WidgetStateMouseCursorExample> {
+class _WidgetStateMouseCursorExampleState
+    extends State<WidgetStateMouseCursorExample> {
   bool _enabled = false;
 
   @override

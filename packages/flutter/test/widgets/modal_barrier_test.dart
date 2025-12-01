@@ -105,7 +105,7 @@ void main() {
     testWidgets('does not prevent interactions with translucent widgets in front of it', (
       WidgetTester tester,
     ) async {
-      bool dragged = false;
+      var dragged = false;
       final Widget subject = Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
@@ -159,7 +159,7 @@ void main() {
     testWidgets('plays system alert sound when user tries to dismiss it', (
       WidgetTester tester,
     ) async {
-      final List<String> playedSystemSounds = <String>[];
+      final playedSystemSounds = <String>[];
       try {
         tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
           MethodCall methodCall,
@@ -189,7 +189,7 @@ void main() {
     });
 
     testWidgets('pops the Navigator when dismissed by primary tap', (WidgetTester tester) async {
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      final routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
         '/modal': (BuildContext context) => const SecondWidget(),
       };
@@ -222,7 +222,7 @@ void main() {
     testWidgets('pops the Navigator when dismissed by non-primary tap', (
       WidgetTester tester,
     ) async {
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      final routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
         '/modal': (BuildContext context) => const SecondWidget(),
       };
@@ -258,7 +258,7 @@ void main() {
     testWidgets('may pop the Navigator when competing with other gestures', (
       WidgetTester tester,
     ) async {
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      final routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
         '/modal': (BuildContext context) => const SecondWidgetWithCompetence(),
       };
@@ -288,8 +288,8 @@ void main() {
     testWidgets('does not pop the Navigator with a WillPopScope that returns false', (
       WidgetTester tester,
     ) async {
-      bool willPopCalled = false;
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      var willPopCalled = false;
+      final routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
         '/modal': (BuildContext context) => Stack(
           children: <Widget>[
@@ -334,8 +334,8 @@ void main() {
     testWidgets('pops the Navigator with a WillPopScope that returns true', (
       WidgetTester tester,
     ) async {
-      bool willPopCalled = false;
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      var willPopCalled = false;
+      final routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
         '/modal': (BuildContext context) => Stack(
           children: <Widget>[
@@ -378,8 +378,8 @@ void main() {
     });
 
     testWidgets('will call onDismiss callback', (WidgetTester tester) async {
-      bool dismissCallbackCalled = false;
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      var dismissCallbackCalled = false;
+      final routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
         '/modal': (BuildContext context) => SecondWidget(
           onDismiss: () {
@@ -413,7 +413,7 @@ void main() {
         error = details;
       };
 
-      final UniqueKey barrierKey = UniqueKey();
+      final barrierKey = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -429,7 +429,7 @@ void main() {
     });
 
     testWidgets('will not pop when given an onDismiss callback', (WidgetTester tester) async {
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      final routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
         '/modal': (BuildContext context) => SecondWidget(onDismiss: () {}),
       };
@@ -457,10 +457,10 @@ void main() {
     });
 
     testWidgets('Undismissible ModalBarrier hidden in semantic tree', (WidgetTester tester) async {
-      final SemanticsTester semantics = SemanticsTester(tester);
+      final semantics = SemanticsTester(tester);
       await tester.pumpWidget(const ModalBarrier(dismissible: false));
 
-      final TestSemantics expectedSemantics = TestSemantics.root();
+      final expectedSemantics = TestSemantics.root();
       expect(semantics, hasSemantics(expectedSemantics));
 
       semantics.dispose();
@@ -469,7 +469,7 @@ void main() {
     testWidgets(
       'Dismissible ModalBarrier includes button in semantic tree on iOS, macOS and android',
       (WidgetTester tester) async {
-        final SemanticsTester semantics = SemanticsTester(tester);
+        final semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           const Directionality(
             textDirection: TextDirection.ltr,
@@ -477,7 +477,7 @@ void main() {
           ),
         );
 
-        final TestSemantics expectedSemantics = TestSemantics.root(
+        final expectedSemantics = TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics.rootChild(
               id: 1,
@@ -566,7 +566,7 @@ void main() {
     testWidgets('does not prevent interactions with translucent widgets in front of it', (
       WidgetTester tester,
     ) async {
-      bool dragged = false;
+      var dragged = false;
       final Widget subject = Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
@@ -623,7 +623,7 @@ void main() {
     testWidgets('plays system alert sound when user tries to dismiss it', (
       WidgetTester tester,
     ) async {
-      final List<String> playedSystemSounds = <String>[];
+      final playedSystemSounds = <String>[];
       try {
         tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
           MethodCall methodCall,
@@ -656,7 +656,7 @@ void main() {
     });
 
     testWidgets('pops the Navigator when dismissed by primary tap', (WidgetTester tester) async {
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      final routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
         '/modal': (BuildContext context) => const AnimatedSecondWidget(),
       };
@@ -689,7 +689,7 @@ void main() {
     testWidgets('pops the Navigator when dismissed by non-primary tap', (
       WidgetTester tester,
     ) async {
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      final routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
         '/modal': (BuildContext context) => const AnimatedSecondWidget(),
       };
@@ -725,7 +725,7 @@ void main() {
     testWidgets('may pop the Navigator when competing with other gestures', (
       WidgetTester tester,
     ) async {
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      final routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
         '/modal': (BuildContext context) => const AnimatedSecondWidgetWithCompetence(),
       };
@@ -755,8 +755,8 @@ void main() {
     testWidgets('does not pop the Navigator with a WillPopScope that returns false', (
       WidgetTester tester,
     ) async {
-      bool willPopCalled = false;
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      var willPopCalled = false;
+      final routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
         '/modal': (BuildContext context) => Stack(
           children: <Widget>[
@@ -801,8 +801,8 @@ void main() {
     testWidgets('pops the Navigator with a WillPopScope that returns true', (
       WidgetTester tester,
     ) async {
-      bool willPopCalled = false;
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      var willPopCalled = false;
+      final routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
         '/modal': (BuildContext context) => Stack(
           children: <Widget>[
@@ -845,8 +845,8 @@ void main() {
     });
 
     testWidgets('will call onDismiss callback', (WidgetTester tester) async {
-      bool dismissCallbackCalled = false;
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      var dismissCallbackCalled = false;
+      final routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
         '/modal': (BuildContext context) => AnimatedSecondWidget(
           onDismiss: () {
@@ -874,7 +874,7 @@ void main() {
     });
 
     testWidgets('will not pop when given an onDismiss callback', (WidgetTester tester) async {
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      final routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
         '/modal': (BuildContext context) => AnimatedSecondWidget(onDismiss: () {}),
       };
@@ -904,10 +904,10 @@ void main() {
     testWidgets('Undismissible AnimatedModalBarrier hidden in semantic tree', (
       WidgetTester tester,
     ) async {
-      final SemanticsTester semantics = SemanticsTester(tester);
+      final semantics = SemanticsTester(tester);
       await tester.pumpWidget(AnimatedModalBarrier(dismissible: false, color: colorAnimation));
 
-      final TestSemantics expectedSemantics = TestSemantics.root();
+      final expectedSemantics = TestSemantics.root();
       expect(semantics, hasSemantics(expectedSemantics));
 
       semantics.dispose();
@@ -916,7 +916,7 @@ void main() {
     testWidgets(
       'Dismissible AnimatedModalBarrier includes button in semantic tree on iOS, macOS and android',
       (WidgetTester tester) async {
-        final SemanticsTester semantics = SemanticsTester(tester);
+        final semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           Directionality(
             textDirection: TextDirection.ltr,
@@ -924,7 +924,7 @@ void main() {
           ),
         );
 
-        final TestSemantics expectedSemantics = TestSemantics.root(
+        final expectedSemantics = TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics.rootChild(
               rect: TestSemantics.fullScreen,
@@ -950,10 +950,8 @@ void main() {
     testWidgets(
       'SemanticsClipper correctly clips Semantics.rect in four directions',
       (WidgetTester tester) async {
-        final SemanticsTester semantics = SemanticsTester(tester);
-        final ValueNotifier<EdgeInsets> notifier = ValueNotifier<EdgeInsets>(
-          const EdgeInsets.fromLTRB(10, 20, 30, 40),
-        );
+        final semantics = SemanticsTester(tester);
+        final notifier = ValueNotifier<EdgeInsets>(const EdgeInsets.fromLTRB(10, 20, 30, 40));
         addTearDown(notifier.dispose);
         const Rect fullScreen = TestSemantics.fullScreen;
         await tester.pumpWidget(
@@ -963,7 +961,7 @@ void main() {
           ),
         );
 
-        final TestSemantics expectedSemantics = TestSemantics.root(
+        final expectedSemantics = TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics.rootChild(
               rect: Rect.fromLTRB(

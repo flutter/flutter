@@ -48,7 +48,7 @@ class _PointDemoPainter extends CustomPainter {
   final Animation<double>? _repaint;
 
   void drawPoint(Canvas canvas, Offset point, Color color) {
-    final Paint paint = Paint()
+    final paint = Paint()
       ..color = color.withOpacity(0.25)
       ..style = PaintingStyle.fill;
     canvas.drawCircle(point, _kPointRadius, paint);
@@ -61,7 +61,7 @@ class _PointDemoPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint();
+    final paint = Paint();
 
     if (arc.center != null) {
       drawPoint(canvas, arc.center!, Colors.grey.shade400);
@@ -134,7 +134,7 @@ class _PointDemoState extends State<_PointDemo> {
       return _IgnoreDrag();
     }
 
-    final RenderBox? box = _painterKey.currentContext!.findRenderObject() as RenderBox?;
+    final box = _painterKey.currentContext!.findRenderObject() as RenderBox?;
     final double startOffset = (box!.localToGlobal(_begin!) - position).distanceSquared;
     final double endOffset = (box.localToGlobal(_end!) - position).distanceSquared;
     setState(() {
@@ -181,7 +181,7 @@ class _PointDemoState extends State<_PointDemo> {
       _end = Offset(screenSize.width * 0.1, screenSize.height * 0.4);
     }
 
-    final MaterialPointArcTween arc = MaterialPointArcTween(begin: _begin, end: _end);
+    final arc = MaterialPointArcTween(begin: _begin, end: _end);
     return RawGestureDetector(
       behavior: _dragTarget == null ? HitTestBehavior.deferToChild : HitTestBehavior.opaque,
       gestures: <Type, GestureRecognizerFactory>{
@@ -225,7 +225,7 @@ class _RectangleDemoPainter extends CustomPainter {
   final Animation<double> _repaint;
 
   void drawPoint(Canvas canvas, Offset p, Color color) {
-    final Paint paint = Paint()
+    final paint = Paint()
       ..color = color.withOpacity(0.25)
       ..style = PaintingStyle.fill;
     canvas.drawCircle(p, _kPointRadius, paint);
@@ -237,7 +237,7 @@ class _RectangleDemoPainter extends CustomPainter {
   }
 
   void drawRect(Canvas canvas, Rect rect, Color color) {
-    final Paint paint = Paint()
+    final paint = Paint()
       ..color = color.withOpacity(0.25)
       ..strokeWidth = 4.0
       ..style = PaintingStyle.stroke;
@@ -295,7 +295,7 @@ class _RectangleDemoState extends State<_RectangleDemo> {
       return _IgnoreDrag();
     }
 
-    final RenderBox? box = _painterKey.currentContext?.findRenderObject() as RenderBox?;
+    final box = _painterKey.currentContext?.findRenderObject() as RenderBox?;
     final double startOffset = (box!.localToGlobal(_begin!.center) - position).distanceSquared;
     final double endOffset = (box.localToGlobal(_end!.center) - position).distanceSquared;
     setState(() {
@@ -351,7 +351,7 @@ class _RectangleDemoState extends State<_RectangleDemo> {
       );
     }
 
-    final MaterialRectArcTween arc = MaterialRectArcTween(begin: _begin, end: _end);
+    final arc = MaterialRectArcTween(begin: _begin, end: _end);
     return RawGestureDetector(
       behavior: _dragTarget == null ? HitTestBehavior.deferToChild : HitTestBehavior.opaque,
       gestures: <Type, GestureRecognizerFactory>{

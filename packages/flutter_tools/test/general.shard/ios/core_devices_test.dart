@@ -30,7 +30,7 @@ import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
 class LocalFileSystemFake extends Fake implements LocalFileSystem {
-  var memoryFileSystem = MemoryFileSystem.test();
+  MemoryFileSystem memoryFileSystem = MemoryFileSystem.test();
 
   @override
   Directory get systemTempDirectory => memoryFileSystem.systemTempDirectory;
@@ -54,6 +54,8 @@ class LocalFileSystemFake extends Fake implements LocalFileSystem {
 
   var _disposed = false;
 }
+
+final _interactiveModeArgs = <String>['script', '-t', '0', '/dev/null'];
 
 void main() {
   late MemoryFileSystem fileSystem;
@@ -214,6 +216,7 @@ void main() {
           bundlePath: 'bundle-path',
           bundleId: 'bundle-id',
           launchArguments: <String>[],
+          shutdownHooks: FakeShutdownHooks(),
         );
 
         expect(result, isTrue);
@@ -263,6 +266,7 @@ void main() {
           bundlePath: 'bundle-path',
           bundleId: 'bundle-id',
           launchArguments: <String>[],
+          shutdownHooks: FakeShutdownHooks(),
         );
 
         expect(result, isFalse);
@@ -306,6 +310,7 @@ void main() {
           bundlePath: 'bundle-path',
           bundleId: 'bundle-id',
           launchArguments: <String>[],
+          shutdownHooks: FakeShutdownHooks(),
         );
 
         expect(result, isFalse);
@@ -355,6 +360,7 @@ void main() {
           bundlePath: 'bundle-path',
           bundleId: 'bundle-id',
           launchArguments: <String>[],
+          shutdownHooks: FakeShutdownHooks(),
         );
 
         expect(result, isFalse);
@@ -398,6 +404,7 @@ void main() {
           bundlePath: 'bundle-path',
           bundleId: 'bundle-id',
           launchArguments: <String>[],
+          shutdownHooks: FakeShutdownHooks(),
         );
 
         expect(result, isFalse);
@@ -443,6 +450,7 @@ void main() {
           bundlePath: 'bundle-path',
           bundleId: 'bundle-id',
           launchArguments: <String>[],
+          shutdownHooks: FakeShutdownHooks(),
         );
 
         expect(result, isFalse);
@@ -490,6 +498,7 @@ void main() {
           bundlePath: 'bundle-path',
           bundleId: 'bundle-id',
           launchArguments: <String>[],
+          shutdownHooks: FakeShutdownHooks(),
         );
 
         expect(result, isFalse);
@@ -1778,8 +1787,9 @@ invalid JSON
 
       testWithoutContext('Successful launch without launch args', () async {
         fakeProcessManager.addCommand(
-          const FakeCommand(
+          FakeCommand(
             command: <String>[
+              ..._interactiveModeArgs,
               'xcrun',
               'devicectl',
               'device',
@@ -1803,22 +1813,26 @@ Waiting for the application to terminate...
           ),
         );
 
+        final shutdownHooks = FakeShutdownHooks();
         final bool result = await deviceControl.launchAppAndStreamLogs(
           deviceId: deviceId,
           bundleId: bundleId,
           coreDeviceLogForwarder: FakeIOSCoreDeviceLogForwarder(),
           startStopped: true,
+          shutdownHooks: shutdownHooks,
         );
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(shutdownHooks.registeredHooks.length, 1);
         expect(logger.errorText, isEmpty);
         expect(result, isTrue);
       });
 
       testWithoutContext('Successful launch with launch args', () async {
         fakeProcessManager.addCommand(
-          const FakeCommand(
+          FakeCommand(
             command: <String>[
+              ..._interactiveModeArgs,
               'xcrun',
               'devicectl',
               'device',
@@ -1843,24 +1857,27 @@ Waiting for the application to terminate...
 ''',
           ),
         );
-
+        final shutdownHooks = FakeShutdownHooks();
         final bool result = await deviceControl.launchAppAndStreamLogs(
           deviceId: deviceId,
           bundleId: bundleId,
           coreDeviceLogForwarder: FakeIOSCoreDeviceLogForwarder(),
           startStopped: true,
           launchArguments: ['--arg1', '--arg2'],
+          shutdownHooks: shutdownHooks,
         );
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(shutdownHooks.registeredHooks.length, 1);
         expect(logger.errorText, isEmpty);
         expect(result, isTrue);
       });
 
       testWithoutContext('Successful stream logs', () async {
         fakeProcessManager.addCommand(
-          const FakeCommand(
+          FakeCommand(
             command: <String>[
+              ..._interactiveModeArgs,
               'xcrun',
               'devicectl',
               'device',
@@ -1890,14 +1907,17 @@ This log happens after the application is launched and should be sent to FakeIOS
           ),
         );
         final logForwarder = FakeIOSCoreDeviceLogForwarder();
+        final shutdownHooks = FakeShutdownHooks();
         final bool result = await deviceControl.launchAppAndStreamLogs(
           deviceId: deviceId,
           bundleId: bundleId,
           coreDeviceLogForwarder: logForwarder,
           startStopped: true,
+          shutdownHooks: shutdownHooks,
         );
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(shutdownHooks.registeredHooks.length, 1);
         expect(logger.errorText, isEmpty);
         expect(logForwarder.logs.length, 3);
         expect(
@@ -1926,8 +1946,9 @@ Waiting for the application to terminate...
 
       testWithoutContext('devicectl fails launch with an error', () async {
         fakeProcessManager.addCommand(
-          const FakeCommand(
+          FakeCommand(
             command: <String>[
+              ..._interactiveModeArgs,
               'xcrun',
               'devicectl',
               'device',
@@ -1949,15 +1970,17 @@ ERROR: The operation couldn?t be completed. (OSStatus error -10814.) (NSOSStatus
 ''',
           ),
         );
-
+        final shutdownHooks = FakeShutdownHooks();
         final bool result = await deviceControl.launchAppAndStreamLogs(
           deviceId: deviceId,
           bundleId: bundleId,
           coreDeviceLogForwarder: FakeIOSCoreDeviceLogForwarder(),
           startStopped: true,
+          shutdownHooks: shutdownHooks,
         );
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(shutdownHooks.registeredHooks.length, 1);
         expect(logger.errorText, isEmpty);
         expect(result, isFalse);
       });
@@ -3827,6 +3850,7 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
     required IOSCoreDeviceLogForwarder coreDeviceLogForwarder,
     required String deviceId,
     required String bundleId,
+    required ShutdownHooks shutdownHooks,
     List<String> launchArguments = const <String>[],
     bool startStopped = false,
   }) async {
@@ -3847,10 +3871,10 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
 
 class FakeXcodeDebug extends Fake implements XcodeDebug {
   FakeXcodeDebug({this.tempXcodeProject, this.expectedProject, this.expectedLaunchArguments});
-  var exitSuccess = true;
+  bool exitSuccess = true;
   var _debugStarted = false;
-  var exitCalled = false;
-  var isTemporaryProject = false;
+  bool exitCalled = false;
+  bool isTemporaryProject = false;
   Directory? tempXcodeProject;
   XcodeDebugProject? expectedProject;
   List<String>? expectedLaunchArguments;
@@ -3912,11 +3936,11 @@ class FakeLLDB extends Fake implements LLDB {
   FakeLLDB({this.attachSuccess = true});
   bool attachSuccess;
 
-  var attemptedToAttach = false;
+  bool attemptedToAttach = false;
 
   var _isRunning = false;
   int? _processId;
-  var exitCalled = false;
+  bool exitCalled = false;
 
   @override
   bool get isRunning => _isRunning;
@@ -4028,5 +4052,25 @@ class FakeIOSCoreDeviceLogForwarder extends Fake implements IOSCoreDeviceLogForw
   @override
   void addLog(String log) {
     logs.add(log);
+  }
+}
+
+/// A [ShutdownHooks] implementation that does not actually execute any hooks.
+class FakeShutdownHooks extends Fake implements ShutdownHooks {
+  @override
+  bool get isShuttingDown => _isShuttingDown;
+  var _isShuttingDown = false;
+
+  @override
+  final registeredHooks = <ShutdownHook>[];
+
+  @override
+  void addShutdownHook(ShutdownHook shutdownHook) {
+    registeredHooks.add(shutdownHook);
+  }
+
+  @override
+  Future<void> runShutdownHooks(Logger logger) async {
+    _isShuttingDown = true;
   }
 }

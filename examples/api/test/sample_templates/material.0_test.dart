@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/sample_templates/material.0.dart' as example;
+import 'package:flutter_api_samples/sample_templates/material.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 // This is an example of a test for API example code.

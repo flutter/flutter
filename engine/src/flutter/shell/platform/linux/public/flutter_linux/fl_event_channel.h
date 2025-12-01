@@ -134,7 +134,9 @@ void fl_event_channel_set_stream_handlers(FlEventChannel* channel,
  * @event: event to send, must match what the #FlMethodCodec supports.
  * @cancellable: (allow-none): a #GCancellable or %NULL.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
+ * to ignore. If `error` is not %NULL, `*error` must be initialized (typically
+ * %NULL, but an error from a previous call using GLib error handling is
+ * explicitly valid).
  *
  * Sends an event on the channel.
  * Events should only be sent once the channel is being listened to.
@@ -154,7 +156,9 @@ gboolean fl_event_channel_send(FlEventChannel* channel,
  * @details: (allow-none): error details or %NULL.
  * @cancellable: (allow-none): a #GCancellable or %NULL.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
+ * to ignore. If `error` is not %NULL, `*error` must be initialized (typically
+ * %NULL, but an error from a previous call using GLib error handling is
+ * explicitly valid).
  *
  * Sends an error on the channel.
  * Errors should only be sent once the channel is being listened to.
@@ -173,7 +177,9 @@ gboolean fl_event_channel_send_error(FlEventChannel* channel,
  * @channel: an #FlEventChannel.
  * @cancellable: (allow-none): a #GCancellable or %NULL.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
+ * to ignore. If `error` is not %NULL, `*error` must be initialized (typically
+ * %NULL, but an error from a previous call using GLib error handling is
+ * explicitly valid).
  *
  * Indicates the stream has completed.
  * It is a programmer error to send any more events after calling this.

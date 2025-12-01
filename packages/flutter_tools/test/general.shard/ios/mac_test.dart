@@ -800,6 +800,93 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       expect(processManager, hasNoRemainingExpectations);
     });
   });
+
+  group('publicHeadersChanged', () {
+    const correctHeaderFingerprint =
+        '{"files":{"/.tmp_rand0/Flutter.framework/Headers/FlutterPlugin.h":"d41d8cd98f00b204e9800998ecf8427e"}}';
+
+    testWithoutContext('returns true when headers change', () async {
+      final fs = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final Directory mockFlutterFramework = fs.systemTempDirectory.childDirectory(
+        'Flutter.framework',
+      );
+      mockFlutterFramework
+          .childDirectory('Headers')
+          .childFile('FlutterPlugin.h')
+          .createSync(recursive: true);
+      final Directory mockBuildDirectory = fs.systemTempDirectory.childDirectory('build')
+        ..createSync(recursive: true);
+      final File fingerprintFile =
+          mockBuildDirectory.childFile('framework_public_headers.fingerprint')..writeAsStringSync(
+            '{"files":{"/.tmp_rand0/Flutter.framework/Headers/FlutterPlugin.h":"incorrect_hash"}}',
+          );
+      final bool headersChanged = publicHeadersChanged(
+        environmentType: EnvironmentType.physical,
+        mode: BuildMode.debug,
+        buildDirectory: mockBuildDirectory.path,
+        artifacts: FakeArtifacts(frameworkPath: mockFlutterFramework.path),
+        fileSystem: fs,
+        logger: logger,
+      );
+      expect(headersChanged, isTrue);
+      expect(fingerprintFile.readAsStringSync(), correctHeaderFingerprint);
+    });
+
+    testWithoutContext('returns true when fingerprint does not exist yet', () async {
+      final fs = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final Directory mockFlutterFramework = fs.systemTempDirectory.childDirectory(
+        'Flutter.framework',
+      );
+      mockFlutterFramework
+          .childDirectory('Headers')
+          .childFile('FlutterPlugin.h')
+          .createSync(recursive: true);
+      final Directory mockBuildDirectory = fs.systemTempDirectory.childDirectory('build')
+        ..createSync(recursive: true);
+      final File fingerprintFile = mockBuildDirectory.childFile(
+        'framework_public_headers.fingerprint',
+      );
+      final bool headersChanged = publicHeadersChanged(
+        environmentType: EnvironmentType.physical,
+        mode: BuildMode.debug,
+        buildDirectory: mockBuildDirectory.path,
+        artifacts: FakeArtifacts(frameworkPath: mockFlutterFramework.path),
+        fileSystem: fs,
+        logger: logger,
+      );
+      expect(headersChanged, isTrue);
+      expect(fingerprintFile.readAsStringSync(), correctHeaderFingerprint);
+    });
+
+    testWithoutContext('returns false when fingerprint has not changed', () async {
+      final fs = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final Directory mockFlutterFramework = fs.systemTempDirectory.childDirectory(
+        'Flutter.framework',
+      );
+      mockFlutterFramework
+          .childDirectory('Headers')
+          .childFile('FlutterPlugin.h')
+          .createSync(recursive: true);
+      final Directory mockBuildDirectory = fs.systemTempDirectory.childDirectory('build')
+        ..createSync(recursive: true);
+      final File fingerprintFile = mockBuildDirectory.childFile(
+        'framework_public_headers.fingerprint',
+      )..writeAsStringSync(correctHeaderFingerprint);
+      final bool headersChanged = publicHeadersChanged(
+        environmentType: EnvironmentType.physical,
+        mode: BuildMode.debug,
+        buildDirectory: mockBuildDirectory.path,
+        artifacts: FakeArtifacts(frameworkPath: mockFlutterFramework.path),
+        fileSystem: fs,
+        logger: logger,
+      );
+      expect(headersChanged, isFalse);
+      expect(fingerprintFile.readAsStringSync(), correctHeaderFingerprint);
+    });
+  });
 }
 
 void createFakePlugins(
@@ -897,4 +984,19 @@ class FakeFlutterManifest extends Fake implements FlutterManifest {
 
   @override
   YamlMap toYaml() => YamlMap.wrap(<String, String>{});
+}
+
+class FakeArtifacts extends Fake implements Artifacts {
+  FakeArtifacts({required this.frameworkPath});
+
+  final String frameworkPath;
+  @override
+  String getArtifactPath(
+    Artifact artifact, {
+    TargetPlatform? platform,
+    BuildMode? mode,
+    EnvironmentType? environmentType,
+  }) {
+    return frameworkPath;
+  }
 }
