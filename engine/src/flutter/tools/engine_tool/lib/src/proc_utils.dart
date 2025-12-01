@@ -77,9 +77,9 @@ final class ProcessArtifacts {
   /// Returns the File.
   File saveTemp() {
     final Directory systemTemp = Directory.systemTemp;
-    final String prefix = pid != null ? 'et$pid' : 'et';
+    final prefix = pid != null ? 'et$pid' : 'et';
     final Directory artifacts = systemTemp.createTempSync(prefix);
-    final File resultFile = File(p.join(artifacts.path, 'process_artifacts.json'));
+    final resultFile = File(p.join(artifacts.path, 'process_artifacts.json'));
     save(resultFile);
     return resultFile;
   }
@@ -159,7 +159,7 @@ class ProcessTaskProgressReporter implements WorkerPoolProgressReporter {
   @override
   void onRun(Set<WorkerTask> tasks) {
     _totalCount = tasks.length;
-    for (final WorkerTask task in tasks) {
+    for (final task in tasks) {
       assert(task is ProcessTask);
       _longestName = max(_longestName, task.name.length);
     }
@@ -203,14 +203,14 @@ class ProcessTaskProgressReporter implements WorkerPoolProgressReporter {
     }
     _environment.logger.clearLine();
     final String taskName = tasks.isEmpty ? '' : tasks.first.name;
-    final String etc = tasks.length > 1 ? '... [${tasks.length}]' : '';
+    final etc = tasks.length > 1 ? '... [${tasks.length}]' : '';
     _environment.logger.status('Running $_doneCount/$_totalCount $taskName$etc ', newline: false);
     _spinner = _environment.logger.startSpinner();
   }
 
   String _formatDurationShort(Duration dur) {
     int micros = dur.inMicroseconds;
-    String r = '';
+    var r = '';
     if (micros >= Duration.microsecondsPerMinute) {
       final int minutes = micros ~/ Duration.microsecondsPerMinute;
       micros -= minutes * Duration.microsecondsPerMinute;
@@ -251,7 +251,7 @@ void fatalIfFailed(Environment environment, List<String> commandLine, ProcessRun
 
 /// Ensures that pathToBinary includes a '.exe' suffix on relevant platforms.
 String exePath(Environment environment, String pathToBinary) {
-  String suffix = '';
+  var suffix = '';
   if (environment.platform.isWindows) {
     suffix = '.exe';
   }

@@ -10,36 +10,36 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('WindowPlacementTest', () {
-    const Rect clientDisplayArea = Rect.fromLTWH(0, 0, 800, 600);
-    const Size clientParentSize = Size(400, 300);
-    const Size clientChildSize = Size(100, 50);
-    final Offset clientParentPosition = Offset(
+    const clientDisplayArea = Rect.fromLTWH(0, 0, 800, 600);
+    const clientParentSize = Size(400, 300);
+    const clientChildSize = Size(100, 50);
+    final clientParentPosition = Offset(
       (clientDisplayArea.width - clientParentSize.width) / 2,
       (clientDisplayArea.height - clientParentSize.height) / 2,
     );
 
-    final Rect clientParentRect = Rect.fromLTWH(
+    final clientParentRect = Rect.fromLTWH(
       clientParentPosition.dx,
       clientParentPosition.dy,
       clientParentSize.width,
       clientParentSize.height,
     );
 
-    const Rect displayArea = Rect.fromLTWH(0, 0, 640, 480);
-    const Size parentSize = Size(600, 400);
-    const Size childSize = Size(300, 300);
-    const Rect rectangleNearRhs = Rect.fromLTWH(590, 20, 10, 20);
-    const Rect rectangleNearLeftSide = Rect.fromLTWH(0, 20, 20, 20);
-    const Rect rectangleNearAllSides = Rect.fromLTWH(0, 20, 600, 380);
-    const Rect rectangleNearBottom = Rect.fromLTWH(20, 380, 20, 20);
-    const Rect rectangleNearBothBottomRight = Rect.fromLTWH(400, 380, 200, 20);
+    const displayArea = Rect.fromLTWH(0, 0, 640, 480);
+    const parentSize = Size(600, 400);
+    const childSize = Size(300, 300);
+    const rectangleNearRhs = Rect.fromLTWH(590, 20, 10, 20);
+    const rectangleNearLeftSide = Rect.fromLTWH(0, 20, 20, 20);
+    const rectangleNearAllSides = Rect.fromLTWH(0, 20, 600, 380);
+    const rectangleNearBottom = Rect.fromLTWH(20, 380, 20, 20);
+    const rectangleNearBothBottomRight = Rect.fromLTWH(400, 380, 200, 20);
 
-    final Offset parentPosition = Offset(
+    final parentPosition = Offset(
       (displayArea.width - parentSize.width) / 2,
       (displayArea.height - parentSize.height) / 2,
     );
 
-    final Rect parentRect = Rect.fromLTWH(
+    final parentRect = Rect.fromLTWH(
       parentPosition.dx,
       parentPosition.dy,
       parentSize.width,
@@ -51,14 +51,14 @@ void main() {
     Offset onLeftEdge(Rect rect, Size childSize) => rect.topLeft - Offset(childSize.width, 0);
 
     test('Client anchors to parent given anchor rectangle right of parent', () {
-      const double rectSize = 10.0;
-      final Rect overlappingRight = Rect.fromCenter(
+      const rectSize = 10.0;
+      final overlappingRight = Rect.fromCenter(
         center: clientParentRect.topRight.translate(-rectSize / 2, clientParentRect.height / 2),
         width: rectSize,
         height: rectSize,
       );
 
-      const WindowPositioner positioner = WindowPositioner(
+      const positioner = WindowPositioner(
         parentAnchor: WindowPositionerAnchor.topRight,
         childAnchor: WindowPositionerAnchor.topLeft,
         constraintAdjustment: WindowPositionerConstraintAdjustment(slideY: true, resizeX: true),
@@ -78,14 +78,14 @@ void main() {
     });
 
     test('Client anchors to parent given anchor rectangle above parent', () {
-      const double rectSize = 10.0;
-      final Rect overlappingAbove = Rect.fromCenter(
+      const rectSize = 10.0;
+      final overlappingAbove = Rect.fromCenter(
         center: clientParentRect.topCenter.translate(0, -rectSize / 2),
         width: rectSize,
         height: rectSize,
       );
 
-      const WindowPositioner positioner = WindowPositioner(
+      const positioner = WindowPositioner(
         parentAnchor: WindowPositionerAnchor.topRight,
         childAnchor: WindowPositionerAnchor.bottomRight,
         constraintAdjustment: WindowPositionerConstraintAdjustment(slideX: true),
@@ -106,15 +106,15 @@ void main() {
     });
 
     test('Client anchors to parent given offset right of parent', () {
-      const double rectSize = 10.0;
-      final Rect midRight = Rect.fromLTWH(
+      const rectSize = 10.0;
+      final midRight = Rect.fromLTWH(
         clientParentRect.right - rectSize,
         clientParentRect.center.dy,
         rectSize,
         rectSize,
       );
 
-      const WindowPositioner positioner = WindowPositioner(
+      const positioner = WindowPositioner(
         parentAnchor: WindowPositionerAnchor.topRight,
         childAnchor: WindowPositionerAnchor.topLeft,
         offset: Offset(rectSize, 0),
@@ -135,15 +135,15 @@ void main() {
     });
 
     test('Client anchors to parent given offset above parent', () {
-      const double rectSize = 10.0;
-      final Rect midTop = Rect.fromLTWH(
+      const rectSize = 10.0;
+      final midTop = Rect.fromLTWH(
         clientParentRect.center.dx,
         clientParentRect.top,
         rectSize,
         rectSize,
       );
 
-      const WindowPositioner positioner = WindowPositioner(
+      const positioner = WindowPositioner(
         parentAnchor: WindowPositionerAnchor.topRight,
         childAnchor: WindowPositionerAnchor.bottomRight,
         offset: Offset(0, -rectSize),
@@ -167,15 +167,15 @@ void main() {
     });
 
     test('Client anchors to parent given anchor rectangle and offset below left parent', () {
-      const double rectSize = 10.0;
-      final Rect belowLeft = Rect.fromLTWH(
+      const rectSize = 10.0;
+      final belowLeft = Rect.fromLTWH(
         clientParentRect.left - rectSize,
         clientParentRect.bottom,
         rectSize,
         rectSize,
       );
 
-      const WindowPositioner positioner = WindowPositioner(
+      const positioner = WindowPositioner(
         parentAnchor: WindowPositionerAnchor.bottomLeft,
         childAnchor: WindowPositionerAnchor.topRight,
         offset: Offset(-rectSize, rectSize),
@@ -215,7 +215,7 @@ void main() {
         for (final WindowPositionerAnchor childAnchor in WindowPositionerAnchor.values) {
           test('parent: $parentAnchor, child: $childAnchor', () {
             final Rect anchorRect = anchorRectFor(const Rect.fromLTWH(100, 50, 20, 20));
-            final WindowPositioner positioner = WindowPositioner(
+            final positioner = WindowPositioner(
               parentAnchor: parentAnchor,
               childAnchor: childAnchor,
             );
@@ -237,9 +237,9 @@ void main() {
     });
 
     test('Placement is flipped given anchor rectangle near right side and offset', () {
-      const double xOffset = 42.0;
-      const double yOffset = 13.0;
-      const WindowPositioner positioner = WindowPositioner(
+      const xOffset = 42.0;
+      const yOffset = 13.0;
+      const positioner = WindowPositioner(
         parentAnchor: WindowPositionerAnchor.topRight,
         childAnchor: WindowPositionerAnchor.topLeft,
         offset: Offset(xOffset, yOffset),
@@ -261,9 +261,9 @@ void main() {
     });
 
     test('Placement is flipped given anchor rectangle near bottom and offset', () {
-      const double xOffset = 42.0;
-      const double yOffset = 13.0;
-      const WindowPositioner positioner = WindowPositioner(
+      const xOffset = 42.0;
+      const yOffset = 13.0;
+      const positioner = WindowPositioner(
         parentAnchor: WindowPositionerAnchor.bottomLeft,
         childAnchor: WindowPositionerAnchor.topLeft,
         offset: Offset(xOffset, yOffset),
@@ -285,9 +285,9 @@ void main() {
     });
 
     test('Placement is flipped both ways given anchor rectangle near bottom right and offset', () {
-      const double xOffset = 42.0;
-      const double yOffset = 13.0;
-      const WindowPositioner positioner = WindowPositioner(
+      const xOffset = 42.0;
+      const yOffset = 13.0;
+      const positioner = WindowPositioner(
         parentAnchor: WindowPositionerAnchor.bottomRight,
         childAnchor: WindowPositionerAnchor.topLeft,
         offset: Offset(xOffset, yOffset),
@@ -311,7 +311,7 @@ void main() {
     });
 
     test('Placement can slide in X given anchor rectangle near right side', () {
-      const WindowPositioner positioner = WindowPositioner(
+      const positioner = WindowPositioner(
         parentAnchor: WindowPositionerAnchor.topRight,
         childAnchor: WindowPositionerAnchor.topLeft,
         constraintAdjustment: WindowPositionerConstraintAdjustment(slideX: true),
@@ -329,7 +329,7 @@ void main() {
     });
 
     test('Placement can slide in X given anchor rectangle near left side', () {
-      const WindowPositioner positioner = WindowPositioner(
+      const positioner = WindowPositioner(
         parentAnchor: WindowPositionerAnchor.topLeft,
         childAnchor: WindowPositionerAnchor.topRight,
         constraintAdjustment: WindowPositionerConstraintAdjustment(slideX: true),
@@ -347,7 +347,7 @@ void main() {
     });
 
     test('Placement can slide in Y given anchor rectangle near bottom', () {
-      const WindowPositioner positioner = WindowPositioner(
+      const positioner = WindowPositioner(
         parentAnchor: WindowPositionerAnchor.bottomLeft,
         childAnchor: WindowPositionerAnchor.topLeft,
         constraintAdjustment: WindowPositionerConstraintAdjustment(slideY: true),
@@ -365,7 +365,7 @@ void main() {
     });
 
     test('Placement can slide in Y given anchor rectangle near top', () {
-      const WindowPositioner positioner = WindowPositioner(
+      const positioner = WindowPositioner(
         parentAnchor: WindowPositionerAnchor.topLeft,
         childAnchor: WindowPositionerAnchor.bottomLeft,
         constraintAdjustment: WindowPositionerConstraintAdjustment(slideY: true),
@@ -383,7 +383,7 @@ void main() {
     });
 
     test('Placement can slide in X and Y given anchor rectangle near bottom right and offset', () {
-      const WindowPositioner positioner = WindowPositioner(
+      const positioner = WindowPositioner(
         parentAnchor: WindowPositionerAnchor.bottomLeft,
         childAnchor: WindowPositionerAnchor.topLeft,
         constraintAdjustment: WindowPositionerConstraintAdjustment(slideX: true, slideY: true),
@@ -397,7 +397,7 @@ void main() {
         displayRect: displayArea,
       );
 
-      final Offset expectedPosition = Offset(
+      final expectedPosition = Offset(
         displayArea.right - childSize.width,
         displayArea.bottom - childSize.height,
       );
@@ -406,7 +406,7 @@ void main() {
     });
 
     test('Placement can resize in X given anchor rectangle near right side', () {
-      const WindowPositioner positioner = WindowPositioner(
+      const positioner = WindowPositioner(
         parentAnchor: WindowPositionerAnchor.topRight,
         childAnchor: WindowPositionerAnchor.topLeft,
         constraintAdjustment: WindowPositionerConstraintAdjustment(resizeX: true),
@@ -424,7 +424,7 @@ void main() {
     });
 
     test('Placement can resize in X given anchor rectangle near left side', () {
-      const WindowPositioner positioner = WindowPositioner(
+      const positioner = WindowPositioner(
         parentAnchor: WindowPositionerAnchor.topLeft,
         childAnchor: WindowPositionerAnchor.topRight,
         constraintAdjustment: WindowPositionerConstraintAdjustment(resizeX: true),
@@ -442,7 +442,7 @@ void main() {
     });
 
     test('Placement can resize in Y given anchor rectangle near bottom', () {
-      const WindowPositioner positioner = WindowPositioner(
+      const positioner = WindowPositioner(
         parentAnchor: WindowPositionerAnchor.bottomLeft,
         childAnchor: WindowPositionerAnchor.topLeft,
         constraintAdjustment: WindowPositionerConstraintAdjustment(resizeY: true),
@@ -460,7 +460,7 @@ void main() {
     });
 
     test('Placement can resize in Y given anchor rectangle near top', () {
-      const WindowPositioner positioner = WindowPositioner(
+      const positioner = WindowPositioner(
         parentAnchor: WindowPositionerAnchor.topLeft,
         childAnchor: WindowPositionerAnchor.bottomLeft,
         constraintAdjustment: WindowPositionerConstraintAdjustment(resizeY: true),
@@ -478,7 +478,7 @@ void main() {
     });
 
     test('Placement can resize in X and Y given anchor rectangle near bottom right and offset', () {
-      const WindowPositioner positioner = WindowPositioner(
+      const positioner = WindowPositioner(
         parentAnchor: WindowPositionerAnchor.bottomRight,
         childAnchor: WindowPositionerAnchor.topLeft,
         constraintAdjustment: WindowPositionerConstraintAdjustment(resizeX: true, resizeY: true),
@@ -492,7 +492,7 @@ void main() {
         displayRect: displayArea,
       );
 
-      final Size expectedSize = Size(
+      final expectedSize = Size(
         displayArea.right - (anchorRect.left + anchorRect.width),
         displayArea.bottom - (anchorRect.top + anchorRect.height),
       );

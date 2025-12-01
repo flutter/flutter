@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/scroll_view/list_view.1.dart' as example;
+import 'package:flutter_api_samples/widgets/scroll_view/list_view.1.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('tapping Reverse button should reverse ListView', (WidgetTester tester) async {
+  testWidgets('tapping Reverse button should reverse ListView', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.ListViewExampleApp());
     final Finder listView = find.byType(ListView);
     final Finder reverseFinder = find.text('Reverse items');

@@ -32,7 +32,7 @@ class TestMaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLo
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  final MockClipboard mockClipboard = MockClipboard();
+  final mockClipboard = MockClipboard();
 
   Widget inputDatePickerField({
     Key? key,
@@ -97,8 +97,8 @@ void main() {
 
   group('InputDatePickerFormField', () {
     testWidgets('Initial date is the default', (WidgetTester tester) async {
-      final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-      final DateTime initialDate = DateTime(2016, DateTime.february, 21);
+      final formKey = GlobalKey<FormState>();
+      final initialDate = DateTime(2016, DateTime.february, 21);
       DateTime? inputDate;
       await tester.pumpWidget(
         inputDatePickerField(
@@ -113,8 +113,8 @@ void main() {
     });
 
     testWidgets('Changing initial date is reflected in text value', (WidgetTester tester) async {
-      final DateTime initialDate = DateTime(2016, DateTime.february, 21);
-      final DateTime updatedInitialDate = DateTime(2016, DateTime.february, 23);
+      final initialDate = DateTime(2016, DateTime.february, 21);
+      final updatedInitialDate = DateTime(2016, DateTime.february, 23);
       await tester.pumpWidget(inputDatePickerField(initialDate: initialDate));
       expect(textFieldController(tester).value.text, equals('02/21/2016'));
 
@@ -124,7 +124,7 @@ void main() {
     });
 
     testWidgets('Valid date entry', (WidgetTester tester) async {
-      final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+      final formKey = GlobalKey<FormState>();
       DateTime? inputDate;
       await tester.pumpWidget(
         inputDatePickerField(onDateSaved: (DateTime date) => inputDate = date, formKey: formKey),
@@ -136,7 +136,7 @@ void main() {
     });
 
     testWidgets('Invalid text entry shows errorFormat text', (WidgetTester tester) async {
-      final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+      final formKey = GlobalKey<FormState>();
       DateTime? inputDate;
       await tester.pumpWidget(
         inputDatePickerField(onDateSaved: (DateTime date) => inputDate = date, formKey: formKey),
@@ -166,7 +166,7 @@ void main() {
     testWidgets(
       'Valid text entry, but date outside first or last date shows bounds shows errorInvalid text',
       (WidgetTester tester) async {
-        final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+        final formKey = GlobalKey<FormState>();
         DateTime? inputDate;
         await tester.pumpWidget(
           inputDatePickerField(
@@ -208,7 +208,7 @@ void main() {
     testWidgets(
       'selectableDatePredicate will be used to show errorInvalid if date is not selectable',
       (WidgetTester tester) async {
-        final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+        final formKey = GlobalKey<FormState>();
         DateTime? inputDate;
         await tester.pumpWidget(
           inputDatePickerField(
@@ -337,11 +337,11 @@ void main() {
       // ignore: avoid_dynamic_calls
       final dynamic /*_InputBorderTween*/ inputBorderTween = inputBorderPainter.border;
       // ignore: avoid_dynamic_calls
-      final Animation<double> animation = inputBorderPainter.borderAnimation as Animation<double>;
+      final animation = inputBorderPainter.borderAnimation as Animation<double>;
       // ignore: avoid_dynamic_calls
-      final InputBorder actualBorder = inputBorderTween.evaluate(animation) as InputBorder;
+      final actualBorder = inputBorderTween.evaluate(animation) as InputBorder;
       // ignore: avoid_dynamic_calls
-      final Color containerColor = inputBorderPainter.blendedColor as Color;
+      final containerColor = inputBorderPainter.blendedColor as Color;
 
       // Border should match
       expect(actualBorder, equals(border));
@@ -369,8 +369,8 @@ void main() {
     testWidgets(
       'when an empty date is entered and acceptEmptyDate is true, then errorFormatText is not shown',
       (WidgetTester tester) async {
-        final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-        const String errorFormatText = 'That is not a date.';
+        final formKey = GlobalKey<FormState>();
+        const errorFormatText = 'That is not a date.';
         await tester.pumpWidget(
           inputDatePickerField(
             errorFormatText: errorFormatText,
@@ -389,8 +389,8 @@ void main() {
     testWidgets(
       'when an empty date is entered and acceptEmptyDate is false, then errorFormatText is shown',
       (WidgetTester tester) async {
-        final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-        const String errorFormatText = 'That is not a date.';
+        final formKey = GlobalKey<FormState>();
+        const errorFormatText = 'That is not a date.';
         await tester.pumpWidget(
           inputDatePickerField(errorFormatText: errorFormatText, formKey: formKey),
         );
@@ -404,7 +404,7 @@ void main() {
   });
 
   testWidgets('FocusNode can request focus', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     await tester.pumpWidget(inputDatePickerField(focusNode: focusNode));
     expect((tester.widget(find.byType(TextField)) as TextField).focusNode, focusNode);

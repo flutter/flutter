@@ -23,7 +23,7 @@ import '../widgets/semantics_tester.dart';
 void main() {
   testWidgets('Switch can toggle on tap', (WidgetTester tester) async {
     final Key switchKey = UniqueKey();
-    bool value = false;
+    var value = false;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -52,7 +52,7 @@ void main() {
   });
 
   testWidgets('CupertinoSwitch can be toggled by keyboard shortcuts', (WidgetTester tester) async {
-    bool value = true;
+    var value = true;
     Widget buildApp({bool enabled = true}) {
       return CupertinoApp(
         home: CupertinoPageScaffold(
@@ -93,9 +93,9 @@ void main() {
     'Switch emits light haptic vibration on tap',
     (WidgetTester tester) async {
       final Key switchKey = UniqueKey();
-      bool value = false;
+      var value = false;
 
-      final List<MethodCall> log = <MethodCall>[];
+      final log = <MethodCall>[];
 
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
         MethodCall methodCall,
@@ -143,9 +143,9 @@ void main() {
     (WidgetTester tester) async {
       final Key switchKey = UniqueKey();
       final Key switchKey2 = UniqueKey();
-      bool value = false;
-      bool value2 = false;
-      final List<MethodCall> log = <MethodCall>[];
+      var value = false;
+      var value2 = false;
+      final log = <MethodCall>[];
 
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
         MethodCall methodCall,
@@ -228,8 +228,8 @@ void main() {
   );
 
   testWidgets('Haptic vibration triggers on drag', (WidgetTester tester) async {
-    bool value = false;
-    final List<MethodCall> log = <MethodCall>[];
+    var value = false;
+    final log = <MethodCall>[];
 
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
       MethodCall methodCall,
@@ -274,9 +274,9 @@ void main() {
     'No haptic vibration triggers from a programmatic value change',
     (WidgetTester tester) async {
       final Key switchKey = UniqueKey();
-      bool value = false;
+      var value = false;
 
-      final List<MethodCall> log = <MethodCall>[];
+      final log = <MethodCall>[];
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
         MethodCall methodCall,
       ) async {
@@ -329,7 +329,7 @@ void main() {
   );
 
   testWidgets('Switch can drag (LTR)', (WidgetTester tester) async {
-    bool value = false;
+    var value = false;
 
     await tester.pumpWidget(
       Directionality(
@@ -373,7 +373,7 @@ void main() {
   });
 
   testWidgets('Switch can drag with dragStartBehavior', (WidgetTester tester) async {
-    bool value = false;
+    var value = false;
 
     await tester.pumpWidget(
       Directionality(
@@ -459,7 +459,7 @@ void main() {
   });
 
   testWidgets('Switch can drag (RTL)', (WidgetTester tester) async {
-    bool value = false;
+    var value = false;
 
     await tester.pumpWidget(
       Directionality(
@@ -504,7 +504,7 @@ void main() {
   });
 
   testWidgets('can veto switch dragging result', (WidgetTester tester) async {
-    bool value = false;
+    var value = false;
 
     await tester.pumpWidget(
       Directionality(
@@ -540,7 +540,7 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(value, isFalse);
-    final CurvedAnimation position =
+    final position =
         (tester.state(find.byType(CupertinoSwitch)) as dynamic).position as CurvedAnimation;
     expect(position.value, 0.0);
     await tester.pumpAndSettle();
@@ -577,7 +577,7 @@ void main() {
   });
 
   testWidgets('Switch thumb snaps to the side on drag', (WidgetTester tester) async {
-    bool value = false;
+    var value = false;
 
     await tester.pumpWidget(
       Directionality(
@@ -609,7 +609,7 @@ void main() {
     }
 
     final Rect switchRect = tester.getRect(find.byType(CupertinoSwitch));
-    final CurvedAnimation position =
+    final position =
         (tester.state(find.byType(CupertinoSwitch)) as dynamic).position as CurvedAnimation;
 
     // Move to the right, not past the middle.
@@ -684,7 +684,7 @@ void main() {
   });
 
   testWidgets('Switch is using track color when set', (WidgetTester tester) async {
-    const Color trackColor = Color(0xFF00FF00);
+    const trackColor = Color(0xFF00FF00);
 
     await tester.pumpWidget(
       const Directionality(
@@ -727,7 +727,7 @@ void main() {
   });
 
   testWidgets('Switch is using thumb color when set', (WidgetTester tester) async {
-    const Color thumbColor = Color(0xFF000000);
+    const thumbColor = Color(0xFF000000);
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -751,9 +751,9 @@ void main() {
   });
 
   testWidgets('Switch can set active/inactive thumb colors', (WidgetTester tester) async {
-    bool value = false;
-    const Color activeThumbColor = Color(0xff00000A);
-    const Color inactiveThumbColor = Color(0xff00000B);
+    var value = false;
+    const activeThumbColor = Color(0xff00000A);
+    const inactiveThumbColor = Color(0xff00000B);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -887,7 +887,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final Key switchKey = UniqueKey();
-    bool value = false;
+    var value = false;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -951,7 +951,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final Key switchKey = UniqueKey();
-    bool value = false;
+    var value = false;
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(onOffSwitchLabels: true),
@@ -1004,7 +1004,7 @@ void main() {
     'Switch renders switch labels correctly before, during, and after being tapped in high contrast',
     (WidgetTester tester) async {
       final Key switchKey = UniqueKey();
-      bool value = false;
+      var value = false;
       await tester.pumpWidget(
         MediaQuery(
           data: const MediaQueryData(onOffSwitchLabels: true, highContrast: true),
@@ -1058,7 +1058,7 @@ void main() {
     'Switch renders switch labels correctly before, during, and after being tapped with direction rtl',
     (WidgetTester tester) async {
       final Key switchKey = UniqueKey();
-      bool value = false;
+      var value = false;
       await tester.pumpWidget(
         MediaQuery(
           data: const MediaQueryData(onOffSwitchLabels: true),
@@ -1110,7 +1110,7 @@ void main() {
 
   testWidgets('Switch renders correctly in dark mode', (WidgetTester tester) async {
     final Key switchKey = UniqueKey();
-    bool value = false;
+    var value = false;
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(platformBrightness: Brightness.dark),
@@ -1149,7 +1149,7 @@ void main() {
 
   testWidgets('Switch can apply the ambient theme and be opted out', (WidgetTester tester) async {
     final Key switchKey = UniqueKey();
-    bool value = false;
+    var value = false;
     await tester.pumpWidget(
       CupertinoTheme(
         data: const CupertinoThemeData(primaryColor: Colors.amber, applyThemeToAll: true),
@@ -1204,7 +1204,7 @@ void main() {
   testWidgets('Hovering over switch updates cursor to clickable on Web', (
     WidgetTester tester,
   ) async {
-    const bool value = false;
+    const value = false;
     // Disabled CupertinoSwitch does not update cursor on Web.
     await tester.pumpWidget(
       Directionality(
@@ -1269,8 +1269,8 @@ void main() {
   });
 
   testWidgets('Switch configures mouse cursor', (WidgetTester tester) async {
-    const bool value = false;
-    const Offset switchSize = Offset(51.0, 31.0);
+    const value = false;
+    const switchSize = Offset(51.0, 31.0);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1311,11 +1311,11 @@ void main() {
   testWidgets('CupertinoSwitch is focusable and has correct focus color', (
     WidgetTester tester,
   ) async {
-    final FocusNode focusNode = FocusNode(debugLabel: 'CupertinoSwitch');
+    final focusNode = FocusNode(debugLabel: 'CupertinoSwitch');
     addTearDown(focusNode.dispose);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    bool value = true;
-    const Color focusColor = Color(0xffff0000);
+    var value = true;
+    const focusColor = Color(0xffff0000);
 
     Widget buildApp({bool enabled = true}) {
       return Directionality(
@@ -1395,9 +1395,9 @@ void main() {
   });
 
   testWidgets('CupertinoSwitch.onFocusChange callback', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode(debugLabel: 'CupertinoSwitch');
+    final focusNode = FocusNode(debugLabel: 'CupertinoSwitch');
     addTearDown(focusNode.dispose);
-    bool focused = false;
+    var focused = false;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1427,14 +1427,14 @@ void main() {
 
   testWidgets('Switch has semantic events', (WidgetTester tester) async {
     dynamic semanticEvent;
-    bool value = false;
+    var value = false;
     tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(
       SystemChannels.accessibility,
       (dynamic message) async {
         semanticEvent = message;
       },
     );
-    final SemanticsTester semanticsTester = SemanticsTester(tester);
+    final semanticsTester = SemanticsTester(tester);
 
     await tester.pumpWidget(
       Directionality(
@@ -1479,14 +1479,14 @@ void main() {
     WidgetTester tester,
   ) async {
     dynamic semanticEvent;
-    bool value = false;
+    var value = false;
     tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(
       SystemChannels.accessibility,
       (dynamic message) async {
         semanticEvent = message;
       },
     );
-    final SemanticsTester semanticsTester = SemanticsTester(tester);
+    final semanticsTester = SemanticsTester(tester);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -1532,10 +1532,10 @@ void main() {
   });
 
   testWidgets('Track outline color resolves in active/enabled states', (WidgetTester tester) async {
-    const Color activeEnabledTrackOutlineColor = Color(0xFF000001);
-    const Color activeDisabledTrackOutlineColor = Color(0xFF000002);
-    const Color inactiveEnabledTrackOutlineColor = Color(0xFF000003);
-    const Color inactiveDisabledTrackOutlineColor = Color(0xFF000004);
+    const activeEnabledTrackOutlineColor = Color(0xFF000001);
+    const activeDisabledTrackOutlineColor = Color(0xFF000002);
+    const inactiveEnabledTrackOutlineColor = Color(0xFF000003);
+    const inactiveDisabledTrackOutlineColor = Color(0xFF000004);
 
     Color getTrackOutlineColor(Set<WidgetState> states) {
       if (states.contains(WidgetState.disabled)) {
@@ -1616,10 +1616,10 @@ void main() {
   testWidgets('Switch track outline color resolves in hovered/focused states', (
     WidgetTester tester,
   ) async {
-    final FocusNode focusNode = FocusNode(debugLabel: 'Switch');
+    final focusNode = FocusNode(debugLabel: 'Switch');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    const Color hoveredTrackOutlineColor = Color(0xFF000001);
-    const Color focusedTrackOutlineColor = Color(0xFF000002);
+    const hoveredTrackOutlineColor = Color(0xFF000001);
+    const focusedTrackOutlineColor = Color(0xFF000002);
 
     Color getTrackOutlineColor(Set<WidgetState> states) {
       if (states.contains(WidgetState.hovered)) {
@@ -1681,10 +1681,10 @@ void main() {
   });
 
   testWidgets('Track outline width resolves in active/enabled states', (WidgetTester tester) async {
-    const double activeEnabledTrackOutlineWidth = 1.0;
-    const double activeDisabledTrackOutlineWidth = 2.0;
-    const double inactiveEnabledTrackOutlineWidth = 3.0;
-    const double inactiveDisabledTrackOutlineWidth = 4.0;
+    const activeEnabledTrackOutlineWidth = 1.0;
+    const activeDisabledTrackOutlineWidth = 2.0;
+    const inactiveEnabledTrackOutlineWidth = 3.0;
+    const inactiveDisabledTrackOutlineWidth = 4.0;
 
     double getTrackOutlineWidth(Set<WidgetState> states) {
       if (states.contains(WidgetState.disabled)) {
@@ -1768,10 +1768,10 @@ void main() {
   testWidgets('Switch track outline width resolves in hovered/focused states', (
     WidgetTester tester,
   ) async {
-    final FocusNode focusNode = FocusNode(debugLabel: 'Switch');
+    final focusNode = FocusNode(debugLabel: 'Switch');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    const double hoveredTrackOutlineWidth = 4.0;
-    const double focusedTrackOutlineWidth = 6.0;
+    const hoveredTrackOutlineWidth = 4.0;
+    const focusedTrackOutlineWidth = 6.0;
 
     double getTrackOutlineWidth(Set<WidgetState> states) {
       if (states.contains(WidgetState.hovered)) {
@@ -1940,13 +1940,13 @@ void main() {
 
     testWidgets('Thumb images show up when set', (WidgetTester tester) async {
       imageCache.clear();
-      final _TestImageProvider provider1 = _TestImageProvider();
-      final _TestImageProvider provider2 = _TestImageProvider();
+      final provider1 = _TestImageProvider();
+      final provider2 = _TestImageProvider();
 
       expect(provider1.loadCallCount, 0);
       expect(provider2.loadCallCount, 0);
 
-      bool value1 = true;
+      var value1 = true;
       await tester.pumpWidget(
         CupertinoApp(
           home: StatefulBuilder(
@@ -1981,7 +1981,7 @@ void main() {
     testWidgets('Does not crash when imageProvider completes after switch is disposed', (
       WidgetTester tester,
     ) async {
-      final DelayedImageProvider imageProvider = DelayedImageProvider(image);
+      final imageProvider = DelayedImageProvider(image);
 
       await tester.pumpWidget(
         CupertinoApp(
@@ -2010,8 +2010,8 @@ void main() {
     testWidgets('Does not crash when previous imageProvider completes after switch is disposed', (
       WidgetTester tester,
     ) async {
-      final DelayedImageProvider imageProvider1 = DelayedImageProvider(image);
-      final DelayedImageProvider imageProvider2 = DelayedImageProvider(image);
+      final imageProvider1 = DelayedImageProvider(image);
+      final imageProvider2 = DelayedImageProvider(image);
 
       Future<void> buildSwitch(ImageProvider imageProvider) {
         return tester.pumpWidget(
@@ -2048,7 +2048,7 @@ void main() {
     });
 
     testWidgets('Switch uses inactive track color when set', (WidgetTester tester) async {
-      const Color inactiveTrackColor = Color(0xFF00FF00);
+      const inactiveTrackColor = Color(0xFF00FF00);
 
       await tester.pumpWidget(
         const Directionality(
@@ -2073,7 +2073,7 @@ void main() {
     });
 
     testWidgets('Switch uses active track color when set', (WidgetTester tester) async {
-      const Color activeTrackColor = Color(0xFF00FF00);
+      const activeTrackColor = Color(0xFF00FF00);
 
       await tester.pumpWidget(
         const Directionality(

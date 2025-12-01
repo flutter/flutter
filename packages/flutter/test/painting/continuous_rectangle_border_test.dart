@@ -12,7 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('ContinuousRectangleBorder defaults', () {
-    const ContinuousRectangleBorder border = ContinuousRectangleBorder();
+    const border = ContinuousRectangleBorder();
     expect(border.side, BorderSide.none);
     expect(border.borderRadius, BorderRadius.zero);
   });
@@ -23,11 +23,9 @@ void main() {
       const ContinuousRectangleBorder().hashCode,
       const ContinuousRectangleBorder().copyWith().hashCode,
     );
-    const BorderSide side = BorderSide(width: 10.0, color: Color(0xff123456));
-    const BorderRadius radius = BorderRadius.all(Radius.circular(16.0));
-    const BorderRadiusDirectional directionalRadius = BorderRadiusDirectional.all(
-      Radius.circular(16.0),
-    );
+    const side = BorderSide(width: 10.0, color: Color(0xff123456));
+    const radius = BorderRadius.all(Radius.circular(16.0));
+    const directionalRadius = BorderRadiusDirectional.all(Radius.circular(16.0));
 
     expect(
       const ContinuousRectangleBorder().copyWith(side: side, borderRadius: radius),
@@ -41,15 +39,15 @@ void main() {
   });
 
   test('ContinuousRectangleBorder scale and lerp', () {
-    const ContinuousRectangleBorder c10 = ContinuousRectangleBorder(
+    const c10 = ContinuousRectangleBorder(
       side: BorderSide(width: 10.0),
       borderRadius: BorderRadius.all(Radius.circular(100.0)),
     );
-    const ContinuousRectangleBorder c15 = ContinuousRectangleBorder(
+    const c15 = ContinuousRectangleBorder(
       side: BorderSide(width: 15.0),
       borderRadius: BorderRadius.all(Radius.circular(150.0)),
     );
-    const ContinuousRectangleBorder c20 = ContinuousRectangleBorder(
+    const c20 = ContinuousRectangleBorder(
       side: BorderSide(width: 20.0),
       borderRadius: BorderRadius.all(Radius.circular(200.0)),
     );
@@ -62,7 +60,7 @@ void main() {
   });
 
   test('ContinuousRectangleBorder BorderRadius.zero', () {
-    const Rect rect1 = Rect.fromLTRB(10.0, 20.0, 30.0, 40.0);
+    const rect1 = Rect.fromLTRB(10.0, 20.0, 30.0, 40.0);
     final Matcher looksLikeRect1 = isPathThat(
       includes: const <Offset>[Offset(10.0, 20.0), Offset(20.0, 30.0)],
       excludes: const <Offset>[Offset(9.0, 19.0), Offset(31.0, 41.0)],
@@ -79,31 +77,29 @@ void main() {
       excludes: const <Offset>[Offset(9.0, 23.0), Offset(27.0, 37.0)],
     );
 
-    const BorderSide side = BorderSide(width: 4.0);
+    const side = BorderSide(width: 4.0);
     expect(const ContinuousRectangleBorder(side: side).getOuterPath(rect1), looksLikeRect1);
     expect(const ContinuousRectangleBorder(side: side).getInnerPath(rect1), looksLikeInnerPath);
   });
 
   test('ContinuousRectangleBorder non-zero BorderRadius', () {
-    const Rect rect = Rect.fromLTRB(10.0, 20.0, 30.0, 40.0);
+    const rect = Rect.fromLTRB(10.0, 20.0, 30.0, 40.0);
     final Matcher looksLikeRect = isPathThat(
       includes: const <Offset>[Offset(15.0, 25.0), Offset(20.0, 30.0)],
       excludes: const <Offset>[Offset(10.0, 20.0), Offset(30.0, 40.0)],
     );
-    const ContinuousRectangleBorder border = ContinuousRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(5.0)),
-    );
+    const border = ContinuousRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5.0)));
     expect(border.getOuterPath(rect), looksLikeRect);
     expect(border.getInnerPath(rect), looksLikeRect);
   });
 
   test('ContinuousRectangleBorder non-zero BorderRadiusDirectional', () {
-    const Rect rect = Rect.fromLTRB(10.0, 20.0, 30.0, 40.0);
+    const rect = Rect.fromLTRB(10.0, 20.0, 30.0, 40.0);
     final Matcher looksLikeRectLtr = isPathThat(
       includes: const <Offset>[Offset(15.0, 25.0), Offset(20.0, 30.0)],
       excludes: const <Offset>[Offset(10.0, 20.0), Offset(10.0, 40.0)],
     );
-    const ContinuousRectangleBorder border = ContinuousRectangleBorder(
+    const border = ContinuousRectangleBorder(
       borderRadius: BorderRadiusDirectional.only(
         topStart: Radius.circular(5.0),
         bottomStart: Radius.circular(5.0),
