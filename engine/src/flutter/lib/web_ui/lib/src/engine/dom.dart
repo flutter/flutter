@@ -184,6 +184,17 @@ extension type DomWindow._(JSObject _) implements DomEventTarget {
   Future<DomImageBitmap> createImageBitmap(DomImageData source) {
     return _createImageBitmap(source).toDart.then((JSAny? value) => value! as DomImageBitmap);
   }
+
+  /// Scrolls the window by the given delta.
+  external void scrollBy(double x, double y);
+
+  /// Returns the parent window (for iframe scenarios).
+  /// Returns null if there is no parent or if same-origin policy blocks access.
+  external DomWindow? get parent;
+
+  /// Returns the current scroll position of the window.
+  external double get scrollX;
+  external double get scrollY;
 }
 
 typedef DomRequestAnimationFrameCallback = void Function(JSNumber highResTime);
@@ -207,6 +218,42 @@ external double parseFloatImpl(String value);
 
 @JS('window')
 external DomWindow get domWindow;
+
+/// Scrolls the parent/host window by the given delta.
+///
+/// This is used for nested scrolling scenarios where Flutter is embedded
+/// in a host page (iframe or multi-view). When Flutter's scrollable is at
+/// its boundary, this function propagates the scroll to the parent window.
+///
+/// For iframe scenarios, it scrolls window.parent.
+/// For standalone/multi-view, it scrolls window directly.
+///
+/// This fixes GitHub issue #157435 (touch scroll not propagating to host page).
+void scrollParentWindow(double deltaX, double deltaY) {
+  try {
+    final DomWindow? parent = domWindow.parent;
+    // Always use postMessage for cross-origin safety.
+    // Check if parent exists - avoid comparing parent == domWindow as that
+    // triggers SecurityError on cross-origin iframes.
+    if (parent != null) {
+      // Use postMessage which works for both same-origin and cross-origin.
+      // The host page must listen for 'flutter-scroll' messages.
+      // Use jsify() to ensure proper conversion to JS object on all backends.
+      final JSAny jsMessage = <String, dynamic>{
+        'type': 'flutter-scroll',
+        'deltaX': deltaX,
+        'deltaY': deltaY,
+      }.jsify()!;
+      parent._postMessage(jsMessage, '*');
+    } else {
+      // No parent - scroll this window directly
+      domWindow.scrollBy(deltaX, deltaY);
+    }
+  } catch (e) {
+    // Fallback: scroll current window if parent access fails
+    domWindow.scrollBy(deltaX, deltaY);
+  }
+}
 
 @JS('Intl')
 external DomIntl get domIntl;
@@ -478,6 +525,8 @@ extension type DomElement._(JSObject _) implements DomNode {
 
   external double scrollTop;
   external double scrollLeft;
+  external double get scrollHeight;
+  external double get scrollWidth;
   external DomTokenList get classList;
   external String className;
 
@@ -1921,6 +1970,10 @@ extension type DomTouchEvent._(JSObject _) implements DomUIEvent {
   @JS('changedTouches')
   external _DomList get _changedTouches;
   Iterable<DomTouch> get changedTouches => _createDomListWrapper<DomTouch>(_changedTouches);
+  
+  @JS('touches')
+  external _DomList get _touches;
+  Iterable<DomTouch> get touches => _createDomListWrapper<DomTouch>(_touches);
 }
 
 @JS('Touch')
