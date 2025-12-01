@@ -65,6 +65,15 @@ void main(List<String> args) {
   reportSuccessAndExit('No errors were detected with test cross imports.');
 }
 
+/// Checks the tests in the Widgets and Cupertino libraries for cross imports.
+///
+/// Excludes known tests that contain cross imports, i.e.
+/// [TestsCrossImportChecker.knownWidgetsCrossImports] and
+/// [TestsCrossImportChecker.knownCupertinoCrossImports].
+///
+/// The Material library should contain tests that verify behaviors involving
+/// multiple libraries, such as platform adaptivity. Otherwise, these libraries
+/// should not import each other in tests.
 class TestsCrossImportChecker {
   TestsCrossImportChecker({
     required this.testsDirectory,
@@ -423,6 +432,30 @@ class TestsCrossImportChecker {
     return buffer.toString().trimRight();
   }
 
+  /// Returns the File's relative path.
+  String _getRelativePath(File file, [Directory? root]) {
+    root ??= flutterRoot;
+    return path.relative(file.absolute.path, from: root.absolute.path);
+  }
+
+  /// Returns the import error for the `files` in testLibraryName which import
+  /// importedLibraryName.
+  String _getImportError({
+    required Set<File> files,
+    required String testLibraryName,
+    required String importedLibraryName,
+  }) {
+    final buffer = StringBuffer(
+      files.length < 2
+          ? 'The following test in $testLibraryName has a disallowed import of $importedLibraryName. Refactor it or move it to $importedLibraryName.\n'
+          : 'The following ${files.length} tests in $testLibraryName have a disallowed import of $importedLibraryName. Refactor them or move them to $importedLibraryName.\n',
+    );
+    for (final file in files) {
+      buffer.writeln('  ${_getRelativePath(file)}');
+    }
+    return buffer.toString().trimRight();
+  }
+
   /// Returns true if there are no errors, false otherwise.
   bool check() {
     filesystem.currentDirectory = flutterRoot;
@@ -510,30 +543,6 @@ class TestsCrossImportChecker {
     }
 
     return valid;
-  }
-
-  /// Returns the File's relative path.
-  String _getRelativePath(File file, [Directory? root]) {
-    root ??= flutterRoot;
-    return path.relative(file.absolute.path, from: root.absolute.path);
-  }
-
-  /// Returns the import error for the `files` in testLibraryName which import
-  /// importedLibraryName.
-  String _getImportError({
-    required Set<File> files,
-    required String testLibraryName,
-    required String importedLibraryName,
-  }) {
-    final buffer = StringBuffer(
-      files.length < 2
-          ? 'The following test in $testLibraryName has a disallowed import of $importedLibraryName. Refactor it or move it to $importedLibraryName.\n'
-          : 'The following ${files.length} tests in $testLibraryName have a disallowed import of $importedLibraryName. Refactor them or move them to $importedLibraryName.\n',
-    );
-    for (final file in files) {
-      buffer.writeln('  ${_getRelativePath(file)}');
-    }
-    return buffer.toString().trimRight();
   }
 }
 
