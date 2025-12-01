@@ -14,15 +14,8 @@ import 'common.dart';
 
 void main() {
   late TestsCrossImportChecker checker;
-  late FileSystem fs;
-  late Directory flutterRoot;
-
-  // TODO(justinmc): Reuse from main file, or refactor?
-  late Directory _testsDirectory;
-  late Directory _testWidgetsDirectory;
-  late Directory _testMaterialDirectory;
-  late Directory _testCupertinoDirectory;
-  late final _testDirectories = <Directory>{};
+  late Directory testWidgetsDirectory;
+  late Directory testCupertinoDirectory;
 
   // Writes a Material import into the given file.
   void writeImport(File file, [String importString = "import 'package:flutter/material.dart';"]) {
@@ -44,8 +37,8 @@ void main() {
     Set<String> extraWidgetsImportingCupertino = const <String>{},
   }) {
     final knownFiles = <Directory, Set<String>>{
-      _testWidgetsDirectory: TestsCrossImportChecker.knownWidgetsCrossImports,
-      _testCupertinoDirectory: TestsCrossImportChecker.knownCupertinoCrossImports,
+      testWidgetsDirectory: TestsCrossImportChecker.knownWidgetsCrossImports,
+      testCupertinoDirectory: TestsCrossImportChecker.knownCupertinoCrossImports,
     };
 
     for (final MapEntry<Directory, Set<String>>(key: Directory directory, value: Set<String> files)
@@ -59,52 +52,46 @@ void main() {
     }
 
     for (final filepath in extraWidgetsImportingMaterial) {
-      writeImport(getFile(filepath, _testWidgetsDirectory));
+      writeImport(getFile(filepath, testWidgetsDirectory));
     }
     for (final filepath in extraWidgetsImportingCupertino) {
       writeImport(
-        getFile(filepath, _testWidgetsDirectory),
+        getFile(filepath, testWidgetsDirectory),
         "import 'package:flutter/cupertino.dart';",
       );
     }
     for (final filepath in extraCupertinos) {
-      writeImport(getFile(filepath, _testCupertinoDirectory));
+      writeImport(getFile(filepath, testCupertinoDirectory));
     }
   }
 
   setUp(() {
-    fs = MemoryFileSystem(
+    final fs = MemoryFileSystem(
       style: Platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
     );
     // Get the root prefix of the current directory so that on Windows we get a
     // correct root prefix.
-    flutterRoot = fs.directory(
+    final Directory flutterRoot = fs.directory(
       path.join(path.rootPrefix(fs.currentDirectory.absolute.path), 'flutter/sdk'),
     )..createSync(recursive: true);
     fs.currentDirectory = flutterRoot;
 
-    _testsDirectory =
+    final Directory testsDirectory =
         flutterRoot.childDirectory('packages').childDirectory('flutter').childDirectory('test')
           ..createSync(recursive: true);
-    _testWidgetsDirectory = _testsDirectory.childDirectory('widgets')..createSync(recursive: true);
-    _testMaterialDirectory = _testsDirectory.childDirectory('material')
+    testWidgetsDirectory = testsDirectory.childDirectory('widgets')..createSync(recursive: true);
+    testsDirectory.childDirectory('material').createSync(recursive: true);
+    testCupertinoDirectory = testsDirectory.childDirectory('cupertino')
       ..createSync(recursive: true);
-    _testCupertinoDirectory = _testsDirectory.childDirectory('cupertino')
-      ..createSync(recursive: true);
-    _testDirectories.addAll(<Directory>[
-      _testWidgetsDirectory,
-      _testMaterialDirectory,
-      _testCupertinoDirectory,
-    ]);
 
     checker = TestsCrossImportChecker(
-      testsDirectory: _testsDirectory,
+      testsDirectory: testsDirectory,
       flutterRoot: flutterRoot,
       filesystem: fs,
     );
   });
 
-  test('only all knowns have cross imports', () async {
+  test('when only all knowns have cross imports', () async {
     buildTestFiles();
     bool? success;
     final String result = await capture(() async {
@@ -114,7 +101,7 @@ void main() {
     expect(success, isTrue);
   });
 
-  test('not all widgets knowns have cross imports', () async {
+  test('when not all widgets knowns have cross imports', () async {
     buildTestFiles(excludes: <String>{TestsCrossImportChecker.knownWidgetsCrossImports.first});
     bool? success;
     final String result = await capture(() async {
@@ -137,7 +124,7 @@ void main() {
     expect(success, isFalse);
   });
 
-  test('not all cupertino knowns have cross imports', () async {
+  test('when not all cupertino knowns have cross imports', () async {
     final String excluded = TestsCrossImportChecker.knownCupertinoCrossImports.first;
     buildTestFiles(excludes: <String>{excluded});
     bool? success;
