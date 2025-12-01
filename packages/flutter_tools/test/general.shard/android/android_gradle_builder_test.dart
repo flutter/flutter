@@ -840,7 +840,6 @@ void main() {
 /base/assets/flutter_assets/NativeAssetsManifest.json
 /base/assets/flutter_assets/NOTICES.Z
 /base/assets/flutter_assets/FontManifest.json
-/base/assets/flutter_assets/AssetManifest.json
 /base/assets/flutter_assets/AssetManifest.bin
 /base/assets.pb
 /BundleConfig.pb

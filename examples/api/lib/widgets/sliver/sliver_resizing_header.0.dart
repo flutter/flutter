@@ -53,7 +53,10 @@ class _ResizingHeaderExampleState extends State<ResizingHeaderExample> {
                 SliverResizingHeader(
                   minExtentPrototype: ListHeader(text: 'One'),
                   maxExtentPrototype: ListHeader(text: 'One\nTwo\nThree'),
-                  child: ListHeader(text: 'SliverResizingHeader\nWith Two Optional\nLines of Text'),
+                  child: ListHeader(
+                    text:
+                        'SliverResizingHeader\nWith Two Optional\nLines of Text',
+                  ),
                 ),
                 ItemList(),
               ],
@@ -91,7 +94,9 @@ class ListHeader extends StatelessWidget {
           child: Text(
             text,
             textAlign: TextAlign.center,
-            style: theme.textTheme.headlineMedium!.copyWith(color: colorScheme.onPrimaryContainer),
+            style: theme.textTheme.headlineMedium!.copyWith(
+              color: colorScheme.onPrimaryContainer,
+            ),
           ),
         ),
       ),
@@ -108,13 +113,17 @@ class ItemList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    return SliverList(
-      delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+    return SliverList.builder(
+      itemCount: itemCount,
+      itemBuilder: (BuildContext context, int index) {
         return Card(
           color: colorScheme.onSecondary,
-          child: ListTile(textColor: colorScheme.secondary, title: Text('Item $index')),
+          child: ListTile(
+            textColor: colorScheme.secondary,
+            title: Text('Item $index'),
+          ),
         );
-      }, childCount: itemCount),
+      },
     );
   }
 }

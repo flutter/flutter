@@ -37,8 +37,6 @@
 #include "flutter/shell/common/snapshot_surface_producer.h"
 #include "third_party/skia/include/core/SkData.h"
 #include "third_party/skia/include/core/SkImage.h"
-#include "third_party/skia/include/core/SkRect.h"
-#include "third_party/skia/include/core/SkRefCnt.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 
 #if !IMPELLER_SUPPORTS_RENDERING
@@ -410,7 +408,7 @@ class Rasterizer final : public SnapshotDelegate,
     //--------------------------------------------------------------------------
     /// The size of the screenshot in texels.
     ///
-    SkISize frame_size = SkISize::MakeEmpty();
+    DlISize frame_size;
 
     //--------------------------------------------------------------------------
     /// Characterization of the format of the data in `data`.
@@ -438,7 +436,7 @@ class Rasterizer final : public SnapshotDelegate,
     /// @param[in]  p_pixel_format  The screenshot format.
     ///
     Screenshot(sk_sp<SkData> p_data,
-               SkISize p_size,
+               DlISize p_size,
                const std::string& p_format,
                ScreenshotFormat p_pixel_format);
 
@@ -648,12 +646,12 @@ class Rasterizer final : public SnapshotDelegate,
   // |SnapshotDelegate|
   void MakeRasterSnapshot(
       sk_sp<DisplayList> display_list,
-      SkISize picture_size,
+      DlISize picture_size,
       std::function<void(sk_sp<DlImage>)> callback) override;
 
   // |SnapshotDelegate|
   sk_sp<DlImage> MakeRasterSnapshotSync(sk_sp<DisplayList> display_list,
-                                        SkISize picture_size) override;
+                                        DlISize picture_size) override;
 
   // |SnapshotDelegate|
   sk_sp<SkImage> ConvertToRasterImage(sk_sp<SkImage> image) override;
@@ -661,6 +659,9 @@ class Rasterizer final : public SnapshotDelegate,
   // |SnapshotDelegate|
   void CacheRuntimeStage(
       const std::shared_ptr<impeller::RuntimeStage>& runtime_stage) override;
+
+  // |SnapshotDelegate|
+  bool MakeRenderContextCurrent() override;
 
   // |Stopwatch::Delegate|
   /// Time limit for a smooth frame.

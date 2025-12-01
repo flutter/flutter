@@ -724,6 +724,7 @@ class AppDomain extends Domain {
         hostIsIde: true,
         machine: machine,
         analytics: globals.analytics,
+        logger: globals.logger,
       );
     } else {
       runner = ColdRunner(
@@ -752,7 +753,7 @@ class AppDomain extends Domain {
       enableHotReload,
       cwd,
       LaunchMode.run,
-      asLogger<AppRunLogger>(globals.logger),
+      asLogger<MachineOutputLogger>(globals.logger),
     );
   }
 
@@ -764,7 +765,7 @@ class AppDomain extends Domain {
     bool enableHotReload,
     Directory cwd,
     LaunchMode launchMode,
-    AppRunLogger logger,
+    MachineOutputLogger logger,
   ) async {
     final app = AppInstance(
       _getNewAppId(),
@@ -776,8 +777,8 @@ class AppDomain extends Domain {
 
     // Set the domain and app for the given AppRunLogger. This allows the logger
     // to log messages containing the app ID to the host.
-    logger.domain = this;
-    logger.app = app;
+    logger._domain = this;
+    logger._app = app;
 
     _sendAppEvent(app, 'start', <String, Object?>{
       'deviceId': device.id,
@@ -789,21 +790,24 @@ class AppDomain extends Domain {
 
     Completer<DebugConnectionInfo>? connectionInfoCompleter;
 
-    if (runner.debuggingEnabled) {
+    if (runner.supportsServiceProtocol && runner.debuggingEnabled) {
       connectionInfoCompleter = Completer<DebugConnectionInfo>();
       // We don't want to wait for this future to complete and callbacks won't fail.
       // As it just writes to stdout.
       unawaited(
         connectionInfoCompleter.future.then<void>((DebugConnectionInfo info) {
-          final params = <String, Object?>{
+          _sendAppEvent(app, 'debugPort', {
             // The web vmservice proxy does not have an http address.
             'port': info.httpUri?.port ?? info.wsUri!.port,
             'wsUri': info.wsUri.toString(),
-          };
-          if (info.baseUri != null) {
-            params['baseUri'] = info.baseUri;
+            'baseUri': ?info.baseUri,
+          });
+          if (info.devToolsUri != null) {
+            _sendAppEvent(app, 'devTools', {'uri': info.devToolsUri!.toString()});
           }
-          _sendAppEvent(app, 'debugPort', params);
+          if (info.dtdUri != null) {
+            _sendAppEvent(app, 'dtd', {'uri': info.dtdUri!.toString()});
+          }
         }),
       );
     }
@@ -1279,7 +1283,11 @@ class DeviceDomain extends Domain {
       devToolsServerAddress: devToolsServerAddress,
     );
     unawaited(device.dds.done.whenComplete(() => sendEvent('device.dds.done.$deviceId')));
-    return <String, Object?>{'ddsUri': device.dds.uri?.toString()};
+    return <String, Object?>{
+      'ddsUri': device.dds.uri?.toString(),
+      'devToolsUri': device.dds.devToolsUri?.toString(),
+      'dtdUri': device.dds.dtdUri?.toString(),
+    };
   }
 
   /// Starts DDS for the device.
@@ -1402,7 +1410,8 @@ Future<Map<String, Object?>> _deviceToMap(Device device) async {
       'hotReload': device.supportsHotReload,
       'hotRestart': device.supportsHotRestart,
       'screenshot': device.supportsScreenshot,
-      'fastStart': device.supportsFastStart,
+      // TODO(bkonyi): remove once fg3 is updated.
+      'fastStart': false,
       'flutterExit': device.supportsFlutterExit,
       'hardwareRendering': await device.supportsHardwareRendering,
       'startPaused': device.supportsStartPaused,
@@ -1442,7 +1451,7 @@ class NotifyingLogger extends DelegatingLogger {
   final messageBuffer = <LogMessage>[];
   late StreamController<LogMessage> _messageController;
 
-  var notifyVerbose = false;
+  bool notifyVerbose = false;
 
   void _onListen() {
     if (messageBuffer.isNotEmpty) {
@@ -1554,13 +1563,13 @@ class AppInstance {
     this.id, {
     required this.runner,
     this.logToStdout = false,
-    required AppRunLogger logger,
+    required MachineOutputLogger logger,
   }) : _logger = logger;
 
   final String id;
   final ResidentRunner runner;
   final bool logToStdout;
-  final AppRunLogger _logger;
+  final MachineOutputLogger _logger;
 
   Future<OperationResult> restart({bool fullRestart = false, bool pause = false, String? reason}) {
     return runner.restart(fullRestart: fullRestart, pause: pause, reason: reason);
@@ -1586,7 +1595,7 @@ class EmulatorDomain extends Domain {
     registerHandler('create', create);
   }
 
-  var emulators = EmulatorManager(
+  EmulatorManager emulators = EmulatorManager(
     fileSystem: globals.fs,
     logger: globals.logger,
     java: globals.java,
@@ -1778,21 +1787,13 @@ class ProxyDomain extends Domain {
         ..createSync();
 }
 
-/// A [Logger] which sends log messages to a listening daemon client.
-///
-/// This class can either:
-///   1) Send stdout messages and progress events to the client IDE
-///   1) Log messages to stdout and send progress events to the client IDE
-//
-// TODO(devoncarew): To simplify this code a bit, we could choose to specialize
-// this class into two, one for each of the above use cases.
-class AppRunLogger extends DelegatingLogger {
-  AppRunLogger({required Logger parent}) : super(parent);
+/// A [Logger] which omits log messages to avoid breaking `--machine` formatting.
+final class MachineOutputLogger extends DelegatingLogger {
+  MachineOutputLogger({required Logger parent}) : super(parent);
 
-  AppDomain? domain;
-  late AppInstance app;
+  AppDomain? _domain;
+  late final AppInstance _app;
   var _nextProgressId = 0;
-
   Status? _status;
 
   @override
@@ -1819,7 +1820,7 @@ class AppRunLogger extends DelegatingLogger {
   }
 
   void close() {
-    domain = null;
+    _domain = null;
   }
 
   void _sendProgressEvent({
@@ -1828,30 +1829,22 @@ class AppRunLogger extends DelegatingLogger {
     bool finished = false,
     String? message,
   }) {
-    if (domain == null) {
-      // If we're sending progress events before an app has started, send the
-      // progress messages as plain status messages.
-      if (message != null) {
-        printStatus(message);
-      }
-    } else {
+    if (_domain case final domain?) {
       final event = <String, Object?>{
         'id': eventId,
         'progressId': eventType,
-        if (message != null) 'message': message,
+        'message': ?message,
         'finished': finished,
       };
 
-      domain!._sendAppEvent(app, 'progress', event);
+      domain._sendAppEvent(_app, 'progress', event);
     }
   }
 
   @override
   void sendEvent(String name, [Map<String, Object?>? args, List<int>? binary]) {
-    if (domain == null) {
-      printStatus('event sent after app closed: $name');
-    } else {
-      domain!.sendEvent(name, args, binary);
+    if (_domain case final domain?) {
+      domain.sendEvent(name, args, binary);
     }
   }
 

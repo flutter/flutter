@@ -292,7 +292,7 @@ void main() {
           testLogger.statusText,
           containsIgnoringWhitespace(
             'To avoid potential build failures, you can quickly migrate your app by '
-            'following the steps on https://goo.gl/CP92wY',
+            'following the steps on https://docs.flutter.dev/release/breaking-changes/androidx-migration',
           ),
         );
 
@@ -387,5 +387,5 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
 class FakeProcessInfo extends Fake implements ProcessInfo {
   @override
-  var maxRss = 123456789;
+  int maxRss = 123456789;
 }

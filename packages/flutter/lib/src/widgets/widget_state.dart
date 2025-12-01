@@ -283,10 +283,6 @@ typedef WidgetPropertyResolver<T> = T Function(Set<WidgetState> states);
 /// }
 /// ```
 /// {@end-tool}
-///
-/// See also:
-///
-///  * [MaterialStateColor], the Material specific version of `WidgetStateColor`.
 abstract class WidgetStateColor extends Color implements WidgetStateProperty<Color> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -372,8 +368,6 @@ class _WidgetStateColorMapper extends WidgetStateMapper<Color> implements Widget
 ///
 /// See also:
 ///
-///  * [MaterialStateMouseCursor], the Material specific version of
-///    `WidgetStateMouseCursor`.
 ///  * [MouseCursor] for introduction on the mouse cursor system.
 ///  * [SystemMouseCursors], which defines cursors that are supported by
 ///    native platforms.
@@ -420,17 +414,41 @@ abstract class WidgetStateMouseCursor extends MouseCursor
   ///
   /// By default this cursor resolves to [SystemMouseCursors.click]. If the widget is
   /// disabled, the cursor resolves to [SystemMouseCursors.basic].
-  ///
-  /// This cursor is the default for many widgets.
   static const WidgetStateMouseCursor clickable = WidgetStateMouseCursor.resolveWith(
     _clickable,
     debugDescription: 'WidgetStateMouseCursor(clickable)',
   );
+
   static MouseCursor _clickable(Set<WidgetState> states) {
     if (states.contains(WidgetState.disabled)) {
       return SystemMouseCursors.basic;
     }
     return SystemMouseCursors.click;
+  }
+
+  /// A platform-adaptive mouse cursor for clickable widgets, which resolves
+  /// differently based on the widget's state and the platform.
+  ///
+  /// On web platforms, this cursor resolves to [SystemMouseCursors.click] by
+  /// default. If the widget is disabled, it resolves to
+  /// [SystemMouseCursors.basic].
+  ///
+  /// On non-web platforms, this cursor always resolves to
+  /// [SystemMouseCursors.basic].
+  ///
+  /// This cursor is commonly used for interactive widgets like buttons. The
+  /// difference in behavior across platforms reflects native conventions (e.g.,
+  /// web uses a hand pointer for buttons, while desktop platforms do not).
+  static const WidgetStateMouseCursor adaptiveClickable = WidgetStateMouseCursor.resolveWith(
+    _adaptiveClickable,
+    debugDescription: 'WidgetStateMouseCursor(adaptiveClickable)',
+  );
+
+  static MouseCursor _adaptiveClickable(Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
+      return SystemMouseCursors.basic;
+    }
+    return kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic;
   }
 
   /// A mouse cursor for widgets related to text, which resolves differently
@@ -492,11 +510,6 @@ class _WidgetMouseCursorMapper extends WidgetStateMapper<MouseCursor>
 ///
 /// ** See code in examples/api/lib/widgets/widget_state/widget_state_border_side.0.dart **
 /// {@end-tool}
-///
-/// See also:
-///
-///  * [MaterialStateBorderSide], the Material specific version of
-///    `WidgetStateBorderSide`.
 abstract class WidgetStateBorderSide extends BorderSide
     implements WidgetStateProperty<BorderSide?> {
   /// Abstract const constructor. This constructor enables subclasses to provide
@@ -582,6 +595,9 @@ abstract class WidgetStateBorderSide extends BorderSide
     if (a == null && b == null) {
       return null;
     }
+    if (identical(a, b)) {
+      return a;
+    }
     return _LerpSides(a, b, t);
   }
 }
@@ -646,7 +662,7 @@ class _WidgetBorderSideMapper extends WidgetStateMapper<BorderSide?>
 /// implementation of [WidgetStateOutlinedBorder], that resolves to
 /// [RoundedRectangleBorder] when its widget is selected.
 ///
-/// ** See code in examples/api/lib/material/material_state/material_state_outlined_border.0.dart **
+/// ** See code in examples/api/lib/widgets/widget_state/widget_state_outlined_border.0.dart **
 /// {@end-tool}
 ///
 /// This class should only be used for parameters which are documented to take
@@ -655,8 +671,6 @@ class _WidgetBorderSideMapper extends WidgetStateMapper<BorderSide?>
 /// See also:
 ///
 ///  * [ShapeBorder] the base class for shape outlines.
-///  * [MaterialStateOutlinedBorder], the Material specific version of
-///    `WidgetStateOutlinedBorder`.
 abstract class WidgetStateOutlinedBorder extends OutlinedBorder
     implements WidgetStateProperty<OutlinedBorder?> {
   /// Abstract const constructor. This constructor enables subclasses to provide
@@ -725,11 +739,6 @@ class _WidgetOutlinedBorderMapper extends WidgetStateMapper<OutlinedBorder?>
 ///   2. Use [WidgetStateTextStyle.resolveWith] and pass in a callback that
 ///      will be used to resolve the text style in the given states.
 ///   3. Use [WidgetStateTextStyle.fromMap] to assign a style using a [WidgetStateMap].
-///
-/// See also:
-///
-///  * [MaterialStateTextStyle], the Material specific version of
-///    `WidgetStateTextStyle`.
 abstract class WidgetStateTextStyle extends TextStyle implements WidgetStateProperty<TextStyle> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.

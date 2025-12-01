@@ -16,6 +16,7 @@ typedef WidgetPreviewSourceFile = ({String path, String source});
 
 const _kPubspec = 'pubspec.yaml';
 
+/// A utility class for working with Pub workspaces in Widget Preview tests.
 class WidgetPreviewWorkspace {
   WidgetPreviewWorkspace({required this.workspaceRoot})
     : _packagesRoot = workspaceRoot.childDirectory('packages')..createSync(recursive: true),
@@ -24,6 +25,17 @@ class WidgetPreviewWorkspace {
   final Directory workspaceRoot;
   final Directory _packagesRoot;
   final File _pubspecYaml;
+
+  /// The set of directories that make up the workspace, including the workspace root.
+  Set<Directory> get workspaceDirectories => {
+    workspaceRoot,
+    ..._packages.values.map((e) => e.projectRoot),
+  };
+
+  /// The set of paths to each pubspec in the workspace.
+  Set<String> get workspacePubspecPaths => workspaceDirectories
+      .map((e) => workspaceRoot.fileSystem.path.join(e.path, 'pubspec.yaml'))
+      .toSet();
 
   final _packages = <String, WidgetPreviewProject>{};
 
@@ -35,48 +47,89 @@ class WidgetPreviewWorkspace {
     _pubspecYaml.setLastModifiedSync(DateTime.now());
   }
 
-  WidgetPreviewProject createWorkspaceProject({required String name}) {
+  Future<WidgetPreviewProject> createWorkspaceProject({
+    required String name,
+    bool updateWorkspacePubspec = true,
+  }) async {
     if (_packages.containsKey(name)) {
       throw StateError('Project with name "$name" already exists.');
     }
     final project = WidgetPreviewProject(
       projectRoot: _packagesRoot.childDirectory(name)..createSync(),
       inWorkspace: true,
+      packageName: name,
     );
-    project._writePubspec(project.pubspecContents);
     _packages[name] = project;
-    _updatePubspec();
+    project.writePubspec(project.initialPubspecContents);
+    if (updateWorkspacePubspec) {
+      await updatePubspec();
+    }
     return project;
   }
 
-  void deleteWorkspaceProject({required String name}) {
+  Future<void> deleteWorkspaceProject({
+    required String name,
+    bool updateWorkspacePubspec = true,
+  }) async {
     if (!_packages.containsKey(name)) {
       throw StateError('Project with name "$name" does not exist.');
     }
-    _packages[name]!.projectRoot.deleteSync(recursive: true);
-    _updatePubspec();
+    _packages.remove(name)!.projectRoot.deleteSync(recursive: true);
+    if (updateWorkspacePubspec) {
+      await updatePubspec();
+    }
   }
 
-  void _updatePubspec() {
+  Future<void> updatePubspec({String? injectNonExistentProject}) async {
     final pubspec = StringBuffer('workspace:\n');
-    for (final String package in _packages.keys) {
+    for (final String package in [..._packages.keys, ?injectNonExistentProject]) {
       pubspec.writeln('  - packages/$package');
     }
     _pubspecYaml.writeAsStringSync(pubspec.toString());
+
+    final String flutterRoot = getFlutterRoot();
+    await savePackageConfig(
+      PackageConfig(
+        <Package>[
+          for (final String package in [..._packages.keys, ?injectNonExistentProject])
+            Package(package, workspaceRoot.childDirectory('packages').childDirectory(package).uri),
+          Package(
+            'flutter',
+            Uri(scheme: 'file', path: '$flutterRoot/packages/flutter/'),
+            packageUriRoot: Uri(path: 'lib/'),
+          ),
+          Package(
+            'flutter_localizations',
+            Uri(scheme: 'file', path: '$flutterRoot/packages/flutter_localizations/'),
+            packageUriRoot: Uri(path: 'lib/'),
+          ),
+          Package(
+            'sky_engine',
+            Uri(scheme: 'file', path: '$flutterRoot/bin/cache/pkg/sky_engine/'),
+            packageUriRoot: Uri(path: 'lib/'),
+          ),
+        ],
+        extraData: {'flutterRoot': 'file://$flutterRoot', 'flutterVersion': '3.33.0'},
+      ),
+      workspaceRoot,
+    );
   }
 }
 
 /// A utility class used to manage a fake Flutter project for widget preview testing.
 class WidgetPreviewProject {
-  WidgetPreviewProject({required this.projectRoot, this.inWorkspace = false})
-    : _libDirectory = projectRoot.childDirectory('lib')..createSync(recursive: true),
-      _pubspecYaml = projectRoot.childFile(_kPubspec)..createSync();
+  WidgetPreviewProject({
+    required this.projectRoot,
+    this.packageName = 'foo',
+    this.inWorkspace = false,
+  }) : _libDirectory = projectRoot.childDirectory('lib')..createSync(recursive: true),
+       _pubspecYaml = projectRoot.childFile(_kPubspec)..createSync();
 
   /// The name for the package defined by this project.
-  String get packageName => 'foo';
+  final String packageName;
 
   /// The initial contents of the pubspec.yaml for the project.
-  String get pubspecContents =>
+  String get initialPubspecContents =>
       '''
 name: $packageName
 
@@ -88,7 +141,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 ''';
+
+  /// The current contents of the pubspec.yaml for the project.
+  String get pubspecContents => _pubspecYaml.readAsStringSync();
 
   /// The root of the fake project.
   ///
@@ -121,10 +179,30 @@ dependencies:
 
   /// Writes `pubspec.yaml` and `.dart_tool/package_config.json` at [projectRoot].
   Future<void> initializePubspec() async {
-    _writePubspec(pubspecContents);
-
+    writePubspec(initialPubspecContents);
+    final String flutterRoot = getFlutterRoot();
     await savePackageConfig(
-      PackageConfig(<Package>[Package(packageName, projectRoot.uri)]),
+      PackageConfig(
+        <Package>[
+          Package(packageName, projectRoot.uri),
+          Package(
+            'flutter',
+            Uri(scheme: 'file', path: '$flutterRoot/packages/flutter/'),
+            packageUriRoot: Uri(path: 'lib/'),
+          ),
+          Package(
+            'flutter_localizations',
+            Uri(scheme: 'file', path: '$flutterRoot/packages/flutter_localizations/'),
+            packageUriRoot: Uri(path: 'lib/'),
+          ),
+          Package(
+            'sky_engine',
+            Uri(scheme: 'file', path: '$flutterRoot/bin/cache/pkg/sky_engine/'),
+            packageUriRoot: Uri(path: 'lib/'),
+          ),
+        ],
+        extraData: {'flutterRoot': 'file://$flutterRoot', 'flutterVersion': '3.33.0'},
+      ),
       projectRoot,
     );
   }
@@ -135,7 +213,7 @@ dependencies:
   }
 
   /// Updates the content of the project's pubspec.yaml.
-  void _writePubspec(String contents) {
+  void writePubspec(String contents) {
     projectRoot.childFile(_kPubspec)
       ..createSync(recursive: true)
       ..writeAsStringSync(contents);
@@ -164,5 +242,81 @@ dependencies:
     final Directory dir = _libDirectory.childDirectory(context.dirname(file.path));
     _currentSources.removeWhere((String path, _) => path.startsWith(dir.path));
     dir.deleteSync(recursive: true);
+  }
+}
+
+/// A mixin for preview projects that support adding and removing libraries with previews.
+mixin ProjectWithPreviews on WidgetPreviewProject {
+  List<Matcher> get expectedPreviewDetails;
+
+  String get previewContainingFileContents;
+
+  String get nonPreviewContainingFileContents;
+
+  Map<PreviewPath, List<Matcher>> get matcherMapping => <PreviewPath, List<Matcher>>{
+    for (final PreviewPath path in librariesWithPreviews) path: expectedPreviewDetails,
+  };
+
+  final librariesWithPreviews = <PreviewPath>{};
+  final librariesWithoutPreviews = <PreviewPath>{};
+
+  void initialize({
+    required List<String> pathsWithPreviews,
+    required List<String> pathsWithoutPreviews,
+  }) {
+    final initialSources = <WidgetPreviewSourceFile>[];
+    for (final path in pathsWithPreviews) {
+      initialSources.add((path: path, source: previewContainingFileContents));
+      librariesWithPreviews.add(toPreviewPath(path));
+    }
+    for (final path in pathsWithoutPreviews) {
+      initialSources.add((path: path, source: nonPreviewContainingFileContents));
+      librariesWithoutPreviews.add(toPreviewPath(path));
+    }
+    initialSources.forEach(writeFile);
+  }
+
+  /// Adds a file containing previews at [path].
+  void addPreviewContainingFile({required String path}) {
+    writeFile((path: path, source: previewContainingFileContents));
+    final PreviewPath previewPath = toPreviewPath(path);
+    librariesWithoutPreviews.remove(previewPath);
+    librariesWithPreviews.add(previewPath);
+  }
+
+  /// Adds a file with no previews at [path].
+  void addNonPreviewContainingFile({required String path}) {
+    writeFile((path: path, source: nonPreviewContainingFileContents));
+    final PreviewPath previewPath = toPreviewPath(path);
+    librariesWithPreviews.remove(previewPath);
+    librariesWithoutPreviews.add(previewPath);
+  }
+
+  /// Adds a new library with a part at [path].
+  ///
+  /// If the file name specified by [path] is 'path.dart', the part file will be named
+  /// 'path_part.dart'.
+  void addLibraryWithPartsContainingPreviews({required String path}) {
+    final String partPath = path.replaceAll('.dart', '_part.dart');
+    writeFile((
+      path: partPath,
+      source:
+          '''
+part of '$path';
+
+$previewContainingFileContents
+''',
+    ));
+
+    writeFile((
+      path: path,
+      source:
+          '''
+part '$partPath';
+''',
+    ));
+    final PreviewPath previewPath = toPreviewPath(path);
+    librariesWithoutPreviews.remove(previewPath);
+    librariesWithPreviews.add(previewPath);
   }
 }

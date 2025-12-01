@@ -141,10 +141,19 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
 ///
 /// {@macro flutter.widgets.SliverChildDelegate.lifecycle}
 ///
+/// {@tool dartpad}
+///
+/// This example shows a [SliverList] with a dynamic number of items.
+///
+/// ** See code in examples/api/lib/widgets/sliver/sliver_list.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * <https://docs.flutter.dev/ui/layout/scrolling/slivers>, a description
 ///    of what slivers are and how to use them.
+///  * [CustomScrollView], which accepts slivers like [SliverList]
+///    to create custom scroll effects.
 ///  * [SliverFixedExtentList], which is more efficient for children with
 ///    the same extent in the main axis.
 ///  * [SliverPrototypeExtentList], which is similar to [SliverFixedExtentList]
@@ -207,6 +216,7 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
+    int semanticIndexOffset = 0,
   }) : super(
          delegate: SliverChildBuilderDelegate(
            itemBuilder,
@@ -215,6 +225,7 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
            addAutomaticKeepAlives: addAutomaticKeepAlives,
            addRepaintBoundaries: addRepaintBoundaries,
            addSemanticIndexes: addSemanticIndexes,
+           semanticIndexOffset: semanticIndexOffset,
          ),
        );
 
@@ -235,6 +246,7 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   ///
   /// {@macro flutter.widgets.PageView.findChildIndexCallback}
   ///
+  /// {@macro flutter.widgets.ListView.separated.findItemIndexCallback}
   ///
   /// The `separatorBuilder` is similar to `itemBuilder`, except it is the widget
   /// that gets placed between itemBuilder(context, index) and itemBuilder(context, index + 1).
@@ -267,13 +279,27 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   SliverList.separated({
     super.key,
     required NullableIndexedWidgetBuilder itemBuilder,
+    @Deprecated(
+      'Use findItemIndexCallback instead. '
+      'findChildIndexCallback returns child indices (which include separators), '
+      'while findItemIndexCallback returns item indices (which do not). '
+      'If you were multiplying results by 2 to account for separators, '
+      'you can remove that workaround when migrating to findItemIndexCallback. '
+      'This feature was deprecated after v3.37.0-1.0.pre.',
+    )
     ChildIndexGetter? findChildIndexCallback,
+    ChildIndexGetter? findItemIndexCallback,
     required NullableIndexedWidgetBuilder separatorBuilder,
     int? itemCount,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
-  }) : super(
+  }) : assert(
+         findItemIndexCallback == null || findChildIndexCallback == null,
+         'Cannot provide both findItemIndexCallback and findChildIndexCallback. '
+         'Use findItemIndexCallback as findChildIndexCallback is deprecated.',
+       ),
+       super(
          delegate: SliverChildBuilderDelegate(
            (BuildContext context, int index) {
              final int itemIndex = index ~/ 2;
@@ -291,7 +317,12 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
              }
              return widget;
            },
-           findChildIndexCallback: findChildIndexCallback,
+           findChildIndexCallback: findItemIndexCallback != null
+               ? (Key key) {
+                   final int? itemIndex = findItemIndexCallback(key);
+                   return itemIndex == null ? null : itemIndex * 2;
+                 }
+               : findChildIndexCallback,
            childCount: itemCount == null ? null : math.max(0, itemCount * 2 - 1),
            addAutomaticKeepAlives: addAutomaticKeepAlives,
            addRepaintBoundaries: addRepaintBoundaries,
@@ -348,7 +379,7 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
 
   @override
   RenderSliverList createRenderObject(BuildContext context) {
-    final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
+    final element = context as SliverMultiBoxAdaptorElement;
     return RenderSliverList(childManager: element);
   }
 }
@@ -462,6 +493,7 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
+    int semanticIndexOffset = 0,
   }) : super(
          delegate: SliverChildBuilderDelegate(
            itemBuilder,
@@ -470,6 +502,7 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
            addAutomaticKeepAlives: addAutomaticKeepAlives,
            addRepaintBoundaries: addRepaintBoundaries,
            addSemanticIndexes: addSemanticIndexes,
+           semanticIndexOffset: semanticIndexOffset,
          ),
        );
 
@@ -525,7 +558,7 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
 
   @override
   RenderSliverFixedExtentList createRenderObject(BuildContext context) {
-    final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
+    final element = context as SliverMultiBoxAdaptorElement;
     return RenderSliverFixedExtentList(childManager: element, itemExtent: itemExtent);
   }
 
@@ -636,7 +669,7 @@ class SliverVariedExtentList extends SliverMultiBoxAdaptorWidget {
 
   @override
   RenderSliverVariedExtentList createRenderObject(BuildContext context) {
-    final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
+    final element = context as SliverMultiBoxAdaptorElement;
     return RenderSliverVariedExtentList(
       childManager: element,
       itemExtentBuilder: itemExtentBuilder,
@@ -668,23 +701,21 @@ class SliverVariedExtentList extends SliverMultiBoxAdaptorWidget {
 /// list, shows twenty boxes in a pretty teal grid:
 ///
 /// ```dart
-/// SliverGrid(
+/// SliverGrid.builder(
 ///   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
 ///     maxCrossAxisExtent: 200.0,
 ///     mainAxisSpacing: 10.0,
 ///     crossAxisSpacing: 10.0,
 ///     childAspectRatio: 4.0,
 ///   ),
-///   delegate: SliverChildBuilderDelegate(
-///     (BuildContext context, int index) {
-///       return Container(
-///         alignment: Alignment.center,
-///         color: Colors.teal[100 * (index % 9)],
-///         child: Text('grid item $index'),
-///       );
-///     },
-///     childCount: 20,
-///   ),
+///   itemCount: 20,
+///   itemBuilder: (BuildContext context, int index) {
+///     return Container(
+///       alignment: Alignment.center,
+///       color: Colors.teal[100 * (index % 9)],
+///       child: Text('grid item $index'),
+///     );
+///   },
 /// )
 /// ```
 /// {@end-tool}
@@ -737,6 +768,7 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
+    int semanticIndexOffset = 0,
   }) : super(
          delegate: SliverChildBuilderDelegate(
            itemBuilder,
@@ -745,6 +777,7 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
            addAutomaticKeepAlives: addAutomaticKeepAlives,
            addRepaintBoundaries: addRepaintBoundaries,
            addSemanticIndexes: addSemanticIndexes,
+           semanticIndexOffset: semanticIndexOffset,
          ),
        );
 
@@ -796,12 +829,66 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
        ),
        super(delegate: SliverChildListDelegate(children));
 
+  /// Creates a sliver that places multiple box children in a two dimensional
+  /// arrangement.
+  ///
+  /// _To learn more about slivers, see [CustomScrollView.slivers]._
+  ///
+  /// Uses a [SliverChildListDelegate] as the [delegate].
+  ///
+  /// The `addAutomaticKeepAlives` argument corresponds to the
+  /// [SliverChildListDelegate.addAutomaticKeepAlives] property. The
+  /// `addRepaintBoundaries` argument corresponds to the
+  /// [SliverChildListDelegate.addRepaintBoundaries] property. The
+  /// `addSemanticIndexes` argument corresponds to the
+  /// [SliverChildListDelegate.addSemanticIndexes] property. The
+  /// `semanticIndexOffset` argument corresponds to the
+  /// [SliverChildListDelegate.semanticIndexOffset] property.
+  ///
+  /// {@tool snippet}
+  /// This example, which would be inserted into a [CustomScrollView.slivers]
+  /// list, shows a grid of [Container] widgets.
+  ///
+  /// ```dart
+  /// SliverGrid.list(
+  ///   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+  ///     crossAxisCount: 3,
+  ///   ),
+  ///   children: <Widget>[
+  ///     Container(color: Colors.red),
+  ///     Container(color: Colors.green),
+  ///     Container(color: Colors.blue),
+  ///     Container(color: Colors.yellow),
+  ///     Container(color: Colors.orange),
+  ///     Container(color: Colors.purple),
+  ///   ],
+  /// );
+  /// ```
+  /// {@end-tool}
+  SliverGrid.list({
+    super.key,
+    required this.gridDelegate,
+    required List<Widget> children,
+    bool addAutomaticKeepAlives = true,
+    bool addRepaintBoundaries = true,
+    bool addSemanticIndexes = true,
+    int semanticIndexOffset = 0,
+  }) : super(
+         delegate: SliverChildListDelegate(
+           children,
+           addAutomaticKeepAlives: addAutomaticKeepAlives,
+           addRepaintBoundaries: addRepaintBoundaries,
+           addSemanticIndexes: addSemanticIndexes,
+           semanticIndexOffset: semanticIndexOffset,
+         ),
+       );
+
   /// The delegate that controls the size and position of the children.
   final SliverGridDelegate gridDelegate;
 
   @override
   RenderSliverGrid createRenderObject(BuildContext context) {
-    final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
+    final element = context as SliverMultiBoxAdaptorElement;
     return RenderSliverGrid(childManager: element, gridDelegate: gridDelegate);
   }
 
@@ -858,7 +945,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement
 
   @override
   void update(covariant SliverMultiBoxAdaptorWidget newWidget) {
-    final SliverMultiBoxAdaptorWidget oldWidget = widget as SliverMultiBoxAdaptorWidget;
+    final oldWidget = widget as SliverMultiBoxAdaptorWidget;
     super.update(newWidget);
     final SliverChildDelegate newDelegate = newWidget.delegate;
     final SliverChildDelegate oldDelegate = oldWidget.delegate;
@@ -876,12 +963,12 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement
   void performRebuild() {
     super.performRebuild();
     _currentBeforeChild = null;
-    bool childrenUpdated = false;
+    var childrenUpdated = false;
     assert(_currentlyUpdatingChildIndex == null);
     try {
-      final SplayTreeMap<int, Element?> newChildren = SplayTreeMap<int, Element?>();
+      final newChildren = SplayTreeMap<int, Element?>();
       final Map<int, double> indexToLayoutOffset = HashMap<int, double>();
-      final SliverMultiBoxAdaptorWidget adaptorWidget = widget as SliverMultiBoxAdaptorWidget;
+      final adaptorWidget = widget as SliverMultiBoxAdaptorWidget;
       void processElement(int index) {
         _currentlyUpdatingChildIndex = index;
         if (_childElements[index] != null && _childElements[index] != newChildren[index]) {
@@ -897,8 +984,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement
         if (newChild != null) {
           childrenUpdated = childrenUpdated || _childElements[index] != newChild;
           _childElements[index] = newChild;
-          final SliverMultiBoxAdaptorParentData parentData =
-              newChild.renderObject!.parentData! as SliverMultiBoxAdaptorParentData;
+          final parentData = newChild.renderObject!.parentData! as SliverMultiBoxAdaptorParentData;
           if (index == 0) {
             parentData.layoutOffset = 0.0;
           } else if (indexToLayoutOffset.containsKey(index)) {
@@ -916,7 +1002,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement
       for (final int index in _childElements.keys.toList()) {
         final Key? key = _childElements[index]!.widget.key;
         final int? newIndex = key == null ? null : adaptorWidget.delegate.findIndexByKey(key);
-        final SliverMultiBoxAdaptorParentData? childParentData =
+        final childParentData =
             _childElements[index]!.renderObject?.parentData as SliverMultiBoxAdaptorParentData?;
 
         if (childParentData != null && childParentData.layoutOffset != null) {
@@ -973,14 +1059,14 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement
   void createChild(int index, {required RenderBox? after}) {
     assert(_currentlyUpdatingChildIndex == null);
     owner!.buildScope(this, () {
-      final bool insertFirst = after == null;
+      final insertFirst = after == null;
       assert(insertFirst || _childElements[index - 1] != null);
       _currentBeforeChild = insertFirst
           ? null
           : (_childElements[index - 1]!.renderObject as RenderBox?);
       Element? newChild;
       try {
-        final SliverMultiBoxAdaptorWidget adaptorWidget = widget as SliverMultiBoxAdaptorWidget;
+        final adaptorWidget = widget as SliverMultiBoxAdaptorWidget;
         _currentlyUpdatingChildIndex = index;
         newChild = updateChild(_childElements[index], _build(index, adaptorWidget), index);
       } finally {
@@ -996,11 +1082,9 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement
 
   @override
   Element? updateChild(Element? child, Widget? newWidget, Object? newSlot) {
-    final SliverMultiBoxAdaptorParentData? oldParentData =
-        child?.renderObject?.parentData as SliverMultiBoxAdaptorParentData?;
+    final oldParentData = child?.renderObject?.parentData as SliverMultiBoxAdaptorParentData?;
     final Element? newChild = super.updateChild(child, newWidget, newSlot);
-    final SliverMultiBoxAdaptorParentData? newParentData =
-        newChild?.renderObject?.parentData as SliverMultiBoxAdaptorParentData?;
+    final newParentData = newChild?.renderObject?.parentData as SliverMultiBoxAdaptorParentData?;
 
     // Preserve the old layoutOffset if the renderObject was swapped out.
     if (oldParentData != newParentData && oldParentData != null && newParentData != null) {
@@ -1093,9 +1177,9 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement
       // list is finite.
       // Let's do an open-ended binary search to find the end of the list
       // manually.
-      int lo = 0;
-      int hi = 1;
-      final SliverMultiBoxAdaptorWidget adaptorWidget = widget as SliverMultiBoxAdaptorWidget;
+      var lo = 0;
+      var hi = 1;
+      final adaptorWidget = widget as SliverMultiBoxAdaptorWidget;
       const int max = kIsWeb
           ? 9007199254740992 // max safe integer on JS (from 0 to this number x != x+1)
           : ((1 << 63) - 1);
@@ -1152,8 +1236,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement
   @override
   void didAdoptChild(RenderBox child) {
     assert(_currentlyUpdatingChildIndex != null);
-    final SliverMultiBoxAdaptorParentData childParentData =
-        child.parentData! as SliverMultiBoxAdaptorParentData;
+    final childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
     childParentData.index = _currentlyUpdatingChildIndex;
   }
 
@@ -1170,8 +1253,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement
     assert(renderObject.debugValidateChild(child));
     renderObject.insert(child as RenderBox, after: _currentBeforeChild);
     assert(() {
-      final SliverMultiBoxAdaptorParentData childParentData =
-          child.parentData! as SliverMultiBoxAdaptorParentData;
+      final childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
       assert(slot == childParentData.index);
       return true;
     }());
@@ -1202,8 +1284,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement
     _childElements.values
         .cast<Element>()
         .where((Element child) {
-          final SliverMultiBoxAdaptorParentData parentData =
-              child.renderObject!.parentData! as SliverMultiBoxAdaptorParentData;
+          final parentData = child.renderObject!.parentData! as SliverMultiBoxAdaptorParentData;
           final double itemExtent = switch (renderObject.constraints.axis) {
             Axis.horizontal => child.renderObject!.paintBounds.width,
             Axis.vertical => child.renderObject!.paintBounds.height,
@@ -1505,8 +1586,7 @@ class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is KeepAliveParentDataMixin);
-    final KeepAliveParentDataMixin parentData =
-        renderObject.parentData! as KeepAliveParentDataMixin;
+    final parentData = renderObject.parentData! as KeepAliveParentDataMixin;
     if (parentData.keepAlive != keepAlive) {
       // No need to redo layout if it became true.
       parentData.keepAlive = keepAlive;
@@ -1593,9 +1673,8 @@ class _SliverZeroFlexParentDataWidget extends ParentDataWidget<SliverPhysicalPar
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is SliverPhysicalParentData);
-    final SliverPhysicalParentData parentData =
-        renderObject.parentData! as SliverPhysicalParentData;
-    bool needsLayout = false;
+    final parentData = renderObject.parentData! as SliverPhysicalParentData;
+    var needsLayout = false;
     if (parentData.crossAxisFlex != 0) {
       parentData.crossAxisFlex = 0;
       needsLayout = true;
@@ -1656,9 +1735,8 @@ class SliverCrossAxisExpanded extends ParentDataWidget<SliverPhysicalContainerPa
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is SliverPhysicalContainerParentData);
     assert(renderObject.parent is RenderSliverCrossAxisGroup);
-    final SliverPhysicalParentData parentData =
-        renderObject.parentData! as SliverPhysicalParentData;
-    bool needsLayout = false;
+    final parentData = renderObject.parentData! as SliverPhysicalParentData;
+    var needsLayout = false;
 
     if (parentData.crossAxisFlex != flex) {
       parentData.crossAxisFlex = flex;
@@ -1793,7 +1871,7 @@ class _SliverMainAxisGroupElement extends MultiChildRenderObjectElement {
   void debugVisitOnstageChildren(ElementVisitor visitor) {
     children
         .where((Element e) {
-          final RenderSliver renderSliver = e.renderObject! as RenderSliver;
+          final renderSliver = e.renderObject! as RenderSliver;
           return renderSliver.geometry!.visible;
         })
         .forEach(visitor);

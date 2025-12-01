@@ -44,10 +44,8 @@ SurfaceFrame::FramebufferInfo GPUSurfaceGLDelegate::GLContextFramebufferInfo()
   return res;
 }
 
-SkMatrix GPUSurfaceGLDelegate::GLContextSurfaceTransformation() const {
-  SkMatrix matrix;
-  matrix.setIdentity();
-  return matrix;
+DlMatrix GPUSurfaceGLDelegate::GLContextSurfaceTransformation() const {
+  return DlMatrix();
 }
 
 GPUSurfaceGLDelegate::GLProcResolver GPUSurfaceGLDelegate::GetGLProcResolver()

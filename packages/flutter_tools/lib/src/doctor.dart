@@ -651,10 +651,7 @@ class FlutterValidator extends DoctorValidator {
   List<ValidationMessage> _validateRequiredBinaries(String flutterRoot) {
     final ValidationMessage? flutterWarning = _validateSdkBinary('flutter', flutterRoot);
     final ValidationMessage? dartWarning = _validateSdkBinary('dart', flutterRoot);
-    return <ValidationMessage>[
-      if (flutterWarning != null) flutterWarning,
-      if (dartWarning != null) dartWarning,
-    ];
+    return <ValidationMessage>[?flutterWarning, ?dartWarning];
   }
 
   /// Return a warning if the provided [binary] on the user's path does not

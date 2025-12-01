@@ -42,13 +42,13 @@ final createDevFSRequest = FakeVmServiceRequest(
   jsonResponse: <String, Object>{'uri': Uri.parse('test').toString()},
 );
 
-var failingCreateDevFSRequest = FakeVmServiceRequest(
+FakeVmServiceRequest failingCreateDevFSRequest = FakeVmServiceRequest(
   method: '_createDevFS',
   args: <String, Object>{'fsName': 'test'},
   error: FakeRPCError(code: vm_service.RPCErrorKind.kServiceDisappeared.code),
 );
 
-var failingDeleteDevFSRequest = FakeVmServiceRequest(
+FakeVmServiceRequest failingDeleteDevFSRequest = FakeVmServiceRequest(
   method: '_deleteDevFS',
   args: <String, dynamic>{'fsName': 'test'},
   error: FakeRPCError(code: vm_service.RPCErrorKind.kServiceDisappeared.code),
@@ -591,6 +591,7 @@ void main() {
       platform: FakePlatform(),
       fileSystem: fileSystem,
       stdoutHandler: generatorStdoutHandler,
+      shutdownHooks: FakeShutdownHooks(),
     );
 
     fileSystem.file('lib/foo.txt.dill').createSync(recursive: true);
@@ -963,7 +964,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
 }
 
 class FakeDevFSWriter implements DevFSWriter {
-  var written = false;
+  bool written = false;
   Map<Uri, DevFSContent>? entries;
 
   @override
@@ -979,6 +980,7 @@ class FakeBundle extends AssetBundle {
 
   @override
   Future<int> build({
+    FlutterHookResult? flutterHookResult,
     String manifestPath = defaultManifestPath,
     String? assetDirPath,
     String? packageConfigPath,

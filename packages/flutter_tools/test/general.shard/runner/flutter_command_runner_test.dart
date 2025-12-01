@@ -249,7 +249,7 @@ void main() {
       });
 
       testUsingContext(
-        "Doesn't crash on invalid .packages file",
+        "Doesn't crash on invalid package_config.json file",
         () async {
           final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
           fileSystem.file('pubspec.yaml').createSync();

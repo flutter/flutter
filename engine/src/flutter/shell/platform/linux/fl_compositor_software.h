@@ -7,9 +7,8 @@
 
 #include <cairo/cairo.h>
 
-#include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/linux/fl_compositor.h"
-#include "flutter/shell/platform/linux/fl_renderable.h"
+#include "flutter/shell/platform/linux/fl_task_runner.h"
 
 G_BEGIN_DECLS
 
@@ -28,30 +27,13 @@ G_DECLARE_FINAL_TYPE(FlCompositorSoftware,
 
 /**
  * fl_compositor_software_new:
+ * @task_runner: an #FlTaskRunnner.
  *
  * Creates a new software rendering compositor.
  *
  * Returns: a new #FlCompositorSoftware.
  */
-FlCompositorSoftware* fl_compositor_software_new();
-
-/**
- * fl_compositor_software_render:
- * @compositor: an #FlCompositorSoftware.
- * @cr: the cairo context to draw to.
- * @width: output width in pixels.
- * @height: output height in pixels.
- * @scale_factor: pixel scale factor.
- *
- * Render the current frame.
- *
- * Returns: TRUE if rendered.
- */
-gboolean fl_compositor_software_render(FlCompositorSoftware* compositor,
-                                       cairo_t* cr,
-                                       size_t width,
-                                       size_t height,
-                                       gint scale_factor);
+FlCompositorSoftware* fl_compositor_software_new(FlTaskRunner* task_runner);
 
 G_END_DECLS
 

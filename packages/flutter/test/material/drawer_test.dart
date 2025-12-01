@@ -2,15 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
 void main() {
   testWidgets('Material2 - Drawer control test', (WidgetTester tester) async {
-    const Key containerKey = Key('container');
+    const containerKey = Key('container');
 
     await tester.pumpWidget(
       MaterialApp(
@@ -52,7 +54,7 @@ void main() {
   });
 
   testWidgets('Material3 - Drawer control test', (WidgetTester tester) async {
-    const Key containerKey = Key('container');
+    const containerKey = Key('container');
 
     await tester.pumpWidget(
       MaterialApp(
@@ -98,7 +100,7 @@ void main() {
   testWidgets(
     'Drawer dismiss barrier has label',
     (WidgetTester tester) async {
-      final SemanticsTester semantics = SemanticsTester(tester);
+      final semantics = SemanticsTester(tester);
       await tester.pumpWidget(const MaterialApp(home: Scaffold(drawer: Drawer())));
 
       final ScaffoldState state = tester.firstState(find.byType(Scaffold));
@@ -124,7 +126,7 @@ void main() {
   );
 
   testWidgets('Drawer dismiss barrier has no label', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     await tester.pumpWidget(const MaterialApp(home: Scaffold(drawer: Drawer())));
 
     final ScaffoldState state = tester.firstState(find.byType(Scaffold));
@@ -162,7 +164,7 @@ void main() {
           .child!;
     }
 
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final scaffoldKey = GlobalKey<ScaffoldState>();
     Widget buildFrame({Color? drawerScrimColor}) {
       return MaterialApp(
         home: Scaffold(
@@ -183,31 +185,28 @@ void main() {
       );
     }
 
+    Future<void> checkScrim(Color color) async {
+      scaffoldKey.currentState!.openDrawer();
+      await tester.pump();
+      var scrim = getScrim() as ColoredBox;
+      expect(scrim.color, isSameColorAs(color.withValues(alpha: 0)));
+
+      await tester.pumpAndSettle();
+      scrim = getScrim() as ColoredBox;
+      expect(scrim.color, isSameColorAs(color));
+
+      await tester.tap(find.byType(Drawer));
+      await tester.pumpAndSettle();
+      expect(find.byType(Drawer), findsNothing);
+    }
+
     // Default drawerScrimColor
-
     await tester.pumpWidget(buildFrame());
-    scaffoldKey.currentState!.openDrawer();
-    await tester.pumpAndSettle();
-
-    ColoredBox scrim = getScrim() as ColoredBox;
-    expect(scrim.color, Colors.black54);
-
-    await tester.tap(find.byType(Drawer));
-    await tester.pumpAndSettle();
-    expect(find.byType(Drawer), findsNothing);
+    await checkScrim(Colors.black54);
 
     // Specific drawerScrimColor
-
     await tester.pumpWidget(buildFrame(drawerScrimColor: const Color(0xFF323232)));
-    scaffoldKey.currentState!.openDrawer();
-    await tester.pumpAndSettle();
-
-    scrim = getScrim() as ColoredBox;
-    expect(scrim.color, const Color(0xFF323232));
-
-    await tester.tap(find.byType(Drawer));
-    await tester.pumpAndSettle();
-    expect(find.byType(Drawer), findsNothing);
+    await checkScrim(const Color(0xFF323232));
   });
 
   testWidgets('Open/close drawers by flinging', (WidgetTester tester) async {
@@ -252,7 +251,7 @@ void main() {
   });
 
   testWidgets('Open/close drawer by dragging', (WidgetTester tester) async {
-    final ThemeData draggable = ThemeData(platform: TargetPlatform.android);
+    final draggable = ThemeData(platform: TargetPlatform.android);
     await tester.pumpWidget(
       MaterialApp(
         theme: draggable,
@@ -307,7 +306,7 @@ void main() {
   });
 
   testWidgets('Scaffold.drawer - null restorationId ', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
         restorationScopeId: 'app',
@@ -326,7 +325,7 @@ void main() {
   });
 
   testWidgets('Scaffold.endDrawer - null restorationId ', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
         restorationScopeId: 'app',
@@ -345,7 +344,7 @@ void main() {
   });
 
   testWidgets('Scaffold.drawer state restoration test', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
         restorationScopeId: 'app',
@@ -376,7 +375,7 @@ void main() {
   });
 
   testWidgets('Scaffold.endDrawer state restoration test', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
         restorationScopeId: 'app',
@@ -407,7 +406,7 @@ void main() {
   });
 
   testWidgets('Both drawer and endDrawer state restoration test', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
         restorationScopeId: 'app',
@@ -468,7 +467,7 @@ void main() {
   });
 
   testWidgets('ScaffoldState close drawer', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(key: scaffoldKey, drawer: const Text('Drawer'), body: Container()),
@@ -489,7 +488,7 @@ void main() {
   testWidgets('ScaffoldState close drawer do not crash if drawer is already closed', (
     WidgetTester tester,
   ) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(key: scaffoldKey, drawer: const Text('Drawer'), body: Container()),
@@ -578,7 +577,7 @@ void main() {
   });
 
   testWidgets('ScaffoldState close end drawer', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(key: scaffoldKey, endDrawer: const Text('endDrawer'), body: Container()),
@@ -801,8 +800,11 @@ void main() {
     final Scaffold scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
     expect(scaffold.drawerBarrierDismissible, true);
 
-    // Open the drawer initially.
+    // Verify whether the drawer barrier is dimissible by default via the state
     final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+    expect(state.isDrawerBarrierDismissible, true);
+
+    // Open the drawer initially.
     state.openEndDrawer();
 
     await tester.pumpAndSettle();
@@ -826,11 +828,11 @@ void main() {
     final Finder modalBarrierFinder = find.byType(ModalBarrier);
 
     // Get the RenderBox of the ModalBarrier.
-    final RenderBox modalBarrierRenderBox = tester.renderObject(modalBarrierFinder) as RenderBox;
+    final modalBarrierRenderBox = tester.renderObject(modalBarrierFinder) as RenderBox;
 
     // Calculate a point to tap outside the Drawer.
     // This example taps on the ModalBarrier somewhere outside its boundaries.
-    const Offset modalBarrierCenter = Offset(400, 300);
+    const modalBarrierCenter = Offset(400, 300);
     final Offset tapPosition = modalBarrierRenderBox.localToGlobal(modalBarrierCenter);
 
     // Tap on the ModalBarrier.
@@ -865,8 +867,11 @@ void main() {
     final Scaffold scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
     expect(scaffold.drawerBarrierDismissible, false);
 
-    // Open the drawer initially.
+    // Verify the drawer barrier is not dimissible by checking the state's getter
     final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+    expect(state.isDrawerBarrierDismissible, false);
+
+    // Open the drawer initially.
     state.openEndDrawer();
 
     await tester.pumpAndSettle();
@@ -890,11 +895,11 @@ void main() {
     final Finder modalBarrierFinder = find.byType(ModalBarrier);
 
     // Get the RenderBox of the ModalBarrier.
-    final RenderBox modalBarrierRenderBox = tester.renderObject(modalBarrierFinder) as RenderBox;
+    final modalBarrierRenderBox = tester.renderObject(modalBarrierFinder) as RenderBox;
 
     // Calculate a point to tap outside the Drawer.
     // This example taps on the ModalBarrier somewhere outside its boundaries.
-    const Offset modalBarrierCenter = Offset(400, 300);
+    const modalBarrierCenter = Offset(400, 300);
     final Offset tapPosition = modalBarrierRenderBox.localToGlobal(modalBarrierCenter);
 
     // Tap on the ModalBarrier.
@@ -905,6 +910,128 @@ void main() {
     // didn't dismiss it, since the drawerBarrierDismissible property is set to false.
     expect(find.byType(Drawer), findsExactly(1));
   });
+
+  testWidgets('Drawer can be dismissed with the escape key by default', (
+    WidgetTester tester,
+  ) async {
+    final scaffoldKey = GlobalKey<ScaffoldState>();
+
+    // Test with drawerBarrierDismissible: true (default)
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          drawer: const Drawer(child: Text('drawer')),
+        ),
+      ),
+    );
+
+    final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+    expect(state.isDrawerBarrierDismissible, isTrue);
+
+    // Open the drawer.
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+    expect(find.text('drawer'), findsOneWidget);
+
+    // Close the drawer with the escape key.
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(find.text('drawer'), findsNothing);
+  });
+
+  testWidgets(
+    'Drawer cannot be dismissed with the escape key when drawerBarrierDismissible is false',
+    (WidgetTester tester) async {
+      final scaffoldKey = GlobalKey<ScaffoldState>();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            key: scaffoldKey,
+            drawer: const Drawer(child: Text('drawer')),
+            drawerBarrierDismissible: false,
+          ),
+        ),
+      );
+
+      // Verify that the [Scaffold.drawerBarrierDismissible] flag is false
+      final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+      expect(state.isDrawerBarrierDismissible, isFalse);
+
+      // Open the drawer.
+      scaffoldKey.currentState!.openDrawer();
+      await tester.pumpAndSettle();
+      expect(find.text('drawer'), findsOneWidget);
+
+      // Try to close the drawer with the escape key, and verify it does not close.
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
+      expect(find.text('drawer'), findsOneWidget);
+    },
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/177005
+  testWidgets('Drawer semantics for mismatched platforms', (WidgetTester tester) async {
+    const localizations = DefaultMaterialLocalizations();
+
+    Future<void> pumpDrawerWithTheme(TargetPlatform themePlatform) async {
+      final scaffoldKey = GlobalKey<ScaffoldState>();
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: themePlatform),
+          home: Scaffold(
+            key: scaffoldKey,
+            drawer: const Drawer(child: Text('Drawer')),
+            body: Container(),
+          ),
+        ),
+      );
+
+      scaffoldKey.currentState!.openDrawer();
+      await tester.pumpAndSettle();
+
+      // Test label semantics.
+      final Finder drawerLabelFinder = find.bySemanticsLabel(localizations.drawerLabel);
+      if (defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.macOS) {
+        expect(drawerLabelFinder, findsNothing); // Apple platforms don't show drawer label.
+      } else {
+        expect(drawerLabelFinder, findsOneWidget); // Non-Apple platforms show drawer label.
+      }
+
+      // Test barrier semantics.
+      final semantics = SemanticsTester(tester);
+      final expectBarrierExcluded = defaultTargetPlatform == TargetPlatform.android;
+
+      if (expectBarrierExcluded) {
+        expect(
+          semantics,
+          isNot(
+            includesNodeWith(
+              label: localizations.modalBarrierDismissLabel,
+              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+            ),
+          ),
+        );
+      } else {
+        expect(
+          semantics,
+          includesNodeWith(
+            label: localizations.modalBarrierDismissLabel,
+            actions: <SemanticsAction>[SemanticsAction.tap],
+          ),
+        );
+      }
+
+      semantics.dispose();
+    }
+
+    // Test with theme.platform = Android on different real platforms.
+    await pumpDrawerWithTheme(TargetPlatform.android);
+
+    // Test with theme.platform = iOS on different real platforms.
+    await pumpDrawerWithTheme(TargetPlatform.iOS);
+  }, variant: TargetPlatformVariant.all());
 
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
@@ -995,5 +1122,20 @@ void main() {
       material = tester.widget<Material>(drawerMaterial);
       expect(material.clipBehavior, Clip.hardEdge);
     });
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/6537
+  testWidgets('Drawer and DrawerHeader do not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Drawer(child: DrawerHeader(child: Text('X'))),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Drawer)), Size.zero);
+    expect(tester.getSize(find.byType(DrawerHeader)), Size.zero);
   });
 }

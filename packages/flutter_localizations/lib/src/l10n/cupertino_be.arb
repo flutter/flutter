@@ -39,5 +39,11 @@
   "searchWebButtonLabel": "Пошук у сетцы",
   "shareButtonLabel": "Абагуліць...",
   "cancelButtonLabel": "Скасаваць",
-  "backButtonLabel": "Назад"
+  "backButtonLabel": "Назад",
+  "expansionTileExpandedHint": "двойчы націснуць, каб згарнуць",
+  "expansionTileCollapsedHint": "двойчы націснуць, каб разгарнуць",
+  "expansionTileExpandedTapHint": "Згарнуць",
+  "expansionTileCollapsedTapHint": "Разгарніце, каб даведацца больш",
+  "expandedHint": "Згорнута",
+  "collapsedHint": "Разгорнута"
 }

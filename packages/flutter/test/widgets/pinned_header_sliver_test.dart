@@ -15,11 +15,9 @@ void main() {
             reverse: reverse,
             slivers: <Widget>[
               const PinnedHeaderSliver(child: Text('PinnedHeaderSliver')),
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) => Text('Item $index'),
-                  childCount: 100,
-                ),
+              SliverList.builder(
+                itemCount: 100,
+                itemBuilder: (BuildContext context, int index) => Text('Item $index'),
               ),
             ],
           ),
@@ -156,11 +154,9 @@ void main() {
               const PinnedHeaderSliver(child: Text('PinnedHeaderSliver 0')),
               const PinnedHeaderSliver(child: Text('PinnedHeaderSliver 1')),
               const PinnedHeaderSliver(child: Text('PinnedHeaderSliver 2')),
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) => Text('Item $index'),
-                  childCount: 100,
-                ),
+              SliverList.builder(
+                itemCount: 100,
+                itemBuilder: (BuildContext context, int index) => Text('Item $index'),
               ),
             ],
           ),
@@ -189,32 +185,24 @@ void main() {
         home: Scaffold(
           body: CustomScrollView(
             slivers: <Widget>[
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) => Text('Item 0.$index'),
-                  childCount: 2,
-                ),
+              SliverList.builder(
+                itemCount: 2,
+                itemBuilder: (BuildContext context, int index) => Text('Item 0.$index'),
               ),
               const PinnedHeaderSliver(child: Text('PinnedHeaderSliver 0')),
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) => Text('Item 1.$index'),
-                  childCount: 2,
-                ),
+              SliverList.builder(
+                itemCount: 2,
+                itemBuilder: (BuildContext context, int index) => Text('Item 1.$index'),
               ),
               const PinnedHeaderSliver(child: Text('PinnedHeaderSliver 1')),
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) => Text('Item 2.$index'),
-                  childCount: 2,
-                ),
+              SliverList.builder(
+                itemCount: 2,
+                itemBuilder: (BuildContext context, int index) => Text('Item 2.$index'),
               ),
               const PinnedHeaderSliver(child: Text('PinnedHeaderSliver 2')),
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) => Text('Item $index'),
-                  childCount: 100,
-                ),
+              SliverList.builder(
+                itemCount: 100,
+                itemBuilder: (BuildContext context, int index) => Text('Item $index'),
               ),
             ],
           ),

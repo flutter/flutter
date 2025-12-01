@@ -8,6 +8,7 @@
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_sampling_options.h"
+#include "flutter/display_list/dl_text_skia.h"
 #include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/display_list/testing/dl_test_snippets.h"
 #include "flutter/testing/testing.h"
@@ -305,14 +306,14 @@ TEST(DisplayListComplexity, DrawVertices) {
 TEST(DisplayListComplexity, DrawTextBlob) {
   auto text_blob =
       GetTestTextBlob("The quick brown fox jumps over the lazy dog.", 20.0f);
-
+  auto text = DlTextSkia::Make(text_blob);
   DisplayListBuilder builder;
-  builder.DrawTextBlob(text_blob, 0.0f, 0.0f, DlPaint());
+  builder.DrawText(text, 0.0f, 0.0f, DlPaint());
   auto display_list = builder.Build();
 
   DisplayListBuilder builder_multiple;
-  builder_multiple.DrawTextBlob(text_blob, 0.0f, 0.0f, DlPaint());
-  builder_multiple.DrawTextBlob(text_blob, 0.0f, 0.0f, DlPaint());
+  builder_multiple.DrawText(text, 0.0f, 0.0f, DlPaint());
+  builder_multiple.DrawText(text, 0.0f, 0.0f, DlPaint());
   auto display_list_multiple = builder_multiple.Build();
 
   auto calculators = AccumulatorCalculators();

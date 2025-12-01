@@ -211,6 +211,7 @@ void main() {
           '0x20000000',
           // The DebuggingOptions arguments go here.
           '--ez', 'enable-dart-profiling', 'true',
+          '--ez', 'profile-startup', 'true',
           '--ez', 'enable-software-rendering', 'true',
           '--ez', 'skia-deterministic-rendering', 'true',
           '--ez', 'trace-skia', 'true',
@@ -258,6 +259,7 @@ void main() {
         verboseSystemLogs: true,
         enableImpeller: ImpellerStatus.enabled,
         enableFlutterGpu: true,
+        profileStartup: true,
       ),
       platformArgs: <String, dynamic>{},
       userIdentifier: '10',

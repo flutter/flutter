@@ -64,6 +64,13 @@ class PlatformViewAndroidJNI {
       std::vector<std::vector<uint8_t>> string_attribute_args) = 0;
 
   //----------------------------------------------------------------------------
+  /// @brief      Set application locale to a given language.
+  ///
+  /// @note       Must be called from the platform thread.
+  ///
+  virtual void FlutterViewSetApplicationLocale(std::string locale) = 0;
+
+  //----------------------------------------------------------------------------
   /// @brief      Sends new custom accessibility events.
   ///
   /// @note       Must be called from the platform thread.
@@ -186,7 +193,7 @@ class PlatformViewAndroidJNI {
   ///
   struct OverlayMetadata {
     OverlayMetadata(int id, fml::RefPtr<AndroidNativeWindow> window)
-        : id(id), window(std::move(window)){};
+        : id(id), window(std::move(window)) {};
 
     ~OverlayMetadata() = default;
 
@@ -236,6 +243,8 @@ class PlatformViewAndroidJNI {
                                       int32_t viewWidth,
                                       int32_t viewHeight,
                                       MutatorsStack mutators_stack) = 0;
+
+  virtual void hidePlatformView2(int32_t view_id) = 0;
 
   virtual void showOverlaySurface2() = 0;
 

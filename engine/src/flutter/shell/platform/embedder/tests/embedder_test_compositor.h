@@ -7,6 +7,7 @@
 
 #include <vector>
 
+#include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/embedder/embedder.h"
@@ -25,7 +26,7 @@ class EmbedderTestCompositor {
                                              const FlutterLayer** layers,
                                              size_t layers_count)>;
 
-  EmbedderTestCompositor(SkISize surface_size, sk_sp<GrDirectContext> context);
+  EmbedderTestCompositor(DlISize surface_size, sk_sp<GrDirectContext> context);
 
   virtual ~EmbedderTestCompositor();
 
@@ -84,7 +85,7 @@ class EmbedderTestCompositor {
 
   // TODO(gw280): encapsulate these properly for subclasses to use
   std::unique_ptr<EmbedderTestBackingStoreProducer> backingstore_producer_;
-  const SkISize surface_size_;
+  const DlISize surface_size_;
   sk_sp<GrDirectContext> context_;
 
   PlatformViewRendererCallback platform_view_renderer_callback_;

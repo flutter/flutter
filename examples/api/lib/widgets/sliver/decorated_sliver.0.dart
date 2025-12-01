@@ -13,7 +13,9 @@ class SliverDecorationExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        textTheme: const TextTheme(titleLarge: TextStyle(fontSize: 24, color: Colors.white30)),
+        textTheme: const TextTheme(
+          titleLarge: TextStyle(fontSize: 24, color: Colors.white30),
+        ),
       ),
       home: Scaffold(
         appBar: AppBar(title: const Text('SliverDecoration Sample')),
@@ -40,8 +42,8 @@ class SliverDecorationExample extends StatelessWidget {
               stops: <double>[0.4, 0.8],
             ),
           ),
-          sliver: SliverList(
-            delegate: SliverChildListDelegate(<Widget>[
+          sliver: SliverList.list(
+            children: <Widget>[
               SizedBox(
                 height: 200.0,
                 child: Center(
@@ -51,7 +53,7 @@ class SliverDecorationExample extends StatelessWidget {
                   ),
                 ),
               ),
-            ]),
+            ],
           ),
         ),
         DecoratedSliver(
@@ -72,17 +74,20 @@ class SliverDecorationExample extends StatelessWidget {
               ],
             ),
           ),
-          sliver: SliverList(
-            delegate: SliverChildListDelegate(<Widget>[
+          sliver: SliverList.list(
+            children: <Widget>[
               SizedBox(
                 height: 500.0,
                 child: Container(
                   alignment: Alignment.topCenter,
                   padding: const EdgeInsets.only(top: 56.0),
-                  child: Text('A blue sky', style: Theme.of(context).textTheme.titleLarge),
+                  child: Text(
+                    'A blue sky',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
                 ),
               ),
-            ]),
+            ],
           ),
         ),
       ],

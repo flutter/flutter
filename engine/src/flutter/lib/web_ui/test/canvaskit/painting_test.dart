@@ -4,7 +4,6 @@
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-
 import 'package:ui/src/engine.dart';
 
 import 'common.dart';
@@ -19,7 +18,7 @@ void testMain() {
 
     test('toSkPaint', () {
       final paint = CkPaint();
-      final skPaint = paint.toSkPaint();
+      final SkPaint skPaint = paint.toSkPaint();
       expect(skPaint, isNotNull);
       skPaint.delete();
     });

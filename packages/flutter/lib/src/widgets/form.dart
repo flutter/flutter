@@ -7,6 +7,7 @@
 library;
 
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -22,6 +23,7 @@ import 'pop_scope.dart';
 import 'restoration.dart';
 import 'restoration_properties.dart';
 import 'routes.dart';
+import 'view.dart';
 import 'will_pop_scope.dart';
 
 // Duration for delay before announcement in IOS so that the announcement won't be interrupted.
@@ -271,10 +273,10 @@ class FormState extends State<Form> {
   Widget build(BuildContext context) {
     switch (widget.autovalidateMode) {
       case AutovalidateMode.always:
-        _validate();
+        _validate(View.of(context));
       case AutovalidateMode.onUserInteraction:
         if (_hasInteractedByUser) {
-          _validate();
+          _validate(View.of(context));
         }
       case AutovalidateMode.onUnfocus:
       case AutovalidateMode.disabled:
@@ -335,7 +337,7 @@ class FormState extends State<Form> {
   bool validate() {
     _hasInteractedByUser = true;
     _forceRebuild();
-    return _validate();
+    return _validate(View.of(context));
   }
 
   /// Validates every [FormField] that is a descendant of this [Form], and
@@ -349,17 +351,17 @@ class FormState extends State<Form> {
   ///  * [validate], which also validates descendant [FormField]s,
   /// and return true if there are no errors.
   Set<FormFieldState<Object?>> validateGranularly() {
-    final Set<FormFieldState<Object?>> invalidFields = <FormFieldState<Object?>>{};
+    final invalidFields = <FormFieldState<Object?>>{};
     _hasInteractedByUser = true;
     _forceRebuild();
-    _validate(invalidFields);
+    _validate(View.of(context), invalidFields);
     return invalidFields;
   }
 
-  bool _validate([Set<FormFieldState<Object?>>? invalidFields]) {
-    bool hasError = false;
-    String errorMessage = '';
-    final bool validateOnFocusChange = widget.autovalidateMode == AutovalidateMode.onUnfocus;
+  bool _validate(FlutterView view, [Set<FormFieldState<Object?>>? invalidFields]) {
+    var hasError = false;
+    var errorMessage = '';
+    final validateOnFocusChange = widget.autovalidateMode == AutovalidateMode.onUnfocus;
 
     for (final FormFieldState<dynamic> field in _fields) {
       final bool hasFocus = field._focusNode.hasFocus;
@@ -383,7 +385,8 @@ class FormState extends State<Form> {
         unawaited(
           Future<void>(() async {
             await Future<void>.delayed(_kIOSAnnouncementDelayDuration);
-            SemanticsService.announce(
+            SemanticsService.sendAnnouncement(
+              view,
               errorMessage,
               directionality,
               assertiveness: Assertiveness.assertive,
@@ -391,7 +394,8 @@ class FormState extends State<Form> {
           }),
         );
       } else {
-        SemanticsService.announce(
+        SemanticsService.sendAnnouncement(
+          view,
           errorMessage,
           directionality,
           assertiveness: Assertiveness.assertive,

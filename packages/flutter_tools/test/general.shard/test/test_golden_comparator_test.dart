@@ -242,11 +242,11 @@ void main() {
 }
 
 String _encodeStdout({required bool success, String? message}) {
-  return jsonEncode(<String, Object?>{'success': success, if (message != null) 'message': message});
+  return jsonEncode(<String, Object?>{'success': success, 'message': ?message});
 }
 
 final class _FakeTestCompiler extends Fake implements TestCompiler {
-  var disposed = false;
+  bool disposed = false;
 
   @override
   Future<TestCompilerResult> compile(Uri mainDart) async {

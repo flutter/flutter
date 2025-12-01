@@ -9,7 +9,7 @@ import kotlin.test.assertEquals
 
 class VersionUtilsTest {
     @Test
-    fun handles_documenation_examples() {
+    fun handles_documentation_examples() {
         versionComparison("2.8.0", "2.8", expected = "2.8.0")
         versionComparison("8.7-rc-2", "8.7.2", expected = "8.7.2")
     }

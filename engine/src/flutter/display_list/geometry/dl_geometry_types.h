@@ -20,6 +20,7 @@ using DlRadians = impeller::Radians;
 
 using DlPoint = impeller::Point;
 using DlVector2 = impeller::Vector2;
+using DlVector3 = impeller::Vector3;
 using DlIPoint = impeller::IPoint32;
 using DlSize = impeller::Size;
 using DlISize = impeller::ISize32;

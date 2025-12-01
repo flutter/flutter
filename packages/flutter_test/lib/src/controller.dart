@@ -13,6 +13,7 @@
 /// @docImport 'widget_tester.dart';
 library;
 
+import 'dart:ui' as ui;
 import 'package:clock/clock.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -73,17 +74,6 @@ class SemanticsController {
       SemanticsAction.scrollLeft.index |
       SemanticsAction.scrollRight.index |
       SemanticsAction.scrollToOffset.index;
-
-  /// Based on Android's FOCUSABLE_FLAGS. See [flutter/engine/AccessibilityBridge.java](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java).
-  static final int _importantFlagsForAccessibility =
-      SemanticsFlag.hasCheckedState.index |
-      SemanticsFlag.hasToggledState.index |
-      SemanticsFlag.hasEnabledState.index |
-      SemanticsFlag.isButton.index |
-      SemanticsFlag.isTextField.index |
-      SemanticsFlag.isFocusable.index |
-      SemanticsFlag.isSlider.index |
-      SemanticsFlag.isInMutuallyExclusiveGroup.index;
 
   final WidgetController _controller;
 
@@ -271,7 +261,7 @@ class SemanticsController {
       (RenderView r) => r.flutterView == actualView,
     );
 
-    final List<SemanticsNode> traversal = <SemanticsNode>[];
+    final traversal = <SemanticsNode>[];
     _accessibilityTraversal(renderView.owner!.semanticsOwner!.rootSemanticsNode!, traversal);
 
     // Setting the range
@@ -332,7 +322,7 @@ class SemanticsController {
     final List<SemanticsNode> children = node.debugListChildrenInOrder(
       DebugSemanticsDumpOrder.traversalOrder,
     );
-    for (final SemanticsNode child in children) {
+    for (final child in children) {
       _accessibilityTraversal(child, traversal);
     }
   }
@@ -353,21 +343,35 @@ class SemanticsController {
     final SemanticsData data = node.getSemanticsData();
     // If the node scopes a route, it doesn't matter what other flags/actions it
     // has, it is _not_ important for accessibility, so we short circuit.
-    if (data.hasFlag(SemanticsFlag.scopesRoute)) {
+    if (data.flagsCollection.scopesRoute) {
       return false;
     }
 
-    final bool hasNonScrollingAction = data.actions & ~_scrollingActions != 0;
+    final hasNonScrollingAction = data.actions & ~_scrollingActions != 0;
     if (hasNonScrollingAction) {
       return true;
     }
 
-    final bool hasImportantFlag = data.flags & _importantFlagsForAccessibility != 0;
+    /// Based on Android's FOCUSABLE_FLAGS. See [flutter/engine/AccessibilityBridge.java](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java).
+    final bool hasImportantFlag =
+        data.flagsCollection.isChecked != ui.CheckedState.none ||
+        data.flagsCollection.isToggled != ui.Tristate.none ||
+        data.flagsCollection.isEnabled != ui.Tristate.none ||
+        data.flagsCollection.isButton ||
+        data.flagsCollection.isTextField ||
+        data.flagsCollection.isFocused != ui.Tristate.none ||
+        data.flagsCollection.isSlider ||
+        data.flagsCollection.isInMutuallyExclusiveGroup;
+
     if (hasImportantFlag) {
       return true;
     }
 
-    final bool hasContent = data.label.isNotEmpty || data.value.isNotEmpty || data.hint.isNotEmpty;
+    final bool hasContent =
+        data.label.isNotEmpty ||
+        data.value.isNotEmpty ||
+        data.hint.isNotEmpty ||
+        data.tooltip.isNotEmpty;
     if (hasContent) {
       return true;
     }
@@ -772,9 +776,24 @@ abstract class WidgetController {
   }
 
   FlutterView _viewOf(finders.FinderBase<Element> finder) {
-    return firstWidget<View>(
+    final FlutterView? view = _maybeViewOf(finder);
+    if (view == null) {
+      throw StateError(
+        'No FlutterView ancestor found for finder: '
+        '${finder.toString(describeSelf: true)}',
+      );
+    }
+    return view;
+  }
+
+  FlutterView? _maybeViewOf(finders.FinderBase<Element> finder) {
+    final Iterable<View> views = widgetList<View>(
       finders.find.ancestor(of: finder, matching: finders.find.byType(View)),
-    ).view;
+    );
+    if (views.isEmpty) {
+      return null;
+    }
+    return views.first.view;
   }
 
   /// Checks if `finder` exists in the tree.
@@ -822,7 +841,7 @@ abstract class WidgetController {
   Iterable<T> widgetList<T extends Widget>(finders.FinderBase<Element> finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().map<T>((Element element) {
-      final T result = element.widget as T;
+      final result = element.widget as T;
       return result;
     });
   }
@@ -834,7 +853,7 @@ abstract class WidgetController {
     TestAsyncUtils.guardSync();
     final Element element = finder.evaluate().single;
     final RenderObject object = element.renderObject!;
-    RenderObject current = object;
+    var current = object;
     while (current.debugLayer == null) {
       current = current.parent!;
     }
@@ -984,7 +1003,7 @@ abstract class WidgetController {
   Iterable<T> renderObjectList<T extends RenderObject>(finders.FinderBase<Element> finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().map<T>((Element element) {
-      final T result = element.renderObject! as T;
+      final result = element.renderObject! as T;
       return result;
     });
   }
@@ -1037,11 +1056,13 @@ abstract class WidgetController {
     bool warnIfMissed = true,
     PointerDeviceKind kind = PointerDeviceKind.touch,
   }) {
+    final FlutterView? view = _maybeViewOf(finder);
     return tapAt(
       getCenter(finder, warnIfMissed: warnIfMissed, callee: 'tap'),
       pointer: pointer,
       buttons: buttons,
       kind: kind,
+      view: view,
     );
   }
 
@@ -1093,7 +1114,7 @@ abstract class WidgetController {
         ),
       ]);
     }
-    return tapAt(tapLocation, pointer: pointer, buttons: buttons);
+    return tapAt(tapLocation, pointer: pointer, buttons: buttons, view: ranges.single.view.view);
   }
 
   /// Dispatch a pointer down / pointer up sequence at the given location.
@@ -1102,6 +1123,7 @@ abstract class WidgetController {
     int? pointer,
     int buttons = kPrimaryButton,
     PointerDeviceKind kind = PointerDeviceKind.touch,
+    FlutterView? view,
   }) {
     return TestAsyncUtils.guard<void>(() async {
       final TestGesture gesture = await startGesture(
@@ -1109,6 +1131,7 @@ abstract class WidgetController {
         pointer: pointer,
         buttons: buttons,
         kind: kind,
+        view: view,
       );
       await gesture.up();
     });
@@ -1134,12 +1157,14 @@ abstract class WidgetController {
     bool warnIfMissed = true,
     PointerDeviceKind kind = PointerDeviceKind.touch,
   }) {
+    final FlutterView? view = _maybeViewOf(finder);
     return TestAsyncUtils.guard<TestGesture>(() {
       return startGesture(
         getCenter(finder, warnIfMissed: warnIfMissed, callee: 'press'),
         pointer: pointer,
         buttons: buttons,
         kind: kind,
+        view: view,
       );
     });
   }
@@ -1163,11 +1188,13 @@ abstract class WidgetController {
     bool warnIfMissed = true,
     PointerDeviceKind kind = PointerDeviceKind.touch,
   }) {
+    final FlutterView? view = _maybeViewOf(finder);
     return longPressAt(
       getCenter(finder, warnIfMissed: warnIfMissed, callee: 'longPress'),
       pointer: pointer,
       buttons: buttons,
       kind: kind,
+      view: view,
     );
   }
 
@@ -1178,6 +1205,7 @@ abstract class WidgetController {
     int? pointer,
     int buttons = kPrimaryButton,
     PointerDeviceKind kind = PointerDeviceKind.touch,
+    FlutterView? view,
   }) {
     return TestAsyncUtils.guard<void>(() async {
       final TestGesture gesture = await startGesture(
@@ -1185,6 +1213,7 @@ abstract class WidgetController {
         pointer: pointer,
         buttons: buttons,
         kind: kind,
+        view: view,
       );
       await pump(kLongPressTimeout + kPressTimeout);
       await gesture.up();
@@ -1249,6 +1278,7 @@ abstract class WidgetController {
     bool warnIfMissed = true,
     PointerDeviceKind deviceKind = PointerDeviceKind.touch,
   }) {
+    final FlutterView? view = _maybeViewOf(finder);
     return flingFrom(
       getCenter(finder, warnIfMissed: warnIfMissed, callee: 'fling'),
       offset,
@@ -1259,6 +1289,7 @@ abstract class WidgetController {
       initialOffset: initialOffset,
       initialOffsetDelay: initialOffsetDelay,
       deviceKind: deviceKind,
+      view: view,
     );
   }
 
@@ -1279,23 +1310,23 @@ abstract class WidgetController {
     Offset initialOffset = Offset.zero,
     Duration initialOffsetDelay = const Duration(seconds: 1),
     PointerDeviceKind deviceKind = PointerDeviceKind.touch,
+    FlutterView? view,
   }) {
     assert(offset.distance > 0.0);
     assert(speed > 0.0); // speed is pixels/second
     return TestAsyncUtils.guard<void>(() async {
-      final TestPointer testPointer = TestPointer(
-        pointer ?? _getNextPointer(),
-        deviceKind,
-        null,
-        buttons,
-      );
-      const int kMoveCount =
+      final testPointer = TestPointer(pointer ?? _getNextPointer(), deviceKind, null, buttons);
+      const kMoveCount =
           50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
       final double timeStampDelta = 1000000.0 * offset.distance / (kMoveCount * speed);
-      double timeStamp = 0.0;
-      double lastTimeStamp = timeStamp;
+      var timeStamp = 0.0;
+      var lastTimeStamp = timeStamp;
       await sendEventToBinding(
-        testPointer.down(startLocation, timeStamp: Duration(microseconds: timeStamp.round())),
+        testPointer.down(
+          startLocation,
+          timeStamp: Duration(microseconds: timeStamp.round()),
+          view: view,
+        ),
       );
       if (initialOffset.distance > 0.0) {
         await sendEventToBinding(
@@ -1307,11 +1338,15 @@ abstract class WidgetController {
         timeStamp += initialOffsetDelay.inMicroseconds;
         await pump(initialOffsetDelay);
       }
-      for (int i = 0; i <= kMoveCount; i += 1) {
+      for (var i = 0; i <= kMoveCount; i += 1) {
         final Offset location =
             startLocation + initialOffset + Offset.lerp(Offset.zero, offset, i / kMoveCount)!;
         await sendEventToBinding(
-          testPointer.move(location, timeStamp: Duration(microseconds: timeStamp.round())),
+          testPointer.move(
+            location,
+            timeStamp: Duration(microseconds: timeStamp.round()),
+            view: view,
+          ),
         );
         timeStamp += timeStampDelta;
         if (timeStamp - lastTimeStamp > frameInterval.inMicroseconds) {
@@ -1320,7 +1355,10 @@ abstract class WidgetController {
         }
       }
       await sendEventToBinding(
-        testPointer.up(timeStamp: Duration(microseconds: timeStamp.round())),
+        testPointer.up(
+          timeStamp: Duration(microseconds: timeStamp.round()),
+          view: view,
+        ),
       );
     });
   }
@@ -1346,6 +1384,7 @@ abstract class WidgetController {
     Duration initialOffsetDelay = const Duration(seconds: 1),
     bool warnIfMissed = true,
   }) {
+    final FlutterView? view = _maybeViewOf(finder);
     return trackpadFlingFrom(
       getCenter(finder, warnIfMissed: warnIfMissed, callee: 'fling'),
       offset,
@@ -1355,6 +1394,7 @@ abstract class WidgetController {
       frameInterval: frameInterval,
       initialOffset: initialOffset,
       initialOffsetDelay: initialOffsetDelay,
+      view: view,
     );
   }
 
@@ -1375,25 +1415,27 @@ abstract class WidgetController {
     Duration frameInterval = const Duration(milliseconds: 16),
     Offset initialOffset = Offset.zero,
     Duration initialOffsetDelay = const Duration(seconds: 1),
+    FlutterView? view,
   }) {
     assert(offset.distance > 0.0);
     assert(speed > 0.0); // speed is pixels/second
     return TestAsyncUtils.guard<void>(() async {
-      final TestPointer testPointer = TestPointer(
+      final testPointer = TestPointer(
         pointer ?? _getNextPointer(),
         PointerDeviceKind.trackpad,
         null,
         buttons,
       );
-      const int kMoveCount =
+      const kMoveCount =
           50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
       final double timeStampDelta = 1000000.0 * offset.distance / (kMoveCount * speed);
-      double timeStamp = 0.0;
-      double lastTimeStamp = timeStamp;
+      var timeStamp = 0.0;
+      var lastTimeStamp = timeStamp;
       await sendEventToBinding(
         testPointer.panZoomStart(
           startLocation,
           timeStamp: Duration(microseconds: timeStamp.round()),
+          view: view,
         ),
       );
       if (initialOffset.distance > 0.0) {
@@ -1402,18 +1444,20 @@ abstract class WidgetController {
             startLocation,
             pan: initialOffset,
             timeStamp: Duration(microseconds: timeStamp.round()),
+            view: view,
           ),
         );
         timeStamp += initialOffsetDelay.inMicroseconds;
         await pump(initialOffsetDelay);
       }
-      for (int i = 0; i <= kMoveCount; i += 1) {
+      for (var i = 0; i <= kMoveCount; i += 1) {
         final Offset pan = initialOffset + Offset.lerp(Offset.zero, offset, i / kMoveCount)!;
         await sendEventToBinding(
           testPointer.panZoomUpdate(
             startLocation,
             pan: pan,
             timeStamp: Duration(microseconds: timeStamp.round()),
+            view: view,
           ),
         );
         timeStamp += timeStampDelta;
@@ -1423,7 +1467,10 @@ abstract class WidgetController {
         }
       }
       await sendEventToBinding(
-        testPointer.panZoomEnd(timeStamp: Duration(microseconds: timeStamp.round())),
+        testPointer.panZoomEnd(
+          timeStamp: Duration(microseconds: timeStamp.round()),
+          view: view,
+        ),
       );
     });
   }
@@ -1533,6 +1580,7 @@ abstract class WidgetController {
     bool warnIfMissed = true,
     PointerDeviceKind kind = PointerDeviceKind.touch,
   }) {
+    final FlutterView? view = _maybeViewOf(finder);
     return dragFrom(
       getCenter(finder, warnIfMissed: warnIfMissed, callee: 'drag'),
       offset,
@@ -1541,6 +1589,7 @@ abstract class WidgetController {
       touchSlopX: touchSlopX,
       touchSlopY: touchSlopY,
       kind: kind,
+      view: view,
     );
   }
 
@@ -1563,6 +1612,7 @@ abstract class WidgetController {
     double touchSlopX = kDragSlopDefault,
     double touchSlopY = kDragSlopDefault,
     PointerDeviceKind kind = PointerDeviceKind.touch,
+    FlutterView? view,
   }) {
     assert(kDragSlopDefault > kTouchSlop);
     return TestAsyncUtils.guard<void>(() async {
@@ -1571,6 +1621,7 @@ abstract class WidgetController {
         pointer: pointer,
         buttons: buttons,
         kind: kind,
+        view: view,
       );
 
       final double xSign = offset.dx.sign;
@@ -1598,17 +1649,20 @@ abstract class WidgetController {
             final double diffY = offsetSlope.abs() * touchSlopX * ySign;
 
             // The vector from the origin to the vertical edge.
-            await gesture.moveBy(Offset(signedSlopX, diffY));
+            await gesture.moveBy(Offset(signedSlopX, diffY), view: view);
             if (offsetY.abs() <= touchSlopY) {
               // The drag ends on or before getting to the horizontal extension of the horizontal edge.
-              await gesture.moveBy(Offset(offsetX - signedSlopX, offsetY - diffY));
+              await gesture.moveBy(Offset(offsetX - signedSlopX, offsetY - diffY), view: view);
             } else {
               final double diffY2 = signedSlopY - diffY;
               final double diffX2 = inverseOffsetSlope * diffY2;
 
               // The vector from the edge of the box to the horizontal extension of the horizontal edge.
-              await gesture.moveBy(Offset(diffX2, diffY2));
-              await gesture.moveBy(Offset(offsetX - diffX2 - signedSlopX, offsetY - signedSlopY));
+              await gesture.moveBy(Offset(diffX2, diffY2), view: view);
+              await gesture.moveBy(
+                Offset(offsetX - diffX2 - signedSlopX, offsetY - signedSlopY),
+                view: view,
+              );
             }
           } else {
             assert(offsetY.abs() > touchSlopY);
@@ -1617,29 +1671,32 @@ abstract class WidgetController {
             final double diffX = inverseOffsetSlope.abs() * touchSlopY * xSign;
 
             // The vector from the origin to the vertical edge.
-            await gesture.moveBy(Offset(diffX, signedSlopY));
+            await gesture.moveBy(Offset(diffX, signedSlopY), view: view);
             if (offsetX.abs() <= touchSlopX) {
               // The drag ends on or before getting to the vertical extension of the vertical edge.
-              await gesture.moveBy(Offset(offsetX - diffX, offsetY - signedSlopY));
+              await gesture.moveBy(Offset(offsetX - diffX, offsetY - signedSlopY), view: view);
             } else {
               final double diffX2 = signedSlopX - diffX;
               final double diffY2 = offsetSlope * diffX2;
 
               // The vector from the edge of the box to the vertical extension of the vertical edge.
-              await gesture.moveBy(Offset(diffX2, diffY2));
-              await gesture.moveBy(Offset(offsetX - signedSlopX, offsetY - diffY2 - signedSlopY));
+              await gesture.moveBy(Offset(diffX2, diffY2), view: view);
+              await gesture.moveBy(
+                Offset(offsetX - signedSlopX, offsetY - diffY2 - signedSlopY),
+                view: view,
+              );
             }
           }
         } else {
           // The drag goes through the corner of the box.
-          await gesture.moveBy(Offset(signedSlopX, signedSlopY));
-          await gesture.moveBy(Offset(offsetX - signedSlopX, offsetY - signedSlopY));
+          await gesture.moveBy(Offset(signedSlopX, signedSlopY), view: view);
+          await gesture.moveBy(Offset(offsetX - signedSlopX, offsetY - signedSlopY), view: view);
         }
       } else {
         // The drag ends inside the box.
-        await gesture.moveBy(offset);
+        await gesture.moveBy(offset, view: view);
       }
-      await gesture.up();
+      await gesture.up(view: view);
     });
   }
 
@@ -1671,6 +1728,7 @@ abstract class WidgetController {
     int buttons = kPrimaryButton,
     double frequency = 60.0,
     bool warnIfMissed = true,
+    FlutterView? view,
   }) {
     return timedDragFrom(
       getCenter(finder, warnIfMissed: warnIfMissed, callee: 'timedDrag'),
@@ -1679,6 +1737,7 @@ abstract class WidgetController {
       pointer: pointer,
       buttons: buttons,
       frequency: frequency,
+      view: view,
     );
   }
 
@@ -1697,27 +1756,33 @@ abstract class WidgetController {
     int? pointer,
     int buttons = kPrimaryButton,
     double frequency = 60.0,
+    FlutterView? view,
   }) {
     assert(frequency > 0);
     final int intervals = duration.inMicroseconds * frequency ~/ 1E6;
     assert(intervals > 1);
     pointer ??= _getNextPointer();
-    final List<Duration> timeStamps = <Duration>[
+    final timeStamps = <Duration>[
       for (int t = 0; t <= intervals; t += 1) duration * t ~/ intervals,
     ];
-    final List<Offset> offsets = <Offset>[
+    final offsets = <Offset>[
       startLocation,
       for (int t = 0; t <= intervals; t += 1) startLocation + offset * (t / intervals),
     ];
-    final List<PointerEventRecord> records = <PointerEventRecord>[
+    final records = <PointerEventRecord>[
       PointerEventRecord(Duration.zero, <PointerEvent>[
-        PointerAddedEvent(position: startLocation),
+        PointerAddedEvent(
+          position: startLocation,
+          viewId: view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView!.viewId,
+        ),
         PointerDownEvent(position: startLocation, pointer: pointer, buttons: buttons),
       ]),
       ...<PointerEventRecord>[
         for (int t = 0; t <= intervals; t += 1)
           PointerEventRecord(timeStamps[t], <PointerEvent>[
             PointerMoveEvent(
+              viewId:
+                  view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView!.viewId,
               timeStamp: timeStamps[t],
               position: offsets[t + 1],
               delta: offsets[t + 1] - offsets[t],
@@ -1728,6 +1793,7 @@ abstract class WidgetController {
       ],
       PointerEventRecord(duration, <PointerEvent>[
         PointerUpEvent(
+          viewId: view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView!.viewId,
           timeStamp: duration,
           position: offsets.last,
           pointer: pointer,
@@ -1803,12 +1869,13 @@ abstract class WidgetController {
     int? pointer,
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int buttons = kPrimaryButton,
+    FlutterView? view,
   }) async {
     final TestGesture result = _createGesture(pointer: pointer, kind: kind, buttons: buttons);
     if (kind == PointerDeviceKind.trackpad) {
-      await result.panZoomStart(downLocation);
+      await result.panZoomStart(downLocation, view: view);
     } else {
-      await result.down(downLocation);
+      await result.down(downLocation, view: view);
     }
     return result;
   }
@@ -1816,7 +1883,7 @@ abstract class WidgetController {
   /// Forwards the given location to the binding's hitTest logic.
   HitTestResult hitTestOnBinding(Offset location, {int? viewId}) {
     viewId ??= view.viewId;
-    final HitTestResult result = HitTestResult();
+    final result = HitTestResult();
     binding.hitTestInView(result, location, viewId);
     return result;
   }
@@ -1979,8 +2046,8 @@ abstract class WidgetController {
               // Try hit-testing the center of each TextBox.
               .map((TextBox textBox) => textBox.toRect().center);
 
-          for (final Offset localOffset in testOffsets) {
-            final HitTestResult result = HitTestResult();
+          for (final localOffset in testOffsets) {
+            final result = HitTestResult();
             final Offset globalOffset = localOffset + renderParagraphPaintOffset;
             binding.hitTestInView(result, globalOffset, textRangeContext.view.view.viewId);
             if (result.path.any((HitTestEntry entry) => entry.target == target)) {
@@ -2029,11 +2096,11 @@ abstract class WidgetController {
         'Unfortunately "$callee()" only supports targeting widgets that correspond to RenderBox objects in the rendering.',
       );
     }
-    final RenderBox box = element.renderObject! as RenderBox;
+    final box = element.renderObject! as RenderBox;
     final Offset location = box.localToGlobal(sizeToPoint(box.size));
     if (warnIfMissed) {
       final FlutterView view = _viewOf(finder);
-      final HitTestResult result = HitTestResult();
+      final result = HitTestResult();
       binding.hitTestInView(result, location, view.viewId);
       final bool found = result.path.any((HitTestEntry entry) => entry.target == box);
       if (!found) {
@@ -2088,7 +2155,7 @@ abstract class WidgetController {
   Size getSize(finders.FinderBase<Element> finder) {
     TestAsyncUtils.guardSync();
     final Element element = finder.evaluate().single;
-    final RenderBox box = element.renderObject! as RenderBox;
+    final box = element.renderObject! as RenderBox;
     return box.size;
   }
 
@@ -2417,7 +2484,7 @@ class LiveWidgetController extends WidgetController {
   Future<int> pumpAndSettle([Duration duration = const Duration(milliseconds: 100)]) {
     assert(duration > Duration.zero);
     return TestAsyncUtils.guard<int>(() async {
-      int count = 0;
+      var count = 0;
       do {
         await pump(duration);
         count += 1;
@@ -2430,9 +2497,9 @@ class LiveWidgetController extends WidgetController {
   Future<List<Duration>> handlePointerEventRecord(List<PointerEventRecord> records) {
     assert(records.isNotEmpty);
     return TestAsyncUtils.guard<List<Duration>>(() async {
-      final List<Duration> handleTimeStampDiff = <Duration>[];
+      final handleTimeStampDiff = <Duration>[];
       DateTime? startTime;
-      for (final PointerEventRecord record in records) {
+      for (final record in records) {
         final DateTime now = clock.now();
         startTime ??= now;
         // So that the first event is promised to receive a zero timeDiff.

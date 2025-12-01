@@ -64,6 +64,7 @@ void main() {
       platform: FakePlatform(),
       fileSystem: MemoryFileSystem.test(),
       stdoutHandler: generatorStdoutHandler,
+      shutdownHooks: FakeShutdownHooks(),
     );
     generatorWithScheme = DefaultResidentCompiler(
       'sdkroot',
@@ -76,6 +77,7 @@ void main() {
       fileSystemScheme: 'scheme',
       fileSystem: MemoryFileSystem.test(),
       stdoutHandler: generatorWithSchemeStdoutHandler,
+      shutdownHooks: FakeShutdownHooks(),
     );
     generatorWithPlatformDillAndLibrariesSpec = DefaultResidentCompiler(
       'sdkroot',
@@ -88,6 +90,7 @@ void main() {
       stdoutHandler: generatorStdoutHandler,
       platformDill: '/foo/platform.dill',
       librariesSpec: '/bar/libraries.json',
+      shutdownHooks: FakeShutdownHooks(),
     );
   });
 

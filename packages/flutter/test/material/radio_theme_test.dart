@@ -15,12 +15,12 @@ void main() {
 
   test('RadioThemeData lerp special cases', () {
     expect(RadioThemeData.lerp(null, null, 0), const RadioThemeData());
-    const RadioThemeData data = RadioThemeData();
+    const data = RadioThemeData();
     expect(identical(RadioThemeData.lerp(data, data, 0.5), data), true);
   });
 
   test('RadioThemeData defaults', () {
-    const RadioThemeData themeData = RadioThemeData();
+    const themeData = RadioThemeData();
     expect(themeData.mouseCursor, null);
     expect(themeData.fillColor, null);
     expect(themeData.overlayColor, null);
@@ -28,8 +28,10 @@ void main() {
     expect(themeData.materialTapTargetSize, null);
     expect(themeData.visualDensity, null);
     expect(themeData.backgroundColor, null);
+    expect(themeData.side, null);
+    expect(themeData.innerRadius, null);
 
-    const RadioTheme theme = RadioTheme(data: RadioThemeData(), child: SizedBox());
+    const theme = RadioTheme(data: RadioThemeData(), child: SizedBox());
     expect(theme.data.mouseCursor, null);
     expect(theme.data.fillColor, null);
     expect(theme.data.overlayColor, null);
@@ -37,10 +39,12 @@ void main() {
     expect(theme.data.materialTapTargetSize, null);
     expect(theme.data.visualDensity, null);
     expect(theme.data.backgroundColor, null);
+    expect(theme.data.side, null);
+    expect(theme.data.innerRadius, null);
   });
 
   testWidgets('Default RadioThemeData debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const RadioThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -52,7 +56,7 @@ void main() {
   });
 
   testWidgets('RadioThemeData implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const RadioThemeData(
       mouseCursor: WidgetStatePropertyAll<MouseCursor>(SystemMouseCursors.click),
       fillColor: WidgetStatePropertyAll<Color>(Color(0xfffffff0)),
@@ -61,6 +65,8 @@ void main() {
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       visualDensity: VisualDensity.standard,
       backgroundColor: WidgetStatePropertyAll<Color>(Color(0xfffffff2)),
+      side: BorderSide(color: Color(0xfffffff3), width: 2),
+      innerRadius: WidgetStatePropertyAll<double>(5.0),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -78,6 +84,8 @@ void main() {
         'materialTapTargetSize: MaterialTapTargetSize.shrinkWrap',
         'visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)',
         'backgroundColor: WidgetStatePropertyAll(${const Color(0xfffffff2)})',
+        'side: BorderSide(color: ${const Color(0xfffffff3)}, width: 2.0)',
+        'innerRadius: WidgetStatePropertyAll(5.0)',
       ]),
     );
   });
@@ -86,15 +94,16 @@ void main() {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const MouseCursor mouseCursor = SystemMouseCursors.text;
-    const Color defaultFillColor = Color(0xfffffff0);
-    const Color selectedFillColor = Color(0xfffffff1);
-    const Color focusOverlayColor = Color(0xfffffff2);
-    const Color hoverOverlayColor = Color(0xfffffff3);
-    const Color defaultBackgroundColor = Color(0xfffffff4);
-    const Color selectedBackgroundColor = Color(0xfffffff5);
-    const double splashRadius = 1.0;
+    const defaultFillColor = Color(0xfffffff0);
+    const selectedFillColor = Color(0xfffffff1);
+    const focusOverlayColor = Color(0xfffffff2);
+    const hoverOverlayColor = Color(0xfffffff3);
+    const defaultBackgroundColor = Color(0xfffffff4);
+    const selectedBackgroundColor = Color(0xfffffff5);
+    const splashRadius = 1.0;
     const MaterialTapTargetSize materialTapTargetSize = MaterialTapTargetSize.shrinkWrap;
-    const VisualDensity visualDensity = VisualDensity(horizontal: 1, vertical: 1);
+    const visualDensity = VisualDensity(horizontal: 1, vertical: 1);
+    const innerRadius = 5.0;
 
     Widget buildRadio({bool selected = false, bool autofocus = false}) {
       return MaterialApp(
@@ -125,6 +134,7 @@ void main() {
               }
               return defaultBackgroundColor;
             }),
+            innerRadius: const WidgetStatePropertyAll<double>(innerRadius),
           ),
         ),
         home: Scaffold(
@@ -157,7 +167,8 @@ void main() {
       _getRadioMaterial(tester),
       paints
         ..circle(color: selectedBackgroundColor)
-        ..circle(color: selectedFillColor),
+        ..circle(color: selectedFillColor)
+        ..circle(color: selectedFillColor, radius: innerRadius),
     );
 
     // Radio with hover.
@@ -179,30 +190,79 @@ void main() {
     );
   });
 
+  testWidgets('Radio side is themeable', (WidgetTester tester) async {
+    const defaultSide = BorderSide(color: Color(0xfffffff0), width: 2.0);
+    const selectedSide = BorderSide(color: Color(0xfffffff1), width: 3.0);
+
+    Widget buildRadio({bool selected = false, bool autofocus = false}) {
+      return MaterialApp(
+        theme: ThemeData(
+          radioTheme: RadioThemeData(
+            side: WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
+                return selectedSide;
+              }
+              return defaultSide;
+            }),
+          ),
+        ),
+        home: Scaffold(
+          body: Radio<int>(
+            onChanged: (int? int) {},
+            value: selected ? 1 : 0,
+            groupValue: 1,
+            autofocus: autofocus,
+          ),
+        ),
+      );
+    }
+
+    // Radio.
+    await tester.pumpWidget(buildRadio());
+    expect(
+      _getRadioMaterial(tester),
+      paints
+        ..circle(color: Colors.transparent)
+        ..circle(color: defaultSide.color, strokeWidth: defaultSide.width),
+    );
+
+    // Selected radio.
+    await tester.pumpWidget(buildRadio(selected: true));
+    await tester.pumpAndSettle();
+    expect(
+      _getRadioMaterial(tester),
+      paints
+        ..circle(color: Colors.transparent)
+        ..circle(color: selectedSide.color, strokeWidth: selectedSide.width),
+    );
+  });
+
   testWidgets('Radio properties are taken over the theme values', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const MouseCursor themeMouseCursor = SystemMouseCursors.click;
-    const Color themeDefaultFillColor = Color(0xfffffff0);
-    const Color themeSelectedFillColor = Color(0xfffffff1);
-    const Color themeFocusOverlayColor = Color(0xfffffff2);
-    const Color themeHoverOverlayColor = Color(0xfffffff3);
-    const Color themeDefaultBackgroundColor = Color(0xfffffff4);
-    const Color themeSelectedBackgroundColor = Color(0xfffffff5);
-    const double themeSplashRadius = 1.0;
+    const themeDefaultFillColor = Color(0xfffffff0);
+    const themeSelectedFillColor = Color(0xfffffff1);
+    const themeFocusOverlayColor = Color(0xfffffff2);
+    const themeHoverOverlayColor = Color(0xfffffff3);
+    const themeDefaultBackgroundColor = Color(0xfffffff4);
+    const themeSelectedBackgroundColor = Color(0xfffffff5);
+    const themeSplashRadius = 1.0;
     const MaterialTapTargetSize themeMaterialTapTargetSize = MaterialTapTargetSize.padded;
     const VisualDensity themeVisualDensity = VisualDensity.standard;
+    const themeInnerRadius = 5.0;
 
     const MouseCursor mouseCursor = SystemMouseCursors.text;
-    const Color defaultFillColor = Color(0xfffffff0);
-    const Color selectedFillColor = Color(0xfffffff1);
-    const Color focusColor = Color(0xfffffff2);
-    const Color hoverColor = Color(0xfffffff3);
-    const Color defaultBackgroundColor = Color(0xfffffff4);
-    const Color selectedBackgroundColor = Color(0xfffffff5);
-    const double splashRadius = 2.0;
+    const defaultFillColor = Color(0xeffffff0);
+    const selectedFillColor = Color(0xeffffff1);
+    const focusColor = Color(0xeffffff2);
+    const hoverColor = Color(0xeffffff3);
+    const defaultBackgroundColor = Color(0xeffffff4);
+    const selectedBackgroundColor = Color(0xeffffff5);
+    const splashRadius = 2.0;
     const MaterialTapTargetSize materialTapTargetSize = MaterialTapTargetSize.shrinkWrap;
-    const VisualDensity visualDensity = VisualDensity(horizontal: 1, vertical: 1);
+    const visualDensity = VisualDensity(horizontal: 1, vertical: 1);
+    const innerRadius = 6.0;
 
     Widget buildRadio({bool selected = false, bool autofocus = false}) {
       return MaterialApp(
@@ -233,6 +293,7 @@ void main() {
               }
               return themeDefaultBackgroundColor;
             }),
+            innerRadius: const WidgetStatePropertyAll<double>(themeInnerRadius),
           ),
         ),
         home: Scaffold(
@@ -259,6 +320,7 @@ void main() {
               }
               return defaultBackgroundColor;
             }),
+            innerRadius: const WidgetStatePropertyAll<double>(innerRadius),
           ),
         ),
       );
@@ -283,7 +345,8 @@ void main() {
       _getRadioMaterial(tester),
       paints
         ..circle(color: selectedBackgroundColor)
-        ..circle(color: selectedFillColor),
+        ..circle(color: selectedFillColor)
+        ..circle(color: selectedFillColor, radius: innerRadius),
     );
 
     // Radio with hover.
@@ -302,18 +365,77 @@ void main() {
     expect(_getRadioMaterial(tester), paints..circle(color: focusColor, radius: splashRadius));
   });
 
-  testWidgets('Radio activeColor property is taken over the theme', (WidgetTester tester) async {
-    const Color themeDefaultFillColor = Color(0xfffffff0);
-    const Color themeSelectedFillColor = Color(0xfffffff1);
+  testWidgets('Radio side property is taken over the theme values', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
-    const Color selectedFillColor = Color(0xfffffff1);
+    const themeDefaultSide = BorderSide(color: Color(0xfffffff0), width: 2.0);
+    const themeSelectedSide = BorderSide(color: Color(0xfffffff1), width: 3.0);
+
+    const defaultSide = BorderSide(color: Color(0xeffffff2), width: 4.0);
+    const selectedSide = BorderSide(color: Color(0xeffffff3), width: 5.0);
 
     Widget buildRadio({bool selected = false, bool autofocus = false}) {
       return MaterialApp(
         theme: ThemeData(
           radioTheme: RadioThemeData(
-            fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
+            side: WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
+                return themeSelectedSide;
+              }
+              return themeDefaultSide;
+            }),
+          ),
+        ),
+        home: Scaffold(
+          body: Radio<int>(
+            onChanged: (int? int) {},
+            value: selected ? 0 : 1,
+            groupValue: 0,
+            autofocus: autofocus,
+            side: WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
+                return selectedSide;
+              }
+              return defaultSide;
+            }),
+          ),
+        ),
+      );
+    }
+
+    // Radio.
+    await tester.pumpWidget(buildRadio());
+    await tester.pumpAndSettle();
+    expect(
+      _getRadioMaterial(tester),
+      paints
+        ..circle(color: Colors.transparent)
+        ..circle(color: defaultSide.color, strokeWidth: defaultSide.width),
+    );
+
+    // Selected radio.
+    await tester.pumpWidget(buildRadio(selected: true));
+    await tester.pumpAndSettle();
+    expect(
+      _getRadioMaterial(tester),
+      paints
+        ..circle(color: Colors.transparent)
+        ..circle(color: selectedSide.color, strokeWidth: selectedSide.width),
+    );
+  });
+
+  testWidgets('Radio activeColor property is taken over the theme', (WidgetTester tester) async {
+    const themeDefaultFillColor = Color(0xfffffff0);
+    const themeSelectedFillColor = Color(0xfffffff1);
+
+    const selectedFillColor = Color(0xfffffff1);
+
+    Widget buildRadio({bool selected = false, bool autofocus = false}) {
+      return MaterialApp(
+        theme: ThemeData(
+          radioTheme: RadioThemeData(
+            fillColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
                 return themeSelectedFillColor;
               }
               return themeDefaultFillColor;
@@ -356,12 +478,12 @@ void main() {
   testWidgets('Radio theme overlay color resolves in active/pressed states', (
     WidgetTester tester,
   ) async {
-    const Color activePressedOverlayColor = Color(0xFF000001);
-    const Color inactivePressedOverlayColor = Color(0xFF000002);
+    const activePressedOverlayColor = Color(0xFF000001);
+    const inactivePressedOverlayColor = Color(0xFF000002);
 
-    Color? getOverlayColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
-        if (states.contains(MaterialState.selected)) {
+    Color? getOverlayColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
+        if (states.contains(WidgetState.selected)) {
           return activePressedOverlayColor;
         }
         return inactivePressedOverlayColor;
@@ -369,13 +491,13 @@ void main() {
       return null;
     }
 
-    const double splashRadius = 24.0;
+    const splashRadius = 24.0;
 
     Widget buildRadio({required bool active}) {
       return MaterialApp(
         theme: ThemeData(
           radioTheme: RadioThemeData(
-            overlayColor: MaterialStateProperty.resolveWith(getOverlayColor),
+            overlayColor: WidgetStateProperty.resolveWith(getOverlayColor),
             splashRadius: splashRadius,
           ),
         ),
@@ -407,8 +529,8 @@ void main() {
   });
 
   testWidgets('Local RadioTheme can override global RadioTheme', (WidgetTester tester) async {
-    const Color globalThemeFillColor = Color(0xfffffff1);
-    const Color localThemeFillColor = Color(0xffff0000);
+    const globalThemeFillColor = Color(0xfffffff1);
+    const localThemeFillColor = Color(0xffff0000);
 
     Widget buildRadio({required bool active}) {
       return MaterialApp(

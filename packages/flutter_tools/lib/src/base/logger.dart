@@ -34,7 +34,7 @@ abstract class Logger {
   bool get isVerbose => false;
 
   /// If true, silences the logger output.
-  var quiet = false;
+  bool quiet = false;
 
   /// If true, this logger supports ANSI sequences and animations are enabled.
   bool get supportsColor;
@@ -44,16 +44,16 @@ abstract class Logger {
 
   /// If true, then [printError] has been called at least once for this logger
   /// since the last time it was set to false.
-  var hadErrorOutput = false;
+  bool hadErrorOutput = false;
 
   /// If true, then [printWarning] has been called at least once with its
   /// "fatal" argument true for this logger
   /// since the last time it was reset to false.
-  var hadWarningOutput = false;
+  bool hadWarningOutput = false;
 
   /// Causes [checkForFatalLogs] to call [throwToolExit] when it is called if
   /// [hadWarningOutput] is true.
-  var fatalWarnings = false;
+  bool fatalWarnings = false;
 
   /// Returns the terminal attached to this logger.
   Terminal get terminal;
@@ -219,9 +219,6 @@ abstract class Logger {
   });
 
   /// Send an event to be emitted.
-  ///
-  /// Only surfaces a value in machine modes, Loggers may ignore this message in
-  /// non-machine modes.
   void sendEvent(String name, [Map<String, dynamic>? args]) {}
 
   /// Clears all output.

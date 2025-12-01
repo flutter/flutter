@@ -15,6 +15,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
@@ -23,11 +24,11 @@ import '../device_vm_service_discovery_for_attach.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../vmservice.dart';
-import 'android.dart';
 import 'android_builder.dart';
 import 'android_console.dart';
 import 'android_sdk.dart';
 import 'application_package.dart';
+import 'gradle_utils.dart' as gradle_utils;
 
 /// Whether the [AndroidDevice] is believed to be a physical device or an emulator.
 enum HardwareType { emulator, physical }
@@ -327,9 +328,9 @@ class AndroidDevice extends Device {
 
       // This has been reported to return null on some devices. In this case,
       // assume the lowest supported API to still allow Flutter to run.
-      // Sample output: '22'
+      // Sample output: '24'
       final String sdkVersion =
-          await _getProperty('ro.build.version.sdk') ?? minApiLevel.toString();
+          await _getProperty('ro.build.version.sdk') ?? gradle_utils.minSdkVersion;
 
       final int? sdkVersionParsed = int.tryParse(sdkVersion);
       if (sdkVersionParsed == null) {
@@ -337,10 +338,10 @@ class AndroidDevice extends Device {
         return false;
       }
 
-      if (sdkVersionParsed < minApiLevel) {
+      if (sdkVersionParsed < gradle_utils.minSdkVersionInt) {
         _logger.printError(
           'The Android version ($sdkVersion) on the target device is too old. Please '
-          'use a $minVersionName (version $minApiLevel / $minVersionText) device or later.',
+          'use a API ${gradle_utils.minSdkVersion} device or later.',
         );
         return false;
       }
@@ -570,7 +571,6 @@ class AndroidDevice extends Device {
         androidBuildInfo: AndroidBuildInfo(
           debuggingOptions.buildInfo,
           targetArchs: <AndroidArch>[androidArch],
-          fastStart: debuggingOptions.fastStart,
         ),
       );
       // Package has been built, so we can get the updated application ID and
@@ -624,6 +624,7 @@ class AndroidDevice extends Device {
         'enable-dart-profiling',
         'true',
       ],
+      if (debuggingOptions.profileStartup) ...<String>['--ez', 'profile-startup', 'true'],
       if (traceStartup) ...<String>['--ez', 'trace-startup', 'true'],
       if (route != null) ...<String>['--es', 'route', route],
       if (debuggingOptions.enableSoftwareRendering) ...<String>[
@@ -731,9 +732,6 @@ class AndroidDevice extends Device {
 
   @override
   bool get supportsHotRestart => true;
-
-  @override
-  bool get supportsFastStart => true;
 
   @override
   Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
@@ -1016,16 +1014,16 @@ class AndroidMemoryInfo extends MemoryInfo {
 
   // Realtime is time since the system was booted includes deep sleep. Clock
   // is monotonic, and ticks even when the CPU is in power saving modes.
-  var realTime = 0;
+  int realTime = 0;
 
   // Each measurement has KB as a unit.
-  var javaHeap = 0;
-  var nativeHeap = 0;
-  var code = 0;
-  var stack = 0;
-  var graphics = 0;
-  var privateOther = 0;
-  var system = 0;
+  int javaHeap = 0;
+  int nativeHeap = 0;
+  int code = 0;
+  int stack = 0;
+  int graphics = 0;
+  int privateOther = 0;
+  int system = 0;
 
   @override
   Map<String, Object> toJson() {
@@ -1122,12 +1120,12 @@ class AdbLogReader extends DeviceLogReader {
     // see: https://github.com/flutter/flutter/pull/8864.
     const decoder = Utf8Decoder(reportErrors: false);
     _adbProcess.stdout
-        .transform<String>(decoder)
-        .transform<String>(const LineSplitter())
+        .transformWithCallSite(decoder)
+        .transform(const LineSplitter())
         .listen(_onLine);
     _adbProcess.stderr
-        .transform<String>(decoder)
-        .transform<String>(const LineSplitter())
+        .transformWithCallSite(decoder)
+        .transform(const LineSplitter())
         .listen(_onLine);
     unawaited(
       _adbProcess.exitCode.whenComplete(() {

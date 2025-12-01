@@ -32,6 +32,7 @@ const BasicMessageChannel<String> _kReloadChannel =
 void main() {
   // Ensures bindings are initialized before doing anything.
   WidgetsFlutterBinding.ensureInitialized();
+  ui.PlatformDispatcher.instance.setSemanticsTreeEnabled(true);
   // Start listening immediately for messages from the iOS side. ObjC calls
   // will be made to let us know when we should be changing the app state.
   _kReloadChannel.setMessageHandler(run);

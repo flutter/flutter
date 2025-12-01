@@ -16,11 +16,13 @@ namespace flutter {
 
 class PlatformViewAndroidDelegate {
  public:
-  static constexpr size_t kBytesPerNode = 50 * sizeof(int32_t);
+  static constexpr size_t kBytesPerNode =
+      70 * sizeof(int32_t);  // The # fields in SemanticsNode
   static constexpr size_t kBytesPerChild = sizeof(int32_t);
   static constexpr size_t kBytesPerCustomAction = sizeof(int32_t);
   static constexpr size_t kBytesPerAction = 4 * sizeof(int32_t);
   static constexpr size_t kBytesPerStringAttribute = 4 * sizeof(int32_t);
+  static constexpr int kEmptyStringIndex = -1;
   explicit PlatformViewAndroidDelegate(
       std::shared_ptr<PlatformViewAndroidJNI> jni_facade);
   void UpdateSemantics(

@@ -24,7 +24,7 @@ class _NoDoubleClamp implements AnalyzeRule {
 
   @override
   void applyTo(ResolvedUnitResult unit) {
-    final _DoubleClampVisitor visitor = _DoubleClampVisitor();
+    final visitor = _DoubleClampVisitor();
     unit.unit.visitChildren(visitor);
     final List<AstNode> violationsInUnit = visitor.clampAccessNodes;
     if (violationsInUnit.isNotEmpty) {
@@ -65,7 +65,7 @@ class _DoubleClampVisitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitSimpleIdentifier(SimpleIdentifier node) {
-    if (node.name != 'clamp' || node.staticElement is! MethodElement) {
+    if (node.name != 'clamp' || node.element is! MethodElement) {
       return;
     }
     final bool isAllowed = switch (node.parent) {

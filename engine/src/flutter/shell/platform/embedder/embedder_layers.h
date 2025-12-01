@@ -11,16 +11,14 @@
 #include "flutter/flow/embedded_views.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/embedder/embedder.h"
-#include "third_party/skia/include/core/SkMatrix.h"
-#include "third_party/skia/include/core/SkSize.h"
 
 namespace flutter {
 
 class EmbedderLayers {
  public:
-  EmbedderLayers(SkISize frame_size,
+  EmbedderLayers(DlISize frame_size,
                  double device_pixel_ratio,
-                 SkMatrix root_surface_transformation,
+                 DlMatrix root_surface_transformation,
                  uint64_t presentation_time);
 
   ~EmbedderLayers();
@@ -38,9 +36,9 @@ class EmbedderLayers {
                              const PresentCallback& callback) const;
 
  private:
-  const SkISize frame_size_;
+  const DlISize frame_size_;
   const double device_pixel_ratio_;
-  const SkMatrix root_surface_transformation_;
+  const DlMatrix root_surface_transformation_;
   std::vector<std::unique_ptr<FlutterPlatformView>> platform_views_referenced_;
   std::vector<std::unique_ptr<FlutterPlatformViewMutation>>
       mutations_referenced_;

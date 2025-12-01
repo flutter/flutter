@@ -209,6 +209,21 @@ public class PlatformPlugin {
       case SELECTION_CLICK:
         view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
         break;
+      case SUCCESS_NOTIFICATION:
+        if (Build.VERSION.SDK_INT >= API_LEVELS.API_30) {
+          view.performHapticFeedback(HapticFeedbackConstants.CONFIRM);
+        }
+        break;
+      case WARNING_NOTIFICATION:
+        if (Build.VERSION.SDK_INT >= API_LEVELS.API_30) {
+          view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+        }
+        break;
+      case ERROR_NOTIFICATION:
+        if (Build.VERSION.SDK_INT >= API_LEVELS.API_30) {
+          view.performHapticFeedback(HapticFeedbackConstants.REJECT);
+        }
+        break;
     }
   }
 
@@ -371,7 +386,7 @@ public class PlatformPlugin {
             | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
 
-    if (overlaysToShow.size() == 0) {
+    if (overlaysToShow.isEmpty()) {
       enabledOverlays |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
     }
 

@@ -100,7 +100,7 @@ template("embedder_source_set") {
     public_deps = [ ":embedder_headers" ]
     deps = [
       ":embedder_gpu_configuration",
-      "$dart_src/runtime/bin:dart_io_api",
+      "$dart_src/runtime/bin:common_embedder_dart_io",
       "$dart_src/runtime/bin:elf_loader",
       "//flutter/assets",
       "//flutter/common",
@@ -602,7 +602,7 @@ if (is_mac) {
   }
 }
 
-if (host_os == "linux" || host_os == "win") {
+if (host_os == "linux" || host_os == "win" || is_android) {
   zip_bundle("embedder-archive") {
     output =
         "$full_target_platform_name/$full_target_platform_name-embedder.zip"
@@ -616,7 +616,7 @@ if (host_os == "linux" || host_os == "win") {
         destination = "flutter_embedder.h"
       },
     ]
-    if (host_os == "linux") {
+    if (host_os == "linux" || is_android) {
       files += [
         {
           source = "$root_out_dir/libflutter_engine.so"

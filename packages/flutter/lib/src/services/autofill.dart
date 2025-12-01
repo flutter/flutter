@@ -733,7 +733,7 @@ class AutofillConfiguration {
             'uniqueIdentifier': uniqueIdentifier,
             'hints': autofillHints,
             'editingValue': currentEditingValue.toJSON(),
-            if (hintText != null) 'hintText': hintText,
+            'hintText': ?hintText,
           }
         : null;
   }
@@ -767,7 +767,7 @@ class AutofillConfiguration {
 
   @override
   String toString() {
-    final List<String> description = <String>[
+    final description = <String>[
       'enabled: $enabled',
       'uniqueIdentifier: $uniqueIdentifier',
       'autofillHints: $autofillHints',

@@ -18,7 +18,6 @@ import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
@@ -744,11 +743,28 @@ void main() {
     testWithoutContext('v - launchDevToolsInBrowser', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[]);
       final runner = terminalHandler.residentRunner as FakeResidentRunner;
-      final devtoolsHandler = runner.residentDevtoolsHandler as FakeResidentDevtoolsHandler;
-
-      expect(devtoolsHandler.calledLaunchDevToolsInBrowser, isFalse);
+      for (final FlutterDevice? device in runner.flutterDevices) {
+        expect(device!.device!.dds.calledLaunchDevToolsInBrowser, isFalse);
+      }
       await terminalHandler.processTerminalInput('v');
-      expect(devtoolsHandler.calledLaunchDevToolsInBrowser, isTrue);
+      for (final FlutterDevice? device in runner.flutterDevices) {
+        expect(device!.device!.dds.calledLaunchDevToolsInBrowser, isTrue);
+      }
+    });
+
+    testWithoutContext('v - does not launchDevToolsInBrowser on web in profile mode', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(
+        <FakeVmServiceRequest>[],
+        web: true,
+        buildMode: BuildMode.profile,
+      );
+
+      final runner = terminalHandler.residentRunner as FakeResidentRunner;
+      final DartDevelopmentService dds = runner.flutterDevices.single.device!.dds;
+
+      expect(dds.calledLaunchDevToolsInBrowser, isFalse);
+      await terminalHandler.processTerminalInput('v');
+      expect(dds.calledLaunchDevToolsInBrowser, isFalse);
     });
 
     testWithoutContext('w,W - debugDumpApp without service protocol is skipped', () async {
@@ -1189,14 +1205,14 @@ class FakeResidentRunner extends ResidentHandlers {
   FakeResidentRunner(FlutterDevice device, this.logger, this.fileSystem)
     : flutterDevices = <FlutterDevice>[device];
 
-  var calledDetach = false;
-  var calledPrint = false;
-  var calledExit = false;
-  var calledPrintWithDetails = false;
-  var calledReload = false;
-  var calledRestart = false;
-  var reloadExitCode = 0;
-  var fatalReloadError = false;
+  bool calledDetach = false;
+  bool calledPrint = false;
+  bool calledExit = false;
+  bool calledPrintWithDetails = false;
+  bool calledReload = false;
+  bool calledRestart = false;
+  int reloadExitCode = 0;
+  bool fatalReloadError = false;
 
   @override
   final Logger logger;
@@ -1208,31 +1224,31 @@ class FakeResidentRunner extends ResidentHandlers {
   final List<FlutterDevice> flutterDevices;
 
   @override
-  var canHotReload = true;
+  bool canHotReload = true;
 
   @override
-  var hotMode = true;
+  bool hotMode = true;
 
   @override
-  var isRunningDebug = true;
+  bool isRunningDebug = true;
 
   @override
-  var isRunningProfile = false;
+  bool isRunningProfile = false;
 
   @override
-  var isRunningRelease = false;
+  bool isRunningRelease = false;
 
   @override
-  var stayResident = true;
+  bool stayResident = true;
 
   @override
-  var supportsRestart = true;
+  bool supportsRestart = true;
 
   @override
-  var supportsDetach = true;
+  bool supportsDetach = true;
 
   @override
-  var supportsServiceProtocol = true;
+  bool supportsServiceProtocol = true;
 
   @override
   Future<void> cleanupAfterSignal() async {}
@@ -1278,21 +1294,6 @@ class FakeResidentRunner extends ResidentHandlers {
     }
     return OperationResult(reloadExitCode, '', fatal: fatalReloadError);
   }
-
-  // TODO(bkonyi): remove when ready to serve DevTools from DDS.
-  @override
-  ResidentDevtoolsHandler get residentDevtoolsHandler => _residentDevtoolsHandler;
-  final ResidentDevtoolsHandler _residentDevtoolsHandler = FakeResidentDevtoolsHandler();
-}
-
-// TODO(bkonyi): remove when ready to serve DevTools from DDS.
-class FakeResidentDevtoolsHandler extends Fake implements ResidentDevtoolsHandler {
-  var calledLaunchDevToolsInBrowser = false;
-
-  @override
-  bool launchDevToolsInBrowser({List<FlutterDevice?>? flutterDevices}) {
-    return calledLaunchDevToolsInBrowser = true;
-  }
 }
 
 class FakeDevice extends Fake implements Device {
@@ -1300,7 +1301,7 @@ class FakeDevice extends Fake implements Device {
   Future<bool> isSupported() async => true;
 
   @override
-  var supportsScreenshot = false;
+  bool supportsScreenshot = false;
 
   @override
   String get name => 'Fake Device';
@@ -1309,7 +1310,7 @@ class FakeDevice extends Fake implements Device {
   String get displayName => name;
 
   @override
-  var dds = DartDevelopmentService(logger: FakeLogger());
+  DartDevelopmentService dds = DartDevelopmentService(logger: FakeLogger());
 
   @override
   Future<void> takeScreenshot(File file) async {
@@ -1390,7 +1391,7 @@ TerminalHandler setUpTerminalHandler(
 class FakeResidentCompiler extends Fake implements ResidentCompiler {}
 
 class TestRunner extends Fake implements ResidentRunner {
-  var hasHelpBeenPrinted = false;
+  bool hasHelpBeenPrinted = false;
 
   @override
   Future<void> cleanupAfterSignal() async {}
@@ -1404,21 +1405,20 @@ class TestRunner extends Fake implements ResidentRunner {
   }
 
   @override
-  Future<int?> run({
+  Future<int> run({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
     bool enableDevTools = false,
     String? route,
-  }) async => null;
+  }) async => -1;
 
   @override
-  Future<int?> attach({
+  Future<int> attach({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
-    bool allowExistingDdsInstance = false,
     bool enableDevTools = false,
     bool needsFullRestart = true,
-  }) async => null;
+  }) async => -1;
 }
 
 class _TestSignals implements Signals {

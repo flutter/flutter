@@ -21,7 +21,8 @@ GeometryResult FillPathSourceGeometry::GetPositionBuffer(
     const ContentContext& renderer,
     const Entity& entity,
     RenderPass& pass) const {
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto& data_host_buffer = renderer.GetTransientsDataBuffer();
+  auto& indexes_host_buffer = renderer.GetTransientsIndexesBuffer();
 
   const auto& bounding_box = GetSource().GetBounds();
   if (bounding_box.IsEmpty()) {
@@ -43,7 +44,8 @@ GeometryResult FillPathSourceGeometry::GetPositionBuffer(
       renderer.GetDeviceCapabilities().SupportsTriangleFan() &&
       supports_primitive_restart;
   VertexBuffer vertex_buffer = renderer.GetTessellator().TessellateConvex(
-      GetSource(), host_buffer, entity.GetTransform().GetMaxBasisLengthXY(),
+      GetSource(), data_host_buffer, indexes_host_buffer,
+      entity.GetTransform().GetMaxBasisLengthXY(),
       /*supports_primitive_restart=*/supports_primitive_restart,
       /*supports_triangle_fan=*/supports_triangle_fan);
 

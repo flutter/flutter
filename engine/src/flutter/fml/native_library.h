@@ -13,7 +13,7 @@
 #include "flutter/fml/memory/ref_ptr.h"
 
 #if defined(FML_OS_WIN)
-#include <windows.h>
+#include "flutter/fml/platform/win/windows_shim.h"
 #endif  // defined(FML_OS_WIN)
 
 namespace fml {

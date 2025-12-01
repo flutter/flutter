@@ -151,7 +151,7 @@ TEST(DirectManipulationTest, TestGesture) {
   owner->SetBindingHandlerDelegate(&delegate);
   auto handler =
       fml::MakeRefCounted<DirectManipulationEventHandler>(owner.get());
-  int32_t device_id = (int32_t) reinterpret_cast<int64_t>(handler.get());
+  int32_t device_id = (int32_t)reinterpret_cast<int64_t>(handler.get());
   EXPECT_CALL(viewport, GetPrimaryContent(_, _))
       .WillOnce(::testing::Invoke([&content](REFIID in, void** out) {
         *out = &content;
@@ -213,7 +213,7 @@ TEST(DirectManipulationTest, TestRounding) {
   owner->SetBindingHandlerDelegate(&delegate);
   auto handler =
       fml::MakeRefCounted<DirectManipulationEventHandler>(owner.get());
-  int32_t device_id = (int32_t) reinterpret_cast<int64_t>(handler.get());
+  int32_t device_id = (int32_t)reinterpret_cast<int64_t>(handler.get());
   EXPECT_CALL(viewport, GetPrimaryContent(_, _))
       .WillOnce(::testing::Invoke([&content](REFIID in, void** out) {
         *out = &content;
@@ -294,7 +294,7 @@ TEST(DirectManipulationTest, TestInertiaCancelSentForUserCancel) {
   owner->SetBindingHandlerDelegate(&delegate);
   auto handler =
       fml::MakeRefCounted<DirectManipulationEventHandler>(owner.get());
-  int32_t device_id = (int32_t) reinterpret_cast<int64_t>(handler.get());
+  int32_t device_id = (int32_t)reinterpret_cast<int64_t>(handler.get());
   // No need to mock the actual gesture, just start at the end.
   EXPECT_CALL(viewport, GetViewportRect(_))
       .WillOnce(::testing::Invoke([DISPLAY_WIDTH, DISPLAY_HEIGHT](RECT* rect) {
@@ -347,7 +347,7 @@ TEST(DirectManipulationTest, TestInertiaCamcelNotSentAtInertiaEnd) {
   owner->SetBindingHandlerDelegate(&delegate);
   auto handler =
       fml::MakeRefCounted<DirectManipulationEventHandler>(owner.get());
-  int32_t device_id = (int32_t) reinterpret_cast<int64_t>(handler.get());
+  int32_t device_id = (int32_t)reinterpret_cast<int64_t>(handler.get());
   // No need to mock the actual gesture, just start at the end.
   EXPECT_CALL(viewport, GetViewportRect(_))
       .WillOnce(::testing::Invoke([DISPLAY_WIDTH, DISPLAY_HEIGHT](RECT* rect) {
@@ -404,7 +404,7 @@ TEST(DirectManipulationTest, TestGestureWithInitialData) {
   owner->SetBindingHandlerDelegate(&delegate);
   auto handler =
       fml::MakeRefCounted<DirectManipulationEventHandler>(owner.get());
-  int32_t device_id = (int32_t) reinterpret_cast<int64_t>(handler.get());
+  int32_t device_id = (int32_t)reinterpret_cast<int64_t>(handler.get());
   EXPECT_CALL(viewport, GetPrimaryContent(_, _))
       .WillOnce(::testing::Invoke([&content](REFIID in, void** out) {
         *out = &content;

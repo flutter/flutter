@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
 import 'package:meta/meta.dart';
 import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
@@ -33,18 +35,14 @@ export 'xcode_project.dart';
 
 /// Enum for each officially supported platform.
 enum SupportedPlatform {
-  android(name: 'android'),
-  ios(name: 'ios'),
-  linux(name: 'linux'),
-  macos(name: 'macos'),
-  web(name: 'web'),
-  windows(name: 'windows'),
-  fuchsia(name: 'fuchsia'),
-  root(name: 'root'); // Special platform to represent the root project directory
-
-  const SupportedPlatform({required this.name});
-
-  final String name;
+  android,
+  ios,
+  linux,
+  macos,
+  web,
+  windows,
+  fuchsia,
+  root, // Special platform to represent the root project directory
 }
 
 class FlutterProjectFactory {
@@ -165,10 +163,7 @@ class FlutterProject {
     if (android.existsSync()) {
       final String? applicationId = android.applicationId;
       final String? group = android.group;
-      candidates.addAll(<String>[
-        if (applicationId != null) applicationId,
-        if (group != null) group,
-      ]);
+      candidates.addAll(<String>[?applicationId, ?group]);
     }
     if (example.android.existsSync()) {
       final String? applicationId = example.android.applicationId;
@@ -236,7 +231,10 @@ class FlutterProject {
 
   /// The location of the generated scaffolding project for hosting widget
   /// previews from this project.
-  Directory get widgetPreviewScaffold => dartTool.childDirectory('widget_preview_scaffold');
+  // TODO(bkonyi): don't create this project in $TMP.
+  // See https://github.com/flutter/flutter/issues/179036
+  late final Directory widgetPreviewScaffold = directory.fileSystem.systemTempDirectory
+      .createTempSync('widget_preview_scaffold');
 
   /// The directory containing the generated code for this project.
   Directory get generated => directory.absolute
@@ -244,6 +242,21 @@ class FlutterProject {
       .childDirectory('build')
       .childDirectory('generated')
       .childDirectory(manifest.appName);
+
+  /// The set of directories created by the tool containing ephemeral state.
+  // TODO(bkonyi): provide getters for each project type that returns the set
+  // of known ephemeral files / directories.
+  Set<Directory> get ephemeralDirectories => UnmodifiableSetView(_ephemeralDirectories);
+  late final _ephemeralDirectories = <Directory>{
+    buildDirectory,
+    android.ephemeralDirectory,
+    ios.ephemeralDirectory,
+    ios.ephemeralModuleDirectory,
+    ios.symlinks,
+    linux.ephemeralDirectory,
+    macos.ephemeralDirectory,
+    windows.ephemeralDirectory,
+  };
 
   /// The generated Dart plugin registrant for non-web platforms.
   File get dartPluginRegistrant =>
@@ -318,6 +331,18 @@ class FlutterProject {
       throwToolExit('Please correct the pubspec.yaml file at $path');
     }
     return manifest;
+  }
+
+  /// Reloads the content of [pubspecFile] and updates the contents of [manifest].
+  void reloadManifest({required Logger logger, required FileSystem fs}) {
+    _manifest = _readManifest(pubspecFile.path, logger: logger, fileSystem: fs);
+  }
+
+  /// Returns the MD5 hash of the contents of [manifest], ensuring [manifest] is up to date before
+  /// calculating the hash.
+  String computeManifestMD5Hash({required Logger logger, required FileSystem fs}) {
+    reloadManifest(logger: logger, fs: fs);
+    return _manifest.computeMD5Hash();
   }
 
   /// Replaces the content of [pubspecFile] with the contents of [updated] and
@@ -417,8 +442,8 @@ class FlutterProject {
     final String? buildNumber = manifest.buildNumber;
     final versionFileJson = <String, String>{
       'app_name': manifest.appName,
-      if (buildName != null) 'version': buildName,
-      if (buildNumber != null) 'build_number': buildNumber,
+      'version': ?buildName,
+      'build_number': ?buildNumber,
       'package_name': manifest.appName,
     };
     return jsonEncode(versionFileJson);
@@ -602,8 +627,8 @@ class AndroidProject extends FlutterProjectPlatform {
 
   /// Gets the project root level Gradle settings file.
   ///
-  /// The file must exist and it must be written in either Groovy (build.gradle)
-  /// or Kotlin (build.gradle.kts).
+  /// The file must exist and it must be written in either Groovy (settings.gradle)
+  /// or Kotlin (settings.gradle.kts).
   File get settingsGradleFile {
     return getGroovyOrKotlin(hostAppGradleRoot, 'settings.gradle');
   }
@@ -646,6 +671,18 @@ class AndroidProject extends FlutterProjectPlatform {
     }
 
     return hostAppGradleRoot.childFile('AndroidManifest.xml');
+  }
+
+  /// Gets the Gradle wrapper properties file.
+  ///
+  /// This file is located under `gradle/wrapper/gradle-wrapper.properties`
+  /// in the host app's Gradle root directory. It defines the distribution
+  /// settings for the Gradle wrapper.
+  File get gradleWrapperPropertiesFile {
+    return hostAppGradleRoot
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.properties');
   }
 
   File get generatedPluginRegistrantFile {

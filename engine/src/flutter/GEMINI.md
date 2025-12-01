@@ -21,7 +21,14 @@ https://github.com/flutter/flutter.
 - `./ci` - necessary data for continuous integration
 - `./fml` - low-level cross-platform helper classes
 - `./impeller` - a 2d renderer
+- `./lib` - Contains the engine's Dart code (dart:ui).
 - `./shell` - contains the embedders for each target platform
 - `./third-party` - 3rd party dependencies which are copied here with depot
   tools.
 - `./tools` - tools used for assisting engine development
+
+## Style
+
+- The Google C++ Style Guide is used for C++.
+- C++ docstrings are in the Doxygen format.
+- Prefer functions that are less than 30 lines long.

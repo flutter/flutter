@@ -50,7 +50,7 @@ void main(List<String> args) {
 
 Future<void> run(List<String> args) async {
   final parser = ArgParser()
-    ..addOption(_kOptionPackages, help: 'The .packages file')
+    ..addOption(_kOptionPackages, help: 'The .dart_tool/package_config.json file')
     ..addOption(_kOptionShell, help: 'The flutter_tester binary')
     ..addOption(_kOptionTestDirectory, help: 'Directory containing the tests')
     ..addOption(_kOptionSdkRoot, help: 'Path to the SDK platform files')

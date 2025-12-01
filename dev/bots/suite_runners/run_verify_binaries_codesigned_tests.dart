@@ -76,6 +76,7 @@ List<String> binariesWithEntitlements(String flutterRoot) {
     'artifacts/engine/ios/gen_snapshot_arm64',
     'dart-sdk/bin/dart',
     'dart-sdk/bin/dartaotruntime',
+    'dart-sdk/bin/dartvm',
     'dart-sdk/bin/utils/gen_snapshot',
     'dart-sdk/bin/utils/wasm-opt',
   ].map((String relativePath) => path.join(flutterRoot, 'bin', 'cache', relativePath)).toList();
@@ -188,7 +189,7 @@ Future<void> verifyExist(
   final List<String> expectedSigned =
       binariesWithEntitlements(flutterRoot) + binariesWithoutEntitlements(flutterRoot);
   final List<String> expectedUnsigned = unsignedBinaries(flutterRoot);
-  final Set<String> foundFiles = <String>{
+  final foundFiles = <String>{
     for (final String binaryPath in binaryPaths)
       if (expectedSigned.contains(binaryPath))
         binaryPath
@@ -199,7 +200,7 @@ Future<void> verifyExist(
   };
 
   if (foundFiles.length < expectedSigned.length) {
-    final List<String> unfoundFiles = <String>[
+    final unfoundFiles = <String>[
       for (final String file in expectedSigned)
         if (!foundFiles.contains(file)) file,
     ];
@@ -223,9 +224,9 @@ Future<void> verifySignatures(
   @visibleForTesting ProcessManager processManager = const LocalProcessManager(),
   bool forRelease = true,
 }) async {
-  final List<String> unsignedFiles = <String>[];
-  final List<String> wrongEntitlementBinaries = <String>[];
-  final List<String> unexpectedFiles = <String>[];
+  final unsignedFiles = <String>[];
+  final wrongEntitlementBinaries = <String>[];
+  final unexpectedFiles = <String>[];
   final String cacheDirectory = path.join(flutterRoot, 'bin', 'cache');
 
   final List<String> binariesAndXcframeworks =
@@ -245,9 +246,9 @@ Future<void> verifySignatures(
     xcframeworksToVerifyCodesigned = <String>[];
   }
 
-  for (final String pathToCheck in binariesAndXcframeworks) {
-    bool verifySignature = false;
-    bool verifyEntitlements = false;
+  for (final pathToCheck in binariesAndXcframeworks) {
+    var verifySignature = false;
+    var verifyEntitlements = false;
     if (binariesToVerifyEntitlements.contains(pathToCheck)) {
       verifySignature = true;
       verifyEntitlements = true;
@@ -339,7 +340,7 @@ Future<List<String>> findBinaryPaths(
   String rootDirectory, {
   @visibleForTesting ProcessManager processManager = const LocalProcessManager(),
 }) async {
-  final List<String> allBinaryPaths = <String>[];
+  final allBinaryPaths = <String>[];
   final io.ProcessResult result = await processManager.run(<String>[
     'find',
     rootDirectory,
@@ -376,7 +377,7 @@ Future<List<String>> findXcframeworksPaths(
   final List<String> allXcframeworkPaths = LineSplitter.split(
     result.stdout as String,
   ).where((String s) => s.isNotEmpty).toList();
-  for (final String path in allXcframeworkPaths) {
+  for (final path in allXcframeworkPaths) {
     print('Found: $path\n');
   }
   return allXcframeworkPaths;
@@ -418,8 +419,8 @@ Future<bool> hasExpectedEntitlements(
     return false;
   }
 
-  bool passes = true;
-  final String output = entitlementResult.stdout as String;
+  var passes = true;
+  final output = entitlementResult.stdout as String;
   for (final String entitlement in expectedEntitlements) {
     final bool entitlementExpected = binariesWithEntitlements(flutterRoot).contains(binaryPath);
     if (output.contains(entitlement) != entitlementExpected) {

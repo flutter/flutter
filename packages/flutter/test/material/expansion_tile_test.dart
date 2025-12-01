@@ -49,7 +49,7 @@ class TestTextState extends State<TestText> {
 }
 
 void main() {
-  const Color dividerColor = Color(0x1f333333);
+  const dividerColor = Color(0x1f333333);
   const Color foregroundColor = Colors.blueAccent;
   const Color unselectedWidgetColor = Colors.black54;
   const Color headerColor = Colors.black45;
@@ -110,13 +110,12 @@ void main() {
       expect(getHeight(topKey), getHeight(collapsedKey) - 2.0);
       expect(getHeight(topKey), getHeight(defaultKey) - 2.0);
 
-      ShapeDecoration expandedContainerDecoration =
-          getDecoratedBox(expandedKey).decoration as ShapeDecoration;
+      var expandedContainerDecoration = getDecoratedBox(expandedKey).decoration as ShapeDecoration;
       expect(expandedContainerDecoration.color, Colors.red);
       expect((expandedContainerDecoration.shape as Border).top.color, dividerColor);
       expect((expandedContainerDecoration.shape as Border).bottom.color, dividerColor);
 
-      ShapeDecoration collapsedContainerDecoration =
+      var collapsedContainerDecoration =
           getDecoratedBox(collapsedKey).decoration as ShapeDecoration;
       expect(collapsedContainerDecoration.color, Colors.transparent);
       expect((collapsedContainerDecoration.shape as Border).top.color, Colors.transparent);
@@ -130,7 +129,7 @@ void main() {
 
       // Pump to the middle of the animation for expansion.
       await tester.pump(const Duration(milliseconds: 100));
-      final ShapeDecoration collapsingContainerDecoration =
+      final collapsingContainerDecoration =
           getDecoratedBox(collapsedKey).decoration as ShapeDecoration;
       expect(collapsingContainerDecoration.color, Colors.transparent);
       expect(
@@ -294,7 +293,7 @@ void main() {
     final Rect titleRect = tester.getRect(find.text('Hello'));
     final Rect trailingRect = tester.getRect(find.byIcon(Icons.expand_more));
     final Rect listTileRect = tester.getRect(find.byType(ListTile));
-    final Rect tallerWidget = titleRect.height > trailingRect.height ? titleRect : trailingRect;
+    final tallerWidget = titleRect.height > trailingRect.height ? titleRect : trailingRect;
 
     // Check the positions of title and trailing Widgets, after padding is applied.
     expect(listTileRect.left, titleRect.left - 8);
@@ -338,8 +337,8 @@ void main() {
   });
 
   testWidgets('ExpansionTile expandedCrossAxisAlignment test', (WidgetTester tester) async {
-    const Key child0Key = Key('child0');
-    const Key child1Key = Key('child1');
+    const child0Key = Key('child0');
+    const child1Key = Key('child1');
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -412,7 +411,7 @@ void main() {
   testWidgets('expandedCrossAxisAlignment and expandedAlignment default values', (
     WidgetTester tester,
   ) async {
-    const Key child1Key = Key('child1');
+    const child1Key = Key('child1');
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -504,7 +503,7 @@ void main() {
   });
 
   testWidgets('ExpansionTile.collapsedBackgroundColor', (WidgetTester tester) async {
-    const Key expansionTileKey = Key('expansionTileKey');
+    const expansionTileKey = Key('expansionTileKey');
     const Color backgroundColor = Colors.red;
     const Color collapsedBackgroundColor = Colors.brown;
 
@@ -522,7 +521,7 @@ void main() {
       ),
     );
 
-    ShapeDecoration shapeDecoration =
+    var shapeDecoration =
         tester
                 .firstWidget<DecoratedBox>(
                   find.descendant(
@@ -553,7 +552,7 @@ void main() {
   });
 
   testWidgets('ExpansionTile default iconColor, textColor', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -584,10 +583,10 @@ void main() {
   testWidgets('ExpansionTile iconColor, textColor', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/78281
 
-    const Color iconColor = Color(0xff00ff00);
-    const Color collapsedIconColor = Color(0xff0000ff);
-    const Color textColor = Color(0xff00ffff);
-    const Color collapsedTextColor = Color(0xffff00ff);
+    const iconColor = Color(0xff00ff00);
+    const collapsedIconColor = Color(0xff0000ff);
+    const textColor = Color(0xff00ffff);
+    const collapsedTextColor = Color(0xffff00ff);
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -621,11 +620,11 @@ void main() {
   testWidgets('ExpansionTile Border', (WidgetTester tester) async {
     const Key expansionTileKey = PageStorageKey<String>('expansionTile');
 
-    const Border collapsedShape = Border(
+    const collapsedShape = Border(
       top: BorderSide(color: Colors.blue),
       bottom: BorderSide(color: Colors.green),
     );
-    final Border shape = Border.all(color: Colors.red);
+    final shape = Border.all(color: Colors.red);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -788,7 +787,7 @@ void main() {
     'ExpansionTile Semantics announcement',
     (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+      const localizations = DefaultMaterialLocalizations();
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -831,7 +830,7 @@ void main() {
     'ExpansionTile Semantics announcement is delayed on iOS',
     (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+      const localizations = DefaultMaterialLocalizations();
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -867,7 +866,7 @@ void main() {
   ) async {
     // This is a regression test for https://github.com/flutter/flutter/pull/121624
     final SemanticsHandle handle = tester.ensureSemantics();
-    const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+    const localizations = DefaultMaterialLocalizations();
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -911,7 +910,7 @@ void main() {
     'Semantics hint for iOS and macOS',
     (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+      const localizations = DefaultMaterialLocalizations();
 
       await tester.pumpWidget(
         const MaterialApp(
@@ -956,13 +955,13 @@ void main() {
   testWidgets('Collapsed ExpansionTile properties can be updated with setState', (
     WidgetTester tester,
   ) async {
-    const Key expansionTileKey = Key('expansionTileKey');
+    const expansionTileKey = Key('expansionTileKey');
     ShapeBorder collapsedShape = const RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(4)),
     );
-    Color collapsedTextColor = const Color(0xffffffff);
-    Color collapsedBackgroundColor = const Color(0xffff0000);
-    Color collapsedIconColor = const Color(0xffffffff);
+    var collapsedTextColor = const Color(0xffffffff);
+    var collapsedBackgroundColor = const Color(0xffff0000);
+    var collapsedIconColor = const Color(0xffffffff);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1050,13 +1049,13 @@ void main() {
   testWidgets('Expanded ExpansionTile properties can be updated with setState', (
     WidgetTester tester,
   ) async {
-    const Key expansionTileKey = Key('expansionTileKey');
+    const expansionTileKey = Key('expansionTileKey');
     ShapeBorder shape = const RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(12)),
     );
-    Color textColor = const Color(0xff00ffff);
-    Color backgroundColor = const Color(0xff0000ff);
-    Color iconColor = const Color(0xff00ffff);
+    var textColor = const Color(0xff00ffff);
+    var backgroundColor = const Color(0xff0000ff);
+    var iconColor = const Color(0xff00ffff);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1148,7 +1147,7 @@ void main() {
   });
 
   testWidgets('Override ExpansionTile animation using AnimationStyle', (WidgetTester tester) async {
-    const Key expansionTileKey = Key('expansionTileKey');
+    const expansionTileKey = Key('expansionTileKey');
 
     Widget buildExpansionTile({AnimationStyle? animationStyle}) {
       return MaterialApp(
@@ -1288,15 +1287,15 @@ void main() {
   testWidgets('Material3 - ExpansionTile draws Inkwell splash on top of background color', (
     WidgetTester tester,
   ) async {
-    const Key expansionTileKey = Key('expansionTileKey');
+    const expansionTileKey = Key('expansionTileKey');
     const ShapeBorder shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(16)),
     );
     const ShapeBorder collapsedShape = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(16)),
     );
-    const Color collapsedBackgroundColor = Color(0xff00ff00);
-    const Color backgroundColor = Color(0xffff0000);
+    const collapsedBackgroundColor = Color(0xff00ff00);
+    const backgroundColor = Color(0xffff0000);
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -1380,7 +1379,7 @@ void main() {
     // can be deleted.
 
     testWidgets('ExpansionTile default iconColor, textColor', (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(useMaterial3: false);
+      final theme = ThemeData(useMaterial3: false);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -1411,16 +1410,16 @@ void main() {
     testWidgets('Material2 - ExpansionTile draws inkwell splash on top of background color', (
       WidgetTester tester,
     ) async {
-      const Key expansionTileKey = Key('expansionTileKey');
-      final ThemeData theme = ThemeData(useMaterial3: false);
+      const expansionTileKey = Key('expansionTileKey');
+      final theme = ThemeData(useMaterial3: false);
       const ShapeBorder shape = RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(16)),
       );
       const ShapeBorder collapsedShape = RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(16)),
       );
-      const Color collapsedBackgroundColor = Color(0xff00ff00);
-      const Color backgroundColor = Color(0xffff0000);
+      const collapsedBackgroundColor = Color(0xff00ff00);
+      const backgroundColor = Color(0xffff0000);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -1471,7 +1470,7 @@ void main() {
   testWidgets('ExpansionTileController isExpanded, expand() and collapse()', (
     WidgetTester tester,
   ) async {
-    final ExpansionTileController controller = ExpansionTileController();
+    final controller = ExpansionTileController();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1503,7 +1502,7 @@ void main() {
   testWidgets(
     'Calling ExpansionTileController.expand/collapsed has no effect if it is already expanded/collapsed',
     (WidgetTester tester) async {
-      final ExpansionTileController controller = ExpansionTileController();
+      final controller = ExpansionTileController();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -1606,9 +1605,9 @@ void main() {
     final GlobalKey titleKey = GlobalKey();
     final GlobalKey nonDescendantKey = GlobalKey();
 
-    const bool dense = true;
+    const dense = true;
     const Color splashColor = Colors.blue;
-    const bool enableFeedback = false;
+    const enableFeedback = false;
     const VisualDensity visualDensity = VisualDensity.compact;
 
     await tester.pumpWidget(
@@ -1640,7 +1639,7 @@ void main() {
   });
 
   testWidgets('ExpansionTileController should not toggle if disabled', (WidgetTester tester) async {
-    final ExpansionTileController controller = ExpansionTileController();
+    final controller = ExpansionTileController();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1690,7 +1689,9 @@ void main() {
       );
 
       final Size materialAppSize = tester.getSize(find.byType(MaterialApp));
-      final Size titleSize = tester.getSize(find.byType(ColoredBox));
+      final Size titleSize = tester.getSize(
+        find.descendant(of: find.byType(ExpansionTile), matching: find.byType(ColoredBox)),
+      );
 
       expect(titleSize.width, materialAppSize.width);
     },
@@ -1713,7 +1714,9 @@ void main() {
       );
 
       final Size materialAppSize = tester.getSize(find.byType(MaterialApp));
-      final Size titleSize = tester.getSize(find.byType(ColoredBox));
+      final Size titleSize = tester.getSize(
+        find.descendant(of: find.byType(ExpansionTile), matching: find.byType(ColoredBox)),
+      );
 
       expect(titleSize.width, materialAppSize.width - 32.0);
     },
@@ -1743,5 +1746,255 @@ void main() {
     final Finder platform = find.text('ExpansionTile');
     final Offset offsetPlatform = tester.getTopLeft(platform);
     expect(offsetPlatform, const Offset(16.0, 17.0));
+  });
+
+  testWidgets('ExpansionTile can accept a new controller', (WidgetTester tester) async {
+    final controller1 = ExpansibleController();
+    final controller2 = ExpansibleController();
+    addTearDown(() {
+      controller1.dispose();
+      controller2.dispose();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ExpansionTile(
+            controller: controller1,
+            title: const Text('Title'),
+            initiallyExpanded: true,
+            children: const <Widget>[Text('Child 0')],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Child 0'), findsOne);
+    expect(controller1.isExpanded, isTrue);
+    controller1.collapse();
+    expect(controller1.isExpanded, isFalse);
+    await tester.pumpAndSettle();
+    expect(find.text('Child 0'), findsNothing);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ExpansionTile(
+            controller: controller2,
+            title: const Text('Title'),
+            initiallyExpanded: true,
+            children: const <Widget>[Text('Child 0')],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Child 0'), findsNothing);
+    controller2.expand();
+    expect(controller2.isExpanded, isTrue);
+    await tester.pumpAndSettle();
+    expect(find.text('Child 0'), findsOne);
+  });
+
+  testWidgets('ExpansionTile can accept a new controller with a different state', (
+    WidgetTester tester,
+  ) async {
+    final controller1 = ExpansibleController();
+    final controller2 = ExpansibleController();
+    addTearDown(() {
+      controller1.dispose();
+      controller2.dispose();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ExpansionTile(
+            controller: controller1,
+            title: const Text('Title'),
+            children: const <Widget>[Text('Child 0')],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Child 0'), findsNothing);
+    expect(controller1.isExpanded, isFalse);
+    controller1.expand();
+    expect(controller1.isExpanded, isTrue);
+    await tester.pumpAndSettle();
+    expect(find.text('Child 0'), findsOne);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ExpansionTile(
+            controller: controller2,
+            title: const Text('Title'),
+            children: const <Widget>[Text('Child 0')],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Child 0'),
+      findsNothing,
+      reason: 'The widget should update to the state of the new controller',
+    );
+    controller2.expand();
+    expect(controller2.isExpanded, isTrue);
+    await tester.pumpAndSettle();
+    expect(find.text('Child 0'), findsOne);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/176566
+  testWidgets(
+    'ExpansionTile semantics hint uses defaultTargetPlatform for VoiceOver regardless of theme platform',
+    (WidgetTester tester) async {
+      // Regression test for VoiceOver accessibility when theme platform differs from device platform.
+      // When someone sets theme.platform to TargetPlatform.android on an iOS device,
+      // VoiceOver should still work correctly by using the actual device platform for semantics hints.
+
+      final SemanticsHandle handle = tester.ensureSemantics();
+      const localizations = DefaultMaterialLocalizations();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.android),
+          home: const Material(
+            child: Column(
+              children: <Widget>[
+                ExpansionTile(title: Text('First Expansion Tile')),
+                ExpansionTile(initiallyExpanded: true, title: Text('Second Expansion Tile')),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      SemanticsNode semantics = tester.getSemantics(
+        find.ancestor(of: find.byType(ListTile).first, matching: find.byType(Semantics)).first,
+      );
+
+      expect(semantics, isNotNull);
+      // On iOS/macOS platform, the semantics hint should include expanded/collapsed state guidance
+      // even theme platform is set to Android.
+      expect(
+        semantics.hint,
+        '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}',
+      );
+
+      semantics = tester.getSemantics(
+        find.ancestor(of: find.byType(ListTile).last, matching: find.byType(Semantics)).first,
+      );
+
+      expect(semantics, isNotNull);
+      expect(
+        semantics.hint,
+        '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}',
+      );
+      handle.dispose();
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    }),
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/173060
+  group('Semantics tests for non-iOS/macOS platforms', () {
+    testWidgets(
+      'Semantics hint should show current state',
+      (WidgetTester tester) async {
+        final SemanticsHandle handle = tester.ensureSemantics();
+        const localizations = DefaultMaterialLocalizations();
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: Material(
+              child: Column(
+                children: <Widget>[
+                  ExpansionTile(title: Text('First Expansion Tile')),
+                  ExpansionTile(initiallyExpanded: true, title: Text('Second Expansion Tile')),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        // Test collapsed tile - should show "Collapsed" hint.
+        SemanticsNode semantics = tester.getSemantics(
+          find.ancestor(of: find.byType(ListTile).first, matching: find.byType(Semantics)).first,
+        );
+        expect(semantics, isNotNull);
+        expect(semantics.hint, localizations.expandedHint);
+
+        // Test expanded tile - should show "Expanded" hint.
+        semantics = tester.getSemantics(
+          find.ancestor(of: find.byType(ListTile).last, matching: find.byType(Semantics)).first,
+        );
+        expect(semantics, isNotNull);
+        expect(semantics.hint, localizations.collapsedHint);
+
+        handle.dispose();
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{
+        TargetPlatform.android,
+        TargetPlatform.fuchsia,
+        TargetPlatform.linux,
+        TargetPlatform.windows,
+      }),
+    );
+
+    testWidgets(
+      'Semantics hint updates when expansion state changes',
+      (WidgetTester tester) async {
+        final SemanticsHandle handle = tester.ensureSemantics();
+        const localizations = DefaultMaterialLocalizations();
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: Material(
+              child: ExpansionTile(title: Text('Test Tile'), children: <Widget>[Text('Child')]),
+            ),
+          ),
+        );
+
+        // Initially collapsed - should show "Collapsed".
+        SemanticsNode semantics = tester.getSemantics(
+          find.ancestor(of: find.byType(ListTile), matching: find.byType(Semantics)).first,
+        );
+        expect(semantics.hint, localizations.expandedHint);
+
+        // Tap to expand.
+        await tester.tap(find.text('Test Tile'));
+        await tester.pumpAndSettle();
+
+        // Now expanded - should show "Expanded".
+        semantics = tester.getSemantics(
+          find.ancestor(of: find.byType(ListTile), matching: find.byType(Semantics)).first,
+        );
+        expect(semantics.hint, localizations.collapsedHint);
+
+        // Tap to collapse.
+        await tester.tap(find.text('Test Tile'));
+        await tester.pumpAndSettle();
+
+        // Back to collapsed - should show "Collapsed" again.
+        semantics = tester.getSemantics(
+          find.ancestor(of: find.byType(ListTile), matching: find.byType(Semantics)).first,
+        );
+        expect(semantics.hint, localizations.expandedHint);
+
+        handle.dispose();
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{
+        TargetPlatform.android,
+        TargetPlatform.fuchsia,
+        TargetPlatform.linux,
+        TargetPlatform.windows,
+      }),
+    );
   });
 }

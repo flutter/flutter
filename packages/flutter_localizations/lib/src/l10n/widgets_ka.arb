@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "ვებში ძიება",
   "shareButtonLabel": "გაზიარება",
   "pasteButtonLabel": "ჩასმა",
-  "selectAllButtonLabel": "ყველას არჩევა"
+  "selectAllButtonLabel": "ყველას არჩევა",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found",
+  "radioButtonUnselectedLabel": "Not selected"
 }

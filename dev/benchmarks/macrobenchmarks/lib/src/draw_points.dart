@@ -70,13 +70,13 @@ class PointsPainter extends CustomPainter {
       return;
     }
     canvas.drawPaint(Paint()..color = Colors.white);
-    for (int i = 0; i < 8; i++) {
+    for (var i = 0; i < 8; i++) {
       final double x = ((size.width / (i + 1)) + tick) % size.width;
-      for (int j = 0; j < data.length; j += 2) {
+      for (var j = 0; j < data.length; j += 2) {
         data[j] = x;
         data[j + 1] = (size.height / (j + 1)) + 200;
       }
-      final Paint paint = Paint()
+      final paint = Paint()
         ..color = kColors[i]
         ..strokeWidth = 5
         ..strokeCap = StrokeCap.round

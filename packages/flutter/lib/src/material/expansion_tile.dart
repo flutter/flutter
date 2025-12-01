@@ -94,11 +94,19 @@ typedef ExpansionTileController = ExpansibleController;
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// This example demonstrates how an [ExpansionTileController] can be used to
+/// This example demonstrates how an [ExpansibleController] can be used to
 /// programmatically expand or collapse an [ExpansionTile].
 ///
 /// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.1.dart **
 /// {@end-tool}
+///
+/// ## Accessibility
+///
+/// The accessibility behavior of [ExpansionTile] is platform adaptive, based on
+/// the device's actual platform rather than the theme's platform setting. This
+/// ensures that assistive technologies like VoiceOver on iOS and macOS receive
+/// the correct platform-specific semantics hints, even when the app's theme is
+/// configured to mimic a different platform's appearance.
 ///
 /// See also:
 ///
@@ -398,7 +406,7 @@ class ExpansionTile extends StatefulWidget {
   /// In cases where control over the tile's state is needed from a callback
   /// triggered by a widget within the tile, [ExpansibleController.of] may be
   /// more convenient than supplying a controller.
-  final ExpansionTileController? controller;
+  final ExpansibleController? controller;
 
   /// {@macro flutter.material.ListTile.dense}
   final bool? dense;
@@ -497,7 +505,7 @@ class _ExpansionTileState extends State<ExpansionTile> {
   late Animation<Color?> _backgroundColor;
 
   late ExpansionTileThemeData _expansionTileTheme;
-  late ExpansionTileController _tileController;
+  late ExpansibleController _tileController;
   Timer? _timer;
   late Curve _curve;
   late Curve? _reverseCurve;
@@ -508,7 +516,7 @@ class _ExpansionTileState extends State<ExpansionTile> {
     super.initState();
     _curve = Curves.easeIn;
     _duration = _kExpand;
-    _tileController = widget.controller ?? ExpansionTileController();
+    _tileController = widget.controller ?? ExpansibleController();
     if (widget.initiallyExpanded) {
       _tileController.expand();
     }
@@ -538,12 +546,12 @@ class _ExpansionTileState extends State<ExpansionTile> {
       // semantic announcements on iOS. https://github.com/flutter/flutter/issues/122101.
       _timer?.cancel();
       _timer = Timer(const Duration(seconds: 1), () {
-        SemanticsService.announce(stateHint, textDirection);
+        SemanticsService.sendAnnouncement(View.of(context), stateHint, textDirection);
         _timer?.cancel();
         _timer = null;
       });
     } else {
-      SemanticsService.announce(stateHint, textDirection);
+      SemanticsService.sendAnnouncement(View.of(context), stateHint, textDirection);
     }
     widget.onExpansionChanged?.call(_tileController.isExpanded);
   }
@@ -584,24 +592,17 @@ class _ExpansionTileState extends State<ExpansionTile> {
   Widget _buildHeader(BuildContext context, Animation<double> animation) {
     _iconColor = animation.drive(_iconColorTween.chain(_easeInTween));
     _headerColor = animation.drive(_headerColorTween.chain(_easeInTween));
-    final ThemeData theme = Theme.of(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final String onTapHint = _tileController.isExpanded
         ? localizations.expansionTileExpandedTapHint
         : localizations.expansionTileCollapsedTapHint;
-    String? semanticsHint;
-    switch (theme.platform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        semanticsHint = _tileController.isExpanded
+    final String semanticsHint = switch (defaultTargetPlatform) {
+      TargetPlatform.iOS || TargetPlatform.macOS =>
+        _tileController.isExpanded
             ? '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}'
-            : '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}';
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        break;
-    }
+            : '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}',
+      _ => _tileController.isExpanded ? localizations.collapsedHint : localizations.expandedHint,
+    };
 
     return Semantics(
       hint: semanticsHint,
@@ -717,6 +718,15 @@ class _ExpansionTileState extends State<ExpansionTile> {
     if (widget.expansionAnimationStyle != oldWidget.expansionAnimationStyle) {
       _updateAnimationDuration();
       _updateHeightFactorCurve();
+    }
+    if (widget.controller != oldWidget.controller) {
+      _tileController.removeListener(_onExpansionChanged);
+      if (oldWidget.controller == null) {
+        _tileController.dispose();
+      }
+
+      _tileController = widget.controller ?? ExpansibleController();
+      _tileController.addListener(_onExpansionChanged);
     }
   }
 

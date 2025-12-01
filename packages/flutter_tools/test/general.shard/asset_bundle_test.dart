@@ -44,7 +44,13 @@ void main() {
       'nonempty',
       () async {
         final AssetBundle ab = AssetBundleFactory.instance.createBundle();
-        expect(await ab.build(packageConfigPath: '.dart_tool/package_config.json'), 0);
+        expect(
+          await ab.build(
+            packageConfigPath: '.dart_tool/package_config.json',
+            targetPlatform: TargetPlatform.tester,
+          ),
+          0,
+        );
         expect(ab.entries.length, greaterThan(0));
       },
       overrides: <Type, Generator>{
@@ -62,17 +68,12 @@ void main() {
           ..writeAsStringSync('');
 
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-        await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
-        expect(
-          bundle.entries.keys,
-          unorderedEquals(<String>['AssetManifest.json', 'AssetManifest.bin']),
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
         );
-        const expectedJsonAssetManifest = '{}';
+        expect(bundle.entries.keys, unorderedEquals(<String>['AssetManifest.bin']));
         const expectedBinAssetManifest = <Object, Object>{};
-        expect(
-          utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
-          expectedJsonAssetManifest,
-        );
         expect(
           const StandardMessageCodec().decodeMessage(
             ByteData.sublistView(
@@ -117,12 +118,14 @@ flutter:
         }
 
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-        await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        );
 
         expect(
           bundle.entries.keys,
           unorderedEquals(<String>[
-            'AssetManifest.json',
             'AssetManifest.bin',
             'FontManifest.json',
             'NOTICES.Z',
@@ -158,11 +161,13 @@ flutter:
     - assets/foo/
 ''');
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-        await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        );
         expect(
           bundle.entries.keys,
           unorderedEquals(<String>[
-            'AssetManifest.json',
             'AssetManifest.bin',
             'FontManifest.json',
             'NOTICES.Z',
@@ -175,11 +180,13 @@ flutter:
           ..setLastModifiedSync(packageFile.lastModifiedSync().add(const Duration(hours: 1)));
 
         expect(bundle.needsBuild(), true);
-        await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        );
         expect(
           bundle.entries.keys,
           unorderedEquals(<String>[
-            'AssetManifest.json',
             'AssetManifest.bin',
             'FontManifest.json',
             'NOTICES.Z',
@@ -214,11 +221,13 @@ flutter:
           mainLibName: 'my_app',
         );
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-        await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        );
         expect(
           bundle.entries.keys,
           unorderedEquals(<String>[
-            'AssetManifest.json',
             'AssetManifest.bin',
             'FontManifest.json',
             'NOTICES.Z',
@@ -243,11 +252,13 @@ name: my_app''')
         // asset manifest and not updated. This is due to the devfs not
         // supporting file deletion.
         expect(bundle.needsBuild(), true);
-        await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        );
         expect(
           bundle.entries.keys,
           unorderedEquals(<String>[
-            'AssetManifest.json',
             'AssetManifest.bin',
             'FontManifest.json',
             'NOTICES.Z',
@@ -282,11 +293,13 @@ flutter:
 ''');
         writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'my_app');
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-        await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        );
         expect(
           bundle.entries.keys,
           unorderedEquals(<String>[
-            'AssetManifest.json',
             'AssetManifest.bin',
             'FontManifest.json',
             'NOTICES.Z',
@@ -337,11 +350,11 @@ flutter:
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           deferredComponentsEnabled: true,
+          targetPlatform: TargetPlatform.tester,
         );
         expect(
           bundle.entries.keys,
           unorderedEquals(<String>[
-            'AssetManifest.json',
             'AssetManifest.bin',
             'FontManifest.json',
             'NOTICES.Z',
@@ -386,14 +399,16 @@ flutter:
         - assets/wild/
 ''');
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-        await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        );
         expect(
           bundle.entries.keys,
           unorderedEquals(<String>[
             'assets/foo/bar.txt',
             'assets/bar/barbie.txt',
             'assets/wild/dash.txt',
-            'AssetManifest.json',
             'AssetManifest.bin',
             'FontManifest.json',
             'NOTICES.Z',
@@ -447,12 +462,12 @@ flutter:
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           deferredComponentsEnabled: true,
+          targetPlatform: TargetPlatform.tester,
         );
         expect(
           bundle.entries.keys,
           unorderedEquals(<String>[
             'assets/foo/bar.txt',
-            'AssetManifest.json',
             'AssetManifest.bin',
             'FontManifest.json',
             'NOTICES.Z',
@@ -471,13 +486,13 @@ flutter:
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           deferredComponentsEnabled: true,
+          targetPlatform: TargetPlatform.tester,
         );
 
         expect(
           bundle.entries.keys,
           unorderedEquals(<String>[
             'assets/foo/bar.txt',
-            'AssetManifest.json',
             'AssetManifest.bin',
             'FontManifest.json',
             'NOTICES.Z',
@@ -495,97 +510,86 @@ flutter:
   });
 
   group('AssetBundle.build', () {
-    testWithoutContext(
-      'throws ToolExit when directory entry contains invalid characters (Windows only)',
-      () async {
-        final fileSystem = MemoryFileSystem(style: FileSystemStyle.windows);
-        final logger = BufferLogger.test();
-        final platform = FakePlatform(operatingSystem: 'windows');
-        final String flutterRoot = Cache.defaultFlutterRoot(
-          platform: platform,
-          fileSystem: fileSystem,
-          userMessages: UserMessages(),
-        );
+    testWithoutContext('throws ToolExit when directory entry has an invalid scheme', () async {
+      final fileSystem = MemoryFileSystem(style: FileSystemStyle.windows);
+      final logger = BufferLogger.test();
+      final platform = FakePlatform(operatingSystem: 'windows');
+      final String flutterRoot = Cache.defaultFlutterRoot(
+        platform: platform,
+        fileSystem: fileSystem,
+        userMessages: UserMessages(),
+      );
 
-        writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
-        fileSystem.file('pubspec.yaml')
-          ..createSync()
-          ..writeAsStringSync(r'''
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
 name: my_app
 flutter:
   assets:
     - https://mywebsite.com/images/
 ''');
-        final bundle = ManifestAssetBundle(
-          logger: logger,
-          fileSystem: fileSystem,
-          platform: platform,
-          flutterRoot: flutterRoot,
-        );
+      final bundle = ManifestAssetBundle(
+        logger: logger,
+        fileSystem: fileSystem,
+        platform: platform,
+        flutterRoot: flutterRoot,
+      );
 
-        expect(
-          () => bundle.build(
-            packageConfigPath: '.dart_tool/package_config.json',
-            flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          ),
-          throwsToolExit(
-            message:
-                'Unable to search for asset files in directory path "https%3A//mywebsite.com/images/". '
-                'Please ensure that this entry in pubspec.yaml is a valid file path.\n'
-                'Error details:\n'
-                'Unsupported operation: Illegal character in path: https:',
-          ),
-        );
-      },
-    );
+      expect(
+        () => bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          targetPlatform: TargetPlatform.tester,
+        ),
+        throwsToolExit(
+          message:
+              'Asset path "https://mywebsite.com/images/" has scheme "https" and is not a valid '
+              'file or directory path. Please update this entry in the pubspec.yaml to point to a '
+              'valid file path.',
+        ),
+      );
+    });
 
-    testWithoutContext(
-      'throws ToolExit when file entry contains invalid characters (Windows only)',
-      () async {
-        final FileSystem fileSystem = MemoryFileSystem(
-          style: FileSystemStyle.windows,
-          opHandle: (String context, FileSystemOp operation) {
-            if (operation == FileSystemOp.exists && context == r'C:\http:\\website.com') {
-              throw const FileSystemException(
-                r"FileSystemException: Exists failed, path = 'C:\http:\\website.com' "
-                '(OS Error: The filename, directory name, or volume label syntax is '
-                'incorrect., errno = 123)',
-              );
-            }
-          },
-        );
-        final logger = BufferLogger.test();
-        final platform = FakePlatform(operatingSystem: 'windows');
-        final String flutterRoot = Cache.defaultFlutterRoot(
-          platform: platform,
-          fileSystem: fileSystem,
-          userMessages: UserMessages(),
-        );
-        writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
-        fileSystem.file('pubspec.yaml')
-          ..createSync()
-          ..writeAsStringSync(r'''
+    testWithoutContext('throws ToolExit when file entry has an invalid scheme', () async {
+      final FileSystem fileSystem = MemoryFileSystem(style: FileSystemStyle.windows);
+      final logger = BufferLogger.test();
+      final platform = FakePlatform(operatingSystem: 'windows');
+      final String flutterRoot = Cache.defaultFlutterRoot(
+        platform: platform,
+        fileSystem: fileSystem,
+        userMessages: UserMessages(),
+      );
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
 name: example
 flutter:
   assets:
     - http://website.com/hi.png
 ''');
-        final bundle = ManifestAssetBundle(
-          logger: logger,
-          fileSystem: fileSystem,
-          platform: platform,
-          flutterRoot: flutterRoot,
-        );
+      final bundle = ManifestAssetBundle(
+        logger: logger,
+        fileSystem: fileSystem,
+        platform: platform,
+        flutterRoot: flutterRoot,
+      );
 
-        expect(
-          () => bundle.build(
-            packageConfigPath: '.dart_tool/package_config.json',
-            flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          ),
-          throwsToolExit(message: 'Unable to check the existence of asset file '),
-        );
-      },
-    );
+      expect(
+        () => bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          targetPlatform: TargetPlatform.tester,
+        ),
+        throwsToolExit(
+          message:
+              'Asset path "http://website.com/hi.png" has scheme "http" and is not a valid '
+              'file or directory path. Please update this entry in the pubspec.yaml to point to a '
+              'valid file path.',
+        ),
+      );
+    });
 
     testWithoutContext(
       "AssetBundleEntry::content::isModified is true when an asset's transformers change in between builds",
@@ -621,6 +625,7 @@ flutter:
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          targetPlatform: TargetPlatform.tester,
         );
 
         expect(bundle.entries['my-asset.txt']!.content.isModified, isTrue);
@@ -628,6 +633,7 @@ flutter:
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          targetPlatform: TargetPlatform.tester,
         );
 
         expect(bundle.entries['my-asset.txt']!.content.isModified, isFalse);
@@ -645,6 +651,7 @@ flutter:
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          targetPlatform: TargetPlatform.tester,
         );
 
         expect(bundle.entries['my-asset.txt']!.content.isModified, isTrue);
@@ -679,13 +686,8 @@ flutter:
 
         expect(
           bundle.entries.keys,
-          unorderedEquals(<String>[
-            'AssetManifest.json',
-            'AssetManifest.bin',
-            'AssetManifest.bin.json',
-          ]),
+          unorderedEquals(<String>['AssetManifest.bin', 'AssetManifest.bin.json']),
         );
-        expect(utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()), '{}');
         expect(
           utf8.decode(await bundle.entries['AssetManifest.bin.json']!.contentsAsBytes()),
           '""',
@@ -724,7 +726,6 @@ flutter:
         expect(
           bundle.entries.keys,
           unorderedEquals(<String>[
-            'AssetManifest.json',
             'AssetManifest.bin',
             'AssetManifest.bin.json',
             'FontManifest.json',
@@ -732,11 +733,6 @@ flutter:
             'assets/bar/lizard.png',
           ]),
         );
-        final manifestJson =
-            json.decode(utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()))
-                as Map<Object?, Object?>;
-        expect(manifestJson, isNotEmpty);
-        expect(manifestJson['assets/bar/lizard.png'], isNotNull);
 
         final Uint8List manifestBinJsonBytes = base64.decode(
           json.decode(
@@ -804,15 +800,19 @@ assets:
   - assets/foo/bar.txt
 ''');
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
+      await bundle.build(
+        packageConfigPath: '.dart_tool/package_config.json',
+        targetPlatform: TargetPlatform.tester,
+      );
 
-      final AssetBundleEntry? assetManifest = bundle.entries['AssetManifest.json'];
       final AssetBundleEntry? fontManifest = bundle.entries['FontManifest.json'];
       final AssetBundleEntry? license = bundle.entries['NOTICES'];
 
-      await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
+      await bundle.build(
+        packageConfigPath: '.dart_tool/package_config.json',
+        targetPlatform: TargetPlatform.tester,
+      );
 
-      expect(assetManifest, bundle.entries['AssetManifest.json']);
       expect(fontManifest, bundle.entries['FontManifest.json']);
       expect(license, bundle.entries['NOTICES']);
     },
@@ -839,7 +839,13 @@ flutter:
 ''');
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-      expect(await bundle.build(packageConfigPath: '.dart_tool/package_config.json'), 0);
+      expect(
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        ),
+        0,
+      );
       expect(
         bundle.additionalDependencies.single.path,
         contains('DOES_NOT_EXIST_RERUN_FOR_WILDCARD'),
@@ -868,7 +874,13 @@ flutter:
 ''');
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-      expect(await bundle.build(packageConfigPath: '.dart_tool/package_config.json'), 0);
+      expect(
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        ),
+        0,
+      );
       expect(bundle.additionalDependencies, isEmpty);
     },
     overrides: <Type, Generator>{
@@ -915,7 +927,13 @@ flutter:
   ''');
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-        expect(await bundle.build(packageConfigPath: '.dart_tool/package_config.json'), 0);
+        expect(
+          await bundle.build(
+            packageConfigPath: '.dart_tool/package_config.json',
+            targetPlatform: TargetPlatform.tester,
+          ),
+          0,
+        );
 
         await writeBundle(
           output,
@@ -1048,26 +1066,30 @@ flutter:
           materialDir.childFile(shader).createSync(recursive: true);
         }
 
-        (globals.processManager as FakeProcessManager).addCommand(
-          FakeCommand(
-            command: <String>[
-              impellerc,
-              '--sksl',
-              '--iplr',
-              '--json',
-              '--sl=${fileSystem.path.join(output.path, 'shaders', 'ink_sparkle.frag')}',
-              '--spirv=${fileSystem.path.join(output.path, 'shaders', 'ink_sparkle.frag.spirv')}',
-              '--input=${fileSystem.path.join(materialDir.path, 'shaders', 'ink_sparkle.frag')}',
-              '--input-type=frag',
-              '--include=${fileSystem.path.join(materialDir.path, 'shaders')}',
-              '--include=$shaderLibDir',
-            ],
-            onRun: (_) {
-              fileSystem.file(outputPath).createSync(recursive: true);
-              fileSystem.file('$outputPath.spirv').createSync(recursive: true);
-            },
-          ),
-        );
+        final testShaders = <String>['ink_sparkle.frag', 'stretch_effect.frag'];
+
+        for (final shader in testShaders) {
+          (globals.processManager as FakeProcessManager).addCommand(
+            FakeCommand(
+              command: <String>[
+                impellerc,
+                '--sksl',
+                '--iplr',
+                '--json',
+                '--sl=${fileSystem.path.join(output.path, 'shaders', shader)}',
+                '--spirv=${fileSystem.path.join(output.path, 'shaders', '$shader.spirv')}',
+                '--input=${fileSystem.path.join(materialDir.path, 'shaders', shader)}',
+                '--input-type=frag',
+                '--include=${fileSystem.path.join(materialDir.path, 'shaders')}',
+                '--include=$shaderLibDir',
+              ],
+              onRun: (_) {
+                fileSystem.file(outputPath).createSync(recursive: true);
+                fileSystem.file('$outputPath.spirv').createSync(recursive: true);
+              },
+            ),
+          );
+        }
 
         fileSystem.file('pubspec.yaml')
           ..createSync()
@@ -1137,7 +1159,13 @@ flutter:
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       globals.fs.file('foo/bar/fizz.txt').createSync(recursive: true);
 
-      expect(await bundle.build(packageConfigPath: '.dart_tool/package_config.json'), 0);
+      expect(
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        ),
+        0,
+      );
       expect(bundle.additionalDependencies, isEmpty);
     },
     overrides: <Type, Generator>{
@@ -1175,13 +1203,15 @@ flutter:
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       globals.fs.file('foo/bar/fizz.txt').createSync(recursive: true);
 
-      await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
+      await bundle.build(
+        packageConfigPath: '.dart_tool/package_config.json',
+        targetPlatform: TargetPlatform.tester,
+      );
 
       expect(
         bundle.entries.keys,
         unorderedEquals(<String>[
           'packages/foo/bar/fizz.txt',
-          'AssetManifest.json',
           'AssetManifest.bin',
           'FontManifest.json',
           'NOTICES.Z',
@@ -1229,7 +1259,13 @@ flutter:
 ''');
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-      expect(await bundle.build(packageConfigPath: '.dart_tool/package_config.json'), 1);
+      expect(
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        ),
+        1,
+      );
       expect(testLogger.errorText, contains('This asset was included from package foo'));
     },
     overrides: <Type, Generator>{
@@ -1258,7 +1294,13 @@ flutter:
 ''');
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-      expect(await bundle.build(packageConfigPath: '.dart_tool/package_config.json'), 1);
+      expect(
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        ),
+        1,
+      );
       expect(testLogger.errorText, isNot(contains('This asset was included from')));
     },
     overrides: <Type, Generator>{
@@ -1297,9 +1339,14 @@ flutter:
 ''');
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-      expect(await bundle.build(packageConfigPath: '.dart_tool/package_config.json'), 0);
+      expect(
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        ),
+        0,
+      );
       expect((bundle.entries['FontManifest.json']!.content as DevFSStringContent).string, '[]');
-      expect((bundle.entries['AssetManifest.json']!.content as DevFSStringContent).string, '{}');
       expect(testLogger.errorText, contains('package:foo has `uses-material-design: true` set'));
     },
     overrides: <Type, Generator>{
@@ -1334,12 +1381,17 @@ flutter:
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-      expect(await bundle.build(packageConfigPath: '.dart_tool/package_config.json'), 0);
+      expect(
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        ),
+        0,
+      );
       expect(
         bundle.entries.keys,
         unorderedEquals(<String>[
           'assets/foo.txt',
-          'AssetManifest.json',
           'AssetManifest.bin',
           'FontManifest.json',
           'NOTICES.Z',
@@ -1379,14 +1431,14 @@ flutter:
       globals.fs.file('assets/zebra.jpg').createSync();
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-      expect(await bundle.build(packageConfigPath: '.dart_tool/package_config.json'), 0);
-      expect((bundle.entries['FontManifest.json']!.content as DevFSStringContent).string, '[]');
-      // The assets from deferred components and regular assets
-      // are both included in alphabetical order
       expect(
-        (bundle.entries['AssetManifest.json']!.content as DevFSStringContent).string,
-        '{"assets/apple.jpg":["assets/apple.jpg"],"assets/bar.jpg":["assets/bar.jpg"],"assets/foo.jpg":["assets/foo.jpg"],"assets/zebra.jpg":["assets/zebra.jpg"]}',
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        ),
+        0,
       );
+      expect((bundle.entries['FontManifest.json']!.content as DevFSStringContent).string, '[]');
     },
     overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
@@ -1394,4 +1446,106 @@ flutter:
       Platform: () => FakePlatform(),
     },
   );
+
+  group('reports error for absolute paths', () {
+    Future<void> testCase({
+      required String pubspecContents,
+      required Uri assetPath,
+      required FileSystem fileSystem,
+      required Platform platform,
+    }) async {
+      final logger = BufferLogger.test();
+      expect(pubspecContents, contains(assetPath.toString()));
+      final String flutterRoot = Cache.defaultFlutterRoot(
+        platform: platform,
+        fileSystem: fileSystem,
+        userMessages: UserMessages(),
+      );
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(pubspecContents);
+
+      final bundle = ManifestAssetBundle(
+        logger: logger,
+        fileSystem: fileSystem,
+        platform: platform,
+        flutterRoot: flutterRoot,
+      );
+      expect(
+        () => bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          targetPlatform: TargetPlatform.tester,
+        ),
+        throwsToolExit(
+          message:
+              'is not a valid asset path. Asset paths must be relative to the location of '
+              'pubspec.yaml. Please update this entry in the pubspec.yaml to use a relative path.',
+        ),
+      );
+    }
+
+    for (final platform in <FakePlatform>[
+      FakePlatform(),
+      FakePlatform(operatingSystem: 'windows'),
+    ]) {
+      group('on ${platform.isWindows ? 'Windows' : 'POSIX'} for', () {
+        final FileSystem fileSystem = MemoryFileSystem(
+          style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
+        );
+        fileSystem.currentDirectory = fileSystem.systemTempDirectory;
+        final assetPath = Uri.file(
+          platform.isWindows ? r'c:\asset\path.json' : '/asset/path.json',
+          windows: platform.isWindows,
+        );
+        testWithoutContext('standard assets', () async {
+          await testCase(
+            pubspecContents:
+                '''
+name: my_app
+flutter:
+  assets:
+    - $assetPath
+''',
+            assetPath: assetPath,
+            fileSystem: fileSystem,
+            platform: platform,
+          );
+        });
+
+        testWithoutContext('font assets', () async {
+          await testCase(
+            pubspecContents:
+                '''
+name: my_app
+flutter:
+  fonts:
+    - family: Foo
+      fonts:
+        - asset: $assetPath
+''',
+            assetPath: assetPath,
+            fileSystem: fileSystem,
+            platform: platform,
+          );
+        });
+
+        testWithoutContext('shader assets', () async {
+          await testCase(
+            pubspecContents:
+                '''
+name: my_app
+flutter:
+  shaders:
+    - $assetPath
+''',
+            assetPath: assetPath,
+            fileSystem: fileSystem,
+            platform: platform,
+          );
+        });
+      });
+    }
+  });
 }

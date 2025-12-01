@@ -18,6 +18,7 @@ import '../../darwin/darwin.dart';
 import '../../devfs.dart';
 import '../../globals.dart' as globals;
 import '../../ios/mac.dart';
+import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../macos/xcode.dart';
 import '../../project.dart';
 import '../build_system.dart';
@@ -253,9 +254,7 @@ abstract class UnpackIOS extends UnpackDarwin {
   ];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.pattern('{OUTPUT_DIR}/Flutter.framework/Flutter'),
-  ];
+  List<Source> get outputs => const <Source>[kFlutterIOSFrameworkBinarySource];
 
   @override
   List<Target> get dependencies => <Target>[];
@@ -458,10 +457,10 @@ class _IssueLaunchRootViewControllerAccess extends Target {
         flutterProject.ios.appDelegateSwift,
       );
     }
-    if (flutterProject.ios.appDelegateObjc.existsSync()) {
+    if (flutterProject.ios.appDelegateObjcImplementation.existsSync()) {
       await checkForLaunchRootViewControllerAccessDeprecationObjc(
         environment.logger,
-        flutterProject.ios.appDelegateObjc,
+        flutterProject.ios.appDelegateObjcImplementation,
       );
     }
   }
@@ -475,7 +474,10 @@ class _IssueLaunchRootViewControllerAccess extends Target {
       const Source.pattern(
         '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart',
       ),
-      Source.fromProject((FlutterProject project) => project.ios.appDelegateObjc, optional: true),
+      Source.fromProject(
+        (FlutterProject project) => project.ios.appDelegateObjcImplementation,
+        optional: true,
+      ),
       Source.fromProject((FlutterProject project) => project.ios.appDelegateSwift, optional: true),
     ];
   }
@@ -571,24 +573,25 @@ class DebugIosLLDBInit extends Target {
     // Also, this cannot check for a specific path/name for the LLDB Init File
     // since Flutter's LLDB Init file may be imported from within a user's
     // custom LLDB Init File.
-    var anyLLDBInitFound = false;
-    await for (final FileSystemEntity entity in xcodeProjectDir.list(recursive: true)) {
-      if (environment.fileSystem.path.extension(entity.path) == '.xcscheme' && entity is File) {
-        if (entity.readAsStringSync().contains('customLLDBInitFile')) {
-          anyLLDBInitFound = true;
-          break;
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+    if (flutterProject.isModule) {
+      var anyLLDBInitFound = false;
+      await for (final FileSystemEntity entity in xcodeProjectDir.list(recursive: true)) {
+        if (environment.fileSystem.path.extension(entity.path) == '.xcscheme' && entity is File) {
+          if (entity.readAsStringSync().contains('customLLDBInitFile')) {
+            anyLLDBInitFound = true;
+            break;
+          }
         }
       }
-    }
-    if (!anyLLDBInitFound) {
-      final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
-      final tab = flutterProject.isModule ? 'Use CocoaPods' : 'Use frameworks';
-      printXcodeWarning(
-        'Debugging Flutter on new iOS versions requires an LLDB Init File. To '
-        'ensure debug mode works, please complete instructions found in '
-        '"Embed a Flutter module in your iOS app > $tab > Set LLDB Init File" '
-        'section of https://docs.flutter.dev/to/ios-add-to-app-embed-setup.',
-      );
+      if (!anyLLDBInitFound) {
+        printXcodeWarning(
+          'Debugging Flutter on new iOS versions requires an LLDB Init File. To '
+          'ensure debug mode works, please complete instructions found in '
+          '"Embed a Flutter module in your iOS app > Use CocoaPods > Set LLDB Init File" '
+          'section of https://docs.flutter.dev/to/ios-add-to-app-embed-setup.',
+        );
+      }
     }
     return;
   }
@@ -609,6 +612,7 @@ abstract class IosAssetBundle extends Target {
     KernelSnapshot(),
     InstallCodeAssets(),
     _IssueLaunchRootViewControllerAccess(),
+    DartBuildForNative(),
   ];
 
   @override
@@ -695,9 +699,11 @@ abstract class IosAssetBundle extends Target {
     final String? flavor = await flutterProject.ios.parseFlavorFromConfiguration(environment);
 
     // Copy the assets.
+    final DartHooksResult dartHookResult = await DartBuild.loadHookResult(environment);
     final Depfile assetDepfile = await copyAssets(
       environment,
       assetDirectory,
+      dartHookResult: dartHookResult,
       targetPlatform: TargetPlatform.ios,
       buildMode: buildMode,
       additionalInputs: <File>[
@@ -717,9 +723,12 @@ abstract class IosAssetBundle extends Target {
     );
 
     // Copy the plist from either the project or module.
-    flutterProject.ios.appFrameworkInfoPlist.copySync(
-      environment.outputDir.childDirectory('App.framework').childFile('Info.plist').path,
-    );
+    final File appFrameworkInfoPlist = environment.outputDir
+        .childDirectory('App.framework')
+        .childFile('Info.plist');
+    flutterProject.ios.appFrameworkInfoPlist.copySync(appFrameworkInfoPlist.path);
+
+    await _updateMinimumOSVersion(appFrameworkInfoPlist, environment);
 
     await _signFramework(environment, frameworkBinary, buildMode);
   }
@@ -817,6 +826,25 @@ class ReleaseIosApplicationBundle extends _IosAssetBundleWithDSYM {
         );
       }
     }
+  }
+}
+
+/// Update the MinimumOSVersion key in the given Info.plist file.
+Future<void> _updateMinimumOSVersion(File infoPlist, Environment environment) async {
+  final minimumOSVersion = FlutterDarwinPlatform.ios.deploymentTarget().toString();
+  final plutilArgs = <String>[
+    'plutil',
+    '-replace',
+    'MinimumOSVersion',
+    '-string',
+    minimumOSVersion,
+    infoPlist.path,
+  ];
+  final ProcessResult result = await environment.processManager.run(plutilArgs);
+  if (result.exitCode != 0) {
+    printXcodeWarning(
+      'Failed to update MinimumOSVersion in ${infoPlist.path}. This may cause AppStore validation failures. Please file an issue at https://github.com/flutter/flutter/issues/new/choose',
+    );
   }
 }
 

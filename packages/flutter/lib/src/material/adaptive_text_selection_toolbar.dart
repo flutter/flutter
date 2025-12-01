@@ -262,8 +262,8 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
         });
       case TargetPlatform.fuchsia:
       case TargetPlatform.android:
-        final List<Widget> buttons = <Widget>[];
-        for (int i = 0; i < buttonItems.length; i++) {
+        final buttons = <Widget>[];
+        for (var i = 0; i < buttonItems.length; i++) {
           final ContextMenuButtonItem buttonItem = buttonItems[i];
           buttons.add(
             TextSelectionToolbarTextButton(
@@ -297,7 +297,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // If there aren't any buttons to build, build an empty toolbar.
-    if ((children != null && children!.isEmpty) || (buttonItems != null && buttonItems!.isEmpty)) {
+    if ((children ?? buttonItems)?.isEmpty ?? true) {
       return const SizedBox.shrink();
     }
 

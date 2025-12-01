@@ -5,6 +5,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 
 #include "flutter/fml/platform/darwin/cf_utils.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifeCycle_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.h"
 
@@ -12,6 +13,7 @@ FLUTTER_ASSERT_ARC
 
 @interface FlutterView ()
 @property(nonatomic, weak) id<FlutterViewEngineDelegate> delegate;
+@property(nonatomic, weak) UIWindowScene* previousScene;
 @end
 
 @implementation FlutterView {
@@ -132,7 +134,7 @@ static void PrintWideGamutWarningOnce() {
   auto screenshot = [_delegate takeScreenshot:flutter::Rasterizer::ScreenshotType::UncompressedImage
                               asBase64Encoded:NO];
 
-  if (!screenshot.data || screenshot.data->isEmpty() || screenshot.frame_size.isEmpty()) {
+  if (!screenshot.data || screenshot.data->isEmpty() || screenshot.frame_size.IsEmpty()) {
     return;
   }
 
@@ -175,26 +177,26 @@ static void PrintWideGamutWarningOnce() {
   }
 
   fml::CFRef<CGImageRef> image(CGImageCreate(
-      screenshot.frame_size.width(),                             // size_t width
-      screenshot.frame_size.height(),                            // size_t height
-      bits_per_component,                                        // size_t bitsPerComponent
-      bits_per_pixel,                                            // size_t bitsPerPixel,
-      bytes_per_row_multiplier * screenshot.frame_size.width(),  // size_t bytesPerRow
-      colorspace,                                                // CGColorSpaceRef space
-      bitmap_info,                                               // CGBitmapInfo bitmapInfo
-      image_data_provider,                                       // CGDataProviderRef provider
-      nullptr,                                                   // const CGFloat* decode
-      false,                                                     // bool shouldInterpolate
-      kCGRenderingIntentDefault                                  // CGColorRenderingIntent intent
+      screenshot.frame_size.width,                             // size_t width
+      screenshot.frame_size.height,                            // size_t height
+      bits_per_component,                                      // size_t bitsPerComponent
+      bits_per_pixel,                                          // size_t bitsPerPixel,
+      bytes_per_row_multiplier * screenshot.frame_size.width,  // size_t bytesPerRow
+      colorspace,                                              // CGColorSpaceRef space
+      bitmap_info,                                             // CGBitmapInfo bitmapInfo
+      image_data_provider,                                     // CGDataProviderRef provider
+      nullptr,                                                 // const CGFloat* decode
+      false,                                                   // bool shouldInterpolate
+      kCGRenderingIntentDefault                                // CGColorRenderingIntent intent
       ));
 
   const CGRect frame_rect =
-      CGRectMake(0.0, 0.0, screenshot.frame_size.width(), screenshot.frame_size.height());
+      CGRectMake(0.0, 0.0, screenshot.frame_size.width, screenshot.frame_size.height);
   CGContextSaveGState(context);
   // If the CGContext is not a bitmap based context, this returns zero.
   CGFloat height = CGBitmapContextGetHeight(context);
   if (height == 0) {
-    height = CGFloat(screenshot.frame_size.height());
+    height = CGFloat(screenshot.frame_size.height);
   }
   CGContextTranslateCTM(context, 0.0, height);
   CGContextScaleCTM(context, 1.0, -1.0);
@@ -241,4 +243,35 @@ static void PrintWideGamutWarningOnce() {
   return nil;
 }
 
+- (void)willMoveToWindow:(UIWindow*)newWindow {
+  // When a FlutterView moves windows, it may also be moving scenes. Add/remove the FlutterEngine
+  // from the FlutterSceneLifeCycleProvider.sceneLifeCycleDelegate if it changes scenes.
+  UIWindowScene* newScene = newWindow.windowScene;
+  UIWindowScene* currentScene = self.window.windowScene;
+
+  if (newScene == currentScene) {
+    return;
+  }
+
+  // Remove the engine from the previous scene if it's no longer in that window and scene.
+  FlutterPluginSceneLifeCycleDelegate* previousSceneLifeCycleDelegate =
+      [FlutterPluginSceneLifeCycleDelegate fromScene:self.previousScene];
+  if (previousSceneLifeCycleDelegate) {
+    [previousSceneLifeCycleDelegate removeFlutterManagedEngine:(FlutterEngine*)self.delegate];
+    self.previousScene = nil;
+  }
+
+  if (newScene) {
+    // Add the engine to the new scene's lifecycle delegate.
+    FlutterPluginSceneLifeCycleDelegate* newSceneLifeCycleDelegate =
+        [FlutterPluginSceneLifeCycleDelegate fromScene:newScene];
+    if (newSceneLifeCycleDelegate) {
+      [newSceneLifeCycleDelegate addFlutterManagedEngine:(FlutterEngine*)self.delegate];
+    }
+  } else {
+    // If the view is being removed from a window, store the current scene to remove the engine
+    // from it later when the view is added to a new window.
+    self.previousScene = currentScene;
+  }
+}
 @end

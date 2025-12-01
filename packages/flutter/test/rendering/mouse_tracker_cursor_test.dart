@@ -16,7 +16,7 @@ typedef MethodCallHandler = Future<dynamic> Function(MethodCall call);
 typedef SimpleAnnotationFinder = Iterable<HitTestTarget> Function(Offset offset);
 
 void main() {
-  final TestMouseTrackerFlutterBinding binding = TestMouseTrackerFlutterBinding();
+  final binding = TestMouseTrackerFlutterBinding();
   MethodCallHandler? methodCallHandler;
 
   // Only one of `logCursors` and `cursorHandler` should be specified.
@@ -69,9 +69,7 @@ void main() {
   });
 
   test('Should work on platforms that does not support mouse cursor', () async {
-    const TestAnnotationTarget annotation = TestAnnotationTarget(
-      cursor: SystemMouseCursors.grabbing,
-    );
+    const annotation = TestAnnotationTarget(cursor: SystemMouseCursors.grabbing);
 
     setUpMouseTracker(
       annotationFinder: (Offset position) => <TestAnnotationTarget>[annotation],
@@ -89,12 +87,10 @@ void main() {
   });
 
   test('pointer is added and removed out of any annotations', () {
-    final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
+    final logCursors = <_CursorUpdateDetails>[];
     TestAnnotationTarget? annotation;
     setUpMouseTracker(
-      annotationFinder: (Offset position) => <TestAnnotationTarget>[
-        if (annotation != null) annotation,
-      ],
+      annotationFinder: (Offset position) => <TestAnnotationTarget>[?annotation],
       logCursors: logCursors,
     );
 
@@ -152,12 +148,10 @@ void main() {
   });
 
   test('pointer is added and removed in an annotation', () {
-    final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
+    final logCursors = <_CursorUpdateDetails>[];
     TestAnnotationTarget? annotation;
     setUpMouseTracker(
-      annotationFinder: (Offset position) => <TestAnnotationTarget>[
-        if (annotation != null) annotation,
-      ],
+      annotationFinder: (Offset position) => <TestAnnotationTarget>[?annotation],
       logCursors: logCursors,
     );
 
@@ -216,12 +210,10 @@ void main() {
   });
 
   test('pointer change caused by new frames', () {
-    final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
+    final logCursors = <_CursorUpdateDetails>[];
     TestAnnotationTarget? annotation;
     setUpMouseTracker(
-      annotationFinder: (Offset position) => <TestAnnotationTarget>[
-        if (annotation != null) annotation,
-      ],
+      annotationFinder: (Offset position) => <TestAnnotationTarget>[?annotation],
       logCursors: logCursors,
     );
 
@@ -261,7 +253,7 @@ void main() {
   });
 
   test('The first annotation with non-deferring cursor is used', () {
-    final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
+    final logCursors = <_CursorUpdateDetails>[];
     late List<TestAnnotationTarget> annotations;
     setUpMouseTracker(
       annotationFinder: (Offset position) sync* {
@@ -293,7 +285,7 @@ void main() {
   });
 
   test('Annotations with deferring cursors are ignored', () {
-    final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
+    final logCursors = <_CursorUpdateDetails>[];
     late List<TestAnnotationTarget> annotations;
     setUpMouseTracker(
       annotationFinder: (Offset position) sync* {
@@ -325,12 +317,10 @@ void main() {
   });
 
   test('Finding no annotation is equivalent to specifying default cursor', () {
-    final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
+    final logCursors = <_CursorUpdateDetails>[];
     TestAnnotationTarget? annotation;
     setUpMouseTracker(
-      annotationFinder: (Offset position) => <TestAnnotationTarget>[
-        if (annotation != null) annotation,
-      ],
+      annotationFinder: (Offset position) => <TestAnnotationTarget>[?annotation],
       logCursors: logCursors,
     );
 
@@ -371,12 +361,10 @@ void main() {
   });
 
   test('Removing a pointer resets it back to the default cursor', () {
-    final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
+    final logCursors = <_CursorUpdateDetails>[];
     TestAnnotationTarget? annotation;
     setUpMouseTracker(
-      annotationFinder: (Offset position) => <TestAnnotationTarget>[
-        if (annotation != null) annotation,
-      ],
+      annotationFinder: (Offset position) => <TestAnnotationTarget>[?annotation],
       logCursors: logCursors,
     );
 
@@ -408,7 +396,7 @@ void main() {
   });
 
   test('Pointing devices display cursors separately', () {
-    final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
+    final logCursors = <_CursorUpdateDetails>[];
     setUpMouseTracker(
       annotationFinder: (Offset position) sync* {
         if (position.dx > 200) {

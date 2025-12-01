@@ -744,7 +744,7 @@ extension type DomHTMLScriptElement._(JSObject _) implements DomHTMLElement {
 }
 
 DomHTMLScriptElement createDomHTMLScriptElement(String? nonce) {
-  final DomHTMLScriptElement script = domDocument.createElement('script') as DomHTMLScriptElement;
+  final script = domDocument.createElement('script') as DomHTMLScriptElement;
   if (nonce != null) {
     script.nonce = nonce;
   }
@@ -783,7 +783,7 @@ extension type DomHTMLStyleElement._(JSObject _) implements DomHTMLElement {
 }
 
 DomHTMLStyleElement createDomHTMLStyleElement(String? nonce) {
-  final DomHTMLStyleElement style = domDocument.createElement('style') as DomHTMLStyleElement;
+  final style = domDocument.createElement('style') as DomHTMLStyleElement;
   if (nonce != null) {
     style.nonce = nonce;
   }
@@ -845,8 +845,7 @@ void debugResetCanvasCount() {
 
 DomHTMLCanvasElement createDomCanvasElement({int? width, int? height}) {
   debugCanvasCount++;
-  final DomHTMLCanvasElement canvas =
-      domWindow.document.createElement('canvas') as DomHTMLCanvasElement;
+  final canvas = domWindow.document.createElement('canvas') as DomHTMLCanvasElement;
   if (width != null) {
     canvas.width = width.toDouble();
   }
@@ -896,8 +895,18 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   set fillStyle(Object? style) => _fillStyle = style?.toJSAnyShallow;
 
   external String font;
+  external String fontWeight;
   external String direction;
+  external String letterSpacing;
+  external String wordSpacing;
+  external String textRendering;
+  external String fontKerning;
+  external String fontVariantCaps;
   external set lineWidth(num? value);
+
+  @JS('setLineDash')
+  external void _setLineDash(JSFloat32Array? value);
+  void setLineDash(Float32List? value) => _setLineDash(value?.toJS);
 
   @JS('strokeStyle')
   external set _strokeStyle(JSAny? value);
@@ -993,6 +1002,7 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   external void rect(num x, num y, num width, num height);
   external void resetTransform();
   external void restore();
+  external void reset();
   external void setTransform(num a, num b, num c, num d, num e, num f);
   external void transform(num a, num b, num c, num d, num e, num f);
 
@@ -1039,7 +1049,16 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   external void strokeText(String text, num x, num y);
   external set globalAlpha(num? value);
 
-  external void fillTextCluster(DomTextCluster textCluster, double x, double y);
+  @JS('fillTextCluster')
+  external void _fillTextCluster(JSAny? textCluster, double x, double y, [JSAny? options]);
+
+  void fillTextCluster(DomTextCluster textCluster, double x, double y, [Object? options]) {
+    if (options == null) {
+      return _fillTextCluster(textCluster.toJSAnyDeep, x, y);
+    } else {
+      return _fillTextCluster(textCluster.toJSAnyDeep, x, y, options.toJSAnyDeep);
+    }
+  }
 }
 
 @JS('ImageBitmapRenderingContext')
@@ -1244,8 +1263,8 @@ class HttpFetchResponseImpl implements HttpFetchResponse {
   @override
   bool get hasPayload {
     final bool accepted = status >= 200 && status < 300;
-    final bool fileUri = status == 0;
-    final bool notModified = status == 304;
+    final fileUri = status == 0;
+    final notModified = status == 304;
     final bool unknownRedirect = status > 307 && status < 400;
     return accepted || fileUri || notModified || unknownRedirect;
   }
@@ -1351,10 +1370,10 @@ class MockHttpFetchPayload implements HttpFetchPayload {
   @override
   Future<void> read(HttpFetchReader<JSUint8Array> callback) async {
     final int totalLength = _byteBuffer.lengthInBytes;
-    int currentIndex = 0;
+    var currentIndex = 0;
     while (currentIndex < totalLength) {
       final int chunkSize = math.min(_chunkSize, totalLength - currentIndex);
-      final Uint8List chunk = Uint8List.sublistView(
+      final chunk = Uint8List.sublistView(
         _byteBuffer.asByteData(),
         currentIndex,
         currentIndex + chunkSize,
@@ -1737,10 +1756,10 @@ extension type DomMutationObserver._(JSObject _) implements JSObject {
   @JS('observe')
   external void _observe(DomNode target, JSAny options);
   void observe(DomNode target, {bool? childList, bool? attributes, List<String>? attributeFilter}) {
-    final Map<String, dynamic> options = <String, dynamic>{
-      if (childList != null) 'childList': childList,
-      if (attributes != null) 'attributes': attributes,
-      if (attributeFilter != null) 'attributeFilter': attributeFilter,
+    final options = <String, dynamic>{
+      'childList': ?childList,
+      'attributes': ?attributes,
+      'attributeFilter': ?attributeFilter,
     };
     return _observe(target, options.toJSAnyDeep);
   }
@@ -2444,6 +2463,50 @@ extension type DomSegments._(JSObject _) implements JSObject {
   }
 }
 
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale
+@JS('Intl.Locale')
+extension type DomLocale._(JSObject _) implements JSObject {
+  external DomLocale(String tag, [DomLocaleOptions? options]);
+
+  external String get language;
+  external String? get script;
+  external String? get region;
+  external String? get calendar;
+  external String? get caseFirst;
+  external String? get collation;
+  external String? get hourCycle;
+  external String? get numberingSystem;
+  external bool? get numeric;
+
+  @JS('toString')
+  external String toJSString();
+}
+
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/Locale#options
+extension type DomLocaleOptions._(JSObject _) implements JSObject {
+  external DomLocaleOptions({
+    String? language,
+    String? script,
+    String? region,
+    String? calendar,
+    String? caseFirst,
+    String? collation,
+    String? hourCycle,
+    String? numberingSystem,
+    bool? numeric,
+  });
+
+  external String? get language;
+  external String? get script;
+  external String? get region;
+  external String? get calendar;
+  external String? get caseFirst;
+  external String? get collation;
+  external String? get hourCycle;
+  external String? get numberingSystem;
+  external bool? get numeric;
+}
+
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols
 @JS('Iterator')
 extension type DomIterator._(JSObject _) implements JSObject {
@@ -2563,9 +2626,16 @@ extension JSArrayExtension on JSArray<JSAny?> {
 
 @JS('TextCluster')
 extension type DomTextCluster._(JSObject _) implements JSObject {
-  // TODO(jlavrova): This has been renamed to `start` in the spec.
-  // See: https://github.com/fserb/canvas2D/blob/master/spec/enhanced-textmetrics.md
-  external int get begin;
+  @JS('begin')
+  external int? _begin;
+  @JS('start')
+  external int _start;
+  // The proposal had this `begin` then renamed it to `start`. Some versions of Chrome still have
+  // the old name.
+  //
+  // `_begin` can be removed once this feature is launched in a stable Chrome release.
+  int get start => _begin ?? _start;
+
   external int get end;
   external double get x;
   external double get y;

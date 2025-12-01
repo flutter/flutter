@@ -66,7 +66,7 @@ void showGalleryAboutDialog(BuildContext context) {
               ),
               _LinkTextSpan(
                 style: linkStyle,
-                url: 'https://goo.gl/iv1p4G',
+                url: 'https://github.com/flutter/gallery',
                 text: 'flutter github repo',
               ),
               TextSpan(style: aboutTextStyle, text: '.'),

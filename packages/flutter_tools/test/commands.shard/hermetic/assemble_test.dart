@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/commands/assemble.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
@@ -72,6 +73,35 @@ void main() {
         'assemble',
         '-o Output',
         '-dFooBar=fizz=2',
+        'debug_macos_bundle_flutter_assets',
+      ]);
+
+      expect(testLogger.traceText, contains('build succeeded.'));
+    },
+    overrides: <Type, Generator>{
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
+
+  testUsingContext(
+    'flutter assemble can parse empty defines',
+    () async {
+      final CommandRunner<void> commandRunner = createTestCommandRunner(
+        AssembleCommand(
+          buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+            Target target,
+            Environment environment,
+          ) {
+            expect(environment.defines, const {'DeferredComponents': 'false'});
+          }),
+        ),
+      );
+      await commandRunner.run(<String>[
+        'assemble',
+        '-o Output',
+        '--DartDefines=',
         'debug_macos_bundle_flutter_assets',
       ]);
 
@@ -231,7 +261,7 @@ void main() {
         'assemble',
         '--output',
         'Output',
-        '--DartDefines=flutter.inspector.structuredErrors%3Dtrue',
+        '-DartDefines=flutter.inspector.structuredErrors%3Dtrue',
         'debug_macos_bundle_flutter_assets',
       ];
       expect(
@@ -467,4 +497,41 @@ void main() {
       ],
     });
   });
+
+  testUsingContext('hides itself from usage unless --verbose', () async {
+    final CommandRunner<void> commandRunner = createTestCommandRunner(
+      AssembleCommand(buildSystem: TestBuildSystem.error(null)),
+    );
+
+    // If all commands are hidden, hidden is ignored. Add a non-hidden stub command.
+    commandRunner.addCommand(_StubCommand());
+
+    await commandRunner.run(['--help']);
+    expect(testLogger.statusText, isNot(contains('assemble')));
+  });
+
+  testUsingContext('describes itself from usage if --verbose', () async {
+    final CommandRunner<void> commandRunner = createTestCommandRunner(
+      AssembleCommand(buildSystem: TestBuildSystem.error(null), verboseHelp: true),
+    );
+
+    // If all commands are hidden, hidden is ignored. Add a non-hidden stub command.
+    commandRunner.addCommand(_StubCommand());
+
+    await commandRunner.run(['--help' /* -- verbose omitted (verboseHelp: true) is set above */]);
+    expect(testLogger.statusText, contains('assemble'));
+  });
+}
+
+final class _StubCommand extends FlutterCommand {
+  @override
+  String get description => 'This is a stub';
+
+  @override
+  String get name => 'stub';
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    return FlutterCommandResult.success();
+  }
 }

@@ -16,6 +16,8 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 
+import 'context.dart';
+
 export 'package:test/test.dart' hide isInstanceOf, test;
 
 CommandRunner<void> createTestCommandRunner([FlutterCommand? command]) {
@@ -64,5 +66,10 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
         return super.runCommand(topLevelResults);
       },
     );
+  }
+
+  @override
+  void printUsage() {
+    testLogger.printStatus(usage);
   }
 }

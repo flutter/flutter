@@ -14,13 +14,7 @@ namespace impeller {
 struct GLTexture {
   GLuint texture_name;
 
-  constexpr bool operator==(const GLTexture& other) const {
-    return texture_name == other.texture_name;
-  }
-
-  constexpr bool operator!=(const GLTexture& other) const {
-    return !(*this == other);
-  }
+  constexpr bool operator==(const GLTexture& other) const = default;
 };
 
 struct GLTextureTraits {

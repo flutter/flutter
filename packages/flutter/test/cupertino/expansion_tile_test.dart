@@ -9,11 +9,12 @@
 library;
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  const Duration expansionDuration = Duration(milliseconds: 250);
-  const Duration infinitesimalDuration = Duration(microseconds: 1);
+  const expansionDuration = Duration(milliseconds: 250);
+  const infinitesimalDuration = Duration(microseconds: 1);
   testWidgets('Toggles expansion on tap', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
@@ -36,7 +37,7 @@ void main() {
   });
 
   testWidgets('Can be controlled by ExpansibleController', (WidgetTester tester) async {
-    final ExpansibleController controller = ExpansibleController();
+    final controller = ExpansibleController();
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoPageScaffold(
@@ -66,7 +67,7 @@ void main() {
   });
 
   testWidgets('Controller can set the tile to be initially expanded', (WidgetTester tester) async {
-    final ExpansibleController controller = ExpansibleController();
+    final controller = ExpansibleController();
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoPageScaffold(
@@ -211,4 +212,168 @@ void main() {
     );
     await tester.pumpAndSettle();
   });
+
+  testWidgets('Nested CupertinoListTile Semantics', (WidgetTester tester) async {
+    final controller = ExpansibleController();
+    addTearDown(controller.dispose);
+    final SemanticsHandle handle = tester.ensureSemantics();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Column(
+          children: <Widget>[
+            const CupertinoExpansionTile(
+              title: Text('First Expansion Tile'),
+              child: SizedBox(height: 50.0),
+            ),
+            CupertinoExpansionTile(
+              controller: controller,
+              title: const Text('Second Expansion Tile'),
+              child: const SizedBox(height: 50.0),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    controller.expand();
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.getSemantics(find.byType(CupertinoListTile).first),
+      matchesSemantics(
+        hasTapAction: true,
+        label: 'First Expansion Tile',
+        textDirection: TextDirection.ltr,
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.byType(CupertinoListTile).last),
+      matchesSemantics(
+        hasTapAction: true,
+        label: 'Second Expansion Tile',
+        textDirection: TextDirection.ltr,
+      ),
+    );
+    handle.dispose();
+  });
+
+  testWidgets('Semantics with the onTapHint is an ancestor of CupertinoListTile', (
+    WidgetTester tester,
+  ) async {
+    final controller = ExpansibleController();
+    addTearDown(controller.dispose);
+    final SemanticsHandle handle = tester.ensureSemantics();
+    const localizations = DefaultCupertinoLocalizations();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Column(
+          children: <Widget>[
+            const CupertinoExpansionTile(
+              title: Text('First Expansion Tile'),
+              child: SizedBox(height: 100, width: 100),
+            ),
+            CupertinoExpansionTile(
+              controller: controller,
+              title: const Text('Second Expansion Tile'),
+              child: const SizedBox(height: 100, width: 100),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    controller.expand();
+    await tester.pumpAndSettle();
+
+    SemanticsNode semantics = tester.getSemantics(
+      find
+          .ancestor(of: find.byType(CupertinoListTile).first, matching: find.byType(Semantics))
+          .first,
+    );
+    expect(semantics, isNotNull);
+    // The onTapHint is passed to semantics properties's hintOverrides.
+    expect(semantics.hintOverrides, isNotNull);
+    // The hint should be the opposite of the current state.
+    // The first CupertinoExpansionTile is collapsed, so the hint should be
+    // "double tap to expand".
+    expect(semantics.hintOverrides!.onTapHint, localizations.expansionTileCollapsedTapHint);
+
+    semantics = tester.getSemantics(
+      find
+          .ancestor(of: find.byType(CupertinoListTile).last, matching: find.byType(Semantics))
+          .first,
+    );
+
+    expect(semantics, isNotNull);
+    // The onTapHint is passed to semantics properties's hintOverrides.
+    expect(semantics.hintOverrides, isNotNull);
+    // The hint should be the opposite of the current state.
+    // The second CupertinoExpansionTile is expanded, so the hint should be
+    // "double tap to collapse".
+    expect(semantics.hintOverrides!.onTapHint, localizations.expansionTileExpandedTapHint);
+    handle.dispose();
+  });
+
+  testWidgets(
+    'Semantics hint for iOS and macOS',
+    (WidgetTester tester) async {
+      final controller = ExpansibleController();
+      addTearDown(controller.dispose);
+      final SemanticsHandle handle = tester.ensureSemantics();
+      const localizations = DefaultCupertinoLocalizations();
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Column(
+            children: <Widget>[
+              const CupertinoExpansionTile(
+                title: Text('First Expansion Tile'),
+                child: SizedBox(height: 100, width: 100),
+              ),
+              CupertinoExpansionTile(
+                controller: controller,
+                title: const Text('Second Expansion Tile'),
+                child: const SizedBox(height: 100, width: 100),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      controller.expand();
+      await tester.pumpAndSettle();
+
+      SemanticsNode semantics = tester.getSemantics(
+        find
+            .ancestor(of: find.byType(CupertinoListTile).first, matching: find.byType(Semantics))
+            .first,
+      );
+
+      expect(semantics, isNotNull);
+      expect(
+        semantics.hint,
+        '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}',
+      );
+
+      semantics = tester.getSemantics(
+        find
+            .ancestor(of: find.byType(CupertinoListTile).last, matching: find.byType(Semantics))
+            .first,
+      );
+
+      expect(semantics, isNotNull);
+      expect(
+        semantics.hint,
+        '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}',
+      );
+      handle.dispose();
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    }),
+  );
 }

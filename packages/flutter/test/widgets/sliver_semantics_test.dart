@@ -20,13 +20,13 @@ void main() {
 
 void _tests() {
   testWidgets('excludeFromScrollable works correctly', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
-    const double appBarExpandedHeight = 200.0;
+    const appBarExpandedHeight = 200.0;
 
-    final ScrollController scrollController = ScrollController();
+    final scrollController = ScrollController();
     addTearDown(scrollController.dispose);
-    final List<Widget> listChildren = List<Widget>.generate(30, (int i) {
+    final listChildren = List<Widget>.generate(30, (int i) {
       return SizedBox(height: appBarExpandedHeight, child: Text('Item $i'));
     });
     await tester.pumpWidget(
@@ -50,7 +50,7 @@ void _tests() {
                     expandedHeight: appBarExpandedHeight,
                     title: Text('Semantics Test with Slivers'),
                   ),
-                  SliverList(delegate: SliverChildListDelegate(listChildren)),
+                  SliverList.list(children: listChildren),
                 ],
               ),
             ),
@@ -251,15 +251,13 @@ void _tests() {
   });
 
   testWidgets('Offscreen sliver are hidden in semantics tree', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
-    const double containerHeight = 200.0;
+    const containerHeight = 200.0;
 
-    final ScrollController scrollController = ScrollController(
-      initialScrollOffset: containerHeight * 1.5,
-    );
+    final scrollController = ScrollController(initialScrollOffset: containerHeight * 1.5);
     addTearDown(scrollController.dispose);
-    final List<Widget> slivers = List<Widget>.generate(30, (int i) {
+    final slivers = List<Widget>.generate(30, (int i) {
       return SliverToBoxAdapter(
         child: SizedBox(
           height: containerHeight,
@@ -341,9 +339,9 @@ void _tests() {
   });
 
   testWidgets('SemanticsNodes of Slivers are in paint order', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
-    final List<Widget> slivers = List<Widget>.generate(5, (int i) {
+    final slivers = List<Widget>.generate(5, (int i) {
       return SliverToBoxAdapter(child: SizedBox(height: 20.0, child: Text('Item $i')));
     });
     await tester.pumpWidget(
@@ -406,12 +404,12 @@ void _tests() {
   testWidgets(
     'SemanticsNodes of a sliver fully covered by another overlapping sliver are excluded',
     (WidgetTester tester) async {
-      final SemanticsTester semantics = SemanticsTester(tester);
+      final semantics = SemanticsTester(tester);
 
-      final List<Widget> listChildren = List<Widget>.generate(10, (int i) {
+      final listChildren = List<Widget>.generate(10, (int i) {
         return SizedBox(height: 200.0, child: Text('Item $i', textDirection: TextDirection.ltr));
       });
-      final ScrollController controller = ScrollController(initialScrollOffset: 280.0);
+      final controller = ScrollController(initialScrollOffset: 280.0);
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         Semantics(
@@ -429,7 +427,7 @@ void _tests() {
                 child: CustomScrollView(
                   slivers: <Widget>[
                     const SliverAppBar(pinned: true, expandedHeight: 100.0, title: Text('AppBar')),
-                    SliverList(delegate: SliverChildListDelegate(listChildren)),
+                    SliverList.list(children: listChildren),
                   ],
                   controller: controller,
                 ),
@@ -513,11 +511,11 @@ void _tests() {
   testWidgets('Slivers fully covered by another overlapping sliver are hidden', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
-    final ScrollController controller = ScrollController(initialScrollOffset: 280.0);
+    final controller = ScrollController(initialScrollOffset: 280.0);
     addTearDown(controller.dispose);
-    final List<Widget> slivers = List<Widget>.generate(10, (int i) {
+    final slivers = List<Widget>.generate(10, (int i) {
       return SliverToBoxAdapter(
         child: SizedBox(height: 200.0, child: Text('Item $i', textDirection: TextDirection.ltr)),
       );
@@ -621,12 +619,12 @@ void _tests() {
   testWidgets(
     'SemanticsNodes of a sliver fully covered by another overlapping sliver are excluded (reverse)',
     (WidgetTester tester) async {
-      final SemanticsTester semantics = SemanticsTester(tester);
+      final semantics = SemanticsTester(tester);
 
-      final List<Widget> listChildren = List<Widget>.generate(10, (int i) {
+      final listChildren = List<Widget>.generate(10, (int i) {
         return SizedBox(height: 200.0, child: Text('Item $i', textDirection: TextDirection.ltr));
       });
-      final ScrollController controller = ScrollController(initialScrollOffset: 280.0);
+      final controller = ScrollController(initialScrollOffset: 280.0);
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         Semantics(
@@ -645,7 +643,7 @@ void _tests() {
                   reverse: true, // This is the important setting for this test.
                   slivers: <Widget>[
                     const SliverAppBar(pinned: true, expandedHeight: 100.0, title: Text('AppBar')),
-                    SliverList(delegate: SliverChildListDelegate(listChildren)),
+                    SliverList.list(children: listChildren),
                   ],
                   controller: controller,
                 ),
@@ -729,11 +727,11 @@ void _tests() {
   testWidgets('Slivers fully covered by another overlapping sliver are hidden (reverse)', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
-    final ScrollController controller = ScrollController(initialScrollOffset: 280.0);
+    final controller = ScrollController(initialScrollOffset: 280.0);
     addTearDown(controller.dispose);
-    final List<Widget> slivers = List<Widget>.generate(10, (int i) {
+    final slivers = List<Widget>.generate(10, (int i) {
       return SliverToBoxAdapter(
         child: SizedBox(height: 200.0, child: Text('Item $i', textDirection: TextDirection.ltr)),
       );
@@ -838,18 +836,18 @@ void _tests() {
   testWidgets(
     'Slivers fully covered by another overlapping sliver are hidden (with center sliver)',
     (WidgetTester tester) async {
-      final SemanticsTester semantics = SemanticsTester(tester);
+      final semantics = SemanticsTester(tester);
 
-      final ScrollController controller = ScrollController(initialScrollOffset: 280.0);
+      final controller = ScrollController(initialScrollOffset: 280.0);
       addTearDown(controller.dispose);
       final GlobalKey forwardAppBarKey = GlobalKey(debugLabel: 'forward app bar');
-      final List<Widget> forwardChildren = List<Widget>.generate(10, (int i) {
+      final forwardChildren = List<Widget>.generate(10, (int i) {
         return SizedBox(
           height: 200.0,
           child: Text('Forward Item $i', textDirection: TextDirection.ltr),
         );
       });
-      final List<Widget> backwardChildren = List<Widget>.generate(10, (int i) {
+      final backwardChildren = List<Widget>.generate(10, (int i) {
         return SizedBox(
           height: 200.0,
           child: Text('Backward Item $i', textDirection: TextDirection.ltr),
@@ -875,7 +873,7 @@ void _tests() {
                       offset: offset,
                       center: forwardAppBarKey,
                       slivers: <Widget>[
-                        SliverList(delegate: SliverChildListDelegate(backwardChildren)),
+                        SliverList.list(children: backwardChildren),
                         const SliverAppBar(
                           pinned: true,
                           expandedHeight: 100.0,
@@ -891,7 +889,7 @@ void _tests() {
                             title: Text('Forward app bar', textDirection: TextDirection.ltr),
                           ),
                         ),
-                        SliverList(delegate: SliverChildListDelegate(forwardChildren)),
+                        SliverList.list(children: forwardChildren),
                       ],
                     );
                   },

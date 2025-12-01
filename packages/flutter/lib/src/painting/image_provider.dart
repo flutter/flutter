@@ -123,9 +123,9 @@ class ImageConfiguration {
 
   @override
   String toString() {
-    final StringBuffer result = StringBuffer();
+    final result = StringBuffer();
     result.write('ImageConfiguration(');
-    bool hasArguments = false;
+    var hasArguments = false;
     if (bundle != null) {
       result.write('bundle: $bundle');
       hasArguments = true;
@@ -348,7 +348,7 @@ typedef ImageDecoderCallback =
 ///
 /// ## Creating an [ImageProvider]
 ///
-/// {@tool dartpad}
+/// {@tool sample}
 /// In this example, a variant of [NetworkImage] is created that passes all the
 /// [ImageConfiguration] information (locale, platform, size, etc) to the server
 /// using query arguments in the image URL.
@@ -431,7 +431,7 @@ abstract class ImageProvider<T extends Object> {
     required ImageConfiguration configuration,
     ImageErrorListener? handleError,
   }) {
-    final Completer<ImageCacheStatus?> completer = Completer<ImageCacheStatus?>();
+    final completer = Completer<ImageCacheStatus?>();
     _createErrorHandlerAndKey(
       configuration,
       (T key, ImageErrorListener innerHandleError) {
@@ -474,7 +474,7 @@ abstract class ImageProvider<T extends Object> {
     _AsyncKeyErrorHandler<T?> errorCallback,
   ) {
     T? obtainedKey;
-    bool didError = false;
+    var didError = false;
     Future<void> handleError(Object exception, StackTrace? stack) async {
       if (didError) {
         return;
@@ -1250,6 +1250,7 @@ enum ResizeImagePolicy {
 ///
 ///  * [ui.FlutterView.devicePixelRatio], used to convert between physical and
 ///    logical pixels.
+@immutable
 class ResizeImage extends ImageProvider<ResizeImageKey> {
   /// Creates an ImageProvider that decodes the image to the specified size.
   ///
@@ -1378,8 +1379,8 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
               final double aspectRatio = intrinsicWidth / intrinsicHeight;
               final int maxWidth = width ?? intrinsicWidth;
               final int maxHeight = height ?? intrinsicHeight;
-              int targetWidth = intrinsicWidth;
-              int targetHeight = intrinsicHeight;
+              var targetWidth = intrinsicWidth;
+              var targetHeight = intrinsicHeight;
 
               if (targetWidth > maxWidth) {
                 targetWidth = maxWidth;
@@ -1462,6 +1463,25 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
     completer = Completer<ResizeImageKey>();
     return completer.future;
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is ResizeImage &&
+        imageProvider == other.imageProvider &&
+        width == other.width &&
+        height == other.height &&
+        policy == other.policy &&
+        allowUpscaling == other.allowUpscaling;
+  }
+
+  @override
+  int get hashCode => Object.hash(imageProvider, width, height, policy, allowUpscaling);
 }
 
 /// The strategy for [Image.network] and [NetworkImage] to decide whether to

@@ -38,7 +38,7 @@ GeometryResult PointFieldGeometry::GetPositionBuffer(
 
   Scalar min_size = 0.5f / max_basis;
   Scalar radius = std::max(radius_, min_size);
-  HostBuffer& host_buffer = renderer.GetTransientsBuffer();
+  HostBuffer& data_host_buffer = renderer.GetTransientsDataBuffer();
   BufferView buffer_view;
   size_t vertex_count = 0;
 
@@ -57,7 +57,7 @@ GeometryResult PointFieldGeometry::GetPositionBuffer(
     FML_DCHECK(circle_vertices.size() == generator.GetVertexCount());
 
     vertex_count = (circle_vertices.size() + 2) * point_count_ - 2;
-    buffer_view = host_buffer.Emplace(
+    buffer_view = data_host_buffer.Emplace(
         vertex_count * sizeof(Point), alignof(Point), [&](uint8_t* data) {
           Point* output = reinterpret_cast<Point*>(data);
           size_t offset = 0;
@@ -82,7 +82,7 @@ GeometryResult PointFieldGeometry::GetPositionBuffer(
         });
   } else {
     vertex_count = 6 * point_count_ - 2;
-    buffer_view = host_buffer.Emplace(
+    buffer_view = data_host_buffer.Emplace(
         vertex_count * sizeof(Point), alignof(Point), [&](uint8_t* data) {
           Point* output = reinterpret_cast<Point*>(data);
           size_t offset = 0;

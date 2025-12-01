@@ -13,7 +13,7 @@ library;
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart' show clampDouble;
+import 'package:flutter/foundation.dart' show clampDouble, kIsWeb;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -27,7 +27,6 @@ import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'material_state.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -288,7 +287,7 @@ abstract interface class ChipAttributes {
   ///  * [WidgetState.focused].
   ///  * [WidgetState.disabled].
   ///
-  /// If this property is null, [WidgetStateMouseCursor.clickable] will be used.
+  /// If this property is null, [WidgetStateMouseCursor.adaptiveClickable] will be used.
   MouseCursor? get mouseCursor;
 }
 
@@ -1187,14 +1186,14 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
         selectedColor: widget.selectedColor ?? chipTheme.selectedColor,
         defaultColor: chipDefaults.color,
       );
-      final ColorTween backgroundTween = ColorTween(begin: disabledColor, end: backgroundColor);
-      final ColorTween selectTween = ColorTween(
+      final backgroundTween = ColorTween(begin: disabledColor, end: backgroundColor);
+      final selectTween = ColorTween(
         begin: backgroundTween.evaluate(enableController),
         end: selectedColor,
       );
       return selectTween.evaluate(selectionFade);
     } else {
-      final ColorTween backgroundTween = ColorTween(
+      final backgroundTween = ColorTween(
         begin: widget.disabledColor ?? chipTheme.disabledColor ?? theme.disabledColor,
         end:
             widget.backgroundColor ??
@@ -1202,7 +1201,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
             theme.chipTheme.backgroundColor ??
             chipDefaults.backgroundColor,
       );
-      final ColorTween selectTween = ColorTween(
+      final selectTween = ColorTween(
         begin: backgroundTween.evaluate(enableController),
         end:
             widget.selectedColor ??
@@ -1278,13 +1277,15 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
         chipTheme.iconTheme ??
         theme.chipTheme.iconTheme ??
         _ChipDefaultsM3(context, widget.isEnabled).iconTheme!;
-    final Color? effectiveDeleteIconColor =
-        widget.deleteIconColor ??
-        chipTheme.deleteIconColor ??
-        theme.chipTheme.deleteIconColor ??
-        widget.iconTheme?.color ??
-        chipTheme.iconTheme?.color ??
-        chipDefaults.deleteIconColor;
+    final Color? effectiveDeleteIconColor = WidgetStateProperty.resolveAs(
+      widget.deleteIconColor ??
+          chipTheme.deleteIconColor ??
+          theme.chipTheme.deleteIconColor ??
+          widget.iconTheme?.color ??
+          chipTheme.iconTheme?.color ??
+          chipDefaults.deleteIconColor,
+      statesController.value,
+    );
     final double effectiveIconSize =
         widget.iconTheme?.size ??
         chipTheme.iconTheme?.size ??
@@ -1502,7 +1503,13 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     return Semantics(
       button: widget.tapEnabled,
       container: true,
-      selected: widget.selected,
+      // On web, aria-selected only works for certain roles: gridcell, option, row and tab.
+      // https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-selected
+      // If the role doesn't support aria-selected, aria-current will be set instead in flutter engine.
+      // But in this case, aria-checked makes more sense than aria-current for a selected chip.
+      // So use checked on web instead.
+      selected: kIsWeb ? null : widget.selected,
+      checked: kIsWeb ? widget.selected : null,
       enabled: widget.tapEnabled ? canTap : null,
       child: result,
     );
@@ -1571,7 +1578,7 @@ class _RenderChipRedirectingHitDetection extends RenderConstrainedBox {
     // Only redirects hit detection which occurs above and below the render object.
     // In order to make this assumption true, I have removed the minimum width
     // constraints, since any reasonable chip would be at least that wide.
-    final Offset offset = Offset(position.dx, size.height / 2);
+    final offset = Offset(position.dx, size.height / 2);
     return result.addWithRawTransform(
       transform: MatrixUtils.forceToPoint(offset),
       position: position,
@@ -1959,13 +1966,13 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     );
 
     final Size labelSize = theme.labelPadding.inflateSize(layoutChild(label, labelConstraints));
-    final Offset densityAdjustment = Offset(0.0, theme.visualDensity.baseSizeAdjustment.dy / 2.0);
+    final densityAdjustment = Offset(0.0, theme.visualDensity.baseSizeAdjustment.dy / 2.0);
     // This is the overall size of the content: it doesn't include
     // theme.padding, that is added in at the end.
     final Size overallSize =
         Size(avatarSize.width + labelSize.width + deleteIconSize.width, contentSize) +
         densityAdjustment;
-    final Size paddedSize = Size(
+    final paddedSize = Size(
       overallSize.width + theme.padding.horizontal,
       overallSize.height + theme.padding.vertical,
     );
@@ -1988,7 +1995,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
 
     // Now we have all of the dimensions. Place the children where they belong.
 
-    const double left = 0.0;
+    const left = 0.0;
     final double right = sizes.overall.width;
 
     Offset centerLayout(Size boxSize, double x) {
@@ -2010,7 +2017,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     Offset deleteIconOffset = Offset.zero;
     switch (textDirection) {
       case TextDirection.rtl:
-        double start = right;
+        var start = right;
         if (theme.showCheckmark || theme.showAvatar) {
           avatarOffset = centerLayout(sizes.avatar, start);
           start -= sizes.avatar.width;
@@ -2040,7 +2047,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
           _pressRect = Rect.zero;
         }
       case TextDirection.ltr:
-        double start = left;
+        var start = left;
         if (theme.showCheckmark || theme.showAvatar) {
           avatarOffset = centerLayout(sizes.avatar, start - avatar.size.width + sizes.avatar.width);
           start += sizes.avatar.width;
@@ -2079,7 +2086,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     _boxParentData(avatar).offset = theme.padding.topLeft + avatarOffset;
     _boxParentData(label).offset = theme.padding.topLeft + labelOffset + theme.labelPadding.topLeft;
     _boxParentData(deleteIcon).offset = theme.padding.topLeft + deleteIconOffset;
-    final Size paddedSize = Size(
+    final paddedSize = Size(
       sizes.overall.width + theme.padding.horizontal,
       sizes.overall.height + theme.padding.vertical,
     );
@@ -2125,13 +2132,13 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
           (Brightness.dark, false) => Colors.white.withAlpha(_kCheckmarkAlpha),
         };
 
-    final ColorTween fadeTween = ColorTween(begin: Colors.transparent, end: paintColor);
+    final fadeTween = ColorTween(begin: Colors.transparent, end: paintColor);
 
     paintColor = checkmarkAnimation.status == AnimationStatus.reverse
         ? fadeTween.evaluate(checkmarkAnimation)
         : paintColor;
 
-    final Paint paint = Paint()
+    final paint = Paint()
       ..color = paintColor!
       ..style = PaintingStyle.stroke
       ..strokeWidth = _kCheckmarkStrokeWidth * avatar.size.height / 24.0;
@@ -2145,10 +2152,10 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     assert(t > 0.0 && t <= 1.0);
     // As t goes from 0.0 to 1.0, animate the two check mark strokes from the
     // short side to the long side.
-    final Path path = Path();
-    final Offset start = Offset(size * 0.15, size * 0.45);
-    final Offset mid = Offset(size * 0.4, size * 0.7);
-    final Offset end = Offset(size * 0.85, size * 0.25);
+    final path = Path();
+    final start = Offset(size * 0.15, size * 0.45);
+    final mid = Offset(size * 0.4, size * 0.7);
+    final end = Offset(size * 0.85, size * 0.25);
     if (t < 0.5) {
       final double strokeT = t * 2.0;
       final Offset drawMid = Offset.lerp(start, mid, strokeT)!;
@@ -2168,7 +2175,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     if (isDrawingCheckmark) {
       if (theme.showAvatar) {
         final Rect avatarRect = _boxRect(avatar).shift(offset);
-        final Paint darkenPaint = Paint()
+        final darkenPaint = Paint()
           ..color = selectionScrimTween.evaluate(checkmarkAnimation)!
           ..blendMode = BlendMode.srcATop;
         final Path path = avatarBorder!.getOuterPath(avatarRect);
@@ -2309,7 +2316,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
           () {
             // Draws a rect around the tap targets to help with visualizing where
             // they really are.
-            final Paint outlinePaint = Paint()
+            final outlinePaint = Paint()
               ..color = const Color(0xff800000)
               ..strokeWidth = 1.0
               ..style = PaintingStyle.stroke;
@@ -2502,7 +2509,7 @@ class _ChipDefaultsM3 extends ChipThemeData {
   );
 
   @override
-  MaterialStateProperty<Color?>? get color => null; // Subclasses override this getter
+  WidgetStateProperty<Color?>? get color => null; // Subclasses override this getter
 
   @override
   Color? get shadowColor => Colors.transparent;

@@ -291,9 +291,8 @@ void main() {
             command: <String>['git', 'rev-parse', '--verify', '@{upstream}'],
             stdout: revision,
           ),
-          const FakeCommand(command: <String>['git', 'tag', '--points-at', revision]),
           const FakeCommand(
-            command: <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', revision],
+            command: <String>['git', 'tag', '--points-at', revision],
             stdout: version,
           ),
         ]);
@@ -761,8 +760,8 @@ void main() {
 }
 
 class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
-  var willHaveUncommittedChanges = false;
-  var alreadyUpToDate = false;
+  bool willHaveUncommittedChanges = false;
+  bool alreadyUpToDate = false;
 
   late FlutterVersion remoteVersion;
 

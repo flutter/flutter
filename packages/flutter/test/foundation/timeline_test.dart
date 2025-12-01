@@ -69,7 +69,7 @@ void main() {
     // a bit inconsistent with Stopwatch.
     final int start = FlutterTimeline.now - 1;
     FlutterTimeline.timeSync('TEST', () {
-      final Stopwatch watch = Stopwatch()..start(); // flutter_ignore: stopwatch (see analyze.dart)
+      final watch = Stopwatch()..start(); // flutter_ignore: stopwatch (see analyze.dart)
       // Ignore context: Used safely for benchmarking.
       while (watch.elapsedMilliseconds < 5) {}
       watch.stop();
@@ -109,7 +109,7 @@ void main() {
   test('Can collect more than one slice of data', () {
     FlutterTimeline.debugCollectionEnabled = true;
 
-    for (int i = 0; i < 10 * kSliceSize; i++) {
+    for (var i = 0; i < 10 * kSliceSize; i++) {
       FlutterTimeline.startSync('TEST');
       FlutterTimeline.finishSync();
     }
@@ -126,7 +126,7 @@ void main() {
     FlutterTimeline.debugCollectionEnabled = true;
     const int testCount = 7 * kSliceSize ~/ 2;
 
-    for (int i = 0; i < testCount; i++) {
+    for (var i = 0; i < testCount; i++) {
       FlutterTimeline.startSync('TEST$i');
       FlutterTimeline.finishSync();
     }

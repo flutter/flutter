@@ -535,9 +535,9 @@ void main() {
           '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
           '--remote-debugging-port=12345',
           ...kChromeArgs,
+          '--no-sandbox',
           '--headless',
           '--disable-gpu',
-          '--no-sandbox',
           '--window-size=2400,1800',
           'example_url',
         ],
@@ -621,9 +621,9 @@ void main() {
       '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
       '--remote-debugging-port=12345',
       ...kChromeArgs,
+      '--no-sandbox',
       '--headless',
       '--disable-gpu',
-      '--no-sandbox',
       '--window-size=2400,1800',
       'example_url',
     ];
@@ -655,9 +655,9 @@ void main() {
       '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
       '--remote-debugging-port=12345',
       ...kChromeArgs,
+      '--no-sandbox',
       '--headless',
       '--disable-gpu',
-      '--no-sandbox',
       '--window-size=2400,1800',
       'example_url',
     ];
@@ -693,9 +693,9 @@ void main() {
             '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
             '--remote-debugging-port=12345',
             ...kChromeArgs,
+            '--no-sandbox',
             '--headless',
             '--disable-gpu',
-            '--no-sandbox',
             '--window-size=2400,1800',
             'example_url',
           ],
@@ -931,6 +931,30 @@ void main() {
       await chrome.close();
     },
   );
+
+  testWithoutContext('respects custom user data directory flag', () async {
+    const customUserDataDir = '/custom/chrome/data/dir';
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>[
+          'example_chrome',
+          '--user-data-dir=$customUserDataDir',
+          '--remote-debugging-port=12345',
+          ...kChromeArgs,
+          'example_url',
+        ],
+        stderr: kDevtoolsStderr,
+      ),
+    );
+
+    await expectReturnsNormallyLater(
+      chromeLauncher.launch(
+        'example_url',
+        skipCheck: true,
+        webBrowserFlags: <String>['--user-data-dir=$customUserDataDir'],
+      ),
+    );
+  });
 }
 
 /// Fake chrome connection that fails to get tabs a few times.
@@ -984,7 +1008,7 @@ class FakeChromeConnectionWithTab extends Fake implements ChromeConnection {
 
   final FakeChromeTab _tab;
   void Function()? onGetTab;
-  var throwSocketExceptions = false;
+  bool throwSocketExceptions = false;
 
   @override
   Future<ChromeTab?> getTab(bool Function(ChromeTab tab) accept, {Duration? retryFor}) async {

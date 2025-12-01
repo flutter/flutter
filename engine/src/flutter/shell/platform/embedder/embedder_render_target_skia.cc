@@ -37,8 +37,8 @@ EmbedderRenderTargetSkia::GetAiksContext() const {
   return nullptr;
 }
 
-SkISize EmbedderRenderTargetSkia::GetRenderTargetSize() const {
-  return SkISize::Make(render_surface_->width(), render_surface_->height());
+DlISize EmbedderRenderTargetSkia::GetRenderTargetSize() const {
+  return DlISize(render_surface_->width(), render_surface_->height());
 }
 
 EmbedderRenderTarget::SetCurrentResult

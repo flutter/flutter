@@ -55,7 +55,7 @@ fi
 EXECUTABLE="$SCRIPT_DIR/../../out/$HOST_PROFILE_DIR/licenses_cpp"
 
 # The root directory for the license check.
-WORKING_DIR="$SCRIPT_DIR/.."
+WORKING_DIR="$SCRIPT_DIR/../.."
 
 # The data directory required by the license tool.
 DATA_DIR="$SCRIPT_DIR/../tools/licenses_cpp/data"
@@ -81,6 +81,7 @@ fi
   --working_dir "$WORKING_DIR" \
   --data_dir "$DATA_DIR" \
   --licenses_path "$LICENSES_OUTPUT_PATH" \
+  --root_package "flutter" \
   --v $VERBOSITY
 
 if ! git diff \
@@ -93,6 +94,8 @@ if ! git diff \
   echo "The licenses have changed."
   echo "Please review added licenses and update //engine/src/flutter/sky/packages/sky_engine/LICENSE"
   echo "The license check can be repeated locally with //engine/src/flutter/ci/licenses_cpp.sh"
+  echo "Make sure your licenses_cpp executable is built. For example:"
+  echo "    et build -c host_profile_arm64 //flutter/tools/licenses_cpp"
   echo "When executed locally the following command can update the licenses after a run:"
   echo "cp $LICENSES_OUTPUT_PATH $LICENSES_PATH"
   exit 1

@@ -97,8 +97,8 @@ flutter:
       final List<AssetsEntry> assets = flutterManifest.assets;
 
       expect(assets, <AssetsEntry>[
-        AssetsEntry(uri: Uri.parse('lib/gallery/abc%23xyz')),
-        AssetsEntry(uri: Uri.parse('lib/gallery/abc%3Fxyz')),
+        AssetsEntry(uri: Uri.parse('lib/gallery/abc#xyz')),
+        AssetsEntry(uri: Uri.parse('lib/gallery/abc?xyz')),
         AssetsEntry(uri: Uri.parse('lib/gallery/aaa%20bbb')),
       ]);
     });

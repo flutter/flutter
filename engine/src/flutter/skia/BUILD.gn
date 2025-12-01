@@ -242,6 +242,7 @@ optional("fontmgr_android") {
   ]
   public = skia_ports_fontmgr_android_public
   sources = skia_ports_fontmgr_android_sources
+  sources += skia_ports_fontmgr_android_parser_sources
 }
 
 optional("fontmgr_custom") {
@@ -310,7 +311,10 @@ optional("fontmgr_fuchsia") {
   enabled = is_fuchsia
   public_defines = [ "SK_FONTMGR_FUCHSIA_AVAILABLE" ]
 
-  deps = [ ":typeface_freetype" ]
+  deps = [
+    ":typeface_freetype",
+    ":typeface_proxy",
+  ]
 
   if (is_fuchsia) {
     deps += [ "${fuchsia_sdk}/fidl/fuchsia.fonts" ]

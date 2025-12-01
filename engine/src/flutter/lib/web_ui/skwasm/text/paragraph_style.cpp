@@ -4,21 +4,19 @@
 
 #include "../export.h"
 #include "../wrappers.h"
+#include "text_types.h"
 #include "third_party/skia/modules/skparagraph/include/Paragraph.h"
 
-using namespace skia::textlayout;
 using namespace Skwasm;
 
 SKWASM_EXPORT ParagraphStyle* paragraphStyle_create() {
   auto style = new ParagraphStyle();
 
   // This is the default behavior in Flutter
-  style->setReplaceTabCharacters(true);
+  style->skiaParagraphStyle.setReplaceTabCharacters(true);
 
   // Default text style has a black color
-  TextStyle textStyle;
-  textStyle.setColor(SK_ColorBLACK);
-  style->setTextStyle(textStyle);
+  style->textStyle.skiaStyle.setColor(SK_ColorBLACK);
 
   return style;
 }
@@ -27,59 +25,62 @@ SKWASM_EXPORT void paragraphStyle_dispose(ParagraphStyle* style) {
   delete style;
 }
 
-SKWASM_EXPORT void paragraphStyle_setTextAlign(ParagraphStyle* style,
-                                               TextAlign align) {
-  style->setTextAlign(align);
+SKWASM_EXPORT void paragraphStyle_setTextAlign(
+    ParagraphStyle* style,
+    skia::textlayout::TextAlign align) {
+  style->skiaParagraphStyle.setTextAlign(align);
 }
 
-SKWASM_EXPORT void paragraphStyle_setTextDirection(ParagraphStyle* style,
-                                                   TextDirection direction) {
-  style->setTextDirection(direction);
+SKWASM_EXPORT void paragraphStyle_setTextDirection(
+    ParagraphStyle* style,
+    skia::textlayout::TextDirection direction) {
+  style->skiaParagraphStyle.setTextDirection(direction);
 }
 
 SKWASM_EXPORT void paragraphStyle_setMaxLines(ParagraphStyle* style,
                                               size_t maxLines) {
-  style->setMaxLines(maxLines);
+  style->skiaParagraphStyle.setMaxLines(maxLines);
 }
 
 SKWASM_EXPORT void paragraphStyle_setHeight(ParagraphStyle* style,
                                             SkScalar height) {
-  style->setHeight(height);
+  style->skiaParagraphStyle.setHeight(height);
 }
 
 SKWASM_EXPORT void paragraphStyle_setTextHeightBehavior(
     ParagraphStyle* style,
     bool applyHeightToFirstAscent,
     bool applyHeightToLastDescent) {
-  TextHeightBehavior behavior;
+  skia::textlayout::TextHeightBehavior behavior;
   if (!applyHeightToFirstAscent && !applyHeightToLastDescent) {
-    behavior = kDisableAll;
+    behavior = skia::textlayout::kDisableAll;
   } else if (!applyHeightToLastDescent) {
-    behavior = kDisableLastDescent;
+    behavior = skia::textlayout::kDisableLastDescent;
   } else if (!applyHeightToFirstAscent) {
-    behavior = kDisableFirstAscent;
+    behavior = skia::textlayout::kDisableFirstAscent;
   } else {
-    behavior = kAll;
+    behavior = skia::textlayout::kAll;
   }
-  style->setTextHeightBehavior(behavior);
+  style->skiaParagraphStyle.setTextHeightBehavior(behavior);
 }
 
 SKWASM_EXPORT void paragraphStyle_setEllipsis(ParagraphStyle* style,
                                               SkString* ellipsis) {
-  style->setEllipsis(*ellipsis);
+  style->skiaParagraphStyle.setEllipsis(*ellipsis);
 }
 
-SKWASM_EXPORT void paragraphStyle_setStrutStyle(ParagraphStyle* style,
-                                                StrutStyle* strutStyle) {
-  style->setStrutStyle(*strutStyle);
+SKWASM_EXPORT void paragraphStyle_setStrutStyle(
+    ParagraphStyle* style,
+    skia::textlayout::StrutStyle* strutStyle) {
+  style->skiaParagraphStyle.setStrutStyle(*strutStyle);
 }
 
 SKWASM_EXPORT void paragraphStyle_setTextStyle(ParagraphStyle* style,
                                                TextStyle* textStyle) {
-  style->setTextStyle(*textStyle);
+  style->textStyle = *textStyle;
 }
 
 SKWASM_EXPORT void paragraphStyle_setApplyRoundingHack(ParagraphStyle* style,
                                                        bool applyRoundingHack) {
-  style->setApplyRoundingHack(applyRoundingHack);
+  style->skiaParagraphStyle.setApplyRoundingHack(applyRoundingHack);
 }

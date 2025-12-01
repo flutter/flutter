@@ -20,9 +20,9 @@ class LocaleInitialization extends Scenario {
   @override
   void onBeginFrame(Duration duration) {
     // Doesn't matter what we draw. Just paint white.
-    final SceneBuilder builder = SceneBuilder();
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder);
+    final builder = SceneBuilder();
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder);
 
     canvas.drawRect(
       Rect.fromLTWH(0, 0, view.physicalSize.width, view.physicalSize.height),
@@ -38,7 +38,7 @@ class LocaleInitialization extends Scenario {
     // On the first frame, pretend that it drew a text field. Send the
     // corresponding semantics tree comprised of 1 node with the locale data
     // as the label.
-    final SemanticsUpdateBuilder semanticsUpdateBuilder = SemanticsUpdateBuilder()
+    final semanticsUpdateBuilder = SemanticsUpdateBuilder()
       ..updateNode(
         id: 0,
         flags: SemanticsFlags(isTextField: true),
@@ -56,10 +56,12 @@ class LocaleInitialization extends Scenario {
         currentValueLength: 0,
         scrollChildren: 0,
         scrollIndex: 0,
+        traversalParent: -1,
         scrollPosition: 0.0,
         scrollExtentMax: 0.0,
         scrollExtentMin: 0.0,
         transform: Matrix4.identity().storage,
+        hitTestTransform: Matrix4.identity().storage,
         hint: '',
         hintAttributes: <StringAttribute>[],
         value: '',
@@ -78,7 +80,7 @@ class LocaleInitialization extends Scenario {
       );
 
     final SemanticsUpdate semanticsUpdate = semanticsUpdateBuilder.build();
-
+    view.platformDispatcher.setSemanticsTreeEnabled(true);
     view.updateSemantics(semanticsUpdate);
   }
 
@@ -87,7 +89,7 @@ class LocaleInitialization extends Scenario {
   /// Send changing information via semantics on each successive tap.
   @override
   void onPointerDataPacket(PointerDataPacket packet) {
-    String label = '';
+    var label = '';
     switch (_tapCount) {
       case 1:
         {
@@ -98,7 +100,7 @@ class LocaleInitialization extends Scenario {
       // Expand for other test cases.
     }
 
-    final SemanticsUpdateBuilder semanticsUpdateBuilder = SemanticsUpdateBuilder()
+    final semanticsUpdateBuilder = SemanticsUpdateBuilder()
       ..updateNode(
         id: 0,
         flags: SemanticsFlags(isTextField: true),
@@ -116,10 +118,12 @@ class LocaleInitialization extends Scenario {
         currentValueLength: 0,
         scrollChildren: 0,
         scrollIndex: 0,
+        traversalParent: -1,
         scrollPosition: 0.0,
         scrollExtentMax: 0.0,
         scrollExtentMin: 0.0,
         transform: Matrix4.identity().storage,
+        hitTestTransform: Matrix4.identity().storage,
         hint: '',
         hintAttributes: <StringAttribute>[],
         value: '',

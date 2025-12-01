@@ -13,6 +13,7 @@ library;
 import 'dart:ui' show SemanticsRole, clampDouble, lerpDouble;
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 
 import 'color_scheme.dart';
 import 'colors.dart';
@@ -771,7 +772,7 @@ class AlertDialog extends StatelessWidget {
         : _DialogDefaultsM2(context);
 
     String? label = semanticLabel;
-    switch (theme.platform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         break;
@@ -784,7 +785,7 @@ class AlertDialog extends StatelessWidget {
 
     // The paddingScaleFactor is used to adjust the padding of Dialog's
     // children.
-    const double fontSizeToScale = 14.0;
+    const fontSizeToScale = 14.0;
     final double effectiveTextScale =
         MediaQuery.textScalerOf(context).scale(fontSizeToScale) / fontSizeToScale;
     final double paddingScaleFactor = _scalePadding(effectiveTextScale);
@@ -796,9 +797,9 @@ class AlertDialog extends StatelessWidget {
     Widget? actionsWidget;
 
     if (icon != null) {
-      final bool belowIsTitle = title != null;
+      final belowIsTitle = title != null;
       final bool belowIsContent = !belowIsTitle && content != null;
-      final EdgeInsets defaultIconPadding = EdgeInsets.only(
+      final defaultIconPadding = EdgeInsets.only(
         left: 24.0,
         top: 24.0,
         right: 24.0,
@@ -825,7 +826,7 @@ class AlertDialog extends StatelessWidget {
     }
 
     if (title != null) {
-      final EdgeInsets defaultTitlePadding = EdgeInsets.only(
+      final defaultTitlePadding = EdgeInsets.only(
         left: 24.0,
         top: icon == null ? 24.0 : 0.0,
         right: 24.0,
@@ -848,7 +849,7 @@ class AlertDialog extends StatelessWidget {
           child: Semantics(
             // For iOS platform, the focus always lands on the title.
             // Set nameRoute to false to avoid title being announce twice.
-            namesRoute: label == null && theme.platform != TargetPlatform.iOS,
+            namesRoute: label == null && defaultTargetPlatform != TargetPlatform.iOS,
             container: true,
             child: title,
           ),
@@ -857,7 +858,7 @@ class AlertDialog extends StatelessWidget {
     }
 
     if (content != null) {
-      final EdgeInsets defaultContentPadding = EdgeInsets.only(
+      final defaultContentPadding = EdgeInsets.only(
         left: 24.0,
         top: theme.useMaterial3 ? 16.0 : 20.0,
         right: 24.0,
@@ -910,22 +911,18 @@ class AlertDialog extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  if (icon != null) iconWidget!,
-                  if (title != null) titleWidget!,
-                  if (content != null) contentWidget!,
-                ],
+                children: <Widget>[?iconWidget, ?titleWidget, ?contentWidget],
               ),
             ),
           ),
-        if (actions != null) actionsWidget!,
+        ?actionsWidget,
       ];
     } else {
       columnChildren = <Widget>[
-        if (icon != null) iconWidget!,
-        if (title != null) titleWidget!,
-        if (content != null) Flexible(child: contentWidget!),
-        if (actions != null) actionsWidget!,
+        ?iconWidget,
+        ?titleWidget,
+        if (contentWidget != null) Flexible(child: contentWidget),
+        ?actionsWidget,
       ];
     }
 
@@ -1277,7 +1274,7 @@ class SimpleDialog extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     String? label = semanticLabel;
-    switch (theme.platform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.macOS:
       case TargetPlatform.iOS:
         break;
@@ -1316,7 +1313,7 @@ class SimpleDialog extends StatelessWidget {
           child: Semantics(
             // For iOS platform, the focus always lands on the title.
             // Set nameRoute to false to avoid title being announce twice.
-            namesRoute: label == null && theme.platform != TargetPlatform.iOS,
+            namesRoute: label == null && defaultTargetPlatform != TargetPlatform.iOS,
             container: true,
             child: title,
           ),

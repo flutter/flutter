@@ -283,6 +283,7 @@ class CustomDeviceAppSession {
       if (traceStartup) 'trace-startup=true',
       if (route != null) 'route=$route',
       if (debuggingOptions.enableDartProfiling) 'enable-dart-profiling=true',
+      if (debuggingOptions.profileStartup) 'profile-startup=true',
       if (debuggingOptions.enableSoftwareRendering) 'enable-software-rendering=true',
       if (debuggingOptions.skiaDeterministicRendering) 'skia-deterministic-rendering=true',
       if (debuggingOptions.traceSkia) 'trace-skia=true',
@@ -827,7 +828,10 @@ class CustomDevices extends PollingDeviceDiscovery {
   }
 
   @override
-  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
+  Future<List<Device>> pollingGetDevices({
+    Duration? timeout,
+    bool forWirelessDiscovery = false,
+  }) async {
     if (!canListAnything) {
       return const <Device>[];
     }

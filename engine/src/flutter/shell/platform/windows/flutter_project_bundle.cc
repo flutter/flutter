@@ -69,11 +69,11 @@ UniqueAotDataPtr FlutterProjectBundle::LoadAotData(
     return UniqueAotDataPtr(nullptr, nullptr);
   }
   if (!std::filesystem::exists(aot_library_path_)) {
-    FML_LOG(ERROR) << "Can't load AOT data from "
-                   << aot_library_path_.u8string() << "; no such file.";
+    FML_LOG(ERROR) << "Can't load AOT data from " << aot_library_path_
+                   << "; no such file.";
     return UniqueAotDataPtr(nullptr, nullptr);
   }
-  std::string path_string = aot_library_path_.u8string();
+  std::string path_string = aot_library_path_.string();
   FlutterEngineAOTDataSource source = {};
   source.type = kFlutterEngineAOTDataSourceTypeElfPath;
   source.elf_path = path_string.c_str();

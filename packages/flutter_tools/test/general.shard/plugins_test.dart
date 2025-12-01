@@ -1245,7 +1245,7 @@ flutter:
               .childFile('GeneratedPluginRegistrant.java');
 
           expect(registrantFile, exists);
-          expect(registrantFile, isNot(contains('SomePlugin')));
+          expect(registrantFile.readAsStringSync(), isNot(contains('SomePlugin')));
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -1278,7 +1278,7 @@ flutter:
           final File registrantFile = iosProject.pluginRegistrantImplementation;
 
           expect(registrantFile, exists);
-          expect(registrantFile, isNot(contains('SomePlugin')));
+          expect(registrantFile.readAsStringSync(), isNot(contains('SomePlugin')));
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -1337,44 +1337,7 @@ flutter:
           );
 
           expect(registrantFile, exists);
-          expect(registrantFile, isNot(contains('SomePlugin')));
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          Pub: ThrowingPub.new,
-        },
-      );
-
-      testUsingContext(
-        "pluginClass: none doesn't trigger registrant entry on macOS",
-        () async {
-          flutterProject.isModule = true;
-          // Create a plugin without a pluginClass.
-          final Directory pluginDirectory = createFakePlugin(fs);
-          pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('''
-flutter:
-  plugin:
-    platforms:
-      macos:
-        pluginClass: none
-        dartPluginClass: SomePlugin
-    ''');
-          final dependencyManagement = FakeDarwinDependencyManagement();
-          await injectPlugins(
-            flutterProject,
-            releaseMode: false,
-            macOSPlatform: true,
-            darwinDependencyManagement: dependencyManagement,
-          );
-
-          final File registrantFile = macosProject.managedDirectory.childFile(
-            'GeneratedPluginRegistrant.swift',
-          );
-
-          expect(registrantFile, exists);
-          expect(registrantFile, isNot(contains('SomePlugin')));
-          expect(registrantFile, isNot(contains('none')));
+          expect(registrantFile.readAsStringSync(), isNot(contains('SomePlugin')));
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -1593,39 +1556,10 @@ flutter:
           );
 
           expect(registrantImpl, exists);
-          expect(registrantImpl, isNot(contains('SomePlugin')));
-          expect(registrantImpl, isNot(contains('some_plugin')));
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          Pub: ThrowingPub.new,
-        },
-      );
 
-      testUsingContext(
-        "pluginClass: none doesn't trigger registrant entry on Linux",
-        () async {
-          // Create a plugin without a pluginClass.
-          final Directory pluginDirectory = createFakePlugin(fs);
-          pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('''
-flutter:
-  plugin:
-    platforms:
-      linux:
-        pluginClass: none
-        dartPluginClass: SomePlugin
-    ''');
-
-          await injectPlugins(flutterProject, releaseMode: false, linuxPlatform: true);
-
-          final File registrantImpl = linuxProject.managedDirectory.childFile(
-            'generated_plugin_registrant.cc',
-          );
-
-          expect(registrantImpl, exists);
-          expect(registrantImpl, isNot(contains('SomePlugin')));
-          expect(registrantImpl, isNot(contains('none')));
+          final String contents = registrantImpl.readAsStringSync();
+          expect(contents, isNot(contains('SomePlugin')));
+          expect(contents, isNot(contains('some_plugin')));
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -1741,38 +1675,7 @@ flutter:
           );
 
           expect(registrantImpl, exists);
-          expect(registrantImpl, isNot(contains('SomePlugin')));
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          Pub: ThrowingPub.new,
-        },
-      );
-
-      testUsingContext(
-        "pluginClass: none doesn't trigger registrant entry on Windows",
-        () async {
-          // Create a plugin without a pluginClass.
-          final Directory pluginDirectory = createFakePlugin(fs);
-          pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('''
-flutter:
-  plugin:
-    platforms:
-      windows:
-        pluginClass: none
-        dartPluginClass: SomePlugin
-    ''');
-
-          await injectPlugins(flutterProject, releaseMode: false, windowsPlatform: true);
-
-          final File registrantImpl = windowsProject.managedDirectory.childFile(
-            'generated_plugin_registrant.cc',
-          );
-
-          expect(registrantImpl, exists);
-          expect(registrantImpl, isNot(contains('SomePlugin')));
-          expect(registrantImpl, isNot(contains('none')));
+          expect(registrantImpl.readAsStringSync(), isNot(contains('SomePlugin')));
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -2748,7 +2651,7 @@ flutter:
 
 class FakeFlutterManifest extends Fake implements FlutterManifest {
   @override
-  late var dependencies = <String>{};
+  late Set<String> dependencies = <String>{};
   @override
   late String appName;
   @override
@@ -2762,7 +2665,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 
 class FakeFlutterProject extends Fake implements FlutterProject {
   @override
-  var isModule = false;
+  bool isModule = false;
 
   @override
   late FlutterManifest manifest;
@@ -2797,9 +2700,9 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 
 class FakeMacOSProject extends Fake implements MacOSProject {
   @override
-  var pluginConfigKey = 'macos';
+  String pluginConfigKey = 'macos';
 
-  var exists = false;
+  bool exists = false;
 
   @override
   late File podfile;
@@ -2808,7 +2711,7 @@ class FakeMacOSProject extends Fake implements MacOSProject {
   late File podManifestLock;
 
   @override
-  var usesSwiftPackageManager = false;
+  bool usesSwiftPackageManager = false;
 
   @override
   late Directory managedDirectory;
@@ -2819,9 +2722,9 @@ class FakeMacOSProject extends Fake implements MacOSProject {
 
 class FakeIosProject extends Fake implements IosProject {
   @override
-  var pluginConfigKey = 'ios';
+  String pluginConfigKey = 'ios';
 
-  var testExists = false;
+  bool testExists = false;
 
   @override
   bool existsSync() => testExists;
@@ -2846,14 +2749,14 @@ class FakeIosProject extends Fake implements IosProject {
   late File podManifestLock;
 
   @override
-  var usesSwiftPackageManager = false;
+  bool usesSwiftPackageManager = false;
 }
 
 class FakeAndroidProject extends Fake implements AndroidProject {
   @override
-  var pluginConfigKey = 'android';
+  String pluginConfigKey = 'android';
 
-  var exists = false;
+  bool exists = false;
 
   @override
   late Directory pluginRegistrantHost;
@@ -2893,12 +2796,12 @@ class FakeAndroidProject extends Fake implements AndroidProject {
 
 class FakeWebProject extends Fake implements WebProject {
   @override
-  var pluginConfigKey = 'web';
+  String pluginConfigKey = 'web';
 
   @override
   late Directory libDirectory;
 
-  var exists = false;
+  bool exists = false;
 
   @override
   bool existsSync() => exists;
@@ -2906,7 +2809,7 @@ class FakeWebProject extends Fake implements WebProject {
 
 class FakeWindowsProject extends Fake implements WindowsProject {
   @override
-  var pluginConfigKey = 'windows';
+  String pluginConfigKey = 'windows';
 
   @override
   late Directory managedDirectory;
@@ -2922,7 +2825,7 @@ class FakeWindowsProject extends Fake implements WindowsProject {
 
   @override
   late File generatedPluginCmakeFile;
-  var exists = false;
+  bool exists = false;
 
   @override
   bool existsSync() => exists;
@@ -2930,7 +2833,7 @@ class FakeWindowsProject extends Fake implements WindowsProject {
 
 class FakeLinuxProject extends Fake implements LinuxProject {
   @override
-  var pluginConfigKey = 'linux';
+  String pluginConfigKey = 'linux';
 
   @override
   late Directory managedDirectory;
@@ -2946,7 +2849,7 @@ class FakeLinuxProject extends Fake implements LinuxProject {
 
   @override
   late File generatedPluginCmakeFile;
-  var exists = false;
+  bool exists = false;
 
   @override
   bool existsSync() => exists;
@@ -2969,7 +2872,7 @@ class FakeSystemClock extends Fake implements SystemClock {
 }
 
 class FakeDarwinDependencyManagement extends Fake implements DarwinDependencyManagement {
-  var setupPlatforms = <FlutterDarwinPlatform>[];
+  List<FlutterDarwinPlatform> setupPlatforms = <FlutterDarwinPlatform>[];
 
   @override
   Future<void> setUp({required FlutterDarwinPlatform platform}) async {

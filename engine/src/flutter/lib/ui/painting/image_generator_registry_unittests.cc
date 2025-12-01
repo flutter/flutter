@@ -54,7 +54,7 @@ class FakeImageGenerator : public ImageGenerator {
       : info_(SkImageInfo::Make(identifiableFakeWidth,
                                 identifiableFakeWidth,
                                 SkColorType::kRGBA_8888_SkColorType,
-                                SkAlphaType::kOpaque_SkAlphaType)){};
+                                SkAlphaType::kOpaque_SkAlphaType)) {};
   ~FakeImageGenerator() = default;
   const SkImageInfo& GetInfo() { return info_; }
 

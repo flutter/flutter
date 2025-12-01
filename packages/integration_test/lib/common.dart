@@ -72,12 +72,12 @@ class Response {
   String toJson() => json.encode(<String, dynamic>{
     'result': allTestsPassed.toString(),
     'failureDetails': _failureDetailsAsString(),
-    if (data != null) 'data': data,
+    'data': ?data,
   });
 
   /// Deserializes the result from JSON.
   static Response fromJson(String source) {
-    final Map<String, dynamic> responseJson = json.decode(source) as Map<String, dynamic>;
+    final responseJson = json.decode(source) as Map<String, dynamic>;
     if ((responseJson['result'] as String?) == 'true') {
       return Response.allTestsPassed(data: responseJson['data'] as Map<String, dynamic>?);
     } else {
@@ -94,9 +94,9 @@ class Response {
       return '';
     }
 
-    final StringBuffer sb = StringBuffer();
-    int failureCount = 1;
-    for (final Failure failure in failureDetails) {
+    final sb = StringBuffer();
+    var failureCount = 1;
+    for (final failure in failureDetails) {
       sb.writeln('Failure in method: ${failure.methodName}');
       sb.writeln(failure.details);
       sb.writeln('end of failure $failureCount\n\n');
@@ -142,7 +142,7 @@ class Failure {
 
   /// Decode a JSON string to create a Failure object.
   static Failure fromJsonString(String jsonString) {
-    final Map<String, dynamic> failure = json.decode(jsonString) as Map<String, dynamic>;
+    final failure = json.decode(jsonString) as Map<String, dynamic>;
     return Failure(failure['methodName'] as String, failure['details'] as String?);
   }
 }
@@ -235,7 +235,7 @@ class WebDriverCommand {
   /// Constructor for [WebDriverCommandType.noop] screenshot.
   WebDriverCommand.screenshot(String screenshotName, [Map<String, Object?>? args])
     : type = WebDriverCommandType.screenshot,
-      values = <String, dynamic>{'screenshot_name': screenshotName, if (args != null) 'args': args};
+      values = <String, dynamic>{'screenshot_name': screenshotName, 'args': ?args};
 
   /// Type of the [WebDriverCommand].
   ///

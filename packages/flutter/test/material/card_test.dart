@@ -9,7 +9,7 @@ import '../widgets/semantics_tester.dart';
 
 void main() {
   testWidgets('Material3 - Card defaults (Elevated card)', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
     final ColorScheme colors = theme.colorScheme;
     await tester.pumpWidget(
       MaterialApp(
@@ -37,7 +37,7 @@ void main() {
   });
 
   testWidgets('Material3 - Card.filled defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
     final ColorScheme colors = theme.colorScheme;
     await tester.pumpWidget(
       MaterialApp(
@@ -62,7 +62,7 @@ void main() {
   });
 
   testWidgets('Material3 - Card.outlined defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
     final ColorScheme colors = theme.colorScheme;
     await tester.pumpWidget(
       MaterialApp(
@@ -90,7 +90,7 @@ void main() {
   });
 
   testWidgets('Card can take semantic text from multiple children', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -141,7 +141,7 @@ void main() {
   });
 
   testWidgets('Card merges children when it is a semanticContainer', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     debugResetSemanticsIdCounter();
 
     await tester.pumpWidget(
@@ -274,6 +274,20 @@ void main() {
 
     expect(getCardMaterial(tester).shadowColor, getCard(tester).shadowColor);
     expect(getCardMaterial(tester).shadowColor, Colors.red);
+  });
+
+  testWidgets('Card renders at zero size', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Scaffold(body: Card(child: Text('X'))),
+          ),
+        ),
+      ),
+    );
+    final Finder xText = find.text('X');
+    expect(tester.getSize(xText).isEmpty, isTrue);
   });
 }
 

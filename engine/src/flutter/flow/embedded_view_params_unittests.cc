@@ -11,14 +11,10 @@ namespace testing {
 
 TEST(EmbeddedViewParams, GetBoundingRectAfterMutationsWithNoMutations) {
   MutatorsStack stack;
-  SkMatrix matrix;
+  DlMatrix matrix;
 
-  EmbeddedViewParams params(matrix, SkSize::Make(1, 1), stack);
-  const SkRect& rect = params.finalBoundingRect();
-  ASSERT_TRUE(SkScalarNearlyEqual(rect.x(), 0));
-  ASSERT_TRUE(SkScalarNearlyEqual(rect.y(), 0));
-  ASSERT_TRUE(SkScalarNearlyEqual(rect.width(), 1));
-  ASSERT_TRUE(SkScalarNearlyEqual(rect.height(), 1));
+  EmbeddedViewParams params(matrix, DlSize(1, 1), stack);
+  EXPECT_EQ(params.finalBoundingRect(), DlRect::MakeXYWH(0, 0, 1, 1));
 }
 
 TEST(EmbeddedViewParams, GetBoundingRectAfterMutationsWithScale) {
@@ -26,12 +22,8 @@ TEST(EmbeddedViewParams, GetBoundingRectAfterMutationsWithScale) {
   DlMatrix matrix = DlMatrix::MakeScale({2, 2, 1});
   stack.PushTransform(matrix);
 
-  EmbeddedViewParams params(ToSkMatrix(matrix), SkSize::Make(1, 1), stack);
-  const SkRect& rect = params.finalBoundingRect();
-  ASSERT_TRUE(SkScalarNearlyEqual(rect.x(), 0));
-  ASSERT_TRUE(SkScalarNearlyEqual(rect.y(), 0));
-  ASSERT_TRUE(SkScalarNearlyEqual(rect.width(), 2));
-  ASSERT_TRUE(SkScalarNearlyEqual(rect.height(), 2));
+  EmbeddedViewParams params(matrix, DlSize(1, 1), stack);
+  EXPECT_EQ(params.finalBoundingRect(), DlRect::MakeXYWH(0, 0, 2, 2));
 }
 
 TEST(EmbeddedViewParams, GetBoundingRectAfterMutationsWithTranslate) {
@@ -39,12 +31,8 @@ TEST(EmbeddedViewParams, GetBoundingRectAfterMutationsWithTranslate) {
   DlMatrix matrix = DlMatrix::MakeTranslation({1, 1});
   stack.PushTransform(matrix);
 
-  EmbeddedViewParams params(ToSkMatrix(matrix), SkSize::Make(1, 1), stack);
-  const SkRect& rect = params.finalBoundingRect();
-  ASSERT_TRUE(SkScalarNearlyEqual(rect.x(), 1));
-  ASSERT_TRUE(SkScalarNearlyEqual(rect.y(), 1));
-  ASSERT_TRUE(SkScalarNearlyEqual(rect.width(), 1));
-  ASSERT_TRUE(SkScalarNearlyEqual(rect.height(), 1));
+  EmbeddedViewParams params(matrix, DlSize(1, 1), stack);
+  EXPECT_EQ(params.finalBoundingRect(), DlRect::MakeXYWH(1, 1, 1, 1));
 }
 
 TEST(EmbeddedViewParams, GetBoundingRectAfterMutationsWithRotation90) {
@@ -52,13 +40,8 @@ TEST(EmbeddedViewParams, GetBoundingRectAfterMutationsWithRotation90) {
   DlMatrix matrix = DlMatrix::MakeRotationZ(DlDegrees(90));
   stack.PushTransform(matrix);
 
-  EmbeddedViewParams params(ToSkMatrix(matrix), SkSize::Make(1, 1), stack);
-  const SkRect& rect = params.finalBoundingRect();
-
-  ASSERT_TRUE(SkScalarNearlyEqual(rect.x(), -1));
-  ASSERT_TRUE(SkScalarNearlyEqual(rect.y(), 0));
-  ASSERT_TRUE(SkScalarNearlyEqual(rect.width(), 1));
-  ASSERT_TRUE(SkScalarNearlyEqual(rect.height(), 1));
+  EmbeddedViewParams params(matrix, DlSize(1, 1), stack);
+  EXPECT_EQ(params.finalBoundingRect(), DlRect::MakeXYWH(-1, 0, 1, 1));
 }
 
 TEST(EmbeddedViewParams, GetBoundingRectAfterMutationsWithRotation45) {
@@ -66,12 +49,9 @@ TEST(EmbeddedViewParams, GetBoundingRectAfterMutationsWithRotation45) {
   DlMatrix matrix = DlMatrix::MakeRotationZ(DlDegrees(45));
   stack.PushTransform(matrix);
 
-  EmbeddedViewParams params(ToSkMatrix(matrix), SkSize::Make(1, 1), stack);
-  const SkRect& rect = params.finalBoundingRect();
-  ASSERT_TRUE(SkScalarNearlyEqual(rect.x(), -sqrt(2) / 2));
-  ASSERT_TRUE(SkScalarNearlyEqual(rect.y(), 0));
-  ASSERT_TRUE(SkScalarNearlyEqual(rect.width(), sqrt(2)));
-  ASSERT_TRUE(SkScalarNearlyEqual(rect.height(), sqrt(2)));
+  EmbeddedViewParams params(matrix, DlSize(1, 1), stack);
+  EXPECT_EQ(params.finalBoundingRect(),
+            DlRect::MakeXYWH(-sqrt(2) / 2, 0, sqrt(2), sqrt(2)));
 }
 
 TEST(EmbeddedViewParams,
@@ -83,12 +63,8 @@ TEST(EmbeddedViewParams,
   MutatorsStack stack;
   stack.PushTransform(matrix);
 
-  EmbeddedViewParams params(ToSkMatrix(matrix), SkSize::Make(1, 1), stack);
-  const SkRect& rect = params.finalBoundingRect();
-  ASSERT_TRUE(SkScalarNearlyEqual(rect.x(), -1));
-  ASSERT_TRUE(SkScalarNearlyEqual(rect.y(), 2));
-  ASSERT_TRUE(SkScalarNearlyEqual(rect.width(), 3));
-  ASSERT_TRUE(SkScalarNearlyEqual(rect.height(), 3));
+  EmbeddedViewParams params(matrix, DlSize(1, 1), stack);
+  EXPECT_EQ(params.finalBoundingRect(), DlRect::MakeXYWH(-1, 2, 3, 3));
 }
 
 }  // namespace testing

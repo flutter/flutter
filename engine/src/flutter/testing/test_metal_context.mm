@@ -8,7 +8,6 @@
 #include <iostream>
 
 #include "flutter/fml/logging.h"
-#include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 #include "third_party/skia/include/gpu/ganesh/mtl/GrMtlBackendContext.h"
 #include "third_party/skia/include/gpu/ganesh/mtl/GrMtlDirectContext.h"
@@ -63,12 +62,12 @@ sk_sp<GrDirectContext> TestMetalContext::GetSkiaContext() const {
   return skia_context_;
 }
 
-TestMetalContext::TextureInfo TestMetalContext::CreateMetalTexture(const SkISize& size) {
+TestMetalContext::TextureInfo TestMetalContext::CreateMetalTexture(const DlISize& size) {
   std::scoped_lock lock(textures_mutex_);
   MTLTextureDescriptor* texture_descriptor =
       [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm
-                                                         width:size.width()
-                                                        height:size.height()
+                                                         width:size.width
+                                                        height:size.height
                                                      mipmapped:NO];
 
   // The most pessimistic option and disables all optimizations but allows tests

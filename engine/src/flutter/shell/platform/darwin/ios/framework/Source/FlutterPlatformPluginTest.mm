@@ -23,6 +23,7 @@ FLUTTER_ASSERT_ARC
 - (void)showLookUpViewController:(NSString*)term;
 - (void)showShareViewController:(NSString*)content;
 - (void)playSystemSound:(NSString*)soundType;
+- (void)vibrateHapticFeedback:(NSString*)feedbackType;
 @end
 
 @interface UIViewController ()
@@ -306,6 +307,24 @@ FLUTTER_ASSERT_ARC
                                         arguments:@"SystemSoundType.click"];
   FlutterResult result = ^(id result) {
     OCMVerify([mockPlugin playSystemSound:@"SystemSoundType.click"]);
+    [invokeExpectation fulfill];
+  };
+  [mockPlugin handleMethodCall:methodCall result:result];
+  [self waitForExpectationsWithTimeout:1 handler:nil];
+}
+
+- (void)testHapticFeedbackVibrate {
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
+  XCTestExpectation* invokeExpectation =
+      [self expectationWithDescription:@"HapticFeedback.vibrate invoked"];
+  FlutterPlatformPlugin* plugin = [[FlutterPlatformPlugin alloc] initWithEngine:engine];
+  FlutterPlatformPlugin* mockPlugin = OCMPartialMock(plugin);
+
+  FlutterMethodCall* methodCall =
+      [FlutterMethodCall methodCallWithMethodName:@"HapticFeedback.vibrate"
+                                        arguments:@"HapticFeedbackType.lightImpact"];
+  FlutterResult result = ^(id result) {
+    OCMVerify([mockPlugin vibrateHapticFeedback:@"HapticFeedbackType.lightImpact"]);
     [invokeExpectation fulfill];
   };
   [mockPlugin handleMethodCall:methodCall result:result];

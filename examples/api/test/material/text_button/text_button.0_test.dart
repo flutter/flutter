@@ -5,7 +5,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/text_button/text_button.0.dart' as example;
+import 'package:flutter_api_samples/material/text_button/text_button.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -58,7 +59,10 @@ void main() {
 
     String smileyButtonImageUrl() {
       final AnimatedContainer container = tester.widget<AnimatedContainer>(
-        find.descendant(of: smileyButton, matching: find.byType(AnimatedContainer)),
+        find.descendant(
+          of: smileyButton,
+          matching: find.byType(AnimatedContainer),
+        ),
       );
       final BoxDecoration decoration = container.decoration! as BoxDecoration;
       final NetworkImage image = decoration.image!.image as NetworkImage;
@@ -70,7 +74,10 @@ void main() {
     // image changes while the action is running.
     expect(smileyButtonImageUrl().endsWith('text_button_nhu_end.png'), isTrue);
     await tester.pump(const Duration(seconds: 1));
-    expect(smileyButtonImageUrl().endsWith('text_button_nhu_default.png'), isTrue);
+    expect(
+      smileyButtonImageUrl().endsWith('text_button_nhu_default.png'),
+      isTrue,
+    );
 
     // Pressing the smiley button while the one second action is
     // underway starts a new one section action. The button's image
@@ -82,7 +89,10 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     expect(smileyButtonImageUrl().endsWith('text_button_nhu_end.png'), isTrue);
     await tester.pump(const Duration(milliseconds: 500));
-    expect(smileyButtonImageUrl().endsWith('text_button_nhu_default.png'), isTrue);
+    expect(
+      smileyButtonImageUrl().endsWith('text_button_nhu_default.png'),
+      isTrue,
+    );
 
     await tester.tap(find.byType(Switch).at(0)); // Dark Mode Switch
     await tester.pumpAndSettle();

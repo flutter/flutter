@@ -29,5 +29,11 @@
   "searchWebButtonLabel": "Търсене в мрежата",
   "shareButtonLabel": "Споделяне...",
   "cancelButtonLabel": "Отказ",
-  "backButtonLabel": "Назад"
+  "backButtonLabel": "Назад",
+  "expansionTileExpandedHint": "докоснете два пъти за свиване",
+  "expansionTileCollapsedHint": "докоснете два пъти за разгъване",
+  "expansionTileExpandedTapHint": "Свиване",
+  "expansionTileCollapsedTapHint": "Разгъване за още подробности",
+  "expandedHint": "Свито",
+  "collapsedHint": "Разгънато"
 }

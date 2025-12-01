@@ -38,24 +38,27 @@ void fl_task_runner_post_flutter_task(FlTaskRunner* task_runner,
                                       uint64_t target_time_nanos);
 
 /**
- * fl_task_runner_block_main_thread:
+ * fl_task_runner_wait:
  * @task_runner: an #FlTaskRunner.
  *
- * Blocks main thread until fl_task_runner_release_main_thread is called.
- * While main thread is blocked tasks posted to #FlTaskRunner are executed as
- * usual.
- * Must be invoked on main thread.
+ * Block until the next task is ready and then perform it. May be interrupted by
+ * fl_task_runner_stop_wait(), in which case no task is run but execution will
+ * be returned to the caller.
+ *
+ * Must be called only by the GTK thread.
  */
-void fl_task_runner_block_main_thread(FlTaskRunner* task_runner);
+void fl_task_runner_wait(FlTaskRunner* task_runner);
 
 /**
- * fl_task_runner_release_main_thread:
+ * fl_task_runner_stop_wait:
  * @task_runner: an #FlTaskRunner.
  *
- * Unblocks main thread. This will resume normal processing of main loop.
- * Can be invoked from any thread.
+ * Cause fl_task_runner_wait() to complete. May be called even if
+ * fl_task_runner_wait() is not being used.
+ *
+ * May be called by any thread.
  */
-void fl_task_runner_release_main_thread(FlTaskRunner* self);
+void fl_task_runner_stop_wait(FlTaskRunner* self);
 
 G_END_DECLS
 

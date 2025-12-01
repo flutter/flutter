@@ -5,6 +5,7 @@
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../flutter_manifest.dart';
@@ -180,9 +181,6 @@ Future<List<String>> _xcodeBuildSettingsLines({
       parsedBuildNumber(manifest: project.manifest, buildInfo: buildInfo) ?? '1';
   xcodeBuildSettings.add('FLUTTER_BUILD_NUMBER=$buildNumber');
 
-  // The current build mode being targeted.
-  xcodeBuildSettings.add('FLUTTER_CLI_BUILD_MODE=${buildInfo.mode.cliName}');
-
   // CoreDevices in debug and profile mode are launched, but not built, via Xcode.
   // Set the CONFIGURATION_BUILD_DIR so Xcode knows where to find the app
   // bundle to launch.
@@ -235,10 +233,11 @@ Future<List<String>> _xcodeBuildSettingsLines({
     // If any plugins or their dependencies do not support arm64 simulators
     // (to run natively without Rosetta translation on an ARM Mac),
     // the app will fail to build unless it also excludes arm64 simulators.
-    var excludedSimulatorArchs = 'i386';
-    if (!(await project.ios.pluginsSupportArmSimulator())) {
-      excludedSimulatorArchs += ' arm64';
+    final Version? xcodeVersion = globals.xcode?.currentVersion;
+    if (xcodeVersion != null && xcodeVersion.major >= 26) {
+      await project.ios.checkForPluginsExcludingArmSimulator();
     }
+    const excludedSimulatorArchs = 'i386';
     xcodeBuildSettings.add(
       'EXCLUDED_ARCHS[sdk=${XcodeSdk.IPhoneSimulator.platformName}*]=$excludedSimulatorArchs',
     );

@@ -24,8 +24,8 @@ import '../../src/test_flutter_command_runner.dart';
 import '../../src/testbed.dart';
 
 class FakePub extends Fake implements Pub {
-  var calledGetOffline = 0;
-  var calledOnline = 0;
+  int calledGetOffline = 0;
+  int calledOnline = 0;
 
   @override
   Future<void> get({
@@ -216,33 +216,6 @@ void main() {
         expect(
           (await command.unifiedAnalyticsUsageValues('create')).eventData['createProjectType'],
           'package_ffi',
-        );
-      }),
-      overrides: <Type, Generator>{Java: () => FakeJava()},
-    );
-
-    testUsingContext(
-      'set iOS host language type as usage value',
-      () => testbed.run(() async {
-        final command = CreateCommand();
-        final CommandRunner<void> runner = createTestCommandRunner(command);
-
-        await runner.run(<String>['create', '--no-pub', '--template=plugin', 'testy']);
-        expect(
-          (await command.unifiedAnalyticsUsageValues('create')).eventData['createIosLanguage'],
-          'swift',
-        );
-
-        await runner.run(<String>[
-          'create',
-          '--no-pub',
-          '--template=plugin',
-          '--ios-language=objc',
-          'testy',
-        ]);
-        expect(
-          (await command.unifiedAnalyticsUsageValues('create')).eventData['createIosLanguage'],
-          'objc',
         );
       }),
       overrides: <Type, Generator>{Java: () => FakeJava()},

@@ -133,8 +133,7 @@ namespace flutter {
   V(DrawAtlasCulled)                 \
                                      \
   V(DrawDisplayList)                 \
-  V(DrawTextBlob)                    \
-  V(DrawTextFrame)                   \
+  V(DrawText)                        \
                                      \
   V(DrawShadow)                      \
   V(DrawShadowTransparentOccluder)
@@ -243,9 +242,6 @@ class SaveLayerOptions {
   }
   bool operator==(const SaveLayerOptions& other) const {
     return flags_ == other.flags_;
-  }
-  bool operator!=(const SaveLayerOptions& other) const {
-    return flags_ != other.flags_;
   }
 
  private:

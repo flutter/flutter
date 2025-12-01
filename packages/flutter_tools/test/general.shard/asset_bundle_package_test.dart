@@ -10,6 +10,7 @@ import 'package:file/memory.dart';
 
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/build_info.dart';
 
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:standard_message_codec/standard_message_codec.dart';
@@ -76,16 +77,6 @@ $assetsSection
 ''');
   }
 
-  Map<Object, Object> assetManifestBinToJson(Map<Object, Object> manifest) {
-    List<Object> convertList(List<Object> variants) =>
-        variants.map((Object variant) => (variant as Map<Object?, Object?>)['asset']!).toList();
-
-    return manifest.map(
-      (Object key, Object value) =>
-          MapEntry<Object, Object>(key, convertList(value as List<Object>)),
-    );
-  }
-
   Future<void> buildAndVerifyAssets(
     List<String> assets,
     List<String> packages,
@@ -93,7 +84,11 @@ $assetsSection
     String? flavor,
   }) async {
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-    await bundle.build(packageConfigPath: '.dart_tool/package_config.json', flavor: flavor);
+    await bundle.build(
+      packageConfigPath: '.dart_tool/package_config.json',
+      flavor: flavor,
+      targetPlatform: TargetPlatform.tester,
+    );
 
     for (final packageName in packages) {
       for (final asset in assets) {
@@ -111,10 +106,6 @@ $assetsSection
             )
             as Map<Object?, Object?>;
 
-    expect(
-      json.decode(utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes())),
-      assetManifestBinToJson(expectedAssetManifest),
-    );
     expect(assetManifest, expectedAssetManifest);
   }
 
@@ -152,20 +143,13 @@ $assetsSection
         writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-        await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        );
         expect(
           bundle.entries.keys,
-          unorderedEquals(<String>[
-            'NOTICES.Z',
-            'AssetManifest.json',
-            'AssetManifest.bin',
-            'FontManifest.json',
-          ]),
-        );
-        const expectedAssetManifest = '{}';
-        expect(
-          utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
-          expectedAssetManifest,
+          unorderedEquals(<String>['NOTICES.Z', 'AssetManifest.bin', 'FontManifest.json']),
         );
         expect(utf8.decode(await bundle.entries['FontManifest.json']!.contentsAsBytes()), '[]');
       },
@@ -190,20 +174,13 @@ $assetsSection
         writeAssets('p/p/', assets);
 
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-        await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        );
         expect(
           bundle.entries.keys,
-          unorderedEquals(<String>[
-            'NOTICES.Z',
-            'AssetManifest.json',
-            'AssetManifest.bin',
-            'FontManifest.json',
-          ]),
-        );
-        const expectedAssetManifest = '{}';
-        expect(
-          utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
-          expectedAssetManifest,
+          unorderedEquals(<String>['NOTICES.Z', 'AssetManifest.bin', 'FontManifest.json']),
         );
         expect(utf8.decode(await bundle.entries['FontManifest.json']!.contentsAsBytes()), '[]');
       },
@@ -699,12 +676,15 @@ $assetsSection
         writeAssets('p/p/', assetsOnDisk);
 
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-        await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        );
 
         expect(
-          bundle.entries['AssetManifest.json'],
+          bundle.entries['AssetManifest.bin'],
           isNull,
-          reason: 'Invalid pubspec.yaml should not generate AssetManifest.json',
+          reason: 'Invalid pubspec.yaml should not generate AssetManifest.bin',
         );
       },
       overrides: <Type, Generator>{
@@ -788,7 +768,10 @@ $assetsSection
         writePubspecFile('p/p/pubspec.yaml', 'test_package', assets: assetOnManifest);
 
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-        await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        );
       },
       overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,

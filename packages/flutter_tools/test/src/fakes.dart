@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -78,6 +79,26 @@ class FakeProcess implements Process {
   @override
   bool kill([io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
     return true;
+  }
+}
+
+/// A [ShutdownHooks] implementation that does not actually execute any hooks.
+class FakeShutdownHooks extends Fake implements ShutdownHooks {
+  @override
+  bool get isShuttingDown => _isShuttingDown;
+  var _isShuttingDown = false;
+
+  @override
+  final registeredHooks = <ShutdownHook>[];
+
+  @override
+  void addShutdownHook(ShutdownHook shutdownHook) {
+    registeredHooks.add(shutdownHook);
+  }
+
+  @override
+  Future<void> runShutdownHooks(Logger logger) async {
+    _isShuttingDown = true;
   }
 }
 
@@ -260,7 +281,7 @@ class FakeStdio extends Stdio {
   }
 
   @override
-  var hasTerminal = false;
+  bool hasTerminal = false;
 
   List<String> get writtenToStdout => _stdout.writes.map<String>(_stdout.encoding.decode).toList();
   List<String> get writtenToStderr => _stderr.writes.map<String>(_stderr.encoding.decode).toList();
@@ -285,10 +306,10 @@ class FakeStdin extends Fake implements Stdin {
   }
 
   @override
-  var lineMode = true;
+  bool lineMode = true;
 
   @override
-  var hasTerminal = false;
+  bool hasTerminal = false;
 
   @override
   Stream<S> transform<S>(StreamTransformer<List<int>, S> transformer) {
@@ -347,6 +368,11 @@ class FakePlistParser implements PlistParser {
     }
     setProperty(key, value);
     return true;
+  }
+
+  @override
+  bool insertKeyWithJson(String plistFilePath, {required String key, required String json}) {
+    return false;
   }
 }
 
@@ -500,8 +526,12 @@ class TestFeatureFlags implements FeatureFlags {
     this.areCustomDevicesEnabled = false,
     this.isCliAnimationEnabled = true,
     this.isNativeAssetsEnabled = false,
+    this.isDartDataAssetsEnabled = false,
     this.isSwiftPackageManagerEnabled = false,
     this.isOmitLegacyVersionFileEnabled = false,
+    this.isWindowingEnabled = false,
+    this.isLLDBDebuggingEnabled = false,
+    this.isUISceneMigrationEnabled = false,
   });
 
   @override
@@ -535,10 +565,22 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isNativeAssetsEnabled;
 
   @override
+  final bool isDartDataAssetsEnabled;
+
+  @override
   final bool isSwiftPackageManagerEnabled;
 
   @override
   final bool isOmitLegacyVersionFileEnabled;
+
+  @override
+  final bool isWindowingEnabled;
+
+  @override
+  final bool isLLDBDebuggingEnabled;
+
+  @override
+  final bool isUISceneMigrationEnabled;
 
   @override
   bool isEnabled(Feature feature) {
@@ -553,7 +595,11 @@ class TestFeatureFlags implements FeatureFlags {
       flutterCustomDevicesFeature => areCustomDevicesEnabled,
       cliAnimation => isCliAnimationEnabled,
       nativeAssets => isNativeAssetsEnabled,
+      swiftPackageManager => isSwiftPackageManagerEnabled,
       omitLegacyVersionFile => isOmitLegacyVersionFileEnabled,
+      windowingFeature => isWindowingEnabled,
+      lldbDebugging => isLLDBDebuggingEnabled,
+      uiSceneMigration => isUISceneMigrationEnabled,
       _ => false,
     };
   }
@@ -569,9 +615,13 @@ class TestFeatureFlags implements FeatureFlags {
     flutterFuchsiaFeature,
     flutterCustomDevicesFeature,
     cliAnimation,
+    dartDataAssets,
     nativeAssets,
     swiftPackageManager,
     omitLegacyVersionFile,
+    windowingFeature,
+    lldbDebugging,
+    uiSceneMigration,
   ];
 
   @override
@@ -667,10 +717,7 @@ class FakeStopwatch implements Stopwatch {
 
 class FakeStopwatchFactory implements StopwatchFactory {
   FakeStopwatchFactory({Stopwatch? stopwatch, Map<String, Stopwatch>? stopwatches})
-    : stopwatches = <String, Stopwatch>{
-        if (stopwatches != null) ...stopwatches,
-        if (stopwatch != null) '': stopwatch,
-      };
+    : stopwatches = <String, Stopwatch>{...?stopwatches, '': ?stopwatch};
 
   Map<String, Stopwatch> stopwatches;
 
@@ -716,7 +763,7 @@ class FakeJava extends Fake implements Java {
   }) : binaryPath = binary,
        version = version ?? const Version.withText(19, 0, 2, 'openjdk 19.0.2 2023-01-17'),
        _environment = <String, String>{
-         if (javaHome != null) Java.javaHomeEnvironmentVariable: javaHome,
+         Java.javaHomeEnvironmentVariable: ?javaHome,
          'PATH': '/android-studio/jbr/bin',
        },
        _canRun = canRun;
@@ -777,7 +824,7 @@ class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
   @override
   Future<void> get ready => readyCompleter.future;
 
-  var readyCompleter = Completer<void>()..complete();
+  Completer<void> readyCompleter = Completer<void>()..complete();
 
   @override
   DevToolsServerAddress? activeDevToolsServer;
@@ -789,7 +836,7 @@ class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
   Uri? dtdUri;
 
   @override
-  var printDtdUri = false;
+  bool printDtdUri = false;
 
   final DevToolsServerAddress? _serverAddress;
 
@@ -802,7 +849,7 @@ class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
     return Completer<void>().future;
   }
 
-  var closed = false;
+  bool closed = false;
 
   @override
   Future<void> close() async {

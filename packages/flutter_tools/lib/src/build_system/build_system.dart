@@ -33,6 +33,14 @@ export 'source.dart';
 /// APIs.
 const kMaxOpenFiles = 64;
 
+/// The [Source] for the FlutterMacOS framework binary.
+const kFlutterMacOSFrameworkBinarySource = Source.pattern(
+  '{OUTPUT_DIR}/FlutterMacOS.framework/Versions/A/FlutterMacOS',
+);
+
+/// The [Source] for the Flutter framework binary.
+const kFlutterIOSFrameworkBinarySource = Source.pattern('{OUTPUT_DIR}/Flutter.framework/Flutter');
+
 /// Configuration for the build system itself.
 class BuildSystemConfig {
   /// Create a new [BuildSystemConfig].
@@ -227,7 +235,7 @@ abstract class Target {
       'dependencies': <String>[for (final Target target in dependencies) target.name],
       'inputs': <String>[for (final File file in resolveInputs(environment).sources) file.path],
       'outputs': <String>[for (final File file in resolveOutputs(environment).sources) file.path],
-      if (key != null) 'buildKey': key,
+      'buildKey': ?key,
       'stamp': _findStampFile(environment).absolute.path,
     };
   }
@@ -447,6 +455,28 @@ class Environment {
     required this.generateDartPluginRegistry,
   });
 
+  Environment copyWith({Directory? outputDir}) {
+    return Environment._(
+      outputDir: outputDir ?? this.outputDir,
+      projectDir: projectDir,
+      packageConfigPath: packageConfigPath,
+      buildDir: buildDir,
+      rootBuildDir: rootBuildDir,
+      cacheDir: cacheDir,
+      defines: defines,
+      flutterRootDir: flutterRootDir,
+      fileSystem: fileSystem,
+      logger: logger,
+      artifacts: artifacts,
+      processManager: processManager,
+      platform: platform,
+      analytics: analytics,
+      engineVersion: engineVersion,
+      inputs: inputs,
+      generateDartPluginRegistry: generateDartPluginRegistry,
+    );
+  }
+
   /// The [Source] value which is substituted with the path to [projectDir].
   static const kProjectDirectory = '{PROJECT_DIR}';
 
@@ -601,6 +631,23 @@ class FlutterBuildSystem extends BuildSystem {
   final Platform _platform;
   final Logger _logger;
 
+  /// Sources that should not be deleted when removed from output list.
+  static const _preservedOutputSources = <Source>[
+    // Xcode handles the Flutter framework output when using SwiftPM so it should not be deleted
+    // from the build.
+    kFlutterMacOSFrameworkBinarySource,
+    kFlutterIOSFrameworkBinarySource,
+  ];
+
+  @visibleForTesting
+  Set<String> convertSourcesToPaths(List<Source> sources, Environment environment) {
+    final collection = SourceVisitor(environment, false);
+    for (final source in sources) {
+      source.accept(collection);
+    }
+    return collection.sources.map((file) => file.path).toSet();
+  }
+
   @override
   Future<BuildResult> build(
     Target target,
@@ -617,6 +664,11 @@ class FlutterBuildSystem extends BuildSystem {
     // Perform sanity checks on build.
     checkCycles(target);
 
+    final Set<String> preservedOutputFilePaths = convertSourcesToPaths(
+      _preservedOutputSources,
+      environment,
+    );
+
     final Node node = target._toNode(environment);
     final buildInstance = _BuildInstance(
       environment: environment,
@@ -625,6 +677,7 @@ class FlutterBuildSystem extends BuildSystem {
       logger: _logger,
       fileSystem: _fileSystem,
       platform: _platform,
+      preservedOutputFilePaths: preservedOutputFilePaths,
     );
     var passed = true;
     try {
@@ -657,7 +710,12 @@ class FlutterBuildSystem extends BuildSystem {
         return isUnconditionalFile(path);
       });
     }
-    trackSharedBuildDirectory(environment, _fileSystem, buildInstance.outputFiles);
+    trackSharedBuildDirectory(
+      environment,
+      _fileSystem,
+      buildInstance.outputFiles,
+      preservedOutputFilePaths,
+    );
     environment.buildDir
         .childFile('outputs.json')
         .writeAsStringSync(json.encode(buildInstance.outputFiles.keys.toList()));
@@ -735,6 +793,7 @@ class FlutterBuildSystem extends BuildSystem {
     Environment environment,
     FileSystem fileSystem,
     Map<String, File> currentOutputs,
+    Set<String> preservedOutputFilePaths,
   ) {
     if (environment.defines[kXcodePreAction] == 'PrepareFramework') {
       // If the current build is the PrepareFramework Xcode pre-action, skip
@@ -774,6 +833,9 @@ class FlutterBuildSystem extends BuildSystem {
     for (final lastOutput in lastOutputs) {
       if (!currentOutputs.containsKey(lastOutput)) {
         final File lastOutputFile = fileSystem.file(lastOutput);
+        if (preservedOutputFilePaths.contains(lastOutputFile.path)) {
+          continue;
+        }
         ErrorHandlingFileSystem.deleteIfExists(lastOutputFile);
       }
     }
@@ -788,6 +850,7 @@ class _BuildInstance {
     required this.buildSystemConfig,
     required this.logger,
     required this.fileSystem,
+    this.preservedOutputFilePaths = const <String>{},
     Platform? platform,
   }) : resourcePool = Pool(buildSystemConfig.resourcePoolSize ?? platform?.numberOfProcessors ?? 1);
 
@@ -800,6 +863,7 @@ class _BuildInstance {
   final FileStore fileCache;
   final inputFiles = <String, File>{};
   final outputFiles = <String, File>{};
+  final Set<String> preservedOutputFilePaths;
 
   // Timings collected during target invocation.
   final stepTimings = <String, PerformanceMeasurement>{};
@@ -894,6 +958,9 @@ class _BuildInstance {
           continue;
         }
         final File previousFile = fileSystem.file(previousOutput);
+        if (preservedOutputFilePaths.contains(previousFile.path)) {
+          continue;
+        }
         ErrorHandlingFileSystem.deleteIfExists(previousFile);
       }
     } on Exception catch (exception, stackTrace) {

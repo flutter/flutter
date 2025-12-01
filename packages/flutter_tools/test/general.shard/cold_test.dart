@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -170,7 +171,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   @override
   final Device device;
 
-  var stopEchoingDeviceLogCount = 0;
+  int stopEchoingDeviceLogCount = 0;
 
   @override
   Future<void> stopEchoingDeviceLog() async {
@@ -180,7 +181,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   @override
   FlutterVmService get vmService => FakeFlutterVmService();
 
-  var runColdCode = 0;
+  int runColdCode = 0;
 
   @override
   Future<int> runCold({ColdRunner? coldRunner, String? route}) async {
@@ -193,10 +194,10 @@ class FakeDevice extends Fake implements Device {
   Future<bool> isSupported() async => true;
 
   @override
-  var supportsHotReload = false;
+  bool supportsHotReload = false;
 
   @override
-  var supportsHotRestart = false;
+  bool supportsHotRestart = false;
 
   @override
   Future<String> get sdkNameAndVersion async => 'Android 10';
@@ -210,12 +211,45 @@ class FakeDevice extends Fake implements Device {
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
 
-  var wasDisposed = false;
+  @override
+  DartDevelopmentService get dds => FakeDartDevelopmentService();
+
+  bool wasDisposed = false;
 
   @override
   Future<void> dispose() async {
     wasDisposed = true;
   }
+}
+
+class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
+  @override
+  late Future<void> done;
+
+  @override
+  Uri? uri;
+
+  @override
+  Uri? devToolsUri;
+
+  @override
+  Uri? dtdUri;
+
+  @override
+  Future<void> startDartDevelopmentService(
+    Uri vmServiceUri, {
+    int? ddsPort,
+    FlutterDevice? device,
+    bool? ipv6,
+    bool? disableServiceAuthCodes,
+    bool enableDevTools = false,
+    bool cacheStartupProfile = false,
+    String? google3WorkspaceRoot,
+    Uri? devToolsServerAddress,
+  }) async {}
+
+  @override
+  Future<void> shutdown() async {}
 }
 
 class TestFlutterDevice extends FlutterDevice {
@@ -242,7 +276,6 @@ class TestFlutterDevice extends FlutterDevice {
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
     int? hostVmServicePort,
-    required bool allowExistingDdsInstance,
   }) async {
     throw exception;
   }

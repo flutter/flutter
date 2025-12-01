@@ -29,5 +29,11 @@
   "shareButtonLabel": "බෙදා ගන්න...",
   "clearButtonLabel": "හිස් කරන්න",
   "cancelButtonLabel": "අවලංගු කරන්න",
-  "backButtonLabel": "Back"
+  "backButtonLabel": "Back",
+  "expansionTileExpandedHint": "හැකිළවීමට දෙවරක් තට්ටු කරන්න",
+  "expansionTileCollapsedHint": "විහිදුවීමට දෙවරක් තට්ටු කරන්න",
+  "expansionTileExpandedTapHint": "හකුළන්න",
+  "expansionTileCollapsedTapHint": "වැඩි විස්තර සඳහා පුළුල් කරන්න",
+  "expandedHint": "හකුළන ලදි",
+  "collapsedHint": "දිග හරින ලදි"
 }

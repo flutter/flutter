@@ -64,6 +64,9 @@ enum ScrollbarOrientation {
 /// proportional to the percentage of content completely visible on screen,
 /// as long as its size isn't less than [minLength] and it isn't overscrolling.
 ///
+/// If [padding] is an [EdgeInsetsDirectional], a non-null [textDirection] must
+/// be provided to properly resolve the padding values.
+///
 /// Unlike [CustomPainter]s that subclasses [CustomPainter] and only repaint
 /// when [shouldRepaint] returns true (which requires this [CustomPainter] to
 /// be rebuilt), this painter has the added optimization of repainting and not
@@ -95,7 +98,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     Color trackBorderColor = const Color(0x00000000),
     TextDirection? textDirection,
     double thickness = _kScrollbarThickness,
-    EdgeInsets padding = EdgeInsets.zero,
+    EdgeInsetsGeometry padding = EdgeInsets.zero,
     double mainAxisMargin = 0.0,
     double crossAxisMargin = 0.0,
     Radius? radius,
@@ -110,12 +113,17 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
        assert(minOverscrollLength == null || minOverscrollLength <= minLength),
        assert(minOverscrollLength == null || minOverscrollLength >= 0),
        assert(padding.isNonNegative),
+       assert(
+         padding is! EdgeInsetsDirectional || textDirection != null,
+         'A non-null textDirection must be provided when using EdgeInsetsDirectional for padding.',
+       ),
        _color = color,
        _textDirection = textDirection,
        _thickness = thickness,
        _radius = radius,
        _shape = shape,
        _padding = padding,
+       _resolvedPadding = padding.resolve(textDirection),
        _mainAxisMargin = mainAxisMargin,
        _crossAxisMargin = crossAxisMargin,
        _minLength = minLength,
@@ -190,6 +198,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     }
 
     _textDirection = value;
+    _resolvedPadding = _padding.resolve(_textDirection);
     notifyListeners();
   }
 
@@ -290,14 +299,20 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   ///
   /// Defaults to [EdgeInsets.zero]. Offsets from all four directions must be
   /// greater than or equal to zero.
-  EdgeInsets get padding => _padding;
-  EdgeInsets _padding;
-  set padding(EdgeInsets value) {
+  ///
+  /// For RTL (right-to-left) support, you can provide [EdgeInsetsDirectional],
+  /// but you must also provide a non-null [textDirection] to properly resolve
+  /// the padding values. The scrollbar will automatically adjust the padding
+  /// based on the text direction.
+  EdgeInsetsGeometry get padding => _padding;
+  EdgeInsetsGeometry _padding;
+  set padding(EdgeInsetsGeometry value) {
     if (padding == value) {
       return;
     }
 
     _padding = value;
+    _resolvedPadding = _padding.resolve(_textDirection);
     notifyListeners();
   }
 
@@ -388,17 +403,19 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   // - Scrollbar Details
 
   Rect? _trackRect;
+  EdgeInsets? _resolvedPadding;
   // The full painted length of the track
   double get _trackExtent => _lastMetrics!.viewportDimension - _totalTrackMainAxisOffsets;
   // The full length of the track that the thumb can travel
   double get _traversableTrackExtent => _trackExtent - (2 * mainAxisMargin);
   // Track Offsets
   // The track is offset by only padding.
-  double get _totalTrackMainAxisOffsets => _isVertical ? padding.vertical : padding.horizontal;
+  double get _totalTrackMainAxisOffsets =>
+      _isVertical ? _resolvedPadding!.vertical : _resolvedPadding!.horizontal;
 
   double get _leadingTrackMainAxisOffset => switch (_resolvedOrientation) {
-    ScrollbarOrientation.left || ScrollbarOrientation.right => padding.top,
-    ScrollbarOrientation.top || ScrollbarOrientation.bottom => padding.left,
+    ScrollbarOrientation.left || ScrollbarOrientation.right => _resolvedPadding!.top,
+    ScrollbarOrientation.top || ScrollbarOrientation.bottom => _resolvedPadding!.left,
   };
 
   Rect? _thumbRect;
@@ -557,7 +574,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       textDirection != null,
       'A TextDirection must be provided before a Scrollbar can be painted.',
     );
-
     final double x, y;
     final Size thumbSize, trackSize;
     final Offset trackOffset, borderStart, borderEnd;
@@ -566,7 +582,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       case ScrollbarOrientation.left:
         thumbSize = Size(thickness, _thumbExtent);
         trackSize = Size(thickness + 2 * crossAxisMargin, _trackExtent);
-        x = crossAxisMargin + padding.left;
+        x = crossAxisMargin + _resolvedPadding!.left;
         y = _thumbOffset;
         trackOffset = Offset(x - crossAxisMargin, _leadingTrackMainAxisOffset);
         borderStart = trackOffset + Offset(trackSize.width, 0.0);
@@ -574,7 +590,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       case ScrollbarOrientation.right:
         thumbSize = Size(thickness, _thumbExtent);
         trackSize = Size(thickness + 2 * crossAxisMargin, _trackExtent);
-        x = size.width - thickness - crossAxisMargin - padding.right;
+        x = size.width - thickness - crossAxisMargin - _resolvedPadding!.right;
         y = _thumbOffset;
         trackOffset = Offset(x - crossAxisMargin, _leadingTrackMainAxisOffset);
         borderStart = trackOffset;
@@ -583,7 +599,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         thumbSize = Size(_thumbExtent, thickness);
         trackSize = Size(_trackExtent, thickness + 2 * crossAxisMargin);
         x = _thumbOffset;
-        y = crossAxisMargin + padding.top;
+        y = crossAxisMargin + _resolvedPadding!.top;
         trackOffset = Offset(_leadingTrackMainAxisOffset, y - crossAxisMargin);
         borderStart = trackOffset + Offset(0.0, trackSize.height);
         borderEnd = Offset(trackOffset.dx + _trackExtent, trackOffset.dy + trackSize.height);
@@ -591,7 +607,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         thumbSize = Size(_thumbExtent, thickness);
         trackSize = Size(_trackExtent, thickness + 2 * crossAxisMargin);
         x = _thumbOffset;
-        y = size.height - thickness - crossAxisMargin - padding.bottom;
+        y = size.height - thickness - crossAxisMargin - _resolvedPadding!.bottom;
         trackOffset = Offset(_leadingTrackMainAxisOffset, y - crossAxisMargin);
         borderStart = trackOffset;
         borderEnd = Offset(trackOffset.dx + _trackExtent, trackOffset.dy);
@@ -634,6 +650,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     if (_lastAxisDirection == null || !_needPaint(_lastMetrics)) {
       return;
     }
+
     // Skip painting if there's not enough space.
     if (_traversableTrackExtent <= 0) {
       return;
@@ -1320,7 +1337,7 @@ class RawScrollbar extends StatefulWidget {
   /// When null, the inherited [MediaQueryData.padding] is used.
   ///
   /// Defaults to null.
-  final EdgeInsets? padding;
+  final EdgeInsetsGeometry? padding;
 
   @override
   RawScrollbarState<RawScrollbar> createState() => RawScrollbarState<RawScrollbar>();
@@ -1439,6 +1456,14 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     } else if (_effectiveScrollController != null && enableGestures) {
       // Interactive scrollbars need to be properly configured. If it is visible
       // for interaction, ensure we are set up properly.
+      // Don't assert immediately if we're in the middle of updating the widget
+      // as the controller may not be attached yet in that frame.
+      if (_fadeoutAnimationController.status == AnimationStatus.forward &&
+          (widget.thumbVisibility ?? false)) {
+        // When thumbVisibility is true and we're animating forward,
+        // the check is already scheduled by _debugScheduleCheckHasValidScrollPosition.
+        return;
+      }
       assert(_debugCheckHasValidScrollPosition());
     }
   }
@@ -1448,12 +1473,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       return true;
     }
     final ScrollController? scrollController = _effectiveScrollController;
-    final bool tryPrimary = widget.controller == null;
-    final String controllerForError = tryPrimary
-        ? 'PrimaryScrollController'
-        : 'provided ScrollController';
+    final tryPrimary = widget.controller == null;
+    final controllerForError = tryPrimary ? 'PrimaryScrollController' : 'provided ScrollController';
 
-    String when = '';
+    var when = '';
     if (widget.thumbVisibility ?? false) {
       when = 'Scrollbar.thumbVisibility is true';
     } else if (enableGestures) {
@@ -1543,6 +1566,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   /// Subclasses can override to configure the [scrollbarPainter].
   @protected
   void updateScrollbarPainter() {
+    final TextDirection textDirection = Directionality.of(context);
     scrollbarPainter
       ..color = widget.thumbColor ?? const Color(0x66BCBCBC)
       ..trackRadius = widget.trackRadius
@@ -1552,10 +1576,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       ..trackBorderColor = _showTrack
           ? widget.trackBorderColor ?? const Color(0x1a000000)
           : const Color(0x00000000)
-      ..textDirection = Directionality.of(context)
+      ..textDirection = textDirection
       ..thickness = widget.thickness ?? _kScrollbarThickness
       ..radius = widget.radius
-      ..padding = widget.padding ?? MediaQuery.paddingOf(context)
+      ..padding = (widget.padding ?? MediaQuery.paddingOf(context)).resolve(textDirection)
       ..scrollbarOrientation = widget.scrollbarOrientation
       ..mainAxisMargin = widget.mainAxisMargin
       ..shape = widget.shape
@@ -1707,9 +1731,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
     assert(_thumbDrag == null);
     final ScrollPosition position = _cachedController!.position;
-    final RenderBox renderBox =
-        _scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
-    final DragStartDetails details = DragStartDetails(
+    final renderBox = _scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
+    final details = DragStartDetails(
       localPosition: localPosition,
       globalPosition: renderBox.localToGlobal(localPosition),
     );
@@ -1755,9 +1778,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       Axis.horizontal => Offset(primaryDelta, 0),
       Axis.vertical => Offset(0, primaryDelta),
     };
-    final RenderBox renderBox =
-        _scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
-    final DragUpdateDetails scrollDetails = DragUpdateDetails(
+    final renderBox = _scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
+    final scrollDetails = DragUpdateDetails(
       delta: delta,
       primaryDelta: primaryDelta,
       globalPosition: renderBox.localToGlobal(localPosition),
@@ -1797,9 +1819,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       TargetPlatform.iOS || TargetPlatform.android => -velocity,
       _ => Velocity.zero,
     };
-    final RenderBox renderBox =
-        _scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
-    final DragEndDetails details = DragEndDetails(
+    final renderBox = _scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
+    final details = DragEndDetails(
       localPosition: localPosition,
       globalPosition: renderBox.localToGlobal(localPosition),
       velocity: adjustedVelocity,
@@ -1851,10 +1872,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }
 
     final ScrollableState? state = Scrollable.maybeOf(position.context.notificationContext!);
-    final ScrollIntent intent = ScrollIntent(
-      direction: scrollDirection,
-      type: ScrollIncrementType.page,
-    );
+    final intent = ScrollIntent(direction: scrollDirection, type: ScrollIncrementType.page);
     assert(state != null);
     final double scrollIncrement = ScrollAction.getDirectionalIncrement(state!, intent);
 
@@ -1962,8 +1980,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   // to the scrollbar. Ensure that the localPosition is reported consistently,
   // even if the source of the event is a trackpad or a stylus.
   Offset _globalToScrollbar(Offset offset) {
-    final RenderBox renderBox =
-        _scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
+    final renderBox = _scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
     return renderBox.globalToLocal(offset);
   }
 
@@ -2014,7 +2031,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
 
   Map<Type, GestureRecognizerFactory> get _gestures {
-    final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
+    final gestures = <Type, GestureRecognizerFactory>{};
     if (!_canHandleScrollGestures()) {
       return gestures;
     }
@@ -2257,7 +2274,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 }
 
 Offset _getLocalOffset(GlobalKey scrollbarPainterKey, Offset position) {
-  final RenderBox renderBox = scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
+  final renderBox = scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
   return renderBox.globalToLocal(position);
 }
 
@@ -2266,8 +2283,8 @@ bool _isThumbEvent(GlobalKey customPaintKey, PointerEvent event) {
     return false;
   }
 
-  final CustomPaint customPaint = customPaintKey.currentContext!.widget as CustomPaint;
-  final ScrollbarPainter painter = customPaint.foregroundPainter! as ScrollbarPainter;
+  final customPaint = customPaintKey.currentContext!.widget as CustomPaint;
+  final painter = customPaint.foregroundPainter! as ScrollbarPainter;
   final Offset localOffset = _getLocalOffset(customPaintKey, event.position);
   return painter.hitTestOnlyThumbInteractive(localOffset, event.kind);
 }
@@ -2276,8 +2293,8 @@ bool _isTrackEvent(GlobalKey customPaintKey, PointerEvent event) {
   if (customPaintKey.currentContext == null) {
     return false;
   }
-  final CustomPaint customPaint = customPaintKey.currentContext!.widget as CustomPaint;
-  final ScrollbarPainter painter = customPaint.foregroundPainter! as ScrollbarPainter;
+  final customPaint = customPaintKey.currentContext!.widget as CustomPaint;
+  final painter = customPaint.foregroundPainter! as ScrollbarPainter;
   final Offset localOffset = _getLocalOffset(customPaintKey, event.position);
   final PointerDeviceKind kind = event.kind;
   return painter.hitTestInteractive(localOffset, kind) &&

@@ -19,7 +19,6 @@ import 'debug.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'material_state.dart';
 import 'theme.dart';
 import 'tooltip.dart';
 
@@ -677,7 +676,7 @@ class _TileIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color? iconColor = colorTween.evaluate(animation);
-    final IconThemeData defaultIconTheme = IconThemeData(color: iconColor, size: iconSize);
+    final defaultIconTheme = IconThemeData(color: iconColor, size: iconSize);
     final IconThemeData iconThemeData = IconThemeData.lerp(
       defaultIconTheme.merge(unselectedIconTheme),
       defaultIconTheme.merge(selectedIconTheme),
@@ -1043,16 +1042,14 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         );
     }
 
-    final List<Widget> tiles = <Widget>[];
-    for (int i = 0; i < widget.items.length; i++) {
-      final Set<MaterialState> states = <MaterialState>{
-        if (i == widget.currentIndex) MaterialState.selected,
-      };
+    final tiles = <Widget>[];
+    for (var i = 0; i < widget.items.length; i++) {
+      final states = <WidgetState>{if (i == widget.currentIndex) WidgetState.selected};
 
       final MouseCursor effectiveMouseCursor =
-          MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
+          WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
           bottomTheme.mouseCursor?.resolve(states) ??
-          MaterialStateMouseCursor.clickable.resolve(states);
+          WidgetStateMouseCursor.clickable.resolve(states);
 
       tiles.add(
         _BottomNavigationTile(
@@ -1250,7 +1247,7 @@ class _RadialPainter extends CustomPainter {
     if (circles.length != oldPainter.circles.length) {
       return true;
     }
-    for (int i = 0; i < circles.length; i += 1) {
+    for (var i = 0; i < circles.length; i += 1) {
       if (circles[i] != oldPainter.circles[i]) {
         return true;
       }
@@ -1261,15 +1258,15 @@ class _RadialPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     for (final _Circle circle in circles) {
-      final Paint paint = Paint()..color = circle.color;
-      final Rect rect = Rect.fromLTWH(0.0, 0.0, size.width, size.height);
+      final paint = Paint()..color = circle.color;
+      final rect = Rect.fromLTWH(0.0, 0.0, size.width, size.height);
       canvas.clipRect(rect);
       final double leftFraction = switch (textDirection) {
         TextDirection.rtl => 1.0 - circle.horizontalLeadingOffset,
         TextDirection.ltr => circle.horizontalLeadingOffset,
       };
-      final Offset center = Offset(leftFraction * size.width, size.height / 2.0);
-      final Tween<double> radiusTween = Tween<double>(begin: 0.0, end: _maxRadius(center, size));
+      final center = Offset(leftFraction * size.width, size.height / 2.0);
+      final radiusTween = Tween<double>(begin: 0.0, end: _maxRadius(center, size));
       canvas.drawCircle(center, radiusTween.transform(circle.animation.value), paint);
     }
   }

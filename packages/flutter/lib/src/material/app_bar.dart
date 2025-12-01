@@ -29,7 +29,6 @@ import 'icon_button.dart';
 import 'icon_button_theme.dart';
 import 'icons.dart';
 import 'material.dart';
-import 'material_state.dart';
 import 'scaffold.dart';
 import 'tabs.dart';
 import 'text_theme.dart';
@@ -111,6 +110,11 @@ class _PreferredAppBarSize extends Size {
 /// instead. This behavior can be turned off by setting the [automaticallyImplyLeading]
 /// to false. In that case a null leading widget will result in the middle/title widget
 /// stretching to start.
+///
+/// If the [actions] widget list is omitted or empty, but the [AppBar] is in a [Scaffold] with
+/// an end [Drawer], then a button will be inserted to open the end drawer.
+/// This behavior can be turned off by setting the [automaticallyImplyActions]
+/// to false.
 ///
 /// The [AppBar] insets its content based on the ambient [MediaQuery]'s padding,
 /// to avoid system UI intrusions. It's taken care of by [Scaffold] when used in
@@ -194,6 +198,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.automaticallyImplyLeading = true,
     this.title,
     this.actions,
+    this.automaticallyImplyActions = true,
     this.flexibleSpace,
     this.bottom,
     this.elevation,
@@ -345,6 +350,11 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// To avoid having the last action covered by the debug banner, you may want
   /// to set the [MaterialApp.debugShowCheckedModeBanner] to false.
+  ///
+  /// If this is null or empty and [automaticallyImplyActions] is set to true, the
+  /// [AppBar] will imply an appropriate widget. For example, if the [AppBar] is
+  /// in a [Scaffold] that also has an end [Drawer], the [Scaffold] will fill this
+  /// widget with an [IconButton] that opens the end drawer (using [Icons.menu]).
   /// {@endtemplate}
   ///
   /// {@tool snippet}
@@ -373,6 +383,15 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// ```
   /// {@end-tool}
   final List<Widget>? actions;
+
+  /// {@template flutter.material.appbar.automaticallyImplyActions}
+  /// Controls whether we should try to imply the actions widget if null.
+  ///
+  /// If true and [AppBar.actions] is null or empty, automatically try to deduce what the actions
+  /// widget should be. If false and [AppBar.actions] is null or empty, the actions widget list is kept empty.
+  /// If [AppBar.actions] is not null, this parameter has no effect.
+  /// {@endtemplate}
+  final bool automaticallyImplyActions;
 
   /// {@template flutter.material.appbar.flexibleSpace}
   /// This widget is stacked behind the toolbar and the tab bar. Its height will
@@ -410,9 +429,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// The value must be non-negative.
   ///
-  /// If this property is null, then [AppBarTheme.elevation] of
-  /// [ThemeData.appBarTheme] is used. If that is also null, the
-  /// default value is 4.
+  /// If this property is null, then the ambient [AppBarThemeData.elevation]
+  /// is used. If that is also null, the default value is 4.
   /// {@endtemplate}
   ///
   /// See also:
@@ -430,9 +448,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// The elevation that will be used if this app bar has something
   /// scrolled underneath it.
   ///
-  /// If non-null then it [AppBarTheme.scrolledUnderElevation] of
-  /// [ThemeData.appBarTheme] will be used. If that is also null then [elevation]
-  /// will be used.
+  /// If this property is null, then the ambient [AppBarThemeData.scrolledUnderElevation]
+  /// is used. If that is also null then [elevation] is used.
   ///
   /// The value must be non-negative.
   ///
@@ -458,9 +475,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// {@template flutter.material.appbar.shadowColor}
   /// The color of the shadow below the app bar.
   ///
-  /// If this property is null, then [AppBarTheme.shadowColor] of
-  /// [ThemeData.appBarTheme] is used. If that is also null, the default value
-  /// is fully opaque black.
+  /// If this property is null, then the ambient [AppBarThemeData.shadowColor]
+  /// is used. If that is also null, the default value is fully opaque black.
   /// {@endtemplate}
   ///
   /// See also:
@@ -483,8 +499,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// {@template flutter.material.appbar.shape}
   /// The shape of the app bar's [Material] as well as its shadow.
   ///
-  /// If this property is null, then [AppBarTheme.shape] of
-  /// [ThemeData.appBarTheme] is used. Both properties default to null.
+  /// If this property is null, then the ambient [AppBarThemeData.shape]
+  /// is used. Both properties default to null.
   /// If both properties are null then the shape of the app bar's [Material]
   /// is just a simple rectangle.
   ///
@@ -583,9 +599,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// themed differently than the icon that appears in the app bar's [leading]
   /// widget.
   ///
-  /// If this property is null, then [AppBarTheme.actionsIconTheme] of
-  /// [ThemeData.appBarTheme] is used. If that is also null, then the value of
-  /// [iconTheme] is used.
+  /// If this property is null, then the ambient [AppBarThemeData.actionsIconTheme]
+  /// is used. If that is also null, then the value of [iconTheme] is used.
   /// {@endtemplate}
   ///
   /// See also:
@@ -613,6 +628,16 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// {@template flutter.material.appbar.excludeHeaderSemantics}
   /// Whether the title should be wrapped with header [Semantics].
+  ///
+  /// If false, the title will be used as [SemanticsProperties.namesRoute]
+  /// for Android, Fuchsia, Linux, and Windows platform. This means the title is
+  /// announced by screen reader when transition to this route.
+  ///
+  /// The accessibility behavior is platform adaptive, based on the device's
+  /// actual platform rather than the theme's platform setting. This ensures that
+  /// assistive technologies like VoiceOver on iOS and macOS receive the correct
+  /// `namesRoute` semantic information, even when the app's theme is configured
+  /// to mimic a different platform's appearance.
   ///
   /// Defaults to false.
   /// {@endtemplate}
@@ -844,21 +869,21 @@ class _AppBarState extends State<AppBar> {
 
       if (_scrolledUnder != oldScrolledUnder) {
         setState(() {
-          // React to a change in MaterialState.scrolledUnder
+          // React to a change in WidgetState.scrolledUnder
         });
       }
     }
   }
 
   Color _resolveColor(
-    Set<MaterialState> states,
+    Set<WidgetState> states,
     Color? widgetColor,
     Color? themeColor,
     Color defaultColor,
   ) {
-    return MaterialStateProperty.resolveAs<Color?>(widgetColor, states) ??
-        MaterialStateProperty.resolveAs<Color?>(themeColor, states) ??
-        MaterialStateProperty.resolveAs<Color>(defaultColor, states);
+    return WidgetStateProperty.resolveAs<Color?>(widgetColor, states) ??
+        WidgetStateProperty.resolveAs<Color?>(themeColor, states) ??
+        WidgetStateProperty.resolveAs<Color>(defaultColor, states);
   }
 
   SystemUiOverlayStyle _systemOverlayStyleForBrightness(
@@ -892,8 +917,8 @@ class _AppBarState extends State<AppBar> {
 
     final FlexibleSpaceBarSettings? settings = context
         .dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>();
-    final Set<MaterialState> states = <MaterialState>{
-      if (settings?.isScrolledUnder ?? _scrolledUnder) MaterialState.scrolledUnder,
+    final states = <WidgetState>{
+      if (settings?.isScrolledUnder ?? _scrolledUnder) WidgetState.scrolledUnder,
     };
 
     final bool hasDrawer = scaffold?.hasDrawer ?? false;
@@ -917,7 +942,7 @@ class _AppBarState extends State<AppBar> {
       Theme.of(context).colorScheme.surfaceContainer,
     );
 
-    final Color effectiveBackgroundColor = states.contains(MaterialState.scrolledUnder)
+    final effectiveBackgroundColor = states.contains(WidgetState.scrolledUnder)
         ? scrolledUnderBackground
         : backgroundColor;
 
@@ -926,7 +951,7 @@ class _AppBarState extends State<AppBar> {
 
     final double elevation = widget.elevation ?? appBarTheme.elevation ?? defaults.elevation!;
 
-    final double effectiveElevation = states.contains(MaterialState.scrolledUnder)
+    final double effectiveElevation = states.contains(WidgetState.scrolledUnder)
         ? widget.scrolledUnderElevation ??
               appBarTheme.scrolledUnderElevation ??
               defaults.scrolledUnderElevation ??
@@ -1047,7 +1072,7 @@ class _AppBarState extends State<AppBar> {
       title = _AppBarTitleBox(child: title);
       if (!widget.excludeHeaderSemantics) {
         title = Semantics(
-          namesRoute: switch (theme.platform) {
+          namesRoute: switch (defaultTargetPlatform) {
             TargetPlatform.android ||
             TargetPlatform.fuchsia ||
             TargetPlatform.linux ||
@@ -1088,7 +1113,7 @@ class _AppBarState extends State<AppBar> {
           children: widget.actions!,
         ),
       );
-    } else if (hasEndDrawer) {
+    } else if (hasEndDrawer && widget.automaticallyImplyActions) {
       actions = EndDrawerButton(style: IconButton.styleFrom(iconSize: overallIconTheme.size ?? 24));
     }
 
@@ -1234,6 +1259,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     required this.automaticallyImplyLeading,
     required this.title,
     required this.actions,
+    required this.automaticallyImplyActions,
     required this.flexibleSpace,
     required this.bottom,
     required this.elevation,
@@ -1277,6 +1303,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final bool automaticallyImplyLeading;
   final Widget? title;
   final List<Widget>? actions;
+  final bool automaticallyImplyActions;
   final Widget? flexibleSpace;
   final PreferredSizeWidget? bottom;
   final double? elevation;
@@ -1371,6 +1398,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         automaticallyImplyLeading: automaticallyImplyLeading,
         title: effectiveTitle,
         actions: actions,
+        automaticallyImplyActions: automaticallyImplyActions,
         flexibleSpace: (title == null && flexibleSpace != null && !excludeHeaderSemantics)
             ? Semantics(header: true, child: flexibleSpace)
             : flexibleSpace,
@@ -1409,6 +1437,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         automaticallyImplyLeading != oldDelegate.automaticallyImplyLeading ||
         title != oldDelegate.title ||
         actions != oldDelegate.actions ||
+        automaticallyImplyActions != oldDelegate.automaticallyImplyActions ||
         flexibleSpace != oldDelegate.flexibleSpace ||
         bottom != oldDelegate.bottom ||
         _bottomHeight != oldDelegate._bottomHeight ||
@@ -1496,7 +1525,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///
 ///
 /// {@tool dartpad}
-/// This sample shows a [SliverAppBar] and it's behavior when using the
+/// This sample shows a [SliverAppBar] and its behavior when using the
 /// [pinned], [snap] and [floating] parameters.
 ///
 /// ** See code in examples/api/lib/material/app_bar/sliver_app_bar.1.dart **
@@ -1547,6 +1576,7 @@ class SliverAppBar extends StatefulWidget {
     this.automaticallyImplyLeading = true,
     this.title,
     this.actions,
+    this.automaticallyImplyActions = true,
     this.flexibleSpace,
     this.bottom,
     this.elevation,
@@ -1617,6 +1647,7 @@ class SliverAppBar extends StatefulWidget {
     this.automaticallyImplyLeading = true,
     this.title,
     this.actions,
+    this.automaticallyImplyActions = true,
     this.flexibleSpace,
     this.bottom,
     this.elevation,
@@ -1687,6 +1718,7 @@ class SliverAppBar extends StatefulWidget {
     this.automaticallyImplyLeading = true,
     this.title,
     this.actions,
+    this.automaticallyImplyActions = true,
     this.flexibleSpace,
     this.bottom,
     this.elevation,
@@ -1747,6 +1779,11 @@ class SliverAppBar extends StatefulWidget {
   ///
   /// This property is used to configure an [AppBar].
   final List<Widget>? actions;
+
+  /// {@macro flutter.material.appbar.automaticallyImplyActions}
+  ///
+  /// This property is used to configure an [AppBar].
+  final bool automaticallyImplyActions;
 
   /// {@macro flutter.material.appbar.flexibleSpace}
   ///
@@ -2110,6 +2147,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           automaticallyImplyLeading: widget.automaticallyImplyLeading,
           title: widget.title,
           actions: widget.actions,
+          automaticallyImplyActions: widget.automaticallyImplyActions,
           flexibleSpace: effectiveFlexibleSpace,
           bottom: widget.bottom,
           elevation: widget.elevation,
@@ -2429,7 +2467,7 @@ class _RenderExpandedTitleBox extends RenderShiftedBox {
     }
     size = constraints.biggest;
     child.layout(constraints.widthConstraints().deflate(padding), parentUsesSize: true);
-    final BoxParentData childParentData = child.parentData! as BoxParentData;
+    final childParentData = child.parentData! as BoxParentData;
     childParentData.offset = _childOffsetFromSize(child.size, size);
   }
 }

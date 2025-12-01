@@ -48,12 +48,12 @@ class MaterialPointArcTween extends Tween<Offset> {
     final Offset begin = this.begin!;
     final Offset end = this.end!;
 
-    // An explanation with a diagram can be found at https://goo.gl/vMSdRg
+    // An explanation with a diagram can be found at https://docs.google.com/document/d/1kF7vhX_RpQCIjQYT6lZdLFs4Dl6hHxoXNkTQfzyHNlw/
     final Offset delta = end - begin;
     final double deltaX = delta.dx.abs();
     final double deltaY = delta.dy.abs();
     final double distanceFromAtoB = delta.distance;
-    final Offset c = Offset(end.dx, begin.dy);
+    final c = Offset(end.dx, begin.dy);
 
     double sweepAngle() => 2.0 * math.asin(distanceFromAtoB / (2.0 * _radius!));
 
@@ -213,7 +213,7 @@ typedef _KeyFunc<T> = double Function(T input);
 T _maxBy<T>(Iterable<T> input, _KeyFunc<T> keyFunc) {
   late T maxValue;
   double? maxKey;
-  for (final T value in input) {
+  for (final value in input) {
     final double key = keyFunc(value);
     if (maxKey == null || key > maxKey) {
       maxValue = value;

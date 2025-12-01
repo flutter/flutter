@@ -29,5 +29,11 @@
   "shareButtonLabel": "Deel …",
   "clearButtonLabel": "Vee uit",
   "cancelButtonLabel": "Kanselleer",
-  "backButtonLabel": "Terug"
+  "backButtonLabel": "Terug",
+  "expansionTileExpandedHint": "dubbeltik om in te vou",
+  "expansionTileCollapsedHint": "dubbeltik om uit te vou",
+  "expansionTileExpandedTapHint": "Vou in",
+  "expansionTileCollapsedTapHint": "Vou uit vir meer besonderhede",
+  "expandedHint": "Ingevou",
+  "collapsedHint": "Uitgevou"
 }

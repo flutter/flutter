@@ -105,6 +105,7 @@ interface class FlutterTestRunner {
             artifacts: globals.artifacts!,
             processManager: globals.processManager,
             config: globals.config,
+            shutdownHooks: globals.shutdownHooks,
           ).initialize(
             projectDirectory: flutterProject!.directory,
             testOutputDir: tempBuildDir,
@@ -572,6 +573,7 @@ class SpawnPlugin extends PlatformPlugin {
       fileSystem: globals.fs,
       fileSystemRoots: debuggingOptions.buildInfo.fileSystemRoots,
       fileSystemScheme: debuggingOptions.buildInfo.fileSystemScheme,
+      shutdownHooks: globals.shutdownHooks,
     );
 
     await residentCompiler.recompile(
@@ -734,7 +736,7 @@ class SpawnPlugin extends PlatformPlugin {
       'FLUTTER_TEST': flutterTest,
       'FONTCONFIG_FILE': FontConfigManager().fontConfigFile.path,
       'APP_NAME': flutterProject.manifest.appName,
-      if (testAssetDirectory != null) 'UNIT_TEST_ASSETS': testAssetDirectory,
+      'UNIT_TEST_ASSETS': ?testAssetDirectory,
       if (nativeAssetsBuilder != null && globals.platform.isWindows)
         'PATH':
             '${nativeAssetsBuilder.windowsBuildDirectory(flutterProject)};${globals.platform.environment['PATH']}',

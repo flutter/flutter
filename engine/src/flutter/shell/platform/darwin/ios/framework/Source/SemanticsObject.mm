@@ -78,8 +78,8 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
     point = ApplyTransform(point, globalTransform);
   }
   SkRect rect;
-  NSCAssert(rect.setBoundsCheck(quad, 4), @"Transformed points can't form a rect");
-  rect.setBounds(quad, 4);
+  NSCAssert(rect.setBoundsCheck({quad, 4}), @"Transformed points can't form a rect");
+  rect.setBounds({quad, 4});
 
   // `rect` is in the physical pixel coordinate system. iOS expects the accessibility frame in
   // the logical pixel coordinate system. Therefore, we divide by the `scale` (pixel ratio) to
@@ -123,7 +123,8 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 }
 
 - (NSString*)accessibilityValue {
-  self.nativeSwitch.on = self.node.flags.isToggled || self.node.flags.isChecked;
+  self.nativeSwitch.on = self.node.flags.isToggled == flutter::SemanticsTristate::kTrue ||
+                         self.node.flags.isChecked == flutter::SemanticsCheckState::kTrue;
 
   if (![self isAccessibilityBridgeAlive]) {
     return nil;
@@ -133,7 +134,7 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 }
 
 - (UIAccessibilityTraits)accessibilityTraits {
-  self.nativeSwitch.enabled = self.node.flags.isEnabled;
+  self.nativeSwitch.enabled = self.node.flags.isEnabled == flutter::SemanticsTristate::kTrue;
 
   return self.nativeSwitch.accessibilityTraits;
 }
@@ -453,6 +454,17 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   return [self isFocusable];
 }
 
+- (NSString*)accessibilityLanguage {
+  if (![self isAccessibilityBridgeAlive]) {
+    return nil;
+  }
+
+  if (!self.node.locale.empty()) {
+    return @(self.node.locale.data());
+  }
+  return self.bridge->GetDefaultLocale();
+}
+
 - (bool)isFocusable {
   // If the node is scrollable AND hidden OR
   // The node has a label, value, or hint OR
@@ -613,12 +625,13 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   }
 
   // FlutterSwitchSemanticsObject should supercede these conditionals.
-  if (self.node.flags.hasToggledState || self.node.flags.hasCheckedState) {
-    if (self.node.flags.isToggled || self.node.flags.isChecked) {
-      return @"1";
-    } else {
-      return @"0";
-    }
+
+  if (self.node.flags.isToggled == flutter::SemanticsTristate::kTrue ||
+      self.node.flags.isChecked == flutter::SemanticsCheckState::kTrue) {
+    return @"1";
+  } else if (self.node.flags.isToggled == flutter::SemanticsTristate::kFalse ||
+             self.node.flags.isChecked == flutter::SemanticsCheckState::kFalse) {
+    return @"0";
   }
 
   return nil;
@@ -776,6 +789,10 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 }
 
 - (BOOL)accessibilityRespondsToUserInteraction {
+  if (self.node.flags.isAccessibilityFocusBlocked) {
+    return false;
+  }
+
   // Return true only if the node contains actions other than system actions.
   if ((self.node.actions & ~flutter::kSystemActions) != 0) {
     return true;
@@ -809,16 +826,17 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
     traits |= UIAccessibilityTraitAdjustable;
   }
   // This should also capture radio buttons.
-  if (self.node.flags.hasToggledState || self.node.flags.hasCheckedState) {
+  if (self.node.flags.isToggled != flutter::SemanticsTristate::kNone ||
+      self.node.flags.isChecked != flutter::SemanticsCheckState::kNone) {
     traits |= UIAccessibilityTraitButton;
   }
-  if (self.node.flags.isSelected) {
+  if (self.node.flags.isSelected == flutter::SemanticsTristate::kTrue) {
     traits |= UIAccessibilityTraitSelected;
   }
   if (self.node.flags.isButton) {
     traits |= UIAccessibilityTraitButton;
   }
-  if (self.node.flags.hasEnabledState && !self.node.flags.isEnabled) {
+  if (self.node.flags.isEnabled == flutter::SemanticsTristate::kFalse) {
     traits |= UIAccessibilityTraitNotEnabled;
   }
   if (self.node.flags.isHeader) {

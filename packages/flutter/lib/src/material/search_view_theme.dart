@@ -225,12 +225,18 @@ class SearchViewThemeData with Diagnosticable {
 
   // Special case because BorderSide.lerp() doesn't support null arguments
   static BorderSide? _lerpSides(BorderSide? a, BorderSide? b, double t) {
-    if (a == null || b == null) {
+    if (a == null && b == null) {
       return null;
     }
-    if (identical(a, b)) {
-      return a;
+    if (a is WidgetStateBorderSide) {
+      a = a.resolve(const <WidgetState>{});
     }
+    if (b is WidgetStateBorderSide) {
+      b = b.resolve(const <WidgetState>{});
+    }
+    a ??= BorderSide(width: 0, color: b!.color.withAlpha(0));
+    b ??= BorderSide(width: 0, color: a.color.withAlpha(0));
+
     return BorderSide.lerp(a, b, t);
   }
 }

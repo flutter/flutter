@@ -75,7 +75,9 @@ class TextureGLES final : public Texture,
       std::shared_ptr<ReactorGLES> reactor,
       TextureDescriptor desc);
 
-  TextureGLES(std::shared_ptr<ReactorGLES> reactor, TextureDescriptor desc);
+  TextureGLES(std::shared_ptr<ReactorGLES> reactor,
+              TextureDescriptor desc,
+              bool threadsafe = false);
 
   // |Texture|
   ~TextureGLES() override;
@@ -164,6 +166,7 @@ class TextureGLES final : public Texture,
 
   TextureGLES(std::shared_ptr<ReactorGLES> reactor,
               TextureDescriptor desc,
+              bool threadsafe,
               std::optional<GLuint> fbo,
               std::optional<HandleGLES> external_handle);
 

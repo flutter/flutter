@@ -234,7 +234,7 @@ void PlatformViewAndroid::NotifyDestroyed() {
   }
 }
 
-void PlatformViewAndroid::NotifyChanged(const SkISize& size) {
+void PlatformViewAndroid::NotifyChanged(const DlISize& size) {
   if (!android_surface_) {
     return;
   }
@@ -323,6 +323,11 @@ void PlatformViewAndroid::UpdateSemantics(
     flutter::SemanticsNodeUpdates update,
     flutter::CustomAccessibilityActionUpdates actions) {
   platform_view_android_delegate_.UpdateSemantics(update, actions);
+}
+
+// |PlatformView|
+void PlatformViewAndroid::SetApplicationLocale(std::string locale) {
+  jni_facade_->FlutterViewSetApplicationLocale(std::move(locale));
 }
 
 void PlatformViewAndroid::RegisterExternalTexture(
