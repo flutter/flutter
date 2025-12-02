@@ -3,15 +3,15 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/button_style/button_style.icon_alignment.0.dart'
+import 'package:flutter_api_samples/material/icon_alignment/icon_alignment.0.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('ButtonStyle.iconAlignment updates button icons alignment', (
+  testWidgets("IconAlignment updates buttons' icons alignment", (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const example.ButtonStyleIconAlignmentApp());
+    await tester.pumpWidget(const example.IconAlignmentApp());
 
     Finder findButtonMaterial(String text) {
       return find

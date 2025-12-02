@@ -48,7 +48,7 @@ import 'tooltip.dart';
 /// This sample demonstrates how to use `iconAlignment` to align the button icon to the start
 /// or the end of the button.
 ///
-/// ** See code in examples/api/lib/material/button_style/button_style_.icon_alignment.0.dart **
+/// ** See code in examples/api/lib/material/icon_alignment/icon_alignment.0.dart **
 /// {@end-tool}
 ///
 /// {@endtemplate}
