@@ -2996,7 +2996,7 @@ void main() {
   testWidgets('Modal bottom sheet has hitTestBehavior.opaque to prevent dismissal on empty areas', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     late BuildContext savedContext;
 
     await tester.pumpWidget(

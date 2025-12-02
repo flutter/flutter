@@ -3315,7 +3315,7 @@ void main() {
   testWidgets('Dialog has hitTestBehavior.opaque to prevent dismissal on empty areas', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -3353,7 +3353,7 @@ void main() {
   });
 
   testWidgets('AlertDialog has hitTestBehavior.opaque via Dialog', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       MaterialApp(
