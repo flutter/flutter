@@ -1011,24 +1011,6 @@ void main() {
 
     expect(testContext.processManager.hasRemainingExpectations, isFalse);
   });
-
-  group('parseFrameworkNameFromDirectory', () {
-    test('Non-framework directory', () {
-      expect(
-        Context.parseFrameworkNameFromDirectory(fileSystem.directory('path/to/directory')),
-        isNull,
-      );
-    });
-
-    test('Framework directory', () {
-      expect(
-        Context.parseFrameworkNameFromDirectory(
-          fileSystem.directory('path/to/directory.framework'),
-        ),
-        'directory',
-      );
-    });
-  });
 }
 
 class TestContext extends Context {
