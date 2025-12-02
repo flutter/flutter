@@ -692,8 +692,6 @@ abstract interface class PredictiveBackRoute {
 /// the [onRemove] callback is called first. Only after all local history
 /// entries have been removed will the route itself be popped.
 ///
-/// ## Example
-///
 /// {@tool dartpad}
 /// This example demonstrates how to use a [LocalHistoryEntry] to show a panel that can be
 /// dismissed with the back button.
