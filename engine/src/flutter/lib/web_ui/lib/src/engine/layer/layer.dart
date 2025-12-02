@@ -53,6 +53,11 @@ class RootLayer extends ContainerLayer {
   R accept<R>(LayerVisitor<R> visitor) {
     return visitor.visitRoot(this);
   }
+
+  /// The pictures that were cloned into this layer tree.
+  ///
+  /// They need to be disposed of after the tree has been rendered.
+  final List<LayerPicture> clonedPictures = <LayerPicture>[];
 }
 
 class BackdropFilterEngineLayer extends ContainerLayer implements ui.BackdropFilterEngineLayer {
