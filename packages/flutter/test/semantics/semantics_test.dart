@@ -1036,7 +1036,7 @@ void main() {
   });
 
   test('SemanticsConfiguration.copy() preserves hitTestBehavior', () {
-    final SemanticsConfiguration config = SemanticsConfiguration()
+    final config = SemanticsConfiguration()
       ..isSemanticBoundary = true
       ..label = 'test'
       ..hitTestBehavior = SemanticsHitTestBehavior.opaque;
@@ -1051,14 +1051,14 @@ void main() {
   });
 
   test('SemanticsConfiguration.copy() preserves all hitTestBehavior values', () {
-    final SemanticsConfiguration deferConfig = SemanticsConfiguration();
+    final deferConfig = SemanticsConfiguration();
     expect(deferConfig.copy().hitTestBehavior, SemanticsHitTestBehavior.defer);
 
-    final SemanticsConfiguration opaqueConfig = SemanticsConfiguration()
+    final opaqueConfig = SemanticsConfiguration()
       ..hitTestBehavior = SemanticsHitTestBehavior.opaque;
     expect(opaqueConfig.copy().hitTestBehavior, SemanticsHitTestBehavior.opaque);
 
-    final SemanticsConfiguration transparentConfig = SemanticsConfiguration()
+    final transparentConfig = SemanticsConfiguration()
       ..hitTestBehavior = SemanticsHitTestBehavior.transparent;
     expect(transparentConfig.copy().hitTestBehavior, SemanticsHitTestBehavior.transparent);
   });
