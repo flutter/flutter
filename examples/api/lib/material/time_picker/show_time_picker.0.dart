@@ -324,11 +324,7 @@ class EnumCard<T extends Enum> extends StatelessWidget {
 // A button that has a radio button on one side and a label child. Tapping on
 // the label or the radio button selects the item.
 class RadioSelection<T extends Object?> extends StatelessWidget {
-  const RadioSelection({
-    super.key,
-    required this.value,
-    required this.child,
-  });
+  const RadioSelection({super.key, required this.value, required this.child});
 
   final T value;
   final Widget child;
