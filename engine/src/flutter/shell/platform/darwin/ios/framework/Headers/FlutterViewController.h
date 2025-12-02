@@ -254,6 +254,19 @@ FLUTTER_DARWIN_EXPORT
  */
 @property(nonatomic, readonly) BOOL engineAllowHeadlessExecution;
 
+/**
+ * Controls whether the created view can be sized based on its content.
+ * When set to `YES`, the FlutterView will be the same size as the outermost widget.
+ * Cannot be used with unbounded height widgets, such as Scaffold.
+ * This property is intended to be used with Add-to-App scenarios.
+ *
+ * Once auto resizing is enabled, the FlutterView will rely on custom constraints from then on.
+ * Avoid disabling it after enabling, as behaviour will then be undefined.
+ *
+ * Default is `NO`.
+ */
+@property(nonatomic, getter=isAutoResizable) BOOL autoResizable;
+
 @end
 
 NS_ASSUME_NONNULL_END
