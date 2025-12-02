@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 /// @docImport 'gesture_detector.dart';
+/// @docImport 'tooltip_visibility.dart';
 library;
 
 import 'dart:async';
