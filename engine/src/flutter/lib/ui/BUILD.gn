@@ -169,6 +169,7 @@ source_set("ui") {
     "//flutter/flow",
     "//flutter/shell/common:display",
     "//flutter/shell/common:platform_message_handler",
+    "//flutter/shell/common:snapshot_pixel_format",
     "//flutter/skia/modules/skparagraph",
     "//flutter/txt",
   ]

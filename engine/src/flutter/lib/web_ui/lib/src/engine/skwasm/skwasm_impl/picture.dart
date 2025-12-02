@@ -25,8 +25,11 @@ class SkwasmPicture extends SkwasmObjectWrapper<RawPicture> implements LayerPict
   }
 
   @override
-  ui.Image toImageSync(int width, int height) =>
-      SkwasmImage(imageCreateFromPicture(handle, width, height));
+  ui.Image toImageSync(
+    int width,
+    int height, {
+    ui.TargetPixelFormat targetFormat = ui.TargetPixelFormat.dontCare,
+  }) => SkwasmImage(imageCreateFromPicture(handle, width, height));
 
   @override
   ui.Rect get cullRect {

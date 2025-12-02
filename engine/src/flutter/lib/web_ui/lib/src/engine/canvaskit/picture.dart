@@ -96,7 +96,11 @@ class CkPicture implements LayerPicture {
   }
 
   @override
-  CkImage toImageSync(int width, int height) {
+  CkImage toImageSync(
+    int width,
+    int height, {
+    ui.TargetPixelFormat targetFormat = ui.TargetPixelFormat.dontCare,
+  }) {
     assert(debugCheckNotDisposed('Cannot convert picture to image.'));
 
     final Surface surface = CanvasKitRenderer.instance.pictureToImageSurface;

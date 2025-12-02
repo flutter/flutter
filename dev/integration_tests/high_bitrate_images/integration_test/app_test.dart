@@ -70,8 +70,8 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('end-to-end test', () {
-    testWidgets('renders sdfs with rgba32f', (WidgetTester tester) async {
-      app.gTargetPixelFormat = ui.TargetPixelFormat.rgbaFloat32;
+    testWidgets('renders cpu sdfs with rgba32f', (WidgetTester tester) async {
+      app.testToRun = app.TestType.cpuRgba32fSdf;
       app.main();
       await tester.pumpAndSettle(const Duration(seconds: 2));
       await _getScreenshot();
@@ -83,17 +83,25 @@ void main() {
       // );
     });
 
-    testWidgets('renders sdfs with r32f', (WidgetTester tester) async {
-      app.gTargetPixelFormat = ui.TargetPixelFormat.rFloat32;
+    testWidgets('renders cpu sdfs with r32f', (WidgetTester tester) async {
+      app.testToRun = app.TestType.cpuR32fSdf;
       app.main();
       await tester.pumpAndSettle(const Duration(seconds: 2));
       await _getScreenshot();
-      // TODO(gaaclarke): Turn this into a golden test. This turned out to be
-      // quite involved so it's deferred.
-      // expect(
-      //   screenshot,
-      //   matchesGoldenFile('high_bitrate_images.rbga32f'),
-      // );
+    });
+
+    testWidgets('renders gpu sdfs with rgba32f', (WidgetTester tester) async {
+      app.testToRun = app.TestType.gpuRgba32fSdf;
+      app.main();
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+      await _getScreenshot();
+    });
+
+    testWidgets('renders gpu sdfs with r32f', (WidgetTester tester) async {
+      app.testToRun = app.TestType.gpuR32fSdf;
+      app.main();
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+      await _getScreenshot();
     });
   });
 }
