@@ -68,7 +68,6 @@ FlutterViewId WindowManager::CreateTooltipWindow(
   FlutterViewId const view_id = window->view_controller_->view()->view_id();
   active_windows_[window->GetWindowHandle()] = std::move(window);
   return view_id;
-  return -1;
 }
 
 void WindowManager::OnEngineShutdown() {

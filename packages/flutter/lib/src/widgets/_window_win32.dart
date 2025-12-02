@@ -687,17 +687,36 @@ class DialogWindowControllerWin32 extends DialogWindowController {
   }
 }
 
+/// Implementation of [TooltipWindowController] for the Windows platform.
+///
+/// {@macro flutter.widgets.windowing.experimental}
+///
+/// See also:
+///
+///  * [TooltipWindowController], the base class for tooltip windows.
 class TooltipWindowControllerWin32 extends TooltipWindowController
     implements _WindowsMessageHandler {
+  /// Creates a new tooltip window controller for Win32.
+  ///
+  /// When this constructor completes the native window has been created and
+  /// has a view associated with it.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  ///
+  /// See also:
+  /// * [TooltipWindowController], the base class for tooltip windows.
+  @internal
   TooltipWindowControllerWin32({
     required WindowingOwnerWin32 owner,
     required TooltipWindowControllerDelegate delegate,
     required BoxConstraints contentSizeConstraints,
     required BaseWindowController parent,
-    required this.anchorRect,
-    required this.positioner,
+    required Rect anchorRect,
+    required WindowPositioner positioner,
   }) : _delegate = delegate,
        _owner = owner,
+       _anchorRect = anchorRect,
+       _positioner = positioner,
        super.empty() {
     owner._addMessageHandler(this);
     _onGetWindowPosition =
@@ -737,14 +756,14 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
     final double scale = PlatformDispatcher.instance.views
         .firstWhere((FlutterView view) => view.viewId == rootView.viewId)
         .devicePixelRatio;
-    final Rect scaledAnchorRect = Rect.fromLTWH(
-      anchorRect.left * scale,
-      anchorRect.top * scale,
-      anchorRect.width * scale,
-      anchorRect.height * scale,
+    final scaledAnchorRect = Rect.fromLTWH(
+      _anchorRect.left * scale,
+      _anchorRect.top * scale,
+      _anchorRect.width * scale,
+      _anchorRect.height * scale,
     );
-    final Offset scaledOffset = positioner.offset * scale;
-    final WindowPositioner scaledPositioner = positioner.copyWith(offset: scaledOffset);
+    final Offset scaledOffset = _positioner.offset * scale;
+    final WindowPositioner scaledPositioner = _positioner.copyWith(offset: scaledOffset);
     final Rect targetRect = scaledPositioner.placeWindow(
       childSize: childSize.ref.toSize(),
       anchorRect: scaledAnchorRect.translate(
@@ -762,11 +781,12 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
   }
 
   final WindowingOwnerWin32 _owner;
-  WindowPositioner positioner;
-  Rect anchorRect;
   final TooltipWindowControllerDelegate _delegate;
+  WindowPositioner _positioner;
+  Rect _anchorRect;
   bool _destroyed = false;
 
+  /// Returns HWND pointer to the top level window.
   @internal
   HWND getWindowHandle() {
     _ensureNotDestroyed();
@@ -780,8 +800,7 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
   Size get contentSize {
     _ensureNotDestroyed();
     final _ActualContentSize size = _Win32PlatformInterface.getWindowContentSize(getWindowHandle());
-    final Size result = Size(size.width, size.height);
-    return result;
+    return Size(size.width, size.height);
   }
 
   void _ensureNotDestroyed() {
@@ -802,10 +821,10 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
   @override
   void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {
     if (anchorRect != null) {
-      this.anchorRect = anchorRect;
+      _anchorRect = anchorRect;
     }
     if (positioner != null) {
-      this.positioner = positioner;
+      _positioner = positioner;
     }
     _Win32PlatformInterface.updateTooltipWindowPosition(getWindowHandle());
   }

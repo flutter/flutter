@@ -101,7 +101,7 @@ void HostWindowTooltip::UpdatePosition() {
                  parent_bottom_right.x - parent_top_left.x,
                  parent_bottom_right.y - parent_top_left.y},
       work_area);
-  SetWindowPos(window_handle_, HWND_TOP, rect->left, rect->top, rect->width,
+  SetWindowPos(window_handle_, nullptr, rect->left, rect->top, rect->width,
                rect->height, SWP_NOACTIVATE | SWP_NOOWNERZORDER);
   free(rect);
 
