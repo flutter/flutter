@@ -8,7 +8,7 @@ import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
 Future<String> _runWithMode(String mode, String deviceId) async {
-  final StringBuffer stderr = StringBuffer();
+  final stderr = StringBuffer();
   await evalFlutter(
     'drive',
     stderr: stderr,
@@ -24,7 +24,7 @@ Future<TaskResult> run() async {
   final String deviceId = device.deviceId;
   await flutter('packages', options: <String>['get']);
 
-  const String warningPiece = 'THIS BENCHMARK IS BEING RUN IN DEBUG MODE';
+  const warningPiece = 'THIS BENCHMARK IS BEING RUN IN DEBUG MODE';
 
   final String debugOutput = await _runWithMode('--debug', deviceId);
   if (!debugOutput.contains(warningPiece)) {

@@ -86,7 +86,7 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
       ];
     }
 
-    final List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
+    final buttonItems = <ContextMenuButtonItem>[];
 
     // Build suggestion buttons.
     for (final String suggestion in spanAtCursorIndex.suggestions.take(_kMaxSuggestions)) {

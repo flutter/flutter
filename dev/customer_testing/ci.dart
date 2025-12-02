@@ -32,9 +32,7 @@ void main(List<String> args) async {
   }
 
   final String flutterRootPath = p.canonicalize('../../');
-  final io.Directory testsCacheDir = io.Directory(
-    p.join(flutterRootPath, 'bin', 'cache', 'pkg', 'tests'),
-  );
+  final testsCacheDir = io.Directory(p.join(flutterRootPath, 'bin', 'cache', 'pkg', 'tests'));
 
   if (testsCacheDir.existsSync()) {
     io.stderr.writeln('Cleaning up existing repo: ${testsCacheDir.path}');

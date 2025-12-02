@@ -49,7 +49,7 @@ void main() {
       int viewId, {
       Object? params,
     }) {
-      final web.HTMLElement htmlElement = web.document.createElement('div') as web.HTMLElement;
+      final htmlElement = web.document.createElement('div') as web.HTMLElement;
       htmlElement
         ..style.width = '100%'
         ..style.height = '100%'
@@ -81,7 +81,7 @@ void main() {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       fakePlatformViewRegistry.registerViewFactory('webview', _mockViewFactory);
 
-      bool hasPlatformViewCreated = false;
+      var hasPlatformViewCreated = false;
       void onPlatformViewCreatedCallBack(int id) {
         hasPlatformViewCreated = true;
       }
@@ -153,7 +153,7 @@ void main() {
         ),
       );
 
-      final Completer<void> resizeCompleter = Completer<void>();
+      final resizeCompleter = Completer<void>();
 
       await tester.pumpWidget(
         const Center(
@@ -307,7 +307,7 @@ void main() {
       expect(fakePlatformView.params, <dynamic, dynamic>{'tagName': 'div'});
 
       // The HTML element should be a div.
-      final web.HTMLElement htmlElement = fakePlatformView.htmlElement as web.HTMLElement;
+      final htmlElement = fakePlatformView.htmlElement as web.HTMLElement;
       expect(htmlElement.tagName, equalsIgnoringCase('div'));
     });
 
@@ -333,12 +333,12 @@ void main() {
       expect(fakePlatformView.params, <dynamic, dynamic>{'tagName': 'script'});
 
       // The HTML element should be a script.
-      final web.HTMLElement htmlElement = fakePlatformView.htmlElement as web.HTMLElement;
+      final htmlElement = fakePlatformView.htmlElement as web.HTMLElement;
       expect(htmlElement.tagName, equalsIgnoringCase('script'));
     });
 
     testWidgets('onElementCreated', (WidgetTester tester) async {
-      final List<Object> createdElements = <Object>[];
+      final createdElements = <Object>[];
       void onElementCreated(Object element) {
         createdElements.add(element);
       }
@@ -369,7 +369,7 @@ void main() {
     group('hitTestBehavior', () {
       testWidgets('opaque by default', (WidgetTester tester) async {
         final Key containerKey = UniqueKey();
-        int taps = 0;
+        var taps = 0;
 
         await tester.pumpWidget(
           GestureDetector(
@@ -398,7 +398,7 @@ void main() {
 
       testWidgets('can be set to transparent', (WidgetTester tester) async {
         final Key containerKey = UniqueKey();
-        int taps = 0;
+        var taps = 0;
 
         await tester.pumpWidget(
           GestureDetector(
@@ -477,7 +477,7 @@ void main() {
       findsNothing,
     );
 
-    const Offset region1 = Offset(10, 10);
+    const region1 = Offset(10, 10);
     final Offset region2 = tester.getTopLeft(find.byKey(innerRegion)) - const Offset(3, 3);
     final Offset region3 = tester.getCenter(find.byKey(innerRegion));
 

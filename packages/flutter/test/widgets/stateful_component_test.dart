@@ -19,7 +19,7 @@ void main() {
       );
       expect(element, isNotNull);
       expect(element.renderObject, isA<RenderDecoratedBox>());
-      final RenderDecoratedBox renderObject = element.renderObject as RenderDecoratedBox;
+      final renderObject = element.renderObject as RenderDecoratedBox;
       expect(renderObject.decoration, equals(expectedDecoration));
     }
 
