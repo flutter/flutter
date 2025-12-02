@@ -1021,7 +1021,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
     return result;
   }
 
-  void handleUpKeyInvoke(_ArrowUpIntent _) {
+  void handleUpKey(_ArrowUpIntent _) {
     setState(() {
       if (!widget.enabled || !_menuHasEnabledItem || !_controller.isOpen) {
         return;
@@ -1041,7 +1041,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
     });
   }
 
-  void handleDownKeyInvoke(_ArrowDownIntent _) {
+  void handleDownKey(_ArrowDownIntent _) {
     setState(() {
       if (!widget.enabled || !_menuHasEnabledItem || !_controller.isOpen) {
         return;
@@ -1367,8 +1367,8 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
 
     return Actions(
       actions: <Type, Action<Intent>>{
-        _ArrowUpIntent: CallbackAction<_ArrowUpIntent>(onInvoke: handleUpKeyInvoke),
-        _ArrowDownIntent: CallbackAction<_ArrowDownIntent>(onInvoke: handleDownKeyInvoke),
+        _ArrowUpIntent: CallbackAction<_ArrowUpIntent>(onInvoke: handleUpKey),
+        _ArrowDownIntent: CallbackAction<_ArrowDownIntent>(onInvoke: handleDownKey),
         _EnterIntent: CallbackAction<_EnterIntent>(onInvoke: handleEnterKey),
         DismissIntent: DismissMenuAction(controller: _controller),
       },
