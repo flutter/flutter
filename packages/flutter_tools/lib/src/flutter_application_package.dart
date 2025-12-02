@@ -91,6 +91,7 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
         return WebApplicationPackage(FlutterProject.current());
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
+      case TargetPlatform.linux_riscv64:
         return applicationBinary == null
             ? LinuxApp.fromLinuxProject(FlutterProject.current().linux)
             : LinuxApp.fromPrebuiltApp(applicationBinary);

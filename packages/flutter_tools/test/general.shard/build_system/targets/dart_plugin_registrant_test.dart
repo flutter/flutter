@@ -90,6 +90,7 @@ void main() {
         'darwin-x64': false,
         'linux-x64': false,
         'linux-arm64': false,
+        'linux-riscv64': false,
         'windows-x64': false,
         'web-javascript': true,
         'ios': false,

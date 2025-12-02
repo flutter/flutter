@@ -825,6 +825,9 @@ class FakeFlutterFeatures extends FeatureFlags {
   bool get isUISceneMigrationEnabled => _enabled;
 
   @override
+  bool get isRiscv64SupportEnabled => _enabled;
+
+  @override
   final List<Feature> allFeatures;
 
   @override
