@@ -13,13 +13,17 @@ namespace flutter {
 
 class AndroidSnapshotSurfaceProducer : public SnapshotSurfaceProducer {
  public:
-  explicit AndroidSnapshotSurfaceProducer(AndroidSurface& android_surface);
+   using GetAndroidSurfaceCallback = std::function<AndroidSurface&(void)>;
+  explicit AndroidSnapshotSurfaceProducer(const GetAndroidSurfaceCallback& get_android_surface_callback
+    // AndroidSurface& android_surface
+  );
 
   // |SnapshotSurfaceProducer|
   std::unique_ptr<Surface> CreateSnapshotSurface() override;
 
  private:
-  AndroidSurface& android_surface_;
+  // AndroidSurface& android_surface_;
+  const GetAndroidSurfaceCallback get_android_surface_callback_;
 };
 
 }  // namespace flutter

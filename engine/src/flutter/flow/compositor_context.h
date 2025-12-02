@@ -114,7 +114,8 @@ class CompositorContext {
                 bool instrumentation_enabled,
                 bool surface_supports_readback,
                 fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger,
-                impeller::AiksContext* aiks_context);
+                impeller::AiksContext* aiks_context,
+                int64_t flutter_view_id);
 
     virtual ~ScopedFrame();
 
@@ -138,6 +139,10 @@ class CompositorContext {
                                 bool ignore_raster_cache,
                                 FrameDamage* frame_damage);
 
+    int64_t GetFlutterViewId() const {
+      return flutter_view_id_;
+    }
+
    private:
     void PaintLayerTreeSkia(flutter::LayerTree& layer_tree,
                             std::optional<DlRect> clip_rect,
@@ -157,6 +162,7 @@ class CompositorContext {
     const bool instrumentation_enabled_;
     const bool surface_supports_readback_;
     fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger_;
+    int64_t flutter_view_id_;
 
     FML_DISALLOW_COPY_AND_ASSIGN(ScopedFrame);
   };
@@ -175,7 +181,8 @@ class CompositorContext {
       bool instrumentation_enabled,
       bool surface_supports_readback,
       fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger,
-      impeller::AiksContext* aiks_context);
+      impeller::AiksContext* aiks_context,
+      int64_t flutter_view_id);
 
   void OnGrContextCreated();
 

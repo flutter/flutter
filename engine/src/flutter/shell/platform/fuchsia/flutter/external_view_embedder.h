@@ -77,7 +77,8 @@ class ExternalViewEmbedder final : public flutter::ExternalViewEmbedder {
                       raster_thread_merger) override;
 
   // |ExternalViewEmbedder|
-  void PrepareFlutterView(flutter::DlISize frame_size,
+  void PrepareFlutterView(int64_t flutter_view_id,
+                          flutter::DlISize frame_size,
                           double device_pixel_ratio) override;
 
   // |ExternalViewEmbedder|

@@ -92,7 +92,8 @@ class JNIMock final : public PlatformViewAndroidJNI {
 
   MOCK_METHOD(void,
               FlutterViewOnDisplayPlatformView,
-              (int view_id,
+              (int64_t flutter_view_id,
+               int view_id,
                int x,
                int y,
                int width,
@@ -104,7 +105,7 @@ class JNIMock final : public PlatformViewAndroidJNI {
 
   MOCK_METHOD(void,
               FlutterViewDisplayOverlaySurface,
-              (int surface_id, int x, int y, int width, int height),
+              (int64_t flutter_view_id, int surface_id, int x, int y, int width, int height),
               (override));
 
   MOCK_METHOD(void, FlutterViewBeginFrame, (), (override));
@@ -113,7 +114,7 @@ class JNIMock final : public PlatformViewAndroidJNI {
 
   MOCK_METHOD(std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata>,
               FlutterViewCreateOverlaySurface,
-              (),
+              (int64_t flutter_view_id),
               (override));
 
   MOCK_METHOD(void, FlutterViewDestroyOverlaySurfaces, (), (override));

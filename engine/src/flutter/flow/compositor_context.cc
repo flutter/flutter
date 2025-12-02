@@ -78,11 +78,12 @@ std::unique_ptr<CompositorContext::ScopedFrame> CompositorContext::AcquireFrame(
     bool surface_supports_readback,
     fml::RefPtr<fml::RasterThreadMerger>
         raster_thread_merger,  // NOLINT(performance-unnecessary-value-param)
-    impeller::AiksContext* aiks_context) {
+    impeller::AiksContext* aiks_context,
+    int64_t flutter_view_id) {
   return std::make_unique<ScopedFrame>(
       *this, gr_context, canvas, view_embedder, root_surface_transformation,
       instrumentation_enabled, surface_supports_readback, raster_thread_merger,
-      aiks_context);
+      aiks_context, flutter_view_id);
 }
 
 CompositorContext::ScopedFrame::ScopedFrame(
@@ -94,7 +95,8 @@ CompositorContext::ScopedFrame::ScopedFrame(
     bool instrumentation_enabled,
     bool surface_supports_readback,
     fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger,
-    impeller::AiksContext* aiks_context)
+    impeller::AiksContext* aiks_context,
+    int64_t flutter_view_id)
     : context_(context),
       gr_context_(gr_context),
       canvas_(canvas),
@@ -103,7 +105,9 @@ CompositorContext::ScopedFrame::ScopedFrame(
       root_surface_transformation_(root_surface_transformation),
       instrumentation_enabled_(instrumentation_enabled),
       surface_supports_readback_(surface_supports_readback),
-      raster_thread_merger_(std::move(raster_thread_merger)) {
+      raster_thread_merger_(std::move(raster_thread_merger)),
+      flutter_view_id_(flutter_view_id)
+      {
   context_.BeginFrame(*this, instrumentation_enabled_);
 }
 

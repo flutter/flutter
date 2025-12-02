@@ -25,20 +25,30 @@ import io.flutter.embedding.engine.systemchannels.ScribeChannel;
 public class ScribePlugin implements ScribeChannel.ScribeMethodHandler {
 
   @NonNull private final ScribeChannel mScribeChannel;
-  @NonNull private final InputMethodManager mInputMethodManager;
-  @NonNull private View mView;
+//  @NonNull private final InputMethodManager mInputMethodManager;
+//  @NonNull private View mView;
+//
+  @NonNull private TextInputPlugin mTextInputPlugin;
 
   public ScribePlugin(
-      @NonNull View view, @NonNull InputMethodManager imm, @NonNull ScribeChannel scribeChannel) {
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_33) {
-      view.setAutoHandwritingEnabled(false);
-    }
+      @NonNull TextInputPlugin textInputPlugin, @NonNull ScribeChannel scribeChannel) {
+//    if (Build.VERSION.SDK_INT >= API_LEVELS.API_33) {
+//      view.setAutoHandwritingEnabled(false);
+//    }
 
-    mView = view;
-    mInputMethodManager = imm;
+    mTextInputPlugin = textInputPlugin;
+
+//    mView = view;
+//    mInputMethodManager = imm;
     mScribeChannel = scribeChannel;
 
     mScribeChannel.setScribeMethodHandler(this);
+  }
+
+  public void checkAutoHandwritingEnabled(View view) {
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_33) {
+      view.setAutoHandwritingEnabled(false);
+    }
   }
 
   /**
@@ -46,12 +56,12 @@ public class ScribePlugin implements ScribeChannel.ScribeMethodHandler {
    *
    * <p>Only one View can be set at any given time.
    */
-  public void setView(@NonNull View view) {
-    if (view == mView) {
-      return;
-    }
-    mView = view;
-  }
+//  public void setView(@NonNull View view) {
+//    if (view == mView) {
+//      return;
+//    }
+//    mView = view;
+//  }
 
   /**
    * Unregisters this {@code ScribePlugin} as the {@code ScribeChannel.ScribeMethodHandler}, for the
@@ -72,7 +82,7 @@ public class ScribePlugin implements ScribeChannel.ScribeMethodHandler {
   @RequiresApi(API_LEVELS.API_34)
   @Override
   public boolean isStylusHandwritingAvailable() {
-    return mInputMethodManager.isStylusHandwritingAvailable();
+    return mTextInputPlugin.getInputMethodManager().isStylusHandwritingAvailable();
   }
 
   /**
@@ -84,7 +94,9 @@ public class ScribePlugin implements ScribeChannel.ScribeMethodHandler {
   @RequiresApi(API_LEVELS.API_33)
   @Override
   public void startStylusHandwriting() {
-    mInputMethodManager.startStylusHandwriting(mView);
+    if (mTextInputPlugin.getCurrentView() != null) {
+      mTextInputPlugin.getInputMethodManager().startStylusHandwriting(mTextInputPlugin.getCurrentView());
+    }
   }
 
   /**

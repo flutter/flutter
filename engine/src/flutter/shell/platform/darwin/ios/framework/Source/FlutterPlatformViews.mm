@@ -734,7 +734,7 @@ static BOOL _preparedOnce = NO;
     // At the start of each gesture sequence, we reset the `_flutterViewController`,
     // so that all the touch events in the same sequence are forwarded to the same
     // `_flutterViewController`.
-    _flutterViewController = _platformViewsController.flutterViewController;
+    _flutterViewController = ((FlutterTouchInterceptingView*)self.view).flutterViewController;
   }
   [_flutterViewController touchesBegan:touches withEvent:event];
   _currentTouchPointersCount += touches.count;

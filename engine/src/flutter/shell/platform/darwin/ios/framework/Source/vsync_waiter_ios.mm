@@ -115,6 +115,11 @@ double VsyncWaiterIOS::GetRefreshRate() const {
 
 - (void)onDisplayLink:(CADisplayLink*)link {
   CFTimeInterval delay = CACurrentMediaTime() - link.timestamp;
+  // Guard against clock skew/rounding causing a negative delay. A negative delay would
+  // push frame_start_time into the future and corrupt timings. Clamp to zero.
+//  if (delay < 0) {
+//    delay = 0;
+//  }
   fml::TimePoint frame_start_time = fml::TimePoint::Now() - fml::TimeDelta::FromSecondsF(delay);
 
   CFTimeInterval duration = link.targetTimestamp - link.timestamp;
