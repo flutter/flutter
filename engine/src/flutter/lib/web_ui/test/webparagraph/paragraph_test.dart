@@ -17,21 +17,21 @@ void main() {
 
 Future<void> testMain() async {
   setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
-  const Rect region = Rect.fromLTWH(0, 0, 500, 500);
+  const region = Rect.fromLTWH(0, 0, 500, 500);
 
   test('Draw WebParagraph LTR text 1 line', () async {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder, region);
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
-    final Paint redPaint = Paint()..color = const Color(0xFFFF0000);
-    final Paint bluePaint = Paint()..color = const Color(0xFF0000FF);
+    final redPaint = Paint()..color = const Color(0xFFFF0000);
+    final bluePaint = Paint()..color = const Color(0xFF0000FF);
     canvas.drawRect(const Rect.fromLTWH(0, 0, 200, 200), bluePaint);
-    final WebParagraphStyle arialStyle = WebParagraphStyle(
+    final arialStyle = WebParagraphStyle(
       fontFamily: 'Roboto',
       fontSize: 50,
       color: const Color(0xFF000000),
     );
-    final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
+    final builder = WebParagraphBuilder(arialStyle);
     builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
     builder.addText('Lorem ipsum dolor sit');
     final WebParagraph paragraph = builder.build();
@@ -43,16 +43,16 @@ Future<void> testMain() async {
   });
 
   test('Draw WebParagraph LTR text with multiple lines', () async {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder, region);
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
 
-    final WebParagraphStyle arialStyle = WebParagraphStyle(
+    final arialStyle = WebParagraphStyle(
       fontFamily: 'Arial',
       fontSize: 50,
       color: const Color(0xFF000000),
     );
-    final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
+    final builder = WebParagraphBuilder(arialStyle);
     builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
     builder.addText(
       'World   domination   is such   an ugly   phrase - I   prefer to   call it   world   optimisation.   ',
@@ -65,17 +65,17 @@ Future<void> testMain() async {
   });
 
   test('Draw WebParagraph RTL text 1 line', () async {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder, region);
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
 
-    final WebParagraphStyle arialStyle = WebParagraphStyle(
+    final arialStyle = WebParagraphStyle(
       fontFamily: 'Roboto',
       fontSize: 50,
       textDirection: TextDirection.rtl,
       color: const Color(0xFF000000),
     );
-    final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
+    final builder = WebParagraphBuilder(arialStyle);
     builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
     builder.addText('عالم');
     final WebParagraph paragraph = builder.build();
@@ -87,16 +87,16 @@ Future<void> testMain() async {
 
   // Small line breaking difference with Chrome
   test('Draw WebParagraph RTL with multiple lines', () async {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder, region);
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
 
-    final WebParagraphStyle arialStyle = WebParagraphStyle(
+    final arialStyle = WebParagraphStyle(
       fontFamily: 'Arial',
       fontSize: 50,
       color: const Color(0xFF000000),
     );
-    final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
+    final builder = WebParagraphBuilder(arialStyle);
     builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
     builder.addText('إنالسيطرةعلىالعالمعبارةقبيحةللغاية-أفضلأنأسميهاتحسينالعالم');
     final WebParagraph paragraph = builder.build();
@@ -107,32 +107,32 @@ Future<void> testMain() async {
   });
 
   test('Draw WebParagraph LTR/RTL 1 Line in ltr', () async {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder, region);
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
 
-    final WebParagraphStyle arialStyle = WebParagraphStyle(
+    final arialStyle = WebParagraphStyle(
       fontFamily: 'Arial',
       fontSize: 50,
       textDirection: TextDirection.ltr,
       color: const Color(0xFF000000),
     );
-    final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
+    final builder = WebParagraphBuilder(arialStyle);
     builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
     builder.addText('لABC لم def لل لم ghi');
     await matchGoldenFile('web_paragraph_canvas_mix_1_ltr.png', region: region);
   });
 
   test('Draw WebParagraph LTR/RTL 1 Line', () async {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder, region);
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder, region);
 
-    final WebParagraphStyle arialStyle = WebParagraphStyle(
+    final arialStyle = WebParagraphStyle(
       fontFamily: 'Arial',
       fontSize: 50,
       color: const Color(0xFF000000),
     );
-    final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
+    final builder = WebParagraphBuilder(arialStyle);
     builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
     builder.addText('ABC لم def');
     final WebParagraph paragraph = builder.build();
@@ -143,16 +143,16 @@ Future<void> testMain() async {
   });
 
   test('Draw WebParagraph LTR/RTL multi Line with RTL default left aligned', () async {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder, region);
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
 
-    final WebParagraphStyle arialStyle = WebParagraphStyle(
+    final arialStyle = WebParagraphStyle(
       fontFamily: 'Arial',
       fontSize: 50,
       textDirection: TextDirection.rtl,
     );
-    final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
+    final builder = WebParagraphBuilder(arialStyle);
     builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
     builder.addText('لABC لم def لل لم ghi');
     //لABC لم def لل لم ghi
@@ -164,18 +164,18 @@ Future<void> testMain() async {
   });
 
   test('Draw WebParagraph LTR/RTL multi Line with LTR left aligned', () async {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder, region);
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
 
-    final WebParagraphStyle arialStyle = WebParagraphStyle(
+    final arialStyle = WebParagraphStyle(
       textDirection: TextDirection.ltr,
       textAlign: TextAlign.left,
       fontFamily: 'Arial',
       fontSize: 50,
       color: const Color(0xFF000000),
     );
-    final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
+    final builder = WebParagraphBuilder(arialStyle);
     builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
     builder.addText(
       'إنالسيطرةعلىاxyz لعالمعباvwx رةقبيحةstu للغاpqr ية-أmno فضلأjkl نأسميهاghi تحسيناdef لعاabc لم',
@@ -188,18 +188,18 @@ Future<void> testMain() async {
   });
 
   test('Draw WebParagraph LTR/RTL multi Line with RTL right aligned', () async {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder, region);
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
 
-    final WebParagraphStyle arialStyle = WebParagraphStyle(
+    final arialStyle = WebParagraphStyle(
       textDirection: TextDirection.rtl,
       textAlign: TextAlign.right,
       fontFamily: 'Arial',
       fontSize: 50,
       color: const Color(0xFF000000),
     );
-    final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
+    final builder = WebParagraphBuilder(arialStyle);
     builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
     builder.addText(
       'إنالسيطرةعلىاxyz لعالمعباvwx رةقبيحةstu للغاpqr ية-أmno فضلأjkl نأسميهاghi تحسيناdef لعاabc لم',
@@ -212,29 +212,17 @@ Future<void> testMain() async {
   });
 
   test('Draw WebParagraph multicolored text', () async {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder, region);
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
-    final Paint blackPaint = Paint()..color = const Color(0xFF000000);
-    final Paint redPaint = Paint()..color = const Color(0xFFFF0000);
-    final Paint bluePaint = Paint()..color = const Color(0xFF0000FF);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
+    final redPaint = Paint()..color = const Color(0xFFFF0000);
+    final bluePaint = Paint()..color = const Color(0xFF0000FF);
 
-    final WebTextStyle blackStyle = WebTextStyle(
-      foreground: blackPaint,
-      fontSize: 20,
-      fontFamily: 'Roboto',
-    );
-    final WebTextStyle blueStyle = WebTextStyle(
-      foreground: bluePaint,
-      fontSize: 20,
-      fontFamily: 'Roboto',
-    );
-    final WebTextStyle redStyle = WebTextStyle(
-      foreground: redPaint,
-      fontSize: 20,
-      fontFamily: 'Roboto',
-    );
-    final WebParagraphBuilder builder = WebParagraphBuilder(WebParagraphStyle());
+    final blackStyle = WebTextStyle(foreground: blackPaint, fontSize: 20, fontFamily: 'Roboto');
+    final blueStyle = WebTextStyle(foreground: bluePaint, fontSize: 20, fontFamily: 'Roboto');
+    final redStyle = WebTextStyle(foreground: redPaint, fontSize: 20, fontFamily: 'Roboto');
+    final builder = WebParagraphBuilder(WebParagraphStyle());
     builder.pushStyle(blackStyle);
 
     builder.pushStyle(redStyle);
@@ -267,35 +255,35 @@ Future<void> testMain() async {
   });
 
   test('Draw WebParagraph multicolored background text', () async {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder, region);
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
-    final Paint blackPaint = Paint()..color = const Color(0xFF000000);
-    final Paint redPaint = Paint()..color = const Color(0xFFFF0000);
-    final Paint bluePaint = Paint()..color = const Color(0xFF0000FF);
-    final Paint greyPaint1 = Paint()..color = const Color(0xFF666666);
-    final Paint greyPaint2 = Paint()..color = const Color(0xFF888888);
-    final Paint greyPaint3 = Paint()..color = const Color(0xFFAAAAAA);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
+    final redPaint = Paint()..color = const Color(0xFFFF0000);
+    final bluePaint = Paint()..color = const Color(0xFF0000FF);
+    final greyPaint1 = Paint()..color = const Color(0xFF666666);
+    final greyPaint2 = Paint()..color = const Color(0xFF888888);
+    final greyPaint3 = Paint()..color = const Color(0xFFAAAAAA);
 
-    final WebTextStyle blackStyle = WebTextStyle(
+    final blackStyle = WebTextStyle(
       fontFamily: 'Roboto',
       fontSize: 20,
       foreground: blackPaint,
       background: greyPaint3,
     );
-    final WebTextStyle blueStyle = WebTextStyle(
+    final blueStyle = WebTextStyle(
       foreground: bluePaint,
       background: greyPaint2,
       fontSize: 20,
       fontFamily: 'Roboto',
     );
-    final WebTextStyle redStyle = WebTextStyle(
+    final redStyle = WebTextStyle(
       foreground: redPaint,
       background: greyPaint1,
       fontSize: 20,
       fontFamily: 'Roboto',
     );
-    final WebParagraphBuilder builder = WebParagraphBuilder(WebParagraphStyle());
+    final builder = WebParagraphBuilder(WebParagraphStyle());
     builder.pushStyle(blackStyle);
 
     builder.pushStyle(redStyle);
@@ -328,48 +316,26 @@ Future<void> testMain() async {
   });
 
   test('Draw WebParagraph multiple font styles text', () async {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder, region);
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
-    final Paint blackPaint = Paint()..color = const Color(0xFF000000);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
 
-    final WebTextStyle defaultStyle = WebTextStyle(
-      fontFamily: 'Roboto',
-      fontSize: 20,
-      foreground: blackPaint,
-    );
+    final defaultStyle = WebTextStyle(fontFamily: 'Roboto', fontSize: 20, foreground: blackPaint);
 
-    final WebTextStyle normalNormal = WebTextStyle(
-      fontStyle: FontStyle.normal,
-      fontWeight: FontWeight.normal,
-    );
+    final normalNormal = WebTextStyle(fontStyle: FontStyle.normal, fontWeight: FontWeight.normal);
 
-    final WebTextStyle normalBold = WebTextStyle(
-      fontStyle: FontStyle.normal,
-      fontWeight: FontWeight.bold,
-    );
+    final normalBold = WebTextStyle(fontStyle: FontStyle.normal, fontWeight: FontWeight.bold);
 
-    final WebTextStyle normalThin = WebTextStyle(
-      fontStyle: FontStyle.normal,
-      fontWeight: FontWeight.w100,
-    );
+    final normalThin = WebTextStyle(fontStyle: FontStyle.normal, fontWeight: FontWeight.w100);
 
-    final WebTextStyle italicNormal = WebTextStyle(
-      fontStyle: FontStyle.italic,
-      fontWeight: FontWeight.normal,
-    );
+    final italicNormal = WebTextStyle(fontStyle: FontStyle.italic, fontWeight: FontWeight.normal);
 
-    final WebTextStyle italicBold = WebTextStyle(
-      fontStyle: FontStyle.italic,
-      fontWeight: FontWeight.bold,
-    );
+    final italicBold = WebTextStyle(fontStyle: FontStyle.italic, fontWeight: FontWeight.bold);
 
-    final WebTextStyle italicThin = WebTextStyle(
-      fontStyle: FontStyle.italic,
-      fontWeight: FontWeight.w100,
-    );
+    final italicThin = WebTextStyle(fontStyle: FontStyle.italic, fontWeight: FontWeight.w100);
 
-    final WebParagraphBuilder builder = WebParagraphBuilder(WebParagraphStyle());
+    final builder = WebParagraphBuilder(WebParagraphStyle());
     builder.pushStyle(defaultStyle);
 
     builder.pushStyle(normalNormal);
@@ -404,15 +370,15 @@ Future<void> testMain() async {
   });
 
   test('Draw WebParagraph multiple shadows text', () async {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder, region);
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
-    final Paint blackPaint = Paint()..color = const Color(0xFF000000);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
 
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 40);
-    final WebTextStyle defaultStyle = WebTextStyle(foreground: blackPaint);
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 40);
+    final defaultStyle = WebTextStyle(foreground: blackPaint);
 
-    final WebTextStyle allShadows = WebTextStyle(
+    final allShadows = WebTextStyle(
       fontFamily: 'Roboto',
       fontSize: 40,
       shadows: const [
@@ -422,27 +388,27 @@ Future<void> testMain() async {
         Shadow(color: Color(0xFF888888), offset: Offset(0, 10), blurRadius: 2.0),
       ],
     );
-    final WebTextStyle leftShadow = WebTextStyle(
+    final leftShadow = WebTextStyle(
       fontFamily: 'Roboto',
       fontSize: 40,
       shadows: const [Shadow(color: Color(0xFFFF0000), offset: Offset(-10, 0), blurRadius: 2.0)],
     );
-    final WebTextStyle topShadow = WebTextStyle(
+    final topShadow = WebTextStyle(
       fontFamily: 'Roboto',
       fontSize: 40,
       shadows: const [Shadow(color: Color(0xFF00FF00), offset: Offset(0, -10), blurRadius: 2.0)],
     );
-    final WebTextStyle rightShadow = WebTextStyle(
+    final rightShadow = WebTextStyle(
       fontFamily: 'Roboto',
       fontSize: 40,
       shadows: const [Shadow(color: Color(0xFF0000FF), offset: Offset(10, 0), blurRadius: 2.0)],
     );
-    final WebTextStyle bottomShadow = WebTextStyle(
+    final bottomShadow = WebTextStyle(
       fontFamily: 'Roboto',
       fontSize: 40,
       shadows: const [Shadow(color: Color(0xFFFF00FF), offset: Offset(0, 10), blurRadius: 2.0)],
     );
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.pushStyle(defaultStyle);
 
     builder.pushStyle(allShadows);
@@ -475,20 +441,20 @@ Future<void> testMain() async {
   });
 
   test('Draw WebParagraph multiple decorations on text', () async {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder, region);
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
-    final Paint blackPaint = Paint()..color = const Color(0xFF000000);
-    const Color redColor = Color(0xFFFF0000);
-    const Color blueColor = Color(0xFF0000FF);
-    const Color greenColor = Color(0xFF00FF00);
-    const Color grayColor = Color(0xFF888888);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
+    const redColor = Color(0xFFFF0000);
+    const blueColor = Color(0xFF0000FF);
+    const greenColor = Color(0xFF00FF00);
+    const grayColor = Color(0xFF888888);
 
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 40);
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 40);
 
-    final WebTextStyle defaultStyle = WebTextStyle(foreground: blackPaint);
+    final defaultStyle = WebTextStyle(foreground: blackPaint);
 
-    final WebTextStyle underlined = WebTextStyle(
+    final underlined = WebTextStyle(
       fontFamily: 'Roboto',
       fontSize: 40,
       decoration: TextDecoration.underline,
@@ -497,7 +463,7 @@ Future<void> testMain() async {
       decorationColor: redColor,
     );
 
-    final WebTextStyle through = WebTextStyle(
+    final through = WebTextStyle(
       fontFamily: 'Roboto',
       fontSize: 40,
       decoration: TextDecoration.lineThrough,
@@ -506,7 +472,7 @@ Future<void> testMain() async {
       decorationColor: blueColor,
     );
 
-    final WebTextStyle overlined = WebTextStyle(
+    final overlined = WebTextStyle(
       fontFamily: 'Roboto',
       fontSize: 40,
       decoration: TextDecoration.overline,
@@ -515,7 +481,7 @@ Future<void> testMain() async {
       decorationColor: greenColor,
     );
 
-    final WebTextStyle wavy = WebTextStyle(
+    final wavy = WebTextStyle(
       fontFamily: 'Roboto',
       fontSize: 40,
       decoration: TextDecoration.underline,
@@ -524,7 +490,7 @@ Future<void> testMain() async {
       decorationColor: grayColor,
     );
 
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.pushStyle(defaultStyle);
 
     builder.pushStyle(underlined);
@@ -551,55 +517,31 @@ Future<void> testMain() async {
   });
 
   test('Draw WebParagraph multiple fonts text', () async {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder, region);
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
-    final Paint blackPaint = Paint()..color = const Color(0xFF000000);
-    final Paint redPaint = Paint()..color = const Color(0xFFFF0000);
-    final Paint bluePaint = Paint()..color = const Color(0xFF0000FF);
-    final Paint greenPaint = Paint()..color = const Color(0xFF00FF00);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
+    final redPaint = Paint()..color = const Color(0xFFFF0000);
+    final bluePaint = Paint()..color = const Color(0xFF0000FF);
+    final greenPaint = Paint()..color = const Color(0xFF00FF00);
 
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 20);
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 20);
 
-    final WebTextStyle defaultStyle = WebTextStyle(foreground: blackPaint);
+    final defaultStyle = WebTextStyle(foreground: blackPaint);
 
-    final WebTextStyle roboto10 = WebTextStyle(
-      fontFamily: 'Roboto',
-      fontSize: 10,
-      foreground: redPaint,
-    );
+    final roboto10 = WebTextStyle(fontFamily: 'Roboto', fontSize: 10, foreground: redPaint);
 
-    final WebTextStyle arial10 = WebTextStyle(
-      fontFamily: 'Arial',
-      fontSize: 10,
-      foreground: bluePaint,
-    );
+    final arial10 = WebTextStyle(fontFamily: 'Arial', fontSize: 10, foreground: bluePaint);
 
-    final WebTextStyle roboto20 = WebTextStyle(
-      fontFamily: 'Roboto',
-      fontSize: 20,
-      foreground: greenPaint,
-    );
+    final roboto20 = WebTextStyle(fontFamily: 'Roboto', fontSize: 20, foreground: greenPaint);
 
-    final WebTextStyle arial20 = WebTextStyle(
-      fontFamily: 'Arial',
-      fontSize: 20,
-      foreground: bluePaint,
-    );
+    final arial20 = WebTextStyle(fontFamily: 'Arial', fontSize: 20, foreground: bluePaint);
 
-    final WebTextStyle roboto40 = WebTextStyle(
-      fontFamily: 'Roboto',
-      fontSize: 40,
-      foreground: redPaint,
-    );
+    final roboto40 = WebTextStyle(fontFamily: 'Roboto', fontSize: 40, foreground: redPaint);
 
-    final WebTextStyle arial40 = WebTextStyle(
-      fontFamily: 'Arial',
-      fontSize: 40,
-      foreground: bluePaint,
-    );
+    final arial40 = WebTextStyle(fontFamily: 'Arial', fontSize: 40, foreground: bluePaint);
 
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.pushStyle(defaultStyle);
 
     builder.pushStyle(roboto10);
@@ -634,18 +576,18 @@ Future<void> testMain() async {
   });
 
   test('Draw WebParagraph letter/word spacing text', () async {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder, region);
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
-    final Paint blackPaint = Paint()..color = const Color(0xFF000000);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
 
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 20);
-    final WebTextStyle defaultStyle = WebTextStyle(foreground: blackPaint);
-    final WebTextStyle letter5 = WebTextStyle(letterSpacing: 5.0);
-    final WebTextStyle letter10 = WebTextStyle(letterSpacing: 10.0);
-    final WebTextStyle word10 = WebTextStyle(wordSpacing: 10.0);
-    final WebTextStyle word20 = WebTextStyle(wordSpacing: 20.0);
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 20);
+    final defaultStyle = WebTextStyle(foreground: blackPaint);
+    final letter5 = WebTextStyle(letterSpacing: 5.0);
+    final letter10 = WebTextStyle(letterSpacing: 10.0);
+    final word10 = WebTextStyle(wordSpacing: 10.0);
+    final word20 = WebTextStyle(wordSpacing: 20.0);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.pushStyle(defaultStyle);
 
     builder.pushStyle(letter5);
@@ -669,34 +611,34 @@ Future<void> testMain() async {
   });
 
   test('Query WebParagraph.GetBoxesForRange LTR text 1 line', () async {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder, region);
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
 
-    final Paint redPaint = Paint()
+    final redPaint = Paint()
       ..color = const Color(0xFFFF0000)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
-    final Paint bluePaint = Paint()
+    final bluePaint = Paint()
       ..color = const Color(0xFF0000FF)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
-    final Paint greenPaint = Paint()
+    final greenPaint = Paint()
       ..color = const Color(0xFF00FF00)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
-    final WebParagraphStyle robotoStyle = WebParagraphStyle(
+    final robotoStyle = WebParagraphStyle(
       fontFamily: 'Roboto',
       fontSize: 40,
       color: const Color(0xFF000000),
     );
-    final WebTextStyle heightStyle = WebTextStyle(
+    final heightStyle = WebTextStyle(
       fontFamily: 'Roboto',
       fontSize: 40,
       height: 2.0,
       color: const Color(0xFF000000),
     );
-    final WebParagraphBuilder builder = WebParagraphBuilder(robotoStyle);
+    final builder = WebParagraphBuilder(robotoStyle);
     builder.pushStyle(heightStyle);
     builder.addText(
       'World domination is such an ugly phrase - I prefer to call it world optimisation. ',
@@ -706,7 +648,7 @@ Future<void> testMain() async {
     paragraph.paint(canvas, Offset.zero);
 
     {
-      final rects = paragraph.getBoxesForRange(
+      final List<TextBox> rects = paragraph.getBoxesForRange(
         0,
         paragraph.text.length,
         boxHeightStyle: BoxHeightStyle.includeLineSpacingTop,
@@ -717,7 +659,7 @@ Future<void> testMain() async {
       }
     }
     {
-      final rects = paragraph.getBoxesForRange(
+      final List<TextBox> rects = paragraph.getBoxesForRange(
         0,
         paragraph.text.length,
         boxHeightStyle: BoxHeightStyle.includeLineSpacingBottom,
@@ -728,7 +670,7 @@ Future<void> testMain() async {
       }
     }
     {
-      final rects = paragraph.getBoxesForRange(
+      final List<TextBox> rects = paragraph.getBoxesForRange(
         0,
         paragraph.text.length,
         boxHeightStyle: BoxHeightStyle.includeLineSpacingMiddle,
@@ -744,23 +686,23 @@ Future<void> testMain() async {
   });
 
   test('Query WebParagraph.Placeholders', () async {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder, region);
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
 
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(
+    final paragraphStyle = WebParagraphStyle(
       fontFamily: 'Roboto',
       fontSize: 50,
       textDirection: TextDirection.ltr,
       color: const Color(0xFF000000),
     );
-    final WebTextStyle textStyle1 = WebTextStyle(
+    final textStyle1 = WebTextStyle(
       fontFamily: 'Roboto',
       fontSize: 20,
       color: const Color(0xFF000000),
     );
-    final WebTextStyle textStyle2 = WebTextStyle(fontFamily: 'Roboto', fontSize: 20);
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final textStyle2 = WebTextStyle(fontFamily: 'Roboto', fontSize: 20);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.pushStyle(textStyle1);
     builder.addText('Alphabetic 20 on baseline:');
     builder.pop();
@@ -837,9 +779,9 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: 500));
     paragraph.paint(canvas, Offset.zero);
 
-    final rects = paragraph.getBoxesForPlaceholders();
+    final List<TextBox> rects = paragraph.getBoxesForPlaceholders();
     paragraph.getBoxesForRange(0, paragraph.text.length);
-    final Paint bluePaint = Paint()
+    final bluePaint = Paint()
       ..color = const Color(0xFF0000FF)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
@@ -852,28 +794,28 @@ Future<void> testMain() async {
   });
 
   test('Draw WebParagraph with fontFeatures', () async {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder, region);
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
-    final Paint blackPaint = Paint()..color = const Color(0xFF000000);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
 
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(
+    final paragraphStyle = WebParagraphStyle(
       fontFamily: 'Roboto',
       fontSize: 20,
       color: const Color(0xFF000000),
     );
-    final WebTextStyle defaultStyle = WebTextStyle(foreground: blackPaint);
-    final WebTextStyle noLiga = WebTextStyle(
+    final defaultStyle = WebTextStyle(foreground: blackPaint);
+    final noLiga = WebTextStyle(
       fontFamily: 'Roboto',
       fontSize: 20,
       fontFeatures: const [FontFeature('liga', 0)],
     );
-    final WebTextStyle smcp = WebTextStyle(
+    final smcp = WebTextStyle(
       fontFamily: 'Roboto',
       fontSize: 20,
       fontFeatures: const [FontFeature('smcp' /*1*/)],
     );
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.pushStyle(defaultStyle);
 
     builder.pushStyle(noLiga);
@@ -893,33 +835,33 @@ Future<void> testMain() async {
   });
 
   test('Draw WebParagraph with fontVariations', () async {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder, region);
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
-    final Paint blackPaint = Paint()..color = const Color(0xFF000000);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
 
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(
+    final paragraphStyle = WebParagraphStyle(
       fontFamily: 'Roboto',
       fontSize: 20,
       color: const Color(0xFF000000),
     );
-    final WebTextStyle defaultStyle = WebTextStyle(foreground: blackPaint);
-    final WebTextStyle wght = WebTextStyle(
+    final defaultStyle = WebTextStyle(foreground: blackPaint);
+    final wght = WebTextStyle(
       fontFamily: 'Roboto',
       fontSize: 20,
       fontVariations: const [FontVariation('wght', 625)],
     );
-    final WebTextStyle slnt = WebTextStyle(
+    final slnt = WebTextStyle(
       fontFamily: 'Roboto',
       fontSize: 20,
       fontVariations: const [FontVariation('slnt', 12)],
     );
-    final WebTextStyle ital = WebTextStyle(
+    final ital = WebTextStyle(
       fontFamily: 'Roboto',
       fontSize: 20,
       fontVariations: const [FontVariation('ital', 1)],
     );
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.pushStyle(defaultStyle);
 
     builder.pushStyle(wght);
@@ -943,30 +885,26 @@ Future<void> testMain() async {
   });
 
   test('Draw WebParagraph multicolored background text', () async {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder, region);
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFF0000), BlendMode.src);
-    final Paint blackPaint = Paint()..color = const Color(0xFF000000);
-    final Paint whitePaint = Paint()..color = const Color(0xFFFFFFFF);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
+    final whitePaint = Paint()..color = const Color(0xFFFFFFFF);
 
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(
+    final paragraphStyle = WebParagraphStyle(
       fontFamily: 'Roboto',
       fontSize: 50,
       color: const Color(0xFF000000),
     );
-    final WebTextStyle blackStyle = WebTextStyle(
-      fontFamily: 'Roboto',
-      fontSize: 20,
-      foreground: blackPaint,
-    );
-    final WebTextStyle whiteStyle = WebTextStyle(
+    final blackStyle = WebTextStyle(fontFamily: 'Roboto', fontSize: 20, foreground: blackPaint);
+    final whiteStyle = WebTextStyle(
       foreground: blackPaint,
       background: whitePaint,
       fontSize: 20,
       fontFamily: 'Roboto',
     );
 
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final builder = WebParagraphBuilder(paragraphStyle);
 
     builder.pushStyle(blackStyle);
     builder.addText('Black on transparent ');
@@ -983,19 +921,19 @@ Future<void> testMain() async {
   });
 
   test('Pixels', () async {
-    final PictureRecorder recorder = PictureRecorder();
+    final recorder = PictureRecorder();
     const region = Rect.fromLTWH(0, 0, 1000, 500);
-    final Canvas canvas = Canvas(recorder, region);
+    final canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFF0000), BlendMode.src);
-    final Paint blackPaint = Paint()..color = const Color(0xFF000000);
-    final Paint whitePaint = Paint()..color = const Color(0xFFFFFFFF);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
+    final whitePaint = Paint()..color = const Color(0xFFFFFFFF);
 
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(
+    final paragraphStyle = WebParagraphStyle(
       fontFamily: 'Roboto',
       fontSize: 15,
       color: const Color(0xFF000000),
     );
-    final WebTextStyle style30 = WebTextStyle(
+    final style30 = WebTextStyle(
       foreground: blackPaint,
       background: whitePaint,
       fontSize: 30,
@@ -1003,7 +941,7 @@ Future<void> testMain() async {
     );
 
     {
-      final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+      final builder = WebParagraphBuilder(paragraphStyle);
 
       builder.pushStyle(style30);
       builder.addText('SsWwTt 30px');

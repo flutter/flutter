@@ -16,7 +16,9 @@ class CupertinoExpansionTileApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const CupertinoApp(
       home: CupertinoPageScaffold(
-        navigationBar: CupertinoNavigationBar(middle: Text('Cupertino Expansion Tile')),
+        navigationBar: CupertinoNavigationBar(
+          middle: Text('Cupertino Expansion Tile'),
+        ),
         backgroundColor: CupertinoColors.systemGroupedBackground,
         child: SafeArea(child: ExpansionTileExamples()),
       ),
@@ -46,7 +48,11 @@ class ExpansionTileExamples extends StatelessWidget {
 }
 
 class TransitionTileSection extends StatefulWidget {
-  const TransitionTileSection({super.key, required this.title, required this.transitionMode});
+  const TransitionTileSection({
+    super.key,
+    required this.title,
+    required this.transitionMode,
+  });
 
   final String title;
   final ExpansionTileTransitionMode transitionMode;
@@ -90,17 +96,26 @@ class _TransitionTileSectionState extends State<TransitionTileSection> {
           CupertinoListTile(
             leading: Icon(CupertinoIcons.person),
             backgroundColor: CupertinoColors.white,
-            title: Text('Profile', style: TextStyle(color: CupertinoColors.black)),
+            title: Text(
+              'Profile',
+              style: TextStyle(color: CupertinoColors.black),
+            ),
           ),
           CupertinoListTile(
             leading: Icon(CupertinoIcons.mail),
             backgroundColor: CupertinoColors.white,
-            title: Text('Messages', style: TextStyle(color: CupertinoColors.black)),
+            title: Text(
+              'Messages',
+              style: TextStyle(color: CupertinoColors.black),
+            ),
           ),
           CupertinoListTile(
             leading: Icon(CupertinoIcons.settings),
             backgroundColor: CupertinoColors.white,
-            title: Text('Settings', style: TextStyle(color: CupertinoColors.black)),
+            title: Text(
+              'Settings',
+              style: TextStyle(color: CupertinoColors.black),
+            ),
           ),
         ],
       ),
