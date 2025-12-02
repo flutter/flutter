@@ -27,16 +27,19 @@ class DlBlurImageFilter final : public DlImageFilter {
    * The [bounds] parameter is optional and dictates the blur's sampling
    * behavior:
    *
-   * - If [bounds] is provided (i.e., not std::nullopt), the filter performs a
-   * "bounded blur." This means the blur kernel will only sample pixels
-   * from *within* this rectangle, treating all pixels outside of it as
-   * transparent. This mode is used to implement high-fidelity iOS-style blurs.
-   *
    * - If [bounds] is std::nullopt, a standard, unbounded blur is performed,
    * with edge behavior defined by [tile_mode].
    *
+   * - If [bounds] is provided (i.e., not std::nullopt), the filter performs a
+   * "bounded blur". This means the blur kernel will only sample pixels from
+   * *within* this rectangle, treating all pixels outside of it as transparent,
+   * and the resulting pixels are opaque. This mode is used to implement
+   * iOS-style blurs.
+   *
    * The [bounds] rectangle must be specified in the current coordinate space
    * of the canvas (i.e., it is subject to the canvas's current transform).
+   * In other words, in the canvas coordinate space, the bounds might not be an
+   * axis-aligned rectangle.
    */
   DlBlurImageFilter(DlScalar sigma_x,
                     DlScalar sigma_y,

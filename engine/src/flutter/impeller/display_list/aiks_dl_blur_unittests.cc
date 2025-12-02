@@ -392,7 +392,8 @@ TEST_P(AiksTest, CanRenderBoundedBlurFarFromEdge) {
   builder.Save();
   builder.ClipRect(rect1.Expand(offset));
   auto backdrop_filter1 = DlBlurImageFilter::Make(
-      20, 20, rect1.Shift(offset - rect1.GetLeftTop()), DlTileMode::kDecal);
+      20, 20, /*bounds=*/rect1.Shift(offset - rect1.GetLeftTop()),
+      DlTileMode::kDecal);
   builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter1.get());
   builder.Restore();
   builder.Restore();
@@ -408,7 +409,7 @@ TEST_P(AiksTest, CanRenderBoundedBlurFarFromEdge) {
   builder.ClipRect(rect2);
   builder.Save();
   auto backdrop_filter = DlBlurImageFilter::Make(
-      20, 20, rect2.Shift(-rect2.GetOrigin()), DlTileMode::kDecal);
+      20, 20, /*bounds=*/rect2.Shift(-rect2.GetOrigin()), DlTileMode::kDecal);
   builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get());
   builder.Restore();
   builder.Restore();
@@ -436,7 +437,7 @@ TEST_P(AiksTest, CanRenderBoundedBlurCloseToEdge) {
   DlRect rect1 = DlRect::MakeLTRB(10, 80, 233, 180);
   builder.Save();
   auto backdrop_filter1 =
-      DlBlurImageFilter::Make(20, 20, rect1, DlTileMode::kDecal);
+      DlBlurImageFilter::Make(20, 20, /*bounds=*/rect1, DlTileMode::kDecal);
   builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter1.get());
   builder.Restore();
   builder.Restore();
