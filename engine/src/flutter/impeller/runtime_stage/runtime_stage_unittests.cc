@@ -18,7 +18,9 @@
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/shader_library.h"
 #include "impeller/runtime_stage/runtime_stage.h"
+#include "impeller/runtime_stage/runtime_stage_flatbuffers.h"
 #include "impeller/runtime_stage/runtime_stage_playground.h"
+#include "runtime_stage_types_flatbuffers.h"
 
 namespace impeller {
 namespace testing {
@@ -35,6 +37,18 @@ TEST_P(RuntimeStageTest, CanReadValidBlob) {
   auto stage = stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(stage->IsValid());
   ASSERT_EQ(stage->GetShaderStage(), RuntimeShaderStage::kFragment);
+}
+
+TEST_P(RuntimeStageTest, RejectInvalidFormatVersion) {
+  flatbuffers::FlatBufferBuilder builder;
+  fb::RuntimeStagesBuilder stages_builder(builder);
+  stages_builder.add_format_version(0);
+  auto stages = stages_builder.Finish();
+  builder.Finish(stages, fb::RuntimeStagesIdentifier());
+  auto mapping = std::make_shared<fml::NonOwnedMapping>(
+      builder.GetBufferPointer(), builder.GetSize());
+  auto runtime_stages = RuntimeStage::DecodeRuntimeStages(mapping);
+  EXPECT_TRUE(runtime_stages.empty());
 }
 
 TEST_P(RuntimeStageTest, CanRejectInvalidBlob) {
