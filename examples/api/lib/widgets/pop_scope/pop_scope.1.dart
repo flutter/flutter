@@ -21,7 +21,9 @@ class NavigatorPopHandlerApp extends StatelessWidget {
           '/two' => MaterialPageRoute<FormData>(
             builder: (BuildContext context) => const _PageTwo(),
           ),
-          _ => MaterialPageRoute<void>(builder: (BuildContext context) => const _HomePage()),
+          _ => MaterialPageRoute<void>(
+            builder: (BuildContext context) => const _HomePage(),
+          ),
         };
       },
     );
@@ -47,11 +49,14 @@ class _HomePageState extends State<_HomePage> {
           children: <Widget>[
             const Text('Page One'),
             if (_formData != null)
-              Text('Hello ${_formData!.name}, whose favorite food is ${_formData!.favoriteFood}.'),
+              Text(
+                'Hello ${_formData!.name}, whose favorite food is ${_formData!.favoriteFood}.',
+              ),
             TextButton(
               onPressed: () async {
                 final FormData formData =
-                    await Navigator.of(context).pushNamed<FormData?>('/two') ?? const FormData();
+                    await Navigator.of(context).pushNamed<FormData?>('/two') ??
+                    const FormData();
                 if (formData != _formData) {
                   setState(() {
                     _formData = formData;
@@ -81,14 +86,18 @@ class _PopScopeWrapper extends StatelessWidget {
           content: const Text('Are you sure you want to leave this page?'),
           actions: <Widget>[
             TextButton(
-              style: TextButton.styleFrom(textStyle: Theme.of(context).textTheme.labelLarge),
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
               child: const Text('Never mind'),
               onPressed: () {
                 Navigator.pop(context, false);
               },
             ),
             TextButton(
-              style: TextButton.styleFrom(textStyle: Theme.of(context).textTheme.labelLarge),
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
               child: const Text('Leave'),
               onPressed: () {
                 Navigator.pop(context, true);
@@ -151,13 +160,17 @@ class _PageTwoBodyState extends State<_PageTwoBody> {
               child: Column(
                 children: <Widget>[
                   TextFormField(
-                    decoration: const InputDecoration(hintText: 'Enter your name.'),
+                    decoration: const InputDecoration(
+                      hintText: 'Enter your name.',
+                    ),
                     onChanged: (String value) {
                       _formData = _formData.copyWith(name: value);
                     },
                   ),
                   TextFormField(
-                    decoration: const InputDecoration(hintText: 'Enter your favorite food.'),
+                    decoration: const InputDecoration(
+                      hintText: 'Enter your favorite food.',
+                    ),
                     onChanged: (String value) {
                       _formData = _formData.copyWith(favoriteFood: value);
                     },
@@ -186,7 +199,10 @@ class FormData {
   final String favoriteFood;
 
   FormData copyWith({String? name, String? favoriteFood}) {
-    return FormData(name: name ?? this.name, favoriteFood: favoriteFood ?? this.favoriteFood);
+    return FormData(
+      name: name ?? this.name,
+      favoriteFood: favoriteFood ?? this.favoriteFood,
+    );
   }
 
   @override
@@ -197,7 +213,9 @@ class FormData {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is FormData && other.name == name && other.favoriteFood == favoriteFood;
+    return other is FormData &&
+        other.name == name &&
+        other.favoriteFood == favoriteFood;
   }
 
   @override

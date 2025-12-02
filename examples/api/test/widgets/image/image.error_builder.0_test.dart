@@ -5,7 +5,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/image/image.error_builder.0.dart' as example;
+import 'package:flutter_api_samples/widgets/image/image.error_builder.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -22,7 +23,10 @@ void main() {
     final Image image = tester.widget<Image>(find.byType(Image));
     final NetworkImage imageProvider = image.image as NetworkImage;
 
-    expect(imageProvider.url, equals('https://example.does.not.exist/image.jpg'));
+    expect(
+      imageProvider.url,
+      equals('https://example.does.not.exist/image.jpg'),
+    );
   });
 
   testWidgets('errorBuilder returns text', (WidgetTester tester) async {
@@ -35,7 +39,11 @@ void main() {
 
     expect(
       errorBuilder(context, const HttpException('oops'), StackTrace.empty),
-      isA<Text>().having((Text text) => text.data, 'data', equals('Image failed to load')),
+      isA<Text>().having(
+        (Text text) => text.data,
+        'data',
+        equals('Image failed to load'),
+      ),
     );
   });
 }

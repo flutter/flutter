@@ -99,6 +99,11 @@ class PreviewDetector {
       // Wait for file watcher to finish initializing, otherwise we might miss changes and cause
       // tests to flake.
       await watcher.ready;
+
+      // Ensure the project's manifest is up to date, just in case an update was made before the
+      // file watcher finished initializing.
+      project.reloadManifest(logger: logger, fs: fs);
+
       return _dependencyGraph;
     });
   }

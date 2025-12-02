@@ -797,7 +797,11 @@ class _DiscreteKeyFrameSimulation extends Simulation {
 /// ```dart
 /// onChanged: (String newText) {
 ///   if (newText.isNotEmpty) {
-///     SemanticsService.announce('\$$newText', Directionality.of(context));
+///     SemanticsService.sendAnnouncement(
+///       View.of(context),
+///       '\$$newText',
+///        Directionality.of(context),
+///     );
 ///   }
 /// }
 /// ```

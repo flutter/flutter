@@ -6,7 +6,9 @@ import 'package:flutter_api_samples/widgets/windows/tooltip.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Calling tooltip main returns normally', (WidgetTester tester) async {
+  testWidgets('Calling tooltip main returns normally', (
+    WidgetTester tester,
+  ) async {
     expect(() => example.main(), returnsNormally);
   });
 }

@@ -10,7 +10,11 @@ class MyDataSource extends DataTableSource {
   static const List<int> _displayIndexToRawIndex = <int>[0, 3, 4, 5, 6];
 
   late List<List<Comparable<Object>>> sortedData;
-  void setData(List<List<Comparable<Object>>> rawData, int sortColumn, bool sortAscending) {
+  void setData(
+    List<List<Comparable<Object>>> rawData,
+    int sortColumn,
+    bool sortAscending,
+  ) {
     sortedData = rawData.toList()
       ..sort((List<Comparable<Object>> a, List<Comparable<Object>> b) {
         final Comparable<Object> cellA = a[_displayIndexToRawIndex[sortColumn]];
@@ -39,7 +43,9 @@ class MyDataSource extends DataTableSource {
     return DataRow.byIndex(
       index: sortedData[index][0] as int,
       cells: <DataCell>[
-        cellFor('S${sortedData[index][1]}E${sortedData[index][2].toString().padLeft(2, '0')}'),
+        cellFor(
+          'S${sortedData[index][1]}E${sortedData[index][2].toString().padLeft(2, '0')}',
+        ),
         cellFor(sortedData[index][3]),
         cellFor(sortedData[index][4]),
         cellFor(sortedData[index][5]),
@@ -63,7 +69,10 @@ class DataTableExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: SingleChildScrollView(padding: EdgeInsets.all(12.0), child: DataTableExample()),
+      home: SingleChildScrollView(
+        padding: EdgeInsets.all(12.0),
+        child: DataTableExample(),
+      ),
     );
   }
 }
@@ -260,7 +269,15 @@ final List<List<Comparable<Object>>> episodes = <List<Comparable<Object>>>[
     'Kathryn Lyn, Bill Wolkoff',
     DateTime(2023, 7, 22),
   ],
-  <Comparable<Object>>[18, 2, 8, 'Under the Cloak of War', '', 'Davy Perez', DateTime(2023, 7, 27)],
+  <Comparable<Object>>[
+    18,
+    2,
+    8,
+    'Under the Cloak of War',
+    '',
+    'Davy Perez',
+    DateTime(2023, 7, 27),
+  ],
   <Comparable<Object>>[
     19,
     2,
@@ -270,5 +287,13 @@ final List<List<Comparable<Object>>> episodes = <List<Comparable<Object>>>[
     'Dana Horgan, Bill Wolkoff',
     DateTime(2023, 8, 3),
   ],
-  <Comparable<Object>>[20, 2, 10, 'Hegemony', '', 'Henry Alonso Myers', DateTime(2023, 8, 10)],
+  <Comparable<Object>>[
+    20,
+    2,
+    10,
+    'Hegemony',
+    '',
+    'Henry Alonso Myers',
+    DateTime(2023, 8, 10),
+  ],
 ];

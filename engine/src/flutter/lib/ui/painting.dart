@@ -5519,10 +5519,10 @@ base class FragmentShader extends Shader {
   ///   shader.setFloat(2, 83);  // uMagnitude y
   ///
   ///   // Convert color to premultiplied opacity.
-  ///   shader.setFloat(3, color.red / 255 * color.opacity);   // uColor r
-  ///   shader.setFloat(4, color.green / 255 * color.opacity); // uColor g
-  ///   shader.setFloat(5, color.blue / 255 * color.opacity);  // uColor b
-  ///   shader.setFloat(6, color.opacity);                     // uColor a
+  ///   shader.setFloat(3, color.r * color.a); // uColor r
+  ///   shader.setFloat(4, color.g * color.a); // uColor g
+  ///   shader.setFloat(5, color.b * color.a); // uColor b
+  ///   shader.setFloat(6, color.a);           // uColor a
   ///
   ///   // initialize sampler uniform.
   ///   shader.setImageSampler(0, image);

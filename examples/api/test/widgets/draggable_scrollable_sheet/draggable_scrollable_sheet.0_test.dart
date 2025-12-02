@@ -8,7 +8,9 @@ import 'package:flutter_api_samples/widgets/draggable_scrollable_sheet/draggable
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Test DraggableScrollableSheet initial state', (WidgetTester tester) async {
+  testWidgets('Test DraggableScrollableSheet initial state', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.DraggableScrollableSheetExampleApp());
 
     final Finder sheetFinder = find.byType(DraggableScrollableSheet);
@@ -24,7 +26,9 @@ void main() {
   testWidgets(
     'Test DraggableScrollableSheet drag behavior on mobile platforms',
     (WidgetTester tester) async {
-      await tester.pumpWidget(const example.DraggableScrollableSheetExampleApp());
+      await tester.pumpWidget(
+        const example.DraggableScrollableSheetExampleApp(),
+      );
 
       // Verify that ListView is visible
       final Finder listViewFinder = find.byType(ListView);
@@ -39,7 +43,10 @@ void main() {
 
       // Verify that the ListView is expanded
       final Size listViewCurrentSize = tester.getSize(listViewFinder);
-      expect(listViewCurrentSize.height, greaterThan(listViewInitialSize.height));
+      expect(
+        listViewCurrentSize.height,
+        greaterThan(listViewInitialSize.height),
+      );
     },
     variant: TargetPlatformVariant.mobile(),
   );
@@ -47,7 +54,9 @@ void main() {
   testWidgets(
     'Test DraggableScrollableSheet drag behavior on desktop platforms',
     (WidgetTester tester) async {
-      await tester.pumpWidget(const example.DraggableScrollableSheetExampleApp());
+      await tester.pumpWidget(
+        const example.DraggableScrollableSheetExampleApp(),
+      );
 
       // Verify that Grabber is visible
       final Finder grabberFinder = find.byType(example.Grabber);

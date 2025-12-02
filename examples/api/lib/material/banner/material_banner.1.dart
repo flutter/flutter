@@ -33,7 +33,9 @@ class MaterialBannerExample extends StatelessWidget {
               content: Text('Hello, I am a Material Banner'),
               leading: Icon(Icons.agriculture_outlined),
               backgroundColor: Colors.green,
-              actions: <Widget>[TextButton(onPressed: null, child: Text('DISMISS'))],
+              actions: <Widget>[
+                TextButton(onPressed: null, child: Text('DISMISS')),
+              ],
             ),
           ),
         ),

@@ -529,7 +529,7 @@ class BackdropGroup extends InheritedWidget {
 ///                sigmaY: 40,
 ///              ),
 ///              child: Container(
-///                color: Colors.black.withOpacity(0.2),
+///                color: Colors.black.withValues(alpha: 0.2),
 ///                height: 200,
 ///                child: const Text('Blur item'),
 ///              ),
@@ -8350,6 +8350,8 @@ typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSette
 /// This example shows using an inline StatefulBuilder that rebuilds and that
 /// also has state.
 ///
+// TODO(loic-sharma): Migrate to RadioGroup.
+// https://github.com/flutter/flutter/issues/179088
 /// ```dart
 /// await showDialog<void>(
 ///   context: context,
@@ -8363,7 +8365,9 @@ typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSette
 ///             children: List<Widget>.generate(4, (int index) {
 ///               return Radio<int>(
 ///                 value: index,
+///                 // ignore: deprecated_member_use
 ///                 groupValue: selectedRadio,
+///                 // ignore: deprecated_member_use
 ///                 onChanged: (int? value) {
 ///                   setState(() => selectedRadio = value);
 ///                 },

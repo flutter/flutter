@@ -3007,6 +3007,7 @@ String describeIdentity(Object? object) =>
 ///
 /// void validateDescribeEnum() {
 ///   assert(Day.monday.toString() == 'Day.monday');
+///   // ignore: deprecated_member_use
 ///   assert(describeEnum(Day.monday) == 'monday');
 ///   assert(Day.monday.name == 'monday'); // preferred for real enums
 /// }

@@ -3,15 +3,21 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/scroll_view/custom_scroll_view.1.dart' as example;
+import 'package:flutter_api_samples/widgets/scroll_view/custom_scroll_view.1.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('What should be visible in the initial state.', (WidgetTester tester) async {
+  testWidgets('What should be visible in the initial state.', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.CustomScrollViewExampleApp());
 
     expect(
-      find.descendant(of: find.byType(IconButton), matching: find.byIcon(Icons.add)),
+      find.descendant(
+        of: find.byType(IconButton),
+        matching: find.byIcon(Icons.add),
+      ),
       findsOne,
     );
     expect(find.byType(SliverList), findsOne);

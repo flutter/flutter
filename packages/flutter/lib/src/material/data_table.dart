@@ -240,7 +240,7 @@ class DataRow {
   /// DataRow(
   ///   color: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.selected)) {
-  ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+  ///       return Theme.of(context).colorScheme.primary.withValues(alpha: 0.08);
   ///     }
   ///     return null;  // Use the default value.
   ///   }),
@@ -588,7 +588,7 @@ class DataTable extends StatelessWidget {
   /// DataTable(
   ///   dataRowColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.selected)) {
-  ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+  ///       return Theme.of(context).colorScheme.primary.withValues(alpha: 0.08);
   ///     }
   ///     return null;  // Use the default value.
   ///   }),
@@ -663,7 +663,7 @@ class DataTable extends StatelessWidget {
   ///   rows: _rows,
   ///   headingRowColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.hovered)) {
-  ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+  ///       return Theme.of(context).colorScheme.primary.withValues(alpha: 0.08);
   ///     }
   ///     return null;  // Use the default value.
   ///   }),

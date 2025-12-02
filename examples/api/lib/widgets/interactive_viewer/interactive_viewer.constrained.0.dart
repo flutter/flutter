@@ -49,7 +49,10 @@ class ConstrainedExample extends StatelessWidget {
                     color: row % 2 + column % 2 == 1
                         ? Colors.white
                         : Colors.grey.withValues(alpha: 0.1),
-                    child: Align(alignment: Alignment.centerLeft, child: Text('$row x $column')),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text('$row x $column'),
+                    ),
                   ),
               ],
             ),

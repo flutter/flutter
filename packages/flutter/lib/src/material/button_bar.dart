@@ -26,6 +26,7 @@ import 'dialog.dart';
 ///
 /// ```dart
 /// // Before
+/// // ignore: deprecated_member_use
 /// ButtonBar(
 ///   alignment: MainAxisAlignment.spaceEvenly,
 ///   children: <Widget>[

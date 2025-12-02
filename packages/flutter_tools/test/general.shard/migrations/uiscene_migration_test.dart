@@ -163,7 +163,7 @@ void main() {
           setupFakeIosProject(
             fileSystem,
             infoPlistContent: validUnmigratedInfoPlist,
-            swiftAppDelegateConent: UISceneMigration.originalSwiftAppDelegate,
+            swiftAppDelegateConent: UISceneMigration.originalSwiftAppDelegateTemplates.first,
           ),
           logger,
           isMigrationFeatureEnabled: true,
