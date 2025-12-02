@@ -453,7 +453,7 @@ TEST_P(AiksTest, CanRenderBoundedBlurCloseToEdge) {
   builder.ClipRect(rect2);
   builder.Save();
   auto backdrop_filter = DlBlurImageFilter::Make(
-      20, 20, rect2.Shift(-rect2.GetOrigin()), DlTileMode::kDecal);
+      20, 20, /*bounds=*/rect2.Shift(-rect2.GetOrigin()), DlTileMode::kDecal);
   builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get());
   builder.Restore();
   builder.Restore();
