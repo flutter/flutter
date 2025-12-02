@@ -211,44 +211,29 @@ Scalar FloorToDivisible(Scalar val, Scalar divisor) {
 // for Impeller graphics backends that use a flipped framebuffer coordinate
 // space.
 //
+// Both input and output quads are expected to be in the order of [Top-Left,
+// Top-Right, Bottom-Left, Bottom-Right], a "Z-order" layout that conforms to
+// the return format of Rect::GetPoints().
+//
 // See also: IPRemapCoords in convergions.glsl.
 Quad RemapQuadCoords(const Quad& input, Scalar texture_sampler_y_coord_scale) {
   if (texture_sampler_y_coord_scale < 0.0f) {
     // The 4 points need reordering, because vertically flipping the quad:
     //
-    //   0   1
-    //   2   3
+    //   0 → 1
+    //     ↙
+    //   2 → 3
     //
     // should be flipped to:
     //
-    //   2   3
-    //   0   1
+    //   2 → 3
+    //     ↙
+    //   0 → 1
     auto remap_point = [&](const Point& p) -> Point {
       return Point(p.x, 1.0f - p.y);
     };
     return Quad{remap_point(input[2]), remap_point(input[3]),
                 remap_point(input[0]), remap_point(input[1])};
-  } else {
-    return input;
-  }
-}
-
-// Rotate the quad so that point 0 is among the two top points.
-//
-// This is necessary because the quad may be rotated 180 degrees, which would
-// might confuse the expansion logic that assumes the edge orders.
-Quad RotateQuadToUpright(const Quad& input) {
-  if (input[0].y > input[2].y) {
-    // The 4 points need reordering, because the quad is rotated 180 degrees:
-    //
-    //   3   2
-    //   1   0
-    //
-    // should be rotated to:
-    //
-    //   0   1
-    //   2   3
-    return Quad{input[3], input[2], input[1], input[0]};
   } else {
     return input;
   }
@@ -305,30 +290,6 @@ Matrix PrecomputeQuadLineParameters(const Quad& bounds) {
   return result;
 }
 
-// Expands the quad line parameters by translating each line outwards
-// perpendicular to X and Y by the specified amounts.
-// Matrix ExpandQuadLineParameters(const Matrix& input,
-//                                 Scalar expandX,
-//                                 Scalar expandY) {
-//   auto translateLine = [](const Vector4& v, Scalar translateX,
-//                           Scalar translateY) -> Vector4 {
-//     // Original line equation: Ax + By + C = 0
-//     //    where v = (A, B, C, placeholder)
-//     // New line equation after expansion:
-//     //    A(x - translateX) + B(y - translateY) + C = 0
-//     // => Ax + By + (C - A*translateX - B*translateY) = 0;
-
-//     Scalar newZ = v.z - v.x * translateX - v.y * translateY;
-//     return Vector4(v.x, v.y, newZ, v.w);
-//   };
-//   Matrix result;
-//   result.vec[0] = translateLine(input.vec[0], expandX, -expandY);   // Top
-//   result.vec[1] = translateLine(input.vec[1], expandX, expandY);    // Right
-//   result.vec[2] = translateLine(input.vec[2], -expandX, expandY);   // Bottom
-//   result.vec[3] = translateLine(input.vec[3], -expandX, -expandY);  // Left
-//   return result;
-// }
-
 struct DownsamplePassArgs {
   /// The output size of the down-sampling pass.
   ISize subpass_size;
@@ -339,12 +300,7 @@ struct DownsamplePassArgs {
   /// UV space as the texture input of the downsampling pass.
   ///
   /// During downsampling, out-of-bound pixels are treated as transparent.
-  // std::optional<Quad> downsample_uv_bounds;
-  /// The bounds used for the blurring pass of a bounded blur, in the same UV
-  /// space as the output of the downsampling pass.
-  ///
-  /// During downsampling, out-of-bound pixels are treated as transparent.
-  std::optional<Quad> blur_uv_bounds;
+  std::optional<Quad> uv_bounds;
   /// The effective scalar of the down-sample pass.
   /// This isn't usually exactly as we'd calculate because it has to be rounded
   /// to integer boundaries for generating the texture for the output.
@@ -417,15 +373,15 @@ DownsamplePassArgs CalculateDownsamplePassArgs(
     FML_DCHECK(effective_scalar == downsample_scalar);
 
     Quad uvs = CalculateSnapshotUVs(input_snapshot, aligned_coverage_hint);
-    std::optional<Quad> blur_uv_bounds;
+    std::optional<Quad> uv_bounds;
     if (source_bounds.has_value()) {
-      blur_uv_bounds = MakeReferenceUVs(input_snapshot.GetCoverage().value(),
-                                        source_bounds.value());
+      uv_bounds = MakeReferenceUVs(input_snapshot.GetCoverage().value(),
+                                   source_bounds.value());
     }
     return {
         .subpass_size = subpass_size,
         .uvs = uvs,
-        .blur_uv_bounds = blur_uv_bounds,
+        .uv_bounds = uv_bounds,
         .effective_scalar = effective_scalar,
         .transform = Matrix::MakeTranslation(
             {aligned_coverage_hint.GetX(), aligned_coverage_hint.GetY(), 0})};
@@ -458,9 +414,9 @@ DownsamplePassArgs CalculateDownsamplePassArgs(
         Vector2(subpass_size) / source_rect_padded.GetSize();
     Quad uvs = GaussianBlurFilterContents::CalculateUVs(
         input, snapshot_entity, source_rect_padded, input_snapshot_size);
-    std::optional<Quad> blur_uv_bounds;
+    std::optional<Quad> uv_bounds;
     if (source_bounds.has_value()) {
-      blur_uv_bounds = MakeReferenceUVs(
+      uv_bounds = MakeReferenceUVs(
           source_rect,
           input_snapshot.transform.Invert().Transform(source_bounds.value()));
     }
@@ -468,7 +424,7 @@ DownsamplePassArgs CalculateDownsamplePassArgs(
     return {
         .subpass_size = subpass_size,
         .uvs = uvs,
-        .blur_uv_bounds = blur_uv_bounds,
+        .uv_bounds = uv_bounds,
         .effective_scalar = effective_scalar,
         .transform = input_snapshot.transform *
                      Matrix::MakeTranslation(-divisible_padding),
@@ -493,7 +449,7 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
   // This doesn't support bounded blurs, since bounded blurs need to treat
   // out-of-bounds pixels as transparent.
   bool may_reuse_mipmap =
-      !pass_args.blur_uv_bounds.has_value() &&
+      !pass_args.uv_bounds.has_value() &&
       (pass_args.effective_scalar.x >= 0.5f ||
        (!input_texture->NeedsMipmapGeneration() &&
         input_texture->GetTextureDescriptor().mip_count > 1));
@@ -561,14 +517,14 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
           pass.SetCommandLabel("Gaussian blur downsample");
           auto pipeline_options = OptionsFromPass(pass);
           pipeline_options.primitive_type = PrimitiveType::kTriangleStrip;
-          if (pass_args.blur_uv_bounds.has_value()) {
+          if (pass_args.uv_bounds.has_value()) {
             pass.SetPipeline(
                 renderer.GetDownsampleBoundedPipeline(pipeline_options));
 
             TextureDownsampleBoundedFragmentShader::BoundInfo bound_info;
             bound_info.quad_line_params =
                 // ExpandQuadLineParameters(
-                PrecomputeQuadLineParameters(pass_args.blur_uv_bounds.value())
+                PrecomputeQuadLineParameters(pass_args.uv_bounds.value())
                 // , -5.0 / pass_args.subpass_size.width, -5.0 /
                 // pass_args.subpass_size.height)
                 ;
@@ -941,9 +897,9 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
   std::optional<Quad> source_bounds;
   if (bounds_.has_value()) {
     Quad global_bounds = bounds_->GetTransformedPoints(effect_transform);
-    source_bounds = RotateQuadToUpright(
+    source_bounds =
         RemapQuadCoords(snapshot_entity.GetTransform().Transform(global_bounds),
-                        input_snapshot->texture->GetYCoordScale()));
+                        input_snapshot->texture->GetYCoordScale());
   }
 
   if (blur_info.scaled_sigma.x < kEhCloseEnough &&

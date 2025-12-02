@@ -21,7 +21,7 @@ uniform KernelSamples {
 kernel_samples;
 
 uniform FragInfo {
-  bool unpremultiply;
+  float unpremultiply;
 }
 frag_info;
 
@@ -46,7 +46,7 @@ void main() {
                           v_texture_coords + kernel_samples.sample_data[i].xy);
   }
 
-  if (frag_info.unpremultiply) {
+  if (frag_info.unpremultiply > 0.5) {
     frag_color = IPHalfUnpremultiplyOpaque(total_color);
   } else {
     frag_color = total_color;
