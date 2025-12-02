@@ -12,6 +12,7 @@
 #include "flutter/impeller/display_list/aiks_unittests.h"
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/display_list/dl_runtime_effect_impeller.h"
+#include "flutter/testing/assert_ok.h"
 
 namespace impeller {
 namespace testing {
@@ -88,7 +89,7 @@ TEST_P(AiksTest, DrawPaintTransformsBounds) {
 TEST_P(AiksTest, CanRenderRuntimeEffectFilter) {
   auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_filter_example.frag.iplr");
-  ASSERT_TRUE(runtime_stages_result.ok());
+  ASSERT_OK(runtime_stages_result);
   auto runtime_stages = runtime_stages_result.value();
 
   std::shared_ptr<RuntimeStage> runtime_stage =
@@ -161,7 +162,7 @@ TEST_P(AiksTest, ComposePaintRuntimeOuter) {
 
   auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_filter_warp.frag.iplr");
-  ASSERT_TRUE(runtime_stages_result.ok());
+  ASSERT_OK(runtime_stages_result);
   auto runtime_stages = runtime_stages_result.value();
 
   std::shared_ptr<RuntimeStage> runtime_stage =
@@ -199,7 +200,7 @@ TEST_P(AiksTest, ComposePaintRuntimeOuter) {
 TEST_P(AiksTest, ComposePaintRuntimeInner) {
   auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_filter_warp.frag.iplr");
-  ASSERT_TRUE(runtime_stages_result.ok());
+  ASSERT_OK(runtime_stages_result);
   auto runtime_stages = runtime_stages_result.value();
 
   std::shared_ptr<RuntimeStage> runtime_stage =
@@ -288,7 +289,7 @@ TEST_P(AiksTest, ComposePaintRuntimeInner) {
 TEST_P(AiksTest, ComposeBackdropRuntimeOuterBlurInner) {
   auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_filter_circle.frag.iplr");
-  ASSERT_TRUE(runtime_stages_result.ok());
+  ASSERT_OK(runtime_stages_result);
   auto runtime_stages = runtime_stages_result.value();
 
   std::shared_ptr<RuntimeStage> runtime_stage =
@@ -348,7 +349,7 @@ TEST_P(AiksTest, ComposeBackdropRuntimeOuterBlurInner) {
 TEST_P(AiksTest, ComposeBackdropRuntimeOuterBlurInnerSmallSigma) {
   auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_filter_circle.frag.iplr");
-  ASSERT_TRUE(runtime_stages_result.ok());
+  ASSERT_OK(runtime_stages_result);
   auto runtime_stages = runtime_stages_result.value();
 
   std::shared_ptr<RuntimeStage> runtime_stage =
@@ -415,7 +416,7 @@ TEST_P(AiksTest, ClippedBackdropFilterWithShader) {
 
   auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_border.frag.iplr");
-  ASSERT_TRUE(runtime_stages_result.ok());
+  ASSERT_OK(runtime_stages_result);
   auto runtime_stages = runtime_stages_result.value();
   auto runtime_stage =
       runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];

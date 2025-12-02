@@ -12,6 +12,7 @@
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_color.h"
 #include "flutter/display_list/dl_paint.h"
+#include "flutter/testing/assert_ok.h"
 #include "flutter/testing/testing.h"
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_image_impeller.h"
@@ -479,7 +480,7 @@ TEST_P(AiksTest, DrawVerticesTextureCoordinatesWithFragmentShader) {
 
   auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_simple.frag.iplr");
-  ASSERT_TRUE(runtime_stages_result.ok());
+  ASSERT_OK(runtime_stages_result);
   auto runtime_stages = runtime_stages_result.value();
 
   auto runtime_stage =
@@ -530,7 +531,7 @@ TEST_P(AiksTest,
 
   auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_position.frag.iplr");
-  ASSERT_TRUE(runtime_stages_result.ok());
+  ASSERT_OK(runtime_stages_result);
   auto runtime_stages = runtime_stages_result.value();
 
   auto runtime_stage =
