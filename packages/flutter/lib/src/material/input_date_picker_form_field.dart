@@ -240,7 +240,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
 
   void _updateDate(String? text, ValueChanged<DateTime?>? callback) {
     // Handle empty text when acceptEmptyDate is true
-    if ((text == null || text.isEmpty) && widget.acceptEmptyDate) {
+    if ((text?.isEmpty ?? true) && widget.acceptEmptyDate) {
       _selectedDate = null;
       _inputText = text ?? '';
       callback?.call(null);
