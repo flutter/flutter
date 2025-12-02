@@ -2,13 +2,31 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: invalid_use_of_internal_member
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:multiple_windows/main.dart' as multiple_windows;
 import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
 
 void main() {
-  isWindowingEnabled = true;
+  if (!isWindowingEnabled) {
+    const String windowingDisabledErrorMessage = '''
+Windowing APIs are not enabled.
+
+Windowing APIs are currently experimental. Do not use windowing APIs in
+production applications or plugins published to pub.dev.
+
+To try experimental windowing APIs:
+1. Switch to Flutter's main release channel.
+2. Turn on the windowing feature flag.
+
+See: https://github.com/flutter/flutter/issues/30701.
+''';
+    // ignore: avoid_print
+    print(windowingDisabledErrorMessage);
+    return;
+  }
 
   testWidgets('Multiple windows smoke test', (WidgetTester tester) async {
     multiple_windows
@@ -55,5 +73,33 @@ void main() {
     await tester.pump();
 
     expect(find.widgetWithText(AppBar, 'Dialog'), findsOneWidget);
+  });
+
+  testWidgets('Can close a modal dialog of a regular window', (
+    WidgetTester tester,
+  ) async {
+    multiple_windows
+        .main(); // builds the app and schedules a frame but doesn't trigger one
+    await tester.pump(); // triggers a frame
+
+    final toTap = find.widgetWithText(OutlinedButton, 'Regular');
+    expect(toTap, findsOneWidget);
+    await tester.tap(toTap);
+    await tester.pump();
+
+    final createModalButton = find.widgetWithText(
+      ElevatedButton,
+      'Create Modal Dialog',
+    );
+    expect(createModalButton, findsOneWidget);
+    await tester.tap(createModalButton);
+    await tester.pump();
+
+    final closeModalButton = find.widgetWithText(ElevatedButton, 'Close');
+    expect(closeModalButton, findsOneWidget);
+    await tester.tap(closeModalButton);
+    await tester.pump();
+
+    expect(find.widgetWithText(AppBar, 'Dialog'), findsNothing);
   });
 }
