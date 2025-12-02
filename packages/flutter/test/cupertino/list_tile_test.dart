@@ -553,7 +553,9 @@ void main() {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(
-          child: SizedBox.shrink(child: CupertinoListTile(title: Text('X'))),
+          child: SizedBox.shrink(
+            child: CupertinoListTile(title: Text('X'), trailing: CupertinoListTileChevron()),
+          ),
         ),
       ),
     );
