@@ -16,13 +16,13 @@ HostWindowTooltip::HostWindowTooltip(
     HWND parent)
     : HostWindow(window_manager,
                  engine,
-                 WindowArchetype::kRegular,
+                 WindowArchetype::kTooltip,
                  WS_POPUP,
-                 0,
+                 WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW,
                  constraints,
                  {{0, 0}, {0, 0}},
                  L"",
-                 std::nullopt,
+                 parent,
                  this),
       get_position_callback_(get_position_callback),
       parent_(parent),
@@ -101,7 +101,7 @@ void HostWindowTooltip::UpdatePosition() {
                  parent_bottom_right.x - parent_top_left.x,
                  parent_bottom_right.y - parent_top_left.y},
       work_area);
-  SetWindowPos(window_handle_, nullptr, rect->left, rect->top, rect->width,
+  SetWindowPos(window_handle_, HWND_TOP, rect->left, rect->top, rect->width,
                rect->height, SWP_NOACTIVATE | SWP_NOOWNERZORDER);
   free(rect);
 
@@ -113,6 +113,31 @@ void HostWindowTooltip::UpdatePosition() {
     auto metrics_event = view_controller_->view()->CreateWindowMetricsEvent();
     view_controller_->engine()->SendWindowMetricsEvent(metrics_event);
   }
+}
+
+LRESULT HostWindowTooltip::HandleMessage(HWND hwnd,
+                                         UINT message,
+                                         WPARAM wparam,
+                                         LPARAM lparam) {
+  switch (message) {
+    case WM_MOUSEACTIVATE:
+      // Prevent activation when clicked
+      return MA_NOACTIVATE;
+
+    case WM_NCACTIVATE:
+      // Return TRUE to prevent visual activation changes
+      return TRUE;
+
+    case WM_ACTIVATE:
+      // Immediately deactivate if somehow activated
+      if (LOWORD(wparam) != WA_INACTIVE) {
+        HWND hFocus = GetFocus();
+        SetFocus(nullptr);
+      }
+      break;
+  }
+
+  return HostWindow::HandleMessage(hwnd, message, wparam, lparam);
 }
 
 }  // namespace flutter

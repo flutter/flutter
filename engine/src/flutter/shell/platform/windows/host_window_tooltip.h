@@ -14,7 +14,7 @@ namespace flutter {
 class HostWindowTooltip : public HostWindow,
                           private FlutterWindowsViewSizingDelegate {
  public:
-  // Creates a regular window.
+  // Creates a tooltip window.
   HostWindowTooltip(WindowManager* window_manager,
                     FlutterWindowsEngine* engine,
                     const BoxConstraints& constraints,
@@ -22,6 +22,12 @@ class HostWindowTooltip : public HostWindow,
                     HWND parent);
 
   void UpdatePosition();
+
+ protected:
+  LRESULT HandleMessage(HWND hwnd,
+                        UINT message,
+                        WPARAM wparam,
+                        LPARAM lparam) override;
 
  private:
   Size GetMinimumViewSize() const override;
