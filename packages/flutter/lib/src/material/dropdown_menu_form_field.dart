@@ -79,26 +79,26 @@ class DropdownMenuFormField<T extends Object> extends FormField<T> {
          builder: (FormFieldState<T> field) {
            final state = field as _DropdownMenuFormFieldState<T>;
 
-           // Delegate label, hintText and helperText definition to a decoration builder.
-           InputDecoration defaultDecorationBuilder(
+           InputDecoration effectiveDecorationBuilder(
              BuildContext context,
              MenuController menuController,
            ) {
              final InputDecoration decoration =
                  decorationBuilder?.call(context, menuController) ?? const InputDecoration();
-             return decoration.copyWith(label: label, hintText: hintText, helperText: helperText);
-           }
+             final InputDecoration decorationWithLabels = decoration.copyWith(
+               label: label,
+               hintText: hintText,
+               helperText: helperText,
+             );
 
-           DropdownMenuDecorationBuilder effectiveDecorationBuilder = defaultDecorationBuilder;
+             final String? errorText = state.errorText;
+             if (errorText == null) {
+               return decorationWithLabels;
+             }
 
-           final String? errorText = state.errorText;
-           if (errorText != null) {
-             effectiveDecorationBuilder = (BuildContext context, MenuController menuController) {
-               final InputDecoration decoration = defaultDecorationBuilder(context, menuController);
-               return errorBuilder != null
-                   ? decoration.copyWith(error: errorBuilder(state.context, errorText))
-                   : decoration.copyWith(errorText: errorText);
-             };
+             return errorBuilder != null
+                 ? decorationWithLabels.copyWith(error: errorBuilder(state.context, errorText))
+                 : decorationWithLabels.copyWith(errorText: errorText);
            }
 
            return UnmanagedRestorationScope(
