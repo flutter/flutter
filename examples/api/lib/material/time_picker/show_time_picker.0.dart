@@ -281,7 +281,6 @@ class ChoiceCard<T extends Object?> extends StatelessWidget {
                   for (final T choice in choices)
                     RadioSelection<T>(
                       value: choice,
-                      onChanged: onChanged,
                       child: Text(choiceLabels[choice]!),
                     ),
                 ],
@@ -324,23 +323,16 @@ class EnumCard<T extends Enum> extends StatelessWidget {
 
 // A button that has a radio button on one side and a label child. Tapping on
 // the label or the radio button selects the item.
-class RadioSelection<T extends Object?> extends StatefulWidget {
+class RadioSelection<T extends Object?> extends StatelessWidget {
   const RadioSelection({
     super.key,
     required this.value,
-    required this.onChanged,
     required this.child,
   });
 
   final T value;
-  final ValueChanged<T?> onChanged;
   final Widget child;
 
-  @override
-  State<RadioSelection<T>> createState() => _RadioSelectionState<T>();
-}
-
-class _RadioSelectionState<T extends Object?> extends State<RadioSelection<T>> {
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -348,11 +340,11 @@ class _RadioSelectionState<T extends Object?> extends State<RadioSelection<T>> {
       children: <Widget>[
         Padding(
           padding: const EdgeInsetsDirectional.only(end: 8),
-          child: Radio<T>(value: widget.value),
+          child: Radio<T>(value: value),
         ),
         GestureDetector(
-          onTap: () => widget.onChanged(widget.value),
-          child: widget.child,
+          onTap: () => RadioGroup.maybeOf<T>(context)?.onChanged(value),
+          child: child,
         ),
       ],
     );
