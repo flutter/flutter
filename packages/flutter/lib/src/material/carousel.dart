@@ -452,6 +452,7 @@ class CarouselView extends StatefulWidget {
   /// The child widgets for the carousel.
   final List<Widget> children;
 
+  /// {@template flutter.material.CarouselView.onIndexChanged}
   /// A callback invoked when the leading item changes.
   ///
   /// The “leading” item is the one that the carousel resolves as primary for
@@ -470,6 +471,7 @@ class CarouselView extends StatefulWidget {
   ///
   /// The callback fires only when the resolved leading index actually changes,
   /// whether due to user interaction or programmatic scrolling.
+  /// {@endtemplate}
   ///
   /// {@tool dartpad}
   /// Example:
