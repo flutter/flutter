@@ -684,7 +684,7 @@ abstract interface class PredictiveBackRoute {
 /// It allows widgets or UI components to handle the back button or pop
 /// operations locally without affecting the main navigator stack.
 ///
-/// Typically used for widgets such as dialogs, bottom sheets, or
+/// It is typically used for widgets such as dialogs, bottom sheets, or
 /// inline expandable panels that can be dismissed independently
 /// of the surrounding route.
 ///
