@@ -6,6 +6,9 @@ name: Generate a content aware hash for the Flutter Engine
 
 on: workflow_dispatch
 
+permissions:
+  contents: read
+
 jobs:
   generate-engine-content-hash:
     runs-on: ubuntu-latest
