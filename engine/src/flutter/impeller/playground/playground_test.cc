@@ -93,7 +93,11 @@ RuntimeStage::Map PlaygroundTest::OpenAssetAsRuntimeStage(
   if (!fixture || fixture->GetSize() == 0) {
     return {};
   }
-  return RuntimeStage::DecodeRuntimeStages(fixture);
+  auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
+  if (!stages.ok()) {
+    return {};
+  }
+  return stages.value();
 }
 
 // |Playground|

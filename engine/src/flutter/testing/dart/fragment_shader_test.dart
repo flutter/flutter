@@ -25,7 +25,7 @@ void main() async {
     expect(rawData is Map<String, Object?>, true);
 
     final data = rawData! as Map<String, Object?>;
-    expect(data.keys.toList(), <String>['sksl']);
+    expect(data.keys.toList(), <String>['format_version', 'sksl']);
     expect(data['sksl'] is Map<String, Object?>, true);
 
     final skslData = data['sksl']! as Map<String, Object?>;
