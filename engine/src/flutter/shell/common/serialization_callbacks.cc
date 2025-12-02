@@ -11,11 +11,12 @@
 
 namespace flutter {
 
-sk_sp<SkData> SerializeTypefaceWithoutData(SkTypeface* typeface, void* ctx) {
+SkSerialReturnType SerializeTypefaceWithoutData(SkTypeface* typeface,
+                                                void* ctx) {
   return SkData::MakeEmpty();
 }
 
-sk_sp<SkData> SerializeTypefaceWithData(SkTypeface* typeface, void* ctx) {
+SkSerialReturnType SerializeTypefaceWithData(SkTypeface* typeface, void* ctx) {
   return typeface->serialize(SkTypeface::SerializeBehavior::kDoIncludeData);
 }
 
@@ -33,7 +34,7 @@ struct ImageMetaData {
   bool has_color_space;
 } __attribute__((packed));
 
-sk_sp<SkData> SerializeImageWithoutData(SkImage* image, void* ctx) {
+SkSerialReturnType SerializeImageWithoutData(SkImage* image, void* ctx) {
   const auto& info = image->imageInfo();
   SkDynamicMemoryWStream stream;
 
