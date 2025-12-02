@@ -196,3 +196,11 @@ void fl_view_accessible_handle_update_semantics(
       },
       self);
 }
+
+void fl_view_accessible_send_announcement(FlViewAccessible* self,
+                                          const char* message) {
+  g_return_if_fail(FL_IS_VIEW_ACCESSIBLE(self));
+  // NOTE: This is replaced by "notification" in ATK 2.50 which supports
+  // politeness but is not in the Flutter version of ATK.
+  g_signal_emit_by_name(self, "announcement", message);
+}
