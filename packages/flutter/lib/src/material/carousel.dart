@@ -1795,8 +1795,7 @@ class CarouselController extends ScrollController {
       'CarouselController.leadingItem cannot be read when multiple CarouselViews '
       'are attached to the same controller.',
     );
-    final int a = (position as _CarouselPosition).leadingItem;
-    return a;
+    return (position as _CarouselPosition).leadingItem;
   }
 
   _CarouselViewState? _carouselState;
