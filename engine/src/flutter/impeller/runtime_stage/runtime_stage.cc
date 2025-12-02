@@ -6,6 +6,7 @@
 
 #include <array>
 #include <memory>
+#include <sstream>
 
 #include "fml/mapping.h"
 #include "impeller/base/validation.h"
@@ -59,30 +60,32 @@ std::unique_ptr<RuntimeStage> RuntimeStage::RuntimeStageIfPresent(
       new RuntimeStage(runtime_stage, payload));
 }
 
-RuntimeStage::Map RuntimeStage::DecodeRuntimeStages(
+absl::StatusOr<RuntimeStage::Map> RuntimeStage::DecodeRuntimeStages(
     const std::shared_ptr<fml::Mapping>& payload) {
   if (payload == nullptr || !payload->GetMapping()) {
-    return {};
+    return absl::InvalidArgumentError("Payload is null or empty.");
   }
   if (!fb::RuntimeStagesBufferHasIdentifier(payload->GetMapping())) {
-    return {};
+    return absl::InvalidArgumentError(
+        "Payload does not have valid identifier.");
   }
 
   auto raw_stages = fb::GetRuntimeStages(payload->GetMapping());
   if (!raw_stages) {
-    return {};
+    return absl::InvalidArgumentError("Failed to get runtime stages.");
   }
 
   const uint32_t version = raw_stages->format_version();
   const auto expected =
       static_cast<uint32_t>(fb::RuntimeStagesFormatVersion::kVersion);
   if (version != expected) {
-    VALIDATION_LOG << "Unsupported runtime stages format version: " << version
-                   << ", expected: " << expected;
-    return {};
+    std::stringstream stream;
+    stream << "Unsupported runtime stages format version. Expected " << expected
+           << ", got " << version << ".";
+    return absl::InvalidArgumentError(stream.str());
   }
 
-  return {
+  return Map{
       {RuntimeStageBackend::kSkSL,
        RuntimeStageIfPresent(raw_stages->sksl(), payload)},
       {RuntimeStageBackend::kMetal,

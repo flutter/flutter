@@ -281,7 +281,11 @@ RuntimeStage::Map GoldenPlaygroundTest::OpenAssetAsRuntimeStage(
   if (!fixture || fixture->GetSize() == 0) {
     return {};
   }
-  return RuntimeStage::DecodeRuntimeStages(fixture);
+  auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
+  if (!stages.ok()) {
+    return {};
+  }
+  return stages.value();
 }
 
 std::shared_ptr<Context> GoldenPlaygroundTest::GetContext() const {

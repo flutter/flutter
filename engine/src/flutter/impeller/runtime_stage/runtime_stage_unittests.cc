@@ -34,7 +34,9 @@ TEST_P(RuntimeStageTest, CanReadValidBlob) {
   ASSERT_TRUE(fixture);
   ASSERT_GT(fixture->GetSize(), 0u);
   auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
-  auto stage = stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ASSERT_TRUE(stages.ok());
+  auto stage =
+      stages.value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(stage->IsValid());
   ASSERT_EQ(stage->GetShaderStage(), RuntimeShaderStage::kFragment);
 }
@@ -48,7 +50,8 @@ TEST_P(RuntimeStageTest, RejectInvalidFormatVersion) {
   auto mapping = std::make_shared<fml::NonOwnedMapping>(
       builder.GetBufferPointer(), builder.GetSize());
   auto runtime_stages = RuntimeStage::DecodeRuntimeStages(mapping);
-  EXPECT_TRUE(runtime_stages.empty());
+  EXPECT_FALSE(runtime_stages.ok());
+  EXPECT_EQ(runtime_stages.status().code(), absl::StatusCode::kInvalidArgument);
 }
 
 TEST_P(RuntimeStageTest, CanRejectInvalidBlob) {
@@ -64,7 +67,7 @@ TEST_P(RuntimeStageTest, CanRejectInvalidBlob) {
            junk_allocation->GetLength().GetByteSize());
   auto stages = RuntimeStage::DecodeRuntimeStages(
       CreateMappingFromAllocation(junk_allocation));
-  ASSERT_FALSE(stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())]);
+  ASSERT_FALSE(stages.ok());
 }
 
 TEST_P(RuntimeStageTest, CanReadUniforms) {
@@ -73,7 +76,9 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
   ASSERT_TRUE(fixture);
   ASSERT_GT(fixture->GetSize(), 0u);
   auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
-  auto stage = stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ASSERT_TRUE(stages.ok());
+  auto stage =
+      stages.value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
 
   ASSERT_TRUE(stage->IsValid());
   switch (GetBackend()) {
@@ -251,7 +256,9 @@ TEST_P(RuntimeStageTest, CanReadUniformsSamplerBeforeUBO) {
   ASSERT_TRUE(fixture);
   ASSERT_GT(fixture->GetSize(), 0u);
   auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
-  auto stage = stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ASSERT_TRUE(stages.ok());
+  auto stage =
+      stages.value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
 
   EXPECT_EQ(stage->GetUniforms().size(), 2u);
   auto uni = stage->GetUniform(RuntimeStage::kVulkanUBOName);
@@ -276,7 +283,9 @@ TEST_P(RuntimeStageTest, CanReadUniformsSamplerAfterUBO) {
   ASSERT_TRUE(fixture);
   ASSERT_GT(fixture->GetSize(), 0u);
   auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
-  auto stage = stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ASSERT_TRUE(stages.ok());
+  auto stage =
+      stages.value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
 
   EXPECT_EQ(stage->GetUniforms().size(), 2u);
   auto uni = stage->GetUniform(RuntimeStage::kVulkanUBOName);
@@ -297,7 +306,9 @@ TEST_P(RuntimeStageTest, CanRegisterStage) {
   ASSERT_TRUE(fixture);
   ASSERT_GT(fixture->GetSize(), 0u);
   auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
-  auto stage = stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ASSERT_TRUE(stages.ok());
+  auto stage =
+      stages.value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(stage->IsValid());
   std::promise<bool> registration;
   auto future = registration.get_future();
