@@ -81,6 +81,7 @@ class DoctorCommand extends FlutterCommand {
     final bool isProject = project.manifest.appName.isNotEmpty;
     final bool disableProjectValidators = boolArg('disable-project-validators');
 
+    final projectValidatorTasks = <ValidatorTask>[];
     if (isProject && !disableProjectValidators) {
       final projectAnalysisValidator = ProjectAnalysisValidator(
         project: project,
@@ -90,45 +91,27 @@ class DoctorCommand extends FlutterCommand {
         terminal: globals.terminal,
         artifacts: globals.artifacts!,
       );
-      // final projectSuggestionsValidator = ProjectSuggestionsValidator(
-      //   project: project,
-      //   fileSystem: globals.fs,
-      //   allProjectValidators: <ProjectValidator>[
-      //     // Add default validators here or get them from somewhere
-      //     // For now, let's assume we want GeneralInfoProjectValidator
-      //     GeneralInfoProjectValidator(),
-      //   ],
-      //   processManager: globals.processManager,
-      //   terminal: globals.terminal,
-      // );
-      final projectValidatorTasks = <ValidatorTask>[
+      projectValidatorTasks.add(
         ValidatorTask(projectAnalysisValidator, projectAnalysisValidator.validate()),
-        // TODO(jwren): ProjectSuggestionsValidator takes too long, should we include with a flag, include it anyways...?
-        // ValidatorTask(projectSuggestionsValidator, projectSuggestionsValidator.validate()),
-      ];
-      final List<ValidatorTask> defaultTasks = globals.doctor!.startValidatorTasks();
-      final combinedTasks = <ValidatorTask>[...defaultTasks, ...projectValidatorTasks];
-      success =
-          await globals.doctor?.diagnose(
-            androidLicenses: boolArg('android-licenses'),
-            verbose: verbose,
-            androidLicenseValidator: androidLicenseValidator,
-            startedValidatorTasks: combinedTasks,
-          ) ??
-          false;
-    } else {
-      success =
-          await globals.doctor?.diagnose(
-            androidLicenses: boolArg('android-licenses'),
-            verbose: verbose,
-            androidLicenseValidator: androidLicenseValidator,
-          ) ??
-          false;
-      if (projectPath == null) {
-        globals.logger.printStatus(
-          'To see project-specific issues, run doctor in some project or specify with "flutter doctor --project-path <path>"',
-        );
-      }
+      );
+    }
+
+    final List<ValidatorTask> defaultTasks = globals.doctor!.startValidatorTasks();
+    final combinedTasks = <ValidatorTask>[...defaultTasks, ...projectValidatorTasks];
+
+    success =
+        await globals.doctor?.diagnose(
+          androidLicenses: boolArg('android-licenses'),
+          verbose: verbose,
+          androidLicenseValidator: androidLicenseValidator,
+          startedValidatorTasks: combinedTasks,
+        ) ??
+        false;
+
+    if (!isProject) {
+      globals.logger.printStatus(
+        'To see project-specific issues, run doctor in some project or specify with "flutter doctor --project-path <path>"',
+      );
     }
 
     return FlutterCommandResult(success ? ExitStatus.success : ExitStatus.warning);
