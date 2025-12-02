@@ -2301,6 +2301,67 @@ TEST_P(EntityTest, FillPathGeometryGetPositionBufferReturnsExpectedMode) {
   }
 }
 
+TEST_P(EntityTest, StrokeArcGeometryGetPositionBufferReturnsExpectedMode) {
+  RenderTarget target;
+  testing::MockRenderPass mock_pass(GetContext(), target);
+  Rect oval_bounds = Rect::MakeLTRB(100, 100, 200, 200);
+
+  // Butt caps don't overlap
+  {
+    StrokeParameters stroke = {.width = 50.0f, .cap = Cap::kButt};
+    auto geometry =
+        Geometry::MakeStrokedArc(oval_bounds, Degrees(0), Degrees(330), stroke);
+
+    GeometryResult result =
+        geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
+    EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal);
+  }
+
+  // Round caps that don't overlap
+  {
+    StrokeParameters stroke = {.width = 10.0f, .cap = Cap::kRound};
+    auto geometry =
+        Geometry::MakeStrokedArc(oval_bounds, Degrees(0), Degrees(330), stroke);
+
+    GeometryResult result =
+        geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
+    EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal);
+  }
+
+  // Round caps that overlap
+  {
+    StrokeParameters stroke = {.width = 50.0f, .cap = Cap::kRound};
+    auto geometry =
+        Geometry::MakeStrokedArc(oval_bounds, Degrees(0), Degrees(330), stroke);
+
+    GeometryResult result =
+        geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
+    EXPECT_EQ(result.mode, GeometryResult::Mode::kPreventOverdraw);
+  }
+
+  // Square caps that don't overlap
+  {
+    StrokeParameters stroke = {.width = 10.0f, .cap = Cap::kSquare};
+    auto geometry =
+        Geometry::MakeStrokedArc(oval_bounds, Degrees(0), Degrees(330), stroke);
+
+    GeometryResult result =
+        geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
+    EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal);
+  }
+
+  // Square caps that overlap
+  {
+    StrokeParameters stroke = {.width = 50.0f, .cap = Cap::kSquare};
+    auto geometry =
+        Geometry::MakeStrokedArc(oval_bounds, Degrees(0), Degrees(330), stroke);
+
+    GeometryResult result =
+        geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
+    EXPECT_EQ(result.mode, GeometryResult::Mode::kPreventOverdraw);
+  }
+}
+
 TEST_P(EntityTest, FailOnValidationError) {
   if (GetParam() != PlaygroundBackend::kVulkan) {
     GTEST_SKIP() << "Validation is only fatal on Vulkan backend.";
