@@ -52,6 +52,19 @@ See: https://github.com/flutter/flutter/issues/30701.
     expect(find.widgetWithText(AppBar, 'Regular Window'), findsOneWidget);
   });
 
+  testWidgets('Can create a modeless dialog', (WidgetTester tester) async {
+    multiple_windows
+        .main(); // builds the app and schedules a frame but doesn't trigger one
+    await tester.pump(); // triggers a frame
+
+    final toTap = find.widgetWithText(OutlinedButton, 'Modeless Dialog');
+    expect(toTap, findsOneWidget);
+    await tester.tap(toTap);
+    await tester.pump();
+
+    expect(find.widgetWithText(AppBar, 'Dialog'), findsOneWidget);
+  });
+
   testWidgets('Can create a modal dialog of a regular window', (
     WidgetTester tester,
   ) async {
