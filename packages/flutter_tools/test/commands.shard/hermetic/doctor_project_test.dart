@@ -163,20 +163,7 @@ void main() {
         );
 
         // Mock analysis server success
-        fakeProcessManager.addCommand(
-          const FakeCommand(
-            command: <String>[
-              'Artifact.engineDartSdkPath/bin/dart',
-              'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
-              '--disable-server-feature-completion',
-              '--disable-server-feature-search',
-              '--sdk',
-              'Artifact.engineDartSdkPath',
-              '--suppress-analytics',
-            ],
-            stdout: '{"event":"server.status","params":{"analysis":{"isAnalyzing":false}}}',
-          ),
-        );
+        fakeProcessManager.addCommand(_createAnalysisServerCommand());
 
         final ValidationResult result = await validator.validate();
         expect(result.type, ValidationType.success);
@@ -202,20 +189,7 @@ void main() {
         );
 
         // Mock analysis server success
-        fakeProcessManager.addCommand(
-          const FakeCommand(
-            command: <String>[
-              'Artifact.engineDartSdkPath/bin/dart',
-              'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
-              '--disable-server-feature-completion',
-              '--disable-server-feature-search',
-              '--sdk',
-              'Artifact.engineDartSdkPath',
-              '--suppress-analytics',
-            ],
-            stdout: '{"event":"server.status","params":{"analysis":{"isAnalyzing":false}}}',
-          ),
-        );
+        fakeProcessManager.addCommand(_createAnalysisServerCommand());
         // Mock dart pub outdated with JSON output
         fakeProcessManager.addCommand(
           const FakeCommand(
@@ -253,20 +227,7 @@ void main() {
         );
 
         // Mock analysis server success
-        fakeProcessManager.addCommand(
-          const FakeCommand(
-            command: <String>[
-              'Artifact.engineDartSdkPath/bin/dart',
-              'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
-              '--disable-server-feature-completion',
-              '--disable-server-feature-search',
-              '--sdk',
-              'Artifact.engineDartSdkPath',
-              '--suppress-analytics',
-            ],
-            stdout: '{"event":"server.status","params":{"analysis":{"isAnalyzing":false}}}',
-          ),
-        );
+        fakeProcessManager.addCommand(_createAnalysisServerCommand());
         // Mock dart pub outdated with up to date message (empty packages list in JSON)
         fakeProcessManager.addCommand(
           const FakeCommand(
@@ -300,20 +261,7 @@ void main() {
         );
 
         // Mock analysis server success
-        fakeProcessManager.addCommand(
-          const FakeCommand(
-            command: <String>[
-              'Artifact.engineDartSdkPath/bin/dart',
-              'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
-              '--disable-server-feature-completion',
-              '--disable-server-feature-search',
-              '--sdk',
-              'Artifact.engineDartSdkPath',
-              '--suppress-analytics',
-            ],
-            stdout: '{"event":"server.status","params":{"analysis":{"isAnalyzing":false}}}',
-          ),
-        );
+        fakeProcessManager.addCommand(_createAnalysisServerCommand());
         // Mock dart pub outdated failure
         fakeProcessManager.addCommand(
           const FakeCommand(
@@ -349,16 +297,7 @@ void main() {
 
         // Mock analysis server with errors
         fakeProcessManager.addCommand(
-          FakeCommand(
-            command: const <String>[
-              'Artifact.engineDartSdkPath/bin/dart',
-              'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
-              '--disable-server-feature-completion',
-              '--disable-server-feature-search',
-              '--sdk',
-              'Artifact.engineDartSdkPath',
-              '--suppress-analytics',
-            ],
+          _createAnalysisServerCommand(
             stdout: <String>[
               '{"event":"server.connected","params":{"version":"1.0.0","pid":123}}',
               '{"id":"1","result":{}}', // Response to setAnalysisRoots
@@ -413,16 +352,7 @@ void main() {
 
         // Mock analysis server with warnings
         fakeProcessManager.addCommand(
-          FakeCommand(
-            command: const <String>[
-              'Artifact.engineDartSdkPath/bin/dart',
-              'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
-              '--disable-server-feature-completion',
-              '--disable-server-feature-search',
-              '--sdk',
-              'Artifact.engineDartSdkPath',
-              '--suppress-analytics',
-            ],
+          _createAnalysisServerCommand(
             stdout: <String>[
               '{"event":"server.connected","params":{"version":"1.0.0","pid":123}}',
               '{"id":"1","result":{}}', // Response to setAnalysisRoots
@@ -477,16 +407,7 @@ void main() {
 
         // Mock analysis server with lints (INFO)
         fakeProcessManager.addCommand(
-          FakeCommand(
-            command: const <String>[
-              'Artifact.engineDartSdkPath/bin/dart',
-              'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
-              '--disable-server-feature-completion',
-              '--disable-server-feature-search',
-              '--sdk',
-              'Artifact.engineDartSdkPath',
-              '--suppress-analytics',
-            ],
+          _createAnalysisServerCommand(
             stdout: <String>[
               '{"event":"server.connected","params":{"version":"1.0.0","pid":123}}',
               '{"id":"1","result":{}}', // Response to setAnalysisRoots
@@ -572,6 +493,23 @@ class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
 
   @override
   List<Workflow> get workflows => <Workflow>[];
+}
+
+FakeCommand _createAnalysisServerCommand({
+  String stdout = '{"event":"server.status","params":{"analysis":{"isAnalyzing":false}}}',
+}) {
+  return FakeCommand(
+    command: const <String>[
+      'Artifact.engineDartSdkPath/bin/dart',
+      'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
+      '--disable-server-feature-completion',
+      '--disable-server-feature-search',
+      '--sdk',
+      'Artifact.engineDartSdkPath',
+      '--suppress-analytics',
+    ],
+    stdout: stdout,
+  );
 }
 
 class FakeValidator extends DoctorValidator {
