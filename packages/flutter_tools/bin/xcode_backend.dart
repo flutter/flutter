@@ -335,13 +335,6 @@ class Context {
   }) {
     // Copy native assets referenced in the native_assets.json file for the
     // current build.
-    final String targetBuildDir = environment['TARGET_BUILD_DIR']!;
-    final lastBuildIdFile = File('$targetBuildDir/.last_build_id');
-    if (!lastBuildIdFile.existsSync()) {
-      throw Exception('Expected earlier build step to have written ${lastBuildIdFile.path}');
-    }
-    final String lastBuildId = lastBuildIdFile.readAsStringSync();
-
     final String sourceRoot = environment['SOURCE_ROOT'] ?? '';
     var projectPath = '$sourceRoot/..';
     if (environment['FLUTTER_APPLICATION_PATH'] != null) {
@@ -360,7 +353,7 @@ class Context {
 
     final Set<String> referencedFrameworks = {};
     final nativeAssetsJson = File(
-      '$projectPath/.dart_tool/flutter_build/$lastBuildId/native_assets.json',
+      '$xcodeFrameworksDir/App.framework/flutter_assets/NativeAssetsManifest.json',
     );
     if (!nativeAssetsJson.existsSync()) {
       if (verbose) {
@@ -368,7 +361,7 @@ class Context {
       }
       return;
     }
-    // native_assets.json looks like this: {
+    // NativeAssetsManifest.json looks like this: {
     //   "format-version":[1,0,0],
     //   "native-assets":{
     //     "ios_arm64":{
