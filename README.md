@@ -27,7 +27,7 @@ open source.
 * [Development wiki](./docs/README.md)
 * [Contributing to Flutter](https://github.com/flutter/flutter/blob/main/CONTRIBUTING.md)
 
-For release and other announcements, join the 
+For release and other announcements, join the
 [flutter-announce](https://groups.google.com/g/flutter-announce)
 mailing list. Our documentation also tracks [breaking
 changes](https://docs.flutter.dev/release/breaking-changes) across releases.
