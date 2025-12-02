@@ -7638,7 +7638,7 @@ base class _NativePicture extends NativeFieldWrapperClass1 implements Picture {
       throw Exception('Invalid image dimensions.');
     }
 
-    final _Image image = _Image._();
+    final image = _Image._();
     _toImageSync(width, height, targetFormat.index, image);
     return Image._(image, image.width, image.height);
   }
