@@ -22,12 +22,15 @@ void setUpRenderingForTests() {
       EnginePlatformDispatcher.instance
           .render(_sceneToRender!)
           .then<void>((_) {
+            _sceneToRender?.dispose();
+            _sceneToRender = null;
             _sceneCompleter?.complete();
           })
           .catchError((Object error) {
+            _sceneToRender?.dispose();
+            _sceneToRender = null;
             _sceneCompleter?.completeError(error);
           });
-      _sceneToRender = null;
     }
   };
 }

@@ -12,11 +12,6 @@ class LayerTree {
   /// The root of the layer tree.
   final RootLayer rootLayer;
 
-  /// The pictures that were cloned into this layer tree.
-  ///
-  /// They need to be disposed of after the tree has been rendered.
-  final List<LayerPicture> clonedPictures = <LayerPicture>[];
-
   /// The devicePixelRatio of the frame to paint this layer tree into.
   double? devicePixelRatio;
 
@@ -77,10 +72,10 @@ class LayerTree {
   }
 
   void dispose() {
-    for (final LayerPicture picture in clonedPictures) {
+    for (final LayerPicture picture in rootLayer.clonedPictures) {
       picture.dispose();
     }
-    clonedPictures.clear();
+    rootLayer.clonedPictures.clear();
   }
 }
 

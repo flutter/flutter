@@ -326,7 +326,6 @@ abstract class Renderer {
     FrameTimingRecorder? recorder,
   ) async {
     await rasterizer.draw((scene as LayerScene).layerTree, recorder);
-    scene.layerTree.dispose();
     recorder?.submitTimings();
   }
 
