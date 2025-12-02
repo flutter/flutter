@@ -3465,6 +3465,46 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     },
   );
 
+  testWidgets(
+    'Scrollbar gestures disabled when maxScrollExtent == minScrollExtent',
+    (WidgetTester tester) async {
+      // Test for the condition: maxScrollExtent > minScrollExtent
+      // When maxScrollExtent == minScrollExtent, gestures should be disabled.
+      final scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+
+      RawGestureDetector getScrollbarGestureDetector() {
+        return tester.widget<RawGestureDetector>(
+          find
+              .descendant(of: find.byType(RawScrollbar), matching: find.byType(RawGestureDetector))
+              .first,
+        );
+      }
+
+      // Content that fits exactly (maxScrollExtent == minScrollExtent == 0.0)
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(),
+            child: RawScrollbar(
+              interactive: true,
+              controller: scrollController,
+              child: SingleChildScrollView(
+                controller: scrollController,
+                child: const SizedBox(height: 600.0, width: 800.0),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // When maxScrollExtent == minScrollExtent, gestures should be disabled.
+      expect(getScrollbarGestureDetector().gestures.length, 0);
+    },
+  );
+
   testWidgets('Drag horizontal and vertical scrollbars', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/87697
     final verticalScrollController = ScrollController();
