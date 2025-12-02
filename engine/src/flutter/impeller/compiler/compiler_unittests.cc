@@ -123,6 +123,86 @@ TEST_P(CompilerTest, BindingBaseForFragShader) {
   ASSERT_GT(frag_uniform_binding, vert_uniform_binding);
 }
 
+TEST_P(CompilerTest, UniformsAppearInJson) {
+  if (GetParam() == TargetPlatform::kSkSL) {
+    GTEST_SKIP() << "Not supported with SkSL";
+  }
+
+  ASSERT_TRUE(CanCompileAndReflect("sample_with_uniforms.frag",
+                                   SourceType::kFragmentShader,
+                                   SourceLanguage::kGLSL));
+
+  struct uniform_info {
+    std::string name;
+    std::string type;
+    uint32_t location;
+    uint32_t columns;
+    uint32_t vec_size;
+  };
+
+  auto json_fd = GetReflectionJson("sample_with_uniforms.frag");
+  auto get_uniform = [&json_fd](uint32_t index,
+                                bool is_sampler =
+                                    false) -> std::optional<uniform_info> {
+    nlohmann::json shader_json = nlohmann::json::parse(json_fd->GetMapping());
+    auto list = shader_json[is_sampler ? "sampled_images" : "uniforms"];
+    EXPECT_LT(index, list.size());
+    if (index >= list.size()) {
+      return std::nullopt;
+    }
+    std::string name = list[index]["name"].get<std::string>();
+    std::string type = list[index]["type"]["type_name"].get<std::string>();
+    uint32_t location = list[index]["location"].get<uint32_t>();
+    uint32_t columns = list[index]["type"]["columns"].get<uint32_t>();
+    uint32_t vec_size = list[index]["type"]["vec_size"].get<uint32_t>();
+    return uniform_info{name, type, location, columns, vec_size};
+  };
+  auto get_float_uniform =
+      [&get_uniform](uint32_t index) -> std::optional<uniform_info> {
+    return get_uniform(index, false);
+  };
+  auto get_sampler_uniform =
+      [&get_uniform](uint32_t index) -> std::optional<uniform_info> {
+    return get_uniform(index, true);
+  };
+
+  {
+    std::optional<uniform_info> info = get_sampler_uniform(0);
+    ASSERT_TRUE(info.has_value());
+    if (info.has_value()) {
+      EXPECT_EQ(info->name, "uFirstSampler");
+      EXPECT_EQ(info->type, "ShaderType::kSampledImage");
+      EXPECT_EQ(info->location, 0u);
+      EXPECT_EQ(info->columns, 1u);
+      EXPECT_EQ(info->vec_size, 1u);
+    }
+  }
+
+  {
+    std::optional<uniform_info> info = get_sampler_uniform(1);
+    ASSERT_TRUE(info.has_value());
+    if (info.has_value()) {
+      EXPECT_EQ(info->name, "uSampler");
+      EXPECT_EQ(info->type, "ShaderType::kSampledImage");
+      EXPECT_EQ(info->location, 1u);
+      EXPECT_EQ(info->columns, 1u);
+      EXPECT_EQ(info->vec_size, 1u);
+    }
+  }
+
+  {
+    std::optional<uniform_info> info = get_float_uniform(0);
+    ASSERT_TRUE(info.has_value());
+    if (info.has_value()) {
+      EXPECT_EQ(info->name, "uFloat");
+      EXPECT_EQ(info->type, "ShaderType::kFloat");
+      EXPECT_EQ(info->location, 0u);
+      EXPECT_EQ(info->columns, 1u);
+      EXPECT_EQ(info->vec_size, 1u);
+    }
+  }
+}
+
 TEST_P(CompilerTest, UniformsHaveBindingAndSet) {
   if (GetParam() == TargetPlatform::kSkSL) {
     GTEST_SKIP() << "Not supported with SkSL";
