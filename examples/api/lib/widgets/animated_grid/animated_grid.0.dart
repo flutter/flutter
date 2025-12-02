@@ -21,7 +21,8 @@ class _AnimatedGridSampleState extends State<AnimatedGridSample> {
   final GlobalKey<AnimatedGridState> _gridKey = GlobalKey<AnimatedGridState>();
   late ListModel<int> _list;
   int? _selectedItem;
-  late int _nextItem; // The next item inserted when the user presses the '+' button.
+  late int
+  _nextItem; // The next item inserted when the user presses the '+' button.
 
   @override
   void initState() {
@@ -35,7 +36,11 @@ class _AnimatedGridSampleState extends State<AnimatedGridSample> {
   }
 
   // Used to build list items that haven't been removed.
-  Widget _buildItem(BuildContext context, int index, Animation<double> animation) {
+  Widget _buildItem(
+    BuildContext context,
+    int index,
+    Animation<double> animation,
+  ) {
     return CardItem(
       animation: animation,
       item: _list[index],
@@ -53,7 +58,11 @@ class _AnimatedGridSampleState extends State<AnimatedGridSample> {
   // completed (even though it's gone as far as this ListModel is concerned).
   // The widget will be used by the [AnimatedGridState.removeItem] method's
   // [AnimatedGridRemovedItemBuilder] parameter.
-  Widget _buildRemovedItem(int item, BuildContext context, Animation<double> animation) {
+  Widget _buildRemovedItem(
+    int item,
+    BuildContext context,
+    Animation<double> animation,
+  ) {
     return CardItem(
       animation: animation,
       item: item,
@@ -64,7 +73,9 @@ class _AnimatedGridSampleState extends State<AnimatedGridSample> {
 
   // Insert the "next item" into the list model.
   void _insert() {
-    final int index = _selectedItem == null ? _list.length : _list.indexOf(_selectedItem!);
+    final int index = _selectedItem == null
+        ? _list.length
+        : _list.indexOf(_selectedItem!);
     setState(() {
       _list.insert(index, _nextItem++);
     });
@@ -138,8 +149,11 @@ typedef RemovedItemBuilder<T> =
 /// mutate the list must make the same changes to the animated list in terms
 /// of [AnimatedGridState.insertItem] and [AnimatedGridState.removeItem].
 class ListModel<E> {
-  ListModel({required this.listKey, required this.removedItemBuilder, Iterable<E>? initialItems})
-    : _items = List<E>.from(initialItems ?? <E>[]);
+  ListModel({
+    required this.listKey,
+    required this.removedItemBuilder,
+    Iterable<E>? initialItems,
+  }) : _items = List<E>.from(initialItems ?? <E>[]);
 
   final GlobalKey<AnimatedGridState> listKey;
   final RemovedItemBuilder<E> removedItemBuilder;
@@ -149,13 +163,19 @@ class ListModel<E> {
 
   void insert(int index, E item) {
     _items.insert(index, item);
-    _animatedGrid!.insertItem(index, duration: const Duration(milliseconds: 500));
+    _animatedGrid!.insertItem(
+      index,
+      duration: const Duration(milliseconds: 500),
+    );
   }
 
   E removeAt(int index) {
     final E removedItem = _items.removeAt(index);
     if (removedItem != null) {
-      _animatedGrid!.removeItem(index, (BuildContext context, Animation<double> animation) {
+      _animatedGrid!.removeItem(index, (
+        BuildContext context,
+        Animation<double> animation,
+      ) {
         return removedItemBuilder(removedItem, context, animation);
       });
     }

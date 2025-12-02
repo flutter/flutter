@@ -4,8 +4,7 @@ repository: https://github.com/flutter/flutter/dev/integration_tests/new_gallery
 version: 2.10.2+021002 # See README.md for details on versioning.
 
 environment:
-  flutter: ^3.13.0
-  sdk: ^3.7.0-0
+  sdk: ^3.9.0-0
 resolution: workspace
 
 

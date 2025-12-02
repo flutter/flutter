@@ -49,7 +49,7 @@ ui.Offset computeEventOffsetToTarget(
   }
 
   // On another DOM Element (normally a platform view)
-  final bool isTargetOutsideOfShadowDOM = eventTarget != actualTarget;
+  final isTargetOutsideOfShadowDOM = eventTarget != actualTarget;
   if (isTargetOutsideOfShadowDOM) {
     final DomRect origin = actualTarget.getBoundingClientRect();
     // event.clientX/Y and origin.x/y are relative **to the viewport**.
@@ -83,13 +83,13 @@ ui.Offset _computeOffsetForInputs(
   final DomHTMLElement domElement = textEditing.strategy.activeDomElement;
   assert(eventTarget == domElement, 'The targeted input element must be the active input element');
 
-  final DomElement? originalTarget = event.target as DomElement?;
+  final originalTarget = event.target as DomElement?;
   final double offsetX;
   final double offsetY;
 
   if (originalTarget != null && originalTarget != eventTarget) {
-    final eventTargetBounds = (eventTarget as DomElement).getBoundingClientRect();
-    final originalTargetBounds = originalTarget.getBoundingClientRect();
+    final DomRect eventTargetBounds = (eventTarget as DomElement).getBoundingClientRect();
+    final DomRect originalTargetBounds = originalTarget.getBoundingClientRect();
     offsetX = event.offsetX + (originalTargetBounds.left - eventTargetBounds.left);
     offsetY = event.offsetY + (originalTargetBounds.top - eventTargetBounds.top);
   } else {
@@ -99,7 +99,7 @@ ui.Offset _computeOffsetForInputs(
 
   final Float32List transformValues = inputGeometry.globalTransform;
   assert(transformValues.length == 16);
-  final Matrix4 transform = Matrix4.fromFloat32List(transformValues);
+  final transform = Matrix4.fromFloat32List(transformValues);
   final Vector3 transformedPoint = transform.perspectiveTransform(x: offsetX, y: offsetY, z: 0);
 
   return ui.Offset(transformedPoint.x, transformedPoint.y);
@@ -142,7 +142,7 @@ ui.Offset _computeOffsetForTalkbackEvent(DomMouseEvent event, DomElement actualT
   double offsetX = event.clientX;
   double offsetY = event.clientY;
   // Compute the scroll offset of actualTarget
-  DomHTMLElement parent = actualTarget as DomHTMLElement;
+  var parent = actualTarget as DomHTMLElement;
   while (parent.offsetParent != null) {
     offsetX -= parent.offsetLeft - parent.scrollLeft;
     offsetY -= parent.offsetTop - parent.scrollTop;

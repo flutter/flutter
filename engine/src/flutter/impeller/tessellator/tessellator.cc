@@ -137,12 +137,24 @@ static size_t ComputeQuadrantDivisions(impeller::Scalar pixel_radius) {
   return ceil(impeller::kPiOver4 / std::acos(1 - k));
 }
 
+template <typename IndexT>
+impeller::IndexType IndexTypeFor();
+template <>
+impeller::IndexType IndexTypeFor<uint32_t>() {
+  return impeller::IndexType::k32bit;
+}
+template <>
+impeller::IndexType IndexTypeFor<uint16_t>() {
+  return impeller::IndexType::k16bit;
+}
+
 /// @brief A vertex writer that generates a triangle fan and requires primitive
 /// restart.
+template <typename IndexT>
 class FanPathVertexWriter : public impeller::PathTessellator::VertexWriter {
  public:
   explicit FanPathVertexWriter(impeller::Point* point_buffer,
-                               uint16_t* index_buffer)
+                               IndexT* index_buffer)
       : point_buffer_(point_buffer), index_buffer_(index_buffer) {}
 
   ~FanPathVertexWriter() = default;
@@ -154,7 +166,7 @@ class FanPathVertexWriter : public impeller::PathTessellator::VertexWriter {
     if (count_ == 0) {
       return;
     }
-    index_buffer_[index_count_++] = 0xFFFF;
+    index_buffer_[index_count_++] = static_cast<IndexT>(-1);
   }
 
   void Write(impeller::Point point) override {
@@ -166,15 +178,16 @@ class FanPathVertexWriter : public impeller::PathTessellator::VertexWriter {
   size_t count_ = 0;
   size_t index_count_ = 0;
   impeller::Point* point_buffer_ = nullptr;
-  uint16_t* index_buffer_ = nullptr;
+  IndexT* index_buffer_ = nullptr;
 };
 
 /// @brief A vertex writer that generates a triangle strip and requires
 ///        primitive restart.
+template <typename IndexT>
 class StripPathVertexWriter : public impeller::PathTessellator::VertexWriter {
  public:
   explicit StripPathVertexWriter(impeller::Point* point_buffer,
-                                 uint16_t* index_buffer)
+                                 IndexT* index_buffer)
       : point_buffer_(point_buffer), index_buffer_(index_buffer) {}
 
   ~StripPathVertexWriter() = default;
@@ -206,7 +219,7 @@ class StripPathVertexWriter : public impeller::PathTessellator::VertexWriter {
     }
 
     contour_start_ = count_;
-    index_buffer_[index_count_++] = 0xFFFF;
+    index_buffer_[index_count_++] = static_cast<IndexT>(-1);
   }
 
   void Write(impeller::Point point) override {
@@ -218,14 +231,15 @@ class StripPathVertexWriter : public impeller::PathTessellator::VertexWriter {
   size_t index_count_ = 0;
   size_t contour_start_ = 0;
   impeller::Point* point_buffer_ = nullptr;
-  uint16_t* index_buffer_ = nullptr;
+  IndexT* index_buffer_ = nullptr;
 };
 
 /// @brief A vertex writer that has no hardware requirements.
+template <typename IndexT>
 class GLESPathVertexWriter : public impeller::PathTessellator::VertexWriter {
  public:
   explicit GLESPathVertexWriter(std::vector<impeller::Point>& points,
-                                std::vector<uint16_t>& indices)
+                                std::vector<IndexT>& indices)
       : points_(points), indices_(indices) {}
 
   ~GLESPathVertexWriter() = default;
@@ -286,19 +300,120 @@ class GLESPathVertexWriter : public impeller::PathTessellator::VertexWriter {
   bool previous_contour_odd_points_ = false;
   size_t contour_start_ = 0u;
   std::vector<impeller::Point>& points_;
-  std::vector<uint16_t>& indices_;
+  std::vector<IndexT>& indices_;
 };
+
+template <typename IndexT>
+void DoTessellateConvexInternal(const impeller::PathSource& path,
+                                std::vector<impeller::Point>& point_buffer,
+                                std::vector<IndexT>& index_buffer,
+                                impeller::Scalar tolerance) {
+  point_buffer.clear();
+  index_buffer.clear();
+
+  GLESPathVertexWriter writer(point_buffer, index_buffer);
+
+  impeller::PathTessellator::PathToFilledVertices(path, writer, tolerance);
+}
 
 }  // namespace
 
 namespace impeller {
 
-Tessellator::Tessellator()
-    : point_buffer_(std::make_unique<std::vector<Point>>()),
-      index_buffer_(std::make_unique<std::vector<uint16_t>>()),
-      stroke_points_(kPointArenaSize) {
-  point_buffer_->reserve(2048);
-  index_buffer_->reserve(2048);
+template <typename IndexT>
+class ConvexTessellatorImpl : public Tessellator::ConvexTessellator {
+ public:
+  ConvexTessellatorImpl() {
+    point_buffer_.reserve(2048);
+    index_buffer_.reserve(2048);
+  }
+
+  VertexBuffer TessellateConvex(const PathSource& path,
+                                HostBuffer& data_host_buffer,
+                                HostBuffer& indexes_host_buffer,
+                                Scalar tolerance,
+                                bool supports_primitive_restart,
+                                bool supports_triangle_fan) override {
+    if (supports_primitive_restart) {
+      // Primitive Restart.
+      const auto [point_count, contour_count] =
+          PathTessellator::CountFillStorage(path, tolerance);
+      BufferView point_buffer = data_host_buffer.Emplace(
+          nullptr, sizeof(Point) * point_count, alignof(Point));
+      BufferView index_buffer = indexes_host_buffer.Emplace(
+          nullptr, sizeof(IndexT) * (point_count + contour_count),
+          alignof(IndexT));
+
+      auto* points_ptr =
+          reinterpret_cast<Point*>(point_buffer.GetBuffer()->OnGetContents() +
+                                   point_buffer.GetRange().offset);
+      auto* indices_ptr =
+          reinterpret_cast<IndexT*>(index_buffer.GetBuffer()->OnGetContents() +
+                                    index_buffer.GetRange().offset);
+
+      auto tessellate_path = [&](auto& writer) {
+        PathTessellator::PathToFilledVertices(path, writer, tolerance);
+        FML_DCHECK(writer.GetPointCount() <= point_count);
+        FML_DCHECK(writer.GetIndexCount() <= (point_count + contour_count));
+        point_buffer.GetBuffer()->Flush(point_buffer.GetRange());
+        index_buffer.GetBuffer()->Flush(index_buffer.GetRange());
+
+        return VertexBuffer{
+            .vertex_buffer = std::move(point_buffer),
+            .index_buffer = std::move(index_buffer),
+            .vertex_count = writer.GetIndexCount(),
+            .index_type = IndexTypeFor<IndexT>(),
+        };
+      };
+
+      if (supports_triangle_fan) {
+        FanPathVertexWriter writer(points_ptr, indices_ptr);
+        return tessellate_path(writer);
+      } else {
+        StripPathVertexWriter writer(points_ptr, indices_ptr);
+        return tessellate_path(writer);
+      }
+    }
+
+    DoTessellateConvexInternal(path, point_buffer_, index_buffer_, tolerance);
+
+    if (point_buffer_.empty()) {
+      return VertexBuffer{
+          .vertex_buffer = {},
+          .index_buffer = {},
+          .vertex_count = 0u,
+          .index_type = IndexTypeFor<IndexT>(),
+      };
+    }
+
+    BufferView vertex_buffer = data_host_buffer.Emplace(
+        point_buffer_.data(), sizeof(Point) * point_buffer_.size(),
+        alignof(Point));
+
+    BufferView index_buffer = indexes_host_buffer.Emplace(
+        index_buffer_.data(), sizeof(IndexT) * index_buffer_.size(),
+        alignof(IndexT));
+
+    return VertexBuffer{
+        .vertex_buffer = std::move(vertex_buffer),
+        .index_buffer = std::move(index_buffer),
+        .vertex_count = index_buffer_.size(),
+        .index_type = IndexTypeFor<IndexT>(),
+    };
+  }
+
+ private:
+  std::vector<Point> point_buffer_;
+  std::vector<IndexT> index_buffer_;
+};
+
+Tessellator::Tessellator(bool supports_32bit_primitive_indices)
+    : stroke_points_(kPointArenaSize) {
+  if (supports_32bit_primitive_indices) {
+    convex_tessellator_ = std::make_unique<ConvexTessellatorImpl<uint32_t>>();
+  } else {
+    convex_tessellator_ = std::make_unique<ConvexTessellatorImpl<uint16_t>>();
+  }
 }
 
 Tessellator::~Tessellator() = default;
@@ -317,96 +432,16 @@ VertexBuffer Tessellator::TessellateConvex(const PathSource& path,
                                            Scalar tolerance,
                                            bool supports_primitive_restart,
                                            bool supports_triangle_fan) {
-  if (supports_primitive_restart) {
-    // Primitive Restart.
-    const auto [point_count, contour_count] =
-        PathTessellator::CountFillStorage(path, tolerance);
-    BufferView point_buffer = data_host_buffer.Emplace(
-        nullptr, sizeof(Point) * point_count, alignof(Point));
-    BufferView index_buffer = indexes_host_buffer.Emplace(
-        nullptr, sizeof(uint16_t) * (point_count + contour_count),
-        alignof(uint16_t));
-
-    if (supports_triangle_fan) {
-      FanPathVertexWriter writer(
-          reinterpret_cast<Point*>(point_buffer.GetBuffer()->OnGetContents() +
-                                   point_buffer.GetRange().offset),
-          reinterpret_cast<uint16_t*>(
-              index_buffer.GetBuffer()->OnGetContents() +
-              index_buffer.GetRange().offset));
-      PathTessellator::PathToFilledVertices(path, writer, tolerance);
-      FML_DCHECK(writer.GetPointCount() <= point_count);
-      FML_DCHECK(writer.GetIndexCount() <= (point_count + contour_count));
-      point_buffer.GetBuffer()->Flush(point_buffer.GetRange());
-      index_buffer.GetBuffer()->Flush(index_buffer.GetRange());
-
-      return VertexBuffer{
-          .vertex_buffer = std::move(point_buffer),
-          .index_buffer = std::move(index_buffer),
-          .vertex_count = writer.GetIndexCount(),
-          .index_type = IndexType::k16bit,
-      };
-    } else {
-      StripPathVertexWriter writer(
-          reinterpret_cast<Point*>(point_buffer.GetBuffer()->OnGetContents() +
-                                   point_buffer.GetRange().offset),
-          reinterpret_cast<uint16_t*>(
-              index_buffer.GetBuffer()->OnGetContents() +
-              index_buffer.GetRange().offset));
-      PathTessellator::PathToFilledVertices(path, writer, tolerance);
-      FML_DCHECK(writer.GetPointCount() <= point_count);
-      FML_DCHECK(writer.GetIndexCount() <= (point_count + contour_count));
-      point_buffer.GetBuffer()->Flush(point_buffer.GetRange());
-      index_buffer.GetBuffer()->Flush(index_buffer.GetRange());
-
-      return VertexBuffer{
-          .vertex_buffer = std::move(point_buffer),
-          .index_buffer = std::move(index_buffer),
-          .vertex_count = writer.GetIndexCount(),
-          .index_type = IndexType::k16bit,
-      };
-    }
-  }
-
-  FML_DCHECK(point_buffer_);
-  FML_DCHECK(index_buffer_);
-  TessellateConvexInternal(path, *point_buffer_, *index_buffer_, tolerance);
-
-  if (point_buffer_->empty()) {
-    return VertexBuffer{
-        .vertex_buffer = {},
-        .index_buffer = {},
-        .vertex_count = 0u,
-        .index_type = IndexType::k16bit,
-    };
-  }
-
-  BufferView vertex_buffer = data_host_buffer.Emplace(
-      point_buffer_->data(), sizeof(Point) * point_buffer_->size(),
-      alignof(Point));
-
-  BufferView index_buffer = indexes_host_buffer.Emplace(
-      index_buffer_->data(), sizeof(uint16_t) * index_buffer_->size(),
-      alignof(uint16_t));
-
-  return VertexBuffer{
-      .vertex_buffer = std::move(vertex_buffer),
-      .index_buffer = std::move(index_buffer),
-      .vertex_count = index_buffer_->size(),
-      .index_type = IndexType::k16bit,
-  };
+  return convex_tessellator_->TessellateConvex(
+      path, data_host_buffer, indexes_host_buffer, tolerance,
+      supports_primitive_restart, supports_triangle_fan);
 }
 
 void Tessellator::TessellateConvexInternal(const PathSource& path,
                                            std::vector<Point>& point_buffer,
                                            std::vector<uint16_t>& index_buffer,
                                            Scalar tolerance) {
-  point_buffer.clear();
-  index_buffer.clear();
-
-  GLESPathVertexWriter writer(point_buffer, index_buffer);
-
-  PathTessellator::PathToFilledVertices(path, writer, tolerance);
+  DoTessellateConvexInternal(path, point_buffer, index_buffer, tolerance);
 }
 
 Tessellator::Trigs::Trigs(Scalar pixel_radius)
@@ -487,31 +522,44 @@ EllipticalVertexGenerator Tessellator::StrokedCircle(
   }
 }
 
-ArcVertexGenerator::ArcVertexGenerator(const Arc::Iteration& iteration,
-                                       Trigs&& trigs,
-                                       const Rect& oval_bounds,
-                                       bool use_center,
-                                       bool supports_triangle_fans)
-    : iteration_(iteration),
-      trigs_(std::move(trigs)),
-      oval_bounds_(oval_bounds),
-      use_center_(use_center),
-      half_width_(-1.0f),
-      cap_(Cap::kButt),
-      supports_triangle_fans_(supports_triangle_fans) {}
+ArcVertexGenerator ArcVertexGenerator::MakeFilled(
+    const Arc::Iteration& iteration,
+    Trigs&& trigs,
+    const Rect& oval_bounds,
+    bool use_center,
+    bool supports_triangle_fans) {
+  return ArcVertexGenerator(iteration, std::move(trigs), oval_bounds,
+                            use_center, supports_triangle_fans, -1.0f,
+                            Cap::kSquare, nullptr);
+}
+
+ArcVertexGenerator ArcVertexGenerator::MakeStroked(
+    const Arc::Iteration& iteration,
+    Trigs&& trigs,
+    const Rect& oval_bounds,
+    Scalar half_width,
+    Cap cap,
+    std::unique_ptr<Trigs> round_cap_trigs) {
+  return ArcVertexGenerator(iteration, std::move(trigs), oval_bounds, false,
+                            false, half_width, cap, std::move(round_cap_trigs));
+}
 
 ArcVertexGenerator::ArcVertexGenerator(const Arc::Iteration& iteration,
                                        Trigs&& trigs,
                                        const Rect& oval_bounds,
+                                       bool use_center,
+                                       bool supports_triangle_fans,
                                        Scalar half_width,
-                                       Cap cap)
+                                       Cap cap,
+                                       std::unique_ptr<Trigs> round_cap_trigs)
     : iteration_(iteration),
       trigs_(std::move(trigs)),
       oval_bounds_(oval_bounds),
-      use_center_(false),
+      use_center_(use_center),
+      supports_triangle_fans_(supports_triangle_fans),
       half_width_(half_width),
       cap_(cap),
-      supports_triangle_fans_(false) {}
+      round_cap_trigs_(std::move(round_cap_trigs)) {}
 
 PrimitiveType ArcVertexGenerator::GetTriangleType() const {
   return (half_width_ < 0 && supports_triangle_fans_)
@@ -523,10 +571,15 @@ size_t ArcVertexGenerator::GetVertexCount() const {
   size_t count = iteration_.GetPointCount();
   if (half_width_ > 0) {
     FML_DCHECK(!use_center_);
-    FML_DCHECK(cap_ != Cap::kRound);
     count *= 2;
     if (cap_ == Cap::kSquare) {
       count += 4;
+    } else if (cap_ == Cap::kRound) {
+      FML_DCHECK(round_cap_trigs_);
+      // 4 vertices for each Trig in round_cap_trigs_: 2 vertices for each in
+      // the start cap and 2 for each in the end cap. Subtract 4 because the cap
+      // vertices elide the beginning and end vertices of the arc.
+      count += round_cap_trigs_->size() * 4 - 4;
     }
   } else if (supports_triangle_fans_) {
     if (use_center_) {
@@ -544,7 +597,7 @@ void ArcVertexGenerator::GenerateVertices(
   if (half_width_ > 0) {
     FML_DCHECK(!use_center_);
     Tessellator::GenerateStrokedArc(trigs_, iteration_, oval_bounds_,
-                                    half_width_, cap_, proc);
+                                    half_width_, cap_, round_cap_trigs_, proc);
   } else if (supports_triangle_fans_) {
     Tessellator::GenerateFilledArcFan(trigs_, iteration_, oval_bounds_,
                                       use_center_, proc);
@@ -560,7 +613,7 @@ ArcVertexGenerator Tessellator::FilledArc(const Matrix& view_transform,
   size_t divisions = ComputeQuadrantDivisions(
       view_transform.GetMaxBasisLengthXY() * arc.GetOvalSize().MaxDimension());
 
-  return ArcVertexGenerator(
+  return ArcVertexGenerator::MakeFilled(
       arc.ComputeIterations(divisions), GetTrigsForDivisions(divisions),
       arc.GetOvalBounds(), arc.IncludeCenter(), supports_triangle_fans);
 };
@@ -576,9 +629,15 @@ ArcVertexGenerator Tessellator::StrokedArc(const Matrix& view_transform,
       ComputeQuadrantDivisions(view_transform.GetMaxBasisLengthXY() *
                                (arc.GetOvalSize().MaxDimension() + half_width));
 
-  return ArcVertexGenerator(arc.ComputeIterations(divisions),
-                            GetTrigsForDivisions(divisions),
-                            arc.GetOvalBounds(), half_width, cap);
+  std::unique_ptr<Trigs> round_cap_trigs;
+  if (cap == Cap::kRound) {
+    round_cap_trigs = std::make_unique<Trigs>(GetTrigsForDeviceRadius(
+        view_transform.GetMaxBasisLengthXY() * half_width));
+  }
+
+  return ArcVertexGenerator::MakeStroked(
+      arc.ComputeIterations(divisions), GetTrigsForDivisions(divisions),
+      arc.GetOvalBounds(), half_width, cap, std::move(round_cap_trigs));
 }
 
 EllipticalVertexGenerator Tessellator::RoundCapLine(
@@ -794,26 +853,41 @@ void Tessellator::GenerateFilledArcStrip(const Trigs& trigs,
   proc(center + iteration.end * radii);
 }
 
-void Tessellator::GenerateStrokedArc(const Trigs& trigs,
-                                     const Arc::Iteration& iteration,
-                                     const Rect& oval_bounds,
-                                     Scalar half_width,
-                                     Cap cap,
-                                     const TessellatedVertexProc& proc) {
+void Tessellator::GenerateStrokedArc(
+    const Trigs& trigs,
+    const Arc::Iteration& iteration,
+    const Rect& oval_bounds,
+    Scalar half_width,
+    Cap cap,
+    const std::unique_ptr<Trigs>& round_cap_trigs,
+    const TessellatedVertexProc& proc) {
   Point center = oval_bounds.GetCenter();
   Size base_radii = oval_bounds.GetSize() * 0.5f;
   Size inner_radii = base_radii - Size(half_width, half_width);
   Size outer_radii = base_radii + Size(half_width, half_width);
 
-  FML_DCHECK(cap != Cap::kRound);
-  if (cap == Cap::kSquare) {
-    Vector2 offset =
-        Vector2{iteration.start.y, -iteration.start.x} * half_width;
-    proc(center + iteration.start * inner_radii + offset);
-    proc(center + iteration.start * outer_radii + offset);
+  // Starting cap
+  switch (cap) {
+    case Cap::kButt:
+      proc(center + iteration.start * inner_radii);
+      proc(center + iteration.start * outer_radii);
+      break;
+    case Cap::kRound:
+      FML_DCHECK(round_cap_trigs);
+      Tessellator::GenerateStartRoundCap(center + iteration.start * base_radii,
+                                         -iteration.start * half_width,
+                                         *round_cap_trigs, proc);
+      break;
+    case Cap::kSquare:
+      Vector2 offset =
+          Vector2{iteration.start.y, -iteration.start.x} * half_width;
+      proc(center + iteration.start * inner_radii + offset);
+      proc(center + iteration.start * outer_radii + offset);
+      proc(center + iteration.start * inner_radii);
+      proc(center + iteration.start * outer_radii);
+      break;
   }
-  proc(center + iteration.start * inner_radii);
-  proc(center + iteration.start * outer_radii);
+
   for (size_t i = 0; i < iteration.quadrant_count; i++) {
     auto quadrant = iteration.quadrants[i];
     for (size_t j = quadrant.start_index; j < quadrant.end_index; j++) {
@@ -821,12 +895,26 @@ void Tessellator::GenerateStrokedArc(const Trigs& trigs,
       proc(center + trigs[j] * quadrant.axis * outer_radii);
     }
   }
-  proc(center + iteration.end * inner_radii);
-  proc(center + iteration.end * outer_radii);
-  if (cap == Cap::kSquare) {
-    Vector2 offset = Vector2{-iteration.end.y, iteration.end.x} * half_width;
-    proc(center + iteration.end * inner_radii + offset);
-    proc(center + iteration.end * outer_radii + offset);
+
+  // Ending cap
+  switch (cap) {
+    case Cap::kButt:
+      proc(center + iteration.end * inner_radii);
+      proc(center + iteration.end * outer_radii);
+      break;
+    case Cap::kRound:
+      FML_DCHECK(round_cap_trigs);
+      Tessellator::GenerateEndRoundCap(center + iteration.end * base_radii,
+                                       -iteration.end * half_width,
+                                       *round_cap_trigs, proc);
+      break;
+    case Cap::kSquare:
+      Vector2 offset = Vector2{-iteration.end.y, iteration.end.x} * half_width;
+      proc(center + iteration.end * inner_radii);
+      proc(center + iteration.end * outer_radii);
+      proc(center + iteration.end * inner_radii + offset);
+      proc(center + iteration.end * outer_radii + offset);
+      break;
   }
 }
 
@@ -845,22 +933,8 @@ void Tessellator::GenerateRoundCapLine(
   along *= radius / along.GetLength();
   auto across = Point(-along.y, along.x);
 
-  for (auto& trig : trigs) {
-    auto relative_along = along * trig.cos;
-    auto relative_across = across * trig.sin;
-    proc(p0 - relative_along + relative_across);
-    proc(p0 - relative_along - relative_across);
-  }
-
-  // The second half of the round caps should be iterated in reverse, but
-  // we can instead iterate forward and swap the sin/cos values as they
-  // should be symmetric.
-  for (auto& trig : trigs) {
-    auto relative_along = along * trig.sin;
-    auto relative_across = across * trig.cos;
-    proc(p1 + relative_along + relative_across);
-    proc(p1 + relative_along - relative_across);
-  }
+  Tessellator::GenerateStartRoundCap(p0, across, trigs, proc);
+  Tessellator::GenerateEndRoundCap(p1, across, trigs, proc);
 }
 
 void Tessellator::GenerateFilledEllipse(
@@ -920,6 +994,37 @@ void Tessellator::GenerateFilledRoundRect(
     auto offset = Point(trig.sin * radii.width, trig.cos * radii.height);
     proc({right + offset.x, bottom + offset.y});
     proc({right + offset.x, top - offset.y});
+  }
+}
+
+void Tessellator::GenerateStartRoundCap(const Point& p,
+                                        const Vector2& perpendicular,
+                                        const Trigs& trigs,
+                                        const TessellatedVertexProc& proc) {
+  Point along(perpendicular.y, -perpendicular.x);
+
+  for (auto& trig : trigs) {
+    auto relative_along = along * trig.cos;
+    auto relative_across = perpendicular * trig.sin;
+    proc(p - relative_along + relative_across);
+    proc(p - relative_along - relative_across);
+  }
+}
+
+void Tessellator::GenerateEndRoundCap(const Point& p,
+                                      const Vector2& perpendicular,
+                                      const Trigs& trigs,
+                                      const TessellatedVertexProc& proc) {
+  Point along(perpendicular.y, -perpendicular.x);
+
+  // The ending round cap should be iterated in reverse, but
+  // we can instead iterate forward and swap the sin/cos values as they
+  // should be symmetric.
+  for (auto& trig : trigs) {
+    auto relative_along = along * trig.sin;
+    auto relative_across = perpendicular * trig.cos;
+    proc(p + relative_along + relative_across);
+    proc(p + relative_along - relative_across);
   }
 }
 

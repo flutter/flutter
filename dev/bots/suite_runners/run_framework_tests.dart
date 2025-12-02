@@ -14,14 +14,14 @@ import '../utils.dart';
 import 'run_test_harness_tests.dart';
 
 Future<void> frameworkTestsRunner() async {
-  final List<String> trackWidgetCreationAlternatives = <String>[
+  final trackWidgetCreationAlternatives = <String>[
     '--track-widget-creation',
     '--no-track-widget-creation',
   ];
 
   Future<void> runWidgets() async {
     printProgress('${green}Running packages/flutter tests $reset for ${cyan}test/widgets/$reset');
-    for (final String trackWidgetCreationOption in trackWidgetCreationAlternatives) {
+    for (final trackWidgetCreationOption in trackWidgetCreationAlternatives) {
       await runFlutterTest(
         path.join(flutterRoot, 'packages', 'flutter'),
         options: <String>[trackWidgetCreationOption],
@@ -29,7 +29,7 @@ Future<void> frameworkTestsRunner() async {
       );
     }
     // Try compiling code outside of the packages/flutter directory with and without --track-widget-creation
-    for (final String trackWidgetCreationOption in trackWidgetCreationAlternatives) {
+    for (final trackWidgetCreationOption in trackWidgetCreationAlternatives) {
       await runFlutterTest(
         path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery'),
         options: <String>[trackWidgetCreationOption],
@@ -71,7 +71,7 @@ Future<void> frameworkTestsRunner() async {
     printProgress(
       '${green}Running packages/flutter tests$reset for $cyan${tests.join(", ")}$reset',
     );
-    for (final String trackWidgetCreationOption in trackWidgetCreationAlternatives) {
+    for (final trackWidgetCreationOption in trackWidgetCreationAlternatives) {
       await runFlutterTest(
         path.join(flutterRoot, 'packages', 'flutter'),
         options: <String>[trackWidgetCreationOption],
@@ -131,18 +131,18 @@ Future<void> frameworkTestsRunner() async {
           ).readAsBytesSync(),
         );
         final ArchiveFile libapp = archive.findFile('base/lib/arm64-v8a/libapp.so')!;
-        final Uint8List libappBytes = libapp.content as Uint8List; // bytes decompressed here
+        final libappBytes = libapp.content as Uint8List; // bytes decompressed here
         final String libappStrings = utf8.decode(libappBytes, allowMalformed: true);
         await runCommand(flutter, <String>['clean'], workingDirectory: tracingDirectory);
-        final List<String> results = <String>[];
-        for (final String pattern in allowed) {
+        final results = <String>[];
+        for (final pattern in allowed) {
           if (!libappStrings.contains(pattern)) {
             results.add(
               'When building with --$modeArgument, expected to find "$pattern" in libapp.so but could not find it.',
             );
           }
         }
-        for (final String pattern in disallowed) {
+        for (final pattern in disallowed) {
           if (libappStrings.contains(pattern)) {
             results.add(
               'When building with --$modeArgument, expected to not find "$pattern" in libapp.so but did find it.',
@@ -155,7 +155,7 @@ Future<void> frameworkTestsRunner() async {
       }
     }
 
-    final List<String> results = <String>[];
+    final results = <String>[];
     results.addAll(
       await verifyTracingAppBuild(
         modeArgument: 'profile',
@@ -208,7 +208,7 @@ Future<void> frameworkTestsRunner() async {
   }
 
   Future<void> runFixTests(String package) async {
-    final List<String> args = <String>['fix', '--compare-to-golden'];
+    final args = <String>['fix', '--compare-to-golden'];
     await runCommand(
       dart,
       args,
@@ -217,8 +217,8 @@ Future<void> frameworkTestsRunner() async {
   }
 
   Future<void> runPrivateTests() async {
-    final List<String> args = <String>['run', 'bin/test_private.dart'];
-    final Map<String, String> environment = <String, String>{
+    final args = <String>['run', 'bin/test_private.dart'];
+    final environment = <String, String>{
       'FLUTTER_ROOT': flutterRoot,
       if (Directory(pubCache).existsSync()) 'PUB_CACHE': pubCache,
     };
@@ -321,7 +321,7 @@ Future<void> frameworkTestsRunner() async {
     await runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'));
     await runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
     await runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'));
-    const String httpClientWarning =
+    const httpClientWarning =
         'Warning: At least one test in this suite creates an HttpClient. When running a test suite that uses\n'
         'TestWidgetsFlutterBinding, all HTTP requests will return status code 400, and no network request\n'
         'will actually be made. Any test expecting a real network connection and status code will fail.\n'

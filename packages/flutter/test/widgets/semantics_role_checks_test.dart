@@ -18,7 +18,7 @@ void main() {
       );
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
-      final FlutterError error = exception! as FlutterError;
+      final error = exception! as FlutterError;
       expect(error.message, 'A tab needs selected states');
     });
 
@@ -31,7 +31,7 @@ void main() {
       );
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
-      final FlutterError error = exception! as FlutterError;
+      final error = exception! as FlutterError;
       expect(error.message, 'A tab must have a tap action');
     });
 
@@ -61,7 +61,7 @@ void main() {
       );
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
-      final FlutterError error = exception! as FlutterError;
+      final error = exception! as FlutterError;
       expect(
         error.message,
         startsWith('Semantics node 1 has role ${SemanticsRole.listItem}, but its parent'),
@@ -96,7 +96,7 @@ void main() {
       );
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
-      final FlutterError error = exception! as FlutterError;
+      final error = exception! as FlutterError;
       expect(error.message, 'a TabBar cannot be empty');
     });
 
@@ -113,7 +113,7 @@ void main() {
       );
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
-      final FlutterError error = exception! as FlutterError;
+      final error = exception! as FlutterError;
       expect(error.message, 'Children of TabBar must have the tab role');
     });
 
@@ -183,7 +183,7 @@ void main() {
       );
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
-      final FlutterError error = exception! as FlutterError;
+      final error = exception! as FlutterError;
       expect(error.message, 'Radio groups must not have multiple checked children');
     });
 
@@ -325,7 +325,7 @@ void main() {
       );
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
-      final FlutterError error = exception! as FlutterError;
+      final error = exception! as FlutterError;
       expect(error.message, 'a menu cannot be empty');
     });
 
@@ -362,7 +362,7 @@ void main() {
       );
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
-      final FlutterError error = exception! as FlutterError;
+      final error = exception! as FlutterError;
       expect(error.message, 'a menu bar cannot be empty');
     });
 
@@ -399,7 +399,7 @@ void main() {
       );
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
-      final FlutterError error = exception! as FlutterError;
+      final error = exception! as FlutterError;
       expect(error.message, 'A menu item must be a child of a menu or a menu bar');
     });
 
@@ -453,7 +453,7 @@ void main() {
       );
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
-      final FlutterError error = exception! as FlutterError;
+      final error = exception! as FlutterError;
       expect(error.message, 'a menu item checkbox must be checkable');
     });
 
@@ -470,7 +470,7 @@ void main() {
       );
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
-      final FlutterError error = exception! as FlutterError;
+      final error = exception! as FlutterError;
       expect(error.message, 'A menu item checkbox must be a child of a menu or a menu bar');
     });
 
@@ -526,7 +526,7 @@ void main() {
       );
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
-      final FlutterError error = exception! as FlutterError;
+      final error = exception! as FlutterError;
       expect(error.message, 'a menu item radio must be checkable');
     });
 
@@ -543,7 +543,7 @@ void main() {
       );
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
-      final FlutterError error = exception! as FlutterError;
+      final error = exception! as FlutterError;
       expect(error.message, 'A menu item radio must be a child of a menu or a menu bar');
     });
 
@@ -600,7 +600,7 @@ void main() {
       );
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
-      final FlutterError error = exception! as FlutterError;
+      final error = exception! as FlutterError;
       expect(
         error.message,
         startsWith('Node 1 has role SemanticsRole.alert but is also a live region.'),
@@ -620,7 +620,7 @@ void main() {
       );
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
-      final FlutterError error = exception! as FlutterError;
+      final error = exception! as FlutterError;
       expect(
         error.message,
         startsWith('Node 1 has role SemanticsRole.status but is also a live region.'),
@@ -712,7 +712,7 @@ void main() {
       );
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
-      final FlutterError error = exception! as FlutterError;
+      final error = exception! as FlutterError;
       expect(
         error.message,
         startsWith(
@@ -748,7 +748,7 @@ void main() {
       );
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
-      final FlutterError error = exception! as FlutterError;
+      final error = exception! as FlutterError;
       expect(
         error.message,
         startsWith(
@@ -819,7 +819,7 @@ void main() {
       );
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
-      final FlutterError error = exception! as FlutterError;
+      final error = exception! as FlutterError;
       expect(
         error.message,
         startsWith(
@@ -844,7 +844,7 @@ void main() {
       );
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
-      final FlutterError error = exception! as FlutterError;
+      final error = exception! as FlutterError;
       expect(
         error.message,
         startsWith(
@@ -912,7 +912,7 @@ void main() {
       );
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
-      final FlutterError error = exception! as FlutterError;
+      final error = exception! as FlutterError;
       expect(
         error.message,
         startsWith(
@@ -937,7 +937,7 @@ void main() {
       );
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
-      final FlutterError error = exception! as FlutterError;
+      final error = exception! as FlutterError;
       expect(
         error.message,
         startsWith('The main landmark role should not contained within any other landmark roles.'),
@@ -1001,7 +1001,7 @@ void main() {
       );
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
-      final FlutterError error = exception! as FlutterError;
+      final error = exception! as FlutterError;
       expect(
         error.message,
         startsWith(
@@ -1054,7 +1054,7 @@ void main() {
       );
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
-      final FlutterError error = exception! as FlutterError;
+      final error = exception! as FlutterError;
       expect(
         error.message,
         startsWith(
