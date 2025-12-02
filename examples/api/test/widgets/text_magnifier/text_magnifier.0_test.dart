@@ -4,30 +4,42 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_api_samples/widgets/text_magnifier/text_magnifier.0.dart' as example;
+import 'package:flutter_api_samples/widgets/text_magnifier/text_magnifier.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
-List<TextSelectionPoint> _globalize(Iterable<TextSelectionPoint> points, RenderBox box) {
+List<TextSelectionPoint> _globalize(
+  Iterable<TextSelectionPoint> points,
+  RenderBox box,
+) {
   return points.map<TextSelectionPoint>((TextSelectionPoint point) {
     return TextSelectionPoint(box.localToGlobal(point.point), point.direction);
   }).toList();
 }
 
-RenderEditable _findRenderEditable<T extends State<StatefulWidget>>(WidgetTester tester) {
-  return (tester.state(find.byType(TextField)) as TextSelectionGestureDetectorBuilderDelegate)
+RenderEditable _findRenderEditable<T extends State<StatefulWidget>>(
+  WidgetTester tester,
+) {
+  return (tester.state(find.byType(TextField))
+          as TextSelectionGestureDetectorBuilderDelegate)
       .editableTextKey
       .currentState!
       .renderEditable;
 }
 
-Offset _textOffsetToPosition<T extends State<StatefulWidget>>(WidgetTester tester, int offset) {
+Offset _textOffsetToPosition<T extends State<StatefulWidget>>(
+  WidgetTester tester,
+  int offset,
+) {
   final RenderEditable renderEditable = _findRenderEditable(tester);
 
   final List<TextSelectionPoint> endpoints = renderEditable
       .getEndpointsForSelection(TextSelection.collapsed(offset: offset))
       .map<TextSelectionPoint>(
-        (TextSelectionPoint point) =>
-            TextSelectionPoint(renderEditable.localToGlobal(point.point), point.direction),
+        (TextSelectionPoint point) => TextSelectionPoint(
+          renderEditable.localToGlobal(point.point),
+          point.direction,
+        ),
       )
       .toList();
 
@@ -74,7 +86,9 @@ void main() {
   testWidgets(
     'should show custom magnifier on drag',
     (WidgetTester tester) async {
-      await tester.pumpWidget(const example.TextMagnifierExampleApp(text: defaultText));
+      await tester.pumpWidget(
+        const example.TextMagnifierExampleApp(text: defaultText),
+      );
 
       await showMagnifier(tester, defaultText.indexOf('e'));
       expect(find.byType(example.CustomMagnifier), findsOneWidget);
@@ -88,15 +102,21 @@ void main() {
       TargetPlatform.iOS,
       TargetPlatform.android,
     }),
-    skip: true, // This image is flaky. https://github.com/flutter/flutter/issues/144350
+    // This image is flaky. https://github.com/flutter/flutter/issues/144350
+    skip: true,
   );
 
-  testWidgets('should show custom magnifier in RTL', (WidgetTester tester) async {
+  testWidgets('should show custom magnifier in RTL', (
+    WidgetTester tester,
+  ) async {
     const String text = 'أثارت زر';
     const String textToTapOn = 'ت';
 
     await tester.pumpWidget(
-      const example.TextMagnifierExampleApp(textDirection: TextDirection.rtl, text: text),
+      const example.TextMagnifierExampleApp(
+        textDirection: TextDirection.rtl,
+        text: text,
+      ),
     );
 
     await showMagnifier(tester, text.indexOf(textToTapOn));
