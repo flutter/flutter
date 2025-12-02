@@ -42,13 +42,13 @@ final createDevFSRequest = FakeVmServiceRequest(
   jsonResponse: <String, Object>{'uri': Uri.parse('test').toString()},
 );
 
-var failingCreateDevFSRequest = FakeVmServiceRequest(
+FakeVmServiceRequest failingCreateDevFSRequest = FakeVmServiceRequest(
   method: '_createDevFS',
   args: <String, Object>{'fsName': 'test'},
   error: FakeRPCError(code: vm_service.RPCErrorKind.kServiceDisappeared.code),
 );
 
-var failingDeleteDevFSRequest = FakeVmServiceRequest(
+FakeVmServiceRequest failingDeleteDevFSRequest = FakeVmServiceRequest(
   method: '_deleteDevFS',
   args: <String, dynamic>{'fsName': 'test'},
   error: FakeRPCError(code: vm_service.RPCErrorKind.kServiceDisappeared.code),
@@ -964,7 +964,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
 }
 
 class FakeDevFSWriter implements DevFSWriter {
-  var written = false;
+  bool written = false;
   Map<Uri, DevFSContent>? entries;
 
   @override

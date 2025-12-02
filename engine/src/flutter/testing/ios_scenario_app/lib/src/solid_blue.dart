@@ -13,9 +13,9 @@ class SolidBlueScenario extends Scenario {
 
   @override
   void onBeginFrame(Duration duration) {
-    final SceneBuilder builder = SceneBuilder();
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder);
+    final builder = SceneBuilder();
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder);
 
     canvas.drawPaint(Paint()..color = const Color(0xFF0000FF));
     final Picture picture = recorder.endRecording();

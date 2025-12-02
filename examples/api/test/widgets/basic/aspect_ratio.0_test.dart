@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/basic/aspect_ratio.0.dart' as example;
+import 'package:flutter_api_samples/widgets/basic/aspect_ratio.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('AspectRatio applies 16 / 9 aspect ratio on its child', (WidgetTester tester) async {
+  testWidgets('AspectRatio applies 16 / 9 aspect ratio on its child', (
+    WidgetTester tester,
+  ) async {
     const double height = 100.0;
 
     await tester.pumpWidget(const example.AspectRatioApp());

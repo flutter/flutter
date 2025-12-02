@@ -146,11 +146,11 @@ void main() {
       ),
     );
     expect(ProbeWidgetState.buildCount, equals(2));
-    final FlipWidgetState flipState1 = flipKey.currentState! as FlipWidgetState;
+    final flipState1 = flipKey.currentState! as FlipWidgetState;
     flipState1.flip();
     await tester.pump();
     expect(ProbeWidgetState.buildCount, equals(3));
-    final FlipWidgetState flipState2 = flipKey.currentState! as FlipWidgetState;
+    final flipState2 = flipKey.currentState! as FlipWidgetState;
     flipState2.flip();
     await tester.pump();
     expect(ProbeWidgetState.buildCount, equals(3));
@@ -180,9 +180,9 @@ void main() {
     final GlobalKey key1 = GlobalKey(debugLabel: 'key1');
     final GlobalKey key2 = GlobalKey(debugLabel: 'key2');
 
-    bool didMiddle = false;
+    var didMiddle = false;
     late Widget middle;
-    final List<StateSetter> setStates = <StateSetter>[];
+    final setStates = <StateSetter>[];
     Widget builder(BuildContext context, StateSetter setState) {
       setStates.add(setState);
       final bool returnMiddle = !didMiddle;
@@ -215,7 +215,7 @@ void main() {
       state.oldBuilt = state.built!;
       state.trigger();
     }
-    for (final StateSetter setState in setStates) {
+    for (final setState in setStates) {
       setState(() {});
     }
 

@@ -20,9 +20,9 @@ Future<void> main() async {
     await createFlavorsTest().call();
     await createIntegrationTestFlavorsTest().call();
 
-    final String projectPath = '${flutterDirectory.path}/dev/integration_tests/flavors';
+    final projectPath = '${flutterDirectory.path}/dev/integration_tests/flavors';
     final TaskResult installTestsResult = await inDirectory(projectPath, () async {
-      final List<TaskResult> testResults = <TaskResult>[
+      final testResults = <TaskResult>[
         await _testInstallDebugPaidFlavor(projectPath),
         await _testInstallBogusFlavor(),
       ];
@@ -58,7 +58,7 @@ Future<TaskResult> _testInstallDebugPaidFlavor(String projectDir) async {
     ),
   ).readAsBytesSync();
 
-  final Map<Object?, Object?> assetManifest =
+  final assetManifest =
       const StandardMessageCodec().decodeMessage(ByteData.sublistView(assetManifestFileData))
           as Map<Object?, Object?>;
 
@@ -84,7 +84,7 @@ Future<TaskResult> _testInstallDebugPaidFlavor(String projectDir) async {
 }
 
 Future<TaskResult> _testInstallBogusFlavor() async {
-  final StringBuffer stderr = StringBuffer();
+  final stderr = StringBuffer();
   await evalFlutter(
     'install',
     canFail: true,
@@ -92,7 +92,7 @@ Future<TaskResult> _testInstallBogusFlavor() async {
     options: <String>['--flavor', 'bogus'],
   );
 
-  final String stderrString = stderr.toString();
+  final stderrString = stderr.toString();
   final String expectedApkPath = path.join(
     'build',
     'app',
@@ -109,11 +109,11 @@ Future<TaskResult> _testInstallBogusFlavor() async {
 }
 
 Future<TaskResult> _testFlavorsWhenBuildStartsWithGradle(String projectDir) async {
-  final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
-  final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
+  final gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
+  final gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
 
-  final String androidDirPath = '$projectDir/android';
-  final StringBuffer stdout = StringBuffer();
+  final androidDirPath = '$projectDir/android';
+  final stdout = StringBuffer();
 
   // Prebuild the project to generate the Android gradle wrapper files.
   await inDirectory(projectDir, () async {
@@ -125,7 +125,7 @@ Future<TaskResult> _testFlavorsWhenBuildStartsWithGradle(String projectDir) asyn
     await exec(gradlewExecutable, <String>[':app:assemblePaidDebug', '--info'], output: stdout);
   });
 
-  final String stdoutString = stdout.toString();
+  final stdoutString = stdout.toString();
 
   if (!stdoutString.contains('-dFlavor=paid')) {
     return TaskResult.failure('Expected to see -dFlavor=paid in the gradle verbose output');

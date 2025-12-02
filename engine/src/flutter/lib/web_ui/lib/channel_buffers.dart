@@ -81,7 +81,7 @@ class _Channel {
   _StoredMessage pop() => _queue.removeFirst();
 
   bool _dropOverflowMessages(int lengthLimit) {
-    bool result = false;
+    var result = false;
     while (_queue.length > lengthLimit) {
       final _StoredMessage message = _queue.removeFirst();
       message.invoke(null); // send empty reply to the plugin side
@@ -93,7 +93,7 @@ class _Channel {
   _ChannelCallbackRecord? _channelCallbackRecord;
 
   void setListener(ChannelCallback callback) {
-    final bool needDrain = _channelCallbackRecord == null;
+    final needDrain = _channelCallbackRecord == null;
     _channelCallbackRecord = _ChannelCallbackRecord(callback);
     if (needDrain && !_draining) {
       _drain();
@@ -176,7 +176,7 @@ class ChannelBuffers {
       if (methodNameLength >= 254) {
         throw Exception('Unrecognized message sent to $kControlChannelName (method name too long)');
       }
-      int index = 2; // where we are in reading the bytes
+      var index = 2; // where we are in reading the bytes
       final String methodName = utf8.decode(bytes.sublist(index, index + methodNameLength));
       index += methodNameLength;
       switch (methodName) {

@@ -33,7 +33,9 @@ class SliverFillRemainingExample extends StatelessWidget {
           itemExtent: 130.0,
           itemCount: 5,
           itemBuilder: (BuildContext context, int index) {
-            return Container(color: index.isEven ? Colors.indigo[200] : Colors.orange[200]);
+            return Container(
+              color: index.isEven ? Colors.indigo[200] : Colors.orange[200],
+            );
           },
         ),
         const SliverFillRemaining(

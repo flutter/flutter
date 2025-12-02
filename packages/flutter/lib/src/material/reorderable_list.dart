@@ -335,7 +335,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
         case TargetPlatform.linux:
         case TargetPlatform.windows:
         case TargetPlatform.macOS:
-          final ListenableBuilder dragHandle = ListenableBuilder(
+          final dragHandle = ListenableBuilder(
             listenable: _dragging,
             builder: (BuildContext context, Widget? child) {
               final MouseCursor effectiveMouseCursor = WidgetStateProperty.resolveAs<MouseCursor>(

@@ -134,10 +134,10 @@ class IconRow extends StatelessWidget {
 
 /// Parses SVG path data into a [Path] object.
 Path _pathFromString(String pathString) {
-  int start = 0;
-  final RegExp pattern = RegExp('[MLCHVZ]');
+  var start = 0;
+  final pattern = RegExp('[MLCHVZ]');
   Offset current = Offset.zero;
-  final Path path = Path();
+  final path = Path();
 
   void performCommand(String command) {
     final String type = command[0];
@@ -196,7 +196,7 @@ class _SettingsIconPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Matrix4 scale = Matrix4.diagonal3Values(size.width / 20, size.height / 20, 1.0);
+    final scale = Matrix4.diagonal3Values(size.width / 20, size.height / 20, 1.0);
 
     Path path;
     path = _path1.transform(scale.storage)..fillType = PathFillType.evenOdd;
@@ -256,7 +256,7 @@ class _CameraIconPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Matrix4 scale = Matrix4.diagonal3Values(size.width / 20, size.height / 20, 1.0);
+    final scale = Matrix4.diagonal3Values(size.width / 20, size.height / 20, 1.0);
 
     Path path;
     path = _path1.transform(scale.storage)..fillType = PathFillType.evenOdd;
@@ -302,7 +302,7 @@ class _CalendarIconPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Matrix4 scale = Matrix4.diagonal3Values(size.width / 20, size.height / 20, 1.0);
+    final scale = Matrix4.diagonal3Values(size.width / 20, size.height / 20, 1.0);
 
     Path path;
     path = _path1.transform(scale.storage)..fillType = PathFillType.evenOdd;
@@ -348,7 +348,7 @@ class _ConversationIconPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Matrix4 scale = Matrix4.diagonal3Values(size.width / 20, size.height / 20, 1.0);
+    final scale = Matrix4.diagonal3Values(size.width / 20, size.height / 20, 1.0);
 
     Path path;
     path = _path1.transform(scale.storage)..fillType = PathFillType.evenOdd;
@@ -394,10 +394,10 @@ class _GeometryIconPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size canvasSize) {
-    const Size size = Size(20, 20);
+    const size = Size(20, 20);
     canvas.scale(canvasSize.width / size.width, canvasSize.height / size.height);
 
-    final Paint paint = Paint()
+    final paint = Paint()
       ..color = const Color(0xFFF84F39)
       ..style = paintStyle
       ..strokeJoin = StrokeJoin.round

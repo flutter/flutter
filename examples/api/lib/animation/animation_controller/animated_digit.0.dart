@@ -23,13 +23,15 @@ class _PlaceholderDigit extends StatelessWidget {
       context,
     ).textTheme.displayLarge!.copyWith(fontWeight: FontWeight.w500);
 
-    final Iterable<Widget> placeholderDigits = <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map<Widget>((
-      int n,
-    ) {
-      return Text('$n', style: textStyle);
-    });
+    final Iterable<Widget> placeholderDigits =
+        <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map<Widget>((int n) {
+          return Text('$n', style: textStyle);
+        });
 
-    return Opacity(opacity: 0, child: Stack(children: placeholderDigits.toList()));
+    return Opacity(
+      opacity: 0,
+      child: Stack(children: placeholderDigits.toList()),
+    );
   }
 }
 
@@ -46,14 +48,15 @@ class AnimatedDigit extends StatefulWidget {
   State<AnimatedDigit> createState() => _AnimatedDigitState();
 }
 
-class _AnimatedDigitState extends State<AnimatedDigit> with SingleTickerProviderStateMixin {
+class _AnimatedDigitState extends State<AnimatedDigit>
+    with SingleTickerProviderStateMixin {
   static const Duration defaultDuration = Duration(milliseconds: 300);
 
   late final AnimationController controller;
   late int incomingValue;
   late int outgoingValue;
-  List<int> pendingValues =
-      <int>[]; // widget.value updates that occurred while the animation is underway
+  // widget.value updates that occurred while the animation is underway.
+  List<int> pendingValues = <int>[];
   Duration duration = defaultDuration;
 
   @override
@@ -109,7 +112,8 @@ class _AnimatedDigitState extends State<AnimatedDigit> with SingleTickerProvider
         // will show the pending values.
         pendingValues.add(widget.value);
         final double percentRemaining = 1 - controller.value;
-        duration = defaultDuration * (1 / (percentRemaining + pendingValues.length));
+        duration =
+            defaultDuration * (1 / (percentRemaining + pendingValues.length));
         controller.animateTo(1.0, duration: duration * percentRemaining);
       } else {
         animateValueUpdate(incomingValue, widget.value);
@@ -134,7 +138,11 @@ class _AnimatedDigitState extends State<AnimatedDigit> with SingleTickerProvider
                 end: const Offset(0, -1), // Out of view above the top.
               ),
             ),
-            child: Text(key: ValueKey<int>(outgoingValue), '$outgoingValue', style: textStyle),
+            child: Text(
+              key: ValueKey<int>(outgoingValue),
+              '$outgoingValue',
+              style: textStyle,
+            ),
           ),
           SlideTransition(
             position: controller.drive(
@@ -143,7 +151,11 @@ class _AnimatedDigitState extends State<AnimatedDigit> with SingleTickerProvider
                 end: Offset.zero,
               ),
             ),
-            child: Text(key: ValueKey<int>(incomingValue), '$incomingValue', style: textStyle),
+            child: Text(
+              key: ValueKey<int>(incomingValue),
+              '$incomingValue',
+              style: textStyle,
+            ),
           ),
         ],
       ),

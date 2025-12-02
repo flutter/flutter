@@ -11,12 +11,12 @@ void main() {
     PointerEvent event;
     debugPrintGestureArenaDiagnostics = true;
     final DebugPrintCallback oldCallback = debugPrint;
-    final List<String> log = <String>[];
+    final log = <String>[];
     debugPrint = (String? s, {int? wrapWidth}) {
       log.add(s ?? '');
     };
 
-    final TapGestureRecognizer tap = TapGestureRecognizer()
+    final tap = TapGestureRecognizer()
       ..onTapDown = (TapDownDetails details) {}
       ..onTapUp = (TapUpDetails details) {}
       ..onTap = () {}
@@ -69,12 +69,12 @@ void main() {
     PointerEvent event;
     debugPrintRecognizerCallbacksTrace = true;
     final DebugPrintCallback oldCallback = debugPrint;
-    final List<String> log = <String>[];
+    final log = <String>[];
     debugPrint = (String? s, {int? wrapWidth}) {
       log.add(s ?? '');
     };
 
-    final TapGestureRecognizer tap = TapGestureRecognizer()
+    final tap = TapGestureRecognizer()
       ..onTapDown = (TapDownDetails details) {}
       ..onTapUp = (TapUpDetails details) {}
       ..onTap = () {}
@@ -131,12 +131,12 @@ void main() {
     debugPrintGestureArenaDiagnostics = true;
     debugPrintRecognizerCallbacksTrace = true;
     final DebugPrintCallback oldCallback = debugPrint;
-    final List<String> log = <String>[];
+    final log = <String>[];
     debugPrint = (String? s, {int? wrapWidth}) {
       log.add(s ?? '');
     };
 
-    final TapGestureRecognizer tap = TapGestureRecognizer()
+    final tap = TapGestureRecognizer()
       ..onTapDown = (TapDownDetails details) {}
       ..onTapUp = (TapUpDetails details) {}
       ..onTap = () {}
@@ -205,10 +205,9 @@ void main() {
   });
 
   test('TapGestureRecognizer _sentTapDown toString', () {
-    final TapGestureRecognizer tap = TapGestureRecognizer()
-      ..onTap = () {}; // Add a callback so that event can be added
+    final tap = TapGestureRecognizer()..onTap = () {}; // Add a callback so that event can be added
     expect(tap.toString(), equalsIgnoringHashCodes('TapGestureRecognizer#00000(state: ready)'));
-    const PointerDownEvent event = PointerDownEvent(pointer: 1, position: Offset(10.0, 10.0));
+    const event = PointerDownEvent(pointer: 1, position: Offset(10.0, 10.0));
     tap.addPointer(event);
     tap.didExceedDeadline();
     expect(
@@ -222,7 +221,7 @@ void main() {
   });
 
   test('Gesture details debugFillProperties', () {
-    final List<(Diagnosticable, List<String>)> pairs = <(Diagnosticable, List<String>)>[
+    final pairs = <(Diagnosticable, List<String>)>[
       (
         DragDownDetails(),
         <String>['globalPosition: Offset(0.0, 0.0)', 'localPosition: Offset(0.0, 0.0)'],
@@ -429,7 +428,7 @@ void main() {
     ];
 
     for (final (Diagnosticable detail, List<String> expected) in pairs) {
-      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      final builder = DiagnosticPropertiesBuilder();
       // ignore: invalid_use_of_protected_member
       detail.debugFillProperties(builder);
       final List<String> description = builder.properties

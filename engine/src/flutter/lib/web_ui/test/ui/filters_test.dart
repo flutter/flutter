@@ -23,7 +23,7 @@ void main() {
 Future<void> testMain() async {
   setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
 
-  const ui.Rect region = ui.Rect.fromLTWH(0, 0, 128, 128);
+  const region = ui.Rect.fromLTWH(0, 0, 128, 128);
 
   Future<void> drawTestImageWithPaint(ui.Paint paint) async {
     final ui.Codec codec = await renderer.instantiateImageCodecFromUrl(
@@ -36,8 +36,8 @@ Future<void> testMain() async {
     final ui.Image image = info.image;
     expect(image.width, 128);
     expect(image.height, 128);
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = ui.Canvas(recorder, region);
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder, region);
     canvas.drawImage(image, ui.Offset.zero, paint);
 
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
@@ -87,7 +87,7 @@ Future<void> testMain() async {
   });
 
   test('composed filters', () async {
-    final ui.ImageFilter filter = ui.ImageFilter.compose(
+    final filter = ui.ImageFilter.compose(
       outer: ui.ImageFilter.matrix(
         Matrix4.rotationZ(math.pi / 6).toFloat64(),
         filterQuality: ui.FilterQuality.high,
@@ -99,7 +99,7 @@ Future<void> testMain() async {
   });
 
   test('compose with colorfilter', () async {
-    final ui.ImageFilter filter = ui.ImageFilter.compose(
+    final filter = ui.ImageFilter.compose(
       outer: const ui.ColorFilter.mode(ui.Color.fromRGBO(0, 0, 255, 128), ui.BlendMode.srcOver),
       inner: ui.ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
     );
@@ -108,7 +108,7 @@ Future<void> testMain() async {
   });
 
   test('color filter as image filter', () async {
-    const ui.ColorFilter colorFilter = ui.ColorFilter.mode(
+    const colorFilter = ui.ColorFilter.mode(
       ui.Color.fromARGB(128, 0, 0, 255),
       ui.BlendMode.srcOver,
     );
@@ -121,7 +121,7 @@ Future<void> testMain() async {
   });
 
   test('mode color filter', () async {
-    const ui.ColorFilter colorFilter = ui.ColorFilter.mode(
+    const colorFilter = ui.ColorFilter.mode(
       ui.Color.fromARGB(128, 0, 0, 255),
       ui.BlendMode.srcOver,
     );
@@ -134,21 +134,21 @@ Future<void> testMain() async {
   });
 
   test('linearToSRGBGamma color filter', () async {
-    const ui.ColorFilter colorFilter = ui.ColorFilter.linearToSrgbGamma();
+    const colorFilter = ui.ColorFilter.linearToSrgbGamma();
     await drawTestImageWithPaint(ui.Paint()..colorFilter = colorFilter);
     await matchGoldenFile('ui_filter_linear_to_srgb_colorfilter.png', region: region);
     expect(colorFilter.toString(), 'ColorFilter.linearToSrgbGamma()');
   });
 
   test('srgbToLinearGamma color filter', () async {
-    const ui.ColorFilter colorFilter = ui.ColorFilter.srgbToLinearGamma();
+    const colorFilter = ui.ColorFilter.srgbToLinearGamma();
     await drawTestImageWithPaint(ui.Paint()..colorFilter = colorFilter);
     await matchGoldenFile('ui_filter_srgb_to_linear_colorfilter.png', region: region);
     expect(colorFilter.toString(), 'ColorFilter.srgbToLinearGamma()');
   });
 
   test('matrix color filter', () async {
-    const ui.ColorFilter sepia = ui.ColorFilter.matrix(<double>[
+    const sepia = ui.ColorFilter.matrix(<double>[
       0.393, 0.769, 0.189, 0, 0, // row
       0.349, 0.686, 0.168, 0, 0, // row
       0.272, 0.534, 0.131, 0, 0, // row
@@ -160,14 +160,14 @@ Future<void> testMain() async {
   });
 
   test('saturation color filter', () async {
-    final ui.ColorFilter colorFilter = ui.ColorFilter.saturation(0);
+    final colorFilter = ui.ColorFilter.saturation(0);
     await drawTestImageWithPaint(ui.Paint()..colorFilter = colorFilter);
     await matchGoldenFile('ui_filter_saturation_colorfilter.png', region: region);
     expect(colorFilter.toString(), startsWith('ColorFilter.matrix([0.2126, 0.7152, 0.0722'));
   });
 
   test('matrix color filter with 0..255 translation values', () async {
-    const ui.ColorFilter sepia = ui.ColorFilter.matrix(<double>[
+    const sepia = ui.ColorFilter.matrix(<double>[
       0.393, 0.769, 0.189, 0, 50.0, // row
       0.349, 0.686, 0.168, 0, 50.0, // row
       0.272, 0.534, 0.131, 0, 50.0, // row
@@ -184,7 +184,7 @@ Future<void> testMain() async {
   });
 
   test('invert colors with color filter', () async {
-    const ui.ColorFilter sepia = ui.ColorFilter.matrix(<double>[
+    const sepia = ui.ColorFilter.matrix(<double>[
       0.393, 0.769, 0.189, 0, 0, // row
       0.349, 0.686, 0.168, 0, 0, // row
       0.272, 0.534, 0.131, 0, 0, // row
@@ -200,7 +200,7 @@ Future<void> testMain() async {
   });
 
   test('mask filter', () async {
-    const ui.MaskFilter maskFilter = ui.MaskFilter.blur(ui.BlurStyle.normal, 25.0);
+    const maskFilter = ui.MaskFilter.blur(ui.BlurStyle.normal, 25.0);
     await drawTestImageWithPaint(ui.Paint()..maskFilter = maskFilter);
     await matchGoldenFile('ui_filter_blur_maskfilter.png', region: region);
   });
@@ -234,7 +234,7 @@ Future<void> testMain() async {
       ui.Paint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
     );
 
-    final picture = recorder.endRecording();
+    final ui.Picture picture = recorder.endRecording();
     return picture.toImageSync(width, height);
   }
 
@@ -243,9 +243,9 @@ Future<void> testMain() async {
     final canvas = ui.Canvas(recorder);
     canvas.drawColor(const ui.Color.fromARGB(255, 224, 224, 224), ui.BlendMode.src);
 
-    const ui.Rect zone = ui.Rect.fromLTWH(15, 15, 20, 20);
+    const zone = ui.Rect.fromLTWH(15, 15, 20, 20);
     final ui.Rect arena = zone.inflate(15);
-    const ui.Rect ovalZone = ui.Rect.fromLTWH(20, 15, 10, 20);
+    const ovalZone = ui.Rect.fromLTWH(20, 15, 10, 20);
 
     final gradient = ui.Gradient.linear(
       zone.topLeft,
@@ -254,19 +254,19 @@ Future<void> testMain() async {
       <double>[0, 1],
     );
     final filter = ui.ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0, tileMode: tileMode);
-    final ui.Paint white = ui.Paint()..color = const ui.Color.fromARGB(255, 255, 255, 255);
-    final ui.Paint grey = ui.Paint()..color = const ui.Color.fromARGB(255, 127, 127, 127);
-    final ui.Paint unblurredFill = ui.Paint()..shader = gradient;
-    final ui.Paint blurredFill = ui.Paint.from(unblurredFill)..imageFilter = filter;
-    final ui.Paint unblurredStroke = ui.Paint.from(unblurredFill)
+    final white = ui.Paint()..color = const ui.Color.fromARGB(255, 255, 255, 255);
+    final grey = ui.Paint()..color = const ui.Color.fromARGB(255, 127, 127, 127);
+    final unblurredFill = ui.Paint()..shader = gradient;
+    final blurredFill = ui.Paint.from(unblurredFill)..imageFilter = filter;
+    final unblurredStroke = ui.Paint.from(unblurredFill)
       ..style = ui.PaintingStyle.stroke
       ..strokeCap = ui.StrokeCap.round
       ..strokeJoin = ui.StrokeJoin.round
       ..strokeWidth = 10;
-    final ui.Paint blurredStroke = ui.Paint.from(unblurredStroke)..imageFilter = filter;
+    final blurredStroke = ui.Paint.from(unblurredStroke)..imageFilter = filter;
     final ui.Image image = makeCheckerBoard(20, 20);
-    const ui.Rect imageBounds = ui.Rect.fromLTRB(0, 0, 20, 20);
-    const ui.Rect imageCenter = ui.Rect.fromLTRB(5, 5, 9, 9);
+    const imageBounds = ui.Rect.fromLTRB(0, 0, 20, 20);
+    const imageCenter = ui.Rect.fromLTRB(5, 5, 9, 9);
     final points = <ui.Offset>[
       zone.topLeft,
       zone.topCenter,
@@ -349,8 +349,8 @@ Future<void> testMain() async {
 
     const double pad = 10;
     final double offset = arena.width + pad;
-    const int columns = 5;
-    final ui.Rect pairArena = ui.Rect.fromLTRB(
+    const columns = 5;
+    final pairArena = ui.Rect.fromLTRB(
       arena.left - 3,
       arena.top - 3,
       arena.right + 3,
@@ -394,13 +394,14 @@ Future<void> testMain() async {
 
     canvas.save();
     canvas.translate(pad, pad);
-    int renderIndex = 0;
-    int rows = 0;
+    var renderIndex = 0;
+    var rows = 0;
     while (renderIndex < renderers.length) {
       rows += 2;
       canvas.save();
-      for (int col = 0; col < columns && renderIndex < renderers.length; col++) {
-        final renderer = renderers[renderIndex++];
+      for (var col = 0; col < columns && renderIndex < renderers.length; col++) {
+        final void Function(ui.Canvas canvas, ui.Paint fill, ui.Paint stroke) renderer =
+            renderers[renderIndex++];
         canvas.drawRect(pairArena, grey);
         canvas.drawRect(arena, white);
         renderer(canvas, unblurredFill, unblurredStroke);
@@ -421,27 +422,27 @@ Future<void> testMain() async {
   }
 
   test('Rendering ops with ImageFilter blur with default tile mode', () async {
-    final region = await renderingOpsWithTileMode(null);
+    final ui.Rect region = await renderingOpsWithTileMode(null);
     await matchGoldenFile('ui_filter_blurred_rendering_with_default_tile_mode.png', region: region);
   });
 
   test('Rendering ops with ImageFilter blur with clamp tile mode', () async {
-    final region = await renderingOpsWithTileMode(ui.TileMode.clamp);
+    final ui.Rect region = await renderingOpsWithTileMode(ui.TileMode.clamp);
     await matchGoldenFile('ui_filter_blurred_rendering_with_clamp_tile_mode.png', region: region);
   });
 
   test('Rendering ops with ImageFilter blur with decal tile mode', () async {
-    final region = await renderingOpsWithTileMode(ui.TileMode.decal);
+    final ui.Rect region = await renderingOpsWithTileMode(ui.TileMode.decal);
     await matchGoldenFile('ui_filter_blurred_rendering_with_decal_tile_mode.png', region: region);
   });
 
   test('Rendering ops with ImageFilter blur with mirror tile mode', () async {
-    final region = await renderingOpsWithTileMode(ui.TileMode.mirror);
+    final ui.Rect region = await renderingOpsWithTileMode(ui.TileMode.mirror);
     await matchGoldenFile('ui_filter_blurred_rendering_with_mirror_tile_mode.png', region: region);
   });
 
   test('Rendering ops with ImageFilter blur with repeated tile mode', () async {
-    final region = await renderingOpsWithTileMode(ui.TileMode.repeated);
+    final ui.Rect region = await renderingOpsWithTileMode(ui.TileMode.repeated);
     await matchGoldenFile(
       'ui_filter_blurred_rendering_with_repeated_tile_mode.png',
       region: region,
@@ -449,12 +450,12 @@ Future<void> testMain() async {
   });
 
   Future<ui.Rect> drawTestCirclesComparison(ui.ImageFilter filter) async {
-    const ui.Rect region = ui.Rect.fromLTRB(0, 0, 500, 250);
+    const region = ui.Rect.fromLTRB(0, 0, 500, 250);
 
-    final ui.SceneBuilder builder = ui.SceneBuilder();
+    final builder = ui.SceneBuilder();
     builder.pushOffset(0, 0);
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = ui.Canvas(recorder, region);
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder, region);
 
     canvas.drawCircle(
       const ui.Offset(75, 125),
@@ -468,8 +469,8 @@ Future<void> testMain() async {
 
     // Draw another red circle and apply it to the scene.
     // This one will be affected by the image filter.
-    final ui.PictureRecorder recorder2 = ui.PictureRecorder();
-    final ui.Canvas canvas2 = ui.Canvas(recorder2, region);
+    final recorder2 = ui.PictureRecorder();
+    final canvas2 = ui.Canvas(recorder2, region);
     canvas2.drawCircle(
       const ui.Offset(425, 125),
       50,
@@ -487,7 +488,7 @@ Future<void> testMain() async {
   test('does not throw for blur filter with sigmaX and sigmaY set to 0', () async {
     // Ignoring redundant arguments (the default sigma is 0) to make the
     // test clearer.
-    final ui.ImageFilter imageFilter = ui.ImageFilter.blur(
+    final imageFilter = ui.ImageFilter.blur(
       // ignore: avoid_redundant_argument_values
       sigmaX: 0,
       // ignore: avoid_redundant_argument_values
@@ -496,14 +497,14 @@ Future<void> testMain() async {
     );
     expect(imageFilter, isNotNull);
 
-    final region = await drawTestCirclesComparison(imageFilter);
+    final ui.Rect region = await drawTestCirclesComparison(imageFilter);
     await matchGoldenFile('ui_zero_sigma_blur.png', region: region);
   });
 
   test('does not throw for dilate filter with both radiusX and radiusY set to 0', () async {
     // Ignoring redundant arguments (the default radius is 0) to make the
     // test clearer.
-    final ui.ImageFilter imageFilter = ui.ImageFilter.dilate(
+    final imageFilter = ui.ImageFilter.dilate(
       // ignore: avoid_redundant_argument_values
       radiusX: 0,
       // ignore: avoid_redundant_argument_values
@@ -511,14 +512,14 @@ Future<void> testMain() async {
     );
     expect(imageFilter, isNotNull);
 
-    final region = await drawTestCirclesComparison(imageFilter);
+    final ui.Rect region = await drawTestCirclesComparison(imageFilter);
     await matchGoldenFile('ui_filter_dilate_imagefilter_with_zeros.png', region: region);
   });
 
   test('does not throw for erode filter with both radiusX and radiusY set to 0', () async {
     // Ignoring redundant arguments (the default radius is 0) to make the
     // test clearer.
-    final ui.ImageFilter imageFilter = ui.ImageFilter.erode(
+    final imageFilter = ui.ImageFilter.erode(
       // ignore: avoid_redundant_argument_values
       radiusX: 0,
       // ignore: avoid_redundant_argument_values
@@ -526,32 +527,26 @@ Future<void> testMain() async {
     );
     expect(imageFilter, isNotNull);
 
-    final region = await drawTestCirclesComparison(imageFilter);
+    final ui.Rect region = await drawTestCirclesComparison(imageFilter);
     await matchGoldenFile('ui_filter_erode_imagefilter_with_zeros.png', region: region);
   });
 
   test('does not throw for matrix filter with identity matrix', () async {
-    final ui.ImageFilter imageFilter = ui.ImageFilter.matrix(Matrix4.identity().toFloat64());
+    final imageFilter = ui.ImageFilter.matrix(Matrix4.identity().toFloat64());
     expect(imageFilter, isNotNull);
 
-    final region = await drawTestCirclesComparison(imageFilter);
+    final ui.Rect region = await drawTestCirclesComparison(imageFilter);
     await matchGoldenFile('ui_filter_matrix_imagefilter_with_identity_matrix.png', region: region);
   });
 
   test('== operator', () {
-    final List<ui.ImageFilter> filters1 = <ui.ImageFilter>[
-      ...createImageFilters(),
-      ...createColorFilters(),
-    ];
-    final List<ui.ImageFilter> filters2 = <ui.ImageFilter>[
-      ...createImageFilters(),
-      ...createColorFilters(),
-    ];
+    final filters1 = <ui.ImageFilter>[...createImageFilters(), ...createColorFilters()];
+    final filters2 = <ui.ImageFilter>[...createImageFilters(), ...createColorFilters()];
 
-    for (int index1 = 0; index1 < filters1.length; index1 += 1) {
+    for (var index1 = 0; index1 < filters1.length; index1 += 1) {
       final ui.ImageFilter imageFilter1 = filters1[index1];
       expect(imageFilter1 == imageFilter1, isTrue);
-      for (int index2 = 0; index2 < filters2.length; index2 += 1) {
+      for (var index2 = 0; index2 < filters2.length; index2 += 1) {
         final ui.ImageFilter imageFilter2 = filters2[index2];
         expect(imageFilter1 == imageFilter2, imageFilter2 == imageFilter1);
         expect(
@@ -568,8 +563,8 @@ Future<void> testMain() async {
 
   group('MaskFilter', () {
     test('with 0 sigma can be set on a Paint', () {
-      final ui.Paint paint = ui.Paint();
-      const ui.MaskFilter filter = ui.MaskFilter.blur(ui.BlurStyle.normal, 0);
+      final paint = ui.Paint();
+      const filter = ui.MaskFilter.blur(ui.BlurStyle.normal, 0);
 
       expect(() => paint.maskFilter = filter, isNot(throwsException));
     });
@@ -599,7 +594,7 @@ List<ui.ColorFilter> createColorFilters() {
 }
 
 List<ui.ImageFilter> createImageFilters() {
-  final List<ui.ImageFilter> filters = <ui.ImageFilter>[
+  final filters = <ui.ImageFilter>[
     ui.ImageFilter.blur(sigmaX: 5, sigmaY: 6, tileMode: ui.TileMode.clamp),
     ui.ImageFilter.blur(sigmaX: 6, sigmaY: 5, tileMode: ui.TileMode.clamp),
     ui.ImageFilter.blur(sigmaX: 6, sigmaY: 5, tileMode: ui.TileMode.decal),

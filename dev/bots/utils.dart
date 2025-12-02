@@ -124,7 +124,7 @@ String get redLine {
 }
 
 String get clock {
-  final DateTime now = DateTime.now();
+  final now = DateTime.now();
   return '$reverse▌'
       '${now.hour.toString().padLeft(2, "0")}:'
       '${now.minute.toString().padLeft(2, "0")}:'
@@ -133,7 +133,7 @@ String get clock {
 }
 
 String prettyPrintDuration(Duration duration) {
-  String result = '';
+  var result = '';
   final int minutes = duration.inMinutes;
   if (minutes > 0) {
     result += '${minutes}min ';
@@ -178,7 +178,7 @@ void foundError(List<String> messages) {
   // Make the error message easy to notice in the logs by
   // wrapping it in a red box.
   final int width = math.max(15, (hasColor ? terminalColumns : 80) - 1);
-  final String title = 'ERROR #${_errorMessages.length + 1}';
+  final title = 'ERROR #${_errorMessages.length + 1}';
   print('$red╔═╡$bold$title$reset$red╞═${"═" * (width - 4 - title.length)}');
   for (final String message in messages.expand((String line) => line.split('\n'))) {
     print('$red║$reset $message');
@@ -221,7 +221,7 @@ Never reportErrorsAndExit(String message) {
   if (printSeparators) {
     print('  -- This line intentionally left blank --  ');
   }
-  for (int index = 0; index < _errorMessages.length * 2 - 1; index += 1) {
+  for (var index = 0; index < _errorMessages.length * 2 - 1; index += 1) {
     if (index.isEven) {
       _errorMessages[index ~/ 2].forEach(print);
     } else if (printSeparators) {
@@ -265,8 +265,8 @@ void _printQuietly(Object? message) {
     _pendingLogs.add(message.toString());
     String line = '$message'.trimRight();
     final int start = line.lastIndexOf(_lineBreak) + 1;
-    int index = start;
-    int length = 0;
+    var index = start;
+    var length = 0;
     while (index < line.length && length < terminalColumns) {
       if (line.codeUnitAt(index) == kESC) {
         // 0x1B
@@ -436,7 +436,7 @@ Future<void> runDartTest(
 }) async {
   // TODO(matanlurey): Consider Platform.numberOfProcessors instead.
   // See https://github.com/flutter/flutter/issues/161399.
-  int cpus = 2;
+  var cpus = 2;
 
   // Integration tests that depend on external processes like chrome
   // can get stuck if there are multiple instances running at once.
@@ -444,10 +444,10 @@ Future<void> runDartTest(
     cpus = 1;
   }
 
-  const LocalFileSystem fileSystem = LocalFileSystem();
-  final String suffix = DateTime.now().microsecondsSinceEpoch.toString();
+  const fileSystem = LocalFileSystem();
+  final suffix = DateTime.now().microsecondsSinceEpoch.toString();
   final File metricFile = fileSystem.systemTempDirectory.childFile('metrics_$suffix.json');
-  final List<String> args = <String>[
+  final args = <String>[
     'run',
     'test',
     '--reporter=expanded',
@@ -462,7 +462,7 @@ Future<void> runDartTest(
     if (testPaths != null)
       for (final String testPath in testPaths) testPath,
   ];
-  final Map<String, String> environment = <String, String>{
+  final environment = <String, String>{
     'FLUTTER_ROOT': flutterRoot,
     if (includeLocalEngineEnv) ...localEngineEnv,
     if (Directory(pubCache).existsSync()) 'PUB_CACHE': pubCache,
@@ -488,15 +488,13 @@ Future<void> runDartTest(
     return;
   }
 
-  final TestFileReporterResults test = TestFileReporterResults.fromFile(
-    metricFile,
-  ); // --file-reporter name
+  final test = TestFileReporterResults.fromFile(metricFile); // --file-reporter name
   final File info = fileSystem.file(path.join(flutterRoot, 'error.log'));
   info.writeAsStringSync(json.encode(test.errors));
 
   if (collectMetrics) {
     try {
-      final List<String> testList = <String>[];
+      final testList = <String>[];
       final Map<int, TestSpecs> allTestSpecs = test.allTestSpecs;
       for (final TestSpecs testSpecs in allTestSpecs.values) {
         testList.add(testSpecs.toJson());
@@ -534,17 +532,17 @@ Future<void> runFlutterTest(
     'Output either can be printed or checked but not both',
   );
 
-  final List<String> tags = <String>[];
+  final tags = <String>[];
   // Recipe-configured reduced test shards will only execute tests with the
   // appropriate tag.
   if (Platform.environment['REDUCED_TEST_SET'] == 'True') {
     tags.addAll(<String>['-t', 'reduced-test-set']);
   }
 
-  const LocalFileSystem fileSystem = LocalFileSystem();
-  final String suffix = DateTime.now().microsecondsSinceEpoch.toString();
+  const fileSystem = LocalFileSystem();
+  final suffix = DateTime.now().microsecondsSinceEpoch.toString();
   final File metricFile = fileSystem.systemTempDirectory.childFile('metrics_$suffix.json');
-  final List<String> args = <String>[
+  final args = <String>[
     'test',
     '--reporter=expanded',
     '--file-reporter=json:${metricFile.path}',
@@ -618,7 +616,7 @@ Future<void> selectSubshard(Map<String, ShardRunner> subshards) =>
 
 Future<void> runShardRunnerIndexOfTotalSubshard(List<ShardRunner> tests) async {
   final List<ShardRunner> sublist = selectIndexOfTotalSubshard<ShardRunner>(tests);
-  for (final ShardRunner test in sublist) {
+  for (final test in sublist) {
     await test();
   }
 }
@@ -642,7 +640,7 @@ List<T> selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSubs
   }
   printProgress('$bold$subshardKey=$subshardName$reset');
 
-  final RegExp pattern = RegExp(r'^(\d+)_(\d+)$');
+  final pattern = RegExp(r'^(\d+)_(\d+)$');
   final Match? match = pattern.firstMatch(subshardName);
   if (match == null || match.groupCount != 2) {
     foundError(<String>[
@@ -681,14 +679,14 @@ List<T> selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSubs
   // items equally into buckets is more intuitive.
   //
   // A bucket represents how many tests a subshard should be allocated.
-  final List<int> buckets = List<int>.filled(subShardCount, 0);
+  final buckets = List<int>.filled(subShardCount, 0);
   // First, allocate an equal number of items to each bucket.
-  for (int i = 0; i < buckets.length; i++) {
+  for (var i = 0; i < buckets.length; i++) {
     buckets[i] = (testCount / subShardCount).floor();
   }
   // For the N leftover items, put one into each of the first N buckets.
   final int remainingItems = testCount % buckets.length;
-  for (int i = 0; i < remainingItems; i++) {
+  for (var i = 0; i < remainingItems; i++) {
     buckets[i] += 1;
   }
 
@@ -698,7 +696,7 @@ List<T> selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSubs
   final int numberOfItemsInPreviousBuckets = subShardIndex == 0
       ? 0
       : buckets.sublist(0, subShardIndex - 1).sum;
-  final int start = numberOfItemsInPreviousBuckets;
+  final start = numberOfItemsInPreviousBuckets;
   final int end = start + buckets[subShardIndex - 1];
 
   return (start, end);
@@ -761,7 +759,7 @@ sealed class Version {
     if (json is! Map<String, Object?>) {
       return VersionError._('The version file was in an unexpected format.', contents: '$json');
     }
-    final String? version = json['flutterVersion'] as String?;
+    final version = json['flutterVersion'] as String?;
     if (version == null) {
       return VersionError._(
         'The version file was missing the key "flutterVersion".',

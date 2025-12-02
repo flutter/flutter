@@ -21,7 +21,10 @@ void main() {
 
     // Verify we're on the second page
     expect(find.text('Second Page'), findsOneWidget);
-    expect(find.text('This page appeared with a custom transition!'), findsOneWidget);
+    expect(
+      find.text('This page appeared with a custom transition!'),
+      findsOneWidget,
+    );
 
     // Go back
     await tester.tap(find.byType(BackButton));
@@ -32,27 +35,31 @@ void main() {
     expect(find.text('Navigate with Custom Transition'), findsOneWidget);
   });
 
-  testWidgets('SlideRightPageTransitionsBuilder creates slide and fade transitions', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(const example.PageTransitionsBuilderExampleApp());
+  testWidgets(
+    'SlideRightPageTransitionsBuilder creates slide and fade transitions',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(const example.PageTransitionsBuilderExampleApp());
 
-    // Navigate to second page
-    await tester.tap(find.byType(ElevatedButton));
+      // Navigate to second page
+      await tester.tap(find.byType(ElevatedButton));
 
-    // Pump one frame to start the animation
-    await tester.pump();
+      // Pump one frame to start the animation
+      await tester.pump();
 
-    // The transition should be in progress
-    await tester.pump(const Duration(milliseconds: 150));
+      // The transition should be in progress
+      await tester.pump(const Duration(milliseconds: 150));
 
-    // The second page should be visible but still animating
-    expect(find.text('Second Page'), findsOneWidget);
+      // The second page should be visible but still animating
+      expect(find.text('Second Page'), findsOneWidget);
 
-    // Complete the animation
-    await tester.pumpAndSettle();
+      // Complete the animation
+      await tester.pumpAndSettle();
 
-    // The second page should be fully visible
-    expect(find.text('This page appeared with a custom transition!'), findsOneWidget);
-  });
+      // The second page should be fully visible
+      expect(
+        find.text('This page appeared with a custom transition!'),
+        findsOneWidget,
+      );
+    },
+  );
 }

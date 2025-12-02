@@ -9,7 +9,9 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Has Hero animation', (WidgetTester tester) async {
     final TransitionDurationObserver observer = TransitionDurationObserver();
-    await tester.pumpWidget(example.HeroApp(navigatorObservers: <NavigatorObserver>[observer]));
+    await tester.pumpWidget(
+      example.HeroApp(navigatorObservers: <NavigatorObserver>[observer]),
+    );
 
     expect(find.text('Hero Sample'), findsOneWidget);
     await tester.tap(find.byType(Container));

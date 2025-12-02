@@ -32,10 +32,8 @@ Future<void> main(List<String> args) async {
 }
 
 Future<int> runLint(ArgParser argParser, ArgResults argResults) async {
-  final String inArgument = argResults['in'] as String;
-  final Directory androidDir = Directory(
-    path.join(inArgument, 'flutter', 'shell', 'platform', 'android'),
-  );
+  final inArgument = argResults['in'] as String;
+  final androidDir = Directory(path.join(inArgument, 'flutter', 'shell', 'platform', 'android'));
   if (!androidDir.existsSync()) {
     print(
       'This command must be run from the engine/src directory, '
@@ -45,7 +43,7 @@ Future<int> runLint(ArgParser argParser, ArgResults argResults) async {
     return -1;
   }
 
-  final Directory androidSdkDir = Directory(
+  final androidSdkDir = Directory(
     path.join(inArgument, 'flutter', 'third_party', 'android_tools', 'sdk'),
   );
 
@@ -59,10 +57,10 @@ Future<int> runLint(ArgParser argParser, ArgResults argResults) async {
     return -1;
   }
 
-  final bool rebaseline = argResults['rebaseline'] as bool;
+  final rebaseline = argResults['rebaseline'] as bool;
   if (rebaseline) {
     print('Removing previous baseline.xml...');
-    final File baselineXml = File(baselineXmlPath);
+    final baselineXml = File(baselineXmlPath);
     if (baselineXml.existsSync()) {
       await baselineXml.delete();
     }
@@ -93,7 +91,7 @@ Future<int> runLint(ArgParser argParser, ArgResults argResults) async {
 ''');
   await projectXml.close();
   print('Wrote project.xml, starting lint...');
-  final List<String> lintArgs = <String>[
+  final lintArgs = <String>[
     path.join(androidSdkDir.path, 'cmdline-tools', 'latest', 'bin', 'lint'),
     '--project', projectXmlPath,
     '--compile-sdk-version', '34',
@@ -104,7 +102,7 @@ Future<int> runLint(ArgParser argParser, ArgResults argResults) async {
     '--baseline',
     baselineXmlPath,
   ];
-  final bool html = argResults['html'] as bool;
+  final html = argResults['html'] as bool;
   if (html) {
     lintArgs.addAll(<String>['--html', argResults['out'] as String]);
   }
@@ -121,7 +119,7 @@ Future<int> runLint(ArgParser argParser, ArgResults argResults) async {
 
 /// Prepares an [ArgParser] for this script.
 ArgParser setupOptions() {
-  final ArgParser argParser = ArgParser();
+  final argParser = ArgParser();
   argParser
     ..addOption(
       'in',

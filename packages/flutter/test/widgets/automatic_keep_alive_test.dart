@@ -558,7 +558,7 @@ void main() {
     // We're just doing a basic test here to make sure that the functionality of
     // RenderSliverWithKeepAliveMixin doesn't get regressed or deleted. As testing
     // the full functionality would be cumbersome.
-    final RenderSliverMultiBoxAdaptorAlt alternate = RenderSliverMultiBoxAdaptorAlt();
+    final alternate = RenderSliverMultiBoxAdaptorAlt();
     addTearDown(alternate.dispose);
     final RenderBox child = RenderBoxKeepAlive();
     addTearDown(child.dispose);
@@ -570,7 +570,7 @@ void main() {
   testWidgets('Keep alive Listenable has its listener removed once called', (
     WidgetTester tester,
   ) async {
-    final LeakCheckerHandle handle = LeakCheckerHandle();
+    final handle = LeakCheckerHandle();
     addTearDown(handle.dispose);
     await tester.pumpWidget(
       Directionality(

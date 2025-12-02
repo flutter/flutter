@@ -21,8 +21,8 @@ void main() {
   test('Can cancel queued callback', () {
     late int secondId;
 
-    bool firstCallbackRan = false;
-    bool secondCallbackRan = false;
+    var firstCallbackRan = false;
+    var secondCallbackRan = false;
 
     void firstCallback(Duration timeStamp) {
       expect(firstCallbackRan, isFalse);

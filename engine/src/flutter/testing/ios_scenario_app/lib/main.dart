@@ -27,7 +27,7 @@ void main() {
   // initialized to some meaningful value at least.
   assert(view.display.size > Offset.zero, 'Expected ${view.display} to be initialized.');
 
-  final ByteData data = ByteData(1);
+  final data = ByteData(1);
   data.setUint8(0, 1);
   PlatformDispatcher.instance.sendPlatformMessage('waiting_for_status', data, null);
 }
@@ -36,9 +36,8 @@ void main() {
 FlutterView get _view => PlatformDispatcher.instance.implicitView!;
 
 void _handleDriverMessage(ByteData? data, PlatformMessageResponseCallback? callback) {
-  final Map<String, dynamic> call =
-      json.decode(utf8.decode(data!.buffer.asUint8List())) as Map<String, dynamic>;
-  final String? methodName = call['method'] as String?;
+  final call = json.decode(utf8.decode(data!.buffer.asUint8List())) as Map<String, dynamic>;
+  final methodName = call['method'] as String?;
   switch (methodName) {
     case 'set_scenario':
       assert(call['args'] != null);
@@ -51,7 +50,7 @@ void _handleDriverMessage(ByteData? data, PlatformMessageResponseCallback? callb
 void _onBeginFrame(Duration duration) {
   // Render an empty frame to signal first frame in the platform side.
   if (currentScenario == null) {
-    final SceneBuilder builder = SceneBuilder();
+    final builder = SceneBuilder();
     final Scene scene = builder.build();
     _view.render(scene);
     scene.dispose();

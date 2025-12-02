@@ -68,7 +68,7 @@ void main() {
       switch (message) {
         case final SendPort sendPort:
           toPlatformThread = sendPort;
-          for (int i = 1; i <= 10; i++) {
+          for (var i = 1; i <= 10; i++) {
             sendPort.send(i);
           }
         case final int value:
@@ -82,7 +82,7 @@ void main() {
       }
     });
 
-    final sendPort = recvPort.sendPort;
+    final SendPort sendPort = recvPort.sendPort;
     await runOnPlatformThread(() async {
       final completer = Completer<void>();
       final recvPort = RawReceivePort((Object message) {
@@ -105,7 +105,7 @@ void main() {
   });
 
   test('PlatformIsolate runOnPlatformThread, throws', () async {
-    bool throws = false;
+    var throws = false;
     try {
       await runOnPlatformThread(() => throw 'Oh no!');
     } catch (error) {
@@ -116,7 +116,7 @@ void main() {
   });
 
   test('PlatformIsolate runOnPlatformThread, async throws', () async {
-    bool throws = false;
+    var throws = false;
     try {
       await runOnPlatformThread(() async {
         await Future<void>.delayed(const Duration(milliseconds: 100));
@@ -151,7 +151,7 @@ void main() {
   });
 
   test('PlatformIsolate runOnPlatformThread, unsendable object', () async {
-    bool throws = false;
+    var throws = false;
     try {
       await runOnPlatformThread(() => ReceivePort());
     } catch (error) {
@@ -161,7 +161,7 @@ void main() {
   });
 
   test('PlatformIsolate runOnPlatformThread, unsendable object async', () async {
-    bool throws = false;
+    var throws = false;
     try {
       await runOnPlatformThread(() async {
         await Future<void>.delayed(const Duration(milliseconds: 100));
@@ -174,7 +174,7 @@ void main() {
   });
 
   test('PlatformIsolate runOnPlatformThread, throws unsendable', () async {
-    bool throws = false;
+    var throws = false;
     try {
       await runOnPlatformThread(() => throw ReceivePort());
     } catch (error) {
@@ -184,7 +184,7 @@ void main() {
   });
 
   test('PlatformIsolate runOnPlatformThread, throws unsendable async', () async {
-    bool throws = false;
+    var throws = false;
     try {
       await runOnPlatformThread(() async {
         await Future<void>.delayed(const Duration(milliseconds: 100));

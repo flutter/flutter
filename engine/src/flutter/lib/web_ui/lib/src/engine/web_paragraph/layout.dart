@@ -74,7 +74,7 @@ class TextLayout {
   }
 
   ui.TextDirection _detectTextDirection(ClusterRange clusterRange) {
-    for (final bidiRun in bidiRuns) {
+    for (final BidiRun bidiRun in bidiRuns) {
       if (bidiRun.clusterRange.overlapsWith(clusterRange.start, clusterRange.end)) {
         return bidiRun.bidiLevel.isEven ? ui.TextDirection.ltr : ui.TextDirection.rtl;
       }
@@ -85,20 +85,20 @@ class TextLayout {
   void extractTextClusters() {
     assert(allClusters.isEmpty);
 
-    for (final span in paragraph.spans) {
+    for (final ParagraphSpan span in paragraph.spans) {
       assert(span.isNotEmpty);
       allClusters.addAll(span.extractClusters());
     }
     allClusters.sort((a, b) => a.start.compareTo(b.start));
-    for (int i = 0; i < allClusters.length; ++i) {
-      final cluster = allClusters[i];
+    for (var i = 0; i < allClusters.length; ++i) {
+      final WebCluster cluster = allClusters[i];
       for (int j = cluster.start; j < cluster.end; ++j) {
         _mapping.add(textIndex: j, clusterIndex: i);
       }
     }
 
     // One more dummy element in the end to avoid extra checks
-    final TextSpan emptySpan = TextSpan(
+    final emptySpan = TextSpan(
       start: paragraph.text.length,
       end: paragraph.text.length,
       style: paragraph.spans.isEmpty
@@ -127,7 +127,7 @@ class TextLayout {
       // Regions operate in text indexes, not cluster indexes (one cluster can contain several text points)
       // We need to convert one into another
       final ClusterRange clusterRange = _mapping.toClusterRange(region.start, region.end);
-      final BidiRun run = BidiRun(clusterRange, region.level);
+      final run = BidiRun(clusterRange, region.level);
       WebParagraphDebug.log(
         'region ${region.level.isEven ? 'ltr' : 'rtl'} [${region.start}:${region.end}) => $clusterRange',
       );
@@ -139,9 +139,9 @@ class TextLayout {
     WebParagraphDebug.log(
       'Mappings ($header): ${_mapping._clusters.length} ${_mapping._textToCluster.length}',
     );
-    for (int i = 0; i < _mapping._textToCluster.length; i++) {
-      final clusterIndex = _mapping._textToCluster[i];
-      final cluster = _mapping._clusters[clusterIndex];
+    for (var i = 0; i < _mapping._textToCluster.length; i++) {
+      final int clusterIndex = _mapping._textToCluster[i];
+      final WebCluster cluster = _mapping._clusters[clusterIndex];
       WebParagraphDebug.log('mappings[$i] => $clusterIndex [${cluster.start}:${cluster.end})');
     }
   }
@@ -160,7 +160,7 @@ class TextLayout {
       return;
     }
 
-    final TextWrapper wrapper = TextWrapper(this);
+    final wrapper = TextWrapper(this);
     wrapper.breakLines(width);
     paragraph.width = width;
     paragraph.maxIntrinsicWidth = wrapper.maxIntrinsicWidth;
@@ -178,21 +178,18 @@ class TextLayout {
   ) {
     assert(contentRange.end == whitespaceRange.start);
     if (WebParagraphDebug.logging) {
-      final allLineText = paragraph.getText1(contentRange.start, whitespaceRange.end);
+      final String allLineText = paragraph.getText1(contentRange.start, whitespaceRange.end);
       WebParagraphDebug.log('LINE "$allLineText" clusters:$contentRange+$whitespaceRange');
     }
 
     // Arrange line vertically, calculate metrics and bounds
     final ui.TextRange contentTextRange = _mapping.toTextRange(contentRange);
     final ui.TextRange whitespaceTextRange = _mapping.toTextRange(whitespaceRange);
-    final ui.TextRange allTextRange = ui.TextRange(
-      start: contentTextRange.start,
-      end: whitespaceTextRange.end,
-    );
+    final allTextRange = ui.TextRange(start: contentTextRange.start, end: whitespaceTextRange.end);
     assert(contentTextRange.end == whitespaceTextRange.start);
 
     // TODO(mdebbar): Move this line creation to the end of the method when all info is available.
-    final TextLine line = TextLine(
+    final line = TextLine(
       contentRange,
       whitespaceRange,
       hardLineBreak,
@@ -203,10 +200,10 @@ class TextLayout {
     );
 
     // Get logical bidi levels belonging to the line.
-    int overlapStart = -1; // Inclusive
-    int overlapEnd = -1; // Exclusive
-    for (int i = 0; i < bidiRuns.length; i++) {
-      final bidiRun = bidiRuns[i];
+    var overlapStart = -1; // Inclusive
+    var overlapEnd = -1; // Exclusive
+    for (var i = 0; i < bidiRuns.length; i++) {
+      final BidiRun bidiRun = bidiRuns[i];
       final bool isOverlapping = bidiRun.clusterRange.overlapsWith(
         contentRange.start,
         whitespaceRange.end,
@@ -234,9 +231,9 @@ class TextLayout {
     // We need to take the VISUALLY first cluster on the line (in case of LTR/RTL it could be anywhere)
     // and shift all runs for this line so this first cluster starts from 0
     // Break the line into the blocks that belong to the same bidi run (monodirectional text) and to the same style block (the same text metrics)
-    double blockShiftFromLineStart = 0.0;
-    double trailingSpacesWidth = 0.0;
-    for (final BidiRun bidiRun in lineVisualRuns) {
+    var blockShiftFromLineStart = 0.0;
+    var trailingSpacesWidth = 0.0;
+    for (final bidiRun in lineVisualRuns) {
       // TODO(jlavrova): we (almost always true) assume that trailing whitespaces do not affect the line height
       final ClusterRange textIntersection = bidiRun.clusterRange.intersect(contentRange);
       final ClusterRange whitespacesIntersection = bidiRun.clusterRange.intersect(whitespaceRange);
@@ -257,7 +254,7 @@ class TextLayout {
 */
       // We cannot ignore whitespaces because they are expected to be counted in some query apis (getBoxesForRange)
       assert(contentRange.isNotEmpty || whitespaceRange.isNotEmpty);
-      final fullIntersection = textIntersection.merge(whitespacesIntersection);
+      final ClusterRange fullIntersection = textIntersection.merge(whitespacesIntersection);
 
       // This is the part of the line that intersects with the `bidiRun` being processed now.
       final ui.TextRange bidiLineTextRange = _mapping.toTextRange(fullIntersection);
@@ -275,7 +272,7 @@ class TextLayout {
 
       // TODO(jlavrova): This loop seems excessive. We are iterating over all spans of the
       //                 paragraph. Can we try to iterate less?
-      for (final span in paragraph.spans) {
+      for (final ParagraphSpan span in paragraph.spans) {
         final bool isOverlapping = bidiLineTextRange.overlapsWith(span.start, span.end);
 
         if (!isOverlapping) {
@@ -322,8 +319,10 @@ class TextLayout {
             ),
           );
 
-          final blockLineWhitespaces = bidiLineSpanTextRange.intersect(bidiWhitespacesTextRange);
-          final blockLineNoWhitespaces = bidiLineSpanTextRange.intersect(
+          final ui.TextRange blockLineWhitespaces = bidiLineSpanTextRange.intersect(
+            bidiWhitespacesTextRange,
+          );
+          final ui.TextRange blockLineNoWhitespaces = bidiLineSpanTextRange.intersect(
             _mapping.toTextRange(textIntersection),
           );
           if (blockLineWhitespaces.start < blockLineWhitespaces.end) {
@@ -409,7 +408,7 @@ class TextLayout {
       // If we have to format the text we find the max line length and use it as a width
       // Notice, that we can have multiple lines even with width=infinity
       // (hard line breaks would do that)
-      double maxLength = 0.0;
+      var maxLength = 0.0;
       for (final TextLine line in lines) {
         maxLength = math.max(maxLength, line.advance.width);
       }
@@ -445,10 +444,10 @@ class TextLayout {
     ui.BoxWidthStyle boxWidthStyle,
   ) {
     final textRange = ui.TextRange(start: start, end: end);
-    final List<ui.TextBox> result = <ui.TextBox>[];
+    final result = <ui.TextBox>[];
     // TODO(mdebbar): Instead of nested loops, make them two consecutive loops.
-    for (int lineIndex = 0; lineIndex < lines.length; ++lineIndex) {
-      final line = lines[lineIndex];
+    for (var lineIndex = 0; lineIndex < lines.length; ++lineIndex) {
+      final TextLine line = lines[lineIndex];
       WebParagraphDebug.log(
         'Line: ${line.textClusterRange} & $textRange '
         '[${line.advance.left}:${line.advance.right} x ${line.advance.top}:${line.advance.bottom}] ',
@@ -575,7 +574,7 @@ class TextLayout {
   }
 
   List<ui.TextBox> getBoxesForPlaceholders() {
-    final List<ui.TextBox> result = <ui.TextBox>[];
+    final result = <ui.TextBox>[];
     for (final TextLine line in lines) {
       for (final LineBlock block in line.visualBlocks) {
         if (block is TextBlock) {
@@ -612,8 +611,8 @@ class TextLayout {
       );
     }
 
-    int lineNum = 0;
-    for (final line in lines) {
+    var lineNum = 0;
+    for (final TextLine line in lines) {
       lineNum++;
       if (line.advance.top > offset.dy) {
         // We didn't find a line that contains the offset. All previous lines are placed above it and this one - below.
@@ -630,8 +629,8 @@ class TextLayout {
       WebParagraphDebug.log('found line: ${line.textClusterRange} ${line.advance} vs $offset');
 
       // We found the line that contains the offset; let's go through all the visual blocks to find the position
-      for (final block in line.visualBlocks) {
-        final blockRect = block.advance
+      for (final LineBlock block in line.visualBlocks) {
+        final ui.Rect blockRect = block.advance
             .translate(line.advance.left + line.formattingShift, line.advance.top)
             .inflate(epsilon);
         if (blockRect.right < offset.dx) {
@@ -648,9 +647,9 @@ class TextLayout {
         // Found the block; let's go through all the clusters IN VISUAL ORDER to find the position
         final int start = block.isLtr ? block.clusterRange.start : block.clusterRange.end - 1;
         final int end = block.isLtr ? block.clusterRange.end : block.clusterRange.start - 1;
-        final int step = block.isLtr ? 1 : -1;
-        for (int i = start; i != end; i += step) {
-          final cluster = allClusters[i];
+        final step = block.isLtr ? 1 : -1;
+        for (var i = start; i != end; i += step) {
+          final WebCluster cluster = allClusters[i];
           final ui.Rect rect = cluster.advance
               .translate(
                 // TODO(mdebbar): Using `block.spanShiftFromLineStart` here is unfortunate. We should try
@@ -698,7 +697,7 @@ class TextLayout {
       return null;
     }
 
-    final clusterRange = _mapping.toClusterRange(codeUnitOffset, codeUnitOffset + 1);
+    final ClusterRange clusterRange = _mapping.toClusterRange(codeUnitOffset, codeUnitOffset + 1);
     if (clusterRange.isEmpty) {
       return null;
     }
@@ -710,7 +709,7 @@ class TextLayout {
     final TextLine line = lines[lineNumber];
 
     // The cluster is on this line.
-    for (final visualBlock in line.visualBlocks) {
+    for (final LineBlock visualBlock in line.visualBlocks) {
       if (visualBlock.clusterRange.isBefore(clusterRange.start)) {
         // We cannot assume clusters go sequentially because of bidi reshuffling
         continue;
@@ -724,7 +723,7 @@ class TextLayout {
       final ClusterRange intersection = visualBlock.clusterRange.intersect(clusterRange);
       assert(intersection.isNotEmpty);
 
-      final cluster = allClusters[intersection.start];
+      final WebCluster cluster = allClusters[intersection.start];
       return ui.GlyphInfo(
         cluster.advance.translate(
           line.advance.left + line.formattingShift + visualBlock.spanShiftFromLineStart,
@@ -760,7 +759,7 @@ class TextLayout {
   }
 
   ui.TextRange getLineBoundary(int codepointPosition) {
-    for (final line in lines) {
+    for (final TextLine line in lines) {
       if (line.allLineTextRange.start <= codepointPosition &&
           line.allLineTextRange.end > codepointPosition) {
         return ui.TextRange(start: line.allLineTextRange.start, end: line.allLineTextRange.end);
@@ -862,11 +861,11 @@ class _TextClusterMapping {
       return ui.TextRange.collapsed(_size);
     }
 
-    final startCluster = _clusters[clusterRange.start];
+    final WebCluster startCluster = _clusters[clusterRange.start];
     if (clusterRange.isEmpty) {
       return ui.TextRange.collapsed(startCluster.start);
     }
-    final endCluster = _clusters[clusterRange.end - 1];
+    final WebCluster endCluster = _clusters[clusterRange.end - 1];
 
     return ui.TextRange(
       start: math.min(startCluster.start, endCluster.end),
@@ -1221,7 +1220,7 @@ extension DomTextMetricsExtension on DomTextMetrics {
     double maxRight = rects.first.right;
     double maxBottom = rects.first.bottom;
 
-    for (int i = 1; i < rects.length; i++) {
+    for (var i = 1; i < rects.length; i++) {
       final DomRectReadOnly rect = rects[i];
 
       minLeft = math.min(minLeft, rect.left);

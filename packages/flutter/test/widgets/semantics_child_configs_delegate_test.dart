@@ -10,17 +10,16 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Semantics can merge sibling group', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    const SemanticsTag first = SemanticsTag('1');
-    const SemanticsTag second = SemanticsTag('2');
-    const SemanticsTag third = SemanticsTag('3');
+    final semantics = SemanticsTester(tester);
+    const first = SemanticsTag('1');
+    const second = SemanticsTag('2');
+    const third = SemanticsTag('3');
     ChildSemanticsConfigurationsResult delegate(List<SemanticsConfiguration> configs) {
       expect(configs.length, 3);
-      final ChildSemanticsConfigurationsResultBuilder builder =
-          ChildSemanticsConfigurationsResultBuilder();
-      final List<SemanticsConfiguration> sibling = <SemanticsConfiguration>[];
+      final builder = ChildSemanticsConfigurationsResultBuilder();
+      final sibling = <SemanticsConfiguration>[];
       // Merge first and third
-      for (final SemanticsConfiguration config in configs) {
+      for (final config in configs) {
         if (config.tagsChildrenWith(first) || config.tagsChildrenWith(third)) {
           sibling.add(config);
         } else {
@@ -81,15 +80,14 @@ void main() {
   });
 
   testWidgets('Semantics can drop semantics config', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    const SemanticsTag first = SemanticsTag('1');
-    const SemanticsTag second = SemanticsTag('2');
-    const SemanticsTag third = SemanticsTag('3');
+    final semantics = SemanticsTester(tester);
+    const first = SemanticsTag('1');
+    const second = SemanticsTag('2');
+    const third = SemanticsTag('3');
     ChildSemanticsConfigurationsResult delegate(List<SemanticsConfiguration> configs) {
-      final ChildSemanticsConfigurationsResultBuilder builder =
-          ChildSemanticsConfigurationsResultBuilder();
+      final builder = ChildSemanticsConfigurationsResultBuilder();
       // Merge first and third
-      for (final SemanticsConfiguration config in configs) {
+      for (final config in configs) {
         if (config.tagsChildrenWith(first) || config.tagsChildrenWith(third)) {
           continue;
         }
@@ -145,12 +143,11 @@ void main() {
   testWidgets('Semantics throws when mark the same config twice case 1', (
     WidgetTester tester,
   ) async {
-    const SemanticsTag first = SemanticsTag('1');
-    const SemanticsTag second = SemanticsTag('2');
-    const SemanticsTag third = SemanticsTag('3');
+    const first = SemanticsTag('1');
+    const second = SemanticsTag('2');
+    const third = SemanticsTag('3');
     ChildSemanticsConfigurationsResult delegate(List<SemanticsConfiguration> configs) {
-      final ChildSemanticsConfigurationsResultBuilder builder =
-          ChildSemanticsConfigurationsResultBuilder();
+      final builder = ChildSemanticsConfigurationsResultBuilder();
       // Marks the same one twice.
       builder.markAsMergeUp(configs.first);
       builder.markAsMergeUp(configs.first);
@@ -195,12 +192,11 @@ void main() {
   testWidgets('Semantics throws when mark the same config twice case 2', (
     WidgetTester tester,
   ) async {
-    const SemanticsTag first = SemanticsTag('1');
-    const SemanticsTag second = SemanticsTag('2');
-    const SemanticsTag third = SemanticsTag('3');
+    const first = SemanticsTag('1');
+    const second = SemanticsTag('2');
+    const third = SemanticsTag('3');
     ChildSemanticsConfigurationsResult delegate(List<SemanticsConfiguration> configs) {
-      final ChildSemanticsConfigurationsResultBuilder builder =
-          ChildSemanticsConfigurationsResultBuilder();
+      final builder = ChildSemanticsConfigurationsResultBuilder();
       // Marks the same one twice.
       builder.markAsMergeUp(configs.first);
       builder.markAsSiblingMergeGroup(<SemanticsConfiguration>[configs.first]);
@@ -245,12 +241,11 @@ void main() {
   testWidgets('RenderObject with semantics child delegate will mark correct boundary dirty', (
     WidgetTester tester,
   ) async {
-    final UniqueKey inner = UniqueKey();
-    final UniqueKey boundaryParent = UniqueKey();
-    final UniqueKey grandBoundaryParent = UniqueKey();
+    final inner = UniqueKey();
+    final boundaryParent = UniqueKey();
+    final grandBoundaryParent = UniqueKey();
     ChildSemanticsConfigurationsResult delegate(List<SemanticsConfiguration> configs) {
-      final ChildSemanticsConfigurationsResultBuilder builder =
-          ChildSemanticsConfigurationsResultBuilder();
+      final builder = ChildSemanticsConfigurationsResultBuilder();
       configs.forEach(builder.markAsMergeUp);
       return builder.build();
     }

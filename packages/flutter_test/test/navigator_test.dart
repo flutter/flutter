@@ -9,7 +9,7 @@ void main() {
   testWidgets('TestNavigatorObserver gets the transition duration of the most recent transition', (
     WidgetTester tester,
   ) async {
-    final TransitionDurationObserver observer = TransitionDurationObserver();
+    final observer = TransitionDurationObserver();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -199,7 +199,7 @@ void main() {
   testWidgets('TestNavigatorObserver throws when there has never been a transition', (
     WidgetTester tester,
   ) async {
-    final TransitionDurationObserver observer = TransitionDurationObserver();
+    final observer = TransitionDurationObserver();
 
     await tester.pumpWidget(
       MaterialApp(

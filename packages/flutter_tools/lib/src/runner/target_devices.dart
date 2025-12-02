@@ -381,7 +381,7 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
   Future<void>? _wirelessDevicesRefresh;
 
   @visibleForTesting
-  var waitForWirelessBeforeInput = false;
+  bool waitForWirelessBeforeInput = false;
 
   @visibleForTesting
   late final deviceSelection = TargetDeviceSelection(_logger);
@@ -756,9 +756,9 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
 class TargetDeviceSelection {
   TargetDeviceSelection(this._logger);
 
-  var devices = <Device>[];
+  List<Device> devices = <Device>[];
   final Logger _logger;
-  var invalidAttempts = 0;
+  int invalidAttempts = 0;
 
   /// Prompt user to select a device and wait until they select a valid device.
   ///

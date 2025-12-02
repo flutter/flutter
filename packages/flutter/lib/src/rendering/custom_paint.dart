@@ -714,7 +714,7 @@ class RenderCustomPaint extends RenderProxyBox {
         _backgroundSemanticsNodes != null && _backgroundSemanticsNodes!.isNotEmpty;
     final bool hasForegroundSemantics =
         _foregroundSemanticsNodes != null && _foregroundSemanticsNodes!.isNotEmpty;
-    final List<SemanticsNode> finalChildren = <SemanticsNode>[
+    final finalChildren = <SemanticsNode>[
       if (hasBackgroundSemantics) ..._backgroundSemanticsNodes!,
       ...children,
       if (hasForegroundSemantics) ..._foregroundSemanticsNodes!,
@@ -760,8 +760,8 @@ class RenderCustomPaint extends RenderProxyBox {
 
     assert(() {
       final Map<Key, int> keys = HashMap<Key, int>();
-      final List<DiagnosticsNode> information = <DiagnosticsNode>[];
-      for (int i = 0; i < newChildSemantics!.length; i += 1) {
+      final information = <DiagnosticsNode>[];
+      for (var i = 0; i < newChildSemantics!.length; i += 1) {
         final CustomPainterSemantics child = newChildSemantics[i];
         if (child.key != null) {
           if (keys.containsKey(child.key)) {
@@ -779,15 +779,12 @@ class RenderCustomPaint extends RenderProxyBox {
       return true;
     }());
 
-    int newChildrenTop = 0;
-    int oldChildrenTop = 0;
+    var newChildrenTop = 0;
+    var oldChildrenTop = 0;
     int newChildrenBottom = newChildSemantics.length - 1;
     int oldChildrenBottom = oldSemantics.length - 1;
 
-    final List<SemanticsNode?> newChildren = List<SemanticsNode?>.filled(
-      newChildSemantics.length,
-      null,
-    );
+    final newChildren = List<SemanticsNode?>.filled(newChildSemantics.length, null);
 
     // Update the top of the list.
     while ((oldChildrenTop <= oldChildrenBottom) && (newChildrenTop <= newChildrenBottom)) {
@@ -874,7 +871,7 @@ class RenderCustomPaint extends RenderProxyBox {
     }
 
     assert(() {
-      for (final SemanticsNode? node in newChildren) {
+      for (final node in newChildren) {
         assert(node != null);
       }
       return true;
@@ -907,7 +904,7 @@ class RenderCustomPaint extends RenderProxyBox {
     final SemanticsNode newChild = oldChild ?? SemanticsNode(key: newSemantics.key);
 
     final SemanticsProperties properties = newSemantics.properties;
-    final SemanticsConfiguration config = SemanticsConfiguration();
+    final config = SemanticsConfiguration();
     if (properties.role != null) {
       config.role = properties.role!;
     }

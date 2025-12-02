@@ -181,7 +181,7 @@ class PageController extends ScrollController {
       'The page property cannot be read when multiple PageViews are attached to '
       'the same PageController.',
     );
-    final _PagePosition position = this.position as _PagePosition;
+    final position = this.position as _PagePosition;
     return position.page;
   }
 
@@ -201,7 +201,7 @@ class PageController extends ScrollController {
   /// The returned [Future] resolves when the animation completes.
   Future<void> animateToPage(int page, {required Duration duration, required Curve curve}) {
     assert(_debugCheckPageControllerAttached());
-    final _PagePosition position = this.position as _PagePosition;
+    final position = this.position as _PagePosition;
     if (position._cachedPage != null) {
       position._cachedPage = page.toDouble();
       return Future<void>.value();
@@ -225,7 +225,7 @@ class PageController extends ScrollController {
   /// without animation, and without checking if the new value is in range.
   void jumpToPage(int page) {
     assert(_debugCheckPageControllerAttached());
-    final _PagePosition position = this.position as _PagePosition;
+    final position = this.position as _PagePosition;
     if (position._cachedPage != null) {
       position._cachedPage = page.toDouble();
       return;
@@ -274,7 +274,7 @@ class PageController extends ScrollController {
   @override
   void attach(ScrollPosition position) {
     super.attach(position);
-    final _PagePosition pagePosition = position as _PagePosition;
+    final pagePosition = position as _PagePosition;
     pagePosition.viewportFraction = viewportFraction;
   }
 }
@@ -439,7 +439,7 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   @override
   void restoreScrollOffset() {
     if (!hasPixels) {
-      final double? value =
+      final value =
           PageStorage.maybeOf(context.storageContext)?.readState(context.storageContext) as double?;
       if (value != null) {
         _pageToUseOnStartup = value;
@@ -949,7 +949,7 @@ class _PageViewState extends State<PageView> {
         if (notification.depth == 0 &&
             widget.onPageChanged != null &&
             notification is ScrollUpdateNotification) {
-          final PageMetrics metrics = notification.metrics as PageMetrics;
+          final metrics = notification.metrics as PageMetrics;
           final int currentPage = metrics.page!.round();
           if (currentPage != _lastReportedPage) {
             _lastReportedPage = currentPage;

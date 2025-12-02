@@ -7,7 +7,7 @@ class ClassWithAClampMethod {
 }
 
 void testNoDoubleClamp(int input) {
-  final ClassWithAClampMethod nonDoubleClamp = ClassWithAClampMethod();
+  final nonDoubleClamp = ClassWithAClampMethod();
   // ignore: unnecessary_nullable_for_final_variable_declarations
   final ClassWithAClampMethod? nonDoubleClamp2 = nonDoubleClamp;
   // ignore: unnecessary_nullable_for_final_variable_declarations

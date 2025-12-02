@@ -25,7 +25,7 @@ Stream<String> runAndGetStdout(
   Map<String, String>? environment,
   bool expectNonZeroExit = false,
 }) async* {
-  final StreamController<String> output = StreamController<String>();
+  final output = StreamController<String>();
   final Future<CommandResult?> command = runCommand(
     executable,
     arguments,
@@ -94,11 +94,11 @@ Future<Command> startCommand(
   void Function(String, io.Process)? outputListener,
 }) async {
   final String relativeWorkingDir = path.relative(workingDirectory ?? io.Directory.current.path);
-  final String commandDescription =
+  final commandDescription =
       '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   print('RUNNING: cd $cyan$relativeWorkingDir$reset; $green$commandDescription$reset');
 
-  final Stopwatch time = Stopwatch()..start();
+  final time = Stopwatch()..start();
   print('workingDirectory: $workingDirectory, executable: $executable, arguments: $arguments');
   final io.Process process = await io.Process.start(
     executable,
@@ -114,7 +114,7 @@ Future<Command> startCommand(
         .transform(const LineSplitter())
         .where((String line) => removeLine == null || !removeLine(line))
         .map<String>((String line) {
-          final String formattedLine = '$line\n';
+          final formattedLine = '$line\n';
           if (outputListener != null) {
             outputListener(formattedLine, process);
           }
@@ -169,7 +169,7 @@ Future<CommandResult> runCommand(
   bool Function(String)? removeLine,
   void Function(String, io.Process)? outputListener,
 }) async {
-  final String commandDescription =
+  final commandDescription =
       '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   final String relativeWorkingDir = workingDirectory ?? path.relative(io.Directory.current.path);
   if (dryRun) {
@@ -192,7 +192,7 @@ Future<CommandResult> runCommand(
     outputListener: outputListener,
   );
 
-  final CommandResult result = CommandResult._(
+  final result = CommandResult._(
     await command.process.exitCode,
     command._time.elapsed,
     await command._savedStdout,
@@ -210,7 +210,7 @@ Future<CommandResult> runCommand(
         print(result.flattenedStdout);
         print(result.flattenedStderr);
     }
-    final String allOutput = '${result.flattenedStdout}\n${result.flattenedStderr}';
+    final allOutput = '${result.flattenedStdout}\n${result.flattenedStderr}';
     foundError(<String>[
       ?failureMessage,
       '${bold}Command: $green$commandDescription$reset',
@@ -233,7 +233,7 @@ final String _flutterRoot = path.dirname(
 );
 
 String _prettyPrintRunCommand(String executable, List<String> arguments, String? workingDirectory) {
-  final StringBuffer output = StringBuffer();
+  final output = StringBuffer();
 
   // Print CWD relative to the root.
   output.write('|> ');

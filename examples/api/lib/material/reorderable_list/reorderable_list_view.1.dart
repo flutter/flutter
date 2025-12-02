@@ -37,11 +37,15 @@ class _ReorderableExampleState extends State<ReorderableExample> {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final Color oddItemColor = colorScheme.secondary.withOpacity(0.05);
-    final Color evenItemColor = colorScheme.secondary.withOpacity(0.15);
+    final Color oddItemColor = colorScheme.secondary.withValues(alpha: 0.05);
+    final Color evenItemColor = colorScheme.secondary.withValues(alpha: 0.15);
     final Color draggableItemColor = colorScheme.secondary;
 
-    Widget proxyDecorator(Widget child, int index, Animation<double> animation) {
+    Widget proxyDecorator(
+      Widget child,
+      int index,
+      Animation<double> animation,
+    ) {
       return AnimatedBuilder(
         animation: animation,
         builder: (BuildContext context, Widget? child) {

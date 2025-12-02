@@ -180,7 +180,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
        super(
          initialValue: controller?.text ?? initialValue ?? '',
          builder: (FormFieldState<String> field) {
-           final _CupertinoTextFormFieldRowState state = field as _CupertinoTextFormFieldRowState;
+           final state = field as _CupertinoTextFormFieldRowState;
 
            void onChangedHandler(String value) {
              field.didChange(value);

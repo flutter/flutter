@@ -14,7 +14,7 @@ Widget wrap({required Widget child, ThemeData? theme}) {
 
 void main() {
   testWidgets('ExpandIcon test', (WidgetTester tester) async {
-    bool expanded = false;
+    var expanded = false;
     IconTheme iconTheme;
 
     // Light mode tests
@@ -100,7 +100,7 @@ void main() {
   });
 
   testWidgets('Material3 - ExpandIcon disabled', (WidgetTester tester) async {
-    ThemeData theme = ThemeData();
+    var theme = ThemeData();
     IconTheme iconTheme;
     // Test light mode.
     await tester.pumpWidget(wrap(theme: theme, child: const ExpandIcon(onPressed: null)));
@@ -119,7 +119,7 @@ void main() {
   });
 
   testWidgets('ExpandIcon test isExpanded does not trigger callback', (WidgetTester tester) async {
-    bool expanded = false;
+    var expanded = false;
 
     await tester.pumpWidget(
       wrap(
@@ -148,7 +148,7 @@ void main() {
   testWidgets('ExpandIcon is rotated initially if isExpanded is true on first build', (
     WidgetTester tester,
   ) async {
-    bool expanded = true;
+    var expanded = true;
 
     await tester.pumpWidget(
       wrap(
@@ -165,7 +165,7 @@ void main() {
   });
 
   testWidgets('ExpandIcon default size is 24', (WidgetTester tester) async {
-    final ExpandIcon expandIcon = ExpandIcon(onPressed: (bool isExpanded) {});
+    final expandIcon = ExpandIcon(onPressed: (bool isExpanded) {});
 
     await tester.pumpWidget(wrap(child: expandIcon));
 
@@ -174,7 +174,7 @@ void main() {
   });
 
   testWidgets('ExpandIcon has the correct given size', (WidgetTester tester) async {
-    ExpandIcon expandIcon = ExpandIcon(size: 36, onPressed: (bool isExpanded) {});
+    var expandIcon = ExpandIcon(size: 36, onPressed: (bool isExpanded) {});
 
     await tester.pumpWidget(wrap(child: expandIcon));
 
@@ -191,7 +191,7 @@ void main() {
 
   testWidgets('Material2 - ExpandIcon has correct semantic hints', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
-    const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+    const localizations = DefaultMaterialLocalizations();
     await tester.pumpWidget(
       wrap(
         theme: ThemeData(useMaterial3: false),
@@ -236,7 +236,7 @@ void main() {
 
   testWidgets('Material3 - ExpandIcon has correct semantic hints', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
-    const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+    const localizations = DefaultMaterialLocalizations();
 
     await tester.pumpWidget(wrap(child: ExpandIcon(isExpanded: true, onPressed: (bool _) {})));
 
@@ -282,7 +282,7 @@ void main() {
   testWidgets('ExpandIcon uses custom icon color and expanded icon color', (
     WidgetTester tester,
   ) async {
-    bool expanded = false;
+    var expanded = false;
     IconTheme iconTheme;
 
     await tester.pumpWidget(

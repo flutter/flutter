@@ -301,13 +301,13 @@ class DriverTest {
       }
       // Make the device ID available in the driver code, so tools like ADB can
       // reference it if needed.
-      final Map<String, String> env = <String, String>{
+      final env = <String, String>{
         if (environment != null) ...environment!,
         'FLUTTER_DEVICE_ID_NUMBER': deviceId,
         if (devicelabAdbPath != null) 'FLUTTER_ADB_PATH': devicelabAdbPath,
       };
 
-      final List<String> options = <String>[
+      final options = <String>[
         '--no-android-gradle-daemon',
         '-v',
         '-t',
@@ -371,7 +371,7 @@ class IntegrationTest {
         await enableTalkBack();
       }
 
-      final List<String> options = <String>['-v', '-d', deviceId, testTarget, ...extraOptions];
+      final options = <String>['-v', '-d', deviceId, testTarget, ...extraOptions];
       await flutter('test', options: options, environment: environment);
       await tearDown?.call(await devices.workingDevice);
 

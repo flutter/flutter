@@ -282,7 +282,7 @@ abstract class Paint {
   factory Paint() => engine.renderer.createPaint();
 
   factory Paint.from(Paint other) {
-    final Paint paint = Paint();
+    final paint = Paint();
     paint
       ..blendMode = other.blendMode
       ..color = other.color
@@ -518,7 +518,7 @@ class _MatrixColorTransform implements _ColorTransform {
 }
 
 _ColorTransform _getColorTransform(ColorSpace source, ColorSpace destination) {
-  const _MatrixColorTransform srgbToP3 = _MatrixColorTransform(<double>[
+  const srgbToP3 = _MatrixColorTransform(<double>[
     0.808052267214446, 0.220292047628890, -0.139648846160100,
     0.145738111193222, //
     0.096480880462996, 0.916386732581291, -0.086093928394828,
@@ -712,10 +712,10 @@ Future<Codec> createBmp(Uint8List pixels, int width, int height, int rowBytes, P
   // The header is in the 108-byte BITMAPV4HEADER format, or as called by
   // Chromium, WindowsV4. Do not use the 56-byte or 52-byte Adobe formats, since
   // they're not supported.
-  const int dibSize = 0x6C /* 108: BITMAPV4HEADER */;
+  const dibSize = 0x6C /* 108: BITMAPV4HEADER */;
   const int headerSize = dibSize + 0x0E;
   final int bufferSize = headerSize + (width * height * 4);
-  final ByteData bmpData = ByteData(bufferSize);
+  final bmpData = ByteData(bufferSize);
   // 'BM' header
   bmpData.setUint16(0x00, 0x424D);
   // Size of data
@@ -753,12 +753,12 @@ Future<Codec> createBmp(Uint8List pixels, int width, int height, int rowBytes, P
   // Bitmask A
   bmpData.setUint32(0x42, 0xFF000000, Endian.little);
 
-  int destinationByte = headerSize;
-  final Uint32List combinedPixels = Uint32List.sublistView(pixels);
+  var destinationByte = headerSize;
+  final combinedPixels = Uint32List.sublistView(pixels);
   // BMP is scanlined from bottom to top. Rearrange here.
   for (int rowCount = height - 1; rowCount >= 0; rowCount -= 1) {
     int sourcePixel = rowCount * rowBytes;
-    for (int colCount = 0; colCount < width; colCount += 1) {
+    for (var colCount = 0; colCount < width; colCount += 1) {
       bmpData.setUint32(destinationByte, combinedPixels[sourcePixel], Endian.little);
       destinationByte += 4;
       sourcePixel += 1;
@@ -845,15 +845,15 @@ class Shadow {
     }
     a ??= <Shadow>[];
     b ??= <Shadow>[];
-    final List<Shadow> result = <Shadow>[];
+    final result = <Shadow>[];
     final int commonLength = math.min(a.length, b.length);
-    for (int i = 0; i < commonLength; i += 1) {
+    for (var i = 0; i < commonLength; i += 1) {
       result.add(Shadow.lerp(a[i], b[i], t)!);
     }
-    for (int i = commonLength; i < a.length; i += 1) {
+    for (var i = commonLength; i < a.length; i += 1) {
       result.add(a[i].scale(1.0 - t));
     }
-    for (int i = commonLength; i < b.length; i += 1) {
+    for (var i = commonLength; i < b.length; i += 1) {
       result.add(b[i].scale(t));
     }
     return result;
@@ -896,7 +896,7 @@ abstract class ImageShader implements Shader {
 class ImmutableBuffer {
   ImmutableBuffer._(this._length);
   static Future<ImmutableBuffer> fromUint8List(Uint8List list) async {
-    final ImmutableBuffer instance = ImmutableBuffer._(list.length);
+    final instance = ImmutableBuffer._(list.length);
     instance._list = list;
     return instance;
   }
@@ -944,7 +944,7 @@ class ImageDescriptor {
   ImageDescriptor._() : _width = null, _height = null, _rowBytes = null, _format = null;
 
   static Future<ImageDescriptor> encoded(ImmutableBuffer buffer) async {
-    final ImageDescriptor descriptor = ImageDescriptor._();
+    final descriptor = ImageDescriptor._();
     descriptor._data = buffer._list;
     return descriptor;
   }

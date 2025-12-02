@@ -30,7 +30,7 @@ void main() {
 
     expect(await stream.single, equals(42));
 
-    bool ranAction = false;
+    var ranAction = false;
     // ignore: void_checks, https://github.com/dart-lang/linter/issues/1675
     final Future<int> completeResult = future.whenComplete(() {
       ranAction = true;

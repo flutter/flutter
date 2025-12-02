@@ -61,7 +61,10 @@ class CupertinoIndicatorExample extends StatelessWidget {
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                CupertinoLinearActivityIndicator(progress: 0.6, color: CupertinoColors.activeGreen),
+                CupertinoLinearActivityIndicator(
+                  progress: 0.6,
+                  color: CupertinoColors.activeGreen,
+                ),
                 SizedBox(height: 10),
                 Text('Color: green', textAlign: TextAlign.center),
               ],

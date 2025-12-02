@@ -19,7 +19,7 @@ import '../impeller_test_helpers.dart';
 
 void main() {
   testWidgets('SnapshotWidget can rasterize child', (WidgetTester tester) async {
-    final SnapshotController controller = SnapshotController(allowSnapshotting: true);
+    final controller = SnapshotController(allowSnapshotting: true);
     addTearDown(controller.dispose);
     final Key key = UniqueKey();
 
@@ -60,11 +60,11 @@ void main() {
   testWidgets('Changing devicePixelRatio does not repaint if snapshotting is not enabled', (
     WidgetTester tester,
   ) async {
-    final SnapshotController controller = SnapshotController();
+    final controller = SnapshotController();
     addTearDown(controller.dispose);
-    final TestPainter painter = TestPainter();
+    final painter = TestPainter();
     addTearDown(painter.dispose);
-    double devicePixelRatio = 1.0;
+    var devicePixelRatio = 1.0;
     late StateSetter localSetState;
 
     await tester.pumpWidget(
@@ -97,11 +97,11 @@ void main() {
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
   testWidgets('Changing devicePixelRatio forces raster regeneration', (WidgetTester tester) async {
-    final SnapshotController controller = SnapshotController(allowSnapshotting: true);
+    final controller = SnapshotController(allowSnapshotting: true);
     addTearDown(controller.dispose);
-    final TestPainter painter = TestPainter();
+    final painter = TestPainter();
     addTearDown(painter.dispose);
-    double devicePixelRatio = 1.0;
+    var devicePixelRatio = 1.0;
     late StateSetter localSetState;
 
     await tester.pumpWidget(
@@ -140,7 +140,7 @@ void main() {
   testWidgets('SnapshotWidget paints its child as a single picture layer', (
     WidgetTester tester,
   ) async {
-    final SnapshotController controller = SnapshotController(allowSnapshotting: true);
+    final controller = SnapshotController(allowSnapshotting: true);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -167,11 +167,11 @@ void main() {
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
   testWidgets('SnapshotWidget can update the painter type', (WidgetTester tester) async {
-    final SnapshotController controller = SnapshotController(allowSnapshotting: true);
+    final controller = SnapshotController(allowSnapshotting: true);
     addTearDown(controller.dispose);
-    final TestPainter painter1 = TestPainter();
+    final painter1 = TestPainter();
     addTearDown(painter1.dispose);
-    final TestPainter2 painter2 = TestPainter2();
+    final painter2 = TestPainter2();
     addTearDown(painter2.dispose);
 
     await tester.pumpWidget(
@@ -196,7 +196,7 @@ void main() {
   testWidgets('RenderSnapshotWidget does not error on rasterization of child with empty size', (
     WidgetTester tester,
   ) async {
-    final SnapshotController controller = SnapshotController(allowSnapshotting: true);
+    final controller = SnapshotController(allowSnapshotting: true);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -213,7 +213,7 @@ void main() {
   testWidgets('RenderSnapshotWidget throws assertion if platform view is encountered', (
     WidgetTester tester,
   ) async {
-    final SnapshotController controller = SnapshotController(allowSnapshotting: true);
+    final controller = SnapshotController(allowSnapshotting: true);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -240,7 +240,7 @@ void main() {
   testWidgets('RenderSnapshotWidget does not assert if SnapshotMode.forced', (
     WidgetTester tester,
   ) async {
-    final SnapshotController controller = SnapshotController(allowSnapshotting: true);
+    final controller = SnapshotController(allowSnapshotting: true);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -261,7 +261,7 @@ void main() {
   testWidgets(
     'RenderSnapshotWidget does not take a snapshot if a platform view is encountered with SnapshotMode.permissive',
     (WidgetTester tester) async {
-      final SnapshotController controller = SnapshotController(allowSnapshotting: true);
+      final controller = SnapshotController(allowSnapshotting: true);
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -291,8 +291,8 @@ void main() {
         ..physicalSize = const Size(10, 10)
         ..devicePixelRatio = 1;
 
-      const ValueKey<String> repaintBoundaryKey = ValueKey<String>('boundary');
-      final SnapshotController controller = SnapshotController();
+      const repaintBoundaryKey = ValueKey<String>('boundary');
+      final controller = SnapshotController();
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(

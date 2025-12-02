@@ -156,7 +156,7 @@ Locale basicLocaleListResolution(
   final Map<String, Locale> languageAndScriptLocales = HashMap<String, Locale>();
   final Map<String, Locale> languageLocales = HashMap<String, Locale>();
   final Map<String?, Locale> countryLocales = HashMap<String?, Locale>();
-  for (final Locale locale in supportedLocales) {
+  for (final locale in supportedLocales) {
     allSupportedLocales['${locale.languageCode}_${locale.scriptCode}_${locale.countryCode}'] ??=
         locale;
     languageAndScriptLocales['${locale.languageCode}_${locale.scriptCode}'] ??= locale;
@@ -173,7 +173,7 @@ Locale basicLocaleListResolution(
   Locale? matchesLanguageCode;
   Locale? matchesCountryCode;
   // Loop over user's preferred locales
-  for (int localeIndex = 0; localeIndex < preferredLocales.length; localeIndex += 1) {
+  for (var localeIndex = 0; localeIndex < preferredLocales.length; localeIndex += 1) {
     final Locale userLocale = preferredLocales[localeIndex];
     // Look for perfect match.
     if (allSupportedLocales.containsKey(
@@ -1650,14 +1650,24 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     supportedLocales: widget.supportedLocales,
   );
 
-  void _updateLocalizations({WidgetsApp? oldWidget}) {
-    _localizationsResolver.update(
-      locale: widget.locale,
-      localeListResolutionCallback: widget.localeListResolutionCallback,
-      localeResolutionCallback: widget.localeResolutionCallback,
-      supportedLocales: widget.supportedLocales,
-      localizationsDelegates: widget.localizationsDelegates,
-    );
+  bool _shouldUpdateLocalizations(WidgetsApp oldWidget) {
+    return widget.locale != oldWidget.locale ||
+        widget.localeListResolutionCallback != oldWidget.localeListResolutionCallback ||
+        widget.localeResolutionCallback != oldWidget.localeResolutionCallback ||
+        widget.supportedLocales != oldWidget.supportedLocales ||
+        widget.localizationsDelegates != oldWidget.localizationsDelegates;
+  }
+
+  void _updateLocalizations({required WidgetsApp oldWidget}) {
+    if (_shouldUpdateLocalizations(oldWidget)) {
+      _localizationsResolver.update(
+        locale: widget.locale,
+        localeListResolutionCallback: widget.localeListResolutionCallback,
+        localeResolutionCallback: widget.localeResolutionCallback,
+        localizationsDelegates: widget.localizationsDelegates,
+        supportedLocales: widget.supportedLocales,
+      );
+    }
   }
 
   // BUILDER

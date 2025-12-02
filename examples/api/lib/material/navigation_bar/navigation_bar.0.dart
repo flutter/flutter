@@ -61,7 +61,9 @@ class _NavigationExampleState extends State<NavigationExample> {
           shadowColor: Colors.transparent,
           margin: const EdgeInsets.all(8.0),
           child: SizedBox.expand(
-            child: Center(child: Text('Home page', style: theme.textTheme.titleLarge)),
+            child: Center(
+              child: Text('Home page', style: theme.textTheme.titleLarge),
+            ),
           ),
         ),
 
@@ -105,7 +107,9 @@ class _NavigationExampleState extends State<NavigationExample> {
                   ),
                   child: Text(
                     'Hello',
-                    style: theme.textTheme.bodyLarge!.copyWith(color: theme.colorScheme.onPrimary),
+                    style: theme.textTheme.bodyLarge!.copyWith(
+                      color: theme.colorScheme.onPrimary,
+                    ),
                   ),
                 ),
               );
@@ -121,7 +125,9 @@ class _NavigationExampleState extends State<NavigationExample> {
                 ),
                 child: Text(
                   'Hi!',
-                  style: theme.textTheme.bodyLarge!.copyWith(color: theme.colorScheme.onPrimary),
+                  style: theme.textTheme.bodyLarge!.copyWith(
+                    color: theme.colorScheme.onPrimary,
+                  ),
                 ),
               ),
             );

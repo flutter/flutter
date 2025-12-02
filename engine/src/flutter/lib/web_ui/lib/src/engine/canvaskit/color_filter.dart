@@ -103,9 +103,9 @@ abstract class CkColorFilter implements CkManagedSkImageFilterConvertible, Layer
 Float32List _identityTransform = _computeIdentityTransform();
 
 Float32List _computeIdentityTransform() {
-  final Float32List result = Float32List(20);
-  const List<int> translationIndices = <int>[0, 6, 12, 18];
-  for (final int i in translationIndices) {
+  final result = Float32List(20);
+  const translationIndices = <int>[0, 6, 12, 18];
+  for (final i in translationIndices) {
     result[i] = 1;
   }
   _identityTransform = result;
@@ -164,9 +164,9 @@ class CkMatrixColorFilter extends CkColorFilter {
   /// See [https://api.flutter.dev/flutter/dart-ui/ColorFilter/ColorFilter.matrix.html].
   Float32List get _normalizedMatrix {
     assert(matrix.length == 20, 'Color Matrix must have 20 entries.');
-    final Float32List result = Float32List(20);
-    const List<int> translationIndices = <int>[4, 9, 14, 19];
-    for (int i = 0; i < 20; i++) {
+    final result = Float32List(20);
+    const translationIndices = <int>[4, 9, 14, 19];
+    for (var i = 0; i < 20; i++) {
       if (translationIndices.contains(i)) {
         result[i] = matrix[i] / 255.0;
       } else {

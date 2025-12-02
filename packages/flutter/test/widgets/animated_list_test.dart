@@ -11,8 +11,8 @@ void main() {
   testWidgets('SliverAnimatedList.builder respects findChildIndexCallback', (
     WidgetTester tester,
   ) async {
-    bool finderCalled = false;
-    int itemCount = 7;
+    var finderCalled = false;
+    var itemCount = 7;
     late StateSetter stateSetter;
 
     await tester.pumpWidget(
@@ -52,7 +52,7 @@ void main() {
       return SizedBox(height: 100.0, child: Center(child: Text('item $index')));
     }
 
-    final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
+    final listKey = GlobalKey<AnimatedListState>();
 
     await tester.pumpWidget(
       Directionality(
@@ -114,7 +114,7 @@ void main() {
       return SizedBox(height: 100.0, child: Center(child: Text('item $index')));
     }
 
-    final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
+    final listKey = GlobalKey<AnimatedListState>();
 
     await tester.pumpWidget(
       Directionality(
@@ -176,7 +176,7 @@ void main() {
 
   group('SliverAnimatedList', () {
     testWidgets('initialItemCount', (WidgetTester tester) async {
-      final Map<int, Animation<double>> animations = <int, Animation<double>>{};
+      final animations = <int, Animation<double>>{};
 
       await tester.pumpWidget(
         Directionality(
@@ -204,7 +204,7 @@ void main() {
     });
 
     testWidgets('insert', (WidgetTester tester) async {
-      final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
+      final listKey = GlobalKey<SliverAnimatedListState>();
 
       await tester.pumpWidget(
         Directionality(
@@ -281,7 +281,7 @@ void main() {
 
     // Test for insertAllItems with SliverAnimatedList
     testWidgets('insertAll', (WidgetTester tester) async {
-      final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
+      final listKey = GlobalKey<SliverAnimatedListState>();
 
       await tester.pumpWidget(
         Directionality(
@@ -334,8 +334,8 @@ void main() {
 
     // Test for removeAllItems with SliverAnimatedList
     testWidgets('remove', (WidgetTester tester) async {
-      final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
-      final List<int> items = <int>[0, 1, 2];
+      final listKey = GlobalKey<SliverAnimatedListState>();
+      final items = <int>[0, 1, 2];
 
       Widget buildItem(BuildContext context, int item, Animation<double> animation) {
         return SizeTransition(
@@ -409,8 +409,8 @@ void main() {
 
     // Test for removeAllItems with SliverAnimatedList
     testWidgets('removeAll', (WidgetTester tester) async {
-      final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
-      final List<int> items = <int>[0, 1, 2];
+      final listKey = GlobalKey<SliverAnimatedListState>();
+      final items = <int>[0, 1, 2];
 
       Widget buildItem(BuildContext context, int item, Animation<double> animation) {
         return SizeTransition(
@@ -458,7 +458,7 @@ void main() {
     });
 
     testWidgets('works in combination with other slivers', (WidgetTester tester) async {
-      final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
+      final listKey = GlobalKey<SliverAnimatedListState>();
 
       await tester.pumpWidget(
         Directionality(
@@ -510,8 +510,8 @@ void main() {
     testWidgets(
       'passes correctly derived index of findChildIndexCallback to the inner SliverChildBuilderDelegate',
       (WidgetTester tester) async {
-        final List<int> items = <int>[0, 1, 2, 3];
-        final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
+        final items = <int>[0, 1, 2, 3];
+        final listKey = GlobalKey<SliverAnimatedListState>();
 
         await tester.pumpWidget(
           Directionality(
@@ -649,7 +649,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/115040
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
 
     addTearDown(controller.dispose);
 
@@ -671,7 +671,7 @@ void main() {
   });
 
   testWidgets('AnimatedList applies MediaQuery padding', (WidgetTester tester) async {
-    const EdgeInsets padding = EdgeInsets.all(30.0);
+    const padding = EdgeInsets.all(30.0);
     EdgeInsets? innerMediaQueryPadding;
     await tester.pumpWidget(
       Directionality(
@@ -718,7 +718,7 @@ void main() {
     }
 
     Widget itemRemovalBuilder(BuildContext context, int? index, Animation<double> animation) {
-      final String text = index != null ? 'removing item $index' : 'removing item';
+      final text = index != null ? 'removing item $index' : 'removing item';
       return SizedBox(height: 100.0, child: Center(child: Text(text)));
     }
 
@@ -746,7 +746,7 @@ void main() {
       return itemsSeparators.allCandidates.map((Element e) => e.widget).whereType<Text>().toList();
     }
 
-    final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
+    final listKey = GlobalKey<AnimatedListState>();
 
     await tester.pumpWidget(
       Directionality(

@@ -1001,7 +1001,7 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
 
   SelectionResult _handleSelectParagraph(SelectParagraphSelectionEvent event) {
     if (event.absorb) {
-      for (int index = 0; index < selectables.length; index += 1) {
+      for (var index = 0; index < selectables.length; index += 1) {
         dispatchSelectionEventToChild(selectables[index], event);
       }
       currentSelectionStartIndex = 0;
@@ -1011,7 +1011,7 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
 
     // First pass, if the position is on a placeholder then dispatch the selection
     // event to the [Selectable] at the location and terminate.
-    for (int index = 0; index < selectables.length; index += 1) {
+    for (var index = 0; index < selectables.length; index += 1) {
       final bool selectableIsPlaceholder = !paragraph.selectableBelongsToParagraph(
         selectables[index],
       );
@@ -1030,9 +1030,9 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
     }
 
     SelectionResult? lastSelectionResult;
-    bool foundStart = false;
+    var foundStart = false;
     int? lastNextIndex;
-    for (int index = 0; index < selectables.length; index += 1) {
+    for (var index = 0; index < selectables.length; index += 1) {
       if (!paragraph.selectableBelongsToParagraph(selectables[index])) {
         if (foundStart) {
           final SelectionEvent synthesizedEvent = SelectParagraphSelectionEvent(
@@ -1071,13 +1071,13 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
           final bool selectionAtStartOfSelectable = selectables[index].boundingBoxes[0].overlaps(
             selectables[index].value.selectionRects[0],
           );
-          int startIndex = 0;
+          var startIndex = 0;
           if (lastNextIndex != null && selectionAtStartOfSelectable) {
             startIndex = lastNextIndex + 1;
           } else {
             startIndex = lastNextIndex == null && selectionAtStartOfSelectable ? 0 : index;
           }
-          for (int i = startIndex; i < index; i += 1) {
+          for (var i = startIndex; i < index; i += 1) {
             final SelectionEvent synthesizedEvent = SelectParagraphSelectionEvent(
               globalPosition: event.globalPosition,
               absorb: true,
@@ -1095,7 +1095,7 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
       if (selectables[index].value != existingGeometry) {
         if (!foundStart && lastNextIndex == null) {
           currentSelectionStartIndex = 0;
-          for (int i = 0; i < index; i += 1) {
+          for (var i = 0; i < index; i += 1) {
             final SelectionEvent synthesizedEvent = SelectParagraphSelectionEvent(
               globalPosition: event.globalPosition,
               absorb: true,
@@ -1131,7 +1131,7 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
     );
     SelectionResult? finalResult;
     // Begin the search for the selection edge at the opposite edge if it exists.
-    final bool hasOppositeEdge = isEnd
+    final hasOppositeEdge = isEnd
         ? currentSelectionStartIndex != -1
         : currentSelectionEndIndex != -1;
     int newIndex = switch ((isEnd, hasOppositeEdge)) {
@@ -1212,10 +1212,10 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
     //
     // This can happen when there is a scrollable child and the edge being adjusted
     // has been scrolled out of view.
-    final bool isCurrentEdgeWithinViewport = isEnd
+    final isCurrentEdgeWithinViewport = isEnd
         ? value.endSelectionPoint != null
         : value.startSelectionPoint != null;
-    final bool isOppositeEdgeWithinViewport = isEnd
+    final isOppositeEdgeWithinViewport = isEnd
         ? value.startSelectionPoint != null
         : value.endSelectionPoint != null;
     int newIndex = switch ((isEnd, isCurrentEdgeWithinViewport, isOppositeEdgeWithinViewport)) {
@@ -1360,9 +1360,9 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
     if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
       return null;
     }
-    int startOffset = 0;
-    int endOffset = 0;
-    bool foundStart = false;
+    var startOffset = 0;
+    var endOffset = 0;
+    var foundStart = false;
     bool forwardSelection = currentSelectionEndIndex >= currentSelectionStartIndex;
     if (currentSelectionEndIndex == currentSelectionStartIndex) {
       // Determining selection direction is inaccurate if currentSelectionStartIndex == currentSelectionEndIndex.
@@ -1372,7 +1372,7 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
       forwardSelection =
           rangeAtSelectableInSelection.endOffset >= rangeAtSelectableInSelection.startOffset;
     }
-    for (int index = 0; index < selections.length; index++) {
+    for (var index = 0; index < selections.length; index++) {
       final _SelectionInfo selection = selections[index];
       if (selection.range == null) {
         if (foundStart) {
@@ -1432,7 +1432,7 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
   /// this method will return `null`.
   @override
   SelectedContentRange? getSelection() {
-    final List<_SelectionInfo> selections = <_SelectionInfo>[
+    final selections = <_SelectionInfo>[
       for (final Selectable selectable in selectables)
         (contentLength: selectable.contentLength, range: selectable.getSelection()),
     ];
@@ -1466,7 +1466,7 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
     }
     final int skipStart = min(currentSelectionStartIndex, currentSelectionEndIndex);
     final int skipEnd = max(currentSelectionStartIndex, currentSelectionEndIndex);
-    for (int index = 0; index < selectables.length; index += 1) {
+    for (var index = 0; index < selectables.length; index += 1) {
       if (index >= skipStart && index <= skipEnd) {
         continue;
       }

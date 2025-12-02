@@ -567,7 +567,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   /// Overridden by [debugSamplingClock] for debug builds and testing. Using
   /// this object under test will maintain synchronization with [FakeAsync].
   SamplingClock get samplingClock {
-    SamplingClock value = SamplingClock();
+    var value = SamplingClock();
     assert(() {
       final SamplingClock? debugValue = debugSamplingClock;
       if (debugValue != null) {

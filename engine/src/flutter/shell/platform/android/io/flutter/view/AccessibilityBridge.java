@@ -4,8 +4,6 @@
 
 package io.flutter.view;
 
-import static io.flutter.Build.API_LEVELS;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ContentResolver;
@@ -38,7 +36,6 @@ import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
 import io.flutter.plugin.platform.PlatformViewsAccessibilityDelegate;
 import io.flutter.util.Predicate;
 import io.flutter.util.ViewUtils;
-import io.flutter.view.AccessibilityBridge.Flag;
 import io.flutter.view.AccessibilityStringBuilder.LocaleStringAttribute;
 import io.flutter.view.AccessibilityStringBuilder.SpellOutStringAttribute;
 import io.flutter.view.AccessibilityStringBuilder.StringAttribute;
@@ -95,7 +92,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           | Action.SCROLL_LEFT.value
           | Action.SCROLL_UP.value
           | Action.SCROLL_DOWN.value;
-  // Flags that make a node accessibilty focusable.
+  // Flags that make a node accessibility focusable.
   private static final int FOCUSABLE_FLAGS =
       Flag.HAS_CHECKED_STATE.value
           | Flag.IS_CHECKED.value
@@ -519,7 +516,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     this.contentResolver.registerContentObserver(transitionUri, false, animationScaleObserver);
 
     // Tells Flutter whether the text should be bolded or not. If the user changes bold text
-    // setting, the configuration will change and trigger a re-build of the accesibiltyBridge.
+    // setting, the configuration will change and trigger a re-build of the accessibilityBridge.
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_31) {
       setBoldTextFlag();
     }
@@ -636,11 +633,18 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     // one that is currently available in the semantics tree.  However, we also want
     // to set it if we're exiting a list to a non-list, so that we can get the "out of list"
     // announcement when A11y focus moves out of a list and not into another list.
-    return semanticsNode.scrollChildren > 0
+    // Adding check for at least 1 scrollChild because we don't want a list with a single item.
+    return semanticsNode.scrollChildren > 1
         && (SemanticsNode.nullableHasAncestor(
                 accessibilityFocusedSemanticsNode, o -> o == semanticsNode)
             || !SemanticsNode.nullableHasAncestor(
                 accessibilityFocusedSemanticsNode, o -> o.hasFlag(Flag.HAS_IMPLICIT_SCROLLING)));
+  }
+
+  private boolean shouldSetCollectionItemInfo(final SemanticsNode semanticsNode) {
+    return semanticsNode.parent != null
+        && shouldSetCollectionInfo(semanticsNode.parent)
+        && semanticsNode.parent.hasFlag(Flag.HAS_IMPLICIT_SCROLLING);
   }
 
   @RequiresApi(API_LEVELS.API_31)
@@ -730,7 +734,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     //
     // In this case, register the accessibility node in the view embedder,
     // so the accessibility tree can be mirrored as a subtree of the Flutter accessibility tree.
-    // This is in constrast to hybrid composition where the embedded view is in the view hiearchy,
+    // This is in contrast to hybrid composition where the embedded view is in the view hierarchy,
     // so it doesn't need to be mirrored.
     //
     // See the case down below for how hybrid composition is handled.
@@ -917,59 +921,131 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         || semanticsNode.hasAction(Action.SCROLL_UP)
         || semanticsNode.hasAction(Action.SCROLL_RIGHT)
         || semanticsNode.hasAction(Action.SCROLL_DOWN)) {
-      result.setScrollable(true);
-
       // This tells Android's a11y to send scroll events when reaching the end of
       // the visible viewport of a scrollable, unless the node itself does not
       // allow implicit scrolling - then we leave the className as view.View.
-      //
-      // We should prefer setCollectionInfo to the class names, as this way we get "In List"
-      // and "Out of list" announcements.  But we don't always know the counts, so we
-      // can fallback to the generic scroll view class names.
-      //
-      // On older APIs, we always fall back to the generic scroll view class names here.
-      //
-      // TODO(dnfield): We should add semantics properties for rows and columns in 2 dimensional
-      // lists, e.g.
-      // GridView.  Right now, we're only supporting ListViews and only if they have scroll
-      // children.
-      if (semanticsNode.hasFlag(Flag.HAS_IMPLICIT_SCROLLING)) {
-        if (semanticsNode.hasAction(Action.SCROLL_LEFT)
-            || semanticsNode.hasAction(Action.SCROLL_RIGHT)) {
-          if (shouldSetCollectionInfo(semanticsNode)) {
-            result.setCollectionInfo(
-                AccessibilityNodeInfo.CollectionInfo.obtain(
-                    0, // rows
-                    semanticsNode.scrollChildren, // columns
-                    false // hierarchical
-                    ));
-          } else {
-            result.setClassName("android.widget.HorizontalScrollView");
-          }
+      result.setScrollable(true);
+    }
+    // We should prefer setCollectionInfo to the class names, as this way we get "In List"
+    // and "Out of list" announcements.  But we don't always know the counts, so we
+    // can fallback to the generic scroll view class names.
+    //
+    // On older APIs, we always fall back to the generic scroll view class names here.
+    //
+    // TODO(dnfield): We should add semantics properties for rows and columns in 2 dimensional
+    // lists, e.g.
+    // GridView.  Right now, we're only supporting ListViews and only if they have scroll
+    // children.
+    if (shouldSetCollectionInfo(semanticsNode)) {
+      if (semanticsNode.hasAction(Action.SCROLL_LEFT)
+          || semanticsNode.hasAction(Action.SCROLL_RIGHT)) {
+        // This code will only run on devices with API level 32 or lower.
+        // The obtain method was deprecated in API 33.
+        if (Build.VERSION.SDK_INT < API_LEVELS.API_33) {
+          result.setCollectionInfo(
+              AccessibilityNodeInfo.CollectionInfo.obtain(
+                  1, // row count
+                  semanticsNode.scrollChildren, // column count
+                  false // hierarchical
+                  ));
+
         } else {
-          if (shouldSetCollectionInfo(semanticsNode)) {
-            result.setCollectionInfo(
-                AccessibilityNodeInfo.CollectionInfo.obtain(
-                    semanticsNode.scrollChildren, // rows
-                    0, // columns
-                    false // hierarchical
-                    ));
-          } else {
-            result.setClassName("android.widget.ScrollView");
-          }
+          result.setCollectionInfo(
+              new AccessibilityNodeInfo.CollectionInfo(
+                  1, // row count
+                  semanticsNode.scrollChildren, // column count
+                  false // hierarchical
+                  ));
+        }
+      } else {
+        // This code will only run on devices with API level 32 or lower.
+        // The obtain method was deprecated in API 33.
+        if (Build.VERSION.SDK_INT < API_LEVELS.API_33) {
+          result.setCollectionInfo(
+              AccessibilityNodeInfo.CollectionInfo.obtain(
+                  semanticsNode.scrollChildren, // row count
+                  1, // column count
+                  false // hierarchical
+                  ));
+        } else {
+          result.setCollectionInfo(
+              new AccessibilityNodeInfo.CollectionInfo(
+                  semanticsNode.scrollChildren, // row count
+                  1, // column count
+                  false // hierarchical
+                  ));
         }
       }
-      // TODO(ianh): Once we're on SDK v23+, call addAction to
-      // expose AccessibilityAction.ACTION_SCROLL_LEFT, _RIGHT,
-      // _UP, and _DOWN when appropriate.
+    }
+    if (semanticsNode.scrollChildren > 0 && !shouldSetCollectionInfo(semanticsNode)) {
       if (semanticsNode.hasAction(Action.SCROLL_LEFT)
-          || semanticsNode.hasAction(Action.SCROLL_UP)) {
-        result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+          || semanticsNode.hasAction(Action.SCROLL_RIGHT)) {
+        result.setClassName("android.widget.HorizontalScrollView");
+      } else {
+        result.setClassName("android.widget.ScrollView");
       }
-      if (semanticsNode.hasAction(Action.SCROLL_RIGHT)
-          || semanticsNode.hasAction(Action.SCROLL_DOWN)) {
-        result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+    }
+    if (shouldSetCollectionItemInfo(semanticsNode)) {
+      SemanticsNode parent = semanticsNode.parent;
+      List<SemanticsNode> scrollChildren = parent.childrenInTraversalOrder;
+      boolean verticalScroll =
+          !(parent.hasAction(Action.SCROLL_LEFT) || parent.hasAction(Action.SCROLL_RIGHT));
+      int nodeIndex = scrollChildren.indexOf(semanticsNode);
+      if (verticalScroll) {
+        // This code will only run on devices with API level 32 or lower.
+        // The obtain method was deprecated in API 33.
+        if (Build.VERSION.SDK_INT < 33) {
+          result.setCollectionItemInfo(
+              AccessibilityNodeInfo.CollectionItemInfo.obtain(
+                  nodeIndex, // row index
+                  1, // row span
+                  0, // column index
+                  1, // column span
+                  semanticsNode.hasFlag(Flag.IS_HEADER) // is heading
+                  ));
+        } else {
+          result.setCollectionItemInfo(
+              new AccessibilityNodeInfo.CollectionItemInfo(
+                  nodeIndex, // row index
+                  1, // row span
+                  0, // column index
+                  1, // column span
+                  semanticsNode.hasFlag(Flag.IS_HEADER) // is heading
+                  ));
+        }
+      } else {
+        // This code will only run on devices with API level 32 or lower.
+        // The obtain method was deprecated in API 33.
+        if (Build.VERSION.SDK_INT < 33) {
+          result.setCollectionItemInfo(
+              AccessibilityNodeInfo.CollectionItemInfo.obtain(
+                  0, // row index
+                  1, // row span
+                  nodeIndex, // column index
+                  1, // column span
+                  semanticsNode.hasFlag(Flag.IS_HEADER) // is heading
+                  ));
+        } else {
+          result.setCollectionItemInfo(
+              new AccessibilityNodeInfo.CollectionItemInfo(
+                  0, // row index
+                  1, // row span
+                  nodeIndex, // column index
+                  1, // column span
+                  semanticsNode.hasFlag(Flag.IS_HEADER) // is heading
+                  ));
+        }
       }
+    }
+    // TODO(ianh): Once we're on SDK v23+, call addAction to
+    // expose AccessibilityAction.ACTION_SCROLL_LEFT, _RIGHT,
+    // _UP, and _DOWN when appropriate.
+    if (semanticsNode.hasAction(Action.SCROLL_LEFT) || semanticsNode.hasAction(Action.SCROLL_UP)) {
+      result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+    }
+    if (semanticsNode.hasAction(Action.SCROLL_RIGHT)
+        || semanticsNode.hasAction(Action.SCROLL_DOWN)) {
+      result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
     }
     if (semanticsNode.hasAction(Action.INCREASE) || semanticsNode.hasAction(Action.DECREASE)) {
       // TODO(jonahwilliams): support AccessibilityAction.ACTION_SET_PROGRESS once SDK is
@@ -2015,7 +2091,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
    *
    * <p>This method sets accessibility panel title if the API level >= 28, otherwise, it creates a
    * {@link AccessibilityEvent#TYPE_WINDOW_STATE_CHANGED} and sends the event to Android's
-   * accessibility system. In both cases, TalkBack announces the label of the route and re-addjusts
+   * accessibility system. In both cases, TalkBack announces the label of the route and re-adjusts
    * the accessibility focus.
    *
    * <p>The given {@code route} should be a {@link SemanticsNode} that represents a navigation route
@@ -2024,7 +2100,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   private void onWindowNameChange(@NonNull SemanticsNode route) {
     String routeName = route.getRouteName();
     if (routeName == null) {
-      // The routeName will be null when there is no semantics node that represnets namesRoute in
+      // The routeName will be null when there is no semantics node that represents namesRoute in
       // the scopeRoute. The TYPE_WINDOW_STATE_CHANGED only works the route name is not null and not
       // empty. Gives it a whitespace will make it focus the first semantics node without
       // pronouncing any word.
@@ -2123,7 +2199,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
     // TODO(mattcarroll): should parent be set to "null" here? Changing the parent seems like the
     //                    behavior of a method called "removeSemanticsNode()". The same is true
-    //                    for null'ing accessibilityFocusedSemanticsNode, inputFocusedSemanticsNode,
+    //                    for nullifying accessibilityFocusedSemanticsNode,
+    // inputFocusedSemanticsNode,
     //                    and hoveredObject.  Is this a hook method or a command?
     semanticsNodeToBeRemoved.parent = null;
 
@@ -2587,7 +2664,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         if (recursive) {
           String childIndent = indent + "  ";
           for (SemanticsNode child : childrenInTraversalOrder) {
-            child.log(childIndent, recursive);
+            child.log(childIndent, true);
           }
         }
       }

@@ -30,7 +30,7 @@ class _OverviewViewState extends State<OverviewView> {
     final List<AlertData> alerts = DummyDataService.getAlerts(context);
 
     if (isDisplayDesktop(context)) {
-      const String sortKeyName = 'Overview';
+      const sortKeyName = 'Overview';
       return SingleChildScrollView(
         restorationId: 'overview_scroll_view',
         child: Padding(
@@ -96,13 +96,14 @@ class _OverviewGrid extends StatelessWidget {
 
         // Only display multiple columns when the constraints allow it and we
         // have a regular text scale factor.
-        const int minWidthForTwoColumns = 600;
+        const minWidthForTwoColumns = 600;
         final bool hasMultipleColumns =
             isDisplayDesktop(context) &&
             constraints.maxWidth > minWidthForTwoColumns &&
             textScaleFactor <= 2;
-        final double boxWidth =
-            hasMultipleColumns ? constraints.maxWidth / 2 - spacing / 2 : double.infinity;
+        final double boxWidth = hasMultipleColumns
+            ? constraints.maxWidth / 2 - spacing / 2
+            : double.infinity;
 
         return Wrap(
           runSpacing: spacing,

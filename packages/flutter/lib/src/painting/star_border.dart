@@ -497,7 +497,7 @@ class _StarGenerator {
 
     // The minimum allowed inner radius ratio. Numerical instabilities occur near
     // zero, so we just don't allow values in that range.
-    const double minInnerRadiusRatio = .002;
+    const minInnerRadiusRatio = .002;
 
     // Map the innerRadiusRatio so that we don't get values close to zero, since
     // things get a little squirrelly there because the path thinks that the
@@ -508,7 +508,7 @@ class _StarGenerator {
         (innerRadiusRatio * (1.0 - minInnerRadiusRatio)) + minInnerRadiusRatio;
 
     // First, generate the "points" of the star.
-    final List<_PointInfo> points = <_PointInfo>[];
+    final points = <_PointInfo>[];
     final double maxDiameter =
         2.0 *
         _generatePoints(
@@ -519,10 +519,10 @@ class _StarGenerator {
         );
 
     // Calculate the endpoints of each of the arcs, then draw the arcs.
-    final Path path = Path();
+    final path = Path();
     _drawPoints(path, points);
 
-    Offset scale = Offset(rect.width / maxDiameter, rect.height / maxDiameter);
+    var scale = Offset(rect.width / maxDiameter, rect.height / maxDiameter);
     if (rect.shortestSide == rect.width) {
       scale = Offset(scale.dx, squash * scale.dy + (1 - squash) * scale.dx);
     } else {
@@ -531,7 +531,7 @@ class _StarGenerator {
     // Scale the border so that it matches the size of the widget rectangle, so
     // that "rotation" of the shape doesn't affect how much of the rectangle it
     // covers.
-    final Matrix4 squashMatrix = Matrix4.translationValues(rect.center.dx, rect.center.dy, 0);
+    final squashMatrix = Matrix4.translationValues(rect.center.dx, rect.center.dy, 0);
     squashMatrix.multiply(Matrix4.diagonal3Values(scale.dx, scale.dy, 1));
     squashMatrix.multiply(Matrix4.rotationZ(rotation));
     squashMatrix.multiply(Matrix4.translationValues(-rect.center.dx, -rect.center.dy, 0));
@@ -547,7 +547,7 @@ class _StarGenerator {
     final double step = math.pi / points;
     // Start initial rotation one step before zero.
     double angle = -math.pi / 2 - step;
-    Offset valley = Offset(
+    var valley = Offset(
       center.dx + math.cos(angle) * innerRadius,
       center.dy + math.sin(angle) * innerRadius,
     );
@@ -569,12 +569,12 @@ class _StarGenerator {
       double pointInnerRadius,
     ) {
       pointAngle += pointStep;
-      final Offset point = Offset(
+      final point = Offset(
         center.dx + math.cos(pointAngle) * pointRadius,
         center.dy + math.sin(pointAngle) * pointRadius,
       );
       pointAngle += pointStep;
-      final Offset nextValley = Offset(
+      final nextValley = Offset(
         center.dx + math.cos(pointAngle) * pointInnerRadius,
         center.dy + math.sin(pointAngle) * pointInnerRadius,
       );
@@ -600,7 +600,7 @@ class _StarGenerator {
     final double remainder = points - points.truncateToDouble();
     final bool hasIntegerSides = remainder < 1e-6;
     final double wholeSides = points - (hasIntegerSides ? 0 : 1);
-    for (int i = 0; i < wholeSides; i += 1) {
+    for (var i = 0; i < wholeSides; i += 1) {
       angle = addPoint(angle, step, radius, innerRadius);
     }
 
@@ -652,7 +652,7 @@ class _StarGenerator {
     final double valleyAngle = _getAngle(points[1].point, points[1].valley, points[0].point);
     final double valleyWeight = _getWeight(valleyAngle);
 
-    for (int i = 0; i < points.length; i += 1) {
+    for (var i = 0; i < points.length; i += 1) {
       final _PointInfo point = points[i];
       final _PointInfo nextPoint = points[(i + 1) % points.length];
       path.lineTo(point.pointArc1.dx, point.pointArc1.dy);

@@ -179,7 +179,7 @@ class _SaveLayerDrawer extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (_image != null) {
-      final Rect imageRect = Rect.fromCenter(
+      final imageRect = Rect.fromCenter(
         center: Offset.zero,
         width: _image!.width.toDouble(),
         height: _image!.height.toDouble(),
@@ -204,13 +204,13 @@ class _SaveLayerDrawer extends CustomPainter {
 }
 
 Future<ui.Image> _drawImage() async {
-  final ui.PictureRecorder recorder = ui.PictureRecorder();
-  const Size markerSize = Size(120, 120);
+  final recorder = ui.PictureRecorder();
+  const markerSize = Size(120, 120);
   final double canvasSize = markerSize.height + 3;
-  final Canvas canvas = Canvas(recorder, Rect.fromLTWH(0, 0, canvasSize, canvasSize));
+  final canvas = Canvas(recorder, Rect.fromLTWH(0, 0, canvasSize, canvasSize));
 
-  final Paint ovalPaint = Paint()..color = const Color(0xff00ff00);
-  final Path ovalPath = Path()
+  final ovalPaint = Paint()..color = const Color(0xff00ff00);
+  final ovalPath = Path()
     ..addOval(
       Rect.fromLTWH((canvasSize - markerSize.width) / 2, 1, markerSize.width, markerSize.height),
     );
@@ -219,7 +219,7 @@ Future<ui.Image> _drawImage() async {
   final ui.Picture picture = recorder.endRecording();
   final ui.Image image = await picture.toImage(canvasSize.toInt(), (canvasSize + 0).toInt());
   final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawExtendedRgba128);
-  final Completer<ui.Image> completer = Completer<ui.Image>();
+  final completer = Completer<ui.Image>();
   ui.decodeImageFromPixels(
     Uint8List.view(byteData!.buffer),
     canvasSize.toInt(),

@@ -19,7 +19,7 @@ const String registry =
     'https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry';
 
 Map<String, List<String>> parseSection(String section) {
-  final Map<String, List<String>> result = <String, List<String>>{};
+  final result = <String, List<String>>{};
   late List<String> lastHeading;
   for (final String line in section.split('\n')) {
     if (line == '') {
@@ -41,7 +41,7 @@ Map<String, List<String>> parseSection(String section) {
 }
 
 Future<void> main() async {
-  final HttpClient client = HttpClient();
+  final client = HttpClient();
   final String body = (await (await (await client.getUrl(
     Uri.parse(registry),
   )).close()).transform(utf8.decoder).toList()).join();
@@ -49,12 +49,9 @@ Future<void> main() async {
       .split('%%')
       .map<Map<String, List<String>>>(parseSection)
       .toList();
-  final Map<String, List<String>> outputs = <String, List<String>>{
-    'language': <String>[],
-    'region': <String>[],
-  };
+  final outputs = <String, List<String>>{'language': <String>[], 'region': <String>[]};
   String? fileDate;
-  for (final Map<String, List<String>> section in sections) {
+  for (final section in sections) {
     if (fileDate == null) {
       // first block should contain a File-Date metadata line.
       fileDate = section['File-Date']!.single;

@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('Typography is defined for all target platforms', () {
     for (final TargetPlatform platform in TargetPlatform.values) {
-      final Typography typography = Typography.material2018(platform: platform);
+      final typography = Typography.material2018(platform: platform);
       expect(typography, isNotNull, reason: 'null typography for $platform');
       expect(typography.black, isNotNull, reason: 'null black typography for $platform');
       expect(typography.white, isNotNull, reason: 'null white typography for $platform');
@@ -17,7 +17,7 @@ void main() {
   });
 
   test('Typography lerp special cases', () {
-    final Typography typography = Typography();
+    final typography = Typography();
     expect(identical(Typography.lerp(typography, typography, 0.5), typography), true);
   });
 
@@ -72,8 +72,8 @@ void main() {
   }, 'Uses macOS system meta-font');
 
   test('Typography on iOS defaults to the correct SF font family based on size', () {
-    final Typography typography = Typography.material2018(platform: TargetPlatform.iOS);
-    for (final TextTheme textTheme in <TextTheme>[typography.black, typography.white]) {
+    final typography = Typography.material2018(platform: TargetPlatform.iOS);
+    for (final textTheme in <TextTheme>[typography.black, typography.white]) {
       expect(textTheme.displayLarge, isSanFranciscoDisplayFont);
       expect(textTheme.displayMedium, isSanFranciscoDisplayFont);
       expect(textTheme.displaySmall, isSanFranciscoDisplayFont);
@@ -93,8 +93,8 @@ void main() {
   });
 
   test('Typography on macOS defaults to the system UI meta-font', () {
-    final Typography typography = Typography.material2018(platform: TargetPlatform.macOS);
-    for (final TextTheme textTheme in <TextTheme>[typography.black, typography.white]) {
+    final typography = Typography.material2018(platform: TargetPlatform.macOS);
+    for (final textTheme in <TextTheme>[typography.black, typography.white]) {
       expect(textTheme.displayLarge, isMacOSSanFranciscoMetaFont);
       expect(textTheme.displayMedium, isMacOSSanFranciscoMetaFont);
       expect(textTheme.displaySmall, isMacOSSanFranciscoMetaFont);
@@ -114,7 +114,7 @@ void main() {
   });
 
   testWidgets('Typography implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     Typography.material2014(
       black: Typography.blackCupertino,
       white: Typography.whiteCupertino,
@@ -132,7 +132,7 @@ void main() {
   });
 
   test('Can lerp between different typographies', () {
-    final List<Typography> all = <Typography>[
+    final all = <Typography>[
       for (final TargetPlatform platform in TargetPlatform.values)
         Typography.material2014(platform: platform),
       for (final TargetPlatform platform in TargetPlatform.values)
@@ -141,8 +141,8 @@ void main() {
         Typography.material2021(platform: platform),
     ];
 
-    for (final Typography fromTypography in all) {
-      for (final Typography toTypography in all) {
+    for (final fromTypography in all) {
+      for (final toTypography in all) {
         Typography.lerp(fromTypography, toTypography, 0.5);
       }
     }
@@ -392,7 +392,7 @@ void main() {
   });
 
   test('Default M3 light textTheme styles all use onSurface', () {
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
     final TextTheme textTheme = theme.textTheme;
     final Color dark = theme.colorScheme.onSurface;
     expect(textTheme.displayLarge!.color, dark);
@@ -413,7 +413,7 @@ void main() {
   });
 
   test('Default M3 dark textTheme styles all use onSurface', () {
-    final ThemeData theme = ThemeData(brightness: Brightness.dark);
+    final theme = ThemeData(brightness: Brightness.dark);
     final TextTheme textTheme = theme.textTheme;
     final Color light = theme.colorScheme.onSurface;
     expect(textTheme.displayLarge!.color, light);

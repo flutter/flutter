@@ -1072,8 +1072,8 @@ class TestIOSDevices extends IOSDevices {
     required super.logger,
   });
 
-  var receivedEvent = Completer<void>();
-  var eventsReceived = 0;
+  Completer<void> receivedEvent = Completer<void>();
+  int eventsReceived = 0;
 
   void resetEventCompleter() {
     receivedEvent = Completer<void>();
@@ -1093,16 +1093,17 @@ class TestIOSDevices extends IOSDevices {
 class FakeIOSWorkflow extends Fake implements IOSWorkflow {}
 
 class FakeXcdevice extends Fake implements XCDevice {
-  var getAvailableIOSDevicesCount = 0;
-  var getAvailableIOSDevicesForWirelessDiscoveryCount = 0;
+  int getAvailableIOSDevicesCount = 0;
+  int getAvailableIOSDevicesForWirelessDiscoveryCount = 0;
   final devices = <List<IOSDevice>>[];
   final diagnostics = <String>[];
-  var deviceEventController = StreamController<XCDeviceEventNotification>();
+  StreamController<XCDeviceEventNotification> deviceEventController =
+      StreamController<XCDeviceEventNotification>();
 
   XCDeviceEventNotification? waitForDeviceEvent;
 
   @override
-  var isInstalled = true;
+  bool isInstalled = true;
 
   @override
   void dispose() {}
@@ -1146,7 +1147,7 @@ class FakeXcdevice extends Fake implements XCDevice {
 }
 
 class FakeProcess extends Fake implements Process {
-  var killed = false;
+  bool killed = false;
 
   @override
   bool kill([io.ProcessSignal signal = io.ProcessSignal.sigterm]) {

@@ -1014,16 +1014,16 @@ class AndroidMemoryInfo extends MemoryInfo {
 
   // Realtime is time since the system was booted includes deep sleep. Clock
   // is monotonic, and ticks even when the CPU is in power saving modes.
-  var realTime = 0;
+  int realTime = 0;
 
   // Each measurement has KB as a unit.
-  var javaHeap = 0;
-  var nativeHeap = 0;
-  var code = 0;
-  var stack = 0;
-  var graphics = 0;
-  var privateOther = 0;
-  var system = 0;
+  int javaHeap = 0;
+  int nativeHeap = 0;
+  int code = 0;
+  int stack = 0;
+  int graphics = 0;
+  int privateOther = 0;
+  int system = 0;
 
   @override
   Map<String, Object> toJson() {

@@ -36,11 +36,11 @@ class _CustomCupertinoTextSelectionControls extends CupertinoTextSelectionContro
       _kArrowScreenPadding + mediaQueryPadding.left,
       MediaQuery.sizeOf(context).width - mediaQueryPadding.right - _kArrowScreenPadding,
     );
-    final Offset anchorAbove = Offset(
+    final anchorAbove = Offset(
       anchorX,
       endpoints.first.point.dy - textLineHeight + globalEditableRegion.top,
     );
-    final Offset anchorBelow = Offset(anchorX, endpoints.last.point.dy + globalEditableRegion.top);
+    final anchorBelow = Offset(anchorX, endpoints.last.point.dy + globalEditableRegion.top);
 
     return CupertinoTextSelectionToolbar(
       anchorAbove: anchorAbove,
@@ -109,7 +109,7 @@ void main() {
 
   testWidgets('chevrons point to the correct side', (WidgetTester tester) async {
     // Add enough TestBoxes to need 3 pages.
-    final List<Widget> children = List<Widget>.generate(15, (int i) => const TestBox());
+    final children = List<Widget>.generate(15, (int i) => const TestBox());
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -149,7 +149,7 @@ void main() {
 
   testWidgets('paginates children if they overflow', (WidgetTester tester) async {
     late StateSetter setState;
-    final List<Widget> children = List<Widget>.generate(7, (int i) => const TestBox());
+    final children = List<Widget>.generate(7, (int i) => const TestBox());
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -236,10 +236,10 @@ void main() {
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
   testWidgets('does not paginate if children fit with zero margin', (WidgetTester tester) async {
-    final List<Widget> children = List<Widget>.generate(7, (int i) => const TestBox());
+    final children = List<Widget>.generate(7, (int i) => const TestBox());
     final double spacerWidth = 1.0 / tester.view.devicePixelRatio;
     final double dividerWidth = 1.0 / tester.view.devicePixelRatio;
-    const double borderRadius = 8.0; // Should match _kToolbarBorderRadius
+    const borderRadius = 8.0; // Should match _kToolbarBorderRadius
     final double width =
         7 * TestBox.itemWidth + 6 * (dividerWidth + 2 * spacerWidth) + 2 * borderRadius;
     await tester.pumpWidget(
@@ -321,10 +321,10 @@ void main() {
 
   testWidgets('positions itself at anchorAbove if it fits', (WidgetTester tester) async {
     late StateSetter setState;
-    const double height = 50.0;
-    const double anchorBelowY = 500.0;
-    double anchorAboveY = 0.0;
-    const double paddingAbove = 12.0;
+    const height = 50.0;
+    const anchorBelowY = 500.0;
+    var anchorAboveY = 0.0;
+    const paddingAbove = 12.0;
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -361,8 +361,7 @@ void main() {
     expect(toolbarY, equals(anchorBelowY + _kToolbarContentDistance));
     expect(find.byType(CustomSingleChildLayout), findsOneWidget);
     final CustomSingleChildLayout layout = tester.widget(find.byType(CustomSingleChildLayout));
-    final TextSelectionToolbarLayoutDelegate delegate =
-        layout.delegate as TextSelectionToolbarLayoutDelegate;
+    final delegate = layout.delegate as TextSelectionToolbarLayoutDelegate;
     expect(delegate.anchorBelow.dy, anchorBelowY - paddingAbove);
 
     // Even when it barely doesn't fit.
@@ -420,7 +419,7 @@ void main() {
   });
 
   testWidgets('can create and use a custom toolbar', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(text: 'Select me custom menu');
+    final controller = TextEditingController(text: 'Select me custom menu');
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       CupertinoApp(
@@ -451,8 +450,8 @@ void main() {
     expect(find.text('Select all'), findsNothing);
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
-  for (final Brightness? themeBrightness in <Brightness?>[...Brightness.values, null]) {
-    for (final Brightness? mediaBrightness in <Brightness?>[...Brightness.values, null]) {
+  for (final themeBrightness in <Brightness?>[...Brightness.values, null]) {
+    for (final mediaBrightness in <Brightness?>[...Brightness.values, null]) {
       testWidgets(
         'draws dark buttons in dark mode and light button in light mode when theme is $themeBrightness and MediaQuery is $mediaBrightness',
         (WidgetTester tester) async {
@@ -511,8 +510,8 @@ void main() {
 
   testWidgets('draws a shadow below the toolbar in light mode', (WidgetTester tester) async {
     late StateSetter setState;
-    const double height = 50.0;
-    double anchorAboveY = 0.0;
+    const height = 50.0;
+    var anchorAboveY = 0.0;
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -613,7 +612,7 @@ void main() {
 
     // The String describes the location of the toolbar in relation to the
     // content the arrow points to.
-    const List<(String, Offset)> toolbarLocation = <(String, Offset)>[
+    const toolbarLocation = <(String, Offset)>[
       ('BottomRight', Offset.zero),
       ('BottomLeft', Offset(100000, 0)),
       ('TopRight', Offset(0, 100)),

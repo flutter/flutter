@@ -157,11 +157,11 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
     final double rightMargin =
         MediaQuery.widthOf(context) - mediaQueryPadding.right - _kArrowScreenPadding;
 
-    final Offset anchorAboveAdjusted = Offset(
+    final anchorAboveAdjusted = Offset(
       clampDouble(anchorAbove.dx, leftMargin, rightMargin),
       anchorAbove.dy - _kToolbarContentDistance - paddingAbove,
     );
-    final Offset anchorBelowAdjusted = Offset(
+    final anchorBelowAdjusted = Offset(
       clampDouble(anchorBelow.dx, leftMargin, rightMargin),
       anchorBelow.dy + _kToolbarContentDistance - paddingAbove,
     );
@@ -311,7 +311,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
     // depends on isAbove.
     // The height of one arrow will be clipped off of the child, so adjust the
     // size and position to remove that piece from the layout.
-    final BoxParentData childParentData = child.parentData! as BoxParentData;
+    final childParentData = child.parentData! as BoxParentData;
     childParentData.offset = _computeChildOffset(child.size);
     size = Size(child.size.width, child.size.height - _kToolbarArrowSize.height);
   }
@@ -341,7 +341,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
     assert(startAngle % halfPI == 0.0);
     final Rect rect = rrect.outerRect;
 
-    final List<(Offset, Radius)> rrectCorners = <(Offset, Radius)>[
+    final rrectCorners = <(Offset, Radius)>[
       (rect.bottomRight, -rrect.brRadius),
       (rect.bottomLeft, Radius.elliptical(rrect.blRadiusX, -rrect.blRadiusY)),
       (rect.topLeft, rrect.tlRadius),
@@ -352,13 +352,13 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
     // to avoid fp arithmetics. The order is br -> bl -> tl -> tr if the starting
     // angle is 0.
     final int startQuadrantIndex = startAngle ~/ halfPI;
-    for (int i = startQuadrantIndex; i < rrectCorners.length + startQuadrantIndex; i += 1) {
+    for (var i = startQuadrantIndex; i < rrectCorners.length + startQuadrantIndex; i += 1) {
       final (Offset vertex, Radius rectCenterOffset) = rrectCorners[i % rrectCorners.length];
-      final Offset otherVertex = Offset(
+      final otherVertex = Offset(
         vertex.dx + 2 * rectCenterOffset.x,
         vertex.dy + 2 * rectCenterOffset.y,
       );
-      final Rect rect = Rect.fromPoints(vertex, otherVertex);
+      final rect = Rect.fromPoints(vertex, otherVertex);
       path.arcTo(rect, halfPI * i, halfPI, false);
     }
     return path;
@@ -366,7 +366,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
 
   // The path is described in the toolbar child's coordinate system.
   Path _clipPath(RenderBox child, RRect rrect) {
-    final Path path = Path();
+    final path = Path();
     // If there isn't enough width for the arrow + radii, ignore the arrow.
     // Because of the constraints we gave children in performLayout, this should
     // only happen if the parent isn't wide enough which should be very rare, and
@@ -399,7 +399,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
         ); // left side of the arrow triangle
     } else {
       final double arrowBaseY = _kToolbarArrowSize.height;
-      const double arrowTipY = 0.0;
+      const arrowTipY = 0.0;
       path
         ..moveTo(
           arrowTipX - _kToolbarArrowSize.width / 2,
@@ -422,14 +422,14 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
       return;
     }
 
-    final BoxParentData childParentData = child.parentData! as BoxParentData;
+    final childParentData = child.parentData! as BoxParentData;
 
     final RRect rrect = _shapeRRect(child);
     final Path clipPath = _clipPath(child, rrect);
 
     // If configured, paint the shadow beneath the shape.
     if (_shadowColor != null) {
-      final BoxShadow boxShadow = BoxShadow(color: _shadowColor!, blurRadius: 15.0);
+      final boxShadow = BoxShadow(color: _shadowColor!, blurRadius: 15.0);
       final RRect shadowRRect = RRect.fromLTRBR(
         rrect.left,
         rrect.top,
@@ -484,7 +484,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
         ..strokeWidth = 2.0
         ..style = PaintingStyle.stroke;
 
-      final BoxParentData childParentData = child.parentData! as BoxParentData;
+      final childParentData = child.parentData! as BoxParentData;
       final Path clipPath = _clipPath(child, _shapeRRect(child));
       context.canvas.drawPath(clipPath.shift(offset + childParentData.offset), debugPaint);
       return true;
@@ -500,8 +500,8 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
 
     // Positions outside of the clipped area of the child are not counted as
     // hits.
-    final BoxParentData childParentData = child.parentData! as BoxParentData;
-    final Rect hitBox = Rect.fromLTWH(
+    final childParentData = child.parentData! as BoxParentData;
+    final hitBox = Rect.fromLTWH(
       childParentData.offset.dx,
       childParentData.offset.dy + _kToolbarArrowSize.height,
       child.size.width,
@@ -561,8 +561,7 @@ class _CupertinoTextSelectionToolbarContentState
   }
 
   void _handleNextPage() {
-    final RenderBox? renderToolbar =
-        _toolbarItemsKey.currentContext?.findRenderObject() as RenderBox?;
+    final renderToolbar = _toolbarItemsKey.currentContext?.findRenderObject() as RenderBox?;
 
     if (renderToolbar is _RenderCupertinoTextSelectionToolbarItems && renderToolbar.hasNextPage) {
       _controller.reverse();
@@ -572,8 +571,7 @@ class _CupertinoTextSelectionToolbarContentState
   }
 
   void _handlePreviousPage() {
-    final RenderBox? renderToolbar =
-        _toolbarItemsKey.currentContext?.findRenderObject() as RenderBox?;
+    final renderToolbar = _toolbarItemsKey.currentContext?.findRenderObject() as RenderBox?;
 
     if (renderToolbar is _RenderCupertinoTextSelectionToolbarItems &&
         renderToolbar.hasPreviousPage) {
@@ -720,13 +718,13 @@ abstract class _CupertinoChevronPainter extends CustomPainter {
     // If pointing left, it means the left half of a square is being used and
     // the offset is positive. If pointing right, the right half is being used
     // and the offset is negative.
-    final Offset centerOffset = Offset(iconSize / 4 * (isLeft ? 1 : -1), 0);
+    final centerOffset = Offset(iconSize / 4 * (isLeft ? 1 : -1), 0);
 
     final Offset firstPoint = Offset(iconSize / 2, 0) + centerOffset;
     final Offset middlePoint = Offset(isLeft ? 0 : iconSize, iconSize / 2) + centerOffset;
     final Offset lowerPoint = Offset(iconSize / 2, iconSize) + centerOffset;
 
-    final Paint paint = Paint()
+    final paint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = _kToolbarChevronThickness
@@ -879,8 +877,7 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
     assert(!_forgottenChildren.contains(child));
     // Handle forgetting a child in children or in a slot.
     if (slotToChild.containsKey(child.slot)) {
-      final _CupertinoTextSelectionToolbarItemsSlot slot =
-          child.slot! as _CupertinoTextSelectionToolbarItemsSlot;
+      final slot = child.slot! as _CupertinoTextSelectionToolbarItemsSlot;
       slotToChild.remove(slot);
     } else {
       _forgottenChildren.add(child);
@@ -904,8 +901,7 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
     // Mount slotted children.
-    final _CupertinoTextSelectionToolbarItems toolbarItems =
-        widget as _CupertinoTextSelectionToolbarItems;
+    final toolbarItems = widget as _CupertinoTextSelectionToolbarItems;
     _mountChild(toolbarItems.backButton, _CupertinoTextSelectionToolbarItemsSlot.backButton);
     _mountChild(toolbarItems.nextButton, _CupertinoTextSelectionToolbarItemsSlot.nextButton);
 
@@ -941,8 +937,7 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
     assert(widget == newWidget);
 
     // Update slotted children.
-    final _CupertinoTextSelectionToolbarItems toolbarItems =
-        widget as _CupertinoTextSelectionToolbarItems;
+    final toolbarItems = widget as _CupertinoTextSelectionToolbarItems;
     _mountChild(toolbarItems.backButton, _CupertinoTextSelectionToolbarItemsSlot.backButton);
     _mountChild(toolbarItems.nextButton, _CupertinoTextSelectionToolbarItemsSlot.nextButton);
 
@@ -1050,9 +1045,9 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox
     }
 
     // First pass: determine the height of the tallest child.
-    double greatestHeight = 0.0;
+    var greatestHeight = 0.0;
     visitChildren((RenderObject renderObjectChild) {
-      final RenderBox child = renderObjectChild as RenderBox;
+      final child = renderObjectChild as RenderBox;
       final double childHeight = child.getMaxIntrinsicHeight(constraints.maxWidth);
       if (childHeight > greatestHeight) {
         greatestHeight = childHeight;
@@ -1060,7 +1055,7 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox
     });
 
     // Layout slotted children.
-    final BoxConstraints slottedConstraints = BoxConstraints(
+    final slottedConstraints = BoxConstraints(
       maxWidth: constraints.maxWidth,
       minHeight: greatestHeight,
       maxHeight: greatestHeight,
@@ -1069,14 +1064,14 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox
     _nextButton!.layout(slottedConstraints, parentUsesSize: true);
 
     final double subsequentPageButtonsWidth = _backButton!.size.width + _nextButton!.size.width;
-    double currentButtonPosition = 0.0;
+    var currentButtonPosition = 0.0;
     late double toolbarWidth; // The width of the whole widget.
-    int currentPage = 0;
-    int i = -1;
+    var currentPage = 0;
+    var i = -1;
     visitChildren((RenderObject renderObjectChild) {
       i++;
-      final RenderBox child = renderObjectChild as RenderBox;
-      final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
+      final child = renderObjectChild as RenderBox;
+      final childParentData = child.parentData! as ToolbarItemsParentData;
       childParentData.shouldPaint = false;
 
       // Skip slotted children and children on pages after the visible page.
@@ -1132,10 +1127,8 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox
 
     // Position page nav buttons.
     if (currentPage > 0) {
-      final ToolbarItemsParentData nextButtonParentData =
-          _nextButton!.parentData! as ToolbarItemsParentData;
-      final ToolbarItemsParentData backButtonParentData =
-          _backButton!.parentData! as ToolbarItemsParentData;
+      final nextButtonParentData = _nextButton!.parentData! as ToolbarItemsParentData;
+      final backButtonParentData = _backButton!.parentData! as ToolbarItemsParentData;
       // The forward button only shows when there's a page after this one.
       if (page != currentPage) {
         nextButtonParentData.offset = Offset(toolbarWidth, 0.0);
@@ -1165,8 +1158,8 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox
   @override
   void paint(PaintingContext context, Offset offset) {
     visitChildren((RenderObject renderObjectChild) {
-      final RenderBox child = renderObjectChild as RenderBox;
-      final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
+      final child = renderObjectChild as RenderBox;
+      final childParentData = child.parentData! as ToolbarItemsParentData;
 
       if (childParentData.shouldPaint) {
         final Offset childOffset = childParentData.offset + offset;
@@ -1199,7 +1192,7 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox
     if (child == null) {
       return false;
     }
-    final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
+    final childParentData = child.parentData! as ToolbarItemsParentData;
     if (!childParentData.shouldPaint) {
       return false;
     }
@@ -1218,7 +1211,7 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox
     // Hit test list children.
     RenderBox? child = lastChild;
     while (child != null) {
-      final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
+      final childParentData = child.parentData! as ToolbarItemsParentData;
 
       // Don't hit test children that aren't shown.
       if (!childParentData.shouldPaint) {
@@ -1268,7 +1261,7 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox
   @override
   void redepthChildren() {
     visitChildren((RenderObject renderObjectChild) {
-      final RenderBox child = renderObjectChild as RenderBox;
+      final child = renderObjectChild as RenderBox;
       redepthChild(child);
     });
   }
@@ -1290,8 +1283,8 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
     visitChildren((RenderObject renderObjectChild) {
-      final RenderBox child = renderObjectChild as RenderBox;
-      final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
+      final child = renderObjectChild as RenderBox;
+      final childParentData = child.parentData! as ToolbarItemsParentData;
       if (childParentData.shouldPaint) {
         visitor(renderObjectChild);
       }
@@ -1300,9 +1293,9 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    final List<DiagnosticsNode> value = <DiagnosticsNode>[];
+    final value = <DiagnosticsNode>[];
     visitChildren((RenderObject renderObjectChild) {
-      final RenderBox child = renderObjectChild as RenderBox;
+      final child = renderObjectChild as RenderBox;
       if (child == backButton) {
         value.add(child.toDiagnosticsNode(name: 'back button'));
       } else if (child == nextButton) {

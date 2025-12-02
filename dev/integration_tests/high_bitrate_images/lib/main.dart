@@ -81,12 +81,12 @@ class _SdfCanvasState extends State<SdfCanvas> {
   }
 
   Future<ui.Image> _loadR32FloatSdfImage() async {
-    const int width = 1024;
-    const int height = 1024;
+    const width = 1024;
+    const height = 1024;
     const double radius = width / 4.0;
-    final List<double> floats = List<double>.filled(width * height, 0.0);
-    for (int i = 0; i < height; ++i) {
-      for (int j = 0; j < width; ++j) {
+    final floats = List<double>.filled(width * height, 0.0);
+    for (var i = 0; i < height; ++i) {
+      for (var j = 0; j < width; ++j) {
         double x = j.toDouble();
         double y = i.toDouble();
         x -= width / 2.0;
@@ -96,9 +96,9 @@ class _SdfCanvasState extends State<SdfCanvas> {
         floats[idx] = length - radius;
       }
     }
-    final Float32List floatList = Float32List.fromList(floats);
-    final Uint8List intList = Uint8List.view(floatList.buffer);
-    final Completer<ui.Image> completer = Completer<ui.Image>();
+    final floatList = Float32List.fromList(floats);
+    final intList = Uint8List.view(floatList.buffer);
+    final completer = Completer<ui.Image>();
     ui.decodeImageFromPixels(
       intList,
       width,
@@ -113,12 +113,12 @@ class _SdfCanvasState extends State<SdfCanvas> {
   }
 
   Future<ui.Image> _loadRGBA32FloatSdfImage() async {
-    const int width = 1024;
-    const int height = 1024;
+    const width = 1024;
+    const height = 1024;
     const double radius = width / 4.0;
-    final List<double> floats = List<double>.filled(width * height * 4, 0.0);
-    for (int i = 0; i < height; ++i) {
-      for (int j = 0; j < width; ++j) {
+    final floats = List<double>.filled(width * height * 4, 0.0);
+    for (var i = 0; i < height; ++i) {
+      for (var j = 0; j < width; ++j) {
         double x = j.toDouble();
         double y = i.toDouble();
         x -= width / 2.0;
@@ -131,9 +131,9 @@ class _SdfCanvasState extends State<SdfCanvas> {
         floats[idx + 3] = 1.0;
       }
     }
-    final Float32List floatList = Float32List.fromList(floats);
-    final Uint8List intList = Uint8List.view(floatList.buffer);
-    final Completer<ui.Image> completer = Completer<ui.Image>();
+    final floatList = Float32List.fromList(floats);
+    final intList = Uint8List.view(floatList.buffer);
+    final completer = Completer<ui.Image>();
     ui.decodeImageFromPixels(
       intList,
       width,
@@ -171,7 +171,7 @@ class SdfPainter extends CustomPainter {
     shader.setFloat(0, size.width);
     shader.setFloat(1, size.height);
     shader.setImageSampler(0, image);
-    final Paint paint = Paint()..shader = shader;
+    final paint = Paint()..shader = shader;
     canvas.drawRect(Offset.zero & size, paint);
   }
 

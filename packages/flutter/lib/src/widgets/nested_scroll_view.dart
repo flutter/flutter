@@ -793,7 +793,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   _NestedScrollMetrics _getMetrics(_NestedScrollPosition innerPosition, double velocity) {
     double pixels, minRange, maxRange, correctionOffset;
-    double extra = 0.0;
+    var extra = 0.0;
     if (innerPosition.pixels == innerPosition.minScrollExtent) {
       pixels = clampDouble(
         _outerPosition!.pixels,
@@ -897,7 +897,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     if (!_outerPosition!.haveDimensions) {
       return;
     }
-    bool innerCanDrag = false;
+    var innerCanDrag = false;
     for (final _NestedScrollPosition position in _innerPositions) {
       if (!position.haveDimensions) {
         return;
@@ -919,7 +919,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       duration,
       curve,
     );
-    final List<Future<void>> resultFutures = <Future<void>>[outerActivity.done];
+    final resultFutures = <Future<void>>[outerActivity.done];
     beginActivity(outerActivity, (_NestedScrollPosition position) {
       final DrivenScrollActivity innerActivity = position.createDrivenScrollActivity(
         nestOffset(to, position),
@@ -970,7 +970,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       // Dragging "up" - delta is positive
       // Prioritize getting rid of any inner overscroll, and then the outer
       // view, so that the app bar will scroll out of the way asap.
-      double outerDelta = delta;
+      var outerDelta = delta;
       for (final _NestedScrollPosition position in _innerPositions) {
         if (position.pixels < 0.0) {
           // This inner position is in overscroll.
@@ -991,7 +991,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       }
     } else {
       // Dragging "down" - delta is negative
-      double innerDelta = delta;
+      var innerDelta = delta;
       // Apply delta to the outer header first if it is configured to float.
       if (_floatHeaderSlivers) {
         innerDelta = _outerPosition!.applyClampedPointerSignalUpdate(delta);
@@ -1001,7 +1001,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
         // Apply the innerDelta, if we have not floated in the outer scrollable,
         // any leftover delta after this will be passed on to the outer
         // scrollable by the outerDelta.
-        double outerDelta = 0.0; // it will go negative if it changes
+        var outerDelta = 0.0; // it will go negative if it changes
         for (final _NestedScrollPosition position in _innerPositions) {
           final double overscroll = position.applyClampedPointerSignalUpdate(innerDelta);
           outerDelta = math.min(outerDelta, overscroll);
@@ -1039,7 +1039,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   }
 
   Drag drag(DragStartDetails details, VoidCallback dragCancelCallback) {
-    final ScrollDragController drag = ScrollDragController(
+    final drag = ScrollDragController(
       delegate: this,
       details: details,
       onDragCanceled: dragCancelCallback,
@@ -1063,7 +1063,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       // Dragging "up"
       // Prioritize getting rid of any inner overscroll, and then the outer
       // view, so that the app bar will scroll out of the way asap.
-      double outerDelta = delta;
+      var outerDelta = delta;
       for (final _NestedScrollPosition position in _innerPositions) {
         if (position.pixels < 0.0) {
           // This inner position is in overscroll.
@@ -1084,7 +1084,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       }
     } else {
       // Dragging "down" - delta is positive
-      double innerDelta = delta;
+      var innerDelta = delta;
       // Apply delta to the outer header first if it is configured to float.
       if (_floatHeaderSlivers) {
         innerDelta = _outerPosition!.applyClampedDragUpdate(delta);
@@ -1094,10 +1094,10 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
         // Apply the innerDelta, if we have not floated in the outer scrollable,
         // any leftover delta after this will be passed on to the outer
         // scrollable by the outerDelta.
-        double outerDelta = 0.0; // it will go positive if it changes
-        final List<double> overscrolls = <double>[];
+        var outerDelta = 0.0; // it will go positive if it changes
+        final overscrolls = <double>[];
         final List<_NestedScrollPosition> innerPositions = _innerPositions.toList();
-        for (final _NestedScrollPosition position in innerPositions) {
+        for (final position in innerPositions) {
           final double overscroll = position.applyClampedDragUpdate(innerDelta);
           outerDelta = math.max(outerDelta, overscroll);
           overscrolls.add(overscroll);
@@ -1107,7 +1107,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
         }
 
         // Now deal with any overscroll
-        for (int i = 0; i < innerPositions.length; ++i) {
+        for (var i = 0; i < innerPositions.length; ++i) {
           final double remainingDelta = overscrolls[i] - outerDelta;
           if (remainingDelta > 0.0) {
             innerPositions[i].applyFullDragUpdate(remainingDelta);
@@ -1549,7 +1549,7 @@ class _NestedOuterBallisticScrollActivity extends BallisticScrollActivity {
 
   @override
   bool applyMoveTo(double value) {
-    bool done = false;
+    var done = false;
     if (velocity > 0.0) {
       if (value < metrics.minRange) {
         return true;
@@ -1939,7 +1939,7 @@ class RenderSliverOverlapInjector extends RenderSliver {
   void debugPaint(PaintingContext context, Offset offset) {
     assert(() {
       if (debugPaintSizeEnabled) {
-        final Paint paint = Paint()
+        final paint = Paint()
           ..color = const Color(0xFFCC9933)
           ..strokeWidth = 3.0
           ..style = PaintingStyle.stroke;
@@ -1956,7 +1956,7 @@ class RenderSliverOverlapInjector extends RenderSliver {
             end = Offset(offset.dy + geometry!.paintExtent, y);
             delta = Offset(0.0, constraints.crossAxisExtent / 5.0);
         }
-        for (int index = -2; index <= 2; index += 1) {
+        for (var index = -2; index <= 2; index += 1) {
           paintZigZag(
             context.canvas,
             paint,
