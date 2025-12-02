@@ -10,11 +10,14 @@
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/image/dl_image.h"
 #include "flutter/impeller/display_list/aiks_context.h"
+#include "flutter/impeller/golden_tests/golden_digest.h"
 #include "flutter/impeller/golden_tests/screenshot.h"
-#include "flutter/impeller/playground/playground.h"
 #include "flutter/impeller/renderer/render_target.h"
 #include "flutter/testing/testing.h"
+#include "gtest/gtest.h"
+#include "impeller/playground/playground.h"
 #include "impeller/typographer/typographer_context.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 #include "third_party/imgui/imgui.h"
 
 #if FML_OS_MACOSX
@@ -70,7 +73,8 @@ class GoldenPlaygroundTest
       const char* fixture_name,
       bool enable_mipmapping = false) const;
 
-  RuntimeStage::Map OpenAssetAsRuntimeStage(const char* asset_name) const;
+  absl::StatusOr<RuntimeStage::Map> OpenAssetAsRuntimeStage(
+      const char* asset_name) const;
 
   std::shared_ptr<Context> GetContext() const;
 

@@ -327,8 +327,10 @@ TEST_P(AiksTest, DrawVerticesLinearGradientWithEmptySize) {
 }
 
 TEST_P(AiksTest, DrawVerticesWithEmptyTextureCoordinates) {
-  auto runtime_stages =
+  auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_simple.frag.iplr");
+  ASSERT_TRUE(runtime_stages_result.ok());
+  auto runtime_stages = runtime_stages_result.value();
 
   auto runtime_stage =
       runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];

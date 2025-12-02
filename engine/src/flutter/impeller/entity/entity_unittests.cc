@@ -1752,8 +1752,10 @@ TEST_P(EntityTest, YUVToRGBFilter) {
 }
 
 TEST_P(EntityTest, RuntimeEffect) {
-  auto runtime_stages =
+  auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
+  ASSERT_TRUE(runtime_stages_result.ok());
+  auto runtime_stages = runtime_stages_result.value();
   auto runtime_stage =
       runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);
@@ -1808,7 +1810,10 @@ TEST_P(EntityTest, RuntimeEffect) {
     callback(*content_context, mock_pass);
 
     // Dirty the runtime stage.
-    runtime_stages = OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
+    auto runtime_stages_result =
+        OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
+    ASSERT_TRUE(runtime_stages_result.ok());
+    runtime_stages = runtime_stages_result.value();
     runtime_stage =
         runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
 
@@ -1820,8 +1825,10 @@ TEST_P(EntityTest, RuntimeEffect) {
 }
 
 TEST_P(EntityTest, RuntimeEffectCanSuccessfullyRender) {
-  auto runtime_stages =
+  auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
+  ASSERT_TRUE(runtime_stages_result.ok());
+  auto runtime_stages = runtime_stages_result.value();
   auto runtime_stage =
       runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);
@@ -1867,8 +1874,10 @@ TEST_P(EntityTest, RuntimeEffectCanSuccessfullyRender) {
 }
 
 TEST_P(EntityTest, RuntimeEffectCanPrecache) {
-  auto runtime_stages =
+  auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
+  ASSERT_TRUE(runtime_stages_result.ok());
+  auto runtime_stages = runtime_stages_result.value();
   auto runtime_stage =
       runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);
@@ -1885,8 +1894,10 @@ TEST_P(EntityTest, RuntimeEffectSetsRightSizeWhenUniformIsStruct) {
     GTEST_SKIP() << "Test only applies to Vulkan";
   }
 
-  auto runtime_stages =
+  auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
+  ASSERT_TRUE(runtime_stages_result.ok());
+  auto runtime_stages = runtime_stages_result.value();
   auto runtime_stage =
       runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);

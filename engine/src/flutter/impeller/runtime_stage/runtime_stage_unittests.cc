@@ -338,7 +338,9 @@ TEST_P(RuntimeStageTest, CanRegisterStage) {
 }
 
 TEST_P(RuntimeStageTest, CanCreatePipelineFromRuntimeStage) {
-  auto stages = OpenAssetAsRuntimeStage("ink_sparkle.frag.iplr");
+  auto stages_result = OpenAssetAsRuntimeStage("ink_sparkle.frag.iplr");
+  ASSERT_TRUE(stages_result.ok());
+  auto stages = stages_result.value();
   auto stage = stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
 
   ASSERT_TRUE(stage);
@@ -381,7 +383,9 @@ TEST_P(RuntimeStageTest, CanCreatePipelineFromRuntimeStage) {
 }
 
 TEST_P(RuntimeStageTest, ContainsExpectedShaderTypes) {
-  auto stages = OpenAssetAsRuntimeStage("ink_sparkle.frag.iplr");
+  auto stages_result = OpenAssetAsRuntimeStage("ink_sparkle.frag.iplr");
+  ASSERT_TRUE(stages_result.ok());
+  auto stages = stages_result.value();
   // Right now, SkSL gets implicitly bundled regardless of what the build rule
   // for this test requested. After
   // https://github.com/flutter/flutter/issues/138919, this may require a build
