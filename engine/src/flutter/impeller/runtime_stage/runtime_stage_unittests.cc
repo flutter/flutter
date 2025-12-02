@@ -37,7 +37,7 @@ TEST_P(RuntimeStageTest, CanReadValidBlob) {
   ASSERT_TRUE(stages.ok());
   auto stage =
       stages.value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
-  ASSERT_TRUE(stage->IsValid());
+  ASSERT_TRUE(stage);
   ASSERT_EQ(stage->GetShaderStage(), RuntimeShaderStage::kFragment);
 }
 
@@ -80,7 +80,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
   auto stage =
       stages.value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
 
-  ASSERT_TRUE(stage->IsValid());
+  ASSERT_TRUE(stage);
   switch (GetBackend()) {
     case PlaygroundBackend::kMetal:
       [[fallthrough]];
@@ -309,7 +309,7 @@ TEST_P(RuntimeStageTest, CanRegisterStage) {
   ASSERT_TRUE(stages.ok());
   auto stage =
       stages.value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
-  ASSERT_TRUE(stage->IsValid());
+  ASSERT_TRUE(stage);
   std::promise<bool> registration;
   auto future = registration.get_future();
   auto library = GetContext()->GetShaderLibrary();
