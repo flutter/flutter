@@ -20,7 +20,7 @@ void main() {
       checkEncodeDecode<dynamic>(json, -9223372036854775807);
     });
     test('should encode and decode list with a big number', () {
-      final List<dynamic> message = <dynamic>[
+      final message = <dynamic>[
         // ignore: avoid_js_rounded_ints, since we check for round-tripping, the actual value doesn't matter!
         -7000000000000000007,
       ];
@@ -104,7 +104,7 @@ void main() {
       checkEncodeDecode<dynamic>(standard, -9223372036854775807);
     });
     test('should encode and decode a list containing big numbers', () {
-      final List<dynamic> message = <dynamic>[
+      final message = <dynamic>[
         -7000000000000000007, // ignore: avoid_js_rounded_ints, browsers are skipped below
         Int64List.fromList(<int>[-0x7fffffffffffffff - 1, 0, 0x7fffffffffffffff]),
       ];

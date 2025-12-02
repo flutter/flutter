@@ -87,7 +87,9 @@ std::optional<Snapshot> TextureContents::RenderToSnapshot(
                                  Matrix::MakeScale(scale),
                     .sampler_descriptor = options.sampler_descriptor.value_or(
                         sampler_descriptor_),
-                    .opacity = opacity};
+                    .opacity = opacity,
+                    .needs_rasterization_for_runtime_effects =
+                        snapshots_need_rasterization_for_runtime_effects_};
   }
   return Contents::RenderToSnapshot(
       renderer, entity,
@@ -251,6 +253,10 @@ const SamplerDescriptor& TextureContents::GetSamplerDescriptor() const {
 
 void TextureContents::SetDeferApplyingOpacity(bool defer_applying_opacity) {
   defer_applying_opacity_ = defer_applying_opacity;
+}
+
+void TextureContents::SetNeedsRasterizationForRuntimeEffects(bool value) {
+  snapshots_need_rasterization_for_runtime_effects_ = value;
 }
 
 }  // namespace impeller

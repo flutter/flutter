@@ -27,7 +27,7 @@ void main() {
   });
 
   test('Cache extent - null, pixels', () async {
-    final RenderViewport renderViewport = RenderViewport(
+    final renderViewport = RenderViewport(
       crossAxisDirection: AxisDirection.left,
       offset: ViewportOffset.zero(),
       children: children,
@@ -40,7 +40,7 @@ void main() {
   });
 
   test('Cache extent - 0, pixels', () async {
-    final RenderViewport renderViewport = RenderViewport(
+    final renderViewport = RenderViewport(
       crossAxisDirection: AxisDirection.left,
       offset: ViewportOffset.zero(),
       cacheExtent: 0.0,
@@ -51,7 +51,7 @@ void main() {
   });
 
   test('Cache extent - 500, pixels', () async {
-    final RenderViewport renderViewport = RenderViewport(
+    final renderViewport = RenderViewport(
       crossAxisDirection: AxisDirection.left,
       offset: ViewportOffset.zero(),
       cacheExtent: 500.0,
@@ -74,7 +74,7 @@ void main() {
   });
 
   test('Cache extent - 0x viewport', () async {
-    final RenderViewport renderViewport = RenderViewport(
+    final renderViewport = RenderViewport(
       crossAxisDirection: AxisDirection.left,
       offset: ViewportOffset.zero(),
       cacheExtent: 0.0,
@@ -87,7 +87,7 @@ void main() {
   });
 
   test('Cache extent - .5x viewport', () async {
-    final RenderViewport renderViewport = RenderViewport(
+    final renderViewport = RenderViewport(
       crossAxisDirection: AxisDirection.left,
       offset: ViewportOffset.zero(),
       cacheExtent: .5,
@@ -100,7 +100,7 @@ void main() {
   });
 
   test('Cache extent - 1x viewport', () async {
-    final RenderViewport renderViewport = RenderViewport(
+    final renderViewport = RenderViewport(
       crossAxisDirection: AxisDirection.left,
       offset: ViewportOffset.zero(),
       cacheExtent: 1.0,
@@ -113,7 +113,7 @@ void main() {
   });
 
   test('Cache extent - 2.5x viewport', () async {
-    final RenderViewport renderViewport = RenderViewport(
+    final renderViewport = RenderViewport(
       crossAxisDirection: AxisDirection.left,
       offset: ViewportOffset.zero(),
       cacheExtent: 2.5,
@@ -145,7 +145,7 @@ void main() {
         ),
       );
 
-      final RenderShrinkWrappingViewport viewport = RenderShrinkWrappingViewport(
+      final viewport = RenderShrinkWrappingViewport(
         crossAxisDirection: AxisDirection.left,
         offset: ViewportOffset.zero(),
         children: <RenderSliver>[child],

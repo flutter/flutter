@@ -26,6 +26,17 @@ class WidgetPreviewWorkspace {
   final Directory _packagesRoot;
   final File _pubspecYaml;
 
+  /// The set of directories that make up the workspace, including the workspace root.
+  Set<Directory> get workspaceDirectories => {
+    workspaceRoot,
+    ..._packages.values.map((e) => e.projectRoot),
+  };
+
+  /// The set of paths to each pubspec in the workspace.
+  Set<String> get workspacePubspecPaths => workspaceDirectories
+      .map((e) => workspaceRoot.fileSystem.path.join(e.path, 'pubspec.yaml'))
+      .toSet();
+
   final _packages = <String, WidgetPreviewProject>{};
 
   /// The absolute path to the workspace's pubspec.yaml.
@@ -36,7 +47,10 @@ class WidgetPreviewWorkspace {
     _pubspecYaml.setLastModifiedSync(DateTime.now());
   }
 
-  Future<WidgetPreviewProject> createWorkspaceProject({required String name}) async {
+  Future<WidgetPreviewProject> createWorkspaceProject({
+    required String name,
+    bool updateWorkspacePubspec = true,
+  }) async {
     if (_packages.containsKey(name)) {
       throw StateError('Project with name "$name" already exists.');
     }
@@ -45,23 +59,30 @@ class WidgetPreviewWorkspace {
       inWorkspace: true,
       packageName: name,
     );
-    project.writePubspec(project.initialPubspecContents);
     _packages[name] = project;
-    await _updatePubspec();
+    project.writePubspec(project.initialPubspecContents);
+    if (updateWorkspacePubspec) {
+      await updatePubspec();
+    }
     return project;
   }
 
-  Future<void> deleteWorkspaceProject({required String name}) async {
+  Future<void> deleteWorkspaceProject({
+    required String name,
+    bool updateWorkspacePubspec = true,
+  }) async {
     if (!_packages.containsKey(name)) {
       throw StateError('Project with name "$name" does not exist.');
     }
-    _packages[name]!.projectRoot.deleteSync(recursive: true);
-    await _updatePubspec();
+    _packages.remove(name)!.projectRoot.deleteSync(recursive: true);
+    if (updateWorkspacePubspec) {
+      await updatePubspec();
+    }
   }
 
-  Future<void> _updatePubspec() async {
+  Future<void> updatePubspec({String? injectNonExistentProject}) async {
     final pubspec = StringBuffer('workspace:\n');
-    for (final String package in _packages.keys) {
+    for (final String package in [..._packages.keys, ?injectNonExistentProject]) {
       pubspec.writeln('  - packages/$package');
     }
     _pubspecYaml.writeAsStringSync(pubspec.toString());
@@ -70,7 +91,7 @@ class WidgetPreviewWorkspace {
     await savePackageConfig(
       PackageConfig(
         <Package>[
-          for (final String package in _packages.keys)
+          for (final String package in [..._packages.keys, ?injectNonExistentProject])
             Package(package, workspaceRoot.childDirectory('packages').childDirectory(package).uri),
           Package(
             'flutter',
