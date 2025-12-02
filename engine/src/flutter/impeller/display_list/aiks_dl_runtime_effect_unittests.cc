@@ -4,6 +4,8 @@
 
 #include <memory>
 
+#include "absl/status/statusor.h"
+
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_paint.h"
 #include "flutter/display_list/effects/dl_color_source.h"
@@ -20,18 +22,24 @@ namespace testing {
 using namespace flutter;
 
 namespace {
-std::shared_ptr<DlColorSource> MakeRuntimeEffect(
+absl::StatusOr<std::shared_ptr<DlColorSource>> MakeRuntimeEffect(
     AiksTest* test,
     std::string_view name,
     const std::shared_ptr<std::vector<uint8_t>>& uniform_data = {},
     const std::vector<std::shared_ptr<DlColorSource>>& samplers = {}) {
   auto runtime_stages_result = test->OpenAssetAsRuntimeStage(name.data());
-  FML_CHECK(runtime_stages_result.ok());
+  if (!runtime_stages_result.ok()) {
+    return runtime_stages_result.status();
+  }
   auto runtime_stages = runtime_stages_result.value();
   auto runtime_stage = runtime_stages[PlaygroundBackendToRuntimeStageBackend(
       test->GetBackend())];
-  FML_CHECK(runtime_stage);
-  FML_CHECK(runtime_stage->IsDirty());
+  if (!runtime_stage) {
+    return absl::InternalError("Runtime stage not found for backend.");
+  }
+  if (!runtime_stage->IsDirty()) {
+    return absl::InternalError("Runtime stage is not dirty.");
+  }
 
   auto dl_runtime_effect = DlRuntimeEffectImpeller::Make(runtime_stage);
 
@@ -51,8 +59,10 @@ TEST_P(AiksTest, CanRenderClippedRuntimeEffects) {
   memcpy(uniform_data->data(), &frag_uniforms, sizeof(FragUniforms));
 
   DlPaint paint;
-  paint.setColorSource(
-      MakeRuntimeEffect(this, "runtime_stage_example.frag.iplr", uniform_data));
+  auto effect =
+      MakeRuntimeEffect(this, "runtime_stage_example.frag.iplr", uniform_data);
+  ASSERT_OK(effect);
+  paint.setColorSource(effect.value());
 
   DisplayListBuilder builder;
   builder.Save();
@@ -74,8 +84,9 @@ TEST_P(AiksTest, DrawPaintTransformsBounds) {
   memcpy(uniform_data->data(), &frag_uniforms, sizeof(FragUniforms));
 
   DlPaint paint;
-  paint.setColorSource(
-      MakeRuntimeEffect(this, "gradient.frag.iplr", uniform_data));
+  auto effect = MakeRuntimeEffect(this, "gradient.frag.iplr", uniform_data);
+  ASSERT_OK(effect);
+  paint.setColorSource(effect.value());
 
   DisplayListBuilder builder;
   builder.Save();
@@ -133,9 +144,11 @@ TEST_P(AiksTest, RuntimeEffectWithInvalidSamplerDoesNotCrash) {
   uniform_data->resize(sizeof(Vector2));
 
   DlPaint paint;
-  paint.setColorSource(
+  auto effect =
       MakeRuntimeEffect(this, "runtime_stage_filter_example.frag.iplr",
-                        uniform_data, sampler_inputs));
+                        uniform_data, sampler_inputs);
+  ASSERT_OK(effect);
+  paint.setColorSource(effect.value());
 
   DisplayListBuilder builder;
   builder.DrawPaint(paint);
