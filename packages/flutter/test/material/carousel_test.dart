@@ -1980,9 +1980,9 @@ void main() {
 
   group('CarouselView onIndexChanged callback', () {
     testWidgets('CarouselView shows correct item after animation', (WidgetTester tester) async {
-      final CarouselController controller = CarouselController();
+      final controller = CarouselController();
       addTearDown(controller.dispose);
-      int leadingIndex = 0;
+      var leadingIndex = 0;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -2025,9 +2025,9 @@ void main() {
     testWidgets('CarouselView shows correct item after animation with symmetric flexWeights', (
       WidgetTester tester,
     ) async {
-      final CarouselController controller = CarouselController();
+      final controller = CarouselController();
       addTearDown(controller.dispose);
-      int leadingIndex = 0;
+      var leadingIndex = 0;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -2082,9 +2082,9 @@ void main() {
     testWidgets('CarouselView shows correct item after animation with asymmetric flexWeights', (
       WidgetTester tester,
     ) async {
-      final CarouselController controller = CarouselController();
+      final controller = CarouselController();
       addTearDown(controller.dispose);
-      int leadingIndex = 0;
+      var leadingIndex = 0;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -2139,9 +2139,9 @@ void main() {
     });
 
     testWidgets('CarouselView shows the correct item after dragging', (WidgetTester tester) async {
-      final CarouselController controller = CarouselController();
+      final controller = CarouselController();
       addTearDown(controller.dispose);
-      int leadingIndex = 0;
+      var leadingIndex = 0;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -2169,7 +2169,7 @@ void main() {
       expect(leadingIndex, equals(2));
 
       // Validate that the dragged item is now the most visible in the viewport.
-      final List<double> visibleAreasAfterLeftDrag = List<double>.generate(
+      final visibleAreasAfterLeftDrag = List<double>.generate(
         5,
         (int i) => visiblePortionOf(tester, 'Item $i'),
       );
@@ -2187,7 +2187,7 @@ void main() {
       expect(leadingIndex, equals(1));
 
       // Validate again which item is most visible after dragging back.
-      final List<double> visibleAreasAfterRightDrag = List<double>.generate(
+      final visibleAreasAfterRightDrag = List<double>.generate(
         5,
         (int i) => visiblePortionOf(tester, 'Item $i'),
       );
@@ -2200,9 +2200,9 @@ void main() {
     testWidgets(
       'CarouselView.weighted resolves leading item correctly when multiple items share the largest weight',
       (WidgetTester tester) async {
-        final CarouselController controller = CarouselController();
+        final controller = CarouselController();
         addTearDown(controller.dispose);
-        int leadingIndex = 0;
+        var leadingIndex = 0;
 
         await tester.pumpWidget(
           MaterialApp(
@@ -2244,7 +2244,7 @@ void main() {
     );
 
     testWidgets('CarouselView starts with the correct initial item', (WidgetTester tester) async {
-      final CarouselController controller = CarouselController(initialItem: 2);
+      final controller = CarouselController(initialItem: 2);
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(

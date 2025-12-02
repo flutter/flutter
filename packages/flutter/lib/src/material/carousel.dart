@@ -455,22 +455,27 @@ class CarouselView extends StatefulWidget {
   /// A callback invoked when the leading item changes.
   ///
   /// {@template flutter.material.CarouselView.onIndexChanged}
-  /// The “leading” item is the one resolved as primary within the viewport.
-  /// Its definition depends on the carousel configuration:
+  /// The “leading” item is the item that the carousel’s layout algorithm
+  /// resolves as primary for the current frame. This resolution depends on the
+  /// carousel configuration and does not require the item to be fully visible
+  /// during scrolling.
   ///
-  /// - For a standard [CarouselView], it is the item
-  ///   that becomes fully visible at the start of the viewport.
-  ///   Partially visible items are not considered leading.
+  /// - For a standard [CarouselView], the leading item is the one positioned at
+  ///   the leading edge of the viewport according to the current scroll offset.
+  ///   While scrolling, this item may be only partially visible. If [itemSnapping]
+  ///   is enabled, scrolling settles with the leading item fully visible.
   ///
-  /// - For a [CarouselView.weighted], it is the
-  ///   visible item that occupies the primary position, determined by
-  ///   the largest effective `weight` in the current layout pass.
-  ///   If multiple items share the same largest weight, the **one closest to the
-  ///   leading edge of the viewport** is considered the leading item.
+  /// - For a [CarouselView.weighted], the leading item is the item selected by
+  ///   the weighted layout algorithm—typically the one with the largest effective
+  ///   weight. If multiple items share the same largest weight, the one closest
+  ///   to the leading edge is chosen. During scrolling, this item may also be
+  ///   partially visible, but with [itemSnapping] enabled the carousel settles with
+  ///   the resolved leading item fully visible when possible.
+  ///
+  /// This callback is invoked only when the resolved leading item index actually
+  /// changes, whether due to user scrolling or programmatic movement.
   /// {@endtemplate}
   ///
-  /// This callback is invoked only when the leading item index actually
-  /// changes, whether through user scrolling or programmatic movement.
   /// {@tool dartpad}
   /// Example:
   ///
@@ -514,7 +519,7 @@ class _CarouselViewState extends State<CarouselView> {
   bool get _consumeMaxWeight => widget.consumeMaxWeight;
   CarouselController? _internalController;
   CarouselController get _controller => widget.controller ?? _internalController!;
-  late int _lastReportedLeadingIndex;
+  late int _lastReportedLeadingItem;
 
   @override
   void initState() {
@@ -523,7 +528,7 @@ class _CarouselViewState extends State<CarouselView> {
     if (widget.controller == null) {
       _internalController = CarouselController();
     }
-    _lastReportedLeadingIndex = _controller.initialItem;
+    _lastReportedLeadingItem = _getInitialLeadingItem();
     _controller._attach(this);
   }
 
@@ -560,6 +565,15 @@ class _CarouselViewState extends State<CarouselView> {
     _controller._detach(this);
     _internalController?.dispose();
     super.dispose();
+  }
+
+  int _getInitialLeadingItem() {
+    if (widget.flexWeights != null) {
+      final int maxWeight = widget.flexWeights!.max;
+      final int firstMaxWeightIndex = widget.flexWeights!.indexOf(maxWeight);
+      return _controller.initialItem - firstMaxWeightIndex;
+    }
+    return _controller.initialItem;
   }
 
   AxisDirection _getDirection(BuildContext context) {
@@ -687,8 +701,8 @@ class _CarouselViewState extends State<CarouselView> {
                 notification is ScrollUpdateNotification) {
               final ScrollPosition position = _controller.position;
               final int currentLeadingIndex = (position as _CarouselPosition).leadingItem;
-              if (currentLeadingIndex != _lastReportedLeadingIndex) {
-                _lastReportedLeadingIndex = currentLeadingIndex;
+              if (currentLeadingIndex != _lastReportedLeadingItem) {
+                _lastReportedLeadingItem = currentLeadingIndex;
                 widget.onIndexChanged?.call(currentLeadingIndex);
               }
             }
@@ -1629,7 +1643,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
   // getItemFromPixels may return a fractional value (e.g., 0.6 when mid-scroll).
   // We use toInt() to truncate the fractional part, ensuring the leading item
   // only advances after fully crossing the next item's boundary.
-  int get leadingItem => getItemFromPixels(pixels, viewportDimension).round();
+  int get leadingItem => getItemFromPixels(pixels, viewportDimension).toInt();
 
   double updateLeadingItem(List<int>? newFlexWeights, bool newConsumeMaxWeight) {
     final double maxItem;
@@ -1781,8 +1795,8 @@ class CarouselController extends ScrollController {
       'CarouselController.leadingItem cannot be read when multiple CarouselViews '
       'are attached to the same controller.',
     );
-
-    return (position as _CarouselPosition).leadingItem;
+    final int a = (position as _CarouselPosition).leadingItem;
+    return a;
   }
 
   _CarouselViewState? _carouselState;
