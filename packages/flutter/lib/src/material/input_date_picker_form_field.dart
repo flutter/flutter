@@ -96,14 +96,16 @@ class InputDatePickerFormField extends StatefulWidget {
   final DateTime lastDate;
 
   /// An optional method to call when the user indicates they are done editing
-  /// the text in the field. Will only be called if the input represents a valid
-  /// [DateTime].
-  final ValueChanged<DateTime>? onDateSubmitted;
+  /// the text in the field. Will be called with a valid [DateTime] when a date
+  /// is entered, or with `null` when the field is cleared and [acceptEmptyDate]
+  /// is `true`.
+  final ValueChanged<DateTime?>? onDateSubmitted;
 
   /// An optional method to call with the final date when the form is
-  /// saved via [FormState.save]. Will only be called if the input represents
-  /// a valid [DateTime].
-  final ValueChanged<DateTime>? onDateSaved;
+  /// saved via [FormState.save]. Will be called with a valid [DateTime] when a
+  /// date is entered, or with `null` when the field is cleared and
+  /// [acceptEmptyDate] is `true`.
+  final ValueChanged<DateTime?>? onDateSaved;
 
   /// Function to provide full control over which [DateTime] can be selected.
   final SelectableDayPredicate? selectableDayPredicate;
@@ -236,7 +238,15 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
     return null;
   }
 
-  void _updateDate(String? text, ValueChanged<DateTime>? callback) {
+  void _updateDate(String? text, ValueChanged<DateTime?>? callback) {
+    // Handle empty text when acceptEmptyDate is true
+    if ((text == null || text.isEmpty) && widget.acceptEmptyDate) {
+      _selectedDate = null;
+      _inputText = text ?? '';
+      callback?.call(null);
+      return;
+    }
+
     final DateTime? date = _parseDate(text);
     if (_isValidAcceptableDate(date)) {
       _selectedDate = date;

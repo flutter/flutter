@@ -39,8 +39,8 @@ void main() {
     DateTime? initialDate,
     DateTime? firstDate,
     DateTime? lastDate,
-    ValueChanged<DateTime>? onDateSubmitted,
-    ValueChanged<DateTime>? onDateSaved,
+    ValueChanged<DateTime?>? onDateSubmitted,
+    ValueChanged<DateTime?>? onDateSaved,
     SelectableDayPredicate? selectableDayPredicate,
     String? errorFormatText,
     String? errorInvalidText,
@@ -103,7 +103,7 @@ void main() {
       await tester.pumpWidget(
         inputDatePickerField(
           initialDate: initialDate,
-          onDateSaved: (DateTime date) => inputDate = date,
+          onDateSaved: (DateTime? date) => inputDate = date,
           formKey: formKey,
         ),
       );
@@ -127,7 +127,7 @@ void main() {
       final formKey = GlobalKey<FormState>();
       DateTime? inputDate;
       await tester.pumpWidget(
-        inputDatePickerField(onDateSaved: (DateTime date) => inputDate = date, formKey: formKey),
+        inputDatePickerField(onDateSaved: (DateTime? date) => inputDate = date, formKey: formKey),
       );
 
       textFieldController(tester).text = '02/21/2016';
@@ -139,7 +139,7 @@ void main() {
       final formKey = GlobalKey<FormState>();
       DateTime? inputDate;
       await tester.pumpWidget(
-        inputDatePickerField(onDateSaved: (DateTime date) => inputDate = date, formKey: formKey),
+        inputDatePickerField(onDateSaved: (DateTime? date) => inputDate = date, formKey: formKey),
       );
       // Default errorFormat text
       expect(find.text('Invalid format.'), findsNothing);
@@ -152,7 +152,7 @@ void main() {
       // Change to a custom errorFormat text
       await tester.pumpWidget(
         inputDatePickerField(
-          onDateSaved: (DateTime date) => inputDate = date,
+          onDateSaved: (DateTime? date) => inputDate = date,
           errorFormatText: 'That is not a date.',
           formKey: formKey,
         ),
@@ -172,7 +172,7 @@ void main() {
           inputDatePickerField(
             firstDate: DateTime(1966, DateTime.february, 21),
             lastDate: DateTime(2040, DateTime.february, 23),
-            onDateSaved: (DateTime date) => inputDate = date,
+            onDateSaved: (DateTime? date) => inputDate = date,
             formKey: formKey,
           ),
         );
@@ -193,7 +193,7 @@ void main() {
 
         await tester.pumpWidget(
           inputDatePickerField(
-            onDateSaved: (DateTime date) => inputDate = date,
+            onDateSaved: (DateTime? date) => inputDate = date,
             errorInvalidText: 'Not in given range.',
             formKey: formKey,
           ),
@@ -213,7 +213,7 @@ void main() {
         await tester.pumpWidget(
           inputDatePickerField(
             initialDate: DateTime(2016, DateTime.january, 16),
-            onDateSaved: (DateTime date) => inputDate = date,
+            onDateSaved: (DateTime? date) => inputDate = date,
             selectableDayPredicate: (DateTime date) => date.day.isEven,
             formKey: formKey,
           ),
@@ -401,6 +401,129 @@ void main() {
         expect(find.text(errorFormatText), findsOneWidget);
       },
     );
+
+    testWidgets(
+      'when acceptEmptyDate is true and field is cleared, onDateSubmitted is called with null',
+      (WidgetTester tester) async {
+        DateTime? submittedDate;
+        await tester.pumpWidget(
+          inputDatePickerField(
+            initialDate: DateTime(2016, DateTime.february, 21),
+            acceptEmptyDate: true,
+            onDateSubmitted: (DateTime? date) => submittedDate = date,
+          ),
+        );
+        expect(submittedDate, isNull);
+
+        // Clear the field
+        await tester.enterText(find.byType(TextField), '');
+        await tester.testTextInput.receiveAction(TextInputAction.done);
+        await tester.pumpAndSettle();
+
+        expect(submittedDate, isNull);
+      },
+    );
+
+    testWidgets(
+      'when acceptEmptyDate is true and field is cleared, onDateSaved is called with null',
+      (WidgetTester tester) async {
+        final formKey = GlobalKey<FormState>();
+        DateTime? savedDate;
+        await tester.pumpWidget(
+          inputDatePickerField(
+            initialDate: DateTime(2016, DateTime.february, 21),
+            acceptEmptyDate: true,
+            onDateSaved: (DateTime? date) => savedDate = date,
+            formKey: formKey,
+          ),
+        );
+        expect(savedDate, isNull);
+
+        // Clear the field
+        await tester.enterText(find.byType(TextField), '');
+        await tester.pumpAndSettle();
+        formKey.currentState!.save();
+        await tester.pumpAndSettle();
+
+        expect(savedDate, isNull);
+      },
+    );
+
+    testWidgets(
+      'when acceptEmptyDate is true, entering a date then clearing it calls callbacks with null',
+      (WidgetTester tester) async {
+        final formKey = GlobalKey<FormState>();
+        DateTime? submittedDate;
+        DateTime? savedDate;
+        await tester.pumpWidget(
+          inputDatePickerField(
+            acceptEmptyDate: true,
+            onDateSubmitted: (DateTime? date) => submittedDate = date,
+            onDateSaved: (DateTime? date) => savedDate = date,
+            formKey: formKey,
+          ),
+        );
+
+        // Enter a valid date
+        await tester.enterText(find.byType(TextField), '02/21/2016');
+        await tester.testTextInput.receiveAction(TextInputAction.done);
+        await tester.pumpAndSettle();
+        expect(submittedDate, equals(DateTime(2016, DateTime.february, 21)));
+
+        formKey.currentState!.save();
+        await tester.pumpAndSettle();
+        expect(savedDate, equals(DateTime(2016, DateTime.february, 21)));
+
+        // Clear the field
+        await tester.enterText(find.byType(TextField), '');
+        await tester.testTextInput.receiveAction(TextInputAction.done);
+        await tester.pumpAndSettle();
+        expect(submittedDate, isNull);
+
+        formKey.currentState!.save();
+        await tester.pumpAndSettle();
+        expect(savedDate, isNull);
+      },
+    );
+
+    testWidgets('when acceptEmptyDate is false and field is cleared, callbacks are not called', (
+      WidgetTester tester,
+    ) async {
+      final formKey = GlobalKey<FormState>();
+      DateTime? submittedDate;
+      DateTime? savedDate;
+      await tester.pumpWidget(
+        inputDatePickerField(
+          initialDate: DateTime(2016, DateTime.february, 21),
+          acceptEmptyDate: false,
+          onDateSubmitted: (DateTime? date) => submittedDate = date,
+          onDateSaved: (DateTime? date) => savedDate = date,
+          formKey: formKey,
+        ),
+      );
+
+      // Enter a valid date first
+      await tester.enterText(find.byType(TextField), '02/22/2016');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+      expect(submittedDate, equals(DateTime(2016, DateTime.february, 22)));
+
+      formKey.currentState!.save();
+      await tester.pumpAndSettle();
+      expect(savedDate, equals(DateTime(2016, DateTime.february, 22)));
+
+      // Clear the field - callbacks should not be called
+      await tester.enterText(find.byType(TextField), '');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+      // submittedDate should still be the previous value
+      expect(submittedDate, equals(DateTime(2016, DateTime.february, 22)));
+
+      formKey.currentState!.save();
+      await tester.pumpAndSettle();
+      // savedDate should still be the previous value
+      expect(savedDate, equals(DateTime(2016, DateTime.february, 22)));
+    });
   });
 
   testWidgets('FocusNode can request focus', (WidgetTester tester) async {
@@ -467,7 +590,7 @@ void main() {
               initialDate: DateTime(2025, DateTime.february, 26),
               firstDate: DateTime(2025, DateTime.february),
               lastDate: DateTime(2026, DateTime.may),
-              onDateSubmitted: (DateTime value) {
+              onDateSubmitted: (DateTime? value) {
                 selectedDate = value;
               },
               calendarDelegate: const TestCalendarDelegate(),
