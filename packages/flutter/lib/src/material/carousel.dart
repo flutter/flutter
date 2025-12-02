@@ -454,27 +454,22 @@ class CarouselView extends StatefulWidget {
 
   /// A callback invoked when the leading item changes.
   ///
-  /// {@template flutter.material.CarouselView.onIndexChanged}
-  /// The “leading” item is the item that the carousel’s layout algorithm
-  /// resolves as primary for the current frame. This resolution depends on the
-  /// carousel configuration and does not require the item to be fully visible
-  /// during scrolling.
+  /// The “leading” item is the one that the carousel resolves as primary for
+  /// the current frame according to its layout algorithm. This item can be only
+  /// partially visible while scrolling.
   ///
-  /// - For a standard [CarouselView], the leading item is the one positioned at
-  ///   the leading edge of the viewport according to the current scroll offset.
-  ///   While scrolling, this item may be only partially visible. If [itemSnapping]
-  ///   is enabled, scrolling settles with the leading item fully visible.
+  /// - In a standard [CarouselView], the leading item is the one positioned at
+  ///   the leading edge of the viewport based on the current scroll offset.
   ///
-  /// - For a [CarouselView.weighted], the leading item is the item selected by
-  ///   the weighted layout algorithm—typically the one with the largest effective
-  ///   weight. If multiple items share the same largest weight, the one closest
-  ///   to the leading edge is chosen. During scrolling, this item may also be
-  ///   partially visible, but with [itemSnapping] enabled the carousel settles with
-  ///   the resolved leading item fully visible when possible.
+  /// - In a [CarouselView.weighted], the leading item is chosen by the weighted
+  ///   layout algorithm (typically the one with the greatest effective weight;
+  ///   ties are resolved using proximity to the leading edge).
   ///
-  /// This callback is invoked only when the resolved leading item index actually
-  /// changes, whether due to user scrolling or programmatic movement.
-  /// {@endtemplate}
+  /// If [itemSnapping] is enabled, scrolling settles with the resolved leading
+  /// item fully visible when possible.
+  ///
+  /// The callback fires only when the resolved leading index actually changes,
+  /// whether due to user interaction or programmatic scrolling.
   ///
   /// {@tool dartpad}
   /// Example:
