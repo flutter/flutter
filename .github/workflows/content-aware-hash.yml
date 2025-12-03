@@ -6,12 +6,15 @@ name: Generate a content aware hash for the Flutter Engine
 
 on: workflow_dispatch
 
+permissions:
+  contents: read
+
 jobs:
   generate-engine-content-hash:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
 
       - name: Generate Hash
         run: |
