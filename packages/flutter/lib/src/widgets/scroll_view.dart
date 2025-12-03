@@ -18,6 +18,7 @@ import 'debug.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
+import 'gesture_detector.dart';
 import 'media_query.dart';
 import 'notification_listener.dart';
 import 'primary_scroll_controller.dart';
@@ -468,6 +469,10 @@ abstract class ScrollView extends StatelessWidget {
         axisDirection: axisDirection,
         offset: offset,
         slivers: slivers,
+        cacheExtent: cacheExtent ?? RawGestureDetector.kDefaultSemanticsScrollFactor,
+        cacheExtentStyle: cacheExtent == null
+          ? CacheExtentStyle.viewport
+          : CacheExtentStyle.pixel,
         paintOrder: paintOrder,
         clipBehavior: clipBehavior,
       );
@@ -476,7 +481,10 @@ abstract class ScrollView extends StatelessWidget {
       axisDirection: axisDirection,
       offset: offset,
       slivers: slivers,
-      cacheExtent: cacheExtent,
+      cacheExtent: cacheExtent ?? RawGestureDetector.kDefaultSemanticsScrollFactor,
+      cacheExtentStyle: cacheExtent == null
+          ? CacheExtentStyle.viewport
+          : CacheExtentStyle.pixel,
       center: center,
       anchor: anchor,
       paintOrder: paintOrder,
