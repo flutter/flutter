@@ -1377,7 +1377,7 @@ void main() {
 
 class TestDeviceManager extends DeviceManager {
   TestDeviceManager({required super.logger});
-  var devices = <Device>[];
+  List<Device> devices = <Device>[];
 
   @override
   List<DeviceDiscovery> get deviceDiscoverers {
@@ -1429,7 +1429,7 @@ class FakeDevice extends Fake implements Device {
   Future<bool> get supportsHardwareRendering async => true;
 
   @override
-  var supportsHotReload = false;
+  bool supportsHotReload = false;
 
   @override
   bool get supportsHotRestart => true;
@@ -1446,7 +1446,7 @@ class FakeDevice extends Fake implements Device {
   @override
   DeviceConnectionInterface get connectionInterface => DeviceConnectionInterface.attached;
 
-  var supported = true;
+  bool supported = true;
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) => _isSupported;
@@ -1662,13 +1662,13 @@ class CapturingAppDomain extends AppDomain {
 
 class FakeAnsiTerminal extends Fake implements AnsiTerminal {
   /// Setting to false will cause operations to Stdin to throw a [StdinException].
-  var hasStdin = true;
+  bool hasStdin = true;
 
   @override
-  var usesTerminalUi = false;
+  bool usesTerminalUi = false;
 
   /// A list of all the calls to the [singleCharMode] setter.
-  var setSingleCharModeHistory = <bool>[];
+  List<bool> setSingleCharModeHistory = <bool>[];
 
   @override
   set singleCharMode(bool value) {

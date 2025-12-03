@@ -9,7 +9,7 @@ import 'package:path/path.dart' as path;
 import 'package:process_runner/process_runner.dart';
 
 Future<int> main(List<String> arguments) async {
-  final ArgParser parser = ArgParser();
+  final parser = ArgParser();
   parser.addFlag('help', help: 'Print help.', abbr: 'h');
   parser.addFlag(
     'fix',
@@ -39,7 +39,7 @@ Future<int> main(List<String> arguments) async {
   final File script = File.fromUri(Platform.script).absolute;
   final Directory flutterRoot = script.parent.parent.parent.parent;
 
-  final bool result =
+  final result =
       (await DartFormatChecker(
         flutterRoot: flutterRoot,
         allFiles: options['all-files'] as bool,
@@ -74,7 +74,7 @@ class DartFormatChecker {
   }
 
   Future<String> _getDiffBaseRevision() async {
-    String upstream = 'upstream';
+    var upstream = 'upstream';
     final String upstreamUrl = await _runGit(
       <String>['remote', 'get-url', upstream],
       processRunner,
@@ -84,7 +84,7 @@ class DartFormatChecker {
       upstream = 'origin';
     }
     await _runGit(<String>['fetch', upstream, 'main'], processRunner);
-    String result = '';
+    var result = '';
     try {
       // This is the preferred command to use, but developer checkouts often do
       // not have a clear fork point, so we fall back to just the regular
@@ -140,7 +140,7 @@ class DartFormatChecker {
   }
 
   Future<int> _checkFormat({required List<String> filesToCheck, required bool fix}) async {
-    final List<String> cmd = <String>[
+    final cmd = <String>[
       path.join(flutterRoot.path, 'bin', 'dart'),
       'format',
       '--set-exit-if-changed',
@@ -148,20 +148,20 @@ class DartFormatChecker {
       if (!fix) '--output=show',
       if (fix) '--output=write',
     ];
-    final List<WorkerJob> jobs = <WorkerJob>[];
-    for (final String file in filesToCheck) {
+    final jobs = <WorkerJob>[];
+    for (final file in filesToCheck) {
       jobs.add(WorkerJob(<String>[...cmd, file]));
     }
-    final ProcessPool dartFmt = ProcessPool(
+    final dartFmt = ProcessPool(
       processRunner: processRunner,
       printReport: _namedReport('dart format'),
     );
 
     Iterable<WorkerJob> incorrect;
-    final List<WorkerJob> errorJobs = <WorkerJob>[];
+    final errorJobs = <WorkerJob>[];
     if (!fix) {
       final Stream<WorkerJob> completedJobs = dartFmt.startWorkers(jobs);
-      final List<WorkerJob> diffJobs = <WorkerJob>[];
+      final diffJobs = <WorkerJob>[];
       await for (final WorkerJob completedJob in completedJobs) {
         if (completedJob.result.exitCode != 0 && completedJob.result.exitCode != 1) {
           // The formatter had a problem formatting the file.
@@ -181,16 +181,13 @@ class DartFormatChecker {
           );
         }
       }
-      final ProcessPool diffPool = ProcessPool(
-        processRunner: processRunner,
-        printReport: _namedReport('diff'),
-      );
+      final diffPool = ProcessPool(processRunner: processRunner, printReport: _namedReport('diff'));
       final List<WorkerJob> completedDiffs = await diffPool.runToCompletion(diffJobs);
       incorrect = completedDiffs.where((WorkerJob job) => job.result.exitCode != 0);
     } else {
       final List<WorkerJob> completedJobs = await dartFmt.runToCompletion(jobs);
       final List<WorkerJob> incorrectJobs = incorrect = <WorkerJob>[];
-      for (final WorkerJob job in completedJobs) {
+      for (final job in completedJobs) {
         if (job.result.exitCode != 0 && job.result.exitCode != 1) {
           // The formatter had a problem formatting the file.
           errorJobs.add(job);
@@ -221,7 +218,7 @@ class DartFormatChecker {
         stdout.writeln('To fix, run `dart format $fileList` or:');
         stdout.writeln();
         stdout.writeln('git apply <<DONE');
-        for (final WorkerJob job in incorrect) {
+        for (final job in incorrect) {
           stdout.write(
             job.result.stdout
                 .replaceFirst('b/-', 'b/${job.command[job.command.length - 2]}')
@@ -251,7 +248,7 @@ class DartFormatChecker {
         'The formatter failed to run on ${errorJobs.length} Dart file${plural ? 's' : ''}.',
       );
       stdout.writeln();
-      for (final WorkerJob job in errorJobs) {
+      for (final job in errorJobs) {
         stdout.writeln('--> ${job.command.last} produced the following error:');
         stdout.write(job.result.stderr);
         stdout.writeln();

@@ -7,13 +7,13 @@ import 'package:flutter_driver/flutter_driver.dart';
 import '../../common.dart';
 
 void main() {
-  final FakeDeserialize fakeDeserialize = FakeDeserialize();
+  final fakeDeserialize = FakeDeserialize();
 
   test('Ancestor finder serialize', () {
     const SerializableFinder of = ByType('Text');
     final SerializableFinder matching = ByValueKey('hello');
 
-    final Ancestor a = Ancestor(of: of, matching: matching, matchRoot: true, firstMatchOnly: true);
+    final a = Ancestor(of: of, matching: matching, matchRoot: true, firstMatchOnly: true);
     expect(a.serialize(), <String, String>{
       'finderType': 'Ancestor',
       'of': '{"finderType":"ByType","type":"Text"}',
@@ -24,7 +24,7 @@ void main() {
   });
 
   test('Ancestor finder deserialize', () {
-    final Map<String, String> serialized = <String, String>{
+    final serialized = <String, String>{
       'finderType': 'Ancestor',
       'of': '{"finderType":"ByType","type":"Text"}',
       'matching': '{"finderType":"ByValueKey","keyValueString":"hello","keyValueType":"String"}',
@@ -40,7 +40,7 @@ void main() {
   });
 
   test('Ancestor finder deserialize with missing `of`', () {
-    final Map<String, String> serialized = <String, String>{
+    final serialized = <String, String>{
       'finderType': 'Ancestor',
       'matching': '{"finderType":"ByValueKey","keyValueString":"hello","keyValueType":"String"}',
       'matchRoot': 'true',
@@ -58,7 +58,7 @@ void main() {
   });
 
   test('Ancestor finder deserialize with missing `matching`', () {
-    final Map<String, String> serialized = <String, String>{
+    final serialized = <String, String>{
       'finderType': 'Ancestor',
       'of': '{"finderType":"ByType","type":"Text","text":"Hi"}',
       'matchRoot': 'true',
@@ -76,7 +76,7 @@ void main() {
   });
 
   test('Ancestor finder deserialize with missing nested `of.type`', () {
-    final Map<String, String> serialized = <String, String>{
+    final serialized = <String, String>{
       'finderType': 'Ancestor',
       'matching': '{"finderType":"ByValueKey","keyValueString":"hello","keyValueType":"String"}',
       'of': '{"finderType":"ByType"}',
@@ -98,12 +98,7 @@ void main() {
     const SerializableFinder of = ByType('Text');
     final SerializableFinder matching = ByValueKey('hello');
 
-    final Descendant a = Descendant(
-      of: of,
-      matching: matching,
-      matchRoot: true,
-      firstMatchOnly: true,
-    );
+    final a = Descendant(of: of, matching: matching, matchRoot: true, firstMatchOnly: true);
     expect(a.serialize(), <String, String>{
       'finderType': 'Descendant',
       'of': '{"finderType":"ByType","type":"Text"}',
@@ -114,7 +109,7 @@ void main() {
   });
 
   test('Descendant finder deserialize', () {
-    final Map<String, String> serialized = <String, String>{
+    final serialized = <String, String>{
       'finderType': 'Descendant',
       'of': '{"finderType":"ByType","type":"Text"}',
       'matching': '{"finderType":"ByValueKey","keyValueString":"hello","keyValueType":"String"}',
@@ -130,7 +125,7 @@ void main() {
   });
 
   test('Descendant finder deserialize with missing `of`', () {
-    final Map<String, String> serialized = <String, String>{
+    final serialized = <String, String>{
       'finderType': 'Descendant',
       'matching': '{"finderType":"ByValueKey","keyValueString":"hello","keyValueType":"String"}',
       'matchRoot': 'true',
@@ -148,7 +143,7 @@ void main() {
   });
 
   test('Descendant finder deserialize with missing `matching`', () {
-    final Map<String, String> serialized = <String, String>{
+    final serialized = <String, String>{
       'finderType': 'Descendant',
       'of': '{"finderType":"ByType","type":"Text","text":"Hi"}',
       'matchRoot': 'true',
@@ -167,13 +162,13 @@ void main() {
 
   group('ByTooltipMessage', () {
     test('serializes and deserializes', () {
-      const ByTooltipMessage finder = ByTooltipMessage('hello');
+      const finder = ByTooltipMessage('hello');
       final ByTooltipMessage roundTrip = ByTooltipMessage.deserialize(finder.serialize());
       expect(roundTrip.text, 'hello');
     });
 
     test('deserialize with missing text', () {
-      final Map<String, String> serialized = <String, String>{'finderType': 'ByTooltipMessage'};
+      final serialized = <String, String>{'finderType': 'ByTooltipMessage'};
       expect(
         () => ByTooltipMessage.deserialize(serialized),
         throwsA(
@@ -187,20 +182,20 @@ void main() {
 
   group('BySemanticsLabel', () {
     test('serializes and deserializes', () {
-      const BySemanticsLabel finder = BySemanticsLabel('hello');
+      const finder = BySemanticsLabel('hello');
       final BySemanticsLabel roundTrip = BySemanticsLabel.deserialize(finder.serialize());
       expect(roundTrip.label, 'hello');
     });
 
     test('serializes and deserializes with regexp', () {
-      final BySemanticsLabel finder = BySemanticsLabel(RegExp('hello'));
+      final finder = BySemanticsLabel(RegExp('hello'));
       final BySemanticsLabel roundTrip = BySemanticsLabel.deserialize(finder.serialize());
       expect(roundTrip.label, isA<RegExp>());
       expect((roundTrip.label as RegExp).pattern, 'hello');
     });
 
     test('deserialize with missing label', () {
-      final Map<String, String> serialized = <String, String>{'finderType': 'BySemanticsLabel'};
+      final serialized = <String, String>{'finderType': 'BySemanticsLabel'};
       expect(
         () => BySemanticsLabel.deserialize(serialized),
         throwsA(
@@ -214,13 +209,13 @@ void main() {
 
   group('ByText', () {
     test('serializes and deserializes', () {
-      const ByText finder = ByText('hello');
+      const finder = ByText('hello');
       final ByText roundTrip = ByText.deserialize(finder.serialize());
       expect(roundTrip.text, 'hello');
     });
 
     test('deserialize with missing text', () {
-      final Map<String, String> serialized = <String, String>{'finderType': 'ByText'};
+      final serialized = <String, String>{'finderType': 'ByText'};
       expect(
         () => ByText.deserialize(serialized),
         throwsA(
@@ -234,22 +229,19 @@ void main() {
 
   group('ByValueKey', () {
     test('serializes and deserializes with string', () {
-      final ByValueKey finder = ByValueKey('hello');
+      final finder = ByValueKey('hello');
       final ByValueKey roundTrip = ByValueKey.deserialize(finder.serialize());
       expect(roundTrip.keyValue, 'hello');
     });
 
     test('serializes and deserializes with int', () {
-      final ByValueKey finder = ByValueKey(123);
+      final finder = ByValueKey(123);
       final ByValueKey roundTrip = ByValueKey.deserialize(finder.serialize());
       expect(roundTrip.keyValue, 123);
     });
 
     test('deserialize with missing keyValueString', () {
-      final Map<String, String> serialized = <String, String>{
-        'finderType': 'ByValueKey',
-        'keyValueType': 'String',
-      };
+      final serialized = <String, String>{'finderType': 'ByValueKey', 'keyValueType': 'String'};
       expect(
         () => ByValueKey.deserialize(serialized),
         throwsA(
@@ -261,10 +253,7 @@ void main() {
     });
 
     test('deserialize with missing keyValueType', () {
-      final Map<String, String> serialized = <String, String>{
-        'finderType': 'ByValueKey',
-        'keyValueString': 'hello',
-      };
+      final serialized = <String, String>{'finderType': 'ByValueKey', 'keyValueString': 'hello'};
       expect(
         () => ByValueKey.deserialize(serialized),
         throwsA(
@@ -276,7 +265,7 @@ void main() {
     });
 
     test('deserialize with unsupported keyValueType', () {
-      final Map<String, String> serialized = <String, String>{
+      final serialized = <String, String>{
         'finderType': 'ByValueKey',
         'keyValueString': 'hello',
         'keyValueType': 'double',
@@ -296,13 +285,13 @@ void main() {
 
   group('ByType', () {
     test('serializes and deserializes', () {
-      const ByType finder = ByType('Text');
+      const finder = ByType('Text');
       final ByType roundTrip = ByType.deserialize(finder.serialize());
       expect(roundTrip.type, 'Text');
     });
 
     test('deserialize with missing type', () {
-      final Map<String, String> serialized = <String, String>{'finderType': 'ByType'};
+      final serialized = <String, String>{'finderType': 'ByType'};
       expect(
         () => ByType.deserialize(serialized),
         throwsA(

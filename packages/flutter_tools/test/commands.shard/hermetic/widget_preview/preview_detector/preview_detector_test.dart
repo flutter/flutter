@@ -10,7 +10,6 @@ import 'package:test/test.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../../../src/common.dart';
-import '../../../../src/context.dart';
 import '../utils/preview_details_matcher.dart';
 import '../utils/preview_detector_test_utils.dart';
 import '../utils/preview_project.dart';
@@ -35,20 +34,10 @@ void main() {
     // Note: we don't use a MemoryFileSystem since we don't have a way to
     // provide it to package:analyzer APIs without writing a significant amount
     // of wrapper logic.
-    late PreviewDetector previewDetector;
     late ProjectWithPreviews project;
-    late FakeAnalytics analytics;
 
-    setUp(() {
-      previewDetector = createTestPreviewDetector();
-      analytics = previewDetector.previewAnalytics.analytics as FakeAnalytics;
-    });
-
-    tearDown(() async {
-      await previewDetector.dispose();
-    });
-
-    void expectNPreviewReloadTimingEvents(int n) {
+    void expectNPreviewReloadTimingEvents(PreviewDetector previewDetector, int n) {
+      final analytics = previewDetector.previewAnalytics.analytics as FakeAnalytics;
       expect(analytics.sentEvents, hasLength(n));
       for (final Event event in analytics.sentEvents) {
         if (event.eventData case {
@@ -67,7 +56,9 @@ void main() {
       'previews': BasicProjectWithExhaustivePreviews.create,
       'multipreviews': MultiPreviewProject.create,
     }.entries) {
-      testUsingContext('can detect $previewType in existing files', () async {
+      testPreviewDetector('can detect $previewType in existing files', (
+        PreviewDetector previewDetector,
+      ) async {
         project = await createProject(
           projectRoot: previewDetector.projectRoot,
           pathsWithPreviews: <String>[
@@ -80,7 +71,9 @@ void main() {
         expect(mapping.nodesWithPreviews.keys, unorderedMatches(project.librariesWithPreviews));
       });
 
-      testUsingContext('can detect $previewType in updated files', () async {
+      testPreviewDetector('can detect $previewType in updated files', (
+        PreviewDetector previewDetector,
+      ) async {
         // Create two files with existing previews and one without.
         project = await createProject(
           projectRoot: previewDetector.projectRoot,
@@ -94,7 +87,7 @@ void main() {
         // Initialize the file watcher.
         final PreviewDependencyGraph initialPreviews = await previewDetector.initialize();
         expectContainsPreviews(initialPreviews, project.matcherMapping);
-        expectNPreviewReloadTimingEvents(0);
+        expectNPreviewReloadTimingEvents(previewDetector, 0);
 
         await waitForChangeDetected(
           onChangeDetected: (PreviewDependencyGraph updated) {
@@ -103,7 +96,7 @@ void main() {
           },
           changeOperation: () => project.addPreviewContainingFile(path: 'baz.dart'),
         );
-        expectNPreviewReloadTimingEvents(1);
+        expectNPreviewReloadTimingEvents(previewDetector, 1);
 
         // Update the file with an existing preview to remove the preview and ensure it triggers
         // the preview detector.
@@ -114,10 +107,12 @@ void main() {
           },
           changeOperation: () => project.addNonPreviewContainingFile(path: 'baz.dart'),
         );
-        expectNPreviewReloadTimingEvents(2);
+        expectNPreviewReloadTimingEvents(previewDetector, 2);
       });
 
-      testUsingContext('can detect $previewType in newly added files', () async {
+      testPreviewDetector('can detect $previewType in newly added files', (
+        PreviewDetector previewDetector,
+      ) async {
         project = await createProject(
           projectRoot: previewDetector.projectRoot,
           pathsWithPreviews: <String>[],
@@ -129,7 +124,7 @@ void main() {
         // Initialize the file watcher.
         final PreviewDependencyGraph initialPreviews = await previewDetector.initialize();
         expect(initialPreviews, expectedInitialMapping);
-        expectNPreviewReloadTimingEvents(0);
+        expectNPreviewReloadTimingEvents(previewDetector, 0);
 
         await waitForChangeDetected(
           onChangeDetected: (PreviewDependencyGraph updated) {
@@ -139,10 +134,12 @@ void main() {
           // Create baz.dart, which contains previews.
           changeOperation: () => project.addPreviewContainingFile(path: 'baz.dart'),
         );
-        expectNPreviewReloadTimingEvents(1);
+        expectNPreviewReloadTimingEvents(previewDetector, 1);
       });
 
-      testUsingContext('can detect $previewType in existing libraries with parts', () async {
+      testPreviewDetector('can detect $previewType in existing libraries with parts', (
+        PreviewDetector previewDetector,
+      ) async {
         project =
             await createProject(
                 projectRoot: previewDetector.projectRoot,
@@ -154,7 +151,9 @@ void main() {
         expect(mapping.nodesWithPreviews.keys, unorderedMatches(project.librariesWithPreviews));
       });
 
-      testUsingContext('can detect $previewType in newly added libraries with parts', () async {
+      testPreviewDetector('can detect $previewType in newly added libraries with parts', (
+        PreviewDetector previewDetector,
+      ) async {
         project = await createProject(
           projectRoot: previewDetector.projectRoot,
           pathsWithPreviews: <String>[],
@@ -165,7 +164,7 @@ void main() {
 
         final PreviewDependencyGraph mapping = await previewDetector.initialize();
         expect(mapping.nodesWithPreviews, expectedInitialMapping);
-        expectNPreviewReloadTimingEvents(0);
+        expectNPreviewReloadTimingEvents(previewDetector, 0);
 
         // Add a library with a part file, which will cause a change detected event for each file.
         await waitForNChangesDetected(
@@ -176,11 +175,13 @@ void main() {
             previewDetector.dependencyGraph.nodesWithPreviews;
         expect(nodesWithPreviews, isNotEmpty);
         expect(nodesWithPreviews.keys, unorderedMatches(project.librariesWithPreviews));
-        expectNPreviewReloadTimingEvents(2);
+        expectNPreviewReloadTimingEvents(previewDetector, 2);
       });
     }
 
-    testUsingContext('can detect changes in the pubspec.yaml', () async {
+    testPreviewDetector('can detect changes in the pubspec.yaml', (
+      PreviewDetector previewDetector,
+    ) async {
       // Create an initial pubspec.
       project = await BasicProjectWithExhaustivePreviews.create(
         projectRoot: previewDetector.projectRoot,
@@ -196,7 +197,7 @@ void main() {
       await waitForPubspecChangeDetected(changeOperation: () => project.touchPubspec());
 
       // There should be no reload timing events for a pubspec change.
-      expectNPreviewReloadTimingEvents(0);
+      expectNPreviewReloadTimingEvents(previewDetector, 0);
     });
   });
 }
