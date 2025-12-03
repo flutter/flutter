@@ -843,8 +843,8 @@ enum AutovalidateMode {
   /// with one, use [always] instead.
   onUnfocus,
 
-  /// Used to auto-validate [Form] and [FormField] only when a field
-  /// already has an error, and the user starts interacting with it again.
+  /// Used to auto-validate [Form] and [FormField] after each user
+  /// interaction, only if the the field already has an error.
   ///
   /// This is useful for reducing unnecessary validation calls while
   /// still ensuring errors are re-checked when the user attempts to fix them.
