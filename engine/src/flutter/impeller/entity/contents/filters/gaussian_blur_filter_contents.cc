@@ -522,12 +522,9 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
                 renderer.GetDownsampleBoundedPipeline(pipeline_options));
 
             TextureDownsampleBoundedFragmentShader::BoundInfo bound_info;
-            bound_info.quad_line_params =
-                // ExpandQuadLineParameters(
-                PrecomputeQuadLineParameters(pass_args.uv_bounds.value())
-                // , -5.0 / pass_args.subpass_size.width, -5.0 /
-                // pass_args.subpass_size.height)
-                ;
+            bound_info.quad_line_params = PrecomputeQuadLineParameters(
+                RemapQuadCoords(pass_args.uv_bounds.value(),
+                                input_texture->GetYCoordScale()));
             TextureDownsampleBoundedFragmentShader::BindBoundInfo(
                 pass, data_host_buffer.EmplaceUniform(bound_info));
           } else {
@@ -897,9 +894,7 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
   std::optional<Quad> source_bounds;
   if (bounds_.has_value()) {
     Quad global_bounds = bounds_->GetTransformedPoints(effect_transform);
-    source_bounds =
-        RemapQuadCoords(snapshot_entity.GetTransform().Transform(global_bounds),
-                        input_snapshot->texture->GetYCoordScale());
+    source_bounds = snapshot_entity.GetTransform().Transform(global_bounds);
   }
 
   if (blur_info.scaled_sigma.x < kEhCloseEnough &&
