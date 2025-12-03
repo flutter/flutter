@@ -4627,7 +4627,7 @@ targets:
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       shard: tool_tests_commands
-      subshard: 1_1 
+      subshard: 1_1
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
@@ -4642,7 +4642,7 @@ targets:
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       shard: tool_tests_commands
-      subshard: 1_1 
+      subshard: 1_1
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
