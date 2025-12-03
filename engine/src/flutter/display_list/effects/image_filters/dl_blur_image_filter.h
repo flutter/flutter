@@ -24,22 +24,18 @@ class DlBlurImageFilter final : public DlImageFilter {
    * @param tile_mode The tile mode used for sampling pixels at the edges
    * when performing a standard, unbounded blur.
    *
-   * The [bounds] parameter is optional and dictates the blur's sampling
-   * behavior:
+   * If [bounds] is std::nullopt, a standard Gaussian blur is applied
+   * and edge sampling behavior is determined by [tileMode].
    *
-   * - If [bounds] is std::nullopt, a standard, unbounded blur is performed,
-   * with edge behavior defined by [tile_mode].
+   * If [bounds] is not std::nullopt, the filter performs a "bounded blur": the
+   * blur kernel only samples pixels from inside the rectangle, pixels outside
+   * the rectangle are treated as transparent, and the resulting pixels are
+   * unpremultiplied to produce opaque output. This mode is used to implement
+   * iOS-style bounded blurs.
    *
-   * - If [bounds] is not std::nullopt, the filter performs a "bounded blur".
-   * This means the blur kernel will only sample pixels from within this
-   * rectangle, treating all pixels outside of it as transparent, and the
-   * resulting pixels are opaque. This mode is used to implement iOS-style
-   * blurs.
-   *
-   * The [bounds] rectangle must be specified in the current coordinate space
-   * of the canvas (i.e., it is subject to the canvas's current transform).
-   * In other words, in the canvas coordinate space, the bounds might not be an
-   * axis-aligned rectangle.
+   * The [bounds] rectangle is specified in the canvas's current coordinate
+   * space (it is affected by the current transform). Consequently, the bounds
+   * may not be axis-aligned in canvas coordinates.
    */
   DlBlurImageFilter(DlScalar sigma_x,
                     DlScalar sigma_y,
