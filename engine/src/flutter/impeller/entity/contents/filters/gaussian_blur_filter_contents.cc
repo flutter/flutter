@@ -838,14 +838,6 @@ std::optional<Rect> GaussianBlurFilterContents::GetFilterCoverage(
       Point(blur_info.local_padding.x, blur_info.local_padding.y));
 }
 
-// A brief overview how this works:
-// 1) Snapshot the filter input.
-// 2) Perform downsample pass. This also inserts the gutter around the input
-//    snapshot since the blur can render outside the bounds of the snapshot.
-// 3) Perform 1D horizontal blur pass.
-// 4) Perform 1D vertical blur pass.
-// 5) Apply the blur style to the blur result. This may just mask the output or
-//    draw the original snapshot over the result.
 std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
     const FilterInput::Vector& inputs,
     const ContentContext& renderer,

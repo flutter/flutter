@@ -51,8 +51,42 @@ GaussianBlurPipeline::FragmentShader::KernelSamples LerpHackKernelSamples(
     KernelSamples samples);
 
 /// Performs a bidirectional Gaussian blur.
-///
-/// This is accomplished by rendering multiple passes in multiple directions.
+//
+// ## Implementation notes
+//
+// The blur is implemented as a three-pass process:
+// 1. A downsampling pass. This is used for performance optimization on large
+//    blurs.
+// 2. A Y-direction blur pass (in canvas coordinates).
+// 3. An X-direction blur pass (in canvas coordinates).
+//
+// ### Lerp Hack
+//
+// The blur passes use a "lerp hack" to optimize the number of texture
+// samples. This technique takes advantage of the hardware's free linear
+// interpolation during texture sampling. It allows for the use of a kernel
+// that is half the size of what would be mathematically required, achieving an
+// equivalent effect as long as the sampling points are correctly aligned.
+//
+// ### Bounded vs. Unbounded Blur
+//
+// The behavior of the blur changes depending on whether the `bounds` parameter
+// is set.
+//
+// - Unbounded (standard) blur: The blur kernel samples all pixels, and
+//   the `tile_mode` determines how to handle edges.
+//
+// - Bounded blur: This mode is used to implement iOS-style blurs where
+//   the blur effect is constrained to a specific rectangle. The process is
+//   modified as follows:
+//   - During the downsampling pass, pixels outside the `bounds` are treated
+//     as transparent black.
+//   - The two blur passes proceed normally, but thanks to the lerp hack and
+//     linear interpolation, when a sample falls between an in-bounds pixel
+//     and an out-of-bounds (transparent black) pixel, the out-of-bounds
+//     pixel contributes nothing to the result.
+//   - The final pass includes an opaque unpremultiply step to counteract the
+//     varying alpha introduced by the weights.
 class GaussianBlurFilterContents final : public FilterContents {
  public:
   explicit GaussianBlurFilterContents(Scalar sigma_x,
