@@ -18,6 +18,27 @@ import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
+  setUp(() {
+    Cache.disableLocking();
+  });
+
+  testUsingContext('flutter build without arguments prints help and exits with code 1', () async {
+    final command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: testLogger,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+
+    await expectLater(
+      () => commandRunner.run(<String>['build']),
+      throwsToolExit(message: '', exitCode: 1),
+    );
+    expect(testLogger.statusText, contains(command.description));
+  });
+
   testUsingContext('obfuscate requires split-debug-info', () {
     final command = FakeBuildInfoCommand();
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
