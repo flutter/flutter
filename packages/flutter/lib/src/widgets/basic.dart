@@ -8360,19 +8360,17 @@ typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSette
 ///     return AlertDialog(
 ///       content: StatefulBuilder(
 ///         builder: (BuildContext context, StateSetter setState) {
-///           return Column(
-///             mainAxisSize: MainAxisSize.min,
-///             children: List<Widget>.generate(4, (int index) {
-///               return Radio<int>(
-///                 value: index,
-///                 // ignore: deprecated_member_use
-///                 groupValue: selectedRadio,
-///                 // ignore: deprecated_member_use
-///                 onChanged: (int? value) {
-///                   setState(() => selectedRadio = value);
-///                 },
-///               );
-///             }),
+///           return RadioGroup<int>(
+///             groupValue: selectedRadio,
+///             onChanged: (int? value) {
+///               setState(() => selectedRadio = value);
+///             },
+///             child: Column(
+///               mainAxisSize: MainAxisSize.min,
+///               children: List<Widget>.generate(4, (int index) {
+///                 return Radio<int>(value: index);
+///               }),
+///             ),
 ///           );
 ///         },
 ///       ),
