@@ -41,7 +41,7 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 - [flutter/179155](https://github.com/flutter/flutter/issues/179155) `flutter widget-preview start` crashes if a file named `pubspec.yaml` is modified outside the root of the previewed project.
 - [flutter/156692](https://github.com/flutter/flutter/issues/156692) `flutter attach` can crash if the target application disconnects unexpectedly.
 - [flutter/179008](https://github.com/flutter/flutter/issues/179008) `flutter pub get` could be spawned multiple times on MacOS when `pubspec.yaml`s outside of the project were modified after a `flutter pub get` in the root project.
-- [flutter/178715](https://github.com/flutter/flutter/issues/178715) Fixes running flutter test on Linux/MacOS for Android projects with build hooks without the desktop native tooling installed.
+- [flutter/178715](https://github.com/flutter/flutter/issues/178715) Running flutter test on Linux/MacOS for Android projects with build hooks fails without the desktop native tooling installed.
 
 ### [3.38.3](https://github.com/flutter/flutter/releases/tag/3.38.3)
 
