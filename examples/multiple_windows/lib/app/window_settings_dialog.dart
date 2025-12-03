@@ -65,6 +65,7 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
   late bool _slideY;
   late bool _resizeX;
   late bool _resizeY;
+  late bool _tooltipTrackPosition;
 
   late WindowPositionerAnchor _parentAnchor;
 
@@ -92,6 +93,8 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
     _resizeX = widget.settings.positioner.constraintAdjustment.resizeX;
 
     _resizeY = widget.settings.positioner.constraintAdjustment.resizeY;
+
+    _tooltipTrackPosition = widget.settings.tooltipTrackPosition;
 
     _parentAnchor = widget.settings.positioner.parentAnchor;
 
@@ -169,6 +172,22 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
                     ),
                   ],
                 ),
+              ),
+              const Divider(),
+              CheckboxListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                title: const Text('Tooltip Track Position'),
+                subtitle: const Text(
+                  'Whether tooltips should track their parent widget\'s position',
+                ),
+                value: _tooltipTrackPosition,
+                onChanged: (bool? value) {
+                  if (value != null) {
+                    setState(() {
+                      _tooltipTrackPosition = value;
+                    });
+                  }
+                },
               ),
               const Divider(),
               ListTile(
@@ -440,6 +459,8 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
                                     resizeY: _resizeY,
                                   ),
                             );
+                        widget.settings.tooltipTrackPosition =
+                            _tooltipTrackPosition;
                         widget.onClose();
                       },
                       child: const Text('Apply'),

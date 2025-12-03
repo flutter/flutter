@@ -73,6 +73,7 @@ class WindowSettings {
       parentAnchor: WindowPositionerAnchor.right,
       childAnchor: WindowPositionerAnchor.left,
     ),
+    this.tooltipTrackPosition = true,
   });
 
   /// The initial size for newly created regular windows.
@@ -83,6 +84,9 @@ class WindowSettings {
 
   /// The positioner used to determine where new tooltips and popups are placed.
   WindowPositioner positioner;
+
+  /// Whether tooltips should track their parent widget's position.
+  bool tooltipTrackPosition;
 }
 
 /// Provides access to the [WindowSettings] from the widget tree.

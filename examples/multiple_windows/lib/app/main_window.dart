@@ -13,6 +13,7 @@ import 'window_settings_dialog.dart';
 import 'models.dart';
 import 'regular_window_edit_dialog.dart';
 import 'dialog_window_edit_dialog.dart';
+import 'tooltip_window_edit_dialog.dart';
 import 'tooltip_button.dart';
 
 class MainWindow extends StatelessWidget {
@@ -72,12 +73,10 @@ class _WindowsTable extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  if (controller.controller is! TooltipWindowController)
-                    IconButton(
-                      icon: const Icon(Icons.edit_outlined),
-                      onPressed: () =>
-                          _showWindowEditDialog(controller, context),
-                    ),
+                  IconButton(
+                    icon: const Icon(Icons.edit_outlined),
+                    onPressed: () => _showWindowEditDialog(controller, context),
+                  ),
                   IconButton(
                     icon: const Icon(Icons.delete_outlined),
                     onPressed: () async {
@@ -105,7 +104,10 @@ class _WindowsTable extends StatelessWidget {
         context: context,
         controller: dialog,
       ),
-      final TooltipWindowController _ => throw UnimplementedError(),
+      final TooltipWindowController tooltip => showTooltipWindowEditDialog(
+        context: context,
+        controller: tooltip,
+      ),
     };
   }
 
