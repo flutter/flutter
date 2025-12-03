@@ -41,9 +41,15 @@ bool _isAlmost(double x, double y, double epsilon) {
   return (x - y).abs() < epsilon;
 }
 
+double _distanceSquared(double r, double g, double b, List<double> color) {
+  return (r - color[0]) * (r - color[0]) +
+      (g - color[1]) * (g - color[1]) +
+      (b - color[2]) * (b - color[2]);
+}
+
 List<double> _deepRed = <double>[1.0931, -0.2268, -0.1501];
 
-bool _findRGBAF16Color(
+(bool, List<double>) _findRGBAF16Color(
   Uint8List bytes,
   int width,
   int height,
@@ -54,6 +60,8 @@ bool _findRGBAF16Color(
   expect(bytes.lengthInBytes, width * height * 8);
   expect(bytes.lengthInBytes, byteData.lengthInBytes);
   var foundDeepRed = false;
+  double minDistance = double.infinity;
+  List<double> closestColor = <double>[0, 0, 0];
   for (var i = 0; i < bytes.lengthInBytes; i += 8) {
     final int pixel = byteData.getUint64(i, Endian.host);
     final double blue = _decodeHalf((pixel >> 32) & 0xffff);
@@ -64,11 +72,16 @@ bool _findRGBAF16Color(
         _isAlmost(blue, color[2], epsilon)) {
       foundDeepRed = true;
     }
+    final double currentDistance = _distanceSquared(red, green, blue, color);
+    if (currentDistance < minDistance) {
+      minDistance = currentDistance;
+      closestColor = <double>[red, green, blue];
+    }
   }
-  return foundDeepRed;
+  return (foundDeepRed, closestColor);
 }
 
-bool _findBGRA10Color(
+(bool, List<double>) _findBGRA10Color(
   Uint8List bytes,
   int width,
   int height,
@@ -79,6 +92,8 @@ bool _findBGRA10Color(
   expect(bytes.lengthInBytes, width * height * 8);
   expect(bytes.lengthInBytes, byteData.lengthInBytes);
   var foundDeepRed = false;
+  double minDistance = double.infinity;
+  List<double> closestColor = <double>[0, 0, 0];
   for (var i = 0; i < bytes.lengthInBytes; i += 8) {
     final int pixel = byteData.getUint64(i, Endian.host);
     final double blue = _decodeBGR10((pixel >> 6) & 0x3ff);
@@ -89,11 +104,16 @@ bool _findBGRA10Color(
         _isAlmost(blue, color[2], epsilon)) {
       foundDeepRed = true;
     }
+    final double currentDistance = _distanceSquared(red, green, blue, color);
+    if (currentDistance < minDistance) {
+      minDistance = currentDistance;
+      closestColor = <double>[red, green, blue];
+    }
   }
-  return foundDeepRed;
+  return (foundDeepRed, closestColor);
 }
 
-bool _findBGR10Color(
+(bool, List<double>) _findBGR10Color(
   Uint8List bytes,
   int width,
   int height,
@@ -104,6 +124,8 @@ bool _findBGR10Color(
   expect(bytes.lengthInBytes, width * height * 4);
   expect(bytes.lengthInBytes, byteData.lengthInBytes);
   var foundDeepRed = false;
+  double minDistance = double.infinity;
+  List<double> closestColor = <double>[0, 0, 0];
   for (var i = 0; i < bytes.lengthInBytes; i += 4) {
     final int pixel = byteData.getUint32(i, Endian.host);
     final double blue = _decodeBGR10(pixel & 0x3ff);
@@ -114,20 +136,81 @@ bool _findBGR10Color(
         _isAlmost(blue, color[2], epsilon)) {
       foundDeepRed = true;
     }
+    final double currentDistance = _distanceSquared(red, green, blue, color);
+    if (currentDistance < minDistance) {
+      minDistance = currentDistance;
+      closestColor = <double>[red, green, blue];
+    }
   }
-  return foundDeepRed;
+  return (foundDeepRed, closestColor);
 }
 
-bool _findColor(List<dynamic> result, List<double> color, {double epsilon = 0.01}) {
+(bool, List<double>) _findColor(
+  List<dynamic> result,
+  List<double> color, {
+  double epsilon = 0.01,
+}) {
   expect(result, isNotNull);
   expect(result.length, 4);
   final [int width, int height, String format, Uint8List bytes] = result;
   return switch (format) {
-    'MTLPixelFormatBGR10_XR' => _findBGR10Color(bytes, width, height, color, epsilon: epsilon),
-    'MTLPixelFormatBGRA10_XR' => _findBGRA10Color(bytes, width, height, color, epsilon: epsilon),
-    'MTLPixelFormatRGBA16Float' => _findRGBAF16Color(bytes, width, height, color, epsilon: epsilon),
+    'MTLPixelFormatBGR10_XR' => _findBGR10Color(
+      bytes,
+      width,
+      height,
+      color,
+      epsilon: epsilon,
+    ),
+    'MTLPixelFormatBGRA10_XR' => _findBGRA10Color(
+      bytes,
+      width,
+      height,
+      color,
+      epsilon: epsilon,
+    ),
+    'MTLPixelFormatRGBA16Float' => _findRGBAF16Color(
+      bytes,
+      width,
+      height,
+      color,
+      epsilon: epsilon,
+    ),
     _ => fail('Unsupported pixel format: $format'),
   };
+}
+
+class _HasColor extends Matcher {
+  const _HasColor(this.color, {this.epsilon = 0.01});
+
+  final List<double> color;
+  final double epsilon;
+
+  @override
+  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+    final (found, closest) = _findColor(
+      item as List<dynamic>,
+      color,
+      epsilon: epsilon,
+    );
+    matchState['closest'] = closest;
+    return found;
+  }
+
+  @override
+  Description describe(Description description) {
+    return description.add('contains color $color');
+  }
+
+  @override
+  Description describeMismatch(
+    dynamic item,
+    Description mismatchDescription,
+    Map<dynamic, dynamic> matchState,
+    bool verbose,
+  ) {
+    final closest = matchState['closest'];
+    return mismatchDescription.add('closest color to $color was $closest');
+  }
 }
 
 void main() {
@@ -140,7 +223,7 @@ void main() {
 
       const channel = MethodChannel('flutter/screenshot');
       final result = await channel.invokeMethod('test') as List<Object?>;
-      expect(_findColor(result, _deepRed), isTrue);
+      expect(result, _HasColor(_deepRed));
     });
     testWidgets('look for display p3 deepest red', (WidgetTester tester) async {
       app.run(app.Setup.canvasSaveLayer);
@@ -148,7 +231,7 @@ void main() {
 
       const channel = MethodChannel('flutter/screenshot');
       final result = await channel.invokeMethod('test') as List<Object?>;
-      expect(_findColor(result, _deepRed), isTrue);
+      expect(result, _HasColor(_deepRed));
     });
     testWidgets('no p3 deepest red without image', (WidgetTester tester) async {
       app.run(app.Setup.none);
@@ -156,8 +239,8 @@ void main() {
 
       const channel = MethodChannel('flutter/screenshot');
       final result = await channel.invokeMethod('test') as List<Object?>;
-      expect(_findColor(result, _deepRed), isFalse);
-      expect(_findColor(result, <double>[0.0, 1.0, 0.0]), isFalse);
+      expect(result, isNot(_HasColor(_deepRed)));
+      expect(result, isNot(_HasColor(<double>[0.0, 1.0, 0.0])));
     });
     testWidgets('p3 deepest red with blur', (WidgetTester tester) async {
       app.run(app.Setup.blur);
@@ -165,60 +248,72 @@ void main() {
 
       const channel = MethodChannel('flutter/screenshot');
       final result = await channel.invokeMethod('test') as List<Object?>;
-      expect(_findColor(result, _deepRed), isTrue);
-      expect(_findColor(result, <double>[0.0, 1.0, 0.0]), isTrue);
+      expect(result, _HasColor(_deepRed));
+      expect(result, _HasColor(<double>[0.0, 1.0, 0.0]));
     });
-    testWidgets('draw image with wide gamut works', (WidgetTester tester) async {
+    testWidgets('draw image with wide gamut works', (
+      WidgetTester tester,
+    ) async {
       app.run(app.Setup.drawnImage);
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
       const channel = MethodChannel('flutter/screenshot');
       final result = await channel.invokeMethod('test') as List<Object?>;
-      expect(_findColor(result, <double>[0.0, 1.0, 0.0]), isTrue);
+      expect(result, _HasColor(<double>[0.0, 1.0, 0.0]));
     });
-    testWidgets('draw container with wide gamut works', (WidgetTester tester) async {
+    testWidgets('draw container with wide gamut works', (
+      WidgetTester tester,
+    ) async {
       app.run(app.Setup.container);
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
       const channel = MethodChannel('flutter/screenshot');
       final result = await channel.invokeMethod('test') as List<Object?>;
-      expect(_findColor(result, _deepRed), isTrue);
+      expect(result, _HasColor(_deepRed));
     });
 
-    testWidgets('draw wide gamut linear gradient works', (WidgetTester tester) async {
+    testWidgets('draw wide gamut linear gradient works', (
+      WidgetTester tester,
+    ) async {
       app.run(app.Setup.linearGradient);
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
       const channel = MethodChannel('flutter/screenshot');
       final result = await channel.invokeMethod('test') as List<Object?>;
-      expect(_findColor(result, _deepRed), isTrue);
+      expect(result, _HasColor(_deepRed));
     });
 
-    testWidgets('draw wide gamut radial gradient works', (WidgetTester tester) async {
+    testWidgets('draw wide gamut radial gradient works', (
+      WidgetTester tester,
+    ) async {
       app.run(app.Setup.radialGradient);
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
       const channel = MethodChannel('flutter/screenshot');
       final result = await channel.invokeMethod('test') as List<Object?>;
-      expect(_findColor(result, _deepRed, epsilon: 0.05), isTrue);
+      expect(result, _HasColor(_deepRed, epsilon: 0.05));
     });
 
-    testWidgets('draw wide gamut conical gradient works', (WidgetTester tester) async {
+    testWidgets('draw wide gamut conical gradient works', (
+      WidgetTester tester,
+    ) async {
       app.run(app.Setup.conicalGradient);
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
       const channel = MethodChannel('flutter/screenshot');
       final result = await channel.invokeMethod('test') as List<Object?>;
-      expect(_findColor(result, _deepRed, epsilon: 0.05), isTrue);
+      expect(result, _HasColor(_deepRed, epsilon: 0.05));
     });
 
-    testWidgets('draw wide gamut sweep gradient works', (WidgetTester tester) async {
+    testWidgets('draw wide gamut sweep gradient works', (
+      WidgetTester tester,
+    ) async {
       app.run(app.Setup.sweepGradient);
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
       const channel = MethodChannel('flutter/screenshot');
       final result = await channel.invokeMethod('test') as List<Object?>;
-      expect(_findColor(result, _deepRed), isTrue);
+      expect(result, _HasColor(_deepRed));
     });
   });
 }
