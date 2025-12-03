@@ -16,7 +16,7 @@ export const loadSkwasm = async (deps, config, browserEnvironment, baseUrl) => {
   const wasmInstantiator = createWasmInstantiator(resolveUrlWithSegments(baseUrl, `${fileStem}.wasm`));
   const skwasm = await import(skwasmUrl);
   return await skwasm.default({
-    skwasmSingleThreaded: !browserEnvironment.crossOriginIsolated || config.forceSingleThreadedSkwasm,
+    skwasmSingleThreaded: !browserEnvironment.crossOriginIsolated || browserEnvironment.isChromeExtension || config.forceSingleThreadedSkwasm,
     instantiateWasm: wasmInstantiator,
     locateFile: (filename, scriptDirectory) => {
       // The wasm workers API has a separate .ww.js file that bootstraps the
