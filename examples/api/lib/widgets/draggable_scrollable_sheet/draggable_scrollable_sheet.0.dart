@@ -36,6 +36,9 @@ class DraggableScrollableSheetExample extends StatefulWidget {
 
 class _DraggableScrollableSheetExampleState
     extends State<DraggableScrollableSheetExample> {
+  // This variable is used to restore the draggable sheet drag position
+  // for the purpose of handling over-dragging beyond bounds when
+  // the dragging mouse pointer re-enters the window on web and desktop platforms.
   double _dragPosition = 0.5;
   late double _sheetPosition = _dragPosition;
   final minChildSize = 0.25;
