@@ -72,7 +72,7 @@ void main() {
     // Get the root prefix of the current directory so that on Windows we get a
     // correct root prefix.
     final Directory flutterRoot = fs.directory(
-      path.join(path.rootPrefix(fs.currentDirectory.absolute.path), 'flutter/sdk'),
+      path.join(path.rootPrefix(fs.currentDirectory.absolute.path), 'flutter sdk'),
     )..createSync(recursive: true);
     fs.currentDirectory = flutterRoot;
 
