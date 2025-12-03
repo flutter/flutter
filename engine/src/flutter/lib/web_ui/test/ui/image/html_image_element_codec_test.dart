@@ -23,11 +23,11 @@ Future<void> testMain() async {
   setUpUnitTests();
   group('$HtmlImageElementCodec', () {
     test('supports raw images - RGBA8888', () async {
-      final Completer<ui.Image> completer = Completer<ui.Image>();
-      const int width = 200;
-      const int height = 300;
-      final Uint32List list = Uint32List(width * height);
-      for (int index = 0; index < list.length; index += 1) {
+      final completer = Completer<ui.Image>();
+      const width = 200;
+      const height = 300;
+      final list = Uint32List(width * height);
+      for (var index = 0; index < list.length; index += 1) {
         list[index] = 0xFF0000FF;
       }
       ui.decodeImageFromPixels(
@@ -42,11 +42,11 @@ Future<void> testMain() async {
       expect(image.height, height);
     });
     test('supports raw images - BGRA8888', () async {
-      final Completer<ui.Image> completer = Completer<ui.Image>();
-      const int width = 200;
-      const int height = 300;
-      final Uint32List list = Uint32List(width * height);
-      for (int index = 0; index < list.length; index += 1) {
+      final completer = Completer<ui.Image>();
+      const width = 200;
+      const height = 300;
+      final list = Uint32List(width * height);
+      for (var index = 0; index < list.length; index += 1) {
         list[index] = 0xFF0000FF;
       }
       ui.decodeImageFromPixels(
@@ -82,7 +82,7 @@ Future<void> testMain() async {
       expect(frameInfo.image.debugDisposed, isTrue);
     });
     test('provides image loading progress', () async {
-      final StringBuffer buffer = StringBuffer();
+      final buffer = StringBuffer();
       final HtmlImageElementCodec codec = CkImageElementCodec(
         'sample_image1.png',
         chunkCallback: (int loaded, int total) {
@@ -116,8 +116,7 @@ Future<void> testMain() async {
   group('ImageCodecUrl', () {
     test('loads sample image from web', () async {
       final Uri uri = Uri.base.resolve('sample_image1.png');
-      final HtmlImageElementCodec codec =
-          await ui_web.createImageCodecFromUrl(uri) as HtmlImageElementCodec;
+      final codec = await ui_web.createImageCodecFromUrl(uri) as HtmlImageElementCodec;
       final ui.FrameInfo frameInfo = await codec.getNextFrame();
 
       expect(codec.imgElement, isNotNull);
@@ -130,8 +129,8 @@ Future<void> testMain() async {
     });
     test('provides image loading progress from web', () async {
       final Uri uri = Uri.base.resolve('sample_image1.png');
-      final StringBuffer buffer = StringBuffer();
-      final HtmlImageElementCodec codec =
+      final buffer = StringBuffer();
+      final codec =
           await ui_web.createImageCodecFromUrl(
                 uri,
                 chunkCallback: (int loaded, int total) {

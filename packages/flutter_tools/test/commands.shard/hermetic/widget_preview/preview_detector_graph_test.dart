@@ -8,7 +8,6 @@ import 'package:flutter_tools/src/widget_preview/preview_detector.dart';
 import 'package:test/test.dart';
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
 import 'utils/preview_detector_test_utils.dart';
 import 'utils/preview_project.dart';
 
@@ -26,20 +25,12 @@ void main() {
     // Note: we don't use a MemoryFileSystem since we don't have a way to
     // provide it to package:analyzer APIs without writing a significant amount
     // of wrapper logic.
-    late PreviewDetector previewDetector;
-    late WidgetPreviewProject project;
 
-    setUp(() async {
-      previewDetector = createTestPreviewDetector();
-      project = WidgetPreviewProject(projectRoot: previewDetector.projectRoot);
+    testPreviewDetector('dependency graph cycle smoke test', (
+      PreviewDetector previewDetector,
+    ) async {
+      final project = WidgetPreviewProject(projectRoot: previewDetector.projectRoot);
       await project.initializePubspec();
-    });
-
-    tearDown(() async {
-      await previewDetector.dispose();
-    });
-
-    testUsingContext('dependency graph cycle smoke test', () async {
       // Simple test to ensure graph cycles don't cause infinite recursion during traversal.
       <WidgetPreviewSourceFile>[
         (path: 'foo.dart', source: "import 'bar.dart';"),
@@ -79,11 +70,12 @@ part of 'lib.dart';
 ''',
       );
 
-      setUp(() {
-        <WidgetPreviewSourceFile>[main, lib, libPart1, libPart2].forEach(project.writeFile);
-      });
+      final sources = <WidgetPreviewSourceFile>[main, lib, libPart1, libPart2];
 
-      testUsingContext('smoke test', () async {
+      testPreviewDetector('smoke test', (PreviewDetector previewDetector) async {
+        final project = WidgetPreviewProject(projectRoot: previewDetector.projectRoot);
+        sources.forEach(project.writeFile);
+        await project.initializePubspec();
         final PreviewDependencyGraph initialGraph = await previewDetector.initialize();
 
         // Ensure that projects with libraries containing parts are handled correctly.
@@ -98,7 +90,10 @@ part of 'lib.dart';
         expect(initialGraph[project.toPreviewPath(lib.path)]!.files, hasLength(3));
       });
 
-      testUsingContext('with errors in parts', () async {
+      testPreviewDetector('with errors in parts', (PreviewDetector previewDetector) async {
+        final project = WidgetPreviewProject(projectRoot: previewDetector.projectRoot);
+        sources.forEach(project.writeFile);
+        await project.initializePubspec();
         final PreviewDependencyGraph initialGraph = await previewDetector.initialize();
         expectPreviewDependencyGraphIsWellFormed(project: project, graph: initialGraph);
 
@@ -141,14 +136,16 @@ void foo() => bar();
 void bar() => null;
 ''',
       );
+
+      const sources = <WidgetPreviewSourceFile>[main, foo, bar];
+
       WidgetPreviewSourceFile toInvalidSource(WidgetPreviewSourceFile original) =>
           withUpdatedSource(original, 'invalid-symbol');
 
-      setUp(() {
-        <WidgetPreviewSourceFile>[main, foo, bar].forEach(project.writeFile);
-      });
-
-      testUsingContext('entire directory removed', () async {
+      testPreviewDetector('entire directory removed', (PreviewDetector previewDetector) async {
+        final project = WidgetPreviewProject(projectRoot: previewDetector.projectRoot);
+        sources.forEach(project.writeFile);
+        await project.initializePubspec();
         String platformPath(List<String> pathSegments) =>
             pathSegments.join(const LocalPlatform().pathSeparator);
         final WidgetPreviewSourceFile a = (
@@ -190,7 +187,10 @@ void bar() => null;
         expectPreviewDependencyGraphIsWellFormed(project: project, graph: initialGraph);
       });
 
-      testUsingContext('smoke test', () async {
+      testPreviewDetector('smoke test', (PreviewDetector previewDetector) async {
+        final project = WidgetPreviewProject(projectRoot: previewDetector.projectRoot);
+        sources.forEach(project.writeFile);
+        await project.initializePubspec();
         final PreviewDependencyGraph initialGraph = await previewDetector.initialize();
         expect(initialGraph.keys, containsAll(project.paths));
 
@@ -212,7 +212,12 @@ void bar() => null;
         await expectHasNoErrors(project: project, changeOperation: () => project.writeFile(bar));
       });
 
-      testUsingContext('file with error added and removed', () async {
+      testPreviewDetector('file with error added and removed', (
+        PreviewDetector previewDetector,
+      ) async {
+        final project = WidgetPreviewProject(projectRoot: previewDetector.projectRoot);
+        sources.forEach(project.writeFile);
+        await project.initializePubspec();
         final PreviewDependencyGraph initialGraph = await previewDetector.initialize();
         expect(initialGraph.keys, containsAll(project.paths));
 
@@ -251,30 +256,32 @@ void bar() => null;
         await expectHasNoErrors(project: project, changeOperation: () => project.writeFile(main));
       });
 
-      testUsingContext(
-        'error added into dependency in the middle of the graph and removed',
-        () async {
-          final PreviewDependencyGraph initialGraph = await previewDetector.initialize();
-          expect(initialGraph.keys, containsAll(project.paths));
+      testPreviewDetector('error added into dependency in the middle of the graph and removed', (
+        PreviewDetector previewDetector,
+      ) async {
+        final project = WidgetPreviewProject(projectRoot: previewDetector.projectRoot);
+        sources.forEach(project.writeFile);
+        await project.initializePubspec();
+        final PreviewDependencyGraph initialGraph = await previewDetector.initialize();
+        expect(initialGraph.keys, containsAll(project.paths));
 
-          // Verify there's no errors in the project.
-          for (final LibraryPreviewNode node in initialGraph.values) {
-            expect(node.dependencyHasErrors, false);
-            expect(node.hasErrors, false);
-          }
+        // Verify there's no errors in the project.
+        for (final LibraryPreviewNode node in initialGraph.values) {
+          expect(node.dependencyHasErrors, false);
+          expect(node.hasErrors, false);
+        }
 
-          // Add baz.dart, which contains errors. Since no other files import baz.dart, it should be
-          // the only file with errors.
-          await expectHasErrors(
-            project: project,
-            changeOperation: () => project.writeFile(toInvalidSource(foo)),
-            filesWithErrors: <WidgetPreviewSourceFile>{foo, main},
-          );
+        // Add baz.dart, which contains errors. Since no other files import baz.dart, it should be
+        // the only file with errors.
+        await expectHasErrors(
+          project: project,
+          changeOperation: () => project.writeFile(toInvalidSource(foo)),
+          filesWithErrors: <WidgetPreviewSourceFile>{foo, main},
+        );
 
-          // Delete baz.dart. main.dart should continue to have an error.
-          await expectHasNoErrors(project: project, changeOperation: () => project.writeFile(foo));
-        },
-      );
+        // Delete baz.dart. main.dart should continue to have an error.
+        await expectHasNoErrors(project: project, changeOperation: () => project.writeFile(foo));
+      });
     });
   });
 }

@@ -32,7 +32,7 @@ class _RenderBoxIntrinsicCalculationRule implements AnalyzeRule {
 
   @override
   void applyTo(ResolvedUnitResult unit) {
-    final _RenderBoxSubclassVisitor visitor = _RenderBoxSubclassVisitor();
+    final visitor = _RenderBoxSubclassVisitor();
     unit.unit.visitChildren(visitor);
     final List<(AstNode, String)> violationsInUnit = visitor.violationNodes;
     if (violationsInUnit.isNotEmpty) {

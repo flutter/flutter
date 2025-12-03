@@ -8,12 +8,12 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  const Offset forcePressOffset = Offset(400.0, 50.0);
+  const forcePressOffset = Offset(400.0, 50.0);
 
   testWidgets('Uncontested scrolls start immediately', (WidgetTester tester) async {
-    bool didStartDrag = false;
+    var didStartDrag = false;
     double? updatedDragDelta;
-    bool didEndDrag = false;
+    var didEndDrag = false;
 
     final Widget widget = GestureDetector(
       onVerticalDragStart: (DragStartDetails details) {
@@ -33,14 +33,14 @@ void main() {
     expect(updatedDragDelta, isNull);
     expect(didEndDrag, isFalse);
 
-    const Offset firstLocation = Offset(10.0, 10.0);
+    const firstLocation = Offset(10.0, 10.0);
     final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
     expect(didStartDrag, isTrue);
     didStartDrag = false;
     expect(updatedDragDelta, isNull);
     expect(didEndDrag, isFalse);
 
-    const Offset secondLocation = Offset(10.0, 9.0);
+    const secondLocation = Offset(10.0, 9.0);
     await gesture.moveTo(secondLocation);
     expect(didStartDrag, isFalse);
     expect(updatedDragDelta, -1.0);
@@ -57,11 +57,11 @@ void main() {
   });
 
   testWidgets('Match two scroll gestures in succession', (WidgetTester tester) async {
-    int gestureCount = 0;
-    double dragDistance = 0.0;
+    var gestureCount = 0;
+    var dragDistance = 0.0;
 
-    const Offset downLocation = Offset(10.0, 10.0);
-    const Offset upLocation = Offset(10.0, 50.0); // must be far enough to be more than kTouchSlop
+    const downLocation = Offset(10.0, 10.0);
+    const upLocation = Offset(10.0, 50.0); // must be far enough to be more than kTouchSlop
 
     final Widget widget = GestureDetector(
       dragStartBehavior: DragStartBehavior.down,
@@ -96,9 +96,9 @@ void main() {
   });
 
   testWidgets("Pan doesn't crash", (WidgetTester tester) async {
-    bool didStartPan = false;
+    var didStartPan = false;
     Offset? panDelta;
-    bool didEndPan = false;
+    var didEndPan = false;
 
     await tester.pumpWidget(
       GestureDetector(
@@ -128,8 +128,8 @@ void main() {
   });
 
   testWidgets('DragEndDetails returns the last known position', (WidgetTester tester) async {
-    Offset updateOffset = const Offset(10.0, 10.0);
-    const EdgeInsets paddingOffset = EdgeInsets.all(10.0);
+    var updateOffset = const Offset(10.0, 10.0);
+    const paddingOffset = EdgeInsets.all(10.0);
     Offset? endOffset;
     Offset? globalEndOffset;
 
@@ -162,7 +162,7 @@ void main() {
   });
 
   group('Tap', () {
-    final ButtonVariant buttonVariant = ButtonVariant(
+    final buttonVariant = ButtonVariant(
       values: <int>[kPrimaryButton, kSecondaryButton, kTertiaryButton],
       descriptions: <int, String>{
         kPrimaryButton: 'primary',
@@ -245,7 +245,7 @@ void main() {
     }, variant: buttonVariant);
 
     testWidgets('Empty', (WidgetTester tester) async {
-      bool didTap = false;
+      var didTap = false;
       await tester.pumpWidget(
         Center(
           child: GestureDetector(
@@ -273,7 +273,7 @@ void main() {
     }, variant: buttonVariant);
 
     testWidgets('Only container', (WidgetTester tester) async {
-      bool didTap = false;
+      var didTap = false;
       await tester.pumpWidget(
         Center(
           child: GestureDetector(
@@ -342,10 +342,10 @@ void main() {
     }, variant: buttonVariant);
 
     testWidgets('Tap down occurs after kPressTimeout', (WidgetTester tester) async {
-      int tapDown = 0;
-      int tap = 0;
-      int tapCancel = 0;
-      int longPress = 0;
+      var tapDown = 0;
+      var tap = 0;
+      var tapCancel = 0;
+      var longPress = 0;
 
       await tester.pumpWidget(
         Container(
@@ -477,7 +477,7 @@ void main() {
     }, variant: buttonVariant);
 
     testWidgets('Long Press Up Callback called after long press', (WidgetTester tester) async {
-      int longPressUp = 0;
+      var longPressUp = 0;
 
       await tester.pumpWidget(
         Container(
@@ -541,7 +541,7 @@ void main() {
   testWidgets(
     'Primary and secondary long press callbacks should work together in GestureDetector',
     (WidgetTester tester) async {
-      bool primaryLongPress = false, secondaryLongPress = false;
+      var primaryLongPress = false, secondaryLongPress = false;
 
       await tester.pumpWidget(
         Container(
@@ -581,10 +581,10 @@ void main() {
   );
 
   testWidgets('Force Press Callback called after force press', (WidgetTester tester) async {
-    int forcePressStart = 0;
-    int forcePressPeaked = 0;
-    int forcePressUpdate = 0;
-    int forcePressEnded = 0;
+    var forcePressStart = 0;
+    var forcePressPeaked = 0;
+    var forcePressUpdate = 0;
+    var forcePressEnded = 0;
 
     await tester.pumpWidget(
       Container(
@@ -672,8 +672,8 @@ void main() {
   testWidgets('Force Press Callback not called if long press triggered before force press', (
     WidgetTester tester,
   ) async {
-    int forcePressStart = 0;
-    int longPressTimes = 0;
+    var forcePressStart = 0;
+    var longPressTimes = 0;
 
     await tester.pumpWidget(
       Container(
@@ -691,7 +691,7 @@ void main() {
     );
 
     final int pointerValue = tester.nextPointer;
-    const double maxPressure = 6.0;
+    const maxPressure = 6.0;
 
     final TestGesture gesture = await tester.createGesture();
 
@@ -743,8 +743,8 @@ void main() {
   testWidgets('Force Press Callback not called if drag triggered before force press', (
     WidgetTester tester,
   ) async {
-    int forcePressStart = 0;
-    int horizontalDragStart = 0;
+    var forcePressStart = 0;
+    var horizontalDragStart = 0;
 
     await tester.pumpWidget(
       Container(
@@ -802,9 +802,9 @@ void main() {
     testWidgets('tap', (WidgetTester tester) async {
       TapDownDetails? receivedTapDownDetails;
       TapUpDetails? receivedTapUpDetails;
-      bool tapped = false;
+      var tapped = false;
       final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
-      final UniqueKey key = UniqueKey();
+      final key = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -849,10 +849,10 @@ void main() {
       LongPressDownDetails? receivedLongPressDownDetails;
       LongPressStartDetails? receivedLongPressStartDetails;
       LongPressEndDetails? receivedLongPressEndDetails;
-      bool pressed = false;
-      bool upped = false;
+      var pressed = false;
+      var upped = false;
       final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
-      final UniqueKey key = UniqueKey();
+      final key = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -909,7 +909,7 @@ void main() {
       DragUpdateDetails? receivedDragUpdateDetails;
       DragEndDetails? receivedDragEndDetails;
       final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
-      final UniqueKey key = UniqueKey();
+      final key = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -966,7 +966,7 @@ void main() {
       DragUpdateDetails? receivedDragUpdateDetails;
       DragEndDetails? receivedDragEndDetails;
       final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
-      final UniqueKey key = UniqueKey();
+      final key = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -1023,7 +1023,7 @@ void main() {
       DragUpdateDetails? receivedDragUpdateDetails;
       DragEndDetails? receivedDragEndDetails;
       final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
-      final UniqueKey key = UniqueKey();
+      final key = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -1095,7 +1095,7 @@ void main() {
 
   group("RawGestureDetectorState's debugFillProperties", () {
     testWidgets('when default', (WidgetTester tester) async {
-      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      final builder = DiagnosticPropertiesBuilder();
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(RawGestureDetector(key: key));
       key.currentState!.debugFillProperties(builder);
@@ -1109,7 +1109,7 @@ void main() {
     });
 
     testWidgets('should show gestures, custom semantics and behavior', (WidgetTester tester) async {
-      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      final builder = DiagnosticPropertiesBuilder();
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(
         RawGestureDetector(
@@ -1151,7 +1151,7 @@ void main() {
     testWidgets('should not show semantics when excludeFromSemantics is true', (
       WidgetTester tester,
     ) async {
-      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      final builder = DiagnosticPropertiesBuilder();
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(
         RawGestureDetector(
@@ -1219,7 +1219,7 @@ void main() {
       });
 
       testWidgets('replaceGestureRecognizers not during layout', (WidgetTester tester) async {
-        final GlobalKey<RawGestureDetectorState> key = GlobalKey<RawGestureDetectorState>();
+        final key = GlobalKey<RawGestureDetectorState>();
         await tester.pumpWidget(
           Directionality(
             textDirection: TextDirection.ltr,
@@ -1261,9 +1261,9 @@ void main() {
 
   testWidgets('supportedDevices update test', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/111716
-    bool didStartPan = false;
+    var didStartPan = false;
     Offset? panDelta;
-    bool didEndPan = false;
+    var didEndPan = false;
     Widget buildFrame(Set<PointerDeviceKind>? supportedDevices) {
       return GestureDetector(
         onPanStart: (DragStartDetails details) {
@@ -1344,9 +1344,9 @@ void main() {
   });
 
   testWidgets('supportedDevices is respected', (WidgetTester tester) async {
-    bool didStartPan = false;
+    var didStartPan = false;
     Offset? panDelta;
-    bool didEndPan = false;
+    var didEndPan = false;
 
     await tester.pumpWidget(
       GestureDetector(
@@ -1400,7 +1400,7 @@ void main() {
     testWidgets('onDoubleTap is called even if onDoubleTapDown has not been not provided', (
       WidgetTester tester,
     ) async {
-      final List<String> log = <String>[];
+      final log = <String>[];
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -1421,7 +1421,7 @@ void main() {
     testWidgets('onDoubleTapDown is called even if onDoubleTap has not been not provided', (
       WidgetTester tester,
     ) async {
-      final List<String> log = <String>[];
+      final log = <String>[];
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,

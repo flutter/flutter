@@ -17,8 +17,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
-  const double kOpenScale = 1.15;
-  const double kMinScaleFactor = 1.02;
+  const kOpenScale = 1.15;
+  const kMinScaleFactor = 1.02;
 
   Widget getChild({double width = 300.0, double height = 100.0}) {
     return Container(width: width, height: height, color: CupertinoColors.activeOrange);
@@ -293,9 +293,9 @@ void main() {
         of: decoyChild,
         matching: find.byType(Container),
       );
-      final BoxDecoration? boxDecoration =
+      final boxDecoration =
           (tester.firstWidget(decoyChildDescendant) as Container).decoration as BoxDecoration?;
-      const List<Color?> expectedColors = <Color?>[null, Color(0x00000000)];
+      const expectedColors = <Color?>[null, Color(0x00000000)];
 
       // `Color(0x00000000)` -> Is `CupertinoColors.transparent`.
       // `null`              -> Default when no color argument is given in `BoxDecoration`.
@@ -404,18 +404,16 @@ void main() {
         );
       }
 
-      final Container decoyContainer =
-          tester.firstElement(findBuilderDecoyChild()).widget as Container;
-      final BoxDecoration? decoyDecoration = decoyContainer.decoration as BoxDecoration?;
+      final decoyContainer = tester.firstElement(findBuilderDecoyChild()).widget as Container;
+      final decoyDecoration = decoyContainer.decoration as BoxDecoration?;
       expect(decoyDecoration?.borderRadius, equals(BorderRadius.circular(0)));
 
       expect(findBuilderDecoyChild(), findsOneWidget);
 
       // After a small delay, the _DecoyChild has begun to animate with a different border radius.
       await tester.pump(const Duration(milliseconds: 500));
-      final Container decoyLaterContainer =
-          tester.firstElement(findBuilderDecoyChild()).widget as Container;
-      final BoxDecoration? decoyLaterDecoration = decoyLaterContainer.decoration as BoxDecoration?;
+      final decoyLaterContainer = tester.firstElement(findBuilderDecoyChild()).widget as Container;
+      final decoyLaterDecoration = decoyLaterContainer.decoration as BoxDecoration?;
       expect(decoyLaterDecoration?.borderRadius, isNot(equals(BorderRadius.circular(0))));
 
       // Finish gesture to release resources.
@@ -709,8 +707,7 @@ void main() {
 
       // Check border radius.
       expect(findStaticDefaultPreview(), findsOneWidget);
-      final ClipRSuperellipse previewWidget =
-          tester.firstWidget(findStaticDefaultPreview()) as ClipRSuperellipse;
+      final previewWidget = tester.firstWidget(findStaticDefaultPreview()) as ClipRSuperellipse;
       expect(previewWidget.borderRadius, equals(BorderRadius.circular(12.0)));
     });
 
@@ -764,7 +761,7 @@ void main() {
     });
 
     testWidgets('CupertinoContextMenu minimizes scaling offscreen', (WidgetTester tester) async {
-      const Size portraitScreenSize = Size(600.0, 800.0);
+      const portraitScreenSize = Size(600.0, 800.0);
       await binding.setSurfaceSize(portraitScreenSize);
       addTearDown(() => binding.setSurfaceSize(null));
       final Widget child = getChild();
@@ -902,7 +899,7 @@ void main() {
 
   group("Open layout differs depending on child's position on screen", () {
     testWidgets('Portrait', (WidgetTester tester) async {
-      const Size portraitScreenSize = Size(600.0, 800.0);
+      const portraitScreenSize = Size(600.0, 800.0);
       await binding.setSurfaceSize(portraitScreenSize);
       addTearDown(() => binding.setSurfaceSize(null));
 
@@ -1032,11 +1029,11 @@ void main() {
   testWidgets('Conflicting gesture detectors', (WidgetTester tester) async {
     int? onPointerDownTime;
     int? onPointerUpTime;
-    bool insideTapTriggered = false;
+    var insideTapTriggered = false;
     // The required duration of the route to be pushed in is [500, 900]ms.
     // 500ms is calculated from kPressTimeout+_previewLongPressTimeout/2.
     // 900ms is calculated from kPressTimeout+_previewLongPressTimeout.
-    const Duration pressDuration = Duration(milliseconds: 501);
+    const pressDuration = Duration(milliseconds: 501);
 
     int now() => clock.now().millisecondsSinceEpoch;
 
@@ -1072,7 +1069,7 @@ void main() {
     // the user keeps pressing and requesting frames.
     // If there is only one frame,
     // the animation is mutant and cannot drive the value of the animation controller.
-    for (int i = 0; i < 100; i++) {
+    for (var i = 0; i < 100; i++) {
       await tester.pump(pressDuration ~/ 100);
     }
     await gesture.up();
@@ -1104,7 +1101,7 @@ void main() {
   });
 
   testWidgets('CupertinoContextMenu scrolls correctly', (WidgetTester tester) async {
-    const int numMenuItems = 100;
+    const numMenuItems = 100;
     final Widget child = getChild();
     await tester.pumpWidget(
       CupertinoApp(
@@ -1159,7 +1156,7 @@ void main() {
 
   testWidgets('Pushing a new route removes overlay', (WidgetTester tester) async {
     final Widget child = getChild();
-    const String page = 'Page 2';
+    const page = 'Page 2';
     await tester.pumpWidget(
       CupertinoApp(
         home: Builder(
@@ -1212,7 +1209,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final Widget child = getChild();
-    bool ctxMenuRemoved = false;
+    var ctxMenuRemoved = false;
     late StateSetter setState;
     await tester.pumpWidget(
       CupertinoApp(
@@ -1252,14 +1249,14 @@ void main() {
   });
 
   testWidgets('CupertinoContextMenu goldens in portrait orientation', (WidgetTester tester) async {
-    const Size portraitScreenSize = Size(800.0, 900.0);
+    const portraitScreenSize = Size(800.0, 900.0);
     await binding.setSurfaceSize(portraitScreenSize);
     addTearDown(() => binding.setSurfaceSize(null));
 
     final Widget leftChild = getChild(width: 200, height: 300);
     final Widget rightChild = getChild(width: 200, height: 300);
     final Widget centerChild = getChild(width: 200, height: 300);
-    final List<Widget> children = <Widget>[leftChild, centerChild, rightChild];
+    final children = <Widget>[leftChild, centerChild, rightChild];
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -1295,14 +1292,14 @@ void main() {
   });
 
   testWidgets('CupertinoContextMenu goldens in landscape orientation', (WidgetTester tester) async {
-    const Size landscapeScreenSize = Size(800.0, 600.0);
+    const landscapeScreenSize = Size(800.0, 600.0);
     await binding.setSurfaceSize(landscapeScreenSize);
     addTearDown(() => binding.setSurfaceSize(null));
 
     final Widget leftChild = getChild(width: 200, height: 300);
     final Widget rightChild = getChild(width: 200, height: 300);
     final Widget centerChild = getChild(width: 200, height: 300);
-    final List<Widget> children = <Widget>[leftChild, centerChild, rightChild];
+    final children = <Widget>[leftChild, centerChild, rightChild];
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -1404,7 +1401,7 @@ void main() {
     }
 
     testWidgets('Portrait', (WidgetTester tester) async {
-      const Size portraitScreenSize = Size(600.0, 800.0);
+      const portraitScreenSize = Size(600.0, 800.0);
       await binding.setSurfaceSize(portraitScreenSize);
       addTearDown(() => binding.setSurfaceSize(null));
 
@@ -1429,7 +1426,7 @@ void main() {
     });
 
     testWidgets('Landscape', (WidgetTester tester) async {
-      const Size landscapeScreenSize = Size(800.0, 600.0);
+      const landscapeScreenSize = Size(800.0, 600.0);
       await binding.setSurfaceSize(landscapeScreenSize);
       addTearDown(() => binding.setSurfaceSize(null));
 
@@ -1457,7 +1454,7 @@ void main() {
   testWidgets('CupertinoContextMenu respects available screen width - Portrait', (
     WidgetTester tester,
   ) async {
-    const Size portraitScreenSize = Size(300.0, 350.0);
+    const portraitScreenSize = Size(300.0, 350.0);
     await binding.setSurfaceSize(portraitScreenSize);
     addTearDown(() => binding.setSurfaceSize(null));
 
@@ -1500,7 +1497,7 @@ void main() {
   testWidgets('CupertinoContextMenu respects available screen width - Landscape', (
     WidgetTester tester,
   ) async {
-    const Size landscapeScreenSize = Size(350.0, 300.0);
+    const landscapeScreenSize = Size(350.0, 300.0);
     await binding.setSurfaceSize(landscapeScreenSize);
     addTearDown(() => binding.setSurfaceSize(null));
 
