@@ -995,9 +995,75 @@ void main() {
     await tester.testTextInput.receiveAction(TextInputAction.done);
     expect(onSubmittedCalled, 1);
     expect(controller.isOpen, false);
+  });
 
+  // Regression test for https://github.com/flutter/flutter/issues/178719.
+  testWidgets('SearchAnchor.bar anchor loses focus after view closes', (WidgetTester tester) async {
+    final controller = SearchController();
+    addTearDown(controller.dispose);
+    var onSubmittedCalled = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Center(
+              child: Material(
+                child: SearchAnchor.bar(
+                  searchController: controller,
+                  onSubmitted: (String value) {
+                    setState(() {
+                      onSubmittedCalled++;
+                    });
+                    controller.closeView(value);
+                  },
+                  suggestionsBuilder: (BuildContext context, SearchController controller) {
+                    return <Widget>[];
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Tap to open the search view.
+    await tester.tap(find.byType(SearchBar));
+    await tester.pumpAndSettle();
+    expect(controller.isOpen, true);
+
+    // Find the anchor SearchBar's TextField.
+    final Finder anchorTextField = find.descendant(
+      of: find.byType(SearchBar).first,
+      matching: find.byType(TextField),
+    );
+
+    // Find the view SearchBar's TextField.
+    final Finder viewTextField = find.descendant(
+      of: findViewContent(),
+      matching: find.byType(TextField),
+    );
+
+    // View SearchBar should have focus.
+    expect(tester.widget<TextField>(viewTextField).focusNode?.hasFocus, isTrue);
+
+    // Close the view (use receiveAction because sendKeyEvent
+    // doesn't trigger onSubmitted in tests - the text input action needs to
+    // be sent directly to properly simulate the IME behavior).
     await tester.testTextInput.receiveAction(TextInputAction.done);
-    expect(onSubmittedCalled, 2);
+    await tester.pumpAndSettle();
+    expect(onSubmittedCalled, 1);
+    expect(controller.isOpen, false);
+
+    // After search view is closed, anchor SearchBar should NOT have focus.
+    expect(tester.widget<TextField>(anchorTextField).focusNode?.hasFocus, isFalse);
+
+    // Simulate the IME behavior via input action again .
+    // It should not trigger onSubmitted because field is unfocused
+    // and the text input connection is closed.
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+    expect(onSubmittedCalled, 1); // Still 1, not incremented.
   });
 
   testWidgets('hintStyle can override textStyle for hintText', (WidgetTester tester) async {
