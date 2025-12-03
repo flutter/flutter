@@ -1176,7 +1176,9 @@ void Canvas::SetupRenderPass() {
         *renderer_.GetContext(),
         *renderer_.GetContext()->GetResourceAllocator(),
         color0.texture->GetSize(),
-        renderer_.GetContext()->GetCapabilities()->SupportsOffscreenMSAA(),
+        renderer_.GetContext()->GetCapabilities()->SupportsOffscreenMSAA() &&
+            color0.texture->GetTextureDescriptor().sample_count >
+                SampleCount::kCount1,
         "ImpellerOnscreen", kDefaultStencilConfig);
   }
 

@@ -59,7 +59,8 @@ RenderTarget RenderTargetCache::CreateOffscreen(
     RenderTarget::AttachmentConfig color_attachment_config,
     std::optional<RenderTarget::AttachmentConfig> stencil_attachment_config,
     const std::shared_ptr<Texture>& existing_color_texture,
-    const std::shared_ptr<Texture>& existing_depth_stencil_texture) {
+    const std::shared_ptr<Texture>& existing_depth_stencil_texture,
+    std::optional<PixelFormat> target_pixel_format) {
   if (size.IsEmpty()) {
     return {};
   }
@@ -86,13 +87,14 @@ RenderTarget RenderTargetCache::CreateOffscreen(
         std::shared_ptr<Texture> depth_tex = depth ? depth->texture : nullptr;
         return RenderTargetAllocator::CreateOffscreen(
             context, size, mip_count, label, color_attachment_config,
-            stencil_attachment_config, color0.texture, depth_tex);
+            stencil_attachment_config, color0.texture, depth_tex,
+            target_pixel_format);
       }
     }
   }
   RenderTarget created_target = RenderTargetAllocator::CreateOffscreen(
       context, size, mip_count, label, color_attachment_config,
-      stencil_attachment_config);
+      stencil_attachment_config, nullptr, nullptr, target_pixel_format);
   if (!created_target.IsValid()) {
     return created_target;
   }
@@ -116,7 +118,8 @@ RenderTarget RenderTargetCache::CreateOffscreenMSAA(
     std::optional<RenderTarget::AttachmentConfig> stencil_attachment_config,
     const std::shared_ptr<Texture>& existing_color_msaa_texture,
     const std::shared_ptr<Texture>& existing_color_resolve_texture,
-    const std::shared_ptr<Texture>& existing_depth_stencil_texture) {
+    const std::shared_ptr<Texture>& existing_depth_stencil_texture,
+    std::optional<PixelFormat> target_pixel_format) {
   if (size.IsEmpty()) {
     return {};
   }
@@ -144,13 +147,14 @@ RenderTarget RenderTargetCache::CreateOffscreenMSAA(
         return RenderTargetAllocator::CreateOffscreenMSAA(
             context, size, mip_count, label, color_attachment_config,
             stencil_attachment_config, color0.texture, color0.resolve_texture,
-            depth_tex);
+            depth_tex, target_pixel_format);
       }
     }
   }
   RenderTarget created_target = RenderTargetAllocator::CreateOffscreenMSAA(
       context, size, mip_count, label, color_attachment_config,
-      stencil_attachment_config);
+      stencil_attachment_config, nullptr, nullptr, nullptr,
+      target_pixel_format);
   if (!created_target.IsValid()) {
     return created_target;
   }

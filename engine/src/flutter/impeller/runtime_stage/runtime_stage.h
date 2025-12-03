@@ -14,6 +14,7 @@
 #include "flutter/impeller/core/runtime_types.h"
 #include "impeller/core/shader_types.h"
 #include "runtime_stage_types_flatbuffers.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 
 namespace impeller {
 
@@ -22,7 +23,8 @@ class RuntimeStage {
   static const char* kVulkanUBOName;
 
   using Map = std::map<RuntimeStageBackend, std::shared_ptr<RuntimeStage>>;
-  static Map DecodeRuntimeStages(const std::shared_ptr<fml::Mapping>& payload);
+  static absl::StatusOr<Map> DecodeRuntimeStages(
+      const std::shared_ptr<fml::Mapping>& payload);
 
   RuntimeStage(const fb::RuntimeStage* runtime_stage,
                const std::shared_ptr<fml::Mapping>& payload);

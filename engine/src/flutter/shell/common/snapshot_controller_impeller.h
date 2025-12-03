@@ -16,13 +16,15 @@ class SnapshotControllerImpeller : public SnapshotController {
       const SnapshotController::Delegate& delegate)
       : SnapshotController(delegate) {}
 
-  void MakeRasterSnapshot(
+  void MakeRasterSnapshot(sk_sp<DisplayList> display_list,
+                          DlISize picture_size,
+                          std::function<void(const sk_sp<DlImage>&)> callback,
+                          SnapshotPixelFormat pixel_format) override;
+
+  sk_sp<DlImage> MakeRasterSnapshotSync(
       sk_sp<DisplayList> display_list,
       DlISize picture_size,
-      std::function<void(const sk_sp<DlImage>&)> callback) override;
-
-  sk_sp<DlImage> MakeRasterSnapshotSync(sk_sp<DisplayList> display_list,
-                                        DlISize picture_size) override;
+      SnapshotPixelFormat pixel_format) override;
 
   sk_sp<SkImage> ConvertToRasterImage(sk_sp<SkImage> image) override;
 
