@@ -1518,6 +1518,69 @@ void main() {
     expect(semantics.nodesWith(label: 'b'), hasLength(1));
     semantics.dispose();
   });
+
+  testWidgets(
+    'nested SliverMainAxisGroup with multiple PinnedHeaderSlivers positions correctly on scroll',
+    (WidgetTester tester) async {
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      final List<Key> keys = [GlobalKey(), GlobalKey(), GlobalKey(), GlobalKey()];
+
+      Future<void> pumpWidget({bool reverse = false}) async {
+        return tester.pumpWidget(
+          _buildSliverMainAxisGroup(
+            controller: controller,
+            reverse: reverse,
+            viewportHeight: 300,
+            precedingSlivers: <Widget>[
+              PinnedHeaderSliver(child: SizedBox(height: 30, key: keys[0])),
+            ],
+            otherSlivers: <Widget>[const SliverToBoxAdapter(child: SizedBox(height: 300))],
+            slivers: <Widget>[
+              PinnedHeaderSliver(child: SizedBox(height: 30, key: keys[1])),
+              SliverMainAxisGroup(
+                slivers: [
+                  PinnedHeaderSliver(child: SizedBox(height: 30, key: keys[2])),
+                  const SliverToBoxAdapter(child: SizedBox(height: 30)),
+                  PinnedHeaderSliver(child: SizedBox(height: 30, key: keys[3])),
+                  const SliverToBoxAdapter(child: SizedBox(height: 30)),
+                ],
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 30)),
+            ],
+          ),
+        );
+      }
+
+      Future<void> verifyPositions(Map<double, List<double>> offsetToPositions) async {
+        for (final MapEntry<double, List<double>> entry in offsetToPositions.entries) {
+          controller.jumpTo(entry.key);
+          await tester.pumpAndSettle();
+          for (var i = 0; i < keys.length; i++) {
+            expect(tester.getTopLeft(find.byKey(keys[i])).dy, entry.value[i]);
+          }
+        }
+      }
+
+      // Forward direction
+      await pumpWidget();
+      await verifyPositions({
+        10: [0.0, 30.0, 60.0, 110.0],
+        40: [0.0, 30.0, 60.0, 90.0],
+        70: [0.0, 30.0, 50.0, 80.0],
+        100: [0.0, 30.0, 20.0, 50.0],
+      });
+
+      // Reverse direction
+      await pumpWidget(reverse: true);
+      await verifyPositions({
+        10: [270.0, 240.0, 210.0, 160.0],
+        40: [270.0, 240.0, 210.0, 180.0],
+        70: [270.0, 240.0, 220.0, 190.0],
+        100: [270.0, 240.0, 250.0, 220.0],
+      });
+    },
+  );
 }
 
 Widget _buildSliverList({
@@ -1559,6 +1622,7 @@ Widget _buildSliverMainAxisGroup({
   Axis scrollDirection = Axis.vertical,
   bool reverse = false,
   List<Widget> otherSlivers = const <Widget>[],
+  List<Widget> precedingSlivers = const <Widget>[],
 }) {
   return MaterialApp(
     home: Directionality(
@@ -1573,6 +1637,7 @@ Widget _buildSliverMainAxisGroup({
             reverse: reverse,
             controller: controller,
             slivers: <Widget>[
+              ...precedingSlivers,
               SliverMainAxisGroup(slivers: slivers),
               ...otherSlivers,
             ],
