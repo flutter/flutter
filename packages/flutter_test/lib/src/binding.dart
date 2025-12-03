@@ -22,6 +22,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
 import 'package:flutter/src/widgets/_window.dart';
 import 'package:flutter/src/widgets/_window_positioner.dart';
 import 'package:flutter/widgets.dart';
@@ -897,7 +898,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       binding.setupHttpOverrides();
     }
     _testTextInput = TestTextInput(onCleared: _resetFocusedEditable);
-    windowingOwner = _TestWindowingOwner(platformDispatcher: platformDispatcher);
+
+    if (isWindowingEnabled) {
+      windowingOwner = _TestWindowingOwner(platformDispatcher: platformDispatcher);
+    }
   }
 
   @override
