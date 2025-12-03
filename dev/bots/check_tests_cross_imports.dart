@@ -356,23 +356,13 @@ class TestsCrossImportChecker {
   static List<File> _getFiles(Directory directory, [Pattern? filenamePattern]) {
     final List<File> files = directory
         .listSync(recursive: true)
-        .map((FileSystemEntity entity) {
-          if (entity is File) {
-            return entity;
-          } else {
-            return null;
-          }
-        })
-        .where((File? file) {
-          if (file == null) {
-            return false;
-          }
+        .whereType<File>()
+        .where((File file) {
           if (filenamePattern == null) {
             return true;
           }
           return file.absolute.path.contains(filenamePattern);
         })
-        .map<File>((File? s) => s!)
         .toList();
     return files;
   }
