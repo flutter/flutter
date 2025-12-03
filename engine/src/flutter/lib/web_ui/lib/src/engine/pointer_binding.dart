@@ -1074,7 +1074,16 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
         // rendered the next input element, leading to the focus incorrectly returning to
         // the main Flutter view instead.
         // A zero-length timer is sufficient in all tested browsers to achieve this.
-        event.preventDefault();
+        //
+        // DON'T prevent default for touch events when embedded in an iframe.
+        // This allows browser's native touch scrolling to work, which provides
+        // smooth momentum scrolling and enables scroll propagation to parent page.
+        // See: https://github.com/flutter/flutter/issues/157435
+        final isTouch = event.pointerType == 'touch';
+        final bool isInIframe = _isEmbeddedInIframe();
+        if (!isTouch || !isInIframe) {
+          event.preventDefault();
+        }
         Timer(Duration.zero, () {
           EnginePlatformDispatcher.instance.requestViewFocusChange(
             viewId: _view.viewId,
