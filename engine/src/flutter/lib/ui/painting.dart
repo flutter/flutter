@@ -2741,6 +2741,79 @@ void decodeImageFromPixels(
   });
 }
 
+/// Decodes the given [pixels] into an [Image] synchronously.
+///
+/// The [pixels] are expected to be in the format specified by [format].
+///
+/// The [width] and [height] arguments specify the dimensions of the image.
+///
+/// The [rowBytes] argument specifies the number of bytes per row in the
+/// [pixels] buffer. If it is not provided, it is calculated from the [width]
+/// and [format].
+///
+/// The [targetWidth] and [targetHeight] arguments specify the expected
+/// dimensions of the output image. If they are not provided, the image is
+/// decoded at its full size.
+///
+/// The [allowUpscaling] argument specifies whether the image should be
+/// upscaled if the [targetWidth] or [targetHeight] are larger than the
+/// intrinsic dimensions of the image.
+///
+/// The [targetFormat] argument specifies the desired pixel format of the
+/// output image.
+///
+/// This function returns an [Image] immediately. The image might not be
+/// fully decoded yet, but it can be drawn to a [Canvas].
+Image decodeImageFromPixelsSync(
+  Uint8List pixels,
+  int width,
+  int height,
+  PixelFormat format, {
+  int? rowBytes,
+  int? targetWidth,
+  int? targetHeight,
+  bool allowUpscaling = true,
+  TargetPixelFormat targetFormat = TargetPixelFormat.dontCare,
+}) {
+  if (targetWidth != null) {
+    assert(allowUpscaling || targetWidth <= width);
+  }
+  if (targetHeight != null) {
+    assert(allowUpscaling || targetHeight <= height);
+  }
+
+  Image image = Image._(_Image._(), targetWidth ?? width, targetHeight ?? height);
+  _decodeImageFromPixelsSync(
+    pixels,
+    width,
+    height,
+    format.index,
+    rowBytes ?? 0,
+    targetWidth ?? 0,
+    targetHeight ?? 0,
+    allowUpscaling,
+    targetFormat.index,
+    image._image,
+  );
+  return image;
+}
+
+@Native<Void Function(Handle, Int32, Int32, Int32, Int32, Int32, Int32, Bool, Int32, Handle)>(
+  symbol: 'Image::decodeImageFromPixelsSync',
+)
+external void _decodeImageFromPixelsSync(
+  Uint8List pixels,
+  int width,
+  int height,
+  int format,
+  int rowBytes,
+  int targetWidth,
+  int targetHeight,
+  bool allowUpscaling,
+  int targetFormat,
+  _Image outImage,
+);
+
 /// Determines the winding rule that decides how the interior of a [Path] is
 /// calculated.
 ///
