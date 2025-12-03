@@ -63,7 +63,7 @@ class _CpuSdfCanvasState extends State<CpuSdfCanvas> {
         double y = i.toDouble();
         x -= width / 2.0;
         y -= height / 2.0;
-        final double length = sqrt(x * x + y * y) - radius;
+        final double length = sqrt(x * x + y * y);
         final int idx = i * width * 4 + j * 4;
         floats[idx + 0] = length - radius;
         floats[idx + 1] = 0.0;
@@ -98,7 +98,7 @@ class _CpuSdfCanvasState extends State<CpuSdfCanvas> {
         double y = i.toDouble();
         x -= width / 2.0;
         y -= height / 2.0;
-        final double length = sqrt(x * x + y * y) - radius;
+        final double length = sqrt(x * x + y * y);
         final int idx = i * width + j;
         floats[idx] = length - radius;
       }
