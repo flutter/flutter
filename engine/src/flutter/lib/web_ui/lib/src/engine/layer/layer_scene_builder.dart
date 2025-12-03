@@ -102,6 +102,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
 
   @override
   LayerScene build() {
+    // TODO(hterkelsen): dispose this SceneBuilder after `build` is called.
     return LayerScene(rootLayer);
   }
 

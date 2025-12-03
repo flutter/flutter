@@ -21,9 +21,11 @@ void setUpRenderingForTests() {
     if (_sceneToRender != null) {
       EnginePlatformDispatcher.instance
           .render(_sceneToRender!)
-          .then<void>((_) {
+          .whenComplete(() {
             _sceneToRender?.dispose();
             _sceneToRender = null;
+          })
+          .then<void>((_) {
             _sceneCompleter?.complete();
           })
           .catchError((Object error) {
