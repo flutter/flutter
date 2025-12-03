@@ -4334,7 +4334,7 @@ abstract class ImageFilter {
 
   /// Creates an image filter from a [FragmentShader].
   ///
-  ////// > [!WARNING]
+  /// > [!WARNING]
   /// > This API is only supported when using the Impeller rendering engine.
   /// > On other backends, an [UnsupportedError] will be thrown.
   ///
