@@ -70,7 +70,6 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     // can be disposed.
     final LayerPicture clonedPicture = (picture as LayerPicture).clone();
     currentLayer.add(PictureLayer(clonedPicture, offset, isComplexHint, willChangeHint));
-    rootLayer.clonedPictures.add(clonedPicture);
   }
 
   @override

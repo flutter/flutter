@@ -29,8 +29,6 @@ void setUpRenderingForTests() {
             _sceneCompleter?.complete();
           })
           .catchError((Object error) {
-            _sceneToRender?.dispose();
-            _sceneToRender = null;
             _sceneCompleter?.completeError(error);
           });
     }
