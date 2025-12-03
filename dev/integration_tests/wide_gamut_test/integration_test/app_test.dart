@@ -59,7 +59,7 @@ List<double> _deepRed = <double>[1.0931, -0.2268, -0.1501];
   final byteData = ByteData.sublistView(bytes);
   expect(bytes.lengthInBytes, width * height * 8);
   expect(bytes.lengthInBytes, byteData.lengthInBytes);
-  var foundDeepRed = false;
+  var foundColor = false;
   double minDistance = double.infinity;
   var closestColor = <double>[0, 0, 0];
   for (var i = 0; i < bytes.lengthInBytes; i += 8) {
@@ -70,7 +70,7 @@ List<double> _deepRed = <double>[1.0931, -0.2268, -0.1501];
     if (_isAlmost(red, color[0], epsilon) &&
         _isAlmost(green, color[1], epsilon) &&
         _isAlmost(blue, color[2], epsilon)) {
-      foundDeepRed = true;
+      foundColor = true;
     }
     final double currentDistance = _distanceSquared(red, green, blue, color);
     if (currentDistance < minDistance) {
@@ -78,7 +78,7 @@ List<double> _deepRed = <double>[1.0931, -0.2268, -0.1501];
       closestColor = <double>[red, green, blue];
     }
   }
-  return (foundDeepRed, closestColor);
+  return (foundColor, closestColor);
 }
 
 (bool, List<double>) _findBGRA10Color(
@@ -93,7 +93,7 @@ List<double> _deepRed = <double>[1.0931, -0.2268, -0.1501];
   expect(bytes.lengthInBytes, byteData.lengthInBytes);
   var foundDeepRed = false;
   double minDistance = double.infinity;
-  var closestColor = <double>[0, 0, 0];
+  var foundColor = <double>[0, 0, 0];
   for (var i = 0; i < bytes.lengthInBytes; i += 8) {
     final int pixel = byteData.getUint64(i, Endian.host);
     final double blue = _decodeBGR10((pixel >> 6) & 0x3ff);
@@ -107,10 +107,10 @@ List<double> _deepRed = <double>[1.0931, -0.2268, -0.1501];
     final double currentDistance = _distanceSquared(red, green, blue, color);
     if (currentDistance < minDistance) {
       minDistance = currentDistance;
-      closestColor = <double>[red, green, blue];
+      foundColor = <double>[red, green, blue];
     }
   }
-  return (foundDeepRed, closestColor);
+  return (foundDeepRed, foundColor);
 }
 
 (bool, List<double>) _findBGR10Color(
@@ -123,7 +123,7 @@ List<double> _deepRed = <double>[1.0931, -0.2268, -0.1501];
   final byteData = ByteData.sublistView(bytes);
   expect(bytes.lengthInBytes, width * height * 4);
   expect(bytes.lengthInBytes, byteData.lengthInBytes);
-  var foundDeepRed = false;
+  var foundColor = false;
   double minDistance = double.infinity;
   var closestColor = <double>[0, 0, 0];
   for (var i = 0; i < bytes.lengthInBytes; i += 4) {
@@ -134,7 +134,7 @@ List<double> _deepRed = <double>[1.0931, -0.2268, -0.1501];
     if (_isAlmost(red, color[0], epsilon) &&
         _isAlmost(green, color[1], epsilon) &&
         _isAlmost(blue, color[2], epsilon)) {
-      foundDeepRed = true;
+      foundColor = true;
     }
     final double currentDistance = _distanceSquared(red, green, blue, color);
     if (currentDistance < minDistance) {
@@ -142,7 +142,7 @@ List<double> _deepRed = <double>[1.0931, -0.2268, -0.1501];
       closestColor = <double>[red, green, blue];
     }
   }
-  return (foundDeepRed, closestColor);
+  return (foundColor, closestColor);
 }
 
 (bool, List<double>) _findColor(
@@ -187,7 +187,7 @@ class _HasColor extends Matcher {
 
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    final (found, closest) = _findColor(
+    final (bool found, List<double> closest) = _findColor(
       item as List<dynamic>,
       color,
       epsilon: epsilon,
