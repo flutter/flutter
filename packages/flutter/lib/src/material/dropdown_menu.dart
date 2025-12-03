@@ -786,7 +786,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
   double? getWidth(GlobalKey key) {
     final BuildContext? context = key.currentContext;
     if (context != null) {
-      final RenderBox box = context.findRenderObject()! as RenderBox;
+      final box = context.findRenderObject()! as RenderBox;
       return box.hasSize ? box.size.width : null;
     }
     return null;
@@ -842,8 +842,8 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
     bool? useMaterial3,
   }) {
     final double effectiveInputStartGap = useMaterial3 ?? false ? _kInputStartGap : 0.0;
-    final List<Widget> result = <Widget>[];
-    for (int i = 0; i < filteredEntries.length; i++) {
+    final result = <Widget>[];
+    for (var i = 0; i < filteredEntries.length; i++) {
       final DropdownMenuEntry<T> entry = filteredEntries[i];
 
       // By default, when the text field has a leading icon but a menu entry doesn't
@@ -925,48 +925,50 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
         );
       }
 
-      final Widget menuItemButton = ExcludeSemantics(
-        excluding: excludeSemantics,
-        child: MenuItemButton(
-          key: enableScrollToHighlight ? buttonItemKeys[i] : null,
-          style: effectiveStyle,
-          leadingIcon: entry.leadingIcon,
-          trailingIcon: entry.trailingIcon,
-          closeOnActivate: widget.closeBehavior == DropdownMenuCloseBehavior.all,
-          onPressed: entry.enabled && widget.enabled
-              ? () {
-                  if (!mounted) {
-                    // In some cases (e.g., nested menus), calling onSelected from MenuAnchor inside a postFrameCallback
-                    // can result in the MenuItemButton's onPressed callback being triggered after the state has been disposed.
-                    // TODO(ahmedrasar): MenuAnchor should avoid calling onSelected inside a postFrameCallback.
-                    widget.controller?.value = TextEditingValue(
+      final Widget menuItemButton = ExcludeFocus(
+        child: ExcludeSemantics(
+          excluding: excludeSemantics,
+          child: MenuItemButton(
+            key: enableScrollToHighlight ? buttonItemKeys[i] : null,
+            style: effectiveStyle,
+            leadingIcon: entry.leadingIcon,
+            trailingIcon: entry.trailingIcon,
+            closeOnActivate: widget.closeBehavior == DropdownMenuCloseBehavior.all,
+            onPressed: entry.enabled && widget.enabled
+                ? () {
+                    if (!mounted) {
+                      // In some cases (e.g., nested menus), calling onSelected from MenuAnchor inside a postFrameCallback
+                      // can result in the MenuItemButton's onPressed callback being triggered after the state has been disposed.
+                      // TODO(ahmedrasar): MenuAnchor should avoid calling onSelected inside a postFrameCallback.
+                      widget.controller?.value = TextEditingValue(
+                        text: entry.label,
+                        selection: TextSelection.collapsed(offset: entry.label.length),
+                      );
+                      widget.onSelected?.call(entry.value);
+                      return;
+                    }
+                    _effectiveTextEditingController.value = TextEditingValue(
                       text: entry.label,
                       selection: TextSelection.collapsed(offset: entry.label.length),
                     );
+                    currentHighlight = widget.enableSearch ? i : null;
                     widget.onSelected?.call(entry.value);
-                    return;
+                    _enableFilter = false;
+                    if (widget.closeBehavior == DropdownMenuCloseBehavior.self) {
+                      _controller.close();
+                    }
                   }
-                  _effectiveTextEditingController.value = TextEditingValue(
-                    text: entry.label,
-                    selection: TextSelection.collapsed(offset: entry.label.length),
-                  );
-                  currentHighlight = widget.enableSearch ? i : null;
-                  widget.onSelected?.call(entry.value);
-                  _enableFilter = false;
-                  if (widget.closeBehavior == DropdownMenuCloseBehavior.self) {
-                    _controller.close();
-                  }
-                }
-              : null,
-          requestFocusOnHover: false,
-          // MenuItemButton implementation is based on M3 spec for menu which specifies a
-          // horizontal padding of 12 pixels.
-          // In the context of DropdownMenu the M3 spec specifies that the menu item and the text
-          // field content should be aligned. The text field has a horizontal padding of 16 pixels.
-          // To conform with the 16 pixels padding, a 4 pixels padding is added in front of the item label.
-          child: Padding(
-            padding: EdgeInsetsDirectional.only(start: effectiveInputStartGap),
-            child: label,
+                : null,
+            requestFocusOnHover: false,
+            // MenuItemButton implementation is based on M3 spec for menu which specifies a
+            // horizontal padding of 12 pixels.
+            // In the context of DropdownMenu the M3 spec specifies that the menu item and the text
+            // field content should be aligned. The text field has a horizontal padding of 16 pixels.
+            // To conform with the 16 pixels padding, a 4 pixels padding is added in front of the item label.
+            child: Padding(
+              padding: EdgeInsetsDirectional.only(start: effectiveInputStartGap),
+              child: label,
+            ),
           ),
         ),
       );
@@ -1034,7 +1036,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
     setState(() {});
   }
 
-  void _handleEditingComplete() {
+  void _handleSubmitted() {
     if (currentHighlight != null) {
       final DropdownMenuEntry<T> entry = filteredEntries[currentHighlight!];
       if (entry.enabled) {
@@ -1216,7 +1218,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
               cursorHeight: widget.cursorHeight,
               style: effectiveTextStyle,
               controller: _effectiveTextEditingController,
-              onEditingComplete: _handleEditingComplete,
+              onSubmitted: (_) => _handleSubmitted(),
               onTap: !widget.enabled
                   ? null
                   : () {
@@ -1237,6 +1239,11 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
           ),
         );
 
+        // The label used in _DropdownMenuBody to compute the preferred width.
+        final Widget? effectiveLabel =
+            effectiveDecoration.label ??
+            (effectiveDecoration.labelText != null ? Text(effectiveDecoration.labelText!) : null);
+
         // If [expandedInsets] is not null, the width of the text field should depend
         // on its parent width. So we don't need to use `_DropdownMenuBody` to
         // calculate the children's width.
@@ -1256,15 +1263,13 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
                 // impact on the total width.
                 children: <Widget>[
                   textField,
-                  ..._initialMenu!.map(
-                    (Widget item) => ExcludeFocus(excluding: !controller.isOpen, child: item),
-                  ),
-                  if (widget.label != null)
+                  ..._initialMenu!,
+                  if (effectiveLabel != null)
                     ExcludeSemantics(
                       child: Padding(
                         // See RenderEditable.floatingCursorAddedMargin for the default horizontal padding.
                         padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: DefaultTextStyle(style: effectiveTextStyle!, child: widget.label!),
+                        child: DefaultTextStyle(style: effectiveTextStyle!, child: effectiveLabel),
                       ),
                     ),
                   effectiveDecoration.suffixIcon ?? const SizedBox.shrink(),
@@ -1325,7 +1330,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
       actions: <Type, Action<Intent>>{
         _ArrowUpIntent: CallbackAction<_ArrowUpIntent>(onInvoke: handleUpKeyInvoke),
         _ArrowDownIntent: CallbackAction<_ArrowDownIntent>(onInvoke: handleDownKeyInvoke),
-        _EnterIntent: CallbackAction<_EnterIntent>(onInvoke: (_) => _handleEditingComplete()),
+        _EnterIntent: CallbackAction<_EnterIntent>(onInvoke: (_) => _handleSubmitted()),
         DismissIntent: DismissMenuAction(controller: _controller),
       },
       child: Stack(
@@ -1454,13 +1459,13 @@ class _RenderDropdownMenuBody extends RenderBox
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
-    double maxWidth = 0.0;
+    var maxWidth = 0.0;
     double? maxHeight;
     RenderBox? child = firstChild;
 
     final double intrinsicWidth = width ?? getMaxIntrinsicWidth(constraints.maxHeight);
     final double widthConstraint = math.min(intrinsicWidth, constraints.maxWidth);
-    final BoxConstraints innerConstraints = BoxConstraints(
+    final innerConstraints = BoxConstraints(
       maxWidth: widthConstraint,
       maxHeight: getMaxIntrinsicHeight(widthConstraint),
     );
@@ -1468,15 +1473,13 @@ class _RenderDropdownMenuBody extends RenderBox
       if (child == firstChild) {
         child.layout(innerConstraints, parentUsesSize: true);
         maxHeight ??= child.size.height;
-        final _DropdownMenuBodyParentData childParentData =
-            child.parentData! as _DropdownMenuBodyParentData;
+        final childParentData = child.parentData! as _DropdownMenuBodyParentData;
         assert(child.parentData == childParentData);
         child = childParentData.nextSibling;
         continue;
       }
       child.layout(innerConstraints, parentUsesSize: true);
-      final _DropdownMenuBodyParentData childParentData =
-          child.parentData! as _DropdownMenuBodyParentData;
+      final childParentData = child.parentData! as _DropdownMenuBodyParentData;
       childParentData.offset = Offset.zero;
       maxWidth = math.max(maxWidth, child.size.width);
       maxHeight ??= child.size.height;
@@ -1493,20 +1496,19 @@ class _RenderDropdownMenuBody extends RenderBox
   void paint(PaintingContext context, Offset offset) {
     final RenderBox? child = firstChild;
     if (child != null) {
-      final _DropdownMenuBodyParentData childParentData =
-          child.parentData! as _DropdownMenuBodyParentData;
+      final childParentData = child.parentData! as _DropdownMenuBodyParentData;
       context.paintChild(child, offset + childParentData.offset);
     }
   }
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    double maxWidth = 0.0;
+    var maxWidth = 0.0;
     double? maxHeight;
     RenderBox? child = firstChild;
     final double intrinsicWidth = width ?? getMaxIntrinsicWidth(constraints.maxHeight);
     final double widthConstraint = math.min(intrinsicWidth, constraints.maxWidth);
-    final BoxConstraints innerConstraints = BoxConstraints(
+    final innerConstraints = BoxConstraints(
       maxWidth: widthConstraint,
       maxHeight: getMaxIntrinsicHeight(widthConstraint),
     );
@@ -1520,8 +1522,7 @@ class _RenderDropdownMenuBody extends RenderBox
         maxWidth = math.max(maxWidth, childSize.width);
       }
 
-      final _DropdownMenuBodyParentData childParentData =
-          child.parentData! as _DropdownMenuBodyParentData;
+      final childParentData = child.parentData! as _DropdownMenuBodyParentData;
       maxHeight ??= childSize.height;
       child = childParentData.nextSibling;
     }
@@ -1537,8 +1538,7 @@ class _RenderDropdownMenuBody extends RenderBox
     double width = 0;
     while (child != null) {
       if (child == firstChild) {
-        final _DropdownMenuBodyParentData childParentData =
-            child.parentData! as _DropdownMenuBodyParentData;
+        final childParentData = child.parentData! as _DropdownMenuBodyParentData;
         child = childParentData.nextSibling;
         continue;
       }
@@ -1552,8 +1552,7 @@ class _RenderDropdownMenuBody extends RenderBox
         width += minIntrinsicWidth;
       }
       width = math.max(width, minIntrinsicWidth);
-      final _DropdownMenuBodyParentData childParentData =
-          child.parentData! as _DropdownMenuBodyParentData;
+      final childParentData = child.parentData! as _DropdownMenuBodyParentData;
       child = childParentData.nextSibling;
     }
 
@@ -1566,8 +1565,7 @@ class _RenderDropdownMenuBody extends RenderBox
     double width = 0;
     while (child != null) {
       if (child == firstChild) {
-        final _DropdownMenuBodyParentData childParentData =
-            child.parentData! as _DropdownMenuBodyParentData;
+        final childParentData = child.parentData! as _DropdownMenuBodyParentData;
         child = childParentData.nextSibling;
         continue;
       }
@@ -1581,8 +1579,7 @@ class _RenderDropdownMenuBody extends RenderBox
         width += maxIntrinsicWidth;
       }
       width = math.max(width, maxIntrinsicWidth);
-      final _DropdownMenuBodyParentData childParentData =
-          child.parentData! as _DropdownMenuBodyParentData;
+      final childParentData = child.parentData! as _DropdownMenuBodyParentData;
       child = childParentData.nextSibling;
     }
 
@@ -1613,8 +1610,7 @@ class _RenderDropdownMenuBody extends RenderBox
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     final RenderBox? child = firstChild;
     if (child != null) {
-      final _DropdownMenuBodyParentData childParentData =
-          child.parentData! as _DropdownMenuBodyParentData;
+      final childParentData = child.parentData! as _DropdownMenuBodyParentData;
       final bool isHit = result.addWithPaintOffset(
         offset: childParentData.offset,
         position: position,
@@ -1634,7 +1630,7 @@ class _RenderDropdownMenuBody extends RenderBox
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
     visitChildren((RenderObject renderObjectChild) {
-      final RenderBox child = renderObjectChild as RenderBox;
+      final child = renderObjectChild as RenderBox;
       if (child == firstChild) {
         visitor(renderObjectChild);
       }

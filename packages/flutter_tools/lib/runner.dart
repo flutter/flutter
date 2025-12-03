@@ -46,6 +46,9 @@ Future<int> run(
     args.removeWhere((String option) => option == '-vv' || option == '-v' || option == '--verbose');
   }
 
+  // Reset this on each run to ensure we don't leak state across tests.
+  _alreadyHandlingToolError = null;
+
   final bool usingLocalEngine = args.any((a) => a.startsWith('--local-engine'));
 
   return runInContext<int>(() async {
@@ -149,7 +152,38 @@ Future<int> run(
   }, overrides: overrides);
 }
 
+/// Track if we're actively processing an error so we don't try and process
+/// additional asynchronous exceptions while we're trying to shut down.
+///
+/// NOTE: This state is cleared at the beginning of [run] to ensure state
+/// doesn't leak when running tests.
+Future<int>? _alreadyHandlingToolError;
+
 Future<int> _handleToolError(
+  Object error,
+  StackTrace? stackTrace,
+  bool verbose,
+  List<String> args,
+  bool reportCrashes,
+  String Function() getFlutterVersion,
+  ShutdownHooks shutdownHooks, {
+  required bool usingLocalEngine,
+  required FeatureFlags featureFlags,
+}) async {
+  return _alreadyHandlingToolError ??= _handleToolErrorImpl(
+    error,
+    stackTrace,
+    verbose,
+    args,
+    reportCrashes,
+    getFlutterVersion,
+    shutdownHooks,
+    usingLocalEngine: usingLocalEngine,
+    featureFlags: featureFlags,
+  );
+}
+
+Future<int> _handleToolErrorImpl(
   Object error,
   StackTrace? stackTrace,
   bool verbose,

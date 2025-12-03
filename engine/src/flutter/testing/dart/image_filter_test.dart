@@ -93,8 +93,8 @@ const List<double> halvesBrightnessColorMatrix = <double>[
 
 void main() async {
   Future<Uint32List> getBytesForPaint(Paint paint, {int width = 3, int height = 3}) async {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas recorderCanvas = Canvas(recorder);
+    final recorder = PictureRecorder();
+    final recorderCanvas = Canvas(recorder);
     recorderCanvas.drawRect(const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0), paint);
     final Picture picture = recorder.endRecording();
     final Image image = await picture.toImage(width, height);
@@ -105,8 +105,8 @@ void main() async {
   }
 
   Future<Uint32List> getBytesForColorPaint(Paint paint, {int width = 1, int height = 1}) async {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas recorderCanvas = Canvas(recorder);
+    final recorder = PictureRecorder();
+    final recorderCanvas = Canvas(recorder);
     recorderCanvas.drawPaint(paint);
     final Picture picture = recorder.endRecording();
     final Image image = await picture.toImage(width, height);
@@ -196,8 +196,8 @@ void main() async {
   }
 
   void checkEquality(List<ImageFilter> a, List<ImageFilter> b) {
-    for (int i = 0; i < a.length; i++) {
-      for (int j = 0; j < a.length; j++) {
+    for (var i = 0; i < a.length; i++) {
+      for (var j = 0; j < a.length; j++) {
         if (i == j) {
           expect(a[i], equals(b[j]));
           expect(a[i].hashCode, equals(b[j].hashCode));
@@ -248,7 +248,7 @@ void main() async {
       print('Disabled - see https://github.com/flutter/flutter/issues/135712');
       return;
     }
-    final Paint paint = Paint()
+    final paint = Paint()
       ..color = green
       ..imageFilter = makeBlur(1.0, 1.0, TileMode.decal);
 
@@ -257,7 +257,7 @@ void main() async {
   });
 
   test('ImageFilter - blur toString', () async {
-    var filter = makeBlur(1.9, 2.1);
+    ImageFilter filter = makeBlur(1.9, 2.1);
     expect(filter.toString(), 'ImageFilter.blur(1.9, 2.1, unspecified)');
 
     filter = makeBlur(1.9, 2.1, TileMode.decal);
@@ -274,7 +274,7 @@ void main() async {
   });
 
   test('ImageFilter - dilate', () async {
-    final Paint paint = Paint()
+    final paint = Paint()
       ..color = green
       ..imageFilter = makeDilate(1.0, 1.0);
 
@@ -283,7 +283,7 @@ void main() async {
   });
 
   test('ImageFilter - erode', () async {
-    final Paint paint = Paint()
+    final paint = Paint()
       ..color = green
       ..imageFilter = makeErode(1.0, 1.0);
 
@@ -297,7 +297,7 @@ void main() async {
       return;
     }
 
-    final Paint paint = Paint()
+    final paint = Paint()
       ..color = green
       ..imageFilter = makeScale(2.0, 2.0, 1.5, 1.5);
 
@@ -306,7 +306,7 @@ void main() async {
   });
 
   test('ImageFilter - matrix: copies the list', () async {
-    final Float64List matrix = Float64List.fromList(<double>[
+    final matrix = Float64List.fromList(<double>[
       1.0,
       0.0,
       0.0,
@@ -325,8 +325,8 @@ void main() async {
       1.0,
     ]);
 
-    final ImageFilter filter = ImageFilter.matrix(matrix);
-    final String originalDescription = filter.toString();
+    final filter = ImageFilter.matrix(matrix);
+    final originalDescription = filter.toString();
 
     // Modify the matrix.
     matrix[0] = 12345;
@@ -343,7 +343,7 @@ void main() async {
       return;
     }
 
-    final Paint paint = Paint()
+    final paint = Paint()
       ..color = green
       ..imageFilter = const ColorFilter.matrix(constValueColorMatrix);
 
@@ -357,17 +357,17 @@ void main() async {
       return;
     }
 
-    final ImageFilter compOrder1 = ImageFilter.compose(
+    final compOrder1 = ImageFilter.compose(
       outer: const ColorFilter.matrix(halvesBrightnessColorMatrix),
       inner: const ColorFilter.matrix(constValueColorMatrix),
     );
 
-    final ImageFilter compOrder2 = ImageFilter.compose(
+    final compOrder2 = ImageFilter.compose(
       outer: const ColorFilter.matrix(constValueColorMatrix),
       inner: const ColorFilter.matrix(halvesBrightnessColorMatrix),
     );
 
-    final Paint paint = Paint()
+    final paint = Paint()
       ..color = green
       ..imageFilter = compOrder1;
 
@@ -415,8 +415,8 @@ void main() async {
   group('ImageFilter|FilterQuality', () {
     /// Draw a red-green checkerboard pattern with 1x1 squares (pixels).
     Future<Image> drawCheckerboard({int width = 100, int height = 100}) async {
-      final Completer<Image> completer = Completer<Image>();
-      final Uint32List pixels = Uint32List.fromList(
+      final completer = Completer<Image>();
+      final pixels = Uint32List.fromList(
         List<int>.generate(width * height, (int index) {
           final int x = index % width;
           final int y = index ~/ width;
@@ -443,12 +443,12 @@ void main() async {
       double factorUp = 10,
     }) async {
       Future<Image> scale(Image image, double factor) async {
-        final Paint paint = Paint()..filterQuality = quality;
-        final PictureRecorder recorder = PictureRecorder();
-        final Canvas canvas = Canvas(recorder);
+        final paint = Paint()..filterQuality = quality;
+        final recorder = PictureRecorder();
+        final canvas = Canvas(recorder);
 
-        final Rect input = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
-        final Rect output = Rect.fromLTWH(0, 0, input.width * factor, input.height * factor);
+        final input = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
+        final output = Rect.fromLTWH(0, 0, input.width * factor, input.height * factor);
 
         canvas.drawImageRect(image, input, output, paint);
         final Picture picture = recorder.endRecording();

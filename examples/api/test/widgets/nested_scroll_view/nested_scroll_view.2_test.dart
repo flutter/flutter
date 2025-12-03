@@ -9,14 +9,18 @@ import 'package:flutter_api_samples/widgets/nested_scroll_view/nested_scroll_vie
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Hides app bar after scrolling past first item', (WidgetTester tester) async {
+  testWidgets('Hides app bar after scrolling past first item', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.NestedScrollViewExampleApp());
     expect(find.text('Snapping Nested SliverAppBar'), findsOneWidget);
     expect(find.byType(NestedScrollView), findsOneWidget);
     expect(find.text('Item 0'), findsOneWidget);
 
     while (find.text('Item 0').evaluate().isNotEmpty) {
-      await tester.sendEventToBinding(const PointerScrollEvent(scrollDelta: Offset(0.0, 1.0)));
+      await tester.sendEventToBinding(
+        const PointerScrollEvent(scrollDelta: Offset(0.0, 1.0)),
+      );
       await tester.pump();
     }
 
