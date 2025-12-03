@@ -61,7 +61,7 @@ List<double> _deepRed = <double>[1.0931, -0.2268, -0.1501];
   expect(bytes.lengthInBytes, byteData.lengthInBytes);
   var foundDeepRed = false;
   double minDistance = double.infinity;
-  List<double> closestColor = <double>[0, 0, 0];
+  var closestColor = <double>[0, 0, 0];
   for (var i = 0; i < bytes.lengthInBytes; i += 8) {
     final int pixel = byteData.getUint64(i, Endian.host);
     final double blue = _decodeHalf((pixel >> 32) & 0xffff);
@@ -93,7 +93,7 @@ List<double> _deepRed = <double>[1.0931, -0.2268, -0.1501];
   expect(bytes.lengthInBytes, byteData.lengthInBytes);
   var foundDeepRed = false;
   double minDistance = double.infinity;
-  List<double> closestColor = <double>[0, 0, 0];
+  var closestColor = <double>[0, 0, 0];
   for (var i = 0; i < bytes.lengthInBytes; i += 8) {
     final int pixel = byteData.getUint64(i, Endian.host);
     final double blue = _decodeBGR10((pixel >> 6) & 0x3ff);
@@ -125,7 +125,7 @@ List<double> _deepRed = <double>[1.0931, -0.2268, -0.1501];
   expect(bytes.lengthInBytes, byteData.lengthInBytes);
   var foundDeepRed = false;
   double minDistance = double.infinity;
-  List<double> closestColor = <double>[0, 0, 0];
+  var closestColor = <double>[0, 0, 0];
   for (var i = 0; i < bytes.lengthInBytes; i += 4) {
     final int pixel = byteData.getUint32(i, Endian.host);
     final double blue = _decodeBGR10(pixel & 0x3ff);
@@ -208,7 +208,7 @@ class _HasColor extends Matcher {
     Map<dynamic, dynamic> matchState,
     bool verbose,
   ) {
-    final closest = matchState['closest'];
+    final closest = matchState['closest'] as List<double>;
     return mismatchDescription.add('closest color to $color was $closest');
   }
 }
@@ -240,7 +240,7 @@ void main() {
       const channel = MethodChannel('flutter/screenshot');
       final result = await channel.invokeMethod('test') as List<Object?>;
       expect(result, isNot(_HasColor(_deepRed)));
-      expect(result, isNot(_HasColor(<double>[0.0, 1.0, 0.0])));
+      expect(result, isNot(const _HasColor(<double>[0.0, 1.0, 0.0])));
     });
     testWidgets('p3 deepest red with blur', (WidgetTester tester) async {
       app.run(app.Setup.blur);
@@ -249,7 +249,7 @@ void main() {
       const channel = MethodChannel('flutter/screenshot');
       final result = await channel.invokeMethod('test') as List<Object?>;
       expect(result, _HasColor(_deepRed));
-      expect(result, _HasColor(<double>[0.0, 1.0, 0.0]));
+      expect(result, const _HasColor(<double>[0.0, 1.0, 0.0]));
     });
     testWidgets('draw image with wide gamut works', (
       WidgetTester tester,
@@ -259,7 +259,7 @@ void main() {
 
       const channel = MethodChannel('flutter/screenshot');
       final result = await channel.invokeMethod('test') as List<Object?>;
-      expect(result, _HasColor(<double>[0.0, 1.0, 0.0]));
+      expect(result, const _HasColor(<double>[0.0, 1.0, 0.0]));
     });
     testWidgets('draw container with wide gamut works', (
       WidgetTester tester,
