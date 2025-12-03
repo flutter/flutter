@@ -406,7 +406,7 @@ class ClickDebouncer {
     // It's only interesting to debounce clicks when both `pointerdown` and
     // `pointerup` land on the same element.
     if (event.type == 'pointerup') {
-      final targetChanged = event.target != state.target;
+      final bool targetChanged = event.target != state.target;
       if (targetChanged) {
         _flush();
       }
@@ -442,7 +442,7 @@ class ClickDebouncer {
     final DebounceState state = _state!;
     state.timer.cancel();
 
-    final aggregateData = <ui.PointerData>[];
+    final List<ui.PointerData> aggregateData = <ui.PointerData>[];
     for (final QueuedEvent queuedEvent in state.queue) {
       if (queuedEvent.event.type == 'pointerup') {
         _lastSentPointerUpTimeStamp = queuedEvent.timeStamp;
@@ -456,9 +456,9 @@ class ClickDebouncer {
   }
 
   void _sendToFramework(DomEvent? event, List<ui.PointerData> data) {
-    final packet = ui.PointerDataPacket(data: data.toList());
+    final ui.PointerDataPacket packet = ui.PointerDataPacket(data: data.toList());
     if (_debugLogFlutterEvents) {
-      for (final datum in data) {
+      for (final ui.PointerData datum in data) {
         print('fw:${datum.change}    ${datum.physicalX},${datum.physicalY}');
       }
     }
@@ -511,11 +511,11 @@ class Listener {
     if (passive == null) {
       target.addEventListener(event, jsHandler);
     } else {
-      final eventOptions = <String, Object>{'passive': passive};
+      final Map<String, Object> eventOptions = <String, Object>{'passive': passive};
       target.addEventListener(event, jsHandler, eventOptions.toJSAnyDeep);
     }
 
-    final listener = Listener._(event: event, target: target, handler: jsHandler);
+    final Listener listener = Listener._(event: event, target: target, handler: jsHandler);
 
     return listener;
   }
@@ -545,15 +545,16 @@ abstract class _BaseAdapter {
   final List<Listener> _listeners = <Listener>[];
   DomWheelEvent? _lastWheelEvent;
   bool _lastWheelEventWasTrackpad = false;
-
-  /// Two flags to track scroll handling for the two-flag system:
-  /// 1. _lastWheelEventAllowedDefault: true if a scrollable is at boundary
-  /// 2. _lastWheelEventHandledByWidget: true if a scrollable consumed the event
-  ///
-  /// This enables proper handling of nested scrollables:
-  /// - If inner scrollable handles the event, don't scroll parent page
-  /// - If all scrollables are at boundary, scroll parent page
   bool _lastWheelEventAllowedDefault = false;
+
+  // Tracking for HTML platform view scroll direction
+  int _lastHtmlScrollDirection = 0; // 1 = down, -1 = up, 0 = none
+
+  /// Tracks whether a widget explicitly handled the wheel event.
+  /// This is set to true when respond(allowPlatformDefault: false) is called.
+  /// Used to prevent parent page scrolling when a nested scrollable handles
+  /// the event, even if an outer scrollable at boundary says allowPlatformDefault: true.
+  /// (GitHub Issue #156985 - nested scrollables case)
   bool _lastWheelEventHandledByWidget = false;
 
   DomElement get _viewTarget => _view.dom.rootElement;
@@ -581,7 +582,7 @@ abstract class _BaseAdapter {
     void loggedHandler(DomEvent event) {
       if (_debugLogPointerEvents) {
         if (event.isA<DomPointerEvent>()) {
-          final pointerEvent = event as DomPointerEvent;
+          final DomPointerEvent pointerEvent = event as DomPointerEvent;
           final ui.Offset offset = computeEventOffsetToTarget(event, _view);
           print(
             '${pointerEvent.type}    '
@@ -614,37 +615,6 @@ abstract class _BaseAdapter {
 
 mixin _WheelEventListenerMixin on _BaseAdapter {
   static double? _defaultScrollLineHeight;
-
-  /// Cached result of iframe detection.
-  static bool? _cachedIsInIframe;
-
-  /// Check if Flutter is embedded inside an iframe.
-  ///
-  /// Used to determine whether to prevent scroll chaining to the parent page.
-  /// When in an iframe, we always preventDefault() to block native scroll
-  /// bubbling, and use postMessage to explicitly scroll the parent when needed.
-  bool _isEmbeddedInIframe() {
-    if (_cachedIsInIframe != null) {
-      return _cachedIsInIframe!;
-    }
-
-    try {
-      // If window.parent is the same object as window, we're not in an iframe.
-      // If they're different, we're in an iframe.
-      final DomWindow? parent = domWindow.parent;
-      if (parent == null) {
-        _cachedIsInIframe = false;
-        return false;
-      }
-      // Use identical() to check if parent and window are the same object
-      _cachedIsInIframe = !identical(parent, domWindow);
-      return _cachedIsInIframe!;
-    } catch (e) {
-      // Cross-origin iframe - assume embedded
-      _cachedIsInIframe = true;
-      return true;
-    }
-  }
 
   bool _isAcceleratedMouseWheelDelta(num delta, num? wheelDelta) {
     // On macOS, scrolling using a mouse wheel by default uses an acceleration
@@ -712,9 +682,9 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
   }
 
   List<ui.PointerData> _convertWheelEventToPointerData(DomWheelEvent event) {
-    const domDeltaPixel = 0x00;
-    const domDeltaLine = 0x01;
-    const domDeltaPage = 0x02;
+    const int domDeltaPixel = 0x00;
+    const int domDeltaLine = 0x01;
+    const int domDeltaPage = 0x02;
 
     ui.PointerDeviceKind kind = ui.PointerDeviceKind.mouse;
     int deviceId = _mouseDeviceId;
@@ -746,9 +716,9 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
         break;
     }
 
-    final data = <ui.PointerData>[];
+    final List<ui.PointerData> data = <ui.PointerData>[];
     final ui.Offset offset = computeEventOffsetToTarget(event, _view);
-    var ignoreCtrlKey = false;
+    bool ignoreCtrlKey = false;
     if (ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs) {
       ignoreCtrlKey =
           (_keyboardConverter?.keyIsPressed(kPhysicalControlLeft) ?? false) ||
@@ -787,12 +757,16 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
         scrollDeltaX: deltaX,
         scrollDeltaY: deltaY,
         onRespond: ({bool allowPlatformDefault = false}) {
-          // Track both: platform default and widget handling
+          // Track both: whether any widget allows default, and whether any widget
+          // explicitly handled the event.
+          // GitHub Issue #156985: With nested scrollables, an inner scrollable may
+          // handle the scroll (respond false) while an outer scrollable at boundary
+          // allows platform default (respond true). The handler takes precedence.
           if (allowPlatformDefault) {
-            // Widget is at boundary, wants platform to handle
             _lastWheelEventAllowedDefault = true;
           } else {
-            // Widget explicitly handled this event
+            // A widget explicitly handled this event - take precedence over any
+            // "allow platform default" responses from other widgets.
             _lastWheelEventHandledByWidget = true;
           }
         },
@@ -818,43 +792,245 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
     }
 
     assert(event.isA<DomWheelEvent>());
+    final DomWheelEvent wheelEvent = event as DomWheelEvent;
     if (_debugLogPointerEvents) {
       print(event.type);
+    }
+
+    // Check if the event target is inside a platform view with regular HTML content
+    // (not a cross-origin iframe). If so, check if the HTML element can scroll.
+    final _HtmlScrollableInfo? htmlScrollInfo = _getHtmlScrollableInfo(event);
+    if (htmlScrollInfo != null) {
+      final double currentScrollTop = htmlScrollInfo.scrollableElement.scrollTop;
+      final int currentDirection = wheelEvent.deltaY > 0 ? 1 : (wheelEvent.deltaY < 0 ? -1 : 0);
+
+      print(
+        '[HTML_SCROLL] Event over HTML, deltaY=${wheelEvent.deltaY}, scrollTop=$currentScrollTop, lastDir=$_lastHtmlScrollDirection, curDir=$currentDirection',
+      );
+
+      // We're over a regular HTML element in a platform view.
+      // Check if it can scroll in the direction of the wheel event.
+      final bool canScrollInDirection = _canHtmlElementScroll(
+        htmlScrollInfo.scrollableElement,
+        wheelEvent.deltaX,
+        wheelEvent.deltaY,
+      );
+
+      print('[HTML_SCROLL] canScrollInDirection=$canScrollInDirection');
+
+      if (canScrollInDirection) {
+        // The HTML element can scroll in this direction.
+        // We need to programmatically scroll the HTML element because Flutter's
+        // event listener captures wheel events at the glass pane level, preventing
+        // them from naturally propagating to the HTML element.
+        final DomElement scrollable = htmlScrollInfo.scrollableElement;
+        scrollable.scrollTop = scrollable.scrollTop + wheelEvent.deltaY;
+
+        final double newScrollTop = scrollable.scrollTop;
+        print('[HTML_SCROLL] Programmatically scrolled HTML: $currentScrollTop -> $newScrollTop');
+
+        // Update tracking
+        _lastHtmlScrollDirection = currentDirection;
+
+        // Prevent default and stop - we handled the scroll
+        event.preventDefault();
+        return;
+      } else {
+        // At boundary - let Flutter handle it
+        print('[HTML_SCROLL] HTML at boundary, dispatching to Flutter');
+        _lastHtmlScrollDirection = currentDirection;
+        // Fall through to Flutter handling
+      }
+    } else {
+      // Not over HTML platform view - keep _lastHtmlScrollDirection unchanged
+      // to handle direction transitions when the user scrolls back into the HTML element.
     }
 
     // Reset flags before dispatching to framework
     _lastWheelEventAllowedDefault = false;
     _lastWheelEventHandledByWidget = false;
-
-    final wheelEvent = event as DomWheelEvent;
-
-    // Dispatch to framework (this triggers onRespond callbacks synchronously)
+    // [ui.PointerData] can set these flags via the `respond` callback.
+    // See the implementation of `onRespond` when creating the PointerData above.
     _callback(event, _convertWheelEventToPointerData(wheelEvent));
-
-    // Determine if we should prevent default and/or scroll parent
+    // This works because the `_callback` is handled synchronously in the
+    // framework, so it's able to modify the flags.
+    //
+    // GitHub Issue #156985: When Flutter is embedded in an iframe, ALWAYS call
+    // preventDefault() to prevent scroll events from bubbling to the parent page.
+    // Without this, scroll chaining causes the parent page to scroll when the
+    // Flutter content is at its scroll boundary.
+    //
+    // We detect iframe embedding by checking if window.parent !== window.
+    // If we want to explicitly scroll the parent (Issue #157435), we do that
+    // via postMessage, not by allowing platform default.
     final bool isInIframe = _isEmbeddedInIframe();
-
-    if (isInIframe) {
-      // In an iframe: always prevent default to block native scroll chaining.
-      // This prevents both the iframe and parent from scrolling simultaneously.
+    if (!_lastWheelEventAllowedDefault || isInIframe) {
       event.preventDefault();
+    }
 
-      // Only scroll parent when ALL scrollables are at boundary.
-      // IMPORTANT: Only scroll parent if:
-      // 1. Some widget wants to allow platform default (at boundary)
-      // 2. NO widget explicitly handled the event (nested scrollables case)
-      //
-      // This fixes GitHub issue #156985
-      final bool shouldScrollParent =
-          _lastWheelEventAllowedDefault && !_lastWheelEventHandledByWidget;
-      if (shouldScrollParent) {
-        scrollParentWindow(wheelEvent.deltaX, wheelEvent.deltaY);
+    // GitHub Issue #156985 + #157435: When Flutter is at boundary in an iframe,
+    // we've prevented the native scroll chaining above, but we still want to
+    // scroll the parent page. Do this explicitly via postMessage.
+    //
+    // IMPORTANT: Only scroll parent if:
+    // 1. We're in an iframe
+    // 2. Some widget wants to allow platform default (at boundary)
+    // 3. NO widget explicitly handled the event (nested scrollables case)
+    final bool shouldScrollParent =
+        isInIframe && _lastWheelEventAllowedDefault && !_lastWheelEventHandledByWidget;
+    if (shouldScrollParent) {
+      // All Flutter scrollables are at boundary - scroll the parent.
+      scrollParentWindow(wheelEvent.deltaX, wheelEvent.deltaY);
+    }
+  }
+
+  /// Information about a scrollable HTML element inside a platform view.
+  _HtmlScrollableInfo? _getHtmlScrollableInfo(DomEvent event) {
+    DomElement? target = event.target as DomElement?;
+    if (target == null) {
+      return null;
+    }
+
+    // Walk up the DOM tree to find the scrollable element and platform view
+    DomElement? scrollableElement;
+    DomElement? current = target;
+
+    while (current != null) {
+      final String tagName = current.tagName.toLowerCase();
+
+      // Check if this element is scrollable
+      if (scrollableElement == null) {
+        final String overflow = current.style.overflow;
+        final String overflowY = current.style.overflowY;
+        if (overflow == 'auto' ||
+            overflow == 'scroll' ||
+            overflowY == 'auto' ||
+            overflowY == 'scroll') {
+          scrollableElement = current;
+        }
       }
-    } else {
-      // Not in an iframe: use original behavior
-      if (!_lastWheelEventAllowedDefault) {
-        event.preventDefault();
+
+      // Check if we've reached the flt-platform-view wrapper
+      if (tagName == 'flt-platform-view') {
+        // Found a platform view - check if its first child is a cross-origin iframe
+        final DomElement? content = current.firstElementChild;
+        if (content == null) {
+          return null;
+        }
+
+        // If the content is an iframe, we have the wheel overlay handling it
+        if (content.tagName.toLowerCase() == 'iframe') {
+          return null;
+        }
+
+        // It's a regular HTML element - return the scrollable info
+        // Use the scrollable element we found, or the content itself
+        return _HtmlScrollableInfo(scrollableElement: scrollableElement ?? content);
       }
+
+      // Stop searching if we've exited the flutter-view
+      if (tagName == 'flutter-view') {
+        break;
+      }
+
+      current = current.parentElement;
+    }
+
+    return null;
+  }
+
+  /// Checks if an HTML element can scroll in the given direction.
+  /// Returns true if the element can handle the scroll, false if it's at boundary.
+  bool _canHtmlElementScroll(DomElement element, num deltaX, num deltaY) {
+    final double scrollTop = element.scrollTop;
+    final double scrollLeft = element.scrollLeft;
+    final double scrollHeight = element.scrollHeight;
+    final double scrollWidth = element.scrollWidth;
+    final double clientHeight = element.clientHeight;
+    final double clientWidth = element.clientWidth;
+
+    // Check if the element is actually scrollable (has overflow content)
+    final bool hasVerticalOverflow = scrollHeight > clientHeight + 1;
+    final bool hasHorizontalOverflow = scrollWidth > clientWidth + 1;
+
+    print(
+      '[HTML_SCROLL] scrollTop=$scrollTop, scrollHeight=$scrollHeight, clientHeight=$clientHeight, deltaY=$deltaY',
+    );
+    print(
+      '[HTML_SCROLL] hasVerticalOverflow=$hasVerticalOverflow, hasHorizontalOverflow=$hasHorizontalOverflow',
+    );
+
+    // Check vertical scrolling
+    if (deltaY != 0 && hasVerticalOverflow) {
+      if (deltaY > 0) {
+        // Scrolling down - can scroll if not at bottom
+        final bool canScrollDown = scrollTop + clientHeight < scrollHeight - 1;
+        print('[HTML_SCROLL] Scrolling DOWN, canScrollDown=$canScrollDown');
+        if (canScrollDown) {
+          return true;
+        }
+      } else {
+        // Scrolling up - can scroll if not at top
+        final bool canScrollUp = scrollTop > 1;
+        print('[HTML_SCROLL] Scrolling UP, canScrollUp=$canScrollUp');
+        if (canScrollUp) {
+          return true;
+        }
+      }
+    }
+
+    // Check horizontal scrolling
+    if (deltaX != 0 && hasHorizontalOverflow) {
+      if (deltaX > 0) {
+        // Scrolling right - can scroll if not at right edge
+        if (scrollLeft + clientWidth < scrollWidth - 1) {
+          return true;
+        }
+      } else {
+        // Scrolling left - can scroll if not at left edge
+        if (scrollLeft > 1) {
+          return true;
+        }
+      }
+    }
+
+    print('[HTML_SCROLL] At boundary, letting Flutter handle');
+    // Element is at boundary in the scroll direction
+    return false;
+  }
+
+  /// Returns true if Flutter is embedded inside an iframe.
+  ///
+  /// This is detected by checking if window.parent is different from window.
+  /// Used to determine whether to always preventDefault on wheel events to
+  /// prevent scroll chaining to the parent page (GitHub Issue #156985).
+  static bool? _cachedIsInIframe;
+  bool _isEmbeddedInIframe() {
+    // Cache the result since this check is called for every wheel event
+    if (_cachedIsInIframe != null) {
+      return _cachedIsInIframe!;
+    }
+
+    try {
+      // If window.parent is the same object as window, we're not in an iframe.
+      // If they're different, we're in an iframe.
+      // Note: Accessing window.parent properties may throw in cross-origin scenarios,
+      // so we wrap in try-catch. If it throws, we assume we're in a cross-origin
+      // iframe and should prevent default.
+      final DomWindow? parent = domWindow.parent;
+      if (parent == null) {
+        _cachedIsInIframe = false;
+        return false;
+      }
+      // Use Dart's identical() to check if parent and window are the same object.
+      // In a top-level window, window.parent === window.
+      // In an iframe, window.parent is the parent window (different object).
+      _cachedIsInIframe = !identical(parent, domWindow);
+      return _cachedIsInIframe!;
+    } catch (e) {
+      // Cross-origin iframe - assume we're embedded and should prevent default
+      _cachedIsInIframe = true;
+      return true;
     }
   }
 
@@ -863,7 +1039,7 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
   ///
   /// Use Firefox to test this code path.
   double _computeDefaultScrollLineHeight() {
-    const kFallbackFontHeight = 16.0;
+    const double kFallbackFontHeight = 16.0;
     final DomHTMLDivElement probe = createDomHTMLDivElement();
     probe.style
       ..fontSize = 'initial'
@@ -889,6 +1065,17 @@ class _SanitizedDetails {
 
   @override
   String toString() => '$runtimeType(change: $change, buttons: $buttons)';
+}
+
+/// Information about a scrollable HTML element inside a platform view.
+/// Used to determine if wheel events should be handled by the HTML element
+/// or passed to Flutter.
+@immutable
+class _HtmlScrollableInfo {
+  const _HtmlScrollableInfo({required this.scrollableElement});
+
+  /// The scrollable HTML element (has overflow: auto/scroll).
+  final DomElement scrollableElement;
 }
 
 class _ButtonSanitizer {
@@ -1031,7 +1218,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     bool checkModifiers = true,
   }) {
     addEventListener(target, eventName, (DomEvent event) {
-      final pointerEvent = event as DomPointerEvent;
+      final DomPointerEvent pointerEvent = event as DomPointerEvent;
       if (checkModifiers) {
         _checkModifiersState(event);
       }
@@ -1053,7 +1240,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
   void setup() {
     _addPointerEventListener(_viewTarget, 'pointerdown', (DomPointerEvent event) {
       final int device = _getPointerId(event);
-      final pointerData = <ui.PointerData>[];
+      final List<ui.PointerData> pointerData = <ui.PointerData>[];
       final _ButtonSanitizer sanitizer = _ensureSanitizer(device);
       final _SanitizedDetails? up = sanitizer.sanitizeMissingRightClickUp(
         buttons: event.buttons!.toInt(),
@@ -1074,7 +1261,16 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
         // rendered the next input element, leading to the focus incorrectly returning to
         // the main Flutter view instead.
         // A zero-length timer is sufficient in all tested browsers to achieve this.
-        event.preventDefault();
+        //
+        // IMPORTANT: For touch events, we DON'T call preventDefault() to allow browser
+        // scrolling to work. This fixes GitHub issues:
+        // - #157435: Flutter Web embed mode not scrolling the hosting page (touch)
+        // - #156985: Scroll events bubble to parent page (touch component)
+        // The trade-off is that focus transitions on touch might be slightly less smooth,
+        // but browser scrolling is more important for mobile UX.
+        if (event.pointerType != 'touch') {
+          event.preventDefault();
+        }
         Timer(Duration.zero, () {
           EnginePlatformDispatcher.instance.requestViewFocusChange(
             viewId: _view.viewId,
@@ -1099,11 +1295,43 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     // TODO(dkwingsmt): Investigate whether we can configure the behavior for
     // `_viewTarget`. https://github.com/flutter/flutter/issues/157968
     _addPointerEventListener(_globalTarget, 'pointermove', (DomPointerEvent moveEvent) {
+      // For touch events over a regular HTML platform view that can scroll,
+      // check if we should skip dispatching to Flutter.
+      if (moveEvent.pointerType == 'touch') {
+        final _HtmlScrollableInfo? htmlScrollInfo = _getHtmlScrollableInfo(moveEvent);
+        if (htmlScrollInfo != null) {
+          // We're over a regular HTML element in a platform view.
+          // Check if the HTML element can scroll in the direction of the touch.
+          final DomElement scrollable = htmlScrollInfo.scrollableElement;
+          final double scrollTop = scrollable.scrollTop;
+          final double scrollHeight = scrollable.scrollHeight;
+          final double clientHeight = scrollable.clientHeight.toDouble();
+          final double maxScroll = scrollHeight - clientHeight;
+
+          // Check if at boundary
+          final bool atTop = scrollTop <= 1;
+          final bool atBottom = scrollTop >= maxScroll - 1;
+
+          print(
+            '[TOUCH_POINTER] scrollTop=$scrollTop, maxScroll=$maxScroll, atTop=$atTop, atBottom=$atBottom',
+          );
+
+          if (!atTop && !atBottom) {
+            // HTML element is not at a boundary - let browser handle it
+            print('[TOUCH_POINTER] Skipping - HTML can scroll');
+            return;
+          }
+
+          // At a boundary - dispatch to Flutter so it can scroll the parent page
+          print('[TOUCH_POINTER] At boundary - dispatching to Flutter');
+        }
+      }
+
       final int device = _getPointerId(moveEvent);
       final _ButtonSanitizer sanitizer = _ensureSanitizer(device);
-      final pointerData = <ui.PointerData>[];
+      final List<ui.PointerData> pointerData = <ui.PointerData>[];
       final List<DomPointerEvent> expandedEvents = _expandEvents(moveEvent);
-      for (final event in expandedEvents) {
+      for (final DomPointerEvent event in expandedEvents) {
         final _SanitizedDetails? up = sanitizer.sanitizeMissingRightClickUp(
           buttons: event.buttons!.toInt(),
         );
@@ -1131,7 +1359,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     _addPointerEventListener(_viewTarget, 'pointerleave', (DomPointerEvent event) {
       final int device = _getPointerId(event);
       final _ButtonSanitizer sanitizer = _ensureSanitizer(device);
-      final pointerData = <ui.PointerData>[];
+      final List<ui.PointerData> pointerData = <ui.PointerData>[];
       final _SanitizedDetails? details = sanitizer.sanitizeLeaveEvent(
         buttons: event.buttons!.toInt(),
       );
@@ -1145,7 +1373,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     _addPointerEventListener(_globalTarget, 'pointerup', (DomPointerEvent event) {
       final int device = _getPointerId(event);
       if (_hasSanitizer(device)) {
-        final pointerData = <ui.PointerData>[];
+        final List<ui.PointerData> pointerData = <ui.PointerData>[];
         final _SanitizedDetails? details = _getSanitizer(
           device,
         ).sanitizeUpEvent(buttons: event.buttons?.toInt());
@@ -1164,7 +1392,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     _addPointerEventListener(_viewTarget, 'pointercancel', (DomPointerEvent event) {
       final int device = _getPointerId(event);
       if (_hasSanitizer(device)) {
-        final pointerData = <ui.PointerData>[];
+        final List<ui.PointerData> pointerData = <ui.PointerData>[];
         final _SanitizedDetails details = _getSanitizer(device).sanitizeCancelEvent();
         _removePointerIfUnhoverable(event);
         _convertEventsToPointerData(data: pointerData, event: event, details: details);
