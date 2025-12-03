@@ -145,36 +145,14 @@ List<double> _deepRed = <double>[1.0931, -0.2268, -0.1501];
   return (foundColor, closestColor);
 }
 
-(bool, List<double>) _findColor(
-  List<dynamic> result,
-  List<double> color, {
-  double epsilon = 0.01,
-}) {
+(bool, List<double>) _findColor(List<dynamic> result, List<double> color, {double epsilon = 0.01}) {
   expect(result, isNotNull);
   expect(result.length, 4);
   final [int width, int height, String format, Uint8List bytes] = result;
   return switch (format) {
-    'MTLPixelFormatBGR10_XR' => _findBGR10Color(
-      bytes,
-      width,
-      height,
-      color,
-      epsilon: epsilon,
-    ),
-    'MTLPixelFormatBGRA10_XR' => _findBGRA10Color(
-      bytes,
-      width,
-      height,
-      color,
-      epsilon: epsilon,
-    ),
-    'MTLPixelFormatRGBA16Float' => _findRGBAF16Color(
-      bytes,
-      width,
-      height,
-      color,
-      epsilon: epsilon,
-    ),
+    'MTLPixelFormatBGR10_XR' => _findBGR10Color(bytes, width, height, color, epsilon: epsilon),
+    'MTLPixelFormatBGRA10_XR' => _findBGRA10Color(bytes, width, height, color, epsilon: epsilon),
+    'MTLPixelFormatRGBA16Float' => _findRGBAF16Color(bytes, width, height, color, epsilon: epsilon),
     _ => fail('Unsupported pixel format: $format'),
   };
 }
@@ -251,9 +229,7 @@ void main() {
       expect(result, _HasColor(_deepRed));
       expect(result, const _HasColor(<double>[0.0, 1.0, 0.0]));
     });
-    testWidgets('draw image with wide gamut works', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('draw image with wide gamut works', (WidgetTester tester) async {
       app.run(app.Setup.drawnImage);
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
@@ -261,9 +237,7 @@ void main() {
       final result = await channel.invokeMethod('test') as List<Object?>;
       expect(result, const _HasColor(<double>[0.0, 1.0, 0.0]));
     });
-    testWidgets('draw container with wide gamut works', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('draw container with wide gamut works', (WidgetTester tester) async {
       app.run(app.Setup.container);
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
@@ -272,9 +246,7 @@ void main() {
       expect(result, _HasColor(_deepRed));
     });
 
-    testWidgets('draw wide gamut linear gradient works', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('draw wide gamut linear gradient works', (WidgetTester tester) async {
       app.run(app.Setup.linearGradient);
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
@@ -283,9 +255,7 @@ void main() {
       expect(result, _HasColor(_deepRed));
     });
 
-    testWidgets('draw wide gamut radial gradient works', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('draw wide gamut radial gradient works', (WidgetTester tester) async {
       app.run(app.Setup.radialGradient);
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
@@ -294,9 +264,7 @@ void main() {
       expect(result, _HasColor(_deepRed, epsilon: 0.05));
     });
 
-    testWidgets('draw wide gamut conical gradient works', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('draw wide gamut conical gradient works', (WidgetTester tester) async {
       app.run(app.Setup.conicalGradient);
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
@@ -305,9 +273,7 @@ void main() {
       expect(result, _HasColor(_deepRed, epsilon: 0.05));
     });
 
-    testWidgets('draw wide gamut sweep gradient works', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('draw wide gamut sweep gradient works', (WidgetTester tester) async {
       app.run(app.Setup.sweepGradient);
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
