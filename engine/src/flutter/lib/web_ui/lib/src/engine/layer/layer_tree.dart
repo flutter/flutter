@@ -70,13 +70,6 @@ class LayerTree {
     }
     return recorder.endRecording();
   }
-
-  void dispose() {
-    for (final LayerPicture picture in rootLayer.clonedPictures) {
-      picture.dispose();
-    }
-    rootLayer.clonedPictures.clear();
-  }
 }
 
 /// A single frame to be rendered.

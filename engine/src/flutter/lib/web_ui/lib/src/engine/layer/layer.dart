@@ -23,9 +23,7 @@ abstract class Layer implements ui.EngineLayer {
   R accept<R>(LayerVisitor<R> visitor);
 
   @override
-  void dispose() {
-    // This is a no-op for all Layer types except PictureLayer.
-  }
+  void dispose() {}
 }
 
 /// A layer that contains child layers.
@@ -41,6 +39,18 @@ abstract class ContainerLayer extends Layer {
   void add(Layer child) {
     child.parent = this;
     children.add(child);
+  }
+
+  @override
+  void dispose() {
+    // Dispose of any picture layers that we own. Picture layers cannot be
+    // retained between frames so this ContainerLayer is the only owner.
+    // Therefore, we dispose of them here.
+    for (final Layer child in children) {
+      if (child is PictureLayer) {
+        child.dispose();
+      }
+    }
   }
 }
 

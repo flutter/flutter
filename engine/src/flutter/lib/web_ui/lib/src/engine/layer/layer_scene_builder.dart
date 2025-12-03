@@ -23,7 +23,7 @@ class LayerScene implements ui.Scene {
 
   @override
   void dispose() {
-    layerTree.dispose();
+    layerTree.rootLayer.dispose();
   }
 
   @override
