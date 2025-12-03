@@ -1094,7 +1094,7 @@ void main() {
   testWidgets(
     'Form with AutovalidateMode.onUserInteractionIfError only revalidates when user interacts after an error exists',
     (WidgetTester tester) async {
-      final GlobalKey<FormState> formState = GlobalKey<FormState>();
+      final formState = GlobalKey<FormState>();
       String? errorText(String? value) => (value == null || value.isEmpty) ? 'Required' : null;
 
       Widget builder() {
