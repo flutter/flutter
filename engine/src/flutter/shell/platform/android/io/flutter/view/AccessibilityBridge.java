@@ -310,8 +310,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   private boolean isReleased = false;
 
   // Handler for all messages received from Flutter via the {@code accessibilityChannel}
-  @VisibleForTesting
-  public final AccessibilityChannel.AccessibilityMessageHandler accessibilityMessageHandler =
+  final AccessibilityChannel.AccessibilityMessageHandler accessibilityMessageHandler =
       new AccessibilityChannel.AccessibilityMessageHandler() {
         /** The Dart application would like the given {@code message} to be announced. */
         @Override

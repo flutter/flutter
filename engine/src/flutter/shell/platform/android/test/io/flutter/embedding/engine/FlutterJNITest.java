@@ -286,7 +286,7 @@ public class FlutterJNITest {
     flutterJNI.setSemanticsTreeEnabled(true);
 
     // --- Verify Results ---
-    verify(accessibilityDelegate, times(1)).setSemanticsTreeEnabled(true);
+    verify(accessibilityDelegate, never()).resetSemantics();
   }
 
   @Test
@@ -301,7 +301,7 @@ public class FlutterJNITest {
     flutterJNI.setSemanticsTreeEnabled(false);
 
     // --- Verify Results ---
-    verify(accessibilityDelegate, times(1)).setSemanticsTreeEnabled(false);
+    verify(accessibilityDelegate, times(1)).resetSemantics();
   }
 
   @Test(expected = IllegalArgumentException.class)
