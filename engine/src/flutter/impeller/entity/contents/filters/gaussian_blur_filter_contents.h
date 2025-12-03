@@ -53,7 +53,6 @@ GaussianBlurPipeline::FragmentShader::KernelSamples LerpHackKernelSamples(
 /// Performs a bidirectional Gaussian blur.
 ///
 /// This is accomplished by rendering multiple passes in multiple directions.
-/// Note: This will replace `DirectionalGaussianBlurFilterContents`.
 class GaussianBlurFilterContents final : public FilterContents {
  public:
   explicit GaussianBlurFilterContents(Scalar sigma_x,

@@ -4262,6 +4262,27 @@ abstract class ImageFilter {
   ImageFilter._(); // ignore: unused_element
 
   /// Creates an image filter that applies a Gaussian blur.
+  ///
+  /// The `sigma_x` and `sigma_y` are the standard deviation of the Gaussian
+  /// kernel in the X direction and the Y direction, respectively.
+  ///
+  /// The `tile_mode` defines the behavior of sampling pixels at the edges when
+  /// performing a standard, unbounded blur.
+  ///
+  /// The `bounds` argument is optional and enables "bounded blur" mode.
+  ///
+  /// When `bounds` is null (the default), a standard Gaussian blur is applied
+  /// and edge sampling behavior is determined by `tileMode`.
+  ///
+  /// When `bounds` is non-null, the filter performs a "bounded blur": the blur
+  /// kernel only samples pixels from inside the rectangle, pixels outside the
+  /// rectangle are treated as transparent, and the resulting pixels are
+  /// unpremultiplied to produce opaque output. This mode is used to implement
+  /// iOS-style bounded blurs.
+  ///
+  /// The `bounds` rectangle is specified in the canvas's current coordinate
+  /// space (it is affected by the current transform). Consequently, the bounds
+  /// may not be axis-aligned in canvas coordinates.
   factory ImageFilter.blur({
     double sigmaX = 0.0,
     double sigmaY = 0.0,

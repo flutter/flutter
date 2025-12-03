@@ -446,8 +446,8 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
   // If the texture already had mip levels generated, then we can use the
   // original downsample shader.
   //
-  // This doesn't support bounded blurs, since bounded blurs need to treat
-  // out-of-bounds pixels as transparent.
+  // Bounded blur must not use existing mip levels, since bounded blurs need to
+  // treat out-of-bounds pixels as transparent.
   bool may_reuse_mipmap =
       !pass_args.uv_bounds.has_value() &&
       (pass_args.effective_scalar.x >= 0.5f ||
