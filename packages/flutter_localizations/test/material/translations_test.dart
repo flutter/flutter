@@ -17,7 +17,7 @@ final String rootDirectoryPath = Directory.current.path;
 void main() {
   for (final String language in kMaterialSupportedLanguages) {
     testWidgets('translations exist for $language', (WidgetTester tester) async {
-      final Locale locale = Locale(language);
+      final locale = Locale(language);
 
       expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
 
@@ -119,7 +119,7 @@ void main() {
   }
 
   testWidgets('translations spot check', (WidgetTester tester) async {
-    Locale locale = const Locale.fromSubtags(languageCode: 'zh');
+    var locale = const Locale.fromSubtags(languageCode: 'zh');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
     expect(localizations, isA<MaterialLocalizationZh>());
@@ -134,7 +134,7 @@ void main() {
   });
 
   testWidgets('translations spot check expansionTileExpandedHint', (WidgetTester tester) async {
-    const Locale locale = Locale.fromSubtags(languageCode: 'en');
+    const locale = Locale.fromSubtags(languageCode: 'en');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(
       locale,
@@ -216,7 +216,7 @@ void main() {
   });
 
   testWidgets('Chinese resolution', (WidgetTester tester) async {
-    Locale locale = const Locale.fromSubtags(languageCode: 'zh');
+    var locale = const Locale.fromSubtags(languageCode: 'zh');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
     expect(localizations, isA<MaterialLocalizationZh>());
@@ -308,7 +308,7 @@ void main() {
   });
 
   testWidgets('Serbian resolution', (WidgetTester tester) async {
-    Locale locale = const Locale.fromSubtags(languageCode: 'sr');
+    var locale = const Locale.fromSubtags(languageCode: 'sr');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
     expect(localizations, isA<MaterialLocalizationSr>());
@@ -355,7 +355,7 @@ void main() {
   });
 
   testWidgets('Misc resolution', (WidgetTester tester) async {
-    Locale locale = const Locale.fromSubtags(languageCode: 'en');
+    var locale = const Locale.fromSubtags(languageCode: 'en');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
     expect(localizations, isA<MaterialLocalizationEn>());
@@ -477,7 +477,7 @@ void main() {
   });
 
   testWidgets('Chinese translations spot check', (WidgetTester tester) async {
-    Locale locale = const Locale.fromSubtags(languageCode: 'zh');
+    var locale = const Locale.fromSubtags(languageCode: 'zh');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
     expect(localizations, isA<MaterialLocalizationZh>());
@@ -525,10 +525,9 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/36704.
   testWidgets('kn arb file should be properly Unicode escaped', (WidgetTester tester) async {
-    final File file = File(path.join(rootDirectoryPath, 'lib', 'src', 'l10n', 'material_kn.arb'));
+    final file = File(path.join(rootDirectoryPath, 'lib', 'src', 'l10n', 'material_kn.arb'));
 
-    final Map<String, dynamic> bundle =
-        json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+    final bundle = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
 
     // Encodes the arb resource values if they have not already been
     // encoded.
@@ -551,7 +550,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/110451.
   testWidgets('Finnish translation for tab label', (WidgetTester tester) async {
-    const Locale locale = Locale('fi');
+    const locale = Locale('fi');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(
       locale,
@@ -562,7 +561,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/138728.
   testWidgets('Share button label on Material', (WidgetTester tester) async {
-    const Locale locale = Locale('en');
+    const locale = Locale('en');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(
       locale,
@@ -573,7 +572,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/141764
   testWidgets('zh-CN translation for look up label', (WidgetTester tester) async {
-    const Locale locale = Locale('zh');
+    const locale = Locale('zh');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(
       locale,
@@ -586,7 +585,7 @@ void main() {
   testWidgets('ko-KR translation for cut, copy, paste label in ButtonLabel', (
     WidgetTester tester,
   ) async {
-    const Locale locale = Locale('ko');
+    const locale = Locale('ko');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(
       locale,
@@ -599,7 +598,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/156954
   testWidgets('Italian translation for dateHelpText', (WidgetTester tester) async {
-    const Locale locale = Locale('it');
+    const locale = Locale('it');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(
       locale,
@@ -610,7 +609,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/176677
   testWidgets('Basque translation for timeOfDayFormat', (WidgetTester tester) async {
-    const Locale locale = Locale('eu');
+    const locale = Locale('eu');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(
       locale,

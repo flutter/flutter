@@ -44,12 +44,12 @@ class SkwasmFontCollection implements FlutterFontCollection {
     final Pointer<SkStringHandle> familyPointers = scope
         .allocPointerArray(families.length)
         .cast<SkStringHandle>();
-    for (int i = 0; i < families.length; i++) {
+    for (var i = 0; i < families.length; i++) {
       familyPointers[i] = skStringFromDartString(families[i]);
     }
     textStyleClearFontFamilies(defaultTextStyle.handle);
     textStyleAddFontFamilies(defaultTextStyle.handle, familyPointers, families.length);
-    for (int i = 0; i < families.length; i++) {
+    for (var i = 0; i < families.length; i++) {
       skStringFree(familyPointers[i]);
     }
   });
@@ -65,8 +65,8 @@ class SkwasmFontCollection implements FlutterFontCollection {
 
   @override
   Future<AssetFontsResult> loadAssetFonts(FontManifest manifest) async {
-    final List<Future<void>> fontFutures = <Future<void>>[];
-    final Map<String, FontLoadError> fontFailures = <String, FontLoadError>{};
+    final fontFutures = <Future<void>>[];
+    final fontFailures = <String, FontLoadError>{};
 
     /// We need a default fallback font for Skwasm, in order to avoid crashing
     /// while laying out text with an unregistered font. We chose Roboto to
@@ -77,7 +77,7 @@ class SkwasmFontCollection implements FlutterFontCollection {
       );
     }
 
-    final List<String> loadedFonts = <String>[];
+    final loadedFonts = <String>[];
     for (final FontFamily family in manifest.families) {
       for (final FontAsset fontAsset in family.fontAssets) {
         loadedFonts.add(fontAsset.asset);
@@ -106,20 +106,20 @@ class SkwasmFontCollection implements FlutterFontCollection {
     if (!response.hasPayload) {
       return FontNotFoundError(ui_web.assetManager.getAssetUrl(asset.asset));
     }
-    int length = 0;
-    final List<JSUint8Array> chunks = <JSUint8Array>[];
+    var length = 0;
+    final chunks = <JSUint8Array>[];
     await response.read((JSUint8Array chunk) {
       length += chunk.length;
       chunks.add(chunk);
     });
     final SkDataHandle fontData = skDataCreate(length);
     int dataAddress = skDataGetPointer(fontData).cast<Int8>().address;
-    final JSUint8Array wasmMemory = JSUint8Array(skwasmInstance.wasmMemory.buffer);
-    for (final JSUint8Array chunk in chunks) {
+    final wasmMemory = JSUint8Array(skwasmInstance.wasmMemory.buffer);
+    for (final chunk in chunks) {
       wasmMemory.set(chunk, dataAddress);
       dataAddress += chunk.length;
     }
-    final SkwasmTypeface typeface = SkwasmTypeface(fontData);
+    final typeface = SkwasmTypeface(fontData);
     skDataDispose(fontData);
     if (typeface.handle != nullptr) {
       final SkStringHandle familyNameHandle = skStringFromDartString(family);
@@ -134,21 +134,21 @@ class SkwasmFontCollection implements FlutterFontCollection {
 
   Future<bool> loadFontFromUrl(String familyName, String url) async {
     final HttpFetchResponse response = await httpFetch(url);
-    int length = 0;
-    final List<JSUint8Array> chunks = <JSUint8Array>[];
+    var length = 0;
+    final chunks = <JSUint8Array>[];
     await response.read((JSUint8Array chunk) {
       length += chunk.length;
       chunks.add(chunk);
     });
     final SkDataHandle fontData = skDataCreate(length);
     int dataAddress = skDataGetPointer(fontData).cast<Int8>().address;
-    final JSUint8Array wasmMemory = JSUint8Array(skwasmInstance.wasmMemory.buffer);
-    for (final JSUint8Array chunk in chunks) {
+    final wasmMemory = JSUint8Array(skwasmInstance.wasmMemory.buffer);
+    for (final chunk in chunks) {
       wasmMemory.set(chunk, dataAddress);
       dataAddress += chunk.length;
     }
 
-    final SkwasmTypeface typeface = SkwasmTypeface(fontData);
+    final typeface = SkwasmTypeface(fontData);
     skDataDispose(fontData);
     if (typeface.handle == nullptr) {
       return false;
@@ -164,10 +164,10 @@ class SkwasmFontCollection implements FlutterFontCollection {
   Future<bool> loadFontFromList(Uint8List list, {String? fontFamily}) async {
     final SkDataHandle dataHandle = skDataCreate(list.length);
     final Pointer<Int8> dataPointer = skDataGetPointer(dataHandle).cast<Int8>();
-    for (int i = 0; i < list.length; i++) {
+    for (var i = 0; i < list.length; i++) {
       dataPointer[i] = list[i];
     }
-    final SkwasmTypeface typeface = SkwasmTypeface(dataHandle);
+    final typeface = SkwasmTypeface(dataHandle);
     skDataDispose(dataHandle);
     if (typeface.handle == nullptr) {
       return false;
@@ -211,11 +211,11 @@ class SkwasmFallbackRegistry implements FallbackFontRegistry {
         final Pointer<TypefaceHandle> typefaceBuffer = scope
             .allocPointerArray(typefaces.length)
             .cast<TypefaceHandle>();
-        for (int i = 0; i < typefaces.length; i++) {
+        for (var i = 0; i < typefaces.length; i++) {
           typefaceBuffer[i] = typefaces[i].handle;
         }
         final Pointer<Int32> codePointBuffer = scope.allocInt32Array(codePoints.length);
-        for (int i = 0; i < codePoints.length; i++) {
+        for (var i = 0; i < codePoints.length; i++) {
           codePointBuffer[i] = codePoints[i];
         }
         final int missingCodePointCount = typefacesFilterCoveredCodePoints(

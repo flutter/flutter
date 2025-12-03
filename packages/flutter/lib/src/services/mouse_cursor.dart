@@ -260,7 +260,7 @@ class _DeferringMouseCursor extends MouseCursor {
 
   /// Returns the first cursor that is not a [MouseCursor.defer].
   static MouseCursor? firstNonDeferred(Iterable<MouseCursor> cursors) {
-    for (final MouseCursor cursor in cursors) {
+    for (final cursor in cursors) {
       if (cursor != MouseCursor.defer) {
         return cursor;
       }

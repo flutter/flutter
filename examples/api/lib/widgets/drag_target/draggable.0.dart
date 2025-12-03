@@ -60,14 +60,21 @@ class _DraggableExampleState extends State<DraggableExample> {
           ),
         ),
         DragTarget<int>(
-          builder: (BuildContext context, List<dynamic> accepted, List<dynamic> rejected) {
-            return Container(
-              height: 100.0,
-              width: 100.0,
-              color: Colors.cyan,
-              child: Center(child: Text('Value is updated to: $acceptedData')),
-            );
-          },
+          builder:
+              (
+                BuildContext context,
+                List<dynamic> accepted,
+                List<dynamic> rejected,
+              ) {
+                return Container(
+                  height: 100.0,
+                  width: 100.0,
+                  color: Colors.cyan,
+                  child: Center(
+                    child: Text('Value is updated to: $acceptedData'),
+                  ),
+                );
+              },
           onAcceptWithDetails: (DragTargetDetails<int> details) {
             setState(() {
               acceptedData += details.data;
