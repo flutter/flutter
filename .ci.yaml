@@ -1688,8 +1688,8 @@ targets:
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
           {"dependency": "ninja", "version": "version:1.9.0"}
         ]
-      shard: tool_tests
-      subshard: commands
+      shard: tool_tests_commands
+      subshard: 1_1
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
@@ -4626,8 +4626,8 @@ targets:
           {"dependency": "android_sdk", "version": "version:36v4"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
-      shard: tool_tests
-      subshard: commands
+      shard: tool_tests_commands
+      subshard: 1_1 
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
@@ -4641,8 +4641,8 @@ targets:
           {"dependency": "android_sdk", "version": "version:36v4"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
-      shard: tool_tests
-      subshard: commands
+      shard: tool_tests_commands
+      subshard: 1_1 
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
@@ -6573,8 +6573,8 @@ targets:
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
-      shard: tool_tests
-      subshard: commands_1_2
+      shard: tool_tests_commands
+      subshard: 1_2
       tags: >
         ["framework", "hostonly", "shard", "windows"]
     runIf:
@@ -6597,8 +6597,8 @@ targets:
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
-      shard: tool_tests
-      subshard: commands_2_2
+      shard: tool_tests_commands
+      subshard: 2_2
       tags: >
         ["framework", "hostonly", "shard", "windows"]
     runIf:
