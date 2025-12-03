@@ -4,6 +4,8 @@
 
 // ignore_for_file: invalid_use_of_internal_member
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 // ignore: avoid_relative_lib_imports
@@ -26,7 +28,7 @@ See: https://github.com/flutter/flutter/issues/30701.
 ''';
     // ignore: avoid_print
     print(windowingDisabledErrorMessage);
-    return;
+    exit(0);
   }
 
   testWidgets('Multiple windows smoke test', (WidgetTester tester) async {
