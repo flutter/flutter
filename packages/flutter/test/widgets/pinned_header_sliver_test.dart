@@ -3,7 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'semantics_tester.dart';
 
 void main() {
   testWidgets('PinnedHeaderSliver basics', (WidgetTester tester) async {
@@ -247,5 +250,110 @@ void main() {
     expect(tester.getRect(find.text('PinnedHeaderSliver 0')), rect0);
     expect(tester.getRect(find.text('PinnedHeaderSliver 1')), rect1);
     expect(tester.getRect(find.text('PinnedHeaderSliver 2')), rect2);
+  });
+
+  testWidgets('PinnedHeaderSliver: presence of RenderViewport.excludeFromScrolling tag', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      Semantics(
+        textDirection: TextDirection.ltr,
+        child: Localizations(
+          locale: const Locale('en', 'us'),
+          delegates: const <LocalizationsDelegate<dynamic>>[
+            DefaultWidgetsLocalizations.delegate,
+            DefaultMaterialLocalizations.delegate,
+          ],
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: MediaQuery(
+              data: const MediaQueryData(),
+              child: CustomScrollView(
+                slivers: <Widget>[
+                  const PinnedHeaderSliver(child: Text('PinnedHeaderSliver')),
+                  SliverList.builder(
+                    itemCount: 6,
+                    itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          tags: <SemanticsTag>[
+                            RenderViewport.excludeFromScrolling,
+                            RenderViewport.useTwoPaneSemantics,
+                          ],
+                          label: 'PinnedHeaderSliver',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
+                              label: 'Item 0',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
+                              label: 'Item 1',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
+                              label: 'Item 2',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
+                              label: 'Item 3',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
+                              label: 'Item 4',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
+                              label: 'Item 5',
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreTransform: true,
+        ignoreId: true,
+        ignoreRect: true,
+      ),
+    );
+
+    semantics.dispose();
   });
 }
