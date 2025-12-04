@@ -7,7 +7,6 @@
 #include "flutter/display_list/dl_tile_mode.h"
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/geometry/dl_geometry_types.h"
-#include "flutter/testing/assert_ok.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
 #include "impeller/core/formats.h"
@@ -20,6 +19,7 @@
 #include "impeller/playground/playground.h"
 #include "impeller/playground/widgets.h"
 #include "impeller/renderer/render_target.h"
+#include "third_party/abseil-cpp/absl/status/status_matchers.h"
 
 namespace impeller {
 namespace testing {
@@ -330,7 +330,7 @@ TEST_P(AiksTest, DrawVerticesLinearGradientWithEmptySize) {
 TEST_P(AiksTest, DrawVerticesWithEmptyTextureCoordinates) {
   auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_simple.frag.iplr");
-  ASSERT_OK(runtime_stages_result);
+  ABSL_ASSERT_OK(runtime_stages_result);
   auto runtime_stages = runtime_stages_result.value();
 
   auto runtime_stage =

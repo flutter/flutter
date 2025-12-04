@@ -12,11 +12,11 @@
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_color.h"
 #include "flutter/display_list/dl_paint.h"
-#include "flutter/testing/assert_ok.h"
 #include "flutter/testing/testing.h"
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/display_list/dl_runtime_effect_impeller.h"
+#include "third_party/abseil-cpp/absl/status/status_matchers.h"
 
 namespace impeller {
 namespace testing {
@@ -480,7 +480,7 @@ TEST_P(AiksTest, DrawVerticesTextureCoordinatesWithFragmentShader) {
 
   auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_simple.frag.iplr");
-  ASSERT_OK(runtime_stages_result);
+  ABSL_ASSERT_OK(runtime_stages_result);
   auto runtime_stages = runtime_stages_result.value();
 
   auto runtime_stage =
@@ -531,7 +531,7 @@ TEST_P(AiksTest,
 
   auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_position.frag.iplr");
-  ASSERT_OK(runtime_stages_result);
+  ABSL_ASSERT_OK(runtime_stages_result);
   auto runtime_stages = runtime_stages_result.value();
 
   auto runtime_stage =

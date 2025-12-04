@@ -16,7 +16,6 @@ source_set("testing_lib") {
   testonly = true
 
   sources = [
-    "assert_ok.h",
     "assertions.h",
     "debugger_detection.cc",
     "debugger_detection.h",

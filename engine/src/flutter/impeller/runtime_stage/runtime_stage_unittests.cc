@@ -5,7 +5,6 @@
 #include <future>
 
 #include "flutter/fml/make_copyable.h"
-#include "flutter/testing/assert_ok.h"
 #include "flutter/testing/testing.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -22,6 +21,7 @@
 #include "impeller/runtime_stage/runtime_stage_flatbuffers.h"
 #include "impeller/runtime_stage/runtime_stage_playground.h"
 #include "runtime_stage_types_flatbuffers.h"
+#include "third_party/abseil-cpp/absl/status/status_matchers.h"
 
 namespace impeller {
 namespace testing {
@@ -35,7 +35,7 @@ TEST_P(RuntimeStageTest, CanReadValidBlob) {
   ASSERT_TRUE(fixture);
   ASSERT_GT(fixture->GetSize(), 0u);
   auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
-  ASSERT_OK(stages);
+  ABSL_ASSERT_OK(stages);
   auto stage =
       stages.value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(stage);
@@ -77,7 +77,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
   ASSERT_TRUE(fixture);
   ASSERT_GT(fixture->GetSize(), 0u);
   auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
-  ASSERT_OK(stages);
+  ABSL_ASSERT_OK(stages);
   auto stage =
       stages.value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
 
@@ -257,7 +257,7 @@ TEST_P(RuntimeStageTest, CanReadUniformsSamplerBeforeUBO) {
   ASSERT_TRUE(fixture);
   ASSERT_GT(fixture->GetSize(), 0u);
   auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
-  ASSERT_OK(stages);
+  ABSL_ASSERT_OK(stages);
   auto stage =
       stages.value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
 
@@ -284,7 +284,7 @@ TEST_P(RuntimeStageTest, CanReadUniformsSamplerAfterUBO) {
   ASSERT_TRUE(fixture);
   ASSERT_GT(fixture->GetSize(), 0u);
   auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
-  ASSERT_OK(stages);
+  ABSL_ASSERT_OK(stages);
   auto stage =
       stages.value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
 
@@ -307,7 +307,7 @@ TEST_P(RuntimeStageTest, CanRegisterStage) {
   ASSERT_TRUE(fixture);
   ASSERT_GT(fixture->GetSize(), 0u);
   auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
-  ASSERT_OK(stages);
+  ABSL_ASSERT_OK(stages);
   auto stage =
       stages.value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(stage);
@@ -340,7 +340,7 @@ TEST_P(RuntimeStageTest, CanRegisterStage) {
 
 TEST_P(RuntimeStageTest, CanCreatePipelineFromRuntimeStage) {
   auto stages_result = OpenAssetAsRuntimeStage("ink_sparkle.frag.iplr");
-  ASSERT_OK(stages_result);
+  ABSL_ASSERT_OK(stages_result);
   auto stages = stages_result.value();
   auto stage = stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
 
@@ -385,7 +385,7 @@ TEST_P(RuntimeStageTest, CanCreatePipelineFromRuntimeStage) {
 
 TEST_P(RuntimeStageTest, ContainsExpectedShaderTypes) {
   auto stages_result = OpenAssetAsRuntimeStage("ink_sparkle.frag.iplr");
-  ASSERT_OK(stages_result);
+  ABSL_ASSERT_OK(stages_result);
   auto stages = stages_result.value();
   // Right now, SkSL gets implicitly bundled regardless of what the build rule
   // for this test requested. After

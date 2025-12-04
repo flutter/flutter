@@ -11,7 +11,6 @@
 
 #include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/display_list/testing/dl_test_snippets.h"
-#include "flutter/testing/assert_ok.h"
 #include "fml/logging.h"
 #include "gtest/gtest.h"
 #include "impeller/core/device_buffer.h"
@@ -55,6 +54,7 @@
 #include "impeller/renderer/render_target.h"
 #include "impeller/renderer/testing/mocks.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
+#include "third_party/abseil-cpp/absl/status/status_matchers.h"
 #include "third_party/imgui/imgui.h"
 
 // TODO(zanderso): https://github.com/flutter/flutter/issues/127701
@@ -1755,7 +1755,7 @@ TEST_P(EntityTest, YUVToRGBFilter) {
 TEST_P(EntityTest, RuntimeEffect) {
   auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
-  ASSERT_OK(runtime_stages_result);
+  ABSL_ASSERT_OK(runtime_stages_result);
   auto runtime_stages = runtime_stages_result.value();
   auto runtime_stage =
       runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
@@ -1813,7 +1813,7 @@ TEST_P(EntityTest, RuntimeEffect) {
     // Dirty the runtime stage.
     auto runtime_stages_result =
         OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
-    ASSERT_OK(runtime_stages_result);
+    ABSL_ASSERT_OK(runtime_stages_result);
     runtime_stages = runtime_stages_result.value();
     runtime_stage =
         runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
@@ -1828,7 +1828,7 @@ TEST_P(EntityTest, RuntimeEffect) {
 TEST_P(EntityTest, RuntimeEffectCanSuccessfullyRender) {
   auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
-  ASSERT_OK(runtime_stages_result);
+  ABSL_ASSERT_OK(runtime_stages_result);
   auto runtime_stages = runtime_stages_result.value();
   auto runtime_stage =
       runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
@@ -1877,7 +1877,7 @@ TEST_P(EntityTest, RuntimeEffectCanSuccessfullyRender) {
 TEST_P(EntityTest, RuntimeEffectCanPrecache) {
   auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
-  ASSERT_OK(runtime_stages_result);
+  ABSL_ASSERT_OK(runtime_stages_result);
   auto runtime_stages = runtime_stages_result.value();
   auto runtime_stage =
       runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
@@ -1897,7 +1897,7 @@ TEST_P(EntityTest, RuntimeEffectSetsRightSizeWhenUniformIsStruct) {
 
   auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
-  ASSERT_OK(runtime_stages_result);
+  ABSL_ASSERT_OK(runtime_stages_result);
   auto runtime_stages = runtime_stages_result.value();
   auto runtime_stage =
       runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
