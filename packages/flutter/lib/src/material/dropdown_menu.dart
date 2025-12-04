@@ -519,7 +519,6 @@ class DropdownMenu<T extends Object> extends StatefulWidget {
   /// behaviors are also activated:
   ///
   ///  * Pressing Enter when the menu is closed opens it.
-  ///
   ///  * The decoration reflects the focus state.
   ///
   /// Defaults to false.
