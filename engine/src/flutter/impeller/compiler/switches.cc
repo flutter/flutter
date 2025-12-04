@@ -86,6 +86,9 @@ void Switches::PrintHelp(std::ostream& stream) {
             "ignored for glsl)"
          << std::endl;
   stream << optional_prefix
+         << "--entry-point-prefix=<entry_point_prefix> (default: empty)"
+         << std::endl;
+  stream << optional_prefix
          << "--iplr (causes --sl file to be emitted in "
             "iplr format)"
          << std::endl;
@@ -184,6 +187,8 @@ Switches::Switches(const fml::CommandLine& command_line)
           command_line.GetOptionValueWithDefault("metal-version", "1.2")),
       entry_point(
           command_line.GetOptionValueWithDefault("entry-point", "main")),
+      entry_point_prefix(
+          command_line.GetOptionValueWithDefault("entry-point-prefix", "")),
       use_half_textures(command_line.HasOption("use-half-textures")),
       require_framebuffer_fetch(
           command_line.HasOption("require-framebuffer-fetch")),
@@ -320,8 +325,10 @@ SourceOptions Switches::CreateSourceOptions(
   options.file_name = source_file_name;
   options.include_dirs = include_directories;
   options.defines = defines;
-  options.entry_point_name = EntryPointFunctionNameFromSourceName(
-      source_file_name, options.type, options.source_language, entry_point);
+  options.entry_point_name =
+      entry_point_prefix +
+      EntryPointFunctionNameFromSourceName(
+          source_file_name, options.type, options.source_language, entry_point);
   options.json_format = json_format;
   options.gles_language_version = gles_language_version;
   options.metal_version = metal_version;
