@@ -4919,6 +4919,212 @@ void main() {
     });
   });
 
+  group('DropdownMenu.selectOnly', () {
+    testWidgets('defaults to false on all platforms', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(body: DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren)),
+        ),
+      );
+
+      final DropdownMenu<TestMenu> dropdownMenu = tester.firstWidget(
+        find.byType(DropdownMenu<TestMenu>),
+      );
+      expect(dropdownMenu.selectOnly, false);
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets('when true and requestFocusOnTap is false, makes the text field readOnly', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              selectOnly: true,
+              requestFocusOnTap: false,
+            ),
+          ),
+        ),
+      );
+
+      final TextField textField = tester.firstWidget(find.byType(TextField));
+      expect(textField.readOnly, true);
+    });
+
+    testWidgets('when true and requestFocusOnTap is true, makes the text field readOnly', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              selectOnly: true,
+              requestFocusOnTap: true,
+            ),
+          ),
+        ),
+      );
+
+      final TextField textField = tester.firstWidget(find.byType(TextField));
+      expect(textField.readOnly, true);
+    });
+
+    testWidgets(
+      'when true and requestFocusOnTap is false, disables text field interactive selection',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: DropdownMenu<TestMenu>(
+                dropdownMenuEntries: menuChildren,
+                selectOnly: true,
+                requestFocusOnTap: false,
+              ),
+            ),
+          ),
+        );
+
+        final TextField textField = tester.firstWidget(find.byType(TextField));
+        expect(textField.enableInteractiveSelection, false);
+      },
+    );
+
+    testWidgets(
+      'when true and requestFocusOnTap is true, disables text field interactive selection',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: DropdownMenu<TestMenu>(
+                dropdownMenuEntries: menuChildren,
+                selectOnly: true,
+                requestFocusOnTap: true,
+              ),
+            ),
+          ),
+        );
+
+        final TextField textField = tester.firstWidget(find.byType(TextField));
+        expect(textField.enableInteractiveSelection, false);
+      },
+    );
+
+    testWidgets(
+      'when true and requestFocusOnTap is false, does not make the text field focusable',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: DropdownMenu<TestMenu>(
+                dropdownMenuEntries: menuChildren,
+                selectOnly: true,
+                requestFocusOnTap: false,
+              ),
+            ),
+          ),
+        );
+
+        final EditableText editableText = tester.widget(find.byType(EditableText));
+        expect(editableText.focusNode.hasFocus, false);
+
+        // Open the menu.
+        await tester.tap(find.byType(TextField));
+        await tester.pump();
+
+        expect(editableText.focusNode.hasFocus, false);
+      },
+    );
+
+    testWidgets('when true and requestFocusOnTap is true, makes the text field focusable', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              selectOnly: true,
+              requestFocusOnTap: true,
+            ),
+          ),
+        ),
+      );
+
+      final EditableText editableText = tester.widget(find.byType(EditableText));
+      expect(editableText.focusNode.hasFocus, false);
+
+      // Open the menu.
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+
+      expect(editableText.focusNode.hasFocus, true);
+    });
+
+    testWidgets('when true and the text field is focused, pressing enter opens the menu', (
+      WidgetTester tester,
+    ) async {
+      final menuController = MenuController();
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              menuController: menuController,
+              focusNode: focusNode,
+              dropdownMenuEntries: menuChildren,
+              selectOnly: true,
+            ),
+          ),
+        ),
+      );
+
+      final EditableText editableText = tester.widget(find.byType(EditableText));
+
+      // Focus the dropdownMenu.
+      expect(editableText.focusNode.hasFocus, false);
+      focusNode.requestFocus();
+      await tester.pump();
+      expect(editableText.focusNode.hasFocus, true);
+
+      // Pressing enter opens the menu.
+      expect(menuController.isOpen, false);
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(menuController.isOpen, true);
+    });
+
+    testWidgets('when true, the mouse cursor should be SystemMouseCursors.click when hovered', (
+      WidgetTester tester,
+    ) async {
+      Widget buildDropdownMenu() => MaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: <Widget>[
+              DropdownMenu<TestMenu>(selectOnly: true, dropdownMenuEntries: menuChildren),
+            ],
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(buildDropdownMenu());
+      await tester.pumpAndSettle();
+
+      final TestGesture gesture = await tester.createGesture(
+        kind: PointerDeviceKind.mouse,
+        pointer: 1,
+      );
+      await gesture.moveTo(tester.getCenter(find.byType(TextField)));
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.click,
+      );
+    });
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/174609.
   testWidgets(
     'DropdownMenu keeps the selected item from filtered list after entries list is updated',
