@@ -3551,7 +3551,6 @@ targets:
   - name: Linux_pixel_7pro draw_arcs_all_fill_styles_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3561,7 +3560,6 @@ targets:
   - name: Mac_ios draw_arcs_all_fill_styles_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3571,7 +3569,6 @@ targets:
   - name: Linux_pixel_7pro draw_arcs_all_stroke_styles_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
