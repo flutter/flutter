@@ -346,7 +346,9 @@ class TestsCrossImportChecker {
     final Set<String> testPaths = files.map((File file) {
       final int index = file.absolute.path.indexOf('packages/flutter/test');
       final indexNormalized = index == -1 ? 0 : index;
-      return file.absolute.path.substring(indexNormalized);
+      return file.absolute.path
+          .substring(indexNormalized)
+          .replaceAll('/', Platform.isWindows ? r'\' : '/');
     }).toSet();
     return knownPaths.difference(testPaths);
   }
@@ -354,23 +356,22 @@ class TestsCrossImportChecker {
   /// Returns a list of files in the given directory optionally matching the
   /// given filenamePattern.
   static List<File> _getFiles(Directory directory, [Pattern? filenamePattern]) {
-    final List<File> files = directory
-        .listSync(recursive: true)
-        .whereType<File>()
-        .where((File file) {
-          if (filenamePattern == null) {
-            return true;
-          }
-          return file.absolute.path.contains(filenamePattern);
-        })
-        .toList();
-    return files;
+    return directory.listSync(recursive: true).whereType<File>().where((
+      File file,
+    ) {
+      if (filenamePattern == null) {
+        return true;
+      }
+      return file.absolute.path.contains(filenamePattern);
+    }).toList();
   }
 
   static Set<File> _getUnknowns(Set<File> files, Set<String> knownPaths) {
     return files.where((File file) {
       final int index = file.absolute.path.indexOf('packages/flutter/test');
-      final String comparablePath = file.absolute.path.substring(index == -1 ? 0 : index);
+      final String comparablePath = file.absolute.path
+          .substring(index == -1 ? 0 : index)
+          .replaceAll('/', Platform.isWindows ? r'\' : '/');
       return !knownPaths.contains(comparablePath);
     }).toSet();
   }
