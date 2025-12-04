@@ -344,7 +344,7 @@ class TestsCrossImportChecker {
   /// Returns the Set of paths in `knownPaths` that are not in `files`.
   static Set<String> _differencePaths(Set<String> knownPaths, Set<File> files) {
     final Set<String> testPaths = files.map((File file) {
-      final int index = file.absolute.path.indexOf(RegExp('packages/flutter/test'));
+      final int index = file.absolute.path.indexOf(RegExp('packages.flutter.test'));
       final indexNormalized = index == -1 ? 0 : index;
       return file.absolute.path
           .substring(indexNormalized)
