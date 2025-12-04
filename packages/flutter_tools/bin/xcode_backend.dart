@@ -350,6 +350,7 @@ class Context {
     }
   }
 
+  /// Returns `true` if a directory exists at `FLUTTER_FRAMEWORK_SWIFT_PACKAGE_PATH`.
   bool _usingFlutterFrameworkSwiftPackage() {
     final String? swiftPackagePath = environment['FLUTTER_FRAMEWORK_SWIFT_PACKAGE_PATH'];
     if (swiftPackagePath == null) {
@@ -362,6 +363,10 @@ class Context {
   /// Returns `true` if the Flutter/FlutterMacOS framework Info.plist in [builtProductsDir] and
   /// [targetBuildDir] matches the framework Info.plist from the engine cache for the
   /// corresponding [platform] and [buildMode].
+  ///
+  /// The Info.plist contains the build mode and engine version.
+  ///
+  /// This validation will always fail when using a local engine since the engine version will not match.
   bool _validateFlutterFramework({
     required String buildMode,
     required TargetPlatform platform,
@@ -616,9 +621,6 @@ class Context {
     final String projectPath = environment['FLUTTER_APPLICATION_PATH'] ?? '$sourceRoot/..';
 
     final String buildMode = parseFlutterBuildMode();
-    if (command == 'prepare') {
-      _updateBuildConfigurationForSwiftPackages(buildMode, platform);
-    }
     final List<String> flutterArgs = _generateFlutterArgsForAssemble(
       command: command,
       buildMode: buildMode,
@@ -643,34 +645,6 @@ class Context {
       echoError('Failed to copy Flutter framework.');
       exitApp(-1);
     }
-  }
-
-  /// Replace the build mode in the relative symlink for the Flutter framework in
-  /// `FLUTTER_PLUGINS_SWIFT_PACKAGE_PATH`.
-  ///
-  /// Example: ./Debug/Flutter.xcframework -> ./Release/Flutter.xcframework
-  void _updateBuildConfigurationForSwiftPackages(String buildMode, TargetPlatform platform) {
-    final String? swiftPackagePath = environment['FLUTTER_FRAMEWORK_SWIFT_PACKAGE_PATH'];
-    if (swiftPackagePath == null) {
-      return;
-    }
-    final String frameworkName;
-    switch (platform) {
-      case TargetPlatform.ios:
-        frameworkName = 'Flutter';
-      case TargetPlatform.macos:
-        frameworkName = 'FlutterMacOS';
-    }
-    final swiftPackage = Link('$swiftPackagePath/$frameworkName.xcframework');
-    if (!swiftPackage.existsSync()) {
-      return;
-    }
-    final String relativeLink = swiftPackage.targetSync();
-    final String newRelativeLink = relativeLink.replaceFirst(
-      RegExp('\\.\\/.*\\/$frameworkName\\.xcframework'),
-      './${buildMode[0].toUpperCase()}${buildMode.substring(1)}/$frameworkName.xcframework',
-    );
-    swiftPackage.updateSync(newRelativeLink);
   }
 
   /// Calls `flutter assemble [buildMode]_[platform]_bundle_flutter_assets`

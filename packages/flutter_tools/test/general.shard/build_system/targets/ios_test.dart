@@ -1277,7 +1277,14 @@ void main() {
         );
         projectDirectory.childFile('pubspec.yaml').createSync(recursive: true);
         projectDirectory.childDirectory('ios').createSync();
-
+        projectDirectory
+            .childDirectory('ios')
+            .childDirectory('Flutter')
+            .childDirectory('ephemeral')
+            .childDirectory('Packages')
+            .childDirectory('.packages')
+            .childDirectory('FlutterFramework')
+            .createSync(recursive: true);
         final environment = Environment.test(
           fileSystem.currentDirectory,
           processManager: processManager,

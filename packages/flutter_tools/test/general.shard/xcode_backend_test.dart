@@ -760,69 +760,6 @@ void main() {
         )..run();
         expect(context.stderr, isEmpty);
       });
-
-      test('updates SwiftPM symlink with build configuration', () async {
-        final memoryFileSystem = MemoryFileSystem.test();
-        final flutterIOOverrides = FlutterIOOverrides(fileSystem: memoryFileSystem);
-        final frameworkName = platform == TargetPlatform.ios ? 'Flutter' : 'FlutterMacOS';
-        final Directory swiftPackagePath = memoryFileSystem.systemTempDirectory.childDirectory(
-          'ios/Flutter/ephemeral/Packages/.packages/FlutterFramework',
-        )..createSync(recursive: true);
-        final Link flutterXcframework = swiftPackagePath.childLink('$frameworkName.xcframework');
-        flutterXcframework.createSync('./Release/$frameworkName.xcframework');
-        await io.IOOverrides.runWithIOOverrides(() async {
-          final targetPlatform = platform == TargetPlatform.ios ? 'Ios' : 'Darwin';
-          final Directory buildDir = fileSystem.directory('/path/to/builds')
-            ..createSync(recursive: true);
-          final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
-            ..createSync(recursive: true);
-          final File pipe = fileSystem.file('/tmp/pipe')..createSync(recursive: true);
-          const buildMode = 'Debug';
-          final context = TestContext(
-            <String>['prepare', platformName],
-            <String, String>{
-              'BUILT_PRODUCTS_DIR': buildDir.path,
-              'CONFIGURATION': buildMode,
-              'FLUTTER_ROOT': flutterRoot.path,
-              'INFOPLIST_PATH': 'Info.plist',
-              'FLUTTER_FRAMEWORK_SWIFT_PACKAGE_PATH': swiftPackagePath.path,
-            },
-            commands: <FakeCommand>[
-              FakeCommand(
-                command: <String>[
-                  '${flutterRoot.path}/bin/flutter',
-                  'assemble',
-                  '--no-version-check',
-                  '--output=${buildDir.path}/',
-                  '-dTargetPlatform=${targetPlatform.toLowerCase()}',
-                  '-dTargetFile=lib/main.dart',
-                  '-dBuildMode=${buildMode.toLowerCase()}',
-                  '-dConfiguration=$buildMode',
-                  '-d${targetPlatform}Archs=',
-                  '-dSdkRoot=',
-                  '-dSplitDebugInfo=',
-                  '-dTreeShakeIcons=',
-                  '-dTrackWidgetCreation=',
-                  '-dDartObfuscation=',
-                  '-dAction=',
-                  '-dFrontendServerStarterPath=',
-                  '--ExtraGenSnapshotOptions=',
-                  '--DartDefines=',
-                  '--ExtraFrontEndOptions=',
-                  '-dSrcRoot=',
-                  '-dXcodeBuildScript=prepare',
-                  if (platform == TargetPlatform.ios) ...<String>['-dTargetDeviceOSVersion='],
-                  'debug_unpack_$platformName',
-                ],
-              ),
-            ],
-            fileSystem: fileSystem,
-            scriptOutputStreamFile: pipe,
-          )..run();
-          expect(context.stderr, isEmpty);
-          expect(flutterXcframework.targetSync(), './Debug/$frameworkName.xcframework');
-        }, flutterIOOverrides);
-      });
     });
   }
   group('embed for', () {

@@ -1079,7 +1079,8 @@ const kPrepareXcodeBuildScript = 'prepare';
 const kBuildXcodeBuildScript = 'build';
 
 /// When [kXcodeBuildScript] equals this value, that indicates that the target was trigged to run
-/// by the second Run Script in the Xcode build process that happens after compiling and linking.
+/// by the second Run Script in the Xcode build process that happens after compiling, linking, and
+/// embedding.
 const kEmbedXcodeBuildScript = 'embed';
 
 final Converter<String, String> _defineEncoder = utf8.encoder.fuse(base64.encoder);
