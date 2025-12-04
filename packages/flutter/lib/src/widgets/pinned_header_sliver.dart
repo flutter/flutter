@@ -106,4 +106,10 @@ class _RenderPinnedHeaderSliver extends RenderSliverSingleBoxAdapter {
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
   }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.addTagForChildren(RenderViewport.excludeFromScrolling);
+  }
 }
