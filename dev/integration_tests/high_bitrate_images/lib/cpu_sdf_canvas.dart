@@ -29,11 +29,22 @@ class _CpuSdfCanvasState extends State<CpuSdfCanvas> {
         _shader = shader;
       });
     });
-    _loadSdfImage().then((ui.Image image) {
-      setState(() {
-        _sdfImage = image;
-      });
-    });
+    switch (widget.targetFormat) {
+      case ui.TargetPixelFormat.rgbaFloat32:
+        _loadRGBA32FloatSdfImage().then((ui.Image image) {
+          setState(() {
+            _sdfImage = image;
+          });
+        });
+      case ui.TargetPixelFormat.rFloat32:
+        _loadR32FloatSdfImage().then((ui.Image image) {
+          setState(() {
+            _sdfImage = image;
+          });
+        });
+      case ui.TargetPixelFormat.dontCare:
+        assert(false);
+    }
   }
 
   Future<ui.FragmentShader> _loadShader() async {
@@ -41,7 +52,7 @@ class _CpuSdfCanvasState extends State<CpuSdfCanvas> {
     return program.fragmentShader();
   }
 
-  Future<ui.Image> _loadSdfImage() async {
+  Future<ui.Image> _loadRGBA32FloatSdfImage() async {
     const width = 1024;
     const height = 1024;
     const double radius = width / 4.0;
@@ -52,7 +63,7 @@ class _CpuSdfCanvasState extends State<CpuSdfCanvas> {
         double y = i.toDouble();
         x -= width / 2.0;
         y -= height / 2.0;
-        final double length = sqrt(x * x + y * y) - radius;
+        final double length = sqrt(x * x + y * y);
         final int idx = i * width * 4 + j * 4;
         floats[idx + 0] = length - radius;
         floats[idx + 1] = 0.0;
@@ -69,6 +80,38 @@ class _CpuSdfCanvasState extends State<CpuSdfCanvas> {
       height,
       ui.PixelFormat.rgbaFloat32,
       targetFormat: widget.targetFormat,
+      (ui.Image image) {
+        completer.complete(image);
+      },
+    );
+    return completer.future;
+  }
+
+  Future<ui.Image> _loadR32FloatSdfImage() async {
+    const width = 1024;
+    const height = 1024;
+    const double radius = width / 4.0;
+    final floats = List<double>.filled(width * height, 0.0);
+    for (var i = 0; i < height; ++i) {
+      for (var j = 0; j < width; ++j) {
+        double x = j.toDouble();
+        double y = i.toDouble();
+        x -= width / 2.0;
+        y -= height / 2.0;
+        final double length = sqrt(x * x + y * y);
+        final int idx = i * width + j;
+        floats[idx] = length - radius;
+      }
+    }
+    final floatList = Float32List.fromList(floats);
+    final intList = Uint8List.view(floatList.buffer);
+    final completer = Completer<ui.Image>();
+    ui.decodeImageFromPixels(
+      intList,
+      width,
+      height,
+      ui.PixelFormat.rFloat32,
+      targetFormat: ui.TargetPixelFormat.rFloat32,
       (ui.Image image) {
         completer.complete(image);
       },
