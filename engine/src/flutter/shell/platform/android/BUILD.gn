@@ -105,6 +105,8 @@ source_set("flutter_shell_native_src") {
     "android_surface_vk_impeller.h",
     "apk_asset_provider.cc",
     "apk_asset_provider.h",
+    "embedder_surface_android.cc",
+    "embedder_surface_android.h",
     "flutter_main.cc",
     "flutter_main.h",
     "image_external_texture.cc",
@@ -151,11 +153,8 @@ source_set("flutter_shell_native_src") {
     ]
   }
 
-  sources += get_target_outputs(":icudtl_asm")
-
   public_deps = [
     ":android_gpu_configuration",
-    ":icudtl_asm",
     ":image_generator",
     "//flutter/assets",
     "//flutter/common",
@@ -177,6 +176,7 @@ source_set("flutter_shell_native_src") {
     "//flutter/shell/platform/android/platform_view_android_delegate",
     "//flutter/shell/platform/android/surface",
     "//flutter/shell/platform/android/surface:native_window",
+    "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/skia",
     "//flutter/txt",
     "//flutter/vulkan",

@@ -15,6 +15,7 @@
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/snapshot_surface_producer.h"
 #include "flutter/shell/platform/android/context/android_context.h"
+#include "flutter/shell/platform/android/embedder_surface_android.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/platform_message_handler_android.h"
 #include "flutter/shell/platform/android/platform_view_android_delegate/platform_view_android_delegate.h"
@@ -23,22 +24,6 @@
 #include "shell/platform/android/image_external_texture.h"
 
 namespace flutter {
-
-class AndroidSurfaceFactoryImpl : public AndroidSurfaceFactory {
- public:
-  AndroidSurfaceFactoryImpl(const std::shared_ptr<AndroidContext>& context,
-                            bool enable_impeller,
-                            bool lazy_shader_mode);
-
-  ~AndroidSurfaceFactoryImpl() override;
-
-  std::unique_ptr<AndroidSurface> CreateSurface() override;
-
- private:
-  const std::shared_ptr<AndroidContext>& android_context_;
-  const bool enable_impeller_;
-  const bool lazy_shader_mode_;
-};
 
 class PlatformViewAndroid final : public PlatformView {
  public:
@@ -127,14 +112,18 @@ class PlatformViewAndroid final : public PlatformView {
   // |PlatformView|
   void SetupImpellerContext() override;
 
+  // creates a new AndroidSurface based on the AndroidRenderingAPI of the
+  // context.
+  static std::unique_ptr<AndroidSurface> CreateAndroidSurface(
+      std::shared_ptr<AndroidContext> context);
+
  private:
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
   std::shared_ptr<AndroidContext> android_context_;
-  std::shared_ptr<AndroidSurfaceFactoryImpl> surface_factory_;
+  std::unique_ptr<EmbedderSurfaceAndroid> embedder_surface_;
 
   PlatformViewAndroidDelegate platform_view_android_delegate_;
 
-  std::unique_ptr<AndroidSurface> android_surface_;
   std::shared_ptr<PlatformMessageHandlerAndroid> platform_message_handler_;
   bool android_meets_hcpp_criteria_ = false;
 
