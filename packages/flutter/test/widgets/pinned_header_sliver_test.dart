@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'semantics_tester.dart';
 import 'widgets_app_tester.dart';
 
 void main() {
@@ -243,5 +245,48 @@ void main() {
     expect(tester.getRect(find.text('PinnedHeaderSliver 0')), rect0);
     expect(tester.getRect(find.text('PinnedHeaderSliver 1')), rect1);
     expect(tester.getRect(find.text('PinnedHeaderSliver 2')), rect2);
+  });
+
+  testWidgets('PinnedHeaderSliver: presence of RenderViewport.excludeFromScrolling tag', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      Semantics(
+        textDirection: TextDirection.ltr,
+        child: Localizations(
+          locale: const Locale('en', 'us'),
+          delegates: const <LocalizationsDelegate<dynamic>>[
+            DefaultWidgetsLocalizations.delegate,
+            DefaultMaterialLocalizations.delegate,
+          ],
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: MediaQuery(
+              data: const MediaQueryData(),
+              child: CustomScrollView(
+                slivers: <Widget>[
+                  const PinnedHeaderSliver(child: Text('PinnedHeaderSliver')),
+                  SliverList.builder(
+                    itemCount: 6,
+                    itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      includesNodeWith(
+        tags: {RenderViewport.excludeFromScrolling, RenderViewport.useTwoPaneSemantics},
+      ),
+    );
+
+    semantics.dispose();
   });
 }
