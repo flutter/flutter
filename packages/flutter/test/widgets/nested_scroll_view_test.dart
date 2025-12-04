@@ -3045,6 +3045,70 @@ void main() {
     );
   });
 
+  testWidgets('Pinned header in body of NestedScrollView', (WidgetTester tester) async {
+    final GlobalKey pinnedHeaderSliverKey = GlobalKey();
+    final Finder pinnedHeader = find.text('Pinned Header');
+    SliverGeometry getPinnedHeaderGeometry() =>
+        (pinnedHeaderSliverKey.currentContext!.findRenderObject()! as RenderSliver).geometry!;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: NestedScrollView(
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[
+                SliverOverlapAbsorber(
+                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                  sliver: const SliverAppBar(pinned: true, title: Text('AppBar Title')),
+                ),
+              ];
+            },
+            body: Builder(
+              builder: (BuildContext context) {
+                return CustomScrollView(
+                  slivers: <Widget>[
+                    SliverOverlapInjector(
+                      handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                    ),
+                    PinnedHeaderSliver(
+                      key: pinnedHeaderSliverKey,
+                      child: const ListTile(title: Text('Pinned Header')),
+                    ),
+                    SliverFixedExtentList.builder(
+                      itemExtent: 50.0,
+                      itemCount: 30,
+                      itemBuilder: (BuildContext context, int index) =>
+                          ListTile(title: Text('Item $index')),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // There is one pinned header.
+    expect(pinnedHeader, findsOneWidget);
+    expect(getPinnedHeaderGeometry().paintOrigin, 0);
+
+    // Scroll down, the pinned header keeps visible.
+    final Offset point1 = tester.getCenter(find.text('Item 5'));
+    await tester.dragFrom(point1, const Offset(0.0, -400.0));
+    await tester.pump();
+    expect(pinnedHeader, findsOneWidget);
+    expect(getPinnedHeaderGeometry().paintExtent, 56);
+    expect(getPinnedHeaderGeometry().paintOrigin, 56);
+
+    // Scroll back.
+    await tester.dragFrom(point1, const Offset(0.0, 400.0));
+    await tester.pump();
+    expect(pinnedHeader, findsOneWidget);
+    expect(getPinnedHeaderGeometry().paintExtent, 56);
+    expect(getPinnedHeaderGeometry().paintOrigin, 0);
+  });
+
   group('NestedScrollView properly sets drag', () {
     Future<bool> canDrag(WidgetTester tester) async {
       await tester.drag(find.byType(CustomScrollView), const Offset(0.0, -20.0), pointer: 1);
