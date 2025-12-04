@@ -1688,8 +1688,8 @@ targets:
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
           {"dependency": "ninja", "version": "version:1.9.0"}
         ]
-      shard: tool_tests
-      subshard: commands
+      shard: tool_tests_commands
+      subshard: 1_1
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
@@ -3551,7 +3551,6 @@ targets:
   - name: Linux_pixel_7pro draw_arcs_all_fill_styles_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3561,7 +3560,6 @@ targets:
   - name: Mac_ios draw_arcs_all_fill_styles_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3571,7 +3569,6 @@ targets:
   - name: Linux_pixel_7pro draw_arcs_all_stroke_styles_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -4624,8 +4621,8 @@ targets:
           {"dependency": "android_sdk", "version": "version:36v4"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
-      shard: tool_tests
-      subshard: commands
+      shard: tool_tests_commands
+      subshard: 1_1
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
@@ -4639,8 +4636,8 @@ targets:
           {"dependency": "android_sdk", "version": "version:36v4"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
-      shard: tool_tests
-      subshard: commands
+      shard: tool_tests_commands
+      subshard: 1_1
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
@@ -6559,9 +6556,10 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Windows tool_tests_commands
+  - name: Windows tool_tests_commands_1_2
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -6570,8 +6568,32 @@ targets:
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
-      shard: tool_tests
-      subshard: commands
+      shard: tool_tests_commands
+      subshard: 1_2
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Windows tool_tests_commands_2_2
+    recipe: flutter/flutter_drone
+    timeout: 60
+    bringup: true
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:36v4"},
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      shard: tool_tests_commands
+      subshard: 2_2
       tags: >
         ["framework", "hostonly", "shard", "windows"]
     runIf:
