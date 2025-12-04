@@ -282,7 +282,9 @@ class SkiaGoldClient {
     final File keys = workDirectory.childFile('keys.json');
     final File failures = workDirectory.childFile('failures.json');
 
-    await keys.writeAsString(_getKeysJSON());
+    final String keysJSON = _getKeysJSON();
+    print(keysJSON);
+    await keys.writeAsString(keysJSON);
     await failures.create();
     final String commitHash = await _getCurrentCommit();
 

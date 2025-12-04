@@ -62,6 +62,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePre
     '${goldenFileComparator.runtimeType}.\n'
     'See also: https://flutter.dev/to/flutter-test-docs',
   );
+  print('flutter_goldens.dart');
   const Platform platform = LocalPlatform();
   const FileSystem fs = LocalFileSystem();
   const ProcessManager process = LocalProcessManager();
@@ -428,6 +429,7 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+    print('Compare $golden');
     await skiaClient.tryjobInit();
     golden = _addPrefix(golden);
     await update(golden, imageBytes);

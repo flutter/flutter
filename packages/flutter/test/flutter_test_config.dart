@@ -49,6 +49,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
         'https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Leak-tracking.md';
     LeakTesting.settings = LeakTesting.settings.withIgnored(createdByTestHelpers: true);
   }
+  print('flutter_test_config.dart');
 
   // Enable golden file testing using Skia Gold.
   return flutter_goldens.testExecutable(testMain);
