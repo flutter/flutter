@@ -148,11 +148,9 @@ class _TooltipButtonState extends State<TooltipButton> {
             ),
             parent: widget.parentController,
           );
-          if (windowSettings.tooltipTrackPosition) {
-            tracker.onGlobalRectChange = (rect) {
-              controller.updatePosition(anchorRect: rect);
-            };
-          }
+          tracker.onGlobalRectChange = (rect) {
+            controller.updatePosition(anchorRect: rect);
+          };
           windowManager.add(KeyedWindow(key: key, controller: controller));
           setState(() {
             _tooltipController = controller;

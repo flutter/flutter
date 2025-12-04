@@ -246,6 +246,7 @@ HostWindow::HostWindow(WindowManager* window_manager,
                        Rect const initial_window_rect,
                        LPCWSTR title,
                        std::optional<HWND> const& owner_window,
+                       int nCmdShow,
                        FlutterWindowsViewSizingDelegate* sizing_delegate)
     : window_manager_(window_manager),
       engine_(engine),
@@ -321,7 +322,7 @@ HostWindow::HostWindow(WindowManager* window_manager,
   // window. This doesn't work for multi window apps as the engine cannot have
   // multiple next frame callbacks. If multiple windows are created, only the
   // last one will be shown.
-  ShowWindow(window_handle_, SW_SHOWNORMAL);
+  ShowWindow(window_handle_, nCmdShow);
   SetWindowLongPtr(window_handle_, GWLP_USERDATA,
                    reinterpret_cast<LONG_PTR>(this));
 }

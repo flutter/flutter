@@ -23,6 +23,7 @@ HostWindowTooltip::HostWindowTooltip(
                  {{0, 0}, {0, 0}},
                  L"",
                  parent,
+                 SW_SHOWNOACTIVATE,
                  this),
       get_position_callback_(get_position_callback),
       parent_(parent),
@@ -57,6 +58,9 @@ Size HostWindowTooltip::GetMaximumViewSize() const {
 }
 
 void HostWindowTooltip::DidUpdateViewSize(int32_t width, int32_t height) {
+  if (width_ == width && height_ == height) {
+    return;
+  }
   width_ = width;
   height_ = height;
   UpdatePosition();

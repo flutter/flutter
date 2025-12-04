@@ -14,6 +14,7 @@
 //
 // See: https://github.com/flutter/flutter/issues/30701.
 
+import 'dart:async';
 import 'dart:ffi' as ffi;
 import 'dart:io';
 import 'dart:typed_data';
@@ -36,6 +37,8 @@ const int _WM_DESTROY = 0x0002;
 const int _WM_SIZE = 0x0005;
 const int _WM_ACTIVATE = 0x0006;
 const int _WM_CLOSE = 0x0010;
+
+const int _WA_INACTIVE = 0;
 
 const int _SW_RESTORE = 9;
 const int _SW_MAXIMIZE = 3;
@@ -715,10 +718,11 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
     required WindowPositioner positioner,
   }) : _delegate = delegate,
        _owner = owner,
+       _parent = parent,
        _anchorRect = anchorRect,
        _positioner = positioner,
        super.empty() {
-    owner._addMessageHandler(this);
+    _owner._addMessageHandler(this);
     _onGetWindowPosition =
         ffi.NativeCallable<
           ffi.Pointer<_Rect> Function(
@@ -728,7 +732,7 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
           )
         >.isolateLocal(_handleOnGetWindowPosition);
     final int viewId = _Win32PlatformInterface.createTooltipWindow(
-      owner.allocator,
+      _owner.allocator,
       PlatformDispatcher.instance.engineId!,
       contentSizeConstraints,
       _Win32PlatformInterface.getWindowHandle(
@@ -746,6 +750,13 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
     );
     rootView = flutterView;
   }
+
+  final WindowingOwnerWin32 _owner;
+  final TooltipWindowControllerDelegate _delegate;
+  final BaseWindowController _parent;
+  WindowPositioner _positioner;
+  Rect _anchorRect;
+  bool _destroyed = false;
 
   ffi.Pointer<_Rect> _handleOnGetWindowPosition(
     ffi.Pointer<_Size> childSize,
@@ -779,12 +790,6 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
     result.ref.height = targetRect.height.toInt();
     return result;
   }
-
-  final WindowingOwnerWin32 _owner;
-  final TooltipWindowControllerDelegate _delegate;
-  WindowPositioner _positioner;
-  Rect _anchorRect;
-  bool _destroyed = false;
 
   /// Returns HWND pointer to the top level window.
   @internal
@@ -846,6 +851,21 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
     int wParam,
     int lParam,
   ) {
+    if (view.viewId == parent.rootView.viewId) {
+      if (message == _WM_SIZE) {
+        // Tooltips should close when their parent window is deactivated.
+        // Queue the destroy on a microtask to avoid destroying the window
+        // while processing its message.
+        scheduleMicrotask(destroy);
+      } else if (message == _WM_ACTIVATE && wParam == _WA_INACTIVE) {
+        // Tooltips should close when their parent window is deactivated.
+        // Queue the destroy on a microtask to avoid destroying the window
+        // while processing its message.
+        scheduleMicrotask(destroy);
+      }
+      return null;
+    }
+
     if (view.viewId != rootView.viewId) {
       return null;
     }
@@ -864,7 +884,7 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
   }
 
   @override
-  BaseWindowController get parent => throw UnimplementedError();
+  BaseWindowController get parent => _parent;
 
   @override
   void setConstraints(BoxConstraints constraints) {}

@@ -139,6 +139,7 @@ class HostWindow {
              Rect const initial_window_rect,
              LPCWSTR title,
              std::optional<HWND> const& owner_window,
+             int nCmdShow = SW_SHOWNORMAL,
              FlutterWindowsViewSizingDelegate* sizing_delegate = nullptr);
 
   // Calculates the required window size, in physical coordinates, to
