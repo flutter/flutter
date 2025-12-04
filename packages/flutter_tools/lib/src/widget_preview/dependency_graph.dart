@@ -201,7 +201,7 @@ final class LibraryPreviewNode {
   /// transitive dependency outside the previewed project (e.g., in a path or Git dependency, or
   /// a modified package).
   // TODO(bkonyi): determine how to best handle compile time errors in non-analyzed dependencies.
-  var dependencyHasErrors = false;
+  bool dependencyHasErrors = false;
 
   /// `true` if this library contains compile time errors.
   bool get hasErrors => errors.isNotEmpty;
@@ -215,11 +215,14 @@ final class LibraryPreviewNode {
   Future<void> populateErrors({required AnalysisContext context}) async {
     errors.clear();
     for (final String file in files) {
-      errors.addAll(
-        ((await context.currentSession.getErrors(file)) as ErrorsResult).diagnostics
-            .where((error) => error.severity == Severity.error)
-            .toList(),
-      );
+      final SomeErrorsResult errorsResult = await context.currentSession.getErrors(file);
+      // If errorsResult isn't an ErrorsResult, the analysis context has likely been disposed and
+      // we're in the process of shutting down. Ignore those results.
+      if (errorsResult is ErrorsResult) {
+        errors.addAll(
+          errorsResult.diagnostics.where((error) => error.severity == Severity.error).toList(),
+        );
+      }
     }
   }
 

@@ -23,7 +23,7 @@ class FakeDevFs extends Fake implements DevFS {
   Future<void> destroy() async {}
 
   @override
-  var sources = <Uri>[];
+  List<Uri> sources = <Uri>[];
 
   @override
   DateTime? lastCompiled;
@@ -32,10 +32,10 @@ class FakeDevFs extends Fake implements DevFS {
   PackageConfig? lastPackageConfig;
 
   @override
-  var assetPathsToEvict = <String>{};
+  Set<String> assetPathsToEvict = <String>{};
 
   @override
-  var shaderPathsToEvict = <String>{};
+  Set<String> shaderPathsToEvict = <String>{};
 
   @override
   Uri? baseUri;
@@ -47,7 +47,7 @@ class FakeDevice extends Fake implements Device {
 
   final TargetPlatform _targetPlatform;
 
-  var disposed = false;
+  bool disposed = false;
 
   @override
   final DartDevelopmentService dds = FakeDartDevelopmentService();
@@ -56,13 +56,13 @@ class FakeDevice extends Fake implements Device {
   Future<bool> isSupported() async => true;
 
   @override
-  var supportsHotReload = true;
+  bool supportsHotReload = true;
 
   @override
-  var supportsHotRestart = true;
+  bool supportsHotRestart = true;
 
   @override
-  var supportsFlutterExit = true;
+  bool supportsFlutterExit = true;
 
   @override
   Future<TargetPlatform> get targetPlatform async => _targetPlatform;
@@ -88,7 +88,7 @@ class FakeDevice extends Fake implements Device {
 }
 
 class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
-  var wasShutdown = false;
+  bool wasShutdown = false;
 
   @override
   void shutdown() {
@@ -99,7 +99,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
 class FakeFlutterDevice extends Fake implements FlutterDevice {
   FakeFlutterDevice(this.device);
 
-  var stoppedEchoingDeviceLog = false;
+  bool stoppedEchoingDeviceLog = false;
   late Future<UpdateFSReport> Function() updateDevFSReportCallback;
 
   @override
@@ -176,8 +176,8 @@ class TestHotRunnerConfig extends HotRunnerConfig {
   TestHotRunnerConfig({this.successfulHotRestartSetup, this.successfulHotReloadSetup});
   bool? successfulHotRestartSetup;
   bool? successfulHotReloadSetup;
-  var shutdownHookCalled = false;
-  var updateDevFSCompleteCalled = false;
+  bool shutdownHookCalled = false;
+  bool updateDevFSCompleteCalled = false;
 
   @override
   Future<bool?> setupHotRestart() async {

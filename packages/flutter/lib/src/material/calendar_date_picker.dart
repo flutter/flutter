@@ -235,7 +235,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
       assert(_selectedDate != null);
       _announcedInitialDate = true;
       final bool isToday = widget.calendarDelegate.isSameDay(widget.currentDate, _selectedDate);
-      final String semanticLabelSuffix = isToday ? ', ${_localizations.currentDateLabel}' : '';
+      final semanticLabelSuffix = isToday ? ', ${_localizations.currentDateLabel}' : '';
       SemanticsService.sendAnnouncement(
         View.of(context),
         '${_localizations.formatFullDate(_selectedDate!)}$semanticLabelSuffix',
@@ -315,7 +315,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
         case TargetPlatform.macOS:
         case TargetPlatform.windows:
           final bool isToday = widget.calendarDelegate.isSameDay(widget.currentDate, _selectedDate);
-          final String semanticLabelSuffix = isToday ? ', ${_localizations.currentDateLabel}' : '';
+          final semanticLabelSuffix = isToday ? ', ${_localizations.currentDateLabel}' : '';
           SemanticsService.sendAnnouncement(
             View.of(context),
             '${_localizations.selectedDateLabel} ${widget.calendarDelegate.formatFullDate(_selectedDate!, _localizations)}$semanticLabelSuffix',
@@ -697,7 +697,7 @@ class _MonthPickerState extends State<_MonthPicker> {
     }
 
     // Start at the 1st and take the first selectable date.
-    for (int day = 1; day <= daysInMonth; day++) {
+    for (var day = 1; day <= daysInMonth; day++) {
       final DateTime newFocus = widget.calendarDelegate.getDay(month.year, month.month, day);
       if (_isSelectable(newFocus)) {
         return newFocus;
@@ -1053,7 +1053,7 @@ class _DayPickerState extends State<_DayPicker> {
   ///     4 5 6 7 8 9 10
   ///
   List<Widget> _dayHeaders(TextStyle? headerStyle, MaterialLocalizations localizations) {
-    final List<Widget> result = <Widget>[];
+    final result = <Widget>[];
     for (
       int i = localizations.firstDayOfWeekIndex;
       result.length < DateTime.daysPerWeek;
@@ -1077,7 +1077,7 @@ class _DayPickerState extends State<_DayPicker> {
     final TextStyle? weekdayStyle = datePickerTheme.weekdayStyle ?? defaults.weekdayStyle;
 
     final Orientation orientation = MediaQuery.orientationOf(context);
-    final bool isLandscapeOrientation = orientation == Orientation.landscape;
+    final isLandscapeOrientation = orientation == Orientation.landscape;
 
     final int year = widget.displayedMonth.year;
     final int month = widget.displayedMonth.month;
@@ -1186,9 +1186,9 @@ class _DayState extends State<_Day> {
     }
 
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final String semanticLabelSuffix = widget.isToday ? ', ${localizations.currentDateLabel}' : '';
+    final semanticLabelSuffix = widget.isToday ? ', ${localizations.currentDateLabel}' : '';
 
-    final Set<WidgetState> states = <WidgetState>{
+    final states = <WidgetState>{
       if (widget.isDisabled) WidgetState.disabled,
       if (widget.isSelectedDay) WidgetState.selected,
     };
@@ -1213,7 +1213,7 @@ class _DayState extends State<_Day> {
       (DatePickerThemeData? theme) => theme?.dayShape,
       states,
     )!;
-    final ShapeDecoration decoration = widget.isToday
+    final decoration = widget.isToday
         ? ShapeDecoration(
             color: dayBackgroundColor,
             shape: dayShape.copyWith(
@@ -1445,13 +1445,13 @@ class _YearPickerState extends State<YearPicker> {
     // Backfill the _YearPicker with disabled years if necessary.
     final int offset = _itemCount < minYears ? (minYears - _itemCount) ~/ 2 : 0;
     final int year = widget.firstDate.year + index - offset;
-    final bool isSelected = year == widget.selectedDate?.year;
-    final bool isCurrentYear = year == widget.currentDate.year;
+    final isSelected = year == widget.selectedDate?.year;
+    final isCurrentYear = year == widget.currentDate.year;
     final bool isDisabled = year < widget.firstDate.year || year > widget.lastDate.year;
     final double decorationHeight = 36.0 * textScaleFactor;
     final double decorationWidth = 72.0 * textScaleFactor;
 
-    final Set<WidgetState> states = <WidgetState>{
+    final states = <WidgetState>{
       if (isDisabled) WidgetState.disabled,
       if (isSelected) WidgetState.selected,
     };
@@ -1483,7 +1483,7 @@ class _YearPickerState extends State<YearPicker> {
         borderSide = borderSide.copyWith(color: textColor);
       }
     }
-    final ShapeDecoration decoration = ShapeDecoration(
+    final decoration = ShapeDecoration(
       color: background,
       shape: yearShape.copyWith(side: borderSide),
     );

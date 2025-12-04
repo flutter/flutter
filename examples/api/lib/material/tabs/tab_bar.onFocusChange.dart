@@ -45,9 +45,24 @@ class _TabBarExampleState extends State<TabBarExample> {
               });
             },
             tabs: <Widget>[
-              Tab(icon: Icon(Icons.cloud_outlined, size: focusedIndex == 0 ? 35 : 25)),
-              Tab(icon: Icon(Icons.beach_access_sharp, size: focusedIndex == 1 ? 35 : 25)),
-              Tab(icon: Icon(Icons.brightness_5_sharp, size: focusedIndex == 2 ? 35 : 25)),
+              Tab(
+                icon: Icon(
+                  Icons.cloud_outlined,
+                  size: focusedIndex == 0 ? 35 : 25,
+                ),
+              ),
+              Tab(
+                icon: Icon(
+                  Icons.beach_access_sharp,
+                  size: focusedIndex == 1 ? 35 : 25,
+                ),
+              ),
+              Tab(
+                icon: Icon(
+                  Icons.brightness_5_sharp,
+                  size: focusedIndex == 2 ? 35 : 25,
+                ),
+              ),
             ],
           ),
         ),

@@ -37,7 +37,10 @@ class ColorFilteredExample extends StatelessWidget {
             ),
           ),
           ColorFiltered(
-            colorFilter: const ColorFilter.mode(Colors.grey, BlendMode.saturation),
+            colorFilter: const ColorFilter.mode(
+              Colors.grey,
+              BlendMode.saturation,
+            ),
             child: Image.network(
               'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
             ),

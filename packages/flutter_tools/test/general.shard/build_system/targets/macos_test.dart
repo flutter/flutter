@@ -329,17 +329,13 @@ void main() {
       binary.createSync(recursive: true);
       frameworkDsym.createSync(recursive: true);
       processManager.addCommands(<FakeCommand>[
-        copyFrameworkDsymCommand,
         releaseCopyFrameworkCommand,
         lipoInfoNonFatCommand,
         lipoVerifyX86_64Command,
+        copyFrameworkDsymCommand,
       ]);
 
-      const Target target = ReleaseUnpackMacOS();
-      for (final Target dep in target.dependencies) {
-        await dep.build(environment..defines[kBuildMode] = 'release');
-      }
-      await target.build(environment..defines[kBuildMode] = 'release');
+      await const ReleaseUnpackMacOS().build(environment..defines[kBuildMode] = 'release');
 
       expect(processManager, hasNoRemainingExpectations);
     },
@@ -367,10 +363,16 @@ void main() {
         ],
         exitCode: 1,
       );
-      processManager.addCommands(<FakeCommand>[failedCopyFrameworkDsymCommand]);
+      processManager.addCommands(<FakeCommand>[
+        releaseCopyFrameworkCommand,
+        lipoInfoFatCommand,
+        lipoVerifyX86_64Command,
+        lipoExtractX86_64Command,
+        failedCopyFrameworkDsymCommand,
+      ]);
 
       await expectLater(
-        const ReleaseUnpackMacOSDsym().build(environment..defines[kBuildMode] = 'release'),
+        const ReleaseUnpackMacOS().build(environment..defines[kBuildMode] = 'release'),
         throwsA(
           isException.having(
             (Exception exception) => exception.toString(),
@@ -813,8 +815,12 @@ void main() {
           command: <String>[
             'Artifact.genSnapshotArm64.TargetPlatform.darwin.release',
             '--deterministic',
-            '--snapshot_kind=app-aot-assembly',
-            '--assembly=${environment.buildDir.childFile('arm64/snapshot_assembly.S').path}',
+            '--snapshot_kind=app-aot-macho-dylib',
+            '--macho=${environment.buildDir.childFile('arm64/App.framework/App').path}',
+            '--macho-object=${environment.buildDir.childFile('arm64/app.o').path}',
+            '--macho-min-os-version=10.15',
+            '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
+            '--macho-install-name=@rpath/App.framework/App',
             environment.buildDir.childFile('app.dill').path,
           ],
         ),
@@ -822,79 +828,13 @@ void main() {
           command: <String>[
             'Artifact.genSnapshotX64.TargetPlatform.darwin.release',
             '--deterministic',
-            '--snapshot_kind=app-aot-assembly',
-            '--assembly=${environment.buildDir.childFile('x86_64/snapshot_assembly.S').path}',
+            '--snapshot_kind=app-aot-macho-dylib',
+            '--macho=${environment.buildDir.childFile('x86_64/App.framework/App').path}',
+            '--macho-object=${environment.buildDir.childFile('x86_64/app.o').path}',
+            '--macho-min-os-version=10.15',
+            '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
+            '--macho-install-name=@rpath/App.framework/App',
             environment.buildDir.childFile('app.dill').path,
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'xcrun',
-            'cc',
-            '-arch',
-            'arm64',
-            '-c',
-            environment.buildDir.childFile('arm64/snapshot_assembly.S').path,
-            '-o',
-            environment.buildDir.childFile('arm64/snapshot_assembly.o').path,
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'xcrun',
-            'cc',
-            '-arch',
-            'x86_64',
-            '-c',
-            environment.buildDir.childFile('x86_64/snapshot_assembly.S').path,
-            '-o',
-            environment.buildDir.childFile('x86_64/snapshot_assembly.o').path,
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'xcrun',
-            'clang',
-            '-arch',
-            'arm64',
-            '-dynamiclib',
-            '-Xlinker',
-            '-rpath',
-            '-Xlinker',
-            '@executable_path/Frameworks',
-            '-Xlinker',
-            '-rpath',
-            '-Xlinker',
-            '@loader_path/Frameworks',
-            '-fapplication-extension',
-            '-install_name',
-            '@rpath/App.framework/App',
-            '-o',
-            environment.buildDir.childFile('arm64/App.framework/App').path,
-            environment.buildDir.childFile('arm64/snapshot_assembly.o').path,
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'xcrun',
-            'clang',
-            '-arch',
-            'x86_64',
-            '-dynamiclib',
-            '-Xlinker',
-            '-rpath',
-            '-Xlinker',
-            '@executable_path/Frameworks',
-            '-Xlinker',
-            '-rpath',
-            '-Xlinker',
-            '@loader_path/Frameworks',
-            '-fapplication-extension',
-            '-install_name',
-            '@rpath/App.framework/App',
-            '-o',
-            environment.buildDir.childFile('x86_64/App.framework/App').path,
-            environment.buildDir.childFile('x86_64/snapshot_assembly.o').path,
           ],
         ),
         FakeCommand(

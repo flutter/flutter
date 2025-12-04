@@ -32,8 +32,8 @@ void testMain() {
   });
 
   test('fetchImage fetches image in chunks', () async {
-    final List<int> cumulativeBytesLoadedInvocations = <int>[];
-    final List<int> expectedTotalBytesInvocations = <int>[];
+    final cumulativeBytesLoadedInvocations = <int>[];
+    final expectedTotalBytesInvocations = <int>[];
     final Uint8List result = await fetchImage('/long_test_payload?length=100000&chunk=1000', (
       int cumulativeBytesLoaded,
       int expectedTotalBytes,
@@ -46,7 +46,7 @@ void testMain() {
     expect(cumulativeBytesLoadedInvocations, hasLength(greaterThan(1)));
 
     // Check that reported total byte count is the same across all invocations.
-    for (final int expectedTotalBytes in expectedTotalBytesInvocations) {
+    for (final expectedTotalBytes in expectedTotalBytesInvocations) {
       expect(expectedTotalBytes, 100000);
     }
 
@@ -71,12 +71,12 @@ void testMain() {
     final SkImage skImage1 = canvasKit.MakeAnimatedImageFromEncoded(
       k4x4PngImage,
     )!.makeImageAtCurrentFrame();
-    final CkImage image1 = CkImage(skImage1, imageSource: imageSource);
+    final image1 = CkImage(skImage1, imageSource: imageSource);
 
     final SkImage skImage2 = canvasKit.MakeAnimatedImageFromEncoded(
       k4x4PngImage,
     )!.makeImageAtCurrentFrame();
-    final CkImage image2 = CkImage(skImage2, imageSource: imageSource);
+    final image2 = CkImage(skImage2, imageSource: imageSource);
 
     final CkImage image3 = image1.clone();
 
@@ -96,9 +96,9 @@ void testMain() {
 Future<ui.Image> _createImage() => _createPicture().toImage(10, 10);
 
 ui.Picture _createPicture() {
-  final ui.PictureRecorder recorder = ui.PictureRecorder();
-  final ui.Canvas canvas = ui.Canvas(recorder);
-  const ui.Rect rect = ui.Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+  final recorder = ui.PictureRecorder();
+  final canvas = ui.Canvas(recorder);
+  const rect = ui.Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
   canvas.clipRect(rect);
   return recorder.endRecording();
 }
