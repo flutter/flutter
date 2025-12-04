@@ -13,7 +13,7 @@ import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../web/web_constants.dart';
 
-import 'web_server_utlities.dart';
+import 'web_server_utilities.dart';
 
 class ReleaseAssetServer {
   ReleaseAssetServer(
