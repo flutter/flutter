@@ -127,6 +127,9 @@ class _StubTooltipWindowController extends TooltipWindowController {
   void setConstraints(BoxConstraints constraints) {}
 
   @override
+  void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {}
+
+  @override
   void destroy() {}
 }
 
