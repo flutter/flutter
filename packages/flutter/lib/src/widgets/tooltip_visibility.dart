@@ -30,7 +30,7 @@ class TooltipVisibility extends StatelessWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// The entire app can be wrapped in this widget to globally control [Tooltip]
+  /// The entire app can be wrapped in this widget to globally control [RawTooltip]
   /// visibility.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}

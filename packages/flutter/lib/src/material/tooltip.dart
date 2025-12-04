@@ -132,7 +132,7 @@ class Tooltip extends StatefulWidget {
     this.mouseCursor,
     this.ignorePointer,
     this.positionDelegate,
-    this.child = const SizedBox.shrink(),
+    this.child,
   }) : assert(
          (message == null) != (richMessage == null),
          'Either `message` or `richMessage` must be specified',
@@ -224,7 +224,7 @@ class Tooltip extends StatefulWidget {
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
-  final Widget child;
+  final Widget? child;
 
   /// Specifies the tooltip's shape and background color.
   ///
@@ -526,7 +526,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       ignorePointer: widget.ignorePointer ?? widget.message != null,
       exitDuration: widget.exitDuration ?? _tooltipTheme.exitDuration ?? _defaultExitDuration,
       positionDelegate: _getDefaultPositionDelegate,
-      child: widget.child,
+      child: widget.child ?? const SizedBox.shrink(),
     );
   }
 }
