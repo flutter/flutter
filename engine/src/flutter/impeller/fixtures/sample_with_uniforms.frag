@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Start with a uniform of each type to demonstrate behavior when
+// mixing declarations of uniform types.
 uniform float uFirstFloat;
 uniform sampler2D uFirstSampler;
 

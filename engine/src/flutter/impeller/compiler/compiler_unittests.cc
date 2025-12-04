@@ -125,6 +125,12 @@ TEST_P(CompilerTest, BindingBaseForFragShader) {
 
 namespace {
 struct UniformInfo {
+  std::string uniform_name;
+  uint32_t location;
+  std::string type_name;
+  uint32_t columns;
+  uint32_t vec_size;
+
   static UniformInfo fromJson(nlohmann::json& json) {
     return {
         .uniform_name = json["name"].get<std::string>(),
@@ -134,11 +140,31 @@ struct UniformInfo {
         .vec_size = json["type"]["vec_size"].get<uint32_t>(),
     };
   }
-  std::string uniform_name;
-  uint32_t location;
-  std::string type_name;
-  uint32_t columns;
-  uint32_t vec_size;
+
+  static UniformInfo Sampler(const std::string& name, uint32_t location) {
+    return UniformInfo{
+        .uniform_name = name,
+        .location = location,
+        .type_name = "ShaderType::kSampledImage",
+        .columns = 1u,
+        .vec_size = 1u,
+    };
+  }
+  static UniformInfo Float(const std::string& name, uint32_t location) {
+    return FloatInfo(name, location, 1u, 1u);
+  }
+  static UniformInfo Vec2(const std::string& name, uint32_t location) {
+    return FloatInfo(name, location, 1u, 2u);
+  }
+  static UniformInfo Vec3(const std::string& name, uint32_t location) {
+    return FloatInfo(name, location, 1u, 3u);
+  }
+  static UniformInfo Vec4(const std::string& name, uint32_t location) {
+    return FloatInfo(name, location, 1u, 4u);
+  }
+  static UniformInfo Mat4(const std::string& name, uint32_t location) {
+    return FloatInfo(name, location, 4u, 4u);
+  }
 
   constexpr bool operator==(const UniformInfo& other) const {
     return (uniform_name == other.uniform_name &&  //
@@ -146,6 +172,20 @@ struct UniformInfo {
             type_name == other.type_name &&        //
             columns == other.columns &&            //
             vec_size == other.vec_size);
+  }
+
+ private:
+  static UniformInfo FloatInfo(const std::string& name,
+                               uint32_t location,
+                               uint32_t columns,
+                               uint32_t vec_size) {
+    return UniformInfo{
+        .uniform_name = name,
+        .location = location,
+        .type_name = "ShaderType::kFloat",
+        .columns = columns,
+        .vec_size = vec_size,
+    };
   }
 };
 
@@ -175,91 +215,83 @@ TEST_P(CompilerTestRuntime, UniformsAppearInJson) {
   ASSERT_EQ(float_list.size(), 6u);
 
   {
-    UniformInfo expected = UniformInfo{
-        .uniform_name = "uFirstSampler",
-        .location = 1u,
-        .type_name = "ShaderType::kSampledImage",
-        .columns = 1u,
-        .vec_size = 1u,
+    // clang-format off
+    std::array expected_infos = {
+        UniformInfo::Sampler("uFirstSampler", 1u),
+        UniformInfo::Sampler("uSampler", 7u),
     };
-    EXPECT_EQ(UniformInfo::fromJson(sampler_list[0]), expected);
+    // clang-format on
+    ASSERT_EQ(sampler_list.size(), expected_infos.size());
+    for (size_t i = 0; i < expected_infos.size(); i++) {
+      EXPECT_EQ(UniformInfo::fromJson(sampler_list[i]), expected_infos[i])
+          << "index: " << i;
+    }
   }
 
   {
-    UniformInfo expected = UniformInfo{
-        .uniform_name = "uSampler",
-        .location = 7u,
-        .type_name = "ShaderType::kSampledImage",
-        .columns = 1u,
-        .vec_size = 1u,
+    // clang-format off
+    std::array expected_infos = {
+        UniformInfo::Float("uFirstFloat", 0u),
+        UniformInfo::Float("uFloat", 2u),
+        UniformInfo::Vec2("uVec2", 3u),
+        UniformInfo::Vec3("uVec3", 4u),
+        UniformInfo::Vec4("uVec4", 5u),
+        UniformInfo::Mat4("uMat4", 6u),
     };
-    EXPECT_EQ(UniformInfo::fromJson(sampler_list[1]), expected);
+    // clang-format on
+    ASSERT_EQ(float_list.size(), expected_infos.size());
+    for (size_t i = 0; i < expected_infos.size(); i++) {
+      EXPECT_EQ(UniformInfo::fromJson(float_list[i]), expected_infos[i])
+          << "index: " << i;
+    }
+  }
+}
+
+TEST_P(CompilerTestRuntime, PositionedUniformsAppearInJson) {
+  ASSERT_TRUE(CanCompileAndReflect("sample_with_positioned_uniforms.frag",
+                                   SourceType::kFragmentShader,
+                                   SourceLanguage::kGLSL));
+
+  auto json_fd = GetReflectionJson("sample_with_positioned_uniforms.frag");
+  ASSERT_TRUE(json_fd);
+  nlohmann::json shader_json = nlohmann::json::parse(json_fd->GetMapping());
+  auto sampler_list = shader_json["sampled_images"];
+  auto float_list = shader_json["uniforms"];
+  ASSERT_EQ(sampler_list.size(), 3u);
+  ASSERT_EQ(float_list.size(), 7u);
+
+  {
+    // clang-format off
+    std::array expected_infos = {
+        UniformInfo::Sampler("uSamplerNotPositioned1", 1u),
+        UniformInfo::Sampler("uSampler", 0u),
+        UniformInfo::Sampler("uSamplerNotPositioned2", 3u),
+    };
+    // clang-format on
+    ASSERT_EQ(sampler_list.size(), expected_infos.size());
+    for (size_t i = 0; i < expected_infos.size(); i++) {
+      EXPECT_EQ(UniformInfo::fromJson(sampler_list[i]), expected_infos[i])
+          << "index: " << i;
+    }
   }
 
   {
-    UniformInfo expected = UniformInfo{
-        .uniform_name = "uFirstFloat",
-        .location = 0u,
-        .type_name = "ShaderType::kFloat",
-        .columns = 1u,
-        .vec_size = 1u,
+    // clang-format off
+    std::array expected_infos = {
+        UniformInfo::Float("uFloatNotPositioned1", 0u),
+        UniformInfo::Float("uFloat", 6u),
+        UniformInfo::Vec2("uVec2", 5u),
+        UniformInfo::Vec3("uVec3", 3u),
+        UniformInfo::Vec4("uVec4", 2u),
+        UniformInfo::Mat4("uMat4", 1u),
+        UniformInfo::Float("uFloatNotPositioned2", 2u),
     };
-    EXPECT_EQ(UniformInfo::fromJson(float_list[0]), expected);
-  }
-
-  {
-    UniformInfo expected = UniformInfo{
-        .uniform_name = "uFloat",
-        .location = 2u,
-        .type_name = "ShaderType::kFloat",
-        .columns = 1u,
-        .vec_size = 1u,
-    };
-    EXPECT_EQ(UniformInfo::fromJson(float_list[1]), expected);
-  }
-
-  {
-    UniformInfo expected = UniformInfo{
-        .uniform_name = "uVec2",
-        .location = 3u,
-        .type_name = "ShaderType::kFloat",
-        .columns = 1u,
-        .vec_size = 2u,
-    };
-    EXPECT_EQ(UniformInfo::fromJson(float_list[2]), expected);
-  }
-
-  {
-    UniformInfo expected = UniformInfo{
-        .uniform_name = "uVec3",
-        .location = 4u,
-        .type_name = "ShaderType::kFloat",
-        .columns = 1u,
-        .vec_size = 3u,
-    };
-    EXPECT_EQ(UniformInfo::fromJson(float_list[3]), expected);
-  }
-
-  {
-    UniformInfo expected = UniformInfo{
-        .uniform_name = "uVec4",
-        .location = 5u,
-        .type_name = "ShaderType::kFloat",
-        .columns = 1u,
-        .vec_size = 4u,
-    };
-    EXPECT_EQ(UniformInfo::fromJson(float_list[4]), expected);
-  }
-
-  {
-    UniformInfo expected = UniformInfo{
-        .uniform_name = "uMat4",
-        .location = 6u,
-        .type_name = "ShaderType::kFloat",
-        .columns = 4u,
-        .vec_size = 4u,
-    };
-    EXPECT_EQ(UniformInfo::fromJson(float_list[5]), expected);
+    // clang-format on
+    ASSERT_EQ(float_list.size(), expected_infos.size());
+    for (size_t i = 0; i < expected_infos.size(); i++) {
+      EXPECT_EQ(UniformInfo::fromJson(float_list[i]), expected_infos[i])
+          << "index: " << i;
+    }
   }
 }
 
