@@ -16,6 +16,10 @@ export const loadSkwasm = async (deps, config, browserEnvironment, baseUrl) => {
   const wasmInstantiator = createWasmInstantiator(resolveUrlWithSegments(baseUrl, `${fileStem}.wasm`));
   const skwasm = await import(skwasmUrl);
   return await skwasm.default({
+    // Chrome extensions enforce strict CSP that blocks the dynamic script 
+    // loading required for multi-threaded workers. We force single-threaded
+    // mode to prevent startup crashes.
+    // See https://github.com/flutter/flutter/issues/177974.
     skwasmSingleThreaded: !browserEnvironment.crossOriginIsolated || browserEnvironment.isChromeExtension || config.forceSingleThreadedSkwasm,
     instantiateWasm: wasmInstantiator,
     locateFile: (filename, scriptDirectory) => {

@@ -73,6 +73,8 @@ const detectWebGLVersion = () => {
 }
 
 const isChromeExtension = () => {
+  // Checks for the presence of the Chrome extension ID.
+  // See: https://developer.chrome.com/docs/extensions/reference/api/runtime
   return window.chrome && chrome.runtime && chrome.runtime.id;
 }
 
