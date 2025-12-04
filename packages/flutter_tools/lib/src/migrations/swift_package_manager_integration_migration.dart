@@ -127,7 +127,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   /// the example app.
   ///
   /// If the app is not an example app or the plugin cannot be found, this will return null.
-  late final ExamplePlugin? _examplePlugin = ExamplePlugin.loadFromProject(
+  late final _PluginRelativeToExample? _examplePlugin = _PluginRelativeToExample.loadFromProject(
     xcodeProject: _xcodeProject,
     fileSystem: _fileSystem,
     logger: logger,
@@ -1249,8 +1249,6 @@ class ParsedProjectGroup {
   final String identifier;
   final List<String>? children;
   final String? name;
-
-  bool addedChildren = false;
 }
 
 /// Representation of data parsed from PBXFrameworksBuildPhase section in Xcode
@@ -1299,12 +1297,16 @@ class ParsedProject {
   final List<String>? packageReferences;
 }
 
-class ExamplePlugin {
-  ExamplePlugin(this.name, this.path);
+class _PluginRelativeToExample {
+  _PluginRelativeToExample(this.name, this.path);
   final String name;
   final String path;
 
-  static ExamplePlugin? loadFromProject({
+  /// If the [xcodeProject] is within a plugin's example app, return the plugin's name and its
+  /// path relative to ios/macos directory the [xcodeProject] is in.
+  ///
+  /// If the [xcodeProject] is not within an example app or the plugin can't be found, return null.
+  static _PluginRelativeToExample? loadFromProject({
     required XcodeBasedProject xcodeProject,
     required FileSystem fileSystem,
     required Logger logger,
@@ -1327,7 +1329,7 @@ class ExamplePlugin {
               absolutePath,
               from: xcodeProject.hostAppRoot.path,
             );
-            return ExamplePlugin(pluginName, relativePath);
+            return _PluginRelativeToExample(pluginName, relativePath);
           }
         }
       }
