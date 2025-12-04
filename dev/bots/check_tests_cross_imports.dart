@@ -356,9 +356,7 @@ class TestsCrossImportChecker {
   /// Returns a list of files in the given directory optionally matching the
   /// given filenamePattern.
   static List<File> _getFiles(Directory directory, [Pattern? filenamePattern]) {
-    return directory.listSync(recursive: true).whereType<File>().where((
-      File file,
-    ) {
+    return directory.listSync(recursive: true).whereType<File>().where((File file) {
       if (filenamePattern == null) {
         return true;
       }
@@ -384,7 +382,7 @@ class TestsCrossImportChecker {
   /// Returns true only if the file imports the given Library.
   static bool _containsImport(File testFile, _Library library) {
     final String contents = testFile.readAsStringSync();
-    return contents.contains(library.regExp);
+    return contents.contains(library.import);
   }
 
   /// Returns a Set of all Files that import the given Library.
@@ -539,25 +537,21 @@ class TestsCrossImportChecker {
 
 /// The libraries that we are concerned with cross importing.
 enum _Library {
-  widgets(directory: 'widgets', name: 'Widgets'),
-  material(directory: 'material', name: 'Material'),
-  cupertino(directory: 'cupertino', name: 'Cupertino');
+  widgets(directory: 'widgets', name: 'Widgets', import: "import 'package:flutter/widgets.dart'"),
+  material(
+    directory: 'material',
+    name: 'Material',
+    import: "import 'package:flutter/material.dart'",
+  ),
+  cupertino(
+    directory: 'cupertino',
+    name: 'Cupertino',
+    import: "import 'package:flutter/cupertino.dart'",
+  );
 
-  const _Library({required this.directory, required this.name});
+  const _Library({required this.directory, required this.name, required this.import});
 
   final String directory;
   final String name;
-
-  static final RegExp cupertinoImportRegExp = RegExp(r"import 'package:flutter\/cupertino.dart'");
-  static final RegExp materialImportRegExp = RegExp(r"import 'package:flutter\/material.dart'");
-  static final RegExp widgetsImportRegExp = RegExp(r"import 'package:flutter\/widgets.dart'");
-
-  /// The RegExp that finds an import of this library.
-  RegExp get regExp {
-    return switch (this) {
-      _Library.widgets => widgetsImportRegExp,
-      _Library.material => materialImportRegExp,
-      _Library.cupertino => cupertinoImportRegExp,
-    };
-  }
+  final String import;
 }
