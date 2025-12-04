@@ -87,7 +87,7 @@ dependencies:
   args: 2.7.0
   async: 2.13.0
   boolean_selector: 2.1.2
-  characters: 1.4.0
+  characters: 1.4.1
   checked_yaml: 2.0.4
   cli_config: 0.2.0
   clock: 1.1.2
@@ -213,4 +213,4 @@ dependencies:
   pedantic: 1.11.1
   quiver: 3.2.2
   yaml_edit: 2.2.2
-# PUBSPEC CHECKSUM: ckq11n
+# PUBSPEC CHECKSUM: mqhsei
