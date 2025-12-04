@@ -24,6 +24,7 @@ impeller_shaders("modern_shader_fixtures") {
     "sepia.vert",
     "swizzle.frag",
   ]
+  entry_point_prefix = ""
 }
 
 impeller_shaders("shader_fixtures") {
@@ -80,6 +81,7 @@ impeller_shaders("shader_fixtures") {
       "half.frag",
     ]
   }
+  entry_point_prefix = ""
 }
 
 impellerc("runtime_stages") {
