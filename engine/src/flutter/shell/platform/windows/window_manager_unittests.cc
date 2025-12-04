@@ -386,16 +386,15 @@ TEST_F(WindowManagerTest, CreateTooltipWindow) {
       InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
           engine_id(), parent_view_id);
 
-  static WindowRect* allocated_rect = nullptr;
   auto position_callback = [](const WindowSize& child_size,
                               const WindowRect& parent_rect,
                               const WindowRect& output_rect) -> WindowRect* {
-    allocated_rect = new WindowRect();
-    allocated_rect->left = parent_rect.left + 10;
-    allocated_rect->top = parent_rect.top + 10;
-    allocated_rect->width = child_size.width;
-    allocated_rect->height = child_size.height;
-    return allocated_rect;
+    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
+    rect->left = parent_rect.left + 10;
+    rect->top = parent_rect.top + 10;
+    rect->width = child_size.width;
+    rect->height = child_size.height;
+    return rect;
   };
 
   TooltipWindowCreationRequest creation_request{
@@ -416,11 +415,6 @@ TEST_F(WindowManagerTest, CreateTooltipWindow) {
       InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
           engine_id(), tooltip_view_id);
   EXPECT_NE(tooltip_window_handle, nullptr);
-
-  if (allocated_rect) {
-    delete allocated_rect;
-    allocated_rect = nullptr;
-  }
 }
 
 TEST_F(WindowManagerTest, TooltipWindowHasNoActivateStyle) {
@@ -433,16 +427,15 @@ TEST_F(WindowManagerTest, TooltipWindowHasNoActivateStyle) {
       InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
           engine_id(), parent_view_id);
 
-  static WindowRect* allocated_rect = nullptr;
   auto position_callback = [](const WindowSize& child_size,
                               const WindowRect& parent_rect,
                               const WindowRect& output_rect) -> WindowRect* {
-    allocated_rect = new WindowRect();
-    allocated_rect->left = parent_rect.left + 10;
-    allocated_rect->top = parent_rect.top + 10;
-    allocated_rect->width = child_size.width;
-    allocated_rect->height = child_size.height;
-    return allocated_rect;
+    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
+    rect->left = parent_rect.left + 10;
+    rect->top = parent_rect.top + 10;
+    rect->width = child_size.width;
+    rect->height = child_size.height;
+    return rect;
   };
 
   TooltipWindowCreationRequest creation_request{
@@ -463,12 +456,7 @@ TEST_F(WindowManagerTest, TooltipWindowHasNoActivateStyle) {
           engine_id(), tooltip_view_id);
 
   DWORD ex_style = GetWindowLong(tooltip_window_handle, GWL_EXSTYLE);
-  EXPECT_TRUE(ex_style & WS_EX_NOACTIVATE);
-
-  if (allocated_rect) {
-    delete allocated_rect;
-    allocated_rect = nullptr;
-  }
+  EXPECT_TRUE(ex_style & WS_EX_NOACTIVATE)
 }
 
 TEST_F(WindowManagerTest, TooltipWindowDoesNotStealFocus) {
@@ -485,16 +473,15 @@ TEST_F(WindowManagerTest, TooltipWindowDoesNotStealFocus) {
   SetFocus(parent_window_handle);
   HWND focused_before = GetFocus();
 
-  static WindowRect* allocated_rect = nullptr;
   auto position_callback = [](const WindowSize& child_size,
                               const WindowRect& parent_rect,
                               const WindowRect& output_rect) -> WindowRect* {
-    allocated_rect = new WindowRect();
-    allocated_rect->left = parent_rect.left + 10;
-    allocated_rect->top = parent_rect.top + 10;
-    allocated_rect->width = child_size.width;
-    allocated_rect->height = child_size.height;
-    return allocated_rect;
+    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
+    rect->left = parent_rect.left + 10;
+    rect->top = parent_rect.top + 10;
+    rect->width = child_size.width;
+    rect->height = child_size.height;
+    return rect;
   };
 
   TooltipWindowCreationRequest creation_request{
@@ -518,11 +505,6 @@ TEST_F(WindowManagerTest, TooltipWindowDoesNotStealFocus) {
   HWND focused_after = GetFocus();
   EXPECT_EQ(focused_before, focused_after);
   EXPECT_NE(focused_after, tooltip_window_handle);
-
-  if (allocated_rect) {
-    delete allocated_rect;
-    allocated_rect = nullptr;
-  }
 }
 
 TEST_F(WindowManagerTest, TooltipWindowReturnsNoActivateOnMouseClick) {
@@ -535,16 +517,15 @@ TEST_F(WindowManagerTest, TooltipWindowReturnsNoActivateOnMouseClick) {
       InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
           engine_id(), parent_view_id);
 
-  static WindowRect* allocated_rect = nullptr;
   auto position_callback = [](const WindowSize& child_size,
                               const WindowRect& parent_rect,
                               const WindowRect& output_rect) -> WindowRect* {
-    allocated_rect = new WindowRect();
-    allocated_rect->left = parent_rect.left + 10;
-    allocated_rect->top = parent_rect.top + 10;
-    allocated_rect->width = child_size.width;
-    allocated_rect->height = child_size.height;
-    return allocated_rect;
+    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
+    rect->left = parent_rect.left + 10;
+    rect->top = parent_rect.top + 10;
+    rect->width = child_size.width;
+    rect->height = child_size.height;
+    return rect;
   };
 
   TooltipWindowCreationRequest creation_request{
@@ -571,11 +552,6 @@ TEST_F(WindowManagerTest, TooltipWindowReturnsNoActivateOnMouseClick) {
 
   // Verify the tooltip returns MA_NOACTIVATE
   EXPECT_EQ(result, MA_NOACTIVATE);
-
-  if (allocated_rect) {
-    delete allocated_rect;
-    allocated_rect = nullptr;
-  }
 }
 
 TEST_F(WindowManagerTest, TooltipWindowUpdatesPositionOnViewSizeChange) {
@@ -589,7 +565,6 @@ TEST_F(WindowManagerTest, TooltipWindowUpdatesPositionOnViewSizeChange) {
           engine_id(), parent_view_id);
 
   // Track the child size passed to the callback
-  static WindowRect* allocated_rect = nullptr;
   static int callback_count = 0;
   static int last_width = 0;
   static int last_height = 0;
@@ -601,12 +576,13 @@ TEST_F(WindowManagerTest, TooltipWindowUpdatesPositionOnViewSizeChange) {
     last_width = child_size.width;
     last_height = child_size.height;
 
-    allocated_rect = new WindowRect();
-    allocated_rect->left = parent_rect.left + callback_count * 5;
-    allocated_rect->top = parent_rect.top + callback_count * 5;
-    allocated_rect->width = child_size.width;
-    allocated_rect->height = child_size.height;
-    return allocated_rect;
+    // Use malloc since the caller will use free()
+    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
+    rect->left = parent_rect.left + callback_count * 5;
+    rect->top = parent_rect.top + callback_count * 5;
+    rect->width = child_size.width;
+    rect->height = child_size.height;
+    return rect;
   };
 
   TooltipWindowCreationRequest creation_request{
@@ -661,11 +637,6 @@ TEST_F(WindowManagerTest, TooltipWindowUpdatesPositionOnViewSizeChange) {
   // (we offset by callback_count * 5)
   EXPECT_NE(initial_rect.left, new_rect.left);
   EXPECT_NE(initial_rect.top, new_rect.top);
-
-  if (allocated_rect) {
-    delete allocated_rect;
-    allocated_rect = nullptr;
-  }
 }
 
 }  // namespace testing
