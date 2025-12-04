@@ -867,9 +867,7 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
   std::optional<Rect> source_expanded_coverage_hint;
   if (expanded_coverage_hint.has_value()) {
     source_expanded_coverage_hint = expanded_coverage_hint->TransformBounds(
-        Matrix::MakeTranslation(blur_info.source_space_offset) *
-        Matrix::MakeScale(blur_info.source_space_scalar) *
-        entity.GetTransform().Invert());
+        snapshot_entity.GetTransform() * entity.GetTransform().Invert());
   }
 
   std::optional<Snapshot> input_snapshot = GetSnapshot(
@@ -880,8 +878,8 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
 
   std::optional<Quad> source_bounds;
   if (bounds_.has_value()) {
-    Quad global_bounds = bounds_->GetTransformedPoints(effect_transform);
-    source_bounds = snapshot_entity.GetTransform().Transform(global_bounds);
+    Matrix transform = snapshot_entity.GetTransform() * effect_transform;
+    source_bounds = bounds_->GetTransformedPoints(transform);
   }
 
   if (blur_info.scaled_sigma.x < kEhCloseEnough &&
