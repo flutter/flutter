@@ -126,7 +126,7 @@ class TextLayout {
       );
       assert(
         regions.isNotEmpty && regions.length == 1,
-        'Ellipsis must be in a single direction only',
+        'The entire ellipsis must have the same text direction',
       );
       _ellipsisBidiLevel = regions.first.level;
     }
@@ -420,7 +420,7 @@ class TextLayout {
 
     // Now when we calculated all line metrics we have to correct placeholders that depend on it
     for (final LineBlock block in line.visualBlocks) {
-      if (block is TextBlock || block is EllipsisBlock) {
+      if (block is! PlaceholderBlock) {
         continue;
       }
       final placeholderBlock = block as PlaceholderBlock;
@@ -1115,7 +1115,7 @@ abstract class LineBlock {
   double get spanShiftFromLineStart;
 
   String getText(int start, int end) {
-    assert(false);
+    assert(false, 'Only implemented for the ellipsis block');
     return '';
   }
 }

@@ -94,6 +94,7 @@ Future<void> testMain() async {
     final arialStyle = WebParagraphStyle(
       fontFamily: 'Arial',
       fontSize: 50,
+      textDirection: TextDirection.rtl,
       color: const Color(0xFF000000),
     );
     final builder = WebParagraphBuilder(arialStyle);
@@ -119,7 +120,11 @@ Future<void> testMain() async {
     );
     final builder = WebParagraphBuilder(arialStyle);
     builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
-    builder.addText('لABC لم def لل لم ghi');
+    builder.addText('ABC لم def');
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 300));
+    paragraph.paint(canvas, Offset.zero);
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_canvas_mix_1_ltr.png', region: region);
   });
 

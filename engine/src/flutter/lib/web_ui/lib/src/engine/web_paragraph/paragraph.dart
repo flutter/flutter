@@ -975,6 +975,13 @@ class WebParagraph implements ui.Paragraph {
     }
   }
 
+  void paintOnCanvas2D(DomHTMLCanvasElement canvas, ui.Offset offset) {
+    _paint.painter.resizePaintCanvas(ui.window.devicePixelRatio);
+    for (final line in _layout.lines) {
+      _paint.paintLineOnCanvas2D(canvas, _layout, line, offset.dx, offset.dy);
+    }
+  }
+
   @override
   ui.TextRange getLineBoundary(ui.TextPosition position) {
     final int codepointPosition = switch (position.affinity) {

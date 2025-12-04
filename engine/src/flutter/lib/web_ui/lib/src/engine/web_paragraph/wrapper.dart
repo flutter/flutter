@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+
 import 'package:ui/ui.dart' as ui;
+
 import 'code_unit_flags.dart';
 import 'debug.dart';
 import 'layout.dart';
@@ -57,6 +59,8 @@ class TextWrapper {
       if (hardLineBreak) {
         // Break the line and then continue with the current cluster as usual
         WebParagraphDebug.log('isHardLineBreak: $index');
+
+        line.consumePendingText();
 
         // This is the case when the ellipsis will be added to the empty line; weird...
         line.ellipsize(index);
@@ -384,10 +388,11 @@ class _LineBuilder {
   }
 
   bool reachedMaxLines() {
-    if (_layout.paragraph.paragraphStyle.maxLines == null) {
+    final int? maxLines = _layout.paragraph.paragraphStyle.maxLines;
+    if (maxLines == null) {
       return false;
     }
-    return _layout.lines.length >= _layout.paragraph.paragraphStyle.maxLines!;
+    return _layout.lines.length >= maxLines;
   }
 
   bool ellipsize(int clusterIndex) {
@@ -395,14 +400,12 @@ class _LineBuilder {
         (_layout.lines.length + 1) < _layout.paragraph.paragraphStyle.maxLines!) {
       return false;
     }
-    if (_layout.paragraph.paragraphStyle.ellipsis == null ||
-        _layout.paragraph.paragraphStyle.ellipsis!.isEmpty) {
+    // We need to shape the ellipsis here because only here we know the span/textStyle we ellipsize with
+    final String? ellipsis = _layout.paragraph.paragraphStyle.ellipsis;
+    if (ellipsis == null || ellipsis.isEmpty) {
       // No ellipsizing needed, but we have reached max lines
       return true;
     }
-    // We need to shape the ellipsis here because only here we know the span/textStyle we ellipsize with
-    final String ellipsis = _layout.paragraph.paragraphStyle.ellipsis!;
-
     // Let's walk backwards and see how many clusters we need to remove to fit the ellipsis in the line
     double cutOffWidth = 0.0;
     while (true) {
@@ -431,12 +434,7 @@ class _LineBuilder {
       if (_isWhitespace(cluster)) {
         // We skip whitespaces when cutting off for ellipsis, so just continue
         WebParagraphDebug.log('Ellipsize: whitespace');
-      } else if (_widthConsumedText +
-              _widthWhitespaces +
-              _widthPendingText -
-              cutOffWidth +
-              ellipsisSpan.advanceWidth()! <=
-          _maxWidth) {
+      } else if (canFit(ellipsisSpan.advanceWidth()! - cutOffWidth)) {
         WebParagraphDebug.log('Ellipsize: stop $clusterIndex');
         // We can fit the ellipsis now
         _layout.ellipsisClusters = ellipsisSpan.extractClusters();

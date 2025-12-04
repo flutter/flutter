@@ -4,10 +4,7 @@
 
 import 'package:ui/ui.dart' as ui;
 
-import 'debug.dart';
-import 'layout.dart';
-import 'painter.dart';
-import 'paragraph.dart';
+import '../../engine.dart';
 
 /// Paints on a [WebParagraph].
 ///
@@ -107,7 +104,6 @@ class TextPaint {
             ? layout.ellipsisClusters[i]
             : layout.allClusters[i];
         // We need to adjust the canvas size to fit the block in case there is scaling or zoom involved
-        // We need to adjust the canvas size to fit the block in case there is scaling or zoom involved
         final (ui.Rect sourceRect, ui.Rect targetRect) = calculateCluster(
           layout,
           block,
@@ -129,13 +125,118 @@ class TextPaint {
           case StyleElements.shadows:
             paintContext.save();
             for (final ui.Shadow shadow in clusterText.style.shadows!) {
-              painter.fillShadow(clusterText, shadow, block.isLtr);
+              painter.fillShadow(
+                clusterText,
+                shadow,
+                // We shape ellipsis with default direction coming from the attaching block
+                // and all the other blocks with the default paragraph direction
+                block is EllipsisBlock
+                    ? block.isLtr
+                    : layout.paragraph.paragraphStyle.textDirection == ui.TextDirection.ltr,
+              );
               painter.paintShadow(canvas, sourceRect, targetRect);
             }
             paintContext.restore();
           case StyleElements.text:
-            painter.fillTextCluster(clusterText, block.isLtr);
+            painter.fillTextCluster(
+              clusterText,
+              // We shape ellipsis with default direction coming from the attaching block
+              // and all the other blocks with the default paragraph direction
+              block is EllipsisBlock
+                  ? block.isLtr
+                  : layout.paragraph.paragraphStyle.textDirection == ui.TextDirection.ltr,
+            );
             painter.paintTextCluster(canvas, sourceRect, targetRect);
+          default:
+            assert(false);
+        }
+      }
+    }
+  }
+
+  void _paintByClustersOnCanvas2D(
+    StyleElements styleElement,
+    DomHTMLCanvasElement canvas,
+    TextLayout layout,
+    TextLine line,
+    double x,
+    double y,
+  ) {
+    // We traverse clusters in the order of visual blocks (broken by text styles and bidi runs, then reordered)
+    // and then in visual order inside blocks
+    for (final LineBlock block in line.visualBlocks) {
+      if (!block.style.hasElement(styleElement)) {
+        continue;
+      }
+      // Placeholders do not need painting, just reserving the space
+      if (block.clusterRange.size == 1 &&
+          layout.allClusters[block.clusterRange.start] is PlaceholderCluster) {
+        continue;
+      }
+
+      WebParagraphDebug.log(
+        '+paintByClusters: ${block.textRange} ${block.clusterRange} ${(block as TextBlock).clusterRangeWithoutWhitespaces} ${block.whitespacesWidth} ${block.isLtr} ${line.advance.left} + ${line.formattingShift} + ${block.shiftFromLineStart}',
+      );
+
+      // We are painting clusters in visual order so that if they step on each other, the paint
+      // order is correct.
+      final int start = block.isLtr
+          ? block.clusterRangeWithoutWhitespaces.start
+          : block.clusterRangeWithoutWhitespaces.end - 1;
+      final int end = block.isLtr
+          ? block.clusterRangeWithoutWhitespaces.end
+          : block.clusterRangeWithoutWhitespaces.start - 1;
+      final int step = block.isLtr ? 1 : -1;
+      for (int i = start; i != end; i += step) {
+        final clusterText = block is EllipsisBlock
+            ? layout.ellipsisClusters[i]
+            : layout.allClusters[i];
+        // We need to adjust the canvas size to fit the block in case there is scaling or zoom involved
+        // We need to adjust the canvas size to fit the block in case there is scaling or zoom involved
+        final (ui.Rect sourceRect, ui.Rect targetRect) = calculateCluster(
+          layout,
+          block,
+          clusterText,
+          ui.Offset(
+            // TODO(mdebbar): Avoid use of `block.spanShiftFromLineStart` (similar to `getPositionForOffset`)
+            line.advance.left + line.formattingShift + block.spanShiftFromLineStart,
+            line.advance.top + line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent,
+          ),
+          ui.Offset(x, y),
+          ui.window.devicePixelRatio,
+        );
+
+        if (sourceRect.isEmpty) {
+          // Let's skip empty clusters
+          continue;
+        }
+        switch (styleElement) {
+          case StyleElements.text:
+            final WebTextStyle style = clusterText.style;
+            paintContext.fillStyle = style.getForegroundColor().toCssString();
+            // We fill the text cluster into a rectange [0,0,w,h]
+            // but we need to shift the y coordinate by the font ascent
+            // becase the text is drawn at the ascent, not at 0
+            clusterText.fillOnContext(
+              paintContext,
+              /*ignore the text cluster shift from the text run*/
+              x: (block.isLtr ? 0 : clusterText.advance.width),
+              y: 0,
+            );
+
+            final DomImageBitmap bitmap = paintCanvas.transferToImageBitmap();
+            canvas.context2D.drawImage(
+              bitmap,
+              sourceRect.left,
+              sourceRect.top,
+              sourceRect.width,
+              sourceRect.height,
+              targetRect.left,
+              targetRect.top,
+              targetRect.width,
+              targetRect.height,
+            );
+
           default:
             assert(false);
         }
@@ -181,7 +282,7 @@ class TextPaint {
 
     if (WebParagraphDebug.logging) {
       final String text = block is EllipsisBlock
-          ? block.getText(webTextCluster.start, webTextCluster.end)
+          ? paragraph.paragraphStyle.ellipsis!
           : paragraph.getText(webTextCluster.start, webTextCluster.end);
       final double left = clusterOffset.dx + webTextCluster.advance.left + lineOffset.dx;
       final double shift = left - left.floorToDouble();
@@ -246,5 +347,16 @@ class TextPaint {
 
     WebParagraphDebug.log('paintLineOnCanvasKit.Decorations: ${line.textRange}');
     _paintByBlocks(StyleElements.decorations, canvas, layout, line, x, y);
+  }
+
+  void paintLineOnCanvas2D(
+    DomHTMLCanvasElement canvas,
+    TextLayout layout,
+    TextLine line,
+    double x,
+    double y,
+  ) {
+    WebParagraphDebug.log('paintLineOnCanvasKit.Text: ${line.textRange}');
+    _paintByClustersOnCanvas2D(StyleElements.text, canvas, layout, line, x, y);
   }
 }
