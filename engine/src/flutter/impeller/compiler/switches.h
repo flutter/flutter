@@ -41,6 +41,7 @@ class Switches {
   uint32_t gles_language_version = 0;
   std::string metal_version = "";
   std::string entry_point = "";
+  std::string entry_point_prefix = "";
   bool use_half_textures = false;
   bool require_framebuffer_fetch = false;
 
