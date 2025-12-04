@@ -14,6 +14,7 @@ impeller_shaders("imgui_shaders") {
     "imgui_raster.vert",
     "imgui_raster.frag",
   ]
+  entry_point_prefix = ""
 }
 
 impeller_component("imgui_impeller_backend") {

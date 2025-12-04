@@ -93,6 +93,17 @@ TEST(SwitchesTest, ShaderBundleModeValid) {
   ASSERT_EQ(switches.shader_bundle, "{}");
 }
 
+TEST(SwitchesTest, EntryPointPrefixIsApplied) {
+  Switches switches =
+      MakeSwitchesDesktopGL({"--entry-point-prefix=my_prefix_"});
+  ASSERT_TRUE(switches.AreValid(std::cout));
+  EXPECT_EQ(switches.entry_point_prefix, "my_prefix_");
+
+  switches.source_file_name = "test.frag";
+  auto options = switches.CreateSourceOptions();
+  EXPECT_EQ(options.entry_point_name, "my_prefix_test_fragment_main");
+}
+
 }  // namespace testing
 }  // namespace compiler
 }  // namespace impeller
