@@ -251,7 +251,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
     if (_isValidAcceptableDate(date)) {
       _selectedDate = date;
       _inputText = text;
-      callback?.call(_selectedDate!);
+      callback?.call(_selectedDate);
     }
   }
 

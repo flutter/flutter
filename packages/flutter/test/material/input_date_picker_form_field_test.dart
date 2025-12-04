@@ -495,7 +495,6 @@ void main() {
       await tester.pumpWidget(
         inputDatePickerField(
           initialDate: DateTime(2016, DateTime.february, 21),
-          acceptEmptyDate: false,
           onDateSubmitted: (DateTime? date) => submittedDate = date,
           onDateSaved: (DateTime? date) => savedDate = date,
           formKey: formKey,
