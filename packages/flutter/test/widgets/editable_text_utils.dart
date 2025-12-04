@@ -56,7 +56,7 @@ Future<void> sendKeys(
   bool shortcutModifier = false,
   required TargetPlatform targetPlatform,
 }) async {
-  final String targetPlatformString = targetPlatform.toString();
+  final targetPlatformString = targetPlatform.toString();
   final String platform = targetPlatformString
       .substring(targetPlatformString.indexOf('.') + 1)
       .toLowerCase();
@@ -87,7 +87,7 @@ Future<void> sendKeys(
       platform: platform,
     );
   }
-  for (final LogicalKeyboardKey key in keys) {
+  for (final key in keys) {
     await tester.sendKeyEvent(key, platform: platform);
     await tester.pump();
   }

@@ -31,7 +31,8 @@ class RestorableSheet extends StatefulWidget {
 }
 
 @pragma('vm:entry-point')
-class _RestorableSheetState extends State<RestorableSheet> with RestorationMixin {
+class _RestorableSheetState extends State<RestorableSheet>
+    with RestorationMixin {
   final RestorableInt _counter = RestorableInt(0);
   late RestorableRouteFuture<int?> _restorableSheetRouteFuture;
 
@@ -41,7 +42,10 @@ class _RestorableSheetState extends State<RestorableSheet> with RestorationMixin
     _restorableSheetRouteFuture = RestorableRouteFuture<int?>(
       onComplete: _changeCounter,
       onPresent: (NavigatorState navigator, Object? arguments) {
-        return navigator.restorablePush(_counterSheetBuilder, arguments: _counter.value);
+        return navigator.restorablePush(
+          _counterSheetBuilder,
+          arguments: _counter.value,
+        );
       },
     );
   }
@@ -62,7 +66,10 @@ class _RestorableSheetState extends State<RestorableSheet> with RestorationMixin
   }
 
   @pragma('vm:entry-point')
-  static Route<void> _counterSheetBuilder(BuildContext context, Object? arguments) {
+  static Route<void> _counterSheetBuilder(
+    BuildContext context,
+    Object? arguments,
+  ) {
     return CupertinoSheetRoute<int?>(
       builder: (BuildContext context) {
         return Navigator(
@@ -132,7 +139,8 @@ class CounterSheetScaffold extends StatefulWidget {
   State<CounterSheetScaffold> createState() => _CounterSheetScaffoldState();
 }
 
-class _CounterSheetScaffoldState extends State<CounterSheetScaffold> with RestorationMixin {
+class _CounterSheetScaffoldState extends State<CounterSheetScaffold>
+    with RestorationMixin {
   late RestorableInt _counter;
   late RestorableRouteFuture<int?> _multiplicationRouteFuture;
 
@@ -143,13 +151,19 @@ class _CounterSheetScaffoldState extends State<CounterSheetScaffold> with Restor
     _multiplicationRouteFuture = RestorableRouteFuture<int?>(
       onComplete: _changeCounter,
       onPresent: (NavigatorState navigator, Object? arguments) {
-        return navigator.restorablePush(_multiplicationRouteBuilder, arguments: _counter.value);
+        return navigator.restorablePush(
+          _multiplicationRouteBuilder,
+          arguments: _counter.value,
+        );
       },
     );
   }
 
   @pragma('vm:entry-point')
-  static Route<void> _multiplicationRouteBuilder(BuildContext context, Object? arguments) {
+  static Route<void> _multiplicationRouteBuilder(
+    BuildContext context,
+    Object? arguments,
+  ) {
     return CupertinoPageRoute<int?>(
       settings: const RouteSettings(name: '/multiplication'),
       builder: (BuildContext context) {
@@ -215,7 +229,10 @@ class _CounterSheetScaffoldState extends State<CounterSheetScaffold> with Restor
               child: const Text('Go to Multiplication Page'),
             ),
             CupertinoButton(
-              onPressed: () => Navigator.of(context, rootNavigator: true).pop(_counter.value),
+              onPressed: () => Navigator.of(
+                context,
+                rootNavigator: true,
+              ).pop(_counter.value),
               child: const Text('Pop Sheet'),
             ),
           ],
@@ -234,7 +251,8 @@ class MultiplicationPage extends StatefulWidget {
   State<MultiplicationPage> createState() => _MultiplicationPageState();
 }
 
-class _MultiplicationPageState extends State<MultiplicationPage> with RestorationMixin {
+class _MultiplicationPageState extends State<MultiplicationPage>
+    with RestorationMixin {
   late final RestorableInt _counter = RestorableInt(widget.counter);
 
   @override

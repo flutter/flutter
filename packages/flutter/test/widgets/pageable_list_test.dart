@@ -24,7 +24,7 @@ Widget buildFrame({
   List<int> pages = defaultPages,
   required TextDirection textDirection,
 }) {
-  final PageView child = PageView(
+  final child = PageView(
     reverse: reverse,
     onPageChanged: (int page) {
       currentPage = page;
@@ -44,7 +44,7 @@ Widget buildFrame({
 
 Future<void> page(WidgetTester tester, Offset offset) {
   return TestAsyncUtils.guard(() async {
-    final String itemText = currentPage != null ? currentPage.toString() : '0';
+    final itemText = currentPage != null ? currentPage.toString() : '0';
     await tester.drag(find.text(itemText), offset);
     await tester.pumpAndSettle();
   });

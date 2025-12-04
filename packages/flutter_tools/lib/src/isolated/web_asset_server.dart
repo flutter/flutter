@@ -35,7 +35,7 @@ import '../web/module_metadata.dart';
 import '../web_template.dart';
 import 'proxy_middleware.dart';
 import 'release_asset_server.dart';
-import 'web_server_utlities.dart';
+import 'web_server_utilities.dart';
 
 // A minimal index for projects that do not yet support web. A meta tag is used
 // to ensure loaded scripts are always parsed as UTF-8.
@@ -197,8 +197,7 @@ class WebAssetServer implements AssetReader {
   }) async {
     final String hostname = webDevServerConfig.host;
     final int port = webDevServerConfig.port;
-    final String? tlsCertPath = webDevServerConfig.https?.certPath;
-    final String? tlsCertKeyPath = webDevServerConfig.https?.certKeyPath;
+    final HttpsConfig? httpsConfig = webDevServerConfig.https;
     final Map<String, String> extraHeaders = webDevServerConfig.headers;
     final List<ProxyRule> proxy = webDevServerConfig.proxy;
 
@@ -217,10 +216,10 @@ class WebAssetServer implements AssetReader {
     const kMaxRetries = 4;
     for (var i = 0; i <= kMaxRetries; i++) {
       try {
-        if (tlsCertPath != null && tlsCertKeyPath != null) {
+        if (httpsConfig != null) {
           final serverContext = SecurityContext()
-            ..useCertificateChain(tlsCertPath)
-            ..usePrivateKey(tlsCertKeyPath);
+            ..useCertificateChain(httpsConfig.certPath)
+            ..usePrivateKey(httpsConfig.certKeyPath);
           httpServer = await HttpServer.bindSecure(address, port, serverContext);
         } else {
           httpServer = await HttpServer.bind(address, port);
@@ -260,7 +259,7 @@ class WebAssetServer implements AssetReader {
     final int selectedPort = server.selectedPort;
 
     final cleanHost = hostname == webDevAnyHostDefault ? 'localhost' : hostname;
-    final scheme = tlsCertPath != null && tlsCertKeyPath != null ? 'https' : 'http';
+    final scheme = httpsConfig != null ? 'https' : 'http';
     server._baseUri = Uri(
       scheme: scheme,
       host: cleanHost,

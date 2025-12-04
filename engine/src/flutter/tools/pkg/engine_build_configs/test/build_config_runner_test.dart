@@ -21,14 +21,14 @@ void main() {
   // Find the engine repo.
   final engine = Engine.findWithin();
 
-  final BuilderConfig buildConfig = BuilderConfig.fromJson(
+  final buildConfig = BuilderConfig.fromJson(
     path: 'linux_test_config',
     map: convert.jsonDecode(fixtures.buildConfigJson) as Map<String, Object?>,
   );
 
   test('BuildTaskRunner runs the right commands', () async {
     final BuildTask generator = buildConfig.builds[0].generators[0];
-    final BuildTaskRunner taskRunner = BuildTaskRunner(
+    final taskRunner = BuildTaskRunner(
       platform: FakePlatform(operatingSystem: Platform.linux, numberOfProcessors: 32),
       processRunner: ProcessRunner(
         // dryRun should not try to spawn any processes.
@@ -39,7 +39,7 @@ void main() {
       task: generator,
       dryRun: true,
     );
-    final List<RunnerEvent> events = <RunnerEvent>[];
+    final events = <RunnerEvent>[];
     void handler(RunnerEvent event) => events.add(event);
     final bool runResult = await taskRunner.run(handler);
 
@@ -55,7 +55,7 @@ void main() {
 
   test('BuildTestRunner runs the right commands', () async {
     final BuildTest test = buildConfig.builds[0].tests[0];
-    final BuildTestRunner testRunner = BuildTestRunner(
+    final testRunner = BuildTestRunner(
       platform: FakePlatform(operatingSystem: Platform.linux, numberOfProcessors: 32),
       processRunner: ProcessRunner(
         // dryRun should not try to spawn any processes.
@@ -66,7 +66,7 @@ void main() {
       test: test,
       dryRun: true,
     );
-    final List<RunnerEvent> events = <RunnerEvent>[];
+    final events = <RunnerEvent>[];
     void handler(RunnerEvent event) => events.add(event);
     final bool runResult = await testRunner.run(handler);
 
@@ -84,7 +84,7 @@ void main() {
 
   test('GlobalBuildRunner runs the right commands', () async {
     final Build targetBuild = buildConfig.builds[0];
-    final BuildRunner buildRunner = BuildRunner(
+    final buildRunner = BuildRunner(
       platform: FakePlatform(operatingSystem: Platform.linux, numberOfProcessors: 32),
       processRunner: ProcessRunner(
         // dryRun should not try to spawn any processes.
@@ -95,7 +95,7 @@ void main() {
       build: targetBuild,
       dryRun: true,
     );
-    final List<RunnerEvent> events = <RunnerEvent>[];
+    final events = <RunnerEvent>[];
     void handler(RunnerEvent event) => events.add(event);
     final bool runResult = await buildRunner.run(handler);
 
@@ -118,7 +118,7 @@ void main() {
     expect(events[2].name, equals('$buildName: ninja'));
     final String rootPath = path.dirname(path.dirname(engine.srcDir.path));
     expect(events[2].command[0], equals('$rootPath/third_party/ninja/ninja'));
-    final String configPath = '${engine.srcDir.path}/out/${targetBuild.ninja.config}';
+    final configPath = '${engine.srcDir.path}/out/${targetBuild.ninja.config}';
     expect(events[2].command.contains(configPath), isTrue);
     for (final String target in targetBuild.ninja.targets) {
       expect(events[2].command.contains(target), isTrue);
@@ -147,7 +147,7 @@ void main() {
 
   test('GlobalBuildRunner extra args are propagated correctly', () async {
     final Build targetBuild = buildConfig.builds[0];
-    final BuildRunner buildRunner = BuildRunner(
+    final buildRunner = BuildRunner(
       platform: FakePlatform(operatingSystem: Platform.linux, numberOfProcessors: 32),
       processRunner: ProcessRunner(
         // dryRun should not try to spawn any processes.
@@ -161,7 +161,7 @@ void main() {
       extraTestArgs: <String>['--extra-test-arg'],
       dryRun: true,
     );
-    final List<RunnerEvent> events = <RunnerEvent>[];
+    final events = <RunnerEvent>[];
     void handler(RunnerEvent event) => events.add(event);
     final bool runResult = await buildRunner.run(handler);
 
@@ -187,7 +187,7 @@ void main() {
 
   test('GlobalBuildRunner passes large -j for an rbe build', () async {
     final Build targetBuild = buildConfig.builds[0];
-    final BuildRunner buildRunner = BuildRunner(
+    final buildRunner = BuildRunner(
       platform: FakePlatform(operatingSystem: Platform.linux, numberOfProcessors: 32),
       processRunner: ProcessRunner(processManager: _fakeProcessManager()),
       abi: ffi.Abi.linuxX64,
@@ -196,7 +196,7 @@ void main() {
       extraGnArgs: <String>['--rbe'],
       dryRun: true,
     );
-    final List<RunnerEvent> events = <RunnerEvent>[];
+    final events = <RunnerEvent>[];
     void handler(RunnerEvent event) => events.add(event);
     final bool runResult = await buildRunner.run(handler);
 
@@ -229,7 +229,7 @@ void main() {
     'GlobalBuildRunner passes the specified -j when explicitly provided in an RBE build',
     () async {
       final Build targetBuild = buildConfig.builds[0];
-      final BuildRunner buildRunner = BuildRunner(
+      final buildRunner = BuildRunner(
         platform: FakePlatform(operatingSystem: Platform.linux, numberOfProcessors: 32),
         processRunner: ProcessRunner(processManager: _fakeProcessManager()),
         abi: ffi.Abi.linuxX64,
@@ -239,7 +239,7 @@ void main() {
         extraGnArgs: <String>['--rbe'],
         dryRun: true,
       );
-      final List<RunnerEvent> events = <RunnerEvent>[];
+      final events = <RunnerEvent>[];
       void handler(RunnerEvent event) => events.add(event);
       final bool runResult = await buildRunner.run(handler);
 
@@ -259,7 +259,7 @@ void main() {
 
   test('GlobalBuildRunner sets default RBE env vars in an RBE build', () async {
     final Build targetBuild = buildConfig.builds[0];
-    final BuildRunner buildRunner = BuildRunner(
+    final buildRunner = BuildRunner(
       platform: FakePlatform(operatingSystem: Platform.linux, numberOfProcessors: 32),
       processRunner: ProcessRunner(processManager: _fakeProcessManager()),
       abi: ffi.Abi.linuxX64,
@@ -269,7 +269,7 @@ void main() {
       extraGnArgs: <String>['--rbe'],
       dryRun: true,
     );
-    final List<RunnerEvent> events = <RunnerEvent>[];
+    final events = <RunnerEvent>[];
     void handler(RunnerEvent event) => events.add(event);
     final bool runResult = await buildRunner.run(handler);
 
@@ -291,7 +291,7 @@ void main() {
 
   test('GlobalBuildRunner sets RBE_disable_remote when remote builds are disabled', () async {
     final Build targetBuild = buildConfig.builds[0];
-    final BuildRunner buildRunner = BuildRunner(
+    final buildRunner = BuildRunner(
       platform: FakePlatform(operatingSystem: Platform.linux, numberOfProcessors: 32),
       processRunner: ProcessRunner(processManager: _fakeProcessManager()),
       abi: ffi.Abi.linuxX64,
@@ -302,7 +302,7 @@ void main() {
       extraGnArgs: <String>['--rbe'],
       dryRun: true,
     );
-    final List<RunnerEvent> events = <RunnerEvent>[];
+    final events = <RunnerEvent>[];
     void handler(RunnerEvent event) => events.add(event);
     final bool runResult = await buildRunner.run(handler);
 
@@ -325,7 +325,7 @@ void main() {
     'GlobalBuildRunner sets RBE_exec_strategy when a non-default value is passed in the RbeConfig',
     () async {
       final Build targetBuild = buildConfig.builds[0];
-      final BuildRunner buildRunner = BuildRunner(
+      final buildRunner = BuildRunner(
         platform: FakePlatform(operatingSystem: Platform.linux, numberOfProcessors: 32),
         processRunner: ProcessRunner(processManager: _fakeProcessManager()),
         abi: ffi.Abi.linuxX64,
@@ -336,7 +336,7 @@ void main() {
         extraGnArgs: <String>['--rbe'],
         dryRun: true,
       );
-      final List<RunnerEvent> events = <RunnerEvent>[];
+      final events = <RunnerEvent>[];
       void handler(RunnerEvent event) => events.add(event);
       final bool runResult = await buildRunner.run(handler);
 
@@ -360,7 +360,7 @@ void main() {
     'GlobalBuildRunner passes the specified -j when explicitly provided in a non-RBE build',
     () async {
       final Build targetBuild = buildConfig.builds[0];
-      final BuildRunner buildRunner = BuildRunner(
+      final buildRunner = BuildRunner(
         platform: FakePlatform(operatingSystem: Platform.linux, numberOfProcessors: 32),
         processRunner: ProcessRunner(processManager: _fakeProcessManager()),
         abi: ffi.Abi.linuxX64,
@@ -370,7 +370,7 @@ void main() {
         extraGnArgs: <String>['--no-rbe'],
         dryRun: true,
       );
-      final List<RunnerEvent> events = <RunnerEvent>[];
+      final events = <RunnerEvent>[];
       void handler(RunnerEvent event) => events.add(event);
       final bool runResult = await buildRunner.run(handler);
 
@@ -390,7 +390,7 @@ void main() {
 
   test('GlobalBuildRunner skips GN when runGn is false', () async {
     final Build targetBuild = buildConfig.builds[0];
-    final BuildRunner buildRunner = BuildRunner(
+    final buildRunner = BuildRunner(
       platform: FakePlatform(operatingSystem: Platform.linux, numberOfProcessors: 32),
       processRunner: ProcessRunner(
         // dryRun should not try to spawn any processes.
@@ -402,7 +402,7 @@ void main() {
       runGn: false,
       dryRun: true,
     );
-    final List<RunnerEvent> events = <RunnerEvent>[];
+    final events = <RunnerEvent>[];
     void handler(RunnerEvent event) => events.add(event);
     final bool runResult = await buildRunner.run(handler);
 
@@ -414,7 +414,7 @@ void main() {
     expect(events[0] is RunnerStart, isTrue);
     expect(events[0].name, equals('$buildName: ninja'));
     expect(events[0].command[0], contains('ninja'));
-    final String configPath = '${engine.srcDir.path}/out/${targetBuild.ninja.config}';
+    final configPath = '${engine.srcDir.path}/out/${targetBuild.ninja.config}';
     expect(events[0].command.contains(configPath), isTrue);
     for (final String target in targetBuild.ninja.targets) {
       expect(events[0].command.contains(target), isTrue);
@@ -425,7 +425,7 @@ void main() {
 
   test('GlobalBuildRunner skips Ninja when runNinja is false', () async {
     final Build targetBuild = buildConfig.builds[0];
-    final BuildRunner buildRunner = BuildRunner(
+    final buildRunner = BuildRunner(
       platform: FakePlatform(operatingSystem: Platform.linux, numberOfProcessors: 32),
       processRunner: ProcessRunner(
         // dryRun should not try to spawn any processes.
@@ -437,7 +437,7 @@ void main() {
       runNinja: false,
       dryRun: true,
     );
-    final List<RunnerEvent> events = <RunnerEvent>[];
+    final events = <RunnerEvent>[];
     void handler(RunnerEvent event) => events.add(event);
     final bool runResult = await buildRunner.run(handler);
 
@@ -467,8 +467,7 @@ void main() {
 
   test('fixes gcc paths', () {
     final String outDir = path.join(io.Directory.current.path, 'foo', 'bar');
-    const String error =
-        'flutter/impeller/renderer/backend/metal/allocator_mtl.h:69:33: error: foobar';
+    const error = 'flutter/impeller/renderer/backend/metal/allocator_mtl.h:69:33: error: foobar';
     final String fixed = BuildRunner.fixGccPaths('../../$error', outDir);
     expect(fixed, './$error');
   });
@@ -476,7 +475,7 @@ void main() {
   test('fixes gcc paths with ansi colors', () {
     final String outDir = path.join(io.Directory.current.path, 'foo', 'bar');
     // An error string with ANSI escape codes for colors.
-    final List<int> bytes = [
+    final bytes = <int>[
       27, 91, 49, 109, 46, 46, 47, 46, 46, 47, 102, //
       108, 117, 116, 116, 101, 114, 47, 105, 109, 112, 101, 108, 108, 101, //
       114, 47, 100, 105, 115, 112, 108, 97, 121, 95, 108, 105, 115, 116, 47, //
@@ -504,7 +503,7 @@ void main() {
 
   test('GlobalBuildRunner skips generators when runGenerators is false', () async {
     final Build targetBuild = buildConfig.builds[0];
-    final BuildRunner buildRunner = BuildRunner(
+    final buildRunner = BuildRunner(
       platform: FakePlatform(operatingSystem: Platform.linux, numberOfProcessors: 32),
       processRunner: ProcessRunner(
         // dryRun should not try to spawn any processes.
@@ -516,7 +515,7 @@ void main() {
       runGenerators: false,
       dryRun: true,
     );
-    final List<RunnerEvent> events = <RunnerEvent>[];
+    final events = <RunnerEvent>[];
     void handler(RunnerEvent event) => events.add(event);
     final bool runResult = await buildRunner.run(handler);
 
@@ -528,7 +527,7 @@ void main() {
     expect(events[2] is RunnerStart, isTrue);
     expect(events[2].name, equals('$buildName: ninja'));
     expect(events[2].command[0], contains('ninja'));
-    final String configPath = '${engine.srcDir.path}/out/${targetBuild.ninja.config}';
+    final configPath = '${engine.srcDir.path}/out/${targetBuild.ninja.config}';
     expect(events[2].command.contains(configPath), isTrue);
     for (final String target in targetBuild.ninja.targets) {
       expect(events[2].command.contains(target), isTrue);
@@ -548,7 +547,7 @@ void main() {
 
   test('GlobalBuildRunner skips tests when runTests is false', () async {
     final Build targetBuild = buildConfig.builds[0];
-    final BuildRunner buildRunner = BuildRunner(
+    final buildRunner = BuildRunner(
       platform: FakePlatform(operatingSystem: Platform.linux, numberOfProcessors: 32),
       processRunner: ProcessRunner(
         // dryRun should not try to spawn any processes.
@@ -560,7 +559,7 @@ void main() {
       runTests: false,
       dryRun: true,
     );
-    final List<RunnerEvent> events = <RunnerEvent>[];
+    final events = <RunnerEvent>[];
     void handler(RunnerEvent event) => events.add(event);
     final bool runResult = await buildRunner.run(handler);
 
@@ -580,7 +579,7 @@ void main() {
 
   test('GlobalBuildRunner extraGnArgs overrides build config args', () async {
     final Build targetBuild = buildConfig.builds[0];
-    final BuildRunner buildRunner = BuildRunner(
+    final buildRunner = BuildRunner(
       platform: FakePlatform(operatingSystem: Platform.linux, numberOfProcessors: 32),
       processRunner: ProcessRunner(processManager: _fakeProcessManager()),
       abi: ffi.Abi.linuxX64,
@@ -589,7 +588,7 @@ void main() {
       extraGnArgs: <String>['--no-lto', '--rbe'],
       dryRun: true,
     );
-    final List<RunnerEvent> events = <RunnerEvent>[];
+    final events = <RunnerEvent>[];
     void handler(RunnerEvent event) => events.add(event);
     final bool runResult = await buildRunner.run(handler);
 
@@ -611,7 +610,7 @@ void main() {
 
   test('GlobalBuildRunner canRun returns false on OS mismatch', () async {
     final Build targetBuild = buildConfig.builds[0];
-    final BuildRunner buildRunner = BuildRunner(
+    final buildRunner = BuildRunner(
       platform: FakePlatform(operatingSystem: Platform.macOS, numberOfProcessors: 32),
       processRunner: ProcessRunner(
         // dryRun should not try to spawn any processes.
@@ -622,7 +621,7 @@ void main() {
       build: targetBuild,
       dryRun: true,
     );
-    final List<RunnerEvent> events = <RunnerEvent>[];
+    final events = <RunnerEvent>[];
     void handler(RunnerEvent event) => events.add(event);
     final bool runResult = await buildRunner.run(handler);
 
@@ -632,7 +631,7 @@ void main() {
 
   test('GlobalBuildRunner fails when gn fails', () async {
     final Build targetBuild = buildConfig.builds[0];
-    final BuildRunner buildRunner = BuildRunner(
+    final buildRunner = BuildRunner(
       platform: FakePlatform(operatingSystem: Platform.linux, numberOfProcessors: 32),
       processRunner: ProcessRunner(
         processManager: _fakeProcessManager(gnResult: io.ProcessResult(1, 1, '', '')),
@@ -641,7 +640,7 @@ void main() {
       engineSrcDir: engine.srcDir,
       build: targetBuild,
     );
-    final List<RunnerEvent> events = <RunnerEvent>[];
+    final events = <RunnerEvent>[];
     void handler(RunnerEvent event) => events.add(event);
     final bool runResult = await buildRunner.run(handler);
 
@@ -657,7 +656,7 @@ void main() {
 
   test('GlobalBuildRunner fails when ninja fails', () async {
     final Build targetBuild = buildConfig.builds[0];
-    final BuildRunner buildRunner = BuildRunner(
+    final buildRunner = BuildRunner(
       platform: FakePlatform(operatingSystem: Platform.linux, numberOfProcessors: 32),
       processRunner: ProcessRunner(
         processManager: _fakeProcessManager(ninjaResult: io.ProcessResult(1, 1, '', '')),
@@ -666,7 +665,7 @@ void main() {
       engineSrcDir: engine.srcDir,
       build: targetBuild,
     );
-    final List<RunnerEvent> events = <RunnerEvent>[];
+    final events = <RunnerEvent>[];
     void handler(RunnerEvent event) => events.add(event);
     final bool runResult = await buildRunner.run(handler);
 
@@ -682,7 +681,7 @@ void main() {
 
   test('GlobalBuildRunner fails an RBE build when bootstrap fails', () async {
     final Build targetBuild = buildConfig.builds[0];
-    final BuildRunner buildRunner = BuildRunner(
+    final buildRunner = BuildRunner(
       platform: FakePlatform(operatingSystem: Platform.linux, numberOfProcessors: 32),
       processRunner: ProcessRunner(
         processManager: _fakeProcessManager(bootstrapResult: io.ProcessResult(1, 1, '', '')),
@@ -692,7 +691,7 @@ void main() {
       build: targetBuild,
       extraGnArgs: <String>['--rbe'],
     );
-    final List<RunnerEvent> events = <RunnerEvent>[];
+    final events = <RunnerEvent>[];
     void handler(RunnerEvent event) => events.add(event);
     final bool runResult = await buildRunner.run(handler);
 
@@ -709,7 +708,7 @@ void main() {
 
   test('GlobalBuildRunner fails an RBE build when bootstrap does not exist', () async {
     final Build targetBuild = buildConfig.builds[0];
-    final BuildRunner buildRunner = BuildRunner(
+    final buildRunner = BuildRunner(
       platform: FakePlatform(operatingSystem: Platform.linux, numberOfProcessors: 32),
       processRunner: ProcessRunner(
         processManager: _fakeProcessManager(
@@ -726,7 +725,7 @@ void main() {
       build: targetBuild,
       extraGnArgs: <String>['--rbe'],
     );
-    final List<RunnerEvent> events = <RunnerEvent>[];
+    final events = <RunnerEvent>[];
     void handler(RunnerEvent event) => events.add(event);
     final bool runResult = await buildRunner.run(handler);
 
@@ -737,7 +736,7 @@ void main() {
 
   test('GlobalBuildRunner throws a StateError on an unsupported host cpu', () async {
     final Build targetBuild = buildConfig.builds[0];
-    final BuildRunner buildRunner = BuildRunner(
+    final buildRunner = BuildRunner(
       platform: FakePlatform(operatingSystem: Platform.linux, numberOfProcessors: 32),
       processRunner: ProcessRunner(processManager: _fakeProcessManager()),
       abi: ffi.Abi.linuxRiscv32,
@@ -746,7 +745,7 @@ void main() {
       extraGnArgs: <String>['--rbe'],
     );
 
-    bool caughtError = false;
+    var caughtError = false;
     try {
       await buildRunner.run((RunnerEvent event) {});
     } on StateError catch (_) {
@@ -760,10 +759,10 @@ void main() {
       'build_config_runner.test',
     );
     try {
-      final io.Directory srcDir = io.Directory(path.join(emptyDir.path, 'src'));
-      final io.Directory hostDebug = io.Directory(path.join(srcDir.path, 'out', 'build_name'))
+      final srcDir = io.Directory(path.join(emptyDir.path, 'src'));
+      final hostDebug = io.Directory(path.join(srcDir.path, 'out', 'build_name'))
         ..createSync(recursive: true);
-      final io.File file = io.File(path.join(hostDebug.path, 'compile_commands.json'));
+      final file = io.File(path.join(hostDebug.path, 'compile_commands.json'));
       file.writeAsStringSync(r'''
 [
   {
@@ -779,7 +778,7 @@ void main() {
 ]
 ''', flush: true);
       final Build targetBuild = buildConfig.builds[0];
-      final BuildRunner buildRunner = BuildRunner(
+      final buildRunner = BuildRunner(
         platform: FakePlatform(operatingSystem: Platform.linux, numberOfProcessors: 32),
         processRunner: ProcessRunner(
           // dryRun should not try to spawn any processes.
@@ -789,7 +788,7 @@ void main() {
         engineSrcDir: srcDir,
         build: targetBuild,
       );
-      final List<RunnerEvent> events = <RunnerEvent>[];
+      final events = <RunnerEvent>[];
       void handler(RunnerEvent event) => events.add(event);
       await buildRunner.run(handler);
       expect(file.readAsStringSync(), r'''
@@ -814,7 +813,7 @@ void main() {
   test('Bootstrap collects reproxy status before shutting down reproxy', () async {
     final Build targetBuild = buildConfig.builds[0];
     final commandLog = <FakeCommandLogEntry>[];
-    final BuildRunner buildRunner = BuildRunner(
+    final buildRunner = BuildRunner(
       platform: FakePlatform(operatingSystem: Platform.linux, numberOfProcessors: 32),
       processRunner: ProcessRunner(
         processManager: _fakeProcessManager(commandLog: commandLog, failUnknown: false),
@@ -830,7 +829,7 @@ void main() {
 
     int? reproxyStatusIndex;
     int? bootstrapShutdownIndex;
-    for (int i = 0; i < commandLog.length; i++) {
+    for (var i = 0; i < commandLog.length; i++) {
       final FakeCommandLogEntry entry = commandLog[i];
       if (entry.command[0].endsWith('reproxystatus')) {
         reproxyStatusIndex = i;
@@ -851,7 +850,7 @@ FakeProcessManager _fakeProcessManager({
   bool failUnknown = true,
   List<FakeCommandLogEntry>? commandLog,
 }) {
-  final io.ProcessResult success = io.ProcessResult(1, 0, '', '');
+  final success = io.ProcessResult(1, 0, '', '');
   FakeProcess fakeProcess(io.ProcessResult? result) => FakeProcess(
     exitCode: result?.exitCode ?? 0,
     stdout: result?.stdout as String? ?? '',
