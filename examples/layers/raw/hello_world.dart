@@ -14,15 +14,15 @@ void beginFrame(Duration timeStamp) {
   final double devicePixelRatio = view.devicePixelRatio;
   final ui.Size logicalSize = view.physicalSize / devicePixelRatio;
 
-  final ui.ParagraphBuilder paragraphBuilder = ui.ParagraphBuilder(
+  final paragraphBuilder = ui.ParagraphBuilder(
     ui.ParagraphStyle(textDirection: ui.TextDirection.ltr),
   )..addText('Hello, world.');
   final ui.Paragraph paragraph = paragraphBuilder.build()
     ..layout(ui.ParagraphConstraints(width: logicalSize.width));
 
   final ui.Rect physicalBounds = ui.Offset.zero & (logicalSize * devicePixelRatio);
-  final ui.PictureRecorder recorder = ui.PictureRecorder();
-  final ui.Canvas canvas = ui.Canvas(recorder, physicalBounds);
+  final recorder = ui.PictureRecorder();
+  final canvas = ui.Canvas(recorder, physicalBounds);
   canvas.scale(devicePixelRatio, devicePixelRatio);
   canvas.drawParagraph(
     paragraph,
@@ -33,7 +33,7 @@ void beginFrame(Duration timeStamp) {
   );
   final ui.Picture picture = recorder.endRecording();
 
-  final ui.SceneBuilder sceneBuilder = ui.SceneBuilder()
+  final sceneBuilder = ui.SceneBuilder()
     // TODO(abarth): We should be able to add a picture without pushing a
     // container layer first.
     ..pushClipRect(physicalBounds)

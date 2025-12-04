@@ -112,7 +112,13 @@ std::string FragmentProgram::initFromAsset(const std::string& asset_name) {
   auto runtime_stages =
       impeller::RuntimeStage::DecodeRuntimeStages(std::move(data));
 
-  if (runtime_stages.empty()) {
+  if (!runtime_stages.ok()) {
+    return std::string("Asset '") + asset_name +
+           std::string("' manifest could not be decoded: ") +
+           runtime_stages.status().ToString();
+  }
+
+  if (runtime_stages->empty()) {
     return std::string("Asset '") + asset_name +
            std::string("' does not contain any shader data.");
   }
@@ -120,7 +126,7 @@ std::string FragmentProgram::initFromAsset(const std::string& asset_name) {
   impeller::RuntimeStageBackend backend =
       ui_dart_state->GetRuntimeStageBackend();
   std::shared_ptr<impeller::RuntimeStage> runtime_stage =
-      runtime_stages[backend];
+      (*runtime_stages)[backend];
   if (!runtime_stage) {
     std::ostringstream stream;
     stream << "Asset '" << asset_name
@@ -128,7 +134,7 @@ std::string FragmentProgram::initFromAsset(const std::string& asset_name) {
               "backend ("
            << RuntimeStageBackendToString(backend) << ")." << std::endl
            << "Found stages: ";
-    for (const auto& kvp : runtime_stages) {
+    for (const auto& kvp : *runtime_stages) {
       if (kvp.second) {
         stream << RuntimeStageBackendToString(kvp.first) << " ";
       }

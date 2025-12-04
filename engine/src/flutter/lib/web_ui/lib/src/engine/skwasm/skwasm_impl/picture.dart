@@ -25,8 +25,11 @@ class SkwasmPicture extends SkwasmObjectWrapper<RawPicture> implements LayerPict
   }
 
   @override
-  ui.Image toImageSync(int width, int height) =>
-      SkwasmImage(imageCreateFromPicture(handle, width, height));
+  ui.Image toImageSync(
+    int width,
+    int height, {
+    ui.TargetPixelFormat targetFormat = ui.TargetPixelFormat.dontCare,
+  }) => SkwasmImage(imageCreateFromPicture(handle, width, height));
 
   @override
   ui.Rect get cullRect {
@@ -51,7 +54,7 @@ class SkwasmPictureRecorder extends SkwasmObjectWrapper<RawPictureRecorder>
   SkwasmPicture endRecording() {
     isRecording = false;
 
-    final SkwasmPicture picture = SkwasmPicture.fromHandle(pictureRecorderEndRecording(handle));
+    final picture = SkwasmPicture.fromHandle(pictureRecorderEndRecording(handle));
     ui.Picture.onCreate?.call(picture);
     dispose();
     return picture;
