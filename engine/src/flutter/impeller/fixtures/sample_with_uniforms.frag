@@ -18,5 +18,5 @@ uniform sampler2D uSampler;
 out vec4 frag_color;
 
 void main() {
-  frag_color = frag_color;
+  frag_color = vec4(1.0);
 }

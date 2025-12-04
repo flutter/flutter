@@ -131,7 +131,7 @@ struct UniformInfo {
   uint32_t columns;
   uint32_t vec_size;
 
-  static UniformInfo fromJson(nlohmann::json& json) {
+  static UniformInfo fromJson(const nlohmann::json& json) {
     return {
         .uniform_name = json["name"].get<std::string>(),
         .location = json["location"].get<uint32_t>(),
