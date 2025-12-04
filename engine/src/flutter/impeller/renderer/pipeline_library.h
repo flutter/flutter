@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_PIPELINE_LIBRARY_H_
 #define FLUTTER_IMPELLER_RENDERER_PIPELINE_LIBRARY_H_
 
+#include <mutex>
 #include <optional>
 #include <unordered_map>
 
@@ -97,6 +98,8 @@ class PipelineLibrary : public std::enable_shared_from_this<PipelineLibrary> {
                      ComparableHash<PipelineDescriptor>,
                      ComparableEqual<PipelineDescriptor>>
       pipeline_use_counts_;
+
+  std::mutex pipeline_use_counts_mutex_;
 };
 
 }  // namespace impeller

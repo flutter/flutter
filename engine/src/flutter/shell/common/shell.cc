@@ -596,7 +596,7 @@ Shell::Shell(DartVMRef vm,
       task_runners_.GetPlatformTaskRunner(),
       std::bind(&Shell::OnServiceProtocolReloadAssetFonts, this,
                 std::placeholders::_1, std::placeholders::_2)};
-  service_protocol_handlers_[ServiceProtocol::kGetPiplineUseageExtensionName] =
+  service_protocol_handlers_[ServiceProtocol::kGetPipelineUsageExtensionName] =
       {task_runners_.GetIOTaskRunner(),
        std::bind(&Shell::OnServiceProtocolGetPipelineUsage, this,
                  std::placeholders::_1, std::placeholders::_2)};
@@ -2186,9 +2186,7 @@ bool Shell::OnServiceProtocolGetPipelineUsage(
 
   for (const auto& pipelineCount : use_counts) {
     std::string_view pipeline_name = pipelineCount.first.GetLabel();
-    std::string pipeline_name_string =
-        std::string(pipeline_name.begin(), pipeline_name.end());
-    rapidjson::Value pipeline_key(pipeline_name_string,
+    rapidjson::Value pipeline_key(pipeline_name.data(), pipeline_name.length(),
                                   response->GetAllocator());
 
     pipelines_json.AddMember(pipeline_key, pipelineCount.second,

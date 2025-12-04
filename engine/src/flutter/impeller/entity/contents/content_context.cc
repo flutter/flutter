@@ -4,10 +4,8 @@
 
 #include "impeller/entity/contents/content_context.h"
 
-#include <algorithm>
 #include <format>
 #include <memory>
-#include <typeinfo>
 #include <utility>
 
 #include "fml/trace_event.h"

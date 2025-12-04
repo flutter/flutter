@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/renderer/pipeline_library.h"
+#include <mutex>
+
 #include <unordered_map>
 #include "impeller/renderer/pipeline_descriptor.h"
+#include "impeller/renderer/pipeline_library.h"
 
 namespace impeller {
 
@@ -37,6 +39,7 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibrary::GetPipeline(
 }
 
 void PipelineLibrary::LogPipelineCreation(const PipelineDescriptor& p) {
+  std::scoped_lock lock(pipeline_use_counts_mutex_);
   if (!pipeline_use_counts_.contains(p)) {
     pipeline_use_counts_[p] = 0;
   }
@@ -47,10 +50,7 @@ void PipelineLibrary::LogPipelineUsage(const PipelineDescriptor& p) {
   if (base_pipeline == nullptr) {
     return;
   }
-
-  if (!pipeline_use_counts_.contains(*base_pipeline)) {
-    pipeline_use_counts_[*base_pipeline] = 0;
-  }
+  std::scoped_lock lock(pipeline_use_counts_mutex_);
   ++pipeline_use_counts_[*base_pipeline];
 }
 
@@ -59,6 +59,7 @@ std::unordered_map<PipelineDescriptor,
                    ComparableHash<PipelineDescriptor>,
                    ComparableEqual<PipelineDescriptor>>
 PipelineLibrary::GetPipelineUseCounts() {
+  std::scoped_lock lock(pipeline_use_counts_mutex_);
   std::unordered_map<PipelineDescriptor, int,
                      ComparableHash<PipelineDescriptor>,
                      ComparableEqual<PipelineDescriptor>>
