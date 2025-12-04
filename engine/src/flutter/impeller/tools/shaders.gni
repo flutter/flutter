@@ -66,10 +66,16 @@ template("impeller_shaders") {
     require_framebuffer_fetch = true
   }
 
+  entry_point_prefix = "imp_"
+  if (defined(invoker.entry_point_prefix)) {
+    entry_point_prefix = invoker.entry_point_prefix
+  }
+
   not_needed([
                "metal_version",
                "use_half_textures",
                "require_framebuffer_fetch",
+               "entry_point_prefix",
              ])
 
   enable_opengles = impeller_enable_opengles
@@ -88,6 +94,7 @@ template("impeller_shaders") {
       shaders = invoker.shaders
       metal_version = metal_version
       use_half_textures = use_half_textures
+      entry_point_prefix = entry_point_prefix
     }
   }
 

@@ -19,6 +19,11 @@ bool Main(const fml::CommandLine& command_line) {
     return false;
   }
 
+  std::string prefix;
+  if (command_line.GetOptionValue("entry-point-prefix", &prefix)) {
+    writer.SetEntryPointPrefix(prefix);
+  }
+
   for (const auto& input : command_line.GetOptionValues("input")) {
     if (!writer.AddShaderAtPath(std::string{input})) {
       std::cerr << "Could not add shader at path: " << input << std::endl;
