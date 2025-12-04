@@ -45,7 +45,7 @@ class CompilerTestBase : public ::testing::TestWithParam<TargetPlatform> {
 
 class CompilerTest : public CompilerTestBase {};
 
-class CompilerTestSkSl : public CompilerTestBase {};
+class CompilerTestSkSL : public CompilerTestBase {};
 
 class CompilerTestRuntime : public CompilerTestBase {};
 

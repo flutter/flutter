@@ -292,10 +292,7 @@ TEST_P(CompilerTest, UniformsHaveBindingAndSet) {
   ASSERT_EQ(vert_uniform_binding.binding, 17u);
 }
 
-TEST_P(CompilerTest, SkSLTextureLookUpOrderOfOperations) {
-  if (GetParam() != TargetPlatform::kSkSL) {
-    GTEST_SKIP() << "Only supported on SkSL";
-  }
+TEST_P(CompilerTestSkSL, SkSLTextureLookUpOrderOfOperations) {
   ASSERT_TRUE(
       CanCompileAndReflect("texture_lookup.frag", SourceType::kFragmentShader));
 
@@ -309,10 +306,7 @@ TEST_P(CompilerTest, SkSLTextureLookUpOrderOfOperations) {
   EXPECT_NE(shader_mapping.find(expected), std::string::npos);
 }
 
-TEST_P(CompilerTest, CanCompileStructs) {
-  if (GetParam() != TargetPlatform::kSkSL) {
-    GTEST_SKIP() << "Only supported on SkSL";
-  }
+TEST_P(CompilerTestSkSL, CanCompileStructs) {
   ASSERT_TRUE(CanCompileAndReflect("struct_internal.frag",
                                    SourceType::kFragmentShader));
 }
@@ -339,6 +333,15 @@ INSTANTIATE_TARGET_PLATFORM_TEST_SUITE_P(CompilerSuite);
       });
 
 INSTANTIATE_RUNTIME_TARGET_PLATFORM_TEST_SUITE_P(CompilerSuite);
+
+#define INSTANTIATE_SKSL_TARGET_PLATFORM_TEST_SUITE_P(suite_name)             \
+  INSTANTIATE_TEST_SUITE_P(                                                   \
+      suite_name, CompilerTestSkSL, ::testing::Values(TargetPlatform::kSkSL), \
+      [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) {     \
+        return TargetPlatformToString(info.param);                            \
+      });
+
+INSTANTIATE_SKSL_TARGET_PLATFORM_TEST_SUITE_P(CompilerSuite);
 
 }  // namespace testing
 }  // namespace compiler
