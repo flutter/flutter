@@ -1756,9 +1756,9 @@ TEST_P(EntityTest, RuntimeEffect) {
   auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
   ABSL_ASSERT_OK(runtime_stages_result);
-  auto runtime_stages = runtime_stages_result.value();
-  auto runtime_stage =
-      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  std::shared_ptr<RuntimeStage> runtime_stage =
+      runtime_stages_result
+          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 
@@ -1814,9 +1814,9 @@ TEST_P(EntityTest, RuntimeEffect) {
     auto runtime_stages_result =
         OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
     ABSL_ASSERT_OK(runtime_stages_result);
-    runtime_stages = runtime_stages_result.value();
     runtime_stage =
-        runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+        runtime_stages_result
+            .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
 
     ASSERT_TRUE(runtime_stage->IsDirty());
     expect_dirty = true;
@@ -1829,9 +1829,9 @@ TEST_P(EntityTest, RuntimeEffectCanSuccessfullyRender) {
   auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
   ABSL_ASSERT_OK(runtime_stages_result);
-  auto runtime_stages = runtime_stages_result.value();
   auto runtime_stage =
-      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result
+          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 
@@ -1878,9 +1878,9 @@ TEST_P(EntityTest, RuntimeEffectCanPrecache) {
   auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
   ABSL_ASSERT_OK(runtime_stages_result);
-  auto runtime_stages = runtime_stages_result.value();
-  auto runtime_stage =
-      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  std::shared_ptr<RuntimeStage> runtime_stage =
+      runtime_stages_result
+          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 
@@ -1898,9 +1898,9 @@ TEST_P(EntityTest, RuntimeEffectSetsRightSizeWhenUniformIsStruct) {
   auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
   ABSL_ASSERT_OK(runtime_stages_result);
-  auto runtime_stages = runtime_stages_result.value();
   auto runtime_stage =
-      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result
+          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 

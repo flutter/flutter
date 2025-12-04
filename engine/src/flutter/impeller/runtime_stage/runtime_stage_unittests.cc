@@ -341,8 +341,9 @@ TEST_P(RuntimeStageTest, CanRegisterStage) {
 TEST_P(RuntimeStageTest, CanCreatePipelineFromRuntimeStage) {
   auto stages_result = OpenAssetAsRuntimeStage("ink_sparkle.frag.iplr");
   ABSL_ASSERT_OK(stages_result);
-  auto stages = stages_result.value();
-  auto stage = stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  auto stage =
+      stages_result
+          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
 
   ASSERT_TRUE(stage);
   ASSERT_NE(stage, nullptr);

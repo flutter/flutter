@@ -331,10 +331,9 @@ TEST_P(AiksTest, DrawVerticesWithEmptyTextureCoordinates) {
   auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_simple.frag.iplr");
   ABSL_ASSERT_OK(runtime_stages_result);
-  auto runtime_stages = runtime_stages_result.value();
-
-  auto runtime_stage =
-      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  std::shared_ptr<RuntimeStage> runtime_stage =
+      runtime_stages_result
+          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);
 
   auto runtime_effect = flutter::DlRuntimeEffectImpeller::Make(runtime_stage);
