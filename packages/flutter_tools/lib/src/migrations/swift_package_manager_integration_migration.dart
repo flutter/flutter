@@ -23,12 +23,11 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   SwiftPackageManagerIntegrationMigration(
     XcodeBasedProject project,
     FlutterDarwinPlatform platform,
-    BuildInfo? buildInfo, {
+    BuildInfo buildInfo, {
     required XcodeProjectInterpreter xcodeProjectInterpreter,
     required Logger logger,
     required FileSystem fileSystem,
     required PlistParser plistParser,
-    bool skipSchemeMigration = false,
   }) : _xcodeProject = project,
        _platform = platform,
        _buildInfo = buildInfo,
@@ -36,17 +35,15 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
        _xcodeProjectInterpreter = xcodeProjectInterpreter,
        _fileSystem = fileSystem,
        _plistParser = plistParser,
-       _skipSchemeMigration = skipSchemeMigration,
        super(logger);
 
   final XcodeBasedProject _xcodeProject;
   final FlutterDarwinPlatform _platform;
-  final BuildInfo? _buildInfo;
+  final BuildInfo _buildInfo;
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
   final FileSystem _fileSystem;
   final File _xcodeProjectInfoFile;
   final PlistParser _plistParser;
-  final bool _skipSchemeMigration;
 
   /// New identifier for FlutterGeneratedPluginSwiftPackage PBXBuildFile.
   static const _flutterPluginsSwiftPackageBuildFileIdentifier = '78A318202AECB46A00862997';
@@ -171,23 +168,15 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     Status? migrationStatus;
     SchemeInfo? schemeInfo;
     try {
-      if (!_skipSchemeMigration && _buildInfo == null) {
-        throw Exception('Unable to migrate scheme without build info.');
-      }
       if (!_xcodeProjectInfoFile.existsSync()) {
         throw Exception('Xcode project not found.');
       }
 
-      final bool isSchemeMigrated;
-      if (!_skipSchemeMigration) {
-        schemeInfo = await _getSchemeFile();
-        isSchemeMigrated = _isSchemeMigrated(schemeInfo);
-      } else {
-        isSchemeMigrated = true;
-      }
+      schemeInfo = await _getSchemeFile();
 
       // Check for specific strings in the xcscheme and pbxproj to see if the
       // project has been already migrated, whether automatically or manually.
+      final bool isSchemeMigrated = _isSchemeMigrated(schemeInfo);
       final bool isPbxprojMigrated = _quickCheckIsPbxprojMigrated(_xcodeProjectInfoFile);
       if (isSchemeMigrated && isPbxprojMigrated) {
         return;
@@ -195,12 +184,10 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
 
       migrationStatus = logger.startProgress('Adding Swift Package Manager integration...');
 
-      if (schemeInfo != null) {
-        if (isSchemeMigrated) {
-          logger.printTrace('${schemeInfo.schemeFile.basename} already migrated. Skipping...');
-        } else {
-          _migrateScheme(schemeInfo);
-        }
+      if (isSchemeMigrated) {
+        logger.printTrace('${schemeInfo.schemeFile.basename} already migrated. Skipping...');
+      } else {
+        _migrateScheme(schemeInfo);
       }
 
       if (isPbxprojMigrated) {
@@ -934,28 +921,6 @@ $newContent
       final newContent = '				$fileReferenceIdentifier /* $fileReferenceName */,';
       lines.insert(startChildrenIndex + 1, newContent);
     }
-
-    // if (parsedGroup.children == null || !parsedGroup.addedChildren) {
-    //   // If children is null, the children field is missing and must be added.
-    //   final newContent =
-    //       '''
-    // 	children = (
-    // 		$fileReferenceIdentifier /* $fileReferenceName */,
-    // 	);''';
-    //   lines.insert(flutterGroupStartIndex + 1, newContent);
-    //   parsedGroup.addedChildren = true;
-    // } else {
-    //   // Find the children field within the Flutter PBXGroup.
-    //   final int startChildrenIndex = lines.indexWhere(
-    //     (String line) => line.trim().contains('children = ('),
-    //     flutterGroupStartIndex,
-    //   );
-    //   if (startChildrenIndex == -1 || startChildrenIndex > endSectionIndex) {
-    //     throw Exception('Unable to children for Flutter PBXGroup.');
-    //   }
-    //   final newContent = '				$fileReferenceIdentifier /* $fileReferenceName */,';
-    //   lines.insert(startChildrenIndex + 1, newContent);
-    // }
 
     return lines;
   }
