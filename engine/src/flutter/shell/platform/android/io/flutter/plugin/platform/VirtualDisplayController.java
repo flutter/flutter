@@ -57,7 +57,7 @@ class VirtualDisplayController {
     // scale or clamp, which leads to a mismatch between the size of the widget and the size of
     // virtual display.
     // This mismatch leads to some test failures: https://github.com/flutter/flutter/issues/106750
-    // TODO(cyanglaz): find a way to prevent the crash without introducing size mistach betewen
+    // TODO(cyanglaz): find a way to prevent the crash without introducing size mismatch between
     // virtual display and AndroidPlatformView widget.
     // https://github.com/flutter/flutter/issues/93115
     renderTarget.resize(width, height);
