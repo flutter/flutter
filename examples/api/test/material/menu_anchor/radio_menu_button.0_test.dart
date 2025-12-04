@@ -61,11 +61,8 @@ void main() {
 
     expect(
       tester
-          .widget<Radio<Color>>(
-            find.descendant(
-              of: find.byType(RadioMenuButton<Color>).at(0),
-              matching: find.byType(Radio<Color>),
-            ),
+          .widget<RadioMenuButton<Color>>(
+            find.byType(RadioMenuButton<Color>).at(0),
           )
           // TODO(loic-sharma): Migrate to RadioGroup.
           // https://github.com/flutter/flutter/issues/179088
@@ -86,11 +83,8 @@ void main() {
 
     expect(
       tester
-          .widget<Radio<Color>>(
-            find.descendant(
-              of: find.byType(RadioMenuButton<Color>).at(1),
-              matching: find.byType(Radio<Color>),
-            ),
+          .widget<RadioMenuButton<Color>>(
+            find.byType(RadioMenuButton<Color>).at(0),
           )
           // TODO(loic-sharma): Migrate to RadioGroup.
           // https://github.com/flutter/flutter/issues/179088
@@ -111,11 +105,8 @@ void main() {
 
     expect(
       tester
-          .widget<Radio<Color>>(
-            find.descendant(
-              of: find.byType(RadioMenuButton<Color>).at(2),
-              matching: find.byType(Radio<Color>),
-            ),
+          .widget<RadioMenuButton<Color>>(
+            find.byType(RadioMenuButton<Color>).at(0),
           )
           // TODO(loic-sharma): Migrate to RadioGroup.
           // https://github.com/flutter/flutter/issues/179088
