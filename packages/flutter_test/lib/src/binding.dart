@@ -154,37 +154,23 @@ class CapturedAccessibilityAnnouncement {
   final Assertiveness assertiveness;
 }
 
-class _TestDisplay implements ui.Display {
-  final ui.Size _size = const ui.Size(1920, 1080);
-
-  @override
-  double get devicePixelRatio => 1.0;
-
-  @override
-  int get id => 1;
-
-  @override
-  double get refreshRate => 60.0;
-
-  @override
-  ui.Size get size => _size;
-}
-
 class _TestFlutterView implements FlutterView {
-  _TestFlutterView({required this.controller, required ui.PlatformDispatcher platformDispatcher})
+  _TestFlutterView({required this.controller, required TestPlatformDispatcher platformDispatcher})
     : _platformDispatcher = platformDispatcher,
-      _viewId = _nextViewId++;
+      _viewId = _nextViewId++ {
+    platformDispatcher.addTestView(this);
+  }
 
   static int _nextViewId = 1;
   final BaseWindowController controller;
-  final ui.PlatformDispatcher _platformDispatcher;
+  final TestPlatformDispatcher _platformDispatcher;
   final int _viewId;
 
   @override
   double get devicePixelRatio => display.devicePixelRatio;
 
   @override
-  ui.Display get display => _TestDisplay();
+  ui.Display get display => platformDispatcher.displays.first;
 
   @override
   List<ui.DisplayFeature> get displayFeatures => List<ui.DisplayFeature>.empty();
@@ -276,7 +262,7 @@ mixin _ChildWindowHierarchyMixin {
 class _TestRegularWindowController extends RegularWindowController with _ChildWindowHierarchyMixin {
   _TestRegularWindowController({
     required RegularWindowControllerDelegate delegate,
-    required ui.PlatformDispatcher platformDispatcher,
+    required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
@@ -287,8 +273,6 @@ class _TestRegularWindowController extends RegularWindowController with _ChildWi
        _title = title ?? 'Test Window',
        super.empty() {
     _constrainToBounds();
-    // QUESTION: Do I have to do anything smart to get this into the list of views
-    // from the PlatformDispatcher?
     rootView = _TestFlutterView(controller: this, platformDispatcher: platformDispatcher);
 
     // Automatically activate the window when created.
@@ -394,7 +378,7 @@ class _TestRegularWindowController extends RegularWindowController with _ChildWi
 class _TestDialogWindowController extends DialogWindowController with _ChildWindowHierarchyMixin {
   _TestDialogWindowController({
     required DialogWindowControllerDelegate delegate,
-    required ui.PlatformDispatcher platformDispatcher,
+    required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
     BaseWindowController? parent,
     Size? preferredSize,
@@ -521,10 +505,10 @@ class _TestDialogWindowController extends DialogWindowController with _ChildWind
 /// for tests.
 /// * [WindowingOwner], the base class.
 class _TestWindowingOwner extends WindowingOwner {
-  _TestWindowingOwner({required ui.PlatformDispatcher platformDispatcher})
+  _TestWindowingOwner({required TestPlatformDispatcher platformDispatcher})
     : _platformDispatcher = platformDispatcher;
 
-  final ui.PlatformDispatcher _platformDispatcher;
+  final TestPlatformDispatcher _platformDispatcher;
   BaseWindowController? _activeWindowController;
 
   /// Activates the given [controller].
@@ -830,6 +814,20 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   @protected
   bool get registerTestTextInput => true;
 
+  /// Determines whether the binding automatically register [windowingOwner] to
+  /// the fake windowing owner implementation.
+  ///
+  /// Unit tests make use of this to mock out windowing system communication for
+  /// widgets. An integration test would set this to false, to test real windowing
+  /// system input.
+  ///
+  /// This property should not change the value it returns during the lifetime
+  /// of the binding. Changing the value of this property risks very confusing
+  /// behavior as the [WindowingOwner] may be inconsistently registered or
+  /// unregistered.
+  @protected
+  bool get registerTestWindowingOwner => true;
+
   /// Delay for `duration` of time.
   ///
   /// In the automated test environment ([AutomatedTestWidgetsFlutterBinding],
@@ -899,7 +897,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     }
     _testTextInput = TestTextInput(onCleared: _resetFocusedEditable);
 
-    if (isWindowingEnabled) {
+    if (isWindowingEnabled && registerTestWindowingOwner) {
       windowingOwner = _TestWindowingOwner(platformDispatcher: platformDispatcher);
     }
   }

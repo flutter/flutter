@@ -15,7 +15,7 @@ import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
 void main() {
   if (!isWindowingEnabled) {
     const String windowingDisabledErrorMessage = '''
-Windowing APIs are not enabled.
+Skipping multiple_windows_test.dart because Windowing APIs are not enabled.
 
 Windowing APIs are currently experimental. Do not use windowing APIs in
 production applications or plugins published to pub.dev.
@@ -26,14 +26,14 @@ To try experimental windowing APIs:
 
 See: https://github.com/flutter/flutter/issues/30701.
 ''';
-    // ignore: avoid_print
-    print(windowingDisabledErrorMessage);
-    exit(0);
+    testWidgets(windowingDisabledErrorMessage, (WidgetTester tester) async {
+      // No-op test to avoid "no tests found" error.
+    });
+    return;
   }
 
   testWidgets('Multiple windows smoke test', (WidgetTester tester) async {
-    multiple_windows
-        .main(); // builds the app and schedules a frame but doesn't trigger one
+    multiple_windows.main();
     await tester.pump(); // triggers a frame
 
     expect(
@@ -43,8 +43,7 @@ See: https://github.com/flutter/flutter/issues/30701.
   });
 
   testWidgets('Can create a regular window', (WidgetTester tester) async {
-    multiple_windows
-        .main(); // builds the app and schedules a frame but doesn't trigger one
+    multiple_windows.main();
     await tester.pump(); // triggers a frame
 
     final toTap = find.widgetWithText(OutlinedButton, 'Regular');
@@ -56,8 +55,7 @@ See: https://github.com/flutter/flutter/issues/30701.
   });
 
   testWidgets('Can create a modeless dialog', (WidgetTester tester) async {
-    multiple_windows
-        .main(); // builds the app and schedules a frame but doesn't trigger one
+    multiple_windows.main();
     await tester.pump(); // triggers a frame
 
     final toTap = find.widgetWithText(OutlinedButton, 'Modeless Dialog');
@@ -71,8 +69,7 @@ See: https://github.com/flutter/flutter/issues/30701.
   testWidgets('Can create a modal dialog of a regular window', (
     WidgetTester tester,
   ) async {
-    multiple_windows
-        .main(); // builds the app and schedules a frame but doesn't trigger one
+    multiple_windows.main();
     await tester.pump(); // triggers a frame
 
     final toTap = find.widgetWithText(OutlinedButton, 'Regular');
@@ -94,8 +91,7 @@ See: https://github.com/flutter/flutter/issues/30701.
   testWidgets('Can close a modal dialog of a regular window', (
     WidgetTester tester,
   ) async {
-    multiple_windows
-        .main(); // builds the app and schedules a frame but doesn't trigger one
+    multiple_windows.main();
     await tester.pump(); // triggers a frame
 
     final toTap = find.widgetWithText(OutlinedButton, 'Regular');
