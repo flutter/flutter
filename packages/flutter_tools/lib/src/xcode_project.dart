@@ -15,7 +15,6 @@ import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'bundle.dart' as bundle;
 import 'convert.dart';
-import 'darwin/darwin.dart';
 import 'features.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
@@ -25,7 +24,6 @@ import 'ios/xcode_build_settings.dart' as xcode;
 import 'ios/xcodeproj.dart';
 import 'macos/swift_package_manager.dart';
 import 'macos/xcode.dart';
-import 'migrations/swift_package_manager_integration_migration.dart';
 import 'platform_plugins.dart';
 import 'plugins.dart';
 import 'project.dart';
@@ -69,8 +67,6 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
 
   /// The parent of this project.
   FlutterProject get parent;
-
-  FlutterDarwinPlatform get darwinPlatform;
 
   Directory get hostAppRoot;
 
@@ -169,6 +165,10 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
     return xcodeProjectInfoFile.existsSync() &&
         xcodeProjectInfoFile.readAsStringSync().contains(kFlutterGeneratedPluginSwiftPackageName);
   }
+
+  /// The Flutter generated directory for the Swift package handling the Flutter framework.
+  Directory get flutterFrameworkSwiftPackageDirectory => relativeSwiftPackagesDirectory
+      .childDirectory(kFlutterGeneratedFrameworkSwiftPackageTargetName);
 
   bool get flutterFrameworkSwiftPackageInProjectSettings {
     return xcodeProjectInfoFile.existsSync() &&
@@ -355,28 +355,6 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
     }
     return flavor;
   }
-
-  // /// If a project has been previously migrated to SwiftPM (indicated by [flutterPluginSwiftPackageInProjectSettings]),
-  // /// but is missing the Flutter framework local override (indicated by [flutterFrameworkSwiftPackageInProjectSettings]),
-  // /// rerun the migration. If the Flutter framework part of the migration is missing,
-  // /// some Xcode commands such as `xcodebuild -list` may fail.
-  // Future<void> _updateSwiftPackageManagerMigrationIfNeeded() async {
-  //   if (usesSwiftPackageManager &&
-  //       flutterPluginSwiftPackageInProjectSettings &&
-  //       !flutterFrameworkSwiftPackageInProjectSettings) {
-  //     final migration = SwiftPackageManagerIntegrationMigration(
-  //       this,
-  //       darwinPlatform,
-  //       null,
-  //       xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
-  //       logger: globals.logger,
-  //       fileSystem: globals.fs,
-  //       plistParser: globals.plistParser,
-  //       skipSchemeMigration: true,
-  //     );
-  //     await migration.migrate();
-  //   }
-  // }
 }
 
 /// Represents the iOS sub-project of a Flutter project.
@@ -388,9 +366,6 @@ class IosProject extends XcodeBasedProject {
 
   @override
   final FlutterProject parent;
-
-  @override
-  FlutterDarwinPlatform get darwinPlatform => FlutterDarwinPlatform.ios;
 
   @override
   String get pluginConfigKey => IOSPlugin.kConfigKey;
@@ -769,7 +744,6 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       return;
     }
     await _updateGeneratedXcodeConfigIfNeeded();
-    // await _updateSwiftPackageManagerMigrationIfNeeded();
   }
 
   /// Check if one the [XcodeProjectInfo.targets] of the project is
@@ -1017,9 +991,6 @@ class MacOSProject extends XcodeBasedProject {
 
   @override
   final FlutterProject parent;
-
-  @override
-  FlutterDarwinPlatform get darwinPlatform => FlutterDarwinPlatform.macos;
 
   @override
   String get pluginConfigKey => MacOSPlugin.kConfigKey;

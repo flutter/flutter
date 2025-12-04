@@ -58,11 +58,10 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   static const _flutterPluginsSwiftPackageProductDependencyIdentifier = '78A3181F2AECB46A00862997';
 
   /// New identifier for FlutterFramework PBXFileReference.
-  static const _flutterFrameworkSwiftPackageFileIdentifier = '784666492D4C4C64000A1A5F';
-  static const _flutterFrameworkSwiftPackageName = 'FlutterFramework';
+  static const _flutterFrameworkLocalOverrideFileIdentifier = '784666492D4C4C64000A1A5F';
 
   /// New identifier for a plugin in an example app PBXFileReference.
-  static const _flutterPluginLocalOverride = '78DABEA22ED26510000E7860';
+  static const _flutterPluginLocalOverrideFileIdenitifier = '78DABEA22ED26510000E7860';
 
   /// New identifier for FlutterGeneratedPluginSwiftPackage PBXFileReference.
   static const _flutterPluginsSwiftPackageFileIdentifer = '78E0A7A72DC9AD7400C4905E';
@@ -132,8 +131,9 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   ///
   /// If the app is not an example app or the plugin cannot be found, this will return null.
   late final ExamplePlugin? _examplePlugin = ExamplePlugin.loadFromProject(
-    _xcodeProject,
-    _fileSystem,
+    xcodeProject: _xcodeProject,
+    fileSystem: _fileSystem,
+    logger: logger,
   );
 
   void restoreFromBackup(SchemeInfo? schemeInfo) {
@@ -427,7 +427,7 @@ $newContent
     final bool rootFlutterFrameworkSwiftPackageMigrationComplete = xcodeProjectInfoFile
         .readAsStringSync()
         .contains(
-          '$_flutterFrameworkSwiftPackageFileIdentifier /* $_flutterFrameworkSwiftPackageName */ = {isa = PBXFileReference',
+          '$_flutterFrameworkLocalOverrideFileIdentifier /* $kFlutterGeneratedFrameworkSwiftPackageTargetName */ = {isa = PBXFileReference',
         );
 
     return initialMigrationComplete &&
@@ -482,13 +482,13 @@ $newContent
     final bool frameworkFileReferenceMigrated = _isFileReferenceMigrated(
       projectInfo,
       logErrorIfNotMigrated: logErrorIfNotMigrated,
-      identifer: _flutterFrameworkSwiftPackageFileIdentifier,
-      name: _flutterFrameworkSwiftPackageName,
+      identifer: _flutterFrameworkLocalOverrideFileIdentifier,
+      name: kFlutterGeneratedFrameworkSwiftPackageTargetName,
     );
     final bool framworkPackageGroupMigrated = _isGroupMigrated(
       projectInfo,
       logErrorIfNotMigrated: logErrorIfNotMigrated,
-      fileReferenceIdentifier: _flutterFrameworkSwiftPackageFileIdentifier,
+      fileReferenceIdentifier: _flutterFrameworkLocalOverrideFileIdentifier,
     );
 
     // Validate plugin is added (for example app only)
@@ -498,13 +498,13 @@ $newContent
       localPluginFileReferenceMigrated = _isFileReferenceMigrated(
         projectInfo,
         logErrorIfNotMigrated: logErrorIfNotMigrated,
-        identifer: _flutterPluginLocalOverride,
+        identifer: _flutterPluginLocalOverrideFileIdenitifier,
         name: _examplePlugin.name,
       );
       localPluginGroupMigrated = _isGroupMigrated(
         projectInfo,
         logErrorIfNotMigrated: logErrorIfNotMigrated,
-        fileReferenceIdentifier: _flutterPluginLocalOverride,
+        fileReferenceIdentifier: _flutterPluginLocalOverrideFileIdenitifier,
       );
     }
 
@@ -536,10 +536,14 @@ $newContent
     lines = _migrateFileReference(
       lines,
       parsedInfo,
-      _flutterPluginsSwiftPackageFileIdentifer,
-      kFlutterGeneratedPluginSwiftPackageName,
-      '$_relativeEphemeralPath/Packages/$kFlutterGeneratedPluginSwiftPackageName',
+      identifier: _flutterPluginsSwiftPackageFileIdentifer,
+      name: kFlutterGeneratedPluginSwiftPackageName,
+      path: _xcodeProject.flutterPluginSwiftPackageDirectory.path.replaceAll(
+        _xcodeProject.ephemeralDirectory.path,
+        _relativeEphemeralPath,
+      ),
     );
+
     lines = _migrateFrameworksBuildPhase(lines, parsedInfo);
     lines = _migrateGroup(
       lines,
@@ -556,15 +560,18 @@ $newContent
     lines = _migrateFileReference(
       lines,
       parsedInfo,
-      _flutterFrameworkSwiftPackageFileIdentifier,
-      _flutterFrameworkSwiftPackageName,
-      '$_relativeEphemeralPath/Packages/.packages/$_flutterFrameworkSwiftPackageName',
+      identifier: _flutterFrameworkLocalOverrideFileIdentifier,
+      name: kFlutterGeneratedFrameworkSwiftPackageTargetName,
+      path: _xcodeProject.flutterFrameworkSwiftPackageDirectory.path.replaceAll(
+        _xcodeProject.ephemeralDirectory.path,
+        _relativeEphemeralPath,
+      ),
     );
     lines = _migrateGroup(
       lines,
       parsedInfo,
-      _flutterFrameworkSwiftPackageFileIdentifier,
-      _flutterFrameworkSwiftPackageName,
+      _flutterFrameworkLocalOverrideFileIdentifier,
+      kFlutterGeneratedFrameworkSwiftPackageTargetName,
     );
 
     // Add plugin as a local package override (for example app only)
@@ -572,15 +579,15 @@ $newContent
       lines = _migrateFileReference(
         lines,
         parsedInfo,
-        _flutterPluginLocalOverride,
-        _examplePlugin.name,
-        _examplePlugin.path,
+        identifier: _flutterPluginLocalOverrideFileIdenitifier,
+        name: _examplePlugin.name,
+        path: _examplePlugin.path,
       );
       lines = _migrateGroup(
         lines,
         parsedInfo,
-        _flutterPluginLocalOverride,
-        _flutterPluginLocalOverride,
+        _flutterPluginLocalOverrideFileIdenitifier,
+        _examplePlugin.name,
       );
     }
 
@@ -621,16 +628,18 @@ $newContent
       );
     }
     if (!originalProjectContents.contains(
-          '$_flutterFrameworkSwiftPackageFileIdentifier /* $_flutterFrameworkSwiftPackageName */',
+          '$_flutterFrameworkLocalOverrideFileIdentifier /* $kFlutterGeneratedFrameworkSwiftPackageTargetName */',
         ) &&
-        originalProjectContents.contains(_flutterFrameworkSwiftPackageFileIdentifier)) {
+        originalProjectContents.contains(_flutterFrameworkLocalOverrideFileIdentifier)) {
       throw Exception(
-        'Duplicate id found for $_flutterFrameworkSwiftPackageName PBXFileReference.',
+        'Duplicate id found for $kFlutterGeneratedFrameworkSwiftPackageTargetName PBXFileReference.',
       );
     }
     if (_examplePlugin != null &&
-        !originalProjectContents.contains('$_flutterPluginLocalOverride /* ${_examplePlugin.name} */') &&
-        originalProjectContents.contains(_flutterPluginLocalOverride)) {
+        !originalProjectContents.contains(
+          '$_flutterPluginLocalOverrideFileIdenitifier /* ${_examplePlugin.name} */',
+        ) &&
+        originalProjectContents.contains(_flutterPluginLocalOverrideFileIdenitifier)) {
       throw Exception('Duplicate id found for ${_examplePlugin.name} PBXFileReference.');
     }
   }
@@ -675,13 +684,13 @@ $newContent
 
   List<String> _migrateFileReference(
     List<String> lines,
-    ParsedProjectInfo projectInfo,
-    String identifier,
-    String name,
-    String path,
-  ) {
+    ParsedProjectInfo projectInfo, {
+    required String identifier,
+    required String name,
+    required String path,
+  }) {
     if (_isFileReferenceMigrated(projectInfo, identifer: identifier, name: name)) {
-      logger.printTrace('PBXFileReference already migrated. Skipping...');
+      logger.printTrace('PBXFileReference for $identifier already migrated. Skipping...');
       return lines;
     }
 
@@ -885,7 +894,7 @@ $newContent
     String fileReferenceName,
   ) {
     if (_isGroupMigrated(projectInfo, fileReferenceIdentifier: fileReferenceIdentifier)) {
-      logger.printTrace('PBXGroup already migrated. Skipping...');
+      logger.printTrace('PBXGroup for $fileReferenceIdentifier already migrated. Skipping...');
       return lines;
     }
 
@@ -909,26 +918,44 @@ $newContent
       throw Exception('Unable to find parsed Flutter PBXGroup.');
     }
 
-    if (parsedGroup.children == null) {
-      // If children is null, the children field is missing and must be added.
-      final newContent =
-          '''
-			children = (
-				$fileReferenceIdentifier /* $fileReferenceName */,
-			);''';
-      lines.insert(flutterGroupStartIndex + 1, newContent);
+    // Find the children field within the Flutter PBXGroup.
+    final int startChildrenIndex = lines.indexWhere(
+      (String line) => line.trim().contains('children = ('),
+      flutterGroupStartIndex,
+    );
+    if (startChildrenIndex == -1 || startChildrenIndex > endSectionIndex) {
+      final newContent = [
+        '			children = (',
+        '				$fileReferenceIdentifier /* $fileReferenceName */,',
+        '			);',
+      ];
+      lines.insertAll(flutterGroupStartIndex + 1, newContent);
     } else {
-      // Find the children field within the Flutter PBXGroup.
-      final int startChildrenIndex = lines.indexWhere(
-        (String line) => line.trim().contains('children = ('),
-        flutterGroupStartIndex,
-      );
-      if (startChildrenIndex == -1 || startChildrenIndex > endSectionIndex) {
-        throw Exception('Unable to children for Flutter PBXGroup.');
-      }
       final newContent = '				$fileReferenceIdentifier /* $fileReferenceName */,';
       lines.insert(startChildrenIndex + 1, newContent);
     }
+
+    // if (parsedGroup.children == null || !parsedGroup.addedChildren) {
+    //   // If children is null, the children field is missing and must be added.
+    //   final newContent =
+    //       '''
+    // 	children = (
+    // 		$fileReferenceIdentifier /* $fileReferenceName */,
+    // 	);''';
+    //   lines.insert(flutterGroupStartIndex + 1, newContent);
+    //   parsedGroup.addedChildren = true;
+    // } else {
+    //   // Find the children field within the Flutter PBXGroup.
+    //   final int startChildrenIndex = lines.indexWhere(
+    //     (String line) => line.trim().contains('children = ('),
+    //     flutterGroupStartIndex,
+    //   );
+    //   if (startChildrenIndex == -1 || startChildrenIndex > endSectionIndex) {
+    //     throw Exception('Unable to children for Flutter PBXGroup.');
+    //   }
+    //   final newContent = '				$fileReferenceIdentifier /* $fileReferenceName */,';
+    //   lines.insert(startChildrenIndex + 1, newContent);
+    // }
 
     return lines;
   }
@@ -1257,6 +1284,8 @@ class ParsedProjectGroup {
   final String identifier;
   final List<String>? children;
   final String? name;
+
+  bool addedChildren = false;
 }
 
 /// Representation of data parsed from PBXFrameworksBuildPhase section in Xcode
@@ -1310,7 +1339,11 @@ class ExamplePlugin {
   final String name;
   final String path;
 
-  static ExamplePlugin? loadFromProject(XcodeBasedProject xcodeProject, FileSystem fileSystem) {
+  static ExamplePlugin? loadFromProject({
+    required XcodeBasedProject xcodeProject,
+    required FileSystem fileSystem,
+    required Logger logger,
+  }) {
     try {
       final FlutterProject flutterProject = xcodeProject.parent;
       if (flutterProject.directory.path.endsWith('example') &&
@@ -1333,7 +1366,8 @@ class ExamplePlugin {
           }
         }
       }
-    } on Exception {
+    } on Exception catch (e) {
+      logger.printTrace('Failed to load project: $e');
       return null;
     }
     return null;
