@@ -278,7 +278,7 @@ class ProcessException implements Exception {
 
   @override
   String toString() {
-    final StringBuffer message = StringBuffer();
+    final message = StringBuffer();
     message
       ..writeln(description)
       ..writeln('Command: $executable ${arguments.join(' ')}')

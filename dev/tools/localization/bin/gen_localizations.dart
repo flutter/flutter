@@ -82,25 +82,25 @@ String generateArbBasedLocalizationSubclasses({
   assert(supportedLanguagesConstant.isNotEmpty);
   assert(supportedLanguagesDocMacro.isNotEmpty);
   generateConstructorForCountrySubClass ??= generateConstructor;
-  final StringBuffer output = StringBuffer();
+  final output = StringBuffer();
   output.writeln(
     generateHeader('dart dev/tools/localization/bin/gen_localizations.dart --overwrite'),
   );
 
-  final StringBuffer supportedLocales = StringBuffer();
+  final supportedLocales = StringBuffer();
 
-  final Map<String, List<LocaleInfo>> languageToLocales = <String, List<LocaleInfo>>{};
-  final Map<String, Set<String>> languageToScriptCodes = <String, Set<String>>{};
+  final languageToLocales = <String, List<LocaleInfo>>{};
+  final languageToScriptCodes = <String, Set<String>>{};
   // Used to calculate if there are any corresponding countries for a given language and script.
-  final Map<LocaleInfo, Set<String>> languageAndScriptToCountryCodes = <LocaleInfo, Set<String>>{};
-  final Set<String> allResourceIdentifiers = <String>{};
+  final languageAndScriptToCountryCodes = <LocaleInfo, Set<String>>{};
+  final allResourceIdentifiers = <String>{};
   for (final LocaleInfo locale in localeToResources.keys.toList()..sort()) {
     if (locale.scriptCode != null) {
       languageToScriptCodes[locale.languageCode] ??= <String>{};
       languageToScriptCodes[locale.languageCode]!.add(locale.scriptCode!);
     }
     if (locale.countryCode != null && locale.scriptCode != null) {
-      final LocaleInfo key = LocaleInfo.fromString('${locale.languageCode}_${locale.scriptCode}');
+      final key = LocaleInfo.fromString('${locale.languageCode}_${locale.scriptCode}');
       languageAndScriptToCountryCodes[key] ??= <String>{};
       languageAndScriptToCountryCodes[key]!.add(locale.countryCode!);
     }
@@ -135,27 +135,26 @@ String generateArbBasedLocalizationSubclasses({
 
   final List<String> allKeys = allResourceIdentifiers.toList()..sort();
   final List<String> languageCodes = languageToLocales.keys.toList()..sort();
-  final LocaleInfo canonicalLocale = LocaleInfo.fromString('en');
-  for (final String languageName in languageCodes) {
-    final LocaleInfo languageLocale = LocaleInfo.fromString(languageName);
+  final canonicalLocale = LocaleInfo.fromString('en');
+  for (final languageName in languageCodes) {
+    final languageLocale = LocaleInfo.fromString(languageName);
     output.writeln(generateClassDeclaration(languageLocale, generatedClassPrefix, baseClass));
     output.writeln(generateConstructor(languageLocale));
 
     final Map<String, String> languageResources = localeToResources[languageLocale]!;
-    for (final String key in allKeys) {
-      final Map<String, dynamic>? attributes =
-          localeToResourceAttributes[canonicalLocale]![key] as Map<String, dynamic>?;
+    for (final key in allKeys) {
+      final attributes = localeToResourceAttributes[canonicalLocale]![key] as Map<String, dynamic>?;
       output.writeln(generateGetter(key, languageResources[key], attributes, languageLocale));
     }
     output.writeln('}');
-    int countryCodeCount = 0;
-    int scriptCodeCount = 0;
+    var countryCodeCount = 0;
+    var scriptCodeCount = 0;
     if (languageToScriptCodes.containsKey(languageName)) {
       scriptCodeCount = languageToScriptCodes[languageName]!.length;
       // Language has scriptCodes, so we need to properly fallback countries to corresponding
       // script default values before language default values.
       for (final String scriptCode in languageToScriptCodes[languageName]!) {
-        final LocaleInfo scriptBaseLocale = LocaleInfo.fromString('${languageName}_$scriptCode');
+        final scriptBaseLocale = LocaleInfo.fromString('${languageName}_$scriptCode');
         output.writeln(
           generateClassDeclaration(
             scriptBaseLocale,
@@ -169,14 +168,14 @@ String generateArbBasedLocalizationSubclasses({
           if (languageResources[key] == scriptResources[key]) {
             continue;
           }
-          final Map<String, dynamic>? attributes =
+          final attributes =
               localeToResourceAttributes[canonicalLocale]![key] as Map<String, dynamic>?;
           output.writeln(generateGetter(key, scriptResources[key], attributes, languageLocale));
         }
         output.writeln('}');
 
         final List<LocaleInfo> localeCodes = languageToLocales[languageName]!..sort();
-        for (final LocaleInfo locale in localeCodes) {
+        for (final locale in localeCodes) {
           if (locale.originalString == languageName) {
             continue;
           }
@@ -203,7 +202,7 @@ String generateArbBasedLocalizationSubclasses({
                 : languageResources[key] == localeResources[key]) {
               continue;
             }
-            final Map<String, dynamic>? attributes =
+            final attributes =
                 localeToResourceAttributes[canonicalLocale]![key] as Map<String, dynamic>?;
             output.writeln(generateGetter(key, localeResources[key], attributes, languageLocale));
           }
@@ -214,7 +213,7 @@ String generateArbBasedLocalizationSubclasses({
       // No scriptCode. Here, we do not compare against script default (because it
       // doesn't exist).
       final List<LocaleInfo> localeCodes = languageToLocales[languageName]!..sort();
-      for (final LocaleInfo locale in localeCodes) {
+      for (final locale in localeCodes) {
         if (locale.originalString == languageName) {
           continue;
         }
@@ -232,7 +231,7 @@ String generateArbBasedLocalizationSubclasses({
           if (languageResources[key] == localeResources[key]) {
             continue;
           }
-          final Map<String, dynamic>? attributes =
+          final attributes =
               localeToResourceAttributes[canonicalLocale]![key] as Map<String, dynamic>?;
           output.writeln(generateGetter(key, localeResources[key], attributes, languageLocale));
         }
@@ -240,7 +239,7 @@ String generateArbBasedLocalizationSubclasses({
       }
     }
 
-    final String scriptCodeMessage = scriptCodeCount == 0
+    final scriptCodeMessage = scriptCodeCount == 0
         ? ''
         : ' and $scriptCodeCount script${scriptCodeCount == 1 ? '' : 's'}';
     if (countryCodeCount == 0) {
@@ -328,12 +327,12 @@ $factoryDeclaration
     }''');
     } else {
       // Language has scriptCode, add additional switch logic.
-      bool hasCountryCode = false;
+      var hasCountryCode = false;
       output.writeln('''
     case '$language': {
       switch (locale.scriptCode) {''');
       for (final String scriptCode in languageToScriptCodes[language]!) {
-        final LocaleInfo scriptLocale = LocaleInfo.fromString('${language}_$scriptCode');
+        final scriptLocale = LocaleInfo.fromString('${language}_$scriptCode');
         output.writeln('''
         case '$scriptCode': {''');
         if (languageAndScriptToCountryCodes.containsKey(scriptLocale)) {
@@ -547,12 +546,10 @@ void main(List<String> rawArgs) {
   // is the 2nd command line argument, lc is a language code and cc is the country
   // code. In most cases both codes are just two characters.
 
-  final Directory directory = Directory(
-    path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n'),
-  );
-  final RegExp widgetsFilenameRE = RegExp(r'widgets_(\w+)\.arb$');
-  final RegExp materialFilenameRE = RegExp(r'material_(\w+)\.arb$');
-  final RegExp cupertinoFilenameRE = RegExp(r'cupertino_(\w+)\.arb$');
+  final directory = Directory(path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n'));
+  final widgetsFilenameRE = RegExp(r'widgets_(\w+)\.arb$');
+  final materialFilenameRE = RegExp(r'material_(\w+)\.arb$');
+  final cupertinoFilenameRE = RegExp(r'cupertino_(\w+)\.arb$');
 
   try {
     validateEnglishLocalizations(File(path.join(directory.path, 'widgets_en.arb')));
@@ -575,28 +572,22 @@ void main(List<String> rawArgs) {
   precacheLanguageAndRegionTags();
 
   // Maps of locales to resource key/value pairs for Widgets ARBs.
-  final Map<LocaleInfo, Map<String, String>> widgetsLocaleToResources =
-      <LocaleInfo, Map<String, String>>{};
+  final widgetsLocaleToResources = <LocaleInfo, Map<String, String>>{};
   // Maps of locales to resource key/attributes pairs for Widgets ARBs.
   // https://github.com/googlei18n/app-resource-bundle/wiki/ApplicationResourceBundleSpecification#resource-attributes
-  final Map<LocaleInfo, Map<String, dynamic>> widgetsLocaleToResourceAttributes =
-      <LocaleInfo, Map<String, dynamic>>{};
+  final widgetsLocaleToResourceAttributes = <LocaleInfo, Map<String, dynamic>>{};
 
   // Maps of locales to resource key/value pairs for Material ARBs.
-  final Map<LocaleInfo, Map<String, String>> materialLocaleToResources =
-      <LocaleInfo, Map<String, String>>{};
+  final materialLocaleToResources = <LocaleInfo, Map<String, String>>{};
   // Maps of locales to resource key/attributes pairs for Material ARBs.
   // https://github.com/googlei18n/app-resource-bundle/wiki/ApplicationResourceBundleSpecification#resource-attributes
-  final Map<LocaleInfo, Map<String, dynamic>> materialLocaleToResourceAttributes =
-      <LocaleInfo, Map<String, dynamic>>{};
+  final materialLocaleToResourceAttributes = <LocaleInfo, Map<String, dynamic>>{};
 
   // Maps of locales to resource key/value pairs for Cupertino ARBs.
-  final Map<LocaleInfo, Map<String, String>> cupertinoLocaleToResources =
-      <LocaleInfo, Map<String, String>>{};
+  final cupertinoLocaleToResources = <LocaleInfo, Map<String, String>>{};
   // Maps of locales to resource key/attributes pairs for Cupertino ARBs.
   // https://github.com/googlei18n/app-resource-bundle/wiki/ApplicationResourceBundleSpecification#resource-attributes
-  final Map<LocaleInfo, Map<String, dynamic>> cupertinoLocaleToResourceAttributes =
-      <LocaleInfo, Map<String, dynamic>>{};
+  final cupertinoLocaleToResourceAttributes = <LocaleInfo, Map<String, dynamic>>{};
 
   loadMatchingArbsIntoBundleMaps(
     directory: directory,
@@ -693,15 +684,15 @@ void main(List<String> rawArgs) {
       : null;
 
   if (options.writeToFile) {
-    final File widgetsLocalizationsFile = File(
+    final widgetsLocalizationsFile = File(
       path.join(directory.path, 'generated_widgets_localizations.dart'),
     );
     widgetsLocalizationsFile.writeAsStringSync(widgetsLocalizations!, flush: true);
-    final File materialLocalizationsFile = File(
+    final materialLocalizationsFile = File(
       path.join(directory.path, 'generated_material_localizations.dart'),
     );
     materialLocalizationsFile.writeAsStringSync(materialLocalizations!, flush: true);
-    final File cupertinoLocalizationsFile = File(
+    final cupertinoLocalizationsFile = File(
       path.join(directory.path, 'generated_cupertino_localizations.dart'),
     );
     cupertinoLocalizationsFile.writeAsStringSync(cupertinoLocalizations!, flush: true);
