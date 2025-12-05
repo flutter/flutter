@@ -24,7 +24,7 @@ void testMain() {
       tearDownAll(() {
         ui_web.TestEnvironment.tearDown();
       });
-      const List<String> testFonts = <String>['FlutterTest', 'Ahem'];
+      const testFonts = <String>['FlutterTest', 'Ahem'];
 
       test('The default test font is used when a non-test fontFamily is specified', () {
         final String defaultTestFontFamily = testFonts.first;
@@ -52,7 +52,7 @@ void testMain() {
       });
 
       test('Can specify test fontFamily to use', () {
-        for (final String testFont in testFonts) {
+        for (final testFont in testFonts) {
           expect(CkTextStyle(fontFamily: testFont).effectiveFontFamily, testFont);
           expect(
             CkParagraphStyle(fontFamily: testFont).getTextStyle().effectiveFontFamily,

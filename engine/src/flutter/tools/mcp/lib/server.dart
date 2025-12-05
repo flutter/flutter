@@ -53,8 +53,8 @@ final class EngineServer extends MCPServer with ToolsSupport {
 
   Future<CallToolResult> _doEngineListTargets(CallToolRequest request) async {
     try {
-      final String? config = request.arguments!['config'] as String?;
-      final List<String> arguments = ['./third_party/gn/gn', 'ls', '../out/$config'];
+      final config = request.arguments!['config'] as String?;
+      final arguments = <String>['./third_party/gn/gn', 'ls', '../out/$config'];
 
       final ProcessRunnerResult result = await _processRunner.runProcess(arguments);
       final String output = result.stdout;
@@ -67,7 +67,7 @@ final class EngineServer extends MCPServer with ToolsSupport {
 
   Future<CallToolResult> _doEngineBuildHelp(CallToolRequest request) async {
     try {
-      final List<String> arguments = ['./bin/et', 'build', '--help'];
+      final arguments = <String>['./bin/et', 'build', '--help'];
       final ProcessRunnerResult result = await _processRunner.runProcess(arguments);
       final String output = result.stdout;
 
@@ -79,8 +79,8 @@ final class EngineServer extends MCPServer with ToolsSupport {
 
   Future<CallToolResult> _doEngineBuild(CallToolRequest request) async {
     try {
-      final String? config = request.arguments!['config'] as String?;
-      final String? target = request.arguments!['target'] as String?;
+      final config = request.arguments!['config'] as String?;
+      final target = request.arguments!['target'] as String?;
       final List<String> arguments = ['./bin/et', 'build', '-c', config!];
       if (target != null) {
         arguments.add(target);

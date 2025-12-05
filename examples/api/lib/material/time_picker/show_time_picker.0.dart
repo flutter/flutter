@@ -158,7 +158,8 @@ class _TimePickerOptionsState extends State<TimePickerOptions> {
                   value: orientation,
                   title: '$Orientation',
                   choiceLabels: <Orientation?, String>{
-                    for (final Orientation choice in Orientation.values) choice: choice.name,
+                    for (final Orientation choice in Orientation.values)
+                      choice: choice.name,
                     null: 'from MediaQuery',
                   },
                   onChanged: _orientationChanged,
@@ -178,7 +179,10 @@ class _TimePickerOptionsState extends State<TimePickerOptions> {
                   value: widget.useMaterial3,
                   onChanged: widget.setUseMaterial3,
                   title: 'Material Version',
-                  choiceLabels: const <bool, String>{false: 'Material 2', true: 'Material 3'},
+                  choiceLabels: const <bool, String>{
+                    false: 'Material 2',
+                    true: 'Material 3',
+                  },
                 ),
               ],
             ),
@@ -205,13 +209,15 @@ class _TimePickerOptionsState extends State<TimePickerOptions> {
                           // rarely necessary, because the default values are
                           // usually used as-is.
                           return Theme(
-                            data: Theme.of(context).copyWith(materialTapTargetSize: tapTargetSize),
+                            data: Theme.of(
+                              context,
+                            ).copyWith(materialTapTargetSize: tapTargetSize),
                             child: Directionality(
                               textDirection: textDirection,
                               child: MediaQuery(
-                                data: MediaQuery.of(
-                                  context,
-                                ).copyWith(alwaysUse24HourFormat: use24HourTime),
+                                data: MediaQuery.of(context).copyWith(
+                                  alwaysUse24HourFormat: use24HourTime,
+                                ),
                                 child: child!,
                               ),
                             ),
@@ -224,7 +230,8 @@ class _TimePickerOptionsState extends State<TimePickerOptions> {
                     },
                   ),
                 ),
-                if (selectedTime != null) Text('Selected time: ${selectedTime!.format(context)}'),
+                if (selectedTime != null)
+                  Text('Selected time: ${selectedTime!.format(context)}'),
               ],
             ),
           ),
@@ -261,18 +268,23 @@ class ChoiceCard<T extends Object?> extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Padding(padding: const EdgeInsets.all(8.0), child: Text(title)),
-                for (final T choice in choices)
-                  RadioSelection<T>(
-                    value: choice,
-                    groupValue: value,
-                    onChanged: onChanged,
-                    child: Text(choiceLabels[choice]!),
+            child: RadioGroup<T>(
+              groupValue: value,
+              onChanged: onChanged,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(title),
                   ),
-              ],
+                  for (final T choice in choices)
+                    RadioSelection<T>(
+                      value: choice,
+                      child: Text(choiceLabels[choice]!),
+                    ),
+                ],
+              ),
             ),
           ),
         ),
@@ -284,7 +296,12 @@ class ChoiceCard<T extends Object?> extends StatelessWidget {
 // This aggregates a ChoiceCard so that it presents a set of radio buttons for
 // the allowed enum values for the user to select from.
 class EnumCard<T extends Enum> extends StatelessWidget {
-  const EnumCard({super.key, required this.value, required this.choices, required this.onChanged});
+  const EnumCard({
+    super.key,
+    required this.value,
+    required this.choices,
+    required this.onChanged,
+  });
 
   final T value;
   final Iterable<T> choices;
@@ -296,7 +313,9 @@ class EnumCard<T extends Enum> extends StatelessWidget {
       value: value,
       choices: choices,
       onChanged: onChanged,
-      choiceLabels: <T, String>{for (final T choice in choices) choice: choice.name},
+      choiceLabels: <T, String>{
+        for (final T choice in choices) choice: choice.name,
+      },
       title: value.runtimeType.toString(),
     );
   }
@@ -304,25 +323,12 @@ class EnumCard<T extends Enum> extends StatelessWidget {
 
 // A button that has a radio button on one side and a label child. Tapping on
 // the label or the radio button selects the item.
-class RadioSelection<T extends Object?> extends StatefulWidget {
-  const RadioSelection({
-    super.key,
-    required this.value,
-    required this.groupValue,
-    required this.onChanged,
-    required this.child,
-  });
+class RadioSelection<T extends Object?> extends StatelessWidget {
+  const RadioSelection({super.key, required this.value, required this.child});
 
   final T value;
-  final T? groupValue;
-  final ValueChanged<T?> onChanged;
   final Widget child;
 
-  @override
-  State<RadioSelection<T>> createState() => _RadioSelectionState<T>();
-}
-
-class _RadioSelectionState<T extends Object?> extends State<RadioSelection<T>> {
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -330,13 +336,12 @@ class _RadioSelectionState<T extends Object?> extends State<RadioSelection<T>> {
       children: <Widget>[
         Padding(
           padding: const EdgeInsetsDirectional.only(end: 8),
-          child: Radio<T>(
-            groupValue: widget.groupValue,
-            value: widget.value,
-            onChanged: widget.onChanged,
-          ),
+          child: Radio<T>(value: value),
         ),
-        GestureDetector(onTap: () => widget.onChanged(widget.value), child: widget.child),
+        GestureDetector(
+          onTap: () => RadioGroup.maybeOf<T>(context)?.onChanged(value),
+          child: child,
+        ),
       ],
     );
   }

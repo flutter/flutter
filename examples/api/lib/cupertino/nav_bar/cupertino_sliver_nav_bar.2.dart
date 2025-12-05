@@ -38,7 +38,10 @@ class SliverNavBarExample extends StatelessWidget {
             largeTitle: Text('Contacts'),
             bottom: PreferredSize(
               preferredSize: Size.fromHeight(100),
-              child: ColoredBox(color: Color(0xff191970), child: Text('Bottom Widget')),
+              child: ColoredBox(
+                color: Color(0xff191970),
+                child: Text('Bottom Widget'),
+              ),
             ),
             trailing: Icon(CupertinoIcons.add_circled),
           ),
@@ -102,7 +105,10 @@ class NextPage extends StatelessWidget {
                 Text('Drag me up', textAlign: TextAlign.center),
                 // When the "leading" parameter is omitted on a route that has a previous page,
                 // the back button is automatically added to the leading position.
-                Text('Tap on the leading button to navigate back', textAlign: TextAlign.center),
+                Text(
+                  'Tap on the leading button to navigate back',
+                  textAlign: TextAlign.center,
+                ),
               ],
             ),
           ),
