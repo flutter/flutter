@@ -178,14 +178,14 @@ class SemanticsTester {
       }
     }
 
-    final Int32List childIds = Int32List(children?.length ?? 0);
+    final childIds = Int32List(children?.length ?? 0);
     if (children != null) {
-      for (int i = 0; i < children.length; i++) {
+      for (var i = 0; i < children.length; i++) {
         childIds[i] = children[i].id;
       }
     }
 
-    final SemanticsNodeUpdate update = SemanticsNodeUpdate(
+    final update = SemanticsNodeUpdate(
       id: id,
       flags: flags ?? ui.SemanticsFlags.none,
       actions: actions,

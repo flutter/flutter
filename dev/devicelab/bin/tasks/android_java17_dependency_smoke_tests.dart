@@ -31,7 +31,7 @@ List<VersionTuple> versionTuples = <VersionTuple>[
 
 Future<void> main() async {
   /// The [FileSystem] for the integration test environment.
-  const LocalFileSystem fileSystem = LocalFileSystem();
+  const fileSystem = LocalFileSystem();
 
   /// The temp [Directory] purposedly has a space in it.
   final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(

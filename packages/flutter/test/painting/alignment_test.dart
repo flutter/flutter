@@ -15,7 +15,7 @@ void approxExpect(Alignment a, Alignment b) {
 
 void main() {
   test('Alignment control test', () {
-    const Alignment alignment = Alignment(0.5, 0.25);
+    const alignment = Alignment(0.5, 0.25);
 
     expect(alignment, hasOneLineDescription);
     expect(alignment.hashCode, equals(const Alignment(0.5, 0.25).hashCode));
@@ -59,7 +59,7 @@ void main() {
     const Alignment center = Alignment.center;
     const Alignment topLeft = Alignment.topLeft;
     const Alignment topRight = Alignment.topRight;
-    final List<double> numbers = <double>[0.0, 1.0, -1.0, 2.0, 0.25, 0.5, 100.0, -999.75];
+    final numbers = <double>[0.0, 1.0, -1.0, 2.0, 0.25, 0.5, 100.0, -999.75];
 
     expect((topEnd * 0.0).add(topRight * 0.0), center);
     expect(topEnd.add(topRight) * 0.0, (topEnd * 0.0).add(topRight * 0.0));
@@ -88,10 +88,10 @@ void main() {
     expect(topEnd * 1.0, topEnd);
     expect(topLeft * 1.0, topLeft);
     expect(topRight * 1.0, topRight);
-    for (final double n in numbers) {
+    for (final n in numbers) {
       expect((topStart * n).add(topStart), topStart * (n + 1.0));
       expect((topEnd * n).add(topEnd), topEnd * (n + 1.0));
-      for (final double m in numbers) {
+      for (final m in numbers) {
         expect((topStart * n).add(topStart * m), topStart * (n + m));
       }
     }
@@ -198,7 +198,7 @@ void main() {
   });
 
   test('lerp commutes with resolve', () {
-    final List<AlignmentGeometry?> offsets = <AlignmentGeometry?>[
+    final offsets = <AlignmentGeometry?>[
       Alignment.topLeft,
       Alignment.topCenter,
       Alignment.topRight,
@@ -231,13 +231,13 @@ void main() {
       null,
     ];
 
-    final List<double> times = <double>[0.25, 0.5, 0.75];
+    final times = <double>[0.25, 0.5, 0.75];
 
     for (final TextDirection direction in TextDirection.values) {
       final Alignment defaultValue = AlignmentDirectional.center.resolve(direction);
-      for (final AlignmentGeometry? a in offsets) {
+      for (final a in offsets) {
         final Alignment resolvedA = a?.resolve(direction) ?? defaultValue;
-        for (final AlignmentGeometry? b in offsets) {
+        for (final b in offsets) {
           final Alignment resolvedB = b?.resolve(direction) ?? defaultValue;
           approxExpect(Alignment.lerp(resolvedA, resolvedB, 0.0)!, resolvedA);
           approxExpect(Alignment.lerp(resolvedA, resolvedB, 1.0)!, resolvedB);
@@ -249,7 +249,7 @@ void main() {
             (AlignmentGeometry.lerp(a, b, 1.0) ?? defaultValue).resolve(direction),
             resolvedB,
           );
-          for (final double t in times) {
+          for (final t in times) {
             assert(t > 0.0);
             assert(t < 1.0);
             final Alignment value = (AlignmentGeometry.lerp(a, b, t) ?? defaultValue).resolve(
@@ -359,7 +359,7 @@ void main() {
   });
 
   test('AlignmentDirectional.resolve with null TextDirection asserts', () {
-    const AlignmentDirectional alignmentDirectional = AlignmentDirectional(1.0, 2.0);
+    const alignmentDirectional = AlignmentDirectional(1.0, 2.0);
 
     expect(
       () => alignmentDirectional.resolve(null),
@@ -374,8 +374,8 @@ void main() {
   });
 
   test('AlignmentDirectional.resolve with null TextDirection asserts', () {
-    const Alignment a = Alignment(5.0, 6.0);
-    const AlignmentDirectional b = AlignmentDirectional(15.0, 16.0);
+    const a = Alignment(5.0, 6.0);
+    const b = AlignmentDirectional(15.0, 16.0);
 
     expect(
       () => a.add(b).resolve(null),
