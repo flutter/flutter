@@ -4,7 +4,6 @@
 
 #include "flutter/lib/ui/painting/pixel_deferred_image_gpu_impeller.h"
 
-#include "flutter/display_list/dl_builder.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/trace_event.h"
 
@@ -126,7 +125,7 @@ void PixelDeferredImageGPUImpeller::ImageWrapper::SnapshotImage(
 }
 
 std::optional<std::string>
-PixelDeferredImageGPUImpeller::ImageWrapper::get_error() {
+PixelDeferredImageGPUImpeller::ImageWrapper::get_error() const {
   std::scoped_lock lock(error_mutex_);
   return error_;
 }

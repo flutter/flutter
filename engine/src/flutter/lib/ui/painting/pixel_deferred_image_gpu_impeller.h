@@ -19,6 +19,10 @@
 
 namespace flutter {
 
+/// A deferred image that is created from pixels.
+/// @see DisplayListDeferredImageGPUImpeller for another example of a deferred
+/// image.
+/// @see dart:ui `decodeImageFromPixelsSync` for the user of this class.
 class PixelDeferredImageGPUImpeller final : public DlImage {
  public:
   static sk_sp<PixelDeferredImageGPUImpeller> Make(
@@ -74,7 +78,7 @@ class PixelDeferredImageGPUImpeller final : public DlImage {
 
     bool isTextureBacked() const;
 
-    std::optional<std::string> get_error();
+    std::optional<std::string> get_error() const;
 
    private:
     void SnapshotImage(sk_sp<SkImage> image);

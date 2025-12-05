@@ -2747,21 +2747,6 @@ void decodeImageFromPixels(
 ///
 /// The [width] and [height] arguments specify the dimensions of the image.
 ///
-/// The [rowBytes] argument specifies the number of bytes per row in the
-/// [pixels] buffer. If it is not provided, it is calculated from the [width]
-/// and [format].
-///
-/// The [targetWidth] and [targetHeight] arguments specify the expected
-/// dimensions of the output image. If they are not provided, the image is
-/// decoded at its full size.
-///
-/// The [allowUpscaling] argument specifies whether the image should be
-/// upscaled if the [targetWidth] or [targetHeight] are larger than the
-/// intrinsic dimensions of the image.
-///
-/// The [targetFormat] argument specifies the desired pixel format of the
-/// output image.
-///
 /// This function returns an [Image] immediately. The image might not be
 /// fully decoded yet, but it can be drawn to a [Canvas].
 Image decodeImageFromPixelsSync(Uint8List pixels, int width, int height, PixelFormat format) {
