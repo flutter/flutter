@@ -456,7 +456,7 @@ TEST_F(WindowManagerTest, TooltipWindowHasNoActivateStyle) {
           engine_id(), tooltip_view_id);
 
   DWORD ex_style = GetWindowLong(tooltip_window_handle, GWL_EXSTYLE);
-  EXPECT_TRUE(ex_style & WS_EX_NOACTIVATE)
+  EXPECT_TRUE(ex_style & WS_EX_NOACTIVATE);
 }
 
 TEST_F(WindowManagerTest, TooltipWindowDoesNotStealFocus) {
