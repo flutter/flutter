@@ -83,7 +83,7 @@ class _RenderSemanticsClipper extends RenderProxyBox {
   Rect get semanticBounds {
     final EdgeInsets clipDetails = _clipDetailsNotifier.value;
     final Rect originalRect = super.semanticBounds;
-    final Rect clippedRect = Rect.fromLTRB(
+    final clippedRect = Rect.fromLTRB(
       originalRect.left + clipDetails.left,
       originalRect.top + clipDetails.top,
       originalRect.right - clipDetails.right,
@@ -434,7 +434,7 @@ class _ModalBarrierGestureDetector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{
+    final gestures = <Type, GestureRecognizerFactory>{
       _AnyTapGestureRecognizer: _AnyTapGestureRecognizerFactory(onAnyTapUp: onDismiss),
     };
 

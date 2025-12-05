@@ -10,9 +10,7 @@
 
 @end
 
-@implementation DynamicResizingViewController {
-  FlutterBasicMessageChannel *_messageChannel;
-}
+@implementation DynamicResizingViewController {}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -50,7 +48,7 @@
       if (index == 10) {
         _flutterViewController = [[FlutterViewController alloc] init];
         [_flutterViewController setInitialRoute:@"resize"];
-        _flutterViewController.autoResizable = true;
+        _flutterViewController.autoResizable = YES;
         [self addChildViewController:_flutterViewController];
         [stackView addArrangedSubview:_flutterViewController.view];
         _flutterViewController.view.translatesAutoresizingMaskIntoConstraints = NO;

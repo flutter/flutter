@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('AnimatedPositioned.fromRect control test', (WidgetTester tester) async {
-    final AnimatedPositioned positioned = AnimatedPositioned.fromRect(
+    final positioned = AnimatedPositioned.fromRect(
       rect: const Rect.fromLTWH(7.0, 5.0, 12.0, 16.0),
       duration: const Duration(milliseconds: 200),
       child: Container(),
@@ -71,8 +71,8 @@ void main() {
       ),
     );
 
-    const Offset first = Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0);
-    const Offset last = Offset(37.0 + 59.0 / 2.0, 31.0 + 71.0 / 2.0);
+    const first = Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0);
+    const last = Offset(37.0 + 59.0 / 2.0, 31.0 + 71.0 / 2.0);
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(first));
@@ -163,8 +163,8 @@ void main() {
       ),
     );
 
-    const Offset first = Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0);
-    const Offset last = Offset(37.0 + 59.0 / 2.0, 31.0 + 71.0 / 2.0);
+    const first = Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0);
+    const last = Offset(37.0 + 59.0 / 2.0, 31.0 + 71.0 / 2.0);
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(first));
@@ -255,8 +255,8 @@ void main() {
       ),
     );
 
-    const Offset first = Offset(800.0 - 50.0 - 70.0 / 2.0, 30.0 + 110.0 / 2.0);
-    const Offset last = Offset(800.0 - 37.0 - 59.0 / 2.0, 31.0 + 71.0 / 2.0);
+    const first = Offset(800.0 - 50.0 - 70.0 / 2.0, 30.0 + 110.0 / 2.0);
+    const last = Offset(800.0 - 37.0 - 59.0 / 2.0, 31.0 + 71.0 / 2.0);
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(first));

@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Does not animate if already at target position', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       Directionality(
@@ -39,7 +39,7 @@ void main() {
   testWidgets('Does not animate if already at target position within tolerance', (
     WidgetTester tester,
   ) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       Directionality(
@@ -71,7 +71,7 @@ void main() {
   });
 
   testWidgets('Animates if going to a position outside of tolerance', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       Directionality(
@@ -106,9 +106,9 @@ void main() {
   });
 
   testWidgets('HoldActivity can interrupt ScrollPosition.animateTo', (WidgetTester tester) async {
-    const double animationExtent = 100.0;
-    const double dragExtent = 30.0;
-    final ScrollController controller = ScrollController();
+    const animationExtent = 100.0;
+    const dragExtent = 30.0;
+    final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       Directionality(

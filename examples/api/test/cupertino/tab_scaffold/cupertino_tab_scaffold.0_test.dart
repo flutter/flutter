@@ -8,7 +8,9 @@ import 'package:flutter_api_samples/cupertino/tab_scaffold/cupertino_tab_scaffol
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can use CupertinoTabView as the root widget', (WidgetTester tester) async {
+  testWidgets('Can use CupertinoTabView as the root widget', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.TabScaffoldApp());
 
     expect(find.text('Page 1 of tab 0'), findsOneWidget);

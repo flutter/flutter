@@ -211,6 +211,7 @@ class DropdownMenu<T extends Object> extends StatefulWidget {
     this.onSelected,
     this.focusNode,
     this.requestFocusOnTap,
+    this.selectOnly = false,
     this.expandedInsets,
     this.filterCallback,
     this.searchCallback,
@@ -506,6 +507,23 @@ class DropdownMenu<T extends Object> extends StatefulWidget {
   /// {@end-tool}
   final bool? requestFocusOnTap;
 
+  /// Determines if the dropdown menu behaves as a 'select' component.
+  ///
+  /// This is useful for mobile platforms where a dropdown menu is commonly used as
+  /// a 'select' widget (i.e., the user can only select from the list, not edit
+  /// the text field to search or filter).
+  ///
+  /// When true, the inner text field is read-only.
+  ///
+  /// If the text field is also focusable (see [requestFocusOnTap]), the following
+  /// behaviors are also activated:
+  ///
+  ///  * Pressing Enter when the menu is closed opens it.
+  ///  * The decoration reflects the focus state.
+  ///
+  /// Defaults to false.
+  final bool selectOnly;
+
   /// Descriptions of the menu items in the [DropdownMenu].
   ///
   /// This is a required parameter. It is recommended that at least one [DropdownMenuEntry]
@@ -659,6 +677,27 @@ class DropdownMenu<T extends Object> extends StatefulWidget {
 }
 
 class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
+  static const Map<ShortcutActivator, Intent> _editableShortcuts = <ShortcutActivator, Intent>{
+    SingleActivator(LogicalKeyboardKey.arrowLeft): ExtendSelectionByCharacterIntent(
+      forward: false,
+      collapseSelection: true,
+    ),
+    SingleActivator(LogicalKeyboardKey.arrowRight): ExtendSelectionByCharacterIntent(
+      forward: true,
+      collapseSelection: true,
+    ),
+    SingleActivator(LogicalKeyboardKey.arrowUp): _ArrowUpIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowDown): _ArrowDownIntent(),
+  };
+
+  static const Map<ShortcutActivator, Intent> _selectOnlyShortcuts = <ShortcutActivator, Intent>{
+    SingleActivator(LogicalKeyboardKey.arrowUp): _ArrowUpIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowDown): _ArrowDownIntent(),
+    // When selectOnly is true, a shortcut for the enter key is needed because
+    // the text field won't provide one.
+    SingleActivator(LogicalKeyboardKey.enter): _EnterIntent(),
+  };
+
   final GlobalKey _anchorKey = GlobalKey();
   final GlobalKey _leadingKey = GlobalKey();
   late List<GlobalKey> buttonItemKeys;
@@ -761,6 +800,9 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
         };
   }
 
+  bool get selectOnly => widget.selectOnly;
+  bool get isButton => !canRequestFocus() || selectOnly;
+
   void refreshLeadingPadding() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) {
@@ -786,7 +828,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
   double? getWidth(GlobalKey key) {
     final BuildContext? context = key.currentContext;
     if (context != null) {
-      final RenderBox box = context.findRenderObject()! as RenderBox;
+      final box = context.findRenderObject()! as RenderBox;
       return box.hasSize ? box.size.width : null;
     }
     return null;
@@ -842,8 +884,8 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
     bool? useMaterial3,
   }) {
     final double effectiveInputStartGap = useMaterial3 ?? false ? _kInputStartGap : 0.0;
-    final List<Widget> result = <Widget>[];
-    for (int i = 0; i < filteredEntries.length; i++) {
+    final result = <Widget>[];
+    for (var i = 0; i < filteredEntries.length; i++) {
       final DropdownMenuEntry<T> entry = filteredEntries[i];
 
       // By default, when the text field has a leading icon but a menu entry doesn't
@@ -978,7 +1020,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
     return result;
   }
 
-  void handleUpKeyInvoke(_ArrowUpIntent _) {
+  void handleUpKey(_ArrowUpIntent _) {
     setState(() {
       if (!widget.enabled || !_menuHasEnabledItem || !_controller.isOpen) {
         return;
@@ -998,7 +1040,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
     });
   }
 
-  void handleDownKeyInvoke(_ArrowDownIntent _) {
+  void handleDownKey(_ArrowDownIntent _) {
     setState(() {
       if (!widget.enabled || !_menuHasEnabledItem || !_controller.isOpen) {
         return;
@@ -1016,6 +1058,14 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
         selection: TextSelection.collapsed(offset: currentLabel.length),
       );
     });
+  }
+
+  void handleEnterKey(_EnterIntent _) {
+    if (selectOnly && !_controller.isOpen) {
+      _controller.open();
+      return;
+    }
+    _handleSubmitted();
   }
 
   void handlePressed(MenuController controller, {bool focusForKeyboard = true}) {
@@ -1141,7 +1191,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
         widget.inputDecorationTheme ?? theme.inputDecorationTheme ?? defaults.inputDecorationTheme!;
 
     final MouseCursor? effectiveMouseCursor = switch (widget.enabled) {
-      true => canRequestFocus() ? SystemMouseCursors.text : SystemMouseCursors.click,
+      true => isButton ? SystemMouseCursors.click : SystemMouseCursors.text,
       false => null,
     };
 
@@ -1176,7 +1226,6 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
               );
 
         final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-        final bool isButton = !canRequestFocus();
         final Widget textField = Semantics(
           button: isButton,
           // This is set specificly for iOS because iOS does not have any native
@@ -1208,8 +1257,8 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
               mouseCursor: effectiveMouseCursor,
               focusNode: widget.focusNode,
               canRequestFocus: canRequestFocus(),
-              enableInteractiveSelection: canRequestFocus(),
-              readOnly: !canRequestFocus(),
+              enableInteractiveSelection: !isButton,
+              readOnly: isButton,
               keyboardType: widget.keyboardType,
               textAlign: widget.textAlign,
               textAlignVertical: TextAlignVertical.center,
@@ -1284,18 +1333,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
               );
 
         return Shortcuts(
-          shortcuts: const <ShortcutActivator, Intent>{
-            SingleActivator(LogicalKeyboardKey.arrowLeft): ExtendSelectionByCharacterIntent(
-              forward: false,
-              collapseSelection: true,
-            ),
-            SingleActivator(LogicalKeyboardKey.arrowRight): ExtendSelectionByCharacterIntent(
-              forward: true,
-              collapseSelection: true,
-            ),
-            SingleActivator(LogicalKeyboardKey.arrowUp): _ArrowUpIntent(),
-            SingleActivator(LogicalKeyboardKey.arrowDown): _ArrowDownIntent(),
-          },
+          shortcuts: selectOnly ? _selectOnlyShortcuts : _editableShortcuts,
           child: body,
         );
       },
@@ -1328,9 +1366,9 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
 
     return Actions(
       actions: <Type, Action<Intent>>{
-        _ArrowUpIntent: CallbackAction<_ArrowUpIntent>(onInvoke: handleUpKeyInvoke),
-        _ArrowDownIntent: CallbackAction<_ArrowDownIntent>(onInvoke: handleDownKeyInvoke),
-        _EnterIntent: CallbackAction<_EnterIntent>(onInvoke: (_) => _handleSubmitted()),
+        _ArrowUpIntent: CallbackAction<_ArrowUpIntent>(onInvoke: handleUpKey),
+        _ArrowDownIntent: CallbackAction<_ArrowDownIntent>(onInvoke: handleDownKey),
+        _EnterIntent: CallbackAction<_EnterIntent>(onInvoke: handleEnterKey),
         DismissIntent: DismissMenuAction(controller: _controller),
       },
       child: Stack(
@@ -1377,7 +1415,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
               // the text field button by excluding semantics. Otherwise,
               // it will inappropriately announce whether this icon button
               // is selected or not.
-              excluding: !canRequestFocus(),
+              excluding: isButton,
               child: IconButton(
                 focusNode: _trailingIconButtonFocusNode,
                 isSelected: controller.isOpen,
@@ -1459,13 +1497,13 @@ class _RenderDropdownMenuBody extends RenderBox
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
-    double maxWidth = 0.0;
+    var maxWidth = 0.0;
     double? maxHeight;
     RenderBox? child = firstChild;
 
     final double intrinsicWidth = width ?? getMaxIntrinsicWidth(constraints.maxHeight);
     final double widthConstraint = math.min(intrinsicWidth, constraints.maxWidth);
-    final BoxConstraints innerConstraints = BoxConstraints(
+    final innerConstraints = BoxConstraints(
       maxWidth: widthConstraint,
       maxHeight: getMaxIntrinsicHeight(widthConstraint),
     );
@@ -1473,15 +1511,13 @@ class _RenderDropdownMenuBody extends RenderBox
       if (child == firstChild) {
         child.layout(innerConstraints, parentUsesSize: true);
         maxHeight ??= child.size.height;
-        final _DropdownMenuBodyParentData childParentData =
-            child.parentData! as _DropdownMenuBodyParentData;
+        final childParentData = child.parentData! as _DropdownMenuBodyParentData;
         assert(child.parentData == childParentData);
         child = childParentData.nextSibling;
         continue;
       }
       child.layout(innerConstraints, parentUsesSize: true);
-      final _DropdownMenuBodyParentData childParentData =
-          child.parentData! as _DropdownMenuBodyParentData;
+      final childParentData = child.parentData! as _DropdownMenuBodyParentData;
       childParentData.offset = Offset.zero;
       maxWidth = math.max(maxWidth, child.size.width);
       maxHeight ??= child.size.height;
@@ -1498,20 +1534,19 @@ class _RenderDropdownMenuBody extends RenderBox
   void paint(PaintingContext context, Offset offset) {
     final RenderBox? child = firstChild;
     if (child != null) {
-      final _DropdownMenuBodyParentData childParentData =
-          child.parentData! as _DropdownMenuBodyParentData;
+      final childParentData = child.parentData! as _DropdownMenuBodyParentData;
       context.paintChild(child, offset + childParentData.offset);
     }
   }
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    double maxWidth = 0.0;
+    var maxWidth = 0.0;
     double? maxHeight;
     RenderBox? child = firstChild;
     final double intrinsicWidth = width ?? getMaxIntrinsicWidth(constraints.maxHeight);
     final double widthConstraint = math.min(intrinsicWidth, constraints.maxWidth);
-    final BoxConstraints innerConstraints = BoxConstraints(
+    final innerConstraints = BoxConstraints(
       maxWidth: widthConstraint,
       maxHeight: getMaxIntrinsicHeight(widthConstraint),
     );
@@ -1525,8 +1560,7 @@ class _RenderDropdownMenuBody extends RenderBox
         maxWidth = math.max(maxWidth, childSize.width);
       }
 
-      final _DropdownMenuBodyParentData childParentData =
-          child.parentData! as _DropdownMenuBodyParentData;
+      final childParentData = child.parentData! as _DropdownMenuBodyParentData;
       maxHeight ??= childSize.height;
       child = childParentData.nextSibling;
     }
@@ -1542,8 +1576,7 @@ class _RenderDropdownMenuBody extends RenderBox
     double width = 0;
     while (child != null) {
       if (child == firstChild) {
-        final _DropdownMenuBodyParentData childParentData =
-            child.parentData! as _DropdownMenuBodyParentData;
+        final childParentData = child.parentData! as _DropdownMenuBodyParentData;
         child = childParentData.nextSibling;
         continue;
       }
@@ -1557,8 +1590,7 @@ class _RenderDropdownMenuBody extends RenderBox
         width += minIntrinsicWidth;
       }
       width = math.max(width, minIntrinsicWidth);
-      final _DropdownMenuBodyParentData childParentData =
-          child.parentData! as _DropdownMenuBodyParentData;
+      final childParentData = child.parentData! as _DropdownMenuBodyParentData;
       child = childParentData.nextSibling;
     }
 
@@ -1571,8 +1603,7 @@ class _RenderDropdownMenuBody extends RenderBox
     double width = 0;
     while (child != null) {
       if (child == firstChild) {
-        final _DropdownMenuBodyParentData childParentData =
-            child.parentData! as _DropdownMenuBodyParentData;
+        final childParentData = child.parentData! as _DropdownMenuBodyParentData;
         child = childParentData.nextSibling;
         continue;
       }
@@ -1586,8 +1617,7 @@ class _RenderDropdownMenuBody extends RenderBox
         width += maxIntrinsicWidth;
       }
       width = math.max(width, maxIntrinsicWidth);
-      final _DropdownMenuBodyParentData childParentData =
-          child.parentData! as _DropdownMenuBodyParentData;
+      final childParentData = child.parentData! as _DropdownMenuBodyParentData;
       child = childParentData.nextSibling;
     }
 
@@ -1618,8 +1648,7 @@ class _RenderDropdownMenuBody extends RenderBox
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     final RenderBox? child = firstChild;
     if (child != null) {
-      final _DropdownMenuBodyParentData childParentData =
-          child.parentData! as _DropdownMenuBodyParentData;
+      final childParentData = child.parentData! as _DropdownMenuBodyParentData;
       final bool isHit = result.addWithPaintOffset(
         offset: childParentData.offset,
         position: position,
@@ -1639,7 +1668,7 @@ class _RenderDropdownMenuBody extends RenderBox
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
     visitChildren((RenderObject renderObjectChild) {
-      final RenderBox child = renderObjectChild as RenderBox;
+      final child = renderObjectChild as RenderBox;
       if (child == firstChild) {
         visitor(renderObjectChild);
       }

@@ -23,7 +23,7 @@ void testMain() {
 
     test('responds to flutter/skia Skia.setResourceCacheMaxBytes', () async {
       const MethodCodec codec = JSONMethodCodec();
-      final Completer<ByteData?> completer = Completer<ByteData?>();
+      final completer = Completer<ByteData?>();
       ui.PlatformDispatcher.instance.sendPlatformMessage(
         'flutter/skia',
         codec.encodeMethodCall(
