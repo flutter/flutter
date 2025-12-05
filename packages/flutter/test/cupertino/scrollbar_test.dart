@@ -1347,4 +1347,15 @@ void main() {
         ),
     );
   });
+
+  testWidgets('CupertinoScrollbar does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(child: CupertinoScrollbar(child: CustomScrollView())),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoScrollbar)), Size.zero);
+  });
 }
