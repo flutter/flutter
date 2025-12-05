@@ -47,6 +47,7 @@ class PreviewPubspecBuilder {
   ///     by widgets being previewed.
   ///   - url_launcher, which is used to open a browser to the preview documentation.
   ///   - web, which is used to access query parameters provided by the IDE.
+  ///   - webview_flutter, webview_flutter_web, which is used to embed DevTools in the previewer.
   static const _kWidgetPreviewScaffoldDeps = <String>[
     'dtd',
     'flutter_lints',
@@ -56,6 +57,8 @@ class PreviewPubspecBuilder {
     'stack_trace',
     'url_launcher',
     'web',
+    'webview_flutter',
+    'webview_flutter_web',
   ];
 
   /// Maps asset URIs to absolute paths for the widget preview project to

@@ -739,25 +739,26 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
             .toArray(new PointerProperties[touch.pointerCount]);
 
     if (!usingVirtualDiplay && trackedEvent != null) {
-      // We have the original event. Check if pointer counts match.
-      if (trackedEvent.getPointerCount() == touch.pointerCount) {
-        // Pointer counts match - we can safely use the original event with offset.
+      // We have the original event. Check if pointer counts and actions match.
+      if (trackedEvent.getPointerCount() == touch.pointerCount
+          && trackedEvent.getAction() == touch.action) {
         // This preserves the verifiable input flag.
         translateMotionEvent(trackedEvent, pointerCoords);
         return trackedEvent;
       }
 
-      // Pointer count mismatch detected (e.g., gesture recognizer filtered some pointers).
+      // Pointer count or action mismatch detected
+      // (e.g., gesture recognizer filtered some pointers).
       // This commonly occurs when:
       // - Multi-touch gestures (zoom/pinch) are filtered by gesture recognizers
       //
-      // We must reconstruct the event with the correct pointer count from Flutter.
+      // We must reconstruct the event with the correct pointer count and action from Flutter.
       // Unfortunately, this loses Android's verifiable input flag because there is no
       // public API to modify pointer count while preserving verifiability.
       return MotionEvent.obtain(
           trackedEvent.getDownTime(),
           trackedEvent.getEventTime(),
-          trackedEvent.getAction(),
+          touch.action, // Use framework's action
           touch.pointerCount, // Use framework's pointer count
           pointerProperties,
           pointerCoords,

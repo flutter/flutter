@@ -15,11 +15,11 @@ namespace impeller {
 namespace compiler {
 namespace testing {
 
-class CompilerTest : public ::testing::TestWithParam<TargetPlatform> {
+class CompilerTestBase : public ::testing::TestWithParam<TargetPlatform> {
  public:
-  CompilerTest();
+  CompilerTestBase();
 
-  ~CompilerTest();
+  ~CompilerTestBase();
 
   std::unique_ptr<fml::FileMapping> GetReflectionJson(
       const char* fixture_name) const;
@@ -38,10 +38,16 @@ class CompilerTest : public ::testing::TestWithParam<TargetPlatform> {
   std::string intermediates_path_;
   fml::UniqueFD intermediates_directory_;
 
-  CompilerTest(const CompilerTest&) = delete;
+  CompilerTestBase(const CompilerTestBase&) = delete;
 
-  CompilerTest& operator=(const CompilerTest&) = delete;
+  CompilerTestBase& operator=(const CompilerTestBase&) = delete;
 };
+
+class CompilerTest : public CompilerTestBase {};
+
+class CompilerTestSkSL : public CompilerTestBase {};
+
+class CompilerTestRuntime : public CompilerTestBase {};
 
 }  // namespace testing
 }  // namespace compiler
