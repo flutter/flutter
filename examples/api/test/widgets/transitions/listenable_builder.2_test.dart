@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/transitions/listenable_builder.2.dart' as example;
+import 'package:flutter_api_samples/widgets/transitions/listenable_builder.2.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -13,7 +14,10 @@ void main() {
     expect(find.text('Current counter value:'), findsOneWidget);
     expect(find.byIcon(Icons.add), findsOneWidget);
     expect(
-      find.descendant(of: find.byType(FloatingActionButton), matching: find.byIcon(Icons.add)),
+      find.descendant(
+        of: find.byType(FloatingActionButton),
+        matching: find.byIcon(Icons.add),
+      ),
       findsOneWidget,
     );
 

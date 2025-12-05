@@ -19,7 +19,7 @@ Future<bool> cipdKnowsPackageVersion({
   //   $package:CIPD_PACKAGE_ID
   // or:
   // No matching instances.
-  final String logLevel = isVerbose ? 'debug' : 'warning';
+  final logLevel = isVerbose ? 'debug' : 'warning';
   final String stdout = await evalProcess('cipd', <String>[
     'search',
     package,
@@ -43,7 +43,7 @@ Future<int> uploadDirectoryToCipd({
   bool isDryRun = false,
   bool isVerbose = false,
 }) async {
-  final String cipdConfig =
+  final cipdConfig =
       '''
 package: $packageName
 description: $description
@@ -54,12 +54,12 @@ data:
 ''';
 
   // Create the config manifest to upload to CIPD
-  final io.File configFile = io.File(path.join(directory.path, configFileName));
+  final configFile = io.File(path.join(directory.path, configFileName));
   await configFile.writeAsString(cipdConfig);
 
-  final String cipdCommand = isDryRun ? 'pkg-build' : 'create';
+  final cipdCommand = isDryRun ? 'pkg-build' : 'create';
   // CIPD won't fully shut up even in 'error' mode
-  final String logLevel = isVerbose ? 'debug' : 'warning';
+  final logLevel = isVerbose ? 'debug' : 'warning';
   return runProcess('cipd', <String>[
     cipdCommand,
     '--pkg-def',

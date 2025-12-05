@@ -18,7 +18,9 @@ class SelectionAreaColorTextRedExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
@@ -36,9 +38,11 @@ class MyHomePage extends StatefulWidget {
 typedef LocalSpanRange = ({int startOffset, int endOffset});
 
 class _MyHomePageState extends State<MyHomePage> {
-  final SelectionListenerNotifier _selectionNotifier = SelectionListenerNotifier();
+  final SelectionListenerNotifier _selectionNotifier =
+      SelectionListenerNotifier();
   final ContextMenuController _menuController = ContextMenuController();
-  final GlobalKey<SelectionAreaState> selectionAreaKey = GlobalKey<SelectionAreaState>();
+  final GlobalKey<SelectionAreaState> selectionAreaKey =
+      GlobalKey<SelectionAreaState>();
 
   // The data of the top level TextSpans. Each TextSpan is mapped to a LocalSpanRange,
   // which is the range the textspan covers relative to the SelectionListener it is under.
@@ -47,14 +51,17 @@ class _MyHomePageState extends State<MyHomePage> {
   // to a LocalSpanRange, being the range the bullet covers relative to the SelectionListener
   // it is under.
   Map<LocalSpanRange, TextSpan> bulletSourceMap = <LocalSpanRange, TextSpan>{};
-  Map<int, Map<LocalSpanRange, TextSpan>> widgetSpanMaps = <int, Map<LocalSpanRange, TextSpan>>{};
+  Map<int, Map<LocalSpanRange, TextSpan>> widgetSpanMaps =
+      <int, Map<LocalSpanRange, TextSpan>>{};
   // The origin data used to restore the demo to its initial state.
   late final Map<LocalSpanRange, TextSpan> originSourceData;
   late final Map<LocalSpanRange, TextSpan> originBulletSourceData;
 
   void _initData() {
     const String bulletListTitle = 'This is some bulleted list:\n';
-    final List<String> bullets = <String>[for (int i = 1; i <= 7; i += 1) '• Bullet $i'];
+    final List<String> bullets = <String>[
+      for (int i = 1; i <= 7; i += 1) '• Bullet $i',
+    ];
     final TextSpan bulletedList = TextSpan(
       text: bulletListTitle,
       children: <InlineSpan>[
@@ -62,7 +69,10 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             children: <Widget>[
               for (final String bullet in bullets)
-                Padding(padding: const EdgeInsets.only(left: 20.0), child: Text(bullet)),
+                Padding(
+                  padding: const EdgeInsets.only(left: 20.0),
+                  child: Text(bullet),
+                ),
             ],
           ),
         ),
@@ -81,43 +91,63 @@ class _MyHomePageState extends State<MyHomePage> {
     widgetSpanMaps[currentOffset] = bulletSourceMap;
     // Map individual bullets to a local range.
     for (final String bullet in bullets) {
-      bulletSourceMap[(startOffset: currentOffset, endOffset: currentOffset + bullet.length)] =
-          TextSpan(text: bullet);
+      bulletSourceMap[(
+        startOffset: currentOffset,
+        endOffset: currentOffset + bullet.length,
+      )] = TextSpan(
+        text: bullet,
+      );
       currentOffset += bullet.length;
     }
 
     const TextSpan secondTextParagraph = TextSpan(
       text: 'This is some text in a text widget.',
-      children: <InlineSpan>[TextSpan(text: ' This is some more text in the same text widget.')],
+      children: <InlineSpan>[
+        TextSpan(text: ' This is some more text in the same text widget.'),
+      ],
     );
-    const TextSpan thirdTextParagraph = TextSpan(text: 'This is some text in another text widget.');
+    const TextSpan thirdTextParagraph = TextSpan(
+      text: 'This is some text in another text widget.',
+    );
     // Map second and third paragraphs to local ranges.
     dataSourceMap[(
           startOffset: currentOffset,
           endOffset:
-              currentOffset + secondTextParagraph.toPlainText(includeSemanticsLabels: false).length,
+              currentOffset +
+              secondTextParagraph
+                  .toPlainText(includeSemanticsLabels: false)
+                  .length,
         )] =
         secondTextParagraph;
-    currentOffset += secondTextParagraph.toPlainText(includeSemanticsLabels: false).length;
+    currentOffset += secondTextParagraph
+        .toPlainText(includeSemanticsLabels: false)
+        .length;
     dataSourceMap[(
           startOffset: currentOffset,
           endOffset:
-              currentOffset + thirdTextParagraph.toPlainText(includeSemanticsLabels: false).length,
+              currentOffset +
+              thirdTextParagraph
+                  .toPlainText(includeSemanticsLabels: false)
+                  .length,
         )] =
         thirdTextParagraph;
 
     // Save the origin data so we can revert our changes.
     originSourceData = <LocalSpanRange, TextSpan>{};
-    for (final MapEntry<LocalSpanRange, TextSpan> entry in dataSourceMap.entries) {
+    for (final MapEntry<LocalSpanRange, TextSpan> entry
+        in dataSourceMap.entries) {
       originSourceData[entry.key] = entry.value;
     }
     originBulletSourceData = <LocalSpanRange, TextSpan>{};
-    for (final MapEntry<LocalSpanRange, TextSpan> entry in bulletSourceMap.entries) {
+    for (final MapEntry<LocalSpanRange, TextSpan> entry
+        in bulletSourceMap.entries) {
       originBulletSourceData[entry.key] = entry.value;
     }
   }
 
-  void _handleSelectableRegionStatusChanged(SelectableRegionSelectionStatus status) {
+  void _handleSelectableRegionStatusChanged(
+    SelectableRegionSelectionStatus status,
+  ) {
     if (_menuController.isShown) {
       ContextMenuController.removeAny();
     }
@@ -127,11 +157,16 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     if (selectionAreaKey.currentState == null ||
         !selectionAreaKey.currentState!.mounted ||
-        selectionAreaKey.currentState!.selectableRegion.contextMenuAnchors.secondaryAnchor ==
+        selectionAreaKey
+                .currentState!
+                .selectableRegion
+                .contextMenuAnchors
+                .secondaryAnchor ==
             null) {
       return;
     }
-    final SelectedContentRange? selectedContentRange = _selectionNotifier.selection.range;
+    final SelectedContentRange? selectedContentRange =
+        _selectionNotifier.selection.range;
     if (selectedContentRange == null) {
       return;
     }
@@ -154,7 +189,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     dataMap: dataSourceMap,
                     coloringChildSpan: false,
                   );
-                  selectionAreaKey.currentState!.selectableRegion.clearSelection();
+                  selectionAreaKey.currentState!.selectableRegion
+                      .clearSelection();
                 },
                 label: 'Color Text Red',
               ),
@@ -196,14 +232,18 @@ class _MyHomePageState extends State<MyHomePage> {
       // The selection details is covering the current entry so let's color the range red.
       final TextSpan rawSpan = entry.value;
       // Determine local ranges relative to rawSpan.
-      final int clampedLocalStart = normalizedStartOffset < entryLocalRange.startOffset
+      final int clampedLocalStart =
+          normalizedStartOffset < entryLocalRange.startOffset
           ? entryLocalRange.startOffset
           : normalizedStartOffset;
-      final int clampedLocalEnd = normalizedEndOffset > entryLocalRange.endOffset
+      final int clampedLocalEnd =
+          normalizedEndOffset > entryLocalRange.endOffset
           ? entryLocalRange.endOffset
           : normalizedEndOffset;
-      final int startOffset = (clampedLocalStart - entryLocalRange.startOffset).abs();
-      final int endOffset = startOffset + (clampedLocalEnd - clampedLocalStart).abs();
+      final int startOffset = (clampedLocalStart - entryLocalRange.startOffset)
+          .abs();
+      final int endOffset =
+          startOffset + (clampedLocalEnd - clampedLocalStart).abs();
       final List<InlineSpan> beforeSelection = <InlineSpan>[];
       final List<InlineSpan> insideSelection = <InlineSpan>[];
       final List<InlineSpan> afterSelection = <InlineSpan>[];
@@ -217,7 +257,10 @@ class _MyHomePageState extends State<MyHomePage> {
               final int globalNewStart = count + newStart;
               // Collect spans before selection.
               beforeSelection.add(
-                TextSpan(style: child.style, text: rawText.substring(0, newStart)),
+                TextSpan(
+                  style: child.style,
+                  text: rawText.substring(0, newStart),
+                ),
               );
               // Check if this span also contains the selection.
               if (globalNewStart == startOffset && newStart < rawText.length) {
@@ -225,10 +268,13 @@ class _MyHomePageState extends State<MyHomePage> {
                   newStart + (endOffset - startOffset),
                   rawText.length,
                 );
-                final int globalNewStartAfterSelection = count + newStartAfterSelection;
+                final int globalNewStartAfterSelection =
+                    count + newStartAfterSelection;
                 insideSelection.add(
                   TextSpan(
-                    style: const TextStyle(color: Colors.red).merge(entry.value.style),
+                    style: const TextStyle(
+                      color: Colors.red,
+                    ).merge(entry.value.style),
                     text: rawText.substring(newStart, newStartAfterSelection),
                   ),
                 );
@@ -236,7 +282,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 if (globalNewStartAfterSelection == endOffset &&
                     newStartAfterSelection < rawText.length) {
                   afterSelection.add(
-                    TextSpan(style: child.style, text: rawText.substring(newStartAfterSelection)),
+                    TextSpan(
+                      style: child.style,
+                      text: rawText.substring(newStartAfterSelection),
+                    ),
                   );
                 }
               }
@@ -255,7 +304,12 @@ class _MyHomePageState extends State<MyHomePage> {
               );
               // Check if this span contains content after the selection.
               if (globalNewStart == endOffset && newStart < rawText.length) {
-                afterSelection.add(TextSpan(style: child.style, text: rawText.substring(newStart)));
+                afterSelection.add(
+                  TextSpan(
+                    style: child.style,
+                    text: rawText.substring(newStart),
+                  ),
+                );
               }
             }
             count += rawText.length;
@@ -265,7 +319,8 @@ class _MyHomePageState extends State<MyHomePage> {
             // We have arrived at a WidgetSpan but it is unaccounted for.
             return true;
           }
-          final Map<LocalSpanRange, TextSpan> widgetSpanSourceMap = widgetSpanMaps[count]!;
+          final Map<LocalSpanRange, TextSpan> widgetSpanSourceMap =
+              widgetSpanMaps[count]!;
           if (count < startOffset &&
               count +
                       (widgetSpanSourceMap.keys.last.endOffset -
@@ -318,7 +373,8 @@ class _MyHomePageState extends State<MyHomePage> {
             );
           }
           count +=
-              (widgetSpanSourceMap.keys.last.endOffset - widgetSpanSourceMap.keys.first.startOffset)
+              (widgetSpanSourceMap.keys.last.endOffset -
+                      widgetSpanSourceMap.keys.first.startOffset)
                   .abs();
           return true;
         }
@@ -326,7 +382,11 @@ class _MyHomePageState extends State<MyHomePage> {
       });
       dataMap[entry.key] = TextSpan(
         style: dataMap[entry.key]!.style,
-        children: <InlineSpan>[...beforeSelection, ...insideSelection, ...afterSelection],
+        children: <InlineSpan>[
+          ...beforeSelection,
+          ...insideSelection,
+          ...afterSelection,
+        ],
       );
     }
     // Avoid clearing the selection and setting the state
@@ -367,10 +427,12 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: () {
           setState(() {
             // Resets the state to the origin data.
-            for (final MapEntry<LocalSpanRange, TextSpan> entry in originSourceData.entries) {
+            for (final MapEntry<LocalSpanRange, TextSpan> entry
+                in originSourceData.entries) {
               dataSourceMap[entry.key] = entry.value;
             }
-            for (final MapEntry<LocalSpanRange, TextSpan> entry in originBulletSourceData.entries) {
+            for (final MapEntry<LocalSpanRange, TextSpan> entry
+                in originBulletSourceData.entries) {
               bulletSourceMap[entry.key] = entry.value;
             }
           });
@@ -411,7 +473,9 @@ class _MySelectableTextColumnState extends State<MySelectableTextColumn> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _selectableRegionScope?.removeListener(_handleOnSelectableRegionChanged);
-    _selectableRegionScope = SelectableRegionSelectionStatusScope.maybeOf(context);
+    _selectableRegionScope = SelectableRegionSelectionStatusScope.maybeOf(
+      context,
+    );
     _selectableRegionScope?.addListener(_handleOnSelectableRegionChanged);
   }
 
@@ -430,7 +494,8 @@ class _MySelectableTextColumnState extends State<MySelectableTextColumn> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            for (final MapEntry<LocalSpanRange, TextSpan> entry in widget.dataSourceMap.entries)
+            for (final MapEntry<LocalSpanRange, TextSpan> entry
+                in widget.dataSourceMap.entries)
               Text.rich(entry.value),
           ],
         ),

@@ -10,7 +10,7 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Semantics 2', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     // this test is the same as the test in Semantics 1, but
     // starting with the second branch being ignored and then

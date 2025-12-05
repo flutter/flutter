@@ -20,12 +20,18 @@ void main() {
     await tester.pump();
     final SystemUiOverlayStyle? secondStyle = SystemChrome.latestStyle;
     expect(secondStyle?.statusBarColor, isNot(firstStyle?.statusBarColor));
-    expect(secondStyle?.systemNavigationBarColor, isNot(firstStyle?.systemNavigationBarColor));
+    expect(
+      secondStyle?.systemNavigationBarColor,
+      isNot(firstStyle?.systemNavigationBarColor),
+    );
 
     await tester.tap(find.byType(ElevatedButton));
     await tester.pump();
     final SystemUiOverlayStyle? thirdStyle = SystemChrome.latestStyle;
     expect(thirdStyle?.statusBarColor, isNot(secondStyle?.statusBarColor));
-    expect(thirdStyle?.systemNavigationBarColor, isNot(secondStyle?.systemNavigationBarColor));
+    expect(
+      thirdStyle?.systemNavigationBarColor,
+      isNot(secondStyle?.systemNavigationBarColor),
+    );
   });
 }

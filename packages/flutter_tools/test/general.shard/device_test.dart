@@ -1053,7 +1053,7 @@ class FakePollingDeviceDiscoveryWithTimeout extends FakePollingDeviceDiscovery {
     : defaultTimeout = timeout ?? const Duration(seconds: 2);
 
   final List<List<Device>> _devices;
-  var index = 0;
+  int index = 0;
 
   Duration defaultTimeout;
   @override
