@@ -235,7 +235,7 @@ Future<T?> showCupertinoSheet<T>({
     return Navigator.of(context, rootNavigator: true).push<T>(route);
   }
 
-  Widget nestedNavigationContent(Widget child) {
+  Widget nestedNavigationContent(WidgetBuilder builder) {
     return NavigatorPopHandler(
       onPopWithResult: (T? result) {
         nestedNavigatorKey.currentState!.maybePop();
@@ -255,7 +255,7 @@ Future<T?> showCupertinoSheet<T>({
                     }
                     Navigator.of(context, rootNavigator: true).pop(result);
                   },
-                  child: child,
+                  child: builder(context),
                 );
               },
             ),
@@ -265,15 +265,17 @@ Future<T?> showCupertinoSheet<T>({
     );
   }
 
-  final PageRoute<T> route = effectiveBuilder != null
+  final CupertinoSheetRoute<T> route = effectiveBuilder != null
       ? CupertinoSheetRoute<T>(
-          builder: (BuildContext context) => nestedNavigationContent(effectiveBuilder(context)),
+          builder: (BuildContext context) => nestedNavigationContent(effectiveBuilder),
           enableDrag: enableDrag,
           topGap: topGap,
         )
       : CupertinoSheetRoute<T>.scrollable(
           scrollableBuilder: (BuildContext context, ScrollController controller) =>
-              nestedNavigationContent(scrollableBuilder!(context, controller)),
+              nestedNavigationContent(
+                (BuildContext context) => scrollableBuilder!(context, controller),
+              ),
           enableDrag: enableDrag,
           topGap: topGap,
         );
@@ -749,6 +751,8 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
 
   @override
   Widget buildContent(BuildContext context) {
+    final double sheetHeight =
+        MediaQuery.sizeOf(context).height - (MediaQuery.sizeOf(context).height * _kTopGapRatio);
     return MediaQuery.removePadding(
       context: context,
       removeTop: true,
@@ -756,16 +760,10 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
         borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
         child: CupertinoUserInterfaceLevel(
           data: CupertinoUserInterfaceLevelData.elevated,
-          child: Builder(
-            builder: (BuildContext context) {
-              final double height =
-                  MediaQuery.sizeOf(context).height -
-                  (MediaQuery.sizeOf(context).height * _kTopGapRatio);
-              return _CupertinoSheetScope(
-                sheetHeight: height,
-                child: _sheetWithDragHandle(context),
-              );
-            },
+          child: _CupertinoSheetScope(
+            sheetHeight: sheetHeight,
+            route: this,
+            child: _sheetWithDragHandle(context),
           ),
         ),
       ),
@@ -806,10 +804,16 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
 
 // Internally used to see if another sheet is in the tree already.
 class _CupertinoSheetScope extends InheritedWidget {
-  const _CupertinoSheetScope({required super.child, required this.sheetHeight});
+  const _CupertinoSheetScope({
+    required super.child,
+    required this.route,
+    required this.sheetHeight,
+  });
 
   // The height of the sheet when fully open, and not stretched upwards.
   final double sheetHeight;
+
+  final CupertinoSheetRoute<dynamic> route;
 
   static _CupertinoSheetScope? maybeOf(BuildContext context) {
     return context.getInheritedWidgetOfExactType<_CupertinoSheetScope>();
@@ -1406,15 +1410,10 @@ class _CupertinoDraggableScrollableSheetState<T>
 /// If this widget is not the child of a [CupertinoSheetRoute], then the drag gesture
 /// will be disabled. Alternatively, the drag gesture can be manually disabled through
 /// [enableDrag], for just this area.
-class CupertinoSheetDragArea<T> extends StatelessWidget {
+class CupertinoSheetDragArea extends StatelessWidget {
   /// Wraps its children with a [VerticalDragGestureRecognizer] which will trigger
   /// a parent [CupertinoSheetRoute]'s drag to dismiss transition.
-  const CupertinoSheetDragArea({
-    super.key,
-    this.enableDrag = true,
-    required this.route,
-    required this.child,
-  });
+  const CupertinoSheetDragArea({super.key, this.enableDrag = true, required this.child});
 
   /// Determines whether the content can be dragged.
   ///
@@ -1424,20 +1423,20 @@ class CupertinoSheetDragArea<T> extends StatelessWidget {
   /// The child widget to be wrapped.
   final Widget child;
 
-  /// The parent [CupertinoSheetRoute].
-  ///
-  /// This is the route that will have its transition respond to the drag gesture
-  /// on this widget.
-  final CupertinoSheetRoute<T> route;
-
   @override
   Widget build(BuildContext context) {
-    final double? sheetHeight = _CupertinoSheetScope.maybeOf(context)?.sheetHeight;
-    return _CupertinoDragGestureDetector<T>(
-      enabledCallback: () => enableDrag && sheetHeight != null,
-      onStartPopGesture: () => _CupertinoSheetRouteTransitionMixin._startPopGesture<T>(route),
-      sheetHeight: sheetHeight,
-      child: child,
-    );
+    final _CupertinoSheetScope? sheet = _CupertinoSheetScope.maybeOf(context);
+    final double? sheetHeight = sheet?.sheetHeight;
+    final CupertinoSheetRoute<dynamic>? sheetRoute = sheet?.route;
+    if (sheetRoute != null) {
+      return _CupertinoDragGestureDetector<dynamic>(
+        enabledCallback: () => enableDrag && sheetHeight != null,
+        onStartPopGesture: () =>
+            _CupertinoSheetRouteTransitionMixin._startPopGesture<dynamic>(sheetRoute),
+        sheetHeight: sheetHeight,
+        child: child,
+      );
+    }
+    return child;
   }
 }
