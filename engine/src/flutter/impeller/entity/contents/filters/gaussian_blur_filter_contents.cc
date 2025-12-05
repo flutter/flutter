@@ -870,7 +870,8 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
                    downsample_pass_args.transform *  //
                    Matrix::MakeScale(1 / downsample_pass_args.effective_scalar),
                .sampler_descriptor = sampler_desc,
-               .opacity = input_snapshot->opacity},
+               .opacity = input_snapshot->opacity,
+               .needs_rasterization_for_runtime_effects = true},
       entity.GetBlendMode());
 
   return ApplyBlurStyle(mask_blur_style_, entity, inputs[0],
