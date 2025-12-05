@@ -7,7 +7,9 @@ import 'package:flutter_api_samples/widgets/basic/flow.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Clicking on the menu icon opens the Flow menu', (WidgetTester tester) async {
+  testWidgets('Clicking on the menu icon opens the Flow menu', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.FlowApp());
 
     // The menu icon is in the top left corner of the screen.

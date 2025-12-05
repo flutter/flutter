@@ -262,8 +262,8 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
         });
       case TargetPlatform.fuchsia:
       case TargetPlatform.android:
-        final List<Widget> buttons = <Widget>[];
-        for (int i = 0; i < buttonItems.length; i++) {
+        final buttons = <Widget>[];
+        for (var i = 0; i < buttonItems.length; i++) {
           final ContextMenuButtonItem buttonItem = buttonItems[i];
           buttons.add(
             TextSelectionToolbarTextButton(
