@@ -1966,7 +1966,6 @@ void main() {
       );
     }
 
-    // Single-line: minTileHeight (30) < content height -> tile height should be content + padding
     await tester.pumpWidget(buildFrame(minTileHeight: 30));
     expect(tester.takeException(), isNull);
   });
