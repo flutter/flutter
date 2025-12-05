@@ -219,8 +219,7 @@ class ColorSourceContents : public Contents {
     // If overdraw prevention is requested (like when drawing stroke paths), set
     // up the depth buffer and depth comparison function to prevent the same
     // pixel from being painted multiple times.
-    if (geometry_result.mode == GeometryResult::Mode::kPreventOverdraw &&
-        options.blend_mode != BlendMode::kSrc) {
+    if (geometry_result.mode == GeometryResult::Mode::kPreventOverdraw) {
       options.depth_write_enabled = true;
       options.depth_compare = CompareFunction::kGreater;
     }
