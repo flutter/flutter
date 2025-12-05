@@ -31,8 +31,12 @@ export 'events.dart' show PointerCancelEvent, PointerDownEvent, PointerEvent, Po
 ///  * [TapGestureRecognizer], which passes this information to one of its callbacks.
 class TapDownDetails with Diagnosticable implements PositionedGestureDetails {
   /// Creates details for a [GestureTapDownCallback].
-  TapDownDetails({this.globalPosition = Offset.zero, Offset? localPosition, this.kind})
-    : localPosition = localPosition ?? globalPosition;
+  TapDownDetails({
+    this.globalPosition = Offset.zero,
+    Offset? localPosition,
+    this.kind,
+    this.buttons,
+  }) : localPosition = localPosition ?? globalPosition;
 
   /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
   @override
@@ -45,12 +49,22 @@ class TapDownDetails with Diagnosticable implements PositionedGestureDetails {
   /// The kind of the device that initiated the event.
   final PointerDeviceKind? kind;
 
+  /// Bit field using the *Button constants such as [kPrimaryMouseButton],
+  /// [kSecondaryStylusButton], etc.
+  ///
+  /// See [PointerEvent.buttons].
+  ///
+  /// NOTE: this will always be set by the platform but synthetic events might
+  /// not have it. It can be made required on future releases.
+  final int? buttons;
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
     properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(EnumProperty<PointerDeviceKind?>('kind', kind));
+    properties.add(IntProperty('buttons', buttons));
   }
 }
 
@@ -76,8 +90,12 @@ typedef GestureTapDownCallback = void Function(TapDownDetails details);
 ///  * [TapGestureRecognizer], which passes this information to one of its callbacks.
 class TapUpDetails with Diagnosticable implements PositionedGestureDetails {
   /// Creates a [TapUpDetails] data object.
-  TapUpDetails({this.globalPosition = Offset.zero, Offset? localPosition, required this.kind})
-    : localPosition = localPosition ?? globalPosition;
+  TapUpDetails({
+    this.globalPosition = Offset.zero,
+    Offset? localPosition,
+    required this.kind,
+    this.buttons,
+  }) : localPosition = localPosition ?? globalPosition;
 
   /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
   @override
@@ -90,12 +108,22 @@ class TapUpDetails with Diagnosticable implements PositionedGestureDetails {
   /// The kind of the device that initiated the event.
   final PointerDeviceKind kind;
 
+  /// Bit field using the *Button constants such as [kPrimaryMouseButton],
+  /// [kSecondaryStylusButton], etc.
+  ///
+  /// See [PointerEvent.buttons].
+  ///
+  /// NOTE: this will always be set by the platform but synthetic events might
+  /// not have it. It can be made required on future releases.
+  final int? buttons;
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
     properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(EnumProperty<PointerDeviceKind>('kind', kind));
+    properties.add(IntProperty('buttons', buttons));
   }
 }
 
@@ -723,6 +751,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
       globalPosition: down.position,
       localPosition: down.localPosition,
       kind: getKindForPointer(down.pointer),
+      buttons: down.buttons,
     );
     switch (down.buttons) {
       case kPrimaryButton:
@@ -746,6 +775,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   void handleTapUp({required PointerDownEvent down, required PointerUpEvent up}) {
     final details = TapUpDetails(
       kind: up.kind,
+      buttons: down.buttons,
       globalPosition: up.position,
       localPosition: up.localPosition,
     );
