@@ -24,5 +24,6 @@ out f16vec4 frag_color;
 // A shader that modulates the shadow color by the gaussian integral
 // value computed from the interpolated v_gaussian coefficient.
 void main() {
-  frag_color = frag_info.shadow_color * IPFractionToGaussian(v_gaussian);
+  frag_color =
+      frag_info.shadow_color * IPHalfFractionToFastGaussianCDF(v_gaussian);
 }

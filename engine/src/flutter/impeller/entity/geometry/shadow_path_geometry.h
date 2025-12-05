@@ -55,6 +55,10 @@ class ShadowVertices {
 
   std::optional<Rect> GetBounds() const;
 
+  GeometryResult GetPositionBuffer(const ContentContext& renderer,
+                                   const Entity& entity,
+                                   RenderPass& pass) const;
+
  private:
   const std::vector<Point> vertices_;
   const std::vector<uint16_t> indices_;
@@ -69,16 +73,12 @@ class ShadowVertices {
 /// without any adjustment for the matrix. The results are un-transformed
 /// and returned back iin the |ShadowVertices| in the original coordinate
 /// system.
-class ShadowPathGeometry : public Geometry {
+class ShadowPathGeometry {
  public:
   ShadowPathGeometry(Tessellator& tessellator,
                      const Matrix& matrix,
                      const PathSource& source,
                      Scalar occluder_height);
-
-  GeometryResult GetPositionBuffer(const ContentContext& renderer,
-                                   const Entity& entity,
-                                   RenderPass& pass) const override;
 
   bool CanRender() const;
 
@@ -86,8 +86,6 @@ class ShadowPathGeometry : public Geometry {
   bool IsEmpty() const;
 
   const std::shared_ptr<ShadowVertices>& GetShadowVertices() const;
-
-  std::optional<Rect> GetCoverage(const Matrix& transform) const override;
 
   /// Constructs a shadow mesh for the given |PathSource| at the given
   /// |matrix| and with the indicated device-space |occluder_height|.

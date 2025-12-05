@@ -24,19 +24,19 @@ namespace impeller {
 // ShadowVerticesContents
 
 ShadowVerticesContents::ShadowVerticesContents(
-    const ShadowPathGeometry* geometry)
+    const std::shared_ptr<ShadowVertices>& geometry)
     : geometry_(geometry) {}
 
 ShadowVerticesContents::~ShadowVerticesContents() {}
 
 std::shared_ptr<ShadowVerticesContents> ShadowVerticesContents::Make(
-    const ShadowPathGeometry* geometry) {
+    const std::shared_ptr<ShadowVertices>& geometry) {
   return std::make_shared<ShadowVerticesContents>(geometry);
 }
 
 std::optional<Rect> ShadowVerticesContents::GetCoverage(
     const Entity& entity) const {
-  return geometry_->GetCoverage({});
+  return geometry_->GetBounds();
 }
 
 void ShadowVerticesContents::SetColor(Color color) {

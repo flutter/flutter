@@ -17,46 +17,57 @@ namespace testing {
 using namespace flutter;
 
 namespace {
+/// @brief  Reflect the segments of a path around a coordinate using the
+///         PathReceiver interface.
 class PathReflector : public PathReceiver {
  public:
+  /// Reflect a path horizontally around the given x coordinate.
   static PathReflector ReflectAroundX(Scalar x_coordinate) {
     return PathReflector(-1.0f, x_coordinate * 2.0f, 1.0f, 0.0f);
   }
 
+  /// Reflect a path vertically around the given y coordinate.
   static PathReflector ReflectAroundY(Scalar y_coordinate) {
     return PathReflector(1.0f, 0.0f, -1.0f, y_coordinate * 2.0f);
   }
 
+  /// Reflect a path horizontally and vertically around the given coordinate.
   static PathReflector ReflectAround(const Point& anchor) {
     return PathReflector(-1.0f, anchor.x * 2.0f, -1.0f, anchor.y * 2.0f);
   }
 
   // |PathReceiver|
-  virtual void MoveTo(const Point& p2, bool will_be_closed) {
+  virtual void MoveTo(const Point& p2, bool will_be_closed) override {
     path_builder_.MoveTo(reflect(p2));
   }
 
   // |PathReceiver|
-  virtual void LineTo(const Point& p2) { path_builder_.LineTo(reflect(p2)); }
+  virtual void LineTo(const Point& p2) override {
+    path_builder_.LineTo(reflect(p2));
+  }
 
   // |PathReceiver|
-  virtual void QuadTo(const Point& cp, const Point& p2) {
+  virtual void QuadTo(const Point& cp, const Point& p2) override {
     path_builder_.QuadraticCurveTo(reflect(cp), reflect(p2));
   }
 
   // |PathReceiver|
-  virtual bool ConicTo(const Point& cp, const Point& p2, Scalar weight) {
+  virtual bool ConicTo(const Point& cp,
+                       const Point& p2,
+                       Scalar weight) override {
     path_builder_.ConicCurveTo(reflect(cp), reflect(p2), weight);
     return true;
   }
 
   // |PathReceiver|
-  virtual void CubicTo(const Point& cp1, const Point& cp2, const Point& p2) {
+  virtual void CubicTo(const Point& cp1,
+                       const Point& cp2,
+                       const Point& p2) override {
     path_builder_.CubicCurveTo(reflect(cp1), reflect(cp2), reflect(p2));
   }
 
   // |PathReceiver|
-  virtual void Close() { path_builder_.Close(); }
+  virtual void Close() override { path_builder_.Close(); }
 
   DlPath TakePath() { return path_builder_.TakePath(); }
 

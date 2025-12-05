@@ -195,12 +195,12 @@ class Canvas::RRectBlurShape : public BlurShape {
     return contents;
   }
 
-  Geometry& BuildDrawGeometry() override {
+  const Geometry& BuildDrawGeometry() override {
     return geom_.emplace(rect_, Size(corner_radius_));
   }
 
  private:
-  const Rect& rect_;
+  const Rect rect_;
   const Scalar corner_radius_;
 
   std::optional<RoundRectGeometry> geom_;  // optional stack allocation
@@ -220,12 +220,12 @@ class Canvas::RSuperellipseBlurShape : public BlurShape {
     return contents;
   }
 
-  Geometry& BuildDrawGeometry() override {
+  const Geometry& BuildDrawGeometry() override {
     return geom_.emplace(rect_, corner_radius_);
   }
 
  private:
-  const Rect& rect_;
+  const Rect rect_;
   const Scalar corner_radius_;
 
   std::optional<RoundSuperellipseGeometry> geom_;  // optional stack allocation
@@ -243,14 +243,15 @@ class Canvas::PathBlurShape : public BlurShape {
   std::shared_ptr<SolidBlurContents> BuildBlurContent(Sigma sigma) override {
     Scalar device_radius =
         sigma.sigma * kSigmaScale * matrix_.GetMaxBasisLengthXY();
-    shadow_geometry_.emplace(tessellator_, matrix_, source_, device_radius);
-    if (!shadow_geometry_->CanRender() || shadow_geometry_->IsEmpty()) {
+    ShadowPathGeometry shadow_geometry(tessellator_, matrix_, source_,
+                                       device_radius);
+    if (!shadow_geometry.CanRender() || shadow_geometry.IsEmpty()) {
       return nullptr;
     }
-    return ShadowVerticesContents::Make(&shadow_geometry_.value());
+    return ShadowVerticesContents::Make(shadow_geometry.GetShadowVertices());
   }
 
-  Geometry& BuildDrawGeometry() override {
+  const Geometry& BuildDrawGeometry() override {
     return source_geometry_.emplace(source_);
   }
 
@@ -708,19 +709,19 @@ bool Canvas::AttemptDrawBlur(BlurShape& shape, const Paint& paint) {
       entity.SetTransform(GetCurrentTransform());
       entity.SetBlendMode(rrect_paint.blend_mode);
 
-      Geometry& geom = shape.BuildDrawGeometry();
+      const Geometry& geom = shape.BuildDrawGeometry();
       AddRenderEntityWithFiltersToCurrentPass(entity, &geom, rrect_paint,
                                               /*reuse_depth=*/true);
       break;
     }
     case FilterContents::BlurStyle::kOuter: {
-      Geometry& geom = shape.BuildDrawGeometry();
+      const Geometry& geom = shape.BuildDrawGeometry();
       ClipGeometry(geom, Entity::ClipOperation::kDifference);
       draw_blurred_rrect();
       break;
     }
     case FilterContents::BlurStyle::kInner: {
-      Geometry& geom = shape.BuildDrawGeometry();
+      const Geometry& geom = shape.BuildDrawGeometry();
       ClipGeometry(geom, Entity::ClipOperation::kIntersect);
       draw_blurred_rrect();
       break;
@@ -901,15 +902,14 @@ void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
     }
   }
 
-  auto& rect = round_rect.GetBounds();
-  auto& radii = round_rect.GetRadii();
-
-  if (radii.AreAllCornersSame() && paint.style == Paint::Style::kFill) {
+  if (round_rect.GetRadii().AreAllCornersSame() &&
+      paint.style == Paint::Style::kFill) {
     Entity entity;
     entity.SetTransform(GetCurrentTransform());
     entity.SetBlendMode(paint.blend_mode);
 
-    RoundRectGeometry geom(rect, radii.top_left);
+    RoundRectGeometry geom(round_rect.GetBounds(),
+                           round_rect.GetRadii().top_left);
     AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
     return;
   }
@@ -951,15 +951,13 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
     }
   }
 
-  auto& rect = round_superellipse.GetBounds();
-  auto& radii = round_superellipse.GetRadii();
-
   Entity entity;
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
 
   if (paint.style == Paint::Style::kFill) {
-    RoundSuperellipseGeometry geom(rect, radii);
+    RoundSuperellipseGeometry geom(round_superellipse.GetBounds(),
+                                   round_superellipse.GetRadii());
     AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
   } else {
     StrokeRoundSuperellipseGeometry geom(round_superellipse, paint.stroke);

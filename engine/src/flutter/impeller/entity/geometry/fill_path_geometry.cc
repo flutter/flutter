@@ -92,10 +92,8 @@ bool FillPathSourceGeometry::CoversArea(const Matrix& transform,
   return coverage.Contains(rect);
 }
 
-FillPathFromSourceGeometry::FillPathFromSourceGeometry(
-    const PathSource& source,
-    std::optional<Rect> inner_rect)
-    : FillPathSourceGeometry(inner_rect), source_(source) {}
+FillPathFromSourceGeometry::FillPathFromSourceGeometry(const PathSource& source)
+    : FillPathSourceGeometry(std::nullopt), source_(source) {}
 
 const PathSource& FillPathFromSourceGeometry::GetSource() const {
   return source_;

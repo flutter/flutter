@@ -143,7 +143,7 @@ class PolygonInfo : impeller::PathTessellator::VertexWriter {
     // nearby pins make it redundant for defining the umbra polygon.
     //
     // Redundant or "removed" pins are indicated by no longer being a part
-    // of the linked list formed by the |pNext| and |pPrev| pointers.
+    // of the linked list formed by the |p_next| and |p_prev| pointers.
     //
     // Eventually, if this pin's umbra_vertex was eliminated, this location
     // will be overwritten by the surviving umbra vertex that best servies
@@ -163,8 +163,8 @@ class PolygonInfo : impeller::PathTessellator::VertexWriter {
     // Pointers used to create a circular linked list while pruning the umbra
     // polygon. The final list of vertices that remain in the umbra polygon
     // are the vertices that remain on this linked list from a "head" pin.
-    UmbraPin* pNext = nullptr;
-    UmbraPin* pPrev = nullptr;
+    UmbraPin* p_next = nullptr;
+    UmbraPin* p_prev = nullptr;
 
     bool IsFractionInitialized() const {
       return umbra_fraction > kFractionUninitialized;
@@ -200,13 +200,22 @@ class PolygonInfo : impeller::PathTessellator::VertexWriter {
         change_count++;
       }
     }
-  } x_direction_detector_, y_direction_detector_;
+
+    bool IsConvex() const {
+      // See comment above on the struct for why 3 changes is the most you
+      // should see in a convex path.
+      return change_count <= 3u;
+    }
+  };
+  DirectionDetector x_direction_detector_;
+  DirectionDetector y_direction_detector_;
+
+  const impeller::Tessellator::Trigs& trigs_;
 
   // The vertex mesh result that represents the shadow, to be rendered
   // using a modified indexed variant of DrawVertices that also adjusts
   // the alpha of the colors on a per-pixel basis by mapping their linear
   // gaussian coefficients into the associated gaussian integral values.
-  const impeller::Tessellator::Trigs& trigs_;
   std::vector<Point> vertices_;
   std::vector<uint16_t> indices_;
   std::vector<Scalar> gaussians_;
@@ -229,7 +238,7 @@ class PolygonInfo : impeller::PathTessellator::VertexWriter {
   static constexpr Scalar kSubPixelScale = (1.0f / kSubPixelCount);
 
   // Rounds the device coordinate to the sub-pixel grid.
-  Point ToDeviceGrid(Point point);
+  static Point ToDeviceGrid(Point point);
 
   // Check the direction that the edge is heading and count the number of
   // times that the sign of the dx and dy values change. If either of those
@@ -271,14 +280,15 @@ class PolygonInfo : impeller::PathTessellator::VertexWriter {
   UmbraPin* ResolveUmbraIntersections();
 
   // Structure to store the result of computing the intersection between
-  // 2 pins, containing the point of intersection and the relative fractions
-  // at which the pins intersected (expressed as a ratio of 0 to 1 where
-  // 0 represents intersecting at the path outline and 1 represents
-  // intersecting at the tip of the pin where the umbra is darkest.
+  // 2 pins, pin0 and pin1, containing the point of intersection and the
+  // relative fractions at which the 2 pins intersected (expressed as a
+  // ratio of 0 to 1 where 0 represents intersecting at the path outline
+  // and 1 represents intersecting at the tip of the pin where the umbra
+  // is darkest.
   struct PinIntersection {
-    Point intersection;
-    Scalar fraction0;
-    Scalar fraction1;
+    Point intersection;  // Point of the intersection between the pins
+    Scalar fraction0;    // fraction along pin0 of the intersection
+    Scalar fraction1;    // fraction along pin1 of the intersection
   };
 
   // Constants used to resolve pin intersections, adopted from the Skia
@@ -292,22 +302,22 @@ class PolygonInfo : impeller::PathTessellator::VertexWriter {
 
   static constexpr inline bool OutsideInterval(Scalar numer,
                                                Scalar denom,
-                                               bool denomPositive) {
-    return (denomPositive && (numer < 0 || numer > denom)) ||
-           (!denomPositive && (numer > 0 || numer < denom));
+                                               bool denom_positive) {
+    return (denom_positive && (numer < 0 || numer > denom)) ||
+           (!denom_positive && (numer > 0 || numer < denom));
   }
 
-  // Return the intersection between the 2 pins pPin0 and pPin1 if there
+  // Return the intersection between the 2 pins pin0 and pin1 if there
   // is an intersection.
-  static std::optional<PinIntersection> ComputeIntersection(UmbraPin* pPin0,
-                                                            UmbraPin* pPin1);
+  static std::optional<PinIntersection> ComputeIntersection(UmbraPin& pin0,
+                                                            UmbraPin& pin1);
 
-  // Remove the pin at pPin from the linked list of pins because the caller
+  // Remove the pin at p_pin from the linked list of pins because the caller
   // determined that it should not contribute to the final umbra polygon.
-  // The pointer to the head pin at *pHead will also be adjusted if we've
+  // The pointer to the head pin at *p_head will also be adjusted if we've
   // eliminated the head pin itself and it will be additionally set to
   // nullptr if that was the last pin in the list.
-  static void RemovePin(UmbraPin* pPin, UmbraPin** pHead);
+  static void RemovePin(UmbraPin* p_pin, UmbraPin** p_head);
 
   // A helper method for resolving pin conflicts, adopted directly from the
   // associated Skia algorithm.
@@ -324,7 +334,7 @@ class PolygonInfo : impeller::PathTessellator::VertexWriter {
   void ComputeMesh();
 
   // After the umbra_vertices of the pins are accumulated and linked into a
-  // ring using their pPrev/pNext pointers, compute the best surviving umbra
+  // ring using their p_prev/p_next pointers, compute the best surviving umbra
   // vertex for each pin and set its location and index into the UmbraPin.
   void PopulateUmbraVertices();
 
@@ -468,8 +478,7 @@ Point PolygonInfo::ToDeviceGrid(Point point) {
 bool PolygonInfo::CheckEdgeDirection(const Vector2 edge_vector) {
   x_direction_detector_.AccumulateDirection(edge_vector.x);
   y_direction_detector_.AccumulateDirection(edge_vector.y);
-  return x_direction_detector_.change_count <= 3u &&
-         y_direction_detector_.change_count <= 3u;
+  return x_direction_detector_.IsConvex() && y_direction_detector_.IsConvex();
 }
 
 // This method performs 4 functions.
@@ -648,8 +657,8 @@ void PolygonInfo::ComputePinDirectionsAndMinDistanceToCentroid() {
   p_prev_pin = &pins_.back();
   for (UmbraPin& pin : pins_) {
     UmbraPin* p_curr_pin = &pin;
-    p_curr_pin->pPrev = p_prev_pin;
-    p_prev_pin->pNext = p_curr_pin;
+    p_curr_pin->p_prev = p_prev_pin;
+    p_prev_pin->p_next = p_curr_pin;
 
     // We compute the vector along the path segment from the previous
     // path vertex to this one as well as the unit direction vector
@@ -682,21 +691,19 @@ void PolygonInfo::ComputePinDirectionsAndMinDistanceToCentroid() {
 // SkShadowTessellator.cpp and SkPolyUtils.cpp, except for variable
 // naming and differences in the methods on Point and Vertex2.
 std::optional<PolygonInfo::PinIntersection> PolygonInfo::ComputeIntersection(
-    UmbraPin* pPin0,
-    UmbraPin* pPin1) {
-  Vector2 v0 = pPin0->path_delta;
-  Vector2 v1 = pPin1->path_delta;
-  Vector2 tip_delta = pPin1->pin_tip - pPin0->pin_tip;
+    UmbraPin& pin0,
+    UmbraPin& pin1) {
+  Vector2 v0 = pin0.path_delta;
+  Vector2 v1 = pin1.path_delta;
+  Vector2 tip_delta = pin1.pin_tip - pin0.pin_tip;
   Vector2 w = tip_delta;
-  Scalar denom = pPin0->path_delta.Cross(pPin1->path_delta);
+  Scalar denom = pin0.path_delta.Cross(pin1.path_delta);
   bool denomPositive = (denom > 0);
   Scalar sNumer, tNumer;
   if (ScalarNearlyZero(denom, kCrossTolerance)) {
     // segments are parallel, but not collinear
-    if (!ScalarNearlyZero(tip_delta.Cross(pPin0->path_delta),
-                          kCrossTolerance) ||
-        !ScalarNearlyZero(tip_delta.Cross(pPin1->path_delta),
-                          kCrossTolerance)) {
+    if (!ScalarNearlyZero(tip_delta.Cross(pin0.path_delta), kCrossTolerance) ||
+        !ScalarNearlyZero(tip_delta.Cross(pin1.path_delta), kCrossTolerance)) {
       return std::nullopt;
     }
 
@@ -712,7 +719,7 @@ std::optional<PolygonInfo::PinIntersection> PolygonInfo::ComputeIntersection(
           // *s = 0;
           // *t = 0;
           return {{
-              .intersection = pPin0->pin_tip,
+              .intersection = pin0.pin_tip,
               .fraction0 = 0.0f,
               .fraction1 = 0.0f,
           }};
@@ -774,19 +781,19 @@ std::optional<PolygonInfo::PinIntersection> PolygonInfo::ComputeIntersection(
   Scalar localT = tNumer / denom;
 
   return {{
-      .intersection = pPin0->pin_tip + v0 * localS,
+      .intersection = pin0.pin_tip + v0 * localS,
       .fraction0 = localS,
       .fraction1 = localT,
   }};
 }
 
-void PolygonInfo::RemovePin(UmbraPin* pPin, UmbraPin** pHead) {
-  UmbraPin* pNext = pPin->pNext;
-  UmbraPin* pPrev = pPin->pPrev;
-  pPrev->pNext = pNext;
-  pNext->pPrev = pPrev;
-  if (*pHead == pPin) {
-    *pHead = (pNext == pPin) ? nullptr : pNext;
+void PolygonInfo::RemovePin(UmbraPin* p_pin, UmbraPin** p_head) {
+  UmbraPin* p_next = p_pin->p_next;
+  UmbraPin* p_prev = p_pin->p_prev;
+  p_prev->p_next = p_next;
+  p_next->p_prev = p_prev;
+  if (*p_head == p_pin) {
+    *p_head = (p_next == p_pin) ? nullptr : p_next;
   }
 }
 
@@ -811,7 +818,7 @@ int PolygonInfo::ComputeSide(const Point& p0,
 PolygonInfo::UmbraPin* PolygonInfo::ResolveUmbraIntersections() {
   UmbraPin* p_head_pin = &pins_.front();
   UmbraPin* p_curr_pin = p_head_pin;
-  UmbraPin* p_prev_pin = p_curr_pin->pPrev;
+  UmbraPin* p_prev_pin = p_curr_pin->p_prev;
   size_t umbra_vertex_count = pins_.size();
 
   // we should check each edge against each other edge at most once
@@ -823,7 +830,7 @@ PolygonInfo::UmbraPin* PolygonInfo::ResolveUmbraIntersections() {
     }
 
     std::optional<PinIntersection> intersection =
-        ComputeIntersection(p_prev_pin, p_curr_pin);
+        ComputeIntersection(*p_prev_pin, *p_curr_pin);
     if (intersection.has_value()) {
       // If the new intersection is further back on previous inset from the
       // prior intersection...
@@ -832,7 +839,7 @@ PolygonInfo::UmbraPin* PolygonInfo::ResolveUmbraIntersections() {
         RemovePin(p_prev_pin, &p_head_pin);
         --umbra_vertex_count;
         // go back one segment
-        p_prev_pin = p_prev_pin->pPrev;
+        p_prev_pin = p_prev_pin->p_prev;
       } else if (p_curr_pin->IsFractionInitialized() &&
                  p_curr_pin->umbra_vertex.GetDistanceSquared(
                      intersection->intersection) < kIntersectionTolerance) {
@@ -846,7 +853,7 @@ PolygonInfo::UmbraPin* PolygonInfo::ResolveUmbraIntersections() {
 
         // go to next segment
         p_prev_pin = p_curr_pin;
-        p_curr_pin = p_curr_pin->pNext;
+        p_curr_pin = p_curr_pin->p_next;
       }
     } else {
       // if previous pin is to right side of the current pin...
@@ -862,12 +869,12 @@ PolygonInfo::UmbraPin* PolygonInfo::ResolveUmbraIntersections() {
         RemovePin(p_prev_pin, &p_head_pin);
         --umbra_vertex_count;
         // go back one segment
-        p_prev_pin = p_prev_pin->pPrev;
+        p_prev_pin = p_prev_pin->p_prev;
       } else {
         // move to next segment
         RemovePin(p_curr_pin, &p_head_pin);
         --umbra_vertex_count;
-        p_curr_pin = p_curr_pin->pNext;
+        p_curr_pin = p_curr_pin->p_next;
       }
     }
   }
@@ -879,20 +886,20 @@ PolygonInfo::UmbraPin* PolygonInfo::ResolveUmbraIntersections() {
   // Now remove any duplicates from the umbra polygon. The head pin is
   // automatically included as the first point of the umbra polygon.
   p_prev_pin = p_head_pin;
-  p_curr_pin = p_head_pin->pNext;
+  p_curr_pin = p_head_pin->p_next;
   size_t umbra_vertices = 1u;
   while (p_curr_pin != p_head_pin) {
     if (p_prev_pin->umbra_vertex.GetDistanceSquared(p_curr_pin->umbra_vertex) <
         kSubPixelScale * kSubPixelScale) {
       RemovePin(p_curr_pin, &p_head_pin);
-      p_curr_pin = p_curr_pin->pNext;
+      p_curr_pin = p_curr_pin->p_next;
     } else {
       umbra_vertices++;
       p_prev_pin = p_curr_pin;
-      p_curr_pin = p_curr_pin->pNext;
+      p_curr_pin = p_curr_pin->p_next;
     }
-    FML_DCHECK(p_curr_pin == p_prev_pin->pNext);
-    FML_DCHECK(p_prev_pin == p_curr_pin->pPrev);
+    FML_DCHECK(p_curr_pin == p_prev_pin->p_next);
+    FML_DCHECK(p_prev_pin == p_curr_pin->p_prev);
   }
 
   if (umbra_vertices < 3u) {
@@ -1081,7 +1088,7 @@ void PolygonInfo::PopulateUmbraVertices() {
   // linked list of surviving umbra pins, possibly jumping over many
   // other umbra pins that were eliminated when we inset the polygon.
   UmbraPin* p_next_umbra_pin = umbra_vertices_head_;
-  UmbraPin* p_curr_umbra_pin = p_next_umbra_pin->pPrev;
+  UmbraPin* p_curr_umbra_pin = p_next_umbra_pin->p_prev;
   for (UmbraPin& pin : pins_) {
     if (p_next_umbra_pin == &pin ||
         (pin.path_vertex.GetDistanceSquared(p_curr_umbra_pin->umbra_vertex) >
@@ -1090,7 +1097,7 @@ void PolygonInfo::PopulateUmbraVertices() {
       // pin, and also when it is closer to this path_vertex than the last
       // matched pin (curr).
       p_curr_umbra_pin = p_next_umbra_pin;
-      p_next_umbra_pin = p_next_umbra_pin->pNext;
+      p_next_umbra_pin = p_next_umbra_pin->p_next;
 
       // New umbra vertex - append it and remember its index.
       uint16_t new_umbra_index =
@@ -1203,35 +1210,28 @@ const std::shared_ptr<ShadowVertices>& ShadowPathGeometry::GetShadowVertices()
   return shadow_vertices_;
 }
 
-std::optional<Rect> ShadowPathGeometry::GetCoverage(
-    const Matrix& transform) const {
-  return shadow_vertices_ ? shadow_vertices_->GetBounds() : std::nullopt;
-}
-
-GeometryResult ShadowPathGeometry::GetPositionBuffer(
-    const ContentContext& renderer,
-    const Entity& entity,
-    RenderPass& pass) const {
-  FML_DCHECK(CanRender());
-
+GeometryResult ShadowVertices::GetPositionBuffer(const ContentContext& renderer,
+                                                 const Entity& entity,
+                                                 RenderPass& pass) const {
   using VS = ShadowVerticesVertexShader;
 
-  size_t vertex_count = shadow_vertices_->GetVertexCount();
+  size_t vertex_count = GetVertexCount();
 
   BufferView vertex_buffer = renderer.GetTransientsDataBuffer().Emplace(
       vertex_count * sizeof(VS::PerVertexData), alignof(VS::PerVertexData),
       [&](uint8_t* data) {
         VS::PerVertexData* vtx_contents =
             reinterpret_cast<VS::PerVertexData*>(data);
-        const std::vector<Point>& vertices = shadow_vertices_->GetVertices();
-        const std::vector<Scalar>& gaussians = shadow_vertices_->GetGaussians();
         for (size_t i = 0u; i < vertex_count; i++) {
-          vtx_contents[i] = {.position = vertices[i], .gaussian = gaussians[i]};
+          vtx_contents[i] = {
+              .position = vertices_[i],
+              .gaussian = gaussians_[i],
+          };
         }
       });
 
-  size_t index_count = shadow_vertices_->GetIndexCount();
-  const uint16_t* indices_data = shadow_vertices_->GetIndices().data();
+  size_t index_count = GetIndexCount();
+  const uint16_t* indices_data = GetIndices().data();
   BufferView index_buffer = {};
   index_buffer = renderer.GetTransientsIndexesBuffer().Emplace(
       indices_data, index_count * sizeof(uint16_t), alignof(uint16_t));

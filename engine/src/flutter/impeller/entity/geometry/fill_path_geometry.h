@@ -53,9 +53,7 @@ class FillPathSourceGeometry : public Geometry {
 ///        using the |FillPathSourceGeometry|.
 class FillPathFromSourceGeometry final : public FillPathSourceGeometry {
  public:
-  explicit FillPathFromSourceGeometry(
-      const PathSource& source,
-      std::optional<Rect> inner_rect = std::nullopt);
+  explicit FillPathFromSourceGeometry(const PathSource& source);
 
  protected:
   const PathSource& GetSource() const override;

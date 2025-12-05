@@ -289,7 +289,7 @@ class Canvas {
     virtual Rect GetBounds() const = 0;
     virtual std::shared_ptr<SolidBlurContents> BuildBlurContent(
         Sigma sigma) = 0;
-    virtual Geometry& BuildDrawGeometry() = 0;
+    virtual const Geometry& BuildDrawGeometry() = 0;
   };
   class RRectBlurShape;
   class RSuperellipseBlurShape;
@@ -383,7 +383,7 @@ class Canvas {
 
   /// Returns true if this operation is consistent with a DrawShadow-like
   /// operation.
-  bool IsShadowBlurDrawOperation(const Paint& paint);
+  static bool IsShadowBlurDrawOperation(const Paint& paint);
 
   bool AttemptDrawAntialiasedCircle(const Point& center,
                                     Scalar radius,
@@ -391,7 +391,7 @@ class Canvas {
 
   /// Returns the radius common to both width and height of all corners,
   /// or -1 if the radii are not uniform.
-  Scalar GetCommonRRectLikeRadius(const RoundingRadii& radii);
+  static Scalar GetCommonRRectLikeRadius(const RoundingRadii& radii);
 
   bool AttemptDrawBlurredRRect(const RoundRect& round_rect, const Paint& paint);
 

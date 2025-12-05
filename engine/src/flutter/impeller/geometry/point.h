@@ -179,7 +179,9 @@ struct TPoint {
   }
 
   constexpr Type GetDistanceSquared(const TPoint& p) const {
-    return (*this - p).GetLengthSquared();
+    double dx = p.x - x;
+    double dy = p.y - y;
+    return dx * dx + dy * dy;
   }
 
   constexpr TPoint Min(const TPoint& p) const {
@@ -200,7 +202,9 @@ struct TPoint {
     return sqrt(GetDistanceSquared(p));
   }
 
-  constexpr Type GetLengthSquared() const { return x * x + y * y; }
+  constexpr Type GetLengthSquared() const {
+    return static_cast<double>(x) * x + static_cast<double>(y) * y;
+  }
 
   constexpr Type GetLength() const { return std::sqrt(GetLengthSquared()); }
 
@@ -211,7 +215,7 @@ struct TPoint {
   /// is between them, the distance (squared) to that point is returned.
   /// Otherwise, we return the distance (squared) to the endpoint that is
   /// closer to the projected point.
-  constexpr Type GetDistanceToSegmentSquared(TPoint p0, TPoint p1) const {
+  Type GetDistanceToSegmentSquared(TPoint p0, TPoint p1) const {
     // Compute relative vectors to one endpoint of the segment (p0)
     TPoint u = p1 - p0;
     TPoint v = *this - p0;

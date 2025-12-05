@@ -20,7 +20,7 @@ namespace impeller {
 class ShadowVerticesContents final : public SolidBlurContents {
  public:
   static std::shared_ptr<ShadowVerticesContents> Make(
-      const ShadowPathGeometry* geometry);
+      const std::shared_ptr<ShadowVertices>& geometry);
 
   // |SolidBlurContents|
   void SetColor(Color color) override;
@@ -33,12 +33,13 @@ class ShadowVerticesContents final : public SolidBlurContents {
               const Entity& entity,
               RenderPass& pass) const override;
 
-  explicit ShadowVerticesContents(const ShadowPathGeometry* geometry);
+  explicit ShadowVerticesContents(
+      const std::shared_ptr<ShadowVertices>& geometry);
 
   ~ShadowVerticesContents() override;
 
  private:
-  const ShadowPathGeometry* geometry_;
+  const std::shared_ptr<ShadowVertices> geometry_;
   Color shadow_color_;
 
   ShadowVerticesContents(const ShadowVerticesContents&) = delete;
