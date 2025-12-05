@@ -2316,7 +2316,6 @@ public class AccessibilityBridgeTest {
     testSemanticsUpdate = testSemanticsNode.toUpdate();
     testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
     nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
-    AccessibilityNodeInfo.CollectionInfo collectionInfo = nodeInfo.getCollectionInfo();
     assertEquals(nodeInfo.getClassName().toString(), "android.widget.HorizontalScrollView");
   }
 
