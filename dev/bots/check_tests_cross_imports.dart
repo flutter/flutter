@@ -349,9 +349,7 @@ class TestsCrossImportChecker {
       if (index < 0) {
         throw ArgumentError('All files must include $prefix in their path.', 'files');
       }
-      return file.absolute.path
-          .substring(index)
-          .replaceAll('/', Platform.isWindows ? r'\' : '/');
+      return file.absolute.path.substring(index).replaceAll('/', Platform.isWindows ? r'\' : '/');
     }).toSet();
     return knownPaths.difference(testPaths);
   }
