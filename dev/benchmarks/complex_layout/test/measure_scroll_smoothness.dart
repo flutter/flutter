@@ -29,7 +29,7 @@ Iterable<PointerEvent> dragInputEvents(
   final Offset movePerEvent = totalMove / moveEventCount.toDouble();
   yield PointerAddedEvent(timeStamp: epoch, position: startLocation);
   yield PointerDownEvent(timeStamp: epoch, position: startLocation, pointer: 1);
-  for (int t = 0; t < moveEventCount + 1; t++) {
+  for (var t = 0; t < moveEventCount + 1; t++) {
     final Offset position = startLocation + movePerEvent * t.toDouble();
     yield PointerMoveEvent(
       timeStamp: epoch + totalTime * t ~/ moveEventCount,
@@ -93,11 +93,10 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
 Future<void> main() async {
   final WidgetsBinding widgetsBinding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   assert(widgetsBinding is IntegrationTestWidgetsFlutterBinding);
-  final IntegrationTestWidgetsFlutterBinding binding =
-      widgetsBinding as IntegrationTestWidgetsFlutterBinding;
+  final binding = widgetsBinding as IntegrationTestWidgetsFlutterBinding;
   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive;
   binding.reportData ??= <String, dynamic>{};
-  final ResampleFlagVariant variant = ResampleFlagVariant(binding);
+  final variant = ResampleFlagVariant(binding);
   testWidgets(
     'Smoothness test',
     (WidgetTester tester) async {
@@ -106,9 +105,9 @@ Future<void> main() async {
       final Finder scrollerFinder = find.byKey(const ValueKey<String>('complex-scroll'));
       final ListView scroller = tester.widget<ListView>(scrollerFinder);
       final ScrollController? controller = scroller.controller;
-      final List<int> frameTimestamp = <int>[];
-      final List<double> scrollOffset = <double>[];
-      final List<Duration> delays = <Duration>[];
+      final frameTimestamp = <int>[];
+      final scrollOffset = <double>[];
+      final delays = <Duration>[];
       binding.addPersistentFrameCallback((Duration timeStamp) {
         if (controller?.hasClients ?? false) {
           // This if is necessary because by the end of the test the widget tree
@@ -142,7 +141,7 @@ Future<void> main() async {
         }
       }
 
-      for (int n = 0; n < 5; n++) {
+      for (var n = 0; n < 5; n++) {
         await scroll();
       }
       variant.result = scrollSummary(scrollOffset, delays, frameTimestamp);
@@ -205,8 +204,8 @@ Map<String, dynamic> scrollSummary(
 ) {
   double jankyCount = 0;
   double absJerkAvg = 0;
-  int lostFrame = 0;
-  for (int i = 1; i < scrollOffset.length - 1; i += 1) {
+  var lostFrame = 0;
+  for (var i = 1; i < scrollOffset.length - 1; i += 1) {
     if (frameTimestamp[i + 1] - frameTimestamp[i - 1] > 40E3 ||
         (i >= delays.length || delays[i] > const Duration(milliseconds: 16))) {
       // filter data points from slow frame building or input simulation artifact

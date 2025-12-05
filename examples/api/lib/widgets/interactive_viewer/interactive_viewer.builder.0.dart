@@ -41,7 +41,11 @@ class _IVBuilderExampleState extends State<_IVBuilderExample> {
     double xMax = quad.point0.x;
     double yMin = quad.point0.y;
     double yMax = quad.point0.y;
-    for (final Vector3 point in <Vector3>[quad.point1, quad.point2, quad.point3]) {
+    for (final Vector3 point in <Vector3>[
+      quad.point1,
+      quad.point2,
+      quad.point3,
+    ]) {
       if (point.x < xMin) {
         xMin = point.x;
       } else if (point.x > xMax) {
@@ -89,7 +93,8 @@ class _IVBuilderExampleState extends State<_IVBuilderExample> {
   }
 }
 
-typedef _CellBuilder = Widget Function(BuildContext context, int row, int column);
+typedef _CellBuilder =
+    Widget Function(BuildContext context, int row, int column);
 
 class _TableBuilder extends StatelessWidget {
   const _TableBuilder({
