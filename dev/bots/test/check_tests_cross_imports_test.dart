@@ -25,8 +25,14 @@ void main() {
   }
 
   File getFile(String filepath, Directory directory) {
-    final String path = directory.path.substring('/flutter/sdk'.length);
-    final String filename = filepath.substring(path.length);
+    final String platformFilepath = filepath.replaceAll('/', Platform.isWindows ? r'\' : '/');
+    final int overlapIndex = platformFilepath.lastIndexOf(directory.basename);
+    if (overlapIndex < 0) {
+      throw ArgumentError('filepath $filepath must be located in directory ${directory.path}.');
+    }
+    final String filename = platformFilepath.substring(
+      overlapIndex + directory.basename.length + 1,
+    );
     return directory.childFile(filename);
   }
 
