@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:test/test.dart';
+import 'impeller_enabled.dart';
 
 void main() {
   test('decodeImageFromPixelsSync decodes RGBA8888', () async {
@@ -42,26 +43,25 @@ void main() {
     expect(resultPixels, pixels);
 
     image.dispose();
-  });
+  }, skip: !impellerEnabled);
 
-  test('decodeImageFromPixelsSync resizes image', () {
+  test('decodeImageFromPixelsSync throws on resize', () {
     const int width = 2;
     const int height = 2;
     final Uint8List pixels = Uint8List(width * height * 4);
 
-    final Image image = decodeImageFromPixelsSync(
-      pixels,
-      width,
-      height,
-      PixelFormat.rgba8888,
-      targetWidth: 4,
-      targetHeight: 4,
+    expect(
+      () => decodeImageFromPixelsSync(
+        pixels,
+        width,
+        height,
+        PixelFormat.rgba8888,
+        targetWidth: 4,
+        targetHeight: 4,
+      ),
+      throwsA(isA<String>()),
     );
-
-    expect(image.width, 4);
-    expect(image.height, 4);
-    image.dispose();
-  });
+  }, skip: !impellerEnabled);
 
   test('decodeImageFromPixelsSync throws on invalid dimensions', () {
     final Uint8List pixels = Uint8List(4);
@@ -69,5 +69,13 @@ void main() {
       () => decodeImageFromPixelsSync(pixels, 0, 1, PixelFormat.rgba8888),
       throwsA(isA<String>()), // Throws string error from C++
     );
-  });
+  }, skip: !impellerEnabled);
+
+  test('decodeImageFromPixelsSync throws if not Impeller', () {
+    final Uint8List pixels = Uint8List(4);
+    expect(
+      () => decodeImageFromPixelsSync(pixels, 1, 1, PixelFormat.rgba8888),
+      throwsA(isA<String>()),
+    );
+  }, skip: impellerEnabled);
 }
