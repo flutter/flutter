@@ -149,7 +149,8 @@ void main() {
   });
 
   test('unknown Widgets cross import of Material', () async {
-    const extra = 'packages/flutter/test/widgets/foo_test.dart';
+    final extra = 'packages/flutter/test/widgets/foo_test.dart'
+      ..replaceAll('/', Platform.isWindows ? r'\' : '/');
     buildTestFiles(extraWidgetsImportingMaterial: <String>{extra});
     bool? success;
     final String result = await capture(() async {
@@ -171,7 +172,8 @@ void main() {
   });
 
   test('unknown Widgets cross import of Cupertino', () async {
-    const extra = 'packages/flutter/test/widgets/foo_test.dart';
+    final extra = 'packages/flutter/test/widgets/foo_test.dart'
+      ..replaceAll('/', Platform.isWindows ? r'\' : '/');
     buildTestFiles(extraWidgetsImportingCupertino: <String>{extra});
     bool? success;
     final String result = await capture(() async {
@@ -193,7 +195,8 @@ void main() {
   });
 
   test('unknown Cupertino cross importing Material', () async {
-    const extra = 'packages/flutter/test/cupertino/foo_test.dart';
+    final extra = 'packages/flutter/test/cupertino/foo_test.dart'
+      ..replaceAll('/', Platform.isWindows ? r'\' : '/');
     buildTestFiles(extraCupertinos: <String>{extra});
     bool? success;
     final String result = await capture(() async {
