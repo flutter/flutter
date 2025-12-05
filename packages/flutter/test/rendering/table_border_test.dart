@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('TableBorder constructor', () {
-    const TableBorder border1 = TableBorder(
+    const border1 = TableBorder(
       left: BorderSide(),
       right: BorderSide(color: Color(0xFF00FF00)),
       verticalInside: BorderSide(),
@@ -31,7 +31,7 @@ void main() {
   });
 
   test('TableBorder.all constructor', () {
-    final TableBorder border2 = TableBorder.all(width: 2.0, color: const Color(0xFF00FFFF));
+    final border2 = TableBorder.all(width: 2.0, color: const Color(0xFF00FFFF));
     expect(border2.top, const BorderSide(width: 2.0, color: Color(0xFF00FFFF)));
     expect(border2.right, const BorderSide(width: 2.0, color: Color(0xFF00FFFF)));
     expect(border2.bottom, const BorderSide(width: 2.0, color: Color(0xFF00FFFF)));
@@ -44,7 +44,7 @@ void main() {
   });
 
   test('TableBorder.symmetric constructor', () {
-    const TableBorder border3 = TableBorder.symmetric(
+    const border3 = TableBorder.symmetric(
       inside: BorderSide(width: 3.0),
       outside: BorderSide(color: Color(0xFFFF0000)),
     );
@@ -65,13 +65,13 @@ void main() {
   });
 
   test('TableBorder.lerp', () {
-    const BorderSide side1 = BorderSide(color: Color(0x00000001));
-    const BorderSide side2 = BorderSide(width: 2.0, color: Color(0x00000002));
-    const BorderSide side3 = BorderSide(width: 3.0, color: Color(0x00000003));
-    const BorderSide side4 = BorderSide(width: 4.0, color: Color(0x00000004));
-    const BorderSide side5 = BorderSide(width: 5.0, color: Color(0x00000005));
-    const BorderSide side6 = BorderSide(width: 6.0, color: Color(0x00000006));
-    const TableBorder tableA = TableBorder(
+    const side1 = BorderSide(color: Color(0x00000001));
+    const side2 = BorderSide(width: 2.0, color: Color(0x00000002));
+    const side3 = BorderSide(width: 3.0, color: Color(0x00000003));
+    const side4 = BorderSide(width: 4.0, color: Color(0x00000004));
+    const side5 = BorderSide(width: 5.0, color: Color(0x00000005));
+    const side6 = BorderSide(width: 6.0, color: Color(0x00000006));
+    const tableA = TableBorder(
       top: side1,
       right: side2,
       bottom: side3,
@@ -81,7 +81,7 @@ void main() {
     );
     expect(tableA.isUniform, isFalse);
     expect(tableA.dimensions, const EdgeInsets.fromLTRB(4.0, 1.0, 2.0, 3.0));
-    final TableBorder tableB = TableBorder(
+    final tableB = TableBorder(
       top: side1.scale(2.0),
       right: side2.scale(2.0),
       bottom: side3.scale(2.0),
@@ -91,7 +91,7 @@ void main() {
     );
     expect(tableB.isUniform, isFalse);
     expect(tableB.dimensions, const EdgeInsets.fromLTRB(4.0, 1.0, 2.0, 3.0) * 2.0);
-    final TableBorder tableC = TableBorder(
+    final tableC = TableBorder(
       top: side1.scale(3.0),
       right: side2.scale(3.0),
       bottom: side3.scale(3.0),
@@ -113,13 +113,13 @@ void main() {
 
   test('TableBorder.lerp identical a,b', () {
     expect(TableBorder.lerp(null, null, 0), null);
-    const TableBorder border = TableBorder();
+    const border = TableBorder();
     expect(identical(TableBorder.lerp(border, border, 0.5), border), true);
   });
 
   test('TableBorder.lerp with nulls', () {
-    final TableBorder table2 = TableBorder.all(width: 2.0);
-    final TableBorder table1 = TableBorder.all();
+    final table2 = TableBorder.all(width: 2.0);
+    final table1 = TableBorder.all();
     expect(TableBorder.lerp(table2, null, 0.5), table1);
     expect(TableBorder.lerp(null, table2, 0.5), table1);
     expect(TableBorder.lerp(null, null, 0.5), null);
@@ -134,8 +134,8 @@ void main() {
   });
 
   test('TableBorder Object API', () {
-    final String none = BorderSide.none.toString();
-    final String zeroRadius = BorderRadius.zero.toString();
+    final none = BorderSide.none.toString();
+    final zeroRadius = BorderRadius.zero.toString();
     expect(
       const TableBorder().toString(),
       'TableBorder($none, $none, $none, $none, $none, $none, $zeroRadius)',
@@ -143,14 +143,12 @@ void main() {
   });
 
   test('TableBorder.all with a borderRadius', () {
-    final TableBorder tableA = TableBorder.all(
-      borderRadius: const BorderRadius.all(Radius.circular(8.0)),
-    );
+    final tableA = TableBorder.all(borderRadius: const BorderRadius.all(Radius.circular(8.0)));
     expect(tableA.borderRadius, const BorderRadius.all(Radius.circular(8.0)));
   });
 
   test('TableBorder outer border uniformity', () {
-    const TableBorder uniformOuter = TableBorder(
+    const uniformOuter = TableBorder(
       top: BorderSide(width: 2.0),
       right: BorderSide(width: 2.0),
       bottom: BorderSide(width: 2.0),
@@ -166,7 +164,7 @@ void main() {
     expect(uniformOuter.bottom, equals(topSide));
     expect(uniformOuter.left, equals(topSide));
 
-    const TableBorder nonUniformOuter = TableBorder(
+    const nonUniformOuter = TableBorder(
       top: BorderSide(width: 2.0),
       right: BorderSide(color: Color(0xFF00FF00), width: 2.0),
       bottom: BorderSide(width: 2.0),
@@ -177,7 +175,7 @@ void main() {
   });
 
   test('TableBorder with non-uniform widths but uniform colors applies border radius', () {
-    const TableBorder borderWithRadius = TableBorder(
+    const borderWithRadius = TableBorder(
       top: BorderSide(width: 3.0, color: Color(0xFF0000FF)),
       right: BorderSide(color: Color(0xFF0000FF)),
       bottom: BorderSide(width: 2.0, color: Color(0xFF0000FF)),

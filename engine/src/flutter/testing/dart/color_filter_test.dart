@@ -55,8 +55,8 @@ const List<double> identityColorMatrix = <double>[
 
 void main() {
   Future<Uint32List> getBytesForPaint(Paint paint, {int width = 1, int height = 1}) async {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas recorderCanvas = Canvas(recorder);
+    final recorder = PictureRecorder();
+    final recorderCanvas = Canvas(recorder);
     recorderCanvas.drawPaint(paint);
     final Picture picture = recorder.endRecording();
     final Image image = await picture.toImage(width, height);
@@ -67,7 +67,7 @@ void main() {
   }
 
   test('ColorFilter - mode', () async {
-    final Paint paint = Paint()
+    final paint = Paint()
       ..color = green
       ..colorFilter = const ColorFilter.mode(red, BlendMode.color);
 
@@ -85,9 +85,9 @@ void main() {
   });
 
   test('ColorFilter - NOP mode does not crash', () async {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder);
-    final Paint paint = Paint()
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder);
+    final paint = Paint()
       ..color = green
       ..colorFilter = const ColorFilter.mode(transparent, BlendMode.srcOver);
     canvas.saveLayer(const Rect.fromLTRB(-100, -100, 200, 200), paint);
@@ -95,7 +95,7 @@ void main() {
     canvas.restore();
     final Picture picture = recorder.endRecording();
 
-    final SceneBuilder builder = SceneBuilder();
+    final builder = SceneBuilder();
     builder.addPicture(Offset.zero, picture);
 
     final Scene scene = builder.build();
@@ -103,7 +103,7 @@ void main() {
   });
 
   test('ColorFilter - matrix', () async {
-    final Paint paint = Paint()
+    final paint = Paint()
       ..color = green
       ..colorFilter = const ColorFilter.matrix(greyscaleColorMatrix);
 
@@ -121,9 +121,9 @@ void main() {
   });
 
   test('ColorFilter - NOP matrix does not crash', () async {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder);
-    final Paint paint = Paint()
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder);
+    final paint = Paint()
       ..color = const Color(0xff00AA00)
       ..colorFilter = const ColorFilter.matrix(identityColorMatrix);
     canvas.saveLayer(const Rect.fromLTRB(-100, -100, 200, 200), paint);
@@ -131,7 +131,7 @@ void main() {
     canvas.restore();
     final Picture picture = recorder.endRecording();
 
-    final SceneBuilder builder = SceneBuilder();
+    final builder = SceneBuilder();
     builder.addPicture(Offset.zero, picture);
 
     final Scene scene = builder.build();
@@ -139,7 +139,7 @@ void main() {
   });
 
   test('ColorFilter - linearToSrgbGamma', () async {
-    final Paint paint = Paint()
+    final paint = Paint()
       ..color = green
       ..colorFilter = const ColorFilter.linearToSrgbGamma();
 
@@ -156,7 +156,7 @@ void main() {
   });
 
   test('ColorFilter - srgbToLinearGamma', () async {
-    final Paint paint = Paint()
+    final paint = Paint()
       ..color = green
       ..colorFilter = const ColorFilter.srgbToLinearGamma();
 

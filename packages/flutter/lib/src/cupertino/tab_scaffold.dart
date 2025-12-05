@@ -480,7 +480,7 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
     return Stack(
       fit: StackFit.expand,
       children: List<Widget>.generate(widget.tabCount, (int index) {
-        final bool active = index == widget.currentTabIndex;
+        final active = index == widget.currentTabIndex;
         shouldBuildTab[index] = active || shouldBuildTab[index];
 
         return HeroMode(

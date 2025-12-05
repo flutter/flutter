@@ -135,7 +135,7 @@ Future<void> main() async {
         section('gradlew assembleLocal with plugin (custom debug build)');
 
         final Directory tempDir = Directory.systemTemp.createTempSync('flutter_plugin.');
-        final Directory pluginDir = Directory(path.join(tempDir.path, 'plugin_under_test'));
+        final pluginDir = Directory(path.join(tempDir.path, 'plugin_under_test'));
 
         section('Create plugin');
         await inDirectory(tempDir, () async {
@@ -192,7 +192,7 @@ Future<void> main() async {
         if (result.exitCode == 0) {
           throw failure('Gradle did not exit with error as expected', result);
         }
-        String output = '${result.stdout}\n${result.stderr}';
+        var output = '${result.stdout}\n${result.stderr}';
         if (output.contains('GradleException') ||
             output.contains('Failed to notify') ||
             output.contains('at org.gradle')) {
@@ -231,7 +231,7 @@ Future<void> main() async {
         if (result.exitCode == 0) {
           throw failure('Gradle did not exit with error as expected', result);
         }
-        final String output = '${result.stdout}\n${result.stderr}';
+        final output = '${result.stdout}\n${result.stderr}';
         if (!output.contains(
           'No file or variants found for asset: lib/gallery/example_code.dart.',
         )) {

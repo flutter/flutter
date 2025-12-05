@@ -22,10 +22,12 @@ class SliverEnsureSemanticsExample extends StatefulWidget {
   const SliverEnsureSemanticsExample({super.key});
 
   @override
-  State<SliverEnsureSemanticsExample> createState() => _SliverEnsureSemanticsExampleState();
+  State<SliverEnsureSemanticsExample> createState() =>
+      _SliverEnsureSemanticsExampleState();
 }
 
-class _SliverEnsureSemanticsExampleState extends State<SliverEnsureSemanticsExample> {
+class _SliverEnsureSemanticsExampleState
+    extends State<SliverEnsureSemanticsExample> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -51,33 +53,51 @@ class _SliverEnsureSemanticsExampleState extends State<SliverEnsureSemanticsExam
                           Semantics(
                             header: true,
                             headingLevel: 3,
-                            child: Text('Steps to reproduce', style: theme.textTheme.headlineSmall),
+                            child: Text(
+                              'Steps to reproduce',
+                              style: theme.textTheme.headlineSmall,
+                            ),
                           ),
                           const Text('Issue description'),
                           Semantics(
                             header: true,
                             headingLevel: 3,
-                            child: Text('Expected Results', style: theme.textTheme.headlineSmall),
+                            child: Text(
+                              'Expected Results',
+                              style: theme.textTheme.headlineSmall,
+                            ),
                           ),
                           Semantics(
                             header: true,
                             headingLevel: 3,
-                            child: Text('Actual Results', style: theme.textTheme.headlineSmall),
+                            child: Text(
+                              'Actual Results',
+                              style: theme.textTheme.headlineSmall,
+                            ),
                           ),
                           Semantics(
                             header: true,
                             headingLevel: 3,
-                            child: Text('Code Sample', style: theme.textTheme.headlineSmall),
+                            child: Text(
+                              'Code Sample',
+                              style: theme.textTheme.headlineSmall,
+                            ),
                           ),
                           Semantics(
                             header: true,
                             headingLevel: 3,
-                            child: Text('Screenshots', style: theme.textTheme.headlineSmall),
+                            child: Text(
+                              'Screenshots',
+                              style: theme.textTheme.headlineSmall,
+                            ),
                           ),
                           Semantics(
                             header: true,
                             headingLevel: 3,
-                            child: Text('Logs', style: theme.textTheme.headlineSmall),
+                            child: Text(
+                              'Logs',
+                              style: theme.textTheme.headlineSmall,
+                            ),
                           ),
                         ],
                       ),
@@ -91,7 +111,10 @@ class _SliverEnsureSemanticsExampleState extends State<SliverEnsureSemanticsExam
               delegate: SliverChildBuilderDelegate(
                 (BuildContext context, int index) {
                   return Card(
-                    child: Padding(padding: const EdgeInsets.all(8.0), child: Text('Item $index')),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text('Item $index'),
+                    ),
                   );
                 },
                 childCount: 50,
@@ -105,7 +128,10 @@ class _SliverEnsureSemanticsExampleState extends State<SliverEnsureSemanticsExam
                   child: Card(
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Semantics(header: true, child: const Text('Footer 1')),
+                      child: Semantics(
+                        header: true,
+                        child: const Text('Footer 1'),
+                      ),
                     ),
                   ),
                 ),
@@ -118,7 +144,10 @@ class _SliverEnsureSemanticsExampleState extends State<SliverEnsureSemanticsExam
                   child: Card(
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Semantics(header: true, child: const Text('Footer 2')),
+                      child: Semantics(
+                        header: true,
+                        child: const Text('Footer 2'),
+                      ),
                     ),
                   ),
                 ),
@@ -138,8 +167,14 @@ class _SliverEnsureSemanticsExampleState extends State<SliverEnsureSemanticsExam
                   index: 54,
                   child: OverflowBar(
                     children: <Widget>[
-                      TextButton(onPressed: () {}, child: const Text('Button 1')),
-                      TextButton(onPressed: () {}, child: const Text('Button 2')),
+                      TextButton(
+                        onPressed: () {},
+                        child: const Text('Button 1'),
+                      ),
+                      TextButton(
+                        onPressed: () {},
+                        child: const Text('Button 2'),
+                      ),
                     ],
                   ),
                 ),
