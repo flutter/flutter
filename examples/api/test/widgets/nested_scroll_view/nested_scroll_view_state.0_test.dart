@@ -9,11 +9,16 @@ import 'package:flutter_api_samples/widgets/nested_scroll_view/nested_scroll_vie
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Access the outer and inner controllers', (WidgetTester tester) async {
+  testWidgets('Access the outer and inner controllers', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.NestedScrollViewStateExampleApp());
 
     expect(find.byType(NestedScrollView), findsOne);
-    expect(find.widgetWithText(SliverAppBar, 'NestedScrollViewState Demo!'), findsOne);
+    expect(
+      find.widgetWithText(SliverAppBar, 'NestedScrollViewState Demo!'),
+      findsOne,
+    );
     expect(find.byType(CustomScrollView), findsOne);
 
     final example.NestedScrollViewStateExample widget = tester
@@ -27,7 +32,9 @@ void main() {
     expect(outerController.offset, 0);
     expect(innerController.offset, 0);
 
-    await tester.sendEventToBinding(const PointerScrollEvent(scrollDelta: Offset(0.0, 10.0)));
+    await tester.sendEventToBinding(
+      const PointerScrollEvent(scrollDelta: Offset(0.0, 10.0)),
+    );
     await tester.pump();
 
     await tester.pumpAndSettle();

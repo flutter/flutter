@@ -12,7 +12,7 @@ import 'package:flutter_devicelab/tasks/perf_tests.dart';
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.ios;
   await task(() async {
-    final String platformViewDirectoryPath = '${flutterDirectory.path}/examples/platform_view';
+    final platformViewDirectoryPath = '${flutterDirectory.path}/examples/platform_view';
     final Directory platformViewDirectory = dir(platformViewDirectoryPath);
     await inDirectory(platformViewDirectory, () async {
       await flutter('pub', options: <String>['get']);
