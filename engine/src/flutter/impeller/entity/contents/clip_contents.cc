@@ -92,6 +92,8 @@ bool ClipContents::Render(const ContentContext& renderer,
   switch (clip_geometry_.mode) {
     case GeometryResult::Mode::kNormal:
       // Fall through to kNonZero case.
+    case GeometryResult::Mode::kPreventOverdraw:
+      // Fall through to kNonZero case.
     case GeometryResult::Mode::kNonZero:
       pass.SetCommandLabel("Clip stencil preparation (NonZero)");
       options.stencil_mode =
@@ -101,8 +103,6 @@ bool ClipContents::Render(const ContentContext& renderer,
       pass.SetCommandLabel("Clip stencil preparation (EvenOdd)");
       options.stencil_mode =
           ContentContextOptions::StencilMode::kStencilEvenOddFill;
-      break;
-    case GeometryResult::Mode::kPreventOverdraw:
       break;
   }
   pass.SetPipeline(renderer.GetClipPipeline(options));
