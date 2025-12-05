@@ -41,6 +41,28 @@ class FakeXcodeProjectInterpreterWithProfile extends FakeXcodeProjectInterpreter
   }
 }
 
+class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInterpreter {
+  FakeXcodeProjectInterpreterWithBuildSettings({this.overrides = const <String, String>{}});
+
+  final Map<String, String> overrides;
+
+  @override
+  Future<XcodeProjectInfo> getInfo(String projectPath, {String? projectFilename}) async {
+    return XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release'], <String>[
+      'Runner',
+    ], BufferLogger.test());
+  }
+
+  @override
+  Future<Map<String, String>> getBuildSettings(
+    String projectPath, {
+    XcodeProjectBuildContext? buildContext,
+    Duration timeout = const Duration(minutes: 1),
+  }) async {
+    return <String, String>{...overrides, 'PRODUCT_BUNDLE_IDENTIFIER': 'com.example.test'};
+  }
+}
+
 final Platform macosPlatform = FakePlatform(
   operatingSystem: 'macos',
   environment: <String, String>{'FLUTTER_ROOT': '/', 'HOME': '/'},
@@ -85,6 +107,9 @@ void main() {
 
   // Sets up the minimal mock project files necessary for macOS builds to succeed.
   void createMinimalMockProjectFiles() {
+    fileSystem
+        .directory(fileSystem.path.join('macos', 'Runner.xcodeproj'))
+        .createSync(recursive: true);
     fileSystem
         .directory(fileSystem.path.join('macos', 'Runner.xcworkspace'))
         .createSync(recursive: true);
@@ -1007,6 +1032,94 @@ STDERR STUFF
       Pub: ThrowingPub.new,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
       XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+    },
+  );
+
+  testUsingContext(
+    'Passes EXCLUDED_ARCHS from Xcode project to xcodebuild command',
+    () async {
+      createMinimalMockProjectFiles();
+
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          'Release',
+          onRun: (_) {
+            fileSystem.file(fileSystem.path.join('macos', 'Flutter', 'ephemeral', '.app_filename'))
+              ..createSync(recursive: true)
+              ..writeAsStringSync('example.app');
+          },
+          additionalCommandArguments: <String>['EXCLUDED_ARCHS=x86_64'],
+        ),
+      ]);
+
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+      );
+
+      await createTestCommandRunner(
+        command,
+      ).run(<String>['build', 'macos', '--release', '--no-pub']);
+
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      Platform: () => macosPlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(
+        overrides: <String, String>{'EXCLUDED_ARCHS': 'x86_64'},
+      ),
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+    },
+  );
+
+  testUsingContext(
+    'Does not pass EXCLUDED_ARCHS when not set in Xcode project',
+    () async {
+      createMinimalMockProjectFiles();
+
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          'Release',
+          onRun: (_) {
+            fileSystem.file(fileSystem.path.join('macos', 'Flutter', 'ephemeral', '.app_filename'))
+              ..createSync(recursive: true)
+              ..writeAsStringSync('example.app');
+          },
+          // Note: No additionalCommandArguments - EXCLUDED_ARCHS should not be passed
+        ),
+      ]);
+
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+      );
+
+      await createTestCommandRunner(
+        command,
+      ).run(<String>['build', 'macos', '--release', '--no-pub']);
+
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      Platform: () => macosPlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(
+        // Empty overrides - no EXCLUDED_ARCHS
+      ),
       OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
     },
   );

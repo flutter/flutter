@@ -66,6 +66,7 @@ void main() {
     }
 
     test('regression test https://github.com/flutter/flutter/issues/178317', () async {
+      // Also regression test for https://github.com/flutter/flutter/issues/179008
       await previewDetector.initialize();
       expect(project.ephemeralDirectories, isNotEmpty);
       for (final Directory dir in project.ephemeralDirectories) {
