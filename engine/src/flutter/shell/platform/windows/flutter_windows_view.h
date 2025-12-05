@@ -425,6 +425,7 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // to prevent screen tearing.
   bool NeedsVsync() const;
 
+  // If true, the view is sized to its content via a sizing delegate.
   bool IsSizedToContent() const;
 
   // The view's unique identifier.

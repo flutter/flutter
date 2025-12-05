@@ -742,7 +742,7 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
       _onGetWindowPosition.nativeFunction,
     );
     if (viewId < 0) {
-      throw Exception('Windows failed to create a regular window with a valid view id.');
+      throw Exception('Windows failed to create a tooltip window with a valid view id.');
     }
 
     final FlutterView flutterView = PlatformDispatcher.instance.views.firstWhere(
@@ -853,7 +853,7 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
   ) {
     if (view.viewId == parent.rootView.viewId) {
       if (message == _WM_SIZE) {
-        // Tooltips should close when their parent window is deactivated.
+        // Tooltips should close when their parent window is resized.
         // Queue the destroy on a microtask to avoid destroying the window
         // while processing its message.
         scheduleMicrotask(destroy);

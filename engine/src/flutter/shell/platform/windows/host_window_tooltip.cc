@@ -67,7 +67,8 @@ void HostWindowTooltip::DidUpdateViewSize(int32_t width, int32_t height) {
 }
 
 WindowRect HostWindowTooltip::GetWorkArea() const {
-  WindowRect work_area = {0, 0, 10000, 10000};
+  constexpr int32_t kDefaultWorkAreaSize = 10000;
+  WindowRect work_area = {0, 0, kDefaultWorkAreaSize, kDefaultWorkAreaSize};
   HMONITOR monitor = MonitorFromWindow(parent_, MONITOR_DEFAULTTONEAREST);
   if (monitor) {
     MONITORINFO monitor_info = {0};

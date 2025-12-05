@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window_positioner.dart';
 import 'models.dart';
 
-// Helper to convert enum to display name
+// Helper to convert enum to display name.
 String _anchorToString(WindowPositionerAnchor anchor) {
   return switch (anchor) {
     WindowPositionerAnchor.center => 'Center',

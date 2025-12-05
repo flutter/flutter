@@ -21,6 +21,8 @@ class HostWindowTooltip : public HostWindow,
                     GetWindowPositionCallback get_position_callback,
                     HWND parent);
 
+  // Update the position of the tooltip window based off the current size
+  // of the tooltip.
   void UpdatePosition();
 
  protected:
