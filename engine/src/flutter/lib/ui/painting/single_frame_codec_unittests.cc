@@ -13,6 +13,9 @@
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/testing/testing.h"
 
+// CREATE_NATIVE_ENTRY is leaky by design
+// NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
+
 #pragma GCC diagnostic ignored "-Wunreachable-code"
 
 namespace flutter {
@@ -118,3 +121,5 @@ TEST_F(ShellTest, SingleFrameCodecHandlesNoGpu) {
 
 }  // namespace testing
 }  // namespace flutter
+
+// NOLINTEND(clang-analyzer-core.StackAddressEscape)
