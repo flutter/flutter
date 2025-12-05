@@ -271,7 +271,7 @@ Future<T?> showCupertinoSheet<T>({
     );
   }
 
-  final CupertinoSheetRoute<T> route = effectiveBuilder != null
+  final route = effectiveBuilder != null
       ? CupertinoSheetRoute<T>(
           builder: (BuildContext context) => nestedNavigationContent(effectiveBuilder),
           enableDrag: enableDrag,
