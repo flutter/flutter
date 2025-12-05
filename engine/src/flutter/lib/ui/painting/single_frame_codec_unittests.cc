@@ -13,6 +13,8 @@
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/testing/testing.h"
 
+#pragma GCC diagnostic ignored "-Wunreachable-code"
+
 namespace flutter {
 namespace testing {
 
