@@ -359,6 +359,7 @@
     "templates/widget_preview_scaffold/lib/src/widget_preview_rendering.dart.tmpl",
     "templates/widget_preview_scaffold/lib/src/widget_preview_scaffold_controller.dart.tmpl",
     "templates/widget_preview_scaffold/lib/src/controls.dart.tmpl",
+    "templates/widget_preview_scaffold/lib/src/split.dart.tmpl",
     "templates/widget_preview_scaffold/lib/src/dtd/utils.dart.tmpl",
     "templates/widget_preview_scaffold/lib/src/dtd/dtd_services.dart.tmpl",
     "templates/widget_preview_scaffold/lib/src/dtd/editor_service.dart.tmpl",
