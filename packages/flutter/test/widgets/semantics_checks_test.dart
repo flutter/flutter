@@ -32,7 +32,7 @@ void main() {
       );
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
-      final FlutterError error = exception! as FlutterError;
+      final error = exception! as FlutterError;
       expect(
         error.message,
         'An expandable node cannot have both expand and collapse actions set at the same time.',
@@ -43,7 +43,7 @@ void main() {
       await tester.pumpWidget(Semantics(expanded: true, onExpand: () {}, child: const SizedBox()));
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
-      final FlutterError error = exception! as FlutterError;
+      final error = exception! as FlutterError;
       expect(error.message, 'An expanded node cannot have an expand action.');
     });
 
@@ -53,7 +53,7 @@ void main() {
       );
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
-      final FlutterError error = exception! as FlutterError;
+      final error = exception! as FlutterError;
       expect(error.message, 'A collapsed node cannot have a collapse action.');
     });
   });

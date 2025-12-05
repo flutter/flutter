@@ -15,7 +15,7 @@ void main() {
   });
 
   test('Ticker.forceFrames requests forced frames', () async {
-    final Ticker t = Ticker((_) {});
+    final t = Ticker((_) {});
     t.forceFrames = true;
     final TickerFuture f = t.start();
     addTearDown(() async {
@@ -42,7 +42,7 @@ void main() {
   });
 
   test('Adding a persistent frame callback during a persistent frame callback', () {
-    bool calledBack = false;
+    var calledBack = false;
     SchedulerBinding.instance.addPersistentFrameCallback((Duration timeStamp) {
       if (!calledBack) {
         SchedulerBinding.instance.addPersistentFrameCallback((Duration timeStamp) {
