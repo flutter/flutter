@@ -4,6 +4,8 @@
 
 #include <memory>
 
+#include "absl/status/statusor.h"
+
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_paint.h"
 #include "flutter/display_list/effects/dl_color_source.h"
@@ -12,6 +14,7 @@
 #include "flutter/impeller/display_list/aiks_unittests.h"
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/display_list/dl_runtime_effect_impeller.h"
+#include "third_party/abseil-cpp/absl/status/status_matchers.h"
 
 namespace impeller {
 namespace testing {
@@ -19,16 +22,24 @@ namespace testing {
 using namespace flutter;
 
 namespace {
-std::shared_ptr<DlColorSource> MakeRuntimeEffect(
+absl::StatusOr<std::shared_ptr<DlColorSource>> MakeRuntimeEffect(
     AiksTest* test,
     std::string_view name,
     const std::shared_ptr<std::vector<uint8_t>>& uniform_data = {},
     const std::vector<std::shared_ptr<DlColorSource>>& samplers = {}) {
-  auto runtime_stages = test->OpenAssetAsRuntimeStage(name.data());
-  auto runtime_stage = runtime_stages[PlaygroundBackendToRuntimeStageBackend(
-      test->GetBackend())];
-  FML_CHECK(runtime_stage);
-  FML_CHECK(runtime_stage->IsDirty());
+  auto runtime_stages_result = test->OpenAssetAsRuntimeStage(name.data());
+  if (!runtime_stages_result.ok()) {
+    return runtime_stages_result.status();
+  }
+  std::shared_ptr<RuntimeStage> runtime_stage =
+      runtime_stages_result
+          .value()[PlaygroundBackendToRuntimeStageBackend(test->GetBackend())];
+  if (!runtime_stage) {
+    return absl::InternalError("Runtime stage not found for backend.");
+  }
+  if (!runtime_stage->IsDirty()) {
+    return absl::InternalError("Runtime stage is not dirty.");
+  }
 
   auto dl_runtime_effect = DlRuntimeEffectImpeller::Make(runtime_stage);
 
@@ -48,8 +59,10 @@ TEST_P(AiksTest, CanRenderClippedRuntimeEffects) {
   memcpy(uniform_data->data(), &frag_uniforms, sizeof(FragUniforms));
 
   DlPaint paint;
-  paint.setColorSource(
-      MakeRuntimeEffect(this, "runtime_stage_example.frag.iplr", uniform_data));
+  auto effect =
+      MakeRuntimeEffect(this, "runtime_stage_example.frag.iplr", uniform_data);
+  ABSL_ASSERT_OK(effect);
+  paint.setColorSource(effect.value());
 
   DisplayListBuilder builder;
   builder.Save();
@@ -71,8 +84,9 @@ TEST_P(AiksTest, DrawPaintTransformsBounds) {
   memcpy(uniform_data->data(), &frag_uniforms, sizeof(FragUniforms));
 
   DlPaint paint;
-  paint.setColorSource(
-      MakeRuntimeEffect(this, "gradient.frag.iplr", uniform_data));
+  auto effect = MakeRuntimeEffect(this, "gradient.frag.iplr", uniform_data);
+  ABSL_ASSERT_OK(effect);
+  paint.setColorSource(effect.value());
 
   DisplayListBuilder builder;
   builder.Save();
@@ -84,11 +98,12 @@ TEST_P(AiksTest, DrawPaintTransformsBounds) {
 }
 
 TEST_P(AiksTest, CanRenderRuntimeEffectFilter) {
-  auto runtime_stages =
+  auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_filter_example.frag.iplr");
-
+  ABSL_ASSERT_OK(runtime_stages_result);
   std::shared_ptr<RuntimeStage> runtime_stage =
-      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result
+          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 
@@ -128,9 +143,11 @@ TEST_P(AiksTest, RuntimeEffectWithInvalidSamplerDoesNotCrash) {
   uniform_data->resize(sizeof(Vector2));
 
   DlPaint paint;
-  paint.setColorSource(
+  auto effect =
       MakeRuntimeEffect(this, "runtime_stage_filter_example.frag.iplr",
-                        uniform_data, sampler_inputs));
+                        uniform_data, sampler_inputs);
+  ABSL_ASSERT_OK(effect);
+  paint.setColorSource(effect.value());
 
   DisplayListBuilder builder;
   builder.DrawPaint(paint);
@@ -155,11 +172,12 @@ TEST_P(AiksTest, ComposePaintRuntimeOuter) {
   std::shared_ptr<DlImageFilter> color_filter =
       DlImageFilter::MakeColorFilter(DlColorFilter::MakeMatrix(matrix));
 
-  auto runtime_stages =
+  auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_filter_warp.frag.iplr");
-
+  ABSL_ASSERT_OK(runtime_stages_result);
   std::shared_ptr<RuntimeStage> runtime_stage =
-      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result
+          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 
@@ -191,11 +209,12 @@ TEST_P(AiksTest, ComposePaintRuntimeOuter) {
 }
 
 TEST_P(AiksTest, ComposePaintRuntimeInner) {
-  auto runtime_stages =
+  auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_filter_warp.frag.iplr");
-
+  ABSL_ASSERT_OK(runtime_stages_result);
   std::shared_ptr<RuntimeStage> runtime_stage =
-      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result
+          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
   Scalar xoffset = 50;
@@ -278,11 +297,12 @@ TEST_P(AiksTest, ComposePaintRuntimeInner) {
 }
 
 TEST_P(AiksTest, ComposeBackdropRuntimeOuterBlurInner) {
-  auto runtime_stages =
+  auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_filter_circle.frag.iplr");
-
+  ABSL_ASSERT_OK(runtime_stages_result);
   std::shared_ptr<RuntimeStage> runtime_stage =
-      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result
+          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
   Scalar sigma = 20.0;
@@ -336,11 +356,12 @@ TEST_P(AiksTest, ComposeBackdropRuntimeOuterBlurInner) {
 }
 
 TEST_P(AiksTest, ComposeBackdropRuntimeOuterBlurInnerSmallSigma) {
-  auto runtime_stages =
+  auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_filter_circle.frag.iplr");
-
+  ABSL_ASSERT_OK(runtime_stages_result);
   std::shared_ptr<RuntimeStage> runtime_stage =
-      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result
+          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
   Scalar sigma = 5.0;
@@ -401,10 +422,12 @@ TEST_P(AiksTest, ClippedBackdropFilterWithShader) {
   uniform_data->resize(sizeof(FragUniforms));
   memcpy(uniform_data->data(), &frag_uniforms, sizeof(FragUniforms));
 
-  auto runtime_stages =
+  auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_border.frag.iplr");
-  auto runtime_stage =
-      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ABSL_ASSERT_OK(runtime_stages_result);
+  std::shared_ptr<RuntimeStage> runtime_stage =
+      runtime_stages_result
+          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 

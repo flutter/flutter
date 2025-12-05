@@ -123,6 +123,178 @@ TEST_P(CompilerTest, BindingBaseForFragShader) {
   ASSERT_GT(frag_uniform_binding, vert_uniform_binding);
 }
 
+namespace {
+struct UniformInfo {
+  std::string uniform_name;
+  uint32_t location;
+  std::string type_name;
+  uint32_t columns;
+  uint32_t vec_size;
+
+  static UniformInfo fromJson(const nlohmann::json& json) {
+    return {
+        .uniform_name = json["name"].get<std::string>(),
+        .location = json["location"].get<uint32_t>(),
+        .type_name = json["type"]["type_name"].get<std::string>(),
+        .columns = json["type"]["columns"].get<uint32_t>(),
+        .vec_size = json["type"]["vec_size"].get<uint32_t>(),
+    };
+  }
+
+  static UniformInfo Sampler(const std::string& name, uint32_t location) {
+    return UniformInfo{
+        .uniform_name = name,
+        .location = location,
+        .type_name = "ShaderType::kSampledImage",
+        .columns = 1u,
+        .vec_size = 1u,
+    };
+  }
+  static UniformInfo Float(const std::string& name, uint32_t location) {
+    return FloatInfo(name, location, 1u, 1u);
+  }
+  static UniformInfo Vec2(const std::string& name, uint32_t location) {
+    return FloatInfo(name, location, 1u, 2u);
+  }
+  static UniformInfo Vec3(const std::string& name, uint32_t location) {
+    return FloatInfo(name, location, 1u, 3u);
+  }
+  static UniformInfo Vec4(const std::string& name, uint32_t location) {
+    return FloatInfo(name, location, 1u, 4u);
+  }
+  static UniformInfo Mat4(const std::string& name, uint32_t location) {
+    return FloatInfo(name, location, 4u, 4u);
+  }
+
+  constexpr bool operator==(const UniformInfo& other) const {
+    return (uniform_name == other.uniform_name &&  //
+            location == other.location &&          //
+            type_name == other.type_name &&        //
+            columns == other.columns &&            //
+            vec_size == other.vec_size);
+  }
+
+ private:
+  static UniformInfo FloatInfo(const std::string& name,
+                               uint32_t location,
+                               uint32_t columns,
+                               uint32_t vec_size) {
+    return UniformInfo{
+        .uniform_name = name,
+        .location = location,
+        .type_name = "ShaderType::kFloat",
+        .columns = columns,
+        .vec_size = vec_size,
+    };
+  }
+};
+
+inline std::ostream& operator<<(std::ostream& out, const UniformInfo& info) {
+  out << "UniformInfo {" << std::endl
+      << "  uniform_name: " << info.uniform_name << std::endl
+      << "  location: " << info.location << std::endl
+      << "  type_name: " << info.type_name << std::endl
+      << "  columns: " << info.columns << std::endl
+      << "  vec_size: " << info.vec_size << std::endl
+      << "}";
+  return out;
+}
+}  // namespace
+
+TEST_P(CompilerTestRuntime, UniformsAppearInJson) {
+  ASSERT_TRUE(CanCompileAndReflect("sample_with_uniforms.frag",
+                                   SourceType::kFragmentShader,
+                                   SourceLanguage::kGLSL));
+
+  auto json_fd = GetReflectionJson("sample_with_uniforms.frag");
+  ASSERT_TRUE(json_fd);
+  nlohmann::json shader_json = nlohmann::json::parse(json_fd->GetMapping());
+  auto sampler_list = shader_json["sampled_images"];
+  auto float_list = shader_json["uniforms"];
+  ASSERT_EQ(sampler_list.size(), 2u);
+  ASSERT_EQ(float_list.size(), 6u);
+
+  {
+    // clang-format off
+    std::array expected_infos = {
+        UniformInfo::Sampler("uFirstSampler", 1u),
+        UniformInfo::Sampler("uSampler", 7u),
+    };
+    // clang-format on
+    ASSERT_EQ(sampler_list.size(), expected_infos.size());
+    for (size_t i = 0; i < expected_infos.size(); i++) {
+      EXPECT_EQ(UniformInfo::fromJson(sampler_list[i]), expected_infos[i])
+          << "index: " << i;
+    }
+  }
+
+  {
+    // clang-format off
+    std::array expected_infos = {
+        UniformInfo::Float("uFirstFloat", 0u),
+        UniformInfo::Float("uFloat", 2u),
+        UniformInfo::Vec2("uVec2", 3u),
+        UniformInfo::Vec3("uVec3", 4u),
+        UniformInfo::Vec4("uVec4", 5u),
+        UniformInfo::Mat4("uMat4", 6u),
+    };
+    // clang-format on
+    ASSERT_EQ(float_list.size(), expected_infos.size());
+    for (size_t i = 0; i < expected_infos.size(); i++) {
+      EXPECT_EQ(UniformInfo::fromJson(float_list[i]), expected_infos[i])
+          << "index: " << i;
+    }
+  }
+}
+
+TEST_P(CompilerTestRuntime, PositionedUniformsAppearInJson) {
+  ASSERT_TRUE(CanCompileAndReflect("sample_with_positioned_uniforms.frag",
+                                   SourceType::kFragmentShader,
+                                   SourceLanguage::kGLSL));
+
+  auto json_fd = GetReflectionJson("sample_with_positioned_uniforms.frag");
+  ASSERT_TRUE(json_fd);
+  nlohmann::json shader_json = nlohmann::json::parse(json_fd->GetMapping());
+  auto sampler_list = shader_json["sampled_images"];
+  auto float_list = shader_json["uniforms"];
+  ASSERT_EQ(sampler_list.size(), 3u);
+  ASSERT_EQ(float_list.size(), 7u);
+
+  {
+    // clang-format off
+    std::array expected_infos = {
+        UniformInfo::Sampler("uSamplerNotPositioned1", 1u),
+        UniformInfo::Sampler("uSampler", 0u),
+        UniformInfo::Sampler("uSamplerNotPositioned2", 3u),
+    };
+    // clang-format on
+    ASSERT_EQ(sampler_list.size(), expected_infos.size());
+    for (size_t i = 0; i < expected_infos.size(); i++) {
+      EXPECT_EQ(UniformInfo::fromJson(sampler_list[i]), expected_infos[i])
+          << "index: " << i;
+    }
+  }
+
+  {
+    // clang-format off
+    std::array expected_infos = {
+        UniformInfo::Float("uFloatNotPositioned1", 0u),
+        UniformInfo::Float("uFloat", 6u),
+        UniformInfo::Vec2("uVec2", 5u),
+        UniformInfo::Vec3("uVec3", 3u),
+        UniformInfo::Vec4("uVec4", 2u),
+        UniformInfo::Mat4("uMat4", 1u),
+        UniformInfo::Float("uFloatNotPositioned2", 2u),
+    };
+    // clang-format on
+    ASSERT_EQ(float_list.size(), expected_infos.size());
+    for (size_t i = 0; i < expected_infos.size(); i++) {
+      EXPECT_EQ(UniformInfo::fromJson(float_list[i]), expected_infos[i])
+          << "index: " << i;
+    }
+  }
+}
+
 TEST_P(CompilerTest, UniformsHaveBindingAndSet) {
   if (GetParam() == TargetPlatform::kSkSL) {
     GTEST_SKIP() << "Not supported with SkSL";
@@ -152,10 +324,7 @@ TEST_P(CompilerTest, UniformsHaveBindingAndSet) {
   ASSERT_EQ(vert_uniform_binding.binding, 17u);
 }
 
-TEST_P(CompilerTest, SkSLTextureLookUpOrderOfOperations) {
-  if (GetParam() != TargetPlatform::kSkSL) {
-    GTEST_SKIP() << "Only supported on SkSL";
-  }
+TEST_P(CompilerTestSkSL, SkSLTextureLookUpOrderOfOperations) {
   ASSERT_TRUE(
       CanCompileAndReflect("texture_lookup.frag", SourceType::kFragmentShader));
 
@@ -169,10 +338,7 @@ TEST_P(CompilerTest, SkSLTextureLookUpOrderOfOperations) {
   EXPECT_NE(shader_mapping.find(expected), std::string::npos);
 }
 
-TEST_P(CompilerTest, CanCompileStructs) {
-  if (GetParam() != TargetPlatform::kSkSL) {
-    GTEST_SKIP() << "Only supported on SkSL";
-  }
+TEST_P(CompilerTestSkSL, CanCompileStructs) {
   ASSERT_TRUE(CanCompileAndReflect("struct_internal.frag",
                                    SourceType::kFragmentShader));
 }
@@ -189,6 +355,25 @@ TEST_P(CompilerTest, CanCompileStructs) {
       });
 
 INSTANTIATE_TARGET_PLATFORM_TEST_SUITE_P(CompilerSuite);
+
+#define INSTANTIATE_RUNTIME_TARGET_PLATFORM_TEST_SUITE_P(suite_name)      \
+  INSTANTIATE_TEST_SUITE_P(                                               \
+      suite_name, CompilerTestRuntime,                                    \
+      ::testing::Values(TargetPlatform::kRuntimeStageMetal),              \
+      [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) { \
+        return TargetPlatformToString(info.param);                        \
+      });
+
+INSTANTIATE_RUNTIME_TARGET_PLATFORM_TEST_SUITE_P(CompilerSuite);
+
+#define INSTANTIATE_SKSL_TARGET_PLATFORM_TEST_SUITE_P(suite_name)             \
+  INSTANTIATE_TEST_SUITE_P(                                                   \
+      suite_name, CompilerTestSkSL, ::testing::Values(TargetPlatform::kSkSL), \
+      [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) {     \
+        return TargetPlatformToString(info.param);                            \
+      });
+
+INSTANTIATE_SKSL_TARGET_PLATFORM_TEST_SUITE_P(CompilerSuite);
 
 }  // namespace testing
 }  // namespace compiler

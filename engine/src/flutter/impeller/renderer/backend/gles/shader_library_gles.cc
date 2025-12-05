@@ -69,7 +69,8 @@ ShaderLibraryGLES::ShaderLibraryGLES(
   for (auto library : shader_libraries) {
     auto blob_library = ShaderArchive::Create(std::move(library));
     if (!blob_library.ok()) {
-      VALIDATION_LOG << "Could not construct blob library for shaders.";
+      VALIDATION_LOG << "Could not construct blob library for shaders: "
+                     << blob_library.status().ToString();
       return;
     }
     blob_library->IterateAllShaders(iterator);

@@ -55,7 +55,7 @@ void main() {
     }
     await controller.initialize();
 
-    await tester.pumpWidget(WidgetPreviewScaffold(controller: controller));
+    await tester.pumpWidget(TestWidgetPreviewScaffold(controller: controller));
 
     // Ensure the WidgetPreviewErrorWidget exists.
     final errorWidgetFinder = find.byType(WidgetPreviewErrorWidget);
@@ -101,7 +101,7 @@ void main() {
     fakeDtdServices.editorServiceAvailable.value = false;
     fakeDtdServices.navigationEvents.clear();
 
-    await tester.pumpWidget(WidgetPreviewScaffold(controller: controller));
+    await tester.pumpWidget(TestWidgetPreviewScaffold(controller: controller));
 
     // Frame entries for both test/error_widget_test.dart and dart: should
     // still be found.

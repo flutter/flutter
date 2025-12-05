@@ -26,13 +26,13 @@ class RuntimeStage {
   static absl::StatusOr<Map> DecodeRuntimeStages(
       const std::shared_ptr<fml::Mapping>& payload);
 
-  RuntimeStage(const fb::RuntimeStage* runtime_stage,
-               const std::shared_ptr<fml::Mapping>& payload);
+  static absl::StatusOr<RuntimeStage> Create(
+      const fb::RuntimeStage* runtime_stage,
+      const std::shared_ptr<fml::Mapping>& payload);
+
   ~RuntimeStage();
   RuntimeStage(RuntimeStage&&);
   RuntimeStage& operator=(RuntimeStage&&);
-
-  bool IsValid() const;
 
   RuntimeShaderStage GetShaderStage() const;
 
@@ -51,13 +51,14 @@ class RuntimeStage {
   void SetClean();
 
  private:
+  explicit RuntimeStage(std::shared_ptr<fml::Mapping> payload);
+
   std::shared_ptr<fml::Mapping> payload_;
   RuntimeShaderStage stage_ = RuntimeShaderStage::kVertex;
   std::string entrypoint_;
   std::shared_ptr<fml::Mapping> code_mapping_;
   std::vector<RuntimeUniformDescription> uniforms_;
   std::vector<DescriptorSetLayout> descriptor_set_layouts_;
-  bool is_valid_ = false;
   bool is_dirty_ = true;
 
   RuntimeStage(const RuntimeStage&) = delete;

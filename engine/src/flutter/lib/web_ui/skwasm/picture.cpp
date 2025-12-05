@@ -56,6 +56,11 @@ SKWASM_EXPORT void picture_getCullRect(DisplayList* picture, DlRect* outRect) {
   *outRect = picture->GetBounds();
 }
 
+SKWASM_EXPORT void picture_ref(DisplayList* picture) {
+  livePictureCount++;
+  picture->ref();
+}
+
 SKWASM_EXPORT void picture_dispose(DisplayList* picture) {
   livePictureCount--;
   picture->unref();

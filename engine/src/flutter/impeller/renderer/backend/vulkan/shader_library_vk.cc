@@ -69,7 +69,8 @@ ShaderLibraryVK::ShaderLibraryVK(
   for (const auto& library_data : shader_libraries_data) {
     auto blob_library = ShaderArchive::Create(library_data);
     if (!blob_library.ok()) {
-      VALIDATION_LOG << "Could not construct shader blob library.";
+      VALIDATION_LOG << "Could not construct shader blob library: "
+                     << blob_library.status().ToString();
       return;
     }
     blob_library->IterateAllShaders(iterator);

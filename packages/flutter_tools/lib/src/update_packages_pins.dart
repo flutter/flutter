@@ -23,8 +23,6 @@ const kManuallyPinnedDependencies = <String, String>{
   'archive': '3.6.1', // https://github.com/flutter/flutter/issues/115660
   'dds':
       '5.0.3', // 5.0.4 contains bugs described in https://github.com/Dart-Code/Dart-Code/issues/4678.
-  'dwds':
-      '26.1.0', // 26.2.2 contains bugs that cause failures, see https://github.com/flutter/flutter/issues/178326
   'flutter_gallery_assets': '1.0.2', // Tests depend on the exact version.
   'flutter_template_images': '5.0.0', // Must always exactly match flutter_tools template.
   'google_mobile_ads': '5.1.0', // https://github.com/flutter/flutter/issues/156912

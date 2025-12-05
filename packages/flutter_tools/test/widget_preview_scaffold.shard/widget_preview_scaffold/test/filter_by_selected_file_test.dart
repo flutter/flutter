@@ -46,7 +46,7 @@ Future<void> testImpl({
     previews: previews,
   );
   await controller.initialize();
-  final WidgetPreviewScaffold widgetPreview = WidgetPreviewScaffold(
+  final WidgetPreviewScaffold widgetPreview = TestWidgetPreviewScaffold(
     controller: controller,
   );
 
@@ -202,7 +202,7 @@ void main() {
       previews: previews,
     );
     await controller.initialize();
-    final WidgetPreviewScaffold widgetPreview = WidgetPreviewScaffold(
+    final WidgetPreviewScaffold widgetPreview = TestWidgetPreviewScaffold(
       controller: controller,
     );
     // Disable the Editor service to mimic a preview session not managed by an IDE.
