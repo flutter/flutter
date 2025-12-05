@@ -516,7 +516,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
 
   void _checkDragOffset() {
     assert(_status == RefreshIndicatorStatus.drag || _status == RefreshIndicatorStatus.armed);
-    final RenderBox renderBox = context.findRenderObject()! as RenderBox;
+    final renderBox = context.findRenderObject()! as RenderBox;
     final double containerExtent = renderBox.size.height;
     double newValue = _dragOffset! / (containerExtent * _kDragContainerExtentPercentage);
     if (_status == RefreshIndicatorStatus.armed) {

@@ -1279,7 +1279,7 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    const double largeHeaderHeight = 550.0; // Large header leaves only 50px for body
+    const largeHeaderHeight = 550.0; // Large header leaves only 50px for body
 
     await tester.pumpWidget(
       MaterialApp(
