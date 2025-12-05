@@ -17,7 +17,10 @@ class RepeatingAnimationBuilderExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData.from(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.purple, brightness: Brightness.dark),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.purple,
+          brightness: Brightness.dark,
+        ),
         useMaterial3: true,
       ),
       home: const RepeatingAnimationBuilderExample(),
@@ -29,10 +32,12 @@ class RepeatingAnimationBuilderExample extends StatefulWidget {
   const RepeatingAnimationBuilderExample({super.key});
 
   @override
-  State<RepeatingAnimationBuilderExample> createState() => _RepeatingAnimationBuilderExampleState();
+  State<RepeatingAnimationBuilderExample> createState() =>
+      _RepeatingAnimationBuilderExampleState();
 }
 
-class _RepeatingAnimationBuilderExampleState extends State<RepeatingAnimationBuilderExample> {
+class _RepeatingAnimationBuilderExampleState
+    extends State<RepeatingAnimationBuilderExample> {
   bool _isPaused = false;
   bool _isReversing = false;
 
@@ -56,7 +61,10 @@ class _RepeatingAnimationBuilderExampleState extends State<RepeatingAnimationBui
           return Stack(
             children: <Widget>[
               Center(
-                child: Transform.rotate(angle: value * 0.5 * math.pi, child: child),
+                child: Transform.rotate(
+                  angle: value * 0.5 * math.pi,
+                  child: child,
+                ),
               ),
               _buildControls(colors, value),
             ],
@@ -77,7 +85,7 @@ class _RepeatingAnimationBuilderExampleState extends State<RepeatingAnimationBui
         children: <Widget>[
           Container(
             decoration: ShapeDecoration(
-              color: colors.primaryContainer.withOpacity(0.5),
+              color: colors.primaryContainer.withValues(alpha: 0.5),
               shape: StarBorder(
                 points: 8,
                 innerRadiusRatio: 0.7,
@@ -98,7 +106,10 @@ class _RepeatingAnimationBuilderExampleState extends State<RepeatingAnimationBui
                 child: Container(
                   decoration: BoxDecoration(
                     boxShadow: <BoxShadow>[
-                      BoxShadow(color: colors.primary.withOpacity(value * 0.7), blurRadius: 25),
+                      BoxShadow(
+                        color: colors.primary.withValues(alpha: value * 0.7),
+                        blurRadius: 25,
+                      ),
                     ],
                   ),
                   child: child,
@@ -164,17 +175,26 @@ class _RepeatingAnimationBuilderExampleState extends State<RepeatingAnimationBui
               child: CircularProgressIndicator(
                 value: animationValue,
                 strokeWidth: 6,
-                backgroundColor: colors.surfaceVariant.withOpacity(0.3),
+                backgroundColor: colors.surfaceContainerHighest.withValues(
+                  alpha: 0.3,
+                ),
                 color: colors.primary,
               ),
             ),
             // The solid button core is the middle layer.
             Container(
               margin: const EdgeInsets.all(8), // Inset from the progress ring
-              decoration: BoxDecoration(shape: BoxShape.circle, color: colors.primary),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: colors.primary,
+              ),
             ),
             // The icon is the top layer.
-            Icon(_isPaused ? Icons.play_arrow : Icons.pause, size: 40, color: colors.onPrimary),
+            Icon(
+              _isPaused ? Icons.play_arrow : Icons.pause,
+              size: 40,
+              color: colors.onPrimary,
+            ),
           ],
         ),
       ),
@@ -189,7 +209,7 @@ class _RepeatingAnimationBuilderExampleState extends State<RepeatingAnimationBui
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         decoration: BoxDecoration(
-          color: colors.surfaceVariant.withOpacity(0.3),
+          color: colors.surfaceContainerHighest.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(24.0),
         ),
         child: Row(
@@ -203,7 +223,10 @@ class _RepeatingAnimationBuilderExampleState extends State<RepeatingAnimationBui
             const SizedBox(width: 8),
             Text(
               _isReversing ? 'Back & Forth' : 'Forward Only',
-              style: TextStyle(color: colors.onSurface, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                color: colors.onSurface,
+                fontWeight: FontWeight.w500,
+              ),
             ),
             const SizedBox(width: 8),
             Switch(

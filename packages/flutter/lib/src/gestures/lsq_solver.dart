@@ -27,8 +27,8 @@ class _Vector {
   }
 
   double operator *(_Vector a) {
-    double result = 0.0;
-    for (int i = 0; i < _length; i += 1) {
+    var result = 0.0;
+    for (var i = 0; i < _length; i += 1) {
       result += this[i] * a[i];
     }
     return result;
@@ -76,7 +76,7 @@ class PolynomialFit {
 
   @override
   String toString() {
-    final String coefficientString = coefficients
+    final coefficientString = coefficients
         .map((double c) => c.toStringAsPrecision(3))
         .toList()
         .toString();
@@ -109,17 +109,17 @@ class LeastSquaresSolver {
       return null;
     }
 
-    final PolynomialFit result = PolynomialFit(degree);
+    final result = PolynomialFit(degree);
 
     // Shorthands for the purpose of notation equivalence to original C++ code.
     final int m = x.length;
     final int n = degree + 1;
 
     // Expand the X vector to a matrix A, pre-multiplied by the weights.
-    final _Matrix a = _Matrix(n, m);
-    for (int h = 0; h < m; h += 1) {
+    final a = _Matrix(n, m);
+    for (var h = 0; h < m; h += 1) {
       a.set(0, h, w[h]);
-      for (int i = 1; i < n; i += 1) {
+      for (var i = 1; i < n; i += 1) {
         a.set(i, h, a.get(i - 1, h) * x[h]);
       }
     }
@@ -127,16 +127,16 @@ class LeastSquaresSolver {
     // Apply the Gram-Schmidt process to A to obtain its QR decomposition.
 
     // Orthonormal basis, column-major ordVectorer.
-    final _Matrix q = _Matrix(n, m);
+    final q = _Matrix(n, m);
     // Upper triangular matrix, row-major order.
-    final _Matrix r = _Matrix(n, n);
-    for (int j = 0; j < n; j += 1) {
-      for (int h = 0; h < m; h += 1) {
+    final r = _Matrix(n, n);
+    for (var j = 0; j < n; j += 1) {
+      for (var h = 0; h < m; h += 1) {
         q.set(j, h, a.get(j, h));
       }
-      for (int i = 0; i < j; i += 1) {
+      for (var i = 0; i < j; i += 1) {
         final double dot = q.getRow(j) * q.getRow(i);
-        for (int h = 0; h < m; h += 1) {
+        for (var h = 0; h < m; h += 1) {
           q.set(j, h, q.get(j, h) - dot * q.get(i, h));
         }
       }
@@ -148,18 +148,18 @@ class LeastSquaresSolver {
       }
 
       final double inverseNorm = 1.0 / norm;
-      for (int h = 0; h < m; h += 1) {
+      for (var h = 0; h < m; h += 1) {
         q.set(j, h, q.get(j, h) * inverseNorm);
       }
-      for (int i = 0; i < n; i += 1) {
+      for (var i = 0; i < n; i += 1) {
         r.set(j, i, i < j ? 0.0 : q.getRow(j) * a.getRow(i));
       }
     }
 
     // Solve R B = Qt W Y to find B. This is easy because R is upper triangular.
     // We just work from bottom-right to top-left calculating B's coefficients.
-    final _Vector wy = _Vector(m);
-    for (int h = 0; h < m; h += 1) {
+    final wy = _Vector(m);
+    for (var h = 0; h < m; h += 1) {
       wy[h] = y[h] * w[h];
     }
     for (int i = n - 1; i >= 0; i -= 1) {
@@ -175,18 +175,18 @@ class LeastSquaresSolver {
     // ...where sumSquaredError is the residual sum of squares (variance of the
     // error), and sumSquaredTotal is the total sum of squares (variance of the
     // data) where each has been weighted.
-    double yMean = 0.0;
-    for (int h = 0; h < m; h += 1) {
+    var yMean = 0.0;
+    for (var h = 0; h < m; h += 1) {
       yMean += y[h];
     }
     yMean /= m;
 
-    double sumSquaredError = 0.0;
-    double sumSquaredTotal = 0.0;
-    for (int h = 0; h < m; h += 1) {
-      double term = 1.0;
+    var sumSquaredError = 0.0;
+    var sumSquaredTotal = 0.0;
+    for (var h = 0; h < m; h += 1) {
+      var term = 1.0;
       double err = y[h] - result.coefficients[0];
-      for (int i = 1; i < n; i += 1) {
+      for (var i = 1; i < n; i += 1) {
         term *= x[h];
         err -= term * result.coefficients[i];
       }

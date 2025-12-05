@@ -126,7 +126,7 @@ Future<void> main(List<String> arguments) async {
     filesystem.directory(publishRoot).createSync(recursive: true);
   }
 
-  final Configurator configurator = Configurator(
+  final configurator = Configurator(
     publishRoot: publishRoot,
     packageRoot: packageRoot,
     docsRoot: docsRoot,
@@ -136,13 +136,10 @@ Future<void> main(List<String> arguments) async {
   );
   configurator.generateConfiguration();
 
-  final PlatformDocGenerator platformGenerator = PlatformDocGenerator(
-    outputDir: publishRoot,
-    filesystem: filesystem,
-  );
+  final platformGenerator = PlatformDocGenerator(outputDir: publishRoot, filesystem: filesystem);
   await platformGenerator.generatePlatformDocs();
 
-  final DartdocGenerator dartdocGenerator = DartdocGenerator(
+  final dartdocGenerator = DartdocGenerator(
     publishRoot: publishRoot,
     packageRoot: packageRoot,
     docsRoot: docsRoot,
@@ -158,7 +155,7 @@ Future<void> main(List<String> arguments) async {
 }
 
 ArgParser _createArgsParser({required String publishDefault}) {
-  final ArgParser parser = ArgParser();
+  final parser = ArgParser();
   parser.addFlag('help', abbr: 'h', negatable: false, help: 'Show command help.');
   parser.addFlag(
     'verbose',
@@ -279,7 +276,7 @@ class Configurator {
 
   void _createDummyPubspec() {
     // Create the pubspec.yaml file.
-    final List<String> pubspec = <String>[
+    final pubspec = <String>[
       'name: $kDummyPackageName',
       'homepage: https://flutter.dev',
       'version: 0.0.0',
@@ -302,7 +299,7 @@ class Configurator {
     final Directory libDir = packageRoot.childDirectory('lib');
     libDir.createSync();
 
-    final StringBuffer contents = StringBuffer('library temp_doc;\n\n');
+    final contents = StringBuffer('library temp_doc;\n\n');
     for (final String libraryRef in _libraryRefs()) {
       contents.writeln("import 'package:$libraryRef';");
     }
@@ -319,7 +316,7 @@ class Configurator {
       channel = 'main';
     }
     final String gitRevision = FlutterInformation.instance.getFlutterRevision();
-    final String channelOut = channel.isEmpty ? '' : '• $channel';
+    final channelOut = channel.isEmpty ? '' : '• $channel';
     footerPath.childFile('footer.html').writeAsStringSync('<script src="footer.js"></script>');
     publishRoot.childDirectory('flutter').childFile('footer.js')
       ..createSync(recursive: true)
@@ -338,12 +335,8 @@ class Configurator {
   }
 
   void _copyCustomizations() {
-    final List<String> files = <String>[
-      'README.md',
-      'analysis_options.yaml',
-      'dartdoc_options.yaml',
-    ];
-    for (final String file in files) {
+    final files = <String>['README.md', 'analysis_options.yaml', 'dartdoc_options.yaml'];
+    for (final file in files) {
       final File source = docsRoot.childFile(file);
       final File destination = packageRoot.childFile(file);
       // Have to canonicalize because otherwise things like /foo/bar/baz and
@@ -403,7 +396,7 @@ class Configurator {
     // If dashing gets stuck, LUCI will time out the build after an hour, and we
     // never get to see the logs. Thus, we run it in the background and tail the
     // logs only if it fails.
-    final ProcessWrapper result = ProcessWrapper(
+    final result = ProcessWrapper(
       await processManager.start(<String>[
         'dashing',
         'build',
@@ -413,7 +406,7 @@ class Configurator {
         docsRoot.childFile('dashing.json').path,
       ], workingDirectory: packageRoot.path),
     );
-    final List<int> buffer = <int>[];
+    final buffer = <int>[];
     result.stdout.listen(buffer.addAll);
     result.stderr.listen(buffer.addAll);
     // If the dashing process exited with an error, print the last 200 lines of stderr and exit.
@@ -445,7 +438,7 @@ class Configurator {
 
     // Since I didn't want to add the XML package as a dependency just for this,
     // I just used a regular expression to make this simple change.
-    final RegExp findRe = RegExp(
+    final findRe = RegExp(
       r'(\s*<key>DocSetPlatformFamily</key>\s*<string>)[^<]+(</string>)',
       multiLine: true,
     );
@@ -464,7 +457,7 @@ class Configurator {
     );
 
     // Write the Dash/Zeal XML feed file.
-    final bool isStable = platform.environment['LUCI_BRANCH'] == 'stable';
+    final isStable = platform.environment['LUCI_BRANCH'] == 'stable';
     offlineDir
         .childFile('flutter.xml')
         .writeAsStringSync(
@@ -555,9 +548,7 @@ class DartdocGenerator {
 
   Future<void> generateDartdoc() async {
     final Directory flutterRoot = FlutterInformation.instance.getFlutterRoot();
-    final Map<String, String> pubEnvironment = <String, String>{
-      'FLUTTER_ROOT': flutterRoot.absolute.path,
-    };
+    final pubEnvironment = <String, String>{'FLUTTER_ROOT': flutterRoot.absolute.path};
 
     // If there's a .pub-cache dir in the Flutter root, use that.
     final File pubCache = flutterRoot.childFile('.pub-cache');
@@ -566,7 +557,7 @@ class DartdocGenerator {
     }
 
     // Run pub.
-    ProcessWrapper process = ProcessWrapper(
+    var process = ProcessWrapper(
       await runPubProcess(
         arguments: <String>['get'],
         workingDirectory: packageRoot,
@@ -596,7 +587,7 @@ class DartdocGenerator {
       r'^(?<name>dartdoc) (?<version>[^\s]+)',
       multiLine: true,
     ).allMatches(versionResults.stdout as String);
-    for (final RegExpMatch match in versionMatches) {
+    for (final match in versionMatches) {
       print('${match.namedGroup('name')} version: ${match.namedGroup('version')}');
     }
 
@@ -604,7 +595,7 @@ class DartdocGenerator {
 
     // Dartdoc warnings and errors in these packages are considered fatal.
     // All packages owned by flutter should be in the list.
-    final List<String> flutterPackages = <String>[
+    final flutterPackages = <String>[
       kDummyPackageName,
       kPlatformIntegrationPackageName,
       ...findPackageNames(filesystem),
@@ -616,7 +607,7 @@ class DartdocGenerator {
     // Generate the documentation. We don't need to exclude flutter_tools in
     // this list because it's not in the recursive dependencies of the package
     // defined at packageRoot
-    final List<String> dartdocArgs = <String>[
+    final dartdocArgs = <String>[
       'global',
       'run',
       '--enable-asserts',
@@ -750,7 +741,7 @@ class DartdocGenerator {
   void _sanityCheckExample(String fileString, String regExpString) {
     final File file = filesystem.file(fileString);
     if (file.existsSync()) {
-      final RegExp regExp = RegExp(regExpString, dotAll: true);
+      final regExp = RegExp(regExpString, dotAll: true);
       final String contents = file.readAsStringSync();
       if (!regExp.hasMatch(contents)) {
         throw Exception("Missing example code matching '$regExpString' in ${file.path}.");
@@ -823,14 +814,14 @@ class DartdocGenerator {
     // Just use "main" for any branch other than "stable", just like it is done
     // in the snippet generator at https://github.com/flutter/assets-for-api-docs/blob/cc56972b8f03552fc5f9f9f1ef309efc6c93d7bc/packages/snippets/lib/src/snippet_generator.dart#L104.
     final String? luciBranch = platform.environment['LUCI_BRANCH']?.trim();
-    final String expectedChannel = luciBranch == 'stable' ? 'stable' : 'main';
-    final List<String> argumentRegExps = <String>[
+    final expectedChannel = luciBranch == 'stable' ? 'stable' : 'main';
+    final argumentRegExps = <String>[
       r'split=\d+',
       r'run=true',
       r'sample_id=widgets\.Listener\.\d+',
       'channel=$expectedChannel',
     ];
-    for (final String argumentRegExp in argumentRegExps) {
+    for (final argumentRegExp in argumentRegExps) {
       _sanityCheckExample(
         widgetsDirectory.childFile('Listener-class.html').path,
         r'\s*<iframe\s+class="snippet-dartpad"\s+src="'
@@ -892,14 +883,14 @@ class DartdocGenerator {
   }
 
   void _putRedirectInOldIndexLocation() {
-    const String metaTag = '<meta http-equiv="refresh" content="0;URL=../index.html">';
+    const metaTag = '<meta http-equiv="refresh" content="0;URL=../index.html">';
     publishRoot.childDirectory('flutter').childFile('index.html').writeAsStringSync(metaTag);
   }
 
   void _writeSnippetsIndexFile() {
     final Directory snippetsDir = publishRoot.childDirectory('snippets');
     if (snippetsDir.existsSync()) {
-      const JsonEncoder jsonEncoder = JsonEncoder.withIndent('    ');
+      const jsonEncoder = JsonEncoder.withIndent('    ');
       final Iterable<File> files = snippetsDir.listSync().whereType<File>().where(
         (File file) => path.extension(file.path) == '.json',
       );
@@ -928,11 +919,11 @@ class PlatformDocGenerator {
   /// This downloads an archive of platform docs for the engine from the artifact
   /// store and extracts them to the location used for Dartdoc.
   Future<void> generatePlatformDocs() async {
-    final String realm = engineRealm.isNotEmpty ? '$engineRealm/' : '';
+    final realm = engineRealm.isNotEmpty ? '$engineRealm/' : '';
 
     for (final String platform in kPlatformDocs.keys) {
       final String zipFile = kPlatformDocs[platform]!.zipName;
-      final String url =
+      final url =
           'https://storage.googleapis.com/${realm}flutter_infra_release/flutter/$engineRevision/$zipFile';
       await _extractDocs(url, platform, kPlatformDocs[platform]!, outputDir);
     }
@@ -943,7 +934,7 @@ class PlatformDocGenerator {
   /// Returns null if the archive fails to download after [maxTries] attempts.
   Future<Archive?> _fetchArchive(String url, int maxTries) async {
     List<int>? responseBytes;
-    for (int i = 0; i < maxTries; i++) {
+    for (var i = 0; i < maxTries; i++) {
       final http.Response response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         responseBytes = response.bodyBytes;
@@ -967,7 +958,7 @@ class PlatformDocGenerator {
     PlatformDocsSection platform,
     Directory outputDir,
   ) async {
-    const int maxTries = 5;
+    const maxTries = 5;
     final Archive? archive = await _fetchArchive(url, maxTries);
     if (archive == null) {
       stderr.writeln('Failed to fetch zip archive from: $url after $maxTries attempts. Giving up.');
@@ -1249,8 +1240,7 @@ class FlutterInformation {
       );
     }
 
-    final Map<String, dynamic> flutterVersion =
-        json.decode(flutterVersionJson) as Map<String, dynamic>;
+    final flutterVersion = json.decode(flutterVersionJson) as Map<String, dynamic>;
     if (flutterVersion['flutterRoot'] == null ||
         flutterVersion['frameworkVersion'] == null ||
         flutterVersion['dartSdkVersion'] == null) {
@@ -1259,7 +1249,7 @@ class FlutterInformation {
       );
     }
 
-    final Map<String, Object> info = <String, Object>{};
+    final info = <String, Object>{};
     final Directory flutterRoot = filesystem.directory(flutterVersion['flutterRoot']! as String);
     info['flutterRoot'] = flutterRoot;
     info['frameworkVersion'] = Version.parse(flutterVersion['frameworkVersion'] as String);
@@ -1307,7 +1297,7 @@ class FlutterInformation {
     if (gitResult.exitCode != 0) {
       throw 'git status exit with non-zero exit code: ${gitResult.exitCode}';
     }
-    final RegExp gitBranchRegexp = RegExp(r'^## (.*)');
+    final gitBranchRegexp = RegExp(r'^## (.*)');
     final RegExpMatch? gitBranchMatch = gitBranchRegexp.firstMatch(
       (gitResult.stdout as String).trim().split('\n').first,
     );
@@ -1316,7 +1306,7 @@ class FlutterInformation {
 
   // Get the git revision for the repo.
   String _getFlutterGitRevision() {
-    const int kGitRevisionLength = 10;
+    const kGitRevisionLength = 10;
 
     final ProcessResult gitResult = processManager.runSync(<String>['git', 'rev-parse', 'HEAD']);
     if (gitResult.exitCode != 0) {

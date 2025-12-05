@@ -30,12 +30,12 @@ Rect currentUnscaledThumbRect(WidgetTester tester, {bool useGlobalCoordinate = f
   final dynamic renderSegmentedControl = getRenderSegmentedControl(tester);
   // Using dynamic to access private class in test.
   // ignore: avoid_dynamic_calls
-  final Rect local = renderSegmentedControl.currentThumbRect as Rect;
+  final local = renderSegmentedControl.currentThumbRect as Rect;
   if (!useGlobalCoordinate) {
     return local;
   }
 
-  final RenderBox segmentedControl = renderSegmentedControl as RenderBox;
+  final segmentedControl = renderSegmentedControl as RenderBox;
   return local.shift(segmentedControl.localToGlobal(Offset.zero));
 }
 
@@ -52,7 +52,7 @@ double currentThumbScale(WidgetTester tester) {
 }
 
 Widget setupSimpleSegmentedControl() {
-  const Map<int, Widget> children = <int, Widget>{0: Text('Child 1'), 1: Text('Child 2')};
+  const children = <int, Widget>{0: Text('Child 1'), 1: Text('Child 2')};
 
   return boilerplate(
     builder: (BuildContext context) {
@@ -149,9 +149,9 @@ void main() {
   });
 
   testWidgets('Padding works', (WidgetTester tester) async {
-    const Key key = Key('Container');
+    const key = Key('Container');
 
-    const Map<int, Widget> children = <int, Widget>{0: Text('Child 1'), 1: Text('Child 2')};
+    const children = <int, Widget>{0: Text('Child 1'), 1: Text('Child 2')};
 
     Future<void> verifyPadding({EdgeInsets? padding}) async {
       final EdgeInsets effectivePadding =
@@ -232,11 +232,7 @@ void main() {
   });
 
   testWidgets('Tap changes toggle state', (WidgetTester tester) async {
-    const Map<int, Widget> children = <int, Widget>{
-      0: Text('Child 1'),
-      1: Text('Child 2'),
-      2: Text('Child 3'),
-    };
+    const children = <int, Widget>{0: Text('Child 1'), 1: Text('Child 2'), 2: Text('Child 3')};
 
     await tester.pumpWidget(
       boilerplate(
@@ -264,7 +260,7 @@ void main() {
   });
 
   testWidgets('Segmented controls respect theme', (WidgetTester tester) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('Child 1'), 1: Icon(IconData(1))};
+    const children = <int, Widget>{0: Text('Child 1'), 1: Icon(IconData(1))};
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -298,7 +294,7 @@ void main() {
   });
 
   testWidgets('SegmentedControl dark mode', (WidgetTester tester) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('Child 1'), 1: Icon(IconData(1))};
+    const children = <int, Widget>{0: Text('Child 1'), 1: Icon(IconData(1))};
 
     Brightness brightness = Brightness.light;
     late StateSetter setState;
@@ -325,7 +321,7 @@ void main() {
       ),
     );
 
-    final ShapeDecoration decoration =
+    final decoration =
         tester
                 .widget<Container>(
                   find.descendant(
@@ -344,7 +340,7 @@ void main() {
     });
     await tester.pump();
 
-    final ShapeDecoration decorationDark =
+    final decorationDark =
         tester
                 .widget<Container>(
                   find.descendant(
@@ -361,7 +357,7 @@ void main() {
 
   testWidgets('Children can be non-Text or Icon widgets (in this case, '
       'a Container or Placeholder widget)', (WidgetTester tester) async {
-    const Map<int, Widget> children = <int, Widget>{
+    const children = <int, Widget>{
       0: Text('Child 1'),
       1: SizedBox(width: 50, height: 50),
       2: Placeholder(),
@@ -389,7 +385,7 @@ void main() {
   testWidgets('Null input for value results in no child initially selected', (
     WidgetTester tester,
   ) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('Child 1'), 1: Text('Child 2')};
+    const children = <int, Widget>{0: Text('Child 1'), 1: Text('Child 2')};
 
     groupValue = null;
     await tester.pumpWidget(
@@ -412,11 +408,7 @@ void main() {
   });
 
   testWidgets('Disabled segment can be selected programmatically', (WidgetTester tester) async {
-    const Map<int, Widget> children = <int, Widget>{
-      0: Text('Child 1'),
-      1: Text('Child 2'),
-      2: Text('Child 3'),
-    };
+    const children = <int, Widget>{0: Text('Child 1'), 1: Text('Child 2'), 2: Text('Child 3')};
 
     groupValue = 0;
     await tester.pumpWidget(
@@ -440,7 +432,7 @@ void main() {
   });
 
   testWidgets('Long press not-selected child interactions', (WidgetTester tester) async {
-    const Map<int, Widget> children = <int, Widget>{
+    const children = <int, Widget>{
       0: Text('Child 1'),
       1: Text('Child 2'),
       2: Text('Child 3'),
@@ -535,7 +527,7 @@ void main() {
   testWidgets('Height of segmented control is determined by tallest widget', (
     WidgetTester tester,
   ) async {
-    final Map<int, Widget> children = <int, Widget>{
+    final children = <int, Widget>{
       0: Container(constraints: const BoxConstraints.tightFor(height: 100.0)),
       1: Container(constraints: const BoxConstraints.tightFor(height: 400.0)),
       2: Container(constraints: const BoxConstraints.tightFor(height: 200.0)),
@@ -567,7 +559,7 @@ void main() {
   testWidgets('Width of each segmented control segment is determined by widest widget by default', (
     WidgetTester tester,
   ) async {
-    final Map<int, Widget> children = <int, Widget>{
+    final children = <int, Widget>{
       0: Container(constraints: const BoxConstraints.tightFor(width: 50.0)),
       1: Container(constraints: const BoxConstraints.tightFor(width: 100.0)),
       2: Container(constraints: const BoxConstraints.tightFor(width: 200.0)),
@@ -599,7 +591,7 @@ void main() {
 
   testWidgets('If proportionalWidth is true, the width of each segmented '
       'control segment is determined by its own content', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{
+    final children = <int, Widget>{
       0: const SizedBox(width: 50, child: Text('First')),
       1: const SizedBox(width: 100, child: Text('Second')),
       2: const SizedBox(width: 70, child: Text('Third')),
@@ -645,12 +637,12 @@ void main() {
   });
 
   testWidgets('proportionalWidth rebuild', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{
+    final children = <int, Widget>{
       0: const SizedBox(width: 50, child: Text('First')),
       1: const SizedBox(width: 200, child: Text('Second')),
       2: const SizedBox(width: 70, child: Text('Third')),
     };
-    bool proportionalWidth = false;
+    var proportionalWidth = false;
 
     await tester.pumpWidget(
       boilerplate(
@@ -698,7 +690,7 @@ void main() {
 
   testWidgets('If proportionalWidth is true, the width of each segmented '
       'control segment is updated when children change', (WidgetTester tester) async {
-    Map<int, Widget> children = <int, Widget>{
+    var children = <int, Widget>{
       0: const SizedBox(width: 50, child: Text('First')),
       1: const SizedBox(width: 100, child: Text('Second')),
       2: const SizedBox(width: 70, child: Text('Third')),
@@ -756,7 +748,7 @@ void main() {
       'is larger than the max width of the parent constraints, each segment scales down', (
     WidgetTester tester,
   ) async {
-    final Map<int, Widget> children = <int, Widget>{
+    final children = <int, Widget>{
       0: const SizedBox(width: 50, child: Text('First')),
       1: const SizedBox(width: 100, child: Text('Second')),
       2: const SizedBox(width: 200, child: Text('Third')),
@@ -804,7 +796,7 @@ void main() {
       'is smaller than the min width of the parent constraints, each segment scales up', (
     WidgetTester tester,
   ) async {
-    final Map<int, Widget> children = <int, Widget>{
+    final children = <int, Widget>{
       0: const SizedBox(width: 20, child: Text('First')),
       1: const SizedBox(width: 30, child: Text('Second')),
       2: const SizedBox(width: 50, child: Text('Third')),
@@ -838,7 +830,7 @@ void main() {
     // each segment width should scale up to original width * (194 - separator) / 155.5.
     final Size firstChildSize = getChildSize(0);
     const double constraintsMinWidth = 200 - 6 - 2;
-    const double originalTotal = 160.0;
+    const originalTotal = 160.0;
     expect(
       firstChildSize.width,
       moreOrLessEquals((20 + 10.0 * 2) * constraintsMinWidth / originalTotal),
@@ -858,7 +850,7 @@ void main() {
   });
 
   testWidgets('Width is finite in unbounded space', (WidgetTester tester) async {
-    const Map<int, Widget> children = <int, Widget>{0: SizedBox(width: 50), 1: SizedBox(width: 70)};
+    const children = <int, Widget>{0: SizedBox(width: 50), 1: SizedBox(width: 70)};
 
     await tester.pumpWidget(
       boilerplate(
@@ -890,7 +882,7 @@ void main() {
   testWidgets('Directionality test - RTL should reverse order of widgets', (
     WidgetTester tester,
   ) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('Child 1'), 1: Text('Child 2')};
+    const children = <int, Widget>{0: Text('Child 1'), 1: Text('Child 2')};
 
     await tester.pumpWidget(
       Directionality(
@@ -917,7 +909,7 @@ void main() {
   });
 
   testWidgets('Correct initial selection and toggling behavior - RTL', (WidgetTester tester) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('Child 1'), 1: Text('Child 2')};
+    const children = <int, Widget>{0: Text('Child 1'), 1: Text('Child 2')};
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.rtl,
@@ -951,8 +943,8 @@ void main() {
   });
 
   testWidgets('Segmented control semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    const Map<int, Widget> children = <int, Widget>{0: Text('Child 1'), 1: Text('Child 2')};
+    final semantics = SemanticsTester(tester);
+    const children = <int, Widget>{0: Text('Child 1'), 1: Text('Child 2')};
 
     await tester.pumpWidget(
       boilerplate(
@@ -1054,7 +1046,7 @@ void main() {
   });
 
   testWidgets('Non-centered taps work on smaller widgets', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
+    final children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const SizedBox();
 
@@ -1082,7 +1074,7 @@ void main() {
   });
 
   testWidgets('Non-centered taps work on proportional segments', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
+    final children = <int, Widget>{};
     children[0] = const SizedBox(width: 50, height: 30);
     children[1] = const SizedBox();
     children[2] = const SizedBox(width: 100, height: 30);
@@ -1133,7 +1125,7 @@ void main() {
   });
 
   testWidgets('Hit-tests report accurate local position in segments', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
+    final children = <int, Widget>{};
     late TapDownDetails tapDownDetails;
     children[0] = GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -1169,7 +1161,7 @@ void main() {
   testWidgets('Hit-tests report accurate local position in proportional segments', (
     WidgetTester tester,
   ) async {
-    final Map<int, Widget> children = <int, Widget>{};
+    final children = <int, Widget>{};
     late TapDownDetails tapDownDetails;
     children[0] = GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -1305,7 +1297,7 @@ void main() {
   });
 
   testWidgets('Thumb does not go out of bounds in animation', (WidgetTester tester) async {
-    const Map<int, Widget> children = <int, Widget>{
+    const children = <int, Widget>{
       0: Text('Child 1', maxLines: 1),
       1: Text('wiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiide Child 2', maxLines: 1),
       2: SizedBox(height: 400),
@@ -1331,10 +1323,7 @@ void main() {
     });
     await tester.pump(const Duration(milliseconds: 10));
 
-    const Map<int, Widget> newChildren = <int, Widget>{
-      0: Text('C1', maxLines: 1),
-      1: Text('C2', maxLines: 1),
-    };
+    const newChildren = <int, Widget>{0: Text('C1', maxLines: 1), 1: Text('C2', maxLines: 1)};
 
     // Now let the segments shrink.
     await tester.pumpWidget(
@@ -1370,7 +1359,7 @@ void main() {
   testWidgets('Transition is triggered while a transition is already occurring', (
     WidgetTester tester,
   ) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('B'), 2: Text('C')};
+    const children = <int, Widget>{0: Text('A'), 1: Text('B'), 2: Text('C')};
 
     await tester.pumpWidget(
       boilerplate(
@@ -1462,9 +1451,9 @@ void main() {
   });
 
   testWidgets('change selection programmatically when dragging', (WidgetTester tester) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('B'), 2: Text('C')};
+    const children = <int, Widget>{0: Text('A'), 1: Text('B'), 2: Text('C')};
 
-    bool callbackCalled = false;
+    var callbackCalled = false;
 
     void onValueChanged(int? newValue) {
       callbackCalled = true;
@@ -1527,8 +1516,8 @@ void main() {
   testWidgets('Disable "highlighted" segment during drag, highlight stays', (
     WidgetTester tester,
   ) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('B'), 2: Text('C')};
-    Set<int> disabledChildren = <int>{};
+    const children = <int, Widget>{0: Text('A'), 1: Text('B'), 2: Text('C')};
+    var disabledChildren = <int>{};
     await tester.pumpWidget(
       boilerplate(
         builder: (BuildContext context) {
@@ -1576,10 +1565,10 @@ void main() {
   testWidgets('Disable "highlighted" segment during drag, onValueChanged is still called', (
     WidgetTester tester,
   ) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('B'), 2: Text('C')};
-    Set<int> disabledChildren = <int>{};
+    const children = <int, Widget>{0: Text('A'), 1: Text('B'), 2: Text('C')};
+    var disabledChildren = <int>{};
 
-    int callbackCalled = 0;
+    var callbackCalled = 0;
 
     void onValueChanged(int? newValue) {
       callbackCalled += 1;
@@ -1631,7 +1620,7 @@ void main() {
   testWidgets('Dragging out of bound does not cause out of range exception', (
     WidgetTester tester,
   ) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('BB'), 2: Text('CCC')};
+    const children = <int, Widget>{0: Text('A'), 1: Text('BB'), 2: Text('CCC')};
 
     await tester.pumpWidget(
       boilerplate(
@@ -1682,9 +1671,9 @@ void main() {
   });
 
   testWidgets('Disallow new gesture when dragging', (WidgetTester tester) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('B'), 2: Text('C')};
+    const children = <int, Widget>{0: Text('A'), 1: Text('B'), 2: Text('C')};
 
-    bool callbackCalled = false;
+    var callbackCalled = false;
 
     void onValueChanged(int? newValue) {
       callbackCalled = true;
@@ -1744,7 +1733,7 @@ void main() {
 
   testWidgets('gesture outlives the widget', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/63338.
-    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('B'), 2: Text('C')};
+    const children = <int, Widget>{0: Text('A'), 1: Text('B'), 2: Text('C')};
 
     await tester.pumpWidget(
       boilerplate(
@@ -1778,7 +1767,7 @@ void main() {
 
   testWidgets('computeDryLayout is pure', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/73362.
-    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('B'), 2: Text('C')};
+    const children = <int, Widget>{0: Text('A'), 1: Text('B'), 2: Text('C')};
 
     const Key key = ValueKey<int>(1);
 
@@ -1808,7 +1797,7 @@ void main() {
 
   testWidgets('Has consistent size, independent of groupValue', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/62063.
-    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('BB'), 2: Text('CCCC')};
+    const children = <int, Widget>{0: Text('A'), 1: Text('BB'), 2: Text('CCCC')};
 
     groupValue = null;
     await tester.pumpWidget(
@@ -1839,8 +1828,8 @@ void main() {
   });
 
   testWidgets('ScrollView + SlidingSegmentedControl interaction', (WidgetTester tester) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('Child 1'), 1: Text('Child 2')};
-    final ScrollController scrollController = ScrollController();
+    const children = <int, Widget>{0: Text('Child 1'), 1: Text('Child 2')};
+    final scrollController = ScrollController();
     addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(
@@ -1925,7 +1914,7 @@ void main() {
   testWidgets(
     'Hovering over Cupertino sliding segmented control updates cursor to clickable on Web',
     (WidgetTester tester) async {
-      const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('BB'), 2: Text('CCCC')};
+      const children = <int, Widget>{0: Text('A'), 1: Text('BB'), 2: Text('CCCC')};
 
       await tester.pumpWidget(
         boilerplate(
@@ -1963,7 +1952,7 @@ void main() {
   testWidgets('CupertinoSlidingSegmentedControl defaults - no selection', (
     WidgetTester tester,
   ) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('BB'), 2: Text('CCCC')};
+    const children = <int, Widget>{0: Text('A'), 1: Text('BB'), 2: Text('CCCC')};
 
     Widget buildSlidingSegmentedControl({Brightness? brightness}) {
       return CupertinoApp(
@@ -1999,7 +1988,7 @@ void main() {
   testWidgets('CupertinoSlidingSegmentedControl defaults - group value is not null', (
     WidgetTester tester,
   ) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('BB'), 2: Text('CCCC')};
+    const children = <int, Widget>{0: Text('A'), 1: Text('BB'), 2: Text('CCCC')};
 
     Widget buildSlidingSegmentedControl({Brightness? brightness}) {
       return CupertinoApp(
@@ -2034,7 +2023,7 @@ void main() {
   });
 
   testWidgets('CupertinoSlidingSegmentedControl defaults - disabled', (WidgetTester tester) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('BB'), 2: Text('CCCC')};
+    const children = <int, Widget>{0: Text('A'), 1: Text('BB'), 2: Text('CCCC')};
 
     Widget buildSlidingSegmentedControl({Brightness? brightness}) {
       return CupertinoApp(
@@ -2069,7 +2058,7 @@ void main() {
   });
 
   testWidgets('Segment can be disabled', (WidgetTester tester) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('BB'), 2: Text('CCCC')};
+    const children = <int, Widget>{0: Text('A'), 1: Text('BB'), 2: Text('CCCC')};
 
     groupValue = 1;
     await tester.pumpWidget(
@@ -2107,9 +2096,9 @@ void main() {
   });
 
   testWidgets('Several segments can be disabled', (WidgetTester tester) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('BB'), 2: Text('CCCC')};
+    const children = <int, Widget>{0: Text('A'), 1: Text('BB'), 2: Text('CCCC')};
 
-    int onValueChangedCalled = 0;
+    var onValueChangedCalled = 0;
     await tester.pumpWidget(
       boilerplate(
         builder: (BuildContext context) {
@@ -2144,7 +2133,7 @@ void main() {
   });
 
   testWidgets('CupertinoSlidingSegmentedControl can be momentary', (WidgetTester tester) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('BB'), 2: Text('CCCC')};
+    const children = <int, Widget>{0: Text('A'), 1: Text('BB'), 2: Text('CCCC')};
 
     groupValue = 1;
     await tester.pumpWidget(
@@ -2173,7 +2162,7 @@ void main() {
   testWidgets('CupertinoSlidingSegmentedControl with momentary scales up selected segment', (
     WidgetTester tester,
   ) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('BB'), 2: Text('CCCC')};
+    const children = <int, Widget>{0: Text('A'), 1: Text('BB'), 2: Text('CCCC')};
 
     await tester.pumpWidget(
       boilerplate(
@@ -2205,7 +2194,7 @@ void main() {
   });
 
   testWidgets('Sliding segmented control can use arrow keys', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
+    final children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
     children[2] = const Text('Child 3');
@@ -2253,7 +2242,7 @@ void main() {
   testWidgets('Sliding segmented control skips disabled segments with keyboard', (
     WidgetTester tester,
   ) async {
-    final Map<int, Widget> children = <int, Widget>{};
+    final children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
     children[2] = const Text('Child 3');
