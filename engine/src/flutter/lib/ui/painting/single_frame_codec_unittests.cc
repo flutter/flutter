@@ -56,6 +56,10 @@ TEST_F(ShellTest, SingleFrameCodecAccuratelyReportsSize) {
 }
 
 TEST_F(ShellTest, SingleFrameCodecHandlesNoGpu) {
+#ifndef FML_OS_MACOSX
+  GTEST_SKIP() << "Only works on macOS currently.";
+#endif
+
   Settings settings = CreateSettingsForFixture();
   settings.enable_impeller = true;
   TaskRunners task_runners("test",                  // label
@@ -78,7 +82,7 @@ TEST_F(ShellTest, SingleFrameCodecHandlesNoGpu) {
     bool value = true;
     ASSERT_TRUE(Dart_IsBoolean(handle));
     Dart_BooleanValue(handle, &value);
-    TurnOffGPU(shell.get(), true);
+    TurnOffGPU(shell.get(), value);
   };
   AddNativeCallback("TurnOffGPU", CREATE_NATIVE_ENTRY(turn_off_gpu));
 
