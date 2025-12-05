@@ -42,7 +42,7 @@ class HomePage extends StatelessWidget {
                   ),
                 );
               },
-              child: const Text('Open Bottom Sheet'),
+              child: const Text('Open Sheet'),
             ),
           ],
         ),
@@ -59,11 +59,18 @@ class _ScrollableSheetBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoSheetNavbar<void>(
+      navigationBar: CupertinoSheetNavbar(
         child: CupertinoNavigationBar(
           backgroundColor: CupertinoColors.systemGrey3,
-          middle: Text('Scrollable Sheet'),
+          middle: const Text('Scrollable Sheet'),
           automaticBackgroundVisibility: false,
+          leading: CupertinoButton(
+            padding: EdgeInsets.zero,
+            child: const Text('Close'),
+            onPressed: () {
+              CupertinoSheetRoute.popSheet(context);
+            },
+          ),
         ),
       ),
       child: CustomScrollView(
@@ -85,7 +92,7 @@ class _ScrollableSheetBody extends StatelessWidget {
   }
 }
 
-class CupertinoSheetNavbar<T> extends StatelessWidget implements ObstructingPreferredSizeWidget {
+class CupertinoSheetNavbar extends StatelessWidget implements ObstructingPreferredSizeWidget {
   const CupertinoSheetNavbar({super.key, required this.child});
 
   final CupertinoNavigationBar child;
