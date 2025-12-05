@@ -2764,41 +2764,13 @@ void decodeImageFromPixels(
 ///
 /// This function returns an [Image] immediately. The image might not be
 /// fully decoded yet, but it can be drawn to a [Canvas].
-Image decodeImageFromPixelsSync(
-  Uint8List pixels,
-  int width,
-  int height,
-  PixelFormat format, {
-  int? rowBytes,
-  int? targetWidth,
-  int? targetHeight,
-  bool allowUpscaling = true,
-  TargetPixelFormat targetFormat = TargetPixelFormat.dontCare,
-}) {
-  if (targetWidth != null) {
-    assert(allowUpscaling || targetWidth <= width);
-  }
-  if (targetHeight != null) {
-    assert(allowUpscaling || targetHeight <= height);
-  }
-
-  Image image = Image._(_Image._(), targetWidth ?? width, targetHeight ?? height);
-  _decodeImageFromPixelsSync(
-    pixels,
-    width,
-    height,
-    format.index,
-    rowBytes ?? 0,
-    targetWidth ?? 0,
-    targetHeight ?? 0,
-    allowUpscaling,
-    targetFormat.index,
-    image._image,
-  );
+Image decodeImageFromPixelsSync(Uint8List pixels, int width, int height, PixelFormat format) {
+  Image image = Image._(_Image._(), width, height);
+  _decodeImageFromPixelsSync(pixels, width, height, format.index, image._image);
   return image;
 }
 
-@Native<Void Function(Handle, Int32, Int32, Int32, Int32, Int32, Int32, Bool, Int32, Handle)>(
+@Native<Void Function(Handle, Int32, Int32, Int32, Handle)>(
   symbol: 'Image::decodeImageFromPixelsSync',
 )
 external void _decodeImageFromPixelsSync(
@@ -2806,11 +2778,6 @@ external void _decodeImageFromPixelsSync(
   int width,
   int height,
   int format,
-  int rowBytes,
-  int targetWidth,
-  int targetHeight,
-  bool allowUpscaling,
-  int targetFormat,
   _Image outImage,
 );
 

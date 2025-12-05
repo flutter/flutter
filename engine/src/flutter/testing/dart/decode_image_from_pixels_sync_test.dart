@@ -45,24 +45,6 @@ void main() {
     image.dispose();
   }, skip: !impellerEnabled);
 
-  test('decodeImageFromPixelsSync throws on resize', () {
-    const int width = 2;
-    const int height = 2;
-    final Uint8List pixels = Uint8List(width * height * 4);
-
-    expect(
-      () => decodeImageFromPixelsSync(
-        pixels,
-        width,
-        height,
-        PixelFormat.rgba8888,
-        targetWidth: 4,
-        targetHeight: 4,
-      ),
-      throwsA(isA<String>()),
-    );
-  }, skip: !impellerEnabled);
-
   test('decodeImageFromPixelsSync throws on invalid dimensions', () {
     final Uint8List pixels = Uint8List(4);
     expect(

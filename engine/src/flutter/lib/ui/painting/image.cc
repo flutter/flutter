@@ -97,11 +97,6 @@ void CanvasImage::decodeImageFromPixelsSync(Dart_Handle pixels_handle,
                                             uint32_t width,
                                             uint32_t height,
                                             int32_t pixel_format,
-                                            int32_t row_bytes,
-                                            int32_t target_width,
-                                            int32_t target_height,
-                                            bool allow_upscaling,
-                                            int32_t target_pixel_format,
                                             Dart_Handle raw_image_handle) {
   auto* dart_state = UIDartState::Current();
   if (!dart_state) {
@@ -122,38 +117,13 @@ void CanvasImage::decodeImageFromPixelsSync(Dart_Handle pixels_handle,
     return;
   }
 
-  if (target_width == 0) {
-    target_width = width;
-  }
-  if (target_height == 0) {
-    target_height = height;
-  }
-
-  if (target_width != static_cast<int32_t>(width) ||
-      target_height != static_cast<int32_t>(height)) {
-    Dart_ThrowException(tonic::ToDart(
-        "decodeImageFromPixelsSync resizing is not implemented."));
-    return;
-  }
-
-  if (!allow_upscaling) {
-    if (target_width > static_cast<int32_t>(width)) {
-      target_width = width;
-    }
-    if (target_height > static_cast<int32_t>(height)) {
-      target_height = height;
-    }
-  }
-
   tonic::Uint8List pixels(pixels_handle);
   if (!pixels.data()) {
     Dart_ThrowException(tonic::ToDart("Pixels must not be null."));
     return;
   }
 
-  if (row_bytes == 0) {
-    row_bytes = width * BytesPerPixel(pixel_format);
-  }
+  int32_t row_bytes = width * BytesPerPixel(pixel_format);
 
   SkColorType color_type = PixelFormatToSkColorType(pixel_format);
   if (color_type == kUnknown_SkColorType) {

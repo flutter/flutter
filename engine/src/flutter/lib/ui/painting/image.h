@@ -39,11 +39,6 @@ class CanvasImage final : public RefCountedDartWrappable<CanvasImage> {
                                         uint32_t width,
                                         uint32_t height,
                                         int32_t pixel_format,
-                                        int32_t row_bytes,
-                                        int32_t target_width,
-                                        int32_t target_height,
-                                        bool allow_upscaling,
-                                        int32_t target_pixel_format,
                                         Dart_Handle raw_image_handle);
 
   Dart_Handle toByteData(int format, Dart_Handle callback);
