@@ -1449,10 +1449,17 @@ class _RenderListTile extends RenderBox
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    return math.max(
-      _targetTileHeight,
-      title.getMinIntrinsicHeight(width) + (subtitle?.getMinIntrinsicHeight(width) ?? 0.0),
-    );
+    final double titleMinHeight = title.getMinIntrinsicHeight(width);
+    final double? subtitleMinHeight = subtitle?.getMinIntrinsicHeight(width);
+
+    if (subtitleMinHeight == null) {
+      return math.max(_targetTileHeight, titleMinHeight + 2.0 * _minVerticalPadding);
+    } else {
+      return math.max(
+        _targetTileHeight,
+        titleMinHeight + subtitleMinHeight + 2.0 * _minVerticalPadding,
+      );
+    }
   }
 
   @override
