@@ -485,8 +485,8 @@ class CanvasKitRenderer extends Renderer {
 
   @override
   void dumpDebugInfo() {
-    int i = 0;
-    for (final viewRasterizer in rasterizers.values) {
+    var i = 0;
+    for (final ViewRasterizer viewRasterizer in rasterizers.values) {
       final Map<String, dynamic>? debugJson = viewRasterizer.dumpDebugInfo();
       if (debugJson != null) {
         downloadDebugInfo('flutter-scene$i', debugJson);

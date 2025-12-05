@@ -24,7 +24,7 @@ void testMain() {
     );
 
     test('defaults to FlutterTest font family', () async {
-      final CkPictureRecorder recorder = CkPictureRecorder();
+      final recorder = CkPictureRecorder();
       final CkCanvas canvas = recorder.beginRecording(kDefaultRegion);
       canvas.translate(10, 10);
 
@@ -51,7 +51,7 @@ void testMain() {
           strutStyle = null;
         }
 
-        final CkParagraphBuilder builder = CkParagraphBuilder(
+        final builder = CkParagraphBuilder(
           CkParagraphStyle(fontFamily: paragraphFontFamily, strutStyle: strutStyle),
         );
 

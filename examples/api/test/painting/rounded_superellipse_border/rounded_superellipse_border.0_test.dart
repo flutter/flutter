@@ -11,7 +11,10 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Smoke Test', (WidgetTester tester) async {
     await tester.pumpWidget(const example.RoundedSuperellipseBorderExample());
-    expect(find.byType(example.RoundedSuperellipseBorderExample), findsOneWidget);
+    expect(
+      find.byType(example.RoundedSuperellipseBorderExample),
+      findsOneWidget,
+    );
 
     final RenderObject borderBox = tester.renderObject(
       find.byKey(example.RoundedSuperellipseBorderExample.kBorderBoxKey),
@@ -29,7 +32,9 @@ void main() {
     );
     expect(radiusSlider, findsOne);
     final Finder thicknessSlider = find.descendant(
-      of: find.byKey(example.RoundedSuperellipseBorderExample.kThicknessSliderKey),
+      of: find.byKey(
+        example.RoundedSuperellipseBorderExample.kThicknessSliderKey,
+      ),
       matching: find.byType(CupertinoSlider),
     );
     expect(thicknessSlider, findsOne);
