@@ -183,4 +183,15 @@ void main() {
     // Text style should not return unresolved color.
     expect(prefixParagraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
   });
+
+  testWidgets('CupertinoFormRow does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(child: CupertinoFormRow(child: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoFormRow)), Size.zero);
+  });
 }
