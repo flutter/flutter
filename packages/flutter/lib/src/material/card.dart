@@ -131,7 +131,7 @@ class Card extends StatelessWidget {
 
   /// The color to paint the shadow below the card.
   ///
-  /// If null then the ambient [CardTheme]'s shadowColor is used.
+  /// If null then the ambient [CardThemeData.shadowColor] is used.
   /// If that's null too, then the overall theme's [ThemeData.shadowColor]
   /// (default black) is used.
   final Color? shadowColor;
@@ -158,16 +158,16 @@ class Card extends StatelessWidget {
   ///
   /// Defines the card's [Material.elevation].
   ///
-  /// If this property is null then [CardTheme.elevation] of
-  /// [ThemeData.cardTheme] is used. If that's null, the default value is 1.0.
+  /// If this property is null then the ambient [CardThemeData.elevation] is
+  /// used. If that's null, the default value is 1.0.
   final double? elevation;
 
   /// The shape of the card's [Material].
   ///
   /// Defines the card's [Material.shape].
   ///
-  /// If this property is null then [CardTheme.shape] of [ThemeData.cardTheme]
-  /// is used. If that's null then the shape will be a [RoundedRectangleBorder]
+  /// If this property is null then the ambient [CardThemeData.shape] is used.
+  /// If that's null then the shape will be a [RoundedRectangleBorder]
   /// with a circular corner radius of 12.0 and if [ThemeData.useMaterial3] is
   /// false, then the circular corner radius will be 4.0.
   final ShapeBorder? shape;
@@ -180,17 +180,17 @@ class Card extends StatelessWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// If this property is null then [CardTheme.clipBehavior] of
-  /// [ThemeData.cardTheme] is used. If that's null then the behavior will be [Clip.none].
+  /// If this property is null then the ambient [CardThemeData.clipBehavior] is
+  /// used. If that's null then the behavior will be [Clip.none].
   final Clip? clipBehavior;
 
   /// The empty space that surrounds the card.
   ///
   /// Defines the card's outer [Container.margin].
   ///
-  /// If this property is null then [CardTheme.margin] of
-  /// [ThemeData.cardTheme] is used. If that's null, the default margin is 4.0
-  /// logical pixels on all sides: `EdgeInsets.all(4.0)`.
+  /// If this property is null then the ambient [CardThemeData.margin] is used.
+  /// If that's null, the default margin is 4.0 logical pixels on
+  /// all sides: `EdgeInsets.all(4.0)`.
   final EdgeInsetsGeometry? margin;
 
   /// Whether this widget represents a single semantic container, or if false
