@@ -228,7 +228,7 @@ class _${blockName}DefaultsM3 extends InputDecorationThemeData {
     final String borderColor = componentColor(componentToken1) != 'null'
         ? componentColor(componentToken1)
         : componentColor(componentToken2);
-    final double width =
+    final width =
         (getToken('$componentToken1.width', optional: true) ??
                 getToken('$componentToken1.height', optional: true) ??
                 getToken('$componentToken2.width', optional: true) ??

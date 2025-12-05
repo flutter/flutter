@@ -17,8 +17,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('SnackBar control test', (WidgetTester tester) async {
-    const String helloSnackBar = 'Hello SnackBar';
-    const Key tapTarget = Key('tap-target');
+    const helloSnackBar = 'Hello SnackBar';
+    const tapTarget = Key('tap-target');
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -66,8 +66,8 @@ void main() {
   });
 
   testWidgets('SnackBar twice test', (WidgetTester tester) async {
-    int snackBarCount = 0;
-    const Key tapTarget = Key('tap-target');
+    var snackBarCount = 0;
+    const tapTarget = Key('tap-target');
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -154,8 +154,8 @@ void main() {
   });
 
   testWidgets('SnackBar cancel test', (WidgetTester tester) async {
-    int snackBarCount = 0;
-    const Key tapTarget = Key('tap-target');
+    var snackBarCount = 0;
+    const tapTarget = Key('tap-target');
     late int time;
     late ScaffoldFeatureController<SnackBar, SnackBarClosedReason> lastController;
     await tester.pumpWidget(
@@ -186,8 +186,7 @@ void main() {
     expect(find.text('bar2'), findsNothing);
     time = 1000;
     await tester.tap(find.byKey(tapTarget)); // queue bar1
-    final ScaffoldFeatureController<SnackBar, SnackBarClosedReason> firstController =
-        lastController;
+    final firstController = lastController;
     time = 2;
     await tester.tap(find.byKey(tapTarget)); // queue bar2
     expect(find.text('bar1'), findsNothing);
@@ -254,10 +253,10 @@ void main() {
   });
 
   testWidgets('SnackBar dismiss test', (WidgetTester tester) async {
-    const Key tapTarget = Key('tap-target');
+    const tapTarget = Key('tap-target');
     late DismissDirection dismissDirection;
     late double width;
-    int snackBarCount = 0;
+    var snackBarCount = 0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -299,7 +298,7 @@ void main() {
   testWidgets('SnackBar dismissDirection can be customised from SnackBarThemeData', (
     WidgetTester tester,
   ) async {
-    const Key tapTarget = Key('tap-target');
+    const tapTarget = Key('tap-target');
     late double width;
 
     await tester.pumpWidget(
@@ -344,7 +343,7 @@ void main() {
   testWidgets('dismissDirection from SnackBar should be preferred over SnackBarThemeData', (
     WidgetTester tester,
   ) async {
-    const Key tapTarget = Key('tap-target');
+    const tapTarget = Key('tap-target');
     late double width;
 
     await tester.pumpWidget(
@@ -391,7 +390,7 @@ void main() {
   });
 
   testWidgets('SnackBar cannot be tapped twice', (WidgetTester tester) async {
-    int tapCount = 0;
+    var tapCount = 0;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -434,7 +433,7 @@ void main() {
   });
 
   testWidgets('Material2 - Light theme SnackBar has dark background', (WidgetTester tester) async {
-    final ThemeData lightTheme = ThemeData.light(useMaterial3: false);
+    final lightTheme = ThemeData.light(useMaterial3: false);
     await tester.pumpWidget(
       MaterialApp(
         theme: lightTheme,
@@ -473,7 +472,7 @@ void main() {
   });
 
   testWidgets('Material3 - Light theme SnackBar has dark background', (WidgetTester tester) async {
-    final ThemeData lightTheme = ThemeData();
+    final lightTheme = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: lightTheme,
@@ -509,7 +508,7 @@ void main() {
   });
 
   testWidgets('Dark theme SnackBar has light background', (WidgetTester tester) async {
-    final ThemeData darkTheme = ThemeData.dark();
+    final darkTheme = ThemeData.dark();
     await tester.pumpWidget(
       MaterialApp(
         theme: darkTheme,
@@ -547,7 +546,7 @@ void main() {
   testWidgets('Material2 - Dark theme SnackBar has primary text buttons', (
     WidgetTester tester,
   ) async {
-    final ThemeData darkTheme = ThemeData.dark(useMaterial3: false);
+    final darkTheme = ThemeData.dark(useMaterial3: false);
     await tester.pumpWidget(
       MaterialApp(
         theme: darkTheme,
@@ -586,7 +585,7 @@ void main() {
   testWidgets('Material3 - Dark theme SnackBar has primary text buttons', (
     WidgetTester tester,
   ) async {
-    final ThemeData darkTheme = ThemeData.dark();
+    final darkTheme = ThemeData.dark();
     await tester.pumpWidget(
       MaterialApp(
         theme: darkTheme,
@@ -623,7 +622,7 @@ void main() {
   });
 
   testWidgets('SnackBar should inherit theme data from its ancestor', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(
+    final theme = ThemeData(
       colorScheme: ColorScheme.fromSeed(seedColor: Colors.green, brightness: Brightness.dark),
     );
     ThemeData? themeBeforeSnackBar;
@@ -669,7 +668,7 @@ void main() {
   });
 
   testWidgets('Snackbar margin can be customized', (WidgetTester tester) async {
-    const double padding = 20.0;
+    const padding = 20.0;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -711,8 +710,8 @@ void main() {
   testWidgets('SnackbarBehavior.floating is positioned within safe area', (
     WidgetTester tester,
   ) async {
-    const double viewPadding = 50.0;
-    const double floatingSnackBarDefaultBottomMargin = 10.0;
+    const viewPadding = 50.0;
+    const floatingSnackBarDefaultBottomMargin = 10.0;
     await tester.pumpWidget(
       MaterialApp(
         home: MediaQuery(
@@ -758,7 +757,7 @@ void main() {
   });
 
   testWidgets('Snackbar padding can be customized', (WidgetTester tester) async {
-    const double padding = 20.0;
+    const padding = 20.0;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -801,7 +800,7 @@ void main() {
   });
 
   testWidgets('Snackbar width can be customized', (WidgetTester tester) async {
-    const double width = 200.0;
+    const width = 200.0;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -840,7 +839,7 @@ void main() {
   });
 
   testWidgets('Snackbar width can be customized from ThemeData', (WidgetTester tester) async {
-    const double width = 200.0;
+    const width = 200.0;
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -880,8 +879,8 @@ void main() {
   testWidgets('Snackbar width customization takes preference of widget over theme', (
     WidgetTester tester,
   ) async {
-    const double themeWidth = 200.0;
-    const double widgetWidth = 400.0;
+    const themeWidth = 200.0;
+    const widgetWidth = 400.0;
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -1019,7 +1018,7 @@ void main() {
   testWidgets('Snackbar labels can be colored as WidgetStateColor (Material 3)', (
     WidgetTester tester,
   ) async {
-    const _TestMaterialStateColor usedColor = _TestMaterialStateColor();
+    const usedColor = _TestMaterialStateColor();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1343,7 +1342,7 @@ void main() {
     final Offset snackBarTopRight = tester.getTopRight(find.byType(SnackBar));
 
     // FAB's surrounding padding is set to [kFloatingActionButtonMargin] in floating_action_button_location.dart by default.
-    const int defaultFabPadding = 16;
+    const defaultFabPadding = 16;
 
     // FAB should be positioned above the SnackBar by the default padding.
     expect(fabRect.bottomRight.dy, snackBarTopRight.dy - defaultFabPadding);
@@ -1590,9 +1589,8 @@ void main() {
   );
 
   testWidgets('SnackBarClosedReason', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
-        GlobalKey<ScaffoldMessengerState>();
-    bool actionPressed = false;
+    final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+    var actionPressed = false;
     SnackBarClosedReason? closedReason;
 
     await tester.pumpWidget(
@@ -1703,7 +1701,7 @@ void main() {
   });
 
   testWidgets('accessible navigation behavior with action', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1748,7 +1746,7 @@ void main() {
 
   testWidgets('contributes dismiss semantics', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1796,8 +1794,8 @@ void main() {
   });
 
   testWidgets('SnackBar default display duration test', (WidgetTester tester) async {
-    const String helloSnackBar = 'Hello SnackBar';
-    const Key tapTarget = Key('tap-target');
+    const helloSnackBar = 'Hello SnackBar';
+    const tapTarget = Key('tap-target');
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1904,8 +1902,8 @@ void main() {
   });
 
   testWidgets('Snackbar calls onVisible once', (WidgetTester tester) async {
-    const Key tapTarget = Key('tap-target');
-    int called = 0;
+    const tapTarget = Key('tap-target');
+    var called = 0;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1942,8 +1940,8 @@ void main() {
   });
 
   testWidgets('Snackbar does not call onVisible when it is queued', (WidgetTester tester) async {
-    const Key tapTarget = Key('tap-target');
-    int called = 0;
+    const tapTarget = Key('tap-target');
+    var called = 0;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1990,7 +1988,7 @@ void main() {
 
   group('SnackBar position', () {
     for (final SnackBarBehavior behavior in SnackBarBehavior.values) {
-      final SnackBar snackBar = SnackBar(content: const Text('SnackBar text'), behavior: behavior);
+      final snackBar = SnackBar(content: const Text('SnackBar text'), behavior: behavior);
 
       testWidgets('$behavior should align SnackBar with the bottom of Scaffold '
           'when Scaffold has no other elements', (WidgetTester tester) async {
@@ -2016,7 +2014,7 @@ void main() {
 
       testWidgets('$behavior should align SnackBar with the top of BottomNavigationBar '
           'when Scaffold has no FloatingActionButton', (WidgetTester tester) async {
-        final UniqueKey boxKey = UniqueKey();
+        final boxKey = UniqueKey();
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
@@ -2215,7 +2213,7 @@ void main() {
           );
         }
 
-        const List<FloatingActionButtonLocation> topLocations = <FloatingActionButtonLocation>[
+        const topLocations = <FloatingActionButtonLocation>[
           FloatingActionButtonLocation.startTop,
           FloatingActionButtonLocation.centerTop,
           FloatingActionButtonLocation.endTop,
@@ -2224,7 +2222,7 @@ void main() {
           FloatingActionButtonLocation.miniEndTop,
         ];
 
-        for (final FloatingActionButtonLocation location in topLocations) {
+        for (final location in topLocations) {
           await pumpApp(fabLocation: location);
 
           await tester.tap(find.text('X'));
@@ -2272,7 +2270,7 @@ void main() {
           );
         }
 
-        const List<FloatingActionButtonLocation> nonTopLocations = <FloatingActionButtonLocation>[
+        const nonTopLocations = <FloatingActionButtonLocation>[
           FloatingActionButtonLocation.startDocked,
           FloatingActionButtonLocation.startFloat,
           FloatingActionButtonLocation.centerDocked,
@@ -2290,7 +2288,7 @@ void main() {
           _CustomFloatingActionButtonLocation(),
         ];
 
-        for (final FloatingActionButtonLocation location in nonTopLocations) {
+        for (final location in nonTopLocations) {
           await pumpApp(fabLocation: location);
 
           await tester.tap(find.text('X'));
@@ -2312,7 +2310,7 @@ void main() {
       '${SnackBarBehavior.fixed} should align SnackBar with the top of BottomNavigationBar '
       'when Scaffold has a BottomNavigationBar and FloatingActionButton',
       (WidgetTester tester) async {
-        final UniqueKey boxKey = UniqueKey();
+        final boxKey = UniqueKey();
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
@@ -2348,7 +2346,7 @@ void main() {
       '${SnackBarBehavior.floating} should align SnackBar with the top of FloatingActionButton '
       'when Scaffold has BottomNavigationBar and FloatingActionButton',
       (WidgetTester tester) async {
-        final UniqueKey boxKey = UniqueKey();
+        final boxKey = UniqueKey();
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
@@ -2380,7 +2378,7 @@ void main() {
       'when Scaffold has both BottomNavigationBar and FloatingActionButton and '
       'BottomNavigationBar.top is higher than FloatingActionButton.top',
       (WidgetTester tester) async {
-        final UniqueKey boxKey = UniqueKey();
+        final boxKey = UniqueKey();
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
@@ -2422,7 +2420,7 @@ void main() {
       await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
     }
 
-    const String offScreenMessage =
+    const offScreenMessage =
         'Floating SnackBar presented off screen.\n'
         'A SnackBar with behavior property set to SnackBarBehavior.floating is fully '
         'or partially off screen because some or all the widgets provided to '
@@ -2452,7 +2450,7 @@ void main() {
         // Run with the Snackbar fully off screen.
         await boilerplate(fabHeight: spaceAboveSnackBar + mediumFabHeight * 2);
         await openFloatingSnackBar(tester);
-        AssertionError exception = tester.takeException() as AssertionError;
+        var exception = tester.takeException() as AssertionError;
         expect(exception.message, offScreenMessage);
 
         // Run with the Snackbar partially off screen.
@@ -2482,7 +2480,7 @@ void main() {
         await openFloatingSnackBar(tester);
         await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
 
-        final AssertionError exception = tester.takeException() as AssertionError;
+        final exception = tester.takeException() as AssertionError;
         expect(exception.message, offScreenMessage);
       },
     );
@@ -2498,7 +2496,7 @@ void main() {
         );
 
         final FlutterExceptionHandler? handler = FlutterError.onError;
-        final List<String> errorMessages = <String>[];
+        final errorMessages = <String>[];
         FlutterError.onError = (FlutterErrorDetails details) {
           errorMessages.add(details.exceptionAsString());
         };
@@ -2524,7 +2522,7 @@ void main() {
 
         await openFloatingSnackBar(tester);
         await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
-        final AssertionError exception = tester.takeException() as AssertionError;
+        final exception = tester.takeException() as AssertionError;
         expect(exception.message, offScreenMessage);
       },
     );
@@ -2538,7 +2536,7 @@ void main() {
         );
 
         final FlutterExceptionHandler? handler = FlutterError.onError;
-        final List<String> errorMessages = <String>[];
+        final errorMessages = <String>[];
         FlutterError.onError = (FlutterErrorDetails details) {
           errorMessages.add(details.exceptionAsString());
         };
@@ -2628,7 +2626,7 @@ void main() {
       'Material3 - Floating snackbar with custom width is centered when text direction is rtl',
       (WidgetTester tester) async {
         // Regression test for https://github.com/flutter/flutter/issues/140125.
-        const double customWidth = 400.0;
+        const customWidth = 400.0;
         await tester.pumpWidget(
           MaterialApp(
             home: Directionality(
@@ -2674,7 +2672,7 @@ void main() {
       'Material2 - Floating snackbar with custom width is centered when text direction is rtl',
       (WidgetTester tester) async {
         // Regression test for https://github.com/flutter/flutter/issues/147838.
-        const double customWidth = 400.0;
+        const customWidth = 400.0;
         await tester.pumpWidget(
           MaterialApp(
             theme: ThemeData(useMaterial3: false),
@@ -2721,11 +2719,11 @@ void main() {
   testWidgets('SnackBars hero across transitions when using ScaffoldMessenger', (
     WidgetTester tester,
   ) async {
-    const String snackBarText = 'hello snackbar';
-    const String firstHeader = 'home';
-    const String secondHeader = 'second';
-    const Key snackTarget = Key('snack-target');
-    const Key transitionTarget = Key('transition-target');
+    const snackBarText = 'hello snackbar';
+    const firstHeader = 'home';
+    const secondHeader = 'second';
+    const snackTarget = Key('snack-target');
+    const transitionTarget = Key('transition-target');
 
     Widget buildApp() {
       return MaterialApp(
@@ -2792,12 +2790,12 @@ void main() {
   testWidgets('Should have only one SnackBar during back swipe navigation', (
     WidgetTester tester,
   ) async {
-    const String snackBarText = 'hello snackbar';
-    const Key snackTarget = Key('snack-target');
-    const Key transitionTarget = Key('transition-target');
+    const snackBarText = 'hello snackbar';
+    const snackTarget = Key('snack-target');
+    const transitionTarget = Key('transition-target');
 
     Widget buildApp() {
-      final PageTransitionsTheme pageTransitionTheme = PageTransitionsTheme(
+      final pageTransitionTheme = PageTransitionsTheme(
         builders: <TargetPlatform, PageTransitionsBuilder>{
           for (final TargetPlatform platform in TargetPlatform.values)
             platform: const CupertinoPageTransitionsBuilder(),
@@ -2931,10 +2929,10 @@ void main() {
   testWidgets('ScaffoldMessenger does not duplicate a SnackBar when presenting a MaterialBanner.', (
     WidgetTester tester,
   ) async {
-    const Key materialBannerTapTarget = Key('materialbanner-tap-target');
-    const Key snackBarTapTarget = Key('snackbar-tap-target');
-    const String snackBarText = 'SnackBar';
-    const String materialBannerText = 'MaterialBanner';
+    const materialBannerTapTarget = Key('materialbanner-tap-target');
+    const snackBarTapTarget = Key('snackbar-tap-target');
+    const snackBarText = 'SnackBar';
+    const materialBannerText = 'MaterialBanner';
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -3070,9 +3068,9 @@ void main() {
   testWidgets('ScaffoldMessengerState clearSnackBars works as expected', (
     WidgetTester tester,
   ) async {
-    final List<String> snackBars = <String>['Hello Snackbar', 'Hi Snackbar', 'Bye Snackbar'];
-    int snackBarCounter = 0;
-    const Key tapTarget = Key('tap-target');
+    final snackBars = <String>['Hello Snackbar', 'Hi Snackbar', 'Bye Snackbar'];
+    var snackBarCounter = 0;
+    const tapTarget = Key('tap-target');
     final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey();
 
     await tester.pumpWidget(
@@ -3163,7 +3161,7 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pump(); // start animation
     await tester.pump(const Duration(milliseconds: 750));
-    final AssertionError exception = tester.takeException() as AssertionError;
+    final exception = tester.takeException() as AssertionError;
     expect(
       exception.message,
       'Margin can only be used with floating behavior. SnackBarBehavior.fixed '
@@ -3177,7 +3175,7 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pump(); // start animation
     await tester.pump(const Duration(milliseconds: 750));
-    final AssertionError exception = tester.takeException() as AssertionError;
+    final exception = tester.takeException() as AssertionError;
     expect(
       exception.message,
       'Margin can only be used with floating behavior. SnackBarBehavior.fixed '
@@ -3193,7 +3191,7 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pump(); // start animation
     await tester.pump(const Duration(milliseconds: 750));
-    final AssertionError exception = tester.takeException() as AssertionError;
+    final exception = tester.takeException() as AssertionError;
     expect(
       exception.message,
       'Width can only be used with floating behavior. SnackBarBehavior.fixed '
@@ -3207,7 +3205,7 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pump(); // start animation
     await tester.pump(const Duration(milliseconds: 750));
-    final AssertionError exception = tester.takeException() as AssertionError;
+    final exception = tester.takeException() as AssertionError;
     expect(
       exception.message,
       'Width can only be used with floating behavior. SnackBarBehavior.fixed '
@@ -3215,7 +3213,7 @@ void main() {
     );
   });
 
-  for (final double overflowThreshold in <double>[-1.0, -.0001, 1.000001, 5]) {
+  for (final overflowThreshold in <double>[-1.0, -.0001, 1.000001, 5]) {
     testWidgets('SnackBar will assert for actionOverflowThreshold outside of 0-1 range', (
       WidgetTester tester,
     ) async {
@@ -3226,7 +3224,7 @@ void main() {
       await tester.pump(); // start animation
       await tester.pump(const Duration(milliseconds: 750));
 
-      final AssertionError exception = tester.takeException() as AssertionError;
+      final exception = tester.takeException() as AssertionError;
       expect(exception.message, 'Action overflow threshold must be between 0 and 1 inclusive');
     });
   }
@@ -3784,9 +3782,7 @@ void main() {
   testWidgets('SnackBarAction backgroundColor works as a WidgetStateColor', (
     WidgetTester tester,
   ) async {
-    final WidgetStateColor backgroundColor = WidgetStateColor.resolveWith((
-      Set<WidgetState> states,
-    ) {
+    final backgroundColor = WidgetStateColor.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.disabled)) {
         return Colors.blue;
       }
@@ -3994,11 +3990,11 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    const String buttonText = 'Show snackbar';
-    const String snackbarContent = 'Snackbar';
-    const String buttonText2 = 'Try press me';
+    const buttonText = 'Show snackbar';
+    const snackbarContent = 'Snackbar';
+    const buttonText2 = 'Try press me';
 
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -4052,11 +4048,11 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    const String buttonText = 'Show snackbar';
-    const String snackbarContent = 'Snackbar';
-    const String buttonText2 = 'Try press me';
+    const buttonText = 'Show snackbar';
+    const snackbarContent = 'Snackbar';
+    const buttonText2 = 'Try press me';
 
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -4112,11 +4108,11 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    const String buttonText = 'Show snackbar';
-    const String snackbarContent = 'Snackbar';
-    const String buttonText2 = 'Try press me';
+    const buttonText = 'Show snackbar';
+    const snackbarContent = 'Snackbar';
+    const buttonText2 = 'Try press me';
 
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -4165,7 +4161,7 @@ void main() {
   });
 
   testWidgets('Action text button uses correct overlay color', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -4210,11 +4206,11 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      const String buttonText = 'Show snackbar';
-      const String snackbarContent = 'Snackbar';
-      const String buttonText2 = 'Try press me';
+      const buttonText = 'Show snackbar';
+      const snackbarContent = 'Snackbar';
+      const buttonText2 = 'Try press me';
 
-      final Completer<void> completer = Completer<void>();
+      final completer = Completer<void>();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -4265,8 +4261,8 @@ void main() {
   );
 
   testWidgets('Setting persist to true prevents timeout', (WidgetTester tester) async {
-    const String buttonText = 'Show snackbar';
-    const String snackbarContent = 'Snackbar';
+    const buttonText = 'Show snackbar';
+    const snackbarContent = 'Snackbar';
 
     await tester.pumpWidget(
       MaterialApp(
@@ -4309,8 +4305,8 @@ void main() {
   });
 
   testWidgets('Setting persist to false so snackbar auto dismisses', (WidgetTester tester) async {
-    const String buttonText = 'Show';
-    const String snackbarContent = 'SnackbarContent';
+    const buttonText = 'Show';
+    const snackbarContent = 'SnackbarContent';
 
     await tester.pumpWidget(
       MaterialApp(
@@ -4351,8 +4347,8 @@ void main() {
   testWidgets('Setting persist to false overrides accessibleNavigation', (
     WidgetTester tester,
   ) async {
-    const String buttonText = 'Show';
-    const String snackbarContent = 'SnackbarContent';
+    const buttonText = 'Show';
+    const snackbarContent = 'SnackbarContent';
 
     await tester.pumpWidget(
       MediaQuery(
@@ -4455,7 +4451,7 @@ Future<void> _testSnackBarDismiss({
 
 /// Create drag gestures for DismissDirections.
 Map<DismissDirection, List<Offset>> _getDragGesturesOfDismissDirections(double scaffoldWidth) {
-  final Map<DismissDirection, List<Offset>> dragGestures = <DismissDirection, List<Offset>>{};
+  final dragGestures = <DismissDirection, List<Offset>>{};
 
   for (final DismissDirection val in DismissDirection.values) {
     switch (val) {

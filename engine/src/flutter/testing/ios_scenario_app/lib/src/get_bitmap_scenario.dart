@@ -13,8 +13,8 @@ class GetBitmapScenario extends Scenario {
 
   @override
   void onBeginFrame(Duration duration) {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder);
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder);
     canvas.drawRect(
       Rect.fromLTWH(0, 0, view.physicalSize.width, 300),
       Paint()..color = const Color(0xFFFF0000),
@@ -24,7 +24,7 @@ class GetBitmapScenario extends Scenario {
       Paint()..color = const Color(0xFF0000FF),
     );
     final Picture picture = recorder.endRecording();
-    final SceneBuilder builder = SceneBuilder();
+    final builder = SceneBuilder();
     builder.addPicture(Offset.zero, picture);
     final Scene scene = builder.build();
     view.render(scene);

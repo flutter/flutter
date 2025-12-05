@@ -10,14 +10,14 @@ void main() {
   testWidgets('PageTransitionsBuilder buildTransitions method is called correctly', (
     WidgetTester tester,
   ) async {
-    bool buildTransitionsCalled = false;
+    var buildTransitionsCalled = false;
     PageRoute<dynamic>? capturedRoute;
     BuildContext? capturedContext;
     Animation<double>? capturedAnimation;
     Animation<double>? capturedSecondaryAnimation;
     Widget? capturedChild;
 
-    final _TestPageTransitionsBuilder builderWithCapture = _TestPageTransitionsBuilder(
+    final builderWithCapture = _TestPageTransitionsBuilder(
       onBuildTransitions:
           <T>(
             PageRoute<T> route,
@@ -43,7 +43,7 @@ void main() {
           },
     );
 
-    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+    final routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
         child: TextButton(
           child: const Text('push'),
@@ -85,7 +85,7 @@ void main() {
   testWidgets('PageTransitionsBuilder works with custom Navigator and PageRoute', (
     WidgetTester tester,
   ) async {
-    final _TestPageTransitionsBuilder customTransitionsBuilder = _TestPageTransitionsBuilder(
+    final customTransitionsBuilder = _TestPageTransitionsBuilder(
       onBuildTransitions:
           <T>(
             PageRoute<T> route,
@@ -327,7 +327,7 @@ void main() {
   testWidgets(
     'PageTransitionsTheme override builds a _OpenUpwardsPageTransition',
     (WidgetTester tester) async {
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      final routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => Material(
           child: TextButton(
             child: const Text('push'),

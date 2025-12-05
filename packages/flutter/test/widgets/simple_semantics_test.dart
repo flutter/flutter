@@ -11,7 +11,7 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Simple tree is simple', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(const Center(child: Text('Hello!', textDirection: TextDirection.ltr)));
 
@@ -36,7 +36,7 @@ void main() {
   });
 
   testWidgets('Simple tree is simple - material', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     // Not using Text widget because of https://github.com/flutter/flutter/issues/12357.
     await tester.pumpWidget(

@@ -56,7 +56,7 @@ class Java {
   /// Tools that depend on Java and need to find it will often check this
   /// variable. If you are looking to set `JAVA_HOME` when stating a process,
   /// consider using the [environment] instance property instead.
-  static var javaHomeEnvironmentVariable = 'JAVA_HOME';
+  static String javaHomeEnvironmentVariable = 'JAVA_HOME';
 
   /// Finds the Java runtime environment that should be used for all java-dependent
   /// operations across the tool.
