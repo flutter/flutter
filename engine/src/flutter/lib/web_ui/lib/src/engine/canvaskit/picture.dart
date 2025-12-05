@@ -16,12 +16,20 @@ import 'renderer.dart';
 import 'surface.dart';
 
 /// Implements [ui.Picture] on top of [SkPicture].
-class CkPicture implements LayerPicture {
-  CkPicture(SkPicture skPicture) {
-    _ref = UniqueRef<SkPicture>(this, skPicture, 'Picture');
+class CkPicture implements LayerPicture, StackTraceDebugger {
+  CkPicture(SkPicture skPicture) : _isClone = false {
+    _ref = CountedRef<CkPicture, SkPicture>(skPicture, this, 'Picture');
+    _initStackTrace();
   }
 
-  late final UniqueRef<SkPicture> _ref;
+  CkPicture._clone(CountedRef<CkPicture, SkPicture> ref) : _isClone = true {
+    _ref = ref;
+    ref.ref(this);
+    _initStackTrace();
+  }
+
+  late final CountedRef<CkPicture, SkPicture> _ref;
+  final bool _isClone;
 
   SkPicture get skiaObject => _ref.nativeObject;
 
@@ -85,9 +93,11 @@ class CkPicture implements LayerPicture {
       _debugDisposalStackTrace = StackTrace.current;
       return true;
     }());
-    ui.Picture.onDispose?.call(this);
+    if (!_isClone) {
+      ui.Picture.onDispose?.call(this);
+    }
     _isDisposed = true;
-    _ref.dispose();
+    _ref.unref(this);
   }
 
   @override
@@ -96,7 +106,11 @@ class CkPicture implements LayerPicture {
   }
 
   @override
-  CkImage toImageSync(int width, int height) {
+  CkImage toImageSync(
+    int width,
+    int height, {
+    ui.TargetPixelFormat targetFormat = ui.TargetPixelFormat.dontCare,
+  }) {
     assert(debugCheckNotDisposed('Cannot convert picture to image.'));
 
     final Surface surface = CanvasKitRenderer.instance.pictureToImageSurface;
@@ -122,4 +136,21 @@ class CkPicture implements LayerPicture {
     }
     return CkImage(rasterImage);
   }
+
+  @override
+  LayerPicture clone() {
+    return CkPicture._clone(_ref);
+  }
+
+  void _initStackTrace() {
+    assert(() {
+      _debugStackTrace = StackTrace.current;
+      return true;
+    }());
+  }
+
+  late StackTrace _debugStackTrace;
+
+  @override
+  StackTrace get debugStackTrace => _debugStackTrace;
 }
