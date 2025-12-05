@@ -197,6 +197,20 @@ std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
   }
 
   {
+    auto& uniforms = root["uniforms"] = nlohmann::json::array_t{};
+    if (auto uniforms_json =
+            ReflectResources(shader_resources.gl_plain_uniforms);
+        uniforms_json.has_value()) {
+      for (auto uniform : uniforms_json.value()) {
+        uniform["descriptor_type"] = "DescriptorType::kUniform";
+        uniforms.emplace_back(std::move(uniform));
+      }
+    } else {
+      return std::nullopt;
+    }
+  }
+
+  {
     auto& stage_inputs = root["stage_inputs"] = nlohmann::json::array_t{};
     if (auto stage_inputs_json = ReflectResources(
             shader_resources.stage_inputs,
