@@ -36,7 +36,6 @@ final firstLaunchMessagesWebServer = <Pattern>[
   'Creating widget preview scaffolding at:',
   launchingOnDeviceRegExp,
   'main.dart is being served at',
-  'Done loading previews.',
 ];
 
 final subsequentLaunchMessagesWeb = <Pattern>[launchingOnDeviceRegExp, 'Done loading previews.'];

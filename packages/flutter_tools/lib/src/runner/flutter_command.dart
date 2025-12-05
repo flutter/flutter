@@ -547,23 +547,28 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addDevToolsOptions({required bool verboseHelp}) {
-    argParser.addFlag(
-      kEnableDevTools,
-      hide: !verboseHelp,
-      defaultsTo: true,
-      help:
-          'Enable (or disable, with "--no-$kEnableDevTools") the launching of the '
-          'Flutter DevTools debugger and profiler. '
-          'If "--no-$kEnableDevTools" is specified, "--$kDevToolsServerAddress" is ignored.',
-    );
+  void addDevToolsOptions({required bool verboseHelp, bool includeEnableDevTools = true}) {
+    if (includeEnableDevTools) {
+      argParser.addFlag(
+        kEnableDevTools,
+        hide: !verboseHelp,
+        defaultsTo: true,
+        help:
+            'Enable (or disable, with "--no-$kEnableDevTools") the launching of the '
+            'Flutter DevTools debugger and profiler. '
+            'If "--no-$kEnableDevTools" is specified, "--$kDevToolsServerAddress" is ignored.',
+      );
+    }
+    final ignoredMessage = includeEnableDevTools
+        ? ' Ignored if "--no-$kEnableDevTools" is specified.'
+        : '';
     argParser.addOption(
       kDevToolsServerAddress,
       hide: !verboseHelp,
       help:
           'When this value is provided, the Flutter tool will not spin up a '
           'new DevTools server instance, and will instead use the one provided '
-          'at the given address. Ignored if "--no-$kEnableDevTools" is specified.',
+          'at the given address.$ignoredMessage',
     );
   }
 
