@@ -24,7 +24,8 @@ class ProgressIndicatorExample extends StatefulWidget {
   const ProgressIndicatorExample({super.key});
 
   @override
-  State<ProgressIndicatorExample> createState() => _ProgressIndicatorExampleState();
+  State<ProgressIndicatorExample> createState() =>
+      _ProgressIndicatorExampleState();
 }
 
 class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
@@ -87,7 +88,9 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Text('Theme controller? ${hasThemeController ? 'Yes' : 'No'}'),
+                  Text(
+                    'Theme controller? ${hasThemeController ? 'Yes' : 'No'}',
+                  ),
                   TextButton(
                     onPressed: () {
                       setState(() {

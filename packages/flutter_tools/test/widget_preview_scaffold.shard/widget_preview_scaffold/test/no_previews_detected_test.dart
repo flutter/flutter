@@ -29,7 +29,9 @@ void main() {
       }
       // Start with no previews populated and verify the help message is displayed with a link to
       // documentation.
-      await tester.pumpWidget(WidgetPreviewScaffold(controller: controller));
+      await tester.pumpWidget(
+        TestWidgetPreviewScaffold(controller: controller),
+      );
 
       final Finder noPreviewDetectedFinder = find.byType(
         NoPreviewsDetectedWidget,
@@ -62,7 +64,9 @@ void main() {
       controller.onHotReload();
 
       // Add previews and verify the help message is gone.
-      await tester.pumpWidget(WidgetPreviewScaffold(controller: controller));
+      await tester.pumpWidget(
+        TestWidgetPreviewScaffold(controller: controller),
+      );
 
       expect(noPreviewDetectedFinder, findsNothing);
       expect(documentationUrlFinder, findsNothing);

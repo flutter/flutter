@@ -1226,12 +1226,12 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 }
 
 class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
-  var startCalled = false;
+  bool startCalled = false;
   late Uri startVMServiceUri;
   bool? startDisableServiceAuthCodes;
 
-  var shutdownCalled = false;
-  var enableDevTools = false;
+  bool shutdownCalled = false;
+  bool enableDevTools = false;
 
   @override
   late Future<void> done;
@@ -1271,7 +1271,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
 
 class FakeDeviceLogReader implements DeviceLogReader {
   final logLinesController = StreamController<String>();
-  var disposeCalled = false;
+  bool disposeCalled = false;
 
   @override
   void dispose() {
@@ -1323,7 +1323,7 @@ final class TestIOOverrides extends io.IOOverrides {
 }
 
 class FakeSocket extends Fake implements io.Socket {
-  var closeCalled = false;
+  bool closeCalled = false;
   final controller = StreamController<Uint8List>();
   final addedData = <List<int>>[];
   final doneCompleter = Completer<bool>();
