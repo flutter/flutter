@@ -11,7 +11,7 @@ import 'gpu_sdf_canvas.dart';
 
 enum TestType { cpuR32fSdf, cpuRgba32fSdf, gpuR32fSdf, gpuRgba32fSdf }
 
-TestType testToRun = TestType.gpuR32fSdf;
+TestType testToRun = TestType.cpuR32fSdf;
 
 void main() {
   runApp(const MyApp());
