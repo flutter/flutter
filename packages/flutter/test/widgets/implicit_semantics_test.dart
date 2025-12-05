@@ -10,7 +10,7 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Implicit Semantics merge behavior', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       Directionality(
@@ -152,7 +152,7 @@ void main() {
   });
 
   testWidgets('Do not merge with conflicts', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       Directionality(

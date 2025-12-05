@@ -33,6 +33,7 @@ import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
+import '../vmservice.dart';
 
 /// A Flutter-command that attaches to applications that have been launched
 /// without `flutter run`.
@@ -253,180 +254,18 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await _validateArguments();
-
     final Device? device = await findTargetDevice();
 
     if (device == null) {
       throwToolExit('Did not find any valid target devices.');
     }
 
-    await _attachToDevice(device);
-
-    return FlutterCommandResult.success();
-  }
-
-  Future<void> _attachToDevice(Device device) async {
-    final FlutterProject flutterProject = FlutterProject.current();
-
-    final Daemon? daemon = boolArg('machine')
-        ? Daemon(
-            DaemonConnection(
-              daemonStreams: DaemonStreams.fromStdio(_stdio, logger: _logger),
-              logger: _logger,
-            ),
-            notifyingLogger: (_logger is NotifyingLogger)
-                ? _logger
-                : NotifyingLogger(verbose: _logger.isVerbose, parent: _logger),
-            logToStdout: true,
-          )
-        : null;
-
-    Stream<Uri>? vmServiceUri;
-    final bool usesIpv6 = ipv6!;
-    final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
-    final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
-    final hostname = usesIpv6 ? ipv6Loopback : ipv4Loopback;
-    final bool isWirelessIOSDevice = (device is IOSDevice) && device.isWirelesslyConnected;
-
-    if ((debugPort == null && debugUri == null) || isWirelessIOSDevice) {
-      // The device port we expect to have the debug port be listening
-      final int? devicePort = debugPort ?? debugUri?.port ?? deviceVmservicePort;
-
-      final VMServiceDiscoveryForAttach vmServiceDiscovery = device.getVMServiceDiscoveryForAttach(
-        appId: appId,
-        fuchsiaModule: stringArg('module'),
-        filterDevicePort: devicePort,
-        expectedHostPort: hostVmservicePort,
-        ipv6: usesIpv6,
-        logger: _logger,
-      );
-
-      _logger.printStatus('Waiting for a connection from Flutter on ${device.displayName}...');
-      final Status discoveryStatus = _logger.startSpinner(
-        timeout: const Duration(seconds: 30),
-        slowWarningCallback: () {
-          // On iOS we rely on mDNS to find Dart VM Service.
-          if (device is IOSSimulator) {
-            // mDNS on simulators stopped working in macOS 15.4.
-            // See https://github.com/flutter/flutter/issues/166333.
-            return 'The Dart VM Service was not discovered after 30 seconds. '
-                'This may be due to limited mDNS support in the iOS Simulator.\n\n'
-                'Click "Allow" to the prompt on your device asking if you would like to find and connect devices on your local network. '
-                'If you selected "Don\'t Allow", you can turn it on in Settings > Your App Name > Local Network. '
-                "If you don't see your app in the Settings, uninstall the app and rerun to see the prompt again.\n\n"
-                'If you do not receive a prompt, either run "flutter attach" before starting the '
-                'app or use the Dart VM service URL from the Xcode console with '
-                '"flutter attach --debug-url=<URL>".\n';
-          } else if (_isIOSDevice(device)) {
-            // Remind the user to allow local network permissions on the device.
-            return 'The Dart VM Service was not discovered after 30 seconds. This is taking much longer than expected...\n\n'
-                'Click "Allow" to the prompt on your device asking if you would like to find and connect devices on your local network. '
-                'If you selected "Don\'t Allow", you can turn it on in Settings > Your App Name > Local Network. '
-                "If you don't see your app in the Settings, uninstall the app and rerun to see the prompt again.\n";
-          }
-
-          return 'The Dart VM Service was not discovered after 30 seconds. This is taking much longer than expected...\n';
-        },
-        warningColor: TerminalColor.cyan,
-      );
-
-      vmServiceUri = vmServiceDiscovery.uris;
-
-      // Stop the timer once we receive the first uri.
-      vmServiceUri = streamWithCallbackOnFirstItem(vmServiceUri, () => discoveryStatus.stop());
-    } else {
-      vmServiceUri = Stream<Uri>.fromFuture(
-        buildVMServiceUri(
-          device,
-          debugUri?.host ?? hostname,
-          debugPort ?? debugUri!.port,
-          hostVmservicePort,
-          debugUri?.path,
-        ),
-      ).asBroadcastStream();
-    }
-
-    _terminal.usesTerminalUi = daemon == null;
+    final bool machineMode = boolArg(FlutterGlobalOptions.kMachineFlag);
 
     try {
-      int? result;
-      if (daemon != null) {
-        final ResidentRunner runner = await createResidentRunner(
-          vmServiceUris: vmServiceUri,
-          device: device,
-          flutterProject: flutterProject,
-          usesIpv6: usesIpv6,
-        );
-        late AppInstance app;
-        try {
-          app = await daemon.appDomain.launch(
-            runner,
-            ({
-              Completer<DebugConnectionInfo>? connectionInfoCompleter,
-              Completer<void>? appStartedCompleter,
-            }) {
-              return runner.attach(
-                connectionInfoCompleter: connectionInfoCompleter,
-                appStartedCompleter: appStartedCompleter,
-              );
-            },
-            device,
-            null,
-            true,
-            _fileSystem.currentDirectory,
-            LaunchMode.attach,
-            _logger as MachineOutputLogger,
-          );
-        } on Exception catch (error) {
-          throwToolExit(error.toString());
-        }
-        result = await app.runner.waitForAppToFinish();
-        return;
-      }
-      while (true) {
-        final ResidentRunner runner = await createResidentRunner(
-          vmServiceUris: vmServiceUri,
-          device: device,
-          flutterProject: flutterProject,
-          usesIpv6: usesIpv6,
-        );
-        final onAppStart = Completer<void>.sync();
-        TerminalHandler? terminalHandler;
-        unawaited(
-          onAppStart.future.whenComplete(() {
-            terminalHandler =
-                TerminalHandler(
-                    runner,
-                    logger: _logger,
-                    terminal: _terminal,
-                    signals: _signals,
-                    processInfo: _processInfo,
-                    reportReady: boolArg('report-ready'),
-                    pidFile: stringArg('pid-file'),
-                  )
-                  ..registerSignalHandlers()
-                  ..setupTerminal();
-          }),
-        );
-        result = await runner.attach(appStartedCompleter: onAppStart);
-        if (result != 0) {
-          throwToolExit(null, exitCode: result);
-        }
-        terminalHandler?.stop();
-        assert(result != null);
-        if (runner.exited || !runner.isWaitingForVmService) {
-          break;
-        }
-        _logger.printStatus(
-          'Waiting for a new connection from Flutter on '
-          '${device.displayName}...',
-        );
-      }
+      await (machineMode ? _attachDaemon(device: device) : _attach(device: device));
     } on RPCError catch (err) {
-      if (err.code == RPCErrorKind.kServiceDisappeared.code ||
-          err.code == RPCErrorKind.kConnectionDisposed.code ||
-          err.message.contains('Service connection disposed')) {
+      if (err.isConnectionDisposedException) {
         throwToolExit('Lost connection to device.');
       }
       rethrow;
@@ -439,14 +278,80 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         // Do nothing, if the STDIN handle is no longer available, there is nothing actionable for us to do at this point
       }
     }
+
+    return FlutterCommandResult.success();
   }
 
-  Future<ResidentRunner> createResidentRunner({
-    required Stream<Uri> vmServiceUris,
-    required Device device,
-    required FlutterProject flutterProject,
-    required bool usesIpv6,
-  }) async {
+  Future<void> _attach({required Device device}) async {
+    _terminal.usesTerminalUi = true;
+    final ResidentRunner runner = await _discoverVmServiceAndCreateResidentRunner(device: device);
+    final onAppStart = Completer<void>.sync();
+    TerminalHandler? terminalHandler;
+    unawaited(
+      onAppStart.future.whenComplete(() {
+        terminalHandler =
+            TerminalHandler(
+                runner,
+                logger: _logger,
+                terminal: _terminal,
+                signals: _signals,
+                processInfo: _processInfo,
+                reportReady: boolArg('report-ready'),
+                pidFile: stringArg('pid-file'),
+              )
+              ..registerSignalHandlers()
+              ..setupTerminal();
+      }),
+    );
+    final int result = await runner.attach(appStartedCompleter: onAppStart);
+    if (result != 0) {
+      throwToolExit(null, exitCode: result);
+    }
+    terminalHandler?.stop();
+  }
+
+  Future<void> _attachDaemon({required Device device}) async {
+    final daemon = Daemon(
+      DaemonConnection(
+        daemonStreams: DaemonStreams.fromStdio(_stdio, logger: _logger),
+        logger: _logger,
+      ),
+      notifyingLogger: (_logger is NotifyingLogger)
+          ? _logger
+          : NotifyingLogger(verbose: _logger.isVerbose, parent: _logger),
+      logToStdout: true,
+    );
+
+    final ResidentRunner runner = await _discoverVmServiceAndCreateResidentRunner(device: device);
+    late AppInstance app;
+    try {
+      app = await daemon.appDomain.launch(
+        runner,
+        ({
+          Completer<DebugConnectionInfo>? connectionInfoCompleter,
+          Completer<void>? appStartedCompleter,
+        }) {
+          return runner.attach(
+            connectionInfoCompleter: connectionInfoCompleter,
+            appStartedCompleter: appStartedCompleter,
+          );
+        },
+        device,
+        null,
+        true,
+        _fileSystem.currentDirectory,
+        LaunchMode.attach,
+        _logger as MachineOutputLogger,
+      );
+    } on Exception catch (error) {
+      throwToolExit(error.toString());
+    }
+    await app.runner.waitForAppToFinish();
+  }
+
+  Future<ResidentRunner> _discoverVmServiceAndCreateResidentRunner({required Device device}) async {
+    final Stream<Uri> vmServiceUri = _discoverVmService(device: device);
+
     final BuildInfo buildInfo = await getBuildInfo();
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
@@ -457,7 +362,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       userIdentifier: userIdentifier,
       platform: _platform,
     );
-    flutterDevice.vmServiceUris = vmServiceUris;
+    flutterDevice.vmServiceUris = vmServiceUri;
     final flutterDevices = <FlutterDevice>[flutterDevice];
     final debuggingOptions = DebuggingOptions.enabled(
       buildInfo,
@@ -467,7 +372,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       usingCISystem: usingCISystem,
       debugLogsDirectoryPath: debugLogsDirectoryPath,
       enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
-      ipv6: usesIpv6,
+      ipv6: ipv6!,
       printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
     );
 
@@ -479,7 +384,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             packagesFilePath: globalResults![FlutterGlobalOptions.kPackagesOption] as String?,
             projectRootPath: stringArg('project-root'),
             dillOutputPath: stringArg('output-dill'),
-            flutterProject: flutterProject,
+            flutterProject: FlutterProject.current(),
             nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
             analytics: analytics,
             logger: _logger,
@@ -492,7 +397,69 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           );
   }
 
-  Future<void> _validateArguments() async {}
+  Stream<Uri> _discoverVmService({required Device device}) {
+    final bool usesIpv6 = ipv6!;
+    final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
+    final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
+    final hostname = usesIpv6 ? ipv6Loopback : ipv4Loopback;
+    final bool isWirelessIOSDevice = (device is IOSDevice) && device.isWirelesslyConnected;
+
+    if (!isWirelessIOSDevice && (debugPort != null || debugUri != null)) {
+      return Stream<Uri>.fromFuture(
+        buildVMServiceUri(
+          device,
+          debugUri?.host ?? hostname,
+          debugPort ?? debugUri!.port,
+          hostVmservicePort,
+          debugUri?.path,
+        ),
+      );
+    }
+
+    // The device port we expect to have the debug port be listening
+    final int? devicePort = debugPort ?? debugUri?.port ?? deviceVmservicePort;
+
+    final VMServiceDiscoveryForAttach vmServiceDiscovery = device.getVMServiceDiscoveryForAttach(
+      appId: appId,
+      fuchsiaModule: stringArg('module'),
+      filterDevicePort: devicePort,
+      expectedHostPort: hostVmservicePort,
+      ipv6: usesIpv6,
+      logger: _logger,
+    );
+
+    _logger.printStatus('Waiting for a connection from Flutter on ${device.displayName}...');
+    final Status discoveryStatus = _logger.startSpinner(
+      timeout: const Duration(seconds: 30),
+      slowWarningCallback: () {
+        // On iOS we rely on mDNS to find Dart VM Service.
+        if (device is IOSSimulator) {
+          // mDNS on simulators stopped working in macOS 15.4.
+          // See https://github.com/flutter/flutter/issues/166333.
+          return 'The Dart VM Service was not discovered after 30 seconds. '
+              'This may be due to limited mDNS support in the iOS Simulator.\n\n'
+              'Click "Allow" to the prompt on your device asking if you would like to find and connect devices on your local network. '
+              'If you selected "Don\'t Allow", you can turn it on in Settings > Your App Name > Local Network. '
+              "If you don't see your app in the Settings, uninstall the app and rerun to see the prompt again.\n\n"
+              'If you do not receive a prompt, either run "flutter attach" before starting the '
+              'app or use the Dart VM service URL from the Xcode console with '
+              '"flutter attach --debug-url=<URL>".\n';
+        } else if (_isIOSDevice(device)) {
+          // Remind the user to allow local network permissions on the device.
+          return 'The Dart VM Service was not discovered after 30 seconds. This is taking much longer than expected...\n\n'
+              'Click "Allow" to the prompt on your device asking if you would like to find and connect devices on your local network. '
+              'If you selected "Don\'t Allow", you can turn it on in Settings > Your App Name > Local Network. '
+              "If you don't see your app in the Settings, uninstall the app and rerun to see the prompt again.\n";
+        }
+
+        return 'The Dart VM Service was not discovered after 30 seconds. This is taking much longer than expected...\n';
+      },
+      warningColor: TerminalColor.cyan,
+    );
+
+    // Stop the timer once we receive the first uri.
+    return streamWithCallbackOnFirstItem(vmServiceDiscovery.uris, discoveryStatus.stop);
+  }
 
   bool _isIOSDevice(Device device) {
     return (device.platformType == PlatformType.ios) || (device is MacOSDesignedForIPadDevice);
