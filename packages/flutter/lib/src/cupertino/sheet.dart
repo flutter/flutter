@@ -169,7 +169,6 @@ Future<T?> showCupertinoSheet<T>({
   assert((pageBuilder == null && builder == null) || scrollableBuilder == null);
 
   final WidgetBuilder? effectiveBuilder = builder ?? pageBuilder;
-  final WidgetBuilder widgetBuilder;
   final nestedNavigatorKey = GlobalKey<NavigatorState>();
   if (!useNestedNavigation) {
     final PageRoute<T> route = effectiveBuilder != null
@@ -212,7 +211,7 @@ Future<T?> showCupertinoSheet<T>({
     );
   }
 
-  final CupertinoSheetRoute<T> route = effectiveBuilder != null
+  final route = effectiveBuilder != null
       ? CupertinoSheetRoute<T>(
           builder: (BuildContext context) => nestedNavigationContent(effectiveBuilder),
           enableDrag: enableDrag,
