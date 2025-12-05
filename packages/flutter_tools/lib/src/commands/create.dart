@@ -104,7 +104,13 @@ class CreateCommand extends FlutterCommand with CreateBase {
           'internally and should generally not be used manually.',
       hide: !verboseHelp,
     );
-    addPlatformsOptions(customHelp: kPlatformHelp);
+
+    final Map<String, String> platformsAllowedHelp = {
+      for (final String p in kAllCreatePlatforms) p: '',
+    };
+    platformsAllowedHelp['darwin'] =
+        'A shared platform for iOS and macOS. (only supported for plugins)';
+    addPlatformsOptions(customHelp: kPlatformHelp, allowedHelp: platformsAllowedHelp);
 
     final List<ParsedFlutterTemplateType> enabledTemplates =
         ParsedFlutterTemplateType.enabledValues(featureFlags);
@@ -356,6 +362,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
 
     final String dartSdk = globals.cache.dartSdkBuild;
     final bool includeIos;
+    final bool includeDarwin;
     final bool includeAndroid;
     final bool includeWeb;
     final bool includeLinux;
@@ -369,6 +376,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
       includeLinux = false;
       includeMacos = false;
       includeWindows = false;
+      includeDarwin = false;
     } else if (template == FlutterTemplateType.package) {
       // The package template does not supports any platform.
       includeIos = false;
@@ -377,12 +385,32 @@ class CreateCommand extends FlutterCommand with CreateBase {
       includeLinux = false;
       includeMacos = false;
       includeWindows = false;
+      includeDarwin = false;
     } else {
-      includeIos = featureFlags.isIOSEnabled && platforms.contains('ios');
+      final bool darwinRequested = platforms.contains('darwin');
+      final bool darwinSupported =
+          (template == FlutterTemplateType.plugin) &&
+          featureFlags.isIOSEnabled &&
+          featureFlags.isMacOSEnabled;
+
+      if (darwinRequested && darwinSupported) {
+        includeDarwin = true;
+        includeIos = true;
+        includeMacos = true;
+      } else {
+        includeDarwin = false;
+        includeIos = featureFlags.isIOSEnabled && platforms.contains('ios');
+        includeMacos = featureFlags.isMacOSEnabled && platforms.contains('macos');
+        if (darwinRequested && !darwinSupported) {
+          globals.printWarning(
+            'Warning: To use the "darwin" platform, you must have both iOS and macOS enabled.\n'
+            'Run "flutter config --enable-ios --enable-macos-desktop" and try again.',
+          );
+        }
+      }
       includeAndroid = featureFlags.isAndroidEnabled && platforms.contains('android');
       includeWeb = featureFlags.isWebEnabled && platforms.contains('web');
       includeLinux = featureFlags.isLinuxEnabled && platforms.contains('linux');
-      includeMacos = featureFlags.isMacOSEnabled && platforms.contains('macos');
       includeWindows = featureFlags.isWindowsEnabled && platforms.contains('windows');
     }
 
@@ -418,6 +446,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
       iosDevelopmentTeam: developmentTeam,
       ios: includeIos,
       android: includeAndroid,
+      darwin: includeDarwin,
       web: includeWeb,
       linux: includeLinux,
       macos: includeMacos,
@@ -529,9 +558,9 @@ class CreateCommand extends FlutterCommand with CreateBase {
         await project.ensureReadyForPlatformSpecificTooling(
           releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
           androidPlatform: includeAndroid,
-          iosPlatform: includeIos,
+          iosPlatform: includeIos || includeDarwin,
           linuxPlatform: includeLinux,
-          macOSPlatform: includeMacos,
+          macOSPlatform: includeMacos || includeDarwin,
           windowsPlatform: includeWindows,
           webPlatform: includeWeb,
         );
@@ -697,10 +726,28 @@ Your $application code is in $relativeAppMain.
     templateContext['description'] = description;
 
     final projectName = templateContext['projectName'] as String?;
+    final bool includeDarwin = templateContext['darwin'] as bool? ?? false;
+    final bool originalIos = templateContext['ios'] as bool? ?? false;
+    final bool originalMacos = templateContext['macos'] as bool? ?? false;
+    if (includeDarwin) {
+      // Temporarily disable ios/macos for the plugin generation
+      // so we don't get ios/ and macos/ directories in the plugin root.
+      templateContext['ios'] = false;
+      templateContext['macos'] = false;
+    }
+
     final templates = <String>['plugin', 'plugin_shared'];
-    if ((templateContext['ios'] == true || templateContext['macos'] == true) &&
-        featureFlags.isSwiftPackageManagerEnabled) {
-      templates.add('plugin_swift_package_manager');
+
+    final bool useSwiftPackageManager =
+        (templateContext['ios'] == true || templateContext['macos'] == true || includeDarwin) &&
+        featureFlags.isSwiftPackageManagerEnabled;
+
+    if (useSwiftPackageManager) {
+      if (includeDarwin) {
+        templates.add('plugin_darwin_spm');
+      } else {
+        templates.add('plugin_swift_package_manager');
+      }
       templateContext['swiftLibraryName'] = projectName?.replaceAll('_', '-');
       templateContext['swiftToolsVersion'] = minimumSwiftToolchainVersion;
       templateContext['iosSupportedPlatform'] = FlutterDarwinPlatform.ios.supportedPackagePlatform
@@ -710,9 +757,12 @@ Your $application code is in $relativeAppMain.
           .supportedPackagePlatform
           .format();
     } else {
-      templates.add('plugin_cocoapods');
+      if (includeDarwin) {
+        templates.add('plugin_darwin_cocoapods');
+      } else {
+        templates.add('plugin_cocoapods');
+      }
     }
-
     generatedCount += await renderMerged(
       templates,
       directory,
@@ -720,6 +770,11 @@ Your $application code is in $relativeAppMain.
       overwrite: overwrite,
       printStatusWhenWriting: printStatusWhenWriting,
     );
+    // Restore the original ios and macos values.
+    // This is necessary in case the user requested the darwin platform,
+    // and we need to restore them for the example app generation.
+    templateContext['ios'] = originalIos;
+    templateContext['macos'] = originalMacos;
 
     final FlutterProject project = FlutterProject.fromDirectory(directory);
     final generateAndroid = templateContext['android'] == true;
@@ -984,6 +1039,10 @@ List<String> _getPlatformWarningList(List<String> requestedPlatforms) {
     if (requestedPlatforms.contains('macos') && !featureFlags.isMacOSEnabled) 'macos',
     if (requestedPlatforms.contains('windows') && !featureFlags.isWindowsEnabled) 'windows',
     if (requestedPlatforms.contains('linux') && !featureFlags.isLinuxEnabled) 'linux',
+    if (requestedPlatforms.contains('darwin') &&
+        !featureFlags.isMacOSEnabled &&
+        !featureFlags.isIOSEnabled)
+      'darwin',
   ];
 
   return platformsToWarn;
@@ -992,6 +1051,7 @@ List<String> _getPlatformWarningList(List<String> requestedPlatforms) {
 void _printWarningDisabledPlatform(List<String> platforms) {
   final desktop = <String>[];
   final web = <String>[];
+  final darwin = <String>[];
 
   for (final platform in platforms) {
     switch (platform) {
@@ -999,6 +1059,8 @@ void _printWarningDisabledPlatform(List<String> platforms) {
         web.add(platform);
       case 'macos' || 'windows' || 'linux':
         desktop.add(platform);
+      case 'darwin':
+        darwin.add(platform);
     }
   }
 
@@ -1015,6 +1077,12 @@ For more details, see: https://flutter.dev/to/add-desktop-support
     globals.printStatus('''
 The web is currently not supported on your local environment.
 For more details, see: https://flutter.dev/to/add-web-support
+''');
+  }
+  if (darwin.isNotEmpty) {
+    globals.printStatus('''
+The darwin platform is currently not supported on your local environment.
+You must have a macOS host with Xcode installed to develop for iOS or macOS.
 ''');
   }
 }

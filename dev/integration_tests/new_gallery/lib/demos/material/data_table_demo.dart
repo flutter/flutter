@@ -38,7 +38,7 @@ class _RestorableDessertSelections extends RestorableProperty<Set<int>> {
 
   @override
   Set<int> fromPrimitives(Object? data) {
-    final List<dynamic> selectedItemIndices = data! as List<dynamic>;
+    final selectedItemIndices = data! as List<dynamic>;
     _dessertSelections = <int>{...selectedItemIndices.map<int>((dynamic id) => id as int)};
     return _dessertSelections;
   }
@@ -156,58 +156,50 @@ class _DataTableDemoState extends State<DataTableDemo> with RestorationMixin {
               columns: <DataColumn>[
                 DataColumn(
                   label: Text(localizations.dataTableColumnDessert),
-                  onSort:
-                      (int columnIndex, bool ascending) =>
-                          _sort<String>((_Dessert d) => d.name, columnIndex, ascending),
+                  onSort: (int columnIndex, bool ascending) =>
+                      _sort<String>((_Dessert d) => d.name, columnIndex, ascending),
                 ),
                 DataColumn(
                   label: Text(localizations.dataTableColumnCalories),
                   numeric: true,
-                  onSort:
-                      (int columnIndex, bool ascending) =>
-                          _sort<num>((_Dessert d) => d.calories, columnIndex, ascending),
+                  onSort: (int columnIndex, bool ascending) =>
+                      _sort<num>((_Dessert d) => d.calories, columnIndex, ascending),
                 ),
                 DataColumn(
                   label: Text(localizations.dataTableColumnFat),
                   numeric: true,
-                  onSort:
-                      (int columnIndex, bool ascending) =>
-                          _sort<num>((_Dessert d) => d.fat, columnIndex, ascending),
+                  onSort: (int columnIndex, bool ascending) =>
+                      _sort<num>((_Dessert d) => d.fat, columnIndex, ascending),
                 ),
                 DataColumn(
                   label: Text(localizations.dataTableColumnCarbs),
                   numeric: true,
-                  onSort:
-                      (int columnIndex, bool ascending) =>
-                          _sort<num>((_Dessert d) => d.carbs, columnIndex, ascending),
+                  onSort: (int columnIndex, bool ascending) =>
+                      _sort<num>((_Dessert d) => d.carbs, columnIndex, ascending),
                 ),
                 DataColumn(
                   label: Text(localizations.dataTableColumnProtein),
                   numeric: true,
-                  onSort:
-                      (int columnIndex, bool ascending) =>
-                          _sort<num>((_Dessert d) => d.protein, columnIndex, ascending),
+                  onSort: (int columnIndex, bool ascending) =>
+                      _sort<num>((_Dessert d) => d.protein, columnIndex, ascending),
                 ),
                 DataColumn(
                   label: Text(localizations.dataTableColumnSodium),
                   numeric: true,
-                  onSort:
-                      (int columnIndex, bool ascending) =>
-                          _sort<num>((_Dessert d) => d.sodium, columnIndex, ascending),
+                  onSort: (int columnIndex, bool ascending) =>
+                      _sort<num>((_Dessert d) => d.sodium, columnIndex, ascending),
                 ),
                 DataColumn(
                   label: Text(localizations.dataTableColumnCalcium),
                   numeric: true,
-                  onSort:
-                      (int columnIndex, bool ascending) =>
-                          _sort<num>((_Dessert d) => d.calcium, columnIndex, ascending),
+                  onSort: (int columnIndex, bool ascending) =>
+                      _sort<num>((_Dessert d) => d.calcium, columnIndex, ascending),
                 ),
                 DataColumn(
                   label: Text(localizations.dataTableColumnIron),
                   numeric: true,
-                  onSort:
-                      (int columnIndex, bool ascending) =>
-                          _sort<num>((_Dessert d) => d.iron, columnIndex, ascending),
+                  onSort: (int columnIndex, bool ascending) =>
+                      _sort<num>((_Dessert d) => d.iron, columnIndex, ascending),
                 ),
               ],
               source: _dessertsDataSource!,
@@ -475,7 +467,7 @@ class _DessertDataSource extends DataTableSource {
 
   void updateSelectedDesserts(_RestorableDessertSelections selectedRows) {
     _selectedCount = 0;
-    for (int i = 0; i < _desserts.length; i += 1) {
+    for (var i = 0; i < _desserts.length; i += 1) {
       final _Dessert dessert = _desserts[i];
       if (selectedRows.isSelected(i)) {
         dessert.selected = true;
@@ -489,7 +481,7 @@ class _DessertDataSource extends DataTableSource {
 
   @override
   DataRow? getRow(int index) {
-    final NumberFormat format = NumberFormat.decimalPercentPattern(
+    final format = NumberFormat.decimalPercentPattern(
       locale: GalleryOptions.of(context).locale.toString(),
       decimalDigits: 0,
     );

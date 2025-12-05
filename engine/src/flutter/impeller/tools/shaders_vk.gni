@@ -35,6 +35,10 @@ template("impeller_shaders_vk") {
     shader_target_flags = [ "--vulkan" ]
 
     defines = [ "IMPELLER_TARGET_VULKAN" ]
+
+    if (defined(invoker.entry_point_prefix)) {
+      entry_point_prefix = invoker.entry_point_prefix
+    }
   }
 
   vk_shaders =
@@ -55,6 +59,9 @@ template("impeller_shaders_vk") {
   shader_archive(vk_lib) {
     shaders = vk_shaders
     deps = [ ":$impellerc_vk" ]
+    if (defined(invoker.entry_point_prefix)) {
+      entry_point_prefix = invoker.entry_point_prefix
+    }
   }
 
   reflect_vk = "reflect_$target_name"

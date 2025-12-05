@@ -71,21 +71,20 @@ class _ContextMenuDemo extends StatelessWidget {
       trailing: PopupMenuButton<String>(
         padding: EdgeInsets.zero,
         onSelected: (String value) => showInSnackBar(localizations.demoMenuSelected(value)),
-        itemBuilder:
-            (BuildContext context) => <PopupMenuItem<String>>[
-              PopupMenuItem<String>(
-                value: localizations.demoMenuContextMenuItemOne,
-                child: Text(localizations.demoMenuContextMenuItemOne),
-              ),
-              PopupMenuItem<String>(
-                enabled: false,
-                child: Text(localizations.demoMenuADisabledMenuItem),
-              ),
-              PopupMenuItem<String>(
-                value: localizations.demoMenuContextMenuItemThree,
-                child: Text(localizations.demoMenuContextMenuItemThree),
-              ),
-            ],
+        itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
+          PopupMenuItem<String>(
+            value: localizations.demoMenuContextMenuItemOne,
+            child: Text(localizations.demoMenuContextMenuItemOne),
+          ),
+          PopupMenuItem<String>(
+            enabled: false,
+            child: Text(localizations.demoMenuADisabledMenuItem),
+          ),
+          PopupMenuItem<String>(
+            value: localizations.demoMenuContextMenuItemThree,
+            child: Text(localizations.demoMenuContextMenuItemThree),
+          ),
+        ],
       ),
     );
   }
@@ -111,38 +110,37 @@ class _SectionedMenuDemo extends StatelessWidget {
       trailing: PopupMenuButton<String>(
         padding: EdgeInsets.zero,
         onSelected: (String value) => showInSnackBar(localizations.demoMenuSelected(value)),
-        itemBuilder:
-            (BuildContext context) => <PopupMenuEntry<String>>[
-              PopupMenuItem<String>(
-                value: localizations.demoMenuPreview,
-                child: ListTile(
-                  leading: const Icon(Icons.visibility),
-                  title: Text(localizations.demoMenuPreview),
-                ),
-              ),
-              PopupMenuItem<String>(
-                value: localizations.demoMenuShare,
-                child: ListTile(
-                  leading: const Icon(Icons.person_add),
-                  title: Text(localizations.demoMenuShare),
-                ),
-              ),
-              PopupMenuItem<String>(
-                value: localizations.demoMenuGetLink,
-                child: ListTile(
-                  leading: const Icon(Icons.link),
-                  title: Text(localizations.demoMenuGetLink),
-                ),
-              ),
-              const PopupMenuDivider(),
-              PopupMenuItem<String>(
-                value: localizations.demoMenuRemove,
-                child: ListTile(
-                  leading: const Icon(Icons.delete),
-                  title: Text(localizations.demoMenuRemove),
-                ),
-              ),
-            ],
+        itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+          PopupMenuItem<String>(
+            value: localizations.demoMenuPreview,
+            child: ListTile(
+              leading: const Icon(Icons.visibility),
+              title: Text(localizations.demoMenuPreview),
+            ),
+          ),
+          PopupMenuItem<String>(
+            value: localizations.demoMenuShare,
+            child: ListTile(
+              leading: const Icon(Icons.person_add),
+              title: Text(localizations.demoMenuShare),
+            ),
+          ),
+          PopupMenuItem<String>(
+            value: localizations.demoMenuGetLink,
+            child: ListTile(
+              leading: const Icon(Icons.link),
+              title: Text(localizations.demoMenuGetLink),
+            ),
+          ),
+          const PopupMenuDivider(),
+          PopupMenuItem<String>(
+            value: localizations.demoMenuRemove,
+            child: ListTile(
+              leading: const Icon(Icons.delete),
+              title: Text(localizations.demoMenuRemove),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -197,21 +195,20 @@ class _SimpleMenuDemoState extends State<_SimpleMenuDemo> {
       padding: EdgeInsets.zero,
       initialValue: _simpleValue,
       onSelected: (SimpleValue value) => showAndSetMenuSelection(context, value),
-      itemBuilder:
-          (BuildContext context) => <PopupMenuItem<SimpleValue>>[
-            PopupMenuItem<SimpleValue>(
-              value: SimpleValue.one,
-              child: Text(simpleValueToString(context, SimpleValue.one)),
-            ),
-            PopupMenuItem<SimpleValue>(
-              value: SimpleValue.two,
-              child: Text(simpleValueToString(context, SimpleValue.two)),
-            ),
-            PopupMenuItem<SimpleValue>(
-              value: SimpleValue.three,
-              child: Text(simpleValueToString(context, SimpleValue.three)),
-            ),
-          ],
+      itemBuilder: (BuildContext context) => <PopupMenuItem<SimpleValue>>[
+        PopupMenuItem<SimpleValue>(
+          value: SimpleValue.one,
+          child: Text(simpleValueToString(context, SimpleValue.one)),
+        ),
+        PopupMenuItem<SimpleValue>(
+          value: SimpleValue.two,
+          child: Text(simpleValueToString(context, SimpleValue.two)),
+        ),
+        PopupMenuItem<SimpleValue>(
+          value: SimpleValue.three,
+          child: Text(simpleValueToString(context, SimpleValue.three)),
+        ),
+      ],
       child: ListTile(
         title: Text(GalleryLocalizations.of(context)!.demoMenuAnItemWithASimpleMenu),
         subtitle: Text(simpleValueToString(context, _simpleValue)),
@@ -276,7 +273,7 @@ class _RestorableCheckedValues extends RestorableProperty<Set<CheckedValue>> {
 
   @override
   Set<CheckedValue> fromPrimitives(Object? data) {
-    final List<dynamic> checkedValues = data! as List<dynamic>;
+    final checkedValues = data! as List<dynamic>;
     return Set<CheckedValue>.from(
       checkedValues.map<CheckedValue>((dynamic id) {
         return CheckedValue.values[id as int];
@@ -286,8 +283,8 @@ class _RestorableCheckedValues extends RestorableProperty<Set<CheckedValue>> {
 }
 
 class _ChecklistMenuDemoState extends State<_ChecklistMenuDemo> with RestorationMixin {
-  final _RestorableCheckedValues _checkedValues =
-      _RestorableCheckedValues()..check(CheckedValue.three);
+  final _RestorableCheckedValues _checkedValues = _RestorableCheckedValues()
+    ..check(CheckedValue.three);
 
   @override
   String get restorationId => 'checklist_menu_demo';
@@ -338,30 +335,29 @@ class _ChecklistMenuDemoState extends State<_ChecklistMenuDemo> with Restoration
       trailing: PopupMenuButton<CheckedValue>(
         padding: EdgeInsets.zero,
         onSelected: (CheckedValue value) => showCheckedMenuSelections(context, value),
-        itemBuilder:
-            (BuildContext context) => <PopupMenuItem<CheckedValue>>[
-              CheckedPopupMenuItem<CheckedValue>(
-                value: CheckedValue.one,
-                checked: _checkedValues.isChecked(CheckedValue.one),
-                child: Text(checkedValueToString(context, CheckedValue.one)),
-              ),
-              CheckedPopupMenuItem<CheckedValue>(
-                value: CheckedValue.two,
-                enabled: false,
-                checked: _checkedValues.isChecked(CheckedValue.two),
-                child: Text(checkedValueToString(context, CheckedValue.two)),
-              ),
-              CheckedPopupMenuItem<CheckedValue>(
-                value: CheckedValue.three,
-                checked: _checkedValues.isChecked(CheckedValue.three),
-                child: Text(checkedValueToString(context, CheckedValue.three)),
-              ),
-              CheckedPopupMenuItem<CheckedValue>(
-                value: CheckedValue.four,
-                checked: _checkedValues.isChecked(CheckedValue.four),
-                child: Text(checkedValueToString(context, CheckedValue.four)),
-              ),
-            ],
+        itemBuilder: (BuildContext context) => <PopupMenuItem<CheckedValue>>[
+          CheckedPopupMenuItem<CheckedValue>(
+            value: CheckedValue.one,
+            checked: _checkedValues.isChecked(CheckedValue.one),
+            child: Text(checkedValueToString(context, CheckedValue.one)),
+          ),
+          CheckedPopupMenuItem<CheckedValue>(
+            value: CheckedValue.two,
+            enabled: false,
+            checked: _checkedValues.isChecked(CheckedValue.two),
+            child: Text(checkedValueToString(context, CheckedValue.two)),
+          ),
+          CheckedPopupMenuItem<CheckedValue>(
+            value: CheckedValue.three,
+            checked: _checkedValues.isChecked(CheckedValue.three),
+            child: Text(checkedValueToString(context, CheckedValue.three)),
+          ),
+          CheckedPopupMenuItem<CheckedValue>(
+            value: CheckedValue.four,
+            checked: _checkedValues.isChecked(CheckedValue.four),
+            child: Text(checkedValueToString(context, CheckedValue.four)),
+          ),
+        ],
       ),
     );
   }

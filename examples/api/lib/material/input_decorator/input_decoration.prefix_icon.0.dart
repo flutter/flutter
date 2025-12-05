@@ -26,7 +26,11 @@ class InputDecoratorExample extends StatelessWidget {
       decoration: InputDecoration(
         border: OutlineInputBorder(),
         labelText: 'Enter name',
-        prefixIcon: Align(widthFactor: 1.0, heightFactor: 1.0, child: Icon(Icons.person)),
+        prefixIcon: Align(
+          widthFactor: 1.0,
+          heightFactor: 1.0,
+          child: Icon(Icons.person),
+        ),
       ),
     );
   }

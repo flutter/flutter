@@ -5,7 +5,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/image/image.frame_builder.0.dart' as example;
+import 'package:flutter_api_samples/widgets/image/image.frame_builder.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -15,23 +16,28 @@ void main() {
     HttpOverrides.global = null;
   });
 
-  testWidgets('The frame builder returns an AnimatedOpacity when not synchronously loaded', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(const example.FrameBuilderExampleApp());
-    await tester.pumpAndSettle();
+  testWidgets(
+    'The frame builder returns an AnimatedOpacity when not synchronously loaded',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(const example.FrameBuilderExampleApp());
+      await tester.pumpAndSettle();
 
-    final Image image = tester.widget<Image>(find.byType(Image));
-    final ImageFrameBuilder frameBuilder = image.frameBuilder!;
-    final BuildContext context = tester.element(find.byType(Image));
+      final Image image = tester.widget<Image>(find.byType(Image));
+      final ImageFrameBuilder frameBuilder = image.frameBuilder!;
+      final BuildContext context = tester.element(find.byType(Image));
 
-    const Key key = Key('child');
+      const Key key = Key('child');
 
-    expect(
-      frameBuilder(context, const SizedBox(key: key), null, false),
-      isA<AnimatedOpacity>().having((AnimatedOpacity opacity) => opacity.child!.key, 'key', key),
-    );
-  });
+      expect(
+        frameBuilder(context, const SizedBox(key: key), null, false),
+        isA<AnimatedOpacity>().having(
+          (AnimatedOpacity opacity) => opacity.child!.key,
+          'key',
+          key,
+        ),
+      );
+    },
+  );
 
   testWidgets('The frame builder returns the child when synchronously loaded', (
     WidgetTester tester,

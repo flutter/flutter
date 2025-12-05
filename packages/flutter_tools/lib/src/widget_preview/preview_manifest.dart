@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:collection/equality.dart';
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
@@ -48,12 +48,12 @@ class PreviewManifest {
   void generate() {
     logger.printStatus('Creating the Widget Preview Scaffold manifest at ${_manifest.path}');
     assert(!_manifest.existsSync());
-    _manifest.createSync(recursive: true);
     final manifestContents = <String, Object?>{
       kManifestVersion: previewManifestVersion.toString(),
       kSdkVersion: cache.dartSdkVersion,
       kPubspecHashes: _calculatePubspecHashes(),
     };
+    _manifest.createSync(recursive: true);
     _updateManifest(manifestContents);
   }
 
@@ -61,28 +61,65 @@ class PreviewManifest {
     _manifest.writeAsStringSync(json.encode(contents));
   }
 
-  Map<String, String> _calculatePubspecHashes({String? updatedPubspecPath}) {
-    if (updatedPubspecPath != null) {
-      final PreviewManifestContents? manifest = _tryLoadManifest();
-      if (manifest != null) {
-        final FlutterProject project =
-            <FlutterProject>[rootProject, ...rootProject.workspaceProjects].firstWhere(
-              (FlutterProject project) => project.pubspecFile.absolute.path == updatedPubspecPath,
-            );
-        final Map<String, String> pubspecHashes =
-            (manifest[kPubspecHashes]! as Map<String, Object?>).cast<String, String>();
-        pubspecHashes[updatedPubspecPath] = project.manifest.computeMD5Hash();
-        return pubspecHashes;
-      }
-    }
+  bool _isPubspecPathForProject({required FlutterProject project, required String path}) {
+    return project.pubspecFile.absolute.path == path;
+  }
 
+  Map<String, String> _buildPubspecHashesMap() {
     return <String, String>{
       for (final FlutterProject project in <FlutterProject>[
         rootProject,
-        ...rootProject.workspaceProjects,
+        ...rootProject.workspaceProjects.where((e) => e.pubspecFile.existsSync()),
       ])
-        project.pubspecFile.absolute.path: project.manifest.computeMD5Hash(),
+        project.pubspecFile.absolute.path: project.computeManifestMD5Hash(logger: logger, fs: fs),
     };
+  }
+
+  Map<String, String> _calculatePubspecHashes({String? updatedPubspecPath}) {
+    // Keep track of the set of previous workspace projects to see if there have been any changes
+    // since the last time we checked.
+    final List<FlutterProject> previousWorkspaceProjects = rootProject.workspaceProjects;
+
+    // Ensure the root project's manifest is up to date.
+    rootProject.reloadManifest(logger: logger, fs: fs);
+    final PreviewManifestContents? manifest = _tryLoadManifest();
+
+    if (updatedPubspecPath == null || manifest == null) {
+      return _buildPubspecHashesMap();
+    }
+
+    // If the workspace's pubspec has changed and the set of workspace projects has been
+    // modified since the last time we calculated hashes, recalculate all the hashes for
+    // simplicity.
+    if (_isPubspecPathForProject(project: rootProject, path: updatedPubspecPath)) {
+      final bool workspaceProjectUpdates = !const SetEquality<Directory>().equals(
+        previousWorkspaceProjects.map((p) => p.directory).toSet(),
+        rootProject.workspaceProjects.map((p) => p.directory).toSet(),
+      );
+      if (workspaceProjectUpdates) {
+        return _buildPubspecHashesMap();
+      }
+    }
+
+    final FlutterProject? project = <FlutterProject>[rootProject, ...rootProject.workspaceProjects]
+        .firstWhereOrNull(
+          (FlutterProject project) =>
+              _isPubspecPathForProject(project: project, path: updatedPubspecPath),
+        );
+    final Map<String, String> pubspecHashes = (manifest[kPubspecHashes]! as Map<String, Object?>)
+        .cast<String, String>();
+    // If the project isn't found, the pubspec is not actually part of the workspace and can be
+    // ignored.
+    if (project != null) {
+      if (fs.file(updatedPubspecPath).existsSync()) {
+        // Update the hash for the pubspec, as long as it exists.
+        pubspecHashes[updatedPubspecPath] = project.computeManifestMD5Hash(logger: logger, fs: fs);
+      } else {
+        // The pubspec has been deleted, so it shouldn't continue to be tracked.
+        pubspecHashes.remove(updatedPubspecPath);
+      }
+    }
+    return pubspecHashes;
   }
 
   bool shouldGenerateProject() {
@@ -142,9 +179,19 @@ class PreviewManifest {
   }
 
   void updatePubspecHash({String? updatedPubspecPath}) {
-    final PreviewManifestContents manifest = _tryLoadManifest()!;
+    final PreviewManifestContents? manifest = _tryLoadManifest();
+    if (manifest == null) {
+      generate();
+      return;
+    }
     manifest[kPubspecHashes] = _calculatePubspecHashes(updatedPubspecPath: updatedPubspecPath);
     _updateManifest(manifest);
+  }
+
+  @visibleForTesting
+  Map<String, String> get pubspecHashes {
+    final PreviewManifestContents manifest = _tryLoadManifest()!;
+    return (manifest[kPubspecHashes]! as Map).cast<String, String>();
   }
 
   @visibleForTesting
