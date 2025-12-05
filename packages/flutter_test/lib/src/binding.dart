@@ -231,7 +231,7 @@ mixin _ChildWindowHierarchyMixin {
   }
 
   /// Returns the first activateable window in this window's hierarchy.
-  BaseWindowController getFirstActivateableChild() {
+  BaseWindowController getFirstActivatableChild() {
     // If there are no children, this window is the first activateable window.
     if (_children.isEmpty) {
       return this as BaseWindowController;
@@ -814,7 +814,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   @protected
   bool get registerTestTextInput => true;
 
-  /// Determines whether the binding automatically register [windowingOwner] to
+  /// Determines whether the binding automatically registers [windowingOwner] to
   /// the fake windowing owner implementation.
   ///
   /// Unit tests make use of this to mock out windowing system communication for
