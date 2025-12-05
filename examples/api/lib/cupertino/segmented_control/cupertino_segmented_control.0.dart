@@ -32,7 +32,8 @@ class SegmentedControlExample extends StatefulWidget {
   const SegmentedControlExample({super.key});
 
   @override
-  State<SegmentedControlExample> createState() => _SegmentedControlExampleState();
+  State<SegmentedControlExample> createState() =>
+      _SegmentedControlExampleState();
 }
 
 class _SegmentedControlExampleState extends State<SegmentedControlExample> {
@@ -88,7 +89,10 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                const Text('Disable one segment', style: TextStyle(color: CupertinoColors.white)),
+                const Text(
+                  'Disable one segment',
+                  style: TextStyle(color: CupertinoColors.white),
+                ),
                 CupertinoSwitch(
                   value: _toggleOne,
                   onChanged: (bool value) {
@@ -109,7 +113,10 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                const Text('Toggle all segments', style: TextStyle(color: CupertinoColors.white)),
+                const Text(
+                  'Toggle all segments',
+                  style: TextStyle(color: CupertinoColors.white),
+                ),
                 CupertinoSwitch(
                   value: _toggleAll,
                   onChanged: (bool value) {
@@ -119,7 +126,11 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
                         _toggleOne = false;
                         _disabledChildren = <Sky>{};
                       } else {
-                        _disabledChildren = <Sky>{Sky.midnight, Sky.viridian, Sky.cerulean};
+                        _disabledChildren = <Sky>{
+                          Sky.midnight,
+                          Sky.viridian,
+                          Sky.cerulean,
+                        };
                       }
                     });
                   },

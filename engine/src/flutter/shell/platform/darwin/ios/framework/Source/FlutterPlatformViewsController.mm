@@ -668,14 +668,17 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   // No platform views to render.
   if (self.flutterView == nil || (self.compositionOrder.empty() && !self.hadPlatformViews)) {
     // No platform views to render but the FlutterView may need to be resized.
+    __weak FlutterPlatformViewsController* weakSelf = self;
     if (self.flutterView != nil) {
-      if (self.platformTaskRunner->RunsTasksOnCurrentThread()) {
-        [self performResize:self.frameSize];
-      } else {
-        PostTaskSync(self.platformTaskRunner, [self, frameSize = self.frameSize]() mutable {
-          [self performResize:frameSize];
-        });
-      }
+      fml::TaskRunner::RunNowOrPostTask(
+          weakSelf.platformTaskRunner,
+          fml::MakeCopyable([weakSelf, frameSize = weakSelf.frameSize]() {
+            FlutterPlatformViewsController* strongSelf = weakSelf;
+            if (!strongSelf) {
+              return;
+            }
+            [strongSelf performResize:frameSize];
+          }));
     }
 
     self.hadPlatformViews = NO;
@@ -1018,19 +1021,5 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 - (std::vector<int64_t>&)previousCompositionOrder {
   return _previousCompositionOrder;
 }
-
-namespace {
-void PostTaskSync(const fml::RefPtr<fml::TaskRunner>& task_runner, fml::closure task) {
-  FML_DCHECK(!task_runner->RunsTasksOnCurrentThread());
-  fml::AutoResetWaitableEvent latch;
-  task_runner->PostTask([&latch, task = std::move(task)]() {
-    if (task) {
-      task();
-    }
-    latch.Signal();
-  });
-  latch.Wait();
-}
-}  // namespace
 
 @end

@@ -49,9 +49,9 @@ class VsyncFrameLagSummarizer {
   }
 
   List<double> _computePlatformToFlutterVsyncBeginLags() {
-    int platformIdx = -1;
-    final List<double> result = <double>[];
-    for (int i = 0; i < vsyncEvents.length; i++) {
+    var platformIdx = -1;
+    final result = <double>[];
+    for (var i = 0; i < vsyncEvents.length; i++) {
       final TimelineEvent event = vsyncEvents[i];
       if (event.phase != 'B') {
         continue;

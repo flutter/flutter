@@ -158,7 +158,7 @@ class _FakeHotCompatibleFlutterDevice extends Fake implements FlutterDevice {
     wasExited = true;
   }
 
-  var wasExited = false;
+  bool wasExited = false;
 }
 
 class _FakeFlutterVmService extends Fake implements FlutterVmService {

@@ -24,7 +24,11 @@ class ExpansionPanelListRadioExampleApp extends StatelessWidget {
 
 // stores ExpansionPanel state information
 class Item {
-  Item({required this.id, required this.expandedValue, required this.headerValue});
+  Item({
+    required this.id,
+    required this.expandedValue,
+    required this.headerValue,
+  });
 
   int id;
   String expandedValue;
@@ -45,10 +49,12 @@ class ExpansionPanelListRadioExample extends StatefulWidget {
   const ExpansionPanelListRadioExample({super.key});
 
   @override
-  State<ExpansionPanelListRadioExample> createState() => _ExpansionPanelListRadioExampleState();
+  State<ExpansionPanelListRadioExample> createState() =>
+      _ExpansionPanelListRadioExampleState();
 }
 
-class _ExpansionPanelListRadioExampleState extends State<ExpansionPanelListRadioExample> {
+class _ExpansionPanelListRadioExampleState
+    extends State<ExpansionPanelListRadioExample> {
   final List<Item> _data = generateItems(8);
 
   @override
@@ -67,7 +73,9 @@ class _ExpansionPanelListRadioExampleState extends State<ExpansionPanelListRadio
           },
           body: ListTile(
             title: Text(item.expandedValue),
-            subtitle: const Text('To delete this panel, tap the trash can icon'),
+            subtitle: const Text(
+              'To delete this panel, tap the trash can icon',
+            ),
             trailing: const Icon(Icons.delete),
             onTap: () {
               setState(() {
