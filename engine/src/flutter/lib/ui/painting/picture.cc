@@ -172,6 +172,17 @@ Dart_Handle Picture::DoRasterizeToImage(const sk_sp<DisplayList>& display_list,
     return tonic::ToDart("Image dimensions for scene were invalid.");
   }
 
+  // Warn about dimensions that may exceed common GPU texture limits.
+  // This provides a better error message than a silent failure or crash.
+  constexpr uint32_t kWarningSizeThreshold = 4096;
+  if (width > kWarningSizeThreshold || height > kWarningSizeThreshold) {
+    FML_LOG(WARNING) << "Picture.toImage dimensions (" << width << " x "
+                     << height << ") exceed " << kWarningSizeThreshold
+                     << " pixels. This may fail on devices with limited GPU "
+                     << "capabilities. Consider reducing dimensions or "
+                     << "splitting into smaller images.";
+  }
+
   auto* dart_state = UIDartState::Current();
   auto image_callback = std::make_unique<tonic::DartPersistentValue>(
       dart_state, raw_image_callback);
