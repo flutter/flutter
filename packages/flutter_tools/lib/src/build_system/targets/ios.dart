@@ -299,9 +299,19 @@ abstract class UnpackIOS extends UnpackDarwin {
     }
     await thinFramework(environment, frameworkBinaryPath, archs);
 
-    // Skip codesigning during pre-action since pre-actions are not passed the codesigning build
-    // settings.
-    if (environment.defines[kXcodeBuildScript] != kPrepareXcodeBuildScript) {
+    var codesignFramework = true;
+    if (environment.defines[kXcodeBuildScript] == kPrepareXcodeBuildScript) {
+      // Skip codesigning during "prepare" when using SwiftPM. When SwiftPM places the Flutter
+      // framework in the BUILT_PRODUCTS_DIR, it does not codesign it (it is later codesigned
+      // in TARGET_BUILD_DIR). Skipping codesigning will improve the caching for the "prepare" script.
+      final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+      final XcodeBasedProject xcodeProject = darwinPlatform.xcodeProject(flutterProject);
+      if (xcodeProject.usesSwiftPackageManager &&
+          xcodeProject.flutterFrameworkSwiftPackageDirectory.existsSync()) {
+        codesignFramework = false;
+      }
+    }
+    if (codesignFramework) {
       await _signFramework(environment, frameworkBinary, buildMode);
     }
   }

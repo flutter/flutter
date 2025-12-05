@@ -411,31 +411,24 @@ class Context {
     );
     switch (platform) {
       case TargetPlatform.ios:
-        String? sdkRoot = environment['SDKROOT'];
-        if (sdkRoot == null) {
+        final String? sdkRoot = environment['SDKROOT']?.toLowerCase();
+        if (sdkRoot == null || !sdkRoot.contains('iphone')) {
           return null;
         }
-        sdkRoot = sdkRoot.toLowerCase();
-        var simulatorSDK = false;
-        if (!sdkRoot.contains('iphone')) {
-          return null;
-        }
-        if (sdkRoot.contains('simulator')) {
-          simulatorSDK = true;
-        }
+        final bool simulatorSDK = sdkRoot.contains('simulator');
         for (final FileSystemEntity entity in xcframework.listSync()) {
-          if (entity is Directory && entity.path.contains('ios-')) {
-            if (simulatorSDK && entity.path.endsWith('-simulator')) {
-              return File('${entity.path}/${platform.infoPlistPath}');
-            }
-            if (!simulatorSDK && !entity.path.endsWith('-simulator')) {
+          final String platformBaseName = Uri.parse(entity.path).pathSegments.last;
+          if (entity is Directory && platformBaseName.startsWith('ios-')) {
+            final bool isSimulatorDirectory = platformBaseName.endsWith('-simulator');
+            if (simulatorSDK == isSimulatorDirectory) {
               return File('${entity.path}/${platform.infoPlistPath}');
             }
           }
         }
       case TargetPlatform.macos:
         for (final FileSystemEntity entity in xcframework.listSync()) {
-          if (entity is Directory && entity.path.contains('macos-')) {
+          final String platformBaseName = Uri.parse(entity.path).pathSegments.last;
+          if (entity is Directory && platformBaseName.startsWith('macos-')) {
             return File('${entity.path}/${platform.infoPlistPath}');
           }
         }

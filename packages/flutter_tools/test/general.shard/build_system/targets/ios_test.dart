@@ -1236,40 +1236,64 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('skips codesigning in pre-action', () async {
-      binary.createSync(recursive: true);
+    testUsingContext(
+      'skips codesigning in pre-action',
+      () async {
+        binary.createSync(recursive: true);
+        final Directory projectDirectory = fileSystem.systemTempDirectory.childDirectory(
+          'my_project',
+        );
+        projectDirectory.childFile('pubspec.yaml').createSync(recursive: true);
+        projectDirectory.childDirectory('ios').createSync();
+        projectDirectory
+            .childDirectory('ios')
+            .childDirectory('Flutter')
+            .childDirectory('ephemeral')
+            .childDirectory('Packages')
+            .childDirectory('.packages')
+            .childDirectory('FlutterFramework')
+            .createSync(recursive: true);
 
-      final environment = Environment.test(
-        fileSystem.currentDirectory,
-        processManager: processManager,
-        artifacts: artifacts,
-        logger: logger,
-        fileSystem: fileSystem,
-        outputDir: outputDir,
-        defines: <String, String>{
-          kIosArchs: 'arm64',
-          kSdkRoot: 'path/to/iPhoneOS.sdk',
-          kCodesignIdentity: 'ABC123',
-          kXcodeBuildScript: 'prepare',
-        },
-      );
+        final environment = Environment.test(
+          fileSystem.currentDirectory,
+          processManager: processManager,
+          artifacts: artifacts,
+          logger: logger,
+          fileSystem: fileSystem,
+          outputDir: outputDir,
+          projectDir: projectDirectory,
+          defines: <String, String>{
+            kIosArchs: 'arm64',
+            kSdkRoot: 'path/to/iPhoneOS.sdk',
+            kCodesignIdentity: 'ABC123',
+            kXcodeBuildScript: 'prepare',
+          },
+        );
 
-      processManager.addCommands(<FakeCommand>[
-        copyPhysicalFrameworkCommand,
-        lipoCommandNonFatResult,
-        lipoVerifyArm64Command,
-      ]);
-      const Target target = DebugUnpackIOS();
-      for (final Target dep in target.dependencies) {
-        await dep.build(environment);
-      }
-      await target.build(environment);
+        processManager.addCommands(<FakeCommand>[
+          copyPhysicalFrameworkCommand,
+          lipoCommandNonFatResult,
+          lipoVerifyArm64Command,
+        ]);
+        const Target target = DebugUnpackIOS();
+        for (final Target dep in target.dependencies) {
+          await dep.build(environment);
+        }
+        await target.build(environment);
 
-      expect(processManager, hasNoRemainingExpectations);
-    });
+        expect(processManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{
+        ProcessManager: () => processManager,
+        FileSystem: () => fileSystem,
+        Artifacts: () => artifacts,
+        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+      },
+    );
 
     testUsingContext(
-      'can be skipped with Swift Package Manager',
+      'can be skipped during build with Swift Package Manager',
       () async {
         binary.createSync(recursive: true);
         final Directory projectDirectory = fileSystem.systemTempDirectory.childDirectory(
