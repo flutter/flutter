@@ -16,7 +16,7 @@ void main() {
   });
 
   testWidgets('A mouse click should only cause one hit test', (WidgetTester tester) async {
-    int hitCount = 0;
+    var hitCount = 0;
     await tester.pumpWidget(
       _HitTestCounter(
         onHitTestCallback: () {
@@ -36,7 +36,7 @@ void main() {
   });
 
   testWidgets('Non-mouse events should not cause movement hit tests', (WidgetTester tester) async {
-    int hitCount = 0;
+    var hitCount = 0;
     await tester.pumpWidget(
       _HitTestCounter(
         onHitTestCallback: () {

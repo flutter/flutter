@@ -9,6 +9,7 @@
 
 #include "flutter/common/graphics/texture.h"
 #include "flutter/display_list/display_list.h"
+#include "flutter/shell/common/snapshot_pixel_format.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/gpu/ganesh/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/GrContextThreadSafeProxy.h"
@@ -76,13 +77,15 @@ class SnapshotDelegate {
 
   virtual GrDirectContext* GetGrContext() = 0;
 
-  virtual void MakeRasterSnapshot(
+  virtual void MakeRasterSnapshot(sk_sp<DisplayList> display_list,
+                                  DlISize picture_size,
+                                  std::function<void(sk_sp<DlImage>)> callback,
+                                  SnapshotPixelFormat pixel_format) = 0;
+
+  virtual sk_sp<DlImage> MakeRasterSnapshotSync(
       sk_sp<DisplayList> display_list,
       DlISize picture_size,
-      std::function<void(sk_sp<DlImage>)> callback) = 0;
-
-  virtual sk_sp<DlImage> MakeRasterSnapshotSync(sk_sp<DisplayList> display_list,
-                                                DlISize picture_size) = 0;
+      SnapshotPixelFormat pixel_format) = 0;
 
   virtual sk_sp<SkImage> ConvertToRasterImage(sk_sp<SkImage> image) = 0;
 

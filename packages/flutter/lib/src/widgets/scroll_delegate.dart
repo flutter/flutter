@@ -184,7 +184,7 @@ abstract class SliverChildDelegate {
   /// included in the current layout. The `lastIndex` argument is the index of
   /// the last child that was included in the current layout.
   ///
-  /// Useful for subclasses that which to track which children are included in
+  /// Useful for subclasses that wish to track which children are included in
   /// the underlying render tree.
   void didFinishLayout(int firstIndex, int lastIndex) {}
 
@@ -212,7 +212,7 @@ abstract class SliverChildDelegate {
 
   @override
   String toString() {
-    final List<String> description = <String>[];
+    final description = <String>[];
     debugFillDescription(description);
     return '${describeIdentity(this)}(${description.join(", ")})';
   }
@@ -912,7 +912,7 @@ class _SelectionKeepAliveState extends State<_SelectionKeepAlive>
 
 // Return a Widget for the given Exception
 Widget _createErrorWidget(Object exception, StackTrace stackTrace) {
-  final FlutterErrorDetails details = FlutterErrorDetails(
+  final details = FlutterErrorDetails(
     exception: exception,
     stack: stackTrace,
     library: 'widgets library',

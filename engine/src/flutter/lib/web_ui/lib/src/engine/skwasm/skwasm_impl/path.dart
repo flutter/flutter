@@ -244,7 +244,7 @@ class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements LayerPath, Disp
     final SkStringHandle skString = pathGetSvgString(handle);
     final Pointer<Int8> buffer = skStringGetData(skString);
     final int length = skStringGetLength(skString);
-    final List<int> characters = List<int>.generate(length, (int i) => buffer[i]);
+    final characters = List<int>.generate(length, (int i) => buffer[i]);
     final String svgString = utf8.decode(characters);
     skStringFree(skString);
     return svgString;
