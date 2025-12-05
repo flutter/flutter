@@ -962,6 +962,15 @@ void main() {
       expect(semanticNode.hint, anyOf(isNull, isEmpty));
     });
   });
+
+  testWidgets('CupertinoRadio does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(child: SizedBox.shrink(child: CupertinoRadio<bool>(value: false))),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoRadio<bool>)), Size.zero);
+  });
 }
 
 class _RadioMouseCursor extends WidgetStateMouseCursor {
