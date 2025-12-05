@@ -9,11 +9,11 @@ void main() {
   testWidgets('Text widget parameter takes precedence over DefaultTextHeightBehavior', (
     WidgetTester tester,
   ) async {
-    const TextHeightBehavior behavior1 = TextHeightBehavior(
+    const behavior1 = TextHeightBehavior(
       applyHeightToLastDescent: false,
       applyHeightToFirstAscent: false,
     );
-    const TextHeightBehavior behavior2 = TextHeightBehavior(applyHeightToFirstAscent: false);
+    const behavior2 = TextHeightBehavior(applyHeightToFirstAscent: false);
 
     await tester.pumpWidget(
       const DefaultTextHeightBehavior(
@@ -30,11 +30,11 @@ void main() {
   testWidgets(
     'DefaultTextStyle.textHeightBehavior takes precedence over DefaultTextHeightBehavior ',
     (WidgetTester tester) async {
-      const TextHeightBehavior behavior1 = TextHeightBehavior(
+      const behavior1 = TextHeightBehavior(
         applyHeightToLastDescent: false,
         applyHeightToFirstAscent: false,
       );
-      const TextHeightBehavior behavior2 = TextHeightBehavior(applyHeightToFirstAscent: false);
+      const behavior2 = TextHeightBehavior(applyHeightToFirstAscent: false);
 
       await tester.pumpWidget(
         const DefaultTextStyle(
@@ -69,12 +69,12 @@ void main() {
   );
 
   testWidgets('DefaultTextHeightBehavior changes propagate to Text', (WidgetTester tester) async {
-    const Text textWidget = Text('Hello', textDirection: TextDirection.ltr);
-    const TextHeightBehavior behavior1 = TextHeightBehavior(
+    const textWidget = Text('Hello', textDirection: TextDirection.ltr);
+    const behavior1 = TextHeightBehavior(
       applyHeightToLastDescent: false,
       applyHeightToFirstAscent: false,
     );
-    const TextHeightBehavior behavior2 = TextHeightBehavior(
+    const behavior2 = TextHeightBehavior(
       applyHeightToLastDescent: false,
       applyHeightToFirstAscent: false,
     );
@@ -98,7 +98,7 @@ void main() {
 
   testWidgets('DefaultTextHeightBehavior.of(context) returns null if no '
       'DefaultTextHeightBehavior widget in tree', (WidgetTester tester) async {
-    const Text textWidget = Text('Hello', textDirection: TextDirection.ltr);
+    const textWidget = Text('Hello', textDirection: TextDirection.ltr);
     TextHeightBehavior? textHeightBehavior;
 
     await tester.pumpWidget(

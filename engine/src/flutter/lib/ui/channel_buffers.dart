@@ -158,7 +158,7 @@ class _Channel {
   /// true, then returns true. The caller is responsible for showing
   /// the warning message in that case.
   bool _dropOverflowMessages(int lengthLimit) {
-    bool result = false;
+    var result = false;
     while (_queue.length > lengthLimit) {
       final _StoredMessage message = _queue.removeFirst();
       message.invoke(null); // send empty reply to the plugin side
@@ -184,7 +184,7 @@ class _Channel {
   /// use the zone that was current when the callback was
   /// registered.
   void setListener(ChannelCallback callback) {
-    final bool needDrain = _channelCallbackRecord == null;
+    final needDrain = _channelCallbackRecord == null;
     _channelCallbackRecord = _ChannelCallbackRecord(callback);
     if (needDrain && !_draining) {
       _drain();
@@ -478,7 +478,7 @@ class ChannelBuffers {
         // lengths greater than 253 have more elaborate encoding
         throw Exception('Unrecognized message sent to $kControlChannelName (method name too long)');
       }
-      int index = 2; // where we are in reading the bytes
+      var index = 2; // where we are in reading the bytes
       final String methodName = utf8.decode(bytes.sublist(index, index + methodNameLength));
       index += methodNameLength;
       switch (methodName) {
