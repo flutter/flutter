@@ -21,6 +21,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   shaders:
+    - shaders/circle_sdf.frag
     - shaders/sdf.frag
 
 # PUBSPEC CHECKSUM: vrimb3

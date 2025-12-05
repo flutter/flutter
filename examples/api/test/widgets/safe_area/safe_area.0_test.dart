@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/safe_area/safe_area.0.dart' as example;
+import 'package:flutter_api_samples/widgets/safe_area/safe_area.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 example.InsetsState get insetsState => example.InsetsState.instance;
@@ -20,7 +21,9 @@ void main() {
     expect(find.byType(SafeArea), findsNWidgets(4));
   });
 
-  testWidgets('ListTile removes side padding from its content', (WidgetTester tester) async {
+  testWidgets('ListTile removes side padding from its content', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.Insets());
 
     late BuildContext context;
@@ -44,7 +47,9 @@ void main() {
     expect(padding.right, 0);
   });
 
-  testWidgets('AppBar removes top padding of Scaffold body', (WidgetTester tester) async {
+  testWidgets('AppBar removes top padding of Scaffold body', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.Insets());
     final BuildContext context = tester.element(find.text('no safe area'));
 
@@ -83,20 +88,28 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/159340.
-  testWidgets('App displays without layout issues', (WidgetTester tester) async {
+  testWidgets('App displays without layout issues', (
+    WidgetTester tester,
+  ) async {
     // Set the app's size to to match the default DartPad demo screen.
     await tester.pumpWidget(
-      const Center(child: SizedBox(width: 500.0, height: 480.0, child: example.Insets())),
+      const Center(
+        child: SizedBox(width: 500.0, height: 480.0, child: example.Insets()),
+      ),
     );
 
-    double appScreenHeight() => tester.getRect(find.byType(example.Insets)).height;
+    double appScreenHeight() =>
+        tester.getRect(find.byType(example.Insets)).height;
 
     expect(appScreenHeight(), 480);
     expect(insetsState.insets, const EdgeInsets.fromLTRB(8.0, 25.0, 8.0, 12.0));
 
     // Drag each slider to its maximum value.
     for (int index = 0; index < 3; index++) {
-      await tester.drag(find.byType(Slider).at(index), const Offset(500.0, 0.0));
+      await tester.drag(
+        find.byType(Slider).at(index),
+        const Offset(500.0, 0.0),
+      );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     }

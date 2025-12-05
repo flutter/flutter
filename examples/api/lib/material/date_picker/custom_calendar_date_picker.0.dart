@@ -24,7 +24,8 @@ class CalendarDatePickerExample extends StatefulWidget {
   const CalendarDatePickerExample({super.key});
 
   @override
-  State<CalendarDatePickerExample> createState() => _CalendarDatePickerExampleState();
+  State<CalendarDatePickerExample> createState() =>
+      _CalendarDatePickerExampleState();
 }
 
 class _CalendarDatePickerExampleState extends State<CalendarDatePickerExample> {
@@ -90,7 +91,8 @@ class CustomCalendarDelegate extends CalendarDelegate<DateTime> {
   DateTime dateOnly(DateTime date) => DateUtils.dateOnly(date);
 
   @override
-  int monthDelta(DateTime startDate, DateTime endDate) => DateUtils.monthDelta(startDate, endDate);
+  int monthDelta(DateTime startDate, DateTime endDate) =>
+      DateUtils.monthDelta(startDate, endDate);
 
   @override
   DateTime addMonthsToMonthDate(DateTime monthDate, int monthsToAdd) {
@@ -98,7 +100,8 @@ class CustomCalendarDelegate extends CalendarDelegate<DateTime> {
   }
 
   @override
-  DateTime addDaysToDate(DateTime date, int days) => DateUtils.addDaysToDate(date, days);
+  DateTime addDaysToDate(DateTime date, int days) =>
+      DateUtils.addDaysToDate(date, days);
 
   @override
   DateTime getMonth(int year, int month) => DateTime(year, month);
@@ -117,7 +120,10 @@ class CustomCalendarDelegate extends CalendarDelegate<DateTime> {
   }
 
   @override
-  String formatShortMonthDay(DateTime date, MaterialLocalizations localizations) {
+  String formatShortMonthDay(
+    DateTime date,
+    MaterialLocalizations localizations,
+  ) {
     return localizations.formatShortMonthDay(date);
   }
 
@@ -137,7 +143,10 @@ class CustomCalendarDelegate extends CalendarDelegate<DateTime> {
   }
 
   @override
-  DateTime? parseCompactDate(String? inputString, MaterialLocalizations localizations) {
+  DateTime? parseCompactDate(
+    String? inputString,
+    MaterialLocalizations localizations,
+  ) {
     return localizations.parseCompactDate(inputString);
   }
 

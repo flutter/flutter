@@ -18,21 +18,21 @@ import 'path_metrics.dart';
 /// The `SkPath` is required for `CkCanvas` methods which take a path.
 class CkPath implements DisposablePath {
   factory CkPath() {
-    final SkPathBuilder skPathBuilder = SkPathBuilder();
+    final skPathBuilder = SkPathBuilder();
     skPathBuilder.setFillType(toSkFillType(ui.PathFillType.nonZero));
     return CkPath._(skPathBuilder, ui.PathFillType.nonZero);
   }
 
   factory CkPath.from(CkPath other) {
     final SkPath skPath = other.snapshotSkPath();
-    final SkPathBuilder skPathBuilder = SkPathBuilder(skPath);
+    final skPathBuilder = SkPathBuilder(skPath);
     skPath.delete();
 
     return CkPath._(skPathBuilder, other._fillType);
   }
 
   factory CkPath.fromSkPath(SkPath skPath, ui.PathFillType fillType) {
-    final SkPathBuilder skPathBuilder = SkPathBuilder(skPath);
+    final skPathBuilder = SkPathBuilder(skPath);
     skPathBuilder.setFillType(toSkFillType(fillType));
     return CkPath._(skPathBuilder, fillType);
   }
@@ -92,7 +92,7 @@ class CkPath implements DisposablePath {
       skMatrix[2] += offset.dx;
       skMatrix[5] += offset.dy;
     }
-    final CkPath otherPath = path as CkPath;
+    final otherPath = path as CkPath;
     final SkPath otherSkPath = otherPath.snapshotSkPath();
     _skiaPathBuilder.addPath(
       otherSkPath,
@@ -289,14 +289,14 @@ class CkPath implements DisposablePath {
 
   @override
   CkPath shift(ui.Offset offset) {
-    final CkPath shiftedPath = CkPath.from(this);
+    final shiftedPath = CkPath.from(this);
     shiftedPath._skiaPathBuilder.transform(1.0, 0.0, offset.dx, 0.0, 1.0, offset.dy, 0.0, 0.0, 1.0);
     return shiftedPath;
   }
 
   static CkPath combine(ui.PathOperation operation, ui.Path uiPath1, ui.Path uiPath2) {
-    final CkPath path1 = uiPath1 as CkPath;
-    final CkPath path2 = uiPath2 as CkPath;
+    final path1 = uiPath1 as CkPath;
+    final path2 = uiPath2 as CkPath;
 
     final SkPath skPath1 = path1.snapshotSkPath();
     final SkPath skPath2 = path2.snapshotSkPath();
@@ -307,7 +307,7 @@ class CkPath implements DisposablePath {
       toSkPathOp(operation),
     );
 
-    final CkPath combinedPath = CkPath.fromSkPath(combinedSkPath, path1._fillType);
+    final combinedPath = CkPath.fromSkPath(combinedSkPath, path1._fillType);
 
     skPath1.delete();
     skPath2.delete();
@@ -318,7 +318,7 @@ class CkPath implements DisposablePath {
 
   @override
   CkPath transform(Float64List matrix4) {
-    final CkPath transformedPath = CkPath.from(this);
+    final transformedPath = CkPath.from(this);
 
     final Float32List m = toSkMatrixFromFloat64(matrix4);
     transformedPath._skiaPathBuilder.transform(

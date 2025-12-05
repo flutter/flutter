@@ -52,7 +52,7 @@ bool _focusDebug(String Function() messageFunc, [Iterable<Object> Function()? de
   debugPrint('FOCUS: ${messageFunc()}');
   final Iterable<Object> details = detailsFunc?.call() ?? const <Object>[];
   if (details.isNotEmpty) {
-    for (final Object detail in details) {
+    for (final detail in details) {
       debugPrint('    $detail');
     }
   }
@@ -88,8 +88,8 @@ enum KeyEventResult {
 /// handlers without preventing the platform to handle; otherwise the node is
 /// ignored.
 KeyEventResult combineKeyEventResults(Iterable<KeyEventResult> results) {
-  bool hasSkipRemainingHandlers = false;
-  for (final KeyEventResult result in results) {
+  var hasSkipRemainingHandlers = false;
+  for (final result in results) {
     switch (result) {
       case KeyEventResult.handled:
         return KeyEventResult.handled;
@@ -706,7 +706,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// depth-first order.
   Iterable<FocusNode> get descendants {
     if (_descendants == null) {
-      final List<FocusNode> result = <FocusNode>[];
+      final result = <FocusNode>[];
       for (final FocusNode child in _children) {
         result.addAll(child.descendants);
         result.add(child);
@@ -732,7 +732,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// [FocusScopeNode] ([FocusManager.rootScope]).
   Iterable<FocusNode> get ancestors {
     if (_ancestors == null) {
-      final List<FocusNode> result = <FocusNode>[];
+      final result = <FocusNode>[];
       FocusNode? parent = _parent;
       while (parent != null) {
         result.add(parent);
@@ -1214,7 +1214,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// track of previously focused children in that scope, so that if the focused
   /// child in that scope is removed, the previous focus returns.
   void _setAsFocusedChildForScope() {
-    FocusNode scopeFocus = this;
+    var scopeFocus = this;
     for (final FocusScopeNode ancestor in ancestors.whereType<FocusScopeNode>()) {
       assert(scopeFocus != ancestor, 'Somehow made a loop by setting focusedChild to its scope.');
       assert(
@@ -1299,7 +1299,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    int count = 1;
+    var count = 1;
     return _children.map<DiagnosticsNode>((FocusNode child) {
       return child.toDiagnosticsNode(name: 'Child ${count++}');
     }).toList();
@@ -1308,7 +1308,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   @override
   String toStringShort() {
     final bool hasDebugLabel = debugLabel != null && debugLabel!.isNotEmpty;
-    final String extraData =
+    final extraData =
         '${hasDebugLabel ? debugLabel : ''}'
         '${hasFocus && hasDebugLabel ? ' ' : ''}'
         '${hasFocus && !hasPrimaryFocus ? '[IN FOCUS PATH]' : ''}'
@@ -2045,7 +2045,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     properties.add(
       DiagnosticsProperty<FocusNode>('nextFocus', _markedForFocus, defaultValue: null),
     );
-    final Element? element = primaryFocus?.context as Element?;
+    final element = primaryFocus?.context as Element?;
     if (element != null) {
       properties.add(
         DiagnosticsProperty<String>('primaryFocusCreator', element.debugGetCreatorChain(20)),
@@ -2141,9 +2141,8 @@ class _HighlightModeManager {
     if (_listeners.isEmpty) {
       return;
     }
-    final List<ValueChanged<FocusHighlightMode>> localListeners =
-        List<ValueChanged<FocusHighlightMode>>.of(_listeners);
-    for (final ValueChanged<FocusHighlightMode> listener in localListeners) {
+    final localListeners = List<ValueChanged<FocusHighlightMode>>.of(_listeners);
+    for (final listener in localListeners) {
       try {
         if (_listeners.contains(listener)) {
           listener(highlightMode);
@@ -2203,11 +2202,11 @@ class _HighlightModeManager {
       return false;
     }
 
-    bool handled = false;
+    var handled = false;
     // Check to see if any of the early handlers handle the key. If so, then
     // return early.
     if (_earlyKeyEventHandlers.isNotEmpty) {
-      final List<KeyEventResult> results = <KeyEventResult>[
+      final results = <KeyEventResult>[
         // Make a copy to prevent problems if the list is modified during iteration.
         for (final OnKeyEventCallback callback in _earlyKeyEventHandlers.toList())
           for (final KeyEvent event in message.events) callback(event),
@@ -2235,11 +2234,11 @@ class _HighlightModeManager {
     // Walk the current focus from the leaf to the root, calling each node's
     // onKeyEvent on the way up, and if one responds that they handled it or
     // want to stop propagation, stop.
-    for (final FocusNode node in <FocusNode>[
+    for (final node in <FocusNode>[
       FocusManager.instance.primaryFocus!,
       ...FocusManager.instance.primaryFocus!.ancestors,
     ]) {
-      final List<KeyEventResult> results = <KeyEventResult>[
+      final results = <KeyEventResult>[
         if (node.onKeyEvent != null)
           for (final KeyEvent event in message.events) node.onKeyEvent!(node, event),
         if (node.onKey != null && message.rawEvent != null) node.onKey!(node, message.rawEvent!),
@@ -2263,7 +2262,7 @@ class _HighlightModeManager {
 
     // Check to see if any late key event handlers want to handle the event.
     if (!handled && _lateKeyEventHandlers.isNotEmpty) {
-      final List<KeyEventResult> results = <KeyEventResult>[
+      final results = <KeyEventResult>[
         // Make a copy to prevent problems if the list is modified during iteration.
         for (final OnKeyEventCallback callback in _lateKeyEventHandlers.toList())
           for (final KeyEvent event in message.events) callback(event),
