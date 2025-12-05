@@ -31,7 +31,7 @@ class BackButtonMemoryTest extends MemoryTest {
   Future<void> useMemory() async {
     await launchApp();
     await recordStart();
-    for (int iteration = 0; iteration < 8; iteration += 1) {
+    for (var iteration = 0; iteration < 8; iteration += 1) {
       print('back/forward iteration $iteration');
 
       // Push back button, wait for it to be seen by the Flutter app.
