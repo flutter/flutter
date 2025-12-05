@@ -246,9 +246,9 @@ mixin _ChildWindowHierarchyMixin {
     for (final BaseWindowController child in _children) {
       switch (child) {
         case final RegularWindowController regularChild:
-          activateable = (regularChild as _TestRegularWindowController).getFirstActivateableChild();
+          activateable = (regularChild as _TestRegularWindowController).getFirstActivatableChild();
         case final DialogWindowController dialogChild:
-          return (dialogChild as _TestDialogWindowController).getFirstActivateableChild();
+          return (dialogChild as _TestDialogWindowController).getFirstActivatableChild();
         case final TooltipWindowController _:
           // Tooltips cannot be activated.
           break;
@@ -524,12 +524,12 @@ class _TestWindowingOwner extends WindowingOwner {
     switch (controller) {
       case final RegularWindowController regularController:
         final BaseWindowController leaf = (regularController as _TestRegularWindowController)
-            .getFirstActivateableChild();
+            .getFirstActivatableChild();
         _activeWindowController = leaf;
         return _activeWindowController!;
       case final DialogWindowController dialogController:
         final BaseWindowController leaf = (dialogController as _TestDialogWindowController)
-            .getFirstActivateableChild();
+            .getFirstActivatableChild();
         _activeWindowController = leaf;
         return _activeWindowController!;
       case final TooltipWindowController _:
