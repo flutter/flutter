@@ -1298,6 +1298,7 @@ void main() {
       addTearDown(clipboardStatus.dispose);
 
       return SelectionOverlay(
+        cursorWidth: 2.0,
         context: tester.element(find.byKey(column)),
         onSelectionHandleTapped: onSelectionHandleTapped,
         startHandleType: TextSelectionHandleType.collapsed,
@@ -1838,6 +1839,7 @@ void main() {
       );
 
       return TextSelectionOverlay(
+        cursorWidth: 2.0,
         value: TextEditingValue.empty,
         renderObject: tester.state<EditableTextState>(find.byKey(editableTextKey)).renderEditable,
         context: tester.element(find.byKey(column)),
@@ -2104,7 +2106,11 @@ class TextSelectionControlsSpy extends TextSelectionControls {
   }
 
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+  Offset getHandleAnchor(
+    TextSelectionHandleType type,
+    double textLineHeight, {
+    required double cursorWidth,
+  }) {
     return Offset.zero;
   }
 
