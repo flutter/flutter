@@ -59,37 +59,30 @@ namespace flutter {
 
 namespace {
 
-int BytesPerPixel(int pixel_format) {
+int BytesPerPixel(PixelFormat pixel_format) {
   switch (pixel_format) {
-    case 0:  // rgba8888
-    case 1:  // bgra8888
-    case 3:  // r32Float
+    case PixelFormat::kRgba8888:
+    case PixelFormat::kBgra8888:
+    case PixelFormat::kRFloat32:
       return 4;
-    case 2:  // rgbaFloat32
+    case PixelFormat::kRgbaFloat32:
       return 16;
-    case 4:  // gray8
-      return 1;
-    default:
-      return 4;
   }
+  return 4;
 }
 
-SkColorType PixelFormatToSkColorType(int pixel_format) {
+SkColorType PixelFormatToSkColorType(PixelFormat pixel_format) {
   switch (pixel_format) {
-    case 0:  // rgba8888
+    case PixelFormat::kRgba8888:
       return kRGBA_8888_SkColorType;
-    case 1:  // bgra8888
+    case PixelFormat::kBgra8888:
       return kBGRA_8888_SkColorType;
-    case 2:  // rgbaFloat32
+    case PixelFormat::kRgbaFloat32:
       return kRGBA_F32_SkColorType;
-    case 3:                         // r32Float
-      return kUnknown_SkColorType;  // Not supported for direct SkImage creation
-                                    // usually?
-    case 4:                         // gray8
-      return kGray_8_SkColorType;
-    default:
+    case PixelFormat::kRFloat32:
       return kUnknown_SkColorType;
   }
+  return kUnknown_SkColorType;
 }
 }  // namespace
 
@@ -117,15 +110,21 @@ void CanvasImage::decodeImageFromPixelsSync(Dart_Handle pixels_handle,
     return;
   }
 
+  if (pixel_format < 0 ||
+      pixel_format > static_cast<int32_t>(kLastPixelFormat)) {
+    Dart_ThrowException(tonic::ToDart("Invalid pixel format."));
+    return;
+  }
+  PixelFormat format = static_cast<PixelFormat>(pixel_format);
+
   tonic::Uint8List pixels(pixels_handle);
   if (!pixels.data()) {
     Dart_ThrowException(tonic::ToDart("Pixels must not be null."));
     return;
   }
 
-  int32_t row_bytes = width * BytesPerPixel(pixel_format);
-
-  SkColorType color_type = PixelFormatToSkColorType(pixel_format);
+  int32_t row_bytes = width * BytesPerPixel(format);
+  SkColorType color_type = PixelFormatToSkColorType(format);
   if (color_type == kUnknown_SkColorType) {
     Dart_ThrowException(tonic::ToDart("Unsupported pixel format."));
     return;

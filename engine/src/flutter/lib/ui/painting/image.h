@@ -7,10 +7,18 @@
 
 #include "flutter/display_list/image/dl_image.h"
 #include "flutter/lib/ui/dart_wrapper.h"
-#include "flutter/lib/ui/ui_dart_state.h"
-#include "third_party/skia/include/core/SkImage.h"
 
 namespace flutter {
+
+// Must be kept in sync with painting.dart.
+enum class PixelFormat {
+  kRgba8888,
+  kBgra8888,
+  kRgbaFloat32,
+  kRFloat32,  // kLastPixelFormat
+};
+
+constexpr PixelFormat kLastPixelFormat = PixelFormat::kRFloat32;
 
 // Must be kept in sync with painting.dart.
 enum ColorSpace {
