@@ -231,7 +231,7 @@ class _AccountDetailsLayout extends MultiChildLayoutDelegate {
         : (hasChild(accountName) ? accountName : null);
 
     if (bottomLine != null) {
-      final Size constraintSize = iconSize == null
+      final constraintSize = iconSize == null
           ? size
           : Size(size.width - iconSize.width, size.height);
       iconSize ??= const Size(_kAccountDetailsHeight, _kAccountDetailsHeight);
