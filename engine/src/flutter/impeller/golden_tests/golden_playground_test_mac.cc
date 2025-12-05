@@ -274,18 +274,14 @@ sk_sp<flutter::DlImage> GoldenPlaygroundTest::CreateDlImageForFixture(
   return DlImageImpeller::Make(texture);
 }
 
-RuntimeStage::Map GoldenPlaygroundTest::OpenAssetAsRuntimeStage(
+absl::StatusOr<RuntimeStage::Map> GoldenPlaygroundTest::OpenAssetAsRuntimeStage(
     const char* asset_name) const {
   const std::shared_ptr<fml::Mapping> fixture =
       flutter::testing::OpenFixtureAsMapping(asset_name);
   if (!fixture || fixture->GetSize() == 0) {
-    return {};
+    return absl::NotFoundError("Asset not found or empty.");
   }
-  auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
-  if (!stages.ok()) {
-    return {};
-  }
-  return stages.value();
+  return RuntimeStage::DecodeRuntimeStages(fixture);
 }
 
 std::shared_ptr<Context> GoldenPlaygroundTest::GetContext() const {
