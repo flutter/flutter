@@ -13,7 +13,9 @@ class SliverDecorationExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        textTheme: const TextTheme(titleLarge: TextStyle(fontSize: 24, color: Colors.white30)),
+        textTheme: const TextTheme(
+          titleLarge: TextStyle(fontSize: 24, color: Colors.white30),
+        ),
       ),
       home: Scaffold(
         appBar: AppBar(title: const Text('SliverDecoration Sample')),
@@ -79,7 +81,10 @@ class SliverDecorationExample extends StatelessWidget {
                 child: Container(
                   alignment: Alignment.topCenter,
                   padding: const EdgeInsets.only(top: 56.0),
-                  child: Text('A blue sky', style: Theme.of(context).textTheme.titleLarge),
+                  child: Text(
+                    'A blue sky',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
                 ),
               ),
             ],

@@ -126,7 +126,7 @@ class _RenderExclusiveMouseRegion extends RenderMouseRegion {
 
   @override
   bool hitTest(BoxHitTestResult result, {required Offset position}) {
-    bool isHit = false;
+    var isHit = false;
     final bool outermost = isOutermostMouseRegion;
     isOutermostMouseRegion = false;
     if (size.contains(position)) {
@@ -499,7 +499,7 @@ class Tooltip extends StatefulWidget {
     if (_openedTooltips.isNotEmpty) {
       // Avoid concurrent modification.
       final List<TooltipState> openedTooltips = _openedTooltips.toList();
-      for (final TooltipState state in openedTooltips) {
+      for (final state in openedTooltips) {
         assert(state.mounted);
         state._scheduleDismissTooltip(withDelay: Duration.zero);
       }
@@ -710,7 +710,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   void _handlePointerDown(PointerDownEvent event) {
     // PointerDeviceKinds that don't support hovering.
-    const Set<PointerDeviceKind> triggerModeDeviceKinds = <PointerDeviceKind>{
+    const triggerModeDeviceKinds = <PointerDeviceKind>{
       PointerDeviceKind.invertedStylus,
       PointerDeviceKind.stylus,
       PointerDeviceKind.touch,
@@ -834,7 +834,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     final List<TooltipState> tooltipsToDismiss = Tooltip._openedTooltips
         .where((TooltipState tooltip) => tooltip._activeHoveringPointerDevices.isEmpty)
         .toList();
-    for (final TooltipState tooltip in tooltipsToDismiss) {
+    for (final tooltip in tooltipsToDismiss) {
       assert(tooltip.mounted);
       tooltip._scheduleDismissTooltip(withDelay: Duration.zero);
     }
@@ -964,10 +964,10 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     };
 
     final TooltipThemeData tooltipTheme = _tooltipTheme;
-    final BoxConstraints defaultConstraints = BoxConstraints(
+    final defaultConstraints = BoxConstraints(
       minHeight: widget.height ?? tooltipTheme.height ?? _getDefaultTooltipHeight(),
     );
-    final _TooltipOverlay overlayChild = _TooltipOverlay(
+    final overlayChild = _TooltipOverlay(
       richMessage: widget.richMessage ?? TextSpan(text: widget.message),
       constraints: widget.constraints ?? tooltipTheme.constraints ?? defaultConstraints,
       padding: widget.padding ?? tooltipTheme.padding ?? _getDefaultPadding(),

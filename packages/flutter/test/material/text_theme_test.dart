@@ -16,12 +16,12 @@ void main() {
 
   test('TextTheme lerp special cases', () {
     expect(TextTheme.lerp(null, null, 0), const TextTheme());
-    const TextTheme theme = TextTheme();
+    const theme = TextTheme();
     expect(identical(TextTheme.lerp(theme, theme, 0.5), theme), true);
   });
 
   test('TextTheme copyWith apply, merge basics with Typography.black', () {
-    final Typography typography = Typography.material2018();
+    final typography = Typography.material2018();
     expect(typography.black, equals(typography.black.copyWith()));
     expect(typography.black, equals(typography.black.apply()));
     expect(typography.black, equals(typography.black.merge(null)));
@@ -33,7 +33,7 @@ void main() {
   });
 
   test('TextTheme copyWith', () {
-    final Typography typography = Typography.material2018();
+    final typography = Typography.material2018();
     final TextTheme whiteCopy = typography.black.copyWith(
       displayLarge: typography.white.displayLarge,
       displayMedium: typography.white.displayMedium,
@@ -55,15 +55,15 @@ void main() {
   });
 
   test('TextTheme merges properly in the presence of null fields.', () {
-    const TextTheme partialTheme = TextTheme(titleLarge: TextStyle(color: Color(0xcafefeed)));
+    const partialTheme = TextTheme(titleLarge: TextStyle(color: Color(0xcafefeed)));
     final TextTheme fullTheme = ThemeData.fallback().textTheme.merge(partialTheme);
     expect(fullTheme.titleLarge!.color, equals(partialTheme.titleLarge!.color));
 
-    const TextTheme onlyHeadlineSmallAndTitleLarge = TextTheme(
+    const onlyHeadlineSmallAndTitleLarge = TextTheme(
       headlineSmall: TextStyle(color: Color(0xcafefeed)),
       titleLarge: TextStyle(color: Color(0xbeefcafe)),
     );
-    const TextTheme onlyBodyMediumAndTitleLarge = TextTheme(
+    const onlyBodyMediumAndTitleLarge = TextTheme(
       bodyMedium: TextStyle(color: Color(0xfeedfeed)),
       titleLarge: TextStyle(color: Color(0xdeadcafe)),
     );
@@ -84,18 +84,18 @@ void main() {
     // The `displayColor` is applied to [displayLarge], [displayMedium],
     // [displaySmall], [headlineLarge], [headlineMedium], and [bodySmall]. The
     // `bodyColor` is applied to the remaining text styles.
-    const Color displayColor = Color(0x00000001);
-    const Color bodyColor = Color(0x00000002);
-    const String fontFamily = 'fontFamily';
-    const List<String> fontFamilyFallback = <String>['font', 'family', 'fallback'];
-    const Color decorationColor = Color(0x00000003);
+    const displayColor = Color(0x00000001);
+    const bodyColor = Color(0x00000002);
+    const fontFamily = 'fontFamily';
+    const fontFamilyFallback = <String>['font', 'family', 'fallback'];
+    const decorationColor = Color(0x00000003);
     const TextDecorationStyle decorationStyle = TextDecorationStyle.dashed;
-    final TextDecoration decoration = TextDecoration.combine(<TextDecoration>[
+    final decoration = TextDecoration.combine(<TextDecoration>[
       TextDecoration.underline,
       TextDecoration.lineThrough,
     ]);
 
-    final Typography typography = Typography.material2018();
+    final typography = Typography.material2018();
     final TextTheme theme = typography.black.apply(
       fontFamily: fontFamily,
       fontFamilyFallback: fontFamilyFallback,
@@ -122,7 +122,7 @@ void main() {
     expect(theme.labelMedium!.color, bodyColor);
     expect(theme.labelSmall!.color, bodyColor);
 
-    final List<TextStyle> themeStyles = <TextStyle>[
+    final themeStyles = <TextStyle>[
       theme.displayLarge!,
       theme.displayMedium!,
       theme.displaySmall!,
@@ -150,7 +150,7 @@ void main() {
   });
 
   test('TextTheme apply fontSizeFactor fontSizeDelta', () {
-    final Typography typography = Typography.material2018();
+    final typography = Typography.material2018();
     final TextTheme baseTheme = Typography.englishLike2018.merge(typography.black);
     final TextTheme sizeTheme = baseTheme.apply(fontSizeFactor: 2.0, fontSizeDelta: 5.0);
 
@@ -172,7 +172,7 @@ void main() {
   });
 
   test('TextTheme apply letterSpacingFactor letterSpacingDelta', () {
-    final Typography typography = Typography.material2018();
+    final typography = Typography.material2018();
     final TextTheme baseTheme = Typography.englishLike2018.merge(typography.black);
     final TextTheme sizeTheme = baseTheme.apply(letterSpacingFactor: 2.0, letterSpacingDelta: 5.0);
 
@@ -212,7 +212,7 @@ void main() {
   });
 
   test('TextTheme apply wordSpacingFactor wordSpacingDelta', () {
-    final Typography typography = Typography.material2018();
+    final typography = Typography.material2018();
     final TextTheme baseTheme = Typography.englishLike2018.merge(typography.black);
     final TextTheme baseThemeWithWordSpacing = baseTheme.copyWith(
       displayLarge: baseTheme.displayLarge!.copyWith(wordSpacing: 1.0),
@@ -299,7 +299,7 @@ void main() {
   });
 
   test('TextTheme apply heightFactor heightDelta', () {
-    final Typography typography = Typography.material2021();
+    final typography = Typography.material2021();
     final TextTheme baseTheme = Typography.englishLike2021.merge(typography.black);
     final TextTheme sizeTheme = baseTheme.apply(heightFactor: 2.0, heightDelta: 5.0);
 
@@ -382,8 +382,8 @@ void main() {
   });
 
   test('VisualDensity.lerp', () {
-    const VisualDensity a = VisualDensity(horizontal: 1.0, vertical: .5);
-    const VisualDensity b = VisualDensity(horizontal: 2.0, vertical: 1.0);
+    const a = VisualDensity(horizontal: 1.0, vertical: .5);
+    const b = VisualDensity(horizontal: 2.0, vertical: 1.0);
 
     final VisualDensity noLerp = VisualDensity.lerp(a, b, 0.0);
     expect(noLerp.horizontal, 1.0);
@@ -401,7 +401,7 @@ void main() {
   testWidgets('TextTheme.of(context) is equivalent to Theme.of(context).textTheme', (
     WidgetTester tester,
   ) async {
-    const Key sizedBoxKey = Key('sizedBox');
+    const sizedBoxKey = Key('sizedBox');
 
     await tester.pumpWidget(
       MaterialApp(
@@ -423,7 +423,7 @@ void main() {
   testWidgets('TextTheme.primaryOf(context) is equivalent to Theme.of(context).primaryTextTheme', (
     WidgetTester tester,
   ) async {
-    const Key sizedBoxKey = Key('sizedBox');
+    const sizedBoxKey = Key('sizedBox');
 
     await tester.pumpWidget(
       MaterialApp(
