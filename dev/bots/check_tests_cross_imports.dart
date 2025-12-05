@@ -344,10 +344,13 @@ class TestsCrossImportChecker {
   /// Returns the Set of paths in `knownPaths` that are not in `files`.
   static Set<String> _differencePaths(Set<String> knownPaths, Set<File> files) {
     final Set<String> testPaths = files.map((File file) {
-      final int index = file.absolute.path.indexOf(RegExp('packages.flutter.test'));
-      final indexNormalized = index == -1 ? 0 : index;
+      final prefix = RegExp('packages.flutter.test');
+      final int index = file.absolute.path.indexOf(prefix);
+      if (index < 0) {
+        throw ArgumentError('All files must include $prefix in their path.', 'files');
+      }
       return file.absolute.path
-          .substring(indexNormalized)
+          .substring(index)
           .replaceAll('/', Platform.isWindows ? r'\' : '/');
     }).toSet();
     return knownPaths.difference(testPaths);
@@ -364,11 +367,16 @@ class TestsCrossImportChecker {
     }).toList();
   }
 
-  static Set<File> _getUnknowns(Set<File> files, Set<String> knownPaths) {
+  /// Returns the Set of Files that are not in knownPaths.
+  static Set<File> _getUnknowns(Set<String> knownPaths, Set<File> files) {
     return files.where((File file) {
-      final int index = file.absolute.path.indexOf(RegExp('packages.flutter.test'));
+      final prefix = RegExp('packages.flutter.test');
+      final int index = file.absolute.path.indexOf(prefix);
+      if (index < 0) {
+        throw ArgumentError('All files must include $prefix in their path.', 'files');
+      }
       final String comparablePath = file.absolute.path
-          .substring(index == -1 ? 0 : index)
+          .substring(index)
           .replaceAll('/', Platform.isWindows ? r'\' : '/');
       return !knownPaths.contains(comparablePath);
     }).toSet();
@@ -471,8 +479,8 @@ class TestsCrossImportChecker {
     // Find any cross imports that are not in the known list.
     var valid = true;
     final Set<File> unknownWidgetsTestsImportingMaterial = _getUnknowns(
-      widgetsTestsImportingMaterial,
       _knownCrossImports,
+      widgetsTestsImportingMaterial,
     );
     if (unknownWidgetsTestsImportingMaterial.isNotEmpty) {
       valid = false;
@@ -485,8 +493,8 @@ class TestsCrossImportChecker {
       );
     }
     final Set<File> unknownWidgetsTestsImportingCupertino = _getUnknowns(
-      widgetsTestsImportingCupertino,
       _knownCrossImports,
+      widgetsTestsImportingCupertino,
     );
     if (unknownWidgetsTestsImportingCupertino.isNotEmpty) {
       valid = false;
@@ -499,8 +507,8 @@ class TestsCrossImportChecker {
       );
     }
     final Set<File> unknownCupertinoTestsImportingMaterial = _getUnknowns(
-      cupertinoTestsImportingMaterial,
       _knownCrossImports,
+      cupertinoTestsImportingMaterial,
     );
     if (unknownCupertinoTestsImportingMaterial.isNotEmpty) {
       valid = false;
