@@ -548,4 +548,13 @@ void main() {
     expect(firstPosition.value, 1.0);
     expect(lastPosition.value, 1.0);
   });
+
+  testWidgets('CupertinoListTileChevron does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(child: SizedBox.shrink(child: CupertinoListTileChevron())),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoListTileChevron)), Size.zero);
+  });
 }
