@@ -90,6 +90,10 @@ bool ClipContents::Render(const ContentContext& renderer,
   options.primitive_type = clip_geometry_.type;
   pass.SetVertexBuffer(clip_geometry_.vertex_buffer);
   switch (clip_geometry_.mode) {
+    case GeometryResult::Mode::kNormal:
+      // Fall through to kNonZero case.
+    case GeometryResult::Mode::kPreventOverdraw:
+      // Fall through to kNonZero case.
     case GeometryResult::Mode::kNonZero:
       pass.SetCommandLabel("Clip stencil preparation (NonZero)");
       options.stencil_mode =
@@ -99,12 +103,6 @@ bool ClipContents::Render(const ContentContext& renderer,
       pass.SetCommandLabel("Clip stencil preparation (EvenOdd)");
       options.stencil_mode =
           ContentContextOptions::StencilMode::kStencilEvenOddFill;
-      break;
-    case GeometryResult::Mode::kNormal:
-    case GeometryResult::Mode::kPreventOverdraw:
-      pass.SetCommandLabel("Clip stencil preparation (Increment)");
-      options.stencil_mode =
-          ContentContextOptions::StencilMode::kOverdrawPreventionIncrement;
       break;
   }
   pass.SetPipeline(renderer.GetClipPipeline(options));
@@ -141,49 +139,6 @@ bool ClipContents::Render(const ContentContext& renderer,
 
   pass.SetPipeline(renderer.GetClipPipeline(options));
 
-  info.mvp = pass.GetOrthographicTransform();
-  VS::BindFrameInfo(pass,
-                    renderer.GetTransientsDataBuffer().EmplaceUniform(info));
-
-  return pass.Draw().ok();
-}
-
-/*******************************************************************************
- ******* ClipRestoreContents
- ******************************************************************************/
-
-bool RenderClipRestore(const ContentContext& renderer,
-                       RenderPass& pass,
-                       uint32_t clip_depth,
-                       std::optional<Rect> restore_coverage) {
-  using VS = ClipPipeline::VertexShader;
-
-  pass.SetCommandLabel("Restore Clip");
-  auto options = OptionsFromPass(pass);
-  options.blend_mode = BlendMode::kDst;
-  options.stencil_mode =
-      ContentContextOptions::StencilMode::kOverdrawPreventionRestore;
-  options.primitive_type = PrimitiveType::kTriangleStrip;
-  pass.SetPipeline(renderer.GetClipPipeline(options));
-  pass.SetStencilReference(0);
-
-  // Create a rect that covers either the given restore area, or the whole
-  // render target texture.
-  auto ltrb =
-      restore_coverage.value_or(Rect::MakeSize(pass.GetRenderTargetSize()))
-          .GetLTRB();
-
-  std::array<VS::PerVertexData, 4> vertices = {
-      VS::PerVertexData{Point(ltrb[0], ltrb[1])},
-      VS::PerVertexData{Point(ltrb[2], ltrb[1])},
-      VS::PerVertexData{Point(ltrb[0], ltrb[3])},
-      VS::PerVertexData{Point(ltrb[2], ltrb[3])},
-  };
-  pass.SetVertexBuffer(
-      CreateVertexBuffer(vertices, renderer.GetTransientsDataBuffer()));
-
-  VS::FrameInfo info;
-  info.depth = GetShaderClipDepth(clip_depth);
   info.mvp = pass.GetOrthographicTransform();
   VS::BindFrameInfo(pass,
                     renderer.GetTransientsDataBuffer().EmplaceUniform(info));

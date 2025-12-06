@@ -481,17 +481,6 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
         front_stencil.stencil_failure = StencilOperation::kSetToReferenceValue;
         desc.SetStencilAttachmentDescriptors(front_stencil);
         break;
-      case StencilMode::kOverdrawPreventionIncrement:
-        front_stencil.stencil_compare = CompareFunction::kEqual;
-        front_stencil.depth_stencil_pass = StencilOperation::kIncrementClamp;
-        desc.SetStencilAttachmentDescriptors(front_stencil);
-        break;
-      case StencilMode::kOverdrawPreventionRestore:
-        front_stencil.stencil_compare = CompareFunction::kLess;
-        front_stencil.depth_stencil_pass =
-            StencilOperation::kSetToReferenceValue;
-        desc.SetStencilAttachmentDescriptors(front_stencil);
-        break;
     }
   }
   if (maybe_depth.has_value()) {
