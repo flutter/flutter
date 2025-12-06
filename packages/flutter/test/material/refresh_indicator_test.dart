@@ -1323,19 +1323,13 @@ void main() {
     // The threshold is based on RefreshIndicator's render size, not the inner body viewport.
     // A small drag of 15px should NOT trigger refresh.
     await tester.fling(find.text('Large Header'), const Offset(0.0, 15.0), 1000.0);
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    await tester.pump(const Duration(seconds: 1));
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
     expect(refreshCalled, false);
 
     // A drag meeting the render-size-based threshold should trigger refresh.
     refreshCalled = false;
     await tester.fling(find.text('Large Header'), Offset(0.0, threshold), 1000.0);
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    await tester.pump(const Duration(seconds: 1));
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
     expect(refreshCalled, true);
   });
 }
