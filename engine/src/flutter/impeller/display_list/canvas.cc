@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <utility>
 
+#include "display_list/dl_vertices.h"
 #include "display_list/effects/color_filters/dl_blend_color_filter.h"
 #include "display_list/effects/color_filters/dl_matrix_color_filter.h"
 #include "display_list/effects/dl_color_filter.h"
@@ -20,6 +21,7 @@
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/display_list/color_filter.h"
+#include "impeller/display_list/dl_vertices_geometry.h"
 #include "impeller/display_list/image_filter.h"
 #include "impeller/display_list/skia_conversions.h"
 #include "impeller/entity/contents/atlas_contents.h"
@@ -30,6 +32,7 @@
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
 #include "impeller/entity/contents/line_contents.h"
+#include "impeller/entity/contents/shadow_vertices_contents.h"
 #include "impeller/entity/contents/solid_rrect_blur_contents.h"
 #include "impeller/entity/contents/solid_rsuperellipse_blur_contents.h"
 #include "impeller/entity/contents/text_contents.h"
@@ -45,6 +48,7 @@
 #include "impeller/entity/geometry/line_geometry.h"
 #include "impeller/entity/geometry/point_field_geometry.h"
 #include "impeller/entity/geometry/rect_geometry.h"
+#include "impeller/entity/geometry/shadow_path_geometry.h"
 #include "impeller/entity/geometry/stroke_path_geometry.h"
 #include "impeller/entity/save_layer_utils.h"
 #include "impeller/geometry/color.h"
@@ -177,24 +181,95 @@ static std::unique_ptr<EntityPassTarget> CreateRenderTarget(
 
 }  // namespace
 
-std::shared_ptr<SolidRRectLikeBlurContents>
-Canvas::RRectBlurShape::BuildBlurContent() {
-  return std::make_shared<SolidRRectBlurContents>();
-}
+class Canvas::RRectBlurShape : public BlurShape {
+ public:
+  RRectBlurShape(const Rect& rect, Scalar corner_radius)
+      : rect_(rect), corner_radius_(corner_radius) {}
 
-Geometry& Canvas::RRectBlurShape::BuildGeometry(Rect rect, Scalar radius) {
-  return geom_.emplace(rect, Size{radius, radius});
-}
+  Rect GetBounds() const override { return rect_; }
 
-std::shared_ptr<SolidRRectLikeBlurContents>
-Canvas::RSuperellipseBlurShape::BuildBlurContent() {
-  return std::make_shared<SolidRSuperellipseBlurContents>();
-}
+  std::shared_ptr<SolidBlurContents> BuildBlurContent(Sigma sigma) override {
+    auto contents = std::make_shared<SolidRRectBlurContents>();
+    contents->SetSigma(sigma);
+    contents->SetShape(rect_, corner_radius_);
+    return contents;
+  }
 
-Geometry& Canvas::RSuperellipseBlurShape::BuildGeometry(Rect rect,
-                                                        Scalar radius) {
-  return geom_.emplace(rect, radius);
-}
+  const Geometry& BuildDrawGeometry() override {
+    return geom_.emplace(rect_, Size(corner_radius_));
+  }
+
+ private:
+  const Rect rect_;
+  const Scalar corner_radius_;
+
+  std::optional<RoundRectGeometry> geom_;  // optional stack allocation
+};
+
+class Canvas::RSuperellipseBlurShape : public BlurShape {
+ public:
+  RSuperellipseBlurShape(const Rect& rect, Scalar corner_radius)
+      : rect_(rect), corner_radius_(corner_radius) {}
+
+  Rect GetBounds() const override { return rect_; }
+
+  std::shared_ptr<SolidBlurContents> BuildBlurContent(Sigma sigma) override {
+    auto contents = std::make_shared<SolidRSuperellipseBlurContents>();
+    contents->SetSigma(sigma);
+    contents->SetShape(rect_, corner_radius_);
+    return contents;
+  }
+
+  const Geometry& BuildDrawGeometry() override {
+    return geom_.emplace(rect_, corner_radius_);
+  }
+
+ private:
+  const Rect rect_;
+  const Scalar corner_radius_;
+
+  std::optional<RoundSuperellipseGeometry> geom_;  // optional stack allocation
+};
+
+class Canvas::PathBlurShape : public BlurShape {
+ public:
+  PathBlurShape(const PathSource& source,
+                Tessellator& tessellator,
+                const Matrix& matrix)
+      : source_(source), tessellator_(tessellator), matrix_(matrix) {}
+
+  Rect GetBounds() const override { return source_.GetBounds(); }
+
+  std::shared_ptr<SolidBlurContents> BuildBlurContent(Sigma sigma) override {
+    Scalar device_radius =
+        sigma.sigma * kSigmaScale * matrix_.GetMaxBasisLengthXY();
+    ShadowPathGeometry shadow_geometry(tessellator_, matrix_, source_,
+                                       device_radius);
+    if (!shadow_geometry.CanRender() || shadow_geometry.IsEmpty()) {
+      return nullptr;
+    }
+    return ShadowVerticesContents::Make(shadow_geometry.GetShadowVertices());
+  }
+
+  const Geometry& BuildDrawGeometry() override {
+    return source_geometry_.emplace(source_);
+  }
+
+ private:
+  // This value was determined by empirical eyesight tests so that the
+  // shadow mesh results will match the results of the shape-specific
+  // optimized shadow shaders.
+  static constexpr Scalar kSigmaScale = 2.8f;
+
+  const PathSource& source_;
+  Tessellator& tessellator_;
+  const Matrix& matrix_;
+
+  // optional stack allocation - for BuildBlurContents
+  std::optional<ShadowPathGeometry> shadow_geometry_;
+  // optional stack allocation - for BuildGeometry
+  std::optional<FillPathFromSourceGeometry> source_geometry_;
+};
 
 Canvas::Canvas(ContentContext& renderer,
                const RenderTarget& render_target,
@@ -326,6 +401,14 @@ void Canvas::RestoreToCount(size_t count) {
 }
 
 void Canvas::DrawPath(const flutter::DlPath& path, const Paint& paint) {
+  if (IsShadowBlurDrawOperation(paint)) {
+    PathBlurShape shape(path, renderer_.GetTessellator(),
+                        GetCurrentTransform());
+    if (AttemptDrawBlur(shape, paint)) {
+      return;
+    }
+  }
+
   Entity entity;
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
@@ -456,25 +539,7 @@ bool Canvas::AttemptDrawAntialiasedCircle(const Point& center,
   return true;
 }
 
-bool Canvas::AttemptDrawBlurredRRect(const Rect& rect,
-                                     Size corner_radii,
-                                     const Paint& paint) {
-  RRectBlurShape rrect_shape;
-  return AttemptDrawBlurredRRectLike(rect, corner_radii, paint, rrect_shape);
-}
-
-bool Canvas::AttemptDrawBlurredRSuperellipse(const Rect& rect,
-                                             Size corner_radii,
-                                             const Paint& paint) {
-  RSuperellipseBlurShape rsuperellipse_shape;
-  return AttemptDrawBlurredRRectLike(rect, corner_radii, paint,
-                                     rsuperellipse_shape);
-}
-
-bool Canvas::AttemptDrawBlurredRRectLike(const Rect& rect,
-                                         Size corner_radii,
-                                         const Paint& paint,
-                                         RRectLikeBlurShape& shape) {
+bool Canvas::IsShadowBlurDrawOperation(const Paint& paint) {
   if (paint.style != Paint::Style::kFill) {
     return false;
   }
@@ -488,15 +553,59 @@ bool Canvas::AttemptDrawBlurredRRectLike(const Rect& rect,
   }
 
   // A blur sigma that is not positive enough should not result in a blur.
+  // We test both the sigma value and the converted radius value as the
+  // algorithms might use either and either indicates the blur is too small
+  // to be noticeable.
   if (paint.mask_blur_descriptor->sigma.sigma <= kEhCloseEnough) {
     return false;
   }
-
-  // The current rrect blur math doesn't work on ovals.
-  if (fabsf(corner_radii.width - corner_radii.height) > kEhCloseEnough) {
+  Radius radius = paint.mask_blur_descriptor->sigma;
+  if (radius.radius <= kEhCloseEnough) {
     return false;
   }
-  Scalar corner_radius = corner_radii.width;
+
+  return true;
+}
+
+Scalar Canvas::GetCommonRRectLikeRadius(const RoundingRadii& radii) {
+  if (!radii.AreAllCornersSame()) {
+    return -1;
+  }
+  const Size& corner_radii = radii.top_left;
+  if (ScalarNearlyEqual(corner_radii.width, corner_radii.height)) {
+    return corner_radii.width;
+  }
+  return -1;
+}
+
+bool Canvas::AttemptDrawBlurredRRect(const RoundRect& round_rect,
+                                     const Paint& paint) {
+  Scalar radius = GetCommonRRectLikeRadius(round_rect.GetRadii());
+  if (radius < 0) {
+    RoundRectPathSource source(round_rect);
+    PathBlurShape shape(source, renderer_.GetTessellator(),
+                        GetCurrentTransform());
+    return AttemptDrawBlur(shape, paint);
+  }
+  RRectBlurShape shape(round_rect.GetBounds(), radius);
+  return AttemptDrawBlur(shape, paint);
+}
+
+bool Canvas::AttemptDrawBlurredRSuperellipse(const RoundSuperellipse& rse,
+                                             const Paint& paint) {
+  Scalar radius = GetCommonRRectLikeRadius(rse.GetRadii());
+  if (radius < 0) {
+    RoundSuperellipsePathSource source(rse);
+    PathBlurShape shape(source, renderer_.GetTessellator(),
+                        GetCurrentTransform());
+    return AttemptDrawBlur(shape, paint);
+  }
+  RSuperellipseBlurShape shape(rse.GetBounds(), radius);
+  return AttemptDrawBlur(shape, paint);
+}
+
+bool Canvas::AttemptDrawBlur(BlurShape& shape, const Paint& paint) {
+  FML_DCHECK(IsShadowBlurDrawOperation(paint));
 
   // For symmetrically mask blurred solid RRects, absorb the mask blur and use
   // a faster SDF approximation.
@@ -509,6 +618,24 @@ bool Canvas::AttemptDrawBlurredRRectLike(const Rect& rect,
   }
 
   Paint rrect_paint = {.mask_blur_descriptor = paint.mask_blur_descriptor};
+
+  // We need to construct the contents up front in case the procedure
+  // fails for this sigma. The most common cause of failure here is if
+  // we are blurring a path and it is not convex or not compatible with
+  // the shadow vertices technique in some other way.
+  if (!rrect_paint.mask_blur_descriptor.has_value()) {
+    // This should never happen in practice because the caller would have
+    // first called |IsShadowBlurDrawOperation| on the paint object, but
+    // we test anyway to make the compiler happy about the dereferences
+    // below.
+    return false;
+  }
+
+  auto contents =
+      shape.BuildBlurContent(rrect_paint.mask_blur_descriptor->sigma);
+  if (contents == nullptr) {
+    return false;
+  }
 
   // In some cases, we need to render the mask blur to a separate layer.
   //
@@ -534,7 +661,7 @@ bool Canvas::AttemptDrawBlurredRRectLike(const Rect& rect,
        paint.image_filter) ||
       (paint.mask_blur_descriptor->style == FilterContents::BlurStyle::kSolid &&
        (!rrect_color.IsOpaque() || paint.blend_mode != BlendMode::kSrcOver))) {
-    Rect render_bounds = rect;
+    Rect render_bounds = shape.GetBounds();
     if (paint.mask_blur_descriptor->style !=
         FilterContents::BlurStyle::kInner) {
       render_bounds =
@@ -556,13 +683,8 @@ bool Canvas::AttemptDrawBlurredRRectLike(const Rect& rect,
     Save(1u);
   }
 
-  auto draw_blurred_rrect = [this, &rect, corner_radius, &rrect_paint,
-                             &shape]() {
-    auto contents = shape.BuildBlurContent();
-
+  auto draw_blurred_rrect = [this, &rrect_paint, &contents]() {
     contents->SetColor(rrect_paint.color);
-    contents->SetSigma(rrect_paint.mask_blur_descriptor->sigma);
-    contents->SetShape(rect, corner_radius);
 
     Entity blurred_rrect_entity;
     blurred_rrect_entity.SetTransform(GetCurrentTransform());
@@ -587,19 +709,19 @@ bool Canvas::AttemptDrawBlurredRRectLike(const Rect& rect,
       entity.SetTransform(GetCurrentTransform());
       entity.SetBlendMode(rrect_paint.blend_mode);
 
-      Geometry& geom = shape.BuildGeometry(rect, corner_radius);
+      const Geometry& geom = shape.BuildDrawGeometry();
       AddRenderEntityWithFiltersToCurrentPass(entity, &geom, rrect_paint,
                                               /*reuse_depth=*/true);
       break;
     }
     case FilterContents::BlurStyle::kOuter: {
-      Geometry& geom = shape.BuildGeometry(rect, corner_radius);
+      const Geometry& geom = shape.BuildDrawGeometry();
       ClipGeometry(geom, Entity::ClipOperation::kDifference);
       draw_blurred_rrect();
       break;
     }
     case FilterContents::BlurStyle::kInner: {
-      Geometry& geom = shape.BuildGeometry(rect, corner_radius);
+      const Geometry& geom = shape.BuildDrawGeometry();
       ClipGeometry(geom, Entity::ClipOperation::kIntersect);
       draw_blurred_rrect();
       break;
@@ -660,8 +782,11 @@ void Canvas::DrawDashedLine(const Point& p0,
 }
 
 void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
-  if (AttemptDrawBlurredRRect(rect, {}, paint)) {
-    return;
+  if (IsShadowBlurDrawOperation(paint)) {
+    RRectBlurShape shape(rect, 0.0f);
+    if (AttemptDrawBlur(shape, paint)) {
+      return;
+    }
   }
 
   Entity entity;
@@ -689,8 +814,20 @@ void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
     return;
   }
 
-  if (AttemptDrawBlurredRRect(rect, rect.GetSize() * 0.5f, paint)) {
-    return;
+  if (IsShadowBlurDrawOperation(paint)) {
+    if (rect.IsSquare()) {
+      RRectBlurShape shape(rect, rect.GetWidth() * 0.5f);
+      if (AttemptDrawBlur(shape, paint)) {
+        return;
+      }
+    } else {
+      EllipsePathSource source(rect);
+      PathBlurShape shape(source, renderer_.GetTessellator(),
+                          GetCurrentTransform());
+      if (AttemptDrawBlur(shape, paint)) {
+        return;
+      }
+    }
   }
 
   Entity entity;
@@ -759,22 +896,22 @@ void Canvas::DrawArc(const Arc& arc, const Paint& paint) {
 }
 
 void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
-  auto& rect = round_rect.GetBounds();
-  auto& radii = round_rect.GetRadii();
-  if (radii.AreAllCornersSame()) {
-    if (AttemptDrawBlurredRRect(rect, radii.top_left, paint)) {
+  if (IsShadowBlurDrawOperation(paint)) {
+    if (AttemptDrawBlurredRRect(round_rect, paint)) {
       return;
     }
+  }
 
-    if (paint.style == Paint::Style::kFill) {
-      Entity entity;
-      entity.SetTransform(GetCurrentTransform());
-      entity.SetBlendMode(paint.blend_mode);
+  if (round_rect.GetRadii().AreAllCornersSame() &&
+      paint.style == Paint::Style::kFill) {
+    Entity entity;
+    entity.SetTransform(GetCurrentTransform());
+    entity.SetBlendMode(paint.blend_mode);
 
-      RoundRectGeometry geom(rect, radii.top_left);
-      AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
-      return;
-    }
+    RoundRectGeometry geom(round_rect.GetBounds(),
+                           round_rect.GetRadii().top_left);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+    return;
   }
 
   Entity entity;
@@ -808,11 +945,10 @@ void Canvas::DrawDiffRoundRect(const RoundRect& outer,
 
 void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
                                    const Paint& paint) {
-  auto& rect = round_superellipse.GetBounds();
-  auto& radii = round_superellipse.GetRadii();
-  if (radii.AreAllCornersSame() &&
-      AttemptDrawBlurredRSuperellipse(rect, radii.top_left, paint)) {
-    return;
+  if (IsShadowBlurDrawOperation(paint)) {
+    if (AttemptDrawBlurredRSuperellipse(round_superellipse, paint)) {
+      return;
+    }
   }
 
   Entity entity;
@@ -820,7 +956,8 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
   entity.SetBlendMode(paint.blend_mode);
 
   if (paint.style == Paint::Style::kFill) {
-    RoundSuperellipseGeometry geom(rect, radii);
+    RoundSuperellipseGeometry geom(round_superellipse.GetBounds(),
+                                   round_superellipse.GetRadii());
     AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
   } else {
     StrokeRoundSuperellipseGeometry geom(round_superellipse, paint.stroke);
@@ -831,11 +968,13 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
 void Canvas::DrawCircle(const Point& center,
                         Scalar radius,
                         const Paint& paint) {
-  Size half_size(radius, radius);
-  if (AttemptDrawBlurredRRect(
-          Rect::MakeOriginSize(center - half_size, half_size * 2),
-          {radius, radius}, paint)) {
-    return;
+  if (IsShadowBlurDrawOperation(paint)) {
+    Rect bounds = Rect::MakeLTRB(center.x - radius, center.y - radius,
+                                 center.x + radius, center.y + radius);
+    RRectBlurShape shape(bounds, radius);
+    if (AttemptDrawBlur(shape, paint)) {
+      return;
+    }
   }
 
   if (AttemptDrawAntialiasedCircle(center, radius, paint)) {
