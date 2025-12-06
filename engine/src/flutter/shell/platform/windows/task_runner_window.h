@@ -7,6 +7,7 @@
 
 #include <windows.h>
 
+#include <atomic>
 #include <chrono>
 #include <functional>
 #include <memory>
@@ -101,6 +102,7 @@ class TaskRunnerWindow {
   std::vector<Delegate*> delegates_;
   DWORD thread_id_ = 0;
   TimerThread timer_thread_;
+  std::atomic_bool wake_up_posted_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(TaskRunnerWindow);
 };
