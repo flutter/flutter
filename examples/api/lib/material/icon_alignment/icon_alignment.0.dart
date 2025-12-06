@@ -4,34 +4,30 @@
 
 import 'package:flutter/material.dart';
 
-// ignore: deprecated_member_use
-/// Flutter code sample for using [ButtonStyleButton.iconAlignment] parameter.
+/// Flutter code sample for the [IconAlignment] property on various Material
+/// button widgets.
 
 void main() {
-  runApp(const ButtonStyleButtonIconAlignmentApp());
+  runApp(const IconAlignmentApp());
 }
 
-class ButtonStyleButtonIconAlignmentApp extends StatelessWidget {
-  const ButtonStyleButtonIconAlignmentApp({super.key});
+class IconAlignmentApp extends StatelessWidget {
+  const IconAlignmentApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(body: ButtonStyleButtonIconAlignmentExample()),
-    );
+    return const MaterialApp(home: Scaffold(body: IconAlignmentExample()));
   }
 }
 
-class ButtonStyleButtonIconAlignmentExample extends StatefulWidget {
-  const ButtonStyleButtonIconAlignmentExample({super.key});
+class IconAlignmentExample extends StatefulWidget {
+  const IconAlignmentExample({super.key});
 
   @override
-  State<ButtonStyleButtonIconAlignmentExample> createState() =>
-      _ButtonStyleButtonIconAlignmentExampleState();
+  State<IconAlignmentExample> createState() => _IconAlignmentExampleState();
 }
 
-class _ButtonStyleButtonIconAlignmentExampleState
-    extends State<ButtonStyleButtonIconAlignmentExample> {
+class _IconAlignmentExampleState extends State<IconAlignmentExample> {
   TextDirection _textDirection = TextDirection.ltr;
   IconAlignment _iconAlignment = IconAlignment.start;
 
