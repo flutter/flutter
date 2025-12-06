@@ -182,6 +182,20 @@ class WindowingOwnerWin32 extends WindowingOwner {
     throw UnimplementedError('Tooltip windows are not yet implemented on Windows.');
   }
 
+  @internal
+  @override
+  OverlayWindowController createOverlayWindowController({
+    required OverlayWindowControllerDelegate delegate,
+    required Rect anchorRect,
+    required WindowPositioner positioner,
+    required BoxConstraints contentSizeConstraints,
+    BaseWindowController? parent,
+    String? title,
+    bool alwaysOnTop = false,
+  }) {
+    throw UnimplementedError('Overlay windows are not yet implemented on Windows.');
+  }
+
   /// Register a new [WindowsMessageHandler].
   ///
   /// The handler will be triggered for unhandled messages for all top level
