@@ -32,6 +32,7 @@
 #include "flutter/shell/common/skia_event_tracer_impl.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/common/vsync_waiter.h"
+#include "impeller/renderer/pipeline_library.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
 #include "third_party/dart/runtime/include/dart_tools_api.h"
@@ -595,6 +596,10 @@ Shell::Shell(DartVMRef vm,
       task_runners_.GetPlatformTaskRunner(),
       std::bind(&Shell::OnServiceProtocolReloadAssetFonts, this,
                 std::placeholders::_1, std::placeholders::_2)};
+  service_protocol_handlers_[ServiceProtocol::kGetPipelineUsageExtensionName] =
+      {task_runners_.GetIOTaskRunner(),
+       std::bind(&Shell::OnServiceProtocolGetPipelineUsage, this,
+                 std::placeholders::_1, std::placeholders::_2)};
 }
 
 Shell::~Shell() {
@@ -2165,6 +2170,31 @@ bool Shell::OnServiceProtocolSetAssetBundlePath(
 
   FML_DCHECK(false);
   return false;
+}
+
+bool Shell::OnServiceProtocolGetPipelineUsage(
+    const ServiceProtocol::Handler::ServiceProtocolMap& params,
+    rapidjson::Document* response) {
+  FML_DCHECK(task_runners_.GetIOTaskRunner()->RunsTasksOnCurrentThread());
+
+  auto context = io_manager_->GetImpellerContext();
+
+  auto use_counts = context->GetPipelineLibrary()->GetPipelineUseCounts();
+  response->SetObject();
+
+  rapidjson::Value pipelines_json(rapidjson::kObjectType);
+
+  for (const auto& pipelineCount : use_counts) {
+    std::string_view pipeline_name = pipelineCount.first.GetLabel();
+    rapidjson::Value pipeline_key(pipeline_name.data(), pipeline_name.length(),
+                                  response->GetAllocator());
+
+    pipelines_json.AddMember(pipeline_key, pipelineCount.second,
+                             response->GetAllocator());
+  }
+
+  response->AddMember("Usages", pipelines_json, response->GetAllocator());
+  return true;
 }
 
 void Shell::SendFontChangeNotification() {
