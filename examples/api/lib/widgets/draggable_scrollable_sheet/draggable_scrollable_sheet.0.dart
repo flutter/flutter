@@ -36,12 +36,18 @@ class DraggableScrollableSheetExample extends StatefulWidget {
 
 class _DraggableScrollableSheetExampleState
     extends State<DraggableScrollableSheetExample> {
-  double _sheetPosition = 0.5;
-  final double _dragSensitivity = 600;
+  // This variable is used to restore the draggable sheet drag position
+  // for the purpose of handling over-dragging beyond bounds when
+  // the dragging mouse pointer re-enters the window on web and desktop platforms.
+  double _dragPosition = 0.5;
+  late double _sheetPosition = _dragPosition;
+  final minChildSize = 0.25;
+  final maxChildSize = 1.0;
 
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final double screenHeight = MediaQuery.sizeOf(context).height;
 
     return DraggableScrollableSheet(
       initialChildSize: _sheetPosition,
@@ -50,20 +56,18 @@ class _DraggableScrollableSheetExampleState
           color: colorScheme.primary,
           child: Column(
             children: <Widget>[
-              Grabber(
-                onVerticalDragUpdate: (DragUpdateDetails details) {
-                  setState(() {
-                    _sheetPosition -= details.delta.dy / _dragSensitivity;
-                    if (_sheetPosition < 0.25) {
-                      _sheetPosition = 0.25;
-                    }
-                    if (_sheetPosition > 1.0) {
-                      _sheetPosition = 1.0;
-                    }
-                  });
-                },
-                isOnDesktopAndWeb: _isOnDesktopAndWeb,
-              ),
+              if (_isOnDesktopAndWeb)
+                Grabber(
+                  onVerticalDragUpdate: (DragUpdateDetails details) {
+                    setState(() {
+                      _dragPosition -= details.delta.dy / screenHeight;
+                      _sheetPosition = _dragPosition.clamp(
+                        minChildSize,
+                        maxChildSize,
+                      );
+                    });
+                  },
+                ),
               Flexible(
                 child: ListView.builder(
                   controller: _isOnDesktopAndWeb ? null : scrollController,
@@ -98,22 +102,14 @@ class _DraggableScrollableSheetExampleState
 }
 
 /// A draggable widget that accepts vertical drag gestures
-/// and this is only visible on desktop and web platforms.
+/// and is only visible on desktop and web platforms.
 class Grabber extends StatelessWidget {
-  const Grabber({
-    super.key,
-    required this.onVerticalDragUpdate,
-    required this.isOnDesktopAndWeb,
-  });
+  const Grabber({super.key, required this.onVerticalDragUpdate});
 
   final ValueChanged<DragUpdateDetails> onVerticalDragUpdate;
-  final bool isOnDesktopAndWeb;
 
   @override
   Widget build(BuildContext context) {
-    if (!isOnDesktopAndWeb) {
-      return const SizedBox.shrink();
-    }
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return GestureDetector(
