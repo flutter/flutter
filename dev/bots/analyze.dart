@@ -1456,6 +1456,7 @@ Future<void> verifyNoTrailingSpaces(String workingDirectory, {int minimumMatches
       .where((File file) => path.extension(file.path) != '.ico')
       .where((File file) => path.extension(file.path) != '.jar')
       .where((File file) => path.extension(file.path) != '.swp')
+      .where((File file) => path.extension(file.path) != '.shaderbundle')
       .toList();
   final problems = <String>[];
   for (final file in files) {
