@@ -51,37 +51,52 @@ class Surface {
  public:
   using CallbackHandler = void(uint32_t, void*, SkwasmObject);
 
-  // Main thread only
   Surface();
 
+  // General getters
   unsigned long getThreadId() { return _thread; }
+  EMSCRIPTEN_WEBGL_CONTEXT_HANDLE getGlContext() { return _glContext; }
 
-  // Main thread only
-  void dispose();
-  void setResourceCacheLimit(int bytes);
-  uint32_t renderPictures(flutter::DisplayList** picture,
-                          int width,
-                          int height,
-                          int count);
-  uint32_t rasterizeImage(SkImage* image, ImageByteFormat format);
+  // Lifecycle
   void setCallbackHandler(CallbackHandler* callbackHandler);
+  void dispose();
+
+  // Surface setup
+  uint32_t setCanvas(SkwasmObject canvas);
+  void onInitialized(uint32_t callbackId);
+  void receiveCanvasOnWorker(SkwasmObject canvas, uint32_t callbackId);
+
+  // Resizing
+  uint32_t setSize(int width, int height);
+  void onResizeComplete(uint32_t callbackId);
+  void resizeOnWorker(int width, int height, uint32_t callbackId);
+
+  // Rendering
+  uint32_t renderPictures(flutter::DisplayList** picture, int count);
   void onRenderComplete(uint32_t callbackId, SkwasmObject imageBitmap);
-  void onRasterizeComplete(uint32_t callbackId, SkData* data);
-
-  // Any thread
-  std::unique_ptr<TextureSourceWrapper> createTextureSourceWrapper(
-      SkwasmObject textureSource);
-
-  // Worker thread
   void renderPicturesOnWorker(sk_sp<flutter::DisplayList>* picture,
-                              int width,
-                              int height,
                               int pictureCount,
                               uint32_t callbackId,
                               double rasterStart);
+
+  // Image Rasterization
+  uint32_t rasterizeImage(SkImage* image, ImageByteFormat format);
+  void onRasterizeComplete(uint32_t callbackId, SkData* data);
   void rasterizeImageOnWorker(SkImage* image,
                               ImageByteFormat format,
                               uint32_t callbackId);
+
+  // Context Loss
+  uint32_t triggerContextLoss();
+  void onContextLossTriggered(uint32_t callbackId);
+  void reportContextLost(uint32_t callbackId);
+  void triggerContextLossOnWorker(uint32_t callbackId);
+  void onContextLost();
+
+  // Other
+  void setResourceCacheLimit(int bytes);
+  std::unique_ptr<TextureSourceWrapper> createTextureSourceWrapper(
+      SkwasmObject textureSource);
 
  private:
   void _init();
@@ -89,7 +104,7 @@ class Surface {
   void _recreateSurface();
 
   CallbackHandler* _callbackHandler = nullptr;
-  uint32_t _currentCallbackId = 0;
+  inline static uint32_t _currentCallbackId = 0;
 
   int _canvasWidth = 0;
   int _canvasHeight = 0;
@@ -100,6 +115,7 @@ class Surface {
   GrGLFramebufferInfo _fbInfo;
   GrGLint _sampleCount;
   GrGLint _stencil;
+  uint32_t _contextLostCallbackId = 0;
 
   pthread_t _thread;
 
