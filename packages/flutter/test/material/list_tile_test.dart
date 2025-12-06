@@ -1941,7 +1941,7 @@ void main() {
   testWidgets('ListTile computeMinIntrinsicHeight respects minTileHeight and padding', (
     WidgetTester tester,
   ) async {
-    Widget buildFrame({double? minTileHeight, Widget? title, Widget? subtitle}) {
+    Widget buildFrame({double? minTileHeight}) {
       return MaterialApp(
         theme: ThemeData(listTileTheme: ListTileThemeData(minTileHeight: minTileHeight)),
         home: const Material(
