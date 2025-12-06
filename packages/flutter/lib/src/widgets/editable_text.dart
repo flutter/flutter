@@ -1275,7 +1275,7 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   ///  * [expands], which determines whether the field should fill the height of
   ///    its parent.
-  final int? maxLines;
+  final num? maxLines;
 
   /// {@template flutter.widgets.editableText.minLines}
   /// The minimum number of lines to occupy when the content spans fewer lines.
@@ -2224,7 +2224,7 @@ class EditableText extends StatefulWidget {
   // Infer the keyboard type of an `EditableText` if it's not specified.
   static TextInputType _inferKeyboardType({
     required Iterable<String>? autofillHints,
-    required int? maxLines,
+    required num? maxLines,
   }) {
     if (autofillHints == null || autofillHints.isEmpty) {
       return maxLines == 1 ? TextInputType.text : TextInputType.multiline;
@@ -2396,7 +2396,7 @@ class EditableText extends StatefulWidget {
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
     properties.add(DiagnosticsProperty<TextScaler>('textScaler', textScaler, defaultValue: null));
-    properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
+    properties.add(DiagnosticsProperty<num>('maxLines', maxLines, defaultValue: 1));
     properties.add(IntProperty('minLines', minLines, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
@@ -6016,7 +6016,7 @@ class _Editable extends MultiChildRenderObjectWidget {
   final bool forceLine;
   final bool readOnly;
   final bool hasFocus;
-  final int? maxLines;
+  final num? maxLines;
   final int? minLines;
   final bool expands;
   final StrutStyle? strutStyle;
