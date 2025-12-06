@@ -1,0 +1,55 @@
+{
+  "datePickerHourSemanticsLabelOne": "Saacad $hour buuxda",
+  "datePickerHourSemanticsLabelOther": "Saacad $hour buuxda",
+
+  "datePickerMinuteSemanticsLabelOne": "1 daqiiqad",
+  "datePickerMinuteSemanticsLabelOther": "$minute daqiiqadood",
+
+  "datePickerDateOrder": "dmy",
+  "datePickerDateTimeOrder": "date_time_dayPeriod",
+
+  "anteMeridiemAbbreviation": "AM",
+  "postMeridiemAbbreviation": "PM",
+
+  "todayLabel": "Maanta",
+  "alertDialogLabel": "Digniin",
+
+  "timerPickerHourLabelOne": "saacad",
+  "timerPickerHourLabelOther": "saacadood",
+
+  "timerPickerMinuteLabelOne": "daqiiqad",
+  "timerPickerMinuteLabelOther": "daqiiqadood",
+
+  "timerPickerSecondLabelOne": "ilbiriqsi",
+  "timerPickerSecondLabelOther": "ilbiriqsi",
+
+  "cutButtonLabel": "Jar",
+  "copyButtonLabel": "Koobi",
+  "pasteButtonLabel": "Dhig",
+  "selectAllButtonLabel": "Xulo dhammaan",
+
+  "tabSemanticsLabel": "Tab $tabIndex oo ka mid ah $tabCount",
+
+  "modalBarrierDismissLabel": "Xir",
+  "menuDismissLabel": "Xir liiska",
+
+  "searchTextFieldPlaceholderLabel": "Raadi",
+  "noSpellCheckReplacementsLabel": "Lama helin erayo kale",
+
+  "lookUpButtonLabel": "Raadi",
+  "searchWebButtonLabel": "Raadi webka",
+  "shareButtonLabel": "Wadaag...",
+
+  "clearButtonLabel": "Tirtir",
+  "cancelButtonLabel": "Jooji",
+  "backButtonLabel": "Dib u noqo",
+
+  "expansionTileExpandedHint": "Laba jeer taabo si aad u isku dhufatid",
+  "expansionTileCollapsedHint": "Laba jeer taabo si aad u fidiso",
+
+  "expansionTileExpandedTapHint": "Isku dhufo",
+  "expansionTileCollapsedTapHint": "Fidid si aad u aragto faahfaahin",
+
+  "expandedHint": "La isku dhufay",
+  "collapsedHint": "Fidsan"
+}

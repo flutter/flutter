@@ -37674,6 +37674,502 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get viewLicensesButtonLabel => 'Prikaži licence';
 }
 
+/// The translations for Somali (`so`).
+class MaterialLocalizationSo extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Somali.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationSo({
+    super.localeName = 'so',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get aboutListTileTitleRaw => r'Ku saabsan $applicationName';
+
+  @override
+  String get alertDialogLabel => 'Digniin';
+
+  @override
+  String get anteMeridiemAbbreviation => 'AM';
+
+  @override
+  String get backButtonTooltip => 'Dib u noqo';
+
+  @override
+  String get bottomSheetLabel => null;
+
+  @override
+  String get calendarModeButtonLabel => 'U beddel habka kalandarka';
+
+  @override
+  String get cancelButtonLabel => 'Jooji';
+
+  @override
+  String get clearButtonTooltip => 'Nadiifi qoraalka';
+
+  @override
+  String get closeButtonLabel => 'Xir';
+
+  @override
+  String get closeButtonTooltip => 'Xir';
+
+  @override
+  String get collapsedHint => null;
+
+  @override
+  String get collapsedIconTapHint => 'Fid';
+
+  @override
+  String get continueButtonLabel => 'Sii wad';
+
+  @override
+  String get copyButtonLabel => 'Koobi';
+
+  @override
+  String get currentDateLabel => 'Maanta';
+
+  @override
+  String get cutButtonLabel => 'Jar';
+
+  @override
+  String get dateHelpText => 'dd/mm/yyyy';
+
+  @override
+  String get dateInputLabel => 'Geli taariikh';
+
+  @override
+  String get dateOutOfRangeLabel => 'Taariikhda waa ka baxsan xadka la oggol yahay.';
+
+  @override
+  String get datePickerHelpText => 'Dooro taariikh';
+
+  @override
+  String get dateRangeEndDateSemanticLabelRaw => r'Taariikhda dhammaadka $fullDate';
+
+  @override
+  String get dateRangeEndLabel => 'Taariikhda dhammaadka';
+
+  @override
+  String get dateRangePickerHelpText => 'Dooro muddada';
+
+  @override
+  String get dateRangeStartDateSemanticLabelRaw => r'Taariikhda billowga $fullDate';
+
+  @override
+  String get dateRangeStartLabel => 'Taariikhda billowga';
+
+  @override
+  String get dateSeparator => '/';
+
+  @override
+  String get deleteButtonTooltip => 'Tirtir';
+
+  @override
+  String get dialModeButtonLabel => 'U beddel habka saacadda';
+
+  @override
+  String get dialogLabel => 'Wadahadal';
+
+  @override
+  String get drawerLabel => 'Liiska socodka';
+
+  @override
+  String get expandedHint => null;
+
+  @override
+  String get expandedIconTapHint => 'U laabo';
+
+  @override
+  String get expansionTileCollapsedHint => null;
+
+  @override
+  String get expansionTileCollapsedTapHint => null;
+
+  @override
+  String get expansionTileExpandedHint => null;
+
+  @override
+  String get expansionTileExpandedTapHint => null;
+
+  @override
+  String get firstPageTooltip => 'Bogga ugu horreeya';
+
+  @override
+  String get hideAccountsLabel => 'Qari akoonnada';
+
+  @override
+  String get inputDateModeButtonLabel => 'U beddel habka gelinta';
+
+  @override
+  String get inputTimeModeButtonLabel => 'U beddel habka qoraalka';
+
+  @override
+  String get invalidDateFormatLabel => 'Qaabka ma aha mid sax ah.';
+
+  @override
+  String get invalidDateRangeLabel => 'Muddada ma aha mid sax ah.';
+
+  @override
+  String get invalidTimeLabel => 'Geli waqti sax ah';
+
+  @override
+  String get keyboardKeyAlt => null;
+
+  @override
+  String get keyboardKeyAltGraph => null;
+
+  @override
+  String get keyboardKeyBackspace => null;
+
+  @override
+  String get keyboardKeyCapsLock => null;
+
+  @override
+  String get keyboardKeyChannelDown => null;
+
+  @override
+  String get keyboardKeyChannelUp => null;
+
+  @override
+  String get keyboardKeyControl => null;
+
+  @override
+  String get keyboardKeyDelete => null;
+
+  @override
+  String get keyboardKeyEject => null;
+
+  @override
+  String get keyboardKeyEnd => null;
+
+  @override
+  String get keyboardKeyEscape => null;
+
+  @override
+  String get keyboardKeyFn => null;
+
+  @override
+  String get keyboardKeyHome => null;
+
+  @override
+  String get keyboardKeyInsert => null;
+
+  @override
+  String get keyboardKeyMeta => null;
+
+  @override
+  String get keyboardKeyMetaMacOs => null;
+
+  @override
+  String get keyboardKeyMetaWindows => null;
+
+  @override
+  String get keyboardKeyNumLock => null;
+
+  @override
+  String get keyboardKeyNumpad0 => null;
+
+  @override
+  String get keyboardKeyNumpad1 => null;
+
+  @override
+  String get keyboardKeyNumpad2 => null;
+
+  @override
+  String get keyboardKeyNumpad3 => null;
+
+  @override
+  String get keyboardKeyNumpad4 => null;
+
+  @override
+  String get keyboardKeyNumpad5 => null;
+
+  @override
+  String get keyboardKeyNumpad6 => null;
+
+  @override
+  String get keyboardKeyNumpad7 => null;
+
+  @override
+  String get keyboardKeyNumpad8 => null;
+
+  @override
+  String get keyboardKeyNumpad9 => null;
+
+  @override
+  String get keyboardKeyNumpadAdd => null;
+
+  @override
+  String get keyboardKeyNumpadComma => null;
+
+  @override
+  String get keyboardKeyNumpadDecimal => null;
+
+  @override
+  String get keyboardKeyNumpadDivide => null;
+
+  @override
+  String get keyboardKeyNumpadEnter => null;
+
+  @override
+  String get keyboardKeyNumpadEqual => null;
+
+  @override
+  String get keyboardKeyNumpadMultiply => null;
+
+  @override
+  String get keyboardKeyNumpadParenLeft => null;
+
+  @override
+  String get keyboardKeyNumpadParenRight => null;
+
+  @override
+  String get keyboardKeyNumpadSubtract => null;
+
+  @override
+  String get keyboardKeyPageDown => null;
+
+  @override
+  String get keyboardKeyPageUp => null;
+
+  @override
+  String get keyboardKeyPower => null;
+
+  @override
+  String get keyboardKeyPowerOff => null;
+
+  @override
+  String get keyboardKeyPrintScreen => null;
+
+  @override
+  String get keyboardKeyScrollLock => null;
+
+  @override
+  String get keyboardKeySelect => null;
+
+  @override
+  String get keyboardKeyShift => null;
+
+  @override
+  String get keyboardKeySpace => null;
+
+  @override
+  String get lastPageTooltip => 'Bogga ugu dambeeya';
+
+  @override
+  String? get licensesPackageDetailTextFew => null;
+
+  @override
+  String? get licensesPackageDetailTextMany => null;
+
+  @override
+  String? get licensesPackageDetailTextOne => '1 shati';
+
+  @override
+  String get licensesPackageDetailTextOther => r'$licenseCount shati';
+
+  @override
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'Shati ma jiro';
+
+  @override
+  String get licensesPageTitle => 'Shatiyada';
+
+  @override
+  String get lookUpButtonLabel => 'Raadi';
+
+  @override
+  String get menuBarMenuLabel => 'Liiska baarka';
+
+  @override
+  String get menuDismissLabel => 'Ka bax liiska';
+
+  @override
+  String get modalBarrierDismissLabel => 'Ka bax';
+
+  @override
+  String get moreButtonTooltip => 'Wixii kale';
+
+  @override
+  String get nextMonthTooltip => 'Bisha soo socota';
+
+  @override
+  String get nextPageTooltip => 'Bogga xiga';
+
+  @override
+  String get okButtonLabel => 'OK';
+
+  @override
+  String get openAppDrawerTooltip => 'Fur liiska socodka';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow oo ka mid ah $rowCount';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow oo qiyaas ahaan ka mid ah $rowCount';
+
+  @override
+  String get pasteButtonLabel => 'Dhig';
+
+  @override
+  String get popupMenuLabel => 'Liiska soo baxa';
+
+  @override
+  String get postMeridiemAbbreviation => 'PM';
+
+  @override
+  String get previousMonthTooltip => 'Bishii hore';
+
+  @override
+  String get previousPageTooltip => 'Bogga hore';
+
+  @override
+  String get refreshIndicatorSemanticLabel => 'Cusboonaysii';
+
+  @override
+  String? get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String? get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String? get remainingTextFieldCharacterCountOne => '1 xaraf ayaa hadhay';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount xaraf ayaa hadhay';
+
+  @override
+  String? get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String? get remainingTextFieldCharacterCountZero => 'Xaraf ma hadhin';
+
+  @override
+  String get reorderItemDown => 'Hoos u dhaq';
+
+  @override
+  String get reorderItemLeft => 'Bidix u dhaq';
+
+  @override
+  String get reorderItemRight => 'Midig u dhaq';
+
+  @override
+  String get reorderItemToEnd => 'U dhaq dhammaadka';
+
+  @override
+  String get reorderItemToStart => 'U dhaq bilowga';
+
+  @override
+  String get reorderItemUp => 'Kor u dhaq';
+
+  @override
+  String get rowsPerPageTitle => 'Safaf bog kasta:';
+
+  @override
+  String get saveButtonLabel => 'Kaydi';
+
+  @override
+  String get scanTextButtonLabel => 'Baadh qoraalka';
+
+  @override
+  String get scrimLabel => null;
+
+  @override
+  String get scrimOnTapHintRaw => null;
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
+
+  @override
+  String get searchFieldLabel => 'Raadi';
+
+  @override
+  String get searchWebButtonLabel => 'Raadi webka';
+
+  @override
+  String get selectAllButtonLabel => 'Xulo dhammaan';
+
+  @override
+  String get selectYearSemanticsLabel => 'Dooro sanadka';
+
+  @override
+  String get selectedDateLabel => 'La xulay';
+
+  @override
+  String? get selectedRowCountTitleFew => null;
+
+  @override
+  String? get selectedRowCountTitleMany => null;
+
+  @override
+  String? get selectedRowCountTitleOne => '1 shay ayaa la xulay';
+
+  @override
+  String get selectedRowCountTitleOther => r'$selectedRowCount shay ayaa la xulay';
+
+  @override
+  String? get selectedRowCountTitleTwo => null;
+
+  @override
+  String? get selectedRowCountTitleZero => 'Midna lama xulin';
+
+  @override
+  String get shareButtonLabel => 'Wadaag';
+
+  @override
+  String get showAccountsLabel => 'Muuji akoonnada';
+
+  @override
+  String get showMenuTooltip => 'Muuji liistiga';
+
+  @override
+  String get signedInLabel => 'La galay';
+
+  @override
+  String get tabLabelRaw => r'Tab $tabIndex oo ka mid ah $tabCount';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
+
+  @override
+  String get timePickerDialHelpText => 'Dooro waqtiga';
+
+  @override
+  String get timePickerHourLabel => 'Saacad';
+
+  @override
+  String get timePickerHourModeAnnouncement => 'Dooro saacadaha';
+
+  @override
+  String get timePickerInputHelpText => 'Geli waqtiga';
+
+  @override
+  String get timePickerMinuteLabel => 'Daqiiqad';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => 'Dooro daqiiqadaha';
+
+  @override
+  String get unspecifiedDate => 'Taariikh';
+
+  @override
+  String get unspecifiedDateRange => 'Muddo';
+
+  @override
+  String get viewLicensesButtonLabel => 'Eeg shatiyada';
+}
+
 /// The translations for Albanian (`sq`).
 class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Albanian.
@@ -46579,6 +47075,7 @@ final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <Stri
   'si', // Sinhala Sinhalese
   'sk', // Slovak
   'sl', // Slovenian
+  'so', // Somali
   'sq', // Albanian
   'sr', // Serbian
   'sv', // Swedish
@@ -46673,6 +47170,7 @@ final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <Stri
 ///  * `si` - Sinhala Sinhalese
 ///  * `sk` - Slovak
 ///  * `sl` - Slovenian
+///  * `so` - Somali
 ///  * `sq` - Albanian
 ///  * `sr` - Serbian (plus 2 scripts)
 ///  * `sv` - Swedish
@@ -46915,6 +47413,8 @@ GlobalMaterialLocalizations? getMaterialTranslation(
       return MaterialLocalizationSk(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'sl':
       return MaterialLocalizationSl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'so':
+      return MaterialLocalizationSo(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'sq':
       return MaterialLocalizationSq(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'sr': {

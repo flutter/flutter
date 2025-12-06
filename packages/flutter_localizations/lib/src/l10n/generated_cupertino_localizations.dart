@@ -13970,6 +13970,196 @@ class CupertinoLocalizationSl extends GlobalCupertinoLocalizations {
   String get todayLabel => 'Danes';
 }
 
+/// The translations for Somali (`so`).
+class CupertinoLocalizationSo extends GlobalCupertinoLocalizations {
+  /// Create an instance of the translation bundle for Somali.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  const CupertinoLocalizationSo({
+    super.localeName = 'so',
+    required super.fullYearFormat,
+    required super.dayFormat,
+    required super.weekdayFormat,
+    required super.mediumDateFormat,
+    required super.singleDigitHourFormat,
+    required super.singleDigitMinuteFormat,
+    required super.doubleDigitMinuteFormat,
+    required super.singleDigitSecondFormat,
+    required super.decimalFormat,
+  });
+
+  @override
+  String get alertDialogLabel => 'Digniin';
+
+  @override
+  String get anteMeridiemAbbreviation => 'AM';
+
+  @override
+  String get backButtonLabel => 'Dib u noqo';
+
+  @override
+  String get cancelButtonLabel => 'Jooji';
+
+  @override
+  String get clearButtonLabel => 'Tirtir';
+
+  @override
+  String get collapsedHint => 'Fidsan';
+
+  @override
+  String get copyButtonLabel => 'Koobi';
+
+  @override
+  String get cutButtonLabel => 'Jar';
+
+  @override
+  String get datePickerDateOrderString => 'dmy';
+
+  @override
+  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+
+  @override
+  String? get datePickerHourSemanticsLabelFew => null;
+
+  @override
+  String? get datePickerHourSemanticsLabelMany => null;
+
+  @override
+  String? get datePickerHourSemanticsLabelOne => r'Saacad $hour buuxda';
+
+  @override
+  String get datePickerHourSemanticsLabelOther => r'Saacad $hour buuxda';
+
+  @override
+  String? get datePickerHourSemanticsLabelTwo => null;
+
+  @override
+  String? get datePickerHourSemanticsLabelZero => null;
+
+  @override
+  String? get datePickerMinuteSemanticsLabelFew => null;
+
+  @override
+  String? get datePickerMinuteSemanticsLabelMany => null;
+
+  @override
+  String? get datePickerMinuteSemanticsLabelOne => '1 daqiiqad';
+
+  @override
+  String get datePickerMinuteSemanticsLabelOther => r'$minute daqiiqadood';
+
+  @override
+  String? get datePickerMinuteSemanticsLabelTwo => null;
+
+  @override
+  String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'La isku dhufay';
+
+  @override
+  String get expansionTileCollapsedHint => 'Laba jeer taabo si aad u fidiso';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Fidid si aad u aragto faahfaahin';
+
+  @override
+  String get expansionTileExpandedHint => 'Laba jeer taabo si aad u isku dhufatid';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Isku dhufo';
+
+  @override
+  String get lookUpButtonLabel => 'Raadi';
+
+  @override
+  String get menuDismissLabel => 'Xir liiska';
+
+  @override
+  String get modalBarrierDismissLabel => 'Xir';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'Lama helin erayo kale';
+
+  @override
+  String get pasteButtonLabel => 'Dhig';
+
+  @override
+  String get postMeridiemAbbreviation => 'PM';
+
+  @override
+  String get searchTextFieldPlaceholderLabel => 'Raadi';
+
+  @override
+  String get searchWebButtonLabel => 'Raadi webka';
+
+  @override
+  String get selectAllButtonLabel => 'Xulo dhammaan';
+
+  @override
+  String get shareButtonLabel => 'Wadaag...';
+
+  @override
+  String get tabSemanticsLabelRaw => r'Tab $tabIndex oo ka mid ah $tabCount';
+
+  @override
+  String? get timerPickerHourLabelFew => null;
+
+  @override
+  String? get timerPickerHourLabelMany => null;
+
+  @override
+  String? get timerPickerHourLabelOne => 'saacad';
+
+  @override
+  String get timerPickerHourLabelOther => 'saacadood';
+
+  @override
+  String? get timerPickerHourLabelTwo => null;
+
+  @override
+  String? get timerPickerHourLabelZero => null;
+
+  @override
+  String? get timerPickerMinuteLabelFew => null;
+
+  @override
+  String? get timerPickerMinuteLabelMany => null;
+
+  @override
+  String? get timerPickerMinuteLabelOne => 'daqiiqad';
+
+  @override
+  String get timerPickerMinuteLabelOther => 'daqiiqadood';
+
+  @override
+  String? get timerPickerMinuteLabelTwo => null;
+
+  @override
+  String? get timerPickerMinuteLabelZero => null;
+
+  @override
+  String? get timerPickerSecondLabelFew => null;
+
+  @override
+  String? get timerPickerSecondLabelMany => null;
+
+  @override
+  String? get timerPickerSecondLabelOne => 'ilbiriqsi';
+
+  @override
+  String get timerPickerSecondLabelOther => 'ilbiriqsi';
+
+  @override
+  String? get timerPickerSecondLabelTwo => null;
+
+  @override
+  String? get timerPickerSecondLabelZero => null;
+
+  @override
+  String get todayLabel => 'Maanta';
+}
+
 /// The translations for Albanian (`sq`).
 class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Albanian.
@@ -17444,6 +17634,7 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
   'si', // Sinhala Sinhalese
   'sk', // Slovak
   'sl', // Slovenian
+  'so', // Somali
   'sq', // Albanian
   'sr', // Serbian
   'sv', // Swedish
@@ -17537,6 +17728,7 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
 ///  * `si` - Sinhala Sinhalese
 ///  * `sk` - Slovak
 ///  * `sl` - Slovenian
+///  * `so` - Somali
 ///  * `sq` - Albanian
 ///  * `sr` - Serbian (plus 2 scripts)
 ///  * `sv` - Swedish
@@ -17777,6 +17969,8 @@ GlobalCupertinoLocalizations? getCupertinoTranslation(
       return CupertinoLocalizationSk(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'sl':
       return CupertinoLocalizationSl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+    case 'so':
+      return CupertinoLocalizationSo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'sq':
       return CupertinoLocalizationSq(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'sr': {
