@@ -761,6 +761,14 @@ abstract class TooltipWindowController extends BaseWindowController {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   void setConstraints(BoxConstraints constraints);
+
+  /// Updates the position of the tooltip.
+  ///
+  /// This requests that the tooltip be repositioned according to the new [anchorRect] and/or [positioner].
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void updatePosition({Rect? anchorRect, WindowPositioner? positioner});
 }
 
 /// [WindowingOwner] is responsible for creating and managing window controllers.
