@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/embedder/embedder_external_texture_gl.h"
+#include "flutter/shell/platform/embedder/embedder_external_texture_gl_skia.h"
 
 #include "flutter/fml/logging.h"
 #include "impeller/core/texture_descriptor.h"
@@ -27,20 +27,20 @@
 
 namespace flutter {
 
-EmbedderExternalTextureGL::EmbedderExternalTextureGL(
+EmbedderExternalTextureGLSkia::EmbedderExternalTextureGLSkia(
     int64_t texture_identifier,
     const ExternalTextureCallback& callback)
     : Texture(texture_identifier), external_texture_callback_(callback) {
   FML_DCHECK(external_texture_callback_);
 }
 
-EmbedderExternalTextureGL::~EmbedderExternalTextureGL() = default;
+EmbedderExternalTextureGLSkia::~EmbedderExternalTextureGLSkia() = default;
 
 // |flutter::Texture|
-void EmbedderExternalTextureGL::Paint(PaintContext& context,
-                                      const DlRect& bounds,
-                                      bool freeze,
-                                      const DlImageSampling sampling) {
+void EmbedderExternalTextureGLSkia::Paint(PaintContext& context,
+                                          const DlRect& bounds,
+                                          bool freeze,
+                                          const DlImageSampling sampling) {
   if (last_image_ == nullptr) {
     last_image_ =
         ResolveTexture(Id(),                                                 //
@@ -63,7 +63,7 @@ void EmbedderExternalTextureGL::Paint(PaintContext& context,
   }
 }
 
-sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTexture(
+sk_sp<DlImage> EmbedderExternalTextureGLSkia::ResolveTexture(
     int64_t texture_id,
     GrDirectContext* context,
     impeller::AiksContext* aiks_context,
@@ -75,7 +75,7 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTexture(
   }
 }
 
-sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureSkia(
+sk_sp<DlImage> EmbedderExternalTextureGLSkia::ResolveTextureSkia(
     int64_t texture_id,
     GrDirectContext* context,
     const SkISize& size) {
@@ -127,7 +127,7 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureSkia(
   return DlImage::Make(std::move(image));
 }
 
-sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureImpeller(
+sk_sp<DlImage> EmbedderExternalTextureGLSkia::ResolveTextureImpeller(
     int64_t texture_id,
     impeller::AiksContext* aiks_context,
     const SkISize& size) {
@@ -170,17 +170,17 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureImpeller(
 }
 
 // |flutter::Texture|
-void EmbedderExternalTextureGL::OnGrContextCreated() {}
+void EmbedderExternalTextureGLSkia::OnGrContextCreated() {}
 
 // |flutter::Texture|
-void EmbedderExternalTextureGL::OnGrContextDestroyed() {}
+void EmbedderExternalTextureGLSkia::OnGrContextDestroyed() {}
 
 // |flutter::Texture|
-void EmbedderExternalTextureGL::MarkNewFrameAvailable() {
+void EmbedderExternalTextureGLSkia::MarkNewFrameAvailable() {
   last_image_ = nullptr;
 }
 
 // |flutter::Texture|
-void EmbedderExternalTextureGL::OnTextureUnregistered() {}
+void EmbedderExternalTextureGLSkia::OnTextureUnregistered() {}
 
 }  // namespace flutter

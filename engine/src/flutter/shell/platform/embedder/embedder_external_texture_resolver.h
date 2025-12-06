@@ -10,7 +10,9 @@
 #include "flutter/common/graphics/texture.h"
 
 #ifdef SHELL_ENABLE_GL
-#include "flutter/shell/platform/embedder/embedder_external_texture_gl.h"
+#ifndef SLIMPELLER
+#include "flutter/shell/platform/embedder/embedder_external_texture_gl_skia.h"
+#endif
 #endif
 
 #ifdef SHELL_ENABLE_METAL
@@ -25,8 +27,10 @@ class EmbedderExternalTextureResolver {
   ~EmbedderExternalTextureResolver() = default;
 
 #ifdef SHELL_ENABLE_GL
+#ifndef SLIMPELLER
   explicit EmbedderExternalTextureResolver(
-      EmbedderExternalTextureGL::ExternalTextureCallback gl_callback);
+      EmbedderExternalTextureGLSkia::ExternalTextureCallback gl_callback);
+#endif
 #endif
 
 #ifdef SHELL_ENABLE_METAL
@@ -40,7 +44,9 @@ class EmbedderExternalTextureResolver {
 
  private:
 #ifdef SHELL_ENABLE_GL
-  EmbedderExternalTextureGL::ExternalTextureCallback gl_callback_;
+#ifndef SLIMPELLER
+  EmbedderExternalTextureGLSkia::ExternalTextureCallback gl_callback_;
+#endif
 #endif
 
 #ifdef SHELL_ENABLE_METAL
