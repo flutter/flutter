@@ -119,6 +119,11 @@ extension type DomWindow._(JSObject _) implements DomEventTarget {
   external DomVisualViewport? get visualViewport;
   external DomPerformance get performance;
 
+  /// The parent window of this window.
+  /// Returns null if this is the top-level window, or the same window
+  /// if not in an iframe.
+  external DomWindow? get parent;
+
   @visibleForTesting
   Future<Object?> fetch(String url) {
     // To make sure we have a consistent approach for handling and reporting
@@ -2639,4 +2644,28 @@ extension type DomTextCluster._(JSObject _) implements JSObject {
   external int get end;
   external double get x;
   external double get y;
+}
+
+/// Scrolls the parent/host window by the given delta using postMessage.
+///
+/// Used when Flutter is embedded in an iframe and needs to scroll the parent
+/// page. This uses postMessage for cross-origin safety - the host page must
+/// add a message listener to handle the scroll request.
+///
+/// This fixes GitHub issue #156985 (scroll bubbling) and #157435 (touch scroll).
+void scrollParentWindow(double deltaX, double deltaY) {
+  try {
+    final DomWindow? parent = domWindow.parent;
+    if (parent != null && !identical(parent, domWindow)) {
+      // Use postMessage for cross-origin safety
+      final JSAny message = <String, dynamic>{
+        'type': 'flutter-scroll',
+        'deltaX': deltaX,
+        'deltaY': deltaY,
+      }.jsify()!;
+      parent._postMessage(message, '*');
+    }
+  } catch (e) {
+    // Silently fail if parent access fails (cross-origin restrictions)
+  }
 }
