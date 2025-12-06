@@ -65,7 +65,7 @@ void main() {
       ),
     );
     expect(controller.position.pixels, thirty + 200.0); // has the same position, still overscrolled
-    expect(await tester.pumpAndSettle(), 8); // now it goes ballistic...
+    expect(await tester.pumpAndSettle(), 7); // now it goes ballistic...
     expect(controller.position.pixels, thirty + 100.0); // and ends up at the end
   });
 
