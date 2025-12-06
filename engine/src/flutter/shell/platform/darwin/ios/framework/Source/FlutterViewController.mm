@@ -360,6 +360,8 @@ typedef struct MouseState {
   _orientationPreferences = UIInterfaceOrientationMaskAll;
   _statusBarStyle = UIStatusBarStyleDefault;
 
+  _accessibilityFeatures = [[FlutterAccessibilityFeatures alloc] init];
+
   // TODO(cbracken): https://github.com/flutter/flutter/issues/157140
   // Eliminate method calls in initializers and dealloc.
   [self setUpNotificationCenterObservers];
@@ -398,45 +400,12 @@ typedef struct MouseState {
                  name:UIKeyboardWillHideNotification
                object:nil];
 
-  [center addObserver:self
-             selector:@selector(onAccessibilityStatusChanged:)
-                 name:UIAccessibilityVoiceOverStatusDidChangeNotification
-               object:nil];
-
-  [center addObserver:self
-             selector:@selector(onAccessibilityStatusChanged:)
-                 name:UIAccessibilitySwitchControlStatusDidChangeNotification
-               object:nil];
-
-  [center addObserver:self
-             selector:@selector(onAccessibilityStatusChanged:)
-                 name:UIAccessibilitySpeakScreenStatusDidChangeNotification
-               object:nil];
-
-  [center addObserver:self
-             selector:@selector(onAccessibilityStatusChanged:)
-                 name:UIAccessibilityInvertColorsStatusDidChangeNotification
-               object:nil];
-
-  [center addObserver:self
-             selector:@selector(onAccessibilityStatusChanged:)
-                 name:UIAccessibilityReduceMotionStatusDidChangeNotification
-               object:nil];
-
-  [center addObserver:self
-             selector:@selector(onAccessibilityStatusChanged:)
-                 name:UIAccessibilityBoldTextStatusDidChangeNotification
-               object:nil];
-
-  [center addObserver:self
-             selector:@selector(onAccessibilityStatusChanged:)
-                 name:UIAccessibilityDarkerSystemColorsStatusDidChangeNotification
-               object:nil];
-
-  [center addObserver:self
-             selector:@selector(onAccessibilityStatusChanged:)
-                 name:UIAccessibilityOnOffSwitchLabelsDidChangeNotification
-               object:nil];
+  for (NSString* notification in [self.accessibilityFeatures observedNotificationNames]) {
+    [center addObserver:self
+               selector:@selector(onAccessibilityStatusChanged:)
+                   name:notification
+                 object:nil];
+  }
 
   [center addObserver:self
              selector:@selector(onUserSettingsChanged:)
@@ -2226,42 +2195,18 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     return;
   }
   BOOL enabled = NO;
-  int32_t flags = self.accessibilityFlags;
+  int32_t flags = [self.accessibilityFeatures flags];
 #if TARGET_OS_SIMULATOR
   // There doesn't appear to be any way to determine whether the accessibility
   // inspector is enabled on the simulator. We conservatively always turn on the
   // accessibility bridge in the simulator, but never assistive technology.
   enabled = YES;
 #else
-  _isVoiceOverRunning = UIAccessibilityIsVoiceOverRunning();
-  enabled = _isVoiceOverRunning || UIAccessibilityIsSwitchControlRunning();
-  if (enabled) {
-    flags |= static_cast<int32_t>(flutter::AccessibilityFeatureFlag::kAccessibleNavigation);
-  }
-  enabled |= UIAccessibilityIsSpeakScreenEnabled();
+  _isVoiceOverRunning = [self.accessibilityFeatures isVoiceOverRunning];
+  enabled = _isVoiceOverRunning || [self.accessibilityFeatures isSwitchControlRunning] ||
+            [self.accessibilityFeatures isSpeakScreenEnabled];
 #endif
   [self.engine enableSemantics:enabled withFlags:flags];
-}
-
-- (int32_t)accessibilityFlags {
-  int32_t flags = 0;
-  if (UIAccessibilityIsInvertColorsEnabled()) {
-    flags |= static_cast<int32_t>(flutter::AccessibilityFeatureFlag::kInvertColors);
-  }
-  if (UIAccessibilityIsReduceMotionEnabled()) {
-    flags |= static_cast<int32_t>(flutter::AccessibilityFeatureFlag::kReduceMotion);
-  }
-  if (UIAccessibilityIsBoldTextEnabled()) {
-    flags |= static_cast<int32_t>(flutter::AccessibilityFeatureFlag::kBoldText);
-  }
-  if (UIAccessibilityDarkerSystemColorsEnabled()) {
-    flags |= static_cast<int32_t>(flutter::AccessibilityFeatureFlag::kHighContrast);
-  }
-  if ([FlutterViewController accessibilityIsOnOffSwitchLabelsEnabled]) {
-    flags |= static_cast<int32_t>(flutter::AccessibilityFeatureFlag::kOnOffSwitchLabels);
-  }
-
-  return flags;
 }
 
 - (BOOL)accessibilityPerformEscape {
@@ -2271,10 +2216,6 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     return YES;
   }
   return NO;
-}
-
-+ (BOOL)accessibilityIsOnOffSwitchLabelsEnabled {
-  return UIAccessibilityIsOnOffSwitchLabelsEnabled();
 }
 
 #pragma mark - Set user settings
