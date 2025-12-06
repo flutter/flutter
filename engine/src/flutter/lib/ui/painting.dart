@@ -7613,6 +7613,34 @@ base class _NativePicture extends NativeFieldWrapperClass1 implements Picture {
     if (width <= 0 || height <= 0) {
       throw Exception('Invalid image dimensions.');
     }
+    // Check for dimensions that commonly exceed GPU texture limits.
+    // Many Android devices have max texture sizes between 2048-4096 pixels.
+    // While some modern GPUs support up to 8192 or 16384, we warn for
+    // dimensions above 4096 as they may fail on mid-range and older devices.
+    const int warningSizeThreshold = 4096;
+    const int hardLimitThreshold = 8192;
+
+    if (width > hardLimitThreshold || height > hardLimitThreshold) {
+      throw Exception(
+        'Image dimensions ($width x $height) exceed the maximum supported size '
+        'of $hardLimitThreshold pixels. The image cannot be rasterized.\n'
+        'Consider:\n'
+        '  - Reducing the SVG/Picture dimensions\n'
+        '  - Splitting into smaller segments\n'
+        '  - Using a raster image format (PNG/JPEG) instead'
+      );
+    }
+
+    if (width > warningSizeThreshold || height > warningSizeThreshold) {
+      // Print warning but allow the operation to proceed
+      // ignore: avoid_print
+      print(
+        'Warning: Picture.toImage dimensions ($width x $height) exceed $warningSizeThreshold pixels.\n'
+        'This may fail on devices with limited GPU capabilities (particularly older Android devices).\n'
+        'If rendering fails, consider reducing dimensions or splitting into smaller images.'
+      );
+    }
+
     return _futurize(
       (_Callback<Image?> callback) => _toImage(width, height, (_Image? image) {
         if (image == null) {
@@ -7636,6 +7664,34 @@ base class _NativePicture extends NativeFieldWrapperClass1 implements Picture {
     assert(!_disposed);
     if (width <= 0 || height <= 0) {
       throw Exception('Invalid image dimensions.');
+    }
+
+    // Check for dimensions that commonly exceed GPU texture limits.
+    // Many Android devices have max texture sizes between 2048-4096 pixels.
+    // While some modern GPUs support up to 8192 or 16384, we warn for
+    // dimensions above 4096 as they may fail on mid-range and older devices.
+    const int warningSizeThreshold = 4096;
+    const int hardLimitThreshold = 8192;
+
+    if (width > hardLimitThreshold || height > hardLimitThreshold) {
+      throw Exception(
+        'Image dimensions ($width x $height) exceed the maximum supported size '
+        'of $hardLimitThreshold pixels. The image cannot be rasterized.\n'
+        'Consider:\n'
+        '  - Reducing the SVG/Picture dimensions\n'
+        '  - Splitting into smaller segments\n'
+        '  - Using a raster image format (PNG/JPEG) instead'
+      );
+    }
+
+    if (width > warningSizeThreshold || height > warningSizeThreshold) {
+      // Print warning but allow the operation to proceed
+      // ignore: avoid_print
+      print(
+        'Warning: Picture.toImageSync dimensions ($width x $height) exceed $warningSizeThreshold pixels.\n'
+        'This may fail on devices with limited GPU capabilities (particularly older Android devices).\n'
+        'If rendering fails, consider reducing dimensions or splitting into smaller images.'
+      );
     }
 
     final image = _Image._();
