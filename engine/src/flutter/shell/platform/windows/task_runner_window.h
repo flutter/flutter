@@ -102,6 +102,8 @@ class TaskRunnerWindow {
   std::vector<Delegate*> delegates_;
   DWORD thread_id_ = 0;
   TimerThread timer_thread_;
+
+  // Used to prevent posting wake up message when one is already scheduled.
   std::atomic_bool wake_up_posted_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(TaskRunnerWindow);

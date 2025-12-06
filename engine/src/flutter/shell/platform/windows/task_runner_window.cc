@@ -217,6 +217,8 @@ TaskRunnerWindow::HandleMessage(UINT const message,
                                 LPARAM const lparam) noexcept {
   switch (message) {
     case WM_NULL:
+      // After this point, WakeUp() needs to post new message to ensure
+      // that the wake-up request is not lost.
       wake_up_posted_ = false;
       ProcessTasks();
       return 0;
