@@ -570,6 +570,7 @@ PrimitiveType ArcVertexGenerator::GetTriangleType() const {
 size_t ArcVertexGenerator::GetVertexCount() const {
   size_t count = iteration_.GetPointCount();
   if (half_width_ > 0) {
+    // Stroked arc
     FML_DCHECK(!use_center_);
     count *= 2;
     if (cap_ == Cap::kSquare) {
@@ -582,12 +583,13 @@ size_t ArcVertexGenerator::GetVertexCount() const {
       count += round_cap_trigs_->size() * 4 - 4;
     }
   } else if (supports_triangle_fans_) {
+    // Filled arc using a triangle fan
     if (use_center_) {
       count++;
     }
   } else {
-    // corrugated triangle fan
-    count += (count + 1) / 2;
+    // Filled arc using a triangle strip
+    count = (2 * count) - 1;
   }
   return count;
 }
@@ -834,22 +836,15 @@ void Tessellator::GenerateFilledArcStrip(const Trigs& trigs,
     origin = center + midpoint * radii;
   }
 
-  proc(origin);
   proc(center + iteration.start * radii);
-  bool insert_origin = false;
   for (size_t i = 0; i < iteration.quadrant_count; i++) {
     auto quadrant = iteration.quadrants[i];
     for (size_t j = quadrant.start_index; j < quadrant.end_index; j++) {
-      if (insert_origin) {
-        proc(origin);
-      }
-      insert_origin = !insert_origin;
+      proc(origin);
       proc(center + trigs[j] * quadrant.axis * radii);
     }
   }
-  if (insert_origin) {
-    proc(origin);
-  }
+  proc(origin);
   proc(center + iteration.end * radii);
 }
 
