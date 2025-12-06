@@ -909,11 +909,11 @@ class SelectableRegionState extends State<SelectableRegion>
       case TargetPlatform.fuchsia:
         if (shouldShowSelectionOverlayOnMobile) {
           _showHandles();
-          _showToolbar();
+          showToolbar();
         }
       case TargetPlatform.iOS:
         if (shouldShowSelectionOverlayOnMobile) {
-          _showToolbar();
+          showToolbar();
         }
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
@@ -931,12 +931,7 @@ class SelectableRegionState extends State<SelectableRegion>
         _positionIsOnActiveSelection(globalPosition: details.globalPosition)) {
       // On iOS when the tap occurs on the previous selection, instead of
       // moving the selection, the context menu will be toggled.
-      final bool toolbarIsVisible = _selectionOverlay?.toolbarIsVisible ?? false;
-      if (toolbarIsVisible) {
-        hideToolbar(false);
-      } else {
-        _showToolbar();
-      }
+      toggleToolbar();
       return;
     }
     switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
@@ -962,7 +957,7 @@ class SelectableRegionState extends State<SelectableRegion>
               // On Android, a double tap will only show the selection overlay after
               // the following tap up when the pointer device kind is not precise.
               _showHandles();
-              _showToolbar();
+              showToolbar();
             }
           case TargetPlatform.iOS:
             if (!isPointerPrecise) {
@@ -972,7 +967,7 @@ class SelectableRegionState extends State<SelectableRegion>
               }
               // On iOS, a double tap will only show the selection toolbar after
               // the following tap up when the pointer device kind is not precise.
-              _showToolbar();
+              showToolbar();
             }
           case TargetPlatform.macOS:
           case TargetPlatform.linux:
@@ -1021,7 +1016,7 @@ class SelectableRegionState extends State<SelectableRegion>
     _finalizeSelection();
     _updateSelectedContentIfNeeded();
     _finalizeSelectableRegionStatus();
-    _showToolbar();
+    showToolbar();
     if (defaultTargetPlatform == TargetPlatform.android) {
       _showHandles();
     }
@@ -1343,12 +1338,24 @@ class SelectableRegionState extends State<SelectableRegion>
 
   /// Shows the text selection toolbar.
   ///
-  /// If the parameter `location` is set, the toolbar will be shown at the
-  /// location. Otherwise, the toolbar location will be calculated based on the
-  /// handles' locations. The `location` is in the coordinates system of the
-  /// [Overlay].
+  /// The toolbar location will be calculated based on the
+  /// location of the selection endpoints.
   ///
   /// Returns true if the toolbar is shown, false if the toolbar can't be shown.
+  @override
+  bool showToolbar() {
+    return _showToolbar();
+  }
+
+  /// Shows the text selection toolbar.
+  ///
+  /// When using [TextSelectionControls] to build the toolbar `location` will
+  /// be where the toolbar is shown. Otherwise, the toolbar location will be
+  /// calculated based on the selection endpoints locations. The `location` is
+  /// in the coordinates system of the [Overlay].
+  ///
+  /// Returns true if the toolbar is shown, false if the toolbar can't be shown.
+  // TODO(Renzo-Olivares): Update this method when TextSelectionControls is removed from the framework.
   bool _showToolbar({Offset? location}) {
     if (!_hasSelectionOverlayGeometry && _selectionOverlay == null) {
       return false;
@@ -1385,6 +1392,16 @@ class SelectableRegionState extends State<SelectableRegion>
       },
     );
     return true;
+  }
+
+  @override
+  void toggleToolbar() {
+    final bool toolbarIsVisible = _selectionOverlay?.toolbarIsVisible ?? false;
+    if (toolbarIsVisible) {
+      hideToolbar(false);
+    } else {
+      showToolbar();
+    }
   }
 
   /// Sets or updates selection end edge to the `offset` location.
@@ -1836,7 +1853,7 @@ class SelectableRegionState extends State<SelectableRegion>
     clearSelection();
     _selectable?.dispatchSelectionEvent(const SelectAllSelectionEvent());
     if (cause == SelectionChangedCause.toolbar) {
-      _showToolbar();
+      showToolbar();
       _showHandles();
     }
     _updateSelectedContentIfNeeded();
