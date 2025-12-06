@@ -539,7 +539,7 @@ static BOOL _preparedOnce = NO;
     // For hit test, don't block gestures using delaying recognizer. However, we still
     // forward touches so Flutter can process it in its gesture arena (e.g. dismiss a
     // drop-down menu when tapping outside of the menu but inside the platform view).
-    if (blockingPolicy != FlutterPlatformViewGestureRecognizersBlockingPolicyHitTest) {
+    if (blockingPolicy != FlutterPlatformViewGestureRecognizersBlockingPolicyTouchBlockingOnly) {
       [self addGestureRecognizer:_delayingRecognizer];
     }
     [self addGestureRecognizer:forwardingRecognizer];
@@ -581,7 +581,7 @@ static BOOL _preparedOnce = NO;
 }
 
 - (UIView*)hitTest:(CGPoint)point withEvent:(UIEvent*)event {
-  if (_blockingPolicy == FlutterPlatformViewGestureRecognizersBlockingPolicyHitTest) {
+  if (_blockingPolicy == FlutterPlatformViewGestureRecognizersBlockingPolicyTouchBlockingOnly) {
     CGPoint pointInFlutterView = [self convertPoint:point toView:self.flutterViewController.view];
     // Block gesture if the framework instructed so (after performing its own hitTest).
     if (![self.flutterViewController
@@ -595,7 +595,7 @@ static BOOL _preparedOnce = NO;
 
 - (void)blockGesture {
   switch (_blockingPolicy) {
-    case FlutterPlatformViewGestureRecognizersBlockingPolicyHitTest:
+    case FlutterPlatformViewGestureRecognizersBlockingPolicyTouchBlockingOnly:
       // No-op. Handled by hit test.
       break;
 

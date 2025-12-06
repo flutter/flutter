@@ -3432,7 +3432,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   [flutterPlatformViewsController
                    registerViewFactory:factory
                                 withId:@"MockFlutterPlatformView"
-      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyHitTest];
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyTouchBlockingOnly];
   FlutterResult result = ^(id result) {
   };
   [flutterPlatformViewsController
@@ -3538,7 +3538,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   [flutterPlatformViewsController
                    registerViewFactory:factory
                                 withId:@"MockFlutterPlatformView"
-      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyHitTest];
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyTouchBlockingOnly];
   FlutterResult result = ^(id result) {
   };
   [flutterPlatformViewsController
@@ -3600,7 +3600,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   [flutterPlatformViewsController
                    registerViewFactory:factory
                                 withId:@"MockFlutterPlatformView"
-      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyHitTest];
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyTouchBlockingOnly];
   FlutterResult result = ^(id result) {
   };
   [flutterPlatformViewsController
