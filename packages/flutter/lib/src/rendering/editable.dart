@@ -747,10 +747,12 @@ class RenderEditable extends RenderBox
         extentOffset: math.min(nextSelection.extentOffset, textLength),
       );
     }
-    _setTextEditingValue(
-      textSelectionDelegate.textEditingValue.copyWith(selection: nextSelection),
-      cause,
-    );
+    if (nextSelection.extentOffset > nextSelection.baseOffset) {
+      _setTextEditingValue(
+        textSelectionDelegate.textEditingValue.copyWith(selection: nextSelection),
+        cause,
+      );
+    }
   }
 
   @override
