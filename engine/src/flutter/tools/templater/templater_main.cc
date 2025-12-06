@@ -50,9 +50,9 @@ bool TemplaterMain(const fml::CommandLine& command_line) {
       reinterpret_cast<const uint8_t*>(rendered_template.data()),
       rendered_template.size()};
 
-  auto current_dir =
-      fml::OpenDirectory(std::filesystem::current_path().string().c_str(),
-                         false, fml::FilePermission::kReadWrite);
+  auto current_dir = fml::OpenDirectory(
+      fml::PathToUtf8(std::filesystem::current_path()).c_str(), false,
+      fml::FilePermission::kReadWrite);
   if (!current_dir.is_valid()) {
     FML_LOG(ERROR) << "Could not open current directory.";
     return false;
