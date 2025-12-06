@@ -611,7 +611,7 @@ class _CarouselViewState extends State<CarouselView> {
   }
 
   Widget _buildCarouselItem(int index) {
-    // For infinite scrolling, wrap the index to the actual children range
+    // For infinite scrolling, wrap the index to the actual children range.
     if (widget.infinite && widget.children.isNotEmpty) {
       index = index % widget.children.length;
     }
@@ -683,9 +683,20 @@ class _CarouselViewState extends State<CarouselView> {
         : widget.itemBuilder != null
         ? widget.itemCount
         : widget.children.length;
-    final NullableIndexedWidgetBuilder effectiveBuilder = widget.itemBuilder != null
-        ? widget.itemBuilder!
-        : (BuildContext context, int index) => _buildCarouselItem(index);
+
+    NullableIndexedWidgetBuilder effectiveBuilder;
+    if (widget.itemBuilder != null) {
+      if (widget.infinite && widget.itemCount != null && widget.itemCount! > 0) {
+        final int itemCount = widget.itemCount!;
+        effectiveBuilder = (BuildContext context, int index) {
+          return widget.itemBuilder!(context, index % itemCount);
+        };
+      } else {
+        effectiveBuilder = widget.itemBuilder!;
+      }
+    } else {
+      effectiveBuilder = (BuildContext context, int index) => _buildCarouselItem(index);
+    }
 
     if (_itemExtent != null) {
       return _SliverFixedExtentCarousel(
@@ -1653,16 +1664,41 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
     double? itemExtent,
     List<int>? flexWeights,
     bool consumeMaxWeight = true,
+    bool infinite = false,
+    int? itemCount,
     super.oldPosition,
   }) : assert(
          flexWeights != null && itemExtent == null || flexWeights == null && itemExtent != null,
        ),
        _itemToShowOnStartup = initialItem.toDouble(),
        _consumeMaxWeight = consumeMaxWeight,
+       _infinite = infinite,
+       _itemCount = itemCount,
        super(initialPixels: null);
 
   int initialItem;
   final double _itemToShowOnStartup;
+
+  /// The number of items in the carousel for infinite scrolling wrapping.
+  int? get itemCount => _itemCount;
+  int? _itemCount;
+  set itemCount(int? value) {
+    if (_itemCount == value) {
+      return;
+    }
+    _itemCount = value;
+  }
+
+  /// Whether the carousel scrolls infinitely in both directions.
+  bool get infinite => _infinite;
+  bool _infinite;
+  set infinite(bool value) {
+    if (_infinite == value) {
+      return;
+    }
+    _infinite = value;
+  }
+
   // When the viewport has a zero-size, the item can not
   // be retrieved by `getItemFromPixels`, so we need to cache the item
   // for use when resizing the viewport to non-zero next time.
@@ -1834,6 +1870,41 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
     _itemExtent = other._itemExtent;
   }
 
+  /// Returns the length of one complete cycle in pixels.
+  /// A cycle is the scroll distance needed to return to the same visual state.
+  double _getCycleLengthInPixels() {
+    if (itemCount == null || itemCount! <= 0 || !hasViewportDimension || viewportDimension == 0) {
+      return 0.0;
+    }
+    double fraction;
+    if (itemExtent != null) {
+      fraction = itemExtent! / viewportDimension;
+    } else if (flexWeights != null) {
+      fraction = flexWeights!.first / flexWeights!.sum;
+    } else {
+      return 0.0;
+    }
+    return itemCount! * viewportDimension * fraction;
+  }
+
+  @override
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
+    // For infinite scrolling, dynamically add cycles when approaching the boundary.
+    // This eliminates the need for a large hardcoded starting offset.
+    if (infinite && hasPixels) {
+      final double cycleLength = _getCycleLengthInPixels();
+      if (cycleLength > 0 && pixels < cycleLength) {
+        // When scroll position drops below one cycle, add cycles to maintain buffer.
+        // This allows seamless backward scrolling without hitting the boundary.
+        final int cyclesToAdd = ((cycleLength - pixels) / cycleLength).ceil();
+        correctPixels(pixels + cyclesToAdd * cycleLength);
+        // Indicate position was corrected and layout should rerun.
+        return false;
+      }
+    }
+    return super.applyContentDimensions(infinite ? 0.0 : minScrollExtent, maxScrollExtent);
+  }
+
   @override
   _CarouselMetrics copyWith({
     double? minScrollExtent,
@@ -1969,6 +2040,16 @@ class CarouselController extends ScrollController {
     return dimension * (weights.first / totalWeight) * leadingIndex;
   }
 
+  int? _getItemCount() {
+    if (_carouselState == null) {
+      return null;
+    }
+    if (_carouselState!.widget.itemBuilder != null) {
+      return _carouselState!.widget.itemCount;
+    }
+    return _carouselState!.widget.children.length;
+  }
+
   @override
   ScrollPosition createScrollPosition(
     ScrollPhysics physics,
@@ -1983,6 +2064,8 @@ class CarouselController extends ScrollController {
       itemExtent: _carouselState!._itemExtent,
       consumeMaxWeight: _carouselState!._consumeMaxWeight,
       flexWeights: _carouselState!._flexWeights,
+      infinite: _carouselState!.widget.infinite,
+      itemCount: _getItemCount(),
       oldPosition: oldPosition,
     );
   }
@@ -1994,5 +2077,7 @@ class CarouselController extends ScrollController {
     carouselPosition.flexWeights = _carouselState!._flexWeights;
     carouselPosition.itemExtent = _carouselState!._itemExtent;
     carouselPosition.consumeMaxWeight = _carouselState!._consumeMaxWeight;
+    carouselPosition.infinite = _carouselState!.widget.infinite;
+    carouselPosition.itemCount = _getItemCount();
   }
 }

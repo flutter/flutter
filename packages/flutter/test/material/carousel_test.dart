@@ -2053,6 +2053,49 @@ void main() {
     expect(rect1, const Rect.fromLTRB(400.0, 0.0, 600.0, 600.0));
   });
 
+  testWidgets('CarouselView infinite scrolling supports bidirectional scrolling', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CarouselView(
+            itemExtent: 200,
+            infinite: true,
+            children: List<Widget>.generate(3, (int index) {
+              return Center(child: Text('Item $index'));
+            }),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Item 0'), findsNWidgets(2));
+    expect(find.text('Item 1'), findsOneWidget);
+    expect(find.text('Item 2'), findsOneWidget);
+
+    final double initialItem0Left = tester.getRect(getItem(0).first).left;
+
+    await tester.drag(find.byType(CarouselView), const Offset(200, 0));
+    await tester.pumpAndSettle();
+
+    // After scrolling backward, Item 2 should now appear twice.
+    expect(find.text('Item 2'), findsNWidgets(2));
+    expect(find.text('Item 0'), findsOneWidget);
+    expect(find.text('Item 1'), findsOneWidget);
+
+    final double afterItem2Left = tester.getRect(getItem(2).first).left;
+    expect(afterItem2Left, moreOrLessEquals(initialItem0Left, epsilon: 10.0));
+
+    await tester.drag(find.byType(CarouselView), const Offset(-200, 0));
+    await tester.pumpAndSettle();
+
+    // Should be back to initial state.
+    expect(find.text('Item 0'), findsNWidgets(2));
+    expect(find.text('Item 1'), findsOneWidget);
+    expect(find.text('Item 2'), findsOneWidget);
+  });
+
   testWidgets('CarouselView.weighted infinite scrolling', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -2074,11 +2117,14 @@ void main() {
     // With flexWeights [1, 2, 1], total weight = 4, viewport = 800.
     // Item widths: small = 1/4 * 800 = 200, large = 2/4 * 800 = 400.
     // With consumeMaxWeight (default true), Item 0 is placed at the max weight position (index 1).
-    // Initial layout: [padding 200] Item 0 (large) at [200, 600], Item 1 (small) at [600, 800].
+    // With infinite scrolling, items wrap to fill the entire viewport:
+    // Item 2 (small) at [0, 200], Item 0 (large) at [200, 600], Item 1 (small) at [600, 800].
     expect(find.text('Item 0'), findsOneWidget);
     expect(find.text('Item 1'), findsOneWidget);
-    expect(find.text('Item 2'), findsNothing);
+    expect(find.text('Item 2'), findsOneWidget); // Wraps to fill the padding area
 
+    final Rect rect2 = tester.getRect(getItem(2).first);
+    expect(rect2, const Rect.fromLTRB(0.0, 0.0, 200.0, 600.0));
     final Rect rect0 = tester.getRect(getItem(0).first);
     expect(rect0, const Rect.fromLTRB(200.0, 0.0, 600.0, 600.0));
     final Rect rect1 = tester.getRect(getItem(1).first);
@@ -2135,12 +2181,22 @@ void main() {
     expect(find.text('Item 1'), findsOneWidget);
     expect(find.text('Item 2'), findsOneWidget);
 
-    // Scroll backward beyond initial position - should work due to infinite.
-    await tester.drag(find.byType(CarouselView), const Offset(800, 0));
+    // Scroll backward to return to initial position.
+    await tester.drag(find.byType(CarouselView), const Offset(622, 0));
     await tester.pumpAndSettle();
 
-    // Should show Item 0 again (and possibly wrap around to show Item 5).
+    // Should show Item 0 again in the hero position.
     expect(find.text('Item 0'), findsOneWidget);
+    expect(find.text('Item 1'), findsOneWidget);
+
+    // Scroll backward beyond initial position - should work due to infinite.
+    // This tests true bidirectional infinite scrolling.
+    await tester.drag(find.byType(CarouselView), const Offset(200, 0));
+    await tester.pumpAndSettle();
+
+    // After scrolling backward, items from the "end" of the list should appear
+    // (wrapping around). With 6 items, scrolling backward from Item 0 shows Item 5.
+    expect(find.text('Item 5'), findsOneWidget);
   });
 
   testWidgets('CarouselView.weighted with multi-browse layout and infinite scrolling', (
