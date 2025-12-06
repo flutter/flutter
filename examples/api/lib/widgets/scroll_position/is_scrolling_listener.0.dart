@@ -15,7 +15,13 @@ class IsScrollingListenerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: IsScrollingListenerExample());
+    return MaterialApp(
+      // Overridden scroll behavior for sample clarity - does not build
+      // a default Scrollbar (as it does on some platforms) because
+      // this sample demonstrates manual Scrollbar use.
+      scrollBehavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+      home: const IsScrollingListenerExample(),
+    );
   }
 }
 
@@ -138,5 +144,14 @@ class Item extends StatelessWidget {
       color: color,
       child: ListTile(textColor: Colors.white, title: Text(title)),
     );
+  }
+}
+
+class NoScrollbarBehavior extends MaterialScrollBehavior {
+  const NoScrollbarBehavior();
+
+  @override
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
+    return child;
   }
 }

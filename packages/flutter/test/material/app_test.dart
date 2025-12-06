@@ -1510,7 +1510,6 @@ void main() {
       final Widget child = Container();
 
       switch (defaultTargetPlatform) {
-        case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.iOS:
           // Does not throw if we aren't using it.
@@ -1518,6 +1517,7 @@ void main() {
         case TargetPlatform.linux:
         case TargetPlatform.macOS:
         case TargetPlatform.windows:
+        case TargetPlatform.android:
           expect(
             () {
               defaultBehavior.buildScrollbar(capturedContext, child, details);
