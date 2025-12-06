@@ -5138,27 +5138,14 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// re-established in the current build. Dependencies on widgets with
   /// [InheritedWidget.cleanupUnusedDependents] set to false persist across
   /// rebuilds even if not re-established.
-  void cleanupRemovedDependencies() {
+  void _cleanupRemovedDependencies() {
     if (_dependencies != null && _currentBuildDependencies != null) {
-      final Set<InheritedElement> toRemove = HashSet<InheritedElement>();
-
-      for (final InheritedElement dependency in _dependencies!) {
-        // Check if this dependency was re-established in the current build
-        final bool inCurrentBuild = _currentBuildDependencies!.contains(dependency);
-
-        if (!inCurrentBuild) {
-          // Dependency was NOT re-established in this build
-          final InheritedWidget widget = dependency.widget as InheritedWidget;
-          if (widget.cleanupUnusedDependents) {
-            // The widget wants cleanup and the dependency wasn't re-established, so remove it
-            toRemove.add(dependency);
-          }
-        }
-      }
-
+      final Set<InheritedElement> toRemove = _dependencies!.difference(_currentBuildDependencies!);
       for (final InheritedElement dependency in toRemove) {
-        dependency.removeDependent(this);
-        _dependencies!.remove(dependency);
+        if ((dependency.widget as InheritedWidget).cleanupUnusedDependents) {
+          dependency.removeDependent(this);
+          _dependencies!.remove(dependency);
+        }
       }
     }
   }
@@ -5923,7 +5910,7 @@ abstract class ComponentElement extends Element {
       } catch (_) {}
       _child = updateChild(null, built, slot);
     }
-    cleanupRemovedDependencies();
+    _cleanupRemovedDependencies();
   }
 
   /// Subclasses should override this function to actually call the appropriate
