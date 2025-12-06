@@ -308,8 +308,8 @@ void _dispatchPointerDataPacket(ByteData packet) {
 }
 
 @pragma('vm:entry-point')
-bool _platformViewShouldAcceptGesture(int viewId, double x, double y) {
-  return PlatformDispatcher.instance._platformViewShouldAcceptGesture(viewId, x, y);
+bool _platformViewShouldAcceptTouch(int viewId, double x, double y) {
+  return PlatformDispatcher.instance._platformViewShouldAcceptTouch(viewId, x, y);
 }
 
 @pragma('vm:entry-point')

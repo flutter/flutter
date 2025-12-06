@@ -507,8 +507,8 @@ static BOOL _preparedOnce = NO;
 @interface FlutterTouchInterceptingView ()
 @property(nonatomic, weak, readonly) UIView* embeddedView;
 @property(nonatomic, weak, readonly) UIViewController<FlutterViewResponder>* flutterViewController;
+@property(nonatomic, weak, readonly) FlutterPlatformViewsController* platformViewsController;
 @property(nonatomic, readonly) FlutterDelayingGestureRecognizer* delayingRecognizer;
-@property(nonatomic, readonly) FlutterPlatformViewGestureRecognizersBlockingPolicy blockingPolicy;
 @end
 
 @implementation FlutterTouchInterceptingView
@@ -520,6 +520,7 @@ static BOOL _preparedOnce = NO;
   if (self) {
     self.multipleTouchEnabled = YES;
     _embeddedView = embeddedView;
+    _platformViewsController = platformViewsController;
     _flutterViewController = platformViewsController.flutterViewController;
     embeddedView.autoresizingMask =
         (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
@@ -582,10 +583,14 @@ static BOOL _preparedOnce = NO;
 
 - (UIView*)hitTest:(CGPoint)point withEvent:(UIEvent*)event {
   if (_blockingPolicy == FlutterPlatformViewGestureRecognizersBlockingPolicyTouchBlockingOnly) {
+    // In release mode, FlutterTouchInterceptingView's init is called before flutterViewController is set on platformViewsController.
+    if (self.flutterViewController == nil) {
+      _flutterViewController = self.platformViewsController.flutterViewController;
+    }
     CGPoint pointInFlutterView = [self convertPoint:point toView:self.flutterViewController.view];
     // Block gesture if the framework instructed so (after performing its own hitTest).
     if (![self.flutterViewController
-            platformViewShouldAcceptGestureAtTouchBeganLocation:pointInFlutterView]) {
+            platformViewShouldAcceptTouchAtTouchBeganLocation:pointInFlutterView]) {
       return self;
     }
   }

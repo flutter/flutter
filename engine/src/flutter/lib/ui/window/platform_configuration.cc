@@ -83,7 +83,7 @@ void PlatformConfiguration::DidCreateIsolate() {
   embedded_view_should_accept_gesture_.Set(
       tonic::DartState::Current(),
       Dart_GetField(library,
-                    tonic::ToDart("_platformViewShouldAcceptGesture")));
+                    tonic::ToDart("_platformViewShouldAcceptTouch")));
   dispatch_semantics_action_.Set(
       tonic::DartState::Current(),
       Dart_GetField(library, tonic::ToDart("_dispatchSemanticsAction")));
@@ -395,7 +395,7 @@ void PlatformConfiguration::DispatchPointerDataPacket(
       tonic::DartInvoke(dispatch_pointer_data_packet_.Get(), {data_handle}));
 }
 
-bool PlatformConfiguration::EmbeddedNativeViewShouldAcceptGesture(
+bool PlatformConfiguration::EmbeddedNativeViewShouldAcceptTouch(
     int64_t view_id,
     const flutter::PointData& touch_began_location) {
   std::shared_ptr<tonic::DartState> dart_state =

@@ -35,10 +35,10 @@ void PlatformView::DispatchPointerDataPacket(
   delegate_.OnPlatformViewDispatchPointerDataPacket(std::move(packet));
 }
 
-bool PlatformView::EmbeddedNativeViewShouldAcceptGesture(
+bool PlatformView::EmbeddedNativeViewShouldAcceptTouch(
     int64_t view_id,
     const flutter::PointData& touch_began_location) {
-  return delegate_.OnPlatformViewEmbeddedNativeViewShouldAcceptGesture(
+  return delegate_.OnPlatformViewEmbeddedNativeViewShouldAcceptTouch(
       view_id, touch_began_location);
 }
 

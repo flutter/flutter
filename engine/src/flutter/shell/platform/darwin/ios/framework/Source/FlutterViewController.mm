@@ -1384,9 +1384,9 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   [self dispatchTouches:touches pointerDataChangeOverride:&cancel event:nullptr];
 }
 
-- (BOOL)platformViewShouldAcceptGestureAtTouchBeganLocation:(CGPoint)location {
+- (BOOL)platformViewShouldAcceptTouchAtTouchBeganLocation:(CGPoint)location {
   flutter::PointData point{location.x, location.y};
-  return [self.engine platformViewShouldAcceptGestureAtTouchBeganLocation:point
+  return [self.engine platformViewShouldAcceptTouchAtTouchBeganLocation:point
                                                                    viewId:self.viewIdentifier];
 }
 

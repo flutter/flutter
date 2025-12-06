@@ -283,7 +283,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     _instance = this;
     platformDispatcher
       ..onPointerDataPacket = _handlePointerDataPacket
-      ..onPlatformViewShouldAcceptGesture = _handlePlatformViewShouldAcceptGesture;
+      ..onPlatformViewShouldAcceptTouch = _handlePlatformViewShouldAcceptTouch;
   }
 
   /// The singleton instance of this object.
@@ -324,7 +324,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     }
   }
 
-  bool _handlePlatformViewShouldAcceptGesture(int viewId, double x, double y) {
+  bool _handlePlatformViewShouldAcceptTouch(int viewId, double x, double y) {
     final HitTestResult result = HitTestResult();
     hitTestInView(result, Offset(x, y), viewId);
 

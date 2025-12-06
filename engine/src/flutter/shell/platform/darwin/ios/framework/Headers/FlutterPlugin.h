@@ -278,7 +278,7 @@ typedef enum {
    * a few bugs related to WKWebView being untappable. See
    * https://github.com/flutter/flutter/issues/175099.
    */
-  FlutterPlatformViewGestureRecognizersBlockingPolicyHitTest,
+  FlutterPlatformViewGestureRecognizersBlockingPolicyTouchBlockingOnly,
   // NOLINTEND(readability-identifier-naming)
 } FlutterPlatformViewGestureRecognizersBlockingPolicy;
 

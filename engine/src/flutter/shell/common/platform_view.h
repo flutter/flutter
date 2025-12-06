@@ -195,7 +195,7 @@ class PlatformView {
     /// @return     true if the embedded view should accept gesture; false
     /// otherwise.
     ///
-    virtual bool OnPlatformViewEmbeddedNativeViewShouldAcceptGesture(
+    virtual bool OnPlatformViewEmbeddedNativeViewShouldAcceptTouch(
         int64_t view_id,
         const flutter::PointData& touch_began_location) = 0;
 
@@ -766,7 +766,7 @@ class PlatformView {
   /// @return     true if the embedded view should accept gesture; false
   /// otherwise.
   ///
-  bool EmbeddedNativeViewShouldAcceptGesture(
+  bool EmbeddedNativeViewShouldAcceptTouch(
       int64_t view_id,
       const flutter::PointData& touch_began_location);
 

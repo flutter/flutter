@@ -101,7 +101,7 @@ void main() {
     final bool? acceptGesture = GestureBinding
         .instance
         .platformDispatcher
-        .onPlatformViewShouldAcceptGesture
+        .onPlatformViewShouldAcceptTouch
         ?.call(0, 1, 1);
     expect(acceptGesture, isFalse);
   });
@@ -114,7 +114,7 @@ void main() {
     final bool? acceptGesture = GestureBinding
         .instance
         .platformDispatcher
-        .onPlatformViewShouldAcceptGesture
+        .onPlatformViewShouldAcceptTouch
         ?.call(0, 1, 1);
     expect(acceptGesture, isFalse);
   });
@@ -129,7 +129,7 @@ void main() {
     final bool? acceptGesture = GestureBinding
         .instance
         .platformDispatcher
-        .onPlatformViewShouldAcceptGesture
+        .onPlatformViewShouldAcceptTouch
         ?.call(0, 1, 1);
     expect(acceptGesture, isFalse);
   });
@@ -144,7 +144,7 @@ void main() {
     final bool? acceptGesture = GestureBinding
         .instance
         .platformDispatcher
-        .onPlatformViewShouldAcceptGesture
+        .onPlatformViewShouldAcceptTouch
         ?.call(0, 1, 1);
     expect(acceptGesture, isTrue);
   });

@@ -374,13 +374,13 @@ bool RuntimeController::DispatchPointerDataPacket(
   return false;
 }
 
-bool RuntimeController::EmbeddedNativeViewShouldAcceptGesture(
+bool RuntimeController::EmbeddedNativeViewShouldAcceptTouch(
     int64_t view_id,
     const flutter::PointData& touch_began_location) {
   if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
     TRACE_EVENT0("flutter",
-                 "RuntimeController::EmbeddedNativeViewShouldAcceptGesture");
-    return platform_configuration->EmbeddedNativeViewShouldAcceptGesture(
+                 "RuntimeController::EmbeddedNativeViewShouldAcceptTouch");
+    return platform_configuration->EmbeddedNativeViewShouldAcceptTouch(
         view_id, touch_began_location);
   }
   return false;

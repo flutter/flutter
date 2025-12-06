@@ -43,8 +43,8 @@ typedef KeyDataCallback = bool Function(KeyData data);
 /// Signature for [PlatformDispatcher.onSemanticsActionEvent].
 typedef SemanticsActionEventCallback = void Function(SemanticsActionEvent action);
 
-/// Signature for [PlatformDispatcher.onPlatformViewShouldAcceptGesture].
-typedef PlatformViewShouldAcceptGestureCallback = bool Function(int viewId, double x, double y);
+/// Signature for [PlatformDispatcher.onPlatformViewShouldAcceptTouch].
+typedef PlatformViewShouldAcceptTouchCallback = bool Function(int viewId, double x, double y);
 
 /// Signature for responses to platform messages.
 ///
@@ -1391,12 +1391,12 @@ class PlatformDispatcher {
     _onSemanticsActionEventZone = Zone.current;
   }
 
-  PlatformViewShouldAcceptGestureCallback? get onPlatformViewShouldAcceptGesture =>
-      _onPlatformViewShouldAcceptGesture;
-  PlatformViewShouldAcceptGestureCallback? _onPlatformViewShouldAcceptGesture;
-  Zone _onPlatformViewShouldAcceptGestureZone = Zone.root;
-  set onPlatformViewShouldAcceptGesture(PlatformViewShouldAcceptGestureCallback? callback) {
-    _onPlatformViewShouldAcceptGesture = callback;
+  PlatformViewShouldAcceptTouchCallback? get onPlatformViewShouldAcceptTouch =>
+      _onPlatformViewShouldAcceptTouch;
+  PlatformViewShouldAcceptTouchCallback? _onPlatformViewShouldAcceptTouch;
+  Zone _onPlatformViewShouldAcceptTouchZone = Zone.root;
+  set onPlatformViewShouldAcceptTouch(PlatformViewShouldAcceptTouchCallback? callback) {
+    _onPlatformViewShouldAcceptTouch = callback;
   }
 
   // Called from the engine via hooks.dart.
@@ -1436,10 +1436,10 @@ class PlatformDispatcher {
     );
   }
 
-  bool _platformViewShouldAcceptGesture(int viewId, double x, double y) {
+  bool _platformViewShouldAcceptTouch(int viewId, double x, double y) {
     return _invoke3WithReturn<int, double, double, bool>(
-          onPlatformViewShouldAcceptGesture,
-          _onPlatformViewShouldAcceptGestureZone,
+          onPlatformViewShouldAcceptTouch,
+          _onPlatformViewShouldAcceptTouchZone,
           viewId,
           x,
           y,
