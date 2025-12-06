@@ -5,6 +5,8 @@
 #ifndef FLUTTER_DISPLAY_LIST_DL_TEXT_H_
 #define FLUTTER_DISPLAY_LIST_DL_TEXT_H_
 
+#include <memory>
+
 #include "flutter/display_list/geometry/dl_geometry_types.h"
 
 namespace impeller {
