@@ -1453,17 +1453,12 @@ class _RenderListTile extends RenderBox
     final double? subtitleMinHeight = subtitle?.getMinIntrinsicHeight(width);
 
     const topAndBottomPaddingMultiplier = 2;
-    if (subtitleMinHeight == null) {
-      return math.max(
-        _targetTileHeight,
-        titleMinHeight + topAndBottomPaddingMultiplier * _minVerticalPadding,
-      );
-    } else {
-      return math.max(
-        _targetTileHeight,
-        titleMinHeight + subtitleMinHeight + topAndBottomPaddingMultiplier * _minVerticalPadding,
-      );
-    }
+    final double contentHeight =
+        titleMinHeight +
+        (subtitleMinHeight ?? 0.0) +
+        topAndBottomPaddingMultiplier * _minVerticalPadding;
+
+    return math.max(_targetTileHeight, contentHeight);
   }
 
   @override
