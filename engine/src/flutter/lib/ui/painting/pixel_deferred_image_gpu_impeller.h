@@ -66,7 +66,7 @@ class PixelDeferredImageGPUImpeller final : public DlImage {
         fml::RefPtr<fml::TaskRunner> raster_task_runner);
 
     ImageWrapper(
-        sk_sp<SkImage> image,
+        const sk_sp<SkImage>& image,
         fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
         fml::RefPtr<fml::TaskRunner> raster_task_runner);
 

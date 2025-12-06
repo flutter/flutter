@@ -83,7 +83,7 @@ PixelDeferredImageGPUImpeller::ImageWrapper::Make(
 }
 
 PixelDeferredImageGPUImpeller::ImageWrapper::ImageWrapper(
-    sk_sp<SkImage> image,
+    const sk_sp<SkImage>& image,
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner)
     : size_(DlISize(image->width(), image->height())),
