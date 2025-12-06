@@ -13,7 +13,7 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Drawer control test', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final scaffoldKey = GlobalKey<ScaffoldState>();
     late BuildContext savedContext;
     await tester.pumpWidget(
       MaterialApp(
@@ -40,7 +40,7 @@ void main() {
   });
 
   testWidgets('Drawer tap test', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(key: scaffoldKey, drawer: const Text('drawer'), body: Container()),
@@ -68,8 +68,8 @@ void main() {
   });
 
   testWidgets('Drawer hover test', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    final List<String> logs = <String>[];
+    final scaffoldKey = GlobalKey<ScaffoldState>();
+    final logs = <String>[];
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     // Start out of hoverTarget
     await gesture.addPointer(location: const Offset(100, 100));
@@ -144,7 +144,7 @@ void main() {
   });
 
   testWidgets('Drawer drag cancel resume (LTR)', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -192,7 +192,7 @@ void main() {
   });
 
   testWidgets('Drawer drag cancel resume (RTL)', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
         home: Directionality(
@@ -243,8 +243,8 @@ void main() {
   });
 
   testWidgets('Drawer navigator back button', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    bool buttonPressed = false;
+    final scaffoldKey = GlobalKey<ScaffoldState>();
+    var buttonPressed = false;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -292,8 +292,8 @@ void main() {
   testWidgets(
     'Dismissible ModalBarrier includes button in semantic tree',
     (WidgetTester tester) async {
-      final SemanticsTester semantics = SemanticsTester(tester);
-      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+      final semantics = SemanticsTester(tester);
+      final scaffoldKey = GlobalKey<ScaffoldState>();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -323,8 +323,8 @@ void main() {
   testWidgets(
     'Dismissible ModalBarrier is hidden on Android (back button is used to dismiss)',
     (WidgetTester tester) async {
-      final SemanticsTester semantics = SemanticsTester(tester);
-      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+      final semantics = SemanticsTester(tester);
+      final scaffoldKey = GlobalKey<ScaffoldState>();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -354,8 +354,8 @@ void main() {
   );
 
   testWidgets('Drawer contains route semantics flags', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final semantics = SemanticsTester(tester);
+    final scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(
       MaterialApp(

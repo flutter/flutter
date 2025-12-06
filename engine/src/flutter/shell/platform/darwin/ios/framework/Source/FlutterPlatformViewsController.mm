@@ -665,8 +665,22 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
      withIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext {
   TRACE_EVENT0("flutter", "PlatformViewsController::SubmitFrame");
 
-  // No platform views to render; we're done.
+  // No platform views to render.
   if (self.flutterView == nil || (self.compositionOrder.empty() && !self.hadPlatformViews)) {
+    // No platform views to render but the FlutterView may need to be resized.
+    __weak FlutterPlatformViewsController* weakSelf = self;
+    if (self.flutterView != nil) {
+      fml::TaskRunner::RunNowOrPostTask(
+          weakSelf.platformTaskRunner,
+          fml::MakeCopyable([weakSelf, frameSize = weakSelf.frameSize]() {
+            FlutterPlatformViewsController* strongSelf = weakSelf;
+            if (!strongSelf) {
+              return;
+            }
+            [strongSelf performResize:frameSize];
+          }));
+    }
+
     self.hadPlatformViews = NO;
     return background_frame->Submit();
   }
@@ -752,15 +766,13 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   std::vector<std::shared_ptr<flutter::OverlayLayer>> unusedLayers =
       self.layerPool->RemoveUnusedLayers();
   self.layerPool->RecycleLayers();
-
   auto task = [self,                                                      //
                platformViewLayers = std::move(platformViewLayers),        //
                currentCompositionParams = self.currentCompositionParams,  //
                viewsToRecomposite = self.viewsToRecomposite,              //
                compositionOrder = self.compositionOrder,                  //
                unusedLayers = std::move(unusedLayers),                    //
-               surfaceFrames = std::move(surfaceFrames)                   //
-  ]() mutable {
+               surfaceFrames = std::move(surfaceFrames)]() mutable {
     [self performSubmit:platformViewLayers
         currentCompositionParams:currentCompositionParams
               viewsToRecomposite:viewsToRecomposite
@@ -770,7 +782,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   };
 
   fml::TaskRunner::RunNowOrPostTask(self.platformTaskRunner, fml::MakeCopyable(std::move(task)));
-
   return didEncode;
 }
 
@@ -796,6 +807,16 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
       });
   if (![[NSThread currentThread] isMainThread]) {
     latch->Wait();
+  }
+}
+
+- (void)performResize:(const flutter::DlISize&)frameSize {
+  TRACE_EVENT0("flutter", "PlatformViewsController::PerformResize");
+  FML_DCHECK([[NSThread currentThread] isMainThread]);
+
+  if (self.flutterView != nil) {
+    [(FlutterView*)self.flutterView
+        setIntrinsicContentSize:CGSizeMake(frameSize.width, frameSize.height)];
   }
 }
 

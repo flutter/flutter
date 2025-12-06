@@ -157,7 +157,7 @@ class NavigationDrawer extends StatelessWidget {
         .toList()
         .length;
 
-    int destinationIndex = 0;
+    var destinationIndex = 0;
     Widget wrapChild(Widget child, int index) => _SelectableAnimatedBuilder(
       duration: const Duration(milliseconds: 500),
       isSelected: index == selectedIndex,
@@ -175,7 +175,7 @@ class NavigationDrawer extends StatelessWidget {
       },
     );
 
-    final List<Widget> wrappedChildren = <Widget>[
+    final wrappedChildren = <Widget>[
       for (final Widget child in children)
         if (child is! NavigationDrawerDestination) child else wrapChild(child, destinationIndex++),
     ];
@@ -256,9 +256,9 @@ class NavigationDrawerDestination extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const Set<WidgetState> selectedState = <WidgetState>{WidgetState.selected};
-    const Set<WidgetState> unselectedState = <WidgetState>{};
-    const Set<WidgetState> disabledState = <WidgetState>{WidgetState.disabled};
+    const selectedState = <WidgetState>{WidgetState.selected};
+    const unselectedState = <WidgetState>{};
+    const disabledState = <WidgetState>{WidgetState.disabled};
 
     final NavigationDrawerThemeData navigationDrawerTheme = NavigationDrawerTheme.of(context);
     final NavigationDrawerThemeData defaults = _NavigationDrawerDefaultsM3(context);
@@ -367,7 +367,7 @@ class _NavigationDestinationBuilder extends StatelessWidget {
     final NavigationDrawerThemeData navigationDrawerTheme = NavigationDrawerTheme.of(context);
     final NavigationDrawerThemeData defaults = _NavigationDrawerDefaultsM3(context);
 
-    final InkWell inkWell = InkWell(
+    final inkWell = InkWell(
       highlightColor: Colors.transparent,
       onTap: enabled ? info.onTap : null,
       customBorder:

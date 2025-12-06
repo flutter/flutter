@@ -12,9 +12,9 @@ int use(List<int> a) {
 
 void main() {
   test('Serial GC option test ', () async {
-    const bool threw = false;
-    for (int i = 0; i < 100; i++) {
-      final List<int> a = <int>[100];
+    const threw = false;
+    for (var i = 0; i < 100; i++) {
+      final a = <int>[100];
       use(a);
     }
     expect(threw, false);
