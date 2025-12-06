@@ -702,8 +702,7 @@ void main() {
   testWidgets(
     'Mixed cleanupUnusedDependents - only widgets with cleanup enabled should be cleaned up',
     (WidgetTester tester) async {
-      final GlobalKey<DependencyCleanupTestWidgetState> key =
-          GlobalKey<DependencyCleanupTestWidgetState>();
+      final key = GlobalKey<DependencyCleanupTestWidgetState>();
 
       await tester.pumpWidget(
         CleanupInheritedA(
@@ -760,8 +759,7 @@ void main() {
   testWidgets('All dependencies with cleanupUnusedDependents=true should be cleaned up', (
     WidgetTester tester,
   ) async {
-    final GlobalKey<DependencyCleanupTestWidgetState> key =
-        GlobalKey<DependencyCleanupTestWidgetState>();
+    final key = GlobalKey<DependencyCleanupTestWidgetState>();
 
     await tester.pumpWidget(
       CleanupInheritedA(
@@ -801,8 +799,7 @@ void main() {
   testWidgets('All dependencies with cleanupUnusedDependents=false should persist', (
     WidgetTester tester,
   ) async {
-    final GlobalKey<DependencyCleanupTestWidgetState> key =
-        GlobalKey<DependencyCleanupTestWidgetState>();
+    final key = GlobalKey<DependencyCleanupTestWidgetState>();
 
     await tester.pumpWidget(
       CleanupInheritedB(
