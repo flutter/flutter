@@ -5,6 +5,7 @@
 #include "flutter/impeller/entity/geometry/arc_geometry.h"
 
 #include "flutter/impeller/entity/geometry/line_geometry.h"
+#include "fml/logging.h"
 
 namespace impeller {
 
@@ -47,7 +48,11 @@ GeometryResult ArcGeometry::GetPositionBuffer(const ContentContext& renderer,
     auto generator =
         renderer.GetTessellator().StrokedArc(transform, arc_, cap_, half_width);
 
-    return ComputePositionGeometry(renderer, generator, entity, pass);
+    auto result = ComputePositionGeometry(renderer, generator, entity, pass);
+    if (CapsOverlap()) {
+      result.mode = GeometryResult::Mode::kPreventOverdraw;
+    }
+    return result;
   }
 }
 
@@ -78,6 +83,47 @@ bool ArcGeometry::CoversArea(const Matrix& transform, const Rect& rect) const {
 
 bool ArcGeometry::IsAxisAlignedRect() const {
   return false;
+}
+
+bool ArcGeometry::CapsOverlap() const {
+  FML_DCHECK(arc_.GetSweep().degrees >= 0.0f);
+  FML_DCHECK(arc_.GetSweep().degrees <= 360.0f);
+
+  if (stroke_width_ < 0 || cap_ == Cap::kButt ||
+      arc_.GetSweep().degrees <= 180) {
+    return false;
+  }
+
+  switch (cap_) {
+    case Cap::kSquare: {
+      // Square caps overlap if the inner corner of the ending cap extends
+      // inside the inner edge of the start cap. For a visualization of when
+      // this occurs, see
+      // https://github.com/flutter/flutter/issues/178746#issuecomment-3554526727
+      auto radius = arc_.GetOvalSize().width / 2.0f;
+      auto half_width = stroke_width_ / 2.0f;
+      auto inner_radius = radius - half_width;
+      auto inner_arc_end_x =
+          cos(Radians(arc_.GetSweep()).radians) * inner_radius;
+      auto inner_square_cap_end_x =
+          inner_arc_end_x +
+          cos(Radians(arc_.GetSweep() + Degrees(90)).radians) * half_width;
+      return inner_square_cap_end_x > inner_radius;
+    }
+    case Cap::kRound: {
+      // Round caps overlap if the distance between the arc's start and end
+      // points is less than the stroke width.
+      // https://github.com/flutter/flutter/issues/178746#issuecomment-3554526727
+      auto radius = arc_.GetOvalSize().width / 2.0f;
+      auto start_angle = Radians(arc_.GetStart()).radians;
+      auto end_angle = Radians(arc_.GetStart() + arc_.GetSweep()).radians;
+      auto start_point = Point(cos(start_angle), sin(start_angle)) * radius;
+      auto end_point = Point(cos(end_angle), sin(end_angle)) * radius;
+      return (end_point - start_point).GetLength() < stroke_width_;
+    }
+    case Cap::kButt:
+      FML_UNREACHABLE()
+  }
 }
 
 }  // namespace impeller
