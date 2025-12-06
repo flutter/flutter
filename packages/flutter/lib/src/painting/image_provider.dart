@@ -1513,6 +1513,9 @@ enum WebHtmlElementStrategy {
   prefer,
 }
 
+/// Signature for the callback invoked when a web HTML element has finished loading.
+typedef WebHtmlElementLoadedCallback = void Function(Object);
+
 /// Fetches the given URL from the network, associating it with the given scale.
 ///
 /// The image will be cached regardless of cache headers from the server.
@@ -1545,6 +1548,7 @@ abstract class NetworkImage extends ImageProvider<NetworkImage> {
     double scale,
     Map<String, String>? headers,
     WebHtmlElementStrategy webHtmlElementStrategy,
+    WebHtmlElementLoadedCallback? onWebHtmlElementLoaded,
   }) = network_image.NetworkImage;
 
   /// The URL from which the image will be fetched.
@@ -1568,6 +1572,15 @@ abstract class NetworkImage extends ImageProvider<NetworkImage> {
   ///
   /// Has no effect on other platforms, which always fetch bytes.
   WebHtmlElementStrategy get webHtmlElementStrategy;
+
+  /// Callback invoked when the image is loaded as an HTML element on the Web platform.
+  ///
+  /// Has no effect on non-web platforms.
+  ///
+  /// When the callback is invoked, the image has finished loading and is ready to be displayed. The
+  /// callback can throw a [NetworkImageLoadException] to indicate that loading should be considered
+  /// failed.
+  WebHtmlElementLoadedCallback? get onWebHtmlElementLoaded;
 
   @override
   ImageStreamCompleter loadBuffer(NetworkImage key, DecoderBufferCallback decode);
