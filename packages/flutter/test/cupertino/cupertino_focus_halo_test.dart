@@ -174,7 +174,7 @@ void main() {
   );
 
   testWidgets('CupertinoFocusHalo does not crash at zero area', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     await tester.pumpWidget(
       CupertinoApp(
