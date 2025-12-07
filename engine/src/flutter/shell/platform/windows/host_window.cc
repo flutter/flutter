@@ -357,6 +357,10 @@ HWND HostWindow::GetWindowHandle() const {
   return window_handle_;
 }
 
+HWND HostWindow::GetFlutterViewWindowHandle() const {
+  return view_controller_->view()->GetWindowHandle();
+}
+
 void HostWindow::FocusRootViewOf(HostWindow* window) {
   auto child_content = window->view_controller_->view()->GetWindowHandle();
   if (window != nullptr && child_content != nullptr) {

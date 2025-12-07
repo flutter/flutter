@@ -82,7 +82,7 @@ void WindowManager::OnEngineShutdown() {
     // This will destroy the window, which will in turn remove the
     // HostWindow from map when handling WM_NCDESTROY inside
     // HandleMessage.
-    DestroyWindow(hwnd);
+    InternalFlutterWindows_WindowManager_DestroyWindow(hwnd);
   }
 }
 
@@ -92,9 +92,13 @@ std::optional<LRESULT> WindowManager::HandleMessage(HWND hwnd,
                                                     LPARAM lparam) {
   if (message == WM_NCDESTROY) {
     active_windows_.erase(hwnd);
+    return std::nullopt;
   }
 
-  FlutterWindowsView* view = engine_->GetViewFromTopLevelWindow(hwnd);
+  HostWindow* host_window = HostWindow::GetThisFromHandle(hwnd);
+  FlutterWindowsView* view =
+      host_window ? host_window->view_controller_->view() : nullptr;
+
   if (!view) {
     FML_LOG(WARNING) << "Received message for unknown view";
     return std::nullopt;
@@ -182,6 +186,26 @@ void InternalFlutterWindows_WindowManager_SetWindowSize(
   flutter::HostWindow* window = flutter::HostWindow::GetThisFromHandle(hwnd);
   if (window) {
     window->SetContentSize(*size);
+  }
+}
+
+void InternalFlutterWindows_WindowManager_DestroyWindow(HWND hwnd) {
+  flutter::HostWindow* window = flutter::HostWindow::GetThisFromHandle(hwnd);
+  HWND flutter_view_handle = nullptr;
+  if (window) {
+    // First reparent the FlutterView to null parent. Otherwise destroying
+    // the window HWND will immediately destroy the FlutterView HWND as well,
+    // which will cause crash when raster thread tries to reallocate surface.
+    // The FlutterView may only be destroyed safely when
+    // FlutterWindowsEngine::RemoveView finishes.
+    flutter_view_handle = window->GetFlutterViewWindowHandle();
+    ShowWindow(hwnd, SW_HIDE);
+    SetParent(flutter_view_handle, nullptr);
+  }
+  DestroyWindow(hwnd);
+  if (flutter_view_handle) {
+    // Now the flutter view HWND can be destroyed safely.
+    DestroyWindow(flutter_view_handle);
   }
 }
 

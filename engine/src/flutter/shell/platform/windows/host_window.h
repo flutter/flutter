@@ -79,6 +79,9 @@ class HostWindow {
   // created or has already been destroyed.
   HWND GetWindowHandle() const;
 
+  // Returns the HWND of the FlutterView hosted in this window.
+  HWND GetFlutterViewWindowHandle() const;
+
   // Resizes the window to accommodate a client area of the given
   // |size|. If the size does not satisfy the constraints, the window will be
   // resized to the minimum or maximum size as appropriate.

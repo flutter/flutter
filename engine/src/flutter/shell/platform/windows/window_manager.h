@@ -198,6 +198,9 @@ void InternalFlutterWindows_WindowManager_SetFullscreen(
     const flutter::FullscreenRequest* request);
 
 FLUTTER_EXPORT
+void InternalFlutterWindows_WindowManager_DestroyWindow(HWND hwnd);
+
+FLUTTER_EXPORT
 bool InternalFlutterWindows_WindowManager_GetFullscreen(HWND hwnd);
 
 FLUTTER_EXPORT
