@@ -38,7 +38,7 @@ void main() {
     };
 
     final pointer = TestPointer(5);
-    final down = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
     drag.addPointer(down);
     tester.closeArena(5);
     expect(didStartDrag, isFalse);
@@ -57,7 +57,7 @@ void main() {
 
   testGesture('MultiDrag: delay triggers', (GestureTester tester) {
     final drag = DelayedMultiDragGestureRecognizer();
-    const expectedButtons = kPrimaryButton;
+    const int expectedButtons = kPrimaryButton;
 
     var didStartDrag = false;
     drag.onStart = (Offset position) {
@@ -66,7 +66,7 @@ void main() {
     };
 
     final pointer = TestPointer(5);
-    final down = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
     drag.addPointer(down);
     tester.closeArena(5);
     expect(didStartDrag, isFalse);
@@ -98,7 +98,7 @@ void main() {
     };
 
     final mousePointer = TestPointer(5, PointerDeviceKind.mouse);
-    final down = mousePointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
+    final PointerDownEvent down = mousePointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
     drag.addPointer(down);
     tester.closeArena(5);
     expect(didStartDrag, isFalse);

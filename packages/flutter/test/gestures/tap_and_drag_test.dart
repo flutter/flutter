@@ -252,7 +252,7 @@ void main() {
     setUpTapAndPanGestureRecognizer(expectedButtons: expectedButtons);
 
     final pointer = TestPointer(5);
-    final down = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
     tapAndDrag.addPointer(down);
     tester.closeArena(5);
     tester.route(down);
@@ -267,7 +267,7 @@ void main() {
     setUpTapAndPanGestureRecognizer(expectedButtons: expectedButtons);
 
     final pointer = TestPointer(5);
-    final downA = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
+    final PointerDownEvent downA = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
     tapAndDrag.addPointer(downA);
     tester.closeArena(5);
     tester.route(downA);
@@ -505,7 +505,7 @@ void main() {
       setUpTapAndHorizontalDragGestureRecognizer(expectedButtons: expectedButtons);
 
       final pointer = TestPointer(5);
-      final downB = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
+      final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
 
       tapAndDrag.addPointer(downB);
       tester.closeArena(5);
@@ -546,7 +546,7 @@ void main() {
       addTearDown(verticalDrag.dispose);
 
       final pointer = TestPointer(5);
-      final downB = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
+      final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
 
       tapAndDrag.addPointer(downB);
       verticalDrag.addPointer(downB);
@@ -584,7 +584,7 @@ void main() {
       addTearDown(verticalDrag.dispose);
 
       final pointer = TestPointer(5);
-      final downB = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
+      final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
 
       tapAndDrag.addPointer(downB);
       verticalDrag.addPointer(downB);
@@ -622,7 +622,7 @@ void main() {
       addTearDown(verticalDrag.dispose);
 
       final pointer = TestPointer(5);
-      final downB = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
+      final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
 
       tapAndDrag.addPointer(downB);
       verticalDrag.addPointer(downB);
@@ -665,7 +665,7 @@ void main() {
       addTearDown(verticalDrag.dispose);
 
       final pointer = TestPointer(5);
-      final downB = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
+      final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
 
       tapAndDrag.addPointer(downB);
       verticalDrag.addPointer(downB);
@@ -680,7 +680,7 @@ void main() {
   testGesture(
     'Recognizer loses when competing against a DragGestureRecognizer for a drag when eagerVictoryOnDrag is disabled',
     (GestureTester tester) {
-      const expectedButtons = kPrimaryButton | kTertiaryButton;
+      const int expectedButtons = kPrimaryButton | kTertiaryButton;
       setUpTapAndPanGestureRecognizer(eagerVictoryOnDrag: false, expectedButtons: expectedButtons);
       final pans = _PermissivePanGestureRecognizer()
         ..onStart = (DragStartDetails details) {
@@ -701,7 +701,7 @@ void main() {
       addTearDown(pans.dispose);
 
       final pointer = TestPointer(5);
-      final downB = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
+      final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
       // When competing against another [DragGestureRecognizer], the [TapAndPanGestureRecognizer]
       // will only win when it is the last recognizer in the arena.
       tapAndDrag.addPointer(downB);
@@ -715,7 +715,7 @@ void main() {
   );
 
   testGesture('Drag state is properly reset after losing GestureArena', (GestureTester tester) {
-    const expectedButtons = kPrimaryButton | kSecondaryButton | kTertiaryButton;
+    const int expectedButtons = kPrimaryButton | kSecondaryButton | kTertiaryButton;
     setUpTapAndHorizontalDragGestureRecognizer(eagerVictoryOnDrag: false, expectedButtons: expectedButtons);
     final horizontalDrag = _PermissiveHorizontalDragGestureRecognizer()
       ..onStart = (DragStartDetails details) {
@@ -760,7 +760,7 @@ void main() {
     };
 
     final pointer = TestPointer(5);
-    final downB = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
+    final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
     // When competing against another [DragGestureRecognizer], the [TapAndPanGestureRecognizer]
     // will only win when it is the last recognizer in the arena.
     tapAndDrag.addPointer(downB);
@@ -810,7 +810,7 @@ void main() {
     addTearDown(longpress.dispose);
 
     final pointer = TestPointer(5);
-    final downA = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
+    final PointerDownEvent downA = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
     tapAndDrag.addPointer(downA);
     longpress.addPointer(downA);
     tester.closeArena(5);
