@@ -1,6 +1,6 @@
 {
   "datePickerHourSemanticsLabelOne": "Saacad $hour buuxda",
-  "datePickerHourSemanticsLabelOther": "Saacad $hour buuxda",
+  "datePickerHourSemanticsLabelOther": "Saacado $hour buuxda",
 
   "datePickerMinuteSemanticsLabelOne": "1 daqiiqad",
   "datePickerMinuteSemanticsLabelOther": "$minute daqiiqadood",
@@ -21,7 +21,7 @@
   "timerPickerMinuteLabelOther": "daqiiqadood",
 
   "timerPickerSecondLabelOne": "ilbiriqsi",
-  "timerPickerSecondLabelOther": "ilbiriqsi",
+  "timerPickerSecondLabelOther": "ilbiriqsiyo",
 
   "cutButtonLabel": "Jar",
   "copyButtonLabel": "Koobi",

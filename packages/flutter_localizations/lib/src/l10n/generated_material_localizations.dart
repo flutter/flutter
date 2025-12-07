@@ -37975,7 +37975,7 @@ class MaterialLocalizationSo extends GlobalMaterialLocalizations {
   String? get licensesPackageDetailTextOne => '1 shati';
 
   @override
-  String get licensesPackageDetailTextOther => r'$licenseCount shati';
+  String get licensesPackageDetailTextOther => r'$licenseCount shatiyo';
 
   @override
   String? get licensesPackageDetailTextTwo => null;
@@ -38047,7 +38047,7 @@ class MaterialLocalizationSo extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 xaraf ayaa hadhay';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount xaraf ayaa hadhay';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount xarfo ayaa hadhay';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -38116,7 +38116,7 @@ class MaterialLocalizationSo extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => '1 shay ayaa la xulay';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount shay ayaa la xulay';
+  String get selectedRowCountTitleOther => r'$selectedRowCount shayyaal ayaa la xulay';
 
   @override
   String? get selectedRowCountTitleTwo => null;

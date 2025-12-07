@@ -14028,7 +14028,7 @@ class CupertinoLocalizationSo extends GlobalCupertinoLocalizations {
   String? get datePickerHourSemanticsLabelOne => r'Saacad $hour buuxda';
 
   @override
-  String get datePickerHourSemanticsLabelOther => r'Saacad $hour buuxda';
+  String get datePickerHourSemanticsLabelOther => r'Saacado $hour buuxda';
 
   @override
   String? get datePickerHourSemanticsLabelTwo => null;
@@ -14148,7 +14148,7 @@ class CupertinoLocalizationSo extends GlobalCupertinoLocalizations {
   String? get timerPickerSecondLabelOne => 'ilbiriqsi';
 
   @override
-  String get timerPickerSecondLabelOther => 'ilbiriqsi';
+  String get timerPickerSecondLabelOther => 'ilbiriqsiyo';
 
   @override
   String? get timerPickerSecondLabelTwo => null;

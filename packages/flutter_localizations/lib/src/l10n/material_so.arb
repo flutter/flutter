@@ -24,7 +24,7 @@
 
   "licensesPackageDetailTextZero": "Shati ma jiro",
   "licensesPackageDetailTextOne": "1 shati",
-  "licensesPackageDetailTextOther": "$licenseCount shati",
+  "licensesPackageDetailTextOther": "$licenseCount shatiyo",
 
   "pageRowsInfoTitle": "$firstRow–$lastRow oo ka mid ah $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow oo qiyaas ahaan ka mid ah $rowCount",
@@ -34,7 +34,7 @@
 
   "selectedRowCountTitleZero": "Midna lama xulin",
   "selectedRowCountTitleOne": "1 shay ayaa la xulay",
-  "selectedRowCountTitleOther": "$selectedRowCount shay ayaa la xulay",
+  "selectedRowCountTitleOther": "$selectedRowCount shayyaal ayaa la xulay",
 
   "cancelButtonLabel": "Jooji",
   "closeButtonLabel": "Xir",
@@ -64,7 +64,7 @@
   "selectYearSemanticsLabel": "Dooro sanadka",
 
   "unspecifiedDate": "Taariikh",
-  "unspecifiedDateRange": "Range",
+  "unspecifiedDateRange": "Muddo",
   "dateInputLabel": "Geli taariikh",
   "dateRangeStartLabel": "Taariikhda billowga",
   "dateRangeEndLabel": "Taariikhda dhammaadka",
@@ -73,12 +73,12 @@
   "dateRangeEndDateSemanticLabel": "Taariikhda dhammaadka $fullDate",
 
   "invalidDateFormatLabel": "Qaabka ma aha mid sax ah.",
-  "invalidDateRangeLabel": "Range-ka ma aha mid sax ah.",
+  "invalidDateRangeLabel": "Muddada ma aha mid sax ah.",
   "dateOutOfRangeLabel": "Taariikhda waa ka baxsan xadka la oggol yahay.",
 
   "saveButtonLabel": "Kaydi",
   "datePickerHelpText": "Dooro taariikh",
-  "dateRangePickerHelpText": "Dooro range",
+  "dateRangePickerHelpText": "Dooro muddada",
 
   "calendarModeButtonLabel": "U beddel habka kalandarka",
   "inputDateModeButtonLabel": "U beddel habka gelinta",
@@ -116,7 +116,7 @@
 
   "remainingTextFieldCharacterCountZero": "Xaraf ma hadhin",
   "remainingTextFieldCharacterCountOne": "1 xaraf ayaa hadhay",
-  "remainingTextFieldCharacterCountOther": "$remainingCount xaraf ayaa hadhay",
+  "remainingTextFieldCharacterCountOther": "$remainingCount xarfo ayaa hadhay",
 
   "refreshIndicatorSemanticLabel": "Cusboonaysii",
   "@scrimLabel": {"notUsed": "Minimal localization file"},
