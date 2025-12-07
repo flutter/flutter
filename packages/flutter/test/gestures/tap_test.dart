@@ -1176,7 +1176,7 @@ void main() {
     addTearDown(tap.dispose);
 
     final pointer1 = TestPointer();
-    final PointerDownEvent down = pointer1.down(Offset.zero);
+    final down = pointer1.down(Offset.zero, buttons: kPrimaryMouseButton);
     tap.addPointer(down);
     tester.closeArena(1);
     tester.route(down);
@@ -1184,11 +1184,13 @@ void main() {
     expect(tapMoveDetails, isNotNull);
     expect(tapMoveDetails!.globalPosition, const Offset(50.0, 0));
     expect(tapMoveDetails!.delta, const Offset(50.0, 0));
+    expect(tapMoveDetails!.buttons, kPrimaryMouseButton);
     tapMoveDetails = null;
 
     tester.route(pointer1.move(const Offset(60.0, 10)));
     expect(tapMoveDetails, isNotNull);
     expect(tapMoveDetails!.globalPosition, const Offset(60.0, 10));
     expect(tapMoveDetails!.delta, const Offset(10.0, 10));
+    expect(tapMoveDetails!.buttons, kPrimaryMouseButton);
   });
 }

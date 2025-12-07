@@ -2287,6 +2287,8 @@ class _VerticalOuterDimensionState extends ScrollableState {
       primaryDelta: details.delta.dy,
       globalPosition: details.globalPosition,
       localPosition: details.localPosition,
+      kind: details.kind,
+      buttons: details.buttons,
     );
     final horizontalDragDetails = DragUpdateDetails(
       sourceTimeStamp: details.sourceTimeStamp,
@@ -2294,6 +2296,8 @@ class _VerticalOuterDimensionState extends ScrollableState {
       primaryDelta: details.delta.dx,
       globalPosition: details.globalPosition,
       localPosition: details.localPosition,
+      kind: details.kind,
+      buttons: details.buttons,
     );
 
     switch (diagonalDragBehavior) {

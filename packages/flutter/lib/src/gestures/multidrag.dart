@@ -37,7 +37,7 @@ typedef GestureMultiDragStartCallback = Drag? Function(Offset position);
 /// each pointer is a subclass of [MultiDragPointerState].
 abstract class MultiDragPointerState {
   /// Creates per-pointer state for a [MultiDragGestureRecognizer].
-  MultiDragPointerState(this.initialPosition, this.kind, this.gestureSettings)
+  MultiDragPointerState(this.initialPosition, this.kind, this.buttons, this.gestureSettings)
     : _velocityTracker = VelocityTracker.withKind(kind) {
     assert(debugMaybeDispatchCreated('gestures', 'MultiDragPointerState', this));
   }
@@ -57,6 +57,9 @@ abstract class MultiDragPointerState {
   ///
   /// Used by subclasses to determine the appropriate hit slop, for example.
   final PointerDeviceKind kind;
+
+  /// {@macro flutter.gestures.PointerEvent.buttons}
+  final int buttons;
 
   Drag? _client;
 
@@ -99,6 +102,8 @@ abstract class MultiDragPointerState {
           sourceTimeStamp: event.timeStamp,
           delta: event.delta,
           globalPosition: event.position,
+          kind: kind,
+          buttons: buttons,
         ),
       );
     } else {
@@ -145,6 +150,8 @@ abstract class MultiDragPointerState {
       sourceTimeStamp: _lastPendingEventTimestamp,
       delta: pendingDelta!,
       globalPosition: initialPosition,
+      kind: kind,
+      buttons: buttons,
     );
     _pendingDelta = null;
     _lastPendingEventTimestamp = null;
@@ -336,7 +343,7 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
 }
 
 class _ImmediatePointerState extends MultiDragPointerState {
-  _ImmediatePointerState(super.initialPosition, super.kind, super.gestureSettings);
+  _ImmediatePointerState(super.initialPosition, super.kind, super.buttons, super.gestureSettings);
 
   @override
   void checkForResolutionAfterMove() {
@@ -380,7 +387,7 @@ class ImmediateMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
 
   @override
   MultiDragPointerState createNewPointerState(PointerDownEvent event) {
-    return _ImmediatePointerState(event.position, event.kind, gestureSettings);
+    return _ImmediatePointerState(event.position, event.kind, event.buttons, gestureSettings);
   }
 
   @override
@@ -388,7 +395,7 @@ class ImmediateMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
 }
 
 class _HorizontalPointerState extends MultiDragPointerState {
-  _HorizontalPointerState(super.initialPosition, super.kind, super.gestureSettings);
+  _HorizontalPointerState(super.initialPosition, super.kind, super.buttons, super.gestureSettings);
 
   @override
   void checkForResolutionAfterMove() {
@@ -432,7 +439,7 @@ class HorizontalMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
 
   @override
   MultiDragPointerState createNewPointerState(PointerDownEvent event) {
-    return _HorizontalPointerState(event.position, event.kind, gestureSettings);
+    return _HorizontalPointerState(event.position, event.kind, event.buttons, gestureSettings);
   }
 
   @override
@@ -440,7 +447,7 @@ class HorizontalMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
 }
 
 class _VerticalPointerState extends MultiDragPointerState {
-  _VerticalPointerState(super.initialPosition, super.kind, super.gestureSettings);
+  _VerticalPointerState(super.initialPosition, super.kind, super.buttons, super.gestureSettings);
 
   @override
   void checkForResolutionAfterMove() {
@@ -484,7 +491,7 @@ class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
 
   @override
   MultiDragPointerState createNewPointerState(PointerDownEvent event) {
-    return _VerticalPointerState(event.position, event.kind, gestureSettings);
+    return _VerticalPointerState(event.position, event.kind, event.buttons, gestureSettings);
   }
 
   @override
@@ -492,7 +499,7 @@ class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
 }
 
 class _DelayedPointerState extends MultiDragPointerState {
-  _DelayedPointerState(super.initialPosition, Duration delay, super.kind, super.gestureSettings) {
+  _DelayedPointerState(super.initialPosition, Duration delay, super.kind, super.buttons, super.gestureSettings) {
     _timer = Timer(delay, _delayPassed);
   }
 
@@ -593,7 +600,7 @@ class DelayedMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
 
   @override
   MultiDragPointerState createNewPointerState(PointerDownEvent event) {
-    return _DelayedPointerState(event.position, delay, event.kind, gestureSettings);
+    return _DelayedPointerState(event.position, delay, event.kind, event.buttons, gestureSettings);
   }
 
   @override

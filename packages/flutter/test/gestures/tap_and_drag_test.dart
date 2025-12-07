@@ -19,24 +19,30 @@ void main() {
 
   void setUpTapAndPanGestureRecognizer({
     bool eagerVictoryOnDrag = true, // This is the default for [BaseTapAndDragGestureRecognizer].
+    int expectedButtons = kPrimaryButton, // This is the default for test events when not specified
   }) {
-    tapAndDrag = TapAndPanGestureRecognizer()
+    tapAndDrag = _PermissiveTapAndPanGestureRecognizer()
       ..dragStartBehavior = DragStartBehavior.down
       ..eagerVictoryOnDrag = eagerVictoryOnDrag
       ..maxConsecutiveTap = 3
       ..onTapDown = (TapDragDownDetails details) {
+        expect(details.buttons, expectedButtons);
         events.add('down#${details.consecutiveTapCount}');
       }
       ..onTapUp = (TapDragUpDetails details) {
+        expect(details.buttons, expectedButtons);
         events.add('up#${details.consecutiveTapCount}');
       }
       ..onDragStart = (TapDragStartDetails details) {
+        expect(details.buttons, expectedButtons);
         events.add('panstart#${details.consecutiveTapCount}');
       }
       ..onDragUpdate = (TapDragUpdateDetails details) {
+        expect(details.buttons, expectedButtons);
         events.add('panupdate#${details.consecutiveTapCount}');
       }
       ..onDragEnd = (TapDragEndDetails details) {
+        expect(details.buttons, expectedButtons);
         events.add('panend#${details.consecutiveTapCount}');
       }
       ..onCancel = () {
@@ -46,25 +52,31 @@ void main() {
   }
 
   void setUpTapAndHorizontalDragGestureRecognizer({
+    required int expectedButtons,
     bool eagerVictoryOnDrag = true, // This is the default for [BaseTapAndDragGestureRecognizer].
   }) {
-    tapAndDrag = TapAndHorizontalDragGestureRecognizer()
+    tapAndDrag = _PermissiveTapAndHorizontalDragGestureRecognizer()
       ..dragStartBehavior = DragStartBehavior.down
       ..eagerVictoryOnDrag = eagerVictoryOnDrag
       ..maxConsecutiveTap = 3
       ..onTapDown = (TapDragDownDetails details) {
+        expect(details.buttons, expectedButtons);
         events.add('down#${details.consecutiveTapCount}');
       }
       ..onTapUp = (TapDragUpDetails details) {
+        expect(details.buttons, expectedButtons);
         events.add('up#${details.consecutiveTapCount}');
       }
       ..onDragStart = (TapDragStartDetails details) {
+        expect(details.buttons, expectedButtons);
         events.add('horizontaldragstart#${details.consecutiveTapCount}');
       }
       ..onDragUpdate = (TapDragUpdateDetails details) {
+        expect(details.buttons, expectedButtons);
         events.add('horizontaldragupdate#${details.consecutiveTapCount}');
       }
       ..onDragEnd = (TapDragEndDetails details) {
+        expect(details.buttons, expectedButtons);
         events.add('horizontaldragend#${details.consecutiveTapCount}');
       }
       ..onCancel = () {
@@ -80,31 +92,31 @@ void main() {
   // Down/up pair 1: normal tap sequence
   const down1 = PointerDownEvent(pointer: 1, position: Offset(10.0, 10.0));
 
-  const up1 = PointerUpEvent(pointer: 1, position: Offset(11.0, 9.0));
+  const up1 = PointerUpEvent(pointer: 1, position: Offset(11.0, 9.0), buttons: kPrimaryButton);
 
-  const cancel1 = PointerCancelEvent(pointer: 1);
+  const cancel1 = PointerCancelEvent(pointer: 1, buttons: kPrimaryButton);
 
   // Down/up pair 2: normal tap sequence close to pair 1
   const down2 = PointerDownEvent(pointer: 2, position: Offset(12.0, 12.0));
 
-  const up2 = PointerUpEvent(pointer: 2, position: Offset(13.0, 11.0));
+  const up2 = PointerUpEvent(pointer: 2, position: Offset(13.0, 11.0), buttons: kPrimaryButton);
 
   // Down/up pair 3: normal tap sequence close to pair 1
   const down3 = PointerDownEvent(pointer: 3, position: Offset(12.0, 12.0));
 
-  const up3 = PointerUpEvent(pointer: 3, position: Offset(13.0, 11.0));
+  const up3 = PointerUpEvent(pointer: 3, position: Offset(13.0, 11.0), buttons: kPrimaryButton);
 
   // Down/up pair 4: normal tap sequence far away from pair 1
   const down4 = PointerDownEvent(pointer: 4, position: Offset(130.0, 130.0));
 
-  const up4 = PointerUpEvent(pointer: 4, position: Offset(131.0, 129.0));
+  const up4 = PointerUpEvent(pointer: 4, position: Offset(131.0, 129.0), buttons: kPrimaryButton);
 
   // Down/move/up sequence 5: intervening motion
   const down5 = PointerDownEvent(pointer: 5, position: Offset(10.0, 10.0));
 
   const move5 = PointerMoveEvent(pointer: 5, position: Offset(25.0, 25.0));
 
-  const up5 = PointerUpEvent(pointer: 5, position: Offset(25.0, 25.0));
+  const up5 = PointerUpEvent(pointer: 5, position: Offset(25.0, 25.0), buttons: kPrimaryButton);
 
   // Mouse Down/move/up sequence 6: intervening motion - kPrecisePointerPanSlop
   const down6 = PointerDownEvent(
@@ -236,24 +248,26 @@ void main() {
   });
 
   testGesture('Should recognize drag', (GestureTester tester) {
-    setUpTapAndPanGestureRecognizer();
+    const int expectedButtons = kTertiaryButton;
+    setUpTapAndPanGestureRecognizer(expectedButtons: expectedButtons);
 
     final pointer = TestPointer(5);
-    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
+    final down = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
     tapAndDrag.addPointer(down);
     tester.closeArena(5);
     tester.route(down);
-    tester.route(pointer.move(const Offset(40.0, 45.0)));
+    tester.route(pointer.move(const Offset(40.0, 45.0), buttons: expectedButtons));
     tester.route(pointer.up());
     GestureBinding.instance.gestureArena.sweep(5);
     expect(events, <String>['down#1', 'panstart#1', 'panupdate#1', 'panend#1']);
   });
 
   testGesture('Recognizes consecutive taps + drag', (GestureTester tester) {
-    setUpTapAndPanGestureRecognizer();
+    const int expectedButtons = kSecondaryButton | kTertiaryButton;
+    setUpTapAndPanGestureRecognizer(expectedButtons: expectedButtons);
 
     final pointer = TestPointer(5);
-    final PointerDownEvent downA = pointer.down(const Offset(10.0, 10.0));
+    final downA = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
     tapAndDrag.addPointer(downA);
     tester.closeArena(5);
     tester.route(downA);
@@ -262,7 +276,7 @@ void main() {
 
     tester.async.elapse(kConsecutiveTapDelay);
 
-    final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
+    final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
     tapAndDrag.addPointer(downB);
     tester.closeArena(5);
     tester.route(downB);
@@ -271,11 +285,11 @@ void main() {
 
     tester.async.elapse(kConsecutiveTapDelay);
 
-    final PointerDownEvent downC = pointer.down(const Offset(10.0, 10.0));
+    final PointerDownEvent downC = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
     tapAndDrag.addPointer(downC);
     tester.closeArena(5);
     tester.route(downC);
-    tester.route(pointer.move(const Offset(40.0, 45.0)));
+    tester.route(pointer.move(const Offset(40.0, 45.0), buttons: expectedButtons));
     tester.route(pointer.up());
     expect(events, <String>[
       'down#1',
@@ -487,15 +501,16 @@ void main() {
   testGesture(
     'TapAndHorizontalDragGestureRecognizer accepts drag on a pan when the arena has already been won by the primary pointer',
     (GestureTester tester) {
-      setUpTapAndHorizontalDragGestureRecognizer();
+      const int expectedButtons = kSecondaryButton;
+      setUpTapAndHorizontalDragGestureRecognizer(expectedButtons: expectedButtons);
 
       final pointer = TestPointer(5);
-      final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
+      final downB = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
 
       tapAndDrag.addPointer(downB);
       tester.closeArena(5);
       tester.route(downB);
-      tester.route(pointer.move(const Offset(25.0, 45.0)));
+      tester.route(pointer.move(const Offset(25.0, 45.0), buttons: expectedButtons));
       tester.route(pointer.up());
       expect(events, <String>[
         'down#1',
@@ -509,16 +524,20 @@ void main() {
   testGesture(
     'TapAndHorizontalDragGestureRecognizer loses to VerticalDragGestureRecognizer on a vertical drag',
     (GestureTester tester) {
-      setUpTapAndHorizontalDragGestureRecognizer();
+      const int expectedButtons = kPrimaryButton | kSecondaryButton;
+      setUpTapAndHorizontalDragGestureRecognizer(expectedButtons: expectedButtons);
 
-      final verticalDrag = VerticalDragGestureRecognizer()
+      final verticalDrag = _PermissiveVerticalDragGestureRecognizer()
         ..onStart = (DragStartDetails details) {
+          expect(details.buttons, expectedButtons);
           events.add('verticalstart');
         }
         ..onUpdate = (DragUpdateDetails details) {
+          expect(details.buttons, expectedButtons);
           events.add('verticalupdate');
         }
         ..onEnd = (DragEndDetails details) {
+          expect(details.buttons, expectedButtons);
           events.add('verticalend');
         }
         ..onCancel = () {
@@ -527,14 +546,14 @@ void main() {
       addTearDown(verticalDrag.dispose);
 
       final pointer = TestPointer(5);
-      final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
+      final downB = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
 
       tapAndDrag.addPointer(downB);
       verticalDrag.addPointer(downB);
       tester.closeArena(5);
       tester.route(downB);
-      tester.route(pointer.move(const Offset(10.0, 45.0)));
-      tester.route(pointer.move(const Offset(10.0, 100.0)));
+      tester.route(pointer.move(const Offset(10.0, 45.0), buttons: expectedButtons));
+      tester.route(pointer.move(const Offset(10.0, 100.0), buttons: expectedButtons));
       tester.route(pointer.up());
       expect(events, <String>['verticalstart', 'verticalupdate', 'verticalend']);
     },
@@ -543,16 +562,20 @@ void main() {
   testGesture(
     'TapAndPanGestureRecognizer loses to VerticalDragGestureRecognizer on a vertical drag',
     (GestureTester tester) {
-      setUpTapAndPanGestureRecognizer();
+      const int expectedButtons = kSecondaryButton | kMiddleMouseButton;
+      setUpTapAndPanGestureRecognizer(expectedButtons: expectedButtons);
 
-      final verticalDrag = VerticalDragGestureRecognizer()
+      final verticalDrag = _PermissiveVerticalDragGestureRecognizer()
         ..onStart = (DragStartDetails details) {
+          expect(details.buttons, expectedButtons);
           events.add('verticalstart');
         }
         ..onUpdate = (DragUpdateDetails details) {
+          expect(details.buttons, expectedButtons);
           events.add('verticalupdate');
         }
         ..onEnd = (DragEndDetails details) {
+          expect(details.buttons, expectedButtons);
           events.add('verticalend');
         }
         ..onCancel = () {
@@ -561,7 +584,7 @@ void main() {
       addTearDown(verticalDrag.dispose);
 
       final pointer = TestPointer(5);
-      final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
+      final downB = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
 
       tapAndDrag.addPointer(downB);
       verticalDrag.addPointer(downB);
@@ -577,16 +600,20 @@ void main() {
   testGesture(
     'TapAndHorizontalDragGestureRecognizer beats VerticalDragGestureRecognizer on a horizontal drag',
     (GestureTester tester) {
-      setUpTapAndHorizontalDragGestureRecognizer();
+      const int expectedButtons = kMiddleMouseButton;
+      setUpTapAndHorizontalDragGestureRecognizer(expectedButtons: expectedButtons);
 
-      final verticalDrag = VerticalDragGestureRecognizer()
+      final verticalDrag = _PermissiveVerticalDragGestureRecognizer()
         ..onStart = (DragStartDetails details) {
+          expect(details.buttons, expectedButtons);
           events.add('verticalstart');
         }
         ..onUpdate = (DragUpdateDetails details) {
+          expect(details.buttons, expectedButtons);
           events.add('verticalupdate');
         }
         ..onEnd = (DragEndDetails details) {
+          expect(details.buttons, expectedButtons);
           events.add('verticalend');
         }
         ..onCancel = () {
@@ -595,7 +622,7 @@ void main() {
       addTearDown(verticalDrag.dispose);
 
       final pointer = TestPointer(5);
-      final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
+      final downB = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
 
       tapAndDrag.addPointer(downB);
       verticalDrag.addPointer(downB);
@@ -616,16 +643,20 @@ void main() {
   testGesture(
     'TapAndPanGestureRecognizer beats VerticalDragGestureRecognizer on a horizontal pan',
     (GestureTester tester) {
-      setUpTapAndPanGestureRecognizer();
+      const int expectedButtons = kPrimaryButton | kMiddleMouseButton;
+      setUpTapAndPanGestureRecognizer(expectedButtons: expectedButtons);
 
-      final verticalDrag = VerticalDragGestureRecognizer()
+      final verticalDrag = _PermissiveVerticalDragGestureRecognizer()
         ..onStart = (DragStartDetails details) {
+          expect(details.buttons, expectedButtons);
           events.add('verticalstart');
         }
         ..onUpdate = (DragUpdateDetails details) {
+          expect(details.buttons, expectedButtons);
           events.add('verticalupdate');
         }
         ..onEnd = (DragEndDetails details) {
+          expect(details.buttons, expectedButtons);
           events.add('verticalend');
         }
         ..onCancel = () {
@@ -634,13 +665,13 @@ void main() {
       addTearDown(verticalDrag.dispose);
 
       final pointer = TestPointer(5);
-      final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
+      final downB = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
 
       tapAndDrag.addPointer(downB);
       verticalDrag.addPointer(downB);
       tester.closeArena(5);
       tester.route(downB);
-      tester.route(pointer.move(const Offset(45.0, 25.0)));
+      tester.route(pointer.move(const Offset(45.0, 25.0), buttons: expectedButtons));
       tester.route(pointer.up());
       expect(events, <String>['verticalcancel', 'down#1', 'panstart#1', 'panupdate#1', 'panend#1']);
     },
@@ -649,15 +680,19 @@ void main() {
   testGesture(
     'Recognizer loses when competing against a DragGestureRecognizer for a drag when eagerVictoryOnDrag is disabled',
     (GestureTester tester) {
-      setUpTapAndPanGestureRecognizer(eagerVictoryOnDrag: false);
-      final pans = PanGestureRecognizer()
+      const expectedButtons = kPrimaryButton | kTertiaryButton;
+      setUpTapAndPanGestureRecognizer(eagerVictoryOnDrag: false, expectedButtons: expectedButtons);
+      final pans = _PermissivePanGestureRecognizer()
         ..onStart = (DragStartDetails details) {
+          expect(details.buttons, expectedButtons);
           events.add('panstart');
         }
         ..onUpdate = (DragUpdateDetails details) {
+          expect(details.buttons, expectedButtons);
           events.add('panupdate');
         }
         ..onEnd = (DragEndDetails details) {
+          expect(details.buttons, expectedButtons);
           events.add('panend');
         }
         ..onCancel = () {
@@ -666,29 +701,33 @@ void main() {
       addTearDown(pans.dispose);
 
       final pointer = TestPointer(5);
-      final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
+      final downB = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
       // When competing against another [DragGestureRecognizer], the [TapAndPanGestureRecognizer]
       // will only win when it is the last recognizer in the arena.
       tapAndDrag.addPointer(downB);
       pans.addPointer(downB);
       tester.closeArena(5);
       tester.route(downB);
-      tester.route(pointer.move(const Offset(40.0, 45.0)));
+      tester.route(pointer.move(const Offset(40.0, 45.0), buttons: expectedButtons));
       tester.route(pointer.up());
       expect(events, <String>['panstart', 'panend']);
     },
   );
 
   testGesture('Drag state is properly reset after losing GestureArena', (GestureTester tester) {
-    setUpTapAndHorizontalDragGestureRecognizer(eagerVictoryOnDrag: false);
-    final horizontalDrag = HorizontalDragGestureRecognizer()
+    const expectedButtons = kPrimaryButton | kSecondaryButton | kTertiaryButton;
+    setUpTapAndHorizontalDragGestureRecognizer(eagerVictoryOnDrag: false, expectedButtons: expectedButtons);
+    final horizontalDrag = _PermissiveHorizontalDragGestureRecognizer()
       ..onStart = (DragStartDetails details) {
+        expect(details.buttons, expectedButtons);
         events.add('basichorizontalstart');
       }
       ..onUpdate = (DragUpdateDetails details) {
+        expect(details.buttons, expectedButtons);
         events.add('basichorizontalupdate');
       }
       ..onEnd = (DragEndDetails details) {
+        expect(details.buttons, expectedButtons);
         events.add('basichorizontalend');
       }
       ..onCancel = () {
@@ -698,12 +737,15 @@ void main() {
 
     final longpress = LongPressGestureRecognizer()
       ..onLongPressStart = (LongPressStartDetails details) {
+        expect(details.buttons, expectedButtons);
         events.add('longpressstart');
       }
       ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
+        expect(details.buttons, expectedButtons);
         events.add('longpressmoveupdate');
       }
       ..onLongPressEnd = (LongPressEndDetails details) {
+        expect(details.buttons, expectedButtons);
         events.add('longpressend');
       }
       ..onLongPressCancel = () {
@@ -718,7 +760,7 @@ void main() {
     };
 
     final pointer = TestPointer(5);
-    final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
+    final downB = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
     // When competing against another [DragGestureRecognizer], the [TapAndPanGestureRecognizer]
     // will only win when it is the last recognizer in the arena.
     tapAndDrag.addPointer(downB);
@@ -726,11 +768,11 @@ void main() {
     longpress.addPointer(downB);
     tester.closeArena(5);
     tester.route(downB);
-    tester.route(pointer.move(const Offset(28.1, 10.0)));
+    tester.route(pointer.move(const Offset(28.1, 10.0), buttons: expectedButtons));
     tester.route(pointer.up());
     expect(events, <String>['basichorizontalstart', 'basichorizontalend']);
 
-    final PointerDownEvent downC = pointer.down(const Offset(10.0, 10.0));
+    final PointerDownEvent downC = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
     tapAndDrag.addPointer(downC);
     horizontalDrag.addPointer(downC);
     longpress.addPointer(downC);
@@ -744,16 +786,22 @@ void main() {
   testGesture('Beats LongPressGestureRecognizer on a consecutive tap greater than one', (
     GestureTester tester,
   ) {
+    // NOTE: due to how the LongPressGestureRecognizer switches on single-valued buttons,
+    // it will not work properly with other event buttons combinations.
+    const int expectedButtons = kPrimaryButton;
     setUpTapAndPanGestureRecognizer();
 
     final longpress = LongPressGestureRecognizer()
       ..onLongPressStart = (LongPressStartDetails details) {
+        expect(details.buttons, expectedButtons);
         events.add('longpressstart');
       }
       ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
+        expect(details.buttons, expectedButtons);
         events.add('longpressmoveupdate');
       }
       ..onLongPressEnd = (LongPressEndDetails details) {
+        expect(details.buttons, expectedButtons);
         events.add('longpressend');
       }
       ..onLongPressCancel = () {
@@ -762,7 +810,7 @@ void main() {
     addTearDown(longpress.dispose);
 
     final pointer = TestPointer(5);
-    final PointerDownEvent downA = pointer.down(const Offset(10.0, 10.0));
+    final downA = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
     tapAndDrag.addPointer(downA);
     longpress.addPointer(downA);
     tester.closeArena(5);
@@ -772,7 +820,7 @@ void main() {
 
     tester.async.elapse(kConsecutiveTapDelay);
 
-    final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
+    final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
     tapAndDrag.addPointer(downB);
     longpress.addPointer(downB);
     tester.closeArena(5);
@@ -780,7 +828,7 @@ void main() {
 
     tester.async.elapse(const Duration(milliseconds: 500));
 
-    tester.route(pointer.move(const Offset(40.0, 45.0)));
+    tester.route(pointer.move(const Offset(40.0, 45.0), buttons: expectedButtons));
     tester.route(pointer.up());
     expect(events, <String>[
       'longpresscancel',
@@ -797,13 +845,16 @@ void main() {
   testGesture(
     'Beats TapGestureRecognizer and DoubleTapGestureRecognizer when the pointer has not moved and this recognizer is the first in the arena',
     (GestureTester tester) {
+      const int expectedButtons = kPrimaryButton; // default for the globally defined test events
       setUpTapAndPanGestureRecognizer();
 
       final taps = TapGestureRecognizer()
         ..onTapDown = (TapDownDetails details) {
+          expect(details.buttons, expectedButtons);
           events.add('tapdown');
         }
         ..onTapUp = (TapUpDetails details) {
+          expect(details.buttons, expectedButtons);
           events.add('tapup');
         }
         ..onTapCancel = () {
@@ -813,6 +864,7 @@ void main() {
 
       final doubleTaps = DoubleTapGestureRecognizer()
         ..onDoubleTapDown = (TapDownDetails details) {
+          expect(details.buttons, expectedButtons);
           events.add('doubletapdown');
         }
         ..onDoubleTap = () {
@@ -839,13 +891,16 @@ void main() {
   testGesture(
     'Beats TapGestureRecognizer when the pointer has not moved and this recognizer is the first in the arena',
     (GestureTester tester) {
+      const int expectedButtons = kPrimaryButton; // default for the globally defined test events
       setUpTapAndPanGestureRecognizer();
 
       final taps = TapGestureRecognizer()
         ..onTapDown = (TapDownDetails details) {
+          expect(details.buttons, expectedButtons);
           events.add('tapdown');
         }
         ..onTapUp = (TapUpDetails details) {
+          expect(details.buttons, expectedButtons);
           events.add('tapup');
         }
         ..onTapCancel = () {
@@ -865,13 +920,16 @@ void main() {
   testGesture('Beats TapGestureRecognizer when the pointer has exceeded the slop tolerance', (
     GestureTester tester,
   ) {
+    const int expectedButtons = kPrimaryButton; // default for the globally defined test events
     setUpTapAndPanGestureRecognizer();
 
     final taps = TapGestureRecognizer()
       ..onTapDown = (TapDownDetails details) {
+        expect(details.buttons, expectedButtons);
         events.add('tapdown');
       }
       ..onTapUp = (TapUpDetails details) {
+        expect(details.buttons, expectedButtons);
         events.add('tapup');
       }
       ..onTapCancel = () {
@@ -902,16 +960,20 @@ void main() {
   testGesture(
     'Ties with PanGestureRecognizer when pointer has not met sufficient global distance to be a drag',
     (GestureTester tester) {
+      const int expectedButtons = kPrimaryButton; // default for the globally defined test events
       setUpTapAndPanGestureRecognizer();
 
       final pans = PanGestureRecognizer()
         ..onStart = (DragStartDetails details) {
+          expect(details.buttons, expectedButtons);
           events.add('panstart');
         }
         ..onUpdate = (DragUpdateDetails details) {
+          expect(details.buttons, expectedButtons);
           events.add('panupdate');
         }
         ..onEnd = (DragEndDetails details) {
+          expect(details.buttons, expectedButtons);
           events.add('panend');
         }
         ..onCancel = () {
@@ -1034,4 +1096,59 @@ void main() {
 
     expect(tapDragEndDetails.globalPosition, const Offset(120.0, 45.0));
   });
+}
+
+class _PermissiveTapAndPanGestureRecognizer extends TapAndPanGestureRecognizer {
+  _PermissiveTapAndPanGestureRecognizer() : super(
+    allowedButtonsFilter: (int buttons) => true,
+  );
+
+  @override
+  bool isPointerAllowed(PointerEvent event) {
+    return true;
+  }
+}
+
+class _PermissiveTapAndHorizontalDragGestureRecognizer extends TapAndHorizontalDragGestureRecognizer {
+  _PermissiveTapAndHorizontalDragGestureRecognizer() : super(
+    allowedButtonsFilter: (int buttons) => true,
+  );
+
+  @override
+  bool isPointerAllowed(PointerEvent event) {
+    return true;
+  }
+}
+
+class _PermissiveVerticalDragGestureRecognizer extends VerticalDragGestureRecognizer {
+  _PermissiveVerticalDragGestureRecognizer() : super(
+    allowedButtonsFilter: (int buttons) => true,
+  );
+
+  @override
+  bool isPointerAllowed(PointerEvent event) {
+    return true;
+  }
+}
+
+class _PermissiveHorizontalDragGestureRecognizer extends HorizontalDragGestureRecognizer {
+  _PermissiveHorizontalDragGestureRecognizer() : super(
+    allowedButtonsFilter: (int buttons) => true,
+  );
+
+  @override
+  bool isPointerAllowed(PointerEvent event) {
+    return true;
+  }
+}
+
+class _PermissivePanGestureRecognizer extends PanGestureRecognizer {
+  _PermissivePanGestureRecognizer() : super(
+    allowedButtonsFilter: (int buttons) => true,
+  );
+
+  @override
+  bool isPointerAllowed(PointerEvent event) {
+    return true;
+  }
 }
