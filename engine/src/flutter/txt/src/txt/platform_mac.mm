@@ -32,13 +32,13 @@ const FourCharCode kWeightTag = 'wght';
 
 namespace {
 
-// SkFontMgr wrapper that preserves font weight during fallback.
-// CoreText's CTFontCreateForString() does not preserve the font weight from
-// the input font, so we re-fetch with the correct style.
+// SkFontMgr wrapper that preserves font weight and slant.
+// CoreText does not preserve these attributes during font matching,
+// so we re-fetch with the correct style.
 // See: https://github.com/flutter/flutter/issues/132475
-class WeightPreservingFontManager : public SkFontMgr {
+class StylePreservingFontManager : public SkFontMgr {
  public:
-  explicit WeightPreservingFontManager(sk_sp<SkFontMgr> font_manager)
+  explicit StylePreservingFontManager(sk_sp<SkFontMgr> font_manager)
       : font_manager_(std::move(font_manager)) {}
 
  private:
@@ -77,7 +77,7 @@ class WeightPreservingFontManager : public SkFontMgr {
       return nullptr;
     }
 
-    // Re-fetch with correct weight using the fallback's family name.
+    // Re-fetch with correct style using the fallback's family name.
     SkString fallback_family_name;
     fallback->getFamilyName(&fallback_family_name);
     if (fallback_family_name.isEmpty()) {
@@ -136,7 +136,7 @@ std::vector<std::string> GetDefaultFontFamilies() {
 sk_sp<SkFontMgr> GetDefaultFontManager(uint32_t font_initialization_data) {
   static sk_sp<SkFontMgr> core_text_mgr = SkFontMgr_New_CoreText(nullptr);
   static sk_sp<SkFontMgr> mgr =
-      sk_make_sp<WeightPreservingFontManager>(core_text_mgr);
+      sk_make_sp<StylePreservingFontManager>(core_text_mgr);
   return mgr;
 }
 
