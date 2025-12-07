@@ -244,6 +244,8 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
                     details.globalPosition - getOffset(context),
                     _transform,
                   ),
+                  kind: details.kind,
+                  buttons: details.buttons,
                 ),
               );
             },
@@ -256,6 +258,8 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
                     details.globalPosition - getOffset(context),
                     _transform,
                   ),
+                  kind: details.kind,
+                  buttons: details.buttons,
                 ),
               );
             },
@@ -268,6 +272,8 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
                     details.globalPosition - getOffset(context),
                     _transform,
                   ),
+                  kind: details.kind,
+                  buttons: details.buttons,
                 ),
               );
             },
@@ -282,6 +288,8 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
                     details.globalPosition - getOffset(context),
                     _transform,
                   ),
+                  kind: details.kind,
+                  buttons: details.buttons,
                 ),
               );
             },
@@ -294,6 +302,8 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
                     details.globalPosition - getOffset(context),
                     _transform,
                   ),
+                  kind: details.kind,
+                  buttons: details.buttons,
                 ),
               );
             },
@@ -306,6 +316,8 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
                     details.globalPosition - getOffset(context),
                     _transform,
                   ),
+                  kind: details.kind,
+                  buttons: details.buttons,
                 ),
               );
             },
@@ -320,6 +332,8 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
                     details.globalPosition - getOffset(context),
                     _transform,
                   ),
+                  kind: details.kind,
+                  buttons: details.buttons,
                 ),
               );
             },
@@ -332,6 +346,8 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
                     details.globalPosition - getOffset(context),
                     _transform,
                   ),
+                  kind: details.kind,
+                  buttons: details.buttons,
                 ),
               );
             },
@@ -344,6 +360,8 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
                     details.globalPosition - getOffset(context),
                     _transform,
                   ),
+                  kind: details.kind,
+                  buttons: details.buttons,
                 ),
               );
             },

@@ -1720,7 +1720,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   /// Begins the fade out animation and creates the thumb's DragScrollController.
   @protected
   @mustCallSuper
-  void handleThumbPressStart(Offset localPosition) {
+  void handleThumbPressStart(Offset localPosition, {DragStartDetails? originalDetails}) {
     assert(_debugCheckHasValidScrollPosition());
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {
@@ -1735,6 +1735,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     final details = DragStartDetails(
       localPosition: localPosition,
       globalPosition: renderBox.localToGlobal(localPosition),
+      kind: originalDetails?.kind,
+      buttons: originalDetails?.buttons,
     );
     _thumbDrag = position.drag(details, _disposeThumbDrag);
     assert(_thumbDrag != null);
@@ -1750,7 +1752,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   /// Updates the position of the child scrollable via the _drag ScrollDragController.
   @protected
   @mustCallSuper
-  void handleThumbPressUpdate(Offset localPosition) {
+  void handleThumbPressUpdate(Offset localPosition, {DragUpdateDetails? originalDetails}) {
     assert(_debugCheckHasValidScrollPosition());
     if (_lastDragUpdateOffset == localPosition) {
       return;
@@ -1784,6 +1786,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       primaryDelta: primaryDelta,
       globalPosition: renderBox.localToGlobal(localPosition),
       localPosition: localPosition,
+      kind: originalDetails?.kind,
+      buttons: originalDetails?.buttons,
     );
     _thumbDrag!.update(
       scrollDetails,
@@ -1795,7 +1799,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   /// Handler called when a long press has ended.
   @protected
   @mustCallSuper
-  void handleThumbPressEnd(Offset localPosition, Velocity velocity) {
+  void handleThumbPressEnd(Offset localPosition, Velocity velocity, {DragEndDetails? originalDetails}) {
     assert(_debugCheckHasValidScrollPosition());
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {
@@ -1985,15 +1989,15 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
 
   void _handleThumbDragStart(DragStartDetails details) {
-    handleThumbPressStart(_globalToScrollbar(details.globalPosition));
+    handleThumbPressStart(_globalToScrollbar(details.globalPosition), originalDetails: details);
   }
 
   void _handleThumbDragUpdate(DragUpdateDetails details) {
-    handleThumbPressUpdate(_globalToScrollbar(details.globalPosition));
+    handleThumbPressUpdate(_globalToScrollbar(details.globalPosition), originalDetails: details);
   }
 
   void _handleThumbDragEnd(DragEndDetails details) {
-    handleThumbPressEnd(_globalToScrollbar(details.globalPosition), details.velocity);
+    handleThumbPressEnd(_globalToScrollbar(details.globalPosition), details.velocity, originalDetails: details);
   }
 
   void _handleThumbDragCancel() {

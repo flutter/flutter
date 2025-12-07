@@ -49,10 +49,7 @@ class TapDownDetails with Diagnosticable implements PositionedGestureDetails {
   /// The kind of the device that initiated the event.
   final PointerDeviceKind? kind;
 
-  /// Bit field using the *Button constants such as [kPrimaryMouseButton],
-  /// [kSecondaryStylusButton], etc.
-  ///
-  /// See [PointerEvent.buttons].
+  /// {@macro flutter.gestures.PointerEvent.buttons}
   ///
   /// NOTE: this will always be set by the platform but synthetic events might
   /// not have it. It can be made required on future releases.
@@ -108,10 +105,7 @@ class TapUpDetails with Diagnosticable implements PositionedGestureDetails {
   /// The kind of the device that initiated the event.
   final PointerDeviceKind kind;
 
-  /// Bit field using the *Button constants such as [kPrimaryMouseButton],
-  /// [kSecondaryStylusButton], etc.
-  ///
-  /// See [PointerEvent.buttons].
+  /// {@macro flutter.gestures.PointerEvent.buttons}
   ///
   /// NOTE: this will always be set by the platform but synthetic events might
   /// not have it. It can be made required on future releases.
@@ -140,6 +134,7 @@ class TapMoveDetails {
     this.globalPosition = Offset.zero,
     this.delta = Offset.zero,
     Offset? localPosition,
+    this.buttons,
   }) : localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer contacted the screen.
@@ -154,6 +149,12 @@ class TapMoveDetails {
   /// The amount the pointer has moved in the coordinate space of the
   /// event receiver since the previous update.
   final Offset delta;
+
+  /// {@macro flutter.gestures.PointerEvent.buttons}
+  ///
+  /// NOTE: this will always be set by the platform but synthetic events might
+  /// not have it. It can be made required on future releases.
+  final int? buttons;
 }
 
 /// {@template flutter.gestures.tap.GestureTapUpCallback}
@@ -811,6 +812,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
         localPosition: move.localPosition,
         kind: getKindForPointer(move.pointer),
         delta: move.delta,
+        buttons: move.buttons,
       );
       invokeCallback<void>('onTapMove', () => onTapMove!(details));
     }

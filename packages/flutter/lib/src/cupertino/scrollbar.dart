@@ -177,8 +177,8 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
   // on the scrollbar thumb and then drags the scrollbar without releasing.
 
   @override
-  void handleThumbPressStart(Offset localPosition) {
-    super.handleThumbPressStart(localPosition);
+  void handleThumbPressStart(Offset localPosition, {DragStartDetails? originalDetails}) {
+    super.handleThumbPressStart(localPosition, originalDetails: originalDetails);
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {
       return;
@@ -199,13 +199,13 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
   }
 
   @override
-  void handleThumbPressEnd(Offset localPosition, Velocity velocity) {
+  void handleThumbPressEnd(Offset localPosition, Velocity velocity, {DragEndDetails? originalDetails}) {
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {
       return;
     }
     _thicknessAnimationController.reverse();
-    super.handleThumbPressEnd(localPosition, velocity);
+    super.handleThumbPressEnd(localPosition, velocity, originalDetails: originalDetails);
     final (double axisPosition, double axisVelocity) = switch (direction) {
       Axis.horizontal => (localPosition.dx, velocity.pixelsPerSecond.dx),
       Axis.vertical => (localPosition.dy, velocity.pixelsPerSecond.dy),

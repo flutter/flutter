@@ -80,19 +80,23 @@ void main() {
       longTapDelay: kLongPressTimeout,
       supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch},
     );
+    const int expectedButtons = kPrimaryButton;
 
     final log = <String>[];
 
     tap.onTapDown = (int pointer, TapDownDetails details) {
+      expect(details.buttons, expectedButtons);
       log.add('tap-down $pointer');
     };
     tap.onTapUp = (int pointer, TapUpDetails details) {
+      expect(details.buttons, expectedButtons);
       log.add('tap-up $pointer');
     };
     tap.onTap = (int pointer) {
       log.add('tap $pointer');
     };
     tap.onLongTapDown = (int pointer, TapDownDetails details) {
+      expect(details.buttons, expectedButtons);
       log.add('long-tap-down $pointer');
     };
     tap.onTapCancel = (int pointer) {
@@ -100,7 +104,7 @@ void main() {
     };
 
     final touchPointer5 = TestPointer(5);
-    final PointerDownEvent down5 = touchPointer5.down(const Offset(10.0, 10.0));
+    final down5 = touchPointer5.down(const Offset(10.0, 10.0), buttons: expectedButtons);
     tap.addPointer(down5);
     tester.closeArena(5);
     expect(log, <String>['tap-down 5']);
