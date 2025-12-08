@@ -152,10 +152,10 @@ TEST(TessellatorTest, TessellateConvexUnclosedPath) {
 }
 
 TEST(TessellatorTest, CircleVertexCounts) {
-  auto tessellator = std::make_shared<Tessellator>();
+  Tessellator tessellator;
 
   auto test = [&tessellator](const Matrix& transform, Scalar radius) {
-    auto generator = tessellator->FilledCircle(transform, {}, radius);
+    auto generator = tessellator.FilledCircle(transform, {}, radius);
     size_t quadrant_divisions = generator.GetVertexCount() / 4;
 
     // Confirm the approximation error is within the currently accepted
@@ -188,11 +188,11 @@ TEST(TessellatorTest, CircleVertexCounts) {
 }
 
 TEST(TessellatorTest, FilledCircleTessellationVertices) {
-  auto tessellator = std::make_shared<Tessellator>();
+  Tessellator tessellator;
 
   auto test = [&tessellator](const Matrix& transform, const Point& center,
                              Scalar radius) {
-    auto generator = tessellator->FilledCircle(transform, center, radius);
+    auto generator = tessellator.FilledCircle(transform, center, radius);
     EXPECT_EQ(generator.GetTriangleType(), PrimitiveType::kTriangleStrip);
 
     auto vertex_count = generator.GetVertexCount();
@@ -232,13 +232,13 @@ TEST(TessellatorTest, FilledCircleTessellationVertices) {
 }
 
 TEST(TessellatorTest, StrokedCircleTessellationVertices) {
-  auto tessellator = std::make_shared<Tessellator>();
+  Tessellator tessellator;
 
   auto test = [&tessellator](const Matrix& transform, const Point& center,
                              Scalar radius, Scalar half_width) {
     ASSERT_GT(radius, half_width);
     auto generator =
-        tessellator->StrokedCircle(transform, center, radius, half_width);
+        tessellator.StrokedCircle(transform, center, radius, half_width);
     EXPECT_EQ(generator.GetTriangleType(), PrimitiveType::kTriangleStrip);
 
     auto vertex_count = generator.GetVertexCount();
@@ -380,11 +380,11 @@ TEST(TessellatorTest, FilledArcStripTessellationVertices) {
 }
 
 TEST(TessellatorTest, RoundCapLineTessellationVertices) {
-  auto tessellator = std::make_shared<Tessellator>();
+  Tessellator tessellator;
 
   auto test = [&tessellator](const Matrix& transform, const Point& p0,
                              const Point& p1, Scalar radius) {
-    auto generator = tessellator->RoundCapLine(transform, p0, p1, radius);
+    auto generator = tessellator.RoundCapLine(transform, p0, p1, radius);
     EXPECT_EQ(generator.GetTriangleType(), PrimitiveType::kTriangleStrip);
 
     auto vertex_count = generator.GetVertexCount();
@@ -453,13 +453,13 @@ TEST(TessellatorTest, RoundCapLineTessellationVertices) {
 }
 
 TEST(TessellatorTest, FilledEllipseTessellationVertices) {
-  auto tessellator = std::make_shared<Tessellator>();
+  Tessellator tessellator;
 
   auto test = [&tessellator](const Matrix& transform, const Rect& bounds) {
     auto center = bounds.GetCenter();
     auto half_size = bounds.GetSize() * 0.5f;
 
-    auto generator = tessellator->FilledEllipse(transform, bounds);
+    auto generator = tessellator.FilledEllipse(transform, bounds);
     EXPECT_EQ(generator.GetTriangleType(), PrimitiveType::kTriangleStrip);
 
     auto vertex_count = generator.GetVertexCount();
@@ -514,7 +514,7 @@ TEST(TessellatorTest, FilledEllipseTessellationVertices) {
 }
 
 TEST(TessellatorTest, FilledRoundRectTessellationVertices) {
-  auto tessellator = std::make_shared<Tessellator>();
+  Tessellator tessellator;
 
   auto test = [&tessellator](const Matrix& transform, const Rect& bounds,
                              const Size& radii) {
@@ -526,7 +526,7 @@ TEST(TessellatorTest, FilledRoundRectTessellationVertices) {
     Scalar middle_right = bounds.GetX() + bounds.GetWidth() - radii.width;
     Scalar middle_bottom = bounds.GetY() + bounds.GetHeight() - radii.height;
 
-    auto generator = tessellator->FilledRoundRect(transform, bounds, radii);
+    auto generator = tessellator.FilledRoundRect(transform, bounds, radii);
     EXPECT_EQ(generator.GetTriangleType(), PrimitiveType::kTriangleStrip);
 
     auto vertex_count = generator.GetVertexCount();
