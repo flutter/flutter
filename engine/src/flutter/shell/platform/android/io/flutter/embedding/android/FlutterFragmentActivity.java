@@ -41,13 +41,11 @@ import androidx.fragment.app.FragmentManager;
 import io.flutter.Log;
 import io.flutter.embedding.android.FlutterActivityLaunchConfigs.BackgroundMode;
 import io.flutter.embedding.engine.FlutterEngine;
+import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.plugins.util.GeneratedPluginRegister;
 import io.flutter.plugin.platform.PlatformPlugin;
 import java.util.ArrayList;
 import java.util.List;
-
-import io.flutter.embedding.engine.FlutterShellArgs;
-
 
 /**
  * A Flutter {@code Activity} that is based upon {@link FragmentActivity}.

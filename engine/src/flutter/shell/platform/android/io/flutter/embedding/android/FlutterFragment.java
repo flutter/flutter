@@ -30,9 +30,6 @@ import io.flutter.plugin.view.SensitiveContentPlugin;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.flutter.embedding.engine.FlutterShellArgs;
-
-
 /**
  * {@code Fragment} which displays a Flutter UI that takes up all available {@code Fragment} space.
  *
@@ -129,7 +126,7 @@ public class FlutterFragment extends Fragment
   protected static final String ARG_SHOULD_DELAY_FIRST_ANDROID_VIEW_DRAW =
       "should_delay_first_android_view_draw";
 
-       protected static final String ARG_FLUTTER_INITIALIZATION_ARGS = "initialization_args";
+  protected static final String ARG_FLUTTER_INITIALIZATION_ARGS = "initialization_args";
 
   /**
    * {@link RenderMode} to be used for the {@link io.flutter.embedding.android.FlutterView} in this
@@ -285,7 +282,7 @@ public class FlutterFragment extends Fragment
       return this;
     }
 
-        /** Any special configuration arguments for the Flutter engine */
+    /** Any special configuration arguments for the Flutter engine */
     @NonNull
     public NewEngineFragmentBuilder flutterShellArgs(@NonNull ArrayList<String> shellArgs) {
       this.shellArgs = shellArgs;
@@ -458,7 +455,7 @@ public class FlutterFragment extends Fragment
           dartEntrypointArgs != null ? new ArrayList(dartEntrypointArgs) : null);
       // TODO(mattcarroll): determine if we should have an explicit FlutterTestFragment instead of
       // conflating.
-            if (null != shellArgs) {
+      if (null != shellArgs) {
         args.putStringArrayList(ARG_FLUTTER_INITIALIZATION_ARGS, shellArgs);
       }
       args.putString(
@@ -1293,7 +1290,7 @@ public class FlutterFragment extends Fragment
     }
   }
 
-   /**
+  /**
    * {@link FlutterActivityAndFragmentDelegate.Host} method that is used by {@link
    * FlutterActivityAndFragmentDelegate} to obtain Flutter shell arguments when initializing
    * Flutter.
@@ -1301,7 +1298,8 @@ public class FlutterFragment extends Fragment
   @Override
   @NonNull
   public ArrayList<String> getFlutterShellArgs() {
-    ArrayList<String> flutterShellArgsArray = getArguments().getStringArrayList(ARG_FLUTTER_INITIALIZATION_ARGS);
+    ArrayList<String> flutterShellArgsArray =
+        getArguments().getStringArrayList(ARG_FLUTTER_INITIALIZATION_ARGS);
     return flutterShellArgsArray;
   }
 

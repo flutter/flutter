@@ -49,15 +49,13 @@ import androidx.lifecycle.LifecycleRegistry;
 import io.flutter.Log;
 import io.flutter.embedding.android.FlutterActivityLaunchConfigs.BackgroundMode;
 import io.flutter.embedding.engine.FlutterEngine;
+import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.plugins.activity.ActivityControlSurface;
 import io.flutter.embedding.engine.plugins.util.GeneratedPluginRegister;
 import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.plugin.view.SensitiveContentPlugin;
 import java.util.ArrayList;
 import java.util.List;
-
-import io.flutter.embedding.engine.FlutterShellArgs;
-
 
 /**
  * {@code Activity} which displays a fullscreen Flutter UI.
@@ -1296,7 +1294,6 @@ public class FlutterActivity extends Activity
   protected FlutterEngine getFlutterEngine() {
     return delegate.getFlutterEngine();
   }
-
 
   /**
    * {@link FlutterActivityAndFragmentDelegate.Host} method that is used by {@link

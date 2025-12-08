@@ -36,13 +36,10 @@ import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.plugin.view.SensitiveContentPlugin;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-
-import io.flutter.embedding.engine.FlutterShellArgs;
-import java.util.ArrayList;
-
 
 /**
  * Delegate that implements all Flutter logic that is the same between a {@link FlutterActivity} and
@@ -338,7 +335,10 @@ import java.util.ArrayList;
 
     warnIfEngineFlagsSetViaIntent(host.getActivity().getIntent());
     FlutterEngineGroup group =
-        engineGroup == null ? new FlutterEngineGroup(host.getContext(), host.getFlutterShellArgs().toArray(new String[0])) : engineGroup;
+        engineGroup == null
+            ? new FlutterEngineGroup(
+                host.getContext(), host.getFlutterShellArgs().toArray(new String[0]))
+            : engineGroup;
     flutterEngine =
         group.createAndRunEngine(
             addEntrypointOptions(
@@ -1119,7 +1119,7 @@ import java.util.ArrayList;
     @NonNull
     Lifecycle getLifecycle();
 
-      @NonNull
+    @NonNull
     ArrayList<String> getFlutterShellArgs();
 
     /**
