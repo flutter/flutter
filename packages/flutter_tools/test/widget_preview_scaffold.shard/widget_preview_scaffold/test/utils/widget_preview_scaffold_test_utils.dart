@@ -124,6 +124,17 @@ class FakeWidgetPreviewScaffoldDtdServices extends Fake
     }
     preferences[key] = value;
   }
+
+  /// Retrieves the DevTools URI for the previewer instance.
+  @override
+  Future<Uri> getDevToolsUri() async {
+    return Uri();
+  }
+}
+
+class TestWidgetPreviewScaffold extends WidgetPreviewScaffold {
+  const TestWidgetPreviewScaffold({super.key, required super.controller})
+    : super(enableWebView: false);
 }
 
 class FakeWidgetPreviewScaffoldController
