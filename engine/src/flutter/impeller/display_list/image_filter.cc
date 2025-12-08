@@ -138,12 +138,58 @@ std::shared_ptr<FilterContents> WrapInput(const flutter::DlImageFilter* filter,
             .texture = image->image()->impeller_texture(),
         });
       }
-      return FilterContents::MakeRuntimeEffect(input, std::move(runtime_stage),
-                                               runtime_filter->uniform_data(),
-                                               std::move(texture_inputs));
+      std::vector<FilterInput::Ref> inputs;
+      inputs.push_back(input);
+      std::shared_ptr<std::vector<uint8_t>> uniforms =
+          runtime_filter->uniform_data();
+      return FilterContents::MakeRuntimeEffect(
+          std::move(inputs), std::move(runtime_stage), uniforms,
+          std::move(texture_inputs));
     }
     case flutter::DlImageFilterType::kCombine: {
-      return nullptr;
+      auto combine = filter->asCombine();
+      FML_DCHECK(combine);
+      const flutter::DlRuntimeEffect* runtime_effect =
+          combine->combiner().get();
+      if (!runtime_effect) {
+        return nullptr;
+      }
+      std::shared_ptr<impeller::RuntimeStage> runtime_stage =
+          runtime_effect->runtime_stage();
+
+      std::vector<RuntimeEffectContents::TextureInput> texture_inputs(2);
+      for (auto& input : texture_inputs) {
+        input.sampler_descriptor = skia_conversions::ToSamplerDescriptor({});
+        input.texture = nullptr;
+      }
+
+      FilterInput::Ref first;
+      if (auto first_filter = combine->first().get()) {
+        first = FilterInput::Make(WrapInput(first_filter, input));
+      } else {
+        first = input;
+      }
+
+      FilterInput::Ref second;
+      if (auto second_filter = combine->second().get()) {
+        second = FilterInput::Make(WrapInput(second_filter, input));
+      } else {
+        second = input;
+      }
+
+      std::vector<FilterInput::Ref> inputs;
+      inputs.push_back(first);
+      inputs.push_back(second);
+
+      // We need to synthesize a uniform buffer for the size.
+      // The RuntimeEffectFilterContents will resize this if needed,
+      // but we should provide at least enough space for the size (2 floats).
+      auto uniforms = std::make_shared<std::vector<uint8_t>>();
+      uniforms->resize(sizeof(Size));
+
+      return FilterContents::MakeRuntimeEffect(
+          std::move(inputs), std::move(runtime_stage), uniforms,
+          std::move(texture_inputs));
     }
   }
   FML_UNREACHABLE();

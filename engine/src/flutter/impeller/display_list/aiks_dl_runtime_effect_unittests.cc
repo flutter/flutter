@@ -473,5 +473,51 @@ TEST_P(AiksTest, ClippedBackdropFilterWithShader) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, CombineBlurAndMatrix) {
+  // Combiner: runtime_stage_combiner.frag
+  auto runtime_stages_result =
+      OpenAssetAsRuntimeStage("runtime_stage_combiner.frag.iplr");
+  ABSL_ASSERT_OK(runtime_stages_result);
+  std::shared_ptr<RuntimeStage> runtime_stage =
+      runtime_stages_result
+          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ASSERT_TRUE(runtime_stage);
+
+  auto texture = CreateTextureForFixture("blend_mode_src.png");
+  auto image = DlImageImpeller::Make(texture);
+  Scalar sigma = 20.0f;
+
+  auto callback = [&]() -> sk_sp<DisplayList> {
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::SliderFloat("sigma", &sigma, 0, 50);
+      ImGui::End();
+    }
+
+    DisplayListBuilder builder;
+
+    // First input: Blur
+    auto blur = DlImageFilter::MakeBlur(sigma, sigma, DlTileMode::kDecal);
+
+    // Second input: Identity Matrix
+    auto matrix =
+        DlImageFilter::MakeMatrix(DlMatrix(), DlImageSampling::kLinear);
+    auto combiner = DlRuntimeEffectImpeller::Make(runtime_stage);
+
+    auto combine_filter = DlImageFilter::MakeCombine(blur, matrix, combiner);
+
+    DlPaint paint;
+    paint.setColor(DlColor::kRed());
+    paint.setImageFilter(combine_filter);
+
+    builder.DrawImage(image, DlPoint(100, 100), DlImageSampling::kLinear,
+                      &paint);
+
+    return builder.Build();
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 }  // namespace testing
 }  // namespace impeller
