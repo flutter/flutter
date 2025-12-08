@@ -48,6 +48,9 @@ import io.flutter.plugin.platform.PlatformPlugin;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.flutter.embedding.engine.FlutterShellArgs;
+
+
 /**
  * A Flutter {@code Activity} that is based upon {@link FragmentActivity}.
  *
@@ -590,6 +593,7 @@ public class FlutterFragmentActivity extends FragmentActivity
           .dartEntrypointArgs(getDartEntrypointArgs())
           .initialRoute(getInitialRoute())
           .appBundlePath(getAppBundlePath())
+          .flutterShellArgs(FlutterShellArgs.fromIntent(getIntent()))
           .handleDeeplinking(shouldHandleDeeplinking())
           .renderMode(renderMode)
           .transparencyMode(transparencyMode)
