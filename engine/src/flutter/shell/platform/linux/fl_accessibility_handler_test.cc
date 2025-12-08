@@ -30,8 +30,6 @@ TEST(FlAccessibilityHandlerTest, Announce) {
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =
       fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
-  g_autoptr(FlAccessibilityHandler) handler =
-      fl_accessibility_handler_new(engine);
   FlView* view = fl_view_new_for_engine(engine);
 
   gboolean signalled = FALSE;
@@ -70,8 +68,6 @@ TEST(FlAccessibilityHandlerTest, AnnounceAssertive) {
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =
       fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
-  g_autoptr(FlAccessibilityHandler) handler =
-      fl_accessibility_handler_new(engine);
   FlView* view = fl_view_new_for_engine(engine);
 
   gboolean signalled = FALSE;
@@ -113,8 +109,6 @@ TEST(FlAccessibilityHandlerTest, AnnounceUnknownView) {
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =
       fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
-  g_autoptr(FlAccessibilityHandler) handler =
-      fl_accessibility_handler_new(engine);
 
   g_autoptr(FlValue) message = fl_value_new_map();
   fl_value_set_string_take(message, "type", fl_value_new_string("announce"));
@@ -147,8 +141,6 @@ TEST(FlAccessibilityHandlerTest, UnknownType) {
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =
       fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
-  g_autoptr(FlAccessibilityHandler) handler =
-      fl_accessibility_handler_new(engine);
 
   // Unknown type, ignored by embedder.
   g_autoptr(FlValue) message = fl_value_new_map();
