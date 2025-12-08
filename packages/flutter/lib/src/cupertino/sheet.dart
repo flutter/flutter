@@ -1225,6 +1225,7 @@ class _CupertinoDraggableScrollableSheetState<T>
         _dragGestureController = null;
       });
     }
+    _scrollController.dispose();
     super.dispose();
   }
 
