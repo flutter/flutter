@@ -337,7 +337,7 @@ import java.util.Set;
     String[] flutterShellArgs = host.getFlutterShellArgs() == null ? new String[0]: host.getFlutterShellArgs().toArray(new String[0]);
     FlutterEngineGroup group =
         engineGroup == null
-            ? flutterShellArgs new FlutterEngineGroup(
+            ? new FlutterEngineGroup(
                 host.getContext(), flutterShellArgs)
             : engineGroup;
     flutterEngine =
