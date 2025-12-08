@@ -2750,7 +2750,7 @@ void decodeImageFromPixels(
 /// This function returns an [Image] immediately. The image might not be
 /// fully decoded yet, but it can be drawn to a [Canvas].
 Image decodeImageFromPixelsSync(Uint8List pixels, int width, int height, PixelFormat format) {
-  Image image = Image._(_Image._(), width, height);
+  final image = Image._(_Image._(), width, height);
   _decodeImageFromPixelsSync(pixels, width, height, format.index, image._image);
   return image;
 }

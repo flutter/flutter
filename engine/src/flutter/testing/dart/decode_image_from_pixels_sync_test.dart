@@ -10,10 +10,10 @@ import 'impeller_enabled.dart';
 
 void main() {
   test('decodeImageFromPixelsSync decodes RGBA8888', () async {
-    const int width = 2;
-    const int height = 2;
+    const width = 2;
+    const height = 2;
     // 2x2 red image
-    final Uint8List pixels = Uint8List.fromList(<int>[
+    final pixels = Uint8List.fromList(<int>[
       255,
       0,
       0,
@@ -37,16 +37,16 @@ void main() {
     expect(image.width, width);
     expect(image.height, height);
 
-    final ByteData? data = await image.toByteData(format: ImageByteFormat.rawRgba);
+    final data = await image.toByteData();
     expect(data, isNotNull);
-    final Uint8List resultPixels = data!.buffer.asUint8List();
+    final resultPixels = data!.buffer.asUint8List();
     expect(resultPixels, pixels);
 
     image.dispose();
   }, skip: !impellerEnabled);
 
   test('decodeImageFromPixelsSync throws on invalid dimensions', () {
-    final Uint8List pixels = Uint8List(4);
+    final pixels = Uint8List(4);
     expect(
       () => decodeImageFromPixelsSync(pixels, 0, 1, PixelFormat.rgba8888),
       throwsA(isA<String>()), // Throws string error from C++
@@ -54,7 +54,7 @@ void main() {
   }, skip: !impellerEnabled);
 
   test('decodeImageFromPixelsSync throws if not Impeller', () {
-    final Uint8List pixels = Uint8List(4);
+    final pixels = Uint8List(4);
     expect(
       () => decodeImageFromPixelsSync(pixels, 1, 1, PixelFormat.rgba8888),
       throwsA(isA<String>()),
