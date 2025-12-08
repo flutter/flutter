@@ -118,6 +118,8 @@ extension type DomWindow._(JSObject _) implements DomEventTarget {
   external DomNavigator get navigator;
   external DomVisualViewport? get visualViewport;
   external DomPerformance get performance;
+  @JS('scrollBy')
+  external void scrollBy([num? x, num? y]);
 
   /// The parent window of this window.
   /// Returns null if this is the top-level window, or the same window
@@ -2646,18 +2648,26 @@ extension type DomTextCluster._(JSObject _) implements JSObject {
   external double get y;
 }
 
-/// Scrolls the parent/host window by the given delta using postMessage.
+/// Scrolls the parent/host window by the given delta.
 ///
-/// Used when Flutter is embedded in an iframe and needs to scroll the parent
-/// page. This uses postMessage for cross-origin safety - the host page must
-/// add a message listener to handle the scroll request.
+/// When same-origin, scrolls the parent directly via `scrollBy`. If access is
+/// blocked (cross-origin), falls back to postMessage so a host listener can
+/// handle it.
 ///
-/// This fixes GitHub issue #156985 (scroll bubbling) and #157435 (touch scroll).
+/// This addresses scroll bubbling (#156985) and touch scroll handoff (#157435)
+/// without requiring host changes in same-origin embeds.
 void scrollParentWindow(double deltaX, double deltaY) {
   try {
     final DomWindow? parent = domWindow.parent;
     if (parent != null && !identical(parent, domWindow)) {
-      // Use postMessage for cross-origin safety
+      // Try direct scroll (same-origin or allowed access).
+      try {
+        parent.scrollBy(deltaX, deltaY);
+        return;
+      } catch (_) {
+        // Fall back to postMessage for cross-origin.
+      }
+
       final JSAny message = <String, dynamic>{
         'type': 'flutter-scroll',
         'deltaX': deltaX,
