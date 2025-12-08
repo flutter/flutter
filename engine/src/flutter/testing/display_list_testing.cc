@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/testing/display_list_testing.h"
+#include "flutter/display_list/effects/dl_runtime_effect.h"
 
 #include <cstdint>
 #include <iomanip>
@@ -661,6 +662,13 @@ void DisplayListStreamDispatcher::out(const DlImageFilter* filter) {
     indent(1);
     out(*filter);
     outdent(1);
+  }
+}
+void DisplayListStreamDispatcher::out(const DlRuntimeEffect* effect) {
+  if (effect) {
+    os_ << "DlRuntimeEffect(" << effect << ")";
+  } else {
+    os_ << "null DlRuntimeEffect";
   }
 }
 DisplayListStreamDispatcher::DlPathStreamer::~DlPathStreamer() {

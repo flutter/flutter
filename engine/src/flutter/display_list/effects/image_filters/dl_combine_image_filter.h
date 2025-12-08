@@ -6,6 +6,7 @@
 #define FLUTTER_DISPLAY_LIST_EFFECTS_IMAGE_FILTERS_DL_COMBINE_IMAGE_FILTER_H_
 
 #include "flutter/display_list/effects/dl_image_filter.h"
+#include "flutter/display_list/effects/dl_runtime_effect.h"
 
 namespace flutter {
 
@@ -13,24 +14,26 @@ class DlCombineImageFilter final : public DlImageFilter {
  public:
   DlCombineImageFilter(const std::shared_ptr<DlImageFilter>& first,
                        const std::shared_ptr<DlImageFilter>& second,
-                       const std::shared_ptr<DlImageFilter>& combiner)
-      : first_(first), second_(second), combiner_(combiner) {}
+                       sk_sp<DlRuntimeEffect> combiner)
+      : first_(first), second_(second), combiner_(std::move(combiner)) {}
 
   static std::shared_ptr<DlImageFilter> Make(
       const std::shared_ptr<DlImageFilter>& first,
       const std::shared_ptr<DlImageFilter>& second,
-      const std::shared_ptr<DlImageFilter>& combiner);
+      sk_sp<DlRuntimeEffect> combiner);
 
   std::shared_ptr<DlImageFilter> shared() const override {
     return std::make_shared<DlCombineImageFilter>(this);
   }
 
-  DlImageFilterType type() const override { return DlImageFilterType::kCombine; }
+  DlImageFilterType type() const override {
+    return DlImageFilterType::kCombine;
+  }
   size_t size() const override { return sizeof(*this); }
 
   std::shared_ptr<DlImageFilter> first() const { return first_; }
   std::shared_ptr<DlImageFilter> second() const { return second_; }
-  std::shared_ptr<DlImageFilter> combiner() const { return combiner_; }
+  sk_sp<DlRuntimeEffect> combiner() const { return combiner_; }
 
   const DlCombineImageFilter* asCombine() const override { return this; }
 
@@ -50,7 +53,9 @@ class DlCombineImageFilter final : public DlImageFilter {
   MatrixCapability matrix_capability() const override;
 
   explicit DlCombineImageFilter(const DlCombineImageFilter* filter)
-      : DlCombineImageFilter(filter->first_, filter->second_, filter->combiner_) {}
+      : DlCombineImageFilter(filter->first_,
+                             filter->second_,
+                             filter->combiner_) {}
   DlCombineImageFilter(const DlCombineImageFilter& filter)
       : DlCombineImageFilter(&filter) {}
 
@@ -60,7 +65,7 @@ class DlCombineImageFilter final : public DlImageFilter {
  private:
   const std::shared_ptr<DlImageFilter> first_;
   const std::shared_ptr<DlImageFilter> second_;
-  const std::shared_ptr<DlImageFilter> combiner_;
+  const sk_sp<DlRuntimeEffect> combiner_;
 };
 
 }  // namespace flutter

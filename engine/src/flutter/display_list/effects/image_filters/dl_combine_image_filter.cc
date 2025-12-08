@@ -11,7 +11,7 @@ namespace flutter {
 std::shared_ptr<DlImageFilter> DlCombineImageFilter::Make(
     const std::shared_ptr<DlImageFilter>& first,
     const std::shared_ptr<DlImageFilter>& second,
-    const std::shared_ptr<DlImageFilter>& combiner) {
+    sk_sp<DlRuntimeEffect> combiner) {
   if (!combiner) {
     // If there is no combiner, we can't really combine anything.
     // Returning null seems appropriate as "no filter".
@@ -19,33 +19,15 @@ std::shared_ptr<DlImageFilter> DlCombineImageFilter::Make(
     // Without a combiner, the operation is undefined.
     return nullptr;
   }
-  return std::make_shared<DlCombineImageFilter>(first, second, combiner);
+  return std::make_shared<DlCombineImageFilter>(first, second,
+                                                std::move(combiner));
 }
 
 bool DlCombineImageFilter::modifies_transparent_black() const {
-  // If the combiner modifies transparent black, then the whole thing likely does.
-  if (combiner_ && combiner_->modifies_transparent_black()) {
-    return true;
-  }
-  // If the combiner doesn't modify transparent black, it might still produce
-  // non-transparent output if its inputs are non-transparent.
-  // But if inputs are transparent black (which they are by definition of this check),
-  // and they don't modify it...
-  // Actually, if first_ or second_ modifies transparent black, they produce
-  // something from nothing.
-  // Then combiner sees that something.
-  // If combiner is transparent-preserving (like srcOver), it will preserve that something.
-  // So if ANY of them modifies transparent black, we should return true?
-  // Wait, if combiner is "SrcIn", and first produces color but second is transparent,
-  // SrcIn might result in transparent.
-  // But we must be conservative.
-  if (first_ && first_->modifies_transparent_black()) {
-    return true;
-  }
-  if (second_ && second_->modifies_transparent_black()) {
-    return true;
-  }
-  return false;
+  // If the combiner modifies transparent black, then the whole thing likely
+  // does. We can't ask the RuntimeEffect if it modifies transparent black, so
+  // we assume it does to be safe.
+  return true;
 }
 
 DlRect* DlCombineImageFilter::map_local_bounds(const DlRect& input_bounds,
@@ -79,21 +61,18 @@ DlRect* DlCombineImageFilter::map_local_bounds(const DlRect& input_bounds,
     // If one failed, we might want to be conservative and return nullptr?
     // But map_local_bounds returns nullptr on failure.
     // If first_ failed, it means it can't compute bounds.
-    // We should probably propagate failure if we can't compute bounds for inputs.
-    // But wait, if first_ is null, it's identity, so bounds1 = input_bounds.
-    // map_local_bounds returns pointer to output_bounds on success.
-    // If it returns nullptr, it means "can't compute".
-    // If we can't compute bounds for one input, we can't compute union reliably?
-    // Let's assume if map_local_bounds returns nullptr, it might be infinite or unknown.
-    // Safest is to return nullptr.
+    // We should probably propagate failure if we can't compute bounds for
+    // inputs. But wait, if first_ is null, it's identity, so bounds1 =
+    // input_bounds. map_local_bounds returns pointer to output_bounds on
+    // success. If it returns nullptr, it means "can't compute". If we can't
+    // compute bounds for one input, we can't compute union reliably? Let's
+    // assume if map_local_bounds returns nullptr, it might be infinite or
+    // unknown. Safest is to return nullptr.
     return nullptr;
   }
 
-  if (combiner_) {
-    return combiner_->map_local_bounds(combined_inputs, output_bounds);
-  }
-  
-  // Should be unreachable if Make checks for combiner, but for safety:
+  // We assume the combiner doesn't modify the local bounds of the inputs,
+  // so we just return the union of the inputs.
   output_bounds = combined_inputs;
   return &output_bounds;
 }
@@ -128,10 +107,8 @@ DlIRect* DlCombineImageFilter::map_device_bounds(const DlIRect& input_bounds,
     return nullptr;
   }
 
-  if (combiner_) {
-    return combiner_->map_device_bounds(combined_inputs, ctm, output_bounds);
-  }
-
+  // We assume the combiner doesn't modify the device bounds of the inputs,
+  // so we just return the union of the inputs.
   output_bounds = combined_inputs;
   return &output_bounds;
 }
@@ -140,15 +117,9 @@ DlIRect* DlCombineImageFilter::get_input_device_bounds(
     const DlIRect& output_bounds,
     const DlMatrix& ctm,
     DlIRect& input_bounds) const {
-  
-  DlIRect req_combined;
-  if (combiner_) {
-    if (!combiner_->get_input_device_bounds(output_bounds, ctm, req_combined)) {
-      return nullptr;
-    }
-  } else {
-    req_combined = output_bounds;
-  }
+  // We can't ask the RuntimeEffect closely what it needs, so we assume
+  // it needs the full output bounds from its inputs.
+  DlIRect req_combined = output_bounds;
 
   DlIRect req1 = req_combined;
   DlIRect req2 = req_combined;
@@ -183,7 +154,10 @@ DlIRect* DlCombineImageFilter::get_input_device_bounds(
 DlImageFilter::MatrixCapability DlCombineImageFilter::matrix_capability()
     const {
   // Conservative intersection of capabilities.
-  auto cap = combiner_ ? combiner_->matrix_capability() : MatrixCapability::kComplex;
+  // Conservative intersection of capabilities.
+  // We assume the combiner can handle whatever, or rather that it doesn't
+  // impose restrictions like "must be scale-translate".
+  auto cap = MatrixCapability::kComplex;
   if (first_) {
     cap = std::min(cap, first_->matrix_capability());
   }
@@ -197,7 +171,7 @@ bool DlCombineImageFilter::equals_(const DlImageFilter& other) const {
   FML_DCHECK(other.type() == DlImageFilterType::kCombine);
   auto that = static_cast<const DlCombineImageFilter*>(&other);
   return (Equals(first_, that->first_) && Equals(second_, that->second_) &&
-          Equals(combiner_, that->combiner_));
+          combiner_ == that->combiner_);
 }
 
 }  // namespace flutter

@@ -81,7 +81,7 @@ class DlImageFilter : public DlAttribute<DlImageFilter, DlImageFilterType> {
   static std::shared_ptr<DlImageFilter> MakeCombine(
       const std::shared_ptr<DlImageFilter>& first,
       const std::shared_ptr<DlImageFilter>& second,
-      const std::shared_ptr<DlImageFilter>& combiner);
+      sk_sp<DlRuntimeEffect> combiner);
 
   // Return a DlBlurImageFilter pointer to this object iff it is a Blur
   // type of ImageFilter, otherwise return nullptr.

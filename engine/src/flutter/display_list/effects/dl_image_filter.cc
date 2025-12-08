@@ -53,7 +53,7 @@ std::shared_ptr<DlImageFilter> DlImageFilter::MakeCompose(
 std::shared_ptr<DlImageFilter> DlImageFilter::MakeCombine(
     const std::shared_ptr<DlImageFilter>& first,
     const std::shared_ptr<DlImageFilter>& second,
-    const std::shared_ptr<DlImageFilter>& combiner) {
+    sk_sp<DlRuntimeEffect> combiner) {
   return DlCombineImageFilter::Make(first, second, combiner);
 }
 
