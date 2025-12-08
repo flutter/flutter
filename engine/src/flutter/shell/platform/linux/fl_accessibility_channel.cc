@@ -105,13 +105,17 @@ static void process_announce(FlAccessibilityChannel* self, FlValue* data) {
 // Process an accessibility event received from Flutter.
 static void process_message(FlAccessibilityChannel* self, FlValue* message) {
   if (fl_value_get_type(message) != FL_VALUE_TYPE_MAP) {
-    g_warning("Got invalid accessibility event type");
+    g_warning("Got invalid accessibility event message type");
     return;
   }
 
   FlValue* type_value = fl_value_lookup_string(message, kTypeKey);
   if (type_value == nullptr) {
     g_warning("Accessibility event missing type");
+    return;
+  }
+  if (fl_value_get_type(type_value) != FL_VALUE_TYPE_STRING) {
+    g_warning("Got invalid accessibility event type");
     return;
   }
   const char* type = fl_value_get_string(type_value);
