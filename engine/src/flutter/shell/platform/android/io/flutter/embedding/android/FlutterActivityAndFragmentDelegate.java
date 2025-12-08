@@ -40,6 +40,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import io.flutter.embedding.engine.FlutterShellArgs;
+import java.util.ArrayList;
+
+
 /**
  * Delegate that implements all Flutter logic that is the same between a {@link FlutterActivity} and
  * a {@link FlutterFragment}.
@@ -334,7 +338,7 @@ import java.util.Set;
 
     warnIfEngineFlagsSetViaIntent(host.getActivity().getIntent());
     FlutterEngineGroup group =
-        engineGroup == null ? new FlutterEngineGroup(host.getContext()) : engineGroup;
+        engineGroup == null ? new FlutterEngineGroup(host.getContext(), host.getFlutterShellArgs().toArray(new String[0])) : engineGroup;
     flutterEngine =
         group.createAndRunEngine(
             addEntrypointOptions(
@@ -1114,6 +1118,9 @@ import java.util.Set;
      */
     @NonNull
     Lifecycle getLifecycle();
+
+      @NonNull
+    ArrayList<String> getFlutterShellArgs();
 
     /**
      * Returns the ID of a statically cached {@link io.flutter.embedding.engine.FlutterEngine} to

@@ -56,6 +56,9 @@ import io.flutter.plugin.view.SensitiveContentPlugin;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.flutter.embedding.engine.FlutterShellArgs;
+
+
 /**
  * {@code Activity} which displays a fullscreen Flutter UI.
  *
@@ -1292,6 +1295,18 @@ public class FlutterActivity extends Activity
   @Nullable
   protected FlutterEngine getFlutterEngine() {
     return delegate.getFlutterEngine();
+  }
+
+
+  /**
+   * {@link FlutterActivityAndFragmentDelegate.Host} method that is used by {@link
+   * FlutterActivityAndFragmentDelegate} to obtain Flutter shell arguments when initializing
+   * Flutter.
+   */
+  @NonNull
+  @Override
+  public ArrayList<String> getFlutterShellArgs() {
+    return FlutterShellArgs.fromIntent(getIntent());
   }
 
   /**
