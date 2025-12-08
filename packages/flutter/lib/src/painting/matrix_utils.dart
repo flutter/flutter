@@ -595,9 +595,15 @@ abstract final class MatrixUtils {
 
   /// Returns a matrix that transforms every point to [offset].
   static Matrix4 forceToPoint(Offset offset) {
-    return Matrix4.identity()
-      ..setRow(0, Vector4(0, 0, 0, offset.dx))
-      ..setRow(1, Vector4(0, 0, 0, offset.dy));
+    final result = Matrix4.zero();
+    final Float64List storage = result.storage;
+    // Matrix4 is column-major.
+    // The first two columns (indices 0, 1, 4, 5) are zero, so x and y are ignored.
+    storage[10] = 1; // Row 2, Column 2: z' = z
+    storage[12] = offset.dx; // Row 0, Column 3: x' = offset.dx
+    storage[13] = offset.dy; // Row 1, Column 3: y' = offset.dy
+    storage[15] = 1; // Row 3, Column 3: w' = w
+    return result;
   }
 }
 
