@@ -429,7 +429,7 @@ void main() {
   );
 
   testWidgets('SizeTransition alignment parameter', (WidgetTester tester) async {
-    final AnimationController controller = AnimationController(vsync: const TestVSync());
+    final controller = AnimationController(vsync: const TestVSync());
     addTearDown(controller.dispose);
     final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
 
