@@ -115,7 +115,9 @@ class _TooltipButtonState extends State<TooltipButton> {
     // Toggle tooltip visibility.
     if (_tooltipController != null) {
       _tooltipController!.destroy();
-      _ElementPositionTrackerManager().remove(_tooltipTracker!);
+      if (_tooltipTracker != null) {
+        _ElementPositionTrackerManager().remove(_tooltipTracker!);
+      }
       setState(() {
         _tooltipController = null;
         _tooltipTracker = null;

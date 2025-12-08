@@ -865,10 +865,7 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
       return null;
     }
 
-    if (message == _WM_CLOSE) {
-      _delegate.onWindowCloseRequested(this);
-      return 0;
-    } else if (message == _WM_DESTROY) {
+    if (message == _WM_DESTROY) {
       _destroyed = true;
       _onGetWindowPosition.close();
       _owner._removeMessageHandler(this);
