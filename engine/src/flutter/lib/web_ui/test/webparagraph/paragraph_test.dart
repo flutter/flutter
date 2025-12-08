@@ -960,21 +960,21 @@ Future<void> testMain() async {
   });
 
   test('Ellipsis LTR', () async {
-    final PictureRecorder recorder = PictureRecorder();
+    final recorder = PictureRecorder();
     const region = Rect.fromLTWH(0, 0, 1000, 500);
-    final Canvas canvas = Canvas(recorder, region);
+    final canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFF0000), BlendMode.src);
-    final Paint blackPaint = Paint()..color = const Color(0xFF000000);
-    final Paint whitePaint = Paint()..color = const Color(0xFFFFFFFF);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
+    final whitePaint = Paint()..color = const Color(0xFFFFFFFF);
 
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(
+    final paragraphStyle = WebParagraphStyle(
       fontFamily: 'Roboto',
       fontSize: 15,
       color: const Color(0xFF000000),
       ellipsis: '...',
       maxLines: 1,
     );
-    final WebTextStyle style30 = WebTextStyle(
+    final style30 = WebTextStyle(
       foreground: blackPaint,
       background: whitePaint,
       fontSize: 30,
@@ -982,7 +982,7 @@ Future<void> testMain() async {
     );
 
     {
-      final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+      final builder = WebParagraphBuilder(paragraphStyle);
 
       builder.pushStyle(style30);
       builder.addText('This is a long text that should be ellipsized at the end');
@@ -996,14 +996,14 @@ Future<void> testMain() async {
   });
 
   test('Ellipsis RTL', () async {
-    final PictureRecorder recorder = PictureRecorder();
+    final recorder = PictureRecorder();
     const region = Rect.fromLTWH(0, 0, 1000, 500);
-    final Canvas canvas = Canvas(recorder, region);
+    final canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFF0000), BlendMode.src);
-    final Paint blackPaint = Paint()..color = const Color(0xFF000000);
-    final Paint whitePaint = Paint()..color = const Color(0xFFFFFFFF);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
+    final whitePaint = Paint()..color = const Color(0xFFFFFFFF);
 
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(
+    final paragraphStyle = WebParagraphStyle(
       fontFamily: 'Roboto',
       fontSize: 15,
       color: const Color(0xFF000000),
@@ -1011,7 +1011,7 @@ Future<void> testMain() async {
       maxLines: 1,
       textDirection: TextDirection.rtl,
     );
-    final WebTextStyle style30 = WebTextStyle(
+    final style30 = WebTextStyle(
       foreground: blackPaint,
       background: whitePaint,
       fontSize: 30,
@@ -1019,7 +1019,7 @@ Future<void> testMain() async {
     );
 
     {
-      final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+      final builder = WebParagraphBuilder(paragraphStyle);
 
       builder.pushStyle(style30);
       builder.addText('إنالسيطرةعلىالعالمعبارةقبيحةللغاية-أفضلأنأسميهاتحسينالعالم');
@@ -1033,20 +1033,20 @@ Future<void> testMain() async {
   });
 
   test('MaxLines, no ellipsis', () async {
-    final PictureRecorder recorder = PictureRecorder();
+    final recorder = PictureRecorder();
     const region = Rect.fromLTWH(0, 0, 1000, 500);
-    final Canvas canvas = Canvas(recorder, region);
+    final canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFF0000), BlendMode.src);
-    final Paint blackPaint = Paint()..color = const Color(0xFF000000);
-    final Paint whitePaint = Paint()..color = const Color(0xFFFFFFFF);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
+    final whitePaint = Paint()..color = const Color(0xFFFFFFFF);
 
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(
+    final paragraphStyle = WebParagraphStyle(
       fontFamily: 'Roboto',
       fontSize: 15,
       color: const Color(0xFF000000),
       maxLines: 2,
     );
-    final WebTextStyle style30 = WebTextStyle(
+    final style30 = WebTextStyle(
       foreground: blackPaint,
       background: whitePaint,
       fontSize: 30,
@@ -1054,7 +1054,7 @@ Future<void> testMain() async {
     );
 
     {
-      final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+      final builder = WebParagraphBuilder(paragraphStyle);
 
       builder.pushStyle(style30);
       builder.addText(

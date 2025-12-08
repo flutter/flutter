@@ -197,13 +197,13 @@ class TextLayout {
   ) {
     assert(contentRange.end == whitespaceRange.start);
     if (WebParagraphDebug.logging) {
-      final allLineText = paragraph.getText(contentRange.start, whitespaceRange.end);
+      final String allLineText = paragraph.getText(contentRange.start, whitespaceRange.end);
       WebParagraphDebug.log('LINE "$allLineText" clusters:$contentRange+$whitespaceRange');
     }
     // Prepare ellipsis block in case we need to get metrics for it
     EllipsisBlock? ellipsisBlock;
     if (ellipsisClusters.isNotEmpty) {
-      final TextSpan ellipsisSpan = TextSpan(
+      final ellipsisSpan = TextSpan(
         start: ellipsisClusters.first.start,
         end: ellipsisClusters.last.end,
         style: ellipsisClusters.first.style,
@@ -269,13 +269,13 @@ class TextLayout {
     // We need to take the VISUALLY first cluster on the line (in case of LTR/RTL it could be anywhere)
     // and shift all runs for this line so this first cluster starts from 0
     // Break the line into the blocks that belong to the same bidi run (monodirectional text) and to the same style block (the same text metrics)
-    double trailingSpacesWidth = 0.0;
+    var trailingSpacesWidth = 0.0;
     // In case we attach the ellipsis block at the left (RTL paragraph) we need to reserve its width
     double blockShiftFromLineStart =
         ellipsisBlock != null && paragraph.paragraphStyle.textDirection == ui.TextDirection.rtl
         ? ellipsisBlock.advance.width
         : 0.0;
-    for (final BidiRun bidiRun in lineVisualRuns) {
+    for (final bidiRun in lineVisualRuns) {
       // TODO(jlavrova): we (almost always true) assume that trailing whitespaces do not affect the line height
       final ClusterRange textIntersection = bidiRun.clusterRange.intersect(contentRange);
       final ClusterRange whitespacesIntersection = bidiRun.clusterRange.intersect(whitespaceRange);
@@ -423,19 +423,18 @@ class TextLayout {
       if (block is! PlaceholderBlock) {
         continue;
       }
-      final placeholderBlock = block as PlaceholderBlock;
-      placeholderBlock.calculatePlaceholderTop(
+      block.calculatePlaceholderTop(
         line.fontBoundingBoxAscent,
         line.fontBoundingBoxDescent,
       );
       // Line always counts multipled metrics (no need for the others)
       // TODO(jlavrova): sort our alphabetic/ideographic baseline and how it affects ascent & descent
-      line.fontBoundingBoxAscent = math.max(line.fontBoundingBoxAscent, placeholderBlock.ascent);
-      line.fontBoundingBoxDescent = math.max(line.fontBoundingBoxDescent, placeholderBlock.descent);
+      line.fontBoundingBoxAscent = math.max(line.fontBoundingBoxAscent, block.ascent);
+      line.fontBoundingBoxDescent = math.max(line.fontBoundingBoxDescent, block.descent);
       WebParagraphDebug.log(
         'Adjusted metrics: '
-        '${line.fontBoundingBoxAscent} => ${math.max(line.fontBoundingBoxAscent, placeholderBlock.ascent)} '
-        '${line.fontBoundingBoxDescent} => ${math.max(line.fontBoundingBoxDescent, placeholderBlock.descent)} ',
+        '${line.fontBoundingBoxAscent} => ${math.max(line.fontBoundingBoxAscent, block.ascent)} '
+        '${line.fontBoundingBoxDescent} => ${math.max(line.fontBoundingBoxDescent, block.descent)} ',
       );
     }
 

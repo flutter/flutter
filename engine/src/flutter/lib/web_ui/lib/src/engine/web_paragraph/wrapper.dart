@@ -407,7 +407,7 @@ class _LineBuilder {
       return true;
     }
     // Let's walk backwards and see how many clusters we need to remove to fit the ellipsis in the line
-    double cutOffWidth = 0.0;
+    var cutOffWidth = 0.0;
     while (true) {
       if (clusterIndex <= start) {
         // We have removed all the clusters in this line and still can't fit the ellipsis
@@ -418,7 +418,7 @@ class _LineBuilder {
       }
       final WebCluster cluster = _layout.allClusters[clusterIndex - 1];
       final double widthCluster = cluster.advance.width;
-      final TextSpan ellipsisSpan = TextSpan(
+      final ellipsisSpan = TextSpan(
         start: 0,
         end: ellipsis.length,
         style: cluster.style,
