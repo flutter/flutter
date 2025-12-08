@@ -1479,7 +1479,7 @@ void main() {
       await tester.tap(find.text('Push Page 2'));
       await tester.pumpAndSettle();
 
-      RenderBox box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
+      var box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
       final double initialSheetPosition = box.localToGlobal(Offset.zero).dy;
 
       box = tester.renderObject(find.text('Scroll Item 3')) as RenderBox;
@@ -1513,7 +1513,7 @@ void main() {
       await tester.tap(find.text('Push Page 2'));
       await tester.pumpAndSettle();
 
-      RenderBox box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
+      var box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
       final double initialSheetPosition = box.localToGlobal(Offset.zero).dy;
 
       box = tester.renderObject(find.text('Scroll Item 3')) as RenderBox;
@@ -1552,7 +1552,7 @@ void main() {
         await tester.tap(find.text('Push Page 2'));
         await tester.pumpAndSettle();
 
-        RenderBox box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
+        var box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
         final double initialSheetPosition = box.localToGlobal(Offset.zero).dy;
 
         box = tester.renderObject(find.text('Scroll Item 3')) as RenderBox;
@@ -1708,7 +1708,7 @@ void main() {
 
     expect(find.text('Page 2'), findsOneWidget);
 
-    RenderBox box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
+    var box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
     final double initialPosition = box.localToGlobal(Offset.zero).dy;
 
     final TestGesture gesture = await tester.startGesture(const Offset(100, 200));
@@ -1834,7 +1834,7 @@ void main() {
 
       expect(find.text('Page 3'), findsOneWidget);
 
-      final RenderBox box = tester.renderObject(find.text('Page 3')) as RenderBox;
+      final box = tester.renderObject(find.text('Page 3')) as RenderBox;
       final Offset draggableLocation = box.localToGlobal(Offset.zero);
 
       await gesture.down(draggableLocation);
