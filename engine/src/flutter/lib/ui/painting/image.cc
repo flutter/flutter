@@ -117,33 +117,36 @@ void CanvasImage::decodeImageFromPixelsSync(Dart_Handle pixels_handle,
   }
   PixelFormat format = static_cast<PixelFormat>(pixel_format);
 
-  tonic::Uint8List pixels(pixels_handle);
-  if (!pixels.data()) {
-    Dart_ThrowException(tonic::ToDart("Pixels must not be null."));
-    return;
-  }
+  sk_sp<SkData> sk_data;
+  sk_sp<SkImage> sk_image;
+  {
+    tonic::Uint8List pixels(pixels_handle);
+    if (!pixels.data()) {
+      Dart_ThrowException(tonic::ToDart("Pixels must not be null."));
+      return;
+    }
 
-  int32_t row_bytes = width * BytesPerPixel(format);
-  SkColorType color_type = PixelFormatToSkColorType(format);
-  if (color_type == kUnknown_SkColorType) {
-    Dart_ThrowException(tonic::ToDart("Unsupported pixel format."));
-    return;
-  }
+    int32_t row_bytes = width * BytesPerPixel(format);
+    SkColorType color_type = PixelFormatToSkColorType(format);
+    if (color_type == kUnknown_SkColorType) {
+      Dart_ThrowException(tonic::ToDart("Unsupported pixel format."));
+      return;
+    }
 
-  SkImageInfo image_info =
-      SkImageInfo::Make(width, height, color_type, kUnpremul_SkAlphaType);
-  if (pixel_format == 2) {  // rgbaFloat32
-    image_info = image_info.makeAlphaType(kUnpremul_SkAlphaType);
-  } else {
-    image_info = image_info.makeAlphaType(kPremul_SkAlphaType);
-  }
+    SkImageInfo image_info =
+        SkImageInfo::Make(width, height, color_type, kUnpremul_SkAlphaType);
+    if (pixel_format == 2) {  // rgbaFloat32
+      image_info = image_info.makeAlphaType(kUnpremul_SkAlphaType);
+    } else {
+      image_info = image_info.makeAlphaType(kPremul_SkAlphaType);
+    }
 
-  auto sk_data = SkData::MakeWithCopy(pixels.data(), pixels.num_elements());
-  auto sk_image =
-      SkImages::RasterFromData(image_info, std::move(sk_data), row_bytes);
-  if (!sk_image) {
-    Dart_ThrowException(tonic::ToDart("Failed to create image from pixels."));
-    return;
+    sk_data = SkData::MakeWithCopy(pixels.data(), pixels.num_elements());
+    sk_image = SkImages::RasterFromData(image_info, sk_data, row_bytes);
+    if (!sk_image) {
+      Dart_ThrowException(tonic::ToDart("Failed to create image from pixels."));
+      return;
+    }
   }
 
   auto snapshot_delegate = dart_state->GetSnapshotDelegate();
