@@ -2161,7 +2161,7 @@ void main() {
     WidgetTester tester,
   ) async {
     tester.view.physicalSize = Size.zero;
-    final FocusNode focusNode = FocusNode();
+    final focusNode = FocusNode();
     addTearDown(tester.view.reset);
     addTearDown(focusNode.dispose);
     await tester.pumpWidget(
