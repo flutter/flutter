@@ -789,7 +789,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         globalPosition: _initialPosition.global,
         localPosition: _initialPosition.local,
         kind: getKindForPointer(pointer),
-        buttons: getButtonsForPointer(pointer)
+        buttons: getButtonsForPointer(pointer),
       );
       invokeCallback<void>('onDown', () => onDown!(details));
     }

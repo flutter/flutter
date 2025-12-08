@@ -98,7 +98,10 @@ void main() {
     };
 
     final mousePointer = TestPointer(5, PointerDeviceKind.mouse);
-    final PointerDownEvent down = mousePointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
+    final PointerDownEvent down = mousePointer.down(
+      const Offset(10.0, 10.0),
+      buttons: expectedButtons,
+    );
     drag.addPointer(down);
     tester.closeArena(5);
     expect(didStartDrag, isFalse);
