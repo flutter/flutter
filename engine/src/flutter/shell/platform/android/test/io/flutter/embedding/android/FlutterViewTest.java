@@ -1207,7 +1207,7 @@ public class FlutterViewTest {
 
   @Test
   @TargetApi(31)
-  @Config(sdk = API_LEVELS.API_31)
+  @Config(minSdk = API_LEVELS.API_31)
   public void itSetsDisplayCornerRadii() {
     FlutterView flutterView = new FlutterView(ctx);
     FlutterEngine flutterEngine = spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
