@@ -36,6 +36,30 @@ struct _FlAccessibilityChannel {
 
 G_DEFINE_TYPE(FlAccessibilityChannel, fl_accessibility_channel, G_TYPE_OBJECT)
 
+static FlTextDirection parse_text_direction(int64_t value) {
+  switch (value) {
+    case 0:
+      return FL_TEXT_DIRECTION_RTL;
+    case 1:
+      return FL_TEXT_DIRECTION_LTR;
+    default:
+      g_warning("Unknown text direction value %" G_GINT64_FORMAT, value);
+      return FL_TEXT_DIRECTION_LTR;
+  }
+}
+
+static FlAssertiveness parse_assertiveness(int64_t value) {
+  switch (value) {
+    case 0:
+      return FL_ASSERTIVENESS_POLITE;
+    case 1:
+      return FL_ASSERTIVENESS_ASSERTIVE;
+    default:
+      g_warning("Unknown assertiveness value %" G_GINT64_FORMAT, value);
+      return FL_ASSERTIVENESS_POLITE;
+  }
+}
+
 static void process_announce(FlAccessibilityChannel* self, FlValue* data) {
   FlValue* view_id_value = fl_value_lookup_string(data, kViewIdKey);
   if (view_id_value == nullptr ||
@@ -61,7 +85,7 @@ static void process_announce(FlAccessibilityChannel* self, FlValue* data) {
     return;
   }
   FlTextDirection text_direction =
-      static_cast<FlTextDirection>(fl_value_get_int(text_direction_value));
+      parse_text_direction(fl_value_get_int(text_direction_value));
 
   FlValue* assertiveness_value =
       fl_value_lookup_string(data, kAssertivenessKey);
@@ -71,8 +95,7 @@ static void process_announce(FlAccessibilityChannel* self, FlValue* data) {
       g_warning("Invalid assertiveness in accessibility announce event");
       return;
     }
-    assertiveness =
-        static_cast<FlAssertiveness>(fl_value_get_int(assertiveness_value));
+    assertiveness = parse_assertiveness(fl_value_get_int(assertiveness_value));
   }
 
   self->vtable->send_announcement(view_id, message, text_direction,
