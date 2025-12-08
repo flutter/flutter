@@ -25,6 +25,7 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   static const kResolveUri = 'resolveUri';
   static const kSetPreference = 'setPreference';
   static const kGetPreference = 'getPreference';
+  static const kGetDevToolsUri = 'getDevToolsUri';
 
   /// Error code for RpcException thrown when attempting to load a key from
   /// persistent preferences that doesn't have an entry.
@@ -119,6 +120,14 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   /// Sets [key] to [value] in the persistent preferences map.
   Future<void> setPreference(String key, Object? value) async {
     await _call(kSetPreference, params: {'key': key, 'value': value});
+  }
+
+  /// Retrieves the DevTools URI for the previewer instance.
+  Future<Uri> getDevToolsUri() async {
+    final result = StringResponse.fromDTDResponse(
+      (await _call(kGetDevToolsUri))!,
+    );
+    return Uri.parse(result.value!);
   }
 
   @override
