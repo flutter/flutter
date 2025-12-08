@@ -23,12 +23,12 @@ void main() {
   });
 
   test('WidgetStatesController update, listener', () {
-    int count = 0;
+    var count = 0;
     void valueChanged() {
       count += 1;
     }
 
-    final WidgetStatesController controller = WidgetStatesController();
+    final controller = WidgetStatesController();
     controller.addListener(valueChanged);
 
     controller.update(WidgetState.selected, true);
@@ -81,14 +81,12 @@ void main() {
   });
 
   test('WidgetStatesController const initial value', () {
-    int count = 0;
+    var count = 0;
     void valueChanged() {
       count += 1;
     }
 
-    final WidgetStatesController controller = WidgetStatesController(const <WidgetState>{
-      WidgetState.selected,
-    });
+    final controller = WidgetStatesController(const <WidgetState>{WidgetState.selected});
     controller.addListener(valueChanged);
 
     controller.update(WidgetState.selected, true);

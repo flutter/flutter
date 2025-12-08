@@ -145,15 +145,15 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
 
   @override
   Iterable<LicenseParagraph> get paragraphs {
-    int lineStart = 0;
-    int currentPosition = 0;
-    int lastLineIndent = 0;
-    int currentLineIndent = 0;
+    var lineStart = 0;
+    var currentPosition = 0;
+    var lastLineIndent = 0;
+    var currentLineIndent = 0;
     int? currentParagraphIndentation;
     _LicenseEntryWithLineBreaksParserState state =
         _LicenseEntryWithLineBreaksParserState.beforeParagraph;
-    final List<String> lines = <String>[];
-    final List<LicenseParagraph> result = <LicenseParagraph>[];
+    final lines = <String>[];
+    final result = <LicenseParagraph>[];
 
     void addLine() {
       assert(lineStart < currentPosition);
@@ -163,10 +163,7 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
     LicenseParagraph getParagraph() {
       assert(lines.isNotEmpty);
       assert(currentParagraphIndentation != null);
-      final LicenseParagraph result = LicenseParagraph(
-        lines.join(' '),
-        currentParagraphIndentation!,
-      );
+      final result = LicenseParagraph(lines.join(' '), currentParagraphIndentation!);
       assert(result.text.trimLeft() == result.text);
       assert(result.text.isNotEmpty);
       lines.clear();

@@ -40,7 +40,7 @@ class BorderPainter extends BoxPainter {
           (configuration.size!.height / 2) - indicatorHeight / 2 - 1,
         ) &
         Size(configuration.size!.width - 2 * horizontalInset, indicatorHeight);
-    final Paint paint = Paint();
+    final paint = Paint();
     paint.color = Colors.white;
     paint.style = PaintingStyle.stroke;
     paint.strokeWidth = 2;

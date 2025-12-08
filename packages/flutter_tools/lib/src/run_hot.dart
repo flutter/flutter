@@ -39,10 +39,10 @@ HotRunnerConfig? get hotRunnerConfig => context.get<HotRunnerConfig>();
 
 class HotRunnerConfig {
   /// Should the hot runner assume that the minimal Dart dependencies do not change?
-  var stableDartDependencies = false;
+  bool stableDartDependencies = false;
 
   /// Whether the hot runner should scan for modified files asynchronously.
-  var asyncScanning = false;
+  bool asyncScanning = false;
 
   /// A hook for implementations to perform any necessary initialization prior
   /// to a hot restart. Should return true if the hot restart should continue.
