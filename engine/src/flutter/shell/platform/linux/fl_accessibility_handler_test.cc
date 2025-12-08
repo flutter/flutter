@@ -109,6 +109,11 @@ TEST(FlAccessibilityHandlerTest, AnnounceUnknownView) {
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =
       fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
+  FlView* view = fl_view_new_for_engine(engine);
+
+  gboolean signalled = FALSE;
+  g_signal_connect(fl_view_get_accessible(view), "announcement",
+                   G_CALLBACK(announce_cb), &signalled);
 
   g_autoptr(FlValue) message = fl_value_new_map();
   fl_value_set_string_take(message, "type", fl_value_new_string("announce"));
@@ -133,6 +138,7 @@ TEST(FlAccessibilityHandlerTest, AnnounceUnknownView) {
       },
       &called);
   EXPECT_TRUE(called);
+  EXPECT_FALSE(signalled);
 
   fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
@@ -141,6 +147,11 @@ TEST(FlAccessibilityHandlerTest, UnknownType) {
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =
       fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
+  FlView* view = fl_view_new_for_engine(engine);
+
+  gboolean signalled = FALSE;
+  g_signal_connect(fl_view_get_accessible(view), "announcement",
+                   G_CALLBACK(announce_cb), &signalled);
 
   // Unknown type, ignored by embedder.
   g_autoptr(FlValue) message = fl_value_new_map();
@@ -158,6 +169,7 @@ TEST(FlAccessibilityHandlerTest, UnknownType) {
       },
       &called);
   EXPECT_TRUE(called);
+  EXPECT_FALSE(signalled);
 
   fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
