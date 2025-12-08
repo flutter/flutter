@@ -185,7 +185,7 @@ void main() {
   });
 
   testWidgets('different locale will not merge', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     final GlobalKey key = GlobalKey();
 
     await tester.pumpWidget(
