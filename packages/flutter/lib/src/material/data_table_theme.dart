@@ -19,9 +19,8 @@ import 'theme.dart';
 /// widgets.
 ///
 /// Descendant widgets obtain the current [DataTableThemeData] object
-/// using `DataTableTheme.of(context)`. Instances of
-/// [DataTableThemeData] can be customized with
-/// [DataTableThemeData.copyWith].
+/// using [DataTableTheme.of]. Instances of [DataTableThemeData] can
+/// be customized with [DataTableThemeData.copyWith].
 ///
 /// Typically a [DataTableThemeData] is specified as part of the
 /// overall [Theme] with [ThemeData.dataTableTheme].
