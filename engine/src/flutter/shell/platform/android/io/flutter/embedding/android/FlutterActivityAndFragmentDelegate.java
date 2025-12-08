@@ -334,10 +334,11 @@ import java.util.Set;
             + " this FlutterFragment.");
 
     warnIfEngineFlagsSetViaIntent(host.getActivity().getIntent());
+    String[] flutterShellArgs = host.getFlutterShellArgs() == null ? new String[0]: host.getFlutterShellArgs().toArray(new String[0]);
     FlutterEngineGroup group =
         engineGroup == null
-            ? new FlutterEngineGroup(
-                host.getContext(), host.getFlutterShellArgs().toArray(new String[0]))
+            ? flutterShellArgs new FlutterEngineGroup(
+                host.getContext(), flutterShellArgs)
             : engineGroup;
     flutterEngine =
         group.createAndRunEngine(
