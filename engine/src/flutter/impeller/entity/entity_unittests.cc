@@ -2321,49 +2321,60 @@ TEST_P(EntityTest, StrokeArcGeometryGetPositionBufferReturnsExpectedMode) {
   // Butt caps never overlap
   {
     StrokeParameters stroke = {.width = 50.0f, .cap = Cap::kButt};
-    for (auto sweep = 0; sweep < 360; sweep += 5) {
-      auto geometry = Geometry::MakeStrokedArc(oval_bounds, Degrees(0),
-                                               Degrees(sweep), stroke);
+    for (auto start = 0; start < 360; start += 60) {
+      for (auto sweep = 0; sweep < 360; sweep += 12) {
+        auto geometry = Geometry::MakeStrokedArc(oval_bounds, Degrees(start),
+                                                 Degrees(sweep), stroke);
 
-      GeometryResult result =
-          geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
+        GeometryResult result =
+            geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
 
-      EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal);
+        EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal)
+            << "start: " << start << " sweep: " << sweep;
+      }
     }
   }
 
   // Round caps with 10 stroke width overlap starting at 348.6 degrees
   {
     StrokeParameters stroke = {.width = 10.0f, .cap = Cap::kRound};
-    for (auto sweep = 0; sweep < 360; sweep += 5) {
-      auto geometry = Geometry::MakeStrokedArc(oval_bounds, Degrees(0),
-                                               Degrees(sweep), stroke);
+    for (auto start = 0; start < 360; start += 60) {
+      for (auto sweep = 0; sweep < 360; sweep += 12) {
+        auto geometry = Geometry::MakeStrokedArc(oval_bounds, Degrees(start),
+                                                 Degrees(sweep), stroke);
 
-      GeometryResult result =
-          geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
+        GeometryResult result =
+            geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
 
-      if (sweep < 348.6) {
-        EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal);
-      } else {
-        EXPECT_EQ(result.mode, GeometryResult::Mode::kPreventOverdraw);
+        if (sweep < 348.6) {
+          EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal)
+              << "start: " << start << " sweep: " << sweep;
+        } else {
+          EXPECT_EQ(result.mode, GeometryResult::Mode::kPreventOverdraw)
+              << "start: " << start << " sweep: " << sweep;
+        }
       }
     }
   }
 
-  // Round caps with 50 stroke width overlap starting at 300.0 degrees
+  // Round caps with 50 stroke width overlap starting at 300.1 degrees
   {
     StrokeParameters stroke = {.width = 50.0f, .cap = Cap::kRound};
-    for (auto sweep = 0; sweep < 360; sweep += 5) {
-      auto geometry = Geometry::MakeStrokedArc(oval_bounds, Degrees(0),
-                                               Degrees(sweep), stroke);
+    for (auto start = 0; start < 360; start += 60) {
+      for (auto sweep = 0; sweep < 360; sweep += 12) {
+        auto geometry = Geometry::MakeStrokedArc(oval_bounds, Degrees(start),
+                                                 Degrees(sweep), stroke);
 
-      GeometryResult result =
-          geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
+        GeometryResult result =
+            geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
 
-      if (sweep < 300.0) {
-        EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal);
-      } else {
-        EXPECT_EQ(result.mode, GeometryResult::Mode::kPreventOverdraw);
+        if (sweep < 300.0) {
+          EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal)
+              << "start: " << start << " sweep: " << sweep;
+        } else {
+          EXPECT_EQ(result.mode, GeometryResult::Mode::kPreventOverdraw)
+              << "start: " << start << " sweep: " << sweep;
+        }
       }
     }
   }
@@ -2371,17 +2382,21 @@ TEST_P(EntityTest, StrokeArcGeometryGetPositionBufferReturnsExpectedMode) {
   // Square caps with 10 stroke width overlap starting at 347.4 degrees
   {
     StrokeParameters stroke = {.width = 10.0f, .cap = Cap::kSquare};
-    for (auto sweep = 0; sweep < 360; sweep += 5) {
-      auto geometry = Geometry::MakeStrokedArc(oval_bounds, Degrees(0),
-                                               Degrees(sweep), stroke);
+    for (auto start = 0; start < 360; start += 60) {
+      for (auto sweep = 0; sweep < 360; sweep += 12) {
+        auto geometry = Geometry::MakeStrokedArc(oval_bounds, Degrees(start),
+                                                 Degrees(sweep), stroke);
 
-      GeometryResult result =
-          geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
+        GeometryResult result =
+            geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
 
-      if (sweep < 347.4) {
-        EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal);
-      } else {
-        EXPECT_EQ(result.mode, GeometryResult::Mode::kPreventOverdraw);
+        if (sweep < 347.4) {
+          EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal)
+              << "start: " << start << " sweep: " << sweep;
+        } else {
+          EXPECT_EQ(result.mode, GeometryResult::Mode::kPreventOverdraw)
+              << "start: " << start << " sweep: " << sweep;
+        }
       }
     }
   }
@@ -2389,17 +2404,21 @@ TEST_P(EntityTest, StrokeArcGeometryGetPositionBufferReturnsExpectedMode) {
   // Square caps with 50 stroke width overlap starting at 270.1 degrees
   {
     StrokeParameters stroke = {.width = 50.0f, .cap = Cap::kSquare};
-    for (auto sweep = 0; sweep < 360; sweep += 5) {
-      auto geometry = Geometry::MakeStrokedArc(oval_bounds, Degrees(0),
-                                               Degrees(sweep), stroke);
+    for (auto start = 0; start < 360; start += 60) {
+      for (auto sweep = 0; sweep < 360; sweep += 12) {
+        auto geometry = Geometry::MakeStrokedArc(oval_bounds, Degrees(start),
+                                                 Degrees(sweep), stroke);
 
-      GeometryResult result =
-          geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
+        GeometryResult result =
+            geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
 
-      if (sweep < 270.1) {
-        EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal);
-      } else {
-        EXPECT_EQ(result.mode, GeometryResult::Mode::kPreventOverdraw);
+        if (sweep < 270.1) {
+          EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal)
+              << "start: " << start << " sweep: " << sweep;
+        } else {
+          EXPECT_EQ(result.mode, GeometryResult::Mode::kPreventOverdraw)
+              << "start: " << start << " sweep: " << sweep;
+        }
       }
     }
   }
