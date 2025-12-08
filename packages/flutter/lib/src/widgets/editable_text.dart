@@ -4231,7 +4231,13 @@ class EditableTextState extends State<EditableText>
       _showToolbarOnScreenScheduled = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration _) {
         _showToolbarOnScreenScheduled = false;
-        if (!mounted) {
+        if (!mounted || _dataWhenToolbarShowScheduled == null) {
+          return;
+        }
+        if (_dataWhenToolbarShowScheduled!.value != _value) {
+          // Value has changed so we should invalidate any toolbar scheduling.
+          _dataWhenToolbarShowScheduled = null;
+          _disposeScrollNotificationObserver();
           return;
         }
         final Rect deviceRect = _calculateDeviceRect();

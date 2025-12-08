@@ -41,6 +41,7 @@ export interface BrowserEnvironment {
   supportsWasmGC: boolean;
   crossOriginIsolated: boolean;
   webGLVersion: number;
+  isChromeExtension: boolean;
 }
 
 type CanvasKitVariant =
