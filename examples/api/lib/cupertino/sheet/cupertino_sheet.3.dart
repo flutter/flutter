@@ -15,7 +15,10 @@ class CupertinoSheetApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const CupertinoApp(title: 'Scrollable Cupertino Sheet', home: HomePage());
+    return const CupertinoApp(
+      title: 'Scrollable Cupertino Sheet',
+      home: HomePage(),
+    );
   }
 }
 
@@ -37,8 +40,9 @@ class HomePage extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).push(
                   CupertinoSheetRoute<void>.scrollable(
-                    scrollableBuilder: (BuildContext context, ScrollController controller) =>
-                        _ScrollableSheetBody(scrollController: controller),
+                    scrollableBuilder:
+                        (BuildContext context, ScrollController controller) =>
+                            _ScrollableSheetBody(scrollController: controller),
                   ),
                 );
               },
@@ -78,7 +82,10 @@ class _ScrollableSheetBody extends StatelessWidget {
         primary: false,
         slivers: <Widget>[
           SliverList(
-            delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+            delegate: SliverChildBuilderDelegate((
+              BuildContext context,
+              int index,
+            ) {
               return Container(
                 alignment: Alignment.center,
                 height: 100,
@@ -92,7 +99,8 @@ class _ScrollableSheetBody extends StatelessWidget {
   }
 }
 
-class CupertinoSheetNavbar extends StatelessWidget implements ObstructingPreferredSizeWidget {
+class CupertinoSheetNavbar extends StatelessWidget
+    implements ObstructingPreferredSizeWidget {
   const CupertinoSheetNavbar({super.key, required this.child});
 
   final CupertinoNavigationBar child;
