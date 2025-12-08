@@ -2177,10 +2177,18 @@ bool Shell::OnServiceProtocolGetPipelineUsage(
     rapidjson::Document* response) {
   FML_DCHECK(task_runners_.GetIOTaskRunner()->RunsTasksOnCurrentThread());
 
+  response->SetObject();
+
   auto context = io_manager_->GetImpellerContext();
 
+  if (!context) {
+    FML_DLOG(ERROR) << "Pipeline usage profiling only available in Impeller";
+    ServiceProtocolFailureError(
+        response, "Pipeline usage profiling only available in Impeller");
+    return false;
+  }
+
   auto use_counts = context->GetPipelineLibrary()->GetPipelineUseCounts();
-  response->SetObject();
 
   rapidjson::Value pipelines_json(rapidjson::kObjectType);
 

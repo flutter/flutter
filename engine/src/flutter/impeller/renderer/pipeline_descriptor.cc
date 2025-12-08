@@ -292,14 +292,4 @@ const std::vector<Scalar>& PipelineDescriptor::GetSpecializationConstants()
   return specialization_constants_;
 }
 
-void PipelineDescriptor::SetBasePipeline(
-    std::shared_ptr<PipelineDescriptor> desc) {
-  base_pipeline_ = std::move(desc);
-}
-
-const std::shared_ptr<PipelineDescriptor> PipelineDescriptor::GetBasePipeline()
-    const {
-  return base_pipeline_;
-}
-
 }  // namespace impeller

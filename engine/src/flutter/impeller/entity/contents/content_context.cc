@@ -191,8 +191,6 @@ RenderPipelineHandleT* CreateIfNeeded(
   auto variant_future = pipeline->CreateVariant(
       /*async=*/false, [&opts, variants_count = container.GetPipelineCount()](
                            PipelineDescriptor& desc) {
-        auto desc_copy = desc;
-        desc.SetBasePipeline(std::make_shared<PipelineDescriptor>(desc_copy));
         opts.ApplyToPipelineDescriptor(desc);
         desc.SetLabel(std::format("{} V#{}", desc.GetLabel(), variants_count));
       });

@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <mutex>
-
-#include <unordered_map>
-#include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/pipeline_library.h"
+#include <unordered_map>
+#include "impeller/base/thread.h"
+#include "impeller/renderer/pipeline_descriptor.h"
 
 namespace impeller {
 
@@ -39,27 +38,27 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibrary::GetPipeline(
 }
 
 void PipelineLibrary::LogPipelineCreation(const PipelineDescriptor& p) {
-  std::scoped_lock lock(pipeline_use_counts_mutex_);
+#if defined(FLUTTER_RUNTIME_MODE_DEBUG) || defined(FLUTTER_RUNTIME_MODE_PROFILE)
+  WriterLock lock(pipeline_use_counts_mutex_);
   if (!pipeline_use_counts_.contains(p)) {
     pipeline_use_counts_[p] = 0;
   }
+#endif
 }
 
 void PipelineLibrary::LogPipelineUsage(const PipelineDescriptor& p) {
-  auto base_pipeline = p.GetBasePipeline();
-  if (base_pipeline == nullptr) {
-    return;
-  }
-  std::scoped_lock lock(pipeline_use_counts_mutex_);
-  ++pipeline_use_counts_[*base_pipeline];
+#if defined(FLUTTER_RUNTIME_MODE_DEBUG) || defined(FLUTTER_RUNTIME_MODE_PROFILE)
+  WriterLock lock(pipeline_use_counts_mutex_);
+  ++pipeline_use_counts_[p];
+#endif
 }
 
 std::unordered_map<PipelineDescriptor,
                    int,
                    ComparableHash<PipelineDescriptor>,
                    ComparableEqual<PipelineDescriptor>>
-PipelineLibrary::GetPipelineUseCounts() {
-  std::scoped_lock lock(pipeline_use_counts_mutex_);
+PipelineLibrary::GetPipelineUseCounts() const {
+  ReaderLock lock(pipeline_use_counts_mutex_);
   std::unordered_map<PipelineDescriptor, int,
                      ComparableHash<PipelineDescriptor>,
                      ComparableEqual<PipelineDescriptor>>

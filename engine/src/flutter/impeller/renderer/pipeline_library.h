@@ -5,11 +5,12 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_PIPELINE_LIBRARY_H_
 #define FLUTTER_IMPELLER_RENDERER_PIPELINE_LIBRARY_H_
 
-#include <mutex>
 #include <optional>
 #include <unordered_map>
 
 #include "compute_pipeline_descriptor.h"
+#include "impeller/base/thread.h"
+#include "impeller/base/thread_safety.h"
 #include "impeller/renderer/pipeline.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 
@@ -83,7 +84,7 @@ class PipelineLibrary : public std::enable_shared_from_this<PipelineLibrary> {
                      int,
                      ComparableHash<PipelineDescriptor>,
                      ComparableEqual<PipelineDescriptor>>
-  GetPipelineUseCounts();
+  GetPipelineUseCounts() const;
 
  protected:
   PipelineLibrary();
@@ -93,13 +94,13 @@ class PipelineLibrary : public std::enable_shared_from_this<PipelineLibrary> {
 
   PipelineLibrary& operator=(const PipelineLibrary&) = delete;
 
+  mutable RWMutex pipeline_use_counts_mutex_;
+
   std::unordered_map<PipelineDescriptor,
                      int,
                      ComparableHash<PipelineDescriptor>,
                      ComparableEqual<PipelineDescriptor>>
-      pipeline_use_counts_;
-
-  std::mutex pipeline_use_counts_mutex_;
+      pipeline_use_counts_ IPLR_GUARDED_BY(pipeline_use_counts_mutex_);
 };
 
 }  // namespace impeller
