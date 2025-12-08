@@ -4,14 +4,10 @@
 
 package io.flutter.embedding.engine;
 
-import androidx.annotation.VisibleForTesting;
 import android.content.Intent;
 import androidx.annotation.NonNull;
-
+import androidx.annotation.VisibleForTesting;
 import java.util.*;
-
-import io.flutter.embedding.engine.FlutterShellArgs;
-
 
 /**
  * Arguments that can be delivered to the Flutter shell on Android.
@@ -35,7 +31,8 @@ import io.flutter.embedding.engine.FlutterShellArgs;
 public final class FlutterShellArgs {
 
   private FlutterShellArgs() {}
-    public static final String ARG_KEY_TRACE_STARTUP = "trace-startup";
+
+  public static final String ARG_KEY_TRACE_STARTUP = "trace-startup";
   public static final String ARG_TRACE_STARTUP = "--trace-startup";
   public static final String ARG_KEY_START_PAUSED = "start-paused";
   public static final String ARG_START_PAUSED = "--start-paused";
@@ -84,7 +81,7 @@ public final class FlutterShellArgs {
   public static final String ARG_DART_FLAGS = "--dart-flags";
 
   @NonNull
-  public static  ArrayList<String> fromIntent(@NonNull Intent intent) {
+  public static ArrayList<String> fromIntent(@NonNull Intent intent) {
     // Before adding more entries to this list, consider that arbitrary
     // Android applications can generate intents with extra data and that
     // there are many security-sensitive args in the binary.
