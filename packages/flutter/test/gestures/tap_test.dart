@@ -184,7 +184,7 @@ void main() {
   });
 
   testGesture('Details contain the correct buttons - primary', (GestureTester tester) {
-    final TapGestureRecognizer tap = TapGestureRecognizer();
+    final tap = TapGestureRecognizer();
 
     TapDownDetails? lastDownDetails;
     TapUpDetails? lastUpDetails;
@@ -196,11 +196,11 @@ void main() {
       lastUpDetails = details;
     };
 
-    const PointerDownEvent primaryMouseDown = PointerDownEvent(
+    const primaryMouseDown = PointerDownEvent(
       pointer: 1,
       kind: PointerDeviceKind.mouse,
     );
-    const PointerUpEvent primaryMouseUp = PointerUpEvent(pointer: 1, kind: PointerDeviceKind.mouse);
+    const primaryMouseUp = PointerUpEvent(pointer: 1, kind: PointerDeviceKind.mouse);
 
     tap.addPointer(primaryMouseDown);
     tester.closeArena(1);
@@ -214,7 +214,7 @@ void main() {
   });
 
   testGesture('Details contain the correct buttons - secondary', (GestureTester tester) {
-    final TapGestureRecognizer tap = TapGestureRecognizer();
+    final tap = TapGestureRecognizer();
 
     TapDownDetails? lastDownDetails;
     TapUpDetails? lastUpDetails;
@@ -226,12 +226,12 @@ void main() {
       lastUpDetails = details;
     };
 
-    const PointerDownEvent secondaryMouseDown = PointerDownEvent(
+    const secondaryMouseDown = PointerDownEvent(
       pointer: 1,
       kind: PointerDeviceKind.mouse,
       buttons: kSecondaryMouseButton,
     );
-    const PointerUpEvent secondaryMouseUp = PointerUpEvent(
+    const secondaryMouseUp = PointerUpEvent(
       pointer: 1,
       kind: PointerDeviceKind.mouse,
       buttons: kSecondaryMouseButton,
@@ -1176,7 +1176,7 @@ void main() {
     addTearDown(tap.dispose);
 
     final pointer1 = TestPointer();
-    final down = pointer1.down(Offset.zero, buttons: kPrimaryMouseButton);
+    final PointerDownEvent down = pointer1.down(Offset.zero, buttons: kPrimaryMouseButton);
     tap.addPointer(down);
     tester.closeArena(1);
     tester.route(down);
