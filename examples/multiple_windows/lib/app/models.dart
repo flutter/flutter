@@ -67,8 +67,8 @@ class TooltipSettings {}
 /// Settings that control the behavior of newly created windows.
 class WindowSettings {
   WindowSettings({
-    this.regularSize = const Size(400, 300),
-    this.dialogSize = const Size(200, 200),
+    this.regularSize = const Size(800, 600),
+    this.dialogSize = const Size(400, 400),
     this.positioner = const WindowPositioner(
       parentAnchor: WindowPositionerAnchor.right,
       childAnchor: WindowPositionerAnchor.left,
