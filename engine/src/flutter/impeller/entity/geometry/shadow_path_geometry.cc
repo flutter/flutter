@@ -1210,6 +1210,10 @@ const std::shared_ptr<ShadowVertices>& ShadowPathGeometry::GetShadowVertices()
   return shadow_vertices_;
 }
 
+const std::shared_ptr<ShadowVertices> ShadowPathGeometry::TakeShadowVertices() {
+  return std::move(shadow_vertices_);
+}
+
 GeometryResult ShadowVertices::GetPositionBuffer(const ContentContext& renderer,
                                                  const Entity& entity,
                                                  RenderPass& pass) const {

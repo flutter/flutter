@@ -118,6 +118,46 @@ size_t CountDuplicateTriangles(
   return duplicate_triangles;
 }
 
+bool IsPointInsideTriangle(Point p, std::array<Point, 3> triangle) {
+  if (p == triangle[0] || p == triangle[1] || p == triangle[3]) {
+    return false;
+  }
+  Scalar direction = Point::Cross(p, triangle[0], triangle[1]);
+  // All 3 cross products must be non-zero and have the same sign.
+  return direction * Point::Cross(p, triangle[1], triangle[2]) > 0 &&
+         direction * Point::Cross(p, triangle[2], triangle[0]) > 0;
+};
+
+// This test verifies a condition that doesn't invalidate the process
+// per se, but we'd have to use overlap prevention to render the mesh
+// if this test returned true. We've carefully planned our meshes to
+// avoid that condition, though, so we're just making sure.
+bool DoTrianglesOverlap(
+    const std::shared_ptr<ShadowVertices>& shadow_vertices) {
+  auto vertices = shadow_vertices->GetVertices();
+  auto indices = shadow_vertices->GetIndices();
+  size_t index_count = indices.size();
+  size_t vertex_count = vertices.size();
+
+  for (size_t i = 0u; i < index_count; i += 3) {
+    std::array triangle = {
+        vertices[indices[i + 0]],
+        vertices[indices[i + 1]],
+        vertices[indices[i + 2]],
+    };
+    // Rather than check each pair of triangles to see if any of their
+    // vertices is inside the other, we just check the list of all vertices
+    // to see if that vertex is inside any triangle in the mesh.
+    for (size_t j = 0; j < vertex_count; j++) {
+      if (IsPointInsideTriangle(vertices[j], triangle)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 }  // namespace
 
 TEST(ShadowPathGeometryTest, EmptyPathTest) {
@@ -206,6 +246,26 @@ TEST(ShadowPathGeometryTest, EmptyRectTest) {
   EXPECT_TRUE(shadow_vertices->IsEmpty());
 }
 
+TEST(ShadowPathGeometryTest, GetAndTakeVertices) {
+  DlPath path = DlPath::MakeRectLTRB(100, 100, 200, 200);
+  const Scalar height = 10.0f;
+
+  Tessellator tessellator;
+  ShadowPathGeometry geometry(tessellator, {}, path, height);
+
+  // Can call Get as many times as you want.
+  for (int i = 0; i < 10; i++) {
+    EXPECT_TRUE(geometry.GetShadowVertices());
+  }
+
+  // Can only call Take once.
+  EXPECT_TRUE(geometry.TakeShadowVertices());
+
+  // Further access wll then fail.
+  EXPECT_FALSE(geometry.GetShadowVertices());
+  EXPECT_FALSE(geometry.TakeShadowVertices());
+}
+
 TEST(ShadowPathGeometryTest, ClockwiseRectTest) {
   DlPathBuilder path_builder;
   path_builder.MoveTo(DlPoint(0, 0));
@@ -233,6 +293,7 @@ TEST(ShadowPathGeometryTest, ClockwiseRectTest) {
   // We repeat the first and last vertex that is on the outer umbra.
   EXPECT_LE(CountDuplicateVertices(shadow_vertices), 1u);
   EXPECT_EQ(CountDuplicateTriangles(shadow_vertices), 0u);
+  EXPECT_FALSE(DoTrianglesOverlap(shadow_vertices));
 
 #if SHADOW_UNITTEST_SHOW_VERTICES
   ShowVertices("Impeller Vertices", shadow_vertices);
@@ -266,6 +327,7 @@ TEST(ShadowPathGeometryTest, CounterClockwiseRectTest) {
   // We repeat the first and last vertex that is on the outer umbra.
   EXPECT_LE(CountDuplicateVertices(shadow_vertices), 1u);
   EXPECT_EQ(CountDuplicateTriangles(shadow_vertices), 0u);
+  EXPECT_FALSE(DoTrianglesOverlap(shadow_vertices));
 
 #if SHADOW_UNITTEST_SHOW_VERTICES
   ShowVertices("Impeller Vertices", shadow_vertices);
@@ -293,6 +355,7 @@ TEST(ShadowPathGeometryTest, ScaledRectTest) {
   // We repeat the first and last vertex that is on the outer umbra.
   EXPECT_LE(CountDuplicateVertices(shadow_vertices), 1u);
   EXPECT_EQ(CountDuplicateTriangles(shadow_vertices), 0u);
+  EXPECT_FALSE(DoTrianglesOverlap(shadow_vertices));
 
 #if SHADOW_UNITTEST_SHOW_VERTICES
   ShowVertices("Impeller Vertices", shadow_vertices);
@@ -320,6 +383,7 @@ TEST(ShadowPathGeometryTest, EllipseTest) {
   // We repeat the first and last vertex that is on the outer umbra.
   EXPECT_LE(CountDuplicateVertices(shadow_vertices), 1u);
   EXPECT_EQ(CountDuplicateTriangles(shadow_vertices), 0u);
+  EXPECT_FALSE(DoTrianglesOverlap(shadow_vertices));
 }
 
 TEST(ShadowPathGeometryTest, RoundRectTest) {
@@ -344,6 +408,7 @@ TEST(ShadowPathGeometryTest, RoundRectTest) {
   // There is another duplicate vertex from somewhere else not yet realized.
   EXPECT_LE(CountDuplicateVertices(shadow_vertices), 2u);
   EXPECT_EQ(CountDuplicateTriangles(shadow_vertices), 0u);
+  EXPECT_FALSE(DoTrianglesOverlap(shadow_vertices));
 }
 
 }  // namespace testing

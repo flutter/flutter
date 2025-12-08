@@ -233,22 +233,39 @@ class Canvas::RSuperellipseBlurShape : public BlurShape {
 
 class Canvas::PathBlurShape : public BlurShape {
  public:
-  PathBlurShape(const PathSource& source,
-                Tessellator& tessellator,
-                const Matrix& matrix)
-      : source_(source), tessellator_(tessellator), matrix_(matrix) {}
+  /// Construct a PathBlurShape from a path source, a set of shadow vertices
+  /// (typically produced by ShadowPathGeometry) and the sigma that was used
+  /// to generate the vertex mesh.
+  ///
+  /// The sigma was already used to generate the shadow vertices, so it is
+  /// provided here only to make sure it matches the sigma we will see in
+  /// our BuildBlurContent method.
+  ///
+  /// The source was used to generate the mesh and it might be used again
+  /// for the SOLID mask operation so we save it here in case the mask
+  /// rendering code calls our BuildDrawGeometry method. Its lifetime
+  /// must survive the lifetime of this object, typically because the
+  /// source object was stack allocated not long before this object is
+  /// also being stack allocated.
+  PathBlurShape(const PathSource& source [[clang::lifetimebound]],
+                std::shared_ptr<ShadowVertices> shadow_vertices,
+                Sigma sigma)
+      : sigma_(sigma),
+        source_(source),
+        shadow_vertices_(std::move(shadow_vertices)) {}
 
-  Rect GetBounds() const override { return source_.GetBounds(); }
+  Rect GetBounds() const override {
+    return shadow_vertices_->GetBounds().value_or(Rect());
+  }
 
   std::shared_ptr<SolidBlurContents> BuildBlurContent(Sigma sigma) override {
-    Scalar device_radius =
-        sigma.sigma * kSigmaScale * matrix_.GetMaxBasisLengthXY();
-    ShadowPathGeometry shadow_geometry(tessellator_, matrix_, source_,
-                                       device_radius);
-    if (!shadow_geometry.CanRender() || shadow_geometry.IsEmpty()) {
-      return nullptr;
-    }
-    return ShadowVerticesContents::Make(shadow_geometry.GetShadowVertices());
+    // We have to use the sigma to generate the mesh up front in order to
+    // even know if we can perform the operation, but then the method that
+    // actually uses our contents informs us of the sigma, but it's too
+    // late to make use of it. Instead we remember what sigma we used and
+    // make sure they match.
+    FML_DCHECK(sigma_.sigma == sigma.sigma);
+    return ShadowVerticesContents::Make(shadow_vertices_);
   }
 
   const Geometry& BuildDrawGeometry() override {
@@ -256,17 +273,10 @@ class Canvas::PathBlurShape : public BlurShape {
   }
 
  private:
-  // This value was determined by empirical eyesight tests so that the
-  // shadow mesh results will match the results of the shape-specific
-  // optimized shadow shaders.
-  static constexpr Scalar kSigmaScale = 2.8f;
-
+  const Sigma sigma_;
   const PathSource& source_;
-  Tessellator& tessellator_;
-  const Matrix& matrix_;
+  const std::shared_ptr<ShadowVertices> shadow_vertices_;
 
-  // optional stack allocation - for BuildBlurContents
-  std::optional<ShadowPathGeometry> shadow_geometry_;
   // optional stack allocation - for BuildGeometry
   std::optional<FillPathFromSourceGeometry> source_geometry_;
 };
@@ -402,9 +412,7 @@ void Canvas::RestoreToCount(size_t count) {
 
 void Canvas::DrawPath(const flutter::DlPath& path, const Paint& paint) {
   if (IsShadowBlurDrawOperation(paint)) {
-    PathBlurShape shape(path, renderer_.GetTessellator(),
-                        GetCurrentTransform());
-    if (AttemptDrawBlur(shape, paint)) {
+    if (AttemptDrawBlurredPathSource(path, paint)) {
       return;
     }
   }
@@ -567,6 +575,35 @@ bool Canvas::IsShadowBlurDrawOperation(const Paint& paint) {
   return true;
 }
 
+bool Canvas::AttemptDrawBlurredPathSource(const PathSource& source,
+                                          const Paint& paint) {
+  FML_DCHECK(IsShadowBlurDrawOperation);
+
+  // This has_value() test should always succeed as it is checked by the
+  // IsShadowBlurDrawOperation method which should have been called before
+  // this method, but we check again here to avoid warnings from the
+  // following code.
+  if (paint.mask_blur_descriptor.has_value()) {
+    // This value was determined by empirical eyesight tests so that the
+    // shadow mesh results will match the results of the shape-specific
+    // optimized shadow shaders.
+    static constexpr Scalar kSigmaScale = 2.8f;
+
+    Sigma sigma = paint.mask_blur_descriptor->sigma;
+    const Matrix& matrix = GetCurrentTransform();
+    Scalar basis_scale = matrix.GetMaxBasisLengthXY();
+    Scalar device_radius = sigma.sigma * kSigmaScale * basis_scale;
+    std::shared_ptr<ShadowVertices> shadow_vertices =
+        ShadowPathGeometry::MakeAmbientShadowVertices(
+            renderer_.GetTessellator(), source, device_radius, matrix);
+    if (shadow_vertices) {
+      PathBlurShape shape(source, std::move(shadow_vertices), sigma);
+      return AttemptDrawBlur(shape, paint);
+    }
+  }
+  return false;
+}
+
 Scalar Canvas::GetCommonRRectLikeRadius(const RoundingRadii& radii) {
   if (!radii.AreAllCornersSame()) {
     return -1;
@@ -583,9 +620,7 @@ bool Canvas::AttemptDrawBlurredRRect(const RoundRect& round_rect,
   Scalar radius = GetCommonRRectLikeRadius(round_rect.GetRadii());
   if (radius < 0) {
     RoundRectPathSource source(round_rect);
-    PathBlurShape shape(source, renderer_.GetTessellator(),
-                        GetCurrentTransform());
-    return AttemptDrawBlur(shape, paint);
+    return AttemptDrawBlurredPathSource(source, paint);
   }
   RRectBlurShape shape(round_rect.GetBounds(), radius);
   return AttemptDrawBlur(shape, paint);
@@ -596,9 +631,7 @@ bool Canvas::AttemptDrawBlurredRSuperellipse(const RoundSuperellipse& rse,
   Scalar radius = GetCommonRRectLikeRadius(rse.GetRadii());
   if (radius < 0) {
     RoundSuperellipsePathSource source(rse);
-    PathBlurShape shape(source, renderer_.GetTessellator(),
-                        GetCurrentTransform());
-    return AttemptDrawBlur(shape, paint);
+    return AttemptDrawBlurredPathSource(source, paint);
   }
   RSuperellipseBlurShape shape(rse.GetBounds(), radius);
   return AttemptDrawBlur(shape, paint);
@@ -619,21 +652,11 @@ bool Canvas::AttemptDrawBlur(BlurShape& shape, const Paint& paint) {
 
   Paint rrect_paint = {.mask_blur_descriptor = paint.mask_blur_descriptor};
 
-  // We need to construct the contents up front in case the procedure
-  // fails for this sigma. The most common cause of failure here is if
-  // we are blurring a path and it is not convex or not compatible with
-  // the shadow vertices technique in some other way.
   if (!rrect_paint.mask_blur_descriptor.has_value()) {
     // This should never happen in practice because the caller would have
     // first called |IsShadowBlurDrawOperation| on the paint object, but
     // we test anyway to make the compiler happy about the dereferences
     // below.
-    return false;
-  }
-
-  auto contents =
-      shape.BuildBlurContent(rrect_paint.mask_blur_descriptor->sigma);
-  if (contents == nullptr) {
     return false;
   }
 
@@ -683,7 +706,11 @@ bool Canvas::AttemptDrawBlur(BlurShape& shape, const Paint& paint) {
     Save(1u);
   }
 
-  auto draw_blurred_rrect = [this, &rrect_paint, &contents]() {
+  auto draw_blurred_rrect = [this, &rrect_paint, &shape]() {
+    std::shared_ptr<SolidBlurContents> contents =
+        shape.BuildBlurContent(rrect_paint.mask_blur_descriptor->sigma);
+    FML_DCHECK(contents);
+
     contents->SetColor(rrect_paint.color);
 
     Entity blurred_rrect_entity;
@@ -822,9 +849,7 @@ void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
       }
     } else {
       EllipsePathSource source(rect);
-      PathBlurShape shape(source, renderer_.GetTessellator(),
-                          GetCurrentTransform());
-      if (AttemptDrawBlur(shape, paint)) {
+      if (AttemptDrawBlurredPathSource(source, paint)) {
         return;
       }
     }

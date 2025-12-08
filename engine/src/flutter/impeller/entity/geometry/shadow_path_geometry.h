@@ -85,7 +85,13 @@ class ShadowPathGeometry {
   /// Returns true if this shadow has no effect, is not visible.
   bool IsEmpty() const;
 
+  /// Returns a reference to the generated vertices, or null if the algorithm
+  /// failed to produce a mesh.
   const std::shared_ptr<ShadowVertices>& GetShadowVertices() const;
+
+  /// Takes (returns the only copy of via std::move) the shadow vertices
+  /// or null if the algorithm failed to produce a mesh.
+  const std::shared_ptr<ShadowVertices> TakeShadowVertices();
 
   /// Constructs a shadow mesh for the given |PathSource| at the given
   /// |matrix| and with the indicated device-space |occluder_height|.
@@ -98,7 +104,7 @@ class ShadowPathGeometry {
       const Matrix& matrix);
 
  private:
-  const std::shared_ptr<ShadowVertices> shadow_vertices_;
+  std::shared_ptr<ShadowVertices> shadow_vertices_;
 };
 
 }  // namespace impeller

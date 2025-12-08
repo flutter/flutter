@@ -393,6 +393,9 @@ class Canvas {
   /// or -1 if the radii are not uniform.
   static Scalar GetCommonRRectLikeRadius(const RoundingRadii& radii);
 
+  bool AttemptDrawBlurredPathSource(const PathSource& source,
+                                    const Paint& paint);
+
   bool AttemptDrawBlurredRRect(const RoundRect& round_rect, const Paint& paint);
 
   bool AttemptDrawBlurredRSuperellipse(const RoundSuperellipse& rse,
