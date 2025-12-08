@@ -690,6 +690,13 @@ class DialogWindowControllerWin32 extends DialogWindowController {
   }
 }
 
+typedef _GetWindowPositionNative =
+    ffi.Pointer<_Rect> Function(
+      ffi.Pointer<_Size> childSize,
+      ffi.Pointer<_Rect> parentRect,
+      ffi.Pointer<_Rect> outputRect,
+    );
+
 /// Implementation of [TooltipWindowController] for the Windows platform.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
@@ -701,7 +708,7 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
     implements _WindowsMessageHandler {
   /// Creates a new tooltip window controller for Win32.
   ///
-  /// When this constructor completes the native window has been created and
+  /// When this constructor completes, the native window has been created and
   /// has a view associated with it.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
@@ -723,14 +730,9 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
        _positioner = positioner,
        super.empty() {
     _owner._addMessageHandler(this);
-    _onGetWindowPosition =
-        ffi.NativeCallable<
-          ffi.Pointer<_Rect> Function(
-            ffi.Pointer<_Size> childSize,
-            ffi.Pointer<_Rect> parentRect,
-            ffi.Pointer<_Rect> outputRect,
-          )
-        >.isolateLocal(_handleOnGetWindowPosition);
+    _onGetWindowPosition = ffi.NativeCallable<_GetWindowPositionNative>.isolateLocal(
+      _handleGetWindowPosition,
+    );
     final int viewId = _Win32PlatformInterface.createTooltipWindow(
       _owner.allocator,
       PlatformDispatcher.instance.engineId!,
@@ -758,7 +760,7 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
   Rect _anchorRect;
   bool _destroyed = false;
 
-  ffi.Pointer<_Rect> _handleOnGetWindowPosition(
+  ffi.Pointer<_Rect> _handleGetWindowPosition(
     ffi.Pointer<_Size> childSize,
     ffi.Pointer<_Rect> parentRect,
     ffi.Pointer<_Rect> outputRect,
@@ -834,14 +836,7 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
     _Win32PlatformInterface.updateTooltipWindowPosition(getWindowHandle());
   }
 
-  late final ffi.NativeCallable<
-    ffi.Pointer<_Rect> Function(
-      ffi.Pointer<_Size> childSize,
-      ffi.Pointer<_Rect> parentRect,
-      ffi.Pointer<_Rect> outputRect,
-    )
-  >
-  _onGetWindowPosition;
+  late final ffi.NativeCallable<_GetWindowPositionNative> _onGetWindowPosition;
 
   @override
   int? handleWindowsMessage(

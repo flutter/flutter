@@ -9,21 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window_positioner.dart';
 import 'models.dart';
 
-// Helper to convert enum to display name.
-String _anchorToString(WindowPositionerAnchor anchor) {
-  return switch (anchor) {
-    WindowPositionerAnchor.center => 'Center',
-    WindowPositionerAnchor.top => 'Top',
-    WindowPositionerAnchor.bottom => 'Bottom',
-    WindowPositionerAnchor.left => 'Left',
-    WindowPositionerAnchor.right => 'Right',
-    WindowPositionerAnchor.topLeft => 'Top Left',
-    WindowPositionerAnchor.bottomLeft => 'Bottom Left',
-    WindowPositionerAnchor.topRight => 'Top Right',
-    WindowPositionerAnchor.bottomRight => 'Bottom Right',
-  };
-}
-
 Future<void> showWindowSettingsDialog(
   BuildContext context,
   WindowSettings settings,
@@ -181,7 +166,7 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
                   items: WindowPositionerAnchor.values.map((anchor) {
                     return DropdownMenuItem(
                       value: anchor,
-                      child: Text(_anchorToString(anchor)),
+                      child: Text(anchorToString(anchor)),
                     );
                   }).toList(),
                   onChanged: (WindowPositionerAnchor? value) {
@@ -203,7 +188,7 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
                   items: WindowPositionerAnchor.values.map((anchor) {
                     return DropdownMenuItem(
                       value: anchor,
-                      child: Text(_anchorToString(anchor)),
+                      child: Text(anchorToString(anchor)),
                     );
                   }).toList(),
                   onChanged: (WindowPositionerAnchor? value) {

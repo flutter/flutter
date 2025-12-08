@@ -110,7 +110,7 @@ void HostWindowTooltip::UpdatePosition() {
                rect->height, SWP_NOACTIVATE | SWP_NOOWNERZORDER);
   free(rect);
 
-  // The positiner constrained the dimentions more than current size, apply
+  // The positioner constrained the dimensions more than current size, apply
   // positioner constraints.
   if (rect->width < width_ || rect->height < height_) {
     positioner_size_constraints_.width = rect->width;

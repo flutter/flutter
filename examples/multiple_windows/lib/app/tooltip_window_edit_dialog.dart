@@ -8,21 +8,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
 import 'package:flutter/src/widgets/_window_positioner.dart';
-
-// Helper to convert enum to display name
-String _anchorToString(WindowPositionerAnchor anchor) {
-  return switch (anchor) {
-    WindowPositionerAnchor.center => 'Center',
-    WindowPositionerAnchor.top => 'Top',
-    WindowPositionerAnchor.bottom => 'Bottom',
-    WindowPositionerAnchor.left => 'Left',
-    WindowPositionerAnchor.right => 'Right',
-    WindowPositionerAnchor.topLeft => 'Top Left',
-    WindowPositionerAnchor.bottomLeft => 'Bottom Left',
-    WindowPositionerAnchor.topRight => 'Top Right',
-    WindowPositionerAnchor.bottomRight => 'Bottom Right',
-  };
-}
+import 'models.dart';
 
 void showTooltipWindowEditDialog({
   required BuildContext context,
@@ -177,7 +163,7 @@ class _TooltipWindowEditDialogState extends State<_TooltipWindowEditDialog> {
               items: WindowPositionerAnchor.values.map((anchor) {
                 return DropdownMenuItem(
                   value: anchor,
-                  child: Text(_anchorToString(anchor)),
+                  child: Text(anchorToString(anchor)),
                 );
               }).toList(),
               onChanged: (value) {
@@ -193,7 +179,7 @@ class _TooltipWindowEditDialogState extends State<_TooltipWindowEditDialog> {
               items: WindowPositionerAnchor.values.map((anchor) {
                 return DropdownMenuItem(
                   value: anchor,
-                  child: Text(_anchorToString(anchor)),
+                  child: Text(anchorToString(anchor)),
                 );
               }).toList(),
               onChanged: (value) {

@@ -10,9 +10,6 @@ import 'package:flutter/src/widgets/_window.dart';
 
 class TooltipWindowContent extends StatefulWidget {
   /// Creates a tooltip window widget.
-  /// [controller] the controller for this window
-  /// [child] the content to render into this window
-  /// [key] the key for this widget
   const TooltipWindowContent({super.key, required this.controller});
 
   /// Controller for this widget.

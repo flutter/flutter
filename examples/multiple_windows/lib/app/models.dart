@@ -120,3 +120,17 @@ class CallbackDialogWindowControllerDelegate
 
   final VoidCallback onDestroyed;
 }
+
+String anchorToString(WindowPositionerAnchor anchor) {
+  return switch (anchor) {
+    WindowPositionerAnchor.center => 'Center',
+    WindowPositionerAnchor.top => 'Top',
+    WindowPositionerAnchor.bottom => 'Bottom',
+    WindowPositionerAnchor.left => 'Left',
+    WindowPositionerAnchor.right => 'Right',
+    WindowPositionerAnchor.topLeft => 'Top Left',
+    WindowPositionerAnchor.bottomLeft => 'Bottom Left',
+    WindowPositionerAnchor.topRight => 'Top Right',
+    WindowPositionerAnchor.bottomRight => 'Bottom Right',
+  };
+}

@@ -149,6 +149,8 @@ class _WindowCreatorCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final WindowManager windowManager = WindowManagerAccessor.of(context);
     final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
+    final BaseWindowController windowController = WindowScope.of(context);
+
     return Card.outlined(
       margin: const EdgeInsets.symmetric(horizontal: 25),
       child: Padding(
@@ -185,9 +187,7 @@ class _WindowCreatorCard extends StatelessWidget {
                   child: const Text('Regular'),
                 ),
                 const SizedBox(height: 8),
-                TooltipButton(
-                  parentController: windowManager.windows.first.controller,
-                ),
+                TooltipButton(parentController: windowController),
                 const SizedBox(height: 8),
                 OutlinedButton(
                   onPressed: () {
