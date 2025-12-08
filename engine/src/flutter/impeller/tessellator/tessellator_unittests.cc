@@ -304,11 +304,11 @@ TEST(TessellatorTest, StrokedCircleTessellationVertices) {
 }
 
 TEST(TessellatorTest, FilledArcStripTessellationVertices) {
-  auto tessellator = std::make_shared<Tessellator>();
+  Tessellator tessellator;
 
   auto test = [&tessellator](const Matrix& transform, const Arc& arc) {
-    auto generator = tessellator->FilledArc(transform, arc,
-                                            /*supports_triangle_fans=*/false);
+    auto generator = tessellator.FilledArc(transform, arc,
+                                           /*supports_triangle_fans=*/false);
     EXPECT_EQ(generator.GetTriangleType(), PrimitiveType::kTriangleStrip);
 
     auto vertex_count = generator.GetVertexCount();
