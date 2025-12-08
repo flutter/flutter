@@ -14,7 +14,7 @@ import 'dart:async' show Timer;
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/physics.dart' show Tolerance, nearEqual;
+import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -635,16 +635,6 @@ class _GlowingOverscrollIndicatorPainter extends CustomPainter {
   }
 }
 
-enum _StretchDirection {
-  /// The [trailing] direction indicates that the content will be stretched toward
-  /// the trailing edge.
-  trailing,
-
-  /// The [leading] direction indicates that the content will be stretched toward
-  /// the leading edge.
-  leading,
-}
-
 /// A Material Design visual indication that a scroll view has overscrolled.
 ///
 /// A [StretchingOverscrollIndicator] listens for [ScrollNotification]s in order
@@ -734,7 +724,6 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
       // from a different axis bubbles up, do nothing.
       return false;
     }
-
     if (notification is OverscrollNotification) {
       _lastOverscrollNotification = notification;
       if (_lastNotification.runtimeType is! OverscrollNotification) {
@@ -750,7 +739,7 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
 
         if (notification.velocity != 0.0) {
           assert(notification.dragDetails == null);
-          _stretchController.absorbImpact(notification.velocity.abs(), _totalOverscroll);
+          _stretchController.absorbImpact(notification.velocity);
         } else {
           assert(notification.overscroll != 0.0);
           if (notification.dragDetails != null) {
@@ -760,16 +749,31 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
             // amount of overscroll - https://github.com/flutter/flutter/issues/11884
 
             final double viewportDimension = notification.metrics.viewportDimension;
-            final double distanceForPull = _totalOverscroll.abs() / viewportDimension;
-            final double clampedOverscroll = clampDouble(distanceForPull, 0, 1.0);
-            _stretchController.pull(clampedOverscroll, _totalOverscroll);
+            final double distanceForPull = _totalOverscroll / viewportDimension;
+            final double clampedOverscroll = clampDouble(distanceForPull, -1.0, 1.0);
+            _stretchController.pull(clampedOverscroll);
           }
         }
       }
-    } else if (notification is ScrollEndNotification || notification is ScrollUpdateNotification) {
+    } else if (notification is ScrollEndNotification) {
+      double velocity = switch (widget.axis) {
+        Axis.vertical => notification.dragDetails?.velocity.pixelsPerSecond.dy ?? 0.0,
+        Axis.horizontal => notification.dragDetails?.velocity.pixelsPerSecond.dx ?? 0.0,
+      };
+
+      // Reverse axis directions report dragDetails velocity in
+      // the opposite screen coordinate, so the value must be inverted.
+      if (notification.metrics.axisDirection == AxisDirection.left ||
+          notification.metrics.axisDirection == AxisDirection.up) {
+        velocity = -velocity;
+      }
+
       // Since the overscrolling ended, we reset the total overscroll amount.
-      _totalOverscroll = 0;
-      _stretchController.scrollEnd();
+      _totalOverscroll = 0.0;
+      _stretchController.scrollEnd(velocity);
+    } else if (notification is ScrollUpdateNotification) {
+      _totalOverscroll = 0.0;
+      _stretchController.scrollEnd(0.0);
     }
     _lastNotification = notification;
     return false;
@@ -788,7 +792,7 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
       child: AnimatedBuilder(
         animation: _stretchController,
         builder: (BuildContext context, Widget? child) {
-          final double stretch = _stretchController.value;
+          final double stretch = _stretchController.overscroll;
           final double mainAxisSize;
 
           switch (widget.axis) {
@@ -801,11 +805,7 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
           final double viewportDimension =
               _lastOverscrollNotification?.metrics.viewportDimension ?? mainAxisSize;
 
-          var overscroll = stretch;
-
-          if (_stretchController.stretchDirection == _StretchDirection.trailing) {
-            overscroll = -overscroll;
-          }
+          double overscroll = -stretch;
 
           // Adjust overscroll for reverse scroll directions.
           if (widget.axisDirection == AxisDirection.up ||
@@ -834,138 +834,203 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
   }
 }
 
-enum _StretchState { idle, absorb, pull, recede }
+class _StretchController extends Listenable {
+  _StretchController({required this.vsync});
 
-class _StretchController extends ChangeNotifier {
-  _StretchController({required TickerProvider vsync}) {
-    if (kFlutterMemoryAllocationsEnabled) {
-      ChangeNotifier.maybeDispatchObjectCreation(this);
-    }
-    _stretchController = AnimationController(vsync: vsync)..addStatusListener(_changePhase);
-    _decelerator = CurvedAnimation(parent: _stretchController, curve: Curves.decelerate)
-      ..addListener(notifyListeners);
-    _stretchSize = _decelerator.drive(_stretchSizeTween);
+  final TickerProvider vsync;
+  AnimationController? _controller;
+
+  /// Manages and notifies changes to the current [overscroll] value.
+  final ValueNotifier<double> _overscrollNotifier = ValueNotifier<double>(0.0);
+  double get overscroll => _overscrollNotifier.value;
+  set overscroll(double newValue) {
+    _overscrollNotifier.value = clampDouble(newValue, minOverscroll, maxOverscroll);
   }
 
-  late final AnimationController _stretchController;
-  late final Animation<double> _stretchSize;
-  late final CurvedAnimation _decelerator;
-  final Tween<double> _stretchSizeTween = Tween<double>(begin: 0.0, end: 0.0);
-  _StretchState _state = _StretchState.idle;
-
-  double get pullDistance => _pullDistance;
-  double _pullDistance = 0.0;
-
-  _StretchDirection get stretchDirection => _stretchDirection;
-  _StretchDirection _stretchDirection = _StretchDirection.trailing;
+  /// Stores the `overscroll` value from an ongoing animation at the precise
+  /// moment it is interrupted by a new `pull()` gesture.
+  ///
+  /// When `pull()` is called while an animation (triggered by `absorbImpact`
+  /// or `scrollEnd`) is active, this field captures the animation's current
+  /// `_controller.value` (which represents the overscroll amount) immediately
+  /// before the animation controller is disposed.
+  ///
+  /// This captured value is then added to the overscroll amount calculated
+  /// by the `pull()` method. The primary purpose is to create a smoother
+  /// visual transition from an animated overscroll state to a direct,
+  /// user-driven pull, minimizing any abrupt visual "jumps" in the
+  /// stretch effect.
+  ///
+  /// It is reset to `0.0` when an animation completes naturally via `animate()`
+  /// or when a new pull starts without a preceding active animation.
+  double _interruptedOverscroll = 0.0;
 
   // Constants from Android.
   static const double _exponentialScalar = math.e / 0.33;
   static const double _stretchIntensity = 0.016;
-  static const double _flingFriction = 1.01;
-  static const Duration _stretchDuration = Duration(milliseconds: 400);
 
-  double get value => _stretchSize.value;
+  static const double minOverscroll = -1.0;
+  static const double maxOverscroll = 1.0;
 
-  // Constants for absorbImpact.
-  static const double _kMinVelocity = 1;
-  static const double _kMaxVelocity = 10000;
-  static const Duration _kMinStretchDuration = Duration(milliseconds: 50);
+  /// A fraction used to adjust the input velocity, measured in pixels,
+  /// to a value between -1 and 1 when gesture fling.
+  static const double _flingVelocityFriction = 1 / 6000;
+
+  /// A fraction used to scale the absorbed impact velocity,
+  /// converting raw velocity into a normalized value for simulation.
+  static const double _absorbImpactVelocityFriction = 1 / 3000;
+
+  /// The maximum velocity allowed for a fling after scaling
+  /// to prevent applying an excessive stretch effect.
+  static const double _maxFlingVelocity = 0.5;
+
+  /// The maximum velocity allowed when absorbing an impact,
+  /// ensuring the stretch effect does not exceed a reasonable limit.
+  static const double _maxAbsorbImpactVelocity = 1.25;
+
+  // Physical constants ported directly from Android's EdgeEffect.java.
+  //
+  // Android's EdgeEffect.java:
+  // https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/core/java/android/widget/EdgeEffect.java
+  static const double kNaturalFrequency = 24.657;
+  static const double kDampingRatio = 0.98;
+
+  /// A correction factor applied to the simulation time.
+  ///
+  /// The physical constants `kNaturalFrequency ` and `kDampingRatio ` were ported
+  /// directly from Android's `EdgeEffect.java` source. However, using these
+  /// constants as-is resulted in an animation that was noticeably faster than
+  /// the native Android behavior. The underlying reason for this discrepancy is
+  /// unknown.
+  ///
+  /// This factor, determined by visual comparison ("eyeballing") to match the
+  /// platform's timing, is applied to the elapsed time `t` to slow down the
+  /// simulation.
+  ///
+  /// Based on the damped harmonic oscillator equations, an alternative,
+  /// mathematically equivalent, approach would be to multiply both the
+  /// `kNaturalFrequency ` and the initial velocity by this same factor,
+  /// rather than scaling the time input.
+  static const double kTimeCorrectionFactor = 0.8;
+
+  /// Stiffness coefficient for the spring, derived from the natural frequency.
+  ///
+  /// Calculated as `kStiffness = kNaturalFrequency^2`, this is the baseline
+  /// spring constant used in the damped harmonic oscillator model.
+  static const double kStiffness = kNaturalFrequency * kNaturalFrequency;
+
+  /// Spring description representing the stretch behavior of the edge effect.
+  ///
+  /// This [SpringDescription] is used to simulate the overscroll stretch
+  /// in Flutter. The spring has a mass of 1, a stiffness adjusted by the
+  /// [kTimeCorrectionFactor] squared to match platform timing, and
+  /// a damping ratio corresponding to Android's native `EdgeEffect`.
+  static final SpringDescription _kStretchSpringDescription = SpringDescription.withDampingRatio(
+    mass: 1,
+    stiffness: kStiffness * kTimeCorrectionFactor * kTimeCorrectionFactor,
+    ratio: kDampingRatio,
+  );
+
+  @override
+  void addListener(VoidCallback listener) {
+    _overscrollNotifier.addListener(listener);
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    _overscrollNotifier.removeListener(listener);
+  }
+
+  /// Creates a stretching-only [Simulation] ported from Android 12.
+  SpringSimulation _createStretchSimulation(double velocity) {
+    return SpringSimulation(
+      _kStretchSpringDescription,
+      overscroll,
+      0.0,
+      velocity * kTimeCorrectionFactor,
+    );
+  }
 
   /// Handle a fling to the edge of the viewport at a particular velocity.
   ///
   /// The velocity must be positive.
-  void absorbImpact(double velocity, double totalOverscroll) {
-    assert(velocity >= 0.0);
-    velocity = clampDouble(velocity, _kMinVelocity, _kMaxVelocity);
-    _stretchSizeTween.begin = _stretchSize.value;
-    _stretchSizeTween.end = math.min(_stretchIntensity + (_flingFriction / velocity), 1.0);
-    _stretchController.duration = Duration(
-      milliseconds: math.max(velocity * 0.02, _kMinStretchDuration.inMilliseconds).round(),
+  void absorbImpact(double velocity) {
+    if (velocity == 0.0) {
+      return;
+    }
+    final double scaledVelocity = clampDouble(
+      velocity * _absorbImpactVelocityFriction,
+      -_maxAbsorbImpactVelocity,
+      _maxAbsorbImpactVelocity,
     );
-    _stretchController.forward(from: 0.0);
-    _state = _StretchState.absorb;
-    _stretchDirection = totalOverscroll > 0
-        ? _StretchDirection.trailing
-        : _StretchDirection.leading;
+
+    animate(_createStretchSimulation(scaledVelocity));
+  }
+
+  /// Called when the overscroll ends to trigger a fling animation if needed.
+  void scrollEnd(double velocity) {
+    if (velocity == 0.0 && overscroll == 0.0) {
+      return;
+    }
+    final double scaledVelocity = clampDouble(
+      -(velocity * _flingVelocityFriction),
+      -_maxFlingVelocity,
+      _maxFlingVelocity,
+    );
+
+    if (_controller == null) {
+      animate(_createStretchSimulation(scaledVelocity));
+    }
+  }
+
+  /// Starts a new animation using the given [simulation].
+  ///
+  /// Disposes any existing animation controller before starting a new one.
+  /// Updates the [overscroll] value on each animation frame.
+  /// Automatically disposes the controller when the animation completes.
+  void animate(Simulation simulation) {
+    final controller = AnimationController.unbounded(vsync: vsync)
+      ..addListener(() {
+        final double newOverscroll = _controller?.value ?? 0.0;
+        overscroll = newOverscroll;
+      })
+      ..animateWith(simulation).whenComplete(() {
+        overscroll = 0.0;
+        _interruptedOverscroll = 0.0;
+        _controller!.dispose();
+        _controller = null;
+      });
+
+    _controller?.dispose();
+    _controller = controller;
   }
 
   /// Handle a user-driven overscroll.
   ///
-  /// The `normalizedOverscroll` argument should be the absolute value of the
-  /// scroll distance in logical pixels, divided by the extent of the viewport
-  /// in the main axis.
-  void pull(double normalizedOverscroll, double totalOverscroll) {
-    assert(normalizedOverscroll >= 0.0);
-
-    final _StretchDirection newStretchDirection = totalOverscroll > 0
-        ? _StretchDirection.trailing
-        : _StretchDirection.leading;
-    if (_stretchDirection != newStretchDirection && _state == _StretchState.recede) {
-      // When the stretch direction changes while we are in the recede state, we need to ignore the change.
-      // If we don't, the stretch will instantly jump to the new direction with the recede animation still playing, which causes
-      // a unwanted visual abnormality (https://github.com/flutter/flutter/pull/116548#issuecomment-1414872567).
-      // By ignoring the directional change until the recede state is finished, we can avoid this.
-      return;
+  /// The `normalizedOverscroll` argument should be the scroll distance in
+  /// logical pixels, divided by the extent of the viewport in the main axis.
+  void pull(double normalizedOverscroll) {
+    if (_controller != null) {
+      _interruptedOverscroll = _controller!.value;
+      _controller!.dispose();
+      _controller = null;
     }
 
-    _stretchDirection = newStretchDirection;
-    _pullDistance = normalizedOverscroll;
-    _stretchSizeTween.begin = _stretchSize.value;
-    final double linearIntensity = _stretchIntensity * _pullDistance;
+    final pullDistance = normalizedOverscroll;
+    final double absDistance = pullDistance.abs();
+    final double linearIntensity = _stretchIntensity * absDistance;
     final double exponentialIntensity =
-        _stretchIntensity * (1 - math.exp(-_pullDistance * _exponentialScalar));
-    _stretchSizeTween.end = linearIntensity + exponentialIntensity;
-    _stretchController.duration = _stretchDuration;
-    if (_state != _StretchState.pull) {
-      _stretchController.forward(from: 0.0);
-      _state = _StretchState.pull;
-    } else {
-      if (!_stretchController.isAnimating) {
-        assert(_stretchController.value == 1.0);
-        notifyListeners();
-      }
-    }
+        _stretchIntensity * (1 - math.exp(-absDistance * _exponentialScalar));
+
+    // Maintain sign of overscroll for direction.
+    final double directionSign = pullDistance.sign;
+    final double newOverscroll = directionSign * (linearIntensity + exponentialIntensity);
+    overscroll = newOverscroll + _interruptedOverscroll;
   }
 
-  void scrollEnd() {
-    if (_state == _StretchState.pull) {
-      _recede(_stretchDuration);
-    }
-  }
-
-  void _changePhase(AnimationStatus status) {
-    if (!status.isCompleted) {
-      return;
-    }
-    switch (_state) {
-      case _StretchState.absorb:
-        _recede(_stretchDuration);
-      case _StretchState.recede:
-        _state = _StretchState.idle;
-        _pullDistance = 0.0;
-      case _StretchState.pull:
-      case _StretchState.idle:
-        break;
-    }
-  }
-
-  void _recede(Duration duration) {
-    if (_state == _StretchState.recede || _state == _StretchState.idle) {
-      return;
-    }
-    _stretchSizeTween.begin = _stretchSize.value;
-    _stretchSizeTween.end = 0.0;
-    _stretchController.duration = duration;
-    _stretchController.forward(from: 0.0);
-    _state = _StretchState.recede;
-  }
-
-  @override
   void dispose() {
-    _stretchController.dispose();
-    _decelerator.dispose();
-    super.dispose();
+    _controller?.dispose();
+    _overscrollNotifier.dispose();
   }
 
   @override

@@ -22,7 +22,9 @@ class LayerScene implements ui.Scene {
   final LayerTree layerTree;
 
   @override
-  void dispose() {}
+  void dispose() {
+    layerTree.rootLayer.dispose();
+  }
 
   @override
   Future<ui.Image> toImage(int width, int height) {
@@ -64,7 +66,10 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     bool isComplexHint = false,
     bool willChangeHint = false,
   }) {
-    currentLayer.add(PictureLayer(picture as LayerPicture, offset, isComplexHint, willChangeHint));
+    // Add a clone of the picture to the layer tree so that the original picture
+    // can be disposed.
+    final LayerPicture clonedPicture = (picture as LayerPicture).clone();
+    currentLayer.add(PictureLayer(clonedPicture, offset, isComplexHint, willChangeHint));
   }
 
   @override
@@ -96,6 +101,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
 
   @override
   LayerScene build() {
+    // TODO(hterkelsen): dispose this SceneBuilder after `build` is called.
     return LayerScene(rootLayer);
   }
 
