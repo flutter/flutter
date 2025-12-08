@@ -874,6 +874,20 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     extraViewKeys.forEach(_testViews.remove);
   }
 
+  /// Adds a [TestFlutterView] that wraps the given [view] to the list of views
+  /// managed by this [TestPlatformDispatcher].
+  ///
+  /// The added view will be associated with the first display in the list of
+  /// displays managed by this [TestPlatformDispatcher].
+  void addTestView(FlutterView view) {
+    _testViews[view.viewId] = TestFlutterView(
+      view: view,
+      platformDispatcher: this,
+      display: displays.first,
+    );
+    _updateViewsAndDisplays();
+  }
+
   @override
   ErrorCallback? get onError => _platformDispatcher.onError;
   @override
