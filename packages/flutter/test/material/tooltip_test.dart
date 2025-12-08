@@ -3665,7 +3665,7 @@ void main() {
   });
 
   testWidgets('Tooltip does not crash at zero area', (WidgetTester tester) async {
-    final GlobalKey<TooltipState> key = GlobalKey<TooltipState>();
+    final key = GlobalKey<TooltipState>();
     tester.view.physicalSize = Size.zero;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
