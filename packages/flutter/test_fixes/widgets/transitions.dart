@@ -5,6 +5,9 @@ void main() {
   SizeTransition();
   SizeTransition(axisAlignment: 1.0);
   SizeTransition(axis: Axis.vertical, axisAlignment: 1.0);
-  SizeTransition(axis: Axis.vertical, axisAlignment: position.dx < 0 ? 1.0 : -1.0);
+  SizeTransition(
+    axis: Axis.vertical,
+    axisAlignment: position.dx < 0 ? 1.0 : -1.0,
+  );
   SizeTransition(axis: Axis.horizontal, axisAlignment: 1.0);
 }
