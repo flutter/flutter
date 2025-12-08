@@ -466,7 +466,7 @@ class CarouselView extends StatefulWidget {
   ///   layout algorithm (typically the one with the greatest effective weight;
   ///   ties are resolved using proximity to the leading edge).
   ///
-  /// If [itemSnapping] is enabled, scrolling settles with the resolved leading
+  /// If `itemSnapping` is enabled, scrolling settles with the resolved leading
   /// item fully visible when possible.
   ///
   /// The callback fires only when the resolved leading index actually changes,
