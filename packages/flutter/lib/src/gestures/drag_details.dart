@@ -29,8 +29,7 @@ class DragDownDetails with Diagnosticable implements PositionedGestureDetails {
     Offset? localPosition,
     this.kind,
     this.buttons,
-  })
-    : localPosition = localPosition ?? globalPosition;
+  }) : localPosition = localPosition ?? globalPosition;
 
   /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
   @override

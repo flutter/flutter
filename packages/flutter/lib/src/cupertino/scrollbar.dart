@@ -199,7 +199,11 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
   }
 
   @override
-  void handleThumbPressEnd(Offset localPosition, Velocity velocity, {DragEndDetails? originalDetails}) {
+  void handleThumbPressEnd(
+    Offset localPosition,
+    Velocity velocity, {
+    DragEndDetails? originalDetails,
+  }) {
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {
       return;

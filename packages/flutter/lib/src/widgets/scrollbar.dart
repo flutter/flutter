@@ -1799,7 +1799,11 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   /// Handler called when a long press has ended.
   @protected
   @mustCallSuper
-  void handleThumbPressEnd(Offset localPosition, Velocity velocity, {DragEndDetails? originalDetails}) {
+  void handleThumbPressEnd(
+    Offset localPosition,
+    Velocity velocity, {
+    DragEndDetails? originalDetails,
+  }) {
     assert(_debugCheckHasValidScrollPosition());
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {
@@ -1997,7 +2001,11 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
 
   void _handleThumbDragEnd(DragEndDetails details) {
-    handleThumbPressEnd(_globalToScrollbar(details.globalPosition), details.velocity, originalDetails: details);
+    handleThumbPressEnd(
+      _globalToScrollbar(details.globalPosition),
+      details.velocity,
+      originalDetails: details,
+    );
   }
 
   void _handleThumbDragCancel() {

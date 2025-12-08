@@ -104,7 +104,10 @@ void main() {
     };
 
     final touchPointer5 = TestPointer(5);
-    final PointerDownEvent down5 = touchPointer5.down(const Offset(10.0, 10.0), buttons: expectedButtons);
+    final PointerDownEvent down5 = touchPointer5.down(
+      const Offset(10.0, 10.0),
+      buttons: expectedButtons,
+    );
     tap.addPointer(down5);
     tester.closeArena(5);
     expect(log, <String>['tap-down 5']);

@@ -1356,7 +1356,7 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
       localPosition: localPosition,
       primaryVelocity: 0.0,
       consecutiveTapCount: consecutiveTapCount,
-      buttons: pointer != null ? getButtonsForPointer(pointer): null,
+      buttons: pointer != null ? getButtonsForPointer(pointer) : null,
     );
 
     if (onDragEnd != null) {
@@ -1449,7 +1449,11 @@ class TapAndHorizontalDragGestureRecognizer extends BaseTapAndDragGestureRecogni
   /// Create a gesture recognizer for interactions in the horizontal axis.
   ///
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
-  TapAndHorizontalDragGestureRecognizer({super.debugOwner, super.supportedDevices, super.allowedButtonsFilter});
+  TapAndHorizontalDragGestureRecognizer({
+    super.debugOwner,
+    super.supportedDevices,
+    super.allowedButtonsFilter,
+  });
 
   @override
   bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind) {
@@ -1484,7 +1488,11 @@ class TapAndHorizontalDragGestureRecognizer extends BaseTapAndDragGestureRecogni
 /// {@endtemplate}
 class TapAndPanGestureRecognizer extends BaseTapAndDragGestureRecognizer {
   /// Create a gesture recognizer for interactions on a plane.
-  TapAndPanGestureRecognizer({super.debugOwner, super.supportedDevices, super.allowedButtonsFilter});
+  TapAndPanGestureRecognizer({
+    super.debugOwner,
+    super.supportedDevices,
+    super.allowedButtonsFilter,
+  });
 
   @override
   bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind) {

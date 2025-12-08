@@ -505,7 +505,10 @@ void main() {
       setUpTapAndHorizontalDragGestureRecognizer(expectedButtons: expectedButtons);
 
       final pointer = TestPointer(5);
-      final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
+      final PointerDownEvent downB = pointer.down(
+        const Offset(10.0, 10.0),
+        buttons: expectedButtons,
+      );
 
       tapAndDrag.addPointer(downB);
       tester.closeArena(5);
@@ -546,7 +549,10 @@ void main() {
       addTearDown(verticalDrag.dispose);
 
       final pointer = TestPointer(5);
-      final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
+      final PointerDownEvent downB = pointer.down(
+        const Offset(10.0, 10.0),
+        buttons: expectedButtons,
+      );
 
       tapAndDrag.addPointer(downB);
       verticalDrag.addPointer(downB);
@@ -584,7 +590,10 @@ void main() {
       addTearDown(verticalDrag.dispose);
 
       final pointer = TestPointer(5);
-      final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
+      final PointerDownEvent downB = pointer.down(
+        const Offset(10.0, 10.0),
+        buttons: expectedButtons,
+      );
 
       tapAndDrag.addPointer(downB);
       verticalDrag.addPointer(downB);
@@ -622,7 +631,10 @@ void main() {
       addTearDown(verticalDrag.dispose);
 
       final pointer = TestPointer(5);
-      final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
+      final PointerDownEvent downB = pointer.down(
+        const Offset(10.0, 10.0),
+        buttons: expectedButtons,
+      );
 
       tapAndDrag.addPointer(downB);
       verticalDrag.addPointer(downB);
@@ -665,7 +677,10 @@ void main() {
       addTearDown(verticalDrag.dispose);
 
       final pointer = TestPointer(5);
-      final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
+      final PointerDownEvent downB = pointer.down(
+        const Offset(10.0, 10.0),
+        buttons: expectedButtons,
+      );
 
       tapAndDrag.addPointer(downB);
       verticalDrag.addPointer(downB);
@@ -701,7 +716,10 @@ void main() {
       addTearDown(pans.dispose);
 
       final pointer = TestPointer(5);
-      final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
+      final PointerDownEvent downB = pointer.down(
+        const Offset(10.0, 10.0),
+        buttons: expectedButtons,
+      );
       // When competing against another [DragGestureRecognizer], the [TapAndPanGestureRecognizer]
       // will only win when it is the last recognizer in the arena.
       tapAndDrag.addPointer(downB);
@@ -716,7 +734,10 @@ void main() {
 
   testGesture('Drag state is properly reset after losing GestureArena', (GestureTester tester) {
     const int expectedButtons = kPrimaryButton | kSecondaryButton | kTertiaryButton;
-    setUpTapAndHorizontalDragGestureRecognizer(eagerVictoryOnDrag: false, expectedButtons: expectedButtons);
+    setUpTapAndHorizontalDragGestureRecognizer(
+      eagerVictoryOnDrag: false,
+      expectedButtons: expectedButtons,
+    );
     final horizontalDrag = _PermissiveHorizontalDragGestureRecognizer()
       ..onStart = (DragStartDetails details) {
         expect(details.buttons, expectedButtons);
@@ -1099,9 +1120,7 @@ void main() {
 }
 
 class _PermissiveTapAndPanGestureRecognizer extends TapAndPanGestureRecognizer {
-  _PermissiveTapAndPanGestureRecognizer() : super(
-    allowedButtonsFilter: (int buttons) => true,
-  );
+  _PermissiveTapAndPanGestureRecognizer() : super(allowedButtonsFilter: (int buttons) => true);
 
   @override
   bool isPointerAllowed(PointerEvent event) {
@@ -1109,10 +1128,10 @@ class _PermissiveTapAndPanGestureRecognizer extends TapAndPanGestureRecognizer {
   }
 }
 
-class _PermissiveTapAndHorizontalDragGestureRecognizer extends TapAndHorizontalDragGestureRecognizer {
-  _PermissiveTapAndHorizontalDragGestureRecognizer() : super(
-    allowedButtonsFilter: (int buttons) => true,
-  );
+class _PermissiveTapAndHorizontalDragGestureRecognizer
+    extends TapAndHorizontalDragGestureRecognizer {
+  _PermissiveTapAndHorizontalDragGestureRecognizer()
+    : super(allowedButtonsFilter: (int buttons) => true);
 
   @override
   bool isPointerAllowed(PointerEvent event) {
@@ -1121,9 +1140,7 @@ class _PermissiveTapAndHorizontalDragGestureRecognizer extends TapAndHorizontalD
 }
 
 class _PermissiveVerticalDragGestureRecognizer extends VerticalDragGestureRecognizer {
-  _PermissiveVerticalDragGestureRecognizer() : super(
-    allowedButtonsFilter: (int buttons) => true,
-  );
+  _PermissiveVerticalDragGestureRecognizer() : super(allowedButtonsFilter: (int buttons) => true);
 
   @override
   bool isPointerAllowed(PointerEvent event) {
@@ -1132,9 +1149,7 @@ class _PermissiveVerticalDragGestureRecognizer extends VerticalDragGestureRecogn
 }
 
 class _PermissiveHorizontalDragGestureRecognizer extends HorizontalDragGestureRecognizer {
-  _PermissiveHorizontalDragGestureRecognizer() : super(
-    allowedButtonsFilter: (int buttons) => true,
-  );
+  _PermissiveHorizontalDragGestureRecognizer() : super(allowedButtonsFilter: (int buttons) => true);
 
   @override
   bool isPointerAllowed(PointerEvent event) {
@@ -1143,9 +1158,7 @@ class _PermissiveHorizontalDragGestureRecognizer extends HorizontalDragGestureRe
 }
 
 class _PermissivePanGestureRecognizer extends PanGestureRecognizer {
-  _PermissivePanGestureRecognizer() : super(
-    allowedButtonsFilter: (int buttons) => true,
-  );
+  _PermissivePanGestureRecognizer() : super(allowedButtonsFilter: (int buttons) => true);
 
   @override
   bool isPointerAllowed(PointerEvent event) {

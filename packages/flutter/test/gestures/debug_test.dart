@@ -277,9 +277,7 @@ void main() {
         ],
       ),
       (
-        const LongPressStartDetails(
-          buttons: kMiddleMouseButton,
-        ),
+        const LongPressStartDetails(buttons: kMiddleMouseButton),
         <String>[
           'globalPosition: Offset(0.0, 0.0)',
           'localPosition: Offset(0.0, 0.0)',
@@ -287,9 +285,7 @@ void main() {
         ],
       ),
       (
-        const LongPressMoveUpdateDetails(
-          buttons: kPrimaryButton | kSecondaryButton,
-        ),
+        const LongPressMoveUpdateDetails(buttons: kPrimaryButton | kSecondaryButton),
         <String>[
           'globalPosition: Offset(0.0, 0.0)',
           'localPosition: Offset(0.0, 0.0)',
@@ -299,9 +295,7 @@ void main() {
         ],
       ),
       (
-        const LongPressEndDetails(
-          buttons: kSecondaryButton,
-        ),
+        const LongPressEndDetails(buttons: kSecondaryButton),
         <String>[
           'globalPosition: Offset(0.0, 0.0)',
           'localPosition: Offset(0.0, 0.0)',
