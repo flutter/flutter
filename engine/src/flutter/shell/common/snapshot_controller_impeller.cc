@@ -190,7 +190,6 @@ sk_sp<DlImage> SnapshotControllerImpeller::MakeTextureImage(
     return nullptr;
   }
 
-  // Create a host-visible buffer to upload the pixels.
   size_t byte_size = image->width() * image->height() * 4;
   auto buffer = context->GetResourceAllocator()->CreateBuffer(
       impeller::DeviceBufferDescriptor{
@@ -202,7 +201,6 @@ sk_sp<DlImage> SnapshotControllerImpeller::MakeTextureImage(
     return nullptr;
   }
 
-  // Read pixels directly into the buffer.
   {
     uint8_t* map = buffer->OnGetContents();
     if (!map) {
