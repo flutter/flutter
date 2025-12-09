@@ -96,13 +96,13 @@ enum _CupertinoSheetMode { scrollable, dragOnly }
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=5H-WvH5O29I}
 ///
-/// This is a convenience method for displaying [CupertinoSheetRoute] for common,
-/// straightforward use cases. There are two different build methods that are provided
-/// by the method for building the content of the [CupertinoSheetRoute]. Use `builder`
-/// if there is no content within the sheet that needs to scroll. This is good
-/// for sheets with a simple display, however scrolling gestures will conflict
-/// with the drag to dismiss gesture. `scrollableBuilder` will enable scrollable
-/// content within the sheet. See [CupertinoSheetRoute.scrollable] for more
+/// This is a convenience method for displaying [CupertinoSheetRoute] for most
+/// use cases. There are two different build methods that are provided by the method
+/// for building the content of the [CupertinoSheetRoute]. Use `builder` if there
+/// is no content within the sheet that needs to scroll vertically. This
+/// is good for sheets with a simple display, however scrolling gestures will
+/// conflict with the drag to dismiss gesture. `scrollableBuilder` will enable
+/// scrollable content within the sheet. See [CupertinoSheetRoute.scrollable] for more
 /// information.
 ///
 /// `useNestedNavigation` allows new routes to be pushed inside of a [CupertinoSheetRoute]
@@ -675,18 +675,21 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
   /// have scrollable content that spans the whole sheet.
   ///
   /// When this constructor is used, the content of the sheet will not watch for
-  /// drag gestures to trigger the drag downwards to dismiss behavior. Instead,
-  /// if a vertical happens within a scrollable widget that uses the [ScrollController]
-  /// provided by [scrollableBuilder], the sheet will trigger either scrolling or
-  /// the drag to dismiss gesture based on the state of the widget.
+  /// drag gestures to trigger the drag downwards to dismiss behavior over the
+  /// entire sheet. Instead, if a vertical drag happens within a scrollable widget
+  /// that uses the [ScrollController] provided by [scrollableBuilder], the sheet
+  /// will either scroll its content or slide down depending on the gesture.
   ///
   /// In order to trigger the drag to dismiss gesture outside of the scrollable
   /// content, wrap that area with a CupertinoSheetDragArea.
   ///
   /// {@tool dartpad}
-  /// This example shows how to show a Cupertino Sheet with scrollable content,
-  /// and a navbar that will trigger the drag only on a gesture started within
-  /// its bounds.
+  /// This example shows how to show a Cupertino Sheet with scrollable content.
+  ///
+  /// This example also includes a [CupertinoNavigationBar] wrapped with a
+  /// [CupertinoSheetDragArea] at the top of the sheet content to trigger the
+  /// drag-to-dismiss behaviour for drag gestures originating outside of the
+  /// scrollable content.
   ///
   /// ** See code in examples/api/lib/cupertino/sheet/cupertino_sheet.3.dart **
   /// {@end-tool}
@@ -700,7 +703,7 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
        _topGap = topGap;
 
   @override
-  bool get enableScroll => _sheetMode == _CupertinoSheetMode.scrollable;
+  bool get _enableScroll => _sheetMode == _CupertinoSheetMode.scrollable;
 
   /// Builds the primary contents of the sheet route.
   final WidgetBuilder? builder;
@@ -888,7 +891,7 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
   bool get _hasCustomTopGap;
 
   /// Determines whether the content can be scrolled.
-  bool get enableScroll;
+  bool get _enableScroll;
 
   @override
   Widget buildPage(
@@ -967,7 +970,7 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
       child,
       enableDrag,
       topGap,
-      enableScroll,
+      _enableScroll,
     );
   }
 }
