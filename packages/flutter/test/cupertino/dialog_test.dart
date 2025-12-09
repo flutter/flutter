@@ -2168,6 +2168,17 @@ void main() {
     expect(tester.getSize(find.byType(CupertinoDialogAction)), Size.zero);
   });
 
+  testWidgets('CupertinoPopupSurface does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(child: CupertinoPopupSurface(child: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoPopupSurface)), Size.zero);
+  });
+
   testWidgets('CupertinoAlertDialog does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
