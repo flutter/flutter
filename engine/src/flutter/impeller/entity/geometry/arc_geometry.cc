@@ -100,13 +100,13 @@ bool ArcGeometry::CapsOverlap() const {
       // inside the inner edge of the start cap. For a visualization of when
       // this occurs, see
       // https://github.com/flutter/flutter/issues/178746#issuecomment-3554526727
-      // Note that testing for overlap is completely non-dependent on the arc's
+      // Note that testing for overlap is completely independent of the arc's
       // start angle. To simplify the overlap test, we treat the arc as if its
       // start angle is 0. This allows the test to only require checking the x
       // coordinate of the ending cap, rather than needing to calculate overlap
       // based on both x and y positions of both caps.
-      auto radius = arc_.GetOvalSize().width / 2.0f;
-      auto half_width = stroke_width_ / 2.0f;
+      auto radius = arc_.GetOvalSize().width * 0.5f;
+      auto half_width = stroke_width_ * 0.5f;
       auto inner_radius = radius - half_width;
       auto inner_arc_end_x =
           cos(Radians(arc_.GetSweep()).radians) * inner_radius;
@@ -119,14 +119,15 @@ bool ArcGeometry::CapsOverlap() const {
       // Round caps overlap if the distance between the arc's start and end
       // points is less than the stroke width.
       // https://github.com/flutter/flutter/issues/178746#issuecomment-3554526727
-      // Note that testing for overlap is completely non-dependent on the arc's
+      // Note that testing for overlap is completely independent of the arc's
       // start angle. To simplify the overlap test, we treat the arc as if its
       // start angle is 0.
       auto radius = arc_.GetOvalSize().width / 2.0f;
       auto start_point = Point(radius, 0);
-      auto sweep_angle = Radians(arc_.GetSweep()).radians;
-      auto end_point = Point(cos(sweep_angle), sin(sweep_angle)) * radius;
-      return (end_point - start_point).GetLength() < stroke_width_;
+      auto sweep_radians = Radians(arc_.GetSweep()).radians;
+      auto end_point = Point(cos(sweep_radians), sin(sweep_radians)) * radius;
+      return start_point.GetDistanceSquared(end_point) <
+             stroke_width_ * stroke_width_;
     }
     case Cap::kButt:
       FML_UNREACHABLE()
