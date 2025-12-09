@@ -33,7 +33,7 @@ public class SettingsChannel {
   private static final String CONFIGURATION_ID = "configurationId";
 
   // When hasNonlinearTextScalingSupport() returns false, this will not be initialized.
-  private final ConfigurationQueue configurationQueue = new ConfigurationQueue();
+  @VisibleForTesting final ConfigurationQueue configurationQueue = new ConfigurationQueue();
 
   @NonNull public final BasicMessageChannel<Object> channel;
 
@@ -56,17 +56,14 @@ public class SettingsChannel {
 
   @NonNull
   public MessageBuilder startMessage() {
-    return new MessageBuilder(channel);
+    return new MessageBuilder();
   }
 
   public class MessageBuilder {
-    @NonNull private final BasicMessageChannel<Object> channel;
     @NonNull private Map<String, Object> message = new HashMap<>();
     @Nullable private DisplayMetrics displayMetrics;
 
-    MessageBuilder(@NonNull BasicMessageChannel<Object> channel) {
-      this.channel = channel;
-    }
+    MessageBuilder() {}
 
     @NonNull
     public MessageBuilder setDisplayMetrics(@NonNull DisplayMetrics displayMetrics) {
@@ -176,9 +173,9 @@ public class SettingsChannel {
    * implementation much simpler.
    */
   @VisibleForTesting
-  public static class ConfigurationQueue {
-    private final ConcurrentLinkedQueue<SentConfiguration> sentQueue =
-        new ConcurrentLinkedQueue<>();
+  static class ConfigurationQueue {
+    @VisibleForTesting
+    final ConcurrentLinkedQueue<SentConfiguration> sentQueue = new ConcurrentLinkedQueue<>();
 
     // The current SentConfiguration the Flutter application is using, according
     // to the most recent getConfiguration call.
