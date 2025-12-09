@@ -696,7 +696,7 @@ abstract interface class PredictiveBackRoute {
 /// This sample demonstrates how to use a [LocalHistoryEntry] to show a panel that can be
 /// dismissed with the back button.
 ///
-/// ** See code in examples\api\lib\widgets\routes\local_history_entry.0.dart **
+/// ** See code in examples/api/lib/widgets/routes/local_history_entry.0.dart **
 /// {@end-tool}
 ///
 /// See also:
