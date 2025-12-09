@@ -3688,6 +3688,30 @@ void main() {
     );
     expect(tester.getSize(find.byType(Scaffold)), Size.zero);
   });
+  testWidgets('Tap status bar to scroll to top', (WidgetTester tester) async {
+    final scrollController = ScrollController(initialScrollOffset: 1000);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PrimaryScrollController(
+          controller: scrollController,
+          child: const Scaffold(
+            body: SingleChildScrollView(primary: true, child: SizedBox(height: 12345)),
+          ),
+        ),
+      ),
+    );
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(
+      const MethodCall('handleScrollToTop'),
+    );
+    tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+      SystemChannels.statusBar.name,
+      message,
+      (ByteData? data) {},
+    );
+    await tester.pumpAndSettle();
+
+    expect(scrollController.offset, 0.0);
+  });
 }
 
 class _GeometryListener extends StatefulWidget {

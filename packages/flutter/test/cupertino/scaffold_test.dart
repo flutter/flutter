@@ -5,6 +5,8 @@
 import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart' show SystemChannels;
+import 'package:flutter/src/services/message_codecs.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../image_data.dart';
@@ -586,5 +588,34 @@ void main() {
           .textScaler,
       const TextScaler.linear(99.0),
     );
+  });
+
+  testWidgets('Tap status bar to scroll to top', (WidgetTester tester) async {
+    final scrollController = ScrollController(initialScrollOffset: 1000);
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return PrimaryScrollController(
+              controller: scrollController,
+              child: const CupertinoPageScaffold(
+                child: SingleChildScrollView(primary: true, child: SizedBox(height: 12345)),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(
+      const MethodCall('handleScrollToTop'),
+    );
+    tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+      SystemChannels.statusBar.name,
+      message,
+      (ByteData? data) {},
+    );
+    await tester.pumpAndSettle();
+
+    expect(scrollController.offset, 0.0);
   });
 }
