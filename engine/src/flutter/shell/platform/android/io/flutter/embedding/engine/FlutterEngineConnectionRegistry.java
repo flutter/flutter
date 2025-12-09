@@ -353,6 +353,7 @@ import java.util.Set;
 
     // Check manifest for software rendering configuration.
     if (useSoftwareRendering == false) {
+      Log.e("CAMILLE", "setting software rendering in an unexpected place");
       useSoftwareRendering = flutterLoader.getSofwareRenderingEnabledViaManifest();
     }
 
