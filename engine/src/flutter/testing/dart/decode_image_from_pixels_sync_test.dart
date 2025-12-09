@@ -37,9 +37,9 @@ void main() {
     expect(image.width, width);
     expect(image.height, height);
 
-    final data = await image.toByteData();
+    final ByteData? data = await image.toByteData();
     expect(data, isNotNull);
-    final resultPixels = data!.buffer.asUint8List();
+    final Uint8List resultPixels = data!.buffer.asUint8List();
     expect(resultPixels, pixels);
 
     image.dispose();
