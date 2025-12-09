@@ -614,9 +614,19 @@ class PlaceholderSpan extends ParagraphSpan {
 }
 
 class TextSpan extends ParagraphSpan {
-  TextSpan({required super.start, required super.end, required super.style, required this.text});
+  TextSpan({
+    required super.start,
+    required super.end,
+    required super.style,
+    required this.text,
+    required this.textDirection,
+  });
 
   final String text;
+  // We use TextSpan to get metrics from Chrome in many places,
+  // including empty spans (for example when measuring strut) and
+  // ellipsis span (which inherits textDirection from the span it attaches to).
+  final ui.TextDirection? textDirection;
 
   late final DomTextMetrics _metrics = _getMetrics();
 
@@ -627,10 +637,16 @@ class TextSpan extends ParagraphSpan {
   late final double fontBoundingBoxDescent = _metrics.fontBoundingBoxDescent;
 
   DomTextMetrics _getMetrics() {
-    // TODO(jlavrova): Is this necessary?
-    // layoutContext.direction = isDefaultLtr ? 'ltr' : 'rtl';
     style.applyToContext(layoutContext);
+    // We need to set in up because we otherwise in RTL text without textDirection
+    // Canvas2D will return all clusters placed right to left starting from 0.
+    // Also, we have a separate (possibly, different) textDirection for the ellipsis.
+    layoutContext.direction = textDirection == ui.TextDirection.ltr ? 'ltr' : 'rtl';
     return layoutContext.measureText(text);
+  }
+
+  double? advanceWidth() {
+    return _metrics.width;
   }
 
   @override
@@ -942,11 +958,6 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   void layout(ui.ParagraphConstraints constraints) {
-    // We need to set in up because we otherwise in RTL text without textDirection
-    // Canvas2D will return all clusters placed right to left starting from 0.
-    // If we go with that we will have to take it in account EVERYWHERE (lots of places)
-    layoutContext.direction = paragraphStyle.textDirection == ui.TextDirection.ltr ? 'ltr' : 'rtl';
-
     _layout.performLayout(constraints.width);
     WebParagraphDebug.apiTrace(
       'layout("$text", ${constraints.width.toStringAsFixed(4)}}): '
@@ -961,6 +972,13 @@ class WebParagraph implements ui.Paragraph {
     _paint.painter.resizePaintCanvas(ui.window.devicePixelRatio);
     for (final TextLine line in _layout.lines) {
       _paint.paintLine(canvas, _layout, line, offset.dx, offset.dy);
+    }
+  }
+
+  void paintOnCanvas2D(DomHTMLCanvasElement canvas, ui.Offset offset) {
+    _paint.painter.resizePaintCanvas(ui.window.devicePixelRatio);
+    for (final TextLine line in _layout.lines) {
+      _paint.paintLineOnCanvas2D(canvas, _layout, line, offset.dx, offset.dy);
     }
   }
 
@@ -1061,12 +1079,7 @@ class WebParagraph implements ui.Paragraph {
     return _layout;
   }
 
-  // TODO(mdebbar): Remove this in favor of `getText1`.
-  String getText(ui.TextRange textRange) {
-    return getText1(textRange.start, textRange.end);
-  }
-
-  String getText1(int start, int end) {
+  String getText(int start, int end) {
     if (text.isEmpty) {
       return text;
     }
@@ -1265,6 +1278,7 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
         end: _fullTextBuffer.length,
         style: _spanStyle!,
         text: _spanTextBuffer.toString(),
+        textDirection: _paragraphStyle.textDirection,
       ),
     );
 
