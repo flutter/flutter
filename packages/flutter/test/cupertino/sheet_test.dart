@@ -13,6 +13,69 @@ import '../widgets/navigator_utils.dart';
 // Matches _kTopGapRatio in cupertino/sheet.dart.
 const double _kTopGapRatio = 0.08;
 
+class _RebuildingPage extends StatefulWidget {
+  const _RebuildingPage({required this.scaffoldKey});
+
+  final GlobalKey scaffoldKey;
+
+  @override
+  _RebuildingPageState createState() => _RebuildingPageState();
+}
+
+class _RebuildingPageState extends State<_RebuildingPage> {
+  late int counter;
+
+  @override
+  void initState() {
+    super.initState();
+    counter = 0;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoApp(
+      home: CupertinoPageScaffold(
+        key: widget.scaffoldKey,
+        child: Center(
+          child: Column(
+            children: <Widget>[
+              const Text('Page 1'),
+              CupertinoButton(
+                onPressed: () {
+                  Navigator.push<void>(
+                    widget.scaffoldKey.currentContext!,
+                    CupertinoSheetRoute<void>(
+                      builder: (BuildContext context) {
+                        return CupertinoPageScaffold(
+                          child: Center(
+                            child: Column(
+                              children: <Widget>[
+                                const Text('Page two'),
+                                Text('Counter Value: $counter'),
+                                CupertinoButton(
+                                  onPressed: () => setState(() {
+                                    counter++;
+                                  }),
+                                  child: const Text('Increase Count'),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+                child: const Text('Push Page 2'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 void main() {
   testWidgets('Sheet route does not cover the whole screen', (WidgetTester tester) async {
     final GlobalKey scaffoldKey = GlobalKey();
@@ -1554,6 +1617,7 @@ void main() {
     },
   );
 
+<<<<<<< HEAD
   group('topGap parameter tests', () {
     testWidgets('sheet uses default topGap when not specified', (WidgetTester tester) async {
       final GlobalKey scaffoldKey = GlobalKey();
@@ -1904,5 +1968,33 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle();
     });
+=======
+  testWidgets('didUpdateWidget in sheet transition does not try and use multiple tickers', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey scaffoldKey = GlobalKey();
+
+    await tester.pumpWidget(_RebuildingPage(scaffoldKey: scaffoldKey));
+
+    await tester.tap(find.text('Push Page 2'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Increase Count'), findsOneWidget);
+    Navigator.of(scaffoldKey.currentContext!).pop();
+
+    // await tester.pump();
+
+    await tester.tap(find.text('Increase Count'));
+
+    // await tester.tap(find.text('Increase Count'));
+    // Navigator.of(scaffoldKey.currentContext!).push(
+    //   CupertinoPageRoute(
+    //     builder: (BuildContext context) => const CupertinoPageScaffold(child: Text('Page 3')),
+    //   ),
+    // );
+    await tester.pumpAndSettle();
+
+    // expect(find.text('Increase Count'), findsOneWidget);
+>>>>>>> 7fab17d486f (Do not dispose of controller on update)
   });
 }
