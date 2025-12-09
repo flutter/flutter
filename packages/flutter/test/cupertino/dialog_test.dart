@@ -2179,6 +2179,26 @@ void main() {
     focusNode.requestFocus();
     await tester.pumpAndSettle();
   });
+
+  testWidgets('CupertinoPopupSurface does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(child: CupertinoPopupSurface(child: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoPopupSurface)), Size.zero);
+  });
+
+  testWidgets('CupertinoAlertDialog does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(child: SizedBox.shrink(child: CupertinoAlertDialog())),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoAlertDialog)), Size.zero);
+  });
 }
 
 RenderBox findActionButtonRenderBoxByTitle(WidgetTester tester, String title) {
