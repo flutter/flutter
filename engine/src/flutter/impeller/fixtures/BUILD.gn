@@ -24,6 +24,7 @@ impeller_shaders("modern_shader_fixtures") {
     "sepia.vert",
     "swizzle.frag",
   ]
+  entry_point_prefix = ""
 }
 
 impeller_shaders("shader_fixtures") {
@@ -80,6 +81,7 @@ impeller_shaders("shader_fixtures") {
       "half.frag",
     ]
   }
+  entry_point_prefix = ""
 }
 
 impellerc("runtime_stages") {
@@ -138,6 +140,8 @@ test_fixtures("file_fixtures") {
     "sample.vert",
     "check_gles_definition.frag",
     "sample_with_binding.vert",
+    "sample_with_positioned_uniforms.frag",
+    "sample_with_uniforms.frag",
     "simple.vert.hlsl",
     "sa%m#ple.vert",
     "stage1.comp",
