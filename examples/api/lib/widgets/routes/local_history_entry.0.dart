@@ -9,12 +9,11 @@ import 'package:flutter/material.dart';
 /// back button removes the entry and closes the custom bottom panel.
 
 void main() {
-  runApp(const MaterialApp(home: PanelDemo()));
+  runApp(PanelDemo());
 }
 
 class PanelDemo extends StatefulWidget {
   const PanelDemo({super.key});
-
   @override
   State<PanelDemo> createState() => _PanelDemoState();
 }
@@ -22,7 +21,6 @@ class PanelDemo extends StatefulWidget {
 class _PanelDemoState extends State<PanelDemo> {
   bool _isPanelOpen = false;
   LocalHistoryEntry? _entry;
-
   void _openPanel() {
     if (_isPanelOpen) {
       return;
@@ -43,28 +41,33 @@ class _PanelDemoState extends State<PanelDemo> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('LocalHistoryEntry Example')),
-      body: Stack(
-        children: <Widget>[
-          Center(
-            child: ElevatedButton(onPressed: _openPanel, child: const Text('Open Panel')),
-          ),
-          if (_isPanelOpen)
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                height: 200,
-                color: Colors.blueAccent,
-                child: const Center(
-                  child: Text(
-                    'Press back to close this panel',
-                    style: TextStyle(color: Colors.white, fontSize: 18),
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(title: const Text('LocalHistoryEntry Example')),
+        body: Stack(
+          children: <Widget>[
+            Center(
+              child: ElevatedButton(
+                onPressed: _openPanel,
+                child: const Text('Open Panel'),
+              ),
+            ),
+            if (_isPanelOpen)
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
+                  height: 200,
+                  color: Colors.blueAccent,
+                  child: const Center(
+                    child: Text(
+                      'Press back to close this panel',
+                      style: TextStyle(color: Colors.white, fontSize: 18),
+                    ),
                   ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
