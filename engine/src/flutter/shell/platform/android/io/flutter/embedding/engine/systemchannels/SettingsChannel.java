@@ -33,7 +33,7 @@ public class SettingsChannel {
   private static final String CONFIGURATION_ID = "configurationId";
 
   // When hasNonlinearTextScalingSupport() returns false, this will not be initialized.
-  private static final ConfigurationQueue CONFIGURATION_QUEUE = new ConfigurationQueue();
+  private final ConfigurationQueue configurationQueue = new ConfigurationQueue();
 
   @NonNull public final BasicMessageChannel<Object> channel;
 
@@ -47,10 +47,10 @@ public class SettingsChannel {
   }
 
   // This method will only be called on Flutter's UI thread.
-  public static DisplayMetrics getPastDisplayMetrics(int configId) {
+  public DisplayMetrics getPastDisplayMetrics(int configId) {
     assert hasNonlinearTextScalingSupport();
     final ConfigurationQueue.SentConfiguration configuration =
-        CONFIGURATION_QUEUE.getConfiguration(configId);
+        configurationQueue.getConfiguration(configId);
     return configuration == null ? null : configuration.displayMetrics;
   }
 
@@ -59,7 +59,7 @@ public class SettingsChannel {
     return new MessageBuilder(channel);
   }
 
-  public static class MessageBuilder {
+  public class MessageBuilder {
     @NonNull private final BasicMessageChannel<Object> channel;
     @NonNull private Map<String, Object> message = new HashMap<>();
     @Nullable private DisplayMetrics displayMetrics;
@@ -125,7 +125,7 @@ public class SettingsChannel {
       final ConfigurationQueue.SentConfiguration sentConfiguration =
           new ConfigurationQueue.SentConfiguration(metrics);
       final BasicMessageChannel.Reply deleteCallback =
-          CONFIGURATION_QUEUE.enqueueConfiguration(sentConfiguration);
+          configurationQueue.enqueueConfiguration(sentConfiguration);
       message.put(CONFIGURATION_ID, sentConfiguration.generationNumber);
       channel.send(message, deleteCallback);
     }
