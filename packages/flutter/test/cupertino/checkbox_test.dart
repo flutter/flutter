@@ -1019,6 +1019,17 @@ void main() {
     await gesture2.up();
     await tester.pump();
   });
+
+  testWidgets('CupertinoCheckbox does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(child: CupertinoCheckbox(value: true, onChanged: (_) {})),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoCheckbox)), Size.zero);
+  });
 }
 
 class _CheckboxMouseCursor extends WidgetStateMouseCursor {

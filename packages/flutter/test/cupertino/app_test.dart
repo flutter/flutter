@@ -704,6 +704,15 @@ void main() {
     },
     variant: TargetPlatformVariant.all(),
   );
+
+  testWidgets('CupertinoApp does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Center(
+        child: SizedBox.shrink(child: CupertinoApp(home: Text('X'))),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoApp)), Size.zero);
+  });
 }
 
 class MockScrollBehavior extends ScrollBehavior {
