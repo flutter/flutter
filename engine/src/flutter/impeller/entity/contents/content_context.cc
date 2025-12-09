@@ -302,10 +302,14 @@ struct ContentContext::Pipelines {
   Variants<VerticesUber2Shader> vertices_uber_2_;
   Variants<YUVToRGBFilterPipeline> yuv_to_rgb_filter;
 
-#ifdef IMPELLER_ENABLE_OPENGLES
+// Web doesn't support external texture OpenGL extensions
+#if defined(IMPELLER_ENABLE_OPENGLES) && !defined(FML_OS_EMSCRIPTEN)
   Variants<TiledTextureExternalPipeline> tiled_texture_external;
-  Variants<TextureDownsampleGlesPipeline> texture_downsample_gles;
   Variants<TiledTextureUvExternalPipeline> tiled_texture_uv_external;
+#endif
+
+#if defined(IMPELLER_ENABLE_OPENGLES)
+  Variants<TextureDownsampleGlesPipeline> texture_downsample_gles;
 #endif  // IMPELLER_ENABLE_OPENGLES
   // clang-format on
 };
@@ -853,17 +857,19 @@ ContentContext::ContentContext(
                                                   options_trianglestrip);
   pipelines_->yuv_to_rgb_filter.CreateDefault(*context_, options_trianglestrip);
 
-#if defined(IMPELLER_ENABLE_OPENGLES)
   if (GetContext()->GetBackendType() == Context::BackendType::kOpenGLES) {
-#if !defined(FML_OS_MACOSX)
-    // GLES only shader that is unsupported on macOS.
+#if defined(IMPELLER_ENABLE_OPENGLES) && !defined(FML_OS_MACOSX) && \
+    !defined(FML_OS_EMSCRIPTEN)
+    // GLES only shader that is unsupported on macOS and web.
     pipelines_->tiled_texture_external.CreateDefault(*context_, options);
     pipelines_->tiled_texture_uv_external.CreateDefault(*context_, options);
 #endif  // !defined(FML_OS_MACOSX)
+
+#if defined(IMPELLER_ENABLE_OPENGLES)
     pipelines_->texture_downsample_gles.CreateDefault(*context_,
                                                       options_trianglestrip);
-  }
 #endif  // IMPELLER_ENABLE_OPENGLES
+  }
 
   is_valid_ = true;
   InitializeCommonlyUsedShadersIfNeeded();
@@ -1518,9 +1524,12 @@ PipelineRef ContentContext::GetLinePipeline(ContentContextOptions opts) const {
 }
 
 #ifdef IMPELLER_ENABLE_OPENGLES
-PipelineRef ContentContext::GetDownsampleTextureGlesPipeline(
+
+#if !defined(FML_OS_EMSCRIPTEN)
+PipelineRef ContentContext::GetTiledTextureUvExternalPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(this, pipelines_->texture_downsample_gles, opts);
+  FML_DCHECK(GetContext()->GetBackendType() == Context::BackendType::kOpenGLES);
+  return GetPipeline(this, pipelines_->tiled_texture_uv_external, opts);
 }
 
 PipelineRef ContentContext::GetTiledTextureExternalPipeline(
@@ -1528,12 +1537,13 @@ PipelineRef ContentContext::GetTiledTextureExternalPipeline(
   FML_DCHECK(GetContext()->GetBackendType() == Context::BackendType::kOpenGLES);
   return GetPipeline(this, pipelines_->tiled_texture_external, opts);
 }
+#endif
 
-PipelineRef ContentContext::GetTiledTextureUvExternalPipeline(
+PipelineRef ContentContext::GetDownsampleTextureGlesPipeline(
     ContentContextOptions opts) const {
-  FML_DCHECK(GetContext()->GetBackendType() == Context::BackendType::kOpenGLES);
-  return GetPipeline(this, pipelines_->tiled_texture_uv_external, opts);
+  return GetPipeline(this, pipelines_->texture_downsample_gles, opts);
 }
+
 #endif  // IMPELLER_ENABLE_OPENGLES
 
 }  // namespace impeller

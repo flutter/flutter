@@ -16,6 +16,8 @@ import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 class SkwasmRenderer extends Renderer {
   bool get isMultiThreaded => skwasmIsMultiThreaded();
 
+  bool get isWimp => skwasmIsWimp();
+
   SkwasmPathConstructors pathConstructors = SkwasmPathConstructors();
 
   @override
