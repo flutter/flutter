@@ -679,6 +679,32 @@ abstract interface class PredictiveBackRoute {
 }
 
 /// An entry in the history of a [LocalHistoryRoute].
+///
+/// A [LocalHistoryEntry] represents a "mini" navigation state within a route.
+/// It allows widgets or UI components to handle the back button or pop
+/// operations locally without affecting the main navigator stack.
+///
+/// It is typically used for widgets such as dialogs, bottom sheets, or
+/// inline expandable panels that can be dismissed independently
+/// of the surrounding route.
+///
+/// When a local history entry is removed (e.g., via the back button),
+/// the [onRemove] callback is called first. Only after all local history
+/// entries have been removed will the route itself be popped.
+///
+/// {@tool sample}
+/// This sample demonstrates how to use a [LocalHistoryEntry] to show a panel that can be
+/// dismissed with the back button.
+///
+/// ** See code in examples/api/lib/widgets/routes/local_history_entry.0.dart **
+/// {@end-tool}
+///
+/// See also:
+///
+/// * [LocalHistoryRoute], which manages a stack of local history entries.
+/// * [ModalRoute.addLocalHistoryEntry], which adds an entry to a route.
+/// * [showModalBottomSheet], which internally uses local history entries
+///   to handle back button behavior.
 class LocalHistoryEntry {
   /// Creates an entry in the history of a [LocalHistoryRoute].
   ///
