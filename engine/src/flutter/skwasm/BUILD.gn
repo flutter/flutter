@@ -9,34 +9,34 @@ template("skwasm_variant") {
     public_configs = [ "//flutter:config" ]
 
     sources = [
-      "canvas.cpp",
+      "canvas.cc",
       "canvas_text.h",
-      "contour_measure.cpp",
-      "data.cpp",
+      "contour_measure.cc",
+      "data.cc",
       "export.h",
-      "filters.cpp",
-      "fonts.cpp",
+      "filters.cc",
+      "fonts.cc",
       "helpers.h",
-      "image.cpp",
+      "image.cc",
       "images.h",
-      "live_objects.cpp",
+      "live_objects.cc",
       "live_objects.h",
-      "paint.cpp",
-      "path.cpp",
-      "picture.cpp",
+      "paint.cc",
+      "path.cc",
+      "picture.cc",
       "render_context.h",
-      "shaders.cpp",
+      "shaders.cc",
       "skwasm_support.h",
-      "string.cpp",
-      "surface.cpp",
-      "text/line_metrics.cpp",
-      "text/paragraph.cpp",
-      "text/paragraph_builder.cpp",
-      "text/paragraph_style.cpp",
-      "text/strut_style.cpp",
-      "text/text_style.cpp",
+      "string.cc",
+      "surface.cc",
+      "text/line_metrics.cc",
+      "text/paragraph.cc",
+      "text/paragraph_builder.cc",
+      "text/paragraph_style.cc",
+      "text/strut_style.cc",
+      "text/text_style.cc",
       "text/text_types.h",
-      "vertices.cpp",
+      "vertices.cc",
       "wrappers.h",
     ]
 
@@ -62,29 +62,29 @@ template("skwasm_variant") {
     inputs = [ rebase_path("library_skwasm_support.js") ]
     if (invoker.is_heavy) {
       sources += [
-        "animated_image.cpp",
-        "text/paragraph_builder_builtin_icu.cpp",
+        "animated_image.cc",
+        "text/paragraph_builder_builtin_icu.cc",
       ]
     } else {
       sources += [
-        "animated_image_stub.cpp",
-        "text/paragraph_builder_client_icu.cpp",
+        "animated_image_stub.cc",
+        "text/paragraph_builder_client_icu.cc",
       ]
     }
 
     if (invoker.use_impeller) {
       sources += [
-        "canvas_text_impeller.cpp",
-        "images_impeller.cpp",
-        "render_context_impeller.cpp",
-        "shaders_impeller.cpp",
+        "canvas_text_impeller.cc",
+        "images_impeller.cc",
+        "render_context_impeller.cc",
+        "shaders_impeller.cc",
       ]
     } else {
       sources += [
-        "canvas_text_skia.cpp",
-        "images_skia.cpp",
-        "render_context_skia.cpp",
-        "shaders_skia.cpp",
+        "canvas_text_skia.cc",
+        "images_skia.cc",
+        "render_context_skia.cc",
+        "shaders_skia.cc",
       ]
     }
 
