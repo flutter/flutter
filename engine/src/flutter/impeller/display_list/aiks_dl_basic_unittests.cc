@@ -852,6 +852,26 @@ void RenderArcFarm(DisplayListBuilder& builder,
   }
   builder.Restore();
 }
+
+void RenderArcFarmForOverlappingCapsTest(DisplayListBuilder& builder,
+                                         const DlPaint& paint) {
+  builder.Save();
+  builder.Translate(40, 30);
+  const Rect arc_bounds = Rect::MakeLTRB(0, 0, 40, 40);
+  DlPaint modified_paint = DlPaint(paint);
+  for (Scalar stroke_width = 10; stroke_width <= 40; stroke_width += 3) {
+    DlPaint modified_paint = DlPaint(paint);
+    modified_paint.setStrokeWidth(stroke_width);
+    builder.Save();
+    for (int sweep = 160; sweep <= 360; sweep += 20) {
+      builder.DrawArc(arc_bounds, 0, sweep, false, modified_paint);
+      builder.Translate(84, 0);
+    }
+    builder.Restore();
+    builder.Translate(0, 44 + stroke_width);
+  }
+  builder.Restore();
+}
 }  // namespace
 
 TEST_P(AiksTest, FilledArcsRenderCorrectly) {
@@ -964,6 +984,21 @@ TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithSquareEnds) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithTranslucencyAndSquareEnds) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeCap(DlStrokeCap::kSquare);
+  paint.setColor(DlColor::kBlue().modulateOpacity(0.5));
+
+  RenderArcFarmForOverlappingCapsTest(builder, paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithRoundEnds) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
@@ -980,6 +1015,21 @@ TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithRoundEnds) {
                     .use_center = false,
                     .full_circles = false,
                 });
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithTranslucencyAndRoundEnds) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeCap(DlStrokeCap::kRound);
+  paint.setColor(DlColor::kBlue().modulateOpacity(0.5));
+
+  RenderArcFarmForOverlappingCapsTest(builder, paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
