@@ -4,7 +4,7 @@
 
 #include <impeller/types.glsl>
 
-uniform FrameInfo {
+layout(binding = 10) uniform FrameInfo {
   mat4 mvp;
   mat4 text_transform_0;
   mat4 text_transform_1;
