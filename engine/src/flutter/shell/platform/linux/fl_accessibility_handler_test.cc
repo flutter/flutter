@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Workaround missing C code compatibility in ATK header.
+// Fixed in https://gitlab.gnome.org/GNOME/at-spi2-core/-/merge_requests/219
+extern "C" {
+#include <atk/atk.h>
+}
+
 #include "flutter/shell/platform/linux/fl_accessibility_handler.h"
 #include "flutter/shell/platform/linux/fl_binary_messenger_private.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
@@ -16,12 +22,58 @@
 static constexpr int64_t kTextDirectionLtr = 0;
 static constexpr int64_t kAssertivenessAssertive = 1;
 
-static void announce_cb(FlViewAccessible* accessible,
-                        const gchar* message,
-                        gpointer user_data) {
+// Enum copied from ATK 2.50, as the version we are building against doesn't
+// have this.
+typedef enum { _ATK_LIVE_NONE, _ATK_LIVE_POLITE, _ATK_LIVE_ASSERTIVE } _AtkLive;
+
+static void announcement_cb(FlViewAccessible* accessible,
+                            const gchar* message,
+                            gpointer user_data) {
   EXPECT_STREQ(message, "MESSAGE");
   gboolean* signalled = static_cast<gboolean*>(user_data);
   *signalled = TRUE;
+}
+
+static void notification_polite_cb(FlViewAccessible* accessible,
+                                   const gchar* message,
+                                   _AtkLive politeness,
+                                   gpointer user_data) {
+  EXPECT_STREQ(message, "MESSAGE");
+  EXPECT_EQ(politeness, _ATK_LIVE_POLITE);
+  gboolean* signalled = static_cast<gboolean*>(user_data);
+  *signalled = TRUE;
+}
+
+static void notification_assertive_cb(FlViewAccessible* accessible,
+                                      const gchar* message,
+                                      _AtkLive politeness,
+                                      gpointer user_data) {
+  EXPECT_STREQ(message, "MESSAGE");
+  EXPECT_EQ(politeness, _ATK_LIVE_ASSERTIVE);
+  gboolean* signalled = static_cast<gboolean*>(user_data);
+  *signalled = TRUE;
+}
+
+static gboolean atk_supports_announce() {
+  return atk_get_major_version() == 2 && atk_get_minor_version() >= 46;
+}
+
+static void subscribe_signal(FlViewAccessible* accessible,
+                             gboolean* signalled,
+                             gboolean assertive) {
+  if (!atk_supports_announce()) {
+    return;
+  }
+
+  if (atk_get_major_version() == 2 && atk_get_minor_version() < 50) {
+    g_signal_connect(accessible, "announcement", G_CALLBACK(announcement_cb),
+                     signalled);
+  } else {
+    g_signal_connect(accessible, "notification",
+                     G_CALLBACK(assertive ? notification_assertive_cb
+                                          : notification_polite_cb),
+                     signalled);
+  }
 }
 
 TEST(FlAccessibilityHandlerTest, Announce) {
@@ -33,8 +85,7 @@ TEST(FlAccessibilityHandlerTest, Announce) {
   FlView* view = fl_view_new_for_engine(engine);
 
   gboolean signalled = FALSE;
-  g_signal_connect(fl_view_get_accessible(view), "announcement",
-                   G_CALLBACK(announce_cb), &signalled);
+  subscribe_signal(fl_view_get_accessible(view), &signalled, FALSE);
 
   g_autoptr(FlValue) message = fl_value_new_map();
   fl_value_set_string_take(message, "type", fl_value_new_string("announce"));
@@ -57,7 +108,9 @@ TEST(FlAccessibilityHandlerTest, Announce) {
       },
       &called);
   EXPECT_TRUE(called);
-  EXPECT_TRUE(signalled);
+  if (atk_supports_announce()) {
+    EXPECT_TRUE(signalled);
+  }
 
   fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
@@ -71,8 +124,7 @@ TEST(FlAccessibilityHandlerTest, AnnounceAssertive) {
   FlView* view = fl_view_new_for_engine(engine);
 
   gboolean signalled = FALSE;
-  g_signal_connect(fl_view_get_accessible(view), "announcement",
-                   G_CALLBACK(announce_cb), &signalled);
+  subscribe_signal(fl_view_get_accessible(view), &signalled, TRUE);
 
   g_autoptr(FlValue) message = fl_value_new_map();
   fl_value_set_string_take(message, "type", fl_value_new_string("announce"));
@@ -98,7 +150,9 @@ TEST(FlAccessibilityHandlerTest, AnnounceAssertive) {
       },
       &called);
   EXPECT_TRUE(called);
-  EXPECT_TRUE(signalled);
+  if (atk_supports_announce()) {
+    EXPECT_TRUE(signalled);
+  }
 
   fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
@@ -112,8 +166,7 @@ TEST(FlAccessibilityHandlerTest, AnnounceUnknownView) {
   FlView* view = fl_view_new_for_engine(engine);
 
   gboolean signalled = FALSE;
-  g_signal_connect(fl_view_get_accessible(view), "announcement",
-                   G_CALLBACK(announce_cb), &signalled);
+  subscribe_signal(fl_view_get_accessible(view), &signalled, FALSE);
 
   g_autoptr(FlValue) message = fl_value_new_map();
   fl_value_set_string_take(message, "type", fl_value_new_string("announce"));
@@ -152,8 +205,7 @@ TEST(FlAccessibilityHandlerTest, UnknownType) {
   FlView* view = fl_view_new_for_engine(engine);
 
   gboolean signalled = FALSE;
-  g_signal_connect(fl_view_get_accessible(view), "announcement",
-                   G_CALLBACK(announce_cb), &signalled);
+  subscribe_signal(fl_view_get_accessible(view), &signalled, FALSE);
 
   // Unknown type, ignored by embedder.
   g_autoptr(FlValue) message = fl_value_new_map();
