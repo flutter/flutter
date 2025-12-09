@@ -379,7 +379,7 @@ void main() {
 
   testWidgets('CupertinoExpansionTile does not crash at zero area', (WidgetTester tester) async {
     tester.view.physicalSize = Size.zero;
-    final ExpansibleController controller = ExpansibleController();
+    final controller = ExpansibleController();
     addTearDown(tester.view.reset);
     addTearDown(controller.dispose);
     await tester.pumpWidget(
