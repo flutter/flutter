@@ -7,6 +7,7 @@ package io.flutter.embedding.engine;
 import android.content.Intent;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
+import io.flutter.Log;
 import java.util.*;
 
 /**
@@ -164,6 +165,7 @@ public final class FlutterShellArgs {
       args.add(ARG_DART_FLAGS + "=" + intent.getStringExtra(ARG_KEY_DART_FLAGS));
     }
 
+    Log.e("CAMILLE", "fromIntent args: " + args.toString());
     return args;
   }
 

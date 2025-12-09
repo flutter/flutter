@@ -329,6 +329,13 @@ import java.util.Set;
   private void attachToActivityInternal(@NonNull Activity activity, @NonNull Lifecycle lifecycle) {
     this.activityPluginBinding = new FlutterEngineActivityPluginBinding(activity, lifecycle);
 
+    boolean useSoftwareRendering =
+        activity.getIntent() != null
+            ? activity
+                .getIntent()
+                .getBooleanExtra(FlutterShellArgs.ARG_KEY_ENABLE_SOFTWARE_RENDERING, false)
+            : false;
+
     // Previously, --enable-software-rendering could be set here via Intent. Warn developers
     // about the new method for doing so if this was attempted.
     // TODO(camsim99): Remove this warning after a stable release has passed:
@@ -345,7 +352,10 @@ import java.util.Set;
     }
 
     // Check manifest for software rendering configuration.
-    boolean useSoftwareRendering = flutterLoader.getSofwareRenderingEnabledViaManifest();
+    if (useSoftwareRendering == false) {
+      useSoftwareRendering = flutterLoader.getSofwareRenderingEnabledViaManifest();
+    }
+
     flutterEngine.getPlatformViewsController().setSoftwareRendering(useSoftwareRendering);
 
     // Activate the PlatformViewsController. This must happen before any plugins attempt
