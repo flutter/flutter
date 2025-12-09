@@ -141,7 +141,9 @@ class TextPaint {
             painter.fillTextCluster(
               clusterText,
               // We shape ellipsis with default direction coming from the attaching block
-              // and all the other blocks with the default paragraph direction
+              // and all the other blocks with the default paragraph direction.
+              // The reason for shaping ellipsis this way is that we literally attach it to the block
+              // that overflows and we want to keep all the styling attributes (including text direction) consistent.
               block is EllipsisBlock
                   ? block.isLtr
                   : layout.paragraph.paragraphStyle.textDirection == ui.TextDirection.ltr,

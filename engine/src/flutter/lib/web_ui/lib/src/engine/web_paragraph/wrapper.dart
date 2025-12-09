@@ -396,8 +396,7 @@ class _LineBuilder {
   }
 
   bool ellipsize(int clusterIndex) {
-    if (_layout.paragraph.paragraphStyle.maxLines == null ||
-        (_layout.lines.length + 1) < _layout.paragraph.paragraphStyle.maxLines!) {
+    if (reachedMaxLines()) {
       return false;
     }
     // We need to shape the ellipsis here because only here we know the span/textStyle we ellipsize with

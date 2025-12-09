@@ -423,10 +423,7 @@ class TextLayout {
       if (block is! PlaceholderBlock) {
         continue;
       }
-      block.calculatePlaceholderTop(
-        line.fontBoundingBoxAscent,
-        line.fontBoundingBoxDescent,
-      );
+      block.calculatePlaceholderTop(line.fontBoundingBoxAscent, line.fontBoundingBoxDescent);
       // Line always counts multipled metrics (no need for the others)
       // TODO(jlavrova): sort our alphabetic/ideographic baseline and how it affects ascent & descent
       line.fontBoundingBoxAscent = math.max(line.fontBoundingBoxAscent, block.ascent);
@@ -1112,11 +1109,6 @@ abstract class LineBlock {
 
   // TODO(mdebbar): Remove when possible!
   double get spanShiftFromLineStart;
-
-  String getText(int start, int end) {
-    assert(false, 'Only implemented for the ellipsis block');
-    return '';
-  }
 }
 
 class TextBlock extends LineBlock {
@@ -1236,16 +1228,6 @@ class EllipsisBlock extends TextBlock {
     super.shiftFromLineStart,
     super.shiftFromSpanStart,
   );
-
-  @override
-  String getText(int start, int end) {
-    if (span.text.isEmpty) {
-      return span.text;
-    }
-    assert(start >= 0);
-    assert(end <= span.text.length);
-    return span.text.substring(start, end);
-  }
 }
 
 class TextLine {
