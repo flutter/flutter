@@ -404,6 +404,14 @@ extern CFTimeInterval display_link_target;
 }
 
 - (void)presentOnMainThread:(FlutterTexture*)texture {
+  if (texture.texture.width != _drawableSize.width ||
+      texture.texture.height != _drawableSize.height) {
+    // This texture was created with an old size, but the view has since been
+    // resized. Do not present this stale frame to avoid distortion. The texture
+    // will be correctly recycled on the next frame.
+    return;
+  }
+
   // This is needed otherwise frame gets skipped on touch begin / end. Go figure.
   // Might also be placebo
   [self setNeedsDisplay];

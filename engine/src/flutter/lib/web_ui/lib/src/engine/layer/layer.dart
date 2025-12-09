@@ -22,8 +22,6 @@ abstract class Layer implements ui.EngineLayer {
   /// Implement layer visitor.
   R accept<R>(LayerVisitor<R> visitor);
 
-  // TODO(dnfield): Implement ui.EngineLayer.dispose for CanvasKit.
-  // https://github.com/flutter/flutter/issues/82878
   @override
   void dispose() {}
 }
@@ -41,6 +39,18 @@ abstract class ContainerLayer extends Layer {
   void add(Layer child) {
     child.parent = this;
     children.add(child);
+  }
+
+  @override
+  void dispose() {
+    // Dispose of any picture layers that we own. Picture layers cannot be
+    // retained between frames so this ContainerLayer is the only owner.
+    // Therefore, we dispose of them here.
+    for (final Layer child in children) {
+      if (child is PictureLayer) {
+        child.dispose();
+      }
+    }
   }
 }
 
@@ -228,6 +238,12 @@ class PictureLayer extends Layer {
 
   @override
   bool get needsPainting => super.needsPainting && !isCulled;
+
+  @override
+  void dispose() {
+    picture.dispose();
+    super.dispose();
+  }
 }
 
 /// A layer which contains a [ui.ColorFilter].

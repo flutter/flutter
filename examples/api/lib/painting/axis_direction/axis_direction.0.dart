@@ -107,62 +107,26 @@ class _MyWidgetState extends State<MyWidget> {
         ),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-              Radio<AxisDirection>(
-                value: AxisDirection.up,
-                // TODO(loic-sharma): Migrate to RadioGroup.
-                // https://github.com/flutter/flutter/issues/179088
-                // ignore: deprecated_member_use
-                groupValue: _axisDirection,
-                // TODO(loic-sharma): Migrate to RadioGroup.
-                // https://github.com/flutter/flutter/issues/179088
-                // ignore: deprecated_member_use
-                onChanged: _onAxisDirectionChanged,
-              ),
-              const Text('up'),
-              _spacer,
-              Radio<AxisDirection>(
-                value: AxisDirection.down,
-                // TODO(loic-sharma): Migrate to RadioGroup.
-                // https://github.com/flutter/flutter/issues/179088
-                // ignore: deprecated_member_use
-                groupValue: _axisDirection,
-                // TODO(loic-sharma): Migrate to RadioGroup.
-                // https://github.com/flutter/flutter/issues/179088
-                // ignore: deprecated_member_use
-                onChanged: _onAxisDirectionChanged,
-              ),
-              const Text('down'),
-              _spacer,
-              Radio<AxisDirection>(
-                value: AxisDirection.left,
-                // TODO(loic-sharma): Migrate to RadioGroup.
-                // https://github.com/flutter/flutter/issues/179088
-                // ignore: deprecated_member_use
-                groupValue: _axisDirection,
-                // TODO(loic-sharma): Migrate to RadioGroup.
-                // https://github.com/flutter/flutter/issues/179088
-                // ignore: deprecated_member_use
-                onChanged: _onAxisDirectionChanged,
-              ),
-              const Text('left'),
-              _spacer,
-              Radio<AxisDirection>(
-                value: AxisDirection.right,
-                // TODO(loic-sharma): Migrate to RadioGroup.
-                // https://github.com/flutter/flutter/issues/179088
-                // ignore: deprecated_member_use
-                groupValue: _axisDirection,
-                // TODO(loic-sharma): Migrate to RadioGroup.
-                // https://github.com/flutter/flutter/issues/179088
-                // ignore: deprecated_member_use
-                onChanged: _onAxisDirectionChanged,
-              ),
-              const Text('right'),
-              _spacer,
-            ],
+          child: RadioGroup<AxisDirection>(
+            groupValue: _axisDirection,
+            onChanged: _onAxisDirectionChanged,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Radio<AxisDirection>(value: AxisDirection.up),
+                const Text('up'),
+                _spacer,
+                Radio<AxisDirection>(value: AxisDirection.down),
+                const Text('down'),
+                _spacer,
+                Radio<AxisDirection>(value: AxisDirection.left),
+                const Text('left'),
+                _spacer,
+                Radio<AxisDirection>(value: AxisDirection.right),
+                const Text('right'),
+                _spacer,
+              ],
+            ),
           ),
         ),
       ),
