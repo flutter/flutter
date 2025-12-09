@@ -196,10 +196,7 @@ void main() {
       lastUpDetails = details;
     };
 
-    const primaryMouseDown = PointerDownEvent(
-      pointer: 1,
-      kind: PointerDeviceKind.mouse,
-    );
+    const primaryMouseDown = PointerDownEvent(pointer: 1, kind: PointerDeviceKind.mouse);
     const primaryMouseUp = PointerUpEvent(pointer: 1, kind: PointerDeviceKind.mouse);
 
     tap.addPointer(primaryMouseDown);
