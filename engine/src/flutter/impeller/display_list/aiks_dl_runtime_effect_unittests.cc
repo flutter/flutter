@@ -554,7 +554,13 @@ TEST_P(AiksTest, CombineColorFilters) {
       DlImageFilter::MakeCombine(keep_red, keep_blue, combiner);
 
   DlPaint paint;
-  paint.setColor(DlColor::kWhite());
+  std::vector<DlColor> colors = {
+      DlColor(0.1, 0.1, 0.1, 1.0, DlColorSpace::kSRGB), DlColor::kWhite()};
+  const float stops[2] = {0.0, 1.0};
+  auto gradient =
+      DlColorSource::MakeLinear({100.0, 100.0}, {300.0, 100.0}, 2,
+                                colors.data(), stops, DlTileMode::kClamp);
+  paint.setColorSource(gradient);
   paint.setImageFilter(combine_filter);
 
   DisplayListBuilder builder;
