@@ -858,7 +858,6 @@ void RenderArcFarmForOverlappingCapsTest(DisplayListBuilder& builder,
   builder.Save();
   builder.Translate(40, 30);
   const Rect arc_bounds = Rect::MakeLTRB(0, 0, 40, 40);
-  DlPaint modified_paint = DlPaint(paint);
   for (Scalar stroke_width = 10; stroke_width <= 40; stroke_width += 3) {
     DlPaint modified_paint = DlPaint(paint);
     modified_paint.setStrokeWidth(stroke_width);
