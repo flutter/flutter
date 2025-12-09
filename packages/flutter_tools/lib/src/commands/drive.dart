@@ -319,11 +319,11 @@ class DriveCommand extends RunCommandBase {
     // If CLI provides TLS certs, use them (with file config as fallback for missing values)
     // If CLI doesn't provide TLS certs, use file config
     final HttpsConfig? httpsConfig;
-    if (fileConfig != null && (cliCertPath != null || cliCertKeyPath != null)) {
+    if (cliCertPath != null || cliCertKeyPath != null) {
       // CLI is trying to configure HTTPS - use CLI values with file config as fallback
       httpsConfig = HttpsConfig.parse(
-        cliCertPath ?? fileConfig.https?.certPath,
-        cliCertKeyPath ?? fileConfig.https?.certKeyPath,
+        cliCertPath ?? fileConfig?.https?.certPath,
+        cliCertKeyPath ?? fileConfig?.https?.certKeyPath,
       );
     } else {
       // No CLI HTTPS config - use file config as-is
