@@ -106,8 +106,9 @@ class _DraggableScrollableSheetExampleState
       };
 }
 
-/// A draggable widget that accepts vertical drag gestures
-/// and is only visible on desktop and web platforms.
+/// A draggable widget that accepts vertical drag gestures.
+///
+/// This is typically only used in desktop or web platforms.
 class Grabber extends StatelessWidget {
   const Grabber({super.key, required this.onVerticalDragUpdate});
 
