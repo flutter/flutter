@@ -13,14 +13,7 @@
 #include <webgl/webgl1.h>
 #include <cassert>
 #include "export.h"
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkColorSpace.h"
-#include "third_party/skia/include/core/SkSurface.h"
-#include "third_party/skia/include/encode/SkPngEncoder.h"
-#include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
-#include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
-#include "third_party/skia/include/gpu/ganesh/gl/GrGLInterface.h"
-#include "third_party/skia/include/gpu/ganesh/gl/GrGLTypes.h"
+#include "render_context.h"
 #include "wrappers.h"
 
 namespace flutter {
@@ -28,13 +21,6 @@ class DisplayList;
 }
 
 namespace Skwasm {
-// This must be kept in sync with the `ImageByteFormat` enum in dart:ui.
-enum class ImageByteFormat {
-  rawRgba,
-  rawStraightRgba,
-  rawUnmodified,
-  png,
-};
 
 class TextureSourceWrapper {
  public:
@@ -63,7 +49,7 @@ class Surface {
                           int width,
                           int height,
                           int count);
-  uint32_t rasterizeImage(SkImage* image, ImageByteFormat format);
+  uint32_t rasterizeImage(flutter::DlImage* image, ImageByteFormat format);
   void setCallbackHandler(CallbackHandler* callbackHandler);
   void onRenderComplete(uint32_t callbackId, SkwasmObject imageBitmap);
   void onRasterizeComplete(uint32_t callbackId, SkData* data);
@@ -79,7 +65,7 @@ class Surface {
                               int pictureCount,
                               uint32_t callbackId,
                               double rasterStart);
-  void rasterizeImageOnWorker(SkImage* image,
+  void rasterizeImageOnWorker(flutter::DlImage* image,
                               ImageByteFormat format,
                               uint32_t callbackId);
 
@@ -95,11 +81,7 @@ class Surface {
   int _canvasHeight = 0;
 
   EMSCRIPTEN_WEBGL_CONTEXT_HANDLE _glContext = 0;
-  sk_sp<GrDirectContext> _grContext = nullptr;
-  sk_sp<SkSurface> _surface = nullptr;
-  GrGLFramebufferInfo _fbInfo;
-  GrGLint _sampleCount;
-  GrGLint _stencil;
+  std::unique_ptr<RenderContext> _renderContext;
 
   pthread_t _thread;
 

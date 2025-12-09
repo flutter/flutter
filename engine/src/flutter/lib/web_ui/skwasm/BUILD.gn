@@ -10,6 +10,7 @@ template("skwasm_variant") {
 
     sources = [
       "canvas.cpp",
+      "canvas_text.h",
       "contour_measure.cpp",
       "data.cpp",
       "export.h",
@@ -17,11 +18,13 @@ template("skwasm_variant") {
       "fonts.cpp",
       "helpers.h",
       "image.cpp",
+      "images.h",
       "live_objects.cpp",
       "live_objects.h",
       "paint.cpp",
       "path.cpp",
       "picture.cpp",
+      "render_context.h",
       "shaders.cpp",
       "skwasm_support.h",
       "string.cpp",
@@ -69,6 +72,22 @@ template("skwasm_variant") {
       ]
     }
 
+    if (invoker.use_impeller) {
+      sources += [
+        "canvas_text_impeller.cpp",
+        "images_impeller.cpp",
+        "render_context_impeller.cpp",
+        "shaders_impeller.cpp",
+      ]
+    } else {
+      sources += [
+        "canvas_text_skia.cpp",
+        "images_skia.cpp",
+        "render_context_skia.cpp",
+        "shaders_skia.cpp",
+      ]
+    }
+
     if (is_debug) {
       ldflags += [
         "-sASSERTIONS=1",
@@ -80,17 +99,29 @@ template("skwasm_variant") {
 
     deps = [
       "//flutter/display_list",
-      "//flutter/skia",
       "//flutter/skia/modules/skparagraph",
       "//flutter/skia/modules/skunicode",
     ]
+
+    if (invoker.use_impeller) {
+      deps += [ "//flutter/impeller" ]
+    } else {
+      deps += [ "//flutter/skia" ]
+    }
   }
 }
 
 skwasm_variant("skwasm") {
   is_heavy = false
+  use_impeller = false
 }
 
 skwasm_variant("skwasm_heavy") {
   is_heavy = true
+  use_impeller = false
+}
+
+skwasm_variant("wimp") {
+  is_heavy = false
+  use_impeller = true
 }
