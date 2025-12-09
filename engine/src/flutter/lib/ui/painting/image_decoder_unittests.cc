@@ -27,6 +27,9 @@
 #include "impeller/core/runtime_types.h"
 #include "impeller/renderer/command_queue.h"
 #include "third_party/skia/include/codec/SkCodecAnimation.h"
+#include "third_party/skia/include/codec/SkGifDecoder.h"
+#include "third_party/skia/include/codec/SkJpegDecoder.h"
+#include "third_party/skia/include/codec/SkPngDecoder.h"
 #include "third_party/skia/include/core/SkData.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkImageInfo.h"
@@ -204,7 +207,13 @@ class TestIOManager final : public IOManager {
   FML_DISALLOW_COPY_AND_ASSIGN(TestIOManager);
 };
 
-class ImageDecoderFixtureTest : public FixtureTest {};
+class ImageDecoderFixtureTest : public FixtureTest {
+  void SetUp() override {
+    SkCodecs::Register(SkPngDecoder::Decoder());
+    SkCodecs::Register(SkJpegDecoder::Decoder());
+    SkCodecs::Register(SkGifDecoder::Decoder());
+  }
+};
 
 TEST_F(ImageDecoderFixtureTest, CanCreateImageDecoder) {
   auto loop = fml::ConcurrentMessageLoop::Create();
