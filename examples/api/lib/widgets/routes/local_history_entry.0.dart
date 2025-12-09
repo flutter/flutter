@@ -4,9 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-/// This sample demonstrates how to use [LocalHistoryEntry] to add a
-/// temporary route-like state to the current page. Pressing the system
-/// back button removes the entry and closes the custom bottom panel.
+/// Flutter code sample for [LocalHistoryEntry].
 
 void main() {
   runApp(PanelDemo());
