@@ -692,75 +692,11 @@ abstract interface class PredictiveBackRoute {
 /// the [onRemove] callback is called first. Only after all local history
 /// entries have been removed will the route itself be popped.
 ///
-/// {@tool dartpad}
-/// This example demonstrates how to use a [LocalHistoryEntry] to show a panel that can be
+/// {@tool sample}
+/// This sample demonstrates how to use a [LocalHistoryEntry] to show a panel that can be
 /// dismissed with the back button.
 ///
-/// ```dart
-/// import 'package:flutter/material.dart';
-///
-/// void main() {
-///   runApp(const MaterialApp(home: PanelDemo()));
-/// }
-///
-/// class PanelDemo extends StatefulWidget {
-///   const PanelDemo({super.key});
-///
-///   @override
-///   State<PanelDemo> createState() => _PanelDemoState();
-/// }
-///
-/// class _PanelDemoState extends State<PanelDemo> {
-///   bool _isPanelOpen = false;
-///   LocalHistoryEntry? _entry;
-///
-///   void _openPanel() {
-///     if (_isPanelOpen) {
-///       return;
-///     }
-///     _entry = LocalHistoryEntry(
-///       onRemove: () {
-///         setState(() {
-///           _isPanelOpen = false;
-///           _entry = null;
-///         });
-///       },
-///     );
-///     ModalRoute.of(context)?.addLocalHistoryEntry(_entry!);
-///     setState(() {
-///       _isPanelOpen = true;
-///     });
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Scaffold(
-///       appBar: AppBar(title: const Text('LocalHistoryEntry Example')),
-///       body: Stack(
-///         children: <Widget>[
-///           Center(
-///             child: ElevatedButton(onPressed: _openPanel, child: const Text('Open Panel')),
-///           ),
-///           if (_isPanelOpen)
-///             Align(
-///               alignment: Alignment.bottomCenter,
-///               child: Container(
-///                 height: 200,
-///                 color: Colors.blueAccent,
-///                 child: const Center(
-///                   child: Text(
-///                     'Press back to close this panel',
-///                     style: TextStyle(color: Colors.white, fontSize: 18),
-///                   ),
-///                 ),
-///               ),
-///             ),
-///         ],
-///       ),
-///     );
-///   }
-/// }
-/// ```
+/// ** See code in examples\api\lib\widgets\routes\local_history_entry.0.dart **
 /// {@end-tool}
 ///
 /// See also:
