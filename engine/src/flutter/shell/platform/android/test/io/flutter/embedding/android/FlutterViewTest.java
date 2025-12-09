@@ -1303,6 +1303,44 @@ public class FlutterViewTest {
     assertEquals(SettingsChannel.PlatformBrightness.light, reportedBrightness.get());
   }
 
+  @Test
+  public void onMeasure_whenWrapContent_sendsCorrectViewportMetrics() {
+    FlutterSurfaceView flutterSurfaceView = spy(new FlutterSurfaceView(ctx));
+    FlutterView flutterView = new FlutterView(ctx, flutterSurfaceView);
+    FlutterEngine flutterEngine = spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
+    FlutterRenderer flutterRenderer = spy(new FlutterRenderer(mockFlutterJni));
+    when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
+    flutterView.onMeasure(
+        View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+        View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+
+    flutterView.onSizeChanged(1, 1, 0, 0);
+    flutterView.attachToFlutterEngine(flutterEngine);
+
+    ArgumentCaptor<FlutterRenderer.ViewportMetrics> viewportMetricsCaptor =
+        ArgumentCaptor.forClass(FlutterRenderer.ViewportMetrics.class);
+    verify(flutterRenderer, times(1)).setViewportMetrics(viewportMetricsCaptor.capture());
+    FlutterRenderer.ViewportMetrics metrics = viewportMetricsCaptor.getValue();
+    assertEquals(0, metrics.minWidth);
+    assertEquals(FlutterView.CONTENT_SIZING_MAX, metrics.maxWidth);
+    assertEquals(0, metrics.minHeight);
+    assertEquals(FlutterView.CONTENT_SIZING_MAX, metrics.maxHeight);
+  }
+
+  @Test
+  public void resizeEngineView_resizesTheSurfaceView() {
+    FlutterSurfaceView flutterSurfaceView = spy(new FlutterSurfaceView(ctx));
+    FlutterView flutterView = new FlutterView(ctx, flutterSurfaceView);
+    FlutterEngine flutterEngine = spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
+    FlutterRenderer flutterRenderer = spy(new FlutterRenderer(mockFlutterJni));
+    when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
+    flutterView.attachToFlutterEngine(flutterEngine);
+
+    clearInvocations(flutterView.flutterEngineView);
+    flutterView.flutterUiResizeListener.resizeEngineView(100, 200);
+    verify(flutterView.flutterEngineView, times(1)).setLayoutParams(any());
+  }
+
   @SuppressWarnings("deprecation")
   private void setExpectedDisplayRotation(int rotation) {
     ShadowDisplay myDisplay =

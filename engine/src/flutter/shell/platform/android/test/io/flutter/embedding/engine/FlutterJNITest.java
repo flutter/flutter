@@ -23,6 +23,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorsStack;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
+import io.flutter.embedding.engine.renderer.FlutterUiResizeListener;
 import io.flutter.embedding.engine.systemchannels.LocalizationChannel;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
@@ -288,6 +289,27 @@ public class FlutterJNITest {
     flutterJNI.setRefreshRateFPS(120.0f);
     // --- Verify Results ---
     verify(flutterJNI, times(1)).updateRefreshRate();
+  }
+
+  @Test
+  public void addAndRemoveFlutterUiResizeListener() {
+    // Setup test.
+    FlutterJNI flutterJNI = new FlutterJNI();
+    FlutterUiResizeListener listener = mock(FlutterUiResizeListener.class);
+
+    // Execute behavior under test.
+    flutterJNI.addResizingFlutterUiListener(listener);
+    flutterJNI.maybeResizeSurfaceView(100, 200);
+
+    // Verify results.
+    verify(listener, times(1)).resizeEngineView(100, 200);
+
+    // Execute behavior under test.
+    flutterJNI.removeResizingFlutterUiListener(listener);
+    flutterJNI.maybeResizeSurfaceView(100, 200);
+
+    // Verify results.
+    verify(listener, times(1)).resizeEngineView(100, 200);
   }
 
   static class FlutterJNITester extends FlutterJNI {

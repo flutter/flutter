@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/shell/common/serialization_callbacks.h"
 #include "flutter/fml/logging.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
 #include "third_party/skia/include/core/SkImage.h"
@@ -11,11 +12,12 @@
 
 namespace flutter {
 
-sk_sp<SkData> SerializeTypefaceWithoutData(SkTypeface* typeface, void* ctx) {
+SkSerialReturnType SerializeTypefaceWithoutData(SkTypeface* typeface,
+                                                void* ctx) {
   return SkData::MakeEmpty();
 }
 
-sk_sp<SkData> SerializeTypefaceWithData(SkTypeface* typeface, void* ctx) {
+SkSerialReturnType SerializeTypefaceWithData(SkTypeface* typeface, void* ctx) {
   return typeface->serialize(SkTypeface::SerializeBehavior::kDoIncludeData);
 }
 
@@ -33,7 +35,7 @@ struct ImageMetaData {
   bool has_color_space;
 } __attribute__((packed));
 
-sk_sp<SkData> SerializeImageWithoutData(SkImage* image, void* ctx) {
+SkSerialReturnType SerializeImageWithoutData(SkImage* image, void* ctx) {
   const auto& info = image->imageInfo();
   SkDynamicMemoryWStream stream;
 
