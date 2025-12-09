@@ -311,10 +311,24 @@ class DriveCommand extends RunCommandBase {
         ? (await WebDevServerConfig.loadFromFile(fileSystem: globals.fs, logger: globals.logger))
         : null;
 
-    final HttpsConfig? httpsConfig = fileConfig?.https?.copyWith(
-      certPath: stringArg('web-tls-cert-path'),
-      certKeyPath: stringArg('web-tls-cert-key-path'),
-    );
+    // CLI arguments for TLS certificates
+    final String? cliCertPath = stringArg('web-tls-cert-path');
+    final String? cliCertKeyPath = stringArg('web-tls-cert-key-path');
+
+    // Determine HTTPS config with CLI > file precedence
+    // If CLI provides TLS certs, use them (with file config as fallback for missing values)
+    // If CLI doesn't provide TLS certs, use file config
+    final HttpsConfig? httpsConfig;
+    if (fileConfig != null && (cliCertPath != null || cliCertKeyPath != null)) {
+      // CLI is trying to configure HTTPS - use CLI values with file config as fallback
+      httpsConfig = HttpsConfig.parse(
+        cliCertPath ?? fileConfig.https?.certPath,
+        cliCertKeyPath ?? fileConfig.https?.certKeyPath,
+      );
+    } else {
+      // No CLI HTTPS config - use file config as-is
+      httpsConfig = fileConfig?.https;
+    }
 
     final WebDevServerConfig? webDevServerConfig = fileConfig?.copyWith(
       host: stringArg('web-hostname'),
