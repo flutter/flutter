@@ -5,9 +5,8 @@
 #ifndef FLUTTER_LIB_WEB_UI_SKWASM_IMAGES_H_
 #define FLUTTER_LIB_WEB_UI_SKWASM_IMAGES_H_
 
-#include "skwasm_support.h"
-
 #include "flutter/display_list/image/dl_image.h"
+#include "flutter/skwasm/skwasm_support.h"
 
 namespace Skwasm {
 

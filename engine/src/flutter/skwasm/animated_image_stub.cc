@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "export.h"
-#include "skwasm_support.h"
+#include <emscripten/console.h>
+
+#include "flutter/skwasm/export.h"
+#include "flutter/skwasm/skwasm_support.h"
+#include "third_party/skia/include/core/SkData.h"
 
 SKWASM_EXPORT void* animatedImage_create(SkData* data,
                                          int targetWidth,

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "live_objects.h"
+#include "flutter/skwasm/live_objects.h"
 
-#include "export.h"
+#include "flutter/skwasm/export.h"
 
 uint32_t liveLineBreakBufferCount = 0;
 uint32_t liveUnicodePositionBufferCount = 0;

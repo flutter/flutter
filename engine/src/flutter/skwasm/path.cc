@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "export.h"
-#include "helpers.h"
-#include "live_objects.h"
+#include "flutter/skwasm/export.h"
+#include "flutter/skwasm/helpers.h"
+#include "flutter/skwasm/live_objects.h"
 #include "third_party/skia/include/core/SkPathBuilder.h"
 #include "third_party/skia/include/core/SkString.h"
 #include "third_party/skia/include/pathops/SkPathOps.h"

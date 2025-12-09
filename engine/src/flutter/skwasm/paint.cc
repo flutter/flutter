@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "export.h"
-#include "helpers.h"
-#include "live_objects.h"
-
 #include "flutter/display_list/dl_paint.h"
 #include "flutter/display_list/geometry/dl_geometry_types.h"
+#include "flutter/skwasm/export.h"
+#include "flutter/skwasm/helpers.h"
+#include "flutter/skwasm/live_objects.h"
 
 using namespace Skwasm;
 using namespace flutter;

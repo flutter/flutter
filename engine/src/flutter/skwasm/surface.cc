@@ -2,15 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "surface.h"
-#include "live_objects.h"
-#include "skwasm_support.h"
+#include "flutter/skwasm/surface.h"
+
+#include <algorithm>
+
+#include <emscripten/wasm_worker.h>
 
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/image/dl_image.h"
-
-#include <emscripten/wasm_worker.h>
-#include <algorithm>
+#include "flutter/skwasm/live_objects.h"
+#include "flutter/skwasm/skwasm_support.h"
+#include "third_party/skia/include/core/SkColorSpace.h"
 
 using namespace Skwasm;
 using namespace flutter;

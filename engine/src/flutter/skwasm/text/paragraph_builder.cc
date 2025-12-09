@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "../export.h"
-#include "../live_objects.h"
-#include "../wrappers.h"
-#include "text_types.h"
+#include "flutter/skwasm/export.h"
+#include "flutter/skwasm/live_objects.h"
+#include "flutter/skwasm/text/text_types.h"
+#include "flutter/skwasm/wrappers.h"
 #include "third_party/skia/modules/skparagraph/include/ParagraphBuilder.h"
 #include "third_party/skia/modules/skunicode/include/SkUnicode_client.h"
 

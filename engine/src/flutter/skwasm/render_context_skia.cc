@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "render_context.h"
+#include "flutter/skwasm/render_context.h"
 
-#include "export.h"
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+
 #include "flutter/display_list/skia/dl_sk_dispatcher.h"
+#include "flutter/skwasm/export.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/ganesh/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
@@ -15,9 +18,6 @@
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLInterface.h"
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLMakeWebGLInterface.h"
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLTypes.h"
-
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
 
 SKWASM_EXPORT bool skwasm_isWimp() {
   return false;

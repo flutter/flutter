@@ -6,8 +6,10 @@
 #define FLUTTER_LIB_WEB_UI_SKWASM_WRAPPERS_H_
 
 #include <emscripten/html5_webgl.h>
+
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkSurface.h"
+#include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 #include "third_party/skia/modules/skparagraph/include/FontCollection.h"
 #include "third_party/skia/modules/skparagraph/include/TypefaceFontProvider.h"
 

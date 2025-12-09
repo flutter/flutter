@@ -2,19 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "export.h"
-#include "live_objects.h"
-#include "skwasm_support.h"
+#include <memory>
 
+#include "flutter/display_list/image/dl_image.h"
+#include "flutter/skwasm/export.h"
+#include "flutter/skwasm/live_objects.h"
+#include "flutter/skwasm/skwasm_support.h"
 #include "third_party/skia/include/android/SkAnimatedImage.h"
 #include "third_party/skia/include/codec/SkAndroidCodec.h"
 #include "third_party/skia/include/codec/SkCodec.h"
 #include "third_party/skia/include/codec/SkGifDecoder.h"
 #include "third_party/skia/include/codec/SkWebpDecoder.h"
-
-#include "flutter/display_list/image/dl_image.h"
-
-#include <memory>
 
 namespace {
 std::unique_ptr<SkCodec> getCodecForData(SkData* data) {

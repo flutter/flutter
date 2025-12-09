@@ -2,14 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "export.h"
-#include "helpers.h"
-#include "live_objects.h"
-#include "wrappers.h"
+#include <vector>
 
 #include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/display_list/effects/dl_runtime_effect_skia.h"
 #include "flutter/display_list/image/dl_image.h"
+#include "flutter/skwasm/export.h"
+#include "flutter/skwasm/helpers.h"
+#include "flutter/skwasm/live_objects.h"
+#include "flutter/skwasm/wrappers.h"
 #include "third_party/skia/include/effects/SkRuntimeEffect.h"
 
 using namespace Skwasm;

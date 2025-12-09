@@ -5,11 +5,11 @@
 #ifndef FLUTTER_LIB_WEB_UI_SKWASM_RENDER_CONTEXT_H_
 #define FLUTTER_LIB_WEB_UI_SKWASM_RENDER_CONTEXT_H_
 
+#include <memory>
+
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/image/dl_image.h"
-#include "helpers.h"
-
-#include <memory>
+#include "flutter/skwasm/helpers.h"
 
 namespace Skwasm {
 class RenderContext {

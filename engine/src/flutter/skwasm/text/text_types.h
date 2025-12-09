@@ -5,12 +5,12 @@
 #ifndef FLUTTER_LIB_WEB_UI_SKWASM_TEXT_TEXT_TYPES_H_
 #define FLUTTER_LIB_WEB_UI_SKWASM_TEXT_TEXT_TYPES_H_
 
+#include <optional>
+#include <vector>
+
 #include "flutter/display_list/dl_paint.h"
 #include "third_party/skia/modules/skparagraph/include/Paragraph.h"
 #include "third_party/skia/modules/skparagraph/include/ParagraphBuilder.h"
-
-#include <optional>
-#include <vector>
 
 namespace Skwasm {
 struct TextStyle {

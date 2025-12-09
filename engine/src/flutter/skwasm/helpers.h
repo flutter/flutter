@@ -7,7 +7,6 @@
 
 #include "flutter/display_list/dl_sampling_options.h"
 #include "flutter/display_list/geometry/dl_geometry_types.h"
-
 #include "third_party/skia/include/core/SkMatrix.h"
 #include "third_party/skia/include/core/SkRRect.h"
 #include "third_party/skia/include/core/SkSamplingOptions.h"

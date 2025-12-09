@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "render_context.h"
+#include "flutter/skwasm/render_context.h"
 
-#include "export.h"
-#include "impeller/display_list/dl_dispatcher.h"
-#include "impeller/entity/gles3/entity_shaders_gles.h"
-#include "impeller/renderer/backend/gles/context_gles.h"
-#include "impeller/renderer/backend/gles/surface_gles.h"
-#include "impeller/typographer/backends/skia/text_frame_skia.h"
-#include "impeller/typographer/backends/skia/typographer_context_skia.h"
+#include "flutter/impeller/display_list/dl_dispatcher.h"
+#include "flutter/impeller/entity/gles3/entity_shaders_gles.h"
+#include "flutter/impeller/renderer/backend/gles/context_gles.h"
+#include "flutter/impeller/renderer/backend/gles/surface_gles.h"
+#include "flutter/impeller/typographer/backends/skia/text_frame_skia.h"
+#include "flutter/impeller/typographer/backends/skia/typographer_context_skia.h"
+#include "flutter/skwasm/export.h"
 
 using namespace Skwasm;
 using namespace flutter;

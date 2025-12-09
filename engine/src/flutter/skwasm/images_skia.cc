@@ -2,7 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "images.h"
+#include "flutter/skwasm/images.h"
+
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+#include <emscripten/html5_webgl.h>
 
 #include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "flutter/display_list/skia/dl_sk_conversions.h"
@@ -22,10 +26,6 @@
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLInterface.h"
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLTypes.h"
-
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
-#include <emscripten/html5_webgl.h>
 
 using namespace flutter;
 using namespace SkImages;

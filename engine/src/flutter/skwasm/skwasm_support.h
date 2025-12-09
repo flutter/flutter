@@ -5,9 +5,13 @@
 #ifndef FLUTTER_LIB_WEB_UI_SKWASM_SKWASM_SUPPORT_H_
 #define FLUTTER_LIB_WEB_UI_SKWASM_SKWASM_SUPPORT_H_
 
-#include <emscripten/threading.h>
 #include <cinttypes>
-#include "surface.h"
+
+#include <emscripten/threading.h>
+
+#include "flutter/display_list/image/dl_image.h"
+#include "flutter/skwasm/surface.h"
+#include "third_party/skia/include/core/SkData.h"
 #include "third_party/skia/include/core/SkPicture.h"
 
 using SkwasmObject = __externref_t;

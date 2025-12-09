@@ -5,10 +5,10 @@
 #ifndef FLUTTER_LIB_WEB_UI_SKWASM_CANVAS_TEXT_H_
 #define FLUTTER_LIB_WEB_UI_SKWASM_CANVAS_TEXT_H_
 
+#include <memory>
+
 #include "flutter/display_list/dl_text.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
-
-#include <memory>
 
 namespace flutter {
 std::shared_ptr<DlText> textFromBlob(const sk_sp<SkTextBlob>& blob);

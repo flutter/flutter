@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/skwasm/export.h"
+#include "flutter/skwasm/live_objects.h"
+#include "flutter/skwasm/text/text_types.h"
+#include "third_party/skia/include/core/SkScalar.h"
+#include "third_party/skia/modules/skparagraph/include/DartTypes.h"
 #include "third_party/skia/modules/skparagraph/include/Paragraph.h"
-#include "../export.h"
-#include "../live_objects.h"
-#include "DartTypes.h"
-#include "TextStyle.h"
-#include "include/core/SkScalar.h"
-#include "text_types.h"
+#include "third_party/skia/modules/skparagraph/include/TextStyle.h"
 
 using namespace Skwasm;
 

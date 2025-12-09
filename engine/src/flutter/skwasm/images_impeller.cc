@@ -2,7 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "images.h"
+#include "flutter/skwasm/images.h"
+
+#include "flutter/display_list/display_list.h"
+#include "flutter/display_list/image/dl_image.h"
+#include "third_party/skia/include/core/SkData.h"
+#include "third_party/skia/include/core/SkImage.h"
 
 using namespace flutter;
 using namespace Skwasm;

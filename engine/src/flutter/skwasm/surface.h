@@ -5,16 +5,21 @@
 #ifndef FLUTTER_LIB_WEB_UI_SKWASM_SURFACE_H_
 #define FLUTTER_LIB_WEB_UI_SKWASM_SURFACE_H_
 
+#include <cassert>
+
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 #include <emscripten.h>
 #include <emscripten/html5_webgl.h>
 #include <emscripten/threading.h>
 #include <webgl/webgl1.h>
-#include <cassert>
-#include "export.h"
-#include "render_context.h"
-#include "wrappers.h"
+
+#include "flutter/display_list/image/dl_image.h"
+#include "flutter/skwasm/export.h"
+#include "flutter/skwasm/render_context.h"
+#include "flutter/skwasm/wrappers.h"
+#include "third_party/skia/include/core/SkData.h"
+#include "third_party/skia/include/core/SkRefCnt.h"
 
 namespace flutter {
 class DisplayList;

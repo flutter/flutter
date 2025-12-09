@@ -2,18 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "canvas_text.h"
-#include "export.h"
-#include "helpers.h"
-#include "text/text_types.h"
-#include "wrappers.h"
-
-#include "third_party/skia/include/core/SkPath.h"
-#include "third_party/skia/include/core/SkPathBuilder.h"
-#include "third_party/skia/modules/skparagraph/include/Paragraph.h"
+#include <vector>
 
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_text_skia.h"
+#include "flutter/skwasm/canvas_text.h"
+#include "flutter/skwasm/export.h"
+#include "flutter/skwasm/helpers.h"
+#include "flutter/skwasm/text/text_types.h"
+#include "flutter/skwasm/wrappers.h"
+#include "third_party/skia/include/core/SkPath.h"
+#include "third_party/skia/include/core/SkPathBuilder.h"
+#include "third_party/skia/modules/skparagraph/include/Paragraph.h"
 
 using namespace Skwasm;
 using namespace flutter;
