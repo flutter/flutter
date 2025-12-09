@@ -856,7 +856,7 @@ static sk_sp<SkData> ScreenshotLayerTreeAsPicture(
 #else
   SkSerialProcs procs = {0};
   procs.fTypefaceProc = SerializeTypefaceWithData;
-  procs.fImageProc = [](SkImage* img, void*) -> sk_sp<SkData> {
+  procs.fImageProc = [](SkImage* img, void*) -> SkSerialReturnType {
     return SkPngEncoder::Encode(nullptr, img, SkPngEncoder::Options{});
   };
 #endif
