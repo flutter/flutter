@@ -508,8 +508,10 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     return RawTooltip(
       key: _tooltipKey,
       semanticsTooltip: widget.message ?? widget.richMessage?.toPlainText() ?? '',
-      tooltipBuilder: (BuildContext context, Animation<double> animation) =>
-          FadeTransition(opacity: animation, child: tooltipBox),
+      tooltipBuilder: (BuildContext context, Animation<double> animation) => IgnorePointer(
+        ignoring: widget.ignorePointer ?? widget.message != null,
+        child: FadeTransition(opacity: animation, child: tooltipBox),
+      ),
       preferBelow: widget.preferBelow ?? _tooltipTheme.preferBelow ?? _defaultPreferBelow,
       excludeFromSemantics:
           widget.excludeFromSemantics ??
@@ -523,7 +525,6 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       enableTapToDismiss: widget.enableTapToDismiss,
       onTriggered: widget.onTriggered,
       mouseCursor: widget.mouseCursor,
-      ignorePointer: widget.ignorePointer ?? widget.message != null,
       exitDuration: widget.exitDuration ?? _tooltipTheme.exitDuration ?? _defaultExitDuration,
       positionDelegate: _getDefaultPositionDelegate,
       child: widget.child ?? const SizedBox.shrink(),

@@ -667,7 +667,7 @@ void main() {
     await _testGestureTap(tester, tooltip);
     expect(find.text(tooltipText), findsOneWidget);
 
-    // Tap the tooltip. Tooltip is not dismissed .
+    // Tap the tooltip. The tooltip is not dismissed.
     await _testGestureTap(tester, find.text(tooltipText));
     await tester.pump(const Duration(milliseconds: 10));
     expect(find.text(tooltipText), findsOneWidget);
@@ -1092,7 +1092,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text(tooltipText), findsOneWidget);
 
-    // Hover to the tool tip text and verify the tooltip doesn't go away.
+    // Hover to the tooltip text and verify the tooltip doesn't go away.
     await gesture.moveTo(tester.getTopLeft(find.text(tooltipText)));
     await tester.pump(const Duration(days: 1));
     await tester.pumpAndSettle();
@@ -1184,6 +1184,114 @@ void main() {
     gesture = null;
     expect(find.text('Outer'), findsNothing);
     expect(find.text('Inner'), findsNothing);
+  });
+
+  testWidgets('Tooltip can be dismissed by escape key', (WidgetTester tester) async {
+    const Duration waitDuration = Duration.zero;
+    TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(() async {
+      if (gesture != null) {
+        return gesture.removePointer();
+      }
+    });
+    await gesture.addPointer();
+    await gesture.moveTo(const Offset(1.0, 1.0));
+    await tester.pump();
+    await gesture.moveTo(Offset.zero);
+
+    await tester.pumpWidget(
+      WidgetsApp(
+        color: const Color(0x00000000),
+        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+          return PageRouteBuilder<T>(
+            pageBuilder:
+                (
+                  BuildContext context,
+                  Animation<double> animation,
+                  Animation<double> secondaryAnimation,
+                ) => builder(context),
+          );
+        },
+        home: Center(
+          child: RawTooltip(
+            semanticsTooltip: tooltipText,
+            tooltipBuilder: (context, animation) => const ColoredBox(color: Color(0xff0000ff)),
+            child: const Text('I am tool tip'),
+          ),
+        ),
+      ),
+    );
+
+    final Finder tooltip = find.byType(RawTooltip);
+    await gesture.moveTo(Offset.zero);
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(tooltip));
+    await tester.pump();
+    // Wait for it to appear.
+    await tester.pump(waitDuration);
+    expect(find.byType(ColoredBox), findsOneWidget);
+
+    // Try to dismiss the tooltip with the shortcut key.
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(find.byType(ColoredBox), findsNothing);
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
+    await gesture.removePointer();
+    gesture = null;
+  });
+
+  testWidgets('Multiple Tooltips are dismissed by escape key', (WidgetTester tester) async {
+    const Duration waitDuration = Duration.zero;
+    await tester.pumpWidget(
+      WidgetsApp(
+        color: const Color(0x00000000),
+        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+          return PageRouteBuilder<T>(
+            pageBuilder:
+                (
+                  BuildContext context,
+                  Animation<double> animation,
+                  Animation<double> secondaryAnimation,
+                ) => builder(context),
+          );
+        },
+        home: Center(
+          child: Column(
+            children: <Widget>[
+              RawTooltip(
+                semanticsTooltip: 'tooltip1',
+                showDuration: const Duration(days: 1),
+                tooltipBuilder: (context, animation) => const Text('message1'),
+                child: const Text('tooltip1'),
+              ),
+              const Spacer(flex: 2),
+              RawTooltip(
+                semanticsTooltip: 'tooltip2',
+                showDuration: const Duration(days: 1),
+                tooltipBuilder: (context, animation) => const Text('message2'),
+                child: const Text('tooltip2'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    tester.state<RawTooltipState>(find.byTooltip('tooltip1')).ensureTooltipVisible();
+    tester.state<RawTooltipState>(find.byTooltip('tooltip2')).ensureTooltipVisible();
+    await tester.pump();
+    await tester.pump(waitDuration);
+    // Make sure both messages are on the screen.
+    expect(find.text('message1'), findsOneWidget);
+    expect(find.text('message2'), findsOneWidget);
+
+    // Try to dismiss the tooltip with the shortcut key
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(find.text('message1'), findsNothing);
+    expect(find.text('message2'), findsNothing);
   });
 
   testWidgets('Tooltip does not attempt to show after unmount', (WidgetTester tester) async {
@@ -1605,7 +1713,7 @@ void main() {
       null,
     );
   });
-  testWidgets('default Tooltip debugFillProperties', (WidgetTester tester) async {
+  testWidgets('default RawTooltip debugFillProperties', (WidgetTester tester) async {
     final builder = DiagnosticPropertiesBuilder();
 
     RawTooltip(
@@ -1630,7 +1738,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Tooltip implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('RawTooltip implements debugFillProperties', (WidgetTester tester) async {
     final builder = DiagnosticPropertiesBuilder();
 
     // Not checking controller, inputFormatters, focusNode
@@ -2714,7 +2822,6 @@ Future<void> setWidgetForTooltipMode(
           onTriggered: onTriggered,
           showDuration: showDuration ?? const Duration(milliseconds: 1500),
           enableTapToDismiss: enableTapToDismiss ?? true,
-          ignorePointer: ignorePointer ?? false,
           positionDelegate: (TooltipPositionContext context) => positionDependentBox(
             size: context.overlaySize,
             childSize: context.tooltipSize,
