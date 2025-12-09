@@ -519,5 +519,49 @@ TEST_P(AiksTest, CombineBlurAndMatrix) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
+TEST_P(AiksTest, CombineColorFilters) {
+  // Combiner: runtime_stage_combiner_add.frag
+  auto runtime_stages_result =
+      OpenAssetAsRuntimeStage("runtime_stage_combiner_add.frag.iplr");
+  ABSL_ASSERT_OK(runtime_stages_result);
+  std::shared_ptr<RuntimeStage> runtime_stage =
+      runtime_stages_result
+          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ASSERT_TRUE(runtime_stage);
+
+  // Filter 1: Keep Red, zero G/B/A
+  const float keep_red_matrix[20] = {
+      1, 0, 0, 0, 0,  // R = R
+      0, 0, 0, 0, 0,  // G = 0
+      0, 0, 0, 0, 0,  // B = 0
+      0, 0, 0, 1, 0,  // A = A
+  };
+  auto keep_red = DlImageFilter::MakeColorFilter(
+      DlColorFilter::MakeMatrix(keep_red_matrix));
+
+  // Filter 2: Keep Blue, zero R/G/A
+  const float keep_blue_matrix[20] = {
+      0, 0, 0, 0, 0,  // R = 0
+      0, 0, 0, 0, 0,  // G = 0
+      0, 0, 1, 0, 0,  // B = B
+      0, 0, 0, 1, 0,  // A = A
+  };
+  auto keep_blue = DlImageFilter::MakeColorFilter(
+      DlColorFilter::MakeMatrix(keep_blue_matrix));
+
+  auto combiner = DlRuntimeEffectImpeller::Make(runtime_stage);
+  auto combine_filter =
+      DlImageFilter::MakeCombine(keep_red, keep_blue, combiner);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kWhite());
+  paint.setImageFilter(combine_filter);
+
+  DisplayListBuilder builder;
+  builder.DrawRect(DlRect::MakeXYWH(100, 100, 200, 200), paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller

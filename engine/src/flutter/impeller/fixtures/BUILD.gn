@@ -100,6 +100,7 @@ impellerc("runtime_stages") {
     "uniforms_and_sampler_2.frag",
     "runtime_stage_border.frag",
     "runtime_stage_combiner.frag",
+    "runtime_stage_combiner_add.frag",
   ]
   sl_file_extension = "iplr"
 
