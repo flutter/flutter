@@ -326,9 +326,17 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
             });
       };
 
-  VS::FrameInfo frame_info;
-  for (size_t i = 0; i < texture_inputs_.size() && i < 4; i++) {
-    auto& input = texture_inputs_[i];
+  VS::FrameInfo frame_info = CalculateFrameInfo(texture_inputs_);
+
+  return ColorSourceContents::DrawGeometry<VS>(
+      renderer, entity, pass, pipeline_callback, frame_info, bind_callback);
+}
+
+RuntimeEffectVertexShader::FrameInfo RuntimeEffectContents::CalculateFrameInfo(
+    const std::vector<TextureInput>& inputs) {
+  RuntimeEffectVertexShader::FrameInfo frame_info;
+  for (size_t i = 0; i < inputs.size() && i < 4; i++) {
+    auto& input = inputs[i];
     Matrix screen_to_texture = input.transform.Invert();
     ISize size = input.texture->GetSize();
     // Scale to normalize (0..1).
@@ -350,9 +358,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
         break;
     }
   }
-
-  return ColorSourceContents::DrawGeometry<VS>(
-      renderer, entity, pass, pipeline_callback, frame_info, bind_callback);
+  return frame_info;
 }
 
 }  // namespace impeller
