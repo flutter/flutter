@@ -159,12 +159,13 @@ abstract mixin class WidgetsBindingObserver {
   /// implementer(s) of this callback must coordinate to determine the most
   /// suitable scroll view for handling this event.
   ///
-  /// This callback is only called on iOS.
+  /// This callback is only called on iOS. The default implementation provided by
+  /// [WidgetsBindingObserver] does nothing.
   ///
   /// See also:
   ///
   ///  * [Scaffold] and [CupertinoPageScaffold] which use this callback to implement
-  ///    scroll-to-top.
+  ///    iOS scroll-to-top.
   void handleStatusBarTap() {}
 
   /// Called when the host tells the application to push a new route onto the
