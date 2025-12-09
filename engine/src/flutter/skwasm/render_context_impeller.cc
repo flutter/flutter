@@ -12,9 +12,6 @@
 #include "flutter/impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "flutter/skwasm/export.h"
 
-using namespace Skwasm;
-using namespace flutter;
-
 SKWASM_EXPORT bool skwasm_isWimp() {
   return true;
 }
@@ -42,7 +39,7 @@ class ReactorWorker : public impeller::ReactorGLES::Worker {
   }
 };
 
-class ImpellerRenderContext : public RenderContext {
+class ImpellerRenderContext : public Skwasm::RenderContext {
  public:
   ImpellerRenderContext(std::shared_ptr<impeller::ContextGLES> context,
                         std::shared_ptr<ReactorWorker> worker)
@@ -56,12 +53,13 @@ class ImpellerRenderContext : public RenderContext {
 
   virtual void renderPicture(
       const sk_sp<flutter::DisplayList> displayList) override {
-    RenderToTarget(*_contentContext, _surface->GetRenderTarget(), displayList,
-                   impeller::Rect::MakeLTRB(0, 0, _width, _height), true);
+    impeller::RenderToTarget(
+        *_contentContext, _surface->GetRenderTarget(), displayList,
+        impeller::Rect::MakeLTRB(0, 0, _width, _height), true);
   }
 
   virtual void renderImage(flutter::DlImage* image,
-                           ImageByteFormat format) override {}
+                           Skwasm::ImageByteFormat format) override {}
 
   virtual void resize(int width, int height) override {
     if (_width != width || _height != height) {
@@ -95,8 +93,9 @@ class ImpellerRenderContext : public RenderContext {
 };
 }  // namespace
 
-std::unique_ptr<RenderContext> Skwasm::RenderContext::Make(int sampleCount,
-                                                           int stencil) {
+std::unique_ptr<Skwasm::RenderContext> Skwasm::RenderContext::Make(
+    int sampleCount,
+    int stencil) {
   auto clearDepthEmulated = [](float depth) {};
   auto depthRangeEmulated = [](float nearVal, float farVal) {};
 

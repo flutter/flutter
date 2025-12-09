@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_LIB_WEB_UI_SKWASM_SURFACE_H_
-#define FLUTTER_LIB_WEB_UI_SKWASM_SURFACE_H_
+#ifndef FLUTTER_SKWASM_SURFACE_H_
+#define FLUTTER_SKWASM_SURFACE_H_
 
 #include <cassert>
 
@@ -94,4 +94,4 @@ class Surface {
 };
 }  // namespace Skwasm
 
-#endif  // FLUTTER_LIB_WEB_UI_SKWASM_SURFACE_H_
+#endif  // FLUTTER_SKWASM_SURFACE_H_

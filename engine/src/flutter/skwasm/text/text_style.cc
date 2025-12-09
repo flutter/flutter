@@ -14,54 +14,52 @@
 
 const double kTextHeightNone = 0.0;
 
-using namespace Skwasm;
-
-SKWASM_EXPORT TextStyle* textStyle_create() {
-  liveTextStyleCount++;
-  auto style = new TextStyle();
+SKWASM_EXPORT Skwasm::TextStyle* textStyle_create() {
+  Skwasm::liveTextStyleCount++;
+  auto style = new Skwasm::TextStyle();
 
   // Default color in flutter is black.
   style->skiaStyle.setColor(SK_ColorBLACK);
   return style;
 }
 
-SKWASM_EXPORT TextStyle* textStyle_copy(TextStyle* style) {
-  liveTextStyleCount++;
-  return new TextStyle(*style);
+SKWASM_EXPORT Skwasm::TextStyle* textStyle_copy(Skwasm::TextStyle* style) {
+  Skwasm::liveTextStyleCount++;
+  return new Skwasm::TextStyle(*style);
 }
 
-SKWASM_EXPORT void textStyle_dispose(TextStyle* style) {
-  liveTextStyleCount--;
+SKWASM_EXPORT void textStyle_dispose(Skwasm::TextStyle* style) {
+  Skwasm::liveTextStyleCount--;
   delete style;
 }
 
-SKWASM_EXPORT void textStyle_setColor(TextStyle* style, SkColor color) {
+SKWASM_EXPORT void textStyle_setColor(Skwasm::TextStyle* style, SkColor color) {
   style->skiaStyle.setColor(color);
 }
 
 SKWASM_EXPORT void textStyle_setDecoration(
-    TextStyle* style,
+    Skwasm::TextStyle* style,
     skia::textlayout::TextDecoration decoration) {
   style->skiaStyle.setDecoration(decoration);
 }
 
-SKWASM_EXPORT void textStyle_setDecorationColor(TextStyle* style,
+SKWASM_EXPORT void textStyle_setDecorationColor(Skwasm::TextStyle* style,
                                                 SkColor color) {
   style->skiaStyle.setDecorationColor(color);
 }
 
 SKWASM_EXPORT void textStyle_setDecorationStyle(
-    TextStyle* style,
+    Skwasm::TextStyle* style,
     skia::textlayout::TextDecorationStyle decorationStyle) {
   style->skiaStyle.setDecorationStyle(decorationStyle);
 }
 
-SKWASM_EXPORT void textStyle_setDecorationThickness(TextStyle* style,
+SKWASM_EXPORT void textStyle_setDecorationThickness(Skwasm::TextStyle* style,
                                                     SkScalar thickness) {
   style->skiaStyle.setDecorationThicknessMultiplier(thickness);
 }
 
-SKWASM_EXPORT void textStyle_setFontStyle(TextStyle* style,
+SKWASM_EXPORT void textStyle_setFontStyle(Skwasm::TextStyle* style,
                                           int weight,
                                           SkFontStyle::Slant slant) {
   style->skiaStyle.setFontStyle(
@@ -69,16 +67,16 @@ SKWASM_EXPORT void textStyle_setFontStyle(TextStyle* style,
 }
 
 SKWASM_EXPORT void textStyle_setTextBaseline(
-    TextStyle* style,
+    Skwasm::TextStyle* style,
     skia::textlayout::TextBaseline baseline) {
   style->skiaStyle.setTextBaseline(baseline);
 }
 
-SKWASM_EXPORT void textStyle_clearFontFamilies(TextStyle* style) {
+SKWASM_EXPORT void textStyle_clearFontFamilies(Skwasm::TextStyle* style) {
   style->skiaStyle.setFontFamilies({});
 }
 
-SKWASM_EXPORT void textStyle_addFontFamilies(TextStyle* style,
+SKWASM_EXPORT void textStyle_addFontFamilies(Skwasm::TextStyle* style,
                                              SkString** fontFamilies,
                                              int count) {
   const std::vector<SkString>& currentFamilies =
@@ -94,45 +92,48 @@ SKWASM_EXPORT void textStyle_addFontFamilies(TextStyle* style,
   style->skiaStyle.setFontFamilies(std::move(newFamilies));
 }
 
-SKWASM_EXPORT void textStyle_setFontSize(TextStyle* style, SkScalar size) {
+SKWASM_EXPORT void textStyle_setFontSize(Skwasm::TextStyle* style,
+                                         SkScalar size) {
   style->skiaStyle.setFontSize(size);
 }
 
-SKWASM_EXPORT void textStyle_setLetterSpacing(TextStyle* style,
+SKWASM_EXPORT void textStyle_setLetterSpacing(Skwasm::TextStyle* style,
                                               SkScalar letterSpacing) {
   style->skiaStyle.setLetterSpacing(letterSpacing);
 }
 
-SKWASM_EXPORT void textStyle_setWordSpacing(TextStyle* style,
+SKWASM_EXPORT void textStyle_setWordSpacing(Skwasm::TextStyle* style,
                                             SkScalar wordSpacing) {
   style->skiaStyle.setWordSpacing(wordSpacing);
 }
 
-SKWASM_EXPORT void textStyle_setHeight(TextStyle* style, SkScalar height) {
+SKWASM_EXPORT void textStyle_setHeight(Skwasm::TextStyle* style,
+                                       SkScalar height) {
   style->skiaStyle.setHeight(height);
   style->skiaStyle.setHeightOverride(height != kTextHeightNone);
 }
 
-SKWASM_EXPORT void textStyle_setHalfLeading(TextStyle* style,
+SKWASM_EXPORT void textStyle_setHalfLeading(Skwasm::TextStyle* style,
                                             bool halfLeading) {
   style->skiaStyle.setHalfLeading(halfLeading);
 }
 
-SKWASM_EXPORT void textStyle_setLocale(TextStyle* style, SkString* locale) {
+SKWASM_EXPORT void textStyle_setLocale(Skwasm::TextStyle* style,
+                                       SkString* locale) {
   style->skiaStyle.setLocale(*locale);
 }
 
-SKWASM_EXPORT void textStyle_setBackground(TextStyle* style,
+SKWASM_EXPORT void textStyle_setBackground(Skwasm::TextStyle* style,
                                            flutter::DlPaint* paint) {
   style->background = *paint;
 }
 
-SKWASM_EXPORT void textStyle_setForeground(TextStyle* style,
+SKWASM_EXPORT void textStyle_setForeground(Skwasm::TextStyle* style,
                                            flutter::DlPaint* paint) {
   style->foreground = *paint;
 }
 
-SKWASM_EXPORT void textStyle_addShadow(TextStyle* style,
+SKWASM_EXPORT void textStyle_addShadow(Skwasm::TextStyle* style,
                                        SkColor color,
                                        SkScalar offsetX,
                                        SkScalar offsetY,
@@ -141,13 +142,13 @@ SKWASM_EXPORT void textStyle_addShadow(TextStyle* style,
       skia::textlayout::TextShadow(color, {offsetX, offsetY}, blurSigma));
 }
 
-SKWASM_EXPORT void textStyle_addFontFeature(TextStyle* style,
+SKWASM_EXPORT void textStyle_addFontFeature(Skwasm::TextStyle* style,
                                             SkString* featureName,
                                             int value) {
   style->skiaStyle.addFontFeature(*featureName, value);
 }
 
-SKWASM_EXPORT void textStyle_setFontVariations(TextStyle* style,
+SKWASM_EXPORT void textStyle_setFontVariations(Skwasm::TextStyle* style,
                                                SkFourByteTag* axes,
                                                float* values,
                                                int count) {

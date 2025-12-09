@@ -9,49 +9,50 @@
 #include "flutter/skwasm/surface.h"
 #include "flutter/skwasm/wrappers.h"
 
-using namespace flutter;
-
-SKWASM_EXPORT DlImage* image_createFromPicture(DisplayList* displayList,
-                                               int32_t width,
-                                               int32_t height) {
-  liveImageCount++;
+SKWASM_EXPORT flutter::DlImage* image_createFromPicture(
+    flutter::DisplayList* displayList,
+    int32_t width,
+    int32_t height) {
+  Skwasm::liveImageCount++;
   return Skwasm::MakeImageFromPicture(displayList, width, height).release();
 }
 
-SKWASM_EXPORT DlImage* image_createFromPixels(SkData* data,
-                                              int width,
-                                              int height,
-                                              Skwasm::PixelFormat pixelFormat,
-                                              size_t rowByteCount) {
-  liveImageCount++;
+SKWASM_EXPORT flutter::DlImage* image_createFromPixels(
+    SkData* data,
+    int width,
+    int height,
+    Skwasm::PixelFormat pixelFormat,
+    size_t rowByteCount) {
+  Skwasm::liveImageCount++;
   return Skwasm::MakeImageFromPixels(data, width, height, pixelFormat,
                                      rowByteCount)
       .release();
 }
 
-SKWASM_EXPORT DlImage* image_createFromTextureSource(SkwasmObject textureSource,
-                                                     int width,
-                                                     int height,
-                                                     Skwasm::Surface* surface) {
-  liveImageCount++;
+SKWASM_EXPORT flutter::DlImage* image_createFromTextureSource(
+    SkwasmObject textureSource,
+    int width,
+    int height,
+    Skwasm::Surface* surface) {
+  Skwasm::liveImageCount++;
   return Skwasm::MakeImageFromTexture(textureSource, width, height, surface)
       .release();
 }
 
-SKWASM_EXPORT void image_ref(DlImage* image) {
-  liveImageCount++;
+SKWASM_EXPORT void image_ref(flutter::DlImage* image) {
+  Skwasm::liveImageCount++;
   image->ref();
 }
 
-SKWASM_EXPORT void image_dispose(DlImage* image) {
-  liveImageCount--;
+SKWASM_EXPORT void image_dispose(flutter::DlImage* image) {
+  Skwasm::liveImageCount--;
   image->unref();
 }
 
-SKWASM_EXPORT int image_getWidth(DlImage* image) {
+SKWASM_EXPORT int image_getWidth(flutter::DlImage* image) {
   return image->width();
 }
 
-SKWASM_EXPORT int image_getHeight(DlImage* image) {
+SKWASM_EXPORT int image_getHeight(flutter::DlImage* image) {
   return image->height();
 }

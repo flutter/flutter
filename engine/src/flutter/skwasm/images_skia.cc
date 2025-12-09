@@ -27,29 +27,25 @@
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLInterface.h"
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLTypes.h"
 
-using namespace flutter;
-using namespace SkImages;
-using namespace Skwasm;
-
 namespace {
 
-SkColorType colorTypeForPixelFormat(PixelFormat format) {
+SkColorType colorTypeForPixelFormat(Skwasm::PixelFormat format) {
   switch (format) {
-    case PixelFormat::rgba8888:
+    case Skwasm::PixelFormat::rgba8888:
       return SkColorType::kRGBA_8888_SkColorType;
-    case PixelFormat::bgra8888:
+    case Skwasm::PixelFormat::bgra8888:
       return SkColorType::kBGRA_8888_SkColorType;
-    case PixelFormat::rgbaFloat32:
+    case Skwasm::PixelFormat::rgbaFloat32:
       return SkColorType::kRGBA_F32_SkColorType;
   }
 }
 
-SkAlphaType alphaTypeForPixelFormat(PixelFormat format) {
+SkAlphaType alphaTypeForPixelFormat(Skwasm::PixelFormat format) {
   switch (format) {
-    case PixelFormat::rgba8888:
-    case PixelFormat::bgra8888:
+    case Skwasm::PixelFormat::rgba8888:
+    case Skwasm::PixelFormat::bgra8888:
       return SkAlphaType::kPremul_SkAlphaType;
-    case PixelFormat::rgbaFloat32:
+    case Skwasm::PixelFormat::rgbaFloat32:
       return SkAlphaType::kUnpremul_SkAlphaType;
   }
 }
@@ -79,7 +75,7 @@ class ExternalWebGLTexture : public GrExternalTexture {
 class TextureSourceImageGenerator : public GrExternalTextureGenerator {
  public:
   TextureSourceImageGenerator(SkImageInfo ii,
-                              SkwasmObject textureSource,
+                              Skwasm::SkwasmObject textureSource,
                               Skwasm::Surface* surface)
       : GrExternalTextureGenerator(ii),
         _textureSourceWrapper(
@@ -113,25 +109,25 @@ class TextureSourceImageGenerator : public GrExternalTextureGenerator {
 
 namespace Skwasm {
 
-sk_sp<DlImage> MakeImageFromPicture(flutter::DisplayList* displayList,
-                                    int32_t width,
-                                    int32_t height) {
+sk_sp<flutter::DlImage> MakeImageFromPicture(flutter::DisplayList* displayList,
+                                             int32_t width,
+                                             int32_t height) {
   SkPictureRecorder recorder;
   SkCanvas* canvas =
-      recorder.beginRecording(ToSkRect(displayList->GetBounds()));
-  DlSkCanvasDispatcher dispatcher(canvas);
+      recorder.beginRecording(flutter::ToSkRect(displayList->GetBounds()));
+  flutter::DlSkCanvasDispatcher dispatcher(canvas);
   dispatcher.drawDisplayList(sk_ref_sp(displayList), 1.0f);
 
-  return DlImage::Make(DeferredFromPicture(
+  return flutter::DlImage::Make(SkImages::DeferredFromPicture(
       recorder.finishRecordingAsPicture(), {width, height}, nullptr, nullptr,
-      BitDepth::kU8, SkColorSpace::MakeSRGB()));
+      SkImages::BitDepth::kU8, SkColorSpace::MakeSRGB()));
 }
 
-sk_sp<DlImage> MakeImageFromTexture(SkwasmObject textureSource,
-                                    int width,
-                                    int height,
-                                    Skwasm::Surface* surface) {
-  return DlImage::Make(SkImages::DeferredFromTextureGenerator(
+sk_sp<flutter::DlImage> MakeImageFromTexture(SkwasmObject textureSource,
+                                             int width,
+                                             int height,
+                                             Skwasm::Surface* surface) {
+  return flutter::DlImage::Make(SkImages::DeferredFromTextureGenerator(
       std::unique_ptr<TextureSourceImageGenerator>(
           new TextureSourceImageGenerator(
               SkImageInfo::Make(width, height,
@@ -140,12 +136,12 @@ sk_sp<DlImage> MakeImageFromTexture(SkwasmObject textureSource,
               textureSource, surface))));
 }
 
-sk_sp<DlImage> MakeImageFromPixels(SkData* data,
-                                   int width,
-                                   int height,
-                                   PixelFormat pixelFormat,
-                                   size_t rowByteCount) {
-  return DlImage::Make(SkImages::RasterFromData(
+sk_sp<flutter::DlImage> MakeImageFromPixels(SkData* data,
+                                            int width,
+                                            int height,
+                                            Skwasm::PixelFormat pixelFormat,
+                                            size_t rowByteCount) {
+  return flutter::DlImage::Make(SkImages::RasterFromData(
       SkImageInfo::Make(width, height, colorTypeForPixelFormat(pixelFormat),
                         alphaTypeForPixelFormat(pixelFormat),
                         SkColorSpace::MakeSRGB()),

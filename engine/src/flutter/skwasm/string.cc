@@ -9,7 +9,7 @@
 #include "third_party/skia/include/core/SkString.h"
 
 SKWASM_EXPORT SkString* skString_allocate(size_t length) {
-  liveStringCount++;
+  Skwasm::liveStringCount++;
   return new SkString(length);
 }
 
@@ -22,12 +22,12 @@ SKWASM_EXPORT int skString_getLength(SkString* string) {
 }
 
 SKWASM_EXPORT void skString_free(SkString* string) {
-  liveStringCount--;
+  Skwasm::liveStringCount--;
   return delete string;
 }
 
 SKWASM_EXPORT std::u16string* skString16_allocate(size_t length) {
-  liveString16Count++;
+  Skwasm::liveString16Count++;
   std::u16string* string = new std::u16string();
   string->resize(length);
   return string;
@@ -38,6 +38,6 @@ SKWASM_EXPORT char16_t* skString16_getData(std::u16string* string) {
 }
 
 SKWASM_EXPORT void skString16_free(std::u16string* string) {
-  liveString16Count--;
+  Skwasm::liveString16Count--;
   delete string;
 }

@@ -6,19 +6,18 @@
 #include "flutter/skwasm/live_objects.h"
 #include "third_party/skia/modules/skparagraph/include/Paragraph.h"
 
-using namespace skia::textlayout;
-
-SKWASM_EXPORT LineMetrics* lineMetrics_create(bool hardBreak,
-                                              double ascent,
-                                              double descent,
-                                              double unscaledAscent,
-                                              double height,
-                                              double width,
-                                              double left,
-                                              double baseline,
-                                              size_t lineNumber) {
-  liveLineMetricsCount++;
-  auto metrics = new LineMetrics();
+SKWASM_EXPORT skia::textlayout::LineMetrics* lineMetrics_create(
+    bool hardBreak,
+    double ascent,
+    double descent,
+    double unscaledAscent,
+    double height,
+    double width,
+    double left,
+    double baseline,
+    size_t lineNumber) {
+  Skwasm::liveLineMetricsCount++;
+  auto metrics = new skia::textlayout::LineMetrics();
   metrics->fHardBreak = hardBreak;
   metrics->fAscent = ascent;
   metrics->fDescent = descent;
@@ -31,51 +30,62 @@ SKWASM_EXPORT LineMetrics* lineMetrics_create(bool hardBreak,
   return metrics;
 }
 
-SKWASM_EXPORT void lineMetrics_dispose(LineMetrics* metrics) {
-  liveLineMetricsCount--;
+SKWASM_EXPORT void lineMetrics_dispose(skia::textlayout::LineMetrics* metrics) {
+  Skwasm::liveLineMetricsCount--;
   delete metrics;
 }
 
-SKWASM_EXPORT bool lineMetrics_getHardBreak(LineMetrics* metrics) {
+SKWASM_EXPORT bool lineMetrics_getHardBreak(
+    skia::textlayout::LineMetrics* metrics) {
   return metrics->fHardBreak;
 }
 
-SKWASM_EXPORT SkScalar lineMetrics_getAscent(LineMetrics* metrics) {
+SKWASM_EXPORT SkScalar
+lineMetrics_getAscent(skia::textlayout::LineMetrics* metrics) {
   return metrics->fAscent;
 }
 
-SKWASM_EXPORT SkScalar lineMetrics_getDescent(LineMetrics* metrics) {
+SKWASM_EXPORT SkScalar
+lineMetrics_getDescent(skia::textlayout::LineMetrics* metrics) {
   return metrics->fDescent;
 }
 
-SKWASM_EXPORT SkScalar lineMetrics_getUnscaledAscent(LineMetrics* metrics) {
+SKWASM_EXPORT SkScalar
+lineMetrics_getUnscaledAscent(skia::textlayout::LineMetrics* metrics) {
   return metrics->fUnscaledAscent;
 }
 
-SKWASM_EXPORT SkScalar lineMetrics_getHeight(LineMetrics* metrics) {
+SKWASM_EXPORT SkScalar
+lineMetrics_getHeight(skia::textlayout::LineMetrics* metrics) {
   return metrics->fHeight;
 }
 
-SKWASM_EXPORT SkScalar lineMetrics_getWidth(LineMetrics* metrics) {
+SKWASM_EXPORT SkScalar
+lineMetrics_getWidth(skia::textlayout::LineMetrics* metrics) {
   return metrics->fWidth;
 }
 
-SKWASM_EXPORT SkScalar lineMetrics_getLeft(LineMetrics* metrics) {
+SKWASM_EXPORT SkScalar
+lineMetrics_getLeft(skia::textlayout::LineMetrics* metrics) {
   return metrics->fLeft;
 }
 
-SKWASM_EXPORT SkScalar lineMetrics_getBaseline(LineMetrics* metrics) {
+SKWASM_EXPORT SkScalar
+lineMetrics_getBaseline(skia::textlayout::LineMetrics* metrics) {
   return metrics->fBaseline;
 }
 
-SKWASM_EXPORT int lineMetrics_getLineNumber(LineMetrics* metrics) {
+SKWASM_EXPORT int lineMetrics_getLineNumber(
+    skia::textlayout::LineMetrics* metrics) {
   return metrics->fLineNumber;
 }
 
-SKWASM_EXPORT size_t lineMetrics_getStartIndex(LineMetrics* metrics) {
+SKWASM_EXPORT size_t
+lineMetrics_getStartIndex(skia::textlayout::LineMetrics* metrics) {
   return metrics->fStartIndex;
 }
 
-SKWASM_EXPORT size_t lineMetrics_getEndIndex(LineMetrics* metrics) {
+SKWASM_EXPORT size_t
+lineMetrics_getEndIndex(skia::textlayout::LineMetrics* metrics) {
   return metrics->fEndIndex;
 }

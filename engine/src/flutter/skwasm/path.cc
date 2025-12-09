@@ -10,20 +10,18 @@
 #include "third_party/skia/include/pathops/SkPathOps.h"
 #include "third_party/skia/include/utils/SkParsePath.h"
 
-using namespace Skwasm;
-
 SKWASM_EXPORT SkPathBuilder* path_create() {
-  livePathCount++;
+  Skwasm::livePathCount++;
   return new SkPathBuilder();
 }
 
 SKWASM_EXPORT void path_dispose(SkPathBuilder* path) {
-  livePathCount--;
+  Skwasm::livePathCount--;
   delete path;
 }
 
 SKWASM_EXPORT SkPathBuilder* path_copy(SkPathBuilder* path) {
-  livePathCount++;
+  Skwasm::livePathCount++;
   return new SkPathBuilder(path->snapshot());
 }
 
@@ -164,14 +162,15 @@ SKWASM_EXPORT void path_addPolygon(SkPathBuilder* path,
 
 SKWASM_EXPORT void path_addRRect(SkPathBuilder* path,
                                  const SkScalar* rrectValues) {
-  path->addRRect(createSkRRect(rrectValues), SkPathDirection::kCW);
+  path->addRRect(Skwasm::createSkRRect(rrectValues), SkPathDirection::kCW);
 }
 
 SKWASM_EXPORT void path_addPath(SkPathBuilder* path,
                                 const SkPathBuilder* other,
                                 const SkScalar* matrix33,
                                 SkPath::AddPathMode extendPath) {
-  path->addPath(other->snapshot(), createSkMatrix(matrix33), extendPath);
+  path->addPath(other->snapshot(), Skwasm::createSkMatrix(matrix33),
+                extendPath);
 }
 
 SKWASM_EXPORT void path_close(SkPathBuilder* path) {
@@ -188,7 +187,7 @@ SKWASM_EXPORT bool path_contains(SkPathBuilder* path, SkScalar x, SkScalar y) {
 
 SKWASM_EXPORT void path_transform(SkPathBuilder* path,
                                   const SkScalar* matrix33) {
-  path->transform(createSkMatrix(matrix33));
+  path->transform(Skwasm::createSkMatrix(matrix33));
 }
 
 SKWASM_EXPORT void path_getBounds(SkPathBuilder* path, SkRect* rect) {
@@ -199,7 +198,7 @@ SKWASM_EXPORT SkPathBuilder* path_combine(SkPathOp operation,
                                           const SkPathBuilder* path1,
                                           const SkPathBuilder* path2) {
   if (auto result = Op(path1->snapshot(), path2->snapshot(), operation)) {
-    livePathCount++;
+    Skwasm::livePathCount++;
     SkPathBuilder* output = new SkPathBuilder(result.value());
     output->setFillType(path1->fillType());
     return output;
@@ -209,7 +208,7 @@ SKWASM_EXPORT SkPathBuilder* path_combine(SkPathOp operation,
 }
 
 SKWASM_EXPORT SkString* path_getSvgString(SkPathBuilder* path) {
-  liveStringCount++;
+  Skwasm::liveStringCount++;
   SkString* string = new SkString(SkParsePath::ToSVGString(path->snapshot()));
   return string;
 }

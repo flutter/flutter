@@ -9,117 +9,119 @@
 #include "flutter/skwasm/helpers.h"
 #include "flutter/skwasm/live_objects.h"
 
-using namespace Skwasm;
-using namespace flutter;
-
-SKWASM_EXPORT sp_wrapper<DlImageFilter>*
-imageFilter_createBlur(DlScalar sigmaX, DlScalar sigmaY, DlTileMode tileMode) {
-  liveImageFilterCount++;
-  return new sp_wrapper<DlImageFilter>(
-      DlImageFilter::MakeBlur(sigmaX, sigmaY, tileMode));
+SKWASM_EXPORT Skwasm::sp_wrapper<flutter::DlImageFilter>*
+imageFilter_createBlur(flutter::DlScalar sigmaX,
+                       flutter::DlScalar sigmaY,
+                       flutter::DlTileMode tileMode) {
+  Skwasm::liveImageFilterCount++;
+  return new Skwasm::sp_wrapper<flutter::DlImageFilter>(
+      flutter::DlImageFilter::MakeBlur(sigmaX, sigmaY, tileMode));
 }
 
-SKWASM_EXPORT sp_wrapper<DlImageFilter>* imageFilter_createDilate(
-    DlScalar radiusX,
-    DlScalar radiusY) {
-  liveImageFilterCount++;
-  return new sp_wrapper<DlImageFilter>(
-      DlImageFilter::MakeDilate(radiusX, radiusY));
+SKWASM_EXPORT Skwasm::sp_wrapper<flutter::DlImageFilter>*
+imageFilter_createDilate(flutter::DlScalar radiusX, flutter::DlScalar radiusY) {
+  Skwasm::liveImageFilterCount++;
+  return new Skwasm::sp_wrapper<flutter::DlImageFilter>(
+      flutter::DlImageFilter::MakeDilate(radiusX, radiusY));
 }
 
-SKWASM_EXPORT sp_wrapper<DlImageFilter>* imageFilter_createErode(
-    DlScalar radiusX,
-    DlScalar radiusY) {
-  liveImageFilterCount++;
-  return new sp_wrapper<DlImageFilter>(
-      DlImageFilter::MakeErode(radiusX, radiusY));
+SKWASM_EXPORT Skwasm::sp_wrapper<flutter::DlImageFilter>*
+imageFilter_createErode(flutter::DlScalar radiusX, flutter::DlScalar radiusY) {
+  Skwasm::liveImageFilterCount++;
+  return new Skwasm::sp_wrapper<flutter::DlImageFilter>(
+      flutter::DlImageFilter::MakeErode(radiusX, radiusY));
 }
 
-SKWASM_EXPORT sp_wrapper<DlImageFilter>* imageFilter_createMatrix(
-    DlScalar* matrix33,
-    FilterQuality quality) {
-  liveImageFilterCount++;
-  return new sp_wrapper<DlImageFilter>(DlImageFilter::MakeMatrix(
-      createDlMatrixFrom3x3(matrix33), samplingOptionsForQuality(quality)));
+SKWASM_EXPORT Skwasm::sp_wrapper<flutter::DlImageFilter>*
+imageFilter_createMatrix(flutter::DlScalar* matrix33,
+                         Skwasm::FilterQuality quality) {
+  Skwasm::liveImageFilterCount++;
+  return new Skwasm::sp_wrapper<flutter::DlImageFilter>(
+      flutter::DlImageFilter::MakeMatrix(
+          Skwasm::createDlMatrixFrom3x3(matrix33),
+          Skwasm::samplingOptionsForQuality(quality)));
 }
 
-SKWASM_EXPORT sp_wrapper<DlImageFilter>* imageFilter_createFromColorFilter(
-    sp_wrapper<DlColorFilter>* filter) {
-  liveImageFilterCount++;
-  return new sp_wrapper<DlImageFilter>(
-      DlImageFilter::MakeColorFilter(filter->shared()));
+SKWASM_EXPORT Skwasm::sp_wrapper<flutter::DlImageFilter>*
+imageFilter_createFromColorFilter(
+    Skwasm::sp_wrapper<flutter::DlColorFilter>* filter) {
+  Skwasm::liveImageFilterCount++;
+  return new Skwasm::sp_wrapper<flutter::DlImageFilter>(
+      flutter::DlImageFilter::MakeColorFilter(filter->shared()));
 }
 
-SKWASM_EXPORT sp_wrapper<DlImageFilter>* imageFilter_compose(
-    sp_wrapper<DlImageFilter>* outer,
-    sp_wrapper<DlImageFilter>* inner) {
-  liveImageFilterCount++;
-  return new sp_wrapper<DlImageFilter>(
-      DlImageFilter::MakeCompose(outer->shared(), inner->shared()));
+SKWASM_EXPORT Skwasm::sp_wrapper<flutter::DlImageFilter>* imageFilter_compose(
+    Skwasm::sp_wrapper<flutter::DlImageFilter>* outer,
+    Skwasm::sp_wrapper<flutter::DlImageFilter>* inner) {
+  Skwasm::liveImageFilterCount++;
+  return new Skwasm::sp_wrapper<flutter::DlImageFilter>(
+      flutter::DlImageFilter::MakeCompose(outer->shared(), inner->shared()));
 }
 
-SKWASM_EXPORT void imageFilter_dispose(sp_wrapper<DlImageFilter>* filter) {
-  liveImageFilterCount--;
+SKWASM_EXPORT void imageFilter_dispose(
+    Skwasm::sp_wrapper<flutter::DlImageFilter>* filter) {
+  Skwasm::liveImageFilterCount--;
   delete filter;
 }
 
 SKWASM_EXPORT void imageFilter_getFilterBounds(
-    sp_wrapper<DlImageFilter>* filter,
-    DlIRect* inOutBounds) {
+    Skwasm::sp_wrapper<flutter::DlImageFilter>* filter,
+    flutter::DlIRect* inOutBounds) {
   auto dlFilter = filter->shared();
   if (dlFilter == nullptr) {
     // If there is no filter, the output bounds are the same as the input
     // bounds.
     return;
   }
-  DlIRect inRect = *inOutBounds;
-  dlFilter->map_device_bounds(inRect, DlMatrix(), *inOutBounds);
+  flutter::DlIRect inRect = *inOutBounds;
+  dlFilter->map_device_bounds(inRect, flutter::DlMatrix(), *inOutBounds);
 }
 
-SKWASM_EXPORT sp_wrapper<const DlColorFilter>* colorFilter_createMode(
-    uint32_t color,
-    DlBlendMode mode) {
-  liveColorFilterCount++;
-  return new sp_wrapper<const DlColorFilter>(
-      DlColorFilter::MakeBlend(DlColor(color), mode));
+SKWASM_EXPORT Skwasm::sp_wrapper<const flutter::DlColorFilter>*
+colorFilter_createMode(uint32_t color, flutter::DlBlendMode mode) {
+  Skwasm::liveColorFilterCount++;
+  return new Skwasm::sp_wrapper<const flutter::DlColorFilter>(
+      flutter::DlColorFilter::MakeBlend(flutter::DlColor(color), mode));
 }
 
-SKWASM_EXPORT sp_wrapper<const DlColorFilter>* colorFilter_createMatrix(
-    float* matrixData  // 20 values
+SKWASM_EXPORT Skwasm::sp_wrapper<const flutter::DlColorFilter>*
+colorFilter_createMatrix(float* matrixData  // 20 values
 ) {
-  liveColorFilterCount++;
-  return new sp_wrapper<const DlColorFilter>(
-      DlColorFilter::MakeMatrix(matrixData));
+  Skwasm::liveColorFilterCount++;
+  return new Skwasm::sp_wrapper<const flutter::DlColorFilter>(
+      flutter::DlColorFilter::MakeMatrix(matrixData));
 }
 
-SKWASM_EXPORT sp_wrapper<const DlColorFilter>*
+SKWASM_EXPORT Skwasm::sp_wrapper<const flutter::DlColorFilter>*
 colorFilter_createSRGBToLinearGamma() {
-  liveColorFilterCount++;
-  return new sp_wrapper<const DlColorFilter>(
-      DlColorFilter::MakeSrgbToLinearGamma());
+  Skwasm::liveColorFilterCount++;
+  return new Skwasm::sp_wrapper<const flutter::DlColorFilter>(
+      flutter::DlColorFilter::MakeSrgbToLinearGamma());
 }
 
-SKWASM_EXPORT sp_wrapper<const DlColorFilter>*
+SKWASM_EXPORT Skwasm::sp_wrapper<const flutter::DlColorFilter>*
 colorFilter_createLinearToSRGBGamma() {
-  liveColorFilterCount++;
-  return new sp_wrapper<const DlColorFilter>(
-      DlColorFilter::MakeLinearToSrgbGamma());
+  Skwasm::liveColorFilterCount++;
+  return new Skwasm::sp_wrapper<const flutter::DlColorFilter>(
+      flutter::DlColorFilter::MakeLinearToSrgbGamma());
 }
 
 SKWASM_EXPORT void colorFilter_dispose(
-    sp_wrapper<const DlColorFilter>* filter) {
-  liveColorFilterCount--;
+    Skwasm::sp_wrapper<const flutter::DlColorFilter>* filter) {
+  Skwasm::liveColorFilterCount--;
   delete filter;
 }
 
-SKWASM_EXPORT sp_wrapper<DlMaskFilter>* maskFilter_createBlur(
-    DlBlurStyle blurStyle,
-    DlScalar sigma) {
-  liveMaskFilterCount++;
-  return new sp_wrapper<DlMaskFilter>(DlBlurMaskFilter::Make(blurStyle, sigma));
+SKWASM_EXPORT Skwasm::sp_wrapper<flutter::DlMaskFilter>* maskFilter_createBlur(
+    flutter::DlBlurStyle blurStyle,
+    flutter::DlScalar sigma) {
+  Skwasm::liveMaskFilterCount++;
+  return new Skwasm::sp_wrapper<flutter::DlMaskFilter>(
+      flutter::DlBlurMaskFilter::Make(blurStyle, sigma));
 }
 
-SKWASM_EXPORT void maskFilter_dispose(sp_wrapper<DlMaskFilter>* filter) {
-  liveMaskFilterCount--;
+SKWASM_EXPORT void maskFilter_dispose(
+    Skwasm::sp_wrapper<flutter::DlMaskFilter>* filter) {
+  Skwasm::liveMaskFilterCount--;
   delete filter;
 }

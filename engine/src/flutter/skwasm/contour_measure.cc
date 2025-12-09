@@ -9,13 +9,11 @@
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/core/SkPathBuilder.h"
 
-using namespace Skwasm;
-
 SKWASM_EXPORT SkContourMeasureIter* contourMeasureIter_create(
     SkPathBuilder* path,
     bool forceClosed,
     SkScalar resScale) {
-  liveCountourMeasureIterCount++;
+  Skwasm::liveCountourMeasureIterCount++;
   return new SkContourMeasureIter(path->snapshot(), forceClosed, resScale);
 }
 
@@ -23,19 +21,19 @@ SKWASM_EXPORT SkContourMeasure* contourMeasureIter_next(
     SkContourMeasureIter* iter) {
   auto next = iter->next();
   if (next) {
-    liveCountourMeasureCount++;
+    Skwasm::liveCountourMeasureCount++;
     next->ref();
   }
   return next.get();
 }
 
 SKWASM_EXPORT void contourMeasureIter_dispose(SkContourMeasureIter* iter) {
-  liveCountourMeasureIterCount--;
+  Skwasm::liveCountourMeasureIterCount--;
   delete iter;
 }
 
 SKWASM_EXPORT void contourMeasure_dispose(SkContourMeasure* measure) {
-  liveCountourMeasureCount--;
+  Skwasm::liveCountourMeasureCount--;
   measure->unref();
 }
 
@@ -64,6 +62,6 @@ SKWASM_EXPORT SkPathBuilder* contourMeasure_getSegment(
     delete outPath;
     return nullptr;
   }
-  livePathCount++;
+  Skwasm::livePathCount++;
   return outPath;
 }

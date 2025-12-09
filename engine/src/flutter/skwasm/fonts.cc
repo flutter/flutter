@@ -12,23 +12,21 @@
 #include "third_party/skia/modules/skparagraph/include/FontCollection.h"
 #include "third_party/skia/modules/skparagraph/include/TypefaceFontProvider.h"
 
-using namespace skia::textlayout;
-using namespace Skwasm;
-
-SKWASM_EXPORT FlutterFontCollection* fontCollection_create() {
-  liveFontCollectionCount++;
-  auto collection = sk_make_sp<FontCollection>();
-  auto provider = sk_make_sp<TypefaceFontProvider>();
+SKWASM_EXPORT Skwasm::FlutterFontCollection* fontCollection_create() {
+  Skwasm::liveFontCollectionCount++;
+  auto collection = sk_make_sp<skia::textlayout::FontCollection>();
+  auto provider = sk_make_sp<skia::textlayout::TypefaceFontProvider>();
   collection->enableFontFallback();
   collection->setDefaultFontManager(provider, "Roboto");
-  return new FlutterFontCollection{
+  return new Skwasm::FlutterFontCollection{
       std::move(collection),
       std::move(provider),
   };
 }
 
-SKWASM_EXPORT void fontCollection_dispose(FlutterFontCollection* collection) {
-  liveFontCollectionCount--;
+SKWASM_EXPORT void fontCollection_dispose(
+    Skwasm::FlutterFontCollection* collection) {
+  Skwasm::liveFontCollectionCount--;
   delete collection;
 }
 
@@ -38,13 +36,13 @@ static sk_sp<SkFontMgr> default_fontmgr() {
 }
 
 SKWASM_EXPORT SkTypeface* typeface_create(SkData* fontData) {
-  liveTypefaceCount++;
+  Skwasm::liveTypefaceCount++;
   auto typeface = default_fontmgr()->makeFromData(sk_ref_sp<SkData>(fontData));
   return typeface.release();
 }
 
 SKWASM_EXPORT void typeface_dispose(SkTypeface* typeface) {
-  liveTypefaceCount--;
+  Skwasm::liveTypefaceCount--;
   typeface->unref();
 }
 
@@ -83,7 +81,7 @@ SKWASM_EXPORT int typefaces_filterCoveredCodePoints(SkTypeface** typefaces,
 }
 
 SKWASM_EXPORT void fontCollection_registerTypeface(
-    FlutterFontCollection* collection,
+    Skwasm::FlutterFontCollection* collection,
     SkTypeface* typeface,
     SkString* fontName) {
   if (fontName) {
@@ -96,6 +94,6 @@ SKWASM_EXPORT void fontCollection_registerTypeface(
 }
 
 SKWASM_EXPORT void fontCollection_clearCaches(
-    FlutterFontCollection* collection) {
+    Skwasm::FlutterFontCollection* collection) {
   collection->collection->clearCaches();
 }

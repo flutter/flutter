@@ -9,9 +9,6 @@
 #include "third_party/skia/include/core/SkData.h"
 #include "third_party/skia/include/core/SkImage.h"
 
-using namespace flutter;
-using namespace Skwasm;
-
 SKWASM_EXPORT void dummyAPICalls() {
   // TODO(jacksongardner):
   // This function is just here so that we have references to these API
@@ -20,7 +17,7 @@ SKWASM_EXPORT void dummyAPICalls() {
   // all will eventually be actually used when we implement proper image
   // support, at which time we can just remove this function entirely.
   // https://github.com/flutter/flutter/issues/175371
-  auto object = __builtin_wasm_ref_null_extern();
+  SkwasmObject object = __builtin_wasm_ref_null_extern();
   skwasm_setAssociatedObjectOnThread(0, nullptr, object);
   skwasm_getAssociatedObject(nullptr);
   skwasm_disposeAssociatedObjectOnThread(0, nullptr);
@@ -30,7 +27,7 @@ SKWASM_EXPORT void dummyAPICalls() {
 namespace {
 // TODO(jacksongardner): Implement proper image support in wimp.
 // See https://github.com/flutter/flutter/issues/175371
-class StubImage : public DlImage {
+class StubImage : public flutter::DlImage {
  public:
   StubImage(int width, int height) : _width(width), _height(height) {}
 
@@ -56,7 +53,9 @@ class StubImage : public DlImage {
   bool isUIThreadSafe() const override { return true; }
 
   // |DlImage|
-  DlISize GetSize() const override { return DlISize::MakeWH(_width, _height); }
+  flutter::DlISize GetSize() const override {
+    return flutter::DlISize::MakeWH(_width, _height);
+  }
 
   // |DlImage|
   size_t GetApproximateByteSize() const override { return 0; }
@@ -69,24 +68,24 @@ class StubImage : public DlImage {
 
 namespace Skwasm {
 
-sk_sp<DlImage> MakeImageFromPicture(flutter::DisplayList* displayList,
-                                    int32_t width,
-                                    int32_t height) {
+sk_sp<flutter::DlImage> MakeImageFromPicture(flutter::DisplayList* displayList,
+                                             int32_t width,
+                                             int32_t height) {
   return StubImage::Make(width, height);
 }
 
-sk_sp<DlImage> MakeImageFromTexture(SkwasmObject textureSource,
-                                    int width,
-                                    int height,
-                                    Skwasm::Surface* surface) {
+sk_sp<flutter::DlImage> MakeImageFromTexture(SkwasmObject textureSource,
+                                             int width,
+                                             int height,
+                                             Skwasm::Surface* surface) {
   return StubImage::Make(width, height);
 }
 
-sk_sp<DlImage> MakeImageFromPixels(SkData* data,
-                                   int width,
-                                   int height,
-                                   PixelFormat pixelFormat,
-                                   size_t rowByteCount) {
+sk_sp<flutter::DlImage> MakeImageFromPixels(SkData* data,
+                                            int width,
+                                            int height,
+                                            Skwasm::PixelFormat pixelFormat,
+                                            size_t rowByteCount) {
   return StubImage::Make(width, height);
 }
 }  // namespace Skwasm

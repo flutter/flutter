@@ -8,12 +8,10 @@
 #include "flutter/impeller/runtime_stage/runtime_stage.h"
 #include "third_party/skia/include/core/SkString.h"
 
-using namespace flutter;
-
 namespace Skwasm {
-sk_sp<DlRuntimeEffect> createRuntimeEffect(SkString* source) {
+sk_sp<flutter::DlRuntimeEffect> createRuntimeEffect(SkString* source) {
   // TODO(jacksongardner): Implement runtime effect for wimp
   // https://github.com/flutter/flutter/issues/175431
-  return DlRuntimeEffectImpeller::Make(nullptr);
+  return flutter::DlRuntimeEffectImpeller::Make(nullptr);
 }
 }  // namespace Skwasm

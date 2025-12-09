@@ -9,33 +9,31 @@
 #include "flutter/skwasm/helpers.h"
 #include "flutter/skwasm/live_objects.h"
 
-using namespace flutter;
-using namespace Skwasm;
-
-SKWASM_EXPORT sp_wrapper<DlVertices>* vertices_create(
-    DlVertexMode vertexMode,
+SKWASM_EXPORT Skwasm::sp_wrapper<flutter::DlVertices>* vertices_create(
+    flutter::DlVertexMode vertexMode,
     int vertexCount,
-    DlPoint* positions,
-    DlPoint* textureCoordinates,
+    flutter::DlPoint* positions,
+    flutter::DlPoint* textureCoordinates,
     uint32_t* colors,
     int indexCount,
     uint16_t* indices) {
-  liveVerticesCount++;
-  std::vector<DlColor> dlColors;
-  DlColor* dlColorPointer = nullptr;
+  Skwasm::liveVerticesCount++;
+  std::vector<flutter::DlColor> dlColors;
+  flutter::DlColor* dlColorPointer = nullptr;
   if (colors != nullptr) {
     dlColors.resize(vertexCount);
     for (int i = 0; i < vertexCount; i++) {
-      dlColors[i] = DlColor(colors[i]);
+      dlColors[i] = flutter::DlColor(colors[i]);
     }
     dlColorPointer = dlColors.data();
   }
-  return new sp_wrapper<DlVertices>(
-      DlVertices::Make(vertexMode, vertexCount, positions, textureCoordinates,
-                       dlColorPointer, indexCount, indices));
+  return new Skwasm::sp_wrapper<flutter::DlVertices>(flutter::DlVertices::Make(
+      vertexMode, vertexCount, positions, textureCoordinates, dlColorPointer,
+      indexCount, indices));
 }
 
-SKWASM_EXPORT void vertices_dispose(sp_wrapper<DlVertices>* vertices) {
-  liveVerticesCount--;
+SKWASM_EXPORT void vertices_dispose(
+    Skwasm::sp_wrapper<flutter::DlVertices>* vertices) {
+  Skwasm::liveVerticesCount--;
   delete vertices;
 }

@@ -29,7 +29,7 @@ std::unique_ptr<SkCodec> getCodecForData(SkData* data) {
 SKWASM_EXPORT SkAnimatedImage* animatedImage_create(SkData* data,
                                                     int targetWidth,
                                                     int targetHeight) {
-  liveAnimatedImageCount++;
+  Skwasm::liveAnimatedImageCount++;
   auto codec = getCodecForData(data);
   if (!codec) {
     printf("Failed to create codec for animated image.\n");
@@ -54,7 +54,7 @@ SKWASM_EXPORT SkAnimatedImage* animatedImage_create(SkData* data,
 }
 
 SKWASM_EXPORT void animatedImage_dispose(SkAnimatedImage* image) {
-  liveAnimatedImageCount--;
+  Skwasm::liveAnimatedImageCount--;
   image->unref();
 }
 
@@ -77,6 +77,6 @@ SKWASM_EXPORT void animatedImage_decodeNextFrame(SkAnimatedImage* image) {
 
 SKWASM_EXPORT flutter::DlImage* animatedImage_getCurrentFrame(
     SkAnimatedImage* image) {
-  liveImageCount++;
+  Skwasm::liveImageCount++;
   return flutter::DlImage::Make(image->getCurrentFrame()).release();
 }

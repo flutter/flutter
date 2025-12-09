@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_LIB_WEB_UI_SKWASM_IMAGES_H_
-#define FLUTTER_LIB_WEB_UI_SKWASM_IMAGES_H_
+#ifndef FLUTTER_SKWASM_IMAGES_H_
+#define FLUTTER_SKWASM_IMAGES_H_
 
 #include "flutter/display_list/image/dl_image.h"
 #include "flutter/skwasm/skwasm_support.h"
@@ -32,4 +32,4 @@ extern sk_sp<flutter::DlImage> MakeImageFromPixels(SkData* data,
 
 }  // namespace Skwasm
 
-#endif  // FLUTTER_LIB_WEB_UI_SKWASM_IMAGES_H_
+#endif  // FLUTTER_SKWASM_IMAGES_H_

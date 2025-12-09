@@ -8,54 +8,54 @@
 #include "flutter/skwasm/helpers.h"
 #include "flutter/skwasm/live_objects.h"
 
-using namespace Skwasm;
-using namespace flutter;
-
-SKWASM_EXPORT DlPaint* paint_create(bool isAntiAlias,
-                                    DlBlendMode blendMode,
-                                    uint32_t color,
-                                    DlDrawStyle style,
-                                    DlScalar strokeWidth,
-                                    DlStrokeCap strokeCap,
-                                    DlStrokeJoin strokeJoin,
-                                    DlScalar strokeMiterLimit,
-                                    bool invertColors) {
-  livePaintCount++;
-  auto paint = new DlPaint();
+SKWASM_EXPORT flutter::DlPaint* paint_create(bool isAntiAlias,
+                                             flutter::DlBlendMode blendMode,
+                                             uint32_t color,
+                                             flutter::DlDrawStyle style,
+                                             flutter::DlScalar strokeWidth,
+                                             flutter::DlStrokeCap strokeCap,
+                                             flutter::DlStrokeJoin strokeJoin,
+                                             flutter::DlScalar strokeMiterLimit,
+                                             bool invertColors) {
+  Skwasm::livePaintCount++;
+  auto paint = new flutter::DlPaint();
   paint->setAntiAlias(isAntiAlias);
   paint->setBlendMode(blendMode);
   paint->setDrawStyle(style);
   paint->setStrokeWidth(strokeWidth);
   paint->setStrokeCap(strokeCap);
   paint->setStrokeJoin(strokeJoin);
-  paint->setColor(DlColor(color));
+  paint->setColor(flutter::DlColor(color));
   paint->setStrokeMiter(strokeMiterLimit);
   paint->setInvertColors(invertColors);
   return paint;
 }
 
-SKWASM_EXPORT void paint_dispose(DlPaint* paint) {
-  livePaintCount--;
+SKWASM_EXPORT void paint_dispose(flutter::DlPaint* paint) {
+  Skwasm::livePaintCount--;
   delete paint;
 }
 
-SKWASM_EXPORT void paint_setShader(DlPaint* paint,
-                                   sp_wrapper<DlColorSource>* shader) {
+SKWASM_EXPORT void paint_setShader(
+    flutter::DlPaint* paint,
+    Skwasm::sp_wrapper<flutter::DlColorSource>* shader) {
   paint->setColorSource(shader->shared());
 }
 
-SKWASM_EXPORT void paint_setImageFilter(DlPaint* paint,
-                                        sp_wrapper<DlImageFilter>* filter) {
+SKWASM_EXPORT void paint_setImageFilter(
+    flutter::DlPaint* paint,
+    Skwasm::sp_wrapper<flutter::DlImageFilter>* filter) {
   paint->setImageFilter(filter->shared());
 }
 
 SKWASM_EXPORT void paint_setColorFilter(
-    DlPaint* paint,
-    sp_wrapper<const DlColorFilter>* filter) {
+    flutter::DlPaint* paint,
+    Skwasm::sp_wrapper<const flutter::DlColorFilter>* filter) {
   paint->setColorFilter(filter->shared());
 }
 
-SKWASM_EXPORT void paint_setMaskFilter(DlPaint* paint,
-                                       sp_wrapper<DlMaskFilter>* filter) {
+SKWASM_EXPORT void paint_setMaskFilter(
+    flutter::DlPaint* paint,
+    Skwasm::sp_wrapper<flutter::DlMaskFilter>* filter) {
   paint->setMaskFilter(filter->shared());
 }

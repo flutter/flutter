@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_LIB_WEB_UI_SKWASM_SKWASM_SUPPORT_H_
-#define FLUTTER_LIB_WEB_UI_SKWASM_SKWASM_SUPPORT_H_
+#ifndef FLUTTER_SKWASM_SKWASM_SUPPORT_H_
+#define FLUTTER_SKWASM_SKWASM_SUPPORT_H_
 
 #include <cinttypes>
 
@@ -60,4 +60,4 @@ extern void skwasm_postRasterizeResult(Skwasm::Surface* surface,
                                        uint32_t callbackId);
 }
 
-#endif  // FLUTTER_LIB_WEB_UI_SKWASM_SKWASM_SUPPORT_H_
+#endif  // FLUTTER_SKWASM_SKWASM_SUPPORT_H_

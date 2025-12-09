@@ -2,59 +2,63 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "third_party/skia/modules/skparagraph/include/Paragraph.h"
 #include "flutter/skwasm/export.h"
 #include "flutter/skwasm/live_objects.h"
 #include "flutter/skwasm/text/text_types.h"
 #include "third_party/skia/include/core/SkScalar.h"
 #include "third_party/skia/modules/skparagraph/include/DartTypes.h"
-#include "third_party/skia/modules/skparagraph/include/Paragraph.h"
 #include "third_party/skia/modules/skparagraph/include/TextStyle.h"
 
-using namespace Skwasm;
-
-SKWASM_EXPORT void paragraph_dispose(Paragraph* paragraph) {
-  liveParagraphCount--;
+SKWASM_EXPORT void paragraph_dispose(Skwasm::Paragraph* paragraph) {
+  Skwasm::liveParagraphCount--;
   delete paragraph;
 }
 
-SKWASM_EXPORT SkScalar paragraph_getWidth(Paragraph* paragraph) {
+SKWASM_EXPORT SkScalar paragraph_getWidth(Skwasm::Paragraph* paragraph) {
   return paragraph->skiaParagraph->getMaxWidth();
 }
 
-SKWASM_EXPORT SkScalar paragraph_getHeight(Paragraph* paragraph) {
+SKWASM_EXPORT SkScalar paragraph_getHeight(Skwasm::Paragraph* paragraph) {
   return paragraph->skiaParagraph->getHeight();
 }
 
-SKWASM_EXPORT SkScalar paragraph_getLongestLine(Paragraph* paragraph) {
+SKWASM_EXPORT SkScalar paragraph_getLongestLine(Skwasm::Paragraph* paragraph) {
   return paragraph->skiaParagraph->getLongestLine();
 }
 
-SKWASM_EXPORT SkScalar paragraph_getMinIntrinsicWidth(Paragraph* paragraph) {
+SKWASM_EXPORT SkScalar
+paragraph_getMinIntrinsicWidth(Skwasm::Paragraph* paragraph) {
   return paragraph->skiaParagraph->getMinIntrinsicWidth();
 }
 
-SKWASM_EXPORT SkScalar paragraph_getMaxIntrinsicWidth(Paragraph* paragraph) {
+SKWASM_EXPORT SkScalar
+paragraph_getMaxIntrinsicWidth(Skwasm::Paragraph* paragraph) {
   return paragraph->skiaParagraph->getMaxIntrinsicWidth();
 }
 
-SKWASM_EXPORT SkScalar paragraph_getAlphabeticBaseline(Paragraph* paragraph) {
+SKWASM_EXPORT SkScalar
+paragraph_getAlphabeticBaseline(Skwasm::Paragraph* paragraph) {
   return paragraph->skiaParagraph->getAlphabeticBaseline();
 }
 
-SKWASM_EXPORT SkScalar paragraph_getIdeographicBaseline(Paragraph* paragraph) {
+SKWASM_EXPORT SkScalar
+paragraph_getIdeographicBaseline(Skwasm::Paragraph* paragraph) {
   return paragraph->skiaParagraph->getIdeographicBaseline();
 }
 
-SKWASM_EXPORT bool paragraph_getDidExceedMaxLines(Paragraph* paragraph) {
+SKWASM_EXPORT bool paragraph_getDidExceedMaxLines(
+    Skwasm::Paragraph* paragraph) {
   return paragraph->skiaParagraph->didExceedMaxLines();
 }
 
-SKWASM_EXPORT void paragraph_layout(Paragraph* paragraph, SkScalar width) {
+SKWASM_EXPORT void paragraph_layout(Skwasm::Paragraph* paragraph,
+                                    SkScalar width) {
   paragraph->skiaParagraph->layout(width);
 }
 
 SKWASM_EXPORT int32_t
-paragraph_getPositionForOffset(Paragraph* paragraph,
+paragraph_getPositionForOffset(Skwasm::Paragraph* paragraph,
                                SkScalar offsetX,
                                SkScalar offsetY,
                                skia::textlayout::Affinity* outAffinity) {
@@ -67,7 +71,7 @@ paragraph_getPositionForOffset(Paragraph* paragraph,
 }
 
 SKWASM_EXPORT bool paragraph_getClosestGlyphInfoAtCoordinate(
-    Paragraph* paragraph,
+    Skwasm::Paragraph* paragraph,
     SkScalar offsetX,
     SkScalar offsetY,
     // Out parameters:
@@ -91,7 +95,7 @@ SKWASM_EXPORT bool paragraph_getClosestGlyphInfoAtCoordinate(
 }
 
 SKWASM_EXPORT bool paragraph_getGlyphInfoAt(
-    Paragraph* paragraph,
+    Skwasm::Paragraph* paragraph,
     size_t index,
     // Out parameters:
     SkRect* graphemeLayoutBounds,   // 1 SkRect
@@ -111,7 +115,7 @@ SKWASM_EXPORT bool paragraph_getGlyphInfoAt(
 }
 
 SKWASM_EXPORT void paragraph_getWordBoundary(
-    Paragraph* paragraph,
+    Skwasm::Paragraph* paragraph,
     unsigned int position,
     int32_t* outRange  // Two `int32_t`s, start and end
 ) {
@@ -120,19 +124,19 @@ SKWASM_EXPORT void paragraph_getWordBoundary(
   outRange[1] = range.end;
 }
 
-SKWASM_EXPORT size_t paragraph_getLineCount(Paragraph* paragraph) {
+SKWASM_EXPORT size_t paragraph_getLineCount(Skwasm::Paragraph* paragraph) {
   return paragraph->skiaParagraph->lineNumber();
 }
 
-SKWASM_EXPORT int paragraph_getLineNumberAt(Paragraph* paragraph,
+SKWASM_EXPORT int paragraph_getLineNumberAt(Skwasm::Paragraph* paragraph,
                                             size_t characterIndex) {
   return paragraph->skiaParagraph->getLineNumberAtUTF16Offset(characterIndex);
 }
 
 SKWASM_EXPORT skia::textlayout::LineMetrics* paragraph_getLineMetricsAtIndex(
-    Paragraph* paragraph,
+    Skwasm::Paragraph* paragraph,
     size_t lineNumber) {
-  liveLineMetricsCount++;
+  Skwasm::liveLineMetricsCount++;
   auto metrics = new skia::textlayout::LineMetrics();
   if (paragraph->skiaParagraph->getLineMetricsAt(lineNumber, metrics)) {
     return metrics;
@@ -147,7 +151,7 @@ struct TextBoxList {
 };
 
 SKWASM_EXPORT void textBoxList_dispose(TextBoxList* list) {
-  liveTextBoxListCount--;
+  Skwasm::liveTextBoxListCount--;
   delete list;
 }
 
@@ -163,19 +167,19 @@ textBoxList_getBoxAtIndex(TextBoxList* list, size_t index, SkRect* outRect) {
 }
 
 SKWASM_EXPORT TextBoxList* paragraph_getBoxesForRange(
-    Paragraph* paragraph,
+    Skwasm::Paragraph* paragraph,
     int start,
     int end,
     skia::textlayout::RectHeightStyle heightStyle,
     skia::textlayout::RectWidthStyle widthStyle) {
-  liveTextBoxListCount++;
+  Skwasm::liveTextBoxListCount++;
   return new TextBoxList{paragraph->skiaParagraph->getRectsForRange(
       start, end, heightStyle, widthStyle)};
 }
 
 SKWASM_EXPORT TextBoxList* paragraph_getBoxesForPlaceholders(
-    Paragraph* paragraph) {
-  liveTextBoxListCount++;
+    Skwasm::Paragraph* paragraph) {
+  Skwasm::liveTextBoxListCount++;
   return new TextBoxList{paragraph->skiaParagraph->getRectsForPlaceholders()};
 }
 
@@ -186,9 +190,10 @@ SKWASM_EXPORT TextBoxList* paragraph_getBoxesForPlaceholders(
 // of the code points.
 // Note: This must be called after the paragraph has been laid out at least
 // once in order to get valid data.
-SKWASM_EXPORT int paragraph_getUnresolvedCodePoints(Paragraph* paragraph,
-                                                    SkUnichar* outCodePoints,
-                                                    int outLength) {
+SKWASM_EXPORT int paragraph_getUnresolvedCodePoints(
+    Skwasm::Paragraph* paragraph,
+    SkUnichar* outCodePoints,
+    int outLength) {
   if (!outCodePoints) {
     return paragraph->skiaParagraph->unresolvedCodepoints().size();
   }

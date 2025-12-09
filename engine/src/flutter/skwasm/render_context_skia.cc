@@ -23,9 +23,8 @@ SKWASM_EXPORT bool skwasm_isWimp() {
   return false;
 }
 
-using namespace Skwasm;
 namespace {
-class SkiaRenderContext : public RenderContext {
+class SkiaRenderContext : public Skwasm::RenderContext {
  public:
   SkiaRenderContext(int sampleCount, int stencil)
       : _sampleCount(sampleCount),
@@ -49,7 +48,7 @@ class SkiaRenderContext : public RenderContext {
   }
 
   virtual void renderImage(flutter::DlImage* image,
-                           ImageByteFormat format) override {
+                           Skwasm::ImageByteFormat format) override {
     auto canvas = _surface->getCanvas();
     canvas->drawColor(SK_ColorTRANSPARENT, SkBlendMode::kSrc);
 
@@ -90,7 +89,8 @@ class SkiaRenderContext : public RenderContext {
 };
 }  // namespace
 
-std::unique_ptr<RenderContext> Skwasm::RenderContext::Make(int sampleCount,
-                                                           int stencil) {
+std::unique_ptr<Skwasm::RenderContext> Skwasm::RenderContext::Make(
+    int sampleCount,
+    int stencil) {
   return std::make_unique<SkiaRenderContext>(sampleCount, stencil);
 }

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_LIB_WEB_UI_SKWASM_RENDER_CONTEXT_H_
-#define FLUTTER_LIB_WEB_UI_SKWASM_RENDER_CONTEXT_H_
+#ifndef FLUTTER_SKWASM_RENDER_CONTEXT_H_
+#define FLUTTER_SKWASM_RENDER_CONTEXT_H_
 
 #include <memory>
 
@@ -24,4 +24,4 @@ class RenderContext {
 };
 }  // namespace Skwasm
 
-#endif  // FLUTTER_LIB_WEB_UI_SKWASM_RENDER_CONTEXT_H_
+#endif  // FLUTTER_SKWASM_RENDER_CONTEXT_H_

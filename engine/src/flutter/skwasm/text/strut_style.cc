@@ -9,23 +9,22 @@
 #include "third_party/skia/include/core/SkString.h"
 #include "third_party/skia/modules/skparagraph/include/Paragraph.h"
 
-using namespace skia::textlayout;
-
-SKWASM_EXPORT StrutStyle* strutStyle_create() {
-  liveStrutStyleCount++;
-  auto style = new StrutStyle();
+SKWASM_EXPORT skia::textlayout::StrutStyle* strutStyle_create() {
+  Skwasm::liveStrutStyleCount++;
+  auto style = new skia::textlayout::StrutStyle();
   style->setStrutEnabled(true);
   return style;
 }
 
-SKWASM_EXPORT void strutStyle_dispose(StrutStyle* style) {
-  liveStrutStyleCount--;
+SKWASM_EXPORT void strutStyle_dispose(skia::textlayout::StrutStyle* style) {
+  Skwasm::liveStrutStyleCount--;
   delete style;
 }
 
-SKWASM_EXPORT void strutStyle_setFontFamilies(StrutStyle* style,
-                                              SkString** fontFamilies,
-                                              int count) {
+SKWASM_EXPORT void strutStyle_setFontFamilies(
+    skia::textlayout::StrutStyle* style,
+    SkString** fontFamilies,
+    int count) {
   std::vector<SkString> families;
   families.reserve(count);
   for (int i = 0; i < count; i++) {
@@ -34,32 +33,36 @@ SKWASM_EXPORT void strutStyle_setFontFamilies(StrutStyle* style,
   style->setFontFamilies(std::move(families));
 }
 
-SKWASM_EXPORT void strutStyle_setFontSize(StrutStyle* style,
+SKWASM_EXPORT void strutStyle_setFontSize(skia::textlayout::StrutStyle* style,
                                           SkScalar fontSize) {
   style->setFontSize(fontSize);
 }
 
-SKWASM_EXPORT void strutStyle_setHeight(StrutStyle* style, SkScalar height) {
+SKWASM_EXPORT void strutStyle_setHeight(skia::textlayout::StrutStyle* style,
+                                        SkScalar height) {
   style->setHeight(height);
   style->setHeightOverride(true);
 }
 
-SKWASM_EXPORT void strutStyle_setHalfLeading(StrutStyle* style,
-                                             bool halfLeading) {
+SKWASM_EXPORT void strutStyle_setHalfLeading(
+    skia::textlayout::StrutStyle* style,
+    bool halfLeading) {
   style->setHalfLeading(halfLeading);
 }
 
-SKWASM_EXPORT void strutStyle_setLeading(StrutStyle* style, SkScalar leading) {
+SKWASM_EXPORT void strutStyle_setLeading(skia::textlayout::StrutStyle* style,
+                                         SkScalar leading) {
   style->setLeading(leading);
 }
 
-SKWASM_EXPORT void strutStyle_setFontStyle(StrutStyle* style,
+SKWASM_EXPORT void strutStyle_setFontStyle(skia::textlayout::StrutStyle* style,
                                            int weight,
                                            SkFontStyle::Slant slant) {
   style->setFontStyle(SkFontStyle(weight, SkFontStyle::kNormal_Width, slant));
 }
 
-SKWASM_EXPORT void strutStyle_setForceStrutHeight(StrutStyle* style,
-                                                  bool forceStrutHeight) {
+SKWASM_EXPORT void strutStyle_setForceStrutHeight(
+    skia::textlayout::StrutStyle* style,
+    bool forceStrutHeight) {
   style->setForceStrutHeight(forceStrutHeight);
 }

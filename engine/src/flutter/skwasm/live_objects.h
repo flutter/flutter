@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_LIB_WEB_UI_SKWASM_LIVE_OBJECTS_H_
-#define FLUTTER_LIB_WEB_UI_SKWASM_LIVE_OBJECTS_H_
+#ifndef FLUTTER_SKWASM_LIVE_OBJECTS_H_
+#define FLUTTER_SKWASM_LIVE_OBJECTS_H_
 
 #include <cinttypes>
+
+namespace Skwasm {
 
 extern uint32_t liveLineBreakBufferCount;
 extern uint32_t liveUnicodePositionBufferCount;
@@ -36,4 +38,6 @@ extern uint32_t liveString16Count;
 extern uint32_t liveSurfaceCount;
 extern uint32_t liveVerticesCount;
 
-#endif  // FLUTTER_LIB_WEB_UI_SKWASM_LIVE_OBJECTS_H_
+}  // namespace Skwasm
+
+#endif  // FLUTTER_SKWASM_LIVE_OBJECTS_H_
