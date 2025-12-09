@@ -63,6 +63,7 @@ class TestSemantics {
     this.identifier = '',
     this.traversalParentIdentifier,
     this.traversalChildIdentifier,
+    this.locale,
     this.hintOverrides,
   }) : assert(flags is int || flags is List<SemanticsFlag> || flags is SemanticsFlags),
        assert(actions is int || actions is List<SemanticsAction>),
@@ -97,6 +98,7 @@ class TestSemantics {
     this.identifier = '',
     this.traversalParentIdentifier,
     this.traversalChildIdentifier,
+    this.locale,
     this.hintOverrides,
   }) : id = 0,
        assert(flags is int || flags is List<SemanticsFlag> || flags is SemanticsFlags),
@@ -143,6 +145,7 @@ class TestSemantics {
     this.identifier = '',
     this.traversalParentIdentifier,
     this.traversalChildIdentifier,
+    this.locale,
     this.hintOverrides,
   }) : assert(flags is int || flags is List<SemanticsFlag> || flags is SemanticsFlags),
        assert(actions is int || actions is List<SemanticsAction>),
@@ -300,6 +303,11 @@ class TestSemantics {
   ///
   /// Defaults to null if not set.
   final Object? traversalChildIdentifier;
+
+  /// The expected locale for the node.
+  ///
+  /// Defaults to null if not set.
+  final Locale? locale;
 
   /// The expected hint overrides for the node.
   ///
@@ -513,6 +521,11 @@ class TestSemantics {
     if (hintOverrides != node.hintOverrides) {
       return fail(
         'expected node id $id to have hint overrides $hintOverrides but found hint overrides ${node.hintOverrides}',
+      );
+    }
+    if (locale != null && locale != node.getSemanticsData().locale) {
+      return fail(
+        'expected node id $id to have locale $locale but found locale ${node.getSemanticsData().locale}',
       );
     }
 

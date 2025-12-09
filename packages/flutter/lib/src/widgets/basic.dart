@@ -4150,11 +4150,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required this.blockUserActions,
     required this.localeForSubtree,
     required this.properties,
-  }) : assert(
-         localeForSubtree == null || container,
-         'To assign locale for subtree, this widget needs to be a '
-         'container',
-       );
+  });
 
   /// Contains properties used by assistive technologies to make the application
   /// more accessible.
