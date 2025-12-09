@@ -925,6 +925,14 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       // the visible viewport of a scrollable, unless the node itself does not
       // allow implicit scrolling - then we leave the className as view.View.
       result.setScrollable(true);
+      if (semanticsNode.hasFlag(Flag.HAS_IMPLICIT_SCROLLING)) {
+        if (semanticsNode.hasAction(Action.SCROLL_LEFT)
+            || semanticsNode.hasAction(Action.SCROLL_RIGHT)) {
+          result.setClassName("android.widget.HorizontalScrollView");
+        } else {
+          result.setClassName("android.widget.ScrollView");
+        }
+      }
     }
     // We should prefer setCollectionInfo to the class names, as this way we get "In List"
     // and "Out of list" announcements.  But we don't always know the counts, so we
@@ -977,14 +985,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         }
       }
     }
-    if (semanticsNode.scrollChildren > 0 && !shouldSetCollectionInfo(semanticsNode)) {
-      if (semanticsNode.hasAction(Action.SCROLL_LEFT)
-          || semanticsNode.hasAction(Action.SCROLL_RIGHT)) {
-        result.setClassName("android.widget.HorizontalScrollView");
-      } else {
-        result.setClassName("android.widget.ScrollView");
-      }
-    }
+
     if (shouldSetCollectionItemInfo(semanticsNode)) {
       SemanticsNode parent = semanticsNode.parent;
       List<SemanticsNode> scrollChildren = parent.childrenInTraversalOrder;
