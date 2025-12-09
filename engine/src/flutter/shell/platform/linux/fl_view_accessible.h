@@ -63,11 +63,13 @@ void fl_view_accessible_handle_update_semantics(
  * fl_view_accessible_send_announcement:
  * @accessible: an #FlViewAccessible.
  * @message: text to be announced.
+ * @assertive: %TRUE if the message should be in an assertive voice.
  *
  * Sends an annoucement to a screen reader.
  */
 void fl_view_accessible_send_announcement(FlViewAccessible* accessible,
-                                          const char* message);
+                                          const char* message,
+                                          gboolean assertive);
 
 G_END_DECLS
 

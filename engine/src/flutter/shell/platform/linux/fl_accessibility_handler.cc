@@ -39,7 +39,8 @@ static void send_announcement(int64_t view_id,
 
   FlView* view = FL_VIEW(renderable);
   FlViewAccessible* accessible = fl_view_get_accessible(view);
-  fl_view_accessible_send_announcement(accessible, message);
+  fl_view_accessible_send_announcement(
+      accessible, message, assertiveness == FL_ASSERTIVENESS_ASSERTIVE);
 }
 
 static void fl_accessibility_handler_dispose(GObject* object) {
