@@ -20,7 +20,7 @@ import 'theme.dart';
 /// Defines default property values for descendant [SearchBar] widgets.
 ///
 /// Descendant widgets obtain the current [SearchBarThemeData] object using
-/// `SearchBarTheme.of(context)`. Instances of [SearchBarThemeData] can be customized
+/// [SearchBarTheme.of]. Instances of [SearchBarThemeData] can be customized
 /// with [SearchBarThemeData.copyWith].
 ///
 /// Typically a [SearchBarThemeData] is specified as part of the overall [Theme]
