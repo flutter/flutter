@@ -20,6 +20,7 @@ class RuntimeEffectContents final : public ColorSourceContents {
   struct TextureInput {
     SamplerDescriptor sampler_descriptor;
     std::shared_ptr<Texture> texture;
+    Matrix transform;
   };
 
   void SetRuntimeStage(std::shared_ptr<RuntimeStage> runtime_stage);

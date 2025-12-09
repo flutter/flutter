@@ -11,9 +11,9 @@ uniform sampler2D u_input1;
 out vec4 frag_color;
 
 void main() {
-  vec2 coords = FlutterFragCoord().xy / u_size;
-  vec4 val0 = texture(u_input0, coords);
-  // Treat red channel of input0 as displacement x
-  vec2 offset = vec2(val0.r * 20.0 / u_size.x, 0.0);
-  frag_color = texture(u_input1, coords + offset);
+  vec4 val0 = texture(u_input0, FlutterGetInputTextureCoordinates(0));
+
+  // Use alpha channel as displacement (arbitrary scalar).
+  vec2 offset = vec2(val0.a * 0.1, 0.0);
+  frag_color = texture(u_input1, FlutterGetInputTextureCoordinates(1) + offset);
 }

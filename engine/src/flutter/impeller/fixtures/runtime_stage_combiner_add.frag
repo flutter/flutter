@@ -11,8 +11,7 @@ uniform sampler2D u_input1;
 out vec4 frag_color;
 
 void main() {
-  vec2 coords = FlutterFragCoord().xy / u_size;
-  vec4 val0 = texture(u_input0, coords);
-  vec4 val1 = texture(u_input1, coords);
+  vec4 val0 = texture(u_input0, FlutterGetInputTextureCoordinates(0));
+  vec4 val1 = texture(u_input1, FlutterGetInputTextureCoordinates(1));
   frag_color = val0 + val1;
 }
