@@ -144,6 +144,8 @@ TEST(FlAccessibilityHandlerTest, AnnounceUnknownView) {
 }
 
 TEST(FlAccessibilityHandlerTest, UnknownType) {
+  flutter::testing::fl_ensure_gtk_init();
+
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =
       fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
