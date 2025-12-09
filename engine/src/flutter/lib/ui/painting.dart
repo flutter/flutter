@@ -4408,7 +4408,7 @@ abstract class ImageFilter {
   ///
   /// > [!WARNING]
   /// > This property indicates whether the Impeller rendering engine is enabled.
-  /// > If `false`, attempting to use [ImageFilter.shader] will throw an [UnsupportedError].
+  /// > Attempting to create an [ImageFilter.shader] when this property is `false` will throw an [UnsupportedError].
   static bool get isShaderFilterSupported => _impellerEnabled;
 
   // Converts this to a native DlImageFilter. See the comments of this method in
