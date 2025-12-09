@@ -831,4 +831,21 @@ void main() {
     await tester.pump(tapScrollDuration + infinitesimalPause);
     expect(selectedItem, equals(2));
   });
+
+  testWidgets('CupertinoPicker does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: CupertinoPicker(
+              itemExtent: 2.0,
+              onSelectedItemChanged: (_) {},
+              children: const <Widget>[Text('X'), Text('Y')],
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoPicker)), Size.zero);
+  });
 }

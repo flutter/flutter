@@ -400,9 +400,8 @@ class CheckboxListTile extends StatelessWidget {
 
   /// Whether this list tile is intended to display three lines of text.
   ///
-  /// If null, the value from [ListTileThemeData.isThreeLine] is used.
-  /// If that is also null, the value from [ThemeData.listTileTheme] is used.
-  /// If still null, the default value is `false`.
+  /// If null then the ambient [ListTileThemeData.isThreeLine] is used.
+  /// If that is also null, the default value is `false`.
   final bool? isThreeLine;
 
   /// Whether this list tile is part of a vertically dense list.
