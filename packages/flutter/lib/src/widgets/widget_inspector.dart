@@ -687,16 +687,12 @@ class _DiagnosticsPathNode {
   final int? childIndex;
 }
 
-List<_DiagnosticsPathNode>? _followDiagnosticableChain(
-  List<Diagnosticable> chain, {
-  String? name,
-  DiagnosticsTreeStyle? style,
-}) {
+List<_DiagnosticsPathNode>? _followDiagnosticableChain(List<Diagnosticable> chain) {
   final path = <_DiagnosticsPathNode>[];
   if (chain.isEmpty) {
     return path;
   }
-  DiagnosticsNode diagnostic = chain.first.toDiagnosticsNode(name: name, style: style);
+  DiagnosticsNode diagnostic = chain.first.toDiagnosticsNode();
   for (var i = 1; i < chain.length; i += 1) {
     final Diagnosticable target = chain[i];
     var foundMatch = false;
