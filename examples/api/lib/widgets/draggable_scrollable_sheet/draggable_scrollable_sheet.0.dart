@@ -47,43 +47,48 @@ class _DraggableScrollableSheetExampleState
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final double screenHeight = MediaQuery.sizeOf(context).height;
 
-    return DraggableScrollableSheet(
-      initialChildSize: _sheetPosition,
-      builder: (BuildContext context, ScrollController scrollController) {
-        return ColoredBox(
-          color: colorScheme.primary,
-          child: Column(
-            children: <Widget>[
-              if (_isOnDesktopAndWeb)
-                Grabber(
-                  onVerticalDragUpdate: (DragUpdateDetails details) {
-                    setState(() {
-                      _dragPosition -= details.delta.dy / screenHeight;
-                      _sheetPosition = _dragPosition.clamp(
-                        minChildSize,
-                        maxChildSize,
-                      );
-                    });
-                  },
-                ),
-              Flexible(
-                child: ListView.builder(
-                  controller: _isOnDesktopAndWeb ? null : scrollController,
-                  itemCount: 25,
-                  itemBuilder: (BuildContext context, int index) {
-                    return ListTile(
-                      title: Text(
-                        'Item $index',
-                        style: TextStyle(color: colorScheme.surface),
-                      ),
-                    );
-                  },
-                ),
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final double viewHeight = constraints.maxHeight;
+
+        return DraggableScrollableSheet(
+          initialChildSize: _sheetPosition,
+          builder: (BuildContext context, ScrollController scrollController) {
+            return ColoredBox(
+              color: colorScheme.primary,
+              child: Column(
+                children: <Widget>[
+                  if (_isOnDesktopAndWeb)
+                    Grabber(
+                      onVerticalDragUpdate: (DragUpdateDetails details) {
+                        setState(() {
+                          _dragPosition -= details.delta.dy / viewHeight;
+                          _sheetPosition = _dragPosition.clamp(
+                            minChildSize,
+                            maxChildSize,
+                          );
+                        });
+                      },
+                    ),
+                  Flexible(
+                    child: ListView.builder(
+                      controller: _isOnDesktopAndWeb ? null : scrollController,
+                      itemCount: 25,
+                      itemBuilder: (BuildContext context, int index) {
+                        return ListTile(
+                          title: Text(
+                            'Item $index',
+                            style: TextStyle(color: colorScheme.surface),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
