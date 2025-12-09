@@ -2157,6 +2157,29 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), customCursor);
   });
 
+  testWidgets('CupertinoActionSheetAction does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = Size.zero;
+    final focusNode = FocusNode();
+    addTearDown(tester.view.reset);
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoActionSheetAction(
+            focusNode: focusNode,
+            onPressed: () {},
+            child: const Text('X'),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoActionSheetAction)), Size.zero);
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('CupertinoPopupSurface does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
