@@ -1643,34 +1643,30 @@ class RenderTable extends RenderBox {
               baselines[y * columns + x] = childBaseline;
               haveBaseline = true;
             } else {
-              if (!isHiddenCell) {
-                rowHeight = math.max(rowHeight, child.size.height);
-                final double cellX = _computeCellX(
-                  positions: positions,
-                  columnIndex: x,
-                  colSpan: colSpan,
-                );
-                childParentData.offset = Offset(cellX, rowTop);
-              }
+              rowHeight = math.max(rowHeight, child.size.height);
+              final double cellX = _computeCellX(
+                positions: positions,
+                columnIndex: x,
+                colSpan: colSpan,
+              );
+              childParentData.offset = Offset(cellX, rowTop);
             }
           case TableCellVerticalAlignment.top:
           case TableCellVerticalAlignment.middle:
           case TableCellVerticalAlignment.bottom:
           case TableCellVerticalAlignment.intrinsicHeight:
-            if (!isHiddenCell) {
-              child.layout(BoxConstraints.tightFor(width: spanWidth), parentUsesSize: true);
-              final double childHeight = child.size.height;
+            child.layout(BoxConstraints.tightFor(width: spanWidth), parentUsesSize: true);
+            final double childHeight = child.size.height;
 
-              if (rowSpan == 1) {
-                rowHeight = math.max(rowHeight, childHeight);
-              } else if (rowSpan > 1) {
-                final int targetY = y + rowSpan - 1;
-                if (targetY < rows) {
-                  pendingRowSpanHeights[targetY] = math.max(
-                    pendingRowSpanHeights[targetY],
-                    childHeight,
-                  );
-                }
+            if (rowSpan == 1) {
+              rowHeight = math.max(rowHeight, childHeight);
+            } else if (rowSpan > 1) {
+              final int targetY = y + rowSpan - 1;
+              if (targetY < rows) {
+                pendingRowSpanHeights[targetY] = math.max(
+                  pendingRowSpanHeights[targetY],
+                  childHeight,
+                );
               }
             }
 
