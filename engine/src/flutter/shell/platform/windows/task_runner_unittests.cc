@@ -131,9 +131,6 @@ TEST(TaskRunnerTest, TaskRunnerWindowCoalescesWakeUpMessages) {
       return std::chrono::nanoseconds::max();
     }
 
-    int process_tasks_call_count() const { return process_tasks_call_count_; }
-
-   private:
     int process_tasks_call_count_ = 0;
   };
 
@@ -151,7 +148,7 @@ TEST(TaskRunnerTest, TaskRunnerWindowCoalescesWakeUpMessages) {
     DispatchMessage(&msg);
   }
 
-  EXPECT_EQ(delegate.process_tasks_call_count(), 1);
+  EXPECT_EQ(delegate.process_tasks_call_count_, 1);
 }
 
 }  // namespace testing
