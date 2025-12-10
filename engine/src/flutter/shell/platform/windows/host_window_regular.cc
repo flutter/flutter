@@ -11,12 +11,13 @@ HostWindowRegular::HostWindowRegular(WindowManager* window_manager,
                                      FlutterWindowsEngine* engine,
                                      const WindowSizeRequest& preferred_size,
                                      const BoxConstraints& constraints,
-                                     LPCWSTR title)
+                                     LPCWSTR title,
+                                     bool decorated)
 
     : HostWindow(window_manager,
                  engine,
                  WindowArchetype::kRegular,
-                 WS_OVERLAPPEDWINDOW,
+                 decorated ? WS_OVERLAPPEDWINDOW : 0,
                  0,
                  constraints,
                  GetInitialRect(engine, preferred_size, constraints),

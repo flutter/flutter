@@ -37,6 +37,7 @@ struct FlutterWindowConstraints {
 };
 
 struct FlutterWindowCreationRequest {
+  bool decorated;
   bool has_size;
   struct FlutterWindowSize size;
   bool has_constraints;

@@ -7,8 +7,10 @@
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 
 namespace {
-DWORD GetWindowStyleForDialog(std::optional<HWND> const& owner_window) {
-  DWORD window_style = WS_OVERLAPPED | WS_CAPTION | WS_THICKFRAME;
+DWORD GetWindowStyleForDialog(std::optional<HWND> const& owner_window,
+                              bool decorated) {
+  DWORD window_style =
+      decorated ? WS_OVERLAPPED | WS_CAPTION | WS_THICKFRAME : 0;
   if (!owner_window) {
     // If the dialog has no owner, add a minimize box and a system menu.
     window_style |= WS_MINIMIZEBOX | WS_SYSMENU;
@@ -37,17 +39,21 @@ HostWindowDialog::HostWindowDialog(WindowManager* window_manager,
                                    const WindowSizeRequest& preferred_size,
                                    const BoxConstraints& constraints,
                                    LPCWSTR title,
+                                   bool decorated,
                                    std::optional<HWND> const& owner_window)
-    : HostWindow(
-          window_manager,
-          engine,
-          WindowArchetype::kDialog,
-          GetWindowStyleForDialog(owner_window),
-          GetExtendedWindowStyleForDialog(owner_window),
-          constraints,
-          GetInitialRect(engine, preferred_size, constraints, owner_window),
-          title,
-          owner_window) {
+    : HostWindow(window_manager,
+                 engine,
+                 WindowArchetype::kDialog,
+                 GetWindowStyleForDialog(owner_window, decorated),
+                 GetExtendedWindowStyleForDialog(owner_window),
+                 constraints,
+                 GetInitialRect(engine,
+                                preferred_size,
+                                constraints,
+                                owner_window,
+                                decorated),
+                 title,
+                 owner_window) {
   auto hwnd = window_handle_;
   if (owner_window == nullptr) {
     if (HMENU hMenu = GetSystemMenu(hwnd, FALSE)) {
@@ -63,8 +69,9 @@ HostWindowDialog::HostWindowDialog(WindowManager* window_manager,
 Rect HostWindowDialog::GetInitialRect(FlutterWindowsEngine* engine,
                                       const WindowSizeRequest& preferred_size,
                                       const BoxConstraints& constraints,
-                                      std::optional<HWND> const& owner_window) {
-  auto const window_style = GetWindowStyleForDialog(owner_window);
+                                      std::optional<HWND> const& owner_window,
+                                      bool decorated) {
+  auto const window_style = GetWindowStyleForDialog(owner_window, decorated);
   auto const extended_window_style =
       GetExtendedWindowStyleForDialog(owner_window);
   std::optional<Size> const window_size =

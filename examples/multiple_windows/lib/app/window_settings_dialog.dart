@@ -57,44 +57,86 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
       children: [
         ListTile(
           title: const Text('Regular'),
-          subtitle: Row(
+          subtitle: Column(
             children: [
-              Expanded(
-                child: TextFormField(
-                  controller: _regularWidthController,
-                  decoration: const InputDecoration(labelText: 'Initial width'),
-                ),
-              ),
-              const SizedBox(width: 20),
-              Expanded(
-                child: TextFormField(
-                  controller: _regularHeightController,
-                  decoration: const InputDecoration(
-                    labelText: 'Initial height',
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _regularWidthController,
+                      decoration: const InputDecoration(
+                        labelText: 'Initial width',
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 20),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _regularHeightController,
+                      decoration: const InputDecoration(
+                        labelText: 'Initial height',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Text('Decorations'),
+                  const SizedBox(width: 10),
+                  Switch(
+                    value: widget.settings.regularDecorated,
+                    onChanged: (bool value) {
+                      setState(() {
+                        widget.settings.regularDecorated = value;
+                      });
+                    },
+                  ),
+                ],
               ),
             ],
           ),
         ),
         ListTile(
           title: const Text('Dialog'),
-          subtitle: Row(
+          subtitle: Column(
             children: [
-              Expanded(
-                child: TextFormField(
-                  controller: _dialogWidthController,
-                  decoration: const InputDecoration(labelText: 'Initial width'),
-                ),
-              ),
-              const SizedBox(width: 20),
-              Expanded(
-                child: TextFormField(
-                  controller: _dialogHeightController,
-                  decoration: const InputDecoration(
-                    labelText: 'Initial height',
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _dialogWidthController,
+                      decoration: const InputDecoration(
+                        labelText: 'Initial width',
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 20),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _dialogHeightController,
+                      decoration: const InputDecoration(
+                        labelText: 'Initial height',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Text('Decorations'),
+                  const SizedBox(width: 10),
+                  Switch(
+                    value: widget.settings.dialogDecorated,
+                    onChanged: (bool value) {
+                      setState(() {
+                        widget.settings.dialogDecorated = value;
+                      });
+                    },
+                  ),
+                ],
               ),
             ],
           ),

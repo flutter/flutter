@@ -19,6 +19,7 @@ class HostWindowDialog : public HostWindow {
                    const WindowSizeRequest& preferred_size,
                    const BoxConstraints& constraints,
                    LPCWSTR title,
+                   bool decorated,
                    std::optional<HWND> const& owner_window);
 
   void SetFullscreen(bool fullscreen,

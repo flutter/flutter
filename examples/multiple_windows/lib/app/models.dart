@@ -66,6 +66,8 @@ class WindowSettings {
   WindowSettings({
     this.regularSize = const Size(800, 600),
     this.dialogSize = const Size(400, 400),
+    this.regularDecorated = true,
+    this.dialogDecorated = true,
   });
 
   /// The initial size for newly created regular windows.
@@ -73,6 +75,12 @@ class WindowSettings {
 
   /// The initial size of the dialog window.
   Size dialogSize;
+
+  /// True if regular windows are decorated.
+  bool regularDecorated;
+
+  /// True if dialog windows are decorated.
+  bool dialogDecorated;
 }
 
 /// Provides access to the [WindowSettings] from the widget tree.

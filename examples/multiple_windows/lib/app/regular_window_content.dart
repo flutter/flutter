@@ -62,6 +62,7 @@ class RegularWindowContent extends StatelessWidget {
                             onDestroyed: () => windowManager.remove(key),
                           ),
                           title: 'Regular',
+                          decorated: windowSettings.regularDecorated,
                         ),
                       ),
                     );
@@ -82,6 +83,7 @@ class RegularWindowContent extends StatelessWidget {
                           ),
                           parent: window,
                           title: 'Dialog',
+                          decorated: windowSettings.dialogDecorated,
                         ),
                       ),
                     );
