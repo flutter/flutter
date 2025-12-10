@@ -34,6 +34,7 @@ analyzer:
     # something (https://github.com/flutter/flutter/issues/143312)
     deprecated_member_use: ignore
     deprecated_member_use_from_same_package: ignore
+    plugins_in_inner_options: ignore
   exclude:
     - "bin/cache/**"
       # Ignore protoc generated files

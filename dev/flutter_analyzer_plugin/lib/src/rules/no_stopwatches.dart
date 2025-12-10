@@ -39,7 +39,7 @@ class NoStopwatches extends AnalysisRule {
 
   @override
   void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
-    final _Visitor visitor = _Visitor(this, context);
+    final visitor = _Visitor(this, context);
     registry
       ..addConstructorName(this, visitor)
       ..addSimpleIdentifier(this, visitor);
