@@ -309,7 +309,12 @@ void _dispatchPointerDataPacket(ByteData packet) {
 
 @pragma('vm:entry-point')
 bool _platformViewShouldAcceptTouch(int viewId, double x, double y) {
-  return PlatformDispatcher.instance._platformViewShouldAcceptTouch(viewId, x, y);
+  Offset offset = Offset(x, y);
+  // TODO(hellohuanlin) investigate how to handle invalid id.
+  FlutterView view = PlatformDispatcher.instance._views[viewId]!;
+  final HitTestRequest request = HitTestRequest(view: view, offset: offset);
+  final HitTestResponse response = PlatformDispatcher.instance._hitTest(request);
+  return response.isPlatformView;
 }
 
 @pragma('vm:entry-point')
@@ -428,23 +433,17 @@ void _invoke3<A1, A2, A3>(
 /// The 3 in the name refers to the number of arguments expected by
 /// the callback (and thus passed to this function, in addition to the
 /// callback itself and the zone in which the callback is executed).
-R? _invoke3WithReturn<A1, A2, A3, R>(
-  R Function(A1 a1, A2 a2, A3 a3)? callback,
-  Zone zone,
-  A1 arg1,
-  A2 arg2,
-  A3 arg3,
-) {
+R? _invoke1WithReturn<A1, R>(R Function(A1 a1)? callback, Zone zone, A1 arg1) {
   if (callback == null) {
     return null;
   }
   if (identical(zone, Zone.current)) {
-    return callback(arg1, arg2, arg3);
+    return callback(arg1);
   } else {
     // TODO(hellohuanlin): add `zone.runGuardedWithReturn` API.
     try {
       return zone.run(() {
-        return callback(arg1, arg2, arg3);
+        return callback(arg1);
       });
     } catch (e, s) {
       zone.handleUncaughtError(e, s);

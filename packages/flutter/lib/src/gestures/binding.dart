@@ -11,7 +11,7 @@ library;
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:ui' as ui show PointerDataPacket;
+import 'dart:ui' as ui show HitTestRequest, HitTestResponse, PointerDataPacket;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -283,7 +283,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     _instance = this;
     platformDispatcher
       ..onPointerDataPacket = _handlePointerDataPacket
-      ..onPlatformViewShouldAcceptTouch = _handlePlatformViewShouldAcceptTouch;
+      ..onHitTest = _handleHitTest;
   }
 
   /// The singleton instance of this object.
@@ -324,15 +324,15 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     }
   }
 
-  bool _handlePlatformViewShouldAcceptTouch(int viewId, double x, double y) {
+  ui.HitTestResponse _handleHitTest(ui.HitTestRequest request) {
     final HitTestResult result = HitTestResult();
-    hitTestInView(result, Offset(x, y), viewId);
+    hitTestInView(result, request.offset, request.view.viewId);
 
     if (result.path.isEmpty) {
-      return false;
+      return ui.HitTestResponse();
     }
     final HitTestTarget firstHit = result.path.first.target;
-    return firstHit is NativeHitTestTarget;
+    return ui.HitTestResponse(isPlatformView: firstHit is NativeHitTestTarget);
   }
 
   double? _devicePixelRatioForView(int viewId) {

@@ -43,8 +43,8 @@ typedef KeyDataCallback = bool Function(KeyData data);
 /// Signature for [PlatformDispatcher.onSemanticsActionEvent].
 typedef SemanticsActionEventCallback = void Function(SemanticsActionEvent action);
 
-/// Signature for [PlatformDispatcher.onPlatformViewShouldAcceptTouch].
-typedef PlatformViewShouldAcceptTouchCallback = bool Function(int viewId, double x, double y);
+/// Signature for [PlatformDispatcher.onHitTest].
+typedef HitTestCallback = HitTestResponse Function(HitTestRequest);
 
 /// Signature for responses to platform messages.
 ///
@@ -1391,12 +1391,11 @@ class PlatformDispatcher {
     _onSemanticsActionEventZone = Zone.current;
   }
 
-  PlatformViewShouldAcceptTouchCallback? get onPlatformViewShouldAcceptTouch =>
-      _onPlatformViewShouldAcceptTouch;
-  PlatformViewShouldAcceptTouchCallback? _onPlatformViewShouldAcceptTouch;
-  Zone _onPlatformViewShouldAcceptTouchZone = Zone.root;
-  set onPlatformViewShouldAcceptTouch(PlatformViewShouldAcceptTouchCallback? callback) {
-    _onPlatformViewShouldAcceptTouch = callback;
+  HitTestCallback? get onHitTest => _onHitTest;
+  HitTestCallback? _onHitTest;
+  Zone _onHitTestZone = Zone.root;
+  set onHitTest(HitTestCallback? callback) {
+    _onHitTest = callback;
   }
 
   // Called from the engine via hooks.dart.
@@ -1436,15 +1435,13 @@ class PlatformDispatcher {
     );
   }
 
-  bool _platformViewShouldAcceptTouch(int viewId, double x, double y) {
-    return _invoke3WithReturn<int, double, double, bool>(
-          onPlatformViewShouldAcceptTouch,
-          _onPlatformViewShouldAcceptTouchZone,
-          viewId,
-          x,
-          y,
+  HitTestResponse _hitTest(HitTestRequest request) {
+    return _invoke1WithReturn<HitTestRequest, HitTestResponse>(
+          onHitTest,
+          _onHitTestZone,
+          request,
         ) ??
-        false;
+        const HitTestResponse();
   }
 
   ErrorCallback? _onError;
@@ -3210,4 +3207,17 @@ enum ViewFocusDirection {
   ///
   /// This is typically result of the user pressing shift + tab.
   backward,
+}
+
+class HitTestRequest {
+  const HitTestRequest({required this.view, required this.offset});
+
+  final FlutterView view;
+  final Offset offset;
+}
+
+class HitTestResponse {
+  const HitTestResponse({this.isPlatformView = false});
+
+  final bool isPlatformView;
 }
