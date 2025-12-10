@@ -577,8 +577,8 @@ FlutterWindow::HandleMessage(UINT const message,
             device_kind = kFlutterPointerDeviceKindTrackpad;
             break;
           default:
-            assert(false, 'Unrecognized device key {}', pointerInfo.pointerType);
-            return kFlutterPlane.value;
+            FML_LOG(ERROR) << "Unrecognized device key " << pointerInfo.pointerType;
+            break;
         }
         if (message == WM_POINTERDOWN) {
           OnPointerDown(x, y, device_kind, touch_id, WM_LBUTTONDOWN, rotation,
