@@ -1068,12 +1068,21 @@ typedef struct {
   /// The view that this event is describing.
   int64_t view_id;
   /// Minimum physical width of the window.
+  ///
+  //// This must be less than or equal to |max_width_constraint| and |width|.
   size_t min_width_constraint;
   /// Minimum physical height of the window.
+  ///
+  /// This must be less than or equal to |max_height_constraint| and |height|.
   size_t min_height_constraint;
   /// Maximum physical width of the window.
+  ///
+  /// This must be greater than or equal to |min_width_constraint| and |width|.
   size_t max_width_constraint;
   /// Maximum physical height of the window.
+  ///
+  /// This must be greater than or equal to |min_height_constraint| and
+  /// |height|.
   size_t max_height_constraint;
 } FlutterWindowMetricsEvent;
 
