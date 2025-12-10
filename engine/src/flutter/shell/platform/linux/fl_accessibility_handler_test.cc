@@ -24,7 +24,11 @@ static constexpr int64_t kAssertivenessAssertive = 1;
 
 // Enum copied from ATK 2.50, as the version we are building against doesn't
 // have this.
-typedef enum { _ATK_LIVE_NONE, _ATK_LIVE_POLITE, _ATK_LIVE_ASSERTIVE } _AtkLive;
+typedef enum {
+  FL_ATK_LIVE_NONE,
+  FL_ATK_LIVE_POLITE,
+  FL_ATK_LIVE_ASSERTIVE
+} FlAtkLive;
 
 static void announcement_cb(FlViewAccessible* accessible,
                             const gchar* message,
@@ -36,20 +40,20 @@ static void announcement_cb(FlViewAccessible* accessible,
 
 static void notification_polite_cb(FlViewAccessible* accessible,
                                    const gchar* message,
-                                   _AtkLive politeness,
+                                   FlAtkLive politeness,
                                    gpointer user_data) {
   EXPECT_STREQ(message, "MESSAGE");
-  EXPECT_EQ(politeness, _ATK_LIVE_POLITE);
+  EXPECT_EQ(politeness, FL_ATK_LIVE_POLITE);
   gboolean* signalled = static_cast<gboolean*>(user_data);
   *signalled = TRUE;
 }
 
 static void notification_assertive_cb(FlViewAccessible* accessible,
                                       const gchar* message,
-                                      _AtkLive politeness,
+                                      FlAtkLive politeness,
                                       gpointer user_data) {
   EXPECT_STREQ(message, "MESSAGE");
-  EXPECT_EQ(politeness, _ATK_LIVE_ASSERTIVE);
+  EXPECT_EQ(politeness, FL_ATK_LIVE_ASSERTIVE);
   gboolean* signalled = static_cast<gboolean*>(user_data);
   *signalled = TRUE;
 }

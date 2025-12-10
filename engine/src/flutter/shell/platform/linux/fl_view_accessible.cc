@@ -34,7 +34,11 @@ G_DEFINE_TYPE(FlViewAccessible, fl_view_accessible, ATK_TYPE_PLUG)
 
 // Enum copied from ATK 2.50, as the version we are building against doesn't
 // have this.
-typedef enum { _ATK_LIVE_NONE, _ATK_LIVE_POLITE, _ATK_LIVE_ASSERTIVE } _AtkLive;
+typedef enum {
+  FL_ATK_LIVE_NONE,
+  FL_ATK_LIVE_POLITE,
+  FL_ATK_LIVE_ASSERTIVE
+} FlAtkLive;
 
 static FlAccessibleNode* create_node(FlViewAccessible* self,
                                      FlutterSemanticsNode2* semantics) {
@@ -212,8 +216,9 @@ void fl_view_accessible_send_announcement(FlViewAccessible* self,
                                           gboolean assertive) {
   g_return_if_fail(FL_IS_VIEW_ACCESSIBLE(self));
   if (atk_get_major_version() == 2 && atk_get_minor_version() >= 50) {
-    g_signal_emit_by_name(self, "notification", message,
-                          assertive ? _ATK_LIVE_ASSERTIVE : _ATK_LIVE_POLITE);
+    g_signal_emit_by_name(
+        self, "notification", message,
+        assertive ? FL_ATK_LIVE_ASSERTIVE : FL_ATK_LIVE_POLITE);
   } else if (atk_get_major_version() == 2 && atk_get_minor_version() >= 46) {
     g_signal_emit_by_name(self, "announcement", message);
   }
