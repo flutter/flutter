@@ -27,8 +27,8 @@ static Reflector::Options CreateReflectorOptions(const SourceOptions& options,
   reflector_options.entry_point_name = options.entry_point_name;
   reflector_options.shader_name =
       InferShaderNameFromPath(switches.source_file_name);
-  reflector_options.header_file_name = Utf8FromPath(
-      std::filesystem::path{switches.reflection_header_name}.filename());
+  reflector_options.header_file_name =
+      Utf8FromPath(switches.reflection_header_name.filename());
   return reflector_options;
 }
 
@@ -164,9 +164,8 @@ static bool OutputReflectionData(const Compiler& compiler,
     }
 
     if (!switches.reflection_header_name.empty()) {
-      auto reflection_header_name =
-          std::filesystem::absolute(std::filesystem::current_path() /
-                                    switches.reflection_header_name.c_str());
+      auto reflection_header_name = std::filesystem::absolute(
+          std::filesystem::current_path() / switches.reflection_header_name);
       if (!fml::WriteAtomically(
               *switches.working_directory,
               Utf8FromPath(reflection_header_name).c_str(),
@@ -178,9 +177,8 @@ static bool OutputReflectionData(const Compiler& compiler,
     }
 
     if (!switches.reflection_cc_name.empty()) {
-      auto reflection_cc_name =
-          std::filesystem::absolute(std::filesystem::current_path() /
-                                    switches.reflection_cc_name.c_str());
+      auto reflection_cc_name = std::filesystem::absolute(
+          std::filesystem::current_path() / switches.reflection_cc_name);
       if (!fml::WriteAtomically(*switches.working_directory,
                                 Utf8FromPath(reflection_cc_name).c_str(),
                                 *compiler.GetReflector()->GetReflectionCC())) {
@@ -211,14 +209,14 @@ static bool OutputDepfile(const Compiler& compiler, const Switches& switches) {
       case TargetPlatform::kRuntimeStageVulkan:
       case TargetPlatform::kSkSL:
       case TargetPlatform::kVulkan:
-        result_file = switches.sl_file_name;
+        result_file = Utf8FromPath(switches.sl_file_name);
         break;
       case TargetPlatform::kUnknown:
-        result_file = switches.spirv_file_name;
+        result_file = Utf8FromPath(switches.spirv_file_name);
         break;
     }
     auto depfile_path = std::filesystem::absolute(
-        std::filesystem::current_path() / switches.depfile_path.c_str());
+        std::filesystem::current_path() / switches.depfile_path);
     if (!fml::WriteAtomically(*switches.working_directory,
                               Utf8FromPath(depfile_path).c_str(),
                               *compiler.CreateDepfileContents({result_file}))) {
@@ -252,7 +250,7 @@ bool Main(const fml::CommandLine& command_line) {
   }
 
   std::shared_ptr<fml::FileMapping> source_file_mapping =
-      fml::FileMapping::CreateReadOnly(switches.source_file_name);
+      fml::FileMapping::CreateReadOnly(Utf8FromPath(switches.source_file_name));
   if (!source_file_mapping) {
     std::cerr << "Could not open input file." << std::endl;
     return false;
