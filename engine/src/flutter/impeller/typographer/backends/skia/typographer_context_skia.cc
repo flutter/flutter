@@ -248,9 +248,9 @@ static void DrawGlyph(SkCanvas* canvas,
   canvas->save();
   Point subpixel_offset = SubpixelPositionToPoint(glyph.subpixel_offset);
   canvas->translate(subpixel_offset.x, subpixel_offset.y);
-  canvas->drawGlyphs(1u,         // count
-                     &glyph_id,  // glyphs
-                     &position,  // positions
+  // Draw a single glyph in the bounds
+  canvas->drawGlyphs({&glyph_id, 1u},  // glyphs
+                     {&position, 1u},  // positions
                      SkPoint::Make(-scaled_bounds.GetLeft(),
                                    -scaled_bounds.GetTop()),  // origin
                      sk_font,                                 // font
@@ -406,7 +406,8 @@ static Rect ComputeGlyphSize(const SkFont& font,
     glyph_paint.setStrokeJoin(ToSkiaJoin(glyph.properties->stroke->join));
     glyph_paint.setStrokeMiter(glyph.properties->stroke->miter_limit);
   }
-  font.getBounds(&glyph.glyph.index, 1, &scaled_bounds, &glyph_paint);
+  // Get bounds for a single glyph
+  font.getBounds({&glyph.glyph.index, 1}, {&scaled_bounds, 1}, &glyph_paint);
 
   // Expand the bounds of glyphs at subpixel offsets by 2 in the x direction.
   Scalar adjustment = 0.0;

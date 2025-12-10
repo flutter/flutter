@@ -7,14 +7,15 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/sliver_utils.dart';
+import 'semantics_tester.dart';
 
 const double VIEWPORT_HEIGHT = 600;
 const double VIEWPORT_WIDTH = 300;
 
 void main() {
   testWidgets('SliverMainAxisGroup is laid out properly', (WidgetTester tester) async {
-    final List<int> items = List<int>.generate(20, (int i) => i);
-    final ScrollController controller = ScrollController();
+    final items = List<int>.generate(20, (int i) => i);
+    final controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -93,8 +94,8 @@ void main() {
   testWidgets('SliverMainAxisGroup is laid out properly when reversed', (
     WidgetTester tester,
   ) async {
-    final List<int> items = List<int>.generate(20, (int i) => i);
-    final ScrollController controller = ScrollController();
+    final items = List<int>.generate(20, (int i) => i);
+    final controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -174,8 +175,8 @@ void main() {
   testWidgets('SliverMainAxisGroup is laid out properly when horizontal', (
     WidgetTester tester,
   ) async {
-    final List<int> items = List<int>.generate(20, (int i) => i);
-    final ScrollController controller = ScrollController();
+    final items = List<int>.generate(20, (int i) => i);
+    final controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -258,8 +259,8 @@ void main() {
   testWidgets('SliverMainAxisGroup is laid out properly when horizontal, reversed', (
     WidgetTester tester,
   ) async {
-    final List<int> items = List<int>.generate(20, (int i) => i);
-    final ScrollController controller = ScrollController();
+    final items = List<int>.generate(20, (int i) => i);
+    final controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -343,14 +344,14 @@ void main() {
   testWidgets('Hit test works properly on various parts of SliverMainAxisGroup', (
     WidgetTester tester,
   ) async {
-    final List<int> items = List<int>.generate(20, (int i) => i);
-    final ScrollController controller = ScrollController();
+    final items = List<int>.generate(20, (int i) => i);
+    final controller = ScrollController();
     addTearDown(controller.dispose);
 
     String? clickedTile;
 
-    int group = 0;
-    int tile = 0;
+    var group = 0;
+    var tile = 0;
 
     await tester.pumpWidget(
       _buildSliverMainAxisGroup(
@@ -431,7 +432,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // localToGlobal calculates offset via applyPaintTransform
-    final RenderBox first = tester.renderObject(find.text('first box')) as RenderBox;
+    final first = tester.renderObject(find.text('first box')) as RenderBox;
     final RenderBox second = tester.renderObject(find.text('second box'));
     expect(first.localToGlobal(Offset.zero), Offset.zero);
     expect(second.localToGlobal(Offset.zero), Offset(0, first.size.height));
@@ -440,7 +441,7 @@ void main() {
   testWidgets('visitChildrenForSemantics visits children in the correct order', (
     WidgetTester tester,
   ) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -454,10 +455,10 @@ void main() {
         ],
       ),
     );
-    controller.jumpTo(300);
+    controller.jumpTo(RenderAbstractViewport.defaultCacheExtent + 200);
     await tester.pumpAndSettle();
 
-    final List<RenderSliver> visitedChildren = <RenderSliver>[];
+    final visitedChildren = <RenderSliver>[];
     final RenderSliverMainAxisGroup renderGroup = tester.renderObject<RenderSliverMainAxisGroup>(
       find.byType(SliverMainAxisGroup),
     );
@@ -466,15 +467,16 @@ void main() {
     }
 
     renderGroup.visitChildrenForSemantics(visitor);
-    expect(visitedChildren.length, equals(2));
+    expect(visitedChildren.length, equals(3));
     expect(visitedChildren[0].geometry!.scrollExtent, equals(300));
     expect(visitedChildren[1].geometry!.scrollExtent, equals(500));
+    expect(visitedChildren[2].geometry!.scrollExtent, equals(400));
   });
 
   testWidgets('SliverPinnedPersistentHeader is painted within bounds of SliverMainAxisGroup', (
     WidgetTester tester,
   ) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -487,13 +489,13 @@ void main() {
         otherSlivers: <Widget>[const SliverToBoxAdapter(child: SizedBox(height: 2400))],
       ),
     );
-    final RenderSliverMainAxisGroup renderGroup =
+    final renderGroup =
         tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverMainAxisGroup;
     // Scroll extent is the total of the box sliver and the sliver persistent header.
     expect(renderGroup.geometry!.scrollExtent, equals(600.0 + 60.0));
     controller.jumpTo(620);
     await tester.pumpAndSettle();
-    final RenderSliverPersistentHeader renderHeader =
+    final renderHeader =
         tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
     // Paint extent after header's layout is 60.0, so we must offset by -20.0 to fit within the 40.0 remaining extent.
     expect(renderHeader.geometry!.paintExtent, equals(60.0));
@@ -503,7 +505,7 @@ void main() {
   testWidgets('SliverFloatingPersistentHeader is painted within bounds of SliverMainAxisGroup', (
     WidgetTester tester,
   ) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -517,7 +519,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final RenderSliverMainAxisGroup renderGroup =
+    final renderGroup =
         tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverMainAxisGroup;
     expect(renderGroup.geometry!.scrollExtent, equals(660));
     controller.jumpTo(660.0);
@@ -525,7 +527,7 @@ void main() {
     final TestGesture gesture = await tester.startGesture(const Offset(150.0, 300.0));
     await gesture.moveBy(const Offset(0.0, 40));
     await tester.pump();
-    final RenderSliverPersistentHeader renderHeader =
+    final renderHeader =
         tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
     // Paint extent after header's layout is 40.0, so no need to correct the paintOffset.
     expect(renderHeader.geometry!.paintExtent, equals(40.0));
@@ -535,7 +537,7 @@ void main() {
   testWidgets(
     'SliverPinnedPersistentHeader is painted within bounds of SliverMainAxisGroup with different minExtent/maxExtent',
     (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -548,9 +550,9 @@ void main() {
           otherSlivers: <Widget>[const SliverToBoxAdapter(child: SizedBox(height: 2400))],
         ),
       );
-      final RenderSliverMainAxisGroup renderGroup =
+      final renderGroup =
           tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverMainAxisGroup;
-      final RenderSliverPersistentHeader renderHeader =
+      final renderHeader =
           tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
       expect(renderGroup.geometry!.scrollExtent, equals(660));
       controller.jumpTo(630);
@@ -568,7 +570,7 @@ void main() {
   testWidgets(
     'SliverFloatingPersistentHeader is painted within bounds of SliverMainAxisGroup with different minExtent/maxExtent',
     (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -582,9 +584,9 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      final RenderSliverMainAxisGroup renderGroup =
+      final renderGroup =
           tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverMainAxisGroup;
-      final RenderSliverPersistentHeader renderHeader =
+      final renderHeader =
           tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
       expect(renderGroup.geometry!.scrollExtent, equals(660));
 
@@ -608,7 +610,7 @@ void main() {
   testWidgets(
     'SliverPinnedFloatingPersistentHeader is painted within bounds of SliverMainAxisGroup with different minExtent/maxExtent',
     (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -626,9 +628,9 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      final RenderSliverMainAxisGroup renderGroup =
+      final renderGroup =
           tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverMainAxisGroup;
-      final RenderSliverPersistentHeader renderHeader =
+      final renderHeader =
           tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
       expect(renderGroup.geometry!.scrollExtent, equals(660));
 
@@ -652,7 +654,7 @@ void main() {
   testWidgets(
     'SliverAppBar with floating: false, pinned: false, snap: false is painted within bounds of SliverMainAxisGroup',
     (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -666,7 +668,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      final RenderSliverMainAxisGroup renderGroup =
+      final renderGroup =
           tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverMainAxisGroup;
       expect(renderGroup.geometry!.scrollExtent, equals(660));
 
@@ -676,7 +678,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // At a scroll offset of 630, a normal scrolling header should be out of view.
-      final RenderSliverPersistentHeader renderHeader =
+      final renderHeader =
           tester.renderObject(find.byType(SliverPersistentHeader, skipOffstage: false))
               as RenderSliverPersistentHeader;
       expect(renderHeader.constraints.scrollOffset, equals(630));
@@ -687,7 +689,7 @@ void main() {
   testWidgets(
     'SliverAppBar with floating: true, pinned: false, snap: true is painted within bounds of SliverMainAxisGroup',
     (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -701,9 +703,9 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      final RenderSliverMainAxisGroup renderGroup =
+      final renderGroup =
           tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverMainAxisGroup;
-      final RenderSliverPersistentHeader renderHeader =
+      final renderHeader =
           tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
       expect(renderGroup.geometry!.scrollExtent, equals(660));
 
@@ -729,7 +731,7 @@ void main() {
   testWidgets(
     'SliverAppBar with floating: true, pinned: true, snap: true is painted within bounds of SliverMainAxisGroup',
     (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -749,9 +751,9 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      final RenderSliverMainAxisGroup renderGroup =
+      final renderGroup =
           tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverMainAxisGroup;
-      final RenderSliverPersistentHeader renderHeader =
+      final renderHeader =
           tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
       expect(renderGroup.geometry!.scrollExtent, equals(660));
 
@@ -774,10 +776,10 @@ void main() {
   );
 
   testWidgets('SliverMainAxisGroup skips painting invisible children', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
 
-    int counter = 0;
+    var counter = 0;
     void incrementCounter() {
       counter += 1;
     }
@@ -824,7 +826,7 @@ void main() {
   ) async {
     // By setting the correct SliverGeometry in the first SliverMainAxisGroup,
     // the following SliverMainAxisGroups will not perform extra work.
-    final Map<int, int> buildsPerGroup = <int, int>{0: 0, 1: 0, 2: 0};
+    final buildsPerGroup = <int, int>{0: 0, 1: 0, 2: 0};
     await tester.pumpWidget(
       MaterialApp(
         home: CustomScrollView(
@@ -849,9 +851,41 @@ void main() {
     expect(buildsPerGroup[0], 17); // First sliver filled the screen and cache extent
     expect(buildsPerGroup[1], 1); // Second only lays out one child
     expect(buildsPerGroup[2], 1); // Third only lays out one child
-    final RenderSliverMainAxisGroup renderGroup =
+    final renderGroup =
         tester.renderObject(find.byType(SliverMainAxisGroup).first) as RenderSliverMainAxisGroup;
     expect(renderGroup.geometry!.cacheExtent, 850.0);
+  });
+
+  testWidgets('SliverMainAxisGroup has consistent cacheOrigin', (WidgetTester tester) async {
+    const Widget item = SizedBox.square(dimension: 50);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            SliverMainAxisGroup(
+              slivers: <Widget>[
+                const PinnedHeaderSliver(child: SizedBox(height: 500)),
+                SliverList.builder(
+                  itemCount: 100,
+                  itemBuilder: (BuildContext context, int index) => item,
+                ),
+                const SliverToBoxAdapter(child: item),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.scrollUntilVisible(find.byType(SliverToBoxAdapter), 500);
+    await tester.pumpAndSettle();
+
+    final sliverList =
+        find.byType(SliverList).evaluate().single.findRenderObject()! as RenderSliver;
+
+    expect(sliverList.constraints.cacheOrigin, -250.0);
+    expect(sliverList.constraints.remainingCacheExtent, 1100);
   });
 
   testWidgets('SliverMainAxisGroup correctly handles ensureVisible', (WidgetTester tester) async {
@@ -876,12 +910,12 @@ void main() {
     'Nesting SliverMainAxisGroups does not break ShowCaretOnScreen for text fields inside nested SliverMainAxisGroup',
     (WidgetTester tester) async {
       // The number of groups and items per group needs to be high enough to reproduce the bug.
-      const int sliverGroupsCount = 3;
-      const int sliverGroupItemsCount = 60;
+      const sliverGroupsCount = 3;
+      const sliverGroupItemsCount = 60;
       // To make working with the scroll offset easier, each item is a fixed height.
-      const double itemHeight = 72.0;
+      const itemHeight = 72.0;
 
-      final ScrollController scrollController = ScrollController();
+      final scrollController = ScrollController();
       addTearDown(scrollController.dispose);
 
       final Widget widget = MaterialApp(
@@ -903,7 +937,7 @@ void main() {
                         SliverList.builder(
                           itemCount: sliverGroupItemsCount,
                           itemBuilder: (_, int index) {
-                            final String label = 'Field $i.${index + 1}';
+                            final label = 'Field $i.${index + 1}';
 
                             return SizedBox(
                               height: itemHeight,
@@ -974,7 +1008,7 @@ void main() {
         ],
       ),
     );
-    final RenderBox renderBox = tester.renderObject(find.text('1')) as RenderBox;
+    final renderBox = tester.renderObject(find.text('1')) as RenderBox;
     expect(renderBox.localToGlobal(Offset.zero), const Offset(0.0, 310.0));
     expect(tester.getTopLeft(find.text('1')), const Offset(0.0, 310.0));
   });
@@ -983,7 +1017,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final Size screenSize = tester.view.physicalSize / tester.view.devicePixelRatio;
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
     Future<void> pumpWidget({Axis scrollDirection = Axis.vertical, bool reverse = false}) async {
       Widget buildExtentBox(double size, {Widget? child}) {
@@ -1032,7 +1066,7 @@ void main() {
   });
 
   testWidgets('SliverMainAxisGroup precision error', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(
@@ -1064,7 +1098,7 @@ void main() {
   });
 
   testWidgets('SliverMainAxisGroup reverse hitTest', (WidgetTester tester) async {
-    bool onTapCalled = false;
+    var onTapCalled = false;
     await tester.pumpWidget(
       _buildSliverMainAxisGroup(
         reverse: true,
@@ -1092,9 +1126,9 @@ void main() {
   });
 
   testWidgets('SliverMainAxisGroup with center', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
-    const Key centerKey = Key('center');
+    const centerKey = Key('center');
     await tester.pumpWidget(
       MaterialApp(
         home: CustomScrollView(
@@ -1129,7 +1163,7 @@ void main() {
   testWidgets('showOnScreen reveals the Sliver after a pinned child in SliverMainAxisGroup', (
     WidgetTester tester,
   ) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       _buildSliverMainAxisGroup(
@@ -1154,7 +1188,7 @@ void main() {
   testWidgets(
     'In multiple SliverMainAxisGroups, children after a PinnedHeaderSliver do not overscroll.',
     (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
       final Key key = GlobalKey();
       await tester.pumpWidget(
@@ -1200,8 +1234,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/173029.
   testWidgets('SliverMainAxisGroup pointer event positions', (WidgetTester tester) async {
-    final List<({int index, TapDownDetails details})> tapDownLog =
-        <({int index, TapDownDetails details})>[];
+    final tapDownLog = <({int index, TapDownDetails details})>[];
 
     Widget buildItem(int index) {
       return SliverToBoxAdapter(
@@ -1225,7 +1258,7 @@ void main() {
     }
 
     // Forward direction.
-    final ScrollController controller1 = ScrollController();
+    final controller1 = ScrollController();
     addTearDown(controller1.dispose);
     await tester.pumpWidget(
       KeyedSubtree(
@@ -1279,7 +1312,7 @@ void main() {
     tapDownLog.clear();
 
     // Reverse direction.
-    final ScrollController controller2 = ScrollController();
+    final controller2 = ScrollController();
     addTearDown(controller2.dispose);
     await tester.pumpWidget(
       KeyedSubtree(
@@ -1334,7 +1367,7 @@ void main() {
   testWidgets(
     'With SliverList can handle inaccurate scroll offset due to changes in children list',
     (WidgetTester tester) async {
-      bool skip = true;
+      var skip = true;
       Widget buildItem(BuildContext context, int index) {
         return !skip || index.isEven
             ? Card(
@@ -1360,7 +1393,7 @@ void main() {
         ),
       );
       // Only even items 0~12 are on the screen.
-      for (int index = 0; index <= 12; index++) {
+      for (var index = 0; index <= 12; index++) {
         expect(find.text('item$index'), index.isEven ? findsOneWidget : findsNothing);
       }
       expect(find.text('item12'), findsOneWidget);
@@ -1429,6 +1462,62 @@ void main() {
       expect(find.text('item7'), findsNothing);
     },
   );
+
+  testWidgets('SliverMainAxisGroup ensure semantics', (WidgetTester tester) async {
+    final semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      _buildSliverMainAxisGroup(
+        slivers: <Widget>[
+          const SliverEnsureSemantics(sliver: SliverToBoxAdapter(child: Text('a'))),
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (BuildContext context, int index) {
+                return Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text('Lorem Ipsum $index'),
+                  ),
+                );
+              },
+              childCount: 50,
+              semanticIndexOffset: 1,
+            ),
+          ),
+          const SliverEnsureSemantics(sliver: SliverToBoxAdapter(child: Text('b'))),
+        ],
+      ),
+    );
+
+    // Even though 'b' is outside of the Viewport and cacheExtent, since it is
+    // wrapped with a `SliverEnsureSemantics` it will still be included in the
+    // semantics tree.
+    expect(semantics.nodesWith(label: 'b'), hasLength(1));
+    expect(find.text('b'), findsNothing);
+    expect(find.byType(SliverEnsureSemantics, skipOffstage: false), findsNWidgets(2));
+    semantics.dispose();
+  });
+
+  testWidgets('SliverMainAxisGroup includes items in cacheExtent in semantics', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      _buildSliverMainAxisGroup(
+        viewportHeight: 300,
+        // Default cacheExtent is 250.0
+        slivers: <Widget>[
+          const SliverToBoxAdapter(child: SizedBox(height: 300, child: Text('a'))),
+          const SliverToBoxAdapter(child: SizedBox(height: 100, child: Text('b'))),
+        ],
+      ),
+    );
+
+    // 'b' is not visible, but it should be in the cache extent.
+    expect(find.text('b'), findsNothing);
+    // So it should be in the semantics tree.
+    expect(semantics.nodesWith(label: 'b'), hasLength(1));
+    semantics.dispose();
+  });
 }
 
 Widget _buildSliverList({
@@ -1453,7 +1542,7 @@ Widget _buildSliverList({
               );
       },
       findChildIndexCallback: (Key key) {
-        final ValueKey<int> valueKey = key as ValueKey<int>;
+        final valueKey = key as ValueKey<int>;
         final int index = items.indexOf(valueKey.value);
         return index == -1 ? null : index;
       },

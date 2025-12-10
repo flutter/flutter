@@ -66,6 +66,10 @@ class IMockGLESImpl {
   virtual void GenBuffers(GLsizei n, GLuint* buffers) {}
   virtual void DeleteBuffers(GLsizei n, const GLuint* buffers) {}
   virtual GLboolean IsTexture(GLuint texture) { return true; }
+  virtual void DiscardFramebufferEXT(GLenum target,
+                                     GLsizei numAttachments,
+                                     const GLenum* attachments) {};
+  virtual void GetIntegerv(GLenum name, GLint* attachments) {};
 };
 
 class MockGLESImpl : public IMockGLESImpl {
@@ -149,6 +153,13 @@ class MockGLESImpl : public IMockGLESImpl {
               (GLsizei n, const GLuint* buffers),
               (override));
   MOCK_METHOD(GLboolean, IsTexture, (GLuint texture), (override));
+  MOCK_METHOD(void,
+              DiscardFramebufferEXT,
+              (GLenum target,
+               GLsizei numAttachments,
+               const GLenum* attachments),
+              (override));
+  MOCK_METHOD(void, GetIntegerv, (GLenum name, GLint* value), (override));
 };
 
 /// @brief      Provides a mocked version of the |ProcTableGLES| class.

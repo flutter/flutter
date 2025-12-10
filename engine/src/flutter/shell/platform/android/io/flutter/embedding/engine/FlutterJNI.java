@@ -10,13 +10,10 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
-import android.graphics.ColorSpace;
-import android.graphics.ImageDecoder;
 import android.graphics.SurfaceTexture;
 import android.os.Build;
 import android.os.Looper;
 import android.util.DisplayMetrics;
-import android.util.Size;
 import android.util.TypedValue;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -31,8 +28,10 @@ import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterEngine.EngineLifecycleListener;
 import io.flutter.embedding.engine.dart.PlatformMessageHandler;
 import io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager;
+import io.flutter.embedding.engine.image.FlutterImageDecoder;
 import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorsStack;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
+import io.flutter.embedding.engine.renderer.FlutterUiResizeListener;
 import io.flutter.embedding.engine.renderer.SurfaceTextureWrapper;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.plugin.common.StandardMessageCodec;
@@ -43,7 +42,6 @@ import io.flutter.util.Preconditions;
 import io.flutter.view.AccessibilityBridge;
 import io.flutter.view.FlutterCallbackInformation;
 import io.flutter.view.TextureRegistry;
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -383,12 +381,17 @@ public class FlutterJNI {
 
   @Nullable private DeferredComponentManager deferredComponentManager;
 
+  @Nullable private SettingsChannel settingsChannel;
+
   @NonNull
   private final Set<EngineLifecycleListener> engineLifecycleListeners = new CopyOnWriteArraySet<>();
 
   @NonNull
   private final Set<FlutterUiDisplayListener> flutterUiDisplayListeners =
       new CopyOnWriteArraySet<>();
+
+  @NonNull
+  private final Set<FlutterUiResizeListener> flutterUiResizeListeners = new CopyOnWriteArraySet<>();
 
   @NonNull private final Looper mainLooper; // cached to avoid synchronization on repeat access.
 
@@ -531,10 +534,29 @@ public class FlutterJNI {
    * Removes a {@link FlutterUiDisplayListener} that was added with {@link
    * #addIsDisplayingFlutterUiListener(FlutterUiDisplayListener)}.
    */
-  @UiThread
   public void removeIsDisplayingFlutterUiListener(@NonNull FlutterUiDisplayListener listener) {
     ensureRunningOnMainThread();
     flutterUiDisplayListeners.remove(listener);
+  }
+
+  /**
+   * Adds a {@link FlutterUiResizeListener}, which receives a callback when Flutter's engine
+   * notifies {@code FlutterJNI} that Flutter is has resized the surface based on the content size.
+   */
+  @UiThread
+  public void addResizingFlutterUiListener(@NonNull FlutterUiResizeListener listener) {
+    ensureRunningOnMainThread();
+    flutterUiResizeListeners.add(listener);
+  }
+
+  /**
+   * Removes a {@link FlutterUiResizeListener} that was added with {@link
+   * #addResizingFlutterUiListener(FlutterUiResizeListener)}.
+   */
+  @UiThread
+  public void removeResizingFlutterUiListener(@NonNull FlutterUiResizeListener listener) {
+    ensureRunningOnMainThread();
+    flutterUiResizeListeners.remove(listener);
   }
 
   public static native void nativeImageHeaderCallback(
@@ -552,26 +574,11 @@ public class FlutterJNI {
   @Nullable
   public static Bitmap decodeImage(@NonNull ByteBuffer buffer, long imageGeneratorAddress) {
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_28) {
-      ImageDecoder.Source source = ImageDecoder.createSource(buffer);
-      try {
-        return ImageDecoder.decodeBitmap(
-            source,
-            (decoder, info, src) -> {
-              // i.e. ARGB_8888
-              decoder.setTargetColorSpace(ColorSpace.get(ColorSpace.Named.SRGB));
-              // TODO(bdero): Switch to ALLOCATOR_HARDWARE for devices that have
-              // `AndroidBitmap_getHardwareBuffer` (API 30+) available once Skia supports
-              // `SkImage::MakeFromAHardwareBuffer` via dynamic lookups:
-              // https://skia-review.googlesource.com/c/skia/+/428960
-              decoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE);
-
-              Size size = info.getSize();
-              nativeImageHeaderCallback(imageGeneratorAddress, size.getWidth(), size.getHeight());
-            });
-      } catch (IOException e) {
-        Log.e(TAG, "Failed to decode image", e);
-        return null;
-      }
+      return FlutterImageDecoder.decodeImage(
+          buffer,
+          (width, height) -> {
+            nativeImageHeaderCallback(imageGeneratorAddress, width, height);
+          });
     }
     return null;
   }
@@ -691,9 +698,14 @@ public class FlutterJNI {
       int physicalTouchSlop,
       int[] displayFeaturesBounds,
       int[] displayFeaturesType,
-      int[] displayFeaturesState) {
+      int[] displayFeaturesState,
+      int minWidth,
+      int maxWidth,
+      int minHeight,
+      int maxHeight) {
     ensureRunningOnMainThread();
     ensureAttachedToNative();
+    Log.d(TAG, "Sending viewport metrics to the engine.");
     nativeSetViewportMetrics(
         nativeShellHolderId,
         devicePixelRatio,
@@ -714,7 +726,11 @@ public class FlutterJNI {
         physicalTouchSlop,
         displayFeaturesBounds,
         displayFeaturesType,
-        displayFeaturesState);
+        displayFeaturesState,
+        minWidth,
+        maxWidth,
+        minHeight,
+        maxHeight);
   }
 
   private native void nativeSetViewportMetrics(
@@ -737,7 +753,11 @@ public class FlutterJNI {
       int physicalTouchSlop,
       int[] displayFeaturesBounds,
       int[] displayFeaturesType,
-      int[] displayFeaturesState);
+      int[] displayFeaturesState,
+      int physicalWidthMin,
+      int physicalWidthMax,
+      int physicalHeightMin,
+      int physicalHeightMax);
 
   // ----- End Render Surface Support -----
 
@@ -800,6 +820,16 @@ public class FlutterJNI {
     ensureRunningOnMainThread();
     if (accessibilityDelegate != null) {
       accessibilityDelegate.updateSemantics(buffer, strings, stringAttributeArgs);
+    }
+  }
+
+  /** Invoked by native to set application locale in Android. */
+  @SuppressWarnings("unused")
+  @UiThread
+  private void setApplicationLocale(@NonNull String locale) {
+    ensureRunningOnMainThread();
+    if (accessibilityDelegate != null) {
+      accessibilityDelegate.setLocale(locale);
     }
   }
 
@@ -1267,6 +1297,14 @@ public class FlutterJNI {
     }
     platformViewsController.destroyOverlaySurfaces();
   }
+
+  // This will get called on the raster thread.
+  @SuppressWarnings("unused")
+  public void maybeResizeSurfaceView(int width, int height) {
+    for (FlutterUiResizeListener listener : flutterUiResizeListeners) {
+      listener.resizeEngineView(width, height);
+    }
+  }
   // ----- End Engine Lifecycle Support ----
 
   // ----- New Platform Views ----------
@@ -1377,6 +1415,18 @@ public class FlutterJNI {
         viewId, x, y, width, height, viewWidth, viewHeight, mutatorsStack);
   }
 
+  @UiThread
+  @SuppressWarnings("unused")
+  @SuppressLint("NewApi")
+  public void hidePlatformView2(int viewId) {
+    ensureRunningOnMainThread();
+    if (platformViewsController2 == null) {
+      throw new RuntimeException(
+          "platformViewsController must be set before attempting to hide a platform view");
+    }
+    platformViewsController2.hidePlatformView(viewId);
+  }
+
   // ----- Start Localization Support ----
 
   /** Sets the localization plugin that is used in various localization methods. */
@@ -1428,7 +1478,10 @@ public class FlutterJNI {
   // ----- End Localization Support ----
   @Nullable
   public float getScaledFontSize(float fontSize, int configurationId) {
-    final DisplayMetrics metrics = SettingsChannel.getPastDisplayMetrics(configurationId);
+    final DisplayMetrics metrics =
+        this.settingsChannel == null
+            ? null
+            : this.settingsChannel.getPastDisplayMetrics(configurationId);
     if (metrics == null) {
       Log.e(
           TAG,
@@ -1439,6 +1492,13 @@ public class FlutterJNI {
     }
     return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, fontSize, metrics)
         / metrics.density;
+  }
+
+  // ----- Start Settings Channel Support ----
+  @UiThread
+  public void setSettingsChannel(@Nullable SettingsChannel settingsChannel) {
+    ensureRunningOnMainThread();
+    this.settingsChannel = settingsChannel;
   }
 
   // ----- Start Deferred Components Support ----
@@ -1631,6 +1691,13 @@ public class FlutterJNI {
         @NonNull ByteBuffer buffer,
         @NonNull String[] strings,
         @NonNull ByteBuffer[] stringAttributeArgs);
+
+    /**
+     * Sets the locale for the assistive technologies.
+     *
+     * <p>Must be called on the main thread
+     */
+    void setLocale(@NonNull String locale);
   }
 
   public interface AsyncWaitForVsyncDelegate {

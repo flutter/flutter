@@ -1,5 +1,6 @@
 _If you've already built the engine and have the configuration set up but merely need a refresher on
-actually compiling the code, see [Compiling the engine](Compiling-the-engine.md)._
+actually compiling the code, see [Compiling the engine](Compiling-the-engine.md) or
+[Engine Tool](https://github.com/flutter/flutter/blob/main/engine/src/flutter/tools/engine_tool)._
 
 _If you are checking these instructions to refresh your memory and your fork of the engine is stale,
 make sure to merge up to HEAD before doing a `gclient sync`._
@@ -47,24 +48,22 @@ Clone the Flutter source code. As of late 2024, the engine source is part of the
 > [!IMPORTANT]
 > On Windows, the following must be run as an Administrator due to [a known issue](https://github.com/flutter/flutter/issues/94580).
 
-[Setup a `.gclient` file](../../../../../engine/README.md) in the repository
-root (the `flutter/flutter` repository root), and run `gclient sync`.
+### `gclient` bootstrap
+
+Flutter engine uses `gclient` to manage dependencies.
+
+1. Copy one of the `engine/scripts/*.gclient` to the repository root as `.gclient`:
+    1. Googlers: copy `rbe.gclient` to enable faster builds with RBE. Follow [RBE Getting started](https://github.com/flutter/flutter/blob/main/docs/engine/rbe/rbe.md#getting-started) to set up RBE.
+    2. Everyone else: copy `standard.gclient`
+2. Run `gclient sync` from the root folder
+
+### Add `et` to `PATH`
 
 The "Engine Tool" called `et` is useful when working with the engine. It is located in the [`flutter/engine/src/flutter/bin`](https://github.com/flutter/flutter/tree/0c3359df8c8342c8907316488b1404a216f215b6/engine/src/flutter/bin) directory. Add this to your `$PATH` in your `.rc` file: e.g. on UNIX, using `export PATH=/path/to/flutter/engine/src/flutter/bin:$PATH`.
 
 ### Additional Steps for Web Engine
 
-Amend the generated `.gclient` file in the root of the source directory to add the following:
-```
-solutions = [
-  {
-    # Same as above...
-    "custom_vars": {
-      "download_emsdk": True,
-    },
-  },
-]
-```
+Open the `.gclient` file in the repository root. Uncomment the lines indicated for building the web engine.
 
 Now, run:
 
@@ -74,7 +73,7 @@ gclient sync
 
 ## Next steps:
 
- * [Compiling the engine](Compiling-the-engine.md) explains how to actually get builds, now that you have the code.
+ * Use `et`, the [Engine Tool](https://github.com/flutter/flutter/blob/main/engine/src/flutter/tools/engine_tool), to actually get builds, now that you have the code.
  * The docs for the flutter tool have a section on [using a locally built engine with the flutter tool](https://github.com/flutter/flutter/blob/main/docs/tool/README.md#using-a-locally-built-engine-with-the-flutter-tool).
  * [Signing commits](https://github.com/flutter/flutter/blob/main/docs/contributing/Signing-commits.md), to configure your environment to securely sign your commits.
 
@@ -104,7 +103,7 @@ The easiest way to do this is create a [multi-root workspace](https://code.visua
 }
 ```
 
-Then, edit the `"settings"` key:
+Then, install the [`clangd` extension](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-clangd) and edit the `"settings"` key:
 
 ```json
 "settings": {

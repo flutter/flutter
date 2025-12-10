@@ -50,7 +50,7 @@ enum _RadioType { material, adaptive }
 /// This widget does not coordinate the [selected] state and the
 /// [checked] state; to have the list tile appear selected when the
 /// radio button is the selected radio button, set [selected] to true
-/// when [value] matches [groupValue].
+/// when [value] matches [RadioGroup.groupValue].
 ///
 /// The radio button is shown on the left by default in left-to-right languages
 /// (i.e. the leading edge). This can be changed using [controlAffinity]. The
@@ -294,7 +294,9 @@ class RadioListTile<T> extends StatefulWidget {
   /// RadioListTile<SingingCharacter>(
   ///   title: const Text('Lafayette'),
   ///   value: SingingCharacter.lafayette,
+  ///   // ignore: deprecated_member_use
   ///   groupValue: _character,
+  ///   // ignore: deprecated_member_use
   ///   onChanged: (SingingCharacter? newValue) {
   ///     setState(() {
   ///       _character = newValue;
@@ -577,6 +579,9 @@ class _RadioListTileState<T> extends State<RadioListTile<T>> with RadioClient<T>
   @override
   bool get tristate => widget.toggleable;
 
+  @override
+  bool get enabled => _enabled;
+
   bool get checked => radioValue == effectiveGroupValue;
 
   late final _RadioRegistry<T> _radioRegistry = _RadioRegistry<T>(this);
@@ -691,7 +696,7 @@ class _RadioListTileState<T> extends State<RadioListTile<T>> with RadioClient<T>
     };
     final ThemeData theme = Theme.of(context);
     final RadioThemeData radioThemeData = RadioTheme.of(context);
-    final Set<WidgetState> states = <WidgetState>{if (widget.selected) WidgetState.selected};
+    final states = <WidgetState>{if (widget.selected) WidgetState.selected};
     final Color effectiveActiveColor =
         widget.activeColor ??
         radioThemeData.fillColor?.resolve(states) ??

@@ -8,7 +8,6 @@ import 'package:flutter_tools/src/widget_preview/preview_detector.dart';
 import 'package:test/test.dart';
 
 import '../../../../src/common.dart';
-import '../../../../src/context.dart';
 import '../utils/preview_details_matcher.dart';
 import '../utils/preview_detector_test_utils.dart';
 import '../utils/preview_project.dart';
@@ -52,7 +51,9 @@ void main() {}
 import 'package:flutter/widget_previews.dart';
 
 class BrightnessPreview extends MultiPreview {
-  const BrightnessPreview();
+  const BrightnessPreview(this.value);
+
+  final Object value;
 
   final List<Preview> previews = <Preview>[
     Preview(name: 'Light', brightness: Brightness.light, wrapper: (child) => child),
@@ -62,7 +63,7 @@ class BrightnessPreview extends MultiPreview {
 
 
 class ClassDeclaration extends StatelessWidget {
-  @BrightnessPreview()
+  @BrightnessPreview(new Object())
   @Preview(theme: () => PreviewThemeData())
   ClassDeclaration();
 
@@ -81,18 +82,11 @@ void main() {
     // Note: we don't use a MemoryFileSystem since we don't have a way to
     // provide it to package:analyzer APIs without writing a significant amount
     // of wrapper logic.
-    late PreviewDetector previewDetector;
     late ProjectWithPreviewsWithNonConstParams project;
 
-    setUp(() {
-      previewDetector = createTestPreviewDetector();
-    });
-
-    tearDown(() async {
-      await previewDetector.dispose();
-    });
-
-    testUsingContext('ignores previews with non-const parameters in existing files', () async {
+    testPreviewDetector('ignores previews with non-const parameters in existing files', (
+      PreviewDetector previewDetector,
+    ) async {
       project = await ProjectWithPreviewsWithNonConstParams.create(
         projectRoot: previewDetector.projectRoot,
         pathsWithPreviews: <String>['foo.dart'],
@@ -102,7 +96,9 @@ void main() {
       expectContainsPreviews(mapping, project.matcherMapping);
     });
 
-    testUsingContext('ignores previews with non-const parameters in updated files', () async {
+    testPreviewDetector('ignores previews with non-const parameters in updated files', (
+      PreviewDetector previewDetector,
+    ) async {
       project = await ProjectWithPreviewsWithNonConstParams.create(
         projectRoot: previewDetector.projectRoot,
         pathsWithPreviews: <String>[],
@@ -122,7 +118,9 @@ void main() {
       );
     });
 
-    testUsingContext('ignores previews with non-const parameters in newly added files', () async {
+    testPreviewDetector('ignores previews with non-const parameters in newly added files', (
+      PreviewDetector previewDetector,
+    ) async {
       project = await ProjectWithPreviewsWithNonConstParams.create(
         projectRoot: previewDetector.projectRoot,
         pathsWithPreviews: <String>[],

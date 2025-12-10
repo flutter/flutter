@@ -293,7 +293,7 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
     if (_viewController == value) {
       return;
     }
-    final bool needsSemanticsUpdate = _viewController.id != value.id;
+    final needsSemanticsUpdate = _viewController.id != value.id;
     _viewController = value;
     markNeedsPaint();
     if (needsSemanticsUpdate) {
@@ -684,7 +684,7 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
     if (_controller == controller) {
       return;
     }
-    final bool needsSemanticsUpdate = _controller.viewId != controller.viewId;
+    final needsSemanticsUpdate = _controller.viewId != controller.viewId;
     _controller = controller;
     markNeedsPaint();
     if (needsSemanticsUpdate) {
@@ -802,7 +802,7 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
   PointerExitEventListener? get onExit => null;
 
   @override
-  MouseCursor get cursor => MouseCursor.uncontrolled;
+  MouseCursor get cursor => kIsWeb ? MouseCursor.defer : MouseCursor.uncontrolled;
 
   @override
   bool get validForMouseTracker => true;

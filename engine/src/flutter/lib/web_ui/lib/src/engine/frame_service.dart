@@ -10,6 +10,7 @@ import 'package:ui/ui.dart' as ui;
 
 import 'dom.dart';
 import 'frame_timing_recorder.dart';
+import 'initialization.dart';
 import 'platform_dispatcher.dart';
 
 /// Provides frame scheduling functionality and frame lifecycle information to
@@ -18,12 +19,18 @@ import 'platform_dispatcher.dart';
 /// If new frame-related functionality needs to be added to the web engine,
 /// prefer to add it here instead of implementing it ad hoc.
 class FrameService {
+  FrameService() {
+    registerHotRestartListener(_dispose);
+  }
+
   /// The singleton instance of the [FrameService] used to schedule frames.
   ///
   /// This may be overridden in tests, for example, to pump fake frames, using
   /// [debugOverrideFrameService].
   static FrameService get instance => _instance ??= FrameService();
   static FrameService? _instance;
+
+  bool _isDisposed = false;
 
   /// Overrides the value returned by [instance].
   ///
@@ -97,6 +104,18 @@ class FrameService {
       //   safest to reset this value before running any significant amount of
       //   functionality that may throw exceptions, or produce wasm traps.
       _isFrameScheduled = false;
+
+      if (_isDisposed) {
+        // Skip this animation frame because the instance has been disposed, meaning there was a
+        // hot restart performed. During a hot restart, Dart automatically cancels timers and
+        // microtasks, but animation frames are requested directly from the browser which isn't
+        // aware of hot restarts, and that leads to problems.
+        //
+        // See:
+        // - https://github.com/flutter/flutter/issues/175260
+        // - https://github.com/flutter/flutter/issues/140684#issuecomment-3251179364
+        return;
+      }
 
       try {
         _isRenderingFrame = true;
@@ -195,5 +214,12 @@ class FrameService {
       //                `EnginePlatformDispatcher.scheduleWarmUpFrame`).
       EnginePlatformDispatcher.instance.invokeOnDrawFrame();
     }
+  }
+
+  void _dispose() {
+    if (identical(this, _instance)) {
+      _instance = null;
+    }
+    _isDisposed = true;
   }
 }

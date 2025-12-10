@@ -28,7 +28,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   EnginePlatformDispatcher() {
     _addBrightnessMediaQueryListener();
     HighContrastSupport.instance.addListener(_updateHighContrast);
-    _addFontSizeObserver();
+    _addTypographySettingsObserver();
     _addLocaleChangedListener();
     registerHotRestartListener(dispose);
     _appLifecycleState.addListener(_setAppLifecycleState);
@@ -59,8 +59,8 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   static final EnginePlatformDispatcher _instance = EnginePlatformDispatcher();
 
   @visibleForTesting
-  final DomElement accessibilityPlaceholder = EngineSemantics.instance.semanticsHelper
-      .prepareAccessibilityPlaceholder();
+  DomElement get accessibilityPlaceholder =>
+      EngineSemantics.instance.semanticsHelper.accessibilityPlaceholder;
 
   PlatformConfiguration configuration = PlatformConfiguration(
     locales: parseBrowserLanguages(),
@@ -70,7 +70,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   /// Compute accessibility features based on the current value of high contrast flag
   static EngineAccessibilityFeatures computeAccessibilityFeatures() {
-    final EngineAccessibilityFeaturesBuilder builder = EngineAccessibilityFeaturesBuilder(0);
+    final builder = EngineAccessibilityFeaturesBuilder(0);
     if (HighContrastSupport.instance.isHighContrastEnabled) {
       builder.highContrast = true;
     }
@@ -79,7 +79,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   void dispose() {
     _removeBrightnessMediaQueryListener();
-    _disconnectFontSizeObserver();
+    _disconnectTypographySettingsObserver();
     _removeLocaleChangedListener();
     HighContrastSupport.instance.removeListener(_updateHighContrast);
     _appLifecycleState.removeListener(_setAppLifecycleState);
@@ -446,7 +446,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     ui.PlatformMessageResponseCallback? callback,
   ) {
     // In widget tests we want to bypass processing of platform messages.
-    bool returnImmediately = false;
+    var returnImmediately = false;
     assert(() {
       if (ui_web.TestEnvironment.instance.ignorePlatformMessages) {
         returnImmediately = true;
@@ -462,7 +462,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       print('Sent platform message on channel: "$name"');
     }
 
-    bool allowDebugEcho = false;
+    var allowDebugEcho = false;
     assert(() {
       allowDebugEcho = true;
       return true;
@@ -480,17 +480,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         final MethodCall decoded = jsonCodec.decodeMethodCall(data);
         switch (decoded.method) {
           case 'Skia.setResourceCacheMaxBytes':
-            if (renderer is CanvasKitRenderer) {
-              assert(
-                decoded.arguments is int,
-                'Argument to Skia.setResourceCacheMaxBytes must be an int, but was ${(decoded.arguments as Object?).runtimeType}',
-              );
-              final int cacheSizeInBytes = decoded.arguments as int;
-              CanvasKitRenderer.instance.resourceCacheMaxBytes = cacheSizeInBytes;
-            }
+            assert(
+              decoded.arguments is int,
+              'Argument to Skia.setResourceCacheMaxBytes must be an int, but was ${(decoded.arguments as Object?).runtimeType}',
+            );
+            final cacheSizeInBytes = decoded.arguments as int;
+            renderer.resourceCacheMaxBytes = cacheSizeInBytes;
 
-            // Also respond in HTML mode. Otherwise, apps would have to detect
-            // CanvasKit vs HTML before invoking this method.
             replyToPlatformMessage(callback, jsonCodec.encodeSuccessEnvelope(<bool>[true]));
         }
         return;
@@ -519,12 +515,12 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
             }
             return;
           case 'HapticFeedback.vibrate':
-            final String? type = decoded.arguments as String?;
+            final type = decoded.arguments as String?;
             vibrate(_getHapticFeedbackDuration(type));
             replyToPlatformMessage(callback, jsonCodec.encodeSuccessEnvelope(true));
             return;
           case 'SystemChrome.setApplicationSwitcherDescription':
-            final Map<String, Object?> arguments = decoded.arguments as Map<String, Object?>;
+            final arguments = decoded.arguments as Map<String, Object?>;
             final String label = arguments['label'] as String? ?? '';
             // TODO(web): Stop setting the color from here, https://github.com/flutter/flutter/issues/123365
             final int primaryColor = arguments['primaryColor'] as int? ?? 0xFF000000;
@@ -533,13 +529,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
             replyToPlatformMessage(callback, jsonCodec.encodeSuccessEnvelope(true));
             return;
           case 'SystemChrome.setSystemUIOverlayStyle':
-            final Map<String, Object?> arguments = decoded.arguments as Map<String, Object?>;
-            final int? statusBarColor = arguments['statusBarColor'] as int?;
+            final arguments = decoded.arguments as Map<String, Object?>;
+            final statusBarColor = arguments['statusBarColor'] as int?;
             setThemeColor(statusBarColor == null ? null : ui.Color(statusBarColor));
             replyToPlatformMessage(callback, jsonCodec.encodeSuccessEnvelope(true));
             return;
           case 'SystemChrome.setPreferredOrientations':
-            final List<dynamic> arguments = decoded.arguments as List<dynamic>;
+            final arguments = decoded.arguments as List<dynamic>;
             ScreenOrientation.instance.setPreferredOrientation(arguments).then((bool success) {
               replyToPlatformMessage(callback, jsonCodec.encodeSuccessEnvelope(success));
             });
@@ -549,12 +545,12 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
             replyToPlatformMessage(callback, jsonCodec.encodeSuccessEnvelope(true));
             return;
           case 'Clipboard.setData':
-            final Map<String, Object?> arguments = decoded.arguments as Map<String, Object?>;
-            final String? text = arguments['text'] as String?;
+            final arguments = decoded.arguments as Map<String, Object?>;
+            final text = arguments['text'] as String?;
             ClipboardMessageHandler().setDataMethodCall(callback, text);
             return;
           case 'Clipboard.getData':
-            final String? format = decoded.arguments as String?;
+            final format = decoded.arguments as String?;
             ClipboardMessageHandler().getDataMethodCall(callback, format);
             return;
           case 'Clipboard.hasStrings':
@@ -587,7 +583,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
       case 'flutter/mousecursor':
         final MethodCall decoded = standardCodec.decodeMethodCall(data);
-        final Map<dynamic, dynamic> arguments = decoded.arguments as Map<dynamic, dynamic>;
+        final arguments = decoded.arguments as Map<dynamic, dynamic>;
         switch (decoded.method) {
           case 'activateSystemCursor':
             // TODO(mdebbar): Once the framework starts sending us a viewId, we
@@ -607,13 +603,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       case PlatformViewMessageHandler.channelName:
         // `arguments` can be a Map<String, Object> for `create`,
         // but an `int` for `dispose`, hence why `dynamic` everywhere.
-        final MethodCall(:String method, :dynamic arguments) = standardCodec.decodeMethodCall(data);
+        final MethodCall(:String method, :Object? arguments) = standardCodec.decodeMethodCall(data);
         PlatformViewMessageHandler.instance.handlePlatformViewCall(method, arguments, callback!);
         return;
 
       case 'flutter/accessibility':
         // In widget tests we want to bypass processing of platform messages.
-        const StandardMessageCodec codec = StandardMessageCodec();
+        const codec = StandardMessageCodec();
         final EngineSemantics semantics = EngineSemantics.instance;
         if (semantics.semanticsEnabled) {
           semantics.accessibilityAnnouncements.handleMessage(codec, data);
@@ -663,8 +659,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     ui.PlatformMessageResponseCallback? callback,
   ) async {
     try {
-      final HttpFetchResponse response =
-          await ui_web.assetManager.loadAsset(url) as HttpFetchResponse;
+      final response = await ui_web.assetManager.loadAsset(url) as HttpFetchResponse;
       final ByteBuffer assetData = await response.asByteBuffer();
       replyToPlatformMessage(callback, assetData.asByteData());
     } catch (error) {
@@ -674,17 +669,20 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   }
 
   int _getHapticFeedbackDuration(String? type) {
-    const int vibrateLongPress = 50;
-    const int vibrateLightImpact = 10;
-    const int vibrateMediumImpact = 20;
-    const int vibrateHeavyImpact = 30;
-    const int vibrateSelectionClick = 10;
+    const vibrateLongPress = 50;
+    const vibrateLightImpact = 10;
+    const vibrateMediumImpact = 20;
+    const vibrateHeavyImpact = 30;
+    const vibrateSelectionClick = 10;
 
     return switch (type) {
       'HapticFeedbackType.lightImpact' => vibrateLightImpact,
       'HapticFeedbackType.mediumImpact' => vibrateMediumImpact,
       'HapticFeedbackType.heavyImpact' => vibrateHeavyImpact,
       'HapticFeedbackType.selectionClick' => vibrateSelectionClick,
+      'HapticFeedbackType.successNotification' => vibrateMediumImpact,
+      'HapticFeedbackType.warningNotification' => vibrateMediumImpact,
+      'HapticFeedbackType.errorNotification' => vibrateHeavyImpact,
       _ => vibrateLongPress,
     };
   }
@@ -743,7 +741,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   ///  * [RendererBinding], the Flutter framework class which manages layout and
   ///    painting.
   Future<void> render(ui.Scene scene, [ui.FlutterView? view]) async {
-    final EngineFlutterView? target = (view ?? implicitView) as EngineFlutterView?;
+    final target = (view ?? implicitView) as EngineFlutterView?;
     assert(target != null, 'Calling render without a FlutterView');
     if (target == null) {
       // If there is no view to render into, then this is a no-op.
@@ -758,6 +756,18 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       await renderer.renderScene(scene, target);
     }
   }
+
+  @override
+  double? get lineHeightScaleFactorOverride => configuration.lineHeightScaleFactorOverride;
+
+  @override
+  double? get letterSpacingOverride => configuration.letterSpacingOverride;
+
+  @override
+  double? get wordSpacingOverride => configuration.wordSpacingOverride;
+
+  @override
+  double? get paragraphSpacingOverride => configuration.paragraphSpacingOverride;
 
   /// Additional accessibility features that may be enabled by the platform.
   @override
@@ -801,6 +811,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   ''')
   void updateSemantics(ui.SemanticsUpdate update) {
     implicitView?.semantics.updateSemantics(update);
+  }
+
+  @override
+  void setApplicationLocale(ui.Locale locale) {
+    for (final EngineFlutterView view in views) {
+      view.setLocale(locale);
+    }
   }
 
   /// This is equivalent to `locales.first`, except that it will provide an
@@ -932,9 +949,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       return const <ui.Locale>[_defaultLocale];
     }
 
-    final List<ui.Locale> locales = <ui.Locale>[];
+    final locales = <ui.Locale>[];
     for (final String language in languages) {
-      final DomLocale domLocale = DomLocale(language);
+      final domLocale = DomLocale(language);
       locales.add(
         ui.Locale.fromSubtags(
           languageCode: domLocale.language,
@@ -976,50 +993,181 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   @override
   bool get alwaysUse24HourFormat => configuration.alwaysUse24HourFormat;
 
-  /// Updates [textScaleFactor] and invokes [onTextScaleFactorChanged] and
-  /// [onPlatformConfigurationChanged] callbacks if [textScaleFactor] changed.
-  void _updateTextScaleFactor(double value) {
+  /// Watches for resize changes on an off-screen invisible element to
+  /// recalculate [lineHeightScaleFactorOverride], [letterSpacingOverride],
+  /// [wordSpacingOverride], and [paragraphSpacingOverride].
+  ///
+  /// Updates [lineHeightScaleFactorOverride], [letterSpacingOverride],
+  /// [wordSpacingOverride], and [paragraphSpacingOverride] with the new values.
+  DomResizeObserver? _typographySettingsObserver;
+  DomElement? _typographyMeasurementElement;
+
+  /// Updates [textScaleFactor] and returns true if [textScaleFactor] changed.
+  /// If not then returns false.
+  bool _updateTextScaleFactor(double value) {
     if (configuration.textScaleFactor != value) {
-      configuration = configuration.copyWith(textScaleFactor: value);
-      invokeOnPlatformConfigurationChanged();
-      invokeOnTextScaleFactorChanged();
+      configuration = configuration.apply(textScaleFactor: value);
+      return true;
     }
+    return false;
   }
 
-  /// Watches for font-size changes in the browser's <html> element to
-  /// recalculate [textScaleFactor].
-  ///
-  /// Updates [textScaleFactor] with the new value.
-  DomMutationObserver? _fontSizeObserver;
+  /// Updates [lineHeightScaleFactorOverride] and return true if
+  /// [lineHeightScaleFactorOverride] changed. If not then returns false.
+  bool _updateLineHeightScaleFactorOverride(double? value) {
+    if (configuration.lineHeightScaleFactorOverride != value) {
+      configuration = configuration.apply(lineHeightScaleFactorOverride: value);
+      return true;
+    }
+    return false;
+  }
 
-  /// Set the callback function for updating [textScaleFactor] based on
-  /// font-size changes in the browser's <html> element.
-  void _addFontSizeObserver() {
-    const String styleAttribute = 'style';
+  /// Updates [letterSpacingOverride] and return true if
+  /// [letterSpacingOverride] changed. If not then returns false.
+  bool _updateLetterSpacingOverride(double? value) {
+    if (configuration.letterSpacingOverride != value) {
+      configuration = configuration.apply(letterSpacingOverride: value);
+      return true;
+    }
+    return false;
+  }
 
-    _fontSizeObserver = createDomMutationObserver((
-      JSArray<JSAny?> mutations,
-      DomMutationObserver _,
+  /// Updates [wordSpacingOverride] and returns true if
+  /// [wordSpacingOverride] changed. If not then returns false.
+  bool _updateWordSpacingOverride(double? value) {
+    if (configuration.wordSpacingOverride != value) {
+      configuration = configuration.apply(wordSpacingOverride: value);
+      return true;
+    }
+    return false;
+  }
+
+  /// Updates [paragraphSpacingOverride] and returns true if
+  /// [paragraphSpacingOverride] changed. If not then returns false.
+  bool _updateParagraphSpacingOverride(double? value) {
+    if (configuration.paragraphSpacingOverride != value) {
+      configuration = configuration.apply(paragraphSpacingOverride: value);
+      return true;
+    }
+    return false;
+  }
+
+  /// Sets the callback function for updating [textScaleFactor],
+  /// [lineHeightScaleFactorOverride], [letterSpacingOverride],
+  /// [wordSpacingOverride], and [paragraphSpacingOverride] based on the sizing
+  /// changes of an off-screen element with text.
+  void _addTypographySettingsObserver() {
+    _typographyMeasurementElement = createDomHTMLParagraphElement();
+    _typographyMeasurementElement!.text = 'flutter typography measurement';
+    // The element should be hidden from screen readers.
+    _typographyMeasurementElement!.setAttribute('aria-hidden', 'true');
+    const spacingDefault = 9999.0;
+    _typographyMeasurementElement!.style
+      // The element should be positioned off-screen above
+      // the window and not visible.
+      ..position = 'fixed'
+      ..bottom = '100%'
+      ..visibility = 'hidden'
+      ..opacity = '0'
+      ..pointerEvents = 'none'
+      // The element should be sensitive to letter-spacing, word-spacing,
+      // and line-height changes.
+      ..width = 'auto'
+      ..height = 'auto'
+      ..whiteSpace = 'nowrap'
+      // Set text spacing properties defaults.
+      ..lineHeight = '${spacingDefault}px'
+      ..letterSpacing = '${spacingDefault}px'
+      ..wordSpacing = '${spacingDefault}px'
+      ..margin = '0px 0px ${spacingDefault}px 0px';
+    domDocument.body!.append(_typographyMeasurementElement!);
+    final double typographyMeasurementElementFontSize =
+        parseFontSize(_typographyMeasurementElement!)?.toDouble() ?? _defaultRootFontSize;
+    final double defaultLineHeightFactor = spacingDefault / typographyMeasurementElementFontSize;
+    _typographySettingsObserver = createDomResizeObserver((
+      List<DomResizeObserverEntry> entries,
+      DomResizeObserver observer,
     ) {
-      for (final JSAny? mutation in mutations.toDart) {
-        final DomMutationRecord record = mutation! as DomMutationRecord;
-        if (record.type == 'attributes' && record.attributeName == styleAttribute) {
-          final double newTextScaleFactor = findBrowserTextScaleFactor();
-          _updateTextScaleFactor(newTextScaleFactor);
-        }
+      final double computedTextScaleFactor = findBrowserTextScaleFactor();
+      final double? lineHeight = parseNumericStyleProperty(
+        _typographyMeasurementElement!,
+        'line-height',
+      )?.toDouble();
+      final double? fontSize = parseFontSize(_typographyMeasurementElement!)?.toDouble();
+      final double? computedLineHeightScaleFactor =
+          fontSize != null && lineHeight != null && lineHeight != spacingDefault
+          ? lineHeight / fontSize
+          : null;
+      final double? computedWordSpacing = parseNumericStyleProperty(
+        _typographyMeasurementElement!,
+        'word-spacing',
+      )?.toDouble();
+      final double? computedLetterSpacing = parseNumericStyleProperty(
+        _typographyMeasurementElement!,
+        'letter-spacing',
+      )?.toDouble();
+      // There is no direct CSS property for paragraph spacing,
+      // so on the web this feature is usually implemented
+      // by extension authors by leveraging `margin-bottom` on
+      // the `p` element.
+      final double? computedParagraphSpacing = parseNumericStyleProperty(
+        _typographyMeasurementElement!,
+        'margin-bottom',
+      )?.toDouble();
+
+      var computedTextScaleFactorChanged = false;
+      var computedLineHeightScaleFactorChanged = false;
+      var computedLetterSpacingChanged = false;
+      var computedWordSpacingChanged = false;
+      var computedParagraphSpacingChanged = false;
+
+      computedTextScaleFactorChanged = _updateTextScaleFactor(computedTextScaleFactor);
+      computedLineHeightScaleFactorChanged = _updateLineHeightScaleFactorOverride(
+        computedLineHeightScaleFactor == defaultLineHeightFactor
+            ? null
+            : computedLineHeightScaleFactor,
+      );
+      computedLetterSpacingChanged = _updateLetterSpacingOverride(
+        computedLetterSpacing == spacingDefault ? null : computedLetterSpacing,
+      );
+      computedWordSpacingChanged = _updateWordSpacingOverride(
+        computedWordSpacing == spacingDefault ? null : computedWordSpacing,
+      );
+      computedParagraphSpacingChanged = _updateParagraphSpacingOverride(
+        computedParagraphSpacing == spacingDefault ? null : computedParagraphSpacing,
+      );
+
+      final bool metricsChanged =
+          computedLineHeightScaleFactorChanged ||
+          computedLetterSpacingChanged ||
+          computedWordSpacingChanged ||
+          computedParagraphSpacingChanged;
+
+      if (!computedTextScaleFactorChanged && !metricsChanged) {
+        return;
+      }
+
+      invokeOnPlatformConfigurationChanged();
+
+      if (computedTextScaleFactorChanged) {
+        invokeOnTextScaleFactorChanged();
+      }
+
+      if (metricsChanged) {
+        invokeOnMetricsChanged();
       }
     });
-    _fontSizeObserver!.observe(
-      domDocument.documentElement!,
-      attributes: true,
-      attributeFilter: <String>[styleAttribute],
-    );
+
+    _typographySettingsObserver!.observe(_typographyMeasurementElement!);
   }
 
-  /// Remove the observer for font-size changes in the browser's <html> element.
-  void _disconnectFontSizeObserver() {
-    _fontSizeObserver?.disconnect();
-    _fontSizeObserver = null;
+  /// Remove the observer for typography changes on the off-screen
+  /// typography measurement element.
+  void _disconnectTypographySettingsObserver() {
+    _typographySettingsObserver?.disconnect();
+    _typographySettingsObserver = null;
+    _typographyMeasurementElement?.remove();
+    _typographyMeasurementElement = null;
   }
 
   void _setAppLifecycleState(ui.AppLifecycleState state) {
@@ -1087,8 +1235,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// callback if [_highContrast] changed.
   void _updateHighContrast(bool value) {
     if (configuration.accessibilityFeatures.highContrast != value) {
-      final EngineAccessibilityFeatures original =
-          configuration.accessibilityFeatures as EngineAccessibilityFeatures;
+      final original = configuration.accessibilityFeatures as EngineAccessibilityFeatures;
       configuration = configuration.copyWith(
         accessibilityFeatures: original.copyWith(highContrast: value),
       );
@@ -1113,7 +1260,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     );
 
     _brightnessMediaQueryListener = (DomEvent event) {
-      final DomMediaQueryListEvent mqEvent = event as DomMediaQueryListEvent;
+      final mqEvent = event as DomMediaQueryListEvent;
       _updatePlatformBrightness(mqEvent.matches! ? ui.Brightness.dark : ui.Brightness.light);
     }.toJS;
     _brightnessMediaQuery.addListener(_brightnessMediaQueryListener);
@@ -1359,11 +1506,11 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   /// Finds the navigation target by traversing up the DOM tree
   NavigationTarget? _findNavigationTarget(DomEvent event) {
-    DomNode? currentNode = event.target as DomNode?;
+    var currentNode = event.target as DomNode?;
 
     while (currentNode != null) {
       if (currentNode.isA<DomElement>()) {
-        final DomElement element = currentNode as DomElement;
+        final element = currentNode as DomElement;
         final String? semanticsId = element.getAttribute('id');
 
         if (semanticsId != null && semanticsId.startsWith(kFlutterSemanticNodePrefix)) {
@@ -1434,7 +1581,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     final Iterable<DomElement> candidates = element.querySelectorAll(
       '[id^="$kFlutterSemanticNodePrefix"]',
     );
-    for (final DomElement candidate in candidates) {
+    for (final candidate in candidates) {
       if (_supportsSemanticsFocusAction(candidate)) {
         return candidate;
       }
@@ -1449,7 +1596,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       return false;
     }
 
-    final DomMouseEvent mouseEvent = event as DomMouseEvent;
+    final mouseEvent = event as DomMouseEvent;
     final double clientX = mouseEvent.clientX;
     final double clientY = mouseEvent.clientY;
 
@@ -1504,7 +1651,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       return false;
     }
 
-    final DomElement? element = event.target as DomElement?;
+    final element = event.target as DomElement?;
     if (element == null) {
       return false;
     }
@@ -1678,7 +1825,53 @@ class PlatformConfiguration {
     this.locales = const <ui.Locale>[],
     this.defaultRouteName = '/',
     this.systemFontFamily,
+    this.lineHeightScaleFactorOverride,
+    this.letterSpacingOverride,
+    this.wordSpacingOverride,
+    this.paragraphSpacingOverride,
   });
+
+  static const Object _noOverridePlaceholder = Object();
+
+  PlatformConfiguration apply({
+    ui.AccessibilityFeatures? accessibilityFeatures,
+    bool? alwaysUse24HourFormat,
+    bool? semanticsEnabled,
+    ui.Brightness? platformBrightness,
+    double? textScaleFactor,
+    List<ui.Locale>? locales,
+    String? defaultRouteName,
+    Object? systemFontFamily = _noOverridePlaceholder,
+    Object? lineHeightScaleFactorOverride = _noOverridePlaceholder,
+    Object? letterSpacingOverride = _noOverridePlaceholder,
+    Object? wordSpacingOverride = _noOverridePlaceholder,
+    Object? paragraphSpacingOverride = _noOverridePlaceholder,
+  }) {
+    return PlatformConfiguration(
+      accessibilityFeatures: accessibilityFeatures ?? this.accessibilityFeatures,
+      alwaysUse24HourFormat: alwaysUse24HourFormat ?? this.alwaysUse24HourFormat,
+      semanticsEnabled: semanticsEnabled ?? this.semanticsEnabled,
+      platformBrightness: platformBrightness ?? this.platformBrightness,
+      textScaleFactor: textScaleFactor ?? this.textScaleFactor,
+      locales: locales ?? this.locales,
+      defaultRouteName: defaultRouteName ?? this.defaultRouteName,
+      systemFontFamily: systemFontFamily == _noOverridePlaceholder
+          ? this.systemFontFamily
+          : systemFontFamily as String?,
+      lineHeightScaleFactorOverride: lineHeightScaleFactorOverride == _noOverridePlaceholder
+          ? this.lineHeightScaleFactorOverride
+          : lineHeightScaleFactorOverride as double?,
+      letterSpacingOverride: letterSpacingOverride == _noOverridePlaceholder
+          ? this.letterSpacingOverride
+          : letterSpacingOverride as double?,
+      wordSpacingOverride: wordSpacingOverride == _noOverridePlaceholder
+          ? this.wordSpacingOverride
+          : wordSpacingOverride as double?,
+      paragraphSpacingOverride: paragraphSpacingOverride == _noOverridePlaceholder
+          ? this.paragraphSpacingOverride
+          : paragraphSpacingOverride as double?,
+    );
+  }
 
   PlatformConfiguration copyWith({
     ui.AccessibilityFeatures? accessibilityFeatures,
@@ -1689,6 +1882,10 @@ class PlatformConfiguration {
     List<ui.Locale>? locales,
     String? defaultRouteName,
     String? systemFontFamily,
+    double? lineHeightScaleFactorOverride,
+    double? letterSpacingOverride,
+    double? wordSpacingOverride,
+    double? paragraphSpacingOverride,
   }) {
     return PlatformConfiguration(
       accessibilityFeatures: accessibilityFeatures ?? this.accessibilityFeatures,
@@ -1699,6 +1896,11 @@ class PlatformConfiguration {
       locales: locales ?? this.locales,
       defaultRouteName: defaultRouteName ?? this.defaultRouteName,
       systemFontFamily: systemFontFamily ?? this.systemFontFamily,
+      lineHeightScaleFactorOverride:
+          lineHeightScaleFactorOverride ?? this.lineHeightScaleFactorOverride,
+      letterSpacingOverride: letterSpacingOverride ?? this.letterSpacingOverride,
+      wordSpacingOverride: wordSpacingOverride ?? this.wordSpacingOverride,
+      paragraphSpacingOverride: paragraphSpacingOverride ?? this.paragraphSpacingOverride,
     );
   }
 
@@ -1710,6 +1912,10 @@ class PlatformConfiguration {
   final List<ui.Locale> locales;
   final String defaultRouteName;
   final String? systemFontFamily;
+  final double? lineHeightScaleFactorOverride;
+  final double? letterSpacingOverride;
+  final double? wordSpacingOverride;
+  final double? paragraphSpacingOverride;
 }
 
 /// Helper class to hold navigation target information for AT focus restoration

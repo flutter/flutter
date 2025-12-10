@@ -165,6 +165,7 @@ class ContentContext {
   PipelineRef GetBlendScreenPipeline(ContentContextOptions opts) const;
   PipelineRef GetBlendSoftLightPipeline(ContentContextOptions opts) const;
   PipelineRef GetBorderMaskBlurPipeline(ContentContextOptions opts) const;
+  PipelineRef GetCirclePipeline(ContentContextOptions opts) const;
   PipelineRef GetClearBlendPipeline(ContentContextOptions opts) const;
   PipelineRef GetClipPipeline(ContentContextOptions opts) const;
   PipelineRef GetColorMatrixColorFilterPipeline(ContentContextOptions opts) const;
@@ -227,9 +228,11 @@ class ContentContext {
   PipelineRef GetXorBlendPipeline(ContentContextOptions opts) const;
   PipelineRef GetYUVToRGBFilterPipeline(ContentContextOptions opts) const;
 #ifdef IMPELLER_ENABLE_OPENGLES
-  PipelineRef GetDownsampleTextureGlesPipeline(ContentContextOptions opts) const;
+#if !defined(FML_OS_EMSCRIPTEN)
   PipelineRef GetTiledTextureExternalPipeline(ContentContextOptions opts) const;
   PipelineRef GetTiledTextureUvExternalPipeline(ContentContextOptions opts) const;
+#endif
+  PipelineRef GetDownsampleTextureGlesPipeline(ContentContextOptions opts) const;
 #endif  // IMPELLER_ENABLE_OPENGLES
   // clang-format on
 

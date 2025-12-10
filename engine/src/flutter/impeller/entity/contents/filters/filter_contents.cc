@@ -253,25 +253,19 @@ std::optional<Entity> FilterContents::GetEntity(
 std::optional<Snapshot> FilterContents::RenderToSnapshot(
     const ContentContext& renderer,
     const Entity& entity,
-    std::optional<Rect> coverage_limit,
-    const std::optional<SamplerDescriptor>& sampler_descriptor,
-    bool msaa_enabled,
-    int32_t mip_count,
-    std::string_view label) const {
+    const SnapshotOptions& options) const {
   // Resolve the render instruction (entity) from the filter and render it to a
   // snapshot.
   if (std::optional<Entity> result =
-          GetEntity(renderer, entity, coverage_limit);
+          GetEntity(renderer, entity, options.coverage_limit);
       result.has_value()) {
     return result->GetContents()->RenderToSnapshot(
-        renderer,        // renderer
-        result.value(),  // entity
-        coverage_limit,  // coverage_limit
-        std::nullopt,    // sampler_descriptor
-        true,            // msaa_enabled
-        /*mip_count=*/mip_count,
-        label  // label
-    );
+        renderer, result.value(),
+        {.coverage_limit = options.coverage_limit,
+         .sampler_descriptor = std::nullopt,
+         .msaa_enabled = true,
+         .mip_count = options.mip_count,
+         .label = options.label});
   }
 
   return std::nullopt;

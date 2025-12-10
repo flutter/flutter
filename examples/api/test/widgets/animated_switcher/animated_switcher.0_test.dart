@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/animated_switcher/animated_switcher.0.dart' as example;
+import 'package:flutter_api_samples/widgets/animated_switcher/animated_switcher.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -17,7 +18,10 @@ void main() {
     while (counter < 10) {
       // Tap on the button to increment the counter.
       await tester.tap(
-        find.ancestor(of: find.text('Increment'), matching: find.byType(ElevatedButton)),
+        find.ancestor(
+          of: find.text('Increment'),
+          matching: find.byType(ElevatedButton),
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -51,7 +55,10 @@ void main() {
 
     // Tap on the button to increment the counter.
     await tester.tap(
-      find.ancestor(of: find.text('Increment'), matching: find.byType(ElevatedButton)),
+      find.ancestor(
+        of: find.text('Increment'),
+        matching: find.byType(ElevatedButton),
+      ),
     );
     await tester.pump();
 

@@ -69,6 +69,8 @@ static jfieldID g_jni_shell_holder_field = nullptr;
     "(ILjava/nio/ByteBuffer;)V")                                              \
   V(g_update_semantics_method, updateSemantics,                               \
     "(Ljava/nio/ByteBuffer;[Ljava/lang/String;[Ljava/nio/ByteBuffer;)V")      \
+  V(g_set_application_locale_method, setApplicationLocale,                    \
+    "(Ljava/lang/String;)V")                                                  \
   V(g_on_display_platform_view_method, onDisplayPlatformView,                 \
     "(IIIIIIILio/flutter/embedding/engine/mutatorsstack/"                     \
     "FlutterMutatorsStack;)V")                                                \
@@ -85,6 +87,7 @@ static jfieldID g_jni_shell_holder_field = nullptr;
   V(g_on_display_platform_view2_method, onDisplayPlatformView2,               \
     "(IIIIIIILio/flutter/embedding/engine/mutatorsstack/"                     \
     "FlutterMutatorsStack;)V")                                                \
+  V(g_hide_platform_view2_method, hidePlatformView2, "(I)V")                  \
   V(g_on_end_frame2_method, endFrame2, "()V")                                 \
   V(g_show_overlay_surface2_method, showOverlaySurface2, "()V")               \
   V(g_hide_overlay_surface2_method, hideOverlaySurface2, "()V")               \
@@ -96,9 +99,9 @@ static jfieldID g_jni_shell_holder_field = nullptr;
   V(g_on_engine_restart_method, onPreEngineRestart, "()V")                    \
   V(g_create_overlay_surface_method, createOverlaySurface,                    \
     "()Lio/flutter/embedding/engine/FlutterOverlaySurface;")                  \
-  V(g_destroy_overlay_surfaces_method, destroyOverlaySurfaces, "()V")
-
-//
+  V(g_destroy_overlay_surfaces_method, destroyOverlaySurfaces, "()V")         \
+  V(g_maybe_resize_surface_view, maybeResizeSurfaceView, "(II)V")             \
+  //
 
 #define FLUTTER_DECLARE_JNI(global_field, jni_name, jni_arg) \
   static jmethodID global_field = nullptr;
@@ -348,7 +351,11 @@ static void SetViewportMetrics(JNIEnv* env,
                                jint physicalTouchSlop,
                                jintArray javaDisplayFeaturesBounds,
                                jintArray javaDisplayFeaturesType,
-                               jintArray javaDisplayFeaturesState) {
+                               jintArray javaDisplayFeaturesState,
+                               jint physicalMinWidth,
+                               jint physicalMaxWidth,
+                               jint physicalMinHeight,
+                               jint physicalMaxHeight) {
   // Convert java->c++. javaDisplayFeaturesBounds, javaDisplayFeaturesType and
   // javaDisplayFeaturesState cannot be null
   jsize rectSize = env->GetArrayLength(javaDisplayFeaturesBounds);
@@ -372,10 +379,12 @@ static void SetViewportMetrics(JNIEnv* env,
       static_cast<double>(devicePixelRatio),  // p_device_pixel_ratio
       static_cast<double>(physicalWidth),     // p_physical_width
       static_cast<double>(physicalHeight),    // p_physical_height
-      static_cast<double>(physicalWidth),     // p_physical_min_width_constraint
-      static_cast<double>(physicalWidth),     // p_physical_max_width_constraint
-      static_cast<double>(physicalHeight),  // p_physical_min_height_constraint
-      static_cast<double>(physicalHeight),  // p_physical_max_height_constraint
+      static_cast<double>(physicalMinWidth),  // p_physical_min_width_constraint
+      static_cast<double>(physicalMaxWidth),  // p_physical_max_width_constraint
+      static_cast<double>(
+          physicalMinHeight),  // p_physical_min_height_constraint
+      static_cast<double>(
+          physicalMaxHeight),  // p_physical_max_height_constraint
       static_cast<double>(physicalPaddingTop),     // p_physical_padding_top
       static_cast<double>(physicalPaddingRight),   // p_physical_padding_right
       static_cast<double>(physicalPaddingBottom),  // p_physical_padding_bottom
@@ -795,7 +804,7 @@ bool RegisterApi(JNIEnv* env) {
       },
       {
           .name = "nativeSetViewportMetrics",
-          .signature = "(JFIIIIIIIIIIIIIII[I[I[I)V",
+          .signature = "(JFIIIIIIIIIIIIIII[I[I[IIIII)V",
           .fnPtr = reinterpret_cast<void*>(&SetViewportMetrics),
       },
       {
@@ -1354,6 +1363,24 @@ void PlatformViewAndroidJNIImpl::FlutterViewHandlePlatformMessage(
     env->CallVoidMethod(java_object.obj(), g_handle_platform_message_method,
                         java_channel.obj(), nullptr, responseId, nullptr);
   }
+
+  FML_CHECK(fml::jni::CheckException(env));
+}
+
+void PlatformViewAndroidJNIImpl::FlutterViewSetApplicationLocale(
+    std::string locale) {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+
+  auto java_object = java_object_.get(env);
+  if (java_object.is_null()) {
+    return;
+  }
+
+  fml::jni::ScopedJavaLocalRef<jstring> jlocale =
+      fml::jni::StringToJavaString(env, locale);
+
+  env->CallVoidMethod(java_object.obj(), g_set_application_locale_method,
+                      jlocale.obj());
 
   FML_CHECK(fml::jni::CheckException(env));
 }
@@ -2285,6 +2312,16 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
   FML_CHECK(fml::jni::CheckException(env));
 }
 
+void PlatformViewAndroidJNIImpl::hidePlatformView2(int32_t view_id) {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+  auto java_object = java_object_.get(env);
+  if (java_object.is_null()) {
+    return;
+  }
+
+  env->CallVoidMethod(java_object.obj(), g_hide_platform_view2_method, view_id);
+}
+
 void PlatformViewAndroidJNIImpl::onEndFrame2() {
   JNIEnv* env = fml::jni::AttachCurrentThread();
 
@@ -2319,6 +2356,20 @@ void PlatformViewAndroidJNIImpl::hideOverlaySurface2() {
   }
 
   env->CallVoidMethod(java_object.obj(), g_hide_overlay_surface2_method);
+  FML_CHECK(fml::jni::CheckException(env));
+}
+
+void PlatformViewAndroidJNIImpl::MaybeResizeSurfaceView(int32_t width,
+                                                        int32_t height) const {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+
+  auto java_object = java_object_.get(env);
+  if (java_object.is_null()) {
+    return;
+  }
+
+  env->CallVoidMethod(java_object.obj(), g_maybe_resize_surface_view, width,
+                      height);
   FML_CHECK(fml::jni::CheckException(env));
 }
 

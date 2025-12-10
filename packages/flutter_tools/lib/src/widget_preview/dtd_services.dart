@@ -4,26 +4,39 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:dtd/dtd.dart';
 import 'package:json_rpc_2/json_rpc_2.dart';
+import 'package:meta/meta.dart';
+import 'package:package_config/package_config_types.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/utils.dart';
 import '../convert.dart';
+import '../dart/package_map.dart';
+import '../project.dart';
+import 'analytics.dart';
+import 'persistent_preferences.dart';
 
 typedef DtdService = (String, DTDServiceCallback);
 
 /// Provides services, streams, and RPC invocations to interact with the Widget Preview Scaffold.
 class WidgetPreviewDtdServices {
   WidgetPreviewDtdServices({
+    required this.previewAnalytics,
+    required this.fs,
     required this.logger,
     required this.shutdownHooks,
     required this.dtdLauncher,
     required this.onHotRestartPreviewerRequest,
+    required this.project,
   }) {
     shutdownHooks.addShutdownHook(() async {
       await _dtd?.close();
@@ -37,13 +50,37 @@ class WidgetPreviewDtdServices {
   // START KEEP SYNCED
 
   static const kWidgetPreviewService = 'widget-preview';
+  static const kIsWindows = 'isWindows';
   static const kHotRestartPreviewer = 'hotRestartPreviewer';
+  static const kResolveUri = 'resolveUri';
+  static const kSetPreference = 'setPreference';
+  static const kGetPreference = 'getPreference';
+  static const kGetDevToolsUri = 'getDevToolsUri';
+
+  static const kWidgetPreviewScaffoldStream = 'WidgetPreviewScaffold';
+  static const kWidgetPreviewConnectedEvent = 'Connected';
+
+  /// Error code for RpcException thrown when attempting to load a key from
+  /// persistent preferences that doesn't have an entry.
+  static const kNoValueForKey = 200;
 
   /// The list of DTD service methods registered by the tool.
-  late final services = <DtdService>[(kHotRestartPreviewer, _hotRestart)];
+  late final services = <DtdService>[
+    (kHotRestartPreviewer, _hotRestart),
+    (kIsWindows, _isWindows),
+    (kResolveUri, _resolveUri),
+    (kSetPreference, _setPreference),
+    (kGetPreference, _getPreference),
+    (kGetDevToolsUri, _getDevToolsUri),
+  ];
 
   // END KEEP SYNCED
 
+  @visibleForTesting
+  late final preferences = PersistentPreferences(fs: fs);
+
+  final WidgetPreviewAnalytics previewAnalytics;
+  final FileSystem fs;
   final Logger logger;
   final ShutdownHooks shutdownHooks;
   final DtdLauncher dtdLauncher;
@@ -52,7 +89,16 @@ class WidgetPreviewDtdServices {
   /// scaffold.
   final VoidCallback onHotRestartPreviewerRequest;
 
+  /// The widget_preview_scaffold project.
+  final FlutterProject project;
+
+  PackageConfig? _packageConfig;
+
   DartToolingDaemon? _dtd;
+
+  @visibleForTesting
+  Future<Uri> get devToolsServerAddress => _devToolsServerAddress.future;
+  final _devToolsServerAddress = Completer<Uri>();
 
   /// The [Uri] pointing to the currently connected DTD instance.
   ///
@@ -75,9 +121,41 @@ class WidgetPreviewDtdServices {
     logger.printTrace('Connected to DTD and registered services.');
   }
 
+  /// Set the DevTools server URI to be used to embed the widget inspector within the
+  /// widget previewer.
+  ///
+  /// This must be called, otherwise the widget previewer will hang waiting for a DevTools URI.
+  void setDevToolsServerAddress({required Uri devToolsServerAddress, required Uri applicationUri}) {
+    if (_devToolsServerAddress.isCompleted) {
+      throw StateError('DevTools server address has already been set.');
+    }
+    _devToolsServerAddress.complete(
+      devToolsServerAddress.replace(
+        pathSegments: [
+          ...devToolsServerAddress.pathSegments.whereNot((s) => s.isEmpty),
+          'inspector',
+        ],
+        queryParameters: {
+          ...devToolsServerAddress.queryParameters,
+          'embedMode': 'one',
+          'uri': applicationUri.toString(),
+        },
+      ),
+    );
+  }
+
   Future<void> _registerServices() async {
     final DartToolingDaemon dtd = _dtd!;
+    dtd.onEvent(kWidgetPreviewScaffoldStream).listen((DTDEvent event) {
+      if (event case DTDEvent(
+        stream: kWidgetPreviewScaffoldStream,
+        kind: kWidgetPreviewConnectedEvent,
+      )) {
+        previewAnalytics.reportPreviewerConnected();
+      }
+    });
     await Future.wait(<Future<void>>[
+      dtd.streamListen(kWidgetPreviewScaffoldStream),
       for (final (String method, DTDServiceCallback callback) in services)
         dtd
             .registerService(kWidgetPreviewService, method, callback)
@@ -88,6 +166,42 @@ class WidgetPreviewDtdServices {
   Future<Map<String, Object?>> _hotRestart(Parameters params) async {
     onHotRestartPreviewerRequest();
     return const Success().toJson();
+  }
+
+  Future<Map<String, Object?>> _isWindows(Parameters _) async {
+    return BoolResponse(const LocalPlatform().isWindows).toJson();
+  }
+
+  Future<Map<String, Object?>> _resolveUri(Parameters params) async {
+    _packageConfig ??= await loadPackageConfigWithLogging(project.packageConfig, logger: logger);
+    final Uri? result = _packageConfig!.resolve(Uri.parse(params.asMap['uri'] as String));
+    return StringResponse(result.toString()).toJson();
+  }
+
+  Future<Map<String, Object?>> _setPreference(Parameters params) async {
+    final String key = params['key'].asString;
+    final Object? value = params['value'].value;
+    preferences[key] = value;
+    return const Success().toJson();
+  }
+
+  Future<Map<String, Object?>> _getPreference(Parameters params) async {
+    final String key = params['key'].asString;
+    final Object? value = preferences[key];
+    if (value == null) {
+      throw RpcException(kNoValueForKey, 'No entry for $key in preferences.');
+    }
+    if (value is String) {
+      return StringResponse(value).toJson();
+    }
+    if (value is bool) {
+      return BoolResponse(value).toJson();
+    }
+    throw UnimplementedError('Unexpected preference value: ${value.runtimeType}');
+  }
+
+  Future<Map<String, Object?>> _getDevToolsUri(Parameters _) async {
+    return StringResponse((await _devToolsServerAddress.future).toString()).toJson();
   }
 }
 
@@ -111,7 +225,7 @@ class DtdLauncher {
     // Wait for the DTD connection information.
     final dtdUri = Completer<Uri>();
     late final StreamSubscription<String> sub;
-    sub = _dtdProcess!.stdout.transform(const Utf8Decoder()).listen((String data) async {
+    sub = _dtdProcess!.stdout.transformWithCallSite(utf8.decoder).listen((String data) async {
       await sub.cancel();
       final jsonData = json.decode(data) as Map<String, Object?>;
       if (jsonData case {'tooling_daemon_details': {'uri': final String dtdUriString}}) {

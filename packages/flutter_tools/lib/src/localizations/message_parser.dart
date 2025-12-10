@@ -44,7 +44,7 @@ enum ST {
 }
 
 // The grammar of the syntax.
-var grammar = <ST, List<List<ST>>>{
+Map<ST, List<List<ST>>> grammar = <ST, List<List<ST>>>{
   ST.message: <List<ST>>[
     <ST>[ST.string, ST.message],
     <ST>[ST.placeholderExpr, ST.message],
@@ -132,9 +132,9 @@ class Node {
 
   String? value;
   late ST type;
-  var children = <Node>[];
+  List<Node> children = <Node>[];
   int positionInMessage;
-  var expectedSymbolCount = 0;
+  int expectedSymbolCount = 0;
 
   @override
   String toString() {
@@ -181,21 +181,21 @@ $indent])''';
   }
 }
 
-var escapedString = RegExp(r"'[^']*'");
-var unescapedString = RegExp(r"[^{}']+");
-var normalString = RegExp(r'[^{}]+');
+RegExp escapedString = RegExp(r"'[^']*'");
+RegExp unescapedString = RegExp(r"[^{}']+");
+RegExp normalString = RegExp(r'[^{}]+');
 
-var brace = RegExp(r'{|}');
+RegExp brace = RegExp(r'{|}');
 
-var whitespace = RegExp(r'\s+');
-var numeric = RegExp(r'[0-9]+');
-var alphanumeric = RegExp(r'[a-zA-Z0-9|_]+');
-var comma = RegExp(r',');
-var equalSign = RegExp(r'=');
-var colon = RegExp(r':');
+RegExp whitespace = RegExp(r'\s+');
+RegExp numeric = RegExp(r'[0-9]+');
+RegExp alphanumeric = RegExp(r'[a-zA-Z0-9|_]+');
+RegExp comma = RegExp(r',');
+RegExp equalSign = RegExp(r'=');
+RegExp colon = RegExp(r':');
 
 // List of token matchers ordered by precedence
-var matchers = <ST, RegExp>{
+Map<ST, RegExp> matchers = <ST, RegExp>{
   ST.empty: whitespace,
   ST.number: numeric,
   ST.comma: comma,

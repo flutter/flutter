@@ -100,6 +100,14 @@ typedef ExpansionTileController = ExpansibleController;
 /// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.1.dart **
 /// {@end-tool}
 ///
+/// ## Accessibility
+///
+/// The accessibility behavior of [ExpansionTile] is platform adaptive, based on
+/// the device's actual platform rather than the theme's platform setting. This
+/// ensures that assistive technologies like VoiceOver on iOS and macOS receive
+/// the correct platform-specific semantics hints, even when the app's theme is
+/// configured to mimic a different platform's appearance.
+///
 /// See also:
 ///
 ///  * [ListTile], useful for creating expansion tile [children] when the
@@ -538,12 +546,12 @@ class _ExpansionTileState extends State<ExpansionTile> {
       // semantic announcements on iOS. https://github.com/flutter/flutter/issues/122101.
       _timer?.cancel();
       _timer = Timer(const Duration(seconds: 1), () {
-        SemanticsService.announce(stateHint, textDirection);
+        SemanticsService.sendAnnouncement(View.of(context), stateHint, textDirection);
         _timer?.cancel();
         _timer = null;
       });
     } else {
-      SemanticsService.announce(stateHint, textDirection);
+      SemanticsService.sendAnnouncement(View.of(context), stateHint, textDirection);
     }
     widget.onExpansionChanged?.call(_tileController.isExpanded);
   }
@@ -584,24 +592,17 @@ class _ExpansionTileState extends State<ExpansionTile> {
   Widget _buildHeader(BuildContext context, Animation<double> animation) {
     _iconColor = animation.drive(_iconColorTween.chain(_easeInTween));
     _headerColor = animation.drive(_headerColorTween.chain(_easeInTween));
-    final ThemeData theme = Theme.of(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final String onTapHint = _tileController.isExpanded
         ? localizations.expansionTileExpandedTapHint
         : localizations.expansionTileCollapsedTapHint;
-    String? semanticsHint;
-    switch (theme.platform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        semanticsHint = _tileController.isExpanded
+    final String semanticsHint = switch (defaultTargetPlatform) {
+      TargetPlatform.iOS || TargetPlatform.macOS =>
+        _tileController.isExpanded
             ? '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}'
-            : '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}';
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        break;
-    }
+            : '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}',
+      _ => _tileController.isExpanded ? localizations.collapsedHint : localizations.expandedHint,
+    };
 
     return Semantics(
       hint: semanticsHint,

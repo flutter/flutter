@@ -23,6 +23,7 @@
 #include "impeller/display_list/image_filter.h"
 #include "impeller/display_list/skia_conversions.h"
 #include "impeller/entity/contents/atlas_contents.h"
+#include "impeller/entity/contents/circle_contents.h"
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/color_source_contents.h"
 #include "impeller/entity/contents/content_context.h"
@@ -426,6 +427,35 @@ bool Canvas::AttemptColorFilterOptimization(
   return true;
 }
 
+bool Canvas::AttemptDrawAntialiasedCircle(const Point& center,
+                                          Scalar radius,
+                                          const Paint& paint) {
+  if (paint.HasColorFilter() || paint.image_filter || paint.invert_colors ||
+      paint.color_source || paint.mask_blur_descriptor.has_value()) {
+    return false;
+  }
+
+  Entity entity;
+  entity.SetTransform(GetCurrentTransform());
+  entity.SetBlendMode(paint.blend_mode);
+
+  const bool is_stroked = paint.style == Paint::Style::kStroke;
+  std::unique_ptr<CircleGeometry> geom;
+  if (is_stroked) {
+    geom = std::make_unique<CircleGeometry>(center, radius, paint.stroke.width);
+  } else {
+    geom = std::make_unique<CircleGeometry>(center, radius);
+  }
+
+  auto contents =
+      CircleContents::Make(std::move(geom), paint.color, is_stroked);
+
+  entity.SetContents(std::move(contents));
+  AddRenderEntityToCurrentPass(entity);
+
+  return true;
+}
+
 bool Canvas::AttemptDrawBlurredRRect(const Rect& rect,
                                      Size corner_radii,
                                      const Paint& paint) {
@@ -717,10 +747,7 @@ void Canvas::DrawArc(const Arc& arc, const Paint& paint) {
     // of the arc - which is not true for elliptical arcs where the inner
     // and outer samples are perpendicular to the traveling direction of the
     // elliptical curve which may not line up with the center of the bounds.
-    //
-    // TODO(flar): It also only supports Butt and Square caps for now.
-    // See https://github.com/flutter/flutter/issues/169400
-    if (oval_bounds.IsSquare() && paint.stroke.cap != Cap::kRound) {
+    if (oval_bounds.IsSquare()) {
       ArcGeometry geom(arc, paint.stroke);
       AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
       return;
@@ -808,6 +835,10 @@ void Canvas::DrawCircle(const Point& center,
   if (AttemptDrawBlurredRRect(
           Rect::MakeOriginSize(center - half_size, half_size * 2),
           {radius, radius}, paint)) {
+    return;
+  }
+
+  if (AttemptDrawAntialiasedCircle(center, radius, paint)) {
     return;
   }
 
@@ -1104,15 +1135,15 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
   contents->SetAlpha(paint.color.alpha);
   contents->SetGeometry(vertices);
   contents->SetLazyTextureCoverage(src_coverage);
-  contents->SetLazyTexture([src_contents,
-                            src_coverage](const ContentContext& renderer) {
-    // Applying the src coverage as the coverage limit prevents the 1px
-    // coverage pad from adding a border that is picked up by developer
-    // specified UVs.
-    auto snapshot =
-        src_contents->RenderToSnapshot(renderer, {}, Rect::Round(src_coverage));
-    return snapshot.has_value() ? snapshot->texture : nullptr;
-  });
+  contents->SetLazyTexture(
+      [src_contents, src_coverage](const ContentContext& renderer) {
+        // Applying the src coverage as the coverage limit prevents the 1px
+        // coverage pad from adding a border that is picked up by developer
+        // specified UVs.
+        auto snapshot = src_contents->RenderToSnapshot(
+            renderer, {}, {.coverage_limit = Rect::Round(src_coverage)});
+        return snapshot.has_value() ? snapshot->texture : nullptr;
+      });
   entity.SetContents(paint.WithFilters(std::move(contents)));
   AddRenderEntityToCurrentPass(entity);
 }
@@ -1145,7 +1176,9 @@ void Canvas::SetupRenderPass() {
         *renderer_.GetContext(),
         *renderer_.GetContext()->GetResourceAllocator(),
         color0.texture->GetSize(),
-        renderer_.GetContext()->GetCapabilities()->SupportsOffscreenMSAA(),
+        renderer_.GetContext()->GetCapabilities()->SupportsOffscreenMSAA() &&
+            color0.texture->GetTextureDescriptor().sample_count >
+                SampleCount::kCount1,
         "ImpellerOnscreen", kDefaultStencilConfig);
   }
 
@@ -1401,7 +1434,7 @@ void Canvas::SaveLayer(const Paint& paint,
           !backdrop_data->shared_filter_snapshot.has_value()) {
         // TODO(157110): compute minimum input hint.
         backdrop_data->shared_filter_snapshot =
-            backdrop_filter_contents->RenderToSnapshot(renderer_, {});
+            backdrop_filter_contents->RenderToSnapshot(renderer_, {}, {});
       }
 
       std::optional<Snapshot> maybe_snapshot =
@@ -1649,7 +1682,8 @@ bool Canvas::AttemptBlurredTextOptimization(
       /*p_identifier=*/identifier,
       /*p_is_single_glyph=*/maybe_glyph.has_value(),
       /*p_font=*/text_frame->GetFont(),
-      /*p_sigma=*/paint.mask_blur_descriptor->sigma);
+      /*p_sigma=*/paint.mask_blur_descriptor->sigma,
+      /*p_color=*/paint.color);
 
   std::optional<Entity> result = renderer_.GetTextShadowCache().Lookup(
       renderer_, entity, filter, cache_key);

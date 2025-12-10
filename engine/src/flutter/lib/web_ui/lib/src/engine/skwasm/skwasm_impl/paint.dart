@@ -15,7 +15,7 @@ class SkwasmPaint implements ui.Paint {
   /// It is the responsibility of the caller to dispose of the returned handle
   /// when it's no longer needed.
   PaintHandle toRawPaint({ui.TileMode defaultBlurTileMode = ui.TileMode.decal}) {
-    final rawPaint = paintCreate(
+    final PaintHandle rawPaint = paintCreate(
       isAntiAlias,
       blendMode.index,
       _colorValue,
@@ -27,7 +27,7 @@ class SkwasmPaint implements ui.Paint {
       invertColors,
     );
 
-    final localColorFilter = _colorFilter;
+    final EngineColorFilter? localColorFilter = _colorFilter;
     if (localColorFilter != null) {
       SkwasmColorFilter.fromEngineColorFilter(localColorFilter).withRawColorFilter((
         nativeFilterHandle,
@@ -36,19 +36,19 @@ class SkwasmPaint implements ui.Paint {
       });
     }
 
-    final shaderHandle = _shader?.handle;
+    final ShaderHandle? shaderHandle = _shader?.handle;
     if (shaderHandle != null) {
       paintSetShader(rawPaint, shaderHandle);
     }
 
-    final localMaskFilter = maskFilter;
+    final ui.MaskFilter? localMaskFilter = maskFilter;
     if (localMaskFilter != null) {
       final nativeFilter = SkwasmMaskFilter.fromUiMaskFilter(localMaskFilter);
       paintSetMaskFilter(rawPaint, nativeFilter.handle);
       nativeFilter.dispose();
     }
 
-    final filter = imageFilter;
+    final ui.ImageFilter? filter = imageFilter;
     if (filter != null) {
       final skwasmImageFilter = SkwasmImageFilter.fromUiFilter(filter);
       skwasmImageFilter.withRawImageFilter((nativeHandle) {
@@ -129,11 +129,11 @@ class SkwasmPaint implements ui.Paint {
 
   @override
   String toString() {
-    String resultString = 'Paint()';
+    var resultString = 'Paint()';
 
     assert(() {
-      final StringBuffer result = StringBuffer();
-      String semicolon = '';
+      final result = StringBuffer();
+      var semicolon = '';
       result.write('Paint(');
       if (style == ui.PaintingStyle.stroke) {
         result.write('$style');

@@ -99,6 +99,7 @@ source_set("flutter_linux_sources") {
              "fl_pointer_manager.h",
              "fl_task_runner.h",
              "fl_view_private.h",
+             "fl_window_monitor.h",
              "fl_window_state_monitor.h",
              "key_mapping.h",
            ]
@@ -108,6 +109,8 @@ source_set("flutter_linux_sources") {
   public_configs = [ ":disable_warnings" ]
 
   sources = [
+    "fl_accessibility_channel.cc",
+    "fl_accessibility_handler.cc",
     "fl_accessible_node.cc",
     "fl_accessible_text_field.cc",
     "fl_application.cc",
@@ -167,6 +170,7 @@ source_set("flutter_linux_sources") {
     "fl_value.cc",
     "fl_view.cc",
     "fl_view_accessible.cc",
+    "fl_window_monitor.cc",
     "fl_window_state_monitor.cc",
     "fl_windowing_channel.cc",
     "fl_windowing_handler.cc",
@@ -180,9 +184,11 @@ source_set("flutter_linux_sources") {
   ]
 
   deps = [
+    "$dart_src/runtime:dart_api",
     "//flutter/fml",
     "//flutter/shell/platform/common:common_cpp_enums",
     "//flutter/shell/platform/common:common_cpp_input",
+    "//flutter/shell/platform/common:common_cpp_isolate_scope",
     "//flutter/shell/platform/common:common_cpp_switches",
     "//flutter/shell/platform/embedder:embedder_headers",
     "//flutter/third_party/rapidjson",
@@ -217,6 +223,7 @@ executable("flutter_linux_unittests") {
   testonly = true
 
   sources = [
+    "fl_accessibility_handler_test.cc",
     "fl_accessible_node_test.cc",
     "fl_accessible_text_field_test.cc",
     "fl_application_test.cc",

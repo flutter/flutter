@@ -33,7 +33,9 @@ class _ScrollbarExampleState extends State<ScrollbarExample> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('CupertinoScrollbar Sample')),
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('CupertinoScrollbar Sample'),
+      ),
       child: CupertinoScrollbar(
         thickness: 6.0,
         thicknessWhileDragging: 10.0,
@@ -46,7 +48,10 @@ class _ScrollbarExampleState extends State<ScrollbarExample> {
           itemCount: 120,
           itemBuilder: (BuildContext context, int index) {
             return Center(
-              child: Padding(padding: const EdgeInsets.all(8.0), child: Text('Item $index')),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text('Item $index'),
+              ),
             );
           },
         ),
