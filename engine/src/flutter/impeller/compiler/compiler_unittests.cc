@@ -78,12 +78,12 @@ TEST_P(CompilerTest, CanCompileHLSLWithMultipleStages) {
 }
 
 TEST_P(CompilerTest, CanCompileComputeShader) {
-  if (!TargetPlatformIsMetal(GetParam())) {
-    GTEST_SKIP()
-        << "Only enabled on Metal backends till ES 3.2 support is added.";
+  if (GetParam() == TargetPlatform::kSkSL) {
+    GTEST_SKIP() << "Not supported with SkSL";
   }
-  ASSERT_TRUE(CanCompileAndReflect("sample.comp"));
-  ASSERT_TRUE(CanCompileAndReflect("sample.comp", SourceType::kComputeShader));
+  ASSERT_TRUE(CanCompileAndReflect("sample.comp", SourceType::kComputeShader,
+                                   SourceLanguage::kGLSL, "main",
+                                   ESSLLanguageVersion::kEssl310));
 }
 
 TEST_P(CompilerTest, MustFailDueToExceedingResourcesLimit) {
