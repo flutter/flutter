@@ -22,7 +22,7 @@ dependencies:
 
   async: 2.13.0
   boolean_selector: 2.1.2
-  characters: 1.4.0
+  characters: 1.4.1
   clock: 1.1.2
   collection: 1.19.1
   convert: 3.1.2
@@ -68,4 +68,4 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-# PUBSPEC CHECKSUM: ofd5s5
+# PUBSPEC CHECKSUM: fs4vp2
