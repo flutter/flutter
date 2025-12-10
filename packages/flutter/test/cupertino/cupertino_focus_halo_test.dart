@@ -172,4 +172,23 @@ void main() {
       expect(findBorder(group2Key, tester), getExpectedHaloBorder());
     },
   );
+
+  testWidgets('CupertinoFocusHalo does not crash at zero area', (WidgetTester tester) async {
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: CupertinoFocusHalo.withRect(
+              child: Focus(focusNode: focusNode, child: const Text('X')),
+            ),
+          ),
+        ),
+      ),
+    );
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(CupertinoFocusHalo)), Size.zero);
+  });
 }
