@@ -32,12 +32,13 @@
     [coordinates tap];
   }
   UIApplication* application = UIApplication.sharedApplication;
-  application.delegate.window.rootViewController = rootVC;
+  FlutterViewController* rootVC =
+      (FlutterViewController*)application.delegate.window.rootViewController;
   FlutterEngine* engine = rootVC.engine;
   XCTestExpectation expectation =
       [[XCTestExpectation alloc] initWithDescription:@"status bar tap message received"];
 
-  [engine.lifecycleChannel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult callback) {
+  [engine.statusBarChannel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult callback) {
     if (![call.method isEqualToString:@"handleScrollToTop"]) {
       XCTFail(@"Unexpected method call %@", call.method);
       return;
