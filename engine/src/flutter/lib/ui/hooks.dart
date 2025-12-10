@@ -310,7 +310,7 @@ void _dispatchPointerDataPacket(ByteData packet) {
 @pragma('vm:entry-point')
 bool _platformViewShouldAcceptTouch(int viewId, double x, double y) {
   Offset offset = Offset(x, y);
-  // TODO(hellohuanlin) investigate how to handle invalid id.
+  // Engine must pass in a valid viewId.
   FlutterView view = PlatformDispatcher.instance._views[viewId]!;
   final HitTestRequest request = HitTestRequest(view: view, offset: offset);
   final HitTestResponse response = PlatformDispatcher.instance._hitTest(request);
@@ -427,10 +427,10 @@ void _invoke3<A1, A2, A3>(
   }
 }
 
-/// Invokes [callback] inside the given [zone] passing it [arg1], [arg2], and [arg3],
+/// Invokes [callback] inside the given [zone] passing it [arg1],
 /// and returns a nullable result of the specified type.
 ///
-/// The 3 in the name refers to the number of arguments expected by
+/// The 1 in the name refers to the number of arguments expected by
 /// the callback (and thus passed to this function, in addition to the
 /// callback itself and the zone in which the callback is executed).
 R? _invoke1WithReturn<A1, R>(R Function(A1 a1)? callback, Zone zone, A1 arg1) {

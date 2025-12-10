@@ -761,6 +761,12 @@ static BOOL _preparedOnce = NO;
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
   FML_DCHECK(_currentTouchPointersCount >= 0);
   if (_currentTouchPointersCount == 0) {
+    // TODO(hellohuanlin): the following comment is likely incorrect and very misleading.
+    // The actual reason is a race condition when platform view is created before
+    // flutterViewController is set in platformViewsController in debug mode. We should clean up the
+    // code, either fix the race condition, or make flutterViewController a computed property rather
+    // than a stored property.
+    //
     // At the start of each gesture sequence, we reset the `_flutterViewController`,
     // so that all the touch events in the same sequence are forwarded to the same
     // `_flutterViewController`.

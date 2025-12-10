@@ -270,8 +270,8 @@ typedef enum {
   FlutterPlatformViewGestureRecognizersBlockingPolicyWaitUntilTouchesEnded,
 
   /**
-   * Flutter blocks all the UIGestureRecognizers on the platform view as soon as it
-   * decides they should be blocked.
+   * Flutter blocks all the touch event callbacks and UIGestureRecognizers on the platform view as
+   * soon as it decides they should be blocked.
    *
    * This is similar to FlutterPlatformViewGestureRecognizersBlockingPolicyEager. However,
    * internally it performs hit test rather than a blocking gesture recognizer. This addresses

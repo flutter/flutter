@@ -464,15 +464,14 @@ class PlatformConfiguration final {
 
   //----------------------------------------------------------------------------
   /// @brief      Requests from the engine if an embedded native view should
-  /// accept
-  ///             gesture at a given touch location.
+  ///             accept touch at a given touch location.
   ///
   ///
   /// @param[in]  view_id               The identifier of the flutter view that
   ///                                   hosts the embedded view.
-  /// @param[in]  touch_began_location  The touch began location of a gesture.
+  /// @param[in]  touch_began_location  The touch began location.
   ///
-  /// @return     true if the embedded view should accept gesture; false
+  /// @return     true if the embedded view should accept touch; false
   /// otherwise.
   ///
   bool EmbeddedNativeViewShouldAcceptTouch(
@@ -602,7 +601,7 @@ class PlatformConfiguration final {
   tonic::DartPersistentValue update_accessibility_features_;
   tonic::DartPersistentValue dispatch_platform_message_;
   tonic::DartPersistentValue dispatch_pointer_data_packet_;
-  tonic::DartPersistentValue embedded_view_should_accept_gesture_;
+  tonic::DartPersistentValue embedded_view_should_accept_touch;
   tonic::DartPersistentValue dispatch_semantics_action_;
   tonic::DartPersistentValue begin_frame_;
   tonic::DartPersistentValue draw_frame_;

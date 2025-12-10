@@ -362,7 +362,6 @@ void main() {
       PlatformViewsService.initUiKitView(
         id: 0,
         viewType: 'webview',
-        gestureBlockingPolicy: UiKitViewGestureBlockingPolicy.fallbackToPluginDefault,
         layoutDirection: TextDirection.ltr,
       ).then((UiKitViewController viewController) {
         final renderBox = RenderUiKitView(
@@ -422,7 +421,6 @@ void main() {
         PlatformViewsService.initUiKitView(
           id: 0,
           viewType: 'webview',
-          gestureBlockingPolicy: UiKitViewGestureBlockingPolicy.fallbackToPluginDefault,
           layoutDirection: TextDirection.ltr,
         ).then((UiKitViewController viewController) {
           final renderBox = RenderUiKitView(
@@ -455,7 +453,6 @@ void main() {
         PlatformViewsService.initUiKitView(
           id: 0,
           viewType: 'webview',
-          gestureBlockingPolicy: UiKitViewGestureBlockingPolicy.fallbackToPluginDefault,
           layoutDirection: TextDirection.ltr,
         ).then((UiKitViewController viewController) {
           final renderBox = RenderUiKitView(

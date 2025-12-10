@@ -3209,15 +3209,21 @@ enum ViewFocusDirection {
   backward,
 }
 
+/// The request containing all the information required to perform framework hitTest.
 class HitTestRequest {
   const HitTestRequest({required this.view, required this.offset});
 
+  /// The flutter view.
   final FlutterView view;
+
+  /// The touch location on screen.
   final Offset offset;
 }
 
+/// The response from the framework hitTest.
 class HitTestResponse {
   const HitTestResponse({this.isPlatformView = false});
 
+  // whether the top-most hit target is a platform view.
   final bool isPlatformView;
 }

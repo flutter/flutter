@@ -509,7 +509,6 @@ void main() {
         return PlatformViewsService.initUiKitView(
           id: 0,
           viewType: 'web',
-          gestureBlockingPolicy: UiKitViewGestureBlockingPolicy.fallbackToPluginDefault,
           layoutDirection: TextDirection.ltr,
         );
       }, throwsA(isA<PlatformException>()));
@@ -520,13 +519,11 @@ void main() {
       await PlatformViewsService.initUiKitView(
         id: 0,
         viewType: 'webview',
-        gestureBlockingPolicy: UiKitViewGestureBlockingPolicy.fallbackToPluginDefault,
         layoutDirection: TextDirection.ltr,
       );
       await PlatformViewsService.initUiKitView(
         id: 1,
         viewType: 'webview',
-        gestureBlockingPolicy: UiKitViewGestureBlockingPolicy.fallbackToPluginDefault,
         layoutDirection: TextDirection.rtl,
       );
       expect(
@@ -543,14 +540,12 @@ void main() {
       await PlatformViewsService.initUiKitView(
         id: 0,
         viewType: 'webview',
-        gestureBlockingPolicy: UiKitViewGestureBlockingPolicy.fallbackToPluginDefault,
         layoutDirection: TextDirection.ltr,
       );
       expect(
         () => PlatformViewsService.initUiKitView(
           id: 0,
           viewType: 'web',
-          gestureBlockingPolicy: UiKitViewGestureBlockingPolicy.fallbackToPluginDefault,
           layoutDirection: TextDirection.ltr,
         ),
         throwsA(isA<PlatformException>()),
@@ -562,7 +557,6 @@ void main() {
       await PlatformViewsService.initUiKitView(
         id: 0,
         viewType: 'webview',
-        gestureBlockingPolicy: UiKitViewGestureBlockingPolicy.fallbackToPluginDefault,
         layoutDirection: TextDirection.ltr,
       );
       final UiKitViewController viewController = await PlatformViewsService.initUiKitView(
@@ -583,13 +577,11 @@ void main() {
       await PlatformViewsService.initUiKitView(
         id: 0,
         viewType: 'webview',
-        gestureBlockingPolicy: UiKitViewGestureBlockingPolicy.fallbackToPluginDefault,
         layoutDirection: TextDirection.ltr,
       );
       final UiKitViewController viewController = await PlatformViewsService.initUiKitView(
         id: 1,
         viewType: 'webview',
-        gestureBlockingPolicy: UiKitViewGestureBlockingPolicy.fallbackToPluginDefault,
         layoutDirection: TextDirection.ltr,
       );
       await viewController.dispose();

@@ -257,7 +257,8 @@ class PlatformViewsService {
   static Future<UiKitViewController> initUiKitView({
     required int id,
     required String viewType,
-    required UiKitViewGestureBlockingPolicy gestureBlockingPolicy,
+    UiKitViewGestureBlockingPolicy gestureBlockingPolicy =
+        UiKitViewGestureBlockingPolicy.fallbackToPluginDefault,
     required TextDirection layoutDirection,
     dynamic creationParams,
     MessageCodec<dynamic>? creationParamsCodec,
@@ -1611,7 +1612,7 @@ enum UiKitViewGestureBlockingPolicy {
   /// https://github.com/flutter/flutter/issues/175099.
   touchBlockingOnly,
 
-  /// Fallback to use the policy set by `FlutterBaseRegistrar::registerViewFactory:withId:gestureRecognizersBlockingPolicy` API.
+  /// Fallback to use the policy set by the `registerViewFactory` engine API in FlutterPlugin.h.
   fallbackToPluginDefault,
 }
 
