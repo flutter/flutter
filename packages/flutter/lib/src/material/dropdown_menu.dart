@@ -211,6 +211,7 @@ class DropdownMenu<T extends Object> extends StatefulWidget {
     this.onSelected,
     this.focusNode,
     this.requestFocusOnTap,
+    this.selectOnly = false,
     this.expandedInsets,
     this.filterCallback,
     this.searchCallback,
@@ -481,7 +482,7 @@ class DropdownMenu<T extends Object> extends StatefulWidget {
   /// by the [FocusNode.canRequestFocus] property.
   final FocusNode? focusNode;
 
-  /// Determine if the dropdown button requests focus and the on-screen virtual
+  /// Determine if the dropdown menu requests focus and the on-screen virtual
   /// keyboard is shown in response to a touch event.
   ///
   /// Ignored if a [focusNode] is explicitly provided (in which case,
@@ -505,6 +506,23 @@ class DropdownMenu<T extends Object> extends StatefulWidget {
   /// ** See code in examples/api/lib/material/dropdown_menu/dropdown_menu.2.dart **
   /// {@end-tool}
   final bool? requestFocusOnTap;
+
+  /// Determines if the dropdown menu behaves as a 'select' component.
+  ///
+  /// This is useful for mobile platforms where a dropdown menu is commonly used as
+  /// a 'select' widget (i.e., the user can only select from the list, not edit
+  /// the text field to search or filter).
+  ///
+  /// When true, the inner text field is read-only.
+  ///
+  /// If the text field is also focusable (see [requestFocusOnTap]), the following
+  /// behaviors are also activated:
+  ///
+  ///  * Pressing Enter when the menu is closed opens it.
+  ///  * The decoration reflects the focus state.
+  ///
+  /// Defaults to false.
+  final bool selectOnly;
 
   /// Descriptions of the menu items in the [DropdownMenu].
   ///
@@ -659,6 +677,27 @@ class DropdownMenu<T extends Object> extends StatefulWidget {
 }
 
 class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
+  static const Map<ShortcutActivator, Intent> _editableShortcuts = <ShortcutActivator, Intent>{
+    SingleActivator(LogicalKeyboardKey.arrowLeft): ExtendSelectionByCharacterIntent(
+      forward: false,
+      collapseSelection: true,
+    ),
+    SingleActivator(LogicalKeyboardKey.arrowRight): ExtendSelectionByCharacterIntent(
+      forward: true,
+      collapseSelection: true,
+    ),
+    SingleActivator(LogicalKeyboardKey.arrowUp): _ArrowUpIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowDown): _ArrowDownIntent(),
+  };
+
+  static const Map<ShortcutActivator, Intent> _selectOnlyShortcuts = <ShortcutActivator, Intent>{
+    SingleActivator(LogicalKeyboardKey.arrowUp): _ArrowUpIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowDown): _ArrowDownIntent(),
+    // When selectOnly is true, a shortcut for the enter key is needed because
+    // the text field won't provide one.
+    SingleActivator(LogicalKeyboardKey.enter): _EnterIntent(),
+  };
+
   final GlobalKey _anchorKey = GlobalKey();
   final GlobalKey _leadingKey = GlobalKey();
   late List<GlobalKey> buttonItemKeys;
@@ -760,6 +799,9 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
           TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => true,
         };
   }
+
+  bool get selectOnly => widget.selectOnly;
+  bool get isButton => !canRequestFocus() || selectOnly;
 
   void refreshLeadingPadding() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -978,7 +1020,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
     return result;
   }
 
-  void handleUpKeyInvoke(_ArrowUpIntent _) {
+  void handleUpKey(_ArrowUpIntent _) {
     setState(() {
       if (!widget.enabled || !_menuHasEnabledItem || !_controller.isOpen) {
         return;
@@ -998,7 +1040,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
     });
   }
 
-  void handleDownKeyInvoke(_ArrowDownIntent _) {
+  void handleDownKey(_ArrowDownIntent _) {
     setState(() {
       if (!widget.enabled || !_menuHasEnabledItem || !_controller.isOpen) {
         return;
@@ -1016,6 +1058,14 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
         selection: TextSelection.collapsed(offset: currentLabel.length),
       );
     });
+  }
+
+  void handleEnterKey(_EnterIntent _) {
+    if (selectOnly && !_controller.isOpen) {
+      _controller.open();
+      return;
+    }
+    _handleSubmitted();
   }
 
   void handlePressed(MenuController controller, {bool focusForKeyboard = true}) {
@@ -1141,7 +1191,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
         widget.inputDecorationTheme ?? theme.inputDecorationTheme ?? defaults.inputDecorationTheme!;
 
     final MouseCursor? effectiveMouseCursor = switch (widget.enabled) {
-      true => canRequestFocus() ? SystemMouseCursors.text : SystemMouseCursors.click,
+      true => isButton ? SystemMouseCursors.click : SystemMouseCursors.text,
       false => null,
     };
 
@@ -1176,7 +1226,6 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
               );
 
         final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-        final bool isButton = !canRequestFocus();
         final Widget textField = Semantics(
           button: isButton,
           // This is set specificly for iOS because iOS does not have any native
@@ -1208,8 +1257,8 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
               mouseCursor: effectiveMouseCursor,
               focusNode: widget.focusNode,
               canRequestFocus: canRequestFocus(),
-              enableInteractiveSelection: canRequestFocus(),
-              readOnly: !canRequestFocus(),
+              enableInteractiveSelection: !isButton,
+              readOnly: isButton,
               keyboardType: widget.keyboardType,
               textAlign: widget.textAlign,
               textAlignVertical: TextAlignVertical.center,
@@ -1284,18 +1333,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
               );
 
         return Shortcuts(
-          shortcuts: const <ShortcutActivator, Intent>{
-            SingleActivator(LogicalKeyboardKey.arrowLeft): ExtendSelectionByCharacterIntent(
-              forward: false,
-              collapseSelection: true,
-            ),
-            SingleActivator(LogicalKeyboardKey.arrowRight): ExtendSelectionByCharacterIntent(
-              forward: true,
-              collapseSelection: true,
-            ),
-            SingleActivator(LogicalKeyboardKey.arrowUp): _ArrowUpIntent(),
-            SingleActivator(LogicalKeyboardKey.arrowDown): _ArrowDownIntent(),
-          },
+          shortcuts: selectOnly ? _selectOnlyShortcuts : _editableShortcuts,
           child: body,
         );
       },
@@ -1328,9 +1366,9 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
 
     return Actions(
       actions: <Type, Action<Intent>>{
-        _ArrowUpIntent: CallbackAction<_ArrowUpIntent>(onInvoke: handleUpKeyInvoke),
-        _ArrowDownIntent: CallbackAction<_ArrowDownIntent>(onInvoke: handleDownKeyInvoke),
-        _EnterIntent: CallbackAction<_EnterIntent>(onInvoke: (_) => _handleSubmitted()),
+        _ArrowUpIntent: CallbackAction<_ArrowUpIntent>(onInvoke: handleUpKey),
+        _ArrowDownIntent: CallbackAction<_ArrowDownIntent>(onInvoke: handleDownKey),
+        _EnterIntent: CallbackAction<_EnterIntent>(onInvoke: handleEnterKey),
         DismissIntent: DismissMenuAction(controller: _controller),
       },
       child: Stack(
@@ -1377,7 +1415,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
               // the text field button by excluding semantics. Otherwise,
               // it will inappropriately announce whether this icon button
               // is selected or not.
-              excluding: !canRequestFocus(),
+              excluding: isButton,
               child: IconButton(
                 focusNode: _trailingIconButtonFocusNode,
                 isSelected: controller.isOpen,

@@ -251,34 +251,44 @@ Future<void> drawTestPicture(LayerCanvas canvas) async {
   );
 
   canvas.translate(60, 0);
-  canvas.drawImage(await generateTestImage(), const ui.Offset(20, 20), ui.Paint());
+
+  // Wimp doesn't support images yet.
+  // See https://github.com/flutter/flutter/issues/175371
+  if (!isWimp) {
+    canvas.drawImage(await generateTestImage(), const ui.Offset(20, 20), ui.Paint());
+  }
 
   canvas.translate(60, 0);
-  final transform = ui.RSTransform.fromComponents(
-    rotation: 0,
-    scale: 1,
-    anchorX: 0,
-    anchorY: 0,
-    translateX: 0,
-    translateY: 0,
-  );
-  canvas.drawRawAtlas(
-    await generateTestImage(),
-    Float32List(4)
-      ..[0] = transform.scos
-      ..[1] = transform.ssin
-      ..[2] = transform.tx + 20
-      ..[3] = transform.ty + 20,
-    Float32List(4)
-      ..[0] = 0
-      ..[1] = 0
-      ..[2] = 15
-      ..[3] = 15,
-    Int32List.fromList(<int>[0x00000000]),
-    ui.BlendMode.srcOver,
-    null,
-    ui.Paint(),
-  );
+
+  // Wimp doesn't support images yet.
+  // See https://github.com/flutter/flutter/issues/175371
+  if (!isWimp) {
+    final transform = ui.RSTransform.fromComponents(
+      rotation: 0,
+      scale: 1,
+      anchorX: 0,
+      anchorY: 0,
+      translateX: 0,
+      translateY: 0,
+    );
+    canvas.drawRawAtlas(
+      await generateTestImage(),
+      Float32List(4)
+        ..[0] = transform.scos
+        ..[1] = transform.ssin
+        ..[2] = transform.tx + 20
+        ..[3] = transform.ty + 20,
+      Float32List(4)
+        ..[0] = 0
+        ..[1] = 0
+        ..[2] = 15
+        ..[3] = 15,
+      Int32List.fromList(<int>[0x00000000]),
+      ui.BlendMode.srcOver,
+      null,
+      ui.Paint(),
+    );
+  }
 
   canvas.translate(60, 0);
   canvas.drawDRRect(
@@ -287,21 +297,25 @@ Future<void> drawTestPicture(LayerCanvas canvas) async {
     ui.Paint(),
   );
 
-  canvas.translate(60, 0);
-  canvas.drawImageRect(
-    await generateTestImage(),
-    const ui.Rect.fromLTRB(0, 0, 15, 15),
-    const ui.Rect.fromLTRB(10, 10, 40, 40),
-    ui.Paint(),
-  );
+  // Wimp doesn't support images yet.
+  // See https://github.com/flutter/flutter/issues/175371
+  if (!isWimp) {
+    canvas.translate(60, 0);
+    canvas.drawImageRect(
+      await generateTestImage(),
+      const ui.Rect.fromLTRB(0, 0, 15, 15),
+      const ui.Rect.fromLTRB(10, 10, 40, 40),
+      ui.Paint(),
+    );
 
-  canvas.translate(60, 0);
-  canvas.drawImageNine(
-    await generateTestImage(),
-    const ui.Rect.fromLTRB(5, 5, 15, 15),
-    const ui.Rect.fromLTRB(10, 10, 50, 40),
-    ui.Paint(),
-  );
+    canvas.translate(60, 0);
+    canvas.drawImageNine(
+      await generateTestImage(),
+      const ui.Rect.fromLTRB(5, 5, 15, 15),
+      const ui.Rect.fromLTRB(10, 10, 50, 40),
+      ui.Paint(),
+    );
+  }
 
   canvas.restore();
 
