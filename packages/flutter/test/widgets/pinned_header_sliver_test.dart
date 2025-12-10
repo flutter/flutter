@@ -269,7 +269,7 @@ void main() {
                 slivers: <Widget>[
                   const PinnedHeaderSliver(child: Text('PinnedHeaderSliver')),
                   SliverList.builder(
-                    itemCount: 6,
+                    itemCount: 50,
                     itemBuilder: (BuildContext context, int index) => Text('Item $index'),
                   ),
                 ],
@@ -279,6 +279,18 @@ void main() {
         ),
       ),
     );
+
+    expect(
+      semantics,
+      isNot(
+        includesNodeWith(
+          tags: {RenderViewport.excludeFromScrolling, RenderViewport.useTwoPaneSemantics},
+        ),
+      ),
+    );
+
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -100));
+    await tester.pumpAndSettle();
 
     expect(
       semantics,
