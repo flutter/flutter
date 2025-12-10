@@ -54,9 +54,6 @@ class TesterContextVK : public TesterContext {
     context_settings.shader_libraries_data = ShaderLibraryMappings();
     context_settings.cache_directory = fml::paths::GetCachesDirectory();
     context_settings.enable_validation = enable_validation;
-    // Enable lazy shader mode for faster test execution as most tests
-    // will never render anything at all.
-    context_settings.flags.lazy_shader_mode = true;
 
     context_ = impeller::ContextVK::Create(std::move(context_settings));
     if (!context_ || !context_->IsValid()) {
