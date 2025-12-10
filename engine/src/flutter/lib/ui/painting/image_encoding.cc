@@ -146,7 +146,7 @@ void EncodeImageAndInvokeDataCallback(
   if (is_impeller_enabled) {
     ImageEncodingImpeller::ConvertImageToRaster(
         image, encode_task, raster_task_runner, io_task_runner,
-        is_gpu_disabled_sync_switch, impeller_context);
+        snapshot_delegate, is_gpu_disabled_sync_switch, impeller_context);
     return;
   }
 #endif  // IMPELLER_SUPPORTS_RENDERING

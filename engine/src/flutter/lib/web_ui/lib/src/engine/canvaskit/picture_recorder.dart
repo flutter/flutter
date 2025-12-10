@@ -7,7 +7,7 @@ import 'dart:typed_data';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-class CkPictureRecorder implements LayerPictureRecorder, ScenePictureRecorder {
+class CkPictureRecorder implements LayerPictureRecorder {
   SkPictureRecorder? _skRecorder;
   CkCanvas? _recordingCanvas;
 
@@ -31,7 +31,7 @@ class CkPictureRecorder implements LayerPictureRecorder, ScenePictureRecorder {
     final SkPicture skPicture = recorder.finishRecordingAsPicture();
     recorder.delete();
     _skRecorder = null;
-    final CkPicture result = CkPicture(skPicture);
+    final result = CkPicture(skPicture);
     // We invoke the handler here, not in the picture constructor, because we want
     // [result.approximateBytesUsed] to be available for the handler.
     ui.Picture.onCreate?.call(result);

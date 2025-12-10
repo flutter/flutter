@@ -192,7 +192,7 @@ void checkApiConsistency(String flutterRoot) {
 
 /// Returns the CamelCase equivalent of an ALL_CAPS identifier.
 String allCapsToCamelCase(String identifier) {
-  final StringBuffer buffer = StringBuffer();
+  final buffer = StringBuffer();
   for (final String word in identifier.split('_')) {
     if (word.isNotEmpty) {
       buffer.write(word[0]);
@@ -245,7 +245,7 @@ class NativeFunctionVisitor extends RecursiveAstVisitor<void> {
         type = (parameter.parameter as SimpleFormalParameter).type;
       }
       if (type! is NamedType) {
-        final String name = (type as NamedType).name2.lexeme;
+        final String name = (type as NamedType).name.lexeme;
         if (type.question != null && simpleTypes.contains(name)) {
           errors.add(description);
           return;
@@ -257,7 +257,7 @@ class NativeFunctionVisitor extends RecursiveAstVisitor<void> {
 
 void checkNativeApi(String flutterRoot) {
   test('Native API does not pass nullable parameters of simple types', () {
-    final NativeFunctionVisitor visitor = NativeFunctionVisitor();
+    final visitor = NativeFunctionVisitor();
     visitUIUnits(flutterRoot, visitor);
     expect(visitor.errors, isEmpty);
   });

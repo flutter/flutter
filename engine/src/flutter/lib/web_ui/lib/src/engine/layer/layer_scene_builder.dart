@@ -7,10 +7,14 @@ import 'dart:typed_data';
 import 'package:ui/ui.dart' as ui;
 
 import '../lazy_path.dart';
+import '../util.dart';
 import '../vector_math.dart';
 import 'layer.dart';
 import 'layer_painting.dart';
 import 'layer_tree.dart';
+
+// Warn about performance overlay on Web only once per page load.
+bool _webPerfOverlayWarned = false;
 
 class LayerScene implements ui.Scene {
   LayerScene(RootLayer rootLayer) : layerTree = LayerTree(rootLayer);
@@ -18,7 +22,9 @@ class LayerScene implements ui.Scene {
   final LayerTree layerTree;
 
   @override
-  void dispose() {}
+  void dispose() {
+    layerTree.rootLayer.dispose();
+  }
 
   @override
   Future<ui.Image> toImage(int width, int height) {
@@ -43,8 +49,14 @@ class LayerSceneBuilder implements ui.SceneBuilder {
 
   @override
   void addPerformanceOverlay(int enabledOptions, ui.Rect bounds) {
-    // We don't plan to implement this on the web.
-    throw UnimplementedError();
+    // Not implemented on Web. Avoid crashing; warn once to guide developers.
+    if (!_webPerfOverlayWarned) {
+      _webPerfOverlayWarned = true;
+      printWarning(
+        'showPerformanceOverlay is not supported on Flutter Web. '
+        'See: https://docs.flutter.dev/perf/web-performance',
+      );
+    }
   }
 
   @override
@@ -54,7 +66,10 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     bool isComplexHint = false,
     bool willChangeHint = false,
   }) {
-    currentLayer.add(PictureLayer(picture as LayerPicture, offset, isComplexHint, willChangeHint));
+    // Add a clone of the picture to the layer tree so that the original picture
+    // can be disposed.
+    final LayerPicture clonedPicture = (picture as LayerPicture).clone();
+    currentLayer.add(PictureLayer(clonedPicture, offset, isComplexHint, willChangeHint));
   }
 
   @override
@@ -86,6 +101,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
 
   @override
   LayerScene build() {
+    // TODO(hterkelsen): dispose this SceneBuilder after `build` is called.
     return LayerScene(rootLayer);
   }
 
@@ -194,7 +210,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
 
   @override
   TransformEngineLayer pushTransform(Float64List matrix4, {ui.EngineLayer? oldLayer}) {
-    final Matrix4 matrix = Matrix4.fromFloat32List(toMatrix32(matrix4));
+    final matrix = Matrix4.fromFloat32List(toMatrix32(matrix4));
     return pushLayer<TransformEngineLayer>(TransformEngineLayer(matrix));
   }
 

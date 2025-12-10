@@ -140,7 +140,7 @@ import java.util.List;
  *   <li>When you are unsure when/if you will need to display a Flutter experience.
  * </ul>
  *
- * <p>See https://flutter.dev/docs/development/add-to-app/performance for additional performance
+ * <p>See https://docs.flutter.dev/development/add-to-app/performance for additional performance
  * explorations on engine loading.
  *
  * <p>The following illustrates how to pre-warm and cache a {@link
@@ -810,15 +810,18 @@ public class FlutterActivity extends Activity
   }
 
   /**
-   * @deprecated This method is outdated because it calls {@code setStatusBarColor}, which is
-   *     deprecated in Android 15 and above. Consider using the new WindowInsetsController or other
-   *     Android 15+ APIs for system UI styling.
+   * Configures the status bar for a fullscreen Flutter experience.
+   *
+   * <p>On API levels before 35, this sets a translucent status bar. On API level 35 and above, this
+   * is a no-op as the system handles the status bar appearance, resulting in a fully transparent
+   * status bar.
    */
-  @Deprecated
   private void configureStatusBarForFullscreenFlutterExperience() {
     Window window = getWindow();
     window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-    window.setStatusBarColor(0x40000000);
+    if (Build.VERSION.SDK_INT < API_LEVELS.API_35) {
+      window.setStatusBarColor(0x40000000);
+    }
     window.getDecorView().setSystemUiVisibility(PlatformPlugin.DEFAULT_SYSTEM_UI);
   }
 

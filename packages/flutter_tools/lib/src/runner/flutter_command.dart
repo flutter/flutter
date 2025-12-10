@@ -547,23 +547,28 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addDevToolsOptions({required bool verboseHelp}) {
-    argParser.addFlag(
-      kEnableDevTools,
-      hide: !verboseHelp,
-      defaultsTo: true,
-      help:
-          'Enable (or disable, with "--no-$kEnableDevTools") the launching of the '
-          'Flutter DevTools debugger and profiler. '
-          'If "--no-$kEnableDevTools" is specified, "--$kDevToolsServerAddress" is ignored.',
-    );
+  void addDevToolsOptions({required bool verboseHelp, bool includeEnableDevTools = true}) {
+    if (includeEnableDevTools) {
+      argParser.addFlag(
+        kEnableDevTools,
+        hide: !verboseHelp,
+        defaultsTo: true,
+        help:
+            'Enable (or disable, with "--no-$kEnableDevTools") the launching of the '
+            'Flutter DevTools debugger and profiler. '
+            'If "--no-$kEnableDevTools" is specified, "--$kDevToolsServerAddress" is ignored.',
+      );
+    }
+    final ignoredMessage = includeEnableDevTools
+        ? ' Ignored if "--no-$kEnableDevTools" is specified.'
+        : '';
     argParser.addOption(
       kDevToolsServerAddress,
       hide: !verboseHelp,
       help:
           'When this value is provided, the Flutter tool will not spin up a '
           'new DevTools server instance, and will instead use the one provided '
-          'at the given address. Ignored if "--no-$kEnableDevTools" is specified.',
+          'at the given address.$ignoredMessage',
     );
   }
 
@@ -1603,7 +1608,10 @@ abstract class FlutterCommand extends Command<void> {
     });
 
     if (argParser.options.containsKey(FlutterOptions.kDartDefinesOption)) {
-      dartDefines.addAll(stringsArg(FlutterOptions.kDartDefinesOption));
+      final Iterable<String> defines = stringsArg(
+        FlutterOptions.kDartDefinesOption,
+      ).where((string) => string.isNotEmpty);
+      dartDefines.addAll(defines);
     }
 
     return dartDefines;
@@ -1946,7 +1954,7 @@ abstract class FlutterCommand extends Command<void> {
   /// If [includeDevicesUnsupportedByProject] is true, the tool does not filter
   /// the list by the current project support list.
   Future<Device?> findTargetDevice({bool includeDevicesUnsupportedByProject = false}) async {
-    List<Device>? deviceList = await findAllTargetDevices(
+    final List<Device>? deviceList = await findAllTargetDevices(
       includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
     );
     if (deviceList == null) {
@@ -1954,9 +1962,9 @@ abstract class FlutterCommand extends Command<void> {
     }
     if (deviceList.length > 1) {
       globals.printStatus(globals.userMessages.flutterSpecifyDevice);
-      deviceList = await globals.deviceManager!.getAllDevices();
+      final List<Device> allDevices = await globals.deviceManager!.getAllDevices();
       globals.printStatus('');
-      await Device.printDevices(deviceList, globals.logger);
+      await Device.printDevices(allDevices, globals.logger);
       return null;
     }
     return deviceList.single;

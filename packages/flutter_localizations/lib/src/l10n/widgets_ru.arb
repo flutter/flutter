@@ -13,5 +13,6 @@
   "pasteButtonLabel": "Вставить",
   "selectAllButtonLabel": "Выбрать все",
   "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found"
+  "noResultsFound": "No results found",
+  "radioButtonUnselectedLabel": "Not selected"
 }

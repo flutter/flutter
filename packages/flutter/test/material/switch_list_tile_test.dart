@@ -23,7 +23,7 @@ Widget wrap({required Widget child}) {
 
 void main() {
   testWidgets('SwitchListTile control test', (WidgetTester tester) async {
-    final List<dynamic> log = <dynamic>[];
+    final log = <dynamic>[];
     await tester.pumpWidget(
       wrap(
         child: SwitchListTile(
@@ -42,7 +42,7 @@ void main() {
   });
 
   testWidgets('SwitchListTile semantics test', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       wrap(
         child: Column(
@@ -136,7 +136,7 @@ void main() {
   });
 
   testWidgets('Material2 - SwitchListTile has the right colors', (WidgetTester tester) async {
-    bool value = false;
+    var value = false;
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(padding: EdgeInsets.all(8.0)),
@@ -194,7 +194,7 @@ void main() {
   });
 
   testWidgets('Material3 - SwitchListTile has the right colors', (WidgetTester tester) async {
-    bool value = false;
+    var value = false;
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(padding: EdgeInsets.all(8.0)),
@@ -246,7 +246,7 @@ void main() {
   });
 
   testWidgets('SwitchListTile.adaptive only uses material switch', (WidgetTester tester) async {
-    bool value = false;
+    var value = false;
 
     Widget buildFrame(TargetPlatform platform) {
       return MaterialApp(
@@ -270,7 +270,7 @@ void main() {
       );
     }
 
-    for (final TargetPlatform platform in <TargetPlatform>[
+    for (final platform in <TargetPlatform>[
       TargetPlatform.iOS,
       TargetPlatform.macOS,
       TargetPlatform.android,
@@ -506,14 +506,14 @@ void main() {
   testWidgets('SwitchListTile selected item text Color', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/76909
 
-    const Color activeColor = Color(0xff00ff00);
+    const activeColor = Color(0xff00ff00);
 
     Widget buildFrame({Color? activeColor, Color? thumbColor}) {
       return MaterialApp(
         theme: ThemeData(
           switchTheme: SwitchThemeData(
-            thumbColor: WidgetStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-              return states.contains(MaterialState.selected) ? thumbColor : null;
+            thumbColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+              return states.contains(WidgetState.selected) ? thumbColor : null;
             }),
           ),
         ),
@@ -543,7 +543,7 @@ void main() {
   });
 
   testWidgets('SwitchListTile respects visualDensity', (WidgetTester tester) async {
-    const Key key = Key('test');
+    const key = Key('test');
     Future<void> buildTest(VisualDensity visualDensity) async {
       return tester.pumpWidget(
         wrap(
@@ -589,8 +589,8 @@ void main() {
   });
 
   testWidgets('SwitchListTile onFocusChange callback', (WidgetTester tester) async {
-    final FocusNode node = FocusNode(debugLabel: 'SwitchListTile onFocusChange');
-    bool gotFocus = false;
+    final node = FocusNode(debugLabel: 'SwitchListTile onFocusChange');
+    var gotFocus = false;
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -619,8 +619,8 @@ void main() {
   });
 
   testWidgets('SwitchListTile.adaptive onFocusChange Callback', (WidgetTester tester) async {
-    final FocusNode node = FocusNode(debugLabel: 'SwitchListTile.adaptive onFocusChange');
-    bool gotFocus = false;
+    final node = FocusNode(debugLabel: 'SwitchListTile.adaptive onFocusChange');
+    var gotFocus = false;
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -689,7 +689,7 @@ void main() {
   });
 
   testWidgets('SwitchListTile respects hoverColor', (WidgetTester tester) async {
-    const Key key = Key('test');
+    const key = Key('test');
     await tester.pumpWidget(
       wrap(
         child: Center(
@@ -730,25 +730,25 @@ void main() {
   testWidgets('Material2 - SwitchListTile respects thumbColor in active/enabled states', (
     WidgetTester tester,
   ) async {
-    const Color activeEnabledThumbColor = Color(0xFF000001);
-    const Color activeDisabledThumbColor = Color(0xFF000002);
-    const Color inactiveEnabledThumbColor = Color(0xFF000003);
-    const Color inactiveDisabledThumbColor = Color(0xFF000004);
+    const activeEnabledThumbColor = Color(0xFF000001);
+    const activeDisabledThumbColor = Color(0xFF000002);
+    const inactiveEnabledThumbColor = Color(0xFF000003);
+    const inactiveDisabledThumbColor = Color(0xFF000004);
 
-    Color getThumbColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        if (states.contains(MaterialState.selected)) {
+    Color getThumbColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
+        if (states.contains(WidgetState.selected)) {
           return activeDisabledThumbColor;
         }
         return inactiveDisabledThumbColor;
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return activeEnabledThumbColor;
       }
       return inactiveEnabledThumbColor;
     }
 
-    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = WidgetStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitchListTile({required bool enabled, required bool selected}) {
       return MaterialApp(
@@ -825,25 +825,25 @@ void main() {
   testWidgets('Material3 - SwitchListTile respects thumbColor in active/enabled states', (
     WidgetTester tester,
   ) async {
-    const Color activeEnabledThumbColor = Color(0xFF000001);
-    const Color activeDisabledThumbColor = Color(0xFF000002);
-    const Color inactiveEnabledThumbColor = Color(0xFF000003);
-    const Color inactiveDisabledThumbColor = Color(0xFF000004);
+    const activeEnabledThumbColor = Color(0xFF000001);
+    const activeDisabledThumbColor = Color(0xFF000002);
+    const inactiveEnabledThumbColor = Color(0xFF000003);
+    const inactiveDisabledThumbColor = Color(0xFF000004);
 
-    Color getThumbColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        if (states.contains(MaterialState.selected)) {
+    Color getThumbColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
+        if (states.contains(WidgetState.selected)) {
           return activeDisabledThumbColor;
         }
         return inactiveDisabledThumbColor;
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return activeEnabledThumbColor;
       }
       return inactiveEnabledThumbColor;
     }
 
-    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = WidgetStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitchListTile({required bool enabled, required bool selected}) {
       return MaterialApp(
@@ -908,20 +908,20 @@ void main() {
     WidgetTester tester,
   ) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    const Color hoveredThumbColor = Color(0xFF4caf50);
-    const Color pressedThumbColor = Color(0xFFF44336);
+    const hoveredThumbColor = Color(0xFF4caf50);
+    const pressedThumbColor = Color(0xFFF44336);
 
-    Color getThumbColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
+    Color getThumbColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
         return pressedThumbColor;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoveredThumbColor;
       }
       return Colors.transparent;
     }
 
-    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = WidgetStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitchListTile() {
       return MaterialApp(
@@ -975,20 +975,20 @@ void main() {
     WidgetTester tester,
   ) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    const Color hoveredThumbColor = Color(0xFF4caf50);
-    const Color pressedThumbColor = Color(0xFFF44336);
+    const hoveredThumbColor = Color(0xFF4caf50);
+    const pressedThumbColor = Color(0xFFF44336);
 
-    Color getThumbColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
+    Color getThumbColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
         return pressedThumbColor;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoveredThumbColor;
       }
       return Colors.transparent;
     }
 
-    final WidgetStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+    final WidgetStateProperty<Color> thumbColor = WidgetStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitchListTile() {
       return MaterialApp(
@@ -1034,25 +1034,25 @@ void main() {
   testWidgets('SwitchListTile respects trackColor in active/enabled states', (
     WidgetTester tester,
   ) async {
-    const Color activeEnabledTrackColor = Color(0xFF000001);
-    const Color activeDisabledTrackColor = Color(0xFF000002);
-    const Color inactiveEnabledTrackColor = Color(0xFF000003);
-    const Color inactiveDisabledTrackColor = Color(0xFF000004);
+    const activeEnabledTrackColor = Color(0xFF000001);
+    const activeDisabledTrackColor = Color(0xFF000002);
+    const inactiveEnabledTrackColor = Color(0xFF000003);
+    const inactiveDisabledTrackColor = Color(0xFF000004);
 
-    Color getTrackColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        if (states.contains(MaterialState.selected)) {
+    Color getTrackColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
+        if (states.contains(WidgetState.selected)) {
           return activeDisabledTrackColor;
         }
         return inactiveDisabledTrackColor;
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return activeEnabledTrackColor;
       }
       return inactiveEnabledTrackColor;
     }
 
-    final WidgetStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
+    final WidgetStateProperty<Color> trackColor = WidgetStateColor.resolveWith(getTrackColor);
 
     Widget buildSwitchListTile({required bool enabled, required bool selected}) {
       return wrap(
@@ -1101,16 +1101,16 @@ void main() {
 
   testWidgets('SwitchListTile respects trackColor in hovered states', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    const Color hoveredTrackColor = Color(0xFF4caf50);
+    const hoveredTrackColor = Color(0xFF4caf50);
 
-    Color getTrackColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered)) {
+    Color getTrackColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.hovered)) {
         return hoveredTrackColor;
       }
       return Colors.transparent;
     }
 
-    final WidgetStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
+    final WidgetStateProperty<Color> trackColor = WidgetStateColor.resolveWith(getTrackColor);
 
     Widget buildSwitchListTile() {
       return wrap(
@@ -1138,12 +1138,12 @@ void main() {
   });
 
   testWidgets('SwitchListTile respects thumbIcon - M3', (WidgetTester tester) async {
-    const Icon activeIcon = Icon(Icons.check);
-    const Icon inactiveIcon = Icon(Icons.close);
+    const activeIcon = Icon(Icons.check);
+    const inactiveIcon = Icon(Icons.close);
 
     WidgetStateProperty<Icon?> thumbIcon(Icon? activeIcon, Icon? inactiveIcon) {
-      return WidgetStateProperty.resolveWith<Icon?>((Set<MaterialState> states) {
-        if (states.contains(MaterialState.selected)) {
+      return WidgetStateProperty.resolveWith<Icon?>((Set<WidgetState> states) {
+        if (states.contains(WidgetState.selected)) {
           return activeIcon;
         }
         return inactiveIcon;
@@ -1177,7 +1177,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     final Switch switchWidget0 = tester.widget<Switch>(find.byType(Switch));
-    expect(switchWidget0.thumbIcon?.resolve(<MaterialState>{MaterialState.selected}), activeIcon);
+    expect(switchWidget0.thumbIcon?.resolve(<WidgetState>{WidgetState.selected}), activeIcon);
     expect(
       Material.of(tester.element(find.byType(Switch))),
       paints
@@ -1192,7 +1192,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     final Switch switchWidget1 = tester.widget<Switch>(find.byType(Switch));
-    expect(switchWidget1.thumbIcon?.resolve(<MaterialState>{}), inactiveIcon);
+    expect(switchWidget1.thumbIcon?.resolve(<WidgetState>{}), inactiveIcon);
     expect(
       Material.of(tester.element(find.byType(Switch))),
       paints
@@ -1208,7 +1208,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     final Switch switchWidget2 = tester.widget<Switch>(find.byType(Switch));
-    expect(switchWidget2.thumbIcon?.resolve(<MaterialState>{MaterialState.selected}), activeIcon);
+    expect(switchWidget2.thumbIcon?.resolve(<WidgetState>{WidgetState.selected}), activeIcon);
     expect(
       Material.of(tester.element(find.byType(Switch))),
       paints
@@ -1223,7 +1223,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     final Switch switchWidget3 = tester.widget<Switch>(find.byType(Switch));
-    expect(switchWidget3.thumbIcon?.resolve(<MaterialState>{}), inactiveIcon);
+    expect(switchWidget3.thumbIcon?.resolve(<WidgetState>{}), inactiveIcon);
     expect(
       Material.of(tester.element(find.byType(Switch))),
       paints
@@ -1325,10 +1325,7 @@ void main() {
       );
     }
 
-    for (final TargetPlatform platform in <TargetPlatform>[
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    ]) {
+    for (final platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
       await tester.pumpWidget(buildSwitchListTile(true, platform));
       await tester.pumpAndSettle();
       expect(find.byType(Switch), findsOneWidget);
@@ -1367,10 +1364,7 @@ void main() {
       );
     }
 
-    for (final TargetPlatform platform in <TargetPlatform>[
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    ]) {
+    for (final platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
       await tester.pumpWidget(buildSwitchListTile(true, platform));
       await tester.pumpAndSettle();
       expect(find.byType(Switch), findsOneWidget);
@@ -1586,21 +1580,21 @@ void main() {
     'The overlay color for the thumb of the switch resolves in active/pressed/hovered states',
     (WidgetTester tester) async {
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-      const Color activeThumbColor = Color(0xFF000000);
-      const Color inactiveThumbColor = Color(0xFF000010);
-      const Color activePressedOverlayColor = Color(0xFF000001);
-      const Color inactivePressedOverlayColor = Color(0xFF000002);
-      const Color hoverOverlayColor = Color(0xFF000003);
-      const Color hoverColor = Color(0xFF000005);
+      const activeThumbColor = Color(0xFF000000);
+      const inactiveThumbColor = Color(0xFF000010);
+      const activePressedOverlayColor = Color(0xFF000001);
+      const inactivePressedOverlayColor = Color(0xFF000002);
+      const hoverOverlayColor = Color(0xFF000003);
+      const hoverColor = Color(0xFF000005);
 
-      Color? getOverlayColor(Set<MaterialState> states) {
-        if (states.contains(MaterialState.pressed)) {
-          if (states.contains(MaterialState.selected)) {
+      Color? getOverlayColor(Set<WidgetState> states) {
+        if (states.contains(WidgetState.pressed)) {
+          if (states.contains(WidgetState.selected)) {
             return activePressedOverlayColor;
           }
           return inactivePressedOverlayColor;
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return hoverOverlayColor;
         }
         return null;
@@ -1612,8 +1606,8 @@ void main() {
             body: SwitchListTile(
               value: active,
               onChanged: (_) {},
-              thumbColor: WidgetStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-                if (states.contains(MaterialState.selected)) {
+              thumbColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+                if (states.contains(WidgetState.selected)) {
                   return activeThumbColor;
                 }
                 return inactiveThumbColor;
@@ -1699,25 +1693,25 @@ void main() {
   testWidgets('SwitchListTile respects trackOutlineColor in active/enabled states', (
     WidgetTester tester,
   ) async {
-    const Color activeEnabledTrackOutlineColor = Color(0xFF000001);
-    const Color activeDisabledTrackOutlineColor = Color(0xFF000002);
-    const Color inactiveEnabledTrackOutlineColor = Color(0xFF000003);
-    const Color inactiveDisabledTrackOutlineColor = Color(0xFF000004);
+    const activeEnabledTrackOutlineColor = Color(0xFF000001);
+    const activeDisabledTrackOutlineColor = Color(0xFF000002);
+    const inactiveEnabledTrackOutlineColor = Color(0xFF000003);
+    const inactiveDisabledTrackOutlineColor = Color(0xFF000004);
 
-    Color getOutlineColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        if (states.contains(MaterialState.selected)) {
+    Color getOutlineColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
+        if (states.contains(WidgetState.selected)) {
           return activeDisabledTrackOutlineColor;
         }
         return inactiveDisabledTrackOutlineColor;
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return activeEnabledTrackOutlineColor;
       }
       return inactiveEnabledTrackOutlineColor;
     }
 
-    final WidgetStateProperty<Color> trackOutlineColor = MaterialStateColor.resolveWith(
+    final WidgetStateProperty<Color> trackOutlineColor = WidgetStateColor.resolveWith(
       getOutlineColor,
     );
 
@@ -1778,16 +1772,16 @@ void main() {
     WidgetTester tester,
   ) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    const Color hoveredTrackColor = Color(0xFF4caf50);
+    const hoveredTrackColor = Color(0xFF4caf50);
 
-    Color getTrackOutlineColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered)) {
+    Color getTrackOutlineColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.hovered)) {
         return hoveredTrackColor;
       }
       return Colors.transparent;
     }
 
-    final WidgetStateProperty<Color> outlineColor = MaterialStateColor.resolveWith(
+    final WidgetStateProperty<Color> outlineColor = WidgetStateColor.resolveWith(
       getTrackOutlineColor,
     );
 
@@ -1896,7 +1890,7 @@ void main() {
 
   testWidgets('SwitchListTile isThreeLine', (WidgetTester tester) async {
     const double height = 300;
-    const double switchTop = 130.0;
+    const switchTop = 130.0;
 
     Widget buildFrame({bool? themeDataIsThreeLine, bool? themeIsThreeLine, bool? isThreeLine}) {
       return MaterialApp(
@@ -2010,7 +2004,7 @@ void main() {
 
   testWidgets('SwitchListTile.adaptive isThreeLine', (WidgetTester tester) async {
     const double height = 300;
-    const double switchTop = 130.0;
+    const switchTop = 130.0;
 
     Widget buildFrame({bool? themeDataIsThreeLine, bool? themeIsThreeLine, bool? isThreeLine}) {
       return MaterialApp(
@@ -2193,5 +2187,18 @@ void main() {
       find.descendant(of: find.byType(ListTile), matching: find.text('title')),
     );
     expect(title.text.style!.color, Colors.yellow[500]);
+  });
+
+  testWidgets('SwitchListTile does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(child: SwitchListTile(value: true, onChanged: (_) {})),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SwitchListTile)), Size.zero);
   });
 }

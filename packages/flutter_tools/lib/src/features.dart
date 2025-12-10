@@ -73,6 +73,9 @@ abstract class FeatureFlags {
   /// Whether physical iOS devices are debugging with LLDB.
   bool get isLLDBDebuggingEnabled;
 
+  /// Whether UIScene migration is enabled.
+  bool get isUISceneMigrationEnabled;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -95,6 +98,7 @@ abstract class FeatureFlags {
     omitLegacyVersionFile,
     windowingFeature,
     lldbDebugging,
+    uiSceneMigration,
   ];
 
   /// All current Flutter feature flags that can be configured.
@@ -188,6 +192,7 @@ const nativeAssets = Feature(
   environmentOverride: 'FLUTTER_NATIVE_ASSETS',
   master: FeatureChannelSetting(available: true, enabledByDefault: true),
   beta: FeatureChannelSetting(available: true, enabledByDefault: true),
+  stable: FeatureChannelSetting(available: true, enabledByDefault: true),
 );
 
 /// Enable Dart data assets building and bundling.
@@ -243,6 +248,21 @@ const lldbDebugging = Feature(
       'Only available for iOS 17 or newer devices. Requires Xcode 26 or greater.',
   configSetting: 'enable-lldb-debugging',
   environmentOverride: 'FLUTTER_LLDB_DEBUGGING',
+  master: FeatureChannelSetting(available: true, enabledByDefault: true),
+  beta: FeatureChannelSetting(available: true, enabledByDefault: true),
+  stable: FeatureChannelSetting(available: true, enabledByDefault: true),
+);
+
+/// Enable UIScene lifecycle migration for iOS apps. When enabled, if possible the tool will
+/// attempt to auto-migrate the app. Otherwise, it will print a warning with instructions on how to
+/// migrate manually.
+const uiSceneMigration = Feature(
+  name: 'support for migrating to UIScene lifecycle',
+  extraHelpText:
+      'If enabled, Flutter will migrate your app to iOS UIScene lifecycle if possible or '
+      'otherwise instruct you to migrate manually.',
+  configSetting: 'enable-uiscene-migration',
+  environmentOverride: 'FLUTTER_UISCENE_MIGRATION',
   master: FeatureChannelSetting(available: true, enabledByDefault: true),
   beta: FeatureChannelSetting(available: true, enabledByDefault: true),
   stable: FeatureChannelSetting(available: true, enabledByDefault: true),

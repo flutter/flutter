@@ -20,7 +20,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/isolated/release_asset_server.dart';
 import 'package:flutter_tools/src/isolated/web_asset_server.dart';
-import 'package:flutter_tools/src/isolated/web_server_utlities.dart';
+import 'package:flutter_tools/src/isolated/web_server_utilities.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
 import 'package:flutter_tools/src/web_template.dart';
@@ -799,7 +799,7 @@ void main() {
           packageConfigPath: '.dart_tool/package_config.json',
         ),
         enableDwds: false,
-        enableDds: false,
+        ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
         entrypoint: Uri.base,
         testMode: true,
         expressionCompiler: null,
@@ -905,7 +905,7 @@ void main() {
             packageConfigPath: '.dart_tool/package_config.json',
           ),
           enableDwds: true,
-          enableDds: false,
+          ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
           entrypoint: Uri.base,
           testMode: true,
           expressionCompiler: null,
@@ -977,7 +977,7 @@ void main() {
       useSseForInjectedClient: true,
       buildInfo: BuildInfo.debug,
       enableDwds: false,
-      enableDds: false,
+      ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null,
@@ -1026,7 +1026,7 @@ void main() {
         packageConfigPath: '.dart_tool/package_config.json',
       ),
       enableDwds: false,
-      enableDds: false,
+      ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null,
@@ -1077,7 +1077,7 @@ void main() {
       nativeNullAssertions: true,
       buildInfo: BuildInfo.debug,
       enableDwds: false,
-      enableDds: false,
+      ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null,
@@ -1121,8 +1121,7 @@ void main() {
           packageConfigPath: '.dart_tool/package_config.json',
         ),
         false,
-        false,
-        null,
+        const DartDevelopmentServiceConfiguration(enable: false),
         Uri.base,
         null,
         webRenderer: WebRendererMode.canvaskit,
@@ -1161,8 +1160,7 @@ void main() {
           packageConfigPath: '.dart_tool/package_config.json',
         ),
         false,
-        false,
-        null,
+        const DartDevelopmentServiceConfiguration(enable: false),
         Uri.base,
         null,
         webRenderer: WebRendererMode.canvaskit,
@@ -1245,7 +1243,7 @@ void main() {
         nativeNullAssertions: true,
         buildInfo: BuildInfo.debug,
         enableDwds: false,
-        enableDds: false,
+        ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
         entrypoint: Uri.base,
         testMode: true,
         expressionCompiler: null,
@@ -1278,7 +1276,7 @@ void main() {
 }
 
 class FakeHttpServer extends Fake implements HttpServer {
-  var closed = false;
+  bool closed = false;
 
   @override
   Future<void> close({bool force = false}) async {

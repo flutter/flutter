@@ -24,14 +24,14 @@ void testMain() {
 
     setUp(() {
       // Create a scene to use in tests.
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
-      final ui.Canvas canvas = ui.Canvas(recorder, const ui.Rect.fromLTRB(0, 0, 60, 60));
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, const ui.Rect.fromLTRB(0, 0, 60, 60));
       canvas.drawRect(
         const ui.Rect.fromLTRB(0, 0, 60, 60),
         ui.Paint()..style = ui.PaintingStyle.fill,
       );
       final ui.Picture picture = recorder.endRecording();
-      final ui.SceneBuilder sb = ui.SceneBuilder();
+      final sb = ui.SceneBuilder();
       sb.addPicture(ui.Offset.zero, picture);
       scene = sb.build();
     });
@@ -39,7 +39,7 @@ void testMain() {
     test('can render into arbitrary views', () async {
       await renderer.renderScene(scene, implicitView as EngineFlutterView);
 
-      final EngineFlutterView anotherView = EngineFlutterView(
+      final anotherView = EngineFlutterView(
         EnginePlatformDispatcher.instance,
         createDomElement('another-view'),
       );
@@ -49,17 +49,15 @@ void testMain() {
     });
 
     test('will error if trying to render into an unregistered view', () async {
-      final EngineFlutterView unregisteredView = EngineFlutterView(
+      final unregisteredView = EngineFlutterView(
         EnginePlatformDispatcher.instance,
         createDomElement('unregistered-view'),
       );
       expect(() => renderer.renderScene(scene, unregisteredView), throwsAssertionError);
-      // Unskip when Skwasm and CanvasKit are unified:
-      // https://github.com/flutter/flutter/issues/172311
-    }, skip: isSkwasm);
+    });
 
     test('will dispose the Rasterizer for a disposed view', () async {
-      final EngineFlutterView view = EngineFlutterView(
+      final view = EngineFlutterView(
         EnginePlatformDispatcher.instance,
         createDomElement('multi-view'),
       );
@@ -74,7 +72,7 @@ void testMain() {
     test('does not reset platform view factories when disposing a view', () async {
       expect(PlatformViewManager.instance.knowsViewType('self-test'), isFalse);
 
-      final EngineFlutterView view = EngineFlutterView(
+      final view = EngineFlutterView(
         EnginePlatformDispatcher.instance,
         createDomElement('multi-view'),
       );

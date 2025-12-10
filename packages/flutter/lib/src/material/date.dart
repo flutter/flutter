@@ -381,7 +381,7 @@ abstract final class DateUtils {
       final bool isLeapYear = (year % 4 == 0) && (year % 100 != 0) || (year % 400 == 0);
       return isLeapYear ? 29 : 28;
     }
-    const List<int> daysInMonth = <int>[31, -1, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    const daysInMonth = <int>[31, -1, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
     return daysInMonth[month - 1];
   }
 }
@@ -436,12 +436,6 @@ enum DatePickerMode {
   /// Choosing a year.
   year,
 }
-
-/// Signature for predicating dates for enabled date selections.
-///
-/// See [showDatePicker], which has a [SelectableDayPredicate] parameter used
-/// to specify allowable days in the date picker.
-typedef SelectableDayPredicate = bool Function(DateTime day);
 
 /// Encapsulates a start and end [DateTime] that represent the range of dates.
 ///

@@ -1564,7 +1564,7 @@ void main() {
 
 class FakeCache extends Fake implements Cache {
   String? versionStamp;
-  var setVersionStamp = false;
+  bool setVersionStamp = false;
 
   @override
   String get engineRevision => 'abcdefg';

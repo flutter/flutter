@@ -26,7 +26,7 @@ void main() {
   }) => processResult;
 
   // Expected test values.
-  const String commitSha = 'a4952838bf288a81d8ea11edfd4b4cd649fa94cc';
+  const commitSha = 'a4952838bf288a81d8ea11edfd4b4cd649fa94cc';
 
   late MetricsResultWriter writer;
   late FileSystem fs;
@@ -51,7 +51,7 @@ void main() {
 
   test('writes expected update task json', () async {
     processResult = ProcessResult(1, 0, commitSha, '');
-    final TaskResult result = TaskResult.fromJson(<String, dynamic>{
+    final result = TaskResult.fromJson(<String, dynamic>{
       'success': true,
       'data': <String, dynamic>{'i': 0, 'j': 0, 'not_a_metric': 'something'},
       'benchmarkScoreKeys': <String>['i', 'j'],
@@ -59,7 +59,7 @@ void main() {
 
     writer = MetricsResultWriter(fs: fs, processRunSync: runSyncStub);
 
-    const String resultsPath = 'results.json';
+    const resultsPath = 'results.json';
     await writer.writeTaskResultToFile(
       builderName: 'builderAbc',
       gitBranch: 'master',
@@ -68,7 +68,7 @@ void main() {
     );
 
     final String resultJson = fs.file(resultsPath).readAsStringSync();
-    const String expectedJson =
+    const expectedJson =
         '{'
         '"CommitBranch":"master",'
         '"CommitSha":"$commitSha",'

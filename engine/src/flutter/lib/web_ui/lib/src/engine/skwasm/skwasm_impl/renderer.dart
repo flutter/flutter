@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:ffi';
 import 'dart:js_interop';
 import 'dart:math' as math;
@@ -16,10 +15,10 @@ import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 class SkwasmRenderer extends Renderer {
   late SkwasmSurface surface;
-  final Map<EngineFlutterView, EngineSceneView> _sceneViews =
-      <EngineFlutterView, EngineSceneView>{};
 
   bool get isMultiThreaded => skwasmIsMultiThreaded();
+
+  bool get isWimp => skwasmIsWimp();
 
   SkwasmPathConstructors pathConstructors = SkwasmPathConstructors();
 
@@ -178,7 +177,7 @@ class SkwasmRenderer extends Renderer {
   );
 
   @override
-  ui.SceneBuilder createSceneBuilder() => EngineSceneBuilder();
+  ui.SceneBuilder createSceneBuilder() => LayerSceneBuilder();
 
   @override
   ui.StrutStyle createStrutStyle({
@@ -311,7 +310,7 @@ class SkwasmRenderer extends Renderer {
     int? targetHeight,
     bool allowUpscaling = true,
   }) {
-    final SkwasmImage pixelImage = SkwasmImage.fromPixels(pixels, width, height, format);
+    final pixelImage = SkwasmImage.fromPixels(pixels, width, height, format);
     final ui.Image scaledImage = scaleImageIfNeeded(
       pixelImage,
       targetWidth: targetWidth,
@@ -324,7 +323,7 @@ class SkwasmRenderer extends Renderer {
   @override
   FutureOr<void> initialize() {
     surface = SkwasmSurface();
-    rasterizer = NoopRasterizer();
+    rasterizer = SkwasmOffscreenCanvasRasterizer(surface);
     return super.initialize();
   }
 
@@ -340,7 +339,7 @@ class SkwasmRenderer extends Renderer {
       throw Exception('Could not determine content type of image from data');
     }
     if (browserSupportsImageDecoder) {
-      final SkwasmBrowserImageDecoder baseDecoder = SkwasmBrowserImageDecoder(
+      final baseDecoder = SkwasmBrowserImageDecoder(
         contentType: contentType.mimeType,
         dataSource: list.toJS,
         debugSource: 'encoded image bytes',
@@ -376,7 +375,7 @@ class SkwasmRenderer extends Renderer {
       throw Exception('Could not determine content type of image at url $uri');
     }
     if (browserSupportsImageDecoder) {
-      final SkwasmBrowserImageDecoder decoder = SkwasmBrowserImageDecoder(
+      final decoder = SkwasmBrowserImageDecoder(
         contentType: contentType,
         dataSource: response.body,
         debugSource: uri.toString(),
@@ -397,25 +396,6 @@ class SkwasmRenderer extends Renderer {
         return SkwasmDomImageDecoder(blob);
       }
     }
-  }
-
-  @override
-  Future<void> renderScene(ui.Scene scene, EngineFlutterView view) {
-    final FrameTimingRecorder? recorder = FrameTimingRecorder.frameTimingsEnabled
-        ? FrameTimingRecorder()
-        : null;
-    recorder?.recordBuildFinish();
-
-    final EngineSceneView sceneView = _getSceneViewForView(view);
-    return sceneView.renderScene(scene as EngineScene, recorder);
-  }
-
-  EngineSceneView _getSceneViewForView(EngineFlutterView view) {
-    return _sceneViews.putIfAbsent(view, () {
-      final EngineSceneView sceneView = EngineSceneView(SkwasmPictureRenderer(surface), view);
-      view.dom.setScene(sceneView.sceneElement);
-      return sceneView;
-    });
   }
 
   @override
@@ -494,34 +474,13 @@ class SkwasmRenderer extends Renderer {
     );
   }
 
-  String _generateDebugFilename(String filePrefix) {
-    final now = DateTime.now();
-    final String y = now.year.toString().padLeft(4, '0');
-    final String mo = now.month.toString().padLeft(2, '0');
-    final String d = now.day.toString().padLeft(2, '0');
-    final String h = now.hour.toString().padLeft(2, '0');
-    final String mi = now.minute.toString().padLeft(2, '0');
-    final String s = now.second.toString().padLeft(2, '0');
-    return '$filePrefix-$y-$mo-$d-$h-$mi-$s.json';
-  }
-
-  void _dumpDebugInfo(String filePrefix, Map<String, dynamic> json) {
-    final String jsonString = const JsonEncoder.withIndent(' ').convert(json);
-    final blob = createDomBlob([jsonString], {'type': 'application/json'});
-    final url = domWindow.URL.createObjectURL(blob);
-    final element = domDocument.createElement('a');
-    element.setAttribute('href', url);
-    element.setAttribute('download', _generateDebugFilename(filePrefix));
-    element.click();
-  }
-
   @override
   void dumpDebugInfo() {
     if (kDebugMode) {
       withStackScope((StackScope scope) {
         final Pointer<Uint32> counts = scope.allocUint32Array(28);
         skwasmGetLiveObjectCounts(counts);
-        final Map<String, dynamic> countsJson = <String, dynamic>{
+        final countsJson = <String, dynamic>{
           'lineBreakBufferCount': counts[0],
           'unicodePositionBufferCount': counts[1],
           'lineMetricsCount': counts[2],
@@ -551,14 +510,14 @@ class SkwasmRenderer extends Renderer {
           'surfaceCount': counts[26],
           'verticesCount': counts[27],
         };
-        _dumpDebugInfo('live_object_counts', countsJson);
+        downloadDebugInfo('live_object_counts', countsJson);
       });
 
-      int i = 0;
-      for (final view in _sceneViews.values) {
-        final Map<String, dynamic>? debugJson = view.dumpDebugInfo();
+      var i = 0;
+      for (final ViewRasterizer viewRasterizer in rasterizers.values) {
+        final Map<String, dynamic>? debugJson = viewRasterizer.dumpDebugInfo();
         if (debugJson != null) {
-          _dumpDebugInfo('flutter-scene$i', debugJson);
+          downloadDebugInfo('flutter-scene$i', debugJson);
           i++;
         }
       }
@@ -567,106 +526,6 @@ class SkwasmRenderer extends Renderer {
 
   @override
   void debugResetRasterizer() {
-    rasterizer = NoopRasterizer();
+    rasterizer = SkwasmOffscreenCanvasRasterizer(surface);
   }
-}
-
-// A [Rasterizer] that does nothing. A placeholder that will be fleshed out
-// when Skwasm and CanvasKit renderers are unified. See: https://github.com/flutter/flutter/issues/172311
-class NoopRasterizer implements Rasterizer {
-  @override
-  ViewRasterizer createViewRasterizer(EngineFlutterView view) {
-    return NoopViewRasterizer();
-  }
-
-  @override
-  void dispose() {
-    // Do nothing
-  }
-
-  @override
-  void setResourceCacheMaxBytes(int bytes) {
-    // Do nothing
-  }
-}
-
-// A [ViewRasterizer] that does nothing. A placeholder that will be fleshed out
-// when Skwasm and CanvasKit renderers are unified. See: https://github.com/flutter/flutter/issues/172311
-class NoopViewRasterizer implements ViewRasterizer {
-  @override
-  BitmapSize currentFrameSize = BitmapSize.zero;
-
-  @override
-  CompositorContext get context => throw UnimplementedError();
-
-  @override
-  void debugClear() {
-    // Do nothing
-  }
-
-  @override
-  DisplayCanvasFactory<DisplayCanvas> get displayFactory => throw UnimplementedError();
-
-  @override
-  void dispose() {
-    // Do nothing
-  }
-
-  @override
-  DisplayCanvas getOverlay() {
-    throw UnimplementedError();
-  }
-
-  @override
-  void prepareToDraw() {}
-
-  @override
-  RenderQueue get queue => throw UnimplementedError();
-
-  @override
-  void releaseOverlay(DisplayCanvas overlay) {}
-
-  @override
-  void releaseOverlays() {}
-
-  @override
-  void removeOverlaysFromDom() {}
-
-  @override
-  DomElement get sceneElement => throw UnimplementedError();
-
-  @override
-  EngineFlutterView get view => throw UnimplementedError();
-
-  @override
-  PlatformViewEmbedder get viewEmbedder => throw UnimplementedError();
-
-  @override
-  Map<String, dynamic>? dumpDebugInfo() {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> rasterize(
-    List<DisplayCanvas> displayCanvases,
-    List<ui.Picture> pictures,
-    FrameTimingRecorder? recorder,
-  ) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> draw(LayerTree layerTree, FrameTimingRecorder? recorder) {
-    throw UnimplementedError();
-  }
-}
-
-class SkwasmPictureRenderer implements PictureRenderer {
-  SkwasmPictureRenderer(this.surface);
-
-  SkwasmSurface surface;
-
-  @override
-  FutureOr<RenderResult> renderPictures(List<ScenePicture> pictures, int width, int height) =>
-      surface.renderPictures(pictures.cast<SkwasmPicture>(), width, height);
 }

@@ -54,8 +54,9 @@ sk_sp<SkImage> DrawSnapshot(
 void SnapshotControllerSkia::MakeRasterSnapshot(
     sk_sp<DisplayList> display_list,
     DlISize picture_size,
-    std::function<void(const sk_sp<DlImage>&)> callback) {
-  callback(MakeRasterSnapshotSync(display_list, picture_size));
+    std::function<void(const sk_sp<DlImage>&)> callback,
+    SnapshotPixelFormat pixel_format) {
+  callback(MakeRasterSnapshotSync(display_list, picture_size, pixel_format));
 }
 
 sk_sp<DlImage> SnapshotControllerSkia::DoMakeRasterSnapshot(
@@ -140,7 +141,8 @@ sk_sp<DlImage> SnapshotControllerSkia::DoMakeRasterSnapshot(
 
 sk_sp<DlImage> SnapshotControllerSkia::MakeRasterSnapshotSync(
     sk_sp<DisplayList> display_list,
-    DlISize size) {
+    DlISize size,
+    SnapshotPixelFormat pixel_format) {
   return DoMakeRasterSnapshot(size, [display_list](SkCanvas* canvas) {
     DlSkCanvasAdapter(canvas).DrawDisplayList(display_list);
   });
@@ -171,6 +173,11 @@ sk_sp<SkImage> SnapshotControllerSkia::ConvertToRasterImage(
 
 void SnapshotControllerSkia::CacheRuntimeStage(
     const std::shared_ptr<impeller::RuntimeStage>& runtime_stage) {}
+
+bool SnapshotControllerSkia::MakeRenderContextCurrent() {
+  FML_UNREACHABLE();
+  return false;
+}
 
 }  // namespace flutter
 

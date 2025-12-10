@@ -26,6 +26,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterLaunchEngine.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate_internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
@@ -78,6 +79,7 @@ typedef struct MouseState {
 @property(nonatomic, assign) UIStatusBarStyle statusBarStyle;
 @property(nonatomic, assign) BOOL initialized;
 @property(nonatomic, assign) BOOL engineNeedsLaunch;
+@property(nonatomic, assign) BOOL awokenFromNib;
 
 @property(nonatomic, readwrite, getter=isDisplayingFlutterUI) BOOL displayingFlutterUI;
 @property(nonatomic, assign) BOOL isHomeIndicatorHidden;
@@ -99,7 +101,6 @@ typedef struct MouseState {
  * Whether we should ignore viewport metrics updates during rotation transition.
  */
 @property(nonatomic, assign) BOOL shouldIgnoreViewportMetricsUpdatesDuringRotation;
-
 /**
  * Keyboard animation properties
  */
@@ -128,6 +129,10 @@ typedef struct MouseState {
 /// With this VSyncClient, it can correct the delivery frame rate of touch events to let it keep
 /// the same with frame rate of rendering.
 @property(nonatomic, strong) VSyncClient* touchRateCorrectionVSyncClient;
+
+/// The size of the FlutterView's frame, as determined by auto-layout,
+/// before Flutter's custom auto-resizing constraints are applied.
+@property(nonatomic, assign) CGSize sizeBeforeAutoResized;
 
 /*
  * Mouse and trackpad gesture recognizers
@@ -246,6 +251,7 @@ typedef struct MouseState {
 
 - (void)awakeFromNib {
   [super awakeFromNib];
+  self.awokenFromNib = YES;
   if (!self.engine) {
     [self sharedSetupWithProject:nil initialRoute:nil];
   }
@@ -294,6 +300,34 @@ typedef struct MouseState {
                                                 opaque:_viewOpaque
                                        enableWideGamut:engine.project.isWideGamutEnabled];
   [_engine createShell:nil libraryURI:nil initialRoute:initialRoute];
+
+  // We call this from the FlutterViewController instead of the FlutterEngine directly because this
+  // is only needed when the FlutterEngine is implicit. If it's not implicit there's no need for
+  // them to have a callback to expose the engine since they created the FlutterEngine directly.
+  // This is the earliest this can be called because it depends on the shell being created.
+  BOOL performedCallback = [_engine performImplicitEngineCallback];
+
+  // TODO(vashworth): Deprecate, see https://github.com/flutter/flutter/issues/176424
+  if ([FlutterSharedApplication.application.delegate
+          respondsToSelector:@selector(pluginRegistrant)]) {
+    NSObject<FlutterPluginRegistrant>* pluginRegistrant =
+        [FlutterSharedApplication.application.delegate performSelector:@selector(pluginRegistrant)];
+    [pluginRegistrant registerWithRegistry:self];
+    performedCallback = YES;
+  }
+  // When migrated to scenes, the FlutterViewController from the storyboard is initialized after the
+  // application launch events. Therefore, plugins may not be registered yet since they're expected
+  // to be registered during the implicit engine callbacks. As a workaround, send the app launch
+  // events after the application callbacks.
+  if (self.awokenFromNib && performedCallback && FlutterSharedApplication.hasSceneDelegate &&
+      [appDelegate isKindOfClass:[FlutterAppDelegate class]]) {
+    id applicationLifeCycleDelegate = ((FlutterAppDelegate*)appDelegate).lifeCycleDelegate;
+    [applicationLifeCycleDelegate
+        sceneFallbackWillFinishLaunchingApplication:FlutterSharedApplication.application];
+    [applicationLifeCycleDelegate
+        sceneFallbackDidFinishLaunchingApplication:FlutterSharedApplication.application];
+  }
+
   _engineNeedsLaunch = YES;
   _ongoingTouches = [[NSMutableSet alloc] init];
 
@@ -301,13 +335,6 @@ typedef struct MouseState {
   // Eliminate method calls in initializers and dealloc.
   [self loadDefaultSplashScreenView];
   [self performCommonViewControllerInitialization];
-
-  if ([FlutterSharedApplication.application.delegate
-          respondsToSelector:@selector(pluginRegistrant)]) {
-    NSObject<FlutterPluginRegistrant>* pluginRegistrant =
-        [FlutterSharedApplication.application.delegate performSelector:@selector(pluginRegistrant)];
-    [pluginRegistrant registerWithRegistry:self];
-  }
 }
 
 - (BOOL)isViewOpaque {
@@ -1434,6 +1461,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   bool firstViewBoundsUpdate = !_viewportMetrics.physical_width;
   _viewportMetrics.device_pixel_ratio = scale;
   [self setViewportMetricsSize];
+  [self checkAndUpdateAutoResizeConstraints];
   [self setViewportMetricsPaddings];
   [self updateViewportMetricsIfNeeded];
 
@@ -1462,6 +1490,89 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   }
 }
 
+- (BOOL)isAutoResizable {
+  return self.flutterView.autoResizable;
+}
+
+- (void)setAutoResizable:(BOOL)value {
+  self.flutterView.autoResizable = value;
+  self.flutterView.contentMode = UIViewContentModeCenter;
+}
+
+- (void)checkAndUpdateAutoResizeConstraints {
+  if (!self.isAutoResizable) {
+    return;
+  }
+
+  [self updateAutoResizeConstraints];
+}
+
+/**
+ * Updates the FlutterAutoResizeLayoutConstraints based on the view's
+ * current frame.
+ *
+ * This method is invoked during viewDidLayoutSubviews, at which point the
+ * view has completed its subview layout and applied any existing Auto Layout
+ * constraints.
+ *
+ * Initially, the view's frame is used to determine the maximum size allowed
+ * by the native layout system. This size is then used to establish the viewport
+ * constraints for the Flutter engine.
+ *
+ * A critical consideration is that this initial frame-based sizing is only
+ * applicable if FlutterAutoResizeLayoutConstraints have not yet been applied
+ * by Flutter. Once Flutter applies its own FlutterAutoResizeLayoutConstraints,
+ * these constraints will subsequently dictate the view's frame.
+ *
+ * This interaction imposes a limitation: native layout constraints that are
+ * updated after Flutter has applied its auto-resize constraints may not
+ * function as expected or properly influence the FlutterView's size.
+ */
+- (void)updateAutoResizeConstraints {
+  BOOL hasBeenAutoResized = NO;
+  for (NSLayoutConstraint* constraint in self.view.constraints) {
+    if ([constraint isKindOfClass:[FlutterAutoResizeLayoutConstraint class]]) {
+      hasBeenAutoResized = YES;
+      break;
+    }
+  }
+  if (!hasBeenAutoResized) {
+    self.sizeBeforeAutoResized = self.view.frame.size;
+  }
+
+  CGFloat maxWidth = self.sizeBeforeAutoResized.width;
+  CGFloat maxHeight = self.sizeBeforeAutoResized.height;
+  CGFloat minWidth = self.sizeBeforeAutoResized.width;
+  CGFloat minHeight = self.sizeBeforeAutoResized.height;
+
+  // maxWidth or maxHeight may be 0 when the width/height are ambiguous, eg. for
+  // unsized widgets
+  if (maxWidth == 0) {
+    maxWidth = CGFLOAT_MAX;
+    [FlutterLogger
+        logWarning:
+            @"Warning: The outermost widget in the autoresizable Flutter view is unsized or has "
+            @"ambiguous dimensions, causing the host native view's width to be 0. The autoresizing "
+            @"logic is setting the viewport constraint to unbounded DBL_MAX to prevent "
+            @"rendering failure. Please ensure your top-level Flutter widget has explicit "
+            @"constraints (e.g., using SizedBox or Container)."];
+  }
+  if (maxHeight == 0) {
+    maxHeight = CGFLOAT_MAX;
+    [FlutterLogger
+        logWarning:
+            @"Warning: The outermost widget in the autoresizable Flutter view is unsized or has "
+            @"ambiguous dimensions, causing the host native view's width to be 0. The autoresizing "
+            @"logic is setting the viewport constraint to unbounded DBL_MAX to prevent "
+            @"rendering failure. Please ensure your top-level Flutter widget has explicit "
+            @"constraints (e.g., using SizedBox or Container)."];
+  }
+  _viewportMetrics.physical_min_width_constraint = minWidth * _viewportMetrics.device_pixel_ratio;
+  _viewportMetrics.physical_max_width_constraint = maxWidth * _viewportMetrics.device_pixel_ratio;
+  _viewportMetrics.physical_min_height_constraint = minHeight * _viewportMetrics.device_pixel_ratio;
+  _viewportMetrics.physical_max_height_constraint = maxHeight * _viewportMetrics.device_pixel_ratio;
+}
+
 - (void)viewSafeAreaInsetsDidChange {
   [self setViewportMetricsPaddings];
   [self updateViewportMetricsIfNeeded];
@@ -1478,6 +1589,11 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   CGFloat scale = screen.scale;
   _viewportMetrics.physical_width = self.view.bounds.size.width * scale;
   _viewportMetrics.physical_height = self.view.bounds.size.height * scale;
+  // TODO(louisehsu): update for https://github.com/flutter/flutter/issues/169147
+  _viewportMetrics.physical_min_width_constraint = _viewportMetrics.physical_width;
+  _viewportMetrics.physical_max_width_constraint = _viewportMetrics.physical_width;
+  _viewportMetrics.physical_min_height_constraint = _viewportMetrics.physical_height;
+  _viewportMetrics.physical_max_height_constraint = _viewportMetrics.physical_height;
 }
 
 // Set _viewportMetrics physical paddings.
@@ -1900,36 +2016,6 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   [self.keyboardManager handlePress:press nextAction:next];
 }
 
-- (void)sendDeepLinkToFramework:(NSURL*)url completionHandler:(void (^)(BOOL success))completion {
-  __weak FlutterViewController* weakSelf = self;
-  [self.engine
-      waitForFirstFrame:3.0
-               callback:^(BOOL didTimeout) {
-                 if (didTimeout) {
-                   [FlutterLogger
-                       logError:@"Timeout waiting for first frame when launching a URL."];
-                   completion(NO);
-                 } else {
-                   // invove the method and get the result
-                   [weakSelf.engine.navigationChannel
-                       invokeMethod:@"pushRouteInformation"
-                          arguments:@{
-                            @"location" : url.absoluteString ?: [NSNull null],
-                          }
-                             result:^(id _Nullable result) {
-                               BOOL success =
-                                   [result isKindOfClass:[NSNumber class]] && [result boolValue];
-                               if (!success) {
-                                 // Logging the error if the result is not successful
-                                 [FlutterLogger
-                                     logError:@"Failed to handle route information in Flutter."];
-                               }
-                               completion(success);
-                             }];
-                 }
-               }];
-}
-
 // The documentation for presses* handlers (implemented below) is entirely
 // unclear about how to handle the case where some, but not all, of the presses
 // are handled here. I've elected to call super separately for each of the
@@ -2196,6 +2282,12 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 - (void)traitCollectionDidChange:(UITraitCollection*)previousTraitCollection {
   [super traitCollectionDidChange:previousTraitCollection];
   [self onUserSettingsChanged:nil];
+
+  // Since this method can get triggered by changes in device orientation, reset and recalculate the
+  // instrinsic size.
+  if (self.isAutoResizable) {
+    [self.flutterView resetIntrinsicContentSize];
+  }
 }
 
 - (void)onUserSettingsChanged:(NSNotification*)notification {

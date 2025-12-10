@@ -8,7 +8,7 @@ import 'dart:typed_data';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-abstract class DisposablePath implements ScenePath, LayerPath {
+abstract class DisposablePath implements LayerPath {
   @override
   DisposablePathMetrics computeMetrics({bool forceClosed = false});
 
@@ -355,7 +355,7 @@ abstract class DisposablePathConstructors {
   );
 }
 
-class LazyPath implements ScenePath, LayerPath, Collectable {
+class LazyPath implements LayerPath, Collectable {
   factory LazyPath(DisposablePathConstructors constructors) =>
       LazyPath._(constructors, ui.PathFillType.nonZero, () => constructors.createNew());
   LazyPath._(this.constructors, this._fillType, this.initializer) : _commands = [];
@@ -426,7 +426,7 @@ class LazyPath implements ScenePath, LayerPath, Collectable {
     }
     final DisposablePath path = initializer();
     path.fillType = _fillType;
-    for (final command in _commands) {
+    for (final PathCommand command in _commands) {
       command.apply(path);
     }
 
@@ -679,7 +679,7 @@ class LazyPathMetricIterator implements Iterator<ui.PathMetric>, Collectable {
     _cachedIterator?.dispose();
     _cachedIterator = null;
 
-    for (final metric in _metrics) {
+    for (final DisposablePathMetric metric in _metrics) {
       metric.dispose();
     }
     _metrics.clear();
@@ -690,7 +690,7 @@ class LazyPathMetricIterator implements Iterator<ui.PathMetric>, Collectable {
       return;
     }
     _cachedIterator = path.builtPath.computeMetrics(forceClosed: forceClosed).iterator;
-    for (int i = 0; i < _nextIndex; i++) {
+    for (var i = 0; i < _nextIndex; i++) {
       if (_cachedIterator!.moveNext()) {
         _metrics.add(_cachedIterator!.current);
       } else {

@@ -6,6 +6,9 @@ package io.flutter.embedding.android;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertNotSame;
+import static junit.framework.TestCase.assertNull;
+import static junit.framework.TestCase.assertSame;
 import static junit.framework.TestCase.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -164,12 +167,12 @@ public class FlutterViewTest {
 
     flutterView.attachToFlutterEngine(flutterEngine);
     flutterView.convertToImageView();
-    assertEquals(flutterView.getChildCount(), 2);
+    assertEquals(2, flutterView.getChildCount());
     View view = flutterView.getChildAt(1);
     assertTrue(view instanceof FlutterImageView);
 
     flutterView.detachFromFlutterEngine();
-    assertEquals(flutterView.getChildCount(), 1);
+    assertEquals(1, flutterView.getChildCount());
     view = flutterView.getChildAt(0);
     assertFalse(view instanceof FlutterImageView);
   }
@@ -189,13 +192,13 @@ public class FlutterViewTest {
 
     flutterView.attachToFlutterEngine(flutterEngine);
 
-    assertFalse(flutterView.renderSurface == imageViewMock);
+    assertNotSame(flutterView.renderSurface, imageViewMock);
 
     flutterView.convertToImageView();
-    assertTrue(flutterView.renderSurface == imageViewMock);
+    assertSame(flutterView.renderSurface, imageViewMock);
 
     flutterView.detachFromFlutterEngine();
-    assertFalse(flutterView.renderSurface == imageViewMock);
+    assertNotSame(flutterView.renderSurface, imageViewMock);
     verify(imageViewMock, times(1)).closeImageReader();
   }
 
@@ -219,7 +222,7 @@ public class FlutterViewTest {
     assertFalse(flutterView.renderSurface instanceof FlutterImageView);
 
     flutterView.detachFromFlutterEngine();
-    assertEquals(null, flutterView.getCurrentImageSurface());
+    assertNull(flutterView.getCurrentImageSurface());
 
     // Invoke all registered `FlutterUiDisplayListener` callback
     mockFlutterJni.onFirstFrame();
@@ -243,9 +246,6 @@ public class FlutterViewTest {
     verify(flutterEngine, times(2)).getSettingsChannel();
   }
 
-  @SuppressWarnings("deprecation")
-  // Robolectric.setupActivity
-  // TODO(reidbaker): https://github.com/flutter/flutter/issues/133151
   @Test
   public void onConfigurationChanged_notifiesEngineOfDisplaySize() {
     try (ActivityScenario<Activity> scenario = ActivityScenario.launch(Activity.class)) {
@@ -1066,7 +1066,7 @@ public class FlutterViewTest {
     Method getAccessibilityViewIdMethod = View.class.getDeclaredMethod("getAccessibilityViewId");
     Integer accessibilityViewId = (Integer) getAccessibilityViewIdMethod.invoke(flutterView);
 
-    assertEquals(null, flutterView.findViewByAccessibilityIdTraversal(accessibilityViewId));
+    assertNull(flutterView.findViewByAccessibilityIdTraversal(accessibilityViewId));
   }
 
   @Test
@@ -1301,6 +1301,44 @@ public class FlutterViewTest {
 
     // Verify results.
     assertEquals(SettingsChannel.PlatformBrightness.light, reportedBrightness.get());
+  }
+
+  @Test
+  public void onMeasure_whenWrapContent_sendsCorrectViewportMetrics() {
+    FlutterSurfaceView flutterSurfaceView = spy(new FlutterSurfaceView(ctx));
+    FlutterView flutterView = new FlutterView(ctx, flutterSurfaceView);
+    FlutterEngine flutterEngine = spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
+    FlutterRenderer flutterRenderer = spy(new FlutterRenderer(mockFlutterJni));
+    when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
+    flutterView.onMeasure(
+        View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+        View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+
+    flutterView.onSizeChanged(1, 1, 0, 0);
+    flutterView.attachToFlutterEngine(flutterEngine);
+
+    ArgumentCaptor<FlutterRenderer.ViewportMetrics> viewportMetricsCaptor =
+        ArgumentCaptor.forClass(FlutterRenderer.ViewportMetrics.class);
+    verify(flutterRenderer, times(1)).setViewportMetrics(viewportMetricsCaptor.capture());
+    FlutterRenderer.ViewportMetrics metrics = viewportMetricsCaptor.getValue();
+    assertEquals(0, metrics.minWidth);
+    assertEquals(FlutterView.CONTENT_SIZING_MAX, metrics.maxWidth);
+    assertEquals(0, metrics.minHeight);
+    assertEquals(FlutterView.CONTENT_SIZING_MAX, metrics.maxHeight);
+  }
+
+  @Test
+  public void resizeEngineView_resizesTheSurfaceView() {
+    FlutterSurfaceView flutterSurfaceView = spy(new FlutterSurfaceView(ctx));
+    FlutterView flutterView = new FlutterView(ctx, flutterSurfaceView);
+    FlutterEngine flutterEngine = spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
+    FlutterRenderer flutterRenderer = spy(new FlutterRenderer(mockFlutterJni));
+    when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
+    flutterView.attachToFlutterEngine(flutterEngine);
+
+    clearInvocations(flutterView.flutterEngineView);
+    flutterView.flutterUiResizeListener.resizeEngineView(100, 200);
+    verify(flutterView.flutterEngineView, times(1)).setLayoutParams(any());
   }
 
   @SuppressWarnings("deprecation")

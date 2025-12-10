@@ -44,14 +44,16 @@ COMMENT_START (\/\/|#)
 }
 ^[ \t]*\/\*[\*]*[\n]? {
   BEGIN(C_COMMENT);
+  if (!yyextra->buffer.empty()) {
+    // If we go from a block to a c comment, add a newline between them.
+    yyextra->buffer.append("\n");
+  }
 }
 
 <C_COMMENT>{
   .*\*\/.*\n {
     BEGIN(INITIAL);
     CommentsUtil::AddCEndTrimLine(&yyextra->buffer, yytext, yyleng - 2);
-    yyextra->callback(yyextra->buffer);
-    yyextra->buffer.clear();
   }
   .*\n {
     CommentsUtil::AddCTrimLine(&yyextra->buffer, yytext, yyleng);
@@ -65,12 +67,15 @@ COMMENT_START (\/\/|#)
   }
   \n|. {
     BEGIN(INITIAL);
+  }
+}
+
+\n|. {
+  if (!yyextra->buffer.empty()) {
     yyextra->callback(yyextra->buffer);
     yyextra->buffer.clear();
   }
 }
-
-\n|. {}
 %%
 
 void IterateComments(const char* buffer,
@@ -83,6 +88,9 @@ void IterateComments(const char* buffer,
   yylex_init_extra(&context, &scanner);
   YY_BUFFER_STATE yybuffer = yy_scan_bytes(buffer, size, scanner);
   yylex(scanner);
+  if (!context.buffer.empty()) {
+    context.callback(context.buffer);
+  }
   yy_delete_buffer(yybuffer, scanner);
   yylex_destroy(scanner);
 }

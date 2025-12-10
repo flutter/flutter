@@ -124,6 +124,15 @@ class FakeDartDevelopmentService extends Fake
   Uri? get uri => null;
 
   @override
+  Uri? get devToolsUri => null;
+
+  @override
+  Uri? get dtdUri => null;
+
+  @override
+  Future<void> handleHotRestart(FlutterDevice? device) async {}
+
+  @override
   void shutdown() {}
 }
 
@@ -169,11 +178,11 @@ class ThrowingForwardingFileSystem extends ForwardingFileSystem {
 class FakeFlutterDevice extends Fake implements FlutterDevice {
   FakeVmServiceHost? Function()? vmServiceHost;
   Uri? testUri;
-  var report = UpdateFSReport(success: true, invalidatedSourcesCount: 1);
+  UpdateFSReport report = UpdateFSReport(success: true, invalidatedSourcesCount: 1);
   Exception? reportError;
   Exception? runColdError;
-  var runHotCode = 0;
-  var runColdCode = 0;
+  int runHotCode = 0;
+  int runColdCode = 0;
 
   @override
   ResidentCompiler? generator;
@@ -256,6 +265,9 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   Future<void> updateReloadStatus(bool wasReloadSuccessful) async {}
+
+  @override
+  Future<void> handleHotRestart() async {}
 }
 
 class FakeDelegateFlutterDevice extends FlutterDevice {
@@ -293,9 +305,9 @@ class FakeDelegateFlutterDevice extends FlutterDevice {
 
 class FakeResidentCompiler extends Fake implements ResidentCompiler {
   CompilerOutput? nextOutput;
-  var didSuppressErrors = false;
+  bool didSuppressErrors = false;
   Uri? receivedNativeAssetsYaml;
-  var recompileCalled = false;
+  bool recompileCalled = false;
 
   @override
   Future<CompilerOutput?> recompile(
@@ -356,9 +368,9 @@ class FakeDevice extends Fake implements Device {
   final TargetPlatform _targetPlatform;
   final String _sdkNameAndVersion;
 
-  var disposed = false;
-  var appStopped = false;
-  var failScreenshot = false;
+  bool disposed = false;
+  bool appStopped = false;
+  bool failScreenshot = false;
 
   @override
   bool supportsHotRestart;
@@ -387,6 +399,9 @@ class FakeDevice extends Fake implements Device {
 
   @override
   String get displayName => name;
+
+  @override
+  Uri? devToolsUri;
 
   @override
   late DartDevelopmentService dds = FakeDartDevelopmentService();
@@ -426,27 +441,27 @@ class FakeDevFS extends Fake implements DevFS {
   PackageConfig? lastPackageConfig = PackageConfig.empty;
 
   @override
-  var sources = <Uri>[];
+  List<Uri> sources = <Uri>[];
 
   @override
-  var baseUri = Uri();
+  Uri baseUri = Uri();
 
   @override
   Future<void> destroy() async {}
 
   @override
-  var assetPathsToEvict = <String>{};
+  Set<String> assetPathsToEvict = <String>{};
 
   @override
-  var shaderPathsToEvict = <String>{};
+  Set<String> shaderPathsToEvict = <String>{};
 
   @override
-  var didUpdateFontManifest = false;
+  bool didUpdateFontManifest = false;
 
-  var nextUpdateReport = UpdateFSReport(success: true);
+  UpdateFSReport nextUpdateReport = UpdateFSReport(success: true);
 
   @override
-  var hasSetAssetDirectory = false;
+  bool hasSetAssetDirectory = false;
 
   @override
   Future<Uri> create() async {

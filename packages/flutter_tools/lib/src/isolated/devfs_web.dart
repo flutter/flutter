@@ -67,8 +67,7 @@ class WebDevFS implements DevFS {
     required this.useSseForInjectedClient,
     required this.buildInfo,
     required this.enableDwds,
-    required this.enableDds,
-    this.ddsPort,
+    required this.ddsConfig,
     required this.entrypoint,
     required this.expressionCompiler,
     required this.chromiumLauncher,
@@ -101,8 +100,7 @@ class WebDevFS implements DevFS {
   final bool useSseForInjectedClient;
   final BuildInfo buildInfo;
   final bool enableDwds;
-  final bool enableDds;
-  final int? ddsPort;
+  final DartDevelopmentServiceConfiguration ddsConfig;
   final bool testMode;
   final bool ddcModuleSystem;
   final bool canaryFeatures;
@@ -128,10 +126,10 @@ class WebDevFS implements DevFS {
 
   // A flag to indicate whether we have called `setAssetDirectory` on the target device.
   @override
-  var hasSetAssetDirectory = false;
+  bool hasSetAssetDirectory = false;
 
   @override
-  var didUpdateFontManifest = false;
+  bool didUpdateFontManifest = false;
 
   Future<DebugConnection>? _cachedExtensionFuture;
   StreamSubscription<void>? _connectedApps;
@@ -183,7 +181,7 @@ class WebDevFS implements DevFS {
   }
 
   @override
-  var sources = <Uri>[];
+  List<Uri> sources = <Uri>[];
 
   @override
   DateTime? lastCompiled;
@@ -208,8 +206,7 @@ class WebDevFS implements DevFS {
       useSseForInjectedClient,
       buildInfo,
       enableDwds,
-      enableDds,
-      ddsPort,
+      ddsConfig,
       entrypoint,
       expressionCompiler,
       webRenderer: webRenderer,

@@ -20,6 +20,10 @@ struct ViewportMetrics {
   ViewportMetrics(double p_device_pixel_ratio,
                   double p_physical_width,
                   double p_physical_height,
+                  double p_physical_min_width_constraint,
+                  double p_physical_max_width_constraint,
+                  double p_physical_min_height_constraint,
+                  double p_physical_max_height_constraint,
                   double p_physical_padding_top,
                   double p_physical_padding_right,
                   double p_physical_padding_bottom,
@@ -37,10 +41,13 @@ struct ViewportMetrics {
                   const std::vector<int>& p_physical_display_features_type,
                   const std::vector<int>& p_physical_display_features_state,
                   size_t p_display_id);
-
   double device_pixel_ratio = 1.0;
   double physical_width = 0;
   double physical_height = 0;
+  double physical_min_width_constraint = 0;
+  double physical_max_width_constraint = 0;
+  double physical_min_height_constraint = 0;
+  double physical_max_height_constraint = 0;
   double physical_padding_top = 0;
   double physical_padding_right = 0;
   double physical_padding_bottom = 0;

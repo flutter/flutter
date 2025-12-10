@@ -40,9 +40,8 @@ SKWASM_EXPORT sp_wrapper<DlImageFilter>* imageFilter_createMatrix(
     DlScalar* matrix33,
     FilterQuality quality) {
   liveImageFilterCount++;
-  auto dlFilter = DlImageFilter::MakeMatrix(createDlMatrixFrom3x3(matrix33),
-                                            samplingOptionsForQuality(quality));
-  return dlFilter ? new sp_wrapper<DlImageFilter>(dlFilter) : nullptr;
+  return new sp_wrapper<DlImageFilter>(DlImageFilter::MakeMatrix(
+      createDlMatrixFrom3x3(matrix33), samplingOptionsForQuality(quality)));
 }
 
 SKWASM_EXPORT sp_wrapper<DlImageFilter>* imageFilter_createFromColorFilter(
@@ -68,8 +67,14 @@ SKWASM_EXPORT void imageFilter_dispose(sp_wrapper<DlImageFilter>* filter) {
 SKWASM_EXPORT void imageFilter_getFilterBounds(
     sp_wrapper<DlImageFilter>* filter,
     DlIRect* inOutBounds) {
+  auto dlFilter = filter->shared();
+  if (dlFilter == nullptr) {
+    // If there is no filter, the output bounds are the same as the input
+    // bounds.
+    return;
+  }
   DlIRect inRect = *inOutBounds;
-  filter->shared()->map_device_bounds(inRect, DlMatrix(), *inOutBounds);
+  dlFilter->map_device_bounds(inRect, DlMatrix(), *inOutBounds);
 }
 
 SKWASM_EXPORT sp_wrapper<const DlColorFilter>* colorFilter_createMode(

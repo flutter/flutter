@@ -37,7 +37,9 @@ class LayoutBuilderExample extends StatelessWidget {
   }
 
   Widget _buildNormalContainer() {
-    return Center(child: Container(height: 100.0, width: 100.0, color: Colors.red));
+    return Center(
+      child: Container(height: 100.0, width: 100.0, color: Colors.red),
+    );
   }
 
   Widget _buildWideContainers() {

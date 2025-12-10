@@ -34,6 +34,8 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
       std::vector<std::string> strings,
       std::vector<std::vector<uint8_t>> string_attribute_args) override;
 
+  void FlutterViewSetApplicationLocale(std::string locale) override;
+
   void FlutterViewUpdateCustomAccessibilityActions(
       std::vector<uint8_t> actions_buffer,
       std::vector<std::string> strings) override;
@@ -124,11 +126,15 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
                               int32_t viewHeight,
                               MutatorsStack mutators_stack) override;
 
+  void hidePlatformView2(int32_t view_id) override;
+
   void showOverlaySurface2() override;
 
   void hideOverlaySurface2() override;
 
   void onEndFrame2() override;
+
+  void MaybeResizeSurfaceView(int32_t width, int32_t height) const override;
 
  private:
   // Reference to FlutterJNI object.

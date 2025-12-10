@@ -8,6 +8,7 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/darwin/darwin.dart';
 
 import '../integration.shard/test_utils.dart';
 import '../src/common.dart';
@@ -170,6 +171,29 @@ void main() {
             );
 
             expect(vmSnapshot.existsSync(), buildMode == BuildMode.debug);
+          });
+
+          testWithoutContext('App.framework Info.plist contains correct MinimumOSVersion', () {
+            final File templateInfoPlist = fileSystem.file(
+              fileSystem.path.join(projectRoot, 'ios', 'Flutter', 'AppFrameworkInfo.plist'),
+            );
+            expect(templateInfoPlist, exists);
+            final String templateContents = templateInfoPlist.readAsStringSync();
+            expect(templateContents, isNot(contains('MinimumOSVersion')));
+
+            final File appFrameworkInfoPlist = outputAppFramework.childFile('Info.plist');
+            expect(appFrameworkInfoPlist, exists);
+
+            final expectedMinimumOSVersion = FlutterDarwinPlatform.ios
+                .deploymentTarget()
+                .toString();
+
+            final String appFrameworkInfoPlistContents = appFrameworkInfoPlist.readAsStringSync();
+
+            expect(
+              appFrameworkInfoPlistContents,
+              contains('<key>MinimumOSVersion</key>\n\t<string>$expectedMinimumOSVersion</string>'),
+            );
           });
 
           testWithoutContext('Info.plist dart VM Service Bonjour service', () {

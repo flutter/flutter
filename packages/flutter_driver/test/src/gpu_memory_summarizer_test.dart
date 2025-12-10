@@ -21,7 +21,7 @@ TimelineEvent newMetalGPUTraceEvent(double ms) => TimelineEvent(<String, dynamic
 
 void main() {
   test('Can process GPU memory usage times.', () {
-    final GPUMemorySumarizer summarizer = GPUMemorySumarizer(<TimelineEvent>[
+    final summarizer = GPUMemorySumarizer(<TimelineEvent>[
       newGPUTraceEvent(1024),
       newGPUTraceEvent(1024),
       newGPUTraceEvent(512),
@@ -34,7 +34,7 @@ void main() {
   });
 
   test('Can process Metal GPU memory usage times.', () {
-    final GPUMemorySumarizer summarizer = GPUMemorySumarizer(<TimelineEvent>[
+    final summarizer = GPUMemorySumarizer(<TimelineEvent>[
       newMetalGPUTraceEvent(1024),
       newMetalGPUTraceEvent(1024),
       newMetalGPUTraceEvent(512),

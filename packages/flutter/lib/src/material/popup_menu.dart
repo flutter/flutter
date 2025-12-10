@@ -26,7 +26,6 @@ import 'list_tile.dart';
 import 'list_tile_theme.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'material_state.dart';
 import 'popup_menu_theme.dart';
 import 'text_theme.dart';
 import 'theme.dart';
@@ -222,7 +221,7 @@ class _RenderMenuItem extends RenderShiftedBox {
     } else {
       child!.layout(constraints, parentUsesSize: true);
       size = constraints.constrain(child!.size);
-      final BoxParentData childParentData = child!.parentData! as BoxParentData;
+      final childParentData = child!.parentData! as BoxParentData;
       childParentData.offset = Offset.zero;
     }
     onLayout(size);
@@ -346,7 +345,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// {@endtemplate}
   ///
   /// If null, then the value of [PopupMenuThemeData.mouseCursor] is used. If
-  /// that is also null, then [WidgetStateMouseCursor.clickable] is used.
+  /// that is also null, then [WidgetStateMouseCursor.adaptiveClickable] is used.
   final MouseCursor? mouseCursor;
 
   /// The widget below this widget in the tree.
@@ -412,7 +411,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
     final PopupMenuThemeData defaults = theme.useMaterial3
         ? _PopupMenuDefaultsM3(context)
         : _PopupMenuDefaultsM2(context);
-    final Set<MaterialState> states = <MaterialState>{if (!widget.enabled) MaterialState.disabled};
+    final states = <WidgetState>{if (!widget.enabled) WidgetState.disabled};
 
     TextStyle style = theme.useMaterial3
         ? (widget.labelTextStyle?.resolve(states) ??
@@ -442,7 +441,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
     );
 
     if (!widget.enabled) {
-      final bool isDark = theme.brightness == Brightness.dark;
+      final isDark = theme.brightness == Brightness.dark;
       item = IconTheme.merge(
         data: IconThemeData(opacity: isDark ? 0.5 : 0.38),
         child: item,
@@ -641,7 +640,7 @@ class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMe
     final PopupMenuThemeData defaults = theme.useMaterial3
         ? _PopupMenuDefaultsM3(context)
         : _PopupMenuDefaultsM2(context);
-    final Set<MaterialState> states = <MaterialState>{if (widget.checked) MaterialState.selected};
+    final states = <WidgetState>{if (widget.checked) WidgetState.selected};
     final WidgetStateProperty<TextStyle?>? effectiveLabelTextStyle =
         widget.labelTextStyle ?? popupMenuTheme.labelTextStyle ?? defaults.labelTextStyle;
     return IgnorePointer(
@@ -703,17 +702,14 @@ class _PopupMenuState<T> extends State<_PopupMenu<T>> {
     for (final CurvedAnimation opacity in _opacities) {
       opacity.dispose();
     }
-    final List<CurvedAnimation> newOpacities = <CurvedAnimation>[];
+    final newOpacities = <CurvedAnimation>[];
     final double unit =
         1.0 /
         (widget.route.items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
-    for (int i = 0; i < widget.route.items.length; i += 1) {
+    for (var i = 0; i < widget.route.items.length; i += 1) {
       final double start = (i + 1) * unit;
       final double end = clampDouble(start + 1.5 * unit, 0.0, 1.0);
-      final CurvedAnimation opacity = CurvedAnimation(
-        parent: widget.route.animation!,
-        curve: Interval(start, end),
-      );
+      final opacity = CurvedAnimation(parent: widget.route.animation!, curve: Interval(start, end));
       newOpacities.add(opacity);
     }
     _opacities = newOpacities;
@@ -732,14 +728,14 @@ class _PopupMenuState<T> extends State<_PopupMenu<T>> {
     final double unit =
         1.0 /
         (widget.route.items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
-    final List<Widget> children = <Widget>[];
+    final children = <Widget>[];
     final ThemeData theme = Theme.of(context);
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     final PopupMenuThemeData defaults = theme.useMaterial3
         ? _PopupMenuDefaultsM3(context)
         : _PopupMenuDefaultsM2(context);
 
-    for (int i = 0; i < widget.route.items.length; i += 1) {
+    for (var i = 0; i < widget.route.items.length; i += 1) {
       final CurvedAnimation opacity = _opacities[i];
       Widget item = widget.route.items[i];
       if (widget.route.initialValue != null &&
@@ -756,9 +752,9 @@ class _PopupMenuState<T> extends State<_PopupMenu<T>> {
       );
     }
 
-    final CurveTween opacity = CurveTween(curve: const Interval(0.0, 1.0 / 3.0));
-    final CurveTween width = CurveTween(curve: Interval(0.0, unit));
-    final CurveTween height = CurveTween(curve: Interval(0.0, unit * widget.route.items.length));
+    final opacity = CurveTween(curve: const Interval(0.0, 1.0 / 3.0));
+    final width = CurveTween(curve: Interval(0.0, unit));
+    final height = CurveTween(curve: Interval(0.0, unit * widget.route.items.length));
 
     final Widget child = ConstrainedBox(
       constraints:
@@ -877,7 +873,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
         TextDirection.ltr => position.left,
       };
     }
-    final Offset wantedPosition = Offset(x, y);
+    final wantedPosition = Offset(x, y);
     final Offset originCenter = position.toRect(Offset.zero & size).center;
     final Iterable<Rect> subScreens = DisplayFeatureSubScreen.subScreensInBounds(
       Offset.zero & size,
@@ -889,7 +885,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
 
   Rect _closestScreen(Iterable<Rect> screens, Offset point) {
     Rect closest = screens.first;
-    for (final Rect screen in screens) {
+    for (final screen in screens) {
       if ((screen.center - point).distance < (closest.center - point).distance) {
         closest = screen;
       }
@@ -1023,7 +1019,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   ) {
     int? selectedItemIndex;
     if (initialValue != null) {
-      for (int index = 0; selectedItemIndex == null && index < items.length; index += 1) {
+      for (var index = 0; selectedItemIndex == null && index < items.length; index += 1) {
         if (items[index].represents(initialValue)) {
           selectedItemIndex = index;
         }
@@ -1193,7 +1189,7 @@ Future<T?> showMenu<T>({
     'Either position or positionBuilder must be provided.',
   );
 
-  switch (Theme.of(context).platform) {
+  switch (defaultTargetPlatform) {
     case TargetPlatform.iOS:
     case TargetPlatform.macOS:
       break;
@@ -1204,10 +1200,7 @@ Future<T?> showMenu<T>({
       semanticLabel ??= MaterialLocalizations.of(context).popupMenuLabel;
   }
 
-  final List<GlobalKey> menuItemKeys = List<GlobalKey>.generate(
-    items.length,
-    (int index) => GlobalKey(),
-  );
+  final menuItemKeys = List<GlobalKey>.generate(items.length, (int index) => GlobalKey());
   final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator);
   return navigator.push(
     _PopupMenuRoute<T>(
@@ -1673,7 +1666,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
           offset -= Offset(0.0, widget.padding.vertical / 2);
         }
     }
-    final RelativeRect position = RelativeRect.fromRect(
+    final position = RelativeRect.fromRect(
       Rect.fromPoints(
         button.localToGlobal(offset, ancestor: overlay),
         button.localToGlobal(button.size.bottomRight(Offset.zero) + offset, ancestor: overlay),
@@ -1695,7 +1688,6 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   void showButtonMenu() {
     // Ensure cached render objects are initialized
     _updateCachedObjects();
-    final PopupMenuThemeData popupMenuTheme = _popupMenuTheme;
     final List<PopupMenuEntry<T>> items = widget.itemBuilder(context);
     // Only show the menu if there is something to show
     if (items.isNotEmpty) {
@@ -1703,15 +1695,15 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       _isMenuExpanded = true;
       showMenu<T?>(
         context: context,
-        elevation: widget.elevation ?? popupMenuTheme.elevation,
-        shadowColor: widget.shadowColor ?? popupMenuTheme.shadowColor,
-        surfaceTintColor: widget.surfaceTintColor ?? popupMenuTheme.surfaceTintColor,
+        elevation: widget.elevation,
+        shadowColor: widget.shadowColor,
+        surfaceTintColor: widget.surfaceTintColor,
         items: items,
         initialValue: widget.initialValue,
         positionBuilder: _positionBuilder,
-        shape: widget.shape ?? popupMenuTheme.shape,
-        menuPadding: widget.menuPadding ?? popupMenuTheme.menuPadding,
-        color: widget.color ?? popupMenuTheme.color,
+        shape: widget.shape,
+        menuPadding: widget.menuPadding,
+        color: widget.color,
         constraints: widget.constraints,
         clipBehavior: widget.clipBehavior,
         useRootNavigator: widget.useRootNavigator,
@@ -1795,23 +1787,23 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
 }
 
 // This WidgetStateProperty is passed along to the menu item's InkWell which
-// resolves the property against MaterialState.disabled, MaterialState.hovered,
-// MaterialState.focused.
-class _EffectiveMouseCursor extends MaterialStateMouseCursor {
+// resolves the property against WidgetState.disabled, WidgetState.hovered,
+// WidgetState.focused.
+class _EffectiveMouseCursor extends WidgetStateMouseCursor {
   const _EffectiveMouseCursor(this.widgetCursor, this.themeCursor);
 
   final MouseCursor? widgetCursor;
   final WidgetStateProperty<MouseCursor?>? themeCursor;
 
   @override
-  MouseCursor resolve(Set<MaterialState> states) {
+  MouseCursor resolve(Set<WidgetState> states) {
     return WidgetStateProperty.resolveAs<MouseCursor?>(widgetCursor, states) ??
         themeCursor?.resolve(states) ??
-        MaterialStateMouseCursor.clickable.resolve(states);
+        WidgetStateMouseCursor.adaptiveClickable.resolve(states);
   }
 
   @override
-  String get debugDescription => 'MaterialStateMouseCursor(PopupMenuItemState)';
+  String get debugDescription => 'WidgetStateMouseCursor(PopupMenuItemState)';
 }
 
 class _PopupMenuDefaultsM2 extends PopupMenuThemeData {

@@ -39,7 +39,7 @@ source on a supported platform (see:
 run at all outside of a valid repository setup.
 
 [architectural layers]: https://docs.flutter.dev/resources/architectural-overview#architectural-layers
-[setting up the engine development environment]: https://github.com/flutter/flutter/blob/main/engine/src/flutter/docs/contributing/Setting-up-the-Engine-development-environment.md
+[setting up the engine development environment]: https://github.com/flutter/flutter/blob/main/docs/engine/contributing/Setting-up-the-Engine-development-environment.md
 
 It is recommended to add `et` to your `PATH` by adding the [`bin` folder][]:
 
@@ -377,7 +377,7 @@ et cleanup --untouched-since=2024-01-01
 
 We welcome contributions to improve `et` for our all developers.
 
-- Follow the [Flutter style guide](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo)
+- Follow the [Flutter style guide](https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md)
   for Dart code that are relevant outside of the framework repo. It contains
   conventions that go beyond code formatting, which we'll follow even if using
   `dart format` in the future.

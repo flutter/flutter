@@ -4,26 +4,26 @@
 
 #include "path_ops.h"
 
+#include "third_party/skia/include/core/SkPath.h"
+
 namespace flutter {
-SkPath* CreatePath(SkPathFillType fill_type) {
-  auto* path = new SkPath();
-  path->setFillType(fill_type);
-  return path;
+SkPathBuilder* CreatePath(SkPathFillType fill_type) {
+  return new SkPathBuilder(fill_type);
 }
 
-void DestroyPath(SkPath* path) {
+void DestroyPath(SkPathBuilder* path) {
   delete path;
 }
 
-void MoveTo(SkPath* path, SkScalar x, SkScalar y) {
+void MoveTo(SkPathBuilder* path, SkScalar x, SkScalar y) {
   path->moveTo(x, y);
 }
 
-void LineTo(SkPath* path, SkScalar x, SkScalar y) {
+void LineTo(SkPathBuilder* path, SkScalar x, SkScalar y) {
   path->lineTo(x, y);
 }
 
-void CubicTo(SkPath* path,
+void CubicTo(SkPathBuilder* path,
              SkScalar x1,
              SkScalar y1,
              SkScalar x2,
@@ -33,25 +33,30 @@ void CubicTo(SkPath* path,
   path->cubicTo(x1, y1, x2, y2, x3, y3);
 }
 
-void Close(SkPath* path) {
+void Close(SkPathBuilder* path) {
   path->close();
 }
 
-void Reset(SkPath* path) {
+void Reset(SkPathBuilder* path) {
   path->reset();
 }
 
-void Op(SkPath* one, SkPath* two, SkPathOp op) {
-  Op(*one, *two, op, one);
+void Op(SkPathBuilder* one, SkPathBuilder* two, SkPathOp op) {
+  SkPath p1 = one->snapshot();
+  SkPath p2 = two->snapshot();
+  if (std::optional<SkPath> result = Op(p1, p2, op)) {
+    *one = result.value();
+  }
 }
 
-int GetFillType(SkPath* path) {
-  return static_cast<int>(path->getFillType());
+int GetFillType(SkPathBuilder* path) {
+  return static_cast<int>(path->fillType());
 }
 
-struct PathData* Data(SkPath* path) {
-  int point_count = path->countPoints();
-  int verb_count = path->countVerbs();
+struct PathData* Data(SkPathBuilder* pb) {
+  SkPath path = pb->snapshot();
+  int point_count = path.countPoints();
+  int verb_count = path.countVerbs();
 
   auto data = new PathData();
   data->points = new float[point_count * 2];
@@ -59,8 +64,11 @@ struct PathData* Data(SkPath* path) {
   data->verbs = new uint8_t[verb_count];
   data->verb_count = verb_count;
 
-  path->getVerbs(data->verbs, verb_count);
-  path->getPoints(reinterpret_cast<SkPoint*>(data->points), point_count);
+  SkSpan<uint8_t> outVerbs(data->verbs, verb_count);
+  path.getVerbs(outVerbs);
+  SkSpan<SkPoint> outPoints(reinterpret_cast<SkPoint*>(data->points),
+                            point_count);
+  path.getPoints(outPoints);
   return data;
 }
 

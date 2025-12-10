@@ -7,12 +7,7 @@
 #include "skwasm_support.h"
 
 #include "flutter/display_list/display_list.h"
-#include "flutter/display_list/skia/dl_sk_dispatcher.h"
-#include "third_party/skia/include/gpu/ganesh/GrBackendSurface.h"
-#include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
-#include "third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h"
-#include "third_party/skia/include/gpu/ganesh/gl/GrGLDirectContext.h"
-#include "third_party/skia/include/gpu/ganesh/gl/GrGLMakeWebGLInterface.h"
+#include "flutter/display_list/image/dl_image.h"
 
 #include <emscripten/wasm_worker.h>
 #include <algorithm>
@@ -43,6 +38,11 @@ void Surface::dispose() {
 }
 
 // Main thread only
+void Surface::setResourceCacheLimit(int bytes) {
+  _renderContext->setResourceCacheLimit(bytes);
+}
+
+// Main thread only
 uint32_t Surface::renderPictures(DisplayList** pictures,
                                  int width,
                                  int height,
@@ -63,7 +63,7 @@ uint32_t Surface::renderPictures(DisplayList** pictures,
 }
 
 // Main thread only
-uint32_t Surface::rasterizeImage(SkImage* image, ImageByteFormat format) {
+uint32_t Surface::rasterizeImage(DlImage* image, ImageByteFormat format) {
   assert(emscripten_is_main_browser_thread());
   uint32_t callbackId = ++_currentCallbackId;
   image->ref();
@@ -86,6 +86,8 @@ void Surface::setCallbackHandler(CallbackHandler* callbackHandler) {
 
 // Worker thread only
 void Surface::_init() {
+  // 256x256 is just an arbitrary size for the initial canvas, so that we can
+  // get a gl context off of it.
   _glContext = skwasm_createOffscreenCanvas(256, 256);
   if (!_glContext) {
     printf("Failed to create context!\n");
@@ -95,31 +97,27 @@ void Surface::_init() {
   makeCurrent(_glContext);
   emscripten_webgl_enable_extension(_glContext, "WEBGL_debug_renderer_info");
 
-  _grContext = GrDirectContexts::MakeGL(GrGLInterfaces::MakeWebGL());
-
   // WebGL should already be clearing the color and stencil buffers, but do it
   // again here to ensure Skia receives them in the expected state.
   emscripten_glBindFramebuffer(GL_FRAMEBUFFER, 0);
   emscripten_glClearColor(0, 0, 0, 0);
   emscripten_glClearStencil(0);
   emscripten_glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-  _grContext->resetContext(kRenderTarget_GrGLBackendState |
-                           kMisc_GrGLBackendState);
 
-  // The on-screen canvas is FBO 0. Wrap it in a Skia render target so Skia
-  // can render to it.
-  _fbInfo.fFBOID = 0;
-  _fbInfo.fFormat = GL_RGBA8_OES;
+  int sampleCount;
+  int stencil;
+  emscripten_glGetIntegerv(GL_SAMPLES, &sampleCount);
+  emscripten_glGetIntegerv(GL_STENCIL_BITS, &stencil);
 
-  emscripten_glGetIntegerv(GL_SAMPLES, &_sampleCount);
-  emscripten_glGetIntegerv(GL_STENCIL_BITS, &_stencil);
+  _renderContext = RenderContext::Make(sampleCount, stencil);
+  _renderContext->resize(256, 256);
 
   _isInitialized = true;
 }
 
 // Worker thread only
 void Surface::_resizeSurface(int width, int height) {
-  if (!_surface || width != _canvasWidth || height != _canvasHeight) {
+  if (width != _canvasWidth || height != _canvasHeight) {
     _canvasWidth = width;
     _canvasHeight = height;
     _recreateSurface();
@@ -130,11 +128,7 @@ void Surface::_resizeSurface(int width, int height) {
 void Surface::_recreateSurface() {
   makeCurrent(_glContext);
   skwasm_resizeCanvas(_glContext, _canvasWidth, _canvasHeight);
-  auto target = GrBackendRenderTargets::MakeGL(_canvasWidth, _canvasHeight,
-                                               _sampleCount, _stencil, _fbInfo);
-  _surface = SkSurfaces::WrapBackendRenderTarget(
-      _grContext.get(), target, kBottomLeft_GrSurfaceOrigin,
-      kRGBA_8888_SkColorType, SkColorSpace::MakeSRGB(), nullptr);
+  _renderContext->resize(_canvasWidth, _canvasHeight);
 }
 
 // Worker thread only
@@ -155,21 +149,16 @@ void Surface::renderPicturesOnWorker(sk_sp<DisplayList>* pictures,
     sk_sp<DisplayList> picture = pictures[i];
     _resizeSurface(width, height);
     makeCurrent(_glContext);
-    auto canvas = _surface->getCanvas();
-    canvas->drawColor(SK_ColorTRANSPARENT, SkBlendMode::kSrc);
-    auto dispatcher = DlSkCanvasDispatcher(canvas);
-    dispatcher.save();
-    dispatcher.drawDisplayList(picture, 1.0f);
-    dispatcher.restore();
 
-    _grContext->flush(_surface.get());
+    _renderContext->renderPicture(picture);
+
     imageBitmapArray = skwasm_captureImageBitmap(_glContext, imageBitmapArray);
   }
   skwasm_resolveAndPostImages(this, imageBitmapArray, rasterStart, callbackId);
 }
 
 // Worker thread only
-void Surface::rasterizeImageOnWorker(SkImage* image,
+void Surface::rasterizeImageOnWorker(DlImage* image,
                                      ImageByteFormat format,
                                      uint32_t callbackId) {
   if (!_isInitialized) {
@@ -179,13 +168,13 @@ void Surface::rasterizeImageOnWorker(SkImage* image,
   // We handle PNG encoding with browser APIs so that we can omit libpng from
   // skia to save binary size.
   assert(format != ImageByteFormat::png);
-  sk_sp<SkData> data;
   SkAlphaType alphaType = format == ImageByteFormat::rawStraightRgba
                               ? SkAlphaType::kUnpremul_SkAlphaType
                               : SkAlphaType::kPremul_SkAlphaType;
   SkImageInfo info = SkImageInfo::Make(image->width(), image->height(),
                                        SkColorType::kRGBA_8888_SkColorType,
                                        alphaType, SkColorSpace::MakeSRGB());
+  sk_sp<SkData> data;
   size_t bytesPerRow = 4 * image->width();
   size_t byteSize = info.computeByteSize(bytesPerRow);
   data = SkData::MakeUninitialized(byteSize);
@@ -199,17 +188,8 @@ void Surface::rasterizeImageOnWorker(SkImage* image,
   // `SkImage::readPixels` instead.
   // See https://g-issues.skia.org/issues/349201915
   _resizeSurface(image->width(), image->height());
-  auto canvas = _surface->getCanvas();
-  canvas->drawColor(SK_ColorTRANSPARENT, SkBlendMode::kSrc);
 
-  // We want the pixels from the upper left corner, but glReadPixels gives us
-  // the pixels from the lower left corner. So we have to flip the image when we
-  // are drawing it to get the pixels in the desired order.
-  canvas->save();
-  canvas->scale(1, -1);
-  canvas->drawImage(image, 0, -_canvasHeight);
-  canvas->restore();
-  _grContext->flush(_surface.get());
+  _renderContext->renderImage(image, format);
 
   emscripten_glReadPixels(0, 0, image->width(), image->height(), GL_RGBA,
                           GL_UNSIGNED_BYTE, reinterpret_cast<void*>(pixels));
@@ -268,6 +248,11 @@ SKWASM_EXPORT void surface_dispose(Surface* surface) {
   surface->dispose();
 }
 
+SKWASM_EXPORT void surface_setResourceCacheLimitBytes(Surface* surface,
+                                                      int bytes) {
+  surface->setResourceCacheLimit(bytes);
+}
+
 SKWASM_EXPORT uint32_t surface_renderPictures(Surface* surface,
                                               DisplayList** pictures,
                                               int width,
@@ -291,13 +276,13 @@ SKWASM_EXPORT void surface_renderPicturesOnWorker(Surface* surface,
 }
 
 SKWASM_EXPORT uint32_t surface_rasterizeImage(Surface* surface,
-                                              SkImage* image,
+                                              DlImage* image,
                                               ImageByteFormat format) {
   return surface->rasterizeImage(image, format);
 }
 
 SKWASM_EXPORT void surface_rasterizeImageOnWorker(Surface* surface,
-                                                  SkImage* image,
+                                                  DlImage* image,
                                                   ImageByteFormat format,
                                                   uint32_t callbackId) {
   surface->rasterizeImageOnWorker(image, format, callbackId);

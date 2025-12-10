@@ -6,12 +6,12 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final OverlayPortalController controller1 = OverlayPortalController(debugLabel: 'controller1');
+  final controller1 = OverlayPortalController(debugLabel: 'controller1');
   setUp(controller1.show);
 
   testWidgets('Basic test', (WidgetTester tester) async {
     late StateSetter setState;
-    Matrix4 transform = Matrix4.identity();
+    var transform = Matrix4.identity();
     late final OverlayEntry overlayEntry;
     addTearDown(() {
       overlayEntry
@@ -94,7 +94,7 @@ void main() {
     );
 
     late Size regularChildSize;
-    Size childSize = const Size(40, 50);
+    var childSize = const Size(40, 50);
 
     await tester.pumpWidget(
       Directionality(
@@ -139,7 +139,7 @@ void main() {
     WidgetTester tester,
   ) async {
     late StateSetter setState;
-    Color color = const Color(0x12345678);
+    var color = const Color(0x12345678);
     late final OverlayEntry overlayEntry;
     addTearDown(
       () => overlayEntry
@@ -222,7 +222,7 @@ void main() {
 
   testWidgets('Rebuilds when the layout info changes', (WidgetTester tester) async {
     late StateSetter setState;
-    Matrix4 transform = Matrix4.identity();
+    var transform = Matrix4.identity();
     late final OverlayEntry overlayEntry;
     addTearDown(
       () => overlayEntry

@@ -24,6 +24,7 @@ import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../convert.dart';
 import '../device.dart';
+import '../features.dart';
 import '../globals.dart' as globals;
 import '../isolated/resident_web_runner.dart';
 import '../project.dart';
@@ -111,7 +112,7 @@ abstract base class WidgetPreviewSubCommandBase extends FlutterCommand {
   FlutterProject validateFlutterProjectForPreview(Directory directory) {
     logger.printTrace('Verifying that ${directory.path} is a Flutter project.');
     final FlutterProject flutterProject = projectFactory.fromDirectory(directory);
-    if (!flutterProject.dartTool.existsSync()) {
+    if (!flutterProject.pubspecFile.existsSync()) {
       throwToolExit('${flutterProject.directory.path} is not a valid Flutter project.');
     }
     return flutterProject;
@@ -234,7 +235,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   late final _previewDetector = PreviewDetector(
     platform: platform,
     previewAnalytics: previewAnalytics,
-    projectRoot: rootProject.directory,
+    project: rootProject,
     logger: logger,
     fs: fs,
     onChangeDetected: onChangeDetected,
@@ -250,14 +251,25 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   );
 
   late var _dtdService = WidgetPreviewDtdServices(
+    previewAnalytics: previewAnalytics,
+    fs: fs,
     logger: logger,
     shutdownHooks: shutdownHooks,
     onHotRestartPreviewerRequest: onHotRestartRequest,
     dtdLauncher: DtdLauncher(logger: logger, artifacts: artifacts, processManager: processManager),
+    project: rootProject.widgetPreviewScaffoldProject,
   );
 
   /// The currently running instance of the widget preview scaffold.
   ResidentRunner? _widgetPreviewApp;
+
+  /// The location of the widget_preview_scaffold for the current execution of the command.
+  ///
+  /// This is only meant for testing as there's no simple mapping from the target project to the
+  /// scaffold project.
+  // TODO(bkonyi): remove once https://github.com/flutter/flutter/issues/179036 is resolved.
+  @visibleForTesting
+  static late Directory widgetPreviewScaffold;
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -268,7 +280,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     logger.sendInitializingEvent();
 
     final String? customPreviewScaffoldOutput = stringArg(kWidgetPreviewScaffoldOutputDir);
-    final Directory widgetPreviewScaffold = customPreviewScaffoldOutput != null
+    widgetPreviewScaffold = customPreviewScaffoldOutput != null
         ? fs.directory(customPreviewScaffoldOutput)
         : rootProject.widgetPreviewScaffold;
 
@@ -277,7 +289,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     final bool generateScaffoldProject =
         customPreviewScaffoldOutput != null || _previewManifest.shouldGenerateProject();
     // TODO(bkonyi): can this be moved?
-    widgetPreviewScaffold.createSync();
+    widgetPreviewScaffold.createSync(recursive: true);
     fs.currentDirectory = widgetPreviewScaffold;
 
     if (generateScaffoldProject) {
@@ -314,8 +326,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     // after we generate the scaffold project as invoking the getter triggers
     // lazy initialization of the preview scaffold's FlutterManifest before
     // the scaffold project's pubspec has been generated.
+    final FlutterProject widgetPreviewScaffoldProject = rootProject.widgetPreviewScaffoldProject;
     _previewCodeGenerator = PreviewCodeGenerator(
-      widgetPreviewScaffoldProject: rootProject.widgetPreviewScaffoldProject,
+      widgetPreviewScaffoldProject: widgetPreviewScaffoldProject,
       fs: fs,
     );
 
@@ -329,6 +342,12 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       await _previewPubspecBuilder.populatePreviewPubspec(rootProject: rootProject);
     }
 
+    if (!widgetPreviewScaffoldProject.dartTool.existsSync()) {
+      await _previewPubspecBuilder.generatePackageConfig(
+        widgetPreviewScaffoldProject: widgetPreviewScaffoldProject,
+      );
+    }
+
     shutdownHooks.addShutdownHook(() async {
       await _widgetPreviewApp?.exitApp();
       await _previewDetector.dispose();
@@ -339,7 +358,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
     await configureDtd();
     final int result = await runPreviewEnvironment(
-      widgetPreviewScaffoldProject: rootProject.widgetPreviewScaffoldProject,
+      widgetPreviewScaffoldProject: widgetPreviewScaffoldProject,
     );
     if (result != 0) {
       throwToolExit('Failed to launch the widget previewer.', exitCode: result);
@@ -386,6 +405,14 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   Future<int> runPreviewEnvironment({required FlutterProject widgetPreviewScaffoldProject}) async {
     try {
+      // In the rare case that Flutter Web is disabled, the device manager will not return any web
+      // devices which will cause us to crash.
+      if (!featureFlags.isWebEnabled) {
+        throwToolExit(
+          'Widget Previews requires Flutter Web to be enabled. Please run '
+          "'flutter config --enable-web' to enable Flutter Web and try again.",
+        );
+      }
       final Device device;
       if (boolArg(kWebServer)) {
         final List<Device> devices;
@@ -447,13 +474,14 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
             widgetPreviewScaffoldProject.packageConfig.readAsBytesSync(),
             widgetPreviewScaffoldProject.packageConfig.uri,
           ),
+          trackWidgetCreation: true,
           // Don't try and download canvaskit from the CDN.
           useLocalCanvasKit: true,
           webEnableHotReload: true,
         ),
         webEnableExposeUrl: false,
+        webEnableExpressionEvaluation: true,
         webRunHeadless: boolArg(kHeadless),
-        enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
         devToolsServerAddress: devToolsServerAddress,
       );
       final String target = bundle.defaultMainPath;
@@ -466,6 +494,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
       if (boolArg(kLaunchPreviewer)) {
         final appStarted = Completer<void>();
+        final connectionInfo = Completer<DebugConnectionInfo>();
         _widgetPreviewApp = ResidentWebRunner(
           flutterDevice,
           target: target,
@@ -478,10 +507,33 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           platform: platform,
           outputPreferences: globals.outputPreferences,
           systemClock: globals.systemClock,
+          // Explicitly provide the project root path rather than relying on the current directory
+          // as the current directory exists within $TMP. At least on MacOS, when setting the
+          // current directory to the widget_preview_scaffold project created under
+          // `/var/folders/...`, the underlying chdir call actually changes the directory to
+          // `/private/var/folders/...`. These directories are identical, but confuse the package
+          // config resolution logic.
+          // TODO(bkonyi): consider removing if we stop placing the scaffold in $TMP.
+          // See https://github.com/flutter/flutter/issues/179036
+          projectRootPath: widgetPreviewScaffoldProject.directory.absolute.path,
         );
-        unawaited(_widgetPreviewApp!.run(appStartedCompleter: appStarted));
+        unawaited(
+          _widgetPreviewApp!.run(
+            appStartedCompleter: appStarted,
+            connectionInfoCompleter: connectionInfo,
+          ),
+        );
         await appStarted.future;
         logger.sendStartedEvent(applicationUrl: flutterDevice.devFS!.baseUri!);
+        final DebugConnectionInfo debugConnection = await connectionInfo.future;
+        final Uri? devToolsUri = devToolsServerAddress ?? debugConnection.devToolsUri;
+        if (devToolsUri == null) {
+          throwToolExit('Could not determine DevTools server address for the widget inspector.');
+        }
+        _dtdService.setDevToolsServerAddress(
+          devToolsServerAddress: devToolsServerAddress ?? debugConnection.devToolsUri!,
+          applicationUri: debugConnection.wsUri!,
+        );
       }
     } on Exception catch (error) {
       throwToolExit(error.toString());
@@ -653,7 +705,9 @@ final class WidgetPreviewMachineAwareLogger extends DelegatingLogger {
     if (!machine) {
       return;
     }
-    super.printStatus(
+    // Don't call super.printStatus as it will result in a prefix being printed when --verbose is
+    // provided.
+    globals.stdio.stdout.writeln(
       json.encode([
         {'event': 'widget_preview.$name', 'params': ?args},
       ]),

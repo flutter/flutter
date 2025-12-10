@@ -32,7 +32,8 @@ class SegmentedControlExample extends StatefulWidget {
   const SegmentedControlExample({super.key});
 
   @override
-  State<SegmentedControlExample> createState() => _SegmentedControlExampleState();
+  State<SegmentedControlExample> createState() =>
+      _SegmentedControlExampleState();
 }
 
 class _SegmentedControlExampleState extends State<SegmentedControlExample> {
@@ -62,15 +63,24 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
           children: const <Sky, Widget>{
             Sky.midnight: Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Text('Midnight', style: TextStyle(color: CupertinoColors.white)),
+              child: Text(
+                'Midnight',
+                style: TextStyle(color: CupertinoColors.white),
+              ),
             ),
             Sky.viridian: Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Text('Viridian', style: TextStyle(color: CupertinoColors.white)),
+              child: Text(
+                'Viridian',
+                style: TextStyle(color: CupertinoColors.white),
+              ),
             ),
             Sky.cerulean: Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Text('Cerulean', style: TextStyle(color: CupertinoColors.white)),
+              child: Text(
+                'Cerulean',
+                style: TextStyle(color: CupertinoColors.white),
+              ),
             ),
           },
         ),
@@ -87,7 +97,10 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                const Text('Momentary mode: ', style: TextStyle(color: CupertinoColors.white)),
+                const Text(
+                  'Momentary mode: ',
+                  style: TextStyle(color: CupertinoColors.white),
+                ),
                 CupertinoSwitch(
                   value: _isMomentary,
                   onChanged: (bool value) {

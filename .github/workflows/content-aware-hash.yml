@@ -6,18 +6,20 @@ name: Generate a content aware hash for the Flutter Engine
 
 on: workflow_dispatch
 
+permissions:
+  contents: read
+
 jobs:
   generate-engine-content-hash:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
 
       - name: Generate Hash
         run: |
-          # IMPORTANT: Keep the list of files in sync with bin/internal/content_aware_hash.sh
-          # We call this directly here as we're expected to be in the merge queue (not master)
-          engine_content_hash=$(git ls-tree --format "%(objectname) %(path)" HEAD -- DEPS engine bin/internal/release-candidate-branch.version | git hash-object --stdin)
+          # Script updated to handle gh-readonly-queue/ branches
+          engine_content_hash=$(bin/internal/content_aware_hash.sh)
           # test notice annotation for retrival from api
           echo "::notice ::{\"engine_content_hash\": \"${engine_content_hash}\"}"
           # test summary writing

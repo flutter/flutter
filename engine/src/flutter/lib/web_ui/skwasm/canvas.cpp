@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "canvas_text.h"
 #include "export.h"
 #include "helpers.h"
 #include "text/text_types.h"
 #include "wrappers.h"
 
+#include "third_party/skia/include/core/SkPath.h"
+#include "third_party/skia/include/core/SkPathBuilder.h"
 #include "third_party/skia/modules/skparagraph/include/Paragraph.h"
 
 #include "flutter/display_list/dl_builder.h"
@@ -32,7 +35,7 @@ class SkwasmParagraphPainter : public skia::textlayout::ParagraphPainter {
 
     const int* paintID = std::get_if<PaintID>(&paint);
     auto dlPaint = paintID ? _paints[*paintID] : DlPaint();
-    _builder.DrawText(DlTextSkia::Make(blob), x, y, dlPaint);
+    _builder.DrawText(textFromBlob(blob), x, y, dlPaint);
   }
 
   virtual void drawTextShadow(const sk_sp<SkTextBlob>& blob,
@@ -50,7 +53,7 @@ class SkwasmParagraphPainter : public skia::textlayout::ParagraphPainter {
       DlBlurMaskFilter filter(DlBlurStyle::kNormal, blurSigma, false);
       paint.setMaskFilter(&filter);
     }
-    _builder.DrawText(DlTextSkia::Make(blob), x, y, paint);
+    _builder.DrawText(textFromBlob(blob), x, y, paint);
   }
 
   virtual void drawRect(const SkRect& rect, const SkPaintOrID& paint) override {
@@ -172,6 +175,10 @@ SKWASM_EXPORT void canvas_transform(DisplayListBuilder* canvas,
   canvas->Transform(*matrix44);
 }
 
+SKWASM_EXPORT void canvas_clear(DisplayListBuilder* canvas, uint32_t color) {
+  canvas->DrawColor(DlColor(color), DlBlendMode::kSrc);
+}
+
 SKWASM_EXPORT void canvas_clipRect(DisplayListBuilder* canvas,
                                    const DlRect* rect,
                                    DlClipOp op,
@@ -187,9 +194,9 @@ SKWASM_EXPORT void canvas_clipRRect(DisplayListBuilder* canvas,
 }
 
 SKWASM_EXPORT void canvas_clipPath(DisplayListBuilder* canvas,
-                                   SkPath* path,
+                                   SkPathBuilder* path,
                                    bool antialias) {
-  canvas->ClipPath(DlPath(*path), DlClipOp::kIntersect, antialias);
+  canvas->ClipPath(DlPath(path->snapshot()), DlClipOp::kIntersect, antialias);
 }
 
 SKWASM_EXPORT void canvas_drawColor(DisplayListBuilder* canvas,
@@ -259,18 +266,18 @@ SKWASM_EXPORT void canvas_drawArc(DisplayListBuilder* canvas,
 }
 
 SKWASM_EXPORT void canvas_drawPath(DisplayListBuilder* canvas,
-                                   SkPath* path,
+                                   SkPathBuilder* path,
                                    DlPaint* paint) {
-  canvas->DrawPath(DlPath(*path), paint ? *paint : DlPaint());
+  canvas->DrawPath(DlPath(path->snapshot()), paint ? *paint : DlPaint());
 }
 
 SKWASM_EXPORT void canvas_drawShadow(DisplayListBuilder* canvas,
-                                     SkPath* path,
+                                     SkPathBuilder* path,
                                      DlScalar elevation,
                                      DlScalar devicePixelRatio,
                                      uint32_t color,
                                      bool transparentOccluder) {
-  canvas->DrawShadow(DlPath(*path), DlColor(color), elevation,
+  canvas->DrawShadow(DlPath(path->snapshot()), DlColor(color), elevation,
                      transparentOccluder, devicePixelRatio);
 }
 
@@ -288,33 +295,33 @@ SKWASM_EXPORT void canvas_drawPicture(DisplayListBuilder* canvas,
 }
 
 SKWASM_EXPORT void canvas_drawImage(DisplayListBuilder* canvas,
-                                    SkImage* image,
+                                    DlImage* image,
                                     DlScalar offsetX,
                                     DlScalar offsetY,
                                     DlPaint* paint,
                                     FilterQuality quality) {
-  canvas->DrawImage(DlImage::Make(image), DlPoint{offsetX, offsetY},
+  canvas->DrawImage(sk_ref_sp(image), DlPoint{offsetX, offsetY},
                     samplingOptionsForQuality(quality), paint);
 }
 
 SKWASM_EXPORT void canvas_drawImageRect(DisplayListBuilder* canvas,
-                                        SkImage* image,
+                                        DlImage* image,
                                         DlRect* sourceRect,
                                         DlRect* destRect,
                                         DlPaint* paint,
                                         FilterQuality quality) {
-  canvas->DrawImageRect(DlImage::Make(image), *sourceRect, *destRect,
+  canvas->DrawImageRect(sk_ref_sp(image), *sourceRect, *destRect,
                         samplingOptionsForQuality(quality), paint,
                         DlSrcRectConstraint::kStrict);
 }
 
 SKWASM_EXPORT void canvas_drawImageNine(DisplayListBuilder* canvas,
-                                        SkImage* image,
+                                        DlImage* image,
                                         DlIRect* centerRect,
                                         DlRect* destinationRect,
                                         DlPaint* paint,
                                         FilterQuality quality) {
-  canvas->DrawImageNine(DlImage::Make(image), *centerRect, *destinationRect,
+  canvas->DrawImageNine(sk_ref_sp(image), *centerRect, *destinationRect,
                         filterModeForQuality(quality), paint);
 }
 
@@ -334,7 +341,7 @@ SKWASM_EXPORT void canvas_drawPoints(DisplayListBuilder* canvas,
 }
 
 SKWASM_EXPORT void canvas_drawAtlas(DisplayListBuilder* canvas,
-                                    SkImage* atlas,
+                                    DlImage* atlas,
                                     DlRSTransform* transforms,
                                     DlRect* rects,
                                     uint32_t* colors,
@@ -347,8 +354,8 @@ SKWASM_EXPORT void canvas_drawAtlas(DisplayListBuilder* canvas,
     dlColors[i] = DlColor(colors[i]);
   }
   canvas->DrawAtlas(
-      DlImage::Make(atlas), transforms, rects, dlColors.data(), spriteCount,
-      mode, samplingOptionsForQuality(FilterQuality::medium), cullRect, paint);
+      sk_ref_sp(atlas), transforms, rects, dlColors.data(), spriteCount, mode,
+      samplingOptionsForQuality(FilterQuality::medium), cullRect, paint);
 }
 
 SKWASM_EXPORT void canvas_getTransform(DisplayListBuilder* canvas,
@@ -364,4 +371,9 @@ SKWASM_EXPORT void canvas_getLocalClipBounds(DisplayListBuilder* canvas,
 SKWASM_EXPORT void canvas_getDeviceClipBounds(DisplayListBuilder* canvas,
                                               DlIRect* outRect) {
   *outRect = DlIRect::RoundOut(canvas->GetDestinationClipCoverage());
+}
+
+SKWASM_EXPORT bool canvas_quickReject(DisplayListBuilder* canvas,
+                                      DlRect* rect) {
+  return canvas->QuickReject(*rect);
 }

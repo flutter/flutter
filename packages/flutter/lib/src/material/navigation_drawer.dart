@@ -14,7 +14,6 @@ import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'material_state.dart';
 import 'navigation_bar.dart';
 import 'navigation_drawer_theme.dart';
 import 'text_theme.dart';
@@ -158,7 +157,7 @@ class NavigationDrawer extends StatelessWidget {
         .toList()
         .length;
 
-    int destinationIndex = 0;
+    var destinationIndex = 0;
     Widget wrapChild(Widget child, int index) => _SelectableAnimatedBuilder(
       duration: const Duration(milliseconds: 500),
       isSelected: index == selectedIndex,
@@ -176,7 +175,7 @@ class NavigationDrawer extends StatelessWidget {
       },
     );
 
-    final List<Widget> wrappedChildren = <Widget>[
+    final wrappedChildren = <Widget>[
       for (final Widget child in children)
         if (child is! NavigationDrawerDestination) child else wrapChild(child, destinationIndex++),
     ];
@@ -257,9 +256,9 @@ class NavigationDrawerDestination extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const Set<MaterialState> selectedState = <MaterialState>{MaterialState.selected};
-    const Set<MaterialState> unselectedState = <MaterialState>{};
-    const Set<MaterialState> disabledState = <MaterialState>{MaterialState.disabled};
+    const selectedState = <WidgetState>{WidgetState.selected};
+    const unselectedState = <WidgetState>{};
+    const disabledState = <WidgetState>{WidgetState.disabled};
 
     final NavigationDrawerThemeData navigationDrawerTheme = NavigationDrawerTheme.of(context);
     final NavigationDrawerThemeData defaults = _NavigationDrawerDefaultsM3(context);
@@ -368,7 +367,7 @@ class _NavigationDestinationBuilder extends StatelessWidget {
     final NavigationDrawerThemeData navigationDrawerTheme = NavigationDrawerTheme.of(context);
     final NavigationDrawerThemeData defaults = _NavigationDrawerDefaultsM3(context);
 
-    final InkWell inkWell = InkWell(
+    final inkWell = InkWell(
       highlightColor: Colors.transparent,
       onTap: enabled ? info.onTap : null,
       customBorder:

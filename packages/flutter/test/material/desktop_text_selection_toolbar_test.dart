@@ -10,7 +10,7 @@ void main() {
 
   testWidgets('positions itself at the anchor', (WidgetTester tester) async {
     // An arbitrary point on the screen to position at.
-    const Offset anchor = Offset(30.0, 40.0);
+    const anchor = Offset(30.0, 40.0);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -26,5 +26,21 @@ void main() {
     );
 
     expect(tester.getTopLeft(find.byType(DesktopTextSelectionToolbarButton)), anchor);
+  });
+
+  testWidgets('DesktopTextSelectionToolbar renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: DesktopTextSelectionToolbar(
+              anchor: const Offset(10, 10),
+              children: const <Widget>[Text('X')],
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(DesktopTextSelectionToolbar)).isEmpty, isTrue);
   });
 }
