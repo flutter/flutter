@@ -44,20 +44,19 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('RouteObserver example renders without overflow on small screens', (
-    WidgetTester tester,
-  ) async {
-    // Set the screen size to a smaller value.
-    tester.binding.window.physicalSizeTestValue = const Size(200, 200);
-    tester.binding.window.devicePixelRatioTestValue = 1.0;
-    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
-    addTearDown(tester.binding.window.clearDevicePixelRatioTestValue);
+  testWidgets(
+    'RouteObserver example renders without overflow on small screens',
+    (WidgetTester tester) async {
+      // Set the screen size to a smaller value.
+      tester.view.physicalSize = const Size(200, 200);
+      addTearDown(tester.view.reset);
 
-    // Build the RouteObserver example widget.
-    await tester.pumpWidget(const example.RouteObserverApp());
-    await tester.pumpAndSettle();
+      // Build the RouteObserver example widget.
+      await tester.pumpWidget(const example.RouteObserverApp());
+      await tester.pumpAndSettle();
 
-    // Verify there are no layout exceptions.
-    expect(tester.takeException(), isNull);
-  });
+      // Verify there are no layout exceptions.
+      expect(tester.takeException(), isNull);
+    },
+  );
 }
