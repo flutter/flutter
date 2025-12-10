@@ -22,12 +22,12 @@ class MockEpoxy {
   MOCK_METHOD(bool, epoxy_is_desktop_gl, ());
   MOCK_METHOD(int, epoxy_gl_version, ());
   MOCK_METHOD(void,
-              eglCreateImage,
+              eglCreateImageKHR,
               (EGLDisplay dpy,
                EGLContext ctx,
                EGLenum target,
                EGLClientBuffer buffer,
-               const EGLAttrib* attrib_list));
+               const EGLint* attrib_list));
   MOCK_METHOD(void, glClearColor, (GLfloat r, GLfloat g, GLfloat b, GLfloat a));
   MOCK_METHOD(void,
               glBlitFramebuffer,

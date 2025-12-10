@@ -48,7 +48,7 @@ extern void skwasm_dispatchDisposeSurface(unsigned long threadId,
                                           Skwasm::Surface* surface);
 extern void skwasm_dispatchRasterizeImage(unsigned long threadId,
                                           Skwasm::Surface* surface,
-                                          SkImage* image,
+                                          flutter::DlImage* image,
                                           Skwasm::ImageByteFormat format,
                                           uint32_t callbackId);
 extern void skwasm_postRasterizeResult(Skwasm::Surface* surface,
