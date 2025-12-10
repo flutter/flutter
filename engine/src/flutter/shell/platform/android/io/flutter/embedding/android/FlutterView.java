@@ -1331,16 +1331,20 @@ public class FlutterView extends FrameLayout
     FlutterRenderer flutterRenderer = flutterEngine.getRenderer();
     isFlutterUiDisplayed = false;
     flutterRenderer.removeIsDisplayingFlutterUiListener(flutterUiDisplayListener);
+    flutterRenderer.removeResizingFlutterUiListener(flutterUiResizeListener);
     flutterRenderer.stopRenderingToSurface();
     flutterRenderer.setSemanticsEnabled(false);
 
     // Revert the image view to previous surface
-    if (previousRenderSurface != null
-        && renderSurface == flutterImageView
-        && previousEngineView != null) {
-      renderSurface = previousRenderSurface;
-      flutterEngineView = previousEngineView;
+    if (renderSurface == flutterImageView) {
+      if (previousRenderSurface != null) {
+        renderSurface = previousRenderSurface;
+      }
+      if (previousEngineView != null) {
+        flutterEngineView = previousEngineView;
+      }
     }
+
     renderSurface.detachFromRenderer();
 
     releaseImageView();
@@ -1415,7 +1419,7 @@ public class FlutterView extends FrameLayout
     }
     if (previousEngineView == null) {
       Log.v(TAG, "Tried to revert the image view, but no previous engine view was used.");
-      return;
+      // This is the problem! return;
     }
 
     renderSurface = previousRenderSurface;
