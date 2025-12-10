@@ -9,9 +9,9 @@
 #include "flutter/flow/surface_frame.h"
 #include "flutter/flow/view_slicer.h"
 #include "flutter/fml/logging.h"
-#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterOverlayView.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/overlay_layer_pool.h"
@@ -355,8 +355,8 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
                  isEqualToString:kGestureBlockingPolicyFallbackToPluginDefault]) {
     gestureBlockingPolicy = self.gestureRecognizersBlockingPoliciesByType[viewType];
   } else {
-    NSString* errorMessage =
-        [NSString stringWithFormat:@"Unsupported gesture blocking policy: %@", gestureBlockingPolicyValue];
+    NSString* errorMessage = [NSString
+        stringWithFormat:@"Unsupported gesture blocking policy: %@", gestureBlockingPolicyValue];
     [FlutterLogger logError:errorMessage];
     gestureBlockingPolicy = FlutterPlatformViewGestureRecognizersBlockingPolicyEager;
   }
