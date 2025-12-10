@@ -71,7 +71,7 @@ enum _CardVariant { elevated, filled, outlined }
 ///  * <https://material.io/design/components/cards.html>
 ///  * <https://m3.material.io/components/cards>
 class Card extends StatelessWidget {
-  /// Creates an elevated variant of card.
+  /// Creates an elevated variant of Card.
   ///
   /// Elevated cards have a drop shadow, providing more separation from the
   /// background than filled cards, but less than outlined cards.
