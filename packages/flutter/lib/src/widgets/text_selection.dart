@@ -2916,7 +2916,7 @@ class TextSelectionGestureDetectorBuilder {
       TapDownDetails(
         globalPosition: details.globalPosition,
         kind: details.kind,
-        buttons: kSecondaryMouseButton,
+        buttons: details.buttons,
       ),
     );
     _shouldShowSelectionToolbar = true;
