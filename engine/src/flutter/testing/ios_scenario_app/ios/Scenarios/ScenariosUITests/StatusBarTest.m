@@ -4,6 +4,10 @@
 
 #import "StatusBarTest.h"
 
+@interface FlutterEngine ()
+@property(nonatomic, strong) FlutterMethodChannel* statusBarChannel;
+@end
+
 @implementation StatusBarTest
 
 - (void)setUp {
@@ -25,22 +29,22 @@
     XCUICoordinate* coordinates = [statusBar coordinateWithNormalizedOffset:CGVectorMake(0, 0)];
     [coordinates tap];
   }
+  UIApplication* application = UIApplication.sharedApplication;
+  application.delegate.window.rootViewController = rootVC;
+  FlutterEngine* engine = rootVC.engine;
+  XCTestExpectation expectation =
+      [[XCTestExpectation alloc] initWithDescription:@"status bar tap message received"];
 
-  XCUIElement* addTextField =
-      self.application
-          .textFields[@"0,PointerChange.add,device=0,buttons=0,signalKind=PointerSignalKind.none"];
-  BOOL exists = [addTextField waitForExistenceWithTimeout:1];
-  XCTAssertTrue(exists, @"");
-  XCUIElement* downTextField =
-      self.application
-          .textFields[@"1,PointerChange.down,device=0,buttons=0,signalKind=PointerSignalKind.none"];
-  exists = [downTextField waitForExistenceWithTimeout:1];
-  XCTAssertTrue(exists, @"");
-  XCUIElement* upTextField =
-      self.application
-          .textFields[@"2,PointerChange.up,device=0,buttons=0,signalKind=PointerSignalKind.none"];
-  exists = [upTextField waitForExistenceWithTimeout:1];
-  XCTAssertTrue(exists, @"");
+  [engine.lifecycleChannel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult callback) {
+    if (![call.method isEqualToString:@"handleScrollToTop"]) {
+      XCTFail(@"Unexpected method call %@", call.method);
+      return;
+    }
+
+    [expectation fulfill];
+  }];
+
+  [self waitForExpectationsWithTimeout:10.0 handler:nil];
 }
 
 @end
