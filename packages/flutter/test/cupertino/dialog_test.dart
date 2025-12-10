@@ -2157,6 +2157,17 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), customCursor);
   });
 
+  testWidgets('CupertinoDialogAction does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(child: CupertinoDialogAction(child: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoDialogAction)), Size.zero);
+  });
+
   testWidgets('CupertinoActionSheetAction does not crash at zero area', (
     WidgetTester tester,
   ) async {
