@@ -26,10 +26,9 @@
 #include "fml/logging.h"
 #include "impeller/core/runtime_types.h"
 #include "impeller/renderer/command_queue.h"
+#include "third_party/skia/include/codec/SkCodec.h"
 #include "third_party/skia/include/codec/SkCodecAnimation.h"
-#include "third_party/skia/include/codec/SkGifDecoder.h"
 #include "third_party/skia/include/codec/SkJpegDecoder.h"
-#include "third_party/skia/include/codec/SkPngDecoder.h"
 #include "third_party/skia/include/core/SkData.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkImageInfo.h"
@@ -207,13 +206,7 @@ class TestIOManager final : public IOManager {
   FML_DISALLOW_COPY_AND_ASSIGN(TestIOManager);
 };
 
-class ImageDecoderFixtureTest : public FixtureTest {
-  void SetUp() override {
-    SkCodecs::Register(SkPngDecoder::Decoder());
-    SkCodecs::Register(SkJpegDecoder::Decoder());
-    SkCodecs::Register(SkGifDecoder::Decoder());
-  }
-};
+class ImageDecoderFixtureTest : public FixtureTest {};
 
 TEST_F(ImageDecoderFixtureTest, CanCreateImageDecoder) {
   auto loop = fml::ConcurrentMessageLoop::Create();
@@ -526,7 +519,7 @@ TEST_F(ImageDecoderFixtureTest, ImpellerPixelConversion32F) {
 
 TEST_F(ImageDecoderFixtureTest, ImpellerWideGamutDisplayP3Opaque) {
   auto data = flutter::testing::OpenFixtureAsSkData("DisplayP3Logo.jpg");
-  auto image = SkImages::DeferredFromEncodedData(data);
+  auto image = SkCodecs::DeferredImage(SkJpegDecoder::Decode(data, nullptr));
   ASSERT_TRUE(image != nullptr);
   ASSERT_EQ(SkISize::Make(100, 100), image->dimensions());
 
@@ -587,7 +580,7 @@ TEST_F(ImageDecoderFixtureTest, ImpellerWideGamutDisplayP3Opaque) {
 
 TEST_F(ImageDecoderFixtureTest, ImpellerNonWideGamut) {
   auto data = flutter::testing::OpenFixtureAsSkData("Horizontal.jpg");
-  auto image = SkImages::DeferredFromEncodedData(data);
+  auto image = SkCodecs::DeferredImage(SkJpegDecoder::Decode(data, nullptr));
   ASSERT_TRUE(image != nullptr);
   ASSERT_EQ(SkISize::Make(600, 200), image->dimensions());
 
@@ -746,8 +739,9 @@ TEST_F(ImageDecoderFixtureTest, CanDecodeWithoutAGPUContext) {
 
 TEST_F(ImageDecoderFixtureTest, CanDecodeWithResizes) {
   const auto image_dimensions =
-      SkImages::DeferredFromEncodedData(
-          flutter::testing::OpenFixtureAsSkData("DashInNooglerHat.jpg"))
+      SkJpegDecoder::Decode(
+          flutter::testing::OpenFixtureAsSkData("DashInNooglerHat.jpg"),
+          nullptr)
           ->dimensions();
 
   ASSERT_FALSE(image_dimensions.isEmpty());
@@ -850,7 +844,9 @@ TEST(ImageDecoderTest,
 
 TEST(ImageDecoderTest, VerifySimpleDecoding) {
   auto data = flutter::testing::OpenFixtureAsSkData("Horizontal.jpg");
-  auto image = SkImages::DeferredFromEncodedData(data);
+  auto codec = SkJpegDecoder::Decode(data, nullptr);
+  ASSERT_TRUE(codec != nullptr);
+  auto image = SkCodecs::DeferredImage(std::move(codec));
   ASSERT_TRUE(image != nullptr);
   EXPECT_EQ(600, image->width());
   EXPECT_EQ(200, image->height());
@@ -949,7 +945,7 @@ TEST(ImageDecoderTest, VerifySubpixelDecodingPreservesExifOrientation) {
   ASSERT_EQ(600, descriptor->width());
   ASSERT_EQ(200, descriptor->height());
 
-  auto image = SkImages::DeferredFromEncodedData(data);
+  auto image = SkCodecs::DeferredImage(SkJpegDecoder::Decode(data, nullptr));
   ASSERT_TRUE(image != nullptr);
   ASSERT_EQ(600, image->width());
   ASSERT_EQ(200, image->height());
