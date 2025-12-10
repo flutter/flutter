@@ -702,7 +702,11 @@ void main() {
       await tester.pump(Duration(milliseconds: duration ~/ stops.length));
       // Scroll pixel position is very long double, compare with floored int
       // pixel position
-      expect(scrollable.position.pixels.toInt(), equals((scrollOffset * (1 - stops[i])).toInt()));
+      expect(
+        scrollable.position.pixels.toInt(),
+        equals((scrollOffset * (1 - stops[i])).toInt()),
+        reason: 'stop $i',
+      );
     }
 
     // Finally stops at the top.
