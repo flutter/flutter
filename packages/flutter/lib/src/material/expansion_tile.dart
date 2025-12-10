@@ -550,7 +550,11 @@ class _ExpansionTileState extends State<ExpansionTile> {
         _timer?.cancel();
         _timer = null;
       });
-    } else {
+
+    }
+    // SemanticsService.sendAnnouncement is deprecated on android. we use liveregion to achieve the announcement effect.
+    else if (defaultTargetPlatform != TargetPlatform.android)
+    {
       SemanticsService.sendAnnouncement(View.of(context), stateHint, textDirection);
     }
     widget.onExpansionChanged?.call(_tileController.isExpanded);
@@ -604,10 +608,7 @@ class _ExpansionTileState extends State<ExpansionTile> {
       _ => _tileController.isExpanded ? localizations.collapsedHint : localizations.expandedHint,
     };
 
-    return Semantics(
-      hint: semanticsHint,
-      onTapHint: onTapHint,
-      child: ListTileTheme.merge(
+    final Widget child = ListTileTheme.merge(
         iconColor: _iconColor.value ?? _expansionTileTheme.iconColor,
         textColor: _headerColor.value,
         child: ListTile(
@@ -627,7 +628,17 @@ class _ExpansionTileState extends State<ExpansionTile> {
           minTileHeight: widget.minTileHeight,
           internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
         ),
-      ),
+      );
+
+    if(){
+      
+    }
+
+
+    return Semantics(
+      hint: semanticsHint,
+      onTapHint: onTapHint,
+      child: child,
     );
   }
 
