@@ -63,7 +63,7 @@ Future<void> main() async {
   });
 
   test('ShapeDecoration with BorderDirectional', () {
-    const ShapeDecoration decoration = ShapeDecoration(
+    const decoration = ShapeDecoration(
       shape: BorderDirectional(start: BorderSide(color: Colors.red, width: 3)),
     );
 
@@ -71,7 +71,7 @@ Future<void> main() async {
   });
 
   testWidgets('TestBorder and Directionality - 1', (WidgetTester tester) async {
-    final List<String> log = <String>[];
+    final log = <String>[];
     await tester.pumpWidget(
       MaterialApp(
         home: DecoratedBox(
@@ -87,7 +87,7 @@ Future<void> main() async {
 
   testWidgets('TestBorder and Directionality - 2', (WidgetTester tester) async {
     addTearDown(imageCache.clear);
-    final List<String> log = <String>[];
+    final log = <String>[];
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.rtl,
@@ -130,13 +130,13 @@ Future<void> main() async {
   });
 
   test('ShapeDecoration equality', () {
-    const ShapeDecoration a = ShapeDecoration(
+    const a = ShapeDecoration(
       color: Color(0xFFFFFFFF),
       shadows: <BoxShadow>[BoxShadow()],
       shape: Border(),
     );
 
-    const ShapeDecoration b = ShapeDecoration(
+    const b = ShapeDecoration(
       color: Color(0xFFFFFFFF),
       shadows: <BoxShadow>[BoxShadow()],
       shape: Border(),
@@ -150,8 +150,8 @@ Future<void> main() async {
   testWidgets('OutlinedBorder avoids clipping edges when possible', (WidgetTester tester) async {
     final Key key = UniqueKey();
     Widget buildWidget(Color color) {
-      final List<Widget> circles = <Widget>[];
-      for (int i = 100; i > 25; i--) {
+      final circles = <Widget>[];
+      for (var i = 100; i > 25; i--) {
         final double radius = i * 2.5;
         final double angle = i * 0.5;
         final double x = radius * math.cos(angle);

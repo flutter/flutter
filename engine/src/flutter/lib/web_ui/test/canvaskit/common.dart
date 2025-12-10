@@ -43,7 +43,7 @@ Future<void> matchPictureGolden(
   CkPicture picture, {
   required ui.Rect region,
 }) async {
-  final LayerSceneBuilder sb = LayerSceneBuilder();
+  final sb = LayerSceneBuilder();
   sb.pushOffset(0, 0);
   sb.addPicture(ui.Offset.zero, picture);
   await renderScene(sb.build());

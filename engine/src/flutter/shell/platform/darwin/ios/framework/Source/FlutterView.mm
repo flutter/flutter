@@ -54,7 +54,8 @@ FLUTTER_ASSERT_ARC
     return;
   }
 
-  CGFloat scale = self.window.windowScene.screen.scale;
+  UIWindow* window = self.window;
+  CGFloat scale = window ? self.window.windowScene.screen.scale : self.traitCollection.displayScale;
   CGSize scaledSize = CGSizeMake(size.width / scale, size.height / scale);
 
   CGSize roundedScaleSize = CGSizeMake(roundf(scaledSize.width), roundf(scaledSize.height));
