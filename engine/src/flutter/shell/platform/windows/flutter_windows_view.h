@@ -32,6 +32,10 @@ using FlutterViewId = int64_t;
 // Optional delegate for views that are sized to contents.
 class FlutterWindowsViewSizingDelegate {
  public:
+  // This method may be called from raster thread.
+  virtual bool ViewIsSizedToContent() const = 0;
+
+  // These methods will always be called from the main thread.
   virtual Size GetMinimumViewSize() const = 0;
   virtual Size GetMaximumViewSize() const = 0;
   virtual void DidUpdateViewSize(int32_t width, int32_t height) = 0;

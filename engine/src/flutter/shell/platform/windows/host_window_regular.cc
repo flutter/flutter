@@ -25,6 +25,7 @@ HostWindowRegular::HostWindowRegular(WindowManager* window_manager,
   // TODO(knopp): Investigate sizing the window to its content with the help of
   // https://github.com/flutter/flutter/pull/173610.
   FML_CHECK(preferred_size.has_preferred_view_size);
+  InitializeFlutterView();
 }
 
 Rect HostWindowRegular::GetInitialRect(FlutterWindowsEngine* engine,

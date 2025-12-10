@@ -28,8 +28,14 @@ HostWindowTooltip::HostWindowTooltip(
       get_position_callback_(get_position_callback),
       parent_(parent),
       isolate_(Isolate::Current()) {
+  InitializeFlutterView();
   SetWindowLongPtr(window_handle_, GWLP_HWNDPARENT,
                    reinterpret_cast<LONG_PTR>(parent_));
+}
+
+bool HostWindowTooltip::ViewIsSizedToContent() const {
+  return box_constraints_.biggest().width() != 0 &&
+         box_constraints_.biggest().height() != 0;
 }
 
 Size HostWindowTooltip::GetMinimumViewSize() const {

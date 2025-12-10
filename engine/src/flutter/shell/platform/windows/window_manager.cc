@@ -199,7 +199,7 @@ void InternalFlutterWindows_WindowManager_DestroyWindow(HWND hwnd) {
     // The FlutterView may only be destroyed safely when
     // FlutterWindowsEngine::RemoveView finishes.
     flutter_view_handle = window->GetFlutterViewWindowHandle();
-    ShowWindow(hwnd, SW_HIDE);
+    ShowWindow(flutter_view_handle, SW_HIDE);
     SetParent(flutter_view_handle, nullptr);
   }
   DestroyWindow(hwnd);

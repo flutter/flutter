@@ -896,8 +896,7 @@ bool FlutterWindowsView::NeedsVsync() const {
 
 bool FlutterWindowsView::IsSizedToContent() const {
   if (sizing_delegate_ != nullptr) {
-    auto max_size = sizing_delegate_->GetMaximumViewSize();
-    return max_size.width() != 0 && max_size.height() != 0;
+    return sizing_delegate_->ViewIsSizedToContent();
   } else {
     return false;
   }

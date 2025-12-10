@@ -48,6 +48,7 @@ HostWindowDialog::HostWindowDialog(WindowManager* window_manager,
           GetInitialRect(engine, preferred_size, constraints, owner_window),
           title,
           owner_window) {
+  InitializeFlutterView();
   auto hwnd = window_handle_;
   if (owner_window == nullptr) {
     if (HMENU hMenu = GetSystemMenu(hwnd, FALSE)) {

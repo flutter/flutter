@@ -32,6 +32,7 @@ class HostWindowTooltip : public HostWindow,
                         LPARAM lparam) override;
 
  private:
+  bool ViewIsSizedToContent() const override;
   Size GetMinimumViewSize() const override;
   Size GetMaximumViewSize() const override;
   void DidUpdateViewSize(int32_t width, int32_t height) override;

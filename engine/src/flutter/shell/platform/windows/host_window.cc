@@ -251,23 +251,32 @@ HostWindow::HostWindow(WindowManager* window_manager,
     : window_manager_(window_manager),
       engine_(engine),
       archetype_(archetype),
-      box_constraints_(box_constraints) {
+      box_constraints_(box_constraints),
+      window_style_(window_style),
+      extended_window_style_(extended_window_style),
+      initial_window_rect_(initial_window_rect),
+      owner_window_(owner_window),
+      title_(title),
+      nCmdShow_(nCmdShow),
+      sizing_delegate_(sizing_delegate) {}
+
+void HostWindow::InitializeFlutterView() {
   // Set up the view.
   auto view_window = std::make_unique<FlutterWindow>(
-      initial_window_rect.width(), initial_window_rect.height(),
-      engine->display_manager(), engine->windows_proc_table());
+      initial_window_rect_.width(), initial_window_rect_.height(),
+      engine_->display_manager(), engine_->windows_proc_table());
 
   std::unique_ptr<FlutterWindowsView> view =
-      engine->CreateView(std::move(view_window), sizing_delegate);
+      engine_->CreateView(std::move(view_window), sizing_delegate_);
   FML_CHECK(view != nullptr);
 
   view_controller_ =
       std::make_unique<FlutterWindowsViewController>(nullptr, std::move(view));
-  FML_CHECK(engine->running());
+  FML_CHECK(engine_->running());
   // The Windows embedder listens to accessibility updates using the
   // view's HWND. The embedder's accessibility features may be stale if
   // the app was in headless mode.
-  engine->UpdateAccessibilityFeatures();
+  engine_->UpdateAccessibilityFeatures();
 
   // Register the window class.
   if (!IsClassRegistered(kWindowClassName)) {
@@ -290,11 +299,11 @@ HostWindow::HostWindow(WindowManager* window_manager,
 
   // Create the native window.
   window_handle_ = CreateWindowEx(
-      extended_window_style, kWindowClassName, title, window_style,
-      initial_window_rect.left(), initial_window_rect.top(),
-      initial_window_rect.width(), initial_window_rect.height(),
-      owner_window ? *owner_window : nullptr, nullptr, GetModuleHandle(nullptr),
-      engine->windows_proc_table().get());
+      extended_window_style_, kWindowClassName, title_.c_str(), window_style_,
+      initial_window_rect_.left(), initial_window_rect_.top(),
+      initial_window_rect_.width(), initial_window_rect_.height(),
+      owner_window_ ? *owner_window_ : nullptr, nullptr,
+      GetModuleHandle(nullptr), engine_->windows_proc_table().get());
   FML_CHECK(window_handle_ != nullptr);
 
   // Adjust the window position so its origin aligns with the top-left corner
@@ -322,7 +331,7 @@ HostWindow::HostWindow(WindowManager* window_manager,
   // window. This doesn't work for multi window apps as the engine cannot have
   // multiple next frame callbacks. If multiple windows are created, only the
   // last one will be shown.
-  ShowWindow(window_handle_, nCmdShow);
+  ShowWindow(window_handle_, nCmdShow_);
   SetWindowLongPtr(window_handle_, GWLP_USERDATA,
                    reinterpret_cast<LONG_PTR>(this));
 }

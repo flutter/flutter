@@ -10,6 +10,7 @@
 #include <wrl/client.h>
 #include <memory>
 #include <optional>
+#include <string>
 
 #include "flutter/fml/macros.h"
 #include "flutter/shell/geometry/geometry.h"
@@ -114,6 +115,8 @@ class HostWindow {
   void UpdateModalStateLayer();
 
  protected:
+  void InitializeFlutterView();
+
   friend WindowManager;
 
   // Information saved before going into fullscreen mode, used to restore the
@@ -225,6 +228,14 @@ class HostWindow {
 
   // Used to mark a window as fullscreen.
   Microsoft::WRL::ComPtr<ITaskbarList2> task_bar_list_;
+
+  FlutterWindowsViewSizingDelegate* sizing_delegate_ = nullptr;
+  std::optional<HWND> const& owner_window_;
+  Rect initial_window_rect_;
+  DWORD window_style_;
+  DWORD extended_window_style_;
+  std::wstring title_;
+  int nCmdShow_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(HostWindow);
 };
