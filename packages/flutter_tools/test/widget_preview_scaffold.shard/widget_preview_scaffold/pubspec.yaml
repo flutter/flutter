@@ -14,7 +14,7 @@ dependencies:
   # These will be replaced with proper constraints after the template is hydrated.
   dtd: 4.0.0
   flutter_lints: 6.0.0
-  google_fonts: 6.3.2
+  google_fonts: 6.3.3
   json_rpc_2: 3.0.3
   path: 1.9.1
   stack_trace: 1.12.1
@@ -58,6 +58,8 @@ dependencies:
   web: 1.1.1
   web_socket: 1.0.1
   web_socket_channel: 3.0.3
+  webview_flutter: 4.9.0
+  webview_flutter_web: ^0.2.3+4
 
 dev_dependencies:
   flutter_tools:
@@ -66,4 +68,4 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-# PUBSPEC CHECKSUM: 2dl8th
+# PUBSPEC CHECKSUM: ofd5s5

@@ -4150,11 +4150,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required this.blockUserActions,
     required this.localeForSubtree,
     required this.properties,
-  }) : assert(
-         localeForSubtree == null || container,
-         'To assign locale for subtree, this widget needs to be a '
-         'container',
-       );
+  });
 
   /// Contains properties used by assistive technologies to make the application
   /// more accessible.
@@ -8360,19 +8356,17 @@ typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSette
 ///     return AlertDialog(
 ///       content: StatefulBuilder(
 ///         builder: (BuildContext context, StateSetter setState) {
-///           return Column(
-///             mainAxisSize: MainAxisSize.min,
-///             children: List<Widget>.generate(4, (int index) {
-///               return Radio<int>(
-///                 value: index,
-///                 // ignore: deprecated_member_use
-///                 groupValue: selectedRadio,
-///                 // ignore: deprecated_member_use
-///                 onChanged: (int? value) {
-///                   setState(() => selectedRadio = value);
-///                 },
-///               );
-///             }),
+///           return RadioGroup<int>(
+///             groupValue: selectedRadio,
+///             onChanged: (int? value) {
+///               setState(() => selectedRadio = value);
+///             },
+///             child: Column(
+///               mainAxisSize: MainAxisSize.min,
+///               children: List<Widget>.generate(4, (int index) {
+///                 return Radio<int>(value: index);
+///               }),
+///             ),
 ///           );
 ///         },
 ///       ),

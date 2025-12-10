@@ -3329,6 +3329,15 @@ void main() {
     expect(find.text('First'), findsNothing);
     expect(find.text('Second'), findsOneWidget);
   });
+
+  testWidgets('CupertinoNavigationBar does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(child: SizedBox.shrink(child: CupertinoNavigationBar())),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoNavigationBar)), Size.zero);
+  });
 }
 
 class _ExpectStyles extends StatelessWidget {

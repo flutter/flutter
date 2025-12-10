@@ -76,7 +76,7 @@ platform_properties:
         [
           {"dependency": "android_sdk", "version": "version:36v4"},
           {"dependency": "android_virtual_device", "version": "android_36_google_apis_x64.textpb"},
-          {"dependency": "avd_cipd_version", "version": "build_id:8699815938758639089"},
+          {"dependency": "avd_cipd_version", "version": "build_id:8702262057250908257"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -1688,8 +1688,8 @@ targets:
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
           {"dependency": "ninja", "version": "version:1.9.0"}
         ]
-      shard: tool_tests
-      subshard: commands
+      shard: tool_tests_commands
+      subshard: 1_1
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
@@ -2367,7 +2367,6 @@ targets:
 
   # Uses Impeller.
   - name: Linux_pixel_7pro hello_world_impeller
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/173698
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2693,6 +2692,7 @@ targets:
 
   # linux mokey benchmark
   - name: Linux_mokey flutter_engine_group_performance
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/179114
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3129,7 +3129,6 @@ targets:
 
   # Pixel 7 Pro, Skia
   - name: Linux_pixel_7pro new_gallery__transition_perf
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/174105
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3170,7 +3169,6 @@ targets:
 
   # Pixel 7 Pro, Impeller (OpenGL)
   - name: Linux_pixel_7pro new_gallery_opengles_impeller__transition_perf
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/173337
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3554,7 +3552,6 @@ targets:
   - name: Linux_pixel_7pro draw_arcs_all_fill_styles_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3564,7 +3561,6 @@ targets:
   - name: Mac_ios draw_arcs_all_fill_styles_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3574,7 +3570,6 @@ targets:
   - name: Linux_pixel_7pro draw_arcs_all_stroke_styles_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -4627,8 +4622,8 @@ targets:
           {"dependency": "android_sdk", "version": "version:36v4"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
-      shard: tool_tests
-      subshard: commands
+      shard: tool_tests_commands
+      subshard: 1_1
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
@@ -4642,8 +4637,8 @@ targets:
           {"dependency": "android_sdk", "version": "version:36v4"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
-      shard: tool_tests
-      subshard: commands
+      shard: tool_tests_commands
+      subshard: 1_1
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
@@ -4741,6 +4736,7 @@ targets:
 
   # mac mokey test
   - name: Mac_arm64_mokey entrypoint_dart_registrant
+    bringup: true # Flakey https://github.com/flutter/flutter/issues/179514
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4829,6 +4825,7 @@ targets:
 
   # mac mokey test
   - name: Mac_arm64_mokey native_assets_android
+    bringup: true # Flakey https://github.com/flutter/flutter/issues/179514
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4885,6 +4882,7 @@ targets:
 
   # mac mokey test
   - name: Mac_arm64_mokey run_release_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/177371
     recipe: devicelab/devicelab_drone
     presubmit: false
     runIf:
@@ -6562,9 +6560,10 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Windows tool_tests_commands
+  - name: Windows tool_tests_commands_1_2
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -6573,8 +6572,32 @@ targets:
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
-      shard: tool_tests
-      subshard: commands
+      shard: tool_tests_commands
+      subshard: 1_2
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Windows tool_tests_commands_2_2
+    recipe: flutter/flutter_drone
+    timeout: 60
+    bringup: true
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:36v4"},
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      shard: tool_tests_commands
+      subshard: 2_2
       tags: >
         ["framework", "hostonly", "shard", "windows"]
     runIf:
