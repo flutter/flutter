@@ -1452,87 +1452,77 @@ void main() {
       hasSemantics(
         TestSemantics.root(
           children: <TestSemantics>[
-            TestSemantics.rootChild(
+            TestSemantics(
+              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+              label: 'Dismiss',
               textDirection: TextDirection.ltr,
               children: <TestSemantics>[
                 TestSemantics(
+                  role: SemanticsRole.menu,
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
+                  label: 'Popup menu',
+                  textDirection: TextDirection.ltr,
                   children: <TestSemantics>[
                     TestSemantics(
-                      role: SemanticsRole.menu,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
-                      label: 'Popup menu',
-                      textDirection: TextDirection.ltr,
                       children: <TestSemantics>[
                         TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                           children: <TestSemantics>[
                             TestSemantics(
-                              flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
-                              children: <TestSemantics>[
-                                TestSemantics(
-                                  role: SemanticsRole.menuItem,
-                                  label: 'one',
-                                  textDirection: TextDirection.ltr,
-                                  flags: <SemanticsFlag>[
-                                    SemanticsFlag.isButton,
-                                    SemanticsFlag.isFocused,
-                                    SemanticsFlag.isFocusable,
-                                  ],
-                                  tags: <SemanticsTag>[
-                                    const SemanticsTag('RenderViewport.twoPane'),
-                                  ],
-                                  actions: <SemanticsAction>[
-                                    SemanticsAction.tap,
-                                    SemanticsAction.focus,
-                                  ],
-                                ),
-                                TestSemantics(
-                                  role: SemanticsRole.menuItem,
-                                  label: 'two',
-                                  textDirection: TextDirection.ltr,
-                                  flags: <SemanticsFlag>[
-                                    SemanticsFlag.isButton,
-                                    SemanticsFlag.isFocusable,
-                                  ],
-                                  tags: <SemanticsTag>[
-                                    const SemanticsTag('RenderViewport.twoPane'),
-                                  ],
-                                  actions: <SemanticsAction>[
-                                    SemanticsAction.tap,
-                                    SemanticsAction.focus,
-                                  ],
-                                ),
-                                TestSemantics(
-                                  role: SemanticsRole.menuItem,
-                                  label: 'three',
-                                  textDirection: TextDirection.ltr,
-                                  flags: <SemanticsFlag>[
-                                    SemanticsFlag.isButton,
-                                    SemanticsFlag.isFocusable,
-                                  ],
-                                  tags: <SemanticsTag>[
-                                    const SemanticsTag('RenderViewport.twoPane'),
-                                  ],
-                                  actions: <SemanticsAction>[
-                                    SemanticsAction.tap,
-                                    SemanticsAction.focus,
-                                  ],
-                                ),
-                                TestSemantics(
-                                  role: SemanticsRole.menuItem,
-                                  label: 'four',
-                                  textDirection: TextDirection.ltr,
-                                  flags: <SemanticsFlag>[
-                                    SemanticsFlag.isButton,
-                                    SemanticsFlag.isFocusable,
-                                  ],
-                                  tags: <SemanticsTag>[
-                                    const SemanticsTag('RenderViewport.twoPane'),
-                                  ],
-                                  actions: <SemanticsAction>[
-                                    SemanticsAction.tap,
-                                    SemanticsAction.focus,
-                                  ],
-                                ),
+                              role: SemanticsRole.menuItem,
+                              label: 'one',
+                              textDirection: TextDirection.ltr,
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.isButton,
+                                SemanticsFlag.isFocused,
+                                SemanticsFlag.isFocusable,
+                              ],
+                              tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                              actions: <SemanticsAction>[
+                                SemanticsAction.tap,
+                                SemanticsAction.focus,
+                              ],
+                            ),
+                            TestSemantics(
+                              role: SemanticsRole.menuItem,
+                              label: 'two',
+                              textDirection: TextDirection.ltr,
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.isButton,
+                                SemanticsFlag.isFocusable,
+                              ],
+                              tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                              actions: <SemanticsAction>[
+                                SemanticsAction.tap,
+                                SemanticsAction.focus,
+                              ],
+                            ),
+                            TestSemantics(
+                              role: SemanticsRole.menuItem,
+                              label: 'three',
+                              textDirection: TextDirection.ltr,
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.isButton,
+                                SemanticsFlag.isFocusable,
+                              ],
+                              tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                              actions: <SemanticsAction>[
+                                SemanticsAction.tap,
+                                SemanticsAction.focus,
+                              ],
+                            ),
+                            TestSemantics(
+                              role: SemanticsRole.menuItem,
+                              label: 'four',
+                              textDirection: TextDirection.ltr,
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.isButton,
+                                SemanticsFlag.isFocusable,
+                              ],
+                              tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                              actions: <SemanticsAction>[
+                                SemanticsAction.tap,
+                                SemanticsAction.focus,
                               ],
                             ),
                           ],
@@ -1540,11 +1530,6 @@ void main() {
                       ],
                     ),
                   ],
-                ),
-                TestSemantics(
-                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
-                  label: 'Dismiss',
-                  textDirection: TextDirection.ltr,
                 ),
               ],
             ),
