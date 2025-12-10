@@ -258,4 +258,15 @@ void main() {
       offsetMoreOrLessEquals(const Offset(margin, 41 + margin), epsilon: 1),
     );
   });
+
+  testWidgets('CupertinoListSection does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(child: CupertinoListSection(header: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoListSection)), Size.zero);
+  });
 }
