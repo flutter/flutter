@@ -18,18 +18,25 @@ class RoundedSuperellipseBorderExample extends StatefulWidget {
   static final GlobalKey kRadiusSliderKey = GlobalKey();
 
   @override
-  State<RoundedSuperellipseBorderExample> createState() => RoundedSuperellipseBorderExampleState();
+  State<RoundedSuperellipseBorderExample> createState() =>
+      RoundedSuperellipseBorderExampleState();
 }
 
-class RoundedSuperellipseBorderExampleState extends State<RoundedSuperellipseBorderExample> {
+class RoundedSuperellipseBorderExampleState
+    extends State<RoundedSuperellipseBorderExample> {
   bool _toggle = true;
   double _borderThickness = 4;
   double _borderRadius = 69;
 
   @override
   Widget build(BuildContext context) {
-    final BorderRadiusGeometry radius = BorderRadiusGeometry.circular(_borderRadius);
-    final BorderSide side = BorderSide(width: _borderThickness, color: const Color(0xFF111111));
+    final BorderRadiusGeometry radius = BorderRadiusGeometry.circular(
+      _borderRadius,
+    );
+    final BorderSide side = BorderSide(
+      width: _borderThickness,
+      color: const Color(0xFF111111),
+    );
     final ShapeBorder shape = _toggle
         ? RoundedSuperellipseBorder(side: side, borderRadius: radius)
         : RoundedRectangleBorder(side: side, borderRadius: radius);
@@ -47,7 +54,10 @@ class RoundedSuperellipseBorderExampleState extends State<RoundedSuperellipseBor
                 // The border is drawn by this DecoratedBox.
                 DecoratedBox(
                   key: RoundedSuperellipseBorderExample.kBorderBoxKey,
-                  decoration: ShapeDecoration(shape: shape, color: const Color(0xFFFFC107)),
+                  decoration: ShapeDecoration(
+                    shape: shape,
+                    color: const Color(0xFFFFC107),
+                  ),
                   child: const SizedBox(width: 400, height: 200),
                 ),
 
@@ -65,7 +75,9 @@ class RoundedSuperellipseBorderExampleState extends State<RoundedSuperellipseBor
                     ),
                     ConstrainedBox(
                       constraints: const BoxConstraints(minWidth: 200),
-                      child: Text(_toggle ? 'Rounded Superellipse' : 'Rounded Rect'),
+                      child: Text(
+                        _toggle ? 'Rounded Superellipse' : 'Rounded Rect',
+                      ),
                     ),
                   ],
                 ),
@@ -125,9 +137,15 @@ class SliderRow extends StatelessWidget {
       direction: Axis.horizontal,
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        ConstrainedBox(constraints: const BoxConstraints(minWidth: 50), child: Text(label)),
+        ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 50),
+          child: Text(label),
+        ),
         Expanded(child: slider),
-        ConstrainedBox(constraints: const BoxConstraints(minWidth: 50), child: Text(valueString)),
+        ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 50),
+          child: Text(valueString),
+        ),
       ],
     );
   }

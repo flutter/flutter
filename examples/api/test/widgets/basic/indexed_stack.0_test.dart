@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/basic/indexed_stack.0.dart' as example;
+import 'package:flutter_api_samples/widgets/basic/indexed_stack.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('has correct forward rendering mechanism', (WidgetTester tester) async {
+  testWidgets('has correct forward rendering mechanism', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.IndexedStackApp());
 
     final Finder gesture2 = find.byKey(const Key('gesture2'));
@@ -39,7 +42,9 @@ void main() {
     expect(containerFinder1.renderObject!.debugNeedsPaint, false);
     expect(containerFinder2.renderObject!.debugNeedsPaint, false);
   });
-  testWidgets('has correct backward rendering mechanism', (WidgetTester tester) async {
+  testWidgets('has correct backward rendering mechanism', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.IndexedStackApp());
 
     final Finder gesture1 = find.byKey(const Key('gesture1'));
@@ -68,21 +73,32 @@ void main() {
     expect(containerFinder1.renderObject!.debugNeedsPaint, false);
     expect(containerFinder2.renderObject!.debugNeedsPaint, false);
   });
-  testWidgets('has correct element addition handling', (WidgetTester tester) async {
+  testWidgets('has correct element addition handling', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.IndexedStackApp());
 
     expect(find.byType(example.PersonTracker), findsOneWidget);
-    expect(find.byType(example.PersonTracker, skipOffstage: false), findsNWidgets(3));
+    expect(
+      find.byType(example.PersonTracker, skipOffstage: false),
+      findsNWidgets(3),
+    );
     final Finder textField = find.byType(TextField);
     await tester.enterText(textField, 'hello');
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pump();
-    expect(find.byType(example.PersonTracker, skipOffstage: false), findsNWidgets(4));
+    expect(
+      find.byType(example.PersonTracker, skipOffstage: false),
+      findsNWidgets(4),
+    );
 
     await tester.enterText(textField, 'hello1');
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pump();
-    expect(find.byType(example.PersonTracker, skipOffstage: false), findsNWidgets(5));
+    expect(
+      find.byType(example.PersonTracker, skipOffstage: false),
+      findsNWidgets(5),
+    );
   });
   testWidgets('has state preservation', (WidgetTester tester) async {
     await tester.pumpWidget(const example.IndexedStackApp());
@@ -92,7 +108,10 @@ void main() {
     final Finder containerFinder = find.byKey(const Key('Dash'));
     final Finder incrementFinder = find.byKey(const Key('incrementDash'));
     Finder counterFinder(int score) {
-      return find.descendant(of: containerFinder, matching: find.text('Score: $score'));
+      return find.descendant(
+        of: containerFinder,
+        matching: find.text('Score: $score'),
+      );
     }
 
     expect(counterFinder(0), findsOneWidget);

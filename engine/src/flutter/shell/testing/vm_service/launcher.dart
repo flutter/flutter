@@ -12,7 +12,7 @@ class ShellProcess {
   ShellProcess(this._process) {
     // Scan stdout and scrape the VM Service Uri.
     _process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((String line) {
-      final uri = _extractVMServiceUri(line);
+      final Uri? uri = _extractVMServiceUri(line);
       if (uri != null) {
         _vmServiceUriCompleter.complete(uri);
       }
@@ -34,7 +34,7 @@ class ShellProcess {
     final listeningMessageRegExp = RegExp(
       r'The Dart VM service is listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)',
     );
-    final match = listeningMessageRegExp.firstMatch(str);
+    final RegExpMatch? match = listeningMessageRegExp.firstMatch(str);
     if (match != null) {
       return Uri.parse(match[1]!);
     }
@@ -65,7 +65,7 @@ class ShellLauncher {
 
   Future<ShellProcess?> launch() async {
     try {
-      final List<String> shellArguments = <String>[];
+      final shellArguments = <String>[];
       if (startPaused) {
         shellArguments.add('--start-paused');
       }
