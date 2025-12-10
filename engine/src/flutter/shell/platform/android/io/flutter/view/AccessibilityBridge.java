@@ -1137,7 +1137,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
     // Heading support
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_28) {
-      result.setHeading(semanticsNode.headingLevel > 0);
+      result.setHeading(semanticsNode.hasFlag(Flag.IS_HEADER) || semanticsNode.headingLevel > 0);
     }
 
     // Accessibility Focus

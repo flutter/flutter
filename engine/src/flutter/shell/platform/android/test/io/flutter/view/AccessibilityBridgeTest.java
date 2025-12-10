@@ -2488,6 +2488,21 @@ public class AccessibilityBridgeTest {
   @Config(sdk = API_LEVELS.API_28)
   @TargetApi(API_LEVELS.API_28)
   @Test
+  public void itSetsHeadingWithHeaderFlag() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+
+    TestSemanticsNode headingNode = new TestSemanticsNode();
+    headingNode.label = "Heading";
+    headingNode.addFlag(AccessibilityBridge.Flag.IS_HEADER);
+    TestSemanticsUpdate headingUpdate = headingNode.toUpdate();
+    headingUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo headingInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertTrue(headingInfo.isHeading());
+  }
+
+  @Config(sdk = API_LEVELS.API_28)
+  @TargetApi(API_LEVELS.API_28)
+  @Test
   public void itSetsHeadingWhenHeadingLevelIsPositive() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
 
