@@ -12,6 +12,7 @@
 #include "flutter/fml/file.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/mapping.h"
+#include "flutter/fml/string_conversion.h"
 #include "inja/inja.hpp"
 
 namespace flutter {
