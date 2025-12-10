@@ -8,6 +8,7 @@
 #include <android/native_window_jni.h>
 #include <dlfcn.h>
 #include <jni.h>
+#include <cstdint>
 #include <memory>
 #include <utility>
 
@@ -72,11 +73,11 @@ static jfieldID g_jni_shell_holder_field = nullptr;
   V(g_set_application_locale_method, setApplicationLocale,                    \
     "(Ljava/lang/String;)V")                                                  \
   V(g_on_display_platform_view_method, onDisplayPlatformView,                 \
-    "(IIIIIIILio/flutter/embedding/engine/mutatorsstack/"                     \
+    "(JIIIIIIILio/flutter/embedding/engine/mutatorsstack/"                     \
     "FlutterMutatorsStack;)V")                                                \
   V(g_on_begin_frame_method, onBeginFrame, "()V")                             \
   V(g_on_end_frame_method, onEndFrame, "()V")                                 \
-  V(g_on_display_overlay_surface_method, onDisplayOverlaySurface, "(IIIII)V") \
+  V(g_on_display_overlay_surface_method, onDisplayOverlaySurface, "(JIIIII)V") \
   V(g_create_transaction_method, createTransaction,                           \
     "()Landroid/view/SurfaceControl$Transaction;")                            \
   V(g_swap_transaction_method, swapTransactions, "()V")                       \
@@ -98,8 +99,8 @@ static jfieldID g_jni_shell_holder_field = nullptr;
   V(g_on_first_frame_method, onFirstFrame, "()V")                             \
   V(g_on_engine_restart_method, onPreEngineRestart, "()V")                    \
   V(g_create_overlay_surface_method, createOverlaySurface,                    \
-    "()Lio/flutter/embedding/engine/FlutterOverlaySurface;")                  \
-  V(g_destroy_overlay_surfaces_method, destroyOverlaySurfaces, "()V")
+    "(J)Lio/flutter/embedding/engine/FlutterOverlaySurface;")                  \
+  V(g_destroy_overlay_surfaces_method, destroyOverlaySurfaces, "(J)V")
 
 //
 
@@ -254,9 +255,23 @@ static jobject SpawnJNI(JNIEnv* env,
   return jni;
 }
 
+//static void SurfaceCreated(JNIEnv* env,
+//                           jobject jcaller,
+//                           jlong shell_holder,
+//                           jobject jsurface) {
+//  // Note: This frame ensures that any local references used by
+//  // ANativeWindow_fromSurface are released immediately. This is needed as a
+//  // workaround for https://code.google.com/p/android/issues/detail?id=68174
+//  fml::jni::ScopedJavaLocalFrame scoped_local_reference_frame(env);
+//  auto window = fml::MakeRefCounted<AndroidNativeWindow>(
+//      ANativeWindow_fromSurface(env, jsurface));
+//  ANDROID_SHELL_HOLDER->GetPlatformView()->NotifyCreated(std::move(window));
+//}
+
 static void SurfaceCreated(JNIEnv* env,
                            jobject jcaller,
                            jlong shell_holder,
+                           jlong view_id,
                            jobject jsurface) {
   // Note: This frame ensures that any local references used by
   // ANativeWindow_fromSurface are released immediately. This is needed as a
@@ -264,35 +279,64 @@ static void SurfaceCreated(JNIEnv* env,
   fml::jni::ScopedJavaLocalFrame scoped_local_reference_frame(env);
   auto window = fml::MakeRefCounted<AndroidNativeWindow>(
       ANativeWindow_fromSurface(env, jsurface));
-  ANDROID_SHELL_HOLDER->GetPlatformView()->NotifyCreated(std::move(window));
+  ANDROID_SHELL_HOLDER->GetPlatformView()->NotifyCreated(view_id, std::move(window));
 }
 
-static void SurfaceWindowChanged(JNIEnv* env,
-                                 jobject jcaller,
-                                 jlong shell_holder,
-                                 jobject jsurface) {
-  // Note: This frame ensures that any local references used by
-  // ANativeWindow_fromSurface are released immediately. This is needed as a
-  // workaround for https://code.google.com/p/android/issues/detail?id=68174
-  fml::jni::ScopedJavaLocalFrame scoped_local_reference_frame(env);
-  auto window = fml::MakeRefCounted<AndroidNativeWindow>(
-      ANativeWindow_fromSurface(env, jsurface));
-  ANDROID_SHELL_HOLDER->GetPlatformView()->NotifySurfaceWindowChanged(
-      std::move(window));
-}
+//static void SurfaceWindowChanged(JNIEnv* env,
+//                                 jobject jcaller,
+//                                 jlong shell_holder,
+//                                 jobject jsurface) {
+//  // Note: This frame ensures that any local references used by
+//  // ANativeWindow_fromSurface are released immediately. This is needed as a
+//  // workaround for https://code.google.com/p/android/issues/detail?id=68174
+//  fml::jni::ScopedJavaLocalFrame scoped_local_reference_frame(env);
+//  auto window = fml::MakeRefCounted<AndroidNativeWindow>(
+//      ANativeWindow_fromSurface(env, jsurface));
+//  ANDROID_SHELL_HOLDER->GetPlatformView()->NotifySurfaceWindowChanged(
+//      std::move(window));
+//}
 
-static void SurfaceChanged(JNIEnv* env,
-                           jobject jcaller,
-                           jlong shell_holder,
-                           jint width,
-                           jint height) {
-  ANDROID_SHELL_HOLDER->GetPlatformView()->NotifyChanged(
-      DlISize(width, height));
-}
+    static void SurfaceWindowChanged(JNIEnv* env,
+                                     jobject jcaller,
+                                     jlong shell_holder,
+                                     jlong view_id,
+                                     jobject jsurface) {
+        // Note: This frame ensures that any local references used by
+        // ANativeWindow_fromSurface are released immediately. This is needed as a
+        // workaround for https://code.google.com/p/android/issues/detail?id=68174
+        fml::jni::ScopedJavaLocalFrame scoped_local_reference_frame(env);
+        auto window = fml::MakeRefCounted<AndroidNativeWindow>(
+                ANativeWindow_fromSurface(env, jsurface));
+        ANDROID_SHELL_HOLDER->GetPlatformView()->NotifySurfaceWindowChanged(
+                view_id, std::move(window));
+    }
 
-static void SurfaceDestroyed(JNIEnv* env, jobject jcaller, jlong shell_holder) {
-  ANDROID_SHELL_HOLDER->GetPlatformView()->NotifyDestroyed();
-}
+//static void SurfaceChanged(JNIEnv* env,
+//                           jobject jcaller,
+//                           jlong shell_holder,
+//                           jint width,
+//                           jint height) {
+//  ANDROID_SHELL_HOLDER->GetPlatformView()->NotifyChanged(
+//      SkISize::Make(width, height));
+//}
+
+    static void SurfaceChanged(JNIEnv* env,
+                               jobject jcaller,
+                               jlong shell_holder,
+                               jlong view_id,
+                               jint width,
+                               jint height) {
+        ANDROID_SHELL_HOLDER->GetPlatformView()->NotifyChanged(view_id,
+                DlISize(width, height));
+    }
+
+//static void SurfaceDestroyed(JNIEnv* env, jobject jcaller, jlong shell_holder) {
+//  ANDROID_SHELL_HOLDER->GetPlatformView()->NotifyDestroyed();
+//}
+
+    static void SurfaceDestroyed(JNIEnv* env, jobject jcaller, jlong shell_holder, jlong view_id) {
+        ANDROID_SHELL_HOLDER->GetPlatformView()->NotifyDestroyed(view_id);
+    }
 
 static void RunBundleAndSnapshotFromLibrary(JNIEnv* env,
                                             jobject jcaller,
@@ -333,6 +377,7 @@ static jobject LookupCallbackInformation(JNIEnv* env,
 static void SetViewportMetrics(JNIEnv* env,
                                jobject jcaller,
                                jlong shell_holder,
+                               jlong view_id,
                                jfloat devicePixelRatio,
                                jint physicalWidth,
                                jint physicalHeight,
@@ -404,8 +449,164 @@ static void SetViewportMetrics(JNIEnv* env,
       0,                      // p_display_id
   };
 
-  ANDROID_SHELL_HOLDER->GetPlatformView()->SetViewportMetrics(
-      kFlutterImplicitViewId, metrics);
+//  ANDROID_SHELL_HOLDER->GetPlatformView()->SetViewportMetrics(
+//      kFlutterImplicitViewId, metrics);
+
+    ANDROID_SHELL_HOLDER->GetPlatformView()->SetViewportMetrics(
+            view_id, metrics);
+
+// if (view_id == kFlutterImplicitViewId) {
+//     ANDROID_SHELL_HOLDER->GetPlatformView()->SetViewportMetrics(
+//             view_id, metrics);
+// } else {
+//     bool added = false;
+//     // FlutterAddViewInfo info{.struct_size = sizeof(FlutterAddViewInfo),
+//     //                         .view_id = viewIdentifier,
+//     //                         .view_metrics = &metrics,
+//     //                         .user_data = &added,
+//     //                         .add_view_callback = [](const FlutterAddViewResult* r) {
+//     //                           auto added = reinterpret_cast<bool*>(r->user_data);
+//     //                           *added = true;
+//     //                         }};
+
+//     ANDROID_SHELL_HOLDER->GetPlatformView()->AddView(
+//             view_id, metrics, [&added](bool result) {
+//                               added = true;
+//                             });
+
+//       FML_DCHECK(added);
+//     if (!added) {
+//       // NSLog(@"Failed to add view with ID %llu", viewIdentifier);
+//     }
+// }
+
+
+}
+
+static void AddView(JNIEnv* env,
+                               jobject jcaller,
+                               jlong shell_holder,
+                               jlong view_id,
+                               jfloat devicePixelRatio,
+                               jint physicalWidth,
+                               jint physicalHeight,
+                               jint physicalPaddingTop,
+                               jint physicalPaddingRight,
+                               jint physicalPaddingBottom,
+                               jint physicalPaddingLeft,
+                               jint physicalViewInsetTop,
+                               jint physicalViewInsetRight,
+                               jint physicalViewInsetBottom,
+                               jint physicalViewInsetLeft,
+                               jint systemGestureInsetTop,
+                               jint systemGestureInsetRight,
+                               jint systemGestureInsetBottom,
+                               jint systemGestureInsetLeft,
+                               jint physicalTouchSlop,
+                               jintArray javaDisplayFeaturesBounds,
+                               jintArray javaDisplayFeaturesType,
+                               jintArray javaDisplayFeaturesState) {
+  if (view_id == kFlutterImplicitViewId) {
+    return;
+  }
+  // Convert java->c++. javaDisplayFeaturesBounds, javaDisplayFeaturesType and
+  // javaDisplayFeaturesState cannot be null
+  jsize rectSize = env->GetArrayLength(javaDisplayFeaturesBounds);
+  std::vector<int> boundsIntVector(rectSize);
+  env->GetIntArrayRegion(javaDisplayFeaturesBounds, 0, rectSize,
+                         &boundsIntVector[0]);
+  std::vector<double> displayFeaturesBounds(boundsIntVector.begin(),
+                                            boundsIntVector.end());
+  jsize typeSize = env->GetArrayLength(javaDisplayFeaturesType);
+  std::vector<int> displayFeaturesType(typeSize);
+  env->GetIntArrayRegion(javaDisplayFeaturesType, 0, typeSize,
+                         &displayFeaturesType[0]);
+
+  jsize stateSize = env->GetArrayLength(javaDisplayFeaturesState);
+  std::vector<int> displayFeaturesState(stateSize);
+  env->GetIntArrayRegion(javaDisplayFeaturesState, 0, stateSize,
+                         &displayFeaturesState[0]);
+
+  const flutter::ViewportMetrics metrics{
+      static_cast<double>(devicePixelRatio),  // p_device_pixel_ratio
+      static_cast<double>(physicalWidth),     // p_physical_width
+      static_cast<double>(physicalHeight),    // p_physical_height
+      static_cast<double>(physicalWidth),     // p_physical_min_width_constraint
+      static_cast<double>(physicalWidth),     // p_physical_max_width_constraint
+      static_cast<double>(physicalHeight),  // p_physical_min_height_constraint
+      static_cast<double>(physicalHeight),  // p_physical_max_height_constraint
+      static_cast<double>(physicalPaddingTop),     // p_physical_padding_top
+      static_cast<double>(physicalPaddingRight),   // p_physical_padding_right
+      static_cast<double>(physicalPaddingBottom),  // p_physical_padding_bottom
+      static_cast<double>(physicalPaddingLeft),    // p_physical_padding_left
+      static_cast<double>(physicalViewInsetTop),   // p_physical_view_inset_top
+      static_cast<double>(
+          physicalViewInsetRight),  // p_physical_view_inset_right
+      static_cast<double>(
+          physicalViewInsetBottom),  // p_physical_view_inset_bottom
+      static_cast<double>(physicalViewInsetLeft),  // p_physical_view_inset_left
+      static_cast<double>(
+          systemGestureInsetTop),  // p_physical_system_gesture_inset_top
+      static_cast<double>(
+          systemGestureInsetRight),  // p_physical_system_gesture_inset_right
+      static_cast<double>(
+          systemGestureInsetBottom),  // p_physical_system_gesture_inset_bottom
+      static_cast<double>(
+          systemGestureInsetLeft),  // p_physical_system_gesture_inset_left
+      static_cast<double>(physicalTouchSlop),  // p_physical_touch_slop
+      displayFeaturesBounds,  // p_physical_display_features_bounds
+      displayFeaturesType,    // p_physical_display_features_type
+      displayFeaturesState,   // p_physical_display_features_state
+      0,                      // p_display_id
+  };
+
+
+    bool added = false;
+    // FlutterAddViewInfo info{.struct_size = sizeof(FlutterAddViewInfo),
+    //                         .view_id = viewIdentifier,
+    //                         .view_metrics = &metrics,
+    //                         .user_data = &added,
+    //                         .add_view_callback = [](const FlutterAddViewResult* r) {
+    //                           auto added = reinterpret_cast<bool*>(r->user_data);
+    //                           *added = true;
+    //                         }};
+
+    ANDROID_SHELL_HOLDER->GetPlatformView()->AddView(
+            view_id, metrics, [&added](bool result) {
+                              added = true;
+                            });
+
+      FML_DCHECK(added);
+    if (!added) {
+      // NSLog(@"Failed to add view with ID %llu", viewIdentifier);
+      FML_LOG(ERROR) << "Failed to add view with ID" << view_id;
+    }
+
+
+}
+
+static void RemoveView(JNIEnv* env,
+                       jobject jcaller,
+                       jlong shell_holder,
+                       jlong view_id) {
+  // if (view_id == kFlutterImplicitViewId) {
+  //   return;
+  // }
+
+  fml::ManualResetWaitableEvent latch;
+    bool is_removed = false;
+    ANDROID_SHELL_HOLDER->GetPlatformView()->RemoveView(
+            view_id, [&is_removed, &latch](bool removed) {
+                              is_removed = removed;
+                              latch.Signal();
+                            });
+      latch.Wait();
+
+      FML_DCHECK(is_removed);
+    if (!is_removed) {
+      // NSLog(@"Failed to add view with ID %llu", viewIdentifier);
+      FML_LOG(ERROR) << "Failed to remove view with ID" << view_id;
+    }
 }
 
 static void UpdateDisplayMetrics(JNIEnv* env,
@@ -776,30 +977,65 @@ bool RegisterApi(JNIEnv* env) {
           .signature = "(J)Landroid/graphics/Bitmap;",
           .fnPtr = reinterpret_cast<void*>(&GetBitmap),
       },
-      {
+//      {
+//          .name = "nativeSurfaceCreated",
+//          .signature = "(JLandroid/view/Surface;)V",
+//          .fnPtr = reinterpret_cast<void*>(&SurfaceCreated),
+//      },
+            {
           .name = "nativeSurfaceCreated",
-          .signature = "(JLandroid/view/Surface;)V",
+          .signature = "(JJLandroid/view/Surface;)V",
           .fnPtr = reinterpret_cast<void*>(&SurfaceCreated),
       },
+//      {
+//          .name = "nativeSurfaceWindowChanged",
+//          .signature = "(JLandroid/view/Surface;)V",
+//          .fnPtr = reinterpret_cast<void*>(&SurfaceWindowChanged),
+//      },
       {
-          .name = "nativeSurfaceWindowChanged",
-          .signature = "(JLandroid/view/Surface;)V",
-          .fnPtr = reinterpret_cast<void*>(&SurfaceWindowChanged),
+              .name = "nativeSurfaceWindowChanged",
+              .signature = "(JJLandroid/view/Surface;)V",
+              .fnPtr = reinterpret_cast<void*>(&SurfaceWindowChanged),
+      },
+//      {
+//          .name = "nativeSurfaceChanged",
+//          .signature = "(JII)V",
+//          .fnPtr = reinterpret_cast<void*>(&SurfaceChanged),
+//      },
+      {
+              .name = "nativeSurfaceChanged",
+              .signature = "(JJII)V",
+              .fnPtr = reinterpret_cast<void*>(&SurfaceChanged),
+      },
+//      {
+//          .name = "nativeSurfaceDestroyed",
+//          .signature = "(J)V",
+//          .fnPtr = reinterpret_cast<void*>(&SurfaceDestroyed),
+//      },
+      {
+              .name = "nativeSurfaceDestroyed",
+              .signature = "(JJ)V",
+              .fnPtr = reinterpret_cast<void*>(&SurfaceDestroyed),
+      },
+//      {
+//          .name = "nativeSetViewportMetrics",
+//          .signature = "(JFIIIIIIIIIIIIIII[I[I[I)V",
+//          .fnPtr = reinterpret_cast<void*>(&SetViewportMetrics),
+//      },
+      {
+              .name = "nativeSetViewportMetrics",
+              .signature = "(JJFIIIIIIIIIIIIIII[I[I[I)V",
+              .fnPtr = reinterpret_cast<void*>(&SetViewportMetrics),
       },
       {
-          .name = "nativeSurfaceChanged",
-          .signature = "(JII)V",
-          .fnPtr = reinterpret_cast<void*>(&SurfaceChanged),
+          .name = "nativeAddView",
+          .signature = "(JJFIIIIIIIIIIIIIII[I[I[I)V",
+          .fnPtr = reinterpret_cast<void*>(&AddView),
       },
       {
-          .name = "nativeSurfaceDestroyed",
-          .signature = "(J)V",
-          .fnPtr = reinterpret_cast<void*>(&SurfaceDestroyed),
-      },
-      {
-          .name = "nativeSetViewportMetrics",
-          .signature = "(JFIIIIIIIIIIIIIII[I[I[I)V",
-          .fnPtr = reinterpret_cast<void*>(&SetViewportMetrics),
+          .name = "nativeRemoveView",
+          .signature = "(JJ)V",
+          .fnPtr = reinterpret_cast<void*>(&RemoveView),
       },
       {
           .name = "nativeDispatchPointerDataPacket",
@@ -1689,6 +1925,7 @@ void PlatformViewAndroidJNIImpl::HardwareBufferClose(
 }
 
 void PlatformViewAndroidJNIImpl::FlutterViewOnDisplayPlatformView(
+    int64_t flutter_view_id,
     int view_id,
     int x,
     int y,
@@ -1791,13 +2028,14 @@ void PlatformViewAndroidJNIImpl::FlutterViewOnDisplayPlatformView(
   }
 
   env->CallVoidMethod(java_object.obj(), g_on_display_platform_view_method,
-                      view_id, x, y, width, height, viewWidth, viewHeight,
+                      flutter_view_id, view_id, x, y, width, height, viewWidth, viewHeight,
                       mutatorsStack);
 
   FML_CHECK(fml::jni::CheckException(env));
 }
 
 void PlatformViewAndroidJNIImpl::FlutterViewDisplayOverlaySurface(
+    int64_t flutter_view_id,
     int surface_id,
     int x,
     int y,
@@ -1811,7 +2049,7 @@ void PlatformViewAndroidJNIImpl::FlutterViewDisplayOverlaySurface(
   }
 
   env->CallVoidMethod(java_object.obj(), g_on_display_overlay_surface_method,
-                      surface_id, x, y, width, height);
+                      flutter_view_id, surface_id, x, y, width, height);
 
   FML_CHECK(fml::jni::CheckException(env));
 }
@@ -1843,7 +2081,7 @@ void PlatformViewAndroidJNIImpl::FlutterViewEndFrame() {
 }
 
 std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata>
-PlatformViewAndroidJNIImpl::FlutterViewCreateOverlaySurface() {
+PlatformViewAndroidJNIImpl::FlutterViewCreateOverlaySurface(int64_t flutter_view_id) {
   JNIEnv* env = fml::jni::AttachCurrentThread();
 
   auto java_object = java_object_.get(env);
@@ -1853,7 +2091,7 @@ PlatformViewAndroidJNIImpl::FlutterViewCreateOverlaySurface() {
 
   fml::jni::ScopedJavaLocalRef<jobject> overlay(
       env, env->CallObjectMethod(java_object.obj(),
-                                 g_create_overlay_surface_method));
+                                 g_create_overlay_surface_method, flutter_view_id));
   FML_CHECK(fml::jni::CheckException(env));
 
   if (overlay.is_null()) {
@@ -1874,7 +2112,7 @@ PlatformViewAndroidJNIImpl::FlutterViewCreateOverlaySurface() {
       overlay_id, std::move(overlay_window));
 }
 
-void PlatformViewAndroidJNIImpl::FlutterViewDestroyOverlaySurfaces() {
+void PlatformViewAndroidJNIImpl::FlutterViewDestroyOverlaySurfaces(int64_t flutter_view_id) {
   JNIEnv* env = fml::jni::AttachCurrentThread();
 
   auto java_object = java_object_.get(env);
@@ -1882,7 +2120,7 @@ void PlatformViewAndroidJNIImpl::FlutterViewDestroyOverlaySurfaces() {
     return;
   }
 
-  env->CallVoidMethod(java_object.obj(), g_destroy_overlay_surfaces_method);
+  env->CallVoidMethod(java_object.obj(), g_destroy_overlay_surfaces_method, flutter_view_id);
 
   FML_CHECK(fml::jni::CheckException(env));
 }

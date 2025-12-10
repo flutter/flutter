@@ -22,7 +22,13 @@ class GPUSurfaceSoftware : public Surface {
   // |Surface|
   bool IsValid() override;
 
-  // |Surface|
+  // // |Surface|
+  // std::unique_ptr<SurfaceFrame> AcquireFrame(const DlISize& size, int64_t view_id = kFlutterImplicitViewId) override;
+
+  // // |Surface|
+  // DlMatrix GetRootTransformation(int64_t view_id = kFlutterImplicitViewId) const override;
+
+    // |Surface|
   std::unique_ptr<SurfaceFrame> AcquireFrame(const DlISize& size) override;
 
   // |Surface|

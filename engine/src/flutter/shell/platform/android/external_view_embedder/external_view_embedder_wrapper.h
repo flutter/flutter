@@ -28,7 +28,8 @@ class AndroidExternalViewEmbedderWrapper final : public ExternalViewEmbedder {
       const AndroidContext& android_context,
       std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
       std::shared_ptr<AndroidSurfaceFactory> surface_factory,
-      const TaskRunners& task_runners);
+      const TaskRunners& task_runners,
+      const SurfaceFrameLayer::GetSurfaceFrameLayerCallback& get_surface_frame_layer_callback);
 
   // |ExternalViewEmbedder|
   void PrerollCompositeEmbeddedView(
@@ -59,7 +60,8 @@ class AndroidExternalViewEmbedderWrapper final : public ExternalViewEmbedder {
                       raster_thread_merger) override;
 
   // |ExternalViewEmbedder|
-  void PrepareFlutterView(DlISize frame_size,
+  void PrepareFlutterView(int64_t flutter_view_id,
+                          DlISize frame_size,
                           double device_pixel_ratio) override;
 
   // |ExternalViewEmbedder|
@@ -70,11 +72,15 @@ class AndroidExternalViewEmbedderWrapper final : public ExternalViewEmbedder {
                 const fml::RefPtr<fml::RasterThreadMerger>&
                     raster_thread_merger) override;
 
+  bool SkipFrame(int64_t flutter_view_id) override;
+
   // |ExternalViewEmbedder|
   bool SupportsDynamicThreadMerging() override;
 
   // |ExternalViewEmbedder|
   void Teardown() override;
+
+  std::unique_ptr<SurfaceFrame> AcquireRootFrame(int64_t flutter_view_id) override;
 
  private:
   void EnsureInitialized();
@@ -85,6 +91,7 @@ class AndroidExternalViewEmbedderWrapper final : public ExternalViewEmbedder {
   const TaskRunners& task_runners_;
   std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
   std::shared_ptr<AndroidSurfaceFactory> surface_factory_;
+  const SurfaceFrameLayer::GetSurfaceFrameLayerCallback get_surface_frame_layer_callback_;
   std::unique_ptr<AndroidExternalViewEmbedder> non_hcpp_view_embedder_;
   std::unique_ptr<AndroidExternalViewEmbedder2> hcpp_view_embedder_;
 };

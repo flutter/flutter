@@ -593,7 +593,17 @@ public class FlutterJNI {
     nativeSurfaceCreated(nativeShellHolderId, surface);
   }
 
+    @UiThread
+  public void onSurfaceCreated(long viewId, @NonNull Surface surface) {
+    Log.v(TAG, "onSurfaceCreated: " + viewId);
+    ensureRunningOnMainThread();
+    ensureAttachedToNative();
+    nativeSurfaceCreated(nativeShellHolderId, viewId, surface);
+  }
+
   private native void nativeSurfaceCreated(long nativeShellHolderId, @NonNull Surface surface);
+
+  private native void nativeSurfaceCreated(long nativeShellHolderId, long viewId, @NonNull Surface surface);
 
   /**
    * In hybrid composition, call this method when the {@link Surface} has changed.
@@ -612,6 +622,17 @@ public class FlutterJNI {
   private native void nativeSurfaceWindowChanged(
       long nativeShellHolderId, @NonNull Surface surface);
 
+        @UiThread
+  public void onSurfaceWindowChanged(long viewId, @NonNull Surface surface) {
+    ensureRunningOnMainThread();
+    ensureAttachedToNative();
+          Log.v(TAG, "onSurfaceWindowChanged: " + viewId);
+    nativeSurfaceWindowChanged(nativeShellHolderId, viewId, surface);
+  }
+
+  private native void nativeSurfaceWindowChanged(
+      long nativeShellHolderId, long viewId, @NonNull Surface surface);
+
   /**
    * Call this method when the {@link Surface} changes that was previously registered with {@link
    * #onSurfaceCreated(Surface)}.
@@ -627,6 +648,16 @@ public class FlutterJNI {
   }
 
   private native void nativeSurfaceChanged(long nativeShellHolderId, int width, int height);
+
+    @UiThread
+  public void onSurfaceChanged(long viewId,int width, int height) {
+    ensureRunningOnMainThread();
+    ensureAttachedToNative();
+      Log.v(TAG, "onSurfaceChanged: " + viewId);
+    nativeSurfaceChanged(nativeShellHolderId, viewId,  width, height);
+  }
+
+  private native void nativeSurfaceChanged( long nativeShellHolderId, long viewId,int width, int height);
 
   /**
    * Call this method when the {@link Surface} is destroyed that was previously registered with
@@ -645,6 +676,17 @@ public class FlutterJNI {
 
   private native void nativeSurfaceDestroyed(long nativeShellHolderId);
 
+  @UiThread
+  public void onSurfaceDestroyed(long viewId) {
+    Log.e(TAG, "onSurfaceDestroyed: " + viewId);
+    ensureRunningOnMainThread();
+    ensureAttachedToNative();
+    onRenderingStopped();
+    nativeSurfaceDestroyed(nativeShellHolderId, viewId);
+  }
+
+  private native void nativeSurfaceDestroyed(long nativeShellHolderId, long viewId );
+
   /**
    * Call this method to notify Flutter of the current device viewport metrics that are applies to
    * the Flutter UI that is being rendered.
@@ -654,6 +696,7 @@ public class FlutterJNI {
    */
   @UiThread
   public void setViewportMetrics(
+          long viewId,
       float devicePixelRatio,
       int physicalWidth,
       int physicalHeight,
@@ -677,6 +720,7 @@ public class FlutterJNI {
     ensureAttachedToNative();
     nativeSetViewportMetrics(
         nativeShellHolderId,
+        viewId,
         devicePixelRatio,
         physicalWidth,
         physicalHeight,
@@ -700,6 +744,7 @@ public class FlutterJNI {
 
   private native void nativeSetViewportMetrics(
       long nativeShellHolderId,
+      long viewId,
       float devicePixelRatio,
       int physicalWidth,
       int physicalHeight,
@@ -719,6 +764,85 @@ public class FlutterJNI {
       int[] displayFeaturesBounds,
       int[] displayFeaturesType,
       int[] displayFeaturesState);
+
+  @UiThread
+  public void addView(
+          long viewId,
+      float devicePixelRatio,
+      int physicalWidth,
+      int physicalHeight,
+      int physicalPaddingTop,
+      int physicalPaddingRight,
+      int physicalPaddingBottom,
+      int physicalPaddingLeft,
+      int physicalViewInsetTop,
+      int physicalViewInsetRight,
+      int physicalViewInsetBottom,
+      int physicalViewInsetLeft,
+      int systemGestureInsetTop,
+      int systemGestureInsetRight,
+      int systemGestureInsetBottom,
+      int systemGestureInsetLeft,
+      int physicalTouchSlop,
+      int[] displayFeaturesBounds,
+      int[] displayFeaturesType,
+      int[] displayFeaturesState) {
+    ensureRunningOnMainThread();
+    ensureAttachedToNative();
+    nativeAddView(
+        nativeShellHolderId,
+        viewId,
+        devicePixelRatio,
+        physicalWidth,
+        physicalHeight,
+        physicalPaddingTop,
+        physicalPaddingRight,
+        physicalPaddingBottom,
+        physicalPaddingLeft,
+        physicalViewInsetTop,
+        physicalViewInsetRight,
+        physicalViewInsetBottom,
+        physicalViewInsetLeft,
+        systemGestureInsetTop,
+        systemGestureInsetRight,
+        systemGestureInsetBottom,
+        systemGestureInsetLeft,
+        physicalTouchSlop,
+        displayFeaturesBounds,
+        displayFeaturesType,
+        displayFeaturesState);
+  }
+
+  private native void nativeAddView(
+      long nativeShellHolderId,
+      long viewId,
+      float devicePixelRatio,
+      int physicalWidth,
+      int physicalHeight,
+      int physicalPaddingTop,
+      int physicalPaddingRight,
+      int physicalPaddingBottom,
+      int physicalPaddingLeft,
+      int physicalViewInsetTop,
+      int physicalViewInsetRight,
+      int physicalViewInsetBottom,
+      int physicalViewInsetLeft,
+      int systemGestureInsetTop,
+      int systemGestureInsetRight,
+      int systemGestureInsetBottom,
+      int systemGestureInsetLeft,
+      int physicalTouchSlop,
+      int[] displayFeaturesBounds,
+      int[] displayFeaturesType,
+      int[] displayFeaturesState);
+
+  public void removeView(long viewId) {
+    ensureRunningOnMainThread();
+    ensureAttachedToNative();
+    nativeRemoveView(nativeShellHolderId, viewId);
+  }
+
+  private native void nativeRemoveView(long nativeShellHolderId, long viewId);
 
   // ----- End Render Surface Support -----
 
@@ -1206,13 +1330,13 @@ public class FlutterJNI {
 
   @SuppressWarnings("unused")
   @UiThread
-  public void onDisplayOverlaySurface(int id, int x, int y, int width, int height) {
+  public void onDisplayOverlaySurface(long flutterViewId, int id, int x, int y, int width, int height) {
     ensureRunningOnMainThread();
     if (platformViewsController == null) {
       throw new RuntimeException(
           "platformViewsController must be set before attempting to position an overlay surface");
     }
-    platformViewsController.onDisplayOverlaySurface(id, x, y, width, height);
+    platformViewsController.onDisplayOverlaySurface(flutterViewId, id, x, y, width, height);
   }
 
   @SuppressWarnings("unused")
@@ -1239,24 +1363,24 @@ public class FlutterJNI {
 
   @SuppressWarnings("unused")
   @UiThread
-  public FlutterOverlaySurface createOverlaySurface() {
+  public FlutterOverlaySurface createOverlaySurface(long flutterViewId) {
     ensureRunningOnMainThread();
     if (platformViewsController == null) {
       throw new RuntimeException(
           "platformViewsController must be set before attempting to position an overlay surface");
     }
-    return platformViewsController.createOverlaySurface();
+    return platformViewsController.createOverlaySurface(flutterViewId);
   }
 
   @SuppressWarnings("unused")
   @UiThread
-  public void destroyOverlaySurfaces() {
+  public void destroyOverlaySurfaces(long flutterViewId) {
     ensureRunningOnMainThread();
     if (platformViewsController == null) {
       throw new RuntimeException(
           "platformViewsController must be set before attempting to destroy an overlay surface");
     }
-    platformViewsController.destroyOverlaySurfaces();
+    platformViewsController.destroyOverlaySurfaces(flutterViewId);
   }
   // ----- End Engine Lifecycle Support ----
 
@@ -1559,6 +1683,7 @@ public class FlutterJNI {
   // @SuppressWarnings("unused")
   @UiThread
   public void onDisplayPlatformView(
+      long flutterViewId,
       int viewId,
       int x,
       int y,
@@ -1573,7 +1698,7 @@ public class FlutterJNI {
           "platformViewsController must be set before attempting to position a platform view");
     }
     platformViewsController.onDisplayPlatformView(
-        viewId, x, y, width, height, viewWidth, viewHeight, mutatorsStack);
+            flutterViewId, viewId, x, y, width, height, viewWidth, viewHeight, mutatorsStack);
   }
 
   @UiThread

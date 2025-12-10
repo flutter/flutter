@@ -46,16 +46,14 @@ class WrappedTextureSourceVK : public impeller::TextureSourceVK {
   impeller::vk::ImageView image_view_;
 };
 
-GPUSurfaceVulkanImpeller::GPUSurfaceVulkanImpeller(
+GPUSurfaceVulkanSurfaceFrameLayer::GPUSurfaceVulkanSurfaceFrameLayer(
     GPUSurfaceVulkanDelegate* delegate,
-    std::shared_ptr<impeller::Context> context)
-    : delegate_(delegate) {
+    const std::shared_ptr<impeller::Context>& context,
+    const std::shared_ptr<impeller::AiksContext>& aiks_context)
+    : delegate_(delegate){
   if (!context || !context->IsValid()) {
     return;
   }
-
-  auto aiks_context = std::make_shared<impeller::AiksContext>(
-      context, impeller::TypographerContextSkia::Make());
   if (!aiks_context->IsValid()) {
     return;
   }
@@ -65,29 +63,27 @@ GPUSurfaceVulkanImpeller::GPUSurfaceVulkanImpeller(
   is_valid_ = !!aiks_context_;
 }
 
-// |Surface|
-GPUSurfaceVulkanImpeller::~GPUSurfaceVulkanImpeller() = default;
+GPUSurfaceVulkanSurfaceFrameLayer::~GPUSurfaceVulkanSurfaceFrameLayer() = default;
 
-// |Surface|
-bool GPUSurfaceVulkanImpeller::IsValid() {
+bool GPUSurfaceVulkanSurfaceFrameLayer::IsValid() {
   return is_valid_;
 }
 
-// |Surface|
-std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
-    const DlISize& size) {
+std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanSurfaceFrameLayer::MakeSurfaceFrame(const DlISize& frame_size) {
   if (!IsValid()) {
     FML_LOG(ERROR) << "Vulkan surface was invalid.";
     return nullptr;
   }
 
-  if (size.IsEmpty()) {
+  if (frame_size.IsEmpty()) {
     FML_LOG(ERROR) << "Vulkan surface was asked for an empty frame.";
     return nullptr;
   }
 
+  // auto impeller_context = get_surface_context_vk_callback_(view_id);
   if (delegate_ == nullptr) {
     auto& context_vk = impeller::SurfaceContextVK::Cast(*impeller_context_);
+    // auto& context_vk = impeller::SurfaceContextVK::Cast(*impeller_context);
     std::unique_ptr<impeller::Surface> surface =
         context_vk.AcquireNextSurface();
 
@@ -131,12 +127,12 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
         fml::MakeCopyable([surface = std::move(surface)](const SurfaceFrame&) {
           return surface->Present();
         }),       // submit callback
-        size,     // frame size
+        frame_size,     // frame size
         nullptr,  // context result
         true      // display list fallback
     );
   } else {
-    FlutterVulkanImage flutter_image = delegate_->AcquireImage(size);
+    FlutterVulkanImage flutter_image = delegate_->AcquireImage(frame_size);
     if (!flutter_image.image) {
       FML_LOG(ERROR) << "Invalid VkImage given by the embedder.";
       return nullptr;
@@ -156,12 +152,13 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
 
     impeller::TextureDescriptor desc;
     desc.format = format.value();
-    desc.size = impeller::ISize{size.width, size.height};
+    desc.size = impeller::ISize{frame_size.width, frame_size.height};
     desc.storage_mode = impeller::StorageMode::kDevicePrivate;
     desc.mip_count = 1;
     desc.compression_type = impeller::CompressionType::kLossless;
     desc.usage = impeller::TextureUsage::kRenderTarget;
 
+    // auto surface_context_vk = get_surface_context_vk_callback_(view_id);
     impeller::ContextVK& context_vk =
         impeller::ContextVK::Cast(*impeller_context_);
 
@@ -269,12 +266,254 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
                                           framebuffer_info,  // framebuffer info
                                           encode_callback,   // encode callback
                                           submit_callback,
-                                          size,     // frame size
+                                          frame_size,     // frame size
                                           nullptr,  // context result
                                           true      // display list fallback
     );
   }
 }
+
+GPUSurfaceVulkanImpeller::GPUSurfaceVulkanImpeller(
+    GPUSurfaceVulkanDelegate* delegate,
+    std::shared_ptr<impeller::Context> context,
+    const GetSurfaceContextVKCallback& get_surface_context_vk_callback)
+    : delegate_(delegate), get_surface_context_vk_callback_(get_surface_context_vk_callback) {
+  if (!context || !context->IsValid()) {
+    return;
+  }
+
+  auto aiks_context = std::make_shared<impeller::AiksContext>(
+      context, impeller::TypographerContextSkia::Make());
+  if (!aiks_context->IsValid()) {
+    return;
+  }
+
+  impeller_context_ = std::move(context);
+  aiks_context_ = std::move(aiks_context);
+  is_valid_ = !!aiks_context_;
+
+  surface_frame_layer_ = std::make_unique<GPUSurfaceVulkanSurfaceFrameLayer>(delegate_, impeller_context_, aiks_context_);
+}
+
+// |Surface|
+GPUSurfaceVulkanImpeller::~GPUSurfaceVulkanImpeller() = default;
+
+// |Surface|
+bool GPUSurfaceVulkanImpeller::IsValid() {
+  return is_valid_;
+}
+
+// |Surface|
+std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
+    const DlISize& size) {
+  return surface_frame_layer_->MakeSurfaceFrame(size);
+}
+
+// |Surface|
+// std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
+//     const DlISize& size) {
+//   if (!IsValid()) {
+//     FML_LOG(ERROR) << "Vulkan surface was invalid.";
+//     return nullptr;
+//   }
+
+//   if (size.IsEmpty()) {
+//     FML_LOG(ERROR) << "Vulkan surface was asked for an empty frame.";
+//     return nullptr;
+//   }
+
+//   // auto impeller_context = get_surface_context_vk_callback_(view_id);
+//   if (delegate_ == nullptr) {
+//     auto& context_vk = impeller::SurfaceContextVK::Cast(*impeller_context_);
+//     // auto& context_vk = impeller::SurfaceContextVK::Cast(*impeller_context);
+//     std::unique_ptr<impeller::Surface> surface =
+//         context_vk.AcquireNextSurface();
+
+//     if (!surface) {
+//       FML_LOG(ERROR) << "No surface available.";
+//       return nullptr;
+//     }
+
+//     impeller::RenderTarget render_target = surface->GetRenderTarget();
+//     auto cull_rect =
+//         impeller::Rect::MakeSize(render_target.GetRenderTargetSize());
+
+//     SurfaceFrame::EncodeCallback encode_callback = [aiks_context =
+//                                                         aiks_context_,  //
+//                                                     render_target,
+//                                                     cull_rect  //
+//     ](SurfaceFrame& surface_frame, DlCanvas* canvas) mutable -> bool {
+//       if (!aiks_context) {
+//         return false;
+//       }
+
+//       auto display_list = surface_frame.BuildDisplayList();
+//       if (!display_list) {
+//         FML_LOG(ERROR) << "Could not build display list for surface frame.";
+//         return false;
+//       }
+
+//       return impeller::RenderToTarget(
+//           aiks_context->GetContentContext(),                                //
+//           render_target,                                                    //
+//           display_list,                                                     //
+//           cull_rect,                                                        //
+//           /*reset_host_buffer=*/surface_frame.submit_info().frame_boundary  //
+//       );
+//     };
+
+//     return std::make_unique<SurfaceFrame>(
+//         nullptr,                          // surface
+//         SurfaceFrame::FramebufferInfo{},  // framebuffer info
+//         encode_callback,                  // encode callback
+//         fml::MakeCopyable([surface = std::move(surface)](const SurfaceFrame&) {
+//           return surface->Present();
+//         }),       // submit callback
+//         size,     // frame size
+//         nullptr,  // context result
+//         true      // display list fallback
+//     );
+//   } else {
+//     FlutterVulkanImage flutter_image = delegate_->AcquireImage(size);
+//     if (!flutter_image.image) {
+//       FML_LOG(ERROR) << "Invalid VkImage given by the embedder.";
+//       return nullptr;
+//     }
+//     impeller::vk::Format vk_format =
+//         static_cast<impeller::vk::Format>(flutter_image.format);
+//     std::optional<impeller::PixelFormat> format =
+//         impeller::VkFormatToImpellerFormat(vk_format);
+//     if (!format.has_value()) {
+//       FML_LOG(ERROR) << "Unsupported pixel format: "
+//                      << impeller::vk::to_string(vk_format);
+//       return nullptr;
+//     }
+
+//     impeller::vk::Image vk_image =
+//         impeller::vk::Image(reinterpret_cast<VkImage>(flutter_image.image));
+
+//     impeller::TextureDescriptor desc;
+//     desc.format = format.value();
+//     desc.size = impeller::ISize{size.width, size.height};
+//     desc.storage_mode = impeller::StorageMode::kDevicePrivate;
+//     desc.mip_count = 1;
+//     desc.compression_type = impeller::CompressionType::kLossless;
+//     desc.usage = impeller::TextureUsage::kRenderTarget;
+
+//     // auto surface_context_vk = get_surface_context_vk_callback_(view_id);
+//     impeller::ContextVK& context_vk =
+//         impeller::ContextVK::Cast(*impeller_context_);
+
+//     impeller::vk::ImageViewCreateInfo view_info = {};
+//     view_info.viewType = impeller::vk::ImageViewType::e2D;
+//     view_info.format = ToVKImageFormat(desc.format);
+//     view_info.subresourceRange.aspectMask =
+//         impeller::vk::ImageAspectFlagBits::eColor;
+//     view_info.subresourceRange.baseMipLevel = 0u;
+//     view_info.subresourceRange.baseArrayLayer = 0u;
+//     view_info.subresourceRange.levelCount = 1;
+//     view_info.subresourceRange.layerCount = 1;
+//     view_info.image = vk_image;
+
+//     auto [result, image_view] =
+//         context_vk.GetDevice().createImageView(view_info);
+//     if (result != impeller::vk::Result::eSuccess) {
+//       FML_LOG(ERROR) << "Failed to create image view for provided image: "
+//                      << impeller::vk::to_string(result);
+//       return nullptr;
+//     }
+
+//     if (transients_ == nullptr) {
+//       transients_ = std::make_shared<impeller::SwapchainTransientsVK>(
+//           impeller_context_, desc,
+//           /*enable_msaa=*/true);
+//     }
+
+//     auto wrapped_onscreen =
+//         std::make_shared<WrappedTextureSourceVK>(vk_image, image_view, desc);
+//     auto surface = impeller::SurfaceVK::WrapSwapchainImage(
+//         transients_, wrapped_onscreen, [&]() -> bool { return true; });
+//     impeller::RenderTarget render_target = surface->GetRenderTarget();
+//     auto cull_rect =
+//         impeller::Rect::MakeSize(render_target.GetRenderTargetSize());
+
+//     SurfaceFrame::EncodeCallback encode_callback = [aiks_context =
+//                                                         aiks_context_,  //
+//                                                     render_target,
+//                                                     cull_rect  //
+//     ](SurfaceFrame& surface_frame, DlCanvas* canvas) mutable -> bool {
+//       if (!aiks_context) {
+//         return false;
+//       }
+
+//       auto display_list = surface_frame.BuildDisplayList();
+//       if (!display_list) {
+//         FML_LOG(ERROR) << "Could not build display list for surface frame.";
+//         return false;
+//       }
+
+//       return impeller::RenderToTarget(aiks_context->GetContentContext(),  //
+//                                       render_target,                      //
+//                                       display_list,                       //
+//                                       cull_rect,                          //
+//                                       /*reset_host_buffer=*/true          //
+//       );
+//     };
+
+//     SurfaceFrame::SubmitCallback submit_callback =
+//         [image = flutter_image, delegate = delegate_,
+//          impeller_context = impeller_context_,
+//          wrapped_onscreen](const SurfaceFrame&) -> bool {
+//       TRACE_EVENT0("flutter", "GPUSurfaceVulkan::PresentImage");
+
+//       {
+//         const auto& context = impeller::ContextVK::Cast(*impeller_context);
+
+//         //----------------------------------------------------------------------------
+//         /// Transition the image to color-attachment-optimal.
+//         ///
+//         auto cmd_buffer = context.CreateCommandBuffer();
+
+//         auto vk_final_cmd_buffer =
+//             impeller::CommandBufferVK::Cast(*cmd_buffer).GetCommandBuffer();
+//         {
+//           impeller::BarrierVK barrier;
+//           barrier.new_layout =
+//               impeller::vk::ImageLayout::eColorAttachmentOptimal;
+//           barrier.cmd_buffer = vk_final_cmd_buffer;
+//           barrier.src_access =
+//               impeller::vk::AccessFlagBits::eColorAttachmentWrite;
+//           barrier.src_stage =
+//               impeller::vk::PipelineStageFlagBits::eColorAttachmentOutput;
+//           barrier.dst_access = {};
+//           barrier.dst_stage =
+//               impeller::vk::PipelineStageFlagBits::eBottomOfPipe;
+
+//           if (!wrapped_onscreen->SetLayout(barrier).ok()) {
+//             return false;
+//           }
+//         }
+//         if (!context.GetCommandQueue()->Submit({cmd_buffer}).ok()) {
+//           return false;
+//         }
+//       }
+
+//       return delegate->PresentImage(reinterpret_cast<VkImage>(image.image),
+//                                     static_cast<VkFormat>(image.format));
+//     };
+
+//     SurfaceFrame::FramebufferInfo framebuffer_info{.supports_readback = true};
+
+//     return std::make_unique<SurfaceFrame>(nullptr,           // surface
+//                                           framebuffer_info,  // framebuffer info
+//                                           encode_callback,   // encode callback
+//                                           submit_callback,
+//                                           size,     // frame size
+//                                           nullptr,  // context result
+//                                           true      // display list fallback
+//     );
+//   }
+// }
 
 // |Surface|
 DlMatrix GPUSurfaceVulkanImpeller::GetRootTransformation() const {

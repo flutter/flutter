@@ -158,6 +158,22 @@ class SurfaceFrame {
   FML_DISALLOW_COPY_AND_ASSIGN(SurfaceFrame);
 };
 
+class SurfaceFrameLayer {
+public:
+  using CreateSurfaceFrameLayerCallback =
+      std::function<std::unique_ptr<SurfaceFrameLayer>(
+          int64_t flutter_view_id)>;
+  using GetSurfaceFrameLayerCallback =
+      std::function<SurfaceFrameLayer*(
+          int64_t flutter_view_id)>;
+
+  SurfaceFrameLayer() = default;
+
+  virtual ~SurfaceFrameLayer() = default;
+
+  virtual std::unique_ptr<SurfaceFrame> MakeSurfaceFrame(const DlISize& frame_size) = 0;
+};
+
 }  // namespace flutter
 
 #endif  // FLUTTER_FLOW_SURFACE_FRAME_H_

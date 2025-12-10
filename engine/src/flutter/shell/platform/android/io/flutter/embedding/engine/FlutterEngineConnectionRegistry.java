@@ -315,7 +315,7 @@ import java.util.Set;
       @NonNull ExclusiveAppComponent<Activity> exclusiveActivity, @NonNull Lifecycle lifecycle) {
     try (TraceSection e = TraceSection.scoped("FlutterEngineConnectionRegistry#attachToActivity")) {
       if (this.exclusiveActivity != null) {
-        this.exclusiveActivity.detachFromFlutterEngine();
+        // this.exclusiveActivity.detachFromFlutterEngine();
       }
       // If we were already attached to an app component, detach from it.
       detachFromAppComponent();

@@ -111,10 +111,10 @@ public class PlatformViewsControllerDelegator
     }
   }
 
-  @Override
-  public void synchronizeToNativeViewHierarchy(boolean yes) {
-    platformViewsController.channelHandler.synchronizeToNativeViewHierarchy(yes);
-  }
+//  @Override
+//  public void synchronizeToNativeViewHierarchy(boolean yes) {
+//    platformViewsController.channelHandler.synchronizeToNativeViewHierarchy(yes);
+//  }
 
   /** Returns true if creation of HC++ platform views is currently supported. */
   @Override

@@ -7,6 +7,7 @@
 
 #include <unordered_map>
 
+#include "flutter/common/constants.h"
 #include "flutter/common/task_runners.h"
 #include "flutter/flow/embedded_views.h"
 #include "flutter/shell/platform/android/context/android_context.h"
@@ -15,6 +16,144 @@
 #include "flutter/shell/platform/android/surface/android_surface.h"
 
 namespace flutter {
+
+class AndroidExternalView {
+ public:
+  AndroidExternalView(
+      const AndroidContext& android_context,
+      std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
+      std::shared_ptr<AndroidSurfaceFactory> surface_factory,
+      const TaskRunners& task_runners,
+      int64_t flutter_view_id,
+      const SurfaceFrameLayer::GetSurfaceFrameLayerCallback& get_surface_frame_layer_callback);
+
+  void CollectView(int64_t view_id);
+
+  // |ExternalViewEmbedder|
+  void PrerollCompositeEmbeddedView(
+      int64_t view_id,
+      std::unique_ptr<flutter::EmbeddedViewParams> params) ;
+
+  // |ExternalViewEmbedder|
+  DlCanvas* CompositeEmbeddedView(int64_t view_id) ;
+
+  // |ExternalViewEmbedder|
+  void SubmitFlutterView(
+      int64_t flutter_view_id,
+      GrDirectContext* context,
+      const std::shared_ptr<impeller::AiksContext>& aiks_context,
+      std::unique_ptr<SurfaceFrame> frame);
+
+  // |ExternalViewEmbedder|
+  PostPrerollResult PostPrerollAction(
+
+      const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger)
+       ;
+
+  // |ExternalViewEmbedder|
+  DlCanvas* GetRootCanvas() ;
+
+  // |ExternalViewEmbedder|
+  void BeginFrame(GrDirectContext* context,
+                  const fml::RefPtr<fml::RasterThreadMerger>&
+                      raster_thread_merger);
+
+  // |ExternalViewEmbedder|
+  void PrepareFlutterView(int64_t flutter_view_id,
+                          DlISize frame_size,
+                          double device_pixel_ratio) ;
+
+  // |ExternalViewEmbedder|
+  void CancelFrame() ;
+
+  // |ExternalViewEmbedder|
+  void EndFrame(bool should_resubmit_frame,
+                const fml::RefPtr<fml::RasterThreadMerger>&
+                    raster_thread_merger) ;
+
+  // |ExternalViewEmbedder|
+//   bool SupportsDynamicThreadMerging() override;
+
+  // |ExternalViewEmbedder|
+//   void Teardown() override ;
+
+  // Gets the rect based on the device pixel ratio of a platform view displayed
+  // on the screen.
+  DlRect GetViewRect(int64_t view_id) const;
+
+  std::unique_ptr<SurfaceFrame> AcquireRootFrame();
+
+ private:
+  // The number of frames the rasterizer task runner will continue
+  // to run on the platform thread after no platform view is rendered.
+  //
+  // Note: this is an arbitrary number that attempts to account for cases
+  // where the platform view might be momentarily off the screen.
+  static const int kDefaultMergedLeaseDuration = 10;
+
+  // Provides metadata to the Android surfaces.
+  const AndroidContext& android_context_;
+
+  // Allows to call methods in Java.
+  const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
+
+  // Allows to create surfaces.
+  const std::shared_ptr<AndroidSurfaceFactory> surface_factory_;
+
+  // Holds surfaces. Allows to recycle surfaces or allocate new ones.
+  const std::unique_ptr<SurfacePool> surface_pool_;
+
+  // The task runners.
+  const TaskRunners task_runners_;
+
+  // The size of the root canvas.
+  DlISize frame_size_;
+
+  // The pixel ratio used to determinate the size of a platform view layer
+  // relative to the device layout system.
+  double device_pixel_ratio_;
+
+  // The order of composition. Each entry contains a unique id for the platform
+  // view.
+  std::vector<int64_t> composition_order_;
+
+  // The |EmbedderViewSlice| implementation keyed off the platform view id,
+  // which contains any subsequent operations until the next platform view or
+  // the end of the last leaf node in the layer tree.
+  std::unordered_map<int64_t, std::unique_ptr<EmbedderViewSlice>> slices_;
+
+  // The params for a platform view, which contains the size, position and
+  // mutation stack.
+  std::unordered_map<int64_t, EmbeddedViewParams> view_params_;
+
+  // The number of platform views in the previous frame.
+  int64_t previous_frame_view_count_;
+
+  int64_t flutter_view_id_;
+
+  const SurfaceFrameLayer::GetSurfaceFrameLayerCallback& get_surface_frame_layer_callback_;
+
+  std::unique_ptr<SurfaceFrameLayer> surface_frame_layer_;
+
+  // Destroys the surfaces created from the surface factory.
+  // This method schedules a task on the platform thread, and waits for
+  // the task until it completes.
+  void DestroySurfaces(int64_t flutter_view_id);
+
+  // Resets the state.
+  void Reset() ;
+
+  // Whether the layer tree in the current frame has platform layers.
+  bool FrameHasPlatformLayers() ;
+
+  // Creates a Surface when needed or recycles an existing one.
+  // Finally, draws the picture on the frame's canvas.
+  std::unique_ptr<SurfaceFrame> CreateSurfaceIfNeeded(GrDirectContext* context,
+                                                      int64_t flutter_view_id,
+                                                      int64_t view_id,
+                                                      EmbedderViewSlice* slice,
+                                                      const DlRect& rect);
+};
 
 //------------------------------------------------------------------------------
 /// Allows to embed Android views into a Flutter application.
@@ -32,7 +171,12 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
       const AndroidContext& android_context,
       std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
       std::shared_ptr<AndroidSurfaceFactory> surface_factory,
-      const TaskRunners& task_runners);
+      const TaskRunners& task_runners,
+      const SurfaceFrameLayer::GetSurfaceFrameLayerCallback& get_surface_frame_layer_callback);
+
+//   void SetCurrentProcessingView(int64_t flutter_view_id) override;
+
+  void CollectView(int64_t view_id) override;
 
   // |ExternalViewEmbedder|
   void PrerollCompositeEmbeddedView(
@@ -63,7 +207,8 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
                       raster_thread_merger) override;
 
   // |ExternalViewEmbedder|
-  void PrepareFlutterView(DlISize frame_size,
+  void PrepareFlutterView(int64_t flutter_view_id,
+                          DlISize frame_size,
                           double device_pixel_ratio) override;
 
   // |ExternalViewEmbedder|
@@ -74,6 +219,8 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
                 const fml::RefPtr<fml::RasterThreadMerger>&
                     raster_thread_merger) override;
 
+  bool SkipFrame(int64_t flutter_view_id) override;
+
   // |ExternalViewEmbedder|
   bool SupportsDynamicThreadMerging() override;
 
@@ -83,6 +230,8 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
   // Gets the rect based on the device pixel ratio of a platform view displayed
   // on the screen.
   DlRect GetViewRect(int64_t view_id) const;
+
+  std::unique_ptr<SurfaceFrame> AcquireRootFrame(int64_t flutter_view_id) override;
 
  private:
   // The number of frames the rasterizer task runner will continue
@@ -147,6 +296,16 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
                                                       int64_t view_id,
                                                       EmbedderViewSlice* slice,
                                                       const DlRect& rect);
+
+
+  std::unordered_map<int64_t, std::unique_ptr<AndroidExternalView>> pending_views_;
+
+  int64_t pending_flutter_view_id_ = kFlutterImplicitViewId;
+
+  const SurfaceFrameLayer::GetSurfaceFrameLayerCallback& get_surface_frame_layer_callback_;
+//   std::unordered_map<int64_t, std::unique_ptr<SurfaceFrameLayer>> frame_layers_;
+//   DlISize pending_frame_size_;
+
 };
 
 }  // namespace flutter

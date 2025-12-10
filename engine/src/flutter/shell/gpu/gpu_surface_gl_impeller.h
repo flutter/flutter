@@ -15,11 +15,35 @@
 
 namespace flutter {
 
+class GPUSurfaceGLSurfaceFrameLayer : public SurfaceFrameLayer {
+public:
+  GPUSurfaceGLSurfaceFrameLayer(
+      // const DlISize& frame_size,
+                  GPUSurfaceGLDelegate* delegate,
+                  const std::shared_ptr<impeller::Context>& context,
+                  const std::shared_ptr<impeller::AiksContext>& aiks_context
+              );
+
+  ~GPUSurfaceGLSurfaceFrameLayer();
+
+  std::unique_ptr<SurfaceFrame> MakeSurfaceFrame(const DlISize& frame_size) override;
+private:
+  bool IsValid();
+
+  fml::TaskRunnerAffineWeakPtrFactory<GPUSurfaceGLSurfaceFrameLayer> weak_factory_;
+  GPUSurfaceGLDelegate* delegate_ = nullptr;
+  std::shared_ptr<impeller::Context> impeller_context_;
+  std::shared_ptr<impeller::AiksContext> aiks_context_;
+  bool is_valid_ = false;
+};
+
 class GPUSurfaceGLImpeller final : public Surface {
  public:
+ using GetGPUSurfaceGLDelegateCallback = std::function<GPUSurfaceGLDelegate*(int64_t view_id)>;
   explicit GPUSurfaceGLImpeller(GPUSurfaceGLDelegate* delegate,
                                 std::shared_ptr<impeller::Context> context,
-                                bool render_to_surface);
+                                bool render_to_surface,
+                              const GetGPUSurfaceGLDelegateCallback& get_gpu_surface_delegate = {});
 
   // |Surface|
   ~GPUSurfaceGLImpeller() override;
@@ -35,7 +59,17 @@ class GPUSurfaceGLImpeller final : public Surface {
   bool is_valid_ = false;
   fml::TaskRunnerAffineWeakPtrFactory<GPUSurfaceGLImpeller> weak_factory_;
 
-  // |Surface|
+  const GetGPUSurfaceGLDelegateCallback get_gpu_surface_delegate_;
+
+  std::unique_ptr<GPUSurfaceGLSurfaceFrameLayer> surface_frame_layer_;
+
+  // // |Surface|
+  // std::unique_ptr<SurfaceFrame> AcquireFrame(const DlISize& size, int64_t view_id = kFlutterImplicitViewId) override;
+
+  // // |Surface|
+  // DlMatrix GetRootTransformation(int64_t view_id = kFlutterImplicitViewId) const override;
+
+    // |Surface|
   std::unique_ptr<SurfaceFrame> AcquireFrame(const DlISize& size) override;
 
   // |Surface|

@@ -131,10 +131,10 @@ public class FlutterView extends FrameLayout
   //
   // These components essentially add some additional behavioral logic on top of
   // existing, stateless system channels, e.g., MouseCursorChannel, TextInputChannel, etc.
-  @Nullable private MouseCursorPlugin mouseCursorPlugin;
+//  @Nullable private MouseCursorPlugin mouseCursorPlugin;
   @Nullable private TextInputPlugin textInputPlugin;
-  @Nullable private SpellCheckPlugin spellCheckPlugin;
-  @Nullable private ScribePlugin scribePlugin;
+//  @Nullable private SpellCheckPlugin spellCheckPlugin;
+//  @Nullable private ScribePlugin scribePlugin;
   @Nullable private LocalizationPlugin localizationPlugin;
   @Nullable private KeyboardManager keyboardManager;
   @Nullable private AndroidTouchProcessor androidTouchProcessor;
@@ -197,6 +197,9 @@ public class FlutterView extends FrameLayout
       };
 
   private Consumer<WindowLayoutInfo> windowInfoListener;
+
+  private static long nextViewId = 0; // Match the `kFlutterImplicitViewId`
+  @NonNull private long viewId;
 
   /**
    * Constructs a {@code FlutterView} programmatically, without any XML attributes.
@@ -370,14 +373,19 @@ public class FlutterView extends FrameLayout
   private void init() {
     Log.v(TAG, "Initializing FlutterView");
 
+    viewId = nextViewId++;
+
     if (flutterSurfaceView != null) {
       Log.v(TAG, "Internally using a FlutterSurfaceView.");
+      flutterSurfaceView.setViewId(viewId);
       addView(flutterSurfaceView);
     } else if (flutterTextureView != null) {
       Log.v(TAG, "Internally using a FlutterTextureView.");
+      flutterTextureView.setViewId(viewId);
       addView(flutterTextureView);
     } else {
       Log.v(TAG, "Internally using a FlutterImageView.");
+      flutterImageView.setViewId(viewId);
       addView(flutterImageView);
     }
 
@@ -879,7 +887,7 @@ public class FlutterView extends FrameLayout
     // superclass. The key processor will typically handle all events except
     // those where it has re-dispatched the event after receiving a reply from
     // the framework that the framework did not handle it.
-    return (isAttachedToFlutterEngine() && keyboardManager.handleEvent(event))
+    return (isAttachedToFlutterEngine() && keyboardManager.handleEvent(event, this))
         || super.dispatchKeyEvent(event);
   }
 
@@ -1057,10 +1065,10 @@ public class FlutterView extends FrameLayout
 
   // -------- Start: Keyboard -------
 
-  @Override
-  public BinaryMessenger getBinaryMessenger() {
-    return flutterEngine.getDartExecutor();
-  }
+//  @Override
+//  public BinaryMessenger getBinaryMessenger() {
+//    return flutterEngine.getDartExecutor();
+//  }
 
   @Override
   public boolean onTextInputKeyEvent(@NonNull KeyEvent keyEvent) {
@@ -1114,37 +1122,39 @@ public class FlutterView extends FrameLayout
 
     // Initialize various components that know how to process Android View I/O
     // in a way that Flutter understands.
-    mouseCursorPlugin = new MouseCursorPlugin(this, this.flutterEngine.getMouseCursorChannel());
+//    mouseCursorPlugin = new MouseCursorPlugin(this, this.flutterEngine.getMouseCursorChannel());
 
-    textInputPlugin =
-        new TextInputPlugin(
-            this,
-            this.flutterEngine.getTextInputChannel(),
-            this.flutterEngine.getScribeChannel(),
-            this.flutterEngine
-                .getPlatformViewsController(), // TODO(gmackall): this can be changed to take a pvc
-            // delegator.
-            this.flutterEngine.getPlatformViewsController2());
+    this.flutterEngine.getMouseCursorPlugin().attachToView(viewId, this);
+
+    textInputPlugin = this.flutterEngine.getTextInputPlugin();
+    textInputPlugin.attachToView(this);
+
+//    textInputPlugin =
+//        new TextInputPlugin(
+//            this,
+//            this.flutterEngine.getTextInputChannel(),
+//            this.flutterEngine.getScribeChannel(),
+//            this.flutterEngine.getPlatformViewsController(),
+//            this.flutterEngine.getPlatformViewsController2());
 
     try {
       textServicesManager =
-          (TextServicesManager)
-              getContext().getSystemService(Context.TEXT_SERVICES_MANAGER_SERVICE);
-      spellCheckPlugin =
-          new SpellCheckPlugin(textServicesManager, this.flutterEngine.getSpellCheckChannel());
+              (TextServicesManager)
+                      getContext().getSystemService(Context.TEXT_SERVICES_MANAGER_SERVICE);
     } catch (Exception e) {
       Log.e(TAG, "TextServicesManager not supported by device, spell check disabled.");
     }
 
-    scribePlugin =
-        new ScribePlugin(
-            this, textInputPlugin.getInputMethodManager(), this.flutterEngine.getScribeChannel());
+//    scribePlugin =
+//        new ScribePlugin(
+//            this, textInputPlugin.getInputMethodManager(), this.flutterEngine.getScribeChannel());
 
     localizationPlugin = this.flutterEngine.getLocalizationPlugin();
 
-    keyboardManager = new KeyboardManager(this);
+    keyboardManager = this.flutterEngine.getKeyboardManager();
     androidTouchProcessor =
         new AndroidTouchProcessor(this.flutterEngine.getRenderer(), /*trackMotionEvents=*/ false);
+    androidTouchProcessor.setViewId(viewId);
 
     accessibilityBridge =
         new AccessibilityBridge(
@@ -1158,17 +1168,21 @@ public class FlutterView extends FrameLayout
         accessibilityBridge.isAccessibilityEnabled(),
         accessibilityBridge.isTouchExplorationEnabled());
 
+//      androidTouchProcessor =
+//              new AndroidTouchProcessor(this.flutterEngine.getRenderer(), /*trackMotionEvents=*/ false);
+//      androidTouchProcessor.setViewId(viewId);
+
     // Connect AccessibilityBridge to the PlatformViewsController within the FlutterEngine.
     // This allows platform Views to hook into Flutter's overall accessibility system.
     this.flutterEngine.getPlatformViewsController().attachAccessibilityBridge(accessibilityBridge);
     this.flutterEngine
-        .getPlatformViewsController()
-        .attachToFlutterRenderer(this.flutterEngine.getRenderer());
+            .getPlatformViewsController()
+            .attachToFlutterRenderer(this.flutterEngine.getRenderer(), viewId);
 
     this.flutterEngine.getPlatformViewsController2().attachAccessibilityBridge(accessibilityBridge);
     this.flutterEngine
-        .getPlatformViewsController2()
-        .attachToFlutterRenderer(this.flutterEngine.getRenderer());
+            .getPlatformViewsController2()
+            .attachToFlutterRenderer(this.flutterEngine.getRenderer());
 
     // Inform the Android framework that it should retrieve a new InputConnection
     // now that an engine is attached.
@@ -1178,16 +1192,29 @@ public class FlutterView extends FrameLayout
     // Push View and Context related information from Android to Flutter.
     sendUserSettingsToFlutter();
     getContext()
-        .getContentResolver()
-        .registerContentObserver(
-            Settings.System.getUriFor(Settings.System.TEXT_SHOW_PASSWORD),
-            false,
-            systemSettingsObserver);
+            .getContentResolver()
+            .registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.TEXT_SHOW_PASSWORD),
+                    false,
+                    systemSettingsObserver);
 
     sendViewportMetricsToFlutter();
 
     flutterEngine.getPlatformViewsController().attachToView(this);
     flutterEngine.getPlatformViewsController2().attachToView(this);
+
+    if (viewId == 0) {
+
+    } else {
+//      androidTouchProcessor =
+//              new AndroidTouchProcessor(this.flutterEngine.getRenderer(), /*trackMotionEvents=*/ true);
+//      androidTouchProcessor.setViewId(viewId);
+      addViewIfNeeded();
+    }
+
+
+
+
 
     // Notify engine attachment listeners of the attachment.
     for (FlutterEngineAttachmentListener listener : flutterEngineAttachmentListeners) {
@@ -1228,7 +1255,7 @@ public class FlutterView extends FrameLayout
 
     getContext().getContentResolver().unregisterContentObserver(systemSettingsObserver);
 
-    flutterEngine.getPlatformViewsController().detachFromView();
+    flutterEngine.getPlatformViewsController().detachFromView(viewId);
     flutterEngine.getPlatformViewsController2().detachFromView();
 
     // Disconnect the FlutterEngine's PlatformViewsController from the AccessibilityBridge.
@@ -1244,21 +1271,24 @@ public class FlutterView extends FrameLayout
     // signifies that this View does not process input (until a new engine is attached).
     // TODO(mattcarroll): once this is proven to work, move this line ot TextInputPlugin
     textInputPlugin.getInputMethodManager().restartInput(this);
-    textInputPlugin.destroy();
-    keyboardManager.destroy();
-    if (spellCheckPlugin != null) {
-      spellCheckPlugin.destroy();
-    }
-
-    if (mouseCursorPlugin != null) {
-      mouseCursorPlugin.destroy();
-    }
+//    textInputPlugin.destroy();
+    textInputPlugin.detachFromView(viewId);
+    textInputPlugin = null;
+    keyboardManager = null;
+//    if (spellCheckPlugin != null) {
+//      spellCheckPlugin.destroy();
+//    }
+//
+//    if (mouseCursorPlugin != null) {
+//      mouseCursorPlugin.destroy();
+//    }
 
     // Instruct our FlutterRenderer that we are no longer interested in being its RenderSurface.
     FlutterRenderer flutterRenderer = flutterEngine.getRenderer();
     isFlutterUiDisplayed = false;
     flutterRenderer.removeIsDisplayingFlutterUiListener(flutterUiDisplayListener);
-    flutterRenderer.stopRenderingToSurface();
+    flutterRenderer.stopRenderingToSurface(viewId);
+    flutterRenderer.removeView(viewId);
     flutterRenderer.setSemanticsEnabled(false);
 
     // Revert the image view to previous surface
@@ -1287,8 +1317,10 @@ public class FlutterView extends FrameLayout
   @VisibleForTesting
   @NonNull
   public FlutterImageView createImageView() {
-    return new FlutterImageView(
-        getContext(), getWidth(), getHeight(), FlutterImageView.SurfaceKind.background);
+    FlutterImageView view = new FlutterImageView(
+            getContext(), getWidth(), getHeight(), FlutterImageView.SurfaceKind.background);
+    view.setViewId(viewId);
+    return view;
   }
 
   @VisibleForTesting
@@ -1500,7 +1532,37 @@ public class FlutterView extends FrameLayout
     viewportMetrics.devicePixelRatio = getResources().getDisplayMetrics().density;
     viewportMetrics.physicalTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
 
-    flutterEngine.getRenderer().setViewportMetrics(viewportMetrics);
+    flutterEngine.getRenderer().setViewportMetrics(viewId, viewportMetrics);
+  }
+
+  private void addViewIfNeeded() {
+    if (!isAttachedToFlutterEngine()) {
+      Log.w(
+              TAG,
+              "Tried to send viewport metrics from Android to Flutter but this "
+                      + "FlutterView was not attached to a FlutterEngine.");
+      return;
+    }
+
+    // viewportMetrics.devicePixelRatio = getResources().getDisplayMetrics().density;
+    // viewportMetrics.physicalTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
+
+          Log.v(
+              TAG,
+              "flutterEngine.getRenderer().addViewIfNeeded(viewId, viewportMetrics);");
+    flutterEngine.getRenderer().addViewIfNeeded(viewId, viewportMetrics);
+  }
+
+  private void removeView() {
+    if (!isAttachedToFlutterEngine()) {
+      Log.w(
+              TAG,
+              "Tried to send viewport metrics from Android to Flutter but this "
+                      + "FlutterView was not attached to a FlutterEngine.");
+      return;
+    }
+
+    flutterEngine.getRenderer().removeView(viewId);
   }
 
   @Override
@@ -1523,6 +1585,10 @@ public class FlutterView extends FrameLayout
     if (renderSurface instanceof FlutterSurfaceView) {
       ((FlutterSurfaceView) renderSurface).setVisibility(visibility);
     }
+  }
+
+  public long getViewId() {
+    return this.viewId;
   }
 
   /**

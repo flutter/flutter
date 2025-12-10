@@ -2209,6 +2209,7 @@ bool Shell::OnServiceProtocolReloadAssetFonts(
 void Shell::OnPlatformViewAddView(int64_t view_id,
                                   const ViewportMetrics& viewport_metrics,
                                   AddViewCallback callback) {
+  FML_LOG(ERROR) << "Shell::OnPlatformViewAddView: " << view_id;
   TRACE_EVENT0("flutter", "Shell::AddView");
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
@@ -2233,9 +2234,9 @@ void Shell::OnPlatformViewRemoveView(int64_t view_id,
   TRACE_EVENT0("flutter", "Shell::RemoveView");
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
-  FML_DCHECK(view_id != kFlutterImplicitViewId)
-      << "Unexpected request to remove the implicit view #"
-      << kFlutterImplicitViewId << ". This view should never be removed.";
+  // FML_DCHECK(view_id != kFlutterImplicitViewId)
+  //     << "Unexpected request to remove the implicit view #"
+  //     << kFlutterImplicitViewId << ". This view should never be removed.";
   {
     std::scoped_lock<std::mutex> lock(resize_mutex_);
     expected_frame_constraints_.erase(view_id);

@@ -45,6 +45,8 @@ source_set("gpu_surface_gl") {
     sources += [
       "gpu_surface_gl_impeller.cc",
       "gpu_surface_gl_impeller.h",
+      "gpu_surface_multi_view.cc",
+      "gpu_surface_multi_view.h",
     ]
 
     public_deps += [ "//flutter/impeller" ]

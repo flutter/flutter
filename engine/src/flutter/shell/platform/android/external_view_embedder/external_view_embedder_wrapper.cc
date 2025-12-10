@@ -18,13 +18,15 @@ AndroidExternalViewEmbedderWrapper::AndroidExternalViewEmbedderWrapper(
     const AndroidContext& android_context,
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
     std::shared_ptr<AndroidSurfaceFactory> surface_factory,
-    const TaskRunners& task_runners)
+    const TaskRunners& task_runners,
+  const SurfaceFrameLayer::GetSurfaceFrameLayerCallback& get_surface_frame_layer_callback)
     : ExternalViewEmbedder(),
       meets_hcpp_criteria_(meets_hcpp_criteria),
       android_context_(android_context),
       task_runners_(task_runners),
       jni_facade_(std::move(jni_facade)),
-      surface_factory_(std::move(surface_factory)) {}
+      surface_factory_(std::move(surface_factory)),
+      get_surface_frame_layer_callback_(get_surface_frame_layer_callback) {}
 
 void AndroidExternalViewEmbedderWrapper::EnsureInitialized() {
   if (non_hcpp_view_embedder_ || hcpp_view_embedder_) {
@@ -38,7 +40,7 @@ void AndroidExternalViewEmbedderWrapper::EnsureInitialized() {
         android_context_, jni_facade_, surface_factory_, task_runners_);
   } else {
     non_hcpp_view_embedder_ = std::make_unique<AndroidExternalViewEmbedder>(
-        android_context_, jni_facade_, surface_factory_, task_runners_);
+        android_context_, jni_facade_, surface_factory_, task_runners_, get_surface_frame_layer_callback_);
   }
 }
 
@@ -73,6 +75,7 @@ void AndroidExternalViewEmbedderWrapper::SubmitFlutterView(
     GrDirectContext* context,
     const std::shared_ptr<impeller::AiksContext>& aiks_context,
     std::unique_ptr<SurfaceFrame> frame) {
+
   EnsureInitialized();
   if (hcpp_view_embedder_) {
     hcpp_view_embedder_->SubmitFlutterView(flutter_view_id, context,
@@ -113,13 +116,14 @@ void AndroidExternalViewEmbedderWrapper::BeginFrame(
 
 // |ExternalViewEmbedder|
 void AndroidExternalViewEmbedderWrapper::PrepareFlutterView(
+    int64_t flutter_view_id,
     DlISize frame_size,
     double device_pixel_ratio) {
   EnsureInitialized();
   if (hcpp_view_embedder_) {
-    hcpp_view_embedder_->PrepareFlutterView(frame_size, device_pixel_ratio);
+    hcpp_view_embedder_->PrepareFlutterView(flutter_view_id, frame_size, device_pixel_ratio);
   } else {
-    non_hcpp_view_embedder_->PrepareFlutterView(frame_size, device_pixel_ratio);
+    non_hcpp_view_embedder_->PrepareFlutterView(flutter_view_id, frame_size, device_pixel_ratio);
   }
 }
 
@@ -146,6 +150,15 @@ void AndroidExternalViewEmbedderWrapper::EndFrame(
   }
 }
 
+bool AndroidExternalViewEmbedderWrapper::SkipFrame(int64_t flutter_view_id) {
+  EnsureInitialized();
+  if (hcpp_view_embedder_) {
+    return hcpp_view_embedder_->SkipFrame(flutter_view_id);
+  } else {
+    return non_hcpp_view_embedder_->SkipFrame(flutter_view_id);
+  }
+}
+
 // |ExternalViewEmbedder|
 bool AndroidExternalViewEmbedderWrapper::SupportsDynamicThreadMerging() {
   EnsureInitialized();
@@ -163,6 +176,15 @@ void AndroidExternalViewEmbedderWrapper::Teardown() {
     hcpp_view_embedder_->Teardown();
   } else {
     non_hcpp_view_embedder_->Teardown();
+  }
+}
+
+std::unique_ptr<SurfaceFrame> AndroidExternalViewEmbedderWrapper::AcquireRootFrame(int64_t flutter_view_id) {
+  EnsureInitialized();
+  if (hcpp_view_embedder_) {
+    return hcpp_view_embedder_->AcquireRootFrame(flutter_view_id);
+  } else {
+    return non_hcpp_view_embedder_->AcquireRootFrame(flutter_view_id);
   }
 }
 

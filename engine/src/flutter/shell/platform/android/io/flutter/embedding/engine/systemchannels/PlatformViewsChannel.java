@@ -72,9 +72,9 @@ public class PlatformViewsChannel {
             case "clearFocus":
               clearFocus(call, result);
               break;
-            case "synchronizeToNativeViewHierarchy":
-              synchronizeToNativeViewHierarchy(call, result);
-              break;
+//            case "synchronizeToNativeViewHierarchy":
+//              synchronizeToNativeViewHierarchy(call, result);
+//              break;
             default:
               result.notImplemented();
           }
@@ -107,8 +107,10 @@ public class PlatformViewsChannel {
             //              return;
             //            }
             if (usesPlatformViewLayer) {
+              Log.e("PlatformViewsChannel", "1111viewid:" + ((Number) createArgs.get("flutterViewId")).longValue());
               final PlatformViewCreationRequest request =
                   PlatformViewCreationRequest.createHybridCompositionRequest(
+                      ((Number) createArgs.get("flutterViewId")).longValue(),
                       (int) createArgs.get("id"),
                       (String) createArgs.get("viewType"),
                       (int) createArgs.get("direction"),
@@ -119,8 +121,16 @@ public class PlatformViewsChannel {
               final boolean hybridFallback =
                   createArgs.containsKey("hybridFallback")
                       && (boolean) createArgs.get("hybridFallback");
+              final PlatformViewCreationRequest.RequestedDisplayMode displayMode =
+                  hybridFallback
+                      ? PlatformViewCreationRequest.RequestedDisplayMode
+                          .TEXTURE_WITH_HYBRID_FALLBACK
+                      : PlatformViewCreationRequest.RequestedDisplayMode
+                          .TEXTURE_WITH_VIRTUAL_FALLBACK;
+              Log.e("PlatformViewsChannel", "222viewid:" + ((Number) createArgs.get("flutterViewId")).longValue());
               final PlatformViewCreationRequest request =
                   PlatformViewCreationRequest.createTLHCWithFallbackRequest(
+                      ((Number) createArgs.get("flutterViewId")).longValue(),
                       (int) createArgs.get("id"),
                       (String) createArgs.get("viewType"),
                       createArgs.containsKey("top") ? (double) createArgs.get("top") : 0.0,
@@ -249,16 +259,16 @@ public class PlatformViewsChannel {
           }
         }
 
-        private void synchronizeToNativeViewHierarchy(
-            @NonNull MethodCall call, @NonNull MethodChannel.Result result) {
-          boolean yes = call.arguments();
-          try {
-            handler.synchronizeToNativeViewHierarchy(yes);
-            result.success(null);
-          } catch (IllegalStateException exception) {
-            result.error("error", detailedExceptionString(exception), null);
-          }
-        }
+//        private void synchronizeToNativeViewHierarchy(
+//            @NonNull MethodCall call, @NonNull MethodChannel.Result result) {
+//          boolean yes = call.arguments();
+//          try {
+//            handler.synchronizeToNativeViewHierarchy(yes);
+//            result.success(null);
+//          } catch (IllegalStateException exception) {
+//            result.error("error", detailedExceptionString(exception), null);
+//          }
+//        }
       };
 
   /**
@@ -370,7 +380,7 @@ public class PlatformViewsChannel {
      * <p>This is done to syncronize the rendering of the PlatformView and the FlutterView. Defaults
      * to true.
      */
-    void synchronizeToNativeViewHierarchy(boolean yes);
+//    void synchronizeToNativeViewHierarchy(boolean yes);
   }
 
   /** Request sent from Flutter to resize a platform view. */

@@ -46,6 +46,7 @@ void ShellTestExternalViewEmbedder::BeginFrame(
 
 // |ExternalViewEmbedder|
 void ShellTestExternalViewEmbedder::PrepareFlutterView(
+    int64_t flutter_view_id,
     DlISize frame_size,
     double device_pixel_ratio) {
   visited_platform_views_.clear();

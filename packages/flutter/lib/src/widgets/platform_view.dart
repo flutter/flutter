@@ -10,6 +10,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/src/widgets/view.dart';
 
 import '_html_element_view_io.dart' if (dart.library.js_interop) '_html_element_view_web.dart';
 import 'basic.dart';
@@ -716,6 +717,7 @@ class _AndroidViewState extends State<AndroidView> {
 
   @override
   Widget build(BuildContext context) {
+    _controller.flutterViewId = View.of(context).viewId;
     return Focus(
       focusNode: _focusNode,
       onFocusChange: _onFocusChange,
@@ -1226,6 +1228,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
     if (controller == null) {
       return const SizedBox.expand();
     }
+    controller.flutterViewId = View.of(context).viewId;
     if (!_platformViewCreated) {
       // Depending on the implementation, the first non-empty size can be used
       // to size the platform view.
