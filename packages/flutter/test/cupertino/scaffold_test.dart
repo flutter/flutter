@@ -587,4 +587,15 @@ void main() {
       const TextScaler.linear(99.0),
     );
   });
+
+  testWidgets('CupertinoPageScaffold does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(child: CupertinoPageScaffold(child: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoPageScaffold)), Size.zero);
+  });
 }
