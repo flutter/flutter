@@ -387,7 +387,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 }
 
 - (BOOL)platformViewShouldAcceptTouchAtTouchBeganLocation:(flutter::PointData)location
-                                                     viewId:(uint64_t)viewId {
+                                                   viewId:(uint64_t)viewId {
   if (!self.platformView) {
     return NO;
   }

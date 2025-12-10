@@ -1387,7 +1387,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 - (BOOL)platformViewShouldAcceptTouchAtTouchBeganLocation:(CGPoint)location {
   flutter::PointData point{location.x, location.y};
   return [self.engine platformViewShouldAcceptTouchAtTouchBeganLocation:point
-                                                                   viewId:self.viewIdentifier];
+                                                                 viewId:self.viewIdentifier];
 }
 
 #pragma mark - Touch events rate correction

@@ -583,7 +583,8 @@ static BOOL _preparedOnce = NO;
 
 - (UIView*)hitTest:(CGPoint)point withEvent:(UIEvent*)event {
   if (_blockingPolicy == FlutterPlatformViewGestureRecognizersBlockingPolicyTouchBlockingOnly) {
-    // In release mode, FlutterTouchInterceptingView's init is called before flutterViewController is set on platformViewsController.
+    // In release mode, FlutterTouchInterceptingView's init is called before flutterViewController
+    // is set on platformViewsController.
     if (self.flutterViewController == nil) {
       _flutterViewController = self.platformViewsController.flutterViewController;
     }

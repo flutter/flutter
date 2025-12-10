@@ -82,8 +82,7 @@ void PlatformConfiguration::DidCreateIsolate() {
   // "platform view" refers to the whole flutter view on engine side.
   embedded_view_should_accept_gesture_.Set(
       tonic::DartState::Current(),
-      Dart_GetField(library,
-                    tonic::ToDart("_platformViewShouldAcceptTouch")));
+      Dart_GetField(library, tonic::ToDart("_platformViewShouldAcceptTouch")));
   dispatch_semantics_action_.Set(
       tonic::DartState::Current(),
       Dart_GetField(library, tonic::ToDart("_dispatchSemanticsAction")));

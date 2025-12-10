@@ -341,22 +341,25 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 
   NSString* gestureBlockingPolicyValue = args[@"gestureBlockingPolicy"];
   FlutterPlatformViewGestureRecognizersBlockingPolicy gestureBlockingPolicy;
-  if ([gestureBlockingPolicyValue isEqualToString: kGestureBlockingPolicyTouchBlockingOnly]) {
+  if ([gestureBlockingPolicyValue isEqualToString:kGestureBlockingPolicyTouchBlockingOnly]) {
     gestureBlockingPolicy = FlutterPlatformViewGestureRecognizersBlockingPolicyTouchBlockingOnly;
-  } else if ([gestureBlockingPolicyValue isEqualToString: kGestureBlockingPolicyEagerValue]) {
+  } else if ([gestureBlockingPolicyValue isEqualToString:kGestureBlockingPolicyEagerValue]) {
     gestureBlockingPolicy = FlutterPlatformViewGestureRecognizersBlockingPolicyEager;
-  } else if ([gestureBlockingPolicyValue isEqualToString: kGestureBlockingPolicyWaitUntilTouchesEndedValue]) {
-    gestureBlockingPolicy = FlutterPlatformViewGestureRecognizersBlockingPolicyWaitUntilTouchesEnded;
-  } else if ([gestureBlockingPolicyValue isEqualToString: kGestureBlockingPolicyFallbackToPluginDefault]) {
+  } else if ([gestureBlockingPolicyValue
+                 isEqualToString:kGestureBlockingPolicyWaitUntilTouchesEndedValue]) {
+    gestureBlockingPolicy =
+        FlutterPlatformViewGestureRecognizersBlockingPolicyWaitUntilTouchesEnded;
+  } else if ([gestureBlockingPolicyValue
+                 isEqualToString:kGestureBlockingPolicyFallbackToPluginDefault]) {
     gestureBlockingPolicy = self.gestureRecognizersBlockingPoliciesByType[viewType];
   } else {
     gestureBlockingPolicy = FlutterPlatformViewGestureRecognizersBlockingPolicyEager;
   }
 
-  FlutterTouchInterceptingView* touchInterceptor = [[FlutterTouchInterceptingView alloc]
-                  initWithEmbeddedView:platformView
-               platformViewsController:self
-      gestureRecognizersBlockingPolicy: gestureBlockingPolicy];
+  FlutterTouchInterceptingView* touchInterceptor =
+      [[FlutterTouchInterceptingView alloc] initWithEmbeddedView:platformView
+                                         platformViewsController:self
+                                gestureRecognizersBlockingPolicy:gestureBlockingPolicy];
 
   ChildClippingView* clippingView = [[ChildClippingView alloc] initWithFrame:CGRectZero];
   [clippingView addSubview:touchInterceptor];

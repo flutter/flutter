@@ -1226,7 +1226,7 @@ bool Shell::OnPlatformViewEmbeddedNativeViewShouldAcceptTouch(
     const flutter::PointData& touch_began_location) {
   if (engine_) {
     return engine_->EmbeddedNativeViewShouldAcceptTouch(view_id,
-                                                          touch_began_location);
+                                                        touch_began_location);
   }
   return false;
 }
