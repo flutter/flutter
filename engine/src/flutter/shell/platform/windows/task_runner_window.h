@@ -19,6 +19,10 @@
 
 namespace flutter {
 
+namespace testing {
+class TestTaskRunnerWindow;
+}
+
 // Background timer thread. Necessary because neither SetTimer nor
 // CreateThreadpoolTimer have good enough accuracy not to affect the
 // framerate.
@@ -73,6 +77,7 @@ class TaskRunnerWindow {
   ~TaskRunnerWindow();
 
  private:
+  friend class testing::TestTaskRunnerWindow;
   TaskRunnerWindow();
 
   void ProcessTasks();
