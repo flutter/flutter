@@ -111,7 +111,7 @@ class DragStartDetails with Diagnosticable implements PositionedGestureDetails {
     properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
     properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(DiagnosticsProperty<Duration?>('sourceTimeStamp', sourceTimeStamp));
-    properties.add(EnumProperty<PointerDeviceKind?>('kind', kind));
+    properties.add(EnumProperty<PointerDeviceKind>('kind', kind));
     properties.add(IntProperty('buttons', buttons));
   }
 }
@@ -208,7 +208,7 @@ class DragUpdateDetails with Diagnosticable implements PositionedGestureDetails 
     properties.add(DiagnosticsProperty<Duration?>('sourceTimeStamp', sourceTimeStamp));
     properties.add(DiagnosticsProperty<Offset>('delta', delta));
     properties.add(DoubleProperty('primaryDelta', primaryDelta));
-    properties.add(EnumProperty<PointerDeviceKind?>('kind', kind));
+    properties.add(EnumProperty<PointerDeviceKind>('kind', kind));
     properties.add(IntProperty('buttons', buttons));
   }
 }
