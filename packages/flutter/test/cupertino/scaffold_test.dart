@@ -534,6 +534,7 @@ void main() {
 
   testWidgets('Tap the status bar scrolls to top', (WidgetTester tester) async {
     final scrollController = ScrollController(initialScrollOffset: 1000);
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       CupertinoApp(
         home: Builder(
