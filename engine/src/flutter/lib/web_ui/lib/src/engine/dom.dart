@@ -119,6 +119,11 @@ extension type DomWindow._(JSObject _) implements DomEventTarget {
   external DomVisualViewport? get visualViewport;
   external DomPerformance get performance;
 
+  /// The parent window of this window.
+  /// Returns null if this is the top-level window, or the same window
+  /// if not in an iframe.
+  external DomWindow? get parent;
+
   @visibleForTesting
   Future<Object?> fetch(String url) {
     // To make sure we have a consistent approach for handling and reporting
@@ -2639,4 +2644,39 @@ extension type DomTextCluster._(JSObject _) implements JSObject {
   external int get end;
   external double get x;
   external double get y;
+}
+
+/// Testing hook for parent postMessage; when set, scrollParentWindow invokes
+/// this callback with a Dart map message instead of calling the parent's
+/// `_postMessage`.
+@visibleForTesting
+void Function(Object message, String targetOrigin)? debugParentPostMessageHandler;
+
+/// Scrolls the parent/host window by the given delta using postMessage.
+///
+/// Used when Flutter is embedded in an iframe and needs to scroll the parent
+/// page. This uses postMessage for cross-origin safety - the host page must
+/// add a message listener to handle the scroll request.
+void scrollParentWindow(double deltaX, double deltaY) {
+  try {
+    final DomWindow? parent = domWindow.parent;
+    if (parent != null) {
+      // Use postMessage for cross-origin safety
+      final message = <String, Object>{
+        'type': 'flutter-scroll',
+        'deltaX': deltaX,
+        'deltaY': deltaY,
+      };
+      if (debugParentPostMessageHandler != null) {
+        debugParentPostMessageHandler!(message, '*');
+        return;
+      }
+      final JSAny messageJs = message.jsify()!;
+      if (!identical(parent, domWindow)) {
+        parent._postMessage(messageJs, '*');
+      }
+    }
+  } catch (e) {
+    // Silently fail if parent access fails (cross-origin restrictions)
+  }
 }
