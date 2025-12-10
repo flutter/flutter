@@ -86,10 +86,11 @@ bool ClipContents::Render(const ContentContext& renderer,
 
   pass.SetVertexBuffer(clip_geometry_.vertex_buffer);
 
-  // kNormal and kPreventOverdraw geometries can clip by writing depth directly,
-  // without stencil-and-cover.
-  if (clip_geometry_.mode == GeometryResult::Mode::kNormal ||
-      clip_geometry_.mode == GeometryResult::Mode::kPreventOverdraw) {
+  // kNormal and kPreventOverdraw geometries can do a difference clip by writing
+  // depth directly without stencil-and-cover.
+  if ((clip_geometry_.mode == GeometryResult::Mode::kNormal ||
+       clip_geometry_.mode == GeometryResult::Mode::kPreventOverdraw) &&
+      clip_op_ == Entity::ClipOperation::kDifference) {
     options.depth_write_enabled = true;
     pass.SetPipeline(renderer.GetClipPipeline(options));
 
@@ -105,6 +106,10 @@ bool ClipContents::Render(const ContentContext& renderer,
 
   options.depth_write_enabled = false;
   switch (clip_geometry_.mode) {
+    case GeometryResult::Mode::kNormal:
+      // Fall through to kNonZero case.
+    case GeometryResult::Mode::kPreventOverdraw:
+      // Fall through to kNonZero case.
     case GeometryResult::Mode::kNonZero:
       pass.SetCommandLabel("Clip stencil preparation (NonZero)");
       options.stencil_mode =
@@ -115,10 +120,6 @@ bool ClipContents::Render(const ContentContext& renderer,
       options.stencil_mode =
           ContentContextOptions::StencilMode::kStencilEvenOddFill;
       break;
-    case GeometryResult::Mode::kNormal:
-    case GeometryResult::Mode::kPreventOverdraw:
-      FML_UNREACHABLE();
-      return false;
   }
   pass.SetPipeline(renderer.GetClipPipeline(options));
 
