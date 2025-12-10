@@ -206,6 +206,7 @@ class LongPressMoveUpdateDetails with Diagnosticable implements PositionedGestur
     Offset? localPosition,
     this.offsetFromOrigin = Offset.zero,
     Offset? localOffsetFromOrigin,
+    this.kind,
     this.buttons,
   }) : localPosition = localPosition ?? globalPosition,
        localOffsetFromOrigin = localOffsetFromOrigin ?? offsetFromOrigin;
@@ -228,6 +229,9 @@ class LongPressMoveUpdateDetails with Diagnosticable implements PositionedGestur
   /// present [localPosition]) when this callback is triggered.
   final Offset localOffsetFromOrigin;
 
+  /// The kind of input device for which the event was generated.
+  final PointerDeviceKind? kind;
+
   /// {@macro flutter.gestures.PointerEvent.buttons}
   ///
   /// NOTE: this will always be set by the platform but synthetic events might
@@ -241,6 +245,7 @@ class LongPressMoveUpdateDetails with Diagnosticable implements PositionedGestur
     properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(DiagnosticsProperty<Offset>('offsetFromOrigin', offsetFromOrigin));
     properties.add(DiagnosticsProperty<Offset>('localOffsetFromOrigin', localOffsetFromOrigin));
+    properties.add(EnumProperty<PointerDeviceKind>('kind', kind));
     properties.add(IntProperty('buttons', buttons));
   }
 }
@@ -258,6 +263,7 @@ class LongPressEndDetails with Diagnosticable implements PositionedGestureDetail
     this.globalPosition = Offset.zero,
     Offset? localPosition,
     this.velocity = Velocity.zero,
+    this.kind,
     this.buttons,
   }) : localPosition = localPosition ?? globalPosition;
 
@@ -274,6 +280,9 @@ class LongPressEndDetails with Diagnosticable implements PositionedGestureDetail
   /// Defaults to zero if not specified in the constructor.
   final Velocity velocity;
 
+  /// The kind of input device for which the event was generated.
+  final PointerDeviceKind? kind;
+
   /// {@macro flutter.gestures.PointerEvent.buttons}
   ///
   /// NOTE: this will always be set by the platform but synthetic events might
@@ -286,6 +295,7 @@ class LongPressEndDetails with Diagnosticable implements PositionedGestureDetail
     properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
     properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(DiagnosticsProperty<Velocity>('velocity', velocity));
+    properties.add(EnumProperty<PointerDeviceKind>('kind', kind));
     properties.add(IntProperty('buttons', buttons));
   }
 }
@@ -837,6 +847,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
       localPosition: event.localPosition,
       offsetFromOrigin: event.position - _longPressOrigin!.global,
       localOffsetFromOrigin: event.localPosition - _longPressOrigin!.local,
+      kind: event.kind,
       buttons: event.buttons,
     );
     switch (_initialButtons) {
@@ -872,6 +883,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
       globalPosition: event.position,
       localPosition: event.localPosition,
       velocity: velocity,
+      kind: event.kind,
       buttons: event.buttons,
     );
 

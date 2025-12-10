@@ -402,6 +402,7 @@ class TapDragEndDetails with Diagnosticable implements PositionedGestureDetails 
     this.velocity = Velocity.zero,
     this.primaryVelocity,
     required this.consecutiveTapCount,
+    this.kind,
     this.buttons,
   }) : assert(
          primaryVelocity == null ||
@@ -439,6 +440,9 @@ class TapDragEndDetails with Diagnosticable implements PositionedGestureDetails 
   /// the number in the series this tap is.
   final int consecutiveTapCount;
 
+  /// The kind of input device for which the event was generated.
+  final PointerDeviceKind? kind;
+
   /// {@macro flutter.gestures.PointerEvent.buttons}
   ///
   /// NOTE: this will always be set by the platform but synthetic events might
@@ -453,6 +457,7 @@ class TapDragEndDetails with Diagnosticable implements PositionedGestureDetails 
     properties.add(DiagnosticsProperty<Velocity>('velocity', velocity));
     properties.add(DoubleProperty('primaryVelocity', primaryVelocity));
     properties.add(IntProperty('consecutiveTapCount', consecutiveTapCount));
+    properties.add(EnumProperty<PointerDeviceKind>('kind', kind));
     properties.add(IntProperty('buttons', buttons));
   }
 }

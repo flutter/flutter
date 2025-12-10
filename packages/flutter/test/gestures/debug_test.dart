@@ -286,12 +286,16 @@ void main() {
         ],
       ),
       (
-        const LongPressMoveUpdateDetails(buttons: kPrimaryButton | kSecondaryButton),
+        const LongPressMoveUpdateDetails(
+          kind: PointerDeviceKind.touch,
+          buttons: kPrimaryButton | kSecondaryButton,
+        ),
         <String>[
           'globalPosition: Offset(0.0, 0.0)',
           'localPosition: Offset(0.0, 0.0)',
           'offsetFromOrigin: Offset(0.0, 0.0)',
           'localOffsetFromOrigin: Offset(0.0, 0.0)',
+          'kind: touch',
           'buttons: 3',
         ],
       ),
@@ -301,6 +305,7 @@ void main() {
           'globalPosition: Offset(0.0, 0.0)',
           'localPosition: Offset(0.0, 0.0)',
           'velocity: Velocity(0.0, 0.0)',
+          'kind: null',
           'buttons: 2',
         ],
       ),
@@ -439,13 +444,18 @@ void main() {
         ],
       ),
       (
-        TapDragEndDetails(consecutiveTapCount: 1, buttons: kPrimaryButton),
+        TapDragEndDetails(
+          consecutiveTapCount: 1,
+          kind: PointerDeviceKind.mouse,
+          buttons: kPrimaryButton,
+        ),
         <String>[
           'globalPosition: Offset(0.0, 0.0)',
           'localPosition: Offset(0.0, 0.0)',
           'velocity: Velocity(0.0, 0.0)',
           'primaryVelocity: null',
           'consecutiveTapCount: 1',
+          'kind: mouse',
           'buttons: 1',
         ],
       ),
