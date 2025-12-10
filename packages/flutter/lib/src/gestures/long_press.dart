@@ -144,7 +144,7 @@ class LongPressDownDetails with Diagnosticable implements PositionedGestureDetai
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
     properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
-    properties.add(EnumProperty<PointerDeviceKind?>('kind', kind));
+    properties.add(EnumProperty<PointerDeviceKind>('kind', kind));
     properties.add(IntProperty('buttons', buttons));
   }
 }
@@ -161,6 +161,7 @@ class LongPressStartDetails with Diagnosticable implements PositionedGestureDeta
   const LongPressStartDetails({
     this.globalPosition = Offset.zero,
     Offset? localPosition,
+    this.kind,
     this.buttons,
   }) : localPosition = localPosition ?? globalPosition;
 
@@ -171,6 +172,9 @@ class LongPressStartDetails with Diagnosticable implements PositionedGestureDeta
   /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.localPosition}
   @override
   final Offset localPosition;
+
+  /// The kind of the device that initiated the event.
+  final PointerDeviceKind? kind;
 
   /// {@macro flutter.gestures.PointerEvent.buttons}
   ///
@@ -183,6 +187,7 @@ class LongPressStartDetails with Diagnosticable implements PositionedGestureDeta
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
     properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
+    properties.add(EnumProperty<PointerDeviceKind>('kind', kind));
     properties.add(IntProperty('buttons', buttons));
   }
 }
@@ -328,6 +333,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   bool _longPressAccepted = false;
   OffsetPair? _longPressOrigin;
+  PointerDeviceKind? _initialKind;
   // The buttons sent by `PointerDownEvent`. If a `PointerMoveEvent` comes with a
   // different set of buttons, the gesture is canceled.
   int? _initialButtons;
@@ -710,6 +716,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     } else if (event is PointerDownEvent) {
       // The first touch.
       _longPressOrigin = OffsetPair.fromEventPosition(event);
+      _initialKind = event.kind;
       _initialButtons = event.buttons;
       _checkLongPressDown(event);
     } else if (event is PointerMoveEvent) {
@@ -779,6 +786,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
           final details = LongPressStartDetails(
             globalPosition: _longPressOrigin!.global,
             localPosition: _longPressOrigin!.local,
+            kind: _initialKind,
             buttons: _initialButtons,
           );
           invokeCallback<void>('onLongPressStart', () => onLongPressStart!(details));
@@ -791,6 +799,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
           final details = LongPressStartDetails(
             globalPosition: _longPressOrigin!.global,
             localPosition: _longPressOrigin!.local,
+            kind: _initialKind,
             buttons: _initialButtons,
           );
           invokeCallback<void>(
@@ -806,6 +815,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
           final details = LongPressStartDetails(
             globalPosition: _longPressOrigin!.global,
             localPosition: _longPressOrigin!.local,
+            kind: _initialKind,
             buttons: _initialButtons,
           );
           invokeCallback<void>(

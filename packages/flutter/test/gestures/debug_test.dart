@@ -277,10 +277,11 @@ void main() {
         ],
       ),
       (
-        const LongPressStartDetails(buttons: kMiddleMouseButton),
+        const LongPressStartDetails(kind: PointerDeviceKind.stylus, buttons: kMiddleMouseButton),
         <String>[
           'globalPosition: Offset(0.0, 0.0)',
           'localPosition: Offset(0.0, 0.0)',
+          'kind: stylus',
           'buttons: 4',
         ],
       ),
