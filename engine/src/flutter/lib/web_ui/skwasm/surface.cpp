@@ -69,18 +69,10 @@ void Surface::setCallbackHandler(CallbackHandler* callbackHandler) {
 }
 
 void Surface::dispose() {
-  if (_grContext) {
-    _grContext->releaseResourcesAndAbandonContext();
-  }
   if (_glContext) {
     skwasm_destroyContext(_glContext);
   }
   delete this;
-}
-
-// Main thread only
-void Surface::setResourceCacheLimit(int bytes) {
-  _renderContext->setResourceCacheLimit(bytes);
 }
 
 // Main thread only
@@ -89,39 +81,6 @@ uint32_t Surface::setCanvas(SkwasmObject canvas) {
   uint32_t callbackId = ++_currentCallbackId;
   skwasm_dispatchTransferCanvas(_thread, this, canvas, callbackId);
   return callbackId;
-}
-
-// Main thread only
-uint32_t Surface::renderPictures(DisplayList** pictures,
-                                 int width,
-                                 int height,
-                                 int count) {
-  assert(emscripten_is_main_browser_thread());
-  uint32_t callbackId = ++_currentCallbackId;
-  skwasm_dispatchTransferCanvas(_thread, this, canvas, callbackId);
-  return callbackId;
-}
-
-// Main thread only
-uint32_t Surface::rasterizeImage(DlImage* image, ImageByteFormat format) {
-  assert(emscripten_is_main_browser_thread());
-  uint32_t callbackId = ++_currentCallbackId;
-  image->ref();
-
-  skwasm_dispatchRasterizeImage(_thread, this, image, format, callbackId);
-  return callbackId;
-}
-
-std::unique_ptr<TextureSourceWrapper> Surface::createTextureSourceWrapper(
-    SkwasmObject textureSource) {
-  return std::unique_ptr<TextureSourceWrapper>(
-      new TextureSourceWrapper(_thread, textureSource));
-}
-
-// Main thread only
-void Surface::setCallbackHandler(CallbackHandler* callbackHandler) {
-  assert(emscripten_is_main_browser_thread());
-  _callbackHandler = callbackHandler;
 }
 
 void Surface::onInitialized(uint32_t callbackId) {
@@ -133,12 +92,11 @@ void Surface::onInitialized(uint32_t callbackId) {
 // Worker thread only
 void Surface::receiveCanvasOnWorker(SkwasmObject canvas, uint32_t callbackId) {
   if (_renderContext) {
-    _renderContext->releaseResourcesAndAbandonContext();
+    _renderContext.reset();
   }
   _canvasWidth = 0;
   _canvasHeight = 0;
   _glContext = skwasm_getGlContextForCanvas(canvas, this);
-  _surface = nullptr;
   if (!_glContext) {
     printf("Failed to create context!\n");
     return;
@@ -188,9 +146,8 @@ void Surface::resizeOnWorker(int width, int height, uint32_t callbackId) {
   skwasm_reportResizeComplete(this, callbackId);
 }
 
-// Worker thread only
 void Surface::_resizeSurface(int width, int height) {
-  if (!_surface || width != _canvasWidth || height != _canvasHeight) {
+  if (width != _canvasWidth || height != _canvasHeight) {
     _canvasWidth = width;
     _canvasHeight = height;
     _recreateSurface();
@@ -323,7 +280,7 @@ void Surface::onContextLost() {
 // Other
 
 void Surface::setResourceCacheLimit(int bytes) {
-  _grContext->setResourceCacheLimit(bytes);
+  _renderContext->setResourceCacheLimit(bytes);
 }
 
 std::unique_ptr<TextureSourceWrapper> Surface::createTextureSourceWrapper(
@@ -334,23 +291,10 @@ std::unique_ptr<TextureSourceWrapper> Surface::createTextureSourceWrapper(
 
 // Private methods
 
-void Surface::_resizeSurface(int width, int height) {
-  if (!_surface || width != _canvasWidth || height != _canvasHeight) {
-    _canvasWidth = width;
-    _canvasHeight = height;
-    _recreateSurface();
-  }
-}
-
 void Surface::_recreateSurface() {
   makeCurrent(_glContext);
   skwasm_resizeCanvas(_glContext, _canvasWidth, _canvasHeight);
   _renderContext->resize(_canvasWidth, _canvasHeight);
-  auto target = GrBackendRenderTargets::MakeGL(_canvasWidth, _canvasHeight,
-                                               _sampleCount, _stencil, _fbInfo);
-  _surface = SkSurfaces::WrapBackendRenderTarget(
-      _grContext.get(), target, kBottomLeft_GrSurfaceOrigin,
-      kRGBA_8888_SkColorType, SkColorSpace::MakeSRGB(), nullptr);
 }
 
 // TextureSourceWrapper implementation

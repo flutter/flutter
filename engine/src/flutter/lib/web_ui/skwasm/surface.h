@@ -97,10 +97,6 @@ class Surface {
 
   EMSCRIPTEN_WEBGL_CONTEXT_HANDLE _glContext = 0;
   std::unique_ptr<RenderContext> _renderContext;
-  sk_sp<SkSurface> _surface = nullptr;
-  GrGLFramebufferInfo _fbInfo;
-  GrGLint _sampleCount;
-  GrGLint _stencil;
   uint32_t _contextLostCallbackId = 0;
 
   pthread_t _thread;
