@@ -354,4 +354,13 @@ void main() {
       });
     });
   });
+
+  testWidgets('CupertinoMagnifier does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(child: SizedBox.shrink(child: CupertinoMagnifier(magnificationScale: 2))),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoMagnifier)), Size.zero);
+  });
 }
