@@ -98,6 +98,9 @@ typedef struct {
 
   // Policy for the thread that runs UI isolate.
   FlutterDesktopUIThreadPolicy ui_thread_policy;
+
+  // Whether to enable IAccessibleEx support for accessibility.
+  bool iaccessibleex_enabled;
 } FlutterDesktopEngineProperties;
 
 // ========== View Controller ==========
