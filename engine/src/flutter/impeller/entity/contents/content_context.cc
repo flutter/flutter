@@ -468,6 +468,12 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
         front_stencil.stencil_failure = StencilOperation::kDecrementWrap;
         desc.SetStencilAttachmentDescriptors(front_stencil);
         break;
+      case StencilMode::kStencilIncrementAll:
+        // The stencil ref should be 0 on commands that use this mode.
+        front_stencil.stencil_compare = CompareFunction::kEqual;
+        front_stencil.depth_stencil_pass = StencilOperation::kIncrementWrap;
+        desc.SetStencilAttachmentDescriptors(front_stencil);
+        break;
       case StencilMode::kCoverCompare:
         // The stencil ref should be 0 on commands that use this mode.
         front_stencil.stencil_compare = CompareFunction::kNotEqual;

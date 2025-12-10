@@ -52,6 +52,11 @@ struct ContentContextOptions {
     ///
     /// The stencil ref should always be 0 on commands using this mode.
     kStencilEvenOddFill,
+    /// Draw a stencil which always increments once for everything in the vertex
+    /// coverage regardless of triangle overlap.
+    ///
+    /// The stencil ref should always be 0 on commands using this mode.
+    kStencilIncrementAll,
     /// Used for draw calls which fill in the stenciled area. Intended to be
     /// used after `kStencilNonZeroFill` or `kStencilEvenOddFill` is used to set
     /// up the stencil buffer. Also cleans up the stencil buffer by resetting
