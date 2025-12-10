@@ -21,9 +21,14 @@ class AppBarLargeApp extends StatelessWidget {
         child: CustomScrollView(
           slivers: <Widget>[
             SliverAppBar.large(
-              leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {}),
+              leading: IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () {},
+              ),
               title: const Text('Large App Bar'),
-              actions: <Widget>[IconButton(icon: const Icon(Icons.more_vert), onPressed: () {})],
+              actions: <Widget>[
+                IconButton(icon: const Icon(Icons.more_vert), onPressed: () {}),
+              ],
             ),
             // Just some content big enough to have something to scroll.
             SliverToBoxAdapter(
