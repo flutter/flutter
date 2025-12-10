@@ -402,6 +402,10 @@ void FlutterWindowsView::SendWindowMetrics(size_t width,
   } else {
     event.width = width;
     event.height = height;
+    event.min_width_constraint = width;
+    event.min_height_constraint = height;
+    event.max_width_constraint = width;
+    event.max_height_constraint = height;
   }
   event.pixel_ratio = pixel_ratio;
   event.display_id = display_id;
@@ -426,6 +430,10 @@ FlutterWindowMetricsEvent FlutterWindowsView::CreateWindowMetricsEvent() const {
   } else {
     event.width = bounds.width;
     event.height = bounds.height;
+    event.min_width_constraint = bounds.width;
+    event.min_height_constraint = bounds.height;
+    event.max_width_constraint = bounds.width;
+    event.max_height_constraint = bounds.height;
   }
   event.pixel_ratio = pixel_ratio;
   event.display_id = display_id;
