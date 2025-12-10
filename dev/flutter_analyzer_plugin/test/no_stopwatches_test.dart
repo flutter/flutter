@@ -97,13 +97,6 @@ void testStopwatchIgnore(Stopwatch stopwatch) {
 }
 ''';
 
-  // TODO(bkonyi): this test will fail until Stopwatch is defined as part of the mock dart:core
-  // shipped with package:analyzer_testing.
-  @FailingTest(
-    reason:
-        'Stopwatch is not defined as part of the mock dart:core shipped '
-        'with package:analyzer_testing',
-  )
   // ignore: unreachable_from_main, non_constant_identifier_names
   Future<void> fail_test_no_stopwatches() async {
     await assertDiagnostics(source, <ExpectedDiagnostic>[

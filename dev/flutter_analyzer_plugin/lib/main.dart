@@ -22,4 +22,7 @@ class FlutterAnalyzerPlugin extends Plugin {
       ..registerWarningRule(ProtectPublicStateSubtypes())
       ..registerWarningRule(RenderBoxIntrinsicCalculationRule());
   }
+
+  @override
+  String get name => 'flutter/flutter analyzer plugin';
 }
