@@ -217,7 +217,7 @@ class Slider extends StatefulWidget {
   ///
   /// If a [CupertinoSlider] is created, the following parameters are ignored:
   /// [secondaryTrackValue], [label], [inactiveColor], [secondaryActiveColor],
-  /// [semanticFormatterCallback].
+  /// [semanticFormatterCallback], [showValueIndicator].
   ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
   const Slider.adaptive({
