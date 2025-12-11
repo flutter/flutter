@@ -107,7 +107,7 @@ void main() {
     final request = ui.HitTestRequest(view: _FakeFlutterView(), offset: const Offset(1, 1));
     final ui.HitTestResponse repsonse =
         GestureBinding.instance.platformDispatcher.onHitTest?.call(request) ??
-        const ui.HitTestResponse();
+        ui.HitTestResponse.empty;
     expect(repsonse.isPlatformView, isFalse);
   });
 
@@ -120,7 +120,7 @@ void main() {
     final request = ui.HitTestRequest(view: _FakeFlutterView(), offset: const Offset(1, 1));
     final ui.HitTestResponse repsonse =
         GestureBinding.instance.platformDispatcher.onHitTest?.call(request) ??
-        const ui.HitTestResponse();
+        ui.HitTestResponse.empty;
     expect(repsonse.isPlatformView, isFalse);
   });
 
@@ -135,7 +135,7 @@ void main() {
 
     final ui.HitTestResponse repsonse =
         GestureBinding.instance.platformDispatcher.onHitTest?.call(request) ??
-        const ui.HitTestResponse();
+        ui.HitTestResponse.empty;
 
     expect(repsonse.isPlatformView, isFalse);
   });
@@ -151,7 +151,7 @@ void main() {
 
     final ui.HitTestResponse repsonse =
         GestureBinding.instance.platformDispatcher.onHitTest?.call(request) ??
-        const ui.HitTestResponse();
+        ui.HitTestResponse.empty;
 
     expect(repsonse.isPlatformView, isTrue);
   });

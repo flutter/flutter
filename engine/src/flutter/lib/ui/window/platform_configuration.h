@@ -601,7 +601,7 @@ class PlatformConfiguration final {
   tonic::DartPersistentValue update_accessibility_features_;
   tonic::DartPersistentValue dispatch_platform_message_;
   tonic::DartPersistentValue dispatch_pointer_data_packet_;
-  tonic::DartPersistentValue embedded_view_should_accept_touch_;
+  tonic::DartPersistentValue embedded_native_view_should_accept_touch_;
   tonic::DartPersistentValue dispatch_semantics_action_;
   tonic::DartPersistentValue begin_frame_;
   tonic::DartPersistentValue draw_frame_;

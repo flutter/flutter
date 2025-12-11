@@ -1368,8 +1368,12 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _onSemanticsActionEventZone = Zone.current;
   }
 
-  /// A callback is invoked when a platform view performs hitTest and queries
-  /// the framework if the platform view should receive the touches.
+  /// A callback invoked when platform wants to perform a hittest on a [FlutterView].
+  ///
+  /// The callback are expected to return value contains the top-most hittest target that are hit at the
+  /// [HitTestRequest.offset] in the [HitTestRequest.view].
+  ///
+  /// This is typically used by iOS to determine whether a hittest will hit a [UIKitView].
   @override
   ui.HitTestCallback? get onHitTest => _onHitTest;
   ui.HitTestCallback? _onHitTest;

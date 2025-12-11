@@ -307,11 +307,12 @@ void _dispatchPointerDataPacket(ByteData packet) {
   PlatformDispatcher.instance._dispatchPointerDataPacket(packet);
 }
 
+// TODO(hellohuanlin): rename function to _onHitTest.
 @pragma('vm:entry-point')
 bool _platformViewShouldAcceptTouch(int viewId, double x, double y) {
-  Offset offset = Offset(x, y);
-  // Engine must pass in a valid viewId.
-  FlutterView view = PlatformDispatcher.instance._views[viewId]!;
+  assert(PlatformDispatcher.instance._views.containsKey(viewId), 'View $viewId does not exist.');
+  final FlutterView view = PlatformDispatcher.instance._views[viewId]!;
+  final offset = Offset(x, y);
   final HitTestRequest request = HitTestRequest(view: view, offset: offset);
   final HitTestResponse response = PlatformDispatcher.instance._hitTest(request);
   return response.isPlatformView;
@@ -440,15 +441,9 @@ R? _invoke1WithReturn<A1, R>(R Function(A1 a1)? callback, Zone zone, A1 arg1) {
   if (identical(zone, Zone.current)) {
     return callback(arg1);
   } else {
-    // TODO(hellohuanlin): add `zone.runGuardedWithReturn` API.
-    try {
-      return zone.run(() {
-        return callback(arg1);
-      });
-    } catch (e, s) {
-      zone.handleUncaughtError(e, s);
-      return null;
-    }
+    return zone.runZonedGuarded(() {
+      return callback(arg1);
+    });
   }
 }
 

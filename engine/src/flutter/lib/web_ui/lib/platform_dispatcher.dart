@@ -11,7 +11,7 @@ typedef TimingsCallback = void Function(List<FrameTiming> timings);
 typedef PointerDataPacketCallback = void Function(PointerDataPacket packet);
 typedef KeyDataCallback = bool Function(KeyData data);
 typedef SemanticsActionEventCallback = void Function(SemanticsActionEvent action);
-typedef HitTestCallback = HitTestResponse Function(HitTestRequest);
+typedef HitTestCallback = HitTestResponse Function(HitTestRequest request);
 typedef PlatformMessageResponseCallback = void Function(ByteData? data);
 typedef PlatformMessageCallback =
     void Function(String name, ByteData? data, PlatformMessageResponseCallback? callback);
@@ -606,21 +606,14 @@ enum ViewFocusState { unfocused, focused }
 
 enum ViewFocusDirection { undefined, forward, backward }
 
-/// The request containing all the information required to perform framework hitTest.
 class HitTestRequest {
   const HitTestRequest({required this.view, required this.offset});
-
-  /// The flutter view.
   final FlutterView view;
-
-  /// The touch location on screen.
   final Offset offset;
 }
 
-/// The response from the framework hitTest.
 class HitTestResponse {
-  const HitTestResponse({this.isPlatformView = false});
-
-  // whether the top-most hit target is a platform view.
+  const HitTestResponse({required this.isPlatformView});
+  static const HitTestResponse empty = HitTestResponse(isPlatformView: false);
   final bool isPlatformView;
 }

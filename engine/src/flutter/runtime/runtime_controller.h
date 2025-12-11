@@ -477,6 +477,7 @@ class RuntimeController : public PlatformConfigurationClient,
   ///
   bool DispatchPointerDataPacket(const PointerDataPacket& packet);
 
+  // TODO(hellohuanlin): we should make make this a generic HitTest API.
   //----------------------------------------------------------------------------
   /// @brief      Requests from the engine if an embedded native view should
   ///             accept touch at a given touch location.

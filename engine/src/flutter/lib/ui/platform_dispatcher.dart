@@ -44,7 +44,7 @@ typedef KeyDataCallback = bool Function(KeyData data);
 typedef SemanticsActionEventCallback = void Function(SemanticsActionEvent action);
 
 /// Signature for [PlatformDispatcher.onHitTest].
-typedef HitTestCallback = HitTestResponse Function(HitTestRequest);
+typedef HitTestCallback = HitTestResponse Function(HitTestRequest request);
 
 /// Signature for responses to platform messages.
 ///
@@ -1391,8 +1391,12 @@ class PlatformDispatcher {
     _onSemanticsActionEventZone = Zone.current;
   }
 
-  /// A callback is invoked when a platform view performs hitTest and queries
-  /// the framework if the platform view should receive the touches.
+  /// A callback invoked when platform wants to perform a hittest on a [FlutterView].
+  ///
+  /// The callback are expected to return value contains the top-most hittest target that are hit at the
+  /// [HitTestRequest.offset] in the [HitTestRequest.view].
+  ///
+  /// This is typically used by iOS to determine whether a hittest will hit a [UIKitView].
   HitTestCallback? get onHitTest => _onHitTest;
   HitTestCallback? _onHitTest;
   Zone _onHitTestZone = Zone.root;
@@ -1444,7 +1448,7 @@ class PlatformDispatcher {
           _onHitTestZone,
           request,
         ) ??
-        const HitTestResponse();
+        HitTestResponse.empty;
   }
 
   ErrorCallback? _onError;
@@ -3212,21 +3216,41 @@ enum ViewFocusDirection {
   backward,
 }
 
-/// The request containing all the information required to perform framework hitTest.
+/// A request to evaluate the content of a view at a specific position.
+///
+/// See also:
+///
+/// * [PlatformDispatcher.onHitTest], the callback that the platform
+///   invokes to hit test a view at a specific position.
+/// * [HitTestResponse], the result of a hit test request.
 class HitTestRequest {
+  /// Creates a hit test request.
   const HitTestRequest({required this.view, required this.offset});
 
-  /// The flutter view.
+  /// The view that should be hit tested.
   final FlutterView view;
 
-  /// The touch location on screen.
+  /// The position in the [view] that should be hit tested.
   final Offset offset;
 }
 
-/// The response from the framework hitTest.
+/// The results of hit testing a view at a specific position.
+///
+/// See also:
+///
+/// * [PlatformDispatcher.onHitTest], the callback that the platform
+///   invokes to hit test a view at a specific position.
+/// * [HitTestRequest], the request to hit test a view at a specific position.
 class HitTestResponse {
-  const HitTestResponse({this.isPlatformView = false});
+  /// Creates a hit test response.
+  const HitTestResponse({required this.isPlatformView});
 
-  // whether the top-most hit target is a platform view.
+  /// A response with no hit entries.
+  static const HitTestResponse empty = HitTestResponse(isPlatformView: false);
+
+  /// Whether the first hit test entry is a platform view.
+  ///
+  /// The first hit test entry is typically the child that is
+  /// visually "on top" (i.e., paints later).
   final bool isPlatformView;
 }
