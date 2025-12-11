@@ -328,11 +328,7 @@ public class FlutterRendererTest {
             anyInt(),
             boundsCaptor.capture(),
             typeCaptor.capture(),
-            stateCaptor.capture(),
-            anyInt(),
-            anyInt(),
-            anyInt(),
-            anyInt());
+            stateCaptor.capture());
 
     assertArrayEquals(new int[] {10, 20, 30, 40, 50, 60, 70, 80}, boundsCaptor.getValue());
     assertArrayEquals(
