@@ -17,16 +17,18 @@ class SemanticsProgressBar extends SemanticRole {
         preferredLabelRepresentation: LabelRepresentation.ariaLabel,
       ) {
     setAriaRole('progressbar');
+    _updateAriaAttributes();
+  }
 
+  void _updateAriaAttributes() {
     // Set ARIA attributes for min, max and current value.
-    if (semanticsObject.minValue != null) {
+    if (semanticsObject.minValue?.isNotEmpty ?? false) {
       setAttribute('aria-valuemin', semanticsObject.minValue!);
     }
-    if (semanticsObject.maxValue != null) {
+    if (semanticsObject.maxValue?.isNotEmpty ?? false) {
       setAttribute('aria-valuemax', semanticsObject.maxValue!);
     }
-
-    if (semanticsObject.value != null) {
+    if (semanticsObject.value?.isNotEmpty ?? false) {
       setAttribute('aria-valuenow', semanticsObject.value!);
     }
   }
@@ -34,18 +36,7 @@ class SemanticsProgressBar extends SemanticRole {
   @override
   void update() {
     super.update();
-
-    if (semanticsObject.minValue != null) {
-      setAttribute('aria-valuemin', semanticsObject.minValue!);
-    }
-
-    if (semanticsObject.maxValue != null) {
-      setAttribute('aria-valuemax', semanticsObject.maxValue!);
-    }
-
-    if (semanticsObject.value != null) {
-      setAttribute('aria-valuenow', semanticsObject.value!);
-    }
+    _updateAriaAttributes();
   }
 
   @override
@@ -53,8 +44,8 @@ class SemanticsProgressBar extends SemanticRole {
 }
 
 /// Indicates a loading spinner element.
-class SementicsLoadingSpinner extends SemanticRole {
-  SementicsLoadingSpinner(SemanticsObject semanticsObject)
+class SemanticsLoadingSpinner extends SemanticRole {
+  SemanticsLoadingSpinner(SemanticsObject semanticsObject)
     : super.withBasics(
         EngineSemanticsRole.loadingSpinner,
         semanticsObject,

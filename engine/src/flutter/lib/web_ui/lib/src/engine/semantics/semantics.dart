@@ -2266,7 +2266,7 @@ class SemanticsObject {
       EngineSemanticsRole.alert => SemanticAlert(this),
       EngineSemanticsRole.status => SemanticStatus(this),
       EngineSemanticsRole.progressBar => SemanticsProgressBar(this),
-      EngineSemanticsRole.loadingSpinner => SementicsLoadingSpinner(this),
+      EngineSemanticsRole.loadingSpinner => SemanticsLoadingSpinner(this),
       EngineSemanticsRole.generic => GenericRole(this),
       EngineSemanticsRole.complementary => SemanticComplementary(this),
       EngineSemanticsRole.contentInfo => SemanticContentInfo(this),

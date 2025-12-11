@@ -215,11 +215,11 @@ sealed class _DebugSemanticsRoleChecks {
     }
 
     // Check if minValue and maxValue are present
-    if (data.minValue == null) {
+    if (data.minValue?.isEmpty ?? true) {
       return FlutterError('A progress bar must have a minValue');
     }
 
-    if (data.maxValue == null) {
+    if (data.maxValue?.isEmpty ?? true) {
       return FlutterError('A progress bar must have a maxValue');
     }
 
@@ -1475,8 +1475,10 @@ class SemanticsData with Diagnosticable {
         other.hitTestBehavior == hitTestBehavior &&
         _sortedListsEqual(other.customSemanticsActionIds, customSemanticsActionIds) &&
         setEquals<String>(controlsNodes, other.controlsNodes) &&
-        minValue == other.minValue &&
-        maxValue == other.maxValue;
+        other.traversalParentIdentifier == traversalParentIdentifier &&
+        other.traversalChildIdentifier == traversalChildIdentifier &&
+        other.minValue == minValue &&
+        other.maxValue == maxValue;
   }
 
   @override
@@ -1511,14 +1513,11 @@ class SemanticsData with Diagnosticable {
       validationResult,
       controlsNodes == null ? null : Object.hashAll(controlsNodes!),
       inputType,
-<<<<<<< HEAD
       hitTestBehavior,
-=======
       traversalParentIdentifier,
       traversalChildIdentifier,
       minValue,
       maxValue,
->>>>>>> a94a46eb9d8 (Relands "Feat: Add a11y for loading indicators (#165173)")
     ),
   );
 
@@ -3334,12 +3333,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
         _linkUrl != config._linkUrl ||
         _role != config.role ||
         _validationResult != config.validationResult ||
-<<<<<<< HEAD
-        _hitTestBehavior != config.hitTestBehavior;
-=======
+        _hitTestBehavior != config.hitTestBehavior ||
+        _traversalChildIdentifier != config._traversalChildIdentifier ||
+        _traversalParentIdentifier != config._traversalParentIdentifier ||
         _minValue != config._minValue ||
         _maxValue != config._maxValue;
->>>>>>> a94a46eb9d8 (Relands "Feat: Add a11y for loading indicators (#165173)")
   }
 
   // TAGS, LABELS, ACTIONS
@@ -6856,12 +6854,11 @@ class SemanticsConfiguration {
       .._controlsNodes = _controlsNodes
       .._validationResult = _validationResult
       .._inputType = _inputType
-<<<<<<< HEAD
-      .._hitTestBehavior = _hitTestBehavior;
-=======
+      .._hitTestBehavior = _hitTestBehavior
+      .._traversalChildIdentifier = _traversalChildIdentifier
+      .._traversalParentIdentifier = _traversalParentIdentifier
       .._minValue = _minValue
       .._maxValue = _maxValue;
->>>>>>> a94a46eb9d8 (Relands "Feat: Add a11y for loading indicators (#165173)")
   }
 }
 
