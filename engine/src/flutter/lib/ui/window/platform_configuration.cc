@@ -78,8 +78,8 @@ void PlatformConfiguration::DidCreateIsolate() {
       tonic::DartState::Current(),
       Dart_GetField(library, tonic::ToDart("_dispatchPointerDataPacket")));
   // The embedded native view (e.g. UIView on iOS) is called "platform view"
-  // on framework side, but "embedded native view" on engine side. On the other hand,
-  // "platform view" refers to the whole flutter view on engine side.
+  // on framework side, but "embedded native view" on engine side. On the other
+  // hand, "platform view" refers to the whole flutter view on engine side.
   embedded_native_view_should_accept_touch_.Set(
       tonic::DartState::Current(),
       Dart_GetField(library, tonic::ToDart("_platformViewShouldAcceptTouch")));
