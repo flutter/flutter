@@ -441,9 +441,14 @@ R? _invoke1WithReturn<A1, R>(R Function(A1 a1)? callback, Zone zone, A1 arg1) {
   if (identical(zone, Zone.current)) {
     return callback(arg1);
   } else {
-    return zone.runZonedGuarded(() {
-      return callback(arg1);
-    });
+    return runZonedGuarded(
+      () {
+        return callback(arg1);
+      },
+      (e, s) {
+        zone.handleUncaughtError(e, s);
+      },
+    );
   }
 }
 

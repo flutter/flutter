@@ -329,7 +329,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     hitTestInView(result, request.offset, request.view.viewId);
 
     if (result.path.isEmpty) {
-      return const ui.HitTestResponse();
+      return ui.HitTestResponse.empty;
     }
     final HitTestTarget firstHit = result.path.first.target;
     return ui.HitTestResponse(isPlatformView: firstHit is NativeHitTestTarget);
