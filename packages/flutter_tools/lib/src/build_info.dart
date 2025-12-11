@@ -1067,21 +1067,21 @@ const kBuildNumber = 'BuildNumber';
 const kXcodeAction = 'Action';
 
 // The define of the Xcode Build Script.
-/// This may be [kPrepareXcodeBuildScript], [kBuildXcodeBuildScript], or [kEmbedXcodeBuildScript].
+/// This may be [kXcodeBuildScriptValuePrepare], [kXcodeBuildScriptValueBuild], or [kXcodeBuildScriptValueEmbed].
 const kXcodeBuildScript = 'XcodeBuildScript';
 
 /// When [kXcodeBuildScript] equals this value, that indicates that the target was trigged to run
 /// by a scheme pre-action.
-const kPrepareXcodeBuildScript = 'prepare';
+const kXcodeBuildScriptValuePrepare = 'prepare';
 
 /// When [kXcodeBuildScript] equals this value, that indicates that the target was trigged to run
 /// by the first Run Script in the Xcode build process that happens before compiling.
-const kBuildXcodeBuildScript = 'build';
+const kXcodeBuildScriptValueBuild = 'build';
 
 /// When [kXcodeBuildScript] equals this value, that indicates that the target was trigged to run
 /// by the second Run Script in the Xcode build process that happens after compiling, linking, and
 /// embedding.
-const kEmbedXcodeBuildScript = 'embed';
+const kXcodeBuildScriptValueEmbed = 'embed';
 
 final Converter<String, String> _defineEncoder = utf8.encoder.fuse(base64.encoder);
 final Converter<String, String> _defineDecoder = base64.decoder.fuse(utf8.decoder);

@@ -314,7 +314,7 @@ class Context {
 
     if (shouldEmbedFlutterFramework) {
       // Embed the actual Flutter.framework that the Flutter app expects to run against,
-      // which could be a local build or an arch/type specific build.
+      // which could be a local build or an arch/type-specific build.
       switch (platform) {
         case TargetPlatform.ios:
           runRsync(
@@ -373,29 +373,52 @@ class Context {
     required String? builtProductsDir,
     required String? targetBuildDir,
   }) {
-    if (builtProductsDir == null || targetBuildDir == null) {
+    if (builtProductsDir == null) {
+      echo('Unable to locate $builtProductsDir; falling back to direct embedding.');
+      return false;
+    }
+    if (targetBuildDir == null) {
+      echo('Unable to locate $targetBuildDir; falling back to direct embedding.');
       return false;
     }
     try {
       final infoPlistFromBuild = File('$builtProductsDir/${platform.infoPlistPath}');
       if (!infoPlistFromBuild.existsSync()) {
+        echo('Unable to locate $infoPlistFromBuild; falling back to direct embedding.');
         return false;
       }
       final infoPlistFromEmbedded = File('$targetBuildDir/${platform.infoPlistPath}');
       if (!infoPlistFromEmbedded.existsSync()) {
+        echo('Unable to locate $infoPlistFromEmbedded; falling back to direct embedding.');
         return false;
       }
 
       final File? infoPlistFromEngineCache = _infoPlistFromEngineCache(buildMode, platform);
       if (infoPlistFromEngineCache == null || !infoPlistFromEngineCache.existsSync()) {
+        echo('Unable to locate $infoPlistFromEngineCache; falling back to direct embedding.');
         return false;
       }
       final String expectedInfoPlist = infoPlistFromEngineCache.readAsStringSync();
+      if (infoPlistFromBuild.readAsStringSync() != expectedInfoPlist) {
+        echo(
+          'Initially processed Flutter framework did not match expectations; falling back to direct embedding.',
+        );
+        return false;
+      }
+      if (infoPlistFromEmbedded.readAsStringSync() != expectedInfoPlist) {
+        echo(
+          'Initially embedded Flutter framework did not match expectations; falling back to direct embedding.',
+        );
+        return false;
+      }
       return infoPlistFromBuild.readAsStringSync() == expectedInfoPlist &&
           infoPlistFromEmbedded.readAsStringSync() == expectedInfoPlist;
     } on Exception catch (e) {
       // Use `echo` instead of `echoError` so it does not cause the build to fail.
-      echo('An error occured while validating the Flutter framework: $e');
+      echo('$e\n');
+      echo(
+        'An error occured while validating the Flutter framework; falling back to direct embedding.\n',
+      );
     }
     return false;
   }

@@ -23,7 +23,7 @@ abstract class UnpackDarwin extends Target {
     final String? buildScript = environment.defines[kXcodeBuildScript];
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
     final XcodeBasedProject xcodeProject = darwinPlatform.xcodeProject(flutterProject);
-    if (buildScript == kBuildXcodeBuildScript &&
+    if (buildScript == kXcodeBuildScriptValueBuild &&
         xcodeProject.usesSwiftPackageManager &&
         xcodeProject.flutterFrameworkSwiftPackageDirectory.existsSync()) {
       // Skip copying the Flutter framework during the build Run Script if Swift Package Manager

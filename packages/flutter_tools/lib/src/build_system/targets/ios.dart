@@ -300,7 +300,7 @@ abstract class UnpackIOS extends UnpackDarwin {
     await thinFramework(environment, frameworkBinaryPath, archs);
 
     var codesignFramework = true;
-    if (environment.defines[kXcodeBuildScript] == kPrepareXcodeBuildScript) {
+    if (environment.defines[kXcodeBuildScript] == kXcodeBuildScriptValuePrepare) {
       // Skip codesigning during "prepare" when using SwiftPM. When SwiftPM places the Flutter
       // framework in the BUILT_PRODUCTS_DIR, it does not codesign it (it is later codesigned
       // in TARGET_BUILD_DIR). Skipping codesigning will improve the caching for the "prepare" script.

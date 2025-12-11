@@ -1107,18 +1107,6 @@ void main() {
                   targetBuildDir.childDirectory(frameworksFolderPath).path,
                 ],
               ),
-              // FakeCommand(
-              //   command: <String>[
-              //     'rsync',
-              //     '-8',
-              //     '-av',
-              //     '--delete',
-              //     '--filter',
-              //     '- .DS_Store',
-              //     buildDir.childDirectory('Flutter.framework').path,
-              //     '${targetBuildDir.childDirectory(frameworksFolderPath).path}/',
-              //   ],
-              // ),
               FakeCommand(
                 command: <String>[
                   'rsync',
@@ -1258,18 +1246,6 @@ void main() {
                   targetBuildDir.childDirectory(frameworksFolderPath).path,
                 ],
               ),
-              // FakeCommand(
-              //   command: <String>[
-              //     'rsync',
-              //     '-8',
-              //     '-av',
-              //     '--delete',
-              //     '--filter',
-              //     '- .DS_Store',
-              //     buildDir.childDirectory('Flutter.framework').path,
-              //     '${targetBuildDir.childDirectory(frameworksFolderPath).path}/',
-              //   ],
-              // ),
               FakeCommand(
                 command: <String>[
                   'rsync',
@@ -1386,7 +1362,6 @@ void main() {
               'FLUTTER_BUILD_DIR': flutterBuildDir,
               'TARGET_BUILD_DIR': targetBuildDir.path,
               'FRAMEWORKS_FOLDER_PATH': frameworksFolderPath,
-              // 'EXPANDED_CODE_SIGN_IDENTITY': '12312313',
               'FLUTTER_FRAMEWORK_SWIFT_PACKAGE_PATH': flutterSwiftPackageDir.path,
               'SDKROOT': 'macosx',
             },
@@ -1411,18 +1386,6 @@ void main() {
                   targetBuildDir.childDirectory(frameworksFolderPath).path,
                 ],
               ),
-              // FakeCommand(
-              //   command: <String>[
-              //     'rsync',
-              //     '-8',
-              //     '-av',
-              //     '--delete',
-              //     '--filter',
-              //     '- .DS_Store',
-              //     buildDir.childDirectory('Flutter.framework').path,
-              //     '${targetBuildDir.childDirectory(frameworksFolderPath).path}/',
-              //   ],
-              // ),
               FakeCommand(
                 command: <String>[
                   'rsync',
@@ -1686,7 +1649,6 @@ void main() {
               'FLUTTER_BUILD_DIR': flutterBuildDir,
               'TARGET_BUILD_DIR': targetBuildDir.path,
               'FRAMEWORKS_FOLDER_PATH': frameworksFolderPath,
-              // 'EXPANDED_CODE_SIGN_IDENTITY': '12312313',
               'FLUTTER_FRAMEWORK_SWIFT_PACKAGE_PATH': flutterSwiftPackageDir.path,
               'SDKROOT': 'macosx',
             },
