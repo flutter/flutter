@@ -1331,20 +1331,16 @@ public class FlutterView extends FrameLayout
     FlutterRenderer flutterRenderer = flutterEngine.getRenderer();
     isFlutterUiDisplayed = false;
     flutterRenderer.removeIsDisplayingFlutterUiListener(flutterUiDisplayListener);
-    flutterRenderer.removeResizingFlutterUiListener(flutterUiResizeListener);
     flutterRenderer.stopRenderingToSurface();
     flutterRenderer.setSemanticsEnabled(false);
 
     // Revert the image view to previous surface
-    if (renderSurface == flutterImageView) {
-      if (previousRenderSurface != null) {
-        renderSurface = previousRenderSurface;
-      }
-      if (previousEngineView != null) {
-        flutterEngineView = previousEngineView;
-      }
+    if (previousRenderSurface != null
+        && renderSurface == flutterImageView
+        && previousEngineView != null) {
+      renderSurface = previousRenderSurface;
+      flutterEngineView = previousEngineView;
     }
-
     renderSurface.detachFromRenderer();
 
     releaseImageView();
