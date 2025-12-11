@@ -125,10 +125,8 @@ public class FlutterView extends FrameLayout
   @Nullable private FlutterTextureView flutterTextureView;
   @Nullable private FlutterImageView flutterImageView;
 
-  @Nullable @VisibleForTesting /* package */ View flutterEngineView;
   @Nullable @VisibleForTesting /* package */ RenderSurface renderSurface;
   @Nullable private RenderSurface previousRenderSurface;
-  @Nullable private View previousEngineView;
   private final Set<FlutterUiDisplayListener> flutterUiDisplayListeners = new HashSet<>();
   private boolean isFlutterUiDisplayed;
 
@@ -194,7 +192,8 @@ public class FlutterView extends FrameLayout
         @Override
         public void resizeEngineView(int width, int height) {
           boolean changed = false;
-          if (flutterEngineView != null) {
+          if (renderSurface != null) {
+            View flutterEngineView = ((View) renderSurface);
             ViewGroup.LayoutParams surfaceParams = flutterEngineView.getLayoutParams();
             if (flutterEngineView.getHeight() != height) {
               changed = true;
@@ -268,11 +267,9 @@ public class FlutterView extends FrameLayout
     if (renderMode == RenderMode.surface) {
       flutterSurfaceView = new FlutterSurfaceView(context);
       renderSurface = flutterSurfaceView;
-      flutterEngineView = flutterSurfaceView;
     } else if (renderMode == RenderMode.texture) {
       flutterTextureView = new FlutterTextureView(context);
       renderSurface = flutterTextureView;
-      flutterEngineView = flutterTextureView;
     } else {
       throw new IllegalArgumentException(
           "RenderMode not supported with this constructor: " + renderMode);
@@ -363,11 +360,9 @@ public class FlutterView extends FrameLayout
       flutterSurfaceView =
           new FlutterSurfaceView(context, transparencyMode == TransparencyMode.transparent);
       renderSurface = flutterSurfaceView;
-      flutterEngineView = flutterSurfaceView;
     } else if (renderMode == RenderMode.texture) {
       flutterTextureView = new FlutterTextureView(context);
       renderSurface = flutterTextureView;
-      flutterEngineView = flutterTextureView;
     } else {
       throw new IllegalArgumentException(
           "RenderMode not supported with this constructor: " + renderMode);
@@ -384,7 +379,6 @@ public class FlutterView extends FrameLayout
 
     this.flutterSurfaceView = flutterSurfaceView;
     this.renderSurface = flutterSurfaceView;
-    this.flutterEngineView = flutterSurfaceView;
 
     init();
   }
@@ -397,7 +391,6 @@ public class FlutterView extends FrameLayout
 
     this.flutterTextureView = flutterTextureView;
     this.renderSurface = flutterTextureView;
-    this.flutterEngineView = flutterTextureView;
 
     init();
   }
@@ -410,7 +403,6 @@ public class FlutterView extends FrameLayout
 
     this.flutterImageView = flutterImageView;
     this.renderSurface = flutterImageView;
-    this.flutterEngineView = flutterImageView;
 
     init();
   }
@@ -1336,18 +1328,14 @@ public class FlutterView extends FrameLayout
     flutterRenderer.setSemanticsEnabled(false);
 
     // Revert the image view to previous surface
-    if (previousRenderSurface != null
-        && renderSurface == flutterImageView
-        && previousEngineView != null) {
+    if (previousRenderSurface != null && renderSurface == flutterImageView) {
       renderSurface = previousRenderSurface;
-      flutterEngineView = previousEngineView;
     }
     renderSurface.detachFromRenderer();
 
     releaseImageView();
 
     previousRenderSurface = null;
-    previousEngineView = null;
     flutterEngine = null;
   }
 
@@ -1388,10 +1376,8 @@ public class FlutterView extends FrameLayout
       flutterImageView.resizeIfNeeded(getWidth(), getHeight());
     }
 
-    previousEngineView = flutterEngineView;
     previousRenderSurface = renderSurface;
     renderSurface = flutterImageView;
-    flutterEngineView = flutterImageView;
     if (flutterEngine != null) {
       renderSurface.attachToRenderer(flutterEngine.getRenderer());
     }
@@ -1413,15 +1399,9 @@ public class FlutterView extends FrameLayout
       Log.v(TAG, "Tried to revert the image view, but no previous surface was used.");
       return;
     }
-    if (previousEngineView == null) {
-      Log.v(TAG, "Tried to revert the image view, but no previous engine view was used.");
-      return;
-    }
 
     renderSurface = previousRenderSurface;
-    flutterEngineView = previousEngineView;
     previousRenderSurface = null;
-    previousEngineView = null;
 
     final FlutterRenderer renderer = flutterEngine.getRenderer();
 
