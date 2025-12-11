@@ -87,9 +87,9 @@ void main() {
       ),
     );
 
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
-    TestSemantics expectedSemantics = TestSemantics.root(
+    var expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
           textDirection: TextDirection.ltr,
@@ -227,7 +227,7 @@ void main() {
   testWidgets('Sliver appbars - floating and pinned - second app bar stacks below', (
     WidgetTester tester,
   ) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -256,7 +256,7 @@ void main() {
         ),
       ),
     );
-    const Offset textPositionInAppBar = Offset(16.0, 18.0);
+    const textPositionInAppBar = Offset(16.0, 18.0);
     expect(tester.getTopLeft(find.text('A')), textPositionInAppBar);
     // top app bar is 200.0 high at this point
     expect(tester.getTopLeft(find.text('B')), const Offset(0.0, 200.0) + textPositionInAppBar);
@@ -298,9 +298,9 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/21887.
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
-    const double availableHeight = 50.0;
+    const availableHeight = 50.0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -342,7 +342,7 @@ void main() {
   testWidgets('Pinned and floating SliverAppBar sticks to top the content is scroll down', (
     WidgetTester tester,
   ) async {
-    const Key anchor = Key('drag');
+    const anchor = Key('drag');
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -378,7 +378,7 @@ void main() {
   testWidgets('Floating SliverAppBar sticks to top the content is scroll down', (
     WidgetTester tester,
   ) async {
-    const Key anchor = Key('drag');
+    const anchor = Key('drag');
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -414,7 +414,7 @@ void main() {
   testWidgets('Pinned SliverAppBar sticks to top the content is scroll down', (
     WidgetTester tester,
   ) async {
-    const Key anchor = Key('drag');
+    const anchor = Key('drag');
     await tester.pumpWidget(
       MaterialApp(
         home: Center(

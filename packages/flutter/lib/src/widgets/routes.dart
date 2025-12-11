@@ -215,7 +215,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
   /// false.
   @protected
   bool debugTransitionCompleted() {
-    bool disposed = false;
+    var disposed = false;
     assert(() {
       disposed = _transitionCompleter.isCompleted;
       return true;
@@ -679,6 +679,32 @@ abstract interface class PredictiveBackRoute {
 }
 
 /// An entry in the history of a [LocalHistoryRoute].
+///
+/// A [LocalHistoryEntry] represents a "mini" navigation state within a route.
+/// It allows widgets or UI components to handle the back button or pop
+/// operations locally without affecting the main navigator stack.
+///
+/// It is typically used for widgets such as dialogs, bottom sheets, or
+/// inline expandable panels that can be dismissed independently
+/// of the surrounding route.
+///
+/// When a local history entry is removed (e.g., via the back button),
+/// the [onRemove] callback is called first. Only after all local history
+/// entries have been removed will the route itself be popped.
+///
+/// {@tool sample}
+/// This sample demonstrates how to use a [LocalHistoryEntry] to show a panel that can be
+/// dismissed with the back button.
+///
+/// ** See code in examples/api/lib/widgets/routes/local_history_entry.0.dart **
+/// {@end-tool}
+///
+/// See also:
+///
+/// * [LocalHistoryRoute], which manages a stack of local history entries.
+/// * [ModalRoute.addLocalHistoryEntry], which adds an entry to a route.
+/// * [showModalBottomSheet], which internally uses local history entries
+///   to handle back button behavior.
 class LocalHistoryEntry {
   /// Creates an entry in the history of a [LocalHistoryRoute].
   ///
@@ -859,7 +885,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
     _localHistory ??= <LocalHistoryEntry>[];
     final bool wasEmpty = _localHistory!.isEmpty;
     _localHistory!.add(entry);
-    bool internalStateChanged = false;
+    var internalStateChanged = false;
     if (entry.impliesAppBarDismissal) {
       internalStateChanged = _entriesImpliesAppBarDismissal == 0;
       _entriesImpliesAppBarDismissal += 1;
@@ -876,7 +902,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   void removeLocalHistoryEntry(LocalHistoryEntry entry) {
     assert(entry._owner == this);
     assert(_localHistory!.contains(entry));
-    bool internalStateChanged = false;
+    var internalStateChanged = false;
     if (_localHistory!.remove(entry) && entry.impliesAppBarDismissal) {
       _entriesImpliesAppBarDismissal -= 1;
       internalStateChanged = _entriesImpliesAppBarDismissal == 0;
@@ -927,7 +953,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
       assert(entry._owner == this);
       entry._owner = null;
       entry._notifyRemoved();
-      bool internalStateChanged = false;
+      var internalStateChanged = false;
       if (entry.impliesAppBarDismissal) {
         _entriesImpliesAppBarDismissal -= 1;
         internalStateChanged = _entriesImpliesAppBarDismissal == 0;
@@ -1072,7 +1098,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   @override
   void initState() {
     super.initState();
-    final List<Listenable> animations = <Listenable>[
+    final animations = <Listenable>[
       if (widget.route.animation != null) widget.route.animation!,
       if (widget.route.secondaryAnimation != null) widget.route.secondaryAnimation!,
     ];
@@ -1634,7 +1660,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     }
 
     // Create a static proxy animation to suppress the original secondary transition.
-    final ProxyAnimation proxyAnimation = ProxyAnimation();
+    final proxyAnimation = ProxyAnimation();
 
     final Widget proxiedOriginalTransitions = buildTransitions(
       context,
@@ -1982,7 +2008,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   Future<RoutePopDisposition> willPop() async {
     final _ModalScopeState<T>? scope = _scopeKey.currentState;
     assert(scope != null);
-    for (final WillPopCallback callback in List<WillPopCallback>.of(_willPopCallbacks)) {
+    for (final callback in List<WillPopCallback>.of(_willPopCallbacks)) {
       if (!await callback()) {
         return RoutePopDisposition.doNotPop;
       }
@@ -2112,7 +2138,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     if (!isCurrent) {
       return;
     }
-    final NavigationNotification notification = NavigationNotification(
+    final notification = NavigationNotification(
       // canPop indicates that the originator of the Notification can handle a
       // pop. In the case of PopScope, it handles pops when canPop is
       // false. Hence the seemingly backward logic here.
@@ -2313,7 +2339,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     // To be sorted before the _modalBarrier.
     return _modalScopeCache ??= Semantics(
       sortKey: const OrdinalSortKey(0.0),
-      hitTestBehavior: ui.SemanticsHitTestBehavior.opaque,
       child: _ModalScope<T>(
         key: _scopeKey,
         route: this,
@@ -2442,7 +2467,7 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   /// subscribed to multiple types, this will unregister it (once) from each type.
   void unsubscribe(RouteAware routeAware) {
     final List<R> routes = _listeners.keys.toList();
-    for (final R route in routes) {
+    for (final route in routes) {
       final Set<RouteAware>? subscribers = _listeners[route];
       if (subscribers != null) {
         subscribers.remove(routeAware);

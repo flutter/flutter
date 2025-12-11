@@ -29,9 +29,9 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
   final LinkResult? linkResult;
   final List<String> packagesWithNativeAssetsResult;
 
-  var buildInvocations = 0;
-  var linkInvocations = 0;
-  var packagesWithNativeAssetsInvocations = 0;
+  int buildInvocations = 0;
+  int linkInvocations = 0;
+  int packagesWithNativeAssetsInvocations = 0;
 
   @override
   Future<BuildResult?> build({

@@ -280,7 +280,7 @@ sealed class _DebugSemanticsRoleChecks {
 
   static FlutterError? _semanticsRadioGroup(SemanticsNode node) {
     FlutterError? error;
-    bool hasCheckedChild = false;
+    var hasCheckedChild = false;
     bool validateRadioGroupChildren(SemanticsNode node) {
       final SemanticsData data = node.getSemanticsData();
       if (data.role == SemanticsRole.radioGroup) {
@@ -411,7 +411,7 @@ sealed class _DebugSemanticsRoleChecks {
 
   static bool _isSameRoleExisted(SemanticsNode semanticsNode) {
     final Map<int, SemanticsNode> treeNodes = semanticsNode.owner!._nodes;
-    int sameRoleCount = 0;
+    var sameRoleCount = 0;
     for (final int id in treeNodes.keys) {
       if (treeNodes[id]?.getSemanticsData().role == semanticsNode.role) {
         sameRoleCount++;
@@ -636,8 +636,8 @@ class ChildSemanticsConfigurationsResultBuilder {
   /// Builds a [ChildSemanticsConfigurationsResult] contains the arrangement.
   ChildSemanticsConfigurationsResult build() {
     assert(() {
-      final Set<SemanticsConfiguration> seenConfigs = <SemanticsConfiguration>{};
-      for (final SemanticsConfiguration config in <SemanticsConfiguration>[
+      final seenConfigs = <SemanticsConfiguration>{};
+      for (final config in <SemanticsConfiguration>[
         ..._mergeUp,
         ..._siblingMergeGroups.flattened,
       ]) {
@@ -771,7 +771,7 @@ class AttributedString {
   AttributedString(this.string, {this.attributes = const <StringAttribute>[]})
     : assert(string.isNotEmpty || attributes.isEmpty),
       assert(() {
-        for (final StringAttribute attribute in attributes) {
+        for (final attribute in attributes) {
           assert(
             string.length >= attribute.range.start && string.length >= attribute.range.end,
             'The range in $attribute is outside of the string $string',
@@ -802,11 +802,11 @@ class AttributedString {
 
     // None of the strings is empty.
     final String newString = string + other.string;
-    final List<StringAttribute> newAttributes = List<StringAttribute>.of(attributes);
+    final newAttributes = List<StringAttribute>.of(attributes);
     if (other.attributes.isNotEmpty) {
       final int offset = string.length;
       for (final StringAttribute attribute in other.attributes) {
-        final TextRange newRange = TextRange(
+        final newRange = TextRange(
           start: attribute.range.start + offset,
           end: attribute.range.end + offset,
         );
@@ -948,7 +948,7 @@ final class SemanticsLabelBuilder {
     }
 
     // Concatenate multiple parts with proper text direction handling
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     final (String firstText, TextDirection? _) = _parts.first;
     buffer.write(firstText);
 
@@ -959,7 +959,7 @@ final class SemanticsLabelBuilder {
         buffer.write(separator);
       }
 
-      String processedText = partText;
+      var processedText = partText;
       if (textDirection != null && partDirection != null && textDirection != partDirection) {
         final String directionalEmbedding = switch (partDirection) {
           TextDirection.rtl => Unicode.RLE,
@@ -1320,7 +1320,7 @@ class SemanticsData with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Rect>('rect', rect, showName: false));
     properties.add(TransformProperty('transform', transform, showName: false, defaultValue: null));
-    final List<String> actionSummary = <String>[
+    final actionSummary = <String>[
       for (final SemanticsAction action in SemanticsAction.values)
         if ((actions & action.index) != 0) action.name,
     ];
@@ -1469,7 +1469,7 @@ class SemanticsData with Diagnosticable {
       if (left.length != right.length) {
         return false;
       }
-      for (int i = 0; i < left.length; i++) {
+      for (var i = 0; i < left.length; i++) {
         if (left[i] != right[i]) {
           return false;
         }
@@ -2731,6 +2731,14 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
   }
 
+  // null means this node is not a traversal child and the transform is
+  // the same as [transform] (or kIsWeb is true).
+  Matrix4? _traversalChildTransform;
+  // null represents the identity transform.
+  Matrix4? get _traversalTransform {
+    return kIsWeb ? transform : (_traversalChildTransform ?? transform);
+  }
+
   /// The bounding box for this node in its coordinate system.
   Rect get rect => _rect;
   Rect _rect = Rect.zero;
@@ -2856,8 +2864,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
   void _replaceChildren(List<SemanticsNode> newChildren) {
     assert(!newChildren.any((SemanticsNode child) => child == this));
     assert(() {
-      final Set<SemanticsNode> seenChildren = <SemanticsNode>{};
-      for (final SemanticsNode child in newChildren) {
+      final seenChildren = <SemanticsNode>{};
+      for (final child in newChildren) {
         assert(seenChildren.add(child));
       } // check for duplicate adds
       return true;
@@ -2869,10 +2877,10 @@ class SemanticsNode with DiagnosticableTreeMixin {
         child._dead = true;
       }
     }
-    for (final SemanticsNode child in newChildren) {
+    for (final child in newChildren) {
       child._dead = false;
     }
-    bool sawChange = false;
+    var sawChange = false;
     if (_children != null) {
       for (final SemanticsNode child in _children!) {
         if (child._dead) {
@@ -2885,7 +2893,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
         }
       }
     }
-    for (final SemanticsNode child in newChildren) {
+    for (final child in newChildren) {
       if (child.parent != this) {
         if (child.parent != null) {
           // we're rebuilding the tree from the bottom up, so it's possible
@@ -2904,7 +2912,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     // up-to-date.
     assert(() {
       if (identical(newChildren, _children)) {
-        final List<DiagnosticsNode> mutationErrors = <DiagnosticsNode>[];
+        final mutationErrors = <DiagnosticsNode>[];
         if (newChildren.length != _debugPreviousSnapshot.length) {
           mutationErrors.add(
             ErrorDescription(
@@ -2913,7 +2921,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
             ),
           );
         } else {
-          for (int i = 0; i < newChildren.length; i++) {
+          for (var i = 0; i < newChildren.length; i++) {
             if (!identical(newChildren[i], _debugPreviousSnapshot[i])) {
               if (mutationErrors.isNotEmpty) {
                 mutationErrors.add(ErrorSpacer());
@@ -2949,7 +2957,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       }
       _debugPreviousSnapshot = List<SemanticsNode>.of(newChildren);
 
-      SemanticsNode ancestor = this;
+      var ancestor = this;
       while (ancestor.parent is SemanticsNode) {
         ancestor = ancestor.parent!;
       }
@@ -2960,7 +2968,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     if (!sawChange && _children != null) {
       assert(newChildren.length == _children!.length);
       // Did the order change?
-      for (int i = 0; i < _children!.length; i++) {
+      for (var i = 0; i < _children!.length; i++) {
         if (_children![i].id != newChildren[i].id) {
           sawChange = true;
           break;
@@ -3101,7 +3109,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   void _adoptChild(SemanticsNode child) {
     assert(child._parent == null);
     assert(() {
-      SemanticsNode node = this;
+      var node = this;
       while (node.parent != null) {
         node = node.parent!;
       }
@@ -3580,7 +3588,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       'SemanticsNodes with children must not specify a platformViewId.',
     );
 
-    final bool mergeAllDescendantsIntoThisNodeValueChanged =
+    final mergeAllDescendantsIntoThisNodeValueChanged =
         _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants;
 
     _identifier = config.identifier;
@@ -3677,20 +3685,20 @@ class SemanticsNode with DiagnosticableTreeMixin {
     ui.SemanticsHitTestBehavior hitTestBehavior = _hitTestBehavior;
     SemanticsInputType inputType = _inputType;
     final Locale? locale = _locale;
-    final Set<int> customSemanticsActionIds = <int>{};
+    final customSemanticsActionIds = <int>{};
     for (final CustomSemanticsAction action in _customSemanticsActions.keys) {
       customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
     }
     if (hintOverrides != null) {
       if (hintOverrides!.onTapHint != null) {
-        final CustomSemanticsAction action = CustomSemanticsAction.overridingAction(
+        final action = CustomSemanticsAction.overridingAction(
           hint: hintOverrides!.onTapHint!,
           action: SemanticsAction.tap,
         );
         customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
       }
       if (hintOverrides!.onLongPressHint != null) {
-        final CustomSemanticsAction action = CustomSemanticsAction.overridingAction(
+        final action = CustomSemanticsAction.overridingAction(
           hint: hintOverrides!.onLongPressHint!,
           action: SemanticsAction.longPress,
         );
@@ -3739,8 +3747,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
         if (inputType == SemanticsInputType.none) {
           inputType = node._inputType;
         }
-        if (hitTestBehavior == ui.SemanticsHitTestBehavior.defer &&
-            node._hitTestBehavior != ui.SemanticsHitTestBehavior.defer) {
+        if (hitTestBehavior == ui.SemanticsHitTestBehavior.defer) {
           hitTestBehavior = node._hitTestBehavior;
         }
         if (tooltip == '') {
@@ -3755,14 +3762,14 @@ class SemanticsNode with DiagnosticableTreeMixin {
         }
         if (node.hintOverrides != null) {
           if (node.hintOverrides!.onTapHint != null) {
-            final CustomSemanticsAction action = CustomSemanticsAction.overridingAction(
+            final action = CustomSemanticsAction.overridingAction(
               hint: node.hintOverrides!.onTapHint!,
               action: SemanticsAction.tap,
             );
             customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
           }
           if (node.hintOverrides!.onLongPressHint != null) {
-            final CustomSemanticsAction action = CustomSemanticsAction.overridingAction(
+            final action = CustomSemanticsAction.overridingAction(
               hint: node.hintOverrides!.onLongPressHint!,
               action: SemanticsAction.longPress,
             );
@@ -3840,65 +3847,54 @@ class SemanticsNode with DiagnosticableTreeMixin {
     );
   }
 
-  static Float64List _initIdentityTransform() {
-    return Matrix4.identity().storage;
-  }
-
   static final Int32List _kEmptyChildList = Int32List(0);
   static final Int32List _kEmptyCustomSemanticsActionsList = Int32List(0);
-  static final Float64List _kIdentityTransform = _initIdentityTransform();
+  static final Matrix4 _kIdentityTransform = Matrix4.identity();
 
-  static Matrix4 _computeChildTransform({
-    required Matrix4? parentTransform,
-    required Rect? parentPaintClipRect,
-    required Rect? parentSemanticsClipRect,
+  static Matrix4 _computeTraversalTransform({
     required SemanticsNode parent,
     required SemanticsNode child,
   }) {
-    final Matrix4 transform = parentTransform?.clone() ?? Matrix4.identity();
+    final traversalTransform = Matrix4.identity();
     Matrix4? parentToCommonAncestorTransform;
-    Matrix4? childToCommonAncestorTransform;
-    SemanticsNode childSemanticsNode = child;
-    SemanticsNode parentSemanticsNode = parent;
+    var fromNode = child;
+    var toNode = parent;
 
     // Find the common ancestor.
-    while (!identical(childSemanticsNode, parentSemanticsNode)) {
-      final int fromDepth = childSemanticsNode.depth;
-      final int toDepth = parentSemanticsNode.depth;
+    while (!identical(fromNode, toNode)) {
+      final int fromDepth = fromNode.depth;
+      final int toDepth = toNode.depth;
 
       if (fromDepth >= toDepth) {
-        childToCommonAncestorTransform ??= Matrix4.identity();
-        childToCommonAncestorTransform.multiply(childSemanticsNode.transform ?? Matrix4.identity());
-        childSemanticsNode = childSemanticsNode.traversalParent!;
+        if (fromNode.transform case final Matrix4 transform?) {
+          traversalTransform.multiply(transform);
+        }
+        fromNode = fromNode.parent!;
       }
       if (fromDepth <= toDepth) {
         parentToCommonAncestorTransform ??= Matrix4.identity();
-        parentToCommonAncestorTransform.multiply(
-          parentSemanticsNode.transform ?? Matrix4.identity(),
-        );
-        if (parentSemanticsNode.traversalParent == null) {
-          break;
+        if (toNode.transform case final Matrix4 transform?) {
+          parentToCommonAncestorTransform.multiply(transform);
         }
-        parentSemanticsNode = parentSemanticsNode.traversalParent!;
+        toNode = toNode.parent!;
       }
     }
 
     if (parentToCommonAncestorTransform != null) {
       if (parentToCommonAncestorTransform.invert() != 0) {
-        transform.multiply(parentToCommonAncestorTransform);
+        traversalTransform.multiply(parentToCommonAncestorTransform);
       } else {
-        transform.setZero();
+        traversalTransform.setZero();
       }
     }
-
-    return transform;
+    return traversalTransform;
   }
 
   Int32List _childrenIdInTraversalOrder() {
     final List<SemanticsNode> sortedChildren = _childrenInTraversalOrder();
 
-    final Int32List childrenInTraversalOrder = Int32List(sortedChildren.length);
-    for (int i = 0; i < sortedChildren.length; i += 1) {
+    final childrenInTraversalOrder = Int32List(sortedChildren.length);
+    for (var i = 0; i < sortedChildren.length; i += 1) {
       childrenInTraversalOrder[i] = sortedChildren[i].id;
     }
     return childrenInTraversalOrder;
@@ -3924,9 +3920,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
         if (owner != null && owner!._traversalChildNodes.containsKey(traversalParentIdentifier)) {
           final Set<SemanticsNode> traversalChildren =
               owner!._traversalChildNodes[traversalParentIdentifier]!;
-          int index = 0;
+          var index = 0;
           childrenInTraversalOrder = Int32List(traversalChildren.length);
-          for (final SemanticsNode node in traversalChildren) {
+          for (final node in traversalChildren) {
             if (node.attached) {
               childrenInTraversalOrder[index] = node.id;
               index += 1;
@@ -3955,36 +3951,27 @@ class SemanticsNode with DiagnosticableTreeMixin {
     Int32List? customSemanticsActionIds;
     if (data.customSemanticsActionIds?.isNotEmpty ?? false) {
       customSemanticsActionIds = Int32List(data.customSemanticsActionIds!.length);
-      for (int i = 0; i < data.customSemanticsActionIds!.length; i++) {
+      for (var i = 0; i < data.customSemanticsActionIds!.length; i++) {
         customSemanticsActionIds[i] = data.customSemanticsActionIds![i];
         customSemanticsActionIdsUpdate.add(data.customSemanticsActionIds![i]);
       }
     }
 
-    if (_isTraversalChild) {
-      traversalParent = owner!._traversalParentNodes[traversalChildIdentifier];
-      transform = _computeChildTransform(
-        parentPaintClipRect: traversalParent!.parentPaintClipRect,
-        parentSemanticsClipRect: traversalParent!.parentSemanticsClipRect,
-        parentTransform: null,
-        parent: traversalParent!,
-        child: this,
-      );
-    }
-
-    int traversalParentId = -1;
-    if (data.traversalChildIdentifier != null) {
-      final Object identifier = data.traversalChildIdentifier!;
-      if (owner!._traversalParentNodes.containsKey(identifier)) {
-        traversalParentId = owner!._traversalParentNodes[identifier]!.id;
+    var traversalParentId = -1;
+    if (data.traversalChildIdentifier case final Object identifier?) {
+      if (owner!._traversalParentNodes[identifier] case final SemanticsNode parentNode?) {
+        traversalParentId = parentNode.id;
       }
     }
-
-    final Float64List updatedTransform;
-    if (kIsWeb) {
-      updatedTransform = data.transform?.storage ?? _kIdentityTransform;
-    } else {
-      updatedTransform = transform?.storage ?? data.transform?.storage ?? _kIdentityTransform;
+    final Object? childIdentifier = traversalChildIdentifier;
+    if (childIdentifier != null) {
+      traversalParent = owner!._traversalParentNodes[childIdentifier];
+      if (!kIsWeb) {
+        _traversalChildTransform = _computeTraversalTransform(
+          parent: traversalParent!,
+          child: this,
+        );
+      }
     }
 
     builder.updateNode(
@@ -4015,9 +4002,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
       scrollPosition: data.scrollPosition ?? double.nan,
       scrollExtentMax: data.scrollExtentMax ?? double.nan,
       scrollExtentMin: data.scrollExtentMin ?? double.nan,
-      transform: updatedTransform,
+      transform: (_traversalTransform ?? _kIdentityTransform).storage,
       traversalParent: traversalParentId,
-      hitTestTransform: data.transform?.storage ?? _kIdentityTransform,
+      hitTestTransform: (data.transform ?? _kIdentityTransform).storage,
       childrenInTraversalOrder: childrenInTraversalOrder,
       childrenInHitTestOrder: childrenInHitTestOrder,
       additionalActions: customSemanticsActionIds ?? _kEmptyCustomSemanticsActionsList,
@@ -4045,7 +4032,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       return _children;
     }
 
-    final List<SemanticsNode> updatedChildren = <SemanticsNode>[];
+    final updatedChildren = <SemanticsNode>[];
     for (final SemanticsNode child in _children!) {
       if (child._isTraversalChild && !_isTraversalParent) {
         // If the child node is a traversal child, but the current node is
@@ -4082,14 +4069,13 @@ class SemanticsNode with DiagnosticableTreeMixin {
     // children from _traversalChildNodes and add them to the children list
     // of this current node.
     if (_isTraversalParent) {
-      if (owner != null && owner!._traversalChildNodes.containsKey(traversalParentIdentifier)) {
-        final Set<SemanticsNode> traversalChildren =
-            owner!._traversalChildNodes[traversalParentIdentifier]!;
-
+      final Set<SemanticsNode>? traversalChildren =
+          owner?._traversalChildNodes[traversalParentIdentifier!];
+      if (traversalChildren != null) {
         // When traversal children are grafted from other branches, make sure
         // these children are not ancestors of the traversal parent. Otherwise,
         // it will cause infinite loop.
-        SemanticsNode currentNode = this;
+        var currentNode = this;
         while (currentNode.parent != null) {
           currentNode = currentNode.parent!;
           if (traversalChildren.contains(currentNode)) {
@@ -4131,10 +4117,10 @@ class SemanticsNode with DiagnosticableTreeMixin {
     // first partitioned into groups that have compatible sort keys, i.e. keys
     // in the same group can be compared to each other. These groups stay in
     // the same place. Only children within the same group are sorted.
-    final List<_TraversalSortNode> everythingSorted = <_TraversalSortNode>[];
-    final List<_TraversalSortNode> sortNodes = <_TraversalSortNode>[];
+    final everythingSorted = <_TraversalSortNode>[];
+    final sortNodes = <_TraversalSortNode>[];
     SemanticsSortKey? lastSortKey;
-    for (int position = 0; position < childrenInDefaultOrder!.length; position += 1) {
+    for (var position = 0; position < childrenInDefaultOrder!.length; position += 1) {
       final SemanticsNode child = childrenInDefaultOrder[position];
       final SemanticsSortKey? sortKey = child.sortKey;
       lastSortKey = position > 0 ? childrenInDefaultOrder[position - 1].sortKey : null;
@@ -4178,7 +4164,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   }
 
   bool _debugIsActionBlocked(SemanticsAction action) {
-    bool result = false;
+    var result = false;
     assert(() {
       result = (_effectiveActionsAsBits & action.index) == 0;
       return true;
@@ -4192,7 +4178,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    bool hideOwner = true;
+    var hideOwner = true;
     if (_dirty) {
       final bool inDirtyNodes = owner != null && owner!._dirtyNodes.contains(this);
       properties.add(
@@ -4447,7 +4433,7 @@ class _SemanticsSortGroup implements Comparable<_SemanticsSortGroup> {
   /// This method breaks up this group into horizontal [_SemanticsSortGroup]s
   /// then sorts them using [sortedWithinKnot].
   List<SemanticsNode> sortedWithinVerticalGroup() {
-    final List<_BoxEdge> edges = <_BoxEdge>[];
+    final edges = <_BoxEdge>[];
     for (final SemanticsNode child in nodes) {
       // Using a small delta to shrink child rects removes overlapping cases.
       final Rect childRect = child.rect.deflate(0.1);
@@ -4468,10 +4454,10 @@ class _SemanticsSortGroup implements Comparable<_SemanticsSortGroup> {
     }
     edges.sort();
 
-    List<_SemanticsSortGroup> horizontalGroups = <_SemanticsSortGroup>[];
+    var horizontalGroups = <_SemanticsSortGroup>[];
     _SemanticsSortGroup? group;
-    int depth = 0;
-    for (final _BoxEdge edge in edges) {
+    var depth = 0;
+    for (final edge in edges) {
       if (edge.isLeadingEdge) {
         depth += 1;
         group ??= _SemanticsSortGroup(startOffset: edge.offset, textDirection: textDirection);
@@ -4515,8 +4501,8 @@ class _SemanticsSortGroup implements Comparable<_SemanticsSortGroup> {
       // Trivial knot. Nothing to do.
       return nodes;
     }
-    final Map<int, SemanticsNode> nodeMap = <int, SemanticsNode>{};
-    final Map<int, int> edges = <int, int>{};
+    final nodeMap = <int, SemanticsNode>{};
+    final edges = <int, int>{};
     for (final SemanticsNode node in nodes) {
       nodeMap[node.id] = node;
       final Offset center = _pointInParentCoordinates(node, node.rect.center);
@@ -4544,8 +4530,8 @@ class _SemanticsSortGroup implements Comparable<_SemanticsSortGroup> {
       }
     }
 
-    final List<int> sortedIds = <int>[];
-    final Set<int> visitedIds = <int>{};
+    final sortedIds = <int>[];
+    final visitedIds = <int>{};
     final List<SemanticsNode> startNodes = nodes.toList()
       ..sort((SemanticsNode a, SemanticsNode b) {
         final Offset aTopLeft = _pointInParentCoordinates(a, a.rect.topLeft);
@@ -4575,11 +4561,13 @@ class _SemanticsSortGroup implements Comparable<_SemanticsSortGroup> {
 
 /// Converts `point` to the `node`'s parent's coordinate system.
 Offset _pointInParentCoordinates(SemanticsNode node, Offset point) {
-  if (node.transform == null) {
+  final Matrix4? traversalTransform = node._traversalTransform;
+  if (traversalTransform == null) {
     return point;
   }
-  final Vector3 vector = Vector3(point.dx, point.dy, 0.0);
-  node.transform!.transform3(vector);
+  final vector = Vector3(point.dx, point.dy, 0.0);
+
+  traversalTransform.transform3(vector);
   return Offset(vector.x, vector.y);
 }
 
@@ -4598,8 +4586,8 @@ List<SemanticsNode> _childrenInDefaultOrder(
   List<SemanticsNode> children,
   TextDirection textDirection,
 ) {
-  final List<_BoxEdge> edges = <_BoxEdge>[];
-  for (final SemanticsNode child in children) {
+  final edges = <_BoxEdge>[];
+  for (final child in children) {
     assert(child.rect.isFinite);
     // Using a small delta to shrink child rects removes overlapping cases.
     final Rect childRect = child.rect.deflate(0.1);
@@ -4620,10 +4608,10 @@ List<SemanticsNode> _childrenInDefaultOrder(
   }
   edges.sort();
 
-  final List<_SemanticsSortGroup> verticalGroups = <_SemanticsSortGroup>[];
+  final verticalGroups = <_SemanticsSortGroup>[];
   _SemanticsSortGroup? group;
-  int depth = 0;
-  for (final _BoxEdge edge in edges) {
+  var depth = 0;
+  for (final edge in edges) {
     if (edge.isLeadingEdge) {
       depth += 1;
       group ??= _SemanticsSortGroup(startOffset: edge.offset, textDirection: textDirection);
@@ -4721,7 +4709,7 @@ class SemanticsOwner extends ChangeNotifier {
   void sendSemanticsUpdate() {
     // Once the tree is up-to-date, verify that every node is visible.
     assert(() {
-      final List<SemanticsNode> invisibleNodes = <SemanticsNode>[];
+      final invisibleNodes = <SemanticsNode>[];
       // Finds the invisible nodes in the tree rooted at `node` and adds them to
       // the invisibleNodes list. If a node is itself invisible, all its
       // descendants will be skipped.
@@ -4784,8 +4772,8 @@ class SemanticsOwner extends ChangeNotifier {
     if (_dirtyNodes.isEmpty) {
       return;
     }
-    final Set<int> customSemanticsActionIds = <int>{};
-    final List<SemanticsNode> visitedNodes = <SemanticsNode>[];
+    final customSemanticsActionIds = <int>{};
+    final visitedNodes = <SemanticsNode>[];
     while (_dirtyNodes.isNotEmpty) {
       final List<SemanticsNode> localDirtyNodes = _dirtyNodes
           .where((SemanticsNode node) => !_detachedNodes.contains(node))
@@ -4794,7 +4782,7 @@ class SemanticsOwner extends ChangeNotifier {
       _detachedNodes.clear();
       localDirtyNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
       visitedNodes.addAll(localDirtyNodes);
-      for (final SemanticsNode node in localDirtyNodes) {
+      for (final node in localDirtyNodes) {
         assert(node._dirty);
         assert(node.parent == null || !node.parent!.isPartOfNodeMerging || node.isMergedIntoParent);
         if (node.isPartOfNodeMerging) {
@@ -4819,9 +4807,9 @@ class SemanticsOwner extends ChangeNotifier {
     visitedNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
     final SemanticsUpdateBuilder builder = SemanticsBinding.instance.createSemanticsUpdateBuilder();
 
-    final List<SemanticsNode> updatedVisitedNodes = <SemanticsNode>[];
+    final updatedVisitedNodes = <SemanticsNode>[];
 
-    for (final SemanticsNode node in visitedNodes) {
+    for (final node in visitedNodes) {
       final bool isTraversalParent = node._isTraversalParent;
       final bool isTraversalChild = node._isTraversalChild;
 
@@ -4866,7 +4854,7 @@ class SemanticsOwner extends ChangeNotifier {
       }
     }
 
-    for (final SemanticsNode node in updatedVisitedNodes) {
+    for (final node in updatedVisitedNodes) {
       assert(
         node.parent?._dirty != true || node._isTraversalParent,
       ); // could be null (no parent) or false (not dirty)
@@ -4891,7 +4879,7 @@ class SemanticsOwner extends ChangeNotifier {
       }
     }
     _dirtyNodes.clear();
-    for (final int actionId in customSemanticsActionIds) {
+    for (final actionId in customSemanticsActionIds) {
       final CustomSemanticsAction action = CustomSemanticsAction.getAction(actionId)!;
       builder.updateCustomAction(
         id: actionId,
@@ -4947,7 +4935,7 @@ class SemanticsOwner extends ChangeNotifier {
     SemanticsAction action,
   ) {
     if (node.transform != null) {
-      final Matrix4 inverse = Matrix4.identity();
+      final inverse = Matrix4.identity();
       if (inverse.copyInverse(node.transform!) == 0.0) {
         return null;
       }
@@ -5043,12 +5031,9 @@ class SemanticsConfiguration {
   Locale? get localeForSubtree => _localeForSubtree;
   Locale? _localeForSubtree;
   set localeForSubtree(Locale? value) {
-    assert(
-      value == null || _isSemanticBoundary,
-      'to set locale for subtree, this configuration must also be a semantics '
-      'boundary.',
-    );
+    assert(value != null);
     _localeForSubtree = value;
+    _hasBeenAnnotated = true;
   }
 
   /// The locale of the resulting semantics node if this configuration formed
@@ -5299,7 +5284,7 @@ class SemanticsConfiguration {
   set onScrollToOffset(ScrollToOffsetHandler? value) {
     assert(value != null);
     _addAction(SemanticsAction.scrollToOffset, (Object? args) {
-      final Float64List list = args! as Float64List;
+      final list = args! as Float64List;
       value!(Offset(list[0], list[1]));
     });
     _onScrollToOffset = value;
@@ -5409,7 +5394,7 @@ class SemanticsConfiguration {
   set onMoveCursorForwardByCharacter(MoveCursorHandler? value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorForwardByCharacter, (Object? args) {
-      final bool extendSelection = args! as bool;
+      final extendSelection = args! as bool;
       value!(extendSelection);
     });
     _onMoveCursorForwardByCharacter = value;
@@ -5427,7 +5412,7 @@ class SemanticsConfiguration {
   set onMoveCursorBackwardByCharacter(MoveCursorHandler? value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorBackwardByCharacter, (Object? args) {
-      final bool extendSelection = args! as bool;
+      final extendSelection = args! as bool;
       value!(extendSelection);
     });
     _onMoveCursorBackwardByCharacter = value;
@@ -5445,7 +5430,7 @@ class SemanticsConfiguration {
   set onMoveCursorForwardByWord(MoveCursorHandler? value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorForwardByWord, (Object? args) {
-      final bool extendSelection = args! as bool;
+      final extendSelection = args! as bool;
       value!(extendSelection);
     });
     _onMoveCursorForwardByCharacter = value;
@@ -5463,7 +5448,7 @@ class SemanticsConfiguration {
   set onMoveCursorBackwardByWord(MoveCursorHandler? value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorBackwardByWord, (Object? args) {
-      final bool extendSelection = args! as bool;
+      final extendSelection = args! as bool;
       value!(extendSelection);
     });
     _onMoveCursorBackwardByCharacter = value;
@@ -5502,7 +5487,7 @@ class SemanticsConfiguration {
     assert(value != null);
     _addAction(SemanticsAction.setText, (Object? args) {
       assert(args != null && args is String);
-      final String text = args! as String;
+      final text = args! as String;
       value!(text);
     });
     _onSetText = value;
@@ -6565,6 +6550,9 @@ class SemanticsConfiguration {
     if (_attributedValue.string.isNotEmpty && other._attributedValue.string.isNotEmpty) {
       return false;
     }
+    if (_localeForSubtree != other._localeForSubtree) {
+      return false;
+    }
     if (_hasExplicitRole && other._hasExplicitRole) {
       return false;
     }
@@ -6682,7 +6670,8 @@ class SemanticsConfiguration {
       child._accessiblityFocusBlockType,
     );
 
-    if (_hitTestBehavior == ui.SemanticsHitTestBehavior.defer) {
+    if (_hitTestBehavior == ui.SemanticsHitTestBehavior.defer &&
+        child._hitTestBehavior != ui.SemanticsHitTestBehavior.defer) {
       _hitTestBehavior = child._hitTestBehavior;
     }
 
@@ -6926,7 +6915,7 @@ Tristate _tristateFromBoolOrNull(bool? value) {
 
 /// This is just to support flag 0-30, new flags don't need to be in the bitmask.
 int _toBitMask(SemanticsFlags flags) {
-  int bitmask = 0;
+  var bitmask = 0;
   if (flags.isChecked != CheckedState.none) {
     bitmask |= 1 << 0;
   }

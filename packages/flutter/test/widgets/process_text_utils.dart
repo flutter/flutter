@@ -22,9 +22,9 @@ class MockProcessTextHandler {
       }
     }
     if (call.method == 'ProcessText.processTextAction') {
-      final List<dynamic> args = call.arguments as List<dynamic>;
-      final String actionId = args[0] as String;
-      final String textToProcess = args[1] as String;
+      final args = call.arguments as List<dynamic>;
+      final actionId = args[0] as String;
+      final textToProcess = args[1] as String;
       lastCalledActionId = actionId;
       lastTextToProcess = textToProcess;
 
