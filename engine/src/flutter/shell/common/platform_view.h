@@ -187,8 +187,7 @@ class PlatformView {
     ///             accept touch at a given touch location.
     ///
     /// @param[in]  view_id               The identifier of the flutter view
-    /// that
-    ///                                   hosts the embedded view.
+    ///                                   that hosts the embedded view.
     /// @param[in]  touch_began_location  The touch began location.
     ///
     /// @return     true if the embedded view should accept touch; false
