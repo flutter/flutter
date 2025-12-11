@@ -83,6 +83,8 @@ final gradleErrors = <GradleHandledError>[
   usageOfV1EmbeddingReferencesHandler,
   jlinkErrorWithJava21AndSourceCompatibility,
   missingNdkSourcePropertiesFile,
+  applyingKotlinAndroidPluginErrorHandler,
+  useNewAgpDslErrorHandler,
   incompatibleKotlinVersionHandler, // This handler should always be last, as its key log output is sometimes in error messages with other root causes.
 ];
 
@@ -659,4 +661,51 @@ final missingNdkSourcePropertiesFile = GradleHandledError(
         return GradleBuildStatus.exit;
       },
   eventLabel: 'ndk-missing-source-properties-file',
+);
+
+/// Handler when applying the kotlin-android plugin results in a build failure. This failure occurs when
+/// using AGP 9+ because built-in Kotlin has become the default behavior.
+@visibleForTesting
+final applyingKotlinAndroidPluginErrorHandler = GradleHandledError(
+  test: (String line) {
+    return line.contains(
+      "The 'org.jetbrains.kotlin.android' plugin is no longer required for Kotlin support since AGP 9.0",
+    );
+  },
+  handler:
+      ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
+        final File appGradleFile = project.android.appGradleFile;
+        globals.printBox(
+          '''
+${globals.logger.terminal.warningMark} Starting AGP 9+, the default has become built-in kotlin. This results in a build failure when applying the kotlin-android plugin at ${appGradleFile.path}. 
+\nTo resolve this, migrate to built-in kotlin. For guidance on the migration, follow these docs here: https://docs.flutter.dev/release/breaking-changes/update-to-AGP-9''',
+          title: _boxTitle,
+        );
+
+        return GradleBuildStatus.exit;
+      },
+  eventLabel: 'applying-kotlin-android-plugin-error',
+);
+
+/// Handler when using the new AGP DSL interfaces. Starting AGP 9+, only the new
+/// DSL interfaces are used. This results in a failure because we still depend
+///on old DSL types.
+@visibleForTesting
+final useNewAgpDslErrorHandler = GradleHandledError(
+  test: (String line) {
+    return line.contains("> Failed to apply plugin 'dev.flutter.flutter-gradle-plugin'.");
+  },
+  handler:
+      ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
+        final File appGradleFile = project.android.appGradleFile;
+        globals.printBox(
+          '''
+${globals.logger.terminal.warningMark} Starting AGP 9+, only the new DSL interface will be read. This results in a build failure when applying the flutter gradle plugin at ${appGradleFile.path}. 
+\nTo resolve this, opt-out of the new DSL. For guidance on opting out, follow these docs here: https://docs.flutter.dev/release/breaking-changes/update-to-AGP-9''',
+          title: _boxTitle,
+        );
+
+        return GradleBuildStatus.exit;
+      },
+  eventLabel: 'use-new-agp-dsl-error',
 );
