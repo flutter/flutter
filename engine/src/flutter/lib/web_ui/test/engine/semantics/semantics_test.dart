@@ -6164,7 +6164,7 @@ void _testProgressBar() {
       ..semanticsEnabled = true;
 
     SemanticsObject pumpSemantics() {
-      final SemanticsTester tester = SemanticsTester(owner());
+      final tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         role: ui.SemanticsRole.progressBar,
@@ -6189,7 +6189,7 @@ void _testLoadingSpinner() {
       ..semanticsEnabled = true;
 
     SemanticsObject pumpSemantics() {
-      final SemanticsTester tester = SemanticsTester(owner());
+      final tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         role: ui.SemanticsRole.loadingSpinner,
