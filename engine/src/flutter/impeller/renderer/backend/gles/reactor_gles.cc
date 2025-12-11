@@ -296,6 +296,7 @@ bool ReactorGLES::ReactOnce() {
 bool ReactorGLES::ConsolidateHandles() {
   TRACE_EVENT0("impeller", __FUNCTION__);
   const auto& gl = GetProcTable();
+  std::thread::id current_thread = std::this_thread::get_id();
   std::vector<std::tuple<HandleGLES, std::optional<GLStorage>>>
       handles_to_delete;
   std::vector<std::tuple<DebugResourceType, GLint, std::string>>
@@ -307,6 +308,10 @@ bool ReactorGLES::ConsolidateHandles() {
     for (auto& handle : handles_) {
       // Collect dead handles.
       if (handle.second.pending_collection) {
+        const auto& owner_thread = handle.first.owner_thread_;
+        if (owner_thread.has_value() && *owner_thread != current_thread) {
+          continue;
+        }
         handles_to_delete.emplace_back(
             std::make_tuple(handle.first, handle.second.name));
         continue;
