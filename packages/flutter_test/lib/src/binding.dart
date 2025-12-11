@@ -203,6 +203,9 @@ class _TestFlutterView implements FlutterView {
   ui.ViewPadding get viewPadding => ui.ViewPadding.zero;
 
   @override
+  ui.DisplayCornerRadii? get displayCornerRadii => null;
+
+  @override
   void render(ui.Scene scene, {ui.Size? size}) {}
 
   @override
