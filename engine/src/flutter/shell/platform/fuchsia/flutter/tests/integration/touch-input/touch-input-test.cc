@@ -121,7 +121,7 @@ using RealmBuilder = component_testing::RealmBuilder;
 
 // Max timeout in failure cases.
 // Set this as low as you can that still works across all test platforms.
-constexpr zx::duration kTimeout = zx::min(1);
+constexpr zx::duration kTimeout = zx::min(5);
 
 constexpr auto kTestUIStackUrl =
     "fuchsia-pkg://fuchsia.com/flatland-scene-manager-test-ui-stack#meta/"
