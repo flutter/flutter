@@ -1358,7 +1358,6 @@ public class FlutterView extends FrameLayout
       // FlutterActivity/FlutterFragment share one engine.
       removeView(flutterImageView);
       flutterImageView = null;
-      flutterEngineView = null;
     }
   }
 
@@ -1415,7 +1414,7 @@ public class FlutterView extends FrameLayout
     }
     if (previousEngineView == null) {
       Log.v(TAG, "Tried to revert the image view, but no previous engine view was used.");
-      // This is the problem! return;
+      return;
     }
 
     renderSurface = previousRenderSurface;
