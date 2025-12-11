@@ -4789,7 +4789,9 @@ mixin SemanticsAnnotationsMixin on RenderObject {
     config.isSemanticBoundary = container;
     config.explicitChildNodes = explicitChildNodes;
     config.isBlockingUserActions = blockUserActions;
-    config.localeForSubtree = localeForSubtree;
+    if (localeForSubtree != null) {
+      config.localeForSubtree = localeForSubtree;
+    }
     assert(
       ((_properties.scopesRoute ?? false) && explicitChildNodes) ||
           !(_properties.scopesRoute ?? false),
@@ -4934,6 +4936,10 @@ mixin SemanticsAnnotationsMixin on RenderObject {
     }
     if (config.validationResult != _properties.validationResult) {
       config.validationResult = _properties.validationResult;
+    }
+
+    if (_properties.hitTestBehavior != null) {
+      config.hitTestBehavior = _properties.hitTestBehavior!;
     }
 
     if (_properties.inputType != null) {

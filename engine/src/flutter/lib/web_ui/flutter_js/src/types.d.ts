@@ -58,6 +58,7 @@ export interface FlutterConfiguration {
   canvasKitBaseUrl?: string;
   canvasKitVariant?: CanvasKitVariant;
   renderer?: WebRenderer;
+  enableWimp?: boolean;
   hostElement?: HTMLElement;
   fontFallbackBaseUrl?: string;
   /** @deprecated use `entrypointBaseUrl` instead*/
