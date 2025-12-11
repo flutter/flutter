@@ -61,10 +61,6 @@ abstract class CanvasProvider<C extends DomEventTarget> {
 }
 
 /// A [CanvasProvider] that manages a pool of [dom.DomOffscreenCanvas] elements.
-///
-/// NOTE: `dom.DomOffscreenCanvas` is not fully defined in the provided `dom.dart`
-/// snippet. This implementation assumes it exists and has a similar API to the
-/// standard `OffscreenCanvas`.
 class OffscreenCanvasProvider extends CanvasProvider<DomOffscreenCanvas> {
   @override
   DomOffscreenCanvas _createCanvas(BitmapSize size) {
