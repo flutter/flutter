@@ -355,8 +355,10 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
                  isEqualToString:kGestureBlockingPolicyFallbackToPluginDefault]) {
     gestureBlockingPolicy = self.gestureRecognizersBlockingPoliciesByType[viewType];
   } else {
-    NSString* errorMessage = [NSString
-        stringWithFormat:@"Unsupported gesture blocking policy: %@, so we fallback to use the policy set via engine API.", gestureBlockingPolicyValue];
+    NSString* errorMessage =
+        [NSString stringWithFormat:@"Unsupported gesture blocking policy: %@, so we fallback to "
+                                   @"use the policy set via engine API.",
+                                   gestureBlockingPolicyValue];
     [FlutterLogger logError:errorMessage];
     gestureBlockingPolicy = self.gestureRecognizersBlockingPoliciesByType[viewType];
   }
