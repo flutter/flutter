@@ -356,9 +356,9 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
     gestureBlockingPolicy = self.gestureRecognizersBlockingPoliciesByType[viewType];
   } else {
     NSString* errorMessage = [NSString
-        stringWithFormat:@"Unsupported gesture blocking policy: %@", gestureBlockingPolicyValue];
+        stringWithFormat:@"Unsupported gesture blocking policy: %@, so we fallback to use the policy set via engine API.", gestureBlockingPolicyValue];
     [FlutterLogger logError:errorMessage];
-    gestureBlockingPolicy = FlutterPlatformViewGestureRecognizersBlockingPolicyEager;
+    gestureBlockingPolicy = self.gestureRecognizersBlockingPoliciesByType[viewType];
   }
 
   FlutterTouchInterceptingView* touchInterceptor =
