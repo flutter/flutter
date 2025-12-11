@@ -30,101 +30,6 @@ namespace txt {
 
 const FourCharCode kWeightTag = 'wght';
 
-namespace {
-
-// SkFontMgr wrapper that preserves font weight and slant.
-// CoreText does not preserve these attributes during font matching,
-// so we re-fetch with the correct style.
-// See: https://github.com/flutter/flutter/issues/132475
-class StylePreservingFontManager : public SkFontMgr {
- public:
-  explicit StylePreservingFontManager(sk_sp<SkFontMgr> font_manager)
-      : font_manager_(std::move(font_manager)) {}
-
- private:
-  int onCountFamilies() const override {
-    return font_manager_->countFamilies();
-  }
-
-  void onGetFamilyName(int index, SkString* familyName) const override {
-    font_manager_->getFamilyName(index, familyName);
-  }
-
-  sk_sp<SkFontStyleSet> onCreateStyleSet(int index) const override {
-    return font_manager_->createStyleSet(index);
-  }
-
-  sk_sp<SkFontStyleSet> onMatchFamily(const char familyName[]) const override {
-    return font_manager_->matchFamily(familyName);
-  }
-
-  sk_sp<SkTypeface> onMatchFamilyStyle(
-      const char familyName[],
-      const SkFontStyle& style) const override {
-    return font_manager_->matchFamilyStyle(familyName, style);
-  }
-
-  sk_sp<SkTypeface> onMatchFamilyStyleCharacter(
-      const char familyName[],
-      const SkFontStyle& style,
-      const char* bcp47[],
-      int bcp47Count,
-      SkUnichar character) const override {
-    sk_sp<SkTypeface> fallback = font_manager_->matchFamilyStyleCharacter(
-        familyName, style, bcp47, bcp47Count, character);
-
-    if (!fallback) {
-      return nullptr;
-    }
-
-    // Re-fetch with correct style using the fallback's family name.
-    SkString fallback_family_name;
-    fallback->getFamilyName(&fallback_family_name);
-    if (fallback_family_name.isEmpty()) {
-      return fallback;
-    }
-
-    sk_sp<SkTypeface> weighted_typeface =
-        font_manager_->matchFamilyStyle(fallback_family_name.c_str(), style);
-    if (!weighted_typeface ||
-        weighted_typeface->unicharToGlyph(character) == 0) {
-      return fallback;
-    }
-
-    return weighted_typeface;
-  }
-
-  sk_sp<SkTypeface> onMakeFromData(sk_sp<SkData> data,
-                                   int ttcIndex) const override {
-    return font_manager_->makeFromData(std::move(data), ttcIndex);
-  }
-
-  sk_sp<SkTypeface> onMakeFromStreamIndex(std::unique_ptr<SkStreamAsset> stream,
-                                          int ttcIndex) const override {
-    return font_manager_->makeFromStream(std::move(stream), ttcIndex);
-  }
-
-  sk_sp<SkTypeface> onMakeFromStreamArgs(
-      std::unique_ptr<SkStreamAsset> stream,
-      const SkFontArguments& args) const override {
-    return font_manager_->makeFromStream(std::move(stream), args);
-  }
-
-  sk_sp<SkTypeface> onMakeFromFile(const char path[],
-                                   int ttcIndex) const override {
-    return font_manager_->makeFromFile(path, ttcIndex);
-  }
-
-  sk_sp<SkTypeface> onLegacyMakeTypeface(const char familyName[],
-                                         SkFontStyle style) const override {
-    return font_manager_->legacyMakeTypeface(familyName, style);
-  }
-
-  sk_sp<SkFontMgr> font_manager_;
-};
-
-}  // namespace
-
 std::vector<std::string> GetDefaultFontFamilies() {
   if (fml::IsPlatformVersionAtLeast(9)) {
     return {[FONT_CLASS systemFontOfSize:14].familyName.UTF8String};
@@ -134,9 +39,7 @@ std::vector<std::string> GetDefaultFontFamilies() {
 }
 
 sk_sp<SkFontMgr> GetDefaultFontManager(uint32_t font_initialization_data) {
-  static sk_sp<SkFontMgr> core_text_mgr = SkFontMgr_New_CoreText(nullptr);
-  static sk_sp<SkFontMgr> mgr =
-      sk_make_sp<StylePreservingFontManager>(core_text_mgr);
+  static sk_sp<SkFontMgr> mgr = SkFontMgr_New_CoreText(nullptr);
   return mgr;
 }
 
