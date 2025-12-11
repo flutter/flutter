@@ -478,6 +478,8 @@ extension type DomElement._(JSObject _) implements DomNode {
 
   external double scrollTop;
   external double scrollLeft;
+  external double get scrollHeight;
+  external double get scrollWidth;
   external DomTokenList get classList;
   external String className;
 
@@ -1920,6 +1922,10 @@ extension type DomTouchEvent._(JSObject _) implements DomUIEvent {
   @JS('changedTouches')
   external _DomList get _changedTouches;
   Iterable<DomTouch> get changedTouches => _createDomListWrapper<DomTouch>(_changedTouches);
+
+  @JS('touches')
+  external _DomList get _touches;
+  Iterable<DomTouch> get touches => _createDomListWrapper<DomTouch>(_touches);
 }
 
 @JS('Touch')

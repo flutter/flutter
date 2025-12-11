@@ -151,6 +151,13 @@ class PlatformViewManager {
         ..id = getPlatformViewDomId(viewId)
         ..setAttribute('slot', slotName);
 
+      // Enable touch scrolling inside platform views.
+      // Flutter sets touch-action: none on the body to capture all touch events,
+      // but this prevents native touch scrolling inside platform views.
+      // We override it here to allow touch scrolling for HTML content.
+      // This fixes GitHub issue #179360.
+      setElementStyle(wrapper, 'touch-action', 'pan-y pan-x');
+
       final Function factoryFunction = _factories[viewType]!;
       final DomElement content;
 
@@ -164,10 +171,111 @@ class PlatformViewManager {
       _ensureContentCorrectlySized(content, viewType);
       wrapper.append(content);
 
+      // For regular HTML elements, set up touch boundary detection.
+      // When the user scrolls to the boundary of the HTML element,
+      // we need to propagate the scroll to Flutter.
+      _setupTouchBoundaryDetection(content, wrapper);
+
       wrapper.setAttribute(_ariaHiddenAttribute, 'true');
 
       return wrapper;
     });
+  }
+
+  /// Sets up touch boundary detection for regular HTML elements.
+  /// When the user scrolls to the boundary of the HTML element during touch scrolling,
+  /// we prevent the default to stop the HTML element from rubber-banding and let
+  /// Flutter handle the scroll.
+  void _setupTouchBoundaryDetection(DomElement content, DomElement wrapper) {
+    double? lastTouchY;
+    bool? browserOwnsScroll; // Once browser takes over (cancelable=false), it owns the gesture
+
+    content.addEventListener(
+      'touchstart',
+      createDomEventListener((DomEvent event) {
+        final touchEvent = event as DomTouchEvent;
+        final Iterable<DomTouch> touches = touchEvent.touches;
+        if (touches.isNotEmpty) {
+          lastTouchY = touches.first.clientY;
+          browserOwnsScroll = null; // Reset on new touch
+        }
+      }),
+      <String, bool>{'passive': true}.toJSAnyDeep,
+    );
+
+    content.addEventListener(
+      'touchmove',
+      createDomEventListener((DomEvent event) {
+        final touchEvent = event as DomTouchEvent;
+        final Iterable<DomTouch> touches = touchEvent.touches;
+        if (touches.isEmpty || lastTouchY == null) {
+          return;
+        }
+
+        final double currentY = touches.first.clientY;
+        final double deltaY = lastTouchY! - currentY; // Positive = scrolling down
+        lastTouchY = currentY;
+
+        // Find the scrollable element (could be content itself or a child)
+        final DomElement scrollable = _findScrollableElement(content);
+
+        final double scrollTop = scrollable.scrollTop;
+        final double scrollHeight = scrollable.scrollHeight;
+        final double clientHeight = scrollable.clientHeight;
+        final double maxScroll = scrollHeight - clientHeight;
+
+        // Check if at boundary in the direction of scroll
+        final bool atTop = scrollTop <= 1 && deltaY < 0; // Trying to scroll up at top
+        final bool atBottom =
+            scrollTop >= maxScroll - 1 && deltaY > 0; // Trying to scroll down at bottom
+        final bool atBoundary = atTop || atBottom;
+
+        // Once browser takes over (first non-cancelable event), it owns this gesture
+        if (!event.cancelable) {
+          browserOwnsScroll = true;
+        }
+
+        // Only prevent if:
+        // 1. Event is cancelable (we can still prevent it)
+        // 2. We're at a boundary in the scroll direction
+        // 3. Browser hasn't already taken over this gesture
+        if (event.cancelable && atBoundary && browserOwnsScroll != true) {
+          // At boundary - prevent default to stop rubber-banding
+          // and let Flutter handle the scroll
+          event.preventDefault();
+        }
+      }),
+      <String, bool>{'passive': false}.toJSAnyDeep,
+    );
+  }
+
+  /// Finds the scrollable element within a platform view content.
+  /// Returns the content itself if it's scrollable, or searches for a scrollable child.
+  DomElement _findScrollableElement(DomElement content) {
+    // Check if content itself is scrollable
+    if (_isScrollable(content)) {
+      return content;
+    }
+
+    // Search for a scrollable child
+    final Iterable<DomElement> children = content.querySelectorAll('*');
+    for (final child in children) {
+      if (_isScrollable(child)) {
+        return child;
+      }
+    }
+
+    // Default to content
+    return content;
+  }
+
+  bool _isScrollable(DomElement element) {
+    final String overflowY = element.style.overflowY;
+    final String overflow = element.style.overflow;
+    final bool hasOverflow =
+        overflowY == 'auto' || overflowY == 'scroll' || overflow == 'auto' || overflow == 'scroll';
+    final bool hasContent = element.scrollHeight > element.clientHeight;
+    return hasOverflow && hasContent;
   }
 
   /// Removes a PlatformView by its `viewId` from the manager, and from the DOM.
