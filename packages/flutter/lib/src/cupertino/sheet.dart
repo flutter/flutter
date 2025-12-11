@@ -120,9 +120,9 @@ final Animatable<double> _kScaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kS
 ///
 /// The `topGap` parameter can be used to customize the gap between the top of
 /// the screen and the top of the sheet as a ratio of the screen height.
-/// It should be a value between 0.0 and 1.0, where 0.0 means no gap and 1.0
-/// means the sheet starts at the bottom. If not provided, defaults to 0.08
-/// (8% of screen height).
+/// It should be a value between 0.0 and 0.9, where 0.0 means no gap and 0.9
+/// means the sheet takes up only the bottom 10% of the screen. If not provided, defaults
+/// to 0.08 (8% of screen height).
 ///
 /// iOS sheet widgets are generally designed to be tightly coupled to the context
 /// of the widget that opened the sheet. As such, it is not recommended to push
@@ -244,9 +244,9 @@ class CupertinoSheetTransition extends StatefulWidget {
   /// The gap between the top of the screen and the top of the sheet as a ratio
   /// of the screen height.
   ///
-  /// This value should be between 0.0 and 1.0, where 0.0 means no gap (sheet
-  /// extends to the top of the screen) and 1.0 means the sheet starts at the
-  /// bottom of the screen. A value of 0.08 represents 8% of the screen height.
+  /// This value should be between 0.0 and 0.9, where 0.0 means no gap (sheet
+  /// extends to the top of the screen) and 0.9 means the sheet covers only the
+  /// bottom 10% of the screen. A value of 0.08 represents 8% of the screen height.
   final double topGap;
 
   /// The primary delegated transition. Will slide a non [CupertinoSheetRoute] page down.
@@ -435,7 +435,7 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition>
       duration: const Duration(microseconds: 1),
       vsync: this,
     );
-    // Maintain the same stretch distance (0.008 of screen height) regardless of custom topGap
+    // Maintain the same stretch distance (0.008 of screen height) regardless of custom topGap.
     const double stretchDistance = _kTopGapRatio - _kStretchedTopGapRatio;
     final double stretchedTopGap = widget.topGap - stretchDistance;
     _stretchDragAnimation = _stretchDragController.drive(
@@ -905,7 +905,7 @@ class _CupertinoDragGestureController<T> {
   void dragUpdate(double delta, AnimationController upController) {
     if (popDragController.value == 1.0 && delta < 0) {
       // Divide by stretchable range (when dragging upward at max extent).
-      // Maintain the same stretch distance regardless of custom topGap
+      // Maintain the same stretch distance regardless of custom topGap.
       const double stretchDistance = _kTopGapRatio - _kStretchedTopGapRatio;
       upController.value -= delta / (navigator.context.size!.height * stretchDistance);
     } else {
