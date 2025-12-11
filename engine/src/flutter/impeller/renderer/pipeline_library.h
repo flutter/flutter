@@ -93,7 +93,8 @@ class PipelineLibrary : public std::enable_shared_from_this<PipelineLibrary> {
   PipelineLibrary(const PipelineLibrary&) = delete;
 
   PipelineLibrary& operator=(const PipelineLibrary&) = delete;
-
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG || \
+    FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE
   mutable RWMutex pipeline_use_counts_mutex_;
 
   std::unordered_map<PipelineDescriptor,
@@ -101,6 +102,8 @@ class PipelineLibrary : public std::enable_shared_from_this<PipelineLibrary> {
                      ComparableHash<PipelineDescriptor>,
                      ComparableEqual<PipelineDescriptor>>
       pipeline_use_counts_ IPLR_GUARDED_BY(pipeline_use_counts_mutex_);
+
+#endif
 };
 
 }  // namespace impeller

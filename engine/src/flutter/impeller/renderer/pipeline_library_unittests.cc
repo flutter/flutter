@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <memory>
-
 #include "impeller/renderer/testing/mocks.h"
 
 namespace impeller {
@@ -19,8 +17,12 @@ TEST(MockPipelineLibrary, LogAndGetPipelineUsageSinglePipeline) {
   pipeline_library.LogPipelineUsage(pipeline_desc);
 
   auto usage_counts = pipeline_library.GetPipelineUseCounts();
-
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG || \
+    FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE
   EXPECT_EQ(usage_counts[pipeline_desc], 2);
+#else
+  EXPECT_EQ(usage_counts[pipeline_desc], 0);
+#endif
 }
 
 TEST(MockPipelineLibrary, LogAndGetPipelineUsageMultiplePipelines) {
@@ -38,8 +40,14 @@ TEST(MockPipelineLibrary, LogAndGetPipelineUsageMultiplePipelines) {
 
   auto usage_counts = pipeline_library.GetPipelineUseCounts();
 
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG || \
+    FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE
   EXPECT_EQ(usage_counts[pipeline_a], 2);
   EXPECT_EQ(usage_counts[pipeline_b], 1);
+#else
+  EXPECT_EQ(usage_counts[pipeline_a], 0);
+  EXPECT_EQ(usage_counts[pipeline_b], 0);
+#endif
 }
 
 }  // namespace  testing

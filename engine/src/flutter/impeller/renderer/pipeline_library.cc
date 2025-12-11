@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/pipeline_library.h"
 #include <unordered_map>
+
 #include "impeller/base/thread.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 
@@ -38,7 +39,8 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibrary::GetPipeline(
 }
 
 void PipelineLibrary::LogPipelineCreation(const PipelineDescriptor& p) {
-#if defined(FLUTTER_RUNTIME_MODE_DEBUG) || defined(FLUTTER_RUNTIME_MODE_PROFILE)
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG || \
+    FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE
   WriterLock lock(pipeline_use_counts_mutex_);
   if (!pipeline_use_counts_.contains(p)) {
     pipeline_use_counts_[p] = 0;
@@ -47,7 +49,8 @@ void PipelineLibrary::LogPipelineCreation(const PipelineDescriptor& p) {
 }
 
 void PipelineLibrary::LogPipelineUsage(const PipelineDescriptor& p) {
-#if defined(FLUTTER_RUNTIME_MODE_DEBUG) || defined(FLUTTER_RUNTIME_MODE_PROFILE)
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG || \
+    FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE
   WriterLock lock(pipeline_use_counts_mutex_);
   ++pipeline_use_counts_[p];
 #endif
@@ -58,11 +61,16 @@ std::unordered_map<PipelineDescriptor,
                    ComparableHash<PipelineDescriptor>,
                    ComparableEqual<PipelineDescriptor>>
 PipelineLibrary::GetPipelineUseCounts() const {
-  ReaderLock lock(pipeline_use_counts_mutex_);
   std::unordered_map<PipelineDescriptor, int,
                      ComparableHash<PipelineDescriptor>,
                      ComparableEqual<PipelineDescriptor>>
-      counts(pipeline_use_counts_);
+      counts;
+
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG || \
+    FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE
+  ReaderLock lock(pipeline_use_counts_mutex_);
+  counts = pipeline_use_counts_;
+#endif
   return counts;
 }
 
