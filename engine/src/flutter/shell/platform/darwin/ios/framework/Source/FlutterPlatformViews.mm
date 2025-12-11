@@ -589,7 +589,10 @@ static BOOL _preparedOnce = NO;
       _flutterViewController = self.platformViewsController.flutterViewController;
     }
     CGPoint pointInFlutterView = [self convertPoint:point toView:self.flutterViewController.view];
-    // Block gesture if the framework instructed so (after performing its own hitTest).
+    // Consult the framework on if the touch should be handled by the platform view.
+    // If NO, the touch is handled by a Flutter widget and should be blocked (by returning self).
+    // If YES, the touch should continue to the standard hit-testing (through super), allowing the
+    // touch to be delivered to the underlying native platform view or one of its subviews.
     if (![self.flutterViewController
             platformViewShouldAcceptTouchAtTouchBeganLocation:pointInFlutterView]) {
       return self;

@@ -3490,7 +3490,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   XCTAssert([forwardingRecognizer isKindOfClass:[ForwardingGestureRecognizer class]]);
 }
 
-- (void)testFlutterPlatformViewBlockGestureUnderNonHitTestPolicyShouldNotAddDelayingRecognizer {
+- (void)testFlutterPlatformViewBlockGestureUnderNonHitTestPolicyShouldAddDelayingRecognizer {
   flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
 
   flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
