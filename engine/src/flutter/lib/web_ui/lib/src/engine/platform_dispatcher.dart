@@ -1368,6 +1368,18 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _onSemanticsActionEventZone = Zone.current;
   }
 
+  /// A callback is invoked when a platform view performs hitTest and queries
+  /// the framework if the platform view should receive the touches.
+  @override
+  ui.HitTestCallback? get onHitTest => _onHitTest;
+  ui.HitTestCallback? _onHitTest;
+  Zone _onHitTestZone = Zone.root;
+  @override
+  set onHitTest(ui.HitTestCallback? callback) {
+    _onHitTest = callback;
+    _onHitTestZone = Zone.current;
+  }
+
   /// Engine code should use this method instead of the callback directly.
   /// Otherwise zones won't work properly.
   void invokeOnSemanticsAction(int viewId, int nodeId, ui.SemanticsAction action, ByteData? args) {

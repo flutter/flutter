@@ -1391,11 +1391,14 @@ class PlatformDispatcher {
     _onSemanticsActionEventZone = Zone.current;
   }
 
+  /// A callback is invoked when a platform view performs hitTest and queries
+  /// the framework if the platform view should receive the touches.
   HitTestCallback? get onHitTest => _onHitTest;
   HitTestCallback? _onHitTest;
   Zone _onHitTestZone = Zone.root;
   set onHitTest(HitTestCallback? callback) {
     _onHitTest = callback;
+    _onHitTestZone = Zone.current;
   }
 
   // Called from the engine via hooks.dart.
