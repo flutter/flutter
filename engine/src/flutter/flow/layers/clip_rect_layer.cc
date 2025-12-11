@@ -18,8 +18,8 @@ void ClipRectLayer::ApplyClip(LayerStateStack::MutatorContext& mutator) const {
 }
 
 void ClipRectLayer::PushClipToEmbeddedNativeViewMutatorStack(
-    PrerollContext* context) const {
-  context->view_embedder->PushClipRectToVisitedPlatformViews(clip_shape());
+    ExternalViewEmbedder* view_embedder) const {
+  view_embedder->PushClipRectToVisitedPlatformViews(clip_shape());
 }
 
 }  // namespace flutter

@@ -21,9 +21,8 @@ void ClipRSuperellipseLayer::ApplyClip(
 }
 
 void ClipRSuperellipseLayer::PushClipToEmbeddedNativeViewMutatorStack(
-    PrerollContext* context) const {
-  context->view_embedder->PushClipRSuperellipseToVisitedPlatformViews(
-      clip_shape());
+    ExternalViewEmbedder* view_embedder) const {
+  view_embedder->PushClipRSuperellipseToVisitedPlatformViews(clip_shape());
 }
 
 }  // namespace flutter

@@ -21,7 +21,7 @@ class ClipPathLayer : public ClipShapeLayer<DlPath> {
 
   void ApplyClip(LayerStateStack::MutatorContext& mutator) const override;
   void PushClipToEmbeddedNativeViewMutatorStack(
-      PrerollContext* context) const override;
+      ExternalViewEmbedder* view_embedder) const override;
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(ClipPathLayer);
