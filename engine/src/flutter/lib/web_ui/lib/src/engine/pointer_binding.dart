@@ -546,6 +546,12 @@ abstract class _BaseAdapter {
   DomWheelEvent? _lastWheelEvent;
   bool _lastWheelEventWasTrackpad = false;
   bool _lastWheelEventAllowedDefault = false;
+  /// Tracks whether a widget explicitly handled the wheel event.
+  /// This is set to true when respond(allowPlatformDefault: false) is called.
+  /// Used to prevent parent page scrolling when a nested scrollable handles
+  /// the event, even if an outer scrollable at boundary says allowPlatformDefault: true.
+  /// (GitHub Issue #156985 - nested scrollables case)
+  bool _lastWheelEventHandledByWidget = false;
 
   DomElement get _viewTarget => _view.dom.rootElement;
   DomEventTarget get _globalTarget => _view.embeddingStrategy.globalEventTarget;
@@ -747,8 +753,18 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
         scrollDeltaX: deltaX,
         scrollDeltaY: deltaY,
         onRespond: ({bool allowPlatformDefault = false}) {
-          // Once `allowPlatformDefault` is `true`, never go back to `false`!
-          _lastWheelEventAllowedDefault |= allowPlatformDefault;
+          // Track both: whether any widget allows default, and whether any widget
+          // explicitly handled the event.
+          // GitHub Issue #156985: With nested scrollables, an inner scrollable may
+          // handle the scroll (respond false) while an outer scrollable at boundary
+          // allows platform default (respond true). The handler takes precedence.
+          if (allowPlatformDefault) {
+            _lastWheelEventAllowedDefault = true;
+          } else {
+            // A widget explicitly handled this event - take precedence over any
+            // "allow platform default" responses from other widgets.
+            _lastWheelEventHandledByWidget = true;
+          }
         },
       );
     }
@@ -772,18 +788,81 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
     }
 
     assert(event.isA<DomWheelEvent>());
+    final DomWheelEvent wheelEvent = event as DomWheelEvent;
     if (_debugLogPointerEvents) {
       print(event.type);
     }
+    // Reset flags before dispatching to framework
     _lastWheelEventAllowedDefault = false;
-    // [ui.PointerData] can set the `_lastWheelEventAllowedDefault` variable
-    // to true, when the framework says so. See the implementation of `respond`
-    // when creating the PointerData object above.
-    _callback(event, _convertWheelEventToPointerData(event as DomWheelEvent));
+    _lastWheelEventHandledByWidget = false;
+    // [ui.PointerData] can set these flags via the `respond` callback.
+    // See the implementation of `onRespond` when creating the PointerData above.
+    _callback(event, _convertWheelEventToPointerData(wheelEvent));
     // This works because the `_callback` is handled synchronously in the
-    // framework, so it's able to modify `_lastWheelEventAllowedDefault`.
-    if (!_lastWheelEventAllowedDefault) {
+    // framework, so it's able to modify the flags.
+    //
+    // GitHub Issue #156985: When Flutter is embedded in an iframe, ALWAYS call
+    // preventDefault() to prevent scroll events from bubbling to the parent page.
+    // Without this, scroll chaining causes the parent page to scroll when the
+    // Flutter content is at its scroll boundary.
+    //
+    // We detect iframe embedding by checking if window.parent !== window.
+    // If we want to explicitly scroll the parent (Issue #157435), we do that
+    // via postMessage, not by allowing platform default.
+    final bool isInIframe = _isEmbeddedInIframe();
+    if (!_lastWheelEventAllowedDefault || isInIframe) {
       event.preventDefault();
+    }
+    
+    // GitHub Issue #156985 + #157435: When Flutter is at boundary in an iframe,
+    // we've prevented the native scroll chaining above, but we still want to
+    // scroll the parent page. Do this explicitly via postMessage.
+    //
+    // IMPORTANT: Only scroll parent if:
+    // 1. We're in an iframe
+    // 2. Some widget wants to allow platform default (at boundary)
+    // 3. NO widget explicitly handled the event (nested scrollables case)
+    final bool shouldScrollParent = isInIframe && 
+        _lastWheelEventAllowedDefault && 
+        !_lastWheelEventHandledByWidget;
+    if (shouldScrollParent) {
+      // All Flutter scrollables are at boundary - scroll the parent.
+      scrollParentWindow(wheelEvent.deltaX, wheelEvent.deltaY);
+    }
+  }
+
+  /// Returns true if Flutter is embedded inside an iframe.
+  ///
+  /// This is detected by checking if window.parent is different from window.
+  /// Used to determine whether to always preventDefault on wheel events to
+  /// prevent scroll chaining to the parent page (GitHub Issue #156985).
+  static bool? _cachedIsInIframe;
+  bool _isEmbeddedInIframe() {
+    // Cache the result since this check is called for every wheel event
+    if (_cachedIsInIframe != null) {
+      return _cachedIsInIframe!;
+    }
+    
+    try {
+      // If window.parent is the same object as window, we're not in an iframe.
+      // If they're different, we're in an iframe.
+      // Note: Accessing window.parent properties may throw in cross-origin scenarios,
+      // so we wrap in try-catch. If it throws, we assume we're in a cross-origin
+      // iframe and should prevent default.
+      final DomWindow? parent = domWindow.parent;
+      if (parent == null) {
+        _cachedIsInIframe = false;
+        return false;
+      }
+      // Use Dart's identical() to check if parent and window are the same object.
+      // In a top-level window, window.parent === window.
+      // In an iframe, window.parent is the parent window (different object).
+      _cachedIsInIframe = !identical(parent, domWindow);
+      return _cachedIsInIframe!;
+    } catch (e) {
+      // Cross-origin iframe - assume we're embedded and should prevent default
+      _cachedIsInIframe = true;
+      return true;
     }
   }
 
@@ -1003,7 +1082,16 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
         // rendered the next input element, leading to the focus incorrectly returning to
         // the main Flutter view instead.
         // A zero-length timer is sufficient in all tested browsers to achieve this.
-        event.preventDefault();
+        //
+        // IMPORTANT: For touch events, we DON'T call preventDefault() to allow browser
+        // scrolling to work. This fixes GitHub issues:
+        // - #157435: Flutter Web embed mode not scrolling the hosting page (touch)
+        // - #156985: Scroll events bubble to parent page (touch component)
+        // The trade-off is that focus transitions on touch might be slightly less smooth,
+        // but browser scrolling is more important for mobile UX.
+        if (event.pointerType != 'touch') {
+          event.preventDefault();
+        }
         Timer(Duration.zero, () {
           EnginePlatformDispatcher.instance.requestViewFocusChange(
             viewId: _view.viewId,
