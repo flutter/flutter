@@ -326,14 +326,16 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
             });
       };
 
-  VS::FrameInfo frame_info = CalculateFrameInfo(texture_inputs_);
+  VS::FrameInfo frame_info =
+      CalculateFrameInfo(texture_inputs_, entity.GetTransform());
 
   return ColorSourceContents::DrawGeometry<VS>(
       renderer, entity, pass, pipeline_callback, frame_info, bind_callback);
 }
 
 RuntimeEffectVertexShader::FrameInfo RuntimeEffectContents::CalculateFrameInfo(
-    const std::vector<TextureInput>& inputs) {
+    const std::vector<TextureInput>& inputs,
+    const Matrix& entity_transform) {
   RuntimeEffectVertexShader::FrameInfo frame_info;
   for (size_t i = 0; i < inputs.size() && i < 4; i++) {
     auto& input = inputs[i];
@@ -342,7 +344,7 @@ RuntimeEffectVertexShader::FrameInfo RuntimeEffectContents::CalculateFrameInfo(
     // Scale to normalize (0..1).
     Matrix normalize =
         Matrix::MakeScale(Vector3(1.0f / size.width, 1.0f / size.height, 1.0f));
-    Matrix final_transform = normalize * screen_to_texture;
+    Matrix final_transform = normalize * screen_to_texture * entity_transform;
     switch (i) {
       case 0:
         frame_info.text_transform_0 = final_transform;

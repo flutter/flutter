@@ -12,8 +12,6 @@ out vec4 frag_color;
 
 void main() {
   vec4 val0 = texture(u_input0, FlutterGetInputTextureCoordinates(0));
-
-  // Use alpha channel as displacement (arbitrary scalar).
-  vec2 offset = vec2(val0.a * 0.1, 0.0);
-  frag_color = texture(u_input1, FlutterGetInputTextureCoordinates(1) + offset);
+  vec4 val1 = texture(u_input1, FlutterGetInputTextureCoordinates(1));
+  frag_color = val1;
 }

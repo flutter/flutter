@@ -23,7 +23,7 @@ TEST(RuntimeEffectContentsTest, CalculateFrameInfo) {
   // Identity transform
   input.transform = Matrix();
 
-  auto frame_info = RuntimeEffectContents::CalculateFrameInfo(inputs);
+  auto frame_info = RuntimeEffectContents::CalculateFrameInfo(inputs, Matrix());
 
   // input.transform (identity) invert is identity.
   // normalize is scale(1/100, 1/100, 1).
@@ -47,7 +47,7 @@ TEST(RuntimeEffectContentsTest, CalculateFrameInfoWithScale) {
 
   input.transform = Matrix::MakeScale(Vector2(2.0, 2.0));
 
-  auto frame_info = RuntimeEffectContents::CalculateFrameInfo(inputs);
+  auto frame_info = RuntimeEffectContents::CalculateFrameInfo(inputs, Matrix());
 
   // Invert(Scale(2)) = Scale(0.5).
   // Normalize = Scale(0.01).

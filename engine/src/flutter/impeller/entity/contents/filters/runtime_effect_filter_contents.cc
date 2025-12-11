@@ -134,21 +134,21 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
     memcpy(uniforms_->data(), &size, sizeof(Size));
   }
 
-  Matrix snapshot_transform = first_input_snapshot->transform;
+  Matrix snapshot_transform = Matrix::MakeTranslation(coverage.GetOrigin());
+
   //----------------------------------------------------------------------------
   /// Create AnonymousContents for rendering.
   ///
   RenderProc render_proc = [snapshot_transform, runtime_stage = runtime_stage_,
                             uniforms = uniforms_,
-                            texture_inputs = texture_input_copy](
+                            texture_inputs = texture_input_copy, coverage](
                                const ContentContext& renderer,
                                const Entity& entity, RenderPass& pass) -> bool {
     RuntimeEffectContents contents;
-    // Use the size of the first input for geometry.
-    FillRectGeometry geom(Rect::MakeSize(texture_inputs[0].texture->GetSize()));
     contents.SetRuntimeStage(runtime_stage);
     contents.SetUniformData(uniforms);
     contents.SetTextureInputs(texture_inputs);
+    FillRectGeometry geom(Rect::MakeSize(coverage.GetSize()));
     contents.SetGeometry(&geom);
     Entity offset_entity = entity.Clone();
     offset_entity.SetTransform(entity.GetTransform() * snapshot_transform);
@@ -165,8 +165,7 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
   Entity sub_entity;
   sub_entity.SetContents(std::move(contents));
   sub_entity.SetBlendMode(entity.GetBlendMode());
-  sub_entity.SetTransform(first_input_snapshot->transform *
-                          snapshot_transform.Invert());
+  sub_entity.SetTransform(Matrix());
 
   return sub_entity;
 }

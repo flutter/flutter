@@ -46,7 +46,8 @@ class RuntimeEffectContents final : public ColorSourceContents {
       size_t minimum_uniform_alignment);
 
   static RuntimeEffectVertexShader::FrameInfo CalculateFrameInfo(
-      const std::vector<TextureInput>& inputs);
+      const std::vector<TextureInput>& inputs,
+      const Matrix& entity_transform);
 
  private:
   bool RegisterShader(const ContentContext& renderer) const;
