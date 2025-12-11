@@ -492,7 +492,7 @@ class RuntimeController : public PlatformConfigurationClient,
   ///
   bool EmbeddedNativeViewShouldAcceptTouch(
       int64_t view_id,
-      const flutter::PointData& touch_began_location);
+      const flutter::PointData touch_began_location);
 
   //----------------------------------------------------------------------------
   /// @brief      Dispatch the semantics action to the specified accessibility

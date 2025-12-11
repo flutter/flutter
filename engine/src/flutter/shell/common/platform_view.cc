@@ -37,7 +37,7 @@ void PlatformView::DispatchPointerDataPacket(
 
 bool PlatformView::EmbeddedNativeViewShouldAcceptTouch(
     int64_t view_id,
-    const flutter::PointData& touch_began_location) {
+    const flutter::PointData touch_began_location) {
   return delegate_.OnPlatformViewEmbeddedNativeViewShouldAcceptTouch(
       view_id, touch_began_location);
 }

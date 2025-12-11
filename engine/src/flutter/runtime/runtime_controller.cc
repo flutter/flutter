@@ -376,7 +376,7 @@ bool RuntimeController::DispatchPointerDataPacket(
 
 bool RuntimeController::EmbeddedNativeViewShouldAcceptTouch(
     int64_t view_id,
-    const flutter::PointData& touch_began_location) {
+    const flutter::PointData touch_began_location) {
   if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
     TRACE_EVENT0("flutter",
                  "RuntimeController::EmbeddedNativeViewShouldAcceptTouch");

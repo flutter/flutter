@@ -195,7 +195,7 @@ class PlatformView {
     ///
     virtual bool OnPlatformViewEmbeddedNativeViewShouldAcceptTouch(
         int64_t view_id,
-        const flutter::PointData& touch_began_location) = 0;
+        const flutter::PointData touch_began_location) = 0;
 
     //--------------------------------------------------------------------------
     /// @brief      Notifies the delegate that the platform view has encountered
@@ -766,7 +766,7 @@ class PlatformView {
   ///
   bool EmbeddedNativeViewShouldAcceptTouch(
       int64_t view_id,
-      const flutter::PointData& touch_began_location);
+      const flutter::PointData touch_began_location);
 
   //--------------------------------------------------------------------------
   /// @brief      Used by the embedder to specify a texture that it wants the

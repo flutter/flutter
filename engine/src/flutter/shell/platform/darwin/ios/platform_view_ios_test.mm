@@ -32,7 +32,7 @@ class MockDelegate : public PlatformView::Delegate {
   }
   bool OnPlatformViewEmbeddedNativeViewShouldAcceptTouch(
       int64_t view_id,
-      const flutter::PointData& touch_began_location) override {
+      const flutter::PointData touch_began_location) override {
     return false;
   }
   void OnPlatformViewSendViewFocusEvent(const ViewFocusEvent& event) override {}

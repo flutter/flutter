@@ -1223,7 +1223,8 @@ void Shell::OnPlatformViewDispatchPointerDataPacket(
 
 bool Shell::OnPlatformViewEmbeddedNativeViewShouldAcceptTouch(
     int64_t view_id,
-    const flutter::PointData& touch_began_location) {
+    const flutter::PointData touch_began_location) {
+  FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
   if (engine_) {
     return engine_->EmbeddedNativeViewShouldAcceptTouch(view_id,
                                                         touch_began_location);

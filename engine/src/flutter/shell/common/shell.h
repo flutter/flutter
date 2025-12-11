@@ -610,7 +610,7 @@ class Shell final : public PlatformView::Delegate,
 
   bool OnPlatformViewEmbeddedNativeViewShouldAcceptTouch(
       int64_t view_id,
-      const flutter::PointData& touch_began_location) override;
+      const flutter::PointData touch_began_location) override;
 
   // |PlatformView::Delegate|
   void OnPlatformViewDispatchSemanticsAction(int64_t view_id,

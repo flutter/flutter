@@ -119,7 +119,7 @@ class MockPlatformViewDelegate : public flutter::PlatformView::Delegate {
   // |flutter::PlatformView::Delegate|
   bool OnPlatformViewEmbeddedNativeViewShouldAcceptTouch(
       int64_t view_id,
-      const flutter::PointData& touch_began_location) {
+      const flutter::PointData touch_began_location) {
     return false;
   }
   // |flutter::PlatformView::Delegate|

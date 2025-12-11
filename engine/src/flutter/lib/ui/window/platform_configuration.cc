@@ -396,7 +396,7 @@ void PlatformConfiguration::DispatchPointerDataPacket(
 
 bool PlatformConfiguration::EmbeddedNativeViewShouldAcceptTouch(
     int64_t view_id,
-    const flutter::PointData& touch_began_location) {
+    const flutter::PointData touch_began_location) {
   std::shared_ptr<tonic::DartState> dart_state =
       embedded_native_view_should_accept_touch_.dart_state().lock();
   if (!dart_state) {

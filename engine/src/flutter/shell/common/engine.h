@@ -843,7 +843,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ///
   bool EmbeddedNativeViewShouldAcceptTouch(
       int64_t view_id,
-      const flutter::PointData& touch_began_location);
+      const flutter::PointData touch_began_location);
 
   //----------------------------------------------------------------------------
   /// @brief      Notifies the engine that the embedder encountered an

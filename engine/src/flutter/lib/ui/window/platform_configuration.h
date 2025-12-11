@@ -476,7 +476,7 @@ class PlatformConfiguration final {
   ///
   bool EmbeddedNativeViewShouldAcceptTouch(
       int64_t view_id,
-      const flutter::PointData& touch_began_location);
+      const flutter::PointData touch_began_location);
 
   //----------------------------------------------------------------------------
   /// @brief      Notifies the framework that the embedder encountered an
