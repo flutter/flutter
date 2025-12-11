@@ -162,6 +162,7 @@ targets:
 
   - name: Linux linux_fuchsia_tests
     recipe: engine_v2/engine_v2
+    bringup: true
     timeout: 90
     enabled_branches:
       # Don't run this on release branches
