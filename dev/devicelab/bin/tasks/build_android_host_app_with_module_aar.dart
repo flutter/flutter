@@ -18,9 +18,6 @@ final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
 final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
 final String fileReadWriteMode = Platform.isWindows ? 'rw-rw-rw-' : 'rw-r--r--';
 
-
-
-
 /// Combines several TaskFunctions with trivial success value into one.
 TaskFunction combine(List<TaskFunction> tasks) {
   return () async {
@@ -50,8 +47,6 @@ class ModuleTest {
 
   Future<TaskResult> call() async {
     section('Running: $buildTarget-$gradleVersion');
-
-
 
     section('Find Java');
 

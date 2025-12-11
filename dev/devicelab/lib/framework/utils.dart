@@ -864,7 +864,6 @@ String? _discoverBestNdkPath() {
   return _bestNdkPath = path.join(ndkDir.path, versions.last.toString());
 }
 
-
 /// Checks that the file does not exists, otherwise throws a [FileSystemException].
 void checkFileNotExists(String file) {
   if (exists(File(file))) {
