@@ -313,7 +313,7 @@ bool _platformViewShouldAcceptTouch(int viewId, double x, double y) {
   assert(PlatformDispatcher.instance._views.containsKey(viewId), 'View $viewId does not exist.');
   final FlutterView view = PlatformDispatcher.instance._views[viewId]!;
   final offset = Offset(x, y);
-  final HitTestRequest request = HitTestRequest(view: view, offset: offset);
+  final request = HitTestRequest(view: view, offset: offset);
   final HitTestResponse response = PlatformDispatcher.instance._hitTest(request);
   return response.isPlatformView;
 }

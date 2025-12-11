@@ -1377,11 +1377,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   @override
   ui.HitTestCallback? get onHitTest => _onHitTest;
   ui.HitTestCallback? _onHitTest;
-  Zone _onHitTestZone = Zone.root;
   @override
   set onHitTest(ui.HitTestCallback? callback) {
     _onHitTest = callback;
-    _onHitTestZone = Zone.current;
   }
 
   /// Engine code should use this method instead of the callback directly.
