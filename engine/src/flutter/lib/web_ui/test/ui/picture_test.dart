@@ -34,6 +34,35 @@ Future<void> testMain() async {
     expect(picture.debugDisposed, true);
   });
 
+  test('Disposing picture does not dispose picture in PictureLayer', () {
+    final recorder = ui.PictureRecorder() as LayerPictureRecorder;
+    final canvas = ui.Canvas(recorder);
+    const rect = ui.Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+    canvas.clipRect(rect);
+
+    expect(recorder.isRecording, true);
+    expect(recorder.debugDisposed, false);
+    final ui.Picture picture = recorder.endRecording();
+
+    expect(picture.debugDisposed, false);
+    expect(recorder.isRecording, false);
+    expect(recorder.debugDisposed, true);
+
+    final builder = ui.SceneBuilder() as LayerSceneBuilder;
+    builder.addPicture(ui.Offset.zero, picture);
+    final LayerScene scene = builder.build();
+    final pictureLayer = scene.layerTree.rootLayer.children.first as PictureLayer;
+
+    expect(pictureLayer.picture.debugDisposed, false);
+
+    picture.dispose();
+    expect(picture.debugDisposed, true);
+    expect(pictureLayer.picture.debugDisposed, false);
+
+    pictureLayer.dispose();
+    expect(pictureLayer.picture.debugDisposed, true);
+  });
+
   test('Picture construction invokes onCreate once', () async {
     var onCreateInvokedCount = 0;
     ui.Picture? createdPicture;
