@@ -9,6 +9,7 @@ import 'dart:math' as math;
 
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
+import 'package:pub_semver/pub_semver.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 import 'devices.dart';
@@ -284,6 +285,13 @@ Future<Process> startProcess(
   final command = '$executable ${arguments?.join(" ") ?? ""}';
   final String finalWorkingDirectory = workingDirectory ?? cwd;
   final newEnvironment = Map<String, String>.from(environment ?? <String, String>{});
+
+  // Override ANDROID_NDK_PATH with a valid discovered path or empty string to clear a potentially bad value.
+  final String? bestNdkPath = _discoverBestNdkPath();
+  if (bestNdkPath != null) {
+    newEnvironment['ANDROID_NDK_PATH'] = bestNdkPath;
+  }
+
   newEnvironment['BOT'] = isBot ? 'true' : 'false';
   newEnvironment['LANG'] = 'en_US.UTF-8';
   print('Executing "$command" in "$finalWorkingDirectory" with environment $newEnvironment');
@@ -796,12 +804,45 @@ Uri? parseServiceUri(String line, {Pattern? prefix}) {
   return matches.isEmpty ? null : Uri.parse(matches[0].group(0)!);
 }
 
-/// Checks that the file exists, otherwise throws a [FileSystemException].
 void checkFileExists(String file) {
   if (!exists(File(file))) {
-    throw FileSystemException('Expected file to exist.', file);
+    fail('File not found: $file');
   }
 }
+
+String? _bestNdkPath;
+String? _discoverBestNdkPath() {
+  if (_bestNdkPath != null) {
+    return _bestNdkPath;
+  }
+  // If we found a valid NDK, return it.
+  // Otherwise return empty string to clear any bad inherited value.
+  final Map<String, String> env = Platform.environment;
+  final String? androidHome = env['ANDROID_HOME'] ?? env['ANDROID_SDK_ROOT'];
+  if (androidHome == null) {
+    return _bestNdkPath = '';
+  }
+  final Directory ndkDir = Directory(path.join(androidHome, 'ndk'));
+  if (!ndkDir.existsSync()) {
+    return _bestNdkPath = '';
+  }
+  final List<Version> versions = <Version>[];
+  for (final FileSystemEntity entity in ndkDir.listSync()) {
+    if (entity is Directory) {
+      try {
+        versions.add(Version.parse(path.basename(entity.path)));
+      } on FormatException {
+        // Ignore non-version directories.
+      }
+    }
+  }
+  if (versions.isEmpty) {
+    return _bestNdkPath = '';
+  }
+  versions.sort();
+  return _bestNdkPath = path.join(ndkDir.path, versions.last.toString());
+}
+
 
 /// Checks that the file does not exists, otherwise throws a [FileSystemException].
 void checkFileNotExists(String file) {
