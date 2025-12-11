@@ -56,6 +56,7 @@ source_set("InternalFlutterSwift") {
   sources = [
     "framework/Source/ConnectionCollection.swift",
     "framework/Source/UIPressProxy.swift",
+    "framework/Source/TranslateController.swift",
   ]
   public = _flutter_framework_headers + framework_common_headers
 }
