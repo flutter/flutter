@@ -4121,8 +4121,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
       hitTestBehavior: data.hitTestBehavior,
       inputType: data.inputType,
       locale: data.locale,
-      minValue: data.minValue ?? '0',
-      maxValue: data.maxValue ?? '0',
+      minValue: data.minValue ?? '',
+      maxValue: data.maxValue ?? '',
     );
     _dirty = false;
   }
