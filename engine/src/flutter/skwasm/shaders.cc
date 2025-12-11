@@ -29,22 +29,22 @@ shader_createLinearGradient(flutter::DlPoint* endPoints,  // Two points
                             flutter::DlTileMode tileMode,
                             flutter::DlScalar* matrix33  // Can be nullptr
 ) {
-  Skwasm::liveShaderCount++;
-  std::vector<flutter::DlColor> dlColors;
-  dlColors.resize(count);
+  Skwasm::live_shader_count++;
+  std::vector<flutter::DlColor> dl_colors;
+  dl_colors.resize(count);
   for (int i = 0; i < count; i++) {
-    dlColors[i] = flutter::DlColor(colors[i]);
+    dl_colors[i] = flutter::DlColor(colors[i]);
   }
   if (matrix33) {
     auto matrix = Skwasm::createDlMatrixFrom3x3(matrix33);
     return new Skwasm::sp_wrapper<flutter::DlColorSource>(
         flutter::DlColorSource::MakeLinear(endPoints[0], endPoints[1], count,
-                                           dlColors.data(), stops, tileMode,
+                                           dl_colors.data(), stops, tileMode,
                                            &matrix));
   } else {
     return new Skwasm::sp_wrapper<flutter::DlColorSource>(
         flutter::DlColorSource::MakeLinear(endPoints[0], endPoints[1], count,
-                                           dlColors.data(), stops, tileMode));
+                                           dl_colors.data(), stops, tileMode));
   }
 }
 
@@ -57,22 +57,22 @@ shader_createRadialGradient(flutter::DlScalar centerX,
                             int count,
                             flutter::DlTileMode tileMode,
                             flutter::DlScalar* matrix33) {
-  Skwasm::liveShaderCount++;
-  std::vector<flutter::DlColor> dlColors;
-  dlColors.resize(count);
+  Skwasm::live_shader_count++;
+  std::vector<flutter::DlColor> dl_colors;
+  dl_colors.resize(count);
   for (int i = 0; i < count; i++) {
-    dlColors[i] = flutter::DlColor(colors[i]);
+    dl_colors[i] = flutter::DlColor(colors[i]);
   }
   if (matrix33) {
     auto localMatrix = Skwasm::createDlMatrixFrom3x3(matrix33);
     return new Skwasm::sp_wrapper<flutter::DlColorSource>(
         flutter::DlColorSource::MakeRadial(flutter::DlPoint{centerX, centerY},
-                                           radius, count, dlColors.data(),
+                                           radius, count, dl_colors.data(),
                                            stops, tileMode, &localMatrix));
   } else {
     return new Skwasm::sp_wrapper<flutter::DlColorSource>(
         flutter::DlColorSource::MakeRadial(flutter::DlPoint{centerX, centerY},
-                                           radius, count, dlColors.data(),
+                                           radius, count, dl_colors.data(),
                                            stops, tileMode));
   }
 }
@@ -86,23 +86,23 @@ shader_createConicalGradient(flutter::DlPoint* endPoints,  // Two points
                              int count,
                              flutter::DlTileMode tileMode,
                              flutter::DlScalar* matrix33) {
-  Skwasm::liveShaderCount++;
-  std::vector<flutter::DlColor> dlColors;
-  dlColors.resize(count);
+  Skwasm::live_shader_count++;
+  std::vector<flutter::DlColor> dl_colors;
+  dl_colors.resize(count);
   for (int i = 0; i < count; i++) {
-    dlColors[i] = flutter::DlColor(colors[i]);
+    dl_colors[i] = flutter::DlColor(colors[i]);
   }
   if (matrix33) {
     auto localMatrix = Skwasm::createDlMatrixFrom3x3(matrix33);
     return new Skwasm::sp_wrapper<flutter::DlColorSource>(
         flutter::DlColorSource::MakeConical(
             endPoints[0], startRadius, endPoints[1], endRadius, count,
-            dlColors.data(), stops, tileMode, &localMatrix));
+            dl_colors.data(), stops, tileMode, &localMatrix));
   } else {
     return new Skwasm::sp_wrapper<flutter::DlColorSource>(
         flutter::DlColorSource::MakeConical(endPoints[0], startRadius,
                                             endPoints[1], endRadius, count,
-                                            dlColors.data(), stops, tileMode));
+                                            dl_colors.data(), stops, tileMode));
   }
 }
 
@@ -116,39 +116,39 @@ shader_createSweepGradient(flutter::DlScalar centerX,
                            flutter::DlScalar startAngle,
                            flutter::DlScalar endAngle,
                            flutter::DlScalar* matrix33) {
-  Skwasm::liveShaderCount++;
-  std::vector<flutter::DlColor> dlColors;
-  dlColors.resize(count);
+  Skwasm::live_shader_count++;
+  std::vector<flutter::DlColor> dl_colors;
+  dl_colors.resize(count);
   for (int i = 0; i < count; i++) {
-    dlColors[i] = flutter::DlColor(colors[i]);
+    dl_colors[i] = flutter::DlColor(colors[i]);
   }
   if (matrix33) {
     auto localMatrix = Skwasm::createDlMatrixFrom3x3(matrix33);
     return new Skwasm::sp_wrapper<flutter::DlColorSource>(
         flutter::DlColorSource::MakeSweep(
             flutter::DlPoint{centerX, centerY}, startAngle, endAngle, count,
-            dlColors.data(), stops, tileMode, &localMatrix));
+            dl_colors.data(), stops, tileMode, &localMatrix));
   } else {
     return new Skwasm::sp_wrapper<flutter::DlColorSource>(
         flutter::DlColorSource::MakeSweep(flutter::DlPoint{centerX, centerY},
                                           startAngle, endAngle, count,
-                                          dlColors.data(), stops, tileMode));
+                                          dl_colors.data(), stops, tileMode));
   }
 }
 
 SKWASM_EXPORT void shader_dispose(
     Skwasm::sp_wrapper<flutter::DlColorSource>* shader) {
-  Skwasm::liveShaderCount--;
+  Skwasm::live_shader_count--;
   delete shader;
 }
 
 SKWASM_EXPORT flutter::DlRuntimeEffect* runtimeEffect_create(SkString* source) {
-  Skwasm::liveRuntimeEffectCount++;
+  Skwasm::live_runtime_effect_count++;
   return Skwasm::createRuntimeEffect(source).release();
 }
 
 SKWASM_EXPORT void runtimeEffect_dispose(flutter::DlRuntimeEffect* effect) {
-  Skwasm::liveRuntimeEffectCount--;
+  Skwasm::live_runtime_effect_count--;
   effect->unref();
 }
 
@@ -163,16 +163,16 @@ shader_createRuntimeEffectShader(
     Skwasm::UniformData* uniforms,
     Skwasm::sp_wrapper<flutter::DlColorSource>** children,
     size_t childCount) {
-  Skwasm::liveShaderCount++;
-  std::vector<std::shared_ptr<flutter::DlColorSource>> childPointers;
-  childPointers.resize(childCount);
+  Skwasm::live_shader_count++;
+  std::vector<std::shared_ptr<flutter::DlColorSource>> child_pointers;
+  child_pointers.resize(childCount);
   for (size_t i = 0; i < childCount; i++) {
-    childPointers[i] = children[i]->shared();
+    child_pointers[i] = children[i]->Shared();
   }
 
   return new Skwasm::sp_wrapper<flutter::DlColorSource>(
       flutter::DlColorSource::MakeRuntimeEffect(
-          sk_ref_sp(runtimeEffect), std::move(childPointers), uniforms->data));
+          sk_ref_sp(runtimeEffect), std::move(child_pointers), uniforms->data));
 }
 
 SKWASM_EXPORT Skwasm::sp_wrapper<flutter::DlColorSource>*
@@ -181,7 +181,7 @@ shader_createFromImage(flutter::DlImage* image,
                        flutter::DlTileMode tileModeY,
                        Skwasm::FilterQuality quality,
                        flutter::DlScalar* matrix33) {
-  Skwasm::liveShaderCount++;
+  Skwasm::live_shader_count++;
   if (matrix33) {
     auto localMatrix = Skwasm::createDlMatrixFrom3x3(matrix33);
     return new Skwasm::sp_wrapper<flutter::DlColorSource>(

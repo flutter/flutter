@@ -11,17 +11,17 @@
 #include "third_party/skia/include/utils/SkParsePath.h"
 
 SKWASM_EXPORT SkPathBuilder* path_create() {
-  Skwasm::livePathCount++;
+  Skwasm::live_path_count++;
   return new SkPathBuilder();
 }
 
 SKWASM_EXPORT void path_dispose(SkPathBuilder* path) {
-  Skwasm::livePathCount--;
+  Skwasm::live_path_count--;
   delete path;
 }
 
 SKWASM_EXPORT SkPathBuilder* path_copy(SkPathBuilder* path) {
-  Skwasm::livePathCount++;
+  Skwasm::live_path_count++;
   return new SkPathBuilder(path->snapshot());
 }
 
@@ -198,7 +198,7 @@ SKWASM_EXPORT SkPathBuilder* path_combine(SkPathOp operation,
                                           const SkPathBuilder* path1,
                                           const SkPathBuilder* path2) {
   if (auto result = Op(path1->snapshot(), path2->snapshot(), operation)) {
-    Skwasm::livePathCount++;
+    Skwasm::live_path_count++;
     SkPathBuilder* output = new SkPathBuilder(result.value());
     output->setFillType(path1->fillType());
     return output;
@@ -208,7 +208,7 @@ SKWASM_EXPORT SkPathBuilder* path_combine(SkPathOp operation,
 }
 
 SKWASM_EXPORT SkString* path_getSvgString(SkPathBuilder* path) {
-  Skwasm::liveStringCount++;
+  Skwasm::live_string_count++;
   SkString* string = new SkString(SkParsePath::ToSVGString(path->snapshot()));
   return string;
 }

@@ -21,7 +21,7 @@ class SkwasmParagraphPainter : public skia::textlayout::ParagraphPainter {
  public:
   SkwasmParagraphPainter(flutter::DisplayListBuilder& builder,
                          const std::vector<flutter::DlPaint>& paints)
-      : _builder(builder), _paints(paints) {}
+      : builder_(builder), paints_(paints) {}
 
   virtual void drawTextBlob(const sk_sp<SkTextBlob>& blob,
                             SkScalar x,
@@ -32,8 +32,8 @@ class SkwasmParagraphPainter : public skia::textlayout::ParagraphPainter {
     }
 
     const int* paintID = std::get_if<PaintID>(&paint);
-    auto dlPaint = paintID ? _paints[*paintID] : flutter::DlPaint();
-    _builder.DrawText(flutter::textFromBlob(blob), x, y, dlPaint);
+    auto dlPaint = paintID ? paints_[*paintID] : flutter::DlPaint();
+    builder_.DrawText(flutter::textFromBlob(blob), x, y, dlPaint);
   }
 
   virtual void drawTextShadow(const sk_sp<SkTextBlob>& blob,
@@ -52,24 +52,24 @@ class SkwasmParagraphPainter : public skia::textlayout::ParagraphPainter {
                                        false);
       paint.setMaskFilter(&filter);
     }
-    _builder.DrawText(flutter::textFromBlob(blob), x, y, paint);
+    builder_.DrawText(flutter::textFromBlob(blob), x, y, paint);
   }
 
   virtual void drawRect(const SkRect& rect, const SkPaintOrID& paint) override {
     const int* paintID = std::get_if<PaintID>(&paint);
-    auto dlPaint = paintID ? _paints[*paintID] : flutter::DlPaint();
-    _builder.DrawRect(flutter::ToDlRect(rect), dlPaint);
+    auto dlPaint = paintID ? paints_[*paintID] : flutter::DlPaint();
+    builder_.DrawRect(flutter::ToDlRect(rect), dlPaint);
   }
 
   virtual void drawFilledRect(const SkRect& rect,
                               const DecorationStyle& decorStyle) override {
-    flutter::DlPaint paint = toDlPaint(decorStyle, flutter::DlDrawStyle::kFill);
-    _builder.DrawRect(flutter::ToDlRect(rect), paint);
+    flutter::DlPaint paint = ToDlPaint(decorStyle, flutter::DlDrawStyle::kFill);
+    builder_.DrawRect(flutter::ToDlRect(rect), paint);
   }
 
   virtual void drawPath(const SkPath& path,
                         const DecorationStyle& decorStyle) override {
-    _builder.DrawPath(flutter::DlPath(path), this->toDlPaint(decorStyle));
+    builder_.DrawPath(flutter::DlPath(path), this->ToDlPaint(decorStyle));
   }
 
   virtual void drawLine(SkScalar x0,
@@ -77,36 +77,36 @@ class SkwasmParagraphPainter : public skia::textlayout::ParagraphPainter {
                         SkScalar x1,
                         SkScalar y1,
                         const DecorationStyle& decorStyle) override {
-    auto paint = this->toDlPaint(decorStyle);
+    auto paint = this->ToDlPaint(decorStyle);
     auto dashPathEffect = decorStyle.getDashPathEffect();
 
     if (dashPathEffect) {
-      _builder.DrawDashedLine(
+      builder_.DrawDashedLine(
           flutter::DlPoint(x0, y0), flutter::DlPoint(x1, y1),
           dashPathEffect->fOnLength, dashPathEffect->fOffLength, paint);
     } else {
-      _builder.DrawLine(flutter::DlPoint(x0, y0), flutter::DlPoint(x1, y1),
+      builder_.DrawLine(flutter::DlPoint(x0, y0), flutter::DlPoint(x1, y1),
                         paint);
     }
   }
 
   virtual void clipRect(const SkRect& rect) override {
-    _builder.ClipRect(flutter::ToDlRect(rect));
+    builder_.ClipRect(flutter::ToDlRect(rect));
   }
 
   virtual void translate(SkScalar dx, SkScalar dy) override {
-    _builder.Translate(dx, dy);
+    builder_.Translate(dx, dy);
   }
 
-  virtual void save() override { _builder.Save(); }
+  virtual void save() override { builder_.Save(); }
 
-  virtual void restore() override { _builder.Restore(); }
+  virtual void restore() override { builder_.Restore(); }
 
  private:
-  const std::vector<flutter::DlPaint>& _paints;
-  flutter::DisplayListBuilder& _builder;
+  const std::vector<flutter::DlPaint>& paints_;
+  flutter::DisplayListBuilder& builder_;
 
-  flutter::DlPaint toDlPaint(
+  flutter::DlPaint ToDlPaint(
       const DecorationStyle& decor_style,
       flutter::DlDrawStyle draw_style = flutter::DlDrawStyle::kStroke) {
     flutter::DlPaint paint;
@@ -125,7 +125,7 @@ SKWASM_EXPORT void canvas_saveLayer(
     flutter::DlPaint* paint,
     Skwasm::sp_wrapper<flutter::DlImageFilter>* backdrop) {
   canvas->SaveLayer(rect ? std::optional(*rect) : std::nullopt, paint,
-                    backdrop ? backdrop->raw() : nullptr);
+                    backdrop ? backdrop->Raw() : nullptr);
 }
 
 SKWASM_EXPORT void canvas_save(flutter::DisplayListBuilder* canvas) {
@@ -294,7 +294,7 @@ SKWASM_EXPORT void canvas_drawParagraph(flutter::DisplayListBuilder* canvas,
                                         flutter::DlScalar x,
                                         flutter::DlScalar y) {
   auto painter = SkwasmParagraphPainter(*canvas, paragraph->paints);
-  paragraph->skiaParagraph->paint(&painter, x, y);
+  paragraph->skia_paragraph->paint(&painter, x, y);
 }
 
 SKWASM_EXPORT void canvas_drawPicture(flutter::DisplayListBuilder* canvas,
@@ -338,7 +338,7 @@ SKWASM_EXPORT void canvas_drawVertices(
     Skwasm::sp_wrapper<flutter::DlVertices>* vertices,
     flutter::DlBlendMode mode,
     flutter::DlPaint* paint) {
-  canvas->DrawVertices(vertices->shared(), mode,
+  canvas->DrawVertices(vertices->Shared(), mode,
                        paint ? *paint : flutter::DlPaint());
 }
 
@@ -360,12 +360,12 @@ SKWASM_EXPORT void canvas_drawAtlas(flutter::DisplayListBuilder* canvas,
                                     flutter::DlBlendMode mode,
                                     flutter::DlRect* cullRect,
                                     flutter::DlPaint* paint) {
-  std::vector<flutter::DlColor> dlColors(spriteCount);
+  std::vector<flutter::DlColor> dl_colors(spriteCount);
   for (int i = 0; i < spriteCount; i++) {
-    dlColors[i] = flutter::DlColor(colors[i]);
+    dl_colors[i] = flutter::DlColor(colors[i]);
   }
   canvas->DrawAtlas(
-      sk_ref_sp(atlas), transforms, rects, dlColors.data(), spriteCount, mode,
+      sk_ref_sp(atlas), transforms, rects, dl_colors.data(), spriteCount, mode,
       Skwasm::samplingOptionsForQuality(Skwasm::FilterQuality::medium),
       cullRect, paint);
 }

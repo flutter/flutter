@@ -13,7 +13,7 @@ SKWASM_EXPORT SkContourMeasureIter* contourMeasureIter_create(
     SkPathBuilder* path,
     bool forceClosed,
     SkScalar resScale) {
-  Skwasm::liveCountourMeasureIterCount++;
+  Skwasm::live_contour_measure_iter_count++;
   return new SkContourMeasureIter(path->snapshot(), forceClosed, resScale);
 }
 
@@ -21,19 +21,19 @@ SKWASM_EXPORT SkContourMeasure* contourMeasureIter_next(
     SkContourMeasureIter* iter) {
   auto next = iter->next();
   if (next) {
-    Skwasm::liveCountourMeasureCount++;
+    Skwasm::live_contour_measure_count++;
     next->ref();
   }
   return next.get();
 }
 
 SKWASM_EXPORT void contourMeasureIter_dispose(SkContourMeasureIter* iter) {
-  Skwasm::liveCountourMeasureIterCount--;
+  Skwasm::live_contour_measure_iter_count--;
   delete iter;
 }
 
 SKWASM_EXPORT void contourMeasure_dispose(SkContourMeasure* measure) {
-  Skwasm::liveCountourMeasureCount--;
+  Skwasm::live_contour_measure_count--;
   measure->unref();
 }
 
@@ -57,11 +57,11 @@ SKWASM_EXPORT SkPathBuilder* contourMeasure_getSegment(
     SkScalar startD,
     SkScalar stopD,
     bool startWithMoveTo) {
-  SkPathBuilder* outPath = new SkPathBuilder();
-  if (!measure->getSegment(startD, stopD, outPath, startWithMoveTo)) {
-    delete outPath;
+  SkPathBuilder* out_path = new SkPathBuilder();
+  if (!measure->getSegment(startD, stopD, out_path, startWithMoveTo)) {
+    delete out_path;
     return nullptr;
   }
-  Skwasm::livePathCount++;
-  return outPath;
+  Skwasm::live_path_count++;
+  return out_path;
 }

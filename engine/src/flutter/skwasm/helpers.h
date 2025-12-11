@@ -16,14 +16,14 @@ namespace Skwasm {
 template <typename T>
 class sp_wrapper {
  public:
-  sp_wrapper(std::shared_ptr<T> ptr) : _ptr(std::move(ptr)) {}
+  sp_wrapper(std::shared_ptr<T> ptr) : ptr_(std::move(ptr)) {}
 
-  const std::shared_ptr<T>& shared() { return _ptr; }
+  const std::shared_ptr<T>& Shared() { return ptr_; }
 
-  T* raw() { return _ptr.get(); }
+  T* Raw() { return ptr_.get(); }
 
  private:
-  std::shared_ptr<T> _ptr;
+  std::shared_ptr<T> ptr_;
 };
 
 inline flutter::DlMatrix createDlMatrixFrom3x3(const flutter::DlScalar* f) {

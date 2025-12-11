@@ -19,7 +19,7 @@ using SkwasmObject = __externref_t;
 
 struct SurfaceWrapper {
   EMSCRIPTEN_WEBGL_CONTEXT_HANDLE context;
-  sk_sp<GrDirectContext> grContext;
+  sk_sp<GrDirectContext> gr_context;
   sk_sp<SkSurface> surface;
 };
 

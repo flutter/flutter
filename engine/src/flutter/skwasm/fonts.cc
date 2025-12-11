@@ -13,7 +13,7 @@
 #include "third_party/skia/modules/skparagraph/include/TypefaceFontProvider.h"
 
 SKWASM_EXPORT Skwasm::FlutterFontCollection* fontCollection_create() {
-  Skwasm::liveFontCollectionCount++;
+  Skwasm::live_font_collection_count++;
   auto collection = sk_make_sp<skia::textlayout::FontCollection>();
   auto provider = sk_make_sp<skia::textlayout::TypefaceFontProvider>();
   collection->enableFontFallback();
@@ -26,7 +26,7 @@ SKWASM_EXPORT Skwasm::FlutterFontCollection* fontCollection_create() {
 
 SKWASM_EXPORT void fontCollection_dispose(
     Skwasm::FlutterFontCollection* collection) {
-  Skwasm::liveFontCollectionCount--;
+  Skwasm::live_font_collection_count--;
   delete collection;
 }
 
@@ -36,13 +36,13 @@ static sk_sp<SkFontMgr> default_fontmgr() {
 }
 
 SKWASM_EXPORT SkTypeface* typeface_create(SkData* fontData) {
-  Skwasm::liveTypefaceCount++;
+  Skwasm::live_typeface_count++;
   auto typeface = default_fontmgr()->makeFromData(sk_ref_sp<SkData>(fontData));
   return typeface.release();
 }
 
 SKWASM_EXPORT void typeface_dispose(SkTypeface* typeface) {
-  Skwasm::liveTypefaceCount--;
+  Skwasm::live_typeface_count--;
   typeface->unref();
 }
 
@@ -53,31 +53,32 @@ SKWASM_EXPORT int typefaces_filterCoveredCodePoints(SkTypeface** typefaces,
                                                     int typefaceCount,
                                                     SkUnichar* codePoints,
                                                     int codePointCount) {
-  std::unique_ptr<SkGlyphID[]> glyphBuffer =
+  std::unique_ptr<SkGlyphID[]> glyph_buffer =
       std::make_unique<SkGlyphID[]>(codePointCount);
-  SkGlyphID* glyphPointer = glyphBuffer.get();
-  int remainingCodePointCount = codePointCount;
-  for (int typefaceIndex = 0; typefaceIndex < typefaceCount; typefaceIndex++) {
-    typefaces[typefaceIndex]->unicharsToGlyphs(
-        {codePoints, remainingCodePointCount},
-        {glyphPointer, remainingCodePointCount});
-    int outputIndex = 0;
-    for (int inputIndex = 0; inputIndex < remainingCodePointCount;
-         inputIndex++) {
-      if (glyphPointer[inputIndex] == 0) {
-        if (outputIndex != inputIndex) {
-          codePoints[outputIndex] = codePoints[inputIndex];
+  SkGlyphID* glyph_pointer = glyph_buffer.get();
+  int remaining_code_point_count = codePointCount;
+  for (int typeface_index = 0; typeface_index < typefaceCount;
+       typeface_index++) {
+    typefaces[typeface_index]->unicharsToGlyphs(
+        {codePoints, remaining_code_point_count},
+        {glyph_pointer, remaining_code_point_count});
+    int output_index = 0;
+    for (int input_index = 0; input_index < remaining_code_point_count;
+         input_index++) {
+      if (glyph_pointer[input_index] == 0) {
+        if (output_index != input_index) {
+          codePoints[output_index] = codePoints[input_index];
         }
-        outputIndex++;
+        output_index++;
       }
     }
-    if (outputIndex == 0) {
+    if (output_index == 0) {
       return 0;
     } else {
-      remainingCodePointCount = outputIndex;
+      remaining_code_point_count = output_index;
     }
   }
-  return remainingCodePointCount;
+  return remaining_code_point_count;
 }
 
 SKWASM_EXPORT void fontCollection_registerTypeface(

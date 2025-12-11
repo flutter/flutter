@@ -9,34 +9,34 @@
 
 namespace Skwasm {
 
-extern uint32_t liveLineBreakBufferCount;
-extern uint32_t liveUnicodePositionBufferCount;
-extern uint32_t liveLineMetricsCount;
-extern uint32_t liveTextBoxListCount;
-extern uint32_t liveParagraphBuilderCount;
-extern uint32_t liveParagraphCount;
-extern uint32_t liveStrutStyleCount;
-extern uint32_t liveTextStyleCount;
-extern uint32_t liveAnimatedImageCount;
-extern uint32_t liveCountourMeasureIterCount;
-extern uint32_t liveCountourMeasureCount;
-extern uint32_t liveDataCount;
-extern uint32_t liveColorFilterCount;
-extern uint32_t liveImageFilterCount;
-extern uint32_t liveMaskFilterCount;
-extern uint32_t liveTypefaceCount;
-extern uint32_t liveFontCollectionCount;
-extern uint32_t liveImageCount;
-extern uint32_t livePaintCount;
-extern uint32_t livePathCount;
-extern uint32_t livePictureCount;
-extern uint32_t livePictureRecorderCount;
-extern uint32_t liveShaderCount;
-extern uint32_t liveRuntimeEffectCount;
-extern uint32_t liveStringCount;
-extern uint32_t liveString16Count;
-extern uint32_t liveSurfaceCount;
-extern uint32_t liveVerticesCount;
+extern uint32_t live_line_break_buffer_count;
+extern uint32_t live_unicode_position_buffer_count;
+extern uint32_t live_line_metrics_count;
+extern uint32_t live_text_box_list_count;
+extern uint32_t live_paragraph_builder_count;
+extern uint32_t live_paragraph_count;
+extern uint32_t live_strut_style_count;
+extern uint32_t live_text_style_count;
+extern uint32_t live_animated_image_count;
+extern uint32_t live_contour_measure_iter_count;
+extern uint32_t live_contour_measure_count;
+extern uint32_t live_data_count;
+extern uint32_t live_color_filter_count;
+extern uint32_t live_image_filter_count;
+extern uint32_t live_mask_filter_count;
+extern uint32_t live_typeface_count;
+extern uint32_t live_font_collection_count;
+extern uint32_t live_image_count;
+extern uint32_t live_paint_count;
+extern uint32_t live_path_count;
+extern uint32_t live_picture_count;
+extern uint32_t live_picture_recorder_count;
+extern uint32_t live_shader_count;
+extern uint32_t live_runtime_effect_count;
+extern uint32_t live_string_count;
+extern uint32_t live_string16_count;
+extern uint32_t live_surface_count;
+extern uint32_t live_vertices_count;
 
 }  // namespace Skwasm
 

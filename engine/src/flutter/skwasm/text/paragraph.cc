@@ -11,50 +11,50 @@
 #include "third_party/skia/modules/skparagraph/include/TextStyle.h"
 
 SKWASM_EXPORT void paragraph_dispose(Skwasm::Paragraph* paragraph) {
-  Skwasm::liveParagraphCount--;
+  Skwasm::live_paragraph_count--;
   delete paragraph;
 }
 
 SKWASM_EXPORT SkScalar paragraph_getWidth(Skwasm::Paragraph* paragraph) {
-  return paragraph->skiaParagraph->getMaxWidth();
+  return paragraph->skia_paragraph->getMaxWidth();
 }
 
 SKWASM_EXPORT SkScalar paragraph_getHeight(Skwasm::Paragraph* paragraph) {
-  return paragraph->skiaParagraph->getHeight();
+  return paragraph->skia_paragraph->getHeight();
 }
 
 SKWASM_EXPORT SkScalar paragraph_getLongestLine(Skwasm::Paragraph* paragraph) {
-  return paragraph->skiaParagraph->getLongestLine();
+  return paragraph->skia_paragraph->getLongestLine();
 }
 
 SKWASM_EXPORT SkScalar
 paragraph_getMinIntrinsicWidth(Skwasm::Paragraph* paragraph) {
-  return paragraph->skiaParagraph->getMinIntrinsicWidth();
+  return paragraph->skia_paragraph->getMinIntrinsicWidth();
 }
 
 SKWASM_EXPORT SkScalar
 paragraph_getMaxIntrinsicWidth(Skwasm::Paragraph* paragraph) {
-  return paragraph->skiaParagraph->getMaxIntrinsicWidth();
+  return paragraph->skia_paragraph->getMaxIntrinsicWidth();
 }
 
 SKWASM_EXPORT SkScalar
 paragraph_getAlphabeticBaseline(Skwasm::Paragraph* paragraph) {
-  return paragraph->skiaParagraph->getAlphabeticBaseline();
+  return paragraph->skia_paragraph->getAlphabeticBaseline();
 }
 
 SKWASM_EXPORT SkScalar
 paragraph_getIdeographicBaseline(Skwasm::Paragraph* paragraph) {
-  return paragraph->skiaParagraph->getIdeographicBaseline();
+  return paragraph->skia_paragraph->getIdeographicBaseline();
 }
 
 SKWASM_EXPORT bool paragraph_getDidExceedMaxLines(
     Skwasm::Paragraph* paragraph) {
-  return paragraph->skiaParagraph->didExceedMaxLines();
+  return paragraph->skia_paragraph->didExceedMaxLines();
 }
 
 SKWASM_EXPORT void paragraph_layout(Skwasm::Paragraph* paragraph,
                                     SkScalar width) {
-  paragraph->skiaParagraph->layout(width);
+  paragraph->skia_paragraph->layout(width);
 }
 
 SKWASM_EXPORT int32_t
@@ -63,7 +63,7 @@ paragraph_getPositionForOffset(Skwasm::Paragraph* paragraph,
                                SkScalar offsetY,
                                skia::textlayout::Affinity* outAffinity) {
   auto position =
-      paragraph->skiaParagraph->getGlyphPositionAtCoordinate(offsetX, offsetY);
+      paragraph->skia_paragraph->getGlyphPositionAtCoordinate(offsetX, offsetY);
   if (outAffinity) {
     *outAffinity = position.affinity;
   }
@@ -78,19 +78,19 @@ SKWASM_EXPORT bool paragraph_getClosestGlyphInfoAtCoordinate(
     SkRect* graphemeLayoutBounds,   // 1 SkRect
     size_t* graphemeCodeUnitRange,  // 2 size_ts: [start, end]
     bool* booleanFlags) {           // 1 boolean: isLTR
-  skia::textlayout::Paragraph::GlyphInfo glyphInfo;
-  if (!paragraph->skiaParagraph->getClosestUTF16GlyphInfoAt(offsetX, offsetY,
-                                                            &glyphInfo)) {
+  skia::textlayout::Paragraph::GlyphInfo glyph_info;
+  if (!paragraph->skia_paragraph->getClosestUTF16GlyphInfoAt(offsetX, offsetY,
+                                                             &glyph_info)) {
     return false;
   }
   // This is more verbose than memcpying the whole struct but ideally we don't
   // want to depend on the exact memory layout of the struct.
-  std::memcpy(graphemeLayoutBounds, &glyphInfo.fGraphemeLayoutBounds,
+  std::memcpy(graphemeLayoutBounds, &glyph_info.fGraphemeLayoutBounds,
               sizeof(SkRect));
-  std::memcpy(graphemeCodeUnitRange, &glyphInfo.fGraphemeClusterTextRange,
+  std::memcpy(graphemeCodeUnitRange, &glyph_info.fGraphemeClusterTextRange,
               2 * sizeof(size_t));
   booleanFlags[0] =
-      glyphInfo.fDirection == skia::textlayout::TextDirection::kLtr;
+      glyph_info.fDirection == skia::textlayout::TextDirection::kLtr;
   return true;
 }
 
@@ -101,16 +101,17 @@ SKWASM_EXPORT bool paragraph_getGlyphInfoAt(
     SkRect* graphemeLayoutBounds,   // 1 SkRect
     size_t* graphemeCodeUnitRange,  // 2 size_ts: [start, end]
     bool* booleanFlags) {           // 1 boolean: isLTR
-  skia::textlayout::Paragraph::GlyphInfo glyphInfo;
-  if (!paragraph->skiaParagraph->getGlyphInfoAtUTF16Offset(index, &glyphInfo)) {
+  skia::textlayout::Paragraph::GlyphInfo glyph_info;
+  if (!paragraph->skia_paragraph->getGlyphInfoAtUTF16Offset(index,
+                                                            &glyph_info)) {
     return false;
   }
-  std::memcpy(graphemeLayoutBounds, &glyphInfo.fGraphemeLayoutBounds,
+  std::memcpy(graphemeLayoutBounds, &glyph_info.fGraphemeLayoutBounds,
               sizeof(SkRect));
-  std::memcpy(graphemeCodeUnitRange, &glyphInfo.fGraphemeClusterTextRange,
+  std::memcpy(graphemeCodeUnitRange, &glyph_info.fGraphemeClusterTextRange,
               2 * sizeof(size_t));
   booleanFlags[0] =
-      glyphInfo.fDirection == skia::textlayout::TextDirection::kLtr;
+      glyph_info.fDirection == skia::textlayout::TextDirection::kLtr;
   return true;
 }
 
@@ -119,26 +120,26 @@ SKWASM_EXPORT void paragraph_getWordBoundary(
     unsigned int position,
     int32_t* outRange  // Two `int32_t`s, start and end
 ) {
-  auto range = paragraph->skiaParagraph->getWordBoundary(position);
+  auto range = paragraph->skia_paragraph->getWordBoundary(position);
   outRange[0] = range.start;
   outRange[1] = range.end;
 }
 
 SKWASM_EXPORT size_t paragraph_getLineCount(Skwasm::Paragraph* paragraph) {
-  return paragraph->skiaParagraph->lineNumber();
+  return paragraph->skia_paragraph->lineNumber();
 }
 
 SKWASM_EXPORT int paragraph_getLineNumberAt(Skwasm::Paragraph* paragraph,
                                             size_t characterIndex) {
-  return paragraph->skiaParagraph->getLineNumberAtUTF16Offset(characterIndex);
+  return paragraph->skia_paragraph->getLineNumberAtUTF16Offset(characterIndex);
 }
 
 SKWASM_EXPORT skia::textlayout::LineMetrics* paragraph_getLineMetricsAtIndex(
     Skwasm::Paragraph* paragraph,
     size_t lineNumber) {
-  Skwasm::liveLineMetricsCount++;
+  Skwasm::live_line_metrics_count++;
   auto metrics = new skia::textlayout::LineMetrics();
-  if (paragraph->skiaParagraph->getLineMetricsAt(lineNumber, metrics)) {
+  if (paragraph->skia_paragraph->getLineMetricsAt(lineNumber, metrics)) {
     return metrics;
   } else {
     delete metrics;
@@ -151,7 +152,7 @@ struct TextBoxList {
 };
 
 SKWASM_EXPORT void textBoxList_dispose(TextBoxList* list) {
-  Skwasm::liveTextBoxListCount--;
+  Skwasm::live_text_box_list_count--;
   delete list;
 }
 
@@ -172,15 +173,15 @@ SKWASM_EXPORT TextBoxList* paragraph_getBoxesForRange(
     int end,
     skia::textlayout::RectHeightStyle heightStyle,
     skia::textlayout::RectWidthStyle widthStyle) {
-  Skwasm::liveTextBoxListCount++;
-  return new TextBoxList{paragraph->skiaParagraph->getRectsForRange(
+  Skwasm::live_text_box_list_count++;
+  return new TextBoxList{paragraph->skia_paragraph->getRectsForRange(
       start, end, heightStyle, widthStyle)};
 }
 
 SKWASM_EXPORT TextBoxList* paragraph_getBoxesForPlaceholders(
     Skwasm::Paragraph* paragraph) {
-  Skwasm::liveTextBoxListCount++;
-  return new TextBoxList{paragraph->skiaParagraph->getRectsForPlaceholders()};
+  Skwasm::live_text_box_list_count++;
+  return new TextBoxList{paragraph->skia_paragraph->getRectsForPlaceholders()};
 }
 
 // Returns a list of the code points that were unable to be rendered with the
@@ -195,16 +196,17 @@ SKWASM_EXPORT int paragraph_getUnresolvedCodePoints(
     SkUnichar* outCodePoints,
     int outLength) {
   if (!outCodePoints) {
-    return paragraph->skiaParagraph->unresolvedCodepoints().size();
+    return paragraph->skia_paragraph->unresolvedCodepoints().size();
   }
-  int outIndex = 0;
-  for (SkUnichar character : paragraph->skiaParagraph->unresolvedCodepoints()) {
-    if (outIndex < outLength) {
-      outCodePoints[outIndex] = character;
-      outIndex++;
+  int out_index = 0;
+  for (SkUnichar character :
+       paragraph->skia_paragraph->unresolvedCodepoints()) {
+    if (out_index < outLength) {
+      outCodePoints[out_index] = character;
+      out_index++;
     } else {
       break;
     }
   }
-  return outIndex;
+  return out_index;
 }

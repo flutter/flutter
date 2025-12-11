@@ -10,7 +10,7 @@
 #include "third_party/skia/modules/skunicode/include/SkUnicode_client.h"
 
 SKWASM_EXPORT void paragraphBuilder_dispose(Skwasm::ParagraphBuilder* builder) {
-  Skwasm::liveParagraphBuilderCount--;
+  Skwasm::live_paragraph_builder_count--;
   delete builder;
 }
 
@@ -19,39 +19,39 @@ SKWASM_EXPORT void paragraphBuilder_addPlaceholder(
     SkScalar width,
     SkScalar height,
     skia::textlayout::PlaceholderAlignment alignment,
-    SkScalar baselineOffset,
+    SkScalar baseline_offset,
     skia::textlayout::TextBaseline baseline) {
-  builder->skiaParagraphBuilder->addPlaceholder(
+  builder->skia_paragraph_builder->addPlaceholder(
       skia::textlayout::PlaceholderStyle(width, height, alignment, baseline,
-                                         baselineOffset));
+                                         baseline_offset));
 }
 
 SKWASM_EXPORT void paragraphBuilder_addText(Skwasm::ParagraphBuilder* builder,
                                             std::u16string* text) {
-  builder->skiaParagraphBuilder->addText(*text);
+  builder->skia_paragraph_builder->addText(*text);
 }
 
 SKWASM_EXPORT char* paragraphBuilder_getUtf8Text(
     Skwasm::ParagraphBuilder* builder,
     uint32_t* outLength) {
-  auto span = builder->skiaParagraphBuilder->getText();
+  auto span = builder->skia_paragraph_builder->getText();
   *outLength = span.size();
   return span.data();
 }
 
 SKWASM_EXPORT void paragraphBuilder_pushStyle(Skwasm::ParagraphBuilder* builder,
                                               Skwasm::TextStyle* style) {
-  style->populatePaintIds(builder->paints);
-  builder->skiaParagraphBuilder->pushStyle(style->skiaStyle);
+  style->PopulatePaintIds(builder->paints);
+  builder->skia_paragraph_builder->pushStyle(style->skia_style);
 }
 
 SKWASM_EXPORT void paragraphBuilder_pop(Skwasm::ParagraphBuilder* builder) {
-  builder->skiaParagraphBuilder->pop();
+  builder->skia_paragraph_builder->pop();
 }
 
 SKWASM_EXPORT std::vector<SkUnicode::Position>* unicodePositionBuffer_create(
     size_t length) {
-  Skwasm::liveUnicodePositionBufferCount++;
+  Skwasm::live_unicode_position_buffer_count++;
   return new std::vector<SkUnicode::Position>(length);
 }
 
@@ -62,13 +62,13 @@ SKWASM_EXPORT SkUnicode::Position* unicodePositionBuffer_getDataPointer(
 
 SKWASM_EXPORT void unicodePositionBuffer_free(
     std::vector<SkUnicode::Position>* buffer) {
-  Skwasm::liveUnicodePositionBufferCount--;
+  Skwasm::live_unicode_position_buffer_count--;
   delete buffer;
 }
 
 SKWASM_EXPORT std::vector<SkUnicode::LineBreakBefore>* lineBreakBuffer_create(
     size_t length) {
-  Skwasm::liveLineBreakBufferCount++;
+  Skwasm::live_line_break_buffer_count++;
   return new std::vector<SkUnicode::LineBreakBefore>(
       length, {0, SkUnicode::LineBreakType::kSoftLineBreak});
 }
@@ -80,6 +80,6 @@ SKWASM_EXPORT SkUnicode::LineBreakBefore* lineBreakBuffer_getDataPointer(
 
 SKWASM_EXPORT void lineBreakBuffer_free(
     std::vector<SkUnicode::LineBreakBefore>* buffer) {
-  Skwasm::liveLineBreakBufferCount--;
+  Skwasm::live_line_break_buffer_count--;
   delete buffer;
 }

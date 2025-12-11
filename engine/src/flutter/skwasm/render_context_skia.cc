@@ -27,29 +27,29 @@ namespace {
 class SkiaRenderContext : public Skwasm::RenderContext {
  public:
   SkiaRenderContext(int sampleCount, int stencil)
-      : _sampleCount(sampleCount),
-        _stencil(stencil),
-        _grContext(GrDirectContexts::MakeGL(GrGLInterfaces::MakeWebGL())),
-        _fbInfo({0, GL_RGBA8_OES}) {
-    _grContext->resetContext(kRenderTarget_GrGLBackendState |
-                             kMisc_GrGLBackendState);
+      : sample_count_(sampleCount),
+        stencil_(stencil),
+        gr_context_(GrDirectContexts::MakeGL(GrGLInterfaces::MakeWebGL())),
+        fb_info_({0, GL_RGBA8_OES}) {
+    gr_context_->resetContext(kRenderTarget_GrGLBackendState |
+                              kMisc_GrGLBackendState);
   }
 
-  virtual void renderPicture(
+  virtual void RenderPicture(
       const sk_sp<flutter::DisplayList> displayList) override {
-    auto canvas = _surface->getCanvas();
+    auto canvas = surface_->getCanvas();
     canvas->drawColor(SK_ColorTRANSPARENT, SkBlendMode::kSrc);
     auto dispatcher = flutter::DlSkCanvasDispatcher(canvas);
     dispatcher.save();
     dispatcher.drawDisplayList(displayList, 1.0f);
     dispatcher.restore();
 
-    _grContext->flush(_surface.get());
+    gr_context_->flush(surface_.get());
   }
 
-  virtual void renderImage(flutter::DlImage* image,
+  virtual void RenderImage(flutter::DlImage* image,
                            Skwasm::ImageByteFormat format) override {
-    auto canvas = _surface->getCanvas();
+    auto canvas = surface_->getCanvas();
     canvas->drawColor(SK_ColorTRANSPARENT, SkBlendMode::kSrc);
 
     // We want the pixels from the upper left corner, but glReadPixels gives us
@@ -57,35 +57,35 @@ class SkiaRenderContext : public Skwasm::RenderContext {
     // we are drawing it to get the pixels in the desired order.
     canvas->save();
     canvas->scale(1, -1);
-    canvas->drawImage(image->skia_image(), 0, -_height);
+    canvas->drawImage(image->skia_image(), 0, -height_);
     canvas->restore();
-    _grContext->flush(_surface.get());
+    gr_context_->flush(surface_.get());
   }
 
-  virtual void resize(int width, int height) override {
-    if (_width != width || _height != height) {
-      _width = width;
-      _height = height;
-      auto target = GrBackendRenderTargets::MakeGL(width, height, _sampleCount,
-                                                   _stencil, _fbInfo);
-      _surface = SkSurfaces::WrapBackendRenderTarget(
-          _grContext.get(), target, kBottomLeft_GrSurfaceOrigin,
+  virtual void Resize(int width, int height) override {
+    if (width_ != width || height_ != height) {
+      width_ = width;
+      height_ = height;
+      auto target = GrBackendRenderTargets::MakeGL(width, height, sample_count_,
+                                                   stencil_, fb_info_);
+      surface_ = SkSurfaces::WrapBackendRenderTarget(
+          gr_context_.get(), target, kBottomLeft_GrSurfaceOrigin,
           kRGBA_8888_SkColorType, SkColorSpace::MakeSRGB(), nullptr);
     }
   }
 
-  virtual void setResourceCacheLimit(int bytes) override {
-    _grContext->setResourceCacheLimit(bytes);
+  virtual void SetResourceCacheLimit(int bytes) override {
+    gr_context_->setResourceCacheLimit(bytes);
   }
 
  private:
-  sk_sp<GrDirectContext> _grContext = nullptr;
-  sk_sp<SkSurface> _surface = nullptr;
-  GrGLFramebufferInfo _fbInfo;
-  GrGLint _sampleCount;
-  GrGLint _stencil;
-  int _width = 0;
-  int _height = 0;
+  sk_sp<GrDirectContext> gr_context_ = nullptr;
+  sk_sp<SkSurface> surface_ = nullptr;
+  GrGLFramebufferInfo fb_info_;
+  GrGLint sample_count_;
+  GrGLint stencil_;
+  int width_ = 0;
+  int height_ = 0;
 };
 }  // namespace
 

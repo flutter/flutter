@@ -55,21 +55,21 @@ class ExternalWebGLTexture : public GrExternalTexture {
   ExternalWebGLTexture(GrBackendTexture backendTexture,
                        GLuint textureId,
                        EMSCRIPTEN_WEBGL_CONTEXT_HANDLE context)
-      : _backendTexture(backendTexture),
-        _textureId(textureId),
-        _webGLContext(context) {}
+      : backend_texture_(backendTexture),
+        texture_id_(textureId),
+        web_gl_context_(context) {}
 
-  GrBackendTexture getBackendTexture() override { return _backendTexture; }
+  GrBackendTexture getBackendTexture() override { return backend_texture_; }
 
   void dispose() override {
-    Skwasm::makeCurrent(_webGLContext);
-    glDeleteTextures(1, &_textureId);
+    Skwasm::makeCurrent(web_gl_context_);
+    glDeleteTextures(1, &texture_id_);
   }
 
  private:
-  GrBackendTexture _backendTexture;
-  GLuint _textureId;
-  EMSCRIPTEN_WEBGL_CONTEXT_HANDLE _webGLContext;
+  GrBackendTexture backend_texture_;
+  GLuint texture_id_;
+  EMSCRIPTEN_WEBGL_CONTEXT_HANDLE web_gl_context_;
 };
 
 class TextureSourceImageGenerator : public GrExternalTextureGenerator {
@@ -78,31 +78,31 @@ class TextureSourceImageGenerator : public GrExternalTextureGenerator {
                               Skwasm::SkwasmObject textureSource,
                               Skwasm::Surface* surface)
       : GrExternalTextureGenerator(ii),
-        _textureSourceWrapper(
-            surface->createTextureSourceWrapper(textureSource)) {}
+        texture_source_wrapper_(
+            surface->CreateTextureSourceWrapper(textureSource)) {}
 
   std::unique_ptr<GrExternalTexture> generateExternalTexture(
       GrRecordingContext* context,
       skgpu::Mipmapped mipmapped) override {
-    GrGLTextureInfo glInfo;
-    glInfo.fID = skwasm_createGlTextureFromTextureSource(
-        _textureSourceWrapper->getTextureSource(), fInfo.width(),
+    GrGLTextureInfo gl_info;
+    gl_info.fID = skwasm_createGlTextureFromTextureSource(
+        texture_source_wrapper_->GetTextureSource(), fInfo.width(),
         fInfo.height());
-    glInfo.fFormat = GL_RGBA8_OES;
-    glInfo.fTarget = GL_TEXTURE_2D;
+    gl_info.fFormat = GL_RGBA8_OES;
+    gl_info.fTarget = GL_TEXTURE_2D;
 
-    auto backendTexture = GrBackendTextures::MakeGL(
-        fInfo.width(), fInfo.height(), skgpu::Mipmapped::kNo, glInfo);
+    auto backend_texture = GrBackendTextures::MakeGL(
+        fInfo.width(), fInfo.height(), skgpu::Mipmapped::kNo, gl_info);
 
     // In order to bind the image source to the texture, makeTexture has changed
     // which texture is "in focus" for the WebGL context.
     GrAsDirectContext(context)->resetContext(kTextureBinding_GrGLBackendState);
     return std::make_unique<ExternalWebGLTexture>(
-        backendTexture, glInfo.fID, emscripten_webgl_get_current_context());
+        backend_texture, gl_info.fID, emscripten_webgl_get_current_context());
   }
 
  private:
-  std::unique_ptr<Skwasm::TextureSourceWrapper> _textureSourceWrapper;
+  std::unique_ptr<Skwasm::TextureSourceWrapper> texture_source_wrapper_;
 };
 
 }  // namespace

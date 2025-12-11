@@ -14,40 +14,40 @@ class PictureRecorder {
  public:
   PictureRecorder() {};
 
-  flutter::DisplayListBuilder* beginRecording(const flutter::DlRect& cullRect) {
-    assert(!_builder);
-    _builder = std::make_unique<flutter::DisplayListBuilder>(cullRect);
-    return _builder.get();
+  flutter::DisplayListBuilder* BeginRecording(const flutter::DlRect& cullRect) {
+    assert(!builder_);
+    builder_ = std::make_unique<flutter::DisplayListBuilder>(cullRect);
+    return builder_.get();
   }
 
-  sk_sp<flutter::DisplayList> finishRecordingAsPicture() {
-    return _builder->Build();
+  sk_sp<flutter::DisplayList> FinishRecordingAsPicture() {
+    return builder_->Build();
   }
 
  private:
-  std::unique_ptr<flutter::DisplayListBuilder> _builder;
+  std::unique_ptr<flutter::DisplayListBuilder> builder_;
 };
 
 SKWASM_EXPORT PictureRecorder* pictureRecorder_create() {
-  Skwasm::livePictureRecorderCount++;
+  Skwasm::live_picture_recorder_count++;
   return new PictureRecorder();
 }
 
 SKWASM_EXPORT void pictureRecorder_dispose(PictureRecorder* recorder) {
-  Skwasm::livePictureRecorderCount--;
+  Skwasm::live_picture_recorder_count--;
   delete recorder;
 }
 
 SKWASM_EXPORT flutter::DisplayListBuilder* pictureRecorder_beginRecording(
     PictureRecorder* recorder,
     const flutter::DlRect* cullRect) {
-  return recorder->beginRecording(*cullRect);
+  return recorder->BeginRecording(*cullRect);
 }
 
 SKWASM_EXPORT flutter::DisplayList* pictureRecorder_endRecording(
     PictureRecorder* recorder) {
-  Skwasm::livePictureCount++;
-  return recorder->finishRecordingAsPicture().release();
+  Skwasm::live_picture_count++;
+  return recorder->FinishRecordingAsPicture().release();
 }
 
 SKWASM_EXPORT void picture_getCullRect(flutter::DisplayList* picture,
@@ -56,12 +56,12 @@ SKWASM_EXPORT void picture_getCullRect(flutter::DisplayList* picture,
 }
 
 SKWASM_EXPORT void picture_ref(flutter::DisplayList* picture) {
-  Skwasm::livePictureCount++;
+  Skwasm::live_picture_count++;
   picture->ref();
 }
 
 SKWASM_EXPORT void picture_dispose(flutter::DisplayList* picture) {
-  Skwasm::livePictureCount--;
+  Skwasm::live_picture_count--;
   picture->unref();
 }
 

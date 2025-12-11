@@ -13,7 +13,7 @@ SKWASM_EXPORT flutter::DlImage* image_createFromPicture(
     flutter::DisplayList* displayList,
     int32_t width,
     int32_t height) {
-  Skwasm::liveImageCount++;
+  Skwasm::live_image_count++;
   return Skwasm::MakeImageFromPicture(displayList, width, height).release();
 }
 
@@ -23,7 +23,7 @@ SKWASM_EXPORT flutter::DlImage* image_createFromPixels(
     int height,
     Skwasm::PixelFormat pixelFormat,
     size_t rowByteCount) {
-  Skwasm::liveImageCount++;
+  Skwasm::live_image_count++;
   return Skwasm::MakeImageFromPixels(data, width, height, pixelFormat,
                                      rowByteCount)
       .release();
@@ -34,18 +34,18 @@ SKWASM_EXPORT flutter::DlImage* image_createFromTextureSource(
     int width,
     int height,
     Skwasm::Surface* surface) {
-  Skwasm::liveImageCount++;
+  Skwasm::live_image_count++;
   return Skwasm::MakeImageFromTexture(textureSource, width, height, surface)
       .release();
 }
 
 SKWASM_EXPORT void image_ref(flutter::DlImage* image) {
-  Skwasm::liveImageCount++;
+  Skwasm::live_image_count++;
   image->ref();
 }
 
 SKWASM_EXPORT void image_dispose(flutter::DlImage* image) {
-  Skwasm::liveImageCount--;
+  Skwasm::live_image_count--;
   image->unref();
 }
 

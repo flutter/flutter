@@ -16,12 +16,12 @@ SKWASM_EXPORT bool skwasm_isHeavy() {
 SKWASM_EXPORT Skwasm::ParagraphBuilder* paragraphBuilder_create(
     Skwasm::ParagraphStyle* style,
     Skwasm::FlutterFontCollection* collection) {
-  Skwasm::liveParagraphBuilderCount++;
+  Skwasm::live_paragraph_builder_count++;
   std::vector<flutter::DlPaint> paints;
-  style->textStyle.populatePaintIds(paints);
-  style->skiaParagraphStyle.setTextStyle(style->textStyle.skiaStyle);
+  style->text_style.PopulatePaintIds(paints);
+  style->skia_paragraph_style.setTextStyle(style->text_style.skia_style);
   return new Skwasm::ParagraphBuilder{
-      skia::textlayout::ParagraphBuilder::make(style->skiaParagraphStyle,
+      skia::textlayout::ParagraphBuilder::make(style->skia_paragraph_style,
                                                collection->collection, nullptr),
       std::move(paints),
   };
@@ -29,15 +29,15 @@ SKWASM_EXPORT Skwasm::ParagraphBuilder* paragraphBuilder_create(
 
 SKWASM_EXPORT Skwasm::Paragraph* paragraphBuilder_build(
     Skwasm::ParagraphBuilder* builder) {
-  Skwasm::liveParagraphCount++;
-  auto [words, graphemeBreaks, lineBreaks] =
-      builder->skiaParagraphBuilder->getClientICUData();
-  auto text = builder->skiaParagraphBuilder->getText();
-  sk_sp<SkUnicode> clientICU =
-      SkUnicodes::Client::Make(text, words, graphemeBreaks, lineBreaks);
-  builder->skiaParagraphBuilder->SetUnicode(clientICU);
+  Skwasm::live_paragraph_count++;
+  auto [words, grapheme_breaks, line_breaks] =
+      builder->skia_paragraph_builder->getClientICUData();
+  auto text = builder->skia_paragraph_builder->getText();
+  sk_sp<SkUnicode> client_icu =
+      SkUnicodes::Client::Make(text, words, grapheme_breaks, line_breaks);
+  builder->skia_paragraph_builder->SetUnicode(client_icu);
   return new Skwasm::Paragraph{
-      builder->skiaParagraphBuilder->Build(),
+      builder->skia_paragraph_builder->Build(),
       std::move(builder->paints),
   };
 }
@@ -45,17 +45,17 @@ SKWASM_EXPORT Skwasm::Paragraph* paragraphBuilder_build(
 SKWASM_EXPORT void paragraphBuilder_setGraphemeBreaksUtf16(
     Skwasm::ParagraphBuilder* builder,
     std::vector<SkUnicode::Position>* breaks) {
-  builder->skiaParagraphBuilder->setGraphemeBreaksUtf16(std::move(*breaks));
+  builder->skia_paragraph_builder->setGraphemeBreaksUtf16(std::move(*breaks));
 }
 
 SKWASM_EXPORT void paragraphBuilder_setWordBreaksUtf16(
     Skwasm::ParagraphBuilder* builder,
     std::vector<SkUnicode::Position>* breaks) {
-  builder->skiaParagraphBuilder->setWordsUtf16(std::move(*breaks));
+  builder->skia_paragraph_builder->setWordsUtf16(std::move(*breaks));
 }
 
 SKWASM_EXPORT void paragraphBuilder_setLineBreaksUtf16(
     Skwasm::ParagraphBuilder* builder,
     std::vector<SkUnicode::LineBreakBefore>* breaks) {
-  builder->skiaParagraphBuilder->setLineBreaksUtf16(std::move(*breaks));
+  builder->skia_paragraph_builder->setLineBreaksUtf16(std::move(*breaks));
 }

@@ -7,7 +7,7 @@
 #include "third_party/skia/include/core/SkData.h"
 
 SKWASM_EXPORT SkData* skData_create(size_t size) {
-  Skwasm::liveDataCount++;
+  Skwasm::live_data_count++;
   return SkData::MakeUninitialized(size).release();
 }
 
@@ -24,6 +24,6 @@ SKWASM_EXPORT size_t skData_getSize(SkData* data) {
 }
 
 SKWASM_EXPORT void skData_dispose(SkData* data) {
-  Skwasm::liveDataCount--;
+  Skwasm::live_data_count--;
   return data->unref();
 }

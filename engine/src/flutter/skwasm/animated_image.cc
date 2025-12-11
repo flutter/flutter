@@ -29,32 +29,32 @@ std::unique_ptr<SkCodec> getCodecForData(SkData* data) {
 SKWASM_EXPORT SkAnimatedImage* animatedImage_create(SkData* data,
                                                     int targetWidth,
                                                     int targetHeight) {
-  Skwasm::liveAnimatedImageCount++;
+  Skwasm::live_animated_image_count++;
   auto codec = getCodecForData(data);
   if (!codec) {
     printf("Failed to create codec for animated image.\n");
     return nullptr;
   }
 
-  auto aCodec = SkAndroidCodec::MakeFromCodec(std::move(codec));
-  if (aCodec == nullptr) {
+  auto android_codec = SkAndroidCodec::MakeFromCodec(std::move(codec));
+  if (android_codec == nullptr) {
     printf("Failed to create codec for animated image.\n");
     return nullptr;
   }
 
   if (targetWidth == 0 || targetHeight == 0) {
-    return SkAnimatedImage::Make(std::move(aCodec)).release();
+    return SkAnimatedImage::Make(std::move(android_codec)).release();
   }
 
   return SkAnimatedImage::Make(
-             std::move(aCodec),
+             std::move(android_codec),
              SkImageInfo::MakeUnknown(targetWidth, targetHeight),
              SkIRect::MakeWH(targetWidth, targetHeight), nullptr)
       .release();
 }
 
 SKWASM_EXPORT void animatedImage_dispose(SkAnimatedImage* image) {
-  Skwasm::liveAnimatedImageCount--;
+  Skwasm::live_animated_image_count--;
   image->unref();
 }
 
@@ -77,6 +77,6 @@ SKWASM_EXPORT void animatedImage_decodeNextFrame(SkAnimatedImage* image) {
 
 SKWASM_EXPORT flutter::DlImage* animatedImage_getCurrentFrame(
     SkAnimatedImage* image) {
-  Skwasm::liveImageCount++;
+  Skwasm::live_image_count++;
   return flutter::DlImage::Make(image->getCurrentFrame()).release();
 }

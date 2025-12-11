@@ -17,10 +17,10 @@ class RenderContext {
   static std::unique_ptr<RenderContext> Make(int sampleCount, int stencil);
 
   virtual ~RenderContext() = default;
-  virtual void renderPicture(const sk_sp<flutter::DisplayList> displayList) = 0;
-  virtual void renderImage(flutter::DlImage* image, ImageByteFormat format) = 0;
-  virtual void resize(int width, int height) = 0;
-  virtual void setResourceCacheLimit(int bytes) = 0;
+  virtual void RenderPicture(const sk_sp<flutter::DisplayList> displayList) = 0;
+  virtual void RenderImage(flutter::DlImage* image, ImageByteFormat format) = 0;
+  virtual void Resize(int width, int height) = 0;
+  virtual void SetResourceCacheLimit(int bytes) = 0;
 };
 }  // namespace Skwasm
 

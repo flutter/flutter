@@ -14,39 +14,39 @@
 
 namespace Skwasm {
 struct TextStyle {
-  skia::textlayout::TextStyle skiaStyle;
+  skia::textlayout::TextStyle skia_style;
   std::optional<flutter::DlPaint> foreground;
   std::optional<flutter::DlPaint> background;
 
-  void populatePaintIds(std::vector<flutter::DlPaint>& paints) {
+  void PopulatePaintIds(std::vector<flutter::DlPaint>& paints) {
     if (background) {
-      skiaStyle.setBackgroundPaintID(paints.size());
+      skia_style.setBackgroundPaintID(paints.size());
       paints.push_back(*background);
     }
     if (foreground) {
-      skiaStyle.setForegroundPaintID(paints.size());
+      skia_style.setForegroundPaintID(paints.size());
       paints.push_back(*foreground);
     } else {
       flutter::DlPaint paint;
-      paint.setColor(flutter::DlColor(skiaStyle.getColor()));
-      skiaStyle.setForegroundPaintID(paints.size());
+      paint.setColor(flutter::DlColor(skia_style.getColor()));
+      skia_style.setForegroundPaintID(paints.size());
       paints.push_back(std::move(paint));
     }
   }
 };
 
 struct ParagraphStyle {
-  skia::textlayout::ParagraphStyle skiaParagraphStyle;
-  TextStyle textStyle;
+  skia::textlayout::ParagraphStyle skia_paragraph_style;
+  TextStyle text_style;
 };
 
 struct ParagraphBuilder {
-  std::unique_ptr<skia::textlayout::ParagraphBuilder> skiaParagraphBuilder;
+  std::unique_ptr<skia::textlayout::ParagraphBuilder> skia_paragraph_builder;
   std::vector<flutter::DlPaint> paints;
 };
 
 struct Paragraph {
-  std::unique_ptr<skia::textlayout::Paragraph> skiaParagraph;
+  std::unique_ptr<skia::textlayout::Paragraph> skia_paragraph;
   std::vector<flutter::DlPaint> paints;
 };
 }  // namespace Skwasm

@@ -7,31 +7,31 @@
 #include "third_party/skia/modules/skparagraph/include/Paragraph.h"
 
 SKWASM_EXPORT skia::textlayout::LineMetrics* lineMetrics_create(
-    bool hardBreak,
+    bool hard_break,
     double ascent,
     double descent,
-    double unscaledAscent,
+    double unscaled_ascent,
     double height,
     double width,
     double left,
     double baseline,
-    size_t lineNumber) {
-  Skwasm::liveLineMetricsCount++;
+    size_t line_number) {
+  Skwasm::live_line_metrics_count++;
   auto metrics = new skia::textlayout::LineMetrics();
-  metrics->fHardBreak = hardBreak;
+  metrics->fHardBreak = hard_break;
   metrics->fAscent = ascent;
   metrics->fDescent = descent;
-  metrics->fUnscaledAscent = unscaledAscent;
+  metrics->fUnscaledAscent = unscaled_ascent;
   metrics->fHeight = height;
   metrics->fWidth = width;
   metrics->fLeft = left;
   metrics->fBaseline = baseline;
-  metrics->fLineNumber = lineNumber;
+  metrics->fLineNumber = line_number;
   return metrics;
 }
 
 SKWASM_EXPORT void lineMetrics_dispose(skia::textlayout::LineMetrics* metrics) {
-  Skwasm::liveLineMetricsCount--;
+  Skwasm::live_line_metrics_count--;
   delete metrics;
 }
 

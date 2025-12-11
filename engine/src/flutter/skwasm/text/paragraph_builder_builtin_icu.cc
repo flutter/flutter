@@ -16,12 +16,12 @@ SKWASM_EXPORT bool skwasm_isHeavy() {
 SKWASM_EXPORT Skwasm::ParagraphBuilder* paragraphBuilder_create(
     Skwasm::ParagraphStyle* style,
     Skwasm::FlutterFontCollection* collection) {
-  Skwasm::liveParagraphBuilderCount++;
+  Skwasm::live_paragraph_builder_count++;
   std::vector<flutter::DlPaint> paints;
-  style->textStyle.populatePaintIds(paints);
-  style->skiaParagraphStyle.setTextStyle(style->textStyle.skiaStyle);
+  style->text_style.PopulatePaintIds(paints);
+  style->skia_paragraph_style.setTextStyle(style->text_style.skia_style);
   return new Skwasm::ParagraphBuilder{
-      skia::textlayout::ParagraphBuilder::make(style->skiaParagraphStyle,
+      skia::textlayout::ParagraphBuilder::make(style->skia_paragraph_style,
                                                collection->collection,
                                                SkUnicodes::ICU::Make()),
       std::move(paints)};
@@ -29,8 +29,8 @@ SKWASM_EXPORT Skwasm::ParagraphBuilder* paragraphBuilder_create(
 
 SKWASM_EXPORT Skwasm::Paragraph* paragraphBuilder_build(
     Skwasm::ParagraphBuilder* builder) {
-  Skwasm::liveParagraphCount++;
-  return new Skwasm::Paragraph{builder->skiaParagraphBuilder->Build(),
+  Skwasm::live_paragraph_count++;
+  return new Skwasm::Paragraph{builder->skia_paragraph_builder->Build(),
                                std::move(builder->paints)};
 }
 

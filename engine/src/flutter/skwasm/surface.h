@@ -29,13 +29,13 @@ namespace Skwasm {
 
 class TextureSourceWrapper {
  public:
-  TextureSourceWrapper(unsigned long threadId, SkwasmObject textureSource);
+  TextureSourceWrapper(unsigned long thread_id, SkwasmObject textureSource);
   ~TextureSourceWrapper();
 
-  SkwasmObject getTextureSource();
+  SkwasmObject GetTextureSource();
 
  private:
-  unsigned long _rasterThreadId;
+  unsigned long raster_thread_id_;
 };
 
 class Surface {
@@ -45,52 +45,51 @@ class Surface {
   // Main thread only
   Surface();
 
-  unsigned long getThreadId() { return _thread; }
+  unsigned long GetThreadId() { return thread_; }
 
   // Main thread only
-  void dispose();
-  void setResourceCacheLimit(int bytes);
-  uint32_t renderPictures(flutter::DisplayList** picture,
+  void Dispose();
+  void SetResourceCacheLimit(int bytes);
+  uint32_t RenderPictures(flutter::DisplayList** pictures,
                           int width,
                           int height,
                           int count);
-  uint32_t rasterizeImage(flutter::DlImage* image, ImageByteFormat format);
-  void setCallbackHandler(CallbackHandler* callbackHandler);
-  void onRenderComplete(uint32_t callbackId, SkwasmObject imageBitmap);
-  void onRasterizeComplete(uint32_t callbackId, SkData* data);
+  uint32_t RasterizeImage(flutter::DlImage* image, ImageByteFormat format);
+  void SetCallbackHandler(CallbackHandler* callbackHandler);
+  void OnRenderComplete(uint32_t callbackId, SkwasmObject imageBitmap);
+  void OnRasterizeComplete(uint32_t callbackId, SkData* data);
 
   // Any thread
-  std::unique_ptr<TextureSourceWrapper> createTextureSourceWrapper(
+  std::unique_ptr<TextureSourceWrapper> CreateTextureSourceWrapper(
       SkwasmObject textureSource);
 
   // Worker thread
-  void renderPicturesOnWorker(sk_sp<flutter::DisplayList>* picture,
+  void RenderPicturesOnWorker(sk_sp<flutter::DisplayList>* pictures,
                               int width,
                               int height,
                               int pictureCount,
                               uint32_t callbackId,
                               double rasterStart);
-  void rasterizeImageOnWorker(flutter::DlImage* image,
+  void RasterizeImageOnWorker(flutter::DlImage* image,
                               ImageByteFormat format,
                               uint32_t callbackId);
 
  private:
-  void _init();
-  void _resizeSurface(int width, int height);
-  void _recreateSurface();
+  void Init();
+  void ResizeSurface(int width, int height);
+  void RecreateSurface();
 
-  CallbackHandler* _callbackHandler = nullptr;
-  uint32_t _currentCallbackId = 0;
+  CallbackHandler* callback_handler_ = nullptr;
+  uint32_t current_callback_id_ = 0;
 
-  int _canvasWidth = 0;
-  int _canvasHeight = 0;
+  int canvas_width_ = 0;
+  int canvas_height_ = 0;
 
-  EMSCRIPTEN_WEBGL_CONTEXT_HANDLE _glContext = 0;
-  std::unique_ptr<RenderContext> _renderContext;
+  EMSCRIPTEN_WEBGL_CONTEXT_HANDLE gl_context_ = 0;
+  std::unique_ptr<RenderContext> render_context_;
+  unsigned long thread_;
 
-  pthread_t _thread;
-
-  bool _isInitialized = false;
+  bool is_initialized_ = false;
 };
 }  // namespace Skwasm
 

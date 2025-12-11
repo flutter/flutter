@@ -29,7 +29,7 @@ namespace {
 // See https://github.com/flutter/flutter/issues/175371
 class StubImage : public flutter::DlImage {
  public:
-  StubImage(int width, int height) : _width(width), _height(height) {}
+  StubImage(int width, int height) : width_(width), height_(height) {}
 
   static sk_sp<StubImage> Make(int width, int height) {
     return sk_make_sp<StubImage>(width, height);
@@ -54,15 +54,15 @@ class StubImage : public flutter::DlImage {
 
   // |DlImage|
   flutter::DlISize GetSize() const override {
-    return flutter::DlISize::MakeWH(_width, _height);
+    return flutter::DlISize::MakeWH(width_, height_);
   }
 
   // |DlImage|
   size_t GetApproximateByteSize() const override { return 0; }
 
  private:
-  int _width;
-  int _height;
+  int width_;
+  int height_;
 };
 }  // namespace
 
