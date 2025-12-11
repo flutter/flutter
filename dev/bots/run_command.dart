@@ -161,7 +161,28 @@ String? _discoverBestNdkPath() {
   // If we found a valid NDK, return it.
   // Otherwise return empty string to clear any bad inherited value.
   final Map<String, String> env = io.Platform.environment;
-  final String? androidHome = env['ANDROID_HOME'] ?? env['ANDROID_SDK_ROOT'];
+  String? androidHome = env['ANDROID_HOME'] ?? env['ANDROID_SDK_ROOT'];
+  if (androidHome == null) {
+    // Try to find it in common default locations.
+    if (io.Platform.isMacOS) {
+      final String? home = env['HOME'];
+      if (home != null) {
+        androidHome = path.join(home, 'Library', 'Android', 'sdk');
+      }
+    } else if (io.Platform.isLinux) {
+      final String? home = env['HOME'];
+      if (home != null) {
+        androidHome = path.join(home, 'Android', 'Sdk');
+      }
+    } else if (io.Platform.isWindows) {
+      final String? homeDrive = env['HOMEDRIVE'];
+      final String? homePath = env['HOMEPATH'];
+      if (homeDrive != null && homePath != null) {
+        androidHome = path.join(homeDrive + homePath, 'AppData', 'Local', 'Android', 'sdk');
+      }
+    }
+  }
+
   if (androidHome == null) {
     return _bestNdkPath = '';
   }
@@ -172,7 +193,11 @@ String? _discoverBestNdkPath() {
   final List<String> versions = <String>[];
   for (final io.FileSystemEntity entity in ndkDir.listSync()) {
     if (entity is io.Directory) {
-      versions.add(path.basename(entity.path));
+      final String name = path.basename(entity.path);
+      // flutter_tools ignores non-SemVer directories. NDK versions should start with a number.
+      if (int.tryParse(name.split('.').first) != null) {
+        versions.add(name);
+      }
     }
   }
   if (versions.isEmpty) {

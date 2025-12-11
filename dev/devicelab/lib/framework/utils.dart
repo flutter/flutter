@@ -818,7 +818,28 @@ String? _discoverBestNdkPath() {
   // If we found a valid NDK, return it.
   // Otherwise return empty string to clear any bad inherited value.
   final Map<String, String> env = Platform.environment;
-  final String? androidHome = env['ANDROID_HOME'] ?? env['ANDROID_SDK_ROOT'];
+  String? androidHome = env['ANDROID_HOME'] ?? env['ANDROID_SDK_ROOT'];
+  if (androidHome == null) {
+    // Try to find it in common default locations.
+    if (Platform.isMacOS) {
+      final String? home = env['HOME'];
+      if (home != null) {
+        androidHome = path.join(home, 'Library', 'Android', 'sdk');
+      }
+    } else if (Platform.isLinux) {
+      final String? home = env['HOME'];
+      if (home != null) {
+        androidHome = path.join(home, 'Android', 'Sdk');
+      }
+    } else if (Platform.isWindows) {
+      final String? homeDrive = env['HOMEDRIVE'];
+      final String? homePath = env['HOMEPATH'];
+      if (homeDrive != null && homePath != null) {
+        androidHome = path.join(homeDrive + homePath, 'AppData', 'Local', 'Android', 'sdk');
+      }
+    }
+  }
+
   if (androidHome == null) {
     return _bestNdkPath = '';
   }
