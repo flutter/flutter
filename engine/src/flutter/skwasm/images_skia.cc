@@ -52,11 +52,11 @@ SkAlphaType alphaTypeForPixelFormat(Skwasm::PixelFormat format) {
 
 class ExternalWebGLTexture : public GrExternalTexture {
  public:
-  ExternalWebGLTexture(GrBackendTexture backendTexture,
-                       GLuint textureId,
+  ExternalWebGLTexture(GrBackendTexture backend_texture,
+                       GLuint texture_id,
                        EMSCRIPTEN_WEBGL_CONTEXT_HANDLE context)
-      : backend_texture_(backendTexture),
-        texture_id_(textureId),
+      : backend_texture_(backend_texture),
+        texture_id_(texture_id),
         web_gl_context_(context) {}
 
   GrBackendTexture getBackendTexture() override { return backend_texture_; }
@@ -75,11 +75,11 @@ class ExternalWebGLTexture : public GrExternalTexture {
 class TextureSourceImageGenerator : public GrExternalTextureGenerator {
  public:
   TextureSourceImageGenerator(SkImageInfo ii,
-                              Skwasm::SkwasmObject textureSource,
+                              Skwasm::SkwasmObject texture_source,
                               Skwasm::Surface* surface)
       : GrExternalTextureGenerator(ii),
         texture_source_wrapper_(
-            surface->CreateTextureSourceWrapper(textureSource)) {}
+            surface->CreateTextureSourceWrapper(texture_source)) {}
 
   std::unique_ptr<GrExternalTexture> generateExternalTexture(
       GrRecordingContext* context,
@@ -109,21 +109,21 @@ class TextureSourceImageGenerator : public GrExternalTextureGenerator {
 
 namespace Skwasm {
 
-sk_sp<flutter::DlImage> MakeImageFromPicture(flutter::DisplayList* displayList,
+sk_sp<flutter::DlImage> MakeImageFromPicture(flutter::DisplayList* display_list,
                                              int32_t width,
                                              int32_t height) {
   SkPictureRecorder recorder;
   SkCanvas* canvas =
-      recorder.beginRecording(flutter::ToSkRect(displayList->GetBounds()));
+      recorder.beginRecording(flutter::ToSkRect(display_list->GetBounds()));
   flutter::DlSkCanvasDispatcher dispatcher(canvas);
-  dispatcher.drawDisplayList(sk_ref_sp(displayList), 1.0f);
+  dispatcher.drawDisplayList(sk_ref_sp(display_list), 1.0f);
 
   return flutter::DlImage::Make(SkImages::DeferredFromPicture(
       recorder.finishRecordingAsPicture(), {width, height}, nullptr, nullptr,
       SkImages::BitDepth::kU8, SkColorSpace::MakeSRGB()));
 }
 
-sk_sp<flutter::DlImage> MakeImageFromTexture(SkwasmObject textureSource,
+sk_sp<flutter::DlImage> MakeImageFromTexture(SkwasmObject texture_source,
                                              int width,
                                              int height,
                                              Skwasm::Surface* surface) {
@@ -133,18 +133,18 @@ sk_sp<flutter::DlImage> MakeImageFromTexture(SkwasmObject textureSource,
               SkImageInfo::Make(width, height,
                                 SkColorType::kRGBA_8888_SkColorType,
                                 SkAlphaType::kPremul_SkAlphaType),
-              textureSource, surface))));
+              texture_source, surface))));
 }
 
 sk_sp<flutter::DlImage> MakeImageFromPixels(SkData* data,
                                             int width,
                                             int height,
-                                            Skwasm::PixelFormat pixelFormat,
-                                            size_t rowByteCount) {
+                                            Skwasm::PixelFormat pixel_format,
+                                            size_t row_byte_count) {
   return flutter::DlImage::Make(SkImages::RasterFromData(
-      SkImageInfo::Make(width, height, colorTypeForPixelFormat(pixelFormat),
-                        alphaTypeForPixelFormat(pixelFormat),
+      SkImageInfo::Make(width, height, colorTypeForPixelFormat(pixel_format),
+                        alphaTypeForPixelFormat(pixel_format),
                         SkColorSpace::MakeSRGB()),
-      sk_ref_sp(data), rowByteCount));
+      sk_ref_sp(data), row_byte_count));
 }
 }  // namespace Skwasm

@@ -10,32 +10,32 @@
 #include "flutter/skwasm/wrappers.h"
 
 SKWASM_EXPORT flutter::DlImage* image_createFromPicture(
-    flutter::DisplayList* displayList,
+    flutter::DisplayList* display_list,
     int32_t width,
     int32_t height) {
   Skwasm::live_image_count++;
-  return Skwasm::MakeImageFromPicture(displayList, width, height).release();
+  return Skwasm::MakeImageFromPicture(display_list, width, height).release();
 }
 
 SKWASM_EXPORT flutter::DlImage* image_createFromPixels(
     SkData* data,
     int width,
     int height,
-    Skwasm::PixelFormat pixelFormat,
-    size_t rowByteCount) {
+    Skwasm::PixelFormat pixel_format,
+    size_t row_byte_count) {
   Skwasm::live_image_count++;
-  return Skwasm::MakeImageFromPixels(data, width, height, pixelFormat,
-                                     rowByteCount)
+  return Skwasm::MakeImageFromPixels(data, width, height, pixel_format,
+                                     row_byte_count)
       .release();
 }
 
 SKWASM_EXPORT flutter::DlImage* image_createFromTextureSource(
-    SkwasmObject textureSource,
+    SkwasmObject texture_source,
     int width,
     int height,
     Skwasm::Surface* surface) {
   Skwasm::live_image_count++;
-  return Skwasm::MakeImageFromTexture(textureSource, width, height, surface)
+  return Skwasm::MakeImageFromTexture(texture_source, width, height, surface)
       .release();
 }
 

@@ -22,42 +22,42 @@ class DisplayList;
 
 extern "C" {
 extern bool skwasm_isSingleThreaded();
-extern void skwasm_setAssociatedObjectOnThread(unsigned long threadId,
+extern void skwasm_setAssociatedObjectOnThread(unsigned long thread_id,
                                                void* pointer,
                                                SkwasmObject object);
 extern SkwasmObject skwasm_getAssociatedObject(void* pointer);
-extern void skwasm_disposeAssociatedObjectOnThread(unsigned long threadId,
+extern void skwasm_disposeAssociatedObjectOnThread(unsigned long thread_id,
                                                    void* pointer);
-extern void skwasm_connectThread(pthread_t threadId);
-extern void skwasm_dispatchRenderPictures(unsigned long threadId,
+extern void skwasm_connectThread(pthread_t thread_id);
+extern void skwasm_dispatchRenderPictures(unsigned long thread_id,
                                           Skwasm::Surface* surface,
                                           sk_sp<flutter::DisplayList>* pictures,
                                           int width,
                                           int height,
                                           int count,
-                                          uint32_t callbackId);
+                                          uint32_t callback_id);
 extern uint32_t skwasm_createOffscreenCanvas(int width, int height);
-extern void skwasm_resizeCanvas(uint32_t contextHandle, int width, int height);
-extern SkwasmObject skwasm_captureImageBitmap(uint32_t contextHandle,
-                                              SkwasmObject imageBitmaps);
+extern void skwasm_resizeCanvas(uint32_t context_handle, int width, int height);
+extern SkwasmObject skwasm_captureImageBitmap(uint32_t context_handle,
+                                              SkwasmObject image_bitmaps);
 extern void skwasm_resolveAndPostImages(Skwasm::Surface* surface,
-                                        SkwasmObject imageBitmaps,
-                                        double rasterStart,
-                                        uint32_t callbackId);
+                                        SkwasmObject image_bitmaps,
+                                        double raster_start,
+                                        uint32_t callback_id);
 extern unsigned int skwasm_createGlTextureFromTextureSource(
-    SkwasmObject textureSource,
+    SkwasmObject texture_source,
     int width,
     int height);
-extern void skwasm_dispatchDisposeSurface(unsigned long threadId,
+extern void skwasm_dispatchDisposeSurface(unsigned long thread_id,
                                           Skwasm::Surface* surface);
-extern void skwasm_dispatchRasterizeImage(unsigned long threadId,
+extern void skwasm_dispatchRasterizeImage(unsigned long thread_id,
                                           Skwasm::Surface* surface,
                                           flutter::DlImage* image,
                                           Skwasm::ImageByteFormat format,
-                                          uint32_t callbackId);
+                                          uint32_t callback_id);
 extern void skwasm_postRasterizeResult(Skwasm::Surface* surface,
                                        SkData* data,
-                                       uint32_t callbackId);
+                                       uint32_t callback_id);
 }
 
 #endif  // FLUTTER_SKWASM_SKWASM_SUPPORT_H_

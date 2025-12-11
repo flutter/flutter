@@ -35,9 +35,9 @@ static sk_sp<SkFontMgr> default_fontmgr() {
   return mgr;
 }
 
-SKWASM_EXPORT SkTypeface* typeface_create(SkData* fontData) {
+SKWASM_EXPORT SkTypeface* typeface_create(SkData* font_data) {
   Skwasm::live_typeface_count++;
-  auto typeface = default_fontmgr()->makeFromData(sk_ref_sp<SkData>(fontData));
+  auto typeface = default_fontmgr()->makeFromData(sk_ref_sp<SkData>(font_data));
   return typeface.release();
 }
 
@@ -47,27 +47,27 @@ SKWASM_EXPORT void typeface_dispose(SkTypeface* typeface) {
 }
 
 // Calculates the code points that are not covered by the specified typefaces.
-// This function mutates the `codePoints` buffer in place and returns the count
+// This function mutates the `code_points` buffer in place and returns the count
 // of code points that are not covered by the fonts.
 SKWASM_EXPORT int typefaces_filterCoveredCodePoints(SkTypeface** typefaces,
-                                                    int typefaceCount,
-                                                    SkUnichar* codePoints,
-                                                    int codePointCount) {
+                                                    int typeface_count,
+                                                    SkUnichar* code_points,
+                                                    int code_point_count) {
   std::unique_ptr<SkGlyphID[]> glyph_buffer =
-      std::make_unique<SkGlyphID[]>(codePointCount);
+      std::make_unique<SkGlyphID[]>(code_point_count);
   SkGlyphID* glyph_pointer = glyph_buffer.get();
-  int remaining_code_point_count = codePointCount;
-  for (int typeface_index = 0; typeface_index < typefaceCount;
+  int remaining_code_point_count = code_point_count;
+  for (int typeface_index = 0; typeface_index < typeface_count;
        typeface_index++) {
     typefaces[typeface_index]->unicharsToGlyphs(
-        {codePoints, remaining_code_point_count},
+        {code_points, remaining_code_point_count},
         {glyph_pointer, remaining_code_point_count});
     int output_index = 0;
     for (int input_index = 0; input_index < remaining_code_point_count;
          input_index++) {
       if (glyph_pointer[input_index] == 0) {
         if (output_index != input_index) {
-          codePoints[output_index] = codePoints[input_index];
+          code_points[output_index] = code_points[input_index];
         }
         output_index++;
       }
@@ -84,9 +84,9 @@ SKWASM_EXPORT int typefaces_filterCoveredCodePoints(SkTypeface** typefaces,
 SKWASM_EXPORT void fontCollection_registerTypeface(
     Skwasm::FlutterFontCollection* collection,
     SkTypeface* typeface,
-    SkString* fontName) {
-  if (fontName) {
-    SkString alias = *fontName;
+    SkString* font_name) {
+  if (font_name) {
+    SkString alias = *font_name;
     collection->provider->registerTypeface(sk_ref_sp<SkTypeface>(typeface),
                                            alias);
   } else {

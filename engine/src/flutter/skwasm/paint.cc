@@ -8,26 +8,27 @@
 #include "flutter/skwasm/helpers.h"
 #include "flutter/skwasm/live_objects.h"
 
-SKWASM_EXPORT flutter::DlPaint* paint_create(bool isAntiAlias,
-                                             flutter::DlBlendMode blendMode,
-                                             uint32_t color,
-                                             flutter::DlDrawStyle style,
-                                             flutter::DlScalar strokeWidth,
-                                             flutter::DlStrokeCap strokeCap,
-                                             flutter::DlStrokeJoin strokeJoin,
-                                             flutter::DlScalar strokeMiterLimit,
-                                             bool invertColors) {
+SKWASM_EXPORT flutter::DlPaint* paint_create(
+    bool is_anti_alias,
+    flutter::DlBlendMode blend_mode,
+    uint32_t color,
+    flutter::DlDrawStyle style,
+    flutter::DlScalar stroke_width,
+    flutter::DlStrokeCap stroke_cap,
+    flutter::DlStrokeJoin stroke_join,
+    flutter::DlScalar stroke_miter_limit,
+    bool invert_colors) {
   Skwasm::live_paint_count++;
   auto paint = new flutter::DlPaint();
-  paint->setAntiAlias(isAntiAlias);
-  paint->setBlendMode(blendMode);
+  paint->setAntiAlias(is_anti_alias);
+  paint->setBlendMode(blend_mode);
   paint->setDrawStyle(style);
-  paint->setStrokeWidth(strokeWidth);
-  paint->setStrokeCap(strokeCap);
-  paint->setStrokeJoin(strokeJoin);
+  paint->setStrokeWidth(stroke_width);
+  paint->setStrokeCap(stroke_cap);
+  paint->setStrokeJoin(stroke_join);
   paint->setColor(flutter::DlColor(color));
-  paint->setStrokeMiter(strokeMiterLimit);
-  paint->setInvertColors(invertColors);
+  paint->setStrokeMiter(stroke_miter_limit);
+  paint->setInvertColors(invert_colors);
   return paint;
 }
 

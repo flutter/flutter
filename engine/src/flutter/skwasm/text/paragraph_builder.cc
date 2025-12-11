@@ -33,9 +33,9 @@ SKWASM_EXPORT void paragraphBuilder_addText(Skwasm::ParagraphBuilder* builder,
 
 SKWASM_EXPORT char* paragraphBuilder_getUtf8Text(
     Skwasm::ParagraphBuilder* builder,
-    uint32_t* outLength) {
+    uint32_t* out_length) {
   auto span = builder->skia_paragraph_builder->getText();
-  *outLength = span.size();
+  *out_length = span.size();
   return span.data();
 }
 

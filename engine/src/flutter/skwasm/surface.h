@@ -29,7 +29,7 @@ namespace Skwasm {
 
 class TextureSourceWrapper {
  public:
-  TextureSourceWrapper(unsigned long thread_id, SkwasmObject textureSource);
+  TextureSourceWrapper(unsigned long thread_id, SkwasmObject texture_source);
   ~TextureSourceWrapper();
 
   SkwasmObject GetTextureSource();
@@ -55,24 +55,24 @@ class Surface {
                           int height,
                           int count);
   uint32_t RasterizeImage(flutter::DlImage* image, ImageByteFormat format);
-  void SetCallbackHandler(CallbackHandler* callbackHandler);
-  void OnRenderComplete(uint32_t callbackId, SkwasmObject imageBitmap);
-  void OnRasterizeComplete(uint32_t callbackId, SkData* data);
+  void SetCallbackHandler(CallbackHandler* callback_handler);
+  void OnRenderComplete(uint32_t callback_id, SkwasmObject image_bitmap);
+  void OnRasterizeComplete(uint32_t callback_id, SkData* data);
 
   // Any thread
   std::unique_ptr<TextureSourceWrapper> CreateTextureSourceWrapper(
-      SkwasmObject textureSource);
+      SkwasmObject texture_source);
 
   // Worker thread
   void RenderPicturesOnWorker(sk_sp<flutter::DisplayList>* pictures,
                               int width,
                               int height,
-                              int pictureCount,
-                              uint32_t callbackId,
-                              double rasterStart);
+                              int picture_count,
+                              uint32_t callback_id,
+                              double raster_start);
   void RasterizeImageOnWorker(flutter::DlImage* image,
                               ImageByteFormat format,
-                              uint32_t callbackId);
+                              uint32_t callback_id);
 
  private:
   void Init();

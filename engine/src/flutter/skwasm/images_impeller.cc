@@ -68,13 +68,13 @@ class StubImage : public flutter::DlImage {
 
 namespace Skwasm {
 
-sk_sp<flutter::DlImage> MakeImageFromPicture(flutter::DisplayList* displayList,
+sk_sp<flutter::DlImage> MakeImageFromPicture(flutter::DisplayList* display_list,
                                              int32_t width,
                                              int32_t height) {
   return StubImage::Make(width, height);
 }
 
-sk_sp<flutter::DlImage> MakeImageFromTexture(SkwasmObject textureSource,
+sk_sp<flutter::DlImage> MakeImageFromTexture(SkwasmObject texture_source,
                                              int width,
                                              int height,
                                              Skwasm::Surface* surface) {
@@ -84,8 +84,8 @@ sk_sp<flutter::DlImage> MakeImageFromTexture(SkwasmObject textureSource,
 sk_sp<flutter::DlImage> MakeImageFromPixels(SkData* data,
                                             int width,
                                             int height,
-                                            Skwasm::PixelFormat pixelFormat,
-                                            size_t rowByteCount) {
+                                            Skwasm::PixelFormat pixel_format,
+                                            size_t row_byte_count) {
   return StubImage::Make(width, height);
 }
 }  // namespace Skwasm

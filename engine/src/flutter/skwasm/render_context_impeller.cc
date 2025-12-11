@@ -52,9 +52,9 @@ class ImpellerRenderContext : public Skwasm::RenderContext {
                                                        nullptr)) {}
 
   virtual void RenderPicture(
-      const sk_sp<flutter::DisplayList> displayList) override {
+      const sk_sp<flutter::DisplayList> display_list) override {
     impeller::RenderToTarget(
-        *content_context_, surface_->GetRenderTarget(), displayList,
+        *content_context_, surface_->GetRenderTarget(), display_list,
         impeller::Rect::MakeLTRB(0, 0, width_, height_), true);
   }
 
@@ -94,10 +94,10 @@ class ImpellerRenderContext : public Skwasm::RenderContext {
 }  // namespace
 
 std::unique_ptr<Skwasm::RenderContext> Skwasm::RenderContext::Make(
-    int sampleCount,
+    int sample_count,
     int stencil) {
   auto clear_depth_emulated = [](float depth) {};
-  auto depth_range_emulated = [](float nearVal, float farVal) {};
+  auto depth_range_emulated = [](float near_val, float far_val) {};
 
   std::map<std::string, void*> gl_procs;
 

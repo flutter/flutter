@@ -17,18 +17,18 @@ enum class PixelFormat {
 };
 
 extern sk_sp<flutter::DlImage> MakeImageFromPicture(
-    flutter::DisplayList* displayList,
+    flutter::DisplayList* display_list,
     int32_t width,
     int32_t height);
-extern sk_sp<flutter::DlImage> MakeImageFromTexture(SkwasmObject textureSource,
+extern sk_sp<flutter::DlImage> MakeImageFromTexture(SkwasmObject texture_source,
                                                     int width,
                                                     int height,
                                                     Skwasm::Surface* surface);
 extern sk_sp<flutter::DlImage> MakeImageFromPixels(SkData* data,
                                                    int width,
                                                    int height,
-                                                   PixelFormat pixelFormat,
-                                                   size_t rowByteCount);
+                                                   PixelFormat pixel_format,
+                                                   size_t row_byte_count);
 
 }  // namespace Skwasm
 

@@ -31,59 +31,60 @@ class SkwasmParagraphPainter : public skia::textlayout::ParagraphPainter {
       return;
     }
 
-    const int* paintID = std::get_if<PaintID>(&paint);
-    auto dlPaint = paintID ? paints_[*paintID] : flutter::DlPaint();
-    builder_.DrawText(flutter::textFromBlob(blob), x, y, dlPaint);
+    const int* paint_id = std::get_if<PaintID>(&paint);
+    auto dl_paint = paint_id ? paints_[*paint_id] : flutter::DlPaint();
+    builder_.DrawText(flutter::textFromBlob(blob), x, y, dl_paint);
   }
 
   virtual void drawTextShadow(const sk_sp<SkTextBlob>& blob,
                               SkScalar x,
                               SkScalar y,
                               SkColor color,
-                              SkScalar blurSigma) override {
+                              SkScalar blur_sigma) override {
     if (!blob) {
       return;
     }
 
     flutter::DlPaint paint;
     paint.setColor(flutter::DlColor(color));
-    if (blurSigma > 0.0) {
-      flutter::DlBlurMaskFilter filter(flutter::DlBlurStyle::kNormal, blurSigma,
-                                       false);
+    if (blur_sigma > 0.0) {
+      flutter::DlBlurMaskFilter filter(flutter::DlBlurStyle::kNormal,
+                                       blur_sigma, false);
       paint.setMaskFilter(&filter);
     }
     builder_.DrawText(flutter::textFromBlob(blob), x, y, paint);
   }
 
   virtual void drawRect(const SkRect& rect, const SkPaintOrID& paint) override {
-    const int* paintID = std::get_if<PaintID>(&paint);
-    auto dlPaint = paintID ? paints_[*paintID] : flutter::DlPaint();
-    builder_.DrawRect(flutter::ToDlRect(rect), dlPaint);
+    const int* paint_id = std::get_if<PaintID>(&paint);
+    auto dl_paint = paint_id ? paints_[*paint_id] : flutter::DlPaint();
+    builder_.DrawRect(flutter::ToDlRect(rect), dl_paint);
   }
 
   virtual void drawFilledRect(const SkRect& rect,
-                              const DecorationStyle& decorStyle) override {
-    flutter::DlPaint paint = ToDlPaint(decorStyle, flutter::DlDrawStyle::kFill);
+                              const DecorationStyle& decor_style) override {
+    flutter::DlPaint paint =
+        ToDlPaint(decor_style, flutter::DlDrawStyle::kFill);
     builder_.DrawRect(flutter::ToDlRect(rect), paint);
   }
 
   virtual void drawPath(const SkPath& path,
-                        const DecorationStyle& decorStyle) override {
-    builder_.DrawPath(flutter::DlPath(path), this->ToDlPaint(decorStyle));
+                        const DecorationStyle& decor_style) override {
+    builder_.DrawPath(flutter::DlPath(path), this->ToDlPaint(decor_style));
   }
 
   virtual void drawLine(SkScalar x0,
                         SkScalar y0,
                         SkScalar x1,
                         SkScalar y1,
-                        const DecorationStyle& decorStyle) override {
-    auto paint = this->ToDlPaint(decorStyle);
-    auto dashPathEffect = decorStyle.getDashPathEffect();
+                        const DecorationStyle& decor_style) override {
+    auto paint = this->ToDlPaint(decor_style);
+    auto dash_path_effect = decor_style.getDashPathEffect();
 
-    if (dashPathEffect) {
+    if (dash_path_effect) {
       builder_.DrawDashedLine(
           flutter::DlPoint(x0, y0), flutter::DlPoint(x1, y1),
-          dashPathEffect->fOnLength, dashPathEffect->fOffLength, paint);
+          dash_path_effect->fOnLength, dash_path_effect->fOffLength, paint);
     } else {
       builder_.DrawLine(flutter::DlPoint(x0, y0), flutter::DlPoint(x1, y1),
                         paint);
@@ -174,8 +175,8 @@ SKWASM_EXPORT void canvas_skew(flutter::DisplayListBuilder* canvas,
 }
 
 SKWASM_EXPORT void canvas_transform(flutter::DisplayListBuilder* canvas,
-                                    const flutter::DlMatrix* matrix44) {
-  canvas->Transform(*matrix44);
+                                    const flutter::DlMatrix* matrix_44) {
+  canvas->Transform(*matrix_44);
 }
 
 SKWASM_EXPORT void canvas_clear(flutter::DisplayListBuilder* canvas,
@@ -191,9 +192,9 @@ SKWASM_EXPORT void canvas_clipRect(flutter::DisplayListBuilder* canvas,
 }
 
 SKWASM_EXPORT void canvas_clipRRect(flutter::DisplayListBuilder* canvas,
-                                    const SkScalar* rrectValues,
+                                    const SkScalar* rrect_values,
                                     bool antialias) {
-  canvas->ClipRoundRect(Skwasm::createDlRRect(rrectValues),
+  canvas->ClipRoundRect(Skwasm::createDlRRect(rrect_values),
                         flutter::DlClipOp::kIntersect, antialias);
 }
 
@@ -206,8 +207,8 @@ SKWASM_EXPORT void canvas_clipPath(flutter::DisplayListBuilder* canvas,
 
 SKWASM_EXPORT void canvas_drawColor(flutter::DisplayListBuilder* canvas,
                                     uint32_t color,
-                                    flutter::DlBlendMode blendMode) {
-  canvas->DrawColor(flutter::DlColor(color), blendMode);
+                                    flutter::DlBlendMode blend_mode) {
+  canvas->DrawColor(flutter::DlColor(color), blend_mode);
 }
 
 SKWASM_EXPORT void canvas_drawLine(flutter::DisplayListBuilder* canvas,
@@ -232,18 +233,18 @@ SKWASM_EXPORT void canvas_drawRect(flutter::DisplayListBuilder* canvas,
 }
 
 SKWASM_EXPORT void canvas_drawRRect(flutter::DisplayListBuilder* canvas,
-                                    const SkScalar* rrectValues,
+                                    const SkScalar* rrect_values,
                                     flutter::DlPaint* paint) {
-  canvas->DrawRoundRect(Skwasm::createDlRRect(rrectValues),
+  canvas->DrawRoundRect(Skwasm::createDlRRect(rrect_values),
                         paint ? *paint : flutter::DlPaint());
 }
 
 SKWASM_EXPORT void canvas_drawDRRect(flutter::DisplayListBuilder* canvas,
-                                     const SkScalar* outerRrectValues,
-                                     const SkScalar* innerRrectValues,
+                                     const SkScalar* outer_rrect_values,
+                                     const SkScalar* inner_rrect_values,
                                      flutter::DlPaint* paint) {
-  canvas->DrawDiffRoundRect(Skwasm::createDlRRect(outerRrectValues),
-                            Skwasm::createDlRRect(innerRrectValues),
+  canvas->DrawDiffRoundRect(Skwasm::createDlRRect(outer_rrect_values),
+                            Skwasm::createDlRRect(inner_rrect_values),
                             paint ? *paint : flutter::DlPaint());
 }
 
@@ -264,11 +265,11 @@ SKWASM_EXPORT void canvas_drawCircle(flutter::DisplayListBuilder* canvas,
 
 SKWASM_EXPORT void canvas_drawArc(flutter::DisplayListBuilder* canvas,
                                   const flutter::DlRect* rect,
-                                  flutter::DlScalar startAngleDegrees,
-                                  flutter::DlScalar sweepAngleDegrees,
-                                  bool useCenter,
+                                  flutter::DlScalar start_angle_degrees,
+                                  flutter::DlScalar sweep_angle_degrees,
+                                  bool use_center,
                                   flutter::DlPaint* paint) {
-  canvas->DrawArc(*rect, startAngleDegrees, sweepAngleDegrees, useCenter,
+  canvas->DrawArc(*rect, start_angle_degrees, sweep_angle_degrees, use_center,
                   paint ? *paint : flutter::DlPaint());
 }
 
@@ -282,11 +283,11 @@ SKWASM_EXPORT void canvas_drawPath(flutter::DisplayListBuilder* canvas,
 SKWASM_EXPORT void canvas_drawShadow(flutter::DisplayListBuilder* canvas,
                                      SkPathBuilder* path,
                                      flutter::DlScalar elevation,
-                                     flutter::DlScalar devicePixelRatio,
+                                     flutter::DlScalar device_pixel_ratio,
                                      uint32_t color,
-                                     bool transparentOccluder) {
+                                     bool transparent_occluder) {
   canvas->DrawShadow(flutter::DlPath(path->snapshot()), flutter::DlColor(color),
-                     elevation, transparentOccluder, devicePixelRatio);
+                     elevation, transparent_occluder, device_pixel_ratio);
 }
 
 SKWASM_EXPORT void canvas_drawParagraph(flutter::DisplayListBuilder* canvas,
@@ -304,32 +305,32 @@ SKWASM_EXPORT void canvas_drawPicture(flutter::DisplayListBuilder* canvas,
 
 SKWASM_EXPORT void canvas_drawImage(flutter::DisplayListBuilder* canvas,
                                     flutter::DlImage* image,
-                                    flutter::DlScalar offsetX,
-                                    flutter::DlScalar offsetY,
+                                    flutter::DlScalar offset_x,
+                                    flutter::DlScalar offset_y,
                                     flutter::DlPaint* paint,
                                     Skwasm::FilterQuality quality) {
-  canvas->DrawImage(sk_ref_sp(image), flutter::DlPoint{offsetX, offsetY},
+  canvas->DrawImage(sk_ref_sp(image), flutter::DlPoint{offset_x, offset_y},
                     Skwasm::samplingOptionsForQuality(quality), paint);
 }
 
 SKWASM_EXPORT void canvas_drawImageRect(flutter::DisplayListBuilder* canvas,
                                         flutter::DlImage* image,
-                                        flutter::DlRect* sourceRect,
-                                        flutter::DlRect* destRect,
+                                        flutter::DlRect* source_rect,
+                                        flutter::DlRect* dest_rect,
                                         flutter::DlPaint* paint,
                                         Skwasm::FilterQuality quality) {
-  canvas->DrawImageRect(sk_ref_sp(image), *sourceRect, *destRect,
+  canvas->DrawImageRect(sk_ref_sp(image), *source_rect, *dest_rect,
                         Skwasm::samplingOptionsForQuality(quality), paint,
                         flutter::DlSrcRectConstraint::kStrict);
 }
 
 SKWASM_EXPORT void canvas_drawImageNine(flutter::DisplayListBuilder* canvas,
                                         flutter::DlImage* image,
-                                        flutter::DlIRect* centerRect,
-                                        flutter::DlRect* destinationRect,
+                                        flutter::DlIRect* center_rect,
+                                        flutter::DlRect* destination_rect,
                                         flutter::DlPaint* paint,
                                         Skwasm::FilterQuality quality) {
-  canvas->DrawImageNine(sk_ref_sp(image), *centerRect, *destinationRect,
+  canvas->DrawImageNine(sk_ref_sp(image), *center_rect, *destination_rect,
                         filterModeForQuality(quality), paint);
 }
 
@@ -345,9 +346,9 @@ SKWASM_EXPORT void canvas_drawVertices(
 SKWASM_EXPORT void canvas_drawPoints(flutter::DisplayListBuilder* canvas,
                                      flutter::DlPointMode mode,
                                      flutter::DlPoint* points,
-                                     int pointCount,
+                                     int point_count,
                                      flutter::DlPaint* paint) {
-  canvas->DrawPoints(mode, pointCount, points,
+  canvas->DrawPoints(mode, point_count, points,
                      paint ? *paint : flutter::DlPaint());
 }
 
@@ -356,35 +357,35 @@ SKWASM_EXPORT void canvas_drawAtlas(flutter::DisplayListBuilder* canvas,
                                     flutter::DlRSTransform* transforms,
                                     flutter::DlRect* rects,
                                     uint32_t* colors,
-                                    int spriteCount,
+                                    int sprite_count,
                                     flutter::DlBlendMode mode,
-                                    flutter::DlRect* cullRect,
+                                    flutter::DlRect* cull_rect,
                                     flutter::DlPaint* paint) {
-  std::vector<flutter::DlColor> dl_colors(spriteCount);
-  for (int i = 0; i < spriteCount; i++) {
+  std::vector<flutter::DlColor> dl_colors(sprite_count);
+  for (int i = 0; i < sprite_count; i++) {
     dl_colors[i] = flutter::DlColor(colors[i]);
   }
   canvas->DrawAtlas(
-      sk_ref_sp(atlas), transforms, rects, dl_colors.data(), spriteCount, mode,
+      sk_ref_sp(atlas), transforms, rects, dl_colors.data(), sprite_count, mode,
       Skwasm::samplingOptionsForQuality(Skwasm::FilterQuality::medium),
-      cullRect, paint);
+      cull_rect, paint);
 }
 
 SKWASM_EXPORT void canvas_getTransform(flutter::DisplayListBuilder* canvas,
-                                       flutter::DlMatrix* outTransform) {
-  *outTransform = canvas->GetMatrix();
+                                       flutter::DlMatrix* out_transform) {
+  *out_transform = canvas->GetMatrix();
 }
 
 SKWASM_EXPORT void canvas_getLocalClipBounds(
     flutter::DisplayListBuilder* canvas,
-    flutter::DlRect* outRect) {
-  *outRect = canvas->GetLocalClipCoverage();
+    flutter::DlRect* out_rect) {
+  *out_rect = canvas->GetLocalClipCoverage();
 }
 
 SKWASM_EXPORT void canvas_getDeviceClipBounds(
     flutter::DisplayListBuilder* canvas,
-    flutter::DlIRect* outRect) {
-  *outRect = flutter::DlIRect::RoundOut(canvas->GetDestinationClipCoverage());
+    flutter::DlIRect* out_rect) {
+  *out_rect = flutter::DlIRect::RoundOut(canvas->GetDestinationClipCoverage());
 }
 
 SKWASM_EXPORT bool canvas_quickReject(flutter::DisplayListBuilder* canvas,

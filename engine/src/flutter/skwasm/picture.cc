@@ -14,9 +14,10 @@ class PictureRecorder {
  public:
   PictureRecorder() {};
 
-  flutter::DisplayListBuilder* BeginRecording(const flutter::DlRect& cullRect) {
+  flutter::DisplayListBuilder* BeginRecording(
+      const flutter::DlRect& cull_rect) {
     assert(!builder_);
-    builder_ = std::make_unique<flutter::DisplayListBuilder>(cullRect);
+    builder_ = std::make_unique<flutter::DisplayListBuilder>(cull_rect);
     return builder_.get();
   }
 
@@ -40,8 +41,8 @@ SKWASM_EXPORT void pictureRecorder_dispose(PictureRecorder* recorder) {
 
 SKWASM_EXPORT flutter::DisplayListBuilder* pictureRecorder_beginRecording(
     PictureRecorder* recorder,
-    const flutter::DlRect* cullRect) {
-  return recorder->BeginRecording(*cullRect);
+    const flutter::DlRect* cull_rect) {
+  return recorder->BeginRecording(*cull_rect);
 }
 
 SKWASM_EXPORT flutter::DisplayList* pictureRecorder_endRecording(
@@ -51,8 +52,8 @@ SKWASM_EXPORT flutter::DisplayList* pictureRecorder_endRecording(
 }
 
 SKWASM_EXPORT void picture_getCullRect(flutter::DisplayList* picture,
-                                       flutter::DlRect* outRect) {
-  *outRect = picture->GetBounds();
+                                       flutter::DlRect* out_rect) {
+  *out_rect = picture->GetBounds();
 }
 
 SKWASM_EXPORT void picture_ref(flutter::DisplayList* picture) {

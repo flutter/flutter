@@ -27,8 +27,8 @@ std::unique_ptr<SkCodec> getCodecForData(SkData* data) {
 }  // namespace
 
 SKWASM_EXPORT SkAnimatedImage* animatedImage_create(SkData* data,
-                                                    int targetWidth,
-                                                    int targetHeight) {
+                                                    int target_width,
+                                                    int target_height) {
   Skwasm::live_animated_image_count++;
   auto codec = getCodecForData(data);
   if (!codec) {
@@ -42,14 +42,14 @@ SKWASM_EXPORT SkAnimatedImage* animatedImage_create(SkData* data,
     return nullptr;
   }
 
-  if (targetWidth == 0 || targetHeight == 0) {
+  if (target_width == 0 || target_height == 0) {
     return SkAnimatedImage::Make(std::move(android_codec)).release();
   }
 
   return SkAnimatedImage::Make(
              std::move(android_codec),
-             SkImageInfo::MakeUnknown(targetWidth, targetHeight),
-             SkIRect::MakeWH(targetWidth, targetHeight), nullptr)
+             SkImageInfo::MakeUnknown(target_width, target_height),
+             SkIRect::MakeWH(target_width, target_height), nullptr)
       .release();
 }
 

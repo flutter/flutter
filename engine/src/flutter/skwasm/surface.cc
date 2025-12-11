@@ -74,16 +74,16 @@ uint32_t Skwasm::Surface::RasterizeImage(flutter::DlImage* image,
 
 std::unique_ptr<Skwasm::TextureSourceWrapper>
 Skwasm::Surface::CreateTextureSourceWrapper(
-    Skwasm::SkwasmObject textureSource) {
+    Skwasm::SkwasmObject texture_source) {
   return std::unique_ptr<Skwasm::TextureSourceWrapper>(
-      new Skwasm::TextureSourceWrapper(thread_, textureSource));
+      new Skwasm::TextureSourceWrapper(thread_, texture_source));
 }
 
 // Main thread only
 void Skwasm::Surface::SetCallbackHandler(
-    Skwasm::Surface::CallbackHandler* callbackHandler) {
+    Skwasm::Surface::CallbackHandler* callback_handler) {
   assert(emscripten_is_main_browser_thread());
-  callback_handler_ = callbackHandler;
+  callback_handler_ = callback_handler;
 }
 
 // Worker thread only
@@ -138,9 +138,9 @@ void Skwasm::Surface::RenderPicturesOnWorker(
     sk_sp<flutter::DisplayList>* pictures,
     int width,
     int height,
-    int pictureCount,
+    int picture_count,
     uint32_t callback_id,
-    double rasterStart) {
+    double raster_start) {
   if (!is_initialized_) {
     Init();
   }
@@ -148,7 +148,7 @@ void Skwasm::Surface::RenderPicturesOnWorker(
   // This is initialized on the first call to `skwasm_captureImageBitmap` and
   // then populated with more bitmaps on subsequent calls.
   Skwasm::SkwasmObject image_bitmap_array = __builtin_wasm_ref_null_extern();
-  for (int i = 0; i < pictureCount; i++) {
+  for (int i = 0; i < picture_count; i++) {
     sk_sp<flutter::DisplayList> picture = pictures[i];
     ResizeSurface(width, height);
     Skwasm::makeCurrent(gl_context_);
@@ -158,7 +158,7 @@ void Skwasm::Surface::RenderPicturesOnWorker(
     image_bitmap_array =
         skwasm_captureImageBitmap(gl_context_, image_bitmap_array);
   }
-  skwasm_resolveAndPostImages(this, image_bitmap_array, rasterStart,
+  skwasm_resolveAndPostImages(this, image_bitmap_array, raster_start,
                               callback_id);
 }
 
@@ -209,16 +209,16 @@ void Skwasm::Surface::OnRasterizeComplete(uint32_t callback_id, SkData* data) {
 
 // Main thread only
 void Skwasm::Surface::OnRenderComplete(uint32_t callback_id,
-                                       Skwasm::SkwasmObject imageBitmap) {
+                                       Skwasm::SkwasmObject image_bitmap) {
   assert(emscripten_is_main_browser_thread());
-  callback_handler_(callback_id, nullptr, imageBitmap);
+  callback_handler_(callback_id, nullptr, image_bitmap);
 }
 
 Skwasm::TextureSourceWrapper::TextureSourceWrapper(
-    unsigned long threadId,
-    Skwasm::SkwasmObject textureSource)
-    : raster_thread_id_(threadId) {
-  skwasm_setAssociatedObjectOnThread(raster_thread_id_, this, textureSource);
+    unsigned long thread_id,
+    Skwasm::SkwasmObject texture_source)
+    : raster_thread_id_(thread_id) {
+  skwasm_setAssociatedObjectOnThread(raster_thread_id_, this, texture_source);
 }
 
 Skwasm::TextureSourceWrapper::~TextureSourceWrapper() {
@@ -240,8 +240,8 @@ SKWASM_EXPORT unsigned long surface_getThreadId(Skwasm::Surface* surface) {
 
 SKWASM_EXPORT void surface_setCallbackHandler(
     Skwasm::Surface* surface,
-    Skwasm::Surface::CallbackHandler* callbackHandler) {
-  surface->SetCallbackHandler(callbackHandler);
+    Skwasm::Surface::CallbackHandler* callback_handler) {
+  surface->SetCallbackHandler(callback_handler);
 }
 
 SKWASM_EXPORT void surface_destroy(Skwasm::Surface* surface) {
@@ -273,14 +273,14 @@ SKWASM_EXPORT void surface_renderPicturesOnWorker(
     sk_sp<flutter::DisplayList>* pictures,
     int width,
     int height,
-    int pictureCount,
-    uint32_t callbackId,
-    double rasterStart) {
+    int picture_count,
+    uint32_t callback_id,
+    double raster_start) {
   // This will release the pictures when they leave scope.
   std::unique_ptr<sk_sp<flutter::DisplayList>[]> pictures_pointer =
       std::unique_ptr<sk_sp<flutter::DisplayList>[]>(pictures);
-  surface->RenderPicturesOnWorker(pictures, width, height, pictureCount,
-                                  callbackId, rasterStart);
+  surface->RenderPicturesOnWorker(pictures, width, height, picture_count,
+                                  callback_id, raster_start);
 }
 
 SKWASM_EXPORT uint32_t surface_rasterizeImage(Skwasm::Surface* surface,
@@ -293,22 +293,22 @@ SKWASM_EXPORT void surface_rasterizeImageOnWorker(
     Skwasm::Surface* surface,
     flutter::DlImage* image,
     Skwasm::ImageByteFormat format,
-    uint32_t callbackId) {
-  surface->RasterizeImageOnWorker(image, format, callbackId);
+    uint32_t callback_id) {
+  surface->RasterizeImageOnWorker(image, format, callback_id);
 }
 
 // This is used by the skwasm JS support code to call back into C++ when the
 // we finish creating the image bitmap, which is an asynchronous operation.
 SKWASM_EXPORT void surface_onRenderComplete(Skwasm::Surface* surface,
-                                            uint32_t callbackId,
-                                            Skwasm::SkwasmObject imageBitmap) {
-  surface->OnRenderComplete(callbackId, imageBitmap);
+                                            uint32_t callback_id,
+                                            Skwasm::SkwasmObject image_bitmap) {
+  surface->OnRenderComplete(callback_id, image_bitmap);
 }
 
 SKWASM_EXPORT void surface_onRasterizeComplete(Skwasm::Surface* surface,
                                                SkData* data,
-                                               uint32_t callbackId) {
-  surface->OnRasterizeComplete(callbackId, data);
+                                               uint32_t callback_id) {
+  surface->OnRasterizeComplete(callback_id, data);
 }
 
 SKWASM_EXPORT bool skwasm_isMultiThreaded() {

@@ -26,8 +26,8 @@ SKWASM_EXPORT SkPathBuilder* path_copy(SkPathBuilder* path) {
 }
 
 SKWASM_EXPORT void path_setFillType(SkPathBuilder* path,
-                                    SkPathFillType fillType) {
-  path->setFillType(fillType);
+                                    SkPathFillType fill_type) {
+  path->setFillType(fill_type);
 }
 
 SKWASM_EXPORT SkPathFillType path_getFillType(SkPathBuilder* path) {
@@ -110,32 +110,32 @@ SKWASM_EXPORT void path_relativeConicTo(SkPathBuilder* path,
 
 SKWASM_EXPORT void path_arcToOval(SkPathBuilder* path,
                                   const SkRect* rect,
-                                  SkScalar startAngle,
-                                  SkScalar sweepAngle,
-                                  bool forceMoveTo) {
-  path->arcTo(*rect, startAngle, sweepAngle, forceMoveTo);
+                                  SkScalar start_angle,
+                                  SkScalar sweep_angle,
+                                  bool force_move_to) {
+  path->arcTo(*rect, start_angle, sweep_angle, force_move_to);
 }
 
 SKWASM_EXPORT void path_arcToRotated(SkPathBuilder* path,
                                      SkScalar rx,
                                      SkScalar ry,
-                                     SkScalar xAxisRotate,
-                                     SkPathBuilder::ArcSize arcSize,
-                                     SkPathDirection pathDirection,
+                                     SkScalar x_axis_rotate,
+                                     SkPathBuilder::ArcSize arc_size,
+                                     SkPathDirection path_direction,
                                      SkScalar x,
                                      SkScalar y) {
-  path->arcTo({rx, ry}, xAxisRotate, arcSize, pathDirection, {x, y});
+  path->arcTo({rx, ry}, x_axis_rotate, arc_size, path_direction, {x, y});
 }
 
 SKWASM_EXPORT void path_relativeArcToRotated(SkPathBuilder* path,
                                              SkScalar rx,
                                              SkScalar ry,
-                                             SkScalar xAxisRotate,
-                                             SkPathBuilder::ArcSize arcSize,
-                                             SkPathDirection pathDirection,
+                                             SkScalar x_axis_rotate,
+                                             SkPathBuilder::ArcSize arc_size,
+                                             SkPathDirection path_direction,
                                              SkScalar x,
                                              SkScalar y) {
-  path->rArcTo({rx, ry}, xAxisRotate, arcSize, pathDirection, {x, y});
+  path->rArcTo({rx, ry}, x_axis_rotate, arc_size, path_direction, {x, y});
 }
 
 SKWASM_EXPORT void path_addRect(SkPathBuilder* path, const SkRect* rect) {
@@ -148,9 +148,9 @@ SKWASM_EXPORT void path_addOval(SkPathBuilder* path, const SkRect* oval) {
 
 SKWASM_EXPORT void path_addArc(SkPathBuilder* path,
                                const SkRect* oval,
-                               SkScalar startAngle,
-                               SkScalar sweepAngle) {
-  path->addArc(*oval, startAngle, sweepAngle);
+                               SkScalar start_angle,
+                               SkScalar sweep_angle) {
+  path->addArc(*oval, start_angle, sweep_angle);
 }
 
 SKWASM_EXPORT void path_addPolygon(SkPathBuilder* path,
@@ -161,16 +161,16 @@ SKWASM_EXPORT void path_addPolygon(SkPathBuilder* path,
 }
 
 SKWASM_EXPORT void path_addRRect(SkPathBuilder* path,
-                                 const SkScalar* rrectValues) {
-  path->addRRect(Skwasm::createSkRRect(rrectValues), SkPathDirection::kCW);
+                                 const SkScalar* rrect_values) {
+  path->addRRect(Skwasm::createSkRRect(rrect_values), SkPathDirection::kCW);
 }
 
 SKWASM_EXPORT void path_addPath(SkPathBuilder* path,
                                 const SkPathBuilder* other,
-                                const SkScalar* matrix33,
-                                SkPath::AddPathMode extendPath) {
-  path->addPath(other->snapshot(), Skwasm::createSkMatrix(matrix33),
-                extendPath);
+                                const SkScalar* matrix_33,
+                                SkPath::AddPathMode extend_path) {
+  path->addPath(other->snapshot(), Skwasm::createSkMatrix(matrix_33),
+                extend_path);
 }
 
 SKWASM_EXPORT void path_close(SkPathBuilder* path) {
@@ -186,8 +186,8 @@ SKWASM_EXPORT bool path_contains(SkPathBuilder* path, SkScalar x, SkScalar y) {
 }
 
 SKWASM_EXPORT void path_transform(SkPathBuilder* path,
-                                  const SkScalar* matrix33) {
-  path->transform(Skwasm::createSkMatrix(matrix33));
+                                  const SkScalar* matrix_33) {
+  path->transform(Skwasm::createSkMatrix(matrix_33));
 }
 
 SKWASM_EXPORT void path_getBounds(SkPathBuilder* path, SkRect* rect) {

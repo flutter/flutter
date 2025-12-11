@@ -9,8 +9,8 @@
 #include "third_party/skia/include/core/SkData.h"
 
 SKWASM_EXPORT void* animatedImage_create(SkData* data,
-                                         int targetWidth,
-                                         int targetHeight) {
+                                         int target_width,
+                                         int target_height) {
   emscripten_console_warn(
       "Animated image not implemented in non-heavy skwasm build.");
   return nullptr;

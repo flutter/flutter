@@ -11,10 +11,10 @@
 
 SKWASM_EXPORT SkContourMeasureIter* contourMeasureIter_create(
     SkPathBuilder* path,
-    bool forceClosed,
-    SkScalar resScale) {
+    bool force_closed,
+    SkScalar res_scale) {
   Skwasm::live_contour_measure_iter_count++;
-  return new SkContourMeasureIter(path->snapshot(), forceClosed, resScale);
+  return new SkContourMeasureIter(path->snapshot(), force_closed, res_scale);
 }
 
 SKWASM_EXPORT SkContourMeasure* contourMeasureIter_next(
@@ -47,18 +47,18 @@ SKWASM_EXPORT bool contourMeasure_isClosed(SkContourMeasure* measure) {
 
 SKWASM_EXPORT bool contourMeasure_getPosTan(SkContourMeasure* measure,
                                             SkScalar distance,
-                                            SkPoint* outPosition,
-                                            SkVector* outTangent) {
-  return measure->getPosTan(distance, outPosition, outTangent);
+                                            SkPoint* out_position,
+                                            SkVector* out_tangent) {
+  return measure->getPosTan(distance, out_position, out_tangent);
 }
 
 SKWASM_EXPORT SkPathBuilder* contourMeasure_getSegment(
     SkContourMeasure* measure,
-    SkScalar startD,
-    SkScalar stopD,
-    bool startWithMoveTo) {
+    SkScalar start_d,
+    SkScalar stop_d,
+    bool start_with_move_to) {
   SkPathBuilder* out_path = new SkPathBuilder();
-  if (!measure->getSegment(startD, stopD, out_path, startWithMoveTo)) {
+  if (!measure->getSegment(start_d, stop_d, out_path, start_with_move_to)) {
     delete out_path;
     return nullptr;
   }
