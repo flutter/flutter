@@ -110,11 +110,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
     std::unordered_map<std::string, FlutterPlatformViewGestureRecognizersBlockingPolicy>&
         gestureRecognizersBlockingPoliciesByType;
 
-// The FlutterPlatformViewGestureRecognizersBlockingPolicy for each instance of platform view.
-@property(nonatomic, readonly)
-    std::unordered_map<int64_t, FlutterPlatformViewGestureRecognizersBlockingPolicy>&
-        gestureRecognizersBlockingPoliciesByViewId;
-
 /// The size of the current onscreen surface in physical pixels.
 @property(nonatomic, assign) DlISize frameSize;
 
@@ -249,8 +244,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   std::unordered_map<std::string, NSObject<FlutterPlatformViewFactory>*> _factories;
   std::unordered_map<std::string, FlutterPlatformViewGestureRecognizersBlockingPolicy>
       _gestureRecognizersBlockingPoliciesByType;
-  std::unordered_map<int64_t, FlutterPlatformViewGestureRecognizersBlockingPolicy>
-      _gestureRecognizersBlockingPoliciesByViewId;
   fml::RefPtr<fml::TaskRunner> _platformTaskRunner;
   std::unordered_map<int64_t, PlatformViewData> _platformViews;
   std::unordered_map<int64_t, flutter::EmbeddedViewParams> _currentCompositionParams;
@@ -1029,11 +1022,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 - (std::unordered_map<std::string, FlutterPlatformViewGestureRecognizersBlockingPolicy>&)
     gestureRecognizersBlockingPoliciesByType {
   return _gestureRecognizersBlockingPoliciesByType;
-}
-
-- (std::unordered_map<int64_t, FlutterPlatformViewGestureRecognizersBlockingPolicy>&)
-    gestureRecognizersBlockingPoliciesByViewId {
-  return _gestureRecognizersBlockingPoliciesByViewId;
 }
 
 - (std::unordered_map<int64_t, PlatformViewData>&)platformViews {
