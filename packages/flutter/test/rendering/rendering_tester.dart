@@ -71,7 +71,7 @@ class TestRenderingFlutterBinding extends BindingBase
   ///
   /// Called automatically when the binding is created.
   RenderView initRenderView(FlutterView view) {
-    final RenderView renderView = RenderView(view: view);
+    final renderView = RenderView(view: view);
     rootPipelineOwner.rootNode = renderView;
     addRenderView(renderView);
     renderView.prepareInitialFrame();
@@ -347,6 +347,9 @@ class FakeTickerProvider implements TickerProvider {
 class FakeTicker implements Ticker {
   @override
   bool muted = false;
+
+  @override
+  bool forceFrames = false;
 
   @override
   void absorbTicker(Ticker originalTicker) {}

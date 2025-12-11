@@ -5,6 +5,7 @@
 package io.flutter.embedding.engine.image;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 import io.flutter.Build;
@@ -20,7 +21,7 @@ class Metadata {
   int width;
   int height;
   int rotation;
-  String mimeType;
+  @Nullable String mimeType;
   int orientation;
   int originalHeight;
   int originalWidth;
@@ -31,7 +32,7 @@ class Metadata {
   static Metadata create(
       @NonNull ByteBuffer buffer, @NonNull FlutterImageDecoder.HeaderListener headerListener) {
     Metadata metadata = new Metadata();
-    byte[] bytes = new ImageUtils().getBytes(buffer);
+    byte[] bytes = ImageUtils.getBytes(buffer);
     // Use bitmap decode to get the mimetype and original dimensions.
     BitmapMetadataReader.read(bytes, metadata);
     // For non-heif images, we'll let the default implementation ImageDecoder handle the rest.
@@ -52,6 +53,6 @@ class Metadata {
    * @return True if the image is HEIF, false otherwise.
    */
   boolean isHeif() {
-    return mimeType.equals("image/heif");
+    return "image/heif".equals(mimeType);
   }
 }

@@ -5,9 +5,12 @@
 #ifndef FLUTTER_IMPELLER_ENTITY_CONTENTS_PIPELINES_H_
 #define FLUTTER_IMPELLER_ENTITY_CONTENTS_PIPELINES_H_
 
+#include "flutter/fml/build_config.h"
 #include "impeller/entity/advanced_blend.frag.h"
 #include "impeller/entity/advanced_blend.vert.h"
 #include "impeller/entity/border_mask_blur.frag.h"
+#include "impeller/entity/circle.frag.h"
+#include "impeller/entity/circle.vert.h"
 #include "impeller/entity/clip.frag.h"
 #include "impeller/entity/clip.vert.h"
 #include "impeller/entity/color_matrix_color_filter.frag.h"
@@ -99,6 +102,7 @@ using BlendSaturationPipeline = AdvancedBlendPipelineHandle;
 using BlendScreenPipeline = AdvancedBlendPipelineHandle;
 using BlendSoftLightPipeline = AdvancedBlendPipelineHandle;
 using BorderMaskBlurPipeline = RenderPipelineHandle<FilterPositionUvVertexShader, BorderMaskBlurFragmentShader>;
+using CirclePipeline = RenderPipelineHandle<CircleVertexShader, CircleFragmentShader>;
 using ClipPipeline = RenderPipelineHandle<ClipVertexShader, ClipFragmentShader>;
 using ColorMatrixColorFilterPipeline = RenderPipelineHandle<FilterPositionUvVertexShader, ColorMatrixColorFilterFragmentShader>;
 using ConicalGradientFillConicalPipeline = GradientPipelineHandle<ConicalGradientFillConicalFragmentShader>;
@@ -155,12 +159,17 @@ using YUVToRGBFilterPipeline = RenderPipelineHandle<FilterPositionVertexShader, 
 // clang-format on
 
 #ifdef IMPELLER_ENABLE_OPENGLES
+
+// Web doesn't support external texture OpenGL extensions
+#if !defined(FML_OS_EMSCRIPTEN)
 using TiledTextureExternalPipeline =
     RenderPipelineHandle<TextureFillVertexShader,
                          TiledTextureFillExternalFragmentShader>;
 using TiledTextureUvExternalPipeline =
     RenderPipelineHandle<TextureUvFillVertexShader,
                          TiledTextureFillExternalFragmentShader>;
+#endif
+
 using TextureDownsampleGlesPipeline =
     RenderPipelineHandle<TextureFillVertexShader,
                          TextureDownsampleGlesFragmentShader>;

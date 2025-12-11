@@ -16,7 +16,7 @@ void main() {
     });
 
     test('disconnect closes peer', () async {
-      final FakeVmService service = FakeVmService();
+      final service = FakeVmService();
       Future<vms.VmService> fakeServiceFunction(Uri uri, {Duration? timeout}) {
         return Future<vms.VmService>(() => service);
       }
@@ -41,7 +41,7 @@ void main() {
     });
 
     test('basic flutter view parsing', () async {
-      final Map<String, dynamic> flutterViewCannedResponses = <String, dynamic>{
+      final flutterViewCannedResponses = <String, dynamic>{
         'views': <Map<String, dynamic>>[
           <String, dynamic>{'type': 'FlutterView', 'id': 'flutterView0'},
           <String, dynamic>{
@@ -91,7 +91,7 @@ void main() {
     });
 
     test('basic flutter view parsing with casting checks', () async {
-      final Map<String, dynamic> flutterViewCannedResponses = <String, dynamic>{
+      final flutterViewCannedResponses = <String, dynamic>{
         'views': <dynamic>[
           <String, dynamic>{'type': 'FlutterView', 'id': 'flutterView0'},
           <String, dynamic>{
@@ -141,7 +141,7 @@ void main() {
     });
 
     test('invalid flutter view missing ID', () async {
-      final Map<String, dynamic> flutterViewCannedResponseMissingId = <String, dynamic>{
+      final flutterViewCannedResponseMissingId = <String, dynamic>{
         'views': <Map<String, dynamic>>[
           // Valid flutter view.
           <String, dynamic>{
@@ -178,7 +178,7 @@ void main() {
     });
 
     test('get isolates by pattern', () async {
-      final List<vms.IsolateRef> isolates = <vms.IsolateRef>[
+      final isolates = <vms.IsolateRef>[
         vms.IsolateRef.parse(<String, dynamic>{
           'type': '@Isolate',
           'fixedId': 'true',
@@ -226,7 +226,7 @@ void main() {
     });
 
     test('invalid flutter view missing ID', () async {
-      final Map<String, dynamic> flutterViewCannedResponseMissingIsolateName = <String, dynamic>{
+      final flutterViewCannedResponseMissingIsolateName = <String, dynamic>{
         'views': <Map<String, dynamic>>[
           // Missing isolate name.
           <String, dynamic>{

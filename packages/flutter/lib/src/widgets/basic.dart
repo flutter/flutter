@@ -9,7 +9,9 @@
 library;
 
 import 'dart:math' as math;
-import 'dart:ui' as ui show Image, ImageFilter, SemanticsInputType, TextHeightBehavior;
+import 'dart:ui'
+    as ui
+    show Image, ImageFilter, SemanticsHitTestBehavior, SemanticsInputType, TextHeightBehavior;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -529,7 +531,7 @@ class BackdropGroup extends InheritedWidget {
 ///                sigmaY: 40,
 ///              ),
 ///              child: Container(
-///                color: Colors.black.withOpacity(0.2),
+///                color: Colors.black.withValues(alpha: 0.2),
 ///                height: 200,
 ///                child: const Text('Blur item'),
 ///              ),
@@ -1709,7 +1711,7 @@ class Transform extends SingleChildRenderObjectWidget {
   }
 
   static Matrix4 _createZRotation(double sin, double cos) {
-    final Matrix4 result = Matrix4.zero();
+    final result = Matrix4.zero();
     result.storage[0] = cos;
     result.storage[1] = sin;
     result.storage[4] = -sin;
@@ -2548,8 +2550,7 @@ class LayoutId extends ParentDataWidget<MultiChildLayoutParentData> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is MultiChildLayoutParentData);
-    final MultiChildLayoutParentData parentData =
-        renderObject.parentData! as MultiChildLayoutParentData;
+    final parentData = renderObject.parentData! as MultiChildLayoutParentData;
     if (parentData.id != id) {
       parentData.id = id;
       renderObject.parent?.markNeedsLayout();
@@ -3991,6 +3992,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required bool? readOnly,
     required bool? focusable,
     required bool? focused,
+    required AccessiblityFocusBlockType? accessiblityFocusBlockType,
     required bool? inMutuallyExclusiveGroup,
     required bool? obscured,
     required bool? multiline,
@@ -4005,7 +4007,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required int? currentValueLength,
     required String? identifier,
     required Object? traversalParentIdentifier,
-    required Set<Object>? traversalChildIdentifier,
+    required Object? traversalChildIdentifier,
     required String? label,
     required AttributedString? attributedLabel,
     required String? value,
@@ -4047,6 +4049,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required SemanticsRole? role,
     required Set<String>? controlsNodes,
     required SemanticsValidationResult validationResult,
+    required ui.SemanticsHitTestBehavior? hitTestBehavior,
     required ui.SemanticsInputType? inputType,
     required Locale? localeForSubtree,
   }) : this.fromProperties(
@@ -4075,6 +4078,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
            readOnly: readOnly,
            focusable: focusable,
            focused: focused,
+           accessiblityFocusBlockType: accessiblityFocusBlockType,
            inMutuallyExclusiveGroup: inMutuallyExclusiveGroup,
            obscured: obscured,
            multiline: multiline,
@@ -4131,6 +4135,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
            role: role,
            controlsNodes: controlsNodes,
            validationResult: validationResult,
+           hitTestBehavior: hitTestBehavior,
            inputType: inputType,
          ),
        );
@@ -4149,11 +4154,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required this.blockUserActions,
     required this.localeForSubtree,
     required this.properties,
-  }) : assert(
-         localeForSubtree == null || container,
-         'To assign locale for subtree, this widget needs to be a '
-         'container',
-       );
+  });
 
   /// Contains properties used by assistive technologies to make the application
   /// more accessible.
@@ -4323,6 +4324,7 @@ class SliverSemantics extends _SemanticsBase {
     super.readOnly,
     super.focusable,
     super.focused,
+    super.accessiblityFocusBlockType,
     super.inMutuallyExclusiveGroup,
     super.obscured,
     super.multiline,
@@ -4379,6 +4381,7 @@ class SliverSemantics extends _SemanticsBase {
     super.role,
     super.controlsNodes,
     super.validationResult = SemanticsValidationResult.none,
+    super.hitTestBehavior,
     super.inputType,
     super.localeForSubtree,
   }) : super(child: sliver);
@@ -4815,7 +4818,7 @@ class IndexedStack extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> wrappedChildren = List<Widget>.generate(children.length, (int i) {
+    final wrappedChildren = List<Widget>.generate(children.length, (int i) {
       return Visibility(
         visible: i == index,
         maintainInteractivity: true,
@@ -5100,8 +5103,8 @@ class Positioned extends ParentDataWidget<StackParentData> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is StackParentData);
-    final StackParentData parentData = renderObject.parentData! as StackParentData;
-    bool needsLayout = false;
+    final parentData = renderObject.parentData! as StackParentData;
+    var needsLayout = false;
 
     if (parentData.left != left) {
       parentData.left = left;
@@ -5998,8 +6001,8 @@ class Flexible extends ParentDataWidget<FlexParentData> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is FlexParentData);
-    final FlexParentData parentData = renderObject.parentData! as FlexParentData;
-    bool needsLayout = false;
+    final parentData = renderObject.parentData! as FlexParentData;
+    var needsLayout = false;
 
     if (parentData.flex != flex) {
       parentData.flex = flex;
@@ -6455,7 +6458,11 @@ class Flow extends MultiChildRenderObjectWidget {
 ///
 /// Text displayed in a [RichText] widget must be explicitly styled. When
 /// picking which style to use, consider using [DefaultTextStyle.of] the current
-/// [BuildContext] to provide defaults. For more details on how to style text in
+/// [BuildContext] to provide defaults. [MediaQuery.maybeBoldTextOf],
+/// [MediaQuery.maybeLineHeightScaleFactorOverrideOf],
+/// [MediaQuery.maybeLetterSpacingOverrideOf], [MediaQuery.maybeWordSpacingOverrideOf],
+/// and [MediaQuery.maybeParagraphSpacingOverrideOf] can also be used to ensure the styling
+/// for your text is accessible. For more details on how to style text in
 /// a [RichText] widget, see the documentation for [TextStyle].
 ///
 /// Consider using the [Text] widget to integrate with the [DefaultTextStyle]
@@ -7265,7 +7272,7 @@ class Listener extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final List<String> listeners = <String>[
+    final listeners = <String>[
       if (onPointerDown != null) 'down',
       if (onPointerMove != null) 'move',
       if (onPointerUp != null) 'up',
@@ -7503,7 +7510,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final List<String> listeners = <String>[
+    final listeners = <String>[
       if (onEnter != null) 'enter',
       if (onExit != null) 'exit',
       if (onHover != null) 'hover',
@@ -7900,6 +7907,7 @@ class Semantics extends _SemanticsBase {
     super.readOnly,
     super.focusable,
     super.focused,
+    super.accessiblityFocusBlockType,
     super.inMutuallyExclusiveGroup,
     super.obscured,
     super.multiline,
@@ -7956,6 +7964,7 @@ class Semantics extends _SemanticsBase {
     super.role,
     super.controlsNodes,
     super.validationResult = SemanticsValidationResult.none,
+    super.hitTestBehavior,
     super.inputType,
     super.localeForSubtree,
   });
@@ -8207,7 +8216,7 @@ class KeyedSubtree extends StatelessWidget {
       return items;
     }
 
-    final List<Widget> itemsWithUniqueKeys = <Widget>[
+    final itemsWithUniqueKeys = <Widget>[
       for (final (int i, Widget item) in items.indexed) KeyedSubtree.wrap(item, baseIndex + i),
     ];
 
@@ -8343,6 +8352,8 @@ typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSette
 /// This example shows using an inline StatefulBuilder that rebuilds and that
 /// also has state.
 ///
+// TODO(loic-sharma): Migrate to RadioGroup.
+// https://github.com/flutter/flutter/issues/179088
 /// ```dart
 /// await showDialog<void>(
 ///   context: context,
@@ -8351,17 +8362,17 @@ typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSette
 ///     return AlertDialog(
 ///       content: StatefulBuilder(
 ///         builder: (BuildContext context, StateSetter setState) {
-///           return Column(
-///             mainAxisSize: MainAxisSize.min,
-///             children: List<Widget>.generate(4, (int index) {
-///               return Radio<int>(
-///                 value: index,
-///                 groupValue: selectedRadio,
-///                 onChanged: (int? value) {
-///                   setState(() => selectedRadio = value);
-///                 },
-///               );
-///             }),
+///           return RadioGroup<int>(
+///             groupValue: selectedRadio,
+///             onChanged: (int? value) {
+///               setState(() => selectedRadio = value);
+///             },
+///             child: Column(
+///               mainAxisSize: MainAxisSize.min,
+///               children: List<Widget>.generate(4, (int index) {
+///                 return Radio<int>(value: index);
+///               }),
+///             ),
 ///           );
 ///         },
 ///       ),
@@ -8400,31 +8411,59 @@ class _StatefulBuilderState extends State<StatefulBuilder> {
 /// child on top of that color.
 class ColoredBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that paints its area with the specified [Color].
-  const ColoredBox({required this.color, super.child, super.key});
+  const ColoredBox({required this.color, this.isAntiAlias = true, super.child, super.key});
 
   /// The color to paint the background area with.
   final Color color;
 
+  /// {@template flutter.widgets.ColoredBox.isAntiAlias}
+  /// Whether to apply anti-aliasing when painting the box.
+  ///
+  /// Defaults to `true`.
+  ///
+  /// When `true`, the painted box will have smooth edges. This is crucial for
+  /// animations and transformations (such as rotation or scaling) where the
+  /// widget's edges may not align perfectly with the physical pixel grid.
+  /// Anti-aliasing allows for sub-pixel rendering, which prevents a 'jagged'
+  /// appearance during motion and ensures visually smooth transitions.
+  ///
+  /// Set this to `false` for specific use cases where multiple `ColoredBox`
+  /// widgets are positioned adjacent to each other to form a larger, seamless
+  /// area of solid color. With anti-aliasing enabled (`true`), faint seams or
+  /// gaps might appear between the boxes due to the semi-transparent pixels at
+  /// their edges. Disabling anti-aliasing ensures that the boxes align perfectly
+  /// without such visual artifacts.
+  ///
+  /// See also:
+  ///
+  ///  * [Paint.isAntiAlias], the underlying property that this controls.
+  /// {@endtemplate}
+  final bool isAntiAlias;
+
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return _RenderColoredBox(color: color);
+    return _RenderColoredBox(color: color, isAntiAlias: isAntiAlias);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderObject renderObject) {
-    (renderObject as _RenderColoredBox).color = color;
+    (renderObject as _RenderColoredBox)
+      ..color = color
+      ..isAntiAlias = isAntiAlias;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Color>('color', color));
+    properties.add(DiagnosticsProperty<bool>('isAntiAlias', isAntiAlias, defaultValue: true));
   }
 }
 
 class _RenderColoredBox extends RenderProxyBoxWithHitTestBehavior {
-  _RenderColoredBox({required Color color})
+  _RenderColoredBox({required Color color, required bool isAntiAlias})
     : _color = color,
+      _isAntiAlias = isAntiAlias,
       super(behavior: HitTestBehavior.opaque);
 
   /// The fill color for this render object.
@@ -8438,6 +8477,16 @@ class _RenderColoredBox extends RenderProxyBoxWithHitTestBehavior {
     markNeedsPaint();
   }
 
+  bool get isAntiAlias => _isAntiAlias;
+  bool _isAntiAlias;
+  set isAntiAlias(bool value) {
+    if (value == _isAntiAlias) {
+      return;
+    }
+    _isAntiAlias = value;
+    markNeedsPaint();
+  }
+
   @override
   void paint(PaintingContext context, Offset offset) {
     // It's tempting to want to optimize out this `drawRect()` call if the
@@ -8445,7 +8494,12 @@ class _RenderColoredBox extends RenderProxyBoxWithHitTestBehavior {
     // https://github.com/flutter/flutter/pull/72526#issuecomment-749185938 for
     // a good description of why.
     if (size > Size.zero) {
-      context.canvas.drawRect(offset & size, Paint()..color = color);
+      context.canvas.drawRect(
+        offset & size,
+        Paint()
+          ..isAntiAlias = isAntiAlias
+          ..color = color,
+      );
     }
     if (child != null) {
       context.paintChild(child!, offset);

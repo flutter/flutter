@@ -255,7 +255,7 @@ Many packages use [`mockito`](https://pub.dev/packages/mockito) for unit tests. 
 
 ## Changing federated plugins
 
-Most of the plugins in flutter/packages are [federated](https://flutter.dev/docs/development/packages-and-plugins/developing-packages#federated-plugins). Because a logical plugin consists of multiple packages, and our CI tests using published package dependencies—in order to ensure that every PR can be published without breaking the ecosystem—changes that span multiple packages will need to be done in multiple PRs. This is common when adding new features.
+Most of the plugins in flutter/packages are [federated](https://docs.flutter.dev/packages-and-plugins/developing-packages#federated-plugins). Because a logical plugin consists of multiple packages, and our CI tests using published package dependencies—in order to ensure that every PR can be published without breaking the ecosystem—changes that span multiple packages will need to be done in multiple PRs. This is common when adding new features.
 
 We are investigating ways to streamline this, but currently the process for a multi-package PR is:
 

@@ -15,8 +15,12 @@ FragmentProgram::FragmentProgram(const std::shared_ptr<fml::Mapping>& data) {
   }
 
   auto stages = RuntimeStage::DecodeRuntimeStages(data);
+  if (!stages.ok()) {
+    VALIDATION_LOG << "Failed to decode runtime stages: " << stages.status();
+    return;
+  }
 
-  for (const auto& stage : stages) {
+  for (const auto& stage : stages.value()) {
     if (auto data = stage.second) {
       stages_[stage.first] = std::move(data);
     }

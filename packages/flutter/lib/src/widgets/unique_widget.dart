@@ -31,7 +31,7 @@ abstract class UniqueWidget<T extends State<StatefulWidget>> extends StatefulWid
   ///
   /// Might be null if the widget is not currently in the tree.
   T? get currentState {
-    final GlobalKey<T> globalKey = key! as GlobalKey<T>;
+    final globalKey = key! as GlobalKey<T>;
     return globalKey.currentState;
   }
 }

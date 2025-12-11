@@ -37,7 +37,7 @@ class FakeFlutterInformation extends FlutterInformation {
 
 void main() {
   group('Generator', () {
-    late MemoryFileSystem memoryFileSystem = MemoryFileSystem();
+    late var memoryFileSystem = MemoryFileSystem();
     late FlutterRepoSnippetConfiguration configuration;
     late SnippetGenerator generator;
     late Directory tmpDir;
@@ -108,9 +108,9 @@ void main() {
       final File outputFile = memoryFileSystem.file(
         path.join(tmpDir.absolute.path, 'snippet_out.txt'),
       );
-      final SnippetDartdocParser sampleParser = SnippetDartdocParser(memoryFileSystem);
-      const String sourcePath = 'packages/flutter/lib/src/widgets/foo.dart';
-      const int sourceLine = 222;
+      final sampleParser = SnippetDartdocParser(memoryFileSystem);
+      const sourcePath = 'packages/flutter/lib/src/widgets/foo.dart';
+      const sourceLine = 222;
       final SourceElement element = sampleParser.parseFromDartdocToolFile(
         inputFile,
         element: 'MyElement',
@@ -158,9 +158,9 @@ void main() {
 ```
 ''');
 
-      final SnippetDartdocParser sampleParser = SnippetDartdocParser(memoryFileSystem);
-      const String sourcePath = 'packages/flutter/lib/src/widgets/foo.dart';
-      const int sourceLine = 222;
+      final sampleParser = SnippetDartdocParser(memoryFileSystem);
+      const sourcePath = 'packages/flutter/lib/src/widgets/foo.dart';
+      const sourceLine = 222;
       final SourceElement element = sampleParser.parseFromDartdocToolFile(
         inputFile,
         element: 'MyElement',
@@ -212,9 +212,9 @@ void main() {
   runApp(MaterialApp(title: 'foo'));
 }\n''');
 
-      final SnippetDartdocParser sampleParser = SnippetDartdocParser(memoryFileSystem);
-      const String sourcePath = 'packages/flutter/lib/src/widgets/foo.dart';
-      const int sourceLine = 222;
+      final sampleParser = SnippetDartdocParser(memoryFileSystem);
+      const sourcePath = 'packages/flutter/lib/src/widgets/foo.dart';
+      const sourceLine = 222;
       final SourceElement element = sampleParser.parseFromDartdocToolFile(
         inputFile,
         element: 'MyElement',
@@ -260,9 +260,9 @@ void main() {
         path.join(tmpDir.absolute.path, 'snippet_out.json'),
       );
 
-      final SnippetDartdocParser sampleParser = SnippetDartdocParser(memoryFileSystem);
-      const String sourcePath = 'packages/flutter/lib/src/widgets/foo.dart';
-      const int sourceLine = 222;
+      final sampleParser = SnippetDartdocParser(memoryFileSystem);
+      const sourcePath = 'packages/flutter/lib/src/widgets/foo.dart';
+      const sourceLine = 222;
       final SourceElement element = sampleParser.parseFromDartdocToolFile(
         inputFile,
         element: 'MyElement',
@@ -274,8 +274,7 @@ void main() {
       element.samples.first.metadata.addAll(<String, Object>{'channel': 'stable'});
       generator.generateCode(element.samples.first, output: outputFile);
       expect(expectedMetadataFile.existsSync(), isTrue);
-      final Map<String, dynamic> json =
-          jsonDecode(expectedMetadataFile.readAsStringSync()) as Map<String, dynamic>;
+      final json = jsonDecode(expectedMetadataFile.readAsStringSync()) as Map<String, dynamic>;
       expect(json['id'], equals('MyElement.0'));
       expect(json['channel'], equals('stable'));
       expect(json['file'], equals('snippet_out.dart'));
@@ -285,7 +284,7 @@ void main() {
   });
 
   group('snippets command line argument test', () {
-    late MemoryFileSystem memoryFileSystem = MemoryFileSystem();
+    late var memoryFileSystem = MemoryFileSystem();
     late Directory tmpDir;
     late Directory flutterRoot;
     late FakeProcessManager fakeProcessManager;
@@ -299,7 +298,7 @@ void main() {
     });
 
     test('command line arguments are parsed and passed to generator', () {
-      final FakePlatform platform = FakePlatform(
+      final platform = FakePlatform(
         environment: <String, String>{
           'PACKAGE_NAME': 'dart:ui',
           'LIBRARY_NAME': 'library',
@@ -320,15 +319,15 @@ void main() {
       }''',
         },
       );
-      final FlutterInformation flutterInformation = FlutterInformation(
+      final flutterInformation = FlutterInformation(
         filesystem: memoryFileSystem,
         processManager: fakeProcessManager,
         platform: platform,
       );
       FlutterInformation.instance = flutterInformation;
-      MockSnippetGenerator mockSnippetGenerator = MockSnippetGenerator();
+      var mockSnippetGenerator = MockSnippetGenerator();
       snippets_main.snippetGenerator = mockSnippetGenerator;
-      String errorMessage = '';
+      var errorMessage = '';
       errorExit = (String message) {
         errorMessage = message;
       };

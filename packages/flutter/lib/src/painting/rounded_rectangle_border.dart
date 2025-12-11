@@ -129,7 +129,7 @@ class RoundedRectangleBorder extends OutlinedBorder with _RRectLikeBorder {
         if (side.width == 0.0) {
           canvas.drawRRect(borderRadius.resolve(textDirection).toRRect(rect), side.toPaint());
         } else {
-          final Paint paint = Paint()..color = side.color;
+          final paint = Paint()..color = side.color;
           final RRect borderRect = borderRadius.resolve(textDirection).toRRect(rect);
           final RRect inner = borderRect.deflate(side.strokeInset);
           final RRect outer = borderRect.inflate(side.strokeOutset);

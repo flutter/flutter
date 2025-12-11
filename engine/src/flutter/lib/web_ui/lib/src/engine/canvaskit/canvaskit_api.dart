@@ -1088,9 +1088,9 @@ extension type SkPathNamespace(JSObject _) implements JSObject {
 /// column major order) to an SkM44 which is a 4x4 matrix represented
 /// as a [Float32List] in row major order.
 Float32List toSkM44FromFloat32(Float32List matrix4) {
-  final Float32List skM44 = Float32List(16);
-  for (int r = 0; r < 4; r++) {
-    for (int c = 0; c < 4; c++) {
+  final skM44 = Float32List(16);
+  for (var r = 0; r < 4; r++) {
+    for (var c = 0; c < 4; c++) {
       skM44[c * 4 + r] = matrix4[r * 4 + c];
     }
   }
@@ -1107,8 +1107,8 @@ const List<int> _skMatrixIndexToMatrix4Index = <int>[
 /// Converts a 4x4 Flutter matrix (represented as a [Float32List]) to an
 /// SkMatrix, which is a 3x3 transform matrix.
 Float32List toSkMatrixFromFloat32(Float32List matrix4) {
-  final Float32List skMatrix = Float32List(9);
-  for (int i = 0; i < 9; ++i) {
+  final skMatrix = Float32List(9);
+  for (var i = 0; i < 9; ++i) {
     final int matrix4Index = _skMatrixIndexToMatrix4Index[i];
     if (matrix4Index < matrix4.length) {
       skMatrix[i] = matrix4[matrix4Index];
@@ -1122,8 +1122,8 @@ Float32List toSkMatrixFromFloat32(Float32List matrix4) {
 /// Converts a 4x4 Flutter matrix (represented as a [Float32List]) to an
 /// SkMatrix, which is a 3x3 transform matrix.
 Float32List toSkMatrixFromFloat64(Float64List matrix4) {
-  final Float32List skMatrix = Float32List(9);
-  for (int i = 0; i < 9; ++i) {
+  final skMatrix = Float32List(9);
+  for (var i = 0; i < 9; ++i) {
     final int matrix4Index = _skMatrixIndexToMatrix4Index[i];
     if (matrix4Index < matrix4.length) {
       skMatrix[i] = matrix4[matrix4Index];
@@ -1138,7 +1138,7 @@ Float32List toSkMatrixFromFloat64(Float64List matrix4) {
 ///
 /// The returned list can be passed to CanvasKit API that take points.
 Float32List toSkPoint(ui.Offset offset) {
-  final Float32List point = Float32List(2);
+  final point = Float32List(2);
   point[0] = offset.dx;
   point[1] = offset.dy;
   return point;
@@ -1158,8 +1158,8 @@ Float32List toSkColorStops(List<double>? colorStops) {
   }
 
   final int len = colorStops.length;
-  final Float32List skColorStops = Float32List(len);
-  for (int i = 0; i < len; i++) {
+  final skColorStops = Float32List(len);
+  for (var i = 0; i < len; i++) {
     skColorStops[i] = colorStops[i];
   }
   return skColorStops;
@@ -1448,7 +1448,7 @@ extension type SkContourMeasure(JSObject _) implements JSObject {
 
 // TODO(hterkelsen): Use a shared malloc'ed array for performance.
 Float32List toSkRect(ui.Rect rect) {
-  final Float32List skRect = Float32List(4);
+  final skRect = Float32List(4);
   skRect[0] = rect.left;
   skRect[1] = rect.top;
   skRect[2] = rect.right;
@@ -1471,7 +1471,7 @@ ui.Rect rectFromSkIRect(Int32List skIRect) {
 
 // TODO(hterkelsen): Use a shared malloc'ed array for performance.
 Float32List toSkRRect(ui.RRect rrect) {
-  final Float32List skRRect = Float32List(12);
+  final skRRect = Float32List(12);
   skRRect[0] = rrect.left;
   skRRect[1] = rrect.top;
   skRRect[2] = rrect.right;
@@ -1489,7 +1489,7 @@ Float32List toSkRRect(ui.RRect rrect) {
 
 // TODO(hterkelsen): Use a shared malloc'ed array for performance.
 Float32List toOuterSkRect(ui.RRect rrect) {
-  final Float32List skRect = Float32List(4);
+  final skRect = Float32List(4);
   skRect[0] = rrect.left;
   skRect[1] = rrect.top;
   skRect[2] = rrect.right;
@@ -1507,7 +1507,7 @@ SkFloat32List toMallocedSkPoints(List<ui.Offset> points) {
   final int len = points.length;
   final SkFloat32List skPoints = mallocFloat32List(len * 2);
   final Float32List list = skPoints.toTypedArray();
-  for (int i = 0; i < len; i++) {
+  for (var i = 0; i < len; i++) {
     list[2 * i] = points[i].dx;
     list[2 * i + 1] = points[i].dy;
   }
@@ -1517,8 +1517,8 @@ SkFloat32List toMallocedSkPoints(List<ui.Offset> points) {
 /// Converts a list of [ui.Offset] into a flat list of points.
 Float32List toFlatSkPoints(List<ui.Offset> points) {
   final int len = points.length;
-  final Float32List result = Float32List(len * 2);
-  for (int i = 0; i < len; i++) {
+  final result = Float32List(len * 2);
+  for (var i = 0; i < len; i++) {
     result[2 * i] = points[i].dx;
     result[2 * i + 1] = points[i].dy;
   }
@@ -1528,8 +1528,8 @@ Float32List toFlatSkPoints(List<ui.Offset> points) {
 /// Converts a list of [ui.Color] into a flat list of ints.
 Uint32List toFlatColors(List<ui.Color> colors) {
   final int len = colors.length;
-  final Uint32List result = Uint32List(len);
-  for (int i = 0; i < len; i++) {
+  final result = Uint32List(len);
+  for (var i = 0; i < len; i++) {
     result[i] = colors[i].value;
   }
   return result;
@@ -1537,8 +1537,8 @@ Uint32List toFlatColors(List<ui.Color> colors) {
 
 Uint16List toUint16List(List<int> ints) {
   final int len = ints.length;
-  final Uint16List result = Uint16List(len);
-  for (int i = 0; i < len; i++) {
+  final result = Uint16List(len);
+  for (var i = 0; i < len; i++) {
     result[i] = ints[i];
   }
   return result;
@@ -2168,16 +2168,13 @@ extension type SkGlyphClusterInfo(JSObject _) implements JSObject {
 
   ui.GlyphInfo get _glyphInfo {
     final List<JSNumber> list = _bounds.toDart.cast<JSNumber>();
-    final ui.Rect bounds = ui.Rect.fromLTRB(
+    final bounds = ui.Rect.fromLTRB(
       list[0].toDartDouble,
       list[1].toDartDouble,
       list[2].toDartDouble,
       list[3].toDartDouble,
     );
-    final ui.TextRange textRange = ui.TextRange(
-      start: _textRange.start.toInt(),
-      end: _textRange.end.toInt(),
-    );
+    final textRange = ui.TextRange(start: _textRange.start.toInt(), end: _textRange.end.toInt());
     return ui.GlyphInfo(bounds, textRange, ui.TextDirection.values[_direction.value.toInt()]);
   }
 }
@@ -2428,7 +2425,7 @@ String canvasKitWasmModuleUrl(String file, String canvasKitBase) => canvasKitBas
 Future<CanvasKit> downloadCanvasKit() async {
   final CanvasKitModule canvasKitModule = await _downloadOneOf(_canvasKitJsUrls);
 
-  final CanvasKit canvasKit =
+  final canvasKit =
       (await canvasKitModule
               .defaultExport(
                 CanvasKitInitOptions(locateFile: createLocateFileCallback(canvasKitWasmModuleUrl)),
@@ -2451,7 +2448,7 @@ Future<CanvasKit> downloadCanvasKit() async {
 ///
 /// If none of the URLs can be downloaded, throws an [Exception].
 Future<CanvasKitModule> _downloadOneOf(Iterable<String> urls) async {
-  for (final String url in urls) {
+  for (final url in urls) {
     try {
       return await _downloadCanvasKitJs(url);
     } catch (_) {

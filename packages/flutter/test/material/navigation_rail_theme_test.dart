@@ -18,7 +18,7 @@ void main() {
   testWidgets(
     'Material3 - Default values are used when no NavigationRail or NavigationRailThemeData properties are specified',
     (WidgetTester tester) async {
-      final ThemeData theme = ThemeData();
+      final theme = ThemeData();
       // Material 3 defaults
       await tester.pumpWidget(
         MaterialApp(
@@ -43,7 +43,7 @@ void main() {
       expect(find.byType(NavigationIndicator), findsWidgets);
       expect(_indicatorDecoration(tester)?.color, theme.colorScheme.secondaryContainer);
       expect(_indicatorDecoration(tester)?.shape, const StadiumBorder());
-      final InkResponse inkResponse =
+      final inkResponse =
           tester.allWidgets.firstWhere(
                 (Widget object) => object.runtimeType.toString() == '_IndicatorInkWell',
               )
@@ -83,20 +83,20 @@ void main() {
   testWidgets(
     'NavigationRailThemeData values are used when no NavigationRail properties are specified',
     (WidgetTester tester) async {
-      const Color backgroundColor = Color(0x00000001);
-      const double elevation = 7.0;
-      const double selectedIconSize = 25.0;
-      const double unselectedIconSize = 23.0;
-      const Color selectedIconColor = Color(0x00000002);
-      const Color unselectedIconColor = Color(0x00000003);
-      const double selectedIconOpacity = 0.99;
-      const double unselectedIconOpacity = 0.98;
-      const double selectedLabelFontSize = 13.0;
-      const double unselectedLabelFontSize = 11.0;
-      const double groupAlignment = 0.0;
+      const backgroundColor = Color(0x00000001);
+      const elevation = 7.0;
+      const selectedIconSize = 25.0;
+      const unselectedIconSize = 23.0;
+      const selectedIconColor = Color(0x00000002);
+      const unselectedIconColor = Color(0x00000003);
+      const selectedIconOpacity = 0.99;
+      const unselectedIconOpacity = 0.98;
+      const selectedLabelFontSize = 13.0;
+      const unselectedLabelFontSize = 11.0;
+      const groupAlignment = 0.0;
       const NavigationRailLabelType labelType = NavigationRailLabelType.all;
-      const bool useIndicator = true;
-      const Color indicatorColor = Color(0x00000004);
+      const useIndicator = true;
+      const indicatorColor = Color(0x00000004);
       const ShapeBorder indicatorShape = RoundedRectangleBorder();
 
       await tester.pumpWidget(
@@ -151,20 +151,20 @@ void main() {
   testWidgets(
     'NavigationRail values take priority over NavigationRailThemeData values when both properties are specified',
     (WidgetTester tester) async {
-      const Color backgroundColor = Color(0x00000001);
-      const double elevation = 7.0;
-      const double selectedIconSize = 25.0;
-      const double unselectedIconSize = 23.0;
-      const Color selectedIconColor = Color(0x00000002);
-      const Color unselectedIconColor = Color(0x00000003);
-      const double selectedIconOpacity = 0.99;
-      const double unselectedIconOpacity = 0.98;
-      const double selectedLabelFontSize = 13.0;
-      const double unselectedLabelFontSize = 11.0;
-      const double groupAlignment = 0.0;
+      const backgroundColor = Color(0x00000001);
+      const elevation = 7.0;
+      const selectedIconSize = 25.0;
+      const unselectedIconSize = 23.0;
+      const selectedIconColor = Color(0x00000002);
+      const unselectedIconColor = Color(0x00000003);
+      const selectedIconOpacity = 0.99;
+      const unselectedIconOpacity = 0.98;
+      const selectedLabelFontSize = 13.0;
+      const unselectedLabelFontSize = 11.0;
+      const groupAlignment = 0.0;
       const NavigationRailLabelType labelType = NavigationRailLabelType.all;
-      const bool useIndicator = true;
-      const Color indicatorColor = Color(0x00000004);
+      const useIndicator = true;
+      const indicatorColor = Color(0x00000004);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -249,7 +249,7 @@ void main() {
   });
 
   testWidgets('Default debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const NavigationRailThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -261,7 +261,7 @@ void main() {
   });
 
   testWidgets('Custom debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const NavigationRailThemeData(
       backgroundColor: Color(0x00000099),
       elevation: 5,
