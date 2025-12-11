@@ -4407,7 +4407,7 @@ abstract class ImageFilter {
   /// Whether [ImageFilter.shader] is supported on the current backend.
   ///
   /// > [!WARNING]
-  /// > This property indicates whether the Impeller rendering engine is enabled.
+  /// > This property will only return true when the Impeller rendering engine is enabled.
   /// > Attempting to create an [ImageFilter.shader] when this property is `false` will throw an [UnsupportedError].
   static bool get isShaderFilterSupported => _impellerEnabled;
 
