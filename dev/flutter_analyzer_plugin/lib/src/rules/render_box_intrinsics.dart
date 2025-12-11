@@ -45,8 +45,7 @@ class RenderBoxIntrinsicCalculationRule extends AnalysisRule {
   @override
   void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
     final visitor = _Visitor(this, context);
-    registry
-      .addSimpleIdentifier(this, visitor);
+    registry.addSimpleIdentifier(this, visitor);
   }
 }
 
@@ -76,6 +75,7 @@ class _Visitor extends SimpleAstVisitor<void> {
       (InterfaceType interface) => _implementsRenderBox(interface.element),
     );
   }
+
   static bool _checkIfRenderBoxParent(AstNode? node) {
     if (node == null) {
       return false;
