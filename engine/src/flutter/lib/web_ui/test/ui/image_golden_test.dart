@@ -236,6 +236,34 @@ Future<void> testMain() async {
         await matchGoldenFile('${name}_fragment_shader_sampler.png', region: drawRegion);
       });
 
+      test('fragment_shader_sampler with filter quality', () async {
+        final ui.Image image = await generateImage();
+
+        final ui.FragmentProgram program = await renderer.createFragmentProgram('glitch_shader');
+        final ui.FragmentShader shader = program.fragmentShader();
+
+        // Resolution
+        shader.setFloat(0, 300);
+        shader.setFloat(1, 300);
+
+        // Time
+        shader.setFloat(2, 2);
+
+        // Image
+        shader.setImageSampler(0, image, filterQuality: ui.FilterQuality.high);
+
+        final recorder = ui.PictureRecorder();
+        final canvas = ui.Canvas(recorder, drawRegion);
+        canvas.drawCircle(const ui.Offset(150, 150), 100, ui.Paint()..shader = shader);
+
+        await drawPictureUsingCurrentRenderer(recorder.endRecording());
+
+        await matchGoldenFile(
+          '${name}_fragment_shader_sampler_with_filter_quality.png',
+          region: drawRegion,
+        );
+      });
+
       test('drawVertices with image shader', () async {
         final ui.Image image = await generateImage();
 
