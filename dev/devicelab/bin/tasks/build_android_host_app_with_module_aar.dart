@@ -18,6 +18,36 @@ final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
 final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
 final String fileReadWriteMode = Platform.isWindows ? 'rw-rw-rw-' : 'rw-r--r--';
 
+/// Discovers the best NDK path by looking in ANDROID_HOME/ndk.
+///
+/// Returns null if no NDK is found.
+String? discoverBestNdkPath() {
+  final Map<String, String> env = Platform.environment;
+  final String? androidHome = env['ANDROID_HOME'] ?? env['ANDROID_SDK_ROOT'];
+  if (androidHome == null) {
+    return null;
+  }
+  final Directory ndkDir = Directory(path.join(androidHome, 'ndk'));
+  if (!ndkDir.existsSync()) {
+    return null;
+  }
+  final List<Version> versions = <Version>[];
+  for (final FileSystemEntity entity in ndkDir.listSync()) {
+    if (entity is Directory) {
+      try {
+        versions.add(Version.parse(path.basename(entity.path)));
+      } on FormatException {
+        // Ignore non-version directories.
+      }
+    }
+  }
+  if (versions.isEmpty) {
+    return null;
+  }
+  versions.sort();
+  return path.join(ndkDir.path, versions.last.toString());
+}
+
 /// Combines several TaskFunctions with trivial success value into one.
 TaskFunction combine(List<TaskFunction> tasks) {
   return () async {
@@ -47,6 +77,19 @@ class ModuleTest {
 
   Future<TaskResult> call() async {
     section('Running: $buildTarget-$gradleVersion');
+
+    // Override the legacy ANDROID_NDK_PATH with a valid one found locally.
+    // This allows us to ignore the bad value set by the recipe until the recipe is updated.
+    final String? ndkPath = discoverBestNdkPath();
+    final Map<String, String> environment = <String, String>{
+      'ANDROID_NDK_PATH': ndkPath ?? '',
+    };
+    if (ndkPath != null) {
+      print('Overriding ANDROID_NDK_PATH to: $ndkPath');
+    } else {
+      print('No NDK found locally to override ANDROID_NDK_PATH with.');
+    }
+
     section('Find Java');
 
     final String? javaHome = await findJavaHome();
@@ -64,7 +107,8 @@ class ModuleTest {
         await flutter(
           'create',
           options: <String>['--org', 'io.flutter.devicelab', '--template=module', 'hello'],
-          environment: <String, String>{'ANDROID_NDK_PATH': ''},
+          options: <String>['--org', 'io.flutter.devicelab', '--template=module', 'hello'],
+          environment: environment,
           output: stdout,
           stderr: stderr,
         );
@@ -86,7 +130,7 @@ class ModuleTest {
       );
       await pubspec.writeAsString(content, flush: true);
       await inDirectory(projectDir, () async {
-        await flutter('packages', options: <String>['get'], environment: <String, String>{'ANDROID_NDK_PATH': ''}, output: stdout, stderr: stderr);
+        await flutter('packages', options: <String>['get'], environment: environment, output: stdout, stderr: stderr);
       });
 
       section('Add read-only asset');
@@ -117,7 +161,7 @@ class ModuleTest {
       );
       await pubspec.writeAsString(content, flush: true);
       await inDirectory(projectDir, () async {
-        await flutter('packages', options: <String>['get'], environment: <String, String>{'ANDROID_NDK_PATH': ''}, output: stdout, stderr: stderr);
+        await flutter('packages', options: <String>['get'], environment: environment, output: stdout, stderr: stderr);
       });
 
       // TODO(dacoharkes): Implement Add2app. https://github.com/flutter/flutter/issues/129757
@@ -128,7 +172,8 @@ class ModuleTest {
         await exec(
           gradlewExecutable,
           <String>['flutter:assembleDebug'],
-          environment: <String, String>{'JAVA_HOME': javaHome!, 'ANDROID_NDK_PATH': ''},
+          <String>['flutter:assembleDebug'],
+          environment: <String, String>{'JAVA_HOME': javaHome!}..addAll(environment),
         );
       });
 
@@ -153,7 +198,9 @@ class ModuleTest {
       section('Build ephemeral host app');
 
       await inDirectory(projectDir, () async {
-        await flutter('build', options: <String>['apk'], environment: <String, String>{'ANDROID_NDK_PATH': ''}, output: stdout, stderr: stderr);
+      await inDirectory(projectDir, () async {
+        await flutter('build', options: <String>['apk'], environment: environment, output: stdout, stderr: stderr);
+      });
       });
 
       final bool ephemeralHostApkBuilt = exists(
@@ -177,13 +224,17 @@ class ModuleTest {
       section('Clean build');
 
       await inDirectory(projectDir, () async {
-        await flutter('clean', environment: <String, String>{'ANDROID_NDK_PATH': ''}, output: stdout, stderr: stderr);
+      await inDirectory(projectDir, () async {
+        await flutter('clean', environment: environment, output: stdout, stderr: stderr);
+      });
       });
 
       section('Build editable host app');
 
       await inDirectory(projectDir, () async {
-        await flutter('build', options: <String>['apk'], environment: <String, String>{'ANDROID_NDK_PATH': ''}, output: stdout, stderr: stderr);
+      await inDirectory(projectDir, () async {
+        await flutter('build', options: <String>['apk'], environment: environment, output: stdout, stderr: stderr);
+      });
       });
 
       final bool editableHostApkBuilt = exists(
@@ -210,7 +261,8 @@ class ModuleTest {
         await flutter(
           'build',
           options: <String>['aar', '--no-profile'],
-          environment: <String, String>{'ANDROID_NDK_PATH': ''},
+          options: <String>['aar', '--no-profile'],
+          environment: environment,
           output: stdout,
           stderr: stderr,
         );
@@ -268,8 +320,7 @@ class ModuleTest {
           environment: <String, String>{
             'JAVA_HOME': javaHome!,
             'FLUTTER_SUPPRESS_ANALYTICS': 'true',
-            'ANDROID_NDK_PATH': '',
-          },
+          }..addAll(environment),
         );
       });
 
@@ -345,8 +396,7 @@ class ModuleTest {
           environment: <String, String>{
             'JAVA_HOME': javaHome!,
             'FLUTTER_SUPPRESS_ANALYTICS': 'true',
-            'ANDROID_NDK_PATH': '',
-          },
+          }..addAll(environment),
         );
       });
 
