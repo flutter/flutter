@@ -64,6 +64,7 @@ class ModuleTest {
         await flutter(
           'create',
           options: <String>['--org', 'io.flutter.devicelab', '--template=module', 'hello'],
+          environment: <String, String>{'ANDROID_NDK_PATH': ''},
           output: stdout,
           stderr: stderr,
         );
@@ -85,7 +86,7 @@ class ModuleTest {
       );
       await pubspec.writeAsString(content, flush: true);
       await inDirectory(projectDir, () async {
-        await flutter('packages', options: <String>['get'], output: stdout, stderr: stderr);
+        await flutter('packages', options: <String>['get'], environment: <String, String>{'ANDROID_NDK_PATH': ''}, output: stdout, stderr: stderr);
       });
 
       section('Add read-only asset');
@@ -116,7 +117,7 @@ class ModuleTest {
       );
       await pubspec.writeAsString(content, flush: true);
       await inDirectory(projectDir, () async {
-        await flutter('packages', options: <String>['get'], output: stdout, stderr: stderr);
+        await flutter('packages', options: <String>['get'], environment: <String, String>{'ANDROID_NDK_PATH': ''}, output: stdout, stderr: stderr);
       });
 
       // TODO(dacoharkes): Implement Add2app. https://github.com/flutter/flutter/issues/129757
@@ -127,7 +128,7 @@ class ModuleTest {
         await exec(
           gradlewExecutable,
           <String>['flutter:assembleDebug'],
-          environment: <String, String>{'JAVA_HOME': javaHome},
+          environment: <String, String>{'JAVA_HOME': javaHome!, 'ANDROID_NDK_PATH': ''},
         );
       });
 
@@ -152,7 +153,7 @@ class ModuleTest {
       section('Build ephemeral host app');
 
       await inDirectory(projectDir, () async {
-        await flutter('build', options: <String>['apk'], output: stdout, stderr: stderr);
+        await flutter('build', options: <String>['apk'], environment: <String, String>{'ANDROID_NDK_PATH': ''}, output: stdout, stderr: stderr);
       });
 
       final bool ephemeralHostApkBuilt = exists(
@@ -176,13 +177,13 @@ class ModuleTest {
       section('Clean build');
 
       await inDirectory(projectDir, () async {
-        await flutter('clean', output: stdout, stderr: stderr);
+        await flutter('clean', environment: <String, String>{'ANDROID_NDK_PATH': ''}, output: stdout, stderr: stderr);
       });
 
       section('Build editable host app');
 
       await inDirectory(projectDir, () async {
-        await flutter('build', options: <String>['apk'], output: stdout, stderr: stderr);
+        await flutter('build', options: <String>['apk'], environment: <String, String>{'ANDROID_NDK_PATH': ''}, output: stdout, stderr: stderr);
       });
 
       final bool editableHostApkBuilt = exists(
@@ -209,6 +210,7 @@ class ModuleTest {
         await flutter(
           'build',
           options: <String>['aar', '--no-profile'],
+          environment: <String, String>{'ANDROID_NDK_PATH': ''},
           output: stdout,
           stderr: stderr,
         );
@@ -264,8 +266,9 @@ class ModuleTest {
           gradlewExecutable,
           <String>['app:assembleDebug'],
           environment: <String, String>{
-            'JAVA_HOME': javaHome,
+            'JAVA_HOME': javaHome!,
             'FLUTTER_SUPPRESS_ANALYTICS': 'true',
+            'ANDROID_NDK_PATH': '',
           },
         );
       });
@@ -340,8 +343,9 @@ class ModuleTest {
           gradlewExecutable,
           <String>['app:assembleRelease'],
           environment: <String, String>{
-            'JAVA_HOME': javaHome,
+            'JAVA_HOME': javaHome!,
             'FLUTTER_SUPPRESS_ANALYTICS': 'true',
+            'ANDROID_NDK_PATH': '',
           },
         );
       });
