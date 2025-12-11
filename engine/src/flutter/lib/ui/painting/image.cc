@@ -84,36 +84,29 @@ SkColorType PixelFormatToSkColorType(PixelFormat pixel_format) {
   }
   return kUnknown_SkColorType;
 }
-}  // namespace
 
-void CanvasImage::decodeImageFromPixelsSync(Dart_Handle pixels_handle,
-                                            uint32_t width,
-                                            uint32_t height,
-                                            int32_t pixel_format,
-                                            Dart_Handle raw_image_handle) {
+// Returns only static strings.
+const char* DoDecodeImageFromPixelsSync(Dart_Handle pixels_handle,
+                                        uint32_t width,
+                                        uint32_t height,
+                                        int32_t pixel_format,
+                                        Dart_Handle raw_image_handle) {
   auto* dart_state = UIDartState::Current();
   if (!dart_state) {
-    Dart_ThrowException(tonic::ToDart("Dart state is null."));
-    return;
+    return "Dart state is null.";
   }
 
   if (!dart_state->IsImpellerEnabled()) {
-    Dart_ThrowException(
-        tonic::ToDart("decodeImageFromPixelsSync is not implemented on "
-                      "Skia."));
-    return;
+    return "decodeImageFromPixelsSync is not implemented on Skia.";
   }
 
   if (width == 0 || height == 0) {
-    Dart_ThrowException(
-        tonic::ToDart("Image dimensions must be greater than zero."));
-    return;
+    return "Image dimensions must be greater than zero.";
   }
 
   if (pixel_format < 0 ||
       pixel_format > static_cast<int32_t>(kLastPixelFormat)) {
-    Dart_ThrowException(tonic::ToDart("Invalid pixel format."));
-    return;
+    return "Invalid pixel format.";
   }
   PixelFormat format = static_cast<PixelFormat>(pixel_format);
 
@@ -122,15 +115,13 @@ void CanvasImage::decodeImageFromPixelsSync(Dart_Handle pixels_handle,
   {
     tonic::Uint8List pixels(pixels_handle);
     if (!pixels.data()) {
-      Dart_ThrowException(tonic::ToDart("Pixels must not be null."));
-      return;
+      return "Pixels must not be null.";
     }
 
     int32_t row_bytes = width * BytesPerPixel(format);
     SkColorType color_type = PixelFormatToSkColorType(format);
     if (color_type == kUnknown_SkColorType) {
-      Dart_ThrowException(tonic::ToDart("Unsupported pixel format."));
-      return;
+      return "Unsupported pixel format.";
     }
 
     SkImageInfo image_info =
@@ -144,8 +135,7 @@ void CanvasImage::decodeImageFromPixelsSync(Dart_Handle pixels_handle,
     sk_data = SkData::MakeWithCopy(pixels.data(), pixels.num_elements());
     sk_image = SkImages::RasterFromData(image_info, sk_data, row_bytes);
     if (!sk_image) {
-      Dart_ThrowException(tonic::ToDart("Failed to create image from pixels."));
-      return;
+      return "Failed to create image from pixels.";
     }
   }
 
@@ -162,6 +152,21 @@ void CanvasImage::decodeImageFromPixelsSync(Dart_Handle pixels_handle,
 
   result_image->set_image(deferred_image);
   result_image->AssociateWithDartWrapper(raw_image_handle);
+
+  return nullptr;
+}
+}  // namespace
+
+void CanvasImage::decodeImageFromPixelsSync(Dart_Handle pixels_handle,
+                                            uint32_t width,
+                                            uint32_t height,
+                                            int32_t pixel_format,
+                                            Dart_Handle raw_image_handle) {
+  const char* error = DoDecodeImageFromPixelsSync(
+      pixels_handle, width, height, pixel_format, raw_image_handle);
+  if (error) {
+    Dart_ThrowException(tonic::ToDart(error));
+  }
 }
 
 }  // namespace flutter

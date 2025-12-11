@@ -107,6 +107,7 @@ void PixelDeferredImageGPUImpeller::ImageWrapper::SnapshotImage(
             if (!wrapper) {
               return;
             }
+            FML_DCHECK(!wrapper->texture_) << "should only execute once.";
             auto snapshot_delegate = wrapper->snapshot_delegate_;
             if (!snapshot_delegate) {
               return;
