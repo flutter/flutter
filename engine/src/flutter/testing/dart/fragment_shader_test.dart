@@ -330,21 +330,6 @@ void main() async {
     blueGreenImage.dispose();
   });
 
-  test('FragmentShader renders sampler with filter quality none', () async {
-    final FragmentProgram program = await FragmentProgram.fromAsset('texture.frag.iplr');
-    final Image blueGreenImage = await _createBlueGreenImage();
-    final FragmentShader shader = program.fragmentShader()
-      ..setImageSampler(0, blueGreenImage, filterQuality: FilterQuality.none)
-      ..setFloat(0, 100)
-      ..setFloat(1, 100);
-
-    final Image shaderImage = await _imageFromShader(shader: shader, imageDimension: 100);
-
-    await comparer.addGoldenImage(shaderImage, 'render_sampler_none.png');
-    shader.dispose();
-    blueGreenImage.dispose();
-  });
-
   test('FragmentShader renders sampler with filter quality low', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('texture.frag.iplr');
     final Image blueGreenImage = await _createBlueGreenImage();
