@@ -314,16 +314,6 @@ void main() async {
     blueGreenImage.dispose();
   });
 
-  Future<void> _expectShaderRendersFoo(Shader shader, Color color) async {
-    final ByteData renderedBytes = (await _imageByteDataFromShader(
-      shader: shader,
-      imageDimension: _shaderImageDimension,
-    ))!;
-    for (final int c in renderedBytes.buffer.asUint32List()) {
-      expect(toHexString(c), toHexString(color.value));
-    }
-  }
-
   test('FragmentShader renders sampler with filter quality default', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('texture.frag.iplr');
     final Image blueGreenImage = await _createBlueGreenImage();
@@ -742,13 +732,6 @@ Future<Image> _createBlueGreenImage() async {
   var i = 0;
   for (var y = 0; y < length; y++) {
     for (var x = 0; x < length; x++) {
-      // if ((x + y) % 2 == 0) {
-      //   pixels[i + 2] = 0xFF; // blue channel
-      // } else if ((x + y) % 3 == 2) {
-      //   pixels[i + 1] = 0xFF; // green channel
-      // } else {
-      //   pixels[i] = 0xFF; // red channel
-      // }
       if (x < length / 2) {
         pixels[i + 2] = 0xFF; // blue channel
       } else {
