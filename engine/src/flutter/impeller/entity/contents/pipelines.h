@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_ENTITY_CONTENTS_PIPELINES_H_
 #define FLUTTER_IMPELLER_ENTITY_CONTENTS_PIPELINES_H_
 
+#include "flutter/fml/build_config.h"
 #include "impeller/entity/advanced_blend.frag.h"
 #include "impeller/entity/advanced_blend.vert.h"
 #include "impeller/entity/border_mask_blur.frag.h"
@@ -158,12 +159,17 @@ using YUVToRGBFilterPipeline = RenderPipelineHandle<FilterPositionVertexShader, 
 // clang-format on
 
 #ifdef IMPELLER_ENABLE_OPENGLES
+
+// Web doesn't support external texture OpenGL extensions
+#if !defined(FML_OS_EMSCRIPTEN)
 using TiledTextureExternalPipeline =
     RenderPipelineHandle<TextureFillVertexShader,
                          TiledTextureFillExternalFragmentShader>;
 using TiledTextureUvExternalPipeline =
     RenderPipelineHandle<TextureUvFillVertexShader,
                          TiledTextureFillExternalFragmentShader>;
+#endif
+
 using TextureDownsampleGlesPipeline =
     RenderPipelineHandle<TextureFillVertexShader,
                          TextureDownsampleGlesFragmentShader>;

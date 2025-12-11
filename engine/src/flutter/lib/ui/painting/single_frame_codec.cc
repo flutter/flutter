@@ -35,6 +35,9 @@ Dart_Handle SingleFrameCodec::getNextFrame(Dart_Handle callback_handle) {
   }
 
   if (status_ == Status::kComplete) {
+    if (!cached_image_) {
+      return tonic::ToDart("Image failed to decode");
+    }
     if (!cached_image_->image()) {
       return tonic::ToDart("Decoded image has been disposed");
     }

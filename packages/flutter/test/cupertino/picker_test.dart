@@ -832,6 +832,17 @@ void main() {
     expect(selectedItem, equals(2));
   });
 
+  testWidgets('CupertinoPickerDefaultSelectionOverlay does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const CupertinoApp(home: Center(child: CupertinoPickerDefaultSelectionOverlay())),
+    );
+    expect(tester.getSize(find.byType(CupertinoPickerDefaultSelectionOverlay)), Size.zero);
+  });
+
   testWidgets('CupertinoPicker does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(

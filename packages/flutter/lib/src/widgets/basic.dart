@@ -9,7 +9,9 @@
 library;
 
 import 'dart:math' as math;
-import 'dart:ui' as ui show Image, ImageFilter, SemanticsInputType, TextHeightBehavior;
+import 'dart:ui'
+    as ui
+    show Image, ImageFilter, SemanticsHitTestBehavior, SemanticsInputType, TextHeightBehavior;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -4047,6 +4049,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required SemanticsRole? role,
     required Set<String>? controlsNodes,
     required SemanticsValidationResult validationResult,
+    required ui.SemanticsHitTestBehavior? hitTestBehavior,
     required ui.SemanticsInputType? inputType,
     required Locale? localeForSubtree,
   }) : this.fromProperties(
@@ -4132,6 +4135,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
            role: role,
            controlsNodes: controlsNodes,
            validationResult: validationResult,
+           hitTestBehavior: hitTestBehavior,
            inputType: inputType,
          ),
        );
@@ -4150,11 +4154,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required this.blockUserActions,
     required this.localeForSubtree,
     required this.properties,
-  }) : assert(
-         localeForSubtree == null || container,
-         'To assign locale for subtree, this widget needs to be a '
-         'container',
-       );
+  });
 
   /// Contains properties used by assistive technologies to make the application
   /// more accessible.
@@ -4381,6 +4381,7 @@ class SliverSemantics extends _SemanticsBase {
     super.role,
     super.controlsNodes,
     super.validationResult = SemanticsValidationResult.none,
+    super.hitTestBehavior,
     super.inputType,
     super.localeForSubtree,
   }) : super(child: sliver);
@@ -7963,6 +7964,7 @@ class Semantics extends _SemanticsBase {
     super.role,
     super.controlsNodes,
     super.validationResult = SemanticsValidationResult.none,
+    super.hitTestBehavior,
     super.inputType,
     super.localeForSubtree,
   });

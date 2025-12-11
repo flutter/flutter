@@ -2296,6 +2296,29 @@ public class AccessibilityBridgeTest {
     assertFalse(nodeInfo.isHeading());
   }
 
+  @Test
+  public void itAddsScrollViewToClassName() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    // Vertical scroll view
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.addFlag(AccessibilityBridge.Flag.HAS_IMPLICIT_SCROLLING);
+    testSemanticsNode.addAction(Action.SCROLL_UP);
+    testSemanticsNode.addAction(Action.SCROLL_DOWN);
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals(nodeInfo.getClassName().toString(), "android.widget.ScrollView");
+    // Horizontal scroll view
+    testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.addFlag(AccessibilityBridge.Flag.HAS_IMPLICIT_SCROLLING);
+    testSemanticsNode.addAction(Action.SCROLL_LEFT);
+    testSemanticsNode.addAction(Action.SCROLL_RIGHT);
+    testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals(nodeInfo.getClassName().toString(), "android.widget.HorizontalScrollView");
+  }
+
   @Config(sdk = API_LEVELS.API_32)
   @TargetApi(API_LEVELS.API_32)
   @Test

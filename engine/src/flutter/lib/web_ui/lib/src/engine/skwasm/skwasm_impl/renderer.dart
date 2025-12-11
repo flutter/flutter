@@ -18,6 +18,8 @@ class SkwasmRenderer extends Renderer {
 
   bool get isMultiThreaded => skwasmIsMultiThreaded();
 
+  bool get isWimp => skwasmIsWimp();
+
   SkwasmPathConstructors pathConstructors = SkwasmPathConstructors();
 
   @override

@@ -10,7 +10,7 @@
 /// @docImport 'text_button.dart';
 library;
 
-import 'dart:ui' show SemanticsRole, clampDouble, lerpDouble;
+import 'dart:ui' show SemanticsHitTestBehavior, SemanticsRole, clampDouble, lerpDouble;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -1676,6 +1676,8 @@ class DialogRoute<T> extends RawDialogRoute<T> {
                if (useSafeArea) {
                  dialog = SafeArea(child: dialog);
                }
+               // Prevent clicks inside the dialog from passing through to the barrier
+               dialog = Semantics(hitTestBehavior: SemanticsHitTestBehavior.opaque, child: dialog);
                return dialog;
              },
          barrierLabel: barrierLabel ?? MaterialLocalizations.of(context).modalBarrierDismissLabel,

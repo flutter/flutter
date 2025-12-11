@@ -111,6 +111,46 @@ Future<void> createSingleFrameCodec() async {
   _finish();
 }
 
+@pragma('vm:entry-point')
+Future<void> singleFrameCodecHandlesNoGpu() async {
+  final ImmutableBuffer buffer = await ImmutableBuffer.fromUint8List(
+    Uint8List.fromList(List<int>.filled(4, 100)),
+  );
+  final ImageDescriptor descriptor = ImageDescriptor.raw(
+    buffer,
+    width: 1,
+    height: 1,
+    pixelFormat: PixelFormat.rgba8888,
+  );
+  _turnOffGPU(true);
+  Timer flusher = Timer.periodic(Duration(milliseconds: 1), (timer) {
+    _flushGpuAwaitingTasks();
+  });
+  try {
+    final Codec codec = await descriptor.instantiateCodec();
+
+    // Call getNextFrame twice.  The first call will throw because the GPU has
+    // been disabled.  The second call will throw because SingleFrameCodec does
+    // not have a cached image.
+    for (int i = 0; i < 2; i++) {
+      bool didThrow = false;
+      try {
+        final FrameInfo info = await codec.getNextFrame();
+      } catch (e) {
+        didThrow = true;
+      }
+      assert(didThrow);
+    }
+
+    codec.dispose();
+    descriptor.dispose();
+    buffer.dispose();
+    _finish();
+  } finally {
+    flusher.cancel();
+  }
+}
+
 @pragma('vm:external-name', 'ValidateCodec')
 external void _validateCodec(Codec codec);
 

@@ -6078,12 +6078,9 @@ void main() {
     final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
-          label: 'Tab 1 of 2',
-          id: 1,
           rect: TestSemantics.fullScreen,
           children: <TestSemantics>[
             TestSemantics(
-              id: 2,
               role: SemanticsRole.tabBar,
               children: <TestSemantics>[
                 TestSemantics(
@@ -6093,7 +6090,6 @@ void main() {
                     SemanticsFlag.isSelected,
                     SemanticsFlag.hasSelectedState,
                   ],
-                  id: 3,
                   rect: TestSemantics.fullScreen,
                   actions: 1 | SemanticsAction.focus.index,
                   role: SemanticsRole.tab,
@@ -6101,7 +6097,6 @@ void main() {
                 TestSemantics(
                   label: 'TAB2${kIsWeb ? '' : '\nTab 2 of 2'}',
                   flags: <SemanticsFlag>[SemanticsFlag.isFocusable, SemanticsFlag.hasSelectedState],
-                  id: 4,
                   rect: TestSemantics.fullScreen,
                   actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                   role: SemanticsRole.tab,
@@ -6109,16 +6104,13 @@ void main() {
               ],
             ),
             TestSemantics(
-              id: 5,
               rect: TestSemantics.fullScreen,
               children: <TestSemantics>[
                 TestSemantics(
-                  id: 7,
                   rect: TestSemantics.fullScreen,
                   actions: <SemanticsAction>[SemanticsAction.scrollLeft],
                   children: <TestSemantics>[
                     TestSemantics(
-                      id: 6,
                       rect: TestSemantics.fullScreen,
                       label: 'PAGE1',
                       role: SemanticsRole.tabPanel,
@@ -6127,12 +6119,16 @@ void main() {
                 ),
               ],
             ),
+            TestSemantics(label: 'Tab 1 of 2', textDirection: TextDirection.ltr),
           ],
         ),
       ],
     );
 
-    expect(semantics, hasSemantics(expectedSemantics, ignoreRect: true, ignoreTransform: true));
+    expect(
+      semantics,
+      hasSemantics(expectedSemantics, ignoreRect: true, ignoreTransform: true, ignoreId: true),
+    );
 
     semantics.dispose();
   });
