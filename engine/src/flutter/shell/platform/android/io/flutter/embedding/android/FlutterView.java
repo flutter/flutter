@@ -1358,7 +1358,6 @@ public class FlutterView extends FrameLayout
       // FlutterActivity/FlutterFragment share one engine.
       removeView(flutterImageView);
       flutterImageView = null;
-      flutterEngineView = null;
     }
   }
 
