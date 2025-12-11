@@ -72,6 +72,14 @@ inline SkRRect createSkRRect(const SkScalar* f) {
   return rr;
 }
 
+// This must be kept in sync with the `ImageByteFormat` enum in dart:ui.
+enum class ImageByteFormat {
+  rawRgba,
+  rawStraightRgba,
+  rawUnmodified,
+  png,
+};
+
 // This needs to be kept in sync with the "FilterQuality" enum in dart:ui
 enum class FilterQuality {
   none,

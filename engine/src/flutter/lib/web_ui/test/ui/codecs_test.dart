@@ -12,6 +12,7 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../common/test_initialization.dart';
+import 'utils.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -255,7 +256,7 @@ Future<void> testMain() async {
 
     group('Codecs (default browserSupportsImageDecoder)', () {
       createTestCodecs().forEach(runCodecTest);
-    });
+    }, skip: isWimp); // https://github.com/flutter/flutter/issues/175371
 
     if (browserSupportsImageDecoder) {
       // For the sake of completeness, test codec fallback logic on browsers that support
@@ -269,7 +270,7 @@ Future<void> testMain() async {
         });
 
         createTestCodecs().forEach(runCodecTest);
-      });
+      }, skip: isWimp); // https://github.com/flutter/flutter/issues/175371
     }
   });
 
