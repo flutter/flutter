@@ -35,7 +35,7 @@
   FlutterViewController* rootVC =
       (FlutterViewController*)application.delegate.window.rootViewController;
   FlutterEngine* engine = rootVC.engine;
-  XCTestExpectation expectation =
+  XCTestExpectation* expectation =
       [[XCTestExpectation alloc] initWithDescription:@"status bar tap message received"];
 
   [engine.statusBarChannel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult callback) {
