@@ -13,6 +13,16 @@
 # This file contains the analysis options used for code in the flutter/flutter
 # repository.
 
+plugins:
+  flutter_analyzer_plugin:
+    path: dev/flutter_analyzer_plugin
+    diagnostics:
+      avoid_future_catch_error: false
+      no_double_clamp: false
+      no_stopwatches: false
+      protect_public_state_subtypes: false
+      render_box_intrinsics: false
+
 analyzer:
   language:
     strict-casts: true
@@ -24,6 +34,7 @@ analyzer:
     # something (https://github.com/flutter/flutter/issues/143312)
     deprecated_member_use: ignore
     deprecated_member_use_from_same_package: ignore
+    plugins_in_inner_options: ignore
   exclude:
     - "bin/cache/**"
       # Ignore protoc generated files
