@@ -190,6 +190,100 @@ void main() {
     },
   );
 
+  testWidgets('Local FloatingActionButtonTheme are used', (WidgetTester tester) async {
+    const backgroundColor = Color(0x00000001);
+    const foregroundColor = Color(0x00000002);
+    const splashColor = Color(0x00000003);
+    const double elevation = 7;
+    const double disabledElevation = 1;
+    const double highlightElevation = 13;
+    const ShapeBorder shape = StadiumBorder();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: FloatingActionButtonTheme(
+          data: const FloatingActionButtonThemeData(
+            backgroundColor: backgroundColor,
+            foregroundColor: foregroundColor,
+            splashColor: splashColor,
+            elevation: elevation,
+            disabledElevation: disabledElevation,
+            highlightElevation: highlightElevation,
+            shape: shape,
+          ),
+          child: Scaffold(
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {},
+              child: const Icon(Icons.add),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(_getRawMaterialButton(tester).fillColor, backgroundColor);
+    expect(_getRichText(tester).text.style!.color, foregroundColor);
+    expect(_getRawMaterialButton(tester).elevation, elevation);
+    expect(_getRawMaterialButton(tester).disabledElevation, disabledElevation);
+    expect(_getRawMaterialButton(tester).highlightElevation, highlightElevation);
+    expect(_getRawMaterialButton(tester).shape, shape);
+    expect(_getRawMaterialButton(tester).splashColor, splashColor);
+  });
+
+  testWidgets(
+    'Local FloatingActionButtonTheme takes priority over ThemeData.floatingActionButtonTheme',
+    (WidgetTester tester) async {
+      const backgroundColor = Color(0x00000001);
+      const foregroundColor = Color(0x00000002);
+      const splashColor = Color(0x00000003);
+      const double elevation = 7;
+      const double disabledElevation = 1;
+      const double highlightElevation = 13;
+      const ShapeBorder shape = StadiumBorder();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData().copyWith(
+            floatingActionButtonTheme: const FloatingActionButtonThemeData(
+              backgroundColor: Color(0x00000004),
+              foregroundColor: Color(0x00000005),
+              splashColor: Color(0x00000006),
+              elevation: 23,
+              disabledElevation: 11,
+              highlightElevation: 43,
+              shape: BeveledRectangleBorder(),
+            ),
+          ),
+          home: FloatingActionButtonTheme(
+            data: const FloatingActionButtonThemeData(
+              backgroundColor: backgroundColor,
+              foregroundColor: foregroundColor,
+              splashColor: splashColor,
+              elevation: elevation,
+              disabledElevation: disabledElevation,
+              highlightElevation: highlightElevation,
+              shape: shape,
+            ),
+            child: Scaffold(
+              floatingActionButton: FloatingActionButton(
+                onPressed: () {},
+                child: const Icon(Icons.add),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(_getRawMaterialButton(tester).fillColor, backgroundColor);
+      expect(_getRichText(tester).text.style!.color, foregroundColor);
+      expect(_getRawMaterialButton(tester).elevation, elevation);
+      expect(_getRawMaterialButton(tester).disabledElevation, disabledElevation);
+      expect(_getRawMaterialButton(tester).highlightElevation, highlightElevation);
+      expect(_getRawMaterialButton(tester).shape, shape);
+      expect(_getRawMaterialButton(tester).splashColor, splashColor);
+    },
+  );
+
   testWidgets('FloatingActionButton uses a custom shape when specified in the theme', (
     WidgetTester tester,
   ) async {
