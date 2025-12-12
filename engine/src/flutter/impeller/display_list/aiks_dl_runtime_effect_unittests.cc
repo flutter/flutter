@@ -486,15 +486,22 @@ TEST_P(AiksTest, CombineBlurAndMatrix) {
   auto texture = CreateTextureForFixture("blend_mode_src.png");
   auto image = DlImageImpeller::Make(texture);
   Scalar sigma = 20.0f;
+  Scalar rotation = 0.0f;
 
   auto callback = [&]() -> sk_sp<DisplayList> {
     if (AiksTest::ImGuiBegin("Controls", nullptr,
                              ImGuiWindowFlags_AlwaysAutoResize)) {
       ImGui::SliderFloat("sigma", &sigma, 0, 50);
+      ImGui::SliderFloat("rotation", &rotation, 0, 360);
       ImGui::End();
     }
 
     DisplayListBuilder builder;
+    Scalar center_x = 100 + image->width() / 2.0f;
+    Scalar center_y = 100 + image->height() / 2.0f;
+    builder.Translate(center_x, center_y);
+    builder.Rotate(rotation);
+    builder.Translate(-center_x, -center_y);
 
     // First input: Blur
     auto blur = DlImageFilter::MakeBlur(sigma, sigma, DlTileMode::kDecal);
