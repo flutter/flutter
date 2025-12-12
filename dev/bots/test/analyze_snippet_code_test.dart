@@ -129,7 +129,7 @@ void main() {
       'test/analyze-snippet-code-test-input',
     ]);
     expect(process.stdout, isEmpty);
-    final String output = process.stderr.toString();
+    final output = process.stderr.toString();
     // Should detect that unusedVariable and neverUsed are not referenced
     expect(output, contains('unused_examples_can_assume.dart'));
     expect(output, contains('Unused "Examples can assume:" declaration'));
@@ -147,7 +147,7 @@ void main() {
       'test/analyze-snippet-code-test-input',
     ]);
     expect(process.stdout, isEmpty);
-    final String output = process.stderr.toString();
+    final output = process.stderr.toString();
     // Should detect that the imports are not used
     expect(output, contains('unused_imports_examples_can_assume.dart'));
     expect(output, contains('Unused "Examples can assume:" import'));
