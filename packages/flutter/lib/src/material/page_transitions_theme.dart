@@ -720,48 +720,6 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   }
 }
 
-/// Used by [PageTransitionsTheme] to define a horizontal [MaterialPageRoute]
-/// page transition animation that matches native iOS page transitions.
-///
-/// See also:
-///
-///  * [FadeUpwardsPageTransitionsBuilder], which defines a page transition
-///    that's similar to the one provided by Android O.
-///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
-///    that's similar to the one provided by Android P.
-///  * [ZoomPageTransitionsBuilder], which defines the default page transition
-///    that's similar to the one provided in Android Q.
-///  * [PredictiveBackPageTransitionsBuilder], which defines a page
-///    transition that allows peeking behind the current route on Android.
-class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
-  /// Constructs a page transition animation that matches the iOS transition.
-  const CupertinoPageTransitionsBuilder();
-
-  @override
-  Duration get transitionDuration => CupertinoRouteTransitionMixin.kTransitionDuration;
-
-  @override
-  DelegatedTransitionBuilder? get delegatedTransition =>
-      CupertinoPageTransition.delegatedTransition;
-
-  @override
-  Widget buildTransitions<T>(
-    PageRoute<T> route,
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
-    return CupertinoRouteTransitionMixin.buildPageTransitions<T>(
-      route,
-      context,
-      animation,
-      secondaryAnimation,
-      child,
-    );
-  }
-}
-
 /// Defines the page transition animations used by [MaterialPageRoute]
 /// for different [TargetPlatform]s.
 ///
