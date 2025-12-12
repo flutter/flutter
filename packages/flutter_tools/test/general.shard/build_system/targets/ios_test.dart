@@ -11,9 +11,11 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
@@ -1328,6 +1330,104 @@ void main() {
 
       expect(processManager, hasNoRemainingExpectations);
     });
+
+    testUsingContext(
+      'skips codesigning in pre-action',
+      () async {
+        binary.createSync(recursive: true);
+        final Directory projectDirectory = fileSystem.systemTempDirectory.childDirectory(
+          'my_project',
+        );
+        projectDirectory.childFile('pubspec.yaml').createSync(recursive: true);
+        projectDirectory.childDirectory('ios').createSync();
+        projectDirectory
+            .childDirectory('ios')
+            .childDirectory('Flutter')
+            .childDirectory('ephemeral')
+            .childDirectory('Packages')
+            .childDirectory('.packages')
+            .childDirectory('FlutterFramework')
+            .createSync(recursive: true);
+
+        final environment = Environment.test(
+          fileSystem.currentDirectory,
+          processManager: processManager,
+          artifacts: artifacts,
+          logger: logger,
+          fileSystem: fileSystem,
+          outputDir: outputDir,
+          projectDir: projectDirectory,
+          defines: <String, String>{
+            kIosArchs: 'arm64',
+            kSdkRoot: 'path/to/iPhoneOS.sdk',
+            kCodesignIdentity: 'ABC123',
+            kXcodeBuildScript: 'prepare',
+          },
+        );
+
+        processManager.addCommands(<FakeCommand>[
+          copyPhysicalFrameworkCommand,
+          lipoCommandNonFatResult,
+          lipoVerifyArm64Command,
+        ]);
+        const Target target = DebugUnpackIOS();
+        for (final Target dep in target.dependencies) {
+          await dep.build(environment);
+        }
+        await target.build(environment);
+
+        expect(processManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{
+        ProcessManager: () => processManager,
+        FileSystem: () => fileSystem,
+        Artifacts: () => artifacts,
+        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+      },
+    );
+
+    testUsingContext(
+      'can be skipped during build with Swift Package Manager',
+      () async {
+        binary.createSync(recursive: true);
+        final Directory projectDirectory = fileSystem.systemTempDirectory.childDirectory(
+          'my_project',
+        );
+        projectDirectory.childFile('pubspec.yaml').createSync(recursive: true);
+        projectDirectory.childDirectory('ios').createSync();
+        projectDirectory
+            .childDirectory('ios')
+            .childDirectory('Flutter')
+            .childDirectory('ephemeral')
+            .childDirectory('Packages')
+            .childDirectory('.packages')
+            .childDirectory('FlutterFramework')
+            .createSync(recursive: true);
+        final environment = Environment.test(
+          fileSystem.currentDirectory,
+          processManager: processManager,
+          artifacts: artifacts,
+          logger: logger,
+          fileSystem: fileSystem,
+          outputDir: outputDir,
+          projectDir: projectDirectory,
+          defines: <String, String>{
+            kIosArchs: 'arm64',
+            kSdkRoot: 'path/to/iPhoneOS.sdk',
+            kCodesignIdentity: 'ABC123',
+            kXcodeBuildScript: 'build',
+          },
+        );
+
+        const Target target = DebugUnpackIOS();
+        expect(await target.canSkip(environment), isTrue);
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+      },
+    );
   });
 
   group('DebugIosLLDBInit', () {
@@ -1551,10 +1651,17 @@ flutter:
 }
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
-  FakeXcodeProjectInterpreter({this.isInstalled = true, this.schemes = const <String>['Runner']});
+  FakeXcodeProjectInterpreter({
+    this.isInstalled = true,
+    this.version,
+    this.schemes = const <String>['Runner'],
+  });
 
   @override
   final bool isInstalled;
+
+  @override
+  final Version? version;
 
   List<String> schemes;
 
