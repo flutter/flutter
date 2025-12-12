@@ -1329,13 +1329,19 @@ void Shell::OnPlatformViewMarkTextureFrameAvailable(int64_t texture_id) {
         texture->MarkNewFrameAvailable();
       });
 
-  // Schedule a new frame without having to rebuild the layer tree.
-  fml::TaskRunner::RunNowOrPostTask(task_runners_.GetUITaskRunner(),
-                                    [engine = engine_->GetWeakPtr()]() {
-                                      if (engine) {
-                                        engine->ScheduleFrame(false);
-                                      }
-                                    });
+  // Notify the framework that a texture has new content available.
+  // This marks the texture render object as needing paint, ensuring the view
+  // containing the texture is recomposited even if no other render objects
+  // are dirty. Also schedule a new frame without having to rebuild the layer
+  // tree.
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners_.GetUITaskRunner(),
+      [engine = engine_->GetWeakPtr(), texture_id]() {
+        if (engine) {
+          engine->TextureFrameAvailable(texture_id);
+          engine->ScheduleFrame(false);
+        }
+      });
 }
 
 // |PlatformView::Delegate|

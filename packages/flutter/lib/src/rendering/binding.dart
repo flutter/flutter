@@ -22,6 +22,7 @@ import 'debug.dart';
 import 'mouse_tracker.dart';
 import 'object.dart';
 import 'service_extensions.dart';
+import 'texture.dart';
 import 'view.dart';
 
 export 'package:flutter/gestures.dart' show HitTestResult;
@@ -58,12 +59,54 @@ mixin RendererBinding
       ..onMetricsChanged = handleMetricsChanged
       ..onTextScaleFactorChanged = handleTextScaleFactorChanged
       ..onPlatformBrightnessChanged = handlePlatformBrightnessChanged;
+    _initTextureFrameCallback();
     addPersistentFrameCallback(_handlePersistentFrameCallback);
     initMouseTracker();
     if (kIsWeb) {
       addPostFrameCallback(_handleWebFirstFrame, debugLabel: 'RendererBinding.webFirstFrame');
     }
     rootPipelineOwner.attach(_manifold);
+  }
+
+  // Registry mapping texture IDs to their TextureBox render objects.
+  // Used to mark textures dirty when the engine notifies us of new frames.
+  @visibleForTesting
+  final Map<int, TextureBox> textureRegistry = <int, TextureBox>{};
+
+  /// Registers a [TextureBox] so it can be marked dirty when its backing
+  /// texture has a new frame available.
+  ///
+  /// This is called automatically by [TextureBox] when it is attached.
+  void registerTexture(int textureId, TextureBox textureBox) {
+    textureRegistry[textureId] = textureBox;
+  }
+
+  /// Unregisters a [TextureBox] from the texture registry.
+  ///
+  /// This is called automatically by [TextureBox] when it is detached.
+  void unregisterTexture(int textureId) {
+    textureRegistry.remove(textureId);
+  }
+
+  void _initTextureFrameCallback() {
+    // Register for texture frame availability notifications from the engine.
+    // This callback is invoked when MarkTextureFrameAvailable is called,
+    // allowing the framework to mark the corresponding texture render object
+    // as needing paint even when no other render objects are dirty.
+    platformDispatcher.onTextureFrameAvailable = handleTextureFrameAvailable;
+  }
+
+  /// Called when the engine notifies that a texture has a new frame available.
+  ///
+  /// This marks the corresponding [TextureBox] as needing paint.
+  @visibleForTesting
+  void handleTextureFrameAvailable(int textureId) {
+    final TextureBox? textureBox = textureRegistry[textureId];
+    if (textureBox != null && textureBox.attached) {
+      // Mark the texture as needing paint without scheduling a frame.
+      // The frame is already scheduled by the engine via ScheduleFrame(false).
+      textureBox.markNeedsPaint();
+    }
   }
 
   /// The current [RendererBinding], if one has been created.
@@ -628,13 +671,36 @@ mixin RendererBinding
   void drawFrame() {
     rootPipelineOwner.flushLayout();
     rootPipelineOwner.flushCompositingBits();
+    // Collect views that need compositing before flushPaint clears the dirty flags.
+    final viewsNeedingPaint = <RenderView>[];
+    for (final RenderView renderView in renderViews) {
+      if (_forceCompositing || (renderView.owner?.needsPaint ?? false)) {
+        viewsNeedingPaint.add(renderView);
+      }
+    }
+    _forceCompositing = false;
     rootPipelineOwner.flushPaint();
     if (sendFramesToEngine) {
-      for (final RenderView renderView in renderViews) {
+      for (final renderView in viewsNeedingPaint) {
         renderView.compositeFrame(); // this sends the bits to the GPU
       }
       rootPipelineOwner.flushSemantics(); // this sends the semantics to the OS.
       _firstFrameSent = true;
+    }
+  }
+
+  // Force compositing all views when returning to the foreground.
+  // This ensures views are recomposited after the app was paused/hidden.
+  bool _forceCompositing = false;
+
+  @override
+  void handleAppLifecycleStateChanged(AppLifecycleState state) {
+    final bool framesEnabledBefore = framesEnabled;
+    super.handleAppLifecycleStateChanged(state);
+    // When transitioning from a state where frames were disabled to one where
+    // they are enabled, force all views to be composited on the next frame.
+    if (!framesEnabledBefore && framesEnabled) {
+      _forceCompositing = true;
     }
   }
 
