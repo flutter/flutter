@@ -99,7 +99,7 @@ After creating and submitting your redirect, it is recommended to test it to ens
 
 Here is how to validate your redirect:
 
-1. Open the link in a private/incognito browser window using:
+1. Open the link in a private/incognito browser window.
 2. Confirm that the redirect takes you to the correct and expected URL.
 3. Test the redirect on multiple browsers if possible (Chrome, Firefox, Safari).
 4. Validate that the redirect works even if the destination includes query parameters.
