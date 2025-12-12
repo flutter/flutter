@@ -33,10 +33,9 @@ const AnimationStyle _kDefaultAnimationStyle = AnimationStyle(
 
 /// Signature for building the tooltip overlay child.
 ///
-/// The `animation` parameter is an [Animation] that can be used to animate
-/// the appearance and disappearance of the tooltip. Its value goes from 0.0
-/// (transparent/hidden) to 1.0 (opaque/fully visible) when the tooltip is
-/// appearing, and from 1.0 to 0.0 when it is disappearing.
+/// The `animation` parameter is an [Animation] that maps to the tooltip's show
+/// and hide animation. Its value goes from 0.0 to 1.0 when the tooltip is
+/// shown, and from 1.0 to 0.0 when it is hidden.
 ///
 /// This animation can be used to create custom transitions for the tooltip,
 /// such as fading or scaling, by wrapping the tooltip's content in a
@@ -97,7 +96,7 @@ class TooltipPositionContext {
     required this.targetSize,
     required this.tooltipSize,
     required this.verticalOffset,
-    required this.preferBelow,
+    this.preferBelow = true,
     this.overlaySize = Size.infinite,
   });
 
@@ -110,14 +109,14 @@ class TooltipPositionContext {
   /// The size of the tooltip itself.
   final Size tooltipSize;
 
-  /// The size of the overlay within which the tooltip is displayed.
-  final Size overlaySize;
-
   /// The configured vertical offset.
   final double verticalOffset;
 
   /// Whether the tooltip prefers to be positioned below the target.
   final bool preferBelow;
+
+  /// The size of the overlay within which the tooltip is displayed.
+  final Size overlaySize;
 
   @override
   bool operator ==(Object other) {
@@ -154,7 +153,7 @@ class TooltipPositionContext {
 ///     a pointer must hover over a tooltip's widget before the tooltip
 ///     will be shown.
 enum TooltipTriggerMode {
-  /// Tooltip will only be shown by calling `ensureTooltipVisible`.
+  /// Tooltip will only be shown by calling [RawTooltipState.ensureTooltipVisible].
   manual,
 
   /// Tooltip will be shown after a long press.
@@ -255,7 +254,6 @@ class RawTooltip extends StatefulWidget {
     super.key,
     required this.semanticsTooltip,
     required this.tooltipBuilder,
-    this.preferBelow = true,
     this.excludeFromSemantics = false,
     this.waitDuration = Duration.zero,
     this.showDuration = const Duration(milliseconds: 1500),
@@ -280,17 +278,6 @@ class RawTooltip extends StatefulWidget {
   /// the tooltip overlay child show/hide animation, for example to fade the
   /// tooltip in and out.
   final TooltipComponentBuilder tooltipBuilder;
-
-  /// Whether the tooltip defaults to being displayed below the widget.
-  ///
-  /// If there is insufficient space to display the tooltip in
-  /// the preferred direction, the tooltip will be displayed in the opposite
-  /// direction.
-  ///
-  /// If [positionDelegate] is provided, this property will be ignored.
-  ///
-  /// Defaults to true.
-  final bool preferBelow;
 
   /// Whether the tooltip's [semanticsTooltip] should be excluded from
   /// the semantics tree.
@@ -453,6 +440,9 @@ class RawTooltip extends StatefulWidget {
 
   /// The widget below this widget in the tree.
   ///
+  /// The widget returned in [tooltipBuilder] will be shown when the user hovers
+  /// over this child widget.
+  ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
@@ -488,15 +478,6 @@ class RawTooltip extends StatefulWidget {
         semanticsTooltip,
         showName: semanticsTooltip.isEmpty,
         defaultValue: semanticsTooltip.isEmpty ? null : kNoDefaultValue,
-      ),
-    );
-    properties.add(
-      FlagProperty(
-        'position',
-        value: preferBelow,
-        ifTrue: 'below',
-        ifFalse: 'above',
-        showName: true,
       ),
     );
     properties.add(
@@ -778,7 +759,7 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
   /// Shows the tooltip if it is not already visible.
   ///
   /// After made visible by this method, the tooltip does not automatically
-  /// dismiss after `waitDuration` until the user dismisses/re-triggers it, or
+  /// dismiss after [RawTooltip.waitDuration] until the user dismisses/re-triggers it, or
   /// [RawTooltip.dismissAllToolTips] is called.
   ///
   /// Returns `false` when the tooltip shouldn't be shown or when the tooltip
@@ -837,7 +818,6 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
         delegate: _TooltipPositionDelegate(
           target: target,
           targetSize: layoutInfo.childSize,
-          preferBelow: widget.preferBelow,
           positionDelegate: widget.positionDelegate,
         ),
         child: tooltip,
@@ -908,12 +888,7 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
 /// below a target specified in the global coordinate system.
 class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   /// Creates a delegate for computing the layout of a tooltip.
-  _TooltipPositionDelegate({
-    required this.target,
-    required this.targetSize,
-    required this.preferBelow,
-    this.positionDelegate,
-  });
+  _TooltipPositionDelegate({required this.target, required this.targetSize, this.positionDelegate});
 
   /// The offset of the target the tooltip is positioned near in the global
   /// coordinate system.
@@ -921,12 +896,6 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
 
   /// The size of the target widget that triggers the tooltip.
   final Size targetSize;
-
-  /// Whether the tooltip is displayed below its widget by default.
-  ///
-  /// If there is insufficient space to display the tooltip in the preferred
-  /// direction, the tooltip will be displayed in the opposite direction.
-  final bool preferBelow;
 
   /// A custom position delegate function for computing where the tooltip should be positioned.
   ///
@@ -947,7 +916,6 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
           tooltipSize: childSize,
           overlaySize: size,
           verticalOffset: 0.0,
-          preferBelow: preferBelow,
         ),
       );
     }
@@ -955,7 +923,7 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
       size: size,
       childSize: childSize,
       target: target,
-      preferBelow: preferBelow,
+      preferBelow: true,
     );
   }
 
@@ -963,7 +931,6 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   bool shouldRelayout(_TooltipPositionDelegate oldDelegate) {
     return target != oldDelegate.target ||
         targetSize != oldDelegate.targetSize ||
-        preferBelow != oldDelegate.preferBelow ||
         positionDelegate != oldDelegate.positionDelegate;
   }
 }

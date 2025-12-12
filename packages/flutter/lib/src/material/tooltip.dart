@@ -385,7 +385,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   static const bool _defaultEnableFeedback = true;
   static const TextAlign _defaultTextAlign = TextAlign.start;
 
-  final GlobalKey<RawTooltipState> _tooltipKey = GlobalKey();
+  final GlobalKey<RawTooltipState> _tooltipKey = GlobalKey<RawTooltipState>();
 
   late TooltipThemeData _tooltipTheme;
 
@@ -437,13 +437,15 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   Offset _getDefaultPositionDelegate(TooltipPositionContext context) {
     final double effectiveVerticalOffset =
         widget.verticalOffset ?? _tooltipTheme.verticalOffset ?? _defaultVerticalOffset;
+    final bool effectivePreferBelow =
+        widget.preferBelow ?? _tooltipTheme.preferBelow ?? _defaultPreferBelow;
     final resolvedContext = TooltipPositionContext(
       target: context.target,
       targetSize: context.targetSize,
       tooltipSize: context.tooltipSize,
       overlaySize: context.overlaySize,
       verticalOffset: effectiveVerticalOffset,
-      preferBelow: context.preferBelow,
+      preferBelow: effectivePreferBelow,
     );
     return widget.positionDelegate?.call(resolvedContext) ??
         positionDependentBox(
@@ -451,7 +453,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
           childSize: context.tooltipSize,
           target: context.target,
           verticalOffset: effectiveVerticalOffset,
-          preferBelow: context.preferBelow,
+          preferBelow: effectivePreferBelow,
         );
   }
 
@@ -512,7 +514,6 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         ignoring: widget.ignorePointer ?? widget.message != null,
         child: FadeTransition(opacity: animation, child: tooltipBox),
       ),
-      preferBelow: widget.preferBelow ?? _tooltipTheme.preferBelow ?? _defaultPreferBelow,
       excludeFromSemantics:
           widget.excludeFromSemantics ??
           _tooltipTheme.excludeFromSemantics ??
@@ -558,17 +559,14 @@ class _TooltipBox extends StatelessWidget {
       child: DefaultTextStyle(
         style: textStyle,
         textAlign: textAlign,
-        child: Semantics(
-          container: true,
-          child: Container(
-            decoration: decoration,
-            padding: padding,
-            margin: margin,
-            child: Center(
-              widthFactor: 1.0,
-              heightFactor: 1.0,
-              child: Text.rich(richMessage, style: textStyle, textAlign: textAlign),
-            ),
+        child: Container(
+          decoration: decoration,
+          padding: padding,
+          margin: margin,
+          child: Center(
+            widthFactor: 1.0,
+            heightFactor: 1.0,
+            child: Text.rich(richMessage, style: textStyle, textAlign: textAlign),
           ),
         ),
       ),

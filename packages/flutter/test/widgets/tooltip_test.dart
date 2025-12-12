@@ -46,7 +46,6 @@ void main() {
                         semanticsTooltip: tooltipText,
                         tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                             const Placeholder(child: Text(tooltipText)),
-                        preferBelow: false,
                         child: const SizedBox.shrink(),
                       ),
                     ),
@@ -108,7 +107,6 @@ void main() {
                                 child: SizedBox(height: 20, child: Text(tooltipText)),
                               ),
                             ),
-                        preferBelow: false,
                         child: const SizedBox.shrink(),
                       ),
                     ),
@@ -166,7 +164,12 @@ void main() {
                             const Placeholder(
                               child: SizedBox(height: 100, child: Text(tooltipText)),
                             ),
-                        preferBelow: false,
+                        positionDelegate: (TooltipPositionContext context) => positionDependentBox(
+                          size: context.overlaySize,
+                          childSize: context.tooltipSize,
+                          target: context.target,
+                          preferBelow: false,
+                        ),
                         child: const SizedBox.shrink(),
                       ),
                     ),
@@ -226,7 +229,12 @@ void main() {
                             const Placeholder(
                               child: SizedBox(height: 190, child: Text(tooltipText)),
                             ),
-                        preferBelow: false,
+                        positionDelegate: (TooltipPositionContext context) => positionDependentBox(
+                          size: context.overlaySize,
+                          childSize: context.tooltipSize,
+                          target: context.target,
+                          preferBelow: false,
+                        ),
                         child: const SizedBox.shrink(),
                       ),
                     ),
@@ -1729,7 +1737,6 @@ void main() {
 
     expect(description, <String>[
       '"message"',
-      'position: below',
       'wait duration: 0:00:00.000000',
       'show duration: 0:00:01.500000',
       'exit duration: 0:00:00.100000',
@@ -1749,7 +1756,6 @@ void main() {
       waitDuration: const Duration(seconds: 1),
       showDuration: const Duration(seconds: 2),
       excludeFromSemantics: true,
-      preferBelow: false,
       triggerMode: TooltipTriggerMode.manual,
       child: const SizedBox.shrink(),
     ).debugFillProperties(builder);
@@ -1761,7 +1767,6 @@ void main() {
 
     expect(description, <String>[
       '"message"',
-      'position: above',
       'semantics: excluded',
       'wait duration: 0:00:01.000000',
       'show duration: 0:00:02.000000',
