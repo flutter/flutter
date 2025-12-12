@@ -94,11 +94,6 @@ public class FlutterImageView extends View implements RenderSurface {
     setAlpha(0.0f);
   }
 
-  @Override
-  protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-    FlutterMeasureSpec.onMeasure(widthMeasureSpec, heightMeasureSpec, this::setMeasuredDimension);
-  }
-
   private static void logW(String format, Object... args) {
     Log.w(TAG, String.format(Locale.US, format, args));
   }
