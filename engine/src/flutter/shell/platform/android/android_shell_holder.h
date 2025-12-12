@@ -7,16 +7,22 @@
 
 #include <memory>
 
+#include "flutter/common/settings.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/common/run_configuration.h"
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/platform/android/android_rendering_selector.h"
 #include "flutter/shell/platform/android/apk_asset_provider.h"
+#include "flutter/shell/platform/android/embedder_bridge.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
 
 namespace flutter {
+
+namespace shell {
+class Shell;
+}  // namespace shell
 
 //----------------------------------------------------------------------------
 /// @brief      This is the Android owner of the core engine Shell.
@@ -100,25 +106,21 @@ class AndroidShellHolder {
   void NotifyLowMemoryWarning();
 
   const std::shared_ptr<PlatformMessageHandler>& GetPlatformMessageHandler()
-      const {
-    return shell_->GetPlatformMessageHandler();
-  }
+      const;
 
   void UpdateDisplayMetrics();
-
-  // Visible for testing.
-  const std::unique_ptr<Shell>& GetShellForTesting() const { return shell_; }
 
  private:
   const flutter::Settings settings_;
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
   fml::WeakPtr<PlatformViewAndroid> platform_view_;
   std::shared_ptr<ThreadHost> thread_host_;
-  std::unique_ptr<Shell> shell_;
+  std::unique_ptr<EmbedderBridge> embedder_bridge_;
   bool is_valid_ = false;
   uint64_t next_pointer_flow_id_ = 0;
   std::unique_ptr<APKAssetProvider> apk_asset_provider_;
   const AndroidRenderingAPI android_rendering_api_;
+  shell::Shell* shell_ = nullptr;
 
   //----------------------------------------------------------------------------
   /// @brief      Constructor with its components injected.
