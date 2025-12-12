@@ -775,7 +775,9 @@ class _SnippetChecker {
         if (preambleLineNumbers.isNotEmpty) {
           for (final preambleLine in preambleLineNumbers) {
             if (!usedPreambleLineNumbers.contains(preambleLine.line)) {
-              final String errorType = preambleLine.code.startsWith('import ') ? 'import' : 'declaration';
+              final String errorType = preambleLine.code.startsWith('import ')
+                  ? 'import'
+                  : 'declaration';
               errors.add(
                 _SnippetCheckerException(
                   'Unused "Examples can assume:" $errorType. This can be cleaned up.',
@@ -1037,7 +1039,13 @@ class _SnippetChecker {
       r'(?:final|late|const|static|var)?\s+(?:[\w<>.,\s]*?\s+)*(\w+)(?:\s*[=;:]|$)',
     );
     // Pattern to extract import prefix: import 'something' as prefix;
-    final importPrefixPattern = RegExp(r'import\s+[' "'" r'"].*?[' "'" r'"]\s+as\s+(\w+);?');
+    final importPrefixPattern = RegExp(
+      r'import\s+['
+      "'"
+      r'"].*?['
+      "'"
+      r'"]\s+as\s+(\w+);?',
+    );
 
     for (final preambleLine in preambleLines) {
       var isUsed = false;
