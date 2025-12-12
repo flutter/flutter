@@ -157,7 +157,7 @@ Future<void> testMain() async {
       await drawPictureUsingCurrentRenderer(recorder.endRecording());
 
       await matchGoldenFile(goldenFilename, region: region);
-    });
+    }, skip: isWimp); // https://github.com/flutter/flutter/issues/175431
   }
 }
 
