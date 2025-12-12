@@ -233,7 +233,7 @@
               }];
     FlutterMethodChannel* channel =
         [FlutterMethodChannel methodChannelWithName:@"flutter/status_bar"
-                                    binaryMessenger:self.binaryMessenger
+                                    binaryMessenger:engine.binaryMessenger
                                               codec:[FlutterJSONMethodCodec sharedInstance]];
     [channel invokeMethod:@"handleScrollToTop" arguments:nil];
   }
