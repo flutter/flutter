@@ -720,9 +720,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       if (flutterSemanticsTree.containsKey(ROOT_NODE_ID)) {
         result.addChild(rootAccessibilityView, ROOT_NODE_ID);
       }
-      if (Build.VERSION.SDK_INT >= API_LEVELS.API_24) {
-        result.setImportantForAccessibility(false);
-      }
+      result.setImportantForAccessibility(false);
       return result;
     }
 
