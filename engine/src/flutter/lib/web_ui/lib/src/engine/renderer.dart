@@ -150,6 +150,7 @@ abstract class Renderer {
     double sigmaX = 0.0,
     double sigmaY = 0.0,
     ui.TileMode? tileMode,
+    ui.Rect? bounds,
   });
   ui.ImageFilter createDilateImageFilter({double radiusX = 0.0, double radiusY = 0.0});
   ui.ImageFilter createErodeImageFilter({double radiusX = 0.0, double radiusY = 0.0});

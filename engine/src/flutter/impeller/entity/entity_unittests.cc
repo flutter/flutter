@@ -1062,7 +1062,7 @@ TEST_P(EntityTest, GaussianBlurFilter) {
     switch (selected_pass_variation) {
       case 0:
         blur = std::make_shared<GaussianBlurFilterContents>(
-            blur_sigma_x.sigma, blur_sigma_y.sigma,
+            blur_sigma_x.sigma, blur_sigma_y.sigma, /*bounds=*/std::nullopt,
             tile_modes[selected_tile_mode], blur_styles[selected_blur_style],
             /*geometry=*/nullptr);
         blur->SetInputs({FilterInput::Make(input)});
@@ -1070,7 +1070,8 @@ TEST_P(EntityTest, GaussianBlurFilter) {
       case 1:
         blur = FilterContents::MakeGaussianBlur(
             FilterInput::Make(input), blur_sigma_x, blur_sigma_y,
-            tile_modes[selected_tile_mode], blur_styles[selected_blur_style]);
+            /*bounds=*/std::nullopt, tile_modes[selected_tile_mode],
+            blur_styles[selected_blur_style]);
         break;
     };
     FML_CHECK(blur);

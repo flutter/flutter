@@ -39,6 +39,7 @@ class SkwasmRenderer extends Renderer {
     double sigmaX = 0.0,
     double sigmaY = 0.0,
     ui.TileMode? tileMode,
+    ui.Rect? bounds,
   }) {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }

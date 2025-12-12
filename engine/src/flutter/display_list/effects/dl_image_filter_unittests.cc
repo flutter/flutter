@@ -176,25 +176,25 @@ static void TestBounds(const DlImageFilter& filter,
 }
 
 TEST(DisplayListImageFilter, BlurConstructor) {
-  DlBlurImageFilter filter(5.0, 6.0, DlTileMode::kMirror);
+  DlBlurImageFilter filter(5.0, 6.0, std::nullopt, DlTileMode::kMirror);
 }
 
 TEST(DisplayListImageFilter, BlurShared) {
-  DlBlurImageFilter filter(5.0, 6.0, DlTileMode::kMirror);
+  DlBlurImageFilter filter(5.0, 6.0, std::nullopt, DlTileMode::kMirror);
 
   ASSERT_NE(filter.shared().get(), &filter);
   ASSERT_EQ(*filter.shared(), filter);
 }
 
 TEST(DisplayListImageFilter, BlurAsBlur) {
-  DlBlurImageFilter filter(5.0, 6.0, DlTileMode::kMirror);
+  DlBlurImageFilter filter(5.0, 6.0, std::nullopt, DlTileMode::kMirror);
 
   ASSERT_NE(filter.asBlur(), nullptr);
   ASSERT_EQ(filter.asBlur(), &filter);
 }
 
 TEST(DisplayListImageFilter, BlurContents) {
-  DlBlurImageFilter filter(5.0, 6.0, DlTileMode::kMirror);
+  DlBlurImageFilter filter(5.0, 6.0, std::nullopt, DlTileMode::kMirror);
 
   ASSERT_EQ(filter.sigma_x(), 5.0);
   ASSERT_EQ(filter.sigma_y(), 6.0);
@@ -202,15 +202,22 @@ TEST(DisplayListImageFilter, BlurContents) {
 }
 
 TEST(DisplayListImageFilter, BlurEquals) {
-  DlBlurImageFilter filter1(5.0, 6.0, DlTileMode::kMirror);
-  DlBlurImageFilter filter2(5.0, 6.0, DlTileMode::kMirror);
+  DlBlurImageFilter filter1(5.0, 6.0, std::nullopt, DlTileMode::kMirror);
+  DlBlurImageFilter filter2(5.0, 6.0, std::nullopt, DlTileMode::kMirror);
 
   TestEquals(filter1, filter2);
+
+  DlBlurImageFilter filter3(5.0, 6.0, DlRect::MakeLTRB(1, 2, 3, 4),
+                            DlTileMode::kMirror);
+  DlBlurImageFilter filter4(5.0, 6.0, DlRect::MakeLTRB(1, 2, 3, 4),
+                            DlTileMode::kMirror);
+
+  TestEquals(filter3, filter4);
 }
 
 TEST(DisplayListImageFilter, BlurWithLocalMatrixEquals) {
-  DlBlurImageFilter filter1(5.0, 6.0, DlTileMode::kMirror);
-  DlBlurImageFilter filter2(5.0, 6.0, DlTileMode::kMirror);
+  DlBlurImageFilter filter1(5.0, 6.0, std::nullopt, DlTileMode::kMirror);
+  DlBlurImageFilter filter2(5.0, 6.0, std::nullopt, DlTileMode::kMirror);
 
   DlMatrix local_matrix = DlMatrix::MakeTranslation({10, 10});
   TestEquals(*filter1.makeWithLocalMatrix(local_matrix),
@@ -218,18 +225,25 @@ TEST(DisplayListImageFilter, BlurWithLocalMatrixEquals) {
 }
 
 TEST(DisplayListImageFilter, BlurNotEquals) {
-  DlBlurImageFilter filter1(5.0, 6.0, DlTileMode::kMirror);
-  DlBlurImageFilter filter2(7.0, 6.0, DlTileMode::kMirror);
-  DlBlurImageFilter filter3(5.0, 8.0, DlTileMode::kMirror);
-  DlBlurImageFilter filter4(5.0, 6.0, DlTileMode::kRepeat);
+  DlBlurImageFilter filter1(5.0, 6.0, std::nullopt, DlTileMode::kMirror);
+  DlBlurImageFilter filter2(7.0, 6.0, std::nullopt, DlTileMode::kMirror);
+  DlBlurImageFilter filter3(5.0, 8.0, std::nullopt, DlTileMode::kMirror);
+  DlBlurImageFilter filter4(5.0, 6.0, std::nullopt, DlTileMode::kRepeat);
+  DlBlurImageFilter filter5(5.0, 6.0, DlRect::MakeLTRB(1, 2, 3, 4),
+                            DlTileMode::kRepeat);
+  DlBlurImageFilter filter6(5.0, 6.0, DlRect::MakeLTRB(4, 2, 3, 4),
+                            DlTileMode::kRepeat);
 
   TestNotEquals(filter1, filter2, "Sigma X differs");
   TestNotEquals(filter1, filter3, "Sigma Y differs");
   TestNotEquals(filter1, filter4, "Tile Mode differs");
+  TestNotEquals(filter4, filter5, "Bounds differs");
+  TestNotEquals(filter5, filter6, "Bounds differs");
 }
 
 TEST(DisplayListImageFilter, BlurBounds) {
-  DlBlurImageFilter filter = DlBlurImageFilter(5, 10, DlTileMode::kDecal);
+  DlBlurImageFilter filter =
+      DlBlurImageFilter(5, 10, std::nullopt, DlTileMode::kDecal);
   DlRect input_bounds = DlRect::MakeLTRB(20, 20, 80, 80);
   DlRect expected_output_bounds = input_bounds.Expand(15, 30);
   TestBounds(filter, input_bounds, expected_output_bounds);
@@ -471,7 +485,7 @@ TEST(DisplayListImageFilter, ComposeConstructor) {
                                               0.0, 0.0, 1.0, 0.0,  //
                                               0.0, 0.0, 0.0, 1.0),
                             DlImageSampling::kLinear);
-  DlBlurImageFilter inner(5.0, 6.0, DlTileMode::kMirror);
+  DlBlurImageFilter inner(5.0, 6.0, std::nullopt, DlTileMode::kMirror);
   DlComposeImageFilter filter(outer, inner);
 }
 
@@ -481,7 +495,7 @@ TEST(DisplayListImageFilter, ComposeShared) {
                                               0.0, 0.0, 1.0, 0.0,  //
                                               0.0, 0.0, 0.0, 1.0),
                             DlImageSampling::kLinear);
-  DlBlurImageFilter inner(5.0, 6.0, DlTileMode::kMirror);
+  DlBlurImageFilter inner(5.0, 6.0, std::nullopt, DlTileMode::kMirror);
   DlComposeImageFilter filter(outer, inner);
 
   ASSERT_NE(filter.shared().get(), &filter);
@@ -494,7 +508,7 @@ TEST(DisplayListImageFilter, ComposeAsCompose) {
                                               0.0, 0.0, 1.0, 0.0,  //
                                               0.0, 0.0, 0.0, 1.0),
                             DlImageSampling::kLinear);
-  DlBlurImageFilter inner(5.0, 6.0, DlTileMode::kMirror);
+  DlBlurImageFilter inner(5.0, 6.0, std::nullopt, DlTileMode::kMirror);
   DlComposeImageFilter filter(outer, inner);
 
   ASSERT_NE(filter.asCompose(), nullptr);
@@ -507,7 +521,7 @@ TEST(DisplayListImageFilter, ComposeContents) {
                                               0.0, 0.0, 1.0, 0.0,  //
                                               0.0, 0.0, 0.0, 1.0),
                             DlImageSampling::kLinear);
-  DlBlurImageFilter inner(5.0, 6.0, DlTileMode::kMirror);
+  DlBlurImageFilter inner(5.0, 6.0, std::nullopt, DlTileMode::kMirror);
   DlComposeImageFilter filter(outer, inner);
 
   ASSERT_EQ(*filter.outer().get(), outer);
@@ -520,7 +534,7 @@ TEST(DisplayListImageFilter, ComposeEquals) {
                                                0.0, 0.0, 1.0, 0.0,  //
                                                0.0, 0.0, 0.0, 1.0),
                              DlImageSampling::kLinear);
-  DlBlurImageFilter inner1(5.0, 6.0, DlTileMode::kMirror);
+  DlBlurImageFilter inner1(5.0, 6.0, std::nullopt, DlTileMode::kMirror);
   DlComposeImageFilter filter1(outer1, inner1);
 
   DlMatrixImageFilter outer2(DlMatrix::MakeRow(2.0, 0.0, 0.0, 10,   //
@@ -528,7 +542,7 @@ TEST(DisplayListImageFilter, ComposeEquals) {
                                                0.0, 0.0, 1.0, 0.0,  //
                                                0.0, 0.0, 0.0, 1.0),
                              DlImageSampling::kLinear);
-  DlBlurImageFilter inner2(5.0, 6.0, DlTileMode::kMirror);
+  DlBlurImageFilter inner2(5.0, 6.0, std::nullopt, DlTileMode::kMirror);
   DlComposeImageFilter filter2(outer1, inner1);
 
   TestEquals(filter1, filter2);
@@ -540,7 +554,7 @@ TEST(DisplayListImageFilter, ComposeWithLocalMatrixEquals) {
                                                0.0, 0.0, 1.0, 0.0,  //
                                                0.0, 0.0, 0.0, 1.0),
                              DlImageSampling::kLinear);
-  DlBlurImageFilter inner1(5.0, 6.0, DlTileMode::kMirror);
+  DlBlurImageFilter inner1(5.0, 6.0, std::nullopt, DlTileMode::kMirror);
   DlComposeImageFilter filter1(outer1, inner1);
 
   DlMatrixImageFilter outer2(DlMatrix::MakeRow(2.0, 0.0, 0.0, 10,   //
@@ -548,7 +562,7 @@ TEST(DisplayListImageFilter, ComposeWithLocalMatrixEquals) {
                                                0.0, 0.0, 1.0, 0.0,  //
                                                0.0, 0.0, 0.0, 1.0),
                              DlImageSampling::kLinear);
-  DlBlurImageFilter inner2(5.0, 6.0, DlTileMode::kMirror);
+  DlBlurImageFilter inner2(5.0, 6.0, std::nullopt, DlTileMode::kMirror);
   DlComposeImageFilter filter2(outer1, inner1);
 
   DlMatrix local_matrix = DlMatrix::MakeTranslation({10, 10});
@@ -562,14 +576,14 @@ TEST(DisplayListImageFilter, ComposeNotEquals) {
                                                0.0, 0.0, 1.0, 0.0,  //
                                                0.0, 0.0, 0.0, 1.0),
                              DlImageSampling::kLinear);
-  DlBlurImageFilter inner1(5.0, 6.0, DlTileMode::kMirror);
+  DlBlurImageFilter inner1(5.0, 6.0, std::nullopt, DlTileMode::kMirror);
 
   DlMatrixImageFilter outer2(DlMatrix::MakeRow(5.0, 0.0, 0.0, 10,   //
                                                0.5, 3.0, 0.0, 15,   //
                                                0.0, 0.0, 1.0, 0.0,  //
                                                0.0, 0.0, 0.0, 1.0),
                              DlImageSampling::kLinear);
-  DlBlurImageFilter inner2(7.0, 6.0, DlTileMode::kMirror);
+  DlBlurImageFilter inner2(7.0, 6.0, std::nullopt, DlTileMode::kMirror);
 
   DlComposeImageFilter filter1(outer1, inner1);
   DlComposeImageFilter filter2(outer2, inner1);
@@ -581,7 +595,8 @@ TEST(DisplayListImageFilter, ComposeNotEquals) {
 
 TEST(DisplayListImageFilter, ComposeBounds) {
   DlDilateImageFilter outer = DlDilateImageFilter(5, 10);
-  DlBlurImageFilter inner = DlBlurImageFilter(12, 5, DlTileMode::kDecal);
+  DlBlurImageFilter inner =
+      DlBlurImageFilter(12, 5, std::nullopt, DlTileMode::kDecal);
   DlComposeImageFilter filter = DlComposeImageFilter(outer, inner);
   DlRect input_bounds = DlRect::MakeLTRB(20, 20, 80, 80);
   DlRect expected_output_bounds = input_bounds.Expand(36, 15).Expand(5, 10);
@@ -613,7 +628,7 @@ TEST(DisplayListImageFilter, ComposeBoundsWithUnboundedInner) {
   auto expected_bounds = DlRect::MakeLTRB(5, 2, 95, 98);
 
   DlBlendColorFilter color_filter(DlColor::kRed(), DlBlendMode::kSrcOver);
-  auto outer = DlBlurImageFilter(5.0, 6.0, DlTileMode::kRepeat);
+  auto outer = DlBlurImageFilter(5.0, 6.0, std::nullopt, DlTileMode::kRepeat);
   auto inner = DlColorFilterImageFilter(color_filter.shared());
   auto composed = DlComposeImageFilter(outer.shared(), inner.shared());
 
@@ -626,7 +641,7 @@ TEST(DisplayListImageFilter, ComposeBoundsWithUnboundedOuter) {
 
   DlBlendColorFilter color_filter(DlColor::kRed(), DlBlendMode::kSrcOver);
   auto outer = DlColorFilterImageFilter(color_filter.shared());
-  auto inner = DlBlurImageFilter(5.0, 6.0, DlTileMode::kRepeat);
+  auto inner = DlBlurImageFilter(5.0, 6.0, std::nullopt, DlTileMode::kRepeat);
   auto composed = DlComposeImageFilter(outer.shared(), inner.shared());
 
   TestUnboundedBounds(composed, input_bounds, expected_bounds, expected_bounds);
@@ -651,7 +666,8 @@ TEST(DisplayListImageFilter, Issue108433) {
   auto expected_bounds = DlIRect::MakeLTRB(5, 2, 95, 98);
 
   DlBlendColorFilter dl_color_filter(DlColor::kRed(), DlBlendMode::kSrcOver);
-  auto dl_outer = DlBlurImageFilter(5.0, 6.0, DlTileMode::kRepeat);
+  auto dl_outer =
+      DlBlurImageFilter(5.0, 6.0, std::nullopt, DlTileMode::kRepeat);
   auto dl_inner = DlColorFilterImageFilter(dl_color_filter.shared());
   auto dl_compose = DlComposeImageFilter(dl_outer, dl_inner);
 
