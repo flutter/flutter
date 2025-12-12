@@ -284,7 +284,6 @@ Future<Process> startProcess(
 }) async {
   final command = '$executable ${arguments?.join(" ") ?? ""}';
   final String finalWorkingDirectory = workingDirectory ?? cwd;
-  final newEnvironment = Map<String, String>.from(environment ?? <String, String>{});
   final newEnvironment = <String, String>{
     ...?environment,
     'ANDROID_NDK_PATH': ?_discoverBestNdkPath(),
