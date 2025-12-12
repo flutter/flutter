@@ -361,7 +361,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
       compilationArgs,
     );
     if (compilerConfig.dryRun) {
-      _handleDryRunResult(environment, runResult);
+      await _handleDryRunResult(environment, runResult);
     }
   }
 
@@ -404,12 +404,12 @@ class Dart2WasmTarget extends Dart2WebTarget {
           if (compilerConfig.sourceMaps) 'main.dart.wasm.map',
         ];
 
-  void _handleDryRunResult(Environment environment, RunResult runResult) {
+  Future<void> _handleDryRunResult(Environment environment, RunResult runResult) async {
     final int exitCode = runResult.exitCode;
     final String stdout = runResult.stdout;
     final String stderr = runResult.stderr;
-    final String result;
-    String? findingsSummary;
+    String? result;
+    final Map<String, String> findingsInfo = {};
 
     if (exitCode != 0 && exitCode != 254) {
       environment.logger.printWarning('Unexpected wasm dry run failure ($exitCode):');
@@ -438,16 +438,83 @@ class Dart2WasmTarget extends Dart2WebTarget {
         'https://docs.flutter.dev/platform-integration/web/wasm\n',
       );
       result = 'findings';
-      findingsSummary = RegExp(
-        r'\(([0-9]+)\)',
-      ).allMatches(stdout).map((RegExpMatch f) => f.group(1)).join(',');
-    } else {
-      result = 'unknown';
+      final Map<String, Set<Uri>> importUriToErrorCode = {};
+      for (final String line in stdout.split('\n')) {
+        final Uri uri = Uri.parse(line.split(' ')[0]);
+        final String? errorCode = RegExp(r'\(([0-9]+)\)').firstMatch(line)?.group(1);
+        if (errorCode != null) {
+          (importUriToErrorCode[errorCode] ??= {}).add(uri);
+        }
+      }
+
+      final PackageConfig packageConfigPackages;
+      try {
+        packageConfigPackages = await loadPackageConfigWithLogging(
+          findPackageConfigFileOrDefault(environment.projectDir),
+          logger: environment.logger,
+        );
+      } on Exception {
+        _analytics.send(
+          Event.flutterWasmDryRunPackage(
+            result: result,
+            exitCode: exitCode,
+            findingsInfo: {'error': 'packageConfigNotLoaded'},
+          ),
+        );
+        return;
+      }
+
+      final Map<String, String> hostedPackages = {};
+      final Set<String> privatePackages = {};
+      for (final Package package in packageConfigPackages.packages) {
+        final String packageName = package.name;
+        if (package.root.toString().contains('hosted/pub.dev')) {
+          final String? packageVersion = RegExp(
+            r'([0-9]+\.[0-9]+\.[0-9]+)',
+          ).firstMatch(package.root.toString())?.group(1);
+          hostedPackages[packageName] = packageVersion ?? '?';
+        } else {
+          privatePackages.add(packageName);
+        }
+      }
+
+      importUriToErrorCode.forEach((String errorCode, Set<Uri> uris) {
+        final List<String> hostedPackageFindings = [];
+        var hostApp = false;
+        var privatePackage = false;
+        for (final uri in uris) {
+          final String packageName = uri.pathSegments.first;
+          final String? hostedPackageVersion = hostedPackages[packageName];
+          if (hostedPackageVersion != null) {
+            hostedPackageFindings.add('$packageName:$hostedPackageVersion');
+          } else if (privatePackages.contains(packageName)) {
+            privatePackage = true;
+          } else {
+            hostApp = true;
+          }
+        }
+        final String? hpHint = switch ((hostApp, privatePackage)) {
+          (true, true) => '-hp',
+          (true, false) => '-h',
+          (false, true) => '-p',
+          _ => null,
+        };
+
+        final String findings = [?hpHint, ...hostedPackageFindings].join(',');
+        // The 100 character limit is imposed by google analytics.
+        findingsInfo['E$errorCode'] = findings.substring(0, min(100, findings.length));
+      });
     }
+    result ??= 'unknown';
+
     environment.logger.printWarning('Use --no-wasm-dry-run to disable these warnings.');
 
     _analytics.send(
-      Event.flutterWasmDryRun(result: result, exitCode: exitCode, findingsSummary: findingsSummary),
+      Event.flutterWasmDryRunPackage(
+        result: result,
+        exitCode: exitCode,
+        findingsInfo: findingsInfo,
+      ),
     );
   }
 }
