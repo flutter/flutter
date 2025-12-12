@@ -52,6 +52,11 @@ typedef HitTestCallback = HitTestResponse Function(HitTestRequest request);
 /// [PlatformDispatcher.onPlatformMessage].
 typedef PlatformMessageResponseCallback = void Function(ByteData? data);
 
+/// Signature for [PlatformDispatcher.onTextureFrameAvailable].
+///
+/// The callback receives the ID of the texture that has a new frame available.
+typedef TextureFrameAvailableCallback = void Function(int textureId);
+
 /// Deprecated. Migrate to [ChannelBuffers.setListener] instead.
 ///
 /// Signature for [PlatformDispatcher.onPlatformMessage].
@@ -637,6 +642,32 @@ class PlatformDispatcher {
 
   @Native<Void Function(Bool)>(symbol: 'PlatformConfigurationNativeApi::SetNeedsReportTimings')
   external static void __nativeSetNeedsReportTimings(bool value);
+
+  /// A callback that is invoked when a texture has a new frame available.
+  ///
+  /// This is called by the engine when [MarkTextureFrameAvailable] is invoked
+  /// for a texture. The callback receives the texture ID that has a new frame.
+  ///
+  /// This is used by the framework to mark texture render objects as needing
+  /// paint when their backing texture has new content, without scheduling a
+  /// new frame (since the frame is already scheduled or will be scheduled
+  /// separately by the engine).
+  ///
+  /// See also:
+  ///
+  ///  * [TextureBox], which uses this to stay updated with texture changes.
+  TextureFrameAvailableCallback? get onTextureFrameAvailable => _onTextureFrameAvailable;
+  TextureFrameAvailableCallback? _onTextureFrameAvailable;
+  Zone _onTextureFrameAvailableZone = Zone.root;
+  set onTextureFrameAvailable(TextureFrameAvailableCallback? callback) {
+    _onTextureFrameAvailable = callback;
+    _onTextureFrameAvailableZone = Zone.current;
+  }
+
+  // Called from the engine, via hooks.dart
+  void _textureFrameAvailable(int textureId) {
+    _invoke1<int>(onTextureFrameAvailable, _onTextureFrameAvailableZone, textureId);
+  }
 
   // Called from the engine, via hooks.dart
   void _reportTimings(List<int> timings) {
