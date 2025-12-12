@@ -653,6 +653,20 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   void ReportTimings(std::vector<int64_t> timings);
 
   //----------------------------------------------------------------------------
+  /// @brief      Notifies the framework that a texture has a new frame
+  ///             available.
+  ///
+  ///             This is called when the platform marks a texture as having new
+  ///             content via `MarkTextureFrameAvailable`. The framework uses
+  ///             this to mark the corresponding texture render object as
+  ///             needing paint, ensuring the view containing the texture is
+  ///             recomposited even if no other render objects are dirty.
+  ///
+  /// @param[in]  texture_id  The ID of the texture that has a new frame.
+  ///
+  void TextureFrameAvailable(int64_t texture_id);
+
+  //----------------------------------------------------------------------------
   /// @brief      Gets the main port of the root isolate. Since the isolate is
   ///             created immediately in the constructor of the engine, it is
   ///             possible to get its main port immediately (even before a call
