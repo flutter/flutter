@@ -27,7 +27,6 @@ android {
     compileSdk = 36
 
 
-
     sourceSets {
         applicationVariants.all { variant ->
             main.assets.srcDirs += "${project.layout.buildDirectory.get()}/intermediates/flutter/${variant.name}/deferred_assets"

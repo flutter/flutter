@@ -8,7 +8,6 @@ android {
     compileSdk = 36
 
 
-
     defaultConfig {
         applicationId = "com.example.myapplication"
         minSdk = 24
