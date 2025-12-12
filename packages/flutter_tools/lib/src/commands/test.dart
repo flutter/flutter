@@ -75,6 +75,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
     usesDartDefineOption();
+    usesWebOptions(verboseHelp: verboseHelp);
     usesDeviceUserOption();
     usesFlavorOption();
     addEnableImpellerFlag(verboseHelp: verboseHelp);
@@ -462,6 +463,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       enableFlutterGpu: (argResults!['enable-flutter-gpu'] as bool?) ?? false,
       debugLogsDirectoryPath: debugLogsDirectoryPath,
       webRenderer: webRenderer,
+      webCrossOriginIsolation: argResults!.wasParsed('cross-origin-isolation')
+          ? argResults!['cross-origin-isolation'] as bool
+          : null,
       printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
       webUseWasm: useWasm,
     );
