@@ -16,6 +16,10 @@
 
 @end
 
+@interface FlutterEngine ()
+@property(nonatomic, strong) FlutterMethodChannel* statusBarChannel;
+@end
+
 @implementation NoStatusBarViewController
 - (BOOL)prefersStatusBarHidden {
   return YES;
@@ -215,6 +219,18 @@
     rootViewController = [[NoStatusBarViewController alloc] init];
     [rootViewController.view addSubview:flutterViewController.view];
     flutterViewController.view.frame = CGRectMake(150, 150, 500, 500);
+  } else if ([scenarioIdentifier isEqualToString:@"tap_status_bar"]) {
+    [engine.binaryMessenger
+        setMessageHandlerOnChannel:@"flutter/status_bar"
+              binaryMessageHandler:^(NSData* _Nullable message, FlutterBinaryReply _Nonnull reply) {
+                NSDictionary* dict = [NSJSONSerialization JSONObjectWithData:message
+                                                                     options:0
+                                                                       error:nil];
+                UITextField* text =
+                    [[UITextField alloc] initWithFrame:CGRectMake(0, 400, 300, 100)];
+                text.text = dict[@"method"];
+                [flutterViewController.view addSubview:text];
+              }];
   }
 
   self.window.rootViewController = rootViewController;
