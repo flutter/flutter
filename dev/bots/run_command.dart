@@ -103,13 +103,9 @@ Future<Command> startCommand(
 
   // Override ANDROID_NDK_PATH with a valid discovered path or empty string to clear a potentially bad value.
   final finalEnvironment = <String, String>{
-    if (environment != null) ...environment,
+    ...?environment,
+    'ANDROID_NDK_PATH': ?_discoverBestNdkPath(),
   };
-  final String? bestNdkPath = _discoverBestNdkPath();
-  if (bestNdkPath != null) {
-    finalEnvironment['ANDROID_NDK_PATH'] = bestNdkPath;
-  }
-
   final io.Process process = await io.Process.start(
     executable,
     arguments,
