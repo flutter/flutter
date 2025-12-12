@@ -841,11 +841,11 @@ String? _discoverBestNdkPath() {
   }
 
   if (androidHome == null) {
-    return _bestNdkPath = '';
+    return _bestNdkPath = null;
   }
   final Directory ndkDir = Directory(path.join(androidHome, 'ndk'));
   if (!ndkDir.existsSync()) {
-    return _bestNdkPath = '';
+    return _bestNdkPath = null;
   }
   final List<Version> versions = <Version>[];
   for (final FileSystemEntity entity in ndkDir.listSync()) {
@@ -858,7 +858,7 @@ String? _discoverBestNdkPath() {
     }
   }
   if (versions.isEmpty) {
-    return _bestNdkPath = '';
+    return _bestNdkPath = null;
   }
   versions.sort();
   return _bestNdkPath = path.join(ndkDir.path, versions.last.toString());

@@ -184,11 +184,11 @@ String? _discoverBestNdkPath() {
   }
 
   if (androidHome == null) {
-    return _bestNdkPath = '';
+    return _bestNdkPath = null;
   }
   final io.Directory ndkDir = io.Directory(path.join(androidHome, 'ndk'));
   if (!ndkDir.existsSync()) {
-    return _bestNdkPath = '';
+    return _bestNdkPath = null;
   }
   final List<String> versions = <String>[];
   for (final io.FileSystemEntity entity in ndkDir.listSync()) {
@@ -201,7 +201,7 @@ String? _discoverBestNdkPath() {
     }
   }
   if (versions.isEmpty) {
-    return _bestNdkPath = '';
+    return _bestNdkPath = null;
   }
   // Sort numerically/lexicographically to find the "highest" version.
   // We assume versions are like "21.4.7075529" or "23.1.7779620".
