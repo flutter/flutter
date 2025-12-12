@@ -86,6 +86,9 @@ void PlatformConfiguration::DidCreateIsolate() {
                   Dart_GetField(library, tonic::ToDart("_drawFrame")));
   report_timings_.Set(tonic::DartState::Current(),
                       Dart_GetField(library, tonic::ToDart("_reportTimings")));
+  texture_frame_available_.Set(
+      tonic::DartState::Current(),
+      Dart_GetField(library, tonic::ToDart("_textureFrameAvailable")));
 }
 
 bool PlatformConfiguration::AddView(int64_t view_id,
@@ -476,6 +479,20 @@ void PlatformConfiguration::ReportTimings(std::vector<int64_t> timings) {
   tonic::CheckAndHandleError(
       tonic::DartInvoke(report_timings_.Get(), {
                                                    data_handle,
+                                               }));
+}
+
+void PlatformConfiguration::TextureFrameAvailable(int64_t texture_id) {
+  std::shared_ptr<tonic::DartState> dart_state =
+      texture_frame_available_.dart_state().lock();
+  if (!dart_state) {
+    return;
+  }
+  tonic::DartState::Scope scope(dart_state);
+
+  tonic::CheckAndHandleError(tonic::DartInvoke(texture_frame_available_.Get(),
+                                               {
+                                                   tonic::ToDart(texture_id),
                                                }));
 }
 
