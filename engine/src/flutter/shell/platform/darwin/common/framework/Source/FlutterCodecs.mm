@@ -147,7 +147,7 @@ FLUTTER_ASSERT_ARC
 - (FlutterMethodCall*)decodeMethodCall:(NSData*)message {
   NSDictionary* dictionary = [[FlutterJSONMessageCodec sharedInstance] decode:message];
   if (dictionary == nil) {
-    NSLog(@"Invalid JSON method call. Couldn't decode message: %s", message);
+    NSLog(@"Invalid JSON method call. Couldn't decode message: %@", message);
     return nil;
   }
   id method = dictionary[@"method"];
