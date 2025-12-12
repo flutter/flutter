@@ -115,7 +115,24 @@ class HostWindow {
   void UpdateModalStateLayer();
 
  protected:
-  void InitializeFlutterView();
+  struct HostWindowInitializationParams {
+    WindowArchetype archetype;
+    DWORD window_style;
+    DWORD extended_window_style;
+    const BoxConstraints& box_constraints;
+    Rect const initial_window_rect;
+    LPCWSTR title;
+    std::optional<HWND> const& owner_window;
+    int nCmdShow = SW_SHOWNORMAL;
+    FlutterWindowsViewSizingDelegate* sizing_delegate = nullptr;
+  };
+
+  // Initialize the underlying native window and the Flutter view.
+  //
+  // See:
+  // - https://learn.microsoft.com/windows/win32/winmsg/window-styles
+  // - https://learn.microsoft.com/windows/win32/winmsg/extended-window-styles
+  void InitializeFlutterView(HostWindowInitializationParams const& params);
 
   friend WindowManager;
 
@@ -133,20 +150,9 @@ class HostWindow {
 
   // Construct a host window.
   //
-  // See:
-  // - https://learn.microsoft.com/windows/win32/winmsg/window-styles
-  // - https://learn.microsoft.com/windows/win32/winmsg/extended-window-styles
-  HostWindow(WindowManager* window_manager,
-             FlutterWindowsEngine* engine,
-             WindowArchetype archetype,
-             DWORD window_style,
-             DWORD extended_window_style,
-             const BoxConstraints& box_constraints,
-             Rect const initial_window_rect,
-             LPCWSTR title,
-             std::optional<HWND> const& owner_window,
-             int nCmdShow = SW_SHOWNORMAL,
-             FlutterWindowsViewSizingDelegate* sizing_delegate = nullptr);
+  // Derived classes should call InitializeFlutterView() after construction to
+  // set up the native window and the Flutter view.
+  HostWindow(WindowManager* window_manager, FlutterWindowsEngine* engine);
 
   // Calculates the required window size, in physical coordinates, to
   // accommodate the given |client_size|, in logical coordinates, constrained by
@@ -230,7 +236,7 @@ class HostWindow {
   Microsoft::WRL::ComPtr<ITaskbarList2> task_bar_list_;
 
   FlutterWindowsViewSizingDelegate* sizing_delegate_ = nullptr;
-  std::optional<HWND> const& owner_window_;
+  std::optional<HWND> owner_window_;
   Rect initial_window_rect_;
   DWORD window_style_;
   DWORD extended_window_style_;

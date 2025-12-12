@@ -14,21 +14,21 @@ HostWindowTooltip::HostWindowTooltip(
     const BoxConstraints& constraints,
     GetWindowPositionCallback get_position_callback,
     HWND parent)
-    : HostWindow(window_manager,
-                 engine,
-                 WindowArchetype::kTooltip,
-                 WS_POPUP,
-                 WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW,
-                 constraints,
-                 {{0, 0}, {0, 0}},
-                 L"",
-                 parent,
-                 SW_SHOWNOACTIVATE,
-                 this),
+    : HostWindow(window_manager, engine),
       get_position_callback_(get_position_callback),
       parent_(parent),
       isolate_(Isolate::Current()) {
-  InitializeFlutterView();
+  InitializeFlutterView(HostWindowInitializationParams{
+      .archetype = WindowArchetype::kTooltip,
+      .window_style = WS_POPUP,
+      .extended_window_style = WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW,
+      .box_constraints = constraints,
+      .initial_window_rect = {{0, 0}, {0, 0}},
+      .title = L"",
+      .owner_window = parent,
+      .nCmdShow = SW_SHOWNOACTIVATE,
+      .sizing_delegate = this,
+  });
   SetWindowLongPtr(window_handle_, GWLP_HWNDPARENT,
                    reinterpret_cast<LONG_PTR>(parent_));
 }

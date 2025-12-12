@@ -238,36 +238,18 @@ std::unique_ptr<HostWindow> HostWindow::CreateTooltipWindow(
 }
 
 HostWindow::HostWindow(WindowManager* window_manager,
-                       FlutterWindowsEngine* engine,
-                       WindowArchetype archetype,
-                       DWORD window_style,
-                       DWORD extended_window_style,
-                       const BoxConstraints& box_constraints,
-                       Rect const initial_window_rect,
-                       LPCWSTR title,
-                       std::optional<HWND> const& owner_window,
-                       int nCmdShow,
-                       FlutterWindowsViewSizingDelegate* sizing_delegate)
-    : window_manager_(window_manager),
-      engine_(engine),
-      archetype_(archetype),
-      box_constraints_(box_constraints),
-      window_style_(window_style),
-      extended_window_style_(extended_window_style),
-      initial_window_rect_(initial_window_rect),
-      owner_window_(owner_window),
-      title_(title),
-      nCmdShow_(nCmdShow),
-      sizing_delegate_(sizing_delegate) {}
+                       FlutterWindowsEngine* engine)
+    : window_manager_(window_manager), engine_(engine) {}
 
-void HostWindow::InitializeFlutterView() {
+void HostWindow::InitializeFlutterView(
+    HostWindowInitializationParams const& params) {
   // Set up the view.
   auto view_window = std::make_unique<FlutterWindow>(
-      initial_window_rect_.width(), initial_window_rect_.height(),
+      params.initial_window_rect.width(), params.initial_window_rect.height(),
       engine_->display_manager(), engine_->windows_proc_table());
 
   std::unique_ptr<FlutterWindowsView> view =
-      engine_->CreateView(std::move(view_window), sizing_delegate_);
+      engine_->CreateView(std::move(view_window), params.sizing_delegate);
   FML_CHECK(view != nullptr);
 
   view_controller_ =
@@ -299,10 +281,11 @@ void HostWindow::InitializeFlutterView() {
 
   // Create the native window.
   window_handle_ = CreateWindowEx(
-      extended_window_style_, kWindowClassName, title_.c_str(), window_style_,
-      initial_window_rect_.left(), initial_window_rect_.top(),
-      initial_window_rect_.width(), initial_window_rect_.height(),
-      owner_window_ ? *owner_window_ : nullptr, nullptr,
+      params.extended_window_style, kWindowClassName, title_.c_str(),
+      params.window_style, params.initial_window_rect.left(),
+      params.initial_window_rect.top(), params.initial_window_rect.width(),
+      params.initial_window_rect.height(),
+      params.owner_window ? *params.owner_window : nullptr, nullptr,
       GetModuleHandle(nullptr), engine_->windows_proc_table().get());
   FML_CHECK(window_handle_ != nullptr);
 
