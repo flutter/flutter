@@ -1108,12 +1108,9 @@ server:
   port: 9000
 ''');
           final command = RunCommand();
-          await createTestCommandRunner(command).run(<String>[
-            'run',
-            '--no-pub',
-            '--no-hot',
-            '--web-port=8080',
-          ]);
+          await createTestCommandRunner(
+            command,
+          ).run(<String>['run', '--no-pub', '--no-hot', '--web-port=8080']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
           expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
@@ -1138,12 +1135,9 @@ server:
   port: 9000
 ''');
           final command = RunCommand();
-          await createTestCommandRunner(command).run(<String>[
-            'run',
-            '--no-pub',
-            '--no-hot',
-            '--web-hostname=clihost',
-          ]);
+          await createTestCommandRunner(
+            command,
+          ).run(<String>['run', '--no-pub', '--no-hot', '--web-hostname=clihost']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
           expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
@@ -1183,7 +1177,8 @@ server:
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
           expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
-          final headers = fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.headers;
+          final Map<String, String> headers =
+              fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.headers;
           // CLI headers override file config headers with same name
           expect(headers['X-Shared-Header'], 'from-cli');
           // CLI-only headers are included
@@ -1210,11 +1205,7 @@ server:
   port: 9000
 ''');
           final command = RunCommand();
-          await createTestCommandRunner(command).run(<String>[
-            'run',
-            '--no-pub',
-            '--no-hot',
-          ]);
+          await createTestCommandRunner(command).run(<String>['run', '--no-pub', '--no-hot']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
           expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
@@ -1254,8 +1245,14 @@ server:
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
           expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
           expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https!.certPath, '/cli/cert.pem');
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https!.certKeyPath, '/cli/key.pem');
+          expect(
+            fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https!.certPath,
+            '/cli/cert.pem',
+          );
+          expect(
+            fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https!.certKeyPath,
+            '/cli/key.pem',
+          );
         },
         overrides: <Type, Generator>{
           FileSystem: () => fileSystem,
@@ -1279,20 +1276,23 @@ server:
     cert-key-path: /config/key.pem
 ''');
           final command = RunCommand();
-          await createTestCommandRunner(command).run(<String>[
-            'run',
-            '--no-pub',
-            '--no-hot',
-            '--web-tls-cert-path=/cli/cert.pem',
-          ]);
+          await createTestCommandRunner(
+            command,
+          ).run(<String>['run', '--no-pub', '--no-hot', '--web-tls-cert-path=/cli/cert.pem']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
           expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
           expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https, isNotNull);
           // CLI cert path overrides file config
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https!.certPath, '/cli/cert.pem');
+          expect(
+            fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https!.certPath,
+            '/cli/cert.pem',
+          );
           // File config key path is used as fallback
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https!.certKeyPath, '/config/key.pem');
+          expect(
+            fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https!.certKeyPath,
+            '/config/key.pem',
+          );
         },
         overrides: <Type, Generator>{
           FileSystem: () => fileSystem,
@@ -1320,8 +1320,14 @@ server:
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
           expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
           expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https!.certPath, '/cli/cert.pem');
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https!.certKeyPath, '/cli/key.pem');
+          expect(
+            fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https!.certPath,
+            '/cli/cert.pem',
+          );
+          expect(
+            fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https!.certKeyPath,
+            '/cli/key.pem',
+          );
         },
         overrides: <Type, Generator>{
           FileSystem: () => fileSystem,
