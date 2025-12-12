@@ -2201,4 +2201,346 @@ void main() {
     );
     expect(tester.getSize(find.byType(SwitchListTile)), Size.zero);
   });
+
+  testWidgets('SwitchListTile horizontalTitleGap = 0.0', (WidgetTester tester) async {
+    Widget buildFrame(
+      TextDirection textDirection, {
+      double? themeHorizontalTitleGap,
+      double? widgetHorizontalTitleGap,
+    }) {
+      return MaterialApp(
+        home: Directionality(
+          textDirection: textDirection,
+          child: Material(
+            child: ListTileTheme(
+              data: ListTileThemeData(horizontalTitleGap: themeHorizontalTitleGap),
+              child: Container(
+                alignment: Alignment.topLeft,
+                child: SwitchListTile(
+                  controlAffinity: ListTileControlAffinity.leading,
+                  horizontalTitleGap: widgetHorizontalTitleGap,
+                  value: true,
+                  title: const Text('title'),
+                  onChanged: (_) {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    double left(String text) => tester.getTopLeft(find.text(text)).dx;
+    double right(String text) => tester.getTopRight(find.text(text)).dx;
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, widgetHorizontalTitleGap: 0));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(left('title'), 76.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, themeHorizontalTitleGap: 0));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(left('title'), 76.0);
+
+    await tester.pumpWidget(
+      buildFrame(TextDirection.ltr, themeHorizontalTitleGap: 10, widgetHorizontalTitleGap: 0),
+    );
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(left('title'), 76.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, widgetHorizontalTitleGap: 0));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(right('title'), 724.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, themeHorizontalTitleGap: 0));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(right('title'), 724.0);
+
+    await tester.pumpWidget(
+      buildFrame(TextDirection.rtl, themeHorizontalTitleGap: 10, widgetHorizontalTitleGap: 0),
+    );
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(right('title'), 724.0);
+  });
+
+  testWidgets(
+    'SwitchListTile horizontalTitleGap = (default) && ListTile minLeadingWidth = (default)',
+    (WidgetTester tester) async {
+      Widget buildFrame(TextDirection textDirection) {
+        return MaterialApp(
+          home: Directionality(
+            textDirection: textDirection,
+            child: Material(
+              child: Container(
+                alignment: Alignment.topLeft,
+                child: SwitchListTile(
+                  controlAffinity: ListTileControlAffinity.leading,
+                  value: true,
+                  title: const Text('title'),
+                  onChanged: (_) {},
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      double left(String text) => tester.getTopLeft(find.text(text)).dx;
+      double right(String text) => tester.getTopRight(find.text(text)).dx;
+
+      await tester.pumpWidget(buildFrame(TextDirection.ltr));
+
+      expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+      // horizontalTitleGap: ListTileDefaultValue.horizontalTitleGap (16.0)
+      expect(left('title'), 92.0);
+
+      await tester.pumpWidget(buildFrame(TextDirection.rtl));
+
+      expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+      // horizontalTitleGap: ListTileDefaultValue.horizontalTitleGap (16.0)
+      expect(right('title'), 708.0);
+    },
+  );
+
+  testWidgets('SwitchListTile horizontalTitleGap with visualDensity', (WidgetTester tester) async {
+    Widget buildFrame({double? horizontalTitleGap, VisualDensity? visualDensity}) {
+      return MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Container(
+              alignment: Alignment.topLeft,
+              child: SwitchListTile(
+                controlAffinity: ListTileControlAffinity.leading,
+                visualDensity: visualDensity,
+                horizontalTitleGap: horizontalTitleGap,
+                value: true,
+                title: const Text('title'),
+                onChanged: (_) {},
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    double left(String text) => tester.getTopLeft(find.text(text)).dx;
+
+    await tester.pumpWidget(
+      buildFrame(
+        horizontalTitleGap: 10.0,
+        visualDensity: const VisualDensity(horizontal: VisualDensity.minimumDensity),
+      ),
+    );
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(left('title'), 78.0);
+
+    // Pump another frame of the same widget to ensure the underlying render
+    // object did not cache the original horizontalTitleGap calculation based on the
+    // visualDensity
+    await tester.pumpWidget(
+      buildFrame(
+        horizontalTitleGap: 10.0,
+        visualDensity: const VisualDensity(horizontal: VisualDensity.minimumDensity),
+      ),
+    );
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(left('title'), 78.0);
+  });
+
+  testWidgets('SwitchListTile minVerticalPadding = 80.0 Material 3', (WidgetTester tester) async {
+    Widget buildFrame(
+      TextDirection textDirection, {
+      double? themeMinVerticalPadding,
+      double? widgetMinVerticalPadding,
+    }) {
+      return MaterialApp(
+        home: Directionality(
+          textDirection: textDirection,
+          child: Material(
+            child: ListTileTheme(
+              data: ListTileThemeData(minVerticalPadding: themeMinVerticalPadding),
+              child: Container(
+                alignment: Alignment.topLeft,
+                child: SwitchListTile(
+                  minVerticalPadding: widgetMinVerticalPadding,
+                  value: true,
+                  title: const Text('title'),
+                  onChanged: (_) {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, widgetMinVerticalPadding: 80));
+    // 80 + 80 + 24(Title) = 184
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 184.0));
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, themeMinVerticalPadding: 80));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 184.0));
+
+    await tester.pumpWidget(
+      buildFrame(TextDirection.ltr, themeMinVerticalPadding: 0, widgetMinVerticalPadding: 80),
+    );
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 184.0));
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, widgetMinVerticalPadding: 80));
+    // 80 + 80 + 24(Title) = 184
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 184.0));
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, themeMinVerticalPadding: 80));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 184.0));
+
+    await tester.pumpWidget(
+      buildFrame(TextDirection.rtl, themeMinVerticalPadding: 0, widgetMinVerticalPadding: 80),
+    );
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 184.0));
+  });
+
+  testWidgets('SwitchListTile minVerticalPadding = 80.0 Material 2', (WidgetTester tester) async {
+    Widget buildFrame(
+      TextDirection textDirection, {
+      double? themeMinVerticalPadding,
+      double? widgetMinVerticalPadding,
+    }) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Directionality(
+          textDirection: textDirection,
+          child: Material(
+            child: ListTileTheme(
+              data: ListTileThemeData(minVerticalPadding: themeMinVerticalPadding),
+              child: Container(
+                alignment: Alignment.topLeft,
+                child: SwitchListTile(
+                  minVerticalPadding: widgetMinVerticalPadding,
+                  value: true,
+                  title: const Text('title'),
+                  onChanged: (_) {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, widgetMinVerticalPadding: 80));
+    // 80 + 80 + 16(Title) = 176
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 176.0));
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, themeMinVerticalPadding: 80));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 176.0));
+
+    await tester.pumpWidget(
+      buildFrame(TextDirection.ltr, themeMinVerticalPadding: 0, widgetMinVerticalPadding: 80),
+    );
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 176.0));
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, widgetMinVerticalPadding: 80));
+    // 80 + 80 + 16(Title) = 176
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 176.0));
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, themeMinVerticalPadding: 80));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 176.0));
+
+    await tester.pumpWidget(
+      buildFrame(TextDirection.rtl, themeMinVerticalPadding: 0, widgetMinVerticalPadding: 80),
+    );
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 176.0));
+  });
+
+  testWidgets('SwitchListTile minLeadingWidth = 60.0', (WidgetTester tester) async {
+    Widget buildFrame(
+      TextDirection textDirection, {
+      double? themeMinLeadingWidth,
+      double? widgetMinLeadingWidth,
+    }) {
+      return MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: textDirection,
+          child: Material(
+            child: ListTileTheme(
+              data: ListTileThemeData(minLeadingWidth: themeMinLeadingWidth),
+              child: Container(
+                alignment: Alignment.topLeft,
+                child: SwitchListTile(
+                  controlAffinity: ListTileControlAffinity.leading,
+                  minLeadingWidth: widgetMinLeadingWidth,
+                  value: true,
+                  title: const Text('title'),
+                  onChanged: (_) {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    double left(String text) => tester.getTopLeft(find.text(text)).dx;
+    double right(String text) => tester.getTopRight(find.text(text)).dx;
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, widgetMinLeadingWidth: 60));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    // 92.0 = 16.0(Default contentPadding) + 16.0(Default horizontalTitleGap) + 60.0
+    expect(left('title'), 92.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, themeMinLeadingWidth: 60));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(left('title'), 92.0);
+
+    await tester.pumpWidget(
+      buildFrame(TextDirection.ltr, themeMinLeadingWidth: 0, widgetMinLeadingWidth: 60),
+    );
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(left('title'), 92.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, widgetMinLeadingWidth: 60));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    // 708.0 = 800.0 - (16.0(Default contentPadding) + 16.0(Default horizontalTitleGap) + 60.0)
+    expect(right('title'), 708.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, themeMinLeadingWidth: 60));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(right('title'), 708.0);
+
+    await tester.pumpWidget(
+      buildFrame(TextDirection.rtl, themeMinLeadingWidth: 0, widgetMinLeadingWidth: 60),
+    );
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(right('title'), 708.0);
+  });
+
+  testWidgets('SwitchListTile minTileHeight', (WidgetTester tester) async {
+    Widget buildFrame(TextDirection textDirection, {double? minTileHeight}) {
+      return MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: textDirection,
+          child: Material(
+            child: Container(
+              alignment: Alignment.topLeft,
+              child: SwitchListTile(value: true, minTileHeight: minTileHeight, onChanged: (_) {}),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Default list tile with height = 56.0
+    await tester.pumpWidget(buildFrame(TextDirection.ltr));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+
+    // Set list tile height = 30.0
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, minTileHeight: 30));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 30.0));
+
+    // Set list tile height = 60.0
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, minTileHeight: 60));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 60.0));
+  });
 }
