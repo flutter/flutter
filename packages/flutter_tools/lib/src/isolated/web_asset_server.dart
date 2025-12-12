@@ -642,6 +642,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
         flutterJsFile: _flutterJsFile,
         flutterBootstrapJs: _flutterBootstrapJsContent,
       ),
+      encoding: utf8,
       headers: <String, String>{HttpHeaders.contentTypeHeader: 'text/html'},
     );
   }
