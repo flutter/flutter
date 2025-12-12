@@ -843,11 +843,11 @@ String? _discoverBestNdkPath() {
   if (androidHome == null) {
     return _bestNdkPath = null;
   }
-  final Directory ndkDir = Directory(path.join(androidHome, 'ndk'));
+  final ndkDir = Directory(path.join(androidHome, 'ndk'));
   if (!ndkDir.existsSync()) {
     return _bestNdkPath = null;
   }
-  final List<Version> versions = <Version>[];
+  final versions = <Version>[];
   for (final FileSystemEntity entity in ndkDir.listSync()) {
     if (entity is Directory) {
       try {

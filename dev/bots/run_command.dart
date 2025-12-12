@@ -102,7 +102,7 @@ Future<Command> startCommand(
   print('workingDirectory: $workingDirectory, executable: $executable, arguments: $arguments');
 
   // Override ANDROID_NDK_PATH with a valid discovered path or empty string to clear a potentially bad value.
-  final Map<String, String> finalEnvironment = <String, String>{
+  final finalEnvironment = <String, String>{
     if (environment != null) ...environment,
   };
   final String? bestNdkPath = _discoverBestNdkPath();
@@ -186,11 +186,11 @@ String? _discoverBestNdkPath() {
   if (androidHome == null) {
     return _bestNdkPath = null;
   }
-  final io.Directory ndkDir = io.Directory(path.join(androidHome, 'ndk'));
+  final ndkDir = io.Directory(path.join(androidHome, 'ndk'));
   if (!ndkDir.existsSync()) {
     return _bestNdkPath = null;
   }
-  final List<String> versions = <String>[];
+  final versions = <String>[];
   for (final io.FileSystemEntity entity in ndkDir.listSync()) {
     if (entity is io.Directory) {
       final String name = path.basename(entity.path);

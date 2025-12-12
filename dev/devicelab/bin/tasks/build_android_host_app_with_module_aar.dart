@@ -128,7 +128,7 @@ class ModuleTest {
         await exec(
           gradlewExecutable,
           <String>['flutter:assembleDebug'],
-          environment: <String, String>{'JAVA_HOME': javaHome!},
+          environment: <String, String>{'JAVA_HOME': javaHome},
         );
       });
 
@@ -265,7 +265,7 @@ class ModuleTest {
           gradlewExecutable,
           <String>['app:assembleDebug'],
           environment: <String, String>{
-            'JAVA_HOME': javaHome!,
+            'JAVA_HOME': javaHome,
             'FLUTTER_SUPPRESS_ANALYTICS': 'true',
           },
         );
@@ -341,7 +341,7 @@ class ModuleTest {
           gradlewExecutable,
           <String>['app:assembleRelease'],
           environment: <String, String>{
-            'JAVA_HOME': javaHome!,
+            'JAVA_HOME': javaHome,
             'FLUTTER_SUPPRESS_ANALYTICS': 'true',
           },
         );
