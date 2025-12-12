@@ -268,7 +268,7 @@
             "properties": {
                 "$flutter/osx_sdk": {
                     "runtime_versions": [
-                        "ios-18-2_17a400"
+                        "ios-26-0_17a400"
                     ],
                     "sdk_version": "17a400"
                 }
@@ -393,7 +393,7 @@
             "properties": {
                 "$flutter/osx_sdk": {
                     "runtime_versions": [
-                        "ios-18-2_17a400"
+                        "ios-26-0_17a400"
                     ],
                     "sdk_version": "17a400"
                 }
@@ -461,7 +461,7 @@
             "properties": {
                 "$flutter/osx_sdk": {
                     "runtime_versions": [
-                        "ios-18-2_17a400"
+                        "ios-26-0_17a400"
                     ],
                     "sdk_version": "17a400"
                 }
