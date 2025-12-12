@@ -677,7 +677,7 @@ final applyingKotlinAndroidPluginErrorHandler = GradleHandledError(
         final File appGradleFile = project.android.appGradleFile;
         globals.printBox(
           '''
-${globals.logger.terminal.warningMark} Starting AGP 9+, the default has become built-in kotlin. This results in a build failure when applying the kotlin-android plugin at ${appGradleFile.path}. 
+${globals.logger.terminal.warningMark} Starting AGP 9+, the default has become built-in kotlin. This results in a build failure when applying the kotlin-android plugin at ${appGradleFile.path}.
 \nTo resolve this, migrate to built-in kotlin. For guidance on the migration, follow these docs here: https://docs.flutter.dev/release/breaking-changes/update-to-AGP-9''',
           title: _boxTitle,
         );
@@ -700,7 +700,7 @@ final useNewAgpDslErrorHandler = GradleHandledError(
         final File appGradleFile = project.android.appGradleFile;
         globals.printBox(
           '''
-${globals.logger.terminal.warningMark} Starting AGP 9+, only the new DSL interface will be read. This results in a build failure when applying the flutter gradle plugin at ${appGradleFile.path}. 
+${globals.logger.terminal.warningMark} Starting AGP 9+, only the new DSL interface will be read. This results in a build failure when applying the flutter gradle plugin at ${appGradleFile.path}.
 \nTo resolve this, opt-out of the new DSL. For guidance on opting out, follow these docs here: https://docs.flutter.dev/release/breaking-changes/update-to-AGP-9''',
           title: _boxTitle,
         );
