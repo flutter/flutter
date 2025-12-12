@@ -10,10 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 // Examples can assume:
-// import 'package:flutter_web_plugins/flutter_web_plugins.dart';
-// import 'package:flutter/services.dart';
 // import 'dart:ui_web' as ui_web;
-// void handleFrameworkMessage(String name, ByteData? data, PlatformMessageResponseCallback? callback) { }
 
 /// A registrar for Flutter plugins implemented in Dart.
 ///
