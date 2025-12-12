@@ -61,5 +61,50 @@ TEST(RuntimeEffectContentsTest, CalculateFrameInfoWithScale) {
   EXPECT_MATRIX_NEAR(frame_info.text_transform_0, expected);
 }
 
+TEST(RuntimeEffectContentsTest, CalculateFrameInfoWithHalo) {
+  std::vector<RuntimeEffectContents::TextureInput> inputs;
+
+  // Input 0: Background/Source (Should be centered too)
+  {
+    auto& input = inputs.emplace_back();
+    auto mock_texture = std::make_shared<MockTexture>(TextureDescriptor{
+        .size = ISize(100, 100),
+    });
+    EXPECT_CALL(*mock_texture, GetSize())
+        .WillRepeatedly(::testing::Return(ISize(100, 100)));
+    input.texture = mock_texture;
+    input.transform = Matrix();
+  }
+
+  // Input 1: Destination/Halo (Should be centered)
+  {
+    auto& input = inputs.emplace_back();
+    auto mock_texture = std::make_shared<MockTexture>(TextureDescriptor{
+        .size = ISize(100, 100),
+    });
+    EXPECT_CALL(*mock_texture, GetSize())
+        .WillRepeatedly(::testing::Return(ISize(100, 100)));
+    input.texture = mock_texture;
+    input.transform = Matrix();
+  }
+
+  // Coverage is 120x120 (100 + 20 padding).
+  Rect coverage = Rect::MakeXYWH(0, 0, 120, 120);
+
+  auto frame_info =
+      RuntimeEffectContents::CalculateFrameInfo(inputs, Matrix(), coverage);
+
+  // Common expected matrix for 100x100 texture in 120x120 coverage (center
+  // offset 10)
+  Matrix expected = Matrix::MakeScale(Vector3(0.01, 0.01, 1.0)) *
+                    Matrix::MakeTranslation(Vector3(-10.0, -10.0, 0.0));
+
+  // Check Input 0
+  EXPECT_MATRIX_NEAR(frame_info.text_transform_0, expected);
+
+  // Check Input 1
+  EXPECT_MATRIX_NEAR(frame_info.text_transform_1, expected);
+}
+
 }  // namespace testing
 }  // namespace impeller

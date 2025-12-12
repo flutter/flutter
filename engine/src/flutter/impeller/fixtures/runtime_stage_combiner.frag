@@ -12,5 +12,6 @@ out vec4 frag_color;
 void main() {
   vec4 val0 = texture(u_input0, FlutterGetInputTextureCoordinates(0));
   vec4 val1 = texture(u_input1, FlutterGetInputTextureCoordinates(1));
-  frag_color = val1;
+  frag_color = val0;
+  frag_color -= val1;
 }

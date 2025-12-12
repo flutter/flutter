@@ -341,14 +341,40 @@ RuntimeEffectVertexShader::FrameInfo RuntimeEffectContents::CalculateFrameInfo(
     std::optional<Rect> coverage) {
   RuntimeEffectVertexShader::FrameInfo frame_info;
   for (size_t i = 0; i < inputs.size() && i < 4; i++) {
-    [[maybe_unused]] auto& input = inputs[i];
-    // Matrix screen_to_texture = input.transform.Invert();
-    // ISize size = input.texture->GetSize();
-    //  Scale to normalize (0..1).
-    Matrix normalize =
-        Matrix::MakeScale(Vector3(1.0f / coverage->GetSize().width,
-                                  1.0f / coverage->GetSize().height, 1.0f));
-    Matrix final_transform = normalize;
+    auto& input = inputs[i];
+    Matrix screen_to_texture = input.transform.Invert();
+    ISize size = input.texture->GetSize();
+    // Scale to normalize (0..1).
+    Matrix normalize = coverage.has_value()
+                           ? Matrix::MakeScale(Vector3(
+                                 1.0f / coverage->GetSize().width,
+                                 1.0f / coverage->GetSize().height, 1.0f))
+                           : Matrix::MakeScale(Vector3(
+                                 1.0f / size.width, 1.0f / size.height, 1.0f));
+
+    Matrix final_transform;
+    if (coverage.has_value()) {
+      // If we have a coverage rect, we want to map the texture to be centered
+      // within that coverage. This prevents valid inputs (like the content or
+      // a destination texture) from being stretched if the coverage has been
+      // expanded (e.g. by a blur halo).
+      //
+      // We ignore input.transform here because we want the texture to be
+      // spatially relative to the coverage rect (which is the geometry being
+      // drawn), preserving a 1:1 pixel mapping if possible (offset centered).
+
+      Scalar offset_x = (coverage->GetSize().width - size.width) / 2.0f;
+      Scalar offset_y = (coverage->GetSize().height - size.height) / 2.0f;
+
+      final_transform =
+          Matrix::MakeScale(Vector2(1.0f / size.width, 1.0f / size.height)) *
+          Matrix::MakeTranslation(Vector2(-offset_x, -offset_y));
+    } else {
+      // Fallback for when coverage is unknown: Map screen space to texture UV
+      // directly. This respects the input transform (e.g. scale).
+      final_transform = normalize * screen_to_texture;
+    }
+
     switch (i) {
       case 0:
         frame_info.text_transform_0 = final_transform;
