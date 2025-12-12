@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <future>
 #include <memory>
+#include <optional>
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/make_copyable.h"
@@ -16,6 +17,7 @@
 #include "impeller/core/shader_types.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/runtime_effect.vert.h"
+#include "impeller/geometry/rect.h"
 #include "impeller/renderer/capabilities.h"
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/render_pass.h"
@@ -326,8 +328,8 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
             });
       };
 
-  VS::FrameInfo frame_info =
-      CalculateFrameInfo(texture_inputs_, entity.GetTransform());
+  VS::FrameInfo frame_info = CalculateFrameInfo(
+      texture_inputs_, entity.GetTransform(), entity.GetCoverage());
 
   return ColorSourceContents::DrawGeometry<VS>(
       renderer, entity, pass, pipeline_callback, frame_info, bind_callback);
@@ -335,16 +337,18 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
 
 RuntimeEffectVertexShader::FrameInfo RuntimeEffectContents::CalculateFrameInfo(
     const std::vector<TextureInput>& inputs,
-    const Matrix& entity_transform) {
+    const Matrix& entity_transform,
+    std::optional<Rect> coverage) {
   RuntimeEffectVertexShader::FrameInfo frame_info;
   for (size_t i = 0; i < inputs.size() && i < 4; i++) {
-    auto& input = inputs[i];
-    Matrix screen_to_texture = input.transform.Invert();
-    ISize size = input.texture->GetSize();
-    // Scale to normalize (0..1).
+    [[maybe_unused]] auto& input = inputs[i];
+    // Matrix screen_to_texture = input.transform.Invert();
+    // ISize size = input.texture->GetSize();
+    //  Scale to normalize (0..1).
     Matrix normalize =
-        Matrix::MakeScale(Vector3(1.0f / size.width, 1.0f / size.height, 1.0f));
-    Matrix final_transform = normalize * screen_to_texture * entity_transform;
+        Matrix::MakeScale(Vector3(1.0f / coverage->GetSize().width,
+                                  1.0f / coverage->GetSize().height, 1.0f));
+    Matrix final_transform = normalize;
     switch (i) {
       case 0:
         frame_info.text_transform_0 = final_transform;

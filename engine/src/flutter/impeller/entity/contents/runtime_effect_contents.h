@@ -47,7 +47,8 @@ class RuntimeEffectContents final : public ColorSourceContents {
 
   static RuntimeEffectVertexShader::FrameInfo CalculateFrameInfo(
       const std::vector<TextureInput>& inputs,
-      const Matrix& entity_transform);
+      const Matrix& entity_transform,
+      std::optional<Rect> coverage);
 
  private:
   bool RegisterShader(const ContentContext& renderer) const;

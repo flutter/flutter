@@ -4,7 +4,6 @@
 
 #include <flutter/runtime_effect.glsl>
 
-uniform vec2 u_size;
 uniform sampler2D u_input0;
 uniform sampler2D u_input1;
 
