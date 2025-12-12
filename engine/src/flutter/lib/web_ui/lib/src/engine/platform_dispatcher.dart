@@ -1368,6 +1368,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _onSemanticsActionEventZone = Zone.current;
   }
 
+  /// A callback invoked when platform wants to hit test a [FlutterView].
+  ///
+  /// For example, this is used by iOS to determine if a gesture hits a
+  /// [UIKitView].
+  @override
+  ui.HitTestCallback? onHitTest;
+
   /// Engine code should use this method instead of the callback directly.
   /// Otherwise zones won't work properly.
   void invokeOnSemanticsAction(int viewId, int nodeId, ui.SemanticsAction action, ByteData? args) {
