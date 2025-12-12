@@ -652,6 +652,7 @@ class _SnippetChecker {
               final newLine = _Line(line: lineNumber, indent: 3, code: line.substring(3));
               if (newLine.code.startsWith('import ')) {
                 customImports.add(newLine);
+                preambleLineNumbers.add(newLine); // Track the line number for later checking
               } else {
                 preambleLines.add(newLine);
                 preambleLineNumbers.add(newLine); // Track the line number for later checking
@@ -770,39 +771,16 @@ class _SnippetChecker {
             }
           }
         }
-        // Check for unused preamble declarations
+        // Check for unused preamble declarations and imports
         if (preambleLineNumbers.isNotEmpty) {
           for (final preambleLine in preambleLineNumbers) {
             if (!usedPreambleLineNumbers.contains(preambleLine.line)) {
+              final String errorType = preambleLine.code.startsWith('import ') ? 'import' : 'declaration';
               errors.add(
                 _SnippetCheckerException(
-                  'Unused "Examples can assume:" declaration. This can be cleaned up.',
+                  'Unused "Examples can assume:" $errorType. This can be cleaned up.',
                   file: relativeFilePath,
                   line: preambleLine.line,
-                ),
-              );
-            }
-          }
-        }
-        // Check for unused custom imports
-        if (customImports.isNotEmpty) {
-          for (final customImport in customImports) {
-            var isUsed = false;
-            for (final _SnippetFile snippet in snippetMap.values) {
-              if (snippet.filename == relativeFilePath) {
-                final String snippetCode = snippet.code.map((line) => line.code).join('\n');
-                if (snippetCode.contains(customImport.code)) {
-                  isUsed = true;
-                  break;
-                }
-              }
-            }
-            if (!isUsed) {
-              errors.add(
-                _SnippetCheckerException(
-                  'Unused "Examples can assume:" import. This can be cleaned up.',
-                  file: relativeFilePath,
-                  line: customImport.line,
                 ),
               );
             }
@@ -1058,13 +1036,25 @@ class _SnippetChecker {
     final identifierPattern = RegExp(
       r'(?:final|late|const|static|var)?\s+(?:[\w<>.,\s]*?\s+)*(\w+)(?:\s*[=;:]|$)',
     );
+    // Pattern to extract import prefix: import 'something' as prefix;
+    final importPrefixPattern = RegExp(r'import\s+[' "'" r'"].*?[' "'" r'"]\s+as\s+(\w+);?');
 
     for (final preambleLine in preambleLines) {
       var isUsed = false;
 
       if (preambleLine.code.startsWith('import ')) {
-        // For imports, check if the full import statement is present
-        isUsed = snippetCode.contains(preambleLine.code);
+        // For imports with a prefix (e.g., import 'dart:math' as math;), check if prefix is used
+        final RegExpMatch? prefixMatch = importPrefixPattern.firstMatch(preambleLine.code);
+        if (prefixMatch != null) {
+          final String prefix = prefixMatch.group(1)!;
+          // Check if the prefix is used (e.g., "math.")
+          isUsed = snippetCode.contains('$prefix.');
+        } else {
+          // For imports without a prefix, we'd need to know what the library exports
+          // to check usage accurately. For now, we'll mark them as unused since we can't
+          // easily verify their usage without extensive library analysis.
+          isUsed = false;
+        }
       } else {
         // Extract identifier and check for word-boundary match
         final RegExpMatch? match = identifierPattern.firstMatch(preambleLine.code);

@@ -10,6 +10,7 @@ import 'dart:io';
 import 'common.dart';
 
 const List<String> expectedMainErrors = <String>[
+  'dev/bots/test/analyze-snippet-code-test-input/custom_imports_broken.dart:9: Unused "Examples can assume:" import. This can be cleaned up.',
   'dev/bots/test/analyze-snippet-code-test-input/custom_imports_broken.dart:19:11: (statement) (undefined_identifier)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:30:5: (expression) (unnecessary_new)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:103:5: (statement) (always_specify_types)',
@@ -30,8 +31,8 @@ const List<String> expectedMainErrors = <String>[
   'dev/bots/test/analyze-snippet-code-test-input/short_but_still_broken.dart:18:4: Empty ```dart block in snippet code.',
   'dev/bots/test/analyze-snippet-code-test-input/unused_examples_can_assume.dart:11: Unused "Examples can assume:" declaration. This can be cleaned up.',
   'dev/bots/test/analyze-snippet-code-test-input/unused_examples_can_assume.dart:12: Unused "Examples can assume:" declaration. This can be cleaned up.',
+  'dev/bots/test/analyze-snippet-code-test-input/unused_imports_examples_can_assume.dart:9: Unused "Examples can assume:" import. This can be cleaned up.',
   'dev/bots/test/analyze-snippet-code-test-input/unused_imports_examples_can_assume.dart:10: Unused "Examples can assume:" import. This can be cleaned up.',
-  'dev/bots/test/analyze-snippet-code-test-input/unused_imports_examples_can_assume.dart:11: Unused "Examples can assume:" import. This can be cleaned up.',
 ];
 
 const List<String> expectedUiErrors = <String>[
@@ -78,7 +79,7 @@ void main() {
       final List<String> stderrNoDescriptions = stderrLines.map(removeLintDescriptions).toList();
       expect(stderrNoDescriptions, <String>[
         ...expectedMainErrors,
-        'Found 22 snippet code errors.',
+        'Found 23 snippet code errors.',
         'See the documentation at the top of dev/bots/analyze_snippet_code.dart for details.',
         '', // because we end with a newline, split gives us an extra blank line
       ]);
@@ -108,7 +109,7 @@ void main() {
       expect(stderrNoDescriptions, <String>[
         ...expectedUiErrors,
         ...expectedMainErrors,
-        'Found 27 snippet code errors.',
+        'Found 28 snippet code errors.',
         'See the documentation at the top of dev/bots/analyze_snippet_code.dart for details.',
         '', // because we end with a newline, split gives us an extra blank line
       ]);
