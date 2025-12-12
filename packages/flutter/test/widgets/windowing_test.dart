@@ -10,6 +10,9 @@ import 'package:flutter/src/widgets/_window.dart'
         DialogWindow,
         DialogWindowController,
         DialogWindowControllerDelegate,
+        OverlayWindow,
+        OverlayWindowController,
+        OverlayWindowControllerDelegate,
         RegularWindow,
         RegularWindowController,
         RegularWindowControllerDelegate,
@@ -18,6 +21,7 @@ import 'package:flutter/src/widgets/_window.dart'
         WindowScope,
         WindowingOwner,
         createDefaultWindowingOwner;
+import 'package:flutter/src/widgets/_window_positioner.dart' show WindowPositioner;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -130,6 +134,45 @@ class _StubTooltipWindowController extends TooltipWindowController {
   void destroy() {}
 }
 
+class _StubOverlayWindowController extends OverlayWindowController {
+  _StubOverlayWindowController(WidgetTester tester) : super.empty() {
+    rootView = FakeView(tester.view);
+  }
+
+  @override
+  BaseWindowController? get parent => null;
+
+  @override
+  Size get contentSize => Size.zero;
+
+  @override
+  String get title => 'Stub Overlay Window';
+
+  @override
+  bool get isActivated => true;
+
+  @override
+  bool get isMinimized => false;
+
+  @override
+  bool get alwaysOnTop => false;
+
+  @override
+  void setTitle(String title) {}
+
+  @override
+  void activate() {}
+
+  @override
+  void setMinimized(bool minimized) {}
+
+  @override
+  void setAlwaysOnTop(bool alwaysOnTop) {}
+
+  @override
+  void destroy() {}
+}
+
 void main() {
   group('Windowing', () {
     group('isWindowingEnabled is false', () {
@@ -158,6 +201,19 @@ void main() {
         );
       });
 
+      test('default WindowingOwner throws when accessing createOverlayWindowController', () {
+        final WindowingOwner owner = createDefaultWindowingOwner();
+        expect(
+          () => owner.createOverlayWindowController(
+            delegate: OverlayWindowControllerDelegate(),
+            anchorRect: const Rect.fromLTWH(0, 0, 100, 100),
+            positioner: const WindowPositioner(),
+            contentSizeConstraints: const BoxConstraints(),
+          ),
+          throwsUnsupportedError,
+        );
+      });
+
       testWidgets('DialogWindow throws UnsupportedError', (WidgetTester tester) async {
         expect(
           () => DialogWindow(
@@ -172,6 +228,16 @@ void main() {
         expect(
           () => TooltipWindow(
             controller: _StubTooltipWindowController(tester: tester),
+            child: const Text('Test'),
+          ),
+          throwsUnsupportedError,
+        );
+      });
+
+      testWidgets('OverlayWindow throws UnsupportedError', (WidgetTester tester) async {
+        expect(
+          () => OverlayWindow(
+            controller: _StubOverlayWindowController(tester),
             child: const Text('Test'),
           ),
           throwsUnsupportedError,
@@ -206,6 +272,15 @@ void main() {
         await tester.pumpWidget(
           wrapWithView: false,
           DialogWindow(controller: controller, child: Container()),
+        );
+      });
+
+      testWidgets('Overlay does not throw', (WidgetTester tester) async {
+        final controller = _StubOverlayWindowController(tester);
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          wrapWithView: false,
+          OverlayWindow(controller: controller, child: Container()),
         );
       });
 
@@ -256,6 +331,24 @@ void main() {
               builder: (BuildContext context) {
                 final BaseWindowController scope = WindowScope.of(context);
                 expect(scope, isA<TooltipWindowController>());
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+      });
+
+      testWidgets('Can access WindowScope.of for overlay windows', (WidgetTester tester) async {
+        final controller = _StubOverlayWindowController(tester);
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          wrapWithView: false,
+          OverlayWindow(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                final BaseWindowController scope = WindowScope.of(context);
+                expect(scope, isA<OverlayWindowController>());
                 return const SizedBox.shrink();
               },
             ),
@@ -314,6 +407,26 @@ void main() {
               builder: (BuildContext context) {
                 final BaseWindowController? scope = WindowScope.maybeOf(context);
                 expect(scope, isA<TooltipWindowController>());
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+      });
+
+      testWidgets('Can access WindowScope.maybeOf for overlay windows', (
+        WidgetTester tester,
+      ) async {
+        final controller = _StubOverlayWindowController(tester);
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          wrapWithView: false,
+          OverlayWindow(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                final BaseWindowController? scope = WindowScope.maybeOf(context);
+                expect(scope, isA<OverlayWindowController>());
                 return const SizedBox.shrink();
               },
             ),
@@ -1032,6 +1145,66 @@ void main() {
               builder: (BuildContext context) {
                 final bool? isFullscreen = WindowScope.maybeIsFullscreenOf(context);
                 expect(isFullscreen, equals(false));
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+      });
+
+      testWidgets('Can access WindowScope.titleOf for overlay windows', (
+        WidgetTester tester,
+      ) async {
+        final controller = _StubOverlayWindowController(tester);
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          wrapWithView: false,
+          OverlayWindow(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                final String title = WindowScope.titleOf(context);
+                expect(title, equals('Stub Overlay Window'));
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+      });
+
+      testWidgets('Can access WindowScope.isActivatedOf for overlay windows', (
+        WidgetTester tester,
+      ) async {
+        final controller = _StubOverlayWindowController(tester);
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          wrapWithView: false,
+          OverlayWindow(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                final bool isActivated = WindowScope.isActivatedOf(context);
+                expect(isActivated, equals(true));
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+      });
+
+      testWidgets('Can access WindowScope.isMinimizedOf for overlay windows', (
+        WidgetTester tester,
+      ) async {
+        final controller = _StubOverlayWindowController(tester);
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          wrapWithView: false,
+          OverlayWindow(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                final bool isMinimized = WindowScope.isMinimizedOf(context);
+                expect(isMinimized, equals(false));
                 return const SizedBox.shrink();
               },
             ),
