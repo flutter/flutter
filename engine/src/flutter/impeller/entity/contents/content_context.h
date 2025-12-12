@@ -39,8 +39,7 @@ namespace impeller {
 /// but they shouldn't require e.g. 10s of thousands.
 struct ContentContextOptions {
   enum class StencilMode : uint8_t {
-    /// Turn the stencil test off. Used when drawing without stencil-then-cover
-    /// or overdraw prevention.
+    /// Turn the stencil test off. Used when drawing without stencil-then-cover.
     kIgnore,
 
     // Operations used for stencil-then-cover.
@@ -53,6 +52,11 @@ struct ContentContextOptions {
     ///
     /// The stencil ref should always be 0 on commands using this mode.
     kStencilEvenOddFill,
+    /// Draw a stencil which always increments once for everything in the vertex
+    /// coverage regardless of triangle overlap.
+    ///
+    /// The stencil ref should always be 0 on commands using this mode.
+    kStencilIncrementAll,
     /// Used for draw calls which fill in the stenciled area. Intended to be
     /// used after `kStencilNonZeroFill` or `kStencilEvenOddFill` is used to set
     /// up the stencil buffer. Also cleans up the stencil buffer by resetting
@@ -68,26 +72,6 @@ struct ContentContextOptions {
     ///
     /// The stencil ref should always be 0 on commands using this mode.
     kCoverCompareInverted,
-
-    // Operations used for the "overdraw prevention" mechanism. This is used for
-    // drawing strokes.
-
-    /// For each fragment, increment the stencil value if it's currently zero.
-    /// Discard fragments when the value is non-zero. This prevents
-    /// self-overlapping strokes from drawing over themselves.
-    ///
-    /// Note that this is done for rendering correctness, not performance. If a
-    /// stroke is drawn with a backdrop-reliant blend and self-intersects, then
-    /// the intersected geometry will render incorrectly when overdrawn because
-    /// we don't adjust the geometry prevent self-intersection.
-    ///
-    /// The stencil ref should always be 0 on commands using this mode.
-    kOverdrawPreventionIncrement,
-    /// Reset the stencil to a new maximum value specified by the ref (currently
-    /// always 0).
-    ///
-    /// The stencil ref should always be 0 on commands using this mode.
-    kOverdrawPreventionRestore,
   };
 
   SampleCount sample_count = SampleCount::kCount1;

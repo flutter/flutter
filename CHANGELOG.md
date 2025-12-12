@@ -32,6 +32,10 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ## Flutter 3.38 Changes
 
+### [3.38.5](https://github.com/flutter/flutter/releases/tag/3.38.5)
+
+- [flutter/179700](https://github.com/flutter/flutter/issues/179700) Update dart to 3.10.4.
+
 ### [3.38.4](https://github.com/flutter/flutter/releases/tag/3.38.4)
 
 - [flutter/178547](https://github.com/flutter/flutter/issues/178547) Rendering issues in the Linux desktop embedder when using Skia.

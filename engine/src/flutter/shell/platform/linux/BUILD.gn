@@ -109,6 +109,8 @@ source_set("flutter_linux_sources") {
   public_configs = [ ":disable_warnings" ]
 
   sources = [
+    "fl_accessibility_channel.cc",
+    "fl_accessibility_handler.cc",
     "fl_accessible_node.cc",
     "fl_accessible_text_field.cc",
     "fl_application.cc",
@@ -221,6 +223,7 @@ executable("flutter_linux_unittests") {
   testonly = true
 
   sources = [
+    "fl_accessibility_handler_test.cc",
     "fl_accessible_node_test.cc",
     "fl_accessible_text_field_test.cc",
     "fl_application_test.cc",

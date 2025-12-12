@@ -13,6 +13,7 @@ tests = [
   "color_test.dart",
   "compositing_test.dart",
   "dart_test.dart",
+  "decode_image_from_pixels_sync_test.dart",
   "encoding_test.dart",
   "fragment_shader_test.dart",
   "geometry_test.dart",

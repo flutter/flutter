@@ -167,6 +167,75 @@ sk_sp<DlImage> SnapshotControllerImpeller::MakeRasterSnapshotSync(
                               pixel_format);
 }
 
+sk_sp<DlImage> SnapshotControllerImpeller::MakeTextureImage(
+    sk_sp<SkImage> image,
+    SnapshotPixelFormat pixel_format) {
+  auto aiks_context = GetDelegate().GetAiksContext();
+  if (!aiks_context) {
+    return nullptr;
+  }
+  auto context = aiks_context->GetContext();
+  if (!context) {
+    return nullptr;
+  }
+
+  impeller::TextureDescriptor desc;
+  desc.storage_mode = impeller::StorageMode::kDevicePrivate;
+  desc.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
+  desc.size = impeller::ISize(image->width(), image->height());
+  desc.mip_count = 1;
+
+  auto texture = context->GetResourceAllocator()->CreateTexture(desc);
+  if (!texture) {
+    return nullptr;
+  }
+
+  size_t byte_size = image->width() * image->height() * 4;
+  auto buffer = context->GetResourceAllocator()->CreateBuffer(
+      impeller::DeviceBufferDescriptor{
+          .storage_mode = impeller::StorageMode::kHostVisible,
+          .size = byte_size,
+      });
+
+  if (!buffer) {
+    return nullptr;
+  }
+
+  {
+    uint8_t* map = buffer->OnGetContents();
+    if (!map) {
+      return nullptr;
+    }
+    SkImageInfo info =
+        SkImageInfo::Make(image->width(), image->height(),
+                          kRGBA_8888_SkColorType, kPremul_SkAlphaType);
+    if (!image->readPixels(info, map, image->width() * 4, 0, 0)) {
+      return nullptr;
+    }
+    buffer->Flush(impeller::Range(0, byte_size));
+  }
+
+  auto command_buffer = context->CreateCommandBuffer();
+  if (!command_buffer) {
+    return nullptr;
+  }
+  auto blit_pass = command_buffer->CreateBlitPass();
+  if (!blit_pass) {
+    return nullptr;
+  }
+
+  blit_pass->AddCopy(
+      impeller::BufferView{buffer, impeller::Range(0, byte_size)}, texture);
+  blit_pass->EncodeCommands();
+
+  if (!context->GetCommandQueue()->Submit({command_buffer}).ok()) {
+    return nullptr;
+  }
+
+  return impeller::DlImageImpeller::Make(texture,
+                                         DlImage::OwningContext::kRaster);
+}
+
 void SnapshotControllerImpeller::CacheRuntimeStage(
     const std::shared_ptr<impeller::RuntimeStage>& runtime_stage) {
   if (!GetDelegate().IsAiksContextInitialized()) {

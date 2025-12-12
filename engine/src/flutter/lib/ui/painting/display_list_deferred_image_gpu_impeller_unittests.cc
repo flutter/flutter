@@ -71,15 +71,17 @@ TEST(DlDeferredImageGPUImpeller, TrashesDisplayList) {
     snapshot_delegate_weak_ptr = snapshot_delegate->GetWeakPtr();
   });
 
+  sk_sp<DlDeferredImageGPUImpeller> image;
   // Pause raster thread.
   fml::AutoResetWaitableEvent latch;
-  task_runner->PostTask([&latch]() { latch.Wait(); });
+  task_runner->PostTask([&latch, &image]() {
+    latch.Wait();
+    EXPECT_FALSE(image->impeller_texture());
+  });
 
-  auto image = DlDeferredImageGPUImpeller::Make(
+  image = DlDeferredImageGPUImpeller::Make(
       builder.Build(), size, SnapshotPixelFormat::kDontCare,
       snapshot_delegate_weak_ptr, task_runner);
-
-  EXPECT_FALSE(image->impeller_texture());
 
   // Unpause raster thread.
   latch.Signal();

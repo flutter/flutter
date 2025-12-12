@@ -3579,7 +3579,6 @@ targets:
   - name: Mac_ios draw_arcs_all_stroke_styles_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >

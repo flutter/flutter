@@ -3663,6 +3663,24 @@ void main() {
     expect(tooltipPosition.dx, closeTo(targetCenter.dx + 25, 5.0));
     expect(tooltipPosition.dy, closeTo(targetCenter.dy - 25 - 32, 5.0));
   });
+
+  testWidgets('Tooltip does not crash at zero area', (WidgetTester tester) async {
+    final key = GlobalKey<TooltipState>();
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Tooltip(key: key, message: 'X'),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Tooltip)), Size.zero);
+    key.currentState!.ensureTooltipVisible();
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(Tooltip)), Size.zero);
+    expect(find.text('X'), findsOne);
+  });
 }
 
 Future<void> setWidgetForTooltipMode(

@@ -251,6 +251,30 @@ void main() {
   );
 
   testUsingContext(
+    'flutter assemble can run a build if dart-defines are base64 encoded',
+    () async {
+      final CommandRunner<void> commandRunner = createTestCommandRunner(
+        AssembleCommand(buildSystem: TestBuildSystem.all(BuildResult(success: true))),
+      );
+
+      await commandRunner.run([
+        'assemble',
+        '--output',
+        'Output',
+        '--dart-define=${base64.encode(utf8.encode('flutter.inspector.structuredErrors=true'))}',
+        'debug_macos_bundle_flutter_assets',
+      ]);
+
+      expect(testLogger.traceText, contains('build succeeded.'));
+    },
+    overrides: <Type, Generator>{
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
+
+  testUsingContext(
     'flutter assemble throws ToolExit if dart-defines are not base64 encoded',
     () async {
       final CommandRunner<void> commandRunner = createTestCommandRunner(

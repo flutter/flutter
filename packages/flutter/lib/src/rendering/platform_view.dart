@@ -5,6 +5,8 @@
 /// @docImport 'package:flutter/widgets.dart';
 library;
 
+import 'dart:ui' as ui show SemanticsHitTestBehavior;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
@@ -267,6 +269,9 @@ class RenderAndroidView extends PlatformViewRenderBox {
 
     if (_viewController.isCreated) {
       config.platformViewId = _viewController.viewId;
+      // Platform views should allow pointer events to pass through to the
+      // underlying platform view content.
+      config.hitTestBehavior = ui.SemanticsHitTestBehavior.transparent;
     }
   }
 }
@@ -372,6 +377,9 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = true;
     config.platformViewId = _viewController.id;
+    // Platform views should allow pointer events to pass through to the
+    // underlying platform view content.
+    config.hitTestBehavior = ui.SemanticsHitTestBehavior.transparent;
   }
 
   @override
@@ -408,7 +416,8 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
 ///
 ///  * [UiKitView], which is a widget that is used to show a UIView.
 ///  * [PlatformViewsService], which is a service for controlling platform views.
-class RenderUiKitView extends RenderDarwinPlatformView<UiKitViewController> {
+class RenderUiKitView extends RenderDarwinPlatformView<UiKitViewController>
+    implements NativeHitTestTarget {
   /// Creates a render object for an iOS UIView.
   RenderUiKitView({
     required super.viewController,
@@ -737,6 +746,9 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = true;
     config.platformViewId = _controller.viewId;
+    // Platform views should allow pointer events to pass through to the
+    // underlying platform view content.
+    config.hitTestBehavior = ui.SemanticsHitTestBehavior.transparent;
   }
 }
 
