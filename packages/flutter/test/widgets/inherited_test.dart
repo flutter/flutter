@@ -103,6 +103,27 @@ class CleanupInheritedD extends InheritedWidget {
   bool updateShouldNotify(CleanupInheritedD oldWidget) => value != oldWidget.value;
 }
 
+/// An InheritedWidget that allows toggling cleanupUnusedDependents dynamically.
+/// Used to test behavior when cleanupUnusedDependents changes during widget lifetime.
+class ToggleableCleanupInherited extends InheritedWidget {
+  const ToggleableCleanupInherited({
+    required super.child,
+    required this.shouldCleanup,
+    this.value = 0,
+    super.key,
+  });
+
+  final bool shouldCleanup;
+  final int value;
+
+  @override
+  bool get cleanupUnusedDependents => shouldCleanup;
+
+  @override
+  bool updateShouldNotify(ToggleableCleanupInherited oldWidget) =>
+      value != oldWidget.value || shouldCleanup != oldWidget.shouldCleanup;
+}
+
 class DependencyCleanupTestWidget extends StatefulWidget {
   const DependencyCleanupTestWidget({super.key});
 
@@ -115,6 +136,7 @@ class DependencyCleanupTestWidgetState extends State<DependencyCleanupTestWidget
   bool useDependencyB = false;
   bool useDependencyC = false;
   bool useDependencyD = false;
+  bool useToggleableDependency = false;
   int buildCount = 0;
   int didChangeDependenciesCount = 0;
 
@@ -132,6 +154,12 @@ class DependencyCleanupTestWidgetState extends State<DependencyCleanupTestWidget
       if (useD != null) {
         useDependencyD = useD;
       }
+    });
+  }
+
+  void updateToggleableDependency(bool use) {
+    setState(() {
+      useToggleableDependency = use;
     });
   }
 
@@ -159,6 +187,10 @@ class DependencyCleanupTestWidgetState extends State<DependencyCleanupTestWidget
 
     if (useDependencyD) {
       context.dependOnInheritedWidgetOfExactType<CleanupInheritedD>();
+    }
+
+    if (useToggleableDependency) {
+      context.dependOnInheritedWidgetOfExactType<ToggleableCleanupInherited>();
     }
 
     return const SizedBox();
@@ -833,6 +865,105 @@ void main() {
       reason:
           'Dependencies with cleanupUnusedDependents=false should persist and '
           'trigger didChangeDependencies even when not re-established.',
+    );
+  });
+
+  testWidgets('cleanupUnusedDependents changing from true to false should prevent cleanup', (
+    WidgetTester tester,
+  ) async {
+    // This tests the scenario where an InheritedWidget's cleanupUnusedDependents
+    // starts as true, but changes to false. The dependency should NOT be cleaned
+    // up because the current value is false at cleanup time.
+
+    final key = GlobalKey<DependencyCleanupTestWidgetState>();
+
+    await tester.pumpWidget(
+      ToggleableCleanupInherited(shouldCleanup: true, child: DependencyCleanupTestWidget(key: key)),
+    );
+
+    final DependencyCleanupTestWidgetState state = key.currentState!;
+    expect(state.buildCount, 1);
+
+    state.updateToggleableDependency(true);
+    await tester.pump();
+    expect(state.buildCount, 2);
+
+    await tester.pumpWidget(
+      ToggleableCleanupInherited(
+        shouldCleanup: false,
+        child: DependencyCleanupTestWidget(key: key),
+      ),
+    );
+
+    state.updateToggleableDependency(false);
+    await tester.pump();
+
+    final int didChangeCountBefore = state.didChangeDependenciesCount;
+
+    await tester.pumpWidget(
+      ToggleableCleanupInherited(
+        shouldCleanup: false,
+        value: 1,
+        child: DependencyCleanupTestWidget(key: key),
+      ),
+    );
+
+    expect(
+      state.didChangeDependenciesCount,
+      greaterThan(didChangeCountBefore),
+      reason:
+          'Dependency should persist when cleanupUnusedDependents changes from true to false. '
+          'The dependent should still be notified of changes via didChangeDependencies.',
+    );
+  });
+
+  testWidgets('cleanupUnusedDependents changing from false to true should enable cleanup', (
+    WidgetTester tester,
+  ) async {
+    // This tests the scenario where an InheritedWidget's cleanupUnusedDependents
+    // starts as false, but changes to true. The dependency SHOULD be cleaned up
+    // because the current value is true at cleanup time.
+
+    final key = GlobalKey<DependencyCleanupTestWidgetState>();
+
+    await tester.pumpWidget(
+      ToggleableCleanupInherited(
+        shouldCleanup: false,
+        child: DependencyCleanupTestWidget(key: key),
+      ),
+    );
+
+    final DependencyCleanupTestWidgetState state = key.currentState!;
+    expect(state.buildCount, 1);
+
+    state.updateToggleableDependency(true);
+    await tester.pump();
+    expect(state.buildCount, 2);
+
+    state.updateToggleableDependency(false);
+    await tester.pump();
+    expect(state.buildCount, 3);
+
+    await tester.pumpWidget(
+      ToggleableCleanupInherited(shouldCleanup: true, child: DependencyCleanupTestWidget(key: key)),
+    );
+
+    final int didChangeCountAfterCleanup = state.didChangeDependenciesCount;
+
+    await tester.pumpWidget(
+      ToggleableCleanupInherited(
+        shouldCleanup: true,
+        value: 1,
+        child: DependencyCleanupTestWidget(key: key),
+      ),
+    );
+
+    expect(
+      state.didChangeDependenciesCount,
+      didChangeCountAfterCleanup,
+      reason:
+          'Dependency should be cleaned up when cleanupUnusedDependents changes from false to true. '
+          'didChangeDependencies should not be called after cleanup.',
     );
   });
 }

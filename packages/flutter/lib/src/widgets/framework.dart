@@ -5839,12 +5839,16 @@ abstract class ComponentElement extends Element {
   /// rebuilds even if not re-established.
   void _cleanupRemovedDependencies() {
     if (_dependencies != null && _currentBuildDependencies != null) {
-      final Set<InheritedElement> toRemove = _dependencies!.difference(_currentBuildDependencies!);
-      for (final dependency in toRemove) {
-        if ((dependency.widget as InheritedWidget).cleanupUnusedDependents) {
-          dependency.removeDependent(this);
-          _dependencies!.remove(dependency);
-        }
+      final List<InheritedElement> cleanupCandidates = _dependencies!
+          .where(
+            (d) =>
+                (d.widget as InheritedWidget).cleanupUnusedDependents &&
+                !_currentBuildDependencies!.contains(d),
+          )
+          .toList();
+      for (final dependency in cleanupCandidates) {
+        dependency.removeDependent(this);
+        _dependencies!.remove(dependency);
       }
     }
   }
