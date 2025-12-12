@@ -315,10 +315,10 @@ void main() async {
   });
 
   for (final (filterQuality, goldenFilename) in [
-    (FilterQuality.none, 'render_sampler_none.png'),
-    (FilterQuality.low, 'render_sampler_low.png'),
-    (FilterQuality.medium, 'render_sampler_medium.png'),
-    (FilterQuality.high, 'render_sampler_high.png'),
+    (FilterQuality.none, 'fragment_shader_texture_with_quality_none.png'),
+    (FilterQuality.low, 'fragment_shader_texture_with_quality_low.png'),
+    (FilterQuality.medium, 'fragment_shader_texture_with_quality_medium.png'),
+    (FilterQuality.high, 'fragment_shader_texture_with_quality_high.png'),
   ]) {
     test('FragmentShader renders sampler with filter quality ${filterQuality.name}', () async {
       final FragmentProgram program = await FragmentProgram.fromAsset('texture.frag.iplr');
