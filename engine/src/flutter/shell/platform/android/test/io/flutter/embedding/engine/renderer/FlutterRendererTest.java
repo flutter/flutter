@@ -185,6 +185,35 @@ public class FlutterRendererTest {
   }
 
   @Test
+  public void itCallsMarkTextureFrameAvailableWhenFrameAvailable() {
+    // Setup the test.
+    Surface fakeSurface = mock(Surface.class);
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+
+    SurfaceTexture surfaceTexture = new SurfaceTexture(0);
+    FlutterRenderer.SurfaceTextureRegistryEntry entry =
+        (FlutterRenderer.SurfaceTextureRegistryEntry)
+            flutterRenderer.registerSurfaceTexture(surfaceTexture);
+
+    flutterRenderer.startRenderingToSurface(fakeSurface, false);
+
+    // Simulate a new frame being available by triggering the OnFrameAvailableListener.
+    // The SurfaceTexture will notify the listener when updateTexImage() is called.
+    // For testing, we directly invoke what the listener would do.
+    surfaceTexture.updateTexImage();
+    shadowOf(Looper.getMainLooper()).idle();
+
+    // Verify that markTextureFrameAvailable was called (not scheduleFrame).
+    // This ensures dirty-view optimization will work correctly.
+    verify(fakeFlutterJNI, times(1)).markTextureFrameAvailable(eq(entry.id()));
+    verify(fakeFlutterJNI, never()).scheduleFrame();
+
+    // Cleanup
+    entry.release();
+    flutterRenderer.stopRenderingToSurface();
+  }
+
+  @Test
   public void itRegistersExistingSurfaceTexture() {
     // Setup the test.
     Surface fakeSurface = mock(Surface.class);

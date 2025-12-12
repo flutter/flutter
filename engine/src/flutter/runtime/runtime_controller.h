@@ -374,6 +374,21 @@ class RuntimeController : public PlatformConfigurationClient,
   bool ReportTimings(std::vector<int64_t> timings);
 
   //----------------------------------------------------------------------------
+  /// @brief      Notifies the framework that a texture has a new frame
+  ///             available.
+  ///
+  ///             This is called by the shell when the platform marks a texture
+  ///             as having new content. The framework uses this to mark the
+  ///             corresponding texture render object as needing paint.
+  ///
+  /// @param[in]  texture_id  The ID of the texture that has a new frame.
+  ///
+  /// @return     Returns if the notification to the running isolate was
+  ///             successful. Returns false if the root isolate is not running.
+  ///
+  bool TextureFrameAvailable(int64_t texture_id);
+
+  //----------------------------------------------------------------------------
   /// @brief      Notify the Dart VM that no frame workloads are expected on the
   ///             UI task runner till the specified deadline. The VM uses this
   ///             opportunity to perform garbage collection operations is a
