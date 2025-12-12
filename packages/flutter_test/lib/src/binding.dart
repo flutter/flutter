@@ -543,7 +543,9 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
   final PopupWindowControllerDelegate _delegate;
   final _TestWindowingOwner windowingOwner;
   BoxConstraints _constraints;
+  // ignore: unused_field
   final ui.Rect _anchorRect;
+  // ignore: unused_field
   final WindowPositioner _positioner;
   final BaseWindowController _parent;
 
@@ -624,6 +626,25 @@ class _TestWindowingOwner extends WindowingOwner {
     }
   }
 
+  bool _tryActivateParent(BaseWindowController? parent) {
+    if (parent == null) {
+      return false;
+    }
+
+    switch (parent) {
+      case final RegularWindowController regularParent:
+        regularParent.activate();
+      case final DialogWindowController dialogParent:
+        dialogParent.activate();
+      case final TooltipWindowController _:
+        fail('TooltipWindowController cannot be a parent of DialogWindowController.');
+      case final PopupWindowController popupParent:
+        popupParent.activate();
+    }
+
+    return true;
+  }
+
   /// Deactivates the given [controller] if it is currently active.
   ///
   /// If the controller is not currently active, this method does nothing.
@@ -638,30 +659,11 @@ class _TestWindowingOwner extends WindowingOwner {
       return;
     }
 
-    final tryActivateParent = (BaseWindowController? parent) {
-      if (parent == null) {
-        return false;
-      }
-
-      switch (parent) {
-        case final RegularWindowController regularParent:
-          regularParent.activate();
-        case final DialogWindowController dialogParent:
-          dialogParent.activate();
-        case final TooltipWindowController _:
-          fail('TooltipWindowController cannot be a parent of DialogWindowController.');
-        case final PopupWindowController popupParent:
-          popupParent.activate();
-      }
-
-      return true;
-    };
-
     switch (controller) {
       case final RegularWindowController _:
         _activeWindowController = null;
       case final DialogWindowController dialogController:
-        if (!tryActivateParent(dialogController.parent)) {
+        if (!_tryActivateParent(dialogController.parent)) {
           _activeWindowController = null;
         }
       case final TooltipWindowController tooltipController:
@@ -670,7 +672,7 @@ class _TestWindowingOwner extends WindowingOwner {
           '${tooltipController.parent}.',
         );
       case final PopupWindowController popupController:
-        if (!tryActivateParent(popupController.parent)) {
+        if (!_tryActivateParent(popupController.parent)) {
           _activeWindowController = null;
         }
     }
