@@ -231,6 +231,11 @@
                 text.text = dict[@"method"];
                 [flutterViewController.view addSubview:text];
               }];
+    FlutterMethodChannel* channel =
+        [FlutterMethodChannel methodChannelWithName:@"flutter/status_bar"
+                                    binaryMessenger:self.binaryMessenger
+                                              codec:[FlutterJSONMethodCodec sharedInstance]];
+    [channel invokeMethod:@"handleScrollToTop" arguments:nil];
   }
 
   self.window.rootViewController = rootViewController;
