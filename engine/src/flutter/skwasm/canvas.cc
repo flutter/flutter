@@ -33,7 +33,7 @@ class SkwasmParagraphPainter : public skia::textlayout::ParagraphPainter {
 
     const int* paint_id = std::get_if<PaintID>(&paint);
     auto dl_paint = paint_id ? paints_[*paint_id] : flutter::DlPaint();
-    builder_.DrawText(flutter::textFromBlob(blob), x, y, dl_paint);
+    builder_.DrawText(flutter::TextFromBlob(blob), x, y, dl_paint);
   }
 
   virtual void drawTextShadow(const sk_sp<SkTextBlob>& blob,
@@ -52,7 +52,7 @@ class SkwasmParagraphPainter : public skia::textlayout::ParagraphPainter {
                                        blur_sigma, false);
       paint.setMaskFilter(&filter);
     }
-    builder_.DrawText(flutter::textFromBlob(blob), x, y, paint);
+    builder_.DrawText(flutter::TextFromBlob(blob), x, y, paint);
   }
 
   virtual void drawRect(const SkRect& rect, const SkPaintOrID& paint) override {
