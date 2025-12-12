@@ -775,9 +775,7 @@ class _SnippetChecker {
         if (preambleLineNumbers.isNotEmpty) {
           for (final preambleLine in preambleLineNumbers) {
             if (!usedPreambleLineNumbers.contains(preambleLine.line)) {
-              final String errorType = preambleLine.code.startsWith('import ')
-                  ? 'import'
-                  : 'declaration';
+              final errorType = preambleLine.code.startsWith('import ') ? 'import' : 'declaration';
               errors.add(
                 _SnippetCheckerException(
                   'Unused "Examples can assume:" $errorType. This can be cleaned up.',
