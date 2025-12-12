@@ -301,6 +301,10 @@ void Engine::ReportTimings(std::vector<int64_t> timings) {
   runtime_controller_->ReportTimings(std::move(timings));
 }
 
+void Engine::TextureFrameAvailable(int64_t texture_id) {
+  runtime_controller_->TextureFrameAvailable(texture_id);
+}
+
 void Engine::NotifyIdle(fml::TimeDelta deadline) {
   runtime_controller_->NotifyIdle(deadline);
 }
