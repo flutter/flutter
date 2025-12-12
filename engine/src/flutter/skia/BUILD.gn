@@ -29,10 +29,7 @@ if (is_fuchsia) {
 config("skia_public") {
   include_dirs = [ "$_skia_root" ]
 
-  defines = [
-    "SK_CODEC_DECODES_BMP",
-    "SK_CODEC_DECODES_WBMP",
-  ]
+  defines = [ "SK_DISABLE_LEGACY_INIT_DECODERS" ]
   defines += flutter_defines
 
   cflags_objcc = []

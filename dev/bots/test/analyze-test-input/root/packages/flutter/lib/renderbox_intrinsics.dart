@@ -2,7 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../foo/fake_render_box.dart';
+abstract class RenderBox {
+  void computeDryBaseline() {}
+  void computeDryLayout() {}
+  void computeDistanceToActualBaseline() {}
+  void computeMaxIntrinsicHeight() {}
+  void computeMinIntrinsicHeight() {}
+  void computeMaxIntrinsicWidth() {}
+  void computeMinIntrinsicWidth() {}
+}
 
 mixin ARenderBoxMixin on RenderBox {
   @override
