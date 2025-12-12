@@ -108,7 +108,10 @@ FLUTTER_ASSERT_ARC
     }
     decoded = [NSJSONSerialization JSONObjectWithData:message options:0 error:&error];
   }
-  NSAssert(decoded, @"Invalid JSON message, decoding failed: %@", error);
+  if (!decoded) {
+    NSLog(@"Invalid JSON message, decoding failed: %@", error);
+    return nil;
+  }
   return isSimpleValue ? ((NSArray*)decoded)[0] : decoded;
 }
 @end
@@ -143,6 +146,10 @@ FLUTTER_ASSERT_ARC
 
 - (FlutterMethodCall*)decodeMethodCall:(NSData*)message {
   NSDictionary* dictionary = [[FlutterJSONMessageCodec sharedInstance] decode:message];
+  if (dictionary == nil) {
+    NSLog(@"Invalid JSON method call. Couldn't decode message: %s", message);
+    return nil;
+  }
   id method = dictionary[@"method"];
   id arguments = [self unwrapNil:dictionary[@"args"]];
   NSAssert([method isKindOfClass:[NSString class]], @"Invalid JSON method call");
