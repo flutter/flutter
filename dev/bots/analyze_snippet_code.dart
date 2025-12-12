@@ -625,6 +625,8 @@ class _SnippetChecker {
         final ignorePreambleLinesOnly = <_Line>[];
         final preambleLines = <_Line>[];
         final customImports = <_Line>[];
+        final preambleLineNumbers = <_Line>[]; // Track line numbers of all preamble declarations
+        final usedPreambleLineNumbers = <int>{}; // Track which preamble lines are used
         var inExamplesCanAssumePreamble =
             false; // Whether or not we're in the file-wide preamble section ("Examples can assume").
         var inToolSection = false; // Whether or not we're in a code snippet
@@ -652,6 +654,7 @@ class _SnippetChecker {
                 customImports.add(newLine);
               } else {
                 preambleLines.add(newLine);
+                preambleLineNumbers.add(newLine); // Track the line number for later checking
               }
               if (line.startsWith('// // ignore_for_file: ')) {
                 ignorePreambleLinesOnly.add(newLine);
@@ -693,6 +696,8 @@ class _SnippetChecker {
                 lastExample,
                 customImports,
               );
+              final String snippetCode = _extractUserCode(snippet);
+              _trackPreambleUsage(snippetCode, preambleLineNumbers, usedPreambleLineNumbers);
               final String path = _writeSnippetFile(snippet).path;
               assert(!snippetMap.containsKey(path));
               snippetMap[path] = snippet;
@@ -762,6 +767,44 @@ class _SnippetChecker {
                 );
               }
               inExamplesCanAssumePreamble = true;
+            }
+          }
+        }
+        // Check for unused preamble declarations
+        if (preambleLineNumbers.isNotEmpty) {
+          for (final preambleLine in preambleLineNumbers) {
+            if (!usedPreambleLineNumbers.contains(preambleLine.line)) {
+              errors.add(
+                _SnippetCheckerException(
+                  'Unused "Examples can assume:" declaration. This can be cleaned up.',
+                  file: relativeFilePath,
+                  line: preambleLine.line,
+                ),
+              );
+            }
+          }
+        }
+        // Check for unused custom imports
+        if (customImports.isNotEmpty) {
+          for (final customImport in customImports) {
+            var isUsed = false;
+            for (final _SnippetFile snippet in snippetMap.values) {
+              if (snippet.filename == relativeFilePath) {
+                final String snippetCode = snippet.code.map((line) => line.code).join('\n');
+                if (snippetCode.contains(customImport.code)) {
+                  isUsed = true;
+                  break;
+                }
+              }
+            }
+            if (!isUsed) {
+              errors.add(
+                _SnippetCheckerException(
+                  'Unused "Examples can assume:" import. This can be cleaned up.',
+                  file: relativeFilePath,
+                  line: customImport.line,
+                ),
+              );
             }
           }
         }
@@ -989,6 +1032,52 @@ class _SnippetChecker {
         'expression',
         filename,
       );
+    }
+  }
+
+  /// Extracts user-written code from a snippet, excluding generated headers and preamble.
+  String _extractUserCode(_SnippetFile snippet) {
+    var userCodeStart = 0;
+    for (var i = 0; i < snippet.code.length; i++) {
+      if (snippet.code[i].code.startsWith('// From: ')) {
+        userCodeStart = i + 1;
+        break;
+      }
+    }
+    return userCodeStart < snippet.code.length
+        ? snippet.code.sublist(userCodeStart).map((line) => line.code).join('\n')
+        : '';
+  }
+
+  /// Tracks which preamble declarations are used in the snippet code.
+  void _trackPreambleUsage(
+    String snippetCode,
+    List<_Line> preambleLines,
+    Set<int> usedLineNumbers,
+  ) {
+    final identifierPattern = RegExp(
+      r'(?:final|late|const|static|var)?\s+(?:[\w<>.,\s]*?\s+)*(\w+)(?:\s*[=;:]|$)',
+    );
+
+    for (final preambleLine in preambleLines) {
+      var isUsed = false;
+
+      if (preambleLine.code.startsWith('import ')) {
+        // For imports, check if the full import statement is present
+        isUsed = snippetCode.contains(preambleLine.code);
+      } else {
+        // Extract identifier and check for word-boundary match
+        final RegExpMatch? match = identifierPattern.firstMatch(preambleLine.code);
+        if (match != null) {
+          final String identifier = match.group(1)!;
+          final wordBoundaryPattern = RegExp(r'\b' + RegExp.escape(identifier) + r'\b');
+          isUsed = snippetCode.isNotEmpty && wordBoundaryPattern.hasMatch(snippetCode);
+        }
+      }
+
+      if (isUsed) {
+        usedLineNumbers.add(preambleLine.line);
+      }
     }
   }
 
