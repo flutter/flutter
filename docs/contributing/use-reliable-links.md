@@ -93,7 +93,7 @@ create one following these steps:
 
 ---
 
-## Testing your redirect (New Section)
+## Testing your redirect
 
 After creating and submitting your redirect, it is recommended to test it to ensure that it resolves correctly, loads the intended destination, and behaves predictably across browsers and tools.
 
