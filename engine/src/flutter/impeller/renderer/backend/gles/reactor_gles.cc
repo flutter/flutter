@@ -308,6 +308,9 @@ bool ReactorGLES::ConsolidateHandles() {
     for (auto& handle : handles_) {
       // Collect dead handles.
       if (handle.second.pending_collection) {
+        // Some objects can only be deleted on a specific thread.  Collection
+        // of these objects will be deferred until the owner thead executes
+        // a reaction and triggers collection of handles.
         const auto& owner_thread = handle.first.owner_thread_;
         if (owner_thread.has_value() && *owner_thread != current_thread) {
           continue;
