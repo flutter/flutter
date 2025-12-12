@@ -350,7 +350,11 @@ public class FlutterRenderer implements TextureRegistry {
               return;
             }
             textureWrapper.markDirty();
-            scheduleEngineFrame();
+            // Mark this specific texture as having a new frame available.
+            // This notifies the framework to mark the texture render object as needing
+            // paint, ensuring the view containing this texture is recomposited even when
+            // no other render objects are dirty.
+            flutterJNI.markTextureFrameAvailable(id);
           };
       // The callback relies on being executed on the UI thread (un-synchronised read of
       // mNativeView and also the engine code check for platform thread in
@@ -657,7 +661,11 @@ public class FlutterRenderer implements TextureRegistry {
           lastQueueTime = System.nanoTime();
         }
       }
-      scheduleEngineFrame();
+      // Mark this specific texture as having a new frame available.
+      // This notifies the framework to mark the texture render object as needing
+      // paint, ensuring the view containing this texture is recomposited even when
+      // no other render objects are dirty.
+      flutterJNI.markTextureFrameAvailable(id);
     }
 
     PerImage dequeueImage() {
@@ -724,10 +732,11 @@ public class FlutterRenderer implements TextureRegistry {
       }
       if (hasPendingImages) {
         // Request another frame to ensure that images are consumed until the queue is empty.
+        // Use markTextureFrameAvailable to ensure the texture view is included in compositing.
         handler.post(
             () -> {
               if (!released) {
-                scheduleEngineFrame();
+                flutterJNI.markTextureFrameAvailable(id);
               }
             });
       }
@@ -889,7 +898,11 @@ public class FlutterRenderer implements TextureRegistry {
         }
         lastScheduleTime = now;
       }
-      scheduleEngineFrame();
+      // Mark this specific texture as having a new frame available.
+      // This notifies the framework to mark the texture render object as needing
+      // paint, ensuring the view containing this texture is recomposited even when
+      // no other render objects are dirty.
+      flutterJNI.markTextureFrameAvailable(id);
     }
 
     @Override
@@ -1060,7 +1073,11 @@ public class FlutterRenderer implements TextureRegistry {
         toClose.close();
       }
       if (image != null) {
-        scheduleEngineFrame();
+        // Mark this specific texture as having a new frame available.
+        // This notifies the framework to mark the texture render object as needing
+        // paint, ensuring the view containing this texture is recomposited even when
+        // no other render objects are dirty.
+        flutterJNI.markTextureFrameAvailable(id);
       }
     }
 
