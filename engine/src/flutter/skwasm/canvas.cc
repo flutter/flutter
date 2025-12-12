@@ -194,7 +194,7 @@ SKWASM_EXPORT void canvas_clipRect(flutter::DisplayListBuilder* canvas,
 SKWASM_EXPORT void canvas_clipRRect(flutter::DisplayListBuilder* canvas,
                                     const SkScalar* rrect_values,
                                     bool antialias) {
-  canvas->ClipRoundRect(Skwasm::createDlRRect(rrect_values),
+  canvas->ClipRoundRect(Skwasm::CreateDlRRect(rrect_values),
                         flutter::DlClipOp::kIntersect, antialias);
 }
 
@@ -235,7 +235,7 @@ SKWASM_EXPORT void canvas_drawRect(flutter::DisplayListBuilder* canvas,
 SKWASM_EXPORT void canvas_drawRRect(flutter::DisplayListBuilder* canvas,
                                     const SkScalar* rrect_values,
                                     flutter::DlPaint* paint) {
-  canvas->DrawRoundRect(Skwasm::createDlRRect(rrect_values),
+  canvas->DrawRoundRect(Skwasm::CreateDlRRect(rrect_values),
                         paint ? *paint : flutter::DlPaint());
 }
 
@@ -243,8 +243,8 @@ SKWASM_EXPORT void canvas_drawDRRect(flutter::DisplayListBuilder* canvas,
                                      const SkScalar* outer_rrect_values,
                                      const SkScalar* inner_rrect_values,
                                      flutter::DlPaint* paint) {
-  canvas->DrawDiffRoundRect(Skwasm::createDlRRect(outer_rrect_values),
-                            Skwasm::createDlRRect(inner_rrect_values),
+  canvas->DrawDiffRoundRect(Skwasm::CreateDlRRect(outer_rrect_values),
+                            Skwasm::CreateDlRRect(inner_rrect_values),
                             paint ? *paint : flutter::DlPaint());
 }
 
@@ -310,7 +310,7 @@ SKWASM_EXPORT void canvas_drawImage(flutter::DisplayListBuilder* canvas,
                                     flutter::DlPaint* paint,
                                     Skwasm::FilterQuality quality) {
   canvas->DrawImage(sk_ref_sp(image), flutter::DlPoint{offset_x, offset_y},
-                    Skwasm::samplingOptionsForQuality(quality), paint);
+                    Skwasm::SamplingOptionsForQuality(quality), paint);
 }
 
 SKWASM_EXPORT void canvas_drawImageRect(flutter::DisplayListBuilder* canvas,
@@ -320,7 +320,7 @@ SKWASM_EXPORT void canvas_drawImageRect(flutter::DisplayListBuilder* canvas,
                                         flutter::DlPaint* paint,
                                         Skwasm::FilterQuality quality) {
   canvas->DrawImageRect(sk_ref_sp(image), *source_rect, *dest_rect,
-                        Skwasm::samplingOptionsForQuality(quality), paint,
+                        Skwasm::SamplingOptionsForQuality(quality), paint,
                         flutter::DlSrcRectConstraint::kStrict);
 }
 
@@ -331,7 +331,7 @@ SKWASM_EXPORT void canvas_drawImageNine(flutter::DisplayListBuilder* canvas,
                                         flutter::DlPaint* paint,
                                         Skwasm::FilterQuality quality) {
   canvas->DrawImageNine(sk_ref_sp(image), *center_rect, *destination_rect,
-                        filterModeForQuality(quality), paint);
+                        FilterModeForQuality(quality), paint);
 }
 
 SKWASM_EXPORT void canvas_drawVertices(
@@ -367,7 +367,7 @@ SKWASM_EXPORT void canvas_drawAtlas(flutter::DisplayListBuilder* canvas,
   }
   canvas->DrawAtlas(
       sk_ref_sp(atlas), transforms, rects, dl_colors.data(), sprite_count, mode,
-      Skwasm::samplingOptionsForQuality(Skwasm::FilterQuality::medium),
+      Skwasm::SamplingOptionsForQuality(Skwasm::FilterQuality::medium),
       cull_rect, paint);
 }
 

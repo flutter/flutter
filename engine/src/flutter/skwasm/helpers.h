@@ -26,7 +26,7 @@ class sp_wrapper {
   std::shared_ptr<T> ptr_;
 };
 
-inline flutter::DlMatrix createDlMatrixFrom3x3(const flutter::DlScalar* f) {
+inline flutter::DlMatrix CreateDlMatrixFrom3x3(const flutter::DlScalar* f) {
   // clang-format off
   return flutter::DlMatrix(
     f[0], f[3], 0, f[6],
@@ -37,16 +37,16 @@ inline flutter::DlMatrix createDlMatrixFrom3x3(const flutter::DlScalar* f) {
   // clang-format on
 }
 
-inline SkMatrix createSkMatrix(const SkScalar* f) {
+inline SkMatrix CreateSkMatrix(const SkScalar* f) {
   return SkMatrix::MakeAll(f[0], f[1], f[2], f[3], f[4], f[5], f[6], f[7],
                            f[8]);
 }
 
-inline flutter::DlRect createDlRect(const float* f) {
+inline flutter::DlRect CreateDlRect(const float* f) {
   return flutter::DlRect::MakeLTRB(f[0], f[1], f[2], f[3]);
 }
 
-inline flutter::DlRoundingRadii createDlRadii(const float* f) {
+inline flutter::DlRoundingRadii CreateDlRadii(const float* f) {
   // Flutter has radii in TL,TR,BR,BL (clockwise) order,
   // but Impeller uses TL,TR,BL,BR (zig-zag) order
   impeller::RoundingRadii radii = {
@@ -58,12 +58,12 @@ inline flutter::DlRoundingRadii createDlRadii(const float* f) {
   return radii;
 }
 
-inline flutter::DlRoundRect createDlRRect(const float* f) {
-  return flutter::DlRoundRect::MakeRectRadii(createDlRect(f),
-                                             createDlRadii(f + 4));
+inline flutter::DlRoundRect CreateDlRRect(const float* f) {
+  return flutter::DlRoundRect::MakeRectRadii(CreateDlRect(f),
+                                             CreateDlRadii(f + 4));
 }
 
-inline SkRRect createSkRRect(const SkScalar* f) {
+inline SkRRect CreateSkRRect(const SkScalar* f) {
   const SkRect* rect = reinterpret_cast<const SkRect*>(f);
   const SkVector* radiiValues = reinterpret_cast<const SkVector*>(f + 4);
   SkRRect rr;
@@ -87,7 +87,7 @@ enum class FilterQuality {
   high,
 };
 
-inline flutter::DlFilterMode filterModeForQuality(FilterQuality quality) {
+inline flutter::DlFilterMode FilterModeForQuality(FilterQuality quality) {
   switch (quality) {
     case FilterQuality::none:
       return flutter::DlFilterMode::kNearest;
@@ -98,7 +98,7 @@ inline flutter::DlFilterMode filterModeForQuality(FilterQuality quality) {
   }
 }
 
-inline flutter::DlImageSampling samplingOptionsForQuality(
+inline flutter::DlImageSampling SamplingOptionsForQuality(
     FilterQuality quality) {
   switch (quality) {
     case FilterQuality::none:

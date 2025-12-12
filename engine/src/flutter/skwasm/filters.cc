@@ -40,8 +40,8 @@ imageFilter_createMatrix(flutter::DlScalar* matrix_33,
   Skwasm::live_image_filter_count++;
   return new Skwasm::sp_wrapper<flutter::DlImageFilter>(
       flutter::DlImageFilter::MakeMatrix(
-          Skwasm::createDlMatrixFrom3x3(matrix_33),
-          Skwasm::samplingOptionsForQuality(quality)));
+          Skwasm::CreateDlMatrixFrom3x3(matrix_33),
+          Skwasm::SamplingOptionsForQuality(quality)));
 }
 
 SKWASM_EXPORT Skwasm::sp_wrapper<flutter::DlImageFilter>*

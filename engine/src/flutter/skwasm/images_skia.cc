@@ -29,7 +29,7 @@
 
 namespace {
 
-SkColorType colorTypeForPixelFormat(Skwasm::PixelFormat format) {
+SkColorType ColorTypeForPixelFormat(Skwasm::PixelFormat format) {
   switch (format) {
     case Skwasm::PixelFormat::rgba8888:
       return SkColorType::kRGBA_8888_SkColorType;
@@ -40,7 +40,7 @@ SkColorType colorTypeForPixelFormat(Skwasm::PixelFormat format) {
   }
 }
 
-SkAlphaType alphaTypeForPixelFormat(Skwasm::PixelFormat format) {
+SkAlphaType AlphaTypeForPixelFormat(Skwasm::PixelFormat format) {
   switch (format) {
     case Skwasm::PixelFormat::rgba8888:
     case Skwasm::PixelFormat::bgra8888:
@@ -142,8 +142,8 @@ sk_sp<flutter::DlImage> MakeImageFromPixels(SkData* data,
                                             Skwasm::PixelFormat pixel_format,
                                             size_t row_byte_count) {
   return flutter::DlImage::Make(SkImages::RasterFromData(
-      SkImageInfo::Make(width, height, colorTypeForPixelFormat(pixel_format),
-                        alphaTypeForPixelFormat(pixel_format),
+      SkImageInfo::Make(width, height, ColorTypeForPixelFormat(pixel_format),
+                        AlphaTypeForPixelFormat(pixel_format),
                         SkColorSpace::MakeSRGB()),
       sk_ref_sp(data), row_byte_count));
 }

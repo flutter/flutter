@@ -162,14 +162,14 @@ SKWASM_EXPORT void path_addPolygon(SkPathBuilder* path,
 
 SKWASM_EXPORT void path_addRRect(SkPathBuilder* path,
                                  const SkScalar* rrect_values) {
-  path->addRRect(Skwasm::createSkRRect(rrect_values), SkPathDirection::kCW);
+  path->addRRect(Skwasm::CreateSkRRect(rrect_values), SkPathDirection::kCW);
 }
 
 SKWASM_EXPORT void path_addPath(SkPathBuilder* path,
                                 const SkPathBuilder* other,
                                 const SkScalar* matrix_33,
                                 SkPath::AddPathMode extend_path) {
-  path->addPath(other->snapshot(), Skwasm::createSkMatrix(matrix_33),
+  path->addPath(other->snapshot(), Skwasm::CreateSkMatrix(matrix_33),
                 extend_path);
 }
 
@@ -187,7 +187,7 @@ SKWASM_EXPORT bool path_contains(SkPathBuilder* path, SkScalar x, SkScalar y) {
 
 SKWASM_EXPORT void path_transform(SkPathBuilder* path,
                                   const SkScalar* matrix_33) {
-  path->transform(Skwasm::createSkMatrix(matrix_33));
+  path->transform(Skwasm::CreateSkMatrix(matrix_33));
 }
 
 SKWASM_EXPORT void path_getBounds(SkPathBuilder* path, SkRect* rect) {

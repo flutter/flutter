@@ -7,7 +7,7 @@
 #include "third_party/skia/include/effects/SkRuntimeEffect.h"
 
 namespace Skwasm {
-sk_sp<flutter::DlRuntimeEffect> createRuntimeEffect(SkString* source) {
+sk_sp<flutter::DlRuntimeEffect> CreateRuntimeEffect(SkString* source) {
   auto result = SkRuntimeEffect::MakeForShader(*source);
   if (result.effect == nullptr) {
     FML_LOG(ERROR) << "Failed to compile shader. Error Text:\n"

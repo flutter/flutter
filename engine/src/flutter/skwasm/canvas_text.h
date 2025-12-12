@@ -11,7 +11,7 @@
 #include "third_party/skia/include/core/SkRefCnt.h"
 
 namespace flutter {
-std::shared_ptr<DlText> textFromBlob(const sk_sp<SkTextBlob>& blob);
+std::shared_ptr<DlText> TextFromBlob(const sk_sp<SkTextBlob>& blob);
 }
 
 #endif  // FLUTTER_SKWASM_CANVAS_TEXT_H_
