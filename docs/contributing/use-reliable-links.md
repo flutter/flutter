@@ -72,7 +72,6 @@ create one following these steps:
     don't include the origin of the destination URL, just the path.
  4. Place this entry with the other tooling (`/to/`) redirects in the file
     according to its alphanumerical sorting.
-    Certain editors can sort a selected portion of the redirects as well.
  5. Commit your changes, push them if needed, and open a new pull request
     against the `flutter/website` repository's `main` branch.
  6. Set a descriptive pull request title, similar to the following:
@@ -91,6 +90,24 @@ create one following these steps:
 10. The website maintainers might reach out to you
     if the redirect needs to be updated, but do consider
     checking your redirects occasionally to verify they still make sense.
+
+---
+
+## Testing your redirect (New Section)
+
+After creating and submitting your redirect, it is recommended to test it to ensure that it resolves correctly, loads the intended destination, and behaves predictably across browsers and tools.
+
+Here is how to validate your redirect:
+
+1. Open the link in a private/incognito browser window using:
+2. Confirm that the redirect takes you to the correct and expected URL.
+3. Test the redirect on multiple browsers if possible (Chrome, Firefox, Safari).
+4. Validate that the redirect works even if the destination includes query parameters.
+5. If the destination page moves or changes, update the redirect in `firebase.json`.
+
+This ensures that your redirect behaves reliably for users across different environments and remains stable over time.
+
+---
 
 > [!IMPORTANT]
 > There is a maintenance cost of a tooling redirect,
