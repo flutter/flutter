@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert' as convert;
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -314,64 +315,27 @@ void main() async {
     blueGreenImage.dispose();
   });
 
-  test('FragmentShader renders sampler with filter quality default', () async {
-    final FragmentProgram program = await FragmentProgram.fromAsset('texture.frag.iplr');
-    final Image blueGreenImage = await _createBlueGreenImage();
-    final FragmentShader shader = program.fragmentShader()
-      ..setImageSampler(0, blueGreenImage)
-      ..setFloat(0, 100)
-      ..setFloat(1, 100);
+  for (final (filterQuality, goldenFilename) in [
+    (FilterQuality.none, 'render_sampler_none.png'),
+    (FilterQuality.low, 'render_sampler_low.png'),
+    (FilterQuality.medium, 'render_sampler_medium.png'),
+    (FilterQuality.high, 'render_sampler_high.png'),
+  ]) {
+    test('FragmentShader renders sampler with filter quality ${filterQuality.name}', () async {
+      final FragmentProgram program = await FragmentProgram.fromAsset('texture.frag.iplr');
+      final Image image = _createOvalGradientImage(imageDimension: 16);
+      final FragmentShader shader = program.fragmentShader()
+        ..setImageSampler(0, image, filterQuality: filterQuality);
+      shader.getUniformFloat('u_size', 0).set(300);
+      shader.getUniformFloat('u_size', 1).set(300);
 
-    final Image shaderImage = await _imageFromShader(shader: shader, imageDimension: 100);
+      final Image shaderImage = await _imageFromShader(shader: shader, imageDimension: 300);
 
-    // Default filter quality uses FilterQuality.none.
-    await comparer.addGoldenImage(shaderImage, 'render_sampler_none.png');
-    shader.dispose();
-    blueGreenImage.dispose();
-  });
-
-  test('FragmentShader renders sampler with filter quality low', () async {
-    final FragmentProgram program = await FragmentProgram.fromAsset('texture.frag.iplr');
-    final Image blueGreenImage = await _createBlueGreenImage();
-    final FragmentShader shader = program.fragmentShader()
-      ..setImageSampler(0, blueGreenImage, filterQuality: FilterQuality.low)
-      ..setFloat(0, 100)
-      ..setFloat(1, 100);
-
-    final Image shaderImage = await _imageFromShader(shader: shader, imageDimension: 100);
-
-    await comparer.addGoldenImage(shaderImage, 'render_sampler_low.png');
-    shader.dispose();
-    blueGreenImage.dispose();
-  });
-
-  test('FragmentShader renders sampler with filter quality medium', () async {
-    final FragmentProgram program = await FragmentProgram.fromAsset('texture.frag.iplr');
-    final Image blueGreenImage = await _createBlueGreenImage();
-    final FragmentShader shader = program.fragmentShader()
-      ..setImageSampler(0, blueGreenImage, filterQuality: FilterQuality.medium)
-      ..setFloat(0, 100)
-      ..setFloat(1, 100);
-
-    final Image shaderImage = await _imageFromShader(shader: shader, imageDimension: 100);
-
-    await comparer.addGoldenImage(shaderImage, 'render_sampler_medium.png');
-    shader.dispose();
-    blueGreenImage.dispose();
-  });
-
-  test('FragmentShader renders sampler with filter quality high', () async {
-    final FragmentProgram program = await FragmentProgram.fromAsset('texture.frag.iplr');
-    final Image blueGreenImage = await _createBlueGreenImage();
-    final FragmentShader shader = program.fragmentShader()
-      ..setImageSampler(0, blueGreenImage, filterQuality: FilterQuality.high)
-      ..setFloat(0, 100)
-      ..setFloat(1, 100);
-    final Image shaderImage = await _imageFromShader(shader: shader, imageDimension: 100);
-    await comparer.addGoldenImage(shaderImage, 'render_sampler_high.png');
-    shader.dispose();
-    blueGreenImage.dispose();
-  });
+      await comparer.addGoldenImage(shaderImage, goldenFilename);
+      shader.dispose();
+      image.dispose();
+    });
+  }
 
   test('FragmentShader with uniforms renders correctly', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
@@ -747,6 +711,32 @@ Image _createBlueGreenImageSync() {
   final Picture picture = recorder.endRecording();
   try {
     return picture.toImageSync(10, 10);
+  } finally {
+    picture.dispose();
+  }
+}
+
+// Image of an oval painted with a linear gradient.
+Image _createOvalGradientImage({required int imageDimension}) {
+  final recorder = PictureRecorder();
+  final canvas = Canvas(recorder);
+  canvas.drawPaint(Paint()..color = const Color(0xFF000000));
+  canvas.drawOval(
+    Rect.fromCenter(
+      center: Offset(imageDimension * 0.5, imageDimension * 0.5),
+      width: imageDimension * 0.6,
+      height: imageDimension * 0.9,
+    ),
+    Paint()
+      ..shader = Gradient.linear(
+        Offset.zero,
+        Offset(imageDimension.toDouble(), imageDimension.toDouble()),
+        [const Color(0xFFFF0000), const Color(0xFF00FF00)],
+      ),
+  );
+  final Picture picture = recorder.endRecording();
+  try {
+    return picture.toImageSync(imageDimension, imageDimension);
   } finally {
     picture.dispose();
   }
