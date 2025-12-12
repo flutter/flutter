@@ -23,7 +23,6 @@ import 'media_query.dart';
 import 'overlay.dart';
 import 'selection_container.dart';
 import 'ticker_provider.dart';
-import 'tooltip_visibility.dart';
 
 const AnimationStyle _kDefaultAnimationStyle = AnimationStyle(
   curve: Curves.fastOutSlowIn,
@@ -515,9 +514,6 @@ class RawTooltip extends StatefulWidget {
 class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMixin {
   final OverlayPortalController _overlayController = OverlayPortalController();
 
-  // From InheritedWidgets
-  late bool _visible;
-
   Timer? _timer;
   AnimationController? _backingController;
   AnimationController get _controller {
@@ -567,9 +563,6 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     assert(mounted);
     void show() {
       assert(mounted);
-      if (!_visible) {
-        return;
-      }
 
       _controller.forward();
       _timer?.cancel();
@@ -676,9 +669,6 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
   }
 
   void _handleTap() {
-    if (!_visible) {
-      return;
-    }
     final bool tooltipCreated = _controller.isDismissed;
     if (tooltipCreated && widget.enableFeedback) {
       assert(widget.triggerMode == TooltipTriggerMode.tap);
@@ -695,10 +685,7 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
   // When a "trigger" gesture is recognized and the pointer down even is a part
   // of it.
   void _handleLongPress() {
-    if (!_visible) {
-      return;
-    }
-    final bool tooltipCreated = _visible && _controller.isDismissed;
+    final bool tooltipCreated = _controller.isDismissed;
     if (tooltipCreated && widget.enableFeedback) {
       assert(widget.triggerMode == TooltipTriggerMode.longPress);
       Feedback.forLongPress(context);
@@ -765,10 +752,6 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
   /// Returns `false` when the tooltip shouldn't be shown or when the tooltip
   /// was already visible.
   bool ensureTooltipVisible() {
-    if (!_visible) {
-      return false;
-    }
-
     _timer?.cancel();
     _timer = null;
     if (_controller.isForwardOrCompleted) {
@@ -786,13 +769,6 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     // if some other control is clicked on. Pointer events are dispatched to
     // global routes **after** other routes.
     GestureBinding.instance.pointerRouter.addGlobalRoute(_handleGlobalPointerEvent);
-  }
-
-  @protected
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _visible = TooltipVisibility.of(context);
   }
 
   Widget _buildTooltipOverlay(BuildContext context, OverlayChildLayoutInfo layoutInfo) {
@@ -864,18 +840,17 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     );
 
     // Only check for gestures if tooltip should be visible.
-    if (_visible) {
-      result = _ExclusiveMouseRegion(
-        onEnter: _handleMouseEnter,
-        onExit: _handleMouseExit,
-        cursor: widget.mouseCursor ?? MouseCursor.defer,
-        child: Listener(
-          onPointerDown: _handlePointerDown,
-          behavior: HitTestBehavior.opaque,
-          child: result,
-        ),
-      );
-    }
+    result = _ExclusiveMouseRegion(
+      onEnter: _handleMouseEnter,
+      onExit: _handleMouseExit,
+      cursor: widget.mouseCursor ?? MouseCursor.defer,
+      child: Listener(
+        onPointerDown: _handlePointerDown,
+        behavior: HitTestBehavior.opaque,
+        child: result,
+      ),
+    );
+
     return OverlayPortal.overlayChildLayoutBuilder(
       controller: _overlayController,
       overlayChildBuilder: _buildTooltipOverlay,

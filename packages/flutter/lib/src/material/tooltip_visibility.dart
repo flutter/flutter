@@ -5,7 +5,7 @@
 /// @docImport 'tooltip.dart';
 library;
 
-import 'framework.dart';
+import 'package:flutter/widgets.dart';
 
 class _TooltipVisibilityScope extends InheritedWidget {
   const _TooltipVisibilityScope({required super.child, required this.visible});
@@ -18,25 +18,25 @@ class _TooltipVisibilityScope extends InheritedWidget {
   }
 }
 
-/// Overrides the visibility of descendant [RawTooltip] widgets.
+/// Overrides the visibility of descendant [Tooltip] widgets.
 ///
-/// If disabled, the descendant [RawTooltip] widgets will not display a tooltip
+/// If disabled, the descendant [Tooltip] widgets will not display a tooltip
 /// when tapped, long-pressed, hovered by the mouse, or when
 /// `ensureTooltipVisible` is called. This only visually disables tooltips but
 /// continues to provide any semantic information that is provided.
 class TooltipVisibility extends StatelessWidget {
-  /// Creates a widget that configures the visibility of [RawTooltip].
+  /// Creates a widget that configures the visibility of [Tooltip].
   const TooltipVisibility({super.key, required this.visible, required this.child});
 
   /// The widget below this widget in the tree.
   ///
-  /// The entire app can be wrapped in this widget to globally control [RawTooltip]
+  /// The entire app can be wrapped in this widget to globally control [Tooltip]
   /// visibility.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
-  /// Determines the visibility of [RawTooltip] widgets that inherit from this widget.
+  /// Determines the visibility of [Tooltip] widgets that inherit from this widget.
   final bool visible;
 
   /// The [visible] of the closest instance of this class that encloses the

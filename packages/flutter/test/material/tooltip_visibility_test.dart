@@ -4,7 +4,8 @@
 
 import 'dart:ui';
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const String tooltipText = 'TIP';
@@ -23,32 +24,16 @@ void main() {
       await gesture.moveTo(Offset.zero);
 
       await tester.pumpWidget(
-        WidgetsApp(
-          color: const Color(0x00000000),
-          pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
-            return PageRouteBuilder<T>(
-              pageBuilder:
-                  (
-                    BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                  ) => builder(context),
-            );
-          },
+        const MaterialApp(
           home: TooltipVisibility(
             visible: false,
-            child: RawTooltip(
-              semanticsTooltip: tooltipText,
-              tooltipBuilder: (BuildContext context, Animation<double> animation) =>
-                  const Text(tooltipText),
-              child: const SizedBox(width: 100.0, height: 100.0),
-            ),
+            child: Tooltip(message: tooltipText, child: SizedBox(width: 100.0, height: 100.0)),
           ),
         ),
       );
 
       expect(
-        find.descendant(of: find.byType(RawTooltip), matching: find.byType(MouseRegion)),
+        find.descendant(of: find.byType(Tooltip), matching: find.byType(MouseRegion)),
         findsNothing,
       );
     },
@@ -68,33 +53,21 @@ void main() {
     await gesture.moveTo(Offset.zero);
 
     await tester.pumpWidget(
-      WidgetsApp(
-        color: const Color(0x00000000),
-        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
-          return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
-          );
-        },
+      const MaterialApp(
         home: Center(
           child: TooltipVisibility(
             visible: false,
-            child: RawTooltip(
-              semanticsTooltip: tooltipText,
-              tooltipBuilder: (BuildContext context, Animation<double> animation) =>
-                  const Text(tooltipText),
-              child: const SizedBox(width: 100.0, height: 100.0),
+            child: Tooltip(
+              message: tooltipText,
+              waitDuration: waitDuration,
+              child: SizedBox(width: 100.0, height: 100.0),
             ),
           ),
         ),
       ),
     );
 
-    final Finder tooltip = find.byType(RawTooltip);
+    final Finder tooltip = find.byType(Tooltip);
     await gesture.moveTo(Offset.zero);
     await tester.pump();
     await gesture.moveTo(tester.getCenter(tooltip));
@@ -120,33 +93,21 @@ void main() {
     await gesture.moveTo(Offset.zero);
 
     await tester.pumpWidget(
-      WidgetsApp(
-        color: const Color(0x00000000),
-        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
-          return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
-          );
-        },
+      const MaterialApp(
         home: Center(
           child: TooltipVisibility(
             visible: true,
-            child: RawTooltip(
-              semanticsTooltip: tooltipText,
-              tooltipBuilder: (BuildContext context, Animation<double> animation) =>
-                  const Text(tooltipText),
-              child: const SizedBox(width: 100.0, height: 100.0),
+            child: Tooltip(
+              message: tooltipText,
+              waitDuration: waitDuration,
+              child: SizedBox(width: 100.0, height: 100.0),
             ),
           ),
         ),
       ),
     );
 
-    final Finder tooltip = find.byType(RawTooltip);
+    final Finder tooltip = find.byType(Tooltip);
     await gesture.moveTo(Offset.zero);
     await tester.pump();
     await gesture.moveTo(tester.getCenter(tooltip));
@@ -177,7 +138,7 @@ void main() {
     (WidgetTester tester) async {
       await setWidgetForTooltipMode(tester, TooltipTriggerMode.tap, true);
 
-      final Finder tooltip = find.byType(RawTooltip);
+      final Finder tooltip = find.byType(Tooltip);
       expect(find.text(tooltipText), findsNothing);
 
       await testGestureTap(tester, tooltip);
@@ -188,27 +149,14 @@ void main() {
   testWidgets('Tooltip does not trigger manually when in TooltipVisibility with visible = false', (
     WidgetTester tester,
   ) async {
-    final tooltipKey = GlobalKey<RawTooltipState>();
+    final tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(
-      WidgetsApp(
-        color: const Color(0x00000000),
-        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
-          return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
-          );
-        },
+      MaterialApp(
         home: TooltipVisibility(
           visible: false,
-          child: RawTooltip(
+          child: Tooltip(
             key: tooltipKey,
-            semanticsTooltip: tooltipText,
-            tooltipBuilder: (BuildContext context, Animation<double> animation) =>
-                const Text(tooltipText),
+            message: tooltipText,
             child: const SizedBox(width: 100.0, height: 100.0),
           ),
         ),
@@ -223,27 +171,14 @@ void main() {
   testWidgets('Tooltip triggers manually when in TooltipVisibility with visible = true', (
     WidgetTester tester,
   ) async {
-    final tooltipKey = GlobalKey<RawTooltipState>();
+    final tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(
-      WidgetsApp(
-        color: const Color(0x00000000),
-        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
-          return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
-          );
-        },
+      MaterialApp(
         home: TooltipVisibility(
           visible: true,
-          child: RawTooltip(
+          child: Tooltip(
             key: tooltipKey,
-            semanticsTooltip: tooltipText,
-            tooltipBuilder: (BuildContext context, Animation<double> animation) =>
-                const Text(tooltipText),
+            message: tooltipText,
             child: const SizedBox(width: 100.0, height: 100.0),
           ),
         ),
@@ -262,25 +197,12 @@ Future<void> setWidgetForTooltipMode(
   bool visibility,
 ) async {
   await tester.pumpWidget(
-    WidgetsApp(
-      color: const Color(0x00000000),
-      pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
-        return PageRouteBuilder<T>(
-          pageBuilder:
-              (
-                BuildContext context,
-                Animation<double> animation,
-                Animation<double> secondaryAnimation,
-              ) => builder(context),
-        );
-      },
+    MaterialApp(
       home: TooltipVisibility(
         visible: visibility,
-        child: RawTooltip(
-          semanticsTooltip: tooltipText,
+        child: Tooltip(
+          message: tooltipText,
           triggerMode: triggerMode,
-          tooltipBuilder: (BuildContext context, Animation<double> animation) =>
-              const Text(tooltipText),
           child: const SizedBox(width: 100.0, height: 100.0),
         ),
       ),

@@ -17,6 +17,7 @@ import 'colors.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 import 'tooltip_theme.dart';
+import 'tooltip_visibility.dart';
 
 /// A Material Design tooltip.
 ///
@@ -389,6 +390,9 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   late TooltipThemeData _tooltipTheme;
 
+  // From InheritedWidgets
+  late bool _visible;
+
   /// Shows the tooltip if it is not already visible.
   ///
   /// After made visible by this method, The tooltip does not automatically
@@ -406,6 +410,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _tooltipTheme = TooltipTheme.of(context);
+    _visible = TooltipVisibility.of(context);
   }
 
   // https://material.io/components/tooltips#specs
@@ -507,29 +512,31 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       richMessage: widget.richMessage ?? TextSpan(text: widget.message),
     );
 
-    return RawTooltip(
-      key: _tooltipKey,
-      semanticsTooltip: widget.message ?? widget.richMessage?.toPlainText() ?? '',
-      tooltipBuilder: (BuildContext context, Animation<double> animation) => IgnorePointer(
-        ignoring: widget.ignorePointer ?? widget.message != null,
-        child: FadeTransition(opacity: animation, child: tooltipBox),
-      ),
-      excludeFromSemantics:
-          widget.excludeFromSemantics ??
-          _tooltipTheme.excludeFromSemantics ??
-          _defaultExcludeFromSemantics,
-      showDuration: widget.showDuration ?? _tooltipTheme.showDuration ?? _defaultShowDuration,
-      triggerMode: widget.triggerMode ?? _tooltipTheme.triggerMode ?? _defaultTriggerMode,
-      enableFeedback:
-          widget.enableFeedback ?? _tooltipTheme.enableFeedback ?? _defaultEnableFeedback,
-      waitDuration: widget.waitDuration ?? _tooltipTheme.waitDuration ?? _defaultWaitDuration,
-      enableTapToDismiss: widget.enableTapToDismiss,
-      onTriggered: widget.onTriggered,
-      mouseCursor: widget.mouseCursor,
-      exitDuration: widget.exitDuration ?? _tooltipTheme.exitDuration ?? _defaultExitDuration,
-      positionDelegate: _getDefaultPositionDelegate,
-      child: widget.child ?? const SizedBox.shrink(),
-    );
+    return _visible
+        ? RawTooltip(
+            key: _tooltipKey,
+            semanticsTooltip: widget.message ?? widget.richMessage?.toPlainText() ?? '',
+            tooltipBuilder: (BuildContext context, Animation<double> animation) => IgnorePointer(
+              ignoring: widget.ignorePointer ?? widget.message != null,
+              child: FadeTransition(opacity: animation, child: tooltipBox),
+            ),
+            excludeFromSemantics:
+                widget.excludeFromSemantics ??
+                _tooltipTheme.excludeFromSemantics ??
+                _defaultExcludeFromSemantics,
+            showDuration: widget.showDuration ?? _tooltipTheme.showDuration ?? _defaultShowDuration,
+            triggerMode: widget.triggerMode ?? _tooltipTheme.triggerMode ?? _defaultTriggerMode,
+            enableFeedback:
+                widget.enableFeedback ?? _tooltipTheme.enableFeedback ?? _defaultEnableFeedback,
+            waitDuration: widget.waitDuration ?? _tooltipTheme.waitDuration ?? _defaultWaitDuration,
+            enableTapToDismiss: widget.enableTapToDismiss,
+            onTriggered: widget.onTriggered,
+            mouseCursor: widget.mouseCursor,
+            exitDuration: widget.exitDuration ?? _tooltipTheme.exitDuration ?? _defaultExitDuration,
+            positionDelegate: _getDefaultPositionDelegate,
+            child: widget.child ?? const SizedBox.shrink(),
+          )
+        : widget.child ?? const SizedBox.shrink();
   }
 }
 
