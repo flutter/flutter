@@ -8,22 +8,37 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'gesture_tester.dart';
 
-class TestDrag extends Drag {}
+class TestDrag extends Drag {
+  TestDrag(this.expectedButtons);
+
+  final int expectedButtons;
+
+  @override
+  void update(DragUpdateDetails details) {
+    expect(details.buttons, expectedButtons);
+  }
+
+  @override
+  void end(DragEndDetails details) {
+    expect(details.buttons, expectedButtons);
+  }
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   testGesture('MultiDrag: moving before delay rejects', (GestureTester tester) {
     final drag = DelayedMultiDragGestureRecognizer();
+    const int expectedButtons = kPrimaryButton;
 
     var didStartDrag = false;
     drag.onStart = (Offset position) {
       didStartDrag = true;
-      return TestDrag();
+      return TestDrag(expectedButtons);
     };
 
     final pointer = TestPointer(5);
-    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
     drag.addPointer(down);
     tester.closeArena(5);
     expect(didStartDrag, isFalse);
@@ -42,15 +57,16 @@ void main() {
 
   testGesture('MultiDrag: delay triggers', (GestureTester tester) {
     final drag = DelayedMultiDragGestureRecognizer();
+    const int expectedButtons = kPrimaryButton;
 
     var didStartDrag = false;
     drag.onStart = (Offset position) {
       didStartDrag = true;
-      return TestDrag();
+      return TestDrag(expectedButtons);
     };
 
     final pointer = TestPointer(5);
-    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0), buttons: expectedButtons);
     drag.addPointer(down);
     tester.closeArena(5);
     expect(didStartDrag, isFalse);
@@ -73,15 +89,19 @@ void main() {
     final drag = DelayedMultiDragGestureRecognizer(
       supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch},
     );
+    const int expectedButtons = kPrimaryButton;
 
     var didStartDrag = false;
     drag.onStart = (Offset position) {
       didStartDrag = true;
-      return TestDrag();
+      return TestDrag(expectedButtons);
     };
 
     final mousePointer = TestPointer(5, PointerDeviceKind.mouse);
-    final PointerDownEvent down = mousePointer.down(const Offset(10.0, 10.0));
+    final PointerDownEvent down = mousePointer.down(
+      const Offset(10.0, 10.0),
+      buttons: expectedButtons,
+    );
     drag.addPointer(down);
     tester.closeArena(5);
     expect(didStartDrag, isFalse);
@@ -130,7 +150,7 @@ void main() {
   test('$MultiDragPointerState dispatches memory events', () async {
     await expectLater(
       await memoryEvents(
-        () => _MultiDragPointerState(Offset.zero, PointerDeviceKind.touch, null).dispose(),
+        () => _MultiDragPointerState(Offset.zero, PointerDeviceKind.touch, 0, null).dispose(),
         _MultiDragPointerState,
       ),
       areCreateAndDispose,
@@ -139,7 +159,7 @@ void main() {
 }
 
 class _MultiDragPointerState extends MultiDragPointerState {
-  _MultiDragPointerState(super.initialPosition, super.kind, super.gestureSettings);
+  _MultiDragPointerState(super.initialPosition, super.kind, super.buttons, super.gestureSettings);
 
   @override
   void accepted(GestureMultiDragStartCallback starter) {}

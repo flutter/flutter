@@ -1290,6 +1290,7 @@ class SelectionOverlay {
         localPosition: details.localPosition,
         sourceTimeStamp: details.sourceTimeStamp,
         kind: details.kind,
+        buttons: details.buttons,
       );
       onStartHandleDragStart?.call(startDetails);
     }
@@ -1411,6 +1412,7 @@ class SelectionOverlay {
         localPosition: details.localPosition,
         sourceTimeStamp: details.sourceTimeStamp,
         kind: details.kind,
+        buttons: details.buttons,
       );
       onEndHandleDragStart?.call(startDetails);
     }
@@ -2441,7 +2443,13 @@ class TextSelectionGestureDetectorBuilder {
     // vs [TapGestureRecognizer.onSecondaryTapUp] instead of having to track state in
     // renderEditable. When this migration is complete we should remove this hack.
     // See https://github.com/flutter/flutter/issues/115130.
-    renderEditable.handleTapDown(TapDownDetails(globalPosition: details.globalPosition));
+    renderEditable.handleTapDown(
+      TapDownDetails(
+        globalPosition: details.globalPosition,
+        kind: details.kind,
+        buttons: details.buttons,
+      ),
+    );
     // The selection overlay should only be shown when the user is interacting
     // through a touch screen (via either a finger or a stylus). A mouse shouldn't
     // trigger the selection overlay.
@@ -2904,7 +2912,13 @@ class TextSelectionGestureDetectorBuilder {
     // vs [TapGestureRecognizer.onSecondaryTapUp] instead of having to track state in
     // renderEditable. When this migration is complete we should remove this hack.
     // See https://github.com/flutter/flutter/issues/115130.
-    renderEditable.handleSecondaryTapDown(TapDownDetails(globalPosition: details.globalPosition));
+    renderEditable.handleSecondaryTapDown(
+      TapDownDetails(
+        globalPosition: details.globalPosition,
+        kind: details.kind,
+        buttons: details.buttons,
+      ),
+    );
     _shouldShowSelectionToolbar = true;
     _shouldShowSelectionHandles =
         details.kind == null ||

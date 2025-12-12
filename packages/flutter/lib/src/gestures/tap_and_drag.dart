@@ -87,6 +87,7 @@ class TapDragDownDetails with Diagnosticable implements PositionedGestureDetails
     required this.localPosition,
     this.kind,
     required this.consecutiveTapCount,
+    this.buttons,
   });
 
   /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
@@ -104,13 +105,20 @@ class TapDragDownDetails with Diagnosticable implements PositionedGestureDetails
   /// the number in the series this tap is.
   final int consecutiveTapCount;
 
+  /// {@macro flutter.gestures.PointerEvent.buttons}
+  ///
+  /// NOTE: this will always be set by the platform but synthetic events might
+  /// not have it. It can be made required on future releases.
+  final int? buttons;
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
     properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
-    properties.add(EnumProperty<PointerDeviceKind?>('kind', kind));
+    properties.add(EnumProperty<PointerDeviceKind>('kind', kind));
     properties.add(IntProperty('consecutiveTapCount', consecutiveTapCount));
+    properties.add(IntProperty('buttons', buttons));
   }
 }
 
@@ -140,6 +148,7 @@ class TapDragUpDetails with Diagnosticable implements PositionedGestureDetails {
     required this.localPosition,
     required this.kind,
     required this.consecutiveTapCount,
+    this.buttons,
   });
 
   /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
@@ -157,13 +166,20 @@ class TapDragUpDetails with Diagnosticable implements PositionedGestureDetails {
   /// the number in the series this tap is.
   final int consecutiveTapCount;
 
+  /// {@macro flutter.gestures.PointerEvent.buttons}
+  ///
+  /// NOTE: this will always be set by the platform but synthetic events might
+  /// not have it. It can be made required on future releases.
+  final int? buttons;
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
     properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
-    properties.add(EnumProperty<PointerDeviceKind?>('kind', kind));
+    properties.add(EnumProperty<PointerDeviceKind>('kind', kind));
     properties.add(IntProperty('consecutiveTapCount', consecutiveTapCount));
+    properties.add(IntProperty('buttons', buttons));
   }
 }
 
@@ -194,6 +210,7 @@ class TapDragStartDetails with Diagnosticable implements PositionedGestureDetail
     this.sourceTimeStamp,
     this.kind,
     required this.consecutiveTapCount,
+    this.buttons,
   });
 
   /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
@@ -217,14 +234,21 @@ class TapDragStartDetails with Diagnosticable implements PositionedGestureDetail
   /// the number in the series this tap is.
   final int consecutiveTapCount;
 
+  /// {@macro flutter.gestures.PointerEvent.buttons}
+  ///
+  /// NOTE: this will always be set by the platform but synthetic events might
+  /// not have it. It can be made required on future releases.
+  final int? buttons;
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
     properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(DiagnosticsProperty<Duration?>('sourceTimeStamp', sourceTimeStamp));
-    properties.add(EnumProperty<PointerDeviceKind?>('kind', kind));
+    properties.add(EnumProperty<PointerDeviceKind>('kind', kind));
     properties.add(IntProperty('consecutiveTapCount', consecutiveTapCount));
+    properties.add(IntProperty('buttons', buttons));
   }
 }
 
@@ -262,6 +286,7 @@ class TapDragUpdateDetails with Diagnosticable implements PositionedGestureDetai
     required this.offsetFromOrigin,
     required this.localOffsetFromOrigin,
     required this.consecutiveTapCount,
+    this.buttons,
   }) : assert(
          primaryDelta == null ||
              (primaryDelta == delta.dx && delta.dy == 0.0) ||
@@ -328,6 +353,12 @@ class TapDragUpdateDetails with Diagnosticable implements PositionedGestureDetai
   /// the number in the series this tap is.
   final int consecutiveTapCount;
 
+  /// {@macro flutter.gestures.PointerEvent.buttons}
+  ///
+  /// NOTE: this will always be set by the platform but synthetic events might
+  /// not have it. It can be made required on future releases.
+  final int? buttons;
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -336,10 +367,11 @@ class TapDragUpdateDetails with Diagnosticable implements PositionedGestureDetai
     properties.add(DiagnosticsProperty<Duration?>('sourceTimeStamp', sourceTimeStamp));
     properties.add(DiagnosticsProperty<Offset>('delta', delta));
     properties.add(DoubleProperty('primaryDelta', primaryDelta));
-    properties.add(EnumProperty<PointerDeviceKind?>('kind', kind));
+    properties.add(EnumProperty<PointerDeviceKind>('kind', kind));
     properties.add(DiagnosticsProperty<Offset>('offsetFromOrigin', offsetFromOrigin));
     properties.add(DiagnosticsProperty<Offset>('localOffsetFromOrigin', localOffsetFromOrigin));
     properties.add(IntProperty('consecutiveTapCount', consecutiveTapCount));
+    properties.add(IntProperty('buttons', buttons));
   }
 }
 
@@ -370,6 +402,8 @@ class TapDragEndDetails with Diagnosticable implements PositionedGestureDetails 
     this.velocity = Velocity.zero,
     this.primaryVelocity,
     required this.consecutiveTapCount,
+    this.kind,
+    this.buttons,
   }) : assert(
          primaryVelocity == null ||
              primaryVelocity == velocity.pixelsPerSecond.dx ||
@@ -406,6 +440,15 @@ class TapDragEndDetails with Diagnosticable implements PositionedGestureDetails 
   /// the number in the series this tap is.
   final int consecutiveTapCount;
 
+  /// The kind of input device for which the event was generated.
+  final PointerDeviceKind? kind;
+
+  /// {@macro flutter.gestures.PointerEvent.buttons}
+  ///
+  /// NOTE: this will always be set by the platform but synthetic events might
+  /// not have it. It can be made required on future releases.
+  final int? buttons;
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -414,6 +457,8 @@ class TapDragEndDetails with Diagnosticable implements PositionedGestureDetails 
     properties.add(DiagnosticsProperty<Velocity>('velocity', velocity));
     properties.add(DoubleProperty('primaryVelocity', primaryVelocity));
     properties.add(IntProperty('consecutiveTapCount', consecutiveTapCount));
+    properties.add(EnumProperty<PointerDeviceKind>('kind', kind));
+    properties.add(IntProperty('buttons', buttons));
   }
 }
 
@@ -1221,6 +1266,7 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
       globalPosition: event.position,
       localPosition: event.localPosition,
       kind: getKindForPointer(event.pointer),
+      buttons: getButtonsForPointer(event.pointer),
       consecutiveTapCount: consecutiveTapCount,
     );
 
@@ -1237,7 +1283,8 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
     }
 
     final upDetails = TapDragUpDetails(
-      kind: event.kind,
+      kind: getKindForPointer(event.pointer),
+      buttons: getButtonsForPointer(event.pointer),
       globalPosition: event.position,
       localPosition: event.localPosition,
       consecutiveTapCount: consecutiveTapCount,
@@ -1260,6 +1307,7 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
         globalPosition: _initialPosition.global,
         localPosition: _initialPosition.local,
         kind: getKindForPointer(event.pointer),
+        buttons: getButtonsForPointer(event.pointer),
         consecutiveTapCount: consecutiveTapCount,
       );
 
@@ -1278,6 +1326,7 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
       delta: event.localDelta,
       globalPosition: globalPosition,
       kind: getKindForPointer(event.pointer),
+      buttons: getButtonsForPointer(event.pointer),
       localPosition: localPosition,
       offsetFromOrigin: globalPosition - _initialPosition.global,
       localOffsetFromOrigin: localPosition - _initialPosition.local,
@@ -1306,11 +1355,13 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
       _handleDragUpdateThrottled();
     }
 
+    final int? pointer = _primaryPointer;
     final endDetails = TapDragEndDetails(
       globalPosition: globalPosition,
       localPosition: localPosition,
       primaryVelocity: 0.0,
       consecutiveTapCount: consecutiveTapCount,
+      buttons: pointer != null ? getButtonsForPointer(pointer) : null,
     );
 
     if (onDragEnd != null) {
@@ -1403,7 +1454,11 @@ class TapAndHorizontalDragGestureRecognizer extends BaseTapAndDragGestureRecogni
   /// Create a gesture recognizer for interactions in the horizontal axis.
   ///
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
-  TapAndHorizontalDragGestureRecognizer({super.debugOwner, super.supportedDevices});
+  TapAndHorizontalDragGestureRecognizer({
+    super.debugOwner,
+    super.supportedDevices,
+    super.allowedButtonsFilter,
+  });
 
   @override
   bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind) {
@@ -1438,7 +1493,11 @@ class TapAndHorizontalDragGestureRecognizer extends BaseTapAndDragGestureRecogni
 /// {@endtemplate}
 class TapAndPanGestureRecognizer extends BaseTapAndDragGestureRecognizer {
   /// Create a gesture recognizer for interactions on a plane.
-  TapAndPanGestureRecognizer({super.debugOwner, super.supportedDevices});
+  TapAndPanGestureRecognizer({
+    super.debugOwner,
+    super.supportedDevices,
+    super.allowedButtonsFilter,
+  });
 
   @override
   bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind) {

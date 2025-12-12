@@ -347,12 +347,14 @@ abstract class PointerEvent with Diagnosticable {
   ///    coordinate system of the screen.
   Offset get localDelta => delta;
 
+  /// {@template flutter.gestures.PointerEvent.buttons}
   /// Bit field using the *Button constants such as [kPrimaryMouseButton],
   /// [kSecondaryStylusButton], etc.
   ///
   /// For example, if this has the value 6 and the
   /// [kind] is [PointerDeviceKind.invertedStylus], then this indicates an
   /// upside-down stylus with both its primary and secondary buttons pressed.
+  /// {@endtemplate}
   final int buttons;
 
   /// Set if the pointer is currently down.
