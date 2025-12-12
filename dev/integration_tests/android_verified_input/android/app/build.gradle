@@ -30,7 +30,6 @@ android {
     namespace "io.flutter.integration.android_verified_input"
     compileSdk flutter.compileSdkVersion
 
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
