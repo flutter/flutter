@@ -254,10 +254,7 @@ Future<void> _runMultipleTypeBenchmark(BenchmarkResultPrinter printer) async {
       await tester.pumpWidget(
         _buildMultiTypeInheritedStack(
           typeCount: typeCount,
-          child: _MultiTypeDependentWidget(
-            rebuildTrigger: rebuildTrigger,
-            typeCount: typeCount,
-          ),
+          child: _MultiTypeDependentWidget(rebuildTrigger: rebuildTrigger, typeCount: typeCount),
         ),
       );
 
@@ -741,10 +738,7 @@ void _dependOnTypedInherited(BuildContext context, int typeIndex, {int? instance
 
 /// Builds a nested stack with multiple distinct InheritedWidget types.
 /// Each type appears once for width test.
-Widget _buildMultiTypeInheritedStack({
-  required int typeCount,
-  required Widget child,
-}) {
+Widget _buildMultiTypeInheritedStack({required int typeCount, required Widget child}) {
   var result = child;
   for (int i = typeCount - 1; i >= 0; i--) {
     result = _createTypedInherited(i, 0, result);
@@ -769,10 +763,7 @@ Widget _buildMultiTypeMultiInstanceStack({
 }
 
 class _MultiTypeDependentWidget extends StatefulWidget {
-  const _MultiTypeDependentWidget({
-    required this.rebuildTrigger,
-    required this.typeCount,
-  });
+  const _MultiTypeDependentWidget({required this.rebuildTrigger, required this.typeCount});
 
   final ValueNotifier<int> rebuildTrigger;
   final int typeCount;
