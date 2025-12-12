@@ -151,6 +151,7 @@ source_set("ui") {
     "window/platform_message_response_dart.h",
     "window/platform_message_response_dart_port.cc",
     "window/platform_message_response_dart_port.h",
+    "window/point_data.h",
     "window/pointer_data.cc",
     "window/pointer_data.h",
     "window/pointer_data_packet.cc",
