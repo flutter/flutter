@@ -7,6 +7,7 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
+import '../../engine.dart';
 import '../canvaskit/canvaskit_api.dart';
 import '../dom.dart';
 import 'bidi.dart';
@@ -57,15 +58,25 @@ class TextLayout {
     if (_isFirstLayout) {
       _isFirstLayout = false;
 
-      codeUnitFlags = AllCodeUnitFlags(paragraph.text);
-      extractTextClusters();
-      calculateStrutMetrics();
-      extractBidiRuns();
+      timeAction('layout.AllCodeUnitFlags', () {
+        codeUnitFlags = AllCodeUnitFlags(paragraph.text);
+      });
+      timeAction('layout.extractTextClusters', () {
+        extractTextClusters();
+        calculateStrutMetrics();
+      });
+      timeAction('layout.extractBidiRuns', () {
+        extractBidiRuns();
+      });
     }
 
     // Wrapping text into lines is required on every layout.
-    wrapText(width);
-    formatLines(width);
+    timeAction('layout.wrapText', () {
+      wrapText(width);
+    });
+    timeAction('layout.formatLines', () {
+      formatLines(width);
+    });
   }
 
   void calculateStrutMetrics() {

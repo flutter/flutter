@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../../engine.dart';
+
+typedef Entry = ({String group, String name});
+
 class WebParagraphDebug {
   static bool logging = false;
   static bool apiLogging = false;
@@ -36,5 +40,26 @@ class WebParagraphDebug {
       print('ERROR: $arg');
       return true;
     }());
+  }
+}
+
+class WebParagraphProfiler {
+  static Map<String, Duration> durations = {};
+
+  static void register() {
+    Profiler.ensureInitialized();
+    engineBenchmarkValueCallback = (String name, double value) {
+      durations[name] = Duration(milliseconds: value.toInt());
+    };
+  }
+
+  static void log() {
+    for (final MapEntry<String, Duration> entry in durations.entries) {
+      WebParagraphDebug.log('${entry.key}: ${entry.value.inMilliseconds}ms');
+    }
+  }
+
+  static void reset() {
+    durations = {};
   }
 }

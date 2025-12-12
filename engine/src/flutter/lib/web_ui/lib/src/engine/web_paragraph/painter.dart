@@ -9,6 +9,7 @@ import 'package:ui/ui.dart' as ui;
 import '../canvaskit/canvaskit_api.dart';
 import '../canvaskit/image.dart';
 import '../dom.dart';
+import '../profiler.dart';
 import '../util.dart';
 import 'debug.dart';
 import 'layout.dart';
@@ -18,7 +19,7 @@ import 'paragraph.dart';
 // so we need to make sure it's big enough to hold the biggest line.
 // Also, we use it to paint shadows (with vertical shifts) so we need to make it tall enough as well.
 const int _paintWidth = 1000;
-const int _paintHeight = 500;
+const int _paintHeight = 1000;
 double? currentDevicePixelRatio;
 final DomOffscreenCanvas paintCanvas = createDomOffscreenCanvas(_paintWidth, _paintHeight);
 final paintContext = paintCanvas.getContext('2d')! as DomCanvasRenderingContext2D;
@@ -233,33 +234,44 @@ class CanvasKitPainter extends Painter {
   void fillTextCluster(WebCluster webTextCluster, bool isDefaultLtr) {
     final WebTextStyle style = webTextCluster.style;
     paintContext.fillStyle = style.getForegroundColor().toCssString();
-    // We fill the text cluster into a rectange [0,0,w,h]
-    // but we need to shift the y coordinate by the font ascent
-    // becase the text is drawn at the ascent, not at 0
-    webTextCluster.fillOnContext(
-      paintContext,
-      /*ignore the text cluster shift from the text run*/
-      x: (isDefaultLtr ? 0 : webTextCluster.advance.width),
-      y: 0,
-    );
+    timeAction('paint.fillTextCluster', () {
+      // We fill the text cluster into a rectange [0,0,w,h]
+      // but we need to shift the y coordinate by the font ascent
+      // becase the text is drawn at the ascent, not at 0
+      webTextCluster.fillOnContext(
+        paintContext,
+        /*ignore the text cluster shift from the text run*/
+        x: (isDefaultLtr ? 0 : webTextCluster.advance.width),
+        y: 0,
+      );
+    });
   }
 
   @override
   void paintTextCluster(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect) {
-    final DomImageBitmap bitmap = paintCanvas.transferToImageBitmap();
+    final DomImageBitmap bitmap = timeAction('paint.transferToImageBitmap', () {
+      return paintCanvas.transferToImageBitmap();
+    });
 
-    final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
+    final SkImage? skImage = timeAction('paint.MakeLazyImageFromImageBitmap', () {
+      return canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
+    });
     if (skImage == null) {
       throw Exception('Failed to convert text image bitmap to an SkImage.');
     }
 
-    final ckImage = CkImage(skImage, imageSource: ImageBitmapImageSource(bitmap));
-    canvas.drawImageRect(
-      ckImage,
-      sourceRect,
-      targetRect,
-      ui.Paint()..filterQuality = ui.FilterQuality.none,
-    );
+    final CkImage ckImage = timeAction('paint.ImageBitmapImageSource', () {
+      return CkImage(skImage, imageSource: ImageBitmapImageSource(bitmap));
+    });
+
+    timeAction('paint.drawImageRect', () {
+      canvas.drawImageRect(
+        ckImage,
+        sourceRect,
+        targetRect,
+        ui.Paint()..filterQuality = ui.FilterQuality.none,
+      );
+    });
   }
 
   double calculateThickness(WebTextStyle textStyle) {

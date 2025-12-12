@@ -203,14 +203,13 @@ class Dart2JSCompiler extends TestCompiler {
     final arguments = <String>[
       'compile',
       'js',
-      '--no-minify',
-      '--disable-inlining',
-      '--enable-asserts',
+      '--minify',
 
       '-DFLUTTER_WEB_USE_SKIA=${renderer == Renderer.canvaskit}',
       '-DFLUTTER_WEB_USE_SKWASM=${renderer == Renderer.skwasm}',
+      '-DFLUTTER_WEB_ENABLE_PROFILING=true',
 
-      '-O2',
+      '-O4',
       '-o',
       targetFileName, // target path.
       relativePath, // current path.
@@ -262,7 +261,9 @@ class Dart2WasmCompiler extends TestCompiler {
       environment.dart2wasmSnapshotPath,
 
       '--libraries-spec=${environment.dartSdkDir.path}/lib/libraries.json',
-      '--enable-asserts',
+      '-O2',
+      '--minify',
+      '--strip-wasm',
       '--enable-experimental-wasm-interop',
 
       '-DFLUTTER_WEB_USE_SKIA=${renderer == Renderer.canvaskit}',

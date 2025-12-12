@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
+import '../../engine.dart';
 import '../dom.dart';
 import '../text/paragraph.dart';
 import '../util.dart';
@@ -875,7 +876,13 @@ class WebParagraph implements ui.Paragraph {
   List<TextLine> get lines => _layout.lines;
 
   @override
-  List<ui.TextBox> getBoxesForPlaceholders() => _layout.getBoxesForPlaceholders();
+  List<ui.TextBox> getBoxesForPlaceholders() {
+    final List<ui.TextBox> results = timeAction('query.getBoxesForPlaceholders', () {
+      return _layout.getBoxesForPlaceholders();
+    });
+    WebParagraphDebug.apiTrace('getBoxesForPlaceholders, ${results.length} boxes: $results');
+    return results;
+  }
 
   @override
   List<ui.TextBox> getBoxesForRange(
@@ -884,12 +891,10 @@ class WebParagraph implements ui.Paragraph {
     ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
     ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
   }) {
-    final List<ui.TextBox> result = _layout.getBoxesForRange(
-      start,
-      end,
-      boxHeightStyle,
-      boxWidthStyle,
-    );
+    final List<ui.TextBox> result = timeAction('query.getBoxesForRange', () {
+      return _layout.getBoxesForRange(start, end, boxHeightStyle, boxWidthStyle);
+    });
+
     WebParagraphDebug.apiTrace(
       'getBoxesForRange("$text", $start, $end, $boxHeightStyle, $boxWidthStyle): $result ($longestLine, $maxLineWidthWithTrailingSpaces)',
     );
@@ -898,9 +903,9 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   ui.TextPosition getPositionForOffset(ui.Offset offset) {
-    final ui.TextPosition result = text.isEmpty
-        ? const ui.TextPosition(offset: 0)
-        : _layout.getPositionForOffset(offset);
+    final ui.TextPosition result = timeAction('query.getPositionForOffset', () {
+      return text.isEmpty ? const ui.TextPosition(offset: 0) : _layout.getPositionForOffset(offset);
+    });
     WebParagraphDebug.apiTrace('getPositionForOffset("$text", $offset): $result');
     return result;
   }
@@ -909,7 +914,9 @@ class WebParagraph implements ui.Paragraph {
   ui.GlyphInfo? getClosestGlyphInfoForOffset(ui.Offset offset) {
     final ui.TextPosition position = getPositionForOffset(offset);
     assert(position.offset < text.length || text.isEmpty);
-    final ui.GlyphInfo? result = getGlyphInfoAt(position.offset);
+    final ui.GlyphInfo? result = timeAction('query.getClosestGlyphInfoForOffset', () {
+      return getGlyphInfoAt(position.offset);
+    });
     if (result == null) {
       WebParagraphDebug.apiTrace(
         'getClosestGlyphInfoForOffset("$text", ${offset.dx}, ${offset.dy}): '
@@ -925,7 +932,6 @@ class WebParagraph implements ui.Paragraph {
       'TextRange: [${result.graphemeClusterCodeUnitRange.start}:${result.graphemeClusterCodeUnitRange.end}) '
       'TextDirection: ${result.writingDirection.toString().replaceFirst('TextDirection.', '')} ',
     );
-
     return result;
   }
 
@@ -934,7 +940,9 @@ class WebParagraph implements ui.Paragraph {
     if (codeUnitOffset < 0 || codeUnitOffset >= text.length) {
       return null;
     }
-    final ui.GlyphInfo? result = _layout.getGlyphInfoAt(codeUnitOffset);
+    final ui.GlyphInfo? result = timeAction('query.getGlyphInfoAt', () {
+      return _layout.getGlyphInfoAt(codeUnitOffset);
+    });
     WebParagraphDebug.apiTrace('getGlyphInfoAt("$text", $codeUnitOffset): $result');
     return result;
   }
@@ -951,7 +959,9 @@ class WebParagraph implements ui.Paragraph {
     if (codepointPosition >= text.length) {
       return ui.TextRange(start: text.length, end: text.length);
     }
-    final ui.TextRange result = _layout.getWordBoundary(codepointPosition);
+    final ui.TextRange result = timeAction('query.getWordBoundary', () {
+      return _layout.getWordBoundary(codepointPosition);
+    });
     WebParagraphDebug.apiTrace('getWordBoundary("$text", $position): $result');
     return result;
   }
@@ -988,8 +998,9 @@ class WebParagraph implements ui.Paragraph {
       ui.TextAffinity.upstream => position.offset - 1,
       ui.TextAffinity.downstream => position.offset,
     };
-
-    final ui.TextRange result = _layout.getLineBoundary(codepointPosition);
+    final ui.TextRange result = timeAction('query.getLineBoundary', () {
+      return _layout.getLineBoundary(codepointPosition);
+    });
     WebParagraphDebug.apiTrace('getLineBoundary("$text", $position): $result');
     return result;
   }
@@ -997,9 +1008,11 @@ class WebParagraph implements ui.Paragraph {
   @override
   List<ui.LineMetrics> computeLineMetrics() {
     final metrics = <ui.LineMetrics>[];
-    for (final TextLine line in _layout.lines) {
-      metrics.add(line.getMetrics());
-    }
+    timeAction('query.computeLineMetrics', () {
+      for (final TextLine line in _layout.lines) {
+        metrics.add(line.getMetrics());
+      }
+    });
     WebParagraphDebug.apiTrace('computeLineMetrics("$text": $metrics');
     return metrics;
   }
@@ -1007,13 +1020,12 @@ class WebParagraph implements ui.Paragraph {
   @override
   ui.LineMetrics? getLineMetricsAt(int lineNumber) {
     if (lineNumber < 0 || lineNumber >= _layout.lines.length) {
-      WebParagraphDebug.apiTrace('getLineMetricsAt("$text", $lineNumber): null (out of range)');
       return null;
     }
-    WebParagraphDebug.apiTrace(
-      'getLineMetricsAt($lineNumber): ${_layout.lines[lineNumber].getMetrics()}',
-    );
-    return _layout.lines[lineNumber].getMetrics();
+    final ui.LineMetrics results = timeAction('query.getLineMetricsAt', () {
+      return _layout.lines[lineNumber].getMetrics();
+    });
+    return results;
   }
 
   @override
@@ -1032,24 +1044,33 @@ class WebParagraph implements ui.Paragraph {
       return null;
     }
 
-    for (final TextLine line in _layout.lines) {
-      if (line.allLineTextRange.isBefore(codeUnitOffset)) {
-        continue;
-      }
-      if (line.allLineTextRange.isAfter(codeUnitOffset)) {
-        // We haven't reached the offset yet, keep going.
-        break;
-      }
+    final int? result = timeAction('query.getLineNumberAt', () {
+      for (final TextLine line in _layout.lines) {
+        if (line.allLineTextRange.isBefore(codeUnitOffset)) {
+          continue;
+        }
+        if (line.allLineTextRange.isAfter(codeUnitOffset)) {
+          // We haven't reached the offset yet, keep going.
+          return null;
+        }
 
-      WebParagraphDebug.apiTrace('getLineNumberAt("$text", $codeUnitOffset): ${line.lineNumber}');
-      return line.lineNumber;
+        WebParagraphDebug.apiTrace('getLineNumberAt("$text", $codeUnitOffset): ${line.lineNumber}');
+        return line.lineNumber;
+      }
+      return null;
+    });
+
+    if (result == null) {
+      assert(
+        false,
+        'getLineNumberAt("$text", $codeUnitOffset): null (out of range, should not happen)',
+      );
+      WebParagraphDebug.apiTrace(
+        'getLineNumberAt("$text", $codeUnitOffset): null (out of text range)',
+      );
     }
 
-    assert(
-      false,
-      'getLineNumberAt("$text", $codeUnitOffset): null (out of range, should not happen)',
-    );
-    return null;
+    return result;
   }
 
   bool _disposed = false;
