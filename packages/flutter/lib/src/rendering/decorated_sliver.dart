@@ -5,7 +5,6 @@
 import 'object.dart';
 import 'proxy_box.dart';
 import 'proxy_sliver.dart';
-import 'sliver.dart';
 
 /// Paints a [Decoration] either before or after its child paints.
 ///
@@ -96,26 +95,12 @@ class RenderDecoratedSliver extends RenderProxySliver {
     if (child == null || !child!.geometry!.visible) {
       return;
     }
-    // In the case where the child sliver has infinite scroll extent, the decoration
-    // should only extend down to the bottom cache extent.
-    final double cappedMainAxisExtent = child!.geometry!.scrollExtent.isInfinite
-        ? constraints.scrollOffset + child!.geometry!.cacheExtent + constraints.cacheOrigin
-        : child!.geometry!.scrollExtent;
-    final (Size childSize, Offset scrollOffset) = switch (constraints.axis) {
-      Axis.horizontal => (
-        Size(cappedMainAxisExtent, constraints.crossAxisExtent),
-        Offset(-constraints.scrollOffset, 0.0),
-      ),
-      Axis.vertical => (
-        Size(constraints.crossAxisExtent, cappedMainAxisExtent),
-        Offset(0.0, -constraints.scrollOffset),
-      ),
-    };
-    offset += (child!.parentData! as SliverPhysicalParentData).paintOffset;
+
+    final Rect paintRect = getMaxPaintRect();
     void paintDecoration() => _painter!.paint(
       context.canvas,
-      offset + scrollOffset,
-      configuration.copyWith(size: childSize),
+      offset + paintRect.topLeft,
+      configuration.copyWith(size: paintRect.size),
     );
     switch (position) {
       case DecorationPosition.background:
@@ -125,5 +110,12 @@ class RenderDecoratedSliver extends RenderProxySliver {
         context.paintChild(child!, offset);
         paintDecoration();
     }
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(_decoration.toDiagnosticsNode(name: 'decoration'));
+    properties.add(DiagnosticsProperty<ImageConfiguration>('configuration', configuration));
   }
 }
