@@ -5347,6 +5347,22 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
     return index;
   }
 
+  int _getUniformVectorSize(String name) {
+    const sizeOfFloat = 4;
+    var sizeInFloats = 0;
+
+    for (final Object? entryDynamic in _uniformInfo) {
+      final entry = entryDynamic! as Map<String, Object>;
+      sizeInFloats = (entry['size'] as int? ?? 0) ~/ sizeOfFloat;
+
+      if (entry['name'] == name) {
+        return sizeInFloats;
+      }
+    }
+
+    throw ArgumentError('No uniform named `$name`.');
+  }
+
   int _getUniformFloatIndex(String name, int index) {
     if (index < 0) {
       throw ArgumentError('Index `$index` out of bounds for `$name`.');
@@ -5437,6 +5453,45 @@ base class UniformFloatSlot {
 
   /// The offset into the bound uniform. For example, 1 for `.y` or 2 for `.b`.
   final int index;
+}
+
+base class UniformVec2Slot {
+  UniformVec2Slot._(this._xSlot, this._ySlot);
+
+  /// Set the float value of the bound uniform.
+  void set(double x, double y) {
+    _xSlot.set(x);
+    _ySlot.set(y);
+  }
+
+  final UniformFloatSlot _xSlot, _ySlot;
+}
+
+base class UniformVec3Slot {
+  UniformVec3Slot._(this._xSlot, this._ySlot, this._zSlot);
+
+  /// Set the float value of the bound uniform.
+  void set(double x, double y, double z) {
+    _xSlot.set(x);
+    _ySlot.set(y);
+    _zSlot.set(z);
+  }
+
+  final UniformFloatSlot _xSlot, _ySlot, _zSlot;
+}
+
+base class UniformVec4Slot {
+  UniformVec4Slot._(this._xSlot, this._ySlot, this._zSlot, this._wSlot);
+
+  /// Set the float value of the bound uniform.
+  void set(double x, double y, double z, double w) {
+    _xSlot.set(x);
+    _ySlot.set(y);
+    _zSlot.set(z);
+    _wSlot.set(w);
+  }
+
+  final UniformFloatSlot _xSlot, _ySlot, _zSlot, _wSlot;
 }
 
 /// A binding to a shader's image sampler. Calling [set] on this object updates
@@ -5568,6 +5623,75 @@ base class FragmentShader extends Shader {
     final result = UniformFloatSlot._(this, name, index, shaderIndex);
     _slots.removeWhere((WeakReference<UniformFloatSlot> ref) => ref.target == null);
     _slots.add(WeakReference<UniformFloatSlot>(result));
+    return result;
+  }
+
+  /// Access the float binding for a vec2 uniform named [name].
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform float uScale;
+  /// uniform vec2 uMagnitude;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   shader.getUniformFloat('uScale');
+  ///   shader.getUniformVec2('uMagnitude');
+  /// }
+  /// ```
+  UniformVec2Slot getUniformVec2(String name) {
+    final int size = _program._getUniformVectorSize(name);
+    assert(size == 2, 'Uniform `$name` has size $size, not size 2.');
+    final slots = List<UniformFloatSlot>.generate(2, (i) => getUniformFloat(name, i));
+    final result = UniformVec2Slot._(slots[0], slots[1]);
+    return result;
+  }
+
+  /// Access the float binding for a vec3 uniform named [name].
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform float uScale;
+  /// uniform vec3 uTime;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   shader.getUniformFloat('uScale');
+  ///   shader.getUniformVec3('uTime');
+  /// }
+  /// ```
+  UniformVec3Slot getUniformVec3(String name) {
+    final int size = _program._getUniformVectorSize(name);
+    assert(size == 3, 'Uniform `$name` has size $size, not size 3.');
+    final slots = List<UniformFloatSlot>.generate(3, (i) => getUniformFloat(name, i));
+    final result = UniformVec3Slot._(slots[0], slots[1], slots[2]);
+    return result;
+  }
+
+  /// Access the float binding for a vec4 uniform named [name].
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform float uScale;
+  /// uniform vec4 uColor;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   shader.getUniformFloat('uScale');
+  ///   shader.getUniformVec4('uColor');
+  /// }
+  /// ```
+  UniformVec4Slot getUniformVec4(String name) {
+    final int size = _program._getUniformVectorSize(name);
+    assert(size == 4, 'Uniform `$name` has size $size, not size 4.');
+    final slots = List<UniformFloatSlot>.generate(4, (i) => getUniformFloat(name, i));
+    final result = UniformVec4Slot._(slots[0], slots[1], slots[2], slots[3]);
     return result;
   }
 

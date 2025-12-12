@@ -106,6 +106,49 @@ void main() async {
     }
   });
 
+  test('FragmentProgram getUniformVec2 wrong size', () async {
+    final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
+    final FragmentShader shader = program.fragmentShader();
+    try {
+      shader.getUniformVec2('iVec3Uniform');
+      fail('Unreachable');
+    } catch (e) {
+      expect(e.toString(), contains('`iVec3Uniform` has size 3, not size 2.'));
+    }
+    try {
+      shader.getUniformVec2('iFloatUniform');
+    } catch (e) {
+      expect(e.toString(), contains('`iFloatUniform` has size 1, not size 2.'));
+    }
+  });
+
+  test('FragmentProgram getUniformVec3 wrong size', () async {
+    final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
+    final FragmentShader shader = program.fragmentShader();
+    try {
+      shader.getUniformVec3('iVec2Uniform');
+      fail('Unreachable');
+    } catch (e) {
+      expect(e.toString(), contains('`iVec2Uniform` has size 2, not size 3.'));
+    }
+    try {
+      shader.getUniformVec3('iVec4Uniform');
+    } catch (e) {
+      expect(e.toString(), contains('`iVec4Uniform` has size 4, not size 3.'));
+    }
+  });
+
+  test('FragmentProgram getUniformVec4 wrong size', () async {
+    final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
+    final FragmentShader shader = program.fragmentShader();
+    try {
+      shader.getUniformVec4('iVec3Uniform');
+      fail('Unreachable');
+    } catch (e) {
+      expect(e.toString(), contains('`iVec3Uniform` has size 3, not size 4.'));
+    }
+  });
+
   test('FragmentProgram getImageSampler', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('uniform_ordering.frag.iplr');
     final FragmentShader shader = program.fragmentShader();
