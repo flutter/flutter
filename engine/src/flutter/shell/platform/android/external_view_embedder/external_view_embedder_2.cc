@@ -73,12 +73,8 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
   if (!FrameHasPlatformLayers()) {
     frame->Submit();
     task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
-        [this, jni_facade = jni_facade_,
+        [jni_facade = jni_facade_,
          views_visible_last_frame = views_visible_last_frame_]() {
-          // This pointer is guaranteed to not be dangling as long as
-          // DestroySurfaces is called before the embedder is deleted. See
-          // https://github.com/flutter/flutter/pull/176742#discussion_r2415229396.
-          this->HideOverlayLayerIfNeeded();
           for (int64_t view_id : views_visible_last_frame) {
             jni_facade->hidePlatformView2(view_id);
           }
