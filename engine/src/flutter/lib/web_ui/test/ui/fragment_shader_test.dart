@@ -129,10 +129,10 @@ Future<void> testMain() async {
   }, skip: isWimp); // https://github.com/flutter/flutter/issues/175431
 
   for (final (filterQuality, goldenFilename) in [
-    (ui.FilterQuality.none, 'fragment_shader_texture_with_quality_none.png'),
-    (ui.FilterQuality.low, 'fragment_shader_texture_with_quality_low.png'),
-    (ui.FilterQuality.medium, 'fragment_shader_texture_with_quality_medium.png'),
-    (ui.FilterQuality.high, 'fragment_shader_texture_with_quality_high.png'),
+    (ui.FilterQuality.none, 'web_fragment_shader_texture_with_quality_none.png'),
+    (ui.FilterQuality.low, 'web_fragment_shader_texture_with_quality_low.png'),
+    (ui.FilterQuality.medium, 'web_fragment_shader_texture_with_quality_medium.png'),
+    (ui.FilterQuality.high, 'web_fragment_shader_texture_with_quality_high.png'),
   ]) {
     test('fragment shader renders sampler with filter quality ${filterQuality.name}', () async {
       final ui.Image image = _createOvalGradientImage(imageDimension: 16);
