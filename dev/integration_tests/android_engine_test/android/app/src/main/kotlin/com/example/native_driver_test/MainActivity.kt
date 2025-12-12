@@ -15,6 +15,7 @@ import com.example.android_engine_test.fixtures.BlueOrangeGradientPlatformViewFa
 import com.example.android_engine_test.fixtures.BlueOrangeGradientSurfaceViewPlatformViewFactory
 import com.example.android_engine_test.fixtures.BoxPlatformViewFactory
 import com.example.android_engine_test.fixtures.ChangingColorButtonPlatformViewFactory
+import com.example.android_engine_test.fixtures.MyTestFactory
 import com.example.android_engine_test.fixtures.OtherFaceTexturePlugin
 import com.example.android_engine_test.fixtures.SmileyFaceTexturePlugin
 import io.flutter.embedding.android.FlutterActivity
@@ -40,6 +41,7 @@ class MainActivity : FlutterActivity() {
                 registerViewFactory("blue_orange_gradient_surface_view_platform_view", BlueOrangeGradientSurfaceViewPlatformViewFactory())
                 registerViewFactory("changing_color_button_platform_view", ChangingColorButtonPlatformViewFactory())
                 registerViewFactory("box_platform_view", BoxPlatformViewFactory())
+                registerViewFactory("my_test", MyTestFactory())
             }
     }
 
