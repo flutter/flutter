@@ -617,6 +617,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
         clip.bottomLeftRadius = radii.bottom_left.width;
         clip.bottomRightRadius = radii.bottom_right.width;
         [pendingClipRRects addObject:clip];
+        break;
       }
       case flutter::MutatorType::kBackdropClipRSuperellipse: {
         // TODO(https://github.com/flutter/flutter/issues/179125)

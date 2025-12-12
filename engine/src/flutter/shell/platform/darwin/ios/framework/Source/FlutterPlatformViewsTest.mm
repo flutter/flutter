@@ -1648,7 +1648,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   // Push a rounded rect clip
   auto clipRect = flutter::DlRect::MakeXYWH(2, 2, 6, 6);
   auto clipRRect = flutter::DlRoundRect::MakeRectXY(clipRect, 3, 3);
-  stack.PushClipRRect(clipRRect);
+  stack.PushPlatformViewClipRRect(clipRRect);
 
   // Push a backdrop filter
   auto filter = flutter::DlBlurImageFilter::Make(5, 2, flutter::DlTileMode::kClamp);
