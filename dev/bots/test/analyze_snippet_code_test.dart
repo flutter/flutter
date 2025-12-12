@@ -154,4 +154,25 @@ void main() {
     expect(output, contains('Unused "Examples can assume:" import'));
     expect(process.exitCode, 1);
   });
+
+  test('Does not report false positives for preamble used in docstring examples', () {
+    // The used_in_docstring_example.dart file tests the fix for false positives
+    // where preamble declarations are used in docstring examples (not in extracted
+    // {@tool snippet} blocks). Previously, the tool would incorrectly flag these
+    // as unused. This test ensures that preamble items are correctly recognized
+    // as "used" when they appear anywhere in the file.
+    final ProcessResult process = Process.runSync('../../bin/cache/dart-sdk/bin/dart', <String>[
+      '--enable-asserts',
+      'analyze_snippet_code.dart',
+      '--no-include-dart-ui',
+      'test/analyze-snippet-code-test-input/used_in_docstring_example.dart',
+    ]);
+    expect(process.stdout, isEmpty);
+    final output = process.stderr.toString();
+    // Should NOT report the preamble variables as unused
+    expect(output, isNot(contains('Unused "Examples can assume:" declaration')));
+    // The file itself is valid Dart code with no other errors
+    expect(output, isNot(contains('snippet code error')));
+    expect(process.exitCode, 0);
+  });
 }

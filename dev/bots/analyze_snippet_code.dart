@@ -772,7 +772,10 @@ class _SnippetChecker {
           }
         }
         // Check for unused preamble declarations and imports
+        // Also check usage in the entire file content (docstrings and examples)
         if (preambleLineNumbers.isNotEmpty) {
+          final String fileContent = fileLines.join('\n');
+          _trackPreambleUsage(fileContent, preambleLineNumbers, usedPreambleLineNumbers);
           for (final preambleLine in preambleLineNumbers) {
             if (!usedPreambleLineNumbers.contains(preambleLine.line)) {
               final errorType = preambleLine.code.startsWith('import ') ? 'import' : 'declaration';
