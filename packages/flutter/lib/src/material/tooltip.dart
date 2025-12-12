@@ -388,10 +388,9 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   final GlobalKey<RawTooltipState> _tooltipKey = GlobalKey<RawTooltipState>();
 
-  late TooltipThemeData _tooltipTheme;
-
   // From InheritedWidgets
   late bool _visible;
+  late TooltipThemeData _tooltipTheme;
 
   /// Shows the tooltip if it is not already visible.
   ///
@@ -409,8 +408,8 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _tooltipTheme = TooltipTheme.of(context);
     _visible = TooltipVisibility.of(context);
+    _tooltipTheme = TooltipTheme.of(context);
   }
 
   // https://material.io/components/tooltips#specs
@@ -512,31 +511,35 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       richMessage: widget.richMessage ?? TextSpan(text: widget.message),
     );
 
-    return _visible
-        ? RawTooltip(
-            key: _tooltipKey,
-            semanticsTooltip: widget.message ?? widget.richMessage?.toPlainText() ?? '',
-            tooltipBuilder: (BuildContext context, Animation<double> animation) => IgnorePointer(
-              ignoring: widget.ignorePointer ?? widget.message != null,
-              child: FadeTransition(opacity: animation, child: tooltipBox),
-            ),
-            excludeFromSemantics:
-                widget.excludeFromSemantics ??
-                _tooltipTheme.excludeFromSemantics ??
-                _defaultExcludeFromSemantics,
-            showDuration: widget.showDuration ?? _tooltipTheme.showDuration ?? _defaultShowDuration,
-            triggerMode: widget.triggerMode ?? _tooltipTheme.triggerMode ?? _defaultTriggerMode,
-            enableFeedback:
-                widget.enableFeedback ?? _tooltipTheme.enableFeedback ?? _defaultEnableFeedback,
-            waitDuration: widget.waitDuration ?? _tooltipTheme.waitDuration ?? _defaultWaitDuration,
-            enableTapToDismiss: widget.enableTapToDismiss,
-            onTriggered: widget.onTriggered,
-            mouseCursor: widget.mouseCursor,
-            exitDuration: widget.exitDuration ?? _tooltipTheme.exitDuration ?? _defaultExitDuration,
-            positionDelegate: _getDefaultPositionDelegate,
-            child: widget.child ?? const SizedBox.shrink(),
-          )
-        : widget.child ?? const SizedBox.shrink();
+    Widget effectiveChild = widget.child ?? const SizedBox.shrink();
+
+    if (_visible) {
+      effectiveChild = RawTooltip(
+        key: _tooltipKey,
+        semanticsTooltip: widget.message ?? widget.richMessage?.toPlainText() ?? '',
+        tooltipBuilder: (BuildContext context, Animation<double> animation) => IgnorePointer(
+          ignoring: widget.ignorePointer ?? widget.message != null,
+          child: FadeTransition(opacity: animation, child: tooltipBox),
+        ),
+        excludeFromSemantics:
+            widget.excludeFromSemantics ??
+            _tooltipTheme.excludeFromSemantics ??
+            _defaultExcludeFromSemantics,
+        showDuration: widget.showDuration ?? _tooltipTheme.showDuration ?? _defaultShowDuration,
+        triggerMode: widget.triggerMode ?? _tooltipTheme.triggerMode ?? _defaultTriggerMode,
+        enableFeedback:
+            widget.enableFeedback ?? _tooltipTheme.enableFeedback ?? _defaultEnableFeedback,
+        waitDuration: widget.waitDuration ?? _tooltipTheme.waitDuration ?? _defaultWaitDuration,
+        enableTapToDismiss: widget.enableTapToDismiss,
+        onTriggered: widget.onTriggered,
+        mouseCursor: widget.mouseCursor,
+        exitDuration: widget.exitDuration ?? _tooltipTheme.exitDuration ?? _defaultExitDuration,
+        positionDelegate: _getDefaultPositionDelegate,
+        child: effectiveChild,
+      );
+    }
+
+    return effectiveChild;
   }
 }
 
