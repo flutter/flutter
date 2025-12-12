@@ -148,6 +148,12 @@ sk_sp<DlImage> SnapshotControllerSkia::MakeRasterSnapshotSync(
   });
 }
 
+sk_sp<DlImage> SnapshotControllerSkia::MakeTextureImage(
+    sk_sp<SkImage> image,
+    SnapshotPixelFormat pixel_format) {
+  return DlImage::Make(image);
+}
+
 sk_sp<SkImage> SnapshotControllerSkia::ConvertToRasterImage(
     sk_sp<SkImage> image) {
   // If the rasterizer does not have a surface with a GrContext, then it will

@@ -659,6 +659,10 @@ class Rasterizer final : public SnapshotDelegate,
   sk_sp<SkImage> ConvertToRasterImage(sk_sp<SkImage> image) override;
 
   // |SnapshotDelegate|
+  sk_sp<DlImage> MakeTextureImage(sk_sp<SkImage> image,
+                                  SnapshotPixelFormat pixel_format) override;
+
+  // |SnapshotDelegate|
   void CacheRuntimeStage(
       const std::shared_ptr<impeller::RuntimeStage>& runtime_stage) override;
 

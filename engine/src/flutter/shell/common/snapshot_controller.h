@@ -52,6 +52,13 @@ class SnapshotController {
       DlISize picture_size,
       SnapshotPixelFormat pixel_format) = 0;
 
+  /// Creates a texture-backed DlImage from the provided SkImage.
+  ///
+  /// This is primarily used by `decodeImageFromPixelsSync` to upload pixels
+  /// to the GPU synchronously.
+  virtual sk_sp<DlImage> MakeTextureImage(sk_sp<SkImage> image,
+                                          SnapshotPixelFormat pixel_format) = 0;
+
   virtual sk_sp<SkImage> ConvertToRasterImage(sk_sp<SkImage> image) = 0;
 
   virtual void CacheRuntimeStage(
