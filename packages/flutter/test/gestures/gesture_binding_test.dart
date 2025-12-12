@@ -7,11 +7,15 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 typedef HandleEventCallback = void Function(PointerEvent event);
+typedef HandleHitTestInViewCallback =
+    void Function(HitTestResult result, Offset position, int viewId);
 
-class TestGestureFlutterBinding extends BindingBase with GestureBinding, SchedulerBinding {
+class TestGestureFlutterBinding extends BindingBase
+    with GestureBinding, SchedulerBinding, ServicesBinding, TestDefaultBinaryMessengerBinding {
   @override
   void initInstances() {
     super.initInstances();
@@ -50,10 +54,107 @@ class TestGestureFlutterBinding extends BindingBase with GestureBinding, Schedul
     super.handleEvent(event, entry);
     onHandleEvent?.call(event);
   }
+
+  HandleHitTestInViewCallback? onHitTestInView;
+
+  @override
+  void hitTestInView(HitTestResult result, Offset position, int viewId) {
+    if (onHitTestInView != null) {
+      onHitTestInView!(result, position, viewId);
+      return;
+    }
+    super.hitTestInView(result, position, viewId);
+  }
+}
+
+class _DummyHitTestTarget implements HitTestTarget {
+  @override
+  void handleEvent(PointerEvent event, HitTestEntry entry) {
+    // Nothing to do.
+  }
+}
+
+class _DummyNativeHitTestTarget implements NativeHitTestTarget, HitTestTarget {
+  @override
+  void handleEvent(PointerEvent event, HitTestEntry entry) {
+    // Nothing to do.
+  }
+}
+
+class _FakeFlutterView extends Fake implements FlutterView {
+  @override
+  final int viewId = 0;
 }
 
 void main() {
   final TestGestureFlutterBinding binding = TestGestureFlutterBinding.ensureInitialized();
+
+  binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, (
+    MethodCall methodCall,
+  ) async {
+    return null;
+  });
+
+  tearDown(() {
+    binding.onHitTestInView = null;
+  });
+
+  test('Platform view hit test should not accept gesture if no hit', () {
+    // not found
+    TestGestureFlutterBinding.instance.onHitTestInView =
+        (HitTestResult result, Offset position, int viewId) {};
+
+    final request = ui.HitTestRequest(view: _FakeFlutterView(), offset: const Offset(1, 1));
+    final ui.HitTestResponse repsonse =
+        GestureBinding.instance.platformDispatcher.onHitTest?.call(request) ??
+        ui.HitTestResponse.empty;
+    expect(repsonse.isPlatformView, isFalse);
+  });
+
+  test('Platform view hit test should not accept gesture if no platform view', () {
+    TestGestureFlutterBinding.instance.onHitTestInView =
+        (HitTestResult result, Offset position, int viewId) {
+          result.add(HitTestEntry(_DummyHitTestTarget()));
+        };
+
+    final request = ui.HitTestRequest(view: _FakeFlutterView(), offset: const Offset(1, 1));
+    final ui.HitTestResponse repsonse =
+        GestureBinding.instance.platformDispatcher.onHitTest?.call(request) ??
+        ui.HitTestResponse.empty;
+    expect(repsonse.isPlatformView, isFalse);
+  });
+
+  test('Platform view hit test should not accept gesture if first hit is not a platform view', () {
+    TestGestureFlutterBinding.instance.onHitTestInView =
+        (HitTestResult result, Offset position, int viewId) {
+          result.add(HitTestEntry(_DummyHitTestTarget()));
+          result.add(HitTestEntry(_DummyNativeHitTestTarget()));
+        };
+
+    final request = ui.HitTestRequest(view: _FakeFlutterView(), offset: const Offset(1, 1));
+
+    final ui.HitTestResponse repsonse =
+        GestureBinding.instance.platformDispatcher.onHitTest?.call(request) ??
+        ui.HitTestResponse.empty;
+
+    expect(repsonse.isPlatformView, isFalse);
+  });
+
+  test('Platform view hit test should accept gesture if first hit is a platform view', () {
+    TestGestureFlutterBinding.instance.onHitTestInView =
+        (HitTestResult result, Offset position, int viewId) {
+          result.add(HitTestEntry(_DummyNativeHitTestTarget()));
+          result.add(HitTestEntry(_DummyHitTestTarget()));
+        };
+
+    final request = ui.HitTestRequest(view: _FakeFlutterView(), offset: const Offset(1, 1));
+
+    final ui.HitTestResponse repsonse =
+        GestureBinding.instance.platformDispatcher.onHitTest?.call(request) ??
+        ui.HitTestResponse.empty;
+
+    expect(repsonse.isPlatformView, isTrue);
+  });
 
   test('Pointer tap events', () {
     const packet = ui.PointerDataPacket(
