@@ -92,7 +92,7 @@ class ExpansionPanel {
   /// The body of the expansion panel that's displayed below the header.
   ///
   /// This widget is visible only when the panel is expanded.
-  final Widget body;
+  final Widget? body;
 
   /// Whether the panel is expanded.
   ///
@@ -394,17 +394,23 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       final ExpansionPanel child = widget.children[index];
       final Widget headerWidget = child.headerBuilder(context, _isChildExpanded(index));
 
-      Widget expandIconPadded = Padding(
-        padding: const EdgeInsetsDirectional.only(end: 8.0),
-        child: IgnorePointer(
-          ignoring: child.canTapOnHeader,
-          child: ExpandIcon(
-            color: widget.expandIconColor,
-            isExpanded: _isChildExpanded(index),
-            padding: _kExpandIconPadding,
-            splashColor: child.splashColor,
-            highlightColor: child.highlightColor,
-            onPressed: (bool isExpanded) => _handlePressed(isExpanded, index),
+      Widget expandIconPadded = Visibility(
+        visible: child.body != null,
+        maintainSize: true,
+        maintainAnimation: true,
+        maintainState: true,
+        child: Padding(
+          padding: const EdgeInsetsDirectional.only(end: 8.0),
+          child: IgnorePointer(
+            ignoring: child.canTapOnHeader,
+            child: ExpandIcon(
+              color: widget.expandIconColor,
+              isExpanded: _isChildExpanded(index),
+              padding: _kExpandIconPadding,
+              splashColor: child.splashColor,
+              highlightColor: child.highlightColor,
+              onPressed: (bool isExpanded) => _handlePressed(isExpanded, index),
+            ),
           ),
         ),
       );
@@ -457,7 +463,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
                   maxWidth: 0.0,
                   child: SizedBox(width: double.infinity, height: 0),
                 ),
-                secondChild: child.body,
+                secondChild: child.body ?? const SizedBox.shrink(),
                 firstCurve: const Interval(0.0, 0.6, curve: Curves.fastOutSlowIn),
                 secondCurve: const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn),
                 sizeCurve: Curves.fastOutSlowIn,
