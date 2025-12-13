@@ -29,6 +29,7 @@
     XCUICoordinate* coordinates = [statusBar coordinateWithNormalizedOffset:CGVectorMake(0, 0)];
     [coordinates tap];
   }
+  NSLog(@">>> %@", self.application.textFields.description);
   exists = [textField waitForExistenceWithTimeout:1];
   XCTAssertTrue(exists, @"");
 }
