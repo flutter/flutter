@@ -154,8 +154,7 @@ enum _CupertinoMenuWidth {
 // https://developer.apple.com/design/human-interface-guidelines/typography#Specifications
 //
 // Note: SF Display doesn't have tracking values on HID guidelines, so the
-// tracking values from SF Pro were unselected.
-
+// tracking values for SF Pro were used
 enum _DynamicTypeStyle {
   body(
     xSmall: TextStyle(fontSize: 14, height: 19 / 14, letterSpacing: -0.15, fontFamily: _kBodyFont),
