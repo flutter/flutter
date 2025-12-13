@@ -86,8 +86,8 @@ double _normalizeTextScale(TextScaler textScaler) {
 ///
 /// Empirically, the jump from one policy to the other occurs at the following text
 /// scale factors:
-/// * Max "regular" scale factor ≈ 23/17 ≈ 1.352... (normalized text scale: 6 units)
-/// * Min "accessible" scale factor  ≈ 28/17 ≈ 1.647... (normalized text scale: 11 units)
+/// * Max "regular" scale factor ≈ 23/17 ≈ 1.352... (normalized text scale: 6)
+/// * Min "accessible" scale factor  ≈ 28/17 ≈ 1.647... (normalized text scale: 11)
 ///
 /// The following constant represents a division in text scale factor beyond which
 /// we want to change how the menu is laid out.
@@ -228,7 +228,6 @@ enum _DynamicTypeStyle {
     return ui.lerpDouble(0, 1, t)!;
   }
 
-  // The following units were measured from the iOS 18.5 simulator in points.
   TextStyle resolveTextStyle(TextScaler textScaler) {
     final double units = _normalizeTextScale(textScaler);
     return switch (units) {
@@ -255,17 +254,17 @@ double _computeSquaredDistanceToRect(Offset point, Rect rect) {
   return dx * dx + dy * dy;
 }
 
-/// Returns the nearest multiple of [to] to [value].
+/// Returns the nearest multiple of `to` to `value`.
 ///
 /// ```dart
-/// print(quantize(3.15, to: 0));    // 3.15
-/// print(quantize(3.15, to: 1));    // 3
-/// print(quantize(3.15, to: 0.1));  // 3.2
-/// print(quantize(3.15, to: 0.01)); // 3.15
-/// print(quantize(3.15, to: 0.25)); // 3.25
-/// print(quantize(3.15, to: 0.5));  // 3.0
-/// print(quantize(-3.15, to: 0.5)); // -3.0
-/// print(quantize(-3.15, to: 0.1)); // -3.2
+/// print(_quantize(3.15, to: 0));    // 3.15
+/// print(_quantize(3.15, to: 1));    // 3
+/// print(_quantize(3.15, to: 0.1));  // 3.2
+/// print(_quantize(3.15, to: 0.01)); // 3.15
+/// print(_quantize(3.15, to: 0.25)); // 3.25
+/// print(_quantize(3.15, to: 0.5));  // 3.0
+/// print(_quantize(-3.15, to: 0.5)); // -3.0
+/// print(_quantize(-3.15, to: 0.1)); // -3.2
 /// ```
 double _quantize(double value, {required double to}) {
   if (to == 0) {
