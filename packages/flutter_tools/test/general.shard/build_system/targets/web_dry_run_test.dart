@@ -261,6 +261,7 @@ Found incompatibilities with WebAssembly.
 package:foo/some/path.dart 6:1 - dart:html unsupported (0)
 file:///some/local/path.dart 943:10 - dart:js unsupported (1)
 file:///some/local/path.dart 195:54 - dart:html unsupported (0)
+package:priv/some/local/path.dart 243:12 - package:js unsupported (2)
 ''',
         ),
       );
@@ -271,11 +272,12 @@ file:///some/local/path.dart 195:54 - dart:html unsupported (0)
 
       final Event event = fakeAnalytics.sentEvents[0];
       expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
-      expect(event.eventData, hasLength(4));
+      expect(event.eventData, hasLength(5));
       expect(event.eventData['result'], 'findings');
       expect(event.eventData['exitCode'], 254);
       expect(event.eventData['E0'], '-h,foo:${_fakePackageVersions['foo']}');
       expect(event.eventData['E1'], '-h');
+      expect(event.eventData['E2'], '-h');
     }),
   );
 
@@ -332,6 +334,7 @@ package:priv/some/path.dart 193:32 - package:js unsupported (2)
 Found incompatibilities with WebAssembly.
 
 package:foo/some/path.dart 6:1 - dart:html unsupported (0)
+package:bar/some/path.dart 8:10 - package:hs unsupported (2)
 ''',
         ),
       );
@@ -348,10 +351,11 @@ package:foo/some/path.dart 6:1 - dart:html unsupported (0)
 
       final Event event = fakeAnalytics.sentEvents[0];
       expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
-      expect(event.eventData, hasLength(3));
+      expect(event.eventData, hasLength(4));
       expect(event.eventData['result'], 'findings');
       expect(event.eventData['exitCode'], 254);
       expect(event.eventData['error'], 'packageConfigNotLoaded');
+      expect(event.eventData['findings'], '0,2');
     }),
   );
 }
