@@ -288,6 +288,14 @@ Future<void> run(List<String> arguments) async {
   // Ensure integration test files are up-to-date with the app template.
   printProgress('Up to date integration test template files...');
   await verifyIntegrationTestTemplateFiles(flutterRoot);
+
+  // Check for cross-library imports in tests. For example,
+  // widget library tests should not import the Material library.
+  printProgress('Cross-import test validation...');
+  await runCommand(dart, <String>[
+    '--enable-asserts',
+    path.join(flutterRoot, 'dev', 'bots', 'check_tests_cross_imports.dart'),
+  ], workingDirectory: flutterRoot);
 }
 
 // TESTS
