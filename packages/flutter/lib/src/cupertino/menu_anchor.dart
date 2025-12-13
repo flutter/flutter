@@ -367,7 +367,7 @@ typedef CupertinoMenuAnimationStatusChangedCallback = void Function(AnimationSta
 ///
 /// See also:
 ///
-/// * [CupertinoMenuItem], the default menu item used in a
+/// * [CupertinoMenuItem], a Cupertino-themed menu item used in a
 ///   [CupertinoMenuAnchor].
 /// * [CupertinoLargeMenuDivider], a large divider used to separate
 ///   [CupertinoMenuItem]s.
