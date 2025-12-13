@@ -27,6 +27,18 @@ const bool _debugLogPointerEvents = false;
 /// Set this to true to log all the events sent to the Flutter framework.
 const bool _debugLogFlutterEvents = false;
 
+/// Resets iframe detection cache for tests.
+@visibleForTesting
+void debugResetIframeDetectionCache() {
+  _WheelEventListenerMixin._cachedIsInIframe = null;
+}
+
+/// Overrides iframe detection for tests. Pass `null` to restore auto-detection.
+@visibleForTesting
+void debugSetIframeEmbeddingForTests(bool? isInIframe) {
+  _WheelEventListenerMixin._cachedIsInIframe = isInIframe;
+}
+
 /// The signature of a callback that handles pointer events.
 typedef _PointerDataCallback = void Function(DomEvent event, List<ui.PointerData>);
 
@@ -606,6 +618,38 @@ abstract class _BaseAdapter {
 mixin _WheelEventListenerMixin on _BaseAdapter {
   static double? _defaultScrollLineHeight;
 
+  /// Cached result of iframe detection.
+  static bool? _cachedIsInIframe;
+
+  /// Check if Flutter is embedded inside an iframe.
+  ///
+  /// Used to determine whether to allow native touch scrolling to work.
+  /// When in an iframe, we don't preventDefault() for touch events so that
+  /// browser's native touch scrolling provides smooth momentum and scroll
+  /// propagation to parent page.
+  bool _isEmbeddedInIframe() {
+    if (_cachedIsInIframe != null) {
+      return _cachedIsInIframe!;
+    }
+
+    try {
+      // If window.parent is the same object as window, we're not in an iframe.
+      // If they're different, we're in an iframe.
+      final DomWindow? parent = domWindow.parent;
+      if (parent == null) {
+        _cachedIsInIframe = false;
+        return false;
+      }
+      // Use identical() to check if parent and window are the same object
+      _cachedIsInIframe = !identical(parent, domWindow);
+      return _cachedIsInIframe!;
+    } catch (e) {
+      // Cross-origin iframe - assume embedded
+      _cachedIsInIframe = true;
+      return true;
+    }
+  }
+
   bool _isAcceleratedMouseWheelDelta(num delta, num? wheelDelta) {
     // On macOS, scrolling using a mouse wheel by default uses an acceleration
     // curve, so delta values ramp up and are not at fixed multiples of 120.
@@ -1003,7 +1047,16 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
         // rendered the next input element, leading to the focus incorrectly returning to
         // the main Flutter view instead.
         // A zero-length timer is sufficient in all tested browsers to achieve this.
-        event.preventDefault();
+        //
+        // DON'T prevent default for touch events when embedded in an iframe.
+        // This allows browser's native touch scrolling to work, which provides
+        // smooth momentum scrolling and enables scroll propagation to parent page.
+        // See: https://github.com/flutter/flutter/issues/157435
+        final isTouch = event.pointerType == 'touch';
+        final bool isInIframe = _isEmbeddedInIframe();
+        if (!isTouch || !isInIframe) {
+          event.preventDefault();
+        }
         Timer(Duration.zero, () {
           EnginePlatformDispatcher.instance.requestViewFocusChange(
             viewId: _view.viewId,

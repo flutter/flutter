@@ -229,6 +229,40 @@ void testMain() {
       expect(codec.decodeEnvelope(response!), true);
     });
 
+    test('responds to flutter/scroll with valid message', () async {
+      // Tests that the flutter/scroll channel handler accepts valid scroll messages.
+      // This channel is used for propagating scroll to parent window when
+      // Flutter is embedded in an iframe.
+      const codec = StandardMessageCodec();
+      final completer = Completer<ByteData?>();
+
+      ui.PlatformDispatcher.instance.sendPlatformMessage(
+        'flutter/scroll',
+        codec.encodeMessage(<String, dynamic>{'deltaX': 0.0, 'deltaY': 10.0}),
+        completer.complete,
+      );
+
+      final ByteData? response = await completer.future;
+      expect(response, isNotNull);
+      expect(codec.decodeMessage(response), true);
+    });
+
+    test('responds to flutter/scroll with invalid message', () async {
+      // Tests that the flutter/scroll channel handler rejects invalid messages.
+      const codec = StandardMessageCodec();
+      final completer = Completer<ByteData?>();
+
+      ui.PlatformDispatcher.instance.sendPlatformMessage(
+        'flutter/scroll',
+        codec.encodeMessage('invalid'),
+        completer.complete,
+      );
+
+      final ByteData? response = await completer.future;
+      expect(response, isNotNull);
+      expect(codec.decodeMessage(response), false);
+    });
+
     test('can set application locale', () async {
       final DomElement host1 = createDomHTMLDivElement();
       final view1 = EngineFlutterView(dispatcher, host1);

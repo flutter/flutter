@@ -119,6 +119,14 @@ extension type DomWindow._(JSObject _) implements DomEventTarget {
   external DomVisualViewport? get visualViewport;
   external DomPerformance get performance;
 
+  /// The parent window of this window.
+  /// Returns null if this is the top-level window, or the same window
+  /// if not in an iframe.
+  external DomWindow? get parent;
+
+  /// Scrolls the window by the given amount.
+  external void scrollBy(double x, double y);
+
   @visibleForTesting
   Future<Object?> fetch(String url) {
     // To make sure we have a consistent approach for handling and reporting
@@ -2639,4 +2647,21 @@ extension type DomTextCluster._(JSObject _) implements JSObject {
   external int get end;
   external double get x;
   external double get y;
+}
+
+/// Scrolls the parent/host window by the given delta.
+///
+/// Used when Flutter is embedded in an iframe and needs to scroll the parent
+/// page. Calls `scrollBy` directly on the parent window for same-origin iframes.
+/// For cross-origin iframes, access may fail due to browser restrictions.
+void scrollParentWindow(double deltaX, double deltaY) {
+  try {
+    final DomWindow? parent = domWindow.parent;
+    final bool isInIframe = parent != null && !identical(parent, domWindow);
+    if (isInIframe) {
+      parent.scrollBy(deltaX, deltaY);
+    }
+  } catch (_) {
+    // Silently ignore failures (e.g., cross-origin iframe).
+  }
 }
