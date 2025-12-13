@@ -175,6 +175,7 @@
 }
 
 - (void)setupFlutterViewControllerTest:(NSString*)scenarioIdentifier {
+  NSLog(@"setupFVC: %@", scenarioIdentifier);
   FlutterEngine* engine = [self engineForTest:scenarioIdentifier];
   FlutterViewController* flutterViewController =
       [self flutterViewControllerForTest:scenarioIdentifier withEngine:engine];
