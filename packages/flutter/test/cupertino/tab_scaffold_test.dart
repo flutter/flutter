@@ -1354,6 +1354,22 @@ void main() {
       skip: kIsWeb, // [intended] frameworkHandlesBack not used on web.
     );
   });
+
+  testWidgets('CupertinoTabScaffold does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: CupertinoTabScaffold(
+              tabBar: _buildTabBar(),
+              tabBuilder: (BuildContext context, int index) => Text('$index'),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoTabScaffold)), Size.zero);
+  });
 }
 
 CupertinoTabBar _buildTabBar({int selectedTab = 0}) {
