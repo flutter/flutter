@@ -3,7 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'semantics_tester.dart';
 
 void main() {
   testWidgets('SliverResizingHeader basics', (WidgetTester tester) async {
@@ -406,5 +409,103 @@ void main() {
     await tester.drag(find.byType(NestedScrollView), const Offset(0, -150));
     await tester.pumpAndSettle();
     expect(getHeaderHeight(), 100);
+  });
+
+  testWidgets('SliverResizingHeader: presence of RenderViewport.excludeFromScrolling tag', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      Semantics(
+        textDirection: TextDirection.ltr,
+        child: Localizations(
+          locale: const Locale('en', 'us'),
+          delegates: const <LocalizationsDelegate<dynamic>>[
+            DefaultWidgetsLocalizations.delegate,
+            DefaultMaterialLocalizations.delegate,
+          ],
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: MediaQuery(
+              data: const MediaQueryData(),
+              child: CustomScrollView(
+                slivers: <Widget>[
+                  const SliverResizingHeader(
+                    minExtentPrototype: SizedBox(height: 100),
+                    maxExtentPrototype: SizedBox(height: 300),
+                    child: SizedBox.expand(child: Text('header')),
+                  ),
+                  SliverList.builder(
+                    itemCount: 6,
+                    itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    semantics.dispose();
+  });
+
+  testWidgets('SliverResizingHeader: presence of RenderViewport.excludeFromScrolling tag', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      Semantics(
+        textDirection: TextDirection.ltr,
+        child: Localizations(
+          locale: const Locale('en', 'us'),
+          delegates: const <LocalizationsDelegate<dynamic>>[
+            DefaultWidgetsLocalizations.delegate,
+            DefaultMaterialLocalizations.delegate,
+          ],
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: MediaQuery(
+              data: const MediaQueryData(),
+              child: CustomScrollView(
+                slivers: <Widget>[
+                  const SliverResizingHeader(
+                    minExtentPrototype: SizedBox(height: 300),
+                    child: SizedBox(height: 300, child: Text('header')),
+                  ),
+                  SliverList.builder(
+                    itemCount: 50,
+                    itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      isNot(
+        includesNodeWith(
+          tags: {RenderViewport.excludeFromScrolling, RenderViewport.useTwoPaneSemantics},
+        ),
+      ),
+    );
+
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -200));
+    await tester.pumpAndSettle();
+
+    expect(
+      semantics,
+      includesNodeWith(
+        tags: {RenderViewport.excludeFromScrolling, RenderViewport.useTwoPaneSemantics},
+      ),
+    );
+
+    semantics.dispose();
   });
 }
