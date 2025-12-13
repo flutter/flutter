@@ -401,6 +401,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       logger.printTrace('Connecting to existing DTD instance at: $existingDtdUri...');
       await _dtdService.connect(dtdWsUri: existingDtdUri);
     }
+    _previewCodeGenerator.populateDtdConnectionInfo(_dtdService.dtdUri!);
   }
 
   Future<int> runPreviewEnvironment({required FlutterProject widgetPreviewScaffoldProject}) async {
@@ -463,12 +464,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           BuildMode.debug,
           null,
           treeShakeIcons: false,
-          // Provide the DTD connection information directly to the preview scaffold.
-          // This could, in theory, be provided via a follow up call to a service extension
-          // registered by the preview scaffold, but there's some uncertainty around how service
-          // extensions will work with Flutter web embedded in VSCode without a Chrome debugger
-          // connection.
-          dartDefines: <String>['$kWidgetPreviewDtdUriEnvVar=${_dtdService.dtdUri}'],
           packageConfigPath: widgetPreviewScaffoldProject.packageConfig.path,
           packageConfig: PackageConfig.parseBytes(
             widgetPreviewScaffoldProject.packageConfig.readAsBytesSync(),
