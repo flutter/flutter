@@ -44,36 +44,18 @@ bool get _isCupertino {
   }
 }
 
-// The font size at which text scales linearly on the iOS 18.5 simulator.
-const double _kCupertinoMobileBaseFontSize = 17.0;
-
-/// The CupertinoMenuAnchor layout policy changes depending on whether the user is using
-/// a "regular" font size vs a "large" font size. This is a spectrum. There are
-/// many "regular" font sizes and many "large" font sizes. But depending on which
-/// policy is currently being used, a menu is laid out differently.
-///
-/// Empirically, the jump from one policy to the other occurs at the following text
-/// scale factors:
-/// * Max "regular" scale factor ≈ 23/17 ≈ 1.352... (6 units)
-/// * Min "accessible" scale factor   ≈ 28/17 ≈ 1.647... (11 units)
-///
-/// The following constant represents a division in text scale factor beyond which
-/// we want to change how the menu is laid out.
-///
-/// This explanation was ported from CupertinoDialog.
-const double _kMinimumAccessibleNormalizedTextScale = 11;
-
-/// The minimum normalized text scale factor supported on iOS.
-const double _kMinimumTextScaleFactor = 1 - 3 / _kCupertinoMobileBaseFontSize;
-
-/// The minimum normalized text scale factor supported on iOS.
-const double _kMaximumTextScaleFactor = 1 + 36 / _kCupertinoMobileBaseFontSize;
-
 /// The font family for menu items at smaller text scales.
 const String _kBodyFont = 'CupertinoSystemText';
 
 /// The font family for menu items at larger text scales.
 const String _kDisplayFont = 'CupertinoSystemDisplay';
+
+/// Base font size used for text-scaling calculations.
+///
+/// On iOS the text scale changes in increments of 1/17 (≈5.88%), as
+/// observed on the iOS 18.5 simulator. Each step (1/17 of the base font size)
+/// is referred to as one "unit" in the documentation for [CupertinoMenuAnchor]
+const double _kCupertinoMobileBaseFontSize = 17.0;
 
 /// Returns an integer that represents the current text scale factor normalized
 /// to the base font size.
@@ -81,13 +63,10 @@ const String _kDisplayFont = 'CupertinoSystemDisplay';
 /// Normalizing to the base font size simplifies storage of nonlinear layout
 /// spacing that depends on the text scale factor.
 ///
-/// On iOS, the base text scale is 17.0 pt, meaning each "unit" represents an
-/// increase or decrease of 1/17th (≈5.88%) of the base font size.
-///
 /// The equation to calculate the normalized text scale is:
 ///
 /// ```dart
-/// final normalizedScale = MediaQuery.of(context).scale(baseFontSize) - baseFontSize
+/// final normalizedScale = MediaQuery.textScalerOf(context).scale(baseFontSize) - baseFontSize
 /// ```
 ///
 /// The returned value is positive when the text scale factor is larger than the
@@ -99,6 +78,28 @@ double _normalizeTextScale(TextScaler textScaler) {
 
   return textScaler.scale(_kCupertinoMobileBaseFontSize) - _kCupertinoMobileBaseFontSize;
 }
+
+/// The CupertinoMenuAnchor layout policy changes depending on whether the user is using
+/// a "regular" font size vs a "large" font size. This is a spectrum. There are
+/// many "regular" font sizes and many "large" font sizes. But depending on which
+/// policy is currently being used, a menu is laid out differently.
+///
+/// Empirically, the jump from one policy to the other occurs at the following text
+/// scale factors:
+/// * Max "regular" scale factor ≈ 23/17 ≈ 1.352... (normalized text scale: 6 units)
+/// * Min "accessible" scale factor  ≈ 28/17 ≈ 1.647... (normalized text scale: 11 units)
+///
+/// The following constant represents a division in text scale factor beyond which
+/// we want to change how the menu is laid out.
+///
+/// This explanation was ported from cupertino/dialog.dart.
+const double _kMinimumAccessibleNormalizedTextScale = 11;
+
+/// The minimum normalized text scale factor supported on iOS.
+const double _kMinimumTextScaleFactor = 1 - 3 / _kCupertinoMobileBaseFontSize;
+
+/// The minimum normalized text scale factor supported on iOS.
+const double _kMaximumTextScaleFactor = 1 + 36 / _kCupertinoMobileBaseFontSize;
 
 // Accessibility mode on iOS is determined by the text scale factor that the
 // user has selected.
@@ -225,8 +226,7 @@ enum _DynamicTypeStyle {
 
   // The following units were measured from the iOS 18.5 simulator in points.
   TextStyle resolveTextStyle(TextScaler textScaler) {
-    final double units =
-        textScaler.scale(_kCupertinoMobileBaseFontSize) - _kCupertinoMobileBaseFontSize;
+    final double units = _normalizeTextScale(textScaler);
     return switch (units) {
       <= -3 => xSmall,
       < -2 => TextStyle.lerp(xSmall, small, _interpolateUnits(units, -3, -2))!,
@@ -252,6 +252,7 @@ double _computeSquaredDistanceToRect(Offset point, Rect rect) {
 }
 
 /// Returns the nearest multiple of [to] to [value].
+///
 /// ```dart
 /// print(quantize(3.15, to: 0));    // 3.15
 /// print(quantize(3.15, to: 1));    // 3
@@ -946,9 +947,9 @@ class _MenuOverlayState extends State<_MenuOverlay>
       return;
     }
 
-    final List<Widget> children = <Widget>[];
+    final children = <Widget>[];
     Widget child = widget.children.first;
-    for (int i = 0; i < widget.children.length; i++) {
+    for (var i = 0; i < widget.children.length; i++) {
       children.add(child);
       if (child == widget.children.last) {
         break;
@@ -1081,10 +1082,10 @@ class _MenuOverlayState extends State<_MenuOverlay>
   // The menu will scale between 80% and 100% of its size based on the distance
   // the user has dragged their pointer away from the menu edges.
   void _updateSwipeScale(Duration elapsed) {
-    const double maxVelocity = 20.0;
+    const maxVelocity = 20.0;
     const double minVelocity = 8;
     const double maxSwipeDistance = 150;
-    const double accelerationRate = 0.12;
+    const accelerationRate = 0.12;
 
     // The distance below which velocity begins to decelerate.
     //
@@ -1096,11 +1097,11 @@ class _MenuOverlayState extends State<_MenuOverlay>
 
     // The distance at which the animation will snap to the target distance without
     // any animation.
-    const double remainingDistanceSnapThreshold = 1.0;
+    const remainingDistanceSnapThreshold = 1.0;
 
     // When the user's pointer is within this distance of the menu edges, the
     // swipe animation will terminate.
-    const double terminationDistanceThreshold = 5.0;
+    const terminationDistanceThreshold = 5.0;
 
     final double distance = _swipeTargetDistance - _swipeCurrentDistance;
     final double absoluteDistance = distance.abs();
@@ -1139,7 +1140,7 @@ class _MenuOverlayState extends State<_MenuOverlay>
     } else {
       final bool isAccessibilityModeEnabled = _isAccessibilityModeEnabled(context);
       final double screenWidth = MediaQuery.widthOf(context);
-      final _CupertinoMenuWidth menuWidth = _CupertinoMenuWidth.fromScreenWidth(
+      final menuWidth = _CupertinoMenuWidth.fromScreenWidth(
         isAccessibilityModeEnabled: isAccessibilityModeEnabled,
         screenWidth: screenWidth,
       );
@@ -1261,8 +1262,8 @@ class _MenuOverlayState extends State<_MenuOverlay>
   }
 
   static Set<ui.Rect> avoidBounds(List<ui.DisplayFeature> displayFeatures) {
-    final Set<ui.Rect> bounds = <ui.Rect>{};
-    for (final ui.DisplayFeature feature in displayFeatures) {
+    final bounds = <ui.Rect>{};
+    for (final feature in displayFeatures) {
       if (feature.bounds.shortestSide > 0 ||
           feature.state == ui.DisplayFeatureState.postureHalfOpened) {
         bounds.add(feature.bounds);
@@ -1285,8 +1286,8 @@ class _ShadowPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     assert(shadowOpacity >= 0 && shadowOpacity <= 1);
-    final Offset center = Offset(size.width / 2, size.height / 2);
-    final ui.RSuperellipse menuRect = RSuperellipse.fromRectAndRadius(
+    final center = Offset(size.width / 2, size.height / 2);
+    final menuRect = RSuperellipse.fromRectAndRadius(
       Rect.fromCenter(center: center, width: size.width, height: size.height),
       radius,
     );
@@ -1294,10 +1295,10 @@ class _ShadowPainter extends CustomPainter {
       ui.Brightness.light => lightShadowOpacity,
       ui.Brightness.dark => darkShadowOpacity,
     };
-    final Paint shadowPaint = Paint()
+    final shadowPaint = Paint()
       ..maskFilter = MaskFilter.blur(BlurStyle.normal, shadowOpacity * 50)
       ..color = ui.Color.fromRGBO(0, 0, 10, shadowOpacity * shadowOpacity * opacityMultiplier);
-    final ui.Paint clearPaint = Paint()..blendMode = BlendMode.clear;
+    final clearPaint = Paint()..blendMode = BlendMode.clear;
 
     canvas
       ..saveLayer(Rect.largest, Paint())
@@ -1357,7 +1358,7 @@ class _MenuLayoutDelegate extends SingleChildLayoutDelegate {
     // childSize: The size of the menu, when fully open, as determined by
     // getConstraintsForChild.
     final double finalHeight = math.min(childSize.height * inverseHeightFactor, size.height);
-    final Size finalSize = Size(childSize.width, finalHeight);
+    final finalSize = Size(childSize.width, finalHeight);
     final ui.Offset desiredPosition = attachmentPoint - menuAlignment.alongSize(finalSize);
     final ui.Rect screen = _findClosestScreen(size, anchorRect.center, avoidBounds);
     final ui.Offset finalPosition = _positionChild(screen, finalSize, desiredPosition, anchorRect);
@@ -1369,7 +1370,7 @@ class _MenuLayoutDelegate extends SingleChildLayoutDelegate {
       return Offset(finalPosition.dx, finalPosition.dy + dy);
     }
 
-    final Offset initialPosition = Offset(finalPosition.dx, anchorRect.bottom);
+    final initialPosition = Offset(finalPosition.dx, anchorRect.bottom);
     return Offset.lerp(initialPosition, finalPosition, heightFactor)!;
   }
 
@@ -1469,7 +1470,7 @@ class _MenuLayoutDelegate extends SingleChildLayoutDelegate {
 
     Rect? closest;
     double closestSquaredDistance = 0;
-    for (final ui.Rect screen in screens) {
+    for (final screen in screens) {
       if (screen.contains(point)) {
         return screen;
       }
@@ -2026,7 +2027,7 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
   }
 
   TextStyle _resolveDefaultSubtitleStyle(BuildContext context, TextScaler textScaler) {
-    final bool isDark = CupertinoTheme.maybeBrightnessOf(context) == Brightness.dark;
+    final isDark = CupertinoTheme.maybeBrightnessOf(context) == Brightness.dark;
     return _DynamicTypeStyle.subhead
         .resolveTextStyle(textScaler)
         .copyWith(
@@ -2405,7 +2406,7 @@ class _RenderAlignMidpoint extends RenderPositionedBox {
     assert(!child!.debugNeedsLayout);
     assert(child!.hasSize);
     assert(hasSize);
-    final BoxParentData childParentData = child!.parentData! as BoxParentData;
+    final childParentData = child!.parentData! as BoxParentData;
     final ui.Offset offset = resolvedAlignment.alongSize(size) - child!.size.center(Offset.zero);
     final double dx = offset.dx.clamp(0.0, size.width - child!.size.width);
     final double dy = offset.dy.clamp(0.0, size.height - child!.size.height);
@@ -3061,10 +3062,10 @@ class _SwipeHandle extends Drag {
   }
 
   void _updateSwipe() {
-    final HitTestResult result = HitTestResult();
+    final result = HitTestResult();
     WidgetsBinding.instance.hitTestInView(result, _position, viewId);
     // Look for the RenderBoxes that corresponds to the hit target
-    final List<_SwipeTarget> targets = <_SwipeTarget>[];
+    final targets = <_SwipeTarget>[];
     for (final HitTestEntry entry in result.path) {
       if (entry.target case RenderMetaData(:final _SwipeTarget metaData)) {
         targets.add(metaData);
@@ -3072,8 +3073,8 @@ class _SwipeHandle extends Drag {
     }
 
     if (_enteredTargets.isNotEmpty && targets.length >= _enteredTargets.length) {
-      bool listsMatch = true;
-      for (int i = 0; i < _enteredTargets.length; i++) {
+      var listsMatch = true;
+      for (var i = 0; i < _enteredTargets.length; i++) {
         if (targets[i] != _enteredTargets[i]) {
           listsMatch = false;
           break;
@@ -3089,7 +3090,7 @@ class _SwipeHandle extends Drag {
     _leaveAllEntered();
 
     // Enter new targets.
-    for (final _SwipeTarget target in targets) {
+    for (final target in targets) {
       _enteredTargets.add(target);
       if (target.didSwipeEnter()) {
         return;
@@ -3098,7 +3099,7 @@ class _SwipeHandle extends Drag {
   }
 
   void _leaveAllEntered({bool pointerUp = false}) {
-    for (int i = 0; i < _enteredTargets.length; i += 1) {
+    for (var i = 0; i < _enteredTargets.length; i += 1) {
       _enteredTargets[i].didSwipeLeave(pointerUp: pointerUp);
     }
     _enteredTargets.clear();
