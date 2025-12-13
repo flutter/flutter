@@ -286,8 +286,9 @@ void main() {
     expect(serializedException, contains('_anchor != null'));
   });
 
-  // Credit to Closure library for the test idea.
-  testWidgets('Intents are not blocked by closed anchor', (WidgetTester tester) async {
+  // Inspired by a test from the Closure Library:
+  // https://github.com/google/closure-library/blob/b312823ec5f84239ff1db7526f4a75cba0420a33/closure/goog/ui/menubutton_test.js#L392
+  testWidgets('Intents are not blocked by a closed anchor', (WidgetTester tester) async {
     final List<Intent> invokedIntents = <Intent>[];
     final FocusNode anchorFocusNode = FocusNode();
     addTearDown(anchorFocusNode.dispose);
@@ -358,7 +359,7 @@ void main() {
     );
   });
 
-  testWidgets('Actions that wrap Menu are invoked by the anchor and the overlay', (
+  testWidgets('Actions that wrap the menu are invoked by the anchor and the overlay', (
     WidgetTester tester,
   ) async {
     final FocusNode anchorFocusNode = FocusNode();
@@ -698,6 +699,7 @@ void main() {
 
     expect(closed, isTrue);
   });
+
   test('debugFillProperties', () {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     final CupertinoMenuAnchor menuAnchor = CupertinoMenuAnchor(

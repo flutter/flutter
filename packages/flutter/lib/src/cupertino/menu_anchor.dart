@@ -10,6 +10,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -592,7 +593,7 @@ class CupertinoMenuAnchor extends StatefulWidget {
 }
 
 class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerProviderStateMixin {
-  static const Tolerance springTolerance = Tolerance(velocity: 0.1, distance: 0.1);
+  static const Tolerance springTolerance = Tolerance(velocity: 0.1);
 
   /// Approximated using settling duration calculation (see
   /// https://github.com/flutter/flutter/pull/164411#issuecomment-2691969477)
