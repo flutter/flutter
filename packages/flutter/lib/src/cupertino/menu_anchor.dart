@@ -273,8 +273,8 @@ double _roundToDivisible(double value, {required double to}) {
   return (value / to).round() * to;
 }
 
-/// Mix [CupertinoMenuEntry] in to define how a menu item should be drawn
-/// in a menu.
+/// Implement [CupertinoMenuEntry] to define how a menu item should be drawn in
+/// a menu.
 abstract interface class CupertinoMenuEntry {
   /// Whether this menu item has a leading widget.
   ///
@@ -364,6 +364,15 @@ typedef CupertinoMenuAnimationStatusChangedCallback = void Function(AnimationSta
 ///
 /// ** See code in examples/api/lib/cupertino/menu_anchor/cupertino_menu_anchor.0.dart **
 /// {@end-tool}
+///
+/// See also:
+///
+/// * [CupertinoMenuItem], the default menu item used in a
+///   [CupertinoMenuAnchor].
+/// * [CupertinoLargeMenuDivider], a large divider used to separate
+///   [CupertinoMenuItem]s.
+/// * [CupertinoMenuEntry], an interface that can be implemented to customize
+///   the appearance of menu items in a [CupertinoMenuAnchor].
 class CupertinoMenuAnchor extends StatefulWidget {
   /// Creates a [CupertinoMenuAnchor].
   const CupertinoMenuAnchor({
@@ -2434,7 +2443,7 @@ class _RenderAlignMidpoint extends RenderPositionedBox {
 ///
 /// * [CupertinoMenuItem], a Cupertino-style menu item.
 /// * [CupertinoMenuAnchor], a widget that creates a Cupertino-style popup menu.
-/// * [CupertinoMenuEntry], a mixin that can be used to control whether
+/// * [CupertinoMenuEntry], an interface that can be used to control whether
 ///   dividers are shown before or after a menu item.
 class CupertinoLargeMenuDivider extends StatelessWidget implements CupertinoMenuEntry {
   /// Creates a large horizontal divider for a [CupertinoMenuAnchor].
