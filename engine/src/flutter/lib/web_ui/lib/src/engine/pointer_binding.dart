@@ -27,6 +27,18 @@ const bool _debugLogPointerEvents = false;
 /// Set this to true to log all the events sent to the Flutter framework.
 const bool _debugLogFlutterEvents = false;
 
+/// Resets iframe detection cache for tests.
+@visibleForTesting
+void debugResetIframeDetectionCache() {
+  _WheelEventListenerMixin._cachedIsInIframe = null;
+}
+
+/// Overrides iframe detection for tests. Pass `null` to restore auto-detection.
+@visibleForTesting
+void debugSetIframeEmbeddingForTests(bool? isInIframe) {
+  _WheelEventListenerMixin._cachedIsInIframe = isInIframe;
+}
+
 /// The signature of a callback that handles pointer events.
 typedef _PointerDataCallback = void Function(DomEvent event, List<ui.PointerData>);
 
@@ -545,7 +557,16 @@ abstract class _BaseAdapter {
   final List<Listener> _listeners = <Listener>[];
   DomWheelEvent? _lastWheelEvent;
   bool _lastWheelEventWasTrackpad = false;
+
+  /// Two flags to track scroll handling for the two-flag system:
+  /// 1. _lastWheelEventAllowedDefault: true if a scrollable is at boundary
+  /// 2. _lastWheelEventHandledByWidget: true if a scrollable consumed the event
+  ///
+  /// This enables proper handling of nested scrollables:
+  /// - If inner scrollable handles the event, don't scroll parent page
+  /// - If all scrollables are at boundary, scroll parent page
   bool _lastWheelEventAllowedDefault = false;
+  bool _lastWheelEventHandledByWidget = false;
 
   DomElement get _viewTarget => _view.dom.rootElement;
   DomEventTarget get _globalTarget => _view.embeddingStrategy.globalEventTarget;
@@ -605,6 +626,37 @@ abstract class _BaseAdapter {
 
 mixin _WheelEventListenerMixin on _BaseAdapter {
   static double? _defaultScrollLineHeight;
+
+  /// Cached result of iframe detection.
+  static bool? _cachedIsInIframe;
+
+  /// Check if Flutter is embedded inside an iframe.
+  ///
+  /// Used to determine whether to prevent scroll chaining to the parent page.
+  /// When in an iframe, we always preventDefault() to block native scroll
+  /// bubbling, and use postMessage to explicitly scroll the parent when needed.
+  bool _isEmbeddedInIframe() {
+    if (_cachedIsInIframe != null) {
+      return _cachedIsInIframe!;
+    }
+
+    try {
+      // If window.parent is the same object as window, we're not in an iframe.
+      // If they're different, we're in an iframe.
+      final DomWindow? parent = domWindow.parent;
+      if (parent == null) {
+        _cachedIsInIframe = false;
+        return false;
+      }
+      // Use identical() to check if parent and window are the same object
+      _cachedIsInIframe = !identical(parent, domWindow);
+      return _cachedIsInIframe!;
+    } catch (e) {
+      // Cross-origin iframe - assume embedded
+      _cachedIsInIframe = true;
+      return true;
+    }
+  }
 
   bool _isAcceleratedMouseWheelDelta(num delta, num? wheelDelta) {
     // On macOS, scrolling using a mouse wheel by default uses an acceleration
@@ -747,8 +799,14 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
         scrollDeltaX: deltaX,
         scrollDeltaY: deltaY,
         onRespond: ({bool allowPlatformDefault = false}) {
-          // Once `allowPlatformDefault` is `true`, never go back to `false`!
-          _lastWheelEventAllowedDefault |= allowPlatformDefault;
+          // Track both: platform default and widget handling
+          if (allowPlatformDefault) {
+            // Widget is at boundary, wants platform to handle
+            _lastWheelEventAllowedDefault = true;
+          } else {
+            // Widget explicitly handled this event
+            _lastWheelEventHandledByWidget = true;
+          }
         },
       );
     }
@@ -775,15 +833,40 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
     if (_debugLogPointerEvents) {
       print(event.type);
     }
+
+    // Reset flags before dispatching to framework
     _lastWheelEventAllowedDefault = false;
-    // [ui.PointerData] can set the `_lastWheelEventAllowedDefault` variable
-    // to true, when the framework says so. See the implementation of `respond`
-    // when creating the PointerData object above.
-    _callback(event, _convertWheelEventToPointerData(event as DomWheelEvent));
-    // This works because the `_callback` is handled synchronously in the
-    // framework, so it's able to modify `_lastWheelEventAllowedDefault`.
-    if (!_lastWheelEventAllowedDefault) {
+    _lastWheelEventHandledByWidget = false;
+
+    final wheelEvent = event as DomWheelEvent;
+
+    // Dispatch to framework (this triggers onRespond callbacks synchronously)
+    _callback(event, _convertWheelEventToPointerData(wheelEvent));
+
+    // Determine if we should prevent default and/or scroll parent
+    final bool isInIframe = _isEmbeddedInIframe();
+
+    if (isInIframe) {
+      // In an iframe: always prevent default to block native scroll chaining.
+      // This prevents both the iframe and parent from scrolling simultaneously.
       event.preventDefault();
+
+      // Only scroll parent when ALL scrollables are at boundary.
+      // IMPORTANT: Only scroll parent if:
+      // 1. Some widget wants to allow platform default (at boundary)
+      // 2. NO widget explicitly handled the event (nested scrollables case)
+      //
+      // This fixes GitHub issue #156985
+      final bool shouldScrollParent =
+          _lastWheelEventAllowedDefault && !_lastWheelEventHandledByWidget;
+      if (shouldScrollParent) {
+        scrollParentWindow(wheelEvent.deltaX, wheelEvent.deltaY);
+      }
+    } else {
+      // Not in an iframe: use original behavior
+      if (!_lastWheelEventAllowedDefault) {
+        event.preventDefault();
+      }
     }
   }
 
