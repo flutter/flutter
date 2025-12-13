@@ -390,7 +390,7 @@ class CupertinoMenuAnchor extends StatefulWidget {
     this.constrainCrossAxis = false,
     this.consumeOutsideTaps = false,
     this.enableSwipe = true,
-    this.longPressToOpenDuration = Duration.zero,
+    this.enableLongPressToOpen = false,
     this.useRootOverlay = false,
     this.overlayPadding = const EdgeInsets.all(8),
     required this.menuChildren,
@@ -481,17 +481,17 @@ class CupertinoMenuAnchor extends StatefulWidget {
   /// Defaults to true.
   final bool enableSwipe;
 
-  /// The duration after which a long-press on the anchor button will open the
-  /// menu.
+  /// Whether or not the menu should open in response to a long-press on the
+  /// anchor.
   ///
   /// When a menu is opened via long-press, the menu can be swiped in the same
   /// gesture to select and activate menu items.
   ///
-  /// When the inner menu button is disabled, [longPressToOpenDuration] should
-  /// be set to [Duration.zero] to prevent the menu from opening on long-press.
+  /// If the widget built by [builder] is disabled, [longPressToOpenDuration]
+  /// should be set to [false] to prevent the menu from opening on long-press.
   ///
-  /// Defaults to [Duration.zero], which disables the behavior.
-  final Duration longPressToOpenDuration;
+  /// Defaults to [false], which disables the behavior.
+  final bool enableLongPressToOpen;
 
   /// {@macro flutter.widgets.RawMenuAnchor.useRootOverlay}
   final bool useRootOverlay;
@@ -594,6 +594,7 @@ class CupertinoMenuAnchor extends StatefulWidget {
 }
 
 class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerProviderStateMixin {
+  static const Duration longPressToOpenDuration = Duration(milliseconds: 400);
   static const Tolerance springTolerance = Tolerance(velocity: 0.1);
 
   /// Approximated using settling duration calculation (see
@@ -707,7 +708,7 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
   void _handleAnchorSwipeStart() {
     // If widget.anchorPressActivationDuration becomes zero while a press is
     // active, do not open the menu.
-    if (isOpening || widget.longPressToOpenDuration == Duration.zero) {
+    if (isOpening || !widget.enableLongPressToOpen) {
       return;
     }
     _menuController.open();
@@ -784,13 +785,13 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
         widget.child ??
         const SizedBox.shrink();
 
-    if (widget.longPressToOpenDuration == Duration.zero || !enableSwipe) {
+    if (!widget.enableLongPressToOpen || !enableSwipe) {
       return anchor;
     }
 
     return _SwipeSurface(
       onStart: _handleAnchorSwipeStart,
-      delay: widget.longPressToOpenDuration,
+      delay: longPressToOpenDuration,
       child: anchor,
     );
   }
