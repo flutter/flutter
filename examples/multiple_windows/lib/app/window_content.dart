@@ -40,6 +40,7 @@ class WindowContent extends StatelessWidget {
         child: MaterialApp(home: DialogWindowContent(window: dialog)),
       ),
       TooltipWindowController() => throw UnimplementedError(),
+      PopupWindowController() => throw UnimplementedError(),
     };
   }
 }
