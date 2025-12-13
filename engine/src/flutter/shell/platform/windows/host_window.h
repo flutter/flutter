@@ -10,6 +10,7 @@
 #include <wrl/client.h>
 #include <memory>
 #include <optional>
+#include <string>
 
 #include "flutter/fml/macros.h"
 #include "flutter/shell/geometry/geometry.h"
@@ -21,6 +22,7 @@ namespace flutter {
 class WindowManager;
 class WindowsProcTable;
 class FlutterWindowsView;
+class FlutterWindowsViewSizingDelegate;
 class FlutterWindowsViewController;
 
 // A Win32 window that hosts a |FlutterWindow| in its client area.
@@ -64,12 +66,22 @@ class HostWindow {
       LPCWSTR title,
       HWND parent);
 
+  static std::unique_ptr<HostWindow> CreateTooltipWindow(
+      WindowManager* window_manager,
+      FlutterWindowsEngine* engine,
+      const WindowConstraints& preferred_constraints,
+      GetWindowPositionCallback get_position_callback,
+      HWND parent);
+
   // Returns the instance pointer for |hwnd| or nullptr if invalid.
   static HostWindow* GetThisFromHandle(HWND hwnd);
 
   // Returns the backing window handle, or nullptr if the native window is not
   // created or has already been destroyed.
   HWND GetWindowHandle() const;
+
+  // Returns the HWND of the FlutterView hosted in this window.
+  HWND GetFlutterViewWindowHandle() const;
 
   // Resizes the window to accommodate a client area of the given
   // |size|. If the size does not satisfy the constraints, the window will be
@@ -103,6 +115,25 @@ class HostWindow {
   void UpdateModalStateLayer();
 
  protected:
+  struct HostWindowInitializationParams {
+    WindowArchetype archetype;
+    DWORD window_style;
+    DWORD extended_window_style;
+    const BoxConstraints& box_constraints;
+    Rect const initial_window_rect;
+    LPCWSTR title;
+    std::optional<HWND> const& owner_window;
+    int nCmdShow = SW_SHOWNORMAL;
+    FlutterWindowsViewSizingDelegate* sizing_delegate = nullptr;
+  };
+
+  // Initialize the underlying native window and the Flutter view.
+  //
+  // See:
+  // - https://learn.microsoft.com/windows/win32/winmsg/window-styles
+  // - https://learn.microsoft.com/windows/win32/winmsg/extended-window-styles
+  void InitializeFlutterView(HostWindowInitializationParams const& params);
+
   friend WindowManager;
 
   // Information saved before going into fullscreen mode, used to restore the
@@ -119,18 +150,9 @@ class HostWindow {
 
   // Construct a host window.
   //
-  // See:
-  // - https://learn.microsoft.com/windows/win32/winmsg/window-styles
-  // - https://learn.microsoft.com/windows/win32/winmsg/extended-window-styles
-  HostWindow(WindowManager* window_manager,
-             FlutterWindowsEngine* engine,
-             WindowArchetype archetype,
-             DWORD window_style,
-             DWORD extended_window_style,
-             const BoxConstraints& box_constraints,
-             Rect const initial_window_rect,
-             LPCWSTR title,
-             std::optional<HWND> const& owner_window);
+  // Derived classes should call InitializeFlutterView() after construction to
+  // set up the native window and the Flutter view.
+  HostWindow(WindowManager* window_manager, FlutterWindowsEngine* engine);
 
   // Calculates the required window size, in physical coordinates, to
   // accommodate the given |client_size|, in logical coordinates, constrained by
@@ -212,6 +234,14 @@ class HostWindow {
 
   // Used to mark a window as fullscreen.
   Microsoft::WRL::ComPtr<ITaskbarList2> task_bar_list_;
+
+  FlutterWindowsViewSizingDelegate* sizing_delegate_ = nullptr;
+  std::optional<HWND> owner_window_;
+  Rect initial_window_rect_;
+  DWORD window_style_;
+  DWORD extended_window_style_;
+  std::wstring title_;
+  int nCmdShow_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(HostWindow);
 };

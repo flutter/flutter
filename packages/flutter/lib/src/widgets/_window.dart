@@ -631,32 +631,9 @@ abstract class DialogWindowController extends BaseWindowController {
 /// * [TooltipWindow], the widget for a tooltip window.
 /// * [RegularWindowControllerDelegate], the delegate for regular window controllers.
 mixin class TooltipWindowControllerDelegate {
-  /// Invoked when the user attempts to close the window.
-  ///
-  /// The default implementation destroys the window. Subclasses
-  /// can override the behavior to delay or prevent the window from closing.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  ///
-  /// See also:
-  ///
-  /// * [onWindowDestroyed], which is invoked after the window is closed.
-  @internal
-  void onWindowCloseRequested(TooltipWindowController controller) {
-    if (!isWindowingEnabled) {
-      throw UnsupportedError(_kWindowingDisabledErrorMessage);
-    }
-
-    controller.destroy();
-  }
-
   /// Invoked after the window is closed.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
-  ///
-  /// See also:
-  ///
-  /// * [onWindowCloseRequested], which is invoked when the user attempts to close the window.
   @internal
   void onWindowDestroyed() {
     if (!isWindowingEnabled) {
@@ -761,6 +738,14 @@ abstract class TooltipWindowController extends BaseWindowController {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   void setConstraints(BoxConstraints constraints);
+
+  /// Updates the position of the tooltip.
+  ///
+  /// This requests that the tooltip be repositioned according to the new [anchorRect] and/or [positioner].
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void updatePosition({Rect? anchorRect, WindowPositioner? positioner});
 }
 
 /// [WindowingOwner] is responsible for creating and managing window controllers.
