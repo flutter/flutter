@@ -150,35 +150,50 @@ enum _CupertinoMenuWidth {
 }
 
 // TODO(davidhicks980): DynamicType should be moved to the Cupertino theming library when available.
-// Obtained from https://developer.apple.com/design/human-interface-guidelines/typography#Specifications
+// Obtained from
+// https://developer.apple.com/design/human-interface-guidelines/typography#Specifications
+//
+// Note: SF Display doesn't have tracking values on HID guidelines, so the
+// tracking values from SF Pro were unselected.
+
 enum _DynamicTypeStyle {
   body(
-    xSmall: TextStyle(fontSize: 14, height: 19 / 14, fontFamily: _kBodyFont),
-    small: TextStyle(fontSize: 15, height: 20 / 15, fontFamily: _kBodyFont),
-    medium: TextStyle(fontSize: 16, height: 21 / 16, fontFamily: _kBodyFont),
-    large: TextStyle(fontSize: 17, height: 22 / 17, fontFamily: _kBodyFont),
-    xLarge: TextStyle(fontSize: 19, height: 24 / 19, fontFamily: _kBodyFont),
-    xxLarge: TextStyle(fontSize: 21, height: 26 / 21, fontFamily: _kBodyFont),
-    xxxLarge: TextStyle(fontSize: 23, height: 29 / 23, fontFamily: _kDisplayFont),
-    ax1: TextStyle(fontSize: 28, height: 34 / 28, fontFamily: _kDisplayFont),
-    ax2: TextStyle(fontSize: 33, height: 40 / 33, fontFamily: _kDisplayFont),
-    ax3: TextStyle(fontSize: 40, height: 48 / 40, fontFamily: _kDisplayFont),
-    ax4: TextStyle(fontSize: 47, height: 56 / 47, fontFamily: _kDisplayFont),
-    ax5: TextStyle(fontSize: 53, height: 62 / 53, fontFamily: _kDisplayFont),
+    xSmall: TextStyle(fontSize: 14, height: 19 / 14, letterSpacing: -0.15, fontFamily: _kBodyFont),
+    small: TextStyle(fontSize: 15, height: 20 / 15, letterSpacing: -0.23, fontFamily: _kBodyFont),
+    medium: TextStyle(fontSize: 16, height: 21 / 16, letterSpacing: -0.31, fontFamily: _kBodyFont),
+    large: TextStyle(fontSize: 17, height: 22 / 17, letterSpacing: -0.43, fontFamily: _kBodyFont),
+    xLarge: TextStyle(fontSize: 19, height: 24 / 19, letterSpacing: -0.44, fontFamily: _kBodyFont),
+    xxLarge: TextStyle(fontSize: 21, height: 26 / 21, letterSpacing: -0.36, fontFamily: _kBodyFont),
+    xxxLarge: TextStyle(
+      fontSize: 23,
+      height: 29 / 23,
+      letterSpacing: -0.10,
+      fontFamily: _kDisplayFont,
+    ),
+    ax1: TextStyle(fontSize: 28, height: 34 / 28, letterSpacing: 0.38, fontFamily: _kDisplayFont),
+    ax2: TextStyle(fontSize: 33, height: 40 / 33, letterSpacing: 0.40, fontFamily: _kDisplayFont),
+    ax3: TextStyle(fontSize: 40, height: 48 / 40, letterSpacing: 0.37, fontFamily: _kDisplayFont),
+    ax4: TextStyle(fontSize: 47, height: 56 / 47, letterSpacing: 0.37, fontFamily: _kDisplayFont),
+    ax5: TextStyle(fontSize: 53, height: 62 / 53, letterSpacing: 0.31, fontFamily: _kDisplayFont),
   ),
   subhead(
-    xSmall: TextStyle(fontSize: 12, height: 16 / 12, fontFamily: _kBodyFont),
-    small: TextStyle(fontSize: 13, height: 18 / 13, fontFamily: _kBodyFont),
-    medium: TextStyle(fontSize: 14, height: 19 / 14, fontFamily: _kBodyFont),
-    large: TextStyle(fontSize: 15, height: 20 / 15, fontFamily: _kBodyFont),
-    xLarge: TextStyle(fontSize: 17, height: 22 / 17, fontFamily: _kBodyFont),
-    xxLarge: TextStyle(fontSize: 19, height: 24 / 19, fontFamily: _kBodyFont),
-    xxxLarge: TextStyle(fontSize: 21, height: 28 / 21, fontFamily: _kBodyFont),
-    ax1: TextStyle(fontSize: 25, height: 31 / 25, fontFamily: _kDisplayFont),
-    ax2: TextStyle(fontSize: 30, height: 37 / 30, fontFamily: _kDisplayFont),
-    ax3: TextStyle(fontSize: 36, height: 43 / 36, fontFamily: _kDisplayFont),
-    ax4: TextStyle(fontSize: 42, height: 50 / 42, fontFamily: _kDisplayFont),
-    ax5: TextStyle(fontSize: 49, height: 58 / 49, fontFamily: _kDisplayFont),
+    xSmall: TextStyle(fontSize: 12, height: 16 / 12, letterSpacing: 0, fontFamily: _kBodyFont),
+    small: TextStyle(fontSize: 13, height: 18 / 13, letterSpacing: -0.08, fontFamily: _kBodyFont),
+    medium: TextStyle(fontSize: 14, height: 19 / 14, letterSpacing: -0.15, fontFamily: _kBodyFont),
+    large: TextStyle(fontSize: 15, height: 20 / 15, letterSpacing: -0.23, fontFamily: _kBodyFont),
+    xLarge: TextStyle(fontSize: 17, height: 22 / 17, letterSpacing: -0.43, fontFamily: _kBodyFont),
+    xxLarge: TextStyle(fontSize: 19, height: 24 / 19, letterSpacing: -0.45, fontFamily: _kBodyFont),
+    xxxLarge: TextStyle(
+      fontSize: 21,
+      height: 28 / 21,
+      letterSpacing: -0.36,
+      fontFamily: _kBodyFont,
+    ),
+    ax1: TextStyle(fontSize: 25, height: 31 / 25, letterSpacing: 0.15, fontFamily: _kDisplayFont),
+    ax2: TextStyle(fontSize: 30, height: 37 / 30, letterSpacing: 0.40, fontFamily: _kDisplayFont),
+    ax3: TextStyle(fontSize: 36, height: 43 / 36, letterSpacing: 0.37, fontFamily: _kDisplayFont),
+    ax4: TextStyle(fontSize: 42, height: 50 / 42, letterSpacing: 0.37, fontFamily: _kDisplayFont),
+    ax5: TextStyle(fontSize: 49, height: 58 / 49, letterSpacing: 0.33, fontFamily: _kDisplayFont),
   );
 
   const _DynamicTypeStyle({
