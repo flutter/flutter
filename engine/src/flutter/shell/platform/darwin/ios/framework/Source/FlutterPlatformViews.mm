@@ -94,10 +94,12 @@ static BOOL _preparedOnce = NO;
 
 - (instancetype)initWithFrame:(CGRect)frame
                    blurRadius:(CGFloat)blurRadius
+                 cornerRadius:(CGFloat)cornerRadius
              visualEffectView:(UIVisualEffectView*)visualEffectView {
   if (self = [super init]) {
     _frame = frame;
     _blurRadius = blurRadius;
+    _cornerRadius = cornerRadius;
     [PlatformViewFilter prepareOnce:visualEffectView];
     if (![PlatformViewFilter isUIVisualEffectViewImplementationValid]) {
       FML_DLOG(ERROR) << "Apple's API for UIVisualEffectView changed. Update the implementation to "
@@ -162,6 +164,9 @@ static BOOL _preparedOnce = NO;
   UIView* visualEffectSubview = visualEffectView.subviews[_indexOfVisualEffectSubview];
   visualEffectSubview.layer.backgroundColor = UIColor.clearColor.CGColor;
   visualEffectView.frame = _frame;
+
+  visualEffectView.layer.cornerRadius = _cornerRadius;
+  visualEffectView.clipsToBounds = YES;
 
   self.backdropFilterView = visualEffectView;
 }
@@ -830,4 +835,7 @@ static BOOL _preparedOnce = NO;
         (UIGestureRecognizer*)otherGestureRecognizer {
   return YES;
 }
+@end
+
+@implementation PendingRRectClip
 @end
