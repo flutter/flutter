@@ -347,7 +347,11 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
   }
 
   @override
-  void setImageSampler(int index, ui.Image image) {
+  void setImageSampler(
+    int index,
+    ui.Image image, {
+    ui.FilterQuality filterQuality = ui.FilterQuality.none,
+  }) {
     if (_nativeShader != null) {
       // Invalidate the previous shader so that it is recreated with the new
       // child shaders.
@@ -360,7 +364,7 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
       ui.TileMode.clamp,
       ui.TileMode.clamp,
       null,
-      ui.FilterQuality.none,
+      filterQuality,
     );
     final SkwasmShader? oldShader = _childShaders[index];
     _childShaders[index] = shader;

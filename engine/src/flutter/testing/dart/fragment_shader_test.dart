@@ -12,10 +12,13 @@ import 'dart:ui';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
+import 'goldens.dart';
 import 'impeller_enabled.dart';
 import 'shader_test_file_utils.dart';
 
 void main() async {
+  final ImageComparer comparer = await ImageComparer.create();
+
   test('impellerc produces reasonable JSON encoded IPLR files', () async {
     final Directory directory = shaderDirectory('iplr-json');
     final Object? rawData = convert.json.decode(
@@ -311,6 +314,28 @@ void main() async {
     blueGreenImage.dispose();
   });
 
+  for (final (filterQuality, goldenFilename) in [
+    (FilterQuality.none, 'fragment_shader_texture_with_quality_none.png'),
+    (FilterQuality.low, 'fragment_shader_texture_with_quality_low.png'),
+    (FilterQuality.medium, 'fragment_shader_texture_with_quality_medium.png'),
+    (FilterQuality.high, 'fragment_shader_texture_with_quality_high.png'),
+  ]) {
+    test('FragmentShader renders sampler with filter quality ${filterQuality.name}', () async {
+      final FragmentProgram program = await FragmentProgram.fromAsset('texture.frag.iplr');
+      final Image image = _createOvalGradientImage(imageDimension: 16);
+      final FragmentShader shader = program.fragmentShader()
+        ..setImageSampler(0, image, filterQuality: filterQuality);
+      shader.getUniformFloat('u_size', 0).set(300);
+      shader.getUniformFloat('u_size', 1).set(300);
+
+      final Image shaderImage = await _imageFromShader(shader: shader, imageDimension: 300);
+
+      await comparer.addGoldenImage(shaderImage, goldenFilename);
+      shader.dispose();
+      image.dispose();
+    });
+  }
+
   test('FragmentShader with uniforms renders correctly', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
 
@@ -597,13 +622,17 @@ Future<ByteData?> _imageByteDataFromShader({
   required Shader shader,
   int imageDimension = 100,
 }) async {
+  final Image image = await _imageFromShader(shader: shader, imageDimension: imageDimension);
+  return image.toByteData();
+}
+
+Future<Image> _imageFromShader({required Shader shader, required int imageDimension}) {
   final recorder = PictureRecorder();
   final canvas = Canvas(recorder);
   final paint = Paint()..shader = shader;
   canvas.drawPaint(paint);
   final Picture picture = recorder.endRecording();
-  final Image image = await picture.toImage(imageDimension, imageDimension);
-  return image.toByteData();
+  return picture.toImage(imageDimension, imageDimension);
 }
 
 // Loads the path and spirv content of the files at
@@ -681,6 +710,32 @@ Image _createBlueGreenImageSync() {
   final Picture picture = recorder.endRecording();
   try {
     return picture.toImageSync(10, 10);
+  } finally {
+    picture.dispose();
+  }
+}
+
+// Image of an oval painted with a linear gradient.
+Image _createOvalGradientImage({required int imageDimension}) {
+  final recorder = PictureRecorder();
+  final canvas = Canvas(recorder);
+  canvas.drawPaint(Paint()..color = const Color(0xFF000000));
+  canvas.drawOval(
+    Rect.fromCenter(
+      center: Offset(imageDimension * 0.5, imageDimension * 0.5),
+      width: imageDimension * 0.6,
+      height: imageDimension * 0.9,
+    ),
+    Paint()
+      ..shader = Gradient.linear(
+        Offset.zero,
+        Offset(imageDimension.toDouble(), imageDimension.toDouble()),
+        [const Color(0xFFFF0000), const Color(0xFF00FF00)],
+      ),
+  );
+  final Picture picture = recorder.endRecording();
+  try {
+    return picture.toImageSync(imageDimension, imageDimension);
   } finally {
     picture.dispose();
   }

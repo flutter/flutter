@@ -1017,7 +1017,7 @@ abstract class ImageSamplerSlot {
 abstract class FragmentShader implements Shader {
   void setFloat(int index, double value);
 
-  void setImageSampler(int index, Image image);
+  void setImageSampler(int index, Image image, {FilterQuality filterQuality = FilterQuality.none});
 
   @override
   void dispose();
