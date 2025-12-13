@@ -36,9 +36,7 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   /// If the connection is successful, the Widget Preview Scaffold will register services and
   /// subscribe to various streams to interact directly with other tooling (e.g., IDEs).
   Future<void> connect({Uri? dtdUri}) async {
-    final Uri dtdWsUri =
-        dtdUri ??
-        Uri.parse(kWidgetPreviewDtdUri);
+    final Uri dtdWsUri = dtdUri ?? Uri.parse(kWidgetPreviewDtdUri);
     dtd = await DartToolingDaemon.connect(dtdWsUri);
     unawaited(
       dtd.postEvent(
