@@ -316,10 +316,13 @@ typedef CupertinoMenuAnimationStatusChangedCallback = void Function(AnimationSta
 /// to the alignment point. If the menu is opened with an explicit position,
 /// then the [alignment] and [alignmentOffset] are ignored.
 ///
-/// The [controller] can be used to open and close the menu from other widgets.
-/// The [onOpen] callback is invoked when the menu popup is mounted and the menu
-/// status changes from [AnimationStatus.dismissed]. The [onClose] callback is
-/// invoked when the menu popup is unmounted and the menu status changes to
+/// A [MenuController] must be used to open and close the menu, and can be
+/// obtained from the [builder] callback, or provided to [controller] parameter.
+/// Calling [MenuController.open] will open the menu, and calling
+/// [MenuController.close] will close the menu. The [onOpen] callback is invoked
+/// when the menu popup is mounted and the menu status changes _from_
+/// [AnimationStatus.dismissed]. The [onClose] callback is invoked when the menu
+/// popup is unmounted and the menu status changes _to_
 /// [AnimationStatus.dismissed]. The [onAnimationStatusChange] callback is
 /// invoked every time the [AnimationStatus] of the menu animation changes.
 ///
