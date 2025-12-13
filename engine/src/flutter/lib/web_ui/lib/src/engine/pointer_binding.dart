@@ -772,19 +772,157 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
     }
 
     assert(event.isA<DomWheelEvent>());
+    final wheelEvent = event as DomWheelEvent;
     if (_debugLogPointerEvents) {
       print(event.type);
     }
+
+    // Check if the event target is inside a platform view with regular HTML content
+    // (not a cross-origin iframe). If so, check if the HTML element can scroll.
+    // This fixes GitHub issue #179360.
+    final _HtmlScrollableInfo? htmlScrollInfo = _getHtmlScrollableInfo(event);
+    if (htmlScrollInfo != null) {
+      // We're over a regular HTML element in a platform view.
+      // Check if it can scroll in the direction of the wheel event.
+      final bool canScrollInDirection = _canHtmlElementScroll(
+        htmlScrollInfo.scrollableElement,
+        wheelEvent.deltaX,
+        wheelEvent.deltaY,
+      );
+
+      if (canScrollInDirection) {
+        // The HTML element can scroll in this direction.
+        // We need to programmatically scroll the HTML element because Flutter's
+        // event listener captures wheel events at the glass pane level, preventing
+        // them from naturally propagating to the HTML element.
+        final DomElement scrollable = htmlScrollInfo.scrollableElement;
+        scrollable.scrollTop = scrollable.scrollTop + wheelEvent.deltaY;
+        if (wheelEvent.deltaX != 0) {
+          scrollable.scrollLeft = scrollable.scrollLeft + wheelEvent.deltaX;
+        }
+
+        // Prevent default and stop - we handled the scroll
+        event.preventDefault();
+        return;
+      }
+      // At boundary - fall through to let Flutter handle it
+    }
+
     _lastWheelEventAllowedDefault = false;
     // [ui.PointerData] can set the `_lastWheelEventAllowedDefault` variable
     // to true, when the framework says so. See the implementation of `respond`
     // when creating the PointerData object above.
-    _callback(event, _convertWheelEventToPointerData(event as DomWheelEvent));
+    _callback(event, _convertWheelEventToPointerData(wheelEvent));
     // This works because the `_callback` is handled synchronously in the
     // framework, so it's able to modify `_lastWheelEventAllowedDefault`.
     if (!_lastWheelEventAllowedDefault) {
       event.preventDefault();
     }
+  }
+
+  /// Information about a scrollable HTML element inside a platform view.
+  _HtmlScrollableInfo? _getHtmlScrollableInfo(DomEvent event) {
+    final target = event.target as DomElement?;
+    if (target == null) {
+      return null;
+    }
+
+    // Walk up the DOM tree to find the scrollable element and platform view
+    DomElement? scrollableElement;
+    DomElement? current = target;
+
+    while (current != null) {
+      final String tagName = current.tagName.toLowerCase();
+
+      // Check if this element is scrollable
+      if (scrollableElement == null) {
+        final String overflow = current.style.overflow;
+        final String overflowY = current.style.overflowY;
+        if (overflow == 'auto' ||
+            overflow == 'scroll' ||
+            overflowY == 'auto' ||
+            overflowY == 'scroll') {
+          scrollableElement = current;
+        }
+      }
+
+      // Check if we've reached the flt-platform-view wrapper
+      if (tagName == 'flt-platform-view') {
+        // Found a platform view - check if its first child is a cross-origin iframe
+        final DomElement? content = current.firstElementChild;
+        if (content == null) {
+          return null;
+        }
+
+        // If the content is an iframe, we have the wheel overlay handling it
+        if (content.tagName.toLowerCase() == 'iframe') {
+          return null;
+        }
+
+        // It's a regular HTML element - return the scrollable info
+        // Use the scrollable element we found, or the content itself
+        return _HtmlScrollableInfo(scrollableElement: scrollableElement ?? content);
+      }
+
+      // Stop searching if we've exited the flutter-view
+      if (tagName == 'flutter-view') {
+        break;
+      }
+
+      current = current.parentElement;
+    }
+
+    return null;
+  }
+
+  /// Checks if an HTML element can scroll in the given direction.
+  /// Returns true if the element can handle the scroll, false if it's at boundary.
+  bool _canHtmlElementScroll(DomElement element, num deltaX, num deltaY) {
+    final double scrollTop = element.scrollTop;
+    final double scrollLeft = element.scrollLeft;
+    final double scrollHeight = element.scrollHeight;
+    final double scrollWidth = element.scrollWidth;
+    final double clientHeight = element.clientHeight;
+    final double clientWidth = element.clientWidth;
+
+    // Check if the element is actually scrollable (has overflow content)
+    final bool hasVerticalOverflow = scrollHeight > clientHeight + 1;
+    final bool hasHorizontalOverflow = scrollWidth > clientWidth + 1;
+
+    // Check vertical scrolling
+    if (deltaY != 0 && hasVerticalOverflow) {
+      if (deltaY > 0) {
+        // Scrolling down - can scroll if not at bottom
+        final bool canScrollDown = scrollTop + clientHeight < scrollHeight - 1;
+        if (canScrollDown) {
+          return true;
+        }
+      } else {
+        // Scrolling up - can scroll if not at top
+        final bool canScrollUp = scrollTop > 1;
+        if (canScrollUp) {
+          return true;
+        }
+      }
+    }
+
+    // Check horizontal scrolling
+    if (deltaX != 0 && hasHorizontalOverflow) {
+      if (deltaX > 0) {
+        // Scrolling right - can scroll if not at right edge
+        if (scrollLeft + clientWidth < scrollWidth - 1) {
+          return true;
+        }
+      } else {
+        // Scrolling left - can scroll if not at left edge
+        if (scrollLeft > 1) {
+          return true;
+        }
+      }
+    }
+
+    // Element is at boundary in the scroll direction
+    return false;
   }
 
   /// For browsers that report delta line instead of pixels such as FireFox
@@ -818,6 +956,17 @@ class _SanitizedDetails {
 
   @override
   String toString() => '$runtimeType(change: $change, buttons: $buttons)';
+}
+
+/// Information about a scrollable HTML element inside a platform view.
+/// Used to determine if wheel events should be handled by the HTML element
+/// or passed to Flutter.
+@immutable
+class _HtmlScrollableInfo {
+  const _HtmlScrollableInfo({required this.scrollableElement});
+
+  /// The scrollable HTML element (has overflow: auto/scroll).
+  final DomElement scrollableElement;
 }
 
 class _ButtonSanitizer {
