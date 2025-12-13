@@ -1672,7 +1672,8 @@ class TerminalHandler {
   /// Greek, etc.) by adding entries to this map.
   ///
   /// Related issues: #27021, #100456, #116658
-  static const _keyboardLayoutMappings = <String, String>{
+  @visibleForTesting
+  static const keyboardLayoutMappings = <String, String>{
     // Cyrillic (Russian ЙЦУКЕН) layout → QWERTY Latin
     // Maps based on physical key positions for terminal commands
     //
@@ -1706,7 +1707,7 @@ class TerminalHandler {
 
   /// Maps a keyboard character to its Latin equivalent if a mapping exists.
   ///
-  /// This method checks if the input character exists in [_keyboardLayoutMappings]
+  /// This method checks if the input character exists in [keyboardLayoutMappings]
   /// and returns the corresponding Latin character. If no mapping is found,
   /// it returns the original character unchanged.
   ///
@@ -1720,7 +1721,7 @@ class TerminalHandler {
   /// _mapKeyToLatin('й') // returns 'q' (quit)
   /// ```
   static String _mapKeyToLatin(String key) {
-    return _keyboardLayoutMappings[key] ?? key;
+    return keyboardLayoutMappings[key] ?? key;
   }
 
   void setupTerminal() {
@@ -1781,7 +1782,7 @@ class TerminalHandler {
   /// - ЙЦУКЕН (Cyrillic)
   ///
   /// This can be extended to support other layouts (AZERTY, QWERTZ, etc.) by
-  /// adding entries to [_keyboardLayoutMappings].
+  /// adding entries to [keyboardLayoutMappings].
   Future<bool> _commonTerminalInputHandler(String character) async {
     _logger.printStatus(''); // the key the user tapped might be on this line
     // Map non-Latin characters to Latin equivalents based on physical key position

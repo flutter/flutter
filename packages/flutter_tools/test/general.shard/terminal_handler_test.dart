@@ -1461,6 +1461,24 @@ void main() {
         expect(device!.device!.dds.calledLaunchDevToolsInBrowser, isTrue);
       }
     });
+
+    testWithoutContext('keyboardLayoutMappings keys must not be ASCII characters', () {
+      // This test ensures that no one accidentally adds regular ASCII characters
+      // as keys in the keyboard layout mappings. ASCII characters (0-127) should
+      // never be mapped because they don't need translation - they are already Latin.
+      // Only non-Latin characters (code points > 127) should be mapped.
+      for (final String key in TerminalHandler.keyboardLayoutMappings.keys) {
+        final int codeUnit = key.codeUnitAt(0);
+        expect(
+          codeUnit > 127,
+          isTrue,
+          reason:
+              'Key "$key" (U+${codeUnit.toRadixString(16).padLeft(4, '0').toUpperCase()}) '
+              'is an ASCII character and should not be in keyboard layout mappings. '
+              'Only non-Latin characters should be mapped.',
+        );
+      }
+    });
   });
 }
 
@@ -1615,13 +1633,12 @@ TerminalHandler setUpTerminalHandler(
     targetPlatform: web ? TargetPlatform.web_javascript : TargetPlatform.android_arm,
   );
   device.vmService = FakeVmServiceHost(requests: requests).vmService;
-  final residentRunner =
-      FakeResidentRunner(device, testLogger, localFileSystem)
-        ..supportsServiceProtocol = supportsServiceProtocol
-        ..supportsRestart = supportsRestart
-        ..canHotReload = supportsHotReload
-        ..fatalReloadError = fatalReloadError
-        ..reloadExitCode = reloadExitCode;
+  final residentRunner = FakeResidentRunner(device, testLogger, localFileSystem)
+    ..supportsServiceProtocol = supportsServiceProtocol
+    ..supportsRestart = supportsRestart
+    ..canHotReload = supportsHotReload
+    ..fatalReloadError = fatalReloadError
+    ..reloadExitCode = reloadExitCode;
 
   switch (buildMode) {
     case BuildMode.debug:
