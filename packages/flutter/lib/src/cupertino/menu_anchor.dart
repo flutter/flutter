@@ -991,8 +991,9 @@ class _MenuOverlayState extends State<_MenuOverlay>
   }
 
   void _resolveMotion() {
-    // Behavior of reduce motion is based on iOS 18.5 simulator. Behavior of
-    // disable animations could not be determined, so all animations are disabled.
+    // Behavior of reduce motion is based on iOS 18.5 simulator. Because the
+    // disableAnimations accessibility feature is not present on iOS, all
+    // animations are disabled when disableAnimations is enabled.
     final ui.AccessibilityFeatures accessibilityFeatures = View.of(
       context,
     ).platformDispatcher.accessibilityFeatures;
@@ -1932,9 +1933,6 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
   bool hasLeading(BuildContext context) => leading != null;
 
   @override
-  bool get allowLeadingSeparator => true;
-
-  @override
   bool get isDivider => true;
 
   /// The default mouse cursor for a [CupertinoMenuItem].
@@ -2194,8 +2192,6 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
   }
 }
 
-// TODO(davidhicks980): Update layout when Flutter adds support for last
-// baseline (https://github.com/flutter/flutter/issues/4614)
 class _CupertinoMenuItemLabel extends StatelessWidget {
   const _CupertinoMenuItemLabel({
     required this.child,
@@ -2388,7 +2384,8 @@ class _CupertinoMenuItemLabel extends StatelessWidget {
 /// Almost identical to [Align], but aligns the midpoint of the child rather
 /// than the top-left corner.
 ///
-/// This layout behavior was observed on the iOS 18.5 simulator.
+/// This layout behavior was observed on the iOS 18.5 simulator
+/// (https://developer.apple.com/documentation/uikit/uiview/centerxanchor)
 class _AlignMidpoint extends SingleChildRenderObjectWidget {
   /// Creates a widget that positions its child's center point at a specific
   /// [alignment].
@@ -2786,11 +2783,12 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
   }
 }
 
-/// Mix into [State] to receive callbacks when a pointer enters or leaves while
-/// down. The [StatefulWidget] this class is mixed into must be a descendant of
-/// a [_SwipeRegion].
+/// Implement to receive callbacks when a pointer enters or leaves while down.
+///
+/// An ancestor [_SwipeRegion] must be present in order to receive these
+/// callbacks.
 @optionalTypeArgs
-abstract class _SwipeTarget {
+abstract interface class _SwipeTarget {
   /// Called when a pointer enters the [_SwipeTarget]. Return true if the pointer
   /// should be considered "on" the [_SwipeTarget], and false otherwise (for
   /// example, when the [_SwipeTarget] is disabled).
@@ -2902,7 +2900,8 @@ class _SwipeRegionState extends State<_SwipeRegion> {
   void _handleSwipeUpdate(DragUpdateDetails updateDetails, {bool onTarget = false}) {
     _position = _position! + updateDetails.delta;
 
-    // We can't used expandToInclude() because the total menu area may not be rectangular.
+    // We can't used expandToInclude() because the total menu area may not be
+    // rectangular.
     double minimumSquaredDistance = double.maxFinite;
     for (final _RenderSwipeSurface surface in _surfaces) {
       final double squaredDistance = _computeSquaredDistanceToRect(
@@ -3033,7 +3032,6 @@ class _RenderSwipeSurface extends RenderProxyBoxWithHitTestBehavior {
 }
 
 /// Handles swiping events for a [_SwipeRegion].
-// This class was adapted from _DragAvatar.
 class _SwipeHandle extends Drag {
   /// Creates a [_SwipeHandle] that handles swiping events for a [_SwipeRegion].
   _SwipeHandle({
