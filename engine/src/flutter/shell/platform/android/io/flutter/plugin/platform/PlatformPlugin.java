@@ -202,9 +202,7 @@ public class PlatformPlugin {
         view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
         break;
       case HEAVY_IMPACT:
-        if (Build.VERSION.SDK_INT >= API_LEVELS.API_23) {
-          view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
-        }
+        view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
         break;
       case SELECTION_CLICK:
         view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
@@ -463,25 +461,23 @@ public class PlatformPlugin {
     // If transparent, SDK 29 and higher may apply a translucent scrim behind the bar to ensure
     // proper contrast. This can be overridden with
     // SystemChromeStyle.systemStatusBarContrastEnforced.
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_23) {
-      if (systemChromeStyle.statusBarIconBrightness != null) {
-        switch (systemChromeStyle.statusBarIconBrightness) {
-          case DARK:
-            // Dark status bar icon brightness.
-            // Light status bar appearance.
-            windowInsetsControllerCompat.setAppearanceLightStatusBars(true);
-            break;
-          case LIGHT:
-            // Light status bar icon brightness.
-            // Dark status bar appearance.
-            windowInsetsControllerCompat.setAppearanceLightStatusBars(false);
-            break;
-        }
+    if (systemChromeStyle.statusBarIconBrightness != null) {
+      switch (systemChromeStyle.statusBarIconBrightness) {
+        case DARK:
+          // Dark status bar icon brightness.
+          // Light status bar appearance.
+          windowInsetsControllerCompat.setAppearanceLightStatusBars(true);
+          break;
+        case LIGHT:
+          // Light status bar icon brightness.
+          // Dark status bar appearance.
+          windowInsetsControllerCompat.setAppearanceLightStatusBars(false);
+          break;
       }
+    }
 
-      if (systemChromeStyle.statusBarColor != null) {
-        window.setStatusBarColor(systemChromeStyle.statusBarColor);
-      }
+    if (systemChromeStyle.statusBarColor != null) {
+      window.setStatusBarColor(systemChromeStyle.statusBarColor);
     }
     // You can't override the enforced contrast for a transparent status bar until SDK 29.
     // This overrides the translucent scrim that may be placed behind the bar on SDK 29+ to ensure
