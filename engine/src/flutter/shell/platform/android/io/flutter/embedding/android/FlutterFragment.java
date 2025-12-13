@@ -24,7 +24,6 @@ import androidx.lifecycle.Lifecycle;
 import io.flutter.Build;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterEngine;
-import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.plugin.view.SensitiveContentPlugin;
@@ -127,8 +126,8 @@ public class FlutterFragment extends Fragment
   protected static final String ARG_SHOULD_DELAY_FIRST_ANDROID_VIEW_DRAW =
       "should_delay_first_android_view_draw";
 
-  /** Flutter shell arguments. */
   protected static final String ARG_FLUTTER_INITIALIZATION_ARGS = "initialization_args";
+
   /**
    * {@link RenderMode} to be used for the {@link io.flutter.embedding.android.FlutterView} in this
    * {@code FlutterFragment}
@@ -253,7 +252,7 @@ public class FlutterFragment extends Fragment
     private String initialRoute = "/";
     private boolean handleDeeplinking = false;
     private String appBundlePath = null;
-    private FlutterShellArgs shellArgs = null;
+    private ArrayList<String> shellArgs = null;
     private RenderMode renderMode = RenderMode.surface;
     private TransparencyMode transparencyMode = TransparencyMode.transparent;
     private boolean shouldAttachEngineToActivity = true;
@@ -280,6 +279,13 @@ public class FlutterFragment extends Fragment
     @NonNull
     public NewEngineFragmentBuilder dartEntrypoint(@NonNull String dartEntrypoint) {
       this.dartEntrypoint = dartEntrypoint;
+      return this;
+    }
+
+    /** Any special configuration arguments for the Flutter engine */
+    @NonNull
+    public NewEngineFragmentBuilder flutterShellArgs(@NonNull ArrayList<String> shellArgs) {
+      this.shellArgs = shellArgs;
       return this;
     }
 
@@ -324,13 +330,6 @@ public class FlutterFragment extends Fragment
     @NonNull
     public NewEngineFragmentBuilder appBundlePath(@NonNull String appBundlePath) {
       this.appBundlePath = appBundlePath;
-      return this;
-    }
-
-    /** Any special configuration arguments for the Flutter engine */
-    @NonNull
-    public NewEngineFragmentBuilder flutterShellArgs(@NonNull FlutterShellArgs shellArgs) {
-      this.shellArgs = shellArgs;
       return this;
     }
 
@@ -457,7 +456,7 @@ public class FlutterFragment extends Fragment
       // TODO(mattcarroll): determine if we should have an explicit FlutterTestFragment instead of
       // conflating.
       if (null != shellArgs) {
-        args.putStringArray(ARG_FLUTTER_INITIALIZATION_ARGS, shellArgs.toArray());
+        args.putStringArrayList(ARG_FLUTTER_INITIALIZATION_ARGS, shellArgs);
       }
       args.putString(
           ARG_FLUTTERVIEW_RENDER_MODE,
@@ -1298,10 +1297,10 @@ public class FlutterFragment extends Fragment
    */
   @Override
   @NonNull
-  public FlutterShellArgs getFlutterShellArgs() {
-    String[] flutterShellArgsArray = getArguments().getStringArray(ARG_FLUTTER_INITIALIZATION_ARGS);
-    return new FlutterShellArgs(
-        flutterShellArgsArray != null ? flutterShellArgsArray : new String[] {});
+  public ArrayList<String> getFlutterShellArgs() {
+    ArrayList<String> flutterShellArgsArray =
+        getArguments().getStringArrayList(ARG_FLUTTER_INITIALIZATION_ARGS);
+    return flutterShellArgsArray;
   }
 
   /**

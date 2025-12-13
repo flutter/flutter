@@ -1040,17 +1040,6 @@ public class FlutterActivity extends Activity
   }
 
   /**
-   * {@link FlutterActivityAndFragmentDelegate.Host} method that is used by {@link
-   * FlutterActivityAndFragmentDelegate} to obtain Flutter shell arguments when initializing
-   * Flutter.
-   */
-  @NonNull
-  @Override
-  public FlutterShellArgs getFlutterShellArgs() {
-    return FlutterShellArgs.fromIntent(getIntent());
-  }
-
-  /**
    * Returns the ID of a statically cached {@link io.flutter.embedding.engine.FlutterEngine} to use
    * within this {@code FlutterActivity}, or {@code null} if this {@code FlutterActivity} does not
    * want to use a cached {@link io.flutter.embedding.engine.FlutterEngine}.
@@ -1304,6 +1293,17 @@ public class FlutterActivity extends Activity
   @Nullable
   protected FlutterEngine getFlutterEngine() {
     return delegate.getFlutterEngine();
+  }
+
+  /**
+   * {@link FlutterActivityAndFragmentDelegate.Host} method that is used by {@link
+   * FlutterActivityAndFragmentDelegate} to obtain Flutter shell arguments when initializing
+   * Flutter.
+   */
+  @NonNull
+  @Override
+  public ArrayList<String> getFlutterShellArgs() {
+    return FlutterShellArgs.fromIntent(getIntent());
   }
 
   /**
