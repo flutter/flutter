@@ -6,6 +6,7 @@
 #define FLUTTER_IMPELLER_COMPILER_TYPES_H_
 
 #include <codecvt>
+#include <filesystem>
 #include <locale>
 #include <map>
 #include <optional>
@@ -87,7 +88,7 @@ bool TargetPlatformIsOpenGL(TargetPlatform platform);
 
 bool TargetPlatformIsVulkan(TargetPlatform platform);
 
-SourceType SourceTypeFromFileName(const std::string& file_name);
+SourceType SourceTypeFromFileName(const std::filesystem::path& file_name);
 
 SourceType SourceTypeFromString(std::string name);
 
@@ -102,7 +103,7 @@ std::string SourceLanguageToString(SourceLanguage source_language);
 std::string TargetPlatformSLExtension(TargetPlatform platform);
 
 std::string EntryPointFunctionNameFromSourceName(
-    const std::string& file_name,
+    const std::filesystem::path& file_name,
     SourceType type,
     SourceLanguage source_language,
     const std::string& entry_point_name);
