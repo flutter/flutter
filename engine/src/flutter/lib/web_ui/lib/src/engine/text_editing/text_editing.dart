@@ -1886,6 +1886,29 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
   void placeElement() {
     moveFocusToActiveDomElement();
     geometry?.applyToDomElement(activeDomElement);
+
+    // When running inside an iframe on iOS Safari, the browser's automatic
+    // scroll-into-view behavior doesn't work because:
+    // 1. We use focusWithoutScroll() to prevent unwanted scrolling
+    // 2. The iframe's visualViewport doesn't receive resize events when the
+    //    keyboard appears (only the parent window's visualViewport does)
+    //
+    // To fix this, we explicitly call scrollIntoView() after placing the element
+    // when we detect we're in an iframe context.
+    // See: https://github.com/flutter/flutter/issues/178743
+    if (isInIframe) {
+      activeDomElement.scrollIntoView(<String, dynamic>{'block': 'center', 'inline': 'nearest'});
+    }
+  }
+
+  /// Returns true if the current window is inside an iframe.
+  ///
+  /// Marked visible-for-testing so tests can override it without relying on
+  /// library-private members.
+  @visibleForTesting
+  bool get isInIframe {
+    final DomWindow? parent = domWindow.parent;
+    return parent != null && !identical(parent, domWindow);
   }
 }
 
