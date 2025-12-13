@@ -1735,6 +1735,63 @@ abstract class RenderSliver extends RenderObject {
     }
   }
 
+  /// Returns the [Rect] that covers the total paint extent of the sliver.
+  @protected
+  Rect getMaxPaintRect() {
+    final SliverGeometry? geometry = this.geometry;
+    if (geometry == null) {
+      return Rect.zero;
+    }
+
+    double maxPaintExtent = geometry.maxPaintExtent;
+    if (maxPaintExtent.isInfinite) {
+      maxPaintExtent = constraints.scrollOffset + geometry.cacheExtent + constraints.cacheOrigin;
+    }
+    final double paintExtent = geometry.paintExtent;
+    // If sliver is pinned, the scroll offset is sticked to the edge.
+    final double clampedScrollOffset = clampDouble(
+      constraints.scrollOffset,
+      0.0,
+      geometry.scrollExtent - geometry.maxScrollObstructionExtent,
+    );
+
+    final AxisDirection axisDirection = applyGrowthDirectionToAxisDirection(
+      constraints.axisDirection,
+      constraints.growthDirection,
+    );
+
+    final Rect rect = switch (constraints.axis) {
+      Axis.horizontal => Rect.fromLTWH(
+        -clampedScrollOffset,
+        0.0,
+        maxPaintExtent,
+        constraints.crossAxisExtent,
+      ),
+      Axis.vertical => Rect.fromLTWH(
+        0.0,
+        -clampedScrollOffset,
+        constraints.crossAxisExtent,
+        maxPaintExtent,
+      ),
+    };
+
+    return switch (axisDirection) {
+      AxisDirection.right || AxisDirection.down => rect,
+      AxisDirection.left => Rect.fromLTRB(
+        paintExtent - rect.right,
+        rect.top,
+        paintExtent - rect.left,
+        rect.bottom,
+      ),
+      AxisDirection.up => Rect.fromLTRB(
+        rect.left,
+        paintExtent - rect.bottom,
+        rect.right,
+        paintExtent - rect.top,
+      ),
+    };
+  }
+
   void _debugDrawArrow(
     Canvas canvas,
     Paint paint,
