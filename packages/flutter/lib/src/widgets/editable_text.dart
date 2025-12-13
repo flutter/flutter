@@ -3425,7 +3425,11 @@ class EditableTextState extends State<EditableText>
     final bool canPaste = widget.selectionControls is TextSelectionHandleControls
         ? pasteEnabled
         : widget.selectionControls?.canPaste(this) ?? false;
-    if (widget.selectionEnabled && pasteEnabled && canPaste) {
+    // Avoid circular calls: only update when clipboard status is unknown to prevent infinite loops
+    if (widget.selectionEnabled &&
+        pasteEnabled &&
+        canPaste &&
+        clipboardStatus.value == ClipboardStatus.unknown) {
       clipboardStatus.update();
     }
   }
