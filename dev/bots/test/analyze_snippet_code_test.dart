@@ -10,6 +10,7 @@ import 'dart:io';
 import 'common.dart';
 
 const List<String> expectedMainErrors = <String>[
+  'dev/bots/test/analyze-snippet-code-test-input/custom_imports_broken.dart:9: Unused "Examples can assume:" import. This can be cleaned up.',
   'dev/bots/test/analyze-snippet-code-test-input/custom_imports_broken.dart:19:11: (statement) (undefined_identifier)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:30:5: (expression) (unnecessary_new)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:103:5: (statement) (always_specify_types)',
@@ -28,6 +29,10 @@ const List<String> expectedMainErrors = <String>[
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:165: Found "```" in code but it did not match RegExp: pattern=^ */// *```dart\$ flags= so something is wrong. Line was: "/// ```none"',
   'dev/bots/test/analyze-snippet-code-test-input/short_but_still_broken.dart:9:12: (statement) (invalid_assignment)',
   'dev/bots/test/analyze-snippet-code-test-input/short_but_still_broken.dart:18:4: Empty ```dart block in snippet code.',
+  'dev/bots/test/analyze-snippet-code-test-input/unused_examples_can_assume.dart:11: Unused "Examples can assume:" declaration. This can be cleaned up.',
+  'dev/bots/test/analyze-snippet-code-test-input/unused_examples_can_assume.dart:12: Unused "Examples can assume:" declaration. This can be cleaned up.',
+  'dev/bots/test/analyze-snippet-code-test-input/unused_imports_examples_can_assume.dart:9: Unused "Examples can assume:" import. This can be cleaned up.',
+  'dev/bots/test/analyze-snippet-code-test-input/unused_imports_examples_can_assume.dart:10: Unused "Examples can assume:" import. This can be cleaned up.',
 ];
 
 const List<String> expectedUiErrors = <String>[
@@ -74,7 +79,7 @@ void main() {
       final List<String> stderrNoDescriptions = stderrLines.map(removeLintDescriptions).toList();
       expect(stderrNoDescriptions, <String>[
         ...expectedMainErrors,
-        'Found 18 snippet code errors.',
+        'Found 23 snippet code errors.',
         'See the documentation at the top of dev/bots/analyze_snippet_code.dart for details.',
         '', // because we end with a newline, split gives us an extra blank line
       ]);
@@ -104,7 +109,7 @@ void main() {
       expect(stderrNoDescriptions, <String>[
         ...expectedUiErrors,
         ...expectedMainErrors,
-        'Found 23 snippet code errors.',
+        'Found 28 snippet code errors.',
         'See the documentation at the top of dev/bots/analyze_snippet_code.dart for details.',
         '', // because we end with a newline, split gives us an extra blank line
       ]);
@@ -113,4 +118,61 @@ void main() {
     // TODO(scheglov): Restore after landing Dart SDK changes, https://github.com/flutter/flutter/issues/154413
     skip: true,
   );
+
+  test('Detects unused "Examples can assume:" declarations in snippet code', () {
+    // The unused_examples_can_assume.dart file is in the test input directory
+    // and will be analyzed by the smoke test. This test verifies that the
+    // new feature correctly identifies unused preamble declarations.
+    final ProcessResult process = Process.runSync('../../bin/cache/dart-sdk/bin/dart', <String>[
+      '--enable-asserts',
+      'analyze_snippet_code.dart',
+      '--no-include-dart-ui',
+      'test/analyze-snippet-code-test-input',
+    ]);
+    expect(process.stdout, isEmpty);
+    final output = process.stderr.toString();
+    // Should detect that unusedVariable and neverUsed are not referenced
+    expect(output, contains('unused_examples_can_assume.dart'));
+    expect(output, contains('Unused "Examples can assume:" declaration'));
+    expect(process.exitCode, 1);
+  });
+
+  test('Detects unused imports in "Examples can assume:" sections', () {
+    // The unused_imports_examples_can_assume.dart file is in the test input directory
+    // and tests that imports declared in "Examples can assume:" but not used
+    // in any snippet are correctly flagged.
+    final ProcessResult process = Process.runSync('../../bin/cache/dart-sdk/bin/dart', <String>[
+      '--enable-asserts',
+      'analyze_snippet_code.dart',
+      '--no-include-dart-ui',
+      'test/analyze-snippet-code-test-input',
+    ]);
+    expect(process.stdout, isEmpty);
+    final output = process.stderr.toString();
+    // Should detect that the imports are not used
+    expect(output, contains('unused_imports_examples_can_assume.dart'));
+    expect(output, contains('Unused "Examples can assume:" import'));
+    expect(process.exitCode, 1);
+  });
+
+  test('Does not report false positives for preamble used in docstring examples', () {
+    // The used_in_docstring_example.dart file tests the fix for false positives
+    // where preamble declarations are used in docstring examples (not in extracted
+    // {@tool snippet} blocks). Previously, the tool would incorrectly flag these
+    // as unused. This test ensures that preamble items are correctly recognized
+    // as "used" when they appear anywhere in the file.
+    final ProcessResult process = Process.runSync('../../bin/cache/dart-sdk/bin/dart', <String>[
+      '--enable-asserts',
+      'analyze_snippet_code.dart',
+      '--no-include-dart-ui',
+      'test/analyze-snippet-code-test-input/used_in_docstring_example.dart',
+    ]);
+    expect(process.stdout, isEmpty);
+    final output = process.stderr.toString();
+    // Should NOT report the preamble variables as unused
+    expect(output, isNot(contains('Unused "Examples can assume:" declaration')));
+    // The file itself is valid Dart code with no other errors
+    expect(output, isNot(contains('snippet code error')));
+    expect(process.exitCode, 0);
+  });
 }

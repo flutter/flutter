@@ -625,6 +625,8 @@ class _SnippetChecker {
         final ignorePreambleLinesOnly = <_Line>[];
         final preambleLines = <_Line>[];
         final customImports = <_Line>[];
+        final preambleLineNumbers = <_Line>[]; // Track line numbers of all preamble declarations
+        final usedPreambleLineNumbers = <int>{}; // Track which preamble lines are used
         var inExamplesCanAssumePreamble =
             false; // Whether or not we're in the file-wide preamble section ("Examples can assume").
         var inToolSection = false; // Whether or not we're in a code snippet
@@ -650,8 +652,10 @@ class _SnippetChecker {
               final newLine = _Line(line: lineNumber, indent: 3, code: line.substring(3));
               if (newLine.code.startsWith('import ')) {
                 customImports.add(newLine);
+                preambleLineNumbers.add(newLine); // Track the line number for later checking
               } else {
                 preambleLines.add(newLine);
+                preambleLineNumbers.add(newLine); // Track the line number for later checking
               }
               if (line.startsWith('// // ignore_for_file: ')) {
                 ignorePreambleLinesOnly.add(newLine);
@@ -693,6 +697,8 @@ class _SnippetChecker {
                 lastExample,
                 customImports,
               );
+              final String snippetCode = _extractUserCode(snippet);
+              _trackPreambleUsage(snippetCode, preambleLineNumbers, usedPreambleLineNumbers);
               final String path = _writeSnippetFile(snippet).path;
               assert(!snippetMap.containsKey(path));
               snippetMap[path] = snippet;
@@ -762,6 +768,24 @@ class _SnippetChecker {
                 );
               }
               inExamplesCanAssumePreamble = true;
+            }
+          }
+        }
+        // Check for unused preamble declarations and imports
+        // Also check usage in the entire file content (docstrings and examples)
+        if (preambleLineNumbers.isNotEmpty) {
+          final String fileContent = fileLines.join('\n');
+          _trackPreambleUsage(fileContent, preambleLineNumbers, usedPreambleLineNumbers);
+          for (final preambleLine in preambleLineNumbers) {
+            if (!usedPreambleLineNumbers.contains(preambleLine.line)) {
+              final errorType = preambleLine.code.startsWith('import ') ? 'import' : 'declaration';
+              errors.add(
+                _SnippetCheckerException(
+                  'Unused "Examples can assume:" $errorType. This can be cleaned up.',
+                  file: relativeFilePath,
+                  line: preambleLine.line,
+                ),
+              );
             }
           }
         }
@@ -989,6 +1013,70 @@ class _SnippetChecker {
         'expression',
         filename,
       );
+    }
+  }
+
+  /// Extracts user-written code from a snippet, excluding generated headers and preamble.
+  String _extractUserCode(_SnippetFile snippet) {
+    var userCodeStart = 0;
+    for (var i = 0; i < snippet.code.length; i++) {
+      if (snippet.code[i].code.startsWith('// From: ')) {
+        userCodeStart = i + 1;
+        break;
+      }
+    }
+    return userCodeStart < snippet.code.length
+        ? snippet.code.sublist(userCodeStart).map((line) => line.code).join('\n')
+        : '';
+  }
+
+  /// Tracks which preamble declarations are used in the snippet code.
+  void _trackPreambleUsage(
+    String snippetCode,
+    List<_Line> preambleLines,
+    Set<int> usedLineNumbers,
+  ) {
+    final identifierPattern = RegExp(
+      r'(?:final|late|const|static|var)?\s+(?:[\w<>.,\s]*?\s+)*(\w+)(?:\s*[=;:]|$)',
+    );
+    // Pattern to extract import prefix: import 'something' as prefix;
+    final importPrefixPattern = RegExp(
+      r'import\s+['
+      "'"
+      r'"].*?['
+      "'"
+      r'"]\s+as\s+(\w+);?',
+    );
+
+    for (final preambleLine in preambleLines) {
+      var isUsed = false;
+
+      if (preambleLine.code.startsWith('import ')) {
+        // For imports with a prefix (e.g., import 'dart:math' as math;), check if prefix is used
+        final RegExpMatch? prefixMatch = importPrefixPattern.firstMatch(preambleLine.code);
+        if (prefixMatch != null) {
+          final String prefix = prefixMatch.group(1)!;
+          // Check if the prefix is used (e.g., "math.")
+          isUsed = snippetCode.contains('$prefix.');
+        } else {
+          // For imports without a prefix, we'd need to know what the library exports
+          // to check usage accurately. For now, we'll mark them as unused since we can't
+          // easily verify their usage without extensive library analysis.
+          isUsed = false;
+        }
+      } else {
+        // Extract identifier and check for word-boundary match
+        final RegExpMatch? match = identifierPattern.firstMatch(preambleLine.code);
+        if (match != null) {
+          final String identifier = match.group(1)!;
+          final wordBoundaryPattern = RegExp(r'\b' + RegExp.escape(identifier) + r'\b');
+          isUsed = snippetCode.isNotEmpty && wordBoundaryPattern.hasMatch(snippetCode);
+        }
+      }
+
+      if (isUsed) {
+        usedLineNumbers.add(preambleLine.line);
+      }
     }
   }
 
