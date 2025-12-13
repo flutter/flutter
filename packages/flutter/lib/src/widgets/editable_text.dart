@@ -2486,6 +2486,9 @@ class EditableTextState extends State<EditableText>
         TextInputClient
     implements AutofillClient {
   Timer? _cursorTimer;
+  Timer? _arrowKeyRepeatTimer;
+  DirectionalCaretMovementIntent? _arrowKeyRepeatIntent;
+  DateTime? _lastArrowKeyInvokeTime;
   AnimationController get _cursorBlinkOpacityController {
     return _backingCursorBlinkOpacityController ??= AnimationController(vsync: this)
       ..addListener(_onCursorColorTick);
@@ -3450,6 +3453,10 @@ class EditableTextState extends State<EditableText>
     assert(!_hasInputConnection);
     _cursorTimer?.cancel();
     _cursorTimer = null;
+    _arrowKeyRepeatTimer?.cancel();
+    _arrowKeyRepeatTimer = null;
+    _arrowKeyRepeatIntent = null;
+    _lastArrowKeyInvokeTime = null;
     _backingCursorBlinkOpacityController?.dispose();
     _backingCursorBlinkOpacityController = null;
     _selectionOverlay?.dispose();
@@ -5495,6 +5502,145 @@ class EditableTextState extends State<EditableText>
   late final Action<UpdateSelectionIntent> _updateSelectionAction =
       CallbackAction<UpdateSelectionIntent>(onInvoke: _updateSelection);
 
+  /// Starts or continues the arrow key repeat timer.
+  void _startArrowKeyRepeat(DirectionalCaretMovementIntent intent) {
+    final now = DateTime.now();
+    final bool isSameIntent = _arrowKeyRepeatIntent?.runtimeType == intent.runtimeType &&
+        _arrowKeyRepeatIntent?.forward == intent.forward &&
+        _arrowKeyRepeatIntent?.collapseSelection == intent.collapseSelection;
+
+    if (isSameIntent && _lastArrowKeyInvokeTime != null) {
+      final Duration timeSinceLastInvoke = now.difference(_lastArrowKeyInvokeTime!);
+      // If the last invoke was recent (within 500ms), start/continue the repeat timer
+      if (timeSinceLastInvoke.inMilliseconds < 500) {
+        _arrowKeyRepeatIntent = intent;
+        _lastArrowKeyInvokeTime = now;
+
+        // Cancel existing timer if any
+        _arrowKeyRepeatTimer?.cancel();
+
+        // Start a new timer that will repeat the movement
+        _arrowKeyRepeatTimer = Timer.periodic(const Duration(milliseconds: 50), (Timer timer) {
+          if (!mounted || !_value.selection.isValid) {
+            timer.cancel();
+            _arrowKeyRepeatTimer = null;
+            _arrowKeyRepeatIntent = null;
+            _lastArrowKeyInvokeTime = null;
+            return;
+          }
+          // Check if arrow key is still pressed using HardwareKeyboard
+          final bool isArrowKeyPressed = intent.forward
+              ? HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.arrowRight)
+              : HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.arrowLeft);
+          if (!isArrowKeyPressed) {
+            timer.cancel();
+            _arrowKeyRepeatTimer = null;
+            _arrowKeyRepeatIntent = null;
+            _lastArrowKeyInvokeTime = null;
+            return;
+          }
+          // Perform cursor movement
+          final TextSelection selection = _value.selection;
+          if (!selection.isValid) {
+            timer.cancel();
+            _arrowKeyRepeatTimer = null;
+            _arrowKeyRepeatIntent = null;
+            _lastArrowKeyInvokeTime = null;
+            return;
+          }
+          final TextSelection newSelection = _calculateNewSelection(selection, intent);
+          _updateSelection(UpdateSelectionIntent(
+            _value,
+            newSelection,
+            SelectionChangedCause.keyboard,
+          ));
+        });
+        return;
+      }
+    }
+
+    // Reset timer if intent changed or too much time passed
+    _arrowKeyRepeatTimer?.cancel();
+    _arrowKeyRepeatTimer = null;
+    _arrowKeyRepeatIntent = intent;
+    _lastArrowKeyInvokeTime = now;
+
+    // Start initial delay before repeating
+    _arrowKeyRepeatTimer = Timer(const Duration(milliseconds: 500), () {
+      if (!mounted || !_value.selection.isValid) {
+        _arrowKeyRepeatTimer?.cancel();
+        _arrowKeyRepeatTimer = null;
+        _arrowKeyRepeatIntent = null;
+        _lastArrowKeyInvokeTime = null;
+        return;
+      }
+      // Start periodic timer after initial delay
+      _arrowKeyRepeatTimer = Timer.periodic(const Duration(milliseconds: 50), (Timer timer) {
+        if (!mounted || !_value.selection.isValid) {
+          timer.cancel();
+          _arrowKeyRepeatTimer = null;
+          _arrowKeyRepeatIntent = null;
+          _lastArrowKeyInvokeTime = null;
+          return;
+        }
+        // Check if arrow key is still pressed using HardwareKeyboard
+        final bool isArrowKeyPressed = intent.forward
+            ? HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.arrowRight)
+            : HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.arrowLeft);
+        if (!isArrowKeyPressed) {
+          timer.cancel();
+          _arrowKeyRepeatTimer = null;
+          _arrowKeyRepeatIntent = null;
+          _lastArrowKeyInvokeTime = null;
+          return;
+        }
+        final TextSelection selection = _value.selection;
+        if (!selection.isValid) {
+          timer.cancel();
+          _arrowKeyRepeatTimer = null;
+          _arrowKeyRepeatIntent = null;
+          _lastArrowKeyInvokeTime = null;
+          return;
+        }
+        final TextSelection newSelection = _calculateNewSelection(selection, intent);
+        _updateSelection(UpdateSelectionIntent(
+          _value,
+          newSelection,
+          SelectionChangedCause.keyboard,
+        ));
+      });
+    });
+  }
+
+  /// Stops the arrow key repeat timer.
+  void _stopArrowKeyRepeat() {
+    _arrowKeyRepeatTimer?.cancel();
+    _arrowKeyRepeatTimer = null;
+    _arrowKeyRepeatIntent = null;
+    _lastArrowKeyInvokeTime = null;
+  }
+
+  /// Calculates the new selection based on the intent.
+  TextSelection _calculateNewSelection(TextSelection selection, DirectionalCaretMovementIntent intent) {
+    final bool collapseSelection = intent.collapseSelection || !widget.selectionEnabled;
+    final TextBoundary boundary = _characterBoundary();
+    final _ApplyTextBoundary applyBoundary = _moveBeyondTextBoundary;
+
+    final TextPosition extent = selection.extent;
+    final TextPosition newExtent = applyBoundary(
+      extent,
+      intent.forward,
+      boundary,
+    );
+    if (collapseSelection) {
+      return TextSelection.fromPosition(newExtent);
+    }
+    if (newExtent.offset == selection.baseOffset) {
+      return TextSelection.fromPosition(newExtent);
+    }
+    return selection.extendTo(newExtent);
+  }
+
   late final _UpdateTextSelectionVerticallyAction<DirectionalCaretMovementIntent>
   _verticalSelectionUpdateAction =
       _UpdateTextSelectionVerticallyAction<DirectionalCaretMovementIntent>(this);
@@ -6503,14 +6649,13 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent>
 
     final bool collapseSelection = intent.collapseSelection || !state.widget.selectionEnabled;
     if (!selection.isCollapsed && !ignoreNonCollapsedSelection && collapseSelection) {
-      return Actions.invoke(
-        context!,
-        UpdateSelectionIntent(
-          state._value,
-          TextSelection.collapsed(offset: intent.forward ? selection.end : selection.start),
-          SelectionChangedCause.keyboard,
-        ),
-      );
+      state._stopArrowKeyRepeat();
+      state._updateSelection(UpdateSelectionIntent(
+        state._value,
+        TextSelection.collapsed(offset: intent.forward ? selection.end : selection.start),
+        SelectionChangedCause.keyboard,
+      ));
+      return null;
     }
 
     TextPosition extent = selection.extent;
@@ -6549,10 +6694,18 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent>
     final newRange = shouldCollapseToBase
         ? TextSelection.fromPosition(selection.base)
         : newSelection;
-    return Actions.invoke(
-      context!,
-      UpdateSelectionIntent(state._value, newRange, SelectionChangedCause.keyboard),
-    );
+
+    // Perform the cursor movement directly
+    state._updateSelection(UpdateSelectionIntent(
+      state._value,
+      newRange,
+      SelectionChangedCause.keyboard,
+    ));
+
+    // Start or continue key repeat timer for arrow keys
+    state._startArrowKeyRepeat(intent);
+
+    return null;
   }
 
   @override

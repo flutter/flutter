@@ -1046,6 +1046,47 @@ void main() {
             expect(controller.selection, const TextSelection.collapsed(offset: 19));
           }, variant: TargetPlatformVariant.all());
 
+          testWidgets('arrow key repeat movement', (WidgetTester tester) async {
+            controller.text = testText;
+            controller.selection = const TextSelection.collapsed(offset: 20);
+            await tester.pumpWidget(buildEditableText());
+
+            // Press arrow key down
+            await tester.sendKeyDownEvent(trigger);
+            await tester.pump();
+
+            // Initial movement should happen immediately
+            expect(controller.selection, const TextSelection.collapsed(offset: 19));
+
+            // Wait for initial delay (500ms) and then some repeat intervals (50ms each)
+            // Timeline:
+            // - 0ms: initial movement (19)
+            // - 500ms: periodic timer starts
+            // - 550ms: first repeat (18)
+            // - 600ms: second repeat (17)
+            // - 650ms: third repeat (16)
+            await tester.pump(const Duration(milliseconds: 600));
+            // After 600ms, should have moved at least 2 times: 19 -> 18 -> 17
+            expect(controller.selection.baseOffset, lessThanOrEqualTo(17));
+            final int positionAfter600ms = controller.selection.baseOffset;
+
+            // Continue holding and wait for more repeats
+            await tester.pump(const Duration(milliseconds: 100));
+            // Should have moved further (at least 1 more repeat)
+            expect(controller.selection.baseOffset, lessThan(positionAfter600ms));
+
+            // Release the key
+            await tester.sendKeyUpEvent(trigger);
+            await tester.pump();
+
+            final int positionAfterRelease = controller.selection.baseOffset;
+
+            // Wait a bit to ensure timer stops
+            await tester.pump(const Duration(milliseconds: 200));
+            // Cursor should not move after key release
+            expect(controller.selection.baseOffset, positionAfterRelease);
+          }, variant: TargetPlatformVariant.all());
+
           testWidgets('word modifier + arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
@@ -1097,6 +1138,47 @@ void main() {
             await tester.pump();
 
             expect(controller.selection, const TextSelection.collapsed(offset: 21));
+          }, variant: TargetPlatformVariant.all());
+
+          testWidgets('arrow key repeat movement', (WidgetTester tester) async {
+            controller.text = testText;
+            controller.selection = const TextSelection.collapsed(offset: 20);
+            await tester.pumpWidget(buildEditableText());
+
+            // Press arrow key down
+            await tester.sendKeyDownEvent(trigger);
+            await tester.pump();
+
+            // Initial movement should happen immediately
+            expect(controller.selection, const TextSelection.collapsed(offset: 21));
+
+            // Wait for initial delay (500ms) and then some repeat intervals (50ms each)
+            // Timeline:
+            // - 0ms: initial movement (21)
+            // - 500ms: periodic timer starts
+            // - 550ms: first repeat (22)
+            // - 600ms: second repeat (23)
+            // - 650ms: third repeat (24)
+            await tester.pump(const Duration(milliseconds: 600));
+            // After 600ms, should have moved at least 2 times: 21 -> 22 -> 23
+            expect(controller.selection.baseOffset, greaterThanOrEqualTo(23));
+            final int positionAfter600ms = controller.selection.baseOffset;
+
+            // Continue holding and wait for more repeats
+            await tester.pump(const Duration(milliseconds: 100));
+            // Should have moved further (at least 1 more repeat)
+            expect(controller.selection.baseOffset, greaterThan(positionAfter600ms));
+
+            // Release the key
+            await tester.sendKeyUpEvent(trigger);
+            await tester.pump();
+
+            final int positionAfterRelease = controller.selection.baseOffset;
+
+            // Wait a bit to ensure timer stops
+            await tester.pump(const Duration(milliseconds: 200));
+            // Cursor should not move after key release
+            expect(controller.selection.baseOffset, positionAfterRelease);
           }, variant: TargetPlatformVariant.all());
 
           testWidgets('word modifier + arrow key movement', (WidgetTester tester) async {
