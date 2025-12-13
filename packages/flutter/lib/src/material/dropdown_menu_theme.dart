@@ -19,7 +19,7 @@ import 'theme.dart';
 /// Overrides the default values of visual properties for descendant [DropdownMenu] widgets.
 ///
 /// Descendant widgets obtain the current [DropdownMenuThemeData] object with
-/// [DropdownMenuTheme.of]. Instances of [DropdownMenuTheme] can
+/// [DropdownMenuTheme.of]. Instances of [DropdownMenuThemeData] can
 /// be customized with [DropdownMenuThemeData.copyWith].
 ///
 /// Typically a [DropdownMenuTheme] is specified as part of the overall [Theme] with

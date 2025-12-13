@@ -30,7 +30,7 @@ import 'theme.dart';
 /// [DatePickerDialog] widgets.
 ///
 /// Descendant widgets obtain the current [DatePickerThemeData] object with
-/// [DatePickerTheme.of]. Instances of [DatePickerTheme] can
+/// [DatePickerTheme.of]. Instances of [DatePickerThemeData] can
 /// be customized with [DatePickerThemeData.copyWith].
 ///
 /// Typically a [DatePickerTheme] is specified as part of the overall
