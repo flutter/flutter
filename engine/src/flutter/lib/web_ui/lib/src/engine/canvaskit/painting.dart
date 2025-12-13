@@ -388,7 +388,11 @@ class CkFragmentShader implements ui.FragmentShader, CkShader {
   }
 
   @override
-  void setImageSampler(int index, ui.Image image) {
+  void setImageSampler(
+    int index,
+    ui.Image image, {
+    ui.FilterQuality filterQuality = ui.FilterQuality.none,
+  }) {
     assert(!_debugDisposed, 'FragmentShader has been disposed of.');
     final sampler = ui.ImageShader(
       image,
@@ -396,7 +400,7 @@ class CkFragmentShader implements ui.FragmentShader, CkShader {
       ui.TileMode.clamp,
       toMatrix64(Matrix4.identity().storage),
     );
-    samplers[index] = (sampler as CkShader).getSkShader(ui.FilterQuality.none);
+    samplers[index] = (sampler as CkShader).getSkShader(filterQuality);
     setFloat(lastFloatIndex + 2 * index, (sampler as CkImageShader).imageWidth.toDouble());
     setFloat(lastFloatIndex + 2 * index + 1, sampler.imageHeight.toDouble());
   }
