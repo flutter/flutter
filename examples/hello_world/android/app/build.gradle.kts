@@ -11,7 +11,6 @@ android {
     namespace = "io.flutter.examples.hello_world"
     compileSdk = flutter.compileSdkVersion
 
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
