@@ -1663,9 +1663,9 @@ class _CupertinoMenuDivider extends StatelessWidget {
     final double displacement = 1 / pixelRatio;
     return CustomPaint(
       size: Size(double.infinity, displacement),
-      painter: _AliasedLinePainter(
+      painter: _CupertinoDividerPainter(
+        color: CupertinoDynamicColor.resolve(color, context),
         overlayColor: CupertinoDynamicColor.resolve(overlayColor, context),
-        border: BorderSide(width: 0.0, color: CupertinoDynamicColor.resolve(color, context)),
         // Only anti-alias on devices with a low pixel density.
         antiAlias: pixelRatio < 1.0,
       ),
@@ -1675,40 +1675,44 @@ class _CupertinoMenuDivider extends StatelessWidget {
 
 // Draws an aliased line that approximates the appearance of an iOS 18.5 menu
 // divider using blend modes.
-class _AliasedLinePainter extends CustomPainter {
-  const _AliasedLinePainter({
-    required this.border,
+class _CupertinoDividerPainter extends CustomPainter {
+  const _CupertinoDividerPainter({
+    required this.color,
     required this.overlayColor,
     this.antiAlias = false,
   });
 
-  final BorderSide border;
+  final Color color;
   final Color overlayColor;
   final bool antiAlias;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Offset p1 = size.bottomLeft(Offset.zero);
-    final Offset p2 = size.bottomRight(Offset.zero);
+    final Offset p1 = size.centerLeft(Offset.zero);
+    final Offset p2 = size.centerRight(Offset.zero);
 
     // BlendMode.overlay is not supported on the web.
     if (!kIsWeb) {
-      final Paint overlayPainter = border.toPaint()
+      final Paint overlayPainter = Paint()
+        ..style = PaintingStyle.stroke
         ..color = overlayColor
         ..isAntiAlias = antiAlias
         ..blendMode = BlendMode.overlay;
       canvas.drawLine(p1, p2, overlayPainter);
     }
 
-    final Paint colorPainter = border.toPaint()..isAntiAlias = antiAlias;
+    final Paint colorPainter = Paint()
+      ..style = PaintingStyle.stroke
+      ..color = color
+      ..isAntiAlias = antiAlias;
     canvas.drawLine(p1, p2, colorPainter);
   }
 
   @override
-  bool shouldRepaint(_AliasedLinePainter oldDelegate) {
-    return border != oldDelegate.border ||
-        antiAlias != oldDelegate.antiAlias ||
-        overlayColor != oldDelegate.overlayColor;
+  bool shouldRepaint(_CupertinoDividerPainter oldDelegate) {
+    return color != oldDelegate.color ||
+        overlayColor != oldDelegate.overlayColor ||
+        antiAlias != oldDelegate.antiAlias;
   }
 }
 
