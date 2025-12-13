@@ -485,7 +485,15 @@ class CupertinoMenuAnchor extends StatefulWidget {
   /// {@macro flutter.widgets.RawMenuAnchor.useRootOverlay}
   final bool useRootOverlay;
 
-  /// The padding to subtract from the overlay when positioning the menu.
+  /// The padding inside the overlay between its boundary and the menu content.
+  ///
+  /// If the menu width is larger than the available space in the overlay minus
+  /// the [overlayPadding] and [constrainCrossAxis] is false, the menu will be
+  /// positioned against the starting edge (left in LTR, right in RTL) of the
+  /// overlay. If [constrainCrossAxis] is true, the menu width will shrink to
+  /// fit within the overlay bounds minus the [overlayPadding].
+  ///
+  /// Defaults to EdgeInsets.all(8).
   final EdgeInsetsGeometry overlayPadding;
 
   /// A list of menu items to display in the menu.
