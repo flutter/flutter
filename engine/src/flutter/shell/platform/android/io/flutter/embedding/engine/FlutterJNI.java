@@ -31,6 +31,7 @@ import io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager;
 import io.flutter.embedding.engine.image.FlutterImageDecoder;
 import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorsStack;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
+import io.flutter.embedding.engine.renderer.FlutterUiResizeListener;
 import io.flutter.embedding.engine.renderer.SurfaceTextureWrapper;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.plugin.common.StandardMessageCodec;
@@ -389,6 +390,9 @@ public class FlutterJNI {
   private final Set<FlutterUiDisplayListener> flutterUiDisplayListeners =
       new CopyOnWriteArraySet<>();
 
+  @NonNull
+  private final Set<FlutterUiResizeListener> flutterUiResizeListeners = new CopyOnWriteArraySet<>();
+
   @NonNull private final Looper mainLooper; // cached to avoid synchronization on repeat access.
 
   // ------ Start Native Attach/Detach Support ----
@@ -535,6 +539,26 @@ public class FlutterJNI {
     flutterUiDisplayListeners.remove(listener);
   }
 
+  /**
+   * Adds a {@link FlutterUiResizeListener}, which receives a callback when Flutter's engine
+   * notifies {@code FlutterJNI} that Flutter is has resized the surface based on the content size.
+   */
+  @UiThread
+  public void addResizingFlutterUiListener(@NonNull FlutterUiResizeListener listener) {
+    ensureRunningOnMainThread();
+    flutterUiResizeListeners.add(listener);
+  }
+
+  /**
+   * Removes a {@link FlutterUiResizeListener} that was added with {@link
+   * #addResizingFlutterUiListener(FlutterUiResizeListener)}.
+   */
+  @UiThread
+  public void removeResizingFlutterUiListener(@NonNull FlutterUiResizeListener listener) {
+    ensureRunningOnMainThread();
+    flutterUiResizeListeners.remove(listener);
+  }
+
   public static native void nativeImageHeaderCallback(
       long imageGeneratorPointer, int width, int height);
 
@@ -674,9 +698,14 @@ public class FlutterJNI {
       int physicalTouchSlop,
       int[] displayFeaturesBounds,
       int[] displayFeaturesType,
-      int[] displayFeaturesState) {
+      int[] displayFeaturesState,
+      int minWidth,
+      int maxWidth,
+      int minHeight,
+      int maxHeight) {
     ensureRunningOnMainThread();
     ensureAttachedToNative();
+    Log.d(TAG, "Sending viewport metrics to the engine.");
     nativeSetViewportMetrics(
         nativeShellHolderId,
         devicePixelRatio,
@@ -697,7 +726,11 @@ public class FlutterJNI {
         physicalTouchSlop,
         displayFeaturesBounds,
         displayFeaturesType,
-        displayFeaturesState);
+        displayFeaturesState,
+        minWidth,
+        maxWidth,
+        minHeight,
+        maxHeight);
   }
 
   private native void nativeSetViewportMetrics(
@@ -720,7 +753,11 @@ public class FlutterJNI {
       int physicalTouchSlop,
       int[] displayFeaturesBounds,
       int[] displayFeaturesType,
-      int[] displayFeaturesState);
+      int[] displayFeaturesState,
+      int physicalWidthMin,
+      int physicalWidthMax,
+      int physicalHeightMin,
+      int physicalHeightMax);
 
   // ----- End Render Surface Support -----
 
@@ -1259,6 +1296,14 @@ public class FlutterJNI {
           "platformViewsController must be set before attempting to destroy an overlay surface");
     }
     platformViewsController.destroyOverlaySurfaces();
+  }
+
+  // This will get called on the raster thread.
+  @SuppressWarnings("unused")
+  public void maybeResizeSurfaceView(int width, int height) {
+    for (FlutterUiResizeListener listener : flutterUiResizeListeners) {
+      listener.resizeEngineView(width, height);
+    }
   }
   // ----- End Engine Lifecycle Support ----
 
