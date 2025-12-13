@@ -3423,9 +3423,15 @@ class EditableTextState extends State<EditableText>
       _startOrStopCursorTimerIfNeeded();
     }
     final bool canPaste = widget.selectionControls is TextSelectionHandleControls
-        ? pasteEnabled
+        ? !widget.readOnly
         : widget.selectionControls?.canPaste(this) ?? false;
-    if (widget.selectionEnabled && pasteEnabled && canPaste) {
+    // Avoid circular calls: for TextSelectionHandleControls, check if not read-only instead of relying on current clipboard status
+    if (widget.selectionEnabled &&
+        (widget.selectionControls is TextSelectionHandleControls
+            ? !widget.readOnly
+            : pasteEnabled) &&
+        canPaste &&
+        clipboardStatus.value == ClipboardStatus.unknown) {
       clipboardStatus.update();
     }
   }
