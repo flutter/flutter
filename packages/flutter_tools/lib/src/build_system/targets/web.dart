@@ -485,13 +485,16 @@ class Dart2WasmTarget extends Dart2WebTarget {
         for (final uri in uris) {
           final String packageName = uri.pathSegments.first;
           final String? hostedPackageVersion = hostedPackages[packageName];
-          if (hostedPackageVersion != null) {
-            hostedPackageFindings.add('$packageName:$hostedPackageVersion');
-          } else if (privatePackages.contains(packageName)) {
-            privatePackage = true;
-          } else {
-            hostApp = true;
+          if (uri.scheme == 'package') {
+            if (hostedPackageVersion != null) {
+              hostedPackageFindings.add('$packageName:$hostedPackageVersion');
+              continue;
+            } else if (privatePackages.contains(packageName)) {
+              privatePackage = true;
+              continue;
+            }
           }
+          hostApp = true;
         }
         final String? hpHint = switch ((hostApp, privatePackage)) {
           (true, true) => '-hp',
