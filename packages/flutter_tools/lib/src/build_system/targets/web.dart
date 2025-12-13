@@ -458,7 +458,10 @@ class Dart2WasmTarget extends Dart2WebTarget {
           Event.flutterWasmDryRunPackage(
             result: result,
             exitCode: exitCode,
-            findingsInfo: {'error': 'packageConfigNotLoaded'},
+            findingsInfo: {
+              'error': 'packageConfigNotLoaded',
+              'findings': importUriToErrorCode.keys.join(','),
+            },
           ),
         );
         return;
