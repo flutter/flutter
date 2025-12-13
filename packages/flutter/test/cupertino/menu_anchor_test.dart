@@ -7305,7 +7305,7 @@ class _DebugCupertinoMenuEntryMixin extends StatelessWidget implements Cupertino
   }
 
   @override
-  final bool allowTrailingSeparator;
+  final bool isDivider;
 
   @override
   final bool allowLeadingSeparator;

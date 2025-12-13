@@ -283,19 +283,12 @@ abstract interface class CupertinoMenuEntry {
   /// of all menu items.
   bool hasLeading(BuildContext context);
 
-  /// Whether a separator can be drawn above this menu item.
+  /// Whether this menu item is a divider.
   ///
-  /// When [allowLeadingSeparator] is true, a separator will be drawn if the
-  /// menu item immediately above this item has mixed in
-  /// [CupertinoMenuEntry] and has set [allowTrailingSeparator] to true.
-  bool get allowLeadingSeparator;
-
-  /// Whether a separator can be drawn below this menu item.
-  ///
-  /// When [allowTrailingSeparator] is true, a separator will be drawn if the
+  /// When [isDivider] is false, a separator will be drawn if the
   /// menu item immediately below this item has mixed in
-  /// [CupertinoMenuEntry] and has set [allowLeadingSeparator] to true.
-  bool get allowTrailingSeparator;
+  /// [CupertinoMenuEntry] and has set [isDivider] to false.
+  bool get isDivider;
 }
 
 class _AnchorScope extends InheritedWidget {
@@ -958,13 +951,13 @@ class _MenuOverlayState extends State<_MenuOverlay>
         break;
       }
 
-      if (child case CupertinoMenuEntry(allowTrailingSeparator: false)) {
+      if (child case CupertinoMenuEntry(isDivider: true)) {
         child = widget.children[i + 1];
         continue;
       }
 
       child = widget.children[i + 1];
-      if (child case CupertinoMenuEntry(allowLeadingSeparator: false)) {
+      if (child case CupertinoMenuEntry(isDivider: true)) {
         continue;
       }
 
@@ -1921,7 +1914,7 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
   bool get allowLeadingSeparator => true;
 
   @override
-  bool get allowTrailingSeparator => true;
+  bool get isDivider => true;
 
   /// The default mouse cursor for a [CupertinoMenuItem].
   static final WidgetStateProperty<MouseCursor> _defaultCursor =
@@ -2440,10 +2433,7 @@ class CupertinoLargeMenuDivider extends StatelessWidget implements CupertinoMenu
   final Color color;
 
   @override
-  bool get allowTrailingSeparator => false;
-
-  @override
-  bool get allowLeadingSeparator => false;
+  bool get isDivider => true;
 
   @override
   bool hasLeading(BuildContext context) => false;
