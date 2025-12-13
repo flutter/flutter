@@ -441,7 +441,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
       final Map<String, Set<Uri>> importUriToErrorCode = {};
       for (final String line in stdout.split('\n')) {
         final Uri uri = Uri.parse(line.split(' ')[0]);
-        final String? errorCode = RegExp(r'\(([0-9]+)\)').firstMatch(line)?.group(1);
+        final String? errorCode = RegExp(r'\(([0-9]+)\)\s*$').firstMatch(line)?.group(1);
         if (errorCode != null) {
           (importUriToErrorCode[errorCode] ??= {}).add(uri);
         }
@@ -473,7 +473,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
         final String packageName = package.name;
         if (package.root.toString().contains('hosted/pub.dev')) {
           final String? packageVersion = RegExp(
-            r'([0-9]+\.[0-9]+\.[0-9]+)',
+            r'([0-9]+\.[0-9]+\.[0-9]+(?:-[\w\.-]+)?)',
           ).firstMatch(package.root.toString())?.group(1);
           hostedPackages[packageName] = packageVersion ?? '?';
         } else {

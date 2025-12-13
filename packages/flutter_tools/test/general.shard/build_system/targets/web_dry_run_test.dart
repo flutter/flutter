@@ -19,7 +19,12 @@ import '../../../src/fakes.dart';
 import '../../../src/package_config.dart';
 import '../../../src/testbed.dart';
 
-const Map<String, String> _fakePackageVersions = {'foo': '4.3.23', 'bar': '2.6.1', 'baz': '1.2.5'};
+const Map<String, String> _fakePackageVersions = {
+  'foo': '4.3.23',
+  'bar': '2.6.1',
+  'baz': '1.2.5',
+  'fizz': '1.2.3-alpha1',
+};
 
 void main() {
   late TestBed testbed;
@@ -182,8 +187,10 @@ package:foo/some/path.dart 6:1 - dart:html unsupported (0)
 package:bar/some/path.dart 120:5 - dart:js unsupported (1)
 package:foo/some/path.dart 7:20 - dart:html unsupported (0)
 package:baz/some/path.dart 54:8 - dart:html unsupported (0)
-package:bar/some/path.dart 6:1 - package:js unsupported (2)
-package:baz/some/path.dart 6:1 - dart:js unsupported (1)
+package:bar/some/path.dart 94:6 - package:js unsupported (2)
+package:baz/some/path.dart 16:6 - dart:js unsupported (1)
+package:fizz/some/path.dart 80:2 - dart:ffi unsupported (3)
+package:foo/some(5)/path.dart 103:20 - dart:io unsupported (4)
 ''',
         ),
       );
@@ -194,7 +201,7 @@ package:baz/some/path.dart 6:1 - dart:js unsupported (1)
 
       final Event event = fakeAnalytics.sentEvents[0];
       expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
-      expect(event.eventData, hasLength(5));
+      expect(event.eventData, hasLength(7));
       expect(event.eventData['result'], 'findings');
       expect(event.eventData['exitCode'], 254);
       expect(
@@ -206,6 +213,8 @@ package:baz/some/path.dart 6:1 - dart:js unsupported (1)
         'bar:${_fakePackageVersions['bar']},baz:${_fakePackageVersions['baz']}',
       );
       expect(event.eventData['E2'], 'bar:${_fakePackageVersions['bar']}');
+      expect(event.eventData['E3'], 'fizz:${_fakePackageVersions['fizz']}');
+      expect(event.eventData['E4'], 'foo:${_fakePackageVersions['foo']}');
     }),
   );
 
