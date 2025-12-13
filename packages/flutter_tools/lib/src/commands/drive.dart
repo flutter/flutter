@@ -304,24 +304,13 @@ class DriveCommand extends RunCommandBase {
     if (screenshot != null && !device.supportsScreenshot) {
       _logger.printError('Screenshot not supported for ${device.displayName}.');
     }
-    final String? webPortArg = stringArg('web-port');
-    final int? webPort = webPortArg != null ? int.tryParse(webPortArg) : null;
 
-    final WebDevServerConfig? fileConfig = (device is WebServerDevice || device is ChromiumDevice)
-        ? (await WebDevServerConfig.loadFromFile(fileSystem: globals.fs, logger: globals.logger))
+    final WebDevServerConfig? webDevServerConfig =
+        // TODO(kevmoo): Not sure why we're not just checking `WebDevice` here
+        (device is WebServerDevice || device is ChromiumDevice)
+        ? await webDevServerConfigCore()
         : null;
 
-    final HttpsConfig? httpsConfig = fileConfig?.https?.copyWith(
-      certPath: stringArg('web-tls-cert-path'),
-      certKeyPath: stringArg('web-tls-cert-key-path'),
-    );
-
-    final WebDevServerConfig? webDevServerConfig = fileConfig?.copyWith(
-      host: stringArg('web-hostname'),
-      port: webPort,
-      https: httpsConfig,
-      headers: extractWebHeaders(),
-    );
     final web = webDevServerConfig != null;
 
     _flutterDriverFactory ??= FlutterDriverFactory(
