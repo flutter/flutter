@@ -150,7 +150,11 @@ enum _CupertinoMenuWidth {
   final double points;
 }
 
-// TODO(davidhicks980): DynamicType should be moved to the Cupertino theming library when available.
+// TODO(davidhicks980): DynamicType should be moved to text_theme.dart when all
+// styles are implemented. https://github.com/flutter/flutter/issues/179828
+//
+// After that, we should deduplicate the same table in menu_anchor_test.dart
+//
 // Obtained from
 // https://developer.apple.com/design/human-interface-guidelines/typography#Specifications
 //

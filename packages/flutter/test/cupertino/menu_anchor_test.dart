@@ -3748,8 +3748,8 @@ void main() {
     ) async {
       Widget entry({required bool leading, required bool trailing, Widget? child}) {
         return _DebugCupertinoMenuEntryMixin(
-          allowLeadingSeparator: leading,
-          allowTrailingSeparator: trailing,
+          isDivider: leading,
+          // isDivider: trailing,
           child: child ?? const SizedBox(),
         );
       }
@@ -3939,9 +3939,9 @@ void main() {
           home: CupertinoMenuAnchor(
             controller: controller,
             menuChildren: const <Widget>[
-              _DebugCupertinoMenuEntryMixin(allowTrailingSeparator: true),
+              _DebugCupertinoMenuEntryMixin(isDivider: true),
               CupertinoLargeMenuDivider(),
-              _DebugCupertinoMenuEntryMixin(allowLeadingSeparator: true),
+              _DebugCupertinoMenuEntryMixin(isDivider: true),
             ],
           ),
         ),
@@ -4379,9 +4379,9 @@ void main() {
               child: CupertinoMenuAnchor(
                 controller: controller,
                 menuChildren: <Widget>[
-                  const _DebugCupertinoMenuEntryMixin(allowTrailingSeparator: true),
+                  const _DebugCupertinoMenuEntryMixin(isDivider: true),
                   CupertinoMenuItem(child: Text(Tag.a.text)),
-                  const _DebugCupertinoMenuEntryMixin(allowLeadingSeparator: true),
+                  const _DebugCupertinoMenuEntryMixin(isDivider: true),
                 ],
               ),
             ),
@@ -4887,6 +4887,7 @@ void main() {
         expect(a2.left - c2.left, closeTo(32 - 3, 0.01));
         expect(a2.left - a1.left, closeTo(32 - 16, 0.01));
       });
+
       testWidgets('RTL hasLeading shift', (WidgetTester tester) async {
         // When no menu item has a leading widget, leadingWidth defaults to 16.
         // If leadingWidth is set, the default is ignored.
@@ -5867,6 +5868,7 @@ void main() {
           expect(trailingAlignment.y, closeTo(0.5, 0.01));
         });
       });
+
       group('Subtitle ', () {
         testWidgets('default layout', (WidgetTester tester) async {
           await tester.pumpWidget(
@@ -6502,6 +6504,7 @@ void main() {
       expect(focusChanges, <bool>[true, false, true, false]);
       expect(disabledFocusChanges, isEmpty);
     });
+
     testWidgets('onHover is called on enabled items', (WidgetTester tester) async {
       final List<(Tag, bool)> hovered = <(Tag, bool)>[];
 
@@ -7194,6 +7197,8 @@ const String _kBodyFont = 'CupertinoSystemText';
 /// The font family for menu items at larger text scales.
 const String _kDisplayFont = 'CupertinoSystemDisplay';
 
+// TODO(davidhicks980): DynamicType should be moved to text_theme.dart when all
+// styles are implemented. https://github.com/flutter/flutter/issues/179828
 enum _DynamicTypeStyle {
   body(
     xSmall: TextStyle(fontSize: 14, height: 19 / 14, letterSpacing: -0.41, fontFamily: _kBodyFont),
@@ -7294,8 +7299,7 @@ enum _DynamicTypeStyle {
 class _DebugCupertinoMenuEntryMixin extends StatelessWidget implements CupertinoMenuEntry {
   const _DebugCupertinoMenuEntryMixin({
     bool hasLeading = false,
-    this.allowTrailingSeparator = false,
-    this.allowLeadingSeparator = false,
+    this.isDivider = false,
     this.child = const SizedBox.shrink(),
   }) : _hasLeading = hasLeading;
 
@@ -7308,9 +7312,6 @@ class _DebugCupertinoMenuEntryMixin extends StatelessWidget implements Cupertino
 
   @override
   final bool isDivider;
-
-  @override
-  final bool allowLeadingSeparator;
 
   final Widget child;
 
