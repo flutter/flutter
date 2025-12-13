@@ -11,6 +11,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../common/matchers.dart';
 import '../common/test_initialization.dart';
@@ -741,7 +742,7 @@ Future<void> testMain() async {
         ..height = 'auto';
 
       // Resize the host to 20x20 (physical pixels).
-      view.resize(const ui.Size.square(50));
+      view.handleFrameworkResize(const ui.Size.square(50));
 
       // The view's physicalSize should be updated too.
       expect(view.physicalSize, const ui.Size(50.0, 50.0));
@@ -797,6 +798,30 @@ Future<void> testMain() async {
             ) *
             dpr,
       );
+    });
+  });
+
+  group('keyboard resize behavior', () {
+    setUp(() async {
+      // Simulate keyboard being up.
+      textEditing.isEditing = true;
+      ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.android;
+    });
+
+    tearDown(() {
+      textEditing.isEditing = false;
+      ui_web.browser.debugOperatingSystemOverride = null;
+    });
+
+    test('physicalSize remains unchanged when keyboard is up', () async {
+      final ui.Size initialPhysicalSize = myWindow.physicalSize;
+
+      // Pick a smaller size.
+      final ui.Size newSize = initialPhysicalSize ~/ 2;
+      myWindow.handleFrameworkResize(newSize);
+
+      // View's `physicalSize` should remain unchanged.
+      expect(myWindow.physicalSize, initialPhysicalSize);
     });
   });
 }
