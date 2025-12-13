@@ -1404,7 +1404,8 @@ class _MenuLayoutDelegate extends SingleChildLayoutDelegate {
       x = screen.left;
     } else {
       if (overLeftEdge(x)) {
-        // Flip the X position across the horizontal midpoint of the anchor so that the menu is to the right of the anchor.
+        // Flip the X position across the horizontal midpoint of the anchor so
+        // that the menu is to the right of the anchor.
         final double flipX = anchor.center.dx * 2 - position.dx - childSize.width;
         hasHorizontalAnchorOverlap = overRightEdge(flipX);
         if (hasHorizontalAnchorOverlap || overLeftEdge(flipX)) {
@@ -1413,7 +1414,8 @@ class _MenuLayoutDelegate extends SingleChildLayoutDelegate {
           x = flipX;
         }
       } else if (overRightEdge(x)) {
-        // Flip the X position across the horizontal midpoint of the anchor so that the menu is to the left of the anchor.
+        // Flip the X position across the horizontal midpoint of the anchor so
+        // that the menu is to the left of the anchor.
         final double flipX = anchor.center.dx * 2 - position.dx - childSize.width;
         hasHorizontalAnchorOverlap = overLeftEdge(flipX);
         if (hasHorizontalAnchorOverlap || overRightEdge(flipX)) {
@@ -1450,7 +1452,8 @@ class _MenuLayoutDelegate extends SingleChildLayoutDelegate {
     }
 
     if (overTopEdge(y)) {
-      // Flip the Y position across the vertical midpoint of the anchor so that the menu is below the anchor.
+      // Flip the Y position across the vertical midpoint of the anchor so that
+      // the menu is below the anchor.
       final double flipY = anchor.center.dy * 2 - position.dy - childSize.height;
       if (overTopEdge(flipY) || overBottomEdge(flipY)) {
         y = screen.top;
@@ -2384,6 +2387,8 @@ class _CupertinoMenuItemLabel extends StatelessWidget {
 ///
 /// Almost identical to [Align], but aligns the midpoint of the child rather
 /// than the top-left corner.
+///
+/// This layout behavior was observed on the iOS 18.5 simulator.
 class _AlignMidpoint extends SingleChildRenderObjectWidget {
   /// Creates a widget that positions its child's center point at a specific
   /// [alignment].
