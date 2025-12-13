@@ -284,8 +284,10 @@ Future<Process> startProcess(
 }) async {
   final command = '$executable ${arguments?.join(" ") ?? ""}';
   final String finalWorkingDirectory = workingDirectory ?? cwd;
-  final newEnvironment = Map<String, String>.from(environment ?? <String, String>{});
-
+  final newEnvironment = <String, String>{
+    ...?environment,
+    'ANDROID_NDK_PATH': ?_discoverBestNdkPath(),
+  };
   // Override ANDROID_NDK_PATH with a valid discovered path or empty string to clear a potentially bad value.
   final String? bestNdkPath = _discoverBestNdkPath();
   if (bestNdkPath != null) {
