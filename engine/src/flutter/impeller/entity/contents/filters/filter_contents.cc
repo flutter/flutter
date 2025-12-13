@@ -120,8 +120,19 @@ std::shared_ptr<FilterContents> FilterContents::MakeRuntimeEffect(
     std::shared_ptr<RuntimeStage> runtime_stage,
     std::shared_ptr<std::vector<uint8_t>> uniforms,
     std::vector<RuntimeEffectContents::TextureInput> texture_inputs) {
+  FilterInput::Vector inputs;
+  inputs.push_back(std::move(input));
+  return MakeRuntimeEffect(std::move(inputs), std::move(runtime_stage),
+                           std::move(uniforms), std::move(texture_inputs));
+}
+
+std::shared_ptr<FilterContents> FilterContents::MakeRuntimeEffect(
+    FilterInput::Vector inputs,
+    std::shared_ptr<RuntimeStage> runtime_stage,
+    std::shared_ptr<std::vector<uint8_t>> uniforms,
+    std::vector<RuntimeEffectContents::TextureInput> texture_inputs) {
   auto filter = std::make_shared<impeller::RuntimeEffectFilterContents>();
-  filter->SetInputs({std::move(input)});
+  filter->SetInputs(std::move(inputs));
   filter->SetRuntimeStage(std::move(runtime_stage));
   filter->SetUniforms(std::move(uniforms));
   filter->SetTextureInputs(std::move(texture_inputs));

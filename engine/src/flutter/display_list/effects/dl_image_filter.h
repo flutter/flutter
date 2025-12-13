@@ -31,6 +31,7 @@ enum class DlImageFilterType {
   kRuntimeEffect,
   kColorFilter,
   kCompose,
+  kCombine,
   kLocalMatrix,
 };
 
@@ -41,6 +42,7 @@ class DlMatrixImageFilter;
 class DlRuntimeEffectImageFilter;
 class DlColorFilterImageFilter;
 class DlComposeImageFilter;
+class DlCombineImageFilter;
 class DlLocalMatrixImageFilter;
 
 class DlImageFilter : public DlAttribute<DlImageFilter, DlImageFilterType> {
@@ -76,6 +78,11 @@ class DlImageFilter : public DlAttribute<DlImageFilter, DlImageFilterType> {
       const std::shared_ptr<DlImageFilter>& outer,
       const std::shared_ptr<DlImageFilter>& inner);
 
+  static std::shared_ptr<DlImageFilter> MakeCombine(
+      const std::shared_ptr<DlImageFilter>& first,
+      const std::shared_ptr<DlImageFilter>& second,
+      sk_sp<DlRuntimeEffect> combiner);
+
   // Return a DlBlurImageFilter pointer to this object iff it is a Blur
   // type of ImageFilter, otherwise return nullptr.
   virtual const DlBlurImageFilter* asBlur() const { return nullptr; }
@@ -102,6 +109,10 @@ class DlImageFilter : public DlAttribute<DlImageFilter, DlImageFilterType> {
   // Return a DlComposeImageFilter pointer to this object iff it is a Compose
   // type of ImageFilter, otherwise return nullptr.
   virtual const DlComposeImageFilter* asCompose() const { return nullptr; }
+
+  // Return a DlCombineImageFilter pointer to this object iff it is a Combine
+  // type of ImageFilter, otherwise return nullptr.
+  virtual const DlCombineImageFilter* asCombine() const { return nullptr; }
 
   // Return a DlColorFilterImageFilter pointer to this object iff it is a
   // ColorFilter type of ImageFilter, otherwise return nullptr.

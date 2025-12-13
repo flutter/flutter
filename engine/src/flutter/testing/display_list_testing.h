@@ -11,6 +11,10 @@
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/dl_op_receiver.h"
 
+namespace flutter {
+class DlRuntimeEffect;
+}  // namespace flutter
+
 namespace flutter::testing {
 
 [[nodiscard]] bool DisplayListsEQ_Verbose(const DisplayList* a,
@@ -212,6 +216,7 @@ class DisplayListStreamDispatcher final : public DlOpReceiver {
   void out(const DlImageFilter& filter);
   void out(const DlImageFilter* filter);
   void out(const DlVerbosePath& path);
+  void out(const DlRuntimeEffect* effect);
 
  private:
   std::ostream& os_;
@@ -320,6 +325,7 @@ class DisplayListGeneralReceiver : public DlOpReceiver {
         case DlImageFilterType::kLocalMatrix:
         case DlImageFilterType::kColorFilter:
         case DlImageFilterType::kRuntimeEffect:
+        case DlImageFilterType::kCombine:
           RecordByType(DisplayListOpType::kSetSharedImageFilter);
           break;
       }

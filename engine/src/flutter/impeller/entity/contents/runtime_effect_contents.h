@@ -11,6 +11,7 @@
 #include "impeller/core/host_buffer.h"
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/entity/contents/color_source_contents.h"
+#include "impeller/entity/runtime_effect.vert.h"
 #include "impeller/runtime_stage/runtime_stage.h"
 
 namespace impeller {
@@ -20,6 +21,7 @@ class RuntimeEffectContents final : public ColorSourceContents {
   struct TextureInput {
     SamplerDescriptor sampler_descriptor;
     std::shared_ptr<Texture> texture;
+    Matrix transform;
   };
 
   void SetRuntimeStage(std::shared_ptr<RuntimeStage> runtime_stage);
@@ -42,6 +44,11 @@ class RuntimeEffectContents final : public ColorSourceContents {
       HostBuffer& host_buffer,
       const RuntimeUniformDescription& uniform,
       size_t minimum_uniform_alignment);
+
+  static RuntimeEffectVertexShader::FrameInfo CalculateFrameInfo(
+      const std::vector<TextureInput>& inputs,
+      const Matrix& entity_transform,
+      std::optional<Rect> coverage);
 
  private:
   bool RegisterShader(const ContentContext& renderer) const;

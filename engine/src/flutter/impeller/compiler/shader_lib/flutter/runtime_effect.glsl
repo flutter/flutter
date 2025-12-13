@@ -15,10 +15,35 @@ vec2 FlutterFragCoord() {
   return _fragCoord;
 }
 
+in vec2 v_tex_coord_0;
+in vec2 v_tex_coord_1;
+in vec2 v_tex_coord_2;
+in vec2 v_tex_coord_3;
+
+vec2 FlutterGetInputTextureCoordinates(int index) {
+  if (index == 0) {
+    return v_tex_coord_0;
+  }
+  if (index == 1) {
+    return v_tex_coord_1;
+  }
+  if (index == 2) {
+    return v_tex_coord_2;
+  }
+  if (index == 3) {
+    return v_tex_coord_3;
+  }
+  return vec2(0.0);
+}
+
 #elif defined(SKIA_GRAPHICS_BACKEND)
 
 vec2 FlutterFragCoord() {
   return gl_FragCoord.xy;
+}
+
+vec2 FlutterGetInputTextureCoordinates(int index) {
+  return vec2(0.0);
 }
 
 #else

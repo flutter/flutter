@@ -85,6 +85,12 @@ class FilterContents : public Contents {
       std::shared_ptr<std::vector<uint8_t>> uniforms,
       std::vector<RuntimeEffectContents::TextureInput> texture_inputs);
 
+  static std::shared_ptr<FilterContents> MakeRuntimeEffect(
+      FilterInput::Vector inputs,
+      std::shared_ptr<RuntimeStage> runtime_stage,
+      std::shared_ptr<std::vector<uint8_t>> uniforms,
+      std::vector<RuntimeEffectContents::TextureInput> texture_inputs);
+
   FilterContents();
 
   ~FilterContents() override;
