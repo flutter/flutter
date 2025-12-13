@@ -1171,16 +1171,6 @@ class _MenuOverlayState extends State<_MenuOverlay>
         groupId: widget.tapRegionGroupId,
         consumeOutsideTaps: widget.consumeOutsideTaps,
         onTapOutside: _handleOutsideTap,
-        // A custom shadow painter is used to make the underlying colors
-        // appear more vibrant. This is achieved by removing the shadow
-        // underlying the popup surface using a save layer combined with a
-        // clear blend mode.
-        //
-        // From my (davidhicks980) understanding and testing, it is
-        // impossible to achieve the appearance of an iOS backdrop using
-        // only Gaussian blur, linear color filter, and shadows, because the
-        // iOS popup surface does not linearly transform underlying colors.
-        // A custom shader would need to be used to achieve the same effect.
         child: Actions(
           actions: _actions,
           child: Shortcuts(
@@ -1190,6 +1180,10 @@ class _MenuOverlayState extends State<_MenuOverlay>
               descendantsAreFocusable: true,
               descendantsAreTraversable: true,
               canRequestFocus: true,
+              // A custom shadow painter is used to make the underlying colors
+              // appear more vibrant. This is achieved by removing the shadow
+              // underlying the popup surface using a save layer combined with a
+              // clear blend mode.
               child: CustomPaint(
                 painter: _ShadowPainter(
                   brightness: CupertinoTheme.maybeBrightnessOf(context) ?? ui.Brightness.light,
