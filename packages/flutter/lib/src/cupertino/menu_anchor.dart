@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/material.dart';
-library;
-
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
@@ -341,7 +338,7 @@ typedef CupertinoMenuAnimationStatusChangedCallback = void Function(AnimationSta
 ///  CupertinoMenuAnchor(
 ///    menuChildren: <Widget>[
 ///      CupertinoMenuItem(
-///        trailing: const Icon(Icons.add),
+///        trailing: const Icon(CupertinoIcons.add),
 ///        onPressed: () {
 ///          print('Item 1 pressed!');
 ///        },
@@ -1727,7 +1724,7 @@ class _AliasedLinePainter extends CustomPainter {
 ///  CupertinoMenuAnchor(
 ///    menuChildren: <Widget>[
 ///      CupertinoMenuItem(
-///        trailing: const Icon(Icons.add),
+///        trailing: const Icon(CupertinoIcons.add),
 ///        onPressed: () {
 ///          print('Item 1 pressed!');
 ///        },
