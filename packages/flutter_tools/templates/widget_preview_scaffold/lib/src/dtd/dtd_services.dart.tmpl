@@ -6,14 +6,12 @@ import 'dart:async';
 
 import 'package:dtd/dtd.dart';
 import 'package:json_rpc_2/json_rpc_2.dart';
+import 'package:widget_preview_scaffold/src/dtd/dtd_connection_info.dart';
 import 'package:widget_preview_scaffold/src/dtd/editor_service.dart';
 import 'package:widget_preview_scaffold/src/dtd/utils.dart';
 
 /// Provides services, streams, and RPC invocations to interact with Flutter developer tooling.
 class WidgetPreviewScaffoldDtdServices with DtdEditorService {
-  /// Environment variable for the DTD URI.
-  static const String kWidgetPreviewDtdUriEnvVar = 'WIDGET_PREVIEW_DTD_URI';
-
   // WARNING: Keep these constants and services in sync with those defined in the widget preview
   // scaffold's dtd_services.dart.
   //
@@ -40,7 +38,7 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   Future<void> connect({Uri? dtdUri}) async {
     final Uri dtdWsUri =
         dtdUri ??
-        Uri.parse(const String.fromEnvironment(kWidgetPreviewDtdUriEnvVar));
+        Uri.parse(kWidgetPreviewDtdUri);
     dtd = await DartToolingDaemon.connect(dtdWsUri);
     unawaited(
       dtd.postEvent(
