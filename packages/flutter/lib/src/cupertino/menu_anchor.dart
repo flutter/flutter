@@ -469,10 +469,10 @@ class CupertinoMenuAnchor extends StatefulWidget {
   /// Whether or not swiping is enabled on the menu.
   ///
   /// When swiping is enabled, a [MultiDragGestureRecognizer] is added around
-  /// the menu button and menu items. The [MultiDragGestureRecognizer] allows
-  /// for users to press, move, and activate adjacent menu items in a single
-  /// gesture. Swiping also scales the menu panel when users drag their
-  /// pointer away from the menu.
+  /// the widget built by [builder] and menu items. The
+  /// [MultiDragGestureRecognizer] allows for users to press, move, and activate
+  /// adjacent menu items in a single gesture. Swiping also scales the menu
+  /// panel when users drag their pointer away from the menu.
   ///
   /// Disabling swiping can be useful if the menu swipe effects interfere with
   /// another swipe gesture, such as in the case of dragging a menu anchor
