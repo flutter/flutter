@@ -7289,7 +7289,7 @@ enum _DynamicTypeStyle {
   }
 }
 
-class _DebugCupertinoMenuEntryMixin extends StatelessWidget with CupertinoMenuEntryMixin {
+class _DebugCupertinoMenuEntryMixin extends StatelessWidget implements CupertinoMenuEntry {
   const _DebugCupertinoMenuEntryMixin({
     bool hasLeading = false,
     this.allowTrailingSeparator = false,

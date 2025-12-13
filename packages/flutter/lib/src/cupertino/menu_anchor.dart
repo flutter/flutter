@@ -257,25 +257,25 @@ double _computeSquaredDistanceToRect(Offset point, Rect rect) {
 /// Returns the nearest multiple of `to` to `value`.
 ///
 /// ```dart
-/// print(_quantize(3.15, to: 0));    // 3.15
-/// print(_quantize(3.15, to: 1));    // 3
-/// print(_quantize(3.15, to: 0.1));  // 3.2
-/// print(_quantize(3.15, to: 0.01)); // 3.15
-/// print(_quantize(3.15, to: 0.25)); // 3.25
-/// print(_quantize(3.15, to: 0.5));  // 3.0
-/// print(_quantize(-3.15, to: 0.5)); // -3.0
-/// print(_quantize(-3.15, to: 0.1)); // -3.2
+/// print(_roundToDivisible(3.15, to: 0));    // 3.15
+/// print(_roundToDivisible(3.15, to: 1));    // 3
+/// print(_roundToDivisible(3.15, to: 0.1));  // 3.2
+/// print(_roundToDivisible(3.15, to: 0.01)); // 3.15
+/// print(_roundToDivisible(3.15, to: 0.25)); // 3.25
+/// print(_roundToDivisible(3.15, to: 0.5));  // 3.0
+/// print(_roundToDivisible(-3.15, to: 0.5)); // -3.0
+/// print(_roundToDivisible(-3.15, to: 0.1)); // -3.2
 /// ```
-double _quantize(double value, {required double to}) {
+double _roundToDivisible(double value, {required double to}) {
   if (to == 0) {
     return value;
   }
   return (value / to).round() * to;
 }
 
-/// Mix [CupertinoMenuEntryMixin] in to define how a menu item should be drawn
+/// Mix [CupertinoMenuEntry] in to define how a menu item should be drawn
 /// in a menu.
-mixin CupertinoMenuEntryMixin {
+abstract interface class CupertinoMenuEntry {
   /// Whether this menu item has a leading widget.
   ///
   /// If [hasLeading] returns true, siblings of this menu item that are missing
@@ -287,14 +287,14 @@ mixin CupertinoMenuEntryMixin {
   ///
   /// When [allowLeadingSeparator] is true, a separator will be drawn if the
   /// menu item immediately above this item has mixed in
-  /// [CupertinoMenuEntryMixin] and has set [allowTrailingSeparator] to true.
+  /// [CupertinoMenuEntry] and has set [allowTrailingSeparator] to true.
   bool get allowLeadingSeparator;
 
   /// Whether a separator can be drawn below this menu item.
   ///
   /// When [allowTrailingSeparator] is true, a separator will be drawn if the
   /// menu item immediately below this item has mixed in
-  /// [CupertinoMenuEntryMixin] and has set [allowLeadingSeparator] to true.
+  /// [CupertinoMenuEntry] and has set [allowLeadingSeparator] to true.
   bool get allowTrailingSeparator;
 }
 
@@ -662,7 +662,7 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
   bool _resolveHasLeading() {
     return widget.menuChildren.any((Widget element) {
       return switch (element) {
-        final CupertinoMenuEntryMixin entry => entry.hasLeading(context),
+        final CupertinoMenuEntry entry => entry.hasLeading(context),
         _ => false,
       };
     });
@@ -958,13 +958,13 @@ class _MenuOverlayState extends State<_MenuOverlay>
         break;
       }
 
-      if (child case CupertinoMenuEntryMixin(allowTrailingSeparator: false)) {
+      if (child case CupertinoMenuEntry(allowTrailingSeparator: false)) {
         child = widget.children[i + 1];
         continue;
       }
 
       child = widget.children[i + 1];
-      if (child case CupertinoMenuEntryMixin(allowLeadingSeparator: false)) {
+      if (child case CupertinoMenuEntry(allowLeadingSeparator: false)) {
         continue;
       }
 
@@ -1786,7 +1786,7 @@ class _AliasedLinePainter extends CustomPainter {
 ///   that is the basis for [CupertinoMenuAnchor].
 /// * [PlatformMenuBar], which creates a menu bar that is rendered by the host
 ///   platform instead of by Flutter (on macOS, for example).
-class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
+class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
   /// Creates a [CupertinoMenuItem]
   ///
   /// The [child] parameter is required and must not be null.
@@ -2231,7 +2231,7 @@ class _CupertinoMenuItemLabel extends StatelessWidget {
   double _resolveLeadingWidth(TextScaler textScaler, double pixelRatio, double lineHeight) {
     final double units = _normalizeTextScale(textScaler);
     final double value = _leadingWidthSlope * units + _leadingWidthYIntercept;
-    return _quantize(value + lineHeight, to: 1 / pixelRatio);
+    return _roundToDivisible(value + lineHeight, to: 1 / pixelRatio);
   }
 
   // Tested across all iOS dynamic type sizes on iOS and iPadOS 18.5 simulators.
@@ -2239,7 +2239,7 @@ class _CupertinoMenuItemLabel extends StatelessWidget {
   double _resolveTrailingWidth(TextScaler textScaler, double pixelRatio, double lineHeight) {
     final double units = _normalizeTextScale(textScaler);
     final double value = _trailingWidthSlope * units + _trailingWidthYIntercept;
-    return _quantize(value + lineHeight, to: 1 / pixelRatio);
+    return _roundToDivisible(value + lineHeight, to: 1 / pixelRatio);
   }
 
   AlignmentGeometry _resolveTrailingAlignment(double trailingWidth) {
@@ -2257,11 +2257,11 @@ class _CupertinoMenuItemLabel extends StatelessWidget {
   }
 
   double _resolveFirstBaselineToTop(double lineHeight, double pixelRatio) {
-    return _quantize(lineHeight * _firstBaselineToTopSlope, to: 1 / pixelRatio);
+    return _roundToDivisible(lineHeight * _firstBaselineToTopSlope, to: 1 / pixelRatio);
   }
 
   double _resolveLastBaselineToBottom(double lineHeight, double pixelRatio) {
-    return _quantize(lineHeight * _lastBaselineToBottomSlope, to: 1 / pixelRatio);
+    return _roundToDivisible(lineHeight * _lastBaselineToBottomSlope, to: 1 / pixelRatio);
   }
 
   EdgeInsets _resolvePadding(double minimumHeight, double lineHeight) {
@@ -2428,9 +2428,9 @@ class _RenderAlignMidpoint extends RenderPositionedBox {
 ///
 /// * [CupertinoMenuItem], a Cupertino-style menu item.
 /// * [CupertinoMenuAnchor], a widget that creates a Cupertino-style popup menu.
-/// * [CupertinoMenuEntryMixin], a mixin that can be used to control whether
+/// * [CupertinoMenuEntry], a mixin that can be used to control whether
 ///   dividers are shown before or after a menu item.
-class CupertinoLargeMenuDivider extends StatelessWidget with CupertinoMenuEntryMixin {
+class CupertinoLargeMenuDivider extends StatelessWidget implements CupertinoMenuEntry {
   /// Creates a large horizontal divider for a [CupertinoMenuAnchor].
   const CupertinoLargeMenuDivider({super.key, this.color = defaultColor});
 
