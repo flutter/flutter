@@ -496,31 +496,19 @@ void main() {
       final List<String> result = splitSetCookieHeader(
         'a=1; Domain=.example.com; Path=/, b=2; Domain=.test.com',
       );
-      expect(result, <String>[
-        'a=1; Domain=.example.com; Path=/',
-        'b=2; Domain=.test.com',
-      ]);
+      expect(result, <String>['a=1; Domain=.example.com; Path=/', 'b=2; Domain=.test.com']);
     });
 
     test('should handle cookies with SameSite attribute', () {
       final List<String> result = splitSetCookieHeader(
         'csrf=token; SameSite=Strict, session=id; SameSite=Lax',
       );
-      expect(result, <String>[
-        'csrf=token; SameSite=Strict',
-        'session=id; SameSite=Lax',
-      ]);
+      expect(result, <String>['csrf=token; SameSite=Strict', 'session=id; SameSite=Lax']);
     });
 
     test('should handle three or more cookies', () {
-      final List<String> result = splitSetCookieHeader(
-        'a=1; Path=/, b=2; Path=/, c=3; Path=/',
-      );
-      expect(result, <String>[
-        'a=1; Path=/',
-        'b=2; Path=/',
-        'c=3; Path=/',
-      ]);
+      final List<String> result = splitSetCookieHeader('a=1; Path=/, b=2; Path=/, c=3; Path=/');
+      expect(result, <String>['a=1; Path=/', 'b=2; Path=/', 'c=3; Path=/']);
     });
 
     test('should handle empty string', () {
@@ -532,20 +520,12 @@ void main() {
       final List<String> result = splitSetCookieHeader(
         'token=abc; Secure; HttpOnly; Path=/, other=xyz; Secure',
       );
-      expect(result, <String>[
-        'token=abc; Secure; HttpOnly; Path=/',
-        'other=xyz; Secure',
-      ]);
+      expect(result, <String>['token=abc; Secure; HttpOnly; Path=/', 'other=xyz; Secure']);
     });
 
     test('should handle cookie name with a dot', () {
-      final List<String> result = splitSetCookieHeader(
-        'app.session=123; Path=/, other.id=456',
-      );
-      expect(result, <String>[
-        'app.session=123; Path=/',
-        'other.id=456',
-      ]);
+      final List<String> result = splitSetCookieHeader('app.session=123; Path=/, other.id=456');
+      expect(result, <String>['app.session=123; Path=/', 'other.id=456']);
     });
   });
 }
