@@ -214,6 +214,10 @@
       gestureRecognizersBlockingPolicy:
           FlutterPlatformViewGestureRecognizersBlockingPolicyWaitUntilTouchesEnded];
 
+  UITextField* text = [[UITextField alloc] initWithFrame:CGRectMake(0, 200, 300, 100)];
+  text.text = @"test1";
+  [flutterViewController.view addSubview:text];
+
   UIViewController* rootViewController = flutterViewController;
   // Make Flutter View's origin x/y not 0.
   if ([scenarioIdentifier isEqualToString:@"non_full_screen_flutter_view_platform_view"]) {
@@ -221,6 +225,9 @@
     [rootViewController.view addSubview:flutterViewController.view];
     flutterViewController.view.frame = CGRectMake(150, 150, 500, 500);
   } else if ([scenarioIdentifier isEqualToString:@"tap_status_bar"]) {
+    UITextField* text = [[UITextField alloc] initWithFrame:CGRectMake(0, 200, 300, 100)];
+    text.text = @"test2";
+    [flutterViewController.view addSubview:text];
     [engine.binaryMessenger
         setMessageHandlerOnChannel:@"flutter/status_bar"
               binaryMessageHandler:^(NSData* _Nullable message, FlutterBinaryReply _Nonnull reply) {
