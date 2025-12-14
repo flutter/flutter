@@ -19,39 +19,15 @@ void main() {
   });
 
   testWidgets(
-    'Verify the sliver with key `radial-gradient` has a RadialGradient',
+    'Verify the DecoratedSliver has a LinearGradient',
     (WidgetTester tester) async {
       await tester.pumpWidget(const example.SliverDecorationExampleApp());
 
-      final DecoratedSliver radialDecoratedSliver = tester
-          .widget<DecoratedSliver>(
-            find.byKey(const ValueKey<String>('radial-gradient')),
-          );
-      expect(
-        radialDecoratedSliver.decoration,
-        const BoxDecoration(
-          gradient: RadialGradient(
-            center: Alignment(-0.5, -0.6),
-            radius: 0.15,
-            colors: <Color>[Color(0xFFEEEEEE), Color(0xFF111133)],
-            stops: <double>[0.4, 0.8],
-          ),
-        ),
+      final DecoratedSliver decoratedSliver = tester.widget<DecoratedSliver>(
+        find.byType(DecoratedSliver),
       );
-    },
-  );
-
-  testWidgets(
-    'Verify that the sliver with key `linear-gradient` has a LinearGradient',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(const example.SliverDecorationExampleApp());
-
-      final DecoratedSliver linearDecoratedSliver = tester
-          .widget<DecoratedSliver>(
-            find.byKey(const ValueKey<String>('linear-gradient')),
-          );
       expect(
-        linearDecoratedSliver.decoration,
+        decoratedSliver.decoration,
         const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -69,6 +45,40 @@ void main() {
           ),
         ),
       );
+    },
+  );
+
+  testWidgets(
+    'Verify the moon section has a RadialGradient',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(const example.SliverDecorationExampleApp());
+
+      final Container moonContainer = tester.widget<Container>(
+        find.ancestor(
+          of: find.text('A moon on a night sky'),
+          matching: find.byType(Container),
+        ).first,
+      );
+      expect(
+        moonContainer.decoration,
+        const BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment(-0.5, -0.6),
+            radius: 0.15,
+            colors: <Color>[Color(0xFFEEEEEE), Color(0xFF111133)],
+            stops: <double>[0.4, 0.8],
+          ),
+        ),
+      );
+    },
+  );
+
+  testWidgets(
+    'Verify that SliverMainAxisGroup is used to group the slivers',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(const example.SliverDecorationExampleApp());
+
+      expect(find.byType(SliverMainAxisGroup), findsOneWidget);
     },
   );
 }
