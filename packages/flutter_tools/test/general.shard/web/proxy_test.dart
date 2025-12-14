@@ -496,5 +496,15 @@ void main() {
         'other=xyz; Secure',
       ]);
     });
+
+    test('should handle cookie name with a dot', () {
+      final List<String> result = splitSetCookieHeader(
+        'app.session=123; Path=/, other.id=456',
+      );
+      expect(result, <String>[
+        'app.session=123; Path=/',
+        'other.id=456',
+      ]);
+    });
   });
 }
