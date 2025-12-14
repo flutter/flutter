@@ -67,7 +67,7 @@ bool _isNewCookie(String part) {
     return false;
   }
 
-  return RegExp(r'^[a-zA-Z0-9_\-]+$').hasMatch(token);
+  return RegExp(r'^[a-zA-Z0-9_.\-]+$').hasMatch(token);
 }
 
 /// Creates a new [shelf.Request] by proxying an [originalRequest] to a [finalTargetUrl].
