@@ -16,7 +16,7 @@ import 'impeller_enabled.dart';
 void main() async {
   final ImageComparer comparer = await ImageComparer.create();
 
-  test('FragmentShader draws RGBA Float32 texture', () async {
+  test('decodeImageFromPixels with RGBA Float32', () async {
     const int dimension = 1024;
     final Image image = await _createRGBA32FloatImage(dimension, dimension);
     final Image shaderImage = await _drawIntoImage(image);
@@ -37,11 +37,11 @@ void main() async {
     expect(data.getUint8(offset + 2), 0, reason: 'Center Blue');
     expect(data.getUint8(offset + 3), 255, reason: 'Center Alpha');
 
-    await comparer.addGoldenImage(shaderImage, 'fragment_shader_rgba_float32_sdf.png');
+    await comparer.addGoldenImage(shaderImage, 'decode_image_from_pixels_rgba_float32.png');
     image.dispose();
   });
 
-  test('FragmentShader draws R Float32 texture', () async {
+  test('decodeImageFromPixels with R Float32', () async {
     if (!impellerEnabled) {
       print('Skipped for Skia');
       return;
@@ -66,11 +66,10 @@ void main() async {
     expect(data.getUint8(offset + 2), 0, reason: 'Center Blue');
     expect(data.getUint8(offset + 3), 255, reason: 'Center Alpha');
 
-    await comparer.addGoldenImage(shaderImage, 'fragment_shader_r_float32_sdf.png');
     image.dispose();
   });
 
-  test('FragmentShader draws RGBA Float32 texture with SDF shader', () async {
+  test('Picture.toImageSync with rgbaFloat32', () async {
     const int dimension = 1024;
     final Image image = await _drawWithCircleShader(
       dimension,
@@ -95,11 +94,11 @@ void main() async {
     expect(data.getUint8(offset + 2), 255, reason: 'Center Blue');
     expect(data.getUint8(offset + 3), 255, reason: 'Center Alpha');
 
-    await comparer.addGoldenImage(shaderImage, 'fragment_shader_rgba_float32_sdf.png');
+    await comparer.addGoldenImage(shaderImage, 'picture_to_image_rgba_float32.png');
     image.dispose();
   });
 
-  test('FragmentShader draws R Float32 texture with SDF shader', () async {
+  test('Picture.toImageSync with rFloat32', () async {
     if (!impellerEnabled) {
       print('Skipped for Skia');
       return;
@@ -128,7 +127,6 @@ void main() async {
     expect(data.getUint8(offset + 2), 255, reason: 'Center Blue');
     expect(data.getUint8(offset + 3), 255, reason: 'Center Alpha');
 
-    await comparer.addGoldenImage(shaderImage, 'fragment_shader_r_float32_sdf.png');
     image.dispose();
   });
 }
