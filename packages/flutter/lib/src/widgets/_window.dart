@@ -143,6 +143,9 @@ mixin class RegularWindowControllerDelegate {
   }
 }
 
+/// Window edge(s) to resize when dragging with cursor.
+enum WindowDragEdge { northWest, north, northEast, west, east, southWest, south, southEast }
+
 /// A controller for a regular window.
 ///
 /// A regular window is a traditional window that can be resized, minimized,
@@ -375,6 +378,16 @@ abstract class RegularWindowController extends BaseWindowController {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   void setFullscreen(bool fullscreen, {Display? display});
+
+  /// Start moving this window.
+  /// FIXME
+  @internal
+  void beginMoveDrag(int button);
+
+  /// Start resizing this window.
+  /// FIXME
+  @internal
+  void beginResizeDrag(int button, WindowDragEdge edge);
 }
 
 /// Delegate class for dialog window controller.
@@ -619,6 +632,16 @@ abstract class DialogWindowController extends BaseWindowController {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   void setMinimized(bool minimized);
+
+  /// Start moving this window.
+  /// FIXME
+  @internal
+  void beginMoveDrag(int button);
+
+  /// Start resizing this window.
+  /// FIXME
+  @internal
+  void beginResizeDrag(int button, WindowDragEdge edge);
 }
 
 /// Delegate class for tooltip window controller.

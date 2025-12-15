@@ -304,6 +304,18 @@ class RegularWindowControllerMacOS extends RegularWindowController {
 
   @override
   String get title => _MacOSPlatformInterface.getTitle(getWindowHandle());
+
+  @override
+  @internal
+  void beginMoveDrag(int button) {
+    _MacOSPlatformInterface.beginMoveDrag(getWindowHandle(), button);
+  }
+
+  @override
+  @internal
+  void beginResizeDrag(int button, WindowDragEdge edge) {
+    _MacOSPlatformInterface.beginResizeDrag(getWindowHandle(), button, edge.index);
+  }
 }
 
 /// Implementation of [DialogWindowController] for the macOS platform.
@@ -452,6 +464,14 @@ class DialogWindowControllerMacOS extends DialogWindowController {
 
   @override
   String get title => _MacOSPlatformInterface.getTitle(getWindowHandle());
+
+  @override
+  @internal
+  void beginMoveDrag(int button) {}
+
+  @override
+  @internal
+  void beginResizeDrag(int button, WindowDragEdge edge) {}
 
   @override
   final BaseWindowController? parent;
@@ -681,6 +701,14 @@ class _MacOSPlatformInterface {
 
   @Native<Bool Function(Pointer<Void>)>(symbol: 'InternalFlutter_Window_IsActivated')
   external static bool isActivated(Pointer<Void> windowHandle);
+
+  @Native<Void Function(Pointer<Void>, ffi.Int)>(symbol: 'InternalFlutter_Window_BeginMoveDrag')
+  external static void beginMoveDrag(Pointer<Void> windowHandle, int button);
+
+  @Native<Void Function(Pointer<Void>, ffi.Int, ffi.Int)>(
+    symbol: 'InternalFlutter_Window_BeginResizeDrag',
+  )
+  external static void beginResizeDrag(Pointer<Void> windowHandle, int button, int edge);
 }
 
 // FFI utilities.

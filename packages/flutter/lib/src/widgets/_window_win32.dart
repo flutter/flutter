@@ -415,6 +415,18 @@ class RegularWindowControllerWin32 extends RegularWindowController {
     );
   }
 
+  @override
+  @internal
+  void beginMoveDrag(int button) {
+    _Win32PlatformInterface.beginMoveDrag(getWindowHandle(), button);
+  }
+
+  @override
+  @internal
+  void beginResizeDrag(int button, WindowDragEdge edge) {
+    _Win32PlatformInterface.beginResizeDrag(getWindowHandle(), button, edge.index);
+  }
+
   /// Returns HWND pointer to the top level window.
   @internal
   HWND getWindowHandle() {
@@ -624,6 +636,18 @@ class DialogWindowControllerWin32 extends DialogWindowController {
     } else {
       _Win32PlatformInterface.showWindow(getWindowHandle(), _SW_RESTORE);
     }
+  }
+
+  @override
+  @internal
+  void beginMoveDrag(int button) {
+    _Win32PlatformInterface.beginMoveDrag(getWindowHandle(), button);
+  }
+
+  @override
+  @internal
+  void beginResizeDrag(int button, WindowDragEdge edge) {
+    _Win32PlatformInterface.beginResizeDrag(getWindowHandle(), button, edge.index);
   }
 
   @override
@@ -863,6 +887,16 @@ class _Win32PlatformInterface {
 
   @ffi.Native<ffi.Bool Function(HWND)>(symbol: 'InternalFlutterWindows_WindowManager_GetFullscreen')
   external static bool getFullscreen(HWND windowHandle);
+
+  @ffi.Native<ffi.Void Function(HWND, ffi.Int)>(
+    symbol: 'InternalFlutterWindows_WindowManager_BeginMoveDrag',
+  )
+  external static void _beginMoveDrag(HWND windowHandle, int button);
+
+  @ffi.Native<ffi.Void Function(HWND, ffi.Int, ffi.Int)>(
+    symbol: 'InternalFlutterWindows_WindowManager_BeginResizeDrag',
+  )
+  external static void _beginResizeDrag(HWND windowHandle, int button, int edge);
 
   @ffi.Native<ffi.Int32 Function(HWND)>(symbol: 'GetWindowTextLengthW')
   external static int _getWindowTextLength(HWND windowHandle);

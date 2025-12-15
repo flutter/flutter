@@ -191,6 +191,15 @@ const int _GDK_WINDOW_STATE_FULLSCREEN = 1 << 4;
 
 const int _GDK_WINDOW_TYPE_HINT_DIALOG = 1;
 
+const int _GDK_WINDOW_EDGE_NORTH_WEST = 0;
+const int _GDK_WINDOW_EDGE_NORTH = 1;
+const int _GDK_WINDOW_EDGE_NORTH_EAST = 2;
+const int _GDK_WINDOW_EDGE_WEST = 3;
+const int _GDK_WINDOW_EDGE_EAST = 4;
+const int _GDK_WINDOW_EDGE_SOUTH_WEST = 5;
+const int _GDK_WINDOW_EDGE_SOUTH = 6;
+const int _GDK_WINDOW_EDGE_SOUTH_EAST = 7;
+
 /// Wraps GtkWindow
 class _GtkWindow extends _GtkContainer {
   /// Create a new GtkWindow
@@ -305,6 +314,19 @@ class _GtkWindow extends _GtkContainer {
     return _gtkWindowIsActive(instance);
   }
 
+  /// Start resizing the window.
+  void beginResizeDrag({
+    required int edge,
+    required int button,
+    int rootX = 0,
+    int rootY = 0,
+    int timestamp = 0,
+  }) => _gtkWindowBeginResizeDrag(instance, edge, button, rootX, rootY, timestamp);
+
+  /// Start moving the window.
+  void beginMoveDrag({required int button, int rootX = 0, int rootY = 0, int timestamp = 0}) =>
+      _gtkWindowBeginMoveDrag(instance, button, rootX, rootY, timestamp);
+
   @ffi.Native<ffi.Pointer<ffi.NativeType> Function(ffi.Int)>(symbol: 'gtk_window_new')
   external static ffi.Pointer<ffi.NativeType> _gtkWindowNew(int type);
 
@@ -400,6 +422,29 @@ class _GtkWindow extends _GtkContainer {
 
   @ffi.Native<ffi.Bool Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gtk_window_is_active')
   external static bool _gtkWindowIsActive(ffi.Pointer<ffi.NativeType> widget);
+
+  @ffi.Native<
+    ffi.Void Function(ffi.Pointer<ffi.NativeType>, ffi.Int, ffi.Int, ffi.Int, ffi.Int, ffi.Uint32)
+  >(symbol: 'gtk_window_begin_resize_drag')
+  external static void _gtkWindowBeginResizeDrag(
+    ffi.Pointer<ffi.NativeType> window,
+    int edge,
+    int button,
+    int rootX,
+    int rootY,
+    int timestamp,
+  );
+
+  @ffi.Native<
+    ffi.Void Function(ffi.Pointer<ffi.NativeType>, ffi.Int, ffi.Int, ffi.Int, ffi.Uint32)
+  >(symbol: 'gtk_window_begin_move_drag')
+  external static void _gtkWindowBeginMoveDrag(
+    ffi.Pointer<ffi.NativeType> window,
+    int button,
+    int rootX,
+    int rootY,
+    int timestamp,
+  );
 }
 
 /// Wraps FlView
@@ -777,6 +822,31 @@ class RegularWindowControllerLinux extends RegularWindowController {
       _window.unfullscreen();
     }
   }
+
+  @override
+  @internal
+  void beginMoveDrag(int button) {
+    _window.beginMoveDrag(button: button);
+  }
+
+  @override
+  @internal
+  void beginResizeDrag(int button, WindowDragEdge edge) {
+    _window.beginResizeDrag(
+      button: button,
+      edge: {
+        WindowDragEdge.northWest: _GDK_WINDOW_EDGE_NORTH_WEST,
+        WindowDragEdge.northWest: _GDK_WINDOW_EDGE_NORTH_WEST,
+        WindowDragEdge.north: _GDK_WINDOW_EDGE_NORTH,
+        WindowDragEdge.northEast: _GDK_WINDOW_EDGE_NORTH_EAST,
+        WindowDragEdge.west: _GDK_WINDOW_EDGE_WEST,
+        WindowDragEdge.east: _GDK_WINDOW_EDGE_EAST,
+        WindowDragEdge.southWest: _GDK_WINDOW_EDGE_SOUTH_WEST,
+        WindowDragEdge.south: _GDK_WINDOW_EDGE_SOUTH,
+        WindowDragEdge.southEast: _GDK_WINDOW_EDGE_SOUTH_EAST,
+      }[edge]!,
+    );
+  }
 }
 
 /// Implementation of [DialogWindowController] for the Linux platform.
@@ -936,5 +1006,30 @@ class DialogWindowControllerLinux extends DialogWindowController {
     } else {
       _window.deiconify();
     }
+  }
+
+  @override
+  @internal
+  void beginMoveDrag(int button) {
+    _window.beginMoveDrag(button: button);
+  }
+
+  @override
+  @internal
+  void beginResizeDrag(int button, WindowDragEdge edge) {
+    _window.beginResizeDrag(
+      button: button,
+      edge: {
+        WindowDragEdge.northWest: _GDK_WINDOW_EDGE_NORTH_WEST,
+        WindowDragEdge.northWest: _GDK_WINDOW_EDGE_NORTH_WEST,
+        WindowDragEdge.north: _GDK_WINDOW_EDGE_NORTH,
+        WindowDragEdge.northEast: _GDK_WINDOW_EDGE_NORTH_EAST,
+        WindowDragEdge.west: _GDK_WINDOW_EDGE_WEST,
+        WindowDragEdge.east: _GDK_WINDOW_EDGE_EAST,
+        WindowDragEdge.southWest: _GDK_WINDOW_EDGE_SOUTH_WEST,
+        WindowDragEdge.south: _GDK_WINDOW_EDGE_SOUTH,
+        WindowDragEdge.southEast: _GDK_WINDOW_EDGE_SOUTH_EAST,
+      }[edge]!,
+    );
   }
 }

@@ -95,6 +95,96 @@ class RegularWindowContent extends StatelessWidget {
                   'Device Pixel Ratio: $dpr',
                   textAlign: TextAlign.center,
                 ),
+                const SizedBox(height: 20),
+                Text('Move/Resize:'),
+                Column(
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        _DragBox(
+                          onStart: (int button) {
+                            window.beginResizeDrag(
+                              button,
+                              WindowDragEdge.northWest,
+                            );
+                          },
+                          child: Text('↖'),
+                        ),
+                        _DragBox(
+                          onStart: (int button) {
+                            window.beginResizeDrag(
+                              button,
+                              WindowDragEdge.north,
+                            );
+                          },
+                          child: Text('↑'),
+                        ),
+                        _DragBox(
+                          onStart: (int button) {
+                            window.beginResizeDrag(
+                              button,
+                              WindowDragEdge.northEast,
+                            );
+                          },
+                          child: Text('↗'),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: <Widget>[
+                        _DragBox(
+                          onStart: (int button) {
+                            window.beginResizeDrag(button, WindowDragEdge.west);
+                          },
+                          child: Text('←'),
+                        ),
+                        _DragBox(
+                          onStart: (int button) {
+                            window.beginMoveDrag(button);
+                          },
+                          child: Text('∷'),
+                        ),
+                        _DragBox(
+                          onStart: (int button) {
+                            window.beginResizeDrag(button, WindowDragEdge.east);
+                          },
+                          child: Text('→'),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: <Widget>[
+                        _DragBox(
+                          onStart: (int button) {
+                            window.beginResizeDrag(
+                              button,
+                              WindowDragEdge.southWest,
+                            );
+                          },
+                          child: Text('↙'),
+                        ),
+                        _DragBox(
+                          onStart: (int button) {
+                            window.beginResizeDrag(
+                              button,
+                              WindowDragEdge.south,
+                            );
+                          },
+                          child: Text('↓'),
+                        ),
+                        _DragBox(
+                          onStart: (int button) {
+                            window.beginResizeDrag(
+                              button,
+                              WindowDragEdge.southEast,
+                            );
+                          },
+                          child: Text('↘'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ],
             ),
           ],
@@ -139,4 +229,32 @@ class CallbackRegularWindowControllerDelegate
   }
 
   final VoidCallback onDestroyed;
+}
+
+class _DragBox extends StatelessWidget {
+  _DragBox({super.key, required this.onStart, required this.child});
+
+  final Function(int button) onStart;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+      onPointerDown: (PointerDownEvent event) {
+        onStart(0);
+      },
+      child: SizedBox(
+        width: 40,
+        height: 40,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.grey.shade300,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          child: child,
+        ),
+      ),
+    );
+  }
 }

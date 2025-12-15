@@ -168,6 +168,14 @@ void InternalFlutterWindows_WindowManager_SetFullscreen(
 
 FLUTTER_EXPORT
 bool InternalFlutterWindows_WindowManager_GetFullscreen(HWND hwnd);
+
+FLUTTER_EXPORT
+void InternalFlutterWindows_WindowManager_BeginMoveDrag(HWND hwnd, int button);
+
+FLUTTER_EXPORT
+void InternalFlutterWindows_WindowManager_BeginResizeDrag(HWND hwnd,
+                                                          int button,
+                                                          int edge);
 }
 
 #endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_WINDOW_MANAGER_H_
