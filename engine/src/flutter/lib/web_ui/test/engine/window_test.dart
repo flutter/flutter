@@ -26,7 +26,7 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-Future<void> testMain() async {
+void testMain() {
   setUpImplicitView();
 
   test('onTextScaleFactorChanged preserves the zone', () {
@@ -521,33 +521,30 @@ Future<void> testMain() async {
     domWindow['screen'] = original;
   });
 
-  test(
-    'SingletonFlutterWindow implements locale, locales, and locale change notifications',
-    () async {
-      // This will count how many times we notified about locale changes.
-      var localeChangedCount = 0;
-      myWindow.onLocaleChanged = () {
-        localeChangedCount += 1;
-      };
+  test('SingletonFlutterWindow implements locale, locales, and locale change notifications', () {
+    // This will count how many times we notified about locale changes.
+    var localeChangedCount = 0;
+    myWindow.onLocaleChanged = () {
+      localeChangedCount += 1;
+    };
 
-      // We populate the initial list of locales automatically (only test that we
-      // got some locales; some contributors may be in different locales, so we
-      // can't test the exact contents).
-      expect(myWindow.locale, isA<ui.Locale>());
-      expect(myWindow.locales, isNotEmpty);
+    // We populate the initial list of locales automatically (only test that we
+    // got some locales; some contributors may be in different locales, so we
+    // can't test the exact contents).
+    expect(myWindow.locale, isA<ui.Locale>());
+    expect(myWindow.locales, isNotEmpty);
 
-      // Trigger a change notification (reset locales because the notification
-      // doesn't actually change the list of languages; the test only observes
-      // that the list is populated again).
-      EnginePlatformDispatcher.instance.debugResetLocales();
-      expect(myWindow.locales, isEmpty);
-      expect(myWindow.locale, equals(const ui.Locale.fromSubtags()));
-      expect(localeChangedCount, 0);
-      domWindow.dispatchEvent(createDomEvent('Event', 'languagechange'));
-      expect(myWindow.locales, isNotEmpty);
-      expect(localeChangedCount, 1);
-    },
-  );
+    // Trigger a change notification (reset locales because the notification
+    // doesn't actually change the list of languages; the test only observes
+    // that the list is populated again).
+    EnginePlatformDispatcher.instance.debugResetLocales();
+    expect(myWindow.locales, isEmpty);
+    expect(myWindow.locale, equals(const ui.Locale.fromSubtags()));
+    expect(localeChangedCount, 0);
+    domWindow.dispatchEvent(createDomEvent('Event', 'languagechange'));
+    expect(myWindow.locales, isNotEmpty);
+    expect(localeChangedCount, 1);
+  });
 
   test('dispatches browser event on flutter/service_worker channel', () async {
     final completer = Completer<void>();
@@ -776,7 +773,7 @@ Future<void> testMain() async {
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(null);
     });
 
-    test('JsViewConstraints are passed and used to compute physicalConstraints', () async {
+    test('JsViewConstraints are passed and used to compute physicalConstraints', () {
       view = EngineFlutterView(
         EnginePlatformDispatcher.instance,
         host,
@@ -802,7 +799,7 @@ Future<void> testMain() async {
   });
 
   group('keyboard resize behavior', () {
-    setUp(() async {
+    setUp(() {
       // Simulate keyboard being up.
       textEditing.isEditing = true;
       ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.android;
@@ -813,7 +810,7 @@ Future<void> testMain() async {
       ui_web.browser.debugOperatingSystemOverride = null;
     });
 
-    test('physicalSize remains unchanged when keyboard is up', () async {
+    test('physicalSize remains unchanged when keyboard is up', () {
       final ui.Size initialPhysicalSize = myWindow.physicalSize;
 
       // Pick a smaller size.
