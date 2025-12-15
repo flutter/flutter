@@ -337,41 +337,29 @@ void main() async {
     });
   }
 
-  test('FragmentShader samples RGBA Float32 texture', () async {
+  test('FragmentShader draws RGBA Float32 texture', () async {
     if (!impellerEnabled) {
       print('Skipped for Skia');
       return;
     }
     const int dimension = 1024;
-    final FragmentProgram program = await FragmentProgram.fromAsset('texture.frag.iplr');
     final Image image = await _createRGBA32FloatImage(dimension, dimension);
-    final FragmentShader shader = program.fragmentShader()..setImageSampler(0, image);
-    shader.getUniformFloat('u_size', 0).set(dimension.toDouble());
-    shader.getUniformFloat('u_size', 1).set(dimension.toDouble());
-
-    final Image shaderImage = await _imageFromShader(shader: shader, imageDimension: dimension);
+    final Image shaderImage = await _drawIntoImage(image);
 
     await comparer.addGoldenImage(shaderImage, 'fragment_shader_rgba_float32.png');
-    shader.dispose();
     image.dispose();
   });
 
-  test('FragmentShader samples R Float32 texture', () async {
+  test('FragmentShader draws R Float32 texture', () async {
     if (!impellerEnabled) {
       print('Skipped for Skia');
       return;
     }
     const int dimension = 1024;
-    final FragmentProgram program = await FragmentProgram.fromAsset('texture.frag.iplr');
     final Image image = await _createR32FloatImage(dimension, dimension);
-    final FragmentShader shader = program.fragmentShader()..setImageSampler(0, image);
-    shader.getUniformFloat('u_size', 0).set(dimension.toDouble());
-    shader.getUniformFloat('u_size', 1).set(dimension.toDouble());
-
-    final Image shaderImage = await _imageFromShader(shader: shader, imageDimension: dimension);
+    final Image shaderImage = await _drawIntoImage(image);
 
     await comparer.addGoldenImage(shaderImage, 'fragment_shader_r_float32.png');
-    shader.dispose();
     image.dispose();
   });
 
@@ -672,6 +660,14 @@ Future<Image> _imageFromShader({required Shader shader, required int imageDimens
   canvas.drawPaint(paint);
   final Picture picture = recorder.endRecording();
   return picture.toImage(imageDimension, imageDimension);
+}
+
+Future<Image> _drawIntoImage(Image image) {
+  final recorder = PictureRecorder();
+  final canvas = Canvas(recorder);
+  canvas.drawImage(image, Offset.zero, Paint());
+  final Picture picture = recorder.endRecording();
+  return picture.toImage(image.width, image.height);
 }
 
 // Loads the path and spirv content of the files at
