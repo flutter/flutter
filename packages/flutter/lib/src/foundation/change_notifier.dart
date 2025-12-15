@@ -516,22 +516,34 @@ class _MergingListenable extends Listenable {
 
 /// A [ChangeNotifier] that holds a single value.
 ///
-/// When [value] is replaced with something that is not equal to the old
-/// value as evaluated by the equality operator ==, this class notifies its
+/// When [value] is replaced with a new value that is **not equal** to the old
+/// value as evaluated by the equality operator (`==`), this class notifies its
 /// listeners.
 ///
 /// ## Limitations
 ///
-/// Because this class only notifies listeners when the [value]'s _identity_
-/// changes, listeners will not be notified when mutable state within the
-/// value itself changes.
+/// Notifications are triggered based on **equality (`==`)**, not on mutations
+/// within the value itself. As a result, changes to mutable objects that do not
+/// affect their equality will not cause listeners to be notified.
 ///
-/// For example, a `ValueNotifier<List<int>>` will not notify its listeners
-/// when the _contents_ of the list are changed.
+/// For example, a `ValueNotifier<List<int>>` will not notify its listeners when
+/// the contents of the list are modified without assigning a new value:
 ///
-/// As a result, this class is best used with only immutable data types.
+/// ```dart
+/// final notifier = ValueNotifier<List<int>>([1, 2]);
 ///
-/// For mutable data types, consider extending [ChangeNotifier] directly.
+/// notifier.addListener(() {
+///   print('Notified');
+/// });
+///
+/// notifier.value.add(3); // No notification
+/// ```
+///
+/// Because of this behavior, [ValueNotifier] is best used with immutable data
+/// types.
+///
+/// For mutable data types, consider extending [ChangeNotifier] directly and
+/// calling [notifyListeners] manually when changes occur.
 class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
   /// Creates a [ChangeNotifier] that wraps this value.
   ValueNotifier(this._value) {
