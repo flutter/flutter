@@ -2211,12 +2211,11 @@ typedef ConditionalElementVisitor = bool Function(Element element);
 /// widget returned by the [StatelessWidget.build] or [State.build] function.
 /// (And similarly, the parent of any children for [RenderObjectWidget]s.)
 ///
-/// In particular, this means that the BuildContext provided to a build() method
-/// represents the parent context of the widgets returned from that method.
-/// Those returned widgets do not inherit that same context, each one receives its
-/// own BuildContext once the framework finishes building them. This can lead to
-/// some tricky cases. For example, [Theme.of(context)] looks for the nearest enclosing
-/// [Theme] of the given build context. If a build method for a widget Q includes a [Theme]
+/// In particular, this means that within a build method, the build context of
+/// the widget of the build method is not the same as the build context of the
+/// widgets returned by that build method. This can lead to some tricky cases.
+/// For example, [Theme.of(context)] looks for the nearest enclosing [Theme] of
+/// the given build context. If a build method for a widget Q includes a [Theme]
 /// within its returned widget tree, and attempts to use [Theme.of] passing its
 /// own context, the build method for Q will not find that [Theme] object. It
 /// will instead find whatever [Theme] was an ancestor to the widget Q. If the
