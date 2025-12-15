@@ -13,6 +13,7 @@ import android.view.SurfaceHolder
 import android.view.SurfaceView // Changed from View
 import android.view.View
 import android.view.ViewGroup
+import io.flutter.Log;
 import io.flutter.plugin.platform.PlatformView
 import io.flutter.plugin.platform.PlatformViewFactory
 
