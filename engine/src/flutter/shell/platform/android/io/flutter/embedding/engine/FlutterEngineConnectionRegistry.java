@@ -333,7 +333,8 @@ import java.util.Set;
         activity.getIntent() != null
             ? activity
                 .getIntent()
-                .getBooleanExtra(FlutterShellArgs.ARG_KEY_ENABLE_SOFTWARE_RENDERING, false)
+                .getBooleanExtra(
+                    FlutterShellArgsFromIntent.ARG_KEY_ENABLE_SOFTWARE_RENDERING, false)
             : false;
 
     // Previously, --enable-software-rendering could be set here via Intent. Warn developers
@@ -345,7 +346,7 @@ import java.util.Set;
       if (intent.hasExtra("enable-software-rendering")) {
         Log.w(
             TAG,
-            "Setting engine flags on Android via Intent is no longer supported. To enable software rendering, set the "
+            "Support for setting engine flags on Android via Intent will soon be dropped; see https://github.com/flutter/flutter/issues/172553 for more information on this breaking change. To migrate, set the "
                 + FlutterShellArgs.ENABLE_SOFTWARE_RENDERING.metadataKey
                 + " metadata in the application manifest. See https://github.com/flutter/flutter/blob/main/docs/engine/Android-Flutter-Shell-Arguments.md for more info.");
       }
@@ -353,7 +354,6 @@ import java.util.Set;
 
     // Check manifest for software rendering configuration.
     if (useSoftwareRendering == false) {
-      Log.e("CAMILLE", "setting software rendering in an unexpected place");
       useSoftwareRendering = flutterLoader.getSofwareRenderingEnabledViaManifest();
     }
 
