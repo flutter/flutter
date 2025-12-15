@@ -119,10 +119,17 @@ struct ProcTable {
   ///
   bool TraceIsEnabled() const;
 
+// The proc table references AChoreographer_postFrameCallback which is
+// deprecated in API level 29+. We suppress the warning because we dynamically
+// check for AChoreographer_postFrameCallback64 availability at runtime and
+// only use the older API on devices where the new one is not available.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #define DEFINE_PROC(name, api) \
   AndroidProc<decltype(name)> name = {.proc_name = #name};
   FOR_EACH_ANDROID_PROC(DEFINE_PROC);
 #undef DEFINE_PROC
+#pragma GCC diagnostic pop
 
  private:
   std::vector<fml::RefPtr<fml::NativeLibrary>> libraries_;
