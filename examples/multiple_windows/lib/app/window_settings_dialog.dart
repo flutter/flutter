@@ -133,6 +133,7 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
           widget.settings.dialogSize.height,
     );
   }
+
   @override
   void dispose() {
     _regularWidthController.removeListener(_updateRegularSize);
