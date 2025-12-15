@@ -9,6 +9,8 @@
 #include <unordered_map>
 
 #include "compute_pipeline_descriptor.h"
+#include "impeller/base/thread.h"
+#include "impeller/base/thread_safety.h"
 #include "impeller/renderer/pipeline.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 
@@ -74,6 +76,16 @@ class PipelineLibrary : public std::enable_shared_from_this<PipelineLibrary> {
   virtual void RemovePipelinesWithEntryPoint(
       std::shared_ptr<const ShaderFunction> function) = 0;
 
+  void LogPipelineUsage(const PipelineDescriptor& p);
+
+  void LogPipelineCreation(const PipelineDescriptor& p);
+
+  std::unordered_map<PipelineDescriptor,
+                     int,
+                     ComparableHash<PipelineDescriptor>,
+                     ComparableEqual<PipelineDescriptor>>
+  GetPipelineUseCounts() const;
+
  protected:
   PipelineLibrary();
 
@@ -81,6 +93,17 @@ class PipelineLibrary : public std::enable_shared_from_this<PipelineLibrary> {
   PipelineLibrary(const PipelineLibrary&) = delete;
 
   PipelineLibrary& operator=(const PipelineLibrary&) = delete;
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG || \
+    FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE
+  mutable RWMutex pipeline_use_counts_mutex_;
+
+  std::unordered_map<PipelineDescriptor,
+                     int,
+                     ComparableHash<PipelineDescriptor>,
+                     ComparableEqual<PipelineDescriptor>>
+      pipeline_use_counts_ IPLR_GUARDED_BY(pipeline_use_counts_mutex_);
+
+#endif
 };
 
 }  // namespace impeller
