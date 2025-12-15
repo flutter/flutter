@@ -525,6 +525,7 @@ class _MergingListenable extends Listenable {
 /// Notifications are triggered based on **equality (`==`)**, not on mutations
 /// within the value itself. As a result, changes to mutable objects that do not
 /// affect their equality will not cause listeners to be notified.
+///
 /// For example, a `ValueNotifier<List<int>>` will not notify its listeners when
 /// the contents of the list are modified without assigning a new value.
 ///
