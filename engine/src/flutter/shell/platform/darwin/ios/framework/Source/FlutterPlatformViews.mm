@@ -578,6 +578,32 @@ static BOOL _preparedOnce = NO;
   return NO;
 }
 
+- (void)searchAndFixWebView:(UIView*)view {
+  if ([view isKindOfClass:[WKWebView class]]) {
+    return [self searchAndFixWebViewGestureRecognzier:view];
+  } else {
+    for (UIView* subview in view.subviews) {
+      [self searchAndFixWebView:subview];
+    }
+  }
+}
+
+- (void)searchAndFixWebViewGestureRecognzier:(UIView*)view {
+  NSArray* recognizers = view.gestureRecognizers;
+  if (recognizers != nil && recognizers.count > 0) {
+    for (UIGestureRecognizer* recognizer in recognizers) {
+      if (recognizer.enabled &&
+          [NSStringFromClass([recognizer class]) hasSuffix:@"TouchEventsGestureRecognizer"]) {
+        recognizer.enabled = NO;
+        recognizer.enabled = YES;
+      }
+    }
+  }
+  for (UIView* subview in view.subviews) {
+    [self searchAndFixWebViewGestureRecognzier:subview];
+  }
+}
+
 - (void)blockGesture {
   switch (_blockingPolicy) {
     case FlutterPlatformViewGestureRecognizersBlockingPolicyEager:
@@ -593,9 +619,10 @@ static BOOL _preparedOnce = NO;
       // FlutterPlatformViewGestureRecognizersBlockingPolicyEager, but we should try it if a similar
       // issue arises for the other policy.
       if (@available(iOS 26.0, *)) {
-        // This workaround does not work on iOS 26.
-        // TODO(hellohuanlin): find a solution for iOS 26,
-        // https://github.com/flutter/flutter/issues/175099.
+        // This performs a nested DFS, with the outer one searching for any web view, and the inner
+        // one searching for a TouchEventsGestureRecognizer inside the web view. Once found, disable
+        // and immediately reenable it to reset its state.
+        [self searchAndFixWebView:self.embeddedView];
       } else if (@available(iOS 18.2, *)) {
         // This workaround is designed for WKWebView only. The 1P web view plugin provides a
         // WKWebView itself as the platform view. However, some 3P plugins provide wrappers of
