@@ -40,7 +40,8 @@ class HostWindowDialog : public HostWindow {
   static Rect GetInitialRect(FlutterWindowsEngine* engine,
                              const WindowSizeRequest& preferred_size,
                              const BoxConstraints& constraints,
-                             std::optional<HWND> const& owner_window);
+                             std::optional<HWND> const& owner_window,
+                             bool decorated);
 };
 }  // namespace flutter
 
