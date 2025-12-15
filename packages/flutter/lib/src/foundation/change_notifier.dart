@@ -525,21 +525,8 @@ class _MergingListenable extends Listenable {
 /// Notifications are triggered based on **equality (`==`)**, not on mutations
 /// within the value itself. As a result, changes to mutable objects that do not
 /// affect their equality will not cause listeners to be notified.
-///
-/// {@tool snippet}
 /// For example, a `ValueNotifier<List<int>>` will not notify its listeners when
-/// the contents of the list are modified without assigning a new value:
-///
-/// ```dart
-/// final notifier = ValueNotifier<List<int>>([1, 2]);
-///
-/// notifier.addListener(() {
-///   print('Notified');
-/// });
-///
-/// notifier.value.add(3); // No notification
-/// ```
-/// {@end-tool}
+/// the contents of the list are modified without assigning a new value.
 ///
 /// Because of this behavior, [ValueNotifier] is best used with immutable data
 /// types.
