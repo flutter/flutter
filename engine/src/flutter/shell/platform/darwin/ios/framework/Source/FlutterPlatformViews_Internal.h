@@ -148,7 +148,6 @@
 
 // Sets flutterAccessibilityContainer as this view's accessibilityContainer.
 @property(nonatomic, retain) id flutterAccessibilityContainer;
-@property(nonatomic, readonly) FlutterPlatformViewGestureRecognizersBlockingPolicy blockingPolicy;
 @end
 
 @interface UIView (FirstResponder)
