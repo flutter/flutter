@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -19,11 +21,13 @@ import '../../../src/fakes.dart';
 import '../../../src/package_config.dart';
 import '../../../src/testbed.dart';
 
-const Map<String, String> _fakePackageVersions = {
+final Map<String, String> _fakePackageVersions = {
   'foo': '4.3.23',
   'bar': '2.6.1',
   'baz': '1.2.5',
   'fizz': '1.2.3-alpha1',
+  'lesslong': '2.12.7865-${'alpha' * 14}',
+  'morelong': '2.12.78650-${'alpha' * 14}',
 };
 
 void main() {
@@ -35,6 +39,11 @@ void main() {
   late List<String> commandArgs;
 
   final Platform linux = FakePlatform(environment: <String, String>{});
+
+  Dart2WasmTarget createTarget() =>
+      Dart2WasmTarget(const WasmCompilerConfig(dryRun: true), fakeAnalytics)
+        ..dryRunRandom = Random(0);
+
   setUp(() {
     testbed = TestBed(
       setup: () {
@@ -105,7 +114,7 @@ name: my_app
     'wasm dry run success',
     () => testbed.run(() async {
       processManager.addCommand(FakeCommand(command: commandArgs));
-      final target = Dart2WasmTarget(const WasmCompilerConfig(dryRun: true), fakeAnalytics);
+      final Dart2WasmTarget target = createTarget();
       await target.build(environment);
 
       expect(fakeAnalytics.sentEvents, hasLength(1));
@@ -132,7 +141,7 @@ package:foo/some/path.dart 6:1 - dart:html unsupported (0)
 ''',
         ),
       );
-      final target = Dart2WasmTarget(const WasmCompilerConfig(dryRun: true), fakeAnalytics);
+      final Dart2WasmTarget target = createTarget();
       await target.build(environment);
 
       expect(fakeAnalytics.sentEvents, hasLength(1));
@@ -160,13 +169,13 @@ package:foo/some/path.dart 6:1 - dart:html unsupported (0)
           stderr: 'Failure reason',
         ),
       );
-      final target = Dart2WasmTarget(const WasmCompilerConfig(dryRun: true), fakeAnalytics);
+      final Dart2WasmTarget target = createTarget();
       await target.build(environment);
 
       expect(fakeAnalytics.sentEvents, hasLength(1));
 
       final Event event = fakeAnalytics.sentEvents[0];
-      expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
+      expect(event.eventName, DashEvent.flutterWasmDryRunPackage);
       expect(event.eventData, hasLength(2));
       expect(event.eventData['result'], 'failure');
       expect(event.eventData['exitCode'], 254);
@@ -194,7 +203,7 @@ package:foo/some(5)/path.dart 103:20 - dart:io unsupported (4)
 ''',
         ),
       );
-      final target = Dart2WasmTarget(const WasmCompilerConfig(dryRun: true), fakeAnalytics);
+      final Dart2WasmTarget target = createTarget();
       await target.build(environment);
 
       expect(fakeAnalytics.sentEvents, hasLength(1));
@@ -242,7 +251,7 @@ package:priv/some/path.dart 195:54 - dart:html unsupported (0)
 ''',
         ),
       );
-      final target = Dart2WasmTarget(const WasmCompilerConfig(dryRun: true), fakeAnalytics);
+      final Dart2WasmTarget target = createTarget();
       await target.build(environment);
 
       expect(fakeAnalytics.sentEvents, hasLength(1));
@@ -274,7 +283,7 @@ package:priv/some/local/path.dart 243:12 - package:js unsupported (2)
 ''',
         ),
       );
-      final target = Dart2WasmTarget(const WasmCompilerConfig(dryRun: true), fakeAnalytics);
+      final Dart2WasmTarget target = createTarget();
       await target.build(environment);
 
       expect(fakeAnalytics.sentEvents, hasLength(1));
@@ -316,7 +325,7 @@ package:priv/some/path.dart 193:32 - package:js unsupported (2)
 ''',
         ),
       );
-      final target = Dart2WasmTarget(const WasmCompilerConfig(dryRun: true), fakeAnalytics);
+      final Dart2WasmTarget target = createTarget();
       await target.build(environment);
 
       expect(fakeAnalytics.sentEvents, hasLength(1));
@@ -343,7 +352,7 @@ package:priv/some/path.dart 193:32 - package:js unsupported (2)
 Found incompatibilities with WebAssembly.
 
 package:foo/some/path.dart 6:1 - dart:html unsupported (0)
-package:bar/some/path.dart 8:10 - package:hs unsupported (2)
+package:bar/some/path.dart 8:10 - package:js unsupported (2)
 ''',
         ),
       );
@@ -353,7 +362,7 @@ package:bar/some/path.dart 8:10 - package:hs unsupported (2)
           .childFile('package_config.json')
           .writeAsStringSync('Invalid file');
 
-      final target = Dart2WasmTarget(const WasmCompilerConfig(dryRun: true), fakeAnalytics);
+      final Dart2WasmTarget target = createTarget();
       await target.build(environment);
 
       expect(fakeAnalytics.sentEvents, hasLength(1));
@@ -365,6 +374,107 @@ package:bar/some/path.dart 8:10 - package:hs unsupported (2)
       expect(event.eventData['exitCode'], 254);
       expect(event.eventData['error'], 'packageConfigNotLoaded');
       expect(event.eventData['findings'], '0,2');
+    }),
+  );
+
+  test(
+    'wasm dry run package config load failure',
+    () => testbed.run(() async {
+      processManager.addCommand(
+        FakeCommand(
+          command: commandArgs,
+          exitCode: 254,
+          stdout: '''
+Found incompatibilities with WebAssembly.
+
+package:foo/some/path.dart 6:1 - dart:html unsupported (0)
+package:bar/some/path.dart 8:10 - package:js unsupported (2)
+''',
+        ),
+      );
+
+      fs.currentDirectory
+          .childDirectory('.dart_tool')
+          .childFile('package_config.json')
+          .writeAsStringSync('Invalid file');
+
+      final Dart2WasmTarget target = createTarget();
+      await target.build(environment);
+
+      expect(fakeAnalytics.sentEvents, hasLength(1));
+
+      final Event event = fakeAnalytics.sentEvents[0];
+      expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
+      expect(event.eventData, hasLength(4));
+      expect(event.eventData['result'], 'findings');
+      expect(event.eventData['exitCode'], 254);
+      expect(event.eventData['error'], 'packageConfigNotLoaded');
+      expect(event.eventData['findings'], '0,2');
+    }),
+  );
+
+  test(
+    'wasm dry run findings include up to 100 characters',
+    () => testbed.run(() async {
+      processManager.addCommand(
+        FakeCommand(
+          command: commandArgs,
+          exitCode: 254,
+          stdout: '''
+Found incompatibilities with WebAssembly.
+
+package:foo/some/path.dart 6:1 - dart:html unsupported (0)
+package:lesslong/some/path.dart 9:20 - dart:html unsupported (0)
+''',
+        ),
+      );
+
+      final Dart2WasmTarget target = createTarget();
+      await target.build(environment);
+
+      expect(fakeAnalytics.sentEvents, hasLength(1));
+
+      final Event event = fakeAnalytics.sentEvents[0];
+      expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
+      expect(event.eventData, hasLength(3));
+      expect(event.eventData['result'], 'findings');
+      expect(event.eventData['exitCode'], 254);
+      expect(event.eventData['E0'], hasLength(100));
+      expect(
+        event.eventData['E0'],
+        'foo:${_fakePackageVersions['foo']},lesslong:${_fakePackageVersions['lesslong']}',
+      );
+    }),
+  );
+
+  test(
+    'wasm dry run findings truncate longer than 100 characters',
+    () => testbed.run(() async {
+      processManager.addCommand(
+        FakeCommand(
+          command: commandArgs,
+          exitCode: 254,
+          stdout: '''
+Found incompatibilities with WebAssembly.
+
+package:foo/some/path.dart 6:1 - dart:html unsupported (0)
+package:morelong/some/path.dart 9:20 - dart:html unsupported (0)
+''',
+        ),
+      );
+
+      final Dart2WasmTarget target = createTarget();
+      await target.build(environment);
+
+      expect(fakeAnalytics.sentEvents, hasLength(1));
+
+      final Event event = fakeAnalytics.sentEvents[0];
+      expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
+      expect(event.eventData, hasLength(3));
+      expect(event.eventData['result'], 'findings');
+      expect(event.eventData['exitCode'], 254);
+      expect(event.eventData['E0'], hasLength(10));
+      expect(event.eventData['E0'], 'foo:${_fakePackageVersions['foo']}');
     }),
   );
 }

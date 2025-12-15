@@ -4,6 +4,7 @@
 
 import 'dart:math';
 
+import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -405,6 +406,9 @@ class Dart2WasmTarget extends Dart2WebTarget {
           if (compilerConfig.sourceMaps) 'main.dart.wasm.map',
         ];
 
+  @visibleForTesting
+  Random? dryRunRandom;
+
   Future<void> _handleDryRunResult(Environment environment, RunResult runResult) async {
     final int exitCode = runResult.exitCode;
     final String stdout = runResult.stdout;
@@ -439,12 +443,12 @@ class Dart2WasmTarget extends Dart2WebTarget {
         'https://docs.flutter.dev/platform-integration/web/wasm\n',
       );
       result = 'findings';
-      final Map<String, Set<Uri>> importUriToErrorCode = {};
+      final Map<String, Set<Uri>> errorCodeToImportUris = {};
       for (final String line in stdout.split('\n')) {
         final Uri uri = Uri.parse(line.split(' ')[0]);
         final String? errorCode = RegExp(r'\(([0-9]+)\)\s*$').firstMatch(line)?.group(1);
         if (errorCode != null) {
-          (importUriToErrorCode[errorCode] ??= {}).add(uri);
+          (errorCodeToImportUris[errorCode] ??= {}).add(uri);
         }
       }
 
@@ -461,7 +465,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
             exitCode: exitCode,
             findingsInfo: {
               'error': 'packageConfigNotLoaded',
-              'findings': importUriToErrorCode.keys.join(','),
+              'findings': errorCodeToImportUris.keys.join(','),
             },
           ),
         );
@@ -482,11 +486,13 @@ class Dart2WasmTarget extends Dart2WebTarget {
         }
       }
 
-      importUriToErrorCode.forEach((String errorCode, Set<Uri> uris) {
+      errorCodeToImportUris.forEach((String errorCode, Set<Uri> uris) {
         final List<String> hostedPackageFindings = [];
+        // Randomize the URI order so that we
+        final urisList = <Uri>[...uris]..shuffle(dryRunRandom);
         var hostApp = false;
         var privatePackage = false;
-        for (final uri in uris) {
+        for (final uri in urisList) {
           final String packageName = uri.pathSegments.first;
           final String? hostedPackageVersion = hostedPackages[packageName];
           if (uri.scheme == 'package') {
@@ -507,9 +513,16 @@ class Dart2WasmTarget extends Dart2WebTarget {
           _ => null,
         };
 
-        final String findings = [?hpHint, ...hostedPackageFindings].join(',');
-        // The 100 character limit is imposed by google analytics.
-        findingsInfo['E$errorCode'] = findings.substring(0, min(100, findings.length));
+        final findingsBuffer = StringBuffer(hpHint ?? '');
+        for (final hostedPackageFinding in hostedPackageFindings) {
+          // Try to fit as many findings as we can into the 100 character limit imposed
+          // by google analytics.
+          final pendingString = '${findingsBuffer.isNotEmpty ? ',' : ''}$hostedPackageFinding';
+          if (findingsBuffer.length + pendingString.length <= 100) {
+            findingsBuffer.write(pendingString);
+          }
+        }
+        findingsInfo['E$errorCode'] = findingsBuffer.toString();
       });
     }
     result ??= 'unknown';
