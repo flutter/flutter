@@ -636,8 +636,6 @@ Future<Image> _imageFromShader({required Shader shader, required int imageDimens
   return picture.toImage(imageDimension, imageDimension);
 }
 
-
-
 // Loads the path and spirv content of the files at
 // $FLUTTER_BUILD_DIRECTORY/gen/flutter/lib/spirv/test/$leafFolderName
 // This is synchronous so that tests can be inside of a loop with
@@ -743,4 +741,3 @@ Image _createOvalGradientImage({required int imageDimension}) {
     picture.dispose();
   }
 }
-

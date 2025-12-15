@@ -45,7 +45,10 @@ if (enable_unittests) {
 
   impellerc("compile_sdf_shaders") {
     mnemonic = "IMPELLERC_SDF"
-    shaders = [ "circle_sdf.frag", "sdf.frag" ]
+    shaders = [
+      "circle_sdf.frag",
+      "sdf.frag",
+    ]
     shader_target_flags = [
       "--sksl",
       "--runtime-stage-metal",
