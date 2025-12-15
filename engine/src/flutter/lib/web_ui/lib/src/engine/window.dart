@@ -309,7 +309,7 @@ class EngineFlutterView implements ui.FlutterView {
   /// presence. This allows the framework to correctly shrink its content using
   /// `resizeToAvoidBottomInset`. When the keyboard is dismissed, `_physicalSize`
   /// is updated to the actual new physical size of the window.
-  void _handleBrowserResize(ui.Size? newSize) {
+  void _handleBrowserResize(ui.Size? _) {
     StyleManager.scaleSemanticsHost(dom.semanticsHost, devicePixelRatio);
     final ui.Size newPhysicalSize = _computePhysicalSize();
     if (_shouldPreservePhysicalSizeOnResize && !_isRotation(newPhysicalSize)) {
