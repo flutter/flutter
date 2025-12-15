@@ -180,5 +180,40 @@ TEST(ReactorGLES, CanDeferOperations) {
   EXPECT_TRUE(did_run);
 }
 
+TEST(ReactorGLES, FramebufferDeletedOnOwnerThread) {
+  auto mock_gles_impl = std::make_unique<MockGLESImpl>();
+
+  EXPECT_CALL(*mock_gles_impl, GenFramebuffers(1, _))
+      .WillOnce([](GLsizei size, GLuint* queries) { queries[0] = 1234; });
+
+  std::shared_ptr<MockGLES> mock_gles =
+      MockGLES::Init(std::move(mock_gles_impl));
+  ProcTableGLES::Resolver resolver = kMockResolverGLES;
+  auto proc_table = std::make_unique<ProcTableGLES>(resolver);
+  auto worker = std::make_shared<TestWorker>();
+  auto reactor = std::make_shared<ReactorGLES>(std::move(proc_table));
+  reactor->AddWorker(worker);
+
+  HandleGLES handle = reactor->CreateHandle(HandleType::kFrameBuffer);
+
+  std::thread::id cleanup_thread;
+  reactor->RegisterCleanupCallback(
+      handle, [&]() { cleanup_thread = std::this_thread::get_id(); });
+
+  reactor->CollectHandle(handle);
+
+  std::thread thread([&] {
+    EXPECT_TRUE(reactor->AddOperation([](const ReactorGLES& reactor) {}));
+    EXPECT_TRUE(reactor->React());
+  });
+  thread.join();
+
+  EXPECT_EQ(cleanup_thread, std::thread::id());
+
+  EXPECT_TRUE(reactor->AddOperation([](const ReactorGLES& reactor) {}));
+  EXPECT_TRUE(reactor->React());
+  EXPECT_EQ(cleanup_thread, std::this_thread::get_id());
+}
+
 }  // namespace testing
 }  // namespace impeller
