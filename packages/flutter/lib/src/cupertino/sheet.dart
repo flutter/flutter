@@ -118,6 +118,9 @@ final Animatable<double> _kScaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kS
 /// `enableDrag` is `false`, users cannot dismiss the sheet by dragging, and it
 /// can only be closed by calling [CupertinoSheetRoute.popSheet].
 ///
+/// The `settings` argument define the settings for this route. See
+/// [RouteSettings] for details.
+///
 /// iOS sheet widgets are generally designed to be tightly coupled to the context
 /// of the widget that opened the sheet. As such, it is not recommended to push
 /// a non-sheet route that covers the sheet without first popping the sheet. If
@@ -155,6 +158,7 @@ Future<T?> showCupertinoSheet<T>({
   WidgetBuilder? builder,
   bool useNestedNavigation = false,
   bool enableDrag = true,
+  RouteSettings? settings,
 }) {
   assert(pageBuilder != null || builder != null);
 
@@ -195,10 +199,9 @@ Future<T?> showCupertinoSheet<T>({
     };
   }
 
-  return Navigator.of(
-    context,
-    rootNavigator: true,
-  ).push<T>(CupertinoSheetRoute<T>(builder: widgetBuilder, enableDrag: enableDrag));
+  return Navigator.of(context, rootNavigator: true).push<T>(
+    CupertinoSheetRoute<T>(builder: widgetBuilder, enableDrag: enableDrag, settings: settings),
+  );
 }
 
 /// Provides an iOS-style sheet transition.

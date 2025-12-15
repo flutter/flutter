@@ -652,6 +652,58 @@ void main() {
     expect(find.text('Page: /next'), findsOneWidget);
   });
 
+  testWidgets('sheet with RouteSettings', (WidgetTester tester) async {
+    late RouteSettings currentRouteSetting;
+    final GlobalKey scaffoldKey = GlobalKey();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        navigatorObservers: <NavigatorObserver>[
+          _ClosureNavigatorObserver(
+            onDidChange: (Route<dynamic> newRoute) {
+              currentRouteSetting = newRoute.settings;
+            },
+          ),
+        ],
+        home: CupertinoPageScaffold(
+          key: scaffoldKey,
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                const Text('Page 1'),
+                CupertinoButton(
+                  onPressed: () {
+                    showCupertinoSheet<void>(
+                      settings: const RouteSettings(name: 'simpleroute'),
+                      context: scaffoldKey.currentContext!,
+                      pageBuilder: (BuildContext context) {
+                        return const CupertinoPageScaffold(child: Text('Hello'));
+                      },
+                    );
+                  },
+                  child: const Text('Push Page 2'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(currentRouteSetting.name, '/');
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Hello'), findsNothing);
+
+    await tester.tap(find.text('Push Page 2'));
+    await tester.pumpAndSettle();
+    expect(find.text('Hello'), findsOneWidget);
+    expect(currentRouteSetting.name, 'simpleroute');
+
+    Navigator.of(scaffoldKey.currentContext!).pop();
+    await tester.pumpAndSettle();
+    expect(currentRouteSetting.name, '/');
+  });
+
   testWidgets('content does not go below the bottom of the screen', (WidgetTester tester) async {
     final GlobalKey scaffoldKey = GlobalKey();
 
@@ -1553,4 +1605,23 @@ void main() {
       );
     },
   );
+}
+
+class _ClosureNavigatorObserver extends NavigatorObserver {
+  _ClosureNavigatorObserver({required this.onDidChange});
+
+  final void Function(Route<dynamic> newRoute) onDidChange;
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) => onDidChange(route);
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) => onDidChange(previousRoute!);
+
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) =>
+      onDidChange(previousRoute!);
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) => onDidChange(newRoute!);
 }
