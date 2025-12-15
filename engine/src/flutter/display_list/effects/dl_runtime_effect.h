@@ -23,6 +23,9 @@ class DlRuntimeEffect : public SkRefCnt {
 
   virtual std::shared_ptr<impeller::RuntimeStage> runtime_stage() const = 0;
 
+  /// Returns the total combined size of all uniforms in bytes.
+  virtual size_t uniform_size() const = 0;
+
  protected:
   DlRuntimeEffect();
   virtual ~DlRuntimeEffect();

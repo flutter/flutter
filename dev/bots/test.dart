@@ -126,6 +126,7 @@ Future<void> main(List<String> args) async {
       'framework_coverage': frameworkCoverageRunner,
       'framework_tests': frameworkTestsRunner,
       'tool_tests': _runToolTests,
+      'tool_tests_commands': _runCommandsToolTests,
       'web_tool_tests': _runWebToolTests,
       'tool_integration_tests': _runIntegrationToolTests,
       'android_preview_tool_integration_tests': androidPreviewIntegrationToolTestsRunner,
@@ -185,10 +186,20 @@ Future<void> _runGeneralToolTests() async {
 }
 
 Future<void> _runCommandsToolTests() async {
+  final List<File> allFiles = Directory(
+    path.join(_toolsPath, 'test', 'commands.shard'),
+  ).listSync(recursive: true).whereType<File>().toList();
+  final allTests = <String>[];
+  for (final file in allFiles) {
+    if (file.path.endsWith('_test.dart')) {
+      allTests.add(file.path);
+    }
+  }
+
   await runDartTest(
     _toolsPath,
     forceSingleCore: true,
-    testPaths: <String>[path.join('test', 'commands.shard')],
+    testPaths: selectIndexOfTotalSubshard<String>(allTests),
   );
 }
 
@@ -244,7 +255,6 @@ Future<void> _runWidgetPreviewScaffoldToolTests() async {
 Future<void> _runToolTests() async {
   await selectSubshard(<String, ShardRunner>{
     'general': _runGeneralToolTests,
-    'commands': _runCommandsToolTests,
     'widget_preview_scaffold': _runWidgetPreviewScaffoldToolTests,
   });
 }

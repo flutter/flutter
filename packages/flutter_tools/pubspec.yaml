@@ -14,7 +14,7 @@ dependencies:
   archive: 3.6.1
   args: 2.7.0
   dds: 5.0.3
-  dwds: 26.1.0
+  dwds: 26.2.2
   code_builder: 4.11.0
   collection: 1.19.1
   completion: 1.0.2
@@ -58,7 +58,7 @@ dependencies:
   pubspec_parse: 1.5.0
 
   graphs: 2.3.2
-  hooks_runner: 1.0.0
+  hooks_runner: 1.0.1
   hooks: 1.0.0
   code_assets: 1.0.0
   data_assets: 0.19.6
@@ -127,4 +127,4 @@ dev_dependencies:
 dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
-# PUBSPEC CHECKSUM: vqtudk
+# PUBSPEC CHECKSUM: llegm7
