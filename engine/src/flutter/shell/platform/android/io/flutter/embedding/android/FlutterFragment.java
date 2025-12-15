@@ -252,7 +252,7 @@ public class FlutterFragment extends Fragment
     private String initialRoute = "/";
     private boolean handleDeeplinking = false;
     private String appBundlePath = null;
-    private ArrayList<String> shellArgs = null;
+    private String[] shellArgs = null;
     private RenderMode renderMode = RenderMode.surface;
     private TransparencyMode transparencyMode = TransparencyMode.transparent;
     private boolean shouldAttachEngineToActivity = true;
@@ -284,7 +284,7 @@ public class FlutterFragment extends Fragment
 
     /** Any special configuration arguments for the Flutter engine */
     @NonNull
-    public NewEngineFragmentBuilder flutterShellArgs(@NonNull ArrayList<String> shellArgs) {
+    public NewEngineFragmentBuilder flutterShellArgs(@NonNull String[] shellArgs) {
       this.shellArgs = shellArgs;
       return this;
     }
@@ -456,7 +456,7 @@ public class FlutterFragment extends Fragment
       // TODO(mattcarroll): determine if we should have an explicit FlutterTestFragment instead of
       // conflating.
       if (null != shellArgs) {
-        args.putStringArrayList(ARG_FLUTTER_INITIALIZATION_ARGS, shellArgs);
+        args.putStringArray(ARG_FLUTTER_INITIALIZATION_ARGS, shellArgs);
       }
       args.putString(
           ARG_FLUTTERVIEW_RENDER_MODE,
@@ -1297,9 +1297,8 @@ public class FlutterFragment extends Fragment
    */
   @Override
   @NonNull
-  public ArrayList<String> getFlutterShellArgs() {
-    ArrayList<String> flutterShellArgsArray =
-        getArguments().getStringArrayList(ARG_FLUTTER_INITIALIZATION_ARGS);
+  public String[] getFlutterShellArgs() {
+    String[] flutterShellArgsArray = getArguments().getStringArray(ARG_FLUTTER_INITIALIZATION_ARGS);
     return flutterShellArgsArray;
   }
 

@@ -36,7 +36,6 @@ import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.plugin.view.SensitiveContentPlugin;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -335,9 +334,7 @@ import java.util.Set;
 
     warnIfEngineFlagsSetViaIntent(host.getActivity().getIntent());
     String[] flutterShellArgs =
-        host.getFlutterShellArgs() == null
-            ? new String[0]
-            : host.getFlutterShellArgs().toArray(new String[0]);
+        host.getFlutterShellArgs() == null ? new String[0] : host.getFlutterShellArgs();
     FlutterEngineGroup group =
         engineGroup == null
             ? new FlutterEngineGroup(host.getContext(), flutterShellArgs)
@@ -351,8 +348,8 @@ import java.util.Set;
     isFlutterEngineFromHost = false;
   }
 
-  // Engine flags can no longer be set via Intent, so warn developers that
-  // engine shell arguments set that way will be ignored.
+  // Soon, engine flags will no longer be settable via Intent extras, so warn
+  // developers that engine shell arguments set that way will be ignored.
   private void warnIfEngineFlagsSetViaIntent(Intent intent) {
     if (intent.getExtras() == null) {
       return;
@@ -366,7 +363,7 @@ import java.util.Set;
       if (flag != null) {
         Log.w(
             TAG,
-            "Engine flags can no longer be set via Intent on Android. If you wish to set "
+            "Support for setting engine flags on Android via Intent will soon be dropped; see https://github.com/flutter/flutter/issues/172553 for more information on this breaking change. To migrate, set "
                 + flag.commandLineArgument
                 + ", see https://github.com/flutter/flutter/blob/main/docs/engine/Android-Flutter-Shell-Arguments.md for alternative methods.");
         break;
@@ -1123,7 +1120,7 @@ import java.util.Set;
     Lifecycle getLifecycle();
 
     @NonNull
-    ArrayList<String> getFlutterShellArgs();
+    String[] getFlutterShellArgs();
 
     /**
      * Returns the ID of a statically cached {@link io.flutter.embedding.engine.FlutterEngine} to
