@@ -53,8 +53,7 @@ if (is_android) {
   android_sdk = "${android_sdk_root}/platforms/android-${android_sdk_version}"
 
   # Path to the Android NDK and SDK.
-  android_ndk_version = "28.2.13676358"
-  android_ndk_root = "//flutter/third_party/android_tools/sdk/ndk/$android_ndk_version"
+  android_ndk_root = "//flutter/third_party/android_tools/ndk"
   android_ndk_include_dir = "$android_ndk_root/usr/include"
 
   android_sdk = "${android_sdk_root}/platforms/android-${android_sdk_version}"
