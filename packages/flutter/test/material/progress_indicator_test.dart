@@ -1984,6 +1984,7 @@ void main() {
     );
     expect(tester.getSize(find.byType(LinearProgressIndicator)), Size.zero);
   });
+
   testWidgets('LinearProgressIndicator clamps value', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
 
@@ -2057,17 +2058,23 @@ void main() {
 
     // Test value > 1.0
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
-          body: RefreshProgressIndicator(value: 1.5),
-        ),
-      ),
+      const MaterialApp(home: Scaffold(body: RefreshProgressIndicator(value: 1.5))),
     );
 
     expect(tester.getSemantics(find.byType(RefreshProgressIndicator)), matchesSemantics(
       value: '100%',
       textDirection: TextDirection.ltr,
     ));
+
+    // Test value < 0.0
+    await tester.pumpWidget(
+      const MaterialApp(home: Scaffold(body: RefreshProgressIndicator(value: -0.5))),
+    );
+
+    expect(
+      tester.getSemantics(find.byType(RefreshProgressIndicator)),
+      matchesSemantics(value: '0%', textDirection: TextDirection.ltr),
+    );
 
     handle.dispose();
   });
