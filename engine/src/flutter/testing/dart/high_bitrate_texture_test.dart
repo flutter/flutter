@@ -37,7 +37,7 @@ void main() async {
     expect(data.getUint8(offset + 2), 0, reason: 'Center Blue');
     expect(data.getUint8(offset + 3), 255, reason: 'Center Alpha');
 
-    await comparer.addGoldenImage(shaderImage, 'fragment_shader_rgba_float32.png');
+    await comparer.addGoldenImage(shaderImage, 'fragment_shader_rgba_float32_sdf.png');
     image.dispose();
   });
 
@@ -66,9 +66,104 @@ void main() async {
     expect(data.getUint8(offset + 2), 0, reason: 'Center Blue');
     expect(data.getUint8(offset + 3), 255, reason: 'Center Alpha');
 
-    await comparer.addGoldenImage(shaderImage, 'fragment_shader_r_float32.png');
+    await comparer.addGoldenImage(shaderImage, 'fragment_shader_r_float32_sdf.png');
     image.dispose();
   });
+
+  test('FragmentShader draws RGBA Float32 texture with SDF shader', () async {
+    const int dimension = 1024;
+    final Image image = await _drawWithCircleShader(
+      dimension,
+      dimension,
+      TargetPixelFormat.rgbaFloat32,
+    );
+    final Image shaderImage = await _drawWithShader(image);
+
+    final ByteData data = (await shaderImage.toByteData())!;
+
+    // Check top left is Black (outside circle, d > 0 -> vec3(0.0))
+    int offset = 0;
+    expect(data.getUint8(offset), 0, reason: 'Top left Red');
+    expect(data.getUint8(offset + 1), 0, reason: 'Top left Green');
+    expect(data.getUint8(offset + 2), 0, reason: 'Top left Blue');
+    expect(data.getUint8(offset + 3), 255, reason: 'Top left Alpha');
+
+    // Check center is White (inside circle, d <= 0 -> vec3(1.0))
+    offset = ((dimension ~/ 2) * dimension + (dimension ~/ 2)) * 4;
+    expect(data.getUint8(offset), 255, reason: 'Center Red');
+    expect(data.getUint8(offset + 1), 255, reason: 'Center Green');
+    expect(data.getUint8(offset + 2), 255, reason: 'Center Blue');
+    expect(data.getUint8(offset + 3), 255, reason: 'Center Alpha');
+
+    await comparer.addGoldenImage(shaderImage, 'fragment_shader_rgba_float32_sdf.png');
+    image.dispose();
+  });
+
+  test('FragmentShader draws R Float32 texture with SDF shader', () async {
+    if (!impellerEnabled) {
+      print('Skipped for Skia');
+      return;
+    }
+    const int dimension = 1024;
+    final Image image = await _drawWithCircleShader(
+      dimension,
+      dimension,
+      TargetPixelFormat.rFloat32,
+    );
+    final Image shaderImage = await _drawWithShader(image);
+
+    final ByteData data = (await shaderImage.toByteData())!;
+
+    // Check top left is Black
+    int offset = 0;
+    expect(data.getUint8(offset), 0, reason: 'Top left Red');
+    expect(data.getUint8(offset + 1), 0, reason: 'Top left Green');
+    expect(data.getUint8(offset + 2), 0, reason: 'Top left Blue');
+    expect(data.getUint8(offset + 3), 255, reason: 'Top left Alpha');
+
+    // Check center is White
+    offset = ((dimension ~/ 2) * dimension + (dimension ~/ 2)) * 4;
+    expect(data.getUint8(offset), 255, reason: 'Center Red');
+    expect(data.getUint8(offset + 1), 255, reason: 'Center Green');
+    expect(data.getUint8(offset + 2), 255, reason: 'Center Blue');
+    expect(data.getUint8(offset + 3), 255, reason: 'Center Alpha');
+
+    await comparer.addGoldenImage(shaderImage, 'fragment_shader_r_float32_sdf.png');
+    image.dispose();
+  });
+}
+
+Future<Image> _drawWithShader(Image image) async {
+  final FragmentProgram program = await FragmentProgram.fromAsset('sdf.frag.iplr');
+  final FragmentShader shader = program.fragmentShader();
+  shader.setFloat(0, image.width.toDouble());
+  shader.setFloat(1, image.height.toDouble());
+  shader.setImageSampler(0, image);
+
+  final recorder = PictureRecorder();
+  final canvas = Canvas(recorder);
+  canvas.drawRect(
+    Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
+    Paint()..shader = shader,
+  );
+  final Picture picture = recorder.endRecording();
+  return picture.toImageSync(image.width, image.height);
+}
+
+Future<Image> _drawWithCircleShader(int width, int height, TargetPixelFormat format) async {
+  final FragmentProgram program = await FragmentProgram.fromAsset('circle_sdf.frag.iplr');
+  final FragmentShader shader = program.fragmentShader();
+  shader.setFloat(0, width.toDouble());
+  shader.setFloat(1, height.toDouble());
+
+  final recorder = PictureRecorder();
+  final canvas = Canvas(recorder);
+  canvas.drawRect(
+    Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()),
+    Paint()..shader = shader,
+  );
+  final Picture picture = recorder.endRecording();
+  return picture.toImageSync(width, height, targetFormat: format);
 }
 
 Future<Image> _drawIntoImage(Image image) {
