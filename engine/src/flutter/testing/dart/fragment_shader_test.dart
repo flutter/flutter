@@ -338,10 +338,6 @@ void main() async {
   }
 
   test('FragmentShader draws RGBA Float32 texture', () async {
-    if (!impellerEnabled) {
-      print('Skipped for Skia');
-      return;
-    }
     const int dimension = 1024;
     final Image image = await _createRGBA32FloatImage(dimension, dimension);
     final Image shaderImage = await _drawIntoImage(image);
