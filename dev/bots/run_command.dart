@@ -102,6 +102,7 @@ Future<Command> startCommand(
   print('workingDirectory: $workingDirectory, executable: $executable, arguments: $arguments');
 
   // Override ANDROID_NDK_PATH with a valid discovered path or empty string to clear a potentially bad value.
+  // See also dev/devicelab/lib/framework/utils.dart.
   final finalEnvironment = <String, String>{
     ...?environment,
     'ANDROID_NDK_PATH': ?_discoverBestNdkPath(),

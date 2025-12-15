@@ -289,6 +289,7 @@ Future<Process> startProcess(
     'ANDROID_NDK_PATH': ?_discoverBestNdkPath(),
   };
   // Override ANDROID_NDK_PATH with a valid discovered path or empty string to clear a potentially bad value.
+  // See also bots/run_command.dart.
   final String? bestNdkPath = _discoverBestNdkPath();
   if (bestNdkPath != null) {
     newEnvironment['ANDROID_NDK_PATH'] = bestNdkPath;
