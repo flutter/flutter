@@ -38,7 +38,7 @@ void main() {
   });
 
   testWidgets('toggling canPop on root route allows/prevents backs', (WidgetTester tester) async {
-    bool canPop = false;
+    var canPop = false;
     late StateSetter setState;
     late BuildContext context;
     await tester.pumpWidget(
@@ -80,8 +80,8 @@ void main() {
 
   testWidgets('pop scope can receive result', (WidgetTester tester) async {
     Object? receivedResult;
-    final Object poppedResult = Object();
-    final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+    final poppedResult = Object();
+    final nav = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       MaterialApp(
         initialRoute: '/',
@@ -112,8 +112,8 @@ void main() {
     'pop scope can have Object? generic type while route has stricter generic type',
     (WidgetTester tester) async {
       Object? receivedResult;
-      const int poppedResult = 13;
-      final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+      const poppedResult = 13;
+      final nav = GlobalKey<NavigatorState>();
       await tester.pumpWidget(
         MaterialApp(
           initialRoute: '/',
@@ -163,8 +163,8 @@ void main() {
   testWidgets('toggling canPop on secondary route allows/prevents backs', (
     WidgetTester tester,
   ) async {
-    final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
-    bool canPop = true;
+    final nav = GlobalKey<NavigatorState>();
+    var canPop = true;
     late StateSetter setState;
     late BuildContext homeContext;
     late BuildContext oneContext;
@@ -329,7 +329,7 @@ void main() {
   testWidgets(
     'removing PopScope from the tree removes its effect on navigation',
     (WidgetTester tester) async {
-      bool usePopScope = true;
+      var usePopScope = true;
       late StateSetter setState;
       late BuildContext context;
       await tester.pumpWidget(
@@ -376,8 +376,8 @@ void main() {
   );
 
   testWidgets('identical PopScopes', (WidgetTester tester) async {
-    bool usePopScope1 = true;
-    bool usePopScope2 = true;
+    var usePopScope1 = true;
+    var usePopScope2 = true;
     late StateSetter setState;
     late BuildContext context;
     await tester.pumpWidget(

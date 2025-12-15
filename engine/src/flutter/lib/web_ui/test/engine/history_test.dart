@@ -53,7 +53,7 @@ void testMain() {
     expect(history.urlStrategy, strategy);
 
     // Multi-entry history state.
-    final Map<dynamic, dynamic> state = <dynamic, dynamic>{
+    final state = <dynamic, dynamic>{
       'serialCount': 1.0,
       'state': <dynamic, dynamic>{'foo': 123.0},
     };
@@ -80,7 +80,7 @@ void testMain() {
   });
 
   group('$SingleEntryBrowserHistory', () {
-    final PlatformMessagesSpy spy = PlatformMessagesSpy();
+    final spy = PlatformMessagesSpy();
 
     setUp(() async {
       spy.setUp();
@@ -92,7 +92,7 @@ void testMain() {
     });
 
     test('basic setup works', () async {
-      final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
+      final strategy = TestUrlStrategy.fromEntry(
         const TestHistoryEntry('initial state', null, '/initial'),
       );
       await implicitView.debugInitializeHistory(strategy, useSingle: true);
@@ -116,10 +116,10 @@ void testMain() {
     });
 
     test('disposes of its listener without touching history', () async {
-      const String unwrappedOriginState = 'initial state';
+      const unwrappedOriginState = 'initial state';
       final Map<String, dynamic> wrappedOriginState = _wrapOriginState(unwrappedOriginState);
 
-      final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
+      final strategy = TestUrlStrategy.fromEntry(
         const TestHistoryEntry(unwrappedOriginState, null, '/initial'),
       );
       expect(strategy.listeners, isEmpty);
@@ -177,9 +177,7 @@ void testMain() {
     });
 
     test('browser back button pops routes correctly', () async {
-      final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
-        const TestHistoryEntry(null, null, '/home'),
-      );
+      final strategy = TestUrlStrategy.fromEntry(const TestHistoryEntry(null, null, '/home'));
       await implicitView.debugInitializeHistory(strategy, useSingle: true);
 
       // Initially, we should be on the flutter entry.
@@ -214,9 +212,7 @@ void testMain() {
     });
 
     test('multiple browser back clicks', () async {
-      final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
-        const TestHistoryEntry(null, null, '/home'),
-      );
+      final strategy = TestUrlStrategy.fromEntry(const TestHistoryEntry(null, null, '/home'));
       await implicitView.debugInitializeHistory(strategy, useSingle: true);
 
       await routeInformationUpdated('/page1', null);
@@ -263,7 +259,7 @@ void testMain() {
       // The next browser back will exit the app. We store the strategy locally
       // because it will be remove from the browser history class once it exits
       // the app.
-      final TestUrlStrategy originalStrategy = strategy;
+      final originalStrategy = strategy;
       await originalStrategy.go(-1);
       // 1. The engine sends a `popRoute` platform message.
       expect(spy.messages, hasLength(1));
@@ -280,9 +276,7 @@ void testMain() {
     });
 
     test('handle user-provided url', () async {
-      final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
-        const TestHistoryEntry(null, null, '/home'),
-      );
+      final strategy = TestUrlStrategy.fromEntry(const TestHistoryEntry(null, null, '/home'));
       await implicitView.debugInitializeHistory(strategy, useSingle: true);
 
       await strategy.simulateUserTypingUrl('/page3');
@@ -321,9 +315,7 @@ void testMain() {
     });
 
     test('user types unknown url', () async {
-      final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
-        const TestHistoryEntry(null, null, '/home'),
-      );
+      final strategy = TestUrlStrategy.fromEntry(const TestHistoryEntry(null, null, '/home'));
       await implicitView.debugInitializeHistory(strategy, useSingle: true);
 
       await strategy.simulateUserTypingUrl('/unknown');
@@ -345,9 +337,7 @@ void testMain() {
     });
 
     test('popping a nameless route does not change url', () async {
-      final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
-        const TestHistoryEntry(null, null, '/home'),
-      );
+      final strategy = TestUrlStrategy.fromEntry(const TestHistoryEntry(null, null, '/home'));
       await implicitView.debugInitializeHistory(strategy, useSingle: true);
 
       // Go to a named route.
@@ -375,7 +365,7 @@ void testMain() {
   });
 
   group('$MultiEntriesBrowserHistory', () {
-    final PlatformMessagesSpy spy = PlatformMessagesSpy();
+    final spy = PlatformMessagesSpy();
 
     setUp(() async {
       spy.setUp();
@@ -387,7 +377,7 @@ void testMain() {
     });
 
     test('basic setup works', () async {
-      final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
+      final strategy = TestUrlStrategy.fromEntry(
         const TestHistoryEntry('initial state', null, '/initial'),
       );
       await implicitView.debugInitializeHistory(strategy, useSingle: false);
@@ -402,10 +392,10 @@ void testMain() {
     });
 
     test('disposes of its listener without touching history', () async {
-      const String untaggedState = 'initial state';
+      const untaggedState = 'initial state';
       final Map<String, dynamic> taggedState = _tagStateWithSerialCount(untaggedState, 0);
 
-      final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
+      final strategy = TestUrlStrategy.fromEntry(
         const TestHistoryEntry(untaggedState, null, '/initial'),
       );
       expect(strategy.listeners, isEmpty);
@@ -457,7 +447,7 @@ void testMain() {
     });
 
     test('browser back button push route information correctly', () async {
-      final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
+      final strategy = TestUrlStrategy.fromEntry(
         const TestHistoryEntry('initial state', null, '/home'),
       );
       await implicitView.debugInitializeHistory(strategy, useSingle: false);
@@ -496,7 +486,7 @@ void testMain() {
     });
 
     test('multiple browser back clicks', () async {
-      final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
+      final strategy = TestUrlStrategy.fromEntry(
         const TestHistoryEntry('initial state', null, '/home'),
       );
       await implicitView.debugInitializeHistory(strategy, useSingle: false);
@@ -545,7 +535,7 @@ void testMain() {
     });
 
     test('handle user-provided url', () async {
-      final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
+      final strategy = TestUrlStrategy.fromEntry(
         const TestHistoryEntry('initial state', null, '/home'),
       );
       await implicitView.debugInitializeHistory(strategy, useSingle: false);
@@ -588,7 +578,7 @@ void testMain() {
     });
 
     test('forward button works', () async {
-      final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
+      final strategy = TestUrlStrategy.fromEntry(
         const TestHistoryEntry('initial state', null, '/home'),
       );
       await implicitView.debugInitializeHistory(strategy, useSingle: false);
@@ -650,7 +640,7 @@ void testMain() {
     });
 
     test('leading slash is optional', () {
-      final HashUrlStrategy strategy = HashUrlStrategy(location);
+      final strategy = HashUrlStrategy(location);
 
       location.hash = '#/';
       expect(strategy.getPath(), '/');
@@ -663,7 +653,7 @@ void testMain() {
     });
 
     test('path should not be empty', () {
-      final HashUrlStrategy strategy = HashUrlStrategy(location);
+      final strategy = HashUrlStrategy(location);
 
       location.hash = '';
       expect(strategy.getPath(), '/');
@@ -673,8 +663,8 @@ void testMain() {
     });
 
     test('prepareExternalUrl', () {
-      const String internalUrl = '/menu?foo=bar';
-      final HashUrlStrategy strategy = HashUrlStrategy(location);
+      const internalUrl = '/menu?foo=bar';
+      final strategy = HashUrlStrategy(location);
 
       location.pathname = '/';
       expect(strategy.prepareExternalUrl(internalUrl), '/#/menu?foo=bar');
@@ -687,8 +677,8 @@ void testMain() {
     });
 
     test('removes /#/ from the home page', () {
-      const String internalUrl = '/';
-      final HashUrlStrategy strategy = HashUrlStrategy(location);
+      const internalUrl = '/';
+      final strategy = HashUrlStrategy(location);
 
       location.pathname = '/';
       expect(strategy.prepareExternalUrl(internalUrl), '/');
@@ -701,9 +691,9 @@ void testMain() {
     });
 
     test('addPopStateListener fn unwraps DomPopStateEvent state', () {
-      final HashUrlStrategy strategy = HashUrlStrategy(location);
-      const String expected = 'expected value';
-      final List<Object?> states = <Object?>[];
+      final strategy = HashUrlStrategy(location);
+      const expected = 'expected value';
+      final states = <Object?>[];
 
       // Put the popStates received from the `location` in a list
       strategy.addPopStateListener(states.add);
@@ -728,7 +718,7 @@ void testMain() {
 
   group('$BrowserPlatformLocation', () {
     test('getOrCreateDomEventListener caches funcions', () {
-      const BrowserPlatformLocation location = BrowserPlatformLocation();
+      const location = BrowserPlatformLocation();
       void myListener(Object event) {}
 
       expect(
@@ -741,7 +731,7 @@ void testMain() {
     });
 
     test('throws if removing an invalid listener', () {
-      const BrowserPlatformLocation location = BrowserPlatformLocation();
+      const location = BrowserPlatformLocation();
       void myAddedListener(Object event) {}
       void myNonAddedListener(Object event) {}
 
@@ -755,14 +745,14 @@ void testMain() {
     });
 
     test('returns a non-empty baseUri', () {
-      const BrowserPlatformLocation location = BrowserPlatformLocation();
+      const location = BrowserPlatformLocation();
       expect(location.getBaseHref(), isNotNull);
     });
   });
 }
 
 Future<void> routeInformationUpdated(String location, dynamic state) {
-  final Completer<void> completer = Completer<void>();
+  final completer = Completer<void>();
   EnginePlatformDispatcher.instance.sendPlatformMessage(
     'flutter/navigation',
     codec.encodeMethodCall(
@@ -777,7 +767,7 @@ Future<void> routeInformationUpdated(String location, dynamic state) {
 }
 
 Future<void> systemNavigatorPop() {
-  final Completer<void> completer = Completer<void>();
+  final completer = Completer<void>();
   EnginePlatformDispatcher.instance.sendPlatformMessage(
     'flutter/platform',
     codec.encodeMethodCall(const MethodCall('SystemNavigator.pop')),

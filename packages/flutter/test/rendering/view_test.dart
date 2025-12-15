@@ -16,7 +16,7 @@ void main() {
     Size size = const Size(20, 20),
     double devicePixelRatio = 2.0,
   }) {
-    final BoxConstraints constraints = BoxConstraints.tight(size);
+    final constraints = BoxConstraints.tight(size);
     return ViewConfiguration(
       logicalConstraints: constraints,
       physicalConstraints: constraints * devicePixelRatio,
@@ -39,11 +39,11 @@ void main() {
     });
 
     test('does not replace the root layer unnecessarily', () {
-      final RenderView view = RenderView(
+      final view = RenderView(
         configuration: createViewConfiguration(),
         view: RendererBinding.instance.platformDispatcher.views.single,
       );
-      final PipelineOwner owner = PipelineOwner();
+      final owner = PipelineOwner();
       view.attach(owner);
       view.prepareInitialFrame();
       final ContainerLayer firstLayer = view.debugLayer!;
@@ -55,11 +55,11 @@ void main() {
     });
 
     test('does not replace the root layer unnecessarily when view resizes', () {
-      final RenderView view = RenderView(
+      final view = RenderView(
         configuration: createViewConfiguration(size: const Size(100.0, 100.0)),
         view: RendererBinding.instance.platformDispatcher.views.single,
       );
-      final PipelineOwner owner = PipelineOwner();
+      final owner = PipelineOwner();
       view.attach(owner);
       view.prepareInitialFrame();
       final ContainerLayer firstLayer = view.debugLayer!;
@@ -104,9 +104,7 @@ void main() {
   test(
     'Config can be set and changed after instantiation without calling prepareInitialFrame first',
     () {
-      final RenderView view = RenderView(
-        view: RendererBinding.instance.platformDispatcher.views.single,
-      );
+      final view = RenderView(view: RendererBinding.instance.platformDispatcher.views.single);
       view.configuration = ViewConfiguration(
         logicalConstraints: BoxConstraints.tight(const Size(100, 200)),
         devicePixelRatio: 3.0,
@@ -121,23 +119,16 @@ void main() {
   );
 
   test('Constraints are derived from configuration', () {
-    const BoxConstraints constraints = BoxConstraints(
-      minWidth: 1,
-      maxWidth: 2,
-      minHeight: 3,
-      maxHeight: 4,
-    );
-    const double devicePixelRatio = 3.0;
-    final ViewConfiguration config = ViewConfiguration(
+    const constraints = BoxConstraints(minWidth: 1, maxWidth: 2, minHeight: 3, maxHeight: 4);
+    const devicePixelRatio = 3.0;
+    final config = ViewConfiguration(
       logicalConstraints: constraints,
       physicalConstraints: constraints * devicePixelRatio,
       devicePixelRatio: devicePixelRatio,
     );
 
     // Configuration set via setter.
-    final RenderView view = RenderView(
-      view: RendererBinding.instance.platformDispatcher.views.single,
-    );
+    final view = RenderView(view: RendererBinding.instance.platformDispatcher.views.single);
     expect(
       () => view.constraints,
       throwsA(
@@ -152,7 +143,7 @@ void main() {
     expect(view.constraints, constraints);
 
     // Configuration set in constructor.
-    final RenderView view2 = RenderView(
+    final view2 = RenderView(
       view: RendererBinding.instance.platformDispatcher.views.single,
       configuration: config,
     );

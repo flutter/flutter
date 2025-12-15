@@ -208,12 +208,12 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
         return;
       }
 
-      final bool isLtr = textDirection == TextDirection.ltr;
+      final isLtr = textDirection == TextDirection.ltr;
       final double left = (isLtr ? startFraction : 1 - endFraction) * size.width;
       final double right = (isLtr ? endFraction : 1 - startFraction) * size.width;
 
-      final Rect rect = Rect.fromLTRB(left, 0, right, size.height);
-      final Paint paint = Paint()..color = color;
+      final rect = Rect.fromLTRB(left, 0, right, size.height);
+      final paint = Paint()..color = color;
 
       if (indicatorBorderRadius != null) {
         final RRect rrect = indicatorBorderRadius!.resolve(textDirection).toRRect(rect);
@@ -227,7 +227,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
       // Limit the stop indicator to the height of the indicator.
       final double maxRadius = size.height / 2;
       final double radius = math.min(stopIndicatorRadius!, maxRadius);
-      final Paint indicatorPaint = Paint()..color = stopIndicatorColor!;
+      final indicatorPaint = Paint()..color = stopIndicatorColor!;
       final Offset position = switch (textDirection) {
         TextDirection.rtl => Offset(maxRadius, maxRadius),
         TextDirection.ltr => Offset(size.width - maxRadius, maxRadius),
@@ -697,7 +697,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()
+    final paint = Paint()
       ..color = valueColor
       ..strokeWidth = strokeWidth
       ..style = PaintingStyle.stroke;
@@ -705,12 +705,12 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
     // Use the negative operator as intended to keep the exposed constant value
     // as users are already familiar with.
     final double strokeOffset = strokeWidth / 2 * -strokeAlign;
-    final Offset arcBaseOffset = Offset(strokeOffset, strokeOffset);
-    final Size arcActualSize = Size(size.width - strokeOffset * 2, size.height - strokeOffset * 2);
+    final arcBaseOffset = Offset(strokeOffset, strokeOffset);
+    final arcActualSize = Size(size.width - strokeOffset * 2, size.height - strokeOffset * 2);
     final bool hasGap = trackGap != null && trackGap! > 0;
 
     if (trackColor != null) {
-      final Paint backgroundPaint = Paint()
+      final backgroundPaint = Paint()
         ..color = trackColor!
         ..strokeWidth = strokeWidth
         ..strokeCap = strokeCap ?? StrokeCap.round
@@ -1241,13 +1241,13 @@ class _RefreshProgressIndicatorPainter extends _CircularProgressIndicatorPainter
     final double innerRadius = radius - arrowheadRadius;
     final double outerRadius = radius + arrowheadRadius;
 
-    final Path path = Path()
+    final path = Path()
       ..moveTo(radius + ux * innerRadius, radius + uy * innerRadius)
       ..lineTo(radius + ux * outerRadius, radius + uy * outerRadius)
       ..lineTo(arrowheadPointX, arrowheadPointY)
       ..close();
 
-    final Paint paint = Paint()
+    final paint = Paint()
       ..color = valueColor
       ..strokeWidth = strokeWidth
       ..style = PaintingStyle.fill;
@@ -1384,10 +1384,10 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
         return _buildMaterialIndicator(
           context,
           // Lengthen the arc a little
-          1.05 * _CircularProgressIndicatorState._strokeHeadTween.evaluate(_controller),
-          _CircularProgressIndicatorState._strokeTailTween.evaluate(_controller),
-          _CircularProgressIndicatorState._offsetTween.evaluate(_controller),
-          _CircularProgressIndicatorState._rotationTween.evaluate(_controller),
+          1.05 * _CircularProgressIndicatorState._strokeHeadTween.transform(_controller.value),
+          _CircularProgressIndicatorState._strokeTailTween.transform(_controller.value),
+          _CircularProgressIndicatorState._offsetTween.transform(_controller.value),
+          _CircularProgressIndicatorState._rotationTween.transform(_controller.value),
         );
       },
     );

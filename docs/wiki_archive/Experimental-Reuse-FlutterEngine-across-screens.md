@@ -50,7 +50,7 @@ You'll need to ensure that pushing a route at the desired time has the desired e
 
 Custom method channels offer a mechanism to implement your own solution for jumping between experiences. Method channels allow you to send any message you would like to your Flutter app, and then take whatever action you'd like.
 
-Start by [setting up a method channel](https://flutter.dev/docs/development/platform-integration/platform-channels) with the navigation messages that you're interested in sending.
+Start by [setting up a method channel](https://docs.flutter.dev/development/platform-integration/platform-channels) with the navigation messages that you're interested in sending.
 
 Once your method channel is setup, respond to your messages on the Flutter/Dart side by switching out your top-level widget, or by switching out any other widget in your hierarchy that makes sense for your use-case.
 

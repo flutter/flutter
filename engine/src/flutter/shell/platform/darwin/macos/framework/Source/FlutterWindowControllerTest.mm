@@ -59,7 +59,8 @@ TEST_F(FlutterWindowControllerTest, CreateRegularWindow) {
   FlutterWindowCreationRequest request{
       .has_size = true,
       .size = {.width = 800, .height = 600},
-      .on_close = [] {},
+      .on_should_close = [] {},
+      .on_will_close = [] {},
       .notify_listeners = [] {},
   };
 
@@ -83,7 +84,8 @@ TEST_F(FlutterWindowControllerRetainTest, WindowControllerDoesNotRetainEngine) {
   FlutterWindowCreationRequest request{
       .has_size = true,
       .size = {.width = 800, .height = 600},
-      .on_close = [] {},
+      .on_should_close = [] {},
+      .on_will_close = [] {},
       .notify_listeners = [] {},
   };
 
@@ -125,7 +127,8 @@ TEST_F(FlutterWindowControllerTest, DestroyRegularWindow) {
   FlutterWindowCreationRequest request{
       .has_size = true,
       .size = {.width = 800, .height = 600},
-      .on_close = [] {},
+      .on_should_close = [] {},
+      .on_will_close = [] {},
       .notify_listeners = [] {},
   };
 
@@ -145,7 +148,8 @@ TEST_F(FlutterWindowControllerTest, InternalFlutter_Window_GetHandle) {
   FlutterWindowCreationRequest request{
       .has_size = true,
       .size = {.width = 800, .height = 600},
-      .on_close = [] {},
+      .on_should_close = [] {},
+      .on_will_close = [] {},
       .notify_listeners = [] {},
   };
 
@@ -164,7 +168,8 @@ TEST_F(FlutterWindowControllerTest, WindowStates) {
   FlutterWindowCreationRequest request{
       .has_size = true,
       .size = {.width = 800, .height = 600},
-      .on_close = [] {},
+      .on_should_close = [] {},
+      .on_will_close = [] {},
       .notify_listeners = [] {},
   };
 

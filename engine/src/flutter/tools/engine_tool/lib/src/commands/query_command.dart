@@ -78,8 +78,8 @@ final class QueryBuildersCommand extends CommandBase {
   Future<int> run() async {
     // Loop through all configs, and log those that are compatible with the
     // current platform.
-    final bool all = parent!.argResults![allFlag]! as bool;
-    final String? builderName = parent!.argResults![builderFlag] as String?;
+    final all = parent!.argResults![allFlag]! as bool;
+    final builderName = parent!.argResults![builderFlag] as String?;
     if (!environment.verbose) {
       environment.logger.status('Add --verbose to see detailed information about each builder');
       environment.logger.status('');
@@ -162,15 +162,15 @@ et query targets //flutter/fml/...  # List all targets under `//flutter/fml`
 
     // TODO(matanlurey): Discuss if we want to just require '//...'.
     // For now this retains the existing behavior.
-    var patterns = argResults!.rest;
+    List<String> patterns = argResults!.rest;
     if (patterns.isEmpty) {
       patterns = ['//...'];
     }
 
     final allTargets = <BuildTarget>{};
     for (final pattern in patterns) {
-      final target = TargetPattern.parse(pattern);
-      final targets = await gn.desc('out/${plan.build.ninja.config}', target);
+      final TargetPattern target = TargetPattern.parse(pattern);
+      final List<BuildTarget> targets = await gn.desc('out/${plan.build.ninja.config}', target);
       allTargets.addAll(targets);
     }
 
@@ -179,7 +179,7 @@ et query targets //flutter/fml/...  # List all targets under `//flutter/fml`
       return 1;
     }
 
-    final testOnly = argResults!.flag(testOnlyFlag);
+    final bool testOnly = argResults!.flag(testOnlyFlag);
     for (final target in allTargets) {
       if (testOnly && (!target.testOnly || target is! ExecutableBuildTarget)) {
         continue;

@@ -262,7 +262,7 @@ class Drawer extends StatelessWidget {
         label = semanticLabel ?? MaterialLocalizations.of(context).drawerLabel;
     }
     final bool useMaterial3 = Theme.of(context).useMaterial3;
-    final bool isDrawerStart = DrawerController.maybeOf(context)?.alignment != DrawerAlignment.end;
+    final isDrawerStart = DrawerController.maybeOf(context)?.alignment != DrawerAlignment.end;
     final DrawerThemeData defaults = useMaterial3
         ? _DrawerDefaultsM3(context)
         : _DrawerDefaultsM2(context);
@@ -579,7 +579,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   final GlobalKey _drawerKey = GlobalKey();
 
   double get _width {
-    final RenderBox? box = _drawerKey.currentContext?.findRenderObject() as RenderBox?;
+    final box = _drawerKey.currentContext?.findRenderObject() as RenderBox?;
     // return _kWidth if drawer not being shown currently
     return box?.size.width ?? _kWidth;
   }

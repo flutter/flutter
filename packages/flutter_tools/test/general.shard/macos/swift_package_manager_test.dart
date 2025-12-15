@@ -355,7 +355,7 @@ class FakeXcodeProject extends Fake implements IosProject {
   File get xcodeProjectInfoFile => xcodeProject.childFile('project.pbxproj');
 
   @override
-  var hostAppProjectName = 'Runner';
+  String hostAppProjectName = 'Runner';
 
   @override
   Directory get flutterSwiftPackagesDirectory =>

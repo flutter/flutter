@@ -20,7 +20,9 @@ class SearchAnchorAsyncExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('SearchAnchor - async and debouncing')),
+        appBar: AppBar(
+          title: const Text('SearchAnchor - async and debouncing'),
+        ),
         body: const Center(child: _AsyncSearchAnchor()),
       ),
     );
@@ -78,30 +80,37 @@ class _AsyncSearchAnchorState extends State<_AsyncSearchAnchor> {
           },
         );
       },
-      suggestionsBuilder: (BuildContext context, SearchController controller) async {
-        final List<String>? options = (await _debouncedSearch(controller.text))?.toList();
-        if (options == null) {
-          return _lastOptions;
-        }
-        _lastOptions = List<ListTile>.generate(options.length, (int index) {
-          final String item = options[index];
-          return ListTile(
-            title: Text(item),
-            onTap: () {
-              debugPrint('You just selected $item');
-            },
-          );
-        });
+      suggestionsBuilder:
+          (BuildContext context, SearchController controller) async {
+            final List<String>? options = (await _debouncedSearch(
+              controller.text,
+            ))?.toList();
+            if (options == null) {
+              return _lastOptions;
+            }
+            _lastOptions = List<ListTile>.generate(options.length, (int index) {
+              final String item = options[index];
+              return ListTile(
+                title: Text(item),
+                onTap: () {
+                  debugPrint('You just selected $item');
+                },
+              );
+            });
 
-        return _lastOptions;
-      },
+            return _lastOptions;
+          },
     );
   }
 }
 
 // Mimics a remote API.
 class _FakeAPI {
-  static const List<String> _kOptions = <String>['aardvark', 'bobcat', 'chameleon'];
+  static const List<String> _kOptions = <String>[
+    'aardvark',
+    'bobcat',
+    'chameleon',
+  ];
 
   // Searches the options, but injects a fake "network" delay.
   static Future<Iterable<String>> search(String query) async {

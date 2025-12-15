@@ -20,7 +20,9 @@ class FlexibleSpaceBarExampleApp extends StatelessWidget {
       ),
       home: Scaffold(
         body: CustomScrollView(
-          physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
           slivers: <Widget>[
             SliverAppBar(
               stretch: true,

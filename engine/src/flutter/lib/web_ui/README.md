@@ -176,7 +176,7 @@ The available versions of Chrome for Testing available can be found [here](https
   the engine code, you probably do).
 - If not already authenticated with CIPD, run `cipd auth-login` and follow
   instructions (this step requires sufficient privileges; contact
-  #hackers-infra-🌡 on [Flutter's Discord server](https://github.com/flutter/flutter/wiki/Chat)).
+  #hackers-infra-🌡 on [Flutter's Discord server](https://github.com/flutter/flutter/blob/main/docs/contributing/Chat.md)).
 - Edit `dev/package_lock.yaml` and update the following values under `chrome`:
   - Set `version` to the full four part version number of the build of Chrome
     for Testing you want to roll (for example, `118.0.5993.70`)

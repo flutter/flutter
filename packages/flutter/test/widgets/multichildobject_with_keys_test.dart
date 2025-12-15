@@ -79,7 +79,7 @@ void main() {
   testWidgets(
     'Building a new MultiChildRenderObjectElement with children having duplicated keys throws',
     (WidgetTester tester) async {
-      const ValueKey<int> duplicatedKey = ValueKey<int>(1);
+      const duplicatedKey = ValueKey<int>(1);
 
       await tester.pumpWidget(
         const Column(
@@ -108,8 +108,8 @@ void main() {
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/81541
 
-      const ValueKey<int> key1 = ValueKey<int>(1);
-      const ValueKey<int> key2 = ValueKey<int>(2);
+      const key1 = ValueKey<int>(1);
+      const key2 = ValueKey<int>(2);
 
       Future<void> buildWithKey(Key key) {
         return tester.pumpWidget(
@@ -144,7 +144,7 @@ void main() {
 // the RenderObjects in the order of their associated RenderObjectWidgets. The
 // point of this test is to assert the children order in the render tree, though.
 List<String> _getChildOrder(RenderFlex flex) {
-  final List<String> childOrder = <String>[];
+  final childOrder = <String>[];
   flex.visitChildren((RenderObject child) {
     childOrder.add(((child as RenderParagraph).text as TextSpan).text!);
   });

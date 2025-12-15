@@ -16,7 +16,9 @@ class CupertinoRadioApp extends StatelessWidget {
     return const CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.light),
       home: CupertinoPageScaffold(
-        navigationBar: CupertinoNavigationBar(middle: Text('CupertinoRadio Example')),
+        navigationBar: CupertinoNavigationBar(
+          middle: Text('CupertinoRadio Example'),
+        ),
         child: SafeArea(child: CupertinoRadioExample()),
       ),
     );
@@ -48,11 +50,15 @@ class _CupertinoRadioExampleState extends State<CupertinoRadioExample> {
         children: const <Widget>[
           CupertinoListTile(
             title: Text('Lafayette'),
-            leading: CupertinoRadio<SingingCharacter>(value: SingingCharacter.lafayette),
+            leading: CupertinoRadio<SingingCharacter>(
+              value: SingingCharacter.lafayette,
+            ),
           ),
           CupertinoListTile(
             title: Text('Thomas Jefferson'),
-            leading: CupertinoRadio<SingingCharacter>(value: SingingCharacter.jefferson),
+            leading: CupertinoRadio<SingingCharacter>(
+              value: SingingCharacter.jefferson,
+            ),
           ),
         ],
       ),

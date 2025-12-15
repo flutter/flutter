@@ -24,10 +24,10 @@ void testMain() {
     setUpUnitTests(withImplicitView: true);
 
     test('is correctly rendered', () async {
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
-      final ui.Canvas canvas = ui.Canvas(recorder, region);
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, region);
 
-      final ui.Gradient gradient = ui.Gradient.sweep(
+      final gradient = ui.Gradient.sweep(
         const ui.Offset(250, 125),
         const <ui.Color>[
           ui.Color(0xFF4285F4),
@@ -42,7 +42,7 @@ void testMain() {
         math.pi * 2 - (math.pi / 2),
       );
 
-      final ui.Paint paint = ui.Paint()..shader = gradient;
+      final paint = ui.Paint()..shader = gradient;
 
       canvas.drawRect(region, paint);
 

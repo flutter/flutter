@@ -1008,10 +1008,10 @@ class ColorScheme with Diagnosticable {
     Color? errorColor,
     Brightness brightness = Brightness.light,
   }) {
-    final bool isDark = brightness == Brightness.dark;
-    final bool primaryIsDark = _brightnessFor(primarySwatch) == Brightness.dark;
+    final isDark = brightness == Brightness.dark;
+    final primaryIsDark = _brightnessFor(primarySwatch) == Brightness.dark;
     final Color secondary = accentColor ?? (isDark ? Colors.tealAccent[200]! : primarySwatch);
-    final bool secondaryIsDark = _brightnessFor(secondary) == Brightness.dark;
+    final secondaryIsDark = _brightnessFor(secondary) == Brightness.dark;
 
     return ColorScheme(
       primary: primarySwatch,
@@ -1667,7 +1667,7 @@ class ColorScheme with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    const ColorScheme defaultScheme = ColorScheme.light();
+    const defaultScheme = ColorScheme.light();
     properties.add(
       DiagnosticsProperty<Brightness>(
         'brightness',
@@ -1994,7 +1994,7 @@ class ColorScheme with Diagnosticable {
 
     // Score colors for color scheme suitability.
     final List<int> scoredResults = Score.score(colorToCount, desired: 1);
-    final ui.Color baseColor = Color(scoredResults.first);
+    final baseColor = Color(scoredResults.first);
 
     final DynamicScheme scheme = _buildDynamicScheme(
       brightness,
@@ -2105,11 +2105,11 @@ class ColorScheme with Diagnosticable {
 
   // Scale image size down to reduce computation time of color extraction.
   static Future<ui.Image> _imageProviderToScaled(ImageProvider imageProvider) async {
-    const double maxDimension = 112.0;
+    const maxDimension = 112.0;
     final ImageStream stream = imageProvider.resolve(
       const ImageConfiguration(size: Size(maxDimension, maxDimension)),
     );
-    final Completer<ui.Image> imageCompleter = Completer<ui.Image>();
+    final imageCompleter = Completer<ui.Image>();
     late ImageStreamListener listener;
     late ui.Image scaledImage;
     Timer? loadFailureTimeout;
@@ -2130,8 +2130,8 @@ class ColorScheme with Diagnosticable {
           paintWidth = (width > height) ? maxDimension : (maxDimension / height) * width;
           paintHeight = (height > width) ? maxDimension : (maxDimension / width) * height;
         }
-        final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
-        final Canvas canvas = Canvas(pictureRecorder);
+        final pictureRecorder = ui.PictureRecorder();
+        final canvas = Canvas(pictureRecorder);
         paintImage(
           canvas: canvas,
           rect: Rect.fromLTRB(0, 0, paintWidth, paintHeight),
@@ -2162,9 +2162,9 @@ class ColorScheme with Diagnosticable {
 
   // Converts AABBGGRR color int to AARRGGBB format.
   static int _getArgbFromAbgr(int abgr) {
-    const int exceptRMask = 0xFF00FFFF;
+    const exceptRMask = 0xFF00FFFF;
     const int onlyRMask = ~exceptRMask;
-    const int exceptBMask = 0xFFFFFF00;
+    const exceptBMask = 0xFFFFFF00;
     const int onlyBMask = ~exceptBMask;
     final int r = (abgr & onlyRMask) >> 16;
     final int b = abgr & onlyBMask;
@@ -2181,7 +2181,7 @@ class ColorScheme with Diagnosticable {
       contrastLevel >= -1.0 && contrastLevel <= 1.0,
       'contrastLevel must be between -1.0 and 1.0 inclusive.',
     );
-    final bool isDark = brightness == Brightness.dark;
+    final isDark = brightness == Brightness.dark;
     final Hct sourceColor = Hct.fromInt(seedColor.value);
     return switch (schemeVariant) {
       DynamicSchemeVariant.tonalSpot => SchemeTonalSpot(

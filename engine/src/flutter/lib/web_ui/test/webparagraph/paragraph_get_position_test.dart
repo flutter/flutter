@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/src/engine/web_paragraph/paragraph.dart';
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../common/test_initialization.dart';
@@ -16,11 +16,11 @@ Future<void> testMain() async {
   setUpUnitTests();
 
   test('Paragraph getPositionForOffset 1 Infinity line', () {
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 
-    const String text =
+    const text =
         'World domination is such an ugly phrase - I prefer to call it world optimisation. ';
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.addText(text);
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
@@ -39,9 +39,10 @@ Future<void> testMain() async {
     expect(positiontt, const ui.TextPosition(offset: 0 /*affinity: ui.TextAffinity.downstream)*/));
     expect(position00, const ui.TextPosition(offset: 0 /*affinity: ui.TextAffinity.downstream)*/));
     expect(positionmm, const ui.TextPosition(offset: 37 /*affinity: ui.TextAffinity.downstream)*/));
+    // The last glyph, position close to the end
     expect(
       positionee,
-      const ui.TextPosition(offset: text.length - 1 /*affinity: ui.TextAffinity.downstream)*/),
+      const ui.TextPosition(offset: text.length - 1, affinity: ui.TextAffinity.upstream),
     );
     expect(
       positionbb,
@@ -50,11 +51,11 @@ Future<void> testMain() async {
   });
 
   test('Paragraph getPositionForOffset multiple lines', () {
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 
-    const String text =
+    const text =
         'World domination is such an ugly phrase - I prefer to call it world optimisation. ';
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.addText(text);
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
@@ -74,13 +75,15 @@ Future<void> testMain() async {
     expect(positiontt, const ui.TextPosition(offset: 0 /*affinity: ui.TextAffinity.downstream)*/));
     expect(position00, const ui.TextPosition(offset: 0 /*affinity: ui.TextAffinity.downstream)*/));
     expect(positionmm, const ui.TextPosition(offset: 37 /*affinity: ui.TextAffinity.downstream)*/));
+    // The last glyph, position close to the end
     expect(
       positionee,
-      const ui.TextPosition(offset: text.length - 1 /*affinity: ui.TextAffinity.downstream)*/),
+      const ui.TextPosition(offset: text.length - 1, affinity: ui.TextAffinity.upstream),
     );
     expect(
       positionbb,
       const ui.TextPosition(offset: text.length, affinity: ui.TextAffinity.upstream),
     );
+    WebParagraphDebug.logging = false;
   });
 }

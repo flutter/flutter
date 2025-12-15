@@ -30,9 +30,9 @@ class Bezier extends StatelessWidget {
   final double delay;
 
   List<PathDetail> _getLogoPath() {
-    final List<PathDetail> paths = <PathDetail>[];
+    final paths = <PathDetail>[];
 
-    final Path path = Path();
+    final path = Path();
     path.moveTo(100.0, 97.0);
     path.cubicTo(100.0, 97.0, 142.0, 59.0, 169.91, 41.22);
     path.cubicTo(197.82, 23.44, 249.24, 5.52, 204.67, 85.84);
@@ -40,7 +40,7 @@ class Bezier extends StatelessWidget {
     paths.add(PathDetail(path));
 
     // Path 2
-    final Path bezier2Path = Path();
+    final bezier2Path = Path();
     bezier2Path.moveTo(0.0, 70.55);
     bezier2Path.cubicTo(0.0, 70.55, 42.0, 31.55, 69.91, 14.77);
     bezier2Path.cubicTo(97.82, -2.01, 149.24, -20.93, 104.37, 59.39);
@@ -48,7 +48,7 @@ class Bezier extends StatelessWidget {
     paths.add(PathDetail(bezier2Path, translate: <double>[29.45, 151.0], rotation: -1.5708));
 
     // Path 3
-    final Path bezier3Path = Path();
+    final bezier3Path = Path();
     bezier3Path.moveTo(0.0, 69.48);
     bezier3Path.cubicTo(0.0, 69.48, 44.82, 27.92, 69.91, 13.7);
     bezier3Path.cubicTo(95.0, -0.52, 149.24, -22.0, 104.37, 58.32);
@@ -56,7 +56,7 @@ class Bezier extends StatelessWidget {
     paths.add(PathDetail(bezier3Path, translate: <double>[53.0, 200.48], rotation: -3.14159));
 
     // Path 4
-    final Path bezier4Path = Path();
+    final bezier4Path = Path();
     bezier4Path.moveTo(0.0, 69.48);
     bezier4Path.cubicTo(0.0, 69.48, 43.82, 27.92, 69.91, 13.7);
     bezier4Path.cubicTo(96.0, -0.52, 149.24, -22.0, 104.37, 58.32);
@@ -114,13 +114,13 @@ class AnimatedBezierState extends State<AnimatedBezier> with SingleTickerProvide
   bool isReversed = false;
 
   List<PathDetail> _playForward() {
-    final List<PathDetail> paths = <PathDetail>[];
+    final paths = <PathDetail>[];
     final double t = curve.value;
     final double b = controller.upperBound;
     double pX;
     double pY;
 
-    final Path path = Path();
+    final path = Path();
 
     if (t < b / 2) {
       pX = _getCubicPoint(t * 2, 100.0, 100.0, 142.0, 169.91);
@@ -141,7 +141,7 @@ class AnimatedBezierState extends State<AnimatedBezier> with SingleTickerProvide
     paths.add(PathDetail(path));
 
     // Path 2
-    final Path bezier2Path = Path();
+    final bezier2Path = Path();
 
     if (t <= b / 2) {
       final double pX = _getCubicPoint(t * 2, 0.0, 0.0, 42.0, 69.91);
@@ -162,7 +162,7 @@ class AnimatedBezierState extends State<AnimatedBezier> with SingleTickerProvide
     paths.add(PathDetail(bezier2Path, translate: <double>[29.45, 151.0], rotation: -1.5708));
 
     // Path 3
-    final Path bezier3Path = Path();
+    final bezier3Path = Path();
     if (t <= b / 2) {
       pX = _getCubicPoint(t * 2, 0.0, 0.0, 44.82, 69.91);
       pY = _getCubicPoint(t * 2, 69.48, 69.48, 27.92, 13.7);
@@ -182,7 +182,7 @@ class AnimatedBezierState extends State<AnimatedBezier> with SingleTickerProvide
     paths.add(PathDetail(bezier3Path, translate: <double>[53.0, 200.48], rotation: -3.14159));
 
     // Path 4
-    final Path bezier4Path = Path();
+    final bezier4Path = Path();
 
     if (t < b / 2) {
       final double pX = _getCubicPoint(t * 2, 0.0, 0.0, 43.82, 69.91);
@@ -213,15 +213,15 @@ class AnimatedBezierState extends State<AnimatedBezier> with SingleTickerProvide
     }
 
     final List<Point> points = pointList[0];
-    final Path path = Path();
+    final path = Path();
 
     path.moveTo(100.0, 97.0);
 
-    for (final Point point in points) {
+    for (final point in points) {
       path.lineTo(point.x, point.y);
     }
 
-    final Path bezier2Path = Path();
+    final bezier2Path = Path();
 
     bezier2Path.moveTo(0.0, 70.55);
 
@@ -229,14 +229,14 @@ class AnimatedBezierState extends State<AnimatedBezier> with SingleTickerProvide
       bezier2Path.lineTo(p.x, p.y);
     }
 
-    final Path bezier3Path = Path();
+    final bezier3Path = Path();
     bezier3Path.moveTo(0.0, 69.48);
 
     for (final Point p in pointList[2]) {
       bezier3Path.lineTo(p.x, p.y);
     }
 
-    final Path bezier4Path = Path();
+    final bezier4Path = Path();
 
     bezier4Path.moveTo(0.0, 69.48);
 
@@ -344,14 +344,14 @@ class BezierPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint();
+    final paint = Paint();
     paint.strokeWidth = 18.0;
     paint.style = PaintingStyle.stroke;
     paint.strokeCap = StrokeCap.round;
     paint.color = color;
     canvas.scale(0.5, 0.5);
 
-    for (int i = 0; i < path.length; i++) {
+    for (var i = 0; i < path.length; i++) {
       if (path[i].translate != null) {
         canvas.translate(path[i].translate![0], path[i].translate![1]);
       }
@@ -361,7 +361,7 @@ class BezierPainter extends CustomPainter {
       }
 
       if (blur > 0) {
-        final MaskFilter blur = MaskFilter.blur(BlurStyle.normal, this.blur);
+        final blur = MaskFilter.blur(BlurStyle.normal, this.blur);
         paint.maskFilter = blur;
         canvas.drawPath(path[i].path, paint);
       }

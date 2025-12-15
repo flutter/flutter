@@ -14,10 +14,7 @@ void main() {
   });
 
   test('DataTableThemeData copyWith dataRowHeight', () {
-    const DataTableThemeData themeData = DataTableThemeData(
-      dataRowMinHeight: 10,
-      dataRowMaxHeight: 10,
-    );
+    const themeData = DataTableThemeData(dataRowMinHeight: 10, dataRowMaxHeight: 10);
     expect(themeData, themeData.copyWith());
     expect(
       themeData.copyWith(dataRowMinHeight: 20, dataRowMaxHeight: 20),
@@ -26,12 +23,12 @@ void main() {
   });
 
   test('DataTableThemeData lerp special cases', () {
-    const DataTableThemeData data = DataTableThemeData();
+    const data = DataTableThemeData();
     expect(identical(DataTableThemeData.lerp(data, data, 0.5), data), true);
   });
 
   test('DataTableThemeData defaults', () {
-    const DataTableThemeData themeData = DataTableThemeData();
+    const themeData = DataTableThemeData();
     expect(themeData.decoration, null);
     expect(themeData.dataRowColor, null);
     expect(themeData.dataRowHeight, null);
@@ -49,7 +46,7 @@ void main() {
     expect(themeData.dataRowCursor, null);
     expect(themeData.headingRowAlignment, null);
 
-    const DataTableTheme theme = DataTableTheme(data: DataTableThemeData(), child: SizedBox());
+    const theme = DataTableTheme(data: DataTableThemeData(), child: SizedBox());
     expect(theme.data.decoration, null);
     expect(theme.data.dataRowColor, null);
     expect(theme.data.dataRowHeight, null);
@@ -69,7 +66,7 @@ void main() {
   });
 
   testWidgets('Default DataTableThemeData debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const DataTableThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -81,7 +78,7 @@ void main() {
   });
 
   testWidgets('DataTableThemeData implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     DataTableThemeData(
       decoration: const BoxDecoration(color: Color(0xfffffff0)),
       dataRowColor: WidgetStateProperty.resolveWith<Color>(
@@ -127,20 +124,20 @@ void main() {
   });
 
   testWidgets('DataTable is themeable', (WidgetTester tester) async {
-    const BoxDecoration decoration = BoxDecoration(color: Color(0xfffffff0));
+    const decoration = BoxDecoration(color: Color(0xfffffff0));
     const WidgetStateProperty<Color> dataRowColor = MaterialStatePropertyAll<Color>(
       Color(0xfffffff1),
     );
-    const double minMaxDataRowHeight = 41.0;
-    const TextStyle dataTextStyle = TextStyle(fontSize: 12.5);
+    const minMaxDataRowHeight = 41.0;
+    const dataTextStyle = TextStyle(fontSize: 12.5);
     const WidgetStateProperty<Color> headingRowColor = MaterialStatePropertyAll<Color>(
       Color(0xfffffff2),
     );
-    const double headingRowHeight = 52.0;
-    const TextStyle headingTextStyle = TextStyle(fontSize: 14.5);
-    const double horizontalMargin = 3.0;
-    const double columnSpacing = 4.0;
-    const double dividerThickness = 5.0;
+    const headingRowHeight = 52.0;
+    const headingTextStyle = TextStyle(fontSize: 14.5);
+    const horizontalMargin = 3.0;
+    const columnSpacing = 4.0;
+    const dividerThickness = 5.0;
     const WidgetStateProperty<MouseCursor> headingCellCursor =
         MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.grab);
     const WidgetStateProperty<MouseCursor> dataRowCursor = MaterialStatePropertyAll<MouseCursor>(
@@ -244,7 +241,7 @@ void main() {
   testWidgets('DataTable is themeable - separate test for deprecated dataRowHeight', (
     WidgetTester tester,
   ) async {
-    const double dataRowHeight = 51.0;
+    const dataRowHeight = 51.0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -268,39 +265,39 @@ void main() {
   });
 
   testWidgets('DataTable properties are taken over the theme values', (WidgetTester tester) async {
-    const BoxDecoration themeDecoration = BoxDecoration(color: Color(0xfffffff1));
+    const themeDecoration = BoxDecoration(color: Color(0xfffffff1));
     const WidgetStateProperty<Color> themeDataRowColor = MaterialStatePropertyAll<Color>(
       Color(0xfffffff0),
     );
-    const double minMaxThemeDataRowHeight = 50.0;
-    const TextStyle themeDataTextStyle = TextStyle(fontSize: 11.5);
+    const minMaxThemeDataRowHeight = 50.0;
+    const themeDataTextStyle = TextStyle(fontSize: 11.5);
     const WidgetStateProperty<Color> themeHeadingRowColor = MaterialStatePropertyAll<Color>(
       Color(0xfffffff1),
     );
-    const double themeHeadingRowHeight = 51.0;
-    const TextStyle themeHeadingTextStyle = TextStyle(fontSize: 13.5);
-    const double themeHorizontalMargin = 2.0;
-    const double themeColumnSpacing = 3.0;
-    const double themeDividerThickness = 4.0;
+    const themeHeadingRowHeight = 51.0;
+    const themeHeadingTextStyle = TextStyle(fontSize: 13.5);
+    const themeHorizontalMargin = 2.0;
+    const themeColumnSpacing = 3.0;
+    const themeDividerThickness = 4.0;
     const WidgetStateProperty<MouseCursor> themeHeadingCellCursor =
         MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.copy);
     const WidgetStateProperty<MouseCursor> themeDataRowCursor =
         MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.copy);
 
-    const BoxDecoration decoration = BoxDecoration(color: Color(0xfffffff0));
+    const decoration = BoxDecoration(color: Color(0xfffffff0));
     const WidgetStateProperty<Color> dataRowColor = MaterialStatePropertyAll<Color>(
       Color(0xfffffff1),
     );
-    const double minMaxDataRowHeight = 51.0;
-    const TextStyle dataTextStyle = TextStyle(fontSize: 12.5);
+    const minMaxDataRowHeight = 51.0;
+    const dataTextStyle = TextStyle(fontSize: 12.5);
     const WidgetStateProperty<Color> headingRowColor = MaterialStatePropertyAll<Color>(
       Color(0xfffffff2),
     );
-    const double headingRowHeight = 52.0;
-    const TextStyle headingTextStyle = TextStyle(fontSize: 14.5);
-    const double horizontalMargin = 3.0;
-    const double columnSpacing = 4.0;
-    const double dividerThickness = 5.0;
+    const headingRowHeight = 52.0;
+    const headingTextStyle = TextStyle(fontSize: 14.5);
+    const horizontalMargin = 3.0;
+    const columnSpacing = 4.0;
+    const dividerThickness = 5.0;
     const WidgetStateProperty<MouseCursor> headingCellCursor =
         MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.forbidden);
     const WidgetStateProperty<MouseCursor> dataRowCursor = MaterialStatePropertyAll<MouseCursor>(
@@ -420,8 +417,8 @@ void main() {
   testWidgets(
     'DataTable properties are taken over the theme values - separate test for deprecated dataRowHeight',
     (WidgetTester tester) async {
-      const double themeDataRowHeight = 50.0;
-      const double dataRowHeight = 51.0;
+      const themeDataRowHeight = 50.0;
+      const dataRowHeight = 51.0;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -451,39 +448,39 @@ void main() {
   testWidgets('Local DataTableTheme can override global DataTableTheme', (
     WidgetTester tester,
   ) async {
-    const BoxDecoration globalThemeDecoration = BoxDecoration(color: Color(0xfffffff1));
+    const globalThemeDecoration = BoxDecoration(color: Color(0xfffffff1));
     const WidgetStateProperty<Color> globalThemeDataRowColor = MaterialStatePropertyAll<Color>(
       Color(0xfffffff0),
     );
-    const double minMaxGlobalThemeDataRowHeight = 50.0;
-    const TextStyle globalThemeDataTextStyle = TextStyle(fontSize: 11.5);
+    const minMaxGlobalThemeDataRowHeight = 50.0;
+    const globalThemeDataTextStyle = TextStyle(fontSize: 11.5);
     const WidgetStateProperty<Color> globalThemeHeadingRowColor = MaterialStatePropertyAll<Color>(
       Color(0xfffffff1),
     );
-    const double globalThemeHeadingRowHeight = 51.0;
-    const TextStyle globalThemeHeadingTextStyle = TextStyle(fontSize: 13.5);
-    const double globalThemeHorizontalMargin = 2.0;
-    const double globalThemeColumnSpacing = 3.0;
-    const double globalThemeDividerThickness = 4.0;
+    const globalThemeHeadingRowHeight = 51.0;
+    const globalThemeHeadingTextStyle = TextStyle(fontSize: 13.5);
+    const globalThemeHorizontalMargin = 2.0;
+    const globalThemeColumnSpacing = 3.0;
+    const globalThemeDividerThickness = 4.0;
     const WidgetStateProperty<MouseCursor> globalHeadingCellCursor =
         MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.allScroll);
     const WidgetStateProperty<MouseCursor> globalDataRowCursor =
         MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.allScroll);
 
-    const BoxDecoration localThemeDecoration = BoxDecoration(color: Color(0xfffffff0));
+    const localThemeDecoration = BoxDecoration(color: Color(0xfffffff0));
     const WidgetStateProperty<Color> localThemeDataRowColor = MaterialStatePropertyAll<Color>(
       Color(0xfffffff1),
     );
-    const double minMaxLocalThemeDataRowHeight = 51.0;
-    const TextStyle localThemeDataTextStyle = TextStyle(fontSize: 12.5);
+    const minMaxLocalThemeDataRowHeight = 51.0;
+    const localThemeDataTextStyle = TextStyle(fontSize: 12.5);
     const WidgetStateProperty<Color> localThemeHeadingRowColor = MaterialStatePropertyAll<Color>(
       Color(0xfffffff2),
     );
-    const double localThemeHeadingRowHeight = 52.0;
-    const TextStyle localThemeHeadingTextStyle = TextStyle(fontSize: 14.5);
-    const double localThemeHorizontalMargin = 3.0;
-    const double localThemeColumnSpacing = 4.0;
-    const double localThemeDividerThickness = 5.0;
+    const localThemeHeadingRowHeight = 52.0;
+    const localThemeHeadingTextStyle = TextStyle(fontSize: 14.5);
+    const localThemeHorizontalMargin = 3.0;
+    const localThemeColumnSpacing = 4.0;
+    const localThemeDividerThickness = 5.0;
     const WidgetStateProperty<MouseCursor> localHeadingCellCursor =
         MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.move);
     const WidgetStateProperty<MouseCursor> localDataRowCursor =
@@ -609,8 +606,8 @@ void main() {
   testWidgets(
     'Local DataTableTheme can override global DataTableTheme - separate test for deprecated dataRowHeight',
     (WidgetTester tester) async {
-      const double globalThemeDataRowHeight = 50.0;
-      const double localThemeDataRowHeight = 51.0;
+      const globalThemeDataRowHeight = 50.0;
+      const localThemeDataRowHeight = 51.0;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -643,7 +640,7 @@ void main() {
   testWidgets('DataColumn label can be centered with DataTableTheme.headingRowAlignment', (
     WidgetTester tester,
   ) async {
-    const double horizontalMargin = 24.0;
+    const horizontalMargin = 24.0;
 
     Widget buildTable({MainAxisAlignment? headingRowAlignment, bool sortEnabled = false}) {
       return MaterialApp(

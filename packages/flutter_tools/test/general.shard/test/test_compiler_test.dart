@@ -281,7 +281,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
   final FileSystem? fileSystem;
 
   CompilerOutput? compilerOutput;
-  var didShutdown = false;
+  bool didShutdown = false;
 
   @override
   Future<CompilerOutput?> recompile(

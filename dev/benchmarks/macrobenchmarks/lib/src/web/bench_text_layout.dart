@@ -29,7 +29,7 @@ class ParagraphGenerator {
   /// Randomizes the given [text] and creates a paragraph with a unique
   /// font-size so that the engine doesn't reuse a cached ruler.
   ui.Paragraph generate(String text, {int? maxLines, bool hasEllipsis = false}) {
-    final ui.ParagraphBuilder builder =
+    final builder =
         ui.ParagraphBuilder(
             ui.ParagraphStyle(
               fontFamily: 'sans-serif',
@@ -108,15 +108,15 @@ class BenchTextLayout extends RawRecorder {
       paragraph.layout(ui.ParagraphConstraints(width: maxWidth));
     }, reported: true);
     profile.record('$keyPrefix.getBoxesForRange', () {
-      for (int start = 0; start < text.length; start += 3) {
+      for (var start = 0; start < text.length; start += 3) {
         for (int end = start + 1; end < text.length; end *= 2) {
           paragraph.getBoxesForRange(start, end);
         }
       }
     }, reported: true);
     profile.record('$keyPrefix.getPositionForOffset', () {
-      for (double dx = 0.0; dx < paragraph.width; dx += 10.0) {
-        for (double dy = 0.0; dy < paragraph.height; dy += 10.0) {
+      for (var dx = 0.0; dx < paragraph.width; dx += 10.0) {
+        for (var dy = 0.0; dy < paragraph.height; dy += 10.0) {
           paragraph.getPositionForOffset(Offset(dx, dy));
         }
       }
@@ -136,13 +136,12 @@ class BenchTextCachedLayout extends RawRecorder {
 
   @override
   void body(Profile profile) {
-    final ui.ParagraphBuilder builder =
-        ui.ParagraphBuilder(ui.ParagraphStyle(fontFamily: 'sans-serif'))
-          ..pushStyle(ui.TextStyle(fontSize: 12.0))
-          ..addText(
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, '
-            'sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-          );
+    final builder = ui.ParagraphBuilder(ui.ParagraphStyle(fontFamily: 'sans-serif'))
+      ..pushStyle(ui.TextStyle(fontSize: 12.0))
+      ..addText(
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, '
+        'sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+      );
     final ui.Paragraph paragraph = builder.build();
     profile.record('layout', () {
       paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));

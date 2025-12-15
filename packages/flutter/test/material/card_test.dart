@@ -9,7 +9,7 @@ import '../widgets/semantics_tester.dart';
 
 void main() {
   testWidgets('Material3 - Card defaults (Elevated card)', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
     final ColorScheme colors = theme.colorScheme;
     await tester.pumpWidget(
       MaterialApp(
@@ -37,7 +37,7 @@ void main() {
   });
 
   testWidgets('Material3 - Card.filled defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
     final ColorScheme colors = theme.colorScheme;
     await tester.pumpWidget(
       MaterialApp(
@@ -62,7 +62,7 @@ void main() {
   });
 
   testWidgets('Material3 - Card.outlined defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
     final ColorScheme colors = theme.colorScheme;
     await tester.pumpWidget(
       MaterialApp(
@@ -90,7 +90,7 @@ void main() {
   });
 
   testWidgets('Card can take semantic text from multiple children', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -141,7 +141,7 @@ void main() {
   });
 
   testWidgets('Card merges children when it is a semanticContainer', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     debugResetSemanticsIdCounter();
 
     await tester.pumpWidget(

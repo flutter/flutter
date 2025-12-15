@@ -8,7 +8,9 @@ import 'package:flutter_api_samples/widgets/scroll_notification_observer/scroll_
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Scroll to top buttons appears when scrolling down', (WidgetTester tester) async {
+  testWidgets('Scroll to top buttons appears when scrolling down', (
+    WidgetTester tester,
+  ) async {
     const String buttonText = 'Scroll to top';
 
     await tester.pumpWidget(const example.ScrollNotificationObserverApp());

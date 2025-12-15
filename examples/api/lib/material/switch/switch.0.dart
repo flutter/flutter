@@ -37,7 +37,7 @@ class _SwitchExampleState extends State<SwitchExample> {
     return Switch(
       // This bool value toggles the switch.
       value: light,
-      activeColor: Colors.red,
+      activeThumbColor: Colors.red,
       onChanged: (bool value) {
         // This is called when the user toggles the switch.
         setState(() {

@@ -23,7 +23,7 @@ import '../_luci_skia_gold_prelude.dart';
 ///
 /// For a convenient way to deflake a test, see `tool/deflake.dart`.
 void main() async {
-  const String goldenPrefix = 'texture_layer_hybrid_composition_platform_view';
+  const goldenPrefix = 'texture_layer_hybrid_composition_platform_view';
 
   late final FlutterDriver flutterDriver;
   late final NativeDriver nativeDriver;

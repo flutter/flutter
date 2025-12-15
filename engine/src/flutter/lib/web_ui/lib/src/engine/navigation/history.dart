@@ -142,7 +142,7 @@ class MultiEntriesBrowserHistory extends BrowserHistory {
   late int _lastSeenSerialCount;
   int get _currentSerialCount {
     if (_hasSerialCount(currentState)) {
-      final Map<dynamic, dynamic> stateMap = currentState! as Map<dynamic, dynamic>;
+      final stateMap = currentState! as Map<dynamic, dynamic>;
       return (stateMap['serialCount'] as double).toInt();
     }
     return 0;
@@ -226,7 +226,7 @@ class MultiEntriesBrowserHistory extends BrowserHistory {
     }
     // Unwrap state.
     assert(_hasSerialCount(currentState) && _currentSerialCount == 0);
-    final Map<dynamic, dynamic> stateMap = currentState! as Map<dynamic, dynamic>;
+    final stateMap = currentState! as Map<dynamic, dynamic>;
     urlStrategy!.replaceState(stateMap['state'], 'flutter', currentPath);
   }
 }
@@ -290,7 +290,7 @@ class SingleEntryBrowserHistory extends BrowserHistory {
 
   Object? _unwrapOriginState(Object? state) {
     assert(_isOriginEntry(state));
-    final Map<dynamic, dynamic> originState = state! as Map<dynamic, dynamic>;
+    final originState = state! as Map<dynamic, dynamic>;
     return originState['state'];
   }
 
@@ -366,7 +366,9 @@ class SingleEntryBrowserHistory extends BrowserHistory {
   /// This method is used manipulate the Flutter Entry which is always the
   /// active entry while the Flutter app is running.
   void _setupFlutterEntry(ui_web.UrlStrategy strategy, {bool replace = false}) {
-    final updateState = replace ? strategy.replaceState : strategy.pushState;
+    final void Function(Object? state, String title, String url) updateState = replace
+        ? strategy.replaceState
+        : strategy.pushState;
     updateState(_flutterState, 'flutter', _currentRouteName);
   }
 

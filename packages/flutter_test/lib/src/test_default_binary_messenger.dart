@@ -362,7 +362,7 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
       return;
     }
 
-    final StreamController<Object?> controller = StreamController<Object?>();
+    final controller = StreamController<Object?>();
     addTearDown(controller.close);
 
     setMockMethodCallHandler(

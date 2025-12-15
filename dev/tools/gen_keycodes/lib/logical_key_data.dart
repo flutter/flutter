@@ -27,7 +27,7 @@ class _ModifierPair {
 // map[key1][key2] might be null.
 List<T> _getGrandchildList<T>(Map<String, dynamic> map, String key1, String key2) {
   final dynamic value = (map[key1] as Map<String, dynamic>?)?[key2];
-  final List<dynamic>? dynamicNullableList = value as List<dynamic>?;
+  final dynamicNullableList = value as List<dynamic>?;
   final List<dynamic> dynamicList = dynamicNullableList ?? <dynamic>[];
   return dynamicList.cast<T>();
 }
@@ -75,12 +75,10 @@ class LogicalKeyData {
 
   /// Parses the given JSON data and populates the data structure from it.
   factory LogicalKeyData.fromJson(Map<String, dynamic> contentMap) {
-    final Map<String, LogicalKeyEntry> data = <String, LogicalKeyEntry>{};
+    final data = <String, LogicalKeyEntry>{};
     data.addEntries(
       contentMap.values.map((dynamic value) {
-        final LogicalKeyEntry entry = LogicalKeyEntry.fromJsonMapEntry(
-          value as Map<String, dynamic>,
-        );
+        final entry = LogicalKeyEntry.fromJsonMapEntry(value as Map<String, dynamic>);
         return MapEntry<String, LogicalKeyEntry>(entry.name, entry);
       }),
     );
@@ -96,7 +94,7 @@ class LogicalKeyData {
   /// Converts the data structure into a JSON structure that can be parsed by
   /// [LogicalKeyData.fromJson].
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> outputMap = <String, dynamic>{};
+    final outputMap = <String, dynamic>{};
     for (final LogicalKeyEntry entry in _data.values) {
       outputMap[entry.name] = entry.toJson();
     }
@@ -134,8 +132,8 @@ class LogicalKeyData {
   ///                 Key       Enum       Character
   /// FLUTTER_KEY_MAP("Lang4",  LANG4,     0x00013),
   static Map<String, LogicalKeyEntry> _readKeyEntries(String input) {
-    final Map<int, LogicalKeyEntry> dataByValue = <int, LogicalKeyEntry>{};
-    final RegExp domKeyRegExp = RegExp(
+    final dataByValue = <int, LogicalKeyEntry>{};
+    final domKeyRegExp = RegExp(
       r'(?<source>DOM|FLUTTER)_KEY_(?<kind>UNI|MAP)\s*\(\s*'
       r'"(?<name>[^\s]+?)",\s*'
       r'(?<enum>[^\s]+?),\s*'
@@ -145,7 +143,7 @@ class LogicalKeyData {
       // multiple lines.
       multiLine: true,
     );
-    final RegExp commentRegExp = RegExp(r'//.*$', multiLine: true);
+    final commentRegExp = RegExp(r'//.*$', multiLine: true);
     input = input.replaceAll(commentRegExp, '');
     for (final RegExpMatch match in domKeyRegExp.allMatches(input)) {
       final String source = match.namedGroup('source')!;
@@ -168,7 +166,7 @@ class LogicalKeyData {
         continue;
       }
 
-      final bool isPrintable = keyLabel != null;
+      final isPrintable = keyLabel != null;
       final int entryValue = toPlane(value, _sourceToPlane(source, isPrintable));
       final LogicalKeyEntry entry = dataByValue.putIfAbsent(
         entryValue,
@@ -245,7 +243,7 @@ class LogicalKeyData {
     String headerFile,
     Map<String, List<String>> nameToGtkName,
   ) {
-    final RegExp definedCodes = RegExp(
+    final definedCodes = RegExp(
       r'#define '
       r'GDK_KEY_(?<name>[a-zA-Z0-9_]+)\s*'
       r'0x(?<value>[0-9a-f]+),?',
@@ -291,7 +289,7 @@ class LogicalKeyData {
       print('Duplicate Windows logical name $windowsName');
     });
 
-    final RegExp definedCodes = RegExp(
+    final definedCodes = RegExp(
       r'define '
       r'VK_(?<name>[A-Z0-9_]+)\s*'
       r'(?<value>[A-Z0-9_x]+),?',
@@ -330,10 +328,10 @@ class LogicalKeyData {
       print('Duplicate Android logical name $androidName');
     });
 
-    final RegExp enumBlock = RegExp(r'enum\s*\{(.*)\};', multiLine: true);
+    final enumBlock = RegExp(r'enum\s*\{(.*)\};', multiLine: true);
     // Eliminate everything outside of the enum block.
     headerFile = headerFile.replaceAllMapped(enumBlock, (Match match) => match.group(1)!);
-    final RegExp enumEntry = RegExp(
+    final enumEntry = RegExp(
       r'AKEYCODE_(?<name>[A-Z0-9_]+)\s*'
       r'=\s*'
       r'(?<value>[0-9]+),?',
@@ -401,18 +399,18 @@ class LogicalKeyData {
     });
 
     // Only get the KEY definitions, ignore the rest (mouse, joystick, etc).
-    final RegExp definedCodes = RegExp(
+    final definedCodes = RegExp(
       r'define\s+'
       r'GLFW_KEY_(?<name>[A-Z0-9_]+)\s+'
       r'(?<value>[A-Z0-9_]+),?',
     );
-    final Map<String, dynamic> replaced = <String, dynamic>{};
+    final replaced = <String, dynamic>{};
     for (final RegExpMatch match in definedCodes.allMatches(headerFile)) {
       final String name = match.namedGroup('name')!;
       final String value = match.namedGroup('value')!;
       replaced[name] = int.tryParse(value) ?? value.replaceAll('GLFW_KEY_', '');
     }
-    final Map<String, int> glfwNameToKeyCode = <String, int>{};
+    final glfwNameToKeyCode = <String, int>{};
     replaced.forEach((String key, dynamic value) {
       // Some definition values point to other definitions (e.g #define GLFW_KEY_LAST GLFW_KEY_MENU).
       if (value is String) {
@@ -440,7 +438,7 @@ class LogicalKeyData {
   static final Map<String, _ModifierPair> _chromeModifiers = () {
     final String rawJson = File(path.join(dataRoot, 'chromium_modifiers.json')).readAsStringSync();
     return (json.decode(rawJson) as Map<String, dynamic>).map((String key, dynamic value) {
-      final List<dynamic> pair = value as List<dynamic>;
+      final pair = value as List<dynamic>;
       return MapEntry<String, _ModifierPair>(
         key,
         _ModifierPair(pair[0] as String, pair[1] as String),
@@ -461,7 +459,7 @@ class LogicalKeyData {
   /// SHIFT, ALT, etc.).
   static final Map<String, List<String>> synonyms = (() {
     final String synonymKeys = File(path.join(dataRoot, 'synonyms.json')).readAsStringSync();
-    final Map<String, dynamic> dynamicSynonym = json.decode(synonymKeys) as Map<String, dynamic>;
+    final dynamicSynonym = json.decode(synonymKeys) as Map<String, dynamic>;
     return dynamicSynonym.map((String name, dynamic values) {
       // The keygen and algorithm of macOS relies on synonyms being pairs.
       // See siblingKeyMap in macos_code_gen.dart.

@@ -9,6 +9,7 @@
 #include <string>
 #include <string_view>
 
+#include "GLES3/gl3.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/mapping.h"
 #include "impeller/renderer/backend/gles/capabilities_gles.h"
@@ -316,6 +317,11 @@ class ProcTableGLES {
   std::string DescribeCurrentFramebuffer() const;
 
   std::string GetProgramInfoLogString(GLuint program) const;
+
+  // Only check framebuffer status in debug builds.
+  // Prefer this if possible to direct calls to CheckFramebufferStatus,
+  // which can cause CPU<->GPU round-trips.
+  GLenum CheckFramebufferStatusDebug(GLenum target) const;
 
   bool IsCurrentFramebufferComplete() const;
 

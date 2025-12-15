@@ -12,10 +12,7 @@ void main() {
 
 void testMain() {
   test('GestureSettings has a reasonable toString', () {
-    const GestureSettings gestureSettings = GestureSettings(
-      physicalDoubleTapSlop: 2.5,
-      physicalTouchSlop: 1.5,
-    );
+    const gestureSettings = GestureSettings(physicalDoubleTapSlop: 2.5, physicalTouchSlop: 1.5);
 
     expect(
       gestureSettings.toString(),
@@ -26,18 +23,9 @@ void testMain() {
   test('GestureSettings has a correct equality', () {
     // don't refactor these to be const, that defeats the point!
     final double value = nonconst(2.0);
-    final GestureSettings settingsA = GestureSettings(
-      physicalDoubleTapSlop: value,
-      physicalTouchSlop: 1.0,
-    );
-    final GestureSettings settingsB = GestureSettings(
-      physicalDoubleTapSlop: value,
-      physicalTouchSlop: 3.0,
-    );
-    final GestureSettings settingsC = GestureSettings(
-      physicalDoubleTapSlop: value,
-      physicalTouchSlop: 1.0,
-    );
+    final settingsA = GestureSettings(physicalDoubleTapSlop: value, physicalTouchSlop: 1.0);
+    final settingsB = GestureSettings(physicalDoubleTapSlop: value, physicalTouchSlop: 3.0);
+    final settingsC = GestureSettings(physicalDoubleTapSlop: value, physicalTouchSlop: 1.0);
 
     expect(settingsA, equals(settingsC));
     expect(settingsC, equals(settingsA));
@@ -50,10 +38,7 @@ void testMain() {
   });
 
   test('GestureSettings copyWith preserves already set values', () {
-    const GestureSettings initial = GestureSettings(
-      physicalDoubleTapSlop: 1.0,
-      physicalTouchSlop: 1.0,
-    );
+    const initial = GestureSettings(physicalDoubleTapSlop: 1.0, physicalTouchSlop: 1.0);
 
     final GestureSettings copyA = initial.copyWith();
 
@@ -70,7 +55,7 @@ void testMain() {
   });
 
   test('GestureSettings constructor defaults to null', () {
-    const GestureSettings settings = GestureSettings();
+    const settings = GestureSettings();
 
     expect(settings.physicalDoubleTapSlop, null);
     expect(settings.physicalTouchSlop, null);

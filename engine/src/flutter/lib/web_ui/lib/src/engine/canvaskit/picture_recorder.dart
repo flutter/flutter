@@ -31,7 +31,7 @@ class CkPictureRecorder implements LayerPictureRecorder {
     final SkPicture skPicture = recorder.finishRecordingAsPicture();
     recorder.delete();
     _skRecorder = null;
-    final CkPicture result = CkPicture(skPicture);
+    final result = CkPicture(skPicture);
     // We invoke the handler here, not in the picture constructor, because we want
     // [result.approximateBytesUsed] to be available for the handler.
     ui.Picture.onCreate?.call(result);

@@ -99,7 +99,8 @@
     - oot_flutter_jit_runner-0.far
     - gen/flutter/shell/platform/fuchsia/flutter/tests/integration/touch-input/touch-input-view/touch-input-view/touch-input-view.far
     - gen/flutter/shell/platform/fuchsia/flutter/tests/integration/touch-input/embedding-flutter-view/embedding-flutter-view/embedding-flutter-view.far
-  variant: debug_x64
+  variant: disabed
+  disabled: FlutterEmbedTapTest(s) are flaky, https://ci.chromium.org/ui/p/flutter/builders/prod/Linux%20linux_fuchsia_tests
 - test_command: test run fuchsia-pkg://fuchsia.com/txt_tests#meta/txt_tests.cm -- --gtest_filter=-ParagraphTest.*
   package: txt_tests-0.far
   variant: debug

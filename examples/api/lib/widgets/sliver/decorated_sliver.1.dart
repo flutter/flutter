@@ -16,7 +16,9 @@ class DecoratedSliverClipExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'DecoratedSliver Clip Example',
-      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      ),
       home: const DecoratedSliverClipExample(),
     );
   }
@@ -26,10 +28,12 @@ class DecoratedSliverClipExample extends StatefulWidget {
   const DecoratedSliverClipExample({super.key});
 
   @override
-  State<DecoratedSliverClipExample> createState() => _DecoratedSliverClipExampleState();
+  State<DecoratedSliverClipExample> createState() =>
+      _DecoratedSliverClipExampleState();
 }
 
-class _DecoratedSliverClipExampleState extends State<DecoratedSliverClipExample> {
+class _DecoratedSliverClipExampleState
+    extends State<DecoratedSliverClipExample> {
   double _height = 225.0;
   bool _isClipped = false;
 
@@ -44,7 +48,7 @@ class _DecoratedSliverClipExampleState extends State<DecoratedSliverClipExample>
             children: <Widget>[
               Switch(
                 inactiveTrackColor: Colors.cyan,
-                activeColor: Colors.pink,
+                activeThumbColor: Colors.pink,
                 onChanged: (bool value) {
                   setState(() {
                     _isClipped = value;
@@ -108,9 +112,15 @@ class ResizableCustomScrollView extends StatelessWidget {
         DecoratedSliver(
           decoration: const ShapeDecoration(
             color: Color(0xFF2C2C2C),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(6))),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(6)),
+            ),
             shadows: <BoxShadow>[
-              BoxShadow(color: Colors.cyan, offset: Offset(3, 3), blurRadius: 24),
+              BoxShadow(
+                color: Colors.cyan,
+                offset: Offset(3, 3),
+                blurRadius: 24,
+              ),
             ],
           ),
           sliver: SliverList.builder(
@@ -121,7 +131,10 @@ class ResizableCustomScrollView extends StatelessWidget {
                 children: <Widget>[
                   const Icon(Icons.add_box, color: Color(0xFFA8A8A8)),
                   Flexible(
-                    child: Text('Item $index', style: const TextStyle(color: Color(0xFFA8A8A8))),
+                    child: Text(
+                      'Item $index',
+                      style: const TextStyle(color: Color(0xFFA8A8A8)),
+                    ),
                   ),
                 ],
               ),

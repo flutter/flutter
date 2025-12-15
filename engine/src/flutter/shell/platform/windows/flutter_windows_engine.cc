@@ -274,8 +274,8 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
     FML_LOG(ERROR) << "Missing or unresolvable paths to assets.";
     return false;
   }
-  std::string assets_path_string = project_->assets_path().string();
-  std::string icu_path_string = project_->icu_path().string();
+  std::string assets_path_string = fml::PathToUtf8(project_->assets_path());
+  std::string icu_path_string = fml::PathToUtf8(project_->icu_path());
   if (embedder_api_.RunsAOTCompiledDartCode()) {
     aot_data_ = project_->LoadAotData(embedder_api_);
     if (!aot_data_) {

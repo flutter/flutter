@@ -31,8 +31,8 @@ class _TestStateState extends State<TestState> {
 
 void main() {
   testWidgets('Visibility', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    final List<String> log = <String>[];
+    final semantics = SemanticsTester(tester);
+    final log = <String>[];
 
     final Widget testChild = GestureDetector(
       onTap: () {
@@ -578,7 +578,7 @@ void main() {
   testWidgets('Visibility.of works when multiple Visibility widgets are in hierarchy', (
     WidgetTester tester,
   ) async {
-    bool didChangeDependencies = false;
+    var didChangeDependencies = false;
     void handleDidChangeDependencies() {
       didChangeDependencies = true;
     }

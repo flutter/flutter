@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/semantics_tester.dart';
+
 class User {
   const User({required this.email, required this.name});
 
@@ -19,7 +21,7 @@ class User {
 }
 
 void main() {
-  const List<String> kOptions = <String>[
+  const kOptions = <String>[
     'aardvark',
     'bobcat',
     'chameleon',
@@ -36,7 +38,7 @@ void main() {
     'northern white rhinoceros',
   ];
 
-  const List<User> kOptionsUsers = <User>[
+  const kOptionsUsers = <User>[
     User(name: 'Alice', email: 'alice@example.com'),
     User(name: 'Bob', email: 'bob@example.com'),
     User(name: 'Charlie', email: 'charlie123@gmail.com'),
@@ -69,7 +71,7 @@ void main() {
     await tester.tap(find.byType(TextFormField));
     await tester.pump();
     expect(find.byType(ListView), findsOneWidget);
-    ListView list = find.byType(ListView).evaluate().first.widget as ListView;
+    var list = find.byType(ListView).evaluate().first.widget as ListView;
     expect(list.semanticChildCount, kOptions.length);
 
     // Enter text. The options are filtered by the text.
@@ -87,7 +89,7 @@ void main() {
     await tester.pump();
     expect(find.byType(TextFormField), findsOneWidget);
     expect(find.byType(ListView), findsNothing);
-    final TextFormField field = find.byType(TextFormField).evaluate().first.widget as TextFormField;
+    final field = find.byType(TextFormField).evaluate().first.widget as TextFormField;
     expect(field.controller!.text, 'chameleon');
     expect(lastSelection, 'chameleon');
 
@@ -125,7 +127,7 @@ void main() {
     await tester.tap(find.byType(TextFormField));
     await tester.pump();
     expect(find.byType(ListView), findsOneWidget);
-    ListView list = find.byType(ListView).evaluate().first.widget as ListView;
+    var list = find.byType(ListView).evaluate().first.widget as ListView;
     expect(list.semanticChildCount, kOptionsUsers.length);
 
     // Enter text. The options are filtered by the text.
@@ -143,7 +145,7 @@ void main() {
     await tester.pump();
     expect(find.byType(TextFormField), findsOneWidget);
     expect(find.byType(ListView), findsNothing);
-    final TextFormField field = find.byType(TextFormField).evaluate().first.widget as TextFormField;
+    final field = find.byType(TextFormField).evaluate().first.widget as TextFormField;
     expect(field.controller!.text, 'Alice, alice@example.com');
 
     // Modify the field text. The options appear again and are filtered.
@@ -183,9 +185,9 @@ void main() {
     await tester.tap(find.byType(TextFormField));
     await tester.pump();
     expect(find.byType(ListView), findsOneWidget);
-    final ListView list = find.byType(ListView).evaluate().first.widget as ListView;
+    final list = find.byType(ListView).evaluate().first.widget as ListView;
     expect(list.semanticChildCount, kOptionsUsers.length);
-    for (int i = 0; i < kOptionsUsers.length; i++) {
+    for (var i = 0; i < kOptionsUsers.length; i++) {
       expect(find.text(kOptionsUsers[i].name), findsOneWidget);
     }
 
@@ -195,7 +197,7 @@ void main() {
     await tester.pump();
     expect(find.byType(TextFormField), findsOneWidget);
     expect(find.byType(ListView), findsNothing);
-    final TextFormField field = find.byType(TextFormField).evaluate().first.widget as TextFormField;
+    final field = find.byType(TextFormField).evaluate().first.widget as TextFormField;
     expect(field.controller!.text, kOptionsUsers.first.name);
   });
 
@@ -291,7 +293,7 @@ void main() {
   });
 
   testWidgets('the options height restricts to max desired height', (WidgetTester tester) async {
-    const double desiredHeight = 150.0;
+    const desiredHeight = 150.0;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -330,7 +332,7 @@ void main() {
       Future<double> getDefaultOptionsHeight(WidgetTester tester, String enteredText) async {
         final Finder listFinder = find.byType(ListView);
         final Finder inputFinder = find.byType(TextFormField);
-        final TextFormField field = inputFinder.evaluate().first.widget as TextFormField;
+        final field = inputFinder.evaluate().first.widget as TextFormField;
         field.controller!.clear();
         await tester.tap(inputFinder);
         await tester.enterText(inputFinder, enteredText);
@@ -339,7 +341,7 @@ void main() {
         return baseSize.height;
       }
 
-      const double maxOptionsHeight = 250.0;
+      const maxOptionsHeight = 250.0;
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -404,7 +406,7 @@ void main() {
     await tester.tap(find.byType(TextFormField));
     await tester.pump();
     expect(find.byType(ListView), findsOneWidget);
-    final ListView list = find.byType(ListView).evaluate().first.widget as ListView;
+    final list = find.byType(ListView).evaluate().first.widget as ListView;
     // Displays just one option ('lemur').
     expect(list.semanticChildCount, 1);
 
@@ -414,7 +416,7 @@ void main() {
     await tester.pump();
     expect(find.byType(TextFormField), findsOneWidget);
     expect(find.byType(ListView), findsNothing);
-    final TextFormField field = find.byType(TextFormField).evaluate().first.widget as TextFormField;
+    final field = find.byType(TextFormField).evaluate().first.widget as TextFormField;
     expect(field.controller!.text, 'lemur');
     expect(lastSelection, 'lemur');
   });
@@ -438,7 +440,7 @@ void main() {
   testWidgets('keyboard navigation of the options properly highlights the option', (
     WidgetTester tester,
   ) async {
-    const Color highlightColor = Color(0xFF112233);
+    const highlightColor = Color(0xFF112233);
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(focusColor: highlightColor),
@@ -458,7 +460,7 @@ void main() {
     await tester.enterText(find.byType(TextFormField), 'el');
     await tester.pump();
     expect(find.byType(ListView), findsOneWidget);
-    final ListView list = find.byType(ListView).evaluate().first.widget as ListView;
+    final list = find.byType(ListView).evaluate().first.widget as ListView;
     expect(list.semanticChildCount, 2);
 
     // Initially the first option should be highlighted
@@ -477,7 +479,7 @@ void main() {
   testWidgets('keyboard navigation keeps the highlighted option scrolled into view', (
     WidgetTester tester,
   ) async {
-    const Color highlightColor = Color(0xFF112233);
+    const highlightColor = Color(0xFF112233);
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(focusColor: highlightColor),
@@ -497,11 +499,11 @@ void main() {
     await tester.enterText(find.byType(TextFormField), 'e');
     await tester.pump();
     expect(find.byType(ListView), findsOneWidget);
-    final ListView list = find.byType(ListView).evaluate().first.widget as ListView;
+    final list = find.byType(ListView).evaluate().first.widget as ListView;
     expect(list.semanticChildCount, 6);
 
     final Rect optionsGroupRect = tester.getRect(find.byType(ListView));
-    const double optionsGroupPadding = 16.0;
+    const optionsGroupPadding = 16.0;
 
     // Highlighted item should be at the top.
     checkOptionHighlight(tester, 'chameleon', highlightColor);
@@ -682,7 +684,7 @@ void main() {
   });
 
   testWidgets('can jump to options that are not yet built', (WidgetTester tester) async {
-    const Color highlightColor = Color(0xFF112233);
+    const highlightColor = Color(0xFF112233);
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(focusColor: highlightColor),
@@ -701,7 +703,7 @@ void main() {
     await tester.tap(find.byType(TextFormField));
     await tester.pump();
     expect(find.byType(ListView), findsOneWidget);
-    final ListView list = find.byType(ListView).evaluate().first.widget as ListView;
+    final list = find.byType(ListView).evaluate().first.widget as ListView;
     expect(list.semanticChildCount, kOptions.length);
 
     Finder optionFinder(int index) {
@@ -736,8 +738,8 @@ void main() {
   testWidgets(
     'passes textEditingController, focusNode to textEditingController, focusNode RawAutocomplete',
     (WidgetTester tester) async {
-      final TextEditingController textEditingController = TextEditingController();
-      final FocusNode focusNode = FocusNode();
+      final textEditingController = TextEditingController();
+      final focusNode = FocusNode();
       addTearDown(textEditingController.dispose);
       addTearDown(focusNode.dispose);
 
@@ -766,9 +768,9 @@ void main() {
   testWidgets('when field scrolled offscreen, reshown selected value when scrolled back', (
     WidgetTester tester,
   ) async {
-    final ScrollController scrollController = ScrollController();
-    final TextEditingController textEditingController = TextEditingController();
-    final FocusNode focusNode = FocusNode();
+    final scrollController = ScrollController();
+    final textEditingController = TextEditingController();
+    final focusNode = FocusNode();
     addTearDown(textEditingController.dispose);
     addTearDown(focusNode.dispose);
     addTearDown(scrollController.dispose);
@@ -798,11 +800,11 @@ void main() {
     /// Select an option.
     await tester.tap(find.byType(TextField));
     await tester.pump();
-    const String textSelection = 'chameleon';
+    const textSelection = 'chameleon';
     await tester.tap(find.text(textSelection));
 
     // Unfocus and scroll to deconstruct the widge
-    final TextField field = find.byType(TextField).evaluate().first.widget as TextField;
+    final field = find.byType(TextField).evaluate().first.widget as TextField;
     field.focusNode?.unfocus();
     scrollController.jumpTo(2000.0);
     await tester.pumpAndSettle();
@@ -812,8 +814,46 @@ void main() {
     await tester.pumpAndSettle();
 
     /// Checks that the option selected is still present.
-    final TextField field2 = find.byType(TextField).evaluate().first.widget as TextField;
+    final field2 = find.byType(TextField).evaluate().first.widget as TextField;
     expect(field2.controller!.text, textSelection);
+  });
+
+  testWidgets('Autocomplete suggestions are hit-tested before ListTiles', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: <Widget>[
+              Autocomplete<String>(
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  const options = <String>['Apple', 'Banana', 'Cherry'];
+                  return options.where(
+                    (String option) => option.toLowerCase().contains(textEditingValue.text),
+                  );
+                },
+              ),
+              for (int i = 0; i < 3; i++) ListTile(title: Text('Item $i'), onTap: () {}),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+
+    final Finder cherryFinder = find.text('Cherry');
+    expect(cherryFinder, findsOneWidget);
+
+    await tester.tap(cherryFinder);
+    await tester.pump();
+
+    expect(find.widgetWithText(TextField, 'Cherry'), findsOneWidget);
+    semantics.dispose();
   });
 
   testWidgets('Autocomplete renders at zero area', (WidgetTester tester) async {
@@ -836,7 +876,7 @@ void main() {
   });
 
   testWidgets('autocomplete options have button semantics', (WidgetTester tester) async {
-    const Color highlightColor = Color(0xFF112233);
+    const highlightColor = Color(0xFF112233);
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(focusColor: highlightColor),

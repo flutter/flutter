@@ -36,10 +36,9 @@ void main() {
     await pumpsUseCase(tester, AutoCompleteUseCase());
     await tester.pumpAndSettle();
 
-    const List<String> kOptions = <String>['apple', 'banana', 'lemon'];
-    const String label = 'Fruit';
-    final String message =
-        'Type below to autocomplete the following possible results: $kOptions.\n$label';
+    const kOptions = <String>['apple', 'banana', 'lemon'];
+    const label = 'Fruit';
+    final message = 'Type below to autocomplete the following possible results: $kOptions.\n$label';
 
     final SemanticsNode node = tester.semantics.find(find.bySemanticsLabel(message));
     expect(node.flagsCollection.isTextField, isTrue);

@@ -8,8 +8,12 @@ import 'package:flutter_api_samples/widgets/navigator/navigator.restorable_push_
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('It pushes a restorable route and restores it', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.RestorablePushReplacementExampleApp());
+  testWidgets('It pushes a restorable route and restores it', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const example.RestorablePushReplacementExampleApp(),
+    );
 
     expect(find.widgetWithText(AppBar, 'Sample Code'), findsOne);
     expect(find.text('This is the initial route.'), findsOne);

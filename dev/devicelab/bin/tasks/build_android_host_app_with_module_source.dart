@@ -20,7 +20,7 @@ final String fileReadWriteMode = Platform.isWindows ? 'rw-rw-rw-' : 'rw-r--r--';
 /// Combines several TaskFunctions with trivial success value into one.
 TaskFunction combine(List<TaskFunction> tasks) {
   return () async {
-    for (final TaskFunction task in tasks) {
+    for (final task in tasks) {
       final TaskResult result = await task();
       if (result.failed) {
         return result;
@@ -53,7 +53,7 @@ class ModuleTest {
     section('Create Flutter module project');
 
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_module_test.');
-    final Directory projectDir = Directory(path.join(tempDir.path, 'hello'));
+    final projectDir = Directory(path.join(tempDir.path, 'hello'));
     try {
       await inDirectory(tempDir, () async {
         await flutter(
@@ -66,12 +66,12 @@ class ModuleTest {
 
       section('Create package with native assets');
 
-      const String ffiPackageName = 'ffi_package';
+      const ffiPackageName = 'ffi_package';
       await createFfiPackage(ffiPackageName, tempDir);
 
       section('Add FFI package');
 
-      final File pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
+      final pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
       String content = await pubspec.readAsString();
       content = content.replaceFirst(
         'dependencies:${Platform.lineTerminator}',
@@ -169,7 +169,7 @@ class ModuleTest {
 
       section('Add to existing Android app');
 
-      final Directory hostApp = Directory(path.join(tempDir.path, 'hello_host_app'));
+      final hostApp = Directory(path.join(tempDir.path, 'hello_host_app'));
       mkdir(hostApp);
       recursiveCopy(
         Directory(
@@ -191,7 +191,7 @@ class ModuleTest {
 
       // Modify gradle version to passed in version.
       // This is somehow the wrong file.
-      final File gradleWrapperProperties = File(
+      final gradleWrapperProperties = File(
         path.join(hostApp.path, 'gradle', 'wrapper', 'gradle-wrapper.properties'),
       );
       String propertyContent = await gradleWrapperProperties.readAsString();
@@ -266,7 +266,7 @@ class ModuleTest {
         'assets',
         'read-only.txt',
       ]);
-      final File readonlyDebugAssetFile = File(readonlyDebugAssetFilePath);
+      final readonlyDebugAssetFile = File(readonlyDebugAssetFilePath);
       if (!exists(readonlyDebugAssetFile)) {
         return TaskResult.failure('Failed to copy read-only asset file');
       }
@@ -319,12 +319,12 @@ class ModuleTest {
       section('Check the NOTICE file is correct');
 
       await inDirectory(hostApp, () async {
-        final File apkFile = File(releaseHostApk);
+        final apkFile = File(releaseHostApk);
         final Archive apk = ZipDecoder().decodeBytes(apkFile.readAsBytesSync());
         // Shouldn't be missing since we already checked it exists above.
         final ArchiveFile? noticesFile = apk.findFile('assets/flutter_assets/NOTICES.Z');
 
-        final Uint8List? licenseData = noticesFile?.content as Uint8List?;
+        final licenseData = noticesFile?.content as Uint8List?;
         if (licenseData == null) {
           return TaskResult.failure('Invalid license file.');
         }
@@ -360,7 +360,7 @@ class ModuleTest {
         'assets',
         'read-only.txt',
       ]);
-      final File readonlyReleaseAssetFile = File(readonlyReleaseAssetFilePath);
+      final readonlyReleaseAssetFile = File(readonlyReleaseAssetFilePath);
       if (!exists(readonlyReleaseAssetFile)) {
         return TaskResult.failure('Failed to copy read-only asset file');
       }
@@ -372,7 +372,7 @@ class ModuleTest {
       }
 
       section('Check for specific log errors.');
-      final String finalStderr = stderr.toString();
+      final finalStderr = stderr.toString();
       if (finalStderr.contains("You are applying Flutter's main Gradle plugin imperatively")) {
         return TaskResult.failure('Applied the Flutter Gradle Plugin imperatively');
       }

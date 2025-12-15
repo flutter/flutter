@@ -54,7 +54,7 @@ class MultiSurfaceViewRasterizer extends ViewRasterizer {
   }
 
   Future<void> rasterizeToCanvas(DisplayCanvas canvas, ui.Picture picture) {
-    final Surface surface = canvas as Surface;
+    final surface = canvas as Surface;
     surface.createOrUpdateSurface(currentFrameSize);
     surface.positionToShowFrame(currentFrameSize);
     final CkCanvas skCanvas = surface.getCanvas();
@@ -73,8 +73,8 @@ class MultiSurfaceViewRasterizer extends ViewRasterizer {
     if (displayCanvases.length != pictures.length) {
       throw ArgumentError('Called rasterize() with a different number of canvases and pictures.');
     }
-    final List<Future<void>> rasterizeFutures = <Future<void>>[];
-    for (int i = 0; i < displayCanvases.length; i++) {
+    final rasterizeFutures = <Future<void>>[];
+    for (var i = 0; i < displayCanvases.length; i++) {
       rasterizeFutures.add(rasterizeToCanvas(displayCanvases[i], pictures[i]));
     }
     recorder?.recordRasterStart();

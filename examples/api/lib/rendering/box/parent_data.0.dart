@@ -37,7 +37,9 @@ class _SampleAppState extends State<SampleApp> {
       'effectiveness and thus to developer happiness.',
     ),
     Headline('Bugs affecting more people are more valuable (maximize N)'),
-    Paragraph('We will make more people happier if we fix a bug experienced by more people.'),
+    Paragraph(
+      'We will make more people happier if we fix a bug experienced by more people.',
+    ),
     Paragraph(
       'One thing to be careful about is to think about the number of '
       'people we are ignoring in our metrics. For example, if we had '
@@ -46,7 +48,9 @@ class _SampleAppState extends State<SampleApp> {
       'However, fixing the bug would enable millions of developers '
       "to use our product, and that's the number that counts.",
     ),
-    Headline('Bugs with greater impact on developers are more valuable (maximize ΔH)'),
+    Headline(
+      'Bugs with greater impact on developers are more valuable (maximize ΔH)',
+    ),
     Paragraph(
       'A slight improvement to the user experience is less valuable '
       'than a greater improvement. For example, if our application, '
@@ -89,7 +93,9 @@ class _SampleAppState extends State<SampleApp> {
         body: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
           // CompactLayout and OpenLayout are the two rendering widgets defined below.
-          child: _compact ? const CompactLayout(children: body) : const OpenLayout(children: body),
+          child: _compact
+              ? const CompactLayout(children: body)
+              : const OpenLayout(children: body),
         ),
       ),
     );
@@ -139,7 +145,8 @@ class TextCategory extends ParentDataWidget<TextFlowParentData> {
 
   @override
   void applyParentData(RenderObject renderObject) {
-    final TextFlowParentData parentData = renderObject.parentData! as TextFlowParentData;
+    final TextFlowParentData parentData =
+        renderObject.parentData! as TextFlowParentData;
     if (parentData.category != category) {
       parentData.category = category;
       renderObject.parent!.markNeedsLayout();
@@ -161,7 +168,10 @@ class CompactLayout extends MultiChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderCompactLayout renderObject) {
+  void updateRenderObject(
+    BuildContext context,
+    RenderCompactLayout renderObject,
+  ) {
     // nothing to update
   }
 }
@@ -268,7 +278,8 @@ abstract class RenderTextFlow extends RenderBox
     double height = 0.0;
     RenderBox? child = firstChild;
     while (child != null) {
-      final String category = (child.parentData! as TextFlowParentData).category;
+      final String category =
+          (child.parentData! as TextFlowParentData).category;
       if (previousCategory != null) {
         height += spacingBetween(previousCategory, category);
       }
@@ -285,7 +296,8 @@ abstract class RenderTextFlow extends RenderBox
     double height = 0.0;
     RenderBox? child = firstChild;
     while (child != null) {
-      final String category = (child.parentData! as TextFlowParentData).category;
+      final String category =
+          (child.parentData! as TextFlowParentData).category;
       if (previousCategory != null) {
         height += spacingBetween(previousCategory, category);
       }
@@ -310,12 +322,15 @@ abstract class RenderTextFlow extends RenderBox
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    final BoxConstraints innerConstraints = BoxConstraints.tightFor(width: constraints.maxWidth);
+    final BoxConstraints innerConstraints = BoxConstraints.tightFor(
+      width: constraints.maxWidth,
+    );
     String? previousCategory;
     double y = 0.0;
     RenderBox? child = firstChild;
     while (child != null) {
-      final String category = (child.parentData! as TextFlowParentData).category;
+      final String category =
+          (child.parentData! as TextFlowParentData).category;
       if (previousCategory != null) {
         y += spacingBetween(previousCategory, category);
       }
@@ -334,12 +349,15 @@ abstract class RenderTextFlow extends RenderBox
 
   @override
   void performLayout() {
-    final BoxConstraints innerConstraints = BoxConstraints.tightFor(width: constraints.maxWidth);
+    final BoxConstraints innerConstraints = BoxConstraints.tightFor(
+      width: constraints.maxWidth,
+    );
     String? previousCategory;
     double y = 0.0;
     RenderBox? child = firstChild;
     while (child != null) {
-      final String category = (child.parentData! as TextFlowParentData).category;
+      final String category =
+          (child.parentData! as TextFlowParentData).category;
       if (previousCategory != null) {
         // This is where we call the function that computes the spacing between
         // the different children. The arguments are the categories, obtained

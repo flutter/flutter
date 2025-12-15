@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/snack_bar/snack_bar.2.dart' as example;
+import 'package:flutter_api_samples/material/snack_bar/snack_bar.2.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -12,22 +13,39 @@ void main() {
 
     expect(find.byType(SnackBar), findsNothing);
     expect(find.widgetWithText(AppBar, 'SnackBar Sample'), findsOneWidget);
-    expect(find.widgetWithText(FloatingActionButton, 'Show Snackbar'), findsOneWidget);
+    expect(
+      find.widgetWithText(FloatingActionButton, 'Show Snackbar'),
+      findsOneWidget,
+    );
     expect(find.text('Behavior'), findsOneWidget);
     expect(find.text('Fixed'), findsOneWidget);
     expect(find.text('Floating'), findsOneWidget);
     expect(find.text('Content'), findsOneWidget);
-    expect(find.widgetWithText(SwitchListTile, 'Include close Icon'), findsOneWidget);
-    expect(find.widgetWithText(SwitchListTile, 'Multi Line Text'), findsOneWidget);
-    expect(find.widgetWithText(SwitchListTile, 'Include Action'), findsOneWidget);
-    expect(find.widgetWithText(SwitchListTile, 'Long Action Label'), findsOneWidget);
+    expect(
+      find.widgetWithText(SwitchListTile, 'Include close Icon'),
+      findsOneWidget,
+    );
+    expect(
+      find.widgetWithText(SwitchListTile, 'Multi Line Text'),
+      findsOneWidget,
+    );
+    expect(
+      find.widgetWithText(SwitchListTile, 'Include Action'),
+      findsOneWidget,
+    );
+    expect(
+      find.widgetWithText(SwitchListTile, 'Long Action Label'),
+      findsOneWidget,
+    );
 
     await tester.scrollUntilVisible(find.byType(Slider), 30);
     expect(find.text('Action new-line overflow threshold'), findsOneWidget);
     expect(find.byType(Slider), findsOneWidget);
   });
 
-  testWidgets('Applies default configuration to snackbar', (WidgetTester tester) async {
+  testWidgets('Applies default configuration to snackbar', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.SnackBarExampleApp());
 
     expect(find.byType(SnackBar), findsNothing);
@@ -44,14 +62,19 @@ void main() {
     expect(find.text('Single Line Snack Bar'), findsOneWidget);
     expect(find.text('Action'), findsOneWidget);
     expect(find.byIcon(Icons.close), findsOneWidget);
-    expect(tester.widget<SnackBar>(find.byType(SnackBar)).behavior, SnackBarBehavior.floating);
+    expect(
+      tester.widget<SnackBar>(find.byType(SnackBar)).behavior,
+      SnackBarBehavior.floating,
+    );
 
     await tester.tap(find.byIcon(Icons.close));
     await tester.pumpAndSettle();
     expect(find.byType(SnackBar), findsNothing);
   });
 
-  testWidgets('Can configure fixed snack bar with long text', (WidgetTester tester) async {
+  testWidgets('Can configure fixed snack bar with long text', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.SnackBarExampleApp());
 
     await tester.tap(find.text('Fixed'));
@@ -64,14 +87,19 @@ void main() {
     expect(find.textContaining('spans across multiple lines'), findsOneWidget);
     expect(find.text('Long Action Text'), findsOneWidget);
     expect(find.byIcon(Icons.close), findsOneWidget);
-    expect(tester.widget<SnackBar>(find.byType(SnackBar)).behavior, SnackBarBehavior.fixed);
+    expect(
+      tester.widget<SnackBar>(find.byType(SnackBar)).behavior,
+      SnackBarBehavior.fixed,
+    );
 
     await tester.tap(find.byIcon(Icons.close));
     await tester.pumpAndSettle();
     expect(find.byType(SnackBar), findsNothing);
   });
 
-  testWidgets('Can configure to remove action and close icon', (WidgetTester tester) async {
+  testWidgets('Can configure to remove action and close icon', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.SnackBarExampleApp());
 
     await tester.tap(find.text('Include close Icon'));
@@ -84,7 +112,9 @@ void main() {
     expect(find.byIcon(Icons.close), findsNothing);
   });
 
-  testWidgets('Higher overflow threshold leads to smaller snack bars', (WidgetTester tester) async {
+  testWidgets('Higher overflow threshold leads to smaller snack bars', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.SnackBarExampleApp());
 
     await tester.tap(find.text('Fixed'));
@@ -93,7 +123,9 @@ void main() {
 
     // Establish max size with low threshold (causes overflow)
     await tester.scrollUntilVisible(find.byType(Slider), 30);
-    TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Slider)));
+    TestGesture gesture = await tester.startGesture(
+      tester.getCenter(find.byType(Slider)),
+    );
     await gesture.moveTo(tester.getBottomLeft(find.byType(Slider)));
     await gesture.up();
     await tester.tapAt(tester.getBottomLeft(find.byType(Slider)));
@@ -112,7 +144,10 @@ void main() {
     await tester.tap(find.text('Show Snackbar'));
     await tester.pumpAndSettle();
 
-    expect(tester.getSize(find.byType(SnackBar)).height, lessThan(highSnackBar));
+    expect(
+      tester.getSize(find.byType(SnackBar)).height,
+      lessThan(highSnackBar),
+    );
   });
 
   testWidgets('Disable unusable elements', (WidgetTester tester) async {

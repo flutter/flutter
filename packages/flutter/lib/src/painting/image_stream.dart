@@ -393,7 +393,7 @@ class ImageStream with Diagnosticable {
       return _completer!.removeListener(listener);
     }
     assert(_listeners != null);
-    for (int i = 0; i < _listeners!.length; i += 1) {
+    for (var i = 0; i < _listeners!.length; i += 1) {
       if (_listeners![i] == listener) {
         _listeners!.removeAt(i);
         break;
@@ -639,7 +639,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// disposed, this image stream is no longer usable.
   void removeListener(ImageStreamListener listener) {
     _checkDisposed();
-    for (int i = 0; i < _listeners.length; i += 1) {
+    for (var i = 0; i < _listeners.length; i += 1) {
       if (_listeners[i] == listener) {
         _listeners.removeAt(i);
         break;
@@ -647,7 +647,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
     }
     if (_listeners.isEmpty) {
       final List<VoidCallback> callbacks = _onLastListenerRemovedCallbacks.toList();
-      for (final VoidCallback callback in callbacks) {
+      for (final callback in callbacks) {
         callback();
       }
       _onLastListenerRemovedCallbacks.clear();
@@ -734,8 +734,8 @@ abstract class ImageStreamCompleter with Diagnosticable {
       return;
     }
     // Make a copy to allow for concurrent modification.
-    final List<ImageStreamListener> localListeners = List<ImageStreamListener>.of(_listeners);
-    for (final ImageStreamListener listener in localListeners) {
+    final localListeners = List<ImageStreamListener>.of(_listeners);
+    for (final listener in localListeners) {
       try {
         listener.onImage(image.clone(), false);
       } catch (exception, stack) {
@@ -796,7 +796,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
     );
 
     // Make a copy to allow for concurrent modification.
-    final List<ImageErrorListener> localErrorListeners = <ImageErrorListener>[
+    final localErrorListeners = <ImageErrorListener>[
       ..._listeners
           .map<ImageErrorListener?>((ImageStreamListener listener) => listener.onError)
           .whereType<ImageErrorListener>(),
@@ -805,8 +805,8 @@ abstract class ImageStreamCompleter with Diagnosticable {
 
     _ephemeralErrorListeners.clear();
 
-    bool handled = false;
-    for (final ImageErrorListener errorListener in localErrorListeners) {
+    var handled = false;
+    for (final errorListener in localErrorListeners) {
       try {
         errorListener(exception, stack);
         handled = true;
@@ -840,7 +840,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
           .map<ImageChunkListener?>((ImageStreamListener listener) => listener.onChunk)
           .whereType<ImageChunkListener>()
           .toList();
-      for (final ImageChunkListener listener in localListeners) {
+      for (final listener in localListeners) {
         listener(event);
       }
     }

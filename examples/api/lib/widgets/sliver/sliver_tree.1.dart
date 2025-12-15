@@ -83,7 +83,9 @@ class _TreeSliverExampleState extends State<TreeSliverExample> {
           SizedBox(width: 10.0 * node.depth! + 8.0),
           DecoratedBox(
             decoration: BoxDecoration(
-              border: node.parent != null ? Border(left: border, bottom: border) : null,
+              border: node.parent != null
+                  ? Border(left: border, bottom: border)
+                  : null,
             ),
             child: const SizedBox(height: 50.0, width: 20.0),
           ),
@@ -93,7 +95,10 @@ class _TreeSliverExampleState extends State<TreeSliverExample> {
               decoration: BoxDecoration(border: Border.all()),
               child: SizedBox.square(
                 dimension: 20.0,
-                child: Icon(node.isExpanded ? Icons.remove : Icons.add, size: 14),
+                child: Icon(
+                  node.isExpanded ? Icons.remove : Icons.add,
+                  size: 14,
+                ),
               ),
             ),
           // Spacer
@@ -117,7 +122,10 @@ class _TreeSliverExampleState extends State<TreeSliverExample> {
         },
         treeNodeBuilder: _treeNodeBuilder,
         treeRowExtentBuilder:
-            (TreeSliverNode<Object?> node, SliverLayoutDimensions layoutDimensions) {
+            (
+              TreeSliverNode<Object?> node,
+              SliverLayoutDimensions layoutDimensions,
+            ) {
               // This gives more space to parent nodes.
               return node.children.isNotEmpty ? 60.0 : 50.0;
             },
@@ -136,7 +144,11 @@ class _TreeSliverExampleState extends State<TreeSliverExample> {
     if (_selectedNode != null) {
       selectedChildren.addAll(<Widget>[
         const Spacer(),
-        Icon(_selectedNode!.children.isEmpty ? Icons.file_open_outlined : Icons.folder_outlined),
+        Icon(
+          _selectedNode!.children.isEmpty
+              ? Icons.file_open_outlined
+              : Icons.folder_outlined,
+        ),
         const SizedBox(height: 16.0),
         Text(_selectedNode!.content),
         const Spacer(),

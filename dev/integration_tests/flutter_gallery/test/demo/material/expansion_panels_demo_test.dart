@@ -19,7 +19,7 @@ Future<void> main() async {
 
     expect(_radioFinder, findsNWidgets(3));
 
-    const int i = 1;
+    const i = 1;
 
     expect(_isRadioSelected(0), isTrue);
     expect(_isRadioSelected(i), isFalse);

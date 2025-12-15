@@ -27,10 +27,9 @@ void main() {
 
       await _enableUISceneMigration(flutterBin, workingDirectoryPath);
 
-      // Create app
+      // Create app with scene templates
       final String appDirectoryPath = await _createApp(flutterBin, workingDirectoryPath);
 
-      // Replace with old template
       final File appDelegate = fileSystem.file(
         fileSystem.path.join(appDirectoryPath, 'ios', 'Runner', 'AppDelegate.swift'),
       );
@@ -39,6 +38,20 @@ void main() {
       );
       expect(appDelegate, exists);
       expect(infoPlist, exists);
+      expect(appDelegate.readAsStringSync(), UISceneMigration.newSwiftAppDelegate);
+      expect(
+        infoPlist.readAsStringSync(),
+        _newInfoPlistTemplate('Uiscene Migration App', 'uiscene_migration_app', fromTemplate: true),
+      );
+      await _buildApp(flutterBin, appDirectoryPath);
+
+      // Replace with old template
+      final String oldInfoPlistTemplate = _oldInfoPlistTemplate(
+        'Uiscene Migration App',
+        'uiscene_migration_app',
+      );
+      appDelegate.writeAsStringSync(UISceneMigration.originalSwiftAppDelegateTemplates.first);
+      infoPlist.writeAsStringSync(oldInfoPlistTemplate);
 
       // Make sure it migrates and builds
       await _buildApp(flutterBin, appDirectoryPath);
@@ -52,10 +65,6 @@ void main() {
       await _disableUISceneMigration(flutterBin, workingDirectoryPath);
 
       // Replace with old template
-      final String oldInfoPlistTemplate = _oldInfoPlistTemplate(
-        'Uiscene Migration App',
-        'uiscene_migration_app',
-      );
       appDelegate.writeAsStringSync(_oldSwiftAppDelegate);
       infoPlist.writeAsStringSync(oldInfoPlistTemplate);
 
@@ -211,7 +220,11 @@ import UIKit
 }
 ''';
 
-String _newInfoPlistTemplate(String titleCaseProjectName, String projectName) {
+String _newInfoPlistTemplate(
+  String titleCaseProjectName,
+  String projectName, {
+  bool fromTemplate = false,
+}) {
   return '''
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -255,7 +268,7 @@ String _newInfoPlistTemplate(String titleCaseProjectName, String projectName) {
 					<key>UISceneConfigurationName</key>
 					<string>flutter</string>
 					<key>UISceneDelegateClassName</key>
-					<string>FlutterSceneDelegate</string>
+					<string>${fromTemplate ? r'$(PRODUCT_MODULE_NAME).SceneDelegate' : 'FlutterSceneDelegate'}</string>
 					<key>UISceneStoryboardFile</key>
 					<string>Main</string>
 				</dict>

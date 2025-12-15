@@ -93,7 +93,7 @@ void main() {
       await fileSystem.file('/some/path/to/llvm-ar').create();
       await fileSystem.file('/some/path/to/ld.lld').create();
 
-      final CCompilerConfig result = await cCompilerConfigLinux();
+      final CCompilerConfig result = (await cCompilerConfigLinux(throwIfNotFound: true))!;
       expect(result.compiler, Uri.file('/some/path/to/clang'));
     },
   );
@@ -115,7 +115,7 @@ void main() {
         await fileSystem.file('/path/to/$execName').create(recursive: true);
       }
 
-      final CCompilerConfig result = await cCompilerConfigLinux();
+      final CCompilerConfig result = (await cCompilerConfigLinux(throwIfNotFound: true))!;
       expect(result.linker, Uri.file('/path/to/ld'));
       expect(result.compiler, Uri.file('/path/to/clang'));
       expect(result.archiver, Uri.file('/path/to/ar'));
@@ -123,7 +123,7 @@ void main() {
   );
 
   testUsingContext(
-    'cCompilerConfigLinux with missing binaries',
+    'cCompilerConfigLinux with missing binaries when required',
     overrides: <Type, Generator>{
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <Pattern>['which', 'clang++'], stdout: '/a/path/to/clang++'),
@@ -137,7 +137,25 @@ void main() {
 
       await fileSystem.file('/a/path/to/clang++').create(recursive: true);
 
-      expect(cCompilerConfigLinux(), throwsA(isA<ToolExit>()));
+      expect(cCompilerConfigLinux(throwIfNotFound: true), throwsA(isA<ToolExit>()));
+    },
+  );
+
+  testUsingContext(
+    'cCompilerConfigLinux with missing binaries when not required',
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <Pattern>['which', 'clang++'], stdout: '/a/path/to/clang++'),
+      ]),
+      FileSystem: () => fileSystem,
+    },
+    () async {
+      if (!const LocalPlatform().isLinux) {
+        return;
+      }
+
+      await fileSystem.file('/a/path/to/clang++').create(recursive: true);
+      expect(cCompilerConfigLinux(throwIfNotFound: false), completes);
     },
   );
 }

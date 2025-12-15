@@ -34,19 +34,20 @@ class ReplyApp extends StatefulWidget {
             Animation<double> animation,
             Animation<double> secondaryAnimation,
           ) => const ComposePage(),
-      transitionsBuilder: (
-        BuildContext context,
-        Animation<double> animation,
-        Animation<double> secondaryAnimation,
-        Widget child,
-      ) {
-        return FadeThroughTransition(
-          fillColor: Theme.of(context).cardColor,
-          animation: animation,
-          secondaryAnimation: secondaryAnimation,
-          child: child,
-        );
-      },
+      transitionsBuilder:
+          (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+            Widget child,
+          ) {
+            return FadeThroughTransition(
+              fillColor: Theme.of(context).cardColor,
+              animation: animation,
+              secondaryAnimation: secondaryAnimation,
+              child: child,
+            );
+          },
       settings: settings,
     );
   }
@@ -75,13 +76,13 @@ class _ReplyAppState extends State<ReplyApp> with RestorationMixin {
   @override
   Widget build(BuildContext context) {
     final ThemeMode galleryThemeMode = GalleryOptions.of(context).themeMode;
-    final bool isDark =
-        galleryThemeMode == ThemeMode.system
-            ? Theme.brightnessOf(context) == Brightness.dark
-            : galleryThemeMode == ThemeMode.dark;
+    final isDark = galleryThemeMode == ThemeMode.system
+        ? Theme.brightnessOf(context) == Brightness.dark
+        : galleryThemeMode == ThemeMode.dark;
 
-    final ThemeData replyTheme =
-        isDark ? _buildReplyDarkTheme(context) : _buildReplyLightTheme(context);
+    final ThemeData replyTheme = isDark
+        ? _buildReplyDarkTheme(context)
+        : _buildReplyLightTheme(context);
 
     return MultiProvider(
       providers: <SingleChildWidget>[
@@ -97,15 +98,14 @@ class _ReplyAppState extends State<ReplyApp> with RestorationMixin {
         supportedLocales: GalleryLocalizations.supportedLocales,
         locale: GalleryOptions.of(context).locale,
         initialRoute: ReplyApp.homeRoute,
-        onGenerateRoute:
-            (RouteSettings settings) => switch (settings.name) {
-              ReplyApp.homeRoute => MaterialPageRoute<void>(
-                builder: (BuildContext context) => const AdaptiveNav(),
-                settings: settings,
-              ),
-              ReplyApp.composeRoute => ReplyApp.createComposeRoute(settings),
-              _ => null,
-            },
+        onGenerateRoute: (RouteSettings settings) => switch (settings.name) {
+          ReplyApp.homeRoute => MaterialPageRoute<void>(
+            builder: (BuildContext context) => const AdaptiveNav(),
+            settings: settings,
+          ),
+          ReplyApp.composeRoute => ReplyApp.createComposeRoute(settings),
+          _ => null,
+        },
       ),
     );
   }
@@ -119,18 +119,18 @@ class _RestorableEmailState extends RestorableListenable<EmailStore> {
 
   @override
   EmailStore fromPrimitives(Object? data) {
-    final EmailStore appState = EmailStore();
-    final Map<String, dynamic> appData = Map<String, dynamic>.from(data! as Map<dynamic, dynamic>);
+    final appState = EmailStore();
+    final appData = Map<String, dynamic>.from(data! as Map<dynamic, dynamic>);
     appState.selectedEmailId = appData['selectedEmailId'] as int;
     appState.onSearchPage = appData['onSearchPage'] as bool;
 
     // The index of the MailboxPageType enum is restored.
-    final int mailboxPageIndex = appData['selectedMailboxPage'] as int;
+    final mailboxPageIndex = appData['selectedMailboxPage'] as int;
     appState.selectedMailboxPage = MailboxPageType.values[mailboxPageIndex];
 
-    final List<dynamic> starredEmailIdsList = appData['starredEmailIds'] as List<dynamic>;
+    final starredEmailIdsList = appData['starredEmailIds'] as List<dynamic>;
     appState.starredEmailIds = <int>{...starredEmailIdsList.map<int>((dynamic id) => id as int)};
-    final List<dynamic> trashEmailIdsList = appData['trashEmailIds'] as List<dynamic>;
+    final trashEmailIdsList = appData['trashEmailIds'] as List<dynamic>;
     appState.trashEmailIds = <int>{...trashEmailIdsList.map<int>((dynamic id) => id as int)};
     return appState;
   }
@@ -150,7 +150,7 @@ class _RestorableEmailState extends RestorableListenable<EmailStore> {
 }
 
 ThemeData _buildReplyLightTheme(BuildContext context) {
-  final ThemeData base = ThemeData();
+  final base = ThemeData();
   return base.copyWith(
     bottomAppBarTheme: const BottomAppBarThemeData(color: ReplyColors.blue700),
     bottomSheetTheme: BottomSheetThemeData(
@@ -190,7 +190,7 @@ ThemeData _buildReplyLightTheme(BuildContext context) {
 }
 
 ThemeData _buildReplyDarkTheme(BuildContext context) {
-  final ThemeData base = ThemeData.dark();
+  final base = ThemeData.dark();
   return base.copyWith(
     bottomAppBarTheme: const BottomAppBarThemeData(color: ReplyColors.darkBottomAppBarBackground),
     bottomSheetTheme: BottomSheetThemeData(

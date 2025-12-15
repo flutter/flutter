@@ -58,7 +58,9 @@ class _StepStyleExampleState extends State<StepStyleExample> {
           isActive: true,
           stepStyle: _stepStyle.copyWith(
             connectorColor: Colors.orange,
-            gradient: const LinearGradient(colors: <Color>[Colors.white, Colors.black]),
+            gradient: const LinearGradient(
+              colors: <Color>[Colors.white, Colors.black],
+            ),
           ),
         ),
         Step(

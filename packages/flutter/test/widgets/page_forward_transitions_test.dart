@@ -18,7 +18,7 @@ class TestTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Animation<double> animation = listenable as Animation<double>;
+    final animation = listenable as Animation<double>;
     if (animation.value >= 0.5) {
       return childSecondHalf;
     }
@@ -55,14 +55,14 @@ class TestRoute<T> extends PageRoute<T> {
 }
 
 void main() {
-  const Duration kTwoTenthsOfTheTransitionDuration = Duration(milliseconds: 30);
-  const Duration kFourTenthsOfTheTransitionDuration = Duration(milliseconds: 60);
+  const kTwoTenthsOfTheTransitionDuration = Duration(milliseconds: 30);
+  const kFourTenthsOfTheTransitionDuration = Duration(milliseconds: 60);
 
   testWidgets('Check onstage/offstage handling around transitions', (WidgetTester tester) async {
     final GlobalKey insideKey = GlobalKey();
 
     String state({bool skipOffstage = true}) {
-      String result = '';
+      var result = '';
       if (tester.any(find.text('A', skipOffstage: skipOffstage))) {
         result += 'A';
       }
@@ -97,7 +97,7 @@ void main() {
                 child: Builder(
                   key: insideKey,
                   builder: (BuildContext context) {
-                    final PageRoute<void> route = ModalRoute.of(context)! as PageRoute<void>;
+                    final route = ModalRoute.of(context)! as PageRoute<void>;
                     return Column(
                       children: <Widget>[
                         TestTransition(

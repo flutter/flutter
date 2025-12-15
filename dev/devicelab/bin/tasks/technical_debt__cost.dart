@@ -39,7 +39,7 @@ Future<double> findCostsForFile(File file) async {
     return 0.0;
   }
   final bool isTest = file.path.endsWith('_test.dart');
-  double total = 0.0;
+  var total = 0.0;
   for (final String line in await file.readAsLines()) {
     if (line.contains(todoPattern)) {
       total += todoCost;
@@ -70,7 +70,7 @@ Future<int> findGlobalsForFile(File file) async {
   if (path.extension(file.path) != '.dart') {
     return 0;
   }
-  int total = 0;
+  var total = 0;
   for (final String line in await file.readAsLines()) {
     if (line.contains(globalsPattern)) {
       total += 1;
@@ -87,7 +87,7 @@ Future<double> findCostsForRepo() async {
     '--full-name',
     flutterDirectory.path,
   ], workingDirectory: flutterDirectory.path);
-  double total = 0.0;
+  var total = 0.0;
   await for (final String entry
       in git.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter())) {
     total += await findCostsForFile(File(path.join(flutterDirectory.path, entry)));
@@ -105,7 +105,7 @@ Future<int> findGlobalsForTool() async {
     '--full-name',
     path.join(flutterDirectory.path, 'packages', 'flutter_tools'),
   ], workingDirectory: flutterDirectory.path);
-  int total = 0;
+  var total = 0;
   await for (final String entry
       in git.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter())) {
     total += await findGlobalsForFile(File(path.join(flutterDirectory.path, entry)));
@@ -137,8 +137,8 @@ Future<Set<String>> dependenciesAt({
       if (workingDirectory != null) ...<String>['-C', workingDirectory],
     ],
   );
-  final Map<String, dynamic> json = jsonDecode(jsonOutput) as Map<String, dynamic>;
-  final List<dynamic> packages = json['packages'] as List<dynamic>;
+  final json = jsonDecode(jsonOutput) as Map<String, dynamic>;
+  final packages = json['packages'] as List<dynamic>;
   final Iterable<String> count = packages
       .map((dynamic e) => e as Map<String, dynamic>)
       .where((Map<String, dynamic> package) => packageNames.contains(package['name']))

@@ -13,10 +13,10 @@ class ComposePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const String senderEmail = 'flutterfan@gmail.com';
-    String subject = '';
+    const senderEmail = 'flutterfan@gmail.com';
+    var subject = '';
     String? recipient = 'Recipient';
-    String recipientAvatar = 'reply/avatars/avatar_0.jpg';
+    var recipientAvatar = 'reply/avatars/avatar_0.jpg';
 
     final EmailStore emailStore = Provider.of<EmailStore>(context);
 
@@ -152,7 +152,7 @@ class __SenderAddressRowState extends State<_SenderAddressRow> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TextTheme textTheme = theme.textTheme;
-    final List<String> accounts = <String>['flutterfan@gmail.com', 'materialfan@gmail.com'];
+    final accounts = <String>['flutterfan@gmail.com', 'materialfan@gmail.com'];
 
     return PopupMenuButton<String>(
       padding: EdgeInsets.zero,
@@ -161,17 +161,16 @@ class __SenderAddressRowState extends State<_SenderAddressRow> {
           senderEmail = email;
         });
       },
-      itemBuilder:
-          (BuildContext context) => <PopupMenuItem<String>>[
-            PopupMenuItem<String>(
-              value: accounts[0],
-              child: Text(accounts[0], style: textTheme.bodyMedium),
-            ),
-            PopupMenuItem<String>(
-              value: accounts[1],
-              child: Text(accounts[1], style: textTheme.bodyMedium),
-            ),
-          ],
+      itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
+        PopupMenuItem<String>(
+          value: accounts[0],
+          child: Text(accounts[0], style: textTheme.bodyMedium),
+        ),
+        PopupMenuItem<String>(
+          value: accounts[1],
+          child: Text(accounts[1], style: textTheme.bodyMedium),
+        ),
+      ],
       child: Padding(
         padding: const EdgeInsets.only(left: 12, top: 16, right: 10, bottom: 10),
         child: Row(

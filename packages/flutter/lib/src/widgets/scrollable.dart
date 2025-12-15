@@ -378,7 +378,7 @@ class Scrollable extends StatefulWidget {
   ///   if no [Scrollable] ancestor is found.
   static ScrollableState? maybeOf(BuildContext context, {Axis? axis}) {
     // This is the context that will need to establish the dependency.
-    final BuildContext originalContext = context;
+    final originalContext = context;
     InheritedElement? element = context.getElementForInheritedWidgetOfExactType<_ScrollableScope>();
     while (element != null) {
       final ScrollableState scrollable = (element.widget as _ScrollableScope).scrollable;
@@ -495,7 +495,7 @@ class Scrollable extends StatefulWidget {
     Curve curve = Curves.ease,
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
   }) {
-    final List<Future<void>> futures = <Future<void>>[];
+    final futures = <Future<void>>[];
 
     // The targetRenderObject is used to record the first target renderObject.
     // If there are multiple scrollable widgets nested, the targetRenderObject
@@ -848,7 +848,7 @@ class ScrollableState extends State<Scrollable>
     }
     _shouldIgnorePointer = value;
     if (_ignorePointerKey.currentContext != null) {
-      final RenderIgnorePointer renderBox =
+      final renderBox =
           _ignorePointerKey.currentContext!.findRenderObject()! as RenderIgnorePointer;
       renderBox.ignoring = _shouldIgnorePointer;
     }
@@ -995,7 +995,7 @@ class ScrollableState extends State<Scrollable>
   }
 
   Widget _buildChrome(BuildContext context, Widget child) {
-    final ScrollableDetails details = ScrollableDetails(
+    final details = ScrollableDetails(
       direction: widget.axisDirection,
       controller: _effectiveScrollController,
       decorationClipBehavior: widget.clipBehavior,
@@ -1309,7 +1309,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
   }
 
   Offset _inferPositionRelatedToOrigin(Offset globalPosition) {
-    final RenderBox box = state.context.findRenderObject()! as RenderBox;
+    final box = state.context.findRenderObject()! as RenderBox;
     final Offset localPosition = box.globalToLocal(globalPosition);
     if (!_selectionStartsInScrollable) {
       // If the selection starts outside of the scrollable, selecting across the
@@ -1339,7 +1339,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
     bool forceUpdateEnd = true,
   }) {
     final Offset deltaToOrigin = _getDeltaToScrollOrigin(state);
-    final RenderBox box = state.context.findRenderObject()! as RenderBox;
+    final box = state.context.findRenderObject()! as RenderBox;
     final Matrix4 transform = box.getTransformTo(null);
     if (currentSelectionStartIndex != -1 &&
         (_currentDragStartRelatedToOrigin == null || forceUpdateStart)) {
@@ -1434,18 +1434,13 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
     if (lineHeight == null || edge == null) {
       return;
     }
-    final RenderBox scrollableBox = state.context.findRenderObject()! as RenderBox;
+    final scrollableBox = state.context.findRenderObject()! as RenderBox;
     final Matrix4 transform = selectable.getTransformTo(scrollableBox);
     final Offset edgeOffsetInScrollableCoordinates = MatrixUtils.transformPoint(
       transform,
       edge.localPosition,
     );
-    final Rect scrollableRect = Rect.fromLTRB(
-      0,
-      0,
-      scrollableBox.size.width,
-      scrollableBox.size.height,
-    );
+    final scrollableRect = Rect.fromLTRB(0, 0, scrollableBox.size.width, scrollableBox.size.height);
     switch (state.axisDirection) {
       case AxisDirection.up:
         final double edgeBottom = edgeOffsetInScrollableCoordinates.dy;
@@ -1505,9 +1500,9 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
   }
 
   bool _globalPositionInScrollable(Offset globalPosition) {
-    final RenderBox box = state.context.findRenderObject()! as RenderBox;
+    final box = state.context.findRenderObject()! as RenderBox;
     final Offset localPosition = box.globalToLocal(globalPosition);
-    final Rect rect = Rect.fromLTWH(0, 0, box.size.width, box.size.height);
+    final rect = Rect.fromLTWH(0, 0, box.size.width, box.size.height);
     return rect.contains(localPosition);
   }
 
@@ -1742,9 +1737,9 @@ class _RenderScrollSemantics extends RenderProxyBox {
     (_innerNode ??= SemanticsNode(showOnScreen: showOnScreen)).rect = node.rect;
 
     int? firstVisibleIndex;
-    final List<SemanticsNode> excluded = <SemanticsNode>[_innerNode!];
-    final List<SemanticsNode> included = <SemanticsNode>[];
-    for (final SemanticsNode child in children) {
+    final excluded = <SemanticsNode>[_innerNode!];
+    final included = <SemanticsNode>[];
+    for (final child in children) {
       assert(child.isTagged(RenderViewport.useTwoPaneSemantics));
       if (child.isTagged(RenderViewport.excludeFromScrolling)) {
         excluded.add(child);
@@ -2286,14 +2281,14 @@ class _VerticalOuterDimensionState extends ScrollableState {
 
   @override
   void _handleDragUpdate(DragUpdateDetails details) {
-    final DragUpdateDetails verticalDragDetails = DragUpdateDetails(
+    final verticalDragDetails = DragUpdateDetails(
       sourceTimeStamp: details.sourceTimeStamp,
       delta: Offset(0.0, details.delta.dy),
       primaryDelta: details.delta.dy,
       globalPosition: details.globalPosition,
       localPosition: details.localPosition,
     );
-    final DragUpdateDetails horizontalDragDetails = DragUpdateDetails(
+    final horizontalDragDetails = DragUpdateDetails(
       sourceTimeStamp: details.sourceTimeStamp,
       delta: Offset(details.delta.dx, 0.0),
       primaryDelta: details.delta.dx,
@@ -2343,11 +2338,11 @@ class _VerticalOuterDimensionState extends ScrollableState {
     lockedAxis = null;
     final double dx = details.velocity.pixelsPerSecond.dx;
     final double dy = details.velocity.pixelsPerSecond.dy;
-    final DragEndDetails verticalDragDetails = DragEndDetails(
+    final verticalDragDetails = DragEndDetails(
       velocity: Velocity(pixelsPerSecond: Offset(0.0, dy)),
       primaryVelocity: dy,
     );
-    final DragEndDetails horizontalDragDetails = DragEndDetails(
+    final horizontalDragDetails = DragEndDetails(
       velocity: Velocity(pixelsPerSecond: Offset(dx, 0.0)),
       primaryVelocity: dx,
     );
@@ -2430,7 +2425,7 @@ class _VerticalOuterDimensionState extends ScrollableState {
 
   @override
   Widget _buildChrome(BuildContext context, Widget child) {
-    final ScrollableDetails details = ScrollableDetails(
+    final details = ScrollableDetails(
       direction: widget.axisDirection,
       controller: _effectiveScrollController,
       clipBehavior: widget.clipBehavior,
@@ -2493,7 +2488,7 @@ class _HorizontalInnerDimensionState extends ScrollableState {
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
     RenderObject? targetRenderObject,
   }) {
-    final List<Future<void>> newFutures = <Future<void>>[
+    final newFutures = <Future<void>>[
       position.ensureVisible(
         object,
         alignment: alignment,
@@ -2548,7 +2543,7 @@ class _HorizontalInnerDimensionState extends ScrollableState {
 
   @override
   Widget _buildChrome(BuildContext context, Widget child) {
-    final ScrollableDetails details = ScrollableDetails(
+    final details = ScrollableDetails(
       direction: widget.axisDirection,
       controller: _effectiveScrollController,
       clipBehavior: widget.clipBehavior,

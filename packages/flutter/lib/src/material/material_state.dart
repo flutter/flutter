@@ -112,6 +112,7 @@ typedef MaterialPropertyResolver<T> = WidgetPropertyResolver<T>;
 /// This example defines a [MaterialStateColor] with a const constructor.
 ///
 /// ```dart
+/// // ignore: deprecated_member_use
 /// class MyColor extends MaterialStateColor {
 ///   const MyColor() : super(_defaultColor);
 ///
@@ -119,7 +120,9 @@ typedef MaterialPropertyResolver<T> = WidgetPropertyResolver<T>;
 ///   static const int _pressedColor = 0xdeadbeef;
 ///
 ///   @override
+///   // ignore: deprecated_member_use
 ///   Color resolve(Set<MaterialState> states) {
+///     // ignore: deprecated_member_use
 ///     if (states.contains(MaterialState.pressed)) {
 ///       return const Color(_pressedColor);
 ///     }

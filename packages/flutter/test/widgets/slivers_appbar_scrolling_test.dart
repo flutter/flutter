@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void verifyPaintPosition(GlobalKey key, Offset ideal) {
   final RenderObject target = key.currentContext!.findRenderObject()!;
   expect(target.parent, isA<RenderViewport>());
-  final SliverPhysicalParentData parentData = target.parentData! as SliverPhysicalParentData;
+  final parentData = target.parentData! as SliverPhysicalParentData;
   final Offset actual = parentData.paintOffset;
   expect(actual, ideal);
 }
@@ -55,7 +55,7 @@ void main() {
 
   testWidgets('Sliver appbars - scrolling off screen', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
-    final TestDelegate delegate = TestDelegate();
+    final delegate = TestDelegate();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -77,7 +77,7 @@ void main() {
     );
     await tester.pumpAndSettle(const Duration(milliseconds: 1000));
     final RenderBox box = tester.renderObject<RenderBox>(find.text('Sliver App Bar'));
-    final Rect rect = Rect.fromPoints(
+    final rect = Rect.fromPoints(
       box.localToGlobal(Offset.zero),
       box.localToGlobal(box.size.bottomRight(Offset.zero)),
     );
@@ -174,7 +174,7 @@ void main() {
 
     testWidgets('partially scrolling off screen', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
-      final TestDelegate delegate = TestDelegate();
+      final delegate = TestDelegate();
       final SemanticsHandle handle = tester.ensureSemantics();
       const double cacheExtent = 250;
       await tester.pumpWidget(
@@ -200,7 +200,7 @@ void main() {
       );
       await tester.pumpAndSettle(const Duration(milliseconds: 1000));
       final RenderBox box = tester.renderObject<RenderBox>(find.text('Sliver App Bar'));
-      final Rect rect = Rect.fromPoints(
+      final rect = Rect.fromPoints(
         box.localToGlobal(Offset.zero),
         box.localToGlobal(box.size.bottomRight(Offset.zero)),
       );
@@ -217,7 +217,7 @@ void main() {
       WidgetTester tester,
     ) async {
       final GlobalKey key = GlobalKey();
-      final TestDelegate delegate = TestDelegate();
+      final delegate = TestDelegate();
       final SemanticsHandle handle = tester.ensureSemantics();
       const double cacheExtent = 250;
       await tester.pumpWidget(
@@ -254,7 +254,7 @@ void main() {
       WidgetTester tester,
     ) async {
       final GlobalKey key = GlobalKey();
-      final TestDelegate delegate = TestDelegate();
+      final delegate = TestDelegate();
       final SemanticsHandle handle = tester.ensureSemantics();
       const double cacheExtent = 250;
       await tester.pumpWidget(

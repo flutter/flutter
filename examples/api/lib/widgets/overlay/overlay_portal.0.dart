@@ -44,7 +44,10 @@ class ClickableTooltipWidgetState extends State<ClickableTooltipWidget> {
             return const Positioned(
               right: 50,
               bottom: 50,
-              child: ColoredBox(color: Colors.amberAccent, child: Text('tooltip')),
+              child: ColoredBox(
+                color: Colors.amberAccent,
+                child: Text('tooltip'),
+              ),
             );
           },
           child: const Text('Press to show/hide tooltip'),

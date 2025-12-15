@@ -21,7 +21,8 @@ class ProgressIndicatorExample extends StatefulWidget {
   const ProgressIndicatorExample({super.key});
 
   @override
-  State<ProgressIndicatorExample> createState() => _ProgressIndicatorExampleState();
+  State<ProgressIndicatorExample> createState() =>
+      _ProgressIndicatorExampleState();
 }
 
 class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
@@ -61,11 +62,16 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
           const Text('Determinate LinearProgressIndicator'),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: LinearProgressIndicator(year2023: year2023, value: controller.value),
+            child: LinearProgressIndicator(
+              // ignore: deprecated_member_use
+              year2023: year2023,
+              value: controller.value,
+            ),
           ),
           const Text('Indeterminate LinearProgressIndicator'),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
+            // ignore: deprecated_member_use
             child: LinearProgressIndicator(year2023: year2023),
           ),
           SwitchListTile(

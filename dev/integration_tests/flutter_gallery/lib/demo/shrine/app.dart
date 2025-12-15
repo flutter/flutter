@@ -81,7 +81,7 @@ IconThemeData _customIconTheme(IconThemeData original) {
 }
 
 ThemeData _buildShrineTheme() {
-  final ThemeData base = ThemeData();
+  final base = ThemeData();
   return base.copyWith(
     colorScheme: kShrineColorScheme,
     primaryColor: kShrinePink100,

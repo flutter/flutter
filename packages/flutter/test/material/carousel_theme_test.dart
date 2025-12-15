@@ -16,7 +16,7 @@ void main() {
   });
 
   test('CarouselViewThemeData null fields by default', () {
-    const CarouselViewThemeData carouselViewTheme = CarouselViewThemeData();
+    const carouselViewTheme = CarouselViewThemeData();
     expect(carouselViewTheme.backgroundColor, null);
     expect(carouselViewTheme.elevation, null);
     expect(carouselViewTheme.overlayColor, null);
@@ -26,7 +26,7 @@ void main() {
   });
 
   testWidgets('Default CarouselViewThemeData debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const CarouselViewThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -38,7 +38,7 @@ void main() {
   });
 
   testWidgets('CarouselViewThemeData implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const CarouselViewThemeData(
       backgroundColor: Color(0xFFFFFFFF),
       elevation: 5.0,
@@ -89,7 +89,7 @@ void main() {
 
     expect(padding, findsOneWidget);
     final Padding paddingWidget = tester.widget<Padding>(padding);
-    final Material material = paddingWidget.child! as Material;
+    final material = paddingWidget.child! as Material;
 
     final InkWell inkWell = tester.widget<InkWell>(
       find.descendant(of: find.byType(CarouselView), matching: find.byType(InkWell)),
@@ -106,9 +106,9 @@ void main() {
 
   testWidgets('Widgets properties override theme', (WidgetTester tester) async {
     final CarouselViewThemeData carouselViewTheme = _carouselViewThemeData();
-    const Color backgroundColor = Color(0xFFFF0000);
-    const double elevation = 10.0;
-    const EdgeInsets padding = EdgeInsets.all(15.0);
+    const backgroundColor = Color(0xFFFF0000);
+    const elevation = 10.0;
+    const padding = EdgeInsets.all(15.0);
     const OutlinedBorder shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(10)),
     );
@@ -145,7 +145,7 @@ void main() {
 
     expect(paddingFinder, findsOneWidget);
     final Padding paddingWidget = tester.widget<Padding>(paddingFinder);
-    final Material material = paddingWidget.child! as Material;
+    final material = paddingWidget.child! as Material;
 
     final InkWell inkWell = tester.widget<InkWell>(
       find.descendant(of: find.byType(CarouselView), matching: find.byType(InkWell)),
@@ -162,17 +162,17 @@ void main() {
   testWidgets('CarouselViewTheme can override Theme.carouselViewTheme', (
     WidgetTester tester,
   ) async {
-    const Color globalBackgroundColor = Color(0xfffffff1);
-    const Color globalOverlayColor = Color(0xff000000);
-    const double globalElevation = 5.0;
-    const EdgeInsets globalPadding = EdgeInsets.all(10.0);
+    const globalBackgroundColor = Color(0xfffffff1);
+    const globalOverlayColor = Color(0xff000000);
+    const globalElevation = 5.0;
+    const globalPadding = EdgeInsets.all(10.0);
     const OutlinedBorder globalShape = RoundedRectangleBorder();
     const Clip globalItemClipBehavior = Clip.hardEdge;
 
-    const Color localBackgroundColor = Color(0xffff0000);
-    const Color localOverlayColor = Color(0xffffffff);
-    const double localElevation = 10.0;
-    const EdgeInsets localPadding = EdgeInsets.all(15.0);
+    const localBackgroundColor = Color(0xffff0000);
+    const localOverlayColor = Color(0xffffffff);
+    const localElevation = 10.0;
+    const localPadding = EdgeInsets.all(15.0);
     const OutlinedBorder localShape = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(10)),
     );
@@ -220,7 +220,7 @@ void main() {
 
     expect(padding, findsOneWidget);
     final Padding paddingWidget = tester.widget<Padding>(padding);
-    final Material material = paddingWidget.child! as Material;
+    final material = paddingWidget.child! as Material;
 
     final InkWell inkWell = tester.widget<InkWell>(
       find.descendant(of: find.byType(CarouselView), matching: find.byType(InkWell)),
@@ -236,9 +236,9 @@ void main() {
 }
 
 CarouselViewThemeData _carouselViewThemeData() {
-  const Color backgroundColor = Color(0xFF0000FF);
-  const double elevation = 5.0;
-  const EdgeInsets padding = EdgeInsets.all(10.0);
+  const backgroundColor = Color(0xFF0000FF);
+  const elevation = 5.0;
+  const padding = EdgeInsets.all(10.0);
   const OutlinedBorder shape = RoundedRectangleBorder();
   const WidgetStateProperty<Color?> overlayColor = MaterialStatePropertyAll<Color>(Colors.red);
   const Clip itemClipBehavior = Clip.hardEdge;

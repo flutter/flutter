@@ -21,7 +21,7 @@ import 'multi_view_testing.dart';
 void main() {
   group('expectLater', () {
     testWidgets('completes when matcher completes', (WidgetTester tester) async {
-      final Completer<void> completer = Completer<void>();
+      final completer = Completer<void>();
       final Future<void> future = expectLater(null, FakeMatcher(completer));
       String? result;
       future.then<void>((void value) {
@@ -36,13 +36,13 @@ void main() {
     });
 
     testWidgets('respects the skip flag', (WidgetTester tester) async {
-      final Completer<void> completer = Completer<void>();
+      final completer = Completer<void>();
       final Future<void> future = expectLater(
         null,
         FakeMatcher(completer),
         skip: 'testing skip',
       ); // [intended] API testing
-      bool completed = false;
+      var completed = false;
       future.then<void>((_) {
         completed = true;
       });
@@ -53,7 +53,7 @@ void main() {
   });
 
   group('group retry flag allows test to run multiple times', () {
-    bool retried = false;
+    var retried = false;
     group('the group with retry flag', () {
       testWidgets('the test inside it', (WidgetTester tester) async {
         addTearDown(() => retried = true);
@@ -66,7 +66,7 @@ void main() {
   });
 
   group('testWidget retry flag allows test to run multiple times', () {
-    bool retried = false;
+    var retried = false;
     testWidgets('the test with retry flag', (WidgetTester tester) async {
       addTearDown(() => retried = true);
       if (!retried) {
@@ -87,10 +87,7 @@ void main() {
       await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
       int count;
 
-      final AnimationController test = AnimationController(
-        duration: const Duration(milliseconds: 5100),
-        vsync: tester,
-      );
+      final test = AnimationController(duration: const Duration(milliseconds: 5100), vsync: tester);
       count = await tester.pumpAndSettle(const Duration(seconds: 1));
       expect(count, 1); // it always pumps at least one frame
 
@@ -118,7 +115,7 @@ void main() {
     });
 
     testWidgets('pumpFrames', (WidgetTester tester) async {
-      final List<int> logPaints = <int>[];
+      final logPaints = <int>[];
       int? initial;
 
       final Widget target = _AlwaysAnimating(
@@ -156,7 +153,7 @@ void main() {
     });
 
     testWidgets('successfully taps material back buttons', (WidgetTester tester) async {
-      final TransitionDurationObserver observer = TransitionDurationObserver();
+      final observer = TransitionDurationObserver();
       await tester.pumpWidget(
         MaterialApp(
           navigatorObservers: <NavigatorObserver>[observer],
@@ -198,7 +195,7 @@ void main() {
     });
 
     testWidgets('successfully taps cupertino back buttons', (WidgetTester tester) async {
-      final TransitionDurationObserver observer = TransitionDurationObserver();
+      final observer = TransitionDurationObserver();
       await tester.pumpWidget(
         MaterialApp(
           navigatorObservers: <NavigatorObserver>[observer],
@@ -241,7 +238,7 @@ void main() {
   });
 
   testWidgets('hasRunningAnimations control test', (WidgetTester tester) async {
-    final AnimationController controller = AnimationController(
+    final controller = AnimationController(
       duration: const Duration(seconds: 1),
       vsync: const TestVSync(),
     );
@@ -257,7 +254,7 @@ void main() {
   });
 
   testWidgets('pumpAndSettle control test', (WidgetTester tester) async {
-    final AnimationController controller = AnimationController(
+    final controller = AnimationController(
       duration: const Duration(minutes: 525600),
       vsync: const TestVSync(),
     );
@@ -280,7 +277,7 @@ void main() {
   });
 
   testWidgets('Input event array', (WidgetTester tester) async {
-    final List<String> logs = <String>[];
+    final logs = <String>[];
 
     await tester.pumpWidget(
       Directionality(
@@ -295,7 +292,7 @@ void main() {
     );
 
     final Offset location = tester.getCenter(find.text('test'));
-    final List<PointerEventRecord> records = <PointerEventRecord>[
+    final records = <PointerEventRecord>[
       PointerEventRecord(Duration.zero, <PointerEvent>[
         // Typically PointerAddedEvent is not used in testers, but for records
         // captured on a device it is usually what start a gesture.
@@ -328,13 +325,13 @@ void main() {
     ];
     final List<Duration> timeDiffs = await tester.handlePointerEventRecord(records);
     expect(timeDiffs.length, records.length);
-    for (final Duration diff in timeDiffs) {
+    for (final diff in timeDiffs) {
       expect(diff, Duration.zero);
     }
 
-    const String b = '$kSecondaryMouseButton';
+    const b = '$kSecondaryMouseButton';
     expect(logs.first, 'down $b');
-    for (int i = 1; i < logs.length - 1; i++) {
+    for (var i = 1; i < logs.length - 1; i++) {
       expect(logs[i], 'move $b');
     }
     expect(logs.last, 'up $b');
@@ -350,7 +347,7 @@ void main() {
     });
 
     testWidgets('works with real async calls', (WidgetTester tester) async {
-      final StringBuffer buf = StringBuffer('1');
+      final buf = StringBuffer('1');
       await tester.runAsync(() async {
         buf.write('2');
         //ignore: avoid_slow_async_io
@@ -377,14 +374,14 @@ void main() {
     });
 
     testWidgets('disallows re-entry', (WidgetTester tester) async {
-      final Completer<void> completer = Completer<void>();
+      final completer = Completer<void>();
       tester.runAsync<void>(() => completer.future);
       expect(() => tester.runAsync(() async {}), throwsA(isA<TestFailure>()));
       completer.complete();
     });
 
     testWidgets('maintains existing zone values', (WidgetTester tester) async {
-      final Object key = Object();
+      final key = Object();
       await runZoned<Future<void>>(() {
         expect(Zone.current[key], 'abczed');
         return tester.runAsync<void>(() async {
@@ -431,8 +428,8 @@ void main() {
         runAsyncZone = currentZone;
 
         // Complete a future when all callbacks have completed.
-        int pendingCallbacks = 6;
-        final Completer<void> callbacksDone = Completer<void>();
+        var pendingCallbacks = 6;
+        final callbacksDone = Completer<void>();
         void onCallback() {
           if (--pendingCallbacks == 0) {
             testZone.run(() {
@@ -560,7 +557,7 @@ void main() {
   });
 
   group('testWidgets variants work', () {
-    int numberOfVariationsRun = 0;
+    var numberOfVariationsRun = 0;
 
     testWidgets(
       'variant tests run all values provided',
@@ -593,7 +590,7 @@ void main() {
   });
 
   group('TargetPlatformVariant', () {
-    int numberOfVariationsRun = 0;
+    var numberOfVariationsRun = 0;
     TargetPlatform? origTargetPlatform;
 
     setUpAll(() {
@@ -622,10 +619,7 @@ void main() {
         }
       }, variant: TargetPlatformVariant.all());
 
-      const Set<TargetPlatform> excludePlatforms = <TargetPlatform>{
-        TargetPlatform.android,
-        TargetPlatform.linux,
-      };
+      const excludePlatforms = <TargetPlatform>{TargetPlatform.android, TargetPlatform.linux};
       testWidgets(
         'TargetPlatformVariant.all, excluding runs an all variants except those provided in excluding',
         (WidgetTester tester) async {
@@ -650,9 +644,9 @@ void main() {
     testWidgets('TargetPlatformVariant.desktop + mobile contains all TargetPlatform values', (
       WidgetTester tester,
     ) async {
-      final TargetPlatformVariant all = TargetPlatformVariant.all();
-      final TargetPlatformVariant desktop = TargetPlatformVariant.all();
-      final TargetPlatformVariant mobile = TargetPlatformVariant.all();
+      final all = TargetPlatformVariant.all();
+      final desktop = TargetPlatformVariant.all();
+      final mobile = TargetPlatformVariant.all();
       expect(desktop.values.union(mobile.values), equals(all.values));
     });
   });
@@ -676,7 +670,7 @@ void main() {
       final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
       debugPrint('DISREGARD NEXT PENDING TIMER LIST, IT IS EXPECTED');
       await binding.runTest(() async {
-        final Timer timer = Timer(const Duration(seconds: 1), () {});
+        final timer = Timer(const Duration(seconds: 1), () {});
         expect(timer.isActive, true);
       }, () {});
 
@@ -731,10 +725,10 @@ void main() {
     });
 
     testWidgets('New test API is not breaking existing tests', (WidgetTester tester) async {
-      final List<Map<dynamic, dynamic>> log = <Map<dynamic, dynamic>>[];
+      final log = <Map<dynamic, dynamic>>[];
 
       Future<dynamic> handleMessage(dynamic mockMessage) async {
-        final Map<dynamic, dynamic> message = mockMessage as Map<dynamic, dynamic>;
+        final message = mockMessage as Map<dynamic, dynamic>;
         log.add(message);
       }
 
@@ -782,7 +776,7 @@ void main() {
   testWidgets('wrapWithView: false does not include View', (WidgetTester tester) async {
     FlutterView? flutterView;
     View? view;
-    int builderCount = 0;
+    var builderCount = 0;
     await tester.pumpWidget(
       wrapWithView: false,
       Builder(

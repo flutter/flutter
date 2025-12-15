@@ -11,7 +11,9 @@ import 'package:flutter_api_samples/widgets/editable_text/editable_text.on_conte
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Image.memory displays inserted content', (WidgetTester tester) async {
+  testWidgets('Image.memory displays inserted content', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.KeyboardInsertedContentApp());
 
     expect(find.text('Keyboard Inserted Content Sample'), findsOneWidget);
@@ -20,7 +22,8 @@ void main() {
     await tester.enterText(find.byType(EditableText), 'test');
     await tester.idle();
 
-    const String uri = 'content://com.google.android.inputmethod.latin.fileprovider/test.png';
+    const String uri =
+        'content://com.google.android.inputmethod.latin.fileprovider/test.png';
     const List<int> kBlueSquarePng = <int>[
       0x89,
       0x50,
@@ -152,14 +155,18 @@ void main() {
       0x60,
       0x82,
     ];
-    final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
-      'args': <dynamic>[
-        -1,
-        'TextInputAction.commitContent',
-        jsonDecode('{"mimeType": "image/png", "data": $kBlueSquarePng, "uri": "$uri"}'),
-      ],
-      'method': 'TextInputClient.performAction',
-    });
+    final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(
+      <String, dynamic>{
+        'args': <dynamic>[
+          -1,
+          'TextInputAction.commitContent',
+          jsonDecode(
+            '{"mimeType": "image/png", "data": $kBlueSquarePng, "uri": "$uri"}',
+          ),
+        ],
+        'method': 'TextInputClient.performAction',
+      },
+    );
 
     try {
       await tester.binding.defaultBinaryMessenger.handlePlatformMessage(

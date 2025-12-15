@@ -8,40 +8,49 @@ import 'package:flutter_api_samples/material/input_decorator/input_decoration.su
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Shows two TextFields decorated with suffix icon sizes matching their hint text', (
+  testWidgets(
+    'Shows two TextFields decorated with suffix icon sizes matching their hint text',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(const example.SuffixIconConstraintsExampleApp());
+      expect(find.text('InputDecoration Sample'), findsOneWidget);
+
+      expect(find.byType(TextField), findsNWidgets(2));
+      expect(find.byIcon(Icons.search), findsNWidgets(2));
+      expect(find.text('Normal Icon Constraints'), findsOneWidget);
+      expect(find.text('Smaller Icon Constraints'), findsOneWidget);
+
+      final Finder normalIcon = find.descendant(
+        of: find.ancestor(
+          of: find.text('Normal Icon Constraints'),
+          matching: find.byType(TextField),
+        ),
+        matching: find.byIcon(Icons.search),
+      );
+      final Finder smallerIcon = find.descendant(
+        of: find.ancestor(
+          of: find.text('Smaller Icon Constraints'),
+          matching: find.byType(TextField),
+        ),
+        matching: find.byIcon(Icons.search),
+      );
+
+      expect(
+        tester.getSize(normalIcon).longestSide,
+        greaterThan(tester.getSize(smallerIcon).longestSide),
+      );
+    },
+  );
+
+  testWidgets('suffixIcons are placed right of hintText', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const example.SuffixIconConstraintsExampleApp());
-    expect(find.text('InputDecoration Sample'), findsOneWidget);
-
-    expect(find.byType(TextField), findsNWidgets(2));
-    expect(find.byIcon(Icons.search), findsNWidgets(2));
-    expect(find.text('Normal Icon Constraints'), findsOneWidget);
-    expect(find.text('Smaller Icon Constraints'), findsOneWidget);
 
     final Finder normalIcon = find.descendant(
-      of: find.ancestor(of: find.text('Normal Icon Constraints'), matching: find.byType(TextField)),
-      matching: find.byIcon(Icons.search),
-    );
-    final Finder smallerIcon = find.descendant(
       of: find.ancestor(
-        of: find.text('Smaller Icon Constraints'),
+        of: find.text('Normal Icon Constraints'),
         matching: find.byType(TextField),
       ),
-      matching: find.byIcon(Icons.search),
-    );
-
-    expect(
-      tester.getSize(normalIcon).longestSide,
-      greaterThan(tester.getSize(smallerIcon).longestSide),
-    );
-  });
-
-  testWidgets('suffixIcons are placed right of hintText', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.SuffixIconConstraintsExampleApp());
-
-    final Finder normalIcon = find.descendant(
-      of: find.ancestor(of: find.text('Normal Icon Constraints'), matching: find.byType(TextField)),
       matching: find.byIcon(Icons.search),
     );
     final Finder smallerIcon = find.descendant(

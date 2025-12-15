@@ -74,8 +74,8 @@ final class RunnerProgress extends RunnerEvent {
 
   @override
   String toString() {
-    final String ts = '[${_timestamp(timestamp)}]';
-    final String pct = '${percent.toStringAsFixed(1)}%';
+    final ts = '[${_timestamp(timestamp)}]';
+    final pct = '${percent.toStringAsFixed(1)}%';
     return '$ts[$name]: $pct ($completed/$total) $what';
   }
 }
@@ -98,7 +98,7 @@ final class RunnerResult extends RunnerEvent {
     if (ok) {
       return '[${_timestamp(timestamp)}][$name]: $okMessage';
     }
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     buffer.writeln('[$timestamp][$name]: FAILED');
     buffer.writeln('COMMAND:\n${command.join(' ')}');
     buffer.writeln('STDOUT:\n${result.stdout}');
@@ -365,7 +365,7 @@ final class BuildRunner extends Runner {
   Future<bool> _runGn(RunnerEventHandler eventHandler) async {
     final String gnPath = p.join(engineSrcDir.path, 'flutter', 'tools', 'gn');
     final Set<String> gnArgs = _mergedGnArgs;
-    final List<String> command = <String>[gnPath, ...gnArgs];
+    final command = <String>[gnPath, ...gnArgs];
     eventHandler(RunnerStart('${build.name}: GN', command, DateTime.now()));
     final ProcessRunnerResult processResult;
     if (dryRun) {
@@ -377,12 +377,7 @@ final class BuildRunner extends Runner {
         failOk: true,
       );
     }
-    final RunnerResult result = RunnerResult(
-      '${build.name}: GN',
-      command,
-      DateTime.now(),
-      processResult,
-    );
+    final result = RunnerResult('${build.name}: GN', command, DateTime.now(), processResult);
     eventHandler(result);
     return result.ok;
   }
@@ -392,16 +387,16 @@ final class BuildRunner extends Runner {
       return;
     }
 
-    final io.File commandsFile = io.File(
+    final commandsFile = io.File(
       p.join(engineSrcDir.path, 'out', build.ninja.config, 'compile_commands.json'),
     );
     if (!commandsFile.existsSync()) {
       return;
     }
 
-    final RegExp regex = RegExp(r'("command"\s*:\s*").*(\s\S*clang\+\+)');
+    final regex = RegExp(r'("command"\s*:\s*").*(\s\S*clang\+\+)');
     String contents = await commandsFile.readAsString();
-    int matches = 0;
+    var matches = 0;
     contents = contents.replaceAllMapped(regex, (Match match) {
       matches += 1;
       return '${match[1]}${match[2]!.trim()}';
@@ -434,7 +429,7 @@ final class BuildRunner extends Runner {
   // RBE statistics, or null if something goes wrong.
   Future<String?> _reproxystatus() async {
     final String reclientPath = p.join(_buildtoolsPath, 'reclient');
-    final String exe = platform.isWindows ? '.exe' : '';
+    final exe = platform.isWindows ? '.exe' : '';
     final String restatsPath = p.join(reclientPath, 'reproxystatus$exe');
     final ProcessRunnerResult restatsResult;
     if (dryRun) {
@@ -465,7 +460,7 @@ final class BuildRunner extends Runner {
 
   Future<bool> _bootstrapRbe(RunnerEventHandler eventHandler, {bool shutdown = false}) async {
     final String reclientPath = p.join(_buildtoolsPath, 'reclient');
-    final String exe = platform.isWindows ? '.exe' : '';
+    final exe = platform.isWindows ? '.exe' : '';
     final String bootstrapPath = p.join(reclientPath, 'bootstrap$exe');
     final String reproxyPath = p.join(reclientPath, 'reproxy$exe');
     final String os = platform.operatingSystem;
@@ -482,7 +477,7 @@ final class BuildRunner extends Runner {
       'rbe',
       reclientConfigFile,
     );
-    final List<String> bootstrapCommand = <String>[
+    final bootstrapCommand = <String>[
       bootstrapPath,
       '--re_proxy=$reproxyPath',
       '--use_application_default_credentials',
@@ -536,10 +531,10 @@ final class BuildRunner extends Runner {
     return bootstrapResult.exitCode == 0;
   }
 
-  late final _computedRbeJValue = () {
+  late final int _computedRbeJValue = () {
     // 80 here matches the value used in CI:
     // https://flutter.googlesource.com/recipes/+/refs/heads/main/recipe_modules/build_util/api.py#56
-    const int multiplier = 80;
+    const multiplier = 80;
     final int processors = platform.numberOfProcessors;
     // Assume simultaneous multithreading on intel and therefore half as many
     // cores as logical processors.
@@ -565,7 +560,7 @@ final class BuildRunner extends Runner {
   /// the paths are relative to [outDir].
   @visibleForTesting
   static String fixGccPaths(String line, String outDir) {
-    final sansAnsi = _stripAnsi(line);
+    final String sansAnsi = _stripAnsi(line);
     final Match? match = _gccRegex.firstMatch(sansAnsi);
     if (match == null) {
       return line;
@@ -582,7 +577,7 @@ final class BuildRunner extends Runner {
         return false;
       }
     }
-    bool success = false;
+    var success = false;
     try {
       final String ninjaPath = p.join(
         engineSrcDir.parent.parent.path,
@@ -592,7 +587,7 @@ final class BuildRunner extends Runner {
       );
       final String outDir = p.join(engineSrcDir.path, 'out', build.ninja.config);
       final int rbej = concurrency == 0 ? _computedRbeJValue : concurrency;
-      final List<String> command = <String>[
+      final command = <String>[
         ninjaPath,
         '-C',
         outDir,
@@ -618,10 +613,10 @@ final class BuildRunner extends Runner {
           workingDirectory: engineSrcDir.path,
           environment: {...rbeConfig.environment, if (shouldEmitAnsi) 'CLICOLOR_FORCE': '1'},
         );
-        final List<int> stderrOutput = <int>[];
-        final List<int> stdoutOutput = <int>[];
-        final Completer<void> stdoutComplete = Completer<void>();
-        final Completer<void> stderrComplete = Completer<void>();
+        final stderrOutput = <int>[];
+        final stdoutOutput = <int>[];
+        final stdoutComplete = Completer<void>();
+        final stderrComplete = Completer<void>();
 
         process.stdout
             .transform<String>(const Utf8Decoder())
@@ -699,7 +694,7 @@ final class BuildRunner extends Runner {
 
   Future<bool> _runGenerators(RunnerEventHandler eventHandler) async {
     for (final BuildTask task in build.generators) {
-      final BuildTaskRunner runner = BuildTaskRunner(
+      final runner = BuildTaskRunner(
         processRunner: processRunner,
         platform: platform,
         abi: abi,
@@ -716,7 +711,7 @@ final class BuildRunner extends Runner {
 
   Future<bool> _runTests(RunnerEventHandler eventHandler) async {
     for (final BuildTest test in build.tests) {
-      final BuildTestRunner runner = BuildTestRunner(
+      final runner = BuildTestRunner(
         processRunner: processRunner,
         platform: platform,
         abi: abi,
@@ -757,11 +752,7 @@ final class BuildTaskRunner extends Runner {
   Future<bool> run(RunnerEventHandler eventHandler) async {
     final String interpreter = _interpreter(task.language);
     for (final String script in task.scripts) {
-      final List<String> command = <String>[
-        if (interpreter.isNotEmpty) interpreter,
-        script,
-        ...task.parameters,
-      ];
+      final command = <String>[if (interpreter.isNotEmpty) interpreter, script, ...task.parameters];
       eventHandler(RunnerStart(task.name, command, DateTime.now()));
       final ProcessRunnerResult processResult;
       if (dryRun) {
@@ -773,7 +764,7 @@ final class BuildTaskRunner extends Runner {
           failOk: true,
         );
       }
-      final RunnerResult result = RunnerResult(task.name, command, DateTime.now(), processResult);
+      final result = RunnerResult(task.name, command, DateTime.now(), processResult);
       eventHandler(result);
       if (!result.ok) {
         return false;
@@ -810,7 +801,7 @@ final class BuildTestRunner extends Runner {
   @override
   Future<bool> run(RunnerEventHandler eventHandler) async {
     final String interpreter = _interpreter(test.language);
-    final List<String> command = <String>[
+    final command = <String>[
       if (interpreter.isNotEmpty) interpreter,
       test.script,
       ...test.parameters,
@@ -831,7 +822,7 @@ final class BuildTestRunner extends Runner {
         printOutput: true,
       );
     }
-    final RunnerResult result = RunnerResult(test.name, command, DateTime.now(), processResult);
+    final result = RunnerResult(test.name, command, DateTime.now(), processResult);
     eventHandler(result);
     return result.ok;
   }
@@ -853,7 +844,7 @@ String _timestamp(DateTime time) {
     };
   }
 
-  final String y = time.year.toString();
+  final y = time.year.toString();
   final String m = twoDigits(time.month);
   final String d = twoDigits(time.day);
   final String hh = twoDigits(time.hour);

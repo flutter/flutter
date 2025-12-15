@@ -36,7 +36,7 @@ class UnpublishException implements Exception {
 
   @override
   String toString() {
-    String output = runtimeType.toString();
+    var output = runtimeType.toString();
     output += ': $message';
     final String stderr = result?.stderr as String? ?? '';
     if (stderr.isNotEmpty) {
@@ -134,9 +134,9 @@ class ProcessRunner {
     if (subprocessOutput) {
       stderr.write('Running "${commandLine.join(' ')}" in ${workingDirectory.path}.\n');
     }
-    final List<int> output = <int>[];
-    final Completer<void> stdoutComplete = Completer<void>();
-    final Completer<void> stderrComplete = Completer<void>();
+    final output = <int>[];
+    final stdoutComplete = Completer<void>();
+    final stderrComplete = Completer<void>();
     late Process process;
     Future<int> allComplete() async {
       await stderrComplete.future;
@@ -164,12 +164,12 @@ class ProcessRunner {
         stderrComplete.complete();
       }
     } on ProcessException catch (e) {
-      final String message =
+      final message =
           'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
           'failed with:\n$e';
       throw UnpublishException(message);
     } on ArgumentError catch (e) {
-      final String message =
+      final message =
           'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
           'failed with:\n$e';
       throw UnpublishException(message);
@@ -177,8 +177,7 @@ class ProcessRunner {
 
     final int exitCode = await allComplete();
     if (exitCode != 0 && !failOk) {
-      final String message =
-          'Running "${commandLine.join(' ')}" in ${workingDirectory.path} failed';
+      final message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} failed';
       throw UnpublishException(message, ProcessResult(0, exitCode, null, 'returned $exitCode'));
     }
     return utf8.decoder.convert(output).trim();
@@ -216,7 +215,7 @@ class ArchiveUnpublisher {
     final Map<String, dynamic> jsonData = await _loadMetadata();
     final List<Map<String, String>> releases = (jsonData['releases'] as List<dynamic>)
         .map<Map<String, String>>((dynamic entry) {
-          final Map<String, dynamic> mapEntry = entry as Map<String, dynamic>;
+          final mapEntry = entry as Map<String, dynamic>;
           return mapEntry.cast<String, String>();
         })
         .toList();
@@ -256,9 +255,9 @@ class ArchiveUnpublisher {
   Future<Map<Channel, Map<String, String>>> _getArchivePaths(
     List<Map<String, String>> releases,
   ) async {
-    final Set<String> hashes = <String>{};
-    final Map<Channel, Map<String, String>> paths = <Channel, Map<String, String>>{};
-    for (final Map<String, String> revision in releases) {
+    final hashes = <String>{};
+    final paths = <Channel, Map<String, String>>{};
+    for (final revision in releases) {
       final String hash = revision['hash']!;
       final Channel channel = fromChannelName(revision['channel']);
       hashes.add(hash);
@@ -280,7 +279,7 @@ class ArchiveUnpublisher {
   }
 
   Future<Map<String, dynamic>> _loadMetadata() async {
-    final File metadataFile = File(path.join(tempDir.absolute.path, getMetadataFilename(platform)));
+    final metadataFile = File(path.join(tempDir.absolute.path, getMetadataFilename(platform)));
     // Always run this, even in dry runs.
     await _runGsUtil(<String>['cp', metadataGsPath, metadataFile.absolute.path], confirm: true);
     final String currentMetadata = metadataFile.readAsStringSync();
@@ -303,8 +302,8 @@ class ArchiveUnpublisher {
     // Windows wants to echo the commands that execute in gsutil.bat to the
     // stdout when we do that. So, we copy the file locally and then read it
     // back in.
-    final File metadataFile = File(path.join(tempDir.absolute.path, getMetadataFilename(platform)));
-    const JsonEncoder encoder = JsonEncoder.withIndent('  ');
+    final metadataFile = File(path.join(tempDir.absolute.path, getMetadataFilename(platform)));
+    const encoder = JsonEncoder.withIndent('  ');
     metadataFile.writeAsStringSync(encoder.convert(jsonData));
     print(
       '${confirmed ? 'Overwriting' : 'Would overwrite'} $metadataGsPath with contents of ${metadataFile.absolute.path}',
@@ -318,7 +317,7 @@ class ArchiveUnpublisher {
     bool failOk = false,
     bool confirm = false,
   }) async {
-    final List<String> command = <String>['gsutil', '--', ...args];
+    final command = <String>['gsutil', '--', ...args];
     if (confirm) {
       return _processRunner.runProcess(command, workingDirectory: workingDirectory, failOk: failOk);
     } else {
@@ -328,12 +327,12 @@ class ArchiveUnpublisher {
   }
 
   Future<void> _cloudRemoveArchive(Map<Channel, Map<String, String>> paths) async {
-    final List<String> files = <String>[];
+    final files = <String>[];
     print('${confirmed ? 'Removing' : 'Would remove'} the following release archives:');
     for (final Channel channel in paths.keys) {
       final Map<String, String> hashes = paths[channel]!;
       for (final String hash in hashes.keys) {
-        final String file = '$gsReleaseFolder/${hashes[hash]}';
+        final file = '$gsReleaseFolder/${hashes[hash]}';
         files.add(file);
         print('  $file');
       }
@@ -357,7 +356,7 @@ class ArchiveUnpublisher {
     if (dest.endsWith('.json')) {
       mimeType = 'application/json';
     }
-    final List<String> args = <String>[
+    final args = <String>[
       // Use our preferred MIME type for the files we care about
       // and let gsutil figure it out for anything else.
       if (mimeType != null) ...<String>['-h', 'Content-Type:$mimeType'],
@@ -368,7 +367,7 @@ class ArchiveUnpublisher {
 }
 
 void _printBanner(String message) {
-  final String banner = '*** $message ***';
+  final banner = '*** $message ***';
   print('\n');
   print('*' * banner.length);
   print(banner);
@@ -384,7 +383,7 @@ Future<void> main(List<String> rawArguments) async {
   final List<String> allowedPlatformNames = PublishedPlatform.values
       .map<String>((PublishedPlatform platform) => getPublishedPlatform(platform))
       .toList();
-  final ArgParser argParser = ArgParser();
+  final argParser = ArgParser();
   argParser.addOption(
     'temp_dir',
     help:
@@ -444,11 +443,11 @@ Future<void> main(List<String> rawArguments) async {
     exit(exitCode);
   }
 
-  final List<String> revisions = parsedArguments['revision'] as List<String>;
+  final revisions = parsedArguments['revision'] as List<String>;
   if (revisions.isEmpty) {
     errorExit('Invalid argument: at least one --revision must be specified.');
   }
-  for (final String revision in revisions) {
+  for (final revision in revisions) {
     if (revision.length != 40) {
       errorExit(
         'Invalid argument: --revision "$revision" must be the entire hash, not just a prefix.',
@@ -459,9 +458,9 @@ Future<void> main(List<String> rawArguments) async {
     }
   }
 
-  final String tempDirArg = parsedArguments['temp_dir'] as String;
+  final tempDirArg = parsedArguments['temp_dir'] as String;
   Directory tempDir;
-  bool removeTempDir = false;
+  var removeTempDir = false;
   if (tempDirArg.isEmpty) {
     tempDir = Directory.systemTemp.createTempSync('flutter_package.');
     removeTempDir = true;
@@ -478,22 +477,22 @@ Future<void> main(List<String> rawArguments) async {
     );
   }
 
-  final List<String> channelArg = parsedArguments['channel'] as List<String>;
-  final List<String> channelOptions = channelArg.isNotEmpty ? channelArg : allowedChannelValues;
+  final channelArg = parsedArguments['channel'] as List<String>;
+  final channelOptions = channelArg.isNotEmpty ? channelArg : allowedChannelValues;
   final Set<Channel> channels = channelOptions
       .map<Channel>((String value) => fromChannelName(value))
       .toSet();
-  final List<String> platformArg = parsedArguments['platform'] as List<String>;
-  final List<String> platformOptions = platformArg.isNotEmpty ? platformArg : allowedPlatformNames;
+  final platformArg = parsedArguments['platform'] as List<String>;
+  final platformOptions = platformArg.isNotEmpty ? platformArg : allowedPlatformNames;
   final List<PublishedPlatform> platforms = platformOptions
       .map<PublishedPlatform>((String value) => fromPublishedPlatform(value))
       .toList();
-  int exitCode = 0;
+  var exitCode = 0;
   late String message;
   late String stack;
   try {
-    for (final PublishedPlatform platform in platforms) {
-      final ArchiveUnpublisher publisher = ArchiveUnpublisher(
+    for (final platform in platforms) {
+      final publisher = ArchiveUnpublisher(
         tempDir,
         revisions.toSet(),
         channels,

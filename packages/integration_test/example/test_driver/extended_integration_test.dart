@@ -17,7 +17,7 @@ Future<void> main() async {
           // Here is an example of using an argument that was passed in via the
           // optional 'args' Map.
           if (args != null) {
-            final String? someArgumentValue = args['someArgumentKey'] as String?;
+            final someArgumentValue = args['someArgumentKey'] as String?;
             return someArgumentValue != null;
           }
           return true;

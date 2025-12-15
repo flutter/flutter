@@ -63,7 +63,7 @@ final class Git {
     ProcessResult result,
     String explanation,
   ) {
-    final StringBuffer message = StringBuffer();
+    final message = StringBuffer();
     if (result.exitCode != 0) {
       message.writeln(
         'Command "git ${args.join(' ')}" failed in directory "$workingDirectory" to '

@@ -25,10 +25,10 @@ void main() {
     });
 
     test('can send events to an $EventChannel (deprecated API)', () async {
-      const EventChannel listeningChannel = EventChannel('test');
-      const PluginEventChannel<String> sendingChannel = PluginEventChannel<String>('test');
+      const listeningChannel = EventChannel('test');
+      const sendingChannel = PluginEventChannel<String>('test');
 
-      final StreamController<String> controller = StreamController<String>();
+      final controller = StreamController<String>();
       sendingChannel.setController(controller);
 
       expect(listeningChannel.receiveBroadcastStream(), emitsInOrder(<String>['hello', 'world']));
@@ -39,10 +39,10 @@ void main() {
     });
 
     test('can send events to an $EventChannel', () async {
-      const EventChannel listeningChannel = EventChannel('test');
-      const PluginEventChannel<String> sendingChannel = PluginEventChannel<String>('test');
+      const listeningChannel = EventChannel('test');
+      const sendingChannel = PluginEventChannel<String>('test');
 
-      final StreamController<String> controller = StreamController<String>();
+      final controller = StreamController<String>();
       sendingChannel.setController(controller);
 
       expect(listeningChannel.receiveBroadcastStream(), emitsInOrder(<String>['hello', 'world']));
@@ -53,10 +53,10 @@ void main() {
     });
 
     test('can send errors to an $EventChannel (deprecated API)', () async {
-      const EventChannel listeningChannel = EventChannel('test2');
-      const PluginEventChannel<String> sendingChannel = PluginEventChannel<String>('test2');
+      const listeningChannel = EventChannel('test2');
+      const sendingChannel = PluginEventChannel<String>('test2');
 
-      final StreamController<String> controller = StreamController<String>();
+      final controller = StreamController<String>();
       sendingChannel.setController(controller);
 
       expect(
@@ -71,10 +71,10 @@ void main() {
     });
 
     test('can send errors to an $EventChannel', () async {
-      const EventChannel listeningChannel = EventChannel('test2');
-      const PluginEventChannel<String> sendingChannel = PluginEventChannel<String>('test2');
+      const listeningChannel = EventChannel('test2');
+      const sendingChannel = PluginEventChannel<String>('test2');
 
-      final StreamController<String> controller = StreamController<String>();
+      final controller = StreamController<String>();
       sendingChannel.setController(controller);
 
       expect(
@@ -89,12 +89,10 @@ void main() {
     });
 
     test('receives a listen event (deprecated API)', () async {
-      const EventChannel listeningChannel = EventChannel('test3');
-      const PluginEventChannel<String> sendingChannel = PluginEventChannel<String>('test3');
+      const listeningChannel = EventChannel('test3');
+      const sendingChannel = PluginEventChannel<String>('test3');
 
-      final StreamController<String> controller = StreamController<String>(
-        onListen: expectAsync0<void>(() {}),
-      );
+      final controller = StreamController<String>(onListen: expectAsync0<void>(() {}));
       sendingChannel.setController(controller);
 
       expect(listeningChannel.receiveBroadcastStream(), emitsInOrder(<String>['hello']));
@@ -104,12 +102,10 @@ void main() {
     });
 
     test('receives a listen event', () async {
-      const EventChannel listeningChannel = EventChannel('test3');
-      const PluginEventChannel<String> sendingChannel = PluginEventChannel<String>('test3');
+      const listeningChannel = EventChannel('test3');
+      const sendingChannel = PluginEventChannel<String>('test3');
 
-      final StreamController<String> controller = StreamController<String>(
-        onListen: expectAsync0<void>(() {}),
-      );
+      final controller = StreamController<String>(onListen: expectAsync0<void>(() {}));
       sendingChannel.setController(controller);
 
       expect(listeningChannel.receiveBroadcastStream(), emitsInOrder(<String>['hello']));
@@ -119,12 +115,10 @@ void main() {
     });
 
     test('receives a cancel event (deprecated API)', () async {
-      const EventChannel listeningChannel = EventChannel('test4');
-      const PluginEventChannel<String> sendingChannel = PluginEventChannel<String>('test4');
+      const listeningChannel = EventChannel('test4');
+      const sendingChannel = PluginEventChannel<String>('test4');
 
-      final StreamController<String> controller = StreamController<String>(
-        onCancel: expectAsync0<void>(() {}),
-      );
+      final controller = StreamController<String>(onCancel: expectAsync0<void>(() {}));
       sendingChannel.setController(controller);
 
       final Stream<dynamic> eventStream = listeningChannel.receiveBroadcastStream();
@@ -140,12 +134,10 @@ void main() {
     });
 
     test('receives a cancel event', () async {
-      const EventChannel listeningChannel = EventChannel('test4');
-      const PluginEventChannel<String> sendingChannel = PluginEventChannel<String>('test4');
+      const listeningChannel = EventChannel('test4');
+      const sendingChannel = PluginEventChannel<String>('test4');
 
-      final StreamController<String> controller = StreamController<String>(
-        onCancel: expectAsync0<void>(() {}),
-      );
+      final controller = StreamController<String>(onCancel: expectAsync0<void>(() {}));
       sendingChannel.setController(controller);
 
       final Stream<dynamic> eventStream = listeningChannel.receiveBroadcastStream();

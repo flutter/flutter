@@ -51,21 +51,21 @@ Future<Map<Type, dynamic>> _loadAll(
   Locale locale,
   Iterable<LocalizationsDelegate<dynamic>> allDelegates,
 ) {
-  final Map<Type, dynamic> output = <Type, dynamic>{};
+  final output = <Type, dynamic>{};
   List<_Pending>? pendingList;
 
   // Only load the first delegate for each delegate type that supports
   // locale.languageCode.
-  final Set<Type> types = <Type>{};
-  final List<LocalizationsDelegate<dynamic>> delegates = <LocalizationsDelegate<dynamic>>[];
-  for (final LocalizationsDelegate<dynamic> delegate in allDelegates) {
+  final types = <Type>{};
+  final delegates = <LocalizationsDelegate<dynamic>>[];
+  for (final delegate in allDelegates) {
     if (!types.contains(delegate.type) && delegate.isSupported(locale)) {
       types.add(delegate.type);
       delegates.add(delegate);
     }
   }
 
-  for (final LocalizationsDelegate<dynamic> delegate in delegates) {
+  for (final delegate in delegates) {
     final Future<dynamic> inputValue = delegate.load(locale);
     dynamic completedValue;
     final Future<dynamic> futureValue = inputValue.then<dynamic>((dynamic value) {
@@ -92,7 +92,7 @@ Future<Map<Type, dynamic>> _loadAll(
     pendingList.map<Future<dynamic>>((_Pending p) => p.futureValue),
   ).then<Map<Type, dynamic>>((List<dynamic> values) {
     assert(values.length == pendingList!.length);
-    for (int i = 0; i < values.length; i += 1) {
+    for (var i = 0; i < values.length; i += 1) {
       final Type type = pendingList![i].delegate.type;
       assert(!output.containsKey(type));
       output[type] = values[i];
@@ -660,7 +660,7 @@ class _LocalizationsState extends State<Localizations> {
     }
     final List<LocalizationsDelegate<dynamic>> delegates = widget.delegates.toList();
     final List<LocalizationsDelegate<dynamic>> oldDelegates = old.delegates.toList();
-    for (int i = 0; i < delegates.length; i += 1) {
+    for (var i = 0; i < delegates.length; i += 1) {
       final LocalizationsDelegate<dynamic> delegate = delegates[i];
       final LocalizationsDelegate<dynamic> oldDelegate = oldDelegates[i];
       if (delegate.runtimeType != oldDelegate.runtimeType || delegate.shouldReload(oldDelegate)) {
@@ -714,13 +714,12 @@ class _LocalizationsState extends State<Localizations> {
   }
 
   T resourcesFor<T>(Type type) {
-    final T resources = _typeToResources[type] as T;
+    final resources = _typeToResources[type] as T;
     return resources;
   }
 
   TextDirection get _textDirection {
-    final WidgetsLocalizations resources =
-        _typeToResources[WidgetsLocalizations] as WidgetsLocalizations;
+    final resources = _typeToResources[WidgetsLocalizations] as WidgetsLocalizations;
     return resources.textDirection;
   }
 
@@ -809,7 +808,10 @@ class LocalizationsResolver extends ChangeNotifier with WidgetsBindingObserver {
     _localeListResolutionCallback = localeListResolutionCallback;
     _localeResolutionCallback = localeResolutionCallback;
     _localizationsDelegates = localizationsDelegates;
-    _supportedLocales = supportedLocales;
+    if (_supportedLocales != supportedLocales) {
+      _supportedLocales = supportedLocales;
+      _updateResolvedLocale(WidgetsBinding.instance.platformDispatcher.locales);
+    }
   }
 
   /// The currently resolved [Locale] based on the current platform locale and
@@ -868,7 +870,17 @@ class LocalizationsResolver extends ChangeNotifier with WidgetsBindingObserver {
 
   @override
   void didChangeLocales(List<Locale>? locales) {
-    final Locale newLocale = _resolveLocales(locales, supportedLocales);
+    _updateResolvedLocale(locales);
+  }
+
+  /// Recompute the resolved locale based on [preferredLocales] and
+  /// [supportedLocales], update the resolved locale, and notify listeners
+  /// only if the resolved locale changed.
+  ///
+  /// This method is called from both [update] (when locale resolution
+  /// parameters change) and [didChangeLocales] (when system locales change).
+  void _updateResolvedLocale(List<Locale>? preferredLocales) {
+    final Locale newLocale = _resolveLocales(preferredLocales, supportedLocales);
     if (newLocale != _resolvedLocale) {
       _resolvedLocale = newLocale;
       notifyListeners();

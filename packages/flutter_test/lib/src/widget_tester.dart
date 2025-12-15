@@ -75,8 +75,8 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 // Return the last element that satisfies `test`, or return null if not found.
 E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
   late E result;
-  bool foundMatching = false;
-  for (final E element in list) {
+  var foundMatching = false;
+  for (final element in list) {
     if (test(element)) {
       result = element;
       foundMatching = true;
@@ -161,14 +161,14 @@ void testWidgets(
     'There must be at least one value to test in the testing variant.',
   );
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
-  final WidgetTester tester = WidgetTester._(binding);
-  for (final dynamic value in variant.values) {
+  final tester = WidgetTester._(binding);
+  for (final Object? value in variant.values) {
     final String variationDescription = variant.describeValue(value);
     // IDEs may make assumptions about the format of this suffix in order to
     // support running tests directly from the editor (where they may have
     // access to only the test name, provided by the analysis server).
     // See https://github.com/flutter/flutter/issues/86659.
-    final String combinedDescription = variationDescription.isNotEmpty
+    final combinedDescription = variationDescription.isNotEmpty
         ? '$description (variant: $variationDescription)'
         : description;
     test(
@@ -442,7 +442,7 @@ Future<void> benchmarkWidgets(
   }());
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   assert(binding is! AutomatedTestWidgetsFlutterBinding);
-  final WidgetTester tester = WidgetTester._(binding);
+  final tester = WidgetTester._(binding);
   SemanticsHandle? semanticsHandle;
   if (semanticsEnabled) {
     semanticsHandle = tester.ensureSemantics();
@@ -603,9 +603,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   Future<List<Duration>> handlePointerEventRecord(Iterable<PointerEventRecord> records) {
     assert(records.isNotEmpty);
     return TestAsyncUtils.guard<List<Duration>>(() async {
-      final List<Duration> handleTimeStampDiff = <Duration>[];
+      final handleTimeStampDiff = <Duration>[];
       DateTime? startTime;
-      for (final PointerEventRecord record in records) {
+      for (final record in records) {
         final DateTime now = binding.clock.now();
         startTime ??= now;
         // So that the first event is promised to receive a zero timeDiff
@@ -711,7 +711,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     }());
     return TestAsyncUtils.guard<int>(() async {
       final DateTime endTime = binding.clock.fromNowBy(timeout);
-      int count = 0;
+      var count = 0;
       do {
         if (binding.clock.now().isAfter(endTime)) {
           throw FlutterError('pumpAndSettle timed out');
@@ -760,7 +760,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       'your widget tree in a RootRestorationScope?',
     );
     return TestAsyncUtils.guard<void>(() async {
-      final RootWidget widget = binding.rootElement!.widget as RootWidget;
+      final widget = binding.rootElement!.widget as RootWidget;
       final TestRestorationData restorationData = binding.restorationManager.restorationData;
       runApp(Container(key: UniqueKey()));
       await pump();
@@ -892,18 +892,18 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
         printToConsole('No widgets found at ${event.position}.');
         return;
       }
-      final List<Element> candidates = <Element>[];
+      final candidates = <Element>[];
       innerTargetElement.visitAncestorElements((Element element) {
         candidates.add(element);
         return true;
       });
       assert(candidates.isNotEmpty);
       String? descendantText;
-      int numberOfWithTexts = 0;
-      int numberOfTypes = 0;
-      int totalNumber = 0;
+      var numberOfWithTexts = 0;
+      var numberOfTypes = 0;
+      var totalNumber = 0;
       printToConsole('Some possible finders for the widgets at ${event.position}:');
-      for (final Element element in candidates) {
+      for (final element in candidates) {
         if (totalNumber > 13) {
           break;
         }
@@ -1022,7 +1022,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   @override
   Ticker createTicker(TickerCallback onTick) {
     _tickers ??= <_TestTicker>{};
-    final _TestTicker result = _TestTicker(onTick, _removeTicker);
+    final result = _TestTicker(onTick, _removeTicker);
     _tickers!.add(result);
     return result;
   }
@@ -1066,7 +1066,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   void _verifySemanticsHandlesWereDisposed() {
     assert(_lastRecordedSemanticsHandles != null);
     // TODO(goderbauer): Fix known leak in web engine when running integration tests and remove this "correction", https://github.com/flutter/flutter/issues/121640.
-    final int knownWebEngineLeakForLiveTestsCorrection =
+    final knownWebEngineLeakForLiveTestsCorrection =
         kIsWeb && binding is LiveTestWidgetsFlutterBinding ? 1 : 0;
 
     if (_currentSemanticsHandles - knownWebEngineLeakForLiveTestsCorrection >
@@ -1117,7 +1117,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// Tests that just need to add text to widgets like [TextField]
   /// or [TextFormField] only need to call [enterText].
   Future<void> showKeyboard(FinderBase<Element> finder) async {
-    bool skipOffstage = true;
+    var skipOffstage = true;
     if (finder is Finder) {
       skipOffstage = finder.skipOffstage;
     }

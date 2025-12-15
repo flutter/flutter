@@ -85,8 +85,8 @@ abstract class ShaderWarmUp {
   ///
   /// Currently, this has no effect when [kIsWeb] is true.
   Future<void> execute() async {
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = ui.Canvas(recorder);
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder);
     await warmUpOnCanvas(canvas);
     final ui.Picture picture = recorder.endRecording();
     assert(debugCaptureShaderWarmUpPicture(picture));

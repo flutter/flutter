@@ -37,19 +37,18 @@ class BottomSheetDemo extends StatelessWidget {
       key: ValueKey<BottomSheetDemoType>(type),
       onGenerateRoute: (RouteSettings settings) {
         return MaterialPageRoute<void>(
-          builder:
-              (BuildContext context) => Scaffold(
-                appBar: AppBar(automaticallyImplyLeading: false, title: Text(_title(context))),
-                floatingActionButton: FloatingActionButton(
-                  onPressed: () {},
-                  backgroundColor: Theme.of(context).colorScheme.secondary,
-                  child: Icon(
-                    Icons.add,
-                    semanticLabel: GalleryLocalizations.of(context)!.demoBottomSheetAddLabel,
-                  ),
-                ),
-                body: _bottomSheetDemo(context),
+          builder: (BuildContext context) => Scaffold(
+            appBar: AppBar(automaticallyImplyLeading: false, title: Text(_title(context))),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {},
+              backgroundColor: Theme.of(context).colorScheme.secondary,
+              child: Icon(
+                Icons.add,
+                semanticLabel: GalleryLocalizations.of(context)!.demoBottomSheetAddLabel,
               ),
+            ),
+            body: _bottomSheetDemo(context),
+          ),
         );
       },
     );

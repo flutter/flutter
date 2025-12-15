@@ -24,7 +24,9 @@ class ClipboardMessageHandler {
         .setData(text)
         .then((_) => callback!(codec.encodeSuccessEnvelope(null)))
         .catchError((Object error) {
-          final message = (error is StateError) ? error.message : 'Clipboard.setData failed.';
+          final String message = (error is StateError)
+              ? error.message
+              : 'Clipboard.setData failed.';
           callback!(codec.encodeErrorEnvelope(code: 'copy_fail', message: message));
         });
   }
@@ -41,11 +43,13 @@ class ClipboardMessageHandler {
     _clipboardStrategy
         .getData()
         .then((String data) {
-          final Map<String, Object?> map = <String, Object?>{'text': data};
+          final map = <String, Object?>{'text': data};
           callback!(codec.encodeSuccessEnvelope(map));
         })
         .catchError((Object error) {
-          final message = (error is StateError) ? error.message : 'Clipboard.getData failed.';
+          final String message = (error is StateError)
+              ? error.message
+              : 'Clipboard.getData failed.';
           callback!(codec.encodeErrorEnvelope(code: 'paste_fail', message: message));
         });
   }
@@ -57,11 +61,13 @@ class ClipboardMessageHandler {
     _clipboardStrategy
         .getData()
         .then((String data) {
-          final Map<String, Object?> map = <String, Object?>{'value': data.isNotEmpty};
+          final map = <String, Object?>{'value': data.isNotEmpty};
           callback!(codec.encodeSuccessEnvelope(map));
         })
         .catchError((Object error) {
-          final message = (error is StateError) ? error.message : 'Clipboard.hasStrings failed.';
+          final String message = (error is StateError)
+              ? error.message
+              : 'Clipboard.hasStrings failed.';
           callback!(codec.encodeErrorEnvelope(code: 'has_strings_fail', message: message));
         });
   }

@@ -27,7 +27,7 @@ void main() {
 
   // This tests when keys like `30hz_frame_percentage`, `60hz_frame_percentage` are not in the generated file.
   test('runs perf tests, no crash if refresh rate percentage keys are not in the data', () async {
-    final Map<String, dynamic> fakeData = <String, dynamic>{
+    final fakeData = <String, dynamic>{
       'frame_count': 5,
       'average_frame_build_time_millis': 0.1,
       'worst_frame_build_time_millis': 0.1,
@@ -63,14 +63,14 @@ void main() {
       '90th_percentile_frame_request_pending_latency': 0.1,
       '99th_percentile_frame_request_pending_latency': 0.1,
     };
-    const String resultFileName = 'fake_result';
+    const resultFileName = 'fake_result';
     void driveCallback(List<String> arguments) {
-      final File resultFile = File('$perfTestOutputPath/$resultFileName.json')
+      final resultFile = File('$perfTestOutputPath/$resultFileName.json')
         ..createSync(recursive: true);
       resultFile.writeAsStringSync(json.encode(fakeData));
     }
 
-    final PerfTest perfTest = PerfTest(
+    final perfTest = PerfTest(
       testDirectory.absolute.path,
       testTarget.absolute.path,
       'test_file',
@@ -85,7 +85,7 @@ void main() {
   test(
     'runs perf tests, successfully parse refresh rate percentage key-values from data`',
     () async {
-      final Map<String, dynamic> fakeData = <String, dynamic>{
+      final fakeData = <String, dynamic>{
         'frame_count': 5,
         'average_frame_build_time_millis': 0.1,
         'worst_frame_build_time_millis': 0.1,
@@ -127,14 +127,14 @@ void main() {
         '90th_percentile_frame_request_pending_latency': 0.1,
         '99th_percentile_frame_request_pending_latency': 0.1,
       };
-      const String resultFileName = 'fake_result';
+      const resultFileName = 'fake_result';
       void driveCallback(List<String> arguments) {
-        final File resultFile = File('$perfTestOutputPath/$resultFileName.json')
+        final resultFile = File('$perfTestOutputPath/$resultFileName.json')
           ..createSync(recursive: true);
         resultFile.writeAsStringSync(json.encode(fakeData));
       }
 
-      final PerfTest perfTest = PerfTest(
+      final perfTest = PerfTest(
         testDirectory.absolute.path,
         testTarget.absolute.path,
         'test_file',

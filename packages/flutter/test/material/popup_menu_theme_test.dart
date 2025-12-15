@@ -56,12 +56,12 @@ void main() {
 
   test('PopupMenuThemeData lerp special cases', () {
     expect(PopupMenuThemeData.lerp(null, null, 0), null);
-    const PopupMenuThemeData data = PopupMenuThemeData();
+    const data = PopupMenuThemeData();
     expect(identical(PopupMenuThemeData.lerp(data, data, 0.5), data), true);
   });
 
   test('PopupMenuThemeData null fields by default', () {
-    const PopupMenuThemeData popupMenuTheme = PopupMenuThemeData();
+    const popupMenuTheme = PopupMenuThemeData();
     expect(popupMenuTheme.color, null);
     expect(popupMenuTheme.shape, null);
     expect(popupMenuTheme.menuPadding, null);
@@ -75,7 +75,7 @@ void main() {
   });
 
   testWidgets('Default PopupMenuThemeData debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const PopupMenuThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -87,7 +87,7 @@ void main() {
   });
 
   testWidgets('PopupMenuThemeData implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     PopupMenuThemeData(
       color: const Color(0xfffffff1),
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0))),
@@ -136,7 +136,7 @@ void main() {
     final Key popupButtonApp = UniqueKey();
     final Key enabledPopupItemKey = UniqueKey();
     final Key disabledPopupItemKey = UniqueKey();
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -370,18 +370,18 @@ void main() {
     final Key popupButtonApp = UniqueKey();
     final Key popupItemKey = UniqueKey();
 
-    const Color color = Color(0xfff11fff);
-    const Color surfaceTintColor = Color(0xfff12fff);
-    const Color shadowColor = Color(0xfff13fff);
+    const color = Color(0xfff11fff);
+    const surfaceTintColor = Color(0xfff12fff);
+    const shadowColor = Color(0xfff13fff);
     const ShapeBorder shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(9.0)),
     );
     const EdgeInsets menuPadding = EdgeInsets.zero;
-    const double elevation = 7.0;
-    const TextStyle textStyle = TextStyle(color: Color(0xfff14fff), fontSize: 19.0);
+    const elevation = 7.0;
+    const textStyle = TextStyle(color: Color(0xfff14fff), fontSize: 19.0);
     const MouseCursor cursor = SystemMouseCursors.forbidden;
-    const Color iconColor = Color(0xfff15fff);
-    const double iconSize = 21.5;
+    const iconColor = Color(0xfff15fff);
+    const iconSize = 21.5;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -478,7 +478,7 @@ void main() {
       final Key popupButtonApp = UniqueKey();
       final Key enabledPopupItemKey = UniqueKey();
       final Key disabledPopupItemKey = UniqueKey();
-      final ThemeData theme = ThemeData(useMaterial3: false);
+      final theme = ThemeData(useMaterial3: false);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -683,8 +683,8 @@ void main() {
       const ShapeBorder shape = RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(9.0)),
       );
-      const double elevation = 7.0;
-      const TextStyle textStyle = TextStyle(color: Color(0xffffffef), fontSize: 19.0);
+      const elevation = 7.0;
+      const textStyle = TextStyle(color: Color(0xffffffef), fontSize: 19.0);
       const MouseCursor cursor = SystemMouseCursors.forbidden;
 
       await tester.pumpWidget(

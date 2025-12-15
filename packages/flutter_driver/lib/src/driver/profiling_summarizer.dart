@@ -51,8 +51,8 @@ class ProfilingSummarizer {
 
   /// Creates a ProfilingSummarizer given the timeline events.
   static ProfilingSummarizer fromEvents(List<TimelineEvent> profilingEvents) {
-    final Map<ProfileType, List<TimelineEvent>> eventsByType = <ProfileType, List<TimelineEvent>>{};
-    for (final TimelineEvent event in profilingEvents) {
+    final eventsByType = <ProfileType, List<TimelineEvent>>{};
+    for (final event in profilingEvents) {
       assert(kProfilingEvents.contains(event.name));
       final ProfileType type = _getProfileType(event.name);
       eventsByType[type] ??= <TimelineEvent>[];
@@ -68,7 +68,7 @@ class ProfilingSummarizer {
   /// usage from the recorded events. If a given profile type isn't available
   /// for any reason, the map will not contain the said profile type.
   Map<String, dynamic> summarize() {
-    final Map<String, dynamic> summary = <String, dynamic>{};
+    final summary = <String, dynamic>{};
     summary.addAll(_summarize(ProfileType.CPU, 'cpu_usage'));
     summary.addAll(_summarize(ProfileType.GPU, 'gpu_usage'));
     summary.addAll(_summarize(ProfileType.Memory, 'memory_usage'));
@@ -76,7 +76,7 @@ class ProfilingSummarizer {
   }
 
   Map<String, double> _summarize(ProfileType profileType, String name) {
-    final Map<String, double> summary = <String, double>{};
+    final summary = <String, double>{};
     if (!hasProfilingInfo(profileType)) {
       return summary;
     }

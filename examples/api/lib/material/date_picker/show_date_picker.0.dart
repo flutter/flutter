@@ -30,13 +30,16 @@ class DatePickerExample extends StatefulWidget {
 }
 
 /// RestorationProperty objects can be used because of RestorationMixin.
-class _DatePickerExampleState extends State<DatePickerExample> with RestorationMixin {
+class _DatePickerExampleState extends State<DatePickerExample>
+    with RestorationMixin {
   // In this example, the restoration ID for the mixin is passed in through
   // the [StatefulWidget]'s constructor.
   @override
   String? get restorationId => widget.restorationId;
 
-  final RestorableDateTime _selectedDate = RestorableDateTime(DateTime(2021, 7, 25));
+  final RestorableDateTime _selectedDate = RestorableDateTime(
+    DateTime(2021, 7, 25),
+  );
   late final RestorableRouteFuture<DateTime?> _restorableDatePickerRouteFuture =
       RestorableRouteFuture<DateTime?>(
         onComplete: _selectDate,
@@ -49,7 +52,10 @@ class _DatePickerExampleState extends State<DatePickerExample> with RestorationM
       );
 
   @pragma('vm:entry-point')
-  static Route<DateTime> _datePickerRoute(BuildContext context, Object? arguments) {
+  static Route<DateTime> _datePickerRoute(
+    BuildContext context,
+    Object? arguments,
+  ) {
     return DialogRoute<DateTime>(
       context: context,
       builder: (BuildContext context) {
@@ -67,7 +73,10 @@ class _DatePickerExampleState extends State<DatePickerExample> with RestorationM
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
     registerForRestoration(_selectedDate, 'selected_date');
-    registerForRestoration(_restorableDatePickerRouteFuture, 'date_picker_route_future');
+    registerForRestoration(
+      _restorableDatePickerRouteFuture,
+      'date_picker_route_future',
+    );
   }
 
   void _selectDate(DateTime? newSelectedDate) {

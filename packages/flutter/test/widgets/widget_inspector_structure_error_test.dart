@@ -14,8 +14,7 @@ void main() {
 
 class StructureErrorTestWidgetInspectorService extends TestWidgetInspectorService {
   static void runTests() {
-    final StructureErrorTestWidgetInspectorService service =
-        StructureErrorTestWidgetInspectorService();
+    final service = StructureErrorTestWidgetInspectorService();
     WidgetInspectorService.instance = service;
 
     test('ext.flutter.inspector.structuredErrors - custom FlutterError.onError', () async {
@@ -33,7 +32,7 @@ class StructureErrorTestWidgetInspectorService extends TestWidgetInspectorServic
         expect(service.dispatchedEvents('Flutter.Error'), isEmpty);
 
         // Set callback that doesn't call presentError.
-        bool onErrorCalled = false;
+        var onErrorCalled = false;
         FlutterError.onError = (FlutterErrorDetails details) {
           onErrorCalled = true;
         };
@@ -41,7 +40,7 @@ class StructureErrorTestWidgetInspectorService extends TestWidgetInspectorServic
         // Get the service registered.
         WidgetsFlutterBinding.ensureInitialized();
 
-        final FlutterErrorDetails expectedError = FlutterErrorDetails(
+        final expectedError = FlutterErrorDetails(
           library: 'rendering library',
           context: ErrorDescription('during layout'),
           exception: StackTrace.current,

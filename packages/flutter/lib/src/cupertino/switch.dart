@@ -35,6 +35,16 @@ const List<BoxShadow> _kSwitchBoxShadows = <BoxShadow>[
   BoxShadow(color: Color(0x26000000), offset: Offset(0, 3), blurRadius: 8.0),
   BoxShadow(color: Color(0x0F000000), offset: Offset(0, 3), blurRadius: 1.0),
 ];
+// The drag distance (as a fraction of the track width) beyond which the switch
+// must be dragged to commit the state change.
+// This threshold is used when the user is dragging to a new state.
+const double _kDragCommitThreshold = 0.7;
+
+// The drag distance (as a fraction of the track width) past which the user must
+// drag back to reverse a state change that has already been visually committed
+// during the drag.
+// This threshold is used when the user is dragging back to the original state.
+const double _kDragReverseThreshold = 0.2;
 
 // Label sizes and padding taken from xcode inspector.
 // See https://github.com/flutter/flutter/issues/4830#issuecomment-528495360.
@@ -298,7 +308,7 @@ class CupertinoSwitch extends StatefulWidget {
   ///   onChanged: (bool value) { },
   ///   trackOutlineColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.disabled)) {
-  ///       return CupertinoColors.activeOrange.withOpacity(.48);
+  ///       return CupertinoColors.activeOrange.withValues(alpha: .48);
   ///     }
   ///     return null; // Use the default color.
   ///   }),
@@ -474,20 +484,32 @@ class _CupertinoSwitchState extends State<CupertinoSwitch>
     with TickerProviderStateMixin, ToggleableStateMixin {
   final _SwitchPainter _painter = _SwitchPainter();
 
+  // The global position where the user first touched the screen. This value to
+  // calculate the initial drag delta.
+  Offset _dragStartPosition = Offset.zero;
+
+  // The cumulative horizontal drag delta, normalized as a fraction of the
+  // track width.
+  double _dragDelta = 0;
+
+  // The transient value of the switch determined by _dragDelta during a
+  // drag.
+  bool? _dragValue;
+
   @override
   void initState() {
     super.initState();
     positionController.duration = const Duration(milliseconds: 200);
     reactionController.duration = const Duration(milliseconds: 300);
+    position
+      ..curve = Curves.ease
+      ..reverseCurve = Curves.ease.flipped;
   }
 
   @override
   void didUpdateWidget(CupertinoSwitch oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.value != widget.value) {
-      position
-        ..curve = Curves.ease
-        ..reverseCurve = Curves.ease.flipped;
       animateToValue();
     }
   }
@@ -554,39 +576,75 @@ class _CupertinoSwitchState extends State<CupertinoSwitch>
     return trackInnerLength;
   }
 
+  void _handleOnTapDown(TapDownDetails details) {
+    if (isInteractive) {
+      _dragStartPosition = details.globalPosition;
+    }
+  }
+
   void _handleDragStart(DragStartDetails details) {
     if (isInteractive) {
       reactionController.forward();
-      _emitVibration();
+
+      if (_dragStartPosition != Offset.zero) {
+        final double delta = (details.globalPosition - _dragStartPosition).dx / _kTrackWidth;
+        _dragDelta = switch (Directionality.of(context)) {
+          TextDirection.rtl => -delta,
+          TextDirection.ltr => delta,
+        };
+      }
+
+      _dragValue = value;
     }
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
     if (isInteractive) {
-      position
-        ..curve = Curves.linear
-        ..reverseCurve = Curves.linear;
-      final double delta = details.primaryDelta! / _trackInnerLength;
-      positionController.value += switch (Directionality.of(context)) {
+      final double delta = details.primaryDelta! / _kTrackWidth;
+      _dragDelta += switch (Directionality.of(context)) {
         TextDirection.rtl => -delta,
         TextDirection.ltr => delta,
       };
+
+      final valueChangedWhileDragging = widget.value != _dragValue;
+
+      final double threshold = valueChangedWhileDragging
+          ? _kDragReverseThreshold
+          : _kDragCommitThreshold;
+      final double effectiveThreshold = widget.value ? -threshold : threshold;
+
+      final bool newDragValue = _dragDelta >= effectiveThreshold;
+
+      if (_dragValue != newDragValue) {
+        _emitVibration();
+
+        if (newDragValue) {
+          positionController.forward();
+        } else {
+          positionController.reverse();
+        }
+
+        _dragValue = newDragValue;
+      }
     }
   }
 
   bool _needsPositionAnimation = false;
 
   void _handleDragEnd(DragEndDetails details) {
-    if (position.value >= 0.5 != widget.value) {
+    if (_dragValue != widget.value) {
       widget.onChanged?.call(!widget.value);
       // Wait to finish the animation until widget.value has changed to
       // !widget.value as part of the widget.onChanged call above.
       setState(() {
         _needsPositionAnimation = true;
       });
-    } else {
-      animateToValue();
     }
+
+    _dragStartPosition = Offset.zero;
+    _dragDelta = 0;
+    _dragValue = null;
+
     reactionController.reverse();
   }
 
@@ -677,13 +735,13 @@ class _CupertinoSwitchState extends State<CupertinoSwitch>
 
     final Color effectiveInactiveIconColor = effectiveInactiveIcon?.color ?? CupertinoColors.black;
 
-    final Set<WidgetState> activePressedStates = activeStates..add(WidgetState.pressed);
+    final activePressedStates = activeStates..add(WidgetState.pressed);
     final Color effectiveActivePressedThumbColor =
         _resolveThumbColor(widget.thumbColor, activePressedStates) ??
         _widgetThumbColor.resolve(activePressedStates) ??
         CupertinoColors.white;
 
-    final Set<WidgetState> inactivePressedStates = inactiveStates..add(WidgetState.pressed);
+    final inactivePressedStates = inactiveStates..add(WidgetState.pressed);
     final Color effectiveInactivePressedThumbColor =
         _resolveThumbColor(widget.thumbColor, inactivePressedStates) ??
         _widgetThumbColor.resolve(inactivePressedStates) ??
@@ -696,6 +754,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch>
       toggled: widget.value,
       child: GestureDetector(
         excludeFromSemantics: true,
+        onTapDown: _handleOnTapDown,
         onHorizontalDragStart: _handleDragStart,
         onHorizontalDragUpdate: _handleDragUpdate,
         onHorizontalDragEnd: _handleDragEnd,
@@ -1057,7 +1116,7 @@ class _SwitchPainter extends ToggleablePainter {
     }
 
     _pressedThumbExtension = reaction.value * _kThumbExtensionFactor;
-    final Size thumbSize = Size(_kThumbRadius * 2 + _pressedThumbExtension!, _kThumbRadius * 2);
+    final thumbSize = Size(_kThumbRadius * 2 + _pressedThumbExtension!, _kThumbRadius * 2);
 
     final double colorValue = _colorAnimation!.value;
     final Color trackColor = Color.lerp(inactiveTrackColor, activeTrackColor, position.value)!;
@@ -1095,7 +1154,7 @@ class _SwitchPainter extends ToggleablePainter {
         ? onInactiveThumbImageError
         : onActiveThumbImageError;
 
-    final Paint paint = Paint()..color = trackColor;
+    final paint = Paint()..color = trackColor;
 
     final Offset trackPaintOffset = _computeTrackPaintOffset(size);
     final Offset thumbPaintOffset = _computeThumbPaintOffset(
@@ -1104,7 +1163,7 @@ class _SwitchPainter extends ToggleablePainter {
       visualPosition,
     );
 
-    final Rect trackRect = Rect.fromLTWH(
+    final trackRect = Rect.fromLTWH(
       trackPaintOffset.dx,
       trackPaintOffset.dy,
       _kTrackWidth,
@@ -1143,18 +1202,18 @@ class _SwitchPainter extends ToggleablePainter {
       };
 
       // Draws '|' label.
-      final Rect onLabelRect = Rect.fromCenter(
+      final onLabelRect = Rect.fromCenter(
         center: onLabelOffset,
         width: _kOnLabelWidth,
         height: _kOnLabelHeight,
       );
-      final Paint onLabelPaint = Paint()
+      final onLabelPaint = Paint()
         ..color = onLabelColor.withOpacity(onLabelOpacity)
         ..style = PaintingStyle.fill;
       canvas.drawRect(onLabelRect, onLabelPaint);
 
       // Draws 'O' label.
-      final Paint offLabelPaint = Paint()
+      final offLabelPaint = Paint()
         ..color = offLabelColor.withOpacity(offLabelOpacity)
         ..style = PaintingStyle.stroke
         ..strokeWidth = _kOffLabelWidth;
@@ -1207,24 +1266,24 @@ class _SwitchPainter extends ToggleablePainter {
     Rect trackRect,
   ) {
     const double trackRadius = _kTrackHeight / 2;
-    final RRect trackRRect = RRect.fromRectAndRadius(trackRect, const Radius.circular(trackRadius));
+    final trackRRect = RRect.fromRectAndRadius(trackRect, const Radius.circular(trackRadius));
 
     canvas.drawRRect(trackRRect, paint);
 
     // Paint the track outline.
     if (trackOutlineColor != null) {
-      final Rect outlineTrackRect = Rect.fromLTWH(
+      final outlineTrackRect = Rect.fromLTWH(
         trackPaintOffset.dx + 1,
         trackPaintOffset.dy + 1,
         _kTrackWidth - 2,
         _kTrackHeight - 2,
       );
-      final RRect outlineTrackRRect = RRect.fromRectAndRadius(
+      final outlineTrackRRect = RRect.fromRectAndRadius(
         outlineTrackRect,
         const Radius.circular(trackRadius),
       );
 
-      final Paint outlinePaint = Paint()
+      final outlinePaint = Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = trackOutlineWidth ?? 2.0
         ..color = trackOutlineColor;
@@ -1234,7 +1293,7 @@ class _SwitchPainter extends ToggleablePainter {
 
     if (isFocused) {
       final RRect focusedOutline = trackRRect.inflate(1.75);
-      final Paint focusedPaint = Paint()
+      final focusedPaint = Paint()
         ..style = PaintingStyle.stroke
         ..color = focusColor
         ..strokeWidth = 3.5;
@@ -1285,7 +1344,7 @@ class _SwitchPainter extends ToggleablePainter {
         final double? iconOpticalSize = thumbIcon.opticalSize ?? iconTheme?.opticalSize;
         final List<Shadow>? iconShadows = thumbIcon.shadows ?? iconTheme?.shadows;
 
-        final TextSpan textSpan = TextSpan(
+        final textSpan = TextSpan(
           text: String.fromCharCode(iconData.codePoint),
           style: TextStyle(
             fontVariations: <FontVariation>[
@@ -1319,7 +1378,7 @@ class _SwitchPainter extends ToggleablePainter {
   }
 
   void _paintCupertinoThumbShadowAndBorder(Canvas canvas, Offset thumbPaintOffset, Size thumbSize) {
-    final RRect thumbBounds = RRect.fromLTRBR(
+    final thumbBounds = RRect.fromLTRBR(
       thumbPaintOffset.dx,
       thumbPaintOffset.dy,
       thumbPaintOffset.dx + thumbSize.width,

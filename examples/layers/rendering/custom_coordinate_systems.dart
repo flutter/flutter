@@ -10,10 +10,10 @@ import 'src/binding.dart';
 import 'src/sector_layout.dart';
 
 RenderBox buildSectorExample() {
-  final RenderSectorRing rootCircle = RenderSectorRing(padding: 20.0);
+  final rootCircle = RenderSectorRing(padding: 20.0);
   rootCircle.add(RenderSolidColor(const Color(0xFF00FFFF), desiredDeltaTheta: kTwoPi * 0.15));
   rootCircle.add(RenderSolidColor(const Color(0xFF0000FF), desiredDeltaTheta: kTwoPi * 0.4));
-  final RenderSectorSlice stack = RenderSectorSlice(padding: 2.0);
+  final stack = RenderSectorSlice(padding: 2.0);
   stack.add(RenderSolidColor(const Color(0xFFFFFF00), desiredDeltaRadius: 20.0));
   stack.add(RenderSolidColor(const Color(0xFFFF9000), desiredDeltaRadius: 20.0));
   stack.add(RenderSolidColor(const Color(0xFF00FF00)));

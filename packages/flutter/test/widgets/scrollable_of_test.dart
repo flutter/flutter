@@ -128,7 +128,7 @@ void main() {
     WidgetTester tester,
   ) async {
     late String logValue;
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
 
     // Changing the SingleChildScrollView's physics causes the
@@ -187,8 +187,7 @@ void main() {
     final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
     await tester.pump(const Duration(seconds: 1));
 
-    final StatefulElement scrollableElement =
-        find.byType(Scrollable).evaluate().first as StatefulElement;
+    final scrollableElement = find.byType(Scrollable).evaluate().first as StatefulElement;
     expect(Scrollable.of(notification.context!), equals(scrollableElement.state));
 
     // Finish gesture to release resources.
@@ -197,9 +196,9 @@ void main() {
   });
 
   testWidgets('Static Scrollable methods can target a specific axis', (WidgetTester tester) async {
-    final TestScrollController horizontalController = TestScrollController(deferLoading: true);
+    final horizontalController = TestScrollController(deferLoading: true);
     addTearDown(horizontalController.dispose);
-    final TestScrollController verticalController = TestScrollController(deferLoading: false);
+    final verticalController = TestScrollController(deferLoading: false);
     addTearDown(verticalController.dispose);
     late final AxisDirection foundAxisDirection;
     late final bool foundRecommendation;
@@ -235,8 +234,8 @@ void main() {
   testWidgets('Axis targeting scrollables establishes the correct dependencies', (
     WidgetTester tester,
   ) async {
-    final GlobalKey<TestScrollableState> verticalKey = GlobalKey<TestScrollableState>();
-    final GlobalKey<TestChildState> childKey = GlobalKey<TestChildState>();
+    final verticalKey = GlobalKey<TestScrollableState>();
+    final childKey = GlobalKey<TestChildState>();
 
     await tester.pumpWidget(
       Directionality(
@@ -255,7 +254,7 @@ void main() {
     expect(verticalKey.currentState!.dependenciesChanged, 1);
     expect(childKey.currentState!.dependenciesChanged, 1);
 
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
 
     // Change the horizontal ScrollView, adding a controller

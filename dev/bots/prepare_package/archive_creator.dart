@@ -43,7 +43,7 @@ class ArchiveCreator {
     bool subprocessOutput = true,
   }) {
     final Directory flutterRoot = fs.directory(path.join(tempDir.path, 'flutter'));
-    final ProcessRunner processRunner = ProcessRunner(
+    final processRunner = ProcessRunner(
       processManager: processManager,
       subprocessOutput: subprocessOutput,
       platform: platform,
@@ -145,7 +145,7 @@ class ArchiveCreator {
   Future<String> get _archiveName async {
     final String os = platform.operatingSystem.toLowerCase();
     // Include the intended host architecture in the file name for non-x64.
-    final String arch = await _dartArch == 'x64' ? '' : '${await _dartArch}_';
+    final arch = await _dartArch == 'x64' ? '' : '${await _dartArch}_';
     // We don't use .tar.xz on Mac because although it can unpack them
     // on the command line (with tar), the "Archive Utility" that runs
     // when you double-click on them just does some crazy behavior (it
@@ -153,8 +153,8 @@ class ArchiveCreator {
     // click on that, it converts it back to .tar.xz, without ever
     // unpacking it!) So, we use .zip for Mac, and the files are about
     // 220MB larger than they need to be. :-(
-    final String suffix = platform.isLinux ? 'tar.xz' : 'zip';
-    final String package = '${os}_$arch${_version[frameworkVersionTag]}';
+    final suffix = platform.isLinux ? 'tar.xz' : 'zip';
+    final package = '${os}_$arch${_version[frameworkVersionTag]}';
     return 'flutter_$package-${branch.name}.$suffix';
   }
 
@@ -236,8 +236,8 @@ class ArchiveCreator {
     // once to capture theJSON output. The second run should be fast.
     await _runFlutter(<String>['--version', '--machine']);
     final String versionJson = await _runFlutter(<String>['--version', '--machine']);
-    final Map<String, String> versionMap = <String, String>{};
-    final Map<String, dynamic> result = json.decode(versionJson) as Map<String, dynamic>;
+    final versionMap = <String, String>{};
+    final result = json.decode(versionJson) as Map<String, dynamic>;
     result.forEach((String key, dynamic value) => versionMap[key] = value.toString());
     versionMap[frameworkVersionTag] = gitVersion;
     versionMap[dartTargetArchTag] = await _dartArch;
@@ -286,8 +286,8 @@ class ArchiveCreator {
   /// Precondition: all packages currently in the PUB_CACHE of [_processRunner]
   /// are installed from pub.dev.
   Future<void> _downloadPubPackageArchives() async {
-    final Pool pool = Pool(10); // Number of simultaneous downloads.
-    final http.Client client = http.Client();
+    final pool = Pool(10); // Number of simultaneous downloads.
+    final client = http.Client();
     final Directory preloadCache = fs.directory(path.join(flutterRoot.path, '.pub-preload-cache'));
     preloadCache.createSync(recursive: true);
 
@@ -295,7 +295,7 @@ class ArchiveCreator {
     Future<void> fetchPackageArchive(String name, String version) async {
       await pool.withResource(() async {
         stderr.write('Fetching package archive for $name-$version.\n');
-        int retries = 7;
+        var retries = 7;
         while (true) {
           retries -= 1;
           try {
@@ -315,7 +315,7 @@ class ArchiveCreator {
             if (versions is! List) {
               throw const FormatException('.versions should be a list');
             }
-            final Map<String, dynamic> versionDescription =
+            final versionDescription =
                 versions.firstWhere(
                       (dynamic description) {
                         if (description is! Map) {
@@ -335,7 +335,7 @@ class ArchiveCreator {
             if (archiveSha256 is! String) {
               throw const FormatException('archive_sha256 should be a string');
             }
-            final http.Request request = http.Request('get', Uri.parse(downloadUrl));
+            final request = http.Request('get', Uri.parse(downloadUrl));
             final http.StreamedResponse response = await client.send(request);
             if (response.statusCode != 200) {
               throw Exception(
@@ -364,13 +364,13 @@ class ArchiveCreator {
       });
     }
 
-    final Map<String, dynamic> cacheDescription =
+    final cacheDescription =
         json.decode(await _runFlutter(<String>['pub', 'cache', 'list'])) as Map<String, dynamic>;
-    final Map<String, dynamic> packages = cacheDescription['packages'] as Map<String, dynamic>;
-    final List<Future<void>> downloads = <Future<void>>[];
+    final packages = cacheDescription['packages'] as Map<String, dynamic>;
+    final downloads = <Future<void>>[];
     for (final MapEntry<String, dynamic> package in packages.entries) {
       final String name = package.key;
-      final Map<String, dynamic> versions = package.value as Map<String, dynamic>;
+      final versions = package.value as Map<String, dynamic>;
       for (final String version in versions.keys) {
         downloads.add(fetchPackageArchive(name, version));
       }
@@ -390,7 +390,7 @@ class ArchiveCreator {
     // Create each of the templates, since they will call 'pub get' on
     // themselves when created, and this will warm the cache with their
     // dependencies too.
-    for (final String template in <String>['app', 'package', 'plugin']) {
+    for (final template in <String>['app', 'package', 'plugin']) {
       final String createName = path.join(tempDir.path, 'create_$template');
       await _runFlutter(
         <String>['create', '--template=$template', createName],

@@ -11,7 +11,7 @@ import '../macos/native_assets_host.dart';
 import '../native_assets.dart';
 
 // TODO(dcharkes): Fetch minimum iOS version from somewhere. https://github.com/flutter/flutter/issues/145104
-const targetIOSVersion = 12;
+const targetIOSVersion = 13;
 
 IOSSdk getIOSSdk(EnvironmentType environmentType) {
   return switch (environmentType) {
@@ -126,9 +126,11 @@ Future<void> copyNativeCodeAssetsIOS(
     }
     dylibs.add((dylibFile, newInstallName, frameworkDir));
 
-    // TODO(knopp): Wire the value once there is a way to configure that in the hook.
-    // https://github.com/dart-lang/native/issues/1133
-    await createInfoPlist(targetUri.pathSegments.last, frameworkDir, minimumIOSVersion: '12.0');
+    await createInfoPlist(
+      targetUri.pathSegments.last,
+      frameworkDir,
+      minimumIOSVersion: '$targetIOSVersion.0',
+    );
   }
 
   for (final (File dylibFile, String newInstallName, Directory frameworkDir) in dylibs) {

@@ -55,7 +55,9 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete> {
     return Autocomplete<String>(
       optionsBuilder: (TextEditingValue textEditingValue) async {
         _searchingWithQuery = textEditingValue.text;
-        final Iterable<String> options = await _FakeAPI.search(_searchingWithQuery!);
+        final Iterable<String> options = await _FakeAPI.search(
+          _searchingWithQuery!,
+        );
 
         // If another search happened after this one, throw away these options.
         // Use the previous options instead and wait for the newer request to
@@ -76,7 +78,11 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete> {
 
 // Mimics a remote API.
 class _FakeAPI {
-  static const List<String> _kOptions = <String>['aardvark', 'bobcat', 'chameleon'];
+  static const List<String> _kOptions = <String>[
+    'aardvark',
+    'bobcat',
+    'chameleon',
+  ];
 
   // Searches the options, but injects a fake "network" delay.
   static Future<Iterable<String>> search(String query) async {

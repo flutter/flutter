@@ -6,7 +6,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:engine_repo_tools/engine_repo_tools.dart';
 import 'package:path/path.dart' as p;
+import 'package:process_runner/process_runner.dart';
 
 import 'command.dart';
 import 'flags.dart';
@@ -31,12 +33,12 @@ final class StampCommand extends CommandBase {
 
   @override
   Future<int> run() async {
-    final dryRun = argResults!.flag('dry-run');
-    final engine = environment.engine;
+    final bool dryRun = argResults!.flag('dry-run');
+    final Engine engine = environment.engine;
 
-    final revision = await _getGitRevision();
-    final revisionDate = await _getGitRevisionDate(revision);
-    final now = environment.now();
+    final String revision = await _getGitRevision();
+    final String revisionDate = await _getGitRevisionDate(revision);
+    final DateTime now = environment.now();
 
     final stamp = <String, Object?>{
       'build_date': now.toIso8601String(),
@@ -46,7 +48,7 @@ final class StampCommand extends CommandBase {
       'content_hash': await _getContentHash(),
     };
 
-    final stampPath = p.join(engine.outDir.path, 'engine_stamp.json');
+    final String stampPath = p.join(engine.outDir.path, 'engine_stamp.json');
     if (dryRun) {
       environment.logger.status('The following would have been written to $stampPath:');
       environment.logger.status(json.encode(stamp));
@@ -59,7 +61,7 @@ final class StampCommand extends CommandBase {
   }
 
   Future<String> _getGitRevision() async {
-    final result = await environment.processRunner.runProcess(
+    final ProcessRunnerResult result = await environment.processRunner.runProcess(
       'git rev-parse HEAD'.split(' '),
       workingDirectory: environment.engine.srcDir,
     );
@@ -75,7 +77,7 @@ final class StampCommand extends CommandBase {
   }
 
   Future<String> _getGitRevisionDate(String revision) async {
-    final result = await environment.processRunner.runProcess(
+    final ProcessRunnerResult result = await environment.processRunner.runProcess(
       'git show -s --pretty=format:%ad --date=iso-strict'.split(' '),
       workingDirectory: environment.engine.srcDir,
     );
@@ -91,7 +93,7 @@ final class StampCommand extends CommandBase {
   }
 
   Future<String> _getContentHash() async {
-    final result = await environment.processRunner.runProcess([
+    final ProcessRunnerResult result = await environment.processRunner.runProcess([
       '${environment.flutterBinInternal}/content_aware_hash.sh',
     ], workingDirectory: environment.engine.srcDir);
     if (result.exitCode != 0) {

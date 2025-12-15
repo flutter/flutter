@@ -15,7 +15,7 @@ class RefreshRateSummary {
   RefreshRateSummary({required List<TimelineEvent> vsyncEvents}) {
     final List<double> refreshRates = _computeRefreshRates(vsyncEvents);
     _numberOfTotalFrames = refreshRates.length;
-    for (final double refreshRate in refreshRates) {
+    for (final refreshRate in refreshRates) {
       if ((refreshRate - 30).abs() < _kErrorMargin) {
         _numberOf30HzFrames++;
         continue;
@@ -105,8 +105,8 @@ class RefreshRateSummary {
   final List<double> _framesWithIllegalRefreshRate = <double>[];
 
   static List<double> _computeRefreshRates(List<TimelineEvent> vsyncEvents) {
-    final List<double> result = <double>[];
-    for (int i = 0; i < vsyncEvents.length; i++) {
+    final result = <double>[];
+    for (var i = 0; i < vsyncEvents.length; i++) {
       final TimelineEvent event = vsyncEvents[i];
       if (event.phase != 'B') {
         continue;
@@ -114,7 +114,7 @@ class RefreshRateSummary {
       assert(event.name == kUIThreadVsyncProcessEvent);
       assert(event.arguments != null);
       final Map<String, dynamic> arguments = event.arguments!;
-      const double nanosecondsPerSecond = 1e+9;
+      const nanosecondsPerSecond = 1e+9;
       final int startTimeInNanoseconds = int.parse(arguments['StartTime'] as String);
       final int targetTimeInNanoseconds = int.parse(arguments['TargetTime'] as String);
       final int frameDurationInNanoseconds = targetTimeInNanoseconds - startTimeInNanoseconds;

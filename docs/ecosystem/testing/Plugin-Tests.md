@@ -10,7 +10,7 @@ Because of the complexities of having native code, plugins have many more types 
   - The Dart code of an implementation package, if any. Some federated implementations are pure Dart, and would be largely tested via unit tests, and some have Dart code binding to a package-internal method channel.
 
   These should live in `test/`
-- **Integration tests**. These use [the `integration_test` package](https://flutter.dev/docs/testing/integration-tests). Unlike Dart unit tests, integration tests run in the context of a Flutter application (the `example/` app), and can therefore load and exercise native plugin code. Almost all plugin packages other than the platform interface package should have these. The only exceptions would be:
+- **Integration tests**. These use [the `integration_test` package](https://docs.flutter.dev/testing/integration-tests). Unlike Dart unit tests, integration tests run in the context of a Flutter application (the `example/` app), and can therefore load and exercise native plugin code. Almost all plugin packages other than the platform interface package should have these. The only exceptions would be:
   - Plugins that need native UI tests (see below)
   - Plugins that have pure Dart implementations which can be comprehensively tested with Dart unit tests.
 

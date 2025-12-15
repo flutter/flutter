@@ -7,10 +7,18 @@
 
 #include "flutter/display_list/image/dl_image.h"
 #include "flutter/lib/ui/dart_wrapper.h"
-#include "flutter/lib/ui/ui_dart_state.h"
-#include "third_party/skia/include/core/SkImage.h"
 
 namespace flutter {
+
+// Must be kept in sync with painting.dart.
+enum class PixelFormat {
+  kRgba8888,
+  kBgra8888,
+  kRgbaFloat32,
+  kRFloat32,  // kLastPixelFormat
+};
+
+constexpr PixelFormat kLastPixelFormat = PixelFormat::kRFloat32;
 
 // Must be kept in sync with painting.dart.
 enum ColorSpace {
@@ -34,6 +42,12 @@ class CanvasImage final : public RefCountedDartWrappable<CanvasImage> {
   int width() { return image_ ? image_->width() : 0; }
 
   int height() { return image_ ? image_->height() : 0; }
+
+  static void decodeImageFromPixelsSync(Dart_Handle pixels_handle,
+                                        uint32_t width,
+                                        uint32_t height,
+                                        int32_t pixel_format,
+                                        Dart_Handle raw_image_handle);
 
   Dart_Handle toByteData(int format, Dart_Handle callback);
 

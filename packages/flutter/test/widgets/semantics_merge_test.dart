@@ -14,7 +14,7 @@ void main() {
   });
 
   testWidgets('MergeSemantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     // not merged
     await tester.pumpWidget(
@@ -102,7 +102,7 @@ void main() {
   testWidgets('MergeSemantics works if other nodes are implicitly merged into its node', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       Directionality(
@@ -144,9 +144,9 @@ void main() {
   testWidgets('LinkUri from child is passed up to the parent when merging nodes', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     final Uri uri = Uri.parse('https://flutter.com');
-    const String label = 'test1';
+    const label = 'test1';
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,

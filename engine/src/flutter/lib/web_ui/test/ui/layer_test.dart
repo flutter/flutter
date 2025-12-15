@@ -24,15 +24,15 @@ void testMain() {
 
     // Regression test for https://github.com/flutter/flutter/issues/63715
     test('TransformLayer prerolls correctly', () async {
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
-      final ui.Canvas canvas = ui.Canvas(recorder, const ui.Rect.fromLTRB(0, 0, 60, 60));
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, const ui.Rect.fromLTRB(0, 0, 60, 60));
       canvas.drawRect(
         const ui.Rect.fromLTRB(0, 0, 60, 60),
         ui.Paint()..style = ui.PaintingStyle.fill,
       );
       final ui.Picture picture = recorder.endRecording();
 
-      final LayerSceneBuilder sb = LayerSceneBuilder();
+      final sb = LayerSceneBuilder();
       sb.pushClipRect(const ui.Rect.fromLTRB(15, 15, 30, 30));
 
       // Intentionally use a perspective transform, which triggered the
@@ -43,24 +43,23 @@ void testMain() {
       final LayerScene scene = sb.build();
       final LayerTree layerTree = scene.layerTree;
       await renderScene(scene);
-      final ClipRectEngineLayer clipRect =
-          layerTree.rootLayer.debugLayers.single as ClipRectEngineLayer;
+      final clipRect = layerTree.rootLayer.debugLayers.single as ClipRectEngineLayer;
       expect(clipRect.paintBounds, const ui.Rect.fromLTRB(15, 15, 30, 30));
 
-      final TransformEngineLayer transform = clipRect.debugLayers.single as TransformEngineLayer;
+      final transform = clipRect.debugLayers.single as TransformEngineLayer;
       expect(transform.paintBounds, const ui.Rect.fromLTRB(0, 0, 30, 30));
     });
 
     test('can push a leaf layer without a container layer', () async {
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final recorder = ui.PictureRecorder();
       // Create a canvas just to start the recorder recording.
-      final ui.Canvas _ = ui.Canvas(recorder);
+      final _ = ui.Canvas(recorder);
       LayerSceneBuilder().addPicture(ui.Offset.zero, recorder.endRecording());
     });
 
     test('null ViewEmbedder with PlatformView', () async {
-      final LayerSceneBuilder sb = LayerSceneBuilder();
-      const ui.Rect kDefaultRegion = ui.Rect.fromLTRB(0, 0, 200, 200);
+      final sb = LayerSceneBuilder();
+      const kDefaultRegion = ui.Rect.fromLTRB(0, 0, 200, 200);
       await createPlatformView(0, 'test-platform-view');
       sb.pushOffset(0, 0);
       sb.addPlatformView(0, width: 10, height: 10);
@@ -68,8 +67,8 @@ void testMain() {
       final LayerScene layerScene = sb.build();
       final ui.Image testImage = await layerScene.toImage(100, 100);
 
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
-      final ui.Canvas canvas = ui.Canvas(recorder, kDefaultRegion);
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, kDefaultRegion);
       canvas.drawImage(testImage, ui.Offset.zero, ui.Paint());
 
       await drawPictureUsingCurrentRenderer(recorder.endRecording());
@@ -78,15 +77,15 @@ void testMain() {
     });
 
     test('ImageFilter layer applies matrix in preroll', () async {
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
-      final ui.Canvas canvas = ui.Canvas(recorder, const ui.Rect.fromLTRB(0, 0, 100, 100));
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, const ui.Rect.fromLTRB(0, 0, 100, 100));
       canvas.drawRect(
         const ui.Rect.fromLTRB(0, 0, 100, 100),
         ui.Paint()..style = ui.PaintingStyle.fill,
       );
       final ui.Picture picture = recorder.endRecording();
 
-      final LayerSceneBuilder sb = LayerSceneBuilder();
+      final sb = LayerSceneBuilder();
       sb.pushImageFilter(
         ui.ImageFilter.matrix(
           (Matrix4.identity()
@@ -101,22 +100,21 @@ void testMain() {
       final LayerTree layerTree = scene.layerTree;
       await renderScene(scene);
 
-      final ImageFilterEngineLayer imageFilterLayer =
-          layerTree.rootLayer.debugLayers.single as ImageFilterEngineLayer;
+      final imageFilterLayer = layerTree.rootLayer.debugLayers.single as ImageFilterEngineLayer;
       expect(imageFilterLayer.paintBounds, const ui.Rect.fromLTRB(10, 0, 60, 50));
     });
 
     test('Opacity layer works correctly with Scene.toImage', () async {
       // This is a regression test for https://github.com/flutter/flutter/issues/138009
-      final ui.PictureRecorder testRecorder = ui.PictureRecorder();
-      final ui.Canvas testCanvas = ui.Canvas(testRecorder, const ui.Rect.fromLTRB(0, 0, 100, 100));
+      final testRecorder = ui.PictureRecorder();
+      final testCanvas = ui.Canvas(testRecorder, const ui.Rect.fromLTRB(0, 0, 100, 100));
       testCanvas.drawRect(
         const ui.Rect.fromLTRB(0, 0, 100, 100),
         ui.Paint()..style = ui.PaintingStyle.fill,
       );
       final ui.Picture picture = testRecorder.endRecording();
 
-      final LayerSceneBuilder sb = LayerSceneBuilder();
+      final sb = LayerSceneBuilder();
       sb.pushTransform(Matrix4.identity().toFloat64());
       sb.pushOpacity(97, offset: const ui.Offset(20, 20));
       sb.addPicture(ui.Offset.zero, picture);
@@ -124,8 +122,8 @@ void testMain() {
       final LayerScene scene = sb.build();
       final ui.Image testImage = await scene.toImage(200, 200);
 
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
-      final ui.Canvas canvas = ui.Canvas(recorder, const ui.Rect.fromLTRB(0, 0, 200, 200));
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, const ui.Rect.fromLTRB(0, 0, 200, 200));
       canvas.drawImage(testImage, ui.Offset.zero, ui.Paint());
 
       await drawPictureUsingCurrentRenderer(recorder.endRecording());

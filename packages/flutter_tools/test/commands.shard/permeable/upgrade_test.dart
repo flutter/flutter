@@ -760,8 +760,8 @@ void main() {
 }
 
 class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
-  var willHaveUncommittedChanges = false;
-  var alreadyUpToDate = false;
+  bool willHaveUncommittedChanges = false;
+  bool alreadyUpToDate = false;
 
   late FlutterVersion remoteVersion;
 

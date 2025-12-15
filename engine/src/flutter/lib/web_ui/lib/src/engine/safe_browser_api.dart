@@ -56,6 +56,15 @@ num? parseFontSize(DomElement element) {
   return fontSize;
 }
 
+/// Parses the given style property [attributeName] of [element] and returns the
+/// [resolved value](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_cascade/Value_processing#resolved_value) without a unit.
+///
+/// Returns `null` if the property value is not numeric (e.g., 'normal',
+/// 'auto') or cannot be parsed.
+num? parseNumericStyleProperty(DomElement element, String attributeName) {
+  return parseFloat(domWindow.getComputedStyle(element).getPropertyValue(attributeName));
+}
+
 /// Provides haptic feedback.
 void vibrate(int durationMs) {
   final DomNavigator navigator = domWindow.navigator;
@@ -152,7 +161,7 @@ extension type DecodeResult(JSObject _) implements JSObject {
 ///
 ///  * https://www.w3.org/TR/webcodecs/#dictdef-imagedecodeoptions
 extension type DecodeOptions._(JSObject _) implements JSObject {
-  external DecodeOptions({required int frameIndex});
+  external DecodeOptions({required int frameIndex, required bool completeFramesOnly});
 }
 
 /// The only frame in a static image, or one of the frames in an animated one.

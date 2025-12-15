@@ -23,11 +23,11 @@ extension VisualOrder on List<BidiRun> {
   /// [start] inclusive, [end] exclusive.
   Iterable<BidiRun> inVisualOrder(int start, int end) {
     final levels = Uint8List(end - start);
-    for (int i = 0; i < levels.length; i++) {
+    for (var i = 0; i < levels.length; i++) {
       levels[i] = this[start + i].bidiLevel;
     }
     // TODO(jlavrova): We need to think about how to support this for Skwasm without calling Canvaskit.
-    final visuals = canvasKit.Bidi.reorderVisual(levels);
+    final List<BidiIndex> visuals = canvasKit.Bidi.reorderVisual(levels);
     return visuals.map((BidiIndex visual) => this[start + visual.index]);
   }
 }

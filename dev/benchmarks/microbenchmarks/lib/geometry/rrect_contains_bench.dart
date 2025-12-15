@@ -10,16 +10,16 @@ const int _kNumIters = 10000;
 
 Future<void> execute() async {
   assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
-  final Stopwatch watch = Stopwatch();
+  final watch = Stopwatch();
   print('RRect contains benchmark...');
   watch.start();
-  for (int i = 0; i < _kNumIters; i += 1) {
-    final RRect outer = RRect.fromLTRBR(10, 10, 20, 20, const Radius.circular(2.0));
+  for (var i = 0; i < _kNumIters; i += 1) {
+    final outer = RRect.fromLTRBR(10, 10, 20, 20, const Radius.circular(2.0));
     outer.contains(const Offset(15, 15));
   }
   watch.stop();
 
-  final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
+  final printer = BenchmarkResultPrinter();
   printer.addResult(
     description: 'RRect contains',
     value: watch.elapsedMicroseconds / _kNumIters,

@@ -817,7 +817,7 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
     final int separatorsCount = itemsAndSeparatorsCount ~/ 2;
     final int separatedItemsCount = _itemsCount - separatorsCount;
 
-    final bool isNewLastIndex = index == separatedItemsCount;
+    final isNewLastIndex = index == separatedItemsCount;
     final int indexAdjustedForSeparators = index * 2;
     return isNewLastIndex ? indexAdjustedForSeparators - 1 : indexAdjustedForSeparators;
   }
@@ -1284,7 +1284,7 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
   // _outgoingItems when the remove animation finishes.
 
   int _indexToItemIndex(int index) {
-    int itemIndex = index;
+    var itemIndex = index;
     for (final _ActiveItem item in _outgoingItems) {
       if (item.itemIndex <= itemIndex) {
         itemIndex += 1;
@@ -1296,7 +1296,7 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
   }
 
   int _itemIndexToIndex(int itemIndex) {
-    int index = itemIndex;
+    var index = itemIndex;
     for (final _ActiveItem item in _outgoingItems) {
       assert(item.itemIndex != itemIndex);
       if (item.itemIndex < itemIndex) {
@@ -1358,8 +1358,8 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
       }
     }
 
-    final AnimationController controller = AnimationController(duration: duration, vsync: this);
-    final _ActiveItem incomingItem = _ActiveItem.incoming(controller, itemIndex);
+    final controller = AnimationController(duration: duration, vsync: this);
+    final incomingItem = _ActiveItem.incoming(controller, itemIndex);
     setState(() {
       _incomingItems
         ..add(incomingItem)
@@ -1376,7 +1376,7 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
   /// to [AnimatedGrid.itemBuilder] or [AnimatedList.itemBuilder] when the items
   /// are visible.
   void insertAllItems(int index, int length, {Duration duration = _kDuration}) {
-    for (int i = 0; i < length; i++) {
+    for (var i = 0; i < length; i++) {
       insertItem(index + i, duration: duration);
     }
   }
@@ -1404,7 +1404,7 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
     final AnimationController controller =
         incomingItem?.controller ??
         AnimationController(duration: duration, value: 1.0, vsync: this);
-    final _ActiveItem outgoingItem = _ActiveItem.outgoing(controller, itemIndex, builder);
+    final outgoingItem = _ActiveItem.outgoing(controller, itemIndex, builder);
     setState(() {
       _outgoingItems
         ..add(outgoingItem)

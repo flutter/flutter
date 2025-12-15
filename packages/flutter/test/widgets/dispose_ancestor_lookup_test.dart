@@ -34,7 +34,7 @@ void main() {
     experimentalLeakTesting: LeakTesting.settings
         .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
-      bool disposeCalled = false;
+      var disposeCalled = false;
       await tester.pumpWidget(
         TestWidget((BuildContext context) {
           disposeCalled = true;
@@ -52,7 +52,7 @@ void main() {
     experimentalLeakTesting: LeakTesting.settings
         .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
-      bool disposeCalled = false;
+      var disposeCalled = false;
       await tester.pumpWidget(
         TestWidget((BuildContext context) {
           disposeCalled = true;
@@ -70,7 +70,7 @@ void main() {
     experimentalLeakTesting: LeakTesting.settings
         .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
-      bool disposeCalled = false;
+      var disposeCalled = false;
       await tester.pumpWidget(
         TestWidget((BuildContext context) {
           disposeCalled = true;
@@ -88,7 +88,7 @@ void main() {
     experimentalLeakTesting: LeakTesting.settings
         .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
-      bool disposeCalled = false;
+      var disposeCalled = false;
       await tester.pumpWidget(
         TestWidget((BuildContext context) {
           disposeCalled = true;
@@ -106,7 +106,7 @@ void main() {
     experimentalLeakTesting: LeakTesting.settings
         .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
-      bool disposeCalled = false;
+      var disposeCalled = false;
       await tester.pumpWidget(
         TestWidget((BuildContext context) {
           disposeCalled = true;
@@ -124,7 +124,7 @@ void main() {
     experimentalLeakTesting: LeakTesting.settings
         .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
-      bool disposeCalled = false;
+      var disposeCalled = false;
       await tester.pumpWidget(
         TestWidget((BuildContext context) {
           disposeCalled = true;
@@ -140,7 +140,7 @@ void main() {
   testWidgets('dispose() method does not unconditionally throw an error', (
     WidgetTester tester,
   ) async {
-    bool disposeCalled = false;
+    var disposeCalled = false;
     await tester.pumpWidget(
       TestWidget((BuildContext context) {
         disposeCalled = true;

@@ -109,13 +109,13 @@ void main() {
   // Run this test twice to ensure that the TestTextInputKeyHandler is cleared
   // between tests.
   // Regression test for https://github.com/flutter/flutter/issues/171491.
-  for (int i = 0; i < 2; i++) {
+  for (var i = 0; i < 2; i++) {
     testWidgets(
       'keyboard shortcut handling is cleared between tests (${i + 1}/2)',
       (WidgetTester tester) async {
-        final _PerformSelectorInputClient client = _PerformSelectorInputClient();
+        final client = _PerformSelectorInputClient();
 
-        final FocusNode focusNode = FocusNode();
+        final focusNode = FocusNode();
 
         await tester.pumpWidget(
           Directionality(

@@ -140,7 +140,7 @@ class PackagesForwardCommand extends FlutterCommand {
   PubContext context = PubContext.pubForward;
 
   @override
-  var argParser = ArgParser.allowAnything();
+  ArgParser argParser = ArgParser.allowAnything();
 
   final String _commandName;
   final String _description;
@@ -174,7 +174,7 @@ class PackagesForwardCommand extends FlutterCommand {
 
 class PackagesPassthroughCommand extends FlutterCommand {
   @override
-  var argParser = ArgParser.allowAnything();
+  ArgParser argParser = ArgParser.allowAnything();
 
   @override
   String get name => 'pub';
@@ -204,7 +204,7 @@ class PackagesGetCommand extends FlutterCommand {
   PackagesGetCommand(this._commandName, this._description, this._context);
 
   @override
-  var argParser = ArgParser.allowAnything();
+  ArgParser argParser = ArgParser.allowAnything();
 
   final String _commandName;
   final String _description;

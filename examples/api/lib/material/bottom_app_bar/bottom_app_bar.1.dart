@@ -20,7 +20,8 @@ class BottomAppBarDemo extends StatefulWidget {
 class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   bool _showFab = true;
   bool _showNotch = true;
-  FloatingActionButtonLocation _fabLocation = FloatingActionButtonLocation.endDocked;
+  FloatingActionButtonLocation _fabLocation =
+      FloatingActionButtonLocation.endDocked;
 
   void _onShowNotchChanged(bool value) {
     setState(() {
@@ -44,49 +45,49 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(automaticallyImplyLeading: false, title: const Text('Bottom App Bar Demo')),
-        body: ListView(
-          padding: const EdgeInsets.only(bottom: 88),
-          children: <Widget>[
-            SwitchListTile(
-              title: const Text('Floating Action Button'),
-              value: _showFab,
-              onChanged: _onShowFabChanged,
-            ),
-            SwitchListTile(
-              title: const Text('Notch'),
-              value: _showNotch,
-              onChanged: _onShowNotchChanged,
-            ),
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: Text('Floating action button position'),
-            ),
-            RadioListTile<FloatingActionButtonLocation>(
-              title: const Text('Docked - End'),
-              value: FloatingActionButtonLocation.endDocked,
-              groupValue: _fabLocation,
-              onChanged: _onFabLocationChanged,
-            ),
-            RadioListTile<FloatingActionButtonLocation>(
-              title: const Text('Docked - Center'),
-              value: FloatingActionButtonLocation.centerDocked,
-              groupValue: _fabLocation,
-              onChanged: _onFabLocationChanged,
-            ),
-            RadioListTile<FloatingActionButtonLocation>(
-              title: const Text('Floating - End'),
-              value: FloatingActionButtonLocation.endFloat,
-              groupValue: _fabLocation,
-              onChanged: _onFabLocationChanged,
-            ),
-            RadioListTile<FloatingActionButtonLocation>(
-              title: const Text('Floating - Center'),
-              value: FloatingActionButtonLocation.centerFloat,
-              groupValue: _fabLocation,
-              onChanged: _onFabLocationChanged,
-            ),
-          ],
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          title: const Text('Bottom App Bar Demo'),
+        ),
+        body: RadioGroup<FloatingActionButtonLocation>(
+          groupValue: _fabLocation,
+          onChanged: (FloatingActionButtonLocation? value) =>
+              _onFabLocationChanged(value),
+          child: ListView(
+            padding: const EdgeInsets.only(bottom: 88),
+            children: <Widget>[
+              SwitchListTile(
+                title: const Text('Floating Action Button'),
+                value: _showFab,
+                onChanged: _onShowFabChanged,
+              ),
+              SwitchListTile(
+                title: const Text('Notch'),
+                value: _showNotch,
+                onChanged: _onShowNotchChanged,
+              ),
+              const Padding(
+                padding: EdgeInsets.all(16),
+                child: Text('Floating action button position'),
+              ),
+              const RadioListTile<FloatingActionButtonLocation>(
+                title: Text('Docked - End'),
+                value: FloatingActionButtonLocation.endDocked,
+              ),
+              const RadioListTile<FloatingActionButtonLocation>(
+                title: Text('Docked - Center'),
+                value: FloatingActionButtonLocation.centerDocked,
+              ),
+              const RadioListTile<FloatingActionButtonLocation>(
+                title: Text('Floating - End'),
+                value: FloatingActionButtonLocation.endFloat,
+              ),
+              const RadioListTile<FloatingActionButtonLocation>(
+                title: Text('Floating - Center'),
+                value: FloatingActionButtonLocation.centerFloat,
+              ),
+            ],
+          ),
         ),
         floatingActionButton: _showFab
             ? FloatingActionButton(
@@ -114,10 +115,11 @@ class _DemoBottomAppBar extends StatelessWidget {
   final FloatingActionButtonLocation fabLocation;
   final NotchedShape? shape;
 
-  static final List<FloatingActionButtonLocation> centerLocations = <FloatingActionButtonLocation>[
-    FloatingActionButtonLocation.centerDocked,
-    FloatingActionButtonLocation.centerFloat,
-  ];
+  static final List<FloatingActionButtonLocation> centerLocations =
+      <FloatingActionButtonLocation>[
+        FloatingActionButtonLocation.centerDocked,
+        FloatingActionButtonLocation.centerFloat,
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -134,8 +136,16 @@ class _DemoBottomAppBar extends StatelessWidget {
               onPressed: () {},
             ),
             if (centerLocations.contains(fabLocation)) const Spacer(),
-            IconButton(tooltip: 'Search', icon: const Icon(Icons.search), onPressed: () {}),
-            IconButton(tooltip: 'Favorite', icon: const Icon(Icons.favorite), onPressed: () {}),
+            IconButton(
+              tooltip: 'Search',
+              icon: const Icon(Icons.search),
+              onPressed: () {},
+            ),
+            IconButton(
+              tooltip: 'Favorite',
+              icon: const Icon(Icons.favorite),
+              onPressed: () {},
+            ),
           ],
         ),
       ),

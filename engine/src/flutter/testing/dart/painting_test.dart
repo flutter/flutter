@@ -95,13 +95,13 @@ void main() {
   test('BackdropFilter with multiple clips', () async {
     // Regression test for https://github.com/flutter/flutter/issues/144211
     Picture makePicture(CanvasCallback callback) {
-      final PictureRecorder recorder = PictureRecorder();
-      final Canvas canvas = Canvas(recorder);
+      final recorder = PictureRecorder();
+      final canvas = Canvas(recorder);
       callback(canvas);
       return recorder.endRecording();
     }
 
-    final SceneBuilder sceneBuilder = SceneBuilder();
+    final sceneBuilder = SceneBuilder();
 
     final Picture redClippedPicture = makePicture((Canvas canvas) {
       canvas.drawPaint(Paint()..color = const Color(0xFFFFFFFF));
@@ -111,7 +111,7 @@ void main() {
     });
     sceneBuilder.addPicture(Offset.zero, redClippedPicture);
 
-    final Float64List matrix = Float64List(16);
+    final matrix = Float64List(16);
     sceneBuilder.pushBackdropFilter(ImageFilter.matrix(matrix));
 
     final Picture whitePicture = makePicture((Canvas canvas) {
@@ -137,28 +137,28 @@ void main() {
 
   Image backdropBlurWithTileMode(TileMode? tileMode) {
     Picture makePicture(CanvasCallback callback) {
-      final PictureRecorder recorder = PictureRecorder();
-      final Canvas canvas = Canvas(recorder);
+      final recorder = PictureRecorder();
+      final canvas = Canvas(recorder);
       callback(canvas);
       return recorder.endRecording();
     }
 
     const double rectSize = 10;
-    const int count = 50;
+    const count = 50;
     const double imgSize = rectSize * count;
 
     final Picture blueGreenGridPicture = makePicture((Canvas canvas) {
-      const Color white = Color(0xFFFFFFFF);
-      const Color purple = Color(0xFFFF00FF);
-      const Color blue = Color(0xFF0000FF);
-      const Color green = Color(0xFF00FF00);
-      const Color yellow = Color(0xFFFFFF00);
-      const Color red = Color(0xFFFF0000);
+      const white = Color(0xFFFFFFFF);
+      const purple = Color(0xFFFF00FF);
+      const blue = Color(0xFF0000FF);
+      const green = Color(0xFF00FF00);
+      const yellow = Color(0xFFFFFF00);
+      const red = Color(0xFFFF0000);
       canvas.drawColor(white, BlendMode.src);
-      for (int i = 0; i < count; i++) {
-        for (int j = 0; j < count; j++) {
-          final bool rectOdd = (i + j) & 1 == 0;
-          final Color fg = (i < count / 2)
+      for (var i = 0; i < count; i++) {
+        for (var j = 0; j < count; j++) {
+          final rectOdd = (i + j) & 1 == 0;
+          final fg = (i < count / 2)
               ? ((j < count / 2) ? green : blue)
               : ((j < count / 2) ? yellow : red);
           canvas.drawRect(
@@ -173,7 +173,7 @@ void main() {
       canvas.drawRect(const Rect.fromLTWH(imgSize - 1, 0, 1, imgSize), Paint()..color = purple);
     });
 
-    final SceneBuilder sceneBuilder = SceneBuilder();
+    final sceneBuilder = SceneBuilder();
     sceneBuilder.addPicture(Offset.zero, blueGreenGridPicture);
     sceneBuilder.pushBackdropFilter(ImageFilter.blur(sigmaX: 20, sigmaY: 20, tileMode: tileMode));
 
@@ -248,11 +248,11 @@ void main() {
     // of scale or number of pixels.
     late final Image image;
     {
-      final PictureRecorder recorder = PictureRecorder();
-      final Canvas canvas = Canvas(recorder);
-      for (int i = 0; i < 20; i++) {
-        for (int j = 0; j < 20; j++) {
-          final Color color = (i + j).isEven ? const Color(0xFFFF0000) : const Color(0xFF0000FF);
+      final recorder = PictureRecorder();
+      final canvas = Canvas(recorder);
+      for (var i = 0; i < 20; i++) {
+        for (var j = 0; j < 20; j++) {
+          final color = (i + j).isEven ? const Color(0xFFFF0000) : const Color(0xFF0000FF);
           canvas.drawRect(Rect.fromLTWH(i * 5, j * 5, 5, 5), Paint()..color = color);
         }
       }
@@ -260,8 +260,8 @@ void main() {
       image = await picture.toImage(100, 100);
     }
 
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder);
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder);
     canvas.save();
     canvas.scale(0.25, 0.25);
     canvas.drawImage(image, Offset.zero, Paint()..filterQuality = FilterQuality.medium);
@@ -272,7 +272,7 @@ void main() {
     final ByteData data = (await resultImage.toByteData())!;
 
     final Int32List colors = data.buffer.asInt32List();
-    for (int i = 0; i < colors.length; i++) {
+    for (var i = 0; i < colors.length; i++) {
       expect(colors[i], isNot(const Color(0xFFFF0000)));
       expect(colors[i], isNot(const Color(0xFF0000FF)));
     }

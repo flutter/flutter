@@ -56,7 +56,7 @@ class DummyPlatformView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const String viewType = 'benchmarks/platform_views_layout/DummyPlatformView';
+    const viewType = 'benchmarks/platform_views_layout/DummyPlatformView';
     late Widget nativeView;
     if (Platform.isIOS) {
       nativeView = const UiKitView(viewType: viewType);
@@ -74,9 +74,9 @@ class ExpensivePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final double boxWidth = size.width / 50;
     final double boxHeight = size.height / 50;
-    for (int i = 0; i < 50; i++) {
-      for (int j = 0; j < 50; j++) {
-        final Rect rect = Rect.fromLTWH(i * boxWidth, j * boxHeight, boxWidth, boxHeight);
+    for (var i = 0; i < 50; i++) {
+      for (var j = 0; j < 50; j++) {
+        final rect = Rect.fromLTWH(i * boxWidth, j * boxHeight, boxWidth, boxHeight);
         canvas.drawRect(
           rect,
           Paint()

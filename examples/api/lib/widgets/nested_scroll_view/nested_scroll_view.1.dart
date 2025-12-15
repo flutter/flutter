@@ -41,7 +41,10 @@ class NestedScrollViewExample extends StatelessWidget {
           padding: const EdgeInsets.all(8),
           itemCount: 30,
           itemBuilder: (BuildContext context, int index) {
-            return SizedBox(height: 50, child: Center(child: Text('Item $index')));
+            return SizedBox(
+              height: 50,
+              child: Center(child: Text('Item $index')),
+            );
           },
         ),
       ),

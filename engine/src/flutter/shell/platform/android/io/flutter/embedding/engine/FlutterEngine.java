@@ -399,6 +399,7 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
     flutterJNI.setPlatformViewsController2(platformViewsController2);
     flutterJNI.setLocalizationPlugin(localizationPlugin);
     flutterJNI.setDeferredComponentManager(injector.deferredComponentManager());
+    flutterJNI.setSettingsChannel(settingsChannel);
 
     // It should typically be a fresh, unattached JNI. But on a spawned engine, the JNI instance
     // is already attached to a native shell. In that case, the Java FlutterEngine is created around

@@ -380,6 +380,8 @@ public class FlutterJNI {
 
   @Nullable private DeferredComponentManager deferredComponentManager;
 
+  @Nullable private SettingsChannel settingsChannel;
+
   @NonNull
   private final Set<EngineLifecycleListener> engineLifecycleListeners = new CopyOnWriteArraySet<>();
 
@@ -1431,7 +1433,10 @@ public class FlutterJNI {
   // ----- End Localization Support ----
   @Nullable
   public float getScaledFontSize(float fontSize, int configurationId) {
-    final DisplayMetrics metrics = SettingsChannel.getPastDisplayMetrics(configurationId);
+    final DisplayMetrics metrics =
+        this.settingsChannel == null
+            ? null
+            : this.settingsChannel.getPastDisplayMetrics(configurationId);
     if (metrics == null) {
       Log.e(
           TAG,
@@ -1442,6 +1447,13 @@ public class FlutterJNI {
     }
     return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, fontSize, metrics)
         / metrics.density;
+  }
+
+  // ----- Start Settings Channel Support ----
+  @UiThread
+  public void setSettingsChannel(@Nullable SettingsChannel settingsChannel) {
+    ensureRunningOnMainThread();
+    this.settingsChannel = settingsChannel;
   }
 
   // ----- Start Deferred Components Support ----

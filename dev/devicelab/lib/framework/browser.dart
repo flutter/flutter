@@ -101,8 +101,8 @@ class Chrome {
     final String jsFlags = options.enableWasmGC
         ? <String>['--experimental-wasm-gc', '--experimental-wasm-type-reflection'].join(' ')
         : '';
-    final bool withDebugging = options.debugPort != null;
-    final List<String> args = <String>[
+    final withDebugging = options.debugPort != null;
+    final args = <String>[
       if (options.userDataDirectory != null) '--user-data-dir=${options.userDataDirectory}',
       if (options.url != null) options.url!,
       if (io.Platform.environment['CHROME_NO_SANDBOX'] == 'true') '--no-sandbox',
@@ -146,7 +146,7 @@ class Chrome {
     String? workingDirectory,
     required ChromeErrorCallback onError,
   }) async {
-    final bool withDebugging = options.debugPort != null;
+    final withDebugging = options.debugPort != null;
 
     WipConnection? debugConnection;
     if (withDebugging) {
@@ -267,7 +267,7 @@ String _findSystemChromeExecutable() {
   } else if (io.Platform.isMacOS) {
     return '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
   } else if (io.Platform.isWindows) {
-    const String kWindowsExecutable = r'Google\Chrome\Application\chrome.exe';
+    const kWindowsExecutable = r'Google\Chrome\Application\chrome.exe';
     final List<String> kWindowsPrefixes = <String?>[
       io.Platform.environment['LOCALAPPDATA'],
       io.Platform.environment['PROGRAMFILES'],
@@ -287,7 +287,7 @@ String _findSystemChromeExecutable() {
 Future<WipConnection> _connectToChromeDebugPort(int port, String? tabUrl) async {
   final Uri devtoolsUri = await _getRemoteDebuggerUrl(Uri.parse('http://localhost:$port'));
   print('Connecting to DevTools: $devtoolsUri');
-  final ChromeConnection chromeConnection = ChromeConnection('localhost', port);
+  final chromeConnection = ChromeConnection('localhost', port);
   final Iterable<ChromeTab> tabs = (await chromeConnection.getTabs()).where((ChromeTab tab) {
     return tab.url.startsWith(tabUrl ?? 'http://localhost');
   });
@@ -299,11 +299,10 @@ Future<WipConnection> _connectToChromeDebugPort(int port, String? tabUrl) async 
 
 /// Gets the Chrome debugger URL for the web page being benchmarked.
 Future<Uri> _getRemoteDebuggerUrl(Uri base) async {
-  final io.HttpClient client = io.HttpClient();
+  final client = io.HttpClient();
   final io.HttpClientRequest request = await client.getUrl(base.resolve('/json/list'));
   final io.HttpClientResponse response = await request.close();
-  final List<dynamic>? jsonObject =
-      await json.fuse(utf8).decoder.bind(response).single as List<dynamic>?;
+  final jsonObject = await json.fuse(utf8).decoder.bind(response).single as List<dynamic>?;
   if (jsonObject == null || jsonObject.isEmpty) {
     return base;
   }
@@ -349,10 +348,10 @@ class BlinkTraceSummary {
       events = events.where((BlinkTraceEvent element) => element.pid == tabPid).toList();
 
       // Extract frame data.
-      final List<BlinkFrame> frames = <BlinkFrame>[];
-      int skipCount = 0;
-      BlinkFrame frame = BlinkFrame();
-      for (final BlinkTraceEvent event in events) {
+      final frames = <BlinkFrame>[];
+      var skipCount = 0;
+      var frame = BlinkFrame();
+      for (final event in events) {
         if (event.isBeginFrame) {
           frame.beginFrame = event;
         } else if (event.isUpdateAllLifecyclePhases) {
@@ -390,7 +389,7 @@ class BlinkTraceSummary {
         ),
       );
     } catch (_) {
-      final io.File traceFile = io.File('./chrome-trace.json');
+      final traceFile = io.File('./chrome-trace.json');
       io.stderr.writeln(
         'Failed to interpret the Chrome trace contents. The trace was saved in ${traceFile.path}',
       );
@@ -596,7 +595,7 @@ class BlinkTraceEvent {
 ///
 /// Returns null if the value is null.
 int? _readInt(Map<String, dynamic> json, String key) {
-  final num? jsonValue = json[key] as num?;
+  final jsonValue = json[key] as num?;
   return jsonValue?.toInt();
 }
 
@@ -636,7 +635,7 @@ Future<io.Process> _spawnChromiumProcess(
 
     // Wait until the DevTools are listening before trying to connect. This is
     // only required for flutter_test --platform=chrome and not flutter run.
-    bool hitGlibcBug = false;
+    var hitGlibcBug = false;
     await process.stderr
         .transform(utf8.decoder)
         .transform(const LineSplitter())

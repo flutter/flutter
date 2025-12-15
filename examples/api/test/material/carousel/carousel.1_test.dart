@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/carousel/carousel.1.dart' as example;
+import 'package:flutter_api_samples/material/carousel/carousel.1.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('CarouselView.builder creates items lazily', (WidgetTester tester) async {
+  testWidgets('CarouselView.builder creates items lazily', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.CarouselBuilderExampleApp());
 
     expect(find.byType(CarouselView), findsOneWidget);

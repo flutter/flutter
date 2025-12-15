@@ -377,7 +377,7 @@ et cleanup --untouched-since=2024-01-01
 
 We welcome contributions to improve `et` for our all developers.
 
-- Follow the [Flutter style guide](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo)
+- Follow the [Flutter style guide](https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md)
   for Dart code that are relevant outside of the framework repo. It contains
   conventions that go beyond code formatting, which we'll follow even if using
   `dart format` in the future.

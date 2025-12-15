@@ -62,7 +62,7 @@ Future<void> main() async {
 
     print('Starting app...');
     runApp(const GalleryApp(testMode: true));
-    final _LiveWidgetController controller = _LiveWidgetController(WidgetsBinding.instance);
+    final controller = _LiveWidgetController(WidgetsBinding.instance);
     for (final GalleryDemoCategory category in kAllGalleryDemoCategories) {
       print('Tapping "${category.name}" section...');
       await controller.tap(find.text(category.name));
@@ -73,7 +73,7 @@ Future<void> main() async {
         if (_kSkippedDemoTitles.contains(demo.title)) {
           continue;
         }
-        for (int i = 0; i < 2; i += 1) {
+        for (var i = 0; i < 2; i += 1) {
           print('Tapping "${demo.title}"...');
           await controller.tap(demoItem); // Launch the demo
           controller.frameSync = !_kUnsynchronizedDemoTitles.contains(demo.title);

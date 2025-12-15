@@ -219,7 +219,7 @@ void main() {
 typedef AsyncVoidCallback = Future<void> Function();
 
 Future<String> capture(AsyncVoidCallback callback, {bool shouldHaveErrors = false}) async {
-  final StringBuffer buffer = StringBuffer();
+  final buffer = StringBuffer();
   final PrintCallback oldPrint = print;
   try {
     print = (Object? line) {

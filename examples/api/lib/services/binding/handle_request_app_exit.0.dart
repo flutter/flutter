@@ -46,7 +46,9 @@ class _BodyState extends State<Body> with WidgetsBindingObserver {
   }
 
   Future<void> _quit() async {
-    final AppExitType exitType = _shouldExit ? AppExitType.required : AppExitType.cancelable;
+    final AppExitType exitType = _shouldExit
+        ? AppExitType.required
+        : AppExitType.cancelable;
     setState(() {
       lastResponse = 'App requesting ${exitType.name} exit';
     });
@@ -55,7 +57,9 @@ class _BodyState extends State<Body> with WidgetsBindingObserver {
 
   @override
   Future<AppExitResponse> didRequestAppExit() async {
-    final AppExitResponse response = _shouldExit ? AppExitResponse.exit : AppExitResponse.cancel;
+    final AppExitResponse response = _shouldExit
+        ? AppExitResponse.exit
+        : AppExitResponse.cancel;
     setState(() {
       lastResponse = 'App responded ${response.name} to exit request';
     });
@@ -77,26 +81,23 @@ class _BodyState extends State<Body> with WidgetsBindingObserver {
     return Center(
       child: SizedBox(
         width: 300,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            RadioListTile<bool>(
-              title: const Text('Do Not Allow Exit'),
-              groupValue: _shouldExit,
-              value: false,
-              onChanged: _radioChanged,
-            ),
-            RadioListTile<bool>(
-              title: const Text('Allow Exit'),
-              groupValue: _shouldExit,
-              value: true,
-              onChanged: _radioChanged,
-            ),
-            const SizedBox(height: 30),
-            ElevatedButton(onPressed: _quit, child: const Text('Quit')),
-            const SizedBox(height: 30),
-            Text(lastResponse),
-          ],
+        child: RadioGroup<bool>(
+          groupValue: _shouldExit,
+          onChanged: (bool? value) => _radioChanged(value),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              const RadioListTile<bool>(
+                title: Text('Do Not Allow Exit'),
+                value: false,
+              ),
+              const RadioListTile<bool>(title: Text('Allow Exit'), value: true),
+              const SizedBox(height: 30),
+              ElevatedButton(onPressed: _quit, child: const Text('Quit')),
+              const SizedBox(height: 30),
+              Text(lastResponse),
+            ],
+          ),
         ),
       ),
     );

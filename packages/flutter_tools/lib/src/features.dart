@@ -263,9 +263,9 @@ const uiSceneMigration = Feature(
       'otherwise instruct you to migrate manually.',
   configSetting: 'enable-uiscene-migration',
   environmentOverride: 'FLUTTER_UISCENE_MIGRATION',
-  master: FeatureChannelSetting(available: true),
-  beta: FeatureChannelSetting(available: true),
-  stable: FeatureChannelSetting(available: true),
+  master: FeatureChannelSetting(available: true, enabledByDefault: true),
+  beta: FeatureChannelSetting(available: true, enabledByDefault: true),
+  stable: FeatureChannelSetting(available: true, enabledByDefault: true),
 );
 
 /// A [Feature] is a process for conditionally enabling tool features.

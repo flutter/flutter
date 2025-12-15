@@ -35,7 +35,7 @@ void _tests() {
   testWidgets('Semantics shutdown and restart', (WidgetTester tester) async {
     SemanticsTester? semantics = SemanticsTester(tester);
 
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics(
           children: <TestSemantics>[
@@ -88,7 +88,7 @@ void _tests() {
   }, semanticsEnabled: false);
 
   testWidgets('tag only applies to immediate child', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       boilerPlate(
@@ -129,7 +129,7 @@ void _tests() {
   }, semanticsEnabled: false);
 
   testWidgets('Detach and reattach assert', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     final GlobalKey key = GlobalKey();
 
     await tester.pumpWidget(
@@ -148,7 +148,7 @@ void _tests() {
       ),
     );
 
-    TestSemantics expectedSemantics = TestSemantics.root(
+    var expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics(
           children: <TestSemantics>[
@@ -225,7 +225,7 @@ void _tests() {
   });
 
   testWidgets('Semantics and Directionality - RTL', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       Directionality(
@@ -247,7 +247,7 @@ void _tests() {
   });
 
   testWidgets('Semantics and Directionality - LTR', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       boilerPlate(
@@ -268,7 +268,7 @@ void _tests() {
   testWidgets('Semantics and Directionality - cannot override RTL with LTR', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       Directionality(
@@ -286,7 +286,7 @@ void _tests() {
       ),
     );
 
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics(
           children: <TestSemantics>[
@@ -315,7 +315,7 @@ void _tests() {
   testWidgets('Semantics and Directionality - cannot override LTR with RTL', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       boilerPlate(
@@ -330,7 +330,7 @@ void _tests() {
       ),
     );
 
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics(
           children: <TestSemantics>[
@@ -357,7 +357,7 @@ void _tests() {
   });
 
   testWidgets('label and hint', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       boilerPlate(
@@ -372,7 +372,7 @@ void _tests() {
       ),
     );
 
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics(
           children: <TestSemantics>[
@@ -401,7 +401,7 @@ void _tests() {
   });
 
   testWidgets('hints can merge', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       boilerPlate(
@@ -425,7 +425,7 @@ void _tests() {
       ),
     );
 
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics(
           children: <TestSemantics>[
@@ -452,7 +452,7 @@ void _tests() {
   });
 
   testWidgets('hints can merge with Semantics widget', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       boilerPlate(
@@ -470,7 +470,7 @@ void _tests() {
       ),
     );
 
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics(
           children: <TestSemantics>[
@@ -497,7 +497,7 @@ void _tests() {
   });
 
   testWidgets('values do not merge', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       boilerPlate(
@@ -521,7 +521,7 @@ void _tests() {
       ),
     );
 
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics(
           children: <TestSemantics>[
@@ -550,7 +550,7 @@ void _tests() {
   });
 
   testWidgets('values do not merge with Semantics widget', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       boilerPlate(
@@ -568,7 +568,7 @@ void _tests() {
       ),
     );
 
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics(
           children: <TestSemantics>[
@@ -597,7 +597,7 @@ void _tests() {
   });
 
   testWidgets('value and hint can merge', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       boilerPlate(
@@ -621,7 +621,7 @@ void _tests() {
       ),
     );
 
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics(
           children: <TestSemantics>[
@@ -648,7 +648,7 @@ void _tests() {
   });
 
   testWidgets('value and hint can merge with Semantics widget', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       boilerPlate(
@@ -666,7 +666,7 @@ void _tests() {
       ),
     );
 
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics(
           children: <TestSemantics>[
@@ -693,7 +693,7 @@ void _tests() {
   });
 
   testWidgets('tagForChildren works', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       boilerPlate(
@@ -717,7 +717,7 @@ void _tests() {
       ),
     );
 
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics(
           children: <TestSemantics>[
@@ -746,7 +746,7 @@ void _tests() {
   });
 
   testWidgets('tagForChildren works with Semantics widget', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       boilerPlate(
@@ -764,7 +764,7 @@ void _tests() {
       ),
     );
 
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics(
           children: <TestSemantics>[
@@ -793,9 +793,9 @@ void _tests() {
   });
 
   testWidgets('supports all actions', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
-    final List<SemanticsAction> performedActions = <SemanticsAction>[];
+    final performedActions = <SemanticsAction>[];
 
     await tester.pumpWidget(
       boilerPlate(
@@ -849,8 +849,8 @@ void _tests() {
       ..remove(SemanticsAction.showOnScreen) // showOnScreen is not user-exposed.
       ..remove(SemanticsAction.scrollToOffset); // scrollToOffset is not user-exposed.
 
-    const int expectedId = 2;
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    const expectedId = 2;
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics(
           children: <TestSemantics>[
@@ -900,8 +900,8 @@ void _tests() {
 
     // Do the actions work?
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
-    int expectedLength = 1;
-    for (final SemanticsAction action in allActions) {
+    var expectedLength = 1;
+    for (final action in allActions) {
       switch (action) {
         case SemanticsAction.moveCursorBackwardByCharacter:
         case SemanticsAction.moveCursorForwardByCharacter:
@@ -946,7 +946,7 @@ void _tests() {
   });
 
   testWidgets('supports all flags', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     // Checked state and toggled state are mutually exclusive.
     await tester.pumpWidget(
       boilerPlate(
@@ -999,7 +999,7 @@ void _tests() {
       ..remove(SemanticsFlag.hasImplicitScrolling)
       ..remove(SemanticsFlag.isCheckStateMixed);
 
-    TestSemantics expectedSemantics = TestSemantics.root(
+    var expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics(
           children: <TestSemantics>[
@@ -1200,9 +1200,9 @@ void _tests() {
   });
 
   testWidgets('supports tooltip', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics(
           children: <TestSemantics>[
@@ -1242,13 +1242,13 @@ void _tests() {
   testWidgets('actions can be replaced without triggering semantics update', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    int semanticsUpdateCount = 0;
+    final semantics = SemanticsTester(tester);
+    var semanticsUpdateCount = 0;
     tester.binding.pipelineOwner.semanticsOwner!.addListener(() {
       semanticsUpdateCount += 1;
     });
 
-    final List<String> performedActions = <String>[];
+    final performedActions = <String>[];
 
     await tester.pumpWidget(
       boilerPlate(
@@ -1262,8 +1262,8 @@ void _tests() {
       ),
     );
 
-    const int expectedId = 2;
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    const expectedId = 2;
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics(
           id: 1,
@@ -1329,7 +1329,7 @@ void _tests() {
       ),
     );
 
-    final TestSemantics expectedSemanticsWithLongPress = TestSemantics.root(
+    final expectedSemanticsWithLongPress = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics(
           id: 1,
@@ -1451,7 +1451,7 @@ void _tests() {
   });
 
   testWidgets('increased/decreased values are annotated', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       boilerPlate(
@@ -1469,7 +1469,7 @@ void _tests() {
       ),
     );
 
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics(
           children: <TestSemantics>[
@@ -1500,7 +1500,7 @@ void _tests() {
   });
 
   testWidgets('excludeSemantics ignores children', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       boilerPlate(
         slivers: <Widget>[
@@ -1518,7 +1518,7 @@ void _tests() {
       ),
     );
 
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics(
           children: <TestSemantics>[
@@ -1545,8 +1545,8 @@ void _tests() {
   });
 
   testWidgets('slivers built in a widget tree are sorted properly', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    int semanticsUpdateCount = 0;
+    final semantics = SemanticsTester(tester);
+    var semanticsUpdateCount = 0;
     tester.binding.pipelineOwner.semanticsOwner!.addListener(() {
       semanticsUpdateCount += 1;
     });
@@ -1593,7 +1593,7 @@ void _tests() {
       ),
     );
     expect(semanticsUpdateCount, 1);
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics(
           id: 1,
@@ -1632,8 +1632,8 @@ void _tests() {
   testWidgets('Semantics widgets built with explicit sort orders are sorted properly', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    int semanticsUpdateCount = 0;
+    final semantics = SemanticsTester(tester);
+    var semanticsUpdateCount = 0;
     tester.binding.pipelineOwner.semanticsOwner!.addListener(() {
       semanticsUpdateCount += 1;
     });
@@ -1660,7 +1660,7 @@ void _tests() {
       ),
     );
     expect(semanticsUpdateCount, 1);
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics(
           id: 1,
@@ -1684,8 +1684,8 @@ void _tests() {
   });
 
   testWidgets('slivers without sort orders are sorted properly', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    int semanticsUpdateCount = 0;
+    final semantics = SemanticsTester(tester);
+    var semanticsUpdateCount = 0;
     tester.binding.pipelineOwner.semanticsOwner!.addListener(() {
       semanticsUpdateCount += 1;
     });
@@ -1709,7 +1709,7 @@ void _tests() {
       ),
     );
     expect(semanticsUpdateCount, 1);
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics(
           children: <TestSemantics>[
@@ -2321,8 +2321,8 @@ void _tests() {
   testWidgets('blocking user interaction works on explicit child node', (
     WidgetTester tester,
   ) async {
-    final UniqueKey key1 = UniqueKey();
-    final UniqueKey key2 = UniqueKey();
+    final key1 = UniqueKey();
+    final key2 = UniqueKey();
     await tester.pumpWidget(
       boilerPlate(
         slivers: <Widget>[
@@ -2364,8 +2364,8 @@ void _tests() {
   testWidgets('blocking user interaction works on explicit child node with Semantics widget', (
     WidgetTester tester,
   ) async {
-    final UniqueKey key1 = UniqueKey();
-    final UniqueKey key2 = UniqueKey();
+    final key1 = UniqueKey();
+    final key2 = UniqueKey();
     await tester.pumpWidget(
       boilerPlate(
         slivers: <Widget>[
@@ -2405,7 +2405,7 @@ void _tests() {
   });
 
   testWidgets('blocking user interaction on a merged child', (WidgetTester tester) async {
-    final UniqueKey key = UniqueKey();
+    final key = UniqueKey();
     await tester.pumpWidget(
       boilerPlate(
         slivers: <Widget>[
@@ -2441,7 +2441,7 @@ void _tests() {
   testWidgets('blocking user interaction on a merged child with Semantics widget', (
     WidgetTester tester,
   ) async {
-    final UniqueKey key = UniqueKey();
+    final key = UniqueKey();
     await tester.pumpWidget(
       boilerPlate(
         slivers: <Widget>[
@@ -2473,7 +2473,7 @@ void _tests() {
   testWidgets('does not merge conflicting actions even if one of them is blocked', (
     WidgetTester tester,
   ) async {
-    final UniqueKey key = UniqueKey();
+    final key = UniqueKey();
     await tester.pumpWidget(
       boilerPlate(
         slivers: <Widget>[
@@ -2514,7 +2514,7 @@ void _tests() {
   testWidgets(
     'does not merge conflicting actions even if one of them is blocked with Semantics widget',
     (WidgetTester tester) async {
-      final UniqueKey key = UniqueKey();
+      final key = UniqueKey();
       await tester.pumpWidget(
         boilerPlate(
           slivers: <Widget>[
@@ -2558,10 +2558,10 @@ void _tests() {
   testWidgets('RenderSliverSemanticsAnnotations provides validation result', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     Future<SemanticsConfiguration> pumpValidationResult(SemanticsValidationResult result) async {
-      final ValueKey<String> key = ValueKey<String>('validation-$result');
+      final key = ValueKey<String>('validation-$result');
       await tester.pumpWidget(
         boilerPlate(
           slivers: <Widget>[
@@ -2577,7 +2577,7 @@ void _tests() {
       );
       final RenderSliverSemanticsAnnotations object = tester
           .renderObject<RenderSliverSemanticsAnnotations>(find.byKey(key));
-      final SemanticsConfiguration config = SemanticsConfiguration();
+      final config = SemanticsConfiguration();
       object.describeSemanticsConfiguration(config);
       return config;
     }
@@ -2601,14 +2601,14 @@ void _tests() {
   });
 
   testWidgets('validation result precedence', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     Future<void> expectValidationResult({
       required SemanticsValidationResult outer,
       required SemanticsValidationResult inner,
       required SemanticsValidationResult expected,
     }) async {
-      const ValueKey<String> key = ValueKey<String>('validated-widget');
+      const key = ValueKey<String>('validated-widget');
       await tester.pumpWidget(
         boilerPlate(
           slivers: <Widget>[
@@ -2699,8 +2699,8 @@ void _tests() {
     );
 
     // Headings level 1-6.
-    for (int level = 1; level <= 6; level++) {
-      final SliverSemantics semantics = SliverSemantics(
+    for (var level = 1; level <= 6; level++) {
+      final semantics = SliverSemantics(
         headingLevel: level,
         sliver: const SliverToBoxAdapter(child: Text('dummy text')),
       );
@@ -2708,7 +2708,7 @@ void _tests() {
     }
 
     // Invalid heading levels.
-    for (final int badLevel in const <int>[-1, 0, 7, 8, 9]) {
+    for (final badLevel in const <int>[-1, 0, 7, 8, 9]) {
       expect(
         () => SliverSemantics(
           headingLevel: badLevel,
@@ -2722,10 +2722,10 @@ void _tests() {
   testWidgets('parent heading level takes precedence when it absorbs a child', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     Future<SemanticsConfiguration> pumpHeading(int? level) async {
-      final ValueKey<String> key = ValueKey<String>('heading-$level');
+      final key = ValueKey<String>('heading-$level');
       await tester.pumpWidget(
         boilerPlate(
           slivers: <Widget>[
@@ -2741,13 +2741,13 @@ void _tests() {
       );
       final RenderSliverSemanticsAnnotations object = tester
           .renderObject<RenderSliverSemanticsAnnotations>(find.byKey(key));
-      final SemanticsConfiguration config = SemanticsConfiguration();
+      final config = SemanticsConfiguration();
       object.describeSemanticsConfiguration(config);
       return config;
     }
 
     // Tuples contain (parent level, child level, expected combined level).
-    final List<(int, int, int)> scenarios = <(int, int, int)>[
+    final scenarios = <(int, int, int)>[
       // Case: neither are headings
       (0, 0, 0), // expect not a heading
       // Case: parent not a heading, child always wins.
@@ -2767,7 +2767,7 @@ void _tests() {
       (1, 5, 1),
     ];
 
-    for (final (int, int, int) scenario in scenarios) {
+    for (final scenario in scenarios) {
       final int parentLevel = scenario.$1;
       final int childLevel = scenario.$2;
       final int resultLevel = scenario.$3;
@@ -2775,7 +2775,7 @@ void _tests() {
       final SemanticsConfiguration parent = await pumpHeading(
         parentLevel == 0 ? null : parentLevel,
       );
-      final SemanticsConfiguration child = SemanticsConfiguration()..headingLevel = childLevel;
+      final child = SemanticsConfiguration()..headingLevel = childLevel;
       parent.absorb(child);
       expect(
         reason:
@@ -2791,7 +2791,7 @@ void _tests() {
   });
 
   testWidgets('applies heading semantics to semantics tree', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       boilerPlate(
@@ -2811,8 +2811,8 @@ void _tests() {
       ),
     );
 
-    for (int level = 1; level <= 6; level++) {
-      final ValueKey<String> key = ValueKey<String>('heading-$level');
+    for (var level = 1; level <= 6; level++) {
+      final key = ValueKey<String>('heading-$level');
       final SemanticsNode node = tester.getSemantics(find.byKey(key));
       expect('$node', contains('headingLevel: $level'));
     }
@@ -2828,7 +2828,7 @@ void _tests() {
     // Construct a widget tree that will end up with a fitted box that applies
     // a zero transform because it does not actually draw its children.
     // Assert that this subtree gets dropped (the root node has no children).
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       boilerPlate(
         slivers: <Widget>[
@@ -2853,7 +2853,7 @@ void _tests() {
       ),
     );
 
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics(flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling]),
       ],
@@ -2871,8 +2871,8 @@ void _tests() {
   });
 
   testWidgets('slivers that are transformed are sorted properly', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    int semanticsUpdateCount = 0;
+    final semantics = SemanticsTester(tester);
+    var semanticsUpdateCount = 0;
     tester.binding.pipelineOwner.semanticsOwner!.addListener(() {
       semanticsUpdateCount += 1;
     });
@@ -2898,7 +2898,7 @@ void _tests() {
     );
     expect(semanticsUpdateCount, 1);
     // Label 3 is off-screen so it gets dropped.
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics(
           children: <TestSemantics>[

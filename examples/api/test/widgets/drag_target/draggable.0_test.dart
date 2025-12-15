@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/drag_target/draggable.0.dart' as example;
+import 'package:flutter_api_samples/widgets/drag_target/draggable.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -22,12 +23,18 @@ void main() {
     expect(find.text('Draggable Sample'), findsOneWidget);
 
     expect(
-      findContainerWith(color: Colors.lightGreenAccent, child: find.text('Draggable')),
+      findContainerWith(
+        color: Colors.lightGreenAccent,
+        child: find.text('Draggable'),
+      ),
       findsOneWidget,
     );
 
     expect(
-      findContainerWith(color: Colors.cyan, child: find.text('Value is updated to: 0')),
+      findContainerWith(
+        color: Colors.cyan,
+        child: find.text('Value is updated to: 0'),
+      ),
       findsOneWidget,
     );
   });
@@ -54,7 +61,9 @@ void main() {
     expect(draggingContainer, findsNothing);
     expect(feedbackContainer, findsNothing);
 
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(idleContainer));
+    final TestGesture gesture = await tester.startGesture(
+      tester.getCenter(idleContainer),
+    );
     await tester.pump();
 
     expect(idleContainer, findsNothing);
@@ -87,7 +96,9 @@ void main() {
     int counter = 0;
 
     for (int i = 0; i < 5; i++) {
-      final TestGesture gesture = await tester.startGesture(tester.getCenter(draggable));
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(draggable),
+      );
       await gesture.moveTo(tester.getCenter(target));
       await gesture.up();
       await tester.pump();
@@ -95,7 +106,10 @@ void main() {
       counter += 10;
 
       expect(
-        findContainerWith(color: Colors.cyan, child: find.text('Value is updated to: $counter')),
+        findContainerWith(
+          color: Colors.cyan,
+          child: find.text('Value is updated to: $counter'),
+        ),
         findsOneWidget,
       );
     }

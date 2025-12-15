@@ -53,7 +53,7 @@ class KeyboardKeysCodeGenerator extends BaseCodeGenerator {
 
   /// Gets the generated definitions of PhysicalKeyboardKeys.
   String get _physicalDefinitions {
-    final OutputLines<int> lines = OutputLines<int>('Physical Key Definition');
+    final lines = OutputLines<int>('Physical Key Definition');
     for (final PhysicalKeyEntry entry in keyData.entries) {
       final String firstComment = _wrapString(
         'Represents the location of the '
@@ -72,7 +72,7 @@ $otherComments  static const PhysicalKeyboardKey ${entry.constantName} = Physica
   }
 
   String get _physicalDebugNames {
-    final OutputLines<int> lines = OutputLines<int>('Physical debug names');
+    final lines = OutputLines<int>('Physical debug names');
     for (final PhysicalKeyEntry entry in keyData.entries) {
       lines.add(entry.usbHidCode, '''
       ${toHex(entry.usbHidCode)}: '${entry.commentName}',''');
@@ -82,10 +82,7 @@ $otherComments  static const PhysicalKeyboardKey ${entry.constantName} = Physica
 
   /// Gets the generated definitions of LogicalKeyboardKeys.
   String get _logicalDefinitions {
-    final OutputLines<int> lines = OutputLines<int>(
-      'Logical debug names',
-      behavior: DeduplicateBehavior.kSkip,
-    );
+    final lines = OutputLines<int>('Logical debug names', behavior: DeduplicateBehavior.kSkip);
     void printKey(int flutterId, String constantName, String commentName, {String? otherComments}) {
       final String firstComment = _wrapString(
         'Represents the logical "$commentName" key on the keyboard.',
@@ -125,7 +122,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   }
 
   String get _logicalSynonyms {
-    final StringBuffer result = StringBuffer();
+    final result = StringBuffer();
     for (final SynonymKeyInfo synonymInfo in synonyms.values) {
       for (final LogicalKeyEntry key in synonymInfo.keys) {
         final LogicalKeyEntry synonym = logicalData.entryByName(synonymInfo.name);
@@ -136,7 +133,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   }
 
   String get _logicalReverseSynonyms {
-    final StringBuffer result = StringBuffer();
+    final result = StringBuffer();
     for (final SynonymKeyInfo synonymInfo in synonyms.values) {
       final LogicalKeyEntry synonym = logicalData.entryByName(synonymInfo.name);
       final List<String> entries = synonymInfo.keys
@@ -148,10 +145,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   }
 
   String get _logicalKeyLabels {
-    final OutputLines<int> lines = OutputLines<int>(
-      'Logical key labels',
-      behavior: DeduplicateBehavior.kSkip,
-    );
+    final lines = OutputLines<int>('Logical key labels', behavior: DeduplicateBehavior.kSkip);
     for (final LogicalKeyEntry entry in logicalData.entries) {
       lines.add(entry.value, '''
     ${toHex(entry.value, digits: 11)}: '${entry.commentName}',''');
@@ -161,7 +155,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
 
   /// This generates the map of USB HID codes to physical keys.
   String get _predefinedHidCodeMap {
-    final OutputLines<int> lines = OutputLines<int>('Physical key map');
+    final lines = OutputLines<int>('Physical key map');
     for (final PhysicalKeyEntry entry in keyData.entries) {
       lines.add(entry.usbHidCode, '    ${toHex(entry.usbHidCode)}: ${entry.constantName},');
     }
@@ -170,10 +164,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
 
   /// This generates the map of Flutter key codes to logical keys.
   String get _predefinedKeyCodeMap {
-    final OutputLines<int> lines = OutputLines<int>(
-      'Logical key map',
-      behavior: DeduplicateBehavior.kSkip,
-    );
+    final lines = OutputLines<int>('Logical key map', behavior: DeduplicateBehavior.kSkip);
     for (final LogicalKeyEntry entry in logicalData.entries) {
       lines.add(entry.value, '    ${toHex(entry.value, digits: 11)}: ${entry.constantName},');
     }
@@ -181,10 +172,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   }
 
   String get _maskConstantVariables {
-    final OutputLines<int> lines = OutputLines<int>(
-      'Mask constants',
-      behavior: DeduplicateBehavior.kKeep,
-    );
+    final lines = OutputLines<int>('Mask constants', behavior: DeduplicateBehavior.kKeep);
     for (final MaskConstant constant in _maskConstants) {
       lines.add(constant.value, '''
 ${_wrapString(constant.description)}  ///

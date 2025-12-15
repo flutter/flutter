@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/autocomplete/raw_autocomplete.0.dart' as example;
+import 'package:flutter_api_samples/widgets/autocomplete/raw_autocomplete.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -17,7 +18,9 @@ void main() {
     expect(find.text('chameleon'), findsNothing);
   });
 
-  testWidgets('Options are shown correctly and selectable', (WidgetTester tester) async {
+  testWidgets('Options are shown correctly and selectable', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.AutocompleteExampleApp());
     await tester.tap(find.byType(TextFormField));
     await tester.pump();
@@ -40,7 +43,10 @@ void main() {
 
     expect(find.byType(ListTile), findsNothing);
     expect(
-      find.descendant(of: find.byType(TextFormField), matching: find.text('bobcat')),
+      find.descendant(
+        of: find.byType(TextFormField),
+        matching: find.text('bobcat'),
+      ),
       findsOneWidget,
     );
   });

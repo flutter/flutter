@@ -15,7 +15,7 @@ import 'package:analyzer/dart/ast/ast.dart';
 const Set<String> _kObjectMembers = <String>{'==', 'toString', 'hashCode'};
 
 CompilationUnit _parseAndCheckDart(String path) {
-  final FeatureSet analyzerFeatures = FeatureSet.latestLanguageVersion();
+  final analyzerFeatures = FeatureSet.latestLanguageVersion();
   if (!analyzerFeatures.isEnabled(Feature.non_nullable)) {
     throw Exception('non-nullable feature is disabled.');
   }
@@ -37,11 +37,11 @@ void main() {
   // These files just contain imports to the part files;
   final CompilationUnit uiUnit = _parseAndCheckDart('$flutterDir/lib/ui/ui.dart');
   final CompilationUnit webUnit = _parseAndCheckDart('$flutterDir/lib/web_ui/lib/ui.dart');
-  final Map<String, ClassDeclaration> uiClasses = <String, ClassDeclaration>{};
-  final Map<String, ClassDeclaration> webClasses = <String, ClassDeclaration>{};
+  final uiClasses = <String, ClassDeclaration>{};
+  final webClasses = <String, ClassDeclaration>{};
 
-  final Map<String, GenericTypeAlias> uiTypeDefs = <String, GenericTypeAlias>{};
-  final Map<String, GenericTypeAlias> webTypeDefs = <String, GenericTypeAlias>{};
+  final uiTypeDefs = <String, GenericTypeAlias>{};
+  final webTypeDefs = <String, GenericTypeAlias>{};
 
   // Gather all public classes from each library. For now we are skipping
   // other top level members.
@@ -59,7 +59,7 @@ void main() {
     print('Warning: did not resolve any typedefs.');
   }
 
-  bool failed = false;
+  var failed = false;
   print('Checking ${uiClasses.length} public classes.');
   for (final String className in uiClasses.keys) {
     final ClassDeclaration uiClass = uiClasses[className]!;
@@ -76,10 +76,10 @@ void main() {
     }
     // Next will check that the public methods exposed in each library are
     // identical.
-    final Map<String, MethodDeclaration> uiMethods = <String, MethodDeclaration>{};
-    final Map<String, MethodDeclaration> webMethods = <String, MethodDeclaration>{};
-    final Map<String, ConstructorDeclaration> uiConstructors = <String, ConstructorDeclaration>{};
-    final Map<String, ConstructorDeclaration> webConstructors = <String, ConstructorDeclaration>{};
+    final uiMethods = <String, MethodDeclaration>{};
+    final webMethods = <String, MethodDeclaration>{};
+    final uiConstructors = <String, ConstructorDeclaration>{};
+    final webConstructors = <String, ConstructorDeclaration>{};
     _collectPublicMethods(uiClass, uiMethods);
     _collectPublicMethods(webClass, webMethods);
     _collectPublicConstructors(uiClass, uiConstructors);
@@ -104,7 +104,7 @@ void main() {
       }
 
       for (
-        int i = 0;
+        var i = 0;
         i < uiConstructor.parameters.parameters.length &&
             i < uiConstructor.parameters.parameters.length;
         i++
@@ -112,7 +112,7 @@ void main() {
         // Technically you could re-order named parameters and still be valid,
         // but we enforce that they are identical.
         for (
-          int i = 0;
+          var i = 0;
           i < uiConstructor.parameters.parameters.length &&
               i < webConstructor.parameters.parameters.length;
           i++
@@ -168,7 +168,7 @@ void main() {
       // Technically you could re-order named parameters and still be valid,
       // but we enforce that they are identical.
       for (
-        int i = 0;
+        var i = 0;
         i < uiMethod.parameters!.parameters.length && i < webMethod.parameters!.parameters.length;
         i++
       ) {
@@ -197,8 +197,8 @@ void main() {
         }
         // check nullability
         if (uiParam is SimpleFormalParameter && webParam is SimpleFormalParameter) {
-          final bool isUiNullable = uiParam.type?.question != null;
-          final bool isWebNullable = webParam.type?.question != null;
+          final isUiNullable = uiParam.type?.question != null;
+          final isWebNullable = webParam.type?.question != null;
           if (isUiNullable != isWebNullable) {
             failed = true;
             print(
@@ -254,7 +254,7 @@ void main() {
     // but we enforce that they are identical.
 
     for (
-      int i = 0;
+      var i = 0;
       i < uiTypeDef.functionType!.parameters.parameters.length &&
           i < webTypeDef.functionType!.parameters.parameters.length;
       i++
@@ -274,10 +274,10 @@ void main() {
 
       // This is not entirely true and can break, but this way we can support both positional and named params
       // (The assumption that the parameter of a DefaultFormalParameter is a SimpleFormalParameter is a stretch)
-      final SimpleFormalParameter uiParam =
+      final uiParam =
           ((uiFormalParam is DefaultFormalParameter) ? uiFormalParam.parameter : uiFormalParam)
               as SimpleFormalParameter;
-      final SimpleFormalParameter webParam =
+      final webParam =
           ((webFormalParam is DefaultFormalParameter) ? webFormalParam.parameter : uiFormalParam)
               as SimpleFormalParameter;
 
@@ -311,8 +311,8 @@ void main() {
         );
       }
 
-      final bool isUiNullable = uiParam.type?.question != null;
-      final bool isWebNullable = webParam.type?.question != null;
+      final isUiNullable = uiParam.type?.question != null;
+      final isWebNullable = webParam.type?.question != null;
       if (isUiNullable != isWebNullable) {
         failed = true;
         print(
@@ -355,7 +355,7 @@ void _collectPublicClasses(
       continue;
     }
     final PartDirective partDirective = directive;
-    final String literalUri = partDirective.uri.toString();
+    final literalUri = partDirective.uri.toString();
     final CompilationUnit subUnit = _parseAndCheckDart(
       '$root${literalUri.substring(1, literalUri.length - 1)}',
     );
@@ -417,7 +417,7 @@ void _collectPublicTypeDefs(
       continue;
     }
     final PartDirective partDirective = directive;
-    final String literalUri = partDirective.uri.toString();
+    final literalUri = partDirective.uri.toString();
     final CompilationUnit subUnit = _parseAndCheckDart(
       '$root${literalUri.substring(1, literalUri.length - 1)}',
     );

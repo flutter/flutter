@@ -14,7 +14,7 @@ import 'utils/fake_and_mock_utils.dart';
 
 void main() {
   tearDown(() {
-    final TestWindow window = WidgetsBinding.instance.window as TestWindow;
+    final window = WidgetsBinding.instance.window as TestWindow;
     window.clearAllTestValues();
   });
 

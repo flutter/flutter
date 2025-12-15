@@ -4,7 +4,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_api_samples/widgets/focus_scope/focus.1.dart' as example;
+import 'package:flutter_api_samples/widgets/focus_scope/focus.1.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -12,23 +13,32 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Scaffold(body: example.FocusableText('Item 0', autofocus: false))),
+      const MaterialApp(
+        home: Scaffold(body: example.FocusableText('Item 0', autofocus: false)),
+      ),
     );
     // Autofocus needs to check that no other node in the [FocusScope] is
     // focused and can only request focus for the second frame.
     await tester.pumpAndSettle();
     expect(
-      find.descendant(of: find.byType(example.FocusableText), matching: find.byType(Focus)),
+      find.descendant(
+        of: find.byType(example.FocusableText),
+        matching: find.byType(Focus),
+      ),
       findsOneWidget,
     );
     expect(find.text('Item 0'), findsOneWidget);
 
     expect(find.byType(Container), findsOneWidget);
-    final Container container1 = tester.widget<Container>(find.byType(Container));
+    final Container container1 = tester.widget<Container>(
+      find.byType(Container),
+    );
     expect(container1.color, Colors.white);
 
     await tester.pumpWidget(
-      const MaterialApp(home: Scaffold(body: example.FocusableText('Item 1', autofocus: true))),
+      const MaterialApp(
+        home: Scaffold(body: example.FocusableText('Item 1', autofocus: true)),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -38,17 +48,27 @@ void main() {
     );
     expect(
       tester
-          .widget<Focus>(find.descendant(of: focusableTextFinder2, matching: find.byType(Focus)))
+          .widget<Focus>(
+            find.descendant(
+              of: focusableTextFinder2,
+              matching: find.byType(Focus),
+            ),
+          )
           .autofocus,
       isTrue,
     );
     final Container container2 = tester.widget<Container>(
-      find.descendant(of: focusableTextFinder2, matching: find.byType(Container)),
+      find.descendant(
+        of: focusableTextFinder2,
+        matching: find.byType(Container),
+      ),
     );
     expect(container2.color, Colors.red);
   });
 
-  testWidgets('builds list showcasing focus traversal', (WidgetTester tester) async {
+  testWidgets('builds list showcasing focus traversal', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.FocusExampleApp());
     await tester.pumpAndSettle();
 

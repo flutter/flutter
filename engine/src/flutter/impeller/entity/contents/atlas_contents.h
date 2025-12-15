@@ -40,8 +40,8 @@ class AtlasGeometry {
 
   virtual bool ShouldInvertBlendMode() const { return true; }
 
-  /// @brief The source rect of the draw if a strict source rect should
-  ///        be applied, or nullopt.
+  /// @brief The source rect of the draw in texture coordinates if a strict
+  ///        source rect should be applied, or nullopt.
   ///
   /// See also `Canvas::AttemptColorFilterOptimization`
   virtual std::optional<Rect> GetStrictSrcRect() const { return std::nullopt; }

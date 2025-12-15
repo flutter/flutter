@@ -14,6 +14,8 @@ import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 class SkwasmRenderer extends Renderer {
   bool get isMultiThreaded => false;
 
+  bool get isWimp => false;
+
   @override
   ui.Path combinePaths(ui.PathOperation op, ui.Path path1, ui.Path path2) {
     throw UnimplementedError('Skwasm not implemented on this platform.');

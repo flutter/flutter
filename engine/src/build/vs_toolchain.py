@@ -18,7 +18,7 @@ import collections
 import glob
 import json
 import os
-import pipes
+import shlex
 import platform
 import re
 import shutil
@@ -39,12 +39,14 @@ MSVS_VERSIONS = collections.OrderedDict([
   ('2019', '16.0'),
   ('2017', '15.0'),
   ('2022', '17.0'),
+  ('2026', '18'),
 ])
 
 VC_VERSIONS = {
   '2017': 'VC141',
   '2019': 'VC142',
   '2022': 'VC143',
+  '2026': 'VC145',
 }
 
 
@@ -168,6 +170,12 @@ def GetVisualStudioVersion():
       for k,v in list(MSVS_VERSIONS.items()))
   available_versions = []
   for version in supported_versions:
+    # Also look for the numeric version folder (e.g. "18")
+    search_versions = [version]
+    if version in MSVS_VERSIONS:
+        search_versions.append(MSVS_VERSIONS[version])
+
+  for version in search_versions:
     for path in (
         os.environ.get('vs%s_install' % version),
         os.path.expandvars('%ProgramFiles(x86)%' +
@@ -192,15 +200,20 @@ def DetectVisualStudioPath():
   # build/toolchain/win/setup_toolchain.py as well.
   version_as_year = GetVisualStudioVersion()
 
+  path_versions = [version_as_year]
+  if version_as_year in MSVS_VERSIONS:
+      path_versions.append(MSVS_VERSIONS[version_as_year])
+
   # The VC++ >=2017 install location needs to be located using COM instead of
   # the registry. For details see:
   # https://blogs.msdn.microsoft.com/heaths/2016/09/15/changes-to-visual-studio-15-setup/
   # For now we use a hardcoded default with an environment variable override.
   possible_install_paths = (
       os.path.expandvars('%s/Microsoft Visual Studio/%s/%s' %
-                         (program_path_var, version_as_year, product))
+                         (program_path_var, v_check, product))
       for program_path_var in ('%ProgramFiles%', '%ProgramFiles(x86)%')
-      for product in ('Enterprise', 'Professional', 'Community', 'Preview'))
+      for product in ('Enterprise', 'Professional', 'Community', 'Preview')
+      for v_check in path_versions)
   for path in (
       os.environ.get('vs%s_install' % version_as_year), *possible_install_paths):
     if path and os.path.exists(path):

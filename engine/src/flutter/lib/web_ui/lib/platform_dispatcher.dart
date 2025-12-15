@@ -11,6 +11,7 @@ typedef TimingsCallback = void Function(List<FrameTiming> timings);
 typedef PointerDataPacketCallback = void Function(PointerDataPacket packet);
 typedef KeyDataCallback = bool Function(KeyData data);
 typedef SemanticsActionEventCallback = void Function(SemanticsActionEvent action);
+typedef HitTestCallback = HitTestResponse Function(HitTestRequest request);
 typedef PlatformMessageResponseCallback = void Function(ByteData? data);
 typedef PlatformMessageCallback =
     void Function(String name, ByteData? data, PlatformMessageResponseCallback? callback);
@@ -89,6 +90,14 @@ abstract class PlatformDispatcher {
 
   void setApplicationLocale(Locale locale) {}
 
+  double? get lineHeightScaleFactorOverride;
+
+  double? get letterSpacingOverride;
+
+  double? get wordSpacingOverride;
+
+  double? get paragraphSpacingOverride;
+
   AccessibilityFeatures get accessibilityFeatures;
 
   VoidCallback? get onAccessibilityFeaturesChanged;
@@ -145,6 +154,9 @@ abstract class PlatformDispatcher {
 
   SemanticsActionEventCallback? get onSemanticsActionEvent;
   set onSemanticsActionEvent(SemanticsActionEventCallback? callback);
+
+  HitTestCallback? get onHitTest;
+  set onHitTest(HitTestCallback? callback);
 
   ErrorCallback? get onError;
   set onError(ErrorCallback? callback);
@@ -529,7 +541,7 @@ class Locale {
   String toLanguageTag() => _rawToString('-');
 
   String _rawToString(String separator) {
-    final StringBuffer out = StringBuffer(languageCode);
+    final out = StringBuffer(languageCode);
     if (scriptCode != null && scriptCode!.isNotEmpty) {
       out.write('$separator$scriptCode');
     }
@@ -593,3 +605,15 @@ final class ViewFocusEvent {
 enum ViewFocusState { unfocused, focused }
 
 enum ViewFocusDirection { undefined, forward, backward }
+
+class HitTestRequest {
+  const HitTestRequest({required this.view, required this.offset});
+  final FlutterView view;
+  final Offset offset;
+}
+
+class HitTestResponse {
+  const HitTestResponse({required this.isPlatformView});
+  static const HitTestResponse empty = HitTestResponse(isPlatformView: false);
+  final bool isPlatformView;
+}

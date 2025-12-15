@@ -22,35 +22,34 @@ class FrameTimingSummarizer {
   /// See [TimelineSummary.summaryJson] for detail.
   factory FrameTimingSummarizer(List<FrameTiming> data, {int? newGenGCCount, int? oldGenGCCount}) {
     assert(data.isNotEmpty);
-    final List<Duration> frameBuildTime = List<Duration>.unmodifiable(
+    final frameBuildTime = List<Duration>.unmodifiable(
       data.map<Duration>((FrameTiming datum) => datum.buildDuration),
     );
-    final List<Duration> frameBuildTimeSorted = List<Duration>.from(frameBuildTime)..sort();
-    final List<Duration> frameRasterizerTime = List<Duration>.unmodifiable(
+    final frameBuildTimeSorted = List<Duration>.from(frameBuildTime)..sort();
+    final frameRasterizerTime = List<Duration>.unmodifiable(
       data.map<Duration>((FrameTiming datum) => datum.rasterDuration),
     );
-    final List<Duration> frameRasterizerTimeSorted = List<Duration>.from(frameRasterizerTime)
-      ..sort();
-    final List<Duration> vsyncOverhead = List<Duration>.unmodifiable(
+    final frameRasterizerTimeSorted = List<Duration>.from(frameRasterizerTime)..sort();
+    final vsyncOverhead = List<Duration>.unmodifiable(
       data.map<Duration>((FrameTiming datum) => datum.vsyncOverhead),
     );
-    final List<int> layerCacheCounts = List<int>.unmodifiable(
+    final layerCacheCounts = List<int>.unmodifiable(
       data.map<int>((FrameTiming datum) => datum.layerCacheCount),
     );
-    final List<int> layerCacheCountsSorted = List<int>.from(layerCacheCounts)..sort();
-    final List<int> layerCacheBytes = List<int>.unmodifiable(
+    final layerCacheCountsSorted = List<int>.from(layerCacheCounts)..sort();
+    final layerCacheBytes = List<int>.unmodifiable(
       data.map<int>((FrameTiming datum) => datum.layerCacheBytes),
     );
-    final List<int> layerCacheBytesSorted = List<int>.from(layerCacheBytes)..sort();
-    final List<int> pictureCacheCounts = List<int>.unmodifiable(
+    final layerCacheBytesSorted = List<int>.from(layerCacheBytes)..sort();
+    final pictureCacheCounts = List<int>.unmodifiable(
       data.map<int>((FrameTiming datum) => datum.pictureCacheCount),
     );
-    final List<int> pictureCacheCountsSorted = List<int>.from(pictureCacheCounts)..sort();
-    final List<int> pictureCacheBytes = List<int>.unmodifiable(
+    final pictureCacheCountsSorted = List<int>.from(pictureCacheCounts)..sort();
+    final pictureCacheBytes = List<int>.unmodifiable(
       data.map<int>((FrameTiming datum) => datum.pictureCacheBytes),
     );
-    final List<int> pictureCacheBytesSorted = List<int>.from(pictureCacheBytes)..sort();
-    final List<Duration> vsyncOverheadSorted = List<Duration>.from(vsyncOverhead)..sort();
+    final pictureCacheBytesSorted = List<int>.from(pictureCacheBytes)..sort();
+    final vsyncOverheadSorted = List<Duration>.from(vsyncOverhead)..sort();
     Duration add(Duration a, Duration b) => a + b;
     int addInts(int a, int b) => a + b;
     return FrameTimingSummarizer._(

@@ -62,9 +62,7 @@ void main() {
           for (var i = 0; i < root.deferredComponents!.length; ++i) {
             expect(
               updated.deferredComponents![i].toString(),
-              PreviewPubspecBuilder.transformDeferredComponent(
-                root.deferredComponents![i],
-              ).toString(),
+              pubspecBuilder.transformDeferredComponent(root.deferredComponents![i]).toString(),
             );
           }
         }
@@ -132,6 +130,9 @@ flutter:
     fileSystem: fileSystem,
     logger: logger,
   )!;
+
+  @override
+  late final Directory directory = fileSystem.directory(projectRoot);
 
   @override
   late FlutterProject widgetPreviewScaffoldProject = FakeFlutterProject(

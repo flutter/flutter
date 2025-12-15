@@ -40,6 +40,7 @@ static bool IsDepthStencilFormat(PixelFormat format) {
     case PixelFormat::kB10G10R10XR:
     case PixelFormat::kB10G10R10XRSRGB:
     case PixelFormat::kB10G10R10A10XR:
+    case PixelFormat::kR32Float:
       return false;
   }
   FML_UNREACHABLE();
@@ -86,6 +87,11 @@ struct TexImage2DData {
         internal_format = GL_RGBA;
         external_format = GL_RGBA;
         type = GL_UNSIGNED_BYTE;
+        break;
+      case PixelFormat::kR32Float:
+        internal_format = GL_R32F;
+        external_format = GL_RGBA;
+        type = GL_FLOAT;
         break;
       case PixelFormat::kR32G32B32A32Float:
         internal_format = GL_RGBA32F;
@@ -401,6 +407,7 @@ static std::optional<GLenum> ToRenderBufferFormat(PixelFormat format) {
     case PixelFormat::kB10G10R10XRSRGB:
     case PixelFormat::kB10G10R10XR:
     case PixelFormat::kB10G10R10A10XR:
+    case PixelFormat::kR32Float:
       return std::nullopt;
   }
   FML_UNREACHABLE();

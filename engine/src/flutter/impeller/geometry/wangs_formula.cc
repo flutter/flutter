@@ -13,11 +13,6 @@ namespace {
 // X and Y directions.
 constexpr static Scalar kPrecision = 4;
 
-inline Scalar length(Point n) {
-  Point nn = n * n;
-  return std::sqrt(nn.x + nn.y);
-}
-
 }  // namespace
 
 Scalar ComputeCubicSubdivisions(Scalar scale_factor,
@@ -25,18 +20,20 @@ Scalar ComputeCubicSubdivisions(Scalar scale_factor,
                                 Point p1,
                                 Point p2,
                                 Point p3) {
-  Scalar k = scale_factor * .75f * kPrecision;
-  Point a = (p0 - p1 * 2 + p2).Abs();
-  Point b = (p1 - p2 * 2 + p3).Abs();
-  return std::sqrt(k * length(a.Max(b)));
+  const Scalar k = scale_factor * .75f * kPrecision;
+  const Vector2 a = p0 - p1 * 2 + p2;
+  const Vector2 b = p1 - p2 * 2 + p3;
+  const Scalar max_len_sq =
+      std::max(a.GetLengthSquared(), b.GetLengthSquared());
+  return std::sqrt(k * std::sqrt(max_len_sq));
 }
 
 Scalar ComputeQuadradicSubdivisions(Scalar scale_factor,
                                     Point p0,
                                     Point p1,
                                     Point p2) {
-  Scalar k = scale_factor * .25f * kPrecision;
-  return std::sqrt(k * length(p0 - p1 * 2 + p2));
+  const Scalar k = scale_factor * .25f * kPrecision;
+  return std::sqrt(k * (p0 - p1 * 2 + p2).GetLength());
 }
 
 // Returns Wang's formula specialized for a conic curve.

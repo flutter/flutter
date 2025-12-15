@@ -136,9 +136,9 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
   }
 
   List<_OverflowRegionData> _calculateOverflowRegions(RelativeRect overflow, Rect containerRect) {
-    final List<_OverflowRegionData> regions = <_OverflowRegionData>[];
+    final regions = <_OverflowRegionData>[];
     if (overflow.left > 0.0) {
-      final Rect markerRect = Rect.fromLTWH(
+      final markerRect = Rect.fromLTWH(
         0.0,
         0.0,
         containerRect.width * _indicatorFraction,
@@ -157,7 +157,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
       );
     }
     if (overflow.right > 0.0) {
-      final Rect markerRect = Rect.fromLTWH(
+      final markerRect = Rect.fromLTWH(
         containerRect.width * (1.0 - _indicatorFraction),
         0.0,
         containerRect.width * _indicatorFraction,
@@ -176,7 +176,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
       );
     }
     if (overflow.top > 0.0) {
-      final Rect markerRect = Rect.fromLTWH(
+      final markerRect = Rect.fromLTWH(
         0.0,
         0.0,
         containerRect.width,
@@ -192,7 +192,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
       );
     }
     if (overflow.bottom > 0.0) {
-      final Rect markerRect = Rect.fromLTWH(
+      final markerRect = Rect.fromLTWH(
         0.0,
         containerRect.height * (1.0 - _indicatorFraction),
         containerRect.width,
@@ -234,13 +234,13 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
       );
     }
 
-    final List<String> overflows = <String>[
+    final overflows = <String>[
       if (overflow.left > 0.0) '${_formatPixels(overflow.left)} pixels on the left',
       if (overflow.top > 0.0) '${_formatPixels(overflow.top)} pixels on the top',
       if (overflow.bottom > 0.0) '${_formatPixels(overflow.bottom)} pixels on the bottom',
       if (overflow.right > 0.0) '${_formatPixels(overflow.right)} pixels on the right',
     ];
-    String overflowText = '';
+    var overflowText = '';
     assert(
       overflows.isNotEmpty,
       "Somehow $runtimeType didn't actually overflow like it thought it did.",
@@ -289,7 +289,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     Rect childRect, {
     List<DiagnosticsNode>? overflowHints,
   }) {
-    final RelativeRect overflow = RelativeRect.fromRect(containerRect, childRect);
+    final overflow = RelativeRect.fromRect(containerRect, childRect);
 
     if (overflow.left <= 0.0 &&
         overflow.right <= 0.0 &&
@@ -302,9 +302,9 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
       overflow,
       containerRect,
     );
-    for (final _OverflowRegionData region in overflowRegions) {
+    for (final region in overflowRegions) {
       context.canvas.drawRect(region.rect.shift(offset), _indicatorPaint);
-      final TextSpan? textSpan = _indicatorLabel[region.side.index].text as TextSpan?;
+      final textSpan = _indicatorLabel[region.side.index].text as TextSpan?;
       if (textSpan?.text != region.label) {
         _indicatorLabel[region.side.index].text = TextSpan(
           text: region.label,
@@ -314,7 +314,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
       }
 
       final Offset labelOffset = region.labelOffset + offset;
-      final Offset centerOffset = Offset(-_indicatorLabel[region.side.index].width / 2.0, 0.0);
+      final centerOffset = Offset(-_indicatorLabel[region.side.index].width / 2.0, 0.0);
       final Rect textBackgroundRect = centerOffset & _indicatorLabel[region.side.index].size;
       context.canvas.save();
       context.canvas.translate(labelOffset.dx, labelOffset.dy);

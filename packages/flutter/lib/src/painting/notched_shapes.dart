@@ -70,11 +70,11 @@ class CircularNotchedRectangle extends NotchedShape {
     // The guest's shape is a circle bounded by the guest rectangle.
     // So the guest's radius is half the guest width.
     final double r = guest.width / 2.0;
-    final Radius notchRadius = Radius.circular(r);
+    final notchRadius = Radius.circular(r);
 
     // The variables [p2yA] and [p2yB] need to be inverted
     // when the notch is drawn on the bottom of a path.
-    final double invertMultiplier = inverted ? -1.0 : 1.0;
+    final invertMultiplier = inverted ? -1.0 : 1.0;
 
     // We build a path for the notch from 3 segments:
     // Segment A - a Bezier curve from the host's top edge to segment B.
@@ -84,8 +84,8 @@ class CircularNotchedRectangle extends NotchedShape {
     // A detailed explanation and the derivation of the formulas below is
     // available at: https://docs.google.com/document/d/e/2PACX-1vRVPWGtR85bawGynRSWzYTKgQtqrxCnxXCKC5xM9ab3IvtRHueku4rRIuJ4TbedzyMz2oy2pkzM71-_/pub
 
-    const double s1 = 15.0;
-    const double s2 = 1.0;
+    const s1 = 15.0;
+    const s2 = 1.0;
 
     final double a = -r - s2;
     final double b = (inverted ? host.bottom : host.top) - guest.center.dy;
@@ -96,12 +96,12 @@ class CircularNotchedRectangle extends NotchedShape {
     final double p2yA = math.sqrt(r * r - p2xA * p2xA) * invertMultiplier;
     final double p2yB = math.sqrt(r * r - p2xB * p2xB) * invertMultiplier;
 
-    final List<Offset> p = List<Offset>.filled(6, Offset.zero);
+    final p = List<Offset>.filled(6, Offset.zero);
 
     // p0, p1, and p2 are the control points for segment A.
     p[0] = Offset(a - s1, b);
     p[1] = Offset(a, b);
-    final double cmp = b < 0 ? -1.0 : 1.0;
+    final cmp = b < 0 ? -1.0 : 1.0;
     p[2] = cmp * p2yA > cmp * p2yB ? Offset(p2xA, p2yA) : Offset(p2xB, p2yB);
 
     // p3, p4, and p5 are the control points for segment B, which is a mirror
@@ -111,12 +111,12 @@ class CircularNotchedRectangle extends NotchedShape {
     p[5] = Offset(-1.0 * p[0].dx, p[0].dy);
 
     // translate all points back to the absolute coordinate system.
-    for (int i = 0; i < p.length; i += 1) {
+    for (var i = 0; i < p.length; i += 1) {
       p[i] += guest.center;
     }
 
     // Use the calculated points to draw out a path object.
-    final Path path = Path()..moveTo(host.left, host.top);
+    final path = Path()..moveTo(host.left, host.top);
     if (!inverted) {
       path
         ..lineTo(p[0].dx, p[0].dy)

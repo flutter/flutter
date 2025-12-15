@@ -56,7 +56,7 @@ void main() {
   });
 
   test('computed hit slop values defer to device value when pointer kind is touch', () {
-    const DeviceGestureSettings settings = DeviceGestureSettings(touchSlop: 1);
+    const settings = DeviceGestureSettings(touchSlop: 1);
 
     expect(computeHitSlop(PointerDeviceKind.mouse, settings), kPrecisePointerHitSlop);
     expect(computeHitSlop(PointerDeviceKind.stylus, settings), 1);
@@ -114,8 +114,8 @@ void main() {
     );
 
     test('PointerEnterEvent.fromMouseEvent(hover)', () {
-      final PointerEnterEvent event = PointerEnterEvent.fromMouseEvent(hover);
-      const PointerEnterEvent empty = PointerEnterEvent();
+      final event = PointerEnterEvent.fromMouseEvent(hover);
+      const empty = PointerEnterEvent();
       expect(event.timeStamp, hover.timeStamp);
       expect(event.pointer, empty.pointer);
       expect(event.kind, hover.kind);
@@ -141,8 +141,8 @@ void main() {
     });
 
     test('PointerExitEvent.fromMouseEvent(hover)', () {
-      final PointerExitEvent event = PointerExitEvent.fromMouseEvent(hover);
-      const PointerExitEvent empty = PointerExitEvent();
+      final event = PointerExitEvent.fromMouseEvent(hover);
+      const empty = PointerExitEvent();
       expect(event.timeStamp, hover.timeStamp);
       expect(event.pointer, empty.pointer);
       expect(event.kind, hover.kind);
@@ -168,8 +168,8 @@ void main() {
     });
 
     test('PointerEnterEvent.fromMouseEvent(move)', () {
-      final PointerEnterEvent event = PointerEnterEvent.fromMouseEvent(move);
-      const PointerEnterEvent empty = PointerEnterEvent();
+      final event = PointerEnterEvent.fromMouseEvent(move);
+      const empty = PointerEnterEvent();
       expect(event.timeStamp, move.timeStamp);
       expect(event.pointer, empty.pointer);
       expect(event.kind, move.kind);
@@ -195,8 +195,8 @@ void main() {
     });
 
     test('PointerExitEvent.fromMouseEvent(move)', () {
-      final PointerExitEvent event = PointerExitEvent.fromMouseEvent(move);
-      const PointerExitEvent empty = PointerExitEvent();
+      final event = PointerExitEvent.fromMouseEvent(move);
+      const empty = PointerExitEvent();
       expect(event.timeStamp, move.timeStamp);
       expect(event.pointer, empty.pointer);
       expect(event.kind, move.kind);
@@ -226,18 +226,18 @@ void main() {
     // Some parameters are intentionally set to a non-trivial value.
 
     test('PointerDownEvent', () {
-      const PointerDownEvent event = PointerDownEvent();
+      const event = PointerDownEvent();
       expect(event.buttons, kPrimaryButton);
     });
 
     test('PointerMoveEvent', () {
-      const PointerMoveEvent event = PointerMoveEvent();
+      const event = PointerMoveEvent();
       expect(event.buttons, kPrimaryButton);
     });
   });
 
   test('paintTransformToPointerEventTransform', () {
-    Matrix4 original = Matrix4.identity();
+    var original = Matrix4.identity();
     Matrix4 changed = PointerEvent.removePerspectiveTransform(original);
     expect(changed, original);
 
@@ -251,10 +251,10 @@ void main() {
   });
 
   test('transformPosition', () {
-    const Offset position = Offset(20, 30);
+    const position = Offset(20, 30);
     expect(PointerEvent.transformPosition(null, position), position);
     expect(PointerEvent.transformPosition(Matrix4.identity(), position), position);
-    final Matrix4 transform = Matrix4.translationValues(10, 20, 0);
+    final transform = Matrix4.translationValues(10, 20, 0);
     expect(
       PointerEvent.transformPosition(transform, position),
       const Offset(20.0 + 10.0, 30.0 + 20.0),
@@ -290,10 +290,10 @@ void main() {
     final Matrix4 transform = (Matrix4.identity()..scale(2.0, 2.0, 1.0)).multiplied(
       Matrix4.translationValues(10.0, 20.0, 0.0),
     );
-    const Offset localPosition = Offset(60, 100);
-    const Offset localDelta = Offset(10, 10);
+    const localPosition = Offset(60, 100);
+    const localDelta = Offset(10, 10);
 
-    const PointerAddedEvent added = PointerAddedEvent(
+    const added = PointerAddedEvent(
       timeStamp: Duration(seconds: 2),
       kind: PointerDeviceKind.mouse,
       device: 1,
@@ -310,7 +310,7 @@ void main() {
     );
     _expectTransformedEvent(original: added, transform: transform, localPosition: localPosition);
 
-    const PointerCancelEvent cancel = PointerCancelEvent(
+    const cancel = PointerCancelEvent(
       timeStamp: Duration(seconds: 2),
       pointer: 45,
       kind: PointerDeviceKind.mouse,
@@ -332,7 +332,7 @@ void main() {
     );
     _expectTransformedEvent(original: cancel, transform: transform, localPosition: localPosition);
 
-    const PointerDownEvent down = PointerDownEvent(
+    const down = PointerDownEvent(
       timeStamp: Duration(seconds: 2),
       pointer: 45,
       kind: PointerDeviceKind.mouse,
@@ -354,7 +354,7 @@ void main() {
     );
     _expectTransformedEvent(original: down, transform: transform, localPosition: localPosition);
 
-    const PointerEnterEvent enter = PointerEnterEvent(
+    const enter = PointerEnterEvent(
       timeStamp: Duration(seconds: 2),
       kind: PointerDeviceKind.mouse,
       device: 1,
@@ -382,7 +382,7 @@ void main() {
       localDelta: localDelta,
     );
 
-    const PointerExitEvent exit = PointerExitEvent(
+    const exit = PointerExitEvent(
       timeStamp: Duration(seconds: 2),
       kind: PointerDeviceKind.mouse,
       device: 1,
@@ -410,7 +410,7 @@ void main() {
       localDelta: localDelta,
     );
 
-    const PointerHoverEvent hover = PointerHoverEvent(
+    const hover = PointerHoverEvent(
       timeStamp: Duration(seconds: 2),
       kind: PointerDeviceKind.mouse,
       device: 1,
@@ -438,7 +438,7 @@ void main() {
       localDelta: localDelta,
     );
 
-    const PointerMoveEvent move = PointerMoveEvent(
+    const move = PointerMoveEvent(
       timeStamp: Duration(seconds: 2),
       pointer: 45,
       kind: PointerDeviceKind.mouse,
@@ -468,7 +468,7 @@ void main() {
       localDelta: localDelta,
     );
 
-    const PointerRemovedEvent removed = PointerRemovedEvent(
+    const removed = PointerRemovedEvent(
       timeStamp: Duration(seconds: 2),
       kind: PointerDeviceKind.mouse,
       device: 1,
@@ -482,14 +482,14 @@ void main() {
     );
     _expectTransformedEvent(original: removed, transform: transform, localPosition: localPosition);
 
-    const PointerScrollEvent scroll = PointerScrollEvent(
+    const scroll = PointerScrollEvent(
       timeStamp: Duration(seconds: 2),
       device: 1,
       position: Offset(20, 30),
     );
     _expectTransformedEvent(original: scroll, transform: transform, localPosition: localPosition);
 
-    const PointerPanZoomStartEvent panZoomStart = PointerPanZoomStartEvent(
+    const panZoomStart = PointerPanZoomStartEvent(
       timeStamp: Duration(seconds: 2),
       device: 1,
       position: Offset(20, 30),
@@ -500,7 +500,7 @@ void main() {
       localPosition: localPosition,
     );
 
-    const PointerPanZoomUpdateEvent panZoomUpdate = PointerPanZoomUpdateEvent(
+    const panZoomUpdate = PointerPanZoomUpdateEvent(
       timeStamp: Duration(seconds: 2),
       device: 1,
       position: Offset(20, 30),
@@ -511,7 +511,7 @@ void main() {
       localPosition: localPosition,
     );
 
-    const PointerPanZoomEndEvent panZoomEnd = PointerPanZoomEndEvent(
+    const panZoomEnd = PointerPanZoomEndEvent(
       timeStamp: Duration(seconds: 2),
       device: 1,
       position: Offset(20, 30),
@@ -522,7 +522,7 @@ void main() {
       localPosition: localPosition,
     );
 
-    const PointerUpEvent up = PointerUpEvent(
+    const up = PointerUpEvent(
       timeStamp: Duration(seconds: 2),
       pointer: 45,
       kind: PointerDeviceKind.mouse,
@@ -655,7 +655,7 @@ void main() {
     );
 
     const Offset position = Offset.zero;
-    const Duration timeStamp = Duration(days: 2);
+    const timeStamp = Duration(days: 2);
 
     test('PointerAddedEvent.copyWith()', () {
       final PointerEvent event = added.copyWith(position: position, timeStamp: timeStamp);

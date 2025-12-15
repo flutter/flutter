@@ -95,6 +95,7 @@ class IOSCoreDeviceLauncher {
     required String bundlePath,
     required String bundleId,
     required List<String> launchArguments,
+    required ShutdownHooks shutdownHooks,
   }) async {
     // Install app to device
     final (bool installStatus, IOSCoreDeviceInstallResult? installResult) = await _coreDeviceControl
@@ -111,6 +112,7 @@ class IOSCoreDeviceLauncher {
       bundleId: bundleId,
       launchArguments: launchArguments,
       startStopped: true,
+      shutdownHooks: shutdownHooks,
     );
 
     if (!launchResult) {
@@ -650,6 +652,9 @@ class IOSCoreDeviceControl {
   ///
   /// If [attachToConsole] is true, attaches the application to the console and waits for the app
   /// to terminate.
+  ///
+  /// If [interactiveMode] is true, runs the process in interactive mode (via script) to convince
+  /// devicectl it has a terminal attached in order to redirect stdout.
   List<String> _launchAppCommand({
     required String deviceId,
     required String bundleId,
@@ -657,8 +662,10 @@ class IOSCoreDeviceControl {
     bool startStopped = false,
     bool attachToConsole = false,
     File? outputFile,
+    bool interactiveMode = false,
   }) {
     return <String>[
+      if (interactiveMode) ...<String>['script', '-t', '0', '/dev/null'],
       ..._xcode.xcrunCommand(),
       'devicectl',
       'device',
@@ -740,6 +747,7 @@ class IOSCoreDeviceControl {
     required IOSCoreDeviceLogForwarder coreDeviceLogForwarder,
     required String deviceId,
     required String bundleId,
+    required ShutdownHooks shutdownHooks,
     List<String> launchArguments = const <String>[],
     bool startStopped = false,
   }) async {
@@ -761,6 +769,7 @@ class IOSCoreDeviceControl {
       launchArguments: launchArguments,
       startStopped: startStopped,
       attachToConsole: true,
+      interactiveMode: true,
     );
 
     try {
@@ -770,6 +779,9 @@ class IOSCoreDeviceControl {
       final StreamSubscription<String> stdoutSubscription = launchProcess.stdout
           .transform(utf8LineDecoder)
           .listen((String line) {
+            if (line.trim().isEmpty) {
+              return;
+            }
             if (launchCompleter.isCompleted && !_ignoreLog(line)) {
               coreDeviceLogForwarder.addLog(line);
             } else {
@@ -784,6 +796,9 @@ class IOSCoreDeviceControl {
       final StreamSubscription<String> stderrSubscription = launchProcess.stderr
           .transform(utf8LineDecoder)
           .listen((String line) {
+            if (line.trim().isEmpty) {
+              return;
+            }
             if (launchCompleter.isCompleted && !_ignoreLog(line)) {
               coreDeviceLogForwarder.addLog(line);
             } else {
@@ -805,6 +820,11 @@ class IOSCoreDeviceControl {
               }
             }),
       );
+
+      // devicectl is running in an interactive shell.
+      // Signal script child jobs to exit and exit the shell.
+      // See https://linux.die.net/Bash-Beginners-Guide/sect_12_01.html#sect_12_01_01_02.
+      shutdownHooks.addShutdownHook(() => launchProcess.kill());
       return launchCompleter.future;
     } on ProcessException catch (err) {
       _logger.printTrace('Error executing devicectl: $err');

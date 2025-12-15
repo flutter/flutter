@@ -46,7 +46,7 @@ const List<String> colorStrings = [
 int colorIndex = 0;
 
 String getNextColor() {
-  final colorString = colorStrings[colorIndex];
+  final String colorString = colorStrings[colorIndex];
   colorIndex++;
   colorIndex %= colorStrings.length;
   return colorString;
@@ -59,8 +59,8 @@ String getColorAsString() {
 String offsetAsString(Object? offset) {
   offset as Map<String, Object?>?;
   offset!;
-  final num x = offset['x']! as num;
-  final num y = offset['y']! as num;
+  final x = offset['x']! as num;
+  final y = offset['y']! as num;
   if (x == 0 && y == 0) {
     return 'ui.Offset.zero';
   }
@@ -84,10 +84,10 @@ String rRectAsString(Object? rRect) {
 String rectAsString(Object? rect) {
   rect as Map<String, Object?>?;
   rect!;
-  final num left = rect['left']! as num;
-  final num top = rect['top']! as num;
-  final num right = rect['right']! as num;
-  final num bottom = rect['bottom']! as num;
+  final left = rect['left']! as num;
+  final top = rect['top']! as num;
+  final right = rect['right']! as num;
+  final bottom = rect['bottom']! as num;
 
   if (left == 0 && top == 0 && right == 0 && bottom == 0) {
     return 'ui.Rect.zero';
@@ -180,7 +180,7 @@ void emitOperation(Object? operation, String indent) {
 void emitLayer(Map<String, Object?> command, String indent) {
   final layer = command['layer']! as Map<String, Object?>;
   print('$indent{');
-  final String innerIndent = '  $indent';
+  final innerIndent = '  $indent';
   emitOperation(layer['operation'], innerIndent);
   emitCommands(layer['commands'], innerIndent);
   print('${innerIndent}builder.pop();');
@@ -232,7 +232,7 @@ int main(List<String> args) {
     stderr.write('Json file at path ${jsonFile.path} not found.\n');
   }
 
-  final fileString = jsonFile.readAsStringSync();
+  final String fileString = jsonFile.readAsStringSync();
   final sceneJson = jsonDecode(fileString) as Map<String, Object?>;
   final rootLayer = sceneJson['rootLayer']! as Map<String, Object?>;
   print('''

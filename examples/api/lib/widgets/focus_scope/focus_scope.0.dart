@@ -135,10 +135,12 @@ class _FocusScopeExampleState extends State<FocusScopeExample> {
           child: Pane(
             icon: const Icon(Icons.menu),
             focusNode: foregroundNode,
-            // TRY THIS: Try changing this to Colors.green.withOpacity(0.8) to see for
+            // TRY THIS: Try changing this to Colors.green.withValues(alpha: 0.8) to see for
             // yourself that the hidden components do/don't get focus.
             backgroundColor: Colors.green,
-            onPressed: backdropIsVisible ? null : () => setState(() => backdropIsVisible = true),
+            onPressed: backdropIsVisible
+                ? null
+                : () => setState(() => backdropIsVisible = true),
             child: DefaultTextStyle(
               style: Theme.of(context).textTheme.displayMedium!,
               child: const Text('FOREGROUND'),

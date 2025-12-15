@@ -27,7 +27,7 @@ export 'package:test_api/fake.dart' show Fake;
 
 Declarer? _localDeclarer;
 Declarer get _declarer {
-  final Declarer? declarer = Zone.current[#test.declarer] as Declarer?;
+  final declarer = Zone.current[#test.declarer] as Declarer?;
   if (declarer != null) {
     return declarer;
   }
@@ -36,10 +36,10 @@ Declarer get _declarer {
     _localDeclarer = Declarer();
     Future<void>(() {
       Invoker.guard<Future<void>>(() async {
-        final _Reporter reporter = _Reporter(color: false); // disable color when run directly.
+        final reporter = _Reporter(color: false); // disable color when run directly.
         // ignore: recursive_getters, this self-call is safe since it will just fetch the declarer instance
         final Group group = _declarer.build();
-        final Suite suite = Suite(group, SuitePlatform(Runtime.vm));
+        final suite = Suite(group, SuitePlatform(Runtime.vm));
         await _runGroup(suite, group, <Group>[], reporter);
         reporter._onDone();
       });
@@ -57,7 +57,7 @@ Future<void> _runGroup(
   parents.add(group);
   try {
     final bool skipGroup = group.metadata.skip;
-    bool setUpAllSucceeded = true;
+    var setUpAllSucceeded = true;
     if (!skipGroup && group.setUpAll != null) {
       final LiveTest liveTest = group.setUpAll!.load(suiteConfig, groups: parents);
       await _runLiveTest(suiteConfig, liveTest, reporter, countSuccess: false);
@@ -70,7 +70,7 @@ Future<void> _runGroup(
         } else if (entry.metadata.skip) {
           await _runSkippedTest(suiteConfig, entry as Test, parents, reporter);
         } else {
-          final Test test = entry as Test;
+          final test = entry as Test;
           await _runLiveTest(suiteConfig, test.load(suiteConfig, groups: parents), reporter);
         }
       }
@@ -113,7 +113,7 @@ Future<void> _runSkippedTest(
   List<Group> parents,
   _Reporter reporter,
 ) async {
-  final LocalTest skipped = LocalTest(test.name, test.metadata, () {}, trace: test.trace);
+  final skipped = LocalTest(test.name, test.metadata, () {}, trace: test.trace);
   if (skipped.metadata.skipReason != null) {
     reporter.log('Skip: ${skipped.metadata.skipReason}');
   }
@@ -450,7 +450,7 @@ class _Reporter {
     }
     color ??= '';
     final Duration duration = _stopwatch.elapsed;
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
 
     // \r moves back to the beginning of the current line.
     buffer.write('${_timeString(duration)} ');
@@ -521,7 +521,7 @@ String _prefixLines(String text, String prefix, {String? first, String? last, St
   if (lines.length == 1) {
     return '$single$text';
   }
-  final StringBuffer buffer = StringBuffer('$first${lines.first}\n');
+  final buffer = StringBuffer('$first${lines.first}\n');
   // Write out all but the first and last lines with [prefix].
   for (final String line in lines.skip(1).take(lines.length - 2)) {
     buffer.writeln('$prefix$line');

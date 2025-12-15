@@ -31,7 +31,7 @@ class PreparePackageException implements Exception {
 
   @override
   String toString() {
-    String output = runtimeType.toString();
+    var output = runtimeType.toString();
     output += ': $message';
     final String stderr = result?.stderr as String? ?? '';
     if (stderr.isNotEmpty) {

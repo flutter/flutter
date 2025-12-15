@@ -246,12 +246,12 @@ class Visibility extends StatelessWidget {
   /// [Visibility] elements in the ancestor tree, such that if any of their
   /// visibilities changes, the specified context will be rebuilt.
   static bool of(BuildContext context) {
-    bool isVisible = true;
-    BuildContext ancestorContext = context;
+    var isVisible = true;
+    var ancestorContext = context;
     InheritedElement? ancestor = ancestorContext
         .getElementForInheritedWidgetOfExactType<_VisibilityScope>();
     while (isVisible && ancestor != null) {
-      final _VisibilityScope scope = context.dependOnInheritedElement(ancestor) as _VisibilityScope;
+      final scope = context.dependOnInheritedElement(ancestor) as _VisibilityScope;
       isVisible = scope.isVisible;
       ancestor.visitAncestorElements((Element parent) {
         ancestorContext = parent;

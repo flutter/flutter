@@ -77,7 +77,7 @@ class Response {
 
   /// Deserializes the result from JSON.
   static Response fromJson(String source) {
-    final Map<String, dynamic> responseJson = json.decode(source) as Map<String, dynamic>;
+    final responseJson = json.decode(source) as Map<String, dynamic>;
     if ((responseJson['result'] as String?) == 'true') {
       return Response.allTestsPassed(data: responseJson['data'] as Map<String, dynamic>?);
     } else {
@@ -94,9 +94,9 @@ class Response {
       return '';
     }
 
-    final StringBuffer sb = StringBuffer();
-    int failureCount = 1;
-    for (final Failure failure in failureDetails) {
+    final sb = StringBuffer();
+    var failureCount = 1;
+    for (final failure in failureDetails) {
       sb.writeln('Failure in method: ${failure.methodName}');
       sb.writeln(failure.details);
       sb.writeln('end of failure $failureCount\n\n');
@@ -142,7 +142,7 @@ class Failure {
 
   /// Decode a JSON string to create a Failure object.
   static Failure fromJsonString(String jsonString) {
-    final Map<String, dynamic> failure = json.decode(jsonString) as Map<String, dynamic>;
+    final failure = json.decode(jsonString) as Map<String, dynamic>;
     return Failure(failure['methodName'] as String, failure['details'] as String?);
   }
 }

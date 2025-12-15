@@ -42,7 +42,7 @@ class HighContrastSupport {
   }
 
   void _onHighContrastChange(DomEvent event) {
-    final DomMediaQueryListEvent mqEvent = event as DomMediaQueryListEvent;
+    final mqEvent = event as DomMediaQueryListEvent;
     final bool isHighContrastEnabled = mqEvent.matches!;
     for (final HighContrastListener listener in _listeners) {
       listener(isHighContrastEnabled);
@@ -84,7 +84,7 @@ class SystemColorPaletteDetector {
 }
 
 Map<String, ui.SystemColor> _detectSystemColors(ui.Brightness brightness) {
-  final hostDetector = createDomHTMLDivElement();
+  final DomHTMLDivElement hostDetector = createDomHTMLDivElement();
   hostDetector.style
     ..position = 'absolute'
     ..transform = 'translate(-10000, -10000)'
@@ -94,8 +94,8 @@ Map<String, ui.SystemColor> _detectSystemColors(ui.Brightness brightness) {
 
   final colorDetectors = <String, DomHTMLElement>{};
 
-  for (final systemColorName in systemColorNames) {
-    final detector = createDomHTMLDivElement();
+  for (final String systemColorName in systemColorNames) {
+    final DomHTMLDivElement detector = createDomHTMLDivElement();
     detector.style.backgroundColor = systemColorName;
     detector.innerText = '$systemColorName detector';
     hostDetector.appendChild(detector);
@@ -105,10 +105,10 @@ Map<String, ui.SystemColor> _detectSystemColors(ui.Brightness brightness) {
   final results = <String, ui.SystemColor>{};
 
   colorDetectors.forEach((systemColorName, detector) {
-    final computedDetector = domWindow.getComputedStyle(detector);
-    final computedColor = computedDetector.backgroundColor;
+    final DomCSSStyleDeclaration computedDetector = domWindow.getComputedStyle(detector);
+    final String computedColor = computedDetector.backgroundColor;
 
-    final isSupported = domCSS.supports('color', systemColorName);
+    final bool isSupported = domCSS.supports('color', systemColorName);
     ui.Color? value;
     if (isSupported) {
       value = parseCssRgb(computedColor);
@@ -128,8 +128,8 @@ ui.Color? parseCssRgb(String rgbString) {
   // Remove leading and trailing whitespace.
   rgbString = rgbString.trim();
 
-  final isRgb = rgbString.startsWith('rgb(');
-  final isRgba = rgbString.startsWith('rgba(');
+  final bool isRgb = rgbString.startsWith('rgb(');
+  final bool isRgba = rgbString.startsWith('rgba(');
 
   if ((!isRgb && !isRgba) || !rgbString.endsWith(')')) {
     assert(() {
@@ -142,8 +142,8 @@ ui.Color? parseCssRgb(String rgbString) {
   assert(isRgb || isRgba);
 
   // Extract the comma-separated values.
-  final valuesString = rgbString.substring(isRgb ? 4 : 5, rgbString.length - 1);
-  final values = valuesString.split(',');
+  final String valuesString = rgbString.substring(isRgb ? 4 : 5, rgbString.length - 1);
+  final List<String> values = valuesString.split(',');
 
   // Check if there are exactly three values for RGB, and four values for RGBA.
   if ((isRgb && values.length != 3) || (isRgba && values.length != 4)) {
@@ -157,9 +157,9 @@ ui.Color? parseCssRgb(String rgbString) {
   }
 
   // Parse the values as integers.
-  final r = int.tryParse(values[0].trim());
-  final g = int.tryParse(values[1].trim());
-  final b = int.tryParse(values[2].trim());
+  final int? r = int.tryParse(values[0].trim());
+  final int? g = int.tryParse(values[1].trim());
+  final int? b = int.tryParse(values[2].trim());
 
   // Check if the values are valid integers between 0 and 255.
   if (r == null ||
@@ -184,7 +184,7 @@ ui.Color? parseCssRgb(String rgbString) {
     return ui.Color.fromRGBO(r, g, b, 1.0);
   } else {
     assert(isRgba);
-    final a = double.tryParse(values[3].trim());
+    final double? a = double.tryParse(values[3].trim());
     if (a == null || a < 0.0 || a > 1.0) {
       assert(() {
         print('Bad CSS color "$rgbString": alpha component outside the 0.0-1.0 range: $a');

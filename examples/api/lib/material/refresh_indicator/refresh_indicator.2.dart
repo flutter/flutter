@@ -21,7 +21,8 @@ class RefreshIndicatorExample extends StatefulWidget {
   const RefreshIndicatorExample({super.key});
 
   @override
-  State<RefreshIndicatorExample> createState() => _RefreshIndicatorExampleState();
+  State<RefreshIndicatorExample> createState() =>
+      _RefreshIndicatorExampleState();
 }
 
 class _RefreshIndicatorExampleState extends State<RefreshIndicatorExample> {
@@ -64,7 +65,9 @@ class _RefreshIndicatorExampleState extends State<RefreshIndicatorExample> {
                     return ListTile(
                       tileColor: Colors.green[100],
                       title: const Text('Pull down here'),
-                      subtitle: const Text('A custom refresh indicator will be shown'),
+                      subtitle: const Text(
+                        'A custom refresh indicator will be shown',
+                      ),
                     );
                   },
                 ),

@@ -15,7 +15,7 @@ Future<void> main() async {
     try {
       await runPluginProjectTest((FlutterPluginProject pluginProject) async {
         section('check main plugin file exists');
-        final File pluginMainKotlinFile = File(
+        final pluginMainKotlinFile = File(
           path.join(
             pluginProject.rootPath,
             'android',

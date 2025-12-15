@@ -18,7 +18,7 @@ void testMain() {
 
     test('toSkPaint', () {
       final paint = CkPaint();
-      final skPaint = paint.toSkPaint();
+      final SkPaint skPaint = paint.toSkPaint();
       expect(skPaint, isNotNull);
       skPaint.delete();
     });

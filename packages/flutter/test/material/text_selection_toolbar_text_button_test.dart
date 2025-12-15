@@ -10,8 +10,8 @@ void main() {
 
   testWidgets('position in the toolbar changes width', (WidgetTester tester) async {
     late StateSetter setState;
-    int index = 1;
-    int total = 3;
+    var index = 1;
+    var total = 3;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -61,10 +61,7 @@ void main() {
     expect(onlySize.width, greaterThan(lastSize.width));
   });
 
-  for (final ColorScheme colorScheme in <ColorScheme>[
-    ThemeData().colorScheme,
-    ThemeData.dark().colorScheme,
-  ]) {
+  for (final colorScheme in <ColorScheme>[ThemeData().colorScheme, ThemeData.dark().colorScheme]) {
     testWidgets('foreground color by default', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -176,4 +173,19 @@ void main() {
       expect(textButton.style!.backgroundColor!.resolve(<WidgetState>{}), Colors.transparent);
     });
   }
+
+  testWidgets('TextSelectionToolbarTextButton does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: TextSelectionToolbarTextButton(padding: EdgeInsets.all(5), child: Text('X')),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(TextSelectionToolbarTextButton)), Size.zero);
+  });
 }

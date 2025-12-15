@@ -14,18 +14,18 @@ void main() {
 
   test('BottomSheetThemeData lerp special cases', () {
     expect(BottomSheetThemeData.lerp(null, null, 0), null);
-    const BottomSheetThemeData data = BottomSheetThemeData();
+    const data = BottomSheetThemeData();
     expect(identical(BottomSheetThemeData.lerp(data, data, 0.5), data), true);
   });
 
   test('BottomSheetThemeData lerp special cases', () {
     expect(BottomSheetThemeData.lerp(null, null, 0), null);
-    const BottomSheetThemeData data = BottomSheetThemeData();
+    const data = BottomSheetThemeData();
     expect(identical(BottomSheetThemeData.lerp(data, data, 0.5), data), true);
   });
 
   test('BottomSheetThemeData null fields by default', () {
-    const BottomSheetThemeData bottomSheetTheme = BottomSheetThemeData();
+    const bottomSheetTheme = BottomSheetThemeData();
     expect(bottomSheetTheme.backgroundColor, null);
     expect(bottomSheetTheme.shadowColor, null);
     expect(bottomSheetTheme.elevation, null);
@@ -37,7 +37,7 @@ void main() {
   });
 
   testWidgets('Default BottomSheetThemeData debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const BottomSheetThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -49,7 +49,7 @@ void main() {
   });
 
   testWidgets('BottomSheetThemeData implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const BottomSheetThemeData(
       backgroundColor: Color(0xFFFFFFFF),
       elevation: 2.0,
@@ -165,7 +165,7 @@ void main() {
   ) async {
     const Color backgroundColor = Colors.purple;
     const Color shadowColor = Colors.blue;
-    const double elevation = 7.0;
+    const elevation = 7.0;
     const ShapeBorder shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(9.0)),
     );
@@ -203,12 +203,12 @@ void main() {
   testWidgets('Modal bottom sheet-specific parameters are used for modal bottom sheets', (
     WidgetTester tester,
   ) async {
-    const double modalElevation = 5.0;
-    const double persistentElevation = 7.0;
+    const modalElevation = 5.0;
+    const persistentElevation = 7.0;
     const Color modalBackgroundColor = Colors.yellow;
     const Color modalBarrierColor = Colors.blue;
     const Color persistentBackgroundColor = Colors.red;
-    const BottomSheetThemeData bottomSheetTheme = BottomSheetThemeData(
+    const bottomSheetTheme = BottomSheetThemeData(
       elevation: persistentElevation,
       modalElevation: modalElevation,
       backgroundColor: persistentBackgroundColor,
@@ -233,11 +233,11 @@ void main() {
   testWidgets(
     'General bottom sheet parameters take priority over modal bottom sheet-specific parameters for persistent bottom sheets',
     (WidgetTester tester) async {
-      const double modalElevation = 5.0;
-      const double persistentElevation = 7.0;
+      const modalElevation = 5.0;
+      const persistentElevation = 7.0;
       const Color modalBackgroundColor = Colors.yellow;
       const Color persistentBackgroundColor = Colors.red;
-      const BottomSheetThemeData bottomSheetTheme = BottomSheetThemeData(
+      const bottomSheetTheme = BottomSheetThemeData(
         elevation: persistentElevation,
         modalElevation: modalElevation,
         backgroundColor: persistentBackgroundColor,
@@ -259,9 +259,9 @@ void main() {
   testWidgets(
     "Material3 - Modal bottom sheet-specific parameters don't apply to persistent bottom sheets",
     (WidgetTester tester) async {
-      const double modalElevation = 5.0;
+      const modalElevation = 5.0;
       const Color modalBackgroundColor = Colors.yellow;
-      const BottomSheetThemeData bottomSheetTheme = BottomSheetThemeData(
+      const bottomSheetTheme = BottomSheetThemeData(
         modalElevation: modalElevation,
         modalBackgroundColor: modalBackgroundColor,
       );
@@ -282,9 +282,9 @@ void main() {
   testWidgets(
     "Material2 - Modal bottom sheet-specific parameters don't apply to persistent bottom sheets",
     (WidgetTester tester) async {
-      const double modalElevation = 5.0;
+      const modalElevation = 5.0;
       const Color modalBackgroundColor = Colors.yellow;
-      const BottomSheetThemeData bottomSheetTheme = BottomSheetThemeData(
+      const bottomSheetTheme = BottomSheetThemeData(
         modalElevation: modalElevation,
         modalBackgroundColor: modalBackgroundColor,
       );
@@ -302,8 +302,8 @@ void main() {
   );
 
   testWidgets('Modal bottom sheets respond to theme changes', (WidgetTester tester) async {
-    const double lightElevation = 5.0;
-    const double darkElevation = 3.0;
+    const lightElevation = 5.0;
+    const darkElevation = 3.0;
     const Color lightBackgroundColor = Colors.green;
     const Color darkBackgroundColor = Colors.grey;
     const Color lightShadowColor = Colors.blue;

@@ -33,7 +33,7 @@ void main() {
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
     // 2nd, check that the painting context has received the default clip behavior.
-    final TestClipPaintingContext context = TestClipPaintingContext();
+    final context = TestClipPaintingContext();
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.hardEdge));
 
@@ -84,9 +84,9 @@ void main() {
     });
 
     testWidgets('FixedExtentScrollController onAttach, onDetach', (WidgetTester tester) async {
-      int attach = 0;
-      int detach = 0;
-      final FixedExtentScrollController controller = FixedExtentScrollController(
+      var attach = 0;
+      var detach = 0;
+      final controller = FixedExtentScrollController(
         onAttach: (_) {
           attach++;
         },
@@ -120,7 +120,7 @@ void main() {
 
     // Regression test for https://github.com/flutter/flutter/issues/162972
     testWidgets('FixedExtentScrollController keepScrollOffset', (WidgetTester tester) async {
-      final PageStorageBucket bucket = PageStorageBucket();
+      final bucket = PageStorageBucket();
 
       Widget buildFrame(ScrollController controller) {
         return Directionality(
@@ -142,7 +142,7 @@ void main() {
         );
       }
 
-      FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 2);
+      var controller = FixedExtentScrollController(initialItem: 2);
       addTearDown(controller.dispose);
       await tester.pumpWidget(buildFrame(controller));
       expect(controller.selectedItem, 2);
@@ -184,9 +184,7 @@ void main() {
 
     // Regression test for https://github.com/flutter/flutter/issues/162972
     test('FixedExtentScrollController debugLabel', () {
-      final FixedExtentScrollController controller = FixedExtentScrollController(
-        debugLabel: 'MyCustomWidget',
-      );
+      final controller = FixedExtentScrollController(debugLabel: 'MyCustomWidget');
       expect(controller.debugLabel, 'MyCustomWidget');
       expect(controller.toString(), contains('MyCustomWidget'));
     });
@@ -237,7 +235,7 @@ void main() {
 
   group('infinite scrolling', () {
     testWidgets('infinite looping list', (WidgetTester tester) async {
-      final FixedExtentScrollController controller = FixedExtentScrollController();
+      final controller = FixedExtentScrollController();
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -279,7 +277,7 @@ void main() {
     });
 
     testWidgets('infinite child builder', (WidgetTester tester) async {
-      final FixedExtentScrollController controller = FixedExtentScrollController();
+      final controller = FixedExtentScrollController();
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -317,9 +315,9 @@ void main() {
 
     testWidgets('child builder with lower and upper limits', (WidgetTester tester) async {
       // Adjust the content dimensions at the end of `RenderListWheelViewport.performLayout()`
-      final List<int> paintedChildren = <int>[];
+      final paintedChildren = <int>[];
 
-      final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: -10);
+      final controller = FixedExtentScrollController(initialItem: -10);
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -371,7 +369,7 @@ void main() {
       'Flings with high velocity should not break the children lower and upper limits',
       (WidgetTester tester) async {
         // Regression test for https://github.com/flutter/flutter/issues/112526
-        final FixedExtentScrollController controller = FixedExtentScrollController();
+        final controller = FixedExtentScrollController();
         addTearDown(controller.dispose);
 
         Widget buildFrame() {
@@ -409,7 +407,7 @@ void main() {
 
     // Regression test for https://github.com/flutter/flutter/issues/90953
     testWidgets('ListWheelScrollView childDelegate update test 2', (WidgetTester tester) async {
-      final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 2);
+      final controller = FixedExtentScrollController(initialItem: 2);
       addTearDown(controller.dispose);
 
       Widget buildFrame(int childCount) {
@@ -469,7 +467,7 @@ void main() {
 
     // Regression test for https://github.com/flutter/flutter/issues/58144
     testWidgets('ListWheelScrollView childDelegate update test', (WidgetTester tester) async {
-      final FixedExtentScrollController controller = FixedExtentScrollController();
+      final controller = FixedExtentScrollController();
       addTearDown(controller.dispose);
 
       Widget buildFrame(int childCount) {
@@ -554,8 +552,8 @@ void main() {
     });
 
     testWidgets('builder is never called twice for same index', (WidgetTester tester) async {
-      final Set<int> builtChildren = <int>{};
-      final FixedExtentScrollController controller = FixedExtentScrollController();
+      final builtChildren = <int>{};
+      final controller = FixedExtentScrollController();
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -589,7 +587,7 @@ void main() {
     testWidgets('only visible children are maintained as children of the rendered viewport', (
       WidgetTester tester,
     ) async {
-      final FixedExtentScrollController controller = FixedExtentScrollController();
+      final controller = FixedExtentScrollController();
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -606,7 +604,7 @@ void main() {
         ),
       );
 
-      final RenderListWheelViewport viewport =
+      final viewport =
           tester.renderObject(find.byType(ListWheelViewport)) as RenderListWheelViewport;
 
       // Item 0 is in the middle. There are 3 children visible after it, so the
@@ -627,7 +625,7 @@ void main() {
     });
 
     testWidgets('a tighter squeeze lays out more children', (WidgetTester tester) async {
-      final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 10);
+      final controller = FixedExtentScrollController(initialItem: 10);
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -644,7 +642,7 @@ void main() {
         ),
       );
 
-      final RenderListWheelViewport viewport =
+      final viewport =
           tester.renderObject(find.byType(ListWheelViewport)) as RenderListWheelViewport;
 
       // The screen is vertically 600px. Since the middle item is centered,
@@ -710,9 +708,9 @@ void main() {
 
   group('pre-transform viewport', () {
     testWidgets('ListWheelScrollView starts and ends from the middle', (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
-      final List<int> paintedChildren = <int>[];
+      final paintedChildren = <int>[];
 
       await tester.pumpWidget(
         Directionality(
@@ -757,9 +755,9 @@ void main() {
     testWidgets('A child gets painted as soon as its first pixel is in the viewport', (
       WidgetTester tester,
     ) async {
-      final ScrollController controller = ScrollController(initialScrollOffset: 50.0);
+      final controller = ScrollController(initialScrollOffset: 50.0);
       addTearDown(controller.dispose);
-      final List<int> paintedChildren = <int>[];
+      final paintedChildren = <int>[];
 
       await tester.pumpWidget(
         Directionality(
@@ -796,9 +794,9 @@ void main() {
     testWidgets('A child is no longer painted after its last pixel leaves the viewport', (
       WidgetTester tester,
     ) async {
-      final ScrollController controller = ScrollController(initialScrollOffset: 250.0);
+      final controller = ScrollController(initialScrollOffset: 250.0);
       addTearDown(controller.dispose);
-      final List<int> paintedChildren = <int>[];
+      final paintedChildren = <int>[];
 
       await tester.pumpWidget(
         Directionality(
@@ -877,7 +875,7 @@ void main() {
         ),
       );
 
-      final RenderListWheelViewport viewport =
+      final viewport =
           tester.renderObject(find.byType(ListWheelViewport)) as RenderListWheelViewport;
       expect(
         viewport,
@@ -905,7 +903,7 @@ void main() {
     });
 
     testWidgets('Curve the wheel to the left', (WidgetTester tester) async {
-      final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
+      final controller = ScrollController(initialScrollOffset: 300.0);
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -934,7 +932,7 @@ void main() {
     testWidgets('Scrolling, diameterRatio, perspective all changes matrix', (
       WidgetTester tester,
     ) async {
-      final ScrollController controller = ScrollController(initialScrollOffset: 200.0);
+      final controller = ScrollController(initialScrollOffset: 200.0);
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -948,7 +946,7 @@ void main() {
         ),
       );
 
-      final RenderListWheelViewport viewport =
+      final viewport =
           tester.renderObject(find.byType(ListWheelViewport)) as RenderListWheelViewport;
       expect(
         viewport,
@@ -1087,7 +1085,7 @@ void main() {
     });
 
     testWidgets('offAxisFraction, magnification changes matrix', (WidgetTester tester) async {
-      final ScrollController controller = ScrollController(initialScrollOffset: 200.0);
+      final controller = ScrollController(initialScrollOffset: 200.0);
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -1102,7 +1100,7 @@ void main() {
         ),
       );
 
-      final RenderListWheelViewport viewport =
+      final viewport =
           tester.renderObject(find.byType(ListWheelViewport)) as RenderListWheelViewport;
       expect(
         viewport,
@@ -1172,7 +1170,7 @@ void main() {
 
   group('scroll notifications', () {
     testWidgets('no onSelectedItemChanged callback on first build', (WidgetTester tester) async {
-      bool itemChangeCalled = false;
+      var itemChangeCalled = false;
       void onItemChange(int _) {
         itemChangeCalled = true;
       }
@@ -1194,7 +1192,7 @@ void main() {
     testWidgets('onSelectedItemChanged when a new item is closest to center', (
       WidgetTester tester,
     ) async {
-      final List<int> selectedItems = <int>[];
+      final selectedItems = <int>[];
 
       await tester.pumpWidget(
         Directionality(
@@ -1235,7 +1233,7 @@ void main() {
     testWidgets('onSelectedItemChanged with new change reporting behavior', (
       WidgetTester tester,
     ) async {
-      final List<int> selectedItems = <int>[];
+      final selectedItems = <int>[];
 
       await tester.pumpWidget(
         Directionality(
@@ -1279,7 +1277,7 @@ void main() {
     });
 
     testWidgets('onSelectedItemChanged reports only in valid range', (WidgetTester tester) async {
-      final List<int> selectedItems = <int>[];
+      final selectedItems = <int>[];
 
       await tester.pumpWidget(
         Directionality(
@@ -1302,7 +1300,7 @@ void main() {
       // First move back past the beginning.
       await scrollGesture.moveBy(const Offset(0.0, 70.0));
 
-      for (double verticalOffset = 0.0; verticalOffset > -2000.0; verticalOffset -= 10.0) {
+      for (var verticalOffset = 0.0; verticalOffset > -2000.0; verticalOffset -= 10.0) {
         // Then gradually move down by a total vertical extent much higher than
         // the scrollable extent.
         await scrollGesture.moveTo(Offset(0.0, verticalOffset));
@@ -1317,9 +1315,9 @@ void main() {
 
   group('scroll controller', () {
     testWidgets('initialItem', (WidgetTester tester) async {
-      final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 10);
+      final controller = FixedExtentScrollController(initialItem: 10);
       addTearDown(controller.dispose);
-      final List<int> paintedChildren = <int>[];
+      final paintedChildren = <int>[];
 
       await tester.pumpWidget(
         Directionality(
@@ -1346,9 +1344,9 @@ void main() {
     });
 
     testWidgets('controller jump', (WidgetTester tester) async {
-      final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 10);
+      final controller = FixedExtentScrollController(initialItem: 10);
       addTearDown(controller.dispose);
-      final List<int> paintedChildren = <int>[];
+      final paintedChildren = <int>[];
 
       await tester.pumpWidget(
         Directionality(
@@ -1381,9 +1379,9 @@ void main() {
     });
 
     testWidgets('controller animateToItem', (WidgetTester tester) async {
-      final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 10);
+      final controller = FixedExtentScrollController(initialItem: 10);
       addTearDown(controller.dispose);
-      final List<int> paintedChildren = <int>[];
+      final paintedChildren = <int>[];
 
       await tester.pumpWidget(
         Directionality(
@@ -1417,8 +1415,8 @@ void main() {
     });
 
     testWidgets('onSelectedItemChanged and controller are in sync', (WidgetTester tester) async {
-      final List<int> selectedItems = <int>[];
-      final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 10);
+      final selectedItems = <int>[];
+      final controller = FixedExtentScrollController(initialItem: 10);
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -1471,7 +1469,7 @@ void main() {
       await tester.drag(find.byType(ListWheelScrollView), const Offset(0.0, -500.0));
       await tester.pump();
 
-      final FixedExtentScrollController controller1 = FixedExtentScrollController(initialItem: 30);
+      final controller1 = FixedExtentScrollController(initialItem: 30);
       addTearDown(controller1.dispose);
 
       // Attaching first controller.
@@ -1496,7 +1494,7 @@ void main() {
       expect(controller1.selectedItem, 50);
       expect(controller1.position.pixels, 5000.0);
 
-      final FixedExtentScrollController controller2 = FixedExtentScrollController(initialItem: 33);
+      final controller2 = FixedExtentScrollController(initialItem: 33);
       addTearDown(controller2.dispose);
 
       // Attaching the second controller.
@@ -1542,7 +1540,7 @@ void main() {
     });
 
     testWidgets('controller can be reused', (WidgetTester tester) async {
-      final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 3);
+      final controller = FixedExtentScrollController(initialItem: 3);
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -1595,9 +1593,9 @@ void main() {
     testWidgets('fling velocities too low snaps back to the same item', (
       WidgetTester tester,
     ) async {
-      final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 40);
+      final controller = FixedExtentScrollController(initialItem: 40);
       addTearDown(controller.dispose);
-      final List<double> scrolledPositions = <double>[];
+      final scrolledPositions = <double>[];
 
       await tester.pumpWidget(
         Directionality(
@@ -1644,9 +1642,9 @@ void main() {
     testWidgets(
       'high fling velocities lands exactly on items',
       (WidgetTester tester) async {
-        final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 40);
+        final controller = FixedExtentScrollController(initialItem: 40);
         addTearDown(controller.dispose);
-        final List<double> scrolledPositions = <double>[];
+        final scrolledPositions = <double>[];
 
         await tester.pumpWidget(
           Directionality(
@@ -1707,8 +1705,8 @@ void main() {
 
   testWidgets('ListWheelScrollView getOffsetToReveal', (WidgetTester tester) async {
     List<Widget> outerChildren;
-    final List<Widget> innerChildren = List<Widget>.generate(10, (int index) => Container());
-    final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
+    final innerChildren = List<Widget>.generate(10, (int index) => Container());
+    final controller = ScrollController(initialScrollOffset: 300.0);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -1794,7 +1792,7 @@ void main() {
   });
 
   testWidgets('will not assert on getOffsetToReveal Axis', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
+    final controller = ScrollController(initialScrollOffset: 300.0);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -1825,8 +1823,8 @@ void main() {
 
   testWidgets('ListWheelScrollView showOnScreen', (WidgetTester tester) async {
     List<Widget> outerChildren;
-    final List<Widget> innerChildren = List<Widget>.generate(10, (int index) => Container());
-    final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
+    final innerChildren = List<Widget>.generate(10, (int index) => Container());
+    final controller = ScrollController(initialScrollOffset: 300.0);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -1882,11 +1880,11 @@ void main() {
 
   group('gestures', () {
     testWidgets('ListWheelScrollView allows taps for on its children', (WidgetTester tester) async {
-      final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 10);
+      final controller = FixedExtentScrollController(initialItem: 10);
       addTearDown(controller.dispose);
-      final List<int> children = List<int>.generate(100, (int index) => index);
-      final List<int> paintedChildren = <int>[];
-      final Set<int> tappedChildren = <int>{};
+      final children = List<int>.generate(100, (int index) => index);
+      final paintedChildren = <int>[];
+      final tappedChildren = <int>{};
 
       await tester.pumpWidget(
         Directionality(
@@ -1922,7 +1920,7 @@ void main() {
       // Screen is 600px tall. Item 10 is in the center and each item is 100px tall.
       expect(paintedChildren, <int>[7, 8, 9, 10, 11, 12, 13]);
 
-      for (final int child in paintedChildren) {
+      for (final child in paintedChildren) {
         await tester.tap(find.byKey(ValueKey<int>(child)));
       }
       expect(tappedChildren, paintedChildren);
@@ -1931,7 +1929,7 @@ void main() {
     testWidgets('ListWheelScrollView allows for horizontal drags on its children', (
       WidgetTester tester,
     ) async {
-      final PageController pageController = PageController();
+      final pageController = PageController();
       addTearDown(pageController.dispose);
 
       await tester.pumpWidget(
@@ -1964,11 +1962,11 @@ void main() {
       (WidgetTester tester) async {
         // Regression test for https://github.com/flutter/flutter/issues/126491
 
-        final FixedExtentScrollController controller = FixedExtentScrollController();
+        final controller = FixedExtentScrollController();
         addTearDown(controller.dispose);
-        final List<int> children = List<int>.generate(100, (int index) => index);
-        final List<int> paintedChildren = <int>[];
-        final Set<int> tappedChildren = <int>{};
+        final children = List<int>.generate(100, (int index) => index);
+        final paintedChildren = <int>[];
+        final tappedChildren = <int>{};
 
         await tester.pumpWidget(
           Directionality(

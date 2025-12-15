@@ -9,14 +9,14 @@ import '../../common.dart';
 void main() {
   group('RequestData', () {
     test('does not insert "null" string when no message is provided', () {
-      const RequestData data = RequestData(null);
+      const data = RequestData(null);
 
       expect(data.serialize(), <String, String>{'command': 'request_data'});
     });
 
     test('serializes and deserializes', () {
-      const RequestData data = RequestData('hello');
-      final RequestData roundTrip = RequestData.deserialize(data.serialize());
+      const data = RequestData('hello');
+      final roundTrip = RequestData.deserialize(data.serialize());
       expect(roundTrip.message, 'hello');
     });
   });

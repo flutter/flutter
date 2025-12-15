@@ -25,7 +25,7 @@ void main() {
     expect(getSwatch(), GestureDemoState.kSwatches[0]);
 
     // every tap change swatch
-    for (int i = 1; i < GestureDemoState.kSwatches.length; i++) {
+    for (var i = 1; i < GestureDemoState.kSwatches.length; i++) {
       await tap();
       expect(getSwatch(), GestureDemoState.kSwatches[i]);
     }

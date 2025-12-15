@@ -22,8 +22,8 @@ class Expect {
 }
 
 Future<String> readResponse(HttpClientResponse response) {
-  final Completer<String> completer = Completer<String>();
-  final StringBuffer contents = StringBuffer();
+  final completer = Completer<String>();
+  final contents = StringBuffer();
   response.transform(utf8.decoder).listen((String data) {
     contents.write(data);
   }, onDone: () => completer.complete(contents.toString()));
@@ -33,7 +33,7 @@ Future<String> readResponse(HttpClientResponse response) {
 // Test accessing the service protocol over http.
 Future<void> testHttpProtocolRequest(Uri uri) async {
   uri = uri.replace(path: 'getVM');
-  final HttpClient client = HttpClient();
+  final client = HttpClient();
   final HttpClientRequest request = await client.getUrl(uri);
   final HttpClientResponse response = await request.close();
   Expect.equals(response.statusCode, 200);
@@ -46,7 +46,7 @@ Future<void> testHttpProtocolRequest(Uri uri) async {
 Future<void> testWebSocketProtocolRequest(Uri uri) async {
   uri = uri.replace(scheme: 'ws', path: 'ws');
   final WebSocket webSocketClient = await WebSocket.connect(uri.toString());
-  final ServiceClient serviceClient = ServiceClient(webSocketClient);
+  final serviceClient = ServiceClient(webSocketClient);
   final Map<String, dynamic> response = await serviceClient.invokeRPC('getVM');
   Expect.equals(response['type'], 'VM');
   try {
@@ -72,7 +72,7 @@ Future<bool> runTests(ShellLauncher launcher, List<TestFunction> tests) async {
   }
   final Uri uri = await process.waitForVMService();
   try {
-    for (int i = 0; i < tests.length; i++) {
+    for (var i = 0; i < tests.length; i++) {
       print('Executing test ${i + 1}/${tests.length}');
       await tests[i](uri);
     }
@@ -96,7 +96,7 @@ Future<void> main(List<String> args) async {
   final String mainDartPath = args[1];
   final List<String> extraArgs = args.length <= 2 ? <String>[] : args.sublist(2);
 
-  final ShellLauncher launcher = ShellLauncher(shellExecutablePath, mainDartPath, false, extraArgs);
+  final launcher = ShellLauncher(shellExecutablePath, mainDartPath, false, extraArgs);
 
   await runTests(launcher, basicTests);
 }

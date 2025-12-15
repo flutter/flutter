@@ -244,11 +244,11 @@ class ChipThemeData with Diagnosticable {
 
     // These are Material Design defaults, and are used to derive
     // component Colors (with opacity) from base colors.
-    const int backgroundAlpha = 0x1f; // 12%
-    const int deleteIconAlpha = 0xde; // 87%
-    const int disabledAlpha = 0x0c; // 38% * 12% = 5%
-    const int selectAlpha = 0x3d; // 12% + 12% = 24%
-    const int textLabelAlpha = 0xde; // 87%
+    const backgroundAlpha = 0x1f; // 12%
+    const deleteIconAlpha = 0xde; // 87%
+    const disabledAlpha = 0x0c; // 38% * 12% = 5%
+    const selectAlpha = 0x3d; // 12% + 12% = 24%
+    const textLabelAlpha = 0xde; // 87%
     const EdgeInsetsGeometry padding = EdgeInsets.all(4.0);
 
     primaryColor = primaryColor ?? (brightness == Brightness.light ? Colors.black : Colors.white);

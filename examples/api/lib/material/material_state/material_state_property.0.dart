@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [MaterialStateProperty].
+/// Flutter code sample for [WidgetStateProperty].
 
 void main() => runApp(const MaterialStatePropertyExampleApp());
 
@@ -27,11 +27,11 @@ class MaterialStatePropertyExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color getColor(Set<MaterialState> states) {
-      const Set<MaterialState> interactiveStates = <MaterialState>{
-        MaterialState.pressed,
-        MaterialState.hovered,
-        MaterialState.focused,
+    Color getColor(Set<WidgetState> states) {
+      const Set<WidgetState> interactiveStates = <WidgetState>{
+        WidgetState.pressed,
+        WidgetState.hovered,
+        WidgetState.focused,
       };
       if (states.any(interactiveStates.contains)) {
         return Colors.blue;
@@ -40,7 +40,9 @@ class MaterialStatePropertyExample extends StatelessWidget {
     }
 
     return TextButton(
-      style: ButtonStyle(foregroundColor: MaterialStateProperty.resolveWith(getColor)),
+      style: ButtonStyle(
+        foregroundColor: WidgetStateProperty.resolveWith(getColor),
+      ),
       onPressed: () {},
       child: const Text('TextButton'),
     );

@@ -19,7 +19,8 @@ void main() {
 ///
 /// The [animationStatus] parameter indicates the current state of the menu
 /// animation, which can be used to adjust the appearance of the menu panel.
-typedef MenuPanelBuilder = Widget Function(BuildContext context, AnimationStatus animationStatus);
+typedef MenuPanelBuilder =
+    Widget Function(BuildContext context, AnimationStatus animationStatus);
 
 /// Signature for the function that builds a [Menu]'s anchor button.
 ///
@@ -41,7 +42,9 @@ class RawMenuAnchorSubmenuAnimationExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return Menu(
       panelBuilder: (BuildContext context, AnimationStatus animationStatus) {
-        final MenuController rootMenuController = MenuController.maybeOf(context)!;
+        final MenuController rootMenuController = MenuController.maybeOf(
+          context,
+        )!;
         return Align(
           alignment: Alignment.topRight,
           child: Column(
@@ -53,7 +56,10 @@ class RawMenuAnchorSubmenuAnimationExample extends StatelessWidget {
                       height: 120,
                       width: 120,
                       child: Center(
-                        child: Text('Panel $i:\n${status.name}', textAlign: TextAlign.center),
+                        child: Text(
+                          'Panel $i:\n${status.name}',
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     );
                   },
@@ -88,7 +94,11 @@ class RawMenuAnchorSubmenuAnimationExample extends StatelessWidget {
         );
       },
       buttonBuilder:
-          (BuildContext context, MenuController controller, AnimationStatus animationStatus) {
+          (
+            BuildContext context,
+            MenuController controller,
+            AnimationStatus animationStatus,
+          ) {
             return FilledButton(
               onPressed: () {
                 if (animationStatus.isForwardOrCompleted) {
@@ -105,7 +115,11 @@ class RawMenuAnchorSubmenuAnimationExample extends StatelessWidget {
 }
 
 class Menu extends StatefulWidget {
-  const Menu({super.key, required this.panelBuilder, required this.buttonBuilder});
+  const Menu({
+    super.key,
+    required this.panelBuilder,
+    required this.buttonBuilder,
+  });
   final MenuPanelBuilder panelBuilder;
   final MenuButtonBuilder buttonBuilder;
 
@@ -124,16 +138,21 @@ class MenuState extends State<Menu> with SingleTickerProviderStateMixin {
   void initState() {
     super.initState();
     animationController =
-        AnimationController(vsync: this, duration: const Duration(milliseconds: 200))
-          ..addStatusListener((AnimationStatus status) {
-            if (mounted) {
-              setState(() {
-                // Rebuild to reflect animation status changes.
-              });
-            }
-          });
+        AnimationController(
+          vsync: this,
+          duration: const Duration(milliseconds: 200),
+        )..addStatusListener((AnimationStatus status) {
+          if (mounted) {
+            setState(() {
+              // Rebuild to reflect animation status changes.
+            });
+          }
+        });
 
-    animation = CurvedAnimation(parent: animationController, curve: Curves.easeOutQuart);
+    animation = CurvedAnimation(
+      parent: animationController,
+      curve: Curves.easeOutQuart,
+    );
   }
 
   @override
@@ -217,9 +236,10 @@ class MenuState extends State<Menu> with SingleTickerProviderStateMixin {
             ),
           );
         },
-        builder: (BuildContext context, MenuController controller, Widget? child) {
-          return widget.buttonBuilder(context, controller, animationStatus);
-        },
+        builder:
+            (BuildContext context, MenuController controller, Widget? child) {
+              return widget.buttonBuilder(context, controller, animationStatus);
+            },
       ),
     );
   }
@@ -237,7 +257,9 @@ class RawMenuAnchorSubmenuAnimationApp extends StatelessWidget {
           dynamicSchemeVariant: DynamicSchemeVariant.vibrant,
         ),
       ),
-      home: const Scaffold(body: Center(child: RawMenuAnchorSubmenuAnimationExample())),
+      home: const Scaffold(
+        body: Center(child: RawMenuAnchorSubmenuAnimationExample()),
+      ),
     );
   }
 }

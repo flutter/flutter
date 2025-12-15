@@ -8,6 +8,7 @@
 #include <optional>
 #include <sstream>
 #include <string>
+#include <thread>
 #include <type_traits>
 
 #include "flutter/fml/hash_combine.h"
@@ -26,6 +27,9 @@ enum class HandleType {
 };
 
 std::string HandleTypeToString(HandleType type);
+
+// Returns whether this type of handle can be shared across OpenGL contexts.
+bool HandleTypeIsShareable(HandleType type);
 
 class ReactorGLES;
 
@@ -80,10 +84,11 @@ class HandleGLES {
   std::optional<UniqueID> name_;
   std::size_t hash_;
   std::optional<uint64_t> untracked_id_;
+  std::optional<std::thread::id> owner_thread_;
 
   friend class ReactorGLES;
 
-  HandleGLES(HandleType p_type, UniqueID p_name)
+  HandleGLES(HandleType p_type, UniqueID p_name, std::thread::id p_owner_thread)
       : type_(p_type),
         name_(p_name),
         hash_(fml::HashCombine(
@@ -98,7 +103,11 @@ class HandleGLES {
             p_name)) {}
 
   static HandleGLES Create(HandleType type) {
-    return HandleGLES{type, UniqueID{}};
+    HandleGLES handle{type, UniqueID{}};
+    if (!HandleTypeIsShareable(type)) {
+      handle.owner_thread_ = std::this_thread::get_id();
+    }
+    return handle;
   }
 };
 

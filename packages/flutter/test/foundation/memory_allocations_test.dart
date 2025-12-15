@@ -61,7 +61,7 @@ void main() {
 
   testWidgets('dispatchObjectEvent handles bad listeners', (WidgetTester tester) async {
     final ObjectEvent event = ObjectDisposed(object: 'object');
-    final List<String> log = <String>[];
+    final log = <String>[];
     void badListener1(ObjectEvent event) {
       log.add('badListener1');
       throw ArgumentError();
@@ -100,7 +100,7 @@ void main() {
 
   test('dispatchObjectEvent does not invoke concurrently added listeners', () {
     final ObjectEvent event = ObjectDisposed(object: 'object');
-    final List<String> log = <String>[];
+    final log = <String>[];
 
     void listener2(ObjectEvent event) => log.add('listener2');
     void listener1(ObjectEvent event) {
@@ -130,7 +130,7 @@ void main() {
 
   test('dispatchObjectEvent does not invoke concurrently removed listeners', () {
     final ObjectEvent event = ObjectDisposed(object: 'object');
-    final List<String> log = <String>[];
+    final log = <String>[];
 
     void listener2(ObjectEvent event) => log.add('listener2');
     void listener1(ObjectEvent event) {
@@ -174,7 +174,7 @@ void main() {
   });
 
   test('publishers in Flutter dispatch events in debug mode', () async {
-    int eventCount = 0;
+    var eventCount = 0;
     void listener(ObjectEvent event) => eventCount++;
     ma.addListener(listener);
 
@@ -203,11 +203,11 @@ void _checkSdkHandlersNotSet() {
 
 /// Create and dispose Flutter objects to fire memory allocation events.
 Future<int> _activateFlutterObjectsAndReturnCountOfEvents() async {
-  int count = 0;
+  var count = 0;
 
-  final ValueNotifier<bool> valueNotifier = ValueNotifier<bool>(true);
+  final valueNotifier = ValueNotifier<bool>(true);
   count++;
-  final ChangeNotifier changeNotifier = ChangeNotifier()..addListener(() {});
+  final changeNotifier = ChangeNotifier()..addListener(() {});
   count++;
   final Picture picture = _createPicture();
   count++;
@@ -237,9 +237,9 @@ Future<Image> _createImage() async {
 }
 
 Picture _createPicture() {
-  final PictureRecorder recorder = PictureRecorder();
-  final Canvas canvas = Canvas(recorder);
-  const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+  final recorder = PictureRecorder();
+  final canvas = Canvas(recorder);
+  const rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
   canvas.clipRect(rect);
   return recorder.endRecording();
 }

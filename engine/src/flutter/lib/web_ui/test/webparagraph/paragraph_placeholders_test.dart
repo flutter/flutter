@@ -18,14 +18,14 @@ Future<void> testMain() async {
   setUpUnitTests();
 
   test('Paragraph getPositionForOffset scales, rtl, multiline', () {
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(
+    final paragraphStyle = WebParagraphStyle(
       fontFamily: 'Roboto',
       fontSize: 50,
       textDirection: TextDirection.rtl,
     );
-    final WebTextStyle textStyle1 = WebTextStyle(fontFamily: 'Roboto', fontSize: 20);
-    final WebTextStyle textStyle2 = WebTextStyle(fontFamily: 'Roboto', fontSize: 20);
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final textStyle1 = WebTextStyle(fontFamily: 'Roboto', fontSize: 20);
+    final textStyle2 = WebTextStyle(fontFamily: 'Roboto', fontSize: 20);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.pushStyle(textStyle1);
     builder.addText('Placeholder with scale 1.0:');
     builder.pop();
@@ -80,14 +80,14 @@ Future<void> testMain() async {
   });
 
   test('Paragraph getPositionForOffset alphabetic, alignment', () {
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(
+    final paragraphStyle = WebParagraphStyle(
       fontFamily: 'Roboto',
       fontSize: 50,
       textDirection: TextDirection.ltr,
     );
-    final WebTextStyle textStyle1 = WebTextStyle(fontFamily: 'Roboto', fontSize: 20);
-    final WebTextStyle textStyle2 = WebTextStyle(fontFamily: 'Roboto', fontSize: 20);
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final textStyle1 = WebTextStyle(fontFamily: 'Roboto', fontSize: 20);
+    final textStyle2 = WebTextStyle(fontFamily: 'Roboto', fontSize: 20);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.pushStyle(textStyle1);
     builder.addText('Alphabetic 20 on baseline:');
     builder.pop();

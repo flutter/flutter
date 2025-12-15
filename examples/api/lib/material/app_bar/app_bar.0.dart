@@ -30,9 +30,9 @@ class AppBarExample extends StatelessWidget {
             icon: const Icon(Icons.add_alert),
             tooltip: 'Show Snackbar',
             onPressed: () {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('This is a snackbar')));
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('This is a snackbar')),
+              );
             },
           ),
           IconButton(
@@ -46,7 +46,10 @@ class AppBarExample extends StatelessWidget {
                     return Scaffold(
                       appBar: AppBar(title: const Text('Next page')),
                       body: const Center(
-                        child: Text('This is the next page', style: TextStyle(fontSize: 24)),
+                        child: Text(
+                          'This is the next page',
+                          style: TextStyle(fontSize: 24),
+                        ),
                       ),
                     );
                   },
@@ -56,7 +59,9 @@ class AppBarExample extends StatelessWidget {
           ),
         ],
       ),
-      body: const Center(child: Text('This is the home page', style: TextStyle(fontSize: 24))),
+      body: const Center(
+        child: Text('This is the home page', style: TextStyle(fontSize: 24)),
+      ),
     );
   }
 }

@@ -27,7 +27,7 @@ Example: from engine/src/flutter on a Mac
 
 Note that `testing/run_tests.py` does not build the engine binaries; instead they
 should be built prior to running this command and also when the source files
-change. See [Compiling the engine](https://github.com/flutter/flutter/wiki/Compiling-the-engine)
+change. See [Compiling the engine](https://github.com/flutter/flutter/blob/main/docs/engine/contributing/Compiling-the-engine.md)
 for details on how to do so.
 
 ## Q&A

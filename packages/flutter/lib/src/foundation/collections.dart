@@ -65,7 +65,7 @@ bool listEquals<T>(List<T>? a, List<T>? b) {
   if (identical(a, b)) {
     return true;
   }
-  for (int index = 0; index < a.length; index += 1) {
+  for (var index = 0; index < a.length; index += 1) {
     if (a[index] != b[index]) {
       return false;
     }
@@ -111,7 +111,7 @@ bool mapEquals<T, U>(Map<T, U>? a, Map<T, U>? b) {
 /// Returns `-1` if the `value` is not in the list. Requires the list items
 /// to implement [Comparable] and the `sortedList` to already be ordered.
 int binarySearch<T extends Comparable<Object>>(List<T> sortedList, T value) {
-  int min = 0;
+  var min = 0;
   int max = sortedList.length;
   while (min < max) {
     final int mid = min + ((max - min) >> 1);
@@ -174,7 +174,7 @@ void mergeSort<T>(List<T> list, {int start = 0, int? end, int Function(T, T)? co
   final int firstLength = middle - start;
   final int secondLength = end - middle;
   // secondLength is always the same as firstLength, or one greater.
-  final List<T> scratchSpace = List<T>.filled(secondLength, list[start]);
+  final scratchSpace = List<T>.filled(secondLength, list[start]);
   _mergeSort<T>(list, compare, middle, end, scratchSpace, 0);
   final int firstTarget = end - firstLength;
   _mergeSort<T>(list, compare, start, middle, list, firstTarget);
@@ -213,8 +213,8 @@ void _insertionSort<T>(List<T> list, {int Function(T, T)? compare, int start = 0
   end ??= list.length;
 
   for (int pos = start + 1; pos < end; pos++) {
-    int min = start;
-    int max = pos;
+    var min = start;
+    var max = pos;
     final T element = list[pos];
     while (min < max) {
       final int mid = min + ((max - min) >> 1);
@@ -247,9 +247,9 @@ void _movingInsertionSort<T>(
     return;
   }
   target[targetOffset] = list[start];
-  for (int i = 1; i < length; i++) {
+  for (var i = 1; i < length; i++) {
     final T element = list[start + i];
-    int min = targetOffset;
+    var min = targetOffset;
     int max = targetOffset + i;
     while (min < max) {
       final int mid = min + ((max - min) >> 1);
@@ -328,8 +328,8 @@ void _merge<T>(
   // No empty lists reaches here.
   assert(firstStart < firstEnd);
   assert(secondStart < secondEnd);
-  int cursor1 = firstStart;
-  int cursor2 = secondStart;
+  var cursor1 = firstStart;
+  var cursor2 = secondStart;
   T firstElement = firstList[cursor1++];
   T secondElement = secondList[cursor2++];
   while (true) {

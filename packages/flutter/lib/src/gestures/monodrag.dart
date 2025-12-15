@@ -485,7 +485,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     required bool positive,
     required _DragDirection axis,
   }) {
-    double sum = 0.0;
+    var sum = 0.0;
 
     if (!_moveDeltaBeforeFrame.containsKey(pointer)) {
       return sum;
@@ -639,7 +639,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     final int pointerCount = _acceptedActivePointers.length;
     assert(pointerCount >= 1);
 
-    double sum = delta;
+    var sum = delta;
     for (final Offset offset in _moveDeltaBeforeFrame.values) {
       if (axis == _DragDirection.horizontal) {
         sum += offset.dx;
@@ -785,7 +785,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   void _checkDown() {
     if (onDown != null) {
-      final DragDownDetails details = DragDownDetails(
+      final details = DragDownDetails(
         globalPosition: _initialPosition.global,
         localPosition: _initialPosition.local,
       );
@@ -821,7 +821,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         untransformedDelta: localUpdateDelta,
         transform: localToGlobal,
       );
-      final OffsetPair updateDelta = OffsetPair(local: localUpdateDelta, global: globalUpdateDelta);
+      final updateDelta = OffsetPair(local: localUpdateDelta, global: globalUpdateDelta);
       final OffsetPair correctedPosition =
           _initialPosition + updateDelta; // Only adds delta for down behaviour
       _checkUpdate(
@@ -841,7 +841,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   void _checkStart(Duration? timestamp, int pointer) {
     if (onStart != null) {
-      final DragStartDetails details = DragStartDetails(
+      final details = DragStartDetails(
         sourceTimeStamp: timestamp,
         globalPosition: _initialPosition.global,
         localPosition: _initialPosition.local,
@@ -860,7 +860,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     required int pointer,
   }) {
     if (onUpdate != null) {
-      final DragUpdateDetails details = DragUpdateDetails(
+      final details = DragUpdateDetails(
         sourceTimeStamp: sourceTimeStamp,
         delta: delta,
         primaryDelta: primaryDelta,

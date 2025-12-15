@@ -225,22 +225,24 @@ void KeyboardKeyEmbedderHandler::KeyboardHookImpl(
   uint64_t result_logical_key;
 
   if (is_event_down) {
+    if (had_record && !was_down) {
+      // Windows delivered a new down event without a matching up event. This
+      // happens if the window lost focus before it could receive the key up.
+      // Synthesize an up event so the framework releases the key before
+      // processing the incoming down.
+      SendSynthesizeUpEvent(physical_key, last_logical_record);
+      last_logical_record_iter = pressingRecords_.find(physical_key);
+      had_record = last_logical_record_iter != pressingRecords_.end();
+      last_logical_record = had_record ? last_logical_record_iter->second : 0;
+    }
+
     if (had_record) {
-      if (was_down) {
-        // A normal repeated key.
-        type = kFlutterKeyEventTypeRepeat;
-        FML_DCHECK(had_record);
-        ConvertUtf32ToUtf8_(character_bytes, character);
-        eventual_logical_record = last_logical_record;
-        result_logical_key = last_logical_record;
-      } else {
-        // A non-repeated key has been pressed that has the exact physical key
-        // as a currently pressed one, usually indicating multiple keyboards are
-        // pressing keys with the same physical key, or the up event was lost
-        // during a loss of focus. The down event is ignored.
-        callback(true);
-        return;
-      }
+      // A normal repeated key.
+      type = kFlutterKeyEventTypeRepeat;
+      FML_DCHECK(had_record);
+      ConvertUtf32ToUtf8_(character_bytes, character);
+      eventual_logical_record = last_logical_record;
+      result_logical_key = last_logical_record;
     } else {
       // A normal down event (whether the system event is a repeat or not).
       type = kFlutterKeyEventTypeDown;

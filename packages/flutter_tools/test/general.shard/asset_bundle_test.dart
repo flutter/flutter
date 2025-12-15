@@ -44,7 +44,13 @@ void main() {
       'nonempty',
       () async {
         final AssetBundle ab = AssetBundleFactory.instance.createBundle();
-        expect(await ab.build(packageConfigPath: '.dart_tool/package_config.json'), 0);
+        expect(
+          await ab.build(
+            packageConfigPath: '.dart_tool/package_config.json',
+            targetPlatform: TargetPlatform.tester,
+          ),
+          0,
+        );
         expect(ab.entries.length, greaterThan(0));
       },
       overrides: <Type, Generator>{
@@ -62,7 +68,10 @@ void main() {
           ..writeAsStringSync('');
 
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-        await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        );
         expect(bundle.entries.keys, unorderedEquals(<String>['AssetManifest.bin']));
         const expectedBinAssetManifest = <Object, Object>{};
         expect(
@@ -109,7 +118,10 @@ flutter:
         }
 
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-        await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        );
 
         expect(
           bundle.entries.keys,
@@ -149,7 +161,10 @@ flutter:
     - assets/foo/
 ''');
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-        await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        );
         expect(
           bundle.entries.keys,
           unorderedEquals(<String>[
@@ -165,7 +180,10 @@ flutter:
           ..setLastModifiedSync(packageFile.lastModifiedSync().add(const Duration(hours: 1)));
 
         expect(bundle.needsBuild(), true);
-        await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        );
         expect(
           bundle.entries.keys,
           unorderedEquals(<String>[
@@ -203,7 +221,10 @@ flutter:
           mainLibName: 'my_app',
         );
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-        await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        );
         expect(
           bundle.entries.keys,
           unorderedEquals(<String>[
@@ -231,7 +252,10 @@ name: my_app''')
         // asset manifest and not updated. This is due to the devfs not
         // supporting file deletion.
         expect(bundle.needsBuild(), true);
-        await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        );
         expect(
           bundle.entries.keys,
           unorderedEquals(<String>[
@@ -269,7 +293,10 @@ flutter:
 ''');
         writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'my_app');
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-        await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        );
         expect(
           bundle.entries.keys,
           unorderedEquals(<String>[
@@ -323,6 +350,7 @@ flutter:
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           deferredComponentsEnabled: true,
+          targetPlatform: TargetPlatform.tester,
         );
         expect(
           bundle.entries.keys,
@@ -371,7 +399,10 @@ flutter:
         - assets/wild/
 ''');
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-        await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        );
         expect(
           bundle.entries.keys,
           unorderedEquals(<String>[
@@ -431,6 +462,7 @@ flutter:
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           deferredComponentsEnabled: true,
+          targetPlatform: TargetPlatform.tester,
         );
         expect(
           bundle.entries.keys,
@@ -454,6 +486,7 @@ flutter:
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           deferredComponentsEnabled: true,
+          targetPlatform: TargetPlatform.tester,
         );
 
         expect(
@@ -507,6 +540,7 @@ flutter:
         () => bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          targetPlatform: TargetPlatform.tester,
         ),
         throwsToolExit(
           message:
@@ -546,6 +580,7 @@ flutter:
         () => bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          targetPlatform: TargetPlatform.tester,
         ),
         throwsToolExit(
           message:
@@ -590,6 +625,7 @@ flutter:
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          targetPlatform: TargetPlatform.tester,
         );
 
         expect(bundle.entries['my-asset.txt']!.content.isModified, isTrue);
@@ -597,6 +633,7 @@ flutter:
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          targetPlatform: TargetPlatform.tester,
         );
 
         expect(bundle.entries['my-asset.txt']!.content.isModified, isFalse);
@@ -614,6 +651,7 @@ flutter:
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          targetPlatform: TargetPlatform.tester,
         );
 
         expect(bundle.entries['my-asset.txt']!.content.isModified, isTrue);
@@ -762,12 +800,18 @@ assets:
   - assets/foo/bar.txt
 ''');
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
+      await bundle.build(
+        packageConfigPath: '.dart_tool/package_config.json',
+        targetPlatform: TargetPlatform.tester,
+      );
 
       final AssetBundleEntry? fontManifest = bundle.entries['FontManifest.json'];
       final AssetBundleEntry? license = bundle.entries['NOTICES'];
 
-      await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
+      await bundle.build(
+        packageConfigPath: '.dart_tool/package_config.json',
+        targetPlatform: TargetPlatform.tester,
+      );
 
       expect(fontManifest, bundle.entries['FontManifest.json']);
       expect(license, bundle.entries['NOTICES']);
@@ -795,7 +839,13 @@ flutter:
 ''');
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-      expect(await bundle.build(packageConfigPath: '.dart_tool/package_config.json'), 0);
+      expect(
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        ),
+        0,
+      );
       expect(
         bundle.additionalDependencies.single.path,
         contains('DOES_NOT_EXIST_RERUN_FOR_WILDCARD'),
@@ -824,7 +874,13 @@ flutter:
 ''');
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-      expect(await bundle.build(packageConfigPath: '.dart_tool/package_config.json'), 0);
+      expect(
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        ),
+        0,
+      );
       expect(bundle.additionalDependencies, isEmpty);
     },
     overrides: <Type, Generator>{
@@ -871,7 +927,13 @@ flutter:
   ''');
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-        expect(await bundle.build(packageConfigPath: '.dart_tool/package_config.json'), 0);
+        expect(
+          await bundle.build(
+            packageConfigPath: '.dart_tool/package_config.json',
+            targetPlatform: TargetPlatform.tester,
+          ),
+          0,
+        );
 
         await writeBundle(
           output,
@@ -1097,7 +1159,13 @@ flutter:
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       globals.fs.file('foo/bar/fizz.txt').createSync(recursive: true);
 
-      expect(await bundle.build(packageConfigPath: '.dart_tool/package_config.json'), 0);
+      expect(
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        ),
+        0,
+      );
       expect(bundle.additionalDependencies, isEmpty);
     },
     overrides: <Type, Generator>{
@@ -1135,7 +1203,10 @@ flutter:
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       globals.fs.file('foo/bar/fizz.txt').createSync(recursive: true);
 
-      await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
+      await bundle.build(
+        packageConfigPath: '.dart_tool/package_config.json',
+        targetPlatform: TargetPlatform.tester,
+      );
 
       expect(
         bundle.entries.keys,
@@ -1188,7 +1259,13 @@ flutter:
 ''');
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-      expect(await bundle.build(packageConfigPath: '.dart_tool/package_config.json'), 1);
+      expect(
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        ),
+        1,
+      );
       expect(testLogger.errorText, contains('This asset was included from package foo'));
     },
     overrides: <Type, Generator>{
@@ -1217,7 +1294,13 @@ flutter:
 ''');
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-      expect(await bundle.build(packageConfigPath: '.dart_tool/package_config.json'), 1);
+      expect(
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        ),
+        1,
+      );
       expect(testLogger.errorText, isNot(contains('This asset was included from')));
     },
     overrides: <Type, Generator>{
@@ -1256,7 +1339,13 @@ flutter:
 ''');
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-      expect(await bundle.build(packageConfigPath: '.dart_tool/package_config.json'), 0);
+      expect(
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        ),
+        0,
+      );
       expect((bundle.entries['FontManifest.json']!.content as DevFSStringContent).string, '[]');
       expect(testLogger.errorText, contains('package:foo has `uses-material-design: true` set'));
     },
@@ -1292,7 +1381,13 @@ flutter:
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-      expect(await bundle.build(packageConfigPath: '.dart_tool/package_config.json'), 0);
+      expect(
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        ),
+        0,
+      );
       expect(
         bundle.entries.keys,
         unorderedEquals(<String>[
@@ -1336,7 +1431,13 @@ flutter:
       globals.fs.file('assets/zebra.jpg').createSync();
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-      expect(await bundle.build(packageConfigPath: '.dart_tool/package_config.json'), 0);
+      expect(
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        ),
+        0,
+      );
       expect((bundle.entries['FontManifest.json']!.content as DevFSStringContent).string, '[]');
     },
     overrides: <Type, Generator>{
@@ -1375,6 +1476,7 @@ flutter:
         () => bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          targetPlatform: TargetPlatform.tester,
         ),
         throwsToolExit(
           message:

@@ -52,7 +52,7 @@ abstract class Command {
   /// Serializes this command to parameter name/value pairs.
   @mustCallSuper
   Map<String, String> serialize() {
-    final Map<String, String> result = <String, String>{'command': kind};
+    final result = <String, String>{'command': kind};
     if (timeout != null) {
       result['timeout'] = '${timeout!.inMilliseconds}';
     }

@@ -21,7 +21,7 @@ void main() {
   testWidgets(
     'when SensitiveContentService.setContentSensitivity fails, SensitiveContentHost.register throws FlutterError but still updates calculatedContentSensitivity',
     (WidgetTester tester) async {
-      int setContentSensitivityCall = 0;
+      var setContentSensitivityCall = 0;
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.sensitiveContent,
         (MethodCall methodCall) async {
@@ -57,7 +57,7 @@ void main() {
   testWidgets(
     'when SensitiveContentService.setContentSensitivity fails, SensitiveContentHost.unregister throws FlutterError when no SensitiveContent widgets are left in the tree',
     (WidgetTester tester) async {
-      int setContentSensitivityCall = 0;
+      var setContentSensitivityCall = 0;
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.sensitiveContent,
         (MethodCall methodCall) async {
@@ -91,16 +91,16 @@ void main() {
   testWidgets(
     'when SensitiveContentService.setContentSensitivity fails, SensitiveContentHost.unregister throws FlutterError and still updates calculatedContentSensitivity when there are SensitiveContent widgets left in the tree',
     (WidgetTester tester) async {
-      int setContentSensitivityCall = 0;
-      const Key scKey = Key('sc');
-      final DisposeTester sc = DisposeTester(
+      var setContentSensitivityCall = 0;
+      const scKey = Key('sc');
+      final sc = DisposeTester(
         child: SensitiveContent(
           key: scKey,
           sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         ),
       );
-      final SensitiveContent asc = SensitiveContent(
+      final asc = SensitiveContent(
         sensitivity: ContentSensitivity.autoSensitive,
         child: Container(),
       );

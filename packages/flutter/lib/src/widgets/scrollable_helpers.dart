@@ -113,7 +113,7 @@ class ScrollableDetails {
 
   @override
   String toString() {
-    final List<String> description = <String>[];
+    final description = <String>[];
     description.add('axisDirection: $direction');
 
     void addIfNonNull(String prefix, Object? value) {
@@ -226,7 +226,7 @@ class EdgeDraggingAutoScroller {
   }
 
   Future<void> _scroll() async {
-    final RenderBox scrollRenderBox = scrollable.context.findRenderObject()! as RenderBox;
+    final scrollRenderBox = scrollable.context.findRenderObject()! as RenderBox;
     final Matrix4 transform = scrollRenderBox.getTransformTo(null);
     final Rect globalRect = MatrixUtils.transformRect(
       transform,
@@ -244,7 +244,7 @@ class EdgeDraggingAutoScroller {
     );
     _scrolling = true;
     double? newOffset;
-    const double overDragMax = 20.0;
+    const overDragMax = 20.0;
 
     final Offset deltaToOrigin = scrollable.deltaToScrollOrigin;
     final Offset viewportOrigin = globalRect.topLeft.translate(deltaToOrigin.dx, deltaToOrigin.dy);
@@ -301,7 +301,7 @@ class EdgeDraggingAutoScroller {
       _scrolling = false;
       return;
     }
-    final Duration duration = Duration(milliseconds: (1000 / velocityScalar).round());
+    final duration = Duration(milliseconds: (1000 / velocityScalar).round());
     await scrollable.position.animateTo(newOffset, duration: duration, curve: Curves.linear);
     onScrollViewScrolled?.call();
     if (_scrolling) {

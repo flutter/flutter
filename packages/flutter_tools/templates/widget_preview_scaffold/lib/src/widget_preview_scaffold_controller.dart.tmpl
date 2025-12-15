@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'package:widget_preview_scaffold/src/widget_preview_rendering.dart';
@@ -35,10 +37,14 @@ class WidgetPreviewScaffoldController {
       style: dtdServices.isWindows ? path.Style.windows : path.Style.posix,
     );
     _registerListeners();
-    _filterBySelectedFile.value = await dtdServices.getFlag(
-      kFilterBySelectedFilePreference,
-      defaultValue: true,
-    );
+    await Future.wait<void>([
+      dtdServices
+          .getFlag(kFilterBySelectedFilePreference, defaultValue: true)
+          .then((value) => _filterBySelectedFile.value = value),
+      dtdServices.getDevToolsUri().then((uri) {
+        devToolsUri = uri;
+      }),
+    ]);
   }
 
   /// Cleanup internal controller state.
@@ -72,6 +78,9 @@ class WidgetPreviewScaffoldController {
   ValueListenable<bool> get editorServiceAvailable =>
       dtdServices.editorServiceAvailable;
 
+  /// The DevTools instance that's used to display the widget inspector within the previewer.
+  late final Uri devToolsUri;
+
   /// Specifies if only previews from the currently selected source file should be rendered.
   ValueListenable<bool> get filterBySelectedFileListenable =>
       _filterBySelectedFile;
@@ -82,6 +91,15 @@ class WidgetPreviewScaffoldController {
     final updated = !_filterBySelectedFile.value;
     await dtdServices.setPreference(kFilterBySelectedFilePreference, updated);
     _filterBySelectedFile.value = updated;
+  }
+
+  /// Specifies if the DevTools Widget Inspector should be visible.
+  ValueListenable<bool> get widgetInspectorVisible => _widgetInspectorVisible;
+  final _widgetInspectorVisible = ValueNotifier<bool>(false);
+
+  /// Enable or disable the DevTools Widget Inspector.
+  void toggleWidgetInspectorVisible() {
+    _widgetInspectorVisible.value = !_widgetInspectorVisible.value;
   }
 
   /// The current set of previews to be displayed.

@@ -8,7 +8,9 @@ import 'package:flutter_api_samples/material/input_decorator/input_decoration.wi
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('TextFormField updates decorations depending on state', (WidgetTester tester) async {
+  testWidgets('TextFormField updates decorations depending on state', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.MaterialStateExampleApp());
     expect(find.text('InputDecoration Sample'), findsOneWidget);
 
@@ -17,7 +19,10 @@ void main() {
     expect(find.byIcon(Icons.person), findsOneWidget);
 
     expect(
-      tester.widget<TextField>(find.byType(TextField)).decoration?.prefixIconColor,
+      tester
+          .widget<TextField>(find.byType(TextField))
+          .decoration
+          ?.prefixIconColor,
       isA<WidgetStateColor>()
           .having(
             (WidgetStateColor color) => color.resolve(<WidgetState>{}),
@@ -25,7 +30,8 @@ void main() {
             Colors.grey,
           )
           .having(
-            (WidgetStateColor color) => color.resolve(<WidgetState>{WidgetState.focused}),
+            (WidgetStateColor color) =>
+                color.resolve(<WidgetState>{WidgetState.focused}),
             'focused',
             Colors.green,
           ),

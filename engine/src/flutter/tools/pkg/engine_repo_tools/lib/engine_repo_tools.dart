@@ -52,13 +52,13 @@ final class Engine {
     }
 
     // If the directory does not exist, or is not a directory, fail.
-    final io.Directory srcDir = io.Directory(srcPath);
+    final srcDir = io.Directory(srcPath);
     if (!srcDir.existsSync()) {
       throw InvalidEngineException.notADirectory(srcPath);
     }
 
     // Check for the existence of a `flutter` directory within `src`.
-    final io.Directory flutterDir = io.Directory(p.join(srcPath, 'flutter'));
+    final flutterDir = io.Directory(p.join(srcPath, 'flutter'));
     if (!flutterDir.existsSync()) {
       throw InvalidEngineException.missingFlutterDirectory(srcPath);
     }
@@ -66,7 +66,7 @@ final class Engine {
     // We do **NOT** check for the existence of a `out` directory within `src`,
     // it's not required to exist (i.e. a new checkout of the engine), and we
     // don't want to fail if it doesn't exist.
-    final io.Directory outDir = io.Directory(p.join(srcPath, 'out'));
+    final outDir = io.Directory(p.join(srcPath, 'out'));
 
     return Engine._(srcDir: srcDir, flutterDir: flutterDir, outDir: outDir);
   }
@@ -105,7 +105,7 @@ final class Engine {
     path ??= p.current;
 
     // Search parent directories for a `src` directory.
-    io.Directory maybeSrcDir = io.Directory(path);
+    var maybeSrcDir = io.Directory(path);
 
     if (!maybeSrcDir.existsSync()) {
       throw StateError('The path "$path" does not exist or is not a directory.');
@@ -185,9 +185,9 @@ final class TestEngine extends Engine {
     required io.Directory rootDir,
     List<TestOutput> outputs = const <TestOutput>[],
   }) {
-    final io.Directory srcDir = io.Directory(p.join(rootDir.path, 'src'));
-    final io.Directory flutterDir = io.Directory(p.join(srcDir.path, 'flutter'));
-    final io.Directory outDir = io.Directory(p.join(srcDir.path, 'out'));
+    final srcDir = io.Directory(p.join(rootDir.path, 'src'));
+    final flutterDir = io.Directory(p.join(srcDir.path, 'flutter'));
+    final outDir = io.Directory(p.join(srcDir.path, 'out'));
     srcDir.createSync(recursive: true);
     flutterDir.createSync(recursive: true);
     outDir.createSync(recursive: true);

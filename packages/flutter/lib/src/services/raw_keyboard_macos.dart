@@ -18,7 +18,7 @@ export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
 int runeToLowerCase(int rune) {
   // Assume only Basic Multilingual Plane runes have lower and upper cases.
   // For other characters, return them as is.
-  const int utf16BmpUpperBound = 0xD7FF;
+  const utf16BmpUpperBound = 0xD7FF;
   if (rune > utf16BmpUpperBound) {
     return rune;
   }

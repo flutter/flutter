@@ -3,7 +3,7 @@ description: Runs tests that use the flutter_test API as integration tests.
 publish_to: none
 
 environment:
-  sdk: ^3.8.0-0
+  sdk: ^3.9.0-0
 
 resolution: workspace
 

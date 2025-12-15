@@ -38,7 +38,7 @@ class TableBorder {
     BorderStyle style = BorderStyle.solid,
     BorderRadius borderRadius = BorderRadius.zero,
   }) {
-    final BorderSide side = BorderSide(color: color, width: width, style: style);
+    final side = BorderSide(color: color, width: width, style: style);
     return TableBorder(
       top: side,
       right: side,
@@ -143,7 +143,7 @@ class TableBorder {
     if (_outerBorderIsUniform && borderRadius != BorderRadius.zero) {
       final RRect outer = borderRadius.toRRect(rect);
       final RRect inner = outer.deflate(top.width);
-      final Paint paint = Paint()..color = top.color;
+      final paint = Paint()..color = top.color;
       canvas.drawDRRect(outer, inner, paint);
       return;
     }
@@ -180,7 +180,7 @@ class TableBorder {
     required BorderSide left,
   }) {
     final RRect borderRect = borderRadius.toRRect(rect);
-    final Paint paint = Paint()..color = color;
+    final paint = Paint()..color = color;
 
     final RRect inner = EdgeInsets.fromLTRB(
       left.strokeInset,
@@ -290,8 +290,8 @@ class TableBorder {
     assert(columns.isEmpty || (columns.first >= 0.0 && columns.last <= rect.width));
 
     if (columns.isNotEmpty || rows.isNotEmpty) {
-      final Paint paint = Paint();
-      final Path path = Path();
+      final paint = Paint();
+      final path = Path();
 
       if (columns.isNotEmpty) {
         switch (verticalInside.style) {
@@ -301,7 +301,7 @@ class TableBorder {
               ..strokeWidth = verticalInside.width
               ..style = PaintingStyle.stroke;
             path.reset();
-            for (final double x in columns) {
+            for (final x in columns) {
               path.moveTo(rect.left + x, rect.top);
               path.lineTo(rect.left + x, rect.bottom);
             }
@@ -319,7 +319,7 @@ class TableBorder {
               ..strokeWidth = horizontalInside.width
               ..style = PaintingStyle.stroke;
             path.reset();
-            for (final double y in rows) {
+            for (final y in rows) {
               path.moveTo(rect.left, rect.top + y);
               path.lineTo(rect.right, rect.top + y);
             }

@@ -60,7 +60,7 @@ const _LongCupertinoLocalizations _longLocalizations = _LongCupertinoLocalizatio
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  final MockClipboard mockClipboard = MockClipboard();
+  final mockClipboard = MockClipboard();
 
   List<TextSelectionPoint> globalize(Iterable<TextSelectionPoint> points, RenderBox box) {
     return points.map<TextSelectionPoint>((TextSelectionPoint point) {
@@ -87,10 +87,10 @@ void main() {
 
   group('canSelectAll', () {
     Widget createEditableText({Key? key, String? text, TextSelection? selection}) {
-      final TextEditingController controller = TextEditingController(text: text)
+      final controller = TextEditingController(text: text)
         ..selection = selection ?? const TextSelection.collapsed(offset: -1);
       addTearDown(controller.dispose);
-      final FocusNode focusNode = FocusNode();
+      final focusNode = FocusNode();
       addTearDown(focusNode.dispose);
 
       return CupertinoApp(
@@ -236,7 +236,7 @@ void main() {
     testWidgets(
       'All menu items show when they fit.',
       (WidgetTester tester) async {
-        final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+        final controller = TextEditingController(text: 'abc def ghi');
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           CupertinoApp(
@@ -297,7 +297,7 @@ void main() {
         tester.view.physicalSize = const Size(1000, 800);
         addTearDown(tester.view.reset);
 
-        final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+        final controller = TextEditingController(text: 'abc def ghi');
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           CupertinoApp(
@@ -406,7 +406,7 @@ void main() {
         tester.view.physicalSize = const Size(640, 800);
         addTearDown(tester.view.reset);
 
-        final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+        final controller = TextEditingController(text: 'abc def ghi');
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           CupertinoApp(
@@ -547,7 +547,7 @@ void main() {
     testWidgets(
       'Handles very long locale strings',
       (WidgetTester tester) async {
-        final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+        final controller = TextEditingController(text: 'abc def ghi');
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           CupertinoApp(
@@ -658,9 +658,7 @@ void main() {
     testWidgets(
       'When selecting multiple lines over max lines',
       (WidgetTester tester) async {
-        final TextEditingController controller = TextEditingController(
-          text: 'abc\ndef\nghi\njkl\nmno\npqr',
-        );
+        final controller = TextEditingController(text: 'abc\ndef\nghi\njkl\nmno\npqr');
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           CupertinoApp(
@@ -753,7 +751,7 @@ void main() {
       final TextEditingController controller = editableTextWidget.controller;
 
       // Double tap to select the second word.
-      const int index = 4;
+      const index = 4;
       await tester.tapAt(textOffsetToPosition(tester, index));
       await tester.pump(const Duration(milliseconds: 50));
       await tester.tapAt(textOffsetToPosition(tester, index));
@@ -834,7 +832,7 @@ void main() {
       final TextEditingController controller = editableTextWidget.controller;
 
       // Double tap to select the second word.
-      const int index = 4;
+      const index = 4;
       await tester.tapAt(textOffsetToPosition(tester, index));
       await tester.pump(const Duration(milliseconds: 50));
       await tester.tapAt(textOffsetToPosition(tester, index));
@@ -920,7 +918,7 @@ void main() {
       final TextEditingController controller = editableTextWidget.controller;
 
       // Double tap to select the second word.
-      const int index = 4;
+      const index = 4;
       await tester.tapAt(textOffsetToPosition(tester, index));
       await tester.pump(const Duration(milliseconds: 50));
       await tester.tapAt(textOffsetToPosition(tester, index));
@@ -1002,7 +1000,7 @@ void main() {
       final TextEditingController controller = editableTextWidget.controller;
 
       // Double tap to select the second word.
-      const int index = 4;
+      const index = 4;
       await tester.tapAt(textOffsetToPosition(tester, index));
       await tester.pump(const Duration(milliseconds: 50));
       await tester.tapAt(textOffsetToPosition(tester, index));
@@ -1083,7 +1081,7 @@ void main() {
       final TextEditingController controller = editableTextWidget.controller;
 
       // Double tap to select the second word.
-      const int index = 4;
+      const index = 4;
       await tester.tapAt(textOffsetToPosition(tester, index));
       await tester.pump(const Duration(milliseconds: 50));
       await tester.tapAt(textOffsetToPosition(tester, index));

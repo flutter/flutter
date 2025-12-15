@@ -23,14 +23,14 @@ void main() {
 
   test('ProgressIndicatorThemeData lerp special cases', () {
     expect(ProgressIndicatorThemeData.lerp(null, null, 0), null);
-    const ProgressIndicatorThemeData data = ProgressIndicatorThemeData();
+    const data = ProgressIndicatorThemeData();
     expect(identical(ProgressIndicatorThemeData.lerp(data, data, 0.5), data), true);
   });
 
   testWidgets('ProgressIndicatorThemeData implements debugFillProperties', (
     WidgetTester tester,
   ) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const ProgressIndicatorThemeData(
       color: Color(0XFF0000F1),
       linearTrackColor: Color(0XFF0000F2),
@@ -79,11 +79,11 @@ void main() {
   testWidgets('Can theme LinearProgressIndicator using ProgressIndicatorTheme', (
     WidgetTester tester,
   ) async {
-    const Color color = Color(0XFF00FF00);
-    const Color linearTrackColor = Color(0XFFFF0000);
-    const double linearMinHeight = 25.0;
-    const double borderRadius = 8.0;
-    final ThemeData theme = ThemeData(
+    const color = Color(0XFF00FF00);
+    const linearTrackColor = Color(0XFFFF0000);
+    const linearMinHeight = 25.0;
+    const borderRadius = 8.0;
+    final theme = ThemeData(
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: color,
         linearTrackColor: linearTrackColor,
@@ -131,14 +131,14 @@ void main() {
   testWidgets('Can theme LinearProgressIndicator when year2023 to false', (
     WidgetTester tester,
   ) async {
-    const Color color = Color(0XFF00FF00);
-    const Color linearTrackColor = Color(0XFFFF0000);
-    const double linearMinHeight = 25.0;
-    const double borderRadius = 8.0;
-    const Color stopIndicatorColor = Color(0XFF0000FF);
-    const double stopIndicatorRadius = 10.0;
-    const double trackGap = 16.0;
-    final ThemeData theme = ThemeData(
+    const color = Color(0XFF00FF00);
+    const linearTrackColor = Color(0XFFFF0000);
+    const linearMinHeight = 25.0;
+    const borderRadius = 8.0;
+    const stopIndicatorColor = Color(0XFF0000FF);
+    const stopIndicatorRadius = 10.0;
+    const trackGap = 16.0;
+    final theme = ThemeData(
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: color,
         linearTrackColor: linearTrackColor,
@@ -196,14 +196,14 @@ void main() {
   testWidgets(
     'Local ProgressIndicatorTheme takes precedence over inherited ProgressIndicatorTheme',
     (WidgetTester tester) async {
-      const Color color = Color(0XFFFF00FF);
-      const Color linearTrackColor = Color(0XFF00FFFF);
-      const double linearMinHeight = 20.0;
-      const double borderRadius = 6.0;
-      const Color stopIndicatorColor = Color(0XFFFFFF00);
-      const double stopIndicatorRadius = 8.0;
-      const double trackGap = 12.0;
-      final ThemeData theme = ThemeData(
+      const color = Color(0XFFFF00FF);
+      const linearTrackColor = Color(0XFF00FFFF);
+      const linearMinHeight = 20.0;
+      const borderRadius = 6.0;
+      const stopIndicatorColor = Color(0XFFFFFF00);
+      const stopIndicatorRadius = 8.0;
+      const trackGap = 12.0;
+      final theme = ThemeData(
         progressIndicatorTheme: const ProgressIndicatorThemeData(
           color: Color(0XFF00FF00),
           linearTrackColor: Color(0XFFFF0000),
@@ -268,14 +268,14 @@ void main() {
   testWidgets('Can theme CircularProgressIndicator using ProgressIndicatorTheme', (
     WidgetTester tester,
   ) async {
-    const Color color = Color(0XFFFF0000);
-    const Color circularTrackColor = Color(0XFF0000FF);
-    const double strokeWidth = 8.0;
+    const color = Color(0XFFFF0000);
+    const circularTrackColor = Color(0XFF0000FF);
+    const strokeWidth = 8.0;
     const double strokeAlign = BorderSide.strokeAlignOutside;
     const StrokeCap strokeCap = StrokeCap.butt;
-    const BoxConstraints constraints = BoxConstraints.tightFor(width: 80.0, height: 80.0);
-    const EdgeInsets padding = EdgeInsets.all(14.0);
-    final ThemeData theme = ThemeData(
+    const constraints = BoxConstraints.tightFor(width: 80.0, height: 80.0);
+    const padding = EdgeInsets.all(14.0);
+    final theme = ThemeData(
       progressIndicatorTheme: const ProgressIndicatorThemeData(
         color: color,
         circularTrackColor: circularTrackColor,
@@ -316,15 +316,15 @@ void main() {
   testWidgets('Can theme CircularProgressIndicator when year2023 to false', (
     WidgetTester tester,
   ) async {
-    const Color color = Color(0XFFFF0000);
-    const Color circularTrackColor = Color(0XFF0000FF);
-    const double strokeWidth = 8.0;
+    const color = Color(0XFFFF0000);
+    const circularTrackColor = Color(0XFF0000FF);
+    const strokeWidth = 8.0;
     const double strokeAlign = BorderSide.strokeAlignOutside;
     const StrokeCap strokeCap = StrokeCap.butt;
-    const BoxConstraints constraints = BoxConstraints.tightFor(width: 80.0, height: 80.0);
-    const double trackGap = 12.0;
-    const EdgeInsets padding = EdgeInsets.all(18.0);
-    final ThemeData theme = ThemeData(
+    const constraints = BoxConstraints.tightFor(width: 80.0, height: 80.0);
+    const trackGap = 12.0;
+    const padding = EdgeInsets.all(18.0);
+    final theme = ThemeData(
       progressIndicatorTheme: const ProgressIndicatorThemeData(
         color: color,
         circularTrackColor: circularTrackColor,
@@ -378,8 +378,8 @@ void main() {
   testWidgets(
     'CircularProgressIndicator.year2023 set to false and provided circularTrackColor does not throw exception',
     (WidgetTester tester) async {
-      const Color circularTrackColor = Color(0XFF0000FF);
-      final ThemeData theme = ThemeData(
+      const circularTrackColor = Color(0XFF0000FF);
+      final theme = ThemeData(
         progressIndicatorTheme: const ProgressIndicatorThemeData(
           circularTrackColor: circularTrackColor,
           year2023: false,
@@ -400,7 +400,7 @@ void main() {
   testWidgets(
     'Opt into 2024 CircularProgressIndicator appearance with ProgressIndicatorThemeData.year2023',
     (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(
+      final theme = ThemeData(
         progressIndicatorTheme: const ProgressIndicatorThemeData(year2023: false),
       );
       const EdgeInsetsGeometry padding = EdgeInsets.all(4.0);
@@ -456,7 +456,7 @@ void main() {
   testWidgets('CircularProgressIndicator.year2023 overrides ProgressIndicatorThemeData.year2023', (
     WidgetTester tester,
   ) async {
-    final ThemeData theme = ThemeData(
+    final theme = ThemeData(
       progressIndicatorTheme: const ProgressIndicatorThemeData(year2023: false),
     );
     await tester.pumpWidget(
@@ -495,10 +495,10 @@ void main() {
   testWidgets(
     'Opt into 2024 LinearProgressIndicator appearance with ProgressIndicatorThemeData.year2023',
     (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(
+      final theme = ThemeData(
         progressIndicatorTheme: const ProgressIndicatorThemeData(year2023: false),
       );
-      const double defaultTrackGap = 4.0;
+      const defaultTrackGap = 4.0;
       await tester.pumpWidget(
         MaterialApp(
           theme: theme,
@@ -536,7 +536,7 @@ void main() {
   testWidgets('LinearProgressIndicator.year2023 overrides ProgressIndicatorThemeData.year2023', (
     WidgetTester tester,
   ) async {
-    final ThemeData theme = ThemeData(
+    final theme = ThemeData(
       progressIndicatorTheme: const ProgressIndicatorThemeData(year2023: false),
     );
     await tester.pumpWidget(
@@ -609,18 +609,12 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     expectProgressAt(left: 16.028758883476257, right: 141.07513427734375);
 
-    final AnimationController globalThemeController = AnimationController(
-      vsync: tester,
-      value: 0.1,
-    );
+    final globalThemeController = AnimationController(vsync: tester, value: 0.1);
     addTearDown(globalThemeController.dispose);
     await tester.pumpWidget(buildApp(globalThemeController: globalThemeController));
     expectProgressAt(left: 0.0, right: 37.14974820613861);
 
-    final AnimationController indicatorThemeController = AnimationController(
-      vsync: tester,
-      value: 0.5,
-    );
+    final indicatorThemeController = AnimationController(vsync: tester, value: 0.5);
     addTearDown(indicatorThemeController.dispose);
     await tester.pumpWidget(
       buildApp(
@@ -630,7 +624,7 @@ void main() {
     );
     expectProgressAt(left: 127.79541015625, right: 200.0);
 
-    final AnimationController widgetController = AnimationController(vsync: tester, value: 0.8);
+    final widgetController = AnimationController(vsync: tester, value: 0.8);
     addTearDown(widgetController.dispose);
     await tester.pumpWidget(
       buildApp(
@@ -685,18 +679,12 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     expectProgressAt(start: 0.43225767465697107, sweep: 4.52182126629162);
 
-    final AnimationController globalThemeController = AnimationController(
-      vsync: tester,
-      value: 0.1,
-    );
+    final globalThemeController = AnimationController(vsync: tester, value: 0.1);
     addTearDown(globalThemeController.dispose);
     await tester.pumpWidget(buildApp(globalThemeController: globalThemeController));
     expectProgressAt(start: 0.628318530718057, sweep: 2.8904563625380906);
 
-    final AnimationController indicatorThemeController = AnimationController(
-      vsync: tester,
-      value: 0.5,
-    );
+    final indicatorThemeController = AnimationController(vsync: tester, value: 0.5);
     addTearDown(indicatorThemeController.dispose);
     await tester.pumpWidget(
       buildApp(
@@ -706,7 +694,7 @@ void main() {
     );
     expectProgressAt(start: 1.5707963267948966, sweep: 0.001);
 
-    final AnimationController widgetController = AnimationController(vsync: tester, value: 0.8);
+    final widgetController = AnimationController(vsync: tester, value: 0.8);
     addTearDown(widgetController.dispose);
     await tester.pumpWidget(
       buildApp(

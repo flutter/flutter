@@ -52,7 +52,8 @@ class _MyKeyExampleState extends State<MyKeyExample> {
         _message = 'Pressed the "Q" key!';
       } else {
         if (kReleaseMode) {
-          _message = 'Not a Q: Pressed 0x${event.logicalKey.keyId.toRadixString(16)}';
+          _message =
+              'Not a Q: Pressed 0x${event.logicalKey.keyId.toRadixString(16)}';
         } else {
           // As the name implies, the debugName will only print useful
           // information in debug mode.

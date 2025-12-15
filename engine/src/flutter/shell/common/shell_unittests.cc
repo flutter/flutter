@@ -142,6 +142,11 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
               (std::unique_ptr<PointerDataPacket> packet),
               (override));
 
+  MOCK_METHOD(bool,
+              OnPlatformViewEmbeddedNativeViewShouldAcceptTouch,
+              (int64_t view_id, const flutter::PointData touch_began_location),
+              (override));
+
   MOCK_METHOD(void,
               OnPlatformViewDispatchSemanticsAction,
               (int64_t view_id,
@@ -2488,7 +2493,8 @@ TEST_F(ShellTest, RasterizerMakeRasterSnapshot) {
         SnapshotDelegate* delegate =
             reinterpret_cast<Rasterizer*>(shell->GetRasterizer().get());
         sk_sp<DlImage> image = delegate->MakeRasterSnapshotSync(
-            MakeSizedDisplayList(50, 50), DlISize(50, 50));
+            MakeSizedDisplayList(50, 50), DlISize(50, 50),
+            SnapshotPixelFormat::kDontCare);
         EXPECT_NE(image, nullptr);
 
         latch->Signal();

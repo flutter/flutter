@@ -17,7 +17,7 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Opacity', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     // Opacity 1.0: Semantics and painting
     await tester.pumpWidget(
@@ -183,7 +183,7 @@ void main() {
     final Element element = find.byType(RepaintBoundary).first.evaluate().single;
     // The following line will send the layer to engine and cause crash if an
     // empty opacity layer is sent.
-    final OffsetLayer offsetLayer = element.renderObject!.debugLayer! as OffsetLayer;
+    final offsetLayer = element.renderObject!.debugLayer! as OffsetLayer;
     final ui.Image image = await offsetLayer.toImage(const Rect.fromLTRB(0.0, 0.0, 1.0, 1.0));
     image.dispose();
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/49857

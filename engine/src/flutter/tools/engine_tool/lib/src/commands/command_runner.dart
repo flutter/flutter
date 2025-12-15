@@ -32,7 +32,7 @@ final class ToolCommandRunner extends CommandRunner<int> {
             'for more information see https://flutter.dev/to/et.',
         usageLineLength: _usageLineLength,
       ) {
-    final List<Command<int>> commands = <Command<int>>[
+    final commands = <Command<int>>[
       CleanupCommand(environment: environment, usageLineLength: _usageLineLength),
       FetchCommand(environment: environment, usageLineLength: _usageLineLength),
       FormatCommand(environment: environment, usageLineLength: _usageLineLength),

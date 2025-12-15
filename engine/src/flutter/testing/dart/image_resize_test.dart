@@ -94,35 +94,35 @@ void main() {
   });
 
   test('pixels: no resize by default', () async {
-    final BlackSquare blackSquare = BlackSquare.create();
+    final blackSquare = BlackSquare.create();
     final Image resized = await blackSquare.resize();
     expect(resized.height, blackSquare.height);
     expect(resized.width, blackSquare.width);
   });
 
   test('pixels: resize width with constrained height', () async {
-    final BlackSquare blackSquare = BlackSquare.create();
+    final blackSquare = BlackSquare.create();
     final Image resized = await blackSquare.resize(targetHeight: 1);
     expect(resized.height, 1);
     expect(resized.width, 1);
   });
 
   test('pixels: resize height with constrained width', () async {
-    final BlackSquare blackSquare = BlackSquare.create();
+    final blackSquare = BlackSquare.create();
     final Image resized = await blackSquare.resize(targetWidth: 1);
     expect(resized.height, 1);
     expect(resized.width, 1);
   });
 
   test('pixels: upscale image by 5x', () async {
-    final BlackSquare blackSquare = BlackSquare.create();
+    final blackSquare = BlackSquare.create();
     final Image resized = await blackSquare.resize(targetWidth: 10, allowUpscaling: true);
     expect(resized.height, 10);
     expect(resized.width, 10);
   });
 
   test('pixels: upscale image by 5x - no upscaling', () async {
-    final BlackSquare blackSquare = BlackSquare.create();
+    final blackSquare = BlackSquare.create();
     expect(() {
       decodeImageFromPixels(
         blackSquare.pixels,
@@ -137,7 +137,7 @@ void main() {
   });
 
   test('pixels: upscale image varying width and height', () async {
-    final BlackSquare blackSquare = BlackSquare.create();
+    final blackSquare = BlackSquare.create();
     final Image resized = await blackSquare.resize(
       targetHeight: 1,
       targetWidth: 10,
@@ -148,7 +148,7 @@ void main() {
   });
 
   test('pixels: upscale image varying width and height - no upscaling', () async {
-    final BlackSquare blackSquare = BlackSquare.create();
+    final blackSquare = BlackSquare.create();
     expect(() {
       decodeImageFromPixels(
         blackSquare.pixels,
@@ -164,7 +164,7 @@ void main() {
   });
 
   test('pixels: large negative dimensions', () async {
-    final BlackSquare blackSquare = BlackSquare.create();
+    final blackSquare = BlackSquare.create();
     final Image resized = await blackSquare.resize(targetHeight: -100, targetWidth: -99999);
     expect(resized.height, 2);
     expect(resized.width, 2);
@@ -175,12 +175,12 @@ class BlackSquare {
   BlackSquare._(this.width, this.height, this.pixels);
 
   factory BlackSquare.create({int width = 2, int height = 2}) {
-    final Uint8List pixels = Uint8List.fromList(List<int>.filled(width * height * 4, 0));
+    final pixels = Uint8List.fromList(List<int>.filled(width * height * 4, 0));
     return BlackSquare._(width, height, pixels);
   }
 
   Future<Image> resize({int? targetWidth, int? targetHeight, bool allowUpscaling = false}) async {
-    final Completer<Image> imageCompleter = Completer<Image>();
+    final imageCompleter = Completer<Image>();
     decodeImageFromPixels(
       pixels,
       width,
@@ -200,6 +200,6 @@ class BlackSquare {
 }
 
 Future<Uint8List> readFile(String fileName) async {
-  final File file = File(path.join('flutter', 'testing', 'resources', fileName));
+  final file = File(path.join('flutter', 'testing', 'resources', fileName));
   return file.readAsBytes();
 }

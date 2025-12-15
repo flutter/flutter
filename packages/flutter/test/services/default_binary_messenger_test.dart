@@ -16,11 +16,11 @@ void main() {
   }
 
   test('default binary messenger calls callback once', () async {
-    int countInbound = 0;
-    int countOutbound = 0;
-    const String channel = 'foo';
+    var countInbound = 0;
+    var countOutbound = 0;
+    const channel = 'foo';
     final ByteData bar = makeByteData('bar');
-    final Completer<void> done = Completer<void>();
+    final done = Completer<void>();
     ServicesBinding.instance.channelBuffers.push(channel, bar, (ByteData? message) async {
       expect(message, isNull);
       countOutbound += 1;

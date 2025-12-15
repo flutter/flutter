@@ -33,7 +33,7 @@ void main() {
 
   test('obtainKey errors will be caught', () async {
     final ImageProvider imageProvider = ObtainKeyErrorImageProvider();
-    final Completer<bool> caughtError = Completer<bool>();
+    final caughtError = Completer<bool>();
     FlutterError.onError = (FlutterErrorDetails details) {
       caughtError.complete(false);
     };
@@ -53,7 +53,7 @@ void main() {
 
   test('obtainKey errors will be caught - check location', () async {
     final ImageProvider imageProvider = ObtainKeyErrorImageProvider();
-    final Completer<bool> caughtError = Completer<bool>();
+    final caughtError = Completer<bool>();
     FlutterError.onError = (FlutterErrorDetails details) {
       caughtError.complete(true);
     };
@@ -63,13 +63,13 @@ void main() {
   });
 
   test('File image with empty file throws expected error and evicts from cache', () async {
-    final Completer<StateError> error = Completer<StateError>();
+    final error = Completer<StateError>();
     FlutterError.onError = (FlutterErrorDetails details) {
       error.complete(details.exception as StateError);
     };
-    final MemoryFileSystem fs = MemoryFileSystem();
+    final fs = MemoryFileSystem();
     final File file = fs.file('/empty.png')..createSync(recursive: true);
-    final FileImage provider = FileImage(file);
+    final provider = FileImage(file);
 
     expect(imageCache.statusForKey(provider).untracked, true);
     expect(imageCache.pendingImageCount, 0);
@@ -85,13 +85,13 @@ void main() {
   });
 
   test('File image with empty file throws expected error (load)', () async {
-    final Completer<StateError> error = Completer<StateError>();
+    final error = Completer<StateError>();
     FlutterError.onError = (FlutterErrorDetails details) {
       error.complete(details.exception as StateError);
     };
-    final MemoryFileSystem fs = MemoryFileSystem();
+    final fs = MemoryFileSystem();
     final File file = fs.file('/empty.png')..createSync(recursive: true);
-    final FileImage provider = FileImage(file);
+    final provider = FileImage(file);
 
     expect(
       provider.loadBuffer(provider, (
@@ -109,42 +109,42 @@ void main() {
   });
 
   test('File image sets tag', () async {
-    final MemoryFileSystem fs = MemoryFileSystem();
+    final fs = MemoryFileSystem();
     final File file = fs.file('/blue.png')
       ..createSync(recursive: true)
       ..writeAsBytesSync(kBlueSquarePng);
-    final FileImage provider = FileImage(file);
+    final provider = FileImage(file);
 
-    final MultiFrameImageStreamCompleter completer =
+    final completer =
         provider.loadBuffer(provider, noOpDecoderBufferCallback) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, file.path);
   });
 
   test('Memory image sets tag', () async {
-    final Uint8List bytes = Uint8List.fromList(kBlueSquarePng);
-    final MemoryImage provider = MemoryImage(bytes);
+    final bytes = Uint8List.fromList(kBlueSquarePng);
+    final provider = MemoryImage(bytes);
 
-    final MultiFrameImageStreamCompleter completer =
+    final completer =
         provider.loadBuffer(provider, noOpDecoderBufferCallback) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, 'MemoryImage(${describeIdentity(bytes)})');
   });
 
   test('Asset image sets tag', () async {
-    const String asset = 'images/blue.png';
-    final ExactAssetImage provider = ExactAssetImage(asset, bundle: _TestAssetBundle());
+    const asset = 'images/blue.png';
+    final provider = ExactAssetImage(asset, bundle: _TestAssetBundle());
     final AssetBundleImageKey key = await provider.obtainKey(ImageConfiguration.empty);
-    final MultiFrameImageStreamCompleter completer =
+    final completer =
         provider.loadBuffer(key, noOpDecoderBufferCallback) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, asset);
   });
 
   test('Resize image sets tag', () async {
-    final Uint8List bytes = Uint8List.fromList(kBlueSquarePng);
-    final ResizeImage provider = ResizeImage(MemoryImage(bytes), width: 40, height: 40);
-    final MultiFrameImageStreamCompleter completer =
+    final bytes = Uint8List.fromList(kBlueSquarePng);
+    final provider = ResizeImage(MemoryImage(bytes), width: 40, height: 40);
+    final completer =
         provider.loadBuffer(
               await provider.obtainKey(ImageConfiguration.empty),
               noOpDecoderBufferCallback,
@@ -155,11 +155,11 @@ void main() {
   });
 
   test('File image throws error when given a real but non-image file', () async {
-    final Completer<Exception> error = Completer<Exception>();
+    final error = Completer<Exception>();
     FlutterError.onError = (FlutterErrorDetails details) {
       error.complete(details.exception as Exception);
     };
-    final FileImage provider = FileImage(File('pubspec.yaml'));
+    final provider = FileImage(File('pubspec.yaml'));
 
     expect(imageCache.statusForKey(provider).untracked, true);
     expect(imageCache.pendingImageCount, 0);

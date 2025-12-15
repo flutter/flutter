@@ -94,7 +94,7 @@ void main() {
   });
 
   test('ClipRRect constructs with the right default values', () {
-    const ClipRRect clipRRect = ClipRRect();
+    const clipRRect = ClipRRect();
     expect(clipRRect.clipBehavior, equals(Clip.antiAlias));
     expect(clipRRect.borderRadius, equals(BorderRadius.zero));
   });
@@ -764,7 +764,7 @@ void main() {
   });
 
   testWidgets('ClipPath.shape', (WidgetTester tester) async {
-    final List<String> logs = <String>[];
+    final logs = <String>[];
     final ShapeBorder shape = TestBorder((String message) {
       logs.add(message);
     });
@@ -811,9 +811,7 @@ void main() {
   });
 
   testWidgets('CustomClipper reclips when notified', (WidgetTester tester) async {
-    final ValueNotifier<Rect> clip = ValueNotifier<Rect>(
-      const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0),
-    );
+    final clip = ValueNotifier<Rect>(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
     addTearDown(clip.dispose);
 
     await tester.pumpWidget(
@@ -851,8 +849,8 @@ void main() {
   });
 
   testWidgets('ClipRRect supports BorderRadiusDirectional', (WidgetTester tester) async {
-    const Radius startRadius = Radius.circular(15.0);
-    const Radius endRadius = Radius.circular(30.0);
+    const startRadius = Radius.circular(15.0);
+    const endRadius = Radius.circular(30.0);
 
     Widget buildClipRRect(TextDirection textDirection) {
       return Directionality(
@@ -866,7 +864,7 @@ void main() {
     for (final TextDirection textDirection in TextDirection.values) {
       await tester.pumpWidget(buildClipRRect(textDirection));
       final RenderClipRRect renderClip = tester.allRenderObjects.whereType<RenderClipRRect>().first;
-      final bool isRtl = textDirection == TextDirection.rtl;
+      final isRtl = textDirection == TextDirection.rtl;
       expect(
         renderClip.borderRadius.resolve(textDirection).topLeft,
         isRtl ? endRadius : startRadius,
@@ -887,8 +885,8 @@ void main() {
   });
 
   testWidgets('ClipRRect is direction-aware', (WidgetTester tester) async {
-    const Radius startRadius = Radius.circular(15.0);
-    const Radius endRadius = Radius.circular(30.0);
+    const startRadius = Radius.circular(15.0);
+    const endRadius = Radius.circular(30.0);
     TextDirection textDirection = TextDirection.ltr;
 
     Widget buildClipRRect(TextDirection textDirection) {
@@ -930,7 +928,7 @@ void main() {
     for (final TextDirection textDirection in TextDirection.values) {
       await tester.pumpWidget(buildClipRRect(textDirection));
       final RenderClipRRect renderClip = tester.allRenderObjects.whereType<RenderClipRRect>().first;
-      final bool isRtl = textDirection == TextDirection.rtl;
+      final isRtl = textDirection == TextDirection.rtl;
       expect(renderClip.textDirection, isRtl ? TextDirection.rtl : TextDirection.ltr);
     }
 

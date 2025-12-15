@@ -79,8 +79,8 @@ class _StatefulListViewState extends State<_StatefulListView> {
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/100451
   testWidgets('ListView.builder respects findChildIndexCallback', (WidgetTester tester) async {
-    bool finderCalled = false;
-    int itemCount = 7;
+    var finderCalled = false;
+    var itemCount = 7;
     late StateSetter stateSetter;
 
     await tester.pumpWidget(
@@ -113,8 +113,8 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/100451
   testWidgets('ListView.separator respects findChildIndexCallback', (WidgetTester tester) async {
-    bool finderCalled = false;
-    int itemCount = 7;
+    var finderCalled = false;
+    var itemCount = 7;
     late StateSetter stateSetter;
 
     await tester.pumpWidget(
@@ -200,7 +200,7 @@ void main() {
   });
 
   testWidgets('ListView large scroll jump', (WidgetTester tester) async {
-    final List<int> log = <int>[];
+    final log = <int>[];
 
     await tester.pumpWidget(
       Directionality(
@@ -453,7 +453,7 @@ void main() {
   });
 
   testWidgets('didFinishLayout has correct indices', (WidgetTester tester) async {
-    final TestSliverChildListDelegate delegate = TestSliverChildListDelegate(
+    final delegate = TestSliverChildListDelegate(
       List<Widget>.generate(20, (int i) {
         return Text('$i', textDirection: TextDirection.ltr);
       }),
@@ -547,11 +547,11 @@ void main() {
   testWidgets(
     'ListView allows touch on children when reaching an edge and over-scrolling / settling',
     (WidgetTester tester) async {
-      bool tapped = false;
-      final ScrollController controller = ScrollController();
+      var tapped = false;
+      final controller = ScrollController();
       addTearDown(controller.dispose);
 
-      const Duration frame = Duration(milliseconds: 16);
+      const frame = Duration(milliseconds: 16);
 
       await tester.pumpWidget(
         Directionality(
@@ -579,7 +579,7 @@ void main() {
 
       await tester.fling(find.byType(ListView), const Offset(0.0, 80.0), 1000.0);
       // Pump a few frames to ensure the scrollable is in an over-scrolled state
-      for (int i = 0; i < 5; i++) {
+      for (var i = 0; i < 5; i++) {
         await tester.pump(frame);
       }
 
@@ -611,7 +611,7 @@ void main() {
       // Strong fling down, to over-scroll the list at the top
       await tester.fling(find.byType(ListView), const Offset(0.0, 500.0), 5000.0);
 
-      for (int i = 0; i < 5; i++) {
+      for (var i = 0; i < 5; i++) {
         await tester.pump(frame);
       }
 
@@ -640,11 +640,11 @@ void main() {
   testWidgets('ListView absorbs touch to stop scrolling when not at the edge', (
     WidgetTester tester,
   ) async {
-    bool tapped = false;
-    final ScrollController controller = ScrollController();
+    var tapped = false;
+    final controller = ScrollController();
     addTearDown(controller.dispose);
 
-    const Duration frame = Duration(milliseconds: 16);
+    const frame = Duration(milliseconds: 16);
 
     await tester.pumpWidget(
       Directionality(
@@ -706,11 +706,11 @@ void main() {
   testWidgets('Horizontal ListView, when over-scrolled at the end allows touches on children', (
     WidgetTester tester,
   ) async {
-    bool tapped = false;
-    final ScrollController controller = ScrollController();
+    var tapped = false;
+    final controller = ScrollController();
     addTearDown(controller.dispose);
 
-    const Duration frame = Duration(milliseconds: 16);
+    const frame = Duration(milliseconds: 16);
 
     await tester.pumpWidget(
       Directionality(
@@ -741,7 +741,7 @@ void main() {
     // Fling the list, it should start scrolling
     await tester.fling(find.byType(ListView), const Offset(-500.0, 0.0), 10000.0);
 
-    for (int i = 0; i < 5; i++) {
+    for (var i = 0; i < 5; i++) {
       await tester.pump(frame);
     }
 
@@ -856,7 +856,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/43380.
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
 
     Widget buildListView({required Axis scrollDirection}) {
@@ -900,7 +900,7 @@ void main() {
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
     // 2nd, check that the painting context has received the default clip behavior.
-    final TestClipPaintingContext context = TestClipPaintingContext();
+    final context = TestClipPaintingContext();
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.hardEdge));
 
@@ -972,9 +972,9 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/pull/138912
   testWidgets('itemExtentBuilder should respect item count', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
-    final List<double> numbers = <double>[10, 20, 30, 40, 50];
+    final numbers = <double>[10, 20, 30, 40, 50];
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -998,9 +998,9 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/pull/131393
   testWidgets('itemExtentBuilder test', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
-    final List<int> buildLog = <int>[];
+    final buildLog = <int>[];
     late SliverLayoutDimensions sliverLayoutDimensions;
     await tester.pumpWidget(
       Directionality(

@@ -31,15 +31,15 @@ Future<void> testMain() async {
 
     test('blur renders to the edges', () async {
       // Make a checkerboard picture so we can see the blur.
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
-      final ui.Canvas canvas = ui.Canvas(recorder, region);
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, region);
       canvas.drawColor(const ui.Color(0xffffffff), ui.BlendMode.srcOver);
       final double sideLength = region.width / 20;
       final int rows = (region.height / sideLength).ceil();
 
-      for (int row = 0; row < rows; row++) {
-        for (int column = 0; column < 10; column++) {
-          final ui.Rect rect = ui.Rect.fromLTWH(
+      for (var row = 0; row < rows; row++) {
+        for (var column = 0; column < 10; column++) {
+          final rect = ui.Rect.fromLTWH(
             row.isEven ? (column * 2) * sideLength : (column * 2 + 1) * sideLength,
             row * sideLength,
             sideLength,
@@ -50,7 +50,7 @@ Future<void> testMain() async {
       }
       final ui.Picture checkerboard = recorder.endRecording();
 
-      final ui.SceneBuilder builder = ui.SceneBuilder();
+      final builder = ui.SceneBuilder();
       builder.pushOffset(0, 0);
       builder.addPicture(ui.Offset.zero, checkerboard);
       builder.pushBackdropFilter(ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10));
@@ -59,14 +59,14 @@ Future<void> testMain() async {
       await matchGoldenFile('ui_backdropfilter_blur_edges.png', region: region);
     });
     test('ImageFilter with ColorFilter as child', () async {
-      final ui.SceneBuilder builder = ui.SceneBuilder();
-      const ui.Rect region = ui.Rect.fromLTRB(0, 0, 500, 250);
+      final builder = ui.SceneBuilder();
+      const region = ui.Rect.fromLTRB(0, 0, 500, 250);
 
       builder.pushOffset(0, 0);
 
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
-      final ui.Canvas canvas = ui.Canvas(recorder, region);
-      final ui.ColorFilter colorFilter = ui.ColorFilter.mode(
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, region);
+      final colorFilter = ui.ColorFilter.mode(
         const ui.Color(0XFF00FF00).withOpacity(0.55),
         ui.BlendMode.darken,
       );
@@ -94,15 +94,15 @@ Future<void> testMain() async {
       await createPlatformView(0, 'test-platform-view');
 
       // Make a checkerboard picture so we can see the blur.
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
-      final ui.Canvas canvas = ui.Canvas(recorder, region);
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, region);
       canvas.drawColor(const ui.Color(0xffffffff), ui.BlendMode.srcOver);
       final double sideLength = region.width / 20;
       final int rows = (region.height / sideLength).ceil();
 
-      for (int row = 0; row < rows; row++) {
-        for (int column = 0; column < 10; column++) {
-          final ui.Rect rect = ui.Rect.fromLTWH(
+      for (var row = 0; row < rows; row++) {
+        for (var column = 0; column < 10; column++) {
+          final rect = ui.Rect.fromLTWH(
             row.isEven ? (column * 2) * sideLength : (column * 2 + 1) * sideLength,
             row * sideLength,
             sideLength,
@@ -113,16 +113,16 @@ Future<void> testMain() async {
       }
       final ui.Picture checkerboard = recorder.endRecording();
 
-      final ui.SceneBuilder builder = ui.SceneBuilder();
+      final builder = ui.SceneBuilder();
       builder.pushOffset(0, 0);
       builder.addPicture(ui.Offset.zero, checkerboard);
       builder.pushBackdropFilter(ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10));
 
       // Draw a green rectangle, then an invisible platform view, then a blue
       // rectangle. Both rectangles should not be blurred.
-      final ui.PictureRecorder greenRectRecorder = ui.PictureRecorder();
-      final ui.Canvas greenRectCanvas = ui.Canvas(greenRectRecorder, region);
-      final ui.Paint greenPaint = ui.Paint()..color = const ui.Color(0xff00ff00);
+      final greenRectRecorder = ui.PictureRecorder();
+      final greenRectCanvas = ui.Canvas(greenRectRecorder, region);
+      final greenPaint = ui.Paint()..color = const ui.Color(0xff00ff00);
       greenRectCanvas.drawRect(
         ui.Rect.fromCenter(
           center: ui.Offset(region.width / 3, region.height / 2),
@@ -133,9 +133,9 @@ Future<void> testMain() async {
       );
       final ui.Picture greenRectPicture = greenRectRecorder.endRecording();
 
-      final ui.PictureRecorder blueRectRecorder = ui.PictureRecorder();
-      final ui.Canvas blueRectCanvas = ui.Canvas(blueRectRecorder, region);
-      final ui.Paint bluePaint = ui.Paint()..color = const ui.Color(0xff0000ff);
+      final blueRectRecorder = ui.PictureRecorder();
+      final blueRectCanvas = ui.Canvas(blueRectRecorder, region);
+      final bluePaint = ui.Paint()..color = const ui.Color(0xff0000ff);
       blueRectCanvas.drawRect(
         ui.Rect.fromCenter(
           center: ui.Offset(2 * region.width / 3, region.height / 2),

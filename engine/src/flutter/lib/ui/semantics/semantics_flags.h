@@ -46,6 +46,7 @@ struct SemanticsFlags {
   bool isLink = false;
   bool isSlider = false;
   bool isKeyboardKey = false;
+  bool isAccessibilityFocusBlocked = false;
 };
 
 //------------------------------------------------------------------------------
@@ -83,7 +84,8 @@ class NativeSemanticsFlags
                                  bool isReadOnly,
                                  bool isLink,
                                  bool isSlider,
-                                 bool isKeyboardKey);
+                                 bool isKeyboardKey,
+                                 bool isAccessibilityFocusBlocked);
 
   //----------------------------------------------------------------------------
   /// Returns the c++ representataion of SemanticsFlags.

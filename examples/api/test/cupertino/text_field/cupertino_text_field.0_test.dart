@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_api_samples/cupertino/text_field/cupertino_text_field.0.dart' as example;
+import 'package:flutter_api_samples/cupertino/text_field/cupertino_text_field.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('CupertinoTextField has initial text', (WidgetTester tester) async {
+  testWidgets('CupertinoTextField has initial text', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.CupertinoTextFieldApp());
 
     expect(find.byType(CupertinoTextField), findsOneWidget);

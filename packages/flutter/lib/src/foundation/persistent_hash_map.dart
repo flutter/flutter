@@ -209,7 +209,7 @@ class _CompressedNode extends _TrieNode {
         final int prefixLength = 2 * index;
         final int totalLength = 2 * occupiedCount;
         final List<Object?> newKeyValuePairs = _makeArray(totalLength + 2);
-        for (int srcIndex = 0; srcIndex < prefixLength; srcIndex++) {
+        for (var srcIndex = 0; srcIndex < prefixLength; srcIndex++) {
           newKeyValuePairs[srcIndex] = keyValuePairs[srcIndex];
         }
         newKeyValuePairs[prefixLength] = key;
@@ -248,8 +248,8 @@ class _CompressedNode extends _TrieNode {
   /// Convert this node into an equivalent [_FullNode].
   _FullNode _inflate(int bitIndex) {
     final List<Object?> nodes = _makeArray(_FullNode.numElements);
-    int srcIndex = 0;
-    for (int dstIndex = 0; dstIndex < _FullNode.numElements; dstIndex++) {
+    var srcIndex = 0;
+    for (var dstIndex = 0; dstIndex < _FullNode.numElements; dstIndex++) {
       if (((occupiedIndices >>> dstIndex) & 1) != 0) {
         final Object? keyOrNull = keyValuePairs[srcIndex];
         if (keyOrNull == null) {
@@ -283,7 +283,7 @@ class _CompressedNode extends _TrieNode {
     int keyHash,
     Object? value,
   ) {
-    final int existingKeyHash = existingKey.hashCode;
+    final existingKeyHash = existingKey.hashCode;
     // Check if this is a full hash collision and use _HashCollisionNode
     // in this case.
     return (existingKeyHash == keyHash)
@@ -330,7 +330,7 @@ class _HashCollisionNode extends _TrieNode {
       }
       final int length = keyValuePairs.length;
       final List<Object?> newArray = _makeArray(length + 2);
-      for (int i = 0; i < length; i++) {
+      for (var i = 0; i < length; i++) {
         newArray[i] = keyValuePairs[i];
       }
       newArray[length] = key;
@@ -351,7 +351,7 @@ class _HashCollisionNode extends _TrieNode {
 
   int _indexOf(Object key) {
     final int length = keyValuePairs.length;
-    for (int i = 0; i < length; i += 2) {
+    for (var i = 0; i < length; i += 2) {
       if (key == keyValuePairs[i]) {
         return i;
       }
@@ -385,7 +385,7 @@ int _bitCount(int n) {
 @pragma('wasm:prefer-inline')
 List<Object?> _copy(List<Object?> array) {
   final List<Object?> clone = _makeArray(array.length);
-  for (int j = 0; j < array.length; j++) {
+  for (var j = 0; j < array.length; j++) {
     clone[j] = array[j];
   }
   return clone;

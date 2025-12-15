@@ -309,7 +309,7 @@ class TooltipThemeData with Diagnosticable {
 /// TooltipTheme(
 ///   data: TooltipThemeData(
 ///     decoration: BoxDecoration(
-///       color: Colors.blue.withOpacity(0.9),
+///       color: Colors.blue.withValues(alpha: 0.9),
 ///       borderRadius: BorderRadius.zero,
 ///     ),
 ///   ),

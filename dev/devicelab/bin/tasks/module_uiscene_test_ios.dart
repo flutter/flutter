@@ -25,10 +25,10 @@ import 'package:path/path.dart' as path;
 ///
 /// e.g. `../../bin/cache/dart-sdk/bin/dart bin/test_runner.dart test -t module_uiscene_test_ios --local-engine ios_debug_sim_unopt_arm64 --local-engine-host host_debug --task-args destination=/path/to/copy/destination`
 Future<void> main(List<String> args) async {
-  const String kDestination = 'destination';
-  const String kTestName = 'name';
-  const String kXcodeProjecType = 'type';
-  final ArgParser argParser = ArgParser()
+  const kDestination = 'destination';
+  const kTestName = 'name';
+  const kXcodeProjecType = 'type';
+  final argParser = ArgParser()
     ..addOption(kDestination)
     ..addOption(kTestName)
     ..addOption(kXcodeProjecType);
@@ -37,7 +37,7 @@ Future<void> main(List<String> args) async {
     final ArgResults argResults = argParser.parse(args);
     final String? destination = argResults.option(kDestination);
     final Directory destinationDir;
-    bool destinationOverride = false;
+    var destinationOverride = false;
     if (destination != null) {
       destinationOverride = true;
       destinationDir = Directory(destination);
@@ -64,7 +64,7 @@ Future<void> main(List<String> args) async {
     }
 
     String? simulatorDeviceId;
-    final Directory templatesDir = Directory(
+    final templatesDir = Directory(
       path.join(flutterDirectory.path, 'dev', 'integration_tests', 'ios_add2app_uiscene'),
     );
 
@@ -78,13 +78,13 @@ Future<void> main(List<String> args) async {
         templatesDir: templatesDir,
       );
 
-      int testCount = 0;
-      int testFailedCount = 0;
+      var testCount = 0;
+      var testFailedCount = 0;
       await testWithNewIOSSimulator(
         'TestAdd2AppSim',
         deviceTypeId: 'com.apple.CoreSimulator.SimDeviceType.iPad-Pro-11-inch-3rd-generation',
         (String deviceId) async {
-          for (final XcodeProjectType xcodeProjectType in projectTypesToTest) {
+          for (final xcodeProjectType in projectTypesToTest) {
             final (String xcodeProjectName, Directory xcodeProjectDir) = await _createNativeApp(
               destinationDir: destinationDir,
               templatesDir: templatesDir,
@@ -92,7 +92,7 @@ Future<void> main(List<String> args) async {
             );
 
             simulatorDeviceId = deviceId;
-            final Scenarios scenarios = Scenarios();
+            final scenarios = Scenarios();
             final Map<String, Map<String, String>> scenariosMap = scenarios.scenarios(
               xcodeProjectType,
             );
@@ -108,7 +108,7 @@ Future<void> main(List<String> args) async {
                 appDir: appDir,
               );
 
-              for (final FileReplacements replacement in replacements) {
+              for (final replacement in replacements) {
                 replacement.replace();
               }
 
@@ -129,7 +129,7 @@ Future<void> main(List<String> args) async {
 
               // Reset files to original between scenarios unless we're targetting a specific test.
               if (testName == null) {
-                for (final FileReplacements replacement in replacements) {
+                for (final replacement in replacements) {
                   replacement.reset();
                 }
               }
@@ -163,7 +163,7 @@ Future<Directory> _createFlutterModuleApp({
 }) async {
   section('Create Flutter Module');
 
-  const String moduleName = 'my_module';
+  const moduleName = 'my_module';
   await flutter(
     'create',
     options: <String>['--org', 'dev.flutter.devicelab', '--template=module', moduleName],
@@ -178,7 +178,7 @@ Future<Directory> _createFlutterPlugin({
 }) async {
   section('Create Flutter Plugin');
 
-  const String pluginName = 'my_plugin';
+  const pluginName = 'my_plugin';
   await flutter(
     'create',
     options: <String>[
@@ -209,9 +209,9 @@ Future<(String, Directory)> _createNativeApp({
       xcodeProjectName = 'NativeSwiftUIExperiment';
   }
   // Copy Xcode project
-  final Directory xcodeProjectDir = Directory(path.join(destinationDir.path, xcodeProjectName));
+  final xcodeProjectDir = Directory(path.join(destinationDir.path, xcodeProjectName));
   xcodeProjectDir.createSync(recursive: true);
-  final Directory xcodeProjectTemplate = Directory(path.join(templatesDir.path, xcodeProjectName));
+  final xcodeProjectTemplate = Directory(path.join(templatesDir.path, xcodeProjectName));
   recursiveCopy(xcodeProjectTemplate, xcodeProjectDir);
 
   return (xcodeProjectName, xcodeProjectDir);
@@ -223,7 +223,7 @@ Future<void> _installPlugins({
 }) async {
   // Poke the pubspec to reset the fingerprinter to ensure the module is re-generated.
   // See [_regenerateModuleFromTemplateIfNeeded] in packages/flutter_tools/lib/src/xcode_project.dart.
-  final File pubspec = File(path.join(appDir.path, 'pubspec.yaml'));
+  final pubspec = File(path.join(appDir.path, 'pubspec.yaml'));
   pubspec.writeAsStringSync(pubspec.readAsStringSync());
 
   await flutter(
@@ -260,7 +260,7 @@ class FileReplacements {
     required Directory pluginDir,
     required Directory appDir,
   }) {
-    final List<FileReplacements> replacements = <FileReplacements>[];
+    final replacements = <FileReplacements>[];
     for (final String source in replacementMap.keys) {
       final String destination = replacementMap[source]!;
       final String sourcePath = source.replaceFirst(r'$TEMPLATE_DIR', templatesDir.path);
@@ -274,8 +274,8 @@ class FileReplacements {
   }
 
   void replace() {
-    final File templateFile = File(templatePath);
-    final File destinationFile = File(destinationPath);
+    final templateFile = File(templatePath);
+    final destinationFile = File(destinationPath);
     if (!destinationFile.existsSync()) {
       File(destinationPath).createSync(recursive: true);
     } else {
@@ -285,7 +285,7 @@ class FileReplacements {
   }
 
   void reset() {
-    final File destinationFile = File(destinationPath);
+    final destinationFile = File(destinationPath);
     if (originalContent != null) {
       destinationFile.writeAsStringSync(originalContent!);
     } else {
@@ -342,7 +342,7 @@ Future<void> _uploadTestResults({
   final Directory? dumpDirectory = hostAgent.dumpDirectory;
   if (dumpDirectory != null) {
     // Zip the test results to the artifacts directory for upload.
-    final String zipName =
+    final zipName =
         'module_uiscene_test_ios-$scenarioName-${DateTime.now().toLocal().toIso8601String()}.zip';
     await inDirectory(resultBundlePath, () {
       final String zipPath = path.join(dumpDirectory.path, zipName);

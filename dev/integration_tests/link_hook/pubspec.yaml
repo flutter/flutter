@@ -3,7 +3,7 @@ description: 'A new Dart FFI package project.'
 version: 0.0.1
 
 environment:
-  sdk: ^3.8.0-0
+  sdk: ^3.9.0-0
 
 resolution: workspace
 

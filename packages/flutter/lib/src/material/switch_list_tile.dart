@@ -617,7 +617,7 @@ class SwitchListTile extends StatelessWidget {
 
     final ThemeData theme = Theme.of(context);
     final SwitchThemeData switchTheme = SwitchTheme.of(context);
-    final Set<WidgetState> states = <WidgetState>{if (selected) WidgetState.selected};
+    final states = <WidgetState>{if (selected) WidgetState.selected};
     final Color effectiveActiveColor =
         activeThumbColor ??
         activeColor ??

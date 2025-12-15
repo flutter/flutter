@@ -70,7 +70,7 @@ class AccessibilityAnnouncements {
   ///
   /// The encoded message is passed as [data], and will be decoded using [codec].
   void handleMessage(StandardMessageCodec codec, ByteData? data) {
-    final Map<dynamic, dynamic> inputMap = codec.decodeMessage(data) as Map<dynamic, dynamic>;
+    final inputMap = codec.decodeMessage(data) as Map<dynamic, dynamic>;
     final Map<dynamic, dynamic> dataMap = inputMap.readDynamicJson('data');
     final String? message = dataMap.tryString('message');
     if (message != null && message.isNotEmpty) {
@@ -98,11 +98,8 @@ class AccessibilityAnnouncements {
   }
 
   static DomHTMLElement _createElement(Assertiveness assertiveness) {
-    final String ariaLiveValue = (assertiveness == Assertiveness.assertive)
-        ? 'assertive'
-        : 'polite';
-    final DomHTMLElement liveRegion =
-        createDomElement('flt-announcement-$ariaLiveValue') as DomHTMLElement;
+    final ariaLiveValue = (assertiveness == Assertiveness.assertive) ? 'assertive' : 'polite';
+    final liveRegion = createDomElement('flt-announcement-$ariaLiveValue') as DomHTMLElement;
     liveRegion.style
       ..position = 'fixed'
       ..overflow = 'hidden'

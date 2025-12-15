@@ -59,7 +59,9 @@ class SliverNavBarExample extends StatelessWidget {
                         context,
                         CupertinoPageRoute<Widget>(
                           builder: (BuildContext context) {
-                            return const NextPage(bottomMode: NavigationBarBottomMode.always);
+                            return const NextPage(
+                              bottomMode: NavigationBarBottomMode.always,
+                            );
                           },
                         ),
                       );
@@ -77,7 +79,10 @@ class SliverNavBarExample extends StatelessWidget {
 }
 
 class NextPage extends StatefulWidget {
-  const NextPage({super.key, this.bottomMode = NavigationBarBottomMode.automatic});
+  const NextPage({
+    super.key,
+    this.bottomMode = NavigationBarBottomMode.automatic,
+  });
 
   final NavigationBarBottomMode bottomMode;
 
@@ -132,7 +137,9 @@ class _NextPageState extends State<NextPage> {
             child: searchIsActive
                 ? ColoredBox(
                     color: CupertinoColors.extraLightBackgroundGray,
-                    child: Center(child: Text(text, textAlign: TextAlign.center)),
+                    child: Center(
+                      child: Text(text, textAlign: TextAlign.center),
+                    ),
                   )
                 : const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16.0),

@@ -534,7 +534,7 @@ class Router<T> extends StatefulWidget {
   ///  * [neglect]: which forces the [Router] to not create a new history entry
   ///    even if location does change.
   static void navigate(BuildContext context, VoidCallback callback) {
-    final _RouterScope scope =
+    final scope =
         context.getElementForInheritedWidgetOfExactType<_RouterScope>()!.widget as _RouterScope;
     scope.routerState._setStateWithExplicitReportStatus(
       RouteInformationReportingType.navigate,
@@ -565,7 +565,7 @@ class Router<T> extends StatefulWidget {
   ///  * [navigate]: which forces the [Router] to create a new history entry
   ///    even if location does not change.
   static void neglect(BuildContext context, VoidCallback callback) {
-    final _RouterScope scope =
+    final scope =
         context.getElementForInheritedWidgetOfExactType<_RouterScope>()!.widget as _RouterScope;
     scope.routerState._setStateWithExplicitReportStatus(
       RouteInformationReportingType.neglect,
@@ -1628,8 +1628,8 @@ class _RestorableRouteInformation extends RestorableValue<RouteInformation?> {
       return null;
     }
     assert(data is List<Object?> && data.length == 2);
-    final List<Object?> castedData = data as List<Object?>;
-    final String? uri = castedData.first as String?;
+    final castedData = data as List<Object?>;
+    final uri = castedData.first as String?;
     if (uri == null) {
       return null;
     }

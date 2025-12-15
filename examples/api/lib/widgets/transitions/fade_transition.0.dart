@@ -23,7 +23,11 @@ class FadeTransitionExampleApp extends StatelessWidget {
 }
 
 class FadeTransitionExample extends StatefulWidget {
-  const FadeTransitionExample({required this.duration, required this.curve, super.key});
+  const FadeTransitionExample({
+    required this.duration,
+    required this.curve,
+    super.key,
+  });
 
   final Duration duration;
 
@@ -41,7 +45,10 @@ class _FadeTransitionExampleState extends State<FadeTransitionExample>
     duration: widget.duration,
     vsync: this,
   )..repeat(reverse: true);
-  late final CurvedAnimation _animation = CurvedAnimation(parent: _controller, curve: widget.curve);
+  late final CurvedAnimation _animation = CurvedAnimation(
+    parent: _controller,
+    curve: widget.curve,
+  );
 
   @override
   void didUpdateWidget(FadeTransitionExample oldWidget) {

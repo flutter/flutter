@@ -28,10 +28,12 @@ class WidgetStateBorderSideExample extends StatefulWidget {
   const WidgetStateBorderSideExample({super.key});
 
   @override
-  State<WidgetStateBorderSideExample> createState() => _WidgetStateBorderSideExampleState();
+  State<WidgetStateBorderSideExample> createState() =>
+      _WidgetStateBorderSideExampleState();
 }
 
-class _WidgetStateBorderSideExampleState extends State<WidgetStateBorderSideExample> {
+class _WidgetStateBorderSideExampleState
+    extends State<WidgetStateBorderSideExample> {
   bool _isSelected = true;
 
   @override
@@ -44,13 +46,15 @@ class _WidgetStateBorderSideExampleState extends State<WidgetStateBorderSideExam
           _isSelected = value;
         });
       },
-      side: const WidgetStateBorderSide.fromMap(<WidgetStatesConstraint, BorderSide?>{
-        WidgetState.pressed: BorderSide(color: Colors.green),
-        WidgetState.hovered: BorderSide(color: Colors.blue),
-        WidgetState.selected: BorderSide(color: Colors.red),
-        // Resolves to null if no keys match, deferring to the default value
-        // of the theme or widget.
-      }),
+      side: const WidgetStateBorderSide.fromMap(
+        <WidgetStatesConstraint, BorderSide?>{
+          WidgetState.pressed: BorderSide(color: Colors.green),
+          WidgetState.hovered: BorderSide(color: Colors.blue),
+          WidgetState.selected: BorderSide(color: Colors.red),
+          // Resolves to null if no keys match, deferring to the default value
+          // of the theme or widget.
+        },
+      ),
     );
   }
 }

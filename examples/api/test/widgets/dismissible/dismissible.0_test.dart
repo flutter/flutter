@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/dismissible/dismissible.0.dart' as example;
+import 'package:flutter_api_samples/widgets/dismissible/dismissible.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -24,7 +25,9 @@ void main() {
     await tester.drag(finder, offset);
   }
 
-  testWidgets('ListTiles can be dismissed from right to left', (WidgetTester tester) async {
+  testWidgets('ListTiles can be dismissed from right to left', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.DismissibleExampleApp());
 
     for (final int index in <int>[0, 33, 66, 99]) {
@@ -46,7 +49,9 @@ void main() {
     }
   });
 
-  testWidgets('ListTiles can be dismissed from left to right', (WidgetTester tester) async {
+  testWidgets('ListTiles can be dismissed from left to right', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.DismissibleExampleApp());
 
     for (final int index in <int>[0, 33, 66, 99]) {

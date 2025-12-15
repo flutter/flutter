@@ -21,10 +21,12 @@ class BottomNavigationBarExample extends StatefulWidget {
   const BottomNavigationBarExample({super.key});
 
   @override
-  State<BottomNavigationBarExample> createState() => _BottomNavigationBarExampleState();
+  State<BottomNavigationBarExample> createState() =>
+      _BottomNavigationBarExampleState();
 }
 
-class _BottomNavigationBarExampleState extends State<BottomNavigationBarExample> {
+class _BottomNavigationBarExampleState
+    extends State<BottomNavigationBarExample> {
   int _selectedIndex = 0;
   final ScrollController _homeController = ScrollController();
 
@@ -34,7 +36,8 @@ class _BottomNavigationBarExampleState extends State<BottomNavigationBarExample>
       itemBuilder: (BuildContext context, int index) {
         return Center(child: Text('Item $index'));
       },
-      separatorBuilder: (BuildContext context, int index) => const Divider(thickness: 1),
+      separatorBuilder: (BuildContext context, int index) =>
+          const Divider(thickness: 1),
       itemCount: 50,
     );
   }
@@ -47,7 +50,10 @@ class _BottomNavigationBarExampleState extends State<BottomNavigationBarExample>
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.open_in_new_rounded), label: 'Open Dialog'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.open_in_new_rounded),
+            label: 'Open Dialog',
+          ),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.amber[800],

@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/basic/custom_multi_child_layout.0.dart' as example;
+import 'package:flutter_api_samples/widgets/basic/custom_multi_child_layout.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -15,7 +16,9 @@ void main() {
 
   testWidgets('containers are the same size', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Scaffold(body: example.CustomMultiChildLayoutExample())),
+      const MaterialApp(
+        home: Scaffold(body: example.CustomMultiChildLayoutExample()),
+      ),
     );
     final Finder containerFinder = find.byType(Container);
     const Size expectedSize = Size(100, 100);
@@ -27,7 +30,9 @@ void main() {
 
   testWidgets('containers are offset', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Scaffold(body: example.CustomMultiChildLayoutExample())),
+      const MaterialApp(
+        home: Scaffold(body: example.CustomMultiChildLayoutExample()),
+      ),
     );
     final Finder containerFinder = find.byType(Container);
     Rect previousRect = tester.getRect(containerFinder.first);

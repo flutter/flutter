@@ -24,7 +24,7 @@ String? testDataRoot;
 
 /// Converts `FOO_BAR` to `FooBar`.
 String shoutingToUpperCamel(String shouting) {
-  final RegExp initialLetter = RegExp(r'(?:_|^)([^_])([^_]*)');
+  final initialLetter = RegExp(r'(?:_|^)([^_])([^_]*)');
   final String snake = shouting.toLowerCase();
   final String result = snake.replaceAllMapped(initialLetter, (Match match) {
     return match.group(1)!.toUpperCase() + match.group(2)!.toLowerCase();
@@ -37,7 +37,7 @@ String shoutingToUpperCamel(String shouting) {
 /// 'TVFoo' should be convert to 'tvFoo'.
 /// 'KeyX' should be convert to 'keyX'.
 String upperCamelToLowerCamel(String upperCamel) {
-  final RegExp initialGroup = RegExp(r'^([A-Z]([A-Z]*|[^A-Z]*))([A-Z]([^A-Z]|$)|$)');
+  final initialGroup = RegExp(r'^([A-Z]([A-Z]*|[^A-Z]*))([A-Z]([^A-Z]|$)|$)');
   return upperCamel.replaceFirstMapped(initialGroup, (Match match) {
     return match.group(1)!.toLowerCase() + (match.group(3) ?? '');
   });
@@ -131,10 +131,10 @@ int getHex(String input) {
 /// line with the [prefix] string. Use for generated comments.
 String wrapString(String input, {required String prefix}) {
   final int wrapWidth = 80 - prefix.length;
-  final StringBuffer result = StringBuffer();
+  final result = StringBuffer();
   final List<String> words = input.split(RegExp(r'\s+'));
   String currentLine = words.removeAt(0);
-  for (final String word in words) {
+  for (final word in words) {
     if ((currentLine.length + word.length) < wrapWidth) {
       currentLine += ' $word';
     } else {
@@ -195,9 +195,9 @@ Map<String, String> reverseMapOfListOfString(
   Map<String, List<String>> inMap,
   void Function(String fromValue, String newToValue) onDuplicate,
 ) {
-  final Map<String, String> result = <String, String>{};
+  final result = <String, String>{};
   inMap.forEach((String fromValue, List<String> toValues) {
-    for (final String toValue in toValues) {
+    for (final toValue in toValues) {
       if (result.containsKey(toValue)) {
         onDuplicate(fromValue, toValue);
         continue;

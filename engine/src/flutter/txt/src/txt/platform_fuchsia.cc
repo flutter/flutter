@@ -5,6 +5,7 @@
 #include <lib/zx/channel.h>
 
 #include "third_party/skia/include/ports/SkFontMgr_fuchsia.h"
+#include "third_party/skia/include/ports/SkFontScanner_FreeType.h"
 #include "txt/platform.h"
 
 #if defined(SK_FONTMGR_FREETYPE_EMPTY_AVAILABLE)
@@ -21,7 +22,8 @@ sk_sp<SkFontMgr> GetDefaultFontManager(uint32_t font_initialization_data) {
   if (font_initialization_data) {
     fuchsia::fonts::ProviderSyncPtr sync_font_provider;
     sync_font_provider.Bind(zx::channel(font_initialization_data));
-    return SkFontMgr_New_Fuchsia(std::move(sync_font_provider));
+    return SkFontMgr_New_Fuchsia(std::move(sync_font_provider),
+                                 SkFontScanner_Make_FreeType());
   } else {
 #if defined(SK_FONTMGR_FREETYPE_EMPTY_AVAILABLE)
     static sk_sp<SkFontMgr> mgr = SkFontMgr_New_Custom_Empty();

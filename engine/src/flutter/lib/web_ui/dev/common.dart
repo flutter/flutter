@@ -243,7 +243,7 @@ bool get isLuci => io.Platform.environment['LUCI_CONTEXT'] != null;
 bool get isCi => isLuci;
 
 final String gitRevision = () {
-  final result = io.Process.runSync(
+  final io.ProcessResult result = io.Process.runSync(
     'git',
     <String>['rev-parse', 'HEAD'],
     workingDirectory: path.join(environment.engineSrcDir.path, 'flutter'),
@@ -268,7 +268,7 @@ final String contentHash = () {
     executable = path.join('bin', 'internal', 'content_aware_hash.sh');
     args = <String>[];
   }
-  final result = io.Process.runSync(
+  final io.ProcessResult result = io.Process.runSync(
     executable,
     args,
     workingDirectory: environment.flutterRootDir.path,

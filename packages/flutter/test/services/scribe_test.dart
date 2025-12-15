@@ -25,9 +25,9 @@ void main() {
     expect(response, isNull);
   }, skip: kIsWeb); // [intended]
 
-  for (final bool? returnValue in <bool?>[false, true, null]) {
+  for (final returnValue in <bool?>[false, true, null]) {
     test('Scribe.isStylusHandwritingAvailable calls through to platform channel', () async {
-      final List<MethodCall> calls = <MethodCall>[];
+      final calls = <MethodCall>[];
       binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.scribe, (
         MethodCall methodCall,
       ) {
@@ -48,9 +48,9 @@ void main() {
     }, skip: kIsWeb); // [intended]
   }
 
-  for (final bool? returnValue in <bool?>[false, true, null]) {
+  for (final returnValue in <bool?>[false, true, null]) {
     test('Scribe.isFeatureAvailable calls through to platform channel', () async {
-      final List<MethodCall> calls = <MethodCall>[];
+      final calls = <MethodCall>[];
       binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.scribe, (
         MethodCall methodCall,
       ) {
@@ -72,7 +72,7 @@ void main() {
   }
 
   test('Scribe.startStylusHandwriting calls through to platform channel', () async {
-    final List<MethodCall> calls = <MethodCall>[];
+    final calls = <MethodCall>[];
     binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.scribe, (
       MethodCall methodCall,
     ) {

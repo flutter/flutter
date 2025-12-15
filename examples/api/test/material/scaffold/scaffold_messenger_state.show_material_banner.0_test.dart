@@ -8,14 +8,24 @@ import 'package:flutter_api_samples/material/scaffold/scaffold_messenger_state.s
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Pressing the button should show a material banner', (WidgetTester tester) async {
+  testWidgets('Pressing the button should show a material banner', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.ShowMaterialBannerExampleApp());
 
-    expect(find.widgetWithText(AppBar, 'ScaffoldMessengerState Sample'), findsOne);
-    await tester.tap(find.widgetWithText(OutlinedButton, 'Show MaterialBanner'));
+    expect(
+      find.widgetWithText(AppBar, 'ScaffoldMessengerState Sample'),
+      findsOne,
+    );
+    await tester.tap(
+      find.widgetWithText(OutlinedButton, 'Show MaterialBanner'),
+    );
     await tester.pumpAndSettle();
 
-    expect(find.widgetWithText(MaterialBanner, 'This is a MaterialBanner'), findsOne);
+    expect(
+      find.widgetWithText(MaterialBanner, 'This is a MaterialBanner'),
+      findsOne,
+    );
     expect(
       find.descendant(
         of: find.byType(MaterialBanner),

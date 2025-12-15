@@ -55,13 +55,13 @@ void main() {
   }
 
   test('MenuThemeData defaults', () {
-    const MenuThemeData menuThemeData = MenuThemeData();
+    const menuThemeData = MenuThemeData();
     expect(menuThemeData.style, isNull);
     expect(menuThemeData.submenuIcon, isNull);
   });
 
   testWidgets('Default MenuThemeData debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const MenuThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -73,7 +73,7 @@ void main() {
   });
 
   testWidgets('MenuThemeData debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const MenuThemeData(
       style: MenuStyle(backgroundColor: WidgetStatePropertyAll<Color?>(Color(0xfffffff1))),
       submenuIcon: WidgetStatePropertyAll<Widget?>(Icon(Icons.add)),
@@ -95,7 +95,7 @@ void main() {
 
   test('MenuThemeData lerp special cases', () {
     expect(MenuThemeData.lerp(null, null, 0), null);
-    const MenuThemeData data = MenuThemeData();
+    const data = MenuThemeData();
     expect(identical(MenuThemeData.lerp(data, data, 0.5), data), true);
   });
 
@@ -261,7 +261,7 @@ void main() {
   });
 
   testWidgets('SubmenuButton.submenuIcon updates default arrow icon', (WidgetTester tester) async {
-    final MenuController controller = MenuController();
+    final controller = MenuController();
     const IconData disabledIcon = Icons.close_fullscreen;
     const IconData hoveredIcon = Icons.ac_unit;
     const IconData focusedIcon = Icons.zoom_out;
@@ -360,7 +360,7 @@ List<Widget> createTestMenus({
   double? menuElevation,
   OutlinedBorder? itemShape,
 }) {
-  final MenuStyle menuStyle = MenuStyle(
+  final menuStyle = MenuStyle(
     padding: menuPadding != null ? MaterialStatePropertyAll<EdgeInsetsGeometry>(menuPadding) : null,
     backgroundColor: menuBackground != null
         ? MaterialStatePropertyAll<Color>(menuBackground)
@@ -368,7 +368,7 @@ List<Widget> createTestMenus({
     elevation: menuElevation != null ? MaterialStatePropertyAll<double>(menuElevation) : null,
     shape: menuShape != null ? MaterialStatePropertyAll<OutlinedBorder>(menuShape) : null,
   );
-  final ButtonStyle itemStyle = ButtonStyle(
+  final itemStyle = ButtonStyle(
     padding: itemPadding != null ? MaterialStatePropertyAll<EdgeInsetsGeometry>(itemPadding) : null,
     shape: itemShape != null ? MaterialStatePropertyAll<OutlinedBorder>(itemShape) : null,
     foregroundColor: itemForeground != null
@@ -379,7 +379,7 @@ List<Widget> createTestMenus({
         : null,
     overlayColor: itemOverlay != null ? MaterialStatePropertyAll<Color>(itemOverlay) : null,
   );
-  final List<Widget> result = <Widget>[
+  final result = <Widget>[
     SubmenuButton(
       onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu0) : null,
       onClose: onClose != null ? () => onClose(TestMenu.mainMenu0) : null,

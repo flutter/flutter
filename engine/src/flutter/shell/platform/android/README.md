@@ -18,10 +18,10 @@ and is responsible for:
 See also:
 
 - [`../../tools/android_lint/bin/main.dart`](../../../tools/android_lint/bin/main.dart)
-- [Android Platform Views](https://github.com/flutter/flutter/wiki/Android-Platform-Views)
+- [Android Platform Views](https://github.com/flutter/flutter/blob/main/docs/platforms/android/Android-Platform-Views.md)
 - [Hosting native Android views in your Flutter app with Platform Views](https://docs.flutter.dev/platform-integration/android/platform-views)
-- [Testing Android Changes in the Devicelab on an Emulator](https://github.com/flutter/flutter/wiki/Testing-Android-Changes-in-the-Devicelab-on-an-Emulator)
-- [Texture Layer Hybrid Composition](https://github.com/flutter/flutter/wiki/Texture-Layer-Hybrid-Composition)
+- [Testing Android Changes in the Devicelab on an Emulator](https://github.com/flutter/flutter/blob/main/docs/platforms/android/Testing-Android-Changes-in-the-Devicelab-on-an-Emulator.md)
+- [Texture Layer Hybrid Composition](https://github.com/flutter/flutter/blob/main/docs/platforms/android/Texture-Layer-Hybrid-Composition.md)
 
 ## Testing
 
@@ -107,7 +107,7 @@ flutter run \
 >
 > ... and rebuild the engine.
 
-See [our wiki](https://github.com/flutter/flutter/wiki/Testing-the-engine#java---android-embedding) also.
+See [our wiki](https://github.com/flutter/flutter/blob/main/docs/engine/testing/Testing-the-engine.md#java---android-embedding) also.
 
 ## Developing
 
@@ -116,13 +116,12 @@ How to edit and contribute to the Android embedder.
 > [!TIP]
 > This guide assumes you already have a working Engine development environment:
 >
-> - [Setting up the Engine development environment](https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment)
-> - [Compiling for Android](https://github.com/flutter/flutter/wiki/Compiling-the-engine#compiling-for-android-from-macos-or-linux)
+> - [Setting up the Engine development environment](https://github.com/flutter/flutter/blob/main/docs/engine/contributing/Setting-up-the-Engine-development-environment.md)
+> - [Compiling for Android](https://github.com/flutter/flutter/blob/main/docs/engine/contributing/Compiling-the-engine.md#compiling-for-android-from-macos-or-linux)
 >
 > You should also have a working Android development environment:
 >
-> - [Android Studio](https://developer.android.com/studio)
-> - [Install Flutter > Test Drive](https://docs.flutter.dev/get-started/test-drive?tab=androidstudio)
+> - [Android Studio and IntelliJ](https://docs.flutter.dev/tools/android-studio)
 >
 > _It is also recommended (but not required) to install
 > [Visual Studio Code](https://code.visualstudio.com/)._
@@ -151,7 +150,7 @@ Some notable files include:
 - [`platform_view_android.h`](./platform_view_android.h): The main entry point
   for the Android embedder.
 
-See [VSCode with C/C++ Intellisense](https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment#vscode-with-cc-intellisense-cc)
+See [VSCode with C/C++ Intellisense](https://github.com/flutter/flutter/blob/main/docs/engine/contributing/Setting-up-the-Engine-development-environment.md#vscode-with-cc-intellisense-cc)
 for how to use the [`clangd`](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-clangd) extension to get C++ code
 completion:
 
@@ -190,7 +189,7 @@ Some notable files include:
   Registry of backend textures used by a Flutter View.
 
 It is non-trivial to get a working IDE setup for editing Java code in the
-Flutter engine. Some developers have had success [using VSCode as an IDE for the Android Embedding](https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment#using-vscode-as-an-ide-for-the-android-embedding-java),
+Flutter engine. Some developers have had success [using VSCode as an IDE for the Android Embedding](https://github.com/flutter/flutter/blob/main/docs/engine/contributing/Setting-up-the-Engine-development-environment.md#using-vscode-as-an-ide-for-the-android-embedding-java),
 but the following instructions are for if that doesn't work, or you want to use
 Android Studio:
 
