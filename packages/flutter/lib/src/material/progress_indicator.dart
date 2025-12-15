@@ -1125,8 +1125,14 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
                 context,
                 indeterminate: widget._effectiveValue == null,
               )
-            : _CircularProgressIndicatorDefaultsM3(context, indeterminate: widget._effectiveValue == null),
-      false => _CircularProgressIndicatorDefaultsM2(context, indeterminate: widget._effectiveValue == null),
+            : _CircularProgressIndicatorDefaultsM3(
+                context,
+                indeterminate: widget._effectiveValue == null,
+              ),
+      false => _CircularProgressIndicatorDefaultsM2(
+        context,
+        indeterminate: widget._effectiveValue == null,
+      ),
     };
     final Color? trackColor =
         widget.backgroundColor ?? indicatorTheme.circularTrackColor ?? defaults.circularTrackColor;
@@ -1150,7 +1156,8 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
           trackColor: trackColor,
           valueColor: widget._getValueColor(context, defaultColor: defaults.color),
           value: widget._effectiveValue, // may be null
-          headValue: headValue, // remaining arguments are ignored if widget._effectiveValue is not null
+          headValue:
+              headValue, // remaining arguments are ignored if widget._effectiveValue is not null
           tailValue: tailValue,
           offsetValue: offsetValue,
           rotationValue: rotationValue,
