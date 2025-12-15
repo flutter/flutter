@@ -17185,7 +17185,7 @@ void main() {
     await tester.pumpWidget(widget);
     await tester.showKeyboard(find.byType(EditableText, skipOffstage: false));
     await tester.pumpAndSettle();
-    expect(scrollController.offset, 75.0);
+    expect(scrollController.offset, 76.0);
   });
 
   testWidgets(

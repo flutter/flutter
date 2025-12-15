@@ -116,8 +116,8 @@ class MaterialTextSelectionControls extends TextSelectionControls {
     required double cursorWidth,
   }) {
     return switch (type) {
-      TextSelectionHandleType.collapsed => -Offset((cursorWidth - _kHandleSize) / 2, 5),
-      TextSelectionHandleType.left => const Offset(_kHandleSize, 0),
+      TextSelectionHandleType.collapsed => -Offset((cursorWidth - _kHandleSize) / 2, 5.0),
+      TextSelectionHandleType.left => const Offset(_kHandleSize, 0.0),
       TextSelectionHandleType.right => Offset.zero,
     };
   }
