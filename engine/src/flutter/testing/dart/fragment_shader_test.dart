@@ -49,6 +49,22 @@ void main() async {
     final Image image = await _createRGBA32FloatImage(dimension, dimension);
     final Image shaderImage = await _drawIntoImage(image);
 
+    final ByteData data = (await shaderImage.toByteData())!;
+
+    // Check top left is Red
+    int offset = 0;
+    expect(data.getUint8(offset), 255, reason: 'Top left Red');
+    expect(data.getUint8(offset + 1), 0, reason: 'Top left Green');
+    expect(data.getUint8(offset + 2), 0, reason: 'Top left Blue');
+    expect(data.getUint8(offset + 3), 255, reason: 'Top left Alpha');
+
+    // Check center is Black
+    offset = ((dimension ~/ 2) * dimension + (dimension ~/ 2)) * 4;
+    expect(data.getUint8(offset), 0, reason: 'Center Red');
+    expect(data.getUint8(offset + 1), 0, reason: 'Center Green');
+    expect(data.getUint8(offset + 2), 0, reason: 'Center Blue');
+    expect(data.getUint8(offset + 3), 255, reason: 'Center Alpha');
+
     await comparer.addGoldenImage(shaderImage, 'fragment_shader_rgba_float32.png');
     image.dispose();
   });
@@ -61,6 +77,22 @@ void main() async {
     const int dimension = 1024;
     final Image image = await _createR32FloatImage(dimension, dimension);
     final Image shaderImage = await _drawIntoImage(image);
+
+    final ByteData data = (await shaderImage.toByteData())!;
+
+    // Check top left is Red
+    int offset = 0;
+    expect(data.getUint8(offset), 255, reason: 'Top left Red');
+    expect(data.getUint8(offset + 1), 0, reason: 'Top left Green');
+    expect(data.getUint8(offset + 2), 0, reason: 'Top left Blue');
+    expect(data.getUint8(offset + 3), 255, reason: 'Top left Alpha');
+
+    // Check center is Black
+    offset = ((dimension ~/ 2) * dimension + (dimension ~/ 2)) * 4;
+    expect(data.getUint8(offset), 0, reason: 'Center Red');
+    expect(data.getUint8(offset + 1), 0, reason: 'Center Green');
+    expect(data.getUint8(offset + 2), 0, reason: 'Center Blue');
+    expect(data.getUint8(offset + 3), 255, reason: 'Center Alpha');
 
     await comparer.addGoldenImage(shaderImage, 'fragment_shader_r_float32.png');
     image.dispose();
