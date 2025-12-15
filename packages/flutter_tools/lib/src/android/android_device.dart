@@ -1158,7 +1158,7 @@ class AdbLogReader extends DeviceLogReader {
     // This is a HWUI bug that spams the console when using platform views like Google Maps.
     // It is not an actual error and causes no problems for the application.
     // See https://github.com/flutter/flutter/issues/104268
-    RegExp(r'^E/FrameEvents\(\s*\d+\): updateAcquireFence: Did not find frame'),
+    RegExp(r'^E/FrameEvents\(\s*\d+\): updateAcquireFence: Did not find frame\.$'),
     // See https://github.com/flutter/flutter/issues/160598
     RegExp(r'ViewPostIme pointer'),
     RegExp(r'mali.instrumentation.graph.work'),
