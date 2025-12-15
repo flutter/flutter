@@ -8,6 +8,7 @@ import 'package:package_config/package_config.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../artifacts.dart';
+import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/process.dart';
 import '../../build_info.dart';
@@ -453,7 +454,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
           findPackageConfigFileOrDefault(environment.projectDir),
           logger: environment.logger,
         );
-      } on Exception {
+      } on ToolExit {
         _analytics.send(
           Event.flutterWasmDryRunPackage(
             result: result,
