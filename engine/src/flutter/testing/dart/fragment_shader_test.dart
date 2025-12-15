@@ -44,6 +44,28 @@ void main() async {
     expect(uniformData['location'] is int, true);
   });
 
+  test('FragmentShader draws RGBA Float32 texture', () async {
+    const int dimension = 1024;
+    final Image image = await _createRGBA32FloatImage(dimension, dimension);
+    final Image shaderImage = await _drawIntoImage(image);
+
+    await comparer.addGoldenImage(shaderImage, 'fragment_shader_rgba_float32.png');
+    image.dispose();
+  });
+
+  test('FragmentShader draws R Float32 texture', () async {
+    if (!impellerEnabled) {
+      print('Skipped for Skia');
+      return;
+    }
+    const int dimension = 1024;
+    final Image image = await _createR32FloatImage(dimension, dimension);
+    final Image shaderImage = await _drawIntoImage(image);
+
+    await comparer.addGoldenImage(shaderImage, 'fragment_shader_r_float32.png');
+    image.dispose();
+  });
+
   if (impellerEnabled) {
     // https://github.com/flutter/flutter/issues/122823
     return;
@@ -336,28 +358,6 @@ void main() async {
       image.dispose();
     });
   }
-
-  test('FragmentShader draws RGBA Float32 texture', () async {
-    const int dimension = 1024;
-    final Image image = await _createRGBA32FloatImage(dimension, dimension);
-    final Image shaderImage = await _drawIntoImage(image);
-
-    await comparer.addGoldenImage(shaderImage, 'fragment_shader_rgba_float32.png');
-    image.dispose();
-  });
-
-  test('FragmentShader draws R Float32 texture', () async {
-    if (!impellerEnabled) {
-      print('Skipped for Skia');
-      return;
-    }
-    const int dimension = 1024;
-    final Image image = await _createR32FloatImage(dimension, dimension);
-    final Image shaderImage = await _drawIntoImage(image);
-
-    await comparer.addGoldenImage(shaderImage, 'fragment_shader_r_float32.png');
-    image.dispose();
-  });
 
   test('FragmentShader with uniforms renders correctly', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
