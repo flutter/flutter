@@ -7,10 +7,8 @@
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 
 namespace {
-DWORD GetWindowStyleForDialog(std::optional<HWND> const& owner_window,
-                              bool decorated) {
-  DWORD window_style =
-      decorated ? WS_OVERLAPPED | WS_CAPTION | WS_THICKFRAME : 0;
+DWORD GetWindowStyleForDialog(std::optional<HWND> const& owner_window) {
+  DWORD window_style = WS_OVERLAPPED | WS_CAPTION | WS_THICKFRAME;
   if (!owner_window) {
     // If the dialog has no owner, add a minimize box and a system menu.
     window_style |= WS_MINIMIZEBOX | WS_SYSMENU;
@@ -44,7 +42,7 @@ HostWindowDialog::HostWindowDialog(WindowManager* window_manager,
     : HostWindow(window_manager,
                  engine,
                  WindowArchetype::kDialog,
-                 GetWindowStyleForDialog(owner_window, decorated),
+                 decorated ? GetWindowStyleForDialog(owner_window) : 0,
                  GetExtendedWindowStyleForDialog(owner_window),
                  constraints,
                  GetInitialRect(engine,
@@ -71,7 +69,8 @@ Rect HostWindowDialog::GetInitialRect(FlutterWindowsEngine* engine,
                                       const BoxConstraints& constraints,
                                       std::optional<HWND> const& owner_window,
                                       bool decorated) {
-  auto const window_style = GetWindowStyleForDialog(owner_window, decorated);
+  auto const window_style =
+      decorated ? GetWindowStyleForDialog(owner_window) : 0;
   auto const extended_window_style =
       GetExtendedWindowStyleForDialog(owner_window);
   std::optional<Size> const window_size =
