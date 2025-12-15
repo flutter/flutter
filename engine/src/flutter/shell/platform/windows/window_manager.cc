@@ -45,7 +45,7 @@ FlutterViewId WindowManager::CreateDialogWindow(
     const DialogWindowCreationRequest* request) {
   auto window = HostWindow::CreateDialogWindow(
       this, engine_, request->preferred_size, request->preferred_constraints,
-      request->title, request->parent_or_null, request->decorated);
+      request->title, request->decorated, request->parent_or_null);
   if (!window || !window->GetWindowHandle()) {
     FML_LOG(ERROR) << "Failed to create host window";
     return -1;
