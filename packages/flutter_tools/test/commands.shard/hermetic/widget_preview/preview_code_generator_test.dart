@@ -245,7 +245,12 @@ void main() {
         onChangeDetected: (_) {},
         onPubspecChangeDetected: (String path) {},
       );
-      codeGenerator = PreviewCodeGenerator(widgetPreviewScaffoldProject: project, fs: fs);
+      codeGenerator = PreviewCodeGenerator(
+        widgetPreviewScaffoldProject: FlutterProject.fromDirectoryTest(
+          project.widgetPreviewScaffold,
+        ),
+        fs: fs,
+      );
       final pub = Pub.test(
         fileSystem: fs,
         logger: logger,
@@ -267,15 +272,15 @@ void main() {
       'correctly generates ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
       () async {
         // Check that the generated preview file doesn't exist yet.
-        final File generatedPreviewFile = project.directory.childFile(
+        final File generatedPreviewFile = project.widgetPreviewScaffold.childFile(
           PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
         );
         expect(generatedPreviewFile, isNot(exists));
+        generatedPreviewFile.createSync(recursive: true);
         final PreviewDependencyGraph details = await previewDetector.initialize();
 
         // Populate the generated preview file.
         codeGenerator.populatePreviewsInGeneratedPreviewScaffold(details);
-        expect(generatedPreviewFile, exists);
 
         const expectedGeneratedPreviewFileContents = '''
 // ignore_for_file: implementation_imports
@@ -385,7 +390,6 @@ List<_i1.WidgetPreview> previews() => [
         codeGenerator.populatePreviewsInGeneratedPreviewScaffold(
           const <PreviewPath, LibraryPreviewNode>{},
         );
-        expect(generatedPreviewFile, exists);
 
         // The generated file should only contain:
         // - An import of the widget preview library
@@ -399,6 +403,30 @@ import 'widget_preview.dart' as _i1;
 List<_i1.WidgetPreview> previews() => [];
 ''';
         expect(generatedPreviewFile.readAsStringSync(), emptyGeneratedPreviewFileContents);
+      },
+    );
+
+    testUsingContext(
+      'correctly generates ${PreviewCodeGenerator.getGeneratedDtdConnectionInfoFilePath(fs)}',
+      () async {
+        // Check that the generated preview file doesn't exist yet.
+        final File generatedDtdConnectionInfoFile = project.widgetPreviewScaffold.childFile(
+          PreviewCodeGenerator.getGeneratedDtdConnectionInfoFilePath(fs),
+        );
+        expect(generatedDtdConnectionInfoFile, isNot(exists));
+        generatedDtdConnectionInfoFile.createSync(recursive: true);
+
+        // Populate the DTD connection info.
+        final Uri dtdUri = Uri.parse('ws://localhost:1234');
+        codeGenerator.populateDtdConnectionInfo(dtdUri);
+
+        final expectedDtdConnectionInfo =
+            '''
+// ignore_for_file: implementation_imports
+
+const String kWidgetPreviewDtdUri = '$dtdUri';
+''';
+        expect(generatedDtdConnectionInfoFile.readAsStringSync(), expectedDtdConnectionInfo);
       },
     );
   });
