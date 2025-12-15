@@ -619,7 +619,7 @@ public class FlutterView extends FrameLayout
         return ZeroSides.RIGHT;
       } else if (rotation == Surface.ROTATION_270) {
         // In android API >= 23, the nav bar always appears on the "bottom" (USB) side.
-        return Build.VERSION.SDK_INT >= API_LEVELS.API_23 ? ZeroSides.LEFT : ZeroSides.RIGHT;
+        return ZeroSides.LEFT;
       }
       // Ambiguous orientation due to landscape left/right default. Zero both sides.
       else if (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180) {
