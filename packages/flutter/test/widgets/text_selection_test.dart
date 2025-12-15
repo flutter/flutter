@@ -1809,7 +1809,7 @@ void main() {
   );
 
   group('TextSelectionOverlay', () {
-    Future<TextSelectionOverlay> pumpApp(WidgetTester tester) async {
+    Future<TextSelectionOverlay> pumpApp(WidgetTester tester, {TextEditingValue? value}) async {
       final column = UniqueKey();
       final startHandleLayerLink = LayerLink();
       final endHandleLayerLink = LayerLink();
@@ -1838,15 +1838,20 @@ void main() {
         ),
       );
 
+      if (value != null) {
+        final FakeRenderEditable renderObject = tester.state<EditableTextState>(find.byKey(editableTextKey)).renderEditable as FakeRenderEditable;
+        renderObject.text = TextSpan(style: const TextStyle(fontSize: 10.0), text: value.text);
+      }
+
       return TextSelectionOverlay(
         cursorWidth: 2.0,
-        value: TextEditingValue.empty,
+        value: value ?? TextEditingValue.empty,
         renderObject: tester.state<EditableTextState>(find.byKey(editableTextKey)).renderEditable,
         context: tester.element(find.byKey(column)),
         onSelectionHandleTapped: () {},
         startHandleLayerLink: startHandleLayerLink,
         endHandleLayerLink: endHandleLayerLink,
-        selectionDelegate: FakeTextSelectionDelegate(),
+        selectionDelegate: FakeTextSelectionDelegate(textEditingValue: value ?? TextEditingValue.empty),
         toolbarLayerLink: toolbarLayerLink,
         magnifierConfiguration: TextMagnifierConfiguration.disabled,
       );
@@ -1861,6 +1866,29 @@ void main() {
         areCreateAndDispose,
       );
     });
+
+    testWidgets('handles auto-dismiss after timeout on Android', (WidgetTester tester) async {
+      final TextSelectionOverlay overlay = await pumpApp(
+        tester,
+        value: const TextEditingValue(text: 'test', selection: TextSelection.collapsed(offset: 0)),
+      );
+
+      // Show handles
+      overlay.handlesVisible = true;
+      overlay.showHandles();
+      await tester.pump();
+      expect(overlay.handlesAreVisible, isTrue);
+
+      // Fast forward to just before the timeout (3.9s)
+      await tester.pump(const Duration(milliseconds: 3900));
+      expect(overlay.handlesAreVisible, isTrue);
+
+      // Fast forward to just after the timeout (4.1s total)
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(overlay.handlesAreVisible, isFalse);
+
+      overlay.dispose();
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
   });
 
   testWidgets('Context menus', (WidgetTester tester) async {
@@ -2059,6 +2087,11 @@ class FakeRenderEditable extends RenderEditable {
   bool hasFocus = false;
 
   @override
+  Rect? getRectForComposingRange(TextRange range) {
+    return const Rect.fromLTWH(0, 0, 10, 10);
+  }
+
+  @override
   void dispose() {
     _offset.dispose();
     super.dispose();
@@ -2131,6 +2164,11 @@ class FakeClipboardStatusNotifier extends ClipboardStatusNotifier {
 }
 
 class FakeTextSelectionDelegate extends Fake implements TextSelectionDelegate {
+  FakeTextSelectionDelegate({this.textEditingValue = TextEditingValue.empty});
+
+  @override
+  final TextEditingValue textEditingValue;
+
   @override
   void cutSelection(SelectionChangedCause cause) {}
 

@@ -434,6 +434,7 @@ class TextSelectionOverlay {
   final ValueNotifier<bool> _effectiveStartHandleVisibility = ValueNotifier<bool>(false);
   final ValueNotifier<bool> _effectiveEndHandleVisibility = ValueNotifier<bool>(false);
   final ValueNotifier<bool> _effectiveToolbarVisibility = ValueNotifier<bool>(false);
+  Timer? _handlesDismissalTimer;
 
   void _updateTextSelectionOverlayVisibilities() {
     _effectiveStartHandleVisibility.value =
@@ -460,14 +461,43 @@ class TextSelectionOverlay {
     _updateTextSelectionOverlayVisibilities();
   }
 
+  void _disposeHandlesDismissalTimer() {
+    _handlesDismissalTimer?.cancel();
+    _handlesDismissalTimer = null;
+  }
+
+  // The duration for auto-dismissal of handles on Android.
+  static const Duration _androidHandlesDismissalDuration = Duration(seconds: 4);
+
+  void _scheduleHandlesDismissal() {
+    _disposeHandlesDismissalTimer();
+    // Android treats specific handle visibility differently.
+    // If the selection is collapsed (cursor), handles should auto-dismiss.
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        if (_value.selection.isCollapsed) {
+          _handlesDismissalTimer = Timer(_androidHandlesDismissalDuration, hideHandles);
+        }
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+    }
+  }
+
   /// {@macro flutter.widgets.SelectionOverlay.showHandles}
   void showHandles() {
     _updateSelectionOverlay();
     _selectionOverlay.showHandles();
+    _scheduleHandlesDismissal();
   }
 
   /// {@macro flutter.widgets.SelectionOverlay.hideHandles}
-  void hideHandles() => _selectionOverlay.hideHandles();
+  void hideHandles() {
+    _disposeHandlesDismissalTimer();
+    _selectionOverlay.hideHandles();
+  }
 
   /// {@macro flutter.widgets.SelectionOverlay.showToolbar}
   void showToolbar() {
@@ -617,6 +647,7 @@ class TextSelectionOverlay {
   /// {@macro flutter.widgets.SelectionOverlay.dispose}
   void dispose() {
     assert(debugMaybeDispatchDisposed(this));
+    _disposeHandlesDismissalTimer();
     _selectionOverlay.dispose();
     renderObject.selectionStartInViewport.removeListener(_updateTextSelectionOverlayVisibilities);
     renderObject.selectionEndInViewport.removeListener(_updateTextSelectionOverlayVisibilities);
@@ -726,6 +757,8 @@ class TextSelectionOverlay {
     if (!renderObject.attached) {
       return;
     }
+
+    _disposeHandlesDismissalTimer(); // No need to schedule dismissal during drag.
 
     _endHandleDragPosition = details.globalPosition.dy;
 
@@ -886,6 +919,8 @@ class TextSelectionOverlay {
       return;
     }
 
+    _disposeHandlesDismissalTimer(); // No need to schedule dismissal during drag.
+
     _startHandleDragPosition = details.globalPosition.dy;
 
     // Use local coordinates when dealing with line height. because in case of a
@@ -1010,6 +1045,8 @@ class TextSelectionOverlay {
     if (!context.mounted) {
       return;
     }
+    _updateSelectionOverlay();
+    _scheduleHandlesDismissal(); // Reschedule dismissal after drag ends.
     _dragStartSelection = null;
     final bool draggingHandles =
         _selectionOverlay.isDraggingStartHandle || _selectionOverlay.isDraggingEndHandle;
