@@ -1124,6 +1124,19 @@ void main() {
     );
     expect(text.text.style?.color, customForegroundColor);
   });
+
+  testWidgets('CupertinoButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: CupertinoButton(child: const Text('X'), onPressed: () {}),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoButton)), Size.zero);
+  });
 }
 
 Widget boilerplate({required Widget child}) {
