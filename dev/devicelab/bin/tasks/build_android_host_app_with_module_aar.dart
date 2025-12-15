@@ -47,7 +47,6 @@ class ModuleTest {
 
   Future<TaskResult> call() async {
     section('Running: $buildTarget-$gradleVersion');
-
     section('Find Java');
 
     final String? javaHome = await findJavaHome();
