@@ -536,6 +536,46 @@ void main() {
     expect(render.backgroundCursorColor, Colors.green);
   });
 
+  testWidgets('when cursorWidth is updated, TextSelectionOverlay should be updated', (
+    WidgetTester tester,
+  ) async {
+    Widget buildWidget(double cursorWidth) {
+      return MaterialApp(
+        home: EditableText(
+          controller: controller,
+          backgroundCursorColor: Colors.grey,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          cursorWidth: cursorWidth,
+          selectionControls: materialTextSelectionControls,
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidget(2.0));
+    final EditableTextState state = tester.state(find.byType(EditableText));
+
+    // Ensure valid selection and focus
+    controller.selection = const TextSelection.collapsed(offset: 0);
+    focusNode.requestFocus();
+    await tester.pump();
+
+    // Use toggleToolbar to force creation of selectionOverlay if it doesn't exist
+    state.toggleToolbar();
+    await tester.pump();
+
+    // Verify initial cursorWidth
+    expect(state.selectionOverlay, isNotNull);
+    expect(state.selectionOverlay!.cursorWidth, 2.0);
+
+    // Update cursorWidth
+    await tester.pumpWidget(buildWidget(10.0));
+
+    // Verify updated cursorWidth in SelectionOverlay
+    expect(state.selectionOverlay!.cursorWidth, 10.0);
+  });
+
   testWidgets('text keyboard is requested when maxLines is default', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(

@@ -3348,6 +3348,7 @@ class EditableTextState extends State<EditableText>
             widget.selectionControls != oldWidget.selectionControls ||
             widget.onSelectionHandleTapped != oldWidget.onSelectionHandleTapped ||
             widget.dragStartBehavior != oldWidget.dragStartBehavior ||
+            widget.cursorWidth != oldWidget.cursorWidth ||
             widget.magnifierConfiguration != oldWidget.magnifierConfiguration)) {
       final bool shouldShowToolbar = _selectionOverlay!.toolbarIsVisible;
       final bool shouldShowHandles = _selectionOverlay!.handlesVisible;
