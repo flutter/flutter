@@ -21,14 +21,41 @@ void main() async {
   runApp(const MainApp());
 }
 
-final class MainApp extends StatelessWidget {
+final class MainApp extends StatefulWidget {
   const MainApp({super.key});
 
   @override
+  State<MainApp> createState() => _MainAppState();
+}
+
+class _MainAppState extends State<MainApp> {
+  bool _show = true;
+
+  @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: _HybridCompositionAndroidPlatformView(viewType: 'my_test'),
+      home: Scaffold(
+        body: Column(
+          children: <Widget>[
+            Expanded(
+              child: Offstage(
+                offstage: !_show,
+                child: const _HybridCompositionAndroidPlatformView(viewType: 'my_test'),
+              ),
+            ),
+            ElevatedButton(
+              key: const ValueKey<String>('TogglePlatformView'),
+              onPressed: () {
+                setState(() {
+                  _show = !_show;
+                });
+              },
+              child: const Text('Toggle Platform View'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
