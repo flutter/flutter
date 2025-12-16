@@ -30,27 +30,20 @@ void main() async {
   test('Should be able to hide and show platform view multiple times', () async {
     const hideText = 'Hide Platform View';
     const showText = 'Show Platform View';
-    
-    expect(await flutterDriver.getText(find.byValueKey('ToggleButtonText')),
-        hideText);
+
+    expect(await flutterDriver.getText(find.byValueKey('ToggleButtonText')), hideText);
     // hide platform view
     await flutterDriver.tap(find.byValueKey('TogglePlatformView'));
 
-    expect(await flutterDriver.getText(find.byValueKey('ToggleButtonText')),
-        showText);
+    expect(await flutterDriver.getText(find.byValueKey('ToggleButtonText')), showText);
     // show platform view
     await flutterDriver.tap(find.byValueKey('TogglePlatformView'));
     await flutterDriver.waitFor(find.byValueKey('PlatformView'));
-   
+
     // hide platform view
     await flutterDriver.tap(find.byValueKey('TogglePlatformView'));
-    expect(await flutterDriver.getText(find.byValueKey('ToggleButtonText')),
-        showText);
+    expect(await flutterDriver.getText(find.byValueKey('ToggleButtonText')), showText);
 
-    await expectLater(
-      nativeDriver.screenshot(),
-      matchesGoldenFile('hide_show_platform_view.png'),
-    );
-
+    await expectLater(nativeDriver.screenshot(), matchesGoldenFile('hide_show_platform_view.png'));
   }, timeout: Timeout.none);
 }
