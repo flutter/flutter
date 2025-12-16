@@ -17693,7 +17693,7 @@ void main() {
         cursorColor: cursorColor,
         backgroundCursorColor: const Color(0xFF424242), // grey.
         focusNode: focusNode,
-        selectionControls: _fakeTextSelectionHandleControls,
+        selectionControls: basicTestTextSelectionHandleControls,
         contextMenuBuilder: (context, editableTextState) {
           return const SizedBox.shrink();
         },
@@ -17766,7 +17766,7 @@ void main() {
         cursorColor: cursorColor,
         backgroundCursorColor: const Color(0xFF424242), // grey.
         focusNode: focusNode,
-        selectionControls: _fakeTextSelectionHandleControls,
+        selectionControls: basicTestTextSelectionHandleControls,
         contextMenuBuilder: (context, editableTextState) {
           return const SizedBox.shrink();
         },
@@ -18279,28 +18279,3 @@ class FakeFlutterView extends TestFlutterView {
   @override
   final int viewId;
 }
-
-class _FakeTextSelectionHandleControls extends TextSelectionControls
-    with TextSelectionHandleControls {
-  @override
-  Widget buildHandle(
-    BuildContext context,
-    TextSelectionHandleType type,
-    double textLineHeight, [
-    VoidCallback? onTap,
-  ]) {
-    return const SizedBox.shrink();
-  }
-
-  @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
-    return Offset.zero;
-  }
-
-  @override
-  Size getHandleSize(double textLineHeight) {
-    return Size.zero;
-  }
-}
-
-final TextSelectionControls _fakeTextSelectionHandleControls = _FakeTextSelectionHandleControls();

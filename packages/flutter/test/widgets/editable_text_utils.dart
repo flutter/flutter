@@ -148,12 +148,16 @@ class BasicTestTextField extends StatefulWidget {
     this.focusNode,
     this.style,
     this.autofocus = false,
+    this.contextMenuBuilder,
+    this.readOnly = false,
   });
 
   final bool autofocus;
   final TextEditingController? controller;
   final FocusNode? focusNode;
   final TextStyle? style;
+  final EditableTextContextMenuBuilder? contextMenuBuilder;
+  final bool readOnly;
 
   @override
   State<BasicTestTextField> createState() => _BasicTestTextFieldState();
@@ -173,15 +177,46 @@ class _BasicTestTextFieldState extends State<BasicTestTextField> {
     super.dispose();
   }
 
+  static const Color _red = Color(0xFFF44336); // Colors.red.
+
   @override
   Widget build(BuildContext context) {
     return EditableText(
+      readOnly: widget.readOnly,
       autofocus: widget.autofocus,
       controller: _effectiveController,
       focusNode: _effectiveFocusNode,
       style: widget.style ?? const TextStyle(),
-      cursorColor: Colors.red,
-      backgroundCursorColor: Colors.red,
+      contextMenuBuilder: widget.contextMenuBuilder,
+      cursorColor: _red, // Colors.red
+      backgroundCursorColor: _red, // Colors.red
+      selectionControls: basicTestTextSelectionHandleControls,
     );
   }
 }
+
+class BasicTestTextSelectionHandleControls extends TextSelectionControls
+    with TextSelectionHandleControls {
+  @override
+  Widget buildHandle(
+    BuildContext context,
+    TextSelectionHandleType type,
+    double textLineHeight, [
+    VoidCallback? onTap,
+  ]) {
+    return const SizedBox.shrink();
+  }
+
+  @override
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+    return Offset.zero;
+  }
+
+  @override
+  Size getHandleSize(double textLineHeight) {
+    return Size.zero;
+  }
+}
+
+final TextSelectionControls basicTestTextSelectionHandleControls =
+    BasicTestTextSelectionHandleControls();
