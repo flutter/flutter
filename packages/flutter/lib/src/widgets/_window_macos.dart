@@ -156,7 +156,7 @@ class RegularWindowControllerMacOS extends RegularWindowController {
     required Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
-    bool decorated,
+    bool decorated = true,
   }) : _owner = owner,
        _delegate = delegate,
        super.empty() {
@@ -168,6 +168,7 @@ class RegularWindowControllerMacOS extends RegularWindowController {
     _onWillClose = NativeCallable<Void Function()>.isolateLocal(_handleOnWillClose);
     _onResize = NativeCallable<Void Function()>.isolateLocal(_handleOnResize);
     final int viewId = _MacOSPlatformInterface.createRegularWindow(
+      decorated: decorated,
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
       onShouldClose: _onShouldClose.nativeFunction,
@@ -328,7 +329,7 @@ class DialogWindowControllerMacOS extends DialogWindowController {
     this.parent,
     BoxConstraints? preferredConstraints,
     String? title,
-    bool decorated,
+    bool decorated = true,
   }) : _owner = owner,
        _delegate = delegate,
        super.empty() {
@@ -551,6 +552,7 @@ class _MacOSPlatformInterface {
 
   /// Creates a new window and returns the viewId of the created FlutterView.
   static int createRegularWindow({
+    bool decorated = true,
     required Size? preferredSize,
     BoxConstraints? preferredConstraints,
     required Pointer<NativeFunction<Void Function()>> onShouldClose,
