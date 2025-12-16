@@ -127,9 +127,9 @@ final Animatable<double> _kScaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kS
 /// means the sheet takes up only the bottom 10% of the screen. If not provided, defaults
 /// to 0.08 (8% of screen height).
 ///
-/// When 'dragHandle' is set to `true`, then a an iOS-style drag handle will be placed
-/// at the top of the sheet. If a value is not provided, then it will default to
-/// false.
+/// When `showDragHandle` is set to `true`, then an iOS-style drag handle will
+/// be placed at the top of the sheet. If a value is not provided, then it will
+/// default to false.
 ///
 /// iOS sheet widgets are generally designed to be tightly coupled to the context
 /// of the widget that opened the sheet. As such, it is not recommended to push
@@ -618,6 +618,11 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
     if (!showDragHandle) {
       return builder(context);
     }
+
+    const dragHandleTopPadding = 5.0;
+    const dragHandleHeight = 5.0;
+    const dragHandleWidth = 36.0;
+
     return Stack(
       children: <Widget>[
         MediaQuery(
@@ -629,15 +634,15 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
           child: Semantics.fromProperties(
             properties: SemanticsProperties(role: SemanticsRole.dragHandle),
             child: Padding(
-              padding: EdgeInsetsGeometry.only(top: 5),
+              padding: EdgeInsetsGeometry.only(top: dragHandleTopPadding),
               child: DecoratedBox(
                 decoration: ShapeDecoration(
                   shape: RoundedSuperellipseBorder(
-                    borderRadius: BorderRadiusGeometry.all(Radius.circular(18)),
+                    borderRadius: BorderRadiusGeometry.all(Radius.circular(dragHandleWidth / 2)),
                   ),
                   color: CupertinoColors.tertiaryLabel,
                 ),
-                child: SizedBox(height: 5, width: 36),
+                child: SizedBox(height: dragHandleHeight, width: dragHandleWidth),
               ),
             ),
           ),
