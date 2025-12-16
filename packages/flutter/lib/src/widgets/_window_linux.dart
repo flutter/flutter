@@ -836,7 +836,6 @@ class RegularWindowControllerLinux extends RegularWindowController {
       button: button,
       edge: {
         WindowDragEdge.northWest: _GDK_WINDOW_EDGE_NORTH_WEST,
-        WindowDragEdge.northWest: _GDK_WINDOW_EDGE_NORTH_WEST,
         WindowDragEdge.north: _GDK_WINDOW_EDGE_NORTH,
         WindowDragEdge.northEast: _GDK_WINDOW_EDGE_NORTH_EAST,
         WindowDragEdge.west: _GDK_WINDOW_EDGE_WEST,
@@ -1020,7 +1019,6 @@ class DialogWindowControllerLinux extends DialogWindowController {
     _window.beginResizeDrag(
       button: button,
       edge: {
-        WindowDragEdge.northWest: _GDK_WINDOW_EDGE_NORTH_WEST,
         WindowDragEdge.northWest: _GDK_WINDOW_EDGE_NORTH_WEST,
         WindowDragEdge.north: _GDK_WINDOW_EDGE_NORTH,
         WindowDragEdge.northEast: _GDK_WINDOW_EDGE_NORTH_EAST,
