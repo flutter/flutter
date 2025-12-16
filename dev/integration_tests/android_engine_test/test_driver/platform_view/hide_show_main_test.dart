@@ -28,13 +28,13 @@ void main() async {
   });
 
   test('Should be able to hide and show platform view multiple times', () async {
-    String text = 'Hide Platform View';
+    final text = 'Hide Platform View';
     expect(await flutterDriver.getText(find.byValueKey('ToggleButtonText')),
         text);
     // hide platform view
     await flutterDriver.tap(find.byValueKey('TogglePlatformView'));
 
-    String newText = 'Show Platform View';
+    final newText = 'Show Platform View';
     expect(await flutterDriver.getText(find.byValueKey('ToggleButtonText')),
         newText);
     // show platform view
