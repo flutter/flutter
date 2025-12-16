@@ -14,7 +14,7 @@ dependencies:
   archive: 3.6.1
   args: 2.7.0
   dds: 5.0.3
-  dwds: 26.1.0
+  dwds: 26.2.2
   code_builder: 4.11.0
   collection: 1.19.1
   completion: 1.0.2
@@ -54,11 +54,11 @@ dependencies:
   http_multi_server: 3.2.2
   convert: 3.1.2
   async: 2.13.0
-  unified_analytics: 8.0.5
+  unified_analytics: 8.0.10
   pubspec_parse: 1.5.0
 
   graphs: 2.3.2
-  hooks_runner: 1.0.0
+  hooks_runner: 1.0.1
   hooks: 1.0.0
   code_assets: 1.0.0
   data_assets: 0.19.6
@@ -110,10 +110,10 @@ dependencies:
   term_glyph: 1.2.2
   typed_data: 1.4.0
   vm_service_interface: 2.0.1
-  watcher: 1.1.4
+  watcher: 1.2.0
   web: 1.1.1
   web_socket: 1.0.1
-  yaml_edit: 2.2.2
+  yaml_edit: 2.2.3
 
 dev_dependencies:
   file_testing: 3.0.2
@@ -127,4 +127,4 @@ dev_dependencies:
 dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
-# PUBSPEC CHECKSUM: vqtudk
+# PUBSPEC CHECKSUM: omlptf

@@ -1010,6 +1010,7 @@ enum BlendMode {
 ///  * [Paint.filterQuality], which is used to pass [FilterQuality] to the
 ///    engine while using drawImage calls on a [Canvas].
 ///  * [ImageShader].
+///  * [FragmentShader.setImageSampler].
 ///  * [ImageFilter.matrix].
 ///  * [Canvas.drawImage].
 ///  * [Canvas.drawImageRect].
@@ -2740,6 +2741,31 @@ void decodeImageFromPixels(
         });
   });
 }
+
+/// Decodes the given [pixels] into an [Image] synchronously.
+///
+/// The [pixels] are expected to be in the format specified by [format].
+///
+/// The [width] and [height] arguments specify the dimensions of the image.
+///
+/// This function returns an [Image] immediately. The image might not be
+/// fully decoded yet, but it can be drawn to a [Canvas].
+Image decodeImageFromPixelsSync(Uint8List pixels, int width, int height, PixelFormat format) {
+  final image = Image._(_Image._(), width, height);
+  _decodeImageFromPixelsSync(pixels, width, height, format.index, image._image);
+  return image;
+}
+
+@Native<Void Function(Handle, Int32, Int32, Int32, Handle)>(
+  symbol: 'Image::decodeImageFromPixelsSync',
+)
+external void _decodeImageFromPixelsSync(
+  Uint8List pixels,
+  int width,
+  int height,
+  int format,
+  _Image outImage,
+);
 
 /// Determines the winding rule that decides how the interior of a [Path] is
 /// calculated.
@@ -5589,12 +5615,15 @@ base class FragmentShader extends Shader {
   /// The index provided to setImageSampler is the index of the sampler uniform defined
   /// in the fragment program, excluding all non-sampler uniforms.
   ///
+  /// The optional [filterQuality] argument may be provided to set the quality level used to sample
+  /// the image. By default, it is set to [FilterQuality.none].
+  ///
   /// All the sampler uniforms that a shader expects must be provided or the
   /// results will be undefined.
-  void setImageSampler(int index, Image image) {
+  void setImageSampler(int index, Image image, {FilterQuality filterQuality = FilterQuality.none}) {
     assert(!debugDisposed, 'Tried to access uniforms on a disposed Shader: $this');
     assert(!image.debugDisposed, 'Image has been disposed');
-    _setImageSampler(index, image._image);
+    _setImageSampler(index, image._image, filterQuality.index);
   }
 
   /// Releases the native resources held by the [FragmentShader].
@@ -5616,10 +5645,10 @@ base class FragmentShader extends Shader {
     int samplerUniforms,
   );
 
-  @Native<Void Function(Pointer<Void>, Handle, Handle)>(
+  @Native<Void Function(Pointer<Void>, Handle, Handle, Int32)>(
     symbol: 'ReusableFragmentShader::SetImageSampler',
   )
-  external void _setImageSampler(int index, _Image sampler);
+  external void _setImageSampler(int index, _Image sampler, int filterQualityIndex);
 
   @Native<Bool Function(Pointer<Void>)>(symbol: 'ReusableFragmentShader::ValidateSamplers')
   external bool _validateSamplers();
@@ -7559,9 +7588,9 @@ abstract class Picture {
   /// Synchronously creates a handle to an image of this picture.
   ///
   /// {@template dart.ui.painting.Picture.toImageSync}
-  /// The returned image will be `width` pixels wide and `height` pixels high.
-  /// The picture is rasterized within the 0 (left), 0 (top), `width` (right),
-  /// `height` (bottom) bounds. Content outside these bounds is clipped.
+  /// The returned image will be [width] pixels wide and [height] pixels high.
+  /// The picture is rasterized within the 0 (left), 0 (top), [width] (right),
+  /// [height] (bottom) bounds. Content outside these bounds is clipped.
   ///
   /// The image object is created and returned synchronously, but is rasterized
   /// asynchronously. If the rasterization fails, an exception will be thrown
@@ -7572,8 +7601,16 @@ abstract class Picture {
   /// efficient to draw.
   ///
   /// If no GPU context is available, the image will be rasterized on the CPU.
+  ///
+  /// The [targetFormat] argument specifies the pixel format of the returned
+  /// [Image]. If [TargetPixelFormat.dontCare] is specified, the pixel format
+  /// will be chosen automatically based on the GPU capabilities.
   /// {@endtemplate}
-  Image toImageSync(int width, int height);
+  Image toImageSync(
+    int width,
+    int height, {
+    TargetPixelFormat targetFormat = TargetPixelFormat.dontCare,
+  });
 
   /// Release the resources used by this object. The object is no longer usable
   /// after this method is called.
@@ -7620,19 +7657,25 @@ base class _NativePicture extends NativeFieldWrapperClass1 implements Picture {
   external String? _toImage(int width, int height, void Function(_Image?) callback);
 
   @override
-  Image toImageSync(int width, int height) {
+  Image toImageSync(
+    int width,
+    int height, {
+    TargetPixelFormat targetFormat = TargetPixelFormat.dontCare,
+  }) {
     assert(!_disposed);
     if (width <= 0 || height <= 0) {
       throw Exception('Invalid image dimensions.');
     }
 
     final image = _Image._();
-    _toImageSync(width, height, image);
+    _toImageSync(width, height, targetFormat.index, image);
     return Image._(image, image.width, image.height);
   }
 
-  @Native<Void Function(Pointer<Void>, Uint32, Uint32, Handle)>(symbol: 'Picture::toImageSync')
-  external void _toImageSync(int width, int height, _Image outImage);
+  @Native<Void Function(Pointer<Void>, Uint32, Uint32, Int32, Handle)>(
+    symbol: 'Picture::toImageSync',
+  )
+  external void _toImageSync(int width, int height, int targetFormat, _Image outImage);
 
   @override
   void dispose() {

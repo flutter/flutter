@@ -4,6 +4,7 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -18,6 +19,35 @@ import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
+  setUp(() {
+    Cache.disableLocking();
+  });
+
+  tearDown(() {
+    restoreExitFunction();
+  });
+
+  testUsingContext('flutter build without arguments prints help and exits with code 1', () async {
+    int? exitCode;
+    setExitFunctionForTests((int code) {
+      exitCode = code;
+    });
+
+    final command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: testLogger,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+
+    await commandRunner.run(<String>['build']);
+
+    expect(exitCode, 1);
+    expect(testLogger.statusText, contains(command.description));
+  });
+
   testUsingContext('obfuscate requires split-debug-info', () {
     final command = FakeBuildInfoCommand();
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
