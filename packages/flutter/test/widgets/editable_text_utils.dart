@@ -142,8 +142,16 @@ class OverflowWidgetTextEditingController extends TextEditingController {
 }
 
 class BasicTestTextField extends StatefulWidget {
-  const BasicTestTextField({super.key, this.focusNode, this.style});
+  const BasicTestTextField({
+    super.key,
+    this.controller,
+    this.focusNode,
+    this.style,
+    this.autofocus = false,
+  });
 
+  final bool autofocus;
+  final TextEditingController? controller;
   final FocusNode? focusNode;
   final TextStyle? style;
 
@@ -152,21 +160,24 @@ class BasicTestTextField extends StatefulWidget {
 }
 
 class _BasicTestTextFieldState extends State<BasicTestTextField> {
-  final TextEditingController _controller = TextEditingController();
+  TextEditingController? _controller;
+  TextEditingController get _effectiveController =>
+      widget.controller ?? (_controller ??= TextEditingController());
   FocusNode? _focusNode;
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
 
   @override
   void dispose() {
     _focusNode?.dispose();
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return EditableText(
-      controller: _controller,
+      autofocus: widget.autofocus,
+      controller: _effectiveController,
       focusNode: _effectiveFocusNode,
       style: widget.style ?? const TextStyle(),
       cursorColor: Colors.red,
