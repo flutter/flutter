@@ -44,6 +44,9 @@ void main() async {
     await flutterDriver.tap(find.byValueKey('TogglePlatformView'));
     expect(await flutterDriver.getText(find.byValueKey('ToggleButtonText')), showText);
 
-    await expectLater(nativeDriver.screenshot(), matchesGoldenFile('hide_show_hide_platform_view.png'));
+    await expectLater(
+      nativeDriver.screenshot(),
+      matchesGoldenFile('hide_show_hide_platform_view.png'),
+    );
   }, timeout: Timeout.none);
 }
