@@ -61,37 +61,22 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
     _regularWidthController.text = widget.settings.regularSize.width.toString();
     _regularHeightController.text = widget.settings.regularSize.height
         .toString();
+    _regularWidthController.addListener(_updateRegularSize);
+    _regularHeightController.addListener(_updateRegularSize);
+    _dialogWidthController.addListener(_updateDialogSize);
+    _dialogHeightController.addListener(_updateDialogSize);
     _dialogWidthController.text = widget.settings.dialogSize.width.toString();
     _dialogHeightController.text = widget.settings.dialogSize.height.toString();
     _offsetDxController.text = widget.settings.positioner.offset.dx.toString();
     _offsetDyController.text = widget.settings.positioner.offset.dy.toString();
-
     _flipX = widget.settings.positioner.constraintAdjustment.flipX;
-
     _flipY = widget.settings.positioner.constraintAdjustment.flipY;
-
     _slideX = widget.settings.positioner.constraintAdjustment.slideX;
-
     _slideY = widget.settings.positioner.constraintAdjustment.slideY;
-
     _resizeX = widget.settings.positioner.constraintAdjustment.resizeX;
-
     _resizeY = widget.settings.positioner.constraintAdjustment.resizeY;
-
     _parentAnchor = widget.settings.positioner.parentAnchor;
-
     _childAnchor = widget.settings.positioner.childAnchor;
-  }
-
-  @override
-  void dispose() {
-    _regularWidthController.dispose();
-    _regularHeightController.dispose();
-    _dialogWidthController.dispose();
-    _dialogHeightController.dispose();
-    _offsetDxController.dispose();
-    _offsetDyController.dispose();
-    super.dispose();
   }
 
   @override
@@ -435,7 +420,69 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
             ],
           ),
         ),
+        ListTile(
+          title: const Text('Dialog'),
+          subtitle: Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: _dialogWidthController,
+                  decoration: const InputDecoration(labelText: 'Initial width'),
+                ),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: TextFormField(
+                  controller: _dialogHeightController,
+                  decoration: const InputDecoration(
+                    labelText: 'Initial height',
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: TextButton(
+            onPressed: () {
+              widget.onClose();
+            },
+            child: const Text('Close'),
+          ),
+        ),
       ],
     );
+  }
+
+  void _updateRegularSize() {
+    widget.settings.regularSize = Size(
+      double.tryParse(_regularWidthController.text) ??
+          widget.settings.regularSize.width,
+      double.tryParse(_regularHeightController.text) ??
+          widget.settings.regularSize.height,
+    );
+  }
+
+  void _updateDialogSize() {
+    widget.settings.dialogSize = Size(
+      double.tryParse(_dialogWidthController.text) ??
+          widget.settings.dialogSize.width,
+      double.tryParse(_dialogHeightController.text) ??
+          widget.settings.dialogSize.height,
+    );
+  }
+
+  @override
+  void dispose() {
+    _regularWidthController.removeListener(_updateRegularSize);
+    _regularHeightController.removeListener(_updateRegularSize);
+    _dialogWidthController.removeListener(_updateDialogSize);
+    _dialogHeightController.removeListener(_updateDialogSize);
+    _regularWidthController.dispose();
+    _regularHeightController.dispose();
+    _dialogWidthController.dispose();
+    _dialogHeightController.dispose();
+    super.dispose();
   }
 }
