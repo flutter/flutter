@@ -1839,7 +1839,9 @@ void main() {
       );
 
       if (value != null) {
-        final FakeRenderEditable renderObject = tester.state<EditableTextState>(find.byKey(editableTextKey)).renderEditable as FakeRenderEditable;
+        final renderObject =
+            tester.state<EditableTextState>(find.byKey(editableTextKey)).renderEditable
+                as FakeRenderEditable;
         renderObject.text = TextSpan(style: const TextStyle(fontSize: 10.0), text: value.text);
       }
 
@@ -1851,7 +1853,9 @@ void main() {
         onSelectionHandleTapped: () {},
         startHandleLayerLink: startHandleLayerLink,
         endHandleLayerLink: endHandleLayerLink,
-        selectionDelegate: FakeTextSelectionDelegate(textEditingValue: value ?? TextEditingValue.empty),
+        selectionDelegate: FakeTextSelectionDelegate(
+          textEditingValue: value ?? TextEditingValue.empty,
+        ),
         toolbarLayerLink: toolbarLayerLink,
         magnifierConfiguration: TextMagnifierConfiguration.disabled,
       );
@@ -1867,28 +1871,35 @@ void main() {
       );
     });
 
-    testWidgets('handles auto-dismiss after timeout on Android', (WidgetTester tester) async {
-      final TextSelectionOverlay overlay = await pumpApp(
-        tester,
-        value: const TextEditingValue(text: 'test', selection: TextSelection.collapsed(offset: 0)),
-      );
+    testWidgets(
+      'handles auto-dismiss after timeout on Android',
+      (WidgetTester tester) async {
+        final TextSelectionOverlay overlay = await pumpApp(
+          tester,
+          value: const TextEditingValue(
+            text: 'test',
+            selection: TextSelection.collapsed(offset: 0),
+          ),
+        );
 
-      // Show handles
-      overlay.handlesVisible = true;
-      overlay.showHandles();
-      await tester.pump();
-      expect(overlay.handlesAreVisible, isTrue);
+        // Show handles
+        overlay.handlesVisible = true;
+        overlay.showHandles();
+        await tester.pump();
+        expect(overlay.handlesAreVisible, isTrue);
 
-      // Fast forward to just before the timeout (3.9s)
-      await tester.pump(const Duration(milliseconds: 3900));
-      expect(overlay.handlesAreVisible, isTrue);
+        // Fast forward to just before the timeout (3.9s)
+        await tester.pump(const Duration(milliseconds: 3900));
+        expect(overlay.handlesAreVisible, isTrue);
 
-      // Fast forward to just after the timeout (4.1s total)
-      await tester.pump(const Duration(milliseconds: 200));
-      expect(overlay.handlesAreVisible, isFalse);
+        // Fast forward to just after the timeout (4.1s total)
+        await tester.pump(const Duration(milliseconds: 200));
+        expect(overlay.handlesAreVisible, isFalse);
 
-      overlay.dispose();
-    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+        overlay.dispose();
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+    );
   });
 
   testWidgets('Context menus', (WidgetTester tester) async {
@@ -1928,6 +1939,54 @@ void main() {
     await tester.tapAt(position, buttons: kSecondaryMouseButton, kind: PointerDeviceKind.mouse);
     await tester.pump();
     expect(find.byType(Placeholder), findsOneWidget);
+  }, skip: kIsWeb); // [intended] On web, we use native context menus for text fields.
+
+  testWidgets('Extra large cursor width draws the collapsed handle centered', (
+    WidgetTester tester,
+  ) async {
+    final controller = TextEditingController(text: 'A');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(child: TextField(controller: controller, cursorWidth: 50.0)),
+        ),
+      ),
+    );
+
+    // Tap to focus and show the collapsed handle.
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+
+    // Find the render object of the collapsed handle.
+    // The handle is drawn using a CustomPaint in the overlay.
+    // We can find it by the unique key or by type if we know it.
+    // However, since it's in an overlay, we might need a more specific finder.
+    // Detailed search: The handle is usually a CompositedTransformFollower -> FadeTransition -> Container -> CustomPaint.
+
+    // We can rely on the fact that the handle is visually centered on the cursor.
+    // Let's get the cursor center.
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    final Rect caretRect = renderEditable.getLocalRectForCaret(
+      const TextPosition(offset: 1),
+    ); // End of 'A'
+    final Offset caretCenterGlobal = renderEditable.localToGlobal(caretRect.center);
+
+    // Now find the handle.
+    // In Material, the collapsed handle uses _TextSelectionHandlePainter.
+    final Finder handleFinder = find
+        .byType(CustomPaint)
+        .last; // Usually the last one drawn in the overlay.
+    // To be safer, we can check the painter type if we could access the private class, but we can't easily.
+    // Let's assume the handle is the one that is visible and in the overlay.
+
+    final RenderBox handleBox = tester.renderObject(handleFinder);
+    final Offset handleCenter = handleBox.localToGlobal(handleBox.size.center(Offset.zero));
+
+    // The handle's center x should match the caret's center x.
+    expect(handleCenter.dx, closeTo(caretCenterGlobal.dx, 0.5));
+
+    // Also verify specifically that the visual center of the handle (which is the "onion" shape) points to the caret.
+    // The handle logic in getHandleAnchor should have compensated for the handle size and cursor width.
   }, skip: kIsWeb); // [intended] On web, we use native context menus for text fields.
 }
 

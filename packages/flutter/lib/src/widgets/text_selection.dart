@@ -114,6 +114,9 @@ abstract class TextSelectionControls {
   /// Get the anchor point of the handle relative to itself. The anchor point is
   /// the point that is aligned with a specific point in the text. A handle
   /// often visually "points to" that location.
+  ///
+  /// The [cursorWidth] argument is the thickness of the cursor, which may be
+  /// used to offset the anchor point.
   Offset getHandleAnchor(
     TextSelectionHandleType type,
     double textLineHeight, {

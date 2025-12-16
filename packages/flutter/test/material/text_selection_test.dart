@@ -800,5 +800,25 @@ void main() {
       );
       expect(actual, equals(expected));
     });
+
+    test('returns correct anchor for collapsed handle with custom cursor width', () {
+      const expected = Offset(1.0, -5.0);
+      final Offset actual = materialTextSelectionControls.getHandleAnchor(
+        TextSelectionHandleType.collapsed,
+        0,
+        cursorWidth: 20.0,
+      );
+      expect(actual, equals(expected));
+    });
+
+    test('returns correct anchor for collapsed handle with odd cursor width', () {
+      const expected = Offset(5.75, -5.0);
+      final Offset actual = materialTextSelectionControls.getHandleAnchor(
+        TextSelectionHandleType.collapsed,
+        0,
+        cursorWidth: 10.5,
+      );
+      expect(actual, equals(expected));
+    });
   });
 }

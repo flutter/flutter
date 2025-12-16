@@ -216,6 +216,20 @@ void main() {
         matchesGoldenFile('text_selection.handle.transparent.png'),
       );
     });
+
+    test('getHandleAnchor ignores cursorWidth for Cupertino handles', () {
+      final Offset anchorDefault = cupertinoTextSelectionControls.getHandleAnchor(
+        TextSelectionHandleType.left,
+        10.0,
+        cursorWidth: 2.0,
+      );
+      final Offset anchorWide = cupertinoTextSelectionControls.getHandleAnchor(
+        TextSelectionHandleType.left,
+        10.0,
+        cursorWidth: 20.0,
+      );
+      expect(anchorDefault, equals(anchorWide));
+    });
   });
 
   group('Text selection menu overflow (iOS)', () {
