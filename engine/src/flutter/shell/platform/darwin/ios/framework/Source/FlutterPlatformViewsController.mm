@@ -10,10 +10,8 @@
 #include "flutter/display_list/utils/dl_matrix_clip_tracker.h"
 #include "flutter/flow/surface_frame.h"
 #include "flutter/flow/view_slicer.h"
-#include "flutter/fml/logging.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
-#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterOverlayView.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/overlay_layer_pool.h"
@@ -25,11 +23,6 @@ using flutter::DlRect;
 using flutter::DlRoundRect;
 
 static constexpr NSUInteger kFlutterClippingMaskViewPoolCapacity = 5;
-
-static NSString* const kGestureBlockingPolicyEagerValue = @"eager";
-static NSString* const kGestureBlockingPolicyWaitUntilTouchesEndedValue = @"waitUntilTouchesEnded";
-static NSString* const kGestureBlockingPolicyFallbackToPluginDefault = @"fallbackToPluginDefault";
-static NSString* const kGestureBlockingPolicyTouchBlockingOnly = @"touchBlockingOnly";
 
 struct LayerData {
   DlRect rect;
@@ -110,7 +103,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 // The FlutterPlatformViewGestureRecognizersBlockingPolicy for each type of platform view.
 @property(nonatomic, readonly)
     std::unordered_map<std::string, FlutterPlatformViewGestureRecognizersBlockingPolicy>&
-        gestureRecognizersBlockingPoliciesByType;
+        gestureRecognizersBlockingPolicies;
 
 /// The size of the current onscreen surface in physical pixels.
 @property(nonatomic, assign) DlISize frameSize;
@@ -245,7 +238,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   std::unordered_map<int64_t, std::unique_ptr<flutter::EmbedderViewSlice>> _slices;
   std::unordered_map<std::string, NSObject<FlutterPlatformViewFactory>*> _factories;
   std::unordered_map<std::string, FlutterPlatformViewGestureRecognizersBlockingPolicy>
-      _gestureRecognizersBlockingPoliciesByType;
+      _gestureRecognizersBlockingPolicies;
   fml::RefPtr<fml::TaskRunner> _platformTaskRunner;
   std::unordered_map<int64_t, PlatformViewData> _platformViews;
   std::unordered_map<int64_t, flutter::EmbeddedViewParams> _currentCompositionParams;
@@ -336,32 +329,10 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   // Set a unique view identifier, so the platform view can be identified in unit tests.
   platformView.accessibilityIdentifier = [NSString stringWithFormat:@"platform_view[%lld]", viewId];
 
-  NSString* gestureBlockingPolicyValue = args[@"gestureBlockingPolicy"];
-  FlutterPlatformViewGestureRecognizersBlockingPolicy gestureBlockingPolicy;
-  if ([gestureBlockingPolicyValue isEqualToString:kGestureBlockingPolicyTouchBlockingOnly]) {
-    gestureBlockingPolicy = FlutterPlatformViewGestureRecognizersBlockingPolicyTouchBlockingOnly;
-  } else if ([gestureBlockingPolicyValue isEqualToString:kGestureBlockingPolicyEagerValue]) {
-    gestureBlockingPolicy = FlutterPlatformViewGestureRecognizersBlockingPolicyEager;
-  } else if ([gestureBlockingPolicyValue
-                 isEqualToString:kGestureBlockingPolicyWaitUntilTouchesEndedValue]) {
-    gestureBlockingPolicy =
-        FlutterPlatformViewGestureRecognizersBlockingPolicyWaitUntilTouchesEnded;
-  } else if ([gestureBlockingPolicyValue
-                 isEqualToString:kGestureBlockingPolicyFallbackToPluginDefault]) {
-    gestureBlockingPolicy = self.gestureRecognizersBlockingPoliciesByType[viewType];
-  } else {
-    NSString* errorMessage =
-        [NSString stringWithFormat:@"Unsupported gesture blocking policy: %@, so we fallback to "
-                                   @"use the policy set via engine API.",
-                                   gestureBlockingPolicyValue];
-    [FlutterLogger logError:errorMessage];
-    gestureBlockingPolicy = self.gestureRecognizersBlockingPoliciesByType[viewType];
-  }
-
-  FlutterTouchInterceptingView* touchInterceptor =
-      [[FlutterTouchInterceptingView alloc] initWithEmbeddedView:platformView
-                                         platformViewsController:self
-                                gestureRecognizersBlockingPolicy:gestureBlockingPolicy];
+  FlutterTouchInterceptingView* touchInterceptor = [[FlutterTouchInterceptingView alloc]
+                  initWithEmbeddedView:platformView
+               platformViewsController:self
+      gestureRecognizersBlockingPolicy:self.gestureRecognizersBlockingPolicies[viewType]];
 
   ChildClippingView* clippingView = [[ChildClippingView alloc] initWithFrame:CGRectZero];
   [clippingView addSubview:touchInterceptor];
@@ -431,7 +402,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   std::string idString([factoryId UTF8String]);
   FML_CHECK(self.factories.count(idString) == 0);
   self.factories[idString] = factory;
-  self.gestureRecognizersBlockingPoliciesByType[idString] = gestureRecognizerBlockingPolicy;
+  self.gestureRecognizersBlockingPolicies[idString] = gestureRecognizerBlockingPolicy;
 }
 
 - (void)beginFrameWithSize:(DlISize)frameSize {
@@ -1091,10 +1062,9 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 - (std::unordered_map<std::string, NSObject<FlutterPlatformViewFactory>*>&)factories {
   return _factories;
 }
-
 - (std::unordered_map<std::string, FlutterPlatformViewGestureRecognizersBlockingPolicy>&)
-    gestureRecognizersBlockingPoliciesByType {
-  return _gestureRecognizersBlockingPoliciesByType;
+    gestureRecognizersBlockingPolicies {
+  return _gestureRecognizersBlockingPolicies;
 }
 
 - (std::unordered_map<int64_t, PlatformViewData>&)platformViews {

@@ -77,12 +77,6 @@ void PlatformConfiguration::DidCreateIsolate() {
   dispatch_pointer_data_packet_.Set(
       tonic::DartState::Current(),
       Dart_GetField(library, tonic::ToDart("_dispatchPointerDataPacket")));
-  // The embedded native view (e.g. UIView on iOS) is called "platform view"
-  // on framework side, but "embedded native view" on engine side. On the other
-  // hand, "platform view" refers to the whole flutter view on engine side.
-  embedded_native_view_should_accept_touch_.Set(
-      tonic::DartState::Current(),
-      Dart_GetField(library, tonic::ToDart("_platformViewShouldAcceptTouch")));
   dispatch_semantics_action_.Set(
       tonic::DartState::Current(),
       Dart_GetField(library, tonic::ToDart("_dispatchSemanticsAction")));
@@ -392,26 +386,6 @@ void PlatformConfiguration::DispatchPointerDataPacket(
 
   tonic::CheckAndHandleError(
       tonic::DartInvoke(dispatch_pointer_data_packet_.Get(), {data_handle}));
-}
-
-bool PlatformConfiguration::EmbeddedNativeViewShouldAcceptTouch(
-    int64_t view_id,
-    const flutter::PointData touch_began_location) {
-  std::shared_ptr<tonic::DartState> dart_state =
-      embedded_native_view_should_accept_touch_.dart_state().lock();
-  if (!dart_state) {
-    return false;
-  }
-  tonic::DartState::Scope scope(dart_state);
-
-  Dart_Handle dart_result = tonic::DartInvoke(
-      embedded_native_view_should_accept_touch_.Get(),
-      {tonic::ToDart(view_id), tonic::ToDart(touch_began_location.x),
-       tonic::ToDart(touch_began_location.y)});
-  if (tonic::CheckAndHandleError(dart_result)) {
-    return false;
-  }
-  return tonic::DartConverter<bool>::FromDart(dart_result);
 }
 
 void PlatformConfiguration::DispatchSemanticsAction(int64_t view_id,
