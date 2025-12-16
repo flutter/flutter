@@ -368,6 +368,21 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     invoke1<List<ui.FrameTiming>>(_onReportTimings, _onReportTimingsZone, timings);
   }
 
+  /// A callback invoked when a new frame is available for a texture.
+  @override
+  ui.TextureFrameAvailableCallback? get onTextureFrameAvailable => _onTextureFrameAvailable;
+  ui.TextureFrameAvailableCallback? _onTextureFrameAvailable;
+  Zone? _onTextureFrameAvailableZone;
+  @override
+  set onTextureFrameAvailable(ui.TextureFrameAvailableCallback? callback) {
+    _onTextureFrameAvailable = callback;
+    _onTextureFrameAvailableZone = Zone.current;
+  }
+
+  void invokeOnTextureFrameAvailable(int textureId) {
+    invoke1<int>(_onTextureFrameAvailable, _onTextureFrameAvailableZone, textureId);
+  }
+
   @override
   void sendPlatformMessage(
     String name,
