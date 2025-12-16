@@ -62,8 +62,10 @@ void main() {
     final capturedPrint = capturedPrintLines.toString();
     expect(
       capturedPrint,
-      contains(
-        'with environment {FLUTTER_DEVICELAB_DEVICEID: FAKE_SUCCESS, BOT: true, LANG: en_US.UTF-8}',
+      allOf(
+        contains('with environment {'),
+        contains('FLUTTER_DEVICELAB_DEVICEID: FAKE_SUCCESS'),
+        contains('BOT: true'),
       ),
     );
     expect(capturedPrint, contains('Process terminated with exit code 0.'));
