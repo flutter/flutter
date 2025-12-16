@@ -436,13 +436,13 @@ class CkFragmentShader implements ui.FragmentShader, CkShader {
 
   @override
   ui.UniformVec2Slot getUniformVec2(String name) {
-    final List<CkUniformFloatSlot> slots = _getUniformFloatSlots(name, 4);
+    final List<CkUniformFloatSlot> slots = _getUniformFloatSlots(name, 2);
     return CkUniformVec2Slot._(slots[0], slots[1]);
   }
 
   @override
   ui.UniformVec3Slot getUniformVec3(String name) {
-    final List<CkUniformFloatSlot> slots = _getUniformFloatSlots(name, 4);
+    final List<CkUniformFloatSlot> slots = _getUniformFloatSlots(name, 3);
     return CkUniformVec3Slot._(slots[0], slots[1], slots[2]);
   }
 
