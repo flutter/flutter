@@ -34,7 +34,6 @@ import io.flutter.BuildConfig;
 import io.flutter.Log;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
 import io.flutter.plugin.platform.PlatformViewsAccessibilityDelegate;
-import io.flutter.util.Predicate;
 import io.flutter.util.ViewUtils;
 import io.flutter.view.AccessibilityStringBuilder.LocaleStringAttribute;
 import io.flutter.view.AccessibilityStringBuilder.SpellOutStringAttribute;
@@ -45,6 +44,7 @@ import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -271,7 +271,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   //                    not get left behind.
   @NonNull private final List<Integer> flutterNavigationStack = new ArrayList<>();
 
-  // TODO(mattcarroll): why do we need previouseRouteId if we have flutterNavigationStack
+  // TODO(mattcarroll): why do we need previousRouteId if we have flutterNavigationStack
   private int previousRouteId = ROOT_NODE_ID;
 
   // Tracks the left system inset of the screen because Flutter needs to manually adjust
@@ -516,7 +516,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     this.contentResolver.registerContentObserver(transitionUri, false, animationScaleObserver);
 
     // Tells Flutter whether the text should be bolded or not. If the user changes bold text
-    // setting, the configuration will change and trigger a re-build of the accessibilityBridge.
+    // setting, the configuration will change and trigger a re-build of the
+    // accessibilityBridge.
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_31) {
       setBoldTextFlag();
     }
@@ -719,9 +720,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       if (flutterSemanticsTree.containsKey(ROOT_NODE_ID)) {
         result.addChild(rootAccessibilityView, ROOT_NODE_ID);
       }
-      if (Build.VERSION.SDK_INT >= API_LEVELS.API_24) {
-        result.setImportantForAccessibility(false);
-      }
+      result.setImportantForAccessibility(false);
       return result;
     }
 
@@ -755,9 +754,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
     // Accessibility Scanner uses isImportantForAccessibility to decide whether to check
     // or skip this node.
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_24) {
-      result.setImportantForAccessibility(isImportant(semanticsNode));
-    }
+    result.setImportantForAccessibility(isImportant(semanticsNode));
 
     // Work around for https://github.com/flutter/flutter/issues/21030
     result.setViewIdResourceName("");
