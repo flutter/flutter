@@ -267,7 +267,6 @@ class _TestRegularWindowController extends RegularWindowController with _ChildWi
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
-    bool decorated = true,
   }) : _delegate = delegate,
        _size = preferredSize ?? const Size(800, 600),
        _constraints = preferredConstraints ?? BoxConstraints.loose(const Size(1920, 1080)),
@@ -385,7 +384,6 @@ class _TestDialogWindowController extends DialogWindowController with _ChildWind
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
-    bool decorated = true,
   }) : _delegate = delegate,
        _parent = parent,
        _size = preferredSize ?? const Size(800, 600),
@@ -588,7 +586,7 @@ class _TestWindowingOwner extends WindowingOwner {
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
-    bool decorated,
+    bool decorated = true,
   }) {
     return _TestRegularWindowController(
       delegate: delegate,
@@ -597,7 +595,6 @@ class _TestWindowingOwner extends WindowingOwner {
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
       title: title,
-      decorated: decorated,
     );
   }
 
@@ -609,7 +606,7 @@ class _TestWindowingOwner extends WindowingOwner {
     BoxConstraints? preferredConstraints,
     BaseWindowController? parent,
     String? title,
-    bool decorated,
+    bool decorated = true,
   }) {
     return _TestDialogWindowController(
       delegate: delegate,
@@ -619,7 +616,6 @@ class _TestWindowingOwner extends WindowingOwner {
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
       title: title,
-      decorated: decorated,
     );
   }
 
