@@ -200,6 +200,17 @@ const int _GDK_WINDOW_EDGE_SOUTH_WEST = 5;
 const int _GDK_WINDOW_EDGE_SOUTH = 6;
 const int _GDK_WINDOW_EDGE_SOUTH_EAST = 7;
 
+const Map<WindowDragEdge, int> kDragEdgeToGdkMapping = {
+  WindowDragEdge.northWest: _GDK_WINDOW_EDGE_NORTH_WEST,
+  WindowDragEdge.north: _GDK_WINDOW_EDGE_NORTH,
+  WindowDragEdge.northEast: _GDK_WINDOW_EDGE_NORTH_EAST,
+  WindowDragEdge.west: _GDK_WINDOW_EDGE_WEST,
+  WindowDragEdge.east: _GDK_WINDOW_EDGE_EAST,
+  WindowDragEdge.southWest: _GDK_WINDOW_EDGE_SOUTH_WEST,
+  WindowDragEdge.south: _GDK_WINDOW_EDGE_SOUTH,
+  WindowDragEdge.southEast: _GDK_WINDOW_EDGE_SOUTH_EAST,
+};
+
 /// Wraps GtkWindow
 class _GtkWindow extends _GtkContainer {
   /// Create a new GtkWindow
@@ -832,19 +843,7 @@ class RegularWindowControllerLinux extends RegularWindowController {
   @override
   @internal
   void beginResizeDrag(int button, WindowDragEdge edge) {
-    _window.beginResizeDrag(
-      button: button,
-      edge: {
-        WindowDragEdge.northWest: _GDK_WINDOW_EDGE_NORTH_WEST,
-        WindowDragEdge.north: _GDK_WINDOW_EDGE_NORTH,
-        WindowDragEdge.northEast: _GDK_WINDOW_EDGE_NORTH_EAST,
-        WindowDragEdge.west: _GDK_WINDOW_EDGE_WEST,
-        WindowDragEdge.east: _GDK_WINDOW_EDGE_EAST,
-        WindowDragEdge.southWest: _GDK_WINDOW_EDGE_SOUTH_WEST,
-        WindowDragEdge.south: _GDK_WINDOW_EDGE_SOUTH,
-        WindowDragEdge.southEast: _GDK_WINDOW_EDGE_SOUTH_EAST,
-      }[edge]!,
-    );
+    _window.beginResizeDrag(button: button, edge: kDragEdgeToGdkMapping[edge]!);
   }
 }
 
@@ -1016,18 +1015,6 @@ class DialogWindowControllerLinux extends DialogWindowController {
   @override
   @internal
   void beginResizeDrag(int button, WindowDragEdge edge) {
-    _window.beginResizeDrag(
-      button: button,
-      edge: {
-        WindowDragEdge.northWest: _GDK_WINDOW_EDGE_NORTH_WEST,
-        WindowDragEdge.north: _GDK_WINDOW_EDGE_NORTH,
-        WindowDragEdge.northEast: _GDK_WINDOW_EDGE_NORTH_EAST,
-        WindowDragEdge.west: _GDK_WINDOW_EDGE_WEST,
-        WindowDragEdge.east: _GDK_WINDOW_EDGE_EAST,
-        WindowDragEdge.southWest: _GDK_WINDOW_EDGE_SOUTH_WEST,
-        WindowDragEdge.south: _GDK_WINDOW_EDGE_SOUTH,
-        WindowDragEdge.southEast: _GDK_WINDOW_EDGE_SOUTH_EAST,
-      }[edge]!,
-    );
+    _window.beginResizeDrag(button: button, edge: kDragEdgeToGdkMapping[edge]!);
   }
 }
