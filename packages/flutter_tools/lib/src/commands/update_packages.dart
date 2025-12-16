@@ -258,7 +258,9 @@ class UpdatePackagesCommand extends FlutterCommand {
     );
     final deps = <_ProjectDeps>[];
     for (final project in projects) {
-      final Directory projectTempDir = tempDir.childDirectory('+${project.directory.path}');
+      final Directory projectTempDir = tempDir.childDirectory(
+        globals.fs.path.relative(project.directory.path, from: Cache.flutterRoot),
+      );
       final File tempPubspec = projectTempDir.childFile(project.pubspecFile.basename)
         ..createSync(recursive: true);
       globals.printStatus('Writing to temp pubspec at $tempPubspec');
