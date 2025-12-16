@@ -145,6 +145,7 @@ abstract class ChromiumDevice extends WebDevice {
         headless: debuggingOptions.webRunHeadless,
         debugPort: debuggingOptions.webBrowserDebugPort,
         webBrowserFlags: debuggingOptions.webBrowserFlags,
+        chromeBinary: debuggingOptions.webChromeBinary,
       );
     }
     _logger.sendEvent('app.webLaunchUrl', <String, Object>{'url': url, 'launched': launchChrome});

@@ -345,6 +345,7 @@ class DriveCommand extends RunCommandBase {
     final BuildInfo buildInfo = await getBuildInfo();
     final DebuggingOptions debuggingOptions = await createDebuggingOptions(
       webDevServerConfig: webDevServerConfig,
+      webChromeBinary: stringArg('chrome-binary'),
     );
     final File? applicationBinary = applicationBinaryPath == null
         ? null
