@@ -281,7 +281,7 @@ void HostWindow::InitializeFlutterView(
 
   // Create the native window.
   window_handle_ = CreateWindowEx(
-      params.extended_window_style, kWindowClassName, title_.c_str(),
+      params.extended_window_style, kWindowClassName, params.title,
       params.window_style, params.initial_window_rect.left(),
       params.initial_window_rect.top(), params.initial_window_rect.width(),
       params.initial_window_rect.height(),
@@ -314,7 +314,7 @@ void HostWindow::InitializeFlutterView(
   // window. This doesn't work for multi window apps as the engine cannot have
   // multiple next frame callbacks. If multiple windows are created, only the
   // last one will be shown.
-  ShowWindow(window_handle_, nCmdShow_);
+  ShowWindow(window_handle_, params.nCmdShow);
   SetWindowLongPtr(window_handle_, GWLP_USERDATA,
                    reinterpret_cast<LONG_PTR>(this));
 }

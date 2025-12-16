@@ -32,7 +32,7 @@ using FlutterViewId = int64_t;
 // Optional delegate for views that are sized to contents.
 class FlutterWindowsViewSizingDelegate {
  public:
-  // This method may be called from raster thread.
+  // This method may be called from the platform or raster threads.
   virtual bool ViewIsSizedToContent() const = 0;
 
   // These methods will always be called from the platform thread.
@@ -426,6 +426,7 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   bool NeedsVsync() const;
 
   // If true, the view is sized to its content via a sizing delegate.
+  // If false, the view is sized by its parent HWND or by the user.
   bool IsSizedToContent() const;
 
   // The view's unique identifier.

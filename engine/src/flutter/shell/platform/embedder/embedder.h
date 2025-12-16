@@ -1067,6 +1067,9 @@ typedef struct {
   FlutterEngineDisplayId display_id;
   /// The view that this event is describing.
   int64_t view_id;
+  /// If `true`, the window has size constraints.
+  /// If `false`, the constraint values are ignored.
+  bool has_constraints;
   /// Minimum physical width of the window.
   ///
   //// This must be less than or equal to |max_width_constraint| and |width|.
