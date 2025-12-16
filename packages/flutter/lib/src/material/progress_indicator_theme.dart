@@ -16,14 +16,15 @@ import 'theme.dart';
 // Examples can assume:
 // late BuildContext context;
 
-@immutable
-/// Defines the visual properties of [ProgressIndicator] widgets.
+/// Overrides the default values of visual properties for descendant
+/// [ProgressIndicator] widgets.
 ///
-/// Used by [ProgressIndicatorTheme] to control the visual properties of
-/// progress indicators in a widget subtree.
+/// Descendant widgets obtain the current [ProgressIndicatorThemeData] object
+/// with [ProgressIndicatorTheme.of]. Instances of [ProgressIndicatorThemeData]
+/// can be customized with [ProgressIndicatorThemeData.copyWith].
 ///
-/// To obtain this configuration, use [ProgressIndicatorTheme.of] to access
-/// the closest ancestor [ProgressIndicatorTheme] of the current [BuildContext].
+/// Typically a [ProgressIndicatorThemeData] is specified as part of the overall
+/// [Theme] with [ThemeData.progressIndicatorTheme].
 ///
 /// See also:
 ///
@@ -31,6 +32,7 @@ import 'theme.dart';
 ///    theme down its subtree.
 ///  * [ThemeData.progressIndicatorTheme], which describes the defaults for
 ///    any progress indicators as part of the application's [ThemeData].
+@immutable
 class ProgressIndicatorThemeData with Diagnosticable {
   /// Creates the set of properties used to configure [ProgressIndicator] widgets.
   const ProgressIndicatorThemeData({
