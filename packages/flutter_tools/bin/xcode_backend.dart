@@ -103,6 +103,8 @@ class Context {
 
   Directory directoryFromPath(String path) => Directory(path);
 
+  File fileFromPath(String path) => File(path);
+
   /// Run given command ([bin]) in a synchronous subprocess.
   ///
   /// If [allowFail] is true, an exception will not be thrown even if the process returns a
@@ -352,7 +354,7 @@ class Context {
     }
 
     final Set<String> referencedFrameworks = {};
-    final nativeAssetsJson = File(
+    final File nativeAssetsJson = fileFromPath(
       '$xcodeFrameworksDir/App.framework/flutter_assets/NativeAssetsManifest.json',
     );
     if (!nativeAssetsJson.existsSync()) {
@@ -372,6 +374,9 @@ class Context {
     //     }
     //   }
     // }
+    //
+    // Note that this format is also parsed and expected in
+    // engine/src/flutter/assets/native_assets.cc
     final nativeAssetsSpec = json.decode(nativeAssetsJson.readAsStringSync()) as Map;
     for (final Object? perPlatform
         in (nativeAssetsSpec['native-assets'] as Map<String, Object?>).values) {
@@ -395,7 +400,9 @@ class Context {
     }
 
     for (final framework in referencedFrameworks) {
-      final frameworkDirectory = Directory('$nativeAssetsPath$framework.framework');
+      final Directory frameworkDirectory = directoryFromPath(
+        '$nativeAssetsPath$framework.framework',
+      );
       if (!frameworkDirectory.existsSync()) {
         throw Exception(
           'The native assets specification at ${nativeAssetsJson.path} references $framework, '
