@@ -3311,6 +3311,95 @@ void main() {
       semantics.dispose();
     }, variant: TargetPlatformVariant.all());
   });
+
+  testWidgets('Dialog has hitTestBehavior.opaque to prevent dismissal on empty areas', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                onPressed: () {
+                  showDialog<void>(
+                    context: context,
+                    builder: (BuildContext context) =>
+                        const Dialog(child: SizedBox(width: 200, height: 200)),
+                  );
+                },
+                child: const Text('Show Dialog'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Show Dialog'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Dialog), findsOneWidget);
+
+    final Semantics routeSemantics = tester.widget<Semantics>(
+      find.ancestor(of: find.byType(Dialog), matching: find.byType(Semantics)).first,
+    );
+
+    expect(routeSemantics.properties.hitTestBehavior, SemanticsHitTestBehavior.opaque);
+
+    semantics.dispose();
+  });
+
+  testWidgets('AlertDialog has hitTestBehavior.opaque via Dialog', (WidgetTester tester) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                onPressed: () {
+                  showDialog<void>(
+                    context: context,
+                    builder: (BuildContext context) => AlertDialog(
+                      title: const Text('Test Dialog'),
+                      content: const SizedBox(width: 200, height: 100),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('OK'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                child: const Text('Show Dialog'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Show Dialog'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AlertDialog), findsOneWidget);
+    expect(find.byType(Dialog), findsOneWidget);
+
+    // Find the route-level Semantics with hitTestBehavior.opaque
+    // (wraps the entire dialog content, above the Dialog widget)
+    final Semantics routeSemantics = tester.widget<Semantics>(
+      find.ancestor(of: find.byType(Dialog), matching: find.byType(Semantics)).first,
+    );
+
+    expect(routeSemantics.properties.hitTestBehavior, SemanticsHitTestBehavior.opaque);
+
+    semantics.dispose();
+  });
 }
 
 @pragma('vm:entry-point')
