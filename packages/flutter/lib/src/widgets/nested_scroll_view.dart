@@ -1924,13 +1924,18 @@ class RenderSliverOverlapInjector extends RenderSliver {
       'The SliverOverlapAbsorber is typically contained in the list of slivers '
       'provided by NestedScrollView.headerSliverBuilder.\n',
     );
+    final double clampedPaintExtent = math.min(
+      _currentLayoutExtent!,
+      constraints.remainingPaintExtent,
+    );
     final double clampedLayoutExtent = math.min(
       _currentLayoutExtent! - constraints.scrollOffset,
       constraints.remainingPaintExtent,
     );
     geometry = SliverGeometry(
       scrollExtent: _currentLayoutExtent!,
-      paintExtent: math.max(0.0, clampedLayoutExtent),
+      paintExtent: math.max(0.0, clampedPaintExtent),
+      layoutExtent: math.max(0.0, clampedLayoutExtent),
       maxPaintExtent: _currentMaxExtent!,
     );
   }
