@@ -629,7 +629,12 @@ static BOOL _preparedOnce = NO;
         // This performs a nested DFS, with the outer one searching for any web view, and the inner
         // one searching for a TouchEventsGestureRecognizer inside the web view. Once found, disable
         // and immediately reenable it to reset its state.
-        [self searchAndFixWebView:self.embeddedView];
+        // TODO(hellohuanlin): remove this flag after it is battle tested.
+        NSNumber* isWorkaroundDisabled =
+            [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTDisableWebViewGestureReset"];
+        if (!isWorkaroundDisabled.boolValue) {
+          [self searchAndFixWebView:self.embeddedView];
+        }
       } else if (@available(iOS 18.2, *)) {
         // This workaround is designed for WKWebView only. The 1P web view plugin provides a
         // WKWebView itself as the platform view. However, some 3P plugins provide wrappers of
