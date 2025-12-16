@@ -110,8 +110,7 @@ FlutterWindowsView::FlutterWindowsView(
     : view_id_(view_id),
       engine_(engine),
       sizing_delegate_(sizing_delegate),
-      windows_proc_table_(std::move(windows_proc_table)),
-      view_alive_(std::make_shared<int>(0)) {
+      windows_proc_table_(std::move(windows_proc_table)) {
   if (windows_proc_table_ == nullptr) {
     windows_proc_table_ = std::make_shared<WindowsProcTable>();
   }
@@ -161,13 +160,8 @@ bool FlutterWindowsView::OnFrameGenerated(size_t width, size_t height) {
     if (!ResizeRenderSurface(width, height)) {
       return false;
     }
-    std::weak_ptr<int> weak_view_alive = view_alive_;
-    engine_->task_runner()->PostTask([this, width, height, weak_view_alive]() {
-      if (weak_view_alive.lock().get() == nullptr) {
-        return;
-      }
-      sizing_delegate_->DidUpdateViewSize(width, height);
-    });
+
+    sizing_delegate_->DidUpdateViewSize(width, height);
     return true;
   }
 

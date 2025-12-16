@@ -40,6 +40,11 @@ class HostWindowTooltip : public HostWindow,
   GetWindowPositionCallback get_position_callback_;
   HWND parent_;
   Isolate isolate_;
+
+  // Used to track whether the view is still in tasks scheduled from raster
+  // thread.
+  std::shared_ptr<int> view_alive_;
+
   int width_ = 0;
   int height_ = 0;
   WindowSize positioner_size_constraints_ = {0, 0};

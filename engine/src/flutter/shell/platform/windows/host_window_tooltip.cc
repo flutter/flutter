@@ -17,7 +17,8 @@ HostWindowTooltip::HostWindowTooltip(
     : HostWindow(window_manager, engine),
       get_position_callback_(get_position_callback),
       parent_(parent),
-      isolate_(Isolate::Current()) {
+      isolate_(Isolate::Current()),
+      view_alive_(std::make_shared<int>(0)) {
   InitializeFlutterView(HostWindowInitializationParams{
       .archetype = WindowArchetype::kTooltip,
       .window_style = WS_POPUP,
@@ -62,12 +63,24 @@ BoxConstraints HostWindowTooltip::GetConstraints() const {
 }
 
 void HostWindowTooltip::DidUpdateViewSize(int32_t width, int32_t height) {
-  if (width_ == width && height_ == height) {
-    return;
-  }
-  width_ = width;
-  height_ = height;
-  UpdatePosition();
+  std::weak_ptr<int> weak_view_alive = view_alive_;
+  engine_->task_runner()->PostTask([this, width, height, weak_view_alive]() {
+    auto const view_alive = weak_view_alive.lock();
+    if (!view_alive) {
+      return;
+    }
+    if (width_ == width && height_ == height) {
+      return;
+    }
+
+    if (is_being_destroyed_) {
+      return;
+    }
+
+    width_ = width;
+    height_ = height;
+    UpdatePosition();
+  });
 }
 
 WindowRect HostWindowTooltip::GetWorkArea() const {

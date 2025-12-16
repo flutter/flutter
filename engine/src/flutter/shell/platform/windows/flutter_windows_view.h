@@ -35,8 +35,10 @@ class FlutterWindowsViewSizingDelegate {
   // This method may be called from the platform or raster threads.
   virtual bool ViewIsSizedToContent() const = 0;
 
-  // These methods will always be called from the platform thread.
+  // This method is called from the platform thread.
   virtual BoxConstraints GetConstraints() const = 0;
+
+  // This method is called from the raster thread.
   virtual void DidUpdateViewSize(int32_t width, int32_t height) = 0;
 };
 
@@ -473,10 +475,6 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
 
   // Optional sizing delegate for views that are sized to content.
   FlutterWindowsViewSizingDelegate* sizing_delegate_ = nullptr;
-
-  // Used to track whether the view is still in tasks scheduled from raster
-  // thread.
-  std::shared_ptr<int> view_alive_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterWindowsView);
 };
