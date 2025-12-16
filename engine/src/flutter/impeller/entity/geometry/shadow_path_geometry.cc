@@ -29,6 +29,13 @@ using impeller::Vector2;
 // location of the mesh points within the shadow.
 class PolygonInfo : impeller::PathTessellator::VertexWriter {
  public:
+  enum class MeshStatus {
+    kStillProcessing,
+    kShadowIsEmpty,
+    kCouldNotCompute,
+    kMeshIsValid,
+  };
+
   static constexpr Scalar GetTrigRadiusForHeight(Scalar occluder_height) {
     return GetPenumbraSizeForHeight(occluder_height);
   }
@@ -45,11 +52,15 @@ class PolygonInfo : impeller::PathTessellator::VertexWriter {
   // mesh. The proper response if the mesh was invalid would be to use a
   // backup algorithm, such as "render to temporary buffer and apply a
   // gaussian image filter" instead.
-  bool IsValid() const { return is_valid_; }
+  //
+  // There can be many conditions which can make it impossible to compute
+  // the path shadow, but they will all fail and complete before the vertices
+  // are filled out.
+  bool IsValid() const { return mesh_status_ == MeshStatus::kMeshIsValid; }
 
   // IsEmpty indicates that there was no shadow to display. The proper
-  // responsse to this property being true is to render nothing.
-  bool IsEmpty() const { return is_empty_; }
+  // response to this property being true is to render nothing.
+  bool IsEmpty() const { return mesh_status_ == MeshStatus::kShadowIsEmpty; }
 
   // Return the only copy of the data in a |ShadowVertices| structure if
   // the path was valid and the shadow mesh was computable, otherwise return
@@ -57,8 +68,18 @@ class PolygonInfo : impeller::PathTessellator::VertexWriter {
   // use another algorithm to render the shadow - consistent with the IsValid
   // method returning false.
   std::shared_ptr<ShadowVertices> TakeVertices() {
-    if (!is_valid_) {
-      return nullptr;
+    switch (mesh_status_) {
+      case MeshStatus::kCouldNotCompute:
+        return nullptr;
+      case MeshStatus::kShadowIsEmpty:
+        FML_DCHECK(vertices_.empty());
+        FML_DCHECK(indices_.empty());
+        FML_DCHECK(gaussians_.empty());
+        break;
+      case MeshStatus::kMeshIsValid:
+        break;
+      case MeshStatus::kStillProcessing:
+        FML_UNREACHABLE();
     }
 
     return ShadowVertices::Make(std::move(vertices_),  //
@@ -175,8 +196,10 @@ class PolygonInfo : impeller::PathTessellator::VertexWriter {
   UmbraPin* umbra_vertices_head_ = nullptr;
   size_t umbra_polygon_count_ = 0u;
 
-  bool is_valid_ = true;   // aka single convex contour
-  bool is_empty_ = false;  // is there anything to cast a shadow?
+  MeshStatus mesh_status_ = MeshStatus::kStillProcessing;
+
+  bool path_is_convex_ = true;
+  bool path_has_multiple_contours_ = false;
 
   Point centroid_;
   Scalar shape_area_ = 0.0f;
@@ -201,7 +224,10 @@ class PolygonInfo : impeller::PathTessellator::VertexWriter {
       }
     }
 
-    bool IsConvex() const {
+    // Returns true if the path may still be convex, in other words unless
+    // we have violated a constraint that means it must be concave or
+    // self-intersecting.
+    bool MayBeConvex() const {
       // See comment above on the struct for why 3 changes is the most you
       // should see in a convex path.
       return change_count <= 3u;
@@ -219,12 +245,6 @@ class PolygonInfo : impeller::PathTessellator::VertexWriter {
   std::vector<Point> vertices_;
   std::vector<uint16_t> indices_;
   std::vector<Scalar> gaussians_;
-
-  bool Invalidate() {
-    // This method provides a stop point for debugging shadow conversion
-    // failures.
-    return is_valid_ = false;
-  }
 
   // |VertexWriter|
   void Write(Point point);
@@ -364,7 +384,9 @@ PolygonInfo::PolygonInfo(const impeller::PathSource& source,
       occluder_height_(occluder_height),
       trigs_(trigs) {
   if (!matrix.IsInvertible()) {
-    Invalidate();
+    // Shadow will show as empty which is appropriate if the matrix is
+    // singular.
+    mesh_status_ = MeshStatus::kShadowIsEmpty;
     return;
   }
 
@@ -375,9 +397,13 @@ PolygonInfo::PolygonInfo(const impeller::PathSource& source,
   pins_.reserve(point_count);
 
   PathTessellator::PathToTransformedFilledVertices(source, *this, matrix);
-  if (!is_valid_ || pins_.size() < 3 || direction_ == 0.0f ||
-      shape_area_ == 0.0f) {
-    // The shape was either invalid or empty.
+  if (pins_.size() < 3u || direction_ == 0.0f) {
+    mesh_status_ = MeshStatus::kShadowIsEmpty;
+    return;
+  }
+
+  if (path_has_multiple_contours_ || !path_is_convex_) {
+    mesh_status_ = MeshStatus::kCouldNotCompute;
     return;
   }
 
@@ -387,16 +413,20 @@ PolygonInfo::PolygonInfo(const impeller::PathSource& source,
 
   umbra_vertices_head_ = ResolveUmbraIntersections();
   if (umbra_vertices_head_ == nullptr) {
+    // Ideally the Resolve algorithm will always be able to create an
+    // inner loop of umbra vertices, but it is not perfect.
+    //
     // The Skia algorithm from which this was taken tries to fake an
     // umbra polygon that is 95% from the path polygon to the centroid,
-    // but that result does not look great. If we run into this case
-    // a lot we should either beef up the ResolveIntersections algorithm
-    // or find a better approximation than "95% to the centroid".
-    Invalidate();
+    // but that result does not resemble a proper shadow. If we run into
+    // this case a lot we should either beef up the ResolveIntersections
+    // algorithm or find a better approximation than "95% to the centroid".
+    mesh_status_ = MeshStatus::kCouldNotCompute;
     return;
   }
 
   ComputeMesh();
+  mesh_status_ = MeshStatus::kMeshIsValid;
 }
 
 // Enter a new point for the polygon approximation of the shape. Points are
@@ -405,12 +435,14 @@ PolygonInfo::PolygonInfo(const impeller::PathSource& source,
 // the endpoints, and the centroid is updated from the remaining non-duplicate
 // grid points.
 void PolygonInfo::Write(Point point) {
-  if (!is_valid_) {
-    return;
+  if (path_ended_) {
+    path_has_multiple_contours_ = true;
   }
 
-  if (path_ended_) {
-    Invalidate();
+  // This type of algorithm will never be able to handle multiple contours.
+  // Eventually we might handle concave paths, but we avoid further processing
+  // on them anyway for now.
+  if (path_has_multiple_contours_ || !path_is_convex_) {
     return;
   }
 
@@ -433,7 +465,9 @@ void PolygonInfo::Write(Point point) {
         pins_.pop_back();
         break;
       case PointClass::kNonConvex:
-        Invalidate();
+        path_is_convex_ = false;
+        // Eventually we might handle concave paths, but we avoid further
+        // processing on them anyway for now.
         return;
     }
   }
@@ -451,12 +485,14 @@ void PolygonInfo::Write(Point point) {
 // going forward we don't need the extra pin in the shape so we verify that
 // it is a duplicate and then we delete it.
 void PolygonInfo::EndContour() {
-  if (!is_valid_) {
-    return;
+  if (path_ended_) {
+    path_has_multiple_contours_ = true;
   }
 
-  if (path_ended_) {
-    Invalidate();
+  // This type of algorithm will never be able to handle multiple contours.
+  // Eventually we might handle concave paths, but we avoid further processing
+  // on them anyway for now.
+  if (path_has_multiple_contours_ || !path_is_convex_) {
     return;
   }
 
@@ -478,7 +514,8 @@ Point PolygonInfo::ToDeviceGrid(Point point) {
 bool PolygonInfo::CheckEdgeDirection(const Vector2 edge_vector) {
   x_direction_detector_.AccumulateDirection(edge_vector.x);
   y_direction_detector_.AccumulateDirection(edge_vector.y);
-  return x_direction_detector_.IsConvex() && y_direction_detector_.IsConvex();
+  return x_direction_detector_.MayBeConvex() &&
+         y_direction_detector_.MayBeConvex();
 }
 
 // This method performs 4 functions.
@@ -490,25 +527,27 @@ bool PolygonInfo::CheckEdgeDirection(const Vector2 edge_vector) {
 // - Accumulate data to compute the centroid
 PolygonInfo::PointClass PolygonInfo::ValidatePointAndUpdateCentroid(
     const Point& new_point) {
-  if (!is_valid_) {
-    return PointClass::kNonConvex;
-  }
-
   if (pins_.size() < 2u) {
+    // No validation possible and we cannot start to accumulate centroid
+    // values until we have at least 2 prior points.
     return PointClass::kConvex;
   }
 
+  PointClass result = PointClass::kConvex;
+
   const Point& prev = pins_.back().path_vertex;
   if (!CheckEdgeDirection(new_point - prev)) {
-    return PointClass::kNonConvex;
+    // The whole path is not convex due to coming back around on itself too
+    // many times, so we mark the entire path as non-convex, but we cannot
+    // say that this particular point violates convexity so we leave the
+    // return value alone unless one of the tests below discovers otherwise.
+    path_is_convex_ = false;
   }
 
   // direction_ is always normalized to one of these values.
   FML_DCHECK(direction_ == 0.0f ||  //
              direction_ == 1.0f ||  //
              direction_ == -1.0f);
-
-  PointClass result = PointClass::kConvex;
 
   // We can only perform concavity and collinear detection once we have at
   // least 3 points (2 in the vector and the new point).
@@ -525,7 +564,7 @@ PolygonInfo::PointClass PolygonInfo::ValidatePointAndUpdateCentroid(
       // centroid computation.
       result = PointClass::kCollinear;
     } else if (cross * direction_ < 0) {
-      return PointClass::kNonConvex;
+      result = PointClass::kNonConvex;
     }
   }
 
@@ -552,7 +591,7 @@ PolygonInfo::PointClass PolygonInfo::ValidatePointAndUpdateCentroid(
   if (direction_ == 0) {
     direction_ = std::copysign(1.0f, quad_area);
   } else if (quad_area * direction_ < 0) {
-    return PointClass::kNonConvex;
+    result = PointClass::kNonConvex;
   }
 
   // We are computing the centroid using a weighted average of all of the
@@ -942,10 +981,6 @@ PolygonInfo::UmbraPin* PolygonInfo::ResolveUmbraIntersections() {
 //   vertex following it, plus we insert extra vertices on the outer ring
 //   to turn the corners beteween the projected segments.
 void PolygonInfo::ComputeMesh() {
-  if (!is_valid_) {
-    return;
-  }
-
   // Centroid and umbra polygon...
   size_t vertex_count = umbra_polygon_count_ + 1u;
   size_t triangle_count = umbra_polygon_count_;
