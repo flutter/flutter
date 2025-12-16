@@ -91,10 +91,10 @@ class HostWindow {
   virtual bool GetFullscreen() const;
 
   // Starts dragging the window.
-  virtual void beginMoveDrag(int button);
+  virtual void BeginMoveDrag(int button);
 
   // Starts resizing the window.
-  virtual void beginResizeDrag(int button, int edge);
+  virtual void BeginResizeDrag(int button, int edge);
 
   // Given a window identifier, returns the window content size of the
   // window.

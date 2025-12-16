@@ -709,11 +709,11 @@ bool HostWindow::GetFullscreen() const {
   return is_fullscreen_;
 }
 
-void HostWindow::beginMoveDrag(int button) {
+void HostWindow::BeginMoveDrag(int button) {
   // FIXME: Make window follow cursor until button is released
 }
 
-void HostWindow::beginResizeDrag(int button, int edge) {
+void HostWindow::BeginResizeDrag(int button, int edge) {
   // FIXME: Make window resize with cursor until button is released
 }
 
