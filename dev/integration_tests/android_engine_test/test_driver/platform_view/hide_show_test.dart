@@ -48,7 +48,7 @@ void main() async {
 
     await expectLater(
       nativeDriver.screenshot(),
-      matchesGoldenFile('hide_showt_platform_view.png'),
+      matchesGoldenFile('hide_show_platform_view.png'),
     );
 
   }, timeout: Timeout.none);
