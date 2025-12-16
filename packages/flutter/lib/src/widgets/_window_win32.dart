@@ -891,12 +891,12 @@ class _Win32PlatformInterface {
   @ffi.Native<ffi.Void Function(HWND, ffi.Int)>(
     symbol: 'InternalFlutterWindows_WindowManager_BeginMoveDrag',
   )
-  external static void _beginMoveDrag(HWND windowHandle, int button);
+  external static void beginMoveDrag(HWND windowHandle, int button);
 
   @ffi.Native<ffi.Void Function(HWND, ffi.Int, ffi.Int)>(
     symbol: 'InternalFlutterWindows_WindowManager_BeginResizeDrag',
   )
-  external static void _beginResizeDrag(HWND windowHandle, int button, int edge);
+  external static void beginResizeDrag(HWND windowHandle, int button, int edge);
 
   @ffi.Native<ffi.Int32 Function(HWND)>(symbol: 'GetWindowTextLengthW')
   external static int _getWindowTextLength(HWND windowHandle);
