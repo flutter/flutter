@@ -234,7 +234,7 @@ class CallbackRegularWindowControllerDelegate
 class _DragBox extends StatelessWidget {
   _DragBox({super.key, required this.onStart, required this.child});
 
-  final Function(int button) onStart;
+  final ValueChanged<int> onStart;
   final Widget child;
 
   @override
