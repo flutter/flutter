@@ -761,7 +761,7 @@ class FlutterPlugin : Plugin<Project> {
                     }
 
                     // Flutter now owns its own output directory
-                    into(flutterAssetsDirProvider)
+                    into(flutterAssetsDirProvider.map { it.dir("flutter_assets") })
                 }
 
             val copyFlutterAssetsTask: Task = copyFlutterAssetsTaskProvider.get()
