@@ -46,7 +46,7 @@ class _MainAppState extends State<MainApp> {
                 maintainAnimation: true,
                 child: const _HybridCompositionAndroidPlatformView(
                   key: ValueKey<String>('PlatformView'),
-                  viewType: 'my_test',
+                  viewType: 'changing_color_button_platform_view',
                 ),
               ),
             ),
