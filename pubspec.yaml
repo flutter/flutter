@@ -111,9 +111,9 @@ dependencies:
   glob: 2.1.3
   google_fonts: 6.3.3
   google_identity_services_web: 0.3.3+1
-  google_mobile_ads: 5.1.0
-  googleapis: 14.0.0
   googleapis_auth: 2.0.0
+  googleapis: 14.0.0
+  google_mobile_ads: 6.0.0
   hooks: 1.0.0
   html: 0.15.6
   http: 1.6.0
@@ -196,8 +196,8 @@ dependencies:
   web_socket_channel: 3.0.3
   webdriver: 3.1.0
   webkit_inspection_protocol: 1.2.1
-  webview_flutter: 4.9.0
-  webview_flutter_android: 3.16.9
+  webview_flutter: 4.13.0
+  webview_flutter_android: 4.10.11
   webview_flutter_platform_interface: 2.14.0
   webview_flutter_wkwebview: 3.23.5
   xdg_directories: 1.1.0
@@ -212,4 +212,4 @@ dependencies:
   pedantic: 1.11.1
   quiver: 3.2.2
   yaml_edit: 2.2.3
-# PUBSPEC CHECKSUM: unhors
+# PUBSPEC CHECKSUM: osncbt
