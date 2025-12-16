@@ -389,31 +389,35 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
 
   @override
   ui.UniformVec2Slot getUniformVec2(String name) {
-    final int size = _program._getUniformVectorSize(name);
-    assert(size == 2, 'Uniform `$name` has size $size, not size 2.');
-    final slots = List<ui.UniformFloatSlot>.generate(2, (i) => getUniformFloat(name, i));
+    final List<SkwasmUniformFloatSlot> slots = _getUniformFloatSlots(name, 2);
     return SkwasmUniformVec2Slot._(slots[0], slots[1]);
   }
 
   @override
   ui.UniformVec3Slot getUniformVec3(String name) {
-    final int size = _program._getUniformVectorSize(name);
-    assert(size == 3, 'Uniform `$name` has size $size, not size 3.');
-    final slots = List<ui.UniformFloatSlot>.generate(3, (i) => getUniformFloat(name, i));
+    final List<SkwasmUniformFloatSlot> slots = _getUniformFloatSlots(name, 3);
     return SkwasmUniformVec3Slot._(slots[0], slots[1], slots[2]);
   }
 
   @override
   ui.UniformVec4Slot getUniformVec4(String name) {
-    final int size = _program._getUniformVectorSize(name);
-    assert(size == 4, 'Uniform `$name` has size $size, not size 4.');
-    final slots = List<ui.UniformFloatSlot>.generate(4, (i) => getUniformFloat(name, i));
+    final List<SkwasmUniformFloatSlot> slots = _getUniformFloatSlots(name, 4);
     return SkwasmUniformVec4Slot._(slots[0], slots[1], slots[2], slots[3]);
   }
 
   @override
   ui.ImageSamplerSlot getImageSampler(String name) {
     throw UnsupportedError('getImageSampler is not supported on the web.');
+  }
+
+  List<SkwasmUniformFloatSlot> _getUniformFloatSlots(String name, int size) {
+    final int dataSize = _program._getUniformVectorSize(name);
+    assert(dataSize == size, 'Uniform `$name` has size $dataSize, not size $size.');
+    final int baseShaderIndex = _program._getShaderIndex(name, 0);
+    return List<SkwasmUniformFloatSlot>.generate(
+      size,
+      (i) => SkwasmUniformFloatSlot._(this, i, name, baseShaderIndex),
+    );
   }
 }
 
@@ -446,7 +450,7 @@ class SkwasmUniformVec2Slot implements ui.UniformVec2Slot {
     _ySlot.set(y);
   }
 
-  final ui.UniformFloatSlot _xSlot, _ySlot;
+  final SkwasmUniformFloatSlot _xSlot, _ySlot;
 }
 
 class SkwasmUniformVec3Slot implements ui.UniformVec3Slot {
@@ -459,7 +463,7 @@ class SkwasmUniformVec3Slot implements ui.UniformVec3Slot {
     _zSlot.set(z);
   }
 
-  final ui.UniformFloatSlot _xSlot, _ySlot, _zSlot;
+  final SkwasmUniformFloatSlot _xSlot, _ySlot, _zSlot;
 }
 
 class SkwasmUniformVec4Slot implements ui.UniformVec4Slot {
@@ -473,5 +477,5 @@ class SkwasmUniformVec4Slot implements ui.UniformVec4Slot {
     _wSlot.set(w);
   }
 
-  final ui.UniformFloatSlot _xSlot, _ySlot, _zSlot, _wSlot;
+  final SkwasmUniformFloatSlot _xSlot, _ySlot, _zSlot, _wSlot;
 }

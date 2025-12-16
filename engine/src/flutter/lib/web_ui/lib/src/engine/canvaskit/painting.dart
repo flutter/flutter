@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
@@ -437,31 +436,35 @@ class CkFragmentShader implements ui.FragmentShader, CkShader {
 
   @override
   ui.UniformVec2Slot getUniformVec2(String name) {
-    final int size = _program._getUniformVectorSize(name);
-    assert(size == 2, 'Uniform `$name` has size $size, not size 2.');
-    final slots = List<ui.UniformFloatSlot>.generate(2, (i) => getUniformFloat(name, i));
+    final List<CkUniformFloatSlot> slots = _getUniformFloatSlots(name, 4);
     return CkUniformVec2Slot._(slots[0], slots[1]);
   }
 
   @override
   ui.UniformVec3Slot getUniformVec3(String name) {
-    final int size = _program._getUniformVectorSize(name);
-    assert(size == 3, 'Uniform `$name` has size $size, not size 3.');
-    final slots = List<ui.UniformFloatSlot>.generate(3, (i) => getUniformFloat(name, i));
+    final List<CkUniformFloatSlot> slots = _getUniformFloatSlots(name, 4);
     return CkUniformVec3Slot._(slots[0], slots[1], slots[2]);
   }
 
   @override
   ui.UniformVec4Slot getUniformVec4(String name) {
-    final int size = _program._getUniformVectorSize(name);
-    assert(size == 4, 'Uniform `$name` has size $size, not size 4.');
-    final slots = List<ui.UniformFloatSlot>.generate(4, (i) => getUniformFloat(name, i));
+    final List<CkUniformFloatSlot> slots = _getUniformFloatSlots(name, 4);
     return CkUniformVec4Slot._(slots[0], slots[1], slots[2], slots[3]);
   }
 
   @override
   ui.ImageSamplerSlot getImageSampler(String name) {
     throw UnsupportedError('getImageSampler is not supported on the web.');
+  }
+
+  List<CkUniformFloatSlot> _getUniformFloatSlots(String name, int size) {
+    final int dataSize = _program._getUniformVectorSize(name);
+    assert(dataSize == size, 'Uniform `$name` has size $dataSize, not size $size.');
+    final int baseShaderIndex = _program._getShaderIndex(name, 0);
+    return List<CkUniformFloatSlot>.generate(
+      size,
+      (i) => CkUniformFloatSlot._(this, i, name, baseShaderIndex),
+    );
   }
 }
 
@@ -494,7 +497,7 @@ class CkUniformVec2Slot implements ui.UniformVec2Slot {
     _ySlot.set(y);
   }
 
-  final ui.UniformFloatSlot _xSlot, _ySlot;
+  final CkUniformFloatSlot _xSlot, _ySlot;
 }
 
 class CkUniformVec3Slot implements ui.UniformVec3Slot {
@@ -507,7 +510,7 @@ class CkUniformVec3Slot implements ui.UniformVec3Slot {
     _zSlot.set(z);
   }
 
-  final ui.UniformFloatSlot _xSlot, _ySlot, _zSlot;
+  final CkUniformFloatSlot _xSlot, _ySlot, _zSlot;
 }
 
 class CkUniformVec4Slot implements ui.UniformVec4Slot {
@@ -521,5 +524,5 @@ class CkUniformVec4Slot implements ui.UniformVec4Slot {
     _wSlot.set(w);
   }
 
-  final ui.UniformFloatSlot _xSlot, _ySlot, _zSlot, _wSlot;
+  final CkUniformFloatSlot _xSlot, _ySlot, _zSlot, _wSlot;
 }

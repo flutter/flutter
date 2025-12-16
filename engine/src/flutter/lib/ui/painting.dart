@@ -5546,6 +5546,19 @@ base class FragmentShader extends Shader {
     _floats = _constructor(_program, _program._uniformFloatCount, _program._samplerCount);
   }
 
+  List<UniformFloatSlot> _getSlotsForUniform(String name, int size) {
+    final int dataSize = _program._getUniformVectorSize(name);
+    assert(dataSize == size, 'Uniform `$name` has size $dataSize, not size $size.');
+    final int baseShaderIndex = _program._getUniformFloatIndex(name, 0);
+    final slots = List<UniformFloatSlot>.generate(
+      size,
+      (i) => UniformFloatSlot._(this, name, baseShaderIndex, i),
+    );
+    _slots.removeWhere((WeakReference<UniformFloatSlot> ref) => ref.target == null);
+    _slots.addAll(slots.map((slot) => WeakReference<UniformFloatSlot>(slot)));
+    return slots;
+  }
+
   /// Sets the float uniform at [index] to [value].
   ///
   /// All uniforms defined in a fragment shader that are not samplers must be
@@ -5642,11 +5655,8 @@ base class FragmentShader extends Shader {
   /// }
   /// ```
   UniformVec2Slot getUniformVec2(String name) {
-    final int size = _program._getUniformVectorSize(name);
-    assert(size == 2, 'Uniform `$name` has size $size, not size 2.');
-    final slots = List<UniformFloatSlot>.generate(2, (i) => getUniformFloat(name, i));
-    final result = UniformVec2Slot._(slots[0], slots[1]);
-    return result;
+    final List<UniformFloatSlot> slots = _getSlotsForUniform(name, 2);
+    return UniformVec2Slot._(slots[0], slots[1]);
   }
 
   /// Access the float binding for a vec3 uniform named [name].
@@ -5665,11 +5675,8 @@ base class FragmentShader extends Shader {
   /// }
   /// ```
   UniformVec3Slot getUniformVec3(String name) {
-    final int size = _program._getUniformVectorSize(name);
-    assert(size == 3, 'Uniform `$name` has size $size, not size 3.');
-    final slots = List<UniformFloatSlot>.generate(3, (i) => getUniformFloat(name, i));
-    final result = UniformVec3Slot._(slots[0], slots[1], slots[2]);
-    return result;
+    final List<UniformFloatSlot> slots = _getSlotsForUniform(name, 3);
+    return UniformVec3Slot._(slots[0], slots[1], slots[2]);
   }
 
   /// Access the float binding for a vec4 uniform named [name].
@@ -5688,11 +5695,8 @@ base class FragmentShader extends Shader {
   /// }
   /// ```
   UniformVec4Slot getUniformVec4(String name) {
-    final int size = _program._getUniformVectorSize(name);
-    assert(size == 4, 'Uniform `$name` has size $size, not size 4.');
-    final slots = List<UniformFloatSlot>.generate(4, (i) => getUniformFloat(name, i));
-    final result = UniformVec4Slot._(slots[0], slots[1], slots[2], slots[3]);
-    return result;
+    final List<UniformFloatSlot> slots = _getSlotsForUniform(name, 4);
+    return UniformVec4Slot._(slots[0], slots[1], slots[2], slots[3]);
   }
 
   /// Access the [ImageSamplerSlot] binding associated with the sampler named

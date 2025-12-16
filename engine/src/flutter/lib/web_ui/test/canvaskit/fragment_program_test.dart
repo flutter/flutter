@@ -356,29 +356,27 @@ void testMain() {
     expect(program.name, 'test');
   });
 
-  test('Uniform by-name accessors work throw erros with incorrect datatypes.', () {
-    final Uint8List data = utf8.encode(kJsonIPLR);
+  test('Uniform by-name accessors work throw errors with incorrect datatypes.', () {
+    final Uint8List data = utf8.encode(kJsonArrayIPLR);
     final program = CkFragmentProgram.fromBytes('test', data);
-    {
-      final shader = program.fragmentShader() as CkFragmentShader;
-      try {
-        shader.getUniformVec3('uSize');
-        fail('Unreachable');
-      } catch (e) {
-        expect(e.toString(), contains('`uSize` has size 2, not size 3.'));
-      }
-      try {
-        shader.getUniformVec2('uLoneMatrix');
-        fail('Unreachable');
-      } catch (e) {
-        expect(e.toString(), contains('`uLoneMatrix` has size 2, not size 3.'));
-      }
-      try {
-        shader.getUniformVec4('uLoneMatrix');
-        fail('Unreachable');
-      } catch (e) {
-        expect(e.toString(), contains('`uLoneMatrix` has size 2, not size 3.'));
-      }
+    final shader = program.fragmentShader() as CkFragmentShader;
+    try {
+      shader.getUniformVec3('uSize');
+      fail('Unreachable');
+    } catch (e) {
+      expect(e.toString(), contains('`uSize` has size 2, not size 3.'));
+    }
+    try {
+      shader.getUniformVec2('uLoneMatrix');
+      fail('Unreachable');
+    } catch (e) {
+      expect(e.toString(), contains('`uLoneMatrix` has size 16, not size 3.'));
+    }
+    try {
+      shader.getUniformVec4('uLoneMatrix');
+      fail('Unreachable');
+    } catch (e) {
+      expect(e.toString(), contains('`uLoneMatrix` has size 16, not size 3.'));
     }
   });
 }
