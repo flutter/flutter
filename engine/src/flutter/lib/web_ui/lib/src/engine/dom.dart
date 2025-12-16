@@ -446,6 +446,8 @@ extension type DomElement._(JSObject _) implements DomNode {
   // ignore: annotate_redeclares
   external void remove();
 
+  external void replaceWith(DomNode node);
+
   @JS('setAttribute')
   external void _setAttribute(String name, JSAny value);
   void setAttribute(String name, Object value) => _setAttribute(name, value.toJSAnyDeep);
