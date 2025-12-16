@@ -125,6 +125,7 @@ class Variants : public GenericVariants {
       VALIDATION_LOG << "Failed to create default pipeline.";
       return;
     }
+    context.GetPipelineLibrary()->LogPipelineCreation(*desc);
     options.ApplyToPipelineDescriptor(*desc);
     desc_ = desc;
     if (context.GetFlags().lazy_shader_mode) {
@@ -472,6 +473,12 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
         front_stencil.stencil_failure = StencilOperation::kDecrementWrap;
         desc.SetStencilAttachmentDescriptors(front_stencil);
         break;
+      case StencilMode::kStencilIncrementAll:
+        // The stencil ref should be 0 on commands that use this mode.
+        front_stencil.stencil_compare = CompareFunction::kEqual;
+        front_stencil.depth_stencil_pass = StencilOperation::kIncrementWrap;
+        desc.SetStencilAttachmentDescriptors(front_stencil);
+        break;
       case StencilMode::kCoverCompare:
         // The stencil ref should be 0 on commands that use this mode.
         front_stencil.stencil_compare = CompareFunction::kNotEqual;
@@ -483,17 +490,6 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
         // The stencil ref should be 0 on commands that use this mode.
         front_stencil.stencil_compare = CompareFunction::kEqual;
         front_stencil.stencil_failure = StencilOperation::kSetToReferenceValue;
-        desc.SetStencilAttachmentDescriptors(front_stencil);
-        break;
-      case StencilMode::kOverdrawPreventionIncrement:
-        front_stencil.stencil_compare = CompareFunction::kEqual;
-        front_stencil.depth_stencil_pass = StencilOperation::kIncrementClamp;
-        desc.SetStencilAttachmentDescriptors(front_stencil);
-        break;
-      case StencilMode::kOverdrawPreventionRestore:
-        front_stencil.stencil_compare = CompareFunction::kLess;
-        front_stencil.depth_stencil_pass =
-            StencilOperation::kSetToReferenceValue;
         desc.SetStencilAttachmentDescriptors(front_stencil);
         break;
     }

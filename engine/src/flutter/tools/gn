@@ -633,6 +633,7 @@ def to_gn_args(args):
   if args.target_sysroot:
     gn_args['target_sysroot'] = args.target_sysroot
     gn_args['custom_sysroot'] = args.target_sysroot
+  gn_args['use_default_linux_sysroot'] = args.default_linux_sysroot
 
   if args.target_toolchain:
     gn_args['custom_toolchain'] = args.target_toolchain
@@ -1091,6 +1092,22 @@ def parse_args(args):
   )
 
   parser.add_argument('--target-sysroot', type=str)
+
+  # Python 3.9 has `action=argparse.BooleanOptionalAction`
+  # to do this more concisely.
+  parser.add_argument(
+      '--no-default-linux-sysroot',
+      action='store_false',
+      dest='default_linux_sysroot',
+  )
+  parser.add_argument(
+      '--default-linux-sysroot',
+      action='store_true',
+      help='Use the flutter provided default sysroot if building for linux'
+      ' and no other sysroot is specified (default is true)'
+  )
+  parser.set_defaults(default_linux_sysroot=True)
+
   parser.add_argument('--target-toolchain', type=str)
   parser.add_argument('--target-triple', type=str)
   parser.add_argument(
