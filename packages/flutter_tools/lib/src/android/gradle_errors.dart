@@ -677,8 +677,8 @@ final applyingKotlinAndroidPluginErrorHandler = GradleHandledError(
         final File appGradleFile = project.android.appGradleFile;
         globals.printBox(
           '''
-${globals.logger.terminal.warningMark} Starting AGP 9+, the default has become built-in kotlin. This results in a build failure when applying the kotlin-android plugin at ${appGradleFile.path}.
-\nTo resolve this, migrate to built-in kotlin. For guidance on the migration, follow these docs here: https://docs.flutter.dev/release/breaking-changes/update-to-AGP-9''',
+${globals.logger.terminal.warningMark} Starting AGP 9+, the default has become built-in Kotlin. This results in a build failure when applying the kotlin-android plugin at ${appGradleFile.path}.
+\nTo resolve this, migrate to built-in Kotlin. For instructions on how to migrate, see: https://docs.flutter.dev/release/breaking-changes/update-to-AGP-9''',
           title: _boxTitle,
         );
 
@@ -689,7 +689,7 @@ ${globals.logger.terminal.warningMark} Starting AGP 9+, the default has become b
 
 /// Handler when using the new AGP DSL interfaces. Starting AGP 9+, only the new
 /// DSL interfaces are used. This results in a failure because we still depend
-///on old DSL types.
+/// on old DSL types.
 @visibleForTesting
 final useNewAgpDslErrorHandler = GradleHandledError(
   test: (String line) {
@@ -700,8 +700,8 @@ final useNewAgpDslErrorHandler = GradleHandledError(
         final File appGradleFile = project.android.appGradleFile;
         globals.printBox(
           '''
-${globals.logger.terminal.warningMark} Starting AGP 9+, only the new DSL interface will be read. This results in a build failure when applying the flutter gradle plugin at ${appGradleFile.path}.
-\nTo resolve this, opt-out of the new DSL. For guidance on opting out, follow these docs here: https://docs.flutter.dev/release/breaking-changes/update-to-AGP-9''',
+${globals.logger.terminal.warningMark} Starting AGP 9+, only the new DSL interface will be read. This results in a build failure when applying the Flutter Gradle plugin at ${appGradleFile.path}.
+\nTo resolve this update flutter or opt out of `android.newDsl`. For instructions on how to opt out, see: https://docs.flutter.dev/release/breaking-changes/update-to-AGP-9''',
           title: _boxTitle,
         );
 

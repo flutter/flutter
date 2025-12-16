@@ -1652,7 +1652,7 @@ An exception occurred applying plugin request [id: 'kotlin-android']
 
       expect(
         testLogger.statusText,
-        contains('Starting AGP 9+, the default has become built-in kotlin.'),
+        contains('Starting AGP 9+, the default has become built-in Kotlin.'),
       );
       expect(testLogger.statusText, contains('This results in a build failure'));
       expect(testLogger.statusText, contains('when applying the kotlin-android plugin'));
@@ -1692,7 +1692,7 @@ An exception occurred applying plugin request [id: 'dev.flutter.flutter-gradle-p
         contains('Starting AGP 9+, only the new DSL interface will be read.'),
       );
       expect(testLogger.statusText, contains('This results in a build failure'));
-      expect(testLogger.statusText, contains('when applying the flutter gradle plugin'));
+      expect(testLogger.statusText, contains('when applying the Flutter Gradle plugin'));
     },
     overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
