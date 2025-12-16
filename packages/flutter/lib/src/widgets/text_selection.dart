@@ -540,22 +540,41 @@ class TextSelectionOverlay {
   }
 
   void _updateSelectionOverlay() {
+    final List<TextSelectionPoint> endpoints = renderObject.getEndpointsForSelection(_selection);
+    TextSelectionHandleType startHandleType = TextSelectionHandleType.collapsed;
+    TextSelectionHandleType endHandleType = TextSelectionHandleType.collapsed;
+
+    if (!_selection.isCollapsed) {
+      if (endpoints.length == 2) {
+        if (endpoints[0].point.dx <= endpoints[1].point.dx) {
+          startHandleType = TextSelectionHandleType.left;
+          endHandleType = TextSelectionHandleType.right;
+        } else {
+          startHandleType = TextSelectionHandleType.right;
+          endHandleType = TextSelectionHandleType.left;
+        }
+      } else {
+        startHandleType = _chooseType(
+          renderObject.textDirection,
+          TextSelectionHandleType.left,
+          TextSelectionHandleType.right,
+        );
+        endHandleType = _chooseType(
+          renderObject.textDirection,
+          TextSelectionHandleType.right,
+          TextSelectionHandleType.left,
+        );
+      }
+    }
+
     _selectionOverlay
       // Update selection handle metrics.
-      ..startHandleType = _chooseType(
-        renderObject.textDirection,
-        TextSelectionHandleType.left,
-        TextSelectionHandleType.right,
-      )
+      ..startHandleType = startHandleType
       ..lineHeightAtStart = _getStartGlyphHeight()
-      ..endHandleType = _chooseType(
-        renderObject.textDirection,
-        TextSelectionHandleType.right,
-        TextSelectionHandleType.left,
-      )
+      ..endHandleType = endHandleType
       ..lineHeightAtEnd = _getEndGlyphHeight()
       // Update selection toolbar metrics.
-      ..selectionEndpoints = renderObject.getEndpointsForSelection(_selection)
+      ..selectionEndpoints = endpoints
       ..toolbarLocation = renderObject.lastSecondaryTapDownPosition;
   }
 
