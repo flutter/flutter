@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -17,14 +16,14 @@ void main() async {
   final ImageComparer comparer = await ImageComparer.create();
 
   test('decodeImageFromPixels with RGBA Float32', () async {
-    const int dimension = 1024;
+    const dimension = 1024;
     final Image image = await _createRGBA32FloatImage(dimension, dimension);
     final Image shaderImage = await _drawIntoImage(image);
 
     final ByteData data = (await shaderImage.toByteData())!;
 
     // Check top left is Red
-    int offset = 0;
+    var offset = 0;
     expect(data.getUint8(offset), 255, reason: 'Top left Red');
     expect(data.getUint8(offset + 1), 0, reason: 'Top left Green');
     expect(data.getUint8(offset + 2), 0, reason: 'Top left Blue');
@@ -46,14 +45,14 @@ void main() async {
       print('Skipped for Skia');
       return;
     }
-    const int dimension = 1024;
+    const dimension = 1024;
     final Image image = await _createR32FloatImage(dimension, dimension);
     final Image shaderImage = await _drawIntoImage(image);
 
     final ByteData data = (await shaderImage.toByteData())!;
 
     // Check top left is Red
-    int offset = 0;
+    var offset = 0;
     expect(data.getUint8(offset), 255, reason: 'Top left Red');
     expect(data.getUint8(offset + 1), 0, reason: 'Top left Green');
     expect(data.getUint8(offset + 2), 0, reason: 'Top left Blue');
@@ -70,7 +69,7 @@ void main() async {
   });
 
   test('Picture.toImageSync with rgbaFloat32', () async {
-    const int dimension = 1024;
+    const dimension = 1024;
     final Image image = await _drawWithCircleShader(
       dimension,
       dimension,
@@ -81,7 +80,7 @@ void main() async {
     final ByteData data = (await shaderImage.toByteData())!;
 
     // Check top left is Black (outside circle, d > 0 -> vec3(0.0))
-    int offset = 0;
+    var offset = 0;
     expect(data.getUint8(offset), 0, reason: 'Top left Red');
     expect(data.getUint8(offset + 1), 0, reason: 'Top left Green');
     expect(data.getUint8(offset + 2), 0, reason: 'Top left Blue');
@@ -103,7 +102,7 @@ void main() async {
       print('Skipped for Skia');
       return;
     }
-    const int dimension = 1024;
+    const dimension = 1024;
     final Image image = await _drawWithCircleShader(
       dimension,
       dimension,
@@ -114,7 +113,7 @@ void main() async {
     final ByteData data = (await shaderImage.toByteData())!;
 
     // Check top left is Black
-    int offset = 0;
+    var offset = 0;
     expect(data.getUint8(offset), 0, reason: 'Top left Red');
     expect(data.getUint8(offset + 1), 0, reason: 'Top left Green');
     expect(data.getUint8(offset + 2), 0, reason: 'Top left Blue');
