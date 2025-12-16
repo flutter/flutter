@@ -30,11 +30,12 @@ void DartIO::InitForIsolate(bool may_insecurely_connect_to_all_domains,
       Dart_Invoke(ui_lib, ToDart("_getLocaleClosure"), 0, nullptr);
   FML_CHECK(!CheckAndHandleError(locale_closure));
 
-  dart::bin::SetupDartIoLibrary({
+  Dart_Handle setup_result = dart::bin::SetupDartIoLibrary({
       .http_connection_hook = http_connection_hook_closure,
       .locale_name_callback = locale_closure,
       .script_uri = !script_uri.empty() ? script_uri.c_str() : nullptr,
   });
+  FML_CHECK(!CheckAndHandleError(setup_result));
 }
 
 }  // namespace flutter
