@@ -156,8 +156,9 @@
   [window setReleasedWhenClosed:NO];
 
   window.contentViewController = c;
-  window.styleMask = request->decorated ?
-      NSWindowStyleMaskResizable | NSWindowStyleMaskTitled | NSWindowStyleMaskClosable : NSWindowStyleMaskBorderless;
+  window.styleMask = request->decorated ? NSWindowStyleMaskResizable | NSWindowStyleMaskTitled |
+                                              NSWindowStyleMaskClosable
+                                        : NSWindowStyleMaskBorderless;
   window.collectionBehavior = NSWindowCollectionBehaviorFullScreenAuxiliary;
   if (request->has_size) {
     [window flutterSetContentSize:request->size];
@@ -209,8 +210,10 @@
   [window setReleasedWhenClosed:NO];
 
   window.contentViewController = c;
-  window.styleMask = request->decorated ? NSWindowStyleMaskResizable | NSWindowStyleMaskTitled |
-                     NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable : NSWindowStyleMaskBorderless;
+  window.styleMask = request->decorated
+                         ? NSWindowStyleMaskResizable | NSWindowStyleMaskTitled |
+                               NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable
+                         : NSWindowStyleMaskBorderless;
   if (request->has_size) {
     [window flutterSetContentSize:request->size];
   }
