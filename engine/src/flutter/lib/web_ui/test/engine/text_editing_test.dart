@@ -988,7 +988,7 @@ Future<void> testMain() async {
       // Form elements
       {
         final DomHTMLFormElement formElement =
-            textEditing!.configuration!.autofillGroup!.formElement;
+            textEditing!.configuration!.autofillGroup!.formElement!;
         expect(formElement.style.alignContent, isEmpty);
 
         // Should contain one <input type="text"> and one <input type="submit">
@@ -1201,14 +1201,14 @@ Future<void> testMain() async {
       expect(spy.messages, isEmpty);
       // Form stays on the DOM until autofill context is finalized.
       expect(defaultTextEditingRoot.querySelectorAll('form'), isNotEmpty);
-      expect(formsOnTheDom, hasLength(1));
+      expect(dormantForms, hasLength(1));
 
       const finishAutofillContext = MethodCall('TextInput.finishAutofillContext', false);
       sendFrameworkMessage(codec.encodeMethodCall(finishAutofillContext));
 
       // Form element is removed from DOM.
       expect(defaultTextEditingRoot.querySelectorAll('form'), isEmpty);
-      expect(formsOnTheDom, hasLength(0));
+      expect(dormantForms, hasLength(0));
     });
 
     test('finishAutofillContext with save submits forms', () async {
@@ -1320,7 +1320,7 @@ Future<void> testMain() async {
       await expectLater(await submittedForm.future, isTrue);
       // Form element is removed from DOM.
       expect(defaultTextEditingRoot.querySelectorAll('form'), hasLength(0));
-      expect(formsOnTheDom, hasLength(0));
+      expect(dormantForms, hasLength(0));
     });
 
     test('Moves the focus across input elements', () async {
@@ -1521,7 +1521,7 @@ Future<void> testMain() async {
       expect(spy.messages, isEmpty);
       // Form stays on the DOM until autofill context is finalized.
       expect(defaultTextEditingRoot.querySelectorAll('form'), isNotEmpty);
-      expect(formsOnTheDom, hasLength(1));
+      expect(dormantForms, hasLength(1));
     });
 
     test('singleTextField Autofill setEditableSizeAndTransform preserves'
@@ -1594,7 +1594,7 @@ Future<void> testMain() async {
       expect(spy.messages, isEmpty);
       // Form stays on the DOM until autofill context is finalized.
       expect(defaultTextEditingRoot.querySelectorAll('form'), isNotEmpty);
-      expect(formsOnTheDom, hasLength(1));
+      expect(dormantForms, hasLength(1));
     });
 
     test('multiTextField Autofill: setClient, setEditingState, show, '
@@ -1648,7 +1648,7 @@ Future<void> testMain() async {
       expect(spy.messages, isEmpty);
       // Form stays on the DOM until autofill context is finalized.
       expect(defaultTextEditingRoot.querySelectorAll('form'), isNotEmpty);
-      expect(formsOnTheDom, hasLength(1));
+      expect(dormantForms, hasLength(1));
     });
 
     test('No capitalization: setClient, setEditingState, show', () {
@@ -2792,7 +2792,7 @@ Future<void> testMain() async {
       sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
 
       final DomElement input = textEditing!.strategy.domElement!;
-      final DomElement form = textEditing!.configuration!.autofillGroup!.formElement;
+      final DomElement form = textEditing!.configuration!.autofillGroup!.formElement!;
 
       // Input and form are appended to the right view.
       expect(view.dom.textEditingHost.contains(input), isTrue);
@@ -2832,7 +2832,7 @@ Future<void> testMain() async {
       sendFrameworkMessage(codec.encodeMethodCall(show));
 
       final DomElement input = textEditing!.strategy.domElement!;
-      final DomElement form = textEditing!.configuration!.autofillGroup!.formElement;
+      final DomElement form = textEditing!.configuration!.autofillGroup!.formElement!;
 
       // Input and form are appended to view1.
       expect(view1.dom.textEditingHost.contains(input), isTrue);
@@ -2955,13 +2955,14 @@ Future<void> testMain() async {
 
       // Number of elements if number of fields sent to the constructor minus
       // one (for the focused text element).
-      expect(autofillForm.elements, hasLength(2));
-      expect(autofillForm.items, hasLength(2));
+      expect(autofillForm.elements, hasLength(3));
+      expect(autofillForm.items, hasLength(3));
       expect(autofillForm.formElement, isNotNull);
 
       expect(autofillForm.formIdentifier, 'field1*field2*field3');
 
-      final DomHTMLFormElement form = autofillForm.formElement;
+      // TODO(mdebbar): Things are different now. DOM elements aren't created immediately like they used to.
+      final DomHTMLFormElement form = autofillForm.formElement!;
       // Note that we also add a submit button. Therefore the form element has
       // 3 child nodes.
       expect(form.childNodes, hasLength(3));
@@ -3020,27 +3021,30 @@ Future<void> testMain() async {
         <String>['username', 'password', 'newPassword'],
         <String>['field1', 'fields2', 'field3'],
       );
+      final Map<String, dynamic> focusedAutofillMap = createAutofillInfo('username', 'field1');
       final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
         kImplicitViewId,
-        createAutofillInfo('username', 'field1'),
+        focusedAutofillMap,
         fields,
       )!;
 
       final DomHTMLInputElement testInputElement = createDomHTMLInputElement();
-      autofillForm.placeForm(testInputElement);
+      final focusedAutofill = AutofillInfo.fromFrameworkMessage(focusedAutofillMap);
+      autofillForm.wakeUp(testInputElement, focusedAutofill);
 
       // The focused element is appended to the form, form also has the button
       // so in total it shoould have 4 elements.
-      final DomHTMLFormElement form = autofillForm.formElement;
+      final DomHTMLFormElement form = autofillForm.formElement!;
       expect(form.childNodes, hasLength(4));
 
       final formOnDom = defaultTextEditingRoot.querySelector('form')! as DomHTMLFormElement;
       // Form is attached to the DOM.
       expect(form, equals(formOnDom));
 
-      autofillForm.storeForm();
+      autofillForm.goDormant();
       expect(defaultTextEditingRoot.querySelectorAll('form'), isNotEmpty);
-      expect(formsOnTheDom, hasLength(1));
+      expect(dormantForms, hasLength(1));
+      expect(dormantForms, {autofillForm.formIdentifier: autofillForm});
     });
 
     test('Validate single element form', () {
@@ -3051,16 +3055,20 @@ Future<void> testMain() async {
         fields,
       )!;
 
-      // The focused element is the only field. Form should be empty after
-      // the initialization (focus element is appended later).
-      expect(autofillForm.elements, isEmpty);
-      expect(autofillForm.items, isEmpty);
+      // The focused element is the only field. Form should have a single element after
+      // the initialization.
+      expect(autofillForm.elements, hasLength(1));
+      expect(autofillForm.elements, contains('field1'));
+      expect(autofillForm.items, hasLength(1));
+      expect(autofillForm.items, contains('field1'));
+      expect(autofillForm.items['field1']!.autofillInfo.autofillHint, 'username');
       expect(autofillForm.formElement, isNotNull);
 
-      final DomHTMLFormElement form = autofillForm.formElement;
+      // TODO(mdebbar): Things are different now. DOM elements aren't created immediately like they used to.
+      final DomHTMLFormElement form = autofillForm.formElement!;
       // Submit button is added to the form.
       expect(form.childNodes, isNotEmpty);
-      final inputElement = form.childNodes.toList()[0] as DomHTMLInputElement;
+      final inputElement = form.childNodes.toList().last as DomHTMLInputElement;
       expect(inputElement.type, 'submit');
       expect(inputElement.tabIndex, -1, reason: 'The input should not be reachable by keyboard');
 
@@ -3080,37 +3088,45 @@ Future<void> testMain() async {
     });
 
     test('placeForm() should place element in correct position', () {
+      final Map<String, dynamic> focusedAutofillMap = createAutofillInfo('email', 'field1');
       final List<dynamic> fields = createFieldValues(
         <String>['email', 'username', 'password'],
         <String>['field1', 'field2', 'field3'],
       );
       final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
         kImplicitViewId,
-        createAutofillInfo('email', 'field1'),
+        focusedAutofillMap,
         fields,
       )!;
 
       expect(autofillForm.elements, hasLength(2));
 
+      // TODO(mdebbar): Things are different now. DOM elements aren't created immediately like they used to.
       var formChildNodes =
-          autofillForm.formElement.childNodes.toList() as List<DomHTMLInputElement>;
+          autofillForm.formElement!.childNodes.toList() as List<DomHTMLInputElement>;
 
       // Only username, password, submit nodes are created
       expect(formChildNodes, hasLength(3));
       expect(formChildNodes[0].name, 'username');
       expect(formChildNodes[1].name, 'current-password');
       expect(formChildNodes[2].type, 'submit');
-      // insertion point for email should be before username
-      expect(autofillForm.insertionReferenceNode, formChildNodes[0]);
 
       final DomHTMLInputElement testInputElement = createDomHTMLInputElement();
       testInputElement.name = 'email';
-      autofillForm.placeForm(testInputElement);
+      final focusedAutofill = AutofillInfo.fromFrameworkMessage(focusedAutofillMap);
+      autofillForm.wakeUp(testInputElement, focusedAutofill);
 
-      formChildNodes = autofillForm.formElement.childNodes.toList() as List<DomHTMLInputElement>;
+      expect(autofillForm.elements['field1'], testInputElement);
+      expect(autofillForm.items['field1'], focusedAutofill);
+
+      formChildNodes = autofillForm.formElement!.childNodes.toList() as List<DomHTMLInputElement>;
+
       // email node should be placed before username
       expect(formChildNodes, hasLength(4));
+
       expect(formChildNodes[0].name, 'email');
+      expect(formChildNodes[0], testInputElement);
+
       expect(formChildNodes[1].name, 'username');
       expect(formChildNodes[2].name, 'current-password');
       expect(formChildNodes[3].type, 'submit');
@@ -3128,8 +3144,9 @@ Future<void> testMain() async {
           createAutofillInfo('email', 'field1'),
           fields,
         )!;
+        // TODO(mdebbar): Things are different now. DOM elements aren't created immediately like they used to.
         final formChildNodes =
-            autofillForm.formElement.childNodes.toList() as List<DomHTMLInputElement>;
+            autofillForm.formElement!.childNodes.toList() as List<DomHTMLInputElement>;
         final DomHTMLInputElement username = formChildNodes[0];
         final DomHTMLInputElement password = formChildNodes[1];
 
@@ -3141,7 +3158,7 @@ Future<void> testMain() async {
         expect(password.style.width, '0px');
         expect(password.style.height, '0px');
         expect(password.style.pointerEvents, isNot('none'));
-        expect(autofillForm.formElement.style.pointerEvents, isNot('none'));
+        expect(autofillForm.formElement!.style.pointerEvents, isNot('none'));
       },
       skip: isSafari,
     );
@@ -3156,8 +3173,9 @@ Future<void> testMain() async {
         createAutofillInfo('email', 'field1'),
         fields,
       )!;
+      // TODO(mdebbar): Things are different now. DOM elements aren't created immediately like they used to.
       final formChildNodes =
-          autofillForm.formElement.childNodes.toList() as List<DomHTMLInputElement>;
+          autofillForm.formElement!.childNodes.toList() as List<DomHTMLInputElement>;
       final DomHTMLInputElement username = formChildNodes[0];
       final DomHTMLInputElement password = formChildNodes[1];
       expect(username.name, 'username');
@@ -3168,28 +3186,30 @@ Future<void> testMain() async {
       expect(password.style.width, isNot('0px'));
       expect(password.style.height, isNot('0px'));
       expect(password.style.pointerEvents, 'none');
-      expect(autofillForm.formElement.style.pointerEvents, 'none');
+      expect(autofillForm.formElement!.style.pointerEvents, 'none');
     }, skip: !isSafari);
 
     test(
       'the focused element within a form should explicitly set pointer events on Safari',
       () {
+        final Map<String, dynamic> focusedAutofillMap = createAutofillInfo('email', 'field1');
         final List<dynamic> fields = createFieldValues(
           <String>['email', 'username', 'password'],
           <String>['field1', 'field2', 'field3'],
         );
         final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
           kImplicitViewId,
-          createAutofillInfo('email', 'field1'),
+          focusedAutofillMap,
           fields,
         )!;
 
         final DomHTMLInputElement testInputElement = createDomHTMLInputElement();
         testInputElement.name = 'email';
-        autofillForm.placeForm(testInputElement);
+        final focusedAutofill = AutofillInfo.fromFrameworkMessage(focusedAutofillMap);
+        autofillForm.wakeUp(testInputElement, focusedAutofill);
 
         final formChildNodes =
-            autofillForm.formElement.childNodes.toList() as List<DomHTMLInputElement>;
+            autofillForm.formElement!.childNodes.toList() as List<DomHTMLInputElement>;
         final DomHTMLInputElement email = formChildNodes[0];
         final DomHTMLInputElement username = formChildNodes[1];
         final DomHTMLInputElement password = formChildNodes[2];
@@ -3199,7 +3219,7 @@ Future<void> testMain() async {
         expect(password.name, 'current-password');
 
         // pointer events are none on the form and all non-focused elements
-        expect(autofillForm.formElement.style.pointerEvents, 'none');
+        expect(autofillForm.formElement!.style.pointerEvents, 'none');
         expect(username.style.pointerEvents, 'none');
         expect(password.style.pointerEvents, 'none');
 
@@ -3972,7 +3992,7 @@ void clearForms() {
   while (defaultTextEditingRoot.querySelectorAll('form').isNotEmpty) {
     defaultTextEditingRoot.querySelectorAll('form').last.remove();
   }
-  formsOnTheDom.clear();
+  dormantForms.clear();
 }
 
 /// Waits until the text strategy closes and moves the focus accordingly.
