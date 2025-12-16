@@ -467,11 +467,15 @@ class DialogWindowControllerMacOS extends DialogWindowController {
 
   @override
   @internal
-  void beginMoveDrag(int button) {}
+  void beginMoveDrag(int button) {
+    _MacOSPlatformInterface.beginMoveDrag(getWindowHandle(), button);
+  }
 
   @override
   @internal
-  void beginResizeDrag(int button, WindowDragEdge edge) {}
+  void beginResizeDrag(int button, WindowDragEdge edge) {
+    _MacOSPlatformInterface.beginResizeDrag(getWindowHandle(), button, edge.index);
+  }
 
   @override
   final BaseWindowController? parent;
