@@ -552,7 +552,7 @@ class _ExpansionTileState extends State<ExpansionTile> {
       });
     }
     // SemanticsService.sendAnnouncement is deprecated on android.
-    // We use liveregion to achieve the announcement effect, so we do nothing here.
+    // We use live region to achieve the announcement effect instead.
     else if (defaultTargetPlatform != TargetPlatform.android) {
       SemanticsService.sendAnnouncement(View.of(context), stateHint, textDirection);
     }
