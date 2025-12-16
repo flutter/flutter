@@ -11,6 +11,7 @@ plugins {
 android {
     namespace = "com.yourcompany.integration_ui"
     compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
 
 
     compileOptions {
