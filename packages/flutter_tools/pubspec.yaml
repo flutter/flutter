@@ -113,7 +113,7 @@ dependencies:
   watcher: 1.1.4
   web: 1.1.1
   web_socket: 1.0.1
-  yaml_edit: 2.2.2
+  yaml_edit: 2.2.3
 
 dev_dependencies:
   file_testing: 3.0.2
