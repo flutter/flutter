@@ -9,7 +9,7 @@ import 'package:ui/ui.dart' as ui;
 import '../canvaskit/canvaskit_api.dart';
 import '../canvaskit/image.dart';
 import '../dom.dart';
-import '../profiler.dart';
+//import '../profiler.dart';
 import '../util.dart';
 import 'debug.dart';
 import 'layout.dart';
@@ -234,21 +234,32 @@ class CanvasKitPainter extends Painter {
   void fillTextCluster(WebCluster webTextCluster, bool isDefaultLtr) {
     final WebTextStyle style = webTextCluster.style;
     paintContext.fillStyle = style.getForegroundColor().toCssString();
-    timeAction('paint.fillTextCluster', () {
-      // We fill the text cluster into a rectange [0,0,w,h]
-      // but we need to shift the y coordinate by the font ascent
-      // becase the text is drawn at the ascent, not at 0
-      webTextCluster.fillOnContext(
-        paintContext,
-        /*ignore the text cluster shift from the text run*/
-        x: (isDefaultLtr ? 0 : webTextCluster.advance.width),
-        y: 0,
-      );
-    });
+    // We fill the text cluster into a rectange [0,0,w,h]
+    // but we need to shift the y coordinate by the font ascent
+    // becase the text is drawn at the ascent, not at 0
+    webTextCluster.fillOnContext(
+      paintContext,
+      /*ignore the text cluster shift from the text run*/
+      x: (isDefaultLtr ? 0 : webTextCluster.advance.width),
+      y: 0,
+    );
   }
 
   @override
   void paintTextCluster(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect) {
+    final DomImageBitmap bitmap = paintCanvas.transferToImageBitmap();
+    final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
+    if (skImage == null) {
+      throw Exception('Failed to convert text image bitmap to an SkImage.');
+    }
+    final ckImage = CkImage(skImage, imageSource: ImageBitmapImageSource(bitmap));
+    canvas.drawImageRect(
+      ckImage,
+      sourceRect,
+      targetRect,
+      ui.Paint()..filterQuality = ui.FilterQuality.none,
+    );
+    /*
     final DomImageBitmap bitmap = timeAction('paint.transferToImageBitmap', () {
       return paintCanvas.transferToImageBitmap();
     });
@@ -272,6 +283,7 @@ class CanvasKitPainter extends Painter {
         ui.Paint()..filterQuality = ui.FilterQuality.none,
       );
     });
+    */
   }
 
   double calculateThickness(WebTextStyle textStyle) {

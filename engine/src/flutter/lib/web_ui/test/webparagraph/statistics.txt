@@ -1,0 +1,46 @@
+100 repetitions
+===============
+
+
+Build/Layout/Paint small text  
+-----------------------------  
+build: 0ms                                                                                                                                            
+layout.AllCodeUnitFlags: 101ms
+layout.extractTextClusters: 100ms
+layout.extractBidiRuns: 0ms
+layout.wrapText: 99ms
+layout.formatLines: 0ms
+layout: 300ms
+paint/fillTextCluster: 1600ms / 890 = 1.798ms
+paint/paintTextCluster: 99ms / 890 = 0.111ms
+paint.paintTextCluster: 16500ms
+paint: 16500ms
+
+Build/Layout/Paint medium text     
+------------------------------                                                                                                                                  
+build: 101ms
+layout.AllCodeUnitFlags: 99ms
+layout.extractTextClusters: 101ms
+layout.extractBidiRuns: 0ms
+layout.wrapText: 100ms
+layout.formatLines: 0ms
+layout: 300ms
+paint/fillTextCluster: 1599ms / 1180 = 1.355ms
+paint/paintTextCluster: 101ms / 1180 = 0.086ms
+paint.paintTextCluster: 49,900ms
+paint: 49,900ms
+
+Build/Layout/Paint large text        
+-----------------------------                                                                                                                                        
+build: 101ms
+layout.AllCodeUnitFlags: 1800ms
+layout.extractTextClusters: 1000ms
+layout.extractBidiRuns: 200ms
+layout.wrapText: 5099ms
+layout.formatLines: 0ms
+layout: 8099ms
+paint/fillTextCluster: 1800ms / 3125 = 0.576ms
+paint/paintTextCluster: 0ms / 3125 = 0.000ms
+paint.paintTextCluster: 98,300ms
+paint: 3,519,600ms
+

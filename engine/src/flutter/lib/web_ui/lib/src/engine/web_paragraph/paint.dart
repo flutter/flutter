@@ -138,17 +138,21 @@ class TextPaint {
             }
             paintContext.restore();
           case StyleElements.text:
-            painter.fillTextCluster(
-              clusterText,
-              // We shape ellipsis with default direction coming from the attaching block
-              // and all the other blocks with the default paragraph direction.
-              // The reason for shaping ellipsis this way is that we literally attach it to the block
-              // that overflows and we want to keep all the styling attributes (including text direction) consistent.
-              block is EllipsisBlock
-                  ? block.isLtr
-                  : layout.paragraph.paragraphStyle.textDirection == ui.TextDirection.ltr,
-            );
-            painter.paintTextCluster(canvas, sourceRect, targetRect);
+            timeAction('paint/fillTextCluster', () {
+              painter.fillTextCluster(
+                clusterText,
+                // We shape ellipsis with default direction coming from the attaching block
+                // and all the other blocks with the default paragraph direction.
+                // The reason for shaping ellipsis this way is that we literally attach it to the block
+                // that overflows and we want to keep all the styling attributes (including text direction) consistent.
+                block is EllipsisBlock
+                    ? block.isLtr
+                    : layout.paragraph.paragraphStyle.textDirection == ui.TextDirection.ltr,
+              );
+            });
+            timeAction('paint/paintTextCluster', () {
+              painter.paintTextCluster(canvas, sourceRect, targetRect);
+            });
           default:
             assert(false);
         }
@@ -345,7 +349,9 @@ class TextPaint {
     _paintByClusters(StyleElements.shadows, canvas, layout, line, x, y);
 
     WebParagraphDebug.log('paintLineOnCanvasKit.Text: ${line.textRange}');
-    _paintByClusters(StyleElements.text, canvas, layout, line, x, y);
+    timeAction('paint.paintTextCluster', () {
+      _paintByClusters(StyleElements.text, canvas, layout, line, x, y);
+    });
 
     WebParagraphDebug.log('paintLineOnCanvasKit.Decorations: ${line.textRange}');
     _paintByBlocks(StyleElements.decorations, canvas, layout, line, x, y);

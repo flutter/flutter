@@ -45,17 +45,24 @@ class WebParagraphDebug {
 
 class WebParagraphProfiler {
   static Map<String, Duration> durations = {};
+  static Map<String, int> counts = {};
 
   static void register() {
     Profiler.ensureInitialized();
     engineBenchmarkValueCallback = (String name, double value) {
       durations[name] = Duration(milliseconds: value.toInt());
+      counts[name] = (counts[name] ?? 0) + 1;
     };
   }
 
   static void log() {
     for (final MapEntry<String, Duration> entry in durations.entries) {
-      WebParagraphDebug.log('${entry.key}: ${entry.value.inMilliseconds}ms');
+      //print('${entry.key}: ${entry.value.inMicroseconds}μs');
+      print(
+        entry.key.contains('/')
+            ? '${entry.key}: ${entry.value.inMilliseconds}ms / ${counts[entry.key] ?? 1} = ${(entry.value.inMilliseconds / (counts[entry.key] ?? 1)).toStringAsFixed(3)}ms'
+            : '${entry.key}: ${entry.value.inMilliseconds}ms',
+      );
     }
   }
 
