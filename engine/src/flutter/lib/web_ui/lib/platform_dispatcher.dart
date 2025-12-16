@@ -19,6 +19,7 @@ typedef PlatformMessageCallback = void Function(
   PlatformMessageResponseCallback? callback,
 );
 typedef ErrorCallback = bool Function(Object exception, StackTrace stackTrace);
+typedef TextureFrameAvailableCallback = void Function(int textureId);
 
 /// A token that represents a root isolate.
 class RootIsolateToken {
@@ -69,6 +70,9 @@ abstract class PlatformDispatcher {
 
   TimingsCallback? get onReportTimings;
   set onReportTimings(TimingsCallback? callback);
+
+  TextureFrameAvailableCallback? get onTextureFrameAvailable;
+  set onTextureFrameAvailable(TextureFrameAvailableCallback? callback);
 
   void sendPlatformMessage(String name, ByteData? data, PlatformMessageResponseCallback? callback);
 
