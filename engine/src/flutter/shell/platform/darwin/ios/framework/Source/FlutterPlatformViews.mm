@@ -589,14 +589,21 @@ static BOOL _preparedOnce = NO;
 }
 
 - (void)searchAndFixWebViewGestureRecognzier:(UIView*)view {
-  NSArray* recognizers = view.gestureRecognizers;
-  if (recognizers != nil && recognizers.count > 0) {
-    for (UIGestureRecognizer* recognizer in recognizers) {
-      if (recognizer.enabled &&
-          [NSStringFromClass([recognizer class]) hasSuffix:@"TouchEventsGestureRecognizer"]) {
-        recognizer.enabled = NO;
-        recognizer.enabled = YES;
-      }
+  for (UIGestureRecognizer* recognizer in view.gestureRecognizers) {
+    // This is to fix a bug on iOS 26 where web view link is not tappable.
+    // We reset the web view's WKTouchEventsGestureRecognizer in a bad state
+    // by disabling and re-enabling it.
+    // See: https://github.com/flutter/flutter/issues/175099.
+    // See also: https://github.com/flutter/engine/pull/56804 for an explanation of the
+    // bug on iOS 18.2, which is still valid on iOS 26.
+    // Warning: This is just a quick fix that patches the bug. For example,
+    // touches on a drawing website is still not completely blocked. A proper solution
+    // should rely on overriding the hitTest behavior.
+    // See: https://github.com/flutter/flutter/issues/179916.
+    if (recognizer.enabled &&
+        [NSStringFromClass([recognizer class]) hasSuffix:@"TouchEventsGestureRecognizer"]) {
+      recognizer.enabled = NO;
+      recognizer.enabled = YES;
     }
   }
   for (UIView* subview in view.subviews) {

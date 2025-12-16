@@ -48,7 +48,11 @@ const float kFloatCompareEpsilon = 0.001;
 
 @end
 
-// A mock recognizer without "TouchEventsGestureRecognizer" suffix in class name
+// A mock recognizer without "TouchEventsGestureRecognizer" suffix in class name.
+// This is to verify a fix to a bug on iOS 26 where web view link is not tappable.
+// We reset the web view's WKTouchEventsGestureRecognizer in a bad state
+// by disabling and re-enabling it.
+// See: https://github.com/flutter/flutter/issues/175099.
 @interface MockGestureRecognizer : UIGestureRecognizer
 @property(nonatomic, strong) NSMutableArray<NSNumber*>* toggleHistory;
 @end
