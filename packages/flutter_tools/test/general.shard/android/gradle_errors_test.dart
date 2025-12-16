@@ -1693,6 +1693,8 @@ An exception occurred applying plugin request [id: 'dev.flutter.flutter-gradle-p
       );
       expect(testLogger.statusText, contains('This results in a build failure'));
       expect(testLogger.statusText, contains('when applying the Flutter Gradle plugin'));
+      expect(testLogger.statusText, contains('If you are not upgrading to AGP 9+'));
+      expect(testLogger.statusText, contains('run `flutter analyze --suggestions`'));
     },
     overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
