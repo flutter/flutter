@@ -366,26 +366,36 @@ void testMain() {
     test('getUniformVec2', () {
       expect(
         () => shader.getUniformVec2('uLoneMatrix'),
-        isA<ArgumentError>().having(
-          (e) => e.message,
-          'message',
-          '`uLoneMatrix` has size 16, not size 2.',
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            '`uLoneMatrix` has size 16, not size 2.',
+          ),
         ),
       );
     });
     test('getUniformVec3', () {
       expect(
         () => shader.getUniformVec3('uSize'),
-        isA<ArgumentError>().having((e) => e.message, 'message', '`uSize` has size 2, not size 3.'),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            '`uSize` has size 2, not size 3.',
+          ),
+        ),
       );
     });
     test('getUniformVec4', () {
       expect(
         () => shader.getUniformVec4('uLoneMatrix'),
-        isA<ArgumentError>().having(
-          (e) => e.message,
-          'message',
-          '`uLoneMatrix` has size 16, not size 4.',
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            '`uLoneMatrix` has size 16, not size 4.',
+          ),
         ),
       );
     });
