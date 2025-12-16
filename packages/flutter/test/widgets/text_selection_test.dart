@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -1900,43 +1902,43 @@ void main() {
     expect(find.byType(Placeholder), findsOneWidget);
   }, skip: kIsWeb); // [intended] On web, we use native context menus for text fields.
 
-  const directionalityTestCases = <Map<String, dynamic>>[
-    {
-      'description': 'Ambient LTR, Text LTR (English)',
-      'ambientDirection': TextDirection.ltr,
-      'text': 'Hello World',
-      'selectionBase': 0,
-      'selectionExtent': 5,
-    },
-    {
-      'description': 'Ambient RTL, Text RTL (Arabic)',
-      'ambientDirection': TextDirection.rtl,
-      'text': 'مرحبا بالعالم',
-      'selectionBase': 0,
-      'selectionExtent': 5,
-    },
-    {
-      'description': 'Ambient RTL, Text LTR (English in Arabic App - Bug Case)',
-      'ambientDirection': TextDirection.rtl,
-      'text': 'Hello World',
-      'selectionBase': 0,
-      'selectionExtent': 5,
-    },
-    {
-      'description': 'Ambient LTR, Text RTL (Arabic in English App)',
-      'ambientDirection': TextDirection.ltr,
-      'text': 'مرحبا بالعالم',
-      'selectionBase': 0,
-      'selectionExtent': 5,
-    },
+  const directionalityTestCases = <_DirectionalityTestCase>[
+    _DirectionalityTestCase(
+      description: 'Ambient LTR, Text LTR (English)',
+      ambientDirection: TextDirection.ltr,
+      text: 'Hello World',
+      selectionBase: 0,
+      selectionExtent: 5,
+    ),
+    _DirectionalityTestCase(
+      description: 'Ambient RTL, Text RTL (Arabic)',
+      ambientDirection: TextDirection.rtl,
+      text: 'مرحبا بالعالم',
+      selectionBase: 0,
+      selectionExtent: 5,
+    ),
+    _DirectionalityTestCase(
+      description: 'Ambient RTL, Text LTR (English in Arabic App - Bug Case)',
+      ambientDirection: TextDirection.rtl,
+      text: 'Hello World',
+      selectionBase: 0,
+      selectionExtent: 5,
+    ),
+    _DirectionalityTestCase(
+      description: 'Ambient LTR, Text RTL (Arabic in English App)',
+      ambientDirection: TextDirection.ltr,
+      text: 'مرحبا بالعالم',
+      selectionBase: 0,
+      selectionExtent: 5,
+    ),
   ];
 
   for (final testCase in directionalityTestCases) {
     testWidgets(
-      'handles point correctly: ${testCase['description']}',
+      'handles point correctly: ${testCase.description}',
       (WidgetTester tester) async {
         final customControls = DirectionalitySpyTextSelectionControls();
-        final controller = TextEditingController(text: testCase['text'] as String);
+        final controller = TextEditingController(text: testCase.text);
         final focusNode = FocusNode();
 
         await tester.pumpWidget(
@@ -1945,7 +1947,7 @@ void main() {
               textSelectionTheme: const TextSelectionThemeData(selectionColor: Colors.blue),
             ),
             home: Directionality(
-              textDirection: testCase['ambientDirection'] as TextDirection,
+              textDirection: testCase.ambientDirection,
               child: Material(
                 child: TextField(
                   controller: controller,
@@ -1960,24 +1962,21 @@ void main() {
         final RenderEditable renderEditable = tester.allRenderObjects
             .whereType<RenderEditable>()
             .first;
-        expect(renderEditable.textDirection, testCase['ambientDirection']);
+        expect(renderEditable.textDirection, testCase.ambientDirection);
 
         // Focus and set selection
         focusNode.requestFocus();
         await tester.pump();
 
         controller.selection = TextSelection(
-          baseOffset: testCase['selectionBase'] as int,
-          extentOffset: testCase['selectionExtent'] as int,
+          baseOffset: testCase.selectionBase,
+          extentOffset: testCase.selectionExtent,
         );
         await tester.pumpAndSettle();
 
         // Get selection endpoints
         final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
-          TextSelection(
-            baseOffset: testCase['selectionBase'] as int,
-            extentOffset: testCase['selectionExtent'] as int,
-          ),
+          controller.selection,
         );
         expect(endpoints.length, 2);
 
@@ -2008,8 +2007,8 @@ void main() {
 
         // Also verify they align generally with endpoints
         // One handle should be near point1X, one near point2X.
-        final minEndpointX = point1X < point2X ? point1X : point2X;
-        final maxEndpointX = point1X < point2X ? point2X : point1X;
+        final double minEndpointX = math.min(point1X, point2X);
+        final double maxEndpointX = math.max(point1X, point2X);
 
         // Left Handle should be near minEndpointX
         expect(
@@ -2275,4 +2274,20 @@ class DirectionalitySpyTextSelectionControls extends MaterialTextSelectionContro
       child: super.buildHandle(context, type, textLineHeight, onTap),
     );
   }
+}
+
+class _DirectionalityTestCase {
+  const _DirectionalityTestCase({
+    required this.description,
+    required this.ambientDirection,
+    required this.text,
+    required this.selectionBase,
+    required this.selectionExtent,
+  });
+
+  final String description;
+  final TextDirection ambientDirection;
+  final String text;
+  final int selectionBase;
+  final int selectionExtent;
 }
