@@ -29,10 +29,31 @@ using impeller::Vector2;
 // location of the mesh points within the shadow.
 class PolygonInfo : impeller::PathTessellator::VertexWriter {
  public:
+  // The results of running the shadow mesh algorithm on the given path
+  // with the given parameters.
   enum class MeshStatus {
+    // The algorithm has not finished processing the path and come to a
+    // conclusion about the results. This is the default setting for the
+    // status field.
     kStillProcessing,
+
+    // The path was empty or degenerate in such a way that there would be
+    // no shadow generated. The mesh will be an empty list of vertices
+    // and should be ignored in favor of just skipping the operation.
     kShadowIsEmpty,
+
+    // The algorithm was unable to produce a mesh from the path for any
+    // number of reasons, including but not limited to:
+    // - The path had multiple contours.
+    // - The path was concave.
+    // - The path was self-intersecting.
+    // - The path wound around itself multiple times.
+    // - The algorithm was incapable of producing the mesh due to
+    //   implementation deficiencies.
     kCouldNotCompute,
+
+    // The algorithm was successful in producing a mesh that models the
+    // shadow accurately.
     kMeshIsValid,
   };
 
