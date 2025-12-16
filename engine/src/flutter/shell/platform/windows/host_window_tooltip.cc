@@ -38,11 +38,9 @@ bool HostWindowTooltip::ViewIsSizedToContent() const {
          box_constraints_.biggest().height() != 0;
 }
 
-Size HostWindowTooltip::GetMinimumViewSize() const {
-  return box_constraints_.smallest();
-}
-
-Size HostWindowTooltip::GetMaximumViewSize() const {
+BoxConstraints HostWindowTooltip::GetConstraints() const {
+  Size smallest = box_constraints_.smallest();
+  Size biggest = Size(0, 0);
   if (box_constraints_.biggest().width() != 0 &&
       box_constraints_.biggest().height() != 0) {
     auto work_area = GetWorkArea();
@@ -58,9 +56,9 @@ Size HostWindowTooltip::GetMaximumViewSize() const {
       height = std::min(
           height, static_cast<double>(positioner_size_constraints_.height));
     }
-    return Size(width, height);
+    biggest = Size(width, height);
   }
-  return Size{0, 0};
+  return BoxConstraints(smallest, biggest);
 }
 
 void HostWindowTooltip::DidUpdateViewSize(int32_t width, int32_t height) {

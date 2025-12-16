@@ -35,9 +35,8 @@ class FlutterWindowsViewSizingDelegate {
   // This method may be called from raster thread.
   virtual bool ViewIsSizedToContent() const = 0;
 
-  // These methods will always be called from the main thread.
-  virtual Size GetMinimumViewSize() const = 0;
-  virtual Size GetMaximumViewSize() const = 0;
+  // These methods will always be called from the platform thread.
+  virtual BoxConstraints GetConstraints() const = 0;
   virtual void DidUpdateViewSize(int32_t width, int32_t height) = 0;
 };
 
@@ -51,6 +50,7 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
       FlutterViewId view_id,
       FlutterWindowsEngine* engine,
       std::unique_ptr<WindowBindingHandler> window_binding,
+      FlutterWindowsViewSizingDelegate* sizing_delegate = nullptr,
       std::shared_ptr<WindowsProcTable> windows_proc_table = nullptr);
 
   virtual ~FlutterWindowsView();
@@ -258,10 +258,6 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // Focus the view.
   // Returns true if the view was focused.
   virtual bool Focus();
-
-  void SetSizingDelegate(FlutterWindowsViewSizingDelegate* delegate) {
-    sizing_delegate_ = delegate;
-  }
 
  protected:
   virtual void NotifyWinEventWrapper(ui::AXPlatformNodeWin* node,

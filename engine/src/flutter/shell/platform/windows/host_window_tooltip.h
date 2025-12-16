@@ -33,8 +33,7 @@ class HostWindowTooltip : public HostWindow,
 
  private:
   bool ViewIsSizedToContent() const override;
-  Size GetMinimumViewSize() const override;
-  Size GetMaximumViewSize() const override;
+  BoxConstraints GetConstraints() const override;
   void DidUpdateViewSize(int32_t width, int32_t height) override;
   WindowRect GetWorkArea() const;
 

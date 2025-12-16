@@ -105,9 +105,11 @@ FlutterWindowsView::FlutterWindowsView(
     FlutterViewId view_id,
     FlutterWindowsEngine* engine,
     std::unique_ptr<WindowBindingHandler> window_binding,
+    FlutterWindowsViewSizingDelegate* sizing_delegate,
     std::shared_ptr<WindowsProcTable> windows_proc_table)
     : view_id_(view_id),
       engine_(engine),
+      sizing_delegate_(sizing_delegate),
       windows_proc_table_(std::move(windows_proc_table)),
       view_alive_(std::make_shared<int>(0)) {
   if (windows_proc_table_ == nullptr) {
@@ -393,12 +395,15 @@ void FlutterWindowsView::SendWindowMetrics(size_t width,
   FlutterWindowMetricsEvent event = {};
   event.struct_size = sizeof(event);
   if (IsSizedToContent()) {
-    auto min_size = sizing_delegate_->GetMinimumViewSize();
-    auto max_size = sizing_delegate_->GetMaximumViewSize();
-    event.min_width_constraint = static_cast<size_t>(min_size.width());
-    event.min_height_constraint = static_cast<size_t>(min_size.height());
-    event.max_width_constraint = static_cast<size_t>(max_size.width());
-    event.max_height_constraint = static_cast<size_t>(max_size.height());
+    auto const constraints = sizing_delegate_->GetConstraints();
+    event.min_width_constraint =
+        static_cast<size_t>(constraints.smallest().width());
+    event.min_height_constraint =
+        static_cast<size_t>(constraints.smallest().height());
+    event.max_width_constraint =
+        static_cast<size_t>(constraints.biggest().width());
+    event.max_height_constraint =
+        static_cast<size_t>(constraints.biggest().height());
   } else {
     event.width = width;
     event.height = height;
@@ -421,12 +426,15 @@ FlutterWindowMetricsEvent FlutterWindowsView::CreateWindowMetricsEvent() const {
   FlutterWindowMetricsEvent event = {};
   event.struct_size = sizeof(event);
   if (IsSizedToContent()) {
-    auto min_size = sizing_delegate_->GetMinimumViewSize();
-    auto max_size = sizing_delegate_->GetMaximumViewSize();
-    event.min_width_constraint = static_cast<size_t>(min_size.width());
-    event.min_height_constraint = static_cast<size_t>(min_size.height());
-    event.max_width_constraint = static_cast<size_t>(max_size.width());
-    event.max_height_constraint = static_cast<size_t>(max_size.height());
+    auto constraints = sizing_delegate_->GetConstraints();
+    event.min_width_constraint =
+        static_cast<size_t>(constraints.smallest().width());
+    event.min_height_constraint =
+        static_cast<size_t>(constraints.smallest().height());
+    event.max_width_constraint =
+        static_cast<size_t>(constraints.biggest().width());
+    event.max_height_constraint =
+        static_cast<size_t>(constraints.biggest().height());
   } else {
     event.width = bounds.width;
     event.height = bounds.height;
