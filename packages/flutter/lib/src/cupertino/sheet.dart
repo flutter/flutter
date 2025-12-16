@@ -641,13 +641,6 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
               ),
             ),
           ),
-          // child: const DecoratedBox(
-          //   decoration: ShapeDecoration(
-          //     shape: RoundedSuperellipseBorder(),
-          //     color: CupertinoColors.inactiveGray,
-          //   ),
-          //   child: SizedBox(height: 10, width: 40),
-          // ),
         ),
       ],
     );
