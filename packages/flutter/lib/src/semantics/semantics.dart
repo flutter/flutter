@@ -185,7 +185,7 @@ sealed class _DebugSemanticsRoleChecks {
       SemanticsRole.form => _noCheckRequired,
       // TODO(chunhtai): add checks when the roles are used in framework.
       // https://github.com/flutter/flutter/issues/159741.
-      SemanticsRole.dragHandle => _noCheckRequired,
+      SemanticsRole.dragHandle => _unimplemented,
       SemanticsRole.spinButton => _unimplemented,
       SemanticsRole.comboBox => _unimplemented,
       SemanticsRole.tooltip => _unimplemented,

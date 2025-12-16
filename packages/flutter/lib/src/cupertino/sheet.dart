@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/gestures.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -631,19 +628,16 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
         ),
         const Align(
           alignment: Alignment.topCenter,
-          child: Semantics.fromProperties(
-            properties: SemanticsProperties(role: SemanticsRole.dragHandle),
-            child: Padding(
-              padding: EdgeInsetsGeometry.only(top: dragHandleTopPadding),
-              child: DecoratedBox(
-                decoration: ShapeDecoration(
-                  shape: RoundedSuperellipseBorder(
-                    borderRadius: BorderRadiusGeometry.all(Radius.circular(dragHandleWidth / 2)),
-                  ),
-                  color: CupertinoColors.tertiaryLabel,
+          child: Padding(
+            padding: EdgeInsetsGeometry.only(top: dragHandleTopPadding),
+            child: DecoratedBox(
+              decoration: ShapeDecoration(
+                shape: RoundedSuperellipseBorder(
+                  borderRadius: BorderRadiusGeometry.all(Radius.circular(dragHandleWidth / 2)),
                 ),
-                child: SizedBox(height: dragHandleHeight, width: dragHandleWidth),
+                color: CupertinoColors.tertiaryLabel,
               ),
+              child: SizedBox(height: dragHandleHeight, width: dragHandleWidth),
             ),
           ),
         ),
