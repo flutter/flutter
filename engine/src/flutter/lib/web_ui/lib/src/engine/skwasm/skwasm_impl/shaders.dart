@@ -390,19 +390,19 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
   @override
   ui.UniformVec2Slot getUniformVec2(String name) {
     final List<SkwasmUniformFloatSlot> slots = _getUniformFloatSlots(name, 2);
-    return SkwasmUniformVec2Slot._(slots[0], slots[1]);
+    return _SkwasmUniformVec2Slot._(slots[0], slots[1]);
   }
 
   @override
   ui.UniformVec3Slot getUniformVec3(String name) {
     final List<SkwasmUniformFloatSlot> slots = _getUniformFloatSlots(name, 3);
-    return SkwasmUniformVec3Slot._(slots[0], slots[1], slots[2]);
+    return _SkwasmUniformVec3Slot._(slots[0], slots[1], slots[2]);
   }
 
   @override
   ui.UniformVec4Slot getUniformVec4(String name) {
     final List<SkwasmUniformFloatSlot> slots = _getUniformFloatSlots(name, 4);
-    return SkwasmUniformVec4Slot._(slots[0], slots[1], slots[2], slots[3]);
+    return _SkwasmUniformVec4Slot._(slots[0], slots[1], slots[2], slots[3]);
   }
 
   @override
@@ -412,7 +412,9 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
 
   List<SkwasmUniformFloatSlot> _getUniformFloatSlots(String name, int size) {
     final int dataSize = _program._getUniformVectorSize(name);
-    assert(dataSize == size, 'Uniform `$name` has size $dataSize, not size $size.');
+    if (size != dataSize) {
+      throw ArgumentError('Uniform `$name` has size $dataSize, not size $size.');
+    }
     final int baseShaderIndex = _program._getShaderIndex(name, 0);
     return List<SkwasmUniformFloatSlot>.generate(
       size,
@@ -441,8 +443,8 @@ class SkwasmUniformFloatSlot implements ui.UniformFloatSlot {
   final int shaderIndex;
 }
 
-class SkwasmUniformVec2Slot implements ui.UniformVec2Slot {
-  SkwasmUniformVec2Slot._(this._xSlot, this._ySlot);
+class _SkwasmUniformVec2Slot implements ui.UniformVec2Slot {
+  _SkwasmUniformVec2Slot._(this._xSlot, this._ySlot);
 
   @override
   void set(double x, double y) {
@@ -453,8 +455,8 @@ class SkwasmUniformVec2Slot implements ui.UniformVec2Slot {
   final SkwasmUniformFloatSlot _xSlot, _ySlot;
 }
 
-class SkwasmUniformVec3Slot implements ui.UniformVec3Slot {
-  SkwasmUniformVec3Slot._(this._xSlot, this._ySlot, this._zSlot);
+class _SkwasmUniformVec3Slot implements ui.UniformVec3Slot {
+  _SkwasmUniformVec3Slot._(this._xSlot, this._ySlot, this._zSlot);
 
   @override
   void set(double x, double y, double z) {
@@ -466,8 +468,8 @@ class SkwasmUniformVec3Slot implements ui.UniformVec3Slot {
   final SkwasmUniformFloatSlot _xSlot, _ySlot, _zSlot;
 }
 
-class SkwasmUniformVec4Slot implements ui.UniformVec4Slot {
-  SkwasmUniformVec4Slot._(this._xSlot, this._ySlot, this._zSlot, this._wSlot);
+class _SkwasmUniformVec4Slot implements ui.UniformVec4Slot {
+  _SkwasmUniformVec4Slot._(this._xSlot, this._ySlot, this._zSlot, this._wSlot);
 
   @override
   void set(double x, double y, double z, double w) {

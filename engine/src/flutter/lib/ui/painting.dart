@@ -5455,6 +5455,20 @@ base class UniformFloatSlot {
   final int index;
 }
 
+/// A binding to a uniform of type vec2. Calling [set] on this object updates
+/// the uniform's value.
+///
+/// Example:
+///
+/// ```dart
+/// void updateShader(ui.FragmentShader shader) {
+///   shader.getUniformVec2('uSize').set(100, 100);
+/// }
+/// ```
+///
+/// See also:
+///   [FragmentShader.getUniformVec2] - How [UniformVec2Slot] instances are acquired.
+///
 base class UniformVec2Slot {
   UniformVec2Slot._(this._xSlot, this._ySlot);
 
@@ -5467,6 +5481,20 @@ base class UniformVec2Slot {
   final UniformFloatSlot _xSlot, _ySlot;
 }
 
+/// A binding to a uniform of type vec3. Calling [set] on this object updates
+/// the uniform's value.
+///
+/// Example:
+///
+/// ```dart
+/// void updateShader(ui.FragmentShader shader) {
+///   shader.getUniformVec3('uScaledTime').set(time, time*0.1, time*0.01);
+/// }
+/// ```
+///
+/// See also:
+///   [FragmentShader.getUniformVec3] - How [UniformVec3Slot] instances are acquired.
+///
 base class UniformVec3Slot {
   UniformVec3Slot._(this._xSlot, this._ySlot, this._zSlot);
 
@@ -5480,6 +5508,20 @@ base class UniformVec3Slot {
   final UniformFloatSlot _xSlot, _ySlot, _zSlot;
 }
 
+/// A binding to a uniform of type vec4. Calling [set] on this object updates
+/// the uniform's value.
+///
+/// Example:
+///
+/// ```dart
+/// void updateShader(ui.FragmentShader shader) {
+///   shader.getUniformVec4('uColor').set(1.0, 0.0, 1.0, 1.0);
+/// }
+/// ```
+///
+/// See also:
+///   [FragmentShader.getUniformVec4] - How [UniformVec4Slot] instances are acquired.
+///
 base class UniformVec4Slot {
   UniformVec4Slot._(this._xSlot, this._ySlot, this._zSlot, this._wSlot);
 
@@ -5548,7 +5590,9 @@ base class FragmentShader extends Shader {
 
   List<UniformFloatSlot> _getSlotsForUniform(String name, int size) {
     final int dataSize = _program._getUniformVectorSize(name);
-    assert(dataSize == size, 'Uniform `$name` has size $dataSize, not size $size.');
+    if (size != dataSize) {
+      throw ArgumentError('Uniform `$name` has size $dataSize, not size $size.');
+    }
     final int baseShaderIndex = _program._getUniformFloatIndex(name, 0);
     final slots = List<UniformFloatSlot>.generate(
       size,
@@ -5671,7 +5715,7 @@ base class FragmentShader extends Shader {
   /// ```dart
   /// void updateShader(ui.FragmentShader shader) {
   ///   shader.getUniformFloat('uScale');
-  ///   shader.getUniformVec3('uTime');
+  ///   shader.getUniformVec3('uScaledTime');
   /// }
   /// ```
   UniformVec3Slot getUniformVec3(String name) {
