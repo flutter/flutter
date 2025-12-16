@@ -692,9 +692,10 @@ ${globals.logger.terminal.warningMark} Starting AGP 9+, the default has become b
 /// on old DSL types.
 @visibleForTesting
 final useNewAgpDslErrorHandler = GradleHandledError(
-  test: (String line) {
-    return line.contains("> Failed to apply plugin 'dev.flutter.flutter-gradle-plugin'.");
-  },
+  test: _lineMatcher(const <String>[
+    "> Failed to apply plugin 'dev.flutter.flutter-gradle-plugin'",
+    '> java.lang.NullPointerException (no error message)',
+  ]),
   handler:
       ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
         final File appGradleFile = project.android.appGradleFile;
