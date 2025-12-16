@@ -550,11 +550,10 @@ class _ExpansionTileState extends State<ExpansionTile> {
         _timer?.cancel();
         _timer = null;
       });
-
     }
-    // SemanticsService.sendAnnouncement is deprecated on android. we use liveregion to achieve the announcement effect.
-    else if (defaultTargetPlatform != TargetPlatform.android)
-    {
+    // SemanticsService.sendAnnouncement is deprecated on android.
+    // We use liveregion to achieve the announcement effect, so we do nothing here.
+    else if (defaultTargetPlatform != TargetPlatform.android) {
       SemanticsService.sendAnnouncement(View.of(context), stateHint, textDirection);
     }
     widget.onExpansionChanged?.call(_tileController.isExpanded);
@@ -609,37 +608,39 @@ class _ExpansionTileState extends State<ExpansionTile> {
     };
 
     final Widget child = ListTileTheme.merge(
-        iconColor: _iconColor.value ?? _expansionTileTheme.iconColor,
-        textColor: _headerColor.value,
-        child: ListTile(
-          enabled: widget.enabled,
-          onTap: _tileController.isExpanded ? _tileController.collapse : _tileController.expand,
-          dense: widget.dense,
-          splashColor: widget.splashColor,
-          visualDensity: widget.visualDensity,
-          enableFeedback: widget.enableFeedback,
-          contentPadding: widget.tilePadding ?? _expansionTileTheme.tilePadding,
-          leading: widget.leading ?? _buildLeadingIcon(context, animation),
-          title: widget.title,
-          subtitle: widget.subtitle,
-          trailing: widget.showTrailingIcon
-              ? widget.trailing ?? _buildTrailingIcon(context, animation)
-              : null,
-          minTileHeight: widget.minTileHeight,
-          internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
-        ),
-      );
-
-    if(){
-      
-    }
-
-
-    return Semantics(
-      hint: semanticsHint,
-      onTapHint: onTapHint,
-      child: child,
+      iconColor: _iconColor.value ?? _expansionTileTheme.iconColor,
+      textColor: _headerColor.value,
+      child: ListTile(
+        enabled: widget.enabled,
+        onTap: _tileController.isExpanded ? _tileController.collapse : _tileController.expand,
+        dense: widget.dense,
+        splashColor: widget.splashColor,
+        visualDensity: widget.visualDensity,
+        enableFeedback: widget.enableFeedback,
+        contentPadding: widget.tilePadding ?? _expansionTileTheme.tilePadding,
+        leading: widget.leading ?? _buildLeadingIcon(context, animation),
+        title: widget.title,
+        subtitle: widget.subtitle,
+        trailing: widget.showTrailingIcon
+            ? widget.trailing ?? _buildTrailingIcon(context, animation)
+            : null,
+        minTileHeight: widget.minTileHeight,
+        internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
+      ),
     );
+
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return Semantics(
+        // Live region used to announce state changes (e.g., "expanded" or "collapsed")
+        // without taking focus.
+        // blockNode prevents this node from being part of the focus traversal.
+        label: semanticsHint,
+        liveRegion: true,
+        accessiblityFocusBlockType: AccessiblityFocusBlockType.blockNode,
+        child: Semantics(hint: semanticsHint, onTapHint: onTapHint, child: child),
+      );
+    }
+    return Semantics(hint: semanticsHint, onTapHint: onTapHint, child: child);
   }
 
   Widget _buildBody(BuildContext context, Animation<double> animation) {
