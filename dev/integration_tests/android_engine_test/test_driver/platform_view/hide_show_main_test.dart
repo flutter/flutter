@@ -27,7 +27,7 @@ void main() async {
     await flutterDriver.close();
   });
 
-  test('Should be able to tap multiple times', () async {
+  test('Should be able to hide and show platform view multiple times', () async {
     String text = 'Hide Platform View';
     expect(await flutterDriver.getText(find.byValueKey('ToggleButtonText')),
         text);
