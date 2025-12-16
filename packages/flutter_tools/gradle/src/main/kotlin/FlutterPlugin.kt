@@ -56,7 +56,7 @@ class FlutterPlugin : Plugin<Project> {
             resolveFlutterSdkProperty(flutterRootSystemVal)
                 ?: throw GradleException(
                     "Flutter SDK not found. Define location with flutter.sdk in the " +
-                        "local.properties file or with a FLUTTER_ROOT environment variable."
+                        "local.properties file or with a FLUTTER_ROOT environment variable.",
                 )
 
         flutterRoot = project.file(flutterRootPath)
@@ -110,8 +110,8 @@ class FlutterPlugin : Plugin<Project> {
                     "src",
                     "main",
                     "scripts",
-                    "native_plugin_loader.gradle.kts"
-                )
+                    "native_plugin_loader.gradle.kts",
+                ),
             )
         }
 
@@ -225,7 +225,7 @@ class FlutterPlugin : Plugin<Project> {
                     project.logger.error(
                         "Warning: Flutter was unable to detect project Gradle, Java, " +
                             "AGP, and KGP versions. Skipping dependency version checking. Error was: " +
-                            e
+                            e,
                     )
                 } else {
                     // If usesUnsupportedDependencyVersions is set, the exception was thrown by us
@@ -243,7 +243,7 @@ class FlutterPlugin : Plugin<Project> {
                     "packages",
                     "flutter_tools",
                     "gradle",
-                    "flutter_proguard_rules.pro"
+                    "flutter_proguard_rules.pro",
                 ).toString()
         // TODO(gmackall): reconsider getting the android extension every time
         FlutterPluginUtils.getAndroidExtension(project).buildTypes {
@@ -269,7 +269,7 @@ class FlutterPlugin : Plugin<Project> {
                         FlutterPluginUtils
                             .getAndroidExtension(project)
                             .getDefaultProguardFile("proguard-android-optimize.txt"),
-                        flutterProguardRules
+                        flutterProguardRules,
                     )
 
                     // Optionally adds custom Proguard rules as needed from `android/app/proguard-rules.pro`.
@@ -310,7 +310,7 @@ class FlutterPlugin : Plugin<Project> {
             project!!,
             buildType,
             getPluginHandler(project!!),
-            engineVersion!!
+            engineVersion!!,
         )
     }
 
@@ -325,7 +325,7 @@ class FlutterPlugin : Plugin<Project> {
         }
         return project?.findProperty(propertyName) as? String ?: localProperties!!.getProperty(
             propertyName,
-            defaultValue
+            defaultValue,
         )
     }
 
@@ -372,7 +372,7 @@ class FlutterPlugin : Plugin<Project> {
                 val assembleTask = variant.assembleProvider.get()
                 if (!FlutterPluginUtils.shouldConfigureFlutterTask(
                         projectToAddTasksTo,
-                        assembleTask
+                        assembleTask,
                     )
                 ) {
                     return@configureEach
@@ -448,7 +448,7 @@ class FlutterPlugin : Plugin<Project> {
             getPluginHandler(projectToAddTasksTo).configurePlugins(engineVersion!!)
             FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(
                 projectToAddTasksTo,
-                getPluginHandler(projectToAddTasksTo).getPluginList()
+                getPluginHandler(projectToAddTasksTo).getPluginList(),
             )
             return
         }
@@ -456,7 +456,7 @@ class FlutterPlugin : Plugin<Project> {
         val hostAppProjectName: String? =
             if (projectToAddTasksTo.rootProject.hasProperty("flutter.hostAppProjectName")) {
                 projectToAddTasksTo.rootProject.property(
-                    "flutter.hostAppProjectName"
+                    "flutter.hostAppProjectName",
                 ) as? String
             } else {
                 "app"
@@ -511,7 +511,7 @@ class FlutterPlugin : Plugin<Project> {
                     copyFlutterAssetsTask = copyFlutterAssetsTask ?: addFlutterDeps(
                         libraryVariant,
                         flutterPlugin,
-                        targetPlatforms
+                        targetPlatforms,
                     )
                     // TODO(gmackall): Migrate to AGPs variant api.
                     //    https://github.com/flutter/flutter/issues/166550
@@ -527,7 +527,7 @@ class FlutterPlugin : Plugin<Project> {
         getPluginHandler(projectToAddTasksTo).configurePlugins(engineVersion!!)
         FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(
             projectToAddTasksTo,
-            getPluginHandler(projectToAddTasksTo).getPluginList()
+            getPluginHandler(projectToAddTasksTo).getPluginList(),
         )
     }
 
@@ -555,7 +555,7 @@ class FlutterPlugin : Plugin<Project> {
          */
         private fun findTaskOrNull(
             project: Project,
-            taskName: String
+            taskName: String,
         ): Task? =
             try {
                 project.tasks.named(taskName).get()
@@ -568,7 +568,7 @@ class FlutterPlugin : Plugin<Project> {
         private fun addFlutterDeps(
             @Suppress("DEPRECATION") variant: com.android.build.gradle.api.BaseVariant,
             flutterPlugin: FlutterPlugin,
-            targetPlatforms: List<String>
+            targetPlatforms: List<String>,
         ): Task {
             // Shorthand
             val project: Project = flutterPlugin.project!!
@@ -636,12 +636,12 @@ class FlutterPlugin : Plugin<Project> {
             val packageAssets: Task? =
                 findTaskOrNull(
                     project,
-                    "package${FlutterPluginUtils.capitalize(variant.name)}Assets"
+                    "package${FlutterPluginUtils.capitalize(variant.name)}Assets",
                 )
             val cleanPackageAssets: Task? =
                 findTaskOrNull(
                     project,
-                    "cleanPackage${FlutterPluginUtils.capitalize(variant.name)}Assets"
+                    "cleanPackage${FlutterPluginUtils.capitalize(variant.name)}Assets",
                 )
 
             val isUsedAsSubproject: Boolean =
@@ -654,8 +654,8 @@ class FlutterPlugin : Plugin<Project> {
                     listOf(
                         "compile",
                         FLUTTER_BUILD_PREFIX,
-                        variant.name
-                    )
+                        variant.name,
+                    ),
                 )
             // The task provider below will shadow a lot of the variable names, so provide this reference
             // to access them within that scope.
@@ -684,7 +684,7 @@ class FlutterPlugin : Plugin<Project> {
                     sourceDir = FlutterPluginUtils.getFlutterSourceDirectory(project)
                     intermediateDir =
                         project.file(
-                            project.layout.buildDirectory.dir("${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${variant.name}/")
+                            project.layout.buildDirectory.dir("${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${variant.name}/"),
                         )
                     frontendServerStarterPath = frontendServerStarterPathValue
                     extraFrontEndOptions = extraFrontEndOptionsValue
@@ -702,12 +702,12 @@ class FlutterPlugin : Plugin<Project> {
             val flutterCompileTask: FlutterTask = compileTaskProvider.get()
             val libJar: File =
                 project.file(
-                    project.layout.buildDirectory.dir("${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${variant.name}/libs.jar")
+                    project.layout.buildDirectory.dir("${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${variant.name}/libs.jar"),
                 )
             val packJniLibsTaskProvider: TaskProvider<Jar> =
                 project.tasks.register(
                     "packJniLibs${FLUTTER_BUILD_PREFIX}${FlutterPluginUtils.capitalize(variant.name)}",
-                    Jar::class.java
+                    Jar::class.java,
                 ) {
                     destinationDirectory.set(libJar.parentFile)
                     archiveFileName.set(libJar.name)
@@ -737,42 +737,47 @@ class FlutterPlugin : Plugin<Project> {
                 variant.name,
                 project.files({
                     packJniLibsTask
-                })
+                }),
             )
+            // Flutter-owned assets directory (unique output)
+            val flutterAssetsDirProvider =
+                project.layout.buildDirectory.dir(
+                    "${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter_assets/${variant.name}",
+                )
+
             val copyFlutterAssetsTaskProvider: TaskProvider<Copy> =
                 project.tasks.register(
                     "copyFlutterAssets${FlutterPluginUtils.capitalize(variant.name)}",
-                    Copy::class.java
+                    Copy::class.java,
                 ) {
                     dependsOn(flutterCompileTask)
                     with(flutterCompileTask.assets)
+
                     filePermissions {
                         user {
                             read = true
                             write = true
                         }
                     }
-                    if (isUsedAsSubproject) {
-                        // TODO(gmackall): above is always false, can delete
-                        dependsOn(packageAssets)
-                        dependsOn(cleanPackageAssets)
-                        into(packageAssets!!.outputs)
-                    }
-                    val mergeAssets =
-                        try {
-                            variant.mergeAssetsProvider.get()
-                        } catch (e: IllegalStateException) {
-                            // TODO(gmackall): Migrate to AGPs variant api.
-                            //    https://github.com/flutter/flutter/issues/166550
-                            @Suppress("DEPRECATION")
-                            variant.mergeAssets
-                        }
-                    dependsOn(mergeAssets)
-                    dependsOn("clean${FlutterPluginUtils.capitalize(mergeAssets.name)}")
-                    mergeAssets.mustRunAfter("clean${FlutterPluginUtils.capitalize(mergeAssets.name)}")
-                    into(mergeAssets.outputDir)
+
+                    // Flutter now owns its own output directory
+                    into(flutterAssetsDirProvider)
                 }
+
             val copyFlutterAssetsTask: Task = copyFlutterAssetsTaskProvider.get()
+
+            val mergeAssets =
+                try {
+                    variant.mergeAssetsProvider.get()
+                } catch (e: IllegalStateException) {
+                    @Suppress("DEPRECATION")
+                    variant.mergeAssets
+                }
+
+// mergeAssets owns its output; Flutter assets are inputs
+            mergeAssets.inputs.dir(flutterAssetsDirProvider)
+            mergeAssets.dependsOn(copyFlutterAssetsTask)
+
             if (!isUsedAsSubproject) {
                 // TODO(gmackall): Migrate to AGPs variant api.
                 //    https://github.com/flutter/flutter/issues/166550
@@ -796,7 +801,7 @@ class FlutterPlugin : Plugin<Project> {
                 listOf(
                     "compress${FlutterPluginUtils.capitalize(variant.name)}Assets",
                     "bundle${FlutterPluginUtils.capitalize(variant.name)}Aar",
-                    "bundle${FlutterPluginUtils.capitalize(variant.name)}LocalLintAar"
+                    "bundle${FlutterPluginUtils.capitalize(variant.name)}LocalLintAar",
                 )
             tasksToCheck.forEach { taskTocheck ->
                 try {
