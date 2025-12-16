@@ -286,6 +286,7 @@ void main() {
       );
 
       expect(response.statusCode, HttpStatus.ok);
+      expect(response.headers['Content-Type'], 'text/html; charset=utf-8');
       expect(await response.readAsString(), htmlContent);
     }),
   );
