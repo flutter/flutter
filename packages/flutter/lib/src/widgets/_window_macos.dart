@@ -706,10 +706,10 @@ class _MacOSPlatformInterface {
   @Native<Bool Function(Pointer<Void>)>(symbol: 'InternalFlutter_Window_IsActivated')
   external static bool isActivated(Pointer<Void> windowHandle);
 
-  @Native<Void Function(Pointer<Void>, ffi.Int)>(symbol: 'InternalFlutter_Window_BeginMoveDrag')
+  @Native<Void Function(Pointer<Void>, Int)>(symbol: 'InternalFlutter_Window_BeginMoveDrag')
   external static void beginMoveDrag(Pointer<Void> windowHandle, int button);
 
-  @Native<Void Function(Pointer<Void>, ffi.Int, ffi.Int)>(
+  @Native<Void Function(Pointer<Void>, Int, Int)>(
     symbol: 'InternalFlutter_Window_BeginResizeDrag',
   )
   external static void beginResizeDrag(Pointer<Void> windowHandle, int button, int edge);
