@@ -39,9 +39,15 @@ class _MainAppState extends State<MainApp> {
         body: Column(
           children: <Widget>[
             Expanded(
-              child: Offstage(
-                offstage: !_show,
-                child: const _HybridCompositionAndroidPlatformView(viewType: 'my_test'),
+              child: Visibility(
+                visible: _show,
+                maintainState: true,
+                maintainSize: true,
+                maintainAnimation: true,
+                child: const _HybridCompositionAndroidPlatformView(
+                  key: ValueKey<String>('PlatformView'),
+                  viewType: 'my_test',
+                ),
               ),
             ),
             ElevatedButton(
@@ -51,7 +57,10 @@ class _MainAppState extends State<MainApp> {
                   _show = !_show;
                 });
               },
-              child: const Text('Toggle Platform View'),
+              child: Text(
+                key: const ValueKey<String>('ToggleButtonText'),
+                _show ? 'Hide Platform View' : 'Show Platform View',
+              ),
             ),
           ],
         ),
@@ -61,7 +70,7 @@ class _MainAppState extends State<MainApp> {
 }
 
 final class _HybridCompositionAndroidPlatformView extends StatelessWidget {
-  const _HybridCompositionAndroidPlatformView({required this.viewType});
+  const _HybridCompositionAndroidPlatformView({super.key, required this.viewType});
 
   final String viewType;
 
