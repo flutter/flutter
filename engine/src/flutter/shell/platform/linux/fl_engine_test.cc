@@ -1062,7 +1062,6 @@ TEST(FlEngineTest, ChildObjects) {
   EXPECT_NE(fl_engine_get_task_runner(engine), nullptr);
   EXPECT_NE(fl_engine_get_keyboard_manager(engine), nullptr);
   EXPECT_NE(fl_engine_get_mouse_cursor_handler(engine), nullptr);
-  EXPECT_NE(fl_engine_get_windowing_handler(engine), nullptr);
 }
 
 // NOLINTEND(clang-analyzer-core.StackAddressEscape)

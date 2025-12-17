@@ -19,6 +19,7 @@ if (enable_unittests) {
     "no_builtin_redefinition.frag",
     "no_uniforms.frag",
     "simple.frag",
+    "texture.frag",
     "uniform_arrays.frag",
     "uniform_ordering.frag",
     "uniforms_inserted.frag",
