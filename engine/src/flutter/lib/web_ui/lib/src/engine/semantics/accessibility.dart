@@ -22,9 +22,20 @@ enum Assertiveness { polite, assertive }
 /// This was determined by trial and error with some extra buffer added.
 Duration liveMessageDuration = const Duration(milliseconds: 300);
 
+/// Delay before setting the announcement text. This allows VoiceOver to finish
+/// reading the button's accessible name before the announcement is made.
+///
+/// See: https://github.com/flutter/flutter/issues/179076
+Duration announcementDelay = const Duration(milliseconds: 500);
+
 /// Sets [liveMessageDuration] to reduce the delay in tests.
 void setLiveMessageDurationForTest(Duration duration) {
   liveMessageDuration = duration;
+}
+
+/// Sets [announcementDelay] to reduce the delay in tests.
+void setAnnouncementDelayForTest(Duration duration) {
+  announcementDelay = duration;
 }
 
 /// Makes accessibility announcements using `aria-live` DOM elements.
@@ -108,8 +119,6 @@ class AccessibilityAnnouncements {
     // See the doc-comment for [_appendSpace] for the rationale.
     final messageText = _appendSpace ? '$message\u00A0' : message;
     _appendSpace = !_appendSpace;
-
-    const announcementDelay = Duration(milliseconds: 500);
 
     Timer(announcementDelay, () {
       ariaLiveElement.text = messageText;
