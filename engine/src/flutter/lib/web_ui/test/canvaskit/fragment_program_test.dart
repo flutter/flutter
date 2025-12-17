@@ -370,7 +370,7 @@ void testMain() {
           isA<ArgumentError>().having(
             (e) => e.message,
             'message',
-            '`uLoneMatrix` has size 16, not size 2.',
+            'Uniform `uLoneMatrix` has size 16, not size 2.',
           ),
         ),
       );
@@ -382,7 +382,7 @@ void testMain() {
           isA<ArgumentError>().having(
             (e) => e.message,
             'message',
-            '`uSize` has size 2, not size 3.',
+            'Uniform `uSize` has size 2, not size 3.',
           ),
         ),
       );
@@ -394,7 +394,7 @@ void testMain() {
           isA<ArgumentError>().having(
             (e) => e.message,
             'message',
-            '`uLoneMatrix` has size 16, not size 4.',
+            'Uniform `uLoneMatrix` has size 16, not size 4.',
           ),
         ),
       );
