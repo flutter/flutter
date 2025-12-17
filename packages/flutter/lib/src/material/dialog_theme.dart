@@ -12,11 +12,14 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines a theme for [Dialog] widgets.
 ///
 /// Descendant widgets obtain the current [DialogThemeData] object using
-/// [DialogTheme.of]. Instances of [DialogTheme] can be customized with
-/// [DialogTheme.copyWith].
+/// [DialogTheme.of]. Instances of [DialogThemeData] can be customized with
+/// [DialogThemeData.copyWith].
 ///
 /// [titleTextStyle] and [contentTextStyle] are used in [AlertDialog]s and [SimpleDialog]s.
 ///
@@ -192,7 +195,16 @@ class DialogTheme extends InheritedTheme with Diagnosticable {
         );
   }
 
-  /// The [ThemeData.dialogTheme] property of the ambient [Theme].
+  /// Retrieves the [DialogThemeData] from the closest ancestor [DialogTheme].
+  ///
+  /// If there is no enclosing [DialogTheme] widget, then
+  /// [ThemeData.dialogTheme] is used.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// DialogThemeData theme = DialogTheme.of(context);
+  /// ```
   static DialogThemeData of(BuildContext context) {
     final DialogTheme? dialogTheme = context.dependOnInheritedWidgetOfExactType<DialogTheme>();
     return dialogTheme?.data ?? Theme.of(context).dialogTheme;
