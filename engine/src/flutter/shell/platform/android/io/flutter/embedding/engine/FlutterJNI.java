@@ -1661,7 +1661,7 @@ public class FlutterJNI {
     void setLocale(@NonNull String locale);
 
     /**
-     * Invoked by native to notify framework started or stopped compiling accessibility tree.
+     * Invoked by native to notify embedder to reset accessibility tree.
      *
      * <p>The embedding needs to be prepare to clean up previously stored caches.
      */
