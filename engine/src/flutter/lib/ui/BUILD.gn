@@ -199,6 +199,8 @@ source_set("ui") {
       "painting/image_decoder_impeller.h",
       "painting/image_encoding_impeller.cc",
       "painting/image_encoding_impeller.h",
+      "painting/pixel_deferred_image_gpu_impeller.cc",
+      "painting/pixel_deferred_image_gpu_impeller.h",
     ]
 
     deps += [

@@ -401,6 +401,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       logger.printTrace('Connecting to existing DTD instance at: $existingDtdUri...');
       await _dtdService.connect(dtdWsUri: existingDtdUri);
     }
+    _previewCodeGenerator.populateDtdConnectionInfo(_dtdService.dtdUri!);
   }
 
   Future<int> runPreviewEnvironment({required FlutterProject widgetPreviewScaffoldProject}) async {
@@ -463,12 +464,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           BuildMode.debug,
           null,
           treeShakeIcons: false,
-          // Provide the DTD connection information directly to the preview scaffold.
-          // This could, in theory, be provided via a follow up call to a service extension
-          // registered by the preview scaffold, but there's some uncertainty around how service
-          // extensions will work with Flutter web embedded in VSCode without a Chrome debugger
-          // connection.
-          dartDefines: <String>['$kWidgetPreviewDtdUriEnvVar=${_dtdService.dtdUri}'],
           packageConfigPath: widgetPreviewScaffoldProject.packageConfig.path,
           packageConfig: PackageConfig.parseBytes(
             widgetPreviewScaffoldProject.packageConfig.readAsBytesSync(),
@@ -480,8 +475,8 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           webEnableHotReload: true,
         ),
         webEnableExposeUrl: false,
+        webEnableExpressionEvaluation: true,
         webRunHeadless: boolArg(kHeadless),
-        enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
         devToolsServerAddress: devToolsServerAddress,
       );
       final String target = bundle.defaultMainPath;
@@ -494,6 +489,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
       if (boolArg(kLaunchPreviewer)) {
         final appStarted = Completer<void>();
+        final connectionInfo = Completer<DebugConnectionInfo>();
         _widgetPreviewApp = ResidentWebRunner(
           flutterDevice,
           target: target,
@@ -516,9 +512,23 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           // See https://github.com/flutter/flutter/issues/179036
           projectRootPath: widgetPreviewScaffoldProject.directory.absolute.path,
         );
-        unawaited(_widgetPreviewApp!.run(appStartedCompleter: appStarted));
+        unawaited(
+          _widgetPreviewApp!.run(
+            appStartedCompleter: appStarted,
+            connectionInfoCompleter: connectionInfo,
+          ),
+        );
         await appStarted.future;
         logger.sendStartedEvent(applicationUrl: flutterDevice.devFS!.baseUri!);
+        final DebugConnectionInfo debugConnection = await connectionInfo.future;
+        final Uri? devToolsUri = devToolsServerAddress ?? debugConnection.devToolsUri;
+        if (devToolsUri == null) {
+          throwToolExit('Could not determine DevTools server address for the widget inspector.');
+        }
+        _dtdService.setDevToolsServerAddress(
+          devToolsServerAddress: devToolsServerAddress ?? debugConnection.devToolsUri!,
+          applicationUri: debugConnection.wsUri!,
+        );
       }
     } on Exception catch (error) {
       throwToolExit(error.toString());
@@ -690,7 +700,9 @@ final class WidgetPreviewMachineAwareLogger extends DelegatingLogger {
     if (!machine) {
       return;
     }
-    super.printStatus(
+    // Don't call super.printStatus as it will result in a prefix being printed when --verbose is
+    // provided.
+    globals.stdio.stdout.writeln(
       json.encode([
         {'event': 'widget_preview.$name', 'params': ?args},
       ]),
