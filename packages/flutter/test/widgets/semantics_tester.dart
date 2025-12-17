@@ -63,6 +63,7 @@ class TestSemantics {
     this.identifier = '',
     this.traversalParentIdentifier,
     this.traversalChildIdentifier,
+    this.locale,
     this.hintOverrides,
   }) : assert(flags is int || flags is List<SemanticsFlag> || flags is SemanticsFlags),
        assert(actions is int || actions is List<SemanticsAction>),
@@ -97,6 +98,7 @@ class TestSemantics {
     this.identifier = '',
     this.traversalParentIdentifier,
     this.traversalChildIdentifier,
+    this.locale,
     this.hintOverrides,
   }) : id = 0,
        assert(flags is int || flags is List<SemanticsFlag> || flags is SemanticsFlags),
@@ -143,6 +145,7 @@ class TestSemantics {
     this.identifier = '',
     this.traversalParentIdentifier,
     this.traversalChildIdentifier,
+    this.locale,
     this.hintOverrides,
   }) : assert(flags is int || flags is List<SemanticsFlag> || flags is SemanticsFlags),
        assert(actions is int || actions is List<SemanticsAction>),
@@ -301,13 +304,18 @@ class TestSemantics {
   /// Defaults to null if not set.
   final Object? traversalChildIdentifier;
 
+  /// The expected locale for the node.
+  ///
+  /// Defaults to null if not set.
+  final Locale? locale;
+
   /// The expected hint overrides for the node.
   ///
   /// Defaults to null if not set.
   final SemanticsHintOverrides? hintOverrides;
 
   static Matrix4 _applyRootChildScale(Matrix4? transform) {
-    final Matrix4 result = Matrix4.diagonal3Values(3.0, 3.0, 1.0);
+    final result = Matrix4.diagonal3Values(3.0, 3.0, 1.0);
     if (transform != null) {
       result.multiply(transform);
     }
@@ -515,11 +523,16 @@ class TestSemantics {
         'expected node id $id to have hint overrides $hintOverrides but found hint overrides ${node.hintOverrides}',
       );
     }
+    if (locale != null && locale != node.getSemanticsData().locale) {
+      return fail(
+        'expected node id $id to have locale $locale but found locale ${node.getSemanticsData().locale}',
+      );
+    }
 
     if (children.isEmpty) {
       return true;
     }
-    bool result = true;
+    var result = true;
     final Iterator<TestSemantics> it = children.iterator;
     for (final SemanticsNode child in node.debugListChildrenInOrder(childOrder)) {
       it.moveNext();
@@ -546,7 +559,7 @@ class TestSemantics {
   @override
   String toString([int indentAmount = 0]) {
     final String indent = '  ' * indentAmount;
-    final StringBuffer buf = StringBuffer();
+    final buf = StringBuffer();
     buf.writeln('$indent${objectRuntimeType(this, 'TestSemantics')}(');
     if (id != null) {
       buf.writeln('$indent  id: $id,');
@@ -671,7 +684,7 @@ class SemanticsTester {
     if (first.length != second.length) {
       return false;
     }
-    for (int i = 0; i < first.length; i++) {
+    for (var i = 0; i < first.length; i++) {
       if (first[i] is SpellOutStringAttribute &&
           (second[i] is! SpellOutStringAttribute || second[i].range != first[i].range)) {
         return false;
@@ -713,8 +726,6 @@ class SemanticsTester {
     double? scrollExtentMin,
     int? currentValueLength,
     int? maxValueLength,
-    String? maxValue,
-    String? minValue,
     SemanticsNode? ancestor,
     SemanticsInputType? inputType,
   }) {
@@ -812,16 +823,10 @@ class SemanticsTester {
       if (inputType != null && node.inputType != inputType) {
         return false;
       }
-      if (maxValue != null && node.maxValue != maxValue) {
-        return false;
-      }
-      if (minValue != null && node.minValue != minValue) {
-        return false;
-      }
       return true;
     }
 
-    final List<SemanticsNode> result = <SemanticsNode>[];
+    final result = <SemanticsNode>[];
     bool visit(SemanticsNode node) {
       if (checkNode(node)) {
         result.add(node);
@@ -929,9 +934,9 @@ class SemanticsTester {
       return 'null';
     }
     final String indent = '  ' * indentAmount;
-    final StringBuffer buf = StringBuffer();
+    final buf = StringBuffer();
     final SemanticsData nodeData = node.getSemanticsData();
-    final bool isRoot = node.id == 0;
+    final isRoot = node.id == 0;
     buf.writeln('TestSemantics${isRoot ? '.root' : ''}(');
     if (!isRoot) {
       buf.writeln('  id: ${node.id},');
@@ -1128,8 +1133,6 @@ class _IncludesNodeWith extends Matcher {
     this.maxValueLength,
     this.currentValueLength,
     this.inputType,
-    this.minValue,
-    this.maxValue,
   }) : assert(
          label != null ||
              value != null ||
@@ -1145,7 +1148,6 @@ class _IncludesNodeWith extends Matcher {
              maxValueLength != null ||
              currentValueLength != null ||
              inputType != null,
-         minValue != null || maxValue != null,
        );
   final AttributedString? attributedLabel;
   final AttributedString? attributedValue;
@@ -1166,8 +1168,6 @@ class _IncludesNodeWith extends Matcher {
   final int? currentValueLength;
   final int? maxValueLength;
   final SemanticsInputType? inputType;
-  final String? minValue;
-  final String? maxValue;
 
   @override
   bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
@@ -1192,8 +1192,6 @@ class _IncludesNodeWith extends Matcher {
           currentValueLength: currentValueLength,
           maxValueLength: maxValueLength,
           inputType: inputType,
-          minValue: minValue,
-          maxValue: maxValue,
         )
         .isNotEmpty;
   }
@@ -1214,7 +1212,7 @@ class _IncludesNodeWith extends Matcher {
   }
 
   String get _configAsString {
-    final List<String> strings = <String>[
+    final strings = <String>[
       if (label != null) 'label "$label"',
       if (value != null) 'value "$value"',
       if (hint != null) 'hint "$hint"',
@@ -1230,8 +1228,6 @@ class _IncludesNodeWith extends Matcher {
       if (currentValueLength != null) 'currentValueLength "$currentValueLength"',
       if (maxValueLength != null) 'maxValueLength "$maxValueLength"',
       if (inputType != null) 'inputType $inputType',
-      if (minValue != null) 'minValue "$minValue"',
-      if (maxValue != null) 'maxValue "$maxValue"',
     ];
     return strings.join(', ');
   }
@@ -1261,8 +1257,6 @@ Matcher includesNodeWith({
   int? maxValueLength,
   int? currentValueLength,
   SemanticsInputType? inputType,
-  String? minValue,
-  String? maxValue,
 }) {
   return _IncludesNodeWith(
     label: label,
@@ -1284,7 +1278,5 @@ Matcher includesNodeWith({
     maxValueLength: maxValueLength,
     currentValueLength: currentValueLength,
     inputType: inputType,
-    minValue: minValue,
-    maxValue: maxValue,
   );
 }

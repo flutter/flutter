@@ -74,7 +74,8 @@ impeller_shaders("entity_shaders") {
 impeller_shaders("modern_entity_shaders") {
   name = "modern"
 
-  if (impeller_enable_opengles) {
+  # Wasm only builds GLES3, which has a hard coded language version.
+  if (impeller_enable_opengles && !is_wasm) {
     gles_language_version = 460
   }
 
@@ -294,6 +295,7 @@ impeller_component("entity_unittests") {
     "../geometry:geometry_asserts",
     "../playground:playground_test",
     "//flutter/display_list/testing:display_list_testing",
+    "//flutter/impeller/renderer/testing:mocks",
     "//flutter/impeller/typographer/backends/skia:typographer_skia_backend",
     "//flutter/txt",
   ]

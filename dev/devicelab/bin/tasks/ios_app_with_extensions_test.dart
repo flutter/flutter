@@ -17,8 +17,8 @@ Future<void> main() async {
     final Directory tempDir = Directory.systemTemp.createTempSync(
       'flutter_ios_app_with_extensions_test.',
     );
-    final Directory rootDir = Directory(path.join(tempDir.path, 'app_workspace'));
-    final Directory projectDir = Directory(path.join(rootDir.path, 'app_with_extensions'));
+    final rootDir = Directory(path.join(tempDir.path, 'app_workspace'));
+    final projectDir = Directory(path.join(rootDir.path, 'app_with_extensions'));
     try {
       mkdirs(projectDir);
       recursiveCopy(
@@ -31,7 +31,7 @@ Future<void> main() async {
       final String rootPubspec = File(
         path.join(flutterDirectory.path, 'pubspec.yaml'),
       ).readAsStringSync();
-      final YamlEditor yamlEditor = YamlEditor(rootPubspec);
+      final yamlEditor = YamlEditor(rootPubspec);
       yamlEditor.update(<String>['workspace'], <String>['app_with_extensions']);
       File(path.join(rootDir.path, 'pubspec.yaml'))
         ..createSync()

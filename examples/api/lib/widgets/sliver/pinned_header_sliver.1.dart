@@ -62,9 +62,14 @@ class _SettingsAppBarExampleState extends State<SettingsAppBarExample> {
   bool handleScrollNotification(ScrollNotification notification) {
     final RenderSliver? headerSliver = keyToSliver(headerSliverKey);
     final RenderSliver? titleSliver = keyToSliver(titleSliverKey);
-    if (headerSliver != null && titleSliver != null && titleSliver.geometry != null) {
+    if (headerSliver != null &&
+        titleSliver != null &&
+        titleSliver.geometry != null) {
       final double opacity =
-          headerSliver.constraints.scrollOffset > titleSliver.geometry!.scrollExtent ? 1 : 0;
+          headerSliver.constraints.scrollOffset >
+              titleSliver.geometry!.scrollExtent
+          ? 1
+          : 0;
       if (opacity != headerOpacity) {
         setState(() {
           headerOpacity = opacity;
@@ -111,7 +116,10 @@ class _SettingsAppBarExampleState extends State<SettingsAppBarExample> {
                   ),
                 ),
               ),
-              const SliverPadding(padding: horizontalPadding, sliver: ItemList()),
+              const SliverPadding(
+                padding: horizontalPadding,
+                sliver: ItemList(),
+              ),
             ],
           ),
         ),
@@ -138,7 +146,9 @@ class Header extends StatelessWidget {
       duration: const Duration(milliseconds: 300),
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: ShapeDecoration(
-        color: opacity == 0 ? colorScheme.surfaceContainer : colorScheme.surfaceContainerLowest,
+        color: opacity == 0
+            ? colorScheme.surfaceContainer
+            : colorScheme.surfaceContainerLowest,
         shape: LinearBorder.bottom(
           side: BorderSide(
             color: opacity == 0
@@ -189,7 +199,10 @@ class ItemList extends StatelessWidget {
       itemBuilder: (BuildContext context, int index) {
         return Card(
           color: colorScheme.onSecondary,
-          child: ListTile(textColor: colorScheme.secondary, title: Text('Item $index')),
+          child: ListTile(
+            textColor: colorScheme.secondary,
+            title: Text('Item $index'),
+          ),
         );
       },
     );

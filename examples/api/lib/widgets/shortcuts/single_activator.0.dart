@@ -41,7 +41,8 @@ class _SingleActivatorExampleState extends State<SingleActivatorExample> {
   Widget build(BuildContext context) {
     return Shortcuts(
       shortcuts: const <ShortcutActivator, Intent>{
-        SingleActivator(LogicalKeyboardKey.keyC, control: true): IncrementIntent(),
+        SingleActivator(LogicalKeyboardKey.keyC, control: true):
+            IncrementIntent(),
       },
       child: Actions(
         actions: <Type, Action<Intent>>{

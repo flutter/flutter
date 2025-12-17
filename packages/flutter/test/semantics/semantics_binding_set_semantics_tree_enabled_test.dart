@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('SemanticsHandle ensureSemantics calls setSemanticsTreeEnabled', () async {
-    final SemanticsTestBinding binding = SemanticsTestBinding();
+    final binding = SemanticsTestBinding();
     expect(binding.platformDispatcher.semanticsTreeEnabled, isFalse);
     final SemanticsHandle handle = binding.ensureSemantics();
     expect(binding.platformDispatcher.semanticsTreeEnabled, isTrue);

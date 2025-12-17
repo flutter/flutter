@@ -24,13 +24,13 @@ void testMain() {
     setUpUnitTests(withImplicitView: true);
 
     test('Renders sweep gradient with color blend', () async {
-      final ui.SceneBuilder builder = ui.SceneBuilder();
+      final builder = ui.SceneBuilder();
 
       builder.pushOffset(0, 0);
 
       // Draw a red circle and apply it to the scene.
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
-      final ui.Canvas canvas = ui.Canvas(recorder, region);
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, region);
 
       canvas.drawCircle(
         const ui.Offset(425, 125),
@@ -41,7 +41,7 @@ void testMain() {
 
       builder.addPicture(ui.Offset.zero, redCircle);
 
-      final ui.Gradient shader = ui.Gradient.sweep(
+      final shader = ui.Gradient.sweep(
         const ui.Offset(250, 125),
         const <ui.Color>[
           ui.Color(0xFF4285F4),
@@ -56,7 +56,7 @@ void testMain() {
         math.pi * 2 - (math.pi / 2),
       );
 
-      final ui.Path clipPath = ui.Path()..addOval(const ui.Rect.fromLTWH(25, 75, 100, 100));
+      final clipPath = ui.Path()..addOval(const ui.Rect.fromLTWH(25, 75, 100, 100));
       builder.pushClipPath(clipPath);
 
       // Apply a shader mask.
@@ -64,8 +64,8 @@ void testMain() {
 
       // Draw another red circle and apply it to the scene.
       // This one should be grey since we have the color filter.
-      final ui.PictureRecorder recorder2 = ui.PictureRecorder();
-      final ui.Canvas canvas2 = ui.Canvas(recorder2, region);
+      final recorder2 = ui.PictureRecorder();
+      final canvas2 = ui.Canvas(recorder2, region);
 
       canvas2.drawRect(
         const ui.Rect.fromLTWH(25, 75, 100, 100),
@@ -83,13 +83,13 @@ void testMain() {
 
     /// Regression test for https://github.com/flutter/flutter/issues/78959
     test('Renders sweep gradient with color blend translated', () async {
-      final ui.SceneBuilder builder = ui.SceneBuilder();
+      final builder = ui.SceneBuilder();
 
       builder.pushOffset(0, 0);
 
       // Draw a red circle and apply it to the scene.
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
-      final ui.Canvas canvas = ui.Canvas(recorder, region);
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, region);
 
       canvas.drawCircle(
         const ui.Offset(425, 125),
@@ -100,7 +100,7 @@ void testMain() {
 
       builder.addPicture(ui.Offset.zero, redCircle);
 
-      final ui.Gradient shader = ui.Gradient.sweep(
+      final shader = ui.Gradient.sweep(
         const ui.Offset(250, 125),
         const <ui.Color>[
           ui.Color(0xFF4285F4),
@@ -115,7 +115,7 @@ void testMain() {
         math.pi * 2 - (math.pi / 2),
       );
 
-      final ui.Path clipPath = ui.Path()..addOval(const ui.Rect.fromLTWH(25, 75, 100, 100));
+      final clipPath = ui.Path()..addOval(const ui.Rect.fromLTWH(25, 75, 100, 100));
       builder.pushClipPath(clipPath);
 
       // Apply a shader mask.
@@ -123,8 +123,8 @@ void testMain() {
 
       // Draw another red circle and apply it to the scene.
       // This one should be grey since we have the color filter.
-      final ui.PictureRecorder recorder2 = ui.PictureRecorder();
-      final ui.Canvas canvas2 = ui.Canvas(recorder2, region);
+      final recorder2 = ui.PictureRecorder();
+      final canvas2 = ui.Canvas(recorder2, region);
 
       canvas2.drawRect(
         const ui.Rect.fromLTWH(25, 75, 100, 100),

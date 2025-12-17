@@ -769,6 +769,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       packageConfigPath: packageConfigPath,
       flavor: flavor,
       includeAssetsFromDevDependencies: true,
+      targetPlatform: TargetPlatform.tester,
     );
     if (build != 0) {
       throwToolExit('Error: Failed to build asset bundle');
