@@ -33,6 +33,10 @@ Future<void> testMain() async {
         builder.addText('$text$i.');
         return builder.build();
       });
+      if (paragraph is WebParagraph) {
+        // This is a pure temporary solution because the current dumb glyphId does not containt font information
+        paragraph.resetGlyphCache();
+      }
       timeAction('layout', () {
         paragraph.layout(const ParagraphConstraints(width: 1000));
       });
@@ -101,7 +105,7 @@ Future<void> testMain() async {
     );
     //await drawPictureUsingCurrentRenderer(recorder.endRecording());
     //await matchGoldenFile('largeText.png', region: region);
-  }, timeout: Timeout.none, solo: true);
+  }, timeout: Timeout.none);
   /*
   test('Subsequent layout small text no cache', () async {
     final ParagraphStyle arialStyle = ParagraphStyle(fontFamily: 'Roboto', fontSize: 20);

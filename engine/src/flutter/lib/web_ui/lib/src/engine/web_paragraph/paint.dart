@@ -100,9 +100,9 @@ class TextPaint {
           : block.clusterRangeWithoutWhitespaces.start - 1;
       final step = block.isLtr ? 1 : -1;
       for (var i = start; i != end; i += step) {
-        final WebCluster clusterText = block is EllipsisBlock
-            ? layout.ellipsisClusters[i]
-            : layout.allClusters[i];
+        final clusterText =
+            (block is EllipsisBlock ? layout.ellipsisClusters[i] : layout.allClusters[i])
+                as TextCluster;
         // We need to adjust the canvas size to fit the block in case there is scaling or zoom involved
         final (ui.Rect sourceRect, ui.Rect targetRect) = calculateCluster(
           layout,
@@ -138,8 +138,8 @@ class TextPaint {
             }
             paintContext.restore();
           case StyleElements.text:
-            timeAction('paint/fillTextCluster', () {
-              painter.fillTextCluster(
+            final bool cached = timeAction('paint/fillTextCluster', () {
+              return painter.fillTextCluster(
                 clusterText,
                 // We shape ellipsis with default direction coming from the attaching block
                 // and all the other blocks with the default paragraph direction.
@@ -151,7 +151,16 @@ class TextPaint {
               );
             });
             timeAction('paint/paintTextCluster', () {
-              painter.paintTextCluster(canvas, sourceRect, targetRect);
+              if (cached) {
+                painter.paintTextClusterFromCache(
+                  canvas,
+                  sourceRect,
+                  targetRect,
+                  clusterText.cacheId,
+                );
+              } else {
+                painter.paintTextCluster(canvas, sourceRect, targetRect, clusterText.cacheId);
+              }
             });
           default:
             assert(false);

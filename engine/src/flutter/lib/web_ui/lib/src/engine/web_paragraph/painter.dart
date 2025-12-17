@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
 import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
@@ -28,11 +29,19 @@ final paintContext = paintCanvas.getContext('2d')! as DomCanvasRenderingContext2
 abstract class Painter {
   Painter();
 
+  static HashMap<String, DomImageBitmap> imageCache = HashMap<String, DomImageBitmap>();
+
   /// Fills out the information needed to paint the text cluster.
-  void fillTextCluster(WebCluster webTextCluster, bool isDefaultLtr);
+  bool fillTextCluster(WebCluster webTextCluster, bool isDefaultLtr);
 
   /// Paints the text cluster previously filled by [fillTextCluster].
-  void paintTextCluster(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect);
+  void paintTextCluster(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect, String cacheId);
+  void paintTextClusterFromCache(
+    ui.Canvas canvas,
+    ui.Rect sourceRect,
+    ui.Rect targetRect,
+    String cacheId,
+  );
 
   /// Fills out the information needed to paint the text cluster shadow.
   void fillShadow(WebCluster webTextCluster, ui.Shadow shadow, bool isDefaultLtr);
@@ -231,7 +240,12 @@ class CanvasKitPainter extends Painter {
   }
 
   @override
-  void fillTextCluster(WebCluster webTextCluster, bool isDefaultLtr) {
+  bool fillTextCluster(WebCluster webTextCluster, bool isDefaultLtr) {
+    if (webTextCluster is TextCluster &&
+        webTextCluster.cacheId.isNotEmpty &&
+        Painter.imageCache.containsKey(webTextCluster.cacheId)) {
+      return true;
+    }
     final WebTextStyle style = webTextCluster.style;
     paintContext.fillStyle = style.getForegroundColor().toCssString();
     // We fill the text cluster into a rectange [0,0,w,h]
@@ -243,11 +257,16 @@ class CanvasKitPainter extends Painter {
       x: (isDefaultLtr ? 0 : webTextCluster.advance.width),
       y: 0,
     );
+    return false;
   }
 
   @override
-  void paintTextCluster(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect) {
-    final DomImageBitmap bitmap = paintCanvas.transferToImageBitmap();
+  void paintTextCluster(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect, String cacheId) {
+    assert(!Painter.imageCache.containsKey(cacheId));
+    final DomImageBitmap bitmap = (cacheId.isNotEmpty)
+        ? Painter.imageCache[cacheId] = paintCanvas.transferToImageBitmap()
+        : paintCanvas.transferToImageBitmap();
+
     final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
     if (skImage == null) {
       throw Exception('Failed to convert text image bitmap to an SkImage.');
@@ -284,6 +303,28 @@ class CanvasKitPainter extends Painter {
       );
     });
     */
+  }
+
+  @override
+  void paintTextClusterFromCache(
+    ui.Canvas canvas,
+    ui.Rect sourceRect,
+    ui.Rect targetRect,
+    String cacheId,
+  ) {
+    assert(Painter.imageCache.containsKey(cacheId));
+    final DomImageBitmap bitmap = Painter.imageCache[cacheId]!;
+    final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
+    if (skImage == null) {
+      throw Exception('Failed to convert text image bitmap to an SkImage.');
+    }
+    final ckImage = CkImage(skImage, imageSource: ImageBitmapImageSource(bitmap));
+    canvas.drawImageRect(
+      ckImage,
+      sourceRect,
+      targetRect,
+      ui.Paint()..filterQuality = ui.FilterQuality.none,
+    );
   }
 
   double calculateThickness(WebTextStyle textStyle) {

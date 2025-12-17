@@ -1,6 +1,5 @@
-100 repetitions
-===============
-
+BASE LINE
+=========
 
 Build/Layout/Paint small text  
 -----------------------------  
@@ -43,4 +42,47 @@ paint/fillTextCluster: 1800ms / 3125 = 0.576ms
 paint/paintTextCluster: 0ms / 3125 = 0.000ms
 paint.paintTextCluster: 98,300ms
 paint: 3,519,600ms
+
++ VERY BASIC GLYPH ID (one font, id=cluster text) Saving bitmap
+  can be turned on/off with boolean flag WebParagraph.withCacheId
+================================================================
+000:07 +0: Build/Layout/Paint small text                                                                                                                                            
+build: 0ms
+layout.AllCodeUnitFlags: 99ms
+layout.extractTextClusters: 0ms
+layout.extractBidiRuns: 0ms
+layout.wrapText: 101ms
+layout.formatLines: 0ms
+layout: 200ms
+paint/fillTextCluster: 1900ms / 890 = 2.135ms
+paint/paintTextCluster: 0ms / 890 = 0.000ms
+paint.paintTextCluster: 15099ms
+paint: 15099ms
+
+00:10 +1: Build/Layout/Paint medium text                                                                                                                                           
+build: 0ms
+layout.AllCodeUnitFlags: 101ms
+layout.extractTextClusters: 99ms
+layout.extractBidiRuns: 0ms
+layout.wrapText: 0ms
+layout.formatLines: 0ms
+layout: 200ms
+paint/fillTextCluster: 0ms / 1180 = 0.000ms
+paint/paintTextCluster: 0ms / 1180 = 0.000ms
+paint.paintTextCluster: 50101ms
+paint: 50201ms
+
+00:38 +2: Build/Layout/Paint large text                                                                                                                                            
+build: 0ms
+layout.AllCodeUnitFlags: 1899ms
+layout.extractTextClusters: 1101ms
+layout.extractBidiRuns: 99ms
+layout.wrapText: 8500ms
+layout.formatLines: 101ms
+layout: 11700ms
+paint/fillTextCluster: 0ms / 3125 = 0.000ms
+paint/paintTextCluster: 0ms / 3125 = 0.000ms
+paint.paintTextCluster: 2599ms
+paint: 82399ms
+
 

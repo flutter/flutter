@@ -436,7 +436,7 @@ class _LineBuilder {
       } else if (canFit(ellipsisSpan.advanceWidth()! - cutOffWidth)) {
         WebParagraphDebug.log('Ellipsize: stop $clusterIndex');
         // We can fit the ellipsis now
-        _layout.ellipsisClusters = ellipsisSpan.extractClusters();
+        _layout.ellipsisClusters = ellipsisSpan.extractClusters(false);
         break;
       } else {
         WebParagraphDebug.log('Ellipsize: continue $clusterIndex');

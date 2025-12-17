@@ -99,7 +99,7 @@ class TextLayout {
 
     for (final ParagraphSpan span in paragraph.spans) {
       assert(span.isNotEmpty);
-      allClusters.addAll(span.extractClusters());
+      allClusters.addAll(span.extractClusters(paragraph.withCacheId));
     }
     allClusters.sort((a, b) => a.start.compareTo(b.start));
     for (var i = 0; i < allClusters.length; ++i) {
@@ -972,7 +972,9 @@ abstract class WebCluster {
 }
 
 class TextCluster extends WebCluster {
-  TextCluster(this.span, this._cluster) : startInSpan = _cluster.start, endInSpan = _cluster.end;
+  TextCluster(this.span, this._cluster, this.cacheId)
+    : startInSpan = _cluster.start,
+      endInSpan = _cluster.end;
 
   @override
   final TextSpan span;
@@ -991,6 +993,7 @@ class TextCluster extends WebCluster {
   late final ui.Rect advance = span.getClusterSelection(this);
 
   final DomTextCluster _cluster;
+  final String cacheId;
 
   @override
   void fillOnContext(DomCanvasRenderingContext2D context, {required double x, required double y}) {

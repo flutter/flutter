@@ -562,7 +562,7 @@ abstract class ParagraphSpan extends ui.TextRange {
   double get fontBoundingBoxAscent;
   double get fontBoundingBoxDescent;
 
-  List<WebCluster> extractClusters();
+  List<WebCluster> extractClusters(bool withCacheId);
 }
 
 class PlaceholderSpan extends ParagraphSpan {
@@ -590,7 +590,7 @@ class PlaceholderSpan extends ParagraphSpan {
   double get fontBoundingBoxDescent => 0.0;
 
   @override
-  List<PlaceholderCluster> extractClusters() {
+  List<PlaceholderCluster> extractClusters(bool withCacheId) {
     return <PlaceholderCluster>[PlaceholderCluster(this)];
   }
 
@@ -651,10 +651,12 @@ class TextSpan extends ParagraphSpan {
   }
 
   @override
-  List<TextCluster> extractClusters() {
+  List<TextCluster> extractClusters(bool withCacheId) {
     final clusters = <TextCluster>[];
     for (final DomTextCluster cluster in _metrics.getTextClusters()) {
-      clusters.add(TextCluster(this, cluster));
+      clusters.add(
+        TextCluster(this, cluster, withCacheId ? text.substring(cluster.start, cluster.end) : ''),
+      );
     }
     return clusters;
   }
@@ -875,6 +877,8 @@ class WebParagraph implements ui.Paragraph {
 
   List<TextLine> get lines => _layout.lines;
 
+  bool withCacheId = true;
+
   @override
   List<ui.TextBox> getBoxesForPlaceholders() {
     final List<ui.TextBox> results = timeAction('query.getBoxesForPlaceholders', () {
@@ -976,6 +980,10 @@ class WebParagraph implements ui.Paragraph {
       'longestLine=${longestLine.toStringAsFixed(4)} '
       'maxLineWidthWithTrailingSpaces=${maxLineWidthWithTrailingSpaces.toStringAsFixed(4)} lines=${_layout.lines.length}',
     );
+  }
+
+  void resetGlyphCache() {
+    Painter.imageCache.clear();
   }
 
   void paint(ui.Canvas canvas, ui.Offset offset) {
