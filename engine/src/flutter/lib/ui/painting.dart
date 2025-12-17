@@ -1010,6 +1010,7 @@ enum BlendMode {
 ///  * [Paint.filterQuality], which is used to pass [FilterQuality] to the
 ///    engine while using drawImage calls on a [Canvas].
 ///  * [ImageShader].
+///  * [FragmentShader.setImageSampler].
 ///  * [ImageFilter.matrix].
 ///  * [Canvas.drawImage].
 ///  * [Canvas.drawImageRect].
@@ -2740,6 +2741,31 @@ void decodeImageFromPixels(
         });
   });
 }
+
+/// Decodes the given [pixels] into an [Image] synchronously.
+///
+/// The [pixels] are expected to be in the format specified by [format].
+///
+/// The [width] and [height] arguments specify the dimensions of the image.
+///
+/// This function returns an [Image] immediately. The image might not be
+/// fully decoded yet, but it can be drawn to a [Canvas].
+Image decodeImageFromPixelsSync(Uint8List pixels, int width, int height, PixelFormat format) {
+  final image = Image._(_Image._(), width, height);
+  _decodeImageFromPixelsSync(pixels, width, height, format.index, image._image);
+  return image;
+}
+
+@Native<Void Function(Handle, Int32, Int32, Int32, Handle)>(
+  symbol: 'Image::decodeImageFromPixelsSync',
+)
+external void _decodeImageFromPixelsSync(
+  Uint8List pixels,
+  int width,
+  int height,
+  int format,
+  _Image outImage,
+);
 
 /// Determines the winding rule that decides how the interior of a [Path] is
 /// calculated.
@@ -5589,12 +5615,15 @@ base class FragmentShader extends Shader {
   /// The index provided to setImageSampler is the index of the sampler uniform defined
   /// in the fragment program, excluding all non-sampler uniforms.
   ///
+  /// The optional [filterQuality] argument may be provided to set the quality level used to sample
+  /// the image. By default, it is set to [FilterQuality.none].
+  ///
   /// All the sampler uniforms that a shader expects must be provided or the
   /// results will be undefined.
-  void setImageSampler(int index, Image image) {
+  void setImageSampler(int index, Image image, {FilterQuality filterQuality = FilterQuality.none}) {
     assert(!debugDisposed, 'Tried to access uniforms on a disposed Shader: $this');
     assert(!image.debugDisposed, 'Image has been disposed');
-    _setImageSampler(index, image._image);
+    _setImageSampler(index, image._image, filterQuality.index);
   }
 
   /// Releases the native resources held by the [FragmentShader].
@@ -5616,10 +5645,10 @@ base class FragmentShader extends Shader {
     int samplerUniforms,
   );
 
-  @Native<Void Function(Pointer<Void>, Handle, Handle)>(
+  @Native<Void Function(Pointer<Void>, Handle, Handle, Int32)>(
     symbol: 'ReusableFragmentShader::SetImageSampler',
   )
-  external void _setImageSampler(int index, _Image sampler);
+  external void _setImageSampler(int index, _Image sampler, int filterQualityIndex);
 
   @Native<Bool Function(Pointer<Void>)>(symbol: 'ReusableFragmentShader::ValidateSamplers')
   external bool _validateSamplers();

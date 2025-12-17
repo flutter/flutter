@@ -457,6 +457,12 @@ sk_sp<SkImage> Rasterizer::ConvertToRasterImage(sk_sp<SkImage> image) {
   return snapshot_controller_->ConvertToRasterImage(image);
 }
 
+sk_sp<DlImage> Rasterizer::MakeTextureImage(sk_sp<SkImage> image,
+                                            SnapshotPixelFormat pixel_format) {
+  TRACE_EVENT0("flutter", __FUNCTION__);
+  return snapshot_controller_->MakeTextureImage(image, pixel_format);
+}
+
 // |SnapshotDelegate|
 void Rasterizer::CacheRuntimeStage(
     const std::shared_ptr<impeller::RuntimeStage>& runtime_stage) {
@@ -856,7 +862,7 @@ static sk_sp<SkData> ScreenshotLayerTreeAsPicture(
 #else
   SkSerialProcs procs = {0};
   procs.fTypefaceProc = SerializeTypefaceWithData;
-  procs.fImageProc = [](SkImage* img, void*) -> sk_sp<SkData> {
+  procs.fImageProc = [](SkImage* img, void*) -> SkSerialReturnType {
     return SkPngEncoder::Encode(nullptr, img, SkPngEncoder::Options{});
   };
 #endif

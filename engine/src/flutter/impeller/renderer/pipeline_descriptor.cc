@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/pipeline_descriptor.h"
 
+#include <memory>
 #include <utility>
 
 #include "impeller/base/comparable.h"
