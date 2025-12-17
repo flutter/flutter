@@ -1637,8 +1637,8 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
   }
 
   // The index of the leading item in the carousel.
-  // getItemFromPixels may return a fractional value (e.g., 0.6 when mid-scroll).
-  // We use toInt() to truncate the fractional part, ensuring the leading item
+  // `getItemFromPixels` may return a fractional value (e.g., 0.6 when mid-scroll).
+  // Use `toInt()` to truncate the fractional part, ensuring the leading item
   // only advances after fully crossing the next item's boundary.
   int get leadingItem => getItemFromPixels(pixels, viewportDimension).toInt();
 
