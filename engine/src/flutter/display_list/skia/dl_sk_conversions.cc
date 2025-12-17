@@ -236,6 +236,7 @@ sk_sp<SkImageFilter> ToSk(const DlImageFilter* filter) {
       return skia_filter->makeWithLocalMatrix(ToSkMatrix(lm_filter->matrix()));
     }
     case DlImageFilterType::kRuntimeEffect:
+    case DlImageFilterType::kCombine:
       // UNSUPPORTED.
       return nullptr;
   }

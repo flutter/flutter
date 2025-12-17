@@ -201,6 +201,7 @@ class ColorSourceContents : public Contents {
       geometry_result = create_geom_callback(renderer, entity, pass, geometry);
     }
 
+    FML_LOG(ERROR) << geometry_result.transform;
     if (geometry_result.vertex_buffer.vertex_count == 0u) {
       return true;
     }

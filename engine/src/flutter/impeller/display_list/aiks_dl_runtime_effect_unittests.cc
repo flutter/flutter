@@ -473,5 +473,108 @@ TEST_P(AiksTest, ClippedBackdropFilterWithShader) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, CombineBlurAndMatrix) {
+  // Combiner: runtime_stage_combiner.frag
+  auto runtime_stages_result =
+      OpenAssetAsRuntimeStage("runtime_stage_combiner.frag.iplr");
+  ABSL_ASSERT_OK(runtime_stages_result);
+  std::shared_ptr<RuntimeStage> runtime_stage =
+      runtime_stages_result
+          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ASSERT_TRUE(runtime_stage);
+
+  auto texture = CreateTextureForFixture("blend_mode_src.png");
+  auto image = DlImageImpeller::Make(texture);
+  Scalar sigma = 20.0f;
+  Scalar rotation = 0.0f;
+
+  auto callback = [&]() -> sk_sp<DisplayList> {
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::SliderFloat("sigma", &sigma, 0, 50);
+      ImGui::SliderFloat("rotation", &rotation, 0, 360);
+      ImGui::End();
+    }
+
+    DisplayListBuilder builder;
+    Scalar center_x = 100 + image->width() / 2.0f;
+    Scalar center_y = 100 + image->height() / 2.0f;
+    builder.Translate(center_x, center_y);
+    builder.Rotate(rotation);
+    builder.Translate(-center_x, -center_y);
+
+    // First input: Blur
+    auto blur = DlImageFilter::MakeBlur(sigma, sigma, DlTileMode::kDecal);
+
+    // Second input: Identity Matrix
+    auto matrix =
+        DlImageFilter::MakeMatrix(DlMatrix(), DlImageSampling::kLinear);
+    auto combiner = DlRuntimeEffectImpeller::Make(runtime_stage);
+
+    auto combine_filter = DlImageFilter::MakeCombine(blur, matrix, combiner);
+
+    DlPaint paint;
+    paint.setColor(DlColor::kRed());
+    paint.setImageFilter(combine_filter);
+
+    builder.DrawImage(image, DlPoint(100, 100), DlImageSampling::kLinear,
+                      &paint);
+
+    return builder.Build();
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+TEST_P(AiksTest, CombineColorFilters) {
+  // Combiner: runtime_stage_combiner_add.frag
+  auto runtime_stages_result =
+      OpenAssetAsRuntimeStage("runtime_stage_combiner_add.frag.iplr");
+  ABSL_ASSERT_OK(runtime_stages_result);
+  std::shared_ptr<RuntimeStage> runtime_stage =
+      runtime_stages_result
+          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ASSERT_TRUE(runtime_stage);
+
+  // Filter 1: Keep Red, zero G/B/A
+  const float keep_red_matrix[20] = {
+      1, 0, 0, 0, 0,  // R = R
+      0, 0, 0, 0, 0,  // G = 0
+      0, 0, 0, 0, 0,  // B = 0
+      0, 0, 0, 1, 0,  // A = A
+  };
+  auto keep_red = DlImageFilter::MakeColorFilter(
+      DlColorFilter::MakeMatrix(keep_red_matrix));
+
+  // Filter 2: Keep Blue, zero R/G/A
+  const float keep_blue_matrix[20] = {
+      0, 0, 0, 0, 0,  // R = 0
+      0, 0, 0, 0, 0,  // G = 0
+      0, 0, 1, 0, 0,  // B = B
+      0, 0, 0, 1, 0,  // A = A
+  };
+  auto keep_blue = DlImageFilter::MakeColorFilter(
+      DlColorFilter::MakeMatrix(keep_blue_matrix));
+
+  auto combiner = DlRuntimeEffectImpeller::Make(runtime_stage);
+  auto combine_filter =
+      DlImageFilter::MakeCombine(keep_red, keep_blue, combiner);
+
+  DlPaint paint;
+  std::vector<DlColor> colors = {
+      DlColor(0.1, 0.1, 0.1, 1.0, DlColorSpace::kSRGB), DlColor::kWhite()};
+  const float stops[2] = {0.0, 1.0};
+  auto gradient =
+      DlColorSource::MakeLinear({100.0, 100.0}, {300.0, 100.0}, 2,
+                                colors.data(), stops, DlTileMode::kClamp);
+  paint.setColorSource(gradient);
+  paint.setImageFilter(combine_filter);
+
+  DisplayListBuilder builder;
+  builder.DrawRect(DlRect::MakeXYWH(100, 100, 200, 200), paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller

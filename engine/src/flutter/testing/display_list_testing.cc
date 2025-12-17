@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/testing/display_list_testing.h"
+#include "flutter/display_list/effects/dl_runtime_effect.h"
 
 #include <cstdint>
 #include <iomanip>
@@ -627,6 +628,30 @@ void DisplayListStreamDispatcher::out(const DlImageFilter& filter) {
       os_ << runtime_effect->uniform_data()->size() << " uniform bytes)";
       break;
     }
+    case DlImageFilterType::kCombine: {
+      const DlCombineImageFilter* combine = filter.asCombine();
+      FML_DCHECK(combine);
+      os_ << "DlCombineImageFilter(" << std::endl;
+      indent();
+      startl() << "first: ";
+      indent(7);
+      out(combine->first().get());
+      os_ << "," << std::endl;
+      outdent(7);
+      startl() << "second: ";
+      indent(8);
+      out(combine->second().get());
+      os_ << "," << std::endl;
+      outdent(8);
+      startl() << "combiner: ";
+      indent(10);
+      out(combine->combiner().get());
+      os_ << std::endl;
+      outdent(10);
+      outdent();
+      startl() << ")";
+      break;
+    }
   }
 }
 void DisplayListStreamDispatcher::out(const DlImageFilter* filter) {
@@ -637,6 +662,13 @@ void DisplayListStreamDispatcher::out(const DlImageFilter* filter) {
     indent(1);
     out(*filter);
     outdent(1);
+  }
+}
+void DisplayListStreamDispatcher::out(const DlRuntimeEffect* effect) {
+  if (effect) {
+    os_ << "DlRuntimeEffect(" << effect << ")";
+  } else {
+    os_ << "null DlRuntimeEffect";
   }
 }
 DisplayListStreamDispatcher::DlPathStreamer::~DlPathStreamer() {

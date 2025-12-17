@@ -15,14 +15,22 @@
 #include "flutter/testing/display_list_testing.h"
 #include "gtest/gtest.h"
 
+#include "flutter/display_list/effects/dl_runtime_effect_skia.h"
 #include "include/core/SkMatrix.h"
 #include "third_party/skia/include/core/SkBlendMode.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/core/SkSamplingOptions.h"
 #include "third_party/skia/include/effects/SkImageFilters.h"
+#include "third_party/skia/include/effects/SkRuntimeEffect.h"
 
 namespace flutter {
 namespace testing {
+
+sk_sp<DlRuntimeEffect> MakeTestRuntimeEffect() {
+  const char* sksl = "half4 main(float2 p) { return half4(0); }";
+  auto result = SkRuntimeEffect::MakeForShader(SkString(sksl));
+  return DlRuntimeEffectSkia::Make(result.effect);
+}
 
 // DlRect::Contains treats the rect as a half-open interval which is
 // appropriate for so many operations. Unfortunately, we are using
@@ -963,6 +971,158 @@ TEST(DisplayListImageFilter, RuntimeEffectModifiesTransparentBlack) {
                                       std::make_shared<std::vector<uint8_t>>());
 
   EXPECT_FALSE(filter_a.modifies_transparent_black());
+}
+
+TEST(DisplayListImageFilter, CombineConstructor) {
+  auto first = std::make_shared<DlMatrixImageFilter>(
+      DlMatrix::MakeRow(2.0, 0.0, 0.0, 10,   //
+                        0.5, 3.0, 0.0, 15,   //
+                        0.0, 0.0, 1.0, 0.0,  //
+                        0.0, 0.0, 0.0, 1.0),
+      DlImageSampling::kLinear);
+  auto second =
+      std::make_shared<DlBlurImageFilter>(5.0, 6.0, DlTileMode::kMirror);
+  auto combiner = MakeTestRuntimeEffect();
+  DlCombineImageFilter filter(first, second, combiner);
+}
+
+TEST(DisplayListImageFilter, CombineShared) {
+  auto first = std::make_shared<DlMatrixImageFilter>(
+      DlMatrix::MakeRow(2.0, 0.0, 0.0, 10,   //
+                        0.5, 3.0, 0.0, 15,   //
+                        0.0, 0.0, 1.0, 0.0,  //
+                        0.0, 0.0, 0.0, 1.0),
+      DlImageSampling::kLinear);
+  auto second =
+      std::make_shared<DlBlurImageFilter>(5.0, 6.0, DlTileMode::kMirror);
+  auto combiner = MakeTestRuntimeEffect();
+  DlCombineImageFilter filter(first, second, combiner);
+
+  ASSERT_NE(filter.shared().get(), &filter);
+  ASSERT_EQ(*filter.shared(), filter);
+}
+
+TEST(DisplayListImageFilter, CombineAsCombine) {
+  auto first = std::make_shared<DlMatrixImageFilter>(
+      DlMatrix::MakeRow(2.0, 0.0, 0.0, 10,   //
+                        0.5, 3.0, 0.0, 15,   //
+                        0.0, 0.0, 1.0, 0.0,  //
+                        0.0, 0.0, 0.0, 1.0),
+      DlImageSampling::kLinear);
+  auto second =
+      std::make_shared<DlBlurImageFilter>(5.0, 6.0, DlTileMode::kMirror);
+  auto combiner = MakeTestRuntimeEffect();
+  DlCombineImageFilter filter(first, second, combiner);
+
+  ASSERT_NE(filter.asCombine(), nullptr);
+  ASSERT_EQ(filter.asCombine(), &filter);
+}
+
+TEST(DisplayListImageFilter, CombineContents) {
+  auto first = std::make_shared<DlMatrixImageFilter>(
+      DlMatrix::MakeRow(2.0, 0.0, 0.0, 10,   //
+                        0.5, 3.0, 0.0, 15,   //
+                        0.0, 0.0, 1.0, 0.0,  //
+                        0.0, 0.0, 0.0, 1.0),
+      DlImageSampling::kLinear);
+  auto second =
+      std::make_shared<DlBlurImageFilter>(5.0, 6.0, DlTileMode::kMirror);
+  auto combiner = MakeTestRuntimeEffect();
+  DlCombineImageFilter filter(first, second, combiner);
+
+  ASSERT_EQ(*filter.first().get(), *first);
+  ASSERT_EQ(*filter.second().get(), *second);
+  ASSERT_EQ(filter.combiner(), combiner);
+}
+
+TEST(DisplayListImageFilter, CombineEquals) {
+  auto first1 = std::make_shared<DlMatrixImageFilter>(
+      DlMatrix::MakeRow(2.0, 0.0, 0.0, 10,   //
+                        0.5, 3.0, 0.0, 15,   //
+                        0.0, 0.0, 1.0, 0.0,  //
+                        0.0, 0.0, 0.0, 1.0),
+      DlImageSampling::kLinear);
+  auto second1 =
+      std::make_shared<DlBlurImageFilter>(5.0, 6.0, DlTileMode::kMirror);
+  auto combiner1 = MakeTestRuntimeEffect();
+  DlCombineImageFilter filter1(first1, second1, combiner1);
+
+  DlCombineImageFilter filter2(first1, second1, combiner1);
+
+  TestEquals(filter1, filter2);
+}
+
+TEST(DisplayListImageFilter, CombineInequality) {
+  auto first1 = std::make_shared<DlMatrixImageFilter>(
+      DlMatrix::MakeScale({2.0, 2.0, 1.0}), DlImageSampling::kLinear);
+  auto second1 =
+      std::make_shared<DlBlurImageFilter>(5.0, 5.0, DlTileMode::kClamp);
+  auto combiner1 = MakeTestRuntimeEffect();
+  DlCombineImageFilter filter1(first1, second1, combiner1);
+
+  auto first2 = std::make_shared<DlMatrixImageFilter>(
+      DlMatrix::MakeRow(5.0, 0.0, 0.0, 10,   //
+                        0.5, 3.0, 0.0, 15,   //
+                        0.0, 0.0, 1.0, 0.0,  //
+                        0.0, 0.0, 0.0, 1.0),
+      DlImageSampling::kLinear);
+  auto second2 =
+      std::make_shared<DlBlurImageFilter>(7.0, 6.0, DlTileMode::kMirror);
+
+  const char* sksl = "half4 main(float2 p) { return half4(1); }";
+  auto result = SkRuntimeEffect::MakeForShader(SkString(sksl));
+  auto combiner2 = DlRuntimeEffectSkia::Make(result.effect);
+
+  DlCombineImageFilter filter2(first2, second1, combiner1);
+  DlCombineImageFilter filter3(first1, second2, combiner1);
+  DlCombineImageFilter filter4(first1, second1, combiner2);
+
+  TestNotEquals(filter1, filter2, "First differs");
+  TestNotEquals(filter1, filter3, "Second differs");
+  TestNotEquals(filter1, filter4, "Combiner differs");
+}
+
+TEST(DisplayListImageFilter, CombineBounds) {
+  // First expands by 5, 10
+  auto first = std::make_shared<DlDilateImageFilter>(5, 10);
+  // Second expands by 12, 5
+  auto second = std::make_shared<DlBlurImageFilter>(12, 5, DlTileMode::kDecal);
+  // Combiner does nothing to bounds
+  auto combiner = MakeTestRuntimeEffect();
+
+  DlCombineImageFilter filter(first, second, combiner);
+  DlRect input_bounds = DlRect::MakeLTRB(20, 20, 80, 80);
+
+  // Union of first and second expansion:
+  // First: Expand(5, 10)
+  // Second: Expand(12, 5)
+  // Union: Expand(12, 10) (max of each dimension)
+  DlRect expected_output_bounds = input_bounds.Expand(12, 10);
+  TestBounds(filter, input_bounds, expected_output_bounds);
+}
+
+TEST(DisplayListImageFilter, CombineModifiesTransparentBlack) {
+  // First modifies transparent black (ColorFilter)
+  auto color_filter = std::make_shared<DlBlendColorFilter>(
+      DlColor::kRed(), DlBlendMode::kSrcOver);
+  auto first = std::make_shared<DlColorFilterImageFilter>(color_filter);
+
+  // Second does not (Blur)
+  auto second =
+      std::make_shared<DlBlurImageFilter>(5.0, 6.0, DlTileMode::kDecal);
+
+  // Combiner - we assume true safe default
+  auto combiner = MakeTestRuntimeEffect();
+
+  DlCombineImageFilter filter(first, second, combiner);
+  EXPECT_TRUE(filter.modifies_transparent_black());
+
+  // If none modify transparent black (inputs)
+  auto first_blur =
+      std::make_shared<DlBlurImageFilter>(5.0, 6.0, DlTileMode::kDecal);
+  DlCombineImageFilter filter2(first_blur, second, combiner);
+  // Still true because we assume combiner might
+  EXPECT_TRUE(filter2.modifies_transparent_black());
 }
 
 }  // namespace testing
