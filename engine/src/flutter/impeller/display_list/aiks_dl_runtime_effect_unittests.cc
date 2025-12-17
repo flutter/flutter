@@ -473,5 +473,52 @@ TEST_P(AiksTest, ClippedBackdropFilterWithShader) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, RuntimeEffectImageFilterRotated) {
+  struct FragUniforms {
+    Size size;
+  } frag_uniforms = {.size = Size::MakeWH(400, 400)};
+  auto uniform_data = std::make_shared<std::vector<uint8_t>>();
+  uniform_data->resize(sizeof(FragUniforms));
+  memcpy(uniform_data->data(), &frag_uniforms, sizeof(FragUniforms));
+
+  auto runtime_stages_result = OpenAssetAsRuntimeStage("gradient.frag.iplr");
+  ABSL_ASSERT_OK(runtime_stages_result);
+  std::shared_ptr<RuntimeStage> runtime_stage =
+      runtime_stages_result
+          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ASSERT_TRUE(runtime_stage);
+  ASSERT_TRUE(runtime_stage->IsDirty());
+
+  std::vector<std::shared_ptr<DlColorSource>> sampler_inputs = {
+      nullptr,
+  };
+
+  auto runtime_filter = DlImageFilter::MakeRuntimeEffect(
+      DlRuntimeEffectImpeller::Make(runtime_stage), sampler_inputs,
+      uniform_data);
+
+  Scalar rotation = 45;
+
+  auto callback = [&]() -> sk_sp<DisplayList> {
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::SliderFloat("rotation", &rotation, 0, 360);
+      ImGui::End();
+    }
+    DisplayListBuilder builder;
+    builder.Translate(200, 200);
+    builder.Rotate(rotation);
+    builder.Translate(-200, -200);
+
+    DlPaint paint;
+    paint.setImageFilter(runtime_filter);
+    builder.DrawRect(DlRect::MakeXYWH(0, 0, 400, 400), paint);
+
+    return builder.Build();
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 }  // namespace testing
 }  // namespace impeller
