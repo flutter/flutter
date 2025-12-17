@@ -2163,7 +2163,8 @@ class SemanticsProperties extends DiagnosticableTree {
   /// the main heading of a page, a level 2 heading the first subsection,
   /// a level 3 is a subsection of that, and so on.
   ///
-  /// This is used on Android and web platforms.
+  /// On web, this sets the `aria-level` attribute (e.g., `aria-level="1"`).
+  /// On Android, this sets the `isHeading` property for accessibility.
   final int? headingLevel;
 
   /// Overrides the default accessibility hints provided by the platform.
