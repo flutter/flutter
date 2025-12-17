@@ -171,6 +171,8 @@ Future<Image> _drawIntoImage(Image image) {
   return picture.toImage(image.width, image.height);
 }
 
+/// Draws an ellipsis with radii half the dimensions in the rgbaFloat32 pixel
+/// format.
 Future<Image> _createRGBA32FloatImage(int width, int height) async {
   final double radius = width / 4.0;
   final floats = List<double>.filled(width * height * 4, 0.0);
@@ -204,6 +206,8 @@ Future<Image> _createRGBA32FloatImage(int width, int height) async {
   return completer.future;
 }
 
+/// Draws an ellipsis with radii half the dimensions in the rFloat32 pixel
+/// format.
 Future<Image> _createR32FloatImage(int width, int height) async {
   final double radius = width / 4.0;
   final floats = List<double>.filled(width * height, 0.0);
