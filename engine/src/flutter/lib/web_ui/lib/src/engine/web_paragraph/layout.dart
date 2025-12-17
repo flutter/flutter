@@ -99,7 +99,7 @@ class TextLayout {
 
     for (final ParagraphSpan span in paragraph.spans) {
       assert(span.isNotEmpty);
-      allClusters.addAll(span.extractClusters(paragraph.withCacheId));
+      allClusters.addAll(span.extractClusters(withCacheId));
     }
     allClusters.sort((a, b) => a.start.compareTo(b.start));
     for (var i = 0; i < allClusters.length; ++i) {

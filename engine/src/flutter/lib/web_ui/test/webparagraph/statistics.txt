@@ -1,88 +1,190 @@
+withCacheId: VERY BASIC GLYPH ID (one font, id=cluster text) Saving bitmap 
+useCPUTextLayout: Keeping both layout and paint canvas contexts on CPU side by setting willReadFrequently flag
+
+SKPARAGRAPH
+===========
+00:01 +0: Build/Layout/Paint small text                                                                                                                                            
+build: 101ms
+layout: 0ms
+paint: 0ms
+
+00:02 +1: Build/Layout/Paint medium text                                                                                                                                           
+build: 101ms
+layout: 99ms
+paint: 0ms
+
+00:02 +2: Build/Layout/Paint large text                                                                                                                                            
+build: 799ms
+layout: 1601ms
+paint: 0ms
+
 BASE LINE
 =========
-
-Build/Layout/Paint small text  
------------------------------  
-build: 0ms                                                                                                                                            
-layout.AllCodeUnitFlags: 101ms
-layout.extractTextClusters: 100ms
-layout.extractBidiRuns: 0ms
-layout.wrapText: 99ms
-layout.formatLines: 0ms
-layout: 300ms
-paint/fillTextCluster: 1600ms / 890 = 1.798ms
-paint/paintTextCluster: 99ms / 890 = 0.111ms
-paint.paintTextCluster: 16500ms
-paint: 16500ms
-
-Build/Layout/Paint medium text     
-------------------------------                                                                                                                                  
-build: 101ms
-layout.AllCodeUnitFlags: 99ms
+00:08 +0: Build/Layout/Paint small text                                                                                                                                            
+build: 0ms
+layout.AllCodeUnitFlags: 100ms
 layout.extractTextClusters: 101ms
 layout.extractBidiRuns: 0ms
-layout.wrapText: 100ms
+layout.wrapText: 0ms
 layout.formatLines: 0ms
-layout: 300ms
-paint/fillTextCluster: 1599ms / 1180 = 1.355ms
-paint/paintTextCluster: 101ms / 1180 = 0.086ms
-paint.paintTextCluster: 49,900ms
-paint: 49,900ms
-
-Build/Layout/Paint large text        
------------------------------                                                                                                                                        
-build: 101ms
-layout.AllCodeUnitFlags: 1800ms
-layout.extractTextClusters: 1000ms
-layout.extractBidiRuns: 200ms
-layout.wrapText: 5099ms
-layout.formatLines: 0ms
-layout: 8099ms
-paint/fillTextCluster: 1800ms / 3125 = 0.576ms
-paint/paintTextCluster: 0ms / 3125 = 0.000ms
-paint.paintTextCluster: 98,300ms
-paint: 3,519,600ms
-
-+ VERY BASIC GLYPH ID (one font, id=cluster text) Saving bitmap
-  can be turned on/off with boolean flag WebParagraph.withCacheId
-================================================================
-000:07 +0: Build/Layout/Paint small text                                                                                                                                            
-build: 0ms
-layout.AllCodeUnitFlags: 99ms
-layout.extractTextClusters: 0ms
-layout.extractBidiRuns: 0ms
-layout.wrapText: 101ms
-layout.formatLines: 0ms
-layout: 200ms
-paint/fillTextCluster: 1900ms / 890 = 2.135ms
+layout: 201ms
+paint/fillTextCluster: 1699ms / 890 = 1.909ms
 paint/paintTextCluster: 0ms / 890 = 0.000ms
-paint.paintTextCluster: 15099ms
-paint: 15099ms
+paint.paintTextCluster: 15899ms
+paint: 15899ms
 
-00:10 +1: Build/Layout/Paint medium text                                                                                                                                           
+00:19 +1: Build/Layout/Paint medium text                                                                                                                                           
 build: 0ms
-layout.AllCodeUnitFlags: 101ms
+layout.AllCodeUnitFlags: 201ms
+layout.extractTextClusters: 99ms
+layout.extractBidiRuns: 0ms
+layout.wrapText: 200ms
+layout.formatLines: 0ms
+layout: 500ms
+paint/fillTextCluster: 1600ms / 2380 = 0.672ms
+paint/paintTextCluster: 0ms / 2380 = 0.000ms
+paint.paintTextCluster: 55100ms
+paint: 55201ms
+
+00:52 +2: Build/Layout/Paint large text                                                                                                                                            
+build: 0ms
+layout.AllCodeUnitFlags: 2200ms
+layout.extractTextClusters: 1700ms
+layout.extractBidiRuns: 100ms
+layout.wrapText: 8200ms
+layout.formatLines: 0ms
+layout: 12200ms
+paint/fillTextCluster: 1601ms / 4325 = 0.370ms
+paint/paintTextCluster: 99ms / 4325 = 0.023ms
+paint.paintTextCluster: 109400ms
+paint: 3688200ms
+
+useCPUTextLayout = true
+withCacheId = false
+=======================
+00:08 +0: Build/Layout/Paint small text                                                                                                                                            
+build: 101ms
+layout.AllCodeUnitFlags: 0ms
 layout.extractTextClusters: 99ms
 layout.extractBidiRuns: 0ms
 layout.wrapText: 0ms
 layout.formatLines: 0ms
-layout: 200ms
-paint/fillTextCluster: 0ms / 1180 = 0.000ms
-paint/paintTextCluster: 0ms / 1180 = 0.000ms
-paint.paintTextCluster: 50101ms
-paint: 50201ms
+layout: 99ms
+paint/fillTextCluster: 1701ms / 890 = 1.911ms
+paint/paintTextCluster: 0ms / 890 = 0.000ms
+paint.paintTextCluster: 15600ms
+paint: 15701ms
 
-00:38 +2: Build/Layout/Paint large text                                                                                                                                            
+00:19 +1: Build/Layout/Paint medium text                                                                                                                                           
+build: 99ms
+layout.AllCodeUnitFlags: 0ms
+layout.extractTextClusters: 200ms
+layout.extractBidiRuns: 0ms
+layout.wrapText: 201ms
+layout.formatLines: 0ms
+layout: 401ms
+paint/fillTextCluster: 1700ms / 2380 = 0.714ms
+paint/paintTextCluster: 0ms / 2380 = 0.000ms
+paint.paintTextCluster: 52299ms
+paint: 52299ms
+
+00:51 +2: Build/Layout/Paint large text                                                                                                                                            
 build: 0ms
-layout.AllCodeUnitFlags: 1899ms
-layout.extractTextClusters: 1101ms
-layout.extractBidiRuns: 99ms
-layout.wrapText: 8500ms
-layout.formatLines: 101ms
-layout: 11700ms
-paint/fillTextCluster: 0ms / 3125 = 0.000ms
-paint/paintTextCluster: 0ms / 3125 = 0.000ms
-paint.paintTextCluster: 2599ms
-paint: 82399ms
+layout.AllCodeUnitFlags: 1299ms
+layout.extractTextClusters: 1000ms
+layout.extractBidiRuns: 201ms
+layout.wrapText: 7200ms
+layout.formatLines: 0ms
+layout: 9700ms
+paint/fillTextCluster: 1800ms / 4325 = 0.416ms
+paint/paintTextCluster: 0ms / 4325 = 0.000ms
+paint.paintTextCluster: 114800ms
+paint: 3689300ms
+
+useCPUTextLayout = false
+withCacheId = true
+====================
+00:01 +0: Build/Layout/Paint small text                                                                                                                                            
+build: 0ms
+layout.AllCodeUnitFlags: 0ms
+layout.extractTextClusters: 100ms
+layout.extractBidiRuns: 0ms
+layout.wrapText: 100ms
+layout.formatLines: 0ms
+layout: 200ms
+paint/fillTextCluster: 0ms / 890 = 0.000ms
+paint/paintTextCluster: 0ms / 890 = 0.000ms
+paint.paintTextCluster: 100ms
+paint: 100ms
+
+00:02 +1: Build/Layout/Paint medium text                                                                                                                                           
+build: 0ms
+layout.AllCodeUnitFlags: 0ms
+layout.extractTextClusters: 100ms
+layout.extractBidiRuns: 0ms
+layout.wrapText: 0ms
+layout.formatLines: 0ms
+layout: 100ms
+paint/fillTextCluster: 0ms / 2380 = 0.000ms
+paint/paintTextCluster: 0ms / 2380 = 0.000ms
+paint.paintTextCluster: 200ms
+paint: 200ms
+
+00:03 +2: Build/Layout/Paint large text                                                                                                                                            
+build: 100ms
+layout.AllCodeUnitFlags: 1300ms
+layout.extractTextClusters: 1000ms
+layout.extractBidiRuns: 100ms
+layout.wrapText: 5300ms
+layout.formatLines: 0ms
+layout: 7800ms
+paint/fillTextCluster: 0ms / 4325 = 0.000ms
+paint/paintTextCluster: 0ms / 4325 = 0.000ms
+paint.paintTextCluster: 2200ms
+paint: 68400ms
+   
+useCPUTextLayout = true
+withCacheId = true
+==================
+00:01 +0: Build/Layout/Paint small text                                                                                                                                            
+build: 0ms
+layout.AllCodeUnitFlags: 0ms
+layout.extractTextClusters: 0ms
+layout.extractBidiRuns: 100ms
+layout.wrapText: 100ms
+layout.formatLines: 0ms
+layout: 200ms
+paint/fillTextCluster: 0ms / 890 = 0.000ms
+paint/paintTextCluster: 0ms / 890 = 0.000ms
+paint.paintTextCluster: 0ms
+paint: 0ms
+
+00:02 +1: Build/Layout/Paint medium text                                                                                                                                           
+build: 0ms
+layout.AllCodeUnitFlags: 99ms
+layout.extractTextClusters: 0ms
+layout.extractBidiRuns: 0ms
+layout.wrapText: 0ms
+layout.formatLines: 0ms
+layout: 99ms
+paint/fillTextCluster: 0ms / 2380 = 0.000ms
+paint/paintTextCluster: 0ms / 2380 = 0.000ms
+paint.paintTextCluster: 301ms
+paint: 301ms
+
+00:03 +2: Build/Layout/Paint large text                                                                                                                                            
+build: 0ms
+layout.AllCodeUnitFlags: 1301ms
+layout.extractTextClusters: 1000ms
+layout.extractBidiRuns: 199ms
+layout.wrapText: 5101ms
+layout.formatLines: 0ms
+layout: 7601ms
+paint/fillTextCluster: 0ms / 4325 = 0.000ms
+paint/paintTextCluster: 0ms / 4325 = 0.000ms
+paint.paintTextCluster: 2299ms
+paint: 67899ms
+
+
 
 

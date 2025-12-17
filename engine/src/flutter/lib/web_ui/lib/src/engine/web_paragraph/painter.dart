@@ -23,13 +23,15 @@ const int _paintWidth = 1000;
 const int _paintHeight = 1000;
 double? currentDevicePixelRatio;
 final DomOffscreenCanvas paintCanvas = createDomOffscreenCanvas(_paintWidth, _paintHeight);
-final paintContext = paintCanvas.getContext('2d')! as DomCanvasRenderingContext2D;
+final paintContext =
+    paintCanvas.getContext('2d', {'willReadFrequently': useCPUTextLayout})!
+        as DomCanvasRenderingContext2D;
 
 /// Abstracts the interface for painting text clusters, shadows, and decorations.
 abstract class Painter {
   Painter();
 
-  static HashMap<String, DomImageBitmap> imageCache = HashMap<String, DomImageBitmap>();
+  static HashMap<String, CkImage> imageCache = HashMap<String, CkImage>();
 
   /// Fills out the information needed to paint the text cluster.
   bool fillTextCluster(WebCluster webTextCluster, bool isDefaultLtr);
@@ -263,15 +265,19 @@ class CanvasKitPainter extends Painter {
   @override
   void paintTextCluster(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect, String cacheId) {
     assert(!Painter.imageCache.containsKey(cacheId));
-    final DomImageBitmap bitmap = (cacheId.isNotEmpty)
-        ? Painter.imageCache[cacheId] = paintCanvas.transferToImageBitmap()
-        : paintCanvas.transferToImageBitmap();
+    final DomImageBitmap bitmap = paintCanvas.transferToImageBitmap();
 
     final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
     if (skImage == null) {
       throw Exception('Failed to convert text image bitmap to an SkImage.');
     }
-    final ckImage = CkImage(skImage, imageSource: ImageBitmapImageSource(bitmap));
+    final CkImage ckImage = cacheId.isNotEmpty
+        ? Painter.imageCache[cacheId] = CkImage(
+            skImage,
+            imageSource: ImageBitmapImageSource(bitmap),
+          )
+        : CkImage(skImage, imageSource: ImageBitmapImageSource(bitmap));
+
     canvas.drawImageRect(
       ckImage,
       sourceRect,
@@ -313,12 +319,7 @@ class CanvasKitPainter extends Painter {
     String cacheId,
   ) {
     assert(Painter.imageCache.containsKey(cacheId));
-    final DomImageBitmap bitmap = Painter.imageCache[cacheId]!;
-    final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
-    if (skImage == null) {
-      throw Exception('Failed to convert text image bitmap to an SkImage.');
-    }
-    final ckImage = CkImage(skImage, imageSource: ImageBitmapImageSource(bitmap));
+    final CkImage ckImage = Painter.imageCache[cacheId]!;
     canvas.drawImageRect(
       ckImage,
       sourceRect,

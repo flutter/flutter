@@ -20,12 +20,20 @@ import 'painter.dart';
 @visibleForTesting
 const String kPlaceholderChar = '\uFFFC';
 
+// Performance flags for testing.
+bool useCPUTextLayout = false;
+bool withCacheId = false;
+
 /// A single canvas2d context to use for text layout.
 @visibleForTesting
 final DomCanvasRenderingContext2D layoutContext =
     // We don't use this canvas to draw anything, so let's make it as small as
     // possible to save memory.
-    createDomCanvasElement(width: 0, height: 0).context2D;
+    createDomCanvasElement(
+          width: 0,
+          height: 0,
+        ).getContext('2d', <dynamic, dynamic>{'willReadFrequently': useCPUTextLayout})!
+        as DomCanvasRenderingContext2D;
 
 /// The web implementation of  [ui.ParagraphStyle]
 @immutable
@@ -876,8 +884,6 @@ class WebParagraph implements ui.Paragraph {
   double maxLineWidthWithTrailingSpaces = 0; // without trailing spaces it would be longestLine
 
   List<TextLine> get lines => _layout.lines;
-
-  bool withCacheId = true;
 
   @override
   List<ui.TextBox> getBoxesForPlaceholders() {
