@@ -101,14 +101,61 @@ void main() {
       expect(plistContent, contains('<key>method</key>'));
       expect(plistContent, isNot(contains('<key>teamID</key>')));
     });
+
+    test('generates enhanced plist for manual signing when profile is found', () async {
+      final fileSystem = MemoryFileSystem.test();
+      final command = BuildIOSArchiveCommand(logger: BufferLogger.test(), verboseHelp: false);
+
+      // Configure fake to return a valid provisioning profile
+      final fakeWithProfile = FakeXcodeCodeSigningSettings(
+        profileToReturn: ProvisioningProfile(
+          filePath: '/path/to/profile.mobileprovision',
+          name: 'MyDistProfile',
+          uuid: '12345678-1234-1234-1234-123456789012',
+          teamIdentifier: 'ABC123DEF4',
+          expirationDate: DateTime.now().add(const Duration(days: 365)),
+          developerCertificates: <File>[],
+        ),
+      );
+
+      final File plistFile = await command.createExportPlist(
+        exportMethod: 'app-store',
+        app: FakeBuildableIOSApp(FakeIosProject()),
+        buildInfo: BuildInfo.release,
+        buildSettings: const {
+          'CODE_SIGN_STYLE': 'Manual',
+          'DEVELOPMENT_TEAM': 'ABC123DEF4',
+          'PRODUCT_BUNDLE_IDENTIFIER': 'com.example.myapp',
+          'PROVISIONING_PROFILE_SPECIFIER': 'MyDistProfile',
+        },
+        fileSystem: fileSystem,
+        codeSigningSettings: fakeWithProfile,
+      );
+
+      final String plistContent = plistFile.readAsStringSync();
+      // Should contain enhanced manual signing configuration
+      expect(plistContent, contains('<key>method</key>'));
+      expect(plistContent, contains('<string>app-store</string>'));
+      expect(plistContent, contains('<key>teamID</key>'));
+      expect(plistContent, contains('<string>ABC123DEF4</string>'));
+      expect(plistContent, contains('<key>signingStyle</key>'));
+      expect(plistContent, contains('<string>manual</string>'));
+      expect(plistContent, contains('<key>provisioningProfiles</key>'));
+      expect(plistContent, contains('<key>com.example.myapp</key>'));
+      expect(plistContent, contains('<string>12345678-1234-1234-1234-123456789012</string>'));
+    });
   });
 }
 
 // Fake implementation for testing dependency injection - simplified without Fake base class
 class FakeXcodeCodeSigningSettings implements XcodeCodeSigningSettings {
+  FakeXcodeCodeSigningSettings({this.profileToReturn});
+
+  final ProvisioningProfile? profileToReturn;
+
   @override
   Future<ProvisioningProfile?> parseProvisioningProfile(File provisioningProfileFile) async {
-    return null; // Return null for test cases - no actual profile parsing
+    return profileToReturn;
   }
 
   @override
