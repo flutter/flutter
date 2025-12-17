@@ -1984,6 +1984,84 @@ void main() {
     );
     expect(tester.getSize(find.byType(LinearProgressIndicator)), Size.zero);
   });
+
+  testWidgets('LinearProgressIndicator clamps value', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+
+    // Test value > 1.0
+    await tester.pumpWidget(
+      const MaterialApp(home: Scaffold(body: LinearProgressIndicator(value: 1.5))),
+    );
+
+    expect(
+      tester.getSemantics(find.byType(LinearProgressIndicator)),
+      matchesSemantics(value: '100%', textDirection: TextDirection.ltr),
+    );
+
+    // Test value < 0.0
+    await tester.pumpWidget(
+      const MaterialApp(home: Scaffold(body: LinearProgressIndicator(value: -0.5))),
+    );
+
+    expect(
+      tester.getSemantics(find.byType(LinearProgressIndicator)),
+      matchesSemantics(value: '0%', textDirection: TextDirection.ltr),
+    );
+
+    handle.dispose();
+  });
+
+  testWidgets('CircularProgressIndicator clamps value', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+
+    // Test value > 1.0
+    await tester.pumpWidget(
+      const MaterialApp(home: Scaffold(body: CircularProgressIndicator(value: 1.5))),
+    );
+
+    expect(
+      tester.getSemantics(find.byType(CircularProgressIndicator)),
+      matchesSemantics(value: '100%', textDirection: TextDirection.ltr),
+    );
+
+    // Test value < 0.0
+    await tester.pumpWidget(
+      const MaterialApp(home: Scaffold(body: CircularProgressIndicator(value: -0.5))),
+    );
+
+    expect(
+      tester.getSemantics(find.byType(CircularProgressIndicator)),
+      matchesSemantics(value: '0%', textDirection: TextDirection.ltr),
+    );
+
+    handle.dispose();
+  });
+
+  testWidgets('RefreshProgressIndicator clamps value', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+
+    // Test value > 1.0
+    await tester.pumpWidget(
+      const MaterialApp(home: Scaffold(body: RefreshProgressIndicator(value: 1.5))),
+    );
+
+    expect(
+      tester.getSemantics(find.byType(RefreshProgressIndicator)),
+      matchesSemantics(value: '100%', textDirection: TextDirection.ltr),
+    );
+
+    // Test value < 0.0
+    await tester.pumpWidget(
+      const MaterialApp(home: Scaffold(body: RefreshProgressIndicator(value: -0.5))),
+    );
+
+    expect(
+      tester.getSemantics(find.byType(RefreshProgressIndicator)),
+      matchesSemantics(value: '0%', textDirection: TextDirection.ltr),
+    );
+
+    handle.dispose();
+  });
 }
 
 class _RefreshProgressIndicatorGolden extends StatefulWidget {
