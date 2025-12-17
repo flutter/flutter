@@ -1250,9 +1250,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     _currentSplash?.confirm();
     _currentSplash = null;
     updateHighlight(_HighlightType.pressed, value: false);
-    if (widget.onDoubleTap != null) {
-      widget.onDoubleTap!();
-    }
+    widget.onDoubleTap?.call();
   }
 
   void handleLongPress() {
@@ -1279,9 +1277,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   void handleLongPressEnd(LongPressEndDetails details) {
     // The splash should be canceled if the user releases the pointer outside of the
     // ink well bounds, OR if this is an implicit long press (onLongPress == null).
+    final object = context.findRenderObject()! as RenderBox;
     if (_currentSplash != null) {
-      final object = context.findRenderObject()! as RenderBox;
-
       // Cancel splash if implicit mode (no onLongPress callback) or released outside bounds
       // Only cancel the splash if the pointer was released outside the bounds.
       // Persist the splash until release when the long press is accepted, regardless
@@ -1297,7 +1294,6 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
     // Fire callback if valid long press action was accepted
     if (_longPressAccepted) {
-      final object = context.findRenderObject()! as RenderBox;
       if (object.paintBounds.contains(details.localPosition)) {
         widget.onLongPress?.call();
       }
