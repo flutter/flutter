@@ -1549,19 +1549,39 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
   static final Tween<double> _dialogScaleTween = Tween<double>(begin: 1.3, end: 1.0);
 }
 
-/// Used by [PageTransitionsTheme] to define a horizontal [MaterialPageRoute]
-/// page transition animation that matches native iOS page transitions.
+/// A [PageTransitionsBuilder] that provides an iOS-style page transition
+/// animation.
+///
+/// The page slides in from the right and exits in reverse. It also shifts
+/// to the left in a parallax motion when another page enters to cover it.
+/// This transition is commonly seen in native iOS applications.
+///
+/// This builder can be used with [PageTransitionsTheme] to apply iOS-style
+/// transitions to [MaterialPageRoute] or any [PageRoute] that uses a
+/// [PageTransitionsTheme].
+///
+/// In a [CupertinoApp], this transition is used automatically when navigating
+/// with [CupertinoPageRoute]:
+///
+/// ```dart
+/// Navigator.push(
+///   context,
+///   CupertinoPageRoute<void>(
+///     builder: (BuildContext context) => const MyPage(),
+///   ),
+/// );
+/// ```
 ///
 /// See also:
 ///
-///  * [FadeUpwardsPageTransitionsBuilder], which defines a page transition
-///    that's similar to the one provided by Android O.
-///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
-///    that's similar to the one provided by Android P.
-///  * [ZoomPageTransitionsBuilder], which defines the default page transition
-///    that's similar to the one provided in Android Q.
-///  * [PredictiveBackPageTransitionsBuilder], which defines a page
-///    transition that allows peeking behind the current route on Android.
+///  * [CupertinoPageRoute], which uses this transition style by default for
+///    Cupertino apps.
+///  * [CupertinoPageTransition], the widget that implements the iOS page
+///    transition animation.
+///  * [MaterialPageRoute], an adaptive [PageRoute] that can use this builder
+///    through [PageTransitionsTheme].
+///  * [PageTransitionsTheme], which defines the page transitions used by
+///    [MaterialPageRoute] for different target platforms.
 class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Constructs a page transition animation that matches the iOS transition.
   const CupertinoPageTransitionsBuilder();
