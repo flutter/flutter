@@ -451,6 +451,44 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
                                    completion:nil];
 }
 
+- (void)showTranslateViewController:(NSString*)term {
+  UIViewController* engineViewController = [self.engine viewController];
+  TranslateController* translateController;
+
+  if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+    // On iPad, the translate screen is presented in a popover view, and requires a rect to use as
+    // bounds
+    FlutterTextInputPlugin* _textInputPlugin = [self.engine textInputPlugin];
+    UITextRange* range = _textInputPlugin.textInputView.selectedTextRange;
+
+    // firstRectForRange cannot be used here as it's current implementation does
+    // not always return the full rect of the range.
+    CGRect firstRect = [(FlutterTextInputView*)_textInputPlugin.textInputView
+        caretRectForPosition:(FlutterTextPosition*)range.start];
+    CGRect transformedFirstRect = [(FlutterTextInputView*)_textInputPlugin.textInputView
+        localRectFromFrameworkTransform:firstRect];
+    CGRect lastRect = [(FlutterTextInputView*)_textInputPlugin.textInputView
+        caretRectForPosition:(FlutterTextPosition*)range.end];
+    CGRect transformedLastRect = [(FlutterTextInputView*)_textInputPlugin.textInputView
+        localRectFromFrameworkTransform:lastRect];
+
+    // In case of RTL Language, get the minimum x coordinate too
+    CGRect ipadBounds =
+        CGRectMake(fmin(transformedFirstRect.origin.x, transformedLastRect.origin.x),
+                   transformedFirstRect.origin.y,
+                   abs(transformedLastRect.origin.x - transformedFirstRect.origin.x),
+                   transformedFirstRect.size.height);
+
+    translateController = [[TranslateController alloc] initWithTerm:term ipadBounds:ipadBounds];
+  } else {
+    translateController = [[TranslateController alloc] initWithTerm:term];
+  }
+
+  [engineViewController addChildViewController:translateController];
+  [engineViewController.view addSubview:translateController.view];
+  [translateController didMoveToParentViewController:engineViewController];
+}
+
 - (UITextField*)textField {
   if (_textField == nil) {
     _textField = [[UITextField alloc] init];
