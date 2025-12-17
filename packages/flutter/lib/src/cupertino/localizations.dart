@@ -541,6 +541,9 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   String get searchWebButtonLabel => 'Search Web';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get shareButtonLabel => 'Share...';
 
   @override

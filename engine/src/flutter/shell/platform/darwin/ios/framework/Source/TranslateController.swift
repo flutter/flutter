@@ -1,11 +1,3 @@
-//
-//  FlutterTranslateController.swift
-//  flutter_engine
-//
-//  Created by Louise Hsu on 12/11/25.
-//
-
-
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -16,8 +8,8 @@ import SwiftUI
 import Translation
 
 @available(iOS 17.4, *)
-@objc(FlutterTranslateController)
-public class FlutterTranslateController: UIViewController {
+@objc(TranslateController)
+public class TranslateController: UIViewController {
 
   private let originalText: String
   private let ipadBounds: CGRect?

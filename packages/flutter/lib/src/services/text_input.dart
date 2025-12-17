@@ -1274,6 +1274,9 @@ mixin TextSelectionDelegate {
   ///  * [LiveTextInputStatusNotifier], where the status of Live Text can be listened to.
   bool get liveTextInputEnabled => false;
 
+  /// Whether translate is enabled
+  bool get translateEnabled => false;
+
   /// Cut current selection to [Clipboard].
   ///
   /// If and only if [cause] is [SelectionChangedCause.toolbar], the toolbar
@@ -3072,6 +3075,38 @@ final class IOSSystemContextMenuItemDataShare extends IOSSystemContextMenuItemDa
 
   @override
   String get _jsonType => 'share';
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('title', title));
+  }
+}
+
+/// A [IOSSystemContextMenuItemData] for the system's built-in translate
+/// button.
+///
+/// Must specify a [title], typically
+/// [WidgetsLocalizations.translateButtonLabel].
+///
+/// The action is handled by the platform.
+///
+/// See also:
+///
+///  * [SystemContextMenuController], which is used to show the system context
+///    menu.
+///  * [IOSSystemContextMenuItemTranslate], which performs a similar role but at
+///    the widget level, where the title can be replaced with a default localized
+///    value.
+final class IOSSystemContextMenuItemDataTranslate extends IOSSystemContextMenuItemData with Diagnosticable{
+  /// Creates an instance of [IOSSystemContextMenuItemDataTranslate].
+  const IOSSystemContextMenuItemDataTranslate({required this.title});
+
+  @override
+  final String title;
+
+  @override
+  String get _jsonType => 'translate';
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

@@ -409,6 +409,44 @@ final class IOSSystemContextMenuItemSearchWeb extends IOSSystemContextMenuItem w
 }
 
 /// Creates an instance of [IOSSystemContextMenuItem] for the
+/// system's built-in translation button.
+///
+/// Should only appear when content is selected.
+///
+/// The [title] is optional, but it must be specified before being sent to the
+/// platform. Typically it should be set to
+/// [WidgetsLocalizations.translationButtonLabel].
+///
+/// The action is handled by the platform.
+///
+/// See also:
+///
+///  * [SystemContextMenu], a widget that can be used to display the system
+///    context menu.
+///  * [IOSSystemContextMenuItemDataTranslate], which specifies the data to be
+///    sent to the platform for this same button.
+final class IOSSystemContextMenuItemTranslate extends IOSSystemContextMenuItem with Diagnosticable {
+  /// Creates an instance of [IOSSystemContextMenuItemTranslate].
+  const IOSSystemContextMenuItemTranslate({this.title});
+
+  @override
+  final String? title;
+
+  @override
+  IOSSystemContextMenuItemDataTranslate getData(WidgetsLocalizations localizations) {
+    return IOSSystemContextMenuItemDataTranslate(
+      title: title ?? localizations.translateButtonLabel,
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('title', title));
+  }
+}
+
+/// Creates an instance of [IOSSystemContextMenuItem] for the
 /// system's built-in share button.
 ///
 /// Opens the system share dialog.
