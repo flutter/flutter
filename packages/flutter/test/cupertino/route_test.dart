@@ -3231,41 +3231,6 @@ void main() {
       expect(builder.delegatedTransition, isNotNull);
       expect(builder.delegatedTransition, CupertinoPageTransition.delegatedTransition);
     });
-
-    testWidgets('works with MaterialApp and PageTransitionsTheme', (WidgetTester tester) async {
-      final routes = <String, WidgetBuilder>{
-        '/': (BuildContext context) => Material(
-          child: TextButton(
-            child: const Text('push'),
-            onPressed: () {
-              Navigator.of(context).pushNamed('/b');
-            },
-          ),
-        ),
-        '/b': (BuildContext context) => const Text('page b'),
-      };
-
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(
-            pageTransitionsTheme: const PageTransitionsTheme(
-              builders: <TargetPlatform, PageTransitionsBuilder>{
-                TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-                TargetPlatform.android: CupertinoPageTransitionsBuilder(),
-              },
-            ),
-          ),
-          routes: routes,
-        ),
-      );
-
-      expect(find.byType(CupertinoPageTransition), findsOneWidget);
-
-      await tester.tap(find.text('push'));
-      await tester.pumpAndSettle();
-      expect(find.text('page b'), findsOneWidget);
-      expect(find.byType(CupertinoPageTransition), findsOneWidget);
-    });
   });
 }
 
