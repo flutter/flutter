@@ -54,7 +54,7 @@ dependencies:
   http_multi_server: 3.2.2
   convert: 3.1.2
   async: 2.13.0
-  unified_analytics: 8.0.5
+  unified_analytics: 8.0.10
   pubspec_parse: 1.5.0
 
   graphs: 2.3.2
@@ -110,10 +110,10 @@ dependencies:
   term_glyph: 1.2.2
   typed_data: 1.4.0
   vm_service_interface: 2.0.1
-  watcher: 1.1.4
+  watcher: 1.2.0
   web: 1.1.1
   web_socket: 1.0.1
-  yaml_edit: 2.2.2
+  yaml_edit: 2.2.3
 
 dev_dependencies:
   file_testing: 3.0.2
@@ -127,4 +127,4 @@ dev_dependencies:
 dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
-# PUBSPEC CHECKSUM: llegm7
+# PUBSPEC CHECKSUM: omlptf

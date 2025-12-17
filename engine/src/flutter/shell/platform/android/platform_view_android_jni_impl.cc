@@ -1791,6 +1791,10 @@ void PlatformViewAndroidJNIImpl::FlutterViewOnDisplayPlatformView(
       case MutatorType::kClipPath:
       case MutatorType::kOpacity:
       case MutatorType::kBackdropFilter:
+      case MutatorType::kBackdropClipRect:
+      case MutatorType::kBackdropClipRRect:
+      case MutatorType::kBackdropClipRSuperellipse:
+      case MutatorType::kBackdropClipPath:
         break;
     }
     ++iter;
@@ -2300,6 +2304,10 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
       // TODO(cyanglaz): Implement other mutators.
       // https://github.com/flutter/flutter/issues/58426
       case MutatorType::kBackdropFilter:
+      case MutatorType::kBackdropClipRect:
+      case MutatorType::kBackdropClipRRect:
+      case MutatorType::kBackdropClipRSuperellipse:
+      case MutatorType::kBackdropClipPath:
         break;
     }
     ++iter;
