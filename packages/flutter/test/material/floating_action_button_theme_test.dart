@@ -108,7 +108,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData().copyWith(
+          theme: ThemeData(
             floatingActionButtonTheme: const FloatingActionButtonThemeData(
               backgroundColor: backgroundColor,
               foregroundColor: foregroundColor,
@@ -153,7 +153,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData().copyWith(
+          theme: ThemeData(
             floatingActionButtonTheme: const FloatingActionButtonThemeData(
               backgroundColor: Color(0x00000004),
               foregroundColor: Color(0x00000005),
@@ -190,7 +190,7 @@ void main() {
     },
   );
 
-  testWidgets('Local FloatingActionButtonTheme are used', (WidgetTester tester) async {
+  testWidgets('Local FloatingActionButtonTheme properties are used', (WidgetTester tester) async {
     const backgroundColor = Color(0x00000001);
     const foregroundColor = Color(0x00000002);
     const splashColor = Color(0x00000003);
@@ -243,7 +243,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData().copyWith(
+          theme: ThemeData(
             floatingActionButtonTheme: const FloatingActionButtonThemeData(
               backgroundColor: Color(0x00000004),
               foregroundColor: Color(0x00000005),
@@ -308,7 +308,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData().copyWith(
+        theme: ThemeData(
           floatingActionButtonTheme: const FloatingActionButtonThemeData(
             smallSizeConstraints: constraints,
           ),
@@ -335,7 +335,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData().copyWith(
+        theme: ThemeData(
           floatingActionButtonTheme: const FloatingActionButtonThemeData(
             largeSizeConstraints: constraints,
           ),
@@ -367,7 +367,8 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(colorScheme: colorScheme).copyWith(
+          theme: ThemeData(
+            colorScheme: colorScheme,
             floatingActionButtonTheme: const FloatingActionButtonThemeData(
               extendedSizeConstraints: constraints,
               extendedIconLabelSpacing: iconLabelSpacing,
@@ -419,7 +420,8 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: false).copyWith(
+          theme: ThemeData(
+            useMaterial3: false,
             floatingActionButtonTheme: const FloatingActionButtonThemeData(
               extendedSizeConstraints: constraints,
               extendedIconLabelSpacing: iconLabelSpacing,
@@ -472,7 +474,8 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(colorScheme: colorScheme).copyWith(
+          theme: ThemeData(
+            colorScheme: colorScheme,
             floatingActionButtonTheme: const FloatingActionButtonThemeData(
               extendedIconLabelSpacing: 25.0,
               extendedPadding: EdgeInsetsDirectional.only(start: 7.0, end: 8.0),
@@ -524,7 +527,8 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: false).copyWith(
+          theme: ThemeData(
+            useMaterial3: false,
             floatingActionButtonTheme: const FloatingActionButtonThemeData(
               extendedIconLabelSpacing: 25.0,
               extendedPadding: EdgeInsetsDirectional.only(start: 7.0, end: 8.0),
@@ -639,7 +643,7 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData().copyWith(
+          theme: ThemeData(
             floatingActionButtonTheme: FloatingActionButtonThemeData(
               mouseCursor: WidgetStateProperty.all(SystemMouseCursors.text),
             ),

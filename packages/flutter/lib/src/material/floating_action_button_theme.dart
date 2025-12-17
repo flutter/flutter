@@ -379,10 +379,10 @@ class FloatingActionButtonThemeData with Diagnosticable {
 class FloatingActionButtonTheme extends InheritedTheme {
   /// Creates a floating action button theme that controls the configurations for
   /// [FloatingActionButton]s in its widget subtree.
-  const FloatingActionButtonTheme({super.key, this.data, required super.child});
+  const FloatingActionButtonTheme({super.key, required this.data, required super.child});
 
   /// The properties for descendant [FloatingActionButton] widgets.
-  final FloatingActionButtonThemeData? data;
+  final FloatingActionButtonThemeData data;
 
   /// The closest instance of this class's [data] value that encloses the given
   /// context.
