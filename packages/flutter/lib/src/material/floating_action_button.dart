@@ -266,8 +266,8 @@ class FloatingActionButton extends StatelessWidget {
 
   /// The default foreground color for icons and text within the button.
   ///
-  /// If this property is null, then the [FloatingActionButtonThemeData.foregroundColor]
-  /// of [ThemeData.floatingActionButtonTheme] is used. If that property is also
+  /// If this property is null, then the ambient
+  /// [FloatingActionButtonThemeData.foregroundColor] is used. If that property is also
   /// null, then the [ColorScheme.onPrimaryContainer] color of [ThemeData.colorScheme]
   /// is used. If [ThemeData.useMaterial3] is set to false, then the
   /// [ColorScheme.onSecondary] color of [ThemeData.colorScheme] is used.
@@ -275,8 +275,8 @@ class FloatingActionButton extends StatelessWidget {
 
   /// The button's background color.
   ///
-  /// If this property is null, then the [FloatingActionButtonThemeData.backgroundColor]
-  /// of [ThemeData.floatingActionButtonTheme] is used. If that property is also
+  /// If this property is null, then the ambient
+  /// [FloatingActionButtonThemeData.backgroundColor] is used. If that property is also
   /// null, then the [ColorScheme.primaryContainer] color of [ThemeData.colorScheme]
   /// is used. If [ThemeData.useMaterial3] is set to false, then the
   /// [ColorScheme.secondary] color of [ThemeData.colorScheme] is used.
@@ -488,7 +488,9 @@ class FloatingActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final FloatingActionButtonThemeData floatingActionButtonTheme = theme.floatingActionButtonTheme;
+    final FloatingActionButtonThemeData floatingActionButtonTheme = FloatingActionButtonTheme.of(
+      context,
+    );
     final FloatingActionButtonThemeData defaults = theme.useMaterial3
         ? _FABDefaultsM3(context, _floatingActionButtonType, child != null)
         : _FABDefaultsM2(context, _floatingActionButtonType, child != null);
