@@ -914,7 +914,7 @@ void main() {
     const platformDirPath = '$appPath/macos';
     const frameworksFolderPath = 'Runner.app/Frameworks';
     final Directory flutterAssetsDir = targetBuildDir.childDirectory(
-      '$frameworksFolderPath/App.framework/flutter_assets',
+      '$frameworksFolderPath/App.framework/Resources/flutter_assets',
     )..createSync(recursive: true);
     const ffiPackageName = 'package_a';
     flutterAssetsDir

@@ -354,8 +354,9 @@ class Context {
     }
 
     final Set<String> referencedFrameworks = {};
+    final appResourcesDir = platform == TargetPlatform.macos ? 'Resources/' : '';
     final File nativeAssetsJson = fileFromPath(
-      '$xcodeFrameworksDir/App.framework/flutter_assets/NativeAssetsManifest.json',
+      '$xcodeFrameworksDir/App.framework/${appResourcesDir}flutter_assets/NativeAssetsManifest.json',
     );
     if (!nativeAssetsJson.existsSync()) {
       if (verbose) {
