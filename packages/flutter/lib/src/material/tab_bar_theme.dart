@@ -9,10 +9,17 @@ import 'ink_well.dart';
 import 'tabs.dart';
 import 'theme.dart';
 
-/// Defines a theme for [TabBar] widgets.
+// Examples can assume:
+// late BuildContext context;
+
+/// Defines default property values for descendant [TabBar] widgets.
 ///
 /// Descendant widgets obtain the current [TabBarThemeData] object using
-/// [TabBarTheme.of].
+/// [TabBarTheme.of]. Instances of [TabBarThemeData] can be customized
+/// with [TabBarThemeData.copyWith].
+///
+/// Typically a [TabBarThemeData] is specified as part of the overall [Theme]
+/// with [ThemeData.tabBarTheme].
 ///
 /// See also:
 ///
@@ -265,7 +272,14 @@ class TabBarTheme extends InheritedTheme with Diagnosticable {
     );
   }
 
-  /// Returns the closest [TabBarThemeData] instance given the build context.
+  /// Returns the configuration [data] from the closest [TabBarTheme] ancestor.
+  /// If there is no ancestor, it returns [ThemeData.tabBarTheme].
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// TabBarThemeData theme = TabBarTheme.of(context);
+  /// ```
   static TabBarThemeData of(BuildContext context) {
     final TabBarTheme? tabBarTheme = context.dependOnInheritedWidgetOfExactType<TabBarTheme>();
     return tabBarTheme?.data ?? Theme.of(context).tabBarTheme;
