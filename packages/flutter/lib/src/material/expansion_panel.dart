@@ -404,14 +404,14 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       final Widget headerWidget = child.headerBuilder(context, _isChildExpanded(index));
 
       Widget expandIconPadded = Visibility(
-        visible: child.expandable,
+        visible: child.expandable || _isChildExpanded(index),
         maintainSize: true,
         maintainAnimation: true,
         maintainState: true,
         child: Padding(
           padding: const EdgeInsetsDirectional.only(end: 8.0),
           child: IgnorePointer(
-            ignoring: child.canTapOnHeader || !child.expandable,
+            ignoring: child.canTapOnHeader || (!child.expandable && !_isChildExpanded(index)),
             child: ExpandIcon(
               color: widget.expandIconColor,
               isExpanded: _isChildExpanded(index),
@@ -450,7 +450,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
           expandIconPadded,
         ],
       );
-      if (child.canTapOnHeader && child.expandable) {
+      if (child.canTapOnHeader && (child.expandable || _isChildExpanded(index))) {
         header = MergeSemantics(
           child: InkWell(
             splashColor: child.splashColor,
