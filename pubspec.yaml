@@ -111,9 +111,9 @@ dependencies:
   glob: 2.1.3
   google_fonts: 6.3.3
   google_identity_services_web: 0.3.3+1
-  googleapis_auth: 2.0.0
+  google_mobile_ads: 7.0.0
   googleapis: 14.0.0
-  google_mobile_ads: 6.0.0
+  googleapis_auth: 2.0.0
   hooks: 1.0.0
   html: 0.15.6
   http: 1.6.0
@@ -212,4 +212,4 @@ dependencies:
   pedantic: 1.11.1
   quiver: 3.2.2
   yaml_edit: 2.2.3
-# PUBSPEC CHECKSUM: osncbt
+# PUBSPEC CHECKSUM: sb7299
