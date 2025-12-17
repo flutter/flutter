@@ -459,12 +459,8 @@ class CarouselView extends StatefulWidget {
   /// the current frame according to its layout algorithm. This item can be only
   /// partially visible while scrolling.
   ///
-  /// - In a standard [CarouselView], the leading item is the one positioned at
-  ///   the leading edge of the viewport based on the current scroll offset.
-  ///
-  /// - In a [CarouselView.weighted], the leading item is chosen by the weighted
-  ///   layout algorithm (typically the one with the greatest effective weight;
-  ///   ties are resolved using proximity to the leading edge).
+  /// For both [CarouselView] and [CarouselView.weighted], the leading item is
+  /// the first item resolved by the layout for the current scroll position.
   ///
   /// If `itemSnapping` is enabled, scrolling settles with the resolved leading
   /// item fully visible when possible.
