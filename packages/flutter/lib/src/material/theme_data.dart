@@ -1427,9 +1427,7 @@ class ThemeData with Diagnosticable {
   /// A theme for customizing the appearance and layout of [SegmentedButton] widgets.
   final SegmentedButtonThemeData segmentedButtonTheme;
 
-  /// The colors and shapes used to render [Slider].
-  ///
-  /// This is the value returned from [SliderTheme.of].
+  /// A theme for customizing the appearance and layout of [Slider] widgets.
   final SliderThemeData sliderTheme;
 
   /// A theme for customizing colors, shape, elevation, and behavior of a [SnackBar].
@@ -1445,18 +1443,17 @@ class ThemeData with Diagnosticable {
   /// [TextButton]s.
   final TextButtonThemeData textButtonTheme;
 
-  /// A theme for customizing the appearance and layout of [TextField] widgets.
+  /// A theme for customizing the appearance for text selection in [TextField] and
+  /// [SelectableText] widgets.
   final TextSelectionThemeData textSelectionTheme;
 
   /// A theme for customizing the appearance and layout of time picker widgets.
   final TimePickerThemeData timePickerTheme;
 
-  /// Defines the default configuration of [ToggleButtons] widgets.
+  /// A theme for customizing the appearance and layout of [ToggleButtons] widgets.
   final ToggleButtonsThemeData toggleButtonsTheme;
 
-  /// A theme for customizing the visual properties of [Tooltip]s.
-  ///
-  /// This is the value returned from [TooltipTheme.of].
+  /// A theme for customizing the appearance and layout of [Tooltip] widgets.
   final TooltipThemeData tooltipTheme;
 
   /// A theme for customizing the appearance and layout of [ButtonBar] widgets.
