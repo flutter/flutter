@@ -1556,21 +1556,8 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
 /// to the left in a parallax motion when another page enters to cover it.
 /// This transition is commonly seen in native iOS applications.
 ///
-/// This builder can be used with [PageTransitionsTheme] to apply iOS-style
-/// transitions to [MaterialPageRoute] or any [PageRoute] that uses a
-/// [PageTransitionsTheme].
-///
 /// In a [CupertinoApp], this transition is used automatically when navigating
-/// with [CupertinoPageRoute]:
-///
-/// ```dart
-/// Navigator.push(
-///   context,
-///   CupertinoPageRoute<void>(
-///     builder: (BuildContext context) => const MyPage(),
-///   ),
-/// );
-/// ```
+/// with [CupertinoPageRoute].
 ///
 /// See also:
 ///
