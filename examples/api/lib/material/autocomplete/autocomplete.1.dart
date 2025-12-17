@@ -76,7 +76,9 @@ class AutocompleteBasicUserExample extends StatelessWidget {
           return const Iterable<User>.empty();
         }
         return _userOptions.where((User option) {
-          return option.toString().contains(textEditingValue.text.toLowerCase());
+          return option.toString().contains(
+            textEditingValue.text.toLowerCase(),
+          );
         });
       },
       onSelected: (User selection) {

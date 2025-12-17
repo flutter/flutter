@@ -50,6 +50,7 @@ class DropdownMenuFormField<T extends Object> extends FormField<T> {
     TextAlign textAlign = TextAlign.start,
     // TODO(bleroux): Clean this up once `InputDecorationTheme` is fully normalized.
     Object? inputDecorationTheme,
+    DropdownMenuDecorationBuilder? decorationBuilder,
     MenuStyle? menuStyle,
     this.controller,
     T? initialSelection,
@@ -74,7 +75,7 @@ class DropdownMenuFormField<T extends Object> extends FormField<T> {
          initialValue: initialSelection,
          autovalidateMode: autovalidateMode,
          builder: (FormFieldState<T> field) {
-           final _DropdownMenuFormFieldState<T> state = field as _DropdownMenuFormFieldState<T>;
+           final state = field as _DropdownMenuFormFieldState<T>;
            return UnmanagedRestorationScope(
              bucket: field.bucket,
              child: DropdownMenu<T>(
@@ -95,6 +96,7 @@ class DropdownMenuFormField<T extends Object> extends FormField<T> {
                textStyle: textStyle,
                textAlign: textAlign,
                inputDecorationTheme: inputDecorationTheme,
+               decorationBuilder: decorationBuilder,
                menuStyle: menuStyle,
                controller: state.textFieldController,
                initialSelection: state.value,

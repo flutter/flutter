@@ -106,7 +106,7 @@ Future<void> testMain() async {
 */
 
     final codeUnitFlags = AllCodeUnitFlags(text);
-    for (int i = 0; i < text.length; i++) {
+    for (var i = 0; i < text.length; i++) {
       expect(
         codeUnitFlags.hasFlag(i, CodeUnitFlag.grapheme),
         isTrue,

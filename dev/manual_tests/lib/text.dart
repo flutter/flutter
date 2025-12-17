@@ -377,7 +377,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     if (node.children == null || (node.children?.isEmpty ?? false)) {
       return 0;
     }
-    int result = 0;
+    var result = 0;
     for (final TextSpan child in node.children!.cast<TextSpan>()) {
       result = math.max(result, depthOf(child));
     }
@@ -518,9 +518,9 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
       case 80:
       case 81:
       case 82:
-        final StringBuffer buffer = StringBuffer();
+        final buffer = StringBuffer();
         final int targetLength = _random.nextInt(8) + 1;
-        for (int index = 0; index < targetLength; index += 1) {
+        for (var index = 0; index < targetLength; index += 1) {
           if (_random.nextInt(20) > 0) {
             buffer.writeCharCode(randomCharacter(_random));
           } else {
@@ -1118,10 +1118,10 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
 
   void _update(Duration? duration) {
     setState(() {
-      final StringBuffer buffer = StringBuffer();
+      final buffer = StringBuffer();
       final int targetLength =
           _random.nextInt(20) + (_ellipsize ? MediaQuery.of(context).size.width.round() : 1);
-      for (int index = 0; index < targetLength; index += 1) {
+      for (var index = 0; index < targetLength; index += 1) {
         if (_random.nextInt(5) > 0) {
           buffer.writeCharCode(randomCharacter(_random));
         } else {
@@ -1285,12 +1285,12 @@ String zalgo(
   // The following three tables are derived from UnicodeData.txt:
   //   http://unicode.org/Public/UNIDATA/UnicodeData.txt
   // There are three groups, character classes Mc, Me, and Mn.
-  const List<int> enclosingCombiningMarks = <int>[
+  const enclosingCombiningMarks = <int>[
     // Me
     0x00488, 0x00489, 0x01ABE, 0x020DD, 0x020DE, 0x020DF, 0x020E0,
     0x020E2, 0x020E3, 0x020E4, 0x0A670, 0x0A671, 0x0A672,
   ];
-  const List<int> nonspacingCombiningMarks = <int>[
+  const nonspacingCombiningMarks = <int>[
     // Mn
     0x00300, 0x00301, 0x00302, 0x00303, 0x00304, 0x00305, 0x00306,
     0x00307, 0x00308, 0x00309, 0x0030A, 0x0030B, 0x0030C, 0x0030D,
@@ -1545,7 +1545,7 @@ String zalgo(
     0xE01E3, 0xE01E4, 0xE01E5, 0xE01E6, 0xE01E7, 0xE01E8, 0xE01E9,
     0xE01EA, 0xE01EB, 0xE01EC, 0xE01ED, 0xE01EE, 0xE01EF,
   ];
-  const List<int> spacingCombiningMarks = <int>[
+  const spacingCombiningMarks = <int>[
     // Mc
     0x00903, 0x0093B, 0x0093E, 0x0093F, 0x00940, 0x00949, 0x0094A,
     0x0094B, 0x0094C, 0x0094E, 0x0094F, 0x00982, 0x00983, 0x009BE,
@@ -1606,12 +1606,12 @@ String zalgo(
     0x16F7E, 0x1D165, 0x1D166, 0x1D16D, 0x1D16E, 0x1D16F, 0x1D170,
     0x1D171, 0x1D172,
   ];
-  final Set<int> these = <int>{};
+  final these = <int>{};
   int combiningCount = enclosingCombiningMarks.length + nonspacingCombiningMarks.length;
   if (includeSpacingCombiningMarks) {
     combiningCount += spacingCombiningMarks.length;
   }
-  for (int count = 0; count < targetLength; count += 1) {
+  for (var count = 0; count < targetLength; count += 1) {
     int characterCode = random.nextInt(combiningCount);
     if (characterCode < enclosingCombiningMarks.length) {
       these.add(enclosingCombiningMarks[characterCode]);
@@ -1642,7 +1642,7 @@ class Range {
 
 int randomCharacter(math.Random random) {
   // all ranges of non-control, non-combining characters
-  const List<Range> characterRanges = <Range>[
+  const characterRanges = <Range>[
     Range(0x00020, 0x0007e),
     Range(0x000a0, 0x000ac),
     Range(0x000ae, 0x002ff),

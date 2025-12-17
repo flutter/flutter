@@ -34,10 +34,10 @@ class ImgElementPlatformView extends StatelessWidget {
     assert(!_registered);
     _registered = true;
     ui_web.platformViewRegistry.registerViewFactory(_viewType, (int viewId, {Object? params}) {
-      final Map<Object?, Object?> paramsMap = params! as Map<Object?, Object?>;
+      final paramsMap = params! as Map<Object?, Object?>;
       // Create a new <img> element. The browser is able to display the image
       // without fetching it over the network again.
-      final web.HTMLImageElement img = web.document.createElement('img') as web.HTMLImageElement;
+      final img = web.document.createElement('img') as web.HTMLImageElement;
       img.src = paramsMap['src']! as String;
       // Set `width` and `height`, otherwise the engine will issue a warning.
       img.style
@@ -361,7 +361,7 @@ class RenderWebImage extends RenderShiftedBox {
     //
     // The child could be smaller or larger than the `RenderWebImage`. If the
     // child is larger, then it will be clipped in the `paint` step.
-    final Size inputSize = Size(image.naturalWidth.toDouble(), image.naturalHeight.toDouble());
+    final inputSize = Size(image.naturalWidth.toDouble(), image.naturalHeight.toDouble());
     final BoxFit resolvedFit = fit ?? BoxFit.scaleDown;
     final FittedSizes fittedSizes = applyBoxFit(resolvedFit, inputSize, size);
 
@@ -382,7 +382,7 @@ class RenderWebImage extends RenderShiftedBox {
           halfWidthDelta +
           (_flipHorizontally! ? -_resolvedAlignment!.x : _resolvedAlignment!.x) * halfWidthDelta;
       final double dy = halfHeightDelta + _resolvedAlignment!.y * halfHeightDelta;
-      final BoxParentData childParentData = child!.parentData! as BoxParentData;
+      final childParentData = child!.parentData! as BoxParentData;
       childParentData.offset = Offset(dx, dy);
       _needsClip = false;
     } else {
@@ -424,7 +424,7 @@ class RenderWebImage extends RenderShiftedBox {
       // same scale computed above to get the offset for the child.
       final Rect sourceRect = _resolvedAlignment!.inscribe(sourceSize, Offset.zero & inputSize);
       final Offset childOffset = Offset(-sourceRect.left, -sourceRect.top) * scale;
-      final BoxParentData childParentData = child!.parentData! as BoxParentData;
+      final childParentData = child!.parentData! as BoxParentData;
       childParentData.offset = childOffset;
       _needsClip = true;
     }

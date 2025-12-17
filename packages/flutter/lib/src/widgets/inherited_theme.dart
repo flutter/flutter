@@ -90,8 +90,8 @@ abstract class InheritedTheme extends InheritedWidget {
       return CapturedThemes._(const <InheritedTheme>[]);
     }
 
-    final List<InheritedTheme> themes = <InheritedTheme>[];
-    final Set<Type> themeTypes = <Type>{};
+    final themes = <InheritedTheme>[];
+    final themeTypes = <Type>{};
     late bool debugDidFindAncestor;
     assert(() {
       debugDidFindAncestor = to == null;
