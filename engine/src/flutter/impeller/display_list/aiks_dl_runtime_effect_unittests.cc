@@ -474,9 +474,12 @@ TEST_P(AiksTest, ClippedBackdropFilterWithShader) {
 }
 
 TEST_P(AiksTest, RuntimeEffectImageFilterRotated) {
+  auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
+  auto size = image->GetBounds().GetSize();
+
   struct FragUniforms {
     Size size;
-  } frag_uniforms = {.size = Size::MakeWH(400, 400)};
+  } frag_uniforms = {.size = Size(size.width, size.height)};
   auto uniform_data = std::make_shared<std::vector<uint8_t>>();
   uniform_data->resize(sizeof(FragUniforms));
   memcpy(uniform_data->data(), &frag_uniforms, sizeof(FragUniforms));
@@ -506,13 +509,14 @@ TEST_P(AiksTest, RuntimeEffectImageFilterRotated) {
       ImGui::End();
     }
     DisplayListBuilder builder;
-    builder.Translate(200, 200);
+    builder.Translate(size.width * 0.5, size.height * 0.5);
     builder.Rotate(rotation);
-    builder.Translate(-200, -200);
+    builder.Translate(-size.width * 0.5, -size.height * 0.5);
 
     DlPaint paint;
     paint.setImageFilter(runtime_filter);
-    builder.DrawRect(DlRect::MakeXYWH(0, 0, 400, 400), paint);
+    builder.DrawImage(image, DlPoint(0.0, 0.0),
+                      DlImageSampling::kNearestNeighbor, &paint);
 
     return builder.Build();
   };
