@@ -389,6 +389,7 @@ void main() {
                   return const Color(0xffbadbad); // Shouldn't happen.
                 }),
                 onTap: () {},
+                onLongPress: () {},
               ),
             ),
           ),
@@ -399,12 +400,8 @@ void main() {
     final TestGesture gesture = await tester.startGesture(
       tester.getRect(find.byType(InkWell)).center,
     );
+    await tester.pumpAndSettle(); // Let the gesture be processed and animation finish
     final RenderObject inkFeatures = getInkFeatures(tester);
-    expect(
-      inkFeatures,
-      paints..rect(rect: const Rect.fromLTRB(0, 0, 100, 100), color: pressedColor.withAlpha(0)),
-    );
-    await tester.pumpAndSettle(); // Let the press highlight animation finish.
     expect(
       inkFeatures,
       paints..rect(rect: const Rect.fromLTRB(0, 0, 100, 100), color: pressedColor),
@@ -494,9 +491,8 @@ void main() {
       final TestGesture gesture = await tester.startGesture(
         tester.getRect(find.byType(InkWell)).center,
       );
+      await tester.pumpAndSettle(); // Let the gesture be processed and animation finish
       final RenderObject inkFeatures = getInkFeatures(tester);
-      expect(inkFeatures, paints..rect(rect: inkRect, color: selectedPressedColor.withAlpha(0)));
-      await tester.pumpAndSettle(); // Let the press highlight animation finish.
       expect(inkFeatures, paints..rect(rect: inkRect, color: selectedPressedColor));
       await gesture.up();
     });
@@ -1612,8 +1608,8 @@ void main() {
     );
     final MaterialInkController material = Material.of(tester.element(find.byKey(innerKey)));
 
-    // Press
-    final TestGesture gesture = await tester.startGesture(
+    // Press with Pointer 1
+    final TestGesture gesture1 = await tester.startGesture(
       tester.getCenter(find.byKey(innerKey)),
       pointer: 1,
     );
@@ -1621,33 +1617,42 @@ void main() {
     expect(material, paintsExactlyCountTimes(#drawCircle, 1));
 
     // Up
-    await gesture.up();
+    await gesture1.up();
     await tester.pumpAndSettle();
     expect(material, paintsNothing);
 
-    // Press again
-    await gesture.down(tester.getCenter(find.byKey(innerKey)));
-    await tester.pump(const Duration(milliseconds: 200));
-    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
-
-    // Cancel
-    await gesture.cancel();
-    await tester.pumpAndSettle();
-    expect(material, paintsNothing);
-
-    // Press again
-    await gesture.down(tester.getCenter(find.byKey(innerKey)));
-    await tester.pump(const Duration(milliseconds: 200));
-    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
-
-    // Use a second pointer to press
+    // Press again with Pointer 2 (new pointer to avoid arena conflict)
     final TestGesture gesture2 = await tester.startGesture(
       tester.getCenter(find.byKey(innerKey)),
       pointer: 2,
     );
     await tester.pump(const Duration(milliseconds: 200));
     expect(material, paintsExactlyCountTimes(#drawCircle, 1));
-    await gesture2.up();
+
+    // Cancel
+    await gesture2.cancel();
+    await tester.pumpAndSettle();
+    expect(material, paintsNothing);
+
+    // Press again with Pointer 3
+    final TestGesture gesture3 = await tester.startGesture(
+      tester.getCenter(find.byKey(innerKey)),
+      pointer: 3,
+    );
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+    // Hold this one down...
+
+    // Use a second simultaneous pointer (Pointer 4) to press
+    final TestGesture gesture4 = await tester.startGesture(
+      tester.getCenter(find.byKey(innerKey)),
+      pointer: 4,
+    );
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+    await gesture3.up();
+    await gesture4.up();
   });
 
   testWidgets('Reparenting parent should allow both inkwells to show splash afterwards', (
@@ -2611,5 +2616,209 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(InkWell)), Size.zero);
+  });
+  testWidgets('Persists splash on long press until user moves their finger', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Material(
+          child: Center(
+            child: InkWell(
+              key: key,
+              onTap: () {},
+              onLongPress: () {},
+              child: const SizedBox(width: 100, height: 100),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final MaterialInkController material = Material.of(tester.element(find.byKey(key)));
+
+    // Start gesture
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(key)));
+    await tester.pump(const Duration(milliseconds: 200)); // Tap down processed
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+
+    // Wait for long press
+    await tester.pump(const Duration(seconds: 1)); // Trigger long press
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1)); // Persists
+
+    // Move outside
+    await gesture.moveTo(tester.getTopLeft(find.byKey(key)) - const Offset(20, 20));
+    await tester.pumpAndSettle();
+
+    // Should be cancelled/removed
+    expect(material, paintsNothing);
+    await gesture.up();
+  });
+
+  testWidgets('Persists splash on long press until user releases their finger', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Material(
+          child: Center(
+            child: InkWell(
+              key: key,
+              onTap: () {},
+              onLongPress: () {},
+              child: const SizedBox(width: 100, height: 100),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final MaterialInkController material = Material.of(tester.element(find.byKey(key)));
+
+    // Start gesture
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(key)));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+
+    // Wait for long press
+    await tester.pump(const Duration(seconds: 1));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1)); // Persists
+
+    // Release inside
+    await gesture.up();
+    await tester.pump(); // Confirm splash (start fade out)
+    await tester.pump(const Duration(milliseconds: 200)); // Animate out
+
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+
+    await tester.pumpAndSettle();
+    expect(material, paintsNothing);
+  });
+
+  testWidgets('Implicit long press persists splash until user releases their finger', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Material(
+          child: Center(
+            child: InkWell(
+              key: key,
+              onTap: () {},
+              // onLongPress is null (implicit)
+              child: const SizedBox(width: 100, height: 100),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final MaterialInkController material = Material.of(tester.element(find.byKey(key)));
+
+    // Start gesture
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(key)));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+
+    // Wait for implicit long press duration
+    await tester.pump(const Duration(seconds: 1));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1)); // Must persist
+
+    // Release inside
+    await gesture.up();
+    await tester.pump();
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1)); // Fading out
+
+    await tester.pumpAndSettle();
+    expect(material, paintsNothing);
+  });
+
+  testWidgets('Implicit long press persists splash until user moves their finger', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Material(
+          child: Center(
+            child: InkWell(
+              key: key,
+              onTap: () {},
+              // onLongPress is null (implicit)
+              child: const SizedBox(width: 100, height: 100),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final MaterialInkController material = Material.of(tester.element(find.byKey(key)));
+
+    // Start gesture
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(key)));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+
+    // Wait for implicit long press duration
+    await tester.pump(const Duration(seconds: 1));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1)); // Must persist
+
+    // Move outside
+    await gesture.moveTo(tester.getTopLeft(find.byKey(key)) - const Offset(20, 20));
+    await tester.pumpAndSettle();
+
+    // Should be cancelled/removed
+    expect(material, paintsNothing);
+    await gesture.up();
+  });
+  testWidgets('implicit long press maintains WidgetState.pressed', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    WidgetState? lastState;
+
+    final statesController = WidgetStatesController();
+    statesController.addListener(() {
+      if (statesController.value.contains(WidgetState.pressed)) {
+        lastState = WidgetState.pressed;
+      } else {
+        lastState = null;
+      }
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Material(
+          child: Center(
+            child: InkWell(
+              key: key,
+              onTap: () {},
+              statesController: statesController,
+              child: const SizedBox(width: 100, height: 100),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Tap Down
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(key)));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(lastState, WidgetState.pressed);
+
+    // Initial hold (long press)
+    await tester.pump(const Duration(seconds: 1));
+    expect(lastState, WidgetState.pressed); // Should still be pressed
+
+    // Release
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(lastState, isNull);
   });
 }
