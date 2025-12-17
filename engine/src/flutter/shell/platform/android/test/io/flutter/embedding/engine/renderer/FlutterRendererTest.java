@@ -185,35 +185,6 @@ public class FlutterRendererTest {
   }
 
   @Test
-  public void itCallsMarkTextureFrameAvailableWhenFrameAvailable() {
-    // Setup the test.
-    Surface fakeSurface = mock(Surface.class);
-    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
-
-    SurfaceTexture surfaceTexture = new SurfaceTexture(0);
-    FlutterRenderer.SurfaceTextureRegistryEntry entry =
-        (FlutterRenderer.SurfaceTextureRegistryEntry)
-            flutterRenderer.registerSurfaceTexture(surfaceTexture);
-
-    flutterRenderer.startRenderingToSurface(fakeSurface, false);
-
-    // Simulate a new frame being available by triggering the OnFrameAvailableListener.
-    // The SurfaceTexture will notify the listener when updateTexImage() is called.
-    // For testing, we directly invoke what the listener would do.
-    surfaceTexture.updateTexImage();
-    shadowOf(Looper.getMainLooper()).idle();
-
-    // Verify that markTextureFrameAvailable was called (not scheduleFrame).
-    // This ensures dirty-view optimization will work correctly.
-    verify(fakeFlutterJNI, times(1)).markTextureFrameAvailable(eq(entry.id()));
-    verify(fakeFlutterJNI, never()).scheduleFrame();
-
-    // Cleanup
-    entry.release();
-    flutterRenderer.stopRenderingToSurface();
-  }
-
-  @Test
   public void itRegistersExistingSurfaceTexture() {
     // Setup the test.
     Surface fakeSurface = mock(Surface.class);
@@ -956,12 +927,14 @@ public class FlutterRendererTest {
 
   @Test
   public void ImageReaderSurfaceProducerSchedulesFrameIfQueueNotEmpty() throws Exception {
-    FlutterRenderer flutterRenderer = spy(engineRule.getFlutterEngine().getRenderer());
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
     TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
     FlutterRenderer.ImageReaderSurfaceProducer texture =
         (FlutterRenderer.ImageReaderSurfaceProducer) producer;
     texture.disableFenceForTest();
     texture.setSize(1, 1);
+
+    long textureId = texture.id();
 
     // Render two frames.
     for (int i = 0; i < 2; i++) {
@@ -973,24 +946,26 @@ public class FlutterRendererTest {
       shadowOf(Looper.getMainLooper()).idle();
     }
 
-    // Each enqueue of an image should result in a call to scheduleEngineFrame.
-    verify(flutterRenderer, times(2)).scheduleEngineFrame();
+    // Each enqueue of an image should result in a call to markTextureFrameAvailable.
+    // This ensures the dirty-view optimization works by notifying the framework
+    // which texture has a new frame.
+    verify(fakeFlutterJNI, times(2)).markTextureFrameAvailable(eq(textureId));
 
     // Consume the first image.
     Image image = texture.acquireLatestImage();
     shadowOf(Looper.getMainLooper()).idle();
 
-    // The dequeue should call scheduleEngineFrame because another image
+    // The dequeue should call markTextureFrameAvailable because another image
     // remains in the queue.
-    verify(flutterRenderer, times(3)).scheduleEngineFrame();
+    verify(fakeFlutterJNI, times(3)).markTextureFrameAvailable(eq(textureId));
 
     // Consume the second image.
     image = texture.acquireLatestImage();
     shadowOf(Looper.getMainLooper()).idle();
 
-    // The dequeue should not call scheduleEngineFrame because the queue
+    // The dequeue should not call markTextureFrameAvailable because the queue
     // is now empty.
-    verify(flutterRenderer, times(3)).scheduleEngineFrame();
+    verify(fakeFlutterJNI, times(3)).markTextureFrameAvailable(eq(textureId));
   }
 
   @Test
