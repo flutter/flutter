@@ -1,4 +1,4 @@
-  // Copyright 2013 The Flutter Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,8 +6,6 @@ package io.flutter.embedding.engine;
 
 import android.content.Intent;
 import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
-import io.flutter.Log;
 import java.util.*;
 
 /**
@@ -23,9 +21,9 @@ import java.util.*;
  * list of flags that can be set across all platforms.
  *
  * <p>These flags are preferably set via the manifest metadata in a Flutter component's
- * AndroidManifest.xml or via the command line for security purposes as Intent extras may
- * expose sensitive information to malicious actors. See {@link FlutterShellArgs} for the
- * specification of how to set each flag via the command line and manifest metadata.
+ * AndroidManifest.xml or via the command line for security purposes as Intent extras may expose
+ * sensitive information to malicious actors. See {@link FlutterShellArgs} for the specification of
+ * how to set each flag via the command line and manifest metadata.
  */
 // TODO(camsim99): Delete this class when support for setting engine shell arguments via Intent
 // is no longer supported. See https://github.com/flutter/flutter/issues/172553.
