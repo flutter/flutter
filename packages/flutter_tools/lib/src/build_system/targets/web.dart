@@ -487,7 +487,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
       }
 
       errorCodeToImportUris.forEach((String errorCode, Set<Uri> uris) {
-        final List<String> hostedPackageFindings = [];
+        final Set<String> hostedPackageFindings = {};
         // Randomize the URI order so that we
         final urisList = <Uri>[...uris]..shuffle(dryRunRandom);
         var hostApp = false;
