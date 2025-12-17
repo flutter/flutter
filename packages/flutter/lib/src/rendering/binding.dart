@@ -68,8 +68,10 @@ mixin RendererBinding
     rootPipelineOwner.attach(_manifold);
   }
 
-  // Registry mapping texture IDs to their TextureBox render objects.
-  // Used to mark textures dirty when the engine notifies us of new frames.
+  /// Registry mapping texture IDs to their [TextureBox] render objects.
+  ///
+  /// Used to mark textures dirty when the engine notifies us of new frames
+  /// via [handleTextureFrameAvailable].
   @visibleForTesting
   final Map<int, TextureBox> textureRegistry = <int, TextureBox>{};
 
