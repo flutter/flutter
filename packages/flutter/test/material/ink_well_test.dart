@@ -2821,4 +2821,142 @@ void main() {
     await tester.pumpAndSettle();
     expect(lastState, isNull);
   });
+
+  testWidgets('InkWell splash persists when Tooltip (ancestor) wins LongPress', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Scaffold(
+          body: Center(
+            child: Tooltip(
+              message: 'Tooltip',
+              child: Material(
+                child: InkWell(
+                  onTap: () {},
+                  child: const SizedBox(width: 100, height: 100, key: Key('inkwell')),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder inkWellFinder = find.byKey(const Key('inkwell'));
+    final MaterialInkController material = Material.of(tester.element(inkWellFinder));
+
+    // Start gesture
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(inkWellFinder));
+    await tester.pump(const Duration(milliseconds: 200));
+
+    // Splash should be there
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+
+    // Long press duration (Tooltip appears)
+    await tester.pump(const Duration(seconds: 1));
+    // Verify Tooltip appeared
+    expect(find.text('Tooltip'), findsOneWidget);
+
+    // CRITICAL EXPECTATION: Splash should persist
+    expect(
+      material,
+      paintsExactlyCountTimes(#drawCircle, 1),
+      reason: 'Splash should persist even if Tooltip shows',
+    );
+
+    await gesture.up();
+  });
+
+  testWidgets('InkWell splash cancels when Scroll (ancestor) wins', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Scaffold(
+          body: ListView(
+            children: [
+              Material(
+                child: InkWell(
+                  onTap: () {},
+                  child: const SizedBox(width: 100, height: 100, key: Key('inkwell')),
+                ),
+              ),
+              const SizedBox(height: 1000), // Ensure scrollable
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Finder inkWellFinder = find.byKey(const Key('inkwell'));
+    final MaterialInkController material = Material.of(tester.element(inkWellFinder));
+
+    // Start gesture
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(inkWellFinder));
+    await tester.pump(const Duration(milliseconds: 200));
+
+    // Splash should be there
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+
+    // Drag to scroll
+    await gesture.moveBy(const Offset(0, -100));
+    await tester.pumpAndSettle(); // Allow fade out
+
+    // CRITICAL EXPECTATION: Splash should CANCEL
+    expect(material, paintsExactlyCountTimes(#drawCircle, 0));
+
+    await gesture.up();
+  });
+
+  testWidgets('InkWell highlight removes when Tooltip (ancestor) wins LongPress', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          useMaterial3: false,
+        ), // Use Material 2 for consistent splash/highlight logic
+        home: Scaffold(
+          body: Center(
+            child: Tooltip(
+              message: 'Tooltip',
+              child: Material(
+                child: InkWell(
+                  onTap: () {},
+                  child: const SizedBox(width: 100, height: 100, key: Key('inkwell')),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder inkWellFinder = find.byKey(const Key('inkwell'));
+    final MaterialInkController material = Material.of(tester.element(inkWellFinder));
+
+    // Start gesture
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(inkWellFinder));
+    await tester.pump(const Duration(milliseconds: 200));
+
+    // Splash and Highlight should be there
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+    expect(material, paintsExactlyCountTimes(#drawRect, 1)); // Highlight
+
+    // Long press duration (Tooltip appears)
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('Tooltip'), findsOneWidget);
+
+    // Splash and Highlight should PERSIST (my previous fix)
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+    expect(material, paintsExactlyCountTimes(#drawRect, 1));
+
+    // Release
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // CRITICAL EXPECTATION: Splash AND Highlight should be GONE
+    expect(material, paintsNothing);
+  });
 }

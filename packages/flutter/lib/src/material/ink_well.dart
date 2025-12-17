@@ -847,6 +847,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     implements _ParentInkResponseState {
   Set<InteractiveInkFeature>? _splashes;
   InteractiveInkFeature? _currentSplash;
+  Offset? _startPosition;
+  Offset? _lastPosition;
   bool _hovering = false;
   final Map<_HighlightType, InkHighlight?> _highlights = <_HighlightType, InkHighlight?>{};
   late final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
@@ -1173,6 +1175,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   void handleTapDown(TapDownDetails details) {
+    // If the InkWell is previously disabled, it will have a null _actionMap.
+    // ...   _startNewSplash(details: details);
     handleAnyTapDown(details);
     widget.onTapDown?.call(details);
   }
@@ -1229,16 +1233,17 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   void handleTapCancel() {
     widget.onTapCancel?.call();
-
-    // If long press is configured (explicit), let it handle the splash lifecycle
     if (widget.onLongPress != null) {
       return;
     }
 
-    // If implicit long press is enabled (onTap present), always defer to long press handling
-    // Even if _longPressAccepted is false (it may not be set yet due to event order)
-    if (_primaryEnabled) {
-      return;
+    // If the tap was cancelled but we haven't moved far, it might be an implicit
+    // long press (e.g. Tooltip won the arena). In that case, we keep the splash.
+    // We will clean it up on PointerUp/Cancel.
+    if (_primaryEnabled && _startPosition != null && _lastPosition != null) {
+      if ((_lastPosition! - _startPosition!).distance < kTouchSlop) {
+        return;
+      }
     }
 
     _currentSplash?.cancel();
@@ -1466,35 +1471,56 @@ class _InkResponseState extends State<_InkResponseStateWidget>
                 onLongPress: widget.excludeFromSemantics || widget.onLongPress == null
                     ? null
                     : simulateLongPress,
-                child: GestureDetector(
-                  onTapDown: _primaryEnabled ? handleTapDown : null,
-                  onTapUp: _primaryEnabled ? handleTapUp : null,
-                  onTap: _primaryEnabled ? handleTap : null,
-                  onTapCancel: _primaryEnabled ? handleTapCancel : null,
-                  onDoubleTap: widget.onDoubleTap != null ? handleDoubleTap : null,
-                  // Enable LongPress if explicitly provided OR if we want to fallback to implicit visual persistence (if Tap is enabled)
-                  onLongPress: widget.onLongPress != null || _primaryEnabled
-                      ? handleLongPress
-                      : null,
-                  onLongPressCancel:
-                      widget.onLongPress != null || widget.onLongPressUp != null || _primaryEnabled
-                      ? handleLongPressCancel
-                      : null,
-                  onLongPressEnd:
-                      widget.onLongPress != null || widget.onLongPressUp != null || _primaryEnabled
-                      ? handleLongPressEnd
-                      : null,
-                  onLongPressMoveUpdate:
-                      widget.onLongPress != null || widget.onLongPressUp != null || _primaryEnabled
-                      ? handleLongPressMoveUpdate
-                      : null,
-                  onSecondaryTapDown: _secondaryEnabled ? handleSecondaryTapDown : null,
-                  onSecondaryTapUp: _secondaryEnabled ? handleSecondaryTapUp : null,
-                  onSecondaryTap: _secondaryEnabled ? handleSecondaryTap : null,
-                  onSecondaryTapCancel: _secondaryEnabled ? handleSecondaryTapCancel : null,
-                  behavior: HitTestBehavior.opaque,
-                  excludeFromSemantics: true,
-                  child: widget.child,
+                child: Listener(
+                  onPointerDown: (PointerDownEvent event) {
+                    _startPosition = event.position;
+                    _lastPosition = event.position;
+                  },
+                  onPointerMove: (PointerMoveEvent event) {
+                    _lastPosition = event.position;
+                  },
+                  onPointerUp: (PointerUpEvent event) {
+                    _startPosition = null;
+                    _lastPosition = null;
+                    if (_currentSplash != null) {
+                      _currentSplash!.confirm();
+                      _currentSplash = null;
+                    }
+                    updateHighlight(_HighlightType.pressed, value: false);
+                  },
+                  onPointerCancel: (PointerCancelEvent event) {
+                    _startPosition = null;
+                    _lastPosition = null;
+                    _currentSplash?.cancel();
+                    _currentSplash = null;
+                    updateHighlight(_HighlightType.pressed, value: false);
+                  },
+                  child: GestureDetector(
+                    onTapDown: _primaryEnabled ? handleTapDown : null,
+                    onTapUp: _primaryEnabled ? handleTapUp : null,
+                    onTap: _primaryEnabled ? handleTap : null,
+                    onTapCancel: _primaryEnabled ? handleTapCancel : null,
+                    onDoubleTap: widget.onDoubleTap != null ? handleDoubleTap : null,
+                    // Enable LongPress if explicitly provided OR if we want to fallback to implicit visual persistence (if Tap is enabled)
+                    onLongPress: widget.onLongPress != null ? handleLongPress : null,
+                    onLongPressCancel: widget.onLongPress != null || widget.onLongPressUp != null
+                        ? handleLongPressCancel
+                        : null,
+                    onLongPressEnd: widget.onLongPress != null || widget.onLongPressUp != null
+                        ? handleLongPressEnd
+                        : null,
+                    onLongPressMoveUpdate:
+                        widget.onLongPress != null || widget.onLongPressUp != null
+                        ? handleLongPressMoveUpdate
+                        : null,
+                    onSecondaryTapDown: _secondaryEnabled ? handleSecondaryTapDown : null,
+                    onSecondaryTapUp: _secondaryEnabled ? handleSecondaryTapUp : null,
+                    onSecondaryTap: _secondaryEnabled ? handleSecondaryTap : null,
+                    onSecondaryTapCancel: _secondaryEnabled ? handleSecondaryTapCancel : null,
+                    behavior: HitTestBehavior.opaque,
+                    excludeFromSemantics: true,
+                    child: widget.child,
+                  ),
                 ),
               ),
             ),
