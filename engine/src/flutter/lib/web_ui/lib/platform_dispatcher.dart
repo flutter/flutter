@@ -11,7 +11,6 @@ typedef TimingsCallback = void Function(List<FrameTiming> timings);
 typedef PointerDataPacketCallback = void Function(PointerDataPacket packet);
 typedef KeyDataCallback = bool Function(KeyData data);
 typedef SemanticsActionEventCallback = void Function(SemanticsActionEvent action);
-typedef HitTestCallback = HitTestResponse Function(HitTestRequest request);
 typedef PlatformMessageResponseCallback = void Function(ByteData? data);
 typedef PlatformMessageCallback =
     void Function(String name, ByteData? data, PlatformMessageResponseCallback? callback);
@@ -154,9 +153,6 @@ abstract class PlatformDispatcher {
 
   SemanticsActionEventCallback? get onSemanticsActionEvent;
   set onSemanticsActionEvent(SemanticsActionEventCallback? callback);
-
-  HitTestCallback? get onHitTest;
-  set onHitTest(HitTestCallback? callback);
 
   ErrorCallback? get onError;
   set onError(ErrorCallback? callback);
@@ -605,15 +601,3 @@ final class ViewFocusEvent {
 enum ViewFocusState { unfocused, focused }
 
 enum ViewFocusDirection { undefined, forward, backward }
-
-class HitTestRequest {
-  const HitTestRequest({required this.view, required this.offset});
-  final FlutterView view;
-  final Offset offset;
-}
-
-class HitTestResponse {
-  const HitTestResponse({required this.isPlatformView});
-  static const HitTestResponse empty = HitTestResponse(isPlatformView: false);
-  final bool isPlatformView;
-}

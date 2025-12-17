@@ -43,9 +43,6 @@ typedef KeyDataCallback = bool Function(KeyData data);
 /// Signature for [PlatformDispatcher.onSemanticsActionEvent].
 typedef SemanticsActionEventCallback = void Function(SemanticsActionEvent action);
 
-/// Signature for [PlatformDispatcher.onHitTest].
-typedef HitTestCallback = HitTestResponse Function(HitTestRequest request);
-
 /// Signature for responses to platform messages.
 ///
 /// Used as a parameter to [PlatformDispatcher.sendPlatformMessage] and
@@ -1391,18 +1388,6 @@ class PlatformDispatcher {
     _onSemanticsActionEventZone = Zone.current;
   }
 
-  /// A callback invoked when platform wants to hit test a [FlutterView].
-  ///
-  /// For example, this is used by iOS to determine if a gesture hits a
-  /// [UIKitView].
-  HitTestCallback? get onHitTest => _onHitTest;
-  HitTestCallback? _onHitTest;
-  Zone _onHitTestZone = Zone.root;
-  set onHitTest(HitTestCallback? callback) {
-    _onHitTest = callback;
-    _onHitTestZone = Zone.current;
-  }
-
   // Called from the engine via hooks.dart.
   void _updateFrameData(int frameNumber) {
     final FrameData previous = _frameData;
@@ -1438,15 +1423,6 @@ class PlatformDispatcher {
         arguments: args,
       ),
     );
-  }
-
-  HitTestResponse _hitTest(HitTestRequest request) {
-    return _invoke1WithReturn<HitTestRequest, HitTestResponse>(
-          onHitTest,
-          _onHitTestZone,
-          request,
-        ) ??
-        HitTestResponse.empty;
   }
 
   ErrorCallback? _onError;
@@ -3212,43 +3188,4 @@ enum ViewFocusDirection {
   ///
   /// This is typically result of the user pressing shift + tab.
   backward,
-}
-
-/// A request to evaluate the content of a view at a specific position.
-///
-/// See also:
-///
-/// * [PlatformDispatcher.onHitTest], the callback that the platform
-///   invokes to hit test a view at a specific position.
-/// * [HitTestResponse], the result of a hit test request.
-class HitTestRequest {
-  /// Creates a hit test request.
-  const HitTestRequest({required this.view, required this.offset});
-
-  /// The view that should be hit tested.
-  final FlutterView view;
-
-  /// The position in the [view] that should be hit tested.
-  final Offset offset;
-}
-
-/// The results of hit testing a view at a specific position.
-///
-/// See also:
-///
-/// * [PlatformDispatcher.onHitTest], the callback that the platform
-///   invokes to hit test a view at a specific position.
-/// * [HitTestRequest], the request to hit test a view at a specific position.
-class HitTestResponse {
-  /// Creates a hit test response.
-  const HitTestResponse({required this.isPlatformView});
-
-  /// A response with no hit entries.
-  static const HitTestResponse empty = HitTestResponse(isPlatformView: false);
-
-  /// Whether the first hit test entry is a platform view.
-  ///
-  /// The first hit test entry is typically the child that is
-  /// visually "on top" (i.e., paints later).
-  final bool isPlatformView;
 }
