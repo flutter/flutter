@@ -299,6 +299,12 @@ public class FlutterAndroidComponentTest {
       return lifecycle;
     }
 
+    @NonNull
+    @Override
+    public String[] getFlutterShellArgs() {
+      return new String[0];
+    }
+
     @Nullable
     @Override
     public String getCachedEngineId() {
