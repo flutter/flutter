@@ -5487,7 +5487,7 @@ base class UniformVec2Slot {
 /// Example:
 ///
 /// ```dart
-/// void updateShader(ui.FragmentShader shader) {
+/// void updateShader(ui.FragmentShader shader, double time) {
 ///   shader.getUniformVec3('uScaledTime').set(time, time*0.1, time*0.01);
 /// }
 /// ```
