@@ -4,7 +4,7 @@
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterStringUtils.h"
 
-NSString* FlutterSanitizeUTF8ForJSON(NSData* data) {
+NSString* FLTSanitizeUTF8ForJSON(NSData* data) {
   if (!data) {
     return nil;
   }

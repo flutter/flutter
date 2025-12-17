@@ -15,6 +15,6 @@
  * 1. Lossy UTF-8 decoding to replace invalid bytes with \uFFFD.
  * 2. Scans for JSON-style escape sequences \uXXXX and replaces unpaired surrogates with \uFFFD.
  */
-NSString* FlutterSanitizeUTF8ForJSON(NSData* data);
+NSString* FLTSanitizeUTF8ForJSON(NSData* data);
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_COMMON_FRAMEWORK_HEADERS_FLUTTERSTRINGUTILS_H_

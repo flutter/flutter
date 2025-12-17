@@ -8,43 +8,43 @@
 namespace {
 
 TEST(FlutterStringUtilsTest, HandlesNil) {
-  EXPECT_EQ(FlutterSanitizeUTF8ForJSON(nil), nil);
+  EXPECT_EQ(FLTSanitizeUTF8ForJSON(nil), nil);
 }
 
 TEST(FlutterStringUtilsTest, PreservesValidUTF8) {
   NSString* input = @"Hello, World!";
   NSData* data = [input dataUsingEncoding:NSUTF8StringEncoding];
-  EXPECT_TRUE([FlutterSanitizeUTF8ForJSON(data) isEqualToString:input]);
+  EXPECT_TRUE([FLTSanitizeUTF8ForJSON(data) isEqualToString:input]);
 
   NSString* emoji = @"👋🌍";
   NSData* emojiData = [emoji dataUsingEncoding:NSUTF8StringEncoding];
-  EXPECT_TRUE([FlutterSanitizeUTF8ForJSON(emojiData) isEqualToString:emoji]);
+  EXPECT_TRUE([FLTSanitizeUTF8ForJSON(emojiData) isEqualToString:emoji]);
 }
 
 TEST(FlutterStringUtilsTest, SanitizesInvalidUTF8) {
   // Invalid byte sequence (continuation byte without start)
   const char bytes[] = "Hello \x80 World";
   NSData* data = [NSData dataWithBytes:bytes length:strlen(bytes)];
-  NSString* sanitized = FlutterSanitizeUTF8ForJSON(data);
+  NSString* sanitized = FLTSanitizeUTF8ForJSON(data);
   EXPECT_TRUE([sanitized isEqualToString:@"Hello \uFFFD World"]);
 }
 
 TEST(FlutterStringUtilsTest, PreservesValidJSONEscapes) {
   NSString* input = @"\\\" \\\\ \\/ \\b \\f \\n \\r \\t";
   NSData* data = [input dataUsingEncoding:NSUTF8StringEncoding];
-  EXPECT_TRUE([FlutterSanitizeUTF8ForJSON(data) isEqualToString:input]);
+  EXPECT_TRUE([FLTSanitizeUTF8ForJSON(data) isEqualToString:input]);
 }
 
 TEST(FlutterStringUtilsTest, PreservesValidSurrogatePairs) {
   // \uD83D\uDE00 is 😀
   NSString* input = @"\\uD83D\\uDE00";
   NSData* data = [input dataUsingEncoding:NSUTF8StringEncoding];
-  EXPECT_TRUE([FlutterSanitizeUTF8ForJSON(data) isEqualToString:input]);
+  EXPECT_TRUE([FLTSanitizeUTF8ForJSON(data) isEqualToString:input]);
 
   // Lowercase hex
   NSString* inputLower = @"\\ud83d\\ude00";
   NSData* dataLower = [inputLower dataUsingEncoding:NSUTF8StringEncoding];
-  EXPECT_TRUE([FlutterSanitizeUTF8ForJSON(dataLower) isEqualToString:inputLower]);
+  EXPECT_TRUE([FLTSanitizeUTF8ForJSON(dataLower) isEqualToString:inputLower]);
 }
 
 TEST(FlutterStringUtilsTest, SanitizesUnpairedHighSurrogates) {
@@ -52,7 +52,7 @@ TEST(FlutterStringUtilsTest, SanitizesUnpairedHighSurrogates) {
   NSString* input = @"Val: \\uD800 end";
   NSData* data = [input dataUsingEncoding:NSUTF8StringEncoding];
   NSString* expected = @"Val: \\uFFFD end";
-  EXPECT_TRUE([FlutterSanitizeUTF8ForJSON(data) isEqualToString:expected]);
+  EXPECT_TRUE([FLTSanitizeUTF8ForJSON(data) isEqualToString:expected]);
 }
 
 TEST(FlutterStringUtilsTest, SanitizesUnpairedLowSurrogates) {
@@ -60,7 +60,7 @@ TEST(FlutterStringUtilsTest, SanitizesUnpairedLowSurrogates) {
   NSString* input = @"Val: \\uDC00 end";
   NSData* data = [input dataUsingEncoding:NSUTF8StringEncoding];
   NSString* expected = @"Val: \\uFFFD end";
-  EXPECT_TRUE([FlutterSanitizeUTF8ForJSON(data) isEqualToString:expected]);
+  EXPECT_TRUE([FLTSanitizeUTF8ForJSON(data) isEqualToString:expected]);
 }
 
 TEST(FlutterStringUtilsTest, SanitizesHighSurrogateFollowedByNonLow) {
@@ -68,7 +68,7 @@ TEST(FlutterStringUtilsTest, SanitizesHighSurrogateFollowedByNonLow) {
   NSString* input = @"\\uD800\\u0020";
   NSData* data = [input dataUsingEncoding:NSUTF8StringEncoding];
   NSString* expected = @"\\uFFFD\\u0020";
-  EXPECT_TRUE([FlutterSanitizeUTF8ForJSON(data) isEqualToString:expected]);
+  EXPECT_TRUE([FLTSanitizeUTF8ForJSON(data) isEqualToString:expected]);
 }
 
 TEST(FlutterStringUtilsTest, SanitizesBrokenEscapeSequences) {
@@ -77,7 +77,7 @@ TEST(FlutterStringUtilsTest, SanitizesBrokenEscapeSequences) {
   NSData* data = [input dataUsingEncoding:NSUTF8StringEncoding];
   // Should be preserved as is (or handled gracefully), here it's valid UTF8 chars
   // but not a complete escape. SanitizeJSON loop checks length.
-  EXPECT_TRUE([FlutterSanitizeUTF8ForJSON(data) isEqualToString:input]);
+  EXPECT_TRUE([FLTSanitizeUTF8ForJSON(data) isEqualToString:input]);
 }
 
 TEST(FlutterStringUtilsTest, MixedContent) {
@@ -87,7 +87,7 @@ TEST(FlutterStringUtilsTest, MixedContent) {
   const char bytes[] = "H\x80 \\u0041 \\uD800";
   NSData* data = [NSData dataWithBytes:bytes length:strlen(bytes)];
   NSString* expected = @"H\uFFFD \\u0041 \\uFFFD";
-  EXPECT_TRUE([FlutterSanitizeUTF8ForJSON(data) isEqualToString:expected]);
+  EXPECT_TRUE([FLTSanitizeUTF8ForJSON(data) isEqualToString:expected]);
 }
 
 }  // namespace

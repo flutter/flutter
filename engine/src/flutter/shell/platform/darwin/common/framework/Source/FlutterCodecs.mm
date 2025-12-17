@@ -91,7 +91,7 @@ FLUTTER_ASSERT_ARC
   // Sanitize the input to ensure it is valid UTF-8.
   // This prevents NSJSONSerialization from throwing an exception on invalid Unicode,
   // which causes a crash.
-  NSString* stringMessage = FlutterSanitizeUTF8ForJSON(message);
+  NSString* stringMessage = FLTSanitizeUTF8ForJSON(message);
   NSData* utf8Message = [stringMessage dataUsingEncoding:NSUTF8StringEncoding];
 
   BOOL isSimpleValue = NO;
