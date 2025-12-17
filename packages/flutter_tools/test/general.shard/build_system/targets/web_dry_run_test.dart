@@ -342,6 +342,35 @@ package:priv/some/path.dart 193:32 - package:js unsupported (2)
   );
 
   test(
+    'dry run findings deduplicate entries',
+    () => testbed.run(() async {
+      processManager.addCommand(
+        FakeCommand(
+          command: commandArgs,
+          exitCode: 254,
+          stdout: '''
+Found incompatibilities with WebAssembly.
+
+package:foo/some/path.dart 6:1 - dart:html unsupported (0)
+package:foo/other/path.dart 18:1 - dart:html unsupported (0)
+''',
+        ),
+      );
+      final Dart2WasmTarget target = createTarget();
+      await target.build(environment);
+
+      expect(fakeAnalytics.sentEvents, hasLength(1));
+
+      final Event event = fakeAnalytics.sentEvents[0];
+      expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
+      expect(event.eventData, hasLength(3));
+      expect(event.eventData['result'], 'findings');
+      expect(event.eventData['exitCode'], 254);
+      expect(event.eventData['E0'], 'foo:${_fakePackageVersions['foo']}');
+    }),
+  );
+
+  test(
     'wasm dry run package config load failure',
     () => testbed.run(() async {
       processManager.addCommand(
