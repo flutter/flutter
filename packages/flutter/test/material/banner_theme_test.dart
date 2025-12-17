@@ -318,6 +318,104 @@ void main() {
     expect(contentTopLeft.dx - materialTopLeft.dx, 58);
     expect(leadingTopLeft.dy - materialTopLeft.dy, 24);
     expect(leadingTopLeft.dx - materialTopLeft.dx, 22);
+  });
+
+  testWidgets('Local MaterialBannerTheme properties are used', (WidgetTester tester) async {
+    const Color backgroundColor = Colors.purple;
+    const Color surfaceTintColor = Colors.red;
+    const Color shadowColor = Colors.orange;
+    const textStyle = TextStyle(color: Colors.green);
+    const contentText = 'Content';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MaterialBannerTheme(
+          data: const MaterialBannerThemeData(
+            backgroundColor: backgroundColor,
+            surfaceTintColor: surfaceTintColor,
+            shadowColor: shadowColor,
+            elevation: 6.0,
+            contentTextStyle: textStyle,
+            padding: EdgeInsets.all(10),
+            leadingPadding: EdgeInsets.all(12),
+          ),
+          child: Scaffold(
+            body: MaterialBanner(
+              leading: const Icon(Icons.ac_unit),
+              content: const Text(contentText),
+              actions: <Widget>[TextButton(child: const Text('Action'), onPressed: () {})],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Material material = _getMaterialFromText(tester, contentText);
+    expect(material.color, backgroundColor);
+    expect(material.surfaceTintColor, surfaceTintColor);
+    expect(material.shadowColor, shadowColor);
+    expect(material.elevation, 6.0);
+
+    final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
+    expect(content.text.style, textStyle);
+
+    final Offset contentTopLeft = tester.getTopLeft(_textFinder(contentText));
+    final Offset materialTopLeft = tester.getTopLeft(_materialFinder());
+    final Offset leadingTopLeft = tester.getTopLeft(find.byIcon(Icons.ac_unit));
+    expect(contentTopLeft.dy - materialTopLeft.dy, 29);
+    expect(contentTopLeft.dx - materialTopLeft.dx, 58);
+    expect(leadingTopLeft.dy - materialTopLeft.dy, 24);
+    expect(leadingTopLeft.dx - materialTopLeft.dx, 22);
+  });
+
+  testWidgets('MaterialBanner widget properties take priority over local theme', (
+    WidgetTester tester,
+  ) async {
+    const Color backgroundColor = Colors.purple;
+    const Color surfaceTintColor = Colors.red;
+    const Color shadowColor = Colors.orange;
+    const textStyle = TextStyle(color: Colors.green);
+    final MaterialBannerThemeData bannerTheme = _bannerTheme();
+    const contentText = 'Content';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MaterialBannerTheme(
+          data: bannerTheme,
+          child: Scaffold(
+            body: MaterialBanner(
+              backgroundColor: backgroundColor,
+              surfaceTintColor: surfaceTintColor,
+              shadowColor: shadowColor,
+              elevation: 6.0,
+              leading: const Icon(Icons.ac_unit),
+              contentTextStyle: textStyle,
+              content: const Text(contentText),
+              padding: const EdgeInsets.all(10),
+              leadingPadding: const EdgeInsets.all(12),
+              actions: <Widget>[TextButton(child: const Text('Action'), onPressed: () {})],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Material material = _getMaterialFromText(tester, contentText);
+    expect(material.color, backgroundColor);
+    expect(material.surfaceTintColor, surfaceTintColor);
+    expect(material.shadowColor, shadowColor);
+    expect(material.elevation, 6.0);
+
+    final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
+    expect(content.text.style, textStyle);
+
+    final Offset contentTopLeft = tester.getTopLeft(_textFinder(contentText));
+    final Offset materialTopLeft = tester.getTopLeft(_materialFinder());
+    final Offset leadingTopLeft = tester.getTopLeft(find.byIcon(Icons.ac_unit));
+    expect(contentTopLeft.dy - materialTopLeft.dy, 29);
+    expect(contentTopLeft.dx - materialTopLeft.dx, 58);
+    expect(leadingTopLeft.dy - materialTopLeft.dy, 24);
+    expect(leadingTopLeft.dx - materialTopLeft.dx, 22);
 
     expect(find.byType(Divider), findsNothing);
   });

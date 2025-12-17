@@ -174,10 +174,10 @@ class MaterialBannerThemeData with Diagnosticable {
 class MaterialBannerTheme extends InheritedTheme {
   /// Creates a banner theme that controls the configurations for
   /// [MaterialBanner]s in its widget subtree.
-  const MaterialBannerTheme({super.key, this.data, required super.child});
+  const MaterialBannerTheme({super.key, required this.data, required super.child});
 
   /// The properties for descendant [MaterialBanner] widgets.
-  final MaterialBannerThemeData? data;
+  final MaterialBannerThemeData data;
 
   /// The closest instance of this class's [data] value that encloses the given
   /// context.
