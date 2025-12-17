@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterCodecs.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterStringUtils.h"
 
 #include <cstring>
 
@@ -87,12 +88,18 @@ FLUTTER_ASSERT_ARC
   if ([message length] == 0) {
     return nil;
   }
+  // Sanitize the input to ensure it is valid UTF-8.
+  // This prevents NSJSONSerialization from throwing an exception on invalid Unicode,
+  // which causes a crash.
+  NSString* stringMessage = FlutterSanitizeUTF8ForJSON(message);
+  NSData* utf8Message = [stringMessage dataUsingEncoding:NSUTF8StringEncoding];
+
   BOOL isSimpleValue = NO;
   id decoded = nil;
   NSError* error;
-  if (0 < message.length) {
+  if (0 < utf8Message.length) {
     UInt8 first;
-    [message getBytes:&first length:1];
+    [utf8Message getBytes:&first length:1];
     isSimpleValue = first != '{' && first != '[';
     if (isSimpleValue) {
       // NSJSONSerialization does not support top-level simple values.
@@ -100,13 +107,14 @@ FLUTTER_ASSERT_ARC
       // the single entry.
       UInt8 begin = '[';
       UInt8 end = ']';
-      NSMutableData* expandedMessage = [NSMutableData dataWithLength:message.length + 2];
+      NSMutableData* expandedMessage = [NSMutableData dataWithLength:utf8Message.length + 2];
       [expandedMessage replaceBytesInRange:NSMakeRange(0, 1) withBytes:&begin];
-      [expandedMessage replaceBytesInRange:NSMakeRange(1, message.length) withBytes:message.bytes];
-      [expandedMessage replaceBytesInRange:NSMakeRange(message.length + 1, 1) withBytes:&end];
-      message = expandedMessage;
+      [expandedMessage replaceBytesInRange:NSMakeRange(1, utf8Message.length)
+                                 withBytes:utf8Message.bytes];
+      [expandedMessage replaceBytesInRange:NSMakeRange(utf8Message.length + 1, 1) withBytes:&end];
+      utf8Message = expandedMessage;
     }
-    decoded = [NSJSONSerialization JSONObjectWithData:message options:0 error:&error];
+    decoded = [NSJSONSerialization JSONObjectWithData:utf8Message options:0 error:&error];
   }
   NSAssert(decoded, @"Invalid JSON message, decoding failed: %@", error);
   return isSimpleValue ? ((NSArray*)decoded)[0] : decoded;
