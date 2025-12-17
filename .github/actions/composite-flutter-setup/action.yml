@@ -9,7 +9,7 @@ inputs:
     default: 'android-36'
   ANDROID_BUILDTOOLS:
     description: 'android buildtools version'
-    default: '36.0.0'
+    default: '36.1.0'
 
 runs:
   using: 'composite'
