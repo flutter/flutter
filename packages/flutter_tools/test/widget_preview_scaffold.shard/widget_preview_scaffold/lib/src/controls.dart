@@ -130,6 +130,32 @@ class LayoutTypeSelector extends StatelessWidget {
   }
 }
 
+class WidgetInspectorToggle extends StatelessWidget {
+  const WidgetInspectorToggle({super.key, required this.controller});
+
+  final WidgetPreviewScaffoldController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return _ControlDecorator(
+      child: ValueListenableBuilder(
+        valueListenable: controller.widgetInspectorVisible,
+        builder: (context, widgetInspectorVisible, _) {
+          final theme = Theme.of(context);
+          return IconButton(
+            style: theme.iconButtonTheme.style,
+            visualDensity: VisualDensity.compact,
+            onPressed: controller.toggleWidgetInspectorVisible,
+            // TODO(bkonyi): replace with widget inspector icon.
+            icon: Icon(Icons.image_search),
+            color: widgetInspectorVisible ? Colors.blue : Colors.black,
+          );
+        },
+      ),
+    );
+  }
+}
+
 /// A toggle button that enables / disables filtering previews by the currently
 /// selected source file.
 ///
@@ -144,26 +170,18 @@ class FilterBySelectedFileToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: controller.editorServiceAvailable,
-      builder: (context, editorServiceAvailable, child) {
-        if (!editorServiceAvailable) {
-          return Container();
-        }
-        return _ControlDecorator(
-          child: ValueListenableBuilder(
-            valueListenable: controller.filterBySelectedFileListenable,
-            builder: (context, value, child) {
-              return IconButton(
-                onPressed: controller.toggleFilterBySelectedFile,
-                icon: Icon(Icons.file_open),
-                color: value ? Colors.blue : Colors.black,
-                tooltip: kTooltip,
-              );
-            },
-          ),
-        );
-      },
+    return _ControlDecorator(
+      child: ValueListenableBuilder(
+        valueListenable: controller.filterBySelectedFileListenable,
+        builder: (context, value, child) {
+          return IconButton(
+            onPressed: controller.toggleFilterBySelectedFile,
+            icon: Icon(Icons.file_open),
+            color: value ? Colors.blue : Colors.black,
+            tooltip: kTooltip,
+          );
+        },
+      ),
     );
   }
 }

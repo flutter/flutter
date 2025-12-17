@@ -31,9 +31,8 @@ std::string Utf8FromPath(const std::filesystem::path& path) {
   return reinterpret_cast<const char*>(path.u8string().c_str());
 }
 
-std::string InferShaderNameFromPath(std::string_view path) {
-  auto p = std::filesystem::path{path}.stem();
-  return Utf8FromPath(p);
+std::string InferShaderNameFromPath(const std::filesystem::path& path) {
+  return Utf8FromPath(path.stem());
 }
 
 std::string ToCamelCase(std::string_view string) {

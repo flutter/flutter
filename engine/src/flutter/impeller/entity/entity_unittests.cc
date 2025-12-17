@@ -54,6 +54,7 @@
 #include "impeller/renderer/render_target.h"
 #include "impeller/renderer/testing/mocks.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
+#include "third_party/abseil-cpp/absl/status/status_matchers.h"
 #include "third_party/imgui/imgui.h"
 
 // TODO(zanderso): https://github.com/flutter/flutter/issues/127701
@@ -1752,10 +1753,12 @@ TEST_P(EntityTest, YUVToRGBFilter) {
 }
 
 TEST_P(EntityTest, RuntimeEffect) {
-  auto runtime_stages =
+  auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
-  auto runtime_stage =
-      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ABSL_ASSERT_OK(runtime_stages_result);
+  std::shared_ptr<RuntimeStage> runtime_stage =
+      runtime_stages_result
+          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 
@@ -1808,9 +1811,12 @@ TEST_P(EntityTest, RuntimeEffect) {
     callback(*content_context, mock_pass);
 
     // Dirty the runtime stage.
-    runtime_stages = OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
+    auto runtime_stages_result =
+        OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
+    ABSL_ASSERT_OK(runtime_stages_result);
     runtime_stage =
-        runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+        runtime_stages_result
+            .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
 
     ASSERT_TRUE(runtime_stage->IsDirty());
     expect_dirty = true;
@@ -1820,10 +1826,12 @@ TEST_P(EntityTest, RuntimeEffect) {
 }
 
 TEST_P(EntityTest, RuntimeEffectCanSuccessfullyRender) {
-  auto runtime_stages =
+  auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
+  ABSL_ASSERT_OK(runtime_stages_result);
   auto runtime_stage =
-      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result
+          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 
@@ -1867,10 +1875,12 @@ TEST_P(EntityTest, RuntimeEffectCanSuccessfullyRender) {
 }
 
 TEST_P(EntityTest, RuntimeEffectCanPrecache) {
-  auto runtime_stages =
+  auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
-  auto runtime_stage =
-      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ABSL_ASSERT_OK(runtime_stages_result);
+  std::shared_ptr<RuntimeStage> runtime_stage =
+      runtime_stages_result
+          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 
@@ -1885,10 +1895,12 @@ TEST_P(EntityTest, RuntimeEffectSetsRightSizeWhenUniformIsStruct) {
     GTEST_SKIP() << "Test only applies to Vulkan";
   }
 
-  auto runtime_stages =
+  auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
+  ABSL_ASSERT_OK(runtime_stages_result);
   auto runtime_stage =
-      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result
+          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 
@@ -2298,6 +2310,117 @@ TEST_P(EntityTest, FillPathGeometryGetPositionBufferReturnsExpectedMode) {
                                .TakePath();
     GeometryResult result = get_result(path);
     EXPECT_EQ(result.mode, GeometryResult::Mode::kNonZero);
+  }
+}
+
+TEST_P(EntityTest, StrokeArcGeometryGetPositionBufferReturnsExpectedMode) {
+  RenderTarget target;
+  testing::MockRenderPass mock_pass(GetContext(), target);
+  Rect oval_bounds = Rect::MakeLTRB(100, 100, 200, 200);
+
+  // Butt caps never overlap
+  {
+    StrokeParameters stroke = {.width = 50.0f, .cap = Cap::kButt};
+    for (auto start = 0; start < 360; start += 60) {
+      for (auto sweep = 0; sweep < 360; sweep += 12) {
+        auto geometry = Geometry::MakeStrokedArc(oval_bounds, Degrees(start),
+                                                 Degrees(sweep), stroke);
+
+        GeometryResult result =
+            geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
+
+        EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal)
+            << "start: " << start << " sweep: " << sweep;
+      }
+    }
+  }
+
+  // Round caps with 10 stroke width overlap starting at 348.6 degrees
+  {
+    StrokeParameters stroke = {.width = 10.0f, .cap = Cap::kRound};
+    for (auto start = 0; start < 360; start += 60) {
+      for (auto sweep = 0; sweep < 360; sweep += 12) {
+        auto geometry = Geometry::MakeStrokedArc(oval_bounds, Degrees(start),
+                                                 Degrees(sweep), stroke);
+
+        GeometryResult result =
+            geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
+
+        if (sweep < 348.6) {
+          EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal)
+              << "start: " << start << " sweep: " << sweep;
+        } else {
+          EXPECT_EQ(result.mode, GeometryResult::Mode::kPreventOverdraw)
+              << "start: " << start << " sweep: " << sweep;
+        }
+      }
+    }
+  }
+
+  // Round caps with 50 stroke width overlap starting at 300.1 degrees
+  {
+    StrokeParameters stroke = {.width = 50.0f, .cap = Cap::kRound};
+    for (auto start = 0; start < 360; start += 60) {
+      for (auto sweep = 0; sweep < 360; sweep += 12) {
+        auto geometry = Geometry::MakeStrokedArc(oval_bounds, Degrees(start),
+                                                 Degrees(sweep), stroke);
+
+        GeometryResult result =
+            geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
+
+        if (sweep < 300.0) {
+          EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal)
+              << "start: " << start << " sweep: " << sweep;
+        } else {
+          EXPECT_EQ(result.mode, GeometryResult::Mode::kPreventOverdraw)
+              << "start: " << start << " sweep: " << sweep;
+        }
+      }
+    }
+  }
+
+  // Square caps with 10 stroke width overlap starting at 347.4 degrees
+  {
+    StrokeParameters stroke = {.width = 10.0f, .cap = Cap::kSquare};
+    for (auto start = 0; start < 360; start += 60) {
+      for (auto sweep = 0; sweep < 360; sweep += 12) {
+        auto geometry = Geometry::MakeStrokedArc(oval_bounds, Degrees(start),
+                                                 Degrees(sweep), stroke);
+
+        GeometryResult result =
+            geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
+
+        if (sweep < 347.4) {
+          EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal)
+              << "start: " << start << " sweep: " << sweep;
+        } else {
+          EXPECT_EQ(result.mode, GeometryResult::Mode::kPreventOverdraw)
+              << "start: " << start << " sweep: " << sweep;
+        }
+      }
+    }
+  }
+
+  // Square caps with 50 stroke width overlap starting at 270.1 degrees
+  {
+    StrokeParameters stroke = {.width = 50.0f, .cap = Cap::kSquare};
+    for (auto start = 0; start < 360; start += 60) {
+      for (auto sweep = 0; sweep < 360; sweep += 12) {
+        auto geometry = Geometry::MakeStrokedArc(oval_bounds, Degrees(start),
+                                                 Degrees(sweep), stroke);
+
+        GeometryResult result =
+            geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
+
+        if (sweep < 270.1) {
+          EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal)
+              << "start: " << start << " sweep: " << sweep;
+        } else {
+          EXPECT_EQ(result.mode, GeometryResult::Mode::kPreventOverdraw)
+              << "start: " << start << " sweep: " << sweep;
+        }
+      }
+    }
   }
 }
 

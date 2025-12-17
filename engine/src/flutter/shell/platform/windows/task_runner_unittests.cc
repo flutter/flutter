@@ -4,7 +4,11 @@
 
 #include "flutter/shell/platform/windows/task_runner.h"
 
+#include <atomic>
+#include <chrono>
+
 #include "flutter/fml/macros.h"
+#include "flutter/shell/platform/windows/task_runner_window.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
@@ -86,6 +90,65 @@ TEST(TaskRunnerTest, MaybeExecuteTaskOnlyExpired) {
 
   std::set<uint64_t> only_task_expired_before_now{task_expired_before_now};
   EXPECT_EQ(executed_task, only_task_expired_before_now);
+}
+
+TEST(TaskRunnerTest, TimerThreadDoesNotCancelEarlierScheduledTasks) {
+  std::atomic_bool signaled = false;
+  std::optional<std::chrono::high_resolution_clock::time_point> callback_time;
+  TimerThread timer_thread([&]() {
+    callback_time = std::chrono::high_resolution_clock::now();
+    signaled = true;
+  });
+  timer_thread.Start();
+  auto now = std::chrono::high_resolution_clock::now();
+  // Make sure that subsequent call to schedule does not cancel earlier task
+  // as documented in TimerThread::ScheduleAt.
+  timer_thread.ScheduleAt(now + std::chrono::milliseconds(20));
+  timer_thread.ScheduleAt(now + std::chrono::seconds(10));
+
+  while (!signaled.load()) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+  }
+
+  EXPECT_TRUE(callback_time.has_value());
+  EXPECT_GE(*callback_time, now + std::chrono::milliseconds(20));
+
+  timer_thread.Stop();
+}
+
+class TestTaskRunnerWindow : public TaskRunnerWindow {
+ public:
+  TestTaskRunnerWindow() : TaskRunnerWindow() {}
+};
+
+TEST(TaskRunnerTest, TaskRunnerWindowCoalescesWakeUpMessages) {
+  class Delegate : public TaskRunnerWindow::Delegate {
+   public:
+    Delegate() {}
+
+    std::chrono::nanoseconds ProcessTasks() override {
+      process_tasks_call_count_++;
+      return std::chrono::nanoseconds::max();
+    }
+
+    int process_tasks_call_count_ = 0;
+  };
+
+  Delegate delegate;
+  TestTaskRunnerWindow window;
+
+  window.AddDelegate(&delegate);
+
+  window.WakeUp();
+  window.WakeUp();
+
+  ::MSG msg;
+  while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+    TranslateMessage(&msg);
+    DispatchMessage(&msg);
+  }
+
+  EXPECT_EQ(delegate.process_tasks_call_count_, 1);
 }
 
 }  // namespace testing

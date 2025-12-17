@@ -35,7 +35,7 @@ import '../web/module_metadata.dart';
 import '../web_template.dart';
 import 'proxy_middleware.dart';
 import 'release_asset_server.dart';
-import 'web_server_utlities.dart';
+import 'web_server_utilities.dart';
 
 // A minimal index for projects that do not yet support web. A meta tag is used
 // to ensure loaded scripts are always parsed as UTF-8.
@@ -642,6 +642,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
         flutterJsFile: _flutterJsFile,
         flutterBootstrapJs: _flutterBootstrapJsContent,
       ),
+      encoding: utf8,
       headers: <String, String>{HttpHeaders.contentTypeHeader: 'text/html'},
     );
   }

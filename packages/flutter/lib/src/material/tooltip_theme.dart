@@ -17,16 +17,14 @@ import 'theme.dart';
 // Examples can assume:
 // late BuildContext context;
 
-/// Defines the visual properties of [Tooltip] widgets, a tooltip theme.
+/// Defines default property values for descendant [Tooltip] widgets.
 ///
-/// Each property of [TooltipThemeData] corresponds to a property of [Tooltip],
-/// and describes the value to use when the [Tooltip] property is
-/// not given an explicit non-null value.
+/// Descendant widgets obtain the current [TooltipThemeData] object using
+/// [TooltipTheme.of]. Instances of [TooltipThemeData] can be customized
+/// with [TooltipThemeData.copyWith].
 ///
-/// Use this class to configure a [TooltipTheme] widget, or to set the
-/// [ThemeData.tooltipTheme] for a [Theme] widget or [MaterialApp.theme].
-///
-/// To obtain the current ambient tooltip theme, use [TooltipTheme.of].
+/// Typically a [TooltipThemeData] is specified as part of the overall [Theme]
+/// with [ThemeData.tooltipTheme].
 ///
 /// See also:
 ///
@@ -309,7 +307,7 @@ class TooltipThemeData with Diagnosticable {
 /// TooltipTheme(
 ///   data: TooltipThemeData(
 ///     decoration: BoxDecoration(
-///       color: Colors.blue.withOpacity(0.9),
+///       color: Colors.blue.withValues(alpha: 0.9),
 ///       borderRadius: BorderRadius.zero,
 ///     ),
 ///   ),

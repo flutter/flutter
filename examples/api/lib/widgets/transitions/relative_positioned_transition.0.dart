@@ -27,7 +27,8 @@ class RelativePositionedTransitionExample extends StatefulWidget {
 
 /// [AnimationController]s can be created with `vsync: this` because of
 /// [TickerProviderStateMixin].
-class _RelativePositionedTransitionExampleState extends State<RelativePositionedTransitionExample>
+class _RelativePositionedTransitionExampleState
+    extends State<RelativePositionedTransitionExample>
     with TickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     duration: const Duration(seconds: 2),
@@ -52,16 +53,25 @@ class _RelativePositionedTransitionExampleState extends State<RelativePositioned
           children: <Widget>[
             RelativePositionedTransition(
               size: biggest,
-              rect: RectTween(
-                begin: const Rect.fromLTWH(0, 0, bigLogo, bigLogo),
-                end: Rect.fromLTWH(
-                  biggest.width - smallLogo,
-                  biggest.height - smallLogo,
-                  smallLogo,
-                  smallLogo,
-                ),
-              ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticInOut)),
-              child: const Padding(padding: EdgeInsets.all(8), child: FlutterLogo()),
+              rect:
+                  RectTween(
+                    begin: const Rect.fromLTWH(0, 0, bigLogo, bigLogo),
+                    end: Rect.fromLTWH(
+                      biggest.width - smallLogo,
+                      biggest.height - smallLogo,
+                      smallLogo,
+                      smallLogo,
+                    ),
+                  ).animate(
+                    CurvedAnimation(
+                      parent: _controller,
+                      curve: Curves.elasticInOut,
+                    ),
+                  ),
+              child: const Padding(
+                padding: EdgeInsets.all(8),
+                child: FlutterLogo(),
+              ),
             ),
           ],
         );

@@ -17,12 +17,12 @@ Future<void> testMain() async {
   setUpUnitTests();
 
   test('Paragraph with multiple styles', () {
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
-    final WebTextStyle arial30Style = WebTextStyle(fontFamily: 'Arial', fontSize: 30);
-    final WebTextStyle arial50Style = WebTextStyle(fontFamily: 'Arial', fontSize: 50);
-    final WebTextStyle robotoStyle = WebTextStyle(fontFamily: 'Roboto', fontSize: 40);
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final arial30Style = WebTextStyle(fontFamily: 'Arial', fontSize: 30);
+    final arial50Style = WebTextStyle(fontFamily: 'Arial', fontSize: 50);
+    final robotoStyle = WebTextStyle(fontFamily: 'Roboto', fontSize: 40);
 
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.pushStyle(arial30Style);
     builder.addText('Arial, 30px;');
     builder.pop();
