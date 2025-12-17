@@ -12,22 +12,17 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Container control tests:', () {
-    final container = Container(
+    const container = Container(
       alignment: Alignment.bottomRight,
-      padding: const EdgeInsets.all(7.0),
+      padding: EdgeInsets.all(7.0),
       // uses color, not decoration:
-      color: const Color(0xFF00FF00),
-      foregroundDecoration: const BoxDecoration(color: Color(0x7F0000FF)),
+      color: Color(0xFF00FF00),
+      foregroundDecoration: BoxDecoration(color: Color(0x7F0000FF)),
       width: 53.0,
       height: 76.0,
-      constraints: const BoxConstraints(
-        minWidth: 50.0,
-        maxWidth: 55.0,
-        minHeight: 78.0,
-        maxHeight: 82.0,
-      ),
-      margin: const EdgeInsets.all(5.0),
-      child: const SizedBox(
+      constraints: BoxConstraints(minWidth: 50.0, maxWidth: 55.0, minHeight: 78.0, maxHeight: 82.0),
+      margin: EdgeInsets.all(5.0),
+      child: SizedBox(
         width: 25.0,
         height: 33.0,
         child: DecoratedBox(
@@ -38,7 +33,7 @@ void main() {
     );
 
     testWidgets('paints as expected', (WidgetTester tester) async {
-      await tester.pumpWidget(Align(alignment: Alignment.topLeft, child: container));
+      await tester.pumpWidget(const Align(alignment: Alignment.topLeft, child: container));
 
       final RenderBox box = tester.renderObject(find.byType(Container));
       expect(box, isNotNull);
@@ -54,7 +49,7 @@ void main() {
 
     group('diagnostics', () {
       testWidgets('has reasonable default diagnostics', (WidgetTester tester) async {
-        await tester.pumpWidget(Align(alignment: Alignment.topLeft, child: container));
+        await tester.pumpWidget(const Align(alignment: Alignment.topLeft, child: container));
 
         final RenderBox box = tester.renderObject(find.byType(Container));
 
@@ -63,7 +58,7 @@ void main() {
       });
 
       testWidgets('has expected info diagnostics', (WidgetTester tester) async {
-        await tester.pumpWidget(Align(alignment: Alignment.topLeft, child: container));
+        await tester.pumpWidget(const Align(alignment: Alignment.topLeft, child: container));
 
         final RenderBox box = tester.renderObject(find.byType(Container));
 
@@ -128,7 +123,7 @@ void main() {
       });
 
       testWidgets('has expected debug diagnostics', (WidgetTester tester) async {
-        await tester.pumpWidget(Align(alignment: Alignment.topLeft, child: container));
+        await tester.pumpWidget(const Align(alignment: Alignment.topLeft, child: container));
 
         final RenderBox box = tester.renderObject(find.byType(Container));
 
@@ -232,7 +227,7 @@ void main() {
       });
 
       testWidgets('has expected fine diagnostics', (WidgetTester tester) async {
-        await tester.pumpWidget(Align(alignment: Alignment.topLeft, child: container));
+        await tester.pumpWidget(const Align(alignment: Alignment.topLeft, child: container));
 
         final RenderBox box = tester.renderObject(find.byType(Container));
 
@@ -362,7 +357,7 @@ void main() {
       });
 
       testWidgets('has expected hidden diagnostics', (WidgetTester tester) async {
-        await tester.pumpWidget(Align(alignment: Alignment.topLeft, child: container));
+        await tester.pumpWidget(const Align(alignment: Alignment.topLeft, child: container));
 
         final RenderBox box = tester.renderObject(find.byType(Container));
 
@@ -517,7 +512,7 @@ void main() {
       });
 
       testWidgets('painting error has expected diagnostics', (WidgetTester tester) async {
-        await tester.pumpWidget(Align(alignment: Alignment.topLeft, child: container));
+        await tester.pumpWidget(const Align(alignment: Alignment.topLeft, child: container));
 
         final RenderBox decoratedBox = tester.renderObject(find.byType(DecoratedBox).last);
         final PaintingContext context = _MockPaintingContext();
@@ -549,7 +544,7 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: ListView(children: <Widget>[Container()]),
+        child: ListView(children: const <Widget>[Container()]),
       ),
     );
   });
@@ -562,10 +557,10 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Stack(
           children: <Widget>[
-            Positioned(
+            const Positioned(
               top: 100.0,
               left: 100.0,
-              child: Container(width: 100.0, height: 100.0, color: const Color(0xFF0000FF)),
+              child: Container(width: 100.0, height: 100.0, color: Color(0xFF0000FF)),
             ),
             Positioned(
               top: 100.0,
@@ -576,7 +571,7 @@ void main() {
                 key: key,
                 transform: Matrix4.diagonal3Values(0.5, 0.5, 1.0),
                 transformAlignment: Alignment.centerRight,
-                child: Container(color: const Color(0xFF00FFFF)),
+                child: const Container(color: Color(0xFF00FFFF)),
               ),
             ),
           ],
@@ -599,9 +594,9 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      Container(
-        decoration: const BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(1))),
-        child: const SizedBox(),
+      const Container(
+        decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(1))),
+        child: SizedBox(),
       ),
     );
 
@@ -611,10 +606,10 @@ void main() {
   testWidgets('giving clipBehaviour not a Clip.None, will add a ClipPath to the tree', (
     WidgetTester tester,
   ) async {
-    final container = Container(
+    const container = Container(
       clipBehavior: Clip.hardEdge,
-      decoration: const BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(1))),
-      child: const SizedBox(),
+      decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(1))),
+      child: SizedBox(),
     );
 
     await tester.pumpWidget(container);
@@ -661,7 +656,7 @@ void main() {
         onTap: () {
           tapped = true;
         },
-        child: Container(decoration: const BoxDecoration(color: Colors.black)),
+        child: const Container(decoration: BoxDecoration(color: Colors.black)),
       ),
     );
 
@@ -674,7 +669,7 @@ void main() {
         onTap: () {
           tapped = true;
         },
-        child: Container(foregroundDecoration: const BoxDecoration(color: Colors.black)),
+        child: const Container(foregroundDecoration: BoxDecoration(color: Colors.black)),
       ),
     );
 
@@ -687,7 +682,7 @@ void main() {
         onTap: () {
           tapped = true;
         },
-        child: Container(color: Colors.black),
+        child: const Container(color: Colors.black),
       ),
     );
 
@@ -722,8 +717,8 @@ void main() {
     'Container discards alignment when the child parameter is null and constraints is not Tight',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        Container(
-          decoration: const BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(1))),
+        const Container(
+          decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(1))),
           alignment: Alignment.centerLeft,
         ),
       );
@@ -758,19 +753,19 @@ void main() {
   testWidgets('using clipBehaviour and shadow, should not clip the shadow', (
     WidgetTester tester,
   ) async {
-    final container = Container(
+    const container = Container(
       clipBehavior: Clip.hardEdge,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(30)),
         color: Colors.red,
         boxShadow: <BoxShadow>[BoxShadow(color: Colors.blue, spreadRadius: 10, blurRadius: 20.0)],
       ),
-      child: const SizedBox(width: 50, height: 50),
+      child: SizedBox(width: 50, height: 50),
     );
 
     await tester.pumpWidget(
-      RepaintBoundary(
-        child: Padding(padding: const EdgeInsets.all(30.0), child: container),
+      const RepaintBoundary(
+        child: Padding(padding: EdgeInsets.all(30.0), child: container),
       ),
     );
 
@@ -778,6 +773,45 @@ void main() {
       find.byType(RepaintBoundary),
       matchesGoldenFile('container.clipBehaviour.with.shadow.png'),
     );
+  });
+
+  testWidgets('Container can be const constructed', (WidgetTester tester) async {
+    const cEmpty = Container();
+    expect(cEmpty, isA<Container>());
+
+    const container = Container(width: 100.0, height: 100.0, color: Colors.blue);
+    expect(container, isA<Container>());
+
+    await tester.pumpWidget(const Center(child: container));
+    expect(find.byType(Container), findsOneWidget);
+    expect(find.byType(ColoredBox), findsOneWidget);
+  });
+
+  testWidgets('Container assertions still triggers in build', (WidgetTester tester) async {
+    // Assertions moved to build() should trigger when pumped.
+    // Invalid: negative margin (runtime check)
+    const invalidMarginContainer = Container(
+      // ignore: avoid_init_to_null
+      margin: EdgeInsets.all(-10),
+    );
+
+    await tester.pumpWidget(
+      const Directionality(textDirection: TextDirection.ltr, child: invalidMarginContainer),
+    );
+
+    expect(tester.takeException(), isAssertionError);
+  });
+
+  testWidgets('Container constrained by width/height in build', (WidgetTester tester) async {
+    // ignore: sized_box_for_whitespace
+    const container = Container(width: 50, height: 50);
+
+    await tester.pumpWidget(const Center(child: container));
+
+    expect(find.byType(Container), findsOneWidget);
+    // Use getSize to verify the render object size directly
+    final Size size = tester.getSize(find.byType(Container));
+    expect(size, const Size(50, 50));
   });
 }
 

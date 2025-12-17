@@ -252,7 +252,7 @@ class Container extends StatelessWidget {
   /// it would potentially result in the decoration drawing over the background
   /// color. To supply a decoration with a color, use `decoration:
   /// BoxDecoration(color: color)`.
-  Container({
+  const Container({
     super.key,
     this.alignment,
     this.padding,
@@ -260,28 +260,21 @@ class Container extends StatelessWidget {
     this.isAntiAlias = true,
     this.decoration,
     this.foregroundDecoration,
-    double? width,
-    double? height,
-    BoxConstraints? constraints,
+    this.width,
+    this.height,
+    this.constraints,
     this.margin,
     this.transform,
     this.transformAlignment,
     this.child,
     this.clipBehavior = Clip.none,
-  }) : assert(margin == null || margin.isNonNegative),
-       assert(padding == null || padding.isNonNegative),
-       assert(decoration == null || decoration.debugAssertIsValid()),
-       assert(constraints == null || constraints.debugAssertIsValid()),
-       assert(decoration != null || clipBehavior == Clip.none),
-       assert(
+  }) : assert(
          color == null || decoration == null,
          'Cannot provide both a color and a decoration\n'
          'To provide both, use "decoration: BoxDecoration(color: color)".',
-       ),
-       constraints = (width != null || height != null)
-           ? constraints?.tighten(width: width, height: height) ??
-                 BoxConstraints.tightFor(width: width, height: height)
-           : constraints;
+       );
+
+  /// The [child] contained by the container.
 
   /// The [child] contained by the container.
   ///
@@ -349,6 +342,12 @@ class Container extends StatelessWidget {
   /// The [padding] goes inside the constraints.
   final BoxConstraints? constraints;
 
+  /// If non-null, requires the decoration to have this width.
+  final double? width;
+
+  /// If non-null, requires the decoration to have this height.
+  final double? height;
+
   /// Empty space to surround the [decoration] and [child].
   final EdgeInsetsGeometry? margin;
 
@@ -384,9 +383,17 @@ class Container extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert(margin == null || margin!.isNonNegative);
+    assert(padding == null || padding!.isNonNegative);
+    assert(decoration == null || decoration!.debugAssertIsValid());
+    assert(constraints == null || constraints!.debugAssertIsValid());
+    assert(decoration != null || clipBehavior == Clip.none);
     Widget? current = child;
 
-    if (child == null && (constraints == null || !constraints!.isTight)) {
+    if (child == null &&
+        (constraints == null || !constraints!.isTight) &&
+        width == null &&
+        height == null) {
       current = LimitedBox(
         maxWidth: 0.0,
         maxHeight: 0.0,
@@ -429,8 +436,14 @@ class Container extends StatelessWidget {
       );
     }
 
-    if (constraints != null) {
-      current = ConstrainedBox(constraints: constraints!, child: current);
+    // Effective constraints calculation (moved from constructor)
+    final BoxConstraints? effectiveConstraints = (width != null || height != null)
+        ? constraints?.tighten(width: width, height: height) ??
+              BoxConstraints.tightFor(width: width, height: height)
+        : constraints;
+
+    if (effectiveConstraints != null) {
+      current = ConstrainedBox(constraints: effectiveConstraints, child: current);
     }
 
     if (margin != null) {
@@ -468,6 +481,8 @@ class Container extends StatelessWidget {
     properties.add(
       DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null),
     );
+    properties.add(DoubleProperty('width', width, defaultValue: null));
+    properties.add(DoubleProperty('height', height, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
     properties.add(ObjectFlagProperty<Matrix4>.has('transform', transform));
   }
