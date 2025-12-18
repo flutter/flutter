@@ -32,4 +32,30 @@ void main() {
       await tester.pumpAndSettle(); // Advance pending time.
     },
   );
+
+  testWidgets('Pulling with mouse pointer triggers a refresh indicator', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.RefreshIndicatorExampleApp());
+
+    // Simulate a mouse drag gesture to trigger the refresh.
+    final TestGesture gesture = await tester.startGesture(
+      tester.getCenter(find.text('Pull down here').first),
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.moveBy(const Offset(0.0, 300.0));
+    await tester.pump();
+    await gesture.up();
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(
+      find.bySemanticsLabel('Circular progress indicator'),
+      findsOneWidget,
+    );
+
+    await tester.pumpAndSettle();
+  });
 }
