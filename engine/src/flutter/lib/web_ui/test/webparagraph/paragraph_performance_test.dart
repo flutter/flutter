@@ -117,7 +117,7 @@ Future<void> testMain() async {
           'Abcdef ghijkl mnopqrs tuvwxyz. Abcdef ghijkl mnopqrs tuvwxyz. Abcdef ghijkl mnopqrs tuvwxyz. '
           'Abcdef ghijkl mnopqrs tuvwxyz. Abcdef ghijkl mnopqrs tuvwxyz. Abcdef ghijkl mnopqrs tuvwxyz',
       'Large text',
-      10,
+      1,
     );
     //await drawPictureUsingCurrentRenderer(recorder.endRecording());
     //await matchGoldenFile('largeText.png', region: region);

@@ -8,21 +8,13 @@ import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../../engine.dart';
-import '../dom.dart';
-import '../text/paragraph.dart';
-import '../util.dart';
-import '../view_embedder/style_manager.dart';
-import 'debug.dart';
-import 'layout.dart';
-import 'paint.dart';
-import 'painter.dart';
 
 @visibleForTesting
 const String kPlaceholderChar = '\uFFFC';
 
 // Performance flags for testing.
-bool useCPUTextLayout = true;
-bool withCacheId = true;
+bool useCPUTextLayout = false;
+bool withCacheId = false;
 
 /// A single canvas2d context to use for text layout.
 @visibleForTesting
