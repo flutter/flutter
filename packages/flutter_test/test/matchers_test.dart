@@ -913,6 +913,171 @@ void main() {
       expect(failedExpectation, throwsA(isA<TestFailure>()));
       handle.dispose();
     });
+
+    testWidgets('matchesSemantics captures NBSP in failure descriptions', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsData data = SemanticsData(
+        flagsCollection: SemanticsFlags.none,
+        actions: 0,
+        identifier: '',
+        traversalChildIdentifier: '',
+        traversalParentIdentifier: '',
+        attributedLabel: AttributedString('label\u202f0'),
+        attributedHint: AttributedString('hint\u202f0'),
+        attributedValue: AttributedString('value\u202f0'),
+        attributedIncreasedValue: AttributedString('increasedValue\u202f0'),
+        attributedDecreasedValue: AttributedString('decreasedValue\u202f0'),
+        tooltip: 'tooltip\u202f0',
+        textDirection: TextDirection.ltr,
+        rect: Rect.zero,
+        textSelection: null,
+        scrollIndex: null,
+        scrollChildCount: null,
+        scrollPosition: null,
+        scrollExtentMax: null,
+        scrollExtentMin: null,
+        platformViewId: 0,
+        maxValueLength: 0,
+        currentValueLength: 0,
+        headingLevel: 0,
+        linkUrl: null,
+        role: ui.SemanticsRole.none,
+        controlsNodes: null,
+        validationResult: SemanticsValidationResult.none,
+        inputType: ui.SemanticsInputType.none,
+        locale: null,
+      );
+      final _FakeSemanticsNode node = _FakeSemanticsNode(data);
+
+      // Label
+      expect(
+        () => expect(node, matchesSemantics(label: 'label 0')),
+        throwsA(
+          isA<TestFailure>().having(
+            (TestFailure e) => e.message,
+            'message',
+            contains(r'label was label\u202f0'),
+          ),
+        ),
+      );
+      expect(
+        () => expect(node, matchesSemantics(attributedLabel: AttributedString('label 0'))),
+        throwsA(
+          isA<TestFailure>().having(
+            (TestFailure e) => e.message,
+            'message',
+            contains(r'attributedLabel was label\u202f0'),
+          ),
+        ),
+      );
+
+      // Hint
+      expect(
+        () => expect(node, matchesSemantics(hint: 'hint 0')),
+        throwsA(
+          isA<TestFailure>().having(
+            (TestFailure e) => e.message,
+            'message',
+            contains(r'hint was hint\u202f0'),
+          ),
+        ),
+      );
+      expect(
+        () => expect(node, matchesSemantics(attributedHint: AttributedString('hint 0'))),
+        throwsA(
+          isA<TestFailure>().having(
+            (TestFailure e) => e.message,
+            'message',
+            contains(r'attributedHint was hint\u202f0'),
+          ),
+        ),
+      );
+
+      // Value
+      expect(
+        () => expect(node, matchesSemantics(value: 'value 0')),
+        throwsA(
+          isA<TestFailure>().having(
+            (TestFailure e) => e.message,
+            'message',
+            contains(r'value was value\u202f0'),
+          ),
+        ),
+      );
+      expect(
+        () => expect(node, matchesSemantics(attributedValue: AttributedString('value 0'))),
+        throwsA(
+          isA<TestFailure>().having(
+            (TestFailure e) => e.message,
+            'message',
+            contains(r'attributedValue was value\u202f0'),
+          ),
+        ),
+      );
+
+      // Increased Value
+      expect(
+        () => expect(node, matchesSemantics(increasedValue: 'increasedValue 0')),
+        throwsA(
+          isA<TestFailure>().having(
+            (TestFailure e) => e.message,
+            'message',
+            contains(r'increasedValue was increasedValue\u202f0'),
+          ),
+        ),
+      );
+      expect(
+        () => expect(
+          node,
+          matchesSemantics(attributedIncreasedValue: AttributedString('increasedValue 0')),
+        ),
+        throwsA(
+          isA<TestFailure>().having(
+            (TestFailure e) => e.message,
+            'message',
+            contains(r'attributedIncreasedValue was increasedValue\u202f0'),
+          ),
+        ),
+      );
+
+      // Decreased Value
+      expect(
+        () => expect(node, matchesSemantics(decreasedValue: 'decreasedValue 0')),
+        throwsA(
+          isA<TestFailure>().having(
+            (TestFailure e) => e.message,
+            'message',
+            contains(r'decreasedValue was decreasedValue\u202f0'),
+          ),
+        ),
+      );
+      expect(
+        () => expect(
+          node,
+          matchesSemantics(attributedDecreasedValue: AttributedString('decreasedValue 0')),
+        ),
+        throwsA(
+          isA<TestFailure>().having(
+            (TestFailure e) => e.message,
+            'message',
+            contains(r'attributedDecreasedValue was decreasedValue\u202f0'),
+          ),
+        ),
+      );
+
+      // Tooltip
+      expect(
+        () => expect(node, matchesSemantics(tooltip: 'tooltip 0')),
+        throwsA(
+          isA<TestFailure>().having(
+            (TestFailure e) => e.message,
+            'message',
+            contains(r'tooltip was tooltip\u202f0'),
+          ),
+        ),
+      );
+    });
   });
 
   group('containsSemantics', () {
