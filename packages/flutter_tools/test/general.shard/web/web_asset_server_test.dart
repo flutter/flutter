@@ -275,37 +275,32 @@ void main() {
   );
 
   group('WebAssetServer', () {
-    testWithoutContext(
-      'serves with COOP/COEP headers when crossOriginIsolation is true',
-      () async {
-        final WebAssetServer server = await WebAssetServer.start(
-          null,
-          null,
-          false,
-          false,
-          false,
-          BuildInfo.debug,
-          false,
-          const DartDevelopmentServiceConfiguration(enable: false),
-          Uri.base,
-          null,
-          crossOriginIsolation: true,
-          webDevServerConfig: const WebDevServerConfig(
-            host: 'localhost',
-          ),
-          webRenderer: WebRendererMode.canvaskit,
-          isWasm: false,
-          useLocalCanvasKit: false,
-          testMode: true,
-          fileSystem: fileSystem,
-          logger: BufferLogger.test(),
-          platform: platform,
-        );
+    testWithoutContext('serves with COOP/COEP headers when crossOriginIsolation is true', () async {
+      final WebAssetServer server = await WebAssetServer.start(
+        null,
+        null,
+        false,
+        false,
+        false,
+        BuildInfo.debug,
+        false,
+        const DartDevelopmentServiceConfiguration(enable: false),
+        Uri.base,
+        null,
+        crossOriginIsolation: true,
+        webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+        webRenderer: WebRendererMode.canvaskit,
+        isWasm: false,
+        useLocalCanvasKit: false,
+        testMode: true,
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: platform,
+      );
 
-        expect(server.defaultResponseHeaders['Cross-Origin-Opener-Policy'], ['same-origin']);
-        expect(server.defaultResponseHeaders['Cross-Origin-Embedder-Policy'], ['credentialless']);
-      },
-    );
+      expect(server.defaultResponseHeaders['Cross-Origin-Opener-Policy'], ['same-origin']);
+      expect(server.defaultResponseHeaders['Cross-Origin-Embedder-Policy'], ['credentialless']);
+    });
 
     testWithoutContext(
       'serves without COOP/COEP headers when crossOriginIsolation is false',
@@ -322,9 +317,7 @@ void main() {
           Uri.base,
           null,
           crossOriginIsolation: false,
-          webDevServerConfig: const WebDevServerConfig(
-            host: 'localhost',
-          ),
+          webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
           webRenderer: WebRendererMode.canvaskit,
           isWasm: false,
           useLocalCanvasKit: false,
@@ -339,37 +332,32 @@ void main() {
       },
     );
 
-    testWithoutContext(
-      'serves with COOP/COEP headers when web renderer is skwasm',
-      () async {
-        final WebAssetServer server = await WebAssetServer.start(
-          null,
-          null,
-          false,
-          false,
-          false,
-          BuildInfo.debug,
-          false,
-          const DartDevelopmentServiceConfiguration(enable: false),
-          Uri.base,
-          null,
-          crossOriginIsolation: true,
-          webDevServerConfig: const WebDevServerConfig(
-            host: 'localhost',
-          ),
-          webRenderer: WebRendererMode.skwasm,
-          isWasm: false,
-          useLocalCanvasKit: false,
-          testMode: true,
-          fileSystem: fileSystem,
-          logger: BufferLogger.test(),
-          platform: platform,
-        );
+    testWithoutContext('serves with COOP/COEP headers when web renderer is skwasm', () async {
+      final WebAssetServer server = await WebAssetServer.start(
+        null,
+        null,
+        false,
+        false,
+        false,
+        BuildInfo.debug,
+        false,
+        const DartDevelopmentServiceConfiguration(enable: false),
+        Uri.base,
+        null,
+        crossOriginIsolation: true,
+        webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+        webRenderer: WebRendererMode.skwasm,
+        isWasm: false,
+        useLocalCanvasKit: false,
+        testMode: true,
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: platform,
+      );
 
-        expect(server.defaultResponseHeaders['Cross-Origin-Opener-Policy'], ['same-origin']);
-        expect(server.defaultResponseHeaders['Cross-Origin-Embedder-Policy'], ['credentialless']);
-      },
-    );
+      expect(server.defaultResponseHeaders['Cross-Origin-Opener-Policy'], ['same-origin']);
+      expect(server.defaultResponseHeaders['Cross-Origin-Embedder-Policy'], ['credentialless']);
+    });
 
     testWithoutContext(
       'serves without COOP/COEP headers when web renderer is not skwasm',
@@ -386,9 +374,7 @@ void main() {
           Uri.base,
           null,
           crossOriginIsolation: false,
-          webDevServerConfig: const WebDevServerConfig(
-            host: 'localhost',
-          ),
+          webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
           webRenderer: WebRendererMode.canvaskit,
           isWasm: false,
           useLocalCanvasKit: false,
