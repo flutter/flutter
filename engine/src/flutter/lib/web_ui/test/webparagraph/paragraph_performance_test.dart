@@ -15,6 +15,20 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
+typedef AsyncAction<R> = Future<R> Function();
+
+Future<R> timeActionAsync<R>(String name, AsyncAction<R> action) async {
+  if (!Profiler.isBenchmarkMode) {
+    return action();
+  } else {
+    final stopwatch = Stopwatch()..start();
+    final R result = await action();
+    stopwatch.stop();
+    Profiler.instance.benchmark(name, stopwatch.elapsedMicroseconds.toDouble());
+    return result;
+  }
+}
+
 Future<void> testMain() async {
   WebParagraphProfiler.register();
   setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
@@ -23,9 +37,9 @@ Future<void> testMain() async {
     WebParagraphProfiler.reset();
     final recorder = PictureRecorder();
     const region = Rect.fromLTWH(0, 0, 1000, 1000);
-    final canvas = Canvas(recorder, region);
-    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
     for (var i = 0; i < count; i++) {
+      final canvas = Canvas(recorder, region);
+      canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
       final Paragraph paragraph = timeAction('build', () {
         final arialStyle = ParagraphStyle(fontFamily: 'Roboto', fontSize: 20);
         final builder = ParagraphBuilder(arialStyle);
@@ -38,13 +52,15 @@ Future<void> testMain() async {
         paragraph.resetGlyphCache();
       }
       timeAction('layout', () {
-        paragraph.layout(const ParagraphConstraints(width: 1000));
+        paragraph.layout(const ParagraphConstraints(width: 100));
       });
-      timeAction('paint', () {
+      await timeActionAsync('paint', () async {
         canvas.drawParagraph(paragraph, Offset.zero);
+        await drawPictureUsingCurrentRenderer(
+          recorder.endRecording(),
+        ); // This is a hack to make sure the canvas is flushed
       });
     }
-    await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('$image$count.png', region: region);
     WebParagraphProfiler.log();
   }
@@ -101,7 +117,7 @@ Future<void> testMain() async {
           'Abcdef ghijkl mnopqrs tuvwxyz. Abcdef ghijkl mnopqrs tuvwxyz. Abcdef ghijkl mnopqrs tuvwxyz. '
           'Abcdef ghijkl mnopqrs tuvwxyz. Abcdef ghijkl mnopqrs tuvwxyz. Abcdef ghijkl mnopqrs tuvwxyz',
       'Large text',
-      1,
+      10,
     );
     //await drawPictureUsingCurrentRenderer(recorder.endRecording());
     //await matchGoldenFile('largeText.png', region: region);

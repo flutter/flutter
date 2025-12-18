@@ -21,8 +21,8 @@ import 'painter.dart';
 const String kPlaceholderChar = '\uFFFC';
 
 // Performance flags for testing.
-bool useCPUTextLayout = false;
-bool withCacheId = false;
+bool useCPUTextLayout = true;
+bool withCacheId = true;
 
 /// A single canvas2d context to use for text layout.
 @visibleForTesting

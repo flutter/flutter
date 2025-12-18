@@ -50,8 +50,8 @@ class WebParagraphProfiler {
   static void register() {
     Profiler.ensureInitialized();
     engineBenchmarkValueCallback = (String name, double value) {
-      durations[name] = Duration(milliseconds: value.toInt());
       counts[name] = (counts[name] ?? 0) + 1;
+      durations[name] = (durations[name] ?? Duration.zero) + Duration(microseconds: value.toInt());
     };
   }
 
@@ -59,9 +59,10 @@ class WebParagraphProfiler {
     for (final MapEntry<String, Duration> entry in durations.entries) {
       //print('${entry.key}: ${entry.value.inMicroseconds}μs');
       print(
-        entry.key.contains('/')
-            ? '${entry.key}: ${entry.value.inMilliseconds}ms / ${counts[entry.key] ?? 1} = ${(entry.value.inMilliseconds / (counts[entry.key] ?? 1)).toStringAsFixed(3)}ms'
-            : '${entry.key}: ${entry.value.inMilliseconds}ms',
+        '${entry.key}: ${entry.value.inMilliseconds}ms',
+        //entry.key.contains('/')
+        //    ? '${entry.key}: ${entry.value.inMilliseconds}ms / ${counts[entry.key] ?? 1} = ${(entry.value.inMilliseconds / (counts[entry.key] ?? 1)).toStringAsFixed(3)}ms'
+        //    : '${entry.key}: ${entry.value.inMilliseconds}ms',
       );
     }
   }
