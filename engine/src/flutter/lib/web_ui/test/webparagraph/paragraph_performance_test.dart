@@ -17,6 +17,8 @@ void main() {
 
 typedef AsyncAction<R> = Future<R> Function();
 
+const bool textAsSingleImage = true;
+
 Future<R> timeActionAsync<R>(String name, AsyncAction<R> action) async {
   if (!Profiler.isBenchmarkMode) {
     return action();
@@ -52,10 +54,16 @@ Future<void> testMain() async {
         paragraph.resetGlyphCache();
       }
       timeAction('layout', () {
-        paragraph.layout(const ParagraphConstraints(width: 100));
+        paragraph.layout(const ParagraphConstraints(width: 1000));
       });
       await timeActionAsync('paint', () async {
-        canvas.drawParagraph(paragraph, Offset.zero);
+        if (textAsSingleImage && paragraph is WebParagraph) {
+          paragraph.fillAsSingleImage(canvas);
+          paragraph.paintAsSingleImage(canvas, const Offset(20, 20));
+        } else {
+          canvas.drawParagraph(paragraph, const Offset(20, 20));
+        }
+
         await drawPictureUsingCurrentRenderer(
           recorder.endRecording(),
         ); // This is a hack to make sure the canvas is flushed
@@ -66,30 +74,14 @@ Future<void> testMain() async {
   }
 
   test('Build/Layout/Paint small text', () async {
-    //final recorder = PictureRecorder();
-    //const region = Rect.fromLTWH(0, 0, 1000, 1000);
-    //final canvas = Canvas(recorder, region);
-    //canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
     await draw('smallText', 'Abcdef', 'Small text', 100);
-    //await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    //await matchGoldenFile('smallText.png', region: region);
   }, timeout: Timeout.none);
 
   test('Build/Layout/Paint medium text', () async {
-    //final recorder = PictureRecorder();
-    //const region = Rect.fromLTWH(0, 0, 1000, 1000);
-    //final canvas = Canvas(recorder, region);
-    //canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
     await draw('mediumText', 'Abcdef ghijkl mnopqrs tuvwxyz.', 'Medium text', 50);
-    //await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    //await matchGoldenFile('mediumText.png', region: region);
   }, timeout: Timeout.none);
 
   test('Build/Layout/Paint large text', () async {
-    //final recorder = PictureRecorder();
-    //const region = Rect.fromLTWH(0, 0, 1000, 2000);
-    //final canvas = Canvas(recorder, region);
-    //canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
     await draw(
       'largeText',
       'Abcdef ghijkl mnopqrs tuvwxyz. Abcdef ghijkl mnopqrs tuvwxyz. Abcdef ghijkl mnopqrs tuvwxyz. '
@@ -117,11 +109,49 @@ Future<void> testMain() async {
           'Abcdef ghijkl mnopqrs tuvwxyz. Abcdef ghijkl mnopqrs tuvwxyz. Abcdef ghijkl mnopqrs tuvwxyz. '
           'Abcdef ghijkl mnopqrs tuvwxyz. Abcdef ghijkl mnopqrs tuvwxyz. Abcdef ghijkl mnopqrs tuvwxyz',
       'Large text',
-      1,
+      10,
     );
-    //await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    //await matchGoldenFile('largeText.png', region: region);
   }, timeout: Timeout.none);
+
+  test(
+    'Draw WebParagraph text as a single image',
+    () async {
+      WebParagraphProfiler.reset();
+      final recorder = PictureRecorder();
+      const region = Rect.fromLTWH(0, 0, 1000, 1000);
+      final canvas = Canvas(recorder, region);
+      canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
+
+      final WebParagraph paragraph = timeAction('build', () {
+        final arialStyle = WebParagraphStyle(
+          fontFamily: 'Roboto',
+          fontSize: 20,
+          color: const Color(0xFF000000),
+        );
+        final builder = WebParagraphBuilder(arialStyle);
+        builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
+        builder.addText('Lorem ipsum dolor sit. Abcdef ghijkl mnopqrs tuvwxyz.');
+        return builder.build();
+      });
+
+      timeAction('layout', () {
+        paragraph.layout(const ParagraphConstraints(width: 100));
+      });
+      await timeActionAsync('paint', () async {
+        paragraph.fillAsSingleImage(canvas);
+        paragraph.paintAsSingleImage(canvas, const Offset(100, 100));
+
+        await drawPictureUsingCurrentRenderer(
+          recorder.endRecording(),
+        ); // This is a hack to make sure the canvas is flushed
+      });
+
+      await matchGoldenFile('web_paragraph_single_image.png', region: region);
+      WebParagraphProfiler.log();
+    },
+    timeout: Timeout.none,
+    skip: true,
+  );
   /*
   test('Subsequent layout small text no cache', () async {
     final ParagraphStyle arialStyle = ParagraphStyle(fontFamily: 'Roboto', fontSize: 20);

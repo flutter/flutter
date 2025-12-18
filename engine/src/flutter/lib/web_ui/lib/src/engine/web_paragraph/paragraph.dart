@@ -13,7 +13,7 @@ import '../../engine.dart';
 const String kPlaceholderChar = '\uFFFC';
 
 // Performance flags for testing.
-bool useCPUTextLayout = false;
+bool useCPUTextLayout = true;
 bool withCacheId = false;
 
 /// A single canvas2d context to use for text layout.
@@ -996,6 +996,15 @@ class WebParagraph implements ui.Paragraph {
     for (final TextLine line in _layout.lines) {
       _paint.paintLineOnCanvas2D(canvas, _layout, line, offset.dx, offset.dy);
     }
+  }
+
+  void fillAsSingleImage(ui.Canvas canvas) {
+    _paint.painter.resizePaintCanvas(ui.window.devicePixelRatio);
+    _paint.fillAsSingleImage(canvas, _layout);
+  }
+
+  void paintAsSingleImage(ui.Canvas canvas, ui.Offset offset) {
+    _paint.paintAsSingleImage(canvas, _layout, offset);
   }
 
   @override

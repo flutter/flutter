@@ -35,6 +35,7 @@ abstract class Painter {
 
   /// Fills out the information needed to paint the text cluster.
   bool fillTextCluster(WebCluster webTextCluster, bool isDefaultLtr);
+  void addTextCluster(WebCluster webTextCluster);
 
   /// Paints the text cluster previously filled by [fillTextCluster].
   void paintTextCluster(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect, String cacheId);
@@ -84,6 +85,8 @@ abstract class Painter {
       'resizePaintCanvas: ${paintCanvas.width}x${paintCanvas.height} @ $devicePixelRatio',
     );
   }
+
+  void paintTextClustersAsSingleImage(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect);
 }
 
 class CanvasKitPainter extends Painter {
@@ -263,6 +266,13 @@ class CanvasKitPainter extends Painter {
   }
 
   @override
+  void addTextCluster(WebCluster webTextCluster) {
+    final WebTextStyle style = webTextCluster.style;
+    paintContext.fillStyle = style.getForegroundColor().toCssString();
+    webTextCluster.addToContext(paintContext);
+  }
+
+  @override
   void paintTextCluster(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect, String cacheId) {
     assert(!Painter.imageCache.containsKey(cacheId));
     final DomImageBitmap bitmap = paintCanvas.transferToImageBitmap();
@@ -320,6 +330,24 @@ class CanvasKitPainter extends Painter {
   ) {
     assert(Painter.imageCache.containsKey(cacheId));
     final CkImage ckImage = Painter.imageCache[cacheId]!;
+    canvas.drawImageRect(
+      ckImage,
+      sourceRect,
+      targetRect,
+      ui.Paint()..filterQuality = ui.FilterQuality.none,
+    );
+  }
+
+  @override
+  void paintTextClustersAsSingleImage(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect) {
+    final DomImageBitmap bitmap = paintCanvas.transferToImageBitmap();
+
+    final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
+    if (skImage == null) {
+      throw Exception('Failed to convert text image bitmap to an SkImage.');
+    }
+
+    final ckImage = CkImage(skImage, imageSource: ImageBitmapImageSource(bitmap));
     canvas.drawImageRect(
       ckImage,
       sourceRect,

@@ -8,13 +8,6 @@ import 'dart:typed_data';
 import 'package:ui/ui.dart' as ui;
 
 import '../../engine.dart';
-import '../canvaskit/canvaskit_api.dart';
-import '../dom.dart';
-import 'bidi.dart';
-import 'code_unit_flags.dart';
-import 'debug.dart';
-import 'paragraph.dart';
-import 'wrapper.dart';
 
 /// Performs layout on a [WebParagraph].
 ///
@@ -965,6 +958,10 @@ abstract class WebCluster {
 
   void fillOnContext(DomCanvasRenderingContext2D context, {required double x, required double y});
 
+  void addToContext(DomCanvasRenderingContext2D context) {
+    assert(false, 'We should not call addToContext method on this object');
+  }
+
   @override
   String toString() {
     return 'WebCluster [$start:$end)';
@@ -1004,6 +1001,11 @@ class TextCluster extends WebCluster {
       // TODO(mdebbar): Use proper TextClusterOptions.
       <String, double>{'x': x, 'y': y},
     );
+  }
+
+  @override
+  void addToContext(DomCanvasRenderingContext2D context) {
+    context.fillTextCluster(_cluster, /*left:*/ 0, /*top:*/ span.fontBoundingBoxAscent);
   }
 
   @override

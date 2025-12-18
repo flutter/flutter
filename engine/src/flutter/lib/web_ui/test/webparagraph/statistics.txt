@@ -6,23 +6,18 @@ SKPARAGRAPH
 00:02 +0: Build/Layout/Paint small text                                                                                                                                            
 build: 34ms
 layout: 19ms
-preroll_frame: 11ms
-apply_frame: 2ms
 paint: 559ms
 
 00:02 +1: Build/Layout/Paint medium text                                                                                                                                           
 build: 12ms
 layout: 6ms
-preroll_frame: 5ms
-apply_frame: 1ms
 paint: 227ms
 
 00:03 +2: Build/Layout/Paint large text                                                                                                                                            
-build: 0ms
-layout: 2ms
-preroll_frame: 0ms
-apply_frame: 0ms
-paint: 5ms
+build: 8ms
+layout: 11ms
+paint: 63ms
+
 
 BASE LINE (large text test runs only 1 time)
 =========
@@ -118,3 +113,82 @@ paint.paintTextCluster: 221ms
 preroll_frame: 2ms
 apply_frame: 0ms
 paint: 498ms
+
+
+Draw a paragraph as a single image (width=100 as for all the tests above)
+=========================================================================
+00:02 +0: Build/Layout/Paint small text (*100)                                                                                                                                           
+build: 4ms
+layout.AllCodeUnitFlags: 18ms
+layout.extractTextClusters: 11ms
+layout.extractBidiRuns: 3ms
+layout.wrapText: 7ms
+layout.formatLines: 1ms
+layout: 43ms
+paint.fillParagraph: 177ms
+paint.paintParagraph: 12ms
+paint: 1221ms
+
+00:03 +1: Build/Layout/Paint medium text (*50)                                                                                                                                          
+build: 1ms
+layout.AllCodeUnitFlags: 5ms
+layout.extractTextClusters: 4ms
+layout.extractBidiRuns: 1ms
+layout.wrapText: 8ms
+layout.formatLines: 0ms
+layout: 21ms
+paint.fillParagraph: 96ms
+paint.paintParagraph: 5ms
+paint: 581ms
+
+00:04 +2: Build/Layout/Paint large text (*10)                                                                                                                                           
+build: 0ms
+layout.AllCodeUnitFlags: 12ms
+layout.extractTextClusters: 11ms
+layout.extractBidiRuns: 1ms
+layout.wrapText: 63ms
+layout.formatLines: 1ms
+layout: 90ms
+paint.fillParagraph: 269ms
+paint.paintParagraph: 3ms
+paint: 395ms
+
+
+Draw a paragraph as a single image (width=1000 aso the large text fits into the canvas)
+=======================================================================================
+00:02 +0: Build/Layout/Paint small text                                                                                                                                            
+build: 3ms
+layout.AllCodeUnitFlags: 17ms
+layout.extractTextClusters: 11ms
+layout.extractBidiRuns: 3ms
+layout.wrapText: 8ms
+layout.formatLines: 0ms
+layout: 42ms
+paint.fillParagraph: 182ms
+paint.paintParagraph: 10ms (1123-182)/100 = 9.41
+paint: 1223ms
+
+00:03 +1: Build/Layout/Paint medium text                                                                                                                                           
+build: 1ms
+layout.AllCodeUnitFlags: 5ms
+layout.extractTextClusters: 5ms
+layout.extractBidiRuns: 0ms
+layout.wrapText: 5ms
+layout.formatLines: 0ms
+layout: 17ms
+paint.fillParagraph: 93ms
+paint.paintParagraph: 5ms (572-93)/50 = 9.58
+paint: 572ms
+
+00:04 +2: Build/Layout/Paint large text                                                                                                                                            
+build: 0ms
+layout.AllCodeUnitFlags: 12ms
+layout.extractTextClusters: 10ms
+layout.extractBidiRuns: 1ms
+layout.wrapText: 44ms
+layout.formatLines: 0ms
+layout: 68ms
+paint.fillParagraph: 463ms
+paint.paintParagraph: 16ms  (612 - 463)/10 = 14.9
+paint: 612ms
+

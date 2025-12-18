@@ -207,7 +207,6 @@ class TextPaint {
             ? layout.ellipsisClusters[i]
             : layout.allClusters[i];
         // We need to adjust the canvas size to fit the block in case there is scaling or zoom involved
-        // We need to adjust the canvas size to fit the block in case there is scaling or zoom involved
         final (ui.Rect sourceRect, ui.Rect targetRect) = calculateCluster(
           layout,
           block,
@@ -375,5 +374,92 @@ class TextPaint {
   ) {
     WebParagraphDebug.log('paintLineOnCanvasKit.Text: ${line.textRange}');
     _paintByClustersOnCanvas2D(StyleElements.text, canvas, layout, line, x, y);
+  }
+
+  void fillAsSingleImage(ui.Canvas canvas, TextLayout layout) {
+    // Paint the entire paragraph as a single image on Canvas2D
+    timeAction('paint.fillParagraph', () {
+      ui.Offset offset = ui.Offset.zero;
+      for (final TextLine line in layout.lines) {
+        WebParagraphDebug.log('fillAsSingleImage: ${line.textRange} $offset');
+        paintContext.save();
+        paintContext.translate(offset.dx, offset.dy);
+        _fillClustersOnCanvas2D(layout, line);
+        paintContext.restore();
+        offset = offset.translate(-line.advance.width - line.trailingSpacesWidth, 0);
+        offset = offset.translate(0, line.advance.height);
+      }
+    });
+  }
+
+  void paintAsSingleImage(ui.Canvas canvas, TextLayout layout, ui.Offset offset) {
+    timeAction('paint.paintParagraph', () {
+      _paintClustersAsSingleImage(canvas, layout, offset);
+    });
+  }
+
+  void _fillClustersOnCanvas2D(TextLayout layout, TextLine line) {
+    for (final LineBlock block in line.visualBlocks) {
+      // Placeholders do not need painting, just reserving the space
+      if (block.clusterRange.size == 1 &&
+          layout.allClusters[block.clusterRange.start] is PlaceholderCluster) {
+        continue;
+      }
+
+      WebParagraphDebug.log(
+        '+addClusterToCanvas2D: ${block.textRange} ${block.clusterRange} '
+        '${(block as TextBlock).clusterRangeWithoutWhitespaces} ${block.whitespacesWidth} '
+        '${block.isLtr} ${line.advance.left} + ${line.formattingShift} + ${block.shiftFromLineStart}',
+      );
+
+      final int start = block.isLtr
+          ? block.clusterRangeWithoutWhitespaces.start
+          : block.clusterRangeWithoutWhitespaces.end - 1;
+      final int end = block.isLtr
+          ? block.clusterRangeWithoutWhitespaces.end
+          : block.clusterRangeWithoutWhitespaces.start - 1;
+      final step = block.isLtr ? 1 : -1;
+      for (var i = start; i != end; i += step) {
+        final WebCluster clusterText = block is EllipsisBlock
+            ? layout.ellipsisClusters[i]
+            : layout.allClusters[i];
+        painter.addTextCluster(clusterText);
+      }
+    }
+  }
+
+  void _paintClustersAsSingleImage(ui.Canvas canvas, TextLayout layout, ui.Offset offset) {
+    final (ui.Rect sourceRect, ui.Rect targetRect) = calculateParagraph(
+      layout,
+      ui.Offset(offset.dx, offset.dy),
+      ui.window.devicePixelRatio,
+    );
+    //print('paintClustersAsSingleImage sourceRect: $sourceRect targetRect: $targetRect');
+    painter.paintTextClustersAsSingleImage(canvas, sourceRect, targetRect);
+  }
+
+  (ui.Rect sourceRect, ui.Rect targetRect) calculateParagraph(
+    TextLayout layout,
+    ui.Offset offset,
+    double devicePixelRatio,
+  ) {
+    // Define the paragraph rect (using advances, not selected rects)
+    // Source rect must take in account the scaling
+    final sourceRect = ui.Rect.fromLTWH(
+      0,
+      0,
+      layout.paragraph.longestLine * devicePixelRatio,
+      layout.paragraph.height * devicePixelRatio,
+    );
+    // Target rect will be scaled by the canvas transform, so we don't scale it here
+    final zeroRect = ui.Rect.fromLTWH(0, 0, layout.paragraph.longestLine, layout.paragraph.height);
+    final ui.Rect targetRect = zeroRect.translate(offset.dx, offset.dy);
+
+    WebParagraphDebug.log(
+      'calculateParagraph source: ${sourceRect.left}:${sourceRect.right}x${sourceRect.top}:${sourceRect.bottom} => '
+      'target: ${targetRect.left}:${targetRect.right}x${targetRect.top}:${targetRect.bottom}',
+    );
+
+    return (sourceRect, targetRect);
   }
 }

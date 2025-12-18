@@ -11,6 +11,9 @@ class WebParagraphDebug {
   static bool apiLogging = false;
 
   static void log(String arg) {
+    if (logging) {
+      print(arg);
+    }
     assert(() {
       if (logging) {
         print(arg);
