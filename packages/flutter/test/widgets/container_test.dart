@@ -791,10 +791,7 @@ void main() {
   testWidgets('Container assertions still triggers in build', (WidgetTester tester) async {
     // Assertions moved to build() should trigger when pumped.
     // Invalid: negative margin (runtime check)
-    const invalidMarginContainer = Container(
-      // ignore: avoid_init_to_null
-      margin: EdgeInsets.all(-10),
-    );
+    const invalidMarginContainer = Container(margin: EdgeInsets.all(-10));
 
     await tester.pumpWidget(
       const Directionality(textDirection: TextDirection.ltr, child: invalidMarginContainer),
