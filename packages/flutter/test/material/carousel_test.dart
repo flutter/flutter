@@ -1990,7 +1990,6 @@ void main() {
             body: CarouselView(
               itemExtent: 300,
               controller: controller,
-              itemSnapping: true,
               onIndexChanged: (int index) {
                 leadingIndex = index;
               },
@@ -2022,62 +2021,62 @@ void main() {
       expect(leadingIndex, equals(1));
     });
 
-    testWidgets('CarouselView shows correct item after animation with symmetric flexWeights', (
-      WidgetTester tester,
-    ) async {
-      final controller = CarouselController();
-      addTearDown(controller.dispose);
-      var leadingIndex = 0;
+    testWidgets(
+      'CarouselView.weighted shows correct item after animation with symmetric flexWeights',
+      (WidgetTester tester) async {
+        final controller = CarouselController();
+        addTearDown(controller.dispose);
+        var leadingIndex = 0;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: CarouselView.weighted(
-              flexWeights: const <int>[2, 5, 2],
-              controller: controller,
-              itemSnapping: true,
-              onIndexChanged: (int index) {
-                leadingIndex = index;
-              },
-              children: List<Widget>.generate(6, (int i) => Text('Item $i')),
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: CarouselView.weighted(
+                flexWeights: const <int>[2, 5, 2],
+                controller: controller,
+                onIndexChanged: (int index) {
+                  leadingIndex = index;
+                },
+                children: List<Widget>.generate(6, (int i) => Text('Item $i')),
+              ),
             ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      controller.animateToItem(
-        4,
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.linear,
-      );
-      await tester.pumpAndSettle();
+        controller.animateToItem(
+          4,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.linear,
+        );
+        await tester.pumpAndSettle();
 
-      expect(controller.leadingItem, equals(4));
-      expect(leadingIndex, equals(4));
+        expect(controller.leadingItem, equals(4));
+        expect(leadingIndex, equals(4));
 
-      final double visible4 = visiblePortionOf(tester, 'Item 4');
-      final double visible3 = visiblePortionOf(tester, 'Item 3');
-      final double visible5 = visiblePortionOf(tester, 'Item 5');
-      expect(visible4, greaterThan(visible3));
-      expect(visible4, greaterThan(visible5));
+        final double visible4 = visiblePortionOf(tester, 'Item 4');
+        final double visible3 = visiblePortionOf(tester, 'Item 3');
+        final double visible5 = visiblePortionOf(tester, 'Item 5');
+        expect(visible4, greaterThan(visible3));
+        expect(visible4, greaterThan(visible5));
 
-      controller.animateToItem(
-        2,
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.linear,
-      );
-      await tester.pumpAndSettle();
+        controller.animateToItem(
+          2,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.linear,
+        );
+        await tester.pumpAndSettle();
 
-      expect(controller.leadingItem, equals(2));
-      expect(leadingIndex, equals(2));
+        expect(controller.leadingItem, equals(2));
+        expect(leadingIndex, equals(2));
 
-      final double visible2 = visiblePortionOf(tester, 'Item 2');
-      final double visible1 = visiblePortionOf(tester, 'Item 1');
-      final double visible3After = visiblePortionOf(tester, 'Item 3');
-      expect(visible2, greaterThan(visible1));
-      expect(visible2, greaterThan(visible3After));
-    });
+        final double visible2 = visiblePortionOf(tester, 'Item 2');
+        final double visible1 = visiblePortionOf(tester, 'Item 1');
+        final double visible3After = visiblePortionOf(tester, 'Item 3');
+        expect(visible2, greaterThan(visible1));
+        expect(visible2, greaterThan(visible3After));
+      },
+    );
 
     testWidgets('CarouselView shows correct item after animation with asymmetric flexWeights', (
       WidgetTester tester,
@@ -2092,7 +2091,6 @@ void main() {
             body: CarouselView.weighted(
               flexWeights: const <int>[1, 2, 3, 4],
               controller: controller,
-              itemSnapping: true,
               onIndexChanged: (int index) {
                 leadingIndex = index;
               },

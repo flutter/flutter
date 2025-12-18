@@ -455,17 +455,10 @@ class CarouselView extends StatefulWidget {
   /// {@template flutter.material.CarouselView.onIndexChanged}
   /// A callback invoked when the leading item changes.
   ///
-  /// The “leading” item is the one that the carousel resolves as primary for
-  /// the current frame according to its layout algorithm. This item can be only
-  /// partially visible while scrolling.
-  ///
   /// For both [CarouselView] and [CarouselView.weighted], the leading item is
-  /// the first item resolved by the layout for the current scroll position.
+  /// the first visible item in the carousel view.
   ///
-  /// If `itemSnapping` is enabled, scrolling settles with the resolved leading
-  /// item fully visible when possible.
-  ///
-  /// The callback fires only when the resolved leading index actually changes,
+  /// The callback fires only when the leading index actually changes,
   /// whether due to user interaction or programmatic scrolling.
   /// {@endtemplate}
   ///
