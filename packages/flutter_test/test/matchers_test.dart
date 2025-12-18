@@ -917,7 +917,7 @@ void main() {
     testWidgets('matchesSemantics captures NBSP in failure descriptions', (
       WidgetTester tester,
     ) async {
-      final SemanticsData data = SemanticsData(
+      final data = SemanticsData(
         flagsCollection: SemanticsFlags.none,
         actions: 0,
         identifier: '',
@@ -947,8 +947,9 @@ void main() {
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
         locale: null,
+        hitTestBehavior: ui.SemanticsHitTestBehavior.defer,
       );
-      final _FakeSemanticsNode node = _FakeSemanticsNode(data);
+      final node = _FakeSemanticsNode(data);
 
       // Label
       expect(
