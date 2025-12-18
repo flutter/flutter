@@ -147,7 +147,7 @@ abstract class ProgressIndicator extends StatefulWidget {
     var isProgressBar = false;
     String? expandedSemanticsValue = semanticsValue;
     if (value != null) {
-      expandedSemanticsValue ??= '${(_effectiveValue! * 100).round()}%';
+      expandedSemanticsValue ??= '${(_effectiveValue! * 100).round()}';
       isProgressBar = true;
     }
     return Semantics(
