@@ -39,6 +39,11 @@ class JNIMock final : public PlatformViewAndroidJNI {
               (override));
 
   MOCK_METHOD(void,
+              FlutterViewSetSemanticsTreeEnabled,
+              (bool enabled),
+              (override));
+
+  MOCK_METHOD(void,
               FlutterViewUpdateCustomAccessibilityActions,
               (std::vector<uint8_t> actions_buffer,
                std::vector<std::string> strings),
