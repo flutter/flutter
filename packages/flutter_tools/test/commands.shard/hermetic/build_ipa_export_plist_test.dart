@@ -106,10 +106,32 @@ void main() {
       final fileSystem = MemoryFileSystem.test();
       final command = BuildIOSArchiveCommand(logger: BufferLogger.test(), verboseHelp: false);
 
-      // Configure fake to return a valid provisioning profile
+      // Set up home directory path for the MemoryFileSystem
+      final homeDir = fileSystem.currentDirectory.path;
+      final fakeFileSystemUtils = FakeFileSystemUtils(homeDirPath: homeDir);
+
+      // Create the provisioning profiles directory structure in the memory filesystem.
+      // _findProvisioningProfileUuid iterates over files in this directory.
+      final provisioningProfilesDir = fileSystem.directory(
+        fileSystem.path.join(
+          homeDir,
+          'Library',
+          'Developer',
+          'Xcode',
+          'UserData',
+          'Provisioning Profiles',
+        ),
+      );
+      provisioningProfilesDir.createSync(recursive: true);
+
+      // Create a dummy provisioning profile file for the fake to "parse"
+      final dummyProfileFile = provisioningProfilesDir.childFile('MyDistProfile.mobileprovision');
+      dummyProfileFile.writeAsStringSync('dummy content');
+
+      // Configure fake to return a valid provisioning profile when parseProvisioningProfile is called
       final fakeWithProfile = FakeXcodeCodeSigningSettings(
         profileToReturn: ProvisioningProfile(
-          filePath: '/path/to/profile.mobileprovision',
+          filePath: dummyProfileFile.path,
           name: 'MyDistProfile',
           uuid: '12345678-1234-1234-1234-123456789012',
           teamIdentifier: 'ABC123DEF4',
@@ -130,6 +152,7 @@ void main() {
         },
         fileSystem: fileSystem,
         codeSigningSettings: fakeWithProfile,
+        fileSystemUtils: fakeFileSystemUtils,
       );
 
       final String plistContent = plistFile.readAsStringSync();
@@ -183,6 +206,16 @@ class FakeBuildableIOSApp implements BuildableIOSApp {
 
   @override
   String get name => 'app';
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class FakeFileSystemUtils implements FileSystemUtils {
+  FakeFileSystemUtils({this.homeDirPath});
+
+  @override
+  final String? homeDirPath;
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);

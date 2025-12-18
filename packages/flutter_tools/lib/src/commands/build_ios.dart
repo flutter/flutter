@@ -670,6 +670,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     required Map<String, String>? buildSettings,
     required FileSystem fileSystem,
     XcodeCodeSigningSettings? codeSigningSettings,
+    FileSystemUtils? fileSystemUtils,
   }) async {
     final String? codeSignStyle = buildSettings?['CODE_SIGN_STYLE'];
     final isManualSigning = codeSignStyle == 'Manual';
@@ -687,6 +688,8 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
         final String? profileUuid = await _findProvisioningProfileUuid(
           profileSpecifier,
           codeSigningSettings: codeSigningSettings,
+          fileSystem: fileSystem,
+          fileSystemUtils: fileSystemUtils ?? globals.fsUtils,
         );
 
         if (profileUuid != null) {
@@ -805,10 +808,12 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   Future<String?> _findProvisioningProfileUuid(
     String profileSpecifier, {
     XcodeCodeSigningSettings? codeSigningSettings,
+    required FileSystem fileSystem,
+    required FileSystemUtils fileSystemUtils,
   }) async {
     final Directory? profileDirectory = getProvisioningProfileDirectory(
-      fileSystemUtils: globals.fsUtils,
-      fileSystem: globals.fs,
+      fileSystemUtils: fileSystemUtils,
+      fileSystem: fileSystem,
     );
     if (profileDirectory == null) {
       logger.printTrace(
@@ -843,7 +848,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
     // Search for profiles matching the specifier (could be name or UUID)
     await for (final FileSystemEntity entity in profileDirectory.list()) {
-      if (entity is! File || globals.fs.path.extension(entity.path) != '.mobileprovision') {
+      if (entity is! File || fileSystem.path.extension(entity.path) != '.mobileprovision') {
         continue;
       }
 
