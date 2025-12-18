@@ -1271,9 +1271,12 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   // Configures the [_mediaQueries] object.
   void _registerMediaQueryListeners() {
     // Controls light-dark mode
-    _mediaQueries.addListener('(prefers-color-scheme: dark)', onMatch: (prefersDark) {
-      _updatePlatformBrightness(prefersDark ? ui.Brightness.dark : ui.Brightness.light);
-    });
+    _mediaQueries.addListener(
+      '(prefers-color-scheme: dark)',
+      onMatch: (prefersDark) {
+        _updatePlatformBrightness(prefersDark ? ui.Brightness.dark : ui.Brightness.light);
+      },
+    );
     _mediaQueries.addListener('(prefers-reduced-motion: reduce)', onMatch: _updateReducedMotion);
   }
 
