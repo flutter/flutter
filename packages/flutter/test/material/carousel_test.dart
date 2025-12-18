@@ -2158,7 +2158,9 @@ void main() {
       },
     );
 
-    testWidgets('CarouselView starts with the correct initial item', (WidgetTester tester) async {
+    testWidgets('CarouselView.weighted starts with the provided initialItem', (
+      WidgetTester tester,
+    ) async {
       final controller = CarouselController(initialItem: 2);
       addTearDown(controller.dispose);
 
@@ -2174,15 +2176,21 @@ void main() {
           ),
         ),
       );
+
       await tester.pumpAndSettle();
 
+      // The carousel should start at the provided `initialItem`.
       expect(controller.leadingItem, equals(2));
       expect(find.text('Item 2'), findsOneWidget);
 
       // Verify that the initial item is centered.
       final Rect itemRect = tester.getRect(find.text('Item 2'));
-      final double centerX = tester.getCenter(find.byType(CarouselView)).dx;
-      expect(itemRect.center.dx, closeTo(centerX, 1.0)); // Allow a small margin of error.
+      final double carouselCenterX = tester.getCenter(find.byType(CarouselView)).dx;
+
+      expect(
+        itemRect.center.dx,
+        closeTo(carouselCenterX, 1.0), // Allow a small margin of error.
+      );
     });
   });
 
