@@ -467,6 +467,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
     // The default Gradle script reads the version name and number
     // from the local.properties file.
+    // TODO(camsim99): Can I not do something like that??? This is tea...
     updateLocalProperties(project: project, buildInfo: androidBuildInfo.buildInfo);
 
     final options = <String>[];

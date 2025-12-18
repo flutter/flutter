@@ -567,6 +567,7 @@ class AndroidDevice extends Device {
         _androidSdk.licensesAvailable && _androidSdk.latestVersion == null) {
       _logger.printTrace('Building APK');
       final FlutterProject project = FlutterProject.current();
+      // TODO(camsim99): wondering if I can hook in here
       await androidBuilder!.buildApk(
         project: project,
         target: mainPath ?? 'lib/main.dart',
