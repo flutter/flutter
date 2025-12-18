@@ -230,3 +230,56 @@ bool isIPv6Address(String address) {
     return false;
   }
 }
+
+/// Finds all non-loopback IPv4 and IPv6 addresses of the local machine.
+Future<List<InternetAddress>> getLocalInetAddresses() async {
+  final addresses = <InternetAddress>[];
+  try {
+    final List<NetworkInterface> interfaces = await listNetworkInterfaces();
+    for (final interface in interfaces) {
+      for (final InternetAddress addr in interface.addresses) {
+        if (!addr.isLoopback) {
+          addresses.add(addr);
+        }
+      }
+    }
+  } on SocketException {
+    // Ignore, just return what we have (or defaults if empty).
+  }
+
+  if (addresses.isEmpty) {
+    return <InternetAddress>[InternetAddress.loopbackIPv4, InternetAddress.loopbackIPv6];
+  }
+  return addresses;
+}
+
+/// Finds the primary non-loopback IPv4 address of the local machine.
+///
+/// This address is often used to tell other network devices how to reach
+/// the service running on this machine.
+Future<InternetAddress> getLocalIpAddress() async {
+  final List<InternetAddress> addresses = await getLocalInetAddresses();
+  return addresses.firstWhere(
+    (InternetAddress addr) => addr.type == InternetAddressType.IPv4,
+    orElse: () => InternetAddress.loopbackIPv4,
+  );
+}
+
+Future<int> findUnusedPort({String hostname = '0.0.0.0'}) async {
+  ServerSocket? socket;
+  try {
+    // We bind to the specified hostname (e.g., '0.0.0.0') and let the OS
+    // dynamically assign a free port by using port 0.
+    socket = await ServerSocket.bind(hostname, 0);
+
+    final int port = socket.port;
+    return port;
+  } on SocketException {
+    // If the bind operation fails for any reason (e.g., no interfaces available),
+    // rethrow.
+    rethrow;
+  } finally {
+    // Crucially, close the socket immediately to free the port for your service.
+    await socket?.close();
+  }
+}

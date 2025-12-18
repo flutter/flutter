@@ -28,6 +28,7 @@ dependencies:
   intl: 0.20.2
   meta: 1.17.0
   multicast_dns: 0.3.3
+  mdns_dart: 2.1.0
   mustache_template: 2.0.2
   package_config: 2.2.0
   process: 5.0.5

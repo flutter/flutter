@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/command_help.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -96,6 +97,80 @@ void main() {
       expect(futureAppStart.isCompleted, true);
       expect(fakeVmServiceHost?.hasRemainingExpectations, false);
     }),
+  );
+
+  testUsingContext(
+    'ResidentRunner advertises correct app name via mDNS',
+    () => testbed.run(() async {
+      globals.fs.file('pubspec.yaml').writeAsStringSync('name: my_test_app\n');
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[listViews, listViews],
+        httpAddress: Uri.parse('http://localhost:12345'),
+      );
+      final futureConnectionInfo =
+          Completer<DebugConnectionInfo>.sync();
+      final futureAppStart = Completer<void>.sync();
+      await residentRunner.attach(
+        appStartedCompleter: futureAppStart,
+        connectionInfoCompleter: futureConnectionInfo,
+      );
+
+      expect(
+        testLogger.traceText,
+        contains('mDNS service started for FakeDevice with appName "my_test_app"'),
+      );
+    }, overrides: <Type, Generator>{AssetBundleFactory: () => FakeAssetBundleFactory()}),
+  );
+
+  testUsingContext(
+    'ResidentRunner advertises for Multiple Devices via mDNS',
+    () => testbed.run(() async {
+      globals.fs.file('pubspec.yaml').writeAsStringSync('name: my_test_app\n');
+
+      // Setup first device
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[listViews, listViews],
+        httpAddress: Uri.parse('http://localhost:1111'),
+      );
+
+      // Setup second device
+      final device2 = FakeDevice(name: 'FakeDevice2');
+      final fakeVmServiceHost2 = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[listViews, listViews],
+        httpAddress: Uri.parse('http://localhost:2222'),
+      );
+      final flutterDevice2 = FakeFlutterDevice()
+        ..testUri = Uri.parse('foo://bar2')
+        ..vmServiceHost = (() => fakeVmServiceHost2)
+        ..device = device2
+        ..fakeDevFS = FakeDevFS();
+
+      // Create ResidentRunner with both devices
+      residentRunner = HotRunner(
+        <FlutterDevice>[flutterDevice, flutterDevice2],
+        stayResident: false,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        target: 'main.dart',
+        analytics: fakeAnalytics,
+      );
+
+      final futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
+      final futureAppStart = Completer<void>.sync();
+
+      await residentRunner.attach(
+        appStartedCompleter: futureAppStart,
+        connectionInfoCompleter: futureConnectionInfo,
+      );
+
+      expect(
+        testLogger.traceText,
+        contains('mDNS service started for FakeDevice with appName "my_test_app"'),
+      );
+      expect(
+        testLogger.traceText,
+        contains('mDNS service started for FakeDevice2 with appName "my_test_app"'),
+      );
+    }, overrides: <Type, Generator>{AssetBundleFactory: () => FakeAssetBundleFactory()}),
   );
 
   testUsingContext(
@@ -2181,4 +2256,44 @@ flutter:
       FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true, isMacOSEnabled: true),
     },
   );
+}
+
+class FakeAssetBundleFactory extends AssetBundleFactory {
+  @override
+  AssetBundle createBundle() => FakeAssetBundle();
+}
+
+class FakeAssetBundle implements AssetBundle {
+  @override
+  final entries = <String, AssetBundleEntry>{};
+
+  @override
+  final deferredComponentsEntries =
+      <String, Map<String, AssetBundleEntry>>{};
+
+  @override
+  final inputFiles = <File>[];
+
+  @override
+  final additionalDependencies = <File>[];
+
+  @override
+  bool wasBuiltOnce() => true;
+
+  @override
+  bool needsBuild({String manifestPath = defaultManifestPath}) => false;
+
+  @override
+  Future<int> build({
+    FlutterHookResult? flutterHookResult,
+    String manifestPath = defaultManifestPath,
+    String? packageConfigPath,
+    bool deferredComponentsEnabled = false,
+    TargetPlatform? targetPlatform,
+    String? flavor,
+    bool includeAssetsFromDevDependencies = false,
+    FlutterProject? flutterProject,
+  }) async {
+    return 0;
+  }
 }

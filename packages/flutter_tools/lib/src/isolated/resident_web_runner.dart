@@ -30,6 +30,7 @@ import '../device.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../hook_runner.dart' show hookRunner;
+import '../mdns_device_discovery.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../resident_runner.dart';
@@ -212,6 +213,7 @@ class ResidentWebRunner extends ResidentRunner {
   @override
   Future<void> cleanupAtFinish() async {
     await _cleanup();
+    await super.cleanupAtFinish();
   }
 
   Future<void> _cleanup() async {
@@ -898,6 +900,22 @@ class ResidentWebRunner extends ResidentRunner {
             flutterProject: flutterProject,
             printStructuredErrorLogMethod: printStructuredErrorLog,
             vmService: _vmService.service,
+          );
+
+          // Start mDNS server
+          unawaited(
+            MDNSDeviceDiscovery(
+              device: device,
+              vmService: _vmService.service,
+              debuggingOptions: debuggingOptions,
+              logger: globals.logger,
+              platform: globals.platform,
+              flutterVersion: globals.flutterVersion,
+              systemClock: globals.systemClock,
+            ).advertise(
+              appName: flutterProject.manifest.appName,
+              vmServiceUri: _vmService.httpAddress,
+            ),
           );
 
           final Uri websocketUri = Uri.parse(debugConnection.uri);
