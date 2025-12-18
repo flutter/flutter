@@ -175,7 +175,6 @@
 }
 
 - (void)setupFlutterViewControllerTest:(NSString*)scenarioIdentifier {
-  NSLog(@"setupFVC: %@", scenarioIdentifier);
   FlutterEngine* engine = [self engineForTest:scenarioIdentifier];
   FlutterViewController* flutterViewController =
       [self flutterViewControllerForTest:scenarioIdentifier withEngine:engine];
@@ -214,10 +213,6 @@
       gestureRecognizersBlockingPolicy:
           FlutterPlatformViewGestureRecognizersBlockingPolicyWaitUntilTouchesEnded];
 
-  UITextField* text = [[UITextField alloc] initWithFrame:CGRectMake(0, 200, 300, 100)];
-  text.text = @"test1";
-  [flutterViewController.view addSubview:text];
-
   UIViewController* rootViewController = flutterViewController;
   // Make Flutter View's origin x/y not 0.
   if ([scenarioIdentifier isEqualToString:@"non_full_screen_flutter_view_platform_view"]) {
@@ -225,25 +220,22 @@
     [rootViewController.view addSubview:flutterViewController.view];
     flutterViewController.view.frame = CGRectMake(150, 150, 500, 500);
   } else if ([scenarioIdentifier isEqualToString:@"tap_status_bar"]) {
-    UITextField* text = [[UITextField alloc] initWithFrame:CGRectMake(0, 200, 300, 100)];
-    text.text = @"test2";
-    [flutterViewController.view addSubview:text];
     [engine.binaryMessenger
         setMessageHandlerOnChannel:@"flutter/status_bar"
               binaryMessageHandler:^(NSData* _Nullable message, FlutterBinaryReply _Nonnull reply) {
                 NSDictionary* dict = [NSJSONSerialization JSONObjectWithData:message
                                                                      options:0
                                                                        error:nil];
+                FlutterBasicMessageChannel* channel = [[FlutterBasicMessageChannel alloc]
+                       initWithName:@"display_data"
+                    binaryMessenger:engine.binaryMessenger
+                              codec:[FlutterJSONMessageCodec sharedInstance]];
+                [channel sendMessage:@{@"data" : dict}];
                 UITextField* text =
                     [[UITextField alloc] initWithFrame:CGRectMake(0, 400, 300, 100)];
                 text.text = dict[@"method"];
                 [flutterViewController.view addSubview:text];
               }];
-    FlutterMethodChannel* channel =
-        [FlutterMethodChannel methodChannelWithName:@"flutter/status_bar"
-                                    binaryMessenger:engine.binaryMessenger
-                                              codec:[FlutterJSONMethodCodec sharedInstance]];
-    [channel invokeMethod:@"handleScrollToTop" arguments:nil];
   }
 
   self.window.rootViewController = rootViewController;

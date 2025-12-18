@@ -649,6 +649,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
       [[FlutterMethodChannel alloc] initWithName:@"flutter/status_bar"
                                  binaryMessenger:self.binaryMessenger
                                            codec:[FlutterJSONMethodCodec sharedInstance]];
+  [self.statusBarChannel resizeChannelBuffer:0];  // No buffering.
 
   self.platformViewsChannel =
       [[FlutterMethodChannel alloc] initWithName:@"flutter/platform_views"
