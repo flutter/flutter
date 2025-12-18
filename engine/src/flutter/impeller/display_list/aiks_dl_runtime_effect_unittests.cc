@@ -473,5 +473,56 @@ TEST_P(AiksTest, ClippedBackdropFilterWithShader) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, RuntimeEffectImageFilterRotated) {
+  auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
+  auto size = image->GetBounds().GetSize();
+
+  struct FragUniforms {
+    Size size;
+  } frag_uniforms = {.size = Size(size.width, size.height)};
+  auto uniform_data = std::make_shared<std::vector<uint8_t>>();
+  uniform_data->resize(sizeof(FragUniforms));
+  memcpy(uniform_data->data(), &frag_uniforms, sizeof(FragUniforms));
+
+  auto runtime_stages_result = OpenAssetAsRuntimeStage("gradient.frag.iplr");
+  ABSL_ASSERT_OK(runtime_stages_result);
+  std::shared_ptr<RuntimeStage> runtime_stage =
+      runtime_stages_result
+          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ASSERT_TRUE(runtime_stage);
+  ASSERT_TRUE(runtime_stage->IsDirty());
+
+  std::vector<std::shared_ptr<DlColorSource>> sampler_inputs = {
+      nullptr,
+  };
+
+  auto runtime_filter = DlImageFilter::MakeRuntimeEffect(
+      DlRuntimeEffectImpeller::Make(runtime_stage), sampler_inputs,
+      uniform_data);
+
+  Scalar rotation = 45;
+
+  auto callback = [&]() -> sk_sp<DisplayList> {
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::SliderFloat("rotation", &rotation, 0, 360);
+      ImGui::End();
+    }
+    DisplayListBuilder builder;
+    builder.Translate(size.width * 0.5, size.height * 0.5);
+    builder.Rotate(rotation);
+    builder.Translate(-size.width * 0.5, -size.height * 0.5);
+
+    DlPaint paint;
+    paint.setImageFilter(runtime_filter);
+    builder.DrawImage(image, DlPoint(0.0, 0.0),
+                      DlImageSampling::kNearestNeighbor, &paint);
+
+    return builder.Build();
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 }  // namespace testing
 }  // namespace impeller
