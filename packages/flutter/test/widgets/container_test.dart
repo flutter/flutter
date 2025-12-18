@@ -840,6 +840,16 @@ void main() {
     final RenderPadding renderPadding = tester.renderObject(find.byType(Padding).last);
     expect(renderPadding.padding, const EdgeInsets.all(15));
   });
+
+  testWidgets('Container does not crash at zero area', (WidgetTester tester) async {
+    // ignore: sized_box_for_whitespace
+    const container = Container(width: 0, height: 0);
+    await tester.pumpWidget(const Center(child: container));
+
+    expect(find.byType(Container), findsOneWidget);
+    final Size size = tester.getSize(find.byType(Container));
+    expect(size, Size.zero);
+  });
 }
 
 class _MockPaintingContext extends Fake implements PaintingContext {
