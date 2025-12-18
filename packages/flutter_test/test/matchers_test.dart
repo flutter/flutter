@@ -1246,8 +1246,6 @@ void main() {
         );
       },
     );
-
-
   });
 
   group('containsSemantics', () {
