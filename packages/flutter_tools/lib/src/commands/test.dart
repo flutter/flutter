@@ -285,6 +285,16 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         FlutterOptions.kWebWasmFlag,
         help: 'Compile to WebAssembly rather than JavaScript.\n$kWasmMoreInfo',
         negatable: false,
+      )
+      ..addFlag(
+        'cross-origin-isolation',
+        help:
+            'Adds the Cross-Origin-Opener-Policy and Cross-Origin-Embedder-Policy '
+            'headers to the web server. These headers are required for using APIs like '
+            'SharedArrayBuffer. This is on by default for the "skwasm" web renderer, '
+            'and this flag can be used to override the default. To disable this for the '
+            'skwasm renderer, use "--no-cross-origin-isolation".',
+        hide: !verboseHelp,
       );
 
     addDdsOptions(verboseHelp: verboseHelp);
@@ -462,6 +472,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       enableFlutterGpu: (argResults!['enable-flutter-gpu'] as bool?) ?? false,
       debugLogsDirectoryPath: debugLogsDirectoryPath,
       webRenderer: webRenderer,
+      webCrossOriginIsolation: argResults!.wasParsed('cross-origin-isolation')
+          ? boolArg('cross-origin-isolation')
+          : null,
       printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
       webUseWasm: useWasm,
     );

@@ -80,6 +80,7 @@ class WebDevFS implements DevFS {
     required this.useLocalCanvasKit,
     required this.rootDirectory,
     this.useDwdsWebSocketConnection = false,
+    required this.webCrossOriginIsolation,
     required this.fileSystem,
     required this.logger,
     required this.platform,
@@ -112,6 +113,7 @@ class WebDevFS implements DevFS {
   final bool useLocalCanvasKit;
   final WebDevServerConfig webDevServerConfig;
   final bool useDwdsWebSocketConnection;
+  final bool webCrossOriginIsolation;
   final FileSystem fileSystem;
   final Logger logger;
   final Platform platform;
@@ -220,6 +222,7 @@ class WebDevFS implements DevFS {
       fileSystem: fileSystem,
       logger: logger,
       platform: platform,
+      crossOriginIsolation: webCrossOriginIsolation,
       shouldEnableMiddleware: shouldEnableMiddleware,
     );
     return baseUri;
