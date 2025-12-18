@@ -4210,7 +4210,6 @@ void main() {
     variant: TargetPlatformVariant.desktop(),
   );
 
-  // Regression test for https://github.com/flutter/flutter/issues/179660.
   testWidgets('showValueIndicator takes priority over theme', (WidgetTester tester) async {
     Widget buildApp({
       required ShowValueIndicator? themeShowValueIndicator,
