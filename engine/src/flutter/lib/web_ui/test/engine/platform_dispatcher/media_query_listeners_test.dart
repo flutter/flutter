@@ -112,10 +112,7 @@ Future<void> testMain() async {
       mockedMediaQuery.dispatchEvent(
         createDomMediaQueryListEvent('change', {'media': fakeMediaQueryString, 'matches': true}),
       );
-      expect(
-        mediaQueryMatch,
-        isTrue,
-      );
+      expect(mediaQueryMatch, isTrue);
 
       manager.detachAll();
       // Trigger a DomMediaQueryListEvent
@@ -125,7 +122,7 @@ Future<void> testMain() async {
       expect(
         mediaQueryMatch,
         isTrue,
-        reason: 'The event that sets `matches` to `false` should have been ignored.'
+        reason: 'The event that sets `matches` to `false` should have been ignored.',
       );
     });
   });
