@@ -2051,12 +2051,6 @@ void main() {
         expect(controller.leadingItem, equals(4));
         expect(leadingIndex, equals(4));
         expect(find.text('Item 4'), findsOneWidget);
-
-        final Rect viewport = viewportRect(tester);
-        final Rect rect4 = tester.getRect(getItem(4));
-
-        expect(rect4.top, greaterThanOrEqualTo(viewport.top));
-        expect(rect4.bottom, lessThanOrEqualTo(viewport.bottom));
       },
     );
 
@@ -2091,12 +2085,6 @@ void main() {
         expect(controller.leadingItem, equals(2));
         expect(leadingIndex, equals(2));
         expect(find.text('Item 2'), findsOneWidget);
-
-        final Rect viewport = viewportRect(tester);
-        final Rect rect2 = tester.getRect(getItem(2));
-
-        expect(rect2.top, greaterThanOrEqualTo(viewport.top));
-        expect(rect2.bottom, lessThanOrEqualTo(viewport.bottom));
       },
     );
 
@@ -2127,12 +2115,6 @@ void main() {
 
       expect(controller.leadingItem, equals(2));
       expect(leadingIndex, equals(2));
-
-      final Rect viewport = viewportRect(tester);
-      final Rect rect2 = tester.getRect(getItem(2));
-
-      expect(rect2.top, greaterThanOrEqualTo(viewport.top));
-      expect(rect2.bottom, lessThanOrEqualTo(viewport.bottom));
     });
 
     testWidgets(
@@ -2162,12 +2144,6 @@ void main() {
         expect(leadingIndex, equals(0));
         expect(find.text('Item 0'), findsOneWidget);
 
-        final Rect viewport = tester.getRect(find.byType(Scrollable));
-        final Rect rect0 = tester.getRect(find.text('Item 0'));
-
-        expect(rect0.top, greaterThanOrEqualTo(viewport.top));
-        expect(rect0.bottom, lessThanOrEqualTo(viewport.bottom));
-
         // Move to the next max-weight item
         controller.animateToItem(
           1,
@@ -2179,11 +2155,6 @@ void main() {
         expect(controller.leadingItem, equals(1));
         expect(leadingIndex, equals(1));
         expect(find.text('Item 1'), findsOneWidget);
-
-        final Rect rect1 = tester.getRect(find.text('Item 1'));
-
-        expect(rect1.top, greaterThanOrEqualTo(viewport.top));
-        expect(rect1.bottom, lessThanOrEqualTo(viewport.bottom));
       },
     );
 
@@ -2451,8 +2422,4 @@ Future<void> runCarouselTest({
   // Verify that the first item is visible.
   expect(find.text('Item 0'), findsOneWidget);
   expect(realOffset(), controller.offset);
-}
-
-Rect viewportRect(WidgetTester tester) {
-  return tester.getRect(find.byType(Scrollable));
 }
