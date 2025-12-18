@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui'; // Adicionado para usar o PointerDeviceKind
 import 'package:flutter/material.dart';
 
 /// Flutter code sample for [RefreshIndicator.noSpinner].
@@ -13,7 +14,19 @@ class RefreshIndicatorExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: RefreshIndicatorExample());
+    return MaterialApp(
+      // --- INÍCIO DA CORREÇÃO ---
+      scrollBehavior: const MaterialScrollBehavior().copyWith(
+        dragDevices: <PointerDeviceKind>{
+          PointerDeviceKind.touch,
+          PointerDeviceKind.mouse,
+          PointerDeviceKind.trackpad,
+          PointerDeviceKind.stylus,
+        },
+      ),
+      // --- FIM DA CORREÇÃO ---
+      home: const RefreshIndicatorExample(),
+    );
   }
 }
 
