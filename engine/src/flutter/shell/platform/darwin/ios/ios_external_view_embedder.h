@@ -22,13 +22,15 @@ class IOSSurfacesManager;
 // class IOSExternalView {
 // public:
 //     IOSExternalView(const DlISize& frame_size,
-//                     GPUSurfaceMetalDelegate* delegate,
+//                     std::unique_ptr<Surface> rendering_surface,
 //                     const std::shared_ptr<impeller::AiksContext>& context
 //                 );
 
 //     ~IOSExternalView();
 
 //     std::unique_ptr<SurfaceFrame> MakeSurfaceFrame();
+
+//     DlCanvas* Canvas();
 // private:
 //     std::unique_ptr<SurfaceFrame> AcquireFrameFromCAMetalLayer(
 //       const GPUSurfaceMetalDelegate* delegate,
@@ -49,6 +51,9 @@ class IOSSurfacesManager;
 //     std::shared_ptr<std::map<void*, DlIRect>> damage_ =
 //         std::make_shared<std::map<void*, DlIRect>>();
 //     std::shared_ptr<impeller::SwapchainTransientsMTL> swapchain_transients_;
+
+//     std::unique_ptr<Surface> rendering_surface_;
+//     std::unique_ptr<SurfaceFrame> surface_frame_;
 // };
 
 class IOSExternalViewEmbedder : public ExternalViewEmbedder {
@@ -70,11 +75,14 @@ public:
   std::shared_ptr<IOSContext> ios_context_;
   const GetIOSRenderingSurfaceCallback get_ios_rendering_surface_callback_;
   DlISize pending_frame_size_;
+  std::unordered_map<int64_t, std::unique_ptr<SurfaceFrame>> frame_layers_;
 
   void CollectView(int64_t view_id) override;
 
   // |ExternalViewEmbedder|
   DlCanvas* GetRootCanvas() override;
+
+  DlCanvas* GetRootCanvas(int64_t flutter_view_id) override;
 
   // |ExternalViewEmbedder|
   void CancelFrame() override;

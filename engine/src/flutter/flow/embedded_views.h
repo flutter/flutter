@@ -363,6 +363,11 @@ class ExternalViewEmbedder {
   // from the on-screen render target.
   virtual DlCanvas* GetRootCanvas() = 0;
 
+  // I added this API to verify the logic for convenience, avoiding changes to the other `XXEVE` for now.
+  virtual DlCanvas* GetRootCanvas(int64_t flutter_view_id) {
+    return GetRootCanvas();
+  }
+
   // Call this in-lieu of |SubmitFlutterView| to clear pre-roll state and
   // sets the stage for the next pre-roll.
   virtual void CancelFrame() = 0;

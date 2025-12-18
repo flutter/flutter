@@ -724,15 +724,14 @@ DrawSurfaceStatus Rasterizer::DrawToSurfaceUnsafe(
     external_view_embedder_->PrepareFlutterView(view_id,
         layer_tree.frame_size(), device_pixel_ratio);
     // TODO(dkwingsmt): Add view ID here.
-    embedder_root_canvas = external_view_embedder_->GetRootCanvas();
-    embedder_root_frame = external_view_embedder_->AcquireRootFrame(view_id);
+    embedder_root_canvas = external_view_embedder_->GetRootCanvas(view_id);
   }
 
   // On Android, the external view embedder deletes surfaces in `BeginFrame`.
   //
   // Deleting a surface also clears the GL context. Therefore, acquire the
   // frame after calling `BeginFrame` as this operation resets the GL context.
-  auto frame = embedder_root_frame ? std::move(embedder_root_frame) : surface_->AcquireFrame(layer_tree.frame_size());
+  auto frame = surface_->AcquireFrame(layer_tree.frame_size());
   if (frame == nullptr) {
     return DrawSurfaceStatus::kFailed;
   }

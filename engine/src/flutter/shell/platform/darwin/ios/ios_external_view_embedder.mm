@@ -19,28 +19,24 @@ FLUTTER_ASSERT_ARC
 
 namespace flutter {
 
-// IOSExternalView::IOSExternalView(const DlISize& frame_size,
-//                     GPUSurfaceMetalDelegate* delegate,
-//                     const std::shared_ptr<impeller::AiksContext>& context
-//                 ): render_surface_size_(frame_size),
-//                    delegate_(delegate),
-//                    aiks_context_(context) {
-//   // If this preference is explicitly set, we allow for disabling partial repaint.
-//   NSNumber* disablePartialRepaint =
-//       [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTDisablePartialRepaint"];
-//   if (disablePartialRepaint != nil) {
-//     disable_partial_repaint_ = disablePartialRepaint.boolValue;
-//   }
-//   if (aiks_context_) {
-//     swapchain_transients_ = std::make_shared<impeller::SwapchainTransientsMTL>(
-//         aiks_context_->GetContext()->GetResourceAllocator());
-//   }
+// IOSExternalView::IOSExternalView(
+//     const DlISize& frame_size,
+//     std::unique_ptr<Surface> rendering_surface,
+//     const std::shared_ptr<impeller::AiksContext>& context
+//   ): render_surface_size_(frame_size),
+//      rendering_surface_(rendering_surface),
+//      aiks_context_(context) {
+//     surface_frame_ = rendering_surface->AcquireFrame(frame_size);
 // }
 
 // IOSExternalView::~IOSExternalView() = default;
 
 // std::unique_ptr<SurfaceFrame> IOSExternalView::MakeSurfaceFrame() {
 //   return AcquireFrameFromCAMetalLayer(delegate_, render_surface_size_);
+// }
+
+// DlCanvas* IOSExternalView::Canvas() {
+//   return surface_frame_->Canvas();
 // }
 
 // std::unique_ptr<SurfaceFrame> IOSExternalView::AcquireFrameFromCAMetalLayer(
@@ -187,13 +183,9 @@ IOSExternalViewEmbedder::IOSExternalViewEmbedder(
     __weak FlutterPlatformViewsController* platform_views_controller,
     const std::shared_ptr<IOSContext>& context,
     const GetIOSRenderingSurfaceCallback& get_ios_rendering_surface_callback
-    // const std::shared_ptr<IOSSurfacesManager> &ios_surfaces_manager
-    )
-    : platform_views_controller_(platform_views_controller),
-    ios_context_(context),
-    //  ios_surfaces_manager_(ios_surfaces_manager)
-    get_ios_rendering_surface_callback_(get_ios_rendering_surface_callback)
-     {
+  ) : platform_views_controller_(platform_views_controller),
+      ios_context_(context),
+      get_ios_rendering_surface_callback_(get_ios_rendering_surface_callback) {
   FML_CHECK(ios_context_);
 }
 
@@ -204,6 +196,18 @@ DlCanvas* IOSExternalViewEmbedder::GetRootCanvas() {
   // On iOS, the root surface is created from the on-screen render target. Only the surfaces for the
   // various overlays are controlled by this class.
   return nullptr;
+}
+
+DlCanvas* IOSExternalViewEmbedder::GetRootCanvas(int64_t flutter_view_id) {
+  auto found = frame_layers_.find(flutter_view_id);
+  if (found == frame_layers_.end()) {
+    FML_DLOG(WARNING)
+        << "No root canvas could be found. This is extremely unlikely and "
+           "indicates that the external view embedder did not receive the "
+           "notification to begin the frame.";
+    return nullptr;
+  }
+  return found->second->Canvas();
 }
 
 // |ExternalViewEmbedder|
@@ -228,6 +232,9 @@ void IOSExternalViewEmbedder::PrepareFlutterView(int64_t flutter_view_id, DlISiz
   FML_CHECK(platform_views_controller_);
 
   pending_frame_size_ = frame_size;
+
+  auto *rendering_surface = get_ios_rendering_surface_callback_(flutter_view_id);
+  frame_layers_[flutter_view_id] = rendering_surface->AcquireFrame(frame_size);
 
   [platform_views_controller_ beginFrameWithSize:flutter_view_id frameSize:frame_size];
 }
@@ -270,7 +277,8 @@ void IOSExternalViewEmbedder::SubmitFlutterView(
   // Properly support multi-view in the future.
 //  FML_DCHECK(flutter_view_id == kFlutterImplicitViewId);
   FML_CHECK(platform_views_controller_);
-  [platform_views_controller_ submitFrame:std::move(frame) withIosContext:ios_context_];
+
+  [platform_views_controller_ submitFrame:std::move(frame_layers_[flutter_view_id]) withIosContext:ios_context_];
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::DidSubmitFrame");
 }
 
