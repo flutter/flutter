@@ -275,8 +275,6 @@ class Container extends StatelessWidget {
        );
 
   /// The [child] contained by the container.
-
-  /// The [child] contained by the container.
   ///
   /// If null, and if the [constraints] are unbounded or also null, the
   /// container will expand to fill all available space in its parent, unless
