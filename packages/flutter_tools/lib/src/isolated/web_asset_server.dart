@@ -240,7 +240,7 @@ class WebAssetServer implements AssetReader {
     httpServer!.defaultResponseHeaders.remove('x-frame-options', 'SAMEORIGIN');
 
     if (crossOriginIsolation) {
-      for (final MapEntry<String, String> header in kMultiThreadedHeaders.entries) {
+      for (final MapEntry<String, String> header in kCrossOriginIsolationHeaders.entries) {
         httpServer.defaultResponseHeaders.add(header.key, header.value);
       }
     }

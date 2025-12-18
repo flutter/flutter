@@ -243,7 +243,7 @@ void main() {
 
       expect(response.statusCode, HttpStatus.ok);
       final Map<String, String> headers = response.headers;
-      for (final MapEntry<String, String> entry in kMultiThreadedHeaders.entries) {
+      for (final MapEntry<String, String> entry in kCrossOriginIsolationHeaders.entries) {
         expect(headers, containsPair(entry.key, entry.value));
       }
     },

@@ -58,7 +58,7 @@ shelf.Handler createDirectoryHandler(Directory directory, {required bool crossOr
       file.openRead(),
       headers: <String, String>{
         'Content-Type': ?contentType,
-        if (needsCrossOriginIsolated) ...kMultiThreadedHeaders,
+        if (needsCrossOriginIsolated) ...kCrossOriginIsolationHeaders,
       },
     );
   };
@@ -547,7 +547,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       ''',
         headers: <String, String>{
           'Content-Type': 'text/html',
-          if (webRenderer == WebRendererMode.skwasm) ...kMultiThreadedHeaders,
+          if (webRenderer == WebRendererMode.skwasm) ...kCrossOriginIsolationHeaders,
         },
       );
     }
