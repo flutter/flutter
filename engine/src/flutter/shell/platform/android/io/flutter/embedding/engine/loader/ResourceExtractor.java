@@ -25,10 +25,10 @@ class ResourceExtractor {
   private static final String TIMESTAMP_PREFIX = "res_timestamp-";
   private static final String[] SUPPORTED_ABIS = Build.SUPPORTED_ABIS;
 
-  /** Replacement for AsyncTask.THREAD_POOL_EXECUTOR */
   private static final ExecutorService EXECUTOR = Executors.newCachedThreadPool();
 
   static long getVersionCode(@NonNull PackageInfo packageInfo) {
+    // Linter needs P (28) hardcoded or else it will fail these lines.
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_28) {
       return packageInfo.getLongVersionCode();
     } else {
@@ -120,7 +120,6 @@ class ResourceExtractor {
   @NonNull private final PackageManager mPackageManager;
   @NonNull private final AssetManager mAssetManager;
   @NonNull private final HashSet<String> mResources;
-
   private Future<Void> mExtractFuture;
 
   ResourceExtractor(
