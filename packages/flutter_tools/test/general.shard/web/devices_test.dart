@@ -456,6 +456,7 @@ class TestChromiumLauncher implements ChromiumLauncher {
     bool skipCheck = false,
     Directory? cacheDir,
     List<String> webBrowserFlags = const <String>[],
+    String? chromeBinary,
   }) async {
     currentCompleter.complete(_launcher());
     return currentCompleter.future;
