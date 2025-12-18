@@ -23,12 +23,16 @@ namespace impeller {
 /// The mesh is usually intended to be rendered at device (pixel) resolution.
 class ShadowVertices {
  public:
+  static const std::shared_ptr<ShadowVertices> kEmpty;
+
   static std::shared_ptr<ShadowVertices> Make(std::vector<Point> vertices,
                                               std::vector<uint16_t> indices,
                                               std::vector<Scalar> gaussians) {
     return std::make_shared<ShadowVertices>(
         std::move(vertices), std::move(indices), std::move(gaussians));
   }
+
+  constexpr ShadowVertices() {}
 
   constexpr ShadowVertices(std::vector<Point> vertices,
                            std::vector<uint16_t> indices,

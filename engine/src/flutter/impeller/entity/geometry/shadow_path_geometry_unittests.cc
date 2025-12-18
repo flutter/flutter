@@ -334,6 +334,174 @@ TEST(ShadowPathGeometryTest, CounterClockwiseRectTest) {
 #endif
 }
 
+TEST(ShadowPathGeometryTest, ClockwiseRectDuplicateColinearPointsTest) {
+  // This path includes a colinear point to each edge of the rectangle
+  // which should be trimmed out and ignored when generating the mesh
+  // resulting in the same number of vertices and triangles as the mesh
+  // above.
+  DlPathBuilder path_builder;
+  path_builder.MoveTo(DlPoint(0, 0));
+  path_builder.LineTo(DlPoint(50, 0));
+  path_builder.LineTo(DlPoint(100, 0));
+  path_builder.LineTo(DlPoint(100, 40));
+  path_builder.LineTo(DlPoint(100, 80));
+  path_builder.LineTo(DlPoint(50, 80));
+  path_builder.LineTo(DlPoint(0, 80));
+  path_builder.LineTo(DlPoint(0, 40));
+  path_builder.Close();
+  const DlPath path = path_builder.TakePath();
+  const Matrix matrix;
+  const Scalar height = 10.0f;
+
+  Tessellator tessellator;
+  std::shared_ptr<ShadowVertices> shadow_vertices =
+      ShadowPathGeometry::MakeAmbientShadowVertices(tessellator, path, height,
+                                                    matrix);
+
+  ASSERT_NE(shadow_vertices, nullptr);
+  EXPECT_FALSE(shadow_vertices->IsEmpty());
+  EXPECT_EQ(shadow_vertices->GetVertexCount(), 34u);
+  EXPECT_EQ(shadow_vertices->GetIndexCount(), 108u);
+  EXPECT_EQ(shadow_vertices->GetVertices().size(), 34u);
+  EXPECT_EQ(shadow_vertices->GetGaussians().size(), 34u);
+  EXPECT_EQ(shadow_vertices->GetIndices().size(), 108u);
+  EXPECT_EQ((shadow_vertices->GetIndices().size() % 3u), 0u);
+  // We repeat the first and last vertex that is on the outer umbra.
+  EXPECT_LE(CountDuplicateVertices(shadow_vertices), 1u);
+  EXPECT_EQ(CountDuplicateTriangles(shadow_vertices), 0u);
+  EXPECT_FALSE(DoTrianglesOverlap(shadow_vertices));
+
+#if SHADOW_UNITTEST_SHOW_VERTICES
+  ShowVertices("Impeller Vertices", shadow_vertices);
+#endif
+}
+
+TEST(ShadowPathGeometryTest, CounterClockwiseRectDuplicateColinearPointsTest) {
+  // This path includes a colinear point to each edge of the rectangle
+  // which should be trimmed out and ignored when generating the mesh
+  // resulting in the same number of vertices and triangles as the mesh
+  // above.
+  DlPathBuilder path_builder;
+  path_builder.MoveTo(DlPoint(0, 0));
+  path_builder.LineTo(DlPoint(0, 40));
+  path_builder.LineTo(DlPoint(0, 80));
+  path_builder.LineTo(DlPoint(50, 80));
+  path_builder.LineTo(DlPoint(100, 80));
+  path_builder.LineTo(DlPoint(100, 40));
+  path_builder.LineTo(DlPoint(100, 0));
+  path_builder.LineTo(DlPoint(50, 0));
+  path_builder.Close();
+  DlPath path = path_builder.TakePath();
+  Matrix matrix;
+  const Scalar height = 10.0f;
+
+  Tessellator tessellator;
+  std::shared_ptr<ShadowVertices> shadow_vertices =
+      ShadowPathGeometry::MakeAmbientShadowVertices(tessellator, path, height,
+                                                    matrix);
+
+  ASSERT_NE(shadow_vertices, nullptr);
+  EXPECT_FALSE(shadow_vertices->IsEmpty());
+  EXPECT_EQ(shadow_vertices->GetVertexCount(), 34u);
+  EXPECT_EQ(shadow_vertices->GetIndexCount(), 108u);
+  EXPECT_EQ(shadow_vertices->GetVertices().size(), 34u);
+  EXPECT_EQ(shadow_vertices->GetGaussians().size(), 34u);
+  EXPECT_EQ(shadow_vertices->GetIndices().size(), 108u);
+  EXPECT_EQ((shadow_vertices->GetIndices().size() % 3u), 0u);
+  // We repeat the first and last vertex that is on the outer umbra.
+  EXPECT_LE(CountDuplicateVertices(shadow_vertices), 1u);
+  EXPECT_EQ(CountDuplicateTriangles(shadow_vertices), 0u);
+  EXPECT_FALSE(DoTrianglesOverlap(shadow_vertices));
+
+#if SHADOW_UNITTEST_SHOW_VERTICES
+  ShowVertices("Impeller Vertices", shadow_vertices);
+#endif
+}
+
+TEST(ShadowPathGeometryTest, ClockwiseRectNearlyColinearPointsTest) {
+  // This path includes a bunch of colinear points and one point that
+  // is barely non-colinear but still convex. It should add exactly
+  // one extra set of vertices to the mesh (3 points and 3 triangles)
+  // compared to the regular rects.
+  DlPathBuilder path_builder;
+  path_builder.MoveTo(DlPoint(0, 0));
+  path_builder.LineTo(DlPoint(50, -0.065));
+  path_builder.LineTo(DlPoint(100, 0));
+  path_builder.LineTo(DlPoint(100, 40));
+  path_builder.LineTo(DlPoint(100, 80));
+  path_builder.LineTo(DlPoint(50, 80));
+  path_builder.LineTo(DlPoint(0, 80));
+  path_builder.LineTo(DlPoint(0, 40));
+  path_builder.Close();
+  const DlPath path = path_builder.TakePath();
+  const Matrix matrix;
+  const Scalar height = 10.0f;
+
+  Tessellator tessellator;
+  std::shared_ptr<ShadowVertices> shadow_vertices =
+      ShadowPathGeometry::MakeAmbientShadowVertices(tessellator, path, height,
+                                                    matrix);
+
+  ASSERT_NE(shadow_vertices, nullptr);
+  EXPECT_FALSE(shadow_vertices->IsEmpty());
+  EXPECT_EQ(shadow_vertices->GetVertexCount(), 37u);
+  EXPECT_EQ(shadow_vertices->GetIndexCount(), 120u);
+  EXPECT_EQ(shadow_vertices->GetVertices().size(), 37u);
+  EXPECT_EQ(shadow_vertices->GetGaussians().size(), 37u);
+  EXPECT_EQ(shadow_vertices->GetIndices().size(), 120u);
+  EXPECT_EQ((shadow_vertices->GetIndices().size() % 3u), 0u);
+  // We repeat the first and last vertex that is on the outer umbra.
+  EXPECT_LE(CountDuplicateVertices(shadow_vertices), 1u);
+  EXPECT_EQ(CountDuplicateTriangles(shadow_vertices), 0u);
+  EXPECT_FALSE(DoTrianglesOverlap(shadow_vertices));
+
+#if SHADOW_UNITTEST_SHOW_VERTICES
+  ShowVertices("Impeller Vertices", shadow_vertices);
+#endif
+}
+
+TEST(ShadowPathGeometryTest, CounterClockwiseRectNearlyColinearPointsTest) {
+  // This path includes a bunch of colinear points and one point that
+  // is barely non-colinear but still convex. It should add exactly
+  // one extra set of vertices to the mesh (3 points and 3 triangles)
+  // compared to the regular rects.
+  DlPathBuilder path_builder;
+  path_builder.MoveTo(DlPoint(0, 0));
+  path_builder.LineTo(DlPoint(-0.065, 40));
+  path_builder.LineTo(DlPoint(0, 80));
+  path_builder.LineTo(DlPoint(50, 80));
+  path_builder.LineTo(DlPoint(100, 80));
+  path_builder.LineTo(DlPoint(100, 40));
+  path_builder.LineTo(DlPoint(100, 0));
+  path_builder.LineTo(DlPoint(50, 0));
+  path_builder.Close();
+  DlPath path = path_builder.TakePath();
+  Matrix matrix;
+  const Scalar height = 10.0f;
+
+  Tessellator tessellator;
+  std::shared_ptr<ShadowVertices> shadow_vertices =
+      ShadowPathGeometry::MakeAmbientShadowVertices(tessellator, path, height,
+                                                    matrix);
+
+  ASSERT_NE(shadow_vertices, nullptr);
+  EXPECT_FALSE(shadow_vertices->IsEmpty());
+  EXPECT_EQ(shadow_vertices->GetVertexCount(), 37u);
+  EXPECT_EQ(shadow_vertices->GetIndexCount(), 120u);
+  EXPECT_EQ(shadow_vertices->GetVertices().size(), 37u);
+  EXPECT_EQ(shadow_vertices->GetGaussians().size(), 37u);
+  EXPECT_EQ(shadow_vertices->GetIndices().size(), 120u);
+  EXPECT_EQ((shadow_vertices->GetIndices().size() % 3u), 0u);
+  // We repeat the first and last vertex that is on the outer umbra.
+  EXPECT_LE(CountDuplicateVertices(shadow_vertices), 1u);
+  EXPECT_EQ(CountDuplicateTriangles(shadow_vertices), 0u);
+  EXPECT_FALSE(DoTrianglesOverlap(shadow_vertices));
+
+#if SHADOW_UNITTEST_SHOW_VERTICES
+  ShowVertices("Impeller Vertices", shadow_vertices);
+#endif
+}
+
 TEST(ShadowPathGeometryTest, ScaledRectTest) {
   Tessellator tessellator;
   DlPath path = DlPath::MakeRect(DlRect::MakeLTRB(0, 0, 100, 80));

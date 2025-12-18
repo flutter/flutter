@@ -21,102 +21,143 @@ using impeller::Tessellator;
 using impeller::Trig;
 using impeller::Vector2;
 
-// The |PolygonInfo| class does most of the work of generating a mesh from
-// a path, including transforming it into device space, computing new vertices
-// by applying the inset and outset for the indicated occluder_height, and
-// then stitching all of those vertices together into a mesh that can be
-// used to render the shadow complete with gaussian coefficients for the
-// location of the mesh points within the shadow.
-class PolygonInfo : impeller::PathTessellator::VertexWriter {
+// Each point in the polygon form of the path is turned into a structure
+// that tracks the gradient of the shadow at that point in the path. The
+// shape is turned into a sort of pin cushion where each struct acts
+// like a pin pushed into that cushion in the direction of the shadow
+// gradient at that location.
+//
+// Each entry contains the direction of the pin at that location and the
+// depth to which the pin is inserted, expressed as a fraction of the full
+// umbra size indicated by the shadow parameters. A depth of 1.0 means
+// the pin was inserted all the way to the depth of the shadow gradient
+// and didn't collide with any other pins. A fraction less than 1.0 can
+// occur if either the shape was too small and the pins intersected with
+// other pins across the shape from them, or if the curvature in a given
+// area was so tight that adjacent pins started bumping into their neighbors
+// even if the overall size of the shape was larger than the shadow.
+//
+// Different pins will be shortened by different amounts in the same shape
+// depending on their local geometry (tight curves or narrow cross section).
+struct UmbraPin {
+  // An initial value for the pin fraction that indicates that we have
+  // not yet visited this pin during the clipping process.
+  static constexpr Scalar kFractionUninitialized = -1.0f;
+
+  // The point on the original path that generated this entry into the
+  // umbra geometry.
+  //
+  // AKA the point on the path at which this pin was stabbed.
+  Point path_vertex;
+
+  // The relative vector from this path segment to the next.
+  Vector2 path_delta;
+
+  // The vector from the path_vertex to the head of the pin (the part
+  // outside the shape).
+  Vector2 penumbra_delta;
+
+  // The location of the end of this pin, taking into account the reduction
+  // of the umbra_size due to minimum distance to centroid, but ignoring
+  // clipping against other pins.
+  Point pin_tip;
+
+  // The location that this pin confers to the umbra polygon. Initially,
+  // this is the same as the pin_tip, but can be reduced by intersecting
+  // and clipping against other pins and even eliminated if the other
+  // nearby pins make it redundant for defining the umbra polygon.
+  //
+  // Redundant or "removed" pins are indicated by no longer being a part
+  // of the linked list formed by the |p_next| and |p_prev| pointers.
+  //
+  // Eventually, if this pin's umbra_vertex was eliminated, this location
+  // will be overwritten by the surviving umbra vertex that best servies
+  // this pin's path_vertex in a follow-on step.
+  Point umbra_vertex;
+  uint16_t umbra_index = 0u;
+
+  // The interior penetration of the umbra starts out at the full blur
+  // radius as modified by the global distance of the path segments to
+  // the centroid, but can be shortened when pins are too crowded and start
+  // intersecting each other due to tight curvature.
+  //
+  // It's initial value is actually the uninitialized constant so that the
+  // algorithm can treat it specially the first time it is encountered.
+  Scalar umbra_fraction = kFractionUninitialized;
+
+  // Pointers used to create a circular linked list while pruning the umbra
+  // polygon. The final list of vertices that remain in the umbra polygon
+  // are the vertices that remain on this linked list from a "head" pin.
+  UmbraPin* p_next = nullptr;
+  UmbraPin* p_prev = nullptr;
+
+  bool IsFractionInitialized() const {
+    return umbra_fraction > kFractionUninitialized;
+  }
+};
+
+// Simple cross products of nearby vertices don't catch all cases of
+// non-convexity so we count the number of times that the sign of the
+// dx/dy of the edges change. It must be <= 3 times for the path to
+// be convex. Think of drawing a circle from the top. First you head
+// to the right, then reverse to the left as you round the bottom of
+// the circle, then back near the top you head to the right again,
+// totalling 3 changes in direction.
+struct DirectionDetector {
+  Scalar last_direction_ = 0.0f;
+  size_t change_count = 0u;
+
+  void AccumulateDirection(Scalar new_direction) {
+    if (last_direction_ == 0.0f || last_direction_ * new_direction < 0.0f) {
+      last_direction_ = std::copysign(1.0f, new_direction);
+      change_count++;
+    }
+  }
+
+  // Returns true if the path may still be convex, in other words unless
+  // we have violated a constraint that means it must be concave or
+  // self-intersecting.
+  bool MayBeConvex() const {
+    // See comment above on the struct for why 3 changes is the most you
+    // should see in a convex path.
+    return change_count <= 3u;
+  }
+};
+
+// Utility class to receive the vertices of a path and turn them into
+// a vector of UmbraPins along with a centroid Point.
+class UmbraPinAccumulator : public PathTessellator::VertexWriter {
  public:
-  // The results of running the shadow mesh algorithm on the given path
-  // with the given parameters.
-  enum class MeshStatus {
-    // The algorithm has not finished processing the path and come to a
-    // conclusion about the results. This is the default setting for the
-    // status field.
-    kStillProcessing,
+  // Parameters that determine the sub-pixel grid we will use to simplify
+  // the contours to avoid degenerate differences in the vertices.
+  static constexpr Scalar kSubPixelCount = 16.0f;
+  static constexpr Scalar kSubPixelScale = (1.0f / kSubPixelCount);
 
-    // The path was empty or degenerate in such a way that there would be
-    // no shadow generated. The mesh will be an empty list of vertices
-    // and should be ignored in favor of just skipping the operation.
-    kShadowIsEmpty,
-
-    // The algorithm was unable to produce a mesh from the path for any
-    // number of reasons, including but not limited to:
-    // - The path had multiple contours.
-    // - The path was concave.
-    // - The path was self-intersecting.
-    // - The path wound around itself multiple times.
-    // - The algorithm was incapable of producing the mesh due to
-    //   implementation deficiencies.
-    kCouldNotCompute,
-
-    // The algorithm was successful in producing a mesh that models the
-    // shadow accurately.
-    kMeshIsValid,
+  enum class PathStatus {
+    kEmpty,
+    kConvex,
+    kNonConvex,
+    kMultipleContours,
   };
 
-  static constexpr Scalar GetTrigRadiusForHeight(Scalar occluder_height) {
-    return GetPenumbraSizeForHeight(occluder_height);
-  }
+  UmbraPinAccumulator() = default;
+  ~UmbraPinAccumulator() = default;
 
-  PolygonInfo(const impeller::PathSource& path,
-              const impeller::Matrix& matrix,
-              Scalar occluder_height,
-              const Tessellator::Trigs& trigs);
+  void reserve(size_t vertex_count) { pins_.reserve(vertex_count); }
 
-  // IsValid indicates whether the path was even "computable" - typically that
-  // it was convex, non-self-intersecting, and a single contour. Some paths
-  // that satisfy those constraints may also indicate that they were invalid
-  // if their geometry exceeded the ability of the algorithm to construct the
-  // mesh. The proper response if the mesh was invalid would be to use a
-  // backup algorithm, such as "render to temporary buffer and apply a
-  // gaussian image filter" instead.
-  //
-  // There can be many conditions which can make it impossible to compute
-  // the path shadow, but they will all fail and complete before the vertices
-  // are filled out.
-  bool IsValid() const { return mesh_status_ == MeshStatus::kMeshIsValid; }
+  // Return the status properties of the path.
+  PathStatus GetStatus();
 
-  // IsEmpty indicates that there was no shadow to display. The proper
-  // response to this property being true is to render nothing.
-  bool IsEmpty() const { return mesh_status_ == MeshStatus::kShadowIsEmpty; }
+  // Returns a reference to the accumulated vector of UmbraPin structs.
+  std::vector<UmbraPin>& GetPins() { return pins_; }
 
-  // Return the only copy of the data in a |ShadowVertices| structure if
-  // the path was valid and the shadow mesh was computable, otherwise return
-  // a null pointer which is an indicator to the caller that they should
-  // use another algorithm to render the shadow - consistent with the IsValid
-  // method returning false.
-  std::shared_ptr<ShadowVertices> TakeVertices() {
-    switch (mesh_status_) {
-      case MeshStatus::kCouldNotCompute:
-        return nullptr;
-      case MeshStatus::kShadowIsEmpty:
-        FML_DCHECK(vertices_.empty());
-        FML_DCHECK(indices_.empty());
-        FML_DCHECK(gaussians_.empty());
-        break;
-      case MeshStatus::kMeshIsValid:
-        break;
-      case MeshStatus::kStillProcessing:
-        FML_UNREACHABLE();
-    }
+  // Returns the centroid of the path.
+  Point GetCentroid();
 
-    return ShadowVertices::Make(std::move(vertices_),  //
-                                std::move(indices_),   //
-                                std::move(gaussians_));
-  }
+  // Returns the turning direction of the path.
+  Scalar GetDirection() const { return direction_; }
 
  private:
-  static constexpr Scalar GetPenumbraSizeForHeight(Scalar occluder_height) {
-    return occluder_height;
-  }
-
-  static constexpr Scalar GetUmbraSizeForHeight(Scalar occluder_height) {
-    return occluder_height;
-  }
-
   // An enum used to classify a point as a normal point to be appended, or
   // a point that made the path invalid by being non-convex, or possibly
   // a point that should replace the previous point because it was collinear
@@ -127,159 +168,18 @@ class PolygonInfo : impeller::PathTessellator::VertexWriter {
     kConvex,
   };
 
-  // An inversion of the matrix so we can transform the vertices back
-  // into local space for better interactions with the rest of the
-  // geometry/entity system.
-  const Matrix inverted_matrix_;
-
-  const Scalar occluder_height_;
-
-  // The maximum gaussian of the umbra part of the shadow, usually 1.0f
-  // but can be reduced if the umbra size was clipped.
-  Scalar umbra_gaussian_ = 1.0f;
-
-  // Each point in the polygon form of the path is turned into a structure
-  // that tracks the gradient of the shadow at that point in the path. The
-  // shape is turned into a sort of pin cushion where each struct acts
-  // like a pin pushed into that cushion in the direction of the shadow
-  // gradient at that location.
-  //
-  // Each entry contains the direction of the pin at that location and the
-  // depth to which the pin is inserted, expressed as a fraction of the full
-  // umbra size indicated by the shadow parameters. A depth of 1.0 means
-  // the pin was inserted all the way to the depth of the shadow gradient
-  // and didn't collide with any other pins. A fraction less than 1.0 can
-  // occur if either the shape was too small and the pins intersected with
-  // other pins across the shape from them, or if the curvature in a given
-  // area was so tight that adjacent pins started bumping into their neighbors
-  // even if the overall size of the shape was larger than the shadow.
-  //
-  // Different pins will be shortened by different amounts in the same shape
-  // depending on their local geometry (tight curves or narrow cross section).
-  struct UmbraPin {
-    // An initial value for the pin fraction that indicates that we have
-    // not yet visited this pin during the clipping process.
-    static constexpr Scalar kFractionUninitialized = -1.0f;
-
-    // The point on the original path that generated this entry into the
-    // umbra geometry.
-    //
-    // AKA the point on the path at which this pin was stabbed.
-    Point path_vertex;
-
-    // The relative vector from this path segment to the next.
-    Vector2 path_delta;
-
-    // The vector from the path_vertex to the head of the pin (the part
-    // outside the shape).
-    Vector2 penumbra_delta;
-
-    // The location of the end of this pin, taking into account the reduction
-    // of the umbra_size due to minimum distance to centroid, but ignoring
-    // clipping against other pins.
-    Point pin_tip;
-
-    // The location that this pin confers to the umbra polygon. Initially,
-    // this is the same as the pin_tip, but can be reduced by intersecting
-    // and clipping against other pins and even eliminated if the other
-    // nearby pins make it redundant for defining the umbra polygon.
-    //
-    // Redundant or "removed" pins are indicated by no longer being a part
-    // of the linked list formed by the |p_next| and |p_prev| pointers.
-    //
-    // Eventually, if this pin's umbra_vertex was eliminated, this location
-    // will be overwritten by the surviving umbra vertex that best servies
-    // this pin's path_vertex in a follow-on step.
-    Point umbra_vertex;
-    uint16_t umbra_index = 0u;
-
-    // The interior penetration of the umbra starts out at the full blur
-    // radius as modified by the global distance of the path segments to
-    // the centroid, but can be shortened when pins are too crowded and start
-    // intersecting each other due to tight curvature.
-    //
-    // It's initial value is actually the uninitialized constant so that the
-    // algorithm can treat it specially the first time it is encountered.
-    Scalar umbra_fraction = kFractionUninitialized;
-
-    // Pointers used to create a circular linked list while pruning the umbra
-    // polygon. The final list of vertices that remain in the umbra polygon
-    // are the vertices that remain on this linked list from a "head" pin.
-    UmbraPin* p_next = nullptr;
-    UmbraPin* p_prev = nullptr;
-
-    bool IsFractionInitialized() const {
-      return umbra_fraction > kFractionUninitialized;
-    }
-  };
-
-  std::vector<UmbraPin> pins_;
-  UmbraPin* umbra_vertices_head_ = nullptr;
-  size_t umbra_polygon_count_ = 0u;
-
-  MeshStatus mesh_status_ = MeshStatus::kStillProcessing;
-
-  bool path_is_convex_ = true;
-  bool path_has_multiple_contours_ = false;
-
-  Point centroid_;
-  Scalar shape_area_ = 0.0f;
-  Scalar direction_ = 0.0f;
-  bool path_ended_ = false;
-
-  // Simple cross products of nearby vertices don't catch all cases of
-  // non-convexity so we count the number of times that the sign of the
-  // dx/dy of the edges change. It must be <= 3 times for the path to
-  // be convex. Think of drawing a circle from the top. First you head
-  // to the right, then reverse to the left as you round the bottom of
-  // the circle, then back near the top you head to the right again,
-  // totalling 3 changes in direction.
-  struct DirectionDetector {
-    Scalar last_direction_ = 0.0f;
-    size_t change_count = 0u;
-
-    void AccumulateDirection(Scalar new_direction) {
-      if (last_direction_ == 0.0f || last_direction_ * new_direction < 0.0f) {
-        last_direction_ = std::copysign(1.0f, new_direction);
-        change_count++;
-      }
-    }
-
-    // Returns true if the path may still be convex, in other words unless
-    // we have violated a constraint that means it must be concave or
-    // self-intersecting.
-    bool MayBeConvex() const {
-      // See comment above on the struct for why 3 changes is the most you
-      // should see in a convex path.
-      return change_count <= 3u;
-    }
-  };
-  DirectionDetector x_direction_detector_;
-  DirectionDetector y_direction_detector_;
-
-  const impeller::Tessellator::Trigs& trigs_;
-
-  // The vertex mesh result that represents the shadow, to be rendered
-  // using a modified indexed variant of DrawVertices that also adjusts
-  // the alpha of the colors on a per-pixel basis by mapping their linear
-  // gaussian coefficients into the associated gaussian integral values.
-  std::vector<Point> vertices_;
-  std::vector<uint16_t> indices_;
-  std::vector<Scalar> gaussians_;
+  // |VertexWriter|
+  void Write(Point point) override;
 
   // |VertexWriter|
-  void Write(Point point);
-
-  // |VertexWriter|
-  void EndContour();
-
-  // Parameters that determine the sub-pixel grid we will use to simplify
-  // the contours to avoid degenerate differences in the vertices.
-  static constexpr Scalar kSubPixelCount = 16.0f;
-  static constexpr Scalar kSubPixelScale = (1.0f / kSubPixelCount);
+  void EndContour() override;
 
   // Rounds the device coordinate to the sub-pixel grid.
   static Point ToDeviceGrid(Point point);
+
+  // Finalize the weighted centroid using the area calculated while the
+  // path was being delivered.
+  void FinalizeCentroid();
 
   // Check the direction that the edge is heading and count the number of
   // times that the sign of the dx and dy values change. If either of those
@@ -304,21 +204,95 @@ class PolygonInfo : impeller::PathTessellator::VertexWriter {
   // point at the end.
   PointClass ValidatePointAndUpdateCentroid(const Point& new_point);
 
-  // Finalize the weighted centroid using the area calculated while the
-  // path was being delivered.
-  void FinalizeCentroid();
+  DirectionDetector x_direction_detector_;
+  DirectionDetector y_direction_detector_;
+
+  std::vector<UmbraPin> pins_;
+
+  bool first_contour_ended_ = false;
+  bool has_multiple_contours_ = false;
+  bool is_convex_ = true;
+
+  bool centroid_is_finalized_ = false;
+  Point centroid_;
+  Scalar direction_ = 0.0f;
+  Scalar shape_area_ = 0.0f;
+};
+
+// The |PolygonInfo| class does most of the work of generating a mesh from
+// a path, including transforming it into device space, computing new vertices
+// by applying the inset and outset for the indicated occluder_height, and
+// then stitching all of those vertices together into a mesh that can be
+// used to render the shadow complete with gaussian coefficients for the
+// location of the mesh points within the shadow.
+class PolygonInfo {
+ public:
+  static constexpr Scalar GetTrigRadiusForHeight(Scalar occluder_height) {
+    return GetPenumbraSizeForHeight(occluder_height);
+  }
+
+  explicit PolygonInfo(Scalar occluder_height);
+
+  // Computes a shadow mesh for the indicated path (source) under the
+  // given matrix with the associated trigs. If the algorithm is successful,
+  // it will return true and the caller can call TakeVertices to get the
+  // resulting mesh (which may be empty if the path contained no area).
+  const std::shared_ptr<ShadowVertices> CalculateConvexShadowMesh(
+      const impeller::PathSource& path,
+      const impeller::Matrix& matrix,
+      const Tessellator::Trigs& trigs);
+
+ private:
+  static constexpr Scalar GetPenumbraSizeForHeight(Scalar occluder_height) {
+    return occluder_height;
+  }
+
+  static constexpr Scalar GetUmbraSizeForHeight(Scalar occluder_height) {
+    return occluder_height;
+  }
+
+  // The minimum distance (squared) between points on the mesh before we
+  // eliminate them as redundant.
+  static constexpr Scalar kMinSubPixelDistanceSquared =
+      UmbraPinAccumulator::kSubPixelScale * UmbraPinAccumulator::kSubPixelScale;
+
+  const Scalar occluder_height_;
+
+  // The maximum gaussian of the umbra part of the shadow, usually 1.0f
+  // but can be reduced if the umbra size was clipped.
+  Scalar umbra_gaussian_ = 1.0f;
+
+  // The vertex mesh result that represents the shadow, to be rendered
+  // using a modified indexed variant of DrawVertices that also adjusts
+  // the alpha of the colors on a per-pixel basis by mapping their linear
+  // gaussian coefficients into the associated gaussian integral values.
+  std::vector<Point> vertices_;
+  std::vector<uint16_t> indices_;
+  std::vector<Scalar> gaussians_;
 
   // Run through the pins and determine the closest pin to the centroid
   // and, in particular, adjust the umbra_gaussian value if the closest pin
   // is less than the required umbra distance.
-  void ComputePinDirectionsAndMinDistanceToCentroid();
+  void ComputePinDirectionsAndMinDistanceToCentroid(std::vector<UmbraPin>& pins,
+                                                    const Point& centroid,
+                                                    Scalar direction);
+
+  // The head and count for the list of UmbraPins that contribute to the
+  // umbra vertex ring.
+  struct UmbraPinLinkedList {
+    UmbraPin* p_head_pin = nullptr;
+    size_t pin_count = 0u;
+
+    bool IsNull() { return p_head_pin == nullptr; }
+  };
 
   // Run through the pins and determine if they intersect each other
   // internally, whether they are completely obscured by other pins,
   // their new relative lengths if they defer to another pin at some
   // depth, and which remaining pins are part of the umbra polygon,
   // and then return the pointer to the first pin in the "umbra polygon".
-  UmbraPin* ResolveUmbraIntersections();
+  UmbraPinLinkedList ResolveUmbraIntersections(std::vector<UmbraPin>& pins,
+                                               Scalar direction);
 
   // Structure to store the result of computing the intersection between
   // 2 pins, pin0 and pin1, containing the point of intersection and the
@@ -372,12 +346,18 @@ class PolygonInfo : impeller::PathTessellator::VertexWriter {
   // inner ring connecting the centroid to the umbra polygon, and another
   // outer ring connecting vertices in the umbra polygon to vertices on the
   // outer edge of the penumbra.
-  void ComputeMesh();
+  void ComputeMesh(std::vector<UmbraPin>& pins,
+                   const Point& centroid,
+                   UmbraPinLinkedList& list,
+                   const impeller::Tessellator::Trigs& trigs,
+                   Scalar direction);
 
   // After the umbra_vertices of the pins are accumulated and linked into a
   // ring using their p_prev/p_next pointers, compute the best surviving umbra
   // vertex for each pin and set its location and index into the UmbraPin.
-  void PopulateUmbraVertices();
+  void PopulateUmbraVertices(std::vector<UmbraPin>& pins,
+                             UmbraPinLinkedList& list,
+                             const Point centroid);
 
   // Appends a fan of penumbra vertices centered on the path vertex of the
   // |p_curr_pin| starting from the absolute point |fan_start| and ending
@@ -387,7 +367,9 @@ class PolygonInfo : impeller::PathTessellator::VertexWriter {
   uint16_t AppendFan(const UmbraPin* p_curr_pin,
                      const Point& fan_start,
                      const Point& fan_end,
-                     uint16_t start_index);
+                     uint16_t start_index,
+                     const impeller::Tessellator::Trigs& trigs,
+                     Scalar direction);
 
   // Append a vertex and its associated gaussian coefficient to the lists
   // of vertices and guassians and return their (shared) index.
@@ -397,43 +379,46 @@ class PolygonInfo : impeller::PathTessellator::VertexWriter {
   void AddTriangle(uint16_t v0, uint16_t v1, uint16_t v2);
 };
 
-PolygonInfo::PolygonInfo(const impeller::PathSource& source,
-                         const Matrix& matrix,
-                         Scalar occluder_height,
-                         const Tessellator::Trigs& trigs)
-    : inverted_matrix_(matrix.Invert()),
-      occluder_height_(occluder_height),
-      trigs_(trigs) {
+PolygonInfo::PolygonInfo(Scalar occluder_height)
+    : occluder_height_(occluder_height) {}
+
+const std::shared_ptr<ShadowVertices> PolygonInfo::CalculateConvexShadowMesh(
+    const impeller::PathSource& source,
+    const Matrix& matrix,
+    const Tessellator::Trigs& trigs) {
   if (!matrix.IsInvertible()) {
-    // Shadow will show as empty which is appropriate if the matrix is
-    // singular.
-    mesh_status_ = MeshStatus::kShadowIsEmpty;
-    return;
+    return ShadowVertices::kEmpty;
   }
 
   Scalar scale = matrix.GetMaxBasisLengthXY();
 
+  UmbraPinAccumulator pin_accumulator;
+
   auto [point_count, contour_count] =
       impeller::PathTessellator::CountFillStorage(source, scale);
-  pins_.reserve(point_count);
+  pin_accumulator.reserve(point_count);
 
-  PathTessellator::PathToTransformedFilledVertices(source, *this, matrix);
-  if (pins_.size() < 3u || direction_ == 0.0f) {
-    mesh_status_ = MeshStatus::kShadowIsEmpty;
-    return;
+  PathTessellator::PathToTransformedFilledVertices(source, pin_accumulator,
+                                                   matrix);
+
+  switch (pin_accumulator.GetStatus()) {
+    case UmbraPinAccumulator::PathStatus::kEmpty:
+      return ShadowVertices::kEmpty;
+    case UmbraPinAccumulator::PathStatus::kNonConvex:
+    case UmbraPinAccumulator::PathStatus::kMultipleContours:
+      return nullptr;
+    case UmbraPinAccumulator::PathStatus::kConvex:
+      break;
   }
 
-  if (path_has_multiple_contours_ || !path_is_convex_) {
-    mesh_status_ = MeshStatus::kCouldNotCompute;
-    return;
-  }
+  std::vector<UmbraPin>& pins = pin_accumulator.GetPins();
+  const Point& centroid = pin_accumulator.GetCentroid();
+  Scalar direction = pin_accumulator.GetDirection();
 
-  FinalizeCentroid();
+  ComputePinDirectionsAndMinDistanceToCentroid(pins, centroid, direction);
 
-  ComputePinDirectionsAndMinDistanceToCentroid();
-
-  umbra_vertices_head_ = ResolveUmbraIntersections();
-  if (umbra_vertices_head_ == nullptr) {
+  UmbraPinLinkedList list = ResolveUmbraIntersections(pins, direction);
+  if (list.IsNull()) {
     // Ideally the Resolve algorithm will always be able to create an
     // inner loop of umbra vertices, but it is not perfect.
     //
@@ -442,12 +427,35 @@ PolygonInfo::PolygonInfo(const impeller::PathSource& source,
     // but that result does not resemble a proper shadow. If we run into
     // this case a lot we should either beef up the ResolveIntersections
     // algorithm or find a better approximation than "95% to the centroid".
-    mesh_status_ = MeshStatus::kCouldNotCompute;
-    return;
+    return nullptr;
   }
 
-  ComputeMesh();
-  mesh_status_ = MeshStatus::kMeshIsValid;
+  ComputeMesh(pins, centroid, list, trigs, direction);
+
+  Matrix inverted_matrix = matrix.Invert();
+  for (Point& vertex : vertices_) {
+    vertex = inverted_matrix * vertex;
+  }
+  return ShadowVertices::Make(std::move(vertices_), std::move(indices_),
+                              std::move(gaussians_));
+}
+
+UmbraPinAccumulator::PathStatus UmbraPinAccumulator::GetStatus() {
+  if (has_multiple_contours_) {
+    return PathStatus::kMultipleContours;
+  }
+  if (pins_.size() < 3u || direction_ == 0) {
+    return PathStatus::kEmpty;
+  }
+  return is_convex_ ? PathStatus::kConvex : PathStatus::kNonConvex;
+}
+
+Point UmbraPinAccumulator::GetCentroid() {
+  if (!centroid_is_finalized_) {
+    FinalizeCentroid();
+    FML_DCHECK(centroid_is_finalized_);
+  }
+  return centroid_;
 }
 
 // Enter a new point for the polygon approximation of the shape. Points are
@@ -455,15 +463,15 @@ PolygonInfo::PolygonInfo(const impeller::PathSource& source,
 // at that sub-pixel grid are ignored, collinear points are reduced to just
 // the endpoints, and the centroid is updated from the remaining non-duplicate
 // grid points.
-void PolygonInfo::Write(Point point) {
-  if (path_ended_) {
-    path_has_multiple_contours_ = true;
+void UmbraPinAccumulator::Write(Point point) {
+  if (first_contour_ended_) {
+    has_multiple_contours_ = true;
   }
 
   // This type of algorithm will never be able to handle multiple contours.
   // Eventually we might handle concave paths, but we avoid further processing
   // on them anyway for now.
-  if (path_has_multiple_contours_ || !path_is_convex_) {
+  if (has_multiple_contours_ || !is_convex_) {
     return;
   }
 
@@ -486,7 +494,7 @@ void PolygonInfo::Write(Point point) {
         pins_.pop_back();
         break;
       case PointClass::kNonConvex:
-        path_is_convex_ = false;
+        is_convex_ = false;
         // Eventually we might handle concave paths, but we avoid further
         // processing on them anyway for now.
         return;
@@ -505,15 +513,15 @@ void PolygonInfo::Write(Point point) {
 // centroid accumulation do its math for ever segment in the path, but
 // going forward we don't need the extra pin in the shape so we verify that
 // it is a duplicate and then we delete it.
-void PolygonInfo::EndContour() {
-  if (path_ended_) {
-    path_has_multiple_contours_ = true;
+void UmbraPinAccumulator::EndContour() {
+  if (first_contour_ended_) {
+    has_multiple_contours_ = true;
   }
 
   // This type of algorithm will never be able to handle multiple contours.
   // Eventually we might handle concave paths, but we avoid further processing
   // on them anyway for now.
-  if (path_has_multiple_contours_ || !path_is_convex_) {
+  if (has_multiple_contours_ || !is_convex_) {
     return;
   }
 
@@ -521,18 +529,18 @@ void PolygonInfo::EndContour() {
   // by an extra call to Write(Point).
   FML_DCHECK(pins_.front().path_vertex == pins_.back().path_vertex);
   pins_.pop_back();
-  path_ended_ = true;
+  first_contour_ended_ = true;
 }
 
 // Adjust the device point to its nearest sub-pixel grid location.
-Point PolygonInfo::ToDeviceGrid(Point point) {
+Point UmbraPinAccumulator::ToDeviceGrid(Point point) {
   return (point * kSubPixelCount).Round() * kSubPixelScale;
 }
 
 // Use the direction change accumulators to count the number of times
 // that edges change direction in X and Y and return whether the path
 // can still be classified as simple and convex.
-bool PolygonInfo::CheckEdgeDirection(const Vector2 edge_vector) {
+bool UmbraPinAccumulator::CheckEdgeDirection(const Vector2 edge_vector) {
   x_direction_detector_.AccumulateDirection(edge_vector.x);
   y_direction_detector_.AccumulateDirection(edge_vector.y);
   return x_direction_detector_.MayBeConvex() &&
@@ -546,8 +554,8 @@ bool PolygonInfo::CheckEdgeDirection(const Vector2 edge_vector) {
 // - Ensure that all vertices turn the same direction from the perspective
 //   of the first point. (No "going around twice".)
 // - Accumulate data to compute the centroid
-PolygonInfo::PointClass PolygonInfo::ValidatePointAndUpdateCentroid(
-    const Point& new_point) {
+UmbraPinAccumulator::PointClass
+UmbraPinAccumulator::ValidatePointAndUpdateCentroid(const Point& new_point) {
   if (pins_.size() < 2u) {
     // No validation possible and we cannot start to accumulate centroid
     // values until we have at least 2 prior points.
@@ -562,7 +570,7 @@ PolygonInfo::PointClass PolygonInfo::ValidatePointAndUpdateCentroid(
     // many times, so we mark the entire path as non-convex, but we cannot
     // say that this particular point violates convexity so we leave the
     // return value alone unless one of the tests below discovers otherwise.
-    path_is_convex_ = false;
+    is_convex_ = false;
   }
 
   // direction_ is always normalized to one of these values.
@@ -658,22 +666,40 @@ PolygonInfo::PointClass PolygonInfo::ValidatePointAndUpdateCentroid(
   return result;
 }
 
-void PolygonInfo::FinalizeCentroid() {
-  // To finalize the centroid value we need to divide by both the constant
-  // factor of 3.0 that was ignored when we computed the triangle centroids
-  // (average of the 3 triangle vertices) and also the accumulation of all
-  // of the individual triangle areas used as the averaging weights.
-  centroid_ /= 3.0f * shape_area_;
+void UmbraPinAccumulator::FinalizeCentroid() {
+  FML_DCHECK(!centroid_is_finalized_);
 
-  // The centroid accumulation was relative to the first point in the
-  // polygon so we make it absolute here.
-  centroid_ += pins_[0].path_vertex;
+  switch (GetStatus()) {
+    case PathStatus::kEmpty:
+    case PathStatus::kNonConvex:
+    case PathStatus::kMultipleContours:
+      centroid_ = {};
+      break;
+    case PathStatus::kConvex: {
+      // To finalize the centroid value we need to divide by both the constant
+      // factor of 3.0 that was ignored when we computed the triangle centroids
+      // (average of the 3 triangle vertices) and also the accumulation of all
+      // of the individual triangle areas used as the averaging weights.
+      centroid_ /= 3.0f * shape_area_;
+
+      // The centroid accumulation was relative to the first point in the
+      // polygon so we make it absolute here.
+      centroid_ += pins_[0].path_vertex;
+
+      break;
+    }
+  }
+
+  centroid_is_finalized_ = true;
 }
 
-void PolygonInfo::ComputePinDirectionsAndMinDistanceToCentroid() {
+void PolygonInfo::ComputePinDirectionsAndMinDistanceToCentroid(
+    std::vector<UmbraPin>& pins,
+    const Point& centroid,
+    Scalar direction) {
   Scalar desired_umbra_size = GetUmbraSizeForHeight(occluder_height_);
   Scalar min_umbra_squared = desired_umbra_size * desired_umbra_size;
-  FML_DCHECK(direction_ == 1.0f || direction_ == -1.0f);
+  FML_DCHECK(direction == 1.0f || direction == -1.0f);
 
   // For simplicity of iteration, we start with the last vertex as the
   // "previous" pin and then iterate once over the vector of pins,
@@ -682,12 +708,12 @@ void PolygonInfo::ComputePinDirectionsAndMinDistanceToCentroid() {
   // segments are processed once even if we start with the last pin.
 
   // First pass, compute the smallest distance to the centroid.
-  UmbraPin* p_prev_pin = &pins_.back();
-  for (UmbraPin& pin : pins_) {
+  UmbraPin* p_prev_pin = &pins.back();
+  for (UmbraPin& pin : pins) {
     UmbraPin* p_curr_pin = &pin;
 
     // Accumulate (min) the distance from the centroid to "this" segment.
-    Scalar distance_squared = centroid_.GetDistanceToSegmentSquared(
+    Scalar distance_squared = centroid.GetDistanceToSegmentSquared(
         p_prev_pin->path_vertex, p_curr_pin->path_vertex);
     min_umbra_squared = std::min(min_umbra_squared, distance_squared);
 
@@ -714,8 +740,8 @@ void PolygonInfo::ComputePinDirectionsAndMinDistanceToCentroid() {
   // We also link all of the pins into a circular linked list so they can be
   // quickly eliminated in the method that resolves intersections of the pins.
   Scalar penumbra_scale = -GetPenumbraSizeForHeight(occluder_height_);
-  p_prev_pin = &pins_.back();
-  for (UmbraPin& pin : pins_) {
+  p_prev_pin = &pins.back();
+  for (UmbraPin& pin : pins) {
     UmbraPin* p_curr_pin = &pin;
     p_curr_pin->p_prev = p_prev_pin;
     p_prev_pin->p_next = p_curr_pin;
@@ -729,7 +755,7 @@ void PolygonInfo::ComputePinDirectionsAndMinDistanceToCentroid() {
                                 ->path_delta  //
                                 .Normalize()
                                 .PerpendicularRight() *
-                            direction_;
+                            direction;
 
     p_prev_pin->penumbra_delta = pin_direction * penumbra_scale;
     p_prev_pin->umbra_vertex =  //
@@ -875,18 +901,20 @@ int PolygonInfo::ComputeSide(const Point& p0,
 // This method was converted nearly verbatim from the Skia source files
 // SkShadowTessellator.cpp and SkPolyUtils.cpp, except for variable
 // naming and differences in the methods on Point and Vertex2.
-PolygonInfo::UmbraPin* PolygonInfo::ResolveUmbraIntersections() {
-  UmbraPin* p_head_pin = &pins_.front();
+PolygonInfo::UmbraPinLinkedList PolygonInfo::ResolveUmbraIntersections(
+    std::vector<UmbraPin>& pins,
+    Scalar direction) {
+  UmbraPin* p_head_pin = &pins.front();
   UmbraPin* p_curr_pin = p_head_pin;
   UmbraPin* p_prev_pin = p_curr_pin->p_prev;
-  size_t umbra_vertex_count = pins_.size();
+  size_t umbra_vertex_count = pins.size();
 
   // we should check each edge against each other edge at most once
-  size_t allowed_iterations = pins_.size() * pins_.size() + 1u;
+  size_t allowed_iterations = pins.size() * pins.size() + 1u;
 
   while (p_head_pin && p_prev_pin != p_curr_pin) {
     if (--allowed_iterations == 0) {
-      return nullptr;
+      return {};
     }
 
     std::optional<PinIntersection> intersection =
@@ -917,14 +945,14 @@ PolygonInfo::UmbraPin* PolygonInfo::ResolveUmbraIntersections() {
       }
     } else {
       // if previous pin is to right side of the current pin...
-      int side = direction_ * ComputeSide(p_curr_pin->pin_tip,     //
-                                          p_curr_pin->path_delta,  //
-                                          p_prev_pin->pin_tip);
+      int side = direction * ComputeSide(p_curr_pin->pin_tip,     //
+                                         p_curr_pin->path_delta,  //
+                                         p_prev_pin->pin_tip);
       if (side < 0 &&
-          side == direction_ * ComputeSide(p_curr_pin->pin_tip,     //
-                                           p_curr_pin->path_delta,  //
-                                           p_prev_pin->pin_tip +
-                                               p_prev_pin->path_delta)) {
+          side == direction * ComputeSide(p_curr_pin->pin_tip,     //
+                                          p_curr_pin->path_delta,  //
+                                          p_prev_pin->pin_tip +
+                                              p_prev_pin->path_delta)) {
         // no point in considering this one again
         RemovePin(p_prev_pin, &p_head_pin);
         --umbra_vertex_count;
@@ -940,7 +968,7 @@ PolygonInfo::UmbraPin* PolygonInfo::ResolveUmbraIntersections() {
   }
 
   if (!p_head_pin) {
-    return nullptr;
+    return {};
   }
 
   // Now remove any duplicates from the umbra polygon. The head pin is
@@ -950,7 +978,7 @@ PolygonInfo::UmbraPin* PolygonInfo::ResolveUmbraIntersections() {
   size_t umbra_vertices = 1u;
   while (p_curr_pin != p_head_pin) {
     if (p_prev_pin->umbra_vertex.GetDistanceSquared(p_curr_pin->umbra_vertex) <
-        kSubPixelScale * kSubPixelScale) {
+        kMinSubPixelDistanceSquared) {
       RemovePin(p_curr_pin, &p_head_pin);
       p_curr_pin = p_curr_pin->p_next;
     } else {
@@ -963,11 +991,10 @@ PolygonInfo::UmbraPin* PolygonInfo::ResolveUmbraIntersections() {
   }
 
   if (umbra_vertices < 3u) {
-    return nullptr;
+    return {};
   }
 
-  umbra_polygon_count_ = umbra_vertices;
-  return p_head_pin;
+  return {p_head_pin, umbra_vertices};
 }
 
 // The mesh computed connects all of the points in two rings. The outermost
@@ -1001,14 +1028,18 @@ PolygonInfo::UmbraPin* PolygonInfo::ResolveUmbraIntersections() {
 //   one that links to the vertex before it and the one that links to the
 //   vertex following it, plus we insert extra vertices on the outer ring
 //   to turn the corners beteween the projected segments.
-void PolygonInfo::ComputeMesh() {
+void PolygonInfo::ComputeMesh(std::vector<UmbraPin>& pins,
+                              const Point& centroid,
+                              UmbraPinLinkedList& list,
+                              const impeller::Tessellator::Trigs& trigs,
+                              Scalar direction) {
   // Centroid and umbra polygon...
-  size_t vertex_count = umbra_polygon_count_ + 1u;
-  size_t triangle_count = umbra_polygon_count_;
+  size_t vertex_count = list.pin_count + 1u;
+  size_t triangle_count = list.pin_count;
 
   // Penumbra corners - likely many more fan vertices than estimated...
-  size_t penumbra_count = pins_.size() * 2;  // 2 perp at each vertex.
-  penumbra_count += trigs_.size() * 4;       // total 360 degrees of fans.
+  size_t penumbra_count = pins.size() * 2;  // 2 perp at each vertex.
+  penumbra_count += trigs.size() * 4;       // total 360 degrees of fans.
   vertex_count += penumbra_count;
   triangle_count += penumbra_count;
 
@@ -1027,7 +1058,7 @@ void PolygonInfo::ComputeMesh() {
   // This method will also fill in the inner part of the mesh that connects
   // the centroid to every vertex in the umbra polygon with triangles that
   // are all at the maximum umbra gaussian coefficient.
-  PopulateUmbraVertices();
+  PopulateUmbraVertices(pins, list, centroid);
 
   // We now run through the list of all pins and append points and triangles
   // to our internal vectors to cover the part of the mesh that extends
@@ -1052,7 +1083,7 @@ void PolygonInfo::ComputeMesh() {
   // - The last penumbra point added will be the penumbra point that is
   //   perpendicular to the following segment, which prepares for the
   //   initial conditions that the next pin will expect.
-  UmbraPin* p_prev_pin = &pins_.back();
+  const UmbraPin* p_prev_pin = &pins.back();
 
   // This point may be duplicated at the end of the path. We can try to
   // avoid adding it twice with some bookkeeping, but it is simpler to
@@ -1064,8 +1095,8 @@ void PolygonInfo::ComputeMesh() {
       p_prev_pin->path_vertex + p_prev_pin->penumbra_delta;
   uint16_t last_penumbra_index = AppendVertex(last_penumbra_point, 0.0f);
 
-  for (UmbraPin& pin : pins_) {
-    UmbraPin* p_curr_pin = &pin;
+  for (const UmbraPin& pin : pins) {
+    const UmbraPin* p_curr_pin = &pin;
 
     // Preconditions:
     // - last_penumbra_point was the last outer vertex added by the
@@ -1114,7 +1145,7 @@ void PolygonInfo::ComputeMesh() {
         p_curr_pin->path_vertex + p_curr_pin->penumbra_delta;
     uint16_t new_penumbra_index =
         AppendFan(p_curr_pin, last_penumbra_point, new_penumbra_point,
-                  last_penumbra_index);
+                  last_penumbra_index, trigs, direction);
 
     last_penumbra_point = new_penumbra_point;
     last_penumbra_index = new_penumbra_index;
@@ -1125,17 +1156,19 @@ void PolygonInfo::ComputeMesh() {
 // Visit each pin and find the nearest umbra_vertex from the linked list of
 // surviving umbra pins so we don't have to constantly find this as we stitch
 // together the mesh.
-void PolygonInfo::PopulateUmbraVertices() {
+void PolygonInfo::PopulateUmbraVertices(std::vector<UmbraPin>& pins,
+                                        UmbraPinLinkedList& list,
+                                        const Point centroid) {
   // We should be having the first crack at the vertex list, filling it with
   // the centroid, the umbra vertices, and the mesh connecting those into the
   // central core of the shadow.
-  FML_DCHECK(umbra_vertices_head_ != nullptr);
+  FML_DCHECK(list.p_head_pin != nullptr);
   FML_DCHECK(vertices_.empty());
   FML_DCHECK(gaussians_.empty());
   FML_DCHECK(indices_.empty());
 
   // Always start with the centroid.
-  uint16_t last_umbra_index = AppendVertex(centroid_, umbra_gaussian_);
+  uint16_t last_umbra_index = AppendVertex(centroid, umbra_gaussian_);
   FML_DCHECK(last_umbra_index == 0u);
 
   // curr_umbra_pin is the most recently matched umbra vertex pin.
@@ -1143,9 +1176,9 @@ void PolygonInfo::PopulateUmbraVertices() {
   // These pointers will always point to one of the pins that is on the
   // linked list of surviving umbra pins, possibly jumping over many
   // other umbra pins that were eliminated when we inset the polygon.
-  UmbraPin* p_next_umbra_pin = umbra_vertices_head_;
+  UmbraPin* p_next_umbra_pin = list.p_head_pin;
   UmbraPin* p_curr_umbra_pin = p_next_umbra_pin->p_prev;
-  for (UmbraPin& pin : pins_) {
+  for (UmbraPin& pin : pins) {
     if (p_next_umbra_pin == &pin ||
         (pin.path_vertex.GetDistanceSquared(p_curr_umbra_pin->umbra_vertex) >
          pin.path_vertex.GetDistanceSquared(p_next_umbra_pin->umbra_vertex))) {
@@ -1170,8 +1203,8 @@ void PolygonInfo::PopulateUmbraVertices() {
     }
     FML_DCHECK(pin.umbra_index != 0u);
   }
-  if (last_umbra_index != pins_.front().umbra_index) {
-    AddTriangle(0u, last_umbra_index, pins_.front().umbra_index);
+  if (last_umbra_index != pins.front().umbra_index) {
+    AddTriangle(0u, last_umbra_index, pins.front().umbra_index);
   }
 }
 
@@ -1181,18 +1214,20 @@ void PolygonInfo::PopulateUmbraVertices() {
 uint16_t PolygonInfo::AppendFan(const UmbraPin* p_curr_pin,
                                 const Vector2& start,
                                 const Vector2& end,
-                                uint16_t start_index) {
+                                uint16_t start_index,
+                                const impeller::Tessellator::Trigs& trigs,
+                                Scalar direction) {
   Point center = p_curr_pin->path_vertex;
   uint16_t center_index = p_curr_pin->umbra_index;
   uint16_t prev_index = start_index;
 
   Vector2 start_delta = start - center;
   Vector2 end_delta = end - center;
-  size_t trig_count = trigs_.size();
+  size_t trig_count = trigs.size();
   for (size_t i = 1u; i < trig_count; i++) {
-    Trig trig = trigs_[i];
-    Point fan_delta = (direction_ >= 0 ? trig : -trig) * start_delta;
-    if (fan_delta.Cross(end_delta) * direction_ <= 0) {
+    Trig trig = trigs[i];
+    Point fan_delta = (direction >= 0 ? trig : -trig) * start_delta;
+    if (fan_delta.Cross(end_delta) * direction <= 0) {
       break;
     }
     uint16_t cur_index = AppendVertex(center + fan_delta, 0.0f);
@@ -1223,7 +1258,7 @@ uint16_t PolygonInfo::AppendVertex(const Point& vertex, Scalar gaussian) {
   FML_DCHECK(index == gaussians_.size());
   // TODO(jimgraham): Turn this condition into a failure of the tessellation
   FML_DCHECK(index <= std::numeric_limits<uint16_t>::max());
-  vertices_.push_back(inverted_matrix_ * vertex);
+  vertices_.push_back(vertex);
   gaussians_.push_back(gaussian);
   return index;
 }
@@ -1239,6 +1274,9 @@ void PolygonInfo::AddTriangle(uint16_t v0, uint16_t v1, uint16_t v2) {
 }  // namespace
 
 namespace impeller {
+
+const std::shared_ptr<ShadowVertices> ShadowVertices::kEmpty =
+    std::make_shared<ShadowVertices>();
 
 std::optional<Rect> ShadowVertices::GetBounds() const {
   return Rect::MakePointBounds(vertices_);
@@ -1316,9 +1354,10 @@ std::shared_ptr<ShadowVertices> ShadowPathGeometry::MakeAmbientShadowVertices(
     const Matrix& matrix) {
   Scalar trig_radius = PolygonInfo::GetTrigRadiusForHeight(occluder_height);
   Tessellator::Trigs trigs = tessellator.GetTrigsForDeviceRadius(trig_radius);
-  PolygonInfo polygon(source, matrix, occluder_height, trigs);
 
-  return polygon.TakeVertices();
+  PolygonInfo polygon(occluder_height);
+
+  return polygon.CalculateConvexShadowMesh(source, matrix, trigs);
 }
 
 }  // namespace impeller
