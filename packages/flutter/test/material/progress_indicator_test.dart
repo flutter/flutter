@@ -2002,7 +2002,7 @@ void main() {
 
     expect(
       tester.getSemantics(find.byType(LinearProgressIndicator)),
-      matchesSemantics(value: '100%', textDirection: TextDirection.ltr),
+      matchesSemantics(value: '100', textDirection: TextDirection.ltr),
     );
 
     // Test value < 0.0
@@ -2012,7 +2012,7 @@ void main() {
 
     expect(
       tester.getSemantics(find.byType(LinearProgressIndicator)),
-      matchesSemantics(value: '0%', textDirection: TextDirection.ltr),
+      matchesSemantics(value: '0', textDirection: TextDirection.ltr),
     );
 
     handle.dispose();
@@ -2028,7 +2028,7 @@ void main() {
 
     expect(
       tester.getSemantics(find.byType(CircularProgressIndicator)),
-      matchesSemantics(value: '100%', textDirection: TextDirection.ltr),
+      matchesSemantics(value: '100', textDirection: TextDirection.ltr),
     );
 
     // Test value < 0.0
@@ -2038,7 +2038,7 @@ void main() {
 
     expect(
       tester.getSemantics(find.byType(CircularProgressIndicator)),
-      matchesSemantics(value: '0%', textDirection: TextDirection.ltr),
+      matchesSemantics(value: '0', textDirection: TextDirection.ltr),
     );
 
     handle.dispose();
@@ -2054,7 +2054,7 @@ void main() {
 
     expect(
       tester.getSemantics(find.byType(RefreshProgressIndicator)),
-      matchesSemantics(value: '100%', textDirection: TextDirection.ltr),
+      matchesSemantics(value: '100', textDirection: TextDirection.ltr),
     );
 
     // Test value < 0.0
@@ -2064,7 +2064,7 @@ void main() {
 
     expect(
       tester.getSemantics(find.byType(RefreshProgressIndicator)),
-      matchesSemantics(value: '0%', textDirection: TextDirection.ltr),
+      matchesSemantics(value: '0', textDirection: TextDirection.ltr),
     );
 
     handle.dispose();
