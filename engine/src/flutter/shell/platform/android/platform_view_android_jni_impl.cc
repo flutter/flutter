@@ -816,7 +816,7 @@ bool RegisterApi(JNIEnv* env) {
       },
       {
           .name = "nativeSetViewportMetrics",
-          .signature = "(JFIIIIIIIIIIIIIII[I[I[IIIII)V",
+          .signature = "(JFIIIIIIIIIIIIIII[I[I[IIIIIIIII)V",
           .fnPtr = reinterpret_cast<void*>(&SetViewportMetrics),
       },
       {
