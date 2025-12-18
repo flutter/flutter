@@ -880,9 +880,9 @@ class RunCommand extends RunCommandBase {
     final appStartedTimeRecorder = Completer<void>.sync();
 
     TerminalHandler? handler;
-    // This callback can't throw.
     unawaited(
-      appStartedTimeRecorder.future.then<void>((_) {
+      // This callback is executed once the application has successfully started (or re-started).
+      appStartedTimeRecorder.future.then<void>((_) async {
         appStartedTime = globals.systemClock.now();
         if (stayResident) {
           handler =

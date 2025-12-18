@@ -35,6 +35,7 @@ import 'globals.dart' as globals;
 import 'hook_runner.dart' show FlutterHookRunner;
 import 'ios/application_package.dart';
 import 'ios/devices.dart';
+import 'mdns_device_discovery.dart';
 import 'project.dart';
 import 'run_cold.dart';
 import 'run_hot.dart';
@@ -410,6 +411,7 @@ class FlutterDevice {
         }
 
         await (await device!.getLogReader(app: package)).provideVmService(vmService!);
+
         completer.complete();
         await subscription.cancel();
       },
@@ -1374,6 +1376,24 @@ abstract class ResidentRunner extends ResidentHandlers {
       );
       await device.vmService!.getFlutterViews();
 
+      // Start mDNS service
+      final mdnsDeviceDiscovery = MDNSDeviceDiscovery(
+        device: device.device!,
+        vmService: device.vmService!.service,
+        debuggingOptions: debuggingOptions,
+        logger: globals.logger,
+        platform: globals.platform,
+        flutterVersion: globals.flutterVersion,
+        systemClock: globals.systemClock,
+      );
+      _mdnsDiscoveries.add(mdnsDeviceDiscovery);
+      await mdnsDeviceDiscovery.advertise(
+        appName: FlutterProject.fromDirectory(
+          globals.fs.directory(projectRootPath),
+        ).manifest.appName,
+        vmServiceUri: device.vmService!.httpAddress,
+      );
+
       // This hooks up callbacks for when the connection stops in the future.
       // We don't want to wait for them. We don't handle errors in those callbacks'
       // futures either because they just print to logger and is not critical.
@@ -1421,10 +1441,20 @@ abstract class ResidentRunner extends ResidentHandlers {
     }
   }
 
+  final _mdnsDiscoveries = <MDNSDeviceDiscovery>[];
+
   Future<int> waitForAppToFinish() async {
     final int exitCode = await _finished.future;
     await cleanupAtFinish();
     return exitCode;
+  }
+
+  @mustCallSuper
+  Future<void> cleanupAtFinish() async {
+    for (final MDNSDeviceDiscovery discovery in _mdnsDiscoveries) {
+      await discovery.stop();
+    }
+    _mdnsDiscoveries.clear();
   }
 
   @mustCallSuper
@@ -1554,9 +1584,6 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   @override
   Future<void> cleanupAfterSignal();
-
-  /// Called right before we exit.
-  Future<void> cleanupAtFinish();
 }
 
 class OperationResult {
