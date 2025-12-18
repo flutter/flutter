@@ -697,7 +697,7 @@ Future<void> main() async {
       const epsilon = 0.001;
       final curveName = curve.toString();
 
-    await tester.pump(duration * 0.25);
+      await tester.pump(duration * 0.25);
       expect(
         tester.getSize(find.byKey(secondKey)).height,
         moreOrLessEquals(curve.transform(0.25) * deltaHeight + initialHeight, epsilon: epsilon),
@@ -3365,11 +3365,7 @@ Future<void> main() async {
     ];
 
     for (final reverseCurve in testReverseCurvesList) {
-      await verifyPoppedHeroCurve(
-        tester: tester,
-        curve: Curves.linear,
-        reverseCurve: reverseCurve,
-      );
+      await verifyPoppedHeroCurve(tester: tester, curve: Curves.linear, reverseCurve: reverseCurve);
     }
   });
 
@@ -3385,11 +3381,7 @@ Future<void> main() async {
       ];
 
       for (final curve in testCurvesList) {
-        await verifyPoppedHeroCurve(
-          tester: tester,
-          curve: curve,
-          reverseCurve: null,
-        );
+        await verifyPoppedHeroCurve(tester: tester, curve: curve, reverseCurve: null);
       }
     },
   );
