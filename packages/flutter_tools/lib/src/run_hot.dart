@@ -130,9 +130,17 @@ class HotRunner extends ResidentRunner {
 
   @visibleForTesting
   String? get targetPlatformName => _targetPlatformName;
-  String? _targetPlatformName;
-  final _targetPlatforms = <TargetPlatform>{};
 
+  TargetPlatform get _targetPlatform {
+    if (_targetPlatformName == 'multiple') {
+      return _baseTargetPlatform ?? TargetPlatform.android;
+    }
+    return _targetPlatformName != null
+      ? getTargetPlatformForName(_targetPlatformName!)
+      : throw ArgumentError(
+          'Access to the target platform needs a call to _calculateTargetPlatform first',
+        );
+  }
   String? _sdkName;
   bool? _emulator;
 
@@ -153,9 +161,7 @@ class HotRunner extends ResidentRunner {
     switch (flutterDevices.length) {
       case 1:
         final Device device = flutterDevices.first.device!;
-        final TargetPlatform targetPlatform = await device.targetPlatform;
-        _targetPlatformName = getNameForTargetPlatform(targetPlatform);
-        _targetPlatforms.add(targetPlatform);
+        _targetPlatformName = getNameForTargetPlatform(await device.targetPlatform);
         _sdkName = await device.sdkNameAndVersion;
         _emulator = await device.isLocalEmulator;
       case > 1:
@@ -167,6 +173,9 @@ class HotRunner extends ResidentRunner {
         );
         _sdkName = 'multiple';
         _emulator = false;
+        // Use the first device's platform as the base for building assets.
+        // This is better than an arbitrary default.
+        _baseTargetPlatform = await flutterDevices.first.device!.targetPlatform;
       default:
         _targetPlatformName = 'unknown';
         _sdkName = 'unknown';
@@ -1265,6 +1274,7 @@ class HotRunner extends ResidentRunner {
     }
     await _cleanupDevFS();
     await stopEchoingDeviceLog();
+    await super.cleanupAtFinish();
   }
 }
 

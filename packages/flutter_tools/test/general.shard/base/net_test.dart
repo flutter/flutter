@@ -393,4 +393,109 @@ void main() {
     final bool result = await net.doesRemoteFileExist(valid);
     expect(result, true);
   });
+
+  group('getLocalInetAddresses', () {
+    tearDown(() {
+      io.resetNetworkInterfaceLister();
+    });
+
+    testWithoutContext('returns all non-loopback addresses', () async {
+      io.setNetworkInterfaceLister(({
+        bool includeLoopback = false,
+        bool includeLinkLocal = false,
+        io.InternetAddressType type = io.InternetAddressType.any,
+      }) async {
+        return <io.NetworkInterface>[
+          io.NetworkInterface(
+            FakeNetworkInterface('eth0', <io.InternetAddress>[
+              io.InternetAddress('1.2.3.4'),
+              io.InternetAddress('::1'), // Loopback IPv6
+              io.InternetAddress('127.0.0.1'), // Loopback IPv4
+              io.InternetAddress('2001:db8::1'),
+            ]),
+          ),
+        ];
+      });
+
+      final List<io.InternetAddress> addresses = await getLocalInetAddresses();
+      expect(addresses, hasLength(2));
+      expect(addresses.map((a) => a.address), containsAll(<String>['1.2.3.4', '2001:db8::1']));
+      expect(addresses.map((a) => a.address), isNot(contains('127.0.0.1')));
+      expect(addresses.map((a) => a.address), isNot(contains('::1')));
+    });
+
+    testWithoutContext('returns loopback if no other addresses found', () async {
+      io.setNetworkInterfaceLister(({
+        bool includeLoopback = false,
+        bool includeLinkLocal = false,
+        io.InternetAddressType type = io.InternetAddressType.any,
+      }) async {
+        return <io.NetworkInterface>[];
+      });
+
+      final List<io.InternetAddress> addresses = await getLocalInetAddresses();
+      expect(addresses, hasLength(2));
+      expect(addresses.map((a) => a.address), containsAll(<String>['127.0.0.1', '::1']));
+    });
+  });
+
+  group('getLocalIpAddress', () {
+    tearDown(() {
+      io.resetNetworkInterfaceLister();
+    });
+
+    testWithoutContext('returns first IPv4 address', () async {
+      io.setNetworkInterfaceLister(({
+        bool includeLoopback = false,
+        bool includeLinkLocal = false,
+        io.InternetAddressType type = io.InternetAddressType.any,
+      }) async {
+        return <io.NetworkInterface>[
+          io.NetworkInterface(
+            FakeNetworkInterface('eth0', <io.InternetAddress>[
+              io.InternetAddress('2001:db8::1'), // IPv6
+              io.InternetAddress('1.2.3.4'), // IPv4
+            ]),
+          ),
+        ];
+      });
+
+      final io.InternetAddress address = await getLocalIpAddress();
+      expect(address.type, io.InternetAddressType.IPv4);
+      expect(address.address, '1.2.3.4');
+    });
+
+    testWithoutContext('returns loopback IPv4 if no IPv4 addresses found', () async {
+      io.setNetworkInterfaceLister(({
+        bool includeLoopback = false,
+        bool includeLinkLocal = false,
+        io.InternetAddressType type = io.InternetAddressType.any,
+      }) async {
+        return <io.NetworkInterface>[
+          io.NetworkInterface(
+            FakeNetworkInterface('eth0', <io.InternetAddress>[
+              io.InternetAddress('2001:db8::1'), // IPv6 only
+            ]),
+          ),
+        ];
+      });
+
+      final io.InternetAddress address = await getLocalIpAddress();
+      expect(address.type, io.InternetAddressType.IPv4);
+      expect(address.isLoopback, true);
+    });
+  });
+}
+
+class FakeNetworkInterface implements io.NetworkInterface {
+  FakeNetworkInterface(this.name, this.addresses);
+
+  @override
+  final String name;
+
+  @override
+  final List<io.InternetAddress> addresses;
+
+  @override
+  int get index => 0;
 }
