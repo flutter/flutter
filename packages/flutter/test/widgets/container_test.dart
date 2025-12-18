@@ -8,6 +8,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -812,6 +813,32 @@ void main() {
     // Use getSize to verify the render object size directly
     final Size size = tester.getSize(find.byType(Container));
     expect(size, const Size(50, 50));
+  });
+
+  testWidgets('DecoratedBox debugFillProperties coverage', (WidgetTester tester) async {
+    const Decoration decoration = BoxDecoration(color: Color(0xFF00FF00));
+    const box = DecoratedBox(decoration: decoration, position: DecorationPosition.foreground);
+
+    expect(box, hasOneLineDescription);
+    final String description = box.toStringDeep(minLevel: DiagnosticLevel.hidden);
+    expect(description, contains('fg: BoxDecoration'));
+    expect(description, contains('position: foreground'));
+  });
+
+  testWidgets('Container with both padding and decoration padding', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Center(
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(border: Border.all(width: 5)),
+          child: const SizedBox(width: 20, height: 20),
+        ),
+      ),
+    );
+
+    // Padding widget should have 10 (padding) + 5 (border) = 15
+    final RenderPadding renderPadding = tester.renderObject(find.byType(Padding).last);
+    expect(renderPadding.padding, const EdgeInsets.all(15));
   });
 }
 
