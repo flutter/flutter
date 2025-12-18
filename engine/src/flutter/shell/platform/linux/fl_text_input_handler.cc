@@ -241,20 +241,19 @@ static gboolean im_delete_surrounding_cb(FlTextInputHandler* self,
 }
 
 // Called when the input method client is set up.
-static void set_client(int64_t client_id,
-                       gpointer user_data) {
+static void set_client(int64_t client_id, gpointer user_data) {
   FlTextInputHandler* self = FL_TEXT_INPUT_HANDLER(user_data);
 
   self->client_id = client_id;
 }
 
 // Called when the input method configuration is changed.
-static void update_config(const gchar* input_action,
-                          gboolean enable_delta_model,
-                          FlTextInputType input_type,
-                          GtkInputPurpose im_purpose,
-                          GtkInputHints im_hint,
-                          gpointer user_data) {
+static void configure(const gchar* input_action,
+                      gboolean enable_delta_model,
+                      FlTextInputType input_type,
+                      GtkInputPurpose im_purpose,
+                      GtkInputHints im_hints,
+                      gpointer user_data) {
   FlTextInputHandler* self = FL_TEXT_INPUT_HANDLER(user_data);
 
   g_free(self->input_action);
@@ -264,7 +263,7 @@ static void update_config(const gchar* input_action,
 
   g_object_set(G_OBJECT(self->im_context), kInputPurposeImProperty, im_purpose,
                nullptr);
-  g_object_set(G_OBJECT(self->im_context), kInputHintsImProperty, im_hint,
+  g_object_set(G_OBJECT(self->im_context), kInputHintsImProperty, im_hints,
                nullptr);
 }
 
@@ -426,7 +425,7 @@ static void fl_text_input_handler_init(FlTextInputHandler* self) {
 
 static FlTextInputChannelVTable text_input_vtable = {
     .set_client = set_client,
-    .update_config = update_config,
+    .configure = configure,
     .hide = hide,
     .show = show,
     .set_editing_state = set_editing_state,

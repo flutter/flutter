@@ -86,42 +86,44 @@ static const gchar* text_affinity_to_string(FlTextAffinity affinity) {
 static void fl_text_input_parse_input_type_name(const gchar* input_type_name,
                                                 FlTextInputType* input_type,
                                                 GtkInputPurpose* im_purpose,
-                                                GtkInputHints* im_hint) {
+                                                GtkInputHints* im_hints) {
   if (input_type_name == nullptr) {
     input_type_name = kTextInputType;
   }
 
-  if (strcmp(input_type_name, kTextInputType) == 0) {
+  if (g_strcmp0(input_type_name, kTextInputType) == 0) {
     // default
-  } else if (strcmp(input_type_name, kMultilineInputType) == 0) {
-    *im_hint = static_cast<GtkInputHints>(GTK_INPUT_HINT_SPELLCHECK |
-                                          GTK_INPUT_HINT_UPPERCASE_SENTENCES);
+  } else if (g_strcmp0(input_type_name, kMultilineInputType) == 0) {
+    *im_hints = static_cast<GtkInputHints>(GTK_INPUT_HINT_SPELLCHECK |
+                                           GTK_INPUT_HINT_UPPERCASE_SENTENCES);
     *input_type = FL_TEXT_INPUT_TYPE_MULTILINE;
-  } else if (strcmp(input_type_name, kNumberInputType) == 0) {
+  } else if (g_strcmp0(input_type_name, kNumberInputType) == 0) {
     *im_purpose = GTK_INPUT_PURPOSE_NUMBER;
-  } else if (strcmp(input_type_name, kPhoneInputType) == 0) {
+  } else if (g_strcmp0(input_type_name, kPhoneInputType) == 0) {
     *im_purpose = GTK_INPUT_PURPOSE_PHONE;
-  } else if (strcmp(input_type_name, kDatetimeInputType) == 0) {
+  } else if (g_strcmp0(input_type_name, kDatetimeInputType) == 0) {
     // Not in GTK 3
-  } else if (strcmp(input_type_name, kEmailAddressInputType) == 0) {
+  } else if (g_strcmp0(input_type_name, kEmailAddressInputType) == 0) {
     *im_purpose = GTK_INPUT_PURPOSE_EMAIL;
-  } else if (strcmp(input_type_name, kUrlInputType) == 0) {
+  } else if (g_strcmp0(input_type_name, kUrlInputType) == 0) {
     *im_purpose = GTK_INPUT_PURPOSE_URL;
-  } else if (strcmp(input_type_name, kPasswordInputType) == 0) {
+  } else if (g_strcmp0(input_type_name, kPasswordInputType) == 0) {
     *im_purpose = GTK_INPUT_PURPOSE_PASSWORD;
-  } else if (strcmp(input_type_name, kNameInputType) == 0) {
+  } else if (g_strcmp0(input_type_name, kNameInputType) == 0) {
     *im_purpose = GTK_INPUT_PURPOSE_NAME;
-    *im_hint = GTK_INPUT_HINT_UPPERCASE_WORDS;
-  } else if (strcmp(input_type_name, kAddressInputType) == 0) {
-    *im_hint = GTK_INPUT_HINT_UPPERCASE_WORDS;
-  } else if (strcmp(input_type_name, kNoneInputType) == 0) {
+    *im_hints = GTK_INPUT_HINT_UPPERCASE_WORDS;
+  } else if (g_strcmp0(input_type_name, kAddressInputType) == 0) {
+    *im_hints = GTK_INPUT_HINT_UPPERCASE_WORDS;
+  } else if (g_strcmp0(input_type_name, kNoneInputType) == 0) {
     // keep defaults
     *input_type = FL_TEXT_INPUT_TYPE_NONE;
-  } else if (strcmp(input_type_name, kWebSearchInputType) == 0) {
-    *im_hint = GTK_INPUT_HINT_LOWERCASE;
-  } else if (strcmp(input_type_name, kTwitterInputType) == 0) {
-    *im_hint = static_cast<GtkInputHints>(GTK_INPUT_HINT_SPELLCHECK |
-                                          GTK_INPUT_HINT_UPPERCASE_SENTENCES);
+  } else if (g_strcmp0(input_type_name, kWebSearchInputType) == 0) {
+    *im_hints = GTK_INPUT_HINT_LOWERCASE;
+  } else if (g_strcmp0(input_type_name, kTwitterInputType) == 0) {
+    *im_hints = static_cast<GtkInputHints>(GTK_INPUT_HINT_SPELLCHECK |
+                                           GTK_INPUT_HINT_UPPERCASE_SENTENCES);
+  } else {
+    g_warning("Unhandled input type name: %s", input_type_name);
   }
 }
 
@@ -157,7 +159,7 @@ static FlMethodResponse* update_config(FlTextInputChannel* self,
   // Reset the input type, then set only if appropriate.
   FlTextInputType input_type = FL_TEXT_INPUT_TYPE_TEXT;
   GtkInputPurpose im_purpose = GTK_INPUT_PURPOSE_FREE_FORM;
-  GtkInputHints im_hint = GTK_INPUT_HINT_NONE;
+  GtkInputHints im_hints = GTK_INPUT_HINT_NONE;
   FlValue* input_type_value =
       fl_value_lookup_string(config_value, kTextInputTypeKey);
   if (fl_value_get_type(input_type_value) == FL_VALUE_TYPE_MAP) {
@@ -166,12 +168,12 @@ static FlMethodResponse* update_config(FlTextInputChannel* self,
     if (fl_value_get_type(input_type_name_value) == FL_VALUE_TYPE_STRING) {
       const gchar* input_type_name = fl_value_get_string(input_type_name_value);
       fl_text_input_parse_input_type_name(input_type_name, &input_type,
-                                          &im_purpose, &im_hint);
+                                          &im_purpose, &im_hints);
     }
   }
 
-  self->vtable->update_config(input_action, enable_delta_model, input_type,
-                              im_purpose, im_hint, self->user_data);
+  self->vtable->configure(input_action, enable_delta_model, input_type,
+                          im_purpose, im_hints, self->user_data);
 
   return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
 }
