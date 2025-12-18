@@ -18,6 +18,10 @@ typedef _KeyDataResponseCallback = void Function(bool handled);
 const StandardMethodCodec standardCodec = StandardMethodCodec();
 const JSONMethodCodec jsonCodec = JSONMethodCodec();
 
+// An object to listen to values coming from media queries in the browser, like
+// prefers-color-scheme or prefers-reduced-motion
+final MediaQueryManager _mediaQueries = MediaQueryManager();
+
 /// Platform event dispatcher.
 ///
 /// This is the central entry point for platform messages and configuration
@@ -26,7 +30,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// Private constructor, since only dart:ui is supposed to create one of
   /// these.
   EnginePlatformDispatcher() {
-    _addBrightnessMediaQueryListener();
+    _registerMediaQueryListeners();
     HighContrastSupport.instance.addListener(_updateHighContrast);
     _addTypographySettingsObserver();
     _addLocaleChangedListener();
@@ -78,7 +82,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   }
 
   void dispose() {
-    _removeBrightnessMediaQueryListener();
+    _mediaQueries.detachAll();
     _disconnectTypographySettingsObserver();
     _removeLocaleChangedListener();
     HighContrastSupport.instance.removeListener(_updateHighContrast);
@@ -1243,33 +1247,34 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     }
   }
 
-  /// Reference to css media query that indicates the user theme preference on the web.
-  final DomMediaQueryList _brightnessMediaQuery = domWindow.matchMedia(
-    '(prefers-color-scheme: dark)',
-  );
-
-  /// A callback that is invoked whenever [_brightnessMediaQuery] changes value.
+  /// Updates [AccessibilityFeatures] `reduceMotion` and `disableAnimations` to
+  /// [value], and notifies the framework of the change.
   ///
-  /// Updates the [_platformBrightness] with the new user preference.
-  DomEventListener? _brightnessMediaQueryListener;
-
-  /// Set the callback function for listening changes in [_brightnessMediaQuery] value.
-  void _addBrightnessMediaQueryListener() {
-    _updatePlatformBrightness(
-      _brightnessMediaQuery.matches ? ui.Brightness.dark : ui.Brightness.light,
-    );
-
-    _brightnessMediaQueryListener = (DomEvent event) {
-      final mqEvent = event as DomMediaQueryListEvent;
-      _updatePlatformBrightness(mqEvent.matches! ? ui.Brightness.dark : ui.Brightness.light);
-    }.toJS;
-    _brightnessMediaQuery.addListener(_brightnessMediaQueryListener);
+  /// The web doesn't seem to distinguish between "reduced motion" and "disable
+  /// animations", so we set both at the same time in this update.
+  void _updateReducedMotion(bool value) {
+    if (configuration.accessibilityFeatures.reduceMotion != value) {
+      final original = configuration.accessibilityFeatures as EngineAccessibilityFeatures;
+      configuration = configuration.copyWith(
+        accessibilityFeatures: original.copyWith(
+          // There's no distinction on the web between "reduceMotion" and
+          // "disableAnimations", so we set both at the same time.
+          reduceMotion: value,
+          disableAnimations: value,
+        ),
+      );
+      invokeOnPlatformConfigurationChanged();
+      invokeOnAccessibilityFeaturesChanged();
+    }
   }
 
-  /// Remove the callback function for listening changes in [_brightnessMediaQuery] value.
-  void _removeBrightnessMediaQueryListener() {
-    _brightnessMediaQuery.removeListener(_brightnessMediaQueryListener);
-    _brightnessMediaQueryListener = null;
+  // Configures the [_mediaQueries] object.
+  void _registerMediaQueryListeners() {
+    // Controls light-dark mode
+    _mediaQueries.addListener('(prefers-color-scheme: dark)', onMatch: (prefersDark) {
+      _updatePlatformBrightness(prefersDark ? ui.Brightness.dark : ui.Brightness.light);
+    });
+    _mediaQueries.addListener('(prefers-reduced-motion: reduce)', onMatch: _updateReducedMotion);
   }
 
   /// A callback that is invoked whenever [platformBrightness] changes value.
