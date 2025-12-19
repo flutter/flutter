@@ -1,7 +1,11 @@
 # AI rules for Flutter
 
-This directory contains `rules.md`, the default set of AI rules for building
-Flutter apps, following best-practices.
+This directory contains the default set of AI rules for building Flutter apps, following best practices.
+
+*   `rules.md`: The comprehensive master rule set.
+*   `rules_10k.md`: A condensed version (<10k chars) for tools with stricter context limits.
+*   `rules_4k.md`: A highly concise version (<4k chars) for limited contexts.
+*   `rules_1k.md`: An ultra-compact version (<1k chars) for very strict limits.
 
 ## Device & Editor Specific Limits
 
