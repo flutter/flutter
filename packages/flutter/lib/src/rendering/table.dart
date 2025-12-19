@@ -1531,10 +1531,12 @@ class RenderTable extends RenderBox {
       // Update pending heights - subtract rowHeight from future rows
       for (int futureY = y + 1; futureY < rows; futureY++) {
         if (pendingRowSpanHeights[futureY] > 0) {
-          pendingRowSpanHeights[futureY] = clampDouble(
-            pendingRowSpanHeights[futureY] - rowHeight,
+          // For cells spanning multiple rows, reduce the pending height by the
+          // current row's height. Use math.max to ensure non-negative values,
+          // as the pending height may already be satisfied by earlier rows.
+          pendingRowSpanHeights[futureY] = math.max(
             0.0,
-            double.infinity,
+            pendingRowSpanHeights[futureY] - rowHeight,
           );
         }
       }
@@ -1697,10 +1699,12 @@ class RenderTable extends RenderBox {
       // Adjust pending heights for future rows by subtracting the current height.
       for (int futureY = y + 1; futureY < rows; futureY++) {
         if (pendingRowSpanHeights[futureY] > 0) {
-          pendingRowSpanHeights[futureY] = clampDouble(
-            pendingRowSpanHeights[futureY] - rowHeight,
+          // For cells spanning multiple rows, reduce the pending height by the
+          // current row's height. Use math.max to ensure non-negative values,
+          // as the pending height may already be satisfied by earlier rows.
+          pendingRowSpanHeights[futureY] = math.max(
             0.0,
-            double.infinity,
+            pendingRowSpanHeights[futureY] - rowHeight,
           );
         }
       }
