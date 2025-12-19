@@ -9425,4 +9425,230 @@ void main() {
     await tester.pump();
     await tester.pumpAndSettle();
   });
+
+  testWidgets('TabBar invokes onScrollControllerCreated when isScrollable is true', (
+    WidgetTester tester,
+  ) async {
+    ScrollController? exposedController;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: 10,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(
+                isScrollable: true,
+                onScrollControllerCreated: (ScrollController controller) {
+                  exposedController = controller;
+                },
+                tabs: List<Widget>.generate(10, (int index) => Tab(text: 'Tab $index')),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    expect(exposedController, isNotNull);
+    expect(exposedController!.hasClients, isTrue);
+  });
+
+  testWidgets('TabBar onScrollControllerCreated can listen to scroll events', (
+    WidgetTester tester,
+  ) async {
+    ScrollController? exposedController;
+    final scrollOffsets = <double>[];
+    void scrollListener() {
+      if (exposedController != null) {
+        scrollOffsets.add(exposedController!.offset);
+      }
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: 10,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(
+                isScrollable: true,
+                onScrollControllerCreated: (ScrollController controller) {
+                  exposedController = controller;
+                  controller.addListener(scrollListener);
+                },
+                tabs: List<Widget>.generate(10, (int index) => Tab(text: 'Tab $index')),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    expect(exposedController, isNotNull);
+
+    // Scroll the tab bar.
+    await tester.drag(find.byType(TabBar), const Offset(-100, 0));
+    await tester.pumpAndSettle();
+
+    expect(scrollOffsets, isNotEmpty);
+  });
+
+  testWidgets('TabBar should not invoke onScrollControllerCreated callback '
+      'when isScrollable is false', (WidgetTester tester) async {
+    var callbackInvoked = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: 2,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(
+                onScrollControllerCreated: (ScrollController controller) {
+                  callbackInvoked = true;
+                },
+                tabs: const <Widget>[
+                  Tab(text: 'Tab 1'),
+                  Tab(text: 'Tab 2'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    expect(callbackInvoked, isFalse);
+  });
+
+  testWidgets('TabBar onScrollControllerCreated provides access to scroll position', (
+    WidgetTester tester,
+  ) async {
+    ScrollController? exposedController;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: 10,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(
+                isScrollable: true,
+                onScrollControllerCreated: (ScrollController controller) {
+                  exposedController = controller;
+                },
+                tabs: List<Widget>.generate(10, (int index) => Tab(text: 'Tab $index')),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    expect(exposedController, isNotNull);
+
+    final double initialOffset = exposedController!.offset;
+
+    // Scroll the tab bar.
+    await tester.drag(find.byType(TabBar), const Offset(-100, 0));
+    await tester.pumpAndSettle();
+
+    // Verify offset changed.
+    expect(exposedController!.offset, isNot(equals(initialOffset)));
+  });
+
+  testWidgets('TabBar onScrollControllerCreated controller can be used to '
+      'animate scroll programmatically', (WidgetTester tester) async {
+    ScrollController? exposedController;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: 10,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(
+                isScrollable: true,
+                onScrollControllerCreated: (ScrollController controller) {
+                  exposedController = controller;
+                },
+                tabs: List<Widget>.generate(10, (int index) => Tab(text: 'Tab $index')),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    expect(exposedController, isNotNull);
+
+    final double initialOffset = exposedController!.offset;
+
+    // Animate to a new position using the exposed controller.
+    exposedController!.animateTo(
+      100,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+    await tester.pumpAndSettle();
+
+    // Verify that offset has been changed.
+    expect(exposedController!.offset, greaterThan(initialOffset));
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/124608.
+  testWidgets('Wrapping a Scrollbar around a TabBar should not throw exception', (
+    WidgetTester tester,
+  ) async {
+    ScrollController? exposedController;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: 100,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: PreferredSize(
+                preferredSize: const Size.fromHeight(56.0),
+                child: Scrollbar(
+                  controller: exposedController,
+                  child: TabBar(
+                    isScrollable: true,
+                    onScrollControllerCreated: (ScrollController controller) {
+                      exposedController = controller;
+                    },
+                    tabs: List<Widget>.generate(100, (int index) => Tab(text: 'Tab $index')),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Verify a tab is visible.
+    final Finder tab1 = find.text('Tab 1');
+    expect(tab1, findsOneWidget);
+
+    // Hover over TabBar to trigger a case where scrollbar becomes visible.
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(tab1));
+    await tester.pump();
+
+    // Verify no exception is thrown.
+    expect(tester.takeException(), isNull);
+  });
 }

@@ -938,6 +938,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.onTap,
     this.onHover,
     this.onFocusChange,
+    this.onScrollControllerCreated,
     this.physics,
     this.splashFactory,
     this.splashBorderRadius,
@@ -993,6 +994,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.onTap,
     this.onHover,
     this.onFocusChange,
+    this.onScrollControllerCreated,
     this.physics,
     this.splashFactory,
     this.splashBorderRadius,
@@ -1301,6 +1303,42 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// {@end-tool}
   final TabValueChanged<bool>? onFocusChange;
 
+  /// Called when the custom [ScrollController] for this scrollable [TabBar] is created.
+  ///
+  /// This callback provides access to the internal [ScrollController]
+  /// so that desired scroll behaviors from outside can be applied.
+  /// The callback is only invoked when [isScrollable] is true.
+  ///
+  /// The callback is called during the build phase. Calling [State.setState] in the
+  /// callback is not recommended unless [Future.microtask] or
+  /// [SchedulerBinding.addPostFrameCallback] are used.
+  ///
+  /// The controller is being managed inside [TabBar] and will be disposed automatically.
+  /// If you add listeners to the exposed controller, you must remove them in
+  /// your widget's dispose method to prevent memory leaks.
+  ///
+  /// {@tool dartpad}
+  /// This sample showcases how to use [onScrollControllerCreated] to
+  /// programmatically control the scroll position of a scrollable [TabBar].
+  ///
+  /// ** See code in examples/api/lib/material/tabs/tab_bar.onScrollControllerCreated.dart **
+  /// {@end-tool}
+  ///
+  /// {@tool dartpad}
+  /// This example showcases how to show [Scrollbar] with [TabBar] with
+  /// the exposed controller from [TabBar.onScrollControllerCreated].
+  /// The example will demonstrate how to handle the exposed controller safely,
+  /// and use it to scroll the associated [TabBar] programmatically.
+  ///
+  /// ** See code in examples/api/lib/material/tabs/tab_bar.onScrollControllerCreated.Scrollbar.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollController], which can be used to control a scrollable widget.
+  ///  * [isScrollable], which determines whether the tab bar is scrollable.
+  final void Function(ScrollController controller)? onScrollControllerCreated;
+
   /// How the [TabBar]'s scroll view should respond to user input.
   ///
   /// For example, determines how the scroll view continues to animate after the
@@ -1440,6 +1478,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 
 class _TabBarState extends State<TabBar> {
   ScrollController? _scrollController;
+  bool _scrollControllerCallbackInvoked = false;
   TabController? _controller;
   _IndicatorPainter? _indicatorPainter;
   int? _currentIndex;
@@ -1645,6 +1684,11 @@ class _TabBarState extends State<TabBar> {
     } else if (widget.tabs.length < _tabKeys.length) {
       _tabKeys.removeRange(widget.tabs.length, _tabKeys.length);
       _labelPaddings.removeRange(widget.tabs.length, _tabKeys.length);
+    }
+
+    // Reset callback flag when widget is rebuilt with different configuration.
+    if (widget.onScrollControllerCreated != oldWidget.onScrollControllerCreated) {
+      _scrollControllerCallbackInvoked = false;
     }
   }
 
@@ -2010,6 +2054,13 @@ class _TabBarState extends State<TabBar> {
             ).add(widget.padding ?? EdgeInsets.zero)
           : widget.padding;
       _scrollController ??= _TabBarScrollController(this);
+
+      // Invoke callback when controller is spawned.
+      if (!_scrollControllerCallbackInvoked && widget.onScrollControllerCreated != null) {
+        _scrollControllerCallbackInvoked = true;
+        widget.onScrollControllerCreated!(_scrollController!);
+      }
+
       tabBar = ScrollConfiguration(
         // The scrolling tabs should not show an overscroll indicator.
         behavior: ScrollConfiguration.of(context).copyWith(overscroll: false),
