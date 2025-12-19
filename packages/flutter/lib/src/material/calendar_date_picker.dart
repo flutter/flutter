@@ -237,8 +237,20 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
       final bool isToday = widget.calendarDelegate.isSameDay(widget.currentDate, _selectedDate);
       final semanticLabelSuffix = isToday ? ', ${_localizations.currentDateLabel}' : '';
       setState(() {
-        _announcementText = '${_localizations.formatFullDate(_selectedDate!)}$semanticLabelSuffix';
+        _announce('${_localizations.formatFullDate(_selectedDate!)}$semanticLabelSuffix');
       });
+    }
+  }
+
+  // Auxiliary method for handling the difference between platforms
+  void _announce(String message) {
+    if (Theme.of(context).platform == TargetPlatform.android) {
+      setState(() {
+        _announcementText = message;
+      });
+    } else {
+      // Maintains the mandatory announcement for other platforms
+      SemanticsService.sendAnnouncement(View.of(context), message, Directionality.of(context));
     }
   }
 
@@ -264,7 +276,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
           DatePickerMode.day => widget.calendarDelegate.formatMonthYear(selected, _localizations),
           DatePickerMode.year => widget.calendarDelegate.formatYear(selected.year, _localizations),
         };
-        _announcementText = message;
+        _announce(message);
       }
     });
   }
@@ -308,19 +320,20 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
     setState(() {
       _selectedDate = value;
       widget.onDateChanged(_selectedDate!);
-      switch (Theme.of(context).platform) {
-        case TargetPlatform.linux:
-        case TargetPlatform.macOS:
-        case TargetPlatform.windows:
-          final bool isToday = widget.calendarDelegate.isSameDay(widget.currentDate, _selectedDate);
-          final semanticLabelSuffix = isToday ? ', ${_localizations.currentDateLabel}' : '';
-          _announcementText =
-              '${_localizations.selectedDateLabel} ${widget.calendarDelegate.formatFullDate(_selectedDate!, _localizations)}$semanticLabelSuffix';
-        case TargetPlatform.android:
-        case TargetPlatform.iOS:
-        case TargetPlatform.fuchsia:
-          break;
-      }
+
+      // Calculate the announcement message for all platforms to ensure consistency.
+      final bool isToday = widget.calendarDelegate.isSameDay(widget.currentDate, _selectedDate);
+      final semanticLabelSuffix = isToday ? ', ${_localizations.currentDateLabel}' : '';
+
+      final message =
+          '${_localizations.selectedDateLabel} '
+          '${widget.calendarDelegate.formatFullDate(_selectedDate!, _localizations)}'
+          '$semanticLabelSuffix';
+
+      // The [_announce] helper method determines the platform-specific delivery:
+      // - On Android: Uses declarative updates via live regions (setState).
+      // - Other platforms: Continues using imperative SemanticsService announcements.
+      _announce(message);
     });
   }
 
@@ -386,9 +399,16 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
         : maxDayPickerHeight;
     return Stack(
       children: <Widget>[
-        SizedBox(height: _subHeaderHeight + scaledMaxDayPickerHeight, child: _buildPicker()),
-
-        Semantics(label: _announcementText, liveRegion: true, child: const SizedBox.shrink()),
+        Semantics(
+          container: true,
+          liveRegion: Theme.of(context).platform == TargetPlatform.android,
+          accessiblityFocusBlockType: AccessiblityFocusBlockType.none,
+          label: Theme.of(context).platform == TargetPlatform.android ? _announcementText : null,
+          child: SizedBox(
+            height: _subHeaderHeight + scaledMaxDayPickerHeight,
+            child: _buildPicker(),
+          ),
+        ),
 
         // Put the mode toggle button on top so that it won't be covered up by the _MonthPicker
         MediaQuery.withClampedTextScaling(
@@ -648,6 +668,18 @@ class _MonthPickerState extends State<_MonthPicker> {
     widget.onChanged(selectedDate);
   }
 
+  // Auxiliary method for handling the difference between platforms
+  void _announce(String message) {
+    if (Theme.of(context).platform == TargetPlatform.android) {
+      setState(() {
+        _announcementText = message;
+      });
+    } else {
+      // Maintains the mandatory announcement for other platforms
+      SemanticsService.sendAnnouncement(View.of(context), message, Directionality.of(context));
+    }
+  }
+
   void _handleMonthPageChanged(int monthPage) {
     setState(() {
       final DateTime monthDate = widget.calendarDelegate.addMonthsToMonthDate(
@@ -665,6 +697,7 @@ class _MonthPickerState extends State<_MonthPicker> {
           _focusedDay = _focusableDayForMonth(_currentMonth, _focusedDay!.day);
         }
         _announcementText = widget.calendarDelegate.formatMonthYear(_currentMonth, _localizations);
+        _announce(_announcementText);
       }
     });
   }
@@ -851,9 +884,11 @@ class _MonthPickerState extends State<_MonthPicker> {
     return Semantics(
       container: true,
       explicitChildNodes: true,
+      liveRegion: Theme.of(context).platform == TargetPlatform.android,
+      accessiblityFocusBlockType: AccessiblityFocusBlockType.none,
+      label: Theme.of(context).platform == TargetPlatform.android ? _announcementText : null,
       child: Column(
         children: <Widget>[
-          Semantics(label: _announcementText, liveRegion: true, child: const SizedBox.shrink()),
           SizedBox(
             height: _subHeaderHeight,
             child: Padding(
