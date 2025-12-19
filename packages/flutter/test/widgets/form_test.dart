@@ -840,6 +840,99 @@ void main() {
     },
   );
 
+  testWidgets(
+    'Does not auto-validate before value changes when autovalidateMode is set to onUserInteractionIfError',
+    (WidgetTester tester) async {
+      late FormFieldState<String> formFieldState;
+
+      String? errorText(String? value) => (value == null || value.isEmpty) ? 'Required' : null;
+
+      Widget builder() {
+        return MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: Material(
+                  child: FormField<String>(
+                    initialValue: 'foo',
+                    autovalidateMode: AutovalidateMode.onUserInteractionIfError,
+                    builder: (FormFieldState<String> state) {
+                      formFieldState = state;
+                      return Container();
+                    },
+                    validator: errorText,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(builder());
+
+      // The form field has no error.
+      expect(formFieldState.hasError, isFalse);
+      // No "Required" error is visible.
+      expect(find.text('Required'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'Does not auto-validate before value changes even when initialValue is empty and autovalidateMode is set to onUserInteractionIfError',
+    (WidgetTester tester) async {
+      late FormFieldState<String> formFieldState;
+
+      String? errorText(String? value) => (value == null || value.isEmpty) ? 'Required' : null;
+
+      Widget builder() {
+        return MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: Material(
+                  child: FormField<String>(
+                    autovalidateMode: AutovalidateMode.onUserInteractionIfError,
+                    builder: (FormFieldState<String> state) {
+                      formFieldState = state;
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Container(),
+                          if (state.errorText != null) Text(state.errorText!),
+                        ],
+                      );
+                    },
+                    validator: errorText,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(builder());
+
+      expect(formFieldState.hasError, isFalse);
+
+      expect(find.text('Required'), findsNothing);
+
+      expect(formFieldState.errorText, isNull);
+
+      formFieldState.validate();
+      await tester.pump();
+
+      expect(formFieldState.hasError, isTrue);
+
+      expect(find.text('Required'), findsOneWidget);
+    },
+  );
+
   testWidgets('auto-validate before value changes if autovalidateMode was set to always', (
     WidgetTester tester,
   ) async {
@@ -995,6 +1088,74 @@ void main() {
       formState.currentState!.reset();
       await tester.pump();
       expect(find.text(errorText('bar')!), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'Form with AutovalidateMode.onUserInteractionIfError only revalidates when user interacts after an error exists',
+    (WidgetTester tester) async {
+      final formState = GlobalKey<FormState>();
+      String? errorText(String? value) => (value == null || value.isEmpty) ? 'Required' : null;
+
+      Widget builder() {
+        return MaterialApp(
+          theme: ThemeData(),
+          home: MediaQuery(
+            data: const MediaQueryData(),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: Form(
+                  key: formState,
+                  autovalidateMode: AutovalidateMode.onUserInteractionIfError,
+                  child: Material(
+                    child: TextFormField(initialValue: 'foo', validator: errorText),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(builder());
+
+      // No error text is visible yet. (Initial valid state).
+      expect(find.text('Required'), findsNothing);
+
+      // User types valid input 'bar' → autovalidate is disabled → still no error.
+      await tester.enterText(find.byType(TextFormField), 'bar');
+      await tester.pump();
+      expect(find.text('Required'), findsNothing);
+
+      // Clear the input (invalid).
+      await tester.enterText(find.byType(TextFormField), '');
+      await tester.pump();
+
+      // Manually submit form to show the initial error (AutovalidateMode is now active).
+      formState.currentState!.validate();
+      expect(find.text('Required'), findsNothing);
+      await tester.pump();
+
+      // Verify error is shown.
+      expect(find.text('Required'), findsOneWidget);
+
+      // Now user interacts again with valid text ('baz') → validation auto-runs and clears the error.
+      await tester.enterText(find.byType(TextFormField), 'baz');
+      await tester.pump();
+      expect(find.text('Required'), findsNothing);
+
+      // Check the behavior of a manual validate when the text is already valid.
+      // This should *confirm* the error is cleared, not re-introduce it.
+      formState.currentState!.validate();
+      await tester.pump();
+      expect(find.text('Required'), findsNothing);
+
+      // Resetting should clear form (already cleared, but a safety check).
+      await tester.enterText(find.byType(TextFormField), '');
+      formState.currentState!.reset();
+      await tester.pump();
+      expect(find.text('Required'), findsNothing);
     },
   );
 

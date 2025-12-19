@@ -1336,9 +1336,9 @@ public class FlutterViewTest {
     when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
     flutterView.attachToFlutterEngine(flutterEngine);
 
-    clearInvocations(flutterView.flutterEngineView);
+    clearInvocations(flutterSurfaceView);
     flutterView.flutterUiResizeListener.resizeEngineView(100, 200);
-    verify(flutterView.flutterEngineView, times(1)).setLayoutParams(any());
+    verify(flutterSurfaceView, times(1)).setLayoutParams(any());
   }
 
   @SuppressWarnings("deprecation")
