@@ -21,6 +21,7 @@ import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../ios/xcodeproj.dart';
 import '../macos/cocoapod_utils.dart';
+import '../plugins.dart';
 import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
 import '../version.dart';
 import 'build.dart';
@@ -180,6 +181,140 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
       );
     }
   }
+
+  /// Copies vendored frameworks from plugin podspecs to the output directory.
+  ///
+  /// Parses each plugin's podspec to find vendored_frameworks entries,
+  /// locates the framework files in the plugin directory, and copies them
+  /// to the output directory as xcframeworks.
+  Future<void> copyVendoredFrameworks(Directory modeDirectory, String platform) async {
+    final List<Plugin> plugins = await findPlugins(project);
+    final processedFrameworks = <String>{};
+
+    for (final plugin in plugins) {
+      final String? podspecPath = plugin.pluginPodspecPath(globals.fs, platform);
+      if (podspecPath == null) {
+        continue;
+      }
+
+      final File podspecFile = globals.fs.file(podspecPath);
+      if (!podspecFile.existsSync()) {
+        continue;
+      }
+
+      final String podspecContents = await podspecFile.readAsString();
+      final List<String> vendoredPaths = parseVendoredFrameworks(podspecContents);
+
+      if (vendoredPaths.isEmpty) {
+        continue;
+      }
+
+      // The vendored path is relative to the podspec file's directory
+      final Directory podspecDir = podspecFile.parent;
+
+      for (final vendoredPath in vendoredPaths) {
+        // Skip placeholder paths (used by Flutter's own podhelper.rb)
+        if (vendoredPath.contains('path/to/nothing')) {
+          continue;
+        }
+
+        // The vendored path is relative to the podspec file's directory
+        final String frameworkPath = globals.fs.path.join(podspecDir.path, vendoredPath);
+        final FileSystemEntity frameworkEntity = globals.fs.directory(frameworkPath);
+
+        if (!frameworkEntity.existsSync()) {
+          globals.logger.printTrace('Vendored framework not found: $frameworkPath');
+          continue;
+        }
+
+        final String frameworkName = globals.fs.path.basename(vendoredPath);
+        final String binaryName = globals.fs.path.basenameWithoutExtension(frameworkName);
+
+        // Skip if we've already processed this framework name
+        if (processedFrameworks.contains(binaryName)) {
+          continue;
+        }
+        processedFrameworks.add(binaryName);
+
+        // Check if it's already an xcframework
+        if (frameworkName.endsWith('.xcframework')) {
+          // Copy the xcframework directly
+          final source = frameworkEntity as Directory;
+          final Directory destination = modeDirectory.childDirectory(frameworkName);
+          if (!destination.existsSync()) {
+            globals.logger.printTrace('Copying vendored xcframework: $frameworkName');
+            copyDirectory(source, destination);
+          }
+        } else if (frameworkName.endsWith('.framework')) {
+          // Create an xcframework from the single framework
+          final Directory xcframeworkOutput = modeDirectory.childDirectory(
+            '$binaryName.xcframework',
+          );
+          if (!xcframeworkOutput.existsSync()) {
+            globals.logger.printTrace(
+              'Creating xcframework from vendored framework: $frameworkName',
+            );
+            await BuildFrameworkCommand.produceXCFramework(
+              <Directory>[frameworkEntity as Directory],
+              binaryName,
+              modeDirectory,
+              globals.processManager,
+            );
+          }
+        }
+      }
+    }
+  }
+}
+
+/// Parses a podspec file and returns a list of vendored framework paths.
+///
+/// The vendored_frameworks value in a podspec can be:
+/// - A single string: `s.vendored_frameworks = 'Path/To/Framework.framework'`
+/// - An array: `s.vendored_frameworks = ['Framework1.framework', 'Framework2.framework']`
+///
+/// In Ruby, the last assignment wins, so if there are multiple assignments,
+/// only the last one is used.
+///
+/// Returns an empty list if no vendored_frameworks are found.
+List<String> parseVendoredFrameworks(String podspecContents) {
+  // This regex finds all assignments to `vendored_frameworks`.
+  // It captures either a single quoted string or an array literal.
+  // Group 1: single string content, Group 2: array content
+  final pattern = RegExp(
+    r'''^\s*[a-zA-Z_]+\.vendored_frameworks\s*=\s*(?:["']([^"']+)["']|\[([^\]]*)\])''',
+    multiLine: true,
+  );
+
+  final List<RegExpMatch> matches = pattern.allMatches(podspecContents).toList();
+  if (matches.isEmpty) {
+    return <String>[];
+  }
+
+  // In Ruby, the last assignment wins.
+  final RegExpMatch lastMatch = matches.last;
+  final results = <String>[];
+
+  // Group 1 is single string content, group 2 is array content.
+  final String? singleValue = lastMatch.group(1);
+  final String? arrayContent = lastMatch.group(2);
+
+  if (singleValue != null) {
+    if (singleValue.isNotEmpty) {
+      results.add(singleValue);
+    }
+  } else if (arrayContent != null) {
+    // Extract individual paths from the array content.
+    final pathPattern = RegExp(r'''["']([^"']+)["']''');
+    for (final RegExpMatch pathMatch in pathPattern.allMatches(arrayContent)) {
+      final String? path = pathMatch.group(1);
+      if (path != null && path.isNotEmpty) {
+        results.add(path);
+      }
+    }
+  }
+
+  return results;
 }
 
 /// Produces a .framework for integration into a host iOS app. The .framework
@@ -647,6 +782,9 @@ end
           );
         }
       }
+
+      // Copy vendored frameworks from plugin podspecs.
+      await copyVendoredFrameworks(modeDirectory, 'ios');
     } finally {
       status.stop();
     }
