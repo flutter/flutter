@@ -5373,7 +5373,7 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
     return index;
   }
 
-  int _getUniformFloatIndex(String name, int index, [int expectedSize = 0]) {
+  int _getUniformFloatIndex(String name, int index, [int? expectedSize]) {
     if (index < 0) {
       throw ArgumentError('Index `$index` out of bounds for `$name`.');
     }
@@ -5388,7 +5388,7 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
         if (index + 1 > sizeInFloats) {
           throw ArgumentError('Index `$index` out of bounds for `$name`.');
         }
-        if (expectedSize != 0 && sizeInFloats != expectedSize) {
+        if (expectedSize != null && sizeInFloats != expectedSize) {
           throw ArgumentError('Uniform `$name` has size $sizeInFloats, not size $expectedSize.');
         }
         found = true;
