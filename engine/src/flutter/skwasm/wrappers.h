@@ -29,7 +29,7 @@ inline void makeCurrent(EMSCRIPTEN_WEBGL_CONTEXT_HANDLE handle) {
 
   int result = emscripten_webgl_make_context_current(handle);
   if (result != EMSCRIPTEN_RESULT_SUCCESS) {
-    printf("make_context failed: %d", result);
+    printf("make_context_current failed: %d", result);
   }
 }
 
