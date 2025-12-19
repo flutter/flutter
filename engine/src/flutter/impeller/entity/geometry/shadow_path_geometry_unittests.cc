@@ -266,6 +266,74 @@ TEST(ShadowPathGeometryTest, GetAndTakeVertices) {
   EXPECT_FALSE(geometry.TakeShadowVertices());
 }
 
+TEST(ShadowPathGeometryTest, ClockwiseTriangleTest) {
+  DlPathBuilder path_builder;
+  path_builder.MoveTo(DlPoint(100, 0));
+  path_builder.LineTo(DlPoint(200, 100));
+  path_builder.LineTo(DlPoint(0, 100));
+  path_builder.Close();
+  const DlPath path = path_builder.TakePath();
+  const Matrix matrix;
+  const Scalar height = 10.0f;
+
+  Tessellator tessellator;
+  std::shared_ptr<ShadowVertices> shadow_vertices =
+      ShadowPathGeometry::MakeAmbientShadowVertices(tessellator, path, height,
+                                                    matrix);
+
+  ASSERT_NE(shadow_vertices, nullptr);
+  EXPECT_FALSE(shadow_vertices->IsEmpty());
+  EXPECT_EQ(shadow_vertices->GetVertexCount(), 33u);
+  EXPECT_EQ(shadow_vertices->GetIndexCount(), 102u);
+  EXPECT_EQ(shadow_vertices->GetVertices().size(), 33u);
+  EXPECT_EQ(shadow_vertices->GetGaussians().size(), 33u);
+  EXPECT_EQ(shadow_vertices->GetIndices().size(), 102u);
+  EXPECT_EQ((shadow_vertices->GetIndices().size() % 3u), 0u);
+  // We repeat the first and last vertex that is on the outer umbra.
+  // There is another duplicate vertex from somewhere else not yet realized.
+  EXPECT_LE(CountDuplicateVertices(shadow_vertices), 2u);
+  EXPECT_EQ(CountDuplicateTriangles(shadow_vertices), 0u);
+  EXPECT_FALSE(DoTrianglesOverlap(shadow_vertices));
+
+#if SHADOW_UNITTEST_SHOW_VERTICES
+  ShowVertices("Impeller Vertices", shadow_vertices);
+#endif
+}
+
+TEST(ShadowPathGeometryTest, CounterClockwiseTriangleTest) {
+  DlPathBuilder path_builder;
+  path_builder.MoveTo(DlPoint(100, 0));
+  path_builder.LineTo(DlPoint(0, 100));
+  path_builder.LineTo(DlPoint(200, 100));
+  path_builder.Close();
+  const DlPath path = path_builder.TakePath();
+  const Matrix matrix;
+  const Scalar height = 10.0f;
+
+  Tessellator tessellator;
+  std::shared_ptr<ShadowVertices> shadow_vertices =
+      ShadowPathGeometry::MakeAmbientShadowVertices(tessellator, path, height,
+                                                    matrix);
+
+  ASSERT_NE(shadow_vertices, nullptr);
+  EXPECT_FALSE(shadow_vertices->IsEmpty());
+  EXPECT_EQ(shadow_vertices->GetVertexCount(), 33u);
+  EXPECT_EQ(shadow_vertices->GetIndexCount(), 102u);
+  EXPECT_EQ(shadow_vertices->GetVertices().size(), 33u);
+  EXPECT_EQ(shadow_vertices->GetGaussians().size(), 33u);
+  EXPECT_EQ(shadow_vertices->GetIndices().size(), 102u);
+  EXPECT_EQ((shadow_vertices->GetIndices().size() % 3u), 0u);
+  // We repeat the first and last vertex that is on the outer umbra.
+  // There is another duplicate vertex from somewhere else not yet realized.
+  EXPECT_LE(CountDuplicateVertices(shadow_vertices), 2u);
+  EXPECT_EQ(CountDuplicateTriangles(shadow_vertices), 0u);
+  EXPECT_FALSE(DoTrianglesOverlap(shadow_vertices));
+
+#if SHADOW_UNITTEST_SHOW_VERTICES
+  ShowVertices("Impeller Vertices", shadow_vertices);
+#endif
+}
+
 TEST(ShadowPathGeometryTest, ClockwiseRectTest) {
   DlPathBuilder path_builder;
   path_builder.MoveTo(DlPoint(0, 0));
@@ -334,7 +402,7 @@ TEST(ShadowPathGeometryTest, CounterClockwiseRectTest) {
 #endif
 }
 
-TEST(ShadowPathGeometryTest, ClockwiseRectDuplicateColinearPointsTest) {
+TEST(ShadowPathGeometryTest, ClockwiseRectExtraColinearPointsTest) {
   // This path includes a colinear point to each edge of the rectangle
   // which should be trimmed out and ignored when generating the mesh
   // resulting in the same number of vertices and triangles as the mesh
@@ -376,7 +444,7 @@ TEST(ShadowPathGeometryTest, ClockwiseRectDuplicateColinearPointsTest) {
 #endif
 }
 
-TEST(ShadowPathGeometryTest, CounterClockwiseRectDuplicateColinearPointsTest) {
+TEST(ShadowPathGeometryTest, CounterClockwiseRectExtraColinearPointsTest) {
   // This path includes a colinear point to each edge of the rectangle
   // which should be trimmed out and ignored when generating the mesh
   // resulting in the same number of vertices and triangles as the mesh
@@ -390,6 +458,182 @@ TEST(ShadowPathGeometryTest, CounterClockwiseRectDuplicateColinearPointsTest) {
   path_builder.LineTo(DlPoint(100, 40));
   path_builder.LineTo(DlPoint(100, 0));
   path_builder.LineTo(DlPoint(50, 0));
+  path_builder.Close();
+  DlPath path = path_builder.TakePath();
+  Matrix matrix;
+  const Scalar height = 10.0f;
+
+  Tessellator tessellator;
+  std::shared_ptr<ShadowVertices> shadow_vertices =
+      ShadowPathGeometry::MakeAmbientShadowVertices(tessellator, path, height,
+                                                    matrix);
+
+  ASSERT_NE(shadow_vertices, nullptr);
+  EXPECT_FALSE(shadow_vertices->IsEmpty());
+  EXPECT_EQ(shadow_vertices->GetVertexCount(), 34u);
+  EXPECT_EQ(shadow_vertices->GetIndexCount(), 108u);
+  EXPECT_EQ(shadow_vertices->GetVertices().size(), 34u);
+  EXPECT_EQ(shadow_vertices->GetGaussians().size(), 34u);
+  EXPECT_EQ(shadow_vertices->GetIndices().size(), 108u);
+  EXPECT_EQ((shadow_vertices->GetIndices().size() % 3u), 0u);
+  // We repeat the first and last vertex that is on the outer umbra.
+  EXPECT_LE(CountDuplicateVertices(shadow_vertices), 1u);
+  EXPECT_EQ(CountDuplicateTriangles(shadow_vertices), 0u);
+  EXPECT_FALSE(DoTrianglesOverlap(shadow_vertices));
+
+#if SHADOW_UNITTEST_SHOW_VERTICES
+  ShowVertices("Impeller Vertices", shadow_vertices);
+#endif
+}
+
+TEST(ShadowPathGeometryTest, ClockwiseRectTrickyColinearPointsTest) {
+  // This path includes a colinear point added to each edge of the rectangle
+  // which seems to violate convexity, but is eliminated as not contributing
+  // to the path. We should be able to process the path anyway.
+  DlPathBuilder path_builder;
+  path_builder.MoveTo(DlPoint(0, 0));
+  path_builder.LineTo(DlPoint(-10, 0));
+  path_builder.LineTo(DlPoint(100, 0));
+  path_builder.LineTo(DlPoint(100, -10));
+  path_builder.LineTo(DlPoint(100, 80));
+  path_builder.LineTo(DlPoint(110, 80));
+  path_builder.LineTo(DlPoint(0, 80));
+  path_builder.LineTo(DlPoint(0, 90));
+  path_builder.Close();
+  const DlPath path = path_builder.TakePath();
+  const Matrix matrix;
+  const Scalar height = 10.0f;
+
+  Tessellator tessellator;
+  std::shared_ptr<ShadowVertices> shadow_vertices =
+      ShadowPathGeometry::MakeAmbientShadowVertices(tessellator, path, height,
+                                                    matrix);
+
+  ASSERT_NE(shadow_vertices, nullptr);
+  EXPECT_FALSE(shadow_vertices->IsEmpty());
+  EXPECT_EQ(shadow_vertices->GetVertexCount(), 34u);
+  EXPECT_EQ(shadow_vertices->GetIndexCount(), 108u);
+  EXPECT_EQ(shadow_vertices->GetVertices().size(), 34u);
+  EXPECT_EQ(shadow_vertices->GetGaussians().size(), 34u);
+  EXPECT_EQ(shadow_vertices->GetIndices().size(), 108u);
+  EXPECT_EQ((shadow_vertices->GetIndices().size() % 3u), 0u);
+  // We repeat the first and last vertex that is on the outer umbra.
+  EXPECT_LE(CountDuplicateVertices(shadow_vertices), 1u);
+  EXPECT_EQ(CountDuplicateTriangles(shadow_vertices), 0u);
+  EXPECT_FALSE(DoTrianglesOverlap(shadow_vertices));
+
+#if SHADOW_UNITTEST_SHOW_VERTICES
+  ShowVertices("Impeller Vertices", shadow_vertices);
+#endif
+}
+
+TEST(ShadowPathGeometryTest, CounterClockwiseRectTrickyColinearPointsTest) {
+  // This path includes a colinear point added to each edge of the rectangle
+  // which seems to violate convexity, but is eliminated as not contributing
+  // to the path. We should be able to process the path anyway.
+  DlPathBuilder path_builder;
+  path_builder.MoveTo(DlPoint(0, 0));
+  path_builder.LineTo(DlPoint(0, -10));
+  path_builder.LineTo(DlPoint(0, 80));
+  path_builder.LineTo(DlPoint(-10, 80));
+  path_builder.LineTo(DlPoint(100, 80));
+  path_builder.LineTo(DlPoint(100, 90));
+  path_builder.LineTo(DlPoint(100, 0));
+  path_builder.LineTo(DlPoint(110, 0));
+  path_builder.Close();
+  DlPath path = path_builder.TakePath();
+  Matrix matrix;
+  const Scalar height = 10.0f;
+
+  Tessellator tessellator;
+  std::shared_ptr<ShadowVertices> shadow_vertices =
+      ShadowPathGeometry::MakeAmbientShadowVertices(tessellator, path, height,
+                                                    matrix);
+
+  ASSERT_NE(shadow_vertices, nullptr);
+  EXPECT_FALSE(shadow_vertices->IsEmpty());
+  EXPECT_EQ(shadow_vertices->GetVertexCount(), 34u);
+  EXPECT_EQ(shadow_vertices->GetIndexCount(), 108u);
+  EXPECT_EQ(shadow_vertices->GetVertices().size(), 34u);
+  EXPECT_EQ(shadow_vertices->GetGaussians().size(), 34u);
+  EXPECT_EQ(shadow_vertices->GetIndices().size(), 108u);
+  EXPECT_EQ((shadow_vertices->GetIndices().size() % 3u), 0u);
+  // We repeat the first and last vertex that is on the outer umbra.
+  EXPECT_LE(CountDuplicateVertices(shadow_vertices), 1u);
+  EXPECT_EQ(CountDuplicateTriangles(shadow_vertices), 0u);
+  EXPECT_FALSE(DoTrianglesOverlap(shadow_vertices));
+
+#if SHADOW_UNITTEST_SHOW_VERTICES
+  ShowVertices("Impeller Vertices", shadow_vertices);
+#endif
+}
+
+TEST(ShadowPathGeometryTest, ClockwiseRectTrickyDupColinearPointsTest) {
+  // This path includes a colinear point added to each edge of the rectangle
+  // which seems to violate convexity, but is eliminated as not contributing
+  // to the path. We should be able to process the path anyway.
+  // It also includes multiple collinear points on the first and last points
+  // that end up back where we started to make sure that in that case we
+  // eliminate all of the collinear points and the duplicate, rather than
+  // just the intermediate collinear points.
+  DlPathBuilder path_builder;
+  path_builder.MoveTo(DlPoint(0, 0));
+  path_builder.LineTo(DlPoint(-10, 0));
+  path_builder.LineTo(DlPoint(0, 0));
+  path_builder.LineTo(DlPoint(100, 0));
+  path_builder.LineTo(DlPoint(100, -10));
+  path_builder.LineTo(DlPoint(100, 80));
+  path_builder.LineTo(DlPoint(110, 80));
+  path_builder.LineTo(DlPoint(0, 80));
+  path_builder.LineTo(DlPoint(0, 90));
+  path_builder.LineTo(DlPoint(0, 80));
+  path_builder.Close();
+  const DlPath path = path_builder.TakePath();
+  const Matrix matrix;
+  const Scalar height = 10.0f;
+
+  Tessellator tessellator;
+  std::shared_ptr<ShadowVertices> shadow_vertices =
+      ShadowPathGeometry::MakeAmbientShadowVertices(tessellator, path, height,
+                                                    matrix);
+
+  ASSERT_NE(shadow_vertices, nullptr);
+  EXPECT_FALSE(shadow_vertices->IsEmpty());
+  EXPECT_EQ(shadow_vertices->GetVertexCount(), 34u);
+  EXPECT_EQ(shadow_vertices->GetIndexCount(), 108u);
+  EXPECT_EQ(shadow_vertices->GetVertices().size(), 34u);
+  EXPECT_EQ(shadow_vertices->GetGaussians().size(), 34u);
+  EXPECT_EQ(shadow_vertices->GetIndices().size(), 108u);
+  EXPECT_EQ((shadow_vertices->GetIndices().size() % 3u), 0u);
+  // We repeat the first and last vertex that is on the outer umbra.
+  EXPECT_LE(CountDuplicateVertices(shadow_vertices), 1u);
+  EXPECT_EQ(CountDuplicateTriangles(shadow_vertices), 0u);
+  EXPECT_FALSE(DoTrianglesOverlap(shadow_vertices));
+
+#if SHADOW_UNITTEST_SHOW_VERTICES
+  ShowVertices("Impeller Vertices", shadow_vertices);
+#endif
+}
+
+TEST(ShadowPathGeometryTest, CounterClockwiseRectTrickyDupColinearPointsTest) {
+  // This path includes a colinear point added to each edge of the rectangle
+  // which seems to violate convexity, but is eliminated as not contributing
+  // to the path. We should be able to process the path anyway.
+  // It also includes multiple collinear points on the first and last points
+  // that end up back where we started to make sure that in that case we
+  // eliminate all of the collinear points and the duplicate, rather than
+  // just the intermediate collinear points.
+  DlPathBuilder path_builder;
+  path_builder.MoveTo(DlPoint(0, 0));
+  path_builder.LineTo(DlPoint(0, -10));
+  path_builder.LineTo(DlPoint(0, 0));
+  path_builder.LineTo(DlPoint(0, 80));
+  path_builder.LineTo(DlPoint(-10, 80));
+  path_builder.LineTo(DlPoint(100, 80));
+  path_builder.LineTo(DlPoint(100, 90));
+  path_builder.LineTo(DlPoint(100, 0));
+  path_builder.LineTo(DlPoint(110, 0));
+  path_builder.LineTo(DlPoint(100, 0));
   path_builder.Close();
   DlPath path = path_builder.TakePath();
   Matrix matrix;
@@ -577,6 +821,163 @@ TEST(ShadowPathGeometryTest, RoundRectTest) {
   EXPECT_LE(CountDuplicateVertices(shadow_vertices), 2u);
   EXPECT_EQ(CountDuplicateTriangles(shadow_vertices), 0u);
   EXPECT_FALSE(DoTrianglesOverlap(shadow_vertices));
+}
+
+TEST(ShadowPathGeometryTest, HourglassSelfIntersectingTest) {
+  DlPathBuilder path_builder;
+  path_builder.MoveTo(DlPoint(0, 0));
+  path_builder.LineTo(DlPoint(100, 80));
+  path_builder.LineTo(DlPoint(100, 0));
+  path_builder.LineTo(DlPoint(0, 80));
+  path_builder.Close();
+  const DlPath path = path_builder.TakePath();
+  const Matrix matrix;
+  const Scalar height = 10.0f;
+
+  Tessellator tessellator;
+  std::shared_ptr<ShadowVertices> shadow_vertices =
+      ShadowPathGeometry::MakeAmbientShadowVertices(tessellator, path, height,
+                                                    matrix);
+
+  EXPECT_EQ(shadow_vertices, nullptr);
+}
+
+TEST(ShadowPathGeometryTest, ReverseHourglassSelfIntersectingTest) {
+  DlPathBuilder path_builder;
+  path_builder.MoveTo(DlPoint(0, 0));
+  path_builder.LineTo(DlPoint(100, 80));
+  path_builder.LineTo(DlPoint(0, 80));
+  path_builder.LineTo(DlPoint(100, 0));
+  path_builder.Close();
+  const DlPath path = path_builder.TakePath();
+  const Matrix matrix;
+  const Scalar height = 10.0f;
+
+  Tessellator tessellator;
+  std::shared_ptr<ShadowVertices> shadow_vertices =
+      ShadowPathGeometry::MakeAmbientShadowVertices(tessellator, path, height,
+                                                    matrix);
+
+  EXPECT_EQ(shadow_vertices, nullptr);
+}
+
+TEST(ShadowPathGeometryTest, InnerToOuterOverturningSpiralTest) {
+  const Matrix matrix;
+  const Scalar height = 10.0f;
+  int step_count = 20;
+
+  DlPathBuilder path_builder;
+  path_builder.MoveTo(DlPoint(300, 200));
+  for (int i = 1; i < step_count * 2; i++) {
+    Scalar angle = (k2Pi * i) / step_count;
+    Scalar radius = 80.0f + std::abs(i - step_count);
+    path_builder.LineTo(DlPoint(200, 200) + DlPoint(std::cos(angle) * radius,
+                                                    std::sin(angle) * radius));
+  }
+  path_builder.Close();
+  DlPath path = path_builder.TakePath();
+
+  Tessellator tessellator;
+  std::shared_ptr<ShadowVertices> shadow_vertices =
+      ShadowPathGeometry::MakeAmbientShadowVertices(tessellator, path, height,
+                                                    matrix);
+
+  EXPECT_EQ(shadow_vertices, nullptr);
+}
+
+TEST(ShadowPathGeometryTest, ReverseInnerToOuterOverturningSpiralTest) {
+  const Matrix matrix;
+  const Scalar height = 10.0f;
+  int step_count = 20;
+
+  DlPathBuilder path_builder;
+  path_builder.MoveTo(DlPoint(300, 200));
+  for (int i = 1; i < step_count * 2; i++) {
+    Scalar angle = -(k2Pi * i) / step_count;
+    Scalar radius = 80.0f + std::abs(i - step_count);
+    path_builder.LineTo(DlPoint(200, 200) + DlPoint(std::cos(angle) * radius,
+                                                    std::sin(angle) * radius));
+  }
+  path_builder.Close();
+  DlPath path = path_builder.TakePath();
+
+  Tessellator tessellator;
+  std::shared_ptr<ShadowVertices> shadow_vertices =
+      ShadowPathGeometry::MakeAmbientShadowVertices(tessellator, path, height,
+                                                    matrix);
+
+  EXPECT_EQ(shadow_vertices, nullptr);
+}
+
+TEST(ShadowPathGeometryTest, OuterToInnerOverturningSpiralTest) {
+  const Matrix matrix;
+  const Scalar height = 10.0f;
+  int step_count = 20;
+
+  DlPathBuilder path_builder;
+  path_builder.MoveTo(DlPoint(280, 200));
+  for (int i = 1; i < step_count * 2; i++) {
+    Scalar angle = (k2Pi * i) / step_count;
+    Scalar radius = 100.0f - std::abs(i - step_count);
+    path_builder.LineTo(DlPoint(200, 200) + DlPoint(std::cos(angle) * radius,
+                                                    std::sin(angle) * radius));
+  }
+  path_builder.Close();
+  DlPath path = path_builder.TakePath();
+
+  Tessellator tessellator;
+  std::shared_ptr<ShadowVertices> shadow_vertices =
+      ShadowPathGeometry::MakeAmbientShadowVertices(tessellator, path, height,
+                                                    matrix);
+
+  EXPECT_EQ(shadow_vertices, nullptr);
+}
+
+TEST(ShadowPathGeometryTest, ReverseOuterToInnerOverturningSpiralTest) {
+  const Matrix matrix;
+  const Scalar height = 10.0f;
+  int step_count = 20;
+
+  DlPathBuilder path_builder;
+  path_builder.MoveTo(DlPoint(280, 200));
+  for (int i = 1; i < step_count * 2; i++) {
+    Scalar angle = -(k2Pi * i) / step_count;
+    Scalar radius = 100.0f - std::abs(i - step_count);
+    path_builder.LineTo(DlPoint(200, 200) + DlPoint(std::cos(angle) * radius,
+                                                    std::sin(angle) * radius));
+  }
+  path_builder.Close();
+  DlPath path = path_builder.TakePath();
+
+  Tessellator tessellator;
+  std::shared_ptr<ShadowVertices> shadow_vertices =
+      ShadowPathGeometry::MakeAmbientShadowVertices(tessellator, path, height,
+                                                    matrix);
+
+  EXPECT_EQ(shadow_vertices, nullptr);
+}
+
+TEST(ShadowPathGeometryTest, MultipleContoursTest) {
+  const Matrix matrix;
+  const Scalar height = 10.0f;
+
+  DlPathBuilder path_builder;
+  path_builder.MoveTo(DlPoint(150, 100));
+  path_builder.LineTo(DlPoint(200, 300));
+  path_builder.LineTo(DlPoint(100, 300));
+  path_builder.Close();
+  path_builder.MoveTo(DlPoint(250, 100));
+  path_builder.LineTo(DlPoint(300, 300));
+  path_builder.LineTo(DlPoint(200, 300));
+  path_builder.Close();
+  DlPath path = path_builder.TakePath();
+
+  Tessellator tessellator;
+  std::shared_ptr<ShadowVertices> shadow_vertices =
+      ShadowPathGeometry::MakeAmbientShadowVertices(tessellator, path, height,
+                                                    matrix);
+
+  EXPECT_EQ(shadow_vertices, nullptr);
 }
 
 }  // namespace testing

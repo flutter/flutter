@@ -114,18 +114,26 @@ struct DirectionDetector {
     }
   }
 
-  // Returns true if the path may still be convex, in other words unless
-  // we have violated a constraint that means it must be concave or
-  // self-intersecting.
-  bool MayBeConvex() const {
+  // Returns true if the path must be concave.
+  bool IsConcave() const {
     // See comment above on the struct for why 3 changes is the most you
     // should see in a convex path.
-    return change_count <= 3u;
+    return change_count > 3u;
   }
 };
 
 // Utility class to receive the vertices of a path and turn them into
 // a vector of UmbraPins along with a centroid Point.
+//
+// The class will immediately flag and stop processing any path that
+// has more than one contour since algorithms of the nature implemented
+// here won't be able to process such paths.
+//
+// The class will also flag and stop processing any path that has a
+// non-convex section because the current algorithm only works for convex
+// paths. Though it is possible to improve the algorithm to handle
+// concave single-contour paths in the future as the Skia utilities
+// provide a solution for those paths.
 class UmbraPinAccumulator : public PathTessellator::VertexWriter {
  public:
   // Parameters that determine the sub-pixel grid we will use to simplify
@@ -143,29 +151,30 @@ class UmbraPinAccumulator : public PathTessellator::VertexWriter {
   UmbraPinAccumulator() = default;
   ~UmbraPinAccumulator() = default;
 
+  // Reserve enough pins for the indicated number of path vertices to
+  // avoid having to grow the vector during processing.
   void reserve(size_t vertex_count) { pins_.reserve(vertex_count); }
 
   // Return the status properties of the path.
-  PathStatus GetStatus();
+  PathStatus GetStatus() { return GetResults().status; }
 
   // Returns a reference to the accumulated vector of UmbraPin structs.
+  // Only valid if the status is kConvex.
   std::vector<UmbraPin>& GetPins() { return pins_; }
 
   // Returns the centroid of the path.
-  Point GetCentroid();
+  // Only valid if the status is kConvex.
+  Point GetCentroid() { return GetResults().centroid; }
 
   // Returns the turning direction of the path.
-  Scalar GetDirection() const { return direction_; }
+  // Only valid if the status is kConvex.
+  Scalar GetDirection() { return GetResults().path_direction; }
 
  private:
-  // An enum used to classify a point as a normal point to be appended, or
-  // a point that made the path invalid by being non-convex, or possibly
-  // a point that should replace the previous point because it was collinear
-  // with it.
-  enum class PointClass {
-    kNonConvex,
-    kCollinear,
-    kConvex,
+  struct PathResults {
+    PathStatus status;
+    Point centroid;
+    Scalar path_direction = 0.0f;
   };
 
   // |VertexWriter|
@@ -177,46 +186,22 @@ class UmbraPinAccumulator : public PathTessellator::VertexWriter {
   // Rounds the device coordinate to the sub-pixel grid.
   static Point ToDeviceGrid(Point point);
 
-  // Finalize the weighted centroid using the area calculated while the
-  // path was being delivered.
-  void FinalizeCentroid();
-
-  // Check the direction that the edge is heading and count the number of
-  // times that the sign of the dx and dy values change. If either of those
-  // separated coordinate directions change more than 3 times, return false
-  // to indicate that the path is not simple and convex.
-  bool CheckEdgeDirection(const Vector2 edge_vector);
-
-  // Validates that the given point continues the path on a single contour,
-  // non-self-intersecting, convex path and updates the area and centroid
-  // point based on the partial areas of the new point, the previous point
-  // and the first point.
-  //
-  // The method tests for multiple conditions of convexity. If the last 3
-  // points are not turning the same direction as previous points, then the
-  // path is locally not convex and therefore "invalid". If the quad area of
-  // the last 2 points wrt the first point (computed for area and centroid)
-  // is not the same sign as the contour's direction then the path is now
-  // progressing the "wrong way" around the initial point which indicates
-  // multiple turns and self-intersection and is thus "invalid".
-  //
-  // Note that the area is only computed in order to finalize the centroid
-  // point at the end.
-  PointClass ValidatePointAndUpdateCentroid(const Point& new_point);
-
-  DirectionDetector x_direction_detector_;
-  DirectionDetector y_direction_detector_;
-
   std::vector<UmbraPin> pins_;
 
   bool first_contour_ended_ = false;
   bool has_multiple_contours_ = false;
-  bool is_convex_ = true;
 
-  bool centroid_is_finalized_ = false;
-  Point centroid_;
-  Scalar direction_ = 0.0f;
-  Scalar shape_area_ = 0.0f;
+  std::optional<PathResults> results_;
+  PathResults& GetResults() {
+    if (results_.has_value()) {
+      return results_.value();
+    }
+    return (results_ = FinalizePath()).value();
+  }
+
+  // Run through the accumulated, de-duplicated, de-collinearized points
+  // and check for a convex, non-self-intersecting path.
+  PathResults FinalizePath();
 };
 
 // The |PolygonInfo| class does most of the work of generating a mesh from
@@ -235,8 +220,8 @@ class PolygonInfo {
 
   // Computes a shadow mesh for the indicated path (source) under the
   // given matrix with the associated trigs. If the algorithm is successful,
-  // it will return true and the caller can call TakeVertices to get the
-  // resulting mesh (which may be empty if the path contained no area).
+  // it will return the resulting mesh (which may be empty if the path
+  // contained no area) or nullptr if it was unable to process the path.
   const std::shared_ptr<ShadowVertices> CalculateConvexShadowMesh(
       const impeller::PathSource& path,
       const impeller::Matrix& matrix,
@@ -279,6 +264,9 @@ class PolygonInfo {
 
   // The head and count for the list of UmbraPins that contribute to the
   // umbra vertex ring.
+  //
+  // The forward and backward pointers for the linked list are stored
+  // in the UmbraPin struct as p_next, p_prev.
   struct UmbraPinLinkedList {
     UmbraPin* p_head_pin = nullptr;
     size_t pin_count = 0u;
@@ -440,64 +428,54 @@ const std::shared_ptr<ShadowVertices> PolygonInfo::CalculateConvexShadowMesh(
                               std::move(gaussians_));
 }
 
-UmbraPinAccumulator::PathStatus UmbraPinAccumulator::GetStatus() {
-  if (has_multiple_contours_) {
-    return PathStatus::kMultipleContours;
-  }
-  if (pins_.size() < 3u || direction_ == 0) {
-    return PathStatus::kEmpty;
-  }
-  return is_convex_ ? PathStatus::kConvex : PathStatus::kNonConvex;
-}
-
-Point UmbraPinAccumulator::GetCentroid() {
-  if (!centroid_is_finalized_) {
-    FinalizeCentroid();
-    FML_DCHECK(centroid_is_finalized_);
-  }
-  return centroid_;
-}
-
 // Enter a new point for the polygon approximation of the shape. Points are
 // normalized to a device subpixel grid based on |kSubPixelCount|, duplicates
 // at that sub-pixel grid are ignored, collinear points are reduced to just
 // the endpoints, and the centroid is updated from the remaining non-duplicate
 // grid points.
 void UmbraPinAccumulator::Write(Point point) {
+  // This type of algorithm will never be able to handle multiple contours.
   if (first_contour_ended_) {
     has_multiple_contours_ = true;
-  }
-
-  // This type of algorithm will never be able to handle multiple contours.
-  // Eventually we might handle concave paths, but we avoid further processing
-  // on them anyway for now.
-  if (has_multiple_contours_ || !is_convex_) {
     return;
   }
+  FML_DCHECK(!has_multiple_contours_);
 
   point = ToDeviceGrid(point);
 
   if (!pins_.empty()) {
     // If this isn't the first point then we need to perform de-duplication
     // and possibly convexity checking and centroid updates.
+    Point prev = pins_.back().path_vertex;
 
-    if (point == pins_.back().path_vertex) {
-      // Avoid duplicate points, adjusted points are rounded so == is OK
-      // for floating point comparison here.
+    // Adjusted points are rounded so == testing is OK here even for floating
+    // point coordinates.
+    if (point == prev) {
+      // Ignore this point as a duplicate
       return;
     }
 
-    switch (ValidatePointAndUpdateCentroid(point)) {
-      case PointClass::kConvex:
-        break;
-      case PointClass::kCollinear:
+    if (pins_.size() >= 2u) {
+      // A quick collinear check to avoid extra processing later.
+      Point prev_prev = pins_.end()[-2].path_vertex;
+      Vector2 v0 = prev - prev_prev;
+      Vector2 v1 = point - prev_prev;
+      Scalar cross = v0.Cross(v1);
+      if (cross == 0) {
+        // This point is on the same line as the line between the last
+        // 2 points, so skip the intermediate point. Points that are
+        // collinear only contribute to the edge of the shape the vector
+        // from the first to the last of them.
         pins_.pop_back();
-        break;
-      case PointClass::kNonConvex:
-        is_convex_ = false;
-        // Eventually we might handle concave paths, but we avoid further
-        // processing on them anyway for now.
-        return;
+        if (point == prev_prev) {
+          // Not only do we eliminate the previous point as collinear, but
+          // we also eliminate this point as a duplicate.
+          // This point would tend to be eliminated anyway because it would
+          // automatically be collinear with whatever the next point would
+          // be, but we just avoid inserting it anyway to reduce processing.
+          return;
+        }
+      }
     }
   }
 
@@ -514,16 +492,12 @@ void UmbraPinAccumulator::Write(Point point) {
 // going forward we don't need the extra pin in the shape so we verify that
 // it is a duplicate and then we delete it.
 void UmbraPinAccumulator::EndContour() {
+  // This type of algorithm will never be able to handle multiple contours.
   if (first_contour_ended_) {
     has_multiple_contours_ = true;
-  }
-
-  // This type of algorithm will never be able to handle multiple contours.
-  // Eventually we might handle concave paths, but we avoid further processing
-  // on them anyway for now.
-  if (has_multiple_contours_ || !is_convex_) {
     return;
   }
+  FML_DCHECK(!has_multiple_contours_);
 
   // PathTessellator always ensures the path is closed back to the origin
   // by an extra call to Write(Point).
@@ -537,113 +511,120 @@ Point UmbraPinAccumulator::ToDeviceGrid(Point point) {
   return (point * kSubPixelCount).Round() * kSubPixelScale;
 }
 
-// Use the direction change accumulators to count the number of times
-// that edges change direction in X and Y and return whether the path
-// can still be classified as simple and convex.
-bool UmbraPinAccumulator::CheckEdgeDirection(const Vector2 edge_vector) {
-  x_direction_detector_.AccumulateDirection(edge_vector.x);
-  y_direction_detector_.AccumulateDirection(edge_vector.y);
-  return x_direction_detector_.MayBeConvex() &&
-         y_direction_detector_.MayBeConvex();
-}
+// This method assumes that the pins have been accumulated by the PathVertex
+// methods which ensure that no adjacent points are identical or collinear.
+// It returns a PathResults that contains all of the relevant information
+// depending on the geometric state of the path itself (ignoring whether
+// the rest of the shadow processing will succeed).
+//
+// It performs 4 functions:
+// - Normalizes empty paths (either too few vertices, or no turning directin)
+//   to an empty pins vector.
+// - Accumulates and sets the centroid of the path
+// - Accumulates and sets the overall direction of the path as determined by
+//   the sign of the cross products which must all agree.
+// - Checks for convexity, including:
+//   - The direction vector determined above.
+//   - The turning direction of every triplet of points.
+//   - The signs of the area accumulated using cross products.
+//   - The number of times that the path edges change sign in X or Y.
+UmbraPinAccumulator::PathResults UmbraPinAccumulator::FinalizePath() {
+  FML_DCHECK(!results_.has_value());
 
-// This method performs 4 functions.
-// - Make sure we never change direction in X or Y more than 3 times.
-// - Ensure that the 3 most recent vertices are turning in a consistent
-//   direction. (No concave sections.)
-// - Ensure that all vertices turn the same direction from the perspective
-//   of the first point. (No "going around twice".)
-// - Accumulate data to compute the centroid
-UmbraPinAccumulator::PointClass
-UmbraPinAccumulator::ValidatePointAndUpdateCentroid(const Point& new_point) {
-  if (pins_.size() < 2u) {
-    // No validation possible and we cannot start to accumulate centroid
-    // values until we have at least 2 prior points.
-    return PointClass::kConvex;
+  if (has_multiple_contours_) {
+    return {.status = PathStatus::kMultipleContours};
   }
 
-  PointClass result = PointClass::kConvex;
-
-  const Point& prev = pins_.back().path_vertex;
-  if (!CheckEdgeDirection(new_point - prev)) {
-    // The whole path is not convex due to coming back around on itself too
-    // many times, so we mark the entire path as non-convex, but we cannot
-    // say that this particular point violates convexity so we leave the
-    // return value alone unless one of the tests below discovers otherwise.
-    is_convex_ = false;
+  if (pins_.size() < 3u) {
+    return {.status = PathStatus::kEmpty};
   }
 
-  // direction_ is always normalized to one of these values.
-  FML_DCHECK(direction_ == 0.0f ||  //
-             direction_ == 1.0f ||  //
-             direction_ == -1.0f);
+  DirectionDetector x_direction_detector;
+  DirectionDetector y_direction_detector;
 
-  // We can only perform concavity and collinear detection once we have at
-  // least 3 points (2 in the vector and the new point).
-  if (pins_.size() >= 2u) {
-    // Check that each triplet of points (this, prev, prev_prev) turn the
-    // same direction.
-    const Point& prev_prev = pins_.end()[-2].path_vertex;
-    Vector2 v0 = prev - prev_prev;
-    Vector2 v1 = new_point - prev_prev;
-    Scalar cross = v0.Cross(v1);
-    if (cross == 0) {
-      // We note that this point is collinear, but we don't return right
-      // away because we still need to adjust the areas below for proper
-      // centroid computation.
-      result = PointClass::kCollinear;
-    } else if (cross * direction_ < 0) {
-      result = PointClass::kNonConvex;
+  Point relative_centroid;
+  Scalar path_direction = 0.0f;
+  Scalar path_area = 0.0f;
+
+  Point prev = pins_.back().path_vertex;
+  Point prev_prev = pins_.end()[-2].path_vertex;
+  Point first = pins_.front().path_vertex;
+  for (UmbraPin& pin : pins_) {
+    Point new_point = pin.path_vertex;
+
+    // Check for going around more than once in the same direction.
+    {
+      Vector2 delta = new_point - prev;
+      x_direction_detector.AccumulateDirection(delta.x);
+      y_direction_detector.AccumulateDirection(delta.y);
+      if (x_direction_detector.IsConcave() ||
+          y_direction_detector.IsConcave()) {
+        return {.status = PathStatus::kNonConvex};
+      }
     }
+
+    // Check if the path is locally convex over the most recent 3 vertices.
+    if (path_direction != 0.0f) {
+      Vector2 v0 = prev - prev_prev;
+      Vector2 v1 = new_point - prev_prev;
+      Scalar cross = v0.Cross(v1);
+      // We should have eliminated adjacent collinear points in the first pass.
+      FML_DCHECK(cross != 0.0f);
+      if (cross * path_direction < 0.0f) {
+        return {.status = PathStatus::kNonConvex};
+      }
+    }
+
+    // Check if the path is globally convex with respect to the first vertex.
+    {
+      Vector2 v0 = prev - first;
+      Vector2 v1 = new_point - first;
+      Scalar quad_area = v0.Cross(v1);
+      if (quad_area != 0) {
+        // convexity check for whole path which can detect if we turn more than
+        // 360 degrees and start going the other way wrt the start point, but
+        // does not detect if any pair of points are concave (checked above).
+        if (path_direction == 0) {
+          path_direction = std::copysign(1.0f, quad_area);
+        } else if (quad_area * path_direction < 0) {
+          return {.status = PathStatus::kNonConvex};
+        }
+
+        relative_centroid += (v0 + v1) * quad_area;
+        path_area += quad_area;
+      }
+    }
+
+    prev_prev = prev;
+    prev = new_point;
   }
 
-  // Compute (twice) the area of the triangle of the most recent 2 points
-  // back to the first point. We do this both to get its sign to detect
-  // one of the conditions of convexity and also so we can use that area
-  // to accumulate the centroid with a weighted average.
-  //
-  // Note that the cross product is the area of the parallelogram projected
-  // by these 2 vectors (which is twice the area of the triangle between them)
-  // with a sign indicating its turning direction relative to that shared
-  // corner point (i.e. "first" in this case).
-  const Point& first = pins_.front().path_vertex;
-  Vector2 v0 = prev - first;
-  Vector2 v1 = new_point - first;
-  Scalar quad_area = v0.Cross(v1);
-  if (quad_area == 0) {
-    return result;
+  if (path_direction == 0.0f) {
+    // We never changed direction, indicate emptiness.
+    return {.status = PathStatus::kEmpty};
   }
 
-  // convexity check for whole path which can detect if we turn more than
-  // 360 degrees and start going the other way wrt the start point, but
-  // does not detect if any pair of points are concave (checked above).
-  if (direction_ == 0) {
-    direction_ = std::copysign(1.0f, quad_area);
-  } else if (quad_area * direction_ < 0) {
-    result = PointClass::kNonConvex;
-  }
-
-  // We are computing the centroid using a weighted average of all of the
+  // We are computing the centroid using a weighted average of all of  the
   // centroids of the triangles in a tessellation of the polygon, in this
   // case a triangle fan tessellation relative to the first point in the
-  // polygon.  We could use any point, but since we had to compute the
-  // cross product above relative to the initial point in order to detect
-  // if the path turned more than once, we already have values available
-  // relative to that first point here.
+  // polygon.  We could use any point, but since we had to compute the cross
+  // product above relative to the initial point in order to detect if the
+  // path turned more than once, we already have values available relative
+  // to that first point here.
   //
   // The centroid of each triangle is the 3-way average of the corners of
   // that triangle. Since the triangles are all relative to the first point,
-  // one of those corners is (0, 0) in this relative triangle and so we
-  // can simply add up the x,y of the two relative points and divide by
-  // 3.0. Since all values in the sum are divided by 3.0, we can save that
+  // one of those corners is (0, 0) in this relative triangle and so we can
+  // simply add up the x,y of the two relative points and divide by 3.0.
+  // Since all values in the sum are divided by 3.0, we can save that
   // constant division until the end when we finalize the average computation.
   //
   // We also weight these centroids by the area of the triangle so that we
   // adjust for the parts of the polygon that are represented more densely
   // and the parts that span a larger part of its circumference. A simple
   // average would bias the centroid towards parts of the polygon where the
-  // points are denser. If we are rendering a polygonal representation of a
-  // round rect with only one round corner, all of the many approximating
+  // points are denser. If we are rendering a polygonal representation of
+  // a round rect with only one round corner, all of the many approximating
   // segments of the flattened round corner would overwhelm the handful of
   // other simple segments for the flat sides. A weighted average places the
   // centroid back at the "center of mass" of the polygon.
@@ -655,42 +636,20 @@ UmbraPinAccumulator::ValidatePointAndUpdateCentroid(const Point& new_point) {
   // by 2 here, but since we are also accumulating these cross product values
   // for the final weighted division, the factors of 2 all cancel out.
   //
-  // quad_area is (2 * triangle area).
-  // centroid_ is accumulating sum(3 * triangle centroid * quad area).
-  // shape_area_ is accumulating sum(quad area).
+  // path_area is (2 * triangle area).
+  // relative_centroid is accumulating sum(3 * triangle centroid * quad area).
+  // path_area_ is accumulating sum(quad area).
   //
   // The final combined average weight factor will be (3 * sum(quad area)).
-  centroid_ += (v0 + v1) * quad_area;
-  shape_area_ += quad_area;
+  relative_centroid /= 3.0f * path_area;
 
-  return result;
-}
-
-void UmbraPinAccumulator::FinalizeCentroid() {
-  FML_DCHECK(!centroid_is_finalized_);
-
-  switch (GetStatus()) {
-    case PathStatus::kEmpty:
-    case PathStatus::kNonConvex:
-    case PathStatus::kMultipleContours:
-      centroid_ = {};
-      break;
-    case PathStatus::kConvex: {
-      // To finalize the centroid value we need to divide by both the constant
-      // factor of 3.0 that was ignored when we computed the triangle centroids
-      // (average of the 3 triangle vertices) and also the accumulation of all
-      // of the individual triangle areas used as the averaging weights.
-      centroid_ /= 3.0f * shape_area_;
-
-      // The centroid accumulation was relative to the first point in the
-      // polygon so we make it absolute here.
-      centroid_ += pins_[0].path_vertex;
-
-      break;
-    }
-  }
-
-  centroid_is_finalized_ = true;
+  // The centroid accumulation was relative to the first point in the
+  // polygon so we make it absolute here.
+  return {
+      .status = PathStatus::kConvex,
+      .centroid = pins_[0].path_vertex + relative_centroid,
+      .path_direction = path_direction,
+  };
 }
 
 void PolygonInfo::ComputePinDirectionsAndMinDistanceToCentroid(
@@ -787,6 +746,23 @@ std::optional<PolygonInfo::PinIntersection> PolygonInfo::ComputeIntersection(
   bool denomPositive = (denom > 0);
   Scalar sNumer, tNumer;
   if (ScalarNearlyZero(denom, kCrossTolerance)) {
+    // This code also exists in the Skia version of this method, but it is
+    // not clear that we can ever enter here. In particular, since points
+    // were normalized to a grid (1/16th of a pixel), de-duplicated, and
+    // collinear points eliminated, denom can never be 0. And since the
+    // denom value was computed from a cross product of non-normalized
+    // delta vectors, its magnitude must exceed 1/256 which is far greater
+    // than the tolerance value.
+    //
+    // Note that in the Skia code, this method lived in a general polygon
+    // module that was unaware that it was being fed de-duplicated vertices
+    // from the Shadow module, so this code might be possible to trigger
+    // for "unfiltered" polygons, but not the normalized polygons that our
+    // (and Skia's) shadow code uses.
+    //
+    // Though entering here seems unlikely, we include the code until we can
+    // perform more due diligence in vetting that this is truly dead code.
+
     // segments are parallel, but not collinear
     if (!ScalarNearlyZero(tip_delta.Cross(pin0.path_delta), kCrossTolerance) ||
         !ScalarNearlyZero(tip_delta.Cross(pin1.path_delta), kCrossTolerance)) {
@@ -801,9 +777,6 @@ std::optional<PolygonInfo::PinIntersection> PolygonInfo::ComputeIntersection(
       if (v1dotv1 <= 0.0f) {
         // Check if they're the same point
         if (w.IsFinite() && !w.IsZero()) {
-          // *p = s0.fP0;
-          // *s = 0;
-          // *t = 0;
           return {{
               .intersection = pin0.pin_tip,
               .fraction0 = 0.0f,
