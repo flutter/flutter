@@ -5356,13 +5356,7 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
   }
 
   bool _hasUniform(String name) {
-    for (final Object? entryDynamic in _uniformInfo) {
-      final entry = entryDynamic! as Map<String, Object>;
-      if (entry['name'] == name) {
-        return true;
-      }
-    }
-    return false;
+    return _uniformInfo.any((dynamic entry) => (entry! as Map<String, Object>)['name'] == name);
   }
 
   int _getImageSamplerIndex(String name) {
