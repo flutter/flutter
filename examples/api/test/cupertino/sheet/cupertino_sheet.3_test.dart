@@ -50,6 +50,9 @@ void main() {
     final double currentSheetHeight = box.localToGlobal(Offset.zero).dy;
     expect(currentSheetHeight, lessThan(initialSheetHeight));
 
+    await gesture.moveBy(const Offset(0, 50));
+    await tester.pump();
+
     await gesture.moveBy(const Offset(0, 200));
     await tester.pump();
 
