@@ -731,4 +731,92 @@ void main() {
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
   });
+
+  group('parseVendoredFrameworks', () {
+    testWithoutContext('returns empty list when no vendored_frameworks', () {
+      const podspec = '''
+Pod::Spec.new do |s|
+  s.name = 'test'
+  s.version = '1.0.0'
+end
+''';
+      expect(parseVendoredFrameworks(podspec), isEmpty);
+    });
+
+    testWithoutContext('parses single string value with single quotes', () {
+      const podspec = '''
+Pod::Spec.new do |s|
+  s.name = 'test'
+  s.vendored_frameworks = 'Frameworks/SomeSDK.framework'
+end
+''';
+      expect(parseVendoredFrameworks(podspec), ['Frameworks/SomeSDK.framework']);
+    });
+
+    testWithoutContext('parses single string value with double quotes', () {
+      const podspec = '''
+Pod::Spec.new do |s|
+  s.name = "test"
+  s.vendored_frameworks = "Frameworks/SomeSDK.framework"
+end
+''';
+      expect(parseVendoredFrameworks(podspec), ['Frameworks/SomeSDK.framework']);
+    });
+
+    testWithoutContext('parses array value', () {
+      const podspec = '''
+Pod::Spec.new do |s|
+  s.name = 'test'
+  s.vendored_frameworks = ['First.framework', 'Second.framework']
+end
+''';
+      expect(parseVendoredFrameworks(podspec), ['First.framework', 'Second.framework']);
+    });
+
+    testWithoutContext('parses array with mixed quotes', () {
+      const podspec = '''
+Pod::Spec.new do |s|
+  s.vendored_frameworks = ['First.framework', "Second.framework"]
+end
+''';
+      expect(parseVendoredFrameworks(podspec), ['First.framework', 'Second.framework']);
+    });
+
+    testWithoutContext('parses with spec variable name', () {
+      const podspec = '''
+Pod::Spec.new do |spec|
+  spec.vendored_frameworks = 'SDK.framework'
+end
+''';
+      expect(parseVendoredFrameworks(podspec), ['SDK.framework']);
+    });
+
+    testWithoutContext('handles paths with subdirectories', () {
+      const podspec = '''
+Pod::Spec.new do |s|
+  s.vendored_frameworks = 'FairDynamicFlutter/Products/FairDynamicFlutter.framework'
+end
+''';
+      expect(parseVendoredFrameworks(podspec), ['FairDynamicFlutter/Products/FairDynamicFlutter.framework']);
+    });
+
+    testWithoutContext('handles xcframework extension', () {
+      const podspec = '''
+Pod::Spec.new do |s|
+  s.vendored_frameworks = 'SDK.xcframework'
+end
+''';
+      expect(parseVendoredFrameworks(podspec), ['SDK.xcframework']);
+    });
+
+    testWithoutContext('parses placeholder path', () {
+      const podspec = '''
+Pod::Spec.new do |s|
+  s.vendored_frameworks = 'path/to/nothing'
+end
+''';
+      // The function returns all paths; filtering of 'path/to/nothing' is done in _copyVendoredFrameworks
+      expect(parseVendoredFrameworks(podspec), ['path/to/nothing']);
+    });
+  });
 }
