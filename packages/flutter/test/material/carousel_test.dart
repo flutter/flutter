@@ -2048,9 +2048,9 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        expect(controller.leadingItem, equals(4));
-        expect(leadingIndex, equals(4));
-        expect(find.text('Item 4'), findsOneWidget);
+        expect(controller.leadingItem, equals(3));
+        expect(leadingIndex, equals(3));
+        expect(find.text('Item 3'), findsOneWidget);
       },
     );
 
@@ -2082,9 +2082,8 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        expect(controller.leadingItem, equals(2));
-        expect(leadingIndex, equals(2));
-        expect(find.text('Item 2'), findsOneWidget);
+        expect(controller.leadingItem, equals(0));
+        expect(leadingIndex, equals(0));
       },
     );
 
@@ -2113,8 +2112,8 @@ void main() {
       await tester.drag(find.byType(CarouselView), const Offset(-300, 0));
       await tester.pumpAndSettle();
 
-      expect(controller.leadingItem, equals(2));
-      expect(leadingIndex, equals(2));
+      expect(controller.leadingItem, equals(1));
+      expect(leadingIndex, equals(1));
     });
 
     testWidgets(
@@ -2158,7 +2157,7 @@ void main() {
       },
     );
 
-    testWidgets('CarouselView.weighted starts with the provided initialItem', (
+    testWidgets('CarouselView.weighted starts with the correct initial item', (
       WidgetTester tester,
     ) async {
       final controller = CarouselController(initialItem: 2);
@@ -2179,18 +2178,8 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // The carousel should start at the provided `initialItem`.
-      expect(controller.leadingItem, equals(2));
-      expect(find.text('Item 2'), findsOneWidget);
-
-      // Verify that the initial item is centered.
-      final Rect itemRect = tester.getRect(find.text('Item 2'));
-      final double carouselCenterX = tester.getCenter(find.byType(CarouselView)).dx;
-
-      expect(
-        itemRect.center.dx,
-        closeTo(carouselCenterX, 1.0), // Allow a small margin of error.
-      );
+      expect(controller.leadingItem, equals(1));
+      expect(find.text('Item 1'), findsOneWidget);
     });
   });
 

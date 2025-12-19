@@ -1644,7 +1644,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
     //
     // The subtraction may cause negative number for leading item. In this case,
     // constrain the leading item to 0.
-    if (consumeMaxWeight) {
+    if (consumeMaxWeight && flexWeights != null) {
       return math.max(leadingItem - flexWeights!.indexOf(flexWeights!.max), 0);
     }
     return leadingItem;
