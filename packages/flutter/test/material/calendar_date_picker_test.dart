@@ -1478,26 +1478,29 @@ void main() {
           final SemanticsHandle semantics = tester.ensureSemantics();
           const localizations = DefaultMaterialLocalizations();
           final initialDate = DateTime(2016, DateTime.january, 15);
+          final currentDate = DateTime(
+            2016,
+            DateTime.january,
+            3,
+          ); // Default in calendarDatePicker helper.
           DateTime? selectedDate;
 
           await tester.pumpWidget(
             calendarDatePicker(
               initialDate: initialDate,
+              currentDate: currentDate,
               onDateChanged: (DateTime value) {
                 selectedDate = value;
               },
             ),
           );
 
-          final bool isToday = DateUtils.isSameDay(initialDate, selectedDate);
-          final semanticLabelSuffix = isToday ? ', ${localizations.currentDateLabel}' : '';
-          final String initialLabel =
-              '${localizations.formatFullDate(initialDate)}$semanticLabelSuffix';
-
-          // Verify initial date announcement exists and is a live region
+          // Verify initial date announcement exists and is a live region.
+          bool isToday = DateUtils.isSameDay(currentDate, initialDate);
+          var semanticLabelSuffix = isToday ? ', ${localizations.currentDateLabel}' : '';
+          final initialLabel = '${localizations.formatFullDate(initialDate)}$semanticLabelSuffix';
           final Finder initialAnnouncement = find.bySemanticsLabel(initialLabel);
           expect(initialAnnouncement, findsOneWidget);
-          // Check the isLiveRegion flag via hasFlag
           expect(
             tester
                 .getSemantics(initialAnnouncement)
@@ -1510,10 +1513,11 @@ void main() {
           await tester.tap(find.text('20'));
           await tester.pumpAndSettle();
 
-          final String selectedLabel =
+          // Verify the new selection is announced via a live region.
+          isToday = DateUtils.isSameDay(currentDate, selectedDate);
+          semanticLabelSuffix = isToday ? ', ${localizations.currentDateLabel}' : '';
+          final selectedLabel =
               '${localizations.selectedDateLabel} ${localizations.formatFullDate(selectedDate!)}$semanticLabelSuffix';
-
-          // Verify the new selection is announced via a live region
           final Finder selectedAnnouncement = find.bySemanticsLabel(selectedLabel);
           expect(selectedAnnouncement, findsOneWidget);
           expect(
@@ -1528,10 +1532,11 @@ void main() {
           await tester.tap(find.text('15'));
           await tester.pumpAndSettle();
 
-          final String reSelectedLabel =
-              '${localizations.selectedDateLabel} ${localizations.formatFullDate(initialDate)}$semanticLabelSuffix';
-
-          // Verify re-selection announcement via a live region
+          // Verify re-selection announcement via a live region.
+          isToday = DateUtils.isSameDay(currentDate, selectedDate);
+          semanticLabelSuffix = isToday ? ', ${localizations.currentDateLabel}' : '';
+          final reSelectedLabel =
+              '${localizations.selectedDateLabel} ${localizations.formatFullDate(selectedDate!)}$semanticLabelSuffix';
           final Finder reSelectedAnnouncement = find.bySemanticsLabel(reSelectedLabel);
           expect(reSelectedAnnouncement, findsOneWidget);
           expect(
