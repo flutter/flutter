@@ -3774,6 +3774,11 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
       return;
     }
 
+    // Skip clipboard check if status is already known
+    if (value != ClipboardStatus.unknown) {
+      return;
+    }
+
     final bool hasStrings;
     try {
       hasStrings = await Clipboard.hasStrings();
@@ -3827,6 +3832,8 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
   void didChangeAppLifecycleState(AppLifecycleState state) {
     switch (state) {
       case AppLifecycleState.resumed:
+        // Set status to unknown to force recheck since clipboard might have changed while app was in background
+        value = ClipboardStatus.unknown;
         update();
       case AppLifecycleState.detached:
       case AppLifecycleState.inactive:

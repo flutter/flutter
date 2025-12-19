@@ -2754,6 +2754,8 @@ class EditableTextState extends State<EditableText>
     }
     final String text = textEditingValue.text;
     Clipboard.setData(ClipboardData(text: selection.textInside(text)));
+    // Set status to unknown to force recheck since clipboard content changed
+    clipboardStatus.value = ClipboardStatus.unknown;
     if (cause == SelectionChangedCause.toolbar) {
       bringIntoView(textEditingValue.selection.extent);
       hideToolbar(false);
@@ -2791,6 +2793,8 @@ class EditableTextState extends State<EditableText>
       return;
     }
     Clipboard.setData(ClipboardData(text: selection.textInside(text)));
+    // Set status to unknown to force recheck since clipboard content changed
+    clipboardStatus.value = ClipboardStatus.unknown;
     _replaceText(ReplaceTextIntent(textEditingValue, '', selection, cause));
     if (cause == SelectionChangedCause.toolbar) {
       // Schedule a call to bringIntoView() after renderEditable updates.
