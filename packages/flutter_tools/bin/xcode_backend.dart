@@ -345,13 +345,6 @@ class Context {
     final String flutterBuildDir = environment['FLUTTER_BUILD_DIR']!;
     final nativeAssetsPath = '$projectPath/$flutterBuildDir/native_assets/${platform.name}/';
     final bool verbose = (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
-    final Directory nativeAssetsDir = directoryFromPath(nativeAssetsPath);
-    if (!nativeAssetsDir.existsSync()) {
-      if (verbose) {
-        print("♦ No native assets to bundle. $nativeAssetsPath doesn't exist.");
-      }
-      return;
-    }
 
     final Set<String> referencedFrameworks = {};
     final appResourcesDir = platform == TargetPlatform.macos ? 'Resources/' : '';
@@ -378,22 +371,29 @@ class Context {
     //
     // Note that this format is also parsed and expected in
     // engine/src/flutter/assets/native_assets.cc
-    final nativeAssetsSpec = json.decode(nativeAssetsJson.readAsStringSync()) as Map;
-    for (final Object? perPlatform
-        in (nativeAssetsSpec['native-assets'] as Map<String, Object?>).values) {
-      for (final Object? asset in (perPlatform! as Map<String, Object?>).values) {
-        if (asset case ['absolute', final String frameworkPath]) {
-          // frameworkPath is usually something like sqlite3arm64ios.framework/sqlite3arm64ios
-          final [String directory, String name] = frameworkPath.split('/');
-          if (directory != '$name.framework') {
-            throw Exception(
-              'Unexpected framework path: $frameworkPath. Should be $name.framework/$name',
-            );
-          }
+    try {
+      final nativeAssetsSpec = json.decode(nativeAssetsJson.readAsStringSync()) as Map;
+      for (final Object? perPlatform
+          in (nativeAssetsSpec['native-assets'] as Map<String, Object?>).values) {
+        for (final Object? asset in (perPlatform! as Map<String, Object?>).values) {
+          if (asset case ['absolute', final String frameworkPath]) {
+            // frameworkPath is usually something like sqlite3arm64ios.framework/sqlite3arm64ios
+            final [String directory, String name] = frameworkPath.split('/');
+            if (directory != '$name.framework') {
+              throw Exception(
+                'Unexpected framework path: $frameworkPath. Should be $name.framework/$name',
+              );
+            }
 
-          referencedFrameworks.add(name);
+            referencedFrameworks.add(name);
+          }
         }
       }
+    } on Object catch (e, stackTrace) {
+      echo(e.toString());
+      echo(stackTrace.toString());
+      echoXcodeError('Failed to embed native assets: $e');
+      exitApp(1);
     }
 
     if (verbose) {
