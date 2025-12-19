@@ -39,7 +39,7 @@ class HomePage extends StatelessWidget {
             CupertinoButton.filled(
               onPressed: () {
                 Navigator.of(context).push(
-                  CupertinoSheetRoute<void>.scrollable(
+                  CupertinoSheetRoute<void>(
                     scrollableBuilder:
                         (BuildContext context, ScrollController controller) =>
                             _ScrollableSheetBody(scrollController: controller),
@@ -63,18 +63,16 @@ class _ScrollableSheetBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: CupertinoSheetNavbar(
-        child: CupertinoNavigationBar(
-          backgroundColor: CupertinoColors.systemGrey3,
-          middle: const Text('Scrollable Sheet'),
-          automaticBackgroundVisibility: false,
-          leading: CupertinoButton(
-            padding: EdgeInsets.zero,
-            child: const Text('Close'),
-            onPressed: () {
-              CupertinoSheetRoute.popSheet(context);
-            },
-          ),
+      navigationBar: CupertinoNavigationBar(
+        backgroundColor: CupertinoColors.systemGrey3,
+        middle: const Text('Scrollable Sheet'),
+        automaticBackgroundVisibility: false,
+        leading: CupertinoButton(
+          padding: EdgeInsets.zero,
+          child: const Text('Close'),
+          onPressed: () {
+            CupertinoSheetRoute.popSheet(context);
+          },
         ),
       ),
       child: CustomScrollView(
@@ -96,27 +94,5 @@ class _ScrollableSheetBody extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-class CupertinoSheetNavbar extends StatelessWidget
-    implements ObstructingPreferredSizeWidget {
-  const CupertinoSheetNavbar({super.key, required this.child});
-
-  final CupertinoNavigationBar child;
-
-  @override
-  bool shouldFullyObstruct(BuildContext context) {
-    return child.shouldFullyObstruct(context);
-  }
-
-  @override
-  Size get preferredSize {
-    return child.preferredSize;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoSheetDragArea(child: child);
   }
 }
