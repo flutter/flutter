@@ -7,16 +7,16 @@ import 'dart:ui';
 
 import 'scenario.dart';
 
-/// A scenario that intercepts all messages on the given channel, and sends back
+/// A scenario which intercepts all messages on the given channel, and sends back
 /// the same message to the engine on a channel with the same name.
 class EchoPlatformChannelScenario extends Scenario {
-  /// The channel name to
-  final String channel;
-
   /// Constructor for `EchoPlatformChannelScenario`.
   EchoPlatformChannelScenario(super.view, {required this.channel}) {
     channelBuffers.setListener(channel, _onHandlePlatformMessage);
   }
+
+  /// The name of the channel where all messages should be intercepted.
+  final String channel;
 
   void _onHandlePlatformMessage(ByteData? data, PlatformMessageResponseCallback _) {
     view.platformDispatcher.sendPlatformMessage(channel, data, null);
