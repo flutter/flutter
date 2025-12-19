@@ -31,6 +31,13 @@ class TableCellParentData extends BoxParentData {
   /// The number of rows this cell should span.
   int rowSpan = 1;
 
+  /// Whether this cell is visible (not hidden by spanning cells).
+  /// Hidden cells have their rowSpan or colSpan set to 0.
+  bool get _isVisible => rowSpan != 0 && colSpan != 0;
+
+  /// Whether this cell spans multiple rows or columns.
+  bool get _hasSpan => colSpan > 1 || rowSpan > 1;
+
   @override
   String toString() =>
       '${super.toString()}; '
@@ -627,7 +634,7 @@ class RenderTable extends RenderBox {
     for (final RenderBox? child in _children) {
       if (child != null && child.hasSize) {
         final cellParentData = child.parentData! as TableCellParentData;
-        if (cellParentData.rowSpan != 0 && cellParentData.colSpan != 0) {
+        if (cellParentData._isVisible) {
           visitor(child);
         }
       }
@@ -1289,7 +1296,7 @@ class RenderTable extends RenderBox {
         final int rowSpan = parentData.rowSpan;
 
         // Only process if there are actual spans to avoid unnecessary work
-        if (colSpan <= 1 && rowSpan <= 1) {
+        if (!parentData._hasSpan) {
           continue;
         }
 
@@ -1479,13 +1486,13 @@ class RenderTable extends RenderBox {
           final childParentData = child.parentData! as TableCellParentData;
           final int colSpan = childParentData.colSpan;
           final int rowSpan = childParentData.rowSpan;
-          
+
           // Compute the total width covered by this cell's column span.
           var spanWidth = 0.0;
           for (var i = 0; i < colSpan && (x + i) < columns; i++) {
             spanWidth += widths[x + i];
           }
-          
+
           switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
             case TableCellVerticalAlignment.baseline:
               assert(
