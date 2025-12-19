@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
@@ -12,11 +13,17 @@ abstract class Rasterizer {
   /// Creates a [ViewRasterizer] for a given [view].
   ViewRasterizer createViewRasterizer(EngineFlutterView view);
 
+  /// Creates a [Surface] which is to be used for [Picture.toImage] calls.
+  Surface createPictureToImageSurface();
+
   /// Sets the maximum size of the resource cache to [bytes].
   void setResourceCacheMaxBytes(int bytes);
 
   /// Disposes this rasterizer and all [ViewRasterizer]s that it created.
   void dispose();
+
+  @visibleForTesting
+  SurfaceProvider get surfaceProvider;
 }
 
 /// Composites Flutter content into a [FlutterView]. Manages the creation of
@@ -73,7 +80,7 @@ abstract class ViewRasterizer {
     final bitmapSize = BitmapSize.fromSize(frameSize);
 
     currentFrameSize = bitmapSize;
-    prepareToDraw();
+    await prepareToDraw();
     viewEmbedder.frameSize = currentFrameSize;
     final Frame compositorFrame = context.acquireFrame(viewEmbedder);
 
@@ -87,7 +94,7 @@ abstract class ViewRasterizer {
   ///
   /// For example, in the [OffscreenCanvasRasterizer], this ensures the backing
   /// [OffscreenCanvas] is the correct size to draw the frame.
-  void prepareToDraw();
+  Future<void> prepareToDraw();
 
   /// Rasterizes the given [pictures] into the [displayCanvases].
   ///
@@ -122,7 +129,6 @@ abstract class ViewRasterizer {
   /// Disposes this rasterizer.
   void dispose() {
     viewEmbedder.dispose();
-    displayFactory.dispose();
   }
 
   /// Clears the state. Used in tests.
