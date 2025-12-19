@@ -60,6 +60,16 @@ class WidgetPreviewDtdServices {
   /// The actual name of the widget preview stream.
   late final String widgetPreviewScaffoldStream = _withUuid(kWidgetPreviewScaffoldStreamRoot);
 
+  /// The unique identifier added to registered service and stream names if [addUuidToServiceName]
+  /// is true.
+  late final String serviceUuid = const Uuid().v4();
+
+  /// Adds a unique identifier to the service and stream registered by the widget previewer to
+  /// avoid conflicts with other widget previewer instances connected to DTD.
+  ///
+  /// If false, no UUID is added to the registered service and stream names.
+  final bool addUuidToServiceName;
+
   // WARNING: Keep these constants and services in sync with those defined in the widget preview
   // scaffold's dtd_services.dart.
   //
@@ -98,16 +108,6 @@ class WidgetPreviewDtdServices {
   final Logger logger;
   final ShutdownHooks shutdownHooks;
   final DtdLauncher dtdLauncher;
-
-  /// The unique identifier added to registered service and stream names if [addUuidToServiceName]
-  /// is true.
-  late final String serviceUuid = const Uuid().v4();
-
-  /// Adds a unique identifier to the service and stream registered by the widget previewer to
-  /// avoid conflicts with other widget previewer instances connected to DTD.
-  ///
-  /// If false, no UUID is added to the registered service and stream names.
-  final bool addUuidToServiceName;
 
   /// Invoked when the [kHotRestartPreviewer] service method is invoked by the widget preview
   /// scaffold.
