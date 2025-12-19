@@ -16,7 +16,10 @@
 namespace impeller {
 namespace testing {
 
-using namespace flutter;
+using flutter::DlPath;
+using flutter::DlPathBuilder;
+using flutter::DlPoint;
+using flutter::DlRect;
 
 namespace {
 

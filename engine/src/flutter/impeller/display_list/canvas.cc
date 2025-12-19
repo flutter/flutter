@@ -843,6 +843,8 @@ void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
 
   if (IsShadowBlurDrawOperation(paint)) {
     if (rect.IsSquare()) {
+      // RRectBlurShape takes the corner radii which are half of the
+      // overall width and height of the DrawOval bounds rect.
       RRectBlurShape shape(rect, rect.GetWidth() * 0.5f);
       if (AttemptDrawBlur(shape, paint)) {
         return;

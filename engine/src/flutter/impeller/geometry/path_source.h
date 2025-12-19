@@ -113,7 +113,8 @@ class EllipsePathSource : public PathSource {
 /// by a matrix, and pass them along to a subsequent receiver.
 class PathTransformer : public impeller::PathReceiver {
  public:
-  PathTransformer(PathReceiver& receiver, const impeller::Matrix& matrix)
+  PathTransformer(PathReceiver& receiver [[clang::lifetimebound]],
+                  const impeller::Matrix& matrix [[clang::lifetimebound]])
       : receiver_(receiver), matrix_(matrix) {}
 
   void MoveTo(const Point& p2, bool will_be_closed) override {

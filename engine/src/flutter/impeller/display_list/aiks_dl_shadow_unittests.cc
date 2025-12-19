@@ -37,37 +37,31 @@ class PathReflector : public PathReceiver {
   }
 
   // |PathReceiver|
-  virtual void MoveTo(const Point& p2, bool will_be_closed) override {
+  void MoveTo(const Point& p2, bool will_be_closed) override {
     path_builder_.MoveTo(reflect(p2));
   }
 
   // |PathReceiver|
-  virtual void LineTo(const Point& p2) override {
-    path_builder_.LineTo(reflect(p2));
-  }
+  void LineTo(const Point& p2) override { path_builder_.LineTo(reflect(p2)); }
 
   // |PathReceiver|
-  virtual void QuadTo(const Point& cp, const Point& p2) override {
+  void QuadTo(const Point& cp, const Point& p2) override {
     path_builder_.QuadraticCurveTo(reflect(cp), reflect(p2));
   }
 
   // |PathReceiver|
-  virtual bool ConicTo(const Point& cp,
-                       const Point& p2,
-                       Scalar weight) override {
+  bool ConicTo(const Point& cp, const Point& p2, Scalar weight) override {
     path_builder_.ConicCurveTo(reflect(cp), reflect(p2), weight);
     return true;
   }
 
   // |PathReceiver|
-  virtual void CubicTo(const Point& cp1,
-                       const Point& cp2,
-                       const Point& p2) override {
+  void CubicTo(const Point& cp1, const Point& cp2, const Point& p2) override {
     path_builder_.CubicCurveTo(reflect(cp1), reflect(cp2), reflect(p2));
   }
 
   // |PathReceiver|
-  virtual void Close() override { path_builder_.Close(); }
+  void Close() override { path_builder_.Close(); }
 
   DlPath TakePath() { return path_builder_.TakePath(); }
 
