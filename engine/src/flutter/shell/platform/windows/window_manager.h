@@ -46,6 +46,7 @@ struct WindowRect {
   int32_t height;
 };
 
+// Sizes are in physical pixels.
 struct WindowSize {
   int32_t width;
   int32_t height;
