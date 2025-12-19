@@ -109,6 +109,11 @@ void main() async {
       }
     });
 
+    test('FragmentProgram getUniformVec2', () async {
+      final UniformVec2Slot slot = shader.getUniformVec2('iVec2Uniform');
+      slot.set(6.0, 7.0);
+    });
+
     test('FragmentProgram getUniformVec2 wrong size', () async {
       try {
         shader.getUniformVec2('iVec3Uniform');
@@ -123,6 +128,11 @@ void main() async {
       }
     });
 
+    test('FragmentProgram getUniformVec3', () async {
+      final UniformVec3Slot slot = shader.getUniformVec3('iVec3Uniform');
+      slot.set(0.8, 0.1, 0.3);
+    });
+
     test('FragmentProgram getUniformVec3 wrong size', () async {
       try {
         shader.getUniformVec3('iVec2Uniform');
@@ -135,6 +145,11 @@ void main() async {
       } catch (e) {
         expect(e.toString(), contains('`iVec4Uniform` has size 4, not size 3.'));
       }
+    });
+
+    test('FragmentProgram getUniformVec4', () async {
+      final UniformVec4Slot slot = shader.getUniformVec4('iVec4Uniform');
+      slot.set(11.0, 22.0, 19.0, 96.0);
     });
 
     test('FragmentProgram getUniformVec4 wrong size', () async {

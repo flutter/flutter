@@ -5373,23 +5373,7 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
     return index;
   }
 
-  int _getUniformVectorSize(String name) {
-    const sizeOfFloat = 4;
-    var sizeInFloats = 0;
-
-    for (final Object? entryDynamic in _uniformInfo) {
-      final entry = entryDynamic! as Map<String, Object>;
-      sizeInFloats = (entry['size'] as int? ?? 0) ~/ sizeOfFloat;
-
-      if (entry['name'] == name) {
-        return sizeInFloats;
-      }
-    }
-
-    throw ArgumentError('No uniform named `$name`.');
-  }
-
-  int _getUniformFloatIndex(String name, int index) {
+  int _getUniformFloatIndex(String name, int index, [int expectedSize = 0]) {
     if (index < 0) {
       throw ArgumentError('Index `$index` out of bounds for `$name`.');
     }
@@ -5403,6 +5387,9 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
       if (entry['name'] == name) {
         if (index + 1 > sizeInFloats) {
           throw ArgumentError('Index `$index` out of bounds for `$name`.');
+        }
+        if (expectedSize != 0 && sizeInFloats != expectedSize) {
+          throw ArgumentError('Uniform `$name` has size $sizeInFloats, not size $expectedSize.');
         }
         found = true;
         break;
@@ -5615,11 +5602,7 @@ base class FragmentShader extends Shader {
   }
 
   List<UniformFloatSlot> _getSlotsForUniform(String name, int size) {
-    final int dataSize = _program._getUniformVectorSize(name);
-    if (size != dataSize) {
-      throw ArgumentError('Uniform `$name` has size $dataSize, not size $size.');
-    }
-    final int baseShaderIndex = _program._getUniformFloatIndex(name, 0);
+    final int baseShaderIndex = _program._getUniformFloatIndex(name, 0, size);
     final slots = List<UniformFloatSlot>.generate(
       size,
       (i) => UniformFloatSlot._(this, name, baseShaderIndex, i),
@@ -5735,7 +5718,7 @@ base class FragmentShader extends Shader {
   ///
   /// ```glsl
   /// uniform float uScale;
-  /// uniform vec3 uTime;
+  /// uniform vec3 uScaledTime;
   /// ```
   ///
   /// ```dart
