@@ -1246,14 +1246,14 @@ class RenderTable extends RenderBox {
   late double _tableWidth;
 
   // Cached layout data used during painting to avoid recomputation.
-  List<Set<int>> _cachedSpannedColumnsPerRow = const <Set<int>>[];
-  List<Set<int>> _cachedSpannedRowsPerColumn = const <Set<int>>[];
+  List<Set<int>> _cachedSpannedColumnsForRows = const <Set<int>>[];
+  List<Set<int>> _cachedSpannedRowsForColumns = const <Set<int>>[];
   Float64List _cachedRowHeights = Float64List(0);
 
   /// Invalidates the cached span information when the table structure changes.
   void _invalidateSpanCache() {
-    _cachedSpannedColumnsPerRow = const <Set<int>>[];
-    _cachedSpannedRowsPerColumn = const <Set<int>>[];
+    _cachedSpannedColumnsForRows = const <Set<int>>[];
+    _cachedSpannedRowsForColumns = const <Set<int>>[];
   }
 
   /// Computes and caches the span information for table borders.
@@ -1364,15 +1364,15 @@ class RenderTable extends RenderBox {
     switch (textDirection) {
       case TextDirection.ltr:
         // In LTR mode, use the logical span mappings directly.
-        _cachedSpannedColumnsPerRow = logicalSpannedColumnsPerRow;
-        _cachedSpannedRowsPerColumn = logicalSpannedRowsPerColumn;
+        _cachedSpannedColumnsForRows = logicalSpannedColumnsPerRow;
+        _cachedSpannedRowsForColumns = logicalSpannedRowsPerColumn;
       case TextDirection.rtl:
         // In RTL mode, convert logical span mappings to visual coordinates.
-        _cachedSpannedColumnsPerRow = logicalSpannedColumnsPerRow.map((Set<int> rowSpans) {
+        _cachedSpannedColumnsForRows = logicalSpannedColumnsPerRow.map((Set<int> rowSpans) {
           return rowSpans.map((int col) => columns - col).toSet();
         }).toList();
 
-        _cachedSpannedRowsPerColumn = List<Set<int>>.generate(columns, (int visualCol) {
+        _cachedSpannedRowsForColumns = List<Set<int>>.generate(columns, (int visualCol) {
           final int logicalCol = columns - 1 - visualCol;
           return logicalCol < logicalSpannedRowsPerColumn.length
               ? logicalSpannedRowsPerColumn[logicalCol]
@@ -1477,7 +1477,15 @@ class RenderTable extends RenderBox {
         final RenderBox? child = _children[xy];
         if (child != null) {
           final childParentData = child.parentData! as TableCellParentData;
+          final int colSpan = childParentData.colSpan;
           final int rowSpan = childParentData.rowSpan;
+          
+          // Compute the total width covered by this cell's column span.
+          var spanWidth = 0.0;
+          for (var i = 0; i < colSpan && (x + i) < columns; i++) {
+            spanWidth += widths[x + i];
+          }
+          
           switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
             case TableCellVerticalAlignment.baseline:
               assert(
@@ -1491,7 +1499,7 @@ class RenderTable extends RenderBox {
             case TableCellVerticalAlignment.middle:
             case TableCellVerticalAlignment.bottom:
             case TableCellVerticalAlignment.intrinsicHeight:
-              final Size childSize = child.getDryLayout(BoxConstraints.tightFor(width: widths[x]));
+              final Size childSize = child.getDryLayout(BoxConstraints.tightFor(width: spanWidth));
               if (rowSpan == 1) {
                 rowHeight = math.max(rowHeight, childSize.height);
               } else if (rowSpan > 1) {
@@ -1849,8 +1857,8 @@ class RenderTable extends RenderBox {
         borderRect,
         rows: rows,
         columns: columns,
-        spannedColumnsPerRow: _cachedSpannedColumnsPerRow,
-        spannedRowsPerColumn: _cachedSpannedRowsPerColumn,
+        spannedColumnsPerRow: _cachedSpannedColumnsForRows,
+        spannedRowsPerColumn: _cachedSpannedRowsForColumns,
         rowHeights: _cachedRowHeights,
       );
     }
