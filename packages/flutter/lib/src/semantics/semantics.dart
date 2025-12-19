@@ -2156,15 +2156,15 @@ class SemanticsProperties extends DiagnosticableTree {
   /// [Directionality] or an explicit [textDirection] should be provided.
   final String? tooltip;
 
-  /// The heading level in the DOM document structure.
-  ///
-  /// This is only applied to web semantics and is ignored on other platforms.
+  /// The heading level in the document structure.
   ///
   /// Screen readers will use this value to determine which part of the page
-  /// structure this heading represents. A level 1 heading, indicated
-  /// with aria-level="1", usually indicates the main heading of a page,
-  /// a level 2 heading, defined with aria-level="2" the first subsection,
+  /// structure this heading represents. A level 1 heading usually indicates
+  /// the main heading of a page, a level 2 heading the first subsection,
   /// a level 3 is a subsection of that, and so on.
+  ///
+  /// On web, this sets the `aria-level` attribute (e.g., `aria-level="1"`).
+  /// On Android, this sets the `isHeading` property for accessibility.
   final int? headingLevel;
 
   /// Overrides the default accessibility hints provided by the platform.
