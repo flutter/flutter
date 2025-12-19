@@ -34,10 +34,10 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ### [3.38.6](https://github.com/flutter/flutter/releases/tag/3.38.6)
 
-[flutter/179139](https://github.com/flutter/flutter/issues/179139) - `flutter widget-preview start` creates new cached build artifacts on each run, resulting in increasing disk usage after each run.
-[flutter/178896](https://github.com/flutter/flutter/issues/178896) - Apps crash during launch on Windows when run from paths containing non-ASCII characters.
-[flutter/176943](https://github.com/flutter/flutter/issues/176943) - Configuration changes to run test on macOS 15 or 15.7.2 for Flutter's CI.
-[flutter/179914](https://github.com/flutter/flutter/issues/179914) - Flutter Android apps created with  3.40.0 or below require action to upgrade to AGP 9.0.0.
+- [flutter/179139](https://github.com/flutter/flutter/issues/179139) - `flutter widget-preview start` creates new cached build artifacts on each run, resulting in increasing disk usage after each run.
+- [flutter/178896](https://github.com/flutter/flutter/issues/178896) - Apps crash during launch on Windows when run from paths containing non-ASCII characters.
+- [flutter/176943](https://github.com/flutter/flutter/issues/176943) - Configuration changes to run test on macOS 15 or 15.7.2 for Flutter's CI.
+- [flutter/179914](https://github.com/flutter/flutter/issues/179914) - Flutter Android apps created with  3.40.0 or below require action to upgrade to AGP 9.0.0.
 
 ### [3.38.5](https://github.com/flutter/flutter/releases/tag/3.38.5)
 
