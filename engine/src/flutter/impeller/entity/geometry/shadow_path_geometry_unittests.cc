@@ -269,8 +269,8 @@ TEST(ShadowPathGeometryTest, GetAndTakeVertices) {
 TEST(ShadowPathGeometryTest, ClockwiseTriangleTest) {
   DlPathBuilder path_builder;
   path_builder.MoveTo(DlPoint(100, 0));
-  path_builder.LineTo(DlPoint(200, 100));
-  path_builder.LineTo(DlPoint(0, 100));
+  path_builder.LineTo(DlPoint(200, 110));
+  path_builder.LineTo(DlPoint(0, 110));
   path_builder.Close();
   const DlPath path = path_builder.TakePath();
   const Matrix matrix;
@@ -303,8 +303,8 @@ TEST(ShadowPathGeometryTest, ClockwiseTriangleTest) {
 TEST(ShadowPathGeometryTest, CounterClockwiseTriangleTest) {
   DlPathBuilder path_builder;
   path_builder.MoveTo(DlPoint(100, 0));
-  path_builder.LineTo(DlPoint(0, 100));
-  path_builder.LineTo(DlPoint(200, 100));
+  path_builder.LineTo(DlPoint(0, 110));
+  path_builder.LineTo(DlPoint(200, 110));
   path_builder.Close();
   const DlPath path = path_builder.TakePath();
   const Matrix matrix;
