@@ -29,6 +29,7 @@ abstract class AndroidBuilder {
     required FlutterProject project,
     required AndroidBuildInfo androidBuildInfo,
     required String target,
+    required List<String> androidShellArguments,
     bool configOnly = false,
   });
 
@@ -37,6 +38,7 @@ abstract class AndroidBuilder {
     required FlutterProject project,
     required AndroidBuildInfo androidBuildInfo,
     required String target,
+    required List<String> androidShellArguments
     bool validateDeferredComponents = true,
     bool deferredComponentsEnabled = false,
     bool configOnly = false,

@@ -1249,6 +1249,41 @@ class DebuggingOptions {
     ];
   }
 
+  // TODO(camsim99): note this is missing some flags but gonna roll with this for the poc
+  List<String> getAndroidShellArguments() {
+    final androidShellArguments = <String>[
+      if (enableDartProfiling) ...<String>['--enable-dart-profiling=true'],
+      if (profileStartup) ...<String>['--profile-startup=true'],
+      if (enableSoftwareRendering) ...<String>['--enable-software-rendering=true'],
+      if (skiaDeterministicRendering) ...<String>['--skia-deterministic-rendering=true'],
+      if (traceSkia) ...<String>['--trace-skia=true'],
+      if (traceAllowlist != null) ...<String>['--trace-allowlist=${traceAllowlist!}'],
+      if (traceSkiaAllowlist != null) ...<String>['--trace-skia-allowlist=${traceSkiaAllowlist!}'],
+      if (traceSystrace) ...<String>['--trace-systrace=true'],
+      if (traceToFile != null) ...<String>['--trace-to-file=${traceToFile!}'],
+      if (endlessTraceBuffer) ...<String>['--endless-trace-buffer=true'],
+      if (profileMicrotasks) ...<String>['--profile-microtasks=true'],
+      if (purgePersistentCache) ...<String>['--purge-persistent-cache=true'],
+      if (enableImpeller == ImpellerStatus.enabled) ...<String>['--enable-impeller=true'],
+      if (enableImpeller == ImpellerStatus.disabled) ...<String>['--enable-impeller=false'],
+      if (enableFlutterGpu) ...<String>['--enable-flutter-gpu=true'],
+      if (enableVulkanValidation) ...<String>['--enable-vulkan-validation=true'],
+      if (debuggingEnabled) ...<String>[
+        if (buildInfo.isDebug) ...<String>[
+          ...<String>['--enable-checked-mode=true'],
+          ...<String>['--verify-entry-points=true'],
+        ],
+        if (startPaused) ...<String>['--start-paused=true'],
+        if (disableServiceAuthCodes) ...<String>['--disable-service-auth-codes=true'],
+        if (dartFlags.isNotEmpty) ...<String>['--dart-flags', dartFlags],
+        if (useTestFonts) ...<String>['--use-test-fonts=true'],
+        if (verboseSystemLogs) ...<String>['--verbose-logging=true'],
+      ],
+    ];
+
+    return androidShellArguments;
+  }
+
   Map<String, Object?> toJson() => <String, Object?>{
     'debuggingEnabled': debuggingEnabled,
     'startPaused': startPaused,
