@@ -5,11 +5,11 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
-// Flutter code sample for [DropdownMenu]s. The first dropdown menu
-// has the default outlined border and demos using the
-// [DropdownMenuEntry] style parameter to customize its appearance.
-// The second dropdown menu customizes the appearance of the dropdown
-// menu's text field with its [DropdownMenu.inputDecorationTheme] parameter.
+/// Flutter code sample for [DropdownMenu]s. The first dropdown menu
+/// has the default outlined border and demos using the
+/// [DropdownMenuEntry] style parameter to customize its appearance.
+/// The second dropdown menu customizes the appearance of the dropdown
+/// menu's text field with its [DropdownMenu.inputDecorationTheme] parameter.
 
 void main() {
   runApp(const DropdownMenuExample());
