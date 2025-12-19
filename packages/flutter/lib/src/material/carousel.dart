@@ -553,11 +553,15 @@ class _CarouselViewState extends State<CarouselView> {
     super.dispose();
   }
 
+  // The initialItem means the index of the item to occupy the first maximum weight
+  // when flexWeights is not null. So it might be negative when initialItem value
+  // is small but the first max weight index is large. In that case, the initial
+  // leading item should be 0.
   int _getInitialLeadingItem() {
     if (widget.flexWeights != null) {
       final int maxWeight = widget.flexWeights!.max;
       final int firstMaxWeightIndex = widget.flexWeights!.indexOf(maxWeight);
-      return _controller.initialItem - firstMaxWeightIndex;
+      return math.max(_controller.initialItem - firstMaxWeightIndex, 0);
     }
     return _controller.initialItem;
   }
@@ -1629,7 +1633,22 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
   // `getItemFromPixels` may return a fractional value (e.g., 0.6 when mid-scroll).
   // Use `toInt()` to truncate the fractional part, ensuring the leading item
   // only advances after fully crossing the next item's boundary.
-  int get leadingItem => getItemFromPixels(pixels, viewportDimension).toInt();
+  int get leadingItem {
+    final int leadingItem = getItemFromPixels(pixels, viewportDimension).toInt();
+    // When `consumeMaxWeight` is true, there is some reserved space before
+    // item 0 so that item 0 can be expanded to occupy the maximum
+    // weight while scrolling. The way how consumeMaxWeight works is that we assume
+    // there are some "invisible" items before the first visible item. Therefore,
+    // to calculate the correct visible leading item, we need to offset the leading
+    // item by the index of the maximum weight.
+    //
+    // The subtraction may cause negative number for leading item. In this case,
+    // constrain the leading item to 0.
+    if (consumeMaxWeight) {
+      return math.max(leadingItem - flexWeights!.indexOf(flexWeights!.max), 0);
+    }
+    return leadingItem;
+  }
 
   double updateLeadingItem(List<int>? newFlexWeights, bool newConsumeMaxWeight) {
     final double maxItem;
