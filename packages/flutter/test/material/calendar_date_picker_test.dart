@@ -1469,7 +1469,9 @@ void main() {
         semantics.dispose();
       });
 
-      // This is a regression test for https://github.com/flutter/flutter/issues/143439.
+      // This test verifies that date selection changes are announced using live regions,
+      // maintaining the fix for https://github.com/flutter/flutter/issues/143439
+      // after migrating away from the deprecated SemanticsService.sendAnnouncement.
       testWidgets(
         'Selected date Semantics announcement on onDateChanged',
         (WidgetTester tester) async {
@@ -1489,30 +1491,55 @@ void main() {
 
           final bool isToday = DateUtils.isSameDay(initialDate, selectedDate);
           final semanticLabelSuffix = isToday ? ', ${localizations.currentDateLabel}' : '';
+          final String initialLabel =
+              '${localizations.formatFullDate(initialDate)}$semanticLabelSuffix';
 
-          // The initial date should be announced.
+          // Verify initial date announcement exists and is a live region
+          final Finder initialAnnouncement = find.bySemanticsLabel(initialLabel);
+          expect(initialAnnouncement, findsOneWidget);
+          // Check the isLiveRegion flag via hasFlag
           expect(
-            tester.takeAnnouncements().last.message,
-            '${localizations.formatFullDate(initialDate)}$semanticLabelSuffix',
+            tester
+                .getSemantics(initialAnnouncement)
+                .getSemanticsData()
+                .hasFlag(SemanticsFlag.isLiveRegion),
+            isTrue,
           );
 
-          // Select a new date.
+          // Select a new date (20th).
           await tester.tap(find.text('20'));
           await tester.pumpAndSettle();
 
-          // The selected date should be announced.
+          final String selectedLabel =
+              '${localizations.selectedDateLabel} ${localizations.formatFullDate(selectedDate!)}$semanticLabelSuffix';
+
+          // Verify the new selection is announced via a live region
+          final Finder selectedAnnouncement = find.bySemanticsLabel(selectedLabel);
+          expect(selectedAnnouncement, findsOneWidget);
           expect(
-            tester.takeAnnouncements().last.message,
-            '${localizations.selectedDateLabel} ${localizations.formatFullDate(selectedDate!)}$semanticLabelSuffix',
+            tester
+                .getSemantics(selectedAnnouncement)
+                .getSemanticsData()
+                .hasFlag(SemanticsFlag.isLiveRegion),
+            isTrue,
           );
 
-          // Select the initial date.
+          // Select the initial date again (15th).
           await tester.tap(find.text('15'));
+          await tester.pumpAndSettle();
 
-          // The initial date should be announced as selected.
+          final String reSelectedLabel =
+              '${localizations.selectedDateLabel} ${localizations.formatFullDate(initialDate)}$semanticLabelSuffix';
+
+          // Verify re-selection announcement via a live region
+          final Finder reSelectedAnnouncement = find.bySemanticsLabel(reSelectedLabel);
+          expect(reSelectedAnnouncement, findsOneWidget);
           expect(
-            tester.takeAnnouncements().first.message,
-            '${localizations.selectedDateLabel} ${localizations.formatFullDate(initialDate)}$semanticLabelSuffix',
+            tester
+                .getSemantics(reSelectedAnnouncement)
+                .getSemanticsData()
+                .hasFlag(SemanticsFlag.isLiveRegion),
+            isTrue,
           );
 
           semantics.dispose();
