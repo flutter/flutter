@@ -32,6 +32,7 @@ import '../web/devfs_config.dart';
 import '../web/devfs_proxy.dart';
 import '../web/memory_fs.dart';
 import '../web/module_metadata.dart';
+import '../web/web_constants.dart';
 import '../web_template.dart';
 import 'proxy_middleware.dart';
 import 'release_asset_server.dart';
@@ -180,6 +181,7 @@ class WebAssetServer implements AssetReader {
     DartDevelopmentServiceConfiguration ddsConfig,
     Uri entrypoint,
     ExpressionCompiler? expressionCompiler, {
+    required bool crossOriginIsolation,
     required WebDevServerConfig webDevServerConfig,
     required WebRendererMode webRenderer,
     required bool isWasm,
@@ -237,6 +239,12 @@ class WebAssetServer implements AssetReader {
     // Allow rendering in a iframe.
     httpServer!.defaultResponseHeaders.remove('x-frame-options', 'SAMEORIGIN');
 
+    if (crossOriginIsolation) {
+      for (final MapEntry<String, String> header in kCrossOriginIsolationHeaders.entries) {
+        httpServer.defaultResponseHeaders.add(header.key, header.value);
+      }
+    }
+
     for (final MapEntry<String, String> header in extraHeaders.entries) {
       httpServer.defaultResponseHeaders.add(header.key, header.value);
     }
@@ -279,7 +287,7 @@ class WebAssetServer implements AssetReader {
         flutterRoot: Cache.flutterRoot,
         webBuildDirectory: getWebBuildDirectory(),
         basePath: server.basePath,
-        needsCoopCoep: webRenderer == WebRendererMode.skwasm,
+        needsCoopCoep: crossOriginIsolation,
       );
       runZonedGuarded(
         () {
@@ -335,6 +343,7 @@ class WebAssetServer implements AssetReader {
                   appEntrypoint: packageConfig.toPackageUri(
                     fileSystem.file(entrypoint).absolute.uri,
                   ),
+                  canaryFeatures: canaryFeatures,
                 ),
                 packageConfigPath: buildInfo.packageConfigPath,
                 reloadedSourcesUri: server._baseUri.replace(
@@ -351,6 +360,7 @@ class WebAssetServer implements AssetReader {
                   appEntrypoint: packageConfig.toPackageUri(
                     fileSystem.file(entrypoint).absolute.uri,
                   ),
+                  canaryFeatures: canaryFeatures,
                 ),
                 packageConfigPath: buildInfo.packageConfigPath,
               ).strategy,
