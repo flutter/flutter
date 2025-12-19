@@ -343,6 +343,7 @@ class WebAssetServer implements AssetReader {
                   appEntrypoint: packageConfig.toPackageUri(
                     fileSystem.file(entrypoint).absolute.uri,
                   ),
+                  canaryFeatures: canaryFeatures,
                 ),
                 packageConfigPath: buildInfo.packageConfigPath,
                 reloadedSourcesUri: server._baseUri.replace(
@@ -359,6 +360,7 @@ class WebAssetServer implements AssetReader {
                   appEntrypoint: packageConfig.toPackageUri(
                     fileSystem.file(entrypoint).absolute.uri,
                   ),
+                  canaryFeatures: canaryFeatures,
                 ),
                 packageConfigPath: buildInfo.packageConfigPath,
               ).strategy,
