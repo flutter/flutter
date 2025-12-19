@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -107,12 +106,12 @@ void main() {
       final command = BuildIOSArchiveCommand(logger: BufferLogger.test(), verboseHelp: false);
 
       // Set up home directory path for the MemoryFileSystem
-      final homeDir = fileSystem.currentDirectory.path;
+      final String homeDir = fileSystem.currentDirectory.path;
       final fakeFileSystemUtils = FakeFileSystemUtils(homeDirPath: homeDir);
 
       // Create the provisioning profiles directory structure in the memory filesystem.
       // _findProvisioningProfileUuid iterates over files in this directory.
-      final provisioningProfilesDir = fileSystem.directory(
+      final Directory provisioningProfilesDir = fileSystem.directory(
         fileSystem.path.join(
           homeDir,
           'Library',
@@ -125,7 +124,9 @@ void main() {
       provisioningProfilesDir.createSync(recursive: true);
 
       // Create a dummy provisioning profile file for the fake to "parse"
-      final dummyProfileFile = provisioningProfilesDir.childFile('MyDistProfile.mobileprovision');
+      final File dummyProfileFile = provisioningProfilesDir.childFile(
+        'MyDistProfile.mobileprovision',
+      );
       dummyProfileFile.writeAsStringSync('dummy content');
 
       // Configure fake to return a valid provisioning profile when parseProvisioningProfile is called
