@@ -326,21 +326,17 @@ class CkFragmentProgram implements ui.FragmentProgram {
     return CkFragmentShader(name, effect, this);
   }
 
-  int _getUniformVectorSize(String name) {
-    for (final UniformData uniform in uniforms) {
-      if (uniform.name == name) {
-        return uniform.floatCount;
-      }
-    }
-    throw ArgumentError('No uniform named `$name`.');
-  }
-
-  int _getShaderIndex(String name, int index) {
+  int _getShaderIndex(String name, int index, [int? expectedSize]) {
     var result = 0;
     for (final UniformData uniform in uniforms) {
       if (uniform.name == name) {
         if (index < 0 || index >= uniform.floatCount) {
           throw IndexError.withLength(index, uniform.floatCount);
+        }
+        if (expectedSize != null && uniform.floatCount != expectedSize) {
+          throw ArgumentError(
+            'Uniform `$name` has size ${uniform.floatCount}, not size $expectedSize.',
+          );
         }
         result += index;
         break;
@@ -462,11 +458,7 @@ class CkFragmentShader implements ui.FragmentShader, CkShader {
   }
 
   List<CkUniformFloatSlot> _getUniformFloatSlots(String name, int size) {
-    final int dataSize = _program._getUniformVectorSize(name);
-    if (size != dataSize) {
-      throw ArgumentError('Uniform `$name` has size $dataSize, not size $size.');
-    }
-    final int baseShaderIndex = _program._getShaderIndex(name, 0);
+    final int baseShaderIndex = _program._getShaderIndex(name, 0, size);
     return List<CkUniformFloatSlot>.generate(
       size,
       (i) => CkUniformFloatSlot._(this, i, name, baseShaderIndex),
