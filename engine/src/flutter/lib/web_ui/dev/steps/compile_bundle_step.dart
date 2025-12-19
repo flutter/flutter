@@ -260,6 +260,7 @@ class Dart2WasmCompiler extends TestCompiler {
 
     final arguments = <String>[
       environment.dart2wasmSnapshotPath,
+
       '--libraries-spec=${environment.dartSdkDir.path}/lib/libraries.json',
       '--enable-asserts',
       '--enable-experimental-ffi',
