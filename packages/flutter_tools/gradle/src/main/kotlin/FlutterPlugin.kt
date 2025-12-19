@@ -318,6 +318,14 @@ class FlutterPlugin : Plugin<Project> {
             }
         }
 
+        // TODO(camsim99): Should I check if this is an app? Wb modules?
+        val engineShellArgs: String =
+            project.hasProperty("engineShellArgs") &&
+                (
+                    project.properties["engineShellArgs"].toString()
+                )
+        FlutterPluginUtils.addTaskForEngineShellArgumentManifestInjection(projectToAddTasksTo, engineShellArgs)
+
         val targetPlatforms: List<String> =
             FlutterPluginUtils.getTargetPlatforms(projectToAddTasksTo)
 
