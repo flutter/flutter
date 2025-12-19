@@ -14,7 +14,7 @@ dependencies:
   archive: 3.6.1
   args: 2.7.0
   dds: 5.0.3
-  dwds: 26.2.2
+  dwds: 26.2.3
   code_builder: 4.11.0
   collection: 1.19.1
   completion: 1.0.2
@@ -127,4 +127,4 @@ dev_dependencies:
 dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
-# PUBSPEC CHECKSUM: omlptf
+# PUBSPEC CHECKSUM: daeirv
